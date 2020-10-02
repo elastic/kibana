@@ -148,7 +148,7 @@ export class UsersGridPage extends Component<Props, State> {
         }),
         width: '30%',
         render: (rolenames: string[]) => {
-          const roleLinks = rolenames.map((rolename, index) => {
+          const roleLinks = rolenames.map((rolename) => {
             const roleDefinition = roles?.find((role) => role.name === rolename) ?? rolename;
             return (
               <RoleTableDisplay
@@ -157,7 +157,7 @@ export class UsersGridPage extends Component<Props, State> {
                 navigateToApp={this.props.navigateToApp}
               />
             );
-          });
+          }).join(', ');
           return <div data-test-subj="userRowRoles">{roleLinks}</div>;
         },
       },
