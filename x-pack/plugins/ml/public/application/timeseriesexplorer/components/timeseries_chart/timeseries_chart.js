@@ -33,7 +33,7 @@ import {
   showMultiBucketAnomalyMarker,
   showMultiBucketAnomalyTooltip,
 } from '../../../util/chart_utils';
-import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
+import { formatHumanReadableDateTimeSeconds } from '../../../../../common/util/date_utils';
 import { getTimeBucketsFromCache } from '../../../util/time_buckets';
 import { mlTableService } from '../../../services/table_service';
 import { ContextChartMask } from '../context_chart_mask';
