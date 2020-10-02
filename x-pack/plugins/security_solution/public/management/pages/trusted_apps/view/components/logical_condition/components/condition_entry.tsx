@@ -83,7 +83,7 @@ export const ConditionEntry = memo<ConditionEntryProps>(
             'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.path',
             { defaultMessage: 'Path' }
           ),
-          value: 'process.path.text',
+          value: 'process.executable.text',
         },
       ];
     }, []);
