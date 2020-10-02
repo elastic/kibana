@@ -99,6 +99,7 @@ export const ProcessorsTree: FunctionComponent<Props> = memo((props) => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup
+          data-test-subj={selectorToDataTestSubject(baseSelector)}
           responsive={false}
           alignItems="flexStart"
           gutterSize="none"
@@ -124,7 +125,7 @@ export const ProcessorsTree: FunctionComponent<Props> = memo((props) => {
               />
             </EuiFlexItem>
           )}
-          <EuiFlexItem data-test-subj={selectorToDataTestSubject(baseSelector)} grow={false}>
+          <EuiFlexItem grow={false}>
             <AddProcessorButton
               onClick={() => {
                 onAction({ type: 'addProcessor', payload: { target: baseSelector } });
