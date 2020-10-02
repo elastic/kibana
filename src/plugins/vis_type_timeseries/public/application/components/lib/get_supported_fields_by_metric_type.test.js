@@ -24,12 +24,16 @@ describe('getSupportedFieldsByMetricType', () => {
     it(`should return numbers and histogram for ${type}`, () => {
       expect(getSupportedFieldsByMetricType(type)).toEqual(['number', 'histogram']);
     });
+  const shouldHaveHistogramNumbersAndStrings = (type) =>
+    it(`should return numbers and histogram for ${type}`, () => {
+      expect(getSupportedFieldsByMetricType(type)).toEqual(['number', 'histogram', 'string']);
+    });
   const shouldHaveOnlyNumbers = (type) =>
     it(`should return only numbers for ${type}`, () => {
       expect(getSupportedFieldsByMetricType(type)).toEqual(['number']);
     });
 
-  shouldHaveHistogramAndNumbers('value_count');
+  shouldHaveHistogramNumbersAndStrings('value_count');
   shouldHaveHistogramAndNumbers('avg');
   shouldHaveHistogramAndNumbers('sum');
 
