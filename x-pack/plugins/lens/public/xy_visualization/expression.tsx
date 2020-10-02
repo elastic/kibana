@@ -255,8 +255,9 @@ export function XYChart({
       data.tables[layerId].rows.length === 0 ||
       (xAccessor &&
         data.tables[layerId].rows.every((row) => typeof row[xAccessor] === 'undefined')) ||
-      // stacked percentage bars may have no xAccessors but splitAccessor with undefined values in them
-      (splitAccessor &&
+      // stacked percentage bars have no xAccessors but splitAccessor with undefined values in them when empty
+      (!xAccessor &&
+        splitAccessor &&
         data.tables[layerId].rows.every((row) => typeof row[splitAccessor] === 'undefined'))
     );
   });
