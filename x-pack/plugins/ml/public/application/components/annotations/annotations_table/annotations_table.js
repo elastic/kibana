@@ -10,7 +10,7 @@
  * getting the annotations via props (used in Anomaly Explorer and Single Series Viewer).
  */
 
-import uniq from 'lodash/uniq';
+import { uniq } from 'lodash';
 
 import PropTypes from 'prop-types';
 import React, { Component, Fragment } from 'react';
