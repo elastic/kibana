@@ -73,6 +73,7 @@ export async function fetchMemoryUsageNodeStats(
                 cluster_uuid: {
                   terms: {
                     field: 'cluster_uuid',
+                    size: 1,
                   },
                 },
                 name: {
