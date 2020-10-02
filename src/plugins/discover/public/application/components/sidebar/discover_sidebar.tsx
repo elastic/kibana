@@ -40,7 +40,7 @@ import { FIELDS_LIMIT_SETTING } from '../../../../common';
 import { groupFields } from './lib/group_fields';
 import { IndexPatternField, IndexPattern, UI_SETTINGS } from '../../../../../data/public';
 import { getDetails } from './lib/get_details';
-import { getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
+import { FieldFilterState, getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
 import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
 import { getServices } from '../../../kibana_services';
 
@@ -86,6 +86,18 @@ export interface DiscoverSidebarProps {
    * Shows Add button at all times and not only on focus
    */
   mobile?: boolean;
+  /**
+   * Shows index pattern and a button that displays the sidebar in a flyout
+   */
+  useFlyout?: boolean;
+  /**
+   * Current state of the field filter, filtering fields by name, type, ...
+   */
+  fieldFilter: FieldFilterState;
+  /**
+   * Change current state of fieldFilter
+   */
+  setFieldFilter: (next: FieldFilterState) => void;
 }
 
 export function DiscoverSidebar({
@@ -99,10 +111,11 @@ export function DiscoverSidebar({
   selectedIndexPattern,
   setIndexPattern,
   mobile = false,
+  useFlyout = false,
+  fieldFilter,
+  setFieldFilter,
 }: DiscoverSidebarProps) {
-  const [showFields, setShowFields] = useState(false);
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
-  const [fieldFilterState, setFieldFilterState] = useState(getDefaultFieldFilter());
   const services = useMemo(() => getServices(), []);
 
   useEffect(() => {
@@ -112,10 +125,10 @@ export function DiscoverSidebar({
 
   const onChangeFieldSearch = useCallback(
     (field: string, value: string | boolean | undefined) => {
-      const newState = setFieldFilterProp(fieldFilterState, field, value);
-      setFieldFilterState(newState);
+      const newState = setFieldFilterProp(fieldFilter, field, value);
+      setFieldFilter(newState);
     },
-    [fieldFilterState]
+    [fieldFilter, setFieldFilter]
   );
 
   const getDetailsByField = useCallback(
@@ -130,12 +143,12 @@ export function DiscoverSidebar({
     selected: selectedFields,
     popular: popularFields,
     unpopular: unpopularFields,
-  } = useMemo(() => groupFields(fields, columns, popularLimit, fieldCounts, fieldFilterState), [
+  } = useMemo(() => groupFields(fields, columns, popularLimit, fieldCounts, fieldFilter), [
     fields,
     columns,
     popularLimit,
     fieldCounts,
-    fieldFilterState,
+    fieldFilter,
   ]);
 
   const fieldTypes = useMemo(() => {
@@ -154,7 +167,26 @@ export function DiscoverSidebar({
     return null;
   }
 
-  const filterChanged = isEqual(fieldFilterState, getDefaultFieldFilter());
+  const filterChanged = isEqual(fieldFilter, getDefaultFieldFilter());
+
+  if (useFlyout) {
+    return (
+      <section
+        className="sidebar-list dscSidebar__section "
+        aria-label={i18n.translate('discover.fieldChooser.filter.indexAndFieldsSectionAriaLabel', {
+          defaultMessage: 'Index and fields',
+        })}
+      >
+        <div className="dscSidebar__sectionStatic">
+          <DiscoverIndexPattern
+            selectedIndexPattern={selectedIndexPattern}
+            setIndexPattern={setIndexPattern}
+            indexPatternList={sortBy(indexPatternList, (o) => o.attributes.title)}
+          />
+        </div>
+      </section>
+    );
+  }
 
   return (
     <I18nProvider>
@@ -182,7 +214,7 @@ export function DiscoverSidebar({
             <form>
               <DiscoverFieldSearch
                 onChange={onChangeFieldSearch}
-                value={fieldFilterState.name}
+                value={fieldFilter.name}
                 types={fieldTypes}
               />
             </form>

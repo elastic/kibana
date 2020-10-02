@@ -18,27 +18,12 @@
  */
 import React, { useState, useCallback, useEffect } from 'react';
 import classNames from 'classnames';
-import {
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiHideFor,
-  EuiShowFor,
-  EuiButton,
-  EuiBadge,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiHideFor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { IUiSettingsClient, MountPoint } from 'kibana/public';
 import { HitsCounter } from './hits_counter';
 import { TimechartHeader } from './timechart_header';
-import { DiscoverSidebar } from './sidebar';
-import { DiscoverSidebarMobile } from './sidebar';
 import { getServices, IndexPattern } from '../../kibana_services';
 // @ts-ignore
 import { DiscoverNoResults } from '../angular/directives/no_results';
@@ -63,6 +48,7 @@ import { SavedSearch } from '../../saved_searches';
 import { SavedObject } from '../../../../../core/types';
 import { Vis } from '../../../../visualizations/public';
 import { TopNavMenuData } from '../../../../navigation/public';
+import { DiscoverSidebarResponsive } from './sidebar/discover_sidebar_responsive';
 
 export interface DiscoverLegacyProps {
   addColumn: (column: string) => void;
@@ -137,7 +123,6 @@ export function DiscoverLegacy({
   vis,
 }: DiscoverLegacyProps) {
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const { TopNavMenu } = getServices().navigation.ui;
   const { savedSearch, indexPatternList } = opts;
   const bucketAggConfig = vis?.data?.aggs?.aggs[1];
@@ -163,47 +148,6 @@ export function DiscoverLegacy({
     closed: isSidebarClosed,
   });
 
-  let flyout;
-
-  if (isFlyoutVisible) {
-    flyout = (
-      <EuiShowFor sizes={['xs', 's']}>
-        <EuiFlyout onClose={() => setIsFlyoutVisible(false)} aria-labelledby="flyoutTitle">
-          <EuiFlyoutHeader hasBorder>
-            <EuiFlexGroup className="dscSidebarFlyout__header" gutterSize="none" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon onClick={() => setIsFlyoutVisible(false)} iconType="arrowLeft" />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiTitle size="s">
-                  <h2 id="flyoutTitle">
-                    {i18n.translate('discover.fieldList.flyoutHeading', {
-                      defaultMessage: 'Field list',
-                    })}
-                  </h2>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            <DiscoverSidebar
-              columns={state.columns || []}
-              fieldCounts={fieldCounts}
-              hits={rows}
-              indexPatternList={indexPatternList}
-              onAddField={addColumn}
-              onAddFilter={onAddFilter}
-              onRemoveField={onRemoveColumn}
-              selectedIndexPattern={searchSource && searchSource.getField('index')}
-              setIndexPattern={setIndexPattern}
-              mobile
-            />
-          </EuiFlyoutBody>
-        </EuiFlyout>
-      </EuiShowFor>
-    );
-  }
-
   return (
     <I18nProvider>
       <div className="dscAppContainer" data-fetch-counter={fetchCounter}>
@@ -223,57 +167,20 @@ export function DiscoverLegacy({
           showSearchBar={true}
           useDefaultBehaviors={true}
         />
-        {flyout}
         <div className="dscApp__frame">
-          <EuiHideFor sizes={['xs', 's']}>
-            {!isSidebarClosed && (
-              <div
-                className={`dscSidebar dscSidebar__desktop dscCollapsibleSidebar ${sidebarClassName}`}
-              >
-                <DiscoverSidebar
-                  columns={state.columns || []}
-                  fieldCounts={fieldCounts}
-                  hits={rows}
-                  indexPatternList={indexPatternList}
-                  onAddField={addColumn}
-                  onAddFilter={onAddFilter}
-                  onRemoveField={onRemoveColumn}
-                  selectedIndexPattern={searchSource && searchSource.getField('index')}
-                  setIndexPattern={setIndexPattern}
-                />
-              </div>
-            )}
-          </EuiHideFor>
-          <EuiShowFor sizes={['xs', 's']}>
-            <div className="dscSidebar dscSidebar__mobile">
-              <DiscoverSidebarMobile
-                columns={state.columns}
-                fieldCounts={fieldCounts}
-                hits={rows}
-                indexPatternList={indexPatternList}
-                onAddField={addColumn}
-                onAddFilter={onAddFilter}
-                onRemoveField={onRemoveColumn}
-                selectedIndexPattern={searchSource && searchSource.getField('index')}
-                setIndexPattern={setIndexPattern}
-              />
-              <EuiButton
-                contentProps={{ className: 'dscSidebar__mobileButton' }}
-                iconSide="right"
-                iconType="arrowRight"
-                fullWidth
-                onClick={() => setIsFlyoutVisible(true)}
-              >
-                <FormattedMessage
-                  id="discover.fieldChooser.fieldsMobileButtonLabel"
-                  defaultMessage="Fields"
-                />
-                <EuiBadge className="dscSidebar__mobileBadge" color="accent">
-                  {state.columns[0] === '_source' ? 0 : state.columns.length}
-                </EuiBadge>
-              </EuiButton>
-            </div>
-          </EuiShowFor>
+          <DiscoverSidebarResponsive
+            columns={state.columns || []}
+            fieldCounts={fieldCounts}
+            hits={rows}
+            indexPatternList={indexPatternList}
+            onAddField={addColumn}
+            onAddFilter={onAddFilter}
+            onRemoveField={onRemoveColumn}
+            selectedIndexPattern={searchSource && searchSource.getField('index')}
+            setIndexPattern={setIndexPattern}
+            legacy={true}
+            sidebarClassName={sidebarClassName}
+          />
           {/* </div> */}
           <EuiHideFor sizes={['xs', 's']}>
             <EuiButtonIcon

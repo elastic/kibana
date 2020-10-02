@@ -19,27 +19,11 @@
 import React, { useState } from 'react';
 import rison from 'rison-node';
 // import { EuiResizableContainer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
-import {
-  EuiBadge,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiButton,
-  EuiButtonToggle,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiButtonIcon,
-  EuiTitle,
-  EuiShowFor,
-  EuiHideFor,
-} from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiButtonToggle } from '@elastic/eui';
 import { HitsCounter } from './hits_counter';
 import { DiscoverGrid } from './discover_grid/discover_grid';
 import { TimechartHeader } from './timechart_header';
-import { DiscoverSidebar } from './sidebar';
-import { DiscoverSidebarMobile } from './sidebar';
 import { getServices } from '../../kibana_services';
 
 // @ts-ignore
@@ -50,6 +34,7 @@ import { LoadingSpinner } from './loading_spinner/loading_spinner';
 import { DiscoverFetchError } from './fetch_error';
 import './discover.scss';
 import { esFilters, search } from '../../../../data/public';
+import { DiscoverSidebarResponsive } from './sidebar/discover_sidebar_responsive';
 
 export function Discover({
   addColumn,
@@ -83,7 +68,6 @@ export function Discover({
   updateSavedQueryId,
 }: any) {
   const [toggleOn, toggleChart] = useState(true);
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   if (!timeRange) {
     return <div>Loading</div>;
   }
@@ -96,45 +80,6 @@ export function Discover({
       : undefined;
 
   let flyout;
-
-  if (isFlyoutVisible) {
-    flyout = (
-      <EuiShowFor sizes={['xs', 's']}>
-        <EuiFlyout onClose={() => setIsFlyoutVisible(false)} aria-labelledby="flyoutTitle">
-          <EuiFlyoutHeader hasBorder>
-            <EuiFlexGroup className="dscSidebarFlyout__header" gutterSize="none" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon onClick={() => setIsFlyoutVisible(false)} iconType="arrowLeft" />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiTitle size="s">
-                  <h2 id="flyoutTitle">
-                    {i18n.translate('discover.fieldList.flyoutHeading', {
-                      defaultMessage: 'Field list',
-                    })}
-                  </h2>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            <DiscoverSidebar
-              columns={state.columns}
-              fieldCounts={fieldCounts}
-              hits={rows}
-              indexPatternList={indexPatternList}
-              onAddField={addColumn}
-              onAddFilter={onAddFilter}
-              onRemoveField={onRemoveColumn}
-              selectedIndexPattern={searchSource && searchSource.getField('index')}
-              setIndexPattern={setIndexPattern}
-              mobile
-            />
-          </EuiFlyoutBody>
-        </EuiFlyout>
-      </EuiShowFor>
-    );
-  }
 
   const getContextAppHref = (anchorId: string) => {
     const path = `#/context/${encodeURIComponent(indexPattern.id)}/${encodeURIComponent(anchorId)}`;
@@ -179,51 +124,17 @@ export function Discover({
         {flyout}
         <main className="dscApp__frame">
           <>
-            <EuiHideFor sizes={['xs', 's']}>
-              <div className="dscSidebar dscSidebar__desktop">
-                <DiscoverSidebar
-                  columns={state.columns}
-                  fieldCounts={fieldCounts}
-                  hits={rows}
-                  indexPatternList={indexPatternList}
-                  onAddField={addColumn}
-                  onAddFilter={onAddFilter}
-                  onRemoveField={onRemoveColumn}
-                  selectedIndexPattern={searchSource && searchSource.getField('index')}
-                  setIndexPattern={setIndexPattern}
-                />
-              </div>
-            </EuiHideFor>
-            <EuiShowFor sizes={['xs', 's']}>
-              <div className="dscSidebar dscSidebar__mobile">
-                <DiscoverSidebarMobile
-                  columns={state.columns}
-                  fieldCounts={fieldCounts}
-                  hits={rows}
-                  indexPatternList={indexPatternList}
-                  onAddField={addColumn}
-                  onAddFilter={onAddFilter}
-                  onRemoveField={onRemoveColumn}
-                  selectedIndexPattern={searchSource && searchSource.getField('index')}
-                  setIndexPattern={setIndexPattern}
-                />
-                <EuiButton
-                  contentProps={{ className: 'dscSidebar__mobileButton' }}
-                  iconSide="right"
-                  iconType="arrowRight"
-                  fullWidth
-                  onClick={() => setIsFlyoutVisible(true)}
-                >
-                  <FormattedMessage
-                    id="discover.fieldChooser.fieldsMobileButtonLabel"
-                    defaultMessage="Fields"
-                  />
-                  <EuiBadge className="dscSidebar__mobileBadge" color="accent">
-                    {state.columns[0] === '_source' ? 0 : state.columns.length}
-                  </EuiBadge>
-                </EuiButton>
-              </div>
-            </EuiShowFor>
+            <DiscoverSidebarResponsive
+              columns={state.columns}
+              fieldCounts={fieldCounts}
+              hits={rows}
+              indexPatternList={indexPatternList}
+              onAddField={addColumn}
+              onAddFilter={onAddFilter}
+              onRemoveField={onRemoveColumn}
+              selectedIndexPattern={searchSource && searchSource.getField('index')}
+              setIndexPattern={setIndexPattern}
+            />
             <>
               {resultState === 'none' && (
                 <DiscoverNoResults
