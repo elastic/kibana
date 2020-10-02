@@ -3,8 +3,6 @@
   "root": "plugins/",
   "exclude": [
     "plugins/actions/server/usage/actions_usage_collector.ts",
-    "plugins/alerts/server/usage/alerts_usage_collector.ts",
-    "plugins/infra/server/usage/usage_collector.ts",
-    "plugins/maps/server/maps_telemetry/collectors/register.ts"
+    "plugins/alerts/server/usage/alerts_usage_collector.ts"
   ]
 }
