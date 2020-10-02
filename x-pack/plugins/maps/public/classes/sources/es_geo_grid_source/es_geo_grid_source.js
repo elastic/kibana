@@ -404,7 +404,9 @@ export class ESGeoGridSource extends AbstractESAggSource {
 
   async getLicensedFeatures() {
     const geoField = await this._getGeoField();
-    return geoField.type === ES_GEO_FIELD_TYPE.GEO_SHAPE ? [LICENSED_FEATURES.GEO_SHAPE_AGGS] : [];
+    return geoField.type === ES_GEO_FIELD_TYPE.GEO_SHAPE
+      ? [LICENSED_FEATURES.GEO_SHAPE_AGGS_GEO_TILE]
+      : [];
   }
 }
 

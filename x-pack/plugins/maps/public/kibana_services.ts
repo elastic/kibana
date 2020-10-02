@@ -10,13 +10,6 @@ import { MapsLegacyConfig } from '../../../../src/plugins/maps_legacy/config';
 import { MapsConfigType } from '../config';
 import { MapsPluginStartDependencies } from './plugin';
 
-let licenseId: string | undefined;
-export const setLicenseId = (latestLicenseId: string | undefined) => (licenseId = latestLicenseId);
-export const getLicenseId = () => licenseId;
-let isGoldPlus: boolean = false;
-export const setIsGoldPlus = (igp: boolean) => (isGoldPlus = igp);
-export const getIsGoldPlus = () => isGoldPlus;
-
 let kibanaVersion: string;
 export const setKibanaVersion = (version: string) => (kibanaVersion = version);
 export const getKibanaVersion = () => kibanaVersion;

@@ -148,11 +148,6 @@ export class MapsPlugin
 
   public start(core: CoreStart, plugins: MapsPluginStartDependencies): MapsStartApi {
     if (plugins.licensing) {
-      plugins.licensing.license$.subscribe((license: ILicense) => {
-        const gold = license.check(APP_ID, LICENCED_FEATURES_DETAILS.GEO_SHAPE_AGGS.license);
-        setIsGoldPlus(gold.state === 'valid');
-        setLicenseId(license.uid);
-      });
       setLicensingPluginStart(plugins.licensing);
     }
     plugins.uiActions.addTriggerAction(VISUALIZE_GEO_FIELD_TRIGGER, visualizeGeoFieldAction);

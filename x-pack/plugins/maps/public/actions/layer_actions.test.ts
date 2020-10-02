@@ -34,7 +34,7 @@ describe('layer_actions', () => {
       require('../selectors/map_selectors').createLayerInstance = () => {
         return {
           getLicensedFeatures() {
-            return [LICENSED_FEATURES.GEO_SHAPE_AGGS];
+            return [LICENSED_FEATURES.GEO_SHAPE_AGGS_GEO_TILE];
           },
         };
       };
@@ -43,7 +43,9 @@ describe('layer_actions', () => {
     it('should register feature-use', async () => {
       const action = addLayer(({} as unknown) as LayerDescriptor);
       await action(dispatchMock, getStoreMock);
-      expect(notifyLicensedFeatureUsageMock).toHaveBeenCalledWith(LICENSED_FEATURES.GEO_SHAPE_AGGS);
+      expect(notifyLicensedFeatureUsageMock).toHaveBeenCalledWith(
+        LICENSED_FEATURES.GEO_SHAPE_AGGS_GEO_TILE
+      );
     });
   });
 });

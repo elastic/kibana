@@ -286,7 +286,9 @@ describe('ESGeoGridSource', () => {
 
     it('Should have shape-aggs for geo_shape', async () => {
       esGeoFieldType = ES_GEO_FIELD_TYPE.GEO_SHAPE;
-      expect(await geogridSource.getLicensedFeatures()).toEqual([LICENSED_FEATURES.GEO_SHAPE_AGGS]);
+      expect(await geogridSource.getLicensedFeatures()).toEqual([
+        LICENSED_FEATURES.GEO_SHAPE_AGGS_GEO_TILE,
+      ]);
     });
   });
 });
