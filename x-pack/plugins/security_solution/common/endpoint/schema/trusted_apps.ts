@@ -35,7 +35,7 @@ export const PostTrustedAppCreateRequestSchema = {
       schema.object({
         field: schema.oneOf([
           schema.literal('process.hash.*'),
-          schema.literal('process.executable.text'),
+          schema.literal('process.executable.caseless'),
         ]),
         type: schema.literal('match'),
         operator: schema.literal('included'),
