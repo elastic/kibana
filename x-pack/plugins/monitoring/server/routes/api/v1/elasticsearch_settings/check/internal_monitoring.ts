@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { schema } from '@kbn/config-schema';
 import { RequestHandlerContext } from 'kibana/server';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
@@ -73,10 +74,14 @@ export function internalMonitoringCheckRoute(
 ) {
   npRoute.router.get(
     {
-      path: '/api/monitoring/v1/elasticsearch_settings/check/internal_monitoring',
-      validate: false,
+      path: '/api/monitoring/v1/elasticsearch_settings/check/internal_monitoring/{ccs}',
+      validate: {
+        params: schema.object({
+          ccs: schema.maybe(schema.string()),
+        }),
+      },
     },
-    async (context, _request, response) => {
+    async (context, request, response) => {
       try {
         const typeCount = {
           legacy_indices: 0,
@@ -84,10 +89,16 @@ export function internalMonitoringCheckRoute(
         };
 
         const config = server.config();
-        const ccs = '*';
-        const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs, true);
-        const kbnIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_KIBANA, ccs, true);
-        const lsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_LOGSTASH, ccs, true);
+        const { ccs } = request.params;
+        const ccsPrefix = ccs === 'ccs' ? '*' : null;
+        const esIndexPattern = prefixIndexPattern(
+          config,
+          INDEX_PATTERN_ELASTICSEARCH,
+          ccsPrefix,
+          true
+        );
+        const kbnIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_KIBANA, ccsPrefix, true);
+        const lsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_LOGSTASH, ccsPrefix, true);
 
         const indexCounts = await Promise.all([
           checkLatestMonitoringIsLegacy(context, esIndexPattern),
