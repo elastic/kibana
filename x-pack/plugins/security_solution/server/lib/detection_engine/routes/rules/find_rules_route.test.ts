@@ -11,16 +11,31 @@ import {
   getFindResultWithSingleHit,
   getFindResultStatus,
 } from '../__mocks__/request_responses';
-import { requestContextMock, serverMock, requestMock } from '../__mocks__';
+import {
+  requestContextMock,
+  serverMock,
+  requestMock,
+  ruleStatusServiceFactoryMock,
+  ruleStatusSavedObjectsClientFactory,
+  RuleStatusServiceMock,
+} from '../__mocks__';
 import { findRulesRoute } from './find_rules_route';
+import { ruleStatusServiceFactory } from '../../signals/rule_status_service';
 
+jest.mock('../../signals/rule_status_service');
 describe('find_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
+  let mockedRuleStatusServiceFactory: RuleStatusServiceMock | null | undefined;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
+    mockedRuleStatusServiceFactory = await ruleStatusServiceFactoryMock({
+      alertId: 'fakeId',
+      ruleStatusClient: ruleStatusSavedObjectsClientFactory(clients.savedObjectsClient),
+    });
+    (ruleStatusServiceFactory as jest.Mock).mockReturnValue(mockedRuleStatusServiceFactory);
 
     clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
     clients.alertsClient.get.mockResolvedValue(getResult());
@@ -50,6 +65,31 @@ describe('find_rules', () => {
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         message: 'Test error',
+        status_code: 500,
+      });
+    });
+
+    test('catches error if rule status client throws error', async () => {
+      // rule status service throws an error when trying to write an error status
+      mockedRuleStatusServiceFactory?.error.mockImplementationOnce(async () => {
+        throw new Error('ruleStatusServiceFactory Test error');
+      });
+      const failingExecutionRule = getFindResultWithSingleHit();
+      failingExecutionRule.data[0].executionStatus = {
+        status: 'error',
+        lastExecutionDate: failingExecutionRule.data[0].executionStatus.lastExecutionDate,
+        error: {
+          reason: 'read',
+          message: 'oops',
+        },
+      };
+      clients.alertsClient.find.mockResolvedValue({
+        ...failingExecutionRule,
+      });
+      const response = await server.inject(getFindRequest(), context);
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        message: 'ruleStatusServiceFactory Test error',
         status_code: 500,
       });
     });

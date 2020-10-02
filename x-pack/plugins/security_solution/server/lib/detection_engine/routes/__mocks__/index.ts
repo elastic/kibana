@@ -9,8 +9,21 @@ import { requestContextMock } from './request_context';
 import { serverMock } from './server';
 import { requestMock } from './request';
 import { responseMock } from './response_factory';
+import {
+  ruleStatusServiceFactoryMock,
+  ruleStatusSavedObjectsClientFactory,
+  RuleStatusServiceMock,
+} from './rule_status_service';
 
-export { requestMock, requestContextMock, responseMock, serverMock };
+export {
+  requestMock,
+  requestContextMock,
+  responseMock,
+  serverMock,
+  ruleStatusServiceFactoryMock,
+  ruleStatusSavedObjectsClientFactory,
+  RuleStatusServiceMock,
+};
 
 export const createMockConfig = () => ({
   enabled: true,

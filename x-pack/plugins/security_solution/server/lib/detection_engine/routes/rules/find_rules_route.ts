@@ -77,7 +77,7 @@ export const findRulesRoute = (router: IRouter) => {
                 alertId: rule.id,
                 ruleStatusClient,
               });
-              await ruleStatusService.error(
+              return ruleStatusService.error(
                 `Reason: ${rule.executionStatus.error?.reason} Message: ${rule.executionStatus.error?.message}`
               );
             })
