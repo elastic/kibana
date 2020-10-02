@@ -11,8 +11,8 @@ const tests = [
   {
     package: {
       assets: [
-        '/package/coredns/1.0.1/dataset/log/elasticsearch/ingest-pipeline/pipeline-plaintext.json',
-        '/package/coredns/1.0.1/dataset/log/elasticsearch/ingest-pipeline/pipeline-json.json',
+        '/package/coredns/1.0.1/data_stream/log/elasticsearch/ingest-pipeline/pipeline-plaintext.json',
+        '/package/coredns/1.0.1/data_stream/log/elasticsearch/ingest-pipeline/pipeline-json.json',
       ],
       path: '/package/coredns/1.0.1',
     },
@@ -21,15 +21,15 @@ const tests = [
       return true;
     },
     expected: [
-      '/package/coredns/1.0.1/dataset/log/elasticsearch/ingest-pipeline/pipeline-plaintext.json',
-      '/package/coredns/1.0.1/dataset/log/elasticsearch/ingest-pipeline/pipeline-json.json',
+      '/package/coredns/1.0.1/data_stream/log/elasticsearch/ingest-pipeline/pipeline-plaintext.json',
+      '/package/coredns/1.0.1/data_stream/log/elasticsearch/ingest-pipeline/pipeline-json.json',
     ],
   },
   {
     package: {
       assets: [
-        '/package/coredns-1.0.1/dataset/log/elasticsearch/ingest-pipeline/pipeline-plaintext.json',
-        '/package/coredns-1.0.1/dataset/log/elasticsearch/ingest-pipeline/pipeline-json.json',
+        '/package/coredns-1.0.1/data_stream/log/elasticsearch/ingest-pipeline/pipeline-plaintext.json',
+        '/package/coredns-1.0.1/data_stream/log/elasticsearch/ingest-pipeline/pipeline-json.json',
       ],
       path: '/package/coredns/1.0.1',
     },
@@ -43,8 +43,8 @@ const tests = [
   {
     package: {
       assets: [
-        '/package/coredns-1.0.1/dataset/log/elasticsearch/ingest-pipeline/pipeline-plaintext.json',
-        '/package/coredns-1.0.1/dataset/log/elasticsearch/ingest-pipeline/pipeline-json.json',
+        '/package/coredns-1.0.1/data_stream/log/elasticsearch/ingest-pipeline/pipeline-plaintext.json',
+        '/package/coredns-1.0.1/data_stream/log/elasticsearch/ingest-pipeline/pipeline-json.json',
       ],
     },
     // Filter which does not exist

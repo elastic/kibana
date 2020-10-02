@@ -8,7 +8,7 @@ import { useRef, useEffect } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import * as selectors from '../store/selectors';
-import { parameterName } from '../store/ui/selectors';
+import { parameterName } from '../store/parameter_name';
 /**
  * Cleanup any query string keys that were added by this Resolver instance.
  * This works by having a React effect that just has behavior in the 'cleanup' function.

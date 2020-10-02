@@ -2,10 +2,7 @@
   "prefix": "xpack",
   "paths": {
     "xpack.actions": "plugins/actions",
-    "xpack.uiActionsEnhanced": [
-      "plugins/ui_actions_enhanced",
-      "examples/ui_actions_enhanced_examples"
-    ],
+    "xpack.uiActionsEnhanced": "plugins/ui_actions_enhanced",
     "xpack.alerts": "plugins/alerts",
     "xpack.eventLog": "plugins/event_log",
     "xpack.alertingBuiltins": "plugins/alerting_builtins",
@@ -60,6 +57,9 @@
     "xpack.watcher": "plugins/watcher",
     "xpack.observability": "plugins/observability"
   },
+  "exclude": [
+    "examples"
+  ],
   "translations": [
     "plugins/translations/translations/zh-CN.json",
     "plugins/translations/translations/ja-JP.json"

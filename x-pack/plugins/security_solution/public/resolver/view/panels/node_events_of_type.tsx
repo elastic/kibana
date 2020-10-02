@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useCallback, Fragment } from 'react';
+/* eslint-disable react/display-name */
+
+import React, { memo, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiText, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
 import { useSelector } from 'react-redux';
@@ -24,31 +26,23 @@ import { useFormattedDate } from './use_formatted_date';
 /**
  * Render a list of events that are related to `nodeID` and that have a category of `eventType`.
  */
-export const NodeEventsOfType = memo(function NodeEventsOfType({
+export const NodeEventsInCategory = memo(function ({
   nodeID,
-  eventType,
+  eventCategory,
 }: {
   nodeID: string;
-  eventType: string;
+  eventCategory: string;
 }) {
   const processEvent = useSelector((state: ResolverState) =>
     selectors.processEventForID(state)(nodeID)
   );
-  const eventCount = useSelector(
-    (state: ResolverState) => selectors.relatedEventsStats(state)(nodeID)?.events.total
+  const eventCount = useSelector((state: ResolverState) =>
+    selectors.totalRelatedEventCountForNode(state)(nodeID)
   );
-  const eventsInCategoryCount = useSelector(
-    (state: ResolverState) =>
-      selectors.relatedEventsStats(state)(nodeID)?.events.byCategory[eventType]
+  const eventsInCategoryCount = useSelector((state: ResolverState) =>
+    selectors.relatedEventCountOfTypeForNode(state)(nodeID, eventCategory)
   );
-  const events = useSelector(
-    useCallback(
-      (state: ResolverState) => {
-        return selectors.relatedEventsByCategory(state)(nodeID, eventType);
-      },
-      [eventType, nodeID]
-    )
-  );
+  const events = useSelector((state: ResolverState) => selectors.nodeEventsInCategory(state));
 
   return (
     <StyledPanel>
@@ -56,15 +50,15 @@ export const NodeEventsOfType = memo(function NodeEventsOfType({
         <PanelLoading />
       ) : (
         <>
-          <NodeEventsOfTypeBreadcrumbs
+          <NodeEventsInCategoryBreadcrumbs
             nodeName={eventModel.processNameSafeVersion(processEvent)}
-            eventType={eventType}
+            eventCategory={eventCategory}
             eventCount={eventCount}
             nodeID={nodeID}
             eventsInCategoryCount={eventsInCategoryCount}
           />
           <EuiSpacer size="l" />
-          <NodeEventList eventType={eventType} nodeID={nodeID} events={events} />
+          <NodeEventList eventCategory={eventCategory} nodeID={nodeID} events={events} />
         </>
       )}
     </StyledPanel>
@@ -77,11 +71,11 @@ export const NodeEventsOfType = memo(function NodeEventsOfType({
 const NodeEventsListItem = memo(function ({
   event,
   nodeID,
-  eventType,
+  eventCategory,
 }: {
   event: SafeResolverEvent;
   nodeID: string;
-  eventType: string;
+  eventCategory: string;
 }) {
   const timestamp = eventModel.eventTimestamp(event);
   const date = useFormattedDate(timestamp) || noTimestampRetrievedText;
@@ -89,7 +83,7 @@ const NodeEventsListItem = memo(function ({
     panelView: 'eventDetail',
     panelParameters: {
       nodeID,
-      eventType,
+      eventCategory,
       eventID: String(eventModel.eventID(event)),
     },
   });
@@ -115,7 +109,10 @@ const NodeEventsListItem = memo(function ({
         </StyledTime>
       </EuiText>
       <EuiSpacer size="xs" />
-      <EuiButtonEmpty {...linkProps}>
+      <EuiButtonEmpty
+        data-test-subj="resolver:panel:node-events-in-category:event-link"
+        {...linkProps}
+      >
         <DescriptiveName event={event} />
       </EuiButtonEmpty>
     </>
@@ -126,11 +123,11 @@ const NodeEventsListItem = memo(function ({
  * Renders a list of events with a separator in between.
  */
 const NodeEventList = memo(function NodeEventList({
-  eventType,
+  eventCategory,
   events,
   nodeID,
 }: {
-  eventType: string;
+  eventCategory: string;
   /**
    * The events to list.
    */
@@ -141,7 +138,7 @@ const NodeEventList = memo(function NodeEventList({
     <>
       {events.map((event, index) => (
         <Fragment key={index}>
-          <NodeEventsListItem nodeID={nodeID} eventType={eventType} event={event} />
+          <NodeEventsListItem nodeID={nodeID} eventCategory={eventCategory} event={event} />
           {index === events.length - 1 ? null : <EuiHorizontalRule margin="m" />}
         </Fragment>
       ))}
@@ -152,9 +149,9 @@ const NodeEventList = memo(function NodeEventList({
 /**
  * Renders `Breadcrumbs`.
  */
-const NodeEventsOfTypeBreadcrumbs = memo(function ({
+const NodeEventsInCategoryBreadcrumbs = memo(function ({
   nodeName,
-  eventType,
+  eventCategory,
   eventCount,
   nodeID,
   /**
@@ -163,7 +160,7 @@ const NodeEventsOfTypeBreadcrumbs = memo(function ({
   eventsInCategoryCount,
 }: {
   nodeName: React.ReactNode;
-  eventType: string;
+  eventCategory: string;
   /**
    * The events to list.
    */
@@ -218,7 +215,7 @@ const NodeEventsOfTypeBreadcrumbs = memo(function ({
           text: (
             <FormattedMessage
               id="xpack.securitySolution.endpoint.resolver.panel.relatedEventList.countByCategory"
-              values={{ count: eventsInCategoryCount, category: eventType }}
+              values={{ count: eventsInCategoryCount, category: eventCategory }}
               defaultMessage="{count} {category}"
             />
           ),

@@ -71,7 +71,6 @@ export function analyticsAuditMessagesProvider({ asInternalUser }: IScopedCluste
     const { body } = await asInternalUser.search({
       index: ML_NOTIFICATION_INDEX_PATTERN,
       ignore_unavailable: true,
-      rest_total_hits_as_int: true,
       size: SIZE,
       body: {
         sort: [{ timestamp: { order: 'desc' } }, { job_id: { order: 'asc' } }],
@@ -80,7 +79,7 @@ export function analyticsAuditMessagesProvider({ asInternalUser }: IScopedCluste
     });
 
     let messages = [];
-    if (body.hits.total !== 0) {
+    if (body.hits.total.value > 0) {
       messages = body.hits.hits.map((hit: Message) => hit._source);
       messages.reverse();
     }

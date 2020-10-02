@@ -71,7 +71,7 @@ export interface InstallPackageResponse {
   response: AssetReference[];
 }
 
-export interface IBulkInstallPackageError {
+export interface IBulkInstallPackageHTTPError {
   name: string;
   statusCode: number;
   error: string | Error;
@@ -86,7 +86,7 @@ export interface BulkInstallPackageInfo {
 }
 
 export interface BulkInstallPackagesResponse {
-  response: Array<BulkInstallPackageInfo | IBulkInstallPackageError>;
+  response: Array<BulkInstallPackageInfo | IBulkInstallPackageHTTPError>;
 }
 
 export interface BulkInstallPackagesRequest {
