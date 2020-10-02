@@ -68,7 +68,6 @@ const internalOperationDefinitions = [
   countOperation,
   rangeOperation,
   derivativeOperation,
-  positiveGrowthOperation,
 ];
 
 export type FieldBasedIndexPatternColumn = Extract<IndexPatternColumn, { sourceField: string }>;
@@ -275,6 +274,16 @@ interface OperationDefinitionMap<C extends BaseIndexPatternColumn> {
   none: FieldlessOperationDefinition<C>;
   reference: ReferenceBasedOperationDefinition<C>;
 }
+
+/**
+ * Shape of an operation definition. If the type parameter of the definition
+ * indicates a field based column, `getPossibleOperationForField` has to be
+ * specified, otherwise `getPossibleOperation` has to be defined.
+ */
+export type OperationDefinition<
+  C extends BaseIndexPatternColumn,
+  Input extends keyof OperationDefinitionMap<C>
+> = BaseOperationDefinitionProps<C> & OperationDefinitionMap<C>[Input];
 
 /**
  * Shape of an operation definition. If the type parameter of the definition
