@@ -24,7 +24,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Vis } from '../../../visualizations/public';
 
-export function ExperimentalMapLayerInfo() {
+function ExperimentalMapLayerInfo() {
   const title = (
     <FormattedMessage
       id="visTypeVega.mapView.experimentalMapLayerInfo"

@@ -44,7 +44,7 @@ interface CommonBaseVisTypeOptions {
   useCustomNoDataScreen?: boolean;
   inspectorAdapters?: Adapters | (() => Adapters);
   isDeprecated?: boolean;
-  getInfoMessage?: (vis: Vis) => ReactElement<{}>;
+  getInfoMessage?: (vis: Vis) => ReactElement<{}> | null;
 }
 
 interface ExpressionBaseVisTypeOptions<TVisParams> extends CommonBaseVisTypeOptions {
@@ -84,7 +84,7 @@ export class BaseVisType<TVisParams = VisParams> {
   useCustomNoDataScreen: boolean;
   inspectorAdapters?: Adapters | (() => Adapters);
   toExpressionAst?: VisToExpressionAst<TVisParams>;
-  getInfoMessage?: (vis: Vis) => ReactElement<{}>;
+  getInfoMessage?: (vis: Vis) => ReactElement<{}> | null;
 
   constructor(opts: BaseVisTypeOptions<TVisParams>) {
     if (!opts.icon && !opts.image) {
