@@ -16,15 +16,19 @@ export const AlertAttributesExcludedFromAAD = [
   'muteAll',
   'mutedInstanceIds',
   'updatedBy',
+  'executionStatus',
 ];
 
 // useful for Pick<RawAlert, AlertAttributesExcludedFromAADType> which is a
 // type which is a subset of RawAlert with just attributes excluded from AAD
+
+// useful for Pick<RawAlert, AlertAttributesExcludedFromAADType>
 export type AlertAttributesExcludedFromAADType =
   | 'scheduledTaskId'
   | 'muteAll'
   | 'mutedInstanceIds'
-  | 'updatedBy';
+  | 'updatedBy'
+  | 'executionStatus';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
@@ -42,11 +46,6 @@ export function setupSavedObjects(
   encryptedSavedObjects.registerType({
     type: 'alert',
     attributesToEncrypt: new Set(['apiKey']),
-    attributesToExcludeFromAAD: new Set([
-      'scheduledTaskId',
-      'muteAll',
-      'mutedInstanceIds',
-      'updatedBy',
-    ]),
+    attributesToExcludeFromAAD: new Set(AlertAttributesExcludedFromAAD),
   });
 }

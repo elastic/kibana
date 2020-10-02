@@ -42,7 +42,14 @@ import {
   EventCategoryOverrideOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { PartialFilter } from '../types';
-import { ListArrayOrUndefined } from '../../../../common/detection_engine/schemas/types';
+import {
+  ListArrayOrUndefined,
+  ThreatFiltersOrUndefined,
+  ThreatIndexOrUndefined,
+  ThreatLanguageOrUndefined,
+  ThreatMappingOrUndefined,
+  ThreatQueryOrUndefined,
+} from '../../../../common/detection_engine/schemas/types';
 
 export const calculateInterval = (
   interval: string | undefined,
@@ -86,6 +93,11 @@ export interface UpdateProperties {
   tags: TagsOrUndefined;
   threat: ThreatOrUndefined;
   threshold: ThresholdOrUndefined;
+  threatFilters: ThreatFiltersOrUndefined;
+  threatIndex: ThreatIndexOrUndefined;
+  threatQuery: ThreatQueryOrUndefined;
+  threatMapping: ThreatMappingOrUndefined;
+  threatLanguage: ThreatLanguageOrUndefined;
   timestampOverride: TimestampOverrideOrUndefined;
   to: ToOrUndefined;
   type: TypeOrUndefined;
