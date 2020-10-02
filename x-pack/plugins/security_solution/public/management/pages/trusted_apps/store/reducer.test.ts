@@ -32,17 +32,14 @@ describe('reducer', () => {
 
       expect(result).toStrictEqual({
         ...initialState,
-        listView: { ...initialState.listView, currentPaginationInfo: { index: 5, size: 50 } },
+        location: { page_index: 5, page_size: 50, show: undefined },
         active: true,
       });
     });
 
     it('extracts default pagination parameters when none provided', () => {
       const result = trustedAppsPageReducer(
-        {
-          ...initialState,
-          listView: { ...initialState.listView, currentPaginationInfo: { index: 5, size: 50 } },
-        },
+        { ...initialState, location: { page_index: 5, page_size: 50 } },
         createUserChangedUrlAction('/trusted_apps', '?page_index=b&page_size=60')
       );
 
@@ -51,10 +48,7 @@ describe('reducer', () => {
 
     it('extracts default pagination parameters when invalid provided', () => {
       const result = trustedAppsPageReducer(
-        {
-          ...initialState,
-          listView: { ...initialState.listView, currentPaginationInfo: { index: 5, size: 50 } },
-        },
+        { ...initialState, location: { page_index: 5, page_size: 50 } },
         createUserChangedUrlAction('/trusted_apps')
       );
 
@@ -85,7 +79,7 @@ describe('reducer', () => {
 
       expect(result).toStrictEqual({
         ...initialState,
-        listView: { ...initialState.listView, currentListResourceState: listResourceState },
+        listView: { ...initialState.listView, listResourceState },
       });
     });
   });
