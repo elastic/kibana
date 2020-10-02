@@ -95,7 +95,4 @@ export const selectedFiltersSelector = ({ selectedFilters }: AppState) => select
 
 export const monitorIdSelector = ({ ui: { monitorId } }: AppState) => monitorId;
 
-export const journeySelector = ({ journeys }: AppState) => {
-  console.log('journeys', journeys);
-  return journeys;
-};
+export const journeySelector = ({ journeys }: AppState) => journeys;

@@ -16,7 +16,6 @@ describe('StepScreenshotDisplayProps', () => {
   }));
 
   it('displays screenshot thumbnail when present', () => {
-    // reactUseSpy.
     const wrapper = mountWithIntl(
       <StepScreenshotDisplay
         checkGroup="check_group"
@@ -75,6 +74,79 @@ describe('StepScreenshotDisplayProps', () => {
             >
               <input
                 alt="Screenshot for step with name \\"STEP_NAME\\""
+                onClick={[Function]}
+                onMouseEnter={[Function]}
+                onMouseLeave={[Function]}
+                src="/api/uptime/journey/screenshot/check_group/1"
+                style={
+                  Object {
+                    "height": 180,
+                    "objectFit": "cover",
+                    "objectPosition": "center top",
+                    "width": 320,
+                  }
+                }
+                type="image"
+              />
+            </div>
+          </div>
+        </EuiOutsideClickDetector>
+      </EuiPopover>
+    `);
+  });
+
+  it('uses alternative text when step name not available', () => {
+    const wrapper = mountWithIntl(
+      <StepScreenshotDisplay checkGroup="check_group" screenshotExists={true} stepIndex={1} />
+    );
+
+    wrapper.update();
+
+    expect(wrapper.find('EuiPopover')).toMatchInlineSnapshot(`
+      <EuiPopover
+        anchorPosition="rightCenter"
+        button={
+          <input
+            alt="Screenshot"
+            onClick={[Function]}
+            onMouseEnter={[Function]}
+            onMouseLeave={[Function]}
+            src="/api/uptime/journey/screenshot/check_group/1"
+            style={
+              Object {
+                "height": 180,
+                "objectFit": "cover",
+                "objectPosition": "center top",
+                "width": 320,
+              }
+            }
+            type="image"
+          />
+        }
+        closePopover={[Function]}
+        display="inlineBlock"
+        hasArrow={true}
+        isOpen={false}
+        ownFocus={false}
+        panelPaddingSize="m"
+      >
+        <EuiOutsideClickDetector
+          isDisabled={true}
+          onOutsideClick={[Function]}
+        >
+          <div
+            className="euiPopover euiPopover--anchorRightCenter"
+            onKeyDown={[Function]}
+            onMouseDown={[Function]}
+            onMouseUp={[Function]}
+            onTouchEnd={[Function]}
+            onTouchStart={[Function]}
+          >
+            <div
+              className="euiPopover__anchor"
+            >
+              <input
+                alt="Screenshot"
                 onClick={[Function]}
                 onMouseEnter={[Function]}
                 onMouseLeave={[Function]}
