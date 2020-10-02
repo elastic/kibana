@@ -320,6 +320,16 @@ export const ariaFlowtoNodeID: (
   }
 );
 
+export const nodeEventsInCategoryAreLoading = composeSelectors(
+  dataStateSelector,
+  dataSelectors.nodeEventsInCategoryAreLoading
+);
+
+export const nodeEventsInCategoryNextCursor = composeSelectors(
+  dataStateSelector,
+  dataSelectors.nodeEventsInCategoryNextCursor
+);
+
 export const panelViewAndParameters = composeSelectors(
   uiStateSelector,
   uiSelectors.panelViewAndParameters

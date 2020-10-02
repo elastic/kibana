@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useCallback, Fragment, useEffect } from 'react';
+import React, { memo, useCallback, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiSpacer,
@@ -143,6 +143,14 @@ const NodeEventList = memo(function NodeEventList({
   nodeID: string;
 }) {
   const dispatch = useResolverDispatch();
+  const handleLoadMore = useCallback(() => {
+    dispatch({
+      type: 'userRequestedAdditionalRelatedEvents',
+      payload: {},
+    });
+  }, [dispatch]);
+  const isLoading = useSelector(selectors.nodeEventsInCategoryAreLoading);
+  const hasMore = useSelector(selectors.nodeEventsInCategoryNextCursor);
   return (
     <>
       {events.map((event, index) => (
@@ -151,21 +159,13 @@ const NodeEventList = memo(function NodeEventList({
           {index === events.length - 1 ? null : <EuiHorizontalRule margin="m" />}
         </Fragment>
       ))}
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          color="danger"
-          size="s"
-          fill
-          onClick={() =>
-            dispatch({
-              type: 'userRequestedAdditionalRelatedEvents',
-              payload: {},
-            })
-          }
-        >
-          {'Load More Data'}
-        </EuiButton>
-      </EuiFlexItem>
+      {hasMore && (
+        <EuiFlexItem grow={false}>
+          <EuiButton color={'primary'} size="s" fill onClick={handleLoadMore} isLoading={isLoading}>
+            {'Load More Data'}
+          </EuiButton>
+        </EuiFlexItem>
+      )}
     </>
   );
 });

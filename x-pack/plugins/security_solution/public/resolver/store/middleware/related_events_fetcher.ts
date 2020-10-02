@@ -67,14 +67,13 @@ export function RelatedEventsFetcher(
         }
       }
     } else if (action.type === 'userRequestedAdditionalRelatedEvents') {
-      console.log(state.data.nodeEventsInCategory);
-      const currentData = state.data.nodeEventsInCategory;
-      if (currentData !== undefined) {
+      const nodeEventsInCategory = state.data.nodeEventsInCategory;
+      if (nodeEventsInCategory !== undefined) {
         api.dispatch({
           type: 'appRequestedAdditionalRelatedEvents',
           payload: {},
         });
-        const { nodeID, eventCategory, cursor } = currentData;
+        const { nodeID, eventCategory, cursor } = nodeEventsInCategory;
         let result: ResolverPaginatedEvents | null = null;
         if (cursor) {
           result = await dataAccessLayer.eventsWithEntityIDAndCategory(

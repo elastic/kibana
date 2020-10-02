@@ -665,3 +665,11 @@ export const panelViewAndParameters = createSelector(
 export const nodeEventsInCategory = (state: DataState) => {
   return state.nodeEventsInCategory?.events ?? [];
 };
+
+export const nodeEventsInCategoryAreLoading = (state: DataState) => {
+  return state.nodeEventsInCategory?.loading ?? false;
+};
+
+export const nodeEventsInCategoryNextCursor = (state: DataState) => {
+  return state.nodeEventsInCategory?.cursor ?? null;
+};
