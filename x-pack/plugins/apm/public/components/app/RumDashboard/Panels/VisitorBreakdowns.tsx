@@ -23,13 +23,13 @@ export function VisitorBreakdownsPanel() {
         <>
           <EuiResizablePanel initialSize={50} minSize="20%">
             <EuiPanel style={FULL_HEIGHT}>
-              <VisitorBreakdown />
+              <VisitorBreakdownMap />
             </EuiPanel>
           </EuiResizablePanel>
           <EuiResizableButton />
           <EuiResizablePanel initialSize={50} minSize="20%">
             <EuiPanel style={FULL_HEIGHT}>
-              <VisitorBreakdownMap />
+              <VisitorBreakdown />
             </EuiPanel>
           </EuiResizablePanel>
         </>

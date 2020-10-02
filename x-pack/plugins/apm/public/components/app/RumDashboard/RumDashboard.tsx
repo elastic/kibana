@@ -51,7 +51,7 @@ export function RumDashboard() {
         >
           {(EuiResizablePanel, EuiResizableButton) => (
             <>
-              <EuiResizablePanel initialSize={40} minSize="40%">
+              <EuiResizablePanel initialSize={40} minSize="10%">
                 <PageLoadAndViews />
               </EuiResizablePanel>
               <EuiResizableButton />
