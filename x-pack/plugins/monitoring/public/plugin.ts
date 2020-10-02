@@ -23,7 +23,9 @@ import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { MonitoringStartPluginDependencies, MonitoringConfig } from './types';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
 import { createCpuUsageAlertType } from './alerts/cpu_usage_alert';
+import { createMissingMonitoringDataAlertType } from './alerts/missing_monitoring_data_alert';
 import { createLegacyAlertTypes } from './alerts/legacy_alert';
+import { createDiskUsageAlertType } from './alerts/disk_usage_alert';
 
 interface MonitoringSetupPluginDependencies {
   home?: HomePublicPluginSetup;
@@ -71,6 +73,8 @@ export class MonitoringPlugin
     }
 
     plugins.triggers_actions_ui.alertTypeRegistry.register(createCpuUsageAlertType());
+    plugins.triggers_actions_ui.alertTypeRegistry.register(createMissingMonitoringDataAlertType());
+    plugins.triggers_actions_ui.alertTypeRegistry.register(createDiskUsageAlertType());
     const legacyAlertTypes = createLegacyAlertTypes();
     for (const legacyAlertType of legacyAlertTypes) {
       plugins.triggers_actions_ui.alertTypeRegistry.register(legacyAlertType);

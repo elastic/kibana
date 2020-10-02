@@ -256,6 +256,10 @@ export const goToActionsStepTab = () => {
   cy.get(ACTIONS_EDIT_TAB).click({ force: true });
 };
 
+export const selectEqlRuleType = () => {
+  cy.get(EQL_TYPE).click({ force: true });
+};
+
 export const selectMachineLearningRuleType = () => {
   cy.get(MACHINE_LEARNING_TYPE).click({ force: true });
 };
@@ -264,17 +268,10 @@ export const selectThresholdRuleType = () => {
   cy.get(THRESHOLD_TYPE).click({ force: true });
 };
 
-export const waitForTheRuleToBeExecuted = () => {
-  cy.get(RULE_STATUS)
-    .invoke('text')
-    .then((status) => {
-      if (status !== 'succeeded') {
-        cy.get(REFRESH_BUTTON).click();
-      }
-    });
-  cy.get(RULE_STATUS).should('have.text', 'succeeded');
-};
-
-export const selectEqlRuleType = () => {
-  cy.get(EQL_TYPE).click({ force: true });
+export const waitForTheRuleToBeExecuted = async () => {
+  let status = '';
+  while (status !== 'succeeded') {
+    cy.get(REFRESH_BUTTON).click();
+    status = await cy.get(RULE_STATUS).invoke('text').promisify();
+  }
 };
