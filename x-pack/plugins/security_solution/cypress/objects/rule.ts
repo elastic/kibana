@@ -215,7 +215,7 @@ export const machineLearningRule: MachineLearningRule = {
 };
 
 export const eqlRule: CustomRule = {
-  customQuery: 'process where process_name == "explorer.exe"',
+  customQuery: 'any where process.name == "which"',
   name: 'New EQL Rule',
   description: 'New EQL rule description.',
   severity: 'High',
