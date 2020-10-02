@@ -238,7 +238,11 @@ export const AlertsList: React.FunctionComponent = () => {
       'data-test-subj': 'alertsTableCell-status',
       render: (executionStatus: AlertExecutionStatus) => {
         const healthColor = getHealthColor(executionStatus.status);
-        return <EuiHealth color={healthColor}>{executionStatus.status}</EuiHealth>;
+        return (
+          <EuiHealth data-test-subj={`alertStatus-${executionStatus.status}`} color={healthColor}>
+            {executionStatus.status}
+          </EuiHealth>
+        );
       },
     },
     {
@@ -482,6 +486,7 @@ export const AlertsList: React.FunctionComponent = () => {
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.totalStausesActiveDescription"
               defaultMessage="Active: {totalStausesActive}"
+              data-test-subj="totalStausesActive"
               values={{
                 totalStausesActive: alertsStatusesTotal.active,
               }}
@@ -492,6 +497,7 @@ export const AlertsList: React.FunctionComponent = () => {
           <EuiHealth color="danger">
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.totalStausesErrorDescription"
+              data-test-subj="totalStausesError"
               defaultMessage="Errors: {totalStausesError}"
               values={{ totalStausesError: alertsStatusesTotal.error }}
             />
@@ -501,6 +507,7 @@ export const AlertsList: React.FunctionComponent = () => {
           <EuiHealth color="subdued">
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.totalStausesOkDescription"
+              data-test-subj="totalStausesOk"
               defaultMessage="Ok: {totalStausesOk}"
               values={{ totalStausesOk: alertsStatusesTotal.ok }}
             />
@@ -510,6 +517,7 @@ export const AlertsList: React.FunctionComponent = () => {
           <EuiHealth color="success">
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.totalStausesPendingDescription"
+              data-test-subj="totalStausesPending"
               defaultMessage="Pending: {totalStausesPending}"
               values={{
                 totalStausesPending: alertsStatusesTotal.pending,
@@ -521,6 +529,7 @@ export const AlertsList: React.FunctionComponent = () => {
           <EuiHealth color="warning">
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.totalStausesUnknownDescription"
+              data-test-subj="totalStausesUnknown"
               defaultMessage="Unknown: {totalStausesUnknown}"
               values={{
                 totalStausesUnknown: alertsStatusesTotal.unknown,

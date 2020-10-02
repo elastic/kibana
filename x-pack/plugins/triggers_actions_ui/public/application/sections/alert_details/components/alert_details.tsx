@@ -113,6 +113,14 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
     history.push(routeToAlertDetails.replace(`:alertId`, alert.id));
   };
 
+  const getAlertStatusErrorReason = () => {
+    if (alert.executionStatus.error) {
+      return alert.executionStatus.error.reason;
+    } else {
+      return 'unknown';
+    }
+  };
+
   return (
     <EuiPage>
       <EuiPageBody>
@@ -290,7 +298,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                         id="xpack.triggersActionsUI.sections.alertDetails.attentionBannerTitle"
                         defaultMessage="This alert has an error caused by the {errorReason} reason."
                         values={{
-                          errorReason: alert.executionStatus.error?.reason,
+                          errorReason: getAlertStatusErrorReason(),
                         }}
                       />
                     }
