@@ -7,9 +7,9 @@
 import { schema } from '@kbn/config-schema';
 import { wrapError } from '../../../lib/errors';
 import { ExternalRouteDeps } from '.';
+import { ALL_SPACES_ID } from '../../../../common/constants';
 import { SPACE_ID_REGEX } from '../../../lib/space_schema';
 import { createLicensedRouteHandler } from '../../lib';
-import { ALL_SPACES_STRING } from '../../../lib/utils/namespace';
 
 const uniq = <T>(arr: T[]): T[] => Array.from(new Set<T>(arr));
 export function initShareToSpacesApi(deps: ExternalRouteDeps) {
@@ -19,7 +19,7 @@ export function initShareToSpacesApi(deps: ExternalRouteDeps) {
     spaces: schema.arrayOf(
       schema.string({
         validate: (value) => {
-          if (value !== ALL_SPACES_STRING && !SPACE_ID_REGEX.test(value)) {
+          if (value !== ALL_SPACES_ID && !SPACE_ID_REGEX.test(value)) {
             return `lower case, a-z, 0-9, "_", and "-" are allowed, OR "*"`;
           }
         },
