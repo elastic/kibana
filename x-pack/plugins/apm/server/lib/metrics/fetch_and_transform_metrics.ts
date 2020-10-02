@@ -5,11 +5,7 @@
  */
 
 import { Unionize, Overwrite } from 'utility-types';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../helpers/metrics';
 import { ChartBase } from './types';
 import { transformDataToMetricsChart } from './transform_metrics_chart';
@@ -58,7 +54,7 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
   aggs,
   additionalFilters = [],
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;
   chartBase: ChartBase;

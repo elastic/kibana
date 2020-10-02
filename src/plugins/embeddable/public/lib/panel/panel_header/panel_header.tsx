@@ -136,7 +136,7 @@ export function PanelHeader({
 }: PanelHeaderProps) {
   const viewDescription = getViewDescription(embeddable);
   const showTitle = !hidePanelTitle && (!isViewMode || title || viewDescription !== '');
-  const showPanelBar = badges.length > 0 || notifications.length > 0 || showTitle;
+  const showPanelBar = !isViewMode || badges.length > 0 || notifications.length > 0 || showTitle;
   const classes = classNames('embPanel__header', {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     'embPanel__header--floater': !showPanelBar,

@@ -5,11 +5,7 @@
  */
 
 import { PromiseReturnType } from '../../../../typings/common';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getBuckets } from './get_buckets';
 import { BUCKET_TARGET_COUNT } from '../../transactions/constants';
 
@@ -28,7 +24,7 @@ export async function getErrorDistribution({
 }: {
   serviceName: string;
   groupId?: string;
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
 }) {
   const bucketSize = getBucketSize({ start: setup.start, end: setup.end });
   const { buckets, noHits } = await getBuckets({
