@@ -234,13 +234,12 @@ export const ExceptionBuilderComponent = ({
     // empty `entries` array. Thought about appending an entry item to one, but that
     // would then be arbitrary, decided to just create a new exception list item
     const newException = getNewExceptionItem({
-      listType,
       listId,
       namespaceType: listNamespaceType,
       ruleName,
     });
     setUpdateExceptions([...exceptions, { ...newException }]);
-  }, [setUpdateExceptions, exceptions, listType, listId, listNamespaceType, ruleName]);
+  }, [setUpdateExceptions, exceptions, listId, listNamespaceType, ruleName]);
 
   // The builder can have existing exception items, or new exception items that have yet
   // to be created (and thus lack an id), this was creating some React bugs with relying
