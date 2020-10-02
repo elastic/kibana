@@ -21,14 +21,16 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { CoreService } from 'src/core/types';
+import { SavedObjectsServiceStart } from 'src/core/server';
 import { CoreContext } from '../core_context';
 import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
 import { HttpConfigType } from '../http';
 import { LoggingConfigType } from '../logging';
 import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
-import { CoreUsageData, CoreUsageDataStart } from './types';
-import { SavedObjectsService } from '../saved_objects';
+import { CoreServicesUsageData, CoreUsageData, CoreUsageDataStart } from './types';
 import { isConfigured } from './is_configured';
+import { ElasticsearchServiceStart } from '../elasticsearch';
+import { KibanaConfigType } from '../kibana_config';
 import { MetricsServiceSetup, OpsMetrics } from '..';
 
 export interface SetupDeps {
@@ -36,7 +38,8 @@ export interface SetupDeps {
 }
 
 export interface StartDeps {
-  savedObjectsService: SavedObjectsService;
+  savedObjects: SavedObjectsServiceStart;
+  elasticsearch: ElasticsearchServiceStart;
 }
 
 export class CoreUsageDataService implements CoreService<void, CoreUsageDataStart> {
@@ -47,13 +50,63 @@ export class CoreUsageDataService implements CoreService<void, CoreUsageDataStar
   private soConfig?: SavedObjectsConfigType;
   private stop$: Subject<void>;
   private opsMetrics?: OpsMetrics;
+  private kibanaConfig?: KibanaConfigType;
 
   constructor(core: CoreContext) {
     this.configService = core.configService;
     this.stop$ = new Subject();
   }
 
-  private getCoreUsageData(): CoreUsageData {
+  private async getSavedObjectIndicesUsageData(
+    savedObjects: SavedObjectsServiceStart,
+    elasticsearch: ElasticsearchServiceStart
+  ): Promise<CoreServicesUsageData['savedObjects']> {
+    const indices = await Promise.all(
+      Array.from(
+        savedObjects
+          .getTypeRegistry()
+          .getAllTypes()
+          .reduce((acc, type) => {
+            // TODO: Let the registry return `kibana.index` instead of reading
+            // the config value here.
+            const index =
+              savedObjects.getTypeRegistry().getIndex(type.name) || this.kibanaConfig!.index;
+            return index != null ? acc.add(index) : acc;
+          }, new Set<string>())
+          .values()
+      ).map((alias) => {
+        // The _cat/indices API returns the _index_ and doesn't return a way
+        // to map back from the index to the alias. So we have to make an API
+        // call for every alias
+        return elasticsearch.client.asInternalUser.cat
+          .indices<any[]>({
+            index: alias,
+            format: 'JSON',
+            bytes: 'b',
+          })
+          .then(({ body }) => {
+            const index = body[0];
+            return {
+              name: index.index,
+              alias,
+              docsCount: index['docs.count'],
+              docsDeleted: index['docs.deleted'],
+              storeSizeBytes: index['store.size'],
+              primaryStoreSizeBytes: index['pri.store.size'],
+            };
+          });
+      })
+    );
+
+    return {
+      indices,
+    };
+  }
+
+  private async getCoreUsageData(
+    savedObjects: SavedObjectsServiceStart,
+    elasticsearch: ElasticsearchServiceStart
+  ): Promise<CoreUsageData> {
     if (
       this.elasticsearchConfig == null ||
       this.httpConfig == null ||
@@ -64,6 +117,7 @@ export class CoreUsageDataService implements CoreService<void, CoreUsageDataStar
     }
 
     const es = this.elasticsearchConfig;
+    const soUsageData = await this.getSavedObjectIndicesUsageData(savedObjects, elasticsearch);
 
     const http = this.httpConfig;
     return {
@@ -154,9 +208,14 @@ export class CoreUsageDataService implements CoreService<void, CoreUsageDataStar
           heapUsedBytes: this.opsMetrics.process.memory.heap.used_in_bytes,
         },
         os: {
+          distro: this.opsMetrics.os.distro,
+          distroRelease: this.opsMetrics.os.distroRelease,
           platform: this.opsMetrics.os.platform,
           platformRelease: this.opsMetrics.os.platformRelease,
         },
+      },
+      services: {
+        savedObjects: soUsageData,
       },
     };
   }
@@ -194,12 +253,19 @@ export class CoreUsageDataService implements CoreService<void, CoreUsageDataStar
       .subscribe((config) => {
         this.soConfig = config;
       });
+
+    this.configService
+      .atPath<KibanaConfigType>('kibana')
+      .pipe(takeUntil(this.stop$))
+      .subscribe((config) => {
+        this.kibanaConfig = config;
+      });
   }
 
-  start() {
+  start({ savedObjects, elasticsearch }: StartDeps) {
     return {
       getCoreUsageData: () => {
-        return this.getCoreUsageData();
+        return this.getCoreUsageData(savedObjects, elasticsearch);
       },
     };
   }

@@ -470,11 +470,15 @@ export interface CoreUsageData {
     //
     // (undocumented)
     environment: CoreEnvironmentUsageData;
+    // Warning: (ae-forgotten-export) The symbol "CoreServicesUsageData" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    services: CoreServicesUsageData;
 }
 
 // @internal
 export interface CoreUsageDataStart {
-    getCoreUsageData(): CoreUsageData | null;
+    getCoreUsageData(): Promise<CoreUsageData>;
 }
 
 // @public (undocumented)

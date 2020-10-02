@@ -237,7 +237,10 @@ export class Server {
     const uiSettingsStart = await this.uiSettings.start();
     const metricsStart = await this.metrics.start();
     const httpStart = this.http.getStartContract();
-    const coreUsageDataStart = this.coreUsageData.start();
+    const coreUsageDataStart = this.coreUsageData.start({
+      elasticsearch: elasticsearchStart,
+      savedObjects: savedObjectsStart,
+    });
 
     this.coreStart = {
       capabilities: capabilitiesStart,

@@ -23,7 +23,7 @@
  */
 export interface CoreUsageData {
   config: CoreConfigUsageData;
-  // services: CoreServicesUsageData;
+  services: CoreServicesUsageData;
   environment: CoreEnvironmentUsageData;
 }
 
@@ -32,8 +32,13 @@ export interface CoreUsageData {
  */
 export interface CoreServicesUsageData {
   savedObjects: {
-    totalCount: number;
-    typesCount: number;
+    indices: Array<{
+      name: string;
+      docsCount: number;
+      docsDeleted: number;
+      storeSizeBytes: number;
+      primaryStoreSizeBytes: number;
+    }>;
   };
 }
 
@@ -145,5 +150,5 @@ export interface CoreUsageDataStart {
    * Internal API for collecting Core usage data
    * @internal
    * */
-  getCoreUsageData(): CoreUsageData;
+  getCoreUsageData(): Promise<CoreUsageData>;
 }

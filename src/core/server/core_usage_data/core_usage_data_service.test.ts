@@ -27,10 +27,13 @@ import { mockCoreContext } from '../core_context.mock';
 import { config as RawElasticsearchConfig } from '../elasticsearch/elasticsearch_config';
 import { config as RawHttpConfig } from '../http/http_config';
 import { config as RawLoggingConfig } from '../logging/logging_config';
+import { config as RawKibanaConfig } from '../kibana_config';
 import { savedObjectsConfig as RawSavedObjectsConfig } from '../saved_objects/saved_objects_config';
 import { metricsServiceMock } from '../metrics/metrics_service.mock';
+import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 
 import { CoreUsageDataService } from './core_usage_data_service';
+import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
 
 describe('CoreUsageDataService', () => {
   const getTestScheduler = () =>
@@ -49,6 +52,8 @@ describe('CoreUsageDataService', () => {
       return new BehaviorSubject(RawLoggingConfig.schema.validate({}));
     } else if (path === 'savedObjects') {
       return new BehaviorSubject(RawSavedObjectsConfig.schema.validate({}));
+    } else if (path === 'kibana') {
+      return new BehaviorSubject(RawKibanaConfig.schema.validate({}));
     }
     return new BehaviorSubject({});
   });
@@ -63,7 +68,11 @@ describe('CoreUsageDataService', () => {
       it('returns core metrics for default config', () => {
         const metrics = metricsServiceMock.createInternalSetupContract();
         service.setup({ metrics });
-        const { getCoreUsageData } = service.start();
+
+        const { getCoreUsageData } = service.start({
+          savedObjects: savedObjectsServiceMock.createInternalStartContract(),
+          elasticsearch: elasticsearchServiceMock.createStart(),
+        });
         expect(getCoreUsageData()).toMatchInlineSnapshot(`
           Object {
             "config": Object {

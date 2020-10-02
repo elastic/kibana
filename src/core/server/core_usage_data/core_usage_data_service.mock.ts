@@ -24,7 +24,7 @@ import { CoreUsageData, CoreUsageDataStart } from './types';
 
 const createStartContractMock = () => {
   const startContract: jest.Mocked<CoreUsageDataStart> = {
-    getCoreUsageData: jest.fn().mockReturnValue(
+    getCoreUsageData: jest.fn().mockResolvedValue(
       new BehaviorSubject<CoreUsageData>({
         config: {
           elasticsearch: {
@@ -120,6 +120,19 @@ const createStartContractMock = () => {
           os: {
             platform: 'darwin',
             platformRelease: 'test',
+          },
+        },
+        services: {
+          savedObjects: {
+            indices: [
+              {
+                docsCount: 1,
+                docsDeleted: 1,
+                name: 'test_index',
+                primaryStoreSizeBytes: 1,
+                storeSizeBytes: 1,
+              },
+            ],
           },
         },
       })

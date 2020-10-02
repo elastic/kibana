@@ -113,6 +113,20 @@ export function getCoreUsageCollector(
           platformRelease: { type: 'keyword' },
         },
       },
+      services: {
+        savedObjects: {
+          indices: {
+            type: 'array',
+            items: {
+              docsCount: { type: 'long' },
+              docsDeleted: { type: 'long' },
+              name: { type: 'text' },
+              primaryStoreSizeBytes: { type: 'long' },
+              storeSizeBytes: { type: 'long' },
+            },
+          },
+        },
+      },
     },
     fetch() {
       return getCoreUsageDataService().getCoreUsageData();
