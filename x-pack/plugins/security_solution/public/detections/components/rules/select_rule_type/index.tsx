@@ -12,6 +12,7 @@ import {
   isThresholdRule,
   isEqlRule,
   isQueryRule,
+  isThreatMatchRule,
 } from '../../../../../common/detection_engine/utils';
 import { FieldHook } from '../../../../shared_imports';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -45,6 +46,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
   const setMl = useCallback(() => setType('machine_learning'), [setType]);
   const setQuery = useCallback(() => setType('query'), [setType]);
   const setThreshold = useCallback(() => setType('threshold'), [setType]);
+  const setThreatMatch = useCallback(() => setType('threat_match'), [setType]);
   const mlCardDisabled = isReadOnly || !hasValidLicense || !isMlAdmin;
   const licensingUrl = useKibana().services.application.getUrlForApp('kibana', {
     path: '#/management/stack/license_management',
@@ -84,6 +86,15 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
       isSelected: isThresholdRule(ruleType),
     }),
     [isReadOnly, ruleType, setThreshold]
+  );
+
+  const threatMatchSelectableConfig = useMemo(
+    () => ({
+      isDisabled: isReadOnly,
+      onClick: setThreatMatch,
+      isSelected: isThreatMatchRule(ruleType),
+    }),
+    [isReadOnly, ruleType, setThreatMatch]
   );
 
   return (
@@ -136,6 +147,18 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
             icon={<EuiIcon size="l" type="bullseye" />}
             isDisabled={eqlSelectableConfig.isDisabled && !eqlSelectableConfig.isSelected}
             selectable={eqlSelectableConfig}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiCard
+            data-test-subj="threatMatchRuleType"
+            title={i18n.THREAT_MATCH_TYPE_TITLE}
+            description={i18n.THREAT_MATCH_TYPE_DESCRIPTION}
+            icon={<EuiIcon size="l" type="list" />}
+            isDisabled={
+              threatMatchSelectableConfig.isDisabled && !threatMatchSelectableConfig.isSelected
+            }
+            selectable={threatMatchSelectableConfig}
           />
         </EuiFlexItem>
       </EuiFlexGrid>

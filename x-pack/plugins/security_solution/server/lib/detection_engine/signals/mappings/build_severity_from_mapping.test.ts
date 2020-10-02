@@ -14,7 +14,7 @@ describe('buildSeverityFromMapping', () => {
 
   test('severity defaults to provided if mapping is undefined', () => {
     const severity = buildSeverityFromMapping({
-      doc: sampleDocNoSortId(),
+      eventSource: sampleDocNoSortId()._source,
       severity: 'low',
       severityMapping: undefined,
     });
@@ -24,7 +24,7 @@ describe('buildSeverityFromMapping', () => {
 
   test('severity is overridden to highest matched mapping', () => {
     const severity = buildSeverityFromMapping({
-      doc: sampleDocSeverity(23),
+      eventSource: sampleDocSeverity(23)._source,
       severity: 'low',
       severityMapping: [
         { field: 'event.severity', operator: 'equals', value: '23', severity: 'critical' },
@@ -44,7 +44,7 @@ describe('buildSeverityFromMapping', () => {
 
   test('severity is overridden when field is event.severity and source value is number', () => {
     const severity = buildSeverityFromMapping({
-      doc: sampleDocSeverity(23),
+      eventSource: sampleDocSeverity(23)._source,
       severity: 'low',
       severityMapping: [
         { field: 'event.severity', operator: 'equals', value: '13', severity: 'low' },

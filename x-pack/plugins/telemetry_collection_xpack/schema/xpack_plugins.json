@@ -242,6 +242,30 @@
         }
       }
     },
+    "infraops": {
+      "properties": {
+        "last_24_hours": {
+          "properties": {
+            "hits": {
+              "properties": {
+                "infraops_hosts": {
+                  "type": "long"
+                },
+                "infraops_docker": {
+                  "type": "long"
+                },
+                "infraops_kubernetes": {
+                  "type": "long"
+                },
+                "logs": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "ingest_manager": {
       "properties": {
         "fleet_enabled": {
@@ -650,6 +674,99 @@
             },
             "lnsMetric": {
               "type": "long"
+            }
+          }
+        }
+      }
+    },
+    "maps": {
+      "properties": {
+        "settings": {
+          "properties": {
+            "showMapVisualizationTypes": {
+              "type": "boolean"
+            }
+          }
+        },
+        "indexPatternsWithGeoFieldCount": {
+          "type": "long"
+        },
+        "indexPatternsWithGeoPointFieldCount": {
+          "type": "long"
+        },
+        "indexPatternsWithGeoShapeFieldCount": {
+          "type": "long"
+        },
+        "geoShapeAggLayersCount": {
+          "type": "long"
+        },
+        "mapsTotalCount": {
+          "type": "long"
+        },
+        "timeCaptured": {
+          "type": "date"
+        },
+        "attributesPerMap": {
+          "properties": {
+            "dataSourcesCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
+            "layersCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
+            "layerTypesCount": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
+                    }
+                  }
+                }
+              }
+            },
+            "emsVectorLayersCount": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
+                    }
+                  }
+                }
+              }
             }
           }
         }
