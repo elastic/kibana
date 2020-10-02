@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import uuid from 'uuid';
-import { filter } from 'rxjs/operators';
+import { filter, take } from 'rxjs/operators';
 import { Option, some, none } from 'fp-ts/lib/Option';
 
 import {
@@ -1242,7 +1242,7 @@ if (doc['task.runAt'].size()!=0) {
       return { taskManagerId, runAt, tasks };
     }
 
-    test('emits an event when a task is succesfully claimed by id', async (done) => {
+    test('emits an event when a task is succesfully claimed by id', async () => {
       const { taskManagerId, runAt, tasks } = generateTasks();
       const callCluster = sinon.spy(async (name: string, params?: unknown) =>
         name === 'updateByQuery'
@@ -1262,49 +1262,47 @@ if (doc['task.runAt'].size()!=0) {
         index: '',
       });
 
-      const sub = store.events
+      const promise = store.events
         .pipe(
           filter(
             (event: TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>) =>
               event.id === 'claimed-by-id'
-          )
+          ),
+          take(1)
         )
-        .subscribe({
-          next: (event: TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>) => {
-            expect(event).toMatchObject(
-              asTaskClaimEvent(
-                'claimed-by-id',
-                asOk({
-                  id: 'claimed-by-id',
-                  runAt,
-                  taskType: 'foo',
-                  schedule: undefined,
-                  attempts: 0,
-                  status: 'claiming' as TaskStatus,
-                  params: { hello: 'world' },
-                  state: { baby: 'Henhen' },
-                  user: 'jimbo',
-                  scope: ['reporting'],
-                  ownerId: taskManagerId,
-                  startedAt: null,
-                  retryAt: null,
-                  scheduledAt: new Date(),
-                })
-              )
-            );
-            sub.unsubscribe();
-            done();
-          },
-        });
+        .toPromise();
 
       await store.claimAvailableTasks({
         claimTasksById: ['claimed-by-id'],
         claimOwnershipUntil: new Date(),
         size: 10,
       });
+
+      const event = await promise;
+      expect(event).toMatchObject(
+        asTaskClaimEvent(
+          'claimed-by-id',
+          asOk({
+            id: 'claimed-by-id',
+            runAt,
+            taskType: 'foo',
+            schedule: undefined,
+            attempts: 0,
+            status: 'claiming' as TaskStatus,
+            params: { hello: 'world' },
+            state: { baby: 'Henhen' },
+            user: 'jimbo',
+            scope: ['reporting'],
+            ownerId: taskManagerId,
+            startedAt: null,
+            retryAt: null,
+            scheduledAt: new Date(),
+          })
+        )
+      );
     });
 
-    test('emits an event when a task is succesfully by scheduling', async (done) => {
+    test('emits an event when a task is succesfully by scheduling', async () => {
       const { taskManagerId, runAt, tasks } = generateTasks();
       const callCluster = sinon.spy(async (name: string, params?: unknown) =>
         name === 'updateByQuery'
@@ -1324,49 +1322,47 @@ if (doc['task.runAt'].size()!=0) {
         index: '',
       });
 
-      const sub = store.events
+      const promise = store.events
         .pipe(
           filter(
             (event: TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>) =>
               event.id === 'claimed-by-schedule'
-          )
+          ),
+          take(1)
         )
-        .subscribe({
-          next: (event: TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>) => {
-            expect(event).toMatchObject(
-              asTaskClaimEvent(
-                'claimed-by-schedule',
-                asOk({
-                  id: 'claimed-by-schedule',
-                  runAt,
-                  taskType: 'bar',
-                  schedule: { interval: '5m' },
-                  attempts: 2,
-                  status: 'claiming' as TaskStatus,
-                  params: { shazm: 1 },
-                  state: { henry: 'The 8th' },
-                  user: 'dabo',
-                  scope: ['reporting', 'ceo'],
-                  ownerId: taskManagerId,
-                  startedAt: null,
-                  retryAt: null,
-                  scheduledAt: new Date(),
-                })
-              )
-            );
-            sub.unsubscribe();
-            done();
-          },
-        });
+        .toPromise();
 
       await store.claimAvailableTasks({
         claimTasksById: ['claimed-by-id'],
         claimOwnershipUntil: new Date(),
         size: 10,
       });
+
+      const event = await promise;
+      expect(event).toMatchObject(
+        asTaskClaimEvent(
+          'claimed-by-schedule',
+          asOk({
+            id: 'claimed-by-schedule',
+            runAt,
+            taskType: 'bar',
+            schedule: { interval: '5m' },
+            attempts: 2,
+            status: 'claiming' as TaskStatus,
+            params: { shazm: 1 },
+            state: { henry: 'The 8th' },
+            user: 'dabo',
+            scope: ['reporting', 'ceo'],
+            ownerId: taskManagerId,
+            startedAt: null,
+            retryAt: null,
+            scheduledAt: new Date(),
+          })
+        )
+      );
     });
 
-    test('emits an event when the store fails to claim a required task by id', async (done) => {
+    test('emits an event when the store fails to claim a required task by id', async () => {
       const { taskManagerId, runAt, tasks } = generateTasks();
       const callCluster = sinon.spy(async (name: string, params?: unknown) =>
         name === 'updateByQuery'
@@ -1386,51 +1382,49 @@ if (doc['task.runAt'].size()!=0) {
         index: '',
       });
 
-      const sub = store.events
+      const promise = store.events
         .pipe(
           filter(
             (event: TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>) =>
               event.id === 'already-running'
-          )
+          ),
+          take(1)
         )
-        .subscribe({
-          next: (event: TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>) => {
-            expect(event).toMatchObject(
-              asTaskClaimEvent(
-                'already-running',
-                asErr(
-                  some({
-                    id: 'already-running',
-                    runAt,
-                    taskType: 'bar',
-                    schedule: { interval: '5m' },
-                    attempts: 2,
-                    status: 'running' as TaskStatus,
-                    params: { shazm: 1 },
-                    state: { henry: 'The 8th' },
-                    user: 'dabo',
-                    scope: ['reporting', 'ceo'],
-                    ownerId: taskManagerId,
-                    startedAt: null,
-                    retryAt: null,
-                    scheduledAt: new Date(),
-                  })
-                )
-              )
-            );
-            sub.unsubscribe();
-            done();
-          },
-        });
+        .toPromise();
 
       await store.claimAvailableTasks({
         claimTasksById: ['already-running'],
         claimOwnershipUntil: new Date(),
         size: 10,
       });
+
+      const event = await promise;
+      expect(event).toMatchObject(
+        asTaskClaimEvent(
+          'already-running',
+          asErr(
+            some({
+              id: 'already-running',
+              runAt,
+              taskType: 'bar',
+              schedule: { interval: '5m' },
+              attempts: 2,
+              status: 'running' as TaskStatus,
+              params: { shazm: 1 },
+              state: { henry: 'The 8th' },
+              user: 'dabo',
+              scope: ['reporting', 'ceo'],
+              ownerId: taskManagerId,
+              startedAt: null,
+              retryAt: null,
+              scheduledAt: new Date(),
+            })
+          )
+        )
+      );
     });
 
-    test('emits an event when the store fails to find a task which was required by id', async (done) => {
+    test('emits an event when the store fails to find a task which was required by id', async () => {
       const { taskManagerId, tasks } = generateTasks();
       const callCluster = sinon.spy(async (name: string, params?: unknown) =>
         name === 'updateByQuery'
@@ -1450,26 +1444,24 @@ if (doc['task.runAt'].size()!=0) {
         index: '',
       });
 
-      const sub = store.events
+      const promise = store.events
         .pipe(
           filter(
             (event: TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>) =>
               event.id === 'unknown-task'
-          )
+          ),
+          take(1)
         )
-        .subscribe({
-          next: (event: TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>) => {
-            expect(event).toMatchObject(asTaskClaimEvent('unknown-task', asErr(none)));
-            sub.unsubscribe();
-            done();
-          },
-        });
+        .toPromise();
 
       await store.claimAvailableTasks({
         claimTasksById: ['unknown-task'],
         claimOwnershipUntil: new Date(),
         size: 10,
       });
+
+      const event = await promise;
+      expect(event).toMatchObject(asTaskClaimEvent('unknown-task', asErr(none)));
     });
   });
 });

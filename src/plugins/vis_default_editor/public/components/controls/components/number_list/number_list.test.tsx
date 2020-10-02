@@ -33,10 +33,10 @@ jest.mock('@elastic/eui', () => ({
     let counter = 1;
     return () => `12${counter++}`;
   }),
-  EuiSpacer: require.requireActual('@elastic/eui').EuiSpacer,
-  EuiFlexItem: require.requireActual('@elastic/eui').EuiFlexItem,
-  EuiButtonEmpty: require.requireActual('@elastic/eui').EuiButtonEmpty,
-  EuiFormErrorText: require.requireActual('@elastic/eui').EuiFormErrorText,
+  EuiSpacer: jest.requireActual('@elastic/eui').EuiSpacer,
+  EuiFlexItem: jest.requireActual('@elastic/eui').EuiFlexItem,
+  EuiButtonEmpty: jest.requireActual('@elastic/eui').EuiButtonEmpty,
+  EuiFormErrorText: jest.requireActual('@elastic/eui').EuiFormErrorText,
 }));
 
 describe('NumberList', () => {
