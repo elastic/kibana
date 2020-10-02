@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
+import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { OperationDefinition } from './index';
 import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
@@ -80,6 +82,55 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         missing: 0,
       },
     }),
+    paramEditor({ currentColumn, state, setState, layerId }) {
+      const options = [
+        {
+          value: 'none',
+          text: 'None',
+        },
+        {
+          value: '1s',
+          text: 'Per second',
+        },
+        {
+          value: '1m',
+          text: 'Per minute',
+        },
+        {
+          value: '1h',
+          text: 'Per hour',
+        },
+      ];
+      return (
+        <>
+          <EuiFormRow label="Scale to time">
+            <EuiSelect
+              options={options}
+              value={currentColumn?.params?.format?.params?.unit ?? null}
+              onChange={(e) => {
+                setState(
+                  updateColumnParam({
+                    state,
+                    layerId,
+                    currentColumn,
+                    paramName: 'format',
+                    value:
+                      e.target.value === 'none'
+                        ? undefined
+                        : {
+                            id: 'scaled',
+                            params: {
+                              unit: e.target.value,
+                            },
+                          },
+                  })
+                );
+              }}
+            />
+          </EuiFormRow>
+        </>
+      );
+    },
   } as OperationDefinition<T, 'field'>;
 }
 

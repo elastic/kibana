@@ -54,6 +54,7 @@ import { getBucketSumMetricAgg } from './metrics/bucket_sum';
 import { getBucketAvgMetricAgg } from './metrics/bucket_avg';
 import { getBucketMinMetricAgg } from './metrics/bucket_min';
 import { getBucketMaxMetricAgg } from './metrics/bucket_max';
+import { getPositiveGrowthMetricAgg } from './metrics/positive_growth';
 
 /** @internal */
 export interface AggTypesDependencies {
@@ -86,6 +87,7 @@ export const getAggTypes = () => ({
     { name: METRIC_TYPES.MAX_BUCKET, fn: getBucketMaxMetricAgg },
     { name: METRIC_TYPES.GEO_BOUNDS, fn: getGeoBoundsMetricAgg },
     { name: METRIC_TYPES.GEO_CENTROID, fn: getGeoCentroidMetricAgg },
+    { name: METRIC_TYPES.POSITIVE_GROWTH, fn: getPositiveGrowthMetricAgg },
   ],
   buckets: [
     { name: BUCKET_TYPES.DATE_HISTOGRAM, fn: getDateHistogramBucketAgg },

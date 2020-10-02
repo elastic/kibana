@@ -39,4 +39,5 @@ export enum METRIC_TYPES {
   PERCENTILES = 'percentiles',
   PERCENTILE_RANKS = 'percentile_ranks',
   STD_DEV = 'std_dev',
+  POSITIVE_GROWTH = 'positive_growth',
 }

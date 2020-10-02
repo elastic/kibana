@@ -16,16 +16,19 @@ const countLabel = i18n.translate('xpack.lens.indexPattern.countOf', {
   defaultMessage: 'Count of records',
 });
 
-export type CountIndexPatternColumn = FormattedIndexPatternColumn &
+export type PositiveGrowthIndexPatternColumn = FormattedIndexPatternColumn &
   FieldBasedIndexPatternColumn & {
-    operationType: 'count';
+    operationType: 'positive_growth';
   };
 
-export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field'> = {
-  type: 'count',
+export const positiveGrowthOperation: OperationDefinition<
+  PositiveGrowthIndexPatternColumn,
+  'field'
+> = {
+  type: 'positive_growth',
   priority: 2,
-  displayName: i18n.translate('xpack.lens.indexPattern.count', {
-    defaultMessage: 'Count',
+  displayName: i18n.translate('xpack.lens.indexPattern.positiveGrowth', {
+    defaultMessage: 'Positive growth',
   }),
   input: 'field',
   onFieldChange: (oldColumn, indexPattern, field) => {
@@ -36,7 +39,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     };
   },
   getPossibleOperationForField: (field: IndexPatternField) => {
-    if (field.type === 'document') {
+    if (field.type === 'number') {
       return {
         dataType: 'number',
         isBucketed: false,
@@ -48,7 +51,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     return {
       label: countLabel,
       dataType: 'number',
-      operationType: 'count',
+      operationType: 'positive_growth',
       suggestedPriority,
       isBucketed: false,
       scale: 'ratio',
@@ -64,9 +67,22 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
   toEsAggsConfig: (column, columnId) => ({
     id: columnId,
     enabled: true,
-    type: 'count',
+    type: 'positive_growth',
     schema: 'metric',
-    params: {},
+    params: {
+      field: column.sourceField,
+      // customMetric: {
+      //   type: 'derivative',
+      //   params: {
+      //     customMetric: {
+      //       type: 'max',
+      //       params: {
+      //         field: column.sourceField,
+      //       },
+      //     },
+      //   },
+      // },
+    },
   }),
   isTransferable: () => {
     return true;

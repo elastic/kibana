@@ -5,5 +5,6 @@
  */
 
 import { derivativeFunction } from './derivative_fn';
+import { timescaleFunction } from './time_scale_fn';
 
-export const calculationFunctions = [derivativeFunction];
+export const calculationFunctions = [derivativeFunction, timescaleFunction];

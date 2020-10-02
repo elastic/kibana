@@ -22,6 +22,7 @@ import {
 } from './metrics';
 import { dateHistogramOperation, DateHistogramIndexPatternColumn } from './date_histogram';
 import { countOperation, CountIndexPatternColumn } from './count';
+import { positiveGrowthOperation, PositiveGrowthIndexPatternColumn } from './positive_growth';
 import { derivativeOperation, DerivativeIndexPatternColumn } from './derivative';
 import { DimensionPriority, StateSetter, OperationMetadata } from '../../../types';
 import { BaseIndexPatternColumn } from './column_types';
@@ -51,9 +52,8 @@ export type IndexPatternColumn =
   | CardinalityIndexPatternColumn
   | SumIndexPatternColumn
   | CountIndexPatternColumn
-  | DerivativeIndexPatternColumn;
-
-export type FieldBasedIndexPatternColumn = Extract<IndexPatternColumn, { sourceField: string }>;
+  | DerivativeIndexPatternColumn
+  | PositiveGrowthIndexPatternColumn;
 
 // List of all operation definitions registered to this data source.
 // If you want to implement a new operation, add the definition to this array and
@@ -70,25 +70,10 @@ const internalOperationDefinitions = [
   countOperation,
   rangeOperation,
   derivativeOperation,
+  positiveGrowthOperation,
 ];
 
 export type FieldBasedIndexPatternColumn = Extract<IndexPatternColumn, { sourceField: string }>;
-
-// List of all operation definitions registered to this data source.
-// If you want to implement a new operation, add the definition to this array and
-// the column type to the `IndexPatternColumn` union type below.
-const internalOperationDefinitions = [
-  filtersOperation,
-  termsOperation,
-  dateHistogramOperation,
-  minOperation,
-  maxOperation,
-  averageOperation,
-  cardinalityOperation,
-  sumOperation,
-  countOperation,
-  rangeOperation,
-];
 
 export { termsOperation } from './terms';
 export { rangeOperation } from './ranges';
@@ -292,21 +277,6 @@ interface OperationDefinitionMap<C extends BaseIndexPatternColumn> {
   none: FieldlessOperationDefinition<C>;
   reference: ReferenceBasedOperationDefinition<C>;
 }
-
-interface OperationDefinitionMap<C extends BaseIndexPatternColumn> {
-  field: FieldBasedOperationDefinition<C>;
-  none: FieldlessOperationDefinition<C>;
-}
-
-/**
- * Shape of an operation definition. If the type parameter of the definition
- * indicates a field based column, `getPossibleOperationForField` has to be
- * specified, otherwise `getPossibleOperation` has to be defined.
- */
-export type OperationDefinition<
-  C extends BaseIndexPatternColumn,
-  Input extends keyof OperationDefinitionMap<C>
-> = BaseOperationDefinitionProps<C> & OperationDefinitionMap<C>[Input];
 
 /**
  * Shape of an operation definition. If the type parameter of the definition

@@ -10,6 +10,7 @@ interface FormatColumn {
   format: string;
   columnId: string;
   decimals?: number;
+  unit?: string;
 }
 
 const supportedFormats: Record<string, { decimalsToPattern: (decimals?: number) => string }> = {
@@ -63,9 +64,13 @@ export const formatColumn: ExpressionFunctionDefinition<
       types: ['number'],
       help: '',
     },
+    unit: {
+      types: ['string'],
+      help: '',
+    },
   },
   inputTypes: ['kibana_datatable'],
-  fn(input, { format, columnId, decimals }: FormatColumn) {
+  fn(input, { format, columnId, decimals, unit }: FormatColumn) {
     return {
       ...input,
       columns: input.columns.map((col) => {
@@ -81,7 +86,7 @@ export const formatColumn: ExpressionFunctionDefinition<
           } else {
             return {
               ...col,
-              formatHint: { id: format, params: {} },
+              formatHint: { id: format, params: unit ? { unit } : {} },
             };
           }
         }

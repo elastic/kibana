@@ -108,6 +108,34 @@ export function getFormatWithAggs(getFieldFormat: GetFieldFormat): GetFieldForma
           getConverterFor: (type: FieldFormatsContentType) => (val: string) => convert(val, type),
         } as IFieldFormat;
       },
+      scaled: () => {
+        const scaleToLabel: Record<string, string> = {
+          '1s': '/s',
+          '1m': '/m',
+          '1h': '/h',
+        };
+        const scaleToMultiple: Record<string, number> = {
+          '1s': 1 / 3 / 60 / 60,
+          '1m': 1 / 3 / 60,
+          '1h': 1 / 3,
+        };
+        let unitSuffix = '';
+        if (params.unit && scaleToLabel[params.unit]) {
+          unitSuffix = scaleToLabel[params.unit];
+        }
+        const format = getFieldFormat({ id: 'number', params: {} });
+        console.log('unit suffix', params?.unit, unitSuffix);
+        const convert = (val: number, type: FieldFormatsContentType) => {
+          if (val && unitSuffix) {
+            return `${format.convert(val * scaleToMultiple[params?.unit], type)}${unitSuffix}`;
+          }
+          return `${format.convert(val, type)}${unitSuffix}`;
+        };
+        return {
+          convert,
+          getConverterFor: (type: FieldFormatsContentType) => (val: number) => convert(val, type),
+        } as IFieldFormat;
+      },
     };
 
     if (!id || !(id in customFormats)) {

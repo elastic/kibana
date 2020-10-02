@@ -21,7 +21,7 @@ export interface BaseIndexPatternColumn extends Operation {
 // Formatting can optionally be added to any column
 export interface FormattedIndexPatternColumn extends BaseIndexPatternColumn {
   params?: {
-    format: {
+    format?: {
       id: string;
       params?: {
         decimals: number;

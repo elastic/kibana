@@ -174,6 +174,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           compatibleWithCurrentField ? '' : ' incompatible'
         }`,
         onClick() {
+          const operationDefinition = operationDefinitionMap[operationType];
           if (operationDefinitionMap[operationType].input === 'none') {
             // Clear invalid state because we are creating a valid column
             setInvalidOperationType(null);
@@ -483,9 +484,12 @@ export function DimensionEditor(props: DimensionEditorProps) {
 function getErrorMessage(
   selectedColumn: IndexPatternColumn | undefined,
   incompatibleSelectedOperationType: boolean,
-  input: 'none' | 'field' | undefined,
+  input: 'none' | 'field' | 'reference' | undefined,
   fieldInvalid: boolean
 ) {
+  if (input === 'reference') {
+    return '';
+  }
   if (selectedColumn && incompatibleSelectedOperationType) {
     if (input === 'field') {
       return i18n.translate('xpack.lens.indexPattern.invalidOperationLabel', {

@@ -90,6 +90,15 @@ function getExpressionForLayer(layer: IndexPatternLayer, indexPattern: IndexPatt
           },
         };
       }
+      if (typeof format.params?.unit === 'string') {
+        return {
+          ...base,
+          arguments: {
+            ...base.arguments,
+            unit: [format.params.unit],
+          },
+        };
+      }
       return base;
     });
 

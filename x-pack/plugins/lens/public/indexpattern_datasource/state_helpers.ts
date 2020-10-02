@@ -90,10 +90,17 @@ export function changeColumn<C extends IndexPatternColumn>({
     updatedColumn.label = oldColumn.label;
   }
 
+  const layer = {
+    ...state.layers[layerId],
+  };
+
   const newColumns = adjustColumnReferencesForChangedColumn(
     {
-      ...state.layers[layerId].columns,
+      // ...layer,
+      // columns: {
+      ...layer.columns,
       [columnId]: updatedColumn,
+      // },
     },
     columnId
   );
@@ -102,8 +109,12 @@ export function changeColumn<C extends IndexPatternColumn>({
     state,
     layerId,
     newLayer: {
-      columnOrder: getColumnOrder(newColumns),
+      columnOrder: getColumnOrder({
+        ...layer,
+        columns: newColumns,
+      }),
       columns: newColumns,
+      innerOperations: {},
     },
   });
 }
@@ -156,13 +167,17 @@ export function deleteColumn({
   delete hypotheticalColumns[columnId];
 
   const newColumns = adjustColumnReferencesForChangedColumn(hypotheticalColumns, columnId);
+  const layer = {
+    ...state.layers[layerId],
+    columns: newColumns,
+  };
 
   return mergeLayer({
     state,
     layerId,
     newLayer: {
-      columnOrder: getColumnOrder(newColumns),
-      columns: newColumns,
+      ...layer,
+      columnOrder: getColumnOrder(layer),
     },
   });
 }
