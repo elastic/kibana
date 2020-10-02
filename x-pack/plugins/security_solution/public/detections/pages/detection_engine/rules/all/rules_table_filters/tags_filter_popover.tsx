@@ -27,6 +27,7 @@ import {
 import styled from 'styled-components';
 import * as i18n from '../../translations';
 import { toggleSelectedGroup } from '../../../../../../common/components/ml_popover/jobs_table/filters/toggle_selected_group';
+import { caseInsensitiveSort } from '../helpers';
 
 interface TagsFilterPopoverProps {
   selectedTags: string[];
@@ -62,9 +63,7 @@ const TagsFilterPopoverComponent = ({
   selectedTags,
   onSelectedTagsChanged,
 }: TagsFilterPopoverProps) => {
-  const sortedTags = useMemo(() => {
-    return tags.sort((a: string, b: string) => a.toLowerCase().localeCompare(b.toLowerCase())); // Case insensitive
-  }, [tags]);
+  const sortedTags = useMemo(() => caseInsensitiveSort(tags), [tags]);
   const [isTagPopoverOpen, setIsTagPopoverOpen] = useState(false);
   const [searchInput, setSearchInput] = useState('');
   const [filterTags, setFilterTags] = useState(sortedTags);

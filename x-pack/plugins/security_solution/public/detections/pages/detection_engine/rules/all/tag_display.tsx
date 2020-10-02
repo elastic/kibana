@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { EuiPopover, EuiBadgeGroup, EuiBadge, EuiButtonEmpty } from '@elastic/eui';
 import styled from 'styled-components';
 import * as i18n from '../translations';
+import { caseInsensitiveSort } from './helpers';
 
 interface TagsDisplayProps {
   tags: string[];
@@ -34,12 +35,13 @@ const TagPopoverButton = styled(EuiButtonEmpty)`
  */
 const TagsDisplayComponent = ({ tags }: TagsDisplayProps) => {
   const [isTagPopoverOpen, setIsTagPopoverOpen] = useState(false);
+  const sortedTags = useMemo(() => caseInsensitiveSort(tags), [tags]);
 
   return (
     <>
-      {tags.length <= 3 ? (
+      {sortedTags.length <= 3 ? (
         <TagWrapper data-test-subj="tags">
-          {tags.map((tag: string, i: number) => (
+          {sortedTags.map((tag: string, i: number) => (
             <EuiBadge
               color="hollow"
               key={`${tag}-${i}`}
@@ -51,7 +53,7 @@ const TagsDisplayComponent = ({ tags }: TagsDisplayProps) => {
         </TagWrapper>
       ) : (
         <TagWrapper data-test-subj="tags">
-          {tags.slice(0, 3).map((tag: string, i: number) => (
+          {sortedTags.slice(0, 3).map((tag: string, i: number) => (
             <EuiBadge
               color="hollow"
               key={`${tag}-${i}`}
@@ -79,11 +81,12 @@ const TagsDisplayComponent = ({ tags }: TagsDisplayProps) => {
             repositionOnScroll
           >
             <TagPopoverWrapper>
-              {tags.map((tag: string, i: number) => (
+              {sortedTags.map((tag: string, i: number) => (
                 <EuiBadge
                   color="hollow"
                   key={`${tag}-${i}`}
                   data-test-subj={`rules-table-column-popover-tags-${i}`}
+                  title={tag}
                 >
                   {tag}
                 </EuiBadge>
