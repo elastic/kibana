@@ -17,9 +17,9 @@
  * under the License.
  */
 import _ from 'lodash';
-import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../../../share/public';
+import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../../../../share/public';
 import aggTableTemplate from './agg_table.html';
-import { getFormatService } from '../services';
+import { getFormatService } from '../../services';
 import { i18n } from '@kbn/i18n';
 
 export function KbnAggTable(config, RecursionHelper) {

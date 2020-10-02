@@ -20,29 +20,31 @@ import { CoreSetup, PluginInitializerContext } from 'kibana/public';
 import angular, { IModule, auto, IRootScopeService, IScope, ICompileService } from 'angular';
 import $ from 'jquery';
 
-import { VisParams, ExprVis } from '../../visualizations/public';
+import './index.scss';
+
 import { getAngularModule } from './get_inner_angular';
-import { getKibanaLegacy } from './services';
 import { initTableVisLegacyModule } from './table_vis_legacy_module';
+// @ts-ignore
+import tableVisTemplate from './table_vis.html';
+import { TablePluginStartDependencies } from '../plugin';
+import { TableVisParams } from '../types';
 
 const innerAngularName = 'kibana/table_vis';
 
 export function getTableVisualizationControllerClass(
-  core: CoreSetup,
+  core: CoreSetup<TablePluginStartDependencies>,
   context: PluginInitializerContext
 ) {
   return class TableVisualizationController {
     private tableVisModule: IModule | undefined;
     private injector: auto.IInjectorService | undefined;
     el: JQuery<Element>;
-    vis: ExprVis;
     $rootScope: IRootScopeService | null = null;
     $scope: (IScope & { [key: string]: any }) | undefined;
     $compile: ICompileService | undefined;
 
-    constructor(domeElement: Element, vis: ExprVis) {
+    constructor(domeElement: Element) {
       this.el = $(domeElement);
-      this.vis = vis;
     }
 
     getInjector() {
@@ -58,14 +60,14 @@ export function getTableVisualizationControllerClass(
 
     async initLocalAngular() {
       if (!this.tableVisModule) {
-        const [coreStart] = await core.getStartServices();
+        const [coreStart, { kibanaLegacy }] = await core.getStartServices();
         this.tableVisModule = getAngularModule(innerAngularName, coreStart, context);
         initTableVisLegacyModule(this.tableVisModule);
+        kibanaLegacy.loadFontAwesome();
       }
     }
 
-    async render(esResponse: object, visParams: VisParams): Promise<void> {
-      getKibanaLegacy().loadFontAwesome();
+    async render(esResponse: object, visParams: TableVisParams, uiState: any): Promise<void> {
       await this.initLocalAngular();
 
       return new Promise(async (resolve, reject) => {
@@ -88,7 +90,7 @@ export function getTableVisualizationControllerClass(
           //
           // In case some prop is missing check into the top of the chain if they are available and check
           // the list above that it is passing through
-          this.$scope.vis = this.vis;
+          // this.$scope.vis = this.vis;
           this.$scope.visState = { params: visParams, title: visParams.title };
           this.$scope.esResponse = esResponse;
 
@@ -101,9 +103,9 @@ export function getTableVisualizationControllerClass(
 
         if (!this.$scope && this.$compile) {
           this.$scope = this.$rootScope.$new();
-          this.$scope.uiState = this.vis.getUiState();
+          this.$scope.uiState = uiState;
           updateScope();
-          this.el.find('div').append(this.$compile(this.vis.type!.visConfig.template)(this.$scope));
+          this.el.find('div').append(this.$compile(tableVisTemplate)(this.$scope));
           this.$scope.$apply();
         } else {
           updateScope();

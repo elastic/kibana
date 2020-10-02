@@ -33,6 +33,7 @@ export interface Dimensions {
 }
 
 export interface TableVisParams {
+  title: string;
   type: 'table';
   perPage: number | '';
   showPartialRows: boolean;

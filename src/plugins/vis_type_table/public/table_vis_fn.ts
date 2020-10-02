@@ -65,7 +65,7 @@ export const createTableVisFn = (): TableExpressionFunctionDefinition => ({
 
     return {
       type: 'render',
-      as: 'visualization',
+      as: 'table_vis',
       value: {
         visData: convertedData,
         visType: 'table',
