@@ -24,13 +24,14 @@ import {
   buildColumn,
   changeField,
 } from '../operations';
-import { deleteColumn, changeColumn, updateColumnParam } from '../state_helpers';
+import { deleteColumn, changeColumn, updateColumnParam, mergeLayer } from '../state_helpers';
 import { FieldSelect } from './field_select';
 import { hasField, fieldIsInvalid } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
 import { IndexPattern, IndexPatternField } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { FormatSelector } from './format_selector';
+import { ReferenceEditor } from './reference_editor';
 
 const operationPanels = getOperationDisplay();
 
@@ -173,6 +174,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           compatibleWithCurrentField ? '' : ' incompatible'
         }`,
         onClick() {
+          const operationDefinition = operationDefinitionMap[operationType];
           if (operationDefinitionMap[operationType].input === 'none') {
             // Clear invalid state because we are creating a valid column
             setInvalidOperationType(null);
@@ -191,6 +193,24 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   op: operationType,
                   indexPattern: currentIndexPattern,
                   previousColumn: selectedColumn,
+                }),
+              })
+            );
+            trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
+            return;
+          } else if (operationDefinition.input === 'reference') {
+            // Clear invalid state because we are creating a valid column
+            setInvalidOperationType(null);
+            if (selectedColumn?.operationType === operationType) {
+              return;
+            }
+            setState(
+              mergeLayer({
+                state,
+                layerId,
+                newLayer: operationDefinition.create({
+                  layer: props.state.layers[props.layerId],
+                  newId: columnId,
                 }),
               })
             );
@@ -360,10 +380,18 @@ export function DimensionEditor(props: DimensionEditorProps) {
           </EuiFormRow>
         ) : null}
 
-        {!currentFieldIsInvalid &&
-          !incompatibleSelectedOperationType &&
-          selectedColumn &&
-          ParamEditor && (
+        {selectedColumn &&
+        operationDefinitionMap[selectedColumn.operationType].input === 'reference' ? (
+          <ReferenceEditor
+            {...props}
+            selectedColumn={state.layers[layerId].innerOperations[selectedColumn.references[0]]}
+          />
+        ) : null}
+
+        {
+          /*!currentFieldIsInvalid &&
+          !incompatibleSelectedOperationType &&*/
+          selectedColumn && ParamEditor && (
             <>
               <ParamEditor
                 state={state}
@@ -379,7 +407,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 data={props.data}
               />
             </>
-          )}
+          )
+        }
       </div>
 
       <EuiSpacer size="s" />
@@ -455,9 +484,12 @@ export function DimensionEditor(props: DimensionEditorProps) {
 function getErrorMessage(
   selectedColumn: IndexPatternColumn | undefined,
   incompatibleSelectedOperationType: boolean,
-  input: 'none' | 'field' | undefined,
+  input: 'none' | 'field' | 'reference' | undefined,
   fieldInvalid: boolean
 ) {
+  if (input === 'reference') {
+    return '';
+  }
   if (selectedColumn && incompatibleSelectedOperationType) {
     if (input === 'field') {
       return i18n.translate('xpack.lens.indexPattern.invalidOperationLabel', {

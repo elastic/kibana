@@ -85,7 +85,7 @@ const getOperationSupportMatrix = (props: Props): OperationSupportMatrix => {
         } else {
           supportedFieldsByOperation[operation.operationType] = [operation.field];
         }
-      } else if (operation.type === 'none') {
+      } else if (operation.type === 'none' || operation.type === 'reference') {
         supportedOperationsWithoutField.push(operation.operationType);
       }
     });

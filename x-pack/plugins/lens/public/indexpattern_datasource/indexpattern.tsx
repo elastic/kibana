@@ -317,7 +317,11 @@ export function getIndexPatternDatasource({
         datasourceId: 'indexpattern',
 
         getTableSpec: () => {
-          return state.layers[layerId].columnOrder.map((colId) => ({ columnId: colId }));
+          const layer = state.layers[layerId];
+          return Object.keys(layer.columns)
+            .sort((a, b) => layer.columnOrder.indexOf(b) - layer.columnOrder.indexOf(a))
+            .map((colId) => ({ columnId: colId }));
+          // return state.layers[layerId].columnOrder.map((colId) => ({ columnId: colId }));
         },
         getOperationForColumnId: (columnId: string) => {
           const layer = state.layers[layerId];
@@ -345,5 +349,6 @@ function blankLayer(indexPatternId: string) {
     indexPatternId,
     columns: {},
     columnOrder: [],
+    innerOperations: {},
   };
 }

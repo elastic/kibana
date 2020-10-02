@@ -25,25 +25,24 @@ export function updateColumnParam<C extends IndexPatternColumn, K extends keyof 
     ([_columnId, column]) => column === currentColumn
   )![0];
 
-  return {
-    ...state,
-    layers: {
-      ...state.layers,
-      [layerId]: {
-        ...state.layers[layerId],
-        columns: {
-          ...state.layers[layerId].columns,
-          [columnId]: {
-            ...currentColumn,
-            params: {
-              ...currentColumn.params,
-              [paramName]: value,
-            },
+  const layer = state.layers[layerId];
+
+  return mergeLayer({
+    state,
+    layerId,
+    newLayer: {
+      columns: {
+        ...layer.columns,
+        [columnId]: {
+          ...currentColumn,
+          params: {
+            ...currentColumn.params,
+            [paramName]: value,
           },
         },
       },
     },
-  };
+  });
 }
 
 function adjustColumnReferencesForChangedColumn(
@@ -91,25 +90,68 @@ export function changeColumn<C extends IndexPatternColumn>({
     updatedColumn.label = oldColumn.label;
   }
 
+  const layer = {
+    ...state.layers[layerId],
+  };
+
   const newColumns = adjustColumnReferencesForChangedColumn(
     {
-      ...state.layers[layerId].columns,
+      // ...layer,
+      // columns: {
+      ...layer.columns,
       [columnId]: updatedColumn,
+      // },
     },
     columnId
   );
 
-  return {
-    ...state,
-    layers: {
-      ...state.layers,
-      [layerId]: {
-        ...state.layers[layerId],
-        columnOrder: getColumnOrder(newColumns),
+  return mergeLayer({
+    state,
+    layerId,
+    newLayer: {
+      columnOrder: getColumnOrder({
+        ...layer,
         columns: newColumns,
+      }),
+      columns: newColumns,
+      innerOperations: {},
+    },
+  });
+}
+
+export function changeInnerOperation<C extends IndexPatternColumn>({
+  state,
+  layerId,
+  columnId,
+  newColumn,
+  keepParams = true,
+}: {
+  state: IndexPatternPrivateState;
+  layerId: string;
+  columnId: string;
+  newColumn: C;
+  keepParams?: boolean;
+}): IndexPatternPrivateState {
+  const oldColumn = state.layers[layerId].innerOperations[columnId];
+
+  const updatedColumn =
+    keepParams &&
+    oldColumn &&
+    oldColumn.operationType === newColumn.operationType &&
+    'params' in oldColumn
+      ? { ...newColumn, params: oldColumn.params }
+      : newColumn;
+
+  return mergeLayer({
+    state,
+    layerId,
+    newLayer: {
+      innerOperations: {
+        ...state.layers[layerId].innerOperations,
+        [columnId]: updatedColumn,
       },
     },
-  };
+  });
 }
 
 export function deleteColumn({
@@ -125,24 +167,30 @@ export function deleteColumn({
   delete hypotheticalColumns[columnId];
 
   const newColumns = adjustColumnReferencesForChangedColumn(hypotheticalColumns, columnId);
-
-  return {
-    ...state,
-    layers: {
-      ...state.layers,
-      [layerId]: {
-        ...state.layers[layerId],
-        columnOrder: getColumnOrder(newColumns),
-        columns: newColumns,
-      },
-    },
+  const layer = {
+    ...state.layers[layerId],
+    columns: newColumns,
   };
+
+  return mergeLayer({
+    state,
+    layerId,
+    newLayer: {
+      ...layer,
+      columnOrder: getColumnOrder(layer),
+    },
+  });
 }
 
-export function getColumnOrder(columns: Record<string, IndexPatternColumn>): string[] {
-  const entries = Object.entries(columns);
+export function getColumnOrder(layer: IndexPatternLayer): string[] {
+  const entries = Object.entries(layer.columns).concat(Object.entries(layer.innerOperations));
 
-  const [aggregations, metrics] = _.partition(entries, ([id, col]) => col.isBucketed);
+  const [query, postprocess] = _.partition(
+    entries,
+    ([, col]) => operationDefinitionMap[col.operationType].input !== 'reference'
+  );
+
+  const [aggregations, metrics] = _.partition(query, ([id, col]) => col.isBucketed);
 
   return aggregations
     .sort(([id, col], [id2, col2]) => {
@@ -153,7 +201,26 @@ export function getColumnOrder(columns: Record<string, IndexPatternColumn>): str
       );
     })
     .map(([id]) => id)
-    .concat(metrics.map(([id]) => id));
+    .concat(metrics.map(([id]) => id))
+    .concat(postprocess.map(([id]) => id));
+}
+
+export function mergeLayer({
+  state,
+  layerId,
+  newLayer,
+}: {
+  state: IndexPatternPrivateState;
+  layerId: string;
+  newLayer: Partial<IndexPatternLayer>;
+}) {
+  return {
+    ...state,
+    layers: {
+      ...state.layers,
+      [layerId]: { ...state.layers[layerId], ...newLayer },
+    },
+  };
 }
 
 export function updateLayerIndexPattern(
