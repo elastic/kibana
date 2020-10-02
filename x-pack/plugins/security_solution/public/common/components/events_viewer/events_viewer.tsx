@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import { getOr, isEmpty } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
@@ -235,6 +235,19 @@ const EventsViewerComponent: React.FC<Props> = ({
     events,
   ]);
 
+  const HeaderSectionContent = useMemo(
+    () =>
+      headerFilterGroup && (
+        <HeaderFilterGroupWrapper
+          data-test-subj="header-filter-group-wrapper"
+          show={!resolverIsShowing(graphEventId)}
+        >
+          {headerFilterGroup}
+        </HeaderFilterGroupWrapper>
+      ),
+    [graphEventId, headerFilterGroup]
+  );
+
   useEffect(() => {
     setIsQueryLoading(loading);
   }, [loading]);
@@ -253,14 +266,7 @@ const EventsViewerComponent: React.FC<Props> = ({
               subtitle={utilityBar ? undefined : subtitle}
               title={inspect ? justTitle : titleWithExitFullScreen}
             >
-              {headerFilterGroup && (
-                <HeaderFilterGroupWrapper
-                  data-test-subj="header-filter-group-wrapper"
-                  show={!resolverIsShowing(graphEventId)}
-                >
-                  {headerFilterGroup}
-                </HeaderFilterGroupWrapper>
-              )}
+              {HeaderSectionContent}
             </HeaderSection>
             {utilityBar && !resolverIsShowing(graphEventId) && (
               <UtilityBar>{utilityBar?.(refetch, totalCountMinusDeleted)}</UtilityBar>
@@ -289,7 +295,7 @@ const EventsViewerComponent: React.FC<Props> = ({
                 /** Hide the footer if Resolver is showing. */
                 !graphEventId && (
                   <Footer
-                    activePage={getOr(0, 'activePage', pageInfo)}
+                    activePage={pageInfo.activePage}
                     data-test-subj="events-viewer-footer"
                     updatedAt={updatedAt}
                     height={footerHeight}
@@ -302,7 +308,7 @@ const EventsViewerComponent: React.FC<Props> = ({
                     onChangeItemsPerPage={onChangeItemsPerPage}
                     onChangePage={loadPage}
                     serverSideEventCount={totalCountMinusDeleted}
-                    totalPages={getOr(0, 'totalPages', pageInfo)}
+                    totalCount={pageInfo.fakeTotalCount}
                   />
                 )
               }

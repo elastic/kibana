@@ -75,7 +75,7 @@ export function useTransactionDistribution(urlParams: IUrlParams) {
 
           const preferredSample = maybe(bucketsSortedByCount[0]?.samples[0]);
 
-          history.push({
+          history.replace({
             ...history.location,
             search: fromQuery({
               ...omit(toQuery(history.location.search), [
