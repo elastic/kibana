@@ -8,6 +8,7 @@ import { useHistory } from 'react-router-dom';
 import { fetchHasData } from '../../data_handler';
 import { useFetcher } from '../../hooks/use_fetcher';
 import { useQueryParams } from '../../hooks/use_query_params';
+import { LoadingObservability } from '../overview/loading_observability';
 
 export function HomePage() {
   const history = useHistory();
@@ -32,5 +33,5 @@ export function HomePage() {
     }
   }, [hasSomeData, history]);
 
-  return <></>;
+  return <LoadingObservability />;
 }
