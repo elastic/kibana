@@ -9,6 +9,11 @@ import { EuiText } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React from 'react';
 
+import {
+  singleEntryThreat,
+  containsInvalidItems,
+} from '../../../../common/components/threat_match/helpers';
+import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { esKuery } from '../../../../../../../../src/plugins/data/public';
 import { FieldValueQueryBar } from '../query_bar';
@@ -20,7 +25,14 @@ import {
   ValidationFunc,
 } from '../../../../shared_imports';
 import { DefineStepRule } from '../../../pages/detection_engine/rules/types';
-import { CUSTOM_QUERY_REQUIRED, INVALID_CUSTOM_QUERY, INDEX_HELPER_TEXT } from './translations';
+import {
+  CUSTOM_QUERY_REQUIRED,
+  INVALID_CUSTOM_QUERY,
+  INDEX_HELPER_TEXT,
+  THREAT_MATCH_INDEX_HELPER_TEXT,
+  THREAT_MATCH_REQUIRED,
+  THREAT_MATCH_EMPTIES,
+} from './translations';
 
 export const schema: FormSchema<DefineStepRule> = {
   index: {
@@ -218,5 +230,127 @@ export const schema: FormSchema<DefineStepRule> = {
         },
       ],
     },
+  },
+  threatIndex: {
+    type: FIELD_TYPES.COMBO_BOX,
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThreatIndexPatternsLabel',
+      {
+        defaultMessage: 'Threat index patterns',
+      }
+    ),
+    helpText: <EuiText size="xs">{THREAT_MATCH_INDEX_HELPER_TEXT}</EuiText>,
+    validations: [
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ formData }] = args;
+          const needsValidation = isThreatMatchRule(formData.ruleType);
+          if (!needsValidation) {
+            return;
+          }
+          return fieldValidators.emptyField(
+            i18n.translate(
+              'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.threatMatchoutputIndiceNameFieldRequiredError',
+              {
+                defaultMessage: 'A minimum of one index pattern is required.',
+              }
+            )
+          )(...args);
+        },
+      },
+    ],
+  },
+  threatMapping: {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThreatMappingLabel',
+      {
+        defaultMessage: 'Threat Mapping',
+      }
+    ),
+    validations: [
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ path, formData }] = args;
+          const needsValidation = isThreatMatchRule(formData.ruleType);
+          if (!needsValidation) {
+            return;
+          }
+          if (singleEntryThreat(formData.threatMapping)) {
+            return {
+              code: 'ERR_FIELD_MISSING',
+              path,
+              message: THREAT_MATCH_REQUIRED,
+            };
+          } else if (containsInvalidItems(formData.threatMapping)) {
+            return {
+              code: 'ERR_FIELD_MISSING',
+              path,
+              message: THREAT_MATCH_EMPTIES,
+            };
+          } else {
+            return undefined;
+          }
+        },
+      },
+    ],
+  },
+  threatQueryBar: {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThreatQueryBarLabel',
+      {
+        defaultMessage: 'Threat index query',
+      }
+    ),
+    validations: [
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ value, path, formData }] = args;
+          const needsValidation = isThreatMatchRule(formData.ruleType);
+          if (!needsValidation) {
+            return;
+          }
+
+          const { query, filters } = value as FieldValueQueryBar;
+
+          return isEmpty(query.query as string) && isEmpty(filters)
+            ? {
+                code: 'ERR_FIELD_MISSING',
+                path,
+                message: CUSTOM_QUERY_REQUIRED,
+              }
+            : undefined;
+        },
+      },
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ value, path, formData }] = args;
+          const needsValidation = isThreatMatchRule(formData.ruleType);
+          if (!needsValidation) {
+            return;
+          }
+          const { query } = value as FieldValueQueryBar;
+
+          if (!isEmpty(query.query as string) && query.language === 'kuery') {
+            try {
+              esKuery.fromKueryExpression(query.query);
+            } catch (err) {
+              return {
+                code: 'ERR_FIELD_FORMAT',
+                path,
+                message: INVALID_CUSTOM_QUERY,
+              };
+            }
+          }
+        },
+      },
+    ],
   },
 };
