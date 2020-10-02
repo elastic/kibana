@@ -195,6 +195,20 @@ class TableSeriesConfigUI extends Component {
           <EuiFlexItem grow={false}>
             <EuiFormLabel>
               <FormattedMessage
+                id="visTypeTimeseries.table.optionsTab.ignoreGlobalFilterLabel"
+                defaultMessage="Ignore global filter?"
+              />
+            </EuiFormLabel>
+            <EuiSpacer size="s" />
+            <YesNo
+              value={model.ignore_global_filter}
+              name="ignore_global_filter"
+              onChange={this.props.onChange}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFormLabel>
+              <FormattedMessage
                 id="visTypeTimeseries.table.showTrendArrowsLabel"
                 defaultMessage="Show trend arrows?"
               />

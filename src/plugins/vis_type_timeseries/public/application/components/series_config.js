@@ -56,28 +56,46 @@ export const SeriesConfig = (props) => {
 
       <EuiHorizontalRule margin="s" />
 
-      <EuiFormRow
-        id={htmlId('series_filter')}
-        label={
-          <FormattedMessage
-            id="visTypeTimeseries.seriesConfig.filterLabel"
-            defaultMessage="Filter"
+      <EuiFlexGroup margin="s">
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('series_filter')}
+            label={
+              <FormattedMessage
+                id="visTypeTimeseries.seriesConfig.filterLabel"
+                defaultMessage="Filter"
+              />
+            }
+            fullWidth
+          >
+            <QueryBarWrapper
+              query={{
+                language:
+                  model.filter && model.filter.language
+                    ? model.filter.language
+                    : getDefaultQueryLanguage(),
+                query: model.filter && model.filter.query ? model.filter.query : '',
+              }}
+              onChange={(filter) => props.onChange({ filter })}
+              indexPatterns={[seriesIndexPattern]}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormLabel>
+            <FormattedMessage
+              id="visTypeTimeseries.seriesConfig.ignoreGlobalFilterLabel"
+              defaultMessage="Ignore global filter?"
+            />
+          </EuiFormLabel>
+          <EuiSpacer size="s" />
+          <YesNo
+            value={model.ignore_global_filter}
+            name="ignore_global_filter"
+            onChange={props.onChange}
           />
-        }
-        fullWidth
-      >
-        <QueryBarWrapper
-          query={{
-            language:
-              model.filter && model.filter.language
-                ? model.filter.language
-                : getDefaultQueryLanguage(),
-            query: model.filter && model.filter.query ? model.filter.query : '',
-          }}
-          onChange={(filter) => props.onChange({ filter })}
-          indexPatterns={[seriesIndexPattern]}
-        />
-      </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       <EuiHorizontalRule margin="s" />
 
