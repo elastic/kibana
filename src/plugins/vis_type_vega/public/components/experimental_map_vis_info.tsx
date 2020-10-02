@@ -20,7 +20,6 @@
 import { parse } from 'hjson';
 import React from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n/react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Vis } from '../../../visualizations/public';
 
@@ -45,15 +44,13 @@ function ExperimentalMapLayerInfo() {
   );
 
   return (
-    <I18nProvider>
-      <EuiCallOut
-        className="hide-for-sharing"
-        data-test-subj="experimentalMapLayerInfo"
-        size="s"
-        title={title}
-        iconType="beaker"
-      />
-    </I18nProvider>
+    <EuiCallOut
+      className="hide-for-sharing"
+      data-test-subj="experimentalMapLayerInfo"
+      size="s"
+      title={title}
+      iconType="beaker"
+    />
   );
 }
 
