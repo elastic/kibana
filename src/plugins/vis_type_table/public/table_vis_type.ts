@@ -21,17 +21,19 @@ import { i18n } from '@kbn/i18n';
 import { AggGroupNames } from '../../data/public';
 import { Schemas } from '../../vis_default_editor/public';
 import { BaseVisTypeOptions, Vis } from '../../visualizations/public';
-import { tableVisResponseHandler } from './table_vis_response_handler';
+
 // @ts-ignore
 import tableVisTemplate from './table_vis.html';
 import { TableOptions } from './components/table_vis_options_lazy';
 import { getTableVisualizationControllerClass } from './vis_controller';
 import { VIS_EVENT_TO_TRIGGER } from '../../../plugins/visualizations/public';
+import { toExpressionAst } from './to_ast';
+import { TableVisParams } from './types';
 
 export function getTableVisTypeDefinition(
   core: CoreSetup,
   context: PluginInitializerContext
-): BaseVisTypeOptions {
+): BaseVisTypeOptions<TableVisParams> {
   return {
     name: 'table',
     title: i18n.translate('visTypeTable.tableVisTitle', {
@@ -98,7 +100,7 @@ export function getTableVisTypeDefinition(
         },
       ]),
     },
-    responseHandler: tableVisResponseHandler,
+    toExpressionAst,
     hierarchicalData: (vis: Vis) => {
       return Boolean(vis.params.showPartialRows || vis.params.showMetricsAtAllLevels);
     },

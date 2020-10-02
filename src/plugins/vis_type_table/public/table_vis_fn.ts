@@ -38,12 +38,14 @@ interface RenderValue {
   };
 }
 
-export const createTableVisFn = (): ExpressionFunctionDefinition<
+export type TableExpressionFunctionDefinition = ExpressionFunctionDefinition<
   'kibana_table',
   Input,
   Arguments,
   Render<RenderValue>
-> => ({
+>;
+
+export const createTableVisFn = (): TableExpressionFunctionDefinition => ({
   name: 'kibana_table',
   type: 'render',
   inputTypes: ['kibana_datatable'],
