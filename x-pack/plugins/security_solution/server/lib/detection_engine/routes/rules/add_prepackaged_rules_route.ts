@@ -58,7 +58,6 @@ export const addPrepackedRulesRoute = (
 
       try {
         const alertsClient = context.alerting?.getAlertsClient();
-        const clusterClient = context.core.elasticsearch.legacy.client;
         const siemClient = context.securitySolution?.getAppClient();
 
         if (!siemClient || !alertsClient) {
