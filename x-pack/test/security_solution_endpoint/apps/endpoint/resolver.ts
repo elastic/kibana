@@ -6,7 +6,6 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-// import { sleep } from '../../../../plugins/task_manager/server/test_utils';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'timePicker', 'hosts', 'settings']);

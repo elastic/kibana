@@ -130,7 +130,7 @@ export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrPro
       }
     },
     /**
-     * Runs Nodes Events
+     * Navigate to Events Panel
      */
     async navigateToEventsPanel() {
       if (!(await testSubjects.exists('investigate-in-resolver-button', { timeout: 4000 }))) {
@@ -140,7 +140,7 @@ export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrPro
       }
     },
     /**
-     * Runs Nodes Events
+     * execute Query And Open Resolver
      */
     async executeQueryAndOpenResolver(query: string) {
       await queryBar.setQuery(query);
