@@ -29,10 +29,10 @@ export default function ({ getService }: FtrProviderContext) {
     async function getRawSavedObjectAttributes({ id, type }: SavedObject) {
       const {
         _source: { [type]: savedObject },
-      } = await es.get({
+      } = await es.get<Record<string, any>>({
         id: generateRawID(id, type),
         index: '.kibana',
-      });
+      } as any);
 
       return savedObject;
     }
