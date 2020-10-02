@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SecurityPluginSetup } from '../../../security/server';
 import { ExternalCallback } from '../../../ingest_manager/server';
 import { KibanaRequest, Logger, RequestHandlerContext } from '../../../../../src/core/server';
 import { NewPackagePolicy } from '../../../ingest_manager/common/types/models';
@@ -17,6 +18,7 @@ import { manifestDispatchSchema } from '../../common/endpoint/schema/manifest';
 import { AppClientFactory } from '../client';
 import { createDetectionIndex } from '../lib/detection_engine/routes/index/create_index_route';
 import { createPrepackagedRules } from '../lib/detection_engine/routes/rules/add_prepackaged_rules_route';
+import { buildFrameworkRequest } from '../lib/timeline/routes/utils/common';
 
 const getManifest = async (logger: Logger, manifestManager: ManifestManager): Promise<Manifest> => {
   let manifest: Manifest | null = null;
@@ -76,7 +78,9 @@ const getManifest = async (logger: Logger, manifestManager: ManifestManager): Pr
 export const getPackagePolicyCreateCallback = (
   logger: Logger,
   manifestManager: ManifestManager,
-  appClientFactory: AppClientFactory
+  appClientFactory: AppClientFactory,
+  maxTimelineImportExportSize: number,
+  securitySetup?: SecurityPluginSetup
 ): ExternalCallback[1] => {
   const handlePackagePolicyCreate = async (
     newPackagePolicy: NewPackagePolicy,
@@ -90,13 +94,20 @@ export const getPackagePolicyCreateCallback = (
 
     // prep for detection rules creation
     const appClient = appClientFactory.create(request);
+    const frameworkRequest = await buildFrameworkRequest(context, securitySetup, request);
 
     // get most recent manifest
     // while creating detection index & rules (if necessary)
     const [manifest] = await Promise.all([
       getManifest(logger, manifestManager),
       createDetectionIndex(context, appClient),
-      createPrepackagedRules(context, appClient),
+      createPrepackagedRules(
+        context,
+        appClient,
+        undefined,
+        maxTimelineImportExportSize,
+        frameworkRequest
+      ),
     ]);
 
     const serializedManifest = manifest.toEndpointFormat();

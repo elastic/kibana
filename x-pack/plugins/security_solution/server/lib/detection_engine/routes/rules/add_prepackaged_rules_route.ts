@@ -29,6 +29,8 @@ import { getRulesToUpdate } from '../../rules/get_rules_to_update';
 import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackaged_rules';
 
 import { transformError, buildSiemResponse } from '../utils';
+import { AlertsClient } from '../../../../../../alerts/server';
+import { FrameworkRequest } from '../../../framework';
 
 export interface ValidatedRules {
   rules_installed: number;
@@ -57,14 +59,19 @@ export const addPrepackedRulesRoute = (
       try {
         const alertsClient = context.alerting?.getAlertsClient();
         const clusterClient = context.core.elasticsearch.legacy.client;
-        const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.securitySolution?.getAppClient();
 
         if (!siemClient || !alertsClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const validated = await createPrepackagedRules(context, siemClient);
+        const validated = await createPrepackagedRules(
+          context,
+          siemClient,
+          alertsClient,
+          frameworkRequest,
+          config.maxTimelineImportExportSize
+        );
         return response.ok({ body: validated ?? {} });
       } catch (err) {
         const error = transformError(err);
@@ -87,11 +94,11 @@ class PrepackagedRulesError extends Error {
 
 export const createPrepackagedRules = async (
   context: RequestHandlerContext,
-  siemClient: AppClient
+  siemClient: AppClient,
+  alertsClient: AlertsClient,
+  frameworkRequest: FrameworkRequest,
+  maxTimelineImportExportSize: number
 ): Promise<ValidatedRules | null> => {
-  const frameworkRequest = await buildFrameworkRequest(context, security, _);
-
-  const alertsClient = context.alerting?.getAlertsClient();
   const clusterClient = context.core.elasticsearch.legacy.client;
   const savedObjectsClient = context.core.savedObjects.client;
 
@@ -118,7 +125,7 @@ export const createPrepackagedRules = async (
   }
   const result = await Promise.all([
     installPrepackagedRules(alertsClient, rulesToInstall, signalsIndex),
-    installPrepackagedTimelines(config.maxTimelineImportExportSize, frameworkRequest, true),
+    installPrepackagedTimelines(maxTimelineImportExportSize, frameworkRequest, true),
   ]);
   const [prepackagedTimelinesResult, timelinesErrors] = validate(
     result[1],

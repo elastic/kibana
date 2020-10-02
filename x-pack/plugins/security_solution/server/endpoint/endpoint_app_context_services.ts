@@ -9,6 +9,7 @@ import {
   SavedObjectsServiceStart,
   SavedObjectsClientContract,
 } from 'src/core/server';
+import { SecurityPluginSetup } from '../../../security/server';
 import {
   AgentService,
   IngestManagerStartContract,
@@ -25,6 +26,7 @@ import {
 import { ElasticsearchAssetType } from '../../../ingest_manager/common/types/models';
 import { metadataTransformPrefix } from '../../common/endpoint/constants';
 import { AppClientFactory } from '../client';
+import { ConfigType } from '../config';
 
 export interface MetadataService {
   queryStrategy(
@@ -72,6 +74,8 @@ export type EndpointAppContextServiceStartContract = Partial<
   logger: Logger;
   manifestManager?: ManifestManager;
   appClientFactory: AppClientFactory;
+  securitySetup?: SecurityPluginSetup;
+  config: ConfigType;
   registerIngestCallback?: IngestManagerStartContract['registerExternalCallback'];
   savedObjectsStart: SavedObjectsServiceStart;
 };
@@ -98,7 +102,9 @@ export class EndpointAppContextService {
         getPackagePolicyCreateCallback(
           dependencies.logger,
           this.manifestManager,
-          dependencies.appClientFactory
+          dependencies.appClientFactory,
+          dependencies.config.maxTimelineImportExportSize,
+          dependencies.securitySetup
         )
       );
     }
