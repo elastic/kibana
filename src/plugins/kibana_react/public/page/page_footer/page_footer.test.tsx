@@ -17,6 +17,26 @@
  * under the License.
  */
 
-.homDataManage__content .euiIcon__fillSecondary {
-  fill: $euiColorDarkestShade;
-}
+import React from 'react';
+import { PageFooter } from './page_footer';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+
+jest.mock('../../../../../../src/plugins/kibana_react/public', () => ({
+  useKibana: jest.fn().mockReturnValue({
+    services: {
+      application: { capabilities: { advancedSettings: { show: true } } },
+      notifications: { toast: { addSuccess: jest.fn() } },
+    },
+  }),
+  RedirectAppLinks: jest.fn((element: JSX.Element) => element),
+  useUiSetting$: jest.fn().mockReturnValue(['path-to-default-route', jest.fn()]),
+}));
+
+afterEach(() => jest.clearAllMocks());
+
+describe('PageFooter', () => {
+  test('render', () => {
+    const component = shallowWithIntl(<PageFooter path="new-default-route" />);
+    expect(component).toMatchSnapshot();
+  });
+});

@@ -17,4 +17,7 @@
  * under the License.
  */
 
-export * from './overview_footer';
+// Accounting for no `flush="both"` prop on EuiButtonEmpty
+.pageFooter__button {
+  margin-right: 0;
+}

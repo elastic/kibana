@@ -17,26 +17,5 @@
  * under the License.
  */
 
-import React from 'react';
-import { OverviewHeader } from './overview_header';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-
-jest.mock('../../../../../../src/plugins/kibana_react/public', () => ({
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      application: { capabilities: { navLinks: { management: true, dev_tools: true } } },
-    },
-  }),
-  RedirectAppLinks: jest.fn((element: JSX.Element) => element),
-}));
-
-afterAll(() => jest.clearAllMocks());
-
-const mockTitle = <h1>Page Title</h1>;
-
-describe('OverviewHeader', () => {
-  test('render', () => {
-    const component = shallowWithIntl(<OverviewHeader title={mockTitle} />);
-    expect(component).toMatchSnapshot();
-  });
-});
+export * from './page_footer';
+export * from './page_header';

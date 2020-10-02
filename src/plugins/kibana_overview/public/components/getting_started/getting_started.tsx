@@ -57,55 +57,57 @@ export const GettingStarted: FC<Props> = ({ addBasePath, isDarkTheme, apps }) =>
     >
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem className="kbnOverviewGettingStarted__content">
-          <EuiTitle size="s">
-            <h2 id="kbnOverviewGettingStarted__title">
-              <FormattedMessage
-                id="kibanaOverview.gettingStarted.title"
-                defaultMessage="Getting started with Kibana"
-              />
-            </h2>
-          </EuiTitle>
-
-          <EuiSpacer size="m" />
-
-          <EuiText>
-            <p>
-              <FormattedMessage
-                id="kibanaOverview.gettingStarted.description"
-                defaultMessage="Kibana empowers you to visualize your data, your way.  Start with one question, and see where the answer leads you."
-              />
-            </p>
-          </EuiText>
-
-          <EuiSpacer size="xl" />
-
-          <EuiFlexGrid className="kbnOverviewGettingStarted__apps" columns={2}>
-            {apps.map(({ subtitle = '', icon, title }) => (
-              <EuiFlexItem key={title}>
-                <EuiCard
-                  description={subtitle}
-                  display="plain"
-                  icon={<EuiIcon size="l" type={icon} />}
-                  layout="horizontal"
-                  paddingSize="none"
-                  title={title}
-                  titleElement="h3"
-                  titleSize="xs"
+          <div>
+            <EuiTitle size="s">
+              <h2 id="kbnOverviewGettingStarted__title">
+                <FormattedMessage
+                  id="kibanaOverview.gettingStarted.title"
+                  defaultMessage="Getting started with Kibana"
                 />
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGrid>
+              </h2>
+            </EuiTitle>
 
-          <EuiSpacer size="xl" />
+            <EuiSpacer size="m" />
 
-          <RedirectAppLinks application={application}>
-            <EuiButton fill iconType="indexOpen" href={'/app/management/kibana/indexPatterns'}>
-              <FormattedMessage
-                defaultMessage="Add your data"
-                id="kibanaOverview.gettingStarted.addDataButtonLabel"
-              />
-            </EuiButton>
-          </RedirectAppLinks>
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="kibanaOverview.gettingStarted.description"
+                  defaultMessage="Kibana empowers you to visualize your data, your way.  Start with one question, and see where the answer leads you."
+                />
+              </p>
+            </EuiText>
+
+            <EuiSpacer size="xl" />
+
+            <EuiFlexGrid className="kbnOverviewGettingStarted__apps" columns={2}>
+              {apps.map(({ subtitle = '', icon, title }) => (
+                <EuiFlexItem key={title}>
+                  <EuiCard
+                    description={subtitle}
+                    display="plain"
+                    icon={<EuiIcon color="text" size="l" type={icon} />}
+                    layout="horizontal"
+                    paddingSize="none"
+                    title={title}
+                    titleElement="h3"
+                    titleSize="xs"
+                  />
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGrid>
+
+            <EuiSpacer size="xl" />
+
+            <RedirectAppLinks application={application}>
+              <EuiButton fill iconType="indexOpen" href={'/app/management/kibana/indexPatterns'}>
+                <FormattedMessage
+                  defaultMessage="Add your data"
+                  id="kibanaOverview.gettingStarted.addDataButtonLabel"
+                />
+              </EuiButton>
+            </RedirectAppLinks>
+          </div>
         </EuiFlexItem>
 
         <EuiFlexItem className="kbnOverviewGettingStarted__graphic">

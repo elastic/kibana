@@ -35,7 +35,7 @@ interface Props {
   path: string;
 }
 
-export const OverviewFooter: FC<Props> = ({ path }) => {
+export const PageFooter: FC<Props> = ({ path }) => {
   const [defaultRoute, setDefaultRoute] = useUiSetting$<string>('defaultRoute');
   const {
     services: {
@@ -51,23 +51,27 @@ export const OverviewFooter: FC<Props> = ({ path }) => {
     defaultRoute === path ? (
       <RedirectAppLinks application={application}>
         <EuiButtonEmpty
-          iconType="home"
+          className="pageFooter__button"
+          flush="left"
           href={'/app/management/kibana/settings#defaultRoute'}
+          iconType="home"
           size="xs"
         >
           <FormattedMessage
-            id="kibana-react.overviewFooter.changeHomeRouteLink"
+            id="kibana-react.pageFooter.changeHomeRouteLink"
             defaultMessage="Display a different page on log in"
           />
         </EuiButtonEmpty>
       </RedirectAppLinks>
     ) : (
       <EuiButtonEmpty
+        className="pageFooter__button"
+        flush="left"
         iconType="home"
         onClick={() => {
           setDefaultRoute(path);
           toasts.addSuccess({
-            title: i18n.translate('kibana-react.overviewFooter.changeDefaultRouteSuccessToast', {
+            title: i18n.translate('kibana-react.pageFooter.changeDefaultRouteSuccessToast', {
               defaultMessage: 'Landing page updated',
             }),
           });
@@ -75,32 +79,37 @@ export const OverviewFooter: FC<Props> = ({ path }) => {
         size="xs"
       >
         <FormattedMessage
-          id="kibana-react.overviewFooter.makeDefaultRouteLink"
+          id="kibana-react.pageFooter.makeDefaultRouteLink"
           defaultMessage="Make this my landing page"
         />
       </EuiButtonEmpty>
     );
 
   return (
-    <footer className={`kbnOverviewFooter`}>
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+    <footer className="pageFooter">
+      <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          {isAdvancedSettingsEnabled ? defaultRoutebutton : null}
+          <div>{isAdvancedSettingsEnabled ? defaultRoutebutton : null}</div>
         </EuiFlexItem>
+
         <EuiFlexItem grow={false}>
-          <RedirectAppLinks application={application}>
-            <EuiButtonEmpty
-              data-test-subj="allPlugins"
-              href={'/app/home#/feature_directory'}
-              size="xs"
-              iconType="apps"
-            >
-              <FormattedMessage
-                id="kibana-react.overviewFooter.appDirectoryButtonLabel"
-                defaultMessage="View app directory"
-              />
-            </EuiButtonEmpty>
-          </RedirectAppLinks>
+          <div>
+            <RedirectAppLinks application={application}>
+              <EuiButtonEmpty
+                className="pageFooter__button"
+                data-test-subj="allPlugins"
+                flush="left"
+                href="/app/home#/feature_directory"
+                iconType="apps"
+                size="xs"
+              >
+                <FormattedMessage
+                  id="kibana-react.pageFooter.appDirectoryButtonLabel"
+                  defaultMessage="View app directory"
+                />
+              </EuiButtonEmpty>
+            </RedirectAppLinks>
+          </div>
         </EuiFlexItem>
       </EuiFlexGroup>
     </footer>

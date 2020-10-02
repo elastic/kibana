@@ -51,12 +51,20 @@ export const AddData: FC<Props> = ({ features }) => {
         </EuiFlexItem>
 
         <EuiFlexItem className="kbnOverviewDataAdd__actions" grow={false}>
-          <EuiButtonEmpty iconType="visTable" href="#/tutorial_directory/sampleData" size="xs">
-            <FormattedMessage
-              id="kibanaOverview.addData.sampleDataButtonLabel"
-              defaultMessage="Try our sample data"
-            />
-          </EuiButtonEmpty>
+          <div>
+            <EuiButtonEmpty
+              className="kbnOverviewDataAdd__actionButton"
+              flush="left"
+              href="#/tutorial_directory/sampleData"
+              iconType="visTable"
+              size="xs"
+            >
+              <FormattedMessage
+                id="kibanaOverview.addData.sampleDataButtonLabel"
+                defaultMessage="Try our sample data"
+              />
+            </EuiButtonEmpty>
+          </div>
         </EuiFlexItem>
       </EuiFlexGroup>
 

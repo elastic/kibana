@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export * from './overview_footer';
-export * from './overview_header';
+export * from './page_footer';

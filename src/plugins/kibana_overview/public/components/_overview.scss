@@ -17,9 +17,6 @@
  * under the License.
  */
 
-// Local page variables
-$kbnOverviewPageWidth: 1200px;
-
 .kbnOverviewWrapper {
   background-color: $euiColorEmptyShade;
   display: flex;
@@ -27,44 +24,19 @@ $kbnOverviewPageWidth: 1200px;
   min-height: calc(100vh - #{$euiHeaderHeightCompensation});
 }
 
-.kbnOverviewHeader {
-  background-color: $euiPageBackgroundColor;
-  border-bottom: $euiBorderWidthThin solid $euiColorLightShade;
-}
-
-.kbnOverviewHeader__inner {
-  margin: 0 auto;
-  max-width: $kbnOverviewPageWidth;
-  padding: $euiSizeXL $euiSize;
-}
-
-// Accounting for no `flush="both"` prop on EuiButtonEmpty
-.kbnOverviewHeader__actionItem .euiButtonEmpty__content {
-  padding-left: 0;
-  padding-right: 0;
-}
-
 .kbnOverviewContent {
   margin: 0 auto;
-  max-width: $kbnOverviewPageWidth;
+  max-width: 1200px;
   padding: $euiSizeXL $euiSize;
   width: 100%;
 
   // Ensure card heights are stretched equally when wrapped with this element
   .kbnRedirectCrossAppLinks {
+    align-items: flex-start;
     display: flex;
     flex: 1;
     flex-direction: column;
   }
-}
-
-// Prevent children from rendering as flex items
-.kbnOverviewGettingStarted__content {
-  display: block;
-}
-
-.kbnOverviewGettingStarted__apps .euiIcon__fillSecondary {
-  fill: $euiColorDarkestShade;
 }
 
 .kbnOverviewApps__item {
@@ -136,22 +108,9 @@ $kbnOverviewPageWidth: 1200px;
   }
 }
 
-.kbnOverviewDataAdd__actions {
-  // Prevent children from rendering as flex items
-  display: block;
-
-  // Accounting for no `flush="both"` prop on EuiButtonEmpty
-  .euiButtonEmpty__content {
-    padding-left: 0;
-    padding-right: 0;
-  }
-}
-
-.kbnOverviewDataAdd__content,
-.kbnOverviewDataManage__content {
-  & .euiIcon__fillSecondary {
-    fill: $euiColorDarkestShade;
-  }
+// Accounting for no `flush="both"` prop on EuiButtonEmpty
+.kbnOverviewDataAdd__actionButton {
+  margin-right: 0;
 }
 
 .kbnOverviewDataManage__item:not(:only-child) {

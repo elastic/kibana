@@ -18,25 +18,25 @@
  */
 
 import React from 'react';
-import { OverviewFooter } from './overview_footer';
+import { PageHeader } from './page_header';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 jest.mock('../../../../../../src/plugins/kibana_react/public', () => ({
   useKibana: jest.fn().mockReturnValue({
     services: {
-      application: { capabilities: { advancedSettings: { show: true } } },
-      notifications: { toast: { addSuccess: jest.fn() } },
+      application: { capabilities: { navLinks: { management: true, dev_tools: true } } },
     },
   }),
   RedirectAppLinks: jest.fn((element: JSX.Element) => element),
-  useUiSetting$: jest.fn().mockReturnValue(['path-to-default-route', jest.fn()]),
 }));
 
-afterEach(() => jest.clearAllMocks());
+afterAll(() => jest.clearAllMocks());
 
-describe('OverviewFooter', () => {
+const mockTitle = 'Page Title';
+
+describe('PageHeader', () => {
   test('render', () => {
-    const component = shallowWithIntl(<OverviewFooter path="new-default-route" />);
+    const component = shallowWithIntl(<PageHeader title={mockTitle} />);
     expect(component).toMatchSnapshot();
   });
 });

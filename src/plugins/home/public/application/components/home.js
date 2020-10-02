@@ -20,9 +20,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { OverviewFooter, OverviewHeader } from '../../../../../../src/plugins/kibana_react/public';
+import { PageFooter, PageHeader } from '../../../../../../src/plugins/kibana_react/public';
 import { HOME_APP_BASE_PATH } from '../../../common/constants';
 import { FeatureCatalogueCategory } from '../../services';
 import { getServices } from '../kibana_services';
@@ -128,26 +128,13 @@ export class Home extends Component {
     }
 
     return (
-      <main aria-labelledby="homHeader__title" className="homWrapper" data-test-subj="homeApp">
-        <header
-          className={`homHeader ${
-            solutions.length ? 'homHeader--hasSolutions' : 'homHeader--noSolutions'
-          }`}
-        >
-          <div className="homHeader__inner">
-            <OverviewHeader
-              title={
-                <EuiTitle size="m">
-                  <h1 id="homHeader__title">
-                    <FormattedMessage id="home.header.title" defaultMessage="Home" />
-                  </h1>
-                </EuiTitle>
-              }
-              showDevToolsLink
-              showManagementLink
-            />
-          </div>
-        </header>
+      <main aria-labelledby="pageHeader__title" className="homWrapper" data-test-subj="homeApp">
+        <PageHeader
+          overlap={solutions.length}
+          showDevToolsLink
+          showManagementLink
+          title={<FormattedMessage id="home.header.title" defaultMessage="Home" />}
+        />
 
         <div className="homContent">
           {solutions.length ? (
@@ -176,7 +163,7 @@ export class Home extends Component {
 
           <EuiHorizontalRule margin="xl" aria-hidden="true" />
 
-          <OverviewFooter path={HOME_APP_BASE_PATH} />
+          <PageFooter path={HOME_APP_BASE_PATH} />
         </div>
       </main>
     );
