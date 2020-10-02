@@ -11,10 +11,11 @@ import { MetricsSection } from '../../components/app/section/metrics';
 import { APMSection } from '../../components/app/section/apm';
 import { UptimeSection } from '../../components/app/section/uptime';
 import { UXSection } from '../../components/app/section/ux';
+import { HasDataResponse, ObservabilityFetchDataPlugins } from '../../typings/fetch_overview_data';
 
 interface Props {
   bucketSize: string;
-  hasData: any;
+  hasData: Record<ObservabilityFetchDataPlugins, HasDataResponse>;
 }
 
 export function DataSections({ bucketSize, hasData }: Props) {

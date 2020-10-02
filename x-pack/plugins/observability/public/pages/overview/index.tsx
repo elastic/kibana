@@ -44,8 +44,8 @@ export function OverviewPage({ routeParams }: Props) {
   };
 
   const absoluteTime = {
-    start: getAbsoluteTime(relativeTime.start),
-    end: getAbsoluteTime(relativeTime.end, { roundUp: true }),
+    start: getAbsoluteTime(relativeTime.start) as number,
+    end: getAbsoluteTime(relativeTime.end, { roundUp: true }) as number,
   };
 
   const { core } = usePluginContext();
@@ -115,7 +115,7 @@ export function OverviewPage({ routeParams }: Props) {
         <EuiFlexItem grow={6}>
           {/* Data sections */}
           {showDataSections && (
-            <DataSections hasData={hasData} bucketSize={bucketSize.intervalString!} />
+            <DataSections hasData={hasData} bucketSize={bucketSize?.intervalString!} />
           )}
 
           {/* Empty sections */}

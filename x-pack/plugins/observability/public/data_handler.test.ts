@@ -7,7 +7,7 @@ import {
   registerDataHandler,
   getDataHandler,
   unregisterDataHandler,
-  useFetchHasData,
+  fetchHasData,
 } from './data_handler';
 import moment from 'moment';
 import {
@@ -425,7 +425,7 @@ describe('registerDataHandler', () => {
           throw new Error('BOOM');
         },
       });
-      expect(await useFetchHasData()).toEqual({
+      expect(await fetchHasData()).toEqual({
         apm: false,
         uptime: false,
         infra_logs: false,
@@ -462,7 +462,7 @@ describe('registerDataHandler', () => {
           throw new Error('BOOM');
         },
       });
-      expect(await useFetchHasData()).toEqual({
+      expect(await fetchHasData()).toEqual({
         apm: true,
         uptime: false,
         infra_logs: true,
@@ -495,7 +495,7 @@ describe('registerDataHandler', () => {
         fetchData: async () => (({} as unknown) as UptimeFetchDataResponse),
         hasData: async () => true,
       });
-      expect(await useFetchHasData()).toEqual({
+      expect(await fetchHasData()).toEqual({
         apm: true,
         uptime: true,
         infra_logs: true,
@@ -528,7 +528,7 @@ describe('registerDataHandler', () => {
         fetchData: async () => (({} as unknown) as UptimeFetchDataResponse),
         hasData: async () => false,
       });
-      expect(await useFetchHasData()).toEqual({
+      expect(await fetchHasData()).toEqual({
         apm: false,
         uptime: false,
         infra_logs: false,
@@ -541,7 +541,7 @@ describe('registerDataHandler', () => {
       unregisterDataHandler({ appName: 'infra_metrics' });
       unregisterDataHandler({ appName: 'uptime' });
 
-      expect(await useFetchHasData()).toEqual({
+      expect(await fetchHasData()).toEqual({
         apm: false,
         uptime: false,
         infra_logs: false,
