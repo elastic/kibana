@@ -74,7 +74,7 @@ export class MVTSingleLayerVectorSourceEditor extends Component<Props, State> {
 
   render() {
     return (
-      <EuiPanel>
+      <>
         <EuiFormRow
           label={i18n.translate('xpack.maps.source.MVTSingleLayerVectorSourceEditor.urlMessage', {
             defaultMessage: 'Url',
@@ -104,7 +104,7 @@ export class MVTSingleLayerVectorSourceEditor extends Component<Props, State> {
           maxSourceZoom={this.state.maxSourceZoom}
           showFields={false}
         />
-      </EuiPanel>
+      </>
     );
   }
 }

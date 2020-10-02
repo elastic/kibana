@@ -19,9 +19,9 @@ import {
 import { MVTField } from '../../fields/mvt_field';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { MVTSingleLayerVectorSource } from '../mvt_single_layer_vector_source';
-import { loadTileJsonDocument } from './tilejon_loader_util';
 import { TileJsonUpdateSourceEditor } from './tilejson_update_source_editor';
 import { TileJsonField } from '../../fields/tilejson_field';
+import { loadTileJsonDocument } from './tilejson_loader_util';
 
 export const tilejsonSourceTitle = i18n.translate('xpack.maps.source.tileJsonSource.sourceTitle', {
   defaultMessage: 'TileJSON Layer',
@@ -136,6 +136,7 @@ export class TileJsonSource extends MVTSingleLayerVectorSource {
     const layers = TileJsonSource.getLayerConfigsFromTileJson(tileJsonDoc);
     return layers.find((l) => l.id === this._descriptor.layerName);
   }
+
   async getUrlTemplateWithMeta() {
     const layer = await this.getLayerConfig();
     // todo: EMS does not preserve licesing param

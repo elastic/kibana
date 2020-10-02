@@ -5,28 +5,74 @@
  */
 
 import React, { Component } from 'react';
+import { EuiSwitch, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { TiledSingleLayerVectorSourceSettings } from '../../../../common/descriptor_types';
 import { MVTSingleLayerVectorSource } from '../../sources/mvt_single_layer_vector_source';
 import { TiledVectorLayer } from '../tiled_vector_layer/tiled_vector_layer';
 import { MVTSingleLayerVectorSourceEditor } from '../../sources/mvt_single_layer_vector_source/mvt_single_layer_vector_source_editor';
 import { SOURCE_TYPES } from '../../../../common/constants';
+import { TileJsonSourceEditor } from '../../sources/tilejson_source/tilejson_source_editor';
+import { TileJsonSource } from '../../sources/tilejson_source/tilejson_source';
 
 interface State {
-  sourceType: SOURCE_TYPES.MVT_SINGLE_LAYER | SOURCE_TYPES.TILEJSON_SINGLE_LAYER;
+  useTileJsonConfig: boolean;
 }
 interface Props {
   previewLayers: () => {};
+  mapColors: any;
 }
 
-// eslint-disable-next-line react/prefer-stateless-function
 export class TileJsonManualWizard extends Component<Props, State> {
-  render() {
-    const onSourceConfigChange = (sourceConfig: TiledSingleLayerVectorSourceSettings) => {
-      const sourceDescriptor = MVTSingleLayerVectorSource.createDescriptor(sourceConfig);
-      const layerDescriptor = TiledVectorLayer.createDescriptor({ sourceDescriptor }, mapColors);
-      this.props.previewLayers([layerDescriptor]);
-    };
+  state: State = {
+    useTileJsonConfig: true,
+  };
 
-    return <MVTSingleLayerVectorSourceEditor onSourceConfigChange={onSourceConfigChange} />;
+  onEditorChange = (e) => {
+    if (this.state.useTileJsonConfig !== e.target.checked) {
+      this.setState({ useTileJsonConfig: e.target.checked });
+    }
+  };
+
+  _renderEditor() {
+    if (this.state.useTileJsonConfig) {
+      const onSourceConfigChange = (sourceConfig: TileJsonVectorSourceSettings) => {
+        const sourceDescriptor: TileJsonVectorSourceDescriptor = TileJsonSource.createDescriptor(
+          sourceConfig
+        );
+        const layerDescriptor = TiledVectorLayer.createDescriptor(
+          { sourceDescriptor },
+          this.props.mapColors
+        );
+        this.props.previewLayers([layerDescriptor]);
+      };
+      return <TileJsonSourceEditor onSourceConfigChange={onSourceConfigChange} />;
+    } else {
+      const onSourceConfigChange = (sourceConfig: TiledSingleLayerVectorSourceSettings) => {
+        const sourceDescriptor = MVTSingleLayerVectorSource.createDescriptor(sourceConfig);
+        const layerDescriptor = TiledVectorLayer.createDescriptor(
+          { sourceDescriptor },
+          this.props.mapColors
+        );
+        this.props.previewLayers([layerDescriptor]);
+      };
+      return <MVTSingleLayerVectorSourceEditor onSourceConfigChange={onSourceConfigChange} />;
+    }
+  }
+
+  render() {
+    return (
+      <EuiPanel>
+        <EuiSwitch
+          label={i18n.translate('xpack.maps.source.mvtWizard.switchMessageFalse', {
+            defaultMessage: 'Use TileJson',
+          })}
+          onChange={this.onEditorChange}
+          checked={this.state.useTileJsonConfig}
+        />
+        <EuiSpacer size={'s'} />
+        {this._renderEditor()}
+      </EuiPanel>
+    );
   }
 }

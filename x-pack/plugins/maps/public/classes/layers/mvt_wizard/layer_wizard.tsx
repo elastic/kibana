@@ -6,15 +6,9 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { MVTSingleLayerVectorSourceEditor } from '../../sources/mvt_single_layer_vector_source_editor';
-import {
-  MVTSingleLayerVectorSource,
-  sourceTitle,
-} from '../../sources/mvt_single_layer_vector_source';
+import { sourceTitle } from '../../sources/mvt_single_layer_vector_source';
 import { LayerWizard, RenderWizardArguments } from '../layers/layer_wizard_registry';
-import { TiledVectorLayer } from '../layers/tiled_vector_layer/tiled_vector_layer';
 import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
-import { TiledSingleLayerVectorSourceSettings } from '../../../../common/descriptor_types';
 import { TileJsonManualWizard } from './tilejson_manual_wizard';
 
 export const mvtVectorSourceWizardConfig: LayerWizard = {
@@ -24,15 +18,7 @@ export const mvtVectorSourceWizardConfig: LayerWizard = {
   }),
   icon: 'grid',
   renderWizard: ({ previewLayers, mapColors }: RenderWizardArguments) => {
-    // const onSourceConfigChange = (sourceConfig: TiledSingleLayerVectorSourceSettings) => {
-    //   const sourceDescriptor = MVTSingleLayerVectorSource.createDescriptor(sourceConfig);
-    //   const layerDescriptor = TiledVectorLayer.createDescriptor({ sourceDescriptor }, mapColors);
-    //   previewLayers([layerDescriptor]);
-    // };
-    //
-    // return <MVTSingleLayerVectorSourceEditor onSourceConfigChange={onSourceConfigChange} />;
-
-    return <TileJsonManualWizard previewLayers={previewLayers} />;
+    return <TileJsonManualWizard previewLayers={previewLayers} mapColors={mapColors} />;
   },
   title: sourceTitle,
 };

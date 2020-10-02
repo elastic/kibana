@@ -33,7 +33,7 @@ exports[`LayerPanel is rendered 1`] = `
           grow={false}
         >
           <EuiIcon
-            type="vector"
+            type="-vector"
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -75,7 +75,7 @@ exports[`LayerPanel is rendered 1`] = `
               <strong>
                 source prop1
               </strong>
-               
+
               <span>
                 you get one chance to set me
               </span>

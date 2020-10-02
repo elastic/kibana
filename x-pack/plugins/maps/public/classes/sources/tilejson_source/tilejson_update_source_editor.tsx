@@ -62,38 +62,38 @@ export class TileJsonUpdateSourceEditor extends Component<Props, State> {
     );
   }
 
-  _renderTooltipSelectionCard() {
-    return (
-      <Fragment>
-        <EuiPanel>
-          <EuiTitle size="xs">
-            <h5>
-              <FormattedMessage
-                id="xpack.maps.mvtSource.tooltipsTitle"
-                defaultMessage="Tooltip fields"
-              />
-            </h5>
-          </EuiTitle>
-
-          <EuiSpacer size="m" />
-
-          <TooltipSelector
-            tooltipFields={this.props.tooltipFields} // selected fields in the tooltip
-            onChange={this._onTooltipPropertiesSelect}
-            fields={this.props.source.getMVTFields()} // all the fields in the source
-          />
-        </EuiPanel>
-
-        <EuiSpacer size="s" />
-      </Fragment>
-    );
-  }
+  // _renderTooltipSelectionCard() {
+  //   return (
+  //     <Fragment>
+  //       <EuiPanel>
+  //         <EuiTitle size="xs">
+  //           <h5>
+  //             <FormattedMessage
+  //               id="xpack.maps.mvtSource.tooltipsTitle"
+  //               defaultMessage="Tooltip fields"
+  //             />
+  //           </h5>
+  //         </EuiTitle>
+  //
+  //         <EuiSpacer size="m" />
+  //
+  //         <TooltipSelector
+  //           tooltipFields={this.props.tooltipFields} // selected fields in the tooltip
+  //           onChange={this._onTooltipPropertiesSelect}
+  //           fields={this.props.source.getMVTFields()} // all the fields in the source
+  //         />
+  //       </EuiPanel>
+  //
+  //       <EuiSpacer size="s" />
+  //     </Fragment>
+  //   );
+  // }
 
   render() {
     return (
       <Fragment>
         {this._renderSourceSettingsCard()}
-        {this._renderTooltipSelectionCard()}
+        {/* {this._renderTooltipSelectionCard()}*/}
       </Fragment>
     );
   }
