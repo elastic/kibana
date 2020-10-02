@@ -18,12 +18,9 @@ import {
 // @ts-ignore
 import { MapView } from './inspector/views/map_view';
 import {
-  setIsGoldPlus,
   setKibanaCommonConfig,
   setKibanaVersion,
-  setLicenseId,
   setMapAppConfig,
-  setRegisterFeatureUse,
   setStartServices,
 } from './kibana_services';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
@@ -43,7 +40,6 @@ import { MapEmbeddableFactory } from './embeddable/map_embeddable_factory';
 import { EmbeddableSetup } from '../../../../src/plugins/embeddable/public';
 import { MapsXPackConfig, MapsConfigType } from '../config';
 import { getAppTitle } from '../common/i18n_getters';
-import { ILicense } from '../../licensing/common/types';
 import { lazyLoadMapModules } from './lazy_load_bundle';
 import { MapsStartApi } from './api';
 import { createSecurityLayerDescriptors, registerLayerWizard, registerSource } from './api';
@@ -53,11 +49,7 @@ import { MapsLegacyConfig } from '../../../../src/plugins/maps_legacy/config';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
 import { StartContract as FileUploadStartContract } from '../../file_upload/public';
-import {
-  LICENCED_FEATURES_DETAILS,
-  registerLicensedFeatures,
-  setLicensingPluginStart,
-} from './licensed_features';
+import { registerLicensedFeatures, setLicensingPluginStart } from './licensed_features';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;

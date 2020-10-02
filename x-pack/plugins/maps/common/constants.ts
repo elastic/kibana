@@ -5,7 +5,6 @@
  */
 import { i18n } from '@kbn/i18n';
 import { FeatureCollection } from 'geojson';
-import { LicenseType } from '../../licensing/common/types';
 
 export const EMS_APP_NAME = 'kibana';
 export const EMS_CATALOGUE_PATH = 'ems/catalogue';
