@@ -36,6 +36,7 @@ describe('IndexMigrator', () => {
       client: elasticsearchClientMock.createElasticsearchClient(),
       index: '.kibana',
       log: loggingSystemMock.create().get(),
+      setStatus: jest.fn(),
       mappingProperties: {},
       pollInterval: 1,
       scrollDuration: '1m',

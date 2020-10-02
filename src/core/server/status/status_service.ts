@@ -113,7 +113,6 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     });
 
     if (http.notReadyServer) {
-      this.logger.warn('registering not ready status route');
       http.notReadyServer.registerRoutes('', (notReadyRouter) => {
         registerStatusRoute({
           router: notReadyRouter,
@@ -124,8 +123,6 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
           },
         });
       });
-    } else {
-      this.logger.warn('skipping not ready status route');
     }
 
     return {
