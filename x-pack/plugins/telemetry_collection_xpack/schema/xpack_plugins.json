@@ -1,5 +1,83 @@
 {
   "properties": {
+    "actions": {
+      "properties": {
+        "count_total": {
+          "type": "long"
+        },
+        "count_active_total": {
+          "type": "long"
+        },
+        "count_by_type": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "__email": {
+              "type": "long"
+            },
+            "__index": {
+              "type": "long"
+            },
+            "__pagerduty": {
+              "type": "long"
+            },
+            "__server-log": {
+              "type": "long"
+            },
+            "__slack": {
+              "type": "long"
+            },
+            "__webhook": {
+              "type": "long"
+            },
+            "__servicenow": {
+              "type": "long"
+            },
+            "__jira": {
+              "type": "long"
+            },
+            "__resilient": {
+              "type": "long"
+            }
+          }
+        },
+        "count_active_by_type": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "__email": {
+              "type": "long"
+            },
+            "__index": {
+              "type": "long"
+            },
+            "__pagerduty": {
+              "type": "long"
+            },
+            "__server-log": {
+              "type": "long"
+            },
+            "__slack": {
+              "type": "long"
+            },
+            "__webhook": {
+              "type": "long"
+            },
+            "__servicenow": {
+              "type": "long"
+            },
+            "__jira": {
+              "type": "long"
+            },
+            "__resilient": {
+              "type": "long"
+            }
+          }
+        }
+      }
+    },
     "apm": {
       "properties": {
         "services_per_agent": {
