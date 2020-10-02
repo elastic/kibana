@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText } from '@elastic/eui';
-import { safeLoad } from 'js-yaml';
+import { safeLoad, safeDump } from 'js-yaml';
 import { useComboInput, useCore, useGetSettings, useInput, sendPutSettings } from '../hooks';
 import { useGetOutputs, sendPutOutput } from '../hooks/use_request/outputs';
 import { isDiffPathProtocol } from '../../../../common/';
@@ -100,15 +100,20 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
         if (!outputId) {
           throw new Error('Unable to load outputs');
         }
+        console.log(
+          'onSubmit output config',
+          additionalYamlConfigInput.value,
+          safeLoad(additionalYamlConfigInput.value)
+        );
         const outputResponse = await sendPutOutput(outputId, {
           hosts: elasticsearchUrlInput.value,
+          config: safeLoad(additionalYamlConfigInput.value),
         });
         if (outputResponse.error) {
           throw outputResponse.error;
         }
         const settingsResponse = await sendPutSettings({
           kibana_urls: kibanaUrlsInput.value,
-          additional_yaml_config: additionalYamlConfigInput.value,
         });
         if (settingsResponse.error) {
           throw settingsResponse.error;
@@ -145,6 +150,11 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
   useEffect(() => {
     if (output) {
       inputs.elasticsearchUrl.setValue(output.hosts || []);
+      inputs.additionalYamlConfig.setValue(
+        output.config
+          ? safeDump(output.config)
+          : `# YAML settings here will be added to the Elasticsearch output section of each policy`
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [output]);
@@ -152,9 +162,6 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
   useEffect(() => {
     if (settings) {
       inputs.kibanaUrls.setValue(settings.kibana_urls);
-      if (settings.additional_yaml_config) {
-        inputs.additionalYamlConfig.setValue(settings.additional_yaml_config);
-      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
@@ -276,7 +283,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
         <EuiFormRow
           {...inputs.additionalYamlConfig.formRowProps}
           label={i18n.translate('xpack.ingestManager.settings.additionalYamlConfig', {
-            defaultMessage: 'Additional YAML Configuration',
+            defaultMessage: 'Elasticsearch output configuration',
           })}
           fullWidth={true}
         >

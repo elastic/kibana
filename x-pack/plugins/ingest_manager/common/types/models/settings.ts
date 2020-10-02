@@ -11,7 +11,6 @@ export interface BaseSettings {
   kibana_urls: string[];
   kibana_ca_sha256?: string;
   has_seen_add_data_notice?: boolean;
-  additional_yaml_config?: string;
 }
 
 export interface Settings extends BaseSettings {

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SavedObjectsClientContract } from 'src/core/server';
+import { SavedObjectsClientContract, SavedObjectsUpdateOptions } from 'src/core/server';
 import { NewOutput, Output, OutputSOAttributes } from '../types';
 import { DEFAULT_OUTPUT, OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
 import { appContextService } from './app_context';
@@ -50,9 +50,11 @@ class OutputService {
   public async updateOutput(
     soClient: SavedObjectsClientContract,
     id: string,
-    data: Partial<NewOutput>
+    data: Partial<NewOutput>,
+    options: SavedObjectsUpdateOptions = {}
   ) {
-    await soClient.update<OutputSOAttributes>(SAVED_OBJECT_TYPE, id, data);
+    console.log('update output', SAVED_OBJECT_TYPE, id, data, options);
+    await soClient.update<OutputSOAttributes>(SAVED_OBJECT_TYPE, id, data, options);
   }
 
   public async getDefaultOutputId(soClient: SavedObjectsClientContract) {
@@ -120,12 +122,25 @@ class OutputService {
     };
   }
 
-  public async update(soClient: SavedObjectsClientContract, id: string, data: Partial<Output>) {
-    const outputSO = await soClient.update<OutputSOAttributes>(SAVED_OBJECT_TYPE, id, data);
+  public async update(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    data: Partial<Output>,
+    options: SavedObjectsUpdateOptions
+  ) {
+    console.log('update output', id, data);
+    const outputSO = await soClient.update<OutputSOAttributes>(
+      SAVED_OBJECT_TYPE,
+      id,
+      data,
+      options
+    );
 
     if (outputSO.error) {
       throw new Error(outputSO.error.message);
     }
+    console.log('output service update result', outputSO);
+    return outputSO;
   }
 
   public async list(soClient: SavedObjectsClientContract) {

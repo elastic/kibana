@@ -445,9 +445,6 @@ class AgentPolicyService {
       throw new Error('Default output is not setup');
     }
     const defaultOutput = await outputService.get(soClient, defaultOutputId);
-    const globalConfig = settings.additional_yaml_config
-      ? safeLoad(settings.additional_yaml_config)
-      : {};
 
     const fullAgentPolicy: FullAgentPolicy = {
       id: agentPolicy.id,
@@ -461,7 +458,6 @@ class AgentPolicyService {
               hosts,
               ca_sha256,
               api_key,
-              ...globalConfig,
               ...outputConfig,
             };
 

@@ -22,6 +22,7 @@ export interface PutOutputRequest {
   body: {
     hosts?: string[];
     ca_sha256?: string;
+    config?: Record<string, any>;
   };
 }
 

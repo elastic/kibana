@@ -58,8 +58,12 @@ export const putOuputHandler: RequestHandler<
   TypeOf<typeof PutOutputRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  console.log('PUT output handler', request.params.outputId, request.body);
   try {
-    await outputService.update(soClient, request.params.outputId, request.body);
+    const result = await outputService.update(soClient, request.params.outputId, request.body, {
+      refresh: 'wait_for',
+    });
+    console.log('result from update', result);
     const output = await outputService.get(soClient, request.params.outputId);
 
     const body: GetOneOutputResponse = {
