@@ -5,11 +5,12 @@
  */
 
 import { combineReducers, createStore } from 'redux';
-import { ServerApiError } from '../../../../common/types';
 import { TrustedApp } from '../../../../../common/endpoint/types';
 import { RoutingAction } from '../../../../common/store/routing';
 
 import {
+  MANAGEMENT_DEFAULT_PAGE,
+  MANAGEMENT_DEFAULT_PAGE_SIZE,
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,
   MANAGEMENT_STORE_TRUSTED_APPS_NAMESPACE,
 } from '../../../common/constants';
@@ -105,54 +106,22 @@ export const createListComplexLoadingResourceState = (
     )
   );
 
-export const createDefaultPaginationInfo = () => ({ index: 0, size: 20 });
-
-export const createDefaultListView = (
-  freshDataTimestamp: number
-): TrustedAppsListPageState['listView'] => ({
-  currentListResourceState: createUninitialisedResourceState(),
-  currentPaginationInfo: createDefaultPaginationInfo(),
-  freshDataTimestamp,
-  show: undefined,
-});
-
-export const createLoadingListViewWithPagination = (
-  freshDataTimestamp: number,
-  currentPaginationInfo: PaginationInfo,
-  previousState: StaleResourceState<TrustedAppsListData> = createUninitialisedResourceState()
-): TrustedAppsListPageState['listView'] => ({
-  currentListResourceState: { type: 'LoadingResourceState', previousState },
-  currentPaginationInfo,
-  freshDataTimestamp,
-  show: undefined,
+export const createDefaultPaginationInfo = () => ({
+  index: MANAGEMENT_DEFAULT_PAGE,
+  size: MANAGEMENT_DEFAULT_PAGE_SIZE,
 });
 
 export const createLoadedListViewWithPagination = (
   freshDataTimestamp: number,
   paginationInfo: PaginationInfo = createDefaultPaginationInfo(),
-  currentPaginationInfo: PaginationInfo = createDefaultPaginationInfo(),
   totalItemsCount: number = 200
 ): TrustedAppsListPageState['listView'] => ({
-  currentListResourceState: createListLoadedResourceState(
+  listResourceState: createListLoadedResourceState(
     paginationInfo,
     totalItemsCount,
     freshDataTimestamp
   ),
-  currentPaginationInfo,
   freshDataTimestamp,
-  show: undefined,
-});
-
-export const createFailedListViewWithPagination = (
-  freshDataTimestamp: number,
-  currentPaginationInfo: PaginationInfo,
-  error: ServerApiError,
-  lastLoadedState?: LoadedResourceState<TrustedAppsListData>
-): TrustedAppsListPageState['listView'] => ({
-  currentListResourceState: { type: 'FailedResourceState', error, lastLoadedState },
-  currentPaginationInfo,
-  freshDataTimestamp,
-  show: undefined,
 });
 
 export const createUserChangedUrlAction = (path: string, search: string = ''): RoutingAction => {
