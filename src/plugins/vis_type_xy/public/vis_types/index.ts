@@ -17,22 +17,26 @@
  * under the License.
  */
 
-import { areaVisTypeDefinition } from './area';
-import { lineVisTypeDefinition } from './line';
-import { histogramVisTypeDefinition } from './histogram';
-import { horizontalBarVisTypeDefinition } from './horizontal_bar';
+import { getAreaVisTypeDefinition } from './area';
+import { getLineVisTypeDefinition } from './line';
+import { getHistogramVisTypeDefinition } from './histogram';
+import { getHorizontalBarVisTypeDefinition } from './horizontal_bar';
+import { XyVisTypeDefinition } from '../types';
 
 export const visTypesDefinitions = [
-  areaVisTypeDefinition,
-  lineVisTypeDefinition,
-  histogramVisTypeDefinition,
-  horizontalBarVisTypeDefinition,
+  getAreaVisTypeDefinition(true),
+  getLineVisTypeDefinition(true),
+  getHistogramVisTypeDefinition(true),
+  getHorizontalBarVisTypeDefinition(true),
 ];
 
 // TODO: Remove when vis_type_vislib is removed
-export const xyVisTypes = {
-  area: areaVisTypeDefinition,
-  line: lineVisTypeDefinition,
-  histogram: histogramVisTypeDefinition,
-  horizontalBar: horizontalBarVisTypeDefinition,
+export const xyVisTypes: Record<
+  string,
+  (showElasticChartsOptions?: boolean) => XyVisTypeDefinition
+> = {
+  area: getAreaVisTypeDefinition,
+  line: getLineVisTypeDefinition,
+  histogram: getHistogramVisTypeDefinition,
+  horizontalBar: getHorizontalBarVisTypeDefinition,
 };

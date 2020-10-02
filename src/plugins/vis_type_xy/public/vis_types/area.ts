@@ -42,7 +42,9 @@ import { ChartType } from '../../common';
 import { getConfigCollections } from '../editor/collections';
 import { getOptionTabs } from '../editor/common_config';
 
-export const areaVisTypeDefinition: XyVisTypeDefinition = {
+export const getAreaVisTypeDefinition = (
+  showElasticChartsOptions = false
+): XyVisTypeDefinition => ({
   name: 'area',
   title: i18n.translate('visTypeXy.area.areaTitle', { defaultMessage: 'Area' }),
   icon: 'visArea',
@@ -141,7 +143,7 @@ export const areaVisTypeDefinition: XyVisTypeDefinition = {
   },
   editorConfig: {
     collections: getConfigCollections(),
-    optionTabs: getOptionTabs(true),
+    optionTabs: getOptionTabs(showElasticChartsOptions),
     schemas: new Schemas([
       {
         group: AggGroupNames.Metrics,
@@ -195,4 +197,4 @@ export const areaVisTypeDefinition: XyVisTypeDefinition = {
       },
     ]),
   },
-};
+});

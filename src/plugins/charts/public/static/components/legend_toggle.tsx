@@ -47,13 +47,13 @@ const LegendToggleComponent = ({ onClick, showLegend, legendPosition }: LegendTo
           'legend__toggle--isOpen': showLegend,
         }
       )}
-      aria-label={i18n.translate('visTypeXy.legend.toggleLegendButtonAriaLabel', {
+      aria-label={i18n.translate('charts.legend.toggleLegendButtonAriaLabel', {
         defaultMessage: 'Toggle legend',
       })}
       aria-expanded={showLegend}
       aria-controls={legendId}
       data-test-subj="vislibToggleLegend"
-      title={i18n.translate('visTypeXy.legend.toggleLegendButtonTitle', {
+      title={i18n.translate('charts.legend.toggleLegendButtonTitle', {
         defaultMessage: 'Toggle legend',
       })}
     >

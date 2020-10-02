@@ -42,7 +42,9 @@ import { getConfigCollections } from '../editor/collections';
 import { getOptionTabs } from '../editor/common_config';
 import { defaultCountLabel, LabelRotation } from '../../../charts/public';
 
-export const horizontalBarVisTypeDefinition: XyVisTypeDefinition = {
+export const getHorizontalBarVisTypeDefinition = (
+  showElasticChartsOptions = false
+): XyVisTypeDefinition => ({
   name: 'horizontal_bar',
   title: i18n.translate('visTypeXy.horizontalBar.horizontalBarTitle', {
     defaultMessage: 'Horizontal Bar',
@@ -143,7 +145,7 @@ export const horizontalBarVisTypeDefinition: XyVisTypeDefinition = {
   },
   editorConfig: {
     collections: getConfigCollections(),
-    optionTabs: getOptionTabs(true),
+    optionTabs: getOptionTabs(showElasticChartsOptions),
     schemas: new Schemas([
       {
         group: AggGroupNames.Metrics,
@@ -197,4 +199,4 @@ export const horizontalBarVisTypeDefinition: XyVisTypeDefinition = {
       },
     ]),
   },
-};
+});

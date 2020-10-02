@@ -24,11 +24,11 @@ import { VisTypeVislibDependencies } from './plugin';
 import { toExpressionAst } from './to_expression_ast';
 
 export const createLineVisTypeDefinition = (deps: VisTypeVislibDependencies) => ({
-  ...xyVisTypes.line,
+  ...xyVisTypes.line(),
   toExpressionAst,
   visualization: createVislibVisController(deps),
   visConfig: {
-    ...xyVisTypes.line.visConfig,
+    ...xyVisTypes.line().visConfig,
     component: undefined,
   },
 });

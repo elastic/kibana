@@ -42,7 +42,9 @@ import { getConfigCollections } from '../editor/collections';
 import { getOptionTabs } from '../editor/common_config';
 import { defaultCountLabel, LabelRotation } from '../../../charts/public';
 
-export const histogramVisTypeDefinition: XyVisTypeDefinition = {
+export const getHistogramVisTypeDefinition = (
+  showElasticChartsOptions = false
+): XyVisTypeDefinition => ({
   name: 'histogram',
   title: i18n.translate('visTypeXy.histogram.histogramTitle', {
     defaultMessage: 'Vertical Bar',
@@ -145,7 +147,7 @@ export const histogramVisTypeDefinition: XyVisTypeDefinition = {
   },
   editorConfig: {
     collections: getConfigCollections(),
-    optionTabs: getOptionTabs(true),
+    optionTabs: getOptionTabs(showElasticChartsOptions),
     schemas: new Schemas([
       {
         group: AggGroupNames.Metrics,
@@ -199,4 +201,4 @@ export const histogramVisTypeDefinition: XyVisTypeDefinition = {
       },
     ]),
   },
-};
+});

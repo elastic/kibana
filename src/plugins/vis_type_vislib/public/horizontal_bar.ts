@@ -24,11 +24,11 @@ import { VisTypeVislibDependencies } from './plugin';
 import { toExpressionAst } from './to_expression_ast';
 
 export const createHorizontalBarVisTypeDefinition = (deps: VisTypeVislibDependencies) => ({
-  ...xyVisTypes.horizontalBar,
+  ...xyVisTypes.horizontalBar(),
   toExpressionAst,
   visualization: createVislibVisController(deps),
   visConfig: {
-    ...xyVisTypes.horizontalBar.visConfig,
+    ...xyVisTypes.horizontalBar().visConfig,
     component: undefined,
   },
 });

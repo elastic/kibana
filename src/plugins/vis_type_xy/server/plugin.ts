@@ -30,7 +30,7 @@ export const uiSettingsConfig: Record<string, UiSettingsParams<boolean>> = {
       defaultMessage: 'New Chart UI',
     }),
     value: false,
-    description: i18n.translate('visTypeXy.advancedSettings.visualization.newChartUi', {
+    description: i18n.translate('visTypeXy.advancedSettings.visualization.newChartUi.description', {
       defaultMessage:
         'Enables new chart UI for areas, lines and bars in visualize. Currently, does <strong>not</strong> support split chart aggregation.',
     }),

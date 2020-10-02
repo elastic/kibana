@@ -24,11 +24,11 @@ import { VisTypeVislibDependencies } from './plugin';
 import { toExpressionAst } from './to_expression_ast';
 
 export const createAreaVisTypeDefinition = (deps: VisTypeVislibDependencies) => ({
-  ...xyVisTypes.area,
+  ...xyVisTypes.area(),
   toExpressionAst,
   visualization: createVislibVisController(deps),
   visConfig: {
-    ...xyVisTypes.area.visConfig,
+    ...xyVisTypes.area().visConfig,
     component: undefined,
   },
 });

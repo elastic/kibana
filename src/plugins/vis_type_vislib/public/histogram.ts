@@ -24,11 +24,11 @@ import { VisTypeVislibDependencies } from './plugin';
 import { toExpressionAst } from './to_expression_ast';
 
 export const createHistogramVisTypeDefinition = (deps: VisTypeVislibDependencies) => ({
-  ...xyVisTypes.histogram,
+  ...xyVisTypes.histogram(),
   toExpressionAst,
   visualization: createVislibVisController(deps),
   visConfig: {
-    ...xyVisTypes.histogram.visConfig,
+    ...xyVisTypes.histogram().visConfig,
     component: undefined,
   },
 });

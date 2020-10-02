@@ -31,7 +31,7 @@ export function getEmptyAspect(): Aspect {
     accessor: null,
     aggId: null,
     aggType: null,
-    title: i18n.translate('visTypeXY.aggResponse.allDocsTitle', {
+    title: i18n.translate('visTypeXy.aggResponse.allDocsTitle', {
       defaultMessage: 'All docs',
     }),
     params: {

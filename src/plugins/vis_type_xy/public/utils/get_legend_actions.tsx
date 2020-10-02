@@ -50,7 +50,7 @@ export const getLegendActions = (
         title: `${name}`,
         items: [
           {
-            name: i18n.translate('visTypeXY.legend.filterForValueButtonAriaLabel', {
+            name: i18n.translate('visTypeXy.legend.filterForValueButtonAriaLabel', {
               defaultMessage: 'Filter for value',
             }),
             'data-test-subj': `legend-${name}-filterIn`,
@@ -61,7 +61,7 @@ export const getLegendActions = (
             },
           },
           {
-            name: i18n.translate('visTypeXY.legend.filterOutValueButtonAriaLabel', {
+            name: i18n.translate('visTypeXy.legend.filterOutValueButtonAriaLabel', {
               defaultMessage: 'Filter out value',
             }),
             'data-test-subj': `legend-${name}-filterOut`,

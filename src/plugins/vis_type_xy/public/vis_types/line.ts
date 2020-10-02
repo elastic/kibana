@@ -42,7 +42,9 @@ import { ChartType } from '../../common';
 import { getConfigCollections } from '../editor/collections';
 import { getOptionTabs } from '../editor/common_config';
 
-export const lineVisTypeDefinition: XyVisTypeDefinition = {
+export const getLineVisTypeDefinition = (
+  showElasticChartsOptions = false
+): XyVisTypeDefinition => ({
   name: 'line',
   title: i18n.translate('visTypeXy.line.lineTitle', { defaultMessage: 'Line' }),
   icon: 'visLine',
@@ -141,7 +143,7 @@ export const lineVisTypeDefinition: XyVisTypeDefinition = {
   },
   editorConfig: {
     collections: getConfigCollections(),
-    optionTabs: getOptionTabs(true),
+    optionTabs: getOptionTabs(showElasticChartsOptions),
     schemas: new Schemas([
       {
         group: AggGroupNames.Metrics,
@@ -189,4 +191,4 @@ export const lineVisTypeDefinition: XyVisTypeDefinition = {
       },
     ]),
   },
-};
+});
