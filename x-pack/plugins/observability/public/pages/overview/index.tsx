@@ -24,6 +24,7 @@ import { getEmptySections } from './empty_section';
 import { LoadingObservability } from './loading_observability';
 import { getNewsFeed } from '../../services/get_news_feed';
 import { DataSections } from './data_sections';
+import { useTrackPageview } from '../..';
 
 interface Props {
   routeParams: RouteParams<'/overview'>;
@@ -47,6 +48,9 @@ export function OverviewPage({ routeParams }: Props) {
     start: getAbsoluteTime(relativeTime.start) as number,
     end: getAbsoluteTime(relativeTime.end, { roundUp: true }) as number,
   };
+
+  useTrackPageview({ app: 'observability', path: 'overview' });
+  useTrackPageview({ app: 'observability', path: 'overview', delay: 15000 });
 
   const { core } = usePluginContext();
 
