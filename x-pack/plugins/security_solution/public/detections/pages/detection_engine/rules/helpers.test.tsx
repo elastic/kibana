@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import moment from 'moment';
 import {
   GetStepsData,
   getDefineStepsData,
@@ -31,6 +31,8 @@ import {
 } from './types';
 
 describe('rule helpers', () => {
+  // @ts-ignore
+  moment.suppressDeprecationWarnings = true;
   describe('getStepsData', () => {
     test('returns object with about, define, schedule and actions step properties formatted', () => {
       const {
@@ -79,6 +81,16 @@ describe('rule helpers', () => {
         threshold: {
           field: ['host.name'],
           value: '50',
+        },
+        threatIndex: [],
+        threatMapping: [],
+        threatQueryBar: {
+          query: {
+            query: '',
+            language: '',
+          },
+          filters: [],
+          saved_id: undefined,
         },
         timeline: {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
@@ -215,6 +227,16 @@ describe('rule helpers', () => {
           field: [],
           value: '100',
         },
+        threatIndex: [],
+        threatMapping: [],
+        threatQueryBar: {
+          query: {
+            query: '',
+            language: '',
+          },
+          filters: [],
+          saved_id: undefined,
+        },
         timeline: {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
           title: 'Untitled timeline',
@@ -246,6 +268,16 @@ describe('rule helpers', () => {
         threshold: {
           field: [],
           value: '100',
+        },
+        threatIndex: [],
+        threatMapping: [],
+        threatQueryBar: {
+          query: {
+            query: '',
+            language: '',
+          },
+          filters: [],
+          saved_id: undefined,
         },
         timeline: {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
