@@ -82,6 +82,16 @@ describe('rule helpers', () => {
           field: ['host.name'],
           value: '50',
         },
+        threatIndex: [],
+        threatMapping: [],
+        threatQueryBar: {
+          query: {
+            query: '',
+            language: '',
+          },
+          filters: [],
+          saved_id: undefined,
+        },
         timeline: {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
           title: 'Titled timeline',
@@ -217,6 +227,16 @@ describe('rule helpers', () => {
           field: [],
           value: '100',
         },
+        threatIndex: [],
+        threatMapping: [],
+        threatQueryBar: {
+          query: {
+            query: '',
+            language: '',
+          },
+          filters: [],
+          saved_id: undefined,
+        },
         timeline: {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
           title: 'Untitled timeline',
@@ -248,6 +268,16 @@ describe('rule helpers', () => {
         threshold: {
           field: [],
           value: '100',
+        },
+        threatIndex: [],
+        threatMapping: [],
+        threatQueryBar: {
+          query: {
+            query: '',
+            language: '',
+          },
+          filters: [],
+          saved_id: undefined,
         },
         timeline: {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',

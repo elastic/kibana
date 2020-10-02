@@ -183,10 +183,10 @@ const CreateRulePageComponent: React.FC = () => {
         if (nextStep != null) {
           goToStep(nextStep);
         } else {
-          const defineStep = await stepsData.current[RuleStep.defineRule];
-          const aboutStep = await stepsData.current[RuleStep.aboutRule];
-          const scheduleStep = await stepsData.current[RuleStep.scheduleRule];
-          const actionsStep = await stepsData.current[RuleStep.ruleActions];
+          const defineStep = stepsData.current[RuleStep.defineRule];
+          const aboutStep = stepsData.current[RuleStep.aboutRule];
+          const scheduleStep = stepsData.current[RuleStep.scheduleRule];
+          const actionsStep = stepsData.current[RuleStep.ruleActions];
 
           if (
             stepIsValid(defineStep) &&

@@ -80,15 +80,32 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
                 />
               </p>
               <p>
-                <EuiLink
-                  onClick={[Function]}
-                >
-                  <FormattedMessage
-                    defaultMessage="See an example of what we collect"
-                    id="telemetry.seeExampleOfWhatWeCollectLinkText"
-                    values={Object {}}
-                  />
-                </EuiLink>
+                <FormattedMessage
+                  defaultMessage="See examples of the {clusterData} and {endpointSecurityData} that we collect."
+                  id="telemetry.seeExamplesOfWhatWeCollect"
+                  values={
+                    Object {
+                      "clusterData": <EuiLink
+                        onClick={[Function]}
+                      >
+                        <FormattedMessage
+                          defaultMessage="cluster data"
+                          id="telemetry.clusterData"
+                          values={Object {}}
+                        />
+                      </EuiLink>,
+                      "endpointSecurityData": <EuiLink
+                        onClick={[Function]}
+                      >
+                        <FormattedMessage
+                          defaultMessage="endpoint security data"
+                          id="telemetry.securityData"
+                          values={Object {}}
+                        />
+                      </EuiLink>,
+                    }
+                  }
+                />
               </p>
             </React.Fragment>,
             "displayName": "Provide usage statistics",
