@@ -11,7 +11,7 @@ import { Ping } from '../../../../common/runtime_types';
 import { getJourneySteps } from '../../../state/actions/journey';
 import { JourneyState } from '../../../state/reducers/journey';
 import { journeySelector } from '../../../state/selectors';
-import { EmptyStepState } from './empty_journey';
+import { EmptyJourney } from './empty_journey';
 import { ExecutedJourney } from './executed_journey';
 import { ConsoleOutputEventList } from './console_output_event_list';
 
@@ -51,7 +51,7 @@ export const BrowserExpandedRowComponent: FC<ComponentProps> = ({ checkGroup, jo
   }
 
   if (!journey || journey.steps.length === 0) {
-    return <EmptyStepState checkGroup={checkGroup} />;
+    return <EmptyJourney checkGroup={checkGroup} />;
   }
 
   if (journey.steps.some(stepEnd)) return <ExecutedJourney journey={journey} />;
