@@ -11,6 +11,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const queryBar = getService('queryBar');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
   const PageObjects = getPageObjects([
     'common',
     'error',
@@ -46,9 +47,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.discover.findFieldByName('bytes');
       await PageObjects.discover.clickFieldListItemVisualize('bytes');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
-      expect(dimensions).to.have.length(2);
-      expect(await dimensions[1].getVisibleText()).to.be('Average of bytes');
+      await retry.try(async () => {
+        const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
+        expect(dimensions).to.have.length(2);
+        expect(await dimensions[1].getVisibleText()).to.be('Average of bytes');
+      });
     });
 
     it('should preserve app filters in lens', async () => {
