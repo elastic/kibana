@@ -211,7 +211,7 @@ describe('LayerPanel', () => {
             groupId: 'a',
             accessors: ['newid'],
             filterOperations: () => true,
-            supportsMoreColumns: false,
+            supportsMoreColumns: true,
             dataTestSubj: 'lnsGroup',
             enableDimensionEditor: true,
           },
@@ -220,11 +220,14 @@ describe('LayerPanel', () => {
       mockVisualization.renderDimensionEditor = jest.fn();
 
       const component = mountWithIntl(<LayerPanel {...getDefaultProps()} />);
+      act(() => {
+        component.find('[data-test-subj="lns-empty-dimension"]').first().simulate('click');
+      });
+      component.update();
 
-      const group = component.find('DimensionContainer');
-      const panel = mount(group.prop('panel'));
-
-      expect(panel.children()).toHaveLength(2);
+      const group = component.find('DimensionContainer').first();
+      const panel: React.ReactElement = group.prop('panel');
+      expect(panel.props.children).toHaveLength(2);
     });
 
     it('should keep the DimensionContainer open when configuring a new dimension', () => {
@@ -263,11 +266,8 @@ describe('LayerPanel', () => {
       });
 
       const component = mountWithIntl(<LayerPanel {...getDefaultProps()} />);
-
-      const group = component.find('DimensionContainer');
-      const triggerButton = mountWithIntl(group.prop('trigger'));
       act(() => {
-        triggerButton.find('[data-test-subj="lns-empty-dimension"]').first().simulate('click');
+        component.find('[data-test-subj="lns-empty-dimension"]').first().simulate('click');
       });
       component.update();
 
@@ -312,10 +312,8 @@ describe('LayerPanel', () => {
 
       const component = mountWithIntl(<LayerPanel {...getDefaultProps()} />);
 
-      const group = component.find('DimensionContainer');
-      const triggerButton = mountWithIntl(group.prop('trigger'));
       act(() => {
-        triggerButton.find('[data-test-subj="lns-empty-dimension"]').first().simulate('click');
+        component.find('[data-test-subj="lns-empty-dimension"]').first().simulate('click');
       });
       component.update();
       expect(component.find('EuiFlyoutHeader').exists()).toBe(true);
