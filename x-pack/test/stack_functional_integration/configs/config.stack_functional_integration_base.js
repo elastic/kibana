@@ -16,10 +16,17 @@ const log = new ToolingLog({
   level: 'info',
   writeTo: process.stdout,
 });
+log.info(`REPO_ROOT = ${REPO_ROOT}`);
 log.info(`WORKSPACE in config file ${process.env.WORKSPACE}`);
-const stateFilePath = process.env.WORKSPACE
-  ? `${process.env.WORKSPACE}/qa/envvars.sh`
-  : `${REPO_ROOT}/../integration-test/qa/envvars.sh`;
+
+const integrationTestRoot = process.env.WORKSPACE
+  ? process.env.WORKSPACE
+  : `${REPO_ROOT}/../integration-test`;
+log.info(`integrationTestRoot = ${integrationTestRoot}`);
+
+// const stateFilePath = resolve(integrationTestRoot, '/qa/envvars.sh');
+const stateFilePath = `${integrationTestRoot}/qa/envvars.sh`;
+log.info(`stateFilePath = ${stateFilePath}`);
 
 const prepend = (testFile) => require.resolve(`${testsFolder}/${testFile}`);
 
@@ -46,11 +53,11 @@ export default async ({ readConfigFile }) => {
     security: { disableTestUser: true },
     // choose where screenshots should be saved
     screenshots: {
-      directory: resolve(`${REPO_ROOT}/../integration-test`, 'test/screenshots'),
+      directory: resolve(integrationTestRoot, 'test/screenshots'),
     },
     // choose where esArchiver should load archives from
     esArchiver: {
-      directory: resolve(`${REPO_ROOT}/../integration-test`, 'test/es_archives'),
+      directory: resolve(integrationTestRoot, 'test/es_archives'),
     },
   };
   return settings;
