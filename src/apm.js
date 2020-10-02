@@ -36,7 +36,18 @@ module.exports = function (serviceName = name) {
 
   apmConfig = loadConfiguration(process.argv, ROOT_DIR, isKibanaDistributable);
   const conf = apmConfig.getConfig(serviceName);
-  require('elastic-apm-node').start(conf);
+  const apm = require('elastic-apm-node');
+
+  // Filter out username PII
+  apm.addFilter((payload) => {
+    if (payload.context && payload.context.user && payload.context.user.username) {
+      delete payload.context.user.username;
+    }
+
+    return payload;
+  });
+
+  apm.start(conf);
 };
 
 module.exports.getConfig = (serviceName) => {
