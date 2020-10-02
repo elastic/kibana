@@ -109,12 +109,11 @@ function renderTooltip(description: string) {
   );
 }
 
-const VISUALIZE_EMBEDDABLE_TYPE = 'visualization';
-type VisualizeEmbeddable = any;
+type EmbeddableWithDescription = IEmbeddable & { getDescription: () => string };
 
-function getViewDescription(embeddable: IEmbeddable | VisualizeEmbeddable) {
-  if (embeddable.type === VISUALIZE_EMBEDDABLE_TYPE) {
-    const description = embeddable.getVisualizationDescription();
+function getViewDescription(embeddable: IEmbeddable | EmbeddableWithDescription) {
+  if ('getDescription' in embeddable) {
+    const description = embeddable.getDescription();
 
     if (description) {
       return description;
