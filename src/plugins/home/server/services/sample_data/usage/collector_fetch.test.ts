@@ -18,18 +18,23 @@
  */
 
 import sinon from 'sinon';
+import { FetchClients } from 'src/plugins/usage_collection/server';
 import { fetchProvider } from './collector_fetch';
 
 describe('Sample Data Fetch', () => {
   let callClusterMock: sinon.SinonStub;
+  let fetchClients: FetchClients;
 
   beforeEach(() => {
     callClusterMock = sinon.stub();
+    fetchClients = {
+      callCluster: callClusterMock,
+    };
   });
 
   test('uninitialized .kibana', async () => {
     const fetch = fetchProvider('index');
-    const telemetry = await fetch(callClusterMock);
+    const telemetry = await fetch(fetchClients);
 
     expect(telemetry).toMatchInlineSnapshot(`undefined`);
   });
@@ -49,7 +54,7 @@ describe('Sample Data Fetch', () => {
         ],
       },
     });
-    const telemetry = await fetch(callClusterMock);
+    const telemetry = await fetch(fetchClients);
 
     expect(telemetry).toMatchInlineSnapshot(`
 Object {
@@ -87,7 +92,7 @@ Object {
         ],
       },
     });
-    const telemetry = await fetch(callClusterMock);
+    const telemetry = await fetch(fetchClients);
 
     expect(telemetry).toMatchInlineSnapshot(`
 Object {
@@ -116,7 +121,7 @@ Object {
         ],
       },
     });
-    const telemetry = await fetch(callClusterMock);
+    const telemetry = await fetch(fetchClients);
 
     expect(telemetry).toMatchInlineSnapshot(`
 Object {
@@ -159,7 +164,7 @@ Object {
         ],
       },
     });
-    const telemetry = await fetch(callClusterMock);
+    const telemetry = await fetch(fetchClients);
 
     expect(telemetry).toMatchInlineSnapshot(`
 Object {
