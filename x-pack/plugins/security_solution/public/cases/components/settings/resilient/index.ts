@@ -8,6 +8,7 @@ import { lazy } from 'react';
 
 import { CaseSetting } from '../types';
 import { ResilientFieldsType } from '../../../../../../case/common/api/connectors';
+import * as i18n from './translations';
 
 export * from './types';
 
@@ -16,4 +17,9 @@ export const getCaseSetting = (): CaseSetting<ResilientFieldsType> => {
     id: '.resilient',
     caseSettingFieldsComponent: lazy(() => import('./fields')),
   };
+};
+
+export const fieldLabels = {
+  incidentTypes: i18n.INCIDENT_TYPES_LABEL,
+  severityCode: i18n.SEVERITY_LABEL,
 };

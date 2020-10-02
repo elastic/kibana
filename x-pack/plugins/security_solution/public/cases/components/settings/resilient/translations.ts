@@ -30,7 +30,7 @@ export const INCIDENT_TYPES_PLACEHOLDER = i18n.translate(
 export const INCIDENT_TYPES_LABEL = i18n.translate(
   'xpack.securitySolution.case.settings.resilient.incidentTypesLabel',
   {
-    defaultMessage: 'Incident Type',
+    defaultMessage: 'Incident Types',
   }
 );
 

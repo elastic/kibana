@@ -14,20 +14,18 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import * as i18n from './translations';
+import { i18n } from '@kbn/i18n';
 
-import { ConnectorTypes, JiraFieldsType } from '../../../../../../case/common/api/connectors';
+import { JiraFieldsType } from '../../../../../../case/common/api/connectors';
 import { useKibana } from '../../../../common/lib/kibana';
 import { SettingFieldsProps } from '../types';
 import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import { SearchIssues } from './search_issues';
-import { ConnectorCard } from '../card';
 
 const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<JiraFieldsType>> = ({
-  connector,
   fields,
-  isEdit,
+  connector,
   onChange,
 }) => {
   const { issueType = null, priority = null, parent = null } = fields || {};
@@ -39,7 +37,7 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
 
   useEffect(() => {
     setFirstLoad(true);
-    onChange(fields);
+    onChange({ issueType: issueType ?? null, priority: priority ?? null, parent: parent ?? null });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -117,39 +115,18 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
       onChange({ ...fields, issueType: issueTypesSelectOptions[0].value as string });
     }
   }, [issueTypes, issueType, issueTypesSelectOptions, onChange, fields]);
-  const listItems = useMemo(
-    () => [
-      ...(issueType != null
-        ? [
-            {
-              title: i18n.ISSUE_TYPE,
-              description: issueTypes.find((issue) => issue.id === issueType)?.name ?? '',
-            },
-          ]
-        : []),
-      ...(hasParent && parent
-        ? [
-            {
-              title: i18n.PARENT_ISSUE,
-              description: parent,
-            },
-          ]
-        : []),
-      ...(hasPriority && priority
-        ? [
-            {
-              title: i18n.PRIORITY,
-              description: priority,
-            },
-          ]
-        : []),
-    ],
-    [issueType, issueTypes, hasParent, parent, hasPriority, priority]
-  );
 
-  return isEdit ? (
+  return (
     <span data-test-subj={'connector-settings-jira'}>
-      <EuiFormRow fullWidth label={i18n.ISSUE_TYPE}>
+      <EuiFormRow
+        fullWidth
+        label={i18n.translate(
+          'xpack.securitySolution.case.settings.jira.issueTypesSelectFieldLabel',
+          {
+            defaultMessage: 'Issue type',
+          }
+        )}
+      >
         <EuiSelect
           fullWidth
           isLoading={isLoadingIssueTypes}
@@ -168,7 +145,15 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
           <>
             <EuiFlexGroup>
               <EuiFlexItem>
-                <EuiFormRow fullWidth label={i18n.PARENT_ISSUE}>
+                <EuiFormRow
+                  fullWidth
+                  label={i18n.translate(
+                    'xpack.triggersActionsUI.components.builtinActionTypes.jira.parentIssueSearchLabel',
+                    {
+                      defaultMessage: 'Parent issue',
+                    }
+                  )}
+                >
                   <SearchIssues
                     selectedValue={parent}
                     http={http}
@@ -188,7 +173,15 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
           <>
             <EuiFlexGroup>
               <EuiFlexItem>
-                <EuiFormRow fullWidth label={i18n.PRIORITY}>
+                <EuiFormRow
+                  fullWidth
+                  label={i18n.translate(
+                    'xpack.securitySolution.case.settings.jira.prioritySelectFieldLabel',
+                    {
+                      defaultMessage: 'Priority',
+                    }
+                  )}
+                >
                   <EuiSelect
                     fullWidth
                     isLoading={isLoadingFields}
@@ -208,12 +201,6 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
         )}
       </>
     </span>
-  ) : (
-    <ConnectorCard
-      connectorType={ConnectorTypes.jira}
-      title={connector.name}
-      listItems={listItems}
-    />
   );
 };
 

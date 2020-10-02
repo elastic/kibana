@@ -20,14 +20,15 @@ import styled, { css } from 'styled-components';
 import { noop } from 'lodash/fp';
 
 import { Form, UseField, useForm, useFormData } from '../../../shared_imports';
+import { ConnectorTypeFields } from '../../../../../case/common/api/connectors';
 import { ConnectorSelector } from '../connector_selector/form';
 import { ActionConnector } from '../../../../../case/common/api/cases';
-import { ConnectorTypeFields } from '../../../../../case/common/api/connectors';
 import { SettingFieldsForm } from '../settings/fields_form';
 import { getConnectorById } from '../configure_cases/utils';
 import { CaseUserActions } from '../../containers/types';
 import { schema } from './schema';
 import { getConnectorFieldsFromUserActions } from './helpers';
+import { Connector } from '../settings/connector';
 
 import * as i18n from './translations';
 
@@ -55,14 +56,6 @@ const MyFlexGroup = styled(EuiFlexGroup)`
   `}
 `;
 
-const DisappearingFlexItem = styled(EuiFlexItem)`
-  ${({ $isHidden }: { $isHidden: boolean }) =>
-    $isHidden &&
-    css`
-      margin: 0 !important;
-    `}
-`;
-
 export const EditConnector = React.memo(
   ({
     caseFields,
@@ -87,9 +80,8 @@ export const EditConnector = React.memo(
       watch: ['connectorId', 'description'],
     });
 
-    const [actionConnector, setActionConnector] = useState<ActionConnector | null>(
-      getConnectorById(connectorId, connectors)
-    );
+    const [actionConnector, setActionConnector] = useState<ActionConnector | null>(null);
+    const [currentConnector, setCurrentConnector] = useState<ActionConnector | null>(null);
     const [fields, setFields] = useState<ConnectorTypeFields['fields']>(caseFields);
     const [editConnector, setEditConnector] = useState(false);
 
@@ -104,7 +96,6 @@ export const EditConnector = React.memo(
 
     const onFields = useCallback(
       (newFields) => {
-        console.log('is this gonna get called edit_connector???', { newFields, caseFields });
         if (!deepEqual(newFields, caseFields)) {
           setFields(newFields);
         }
@@ -131,38 +122,21 @@ export const EditConnector = React.memo(
       }
     }, [submit, fields, onSubmit, onError]);
 
-    const onConnectorChange = useCallback(() => {
-      const condition1 = Object.keys(userActions).length > 0 && connectorId !== selectedConnector;
-      console.log('setFields', {
-        condition1,
-        connectorId,
-        selectedConnector,
-        userActions: getConnectorFieldsFromUserActions(connectorId, userActions),
-      });
-      if (condition1) {
-        setFields(getConnectorFieldsFromUserActions(connectorId, userActions));
-      }
-      const condition =
-        connectorId != null &&
-        connectors.length > 0 &&
-        (actionConnector == null || actionConnector.id !== connectorId);
-      console.log('setActionConnector', {
-        actionConnector,
-        connectorId,
-        connectors,
-        condition,
-        selectedConnector,
-      });
-      if (condition) {
-        setActionConnector(getConnectorById(connectorId, connectors));
-      }
-    }, [actionConnector, connectorId, connectors, selectedConnector, userActions]);
+    useEffect(() => {
+      setActionConnector(getConnectorById(connectorId, connectors) ?? null);
+    }, [connectors, connectorId]);
 
     useEffect(() => {
-      onConnectorChange();
-    }, [connectorId, connectors, selectedConnector, userActions]);
+      setCurrentConnector(getConnectorById(selectedConnector, connectors) ?? null);
+    }, [connectors, selectedConnector]);
 
-    console.log('edit_connector fields', fields);
+    useEffect(() => {
+      // Get fields of the connector from user actions when changing connector
+      if (connectorId && selectedConnector && selectedConnector !== connectorId) {
+        setFields(getConnectorFieldsFromUserActions(connectorId, userActions));
+      }
+    }, [selectedConnector, connectorId, userActions]);
+
     const onEditClick = useCallback(() => setEditConnector(true), []);
     return (
       <EuiText>
@@ -171,13 +145,13 @@ export const EditConnector = React.memo(
             <h4>{i18n.CONNECTORS}</h4>
           </EuiFlexItem>
           {isLoading && <EuiLoadingSpinner data-test-subj="connector-loading" />}
-          {!isLoading && !editConnector && (
+          {!isLoading && (
             <EuiFlexItem data-test-subj="connector-edit" grow={false}>
               <EuiButtonIcon
-                aria-label={i18n.EDIT_CONNECTOR_ARIA}
                 data-test-subj="connector-edit-button"
-                iconType={'pencil'}
                 isDisabled={disabled}
+                aria-label={i18n.EDIT_CONNECTOR_ARIA}
+                iconType={'pencil'}
                 onClick={onEditClick}
               />
             </EuiFlexItem>
@@ -185,38 +159,44 @@ export const EditConnector = React.memo(
         </MyFlexGroup>
         <EuiHorizontalRule margin="xs" />
         <MyFlexGroup gutterSize="none">
-          <EuiFlexGroup data-test-subj="edit-connectors" direction="column">
-            <DisappearingFlexItem $isHidden={!editConnector}>
-              <Form form={form}>
-                <EuiFlexGroup gutterSize="none" direction="row">
-                  <EuiFlexItem>
-                    <UseField
-                      path="connectorId"
-                      component={ConnectorSelector}
-                      componentProps={{
-                        connectors,
-                        dataTestSubj: 'caseConnectors',
-                        defaultValue: selectedConnector,
-                        disabled,
-                        idAria: 'caseConnectors',
-                        isEdit: editConnector,
-                        isLoading,
-                      }}
-                      onChange={onChangeConnector}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </Form>
-            </DisappearingFlexItem>
-            <EuiFlexItem>
-              <SettingFieldsForm
-                connector={actionConnector}
-                fields={fields}
-                isEdit={editConnector}
-                onFieldsChange={onFields}
-              />
-            </EuiFlexItem>
-            {editConnector && (
+          {isLoading && <EuiLoadingSpinner data-test-subj="connector-loading" />}
+          {!editConnector && !isLoading && (
+            <Connector
+              name={currentConnector?.name ?? ''}
+              type={currentConnector?.actionTypeId ?? ''}
+              fields={fields}
+            />
+          )}
+          {editConnector && !isLoading && (
+            <EuiFlexGroup data-test-subj="edit-connectors" direction="column">
+              <EuiFlexItem>
+                <Form form={form}>
+                  <EuiFlexGroup gutterSize="none" direction="row">
+                    <EuiFlexItem>
+                      <UseField
+                        path="connectorId"
+                        component={ConnectorSelector}
+                        componentProps={{
+                          connectors,
+                          dataTestSubj: 'caseConnectors',
+                          idAria: 'caseConnectors',
+                          isLoading,
+                          disabled,
+                          defaultValue: selectedConnector,
+                        }}
+                        onChange={onChangeConnector}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </Form>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <SettingFieldsForm
+                  connector={actionConnector}
+                  onFieldsChange={onFields}
+                  fields={fields}
+                />
+              </EuiFlexItem>
               <EuiFlexItem>
                 <EuiFlexGroup gutterSize="s" alignItems="center">
                   <EuiFlexItem grow={false}>
@@ -243,8 +223,8 @@ export const EditConnector = React.memo(
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+            </EuiFlexGroup>
+          )}
         </MyFlexGroup>
       </EuiText>
     );
