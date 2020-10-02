@@ -22,7 +22,7 @@ import { ConfigType } from '../config';
 import { coreMock } from '../../../../core/public/mocks';
 import { nextTick } from 'test_utils/enzyme_helpers';
 
-let mockOnDismissCallback: () => void = jest.fn().mockImplementation(() => {
+let mockOnDismissCallback: (persist: boolean) => void = jest.fn().mockImplementation(() => {
   throw new Error('expected callback to be replaced!');
 });
 
@@ -39,108 +39,162 @@ jest.mock('./components', () => {
 interface InitOpts {
   displayAlert?: boolean;
   isAnonymousPath?: boolean;
+  tenant?: string;
 }
 
-function initCoreStart({ displayAlert = true, isAnonymousPath = false }: InitOpts = {}) {
-  const core = coreMock.createStart();
-  core.http.get.mockImplementation(async (url: unknown) => {
+function initCore({
+  displayAlert = true,
+  isAnonymousPath = false,
+  tenant = '/server-base-path',
+}: InitOpts = {}) {
+  const coreSetup = coreMock.createSetup();
+  (coreSetup.http.basePath.serverBasePath as string) = tenant;
+
+  const coreStart = coreMock.createStart();
+  coreStart.http.get.mockImplementation(async (url: unknown) => {
     if (url === '/internal/security_oss/display_insecure_cluster_alert') {
       return { displayAlert };
     }
     throw new Error(`unexpected call to http.get: ${url}`);
   });
-  core.http.anonymousPaths.isAnonymous.mockReturnValue(isAnonymousPath);
+  coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(isAnonymousPath);
 
-  core.notifications.toasts.addWarning.mockReturnValue({ id: 'mock_alert_id' });
-  return core;
+  coreStart.notifications.toasts.addWarning.mockReturnValue({ id: 'mock_alert_id' });
+  return { coreSetup, coreStart };
 }
 
 describe('InsecureClusterService', () => {
   describe('display scenarios', () => {
     it('does not display an alert when the warning is explicitly disabled via config', async () => {
       const config: ConfigType = { showInsecureClusterWarning: false };
-      const core = initCoreStart({ displayAlert: true });
+      const { coreSetup, coreStart } = initCore({ displayAlert: true });
       const storage = coreMock.createStorage();
 
       const service = new InsecureClusterService(config, storage);
-      service.setup();
-      service.start({ core });
+      service.setup({ core: coreSetup });
+      service.start({ core: coreStart });
 
       await nextTick();
 
-      expect(core.http.get).not.toHaveBeenCalled();
-      expect(core.notifications.toasts.addWarning).not.toHaveBeenCalled();
+      expect(coreStart.http.get).not.toHaveBeenCalled();
+      expect(coreStart.notifications.toasts.addWarning).not.toHaveBeenCalled();
 
-      expect(core.notifications.toasts.remove).not.toHaveBeenCalled();
+      expect(coreStart.notifications.toasts.remove).not.toHaveBeenCalled();
       expect(storage.setItem).not.toHaveBeenCalled();
     });
 
     it('does not display an alert when the endpoint check returns false', async () => {
       const config: ConfigType = { showInsecureClusterWarning: true };
-      const core = initCoreStart({ displayAlert: false });
+      const { coreSetup, coreStart } = initCore({ displayAlert: false });
       const storage = coreMock.createStorage();
 
       const service = new InsecureClusterService(config, storage);
-      service.start({ core });
+      service.setup({ core: coreSetup });
+      service.start({ core: coreStart });
 
       await nextTick();
 
-      expect(core.http.get).toHaveBeenCalledTimes(1);
-      expect(core.notifications.toasts.addWarning).not.toHaveBeenCalled();
+      expect(coreStart.http.get).toHaveBeenCalledTimes(1);
+      expect(coreStart.notifications.toasts.addWarning).not.toHaveBeenCalled();
 
-      expect(core.notifications.toasts.remove).not.toHaveBeenCalled();
+      expect(coreStart.notifications.toasts.remove).not.toHaveBeenCalled();
       expect(storage.setItem).not.toHaveBeenCalled();
     });
 
     it('does not display an alert when on an anonymous path', async () => {
       const config: ConfigType = { showInsecureClusterWarning: true };
-      const core = initCoreStart({ displayAlert: true, isAnonymousPath: true });
+      const { coreSetup, coreStart } = initCore({ displayAlert: true, isAnonymousPath: true });
       const storage = coreMock.createStorage();
 
       const service = new InsecureClusterService(config, storage);
-      service.start({ core });
+      service.setup({ core: coreSetup });
+      service.start({ core: coreStart });
 
       await nextTick();
 
-      expect(core.http.get).not.toHaveBeenCalled();
-      expect(core.notifications.toasts.addWarning).not.toHaveBeenCalled();
+      expect(coreStart.http.get).not.toHaveBeenCalled();
+      expect(coreStart.notifications.toasts.addWarning).not.toHaveBeenCalled();
 
-      expect(core.notifications.toasts.remove).not.toHaveBeenCalled();
+      expect(coreStart.notifications.toasts.remove).not.toHaveBeenCalled();
       expect(storage.setItem).not.toHaveBeenCalled();
+    });
+
+    it('only reads storage information from the current tenant', async () => {
+      const config: ConfigType = { showInsecureClusterWarning: true };
+      const { coreSetup, coreStart } = initCore({
+        displayAlert: true,
+        tenant: '/my-specific-tenant',
+      });
+
+      const storage = coreMock.createStorage();
+      storage.getItem.mockReturnValue(JSON.stringify({ show: false }));
+
+      const service = new InsecureClusterService(config, storage);
+      service.setup({ core: coreSetup });
+      service.start({ core: coreStart });
+
+      await nextTick();
+
+      expect(storage.getItem).toHaveBeenCalledTimes(1);
+      expect(storage.getItem).toHaveBeenCalledWith(
+        'insecureClusterWarningVisibility/my-specific-tenant'
+      );
     });
 
     it('does not display an alert when hidden via storage', async () => {
       const config: ConfigType = { showInsecureClusterWarning: true };
-      const core = initCoreStart({ displayAlert: true });
+      const { coreSetup, coreStart } = initCore({ displayAlert: true });
 
       const storage = coreMock.createStorage();
-      storage.getItem.mockReturnValue('hide');
+      storage.getItem.mockReturnValue(JSON.stringify({ show: false }));
 
       const service = new InsecureClusterService(config, storage);
-      service.start({ core });
+      service.setup({ core: coreSetup });
+      service.start({ core: coreStart });
 
       await nextTick();
 
-      expect(core.http.get).not.toHaveBeenCalled();
-      expect(core.notifications.toasts.addWarning).not.toHaveBeenCalled();
+      expect(coreStart.http.get).not.toHaveBeenCalled();
+      expect(coreStart.notifications.toasts.addWarning).not.toHaveBeenCalled();
 
-      expect(core.notifications.toasts.remove).not.toHaveBeenCalled();
+      expect(coreStart.notifications.toasts.remove).not.toHaveBeenCalled();
+      expect(storage.setItem).not.toHaveBeenCalled();
+    });
+
+    it('displays an alert when persisted preference is corrupted', async () => {
+      const config: ConfigType = { showInsecureClusterWarning: true };
+      const { coreSetup, coreStart } = initCore({ displayAlert: true });
+
+      const storage = coreMock.createStorage();
+      storage.getItem.mockReturnValue('{ this is a string of invalid JSON');
+
+      const service = new InsecureClusterService(config, storage);
+      service.setup({ core: coreSetup });
+      service.start({ core: coreStart });
+
+      await nextTick();
+
+      expect(coreStart.http.get).toHaveBeenCalledTimes(1);
+      expect(coreStart.notifications.toasts.addWarning).toHaveBeenCalledTimes(1);
+
+      expect(coreStart.notifications.toasts.remove).not.toHaveBeenCalled();
       expect(storage.setItem).not.toHaveBeenCalled();
     });
 
     it('displays an alert when enabled via config and endpoint checks', async () => {
       const config: ConfigType = { showInsecureClusterWarning: true };
-      const core = initCoreStart({ displayAlert: true });
+      const { coreSetup, coreStart } = initCore({ displayAlert: true });
       const storage = coreMock.createStorage();
 
       const service = new InsecureClusterService(config, storage);
-      service.start({ core });
+      service.setup({ core: coreSetup });
+      service.start({ core: coreStart });
 
       await nextTick();
 
-      expect(core.http.get).toHaveBeenCalledTimes(1);
-      expect(core.notifications.toasts.addWarning).toHaveBeenCalledTimes(1);
-      expect(core.notifications.toasts.addWarning.mock.calls[0]).toMatchInlineSnapshot(`
+      expect(coreStart.http.get).toHaveBeenCalledTimes(1);
+      expect(coreStart.notifications.toasts.addWarning).toHaveBeenCalledTimes(1);
+      expect(coreStart.notifications.toasts.addWarning.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "text": "mocked default alert text",
@@ -152,27 +206,31 @@ describe('InsecureClusterService', () => {
       ]
     `);
 
-      expect(core.notifications.toasts.remove).not.toHaveBeenCalled();
+      expect(coreStart.notifications.toasts.remove).not.toHaveBeenCalled();
       expect(storage.setItem).not.toHaveBeenCalled();
     });
 
     it('dismisses the alert when requested, and remembers this preference', async () => {
       const config: ConfigType = { showInsecureClusterWarning: true };
-      const core = initCoreStart({ displayAlert: true });
+      const { coreSetup, coreStart } = initCore({ displayAlert: true });
       const storage = coreMock.createStorage();
 
       const service = new InsecureClusterService(config, storage);
-      service.start({ core });
+      service.setup({ core: coreSetup });
+      service.start({ core: coreStart });
 
       await nextTick();
 
-      expect(core.http.get).toHaveBeenCalledTimes(1);
-      expect(core.notifications.toasts.addWarning).toHaveBeenCalledTimes(1);
+      expect(coreStart.http.get).toHaveBeenCalledTimes(1);
+      expect(coreStart.notifications.toasts.addWarning).toHaveBeenCalledTimes(1);
 
-      mockOnDismissCallback();
+      mockOnDismissCallback(true);
 
-      expect(core.notifications.toasts.remove).toHaveBeenCalledTimes(1);
-      expect(storage.setItem).toHaveBeenCalledWith('insecureClusterWarningVisibility', 'hide');
+      expect(coreStart.notifications.toasts.remove).toHaveBeenCalledTimes(1);
+      expect(storage.setItem).toHaveBeenCalledWith(
+        'insecureClusterWarningVisibility/server-base-path',
+        JSON.stringify({ show: false })
+      );
     });
   });
 
@@ -181,8 +239,10 @@ describe('InsecureClusterService', () => {
       const config: ConfigType = { showInsecureClusterWarning: true };
       const storage = coreMock.createStorage();
 
+      const { coreSetup } = initCore();
+
       const service = new InsecureClusterService(config, storage);
-      const { setAlertTitle, setAlertText } = service.setup();
+      const { setAlertTitle, setAlertText } = service.setup({ core: coreSetup });
       setAlertTitle('some new title');
       setAlertText('some new alert text');
 
@@ -196,21 +256,21 @@ describe('InsecureClusterService', () => {
 
     it('allows the alert title and text to be replaced', async () => {
       const config: ConfigType = { showInsecureClusterWarning: true };
-      const core = initCoreStart({ displayAlert: true });
+      const { coreSetup, coreStart } = initCore({ displayAlert: true });
       const storage = coreMock.createStorage();
 
       const service = new InsecureClusterService(config, storage);
-      const { setAlertTitle, setAlertText } = service.setup();
+      const { setAlertTitle, setAlertText } = service.setup({ core: coreSetup });
       setAlertTitle('some new title');
       setAlertText('some new alert text');
 
-      service.start({ core });
+      service.start({ core: coreStart });
 
       await nextTick();
 
-      expect(core.http.get).toHaveBeenCalledTimes(1);
-      expect(core.notifications.toasts.addWarning).toHaveBeenCalledTimes(1);
-      expect(core.notifications.toasts.addWarning.mock.calls[0]).toMatchInlineSnapshot(`
+      expect(coreStart.http.get).toHaveBeenCalledTimes(1);
+      expect(coreStart.notifications.toasts.addWarning).toHaveBeenCalledTimes(1);
+      expect(coreStart.notifications.toasts.addWarning.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "text": "some new alert text",
@@ -222,7 +282,7 @@ describe('InsecureClusterService', () => {
       ]
     `);
 
-      expect(core.notifications.toasts.remove).not.toHaveBeenCalled();
+      expect(coreStart.notifications.toasts.remove).not.toHaveBeenCalled();
       expect(storage.setItem).not.toHaveBeenCalled();
     });
   });
@@ -230,21 +290,45 @@ describe('InsecureClusterService', () => {
   describe('#start', () => {
     it('allows the alert to be hidden via start contract, and remembers this preference', async () => {
       const config: ConfigType = { showInsecureClusterWarning: true };
-      const core = initCoreStart({ displayAlert: true });
+      const { coreSetup, coreStart } = initCore({ displayAlert: true });
       const storage = coreMock.createStorage();
 
       const service = new InsecureClusterService(config, storage);
-      const { hideAlert } = service.start({ core });
+      service.setup({ core: coreSetup });
+      const { hideAlert } = service.start({ core: coreStart });
 
       await nextTick();
 
-      expect(core.http.get).toHaveBeenCalledTimes(1);
-      expect(core.notifications.toasts.addWarning).toHaveBeenCalledTimes(1);
+      expect(coreStart.http.get).toHaveBeenCalledTimes(1);
+      expect(coreStart.notifications.toasts.addWarning).toHaveBeenCalledTimes(1);
 
-      hideAlert();
+      hideAlert(true);
 
-      expect(core.notifications.toasts.remove).toHaveBeenCalledTimes(1);
-      expect(storage.setItem).toHaveBeenCalledWith('insecureClusterWarningVisibility', 'hide');
+      expect(coreStart.notifications.toasts.remove).toHaveBeenCalledTimes(1);
+      expect(storage.setItem).toHaveBeenCalledWith(
+        'insecureClusterWarningVisibility/server-base-path',
+        JSON.stringify({ show: false })
+      );
+    });
+
+    it('allows the alert to be hidden via start contract, and does not remember the preference', async () => {
+      const config: ConfigType = { showInsecureClusterWarning: true };
+      const { coreSetup, coreStart } = initCore({ displayAlert: true });
+      const storage = coreMock.createStorage();
+
+      const service = new InsecureClusterService(config, storage);
+      service.setup({ core: coreSetup });
+      const { hideAlert } = service.start({ core: coreStart });
+
+      await nextTick();
+
+      expect(coreStart.http.get).toHaveBeenCalledTimes(1);
+      expect(coreStart.notifications.toasts.addWarning).toHaveBeenCalledTimes(1);
+
+      hideAlert(false);
+
+      expect(coreStart.notifications.toasts.remove).toHaveBeenCalledTimes(1);
+      expect(storage.setItem).not.toHaveBeenCalled();
     });
   });
 });

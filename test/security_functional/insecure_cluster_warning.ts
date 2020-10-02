@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Insecure Cluster Warning', () => {
     before(async () => {
       await pageObjects.common.navigateToApp('home');
-      await browser.setLocalStorageItem('insecureClusterWarningVisibility', '');
+      await browser.setLocalStorageItem('insecureClusterWarningVisibility/', '');
       // starting without user data
       await esArchiver.unload('hamlet');
     });
@@ -40,12 +40,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('without user data', () => {
       before(async () => {
-        await browser.setLocalStorageItem('insecureClusterWarningVisibility', '');
+        await browser.setLocalStorageItem('insecureClusterWarningVisibility/', '');
         await esArchiver.unload('hamlet');
       });
 
       it('should not warn when the cluster contains no user data', async () => {
-        await browser.setLocalStorageItem('insecureClusterWarningVisibility', 'hide');
+        await browser.setLocalStorageItem(
+          'insecureClusterWarningVisibility/',
+          JSON.stringify({ show: false })
+        );
         await pageObjects.common.navigateToApp('home');
         await testSubjects.missingOrFail('insecureClusterDefaultAlertText');
       });
@@ -54,7 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('with user data', () => {
       before(async () => {
         await pageObjects.common.navigateToApp('home');
-        await browser.setLocalStorageItem('insecureClusterWarningVisibility', '');
+        await browser.setLocalStorageItem('insecureClusterWarningVisibility/', '');
         await esArchiver.load('hamlet');
       });
 
@@ -72,7 +75,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should not warn when local storage is configured to hide', async () => {
-        await browser.setLocalStorageItem('insecureClusterWarningVisibility', 'hide');
+        await browser.setLocalStorageItem(
+          'insecureClusterWarningVisibility/',
+          JSON.stringify({ show: false })
+        );
         await pageObjects.common.navigateToApp('home');
         await testSubjects.missingOrFail('insecureClusterDefaultAlertText');
       });

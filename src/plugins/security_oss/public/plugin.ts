@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 import { ConfigType } from './config';
 import {
   InsecureClusterService,
@@ -44,9 +44,9 @@ export class SecurityOSSPlugin
     this.insecureClusterService = new InsecureClusterService(this.config, localStorage);
   }
 
-  public setup() {
+  public setup(core: CoreSetup) {
     return {
-      insecureCluster: this.insecureClusterService.setup(),
+      insecureCluster: this.insecureClusterService.setup({ core }),
     };
   }
 

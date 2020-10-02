@@ -17,45 +17,80 @@
  * under the License.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCheckbox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 import { MountPoint } from 'kibana/public';
-import React from 'react';
+import React, { useState } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 export const defaultAlertTitle = i18n.translate('security.checkup.insecureClusterTitle', {
   defaultMessage: 'Please secure your installation',
 });
 
-export const defaultAlertText: (onDismiss: () => void) => MountPoint = (onDismiss) => (e) => {
-  render(
-    <div data-test-subj="insecureClusterDefaultAlertText">
-      <EuiText>
-        <FormattedMessage
-          id="security.checkup.insecureClusterMessage"
-          defaultMessage="Our free security features can protect against unauthorized access."
-        />
-      </EuiText>
-      <EuiSpacer />
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            color="primary"
-            fill
-            href="https://www.elastic.co/what-is/elastic-stack-security"
-          >
-            Learn more
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton onClick={onDismiss} data-test-subj="defaultDismissAlertButton">
-            Dismiss
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </div>,
-    e
-  );
+export const defaultAlertText: (onDismiss: (persist: boolean) => void) => MountPoint = (
+  onDismiss
+) => (e) => {
+  const AlertText = () => {
+    const [persist, setPersist] = useState(false);
+
+    return (
+      <I18nProvider>
+        <div data-test-subj="insecureClusterDefaultAlertText">
+          <EuiText size="s">
+            <FormattedMessage
+              id="security.checkup.insecureClusterMessage"
+              defaultMessage="Our free security features can protect against unauthorized access."
+            />
+          </EuiText>
+          <EuiSpacer />
+          <EuiCheckbox
+            id="persistDismissedAlertPreference"
+            checked={persist}
+            onChange={(changeEvent) => setPersist(changeEvent.target.checked)}
+            label={i18n.translate('security.checkup.dontShowAgain', {
+              defaultMessage: `Don't show again`,
+            })}
+          />
+          <EuiSpacer />
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                color="primary"
+                fill
+                href="https://www.elastic.co/what-is/elastic-stack-security"
+              >
+                {i18n.translate('security.checkup.learnMoreButtonText', {
+                  defaultMessage: `Learn more`,
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                onClick={() => onDismiss(persist)}
+                data-test-subj="defaultDismissAlertButton"
+              >
+                {i18n.translate('security.checkup.dismissButtonText', {
+                  defaultMessage: `Dismiss`,
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+      </I18nProvider>
+    );
+  };
+
+  render(<AlertText />, e);
+
   return () => unmountComponentAtNode(e);
 };

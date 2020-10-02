@@ -47,9 +47,6 @@ export const setupDisplayInsecureClusterAlertRoute = ({
     {
       path: '/internal/security_oss/display_insecure_cluster_alert',
       validate: false,
-      options: {
-        authRequired: false,
-      },
     },
     async (context, request, response) => {
       if (!showInsecureClusterWarning) {

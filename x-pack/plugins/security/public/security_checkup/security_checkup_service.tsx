@@ -23,16 +23,18 @@ export class SecurityCheckupService {
 
   public setup({ securityOssSetup }: SetupDeps) {
     securityOssSetup.insecureCluster.setAlertTitle(insecureClusterAlertTitle);
-    securityOssSetup.insecureCluster.setAlertText(insecureClusterAlertText(() => this.onDismiss()));
+    securityOssSetup.insecureCluster.setAlertText(
+      insecureClusterAlertText((persist: boolean) => this.onDismiss(persist))
+    );
   }
 
   public start({ securityOssStart }: StartDeps) {
     this.securityOssStart = securityOssStart;
   }
 
-  private onDismiss() {
+  private onDismiss(persist: boolean) {
     if (this.securityOssStart) {
-      this.securityOssStart.insecureCluster.hideAlert();
+      this.securityOssStart.insecureCluster.hideAlert(persist);
     }
   }
 

@@ -17,17 +17,19 @@
  * under the License.
  */
 
-import { CoreStart, MountPoint, Toast } from 'kibana/public';
+import { CoreSetup, CoreStart, MountPoint, Toast } from 'kibana/public';
 
 import { BehaviorSubject, combineLatest, from } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 import { ConfigType } from '../config';
 import { defaultAlertText, defaultAlertTitle } from './components';
 
-const STORAGE_KEY = 'insecureClusterWarningVisibility';
+interface SetupDeps {
+  core: Pick<CoreSetup, 'http'>;
+}
 
 interface StartDeps {
-  core: Pick<CoreStart, 'overlays' | 'notifications' | 'http' | 'application'>;
+  core: Pick<CoreStart, 'notifications' | 'http' | 'application'>;
 }
 
 export interface InsecureClusterServiceSetup {
@@ -36,7 +38,7 @@ export interface InsecureClusterServiceSetup {
 }
 
 export interface InsecureClusterServiceStart {
-  hideAlert: () => void;
+  hideAlert: (persist: boolean) => void;
 }
 
 export class InsecureClusterService {
@@ -52,13 +54,20 @@ export class InsecureClusterService {
 
   private alertText?: string | MountPoint;
 
+  private storageKey?: string;
+
   constructor(config: Pick<ConfigType, 'showInsecureClusterWarning'>, storage: Storage) {
     this.storage = storage;
-    this.enabled = config.showInsecureClusterWarning && this.getPersistedVisibilityPreference();
+    this.enabled = config.showInsecureClusterWarning;
     this.alertVisibility$ = new BehaviorSubject(this.enabled);
   }
 
-  public setup(): InsecureClusterServiceSetup {
+  public setup({ core }: SetupDeps): InsecureClusterServiceSetup {
+    const tenant = core.http.basePath.serverBasePath;
+    this.storageKey = `insecureClusterWarningVisibility${tenant}`;
+    this.enabled = this.enabled && this.getPersistedVisibilityPreference();
+    this.alertVisibility$.next(this.enabled);
+
     return {
       setAlertTitle: (alertTitle: string | MountPoint) => {
         if (this.alertTitle) {
@@ -84,7 +93,7 @@ export class InsecureClusterService {
     }
 
     return {
-      hideAlert: () => this.setAlertVisibility(false),
+      hideAlert: (persist: boolean) => this.setAlertVisibility(false, persist),
     };
   }
 
@@ -113,7 +122,9 @@ export class InsecureClusterService {
           this.alertToast = core.notifications.toasts.addWarning(
             {
               title: this.alertTitle ?? defaultAlertTitle,
-              text: this.alertText ?? defaultAlertText(() => this.setAlertVisibility(false)),
+              text:
+                this.alertText ??
+                defaultAlertText((persist: boolean) => this.setAlertVisibility(false, persist)),
             },
             {
               toastLifeTimeMs: tenDays,
@@ -126,19 +137,27 @@ export class InsecureClusterService {
       });
   }
 
-  private setAlertVisibility(visible: boolean) {
+  private setAlertVisibility(show: boolean, persist: boolean) {
     if (!this.enabled) {
       return;
     }
-    this.alertVisibility$.next(visible);
-    this.setPersistedVisibilityPreference(visible);
+    this.alertVisibility$.next(show);
+    if (persist) {
+      this.setPersistedVisibilityPreference(show);
+    }
   }
 
   private getPersistedVisibilityPreference() {
-    return (this.storage.getItem(STORAGE_KEY) ?? 'show') !== 'hide';
+    const entry = this.storage.getItem(this.storageKey!) ?? '{}';
+    try {
+      const { show = true } = JSON.parse(entry);
+      return show;
+    } catch (e) {
+      return true;
+    }
   }
 
-  private setPersistedVisibilityPreference(visible: boolean) {
-    this.storage.setItem(STORAGE_KEY, visible ? 'show' : 'hide');
+  private setPersistedVisibilityPreference(show: boolean) {
+    this.storage.setItem(this.storageKey!, JSON.stringify({ show }));
   }
 }
