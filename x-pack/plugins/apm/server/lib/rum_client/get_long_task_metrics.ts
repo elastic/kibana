@@ -6,11 +6,7 @@
 
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 const LONG_TASK_SUM_FIELD = 'transaction.experience.longtask.sum';
 const LONG_TASK_COUNT_FIELD = 'transaction.experience.longtask.count';
@@ -21,7 +17,7 @@ export async function getLongTaskMetrics({
   urlQuery,
   percentile = 50,
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   urlQuery?: string;
   percentile?: number;
 }) {
