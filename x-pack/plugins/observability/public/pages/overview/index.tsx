@@ -8,23 +8,22 @@ import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
 import { EmptySection } from '../../components/app/empty_section';
 import { WithHeaderLayout } from '../../components/app/layout/with_header';
-import { NewsFeed } from '../../components/app/news_feed';
 import { Resources } from '../../components/app/resources';
 import { AlertsSection } from '../../components/app/section/alerts';
 import { DatePicker, TimePickerTime } from '../../components/shared/data_picker';
+import { NewsFeed } from '../../components/app/news_feed';
+import { fetchHasData } from '../../data_handler';
 import { FETCH_STATUS, useFetcher } from '../../hooks/use_fetcher';
 import { UI_SETTINGS, useKibanaUISettings } from '../../hooks/use_kibana_ui_settings';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useTrackPageview } from '../../hooks/use_track_metric';
 import { RouteParams } from '../../routes';
-import { getNewsFeed } from '../../services/get_news_feed';
 import { getObservabilityAlerts } from '../../services/get_observability_alerts';
 import { getAbsoluteTime } from '../../utils/date';
 import { getBucketSize } from '../../utils/get_bucket_size';
 import { getEmptySections } from './empty_section';
 import { LoadingObservability } from './loading_observability';
+import { getNewsFeed } from '../../services/get_news_feed';
 import { DataSections } from './data_sections';
-import { ObsvSharedContext } from '../../context/shared_data';
 
 interface Props {
   routeParams: RouteParams<'/overview'>;
@@ -37,24 +36,6 @@ function calculateBucketSize({ start, end }: { start?: number; end?: number }) {
 }
 
 export function OverviewPage({ routeParams }: Props) {
-  const { core } = usePluginContext();
-
-  const { sharedData } = useContext(ObsvSharedContext);
-
-  const { hasAnyData, hasData } = sharedData ?? {};
-
-  useTrackPageview({ app: 'observability', path: 'overview' });
-  useTrackPageview({ app: 'observability', path: 'overview', delay: 15000 });
-
-  const { data: alerts = [], status: alertStatus } = useFetcher(() => {
-    return getObservabilityAlerts({ core });
-  }, [core]);
-
-  const { data: newsFeed } = useFetcher(() => getNewsFeed({ core }), [core]);
-
-  const theme = useContext(ThemeContext);
-  const { refreshInterval = 10000, refreshPaused = true } = routeParams.query;
-
   const timePickerTime = useKibanaUISettings<TimePickerTime>(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
 
   const relativeTime = {
@@ -67,6 +48,29 @@ export function OverviewPage({ routeParams }: Props) {
     end: getAbsoluteTime(relativeTime.end, { roundUp: true }),
   };
 
+  const { core } = usePluginContext();
+
+  const { data: alerts = [], status: alertStatus } = useFetcher(() => {
+    return getObservabilityAlerts({ core });
+  }, [core]);
+
+  const { data: newsFeed } = useFetcher(() => getNewsFeed({ core }), [core]);
+
+  const theme = useContext(ThemeContext);
+
+  const result = useFetcher(
+    () => fetchHasData(absoluteTime),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+  const hasData = result.data;
+
+  if (!hasData) {
+    return <LoadingObservability />;
+  }
+
+  const { refreshInterval = 10000, refreshPaused = true } = routeParams.query;
+
   const bucketSize = calculateBucketSize({
     start: absoluteTime.start,
     end: absoluteTime.end,
@@ -76,93 +80,95 @@ export function OverviewPage({ routeParams }: Props) {
     if (id === 'alert') {
       return alertStatus !== FETCH_STATUS.FAILURE && !alerts.length;
     }
-    return !hasData?.[id];
+    return !hasData[id];
   });
 
+  // Hides the data section when all 'hasData' is false or undefined
+  const showDataSections = Object.values(hasData).some((hasPluginData) => hasPluginData);
+
   return (
-    <>
-      {!hasAnyData && <LoadingObservability />}
-      <WithHeaderLayout
-        headerColor={theme.eui.euiColorEmptyShade}
-        bodyColor={theme.eui.euiPageBackgroundColor}
-        showAddData
-        showGiveFeedback
-      >
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <DatePicker
-              rangeFrom={relativeTime.start}
-              rangeTo={relativeTime.end}
-              refreshInterval={refreshInterval}
-              refreshPaused={refreshPaused}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+    <WithHeaderLayout
+      headerColor={theme.eui.euiColorEmptyShade}
+      bodyColor={theme.eui.euiPageBackgroundColor}
+      showAddData
+      showGiveFeedback
+    >
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <DatePicker
+            rangeFrom={relativeTime.start}
+            rangeTo={relativeTime.end}
+            refreshInterval={refreshInterval}
+            refreshPaused={refreshPaused}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
-        <EuiHorizontalRule
-          style={{
-            width: 'auto', // full width
-            margin: '24px -24px', // counteract page paddings
-          }}
-        />
+      <EuiHorizontalRule
+        style={{
+          width: 'auto', // full width
+          margin: '24px -24px', // counteract page paddings
+        }}
+      />
 
-        <EuiFlexGroup>
-          <EuiFlexItem grow={6}>
-            {/* Data sections */}
-            <DataSections bucketSize={bucketSize?.intervalString!} hasData={hasData} />
-
-            {/* Empty sections */}
-            {!!appEmptySections.length && (
-              <EuiFlexItem>
-                <EuiSpacer size="s" />
-                <EuiFlexGrid
-                  columns={
-                    // when more than 2 empty sections are available show them on 2 columns, otherwise 1
-                    appEmptySections.length > 2 ? 2 : 1
-                  }
-                  gutterSize="s"
-                >
-                  {appEmptySections.map((app) => {
-                    return (
-                      <EuiFlexItem
-                        key={app.id}
-                        style={{
-                          border: `1px dashed ${theme.eui.euiBorderColor}`,
-                          borderRadius: '4px',
-                        }}
-                      >
-                        <EmptySection section={app} />
-                      </EuiFlexItem>
-                    );
-                  })}
-                </EuiFlexGrid>
-              </EuiFlexItem>
-            )}
-          </EuiFlexItem>
-
-          {/* Alert section */}
-          {!!alerts.length && (
-            <EuiFlexItem grow={3}>
-              <AlertsSection alerts={alerts} />
-            </EuiFlexItem>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={6}>
+          {/* Data sections */}
+          {showDataSections && (
+            <DataSections hasData={hasData} bucketSize={bucketSize.intervalString!} />
           )}
 
-          {/* Resources section */}
-          <EuiFlexItem grow={1}>
-            <EuiFlexGroup direction="column">
-              <EuiFlexItem grow={false}>
-                <Resources />
-              </EuiFlexItem>
+          {/* Empty sections */}
+          {!!appEmptySections.length && (
+            <EuiFlexItem>
+              <EuiSpacer size="s" />
+              <EuiFlexGrid
+                columns={
+                  // when more than 2 empty sections are available show them on 2 columns, otherwise 1
+                  appEmptySections.length > 2 ? 2 : 1
+                }
+                gutterSize="s"
+              >
+                {appEmptySections.map((app) => {
+                  return (
+                    <EuiFlexItem
+                      key={app.id}
+                      style={{
+                        border: `1px dashed ${theme.eui.euiBorderColor}`,
+                        borderRadius: '4px',
+                      }}
+                    >
+                      <EmptySection section={app} />
+                    </EuiFlexItem>
+                  );
+                })}
+              </EuiFlexGrid>
+            </EuiFlexItem>
+          )}
+        </EuiFlexItem>
 
-              {!!newsFeed?.items?.length && (
-                <EuiFlexItem grow={false}>
-                  <NewsFeed items={newsFeed.items.slice(0, 5)} />
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
+        {/* Alert section */}
+        {!!alerts.length && (
+          <EuiFlexItem grow={3}>
+            <AlertsSection alerts={alerts} />
           </EuiFlexItem>
-        </EuiFlexGroup>
-      </WithHeaderLayout>
-    </>
+        )}
+
+        {/* Resources section */}
+        <EuiFlexItem grow={1}>
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem grow={false}>
+              <Resources />
+            </EuiFlexItem>
+
+            {!!newsFeed?.items?.length && (
+              <EuiFlexItem grow={false}>
+                <NewsFeed items={newsFeed.items.slice(0, 5)} />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </WithHeaderLayout>
   );
 }
