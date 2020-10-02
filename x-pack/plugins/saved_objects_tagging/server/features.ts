@@ -7,10 +7,10 @@
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { KibanaFeatureConfig } from '../../features/server';
-import { tagSavedObjectTypeName, tagManagementSectionId } from '../common/constants';
+import { tagSavedObjectTypeName, tagManagementSectionId, tagFeatureId } from '../common/constants';
 
 export const savedObjectsTaggingFeature: KibanaFeatureConfig = {
-  id: 'savedObjectsTagging',
+  id: tagFeatureId,
   name: i18n.translate('xpack.savedObjectsTagging.feature.featureName', {
     defaultMessage: 'Tag Management',
   }),
@@ -31,7 +31,7 @@ export const savedObjectsTaggingFeature: KibanaFeatureConfig = {
       management: {
         kibana: [tagManagementSectionId],
       },
-      ui: ['view', 'create', 'delete', 'assign'],
+      ui: ['view', 'create', 'edit', 'delete', 'assign'],
     },
     read: {
       savedObject: {

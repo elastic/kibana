@@ -6,11 +6,13 @@
 
 import React, { useRef, useEffect, FC } from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
-import { TagWithRelations } from '../../../common/types';
+import { Action as EuiTableAction } from '@elastic/eui/src/components/basic_table/action_types';
+import { TagsCapabilities, TagWithRelations } from '../../../common';
 import { TagBadge } from '../../components';
 
 interface TagTableProps {
   loading: boolean;
+  capabilities: TagsCapabilities;
   tags: TagWithRelations[];
   selectedTags: TagWithRelations[];
   onSelectionChange: (selection: TagWithRelations[]) => void;
@@ -32,6 +34,7 @@ const sorting = {
 
 export const TagTable: FC<TagTableProps> = ({
   loading,
+  capabilities,
   tags,
   onSelectionChange,
   selectedTags,
@@ -45,6 +48,28 @@ export const TagTable: FC<TagTableProps> = ({
       tableRef.current.setSelection(selectedTags);
     }
   }, [selectedTags]);
+
+  const actions: Array<EuiTableAction<TagWithRelations>> = [];
+  if (capabilities.edit) {
+    actions.push({
+      name: 'Edit',
+      description: 'Edit this tag',
+      type: 'icon',
+      icon: 'pencil',
+      onClick: (object: TagWithRelations) => onEdit(object),
+      'data-test-subj': 'tagsTableAction-edit',
+    });
+  }
+  if (capabilities.delete) {
+    actions.push({
+      name: 'Delete',
+      description: 'Delete this tag',
+      type: 'icon',
+      icon: 'trash',
+      onClick: (object: TagWithRelations) => onDelete(object),
+      'data-test-subj': 'tagsTableAction-delete',
+    });
+  }
 
   const columns = [
     {
@@ -62,37 +87,23 @@ export const TagTable: FC<TagTableProps> = ({
       sortable: true,
       'data-test-subj': 'tagsTableRowDescription',
     },
-    // TODO: add permission check on actions
-    {
-      name: 'Actions',
-      width: '100px',
-      actions: [
-        {
-          name: 'Edit',
-          description: 'Edit this tag',
-          type: 'icon',
-          icon: 'pencil',
-          onClick: (object: TagWithRelations) => onEdit(object),
-          'data-test-subj': 'tagsTableAction-edit',
-        },
-        {
-          name: 'Delete',
-          description: 'Delete this tag',
-          type: 'icon',
-          icon: 'trash',
-          onClick: (object: TagWithRelations) => onDelete(object),
-          'data-test-subj': 'tagsTableAction-delete',
-        },
-      ],
-    },
-  ] as any[]; // TODO fix type
+    ...(actions.length
+      ? [
+          {
+            name: 'Actions',
+            width: '100px',
+            actions,
+          },
+        ]
+      : []),
+  ];
 
   return (
     <EuiInMemoryTable
       ref={tableRef as any}
       loading={loading}
       itemId={'id'}
-      columns={columns}
+      columns={columns as any[]}
       items={tags}
       pagination={tablePagination}
       selection={{

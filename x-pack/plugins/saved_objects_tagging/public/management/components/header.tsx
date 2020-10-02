@@ -17,11 +17,11 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 
 interface HeaderProps {
+  canCreate: boolean;
   onCreate: () => void;
 }
 
-export const Header: FC<HeaderProps> = ({ onCreate }) => {
-  // TODO: implement canCreate
+export const Header: FC<HeaderProps> = ({ canCreate, onCreate }) => {
   return (
     <>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
@@ -36,20 +36,22 @@ export const Header: FC<HeaderProps> = ({ onCreate }) => {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
-            key="createTag"
-            iconType="tag"
-            color="primary"
-            fill
-            data-test-subj="createTagButton"
-            onClick={onCreate}
-            isDisabled={false}
-          >
-            <FormattedMessage
-              id="xpack.savedObjectsTagging.management.actions.createTag"
-              defaultMessage="Create tag..."
-            />
-          </EuiButton>
+          {canCreate && (
+            <EuiButton
+              key="createTag"
+              iconType="tag"
+              color="primary"
+              fill
+              data-test-subj="createTagButton"
+              onClick={onCreate}
+              isDisabled={false}
+            >
+              <FormattedMessage
+                id="xpack.savedObjectsTagging.management.actions.createTag"
+                defaultMessage="Create tag..."
+              />
+            </EuiButton>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />

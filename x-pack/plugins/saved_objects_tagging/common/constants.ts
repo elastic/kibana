@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export const tagFeatureId = 'savedObjectsTagging';
 export const tagSavedObjectTypeName = 'tag';
 export const tagManagementSectionId = 'tags';
 export const tagsApiPrefix = '/api/tags';

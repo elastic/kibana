@@ -8,25 +8,26 @@ import React, { useEffect, useCallback, useState, useMemo, FC } from 'react';
 import useMount from 'react-use/lib/useMount';
 import { EuiPageContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ChromeBreadcrumb, OverlayStart, NotificationsStart } from 'src/core/public';
-import { TagWithRelations } from '../../common/types';
+import { ChromeBreadcrumb, CoreStart } from 'src/core/public';
+import { TagWithRelations, TagsCapabilities } from '../../common';
 import { getCreateModalOpener, getEditModalOpener } from '../components/edition_modal';
 import { ITagInternalClient } from '../tags';
 import { Header, TagTable } from './components';
 
 interface TagManagementPageParams {
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
-  overlays: OverlayStart;
-  notifications: NotificationsStart;
+  core: CoreStart;
   tagClient: ITagInternalClient;
+  capabilities: TagsCapabilities;
 }
 
 export const TagManagementPage: FC<TagManagementPageParams> = ({
   setBreadcrumbs,
-  overlays,
-  notifications,
+  core,
   tagClient,
+  capabilities,
 }) => {
+  const { overlays, notifications } = core;
   const [loading, setLoading] = useState<boolean>(false);
   const [allTags, setAllTags] = useState<TagWithRelations[]>([]);
   const [selectedTags, setSelectedTags] = useState<TagWithRelations[]>([]);
@@ -105,10 +106,11 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
 
   return (
     <EuiPageContent horizontalPosition="center">
-      <Header onCreate={openCreateModal} />
+      <Header canCreate={capabilities.create} onCreate={openCreateModal} />
       <TagTable
         loading={loading}
         tags={allTags}
+        capabilities={capabilities}
         selectedTags={selectedTags}
         onSelectionChange={(tags) => {
           setSelectedTags(tags);
