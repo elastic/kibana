@@ -182,6 +182,7 @@ describe('PingList component', () => {
           to: 'now',
         }}
         getPings={jest.fn()}
+        pruneJourneysCallback={jest.fn()}
         lastRefresh={123}
         loading={false}
         locations={[]}

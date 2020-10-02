@@ -201,7 +201,7 @@ export const PingListComponent = (props: Props) => {
   }, [expandedIdsToRemove, expandedRows]);
 
   const expandedCheckGroups = pings
-    .filter((p) => Object.keys(expandedRows).some((f) => p.docId === f))
+    .filter((p: Ping) => Object.keys(expandedRows).some((f) => p.docId === f))
     .map(({ monitor: { check_group: cg } }) => cg);
   const expandedCheckGroupsStr = JSON.stringify(expandedCheckGroups);
   useEffect(() => {

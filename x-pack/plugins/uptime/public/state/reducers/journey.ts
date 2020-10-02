@@ -28,7 +28,10 @@ interface JourneyKVP {
 
 const initialState: JourneyKVP = {};
 
-type Payload = FetchJourneyStepsParams & SyntheticsJourneyApiResponse & GetJourneyFailPayload;
+type Payload = FetchJourneyStepsParams &
+  SyntheticsJourneyApiResponse &
+  GetJourneyFailPayload &
+  string[];
 
 export const journeyReducer = handleActions<JourneyKVP, Payload>(
   {
