@@ -35,7 +35,14 @@ describe('getServiceAnnotations', () => {
             searchAggregatedTransactions: false,
           }),
         {
-          mockResponse: () => noVersions,
+          mockResponse: () =>
+            noVersions as ESSearchResponse<
+              unknown,
+              ESSearchRequest,
+              {
+                restTotalHitsAsInt: false;
+              }
+            >,
         }
       );
 
