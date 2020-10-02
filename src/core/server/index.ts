@@ -459,7 +459,7 @@ export interface CoreStart {
   uiSettings: UiSettingsServiceStart;
   /** {@link AuditTrailSetup} */
   auditTrail: AuditTrailStart;
-  /** {@link CoreUsageDataStart} */
+  /** @internal {@link CoreUsageDataStart} */
   coreUsageData: CoreUsageDataStart;
 }
 

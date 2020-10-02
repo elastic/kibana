@@ -29,7 +29,7 @@ import { KIBANA_STATS_TYPE } from '../../../common/constants';
 
 export function getCoreUsageCollector(
   usageCollection: UsageCollectionSetup,
-  getCoreUsageData: () => CoreUsageDataStart
+  getCoreUsageDataService: () => CoreUsageDataStart
 ) {
   return usageCollection.makeUsageCollector<CoreUsageData, { core: CoreUsageData }>({
     type: 'core',
@@ -116,14 +116,7 @@ export function getCoreUsageCollector(
       },
     },
     fetch() {
-      return new Promise((resolve, reject) => {
-        const result = getCoreUsageData().getCoreUsageData();
-        if (result == null) {
-          reject(new Error('Unable to collect Core telemetry'));
-        } else {
-          resolve(result);
-        }
-      });
+      return getCoreUsageDataService().getCoreUsageData();
     },
 
     /*
@@ -144,7 +137,9 @@ export function getCoreUsageCollector(
 
 export function registerCoreUsageCollector(
   usageCollection: UsageCollectionSetup,
-  getCoreUsageData: () => CoreUsageDataStart
+  getCoreUsageDataService: () => CoreUsageDataStart
 ) {
-  usageCollection.registerCollector(getCoreUsageCollector(usageCollection, getCoreUsageData));
+  usageCollection.registerCollector(
+    getCoreUsageCollector(usageCollection, getCoreUsageDataService)
+  );
 }

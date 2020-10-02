@@ -60,14 +60,6 @@ describe('CoreUsageDataService', () => {
 
   describe('start', () => {
     describe('getCoreUsageData', () => {
-      it('returns null if an exception occurs', () => {
-        const metrics = metricsServiceMock.createInternalSetupContract();
-        metrics.getOpsMetrics$.mockReturnValueOnce(new BehaviorSubject({} as any));
-        service.setup({ metrics });
-        const { getCoreUsageData } = service.start();
-        expect(getCoreUsageData()).toEqual(null);
-      });
-
       it('returns core metrics for default config', () => {
         const metrics = metricsServiceMock.createInternalSetupContract();
         service.setup({ metrics });

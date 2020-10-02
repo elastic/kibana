@@ -24,7 +24,7 @@ import { CoreService } from 'src/core/types';
 import { CoreContext } from '../core_context';
 import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
 import { HttpConfigType } from '../http';
-import { Logger, LoggingConfigType } from '../logging';
+import { LoggingConfigType } from '../logging';
 import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
 import { CoreUsageData, CoreUsageDataStart } from './types';
 import { SavedObjectsService } from '../saved_objects';
@@ -40,7 +40,6 @@ export interface StartDeps {
 }
 
 export class CoreUsageDataService implements CoreService<void, CoreUsageDataStart> {
-  private readonly log: Logger;
   private elasticsearchConfig?: ElasticsearchConfigType;
   private configService: CoreContext['configService'];
   private httpConfig?: HttpConfigType;
@@ -50,7 +49,6 @@ export class CoreUsageDataService implements CoreService<void, CoreUsageDataStar
   private opsMetrics?: OpsMetrics;
 
   constructor(core: CoreContext) {
-    this.log = core.logger.get('core_usage_data');
     this.configService = core.configService;
     this.stop$ = new Subject();
   }
@@ -201,12 +199,7 @@ export class CoreUsageDataService implements CoreService<void, CoreUsageDataStar
   start() {
     return {
       getCoreUsageData: () => {
-        try {
-          return this.getCoreUsageData();
-        } catch (e) {
-          this.log.error('Error collecting core usage data', e);
-          return null;
-        }
+        return this.getCoreUsageData();
       },
     };
   }

@@ -438,9 +438,7 @@ export interface CoreStart {
     auditTrail: AuditTrailStart;
     // (undocumented)
     capabilities: CapabilitiesStart;
-    // Warning: (ae-incompatible-release-tags) The symbol "coreUsageData" is marked as @public, but its signature references "CoreUsageDataStart" which is marked as @internal
-    //
-    // (undocumented)
+    // @internal (undocumented)
     coreUsageData: CoreUsageDataStart;
     // (undocumented)
     elasticsearch: ElasticsearchServiceStart;

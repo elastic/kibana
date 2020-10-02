@@ -105,7 +105,7 @@ describe('isConfigured', () => {
       expect(isConfigured.record(undefined)).toEqual(false);
     });
     it('returns false for null', () => {
-      expect(isConfigured.record(null)).toEqual(false);
+      expect(isConfigured.record(null as any)).toEqual(false);
     });
   });
 
