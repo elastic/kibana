@@ -16,9 +16,11 @@ export function setDefaultAutoFitToBounds({
   }
 
   // MapState type is defined in public, no need to bring all of that to common for this migration
-  const mapState: unknown = JSON.parse(attributes.mapStateJSON);
+  const mapState: { settings?: { autoFitToDataBounds: boolean } } = JSON.parse(
+    attributes.mapStateJSON
+  );
   if ('settings' in mapState) {
-    mapState.settings.autoFitToDataBounds = false;
+    mapState.settings!.autoFitToDataBounds = false;
   } else {
     mapState.settings = {
       autoFitToDataBounds: false,
