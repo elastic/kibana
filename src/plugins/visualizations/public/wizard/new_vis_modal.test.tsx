@@ -51,6 +51,17 @@ describe('NewVisModal', () => {
       aliasApp: 'otherApp',
       aliasPath: '#/aliasUrl',
     },
+    {
+      name: 'visAliasWithPromotion',
+      title: 'Vis alias with promotion',
+      stage: 'production',
+      aliasApp: 'anotherApp',
+      aliasPath: '#/anotherUrl',
+      promotion: {
+        description: 'promotion description',
+        buttonText: 'another app',
+      },
+    },
   ];
   const visTypes: TypesStart = {
     get<T>(id: string): VisType<T> {
@@ -105,6 +116,30 @@ describe('NewVisModal', () => {
       />
     );
     expect(wrapper.find('[data-test-subj="visType-vis"]').exists()).toBe(true);
+  });
+
+  it('should sort promoted visualizations first', () => {
+    const wrapper = mountWithIntl(
+      <NewVisModal
+        isOpen={true}
+        onClose={() => null}
+        visTypesRegistry={visTypes}
+        addBasePath={addBasePath}
+        uiSettings={uiSettings}
+        application={{} as ApplicationStart}
+        savedObjects={{} as SavedObjectsStart}
+      />
+    );
+    expect(
+      wrapper
+        .find('button[data-test-subj^="visType-"]')
+        .map((button) => button.prop('data-test-subj'))
+    ).toEqual([
+      'visType-visAliasWithPromotion',
+      'visType-vis',
+      'visType-visWithAliasUrl',
+      'visType-visWithSearch',
+    ]);
   });
 
   describe('open editor', () => {
