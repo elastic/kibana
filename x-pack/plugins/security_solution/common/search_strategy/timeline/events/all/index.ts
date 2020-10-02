@@ -6,7 +6,7 @@
 
 import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
 import { Ecs } from '../../../../ecs';
-import { CursorType, Inspect, Maybe } from '../../../common';
+import { CursorType, Inspect, Maybe, PageInfoPaginated } from '../../../common';
 import { TimelineRequestOptionsPaginated } from '../..';
 
 export interface TimelineEdges {
@@ -29,10 +29,7 @@ export interface TimelineNonEcsData {
 export interface TimelineEventsAllStrategyResponse extends IEsSearchResponse {
   edges: TimelineEdges[];
   totalCount: number;
-  pageInfo: {
-    activePage: number;
-    totalPages: number;
-  };
+  pageInfo: PageInfoPaginated;
   inspect?: Maybe<Inspect>;
 }
 
