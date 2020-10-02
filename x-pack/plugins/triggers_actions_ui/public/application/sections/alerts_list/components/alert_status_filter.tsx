@@ -17,6 +17,7 @@ import {
   AlertExecutionStatuses,
   AlertExecutionStatusValues,
 } from '../../../../../../alerts/common';
+import { alertsStatusesTranslationsMapping } from '../translations';
 
 interface AlertStatusFilterProps {
   selectedStatuses: string[];
@@ -78,7 +79,7 @@ export const AlertStatusFilter: React.FunctionComponent<AlertStatusFilterProps> 
                 }}
                 checked={selectedValues.includes(item) ? 'on' : undefined}
               >
-                <EuiHealth color={healthColor}>{item}</EuiHealth>
+                <EuiHealth color={healthColor}>{alertsStatusesTranslationsMapping[item]}</EuiHealth>
               </EuiFilterSelectItem>
             );
           })}

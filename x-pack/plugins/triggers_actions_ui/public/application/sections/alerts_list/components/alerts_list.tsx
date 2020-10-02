@@ -51,6 +51,7 @@ import {
   ALERTS_FEATURE_ID,
 } from '../../../../../../alerts/common';
 import { hasAllPrivilege } from '../../../lib/capabilities';
+import { alertsStatusesTranslationsMapping } from '../translations';
 
 const ENTER_KEY = 13;
 
@@ -240,7 +241,7 @@ export const AlertsList: React.FunctionComponent = () => {
         const healthColor = getHealthColor(executionStatus.status);
         return (
           <EuiHealth data-test-subj={`alertStatus-${executionStatus.status}`} color={healthColor}>
-            {executionStatus.status}
+            {alertsStatusesTranslationsMapping[executionStatus.status]}
           </EuiHealth>
         );
       },
@@ -498,7 +499,7 @@ export const AlertsList: React.FunctionComponent = () => {
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.totalStausesErrorDescription"
               data-test-subj="totalStausesError"
-              defaultMessage="Errors: {totalStausesError}"
+              defaultMessage="Error: {totalStausesError}"
               values={{ totalStausesError: alertsStatusesTotal.error }}
             />
           </EuiHealth>

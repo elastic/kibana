@@ -43,6 +43,7 @@ import { PLUGIN } from '../../../constants/plugin';
 import { AlertEdit } from '../../alert_form';
 import { AlertsContextProvider } from '../../../context/alerts_context';
 import { routeToAlertDetails } from '../../../constants';
+import { alertsErrorReasonTranslationsMapping } from '../../alerts_list/translations';
 
 type AlertDetailsProps = {
   alert: Alert;
@@ -113,10 +114,10 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   };
 
   const getAlertStatusErrorReasonText = () => {
-    if (alert.executionStatus.error && alert.executionStatus.error.reason !== 'unknown') {
-      return `An error occurred when ${alert.executionStatus.error.reason} the alert.`;
+    if (alert.executionStatus.error && alert.executionStatus.error.reason) {
+      return alertsErrorReasonTranslationsMapping[alert.executionStatus.error.reason];
     } else {
-      return 'An error occurred for unknown reasons.';
+      return alertsErrorReasonTranslationsMapping.unknown;
     }
   };
 
@@ -292,12 +293,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                     color="danger"
                     data-test-subj="alertErrorBanner"
                     size="s"
-                    title={i18n.translate(
-                      'xpack.triggersActionsUI.sections.alertDetails.attentionBannerTitle',
-                      {
-                        defaultMessage: `${getAlertStatusErrorReasonText()}`,
-                      }
-                    )}
+                    title={getAlertStatusErrorReasonText()}
                     iconType="alert"
                   >
                     <EuiText size="s" color="danger" data-test-subj="alertErrorMessageText">
