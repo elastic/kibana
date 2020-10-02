@@ -77,7 +77,7 @@ const setUpModule = async (setUpModuleArgs: SetUpModuleArgs, fetch: HttpHandler)
     const { job: defaultJobConfig } = getDefaultJobConfigs(id);
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    const analysis_config = {
+    const analysis_config: any = {
       ...defaultJobConfig.analysis_config,
     };
 
@@ -151,7 +151,7 @@ const setUpModule = async (setUpModuleArgs: SetUpModuleArgs, fetch: HttpHandler)
   );
 };
 
-const getDefaultJobConfigs = (jobId: JobType) => {
+const getDefaultJobConfigs = (jobId: JobType): { datafeed: any; job: any } => {
   switch (jobId) {
     case 'k8s_memory_usage':
       return {

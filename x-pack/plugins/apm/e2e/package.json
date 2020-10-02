@@ -14,7 +14,7 @@
     "@types/node": ">=10.17.17 <10.20.0",
     "axios": "^0.19.2",
     "cypress-cucumber-preprocessor": "^2.5.2",
-    "cypress": "^4.9.0",
+    "cypress": "^5.0.0",
     "ora": "^4.0.4",
     "p-limit": "^3.0.1",
     "p-retry": "^4.2.0",

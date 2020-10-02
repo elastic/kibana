@@ -21,6 +21,7 @@ export const MAX_PER_PAGE = 9000;
 export const getThreatList = async ({
   callCluster,
   query,
+  language,
   index,
   perPage,
   searchAfter,
@@ -33,7 +34,13 @@ export const getThreatList = async ({
   if (calculatedPerPage > 10000) {
     throw new TypeError('perPage cannot exceed the size of 10000');
   }
-  const queryFilter = getQueryFilter(query, 'kuery', threatFilters, index, exceptionItems);
+  const queryFilter = getQueryFilter(
+    query,
+    language ?? 'kuery',
+    threatFilters,
+    index,
+    exceptionItems
+  );
   const response: SearchResponse<ThreatListItem> = await callCluster('search', {
     body: {
       query: queryFilter,
