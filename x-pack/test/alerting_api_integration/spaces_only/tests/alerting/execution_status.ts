@@ -15,6 +15,15 @@ import {
 } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
+interface AlertExecutionStatus {
+  status: string;
+  lastExecutionDate: string;
+  error?: {
+    reason: string;
+    message: string;
+  };
+}
+
 // eslint-disable-next-line import/no-default-export
 export default function executionStatusAlertTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -149,6 +158,44 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       });
     });
 
+    it('should clear the error when an error occurs and then recovers', async () => {
+      const err = 'this alert is intended to fail';
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestAlertData({
+            alertTypeId: 'test.patternFiring',
+            schedule: { interval: '1s' },
+            params: {
+              pattern: { instance: [false, err, true] },
+            },
+          })
+        );
+      expect(response.status).to.eql(200);
+      const alertId = response.body.id;
+      objectRemover.add(Spaces.space1.id, alertId, 'alert', 'alerts');
+
+      await waitForStatus(alertId, new Set(['ok']));
+      let executionStatus = await waitForStatus(alertId, new Set(['error']));
+      expect(executionStatus).to.be.ok();
+      expect(executionStatus.status).to.be('error');
+      expect(executionStatus.error).to.be.ok();
+
+      executionStatus = await waitForStatus(alertId, new Set(['active']));
+      expect(executionStatus).to.be.ok();
+      expect(executionStatus.status).to.be('active');
+      expect(executionStatus.error).to.be(undefined);
+
+      // Ensure AAD isn't broken
+      await checkAAD({
+        supertest,
+        spaceId: Spaces.space1.id,
+        type: 'alert',
+        id: response.body.id,
+      });
+    });
+
     // not sure how to test the read error reason!
 
     // note the decrypt error reason is tested in security_and_spaces, can't be tested
@@ -170,8 +217,8 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
 
       const executionStatus = await waitForStatus(alertId, new Set(['error']));
       expect(executionStatus.error).to.be.ok();
-      expect(executionStatus.error.reason).to.be('execute');
-      expect(executionStatus.error.message).to.be('this alert is intended to fail');
+      expect(executionStatus.error!.reason).to.be('execute');
+      expect(executionStatus.error!.message).to.be('this alert is intended to fail');
     });
 
     it('should eventually have error reason "unknown" when appropriate', async () => {
@@ -204,10 +251,10 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
 
       executionStatus = await waitForStatus(alertId, new Set(['error']));
       expect(executionStatus.error).to.be.ok();
-      expect(executionStatus.error.reason).to.be('unknown');
+      expect(executionStatus.error!.reason).to.be('unknown');
 
       const message = 'params invalid: [param1]: expected value of type [string] but got [number]';
-      expect(executionStatus.error.message).to.be(message);
+      expect(executionStatus.error!.message).to.be(message);
     });
 
     it('should be able to find over all the fields', async () => {
@@ -232,26 +279,64 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       expectErrorExecutionStatus(executionStatus, startDate);
 
       filter = `status:error`;
-      executionStatus = await waitForFindStatus(alertId, new Set(['error']), filter);
+      executionStatus = await find(alertId, filter);
       expectErrorExecutionStatus(executionStatus, startDate);
 
       filter = `error.message:*intended*`;
-      executionStatus = await waitForFindStatus(alertId, new Set(['error']), filter);
+      executionStatus = await find(alertId, filter);
       expectErrorExecutionStatus(executionStatus, startDate);
 
       filter = `error.reason:execute`;
-      executionStatus = await waitForFindStatus(alertId, new Set(['error']), filter);
+      executionStatus = await find(alertId, filter);
       expectErrorExecutionStatus(executionStatus, startDate);
+    });
+
+    it('should not be able to find over fields it should not find', async () => {
+      const startDate = Date.now();
+      const createResponse = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestAlertData({
+            alertTypeId: 'test.throw',
+            schedule: { interval: '1s' },
+          })
+        );
+      expect(createResponse.status).to.eql(200);
+      const alertId = createResponse.body.id;
+      objectRemover.add(Spaces.space1.id, alertId, 'alert', 'alerts');
+
+      await waitForStatus(alertId, new Set(['error']));
+
+      let filter = `lastExecutionDate>${startDate}`;
+      await waitForFindStatus(alertId, new Set(['error']), filter);
+
+      filter = `lastExecutionDate<${startDate}`;
+      let executionStatus = await find(alertId, filter);
+      expect(executionStatus).to.be(undefined);
+
+      filter = `status:ok`;
+      executionStatus = await find(alertId, filter);
+      expect(executionStatus).to.be(undefined);
+
+      filter = `error.message:*notintended*`;
+      executionStatus = await find(alertId, filter);
+      expect(executionStatus).to.be(undefined);
+
+      filter = `error.reason:decrypt`;
+      executionStatus = await find(alertId, filter);
+      expect(executionStatus).to.be(undefined);
     });
   });
 
+  const WaitForStatusMax = 30 * 1000;
   const WaitForStatusIncrement = 500;
 
   async function waitForStatus(
     id: string,
     statuses: Set<string>,
-    waitMillis: number = 10000
-  ): Promise<Record<string, any>> {
+    waitMillis: number = WaitForStatusMax
+  ): Promise<AlertExecutionStatus> {
     if (waitMillis < 0) {
       expect().fail(`waiting for alert ${id} statuses ${Array.from(statuses)} timed out`);
     }
@@ -267,6 +352,8 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
     )}`;
 
     if (statuses.has(status)) {
+      // eslint-disable-next-line no-console
+      console.log(`${message}, found!`);
       return response.body.executionStatus;
     }
 
@@ -281,8 +368,8 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
     id: string,
     statuses: Set<string>,
     filter: string,
-    waitMillis: number = 10000
-  ): Promise<Record<string, any>> {
+    waitMillis: number = WaitForStatusMax
+  ): Promise<AlertExecutionStatus | undefined> {
     if (waitMillis < 0) {
       expect().fail(`waiting for find alert ${id} statuses ${Array.from(statuses)} timed out`);
     }
@@ -291,13 +378,15 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
     const response = await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/${findUri}`);
 
     expect(response.status).to.eql(200);
-    const { executionStatus } = response.body.data.find((obj: any) => obj.id === id);
+    const executionStatus = await find(id, filter);
 
     const message = `waitForFindStatus(${Array.from(statuses)}): got ${JSON.stringify(
       executionStatus
     )}`;
 
-    if (statuses.has(executionStatus.status)) {
+    if (executionStatus && statuses.has(executionStatus.status)) {
+      // eslint-disable-next-line no-console
+      console.log(`${message}, found!`);
       return executionStatus;
     }
 
@@ -305,20 +394,38 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
     console.log(`${message}, retrying`);
 
     await delay(WaitForStatusIncrement);
-    return await waitForStatus(id, statuses, waitMillis - WaitForStatusIncrement);
+    return await waitForFindStatus(id, statuses, filter, waitMillis - WaitForStatusIncrement);
+  }
+
+  async function find(id: string, filter: string): Promise<AlertExecutionStatus | undefined> {
+    const findUri = getFindUri(filter);
+    const response = await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/${findUri}`);
+
+    expect(response.status).to.eql(200);
+    if (response.body.data.length === 0) return undefined;
+
+    const result = response.body.data.find((obj: any) => obj.id === id);
+    if (!result) return undefined;
+
+    return result.executionStatus;
   }
 }
 
-function expectErrorExecutionStatus(executionStatus: Record<string, any>, startDate: number) {
-  expect(executionStatus.status).to.equal('error');
+function expectErrorExecutionStatus(
+  executionStatus: AlertExecutionStatus | undefined,
+  startDate: number
+) {
+  expect(executionStatus).to.be.ok();
+  expect(executionStatus!.status).to.equal('error');
 
-  const statusDate = Date.parse(executionStatus.lastExecutionDate);
+  const statusDate = Date.parse(`${executionStatus!.lastExecutionDate}`);
   const stopDate = Date.now();
   expect(startDate).to.be.lessThan(statusDate);
   expect(stopDate).to.be.greaterThan(statusDate);
 
-  expect(executionStatus.error.message).to.equal('this alert is intended to fail');
-  expect(executionStatus.error.reason).to.equal('execute');
+  expect(executionStatus!.error).to.be.ok();
+  expect(executionStatus!.error!.message).to.equal('this alert is intended to fail');
+  expect(executionStatus!.error!.reason).to.equal('execute');
 }
 
 function getFindUri(filter: string) {
