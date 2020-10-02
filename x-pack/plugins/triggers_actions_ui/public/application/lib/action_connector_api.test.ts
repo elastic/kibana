@@ -59,7 +59,7 @@ describe('loadAllActions', () => {
 
 describe('createActionConnector', () => {
   test('should call create action API', async () => {
-    const connector: ActionConnectorWithoutId = {
+    const connector: ActionConnectorWithoutId<{}, {}> = {
       actionTypeId: 'test',
       isPreconfigured: false,
       name: 'My test',
@@ -85,7 +85,7 @@ describe('createActionConnector', () => {
 describe('updateActionConnector', () => {
   test('should call the update API', async () => {
     const id = '123';
-    const connector: ActionConnectorWithoutId = {
+    const connector: ActionConnectorWithoutId<{}, {}> = {
       actionTypeId: 'test',
       isPreconfigured: false,
       name: 'My test',

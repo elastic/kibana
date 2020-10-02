@@ -226,7 +226,7 @@ export function InnerWorkspacePanel({
             )}
           </strong>
         </h2>
-        <DropIllustration className="lnsWorkspacePanel__dropIllustration" />
+        <DropIllustration aria-hidden={true} className="lnsWorkspacePanel__dropIllustration" />
         {expression === null && (
           <>
             <p>
@@ -264,7 +264,7 @@ export function InnerWorkspacePanel({
 
     if (localState.expressionBuildError) {
       return (
-        <EuiFlexGroup direction="column" alignItems="center">
+        <EuiFlexGroup style={{ maxWidth: '100%' }} direction="column" alignItems="center">
           <EuiFlexItem>
             <EuiIcon type="alert" size="xl" color="danger" />
           </EuiFlexItem>
@@ -290,7 +290,7 @@ export function InnerWorkspacePanel({
           onEvent={onEvent}
           renderError={(errorMessage?: string | null) => {
             return (
-              <EuiFlexGroup direction="column" alignItems="center">
+              <EuiFlexGroup style={{ maxWidth: '100%' }} direction="column" alignItems="center">
                 <EuiFlexItem>
                   <EuiIcon type="alert" size="xl" color="danger" />
                 </EuiFlexItem>
@@ -345,8 +345,10 @@ export function InnerWorkspacePanel({
         droppable={Boolean(suggestionForDraggedField)}
         onDrop={onDrop}
       >
-        {renderVisualization()}
-        {Boolean(suggestionForDraggedField) && expression !== null && renderEmptyWorkspace()}
+        <div>
+          {renderVisualization()}
+          {Boolean(suggestionForDraggedField) && expression !== null && renderEmptyWorkspace()}
+        </div>
       </DragDrop>
     </WorkspacePanelWrapper>
   );

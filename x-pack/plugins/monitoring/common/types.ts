@@ -31,8 +31,12 @@ export interface CommonAlertFilter {
   nodeUuid?: string;
 }
 
-export interface CommonAlertCpuUsageFilter extends CommonAlertFilter {
+export interface CommonAlertNodeUuidFilter extends CommonAlertFilter {
   nodeUuid: string;
+}
+
+export interface CommonAlertStackProductFilter extends CommonAlertFilter {
+  stackProduct: string;
 }
 
 export interface CommonAlertParamDetail {
