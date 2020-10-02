@@ -60,6 +60,7 @@ describe('JiraParamsFields renders', () => {
   const fields = {
     issueType: '10006',
     priority: 'High',
+    parent: null,
   };
 
   const onChange = jest.fn();
@@ -125,7 +126,7 @@ describe('JiraParamsFields renders', () => {
         target: { value: '10007' },
       });
 
-    expect(onChange).toHaveBeenCalledWith('issueType', '10007');
+    expect(onChange).toHaveBeenCalledWith({ issueType: '10007', parent: null, priority: 'High' });
   });
 
   test('it sets priority correctly', async () => {
@@ -138,21 +139,20 @@ describe('JiraParamsFields renders', () => {
         target: { value: '2' },
       });
 
-    expect(onChange).toHaveBeenCalledWith('priority', '2');
+    expect(onChange).toHaveBeenCalledWith({ issueType: '10006', parent: null, priority: '2' });
   });
 
   test('it resets fields when changing connector', async () => {
     const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
     wrapper.setProps({ connector: {} });
 
-    expect(onChange).toBeCalledWith('issueType', null);
-    expect(onChange).toBeCalledWith('priority', null);
+    expect(onChange).toBeCalledWith({ issueType: null, parent: null, priority: null });
   });
 
   test('it resets priority when changing issue type', async () => {
     const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
 
     wrapper.setProps({ fields: { issueType: '10007' } });
-    expect(onChange).toBeCalledWith('priority', null);
+    expect(onChange).toBeCalledWith({ issueType: '10007', parent: null, priority: null });
   });
 });

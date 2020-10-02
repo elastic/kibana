@@ -42,7 +42,7 @@ describe('usePostPushToService', () => {
       id: '123',
       name: 'connector name',
       type: ConnectorTypes.jira,
-      fields: { issueType: 'Task', priority: 'Low' },
+      fields: { issueType: 'Task', priority: 'Low', parent: null },
     },
     updateCase,
   };
@@ -66,6 +66,7 @@ describe('usePostPushToService', () => {
     updatedAt: pushedCase.updatedAt,
     updatedBy: serviceConnectorUser,
     issueType: 'Task',
+    labels: [],
     priority: 'Low',
   };
   const sampleCaseServices = {
@@ -217,7 +218,7 @@ describe('usePostPushToService', () => {
     const connector = {
       id: '456',
       name: 'connector 2',
-      type: ConnectorTypes.jira,
+      type: '.jira' as const,
       fields: { issueType: 'Task', priority: 'High', labels: ['test'] },
     };
     const result = formatServiceRequestData(pushedCase, connector, caseServices);
@@ -235,8 +236,8 @@ describe('usePostPushToService', () => {
     const connector = {
       id: '456',
       name: 'connector 2',
-      type: ConnectorTypes.jira,
-      fields: { issueType: 'Task', priority: 'High' },
+      type: '.jira' as const,
+      fields: { issueType: 'Task', priority: 'High', labels: [] },
     };
     const result = formatServiceRequestData(pushedCase, connector, caseServices);
     expect(result).toEqual({

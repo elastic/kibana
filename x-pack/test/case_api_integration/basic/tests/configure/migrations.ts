@@ -34,7 +34,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(body.connector).to.eql({
         id: 'connector-1',
         name: 'Connector 1',
-        type: '',
+        type: '.none',
         fields: null,
       });
     });
