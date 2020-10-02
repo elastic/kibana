@@ -85,6 +85,14 @@ export const xyChart: ExpressionFunctionDefinition<
     defaultMessage: 'An X/Y chart',
   }),
   args: {
+    title: {
+      types: ['string'],
+      help: 'The chart title.',
+    },
+    description: {
+      types: ['string'],
+      help: '',
+    },
     xTitle: {
       types: ['string'],
       help: i18n.translate('xpack.lens.xyChart.xTitle.help', {
@@ -215,7 +223,12 @@ export function XYChartReportable(props: XYChartRenderProps) {
   }, [setState]);
 
   return (
-    <VisualizationContainer className="lnsXyExpression__container" isReady={state.isReady}>
+    <VisualizationContainer
+      className="lnsXyExpression__container"
+      isReady={state.isReady}
+      reportTitle={props.args.title}
+      reportDescription={props.args.description}
+    >
       <MemoizedChart {...props} />
     </VisualizationContainer>
   );
