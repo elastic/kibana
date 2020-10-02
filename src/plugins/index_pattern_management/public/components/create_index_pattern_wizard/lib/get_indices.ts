@@ -39,7 +39,7 @@ const frozenLabel = i18n.translate('indexPatternManagement.frozenLabel', {
   defaultMessage: 'Frozen',
 });
 
-const searchResponseToArray = (
+export const searchResponseToArray = (
   getIndexTags: IndexPatternCreationConfig['getIndexTags'],
   showAllIndices: boolean
 ) => (response: IEsSearchResponse<any>) => {
@@ -68,7 +68,7 @@ const searchResponseToArray = (
   }
 };
 
-const getIndicesViaSearch = async ({
+export const getIndicesViaSearch = async ({
   getIndexTags,
   pattern,
   searchClient,
@@ -99,9 +99,10 @@ const getIndicesViaSearch = async ({
   })
     .pipe(map(searchResponseToArray(getIndexTags, showAllIndices)))
     .pipe(scan((accumulator = [], value) => accumulator.join(value)))
-    .toPromise();
+    .toPromise()
+    .catch(() => []);
 
-const getIndicesViaResolve = async ({
+export const getIndicesViaResolve = async ({
   http,
   getIndexTags,
   pattern,
@@ -124,7 +125,7 @@ const getIndicesViaResolve = async ({
       }
     });
 
-const dedupeMatchedItems = (matchedA: MatchedItem[], matchedB: MatchedItem[]) => {
+export const dedupeMatchedItems = (matchedA: MatchedItem[], matchedB: MatchedItem[]) => {
   const mergedMatchedItems = matchedA.reduce((col, item) => {
     col[item.name] = item;
     return col;
@@ -135,7 +136,12 @@ const dedupeMatchedItems = (matchedA: MatchedItem[], matchedB: MatchedItem[]) =>
     return col;
   }, mergedMatchedItems);
 
-  return Object.values(mergedMatchedItems);
+  return Object.values(mergedMatchedItems).sort((a, b) => {
+    if (a.name > b.name) return 1;
+    if (b.name > a.name) return -1;
+
+    return 0;
+  });
 };
 
 export async function getIndices({
@@ -173,18 +179,30 @@ export async function getIndices({
     return [];
   }
 
-  requests.push(getIndicesViaResolve({ http, getIndexTags, pattern, showAllIndices }));
+  const promiseResolve = getIndicesViaResolve({
+    http,
+    getIndexTags,
+    pattern,
+    showAllIndices,
+  }).catch(() => []);
+  requests.push(promiseResolve);
 
   if (isCCS) {
     // CCS supports ±1 major version. We won't be able to expect resolve endpoint to exist until v9
-    requests.push(getIndicesViaSearch({ getIndexTags, pattern, searchClient, showAllIndices }));
+    const promiseSearch = getIndicesViaSearch({
+      getIndexTags,
+      pattern,
+      searchClient,
+      showAllIndices,
+    }).catch(() => []);
+    requests.push(promiseSearch);
   }
 
   const responses = await Promise.all(requests);
 
   if (responses.length === 2) {
     const [resolveResponse, searchResponse] = responses;
-    return dedupeMatchedItems(resolveResponse, searchResponse);
+    return dedupeMatchedItems(searchResponse, resolveResponse);
   } else {
     return responses[0];
   }
