@@ -18,7 +18,7 @@
  */
 
 import { get } from 'lodash';
-import { LegacyAPICaller } from 'kibana/server';
+import { FetchClients } from 'src/plugins/usage_collection/server';
 import { DEFAULT_QUERY_LANGUAGE, UI_SETTINGS } from '../../../common';
 
 const defaultSearchQueryLanguageSetting = DEFAULT_QUERY_LANGUAGE;
@@ -30,7 +30,8 @@ export interface Usage {
 }
 
 export function fetchProvider(index: string) {
-  return async (callCluster: LegacyAPICaller): Promise<Usage> => {
+  return async (fetchClients: FetchClients): Promise<Usage> => {
+    const { callCluster } = fetchClients;
     const [response, config] = await Promise.all([
       callCluster('get', {
         index,
