@@ -4,49 +4,47 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
+import * as reactUse from 'react-use';
 import { StepScreenshotDisplay } from '../step_screenshot_display';
 
 describe('StepScreenshotDisplayProps', () => {
-  it('displays loading spinner when loading', () => {
-    expect(
-      shallowWithIntl(<StepScreenshotDisplay stepIndex={1} stepName="STEP_NAME" />).find(
-        'EuiLoadingSpinner'
-      )
-    ).toMatchInlineSnapshot(`
-      <EuiLoadingSpinner
-        size="xl"
-      />
-    `);
-  });
+  jest.spyOn(reactUse, 'useIntersection').mockImplementation(() => ({
+    boundingClientRect: null,
+    intersectionRatio: null,
+    intersectionRect: null,
+    rootBounds: null,
+    target: null,
+    time: null,
+    isIntersecting: true,
+  }));
 
   it('displays screenshot thumbnail when present', () => {
-    const wrapper = shallowWithIntl(<StepScreenshotDisplay stepIndex={1} stepName="STEP_NAME" />);
-    expect(wrapper.find('img')).toMatchInlineSnapshot(`
-      <img
-        alt="Thumbnail screenshot for step with name STEP_NAME"
-        src="data:image/jpeg;base64,SCREENSHOT_STRING"
-        style={
-          Object {
-            "height": 360,
-            "objectFit": "contain",
-            "width": 640,
-          }
-        }
+    // reactUseSpy.
+    const wrapper = mountWithIntl(
+      <StepScreenshotDisplay
+        checkGroup="check_group"
+        screenshotExists={true}
+        stepIndex={1}
+        stepName="STEP_NAME"
       />
-    `);
+    );
+
+    wrapper.update();
+
+    expect(wrapper.find('img')).toMatchInlineSnapshot(`null`);
 
     expect(wrapper.find('EuiPopover')).toMatchInlineSnapshot(`
       <EuiPopover
         anchorPosition="rightCenter"
         button={
           <input
-            alt="Screenshot for step with name STEP_NAME"
+            alt="Screenshot for step with name \\"STEP_NAME\\""
             onClick={[Function]}
             onMouseEnter={[Function]}
             onMouseLeave={[Function]}
-            src="data:image/jpeg;base64,SCREENSHOT_STRING"
+            src="/api/uptime/journey/screenshot/check_group/1"
             style={
               Object {
                 "height": 180,
@@ -65,24 +63,54 @@ describe('StepScreenshotDisplayProps', () => {
         ownFocus={false}
         panelPaddingSize="m"
       >
-        <img
-          alt="Thumbnail screenshot for step with name STEP_NAME"
-          src="data:image/jpeg;base64,SCREENSHOT_STRING"
-          style={
-            Object {
-              "height": 360,
-              "objectFit": "contain",
-              "width": 640,
-            }
-          }
-        />
+        <EuiOutsideClickDetector
+          isDisabled={true}
+          onOutsideClick={[Function]}
+        >
+          <div
+            className="euiPopover euiPopover--anchorRightCenter"
+            onKeyDown={[Function]}
+            onMouseDown={[Function]}
+            onMouseUp={[Function]}
+            onTouchEnd={[Function]}
+            onTouchStart={[Function]}
+          >
+            <div
+              className="euiPopover__anchor"
+            >
+              <input
+                alt="Screenshot for step with name \\"STEP_NAME\\""
+                onClick={[Function]}
+                onMouseEnter={[Function]}
+                onMouseLeave={[Function]}
+                src="/api/uptime/journey/screenshot/check_group/1"
+                style={
+                  Object {
+                    "height": 180,
+                    "objectFit": "cover",
+                    "objectPosition": "center top",
+                    "width": 320,
+                  }
+                }
+                type="image"
+              />
+            </div>
+          </div>
+        </EuiOutsideClickDetector>
       </EuiPopover>
     `);
   });
 
   it('displays No Image message when screenshot does not exist', () => {
     expect(
-      shallowWithIntl(<StepScreenshotDisplay stepIndex={1} stepName="STEP_NAME" />).find('EuiText')
+      shallowWithIntl(
+        <StepScreenshotDisplay
+          checkGroup="check_group"
+          stepIndex={1}
+          stepName="STEP_NAME"
+          screenshotExists={false}
+        />
+      ).find('EuiText')
     ).toMatchInlineSnapshot(`
       <EuiText>
         <strong>
