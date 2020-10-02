@@ -118,7 +118,7 @@ image:management/ingest-pipelines/images/ingest-pipeline-processor.png["Processo
 
 . To test the pipeline to verify that it produces the expected results, click *Add documents*.
 
-. In the *Documents* tab, provide the following sample document for testing:
+. In the *Documents* tab, provide a sample document for testing:
 +
 [source,js]
 ----------------------------------
