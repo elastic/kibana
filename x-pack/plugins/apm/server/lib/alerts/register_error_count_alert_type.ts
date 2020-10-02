@@ -55,6 +55,8 @@ export function registerErrorCountAlertType({
         apmActionVariables.environment,
         apmActionVariables.threshold,
         apmActionVariables.triggerValue,
+        apmActionVariables.windowSize,
+        apmActionVariables.windowUnit,
       ],
     },
     producer: 'apm',
@@ -138,6 +140,8 @@ export function registerErrorCountAlertType({
             environment,
             threshold: alertParams.threshold,
             triggerValue: errorCount,
+            intervalSize: alertParams.windowSize,
+            intervalUnit: alertParams.windowUnit,
           });
         }
         response.aggregations?.services.buckets.forEach((serviceBucket) => {

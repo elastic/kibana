@@ -60,6 +60,8 @@ export function registerTransactionErrorRateAlertType({
         apmActionVariables.environment,
         apmActionVariables.threshold,
         apmActionVariables.triggerValue,
+        apmActionVariables.windowSize,
+        apmActionVariables.windowUnit,
       ],
     },
     producer: 'apm',
@@ -170,7 +172,11 @@ export function registerTransactionErrorRateAlertType({
             transactionType,
             environment,
             threshold: alertParams.threshold,
-            triggerValue: transactionErrorRate,
+            triggerValue: String(
+              parseFloat(transactionErrorRate.toPrecision(3))
+            ),
+            intervalSize: alertParams.windowSize,
+            intervalUnit: alertParams.windowUnit,
           });
         }
 
