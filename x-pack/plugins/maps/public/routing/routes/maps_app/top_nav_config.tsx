@@ -123,28 +123,6 @@ export function getTopNavConfig({
     return { id: savedObjectId };
   }
 
-  if (hasSaveAndReturnConfig) {
-    topNavConfigs.push({
-      id: 'saveAndReturn',
-      label: i18n.translate('xpack.maps.topNav.saveAndReturnButtonLabel', {
-        defaultMessage: 'Save and return',
-      }),
-      emphasize: true,
-      iconType: 'checkInCircleFilled',
-      run: () => {
-        onSave({
-          newTitle: savedMap.title ? savedMap.title : '',
-          newDescription: savedMap.description ? savedMap.description : '',
-          newCopyOnSave: false,
-          isTitleDuplicateConfirmed: false,
-          returnToOrigin: true,
-          onTitleDuplicate: () => {},
-        });
-      },
-      testId: 'mapSaveAndReturnButton',
-    });
-  }
-
   topNavConfigs.push(
     {
       id: 'mapSettings',
@@ -194,7 +172,7 @@ export function getTopNavConfig({
   if (hasWritePermissions) {
     topNavConfigs.push({
       id: 'save',
-      iconType: 'save',
+      iconType: hasSaveAndReturnConfig ? undefined : 'save',
       label: hasSaveAndReturnConfig
         ? i18n.translate('xpack.maps.topNav.saveAsButtonLabel', {
             defaultMessage: 'Save as',
@@ -236,6 +214,28 @@ export function getTopNavConfig({
         );
         showSaveModal(saveModal, getCoreI18n().Context);
       },
+    });
+  }
+
+  if (hasSaveAndReturnConfig) {
+    topNavConfigs.push({
+      id: 'saveAndReturn',
+      label: i18n.translate('xpack.maps.topNav.saveAndReturnButtonLabel', {
+        defaultMessage: 'Save and return',
+      }),
+      emphasize: true,
+      iconType: 'checkInCircleFilled',
+      run: () => {
+        onSave({
+          newTitle: savedMap.title ? savedMap.title : '',
+          newDescription: savedMap.description ? savedMap.description : '',
+          newCopyOnSave: false,
+          isTitleDuplicateConfirmed: false,
+          returnToOrigin: true,
+          onTitleDuplicate: () => {},
+        });
+      },
+      testId: 'mapSaveAndReturnButton',
     });
   }
 
