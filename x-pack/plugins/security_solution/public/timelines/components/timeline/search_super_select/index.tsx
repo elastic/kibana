@@ -106,7 +106,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
               description: t.description,
               favorite: t.favorite,
               label: t.title,
-              id: timelineType === TimelineType.default ? t.savedObjectId : t.templateTimelineId,
+              id: timelineType === TimelineType.template ? t.templateTimelineId : t.savedObjectId,
               key: `${t.title}-${index}`,
               title: t.title,
               checked: [t.savedObjectId, t.templateTimelineId].includes(timelineId)

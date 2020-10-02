@@ -150,6 +150,12 @@ export const getThresholdAggregationDataProvider = (
   ];
 };
 
+export const isEqlRule = (ecsData: Ecs) =>
+  ecsData.signal?.rule?.type?.length && ecsData.signal?.rule?.type[0] === 'eql';
+
+export const isThresholdRule = (ecsData: Ecs) =>
+  ecsData.signal?.rule?.type?.length && ecsData.signal?.rule?.type[0] === 'threshold';
+
 export const sendAlertToTimelineAction = async ({
   apolloClient,
   createTimeline,
@@ -158,7 +164,6 @@ export const sendAlertToTimelineAction = async ({
   updateTimelineIsLoading,
   searchStrategyClient,
 }: SendAlertToTimelineActionProps) => {
-  let openAlertInBasicTimeline = true;
   const noteContent = ecsData.signal?.rule?.note != null ? ecsData.signal?.rule?.note[0] : '';
   const timelineId =
     ecsData.signal?.rule?.timeline_id != null ? ecsData.signal?.rule?.timeline_id[0] : '';
@@ -196,7 +201,6 @@ export const sendAlertToTimelineAction = async ({
       const eventData: TimelineEventsDetailsItem[] = getOr([], 'data', eventDataResp);
       if (!isEmpty(resultingTimeline)) {
         const timelineTemplate: TimelineResult = omitTypenameInTimeline(resultingTimeline);
-        openAlertInBasicTimeline = false;
         const { timeline, notes } = formatTimelineResultToModel(
           timelineTemplate,
           true,
@@ -251,16 +255,11 @@ export const sendAlertToTimelineAction = async ({
         });
       }
     } catch {
-      openAlertInBasicTimeline = true;
       updateTimelineIsLoading({ id: TimelineId.active, isLoading: false });
     }
   }
 
-  if (
-    ecsData.signal?.rule?.type?.length &&
-    ecsData.signal?.rule?.type[0] === 'threshold' &&
-    openAlertInBasicTimeline
-  ) {
+  if (isThresholdRule(ecsData)) {
     return createTimeline({
       from,
       notes: null,
@@ -328,7 +327,7 @@ export const sendAlertToTimelineAction = async ({
         },
       },
     ];
-    if (ecsData.signal?.rule?.type?.length && ecsData.signal?.rule?.type[0] === 'eql') {
+    if (isEqlRule(ecsData)) {
       const signalGroupId = ecsData.signal?.group?.id?.length
         ? ecsData.signal?.group?.id[0]
         : 'unknown-signal-group-id';

@@ -49,7 +49,7 @@ const UtilityBarFlexGroup = styled(EuiFlexGroup)`
 
 const BuildingBlockContainer = styled(EuiFlexItem)`
   background: repeating-linear-gradient(
-    135deg,
+    127deg,
     rgba(245, 167, 0, 0.2),
     rgba(245, 167, 0, 0.2) 1px,
     rgba(245, 167, 0, 0.05) 2px,

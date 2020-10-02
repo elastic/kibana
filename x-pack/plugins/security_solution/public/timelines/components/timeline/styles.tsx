@@ -182,14 +182,13 @@ export const EventsTrGroup = styled.div.attrs(({ className = '' }) => ({
   border-bottom: ${({ theme }) => theme.eui.euiBorderWidthThin} solid
     ${({ theme }) => theme.eui.euiColorLightShade};
   ${({ theme, eventType, isBuildingBlockType, showLeftBorder }) =>
-    showLeftBorder && !isBuildingBlockType
+    showLeftBorder
       ? `border-left: 4px solid
     ${eventType === 'raw' ? theme.eui.euiColorLightShade : theme.eui.euiColorWarning}`
       : ''};
   ${({ isBuildingBlockType, showLeftBorder }) =>
     isBuildingBlockType
-      ? `background: repeating-linear-gradient(135deg, rgba(245, 167, 0, 0.2), rgba(245, 167, 0, 0.2) 1px, rgba(245, 167, 0, 0.05) 2px, rgba(245, 167, 0, 0.05) 10px);
-         ${showLeftBorder ? 'border-left: 4px solid transparent;' : ''}`
+      ? `background: repeating-linear-gradient(127deg, rgba(245, 167, 0, 0.2), rgba(245, 167, 0, 0.2) 1px, rgba(245, 167, 0, 0.05) 2px, rgba(245, 167, 0, 0.05) 10px);`
       : ''};
 
   &:hover {
@@ -219,7 +218,7 @@ export const EventsTrSupplement = styled.div.attrs(({ className = '' }) => ({
   line-height: ${({ theme }) => theme.eui.euiLineHeight};
   padding: 0 ${({ theme }) => theme.eui.paddingSizes.m};
   .euiAccordion + div {
-    background-color: white;
+    background-color: ${({ theme }) => theme.eui.euiColorEmptyShade};
     padding: 0 ${({ theme }) => theme.eui.paddingSizes.s};
     border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
     border-radius: ${({ theme }) => theme.eui.paddingSizes.xs};

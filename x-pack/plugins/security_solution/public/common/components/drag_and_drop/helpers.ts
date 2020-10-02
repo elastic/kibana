@@ -199,13 +199,10 @@ export const addFieldToTimelineColumns = ({
   const fieldId = getFieldIdFromDraggable(result);
   const allColumns = getAllFieldsByName(browserFields);
   const column = allColumns[fieldId];
-  let initColumnHeader = {};
-  if (
-    timelineId === TimelineId.detectionsPage ||
-    timelineId === TimelineId.detectionsRulesDetailsPage
-  ) {
-    initColumnHeader = alertsHeaders.find((c) => c.id === fieldId) ?? {};
-  }
+  const initColumnHeader =
+    timelineId === TimelineId.detectionsPage || timelineId === TimelineId.detectionsRulesDetailsPage
+      ? alertsHeaders.find((c) => c.id === fieldId) ?? {}
+      : {};
 
   if (column != null) {
     dispatch(
