@@ -45,28 +45,31 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
   setFieldValue: (fieldName: string, value: FieldValue) => void;
   /** Sets a field errors imperatively. */
   setFieldErrors: (fieldName: string, errors: ValidationError[]) => void;
-  /** Access any field on the form. */
+  /** Access the fields on the form. */
   getFields: () => FieldsMap;
   /**
    * Return the form data. It accepts an optional options object with an `unflatten` parameter (defaults to `true`).
    * If you are only interested in the raw form data, pass `unflatten: false` to the handler
    */
-  getFormData: (options?: { unflatten?: boolean }) => T;
+  getFormData: () => T;
   /* Returns an array with of all errors in the form. */
   getErrors: () => string[];
-  /** Resets the form to its initial state. */
+  /**
+   * Reset the form states to their initial value and optionally
+   * all the fields to their initial values.
+   */
   reset: (options?: { resetValues?: boolean; defaultValue?: Partial<T> }) => void;
   readonly __options: Required<FormOptions>;
-  __getFormData$: () => Subject<T>;
+  __getFormData$: () => Subject<I>;
   __addField: (field: FieldHook) => void;
   __removeField: (fieldNames: string | string[]) => void;
   __validateFields: (
     fieldNames: string[]
   ) => Promise<{ areFieldsValid: boolean; isFormValid: boolean | undefined }>;
-  __updateFormDataAt: (field: string, value: unknown) => T;
+  __updateFormDataAt: (field: string, value: unknown) => I;
   __updateDefaultValueAt: (field: string, value: unknown) => void;
-  __readFieldConfigFromSchema: (fieldName: string) => FieldConfig;
-  __getFieldDefaultValue: (fieldName: string) => unknown;
+  __readFieldConfigFromSchema: (field: string) => FieldConfig;
+  __getFieldDefaultValue: <K extends keyof I>(field: K) => I[K];
 }
 
 export type FormSchema<T extends FormData = FormData> = {
@@ -119,10 +122,26 @@ export interface FieldHook<T = unknown, I = T> {
     validationType?: 'field' | string;
     errorCode?: string;
   }) => string | null;
+  /**
+   * Form <input /> "onChange" event handler
+   *
+   * @param event Form input change event
+   */
   onChange: (event: ChangeEvent<{ name?: string; value: string; checked?: boolean }>) => void;
+  /**
+   * Handler to change the field value
+   *
+   * @param value The new value to assign to the field. If you provide a callback, you wil receive
+   * the previous value and you need to return the next value.
+   */
   setValue: (value: I | ((prevValue: I) => I)) => void;
   setErrors: (errors: ValidationError[]) => void;
   clearErrors: (type?: string | string[]) => void;
+  /**
+   * Validate a form field, running all its validations.
+   * If a validationType is provided then only that validation will be executed,
+   * skipping the other type of validation that might exist.
+   */
   validate: (validateData?: {
     formData?: any;
     value?: I;
@@ -166,19 +185,23 @@ export interface ValidationError<T = string> {
   [key: string]: any;
 }
 
-export interface ValidationFuncArg<T extends FormData, V = unknown> {
+export interface ValidationFuncArg<I extends FormData, V = unknown> {
   path: string;
   value: V;
   form: {
-    getFormData: FormHook<T>['getFormData'];
-    getFields: FormHook<T>['getFields'];
+    getFormData: FormHook<FormData, I>['getFormData'];
+    getFields: FormHook<FormData, I>['getFields'];
   };
-  formData: T;
+  formData: I;
   errors: readonly ValidationError[];
 }
 
-export type ValidationFunc<T extends FormData = any, E extends string = string, V = unknown> = (
-  data: ValidationFuncArg<T, V>
+export type ValidationFunc<
+  I extends FormData = FormData,
+  E extends string = string,
+  V = unknown
+> = (
+  data: ValidationFuncArg<I, V>
 ) => ValidationError<E> | void | undefined | Promise<ValidationError<E> | void | undefined>;
 
 export interface FieldValidateResponse {
@@ -199,11 +222,11 @@ type FormatterFunc = (value: any, formData: FormData) => unknown;
 type FieldValue = unknown;
 
 export interface ValidationConfig<
-  FormType extends FormData = any,
-  Error extends string = string,
-  ValueType = unknown
+  I extends FormData = FormData,
+  E extends string = string,
+  V = unknown
 > {
-  validator: ValidationFunc<FormType, Error, ValueType>;
+  validator: ValidationFunc<I, E, V>;
   type?: string;
   /**
    * By default all validation are blockers, which means that if they fail, the field is invalid.

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 import { FormData, FormHook } from '../types';
 import { useFormDataContext, Context } from '../form_data_context';
@@ -26,14 +26,16 @@ interface Options {
   form?: FormHook<any>;
 }
 
-export type HookReturn<T extends object = FormData> = [FormData, () => T, boolean];
+export type HookReturn<I extends object = FormData, T extends object = I> = [I, () => T, boolean];
 
-export const useFormData = <T extends object = FormData>(options: Options = {}): HookReturn<T> => {
+export const useFormData = <I extends object = FormData, T extends object = I>(
+  options: Options = {}
+): HookReturn<I, T> => {
   const { watch, form } = options;
-  const ctx = useFormDataContext<T>();
+  const ctx = useFormDataContext<T, I>();
 
-  let getFormData: Context<T>['getFormData'];
-  let getFormData$: Context<T>['getFormData$'];
+  let getFormData: Context<T, I>['getFormData'];
+  let getFormData$: Context<T, I>['getFormData$'];
 
   if (form !== undefined) {
     getFormData = form.getFormData;
@@ -48,26 +50,18 @@ export const useFormData = <T extends object = FormData>(options: Options = {}):
 
   const initialValue = getFormData$().value;
 
-  const previousRawData = useRef<FormData>(initialValue);
+  const previousRawData = useRef<I>(initialValue);
   const isMounted = useRef(false);
-  const [formData, setFormData] = useState<FormData>(previousRawData.current);
-
-  const formatFormData = useCallback(() => {
-    return getFormData({ unflatten: true });
-  }, [getFormData]);
+  const [formData, setFormData] = useState<I>(previousRawData.current);
 
   useEffect(() => {
     const subscription = getFormData$().subscribe((raw) => {
       if (watch) {
-        const valuesToWatchArray = Array.isArray(watch)
-          ? (watch as string[])
-          : ([watch] as string[]);
+        const pathsToWatchArray: Array<keyof I> = Array.isArray(watch)
+          ? (watch as Array<keyof I>)
+          : ([watch] as Array<keyof I>);
 
-        if (
-          valuesToWatchArray.some(
-            (value) => previousRawData.current[value] !== raw[value as keyof T]
-          )
-        ) {
+        if (pathsToWatchArray.some((path) => previousRawData.current[path] !== raw[path])) {
           previousRawData.current = raw;
           // Only update the state if one of the field we watch has changed.
           setFormData(raw);
@@ -88,8 +82,8 @@ export const useFormData = <T extends object = FormData>(options: Options = {}):
 
   if (!isMounted.current && Object.keys(formData).length === 0) {
     // No field has mounted yet
-    return [formData, formatFormData, false];
+    return [formData, getFormData, false];
   }
 
-  return [formData, formatFormData, true];
+  return [formData, getFormData, true];
 };
