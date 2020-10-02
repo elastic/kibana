@@ -31,8 +31,7 @@ export interface ConfigPanelWrapperProps {
   core: DatasourceDimensionEditorProps['core'];
 }
 
-export interface DimensionState {
-  isOpen: boolean;
+export interface ActiveDimensionState {
   isNew: boolean;
   activeId?: string;
   activeGroup?: VisualizationDimensionGroupConfig;

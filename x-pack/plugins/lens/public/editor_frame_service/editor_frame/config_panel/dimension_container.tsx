@@ -5,7 +5,7 @@
  */
 import './dimension_container.scss';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiFlyoutHeader,
   EuiFlyoutFooter,
@@ -21,20 +21,29 @@ import { i18n } from '@kbn/i18n';
 export function DimensionContainer({
   isOpen,
   groupLabel,
-  close,
+  handleClose,
   panel,
 }: {
   isOpen: boolean;
-  close: () => void;
+  handleClose: () => void;
   panel: React.ReactElement;
   groupLabel: string;
 }) {
   const [focusTrapIsEnabled, setFocusTrapIsEnabled] = useState(false);
 
   const closeFlyout = () => {
-    close();
+    handleClose();
     setFocusTrapIsEnabled(false);
   };
+
+  useEffect(() => {
+    if (isOpen) {
+      // without setTimeout here the flyout pushes content when animating
+      setTimeout(() => {
+        setFocusTrapIsEnabled(true);
+      }, 255);
+    }
+  }, [isOpen]);
 
   return isOpen ? (
     <EuiFocusTrap disabled={!focusTrapIsEnabled} clickOutsideDisables={true}>

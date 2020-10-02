@@ -23,11 +23,10 @@ import { DragContext, DragDrop, ChildDragDropProvider } from '../../../drag_drop
 import { LayerSettings } from './layer_settings';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { generateId } from '../../../id_generator';
-import { ConfigPanelWrapperProps, DimensionState } from './types';
+import { ConfigPanelWrapperProps, ActiveDimensionState } from './types';
 import { DimensionContainer } from './dimension_container';
 
-const initialDimensionState = {
-  isOpen: false,
+const initialActiveDimensionState = {
   isNew: false,
 };
 
@@ -69,13 +68,15 @@ export function LayerPanel(
   }
 ) {
   const dragDropContext = useContext(DragContext);
-  const [dimensionState, setDimensionState] = useState<DimensionState>(initialDimensionState);
+  const [activeDimension, setActiveDimension] = useState<ActiveDimensionState>(
+    initialActiveDimensionState
+  );
 
   const { framePublicAPI, layerId, isOnlyLayer, onRemoveLayer, dataTestSubj } = props;
   const datasourcePublicAPI = framePublicAPI.datasourceLayers[layerId];
 
   useEffect(() => {
-    setDimensionState(initialDimensionState);
+    setActiveDimension(initialActiveDimensionState);
   }, [props.activeVisualizationId]);
 
   if (
@@ -114,7 +115,7 @@ export function LayerPanel(
 
   const { groups } = activeVisualization.getConfiguration(layerVisualizationConfigProps);
   const isEmptyLayer = !groups.some((d) => d.accessors.length > 0);
-  const { activeId, activeGroup } = dimensionState;
+  const { activeId, activeGroup } = activeDimension;
   return (
     <ChildDragDropProvider {...dragDropContext}>
       <EuiPanel data-test-subj={dataTestSubj} className="lnsLayerPanel" paddingSize="s">
@@ -209,7 +210,7 @@ export function LayerPanel(
                           : 'add'
                       }
                       data-test-subj={group.dataTestSubj}
-                      draggable={!dimensionState.isOpen}
+                      draggable={!activeId}
                       value={{ columnId: accessor, groupId: group.groupId, layerId }}
                       isValueEqual={isSameConfiguration}
                       label={group.groupLabel}
@@ -253,11 +254,10 @@ export function LayerPanel(
                             filterOperations: group.filterOperations,
                             suggestedPriority: group.suggestedPriority,
                             onClick: () => {
-                              if (dimensionState.isOpen) {
-                                setDimensionState(initialDimensionState);
+                              if (activeId) {
+                                setActiveDimension(initialActiveDimensionState);
                               } else {
-                                setDimensionState({
-                                  isOpen: true,
+                                setActiveDimension({
                                   isNew: false,
                                   activeGroup: group,
                                   activeId: accessor,
@@ -355,11 +355,10 @@ export function LayerPanel(
                         }}
                         data-test-subj="lns-empty-dimension"
                         onClick={() => {
-                          if (dimensionState.isOpen) {
-                            setDimensionState(initialDimensionState);
+                          if (activeId) {
+                            setActiveDimension(initialActiveDimensionState);
                           } else {
-                            setDimensionState({
-                              isOpen: true,
+                            setActiveDimension({
                               isNew: true,
                               activeGroup: group,
                               activeId: newId,
@@ -380,9 +379,9 @@ export function LayerPanel(
           );
         })}
         <DimensionContainer
-          isOpen={dimensionState.isOpen}
+          isOpen={!!activeId}
           groupLabel={activeGroup?.groupLabel || ''}
-          close={() => setDimensionState(initialDimensionState)}
+          handleClose={() => setActiveDimension(initialActiveDimensionState)}
           panel={
             <>
               {activeGroup && activeId && (
@@ -405,8 +404,8 @@ export function LayerPanel(
                           prevState: props.visualizationState,
                         })
                       );
-                      setDimensionState({
-                        ...dimensionState,
+                      setActiveDimension({
+                        ...activeDimension,
                         isNew: false,
                       });
                     },
@@ -415,7 +414,7 @@ export function LayerPanel(
               )}
               {activeGroup &&
                 activeId &&
-                !dimensionState.isNew &&
+                !activeDimension.isNew &&
                 activeVisualization.renderDimensionEditor &&
                 activeGroup?.enableDimensionEditor && (
                   <div className="lnsLayerPanel__styleEditor">
