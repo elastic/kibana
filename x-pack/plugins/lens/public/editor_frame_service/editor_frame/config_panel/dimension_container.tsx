@@ -13,6 +13,7 @@ import {
   EuiButtonEmpty,
   EuiFlexItem,
   EuiFocusTrap,
+  EuiOutsideClickDetector,
 } from '@elastic/eui';
 
 import classNames from 'classnames';
@@ -91,43 +92,45 @@ export function DimensionContainer({
 
   const flyout = flyoutIsVisible && (
     <EuiFocusTrap disabled={!focusTrapIsEnabled} clickOutsideDisables={true}>
-      <div
-        role="dialog"
-        aria-labelledby="lnsDimensionContainerTitle"
-        className={classNames('lnsDimensionContainer', {
-          'lnsDimensionContainer--noAnimation': openByCreation,
-        })}
-      >
-        <EuiFlyoutHeader hasBorder className="lnsDimensionContainer__header">
-          <EuiTitle size="xs">
-            <EuiButtonEmpty
-              onClick={closeFlyout}
-              data-test-subj="lns-indexPattern-dimensionContainerTitle"
-              id="lnsDimensionContainerTitle"
-              iconType="sortLeft"
-              flush="left"
-            >
-              <strong>{panelTitle}</strong>
+      <EuiOutsideClickDetector onOutsideClick={closeFlyout} isDisabled={!flyoutIsVisible}>
+        <div
+          role="dialog"
+          aria-labelledby="lnsDimensionContainerTitle"
+          className={classNames('lnsDimensionContainer', {
+            'lnsDimensionContainer--noAnimation': openByCreation,
+          })}
+        >
+          <EuiFlyoutHeader hasBorder className="lnsDimensionContainer__header">
+            <EuiTitle size="xs">
+              <EuiButtonEmpty
+                onClick={closeFlyout}
+                data-test-subj="lns-indexPattern-dimensionContainerTitle"
+                id="lnsDimensionContainerTitle"
+                iconType="sortLeft"
+                flush="left"
+              >
+                <strong>{panelTitle}</strong>
+              </EuiButtonEmpty>
+            </EuiTitle>
+          </EuiFlyoutHeader>
+          <EuiFlexItem className="eui-yScrollWithShadows" grow={1}>
+            {panel}
+          </EuiFlexItem>
+          <EuiFlyoutFooter className="lnsDimensionContainer__footer">
+            <EuiButtonEmpty flush="left" size="s" iconType="cross" onClick={closeFlyout}>
+              {i18n.translate('xpack.lens.dimensionContainer.close', {
+                defaultMessage: 'Close',
+              })}
             </EuiButtonEmpty>
-          </EuiTitle>
-        </EuiFlyoutHeader>
-        <EuiFlexItem className="eui-yScrollWithShadows" grow={1}>
-          {panel}
-        </EuiFlexItem>
-        <EuiFlyoutFooter className="lnsDimensionContainer__footer">
-          <EuiButtonEmpty flush="left" size="s" iconType="cross" onClick={closeFlyout}>
-            {i18n.translate('xpack.lens.dimensionContainer.close', {
-              defaultMessage: 'Close',
-            })}
-          </EuiButtonEmpty>
-        </EuiFlyoutFooter>
-      </div>
+          </EuiFlyoutFooter>
+        </div>
+      </EuiOutsideClickDetector>
     </EuiFocusTrap>
   );
 
   return (
     <>
-      <div className="lnsDimensionContainer__trigger">{trigger}</div>
+      {trigger}
       {flyout}
     </>
   );

@@ -9,8 +9,9 @@ import { isValidNamespace } from '../../../common';
 export const NamespaceSchema = schema.string({
   minLength: 1,
   validate: (value) => {
-    if (!isValidNamespace(value)) {
-      return 'Namespace contains invalid characters';
+    const namespaceValidation = isValidNamespace(value || '');
+    if (!namespaceValidation.valid && namespaceValidation.error) {
+      return namespaceValidation.error;
     }
   },
 });

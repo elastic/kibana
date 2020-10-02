@@ -20,6 +20,7 @@ import { useSourceViaHttp } from '../../../../../../containers/source/use_source
 import { useMetricK8sModuleContext } from '../../../../../../containers/ml/modules/metrics_k8s/module';
 import { useMetricHostsModuleContext } from '../../../../../../containers/ml/modules/metrics_hosts/module';
 import { FixedDatePicker } from '../../../../../../components/fixed_datepicker';
+import { DEFAULT_K8S_PARTITION_FIELD } from '../../../../../../containers/ml/modules/metrics_k8s/module_descriptor';
 
 interface Props {
   jobType: 'hosts' | 'kubernetes';
@@ -107,7 +108,7 @@ export const JobSetupScreen = (props: Props) => {
 
   useEffect(() => {
     if (props.jobType === 'kubernetes') {
-      setPartitionField(['kubernetes.namespace']);
+      setPartitionField([DEFAULT_K8S_PARTITION_FIELD]);
     }
   }, [props.jobType]);
 
@@ -223,7 +224,7 @@ export const JobSetupScreen = (props: Props) => {
                   label={
                     <FormattedMessage
                       id="xpack.infra.ml.steps.setupProcess.partition.label"
-                      defaultMessage="Partition filed"
+                      defaultMessage="Partition field"
                     />
                   }
                   compressed

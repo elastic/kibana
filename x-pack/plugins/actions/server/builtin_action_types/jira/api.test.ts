@@ -93,6 +93,7 @@ describe('api', () => {
             issueType: '10006',
             labels: ['kibana', 'elastic'],
             priority: 'High',
+            parent: null,
           },
         });
         expect(externalService.updateIncident).not.toHaveBeenCalled();
@@ -252,6 +253,7 @@ describe('api', () => {
             issueType: '10006',
             labels: ['kibana', 'elastic'],
             priority: 'High',
+            parent: null,
           },
         });
         expect(externalService.createIncident).not.toHaveBeenCalled();
@@ -376,6 +378,36 @@ describe('api', () => {
             ],
             defaultValue: { name: 'Medium', id: '3' },
           },
+        });
+      });
+    });
+
+    describe('getIssues', () => {
+      test('it returns the issues correctly', async () => {
+        const res = await api.issues({
+          externalService,
+          params: { title: 'Title test' },
+        });
+        expect(res).toEqual([
+          {
+            id: '10267',
+            key: 'RJ-107',
+            title: 'Test title',
+          },
+        ]);
+      });
+    });
+
+    describe('getIssue', () => {
+      test('it returns the issue correctly', async () => {
+        const res = await api.issue({
+          externalService,
+          params: { id: 'RJ-107' },
+        });
+        expect(res).toEqual({
+          id: '10267',
+          key: 'RJ-107',
+          title: 'Test title',
         });
       });
     });

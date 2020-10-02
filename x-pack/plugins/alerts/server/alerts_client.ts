@@ -28,7 +28,7 @@ import {
   AlertTaskState,
   AlertInstanceSummary,
 } from './types';
-import { validateAlertTypeParams } from './lib';
+import { validateAlertTypeParams, alertExecutionStatusFromRaw } from './lib';
 import {
   InvalidateAPIKeyParams,
   GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
@@ -122,6 +122,7 @@ export interface CreateOptions {
     | 'muteAll'
     | 'mutedInstanceIds'
     | 'actions'
+    | 'executionStatus'
   > & { actions: NormalizedAlertAction[] };
   options?: {
     migrationVersion?: Record<string, string>;
@@ -228,15 +229,27 @@ export class AlertsClient {
       params: validatedAlertTypeParams as RawAlert['params'],
       muteAll: false,
       mutedInstanceIds: [],
+      executionStatus: {
+        status: 'pending',
+        lastExecutionDate: new Date().toISOString(),
+        error: null,
+      },
     };
-    const createdAlert = await this.unsecuredSavedObjectsClient.create(
-      'alert',
-      this.updateMeta(rawAlert),
-      {
-        ...options,
-        references,
-      }
-    );
+    let createdAlert: SavedObject<RawAlert>;
+    try {
+      createdAlert = await this.unsecuredSavedObjectsClient.create(
+        'alert',
+        this.updateMeta(rawAlert),
+        {
+          ...options,
+          references,
+        }
+      );
+    } catch (e) {
+      // Avoid unused API key
+      this.invalidateApiKey({ apiKey: rawAlert.apiKey });
+      throw e;
+    }
     if (data.enabled) {
       let scheduledTask;
       try {
@@ -498,23 +511,31 @@ export class AlertsClient {
       : null;
     const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
 
-    const updatedObject = await this.unsecuredSavedObjectsClient.create<RawAlert>(
-      'alert',
-      this.updateMeta({
-        ...attributes,
-        ...data,
-        ...apiKeyAttributes,
-        params: validatedAlertTypeParams as RawAlert['params'],
-        actions,
-        updatedBy: username,
-      }),
-      {
-        id,
-        overwrite: true,
-        version,
-        references,
-      }
-    );
+    let updatedObject: SavedObject<RawAlert>;
+    const createAttributes = this.updateMeta({
+      ...attributes,
+      ...data,
+      ...apiKeyAttributes,
+      params: validatedAlertTypeParams as RawAlert['params'],
+      actions,
+      updatedBy: username,
+    });
+    try {
+      updatedObject = await this.unsecuredSavedObjectsClient.create<RawAlert>(
+        'alert',
+        createAttributes,
+        {
+          id,
+          overwrite: true,
+          version,
+          references,
+        }
+      );
+    } catch (e) {
+      // Avoid unused API key
+      this.invalidateApiKey({ apiKey: createAttributes.apiKey });
+      throw e;
+    }
 
     return this.getPartialAlertFromRaw(
       id,
@@ -580,19 +601,21 @@ export class AlertsClient {
     }
 
     const username = await this.getUserName();
-    await this.unsecuredSavedObjectsClient.update(
-      'alert',
-      id,
-      this.updateMeta({
-        ...attributes,
-        ...this.apiKeyAsAlertAttributes(
-          await this.createAPIKey(this.generateAPIKeyName(attributes.alertTypeId, attributes.name)),
-          username
-        ),
-        updatedBy: username,
-      }),
-      { version }
-    );
+    const updateAttributes = this.updateMeta({
+      ...attributes,
+      ...this.apiKeyAsAlertAttributes(
+        await this.createAPIKey(this.generateAPIKeyName(attributes.alertTypeId, attributes.name)),
+        username
+      ),
+      updatedBy: username,
+    });
+    try {
+      await this.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, { version });
+    } catch (e) {
+      // Avoid unused API key
+      this.invalidateApiKey({ apiKey: updateAttributes.apiKey });
+      throw e;
+    }
 
     if (apiKeyToInvalidate) {
       await this.invalidateApiKey({ apiKey: apiKeyToInvalidate });
@@ -658,22 +681,22 @@ export class AlertsClient {
 
     if (attributes.enabled === false) {
       const username = await this.getUserName();
-      await this.unsecuredSavedObjectsClient.update(
-        'alert',
-        id,
-        this.updateMeta({
-          ...attributes,
-          enabled: true,
-          ...this.apiKeyAsAlertAttributes(
-            await this.createAPIKey(
-              this.generateAPIKeyName(attributes.alertTypeId, attributes.name)
-            ),
-            username
-          ),
-          updatedBy: username,
-        }),
-        { version }
-      );
+      const updateAttributes = this.updateMeta({
+        ...attributes,
+        enabled: true,
+        ...this.apiKeyAsAlertAttributes(
+          await this.createAPIKey(this.generateAPIKeyName(attributes.alertTypeId, attributes.name)),
+          username
+        ),
+        updatedBy: username,
+      });
+      try {
+        await this.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, { version });
+      } catch (e) {
+        // Avoid unused API key
+        this.invalidateApiKey({ apiKey: updateAttributes.apiKey });
+        throw e;
+      }
       const scheduledTask = await this.scheduleAlert(id, attributes.alertTypeId);
       await this.unsecuredSavedObjectsClient.update('alert', id, {
         scheduledTaskId: scheduledTask.id,
@@ -961,9 +984,19 @@ export class AlertsClient {
     updatedAt: SavedObject['updated_at'] = createdAt,
     references: SavedObjectReference[] | undefined
   ): PartialAlert {
+    // Not the prettiest code here, but if we want to use most of the
+    // alert fields from the rawAlert using `...rawAlert` kind of access, we
+    // need to specifically delete the executionStatus as it's a different type
+    // in RawAlert and Alert.  Probably next time we need to do something similar
+    // here, we should look at redesigning the implementation of this method.
+    const rawAlertWithoutExecutionStatus: Partial<Omit<RawAlert, 'executionStatus'>> = {
+      ...rawAlert,
+    };
+    delete rawAlertWithoutExecutionStatus.executionStatus;
+    const executionStatus = alertExecutionStatusFromRaw(this.logger, id, rawAlert.executionStatus);
     return {
       id,
-      ...rawAlert,
+      ...rawAlertWithoutExecutionStatus,
       // we currently only support the Interval Schedule type
       // Once we support additional types, this type signature will likely change
       schedule: rawAlert.schedule as IntervalSchedule,
@@ -973,6 +1006,7 @@ export class AlertsClient {
       ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),
       ...(createdAt ? { createdAt: new Date(createdAt) } : {}),
       ...(scheduledTaskId ? { scheduledTaskId } : {}),
+      ...(executionStatus ? { executionStatus } : {}),
     };
   }
 
