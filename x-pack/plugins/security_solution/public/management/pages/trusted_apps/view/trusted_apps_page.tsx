@@ -21,14 +21,8 @@ import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/
 export const TrustedAppsPage = memo(() => {
   const { state: routeState } = useLocation<TrustedAppsListPageRouteState | undefined>();
   const location = useTrustedAppsSelector(getCurrentLocation);
-  const handleAddButtonClick = useTrustedAppsNavigateCallback(() => ({
-    ...location,
-    show: 'create',
-  }));
-  const handleAddFlyoutClose = useTrustedAppsNavigateCallback(() => ({
-    ...location,
-    show: undefined,
-  }));
+  const handleAddButtonClick = useTrustedAppsNavigateCallback(() => ({ show: 'create' }));
+  const handleAddFlyoutClose = useTrustedAppsNavigateCallback(() => ({ show: undefined }));
 
   const backButton = useMemo(() => {
     if (routeState && routeState.onBackButtonNavigateTo) {

@@ -17,6 +17,7 @@ import {
 
 import { TrustedAppsListPageLocation, TrustedAppsListPageState } from '../state';
 import { getTrustedAppsListPath } from '../../../common/routing';
+import { getCurrentLocation } from '../store/selectors';
 
 export function useTrustedAppsSelector<R>(selector: (state: TrustedAppsListPageState) => R): R {
   return useSelector((state: State) =>
@@ -24,13 +25,18 @@ export function useTrustedAppsSelector<R>(selector: (state: TrustedAppsListPageS
   );
 }
 
-export function useTrustedAppsNavigateCallback(
-  callback: (...args: Parameters<Parameters<typeof useCallback>[0]>) => TrustedAppsListPageLocation
-) {
+export type NavigationCallback = (
+  ...args: Parameters<Parameters<typeof useCallback>[0]>
+) => Partial<TrustedAppsListPageLocation>;
+
+export function useTrustedAppsNavigateCallback(callback: NavigationCallback) {
+  const location = useTrustedAppsSelector(getCurrentLocation);
   const history = useHistory();
 
-  return useCallback((...args) => history.push(getTrustedAppsListPath(callback(...args))), [
-    history,
-    callback,
-  ]);
+  return useCallback(
+    (...args) => history.push(getTrustedAppsListPath({ ...location, ...callback(...args) })),
+    // TODO: needs more investigation, but if callback is in dependencies list memoization will never happen
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [history, location]
+  );
 }
