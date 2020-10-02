@@ -40,7 +40,7 @@ const ConnectorComponent: React.FC<ConnectorComponentProps> = ({ name, type, fie
   );
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" data-test-subj="settings-connector-wrapper">
       <EuiFlexItem grow={false}>
         <MyFlexGroup alignItems="center" gutterSize="none">
           <ConnectorCard listItems={listItems} connectorType={type} title={name} />

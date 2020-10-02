@@ -15,7 +15,7 @@ import { TestProviders } from '../../../common/mock';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { useGetCase } from '../../containers/use_get_case';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
-import { waitFor } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
 
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { connectorsMock } from '../../containers/configure/mock';
@@ -40,7 +40,12 @@ export const caseProps: CaseProps = {
   userCanCrud: true,
   caseData: {
     ...basicCase,
-    connector: { id: 'servicenow-2', name: 'SN', type: ConnectorTypes.servicenow, fields: null },
+    connector: {
+      id: 'resilient-2',
+      name: 'Resilient',
+      type: ConnectorTypes.resilient,
+      fields: null,
+    },
   },
   fetchCase: jest.fn(),
   updateCase: jest.fn(),
@@ -452,6 +457,7 @@ describe('CaseView ', () => {
     updateCaseProperty.mockImplementation(({ onError }) => {
       onError();
     });
+
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
@@ -470,27 +476,35 @@ describe('CaseView ', () => {
         </Router>
       </TestProviders>
     );
-    const connectorName = wrapper.find('[data-test-subj="static-connector-name"]').first().text();
+
+    const connectorName = wrapper
+      .find('[data-test-subj="settings-connector-card"] .euiTitle')
+      .first()
+      .text();
+
     await waitFor(() => {
       wrapper.find('[data-test-subj="connector-edit"] button').simulate('click');
     });
+
     await waitFor(() => {
       wrapper.update();
       wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
       wrapper.update();
-      wrapper.find('button[data-test-subj="dropdown-connector-servicenow-2"]').simulate('click');
+      wrapper.find('button[data-test-subj="dropdown-connector-resilient-2"]').simulate('click');
       wrapper.update();
       wrapper.find(`[data-test-subj="edit-connectors-submit"]`).last().simulate('click');
     });
+
     await waitFor(() => {
       wrapper.update();
       const updateObject = updateCaseProperty.mock.calls[0][0];
       expect(updateObject.updateKey).toEqual('connector');
-      expect(wrapper.find('[data-test-subj="static-connector-name"]').first().text()).toBe(
-        connectorName
-      );
+      expect(
+        wrapper.find('[data-test-subj="settings-connector-card"] .euiTitle').first().text()
+      ).toBe(connectorName);
     });
   });
+
   it('should update connector', async () => {
     const wrapper = mount(
       <TestProviders>
@@ -510,27 +524,37 @@ describe('CaseView ', () => {
         </Router>
       </TestProviders>
     );
+
     await waitFor(() => {
       wrapper.find('[data-test-subj="connector-edit"] button').simulate('click');
     });
+
     await waitFor(() => {
       wrapper.update();
       wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
       wrapper.update();
-      wrapper.find('button[data-test-subj="dropdown-connector-servicenow-2"]').simulate('click');
+      wrapper.find('button[data-test-subj="dropdown-connector-resilient-2"]').simulate('click');
       wrapper.update();
+    });
+
+    act(() => {
       wrapper.find(`[data-test-subj="edit-connectors-submit"]`).last().simulate('click');
     });
+
     await waitFor(() => {
       wrapper.update();
-      const updateObject = updateCaseProperty.mock.calls[0][0];
-      expect(updateObject.updateKey).toEqual('connector');
-      expect(updateObject.updateValue).toEqual({
-        id: 'servicenow-2',
-        name: 'My Connector 2',
-        type: ConnectorTypes.servicenow,
-        fields: null,
-      });
+    });
+
+    const updateObject = updateCaseProperty.mock.calls[0][0];
+    expect(updateObject.updateKey).toEqual('connector');
+    expect(updateObject.updateValue).toEqual({
+      id: 'resilient-2',
+      name: 'My Connector 2',
+      type: ConnectorTypes.resilient,
+      fields: {
+        incidentTypes: null,
+        severityCode: null,
+      },
     });
   });
 });

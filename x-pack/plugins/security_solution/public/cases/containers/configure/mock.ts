@@ -50,6 +50,25 @@ export const connectorsMock: ActionConnector[] = [
     config: {
       apiUrl: 'https://test/',
       orgId: '201',
+      incidentConfiguration: {
+        mapping: [
+          {
+            source: 'title',
+            target: 'name',
+            actionType: 'overwrite',
+          },
+          {
+            source: 'description',
+            target: 'description',
+            actionType: 'overwrite',
+          },
+          {
+            source: 'comments',
+            target: 'comments',
+            actionType: 'append',
+          },
+        ],
+      },
     },
     isPreconfigured: false,
   },

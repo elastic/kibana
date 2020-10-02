@@ -60,7 +60,7 @@ describe('EditConnector ', () => {
 
     wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
     wrapper.update();
-    wrapper.find('button[data-test-subj="dropdown-connector-servicenow-2"]').simulate('click');
+    wrapper.find('button[data-test-subj="dropdown-connector-resilient-2"]').simulate('click');
     wrapper.update();
 
     expect(wrapper.find(`[data-test-subj="edit-connectors-submit"]`).last().exists()).toBeTruthy();
@@ -76,7 +76,7 @@ describe('EditConnector ', () => {
 
     wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
     wrapper.update();
-    wrapper.find('button[data-test-subj="dropdown-connector-servicenow-2"]').simulate('click');
+    wrapper.find('button[data-test-subj="dropdown-connector-resilient-2"]').simulate('click');
     wrapper.update();
 
     expect(wrapper.find(`[data-test-subj="edit-connectors-submit"]`).last().exists()).toBeTruthy();
@@ -98,7 +98,7 @@ describe('EditConnector ', () => {
 
     wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
     wrapper.update();
-    wrapper.find('button[data-test-subj="dropdown-connector-servicenow-2"]').simulate('click');
+    wrapper.find('button[data-test-subj="dropdown-connector-resilient-2"]').simulate('click');
     wrapper.update();
 
     expect(wrapper.find(`[data-test-subj="edit-connectors-submit"]`).last().exists()).toBeTruthy();
@@ -123,7 +123,7 @@ describe('EditConnector ', () => {
 
     wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
     wrapper.update();
-    wrapper.find('button[data-test-subj="dropdown-connector-servicenow-2"]').simulate('click');
+    wrapper.find('button[data-test-subj="dropdown-connector-resilient-2"]').simulate('click');
     wrapper.update();
 
     wrapper.find(`[data-test-subj="edit-connectors-cancel"]`).last().simulate('click');

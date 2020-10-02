@@ -114,7 +114,7 @@ describe('User action tree helpers', () => {
     const action = {
       ...getUserAction(['connector'], 'update'),
       oldValue: JSON.stringify({ id: 'servicenow-1' }),
-      newValue: JSON.stringify({ id: 'servicenow-2' }),
+      newValue: JSON.stringify({ id: 'resilient-2' }),
     };
     const result: string | JSX.Element = getConnectorLabelTitle({
       action,
@@ -122,6 +122,20 @@ describe('User action tree helpers', () => {
     });
 
     expect(result).toEqual('selected My Connector 2 as incident management system');
+  });
+
+  it('label title generated for update connector - change connector to none', () => {
+    const action = {
+      ...getUserAction(['connector'], 'update'),
+      oldValue: JSON.stringify({ id: 'servicenow-1' }),
+      newValue: JSON.stringify({ id: 'none' }),
+    };
+    const result: string | JSX.Element = getConnectorLabelTitle({
+      action,
+      connectors,
+    });
+
+    expect(result).toEqual('removed external incident management system');
   });
 
   it('label title generated for update connector - field change', () => {
