@@ -331,7 +331,7 @@ export class DiskUsageAlert extends BaseAlert {
 
       const alertInstanceState = { alertStates: newAlertStates };
       instance.replaceState(alertInstanceState);
-      if (newAlertStates.length && !instance.hasScheduledActions()) {
+      if (newAlertStates.length) {
         this.executeActions(instance, alertInstanceState, null, cluster);
         state.lastExecutedAction = currentUTC;
       }
