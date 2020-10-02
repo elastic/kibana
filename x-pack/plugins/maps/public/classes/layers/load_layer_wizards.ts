@@ -23,7 +23,7 @@ import { kibanaBasemapLayerWizardConfig } from '../sources/kibana_tilemap_source
 import { tmsLayerWizardConfig } from '../sources/xyz_tms_source';
 // @ts-ignore
 import { wmsLayerWizardConfig } from '../sources/wms_source';
-import { mvtVectorSourceWizardConfig } from '../sources/mvt_single_layer_vector_source';
+import { mvtVectorSourceWizardConfig } from './mvt_wizard/mvt_single_layer_vector_source';
 import { ObservabilityLayerWizardConfig } from './solution_layers/observability';
 import { SecurityLayerWizardConfig } from './solution_layers/security';
 import { choroplethLayerWizardConfig } from './choropleth_layer_wizard';
