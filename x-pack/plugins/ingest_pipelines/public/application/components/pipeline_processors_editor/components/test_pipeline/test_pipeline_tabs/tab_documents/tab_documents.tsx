@@ -75,7 +75,7 @@ const i18nTexts = {
   ),
 };
 
-const documentFieldConfig: FieldConfig<any, string> = {
+const documentFieldConfig: FieldConfig<string> = {
   label: i18n.translate(
     'xpack.ingestPipelines.testPipelineFlyout.documentsForm.documentsFieldLabel',
     {

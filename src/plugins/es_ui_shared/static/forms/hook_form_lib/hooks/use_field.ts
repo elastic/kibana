@@ -30,7 +30,7 @@ export interface InternalFieldConfig<T> {
 export const useField = <T>(
   form: FormHook,
   path: string,
-  config: FieldConfig<any, T> & InternalFieldConfig<T> = {},
+  config: FieldConfig<T> & InternalFieldConfig<T> = {},
   valueChangeListener?: (value: T) => void
 ) => {
   const {

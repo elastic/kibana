@@ -25,7 +25,7 @@ import { useFormContext } from '../form_context';
 
 export interface Props<T> {
   path: string;
-  config?: FieldConfig<any, T>;
+  config?: FieldConfig<T>;
   defaultValue?: T;
   component?: FunctionComponent<any>;
   componentProps?: Record<string, any>;
@@ -52,12 +52,12 @@ function UseFieldComp<T = unknown>(props: Props<T>) {
   const ComponentToRender = component ?? 'input';
   const propsToForward = { ...componentProps, ...rest };
 
-  const fieldConfig: FieldConfig<any, T> & { initialValue?: T } =
+  const fieldConfig: FieldConfig<T> & { initialValue?: T } =
     config !== undefined
       ? { ...config }
       : ({
           ...form.__readFieldConfigFromSchema(path),
-        } as Partial<FieldConfig<any, T>>);
+        } as Partial<FieldConfig<T>>);
 
   if (defaultValue !== undefined) {
     // update the form "defaultValue" ref object so when/if we reset the form we can go back to this value

@@ -70,7 +70,7 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
 }
 
 export type FormSchema<T extends FormData = FormData> = {
-  [K in keyof T]?: FieldConfig<T, T[K]> | FormSchema<T[K]>;
+  [K in keyof T]?: FieldConfig<T[K], T> | FormSchema<T[K]>;
 };
 
 export interface FormConfig<T extends FormData = FormData, I extends FormData = T> {
@@ -135,7 +135,7 @@ export interface FieldHook<T = unknown> {
   __serializeValue: (rawValue?: T) => unknown;
 }
 
-export interface FieldConfig<T extends FormData = any, ValueType = unknown> {
+export interface FieldConfig<ValueType = unknown, T extends FormData = FormData> {
   readonly label?: string;
   readonly labelAppend?: string | ReactNode;
   readonly helpText?: string | ReactNode;
@@ -177,7 +177,7 @@ export interface ValidationFuncArg<T extends FormData, V = unknown> {
   errors: readonly ValidationError[];
 }
 
-export type ValidationFunc<T extends FormData = any, E = string, V = unknown> = (
+export type ValidationFunc<T extends FormData = any, E extends string = string, V = unknown> = (
   data: ValidationFuncArg<T, V>
 ) => ValidationError<E> | void | undefined | Promise<ValidationError<E> | void | undefined>;
 
@@ -198,7 +198,11 @@ type FormatterFunc = (value: any, formData: FormData) => unknown;
 // string | number | boolean | string[] ...
 type FieldValue = unknown;
 
-export interface ValidationConfig<T extends FormData = any, E = string, V = unknown> {
+export interface ValidationConfig<
+  T extends FormData = any,
+  E extends string = string,
+  V = unknown
+> {
   validator: ValidationFunc<T, E, V>;
   type?: string;
   /**
