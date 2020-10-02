@@ -44,7 +44,7 @@ let licensingPluginStart: LicensingPluginStart;
 export function setLicensingPluginStart(licensingPlugin) {
   licensingPluginStart = licensingPlugin;
   licensingPluginStart.license$.subscribe((license: ILicense) => {
-    const gold = license.check(APP_ID, LICENCED_FEATURES_DETAILS.GEO_SHAPE_AGGS.license);
+    const gold = license.check(APP_ID, 'gold');
     isGoldPlus = gold.state === 'valid';
     licenseId = license.uid;
   });
@@ -53,7 +53,8 @@ export function setLicensingPluginStart(licensingPlugin) {
 export function notifyLicensedFeatureUsage(feature: LICENSED_FEATURES) {
   if (!licensingPluginStart) {
     // eslint-disable-next-line no-console
-    console.error('May not call notifyLicensedFeatureUsage before setting notifier');
+    console.error('May not call notifyLicensedFeatureUsage before plugin start');
+    return;
   }
   licensingPluginStart.featureUsage.notifyUsage(LICENCED_FEATURES_DETAILS[feature].name);
 }
