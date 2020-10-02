@@ -50,8 +50,8 @@ describe('Monitoring Breadcrumbs Service', () => {
       },
     });
     expect(controller.breadcrumbs).to.eql([
-      { url: '#/home', label: 'Clusters', testSubj: 'breadcrumbClusters' },
-      { url: '#/overview', label: 'test-cluster-foo' },
+      { url: '#/home', label: 'Clusters', testSubj: 'breadcrumbClusters', ignoreGlobalState: true },
+      { url: '#/overview', label: 'test-cluster-foo', ignoreGlobalState: false },
     ]);
   });
 
@@ -66,7 +66,7 @@ describe('Monitoring Breadcrumbs Service', () => {
       },
     });
     expect(controller.breadcrumbs).to.eql([
-      { url: '#/home', label: 'Clusters', testSubj: 'breadcrumbClusters' },
+      { url: '#/home', label: 'Clusters', testSubj: 'breadcrumbClusters', ignoreGlobalState: true },
     ]);
   });
 
@@ -87,11 +87,16 @@ describe('Monitoring Breadcrumbs Service', () => {
       },
     });
     expect(controller.breadcrumbs).to.eql([
-      { url: '#/home', label: 'Clusters', testSubj: 'breadcrumbClusters' },
-      { url: '#/overview', label: 'test-cluster-foo' },
-      { url: '#/elasticsearch', label: 'Elasticsearch' },
-      { url: '#/elasticsearch/nodes', label: 'Nodes', testSubj: 'breadcrumbEsNodes' },
-      { url: null, label: 'es-node-name-01' },
+      { url: '#/home', label: 'Clusters', testSubj: 'breadcrumbClusters', ignoreGlobalState: true },
+      { url: '#/overview', label: 'test-cluster-foo', ignoreGlobalState: false },
+      { url: '#/elasticsearch', label: 'Elasticsearch', ignoreGlobalState: false },
+      {
+        url: '#/elasticsearch/nodes',
+        label: 'Nodes',
+        testSubj: 'breadcrumbEsNodes',
+        ignoreGlobalState: false,
+      },
+      { url: null, label: 'es-node-name-01', ignoreGlobalState: false },
     ]);
   });
 
@@ -107,9 +112,9 @@ describe('Monitoring Breadcrumbs Service', () => {
       },
     });
     expect(controller.breadcrumbs).to.eql([
-      { url: '#/home', label: 'Clusters', testSubj: 'breadcrumbClusters' },
-      { url: '#/overview', label: 'test-cluster-foo' },
-      { url: null, label: 'Kibana' },
+      { url: '#/home', label: 'Clusters', testSubj: 'breadcrumbClusters', ignoreGlobalState: true },
+      { url: '#/overview', label: 'test-cluster-foo', ignoreGlobalState: false },
+      { url: null, label: 'Kibana', ignoreGlobalState: false },
     ]);
   });
 
@@ -128,9 +133,9 @@ describe('Monitoring Breadcrumbs Service', () => {
       },
     });
     expect(controller.breadcrumbs).to.eql([
-      { url: '#/home', label: 'Clusters', testSubj: 'breadcrumbClusters' },
-      { url: '#/overview', label: 'test-cluster-foo' },
-      { url: null, label: 'Logstash' },
+      { url: '#/home', label: 'Clusters', testSubj: 'breadcrumbClusters', ignoreGlobalState: true },
+      { url: '#/overview', label: 'test-cluster-foo', ignoreGlobalState: false },
+      { url: null, label: 'Logstash', ignoreGlobalState: false },
     ]);
   });
 
@@ -151,10 +156,10 @@ describe('Monitoring Breadcrumbs Service', () => {
       },
     });
     expect(controller.breadcrumbs).to.eql([
-      { url: '#/home', label: 'Clusters', testSubj: 'breadcrumbClusters' },
-      { url: '#/overview', label: 'test-cluster-foo' },
-      { url: '#/logstash', label: 'Logstash' },
-      { url: '#/logstash/pipelines', label: 'Pipelines' },
+      { url: '#/home', label: 'Clusters', testSubj: 'breadcrumbClusters', ignoreGlobalState: true },
+      { url: '#/overview', label: 'test-cluster-foo', ignoreGlobalState: false },
+      { url: '#/logstash', label: 'Logstash', ignoreGlobalState: false },
+      { url: '#/logstash/pipelines', label: 'Pipelines', ignoreGlobalState: false },
     ]);
   });
 });
