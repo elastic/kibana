@@ -18,10 +18,10 @@
  */
 
 import { spawnSync } from 'child_process';
+import { resolve } from 'path';
 
-import { REPO_ROOT } from '@kbn/dev-utils';
-
-const INVALID_CONFIG_PATH = require.resolve('./__fixtures__/invalid_config.yml');
+const ROOT_DIR = resolve(__dirname, '../../../../');
+const INVALID_CONFIG_PATH = resolve(__dirname, '__fixtures__/invalid_config.yml');
 
 interface LogEntry {
   message: string;
@@ -35,11 +35,11 @@ describe('cli invalid config support', function () {
     function () {
       // Unused keys only throw once LegacyService starts, so disable migrations so that Core
       // will finish the start lifecycle without a running Elasticsearch instance.
-      const { error, status, stdout, stderr } = spawnSync(
+      const { error, status, stdout } = spawnSync(
         process.execPath,
-        ['scripts/kibana', '--config', INVALID_CONFIG_PATH, '--migrations.skip=true'],
+        ['src/cli', '--config', INVALID_CONFIG_PATH, '--migrations.skip=true'],
         {
-          cwd: REPO_ROOT,
+          cwd: ROOT_DIR,
         }
       );
 
@@ -57,21 +57,13 @@ describe('cli invalid config support', function () {
         }));
 
       expect(error).toBe(undefined);
-
-      if (!fatalLogLine) {
-        throw new Error(
-          `cli did not log the expected fatal error message:\n\nstdout: \n${stdout}\n\nstderr:\n${stderr}`
-        );
-      }
-
+      expect(status).toBe(64);
       expect(fatalLogLine.message).toContain(
         'Error: Unknown configuration key(s): "unknown.key", "other.unknown.key", "other.third", "some.flat.key", ' +
           '"some.array". Check for spelling errors and ensure that expected plugins are installed.'
       );
       expect(fatalLogLine.tags).toEqual(['fatal', 'root']);
       expect(fatalLogLine.type).toEqual('log');
-
-      expect(status).toBe(64);
     },
     20 * 1000
   );
