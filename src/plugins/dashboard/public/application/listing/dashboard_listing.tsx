@@ -17,17 +17,15 @@
  * under the License.
  */
 
-import React, { Fragment, useMemo } from 'react';
-import PropTypes from 'prop-types';
-
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import React, { Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
-
+import { DashboardAppServices, DashboardListingProps } from '../types';
 import { TableListView, useKibana } from '../../../../kibana_react/public';
-import { DashboardServices } from '../application';
 import { DashboardConstants, createDashboardEditUrl } from '../..';
 import { ApplicationStart } from '../../../../../core/public';
+import { DashboardSavedObject } from '../../saved_dashboards';
 
 export const EMPTY_FILTER = '';
 
@@ -36,10 +34,37 @@ export const EMPTY_FILTER = '';
 // and not supporting server-side paging.
 // This component does not try to tackle these problems (yet) and is just feature matching the legacy component
 // TODO support server side sorting/paging once title and description are sortable on the server.
-export const DashboardListing = () => {
+export const DashboardListing = ({ initialFilter, title, redirectTo }: DashboardListingProps) => {
   const {
-    services: { core, savedDashboards, scopedHistory, savedObjects, dashboardConfig },
-  } = useKibana<DashboardServices>();
+    services: {
+      core,
+      savedDashboards,
+      savedObjectsClient,
+      scopedHistory,
+      savedObjects,
+      dashboardConfig,
+    },
+  } = useKibana<DashboardAppServices>();
+
+  if (title) {
+    savedObjectsClient
+      .find<DashboardSavedObject>({
+        search: `"${title}"`,
+        searchFields: ['title'],
+        type: 'dashboard',
+      })
+      .then((results) => {
+        // The search isn't an exact match, lets see if we can find a single exact match to use
+        const matchingDashboards = results.savedObjects.filter(
+          (dashboard) => dashboard.attributes.title.toLowerCase() === title.toLowerCase()
+        );
+        if (matchingDashboards.length === 1) {
+          redirectTo(matchingDashboards[0].id);
+        } else {
+          initialFilter = title;
+        }
+      });
+  }
 
   const hideWriteControls = dashboardConfig.getHideWriteControls();
   const history = scopedHistory();
@@ -69,7 +94,7 @@ export const DashboardListing = () => {
       tableColumns={tableColumns}
       listingLimit={listingLimit}
       initialPageSize={savedObjects.settings.getPerPage()}
-      initialFilter={''}
+      initialFilter={initialFilter ?? ''}
       noItemsFragment={noItemsFragment}
       entityName={i18n.translate('dashboard.listing.table.entityName', {
         defaultMessage: 'dashboard',

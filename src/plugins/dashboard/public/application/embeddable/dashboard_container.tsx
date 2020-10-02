@@ -24,7 +24,7 @@ import { RefreshInterval, TimeRange, Query, Filter } from 'src/plugins/data/publ
 import { CoreStart } from 'src/core/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import uuid from 'uuid';
-import { UiActionsStart } from '../../ui_actions_plugin';
+import { UiActionsStart } from '../../../../ui_actions/public';
 import {
   Container,
   ContainerInput,
@@ -34,7 +34,7 @@ import {
   IEmbeddable,
   EmbeddableStart,
   PanelState,
-} from '../../embeddable_plugin';
+} from '../../../../embeddable/public';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 import { createPanelState } from './panel';
 import { DashboardPanelState } from './types';

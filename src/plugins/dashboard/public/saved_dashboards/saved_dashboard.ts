@@ -26,7 +26,7 @@ import { extractReferences, injectReferences } from './saved_dashboard_reference
 import { Filter, ISearchSource, Query, RefreshInterval } from '../../../../plugins/data/public';
 import { createDashboardEditUrl } from '../dashboard_constants';
 
-export interface SavedObjectDashboard extends SavedObject {
+export interface DashboardSavedObject extends SavedObject {
   id?: string;
   timeRestore: boolean;
   timeTo?: string;
@@ -46,7 +46,7 @@ export interface SavedObjectDashboard extends SavedObject {
 // Used only by the savedDashboards service, usually no reason to change this
 export function createSavedDashboardClass(
   services: SavedObjectKibanaServices
-): new (id: string) => SavedObjectDashboard {
+): new (id: string) => DashboardSavedObject {
   const SavedObjectClass = createSavedObjectClass(services);
   class SavedDashboard extends SavedObjectClass {
     // save these objects with the 'dashboard' type
@@ -120,5 +120,5 @@ export function createSavedDashboardClass(
 
   // Unfortunately this throws a typescript error without the casting.  I think it's due to the
   // convoluted way SavedObjects are created.
-  return (SavedDashboard as unknown) as new (id: string) => SavedObjectDashboard;
+  return (SavedDashboard as unknown) as new (id: string) => DashboardSavedObject;
 }

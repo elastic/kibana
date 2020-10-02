@@ -18,7 +18,7 @@
  */
 
 import { SavedObjectAttributes, SavedObjectReference } from 'kibana/public';
-import { SavedObjectDashboard } from './saved_dashboard';
+import { DashboardSavedObject } from './saved_dashboard';
 
 export function extractReferences({
   attributes,
@@ -56,7 +56,7 @@ export function extractReferences({
 }
 
 export function injectReferences(
-  savedObject: SavedObjectDashboard,
+  savedObject: DashboardSavedObject,
   references: SavedObjectReference[]
 ) {
   // Skip if panelsJSON is missing otherwise this will cause saved object import to fail when

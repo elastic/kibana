@@ -22,9 +22,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 
-import { useKibana, toMountPoint } from '../../../kibana_react/public';
-import { DashboardServices } from './application';
-import { DashboardConstants } from '../dashboard_constants';
+import { useKibana, toMountPoint } from '../../../../kibana_react/public';
+import { DashboardConstants } from '../../dashboard_constants';
+import { DashboardServices } from '../dashboard_router';
 
 let bannerId: string;
 

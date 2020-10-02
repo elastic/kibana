@@ -45,7 +45,7 @@ import {
   ReduxLikeStateContainer,
   syncState,
 } from '../../../kibana_utils/public';
-import { SavedObjectDashboard } from '../saved_dashboards';
+import { DashboardSavedObject } from '../saved_dashboards';
 import { DashboardContainer } from './embeddable';
 
 /**
@@ -55,7 +55,7 @@ import { DashboardContainer } from './embeddable';
  * versa. They should be as decoupled as possible so updating the store won't affect bwc of urls.
  */
 export class DashboardStateManager {
-  public savedDashboard: SavedObjectDashboard;
+  public savedDashboard: DashboardSavedObject;
   public lastSavedDashboardFilters: {
     timeTo?: string | Moment;
     timeFrom?: string | Moment;
@@ -102,7 +102,7 @@ export class DashboardStateManager {
     history,
     usageCollection,
   }: {
-    savedDashboard: SavedObjectDashboard;
+    savedDashboard: DashboardSavedObject;
     hideWriteControls: boolean;
     kibanaVersion: string;
     kbnUrlStateStorage: IKbnUrlStateStorage;

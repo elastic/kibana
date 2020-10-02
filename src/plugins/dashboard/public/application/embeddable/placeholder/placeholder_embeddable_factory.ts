@@ -23,7 +23,7 @@ import {
   EmbeddableFactoryDefinition,
   EmbeddableInput,
   IContainer,
-} from '../../../embeddable_plugin';
+} from '../../../../../embeddable/public';
 import { PlaceholderEmbeddable, PLACEHOLDER_EMBEDDABLE } from './placeholder_embeddable';
 
 export class PlaceholderEmbeddableFactory implements EmbeddableFactoryDefinition {

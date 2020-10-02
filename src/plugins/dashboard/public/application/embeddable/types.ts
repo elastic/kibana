@@ -18,7 +18,7 @@
  */
 import { SavedObjectEmbeddableInput } from 'src/plugins/embeddable/public';
 import { GridData } from '../../../common';
-import { PanelState, EmbeddableInput } from '../../embeddable_plugin';
+import { PanelState, EmbeddableInput } from '../../../../embeddable/public';
 export type PanelId = string;
 export type SavedObjectId = string;
 

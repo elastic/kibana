@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export * from '../../../plugins/embeddable/public';
+export { Dashboard404 } from './dashboard_4o4';
+export { DashboardListing } from './dashboard_listing';

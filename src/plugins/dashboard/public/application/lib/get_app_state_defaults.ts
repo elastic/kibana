@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { ViewMode } from '../../embeddable_plugin';
-import { SavedObjectDashboard } from '../../saved_dashboards';
+import { ViewMode } from '../../../../embeddable/public';
+import { DashboardSavedObject } from '../../saved_dashboards';
 import { DashboardAppStateDefaults } from '../../types';
 
 export function getAppStateDefaults(
-  savedDashboard: SavedObjectDashboard,
+  savedDashboard: DashboardSavedObject,
   hideWriteControls: boolean
 ): DashboardAppStateDefaults {
   return {

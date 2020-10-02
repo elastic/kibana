@@ -20,64 +20,83 @@
 import React from 'react';
 
 import { I18nProvider } from '@kbn/i18n/react';
-import { AppMountParameters, CoreSetup, ScopedHistory } from 'kibana/public';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router, Switch, Route, RouteComponentProps } from 'react-router-dom';
+import { parse } from 'query-string';
 import { Storage } from '../../../kibana_utils/public';
-import { DashboardStartDependencies, DashboardStart, DashboardSetupDependencies } from '../plugin';
-import { DashboardServices } from './application';
 import { KibanaContextProvider } from '../../../kibana_react/public';
-import { DashboardListing } from './listing/dashboard_listing';
-import { Dashboard404 } from './dashboard_404';
-import { DashboardConstants } from '..';
+import { DashboardListing, Dashboard404 } from './listing';
+import { DashboardAppServices, DashboardMountProps } from './types';
+import { DashboardSavedObject } from '../saved_dashboards';
+import { DashboardApp } from './dashboard_app';
+import { createDashboardEditUrl, DashboardConstants } from '..';
 
-export async function mountApp(
-  core: CoreSetup<DashboardStartDependencies, DashboardStart>,
-  usageCollection: DashboardSetupDependencies['usageCollection'],
-  element: AppMountParameters['element'],
-  scopedHistory: ScopedHistory<unknown>,
-  restorePreviousUrl: () => void
-) {
+export async function mountApp({
+  core,
+  element,
+  scopedHistory,
+  usageCollection,
+  restorePreviousUrl,
+  setHeaderActionMenu,
+}: DashboardMountProps) {
   const [coreStart, pluginsStart, dashboardStart] = await core.getStartServices();
 
   const {
-    embeddable: embeddableStart,
     navigation,
-    share: shareStart,
-    data: dataStart,
-    kibanaLegacy: { dashboardConfig, navigateToDefaultApp, navigateToLegacyKibanaUrl },
     savedObjects,
+    data: dataStart,
+    share: shareStart,
+    embeddable: embeddableStart,
+    kibanaLegacy: { dashboardConfig },
+    urlForwarding: { navigateToDefaultApp, navigateToLegacyKibanaUrl },
   } = pluginsStart;
 
-  const dashboardServices: DashboardServices = {
+  const dashboardServices: DashboardAppServices = {
+    navigation,
+    savedObjects,
+    usageCollection,
     core: coreStart,
     dashboardConfig,
-    navigateToDefaultApp,
-    navigateToLegacyKibanaUrl,
-    navigation,
-    share: shareStart,
     data: dataStart,
+    share: shareStart,
+    restorePreviousUrl,
+    setHeaderActionMenu,
+    navigateToDefaultApp,
+    chrome: coreStart.chrome,
+    navigateToLegacyKibanaUrl,
+    embeddable: embeddableStart,
+    uiSettings: coreStart.uiSettings,
+    scopedHistory: () => scopedHistory,
+    indexPatterns: dataStart.indexPatterns,
+    localStorage: new Storage(localStorage),
+    addBasePath: coreStart.http.basePath.prepend,
+    savedQueryService: dataStart.query.savedQueries,
     savedObjectsClient: coreStart.savedObjects.client,
     savedDashboards: dashboardStart.getSavedDashboardLoader(),
-    chrome: coreStart.chrome,
-    addBasePath: coreStart.http.basePath.prepend,
-    uiSettings: coreStart.uiSettings,
-    savedQueryService: dataStart.query.savedQueries,
-    embeddable: embeddableStart,
     dashboardCapabilities: coreStart.application.capabilities.dashboard,
     embeddableCapabilities: {
       visualizeCapabilities: coreStart.application.capabilities.visualize,
       mapsCapabilities: coreStart.application.capabilities.maps,
     },
-    localStorage: new Storage(localStorage),
-    usageCollection,
-    scopedHistory: () => scopedHistory,
-    savedObjects,
-    restorePreviousUrl,
   };
 
   const renderDashboard = (routeProps: RouteComponentProps<{ id?: string }>) => {
-    return <h1>This will be a dashboard</h1>;
+    return (
+      <DashboardApp history={routeProps.history} savedDashboardId={routeProps.match.params.id} />
+    );
+  };
+
+  const renderListingPage = (routeProps: RouteComponentProps) => {
+    const searchParams = parse(routeProps.history.location.search);
+    const title = (searchParams.title as string) || undefined;
+    const filter = (searchParams.filter as string) || undefined;
+    return (
+      <DashboardListing
+        initialFilter={filter}
+        title={title}
+        redirectTo={(id) => routeProps.history.replace(createDashboardEditUrl(id))}
+      />
+    );
   };
 
   // make sure the index pattern list is up to date
@@ -91,11 +110,11 @@ export async function mountApp(
             <Route
               path={[
                 DashboardConstants.CREATE_NEW_DASHBOARD_URL,
-                `${DashboardConstants.EDIT_DASHBOARD_URL}/:id`,
+                `${DashboardConstants.VIEW_DASHBOARD_URL}/:id`,
               ]}
               render={renderDashboard}
             />
-            <Route exact path={DashboardConstants.LANDING_PAGE_PATH} component={DashboardListing} />
+            <Route exact path={DashboardConstants.LANDING_PAGE_PATH} render={renderListingPage} />
             <Dashboard404 />
           </Switch>
         </KibanaContextProvider>

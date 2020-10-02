@@ -76,7 +76,6 @@ import {
   DashboardContainerFactoryDefinition,
   ExpandPanelAction,
   ExpandPanelActionContext,
-  RenderDeps,
   ReplacePanelAction,
   ReplacePanelActionContext,
   ACTION_UNLINK_FROM_LIBRARY,
@@ -96,7 +95,6 @@ import {
 } from './url_generator';
 import { createSavedDashboardLoader } from './saved_dashboards';
 import { DashboardConstants } from './dashboard_constants';
-import { addEmbeddableToDashboardUrl } from './url_utils/url_helper';
 import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
 import { UrlGeneratorState } from '../../share/public';
 import { AttributeService } from '.';
@@ -323,13 +321,14 @@ export class DashboardPlugin
         this.currentHistory = params.history;
         const { mountApp } = await import('./application/dashboard_router');
         appMounted();
-        return mountApp(
+        return mountApp({
           core,
           usageCollection,
-          params.element,
-          this.currentHistory!,
-          restorePreviousUrl
-        );
+          restorePreviousUrl,
+          element: params.element,
+          scopedHistory: this.currentHistory!,
+          setHeaderActionMenu: params.setHeaderActionMenu,
+        });
       },
     };
 
