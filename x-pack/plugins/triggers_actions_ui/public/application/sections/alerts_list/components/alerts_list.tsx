@@ -347,6 +347,7 @@ export const AlertsList: React.FunctionComponent = () => {
     />,
     <AlertStatusFilter
       key="alert-status-filter"
+      selectedStatuses={alertStatusesFilter}
       onChange={(ids: string[]) => setAlertStatusesFilter(ids)}
     />,
   ];
@@ -422,7 +423,7 @@ export const AlertsList: React.FunctionComponent = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      {!dissmissAlertErrors && alertsStatusesTotal[AlertExecutionStatusValues[2]] > 0 ? (
+      {!dissmissAlertErrors && alertsStatusesTotal.error > 0 ? (
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiCallOut
@@ -433,7 +434,7 @@ export const AlertsList: React.FunctionComponent = () => {
                   id="xpack.triggersActionsUI.sections.alertsList.attentionBannerTitle"
                   defaultMessage="There is {totalStausesError} {totalStausesError, plural, one {{singleTitle}} other {# {multipleTitle}}} with an error."
                   values={{
-                    totalStausesError: alertsStatusesTotal[AlertExecutionStatusValues[2]],
+                    totalStausesError: alertsStatusesTotal.error,
                     singleTitle: 'alert',
                     multipleTitle: 'alerts',
                   }}
@@ -445,7 +446,7 @@ export const AlertsList: React.FunctionComponent = () => {
                 type="primary"
                 size="s"
                 color="danger"
-                onClick={() => setAlertStatusesFilter([AlertExecutionStatusValues[2]])}
+                onClick={() => setAlertStatusesFilter(['error'])}
               >
                 <FormattedMessage
                   id="xpack.triggersActionsUI.sections.alertsList.viewBunnerButtonLabel"
@@ -469,7 +470,10 @@ export const AlertsList: React.FunctionComponent = () => {
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.totalItemsCountDescription"
               defaultMessage="Showing: {pageSize} of {totalItemCount} alerts."
-              values={{ totalItemCount: alertsState.totalItemCount, pageSize: page.size }}
+              values={{
+                totalItemCount: alertsState.totalItemCount,
+                pageSize: alertsState.data.length,
+              }}
             />
           </EuiText>
         </EuiFlexItem>
@@ -479,7 +483,7 @@ export const AlertsList: React.FunctionComponent = () => {
               id="xpack.triggersActionsUI.sections.alertsList.totalStausesActiveDescription"
               defaultMessage="Active: {totalStausesActive}"
               values={{
-                totalStausesActive: alertsStatusesTotal[AlertExecutionStatusValues[1]],
+                totalStausesActive: alertsStatusesTotal.active,
               }}
             />
           </EuiHealth>
@@ -489,7 +493,7 @@ export const AlertsList: React.FunctionComponent = () => {
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.totalStausesErrorDescription"
               defaultMessage="Errors: {totalStausesError}"
-              values={{ totalStausesError: alertsStatusesTotal[AlertExecutionStatusValues[2]] }}
+              values={{ totalStausesError: alertsStatusesTotal.error }}
             />
           </EuiHealth>
         </EuiFlexItem>
@@ -498,7 +502,7 @@ export const AlertsList: React.FunctionComponent = () => {
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.totalStausesOkDescription"
               defaultMessage="Ok: {totalStausesOk}"
-              values={{ totalStausesOk: alertsStatusesTotal[AlertExecutionStatusValues[0]] }}
+              values={{ totalStausesOk: alertsStatusesTotal.ok }}
             />
           </EuiHealth>
         </EuiFlexItem>
@@ -508,7 +512,7 @@ export const AlertsList: React.FunctionComponent = () => {
               id="xpack.triggersActionsUI.sections.alertsList.totalStausesPendingDescription"
               defaultMessage="Pending: {totalStausesPending}"
               values={{
-                totalStausesPending: alertsStatusesTotal[AlertExecutionStatusValues[3]],
+                totalStausesPending: alertsStatusesTotal.pending,
               }}
             />
           </EuiHealth>
@@ -519,7 +523,7 @@ export const AlertsList: React.FunctionComponent = () => {
               id="xpack.triggersActionsUI.sections.alertsList.totalStausesUnknownDescription"
               defaultMessage="Unknown: {totalStausesUnknown}"
               values={{
-                totalStausesUnknown: alertsStatusesTotal[AlertExecutionStatusValues[4]],
+                totalStausesUnknown: alertsStatusesTotal.unknown,
               }}
             />
           </EuiHealth>

@@ -29,7 +29,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { AlertExecutionStatusValues } from '../../../../../../alerts/common';
 import { useAppDependencies } from '../../../app_context';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { getAlertingSectionBreadcrumb, getAlertDetailsBreadcrumb } from '../../../lib/breadcrumb';
@@ -279,8 +278,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
-            {!dissmissAlertErrors &&
-            alert.executionStatus.status === AlertExecutionStatusValues[2] ? (
+            {!dissmissAlertErrors && alert.executionStatus.status === 'error' ? (
               <EuiFlexGroup>
                 <EuiFlexItem>
                   <EuiCallOut
@@ -289,7 +287,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                     size="s"
                     title={
                       <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.alertDetails.alertInstances.attentionBannerTitle"
+                        id="xpack.triggersActionsUI.sections.alertDetails.attentionBannerTitle"
                         defaultMessage="This alert has an error caused by the {errorReason} reason."
                         values={{
                           errorReason: alert.executionStatus.error?.reason,
@@ -302,7 +300,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                       <h3>
                         <EuiTextColor color="danger">
                           <FormattedMessage
-                            id="xpack.triggersActionsUI.sections.alertDetails.alertInstances.alertErrorMessageTitle"
+                            id="xpack.triggersActionsUI.sections.alertDetails.alertErrorMessageTitle"
                             defaultMessage="Error message:"
                           />
                         </EuiTextColor>
@@ -314,7 +312,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                     <EuiSpacer size="s" />
                     <EuiButton color="danger" onClick={() => setDissmissAlertErrors(true)}>
                       <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.alertDetails.alertInstances.dismissButtonTitle"
+                        id="xpack.triggersActionsUI.sections.alertDetails.dismissButtonTitle"
                         defaultMessage="Dismiss"
                       />
                     </EuiButton>

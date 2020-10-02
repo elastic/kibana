@@ -16,13 +16,15 @@ import {
 import { AlertExecutionStatusValues } from '../../../../../../alerts/common';
 
 interface AlertStatusFilterProps {
+  selectedStatuses: string[];
   onChange?: (selectedAlertStatusesIds: string[]) => void;
 }
 
 export const AlertStatusFilter: React.FunctionComponent<AlertStatusFilterProps> = ({
+  selectedStatuses,
   onChange,
 }: AlertStatusFilterProps) => {
-  const [selectedValues, setSelectedValues] = useState<string[]>([]);
+  const [selectedValues, setSelectedValues] = useState<string[]>(selectedStatuses);
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
   useEffect(() => {
@@ -31,6 +33,10 @@ export const AlertStatusFilter: React.FunctionComponent<AlertStatusFilterProps> 
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedValues]);
+
+  useEffect(() => {
+    setSelectedValues(selectedStatuses);
+  }, [selectedStatuses]);
 
   return (
     <EuiFilterGroup>
