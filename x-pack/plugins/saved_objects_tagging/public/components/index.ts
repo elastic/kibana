@@ -5,3 +5,4 @@
  */
 
 export { TagBadge } from './tag_badge';
+export { TagList } from './tag_list';
