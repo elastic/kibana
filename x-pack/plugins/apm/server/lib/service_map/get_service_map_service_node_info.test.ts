@@ -19,11 +19,10 @@ describe('getServiceMapServiceNodeInfo', () => {
             }),
         },
         indices: {},
+        uiFilters: { environment: 'test environment' },
       } as unknown) as Setup & SetupTimeRange;
-      const environment = 'test environment';
       const serviceName = 'test service name';
       const result = await getServiceMapServiceNodeInfo({
-        uiFilters: { environment },
         setup,
         serviceName,
         searchAggregatedTransactions: false,
@@ -67,11 +66,10 @@ describe('getServiceMapServiceNodeInfo', () => {
         config: {
           'xpack.apm.metricsInterval': 30,
         },
+        uiFilters: { environment: 'test environment' },
       } as unknown) as Setup & SetupTimeRange;
-      const environment = 'test environment';
       const serviceName = 'test service name';
       const result = await getServiceMapServiceNodeInfo({
-        uiFilters: { environment },
         setup,
         serviceName,
         searchAggregatedTransactions: false,
