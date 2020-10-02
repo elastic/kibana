@@ -290,6 +290,7 @@ export class AlertingPlugin {
       encryptedSavedObjectsClient,
       getBasePath: this.getBasePath,
       eventLogger: this.eventLogger!,
+      internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
     });
 
     this.eventLogService!.registerSavedObjectProvider('alert', (request) => {
