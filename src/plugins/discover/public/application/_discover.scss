@@ -121,18 +121,9 @@ discover-app {
   padding: $euiSizeXS 0;
 }
 
-.dscOverlay {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 20;
-  padding-top: $euiSizeM;
-
-  opacity: 0.75;
+.dscLoading {
   text-align: center;
-  background-color: transparent;
+  padding: $euiSizeL 0;
 }
 
 .dscTable {

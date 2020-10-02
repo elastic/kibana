@@ -206,7 +206,7 @@ export function DiscoverLegacy({
             {/* @TODO: Solved in the Angular way to satisfy functional test - should be improved*/}
             <span style={{ display: resultState !== 'loading' ? 'none' : '' }}>
               {fetchError && <DiscoverFetchError fetchError={fetchError} />}
-              <div className="dscOverlay" style={{ display: fetchError ? 'none' : '' }}>
+              <div className="dscLoading" style={{ display: fetchError ? 'none' : '' }}>
                 <LoadingSpinner />
               </div>
             </span>
