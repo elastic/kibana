@@ -131,7 +131,7 @@ export class CollectorSet {
         try {
           return {
             type: collector.type,
-            result: await collector.fetch(callCluster, esClient), // each collector must ensure they handle the response appropriately.
+            result: await collector.fetch({ callCluster, esClient }), // each collector must ensure they handle the response appropriately.
           };
         } catch (err) {
           this.logger.warn(err);
