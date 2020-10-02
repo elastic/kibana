@@ -166,13 +166,12 @@ export const uiSettings: Record<string, UiSettingsParams> = {
   },
   [MODIFY_COLUMNS_ON_SWITCH]: {
     name: i18n.translate('discover.advancedSettings.discover.modifyColumnsOnSwitchTitle', {
-      defaultMessage: 'Modify columns when index pattern is switched',
+      defaultMessage: 'Modify columns when changing index patterns',
     }),
     value: true,
     description: i18n.translate('discover.advancedSettings.discover.modifyColumnsOnSwitchText', {
       defaultMessage:
-        'When switching index patterns, selected columns, that are not available in the ' +
-        'next index pattern, are removed.',
+        'Remove columns that not available in the new index pattern.'
     }),
     category: ['discover'],
     schema: schema.boolean(),
