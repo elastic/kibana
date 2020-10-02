@@ -27,10 +27,10 @@ import { ConnectorCard } from '../card';
 const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<JiraFieldsType>> = ({
   connector,
   fields,
-  isEdit,
+  isEdit = true,
   onChange,
 }) => {
-  const { issueType = null, priority = null, parent = null } = fields;
+  const { issueType = null, priority = null, parent = null } = fields ?? {};
 
   const [issueTypesSelectOptions, setIssueTypesSelectOptions] = useState<EuiSelectOption[]>([]);
   const [prioritiesSelectOptions, setPrioritiesSelectOptions] = useState<EuiSelectOption[]>([]);

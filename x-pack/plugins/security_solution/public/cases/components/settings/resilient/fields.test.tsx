@@ -21,7 +21,7 @@ jest.mock('./use_get_severity');
 const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
 const useGetSeverityMock = useGetSeverity as jest.Mock;
 
-describe('JiraParamsFields renders', () => {
+describe('ResilientParamsFields renders', () => {
   const useGetIncidentTypesResponse = {
     isLoading: false,
     incidentTypes: [
@@ -129,12 +129,5 @@ describe('JiraParamsFields renders', () => {
       });
 
     expect(onChange).toHaveBeenCalledWith({ incidentTypes: ['19'], severityCode: '4' });
-  });
-
-  test('it resets fields when changing connector', async () => {
-    const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
-    wrapper.setProps({ connector: {} });
-
-    expect(onChange).toBeCalledWith({ incidentTypes: null, severityCode: null });
   });
 });

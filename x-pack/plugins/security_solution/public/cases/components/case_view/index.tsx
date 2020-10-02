@@ -216,7 +216,7 @@ export const CaseComponent = React.memo<CaseProps>(
     });
 
     const onSubmitConnector = useCallback(
-      (connectorId, connectorFields, onSuccess, onError) => {
+      (connectorId, connectorFields, onError, onSuccess) => {
         const connector = getConnectorById(connectorId, connectors);
         const connectorToUpdate = connector
           ? normalizeActionConnector(connector)

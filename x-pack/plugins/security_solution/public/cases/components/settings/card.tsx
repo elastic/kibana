@@ -48,6 +48,7 @@ const ConnectorCardDisplay: React.FC<ConnectorCardProps> = ({
   );
   return (
     <EuiCard
+      data-test-subj={`settings-connector-card`}
       display="plain"
       description={description}
       icon={icon}

@@ -38,8 +38,8 @@ interface EditConnectorProps {
   onSubmit: (
     connectorId: string,
     connectorFields: ConnectorTypeFields['fields'],
-    onSuccess: () => void,
-    onError: () => void
+    onError: () => void,
+    onSuccess: () => void
   ) => void;
   selectedConnector: string;
   userActions: CaseUserActions[];
@@ -128,10 +128,7 @@ export const EditConnector = React.memo(
     );
 
     const setCurrentConnector = useCallback(() => {
-      const setCurrentConnectorCondition =
-        currentConnector == null || connectorId !== currentConnector.id;
-
-      if (setCurrentConnectorCondition) {
+      if (currentConnector == null || connectorId !== currentConnector.id) {
         dispatch({
           type: 'SET_CURRENT_CONNECTOR',
           payload: getConnectorById(connectorId, connectors),
@@ -191,7 +188,7 @@ export const EditConnector = React.memo(
     const onSubmitConnector = useCallback(async () => {
       const { isValid, data: newData } = await submit();
       if (isValid && newData.connectorId) {
-        onSubmit(newData.connectorId, fields, noop, onError);
+        onSubmit(newData.connectorId, fields, onError, noop);
         dispatch({
           type: 'SET_EDIT_CONNECTOR',
           payload: false,
@@ -250,7 +247,7 @@ export const EditConnector = React.memo(
                 </EuiFlexGroup>
               </Form>
             </DisappearingFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem data-test-subj={'blerg'}>
               <SettingFieldsForm
                 connector={currentConnector}
                 fields={fields}

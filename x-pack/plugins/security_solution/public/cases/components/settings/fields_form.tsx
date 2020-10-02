@@ -23,7 +23,6 @@ const SettingFieldsFormComponent: React.FC<Props> = ({ connector, isEdit, onChan
     },
     [onChange]
   );
-
   if (connector == null || connector.actionTypeId == null || connector.actionTypeId === '.none') {
     return null;
   }

@@ -26,8 +26,8 @@ import { ConnectorCard } from '../card';
 
 const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<
   ResilientFieldsType
->> = ({ isEdit, fields, connector, onChange }) => {
-  const { incidentTypes = null, severityCode = null } = fields;
+>> = ({ isEdit = true, fields, connector, onChange }) => {
+  const { incidentTypes = null, severityCode = null } = fields ?? {};
 
   const [incidentTypesComboBoxOptions, setIncidentTypesComboBoxOptions] = useState<
     Array<EuiComboBoxOptionOption<string>>
@@ -102,7 +102,13 @@ const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProp
         ? [
             {
               title: i18n.INCIDENT_TYPES_LABEL,
-              description: incidentTypes.map((incident) => <p>{incident}</p>),
+              description: incidentTypes.map((incident, i) =>
+                incidentTypes.length - 1 < i ? (
+                  <span key={`${incident}-${i}`}>{`${incident}, `}</span>
+                ) : (
+                  <span key={`${incident}-${i}`}>{incident}</span>
+                )
+              ),
             },
           ]
         : []),

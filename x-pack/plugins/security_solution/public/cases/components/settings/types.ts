@@ -25,7 +25,7 @@ export interface CaseSettingsRegistry {
 }
 
 export interface SettingFieldsProps<TFields> {
-  isEdit: boolean;
+  isEdit?: boolean;
   connector: CaseSettingsConnector;
   fields: TFields;
   onChange: (fields: TFields) => void;

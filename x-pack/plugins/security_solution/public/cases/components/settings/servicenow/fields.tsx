@@ -29,8 +29,8 @@ const selectOptions = [
 
 const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<
   ServiceNowFieldsType
->> = ({ isEdit, fields, connector, onChange }) => {
-  const { severity = null, urgency = null, impact = null } = fields;
+>> = ({ isEdit = true, fields, connector, onChange }) => {
+  const { severity = null, urgency = null, impact = null } = fields ?? {};
 
   useEffect(() => {
     onChange({ severity, urgency, impact });
