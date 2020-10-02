@@ -7,6 +7,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiCard, EuiFlexGrid, EuiFlexItem, EuiFormRow, EuiIcon } from '@elastic/eui';
 
+import { Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import {
   isThresholdRule,
@@ -18,7 +19,7 @@ import { FieldHook } from '../../../../shared_imports';
 import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
 import { MlCardDescription } from './ml_card_description';
-import { Type } from '../../../../../common/detection_engine/schemas/common/schemas';
+import EqlSearchIcon from './eql_search_icon.svg';
 
 interface SelectRuleTypeProps {
   describedByIds: string[];
