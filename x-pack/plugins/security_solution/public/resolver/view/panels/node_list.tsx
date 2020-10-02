@@ -42,7 +42,7 @@ import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { ResolverAction } from '../../store/actions';
 import { useFormattedDate } from './use_formatted_date';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
-import { CopyFieldButton } from './panel_content_utilities';
+import { CopyablePanelField } from './panel_content_utilities';
 
 interface ProcessTableView {
   name?: string;
@@ -216,7 +216,7 @@ const NodeDetailTimestamp = memo(({ eventDate }: { eventDate: Date | undefined }
   const formattedDate = useFormattedDate(eventDate);
 
   return formattedDate ? (
-    <CopyFieldButton textToCopy={formattedDate} content={formattedDate} />
+    <CopyablePanelField textToCopy={formattedDate} content={formattedDate} />
   ) : (
     getEmptyTagValue()
   );

@@ -94,7 +94,7 @@ const StyledCopyableField = styled.div<StyledCopyableField>`
   }
 `;
 
-export const CopyFieldButton = memo(
+export const CopyablePanelField = memo(
   ({ textToCopy, content }: { textToCopy: string; content: JSX.Element | string }) => {
     const { linkColor, pillStroke } = useColors();
     const [isOpen, setIsOpen] = useState(false);
