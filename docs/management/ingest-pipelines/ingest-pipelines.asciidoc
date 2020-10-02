@@ -108,7 +108,7 @@ Once complete, click *Update*.
 
 |===
 +
-You now have defined 4 {ref}/ingest-processors.html[processors] that run sequentially:
+The four {ref}/ingest-processors.html[processors]will run sequentially:
 {ref}/grok-processor.html[grok], {ref}/date-processor.html[date],
 {ref}/geoip-processor.html[geoip], and {ref}/user-agent-processor.html[user_agent].
 Your form should look similar to this:
