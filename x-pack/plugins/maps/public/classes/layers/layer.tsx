@@ -112,13 +112,11 @@ export type CustomIconAndTooltipContent = {
 export interface ILayerArguments {
   layerDescriptor: LayerDescriptor;
   source: ISource;
-  style: IStyle;
 }
 
 export class AbstractLayer implements ILayer {
   protected readonly _descriptor: LayerDescriptor;
   protected readonly _source: ISource;
-  protected readonly _style: IStyle;
   protected readonly _dataRequests: DataRequest[];
 
   static createDescriptor(options: Partial<LayerDescriptor>): LayerDescriptor {
@@ -142,10 +140,9 @@ export class AbstractLayer implements ILayer {
     }
   }
 
-  constructor({ layerDescriptor, source, style }: ILayerArguments) {
+  constructor({ layerDescriptor, source }: ILayerArguments) {
     this._descriptor = AbstractLayer.createDescriptor(layerDescriptor);
     this._source = source;
-    this._style = style;
     if (this._descriptor.__dataRequests) {
       this._dataRequests = this._descriptor.__dataRequests.map(
         (dataRequest) => new DataRequest(dataRequest)
@@ -259,11 +256,15 @@ export class AbstractLayer implements ILayer {
   }
 
   getStyleForEditing(): IStyle {
-    return this._style;
+    throw new Error('Should implement AbstractLayer#getStyleForEditing');
   }
 
-  getStyle() {
-    return this._style;
+  getStyle(): IStyle {
+    throw new Error('Should implement AbstractLayer#getStyle');
+  }
+
+  getCurrentStyle(): IStyle {
+    throw new Error('Should implement AbstractLayer#getCurrentStyle');
   }
 
   getLabel(): string {
@@ -412,10 +413,6 @@ export class AbstractLayer implements ILayer {
 
   getQuery(): Query | null {
     return this._descriptor.query ? this._descriptor.query : null;
-  }
-
-  getCurrentStyle(): IStyle {
-    return this._style;
   }
 
   async getImmutableSourceProperties() {
