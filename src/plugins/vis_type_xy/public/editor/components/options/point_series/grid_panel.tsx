@@ -16,22 +16,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useMemo, useCallback } from 'react';
+
+import React, { useMemo, useEffect, useCallback } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 
-import { VisOptionsProps } from '../../../../../../vis_default_editor/public';
 import { SelectOption, SwitchOption } from '../../../../../../charts/public';
 
 import { VisParams, ValueAxis } from '../../../../types';
+import { ValidationVisOptionsProps } from '../../common';
 
-function GridPanel({ stateParams, setValue }: VisOptionsProps<VisParams>) {
+type GridPanelOptions = ValidationVisOptionsProps<
+  VisParams,
+  {
+    showElasticChartsOptions: boolean;
+  }
+>;
+
+function GridPanel({ stateParams, setValue, hasHistogramAgg, extraProps }: GridPanelOptions) {
   const setGrid = useCallback(
     <T extends keyof VisParams['grid']>(paramName: T, value: VisParams['grid'][T]) =>
       setValue('grid', { ...stateParams.grid, [paramName]: value }),
     [stateParams.grid, setValue]
+  );
+
+  const disableCategoryGridLines = useMemo(
+    () => !extraProps?.showElasticChartsOptions && hasHistogramAgg,
+    [extraProps?.showElasticChartsOptions, hasHistogramAgg]
   );
 
   const options = useMemo(
@@ -50,6 +63,12 @@ function GridPanel({ stateParams, setValue }: VisOptionsProps<VisParams>) {
     [stateParams.valueAxes]
   );
 
+  useEffect(() => {
+    if (disableCategoryGridLines) {
+      setGrid('categoryLines', false);
+    }
+  }, [disableCategoryGridLines, setGrid]);
+
   return (
     <EuiPanel paddingSize="s">
       <EuiTitle size="xs">
@@ -64,10 +83,18 @@ function GridPanel({ stateParams, setValue }: VisOptionsProps<VisParams>) {
       <EuiSpacer size="m" />
 
       <SwitchOption
+        disabled={disableCategoryGridLines}
         label={i18n.translate('visTypeXy.controls.pointSeries.gridAxis.xAxisLinesLabel', {
           defaultMessage: 'Show X-axis lines',
         })}
         paramName="categoryLines"
+        tooltip={
+          disableCategoryGridLines
+            ? i18n.translate('visTypeXy.controls.pointSeries.gridAxis.yAxisLinesDisabledTooltip', {
+                defaultMessage: "X-axis lines can't show for histograms.",
+              })
+            : undefined
+        }
         value={stateParams.grid.categoryLines}
         setValue={setGrid}
         data-test-subj="showCategoryLines"
