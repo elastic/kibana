@@ -23,8 +23,7 @@ describe('setDefaultAutoFitToBounds', () => {
         settings: { showSpatialFilters: false },
       }),
     };
-    const migratedMapState = JSON.parse(setDefaultAutoFitToBounds({ attributes })!.mapStateJSON);
-    expect(JSON.parse(setDefaultAutoFitToBounds({ attributes })!.mapStateJSON)).toEqual({
+    expect(JSON.parse(setDefaultAutoFitToBounds({ attributes }).mapStateJSON!)).toEqual({
       settings: { autoFitToDataBounds: false, showSpatialFilters: false },
     });
   });
@@ -34,8 +33,7 @@ describe('setDefaultAutoFitToBounds', () => {
       title: 'my map',
       mapStateJSON: JSON.stringify({}),
     };
-    const migratedMapState = JSON.parse(setDefaultAutoFitToBounds({ attributes })!.mapStateJSON);
-    expect(JSON.parse(setDefaultAutoFitToBounds({ attributes })!.mapStateJSON)).toEqual({
+    expect(JSON.parse(setDefaultAutoFitToBounds({ attributes }).mapStateJSON!)).toEqual({
       settings: { autoFitToDataBounds: false },
     });
   });

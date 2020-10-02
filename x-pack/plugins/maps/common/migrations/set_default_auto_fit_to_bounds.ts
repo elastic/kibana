@@ -4,22 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
-import {
-  AGG_DELIMITER,
-  AGG_TYPE,
-  FIELD_ORIGIN,
-  JOIN_FIELD_NAME_PREFIX,
-  LAYER_TYPE,
-  VECTOR_STYLES,
-} from '../constants';
-import { getJoinAggKey } from '../get_agg_key';
-import {
-  AggDescriptor,
-  JoinDescriptor,
-  LayerDescriptor,
-  VectorLayerDescriptor,
-} from '../descriptor_types';
 import { MapSavedObjectAttributes } from '../map_saved_object_type';
 
 export function setDefaultAutoFitToBounds({
