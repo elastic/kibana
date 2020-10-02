@@ -63,7 +63,7 @@ describe('Alerts rules, prebuilt rules', () => {
     changeToThreeHundredRowsPerPage();
     waitForRulesToBeLoaded();
 
-    cy.get(SHOWING_RULES_TEXT).should('have.text', `Showing ${expectedNumberOfRules} alerts`);
+    cy.get(SHOWING_RULES_TEXT).should('have.text', `Showing ${expectedNumberOfRules} rules`);
     const firstScreenRules = await cy.get(RULES_TABLE).find(RULES_ROW).promisify();
 
     paginate();
