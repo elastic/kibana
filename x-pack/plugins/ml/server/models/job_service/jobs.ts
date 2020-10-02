@@ -30,7 +30,6 @@ import {
   isTimeSeriesViewJob,
 } from '../../../common/util/job_utils';
 import { groupsProvider } from './groups';
-import type { JobsInSpaces } from '../../saved_objects';
 import type { MlClient } from '../../lib/ml_client';
 
 export interface MlJobsResponse {
@@ -50,26 +49,16 @@ interface Results {
   };
 }
 
-export function jobsProvider(
-  client: IScopedClusterClient,
-  mlClient: MlClient,
-  jobsInSpaces: JobsInSpaces
-) {
+export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
   const { asInternalUser } = client;
 
-  const { forceDeleteDatafeed, getDatafeedIdsByJobId } = datafeedsProvider(mlClient, jobsInSpaces);
+  const { forceDeleteDatafeed, getDatafeedIdsByJobId } = datafeedsProvider(mlClient);
   const { getAuditMessagesSummary } = jobAuditMessagesProvider(client, mlClient);
   const { getLatestBucketTimestampByJob } = resultsServiceProvider(client, mlClient);
   const calMngr = new CalendarManager(mlClient);
 
   async function forceDeleteJob(jobId: string) {
     await mlClient.deleteJob({ job_id: jobId, force: true, wait_for_completion: false });
-    try {
-      await jobsInSpaces.deleteAnomalyDetectionJob(jobId);
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('error deleting job saved object');
-    }
   }
 
   async function deleteJobs(jobIds: string[]) {
@@ -412,8 +401,7 @@ export function jobsProvider(
 
       jobIds.push(...jobs.filter((j) => j.deleting === true).map((j) => j.job_id));
     }
-    // TODO!! TEST THIS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    return { jobIds: jobsInSpaces.filterJobIdsForSpace('anomaly-detector', jobIds) };
+    return { jobIds };
   }
 
   // Checks if each of the jobs in the specified list of IDs exist.

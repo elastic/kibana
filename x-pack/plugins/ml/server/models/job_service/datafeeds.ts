@@ -8,7 +8,6 @@ import { i18n } from '@kbn/i18n';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
 import { Datafeed, DatafeedStats } from '../../../common/types/anomaly_detection_jobs';
-import type { JobsInSpaces } from '../../saved_objects';
 import type { MlClient } from '../../lib/ml_client';
 
 export interface MlDatafeedsResponse {
@@ -27,7 +26,7 @@ interface Results {
   };
 }
 
-export function datafeedsProvider(mlClient: MlClient, jobsInSpaces: JobsInSpaces) {
+export function datafeedsProvider(mlClient: MlClient) {
   async function forceStartDatafeeds(datafeedIds: string[], start?: number, end?: number) {
     const jobIds = await getJobIdsByDatafeedId();
     const doStartsCalled = datafeedIds.reduce((acc, cur) => {
@@ -136,12 +135,6 @@ export function datafeedsProvider(mlClient: MlClient, jobsInSpaces: JobsInSpaces
       datafeed_id: datafeedId,
       force: true,
     });
-    try {
-      await jobsInSpaces.deleteDatafeed(datafeedId);
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('error removing datafeed id from job saved object');
-    }
     return body;
   }
 

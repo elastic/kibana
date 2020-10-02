@@ -166,7 +166,7 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCreateDatafeed'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ mlClient, request, response, jobsInSpaces }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const datafeedId = request.params.datafeedId;
         const { body } = await mlClient.putDatafeed(
@@ -176,8 +176,6 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
           },
           getAuthorizationHeader(request)
         );
-
-        await jobsInSpaces.addDatafeed(datafeedId, request.body.job_id);
 
         return response.ok({
           body,
@@ -250,7 +248,7 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canDeleteDatafeed'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ mlClient, request, response, jobsInSpaces }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const options: RequestParams.MlDeleteDatafeed = {
           datafeed_id: request.params.jobId,
@@ -261,8 +259,6 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
         }
 
         const { body } = await mlClient.deleteDatafeed(options);
-
-        await jobsInSpaces.deleteDatafeed(request.params.jobId);
 
         return response.ok({
           body,

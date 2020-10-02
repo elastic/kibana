@@ -175,15 +175,13 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCreateJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ mlClient, request, response, jobsInSpaces }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { jobId } = request.params;
         const { body } = await mlClient.putJob({
           job_id: jobId,
           body: request.body,
         });
-
-        await jobsInSpaces.createAnomalyDetectionJob(jobId);
 
         return response.ok({
           body,
@@ -320,7 +318,7 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canDeleteJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ mlClient, request, response, jobsInSpaces }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const options: RequestParams.MlDeleteJob = {
           job_id: request.params.jobId,
@@ -331,7 +329,6 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
           options.force = force;
         }
         const { body } = await mlClient.deleteJob(options);
-        await jobsInSpaces.deleteAnomalyDetectionJob(request.params.jobId);
         return response.ok({
           body,
         });

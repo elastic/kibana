@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { ModelSnapshot } from '../../../common/types/anomaly_detection_jobs';
 import { datafeedsProvider } from './datafeeds';
 import { FormCalendar, CalendarManager } from '../calendar';
-import type { JobsInSpaces } from '../../saved_objects';
 import type { MlClient } from '../../lib/ml_client';
 
 export interface ModelSnapshotsResponse {
@@ -20,8 +19,8 @@ export interface RevertModelSnapshotResponse {
   model: ModelSnapshot;
 }
 
-export function modelSnapshotProvider(mlClient: MlClient, jobsInSpaces: JobsInSpaces) {
-  const { forceStartDatafeeds, getDatafeedIdsByJobId } = datafeedsProvider(mlClient, jobsInSpaces);
+export function modelSnapshotProvider(mlClient: MlClient) {
+  const { forceStartDatafeeds, getDatafeedIdsByJobId } = datafeedsProvider(mlClient);
 
   async function revertModelSnapshot(
     jobId: string,

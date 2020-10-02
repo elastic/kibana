@@ -15,7 +15,6 @@ import { AnalysisLimits } from '../../../common/types/anomaly_detection_jobs';
 import { getAuthorizationHeader } from '../../lib/request_authorization';
 import { MlInfoResponse } from '../../../common/types/ml_server_info';
 import type { MlClient } from '../../lib/ml_client';
-import type { JobsInSpaces } from '../../saved_objects';
 import {
   KibanaObjects,
   KibanaObjectConfig,
@@ -127,7 +126,6 @@ export class DataRecognizer {
   constructor(
     mlClusterClient: IScopedClusterClient,
     mlClient: MlClient,
-    jobsInSpaces: JobsInSpaces,
     savedObjectsClient: SavedObjectsClientContract,
     request: KibanaRequest
   ) {
@@ -135,7 +133,7 @@ export class DataRecognizer {
     this._mlClient = mlClient;
     this._savedObjectsClient = savedObjectsClient;
     this._authorizationHeader = getAuthorizationHeader(request);
-    this._jobsService = jobServiceProvider(mlClusterClient, mlClient, jobsInSpaces);
+    this._jobsService = jobServiceProvider(mlClusterClient, mlClient);
     this._resultsService = resultsServiceProvider(mlClusterClient, mlClient);
     this._calculateModelMemoryLimit = calculateModelMemoryLimitProvider(mlClusterClient, mlClient);
   }

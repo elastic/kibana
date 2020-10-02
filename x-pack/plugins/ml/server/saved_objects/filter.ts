@@ -38,7 +38,7 @@ export function filterJobIdsFactory(savedObjectsClient: SavedObjectsClientContra
     return await savedObjectsClient.find<JobObject>(options);
   }
 
-  async function createJob(jobType: JobType, jobId: string) {
+  async function _createJob(jobType: JobType, jobId: string) {
     await savedObjectsClient.create<JobObject>(ML_SAVED_OBJECT_TYPE, {
       job_id: jobId,
       datafeed_id: null,
@@ -46,7 +46,7 @@ export function filterJobIdsFactory(savedObjectsClient: SavedObjectsClientContra
     });
   }
 
-  async function deleteJob(jobType: JobType, jobId: string) {
+  async function _deleteJob(jobType: JobType, jobId: string) {
     const jobs = await getJobObjects(jobType, jobId);
     const job = jobs.saved_objects[0];
     if (job === undefined) {
@@ -57,19 +57,19 @@ export function filterJobIdsFactory(savedObjectsClient: SavedObjectsClientContra
   }
 
   async function createAnomalyDetectionJob(jobId: string) {
-    await createJob('anomaly-detector', jobId);
+    await _createJob('anomaly-detector', jobId);
   }
 
   async function deleteAnomalyDetectionJob(jobId: string) {
-    await deleteJob('anomaly-detector', jobId);
+    await _deleteJob('anomaly-detector', jobId);
   }
 
   async function createDataFrameAnalyticsJob(jobId: string) {
-    await createJob('data-frame-analytics', jobId);
+    await _createJob('data-frame-analytics', jobId);
   }
 
   async function deleteDataFrameAnalyticsJob(jobId: string) {
-    await deleteJob('data-frame-analytics', jobId);
+    await _deleteJob('data-frame-analytics', jobId);
   }
 
   async function addDatafeed(datafeedId: string, jobId: string) {
