@@ -38,14 +38,12 @@ import {
   MITRE_TACTIC_DROPDOWN,
   MITRE_TECHNIQUES_INPUT,
   REFERENCE_URLS_INPUT,
-  REFRESH_BUTTON,
   RISK_INPUT,
   RISK_MAPPING_OVERRIDE_OPTION,
   RISK_OVERRIDE,
   RULE_DESCRIPTION_INPUT,
   RULE_NAME_INPUT,
   RULE_NAME_OVERRIDE,
-  RULE_STATUS,
   RULE_TIMESTAMP_OVERRIDE,
   RUNS_EVERY_INTERVAL,
   RUNS_EVERY_TIME_TYPE,
@@ -266,12 +264,4 @@ export const selectMachineLearningRuleType = () => {
 
 export const selectThresholdRuleType = () => {
   cy.get(THRESHOLD_TYPE).click({ force: true });
-};
-
-export const waitForTheRuleToBeExecuted = async () => {
-  let status = '';
-  while (status !== 'succeeded') {
-    cy.get(REFRESH_BUTTON).click();
-    status = await cy.get(RULE_STATUS).invoke('text').promisify();
-  }
 };

@@ -13,6 +13,8 @@ export const ABOUT_DETAILS =
 
 export const ADDITIONAL_LOOK_BACK_DETAILS = 'Additional look-back time';
 
+export const ALERTS_TAB = '[data-test-subj="alertsTab"]';
+
 export const ANOMALY_SCORE_DETAILS = 'Anomaly score';
 
 export const CUSTOM_QUERY_DETAILS = 'Custom query';
@@ -23,6 +25,8 @@ export const DEFINITION_DETAILS =
 export const DETAILS_DESCRIPTION = '.euiDescriptionList__description';
 
 export const DETAILS_TITLE = '.euiDescriptionList__title';
+
+export const EXCEPTIONS_TAB = '[data-test-subj="exceptionsTab"]';
 
 export const FALSE_POSITIVES_DETAILS = 'False positive examples';
 
@@ -38,6 +42,8 @@ export const MACHINE_LEARNING_JOB_STATUS = '[data-test-subj="machineLearningJobS
 
 export const MITRE_ATTACK_DETAILS = 'MITRE ATT&CK';
 
+export const REFRESH_BUTTON = '[data-test-subj="refreshButton"]';
+
 export const RULE_ABOUT_DETAILS_HEADER_TOGGLE = '[data-test-subj="stepAboutDetailsToggle"]';
 
 export const RULE_NAME_HEADER = '[data-test-subj="header-page-title"]';
@@ -49,6 +55,12 @@ export const RISK_SCORE_DETAILS = 'Risk score';
 export const RISK_SCORE_OVERRIDE_DETAILS = 'Risk score override';
 
 export const REFERENCE_URLS_DETAILS = 'Reference URLs';
+
+export const REMOVE_EXCEPTION_BTN = '[data-test-subj="exceptionsViewerDeleteBtn"]';
+
+export const RULE_SWITCH = '[data-test-subj="rule-switch"]';
+
+export const RULE_SWITCH_LOADER = '[data-test-subj="rule-switch-loader"]';
 
 export const RULE_TYPE_DETAILS = 'Rule type';
 

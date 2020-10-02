@@ -3,94 +3,91 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { exception } from '../objects/exception';
 
-import { newRule } from '../objects/rule';
-import { NUMBER_OF_ALERTS } from '../screens/alerts';
-import { RULES_TABLE, RULES_ROW } from '../screens/alerts_detection_rules';
+import { RULE_STATUS } from '../screens/create_new_rule';
+import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
+
 import {
+  goToClosedAlerts,
   goToManageAlertsDetectionRules,
+  goToOpenedAlerts,
   waitForAlertsIndexToBeCreated,
-  waitForAlertsPanelToBeLoaded,
 } from '../tasks/alerts';
-import {
-  filterByCustomRules,
-  goToCreateNewRule,
-  goToRuleDetails,
-  waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
-} from '../tasks/alerts_detection_rules';
-import {
-  fillDefineCustomRuleWithImportedQueryAndContinue,
-  fillAboutRuleAndContinue,
-  fillScheduleRuleAndContinue,
-  createAndActivateRule,
-  waitForTheRuleToBeExecuted,
-} from '../tasks/create_new_rule';
+import { goToRuleDetails } from '../tasks/alerts_detection_rules';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
+import {
+  activatesRule,
+  addsException,
+  goToAlertsTab,
+  goToExceptionsTab,
+  removeException,
+  waitForTheRuleToBeExecuted,
+} from '../tasks/rule_details';
+import { refreshPage } from '../tasks/security_header';
+
 import { DETECTIONS_URL } from '../urls/navigation';
 
 describe('Exceptions', () => {
   before(() => {
-    esArchiverLoad('timeline');
+    esArchiverLoad('exceptions');
   });
 
   after(() => {
-    esArchiverUnload('timeline');
+    esArchiverUnload('exceptions');
   });
 
-  it('Creates an exception from rule details', () => {
+  it('Creates an exception from rule details and deletes the excpetion', () => {
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
-    waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
-    goToCreateNewRule();
-    fillDefineCustomRuleWithImportedQueryAndContinue(newRule);
-    fillAboutRuleAndContinue(newRule);
-    fillScheduleRuleAndContinue(newRule);
-    createAndActivateRule();
-    filterByCustomRules();
-
-    cy.get(RULES_TABLE).then(($table) => {
-      cy.wrap($table.find(RULES_ROW).length).should('eql', 1);
-    });
-
     goToRuleDetails();
+
+    cy.get(RULE_STATUS).should('have.text', '—');
+
+    activatesRule();
     waitForTheRuleToBeExecuted();
-    cy.wait(15000);
+    refreshPage();
 
-    cy.get('[data-test-subj="exceptionsTab"]').click();
-    cy.get('[data-test-subj="exceptionsHeaderAddExceptionBtn"]').click();
-    cy.wait(10000);
-    cy.get('[data-test-subj="fieldAutocompleteComboBox"] [data-test-subj="comboBoxInput"]').type(
-      'host.name{enter}'
-    );
-    cy.get('[data-test-subj="operatorAutocompleteComboBox"]').type('is one of{enter}');
-    cy.get(
-      '[data-test-subj="valuesAutocompleteComboBox matchAnyComboxBox"] [data-test-subj="comboBoxInput"]'
-    ).type('siem-kibana{enter}', { delay: 30 });
-    cy.get(
-      '[data-test-subj="valuesAutocompleteComboBox matchAnyComboxBox"] [data-test-subj="comboBoxInput"]'
-    ).type('suricata-iowa{enter}', { delay: 30 });
-    cy.get(
-      '[data-test-subj="valuesAutocompleteComboBox matchAnyComboxBox"] [data-test-subj="comboBoxInput"]'
-    ).type('siem-es{enter}', { delay: 30 });
-    cy.get(
-      '[data-test-subj="valuesAutocompleteComboBox matchAnyComboxBox"] [data-test-subj="comboBoxInput"]'
-    ).type('jessie{enter}', { delay: 30 });
-    cy.get(
-      '[data-test-subj="valuesAutocompleteComboBox matchAnyComboxBox"] [data-test-subj="comboBoxInput"]'
-    ).type('siem{enter}', { delay: 30 });
-    cy.get('[data-test-subj="bulk-close-alert-on-add-add-exception-checkbox"]').click({
-      force: true,
-    });
-    cy.get('[data-test-subj="add-exception-confirm-button"]').click();
+    cy.get(SERVER_SIDE_EVENT_COUNT)
+      .invoke('text')
+      .then((numberOfAlertsText) => {
+        cy.wrap(parseInt(numberOfAlertsText, 10)).should('be.above', 0);
+      });
 
+    goToExceptionsTab();
+    addsException(exception);
     esArchiverLoad('auditbeat');
+    goToAlertsTab();
 
-    cy.get('[data-test-subj="alertsTab"]').click();
-    cy.get('[data-test-subj="server-side-event-count"]').should('have.attr', 'title', '0');
-    cy.get('[data-test-subj="closedAlerts"]').click();
-    cy.get('[data-test-subj="server-side-event-count"]')
+    cy.get(SERVER_SIDE_EVENT_COUNT).should('have.attr', 'title', '0');
+
+    goToClosedAlerts();
+
+    cy.get(SERVER_SIDE_EVENT_COUNT)
+      .invoke('text')
+      .then((numberOfAlertsText) => {
+        cy.wrap(parseInt(numberOfAlertsText, 10)).should('be.above', 0);
+      });
+
+    goToOpenedAlerts();
+    refreshPage();
+
+    cy.get(SERVER_SIDE_EVENT_COUNT)
+      .invoke('text')
+      .then((numberOfAlertsText) => {
+        cy.wrap(parseInt(numberOfAlertsText, 10)).should('eql', 0);
+      });
+
+    goToExceptionsTab();
+    removeException();
+    esArchiverLoad('auditbeat');
+    goToAlertsTab();
+    waitForTheRuleToBeExecuted();
+    refreshPage();
+
+    cy.get(SERVER_SIDE_EVENT_COUNT)
       .invoke('text')
       .then((numberOfAlertsText) => {
         cy.wrap(parseInt(numberOfAlertsText, 10)).should('be.above', 0);

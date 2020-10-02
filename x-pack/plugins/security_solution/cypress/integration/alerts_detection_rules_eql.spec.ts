@@ -67,10 +67,10 @@ import {
   fillDefineEqlRuleAndContinue,
   fillScheduleRuleAndContinue,
   selectEqlRuleType,
-  waitForTheRuleToBeExecuted,
 } from '../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
+import { waitForTheRuleToBeExecuted } from '../tasks/rule_details';
 import { refreshPage } from '../tasks/security_header';
 
 import { DETECTIONS_URL } from '../urls/navigation';
