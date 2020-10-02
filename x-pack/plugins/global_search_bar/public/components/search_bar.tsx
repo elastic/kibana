@@ -159,7 +159,7 @@ export function SearchBar({ globalSearch, navigateToUrl, basePathUrl, darkMode }
       <p>
         <FormattedMessage
           id="xpack.globalSearchBar.searchBar.noResults"
-          defaultMessage="Try searching for applications and saved objects by name."
+          defaultMessage="Try searching for applications, dashboards, visualizations, and more."
         />
       </p>
     </EuiSelectableMessage>
