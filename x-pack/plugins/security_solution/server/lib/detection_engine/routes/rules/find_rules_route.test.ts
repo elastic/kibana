@@ -93,6 +93,23 @@ describe('find_rules', () => {
         status_code: 500,
       });
     });
+
+    test('returns success if rule status client writes an error status', async () => {
+      const failingExecutionRule = getFindResultWithSingleHit();
+      failingExecutionRule.data[0].executionStatus = {
+        status: 'error',
+        lastExecutionDate: failingExecutionRule.data[0].executionStatus.lastExecutionDate,
+        error: {
+          reason: 'read',
+          message: 'oops',
+        },
+      };
+      clients.alertsClient.find.mockResolvedValue({
+        ...failingExecutionRule,
+      });
+      const response = await server.inject(getFindRequest(), context);
+      expect(response.status).toEqual(200);
+    });
   });
 
   describe('request validation', () => {
