@@ -19,9 +19,18 @@ import { DataFrameAnalyticsConfig } from '../common';
 
 import { isGetDataFrameAnalyticsStatsResponseOk } from '../pages/analytics_management/services/analytics_service/get_analytics';
 import { DATA_FRAME_TASK_STATE } from '../pages/analytics_management/components/analytics_list/common';
+import { useInferenceApiService } from '../../services/ml_api_service/inference';
+import { TotalFeatureImportance } from '../../../../common/types/feature_importance';
+import { getToastNotificationService } from '../../services/toast_notification_service';
+import {
+  isClassificationAnalysis,
+  isRegressionAnalysis,
+} from '../../../../common/util/analytics_utils';
 
 export const useResultsViewConfig = (jobId: string) => {
   const mlContext = useMlContext();
+  const inferenceApiService = useInferenceApiService();
+
   const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [needsDestIndexPattern, setNeedsDestIndexPattern] = useState<boolean>(false);
@@ -33,6 +42,10 @@ export const useResultsViewConfig = (jobId: string) => {
   const [jobConfigErrorMessage, setJobConfigErrorMessage] = useState<undefined | string>(undefined);
   const [jobStatus, setJobStatus] = useState<DATA_FRAME_TASK_STATE | undefined>(undefined);
 
+  const [totalFeatureImportance, setTotalFeatureImportance] = useState<
+    TotalFeatureImportance[] | undefined
+  >(undefined);
+
   // get analytics configuration, index pattern and field caps
   useEffect(() => {
     (async function () {
@@ -40,6 +53,7 @@ export const useResultsViewConfig = (jobId: string) => {
 
       try {
         const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics(jobId);
+
         const analyticsStats = await ml.dataFrameAnalytics.getDataFrameAnalyticsStats(jobId);
         const stats = isGetDataFrameAnalyticsStatsResponseOk(analyticsStats)
           ? analyticsStats.data_frame_analytics[0]
@@ -54,6 +68,28 @@ export const useResultsViewConfig = (jobId: string) => {
           analyticsConfigs.data_frame_analytics.length > 0
         ) {
           const jobConfigUpdate = analyticsConfigs.data_frame_analytics[0];
+          // don't fetch the total feature importance if it's outlier_detection
+          if (
+            isClassificationAnalysis(jobConfigUpdate.analysis) ||
+            isRegressionAnalysis(jobConfigUpdate.analysis)
+          ) {
+            try {
+              const inferenceModels = await inferenceApiService.getInferenceModel(`${jobId}*`, {
+                include: 'total_feature_importance',
+              });
+              const inferenceModel = inferenceModels.find(
+                (model) => model.metadata?.analytics_config?.id === jobId
+              );
+              if (
+                Array.isArray(inferenceModel?.metadata?.total_feature_importance) === true &&
+                inferenceModel?.metadata?.total_feature_importance.length > 0
+              ) {
+                setTotalFeatureImportance(inferenceModel?.metadata?.total_feature_importance);
+              }
+            } catch (e) {
+              getToastNotificationService().displayErrorToast(e);
+            }
+          }
 
           try {
             const destIndex = Array.isArray(jobConfigUpdate.dest.index)
@@ -103,5 +139,6 @@ export const useResultsViewConfig = (jobId: string) => {
     jobConfigErrorMessage,
     jobStatus,
     needsDestIndexPattern,
+    totalFeatureImportance,
   };
 };
