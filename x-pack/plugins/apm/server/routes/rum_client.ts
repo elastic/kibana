@@ -177,12 +177,13 @@ export const rumLongTaskMetrics = createRoute(() => ({
     const setup = await setupRequest(context, request);
 
     const {
-      query: { urlQuery },
+      query: { urlQuery, percentile },
     } = context.params;
 
     return getLongTaskMetrics({
       setup,
       urlQuery,
+      percentile: percentile ? Number(percentile) : undefined,
     });
   },
 }));

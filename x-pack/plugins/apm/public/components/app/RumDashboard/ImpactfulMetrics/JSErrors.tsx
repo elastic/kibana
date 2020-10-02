@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useState } from 'react';
+import React, { ReactText, useContext, useState } from 'react';
 import {
   EuiBasicTable,
   EuiFlexItem,
@@ -16,11 +16,18 @@ import {
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { I18LABELS } from '../translations';
 import { CsmSharedContext } from '../CsmSharedContext';
 import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
+
+interface JSErrorItem {
+  errorMessage: string;
+  errorGroupId: ReactText;
+  count: number;
+}
 
 export function JSErrors() {
   const { urlParams, uiFilters } = useUrlParams();
@@ -55,27 +62,14 @@ export function JSErrors() {
     sharedData: { totalPageViews },
   } = useContext(CsmSharedContext);
 
-  const items = (data?.items ?? []).map(
-    ({ errorMessage, count, errorGroupId }) => ({
-      errorMessage,
-      errorGroupId,
-      percent: i18n.translate('xpack.apm.rum.jsErrors.percent', {
-        defaultMessage: '{pageLoadPercent} %',
-        values: {
-          pageLoadPercent: ((count / totalPageViews) * 100).toFixed(1),
-        },
-      }),
-    })
-  );
-
   const cols = [
     {
       field: 'errorMessage',
       name: I18LABELS.errorMessage,
-      render: (errorMessage: string, item: any) => (
+      render: (errorMessage: string, item: JSErrorItem) => (
         <ErrorDetailLink
           serviceName={serviceName!}
-          errorGroupId={item.errorGroupId}
+          errorGroupId={item.errorGroupId as string}
         >
           {errorMessage}
         </ErrorDetailLink>
@@ -83,8 +77,17 @@ export function JSErrors() {
     },
     {
       name: I18LABELS.impactedPageLoads,
-      field: 'percent',
+      field: 'count',
       align: 'right' as const,
+      render: (count: number) => (
+        <FormattedMessage
+          id={'xpack.apm.ux.jsErrors.percent'}
+          defaultMessage={'{pageLoadPercent} %'}
+          values={{
+            pageLoadPercent: ((count / totalPageViews) * 100).toFixed(1),
+          }}
+        />
+      ),
     },
   ];
 
@@ -152,7 +155,7 @@ export function JSErrors() {
         responsive={false}
         compressed={true}
         columns={cols}
-        items={items}
+        items={data?.items ?? []}
         onChange={onTableChange}
         pagination={{
           ...pagination,
