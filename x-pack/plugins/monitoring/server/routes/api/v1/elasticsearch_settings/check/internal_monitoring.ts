@@ -5,8 +5,13 @@
  */
 
 import { RequestHandlerContext } from 'kibana/server';
+import {
+  INDEX_PATTERN_ELASTICSEARCH,
+  INDEX_PATTERN_KIBANA,
+  INDEX_PATTERN_LOGSTASH,
+} from '../../../../../../common/constants';
 // @ts-ignore
-import { getIndexPatterns } from '../../../../../lib/cluster/get_index_patterns';
+import { prefixIndexPattern } from '../../../../../lib/ccs_utils';
 // @ts-ignore
 import { handleError } from '../../../../../lib/errors';
 import { RouteDependencies } from '../../../../../types';
@@ -49,7 +54,10 @@ const checkLatestMonitoringIsLegacy = async (context: RequestHandlerContext, ind
   return counts;
 };
 
-export function internalMonitoringCheckRoute(server: unknown, npRoute: RouteDependencies) {
+export function internalMonitoringCheckRoute(
+  server: { config: () => unknown },
+  npRoute: RouteDependencies
+) {
   npRoute.router.get(
     {
       path: '/api/monitoring/v1/elasticsearch_settings/check/internal_monitoring',
@@ -62,7 +70,12 @@ export function internalMonitoringCheckRoute(server: unknown, npRoute: RouteDepe
           mb_indices: 0,
         };
 
-        const { esIndexPattern, kbnIndexPattern, lsIndexPattern } = getIndexPatterns(server);
+        const config = server.config();
+        const ccs = '*';
+        const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs, true);
+        const kbnIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_KIBANA, ccs, true);
+        const lsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_LOGSTASH, ccs, true);
+
         const indexCounts = await Promise.all([
           checkLatestMonitoringIsLegacy(context, esIndexPattern),
           checkLatestMonitoringIsLegacy(context, kbnIndexPattern),
