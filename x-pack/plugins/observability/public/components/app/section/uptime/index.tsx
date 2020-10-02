@@ -28,31 +28,30 @@ import { Series } from '../../../../typings';
 import { ChartContainer } from '../../chart_container';
 import { StyledStat } from '../../styled_stat';
 import { onBrushEnd } from '../helper';
-import { useQueryParams } from '../../../../hooks/use_query_params';
 
 interface Props {
-  bucketSize: string;
+  absoluteTime: { start?: number; end?: number };
+  relativeTime: { start: string; end: string };
+  bucketSize?: string;
 }
 
-export function UptimeSection({ bucketSize }: Props) {
-  const { absStart, absEnd, start, end } = useQueryParams();
-
+export function UptimeSection({ absoluteTime, relativeTime, bucketSize }: Props) {
   const theme = useContext(ThemeContext);
   const history = useHistory();
 
+  const { start, end } = absoluteTime;
   const { data, status } = useFetcher(() => {
     if (start && end && bucketSize) {
       return getDataHandler('uptime')?.fetchData({
-        absoluteTime: { start: absStart, end: absEnd },
-        relativeTime: { start, end },
+        absoluteTime: { start, end },
+        relativeTime,
         bucketSize,
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bucketSize, start, end]);
+  }, [start, end, bucketSize, relativeTime]);
 
-  const min = moment.utc(absStart).valueOf();
-  const max = moment.utc(absEnd).valueOf();
+  const min = moment.utc(absoluteTime.start).valueOf();
+  const max = moment.utc(absoluteTime.end).valueOf();
 
   const formatter = niceTimeFormatter([min, max]);
 

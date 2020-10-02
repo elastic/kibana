@@ -7,10 +7,18 @@ import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { fetchHasData } from '../../data_handler';
 import { useFetcher } from '../../hooks/use_fetcher';
+import { useQueryParams } from '../../hooks/use_query_params';
 
 export function HomePage() {
   const history = useHistory();
-  const { data = {} } = useFetcher(() => fetchHasData(), []);
+
+  const { absStart, absEnd } = useQueryParams();
+
+  const { data = {} } = useFetcher(
+    () => fetchHasData({ start: absStart, end: absEnd }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
   const values = Object.values(data);
   const hasSomeData = values.length ? values.some((hasData) => hasData) : null;

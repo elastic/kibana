@@ -6,9 +6,9 @@
 
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { EuiThemeProvider } from '../../../../../../../observability/public';
 import { CoreVitalItem } from '../core_vital_item';
 import { LCP_LABEL } from '../translations';
+import { EuiThemeProvider } from '../../../../typings';
 
 storiesOf('app/RumDashboard/WebCoreVitals', module)
   .addDecorator((storyFn) => <EuiThemeProvider>{storyFn()}</EuiThemeProvider>)

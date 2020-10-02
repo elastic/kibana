@@ -32,7 +32,7 @@ export interface HasDataParams {
   absoluteTime: { start: number; end: number };
 }
 
-interface UXHasDataResponse {
+export interface UXHasDataResponse {
   hasData: boolean;
   serviceName: string | number | undefined;
 }

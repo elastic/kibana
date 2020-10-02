@@ -16,10 +16,11 @@ import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { Series } from '../../../../typings';
 import { ChartContainer } from '../../chart_container';
 import { StyledStat } from '../../styled_stat';
-import { useQueryParams } from '../../../../hooks/use_query_params';
 
 interface Props {
-  bucketSize: string;
+  absoluteTime: { start?: number; end?: number };
+  relativeTime: { start: string; end: string };
+  bucketSize?: string;
 }
 
 /**
@@ -45,21 +46,19 @@ const StyledProgress = styled.div<{ color?: string }>`
   }
 `;
 
-export function MetricsSection({ bucketSize }: Props) {
+export function MetricsSection({ absoluteTime, relativeTime, bucketSize }: Props) {
   const theme = useContext(ThemeContext);
 
-  const { absStart, absEnd, start, end } = useQueryParams();
-
+  const { start, end } = absoluteTime;
   const { data, status } = useFetcher(() => {
     if (start && end && bucketSize) {
       return getDataHandler('infra_metrics')?.fetchData({
-        absoluteTime: { start: absStart, end: absEnd },
-        relativeTime: { start, end },
+        absoluteTime: { start, end },
+        relativeTime,
         bucketSize,
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [start, end, bucketSize]);
+  }, [start, end, bucketSize, relativeTime]);
 
   const isLoading = status === FETCH_STATUS.LOADING;
 

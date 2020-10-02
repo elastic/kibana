@@ -119,7 +119,12 @@ export function OverviewPage({ routeParams }: Props) {
         <EuiFlexItem grow={6}>
           {/* Data sections */}
           {showDataSections && (
-            <DataSections hasData={hasData} bucketSize={bucketSize?.intervalString!} />
+            <DataSections
+              hasData={hasData}
+              absoluteTime={absoluteTime}
+              relativeTime={relativeTime}
+              bucketSize={bucketSize?.intervalString!}
+            />
           )}
 
           {/* Empty sections */}
