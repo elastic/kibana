@@ -103,7 +103,7 @@ export const SetupPage: React.FunctionComponent<{
               <EuiButton onClick={onSubmit} fill isLoading={isFormLoading} type="submit">
                 <FormattedMessage
                   id="xpack.ingestManager.setupPage.enableCentralManagement"
-                  defaultMessage="Create user and enable Agents"
+                  defaultMessage="Create user and enable central management"
                 />
               </EuiButton>
             </EuiForm>
