@@ -1309,7 +1309,7 @@ export class IndexPatternSelect extends Component<IndexPatternSelectProps> {
     // (undocumented)
     componentWillUnmount(): void;
     // (undocumented)
-    debouncedFetch: ((searchValue: string) => Promise<void>) & _.Cancelable;
+    debouncedFetch: _.DebouncedFunc<(searchValue: string) => Promise<void>>;
     // (undocumented)
     fetchOptions: (searchValue?: string) => void;
     // (undocumented)

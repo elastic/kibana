@@ -5,7 +5,7 @@
  */
 import { useEffect, useState, useReducer, useCallback } from 'react';
 import createContainer from 'constate';
-import { pick, throttle, DebouncedFunc } from 'lodash';
+import { pick, throttle } from 'lodash';
 import { TimeKey, timeKeyIsBetween } from '../../../../common/time';
 import {
   LogEntriesResponse,
@@ -78,7 +78,7 @@ export interface LogEntriesStateParams {
 }
 
 export interface LogEntriesCallbacks {
-  fetchNewerEntries: DebouncedFunc<() => Promise<TimeKey | null | undefined>>;
+  fetchNewerEntries: () => Promise<TimeKey | null | undefined>;
   checkForNewEntries: () => Promise<void>;
 }
 export const logEntriesInitialCallbacks = {
