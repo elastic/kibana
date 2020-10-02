@@ -8,7 +8,15 @@ import React, { useState, useEffect, useMemo, useContext, useCallback } from 're
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiButtonEmpty, EuiLink } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiText,
+  EuiButtonEmpty,
+  EuiLink,
+  EuiSpacer,
+} from '@elastic/eui';
 import { CoreStart, CoreSetup } from 'kibana/public';
 import { ExecutionContextSearch } from 'src/plugins/expressions';
 import {
@@ -224,26 +232,25 @@ export function InnerWorkspacePanel({
         <DropIllustration aria-hidden={true} className="lnsWorkspacePanel__dropIllustration" />
         {expression === null && (
           <>
-            <p>
+            <EuiText textAlign="center" size="s">
               <FormattedMessage
                 id="xpack.lens.editorFrame.emptyWorkspaceHeading"
                 defaultMessage="Lens is a new tool for creating visualizations"
               />
-            </p>
-            <p>
-              <small>
-                <EuiLink
-                  href="https://www.elastic.co/products/kibana/feedback"
-                  target="_blank"
-                  external
-                >
-                  <FormattedMessage
-                    id="xpack.lens.editorFrame.goToForums"
-                    defaultMessage="Make requests and give feedback"
-                  />
-                </EuiLink>
-              </small>
-            </p>
+            </EuiText>
+            <EuiSpacer size="l" />
+            <EuiText textAlign="center" size="xs">
+              <EuiLink
+                href="https://www.elastic.co/products/kibana/feedback"
+                target="_blank"
+                external
+              >
+                <FormattedMessage
+                  id="xpack.lens.editorFrame.goToForums"
+                  defaultMessage="Make requests and give feedback"
+                />
+              </EuiLink>
+            </EuiText>
           </>
         )}
       </EuiText>
