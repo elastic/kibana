@@ -195,16 +195,17 @@ describe('InsecureClusterService', () => {
       expect(coreStart.http.get).toHaveBeenCalledTimes(1);
       expect(coreStart.notifications.toasts.addWarning).toHaveBeenCalledTimes(1);
       expect(coreStart.notifications.toasts.addWarning.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "text": "mocked default alert text",
-          "title": "mocked default alert title",
-        },
-        Object {
-          "toastLifeTimeMs": 864000000,
-        },
-      ]
-    `);
+        Array [
+          Object {
+            "iconType": "alert",
+            "text": "mocked default alert text",
+            "title": "mocked default alert title",
+          },
+          Object {
+            "toastLifeTimeMs": 864000000,
+          },
+        ]
+      `);
 
       expect(coreStart.notifications.toasts.remove).not.toHaveBeenCalled();
       expect(storage.setItem).not.toHaveBeenCalled();
@@ -271,16 +272,17 @@ describe('InsecureClusterService', () => {
       expect(coreStart.http.get).toHaveBeenCalledTimes(1);
       expect(coreStart.notifications.toasts.addWarning).toHaveBeenCalledTimes(1);
       expect(coreStart.notifications.toasts.addWarning.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "text": "some new alert text",
-          "title": "some new title",
-        },
-        Object {
-          "toastLifeTimeMs": 864000000,
-        },
-      ]
-    `);
+        Array [
+          Object {
+            "iconType": "alert",
+            "text": "some new alert text",
+            "title": "some new title",
+          },
+          Object {
+            "toastLifeTimeMs": 864000000,
+          },
+        ]
+      `);
 
       expect(coreStart.notifications.toasts.remove).not.toHaveBeenCalled();
       expect(storage.setItem).not.toHaveBeenCalled();
