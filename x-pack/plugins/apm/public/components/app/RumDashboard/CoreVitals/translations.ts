@@ -6,79 +6,87 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const LCP_LABEL = i18n.translate(
-  'xpack.observability.ux.coreVitals.lcp',
+export const LCP_LABEL = i18n.translate('xpack.apm.rum.coreVitals.lcp', {
+  defaultMessage: 'Largest contentful paint',
+});
+
+export const FID_LABEL = i18n.translate('xpack.apm.rum.coreVitals.fip', {
+  defaultMessage: 'First input delay',
+});
+
+export const CLS_LABEL = i18n.translate('xpack.apm.rum.coreVitals.cls', {
+  defaultMessage: 'Cumulative layout shift',
+});
+
+export const FCP_LABEL = i18n.translate('xpack.apm.rum.coreVitals.fcp', {
+  defaultMessage: 'First contentful paint',
+});
+
+export const TBT_LABEL = i18n.translate('xpack.apm.rum.coreVitals.tbt', {
+  defaultMessage: 'Total blocking time',
+});
+
+export const NO_OF_LONG_TASK = i18n.translate(
+  'xpack.apm.rum.uxMetrics.noOfLongTasks',
   {
-    defaultMessage: 'Largest contentful paint',
+    defaultMessage: 'No. of long tasks',
   }
 );
 
-export const FID_LABEL = i18n.translate(
-  'xpack.observability.ux.coreVitals.fip',
+export const LONGEST_LONG_TASK = i18n.translate(
+  'xpack.apm.rum.uxMetrics.longestLongTasks',
   {
-    defaultMessage: 'First input delay',
+    defaultMessage: 'Longest long task duration',
   }
 );
 
-export const CLS_LABEL = i18n.translate(
-  'xpack.observability.ux.coreVitals.cls',
+export const SUM_LONG_TASKS = i18n.translate(
+  'xpack.apm.rum.uxMetrics.sumLongTasks',
   {
-    defaultMessage: 'Cumulative layout shift',
+    defaultMessage: 'Total long tasks duration',
   }
 );
 
-export const CV_POOR_LABEL = i18n.translate(
-  'xpack.observability.ux.coreVitals.poor',
-  {
-    defaultMessage: 'a poor',
-  }
-);
+export const CV_POOR_LABEL = i18n.translate('xpack.apm.rum.coreVitals.poor', {
+  defaultMessage: 'a poor',
+});
 
-export const CV_GOOD_LABEL = i18n.translate(
-  'xpack.observability.ux.coreVitals.good',
-  {
-    defaultMessage: 'a good',
-  }
-);
+export const CV_GOOD_LABEL = i18n.translate('xpack.apm.rum.coreVitals.good', {
+  defaultMessage: 'a good',
+});
 
 export const CV_AVERAGE_LABEL = i18n.translate(
-  'xpack.observability.ux.coreVitals.average',
+  'xpack.apm.rum.coreVitals.average',
   {
     defaultMessage: 'an average',
   }
 );
 
 export const LEGEND_POOR_LABEL = i18n.translate(
-  'xpack.observability.ux.coreVitals.legends.poor',
+  'xpack.apm.rum.coreVitals.legends.poor',
   {
     defaultMessage: 'Poor',
   }
 );
 
 export const LEGEND_GOOD_LABEL = i18n.translate(
-  'xpack.observability.ux.coreVitals.legends.good',
+  'xpack.apm.rum.coreVitals.legends.good',
   {
     defaultMessage: 'Good',
   }
 );
 
 export const LEGEND_NEEDS_IMPROVEMENT_LABEL = i18n.translate(
-  'xpack.observability.ux.coreVitals.legends.needsImprovement',
+  'xpack.apm.rum.coreVitals.legends.needsImprovement',
   {
     defaultMessage: 'Needs improvement',
   }
 );
 
-export const MORE_LABEL = i18n.translate(
-  'xpack.observability.ux.coreVitals.more',
-  {
-    defaultMessage: 'more',
-  }
-);
+export const MORE_LABEL = i18n.translate('xpack.apm.rum.coreVitals.more', {
+  defaultMessage: 'more',
+});
 
-export const LESS_LABEL = i18n.translate(
-  'xpack.observability.ux.coreVitals.less',
-  {
-    defaultMessage: 'less',
-  }
-);
+export const LESS_LABEL = i18n.translate('xpack.apm.rum.coreVitals.less', {
+  defaultMessage: 'less',
+});

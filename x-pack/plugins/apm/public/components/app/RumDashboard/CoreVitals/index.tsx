@@ -4,34 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { CLS_LABEL, FID_LABEL, LCP_LABEL } from './translations';
-import { CoreVitalItem } from './core_vital_item';
-import { WebCoreVitalsTitle } from './web_core_vitals_title';
-import { ServiceName } from './service_name';
-
-export interface UXMetrics {
-  cls: string;
-  fid: number;
-  lcp: number;
-  tbt: number;
-  fcp: number;
-  lcpRanks: number[];
-  fidRanks: number[];
-  clsRanks: number[];
-}
-
-export function formatToSec(
-  value?: number | string,
-  fromUnit = 'MicroSec'
-): string {
-  const valueInMs = Number(value ?? 0) / (fromUnit === 'MicroSec' ? 1000 : 1);
-
-  if (valueInMs < 1000) {
-    return valueInMs.toFixed(0) + ' ms';
-  }
-  return (valueInMs / 1000).toFixed(2) + ' s';
-}
+import { CoreVitalItem } from './CoreVitalItem';
+import { UXMetrics } from '../UXMetrics';
+import { formatToSec } from '../UXMetrics/KeyUXMetrics';
 
 const CoreVitalsThresholds = {
   LCP: { good: '2.5s', bad: '4.0s' },
@@ -40,54 +17,42 @@ const CoreVitalsThresholds = {
 };
 
 interface Props {
-  loading: boolean;
   data?: UXMetrics | null;
-  displayServiceName?: boolean;
-  serviceName?: string;
+  loading: boolean;
 }
 
-export function CoreVitals({
-  data,
-  loading,
-  displayServiceName,
-  serviceName,
-}: Props) {
+export function CoreVitals({ data, loading }: Props) {
   const { lcp, lcpRanks, fid, fidRanks, cls, clsRanks } = data || {};
 
   return (
-    <>
-      <WebCoreVitalsTitle />
-      {displayServiceName && <ServiceName name={serviceName!} />}
-      <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="xl" justifyContent={'spaceBetween'} wrap>
-        <EuiFlexItem style={{ flexBasis: 380 }}>
-          <CoreVitalItem
-            title={LCP_LABEL}
-            value={formatToSec(lcp, 'ms')}
-            ranks={lcpRanks}
-            loading={loading}
-            thresholds={CoreVitalsThresholds.LCP}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem style={{ flexBasis: 380 }}>
-          <CoreVitalItem
-            title={FID_LABEL}
-            value={formatToSec(fid, 'ms')}
-            ranks={fidRanks}
-            loading={loading}
-            thresholds={CoreVitalsThresholds.FID}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem style={{ flexBasis: 380 }}>
-          <CoreVitalItem
-            title={CLS_LABEL}
-            value={cls ?? '0'}
-            ranks={clsRanks}
-            loading={loading}
-            thresholds={CoreVitalsThresholds.CLS}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
+    <EuiFlexGroup gutterSize="xl" justifyContent={'spaceBetween'} wrap>
+      <EuiFlexItem style={{ flexBasis: 380 }}>
+        <CoreVitalItem
+          title={LCP_LABEL}
+          value={formatToSec(lcp, 'ms')}
+          ranks={lcpRanks}
+          loading={loading}
+          thresholds={CoreVitalsThresholds.LCP}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem style={{ flexBasis: 380 }}>
+        <CoreVitalItem
+          title={FID_LABEL}
+          value={formatToSec(fid, 'ms')}
+          ranks={fidRanks}
+          loading={loading}
+          thresholds={CoreVitalsThresholds.FID}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem style={{ flexBasis: 380 }}>
+        <CoreVitalItem
+          title={CLS_LABEL}
+          value={cls ?? '0'}
+          ranks={clsRanks}
+          loading={loading}
+          thresholds={CoreVitalsThresholds.CLS}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

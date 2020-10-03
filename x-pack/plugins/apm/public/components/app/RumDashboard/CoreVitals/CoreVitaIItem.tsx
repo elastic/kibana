@@ -12,8 +12,8 @@ import {
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { PaletteLegends } from './palette_legends';
-import { ColorPaletteFlexItem } from './color_palette_flex_item';
+import { PaletteLegends } from './PaletteLegends';
+import { ColorPaletteFlexItem } from './ColorPaletteFlexItem';
 import {
   CV_AVERAGE_LABEL,
   CV_GOOD_LABEL,
@@ -45,26 +45,23 @@ export function getCoreVitalTooltipMessage(
   const bad = position === 2;
   const average = !good && !bad;
 
-  return i18n.translate(
-    'xpack.observability.ux.dashboard.webVitals.palette.tooltip',
-    {
-      defaultMessage:
-        '{percentage} % of users have {exp} experience because the {title} takes {moreOrLess} than {value}{averageMessage}.',
-      values: {
-        percentage,
-        title: title?.toLowerCase(),
-        exp: good ? CV_GOOD_LABEL : bad ? CV_POOR_LABEL : CV_AVERAGE_LABEL,
-        moreOrLess: bad || average ? MORE_LABEL : LESS_LABEL,
-        value: good || average ? thresholds.good : thresholds.bad,
-        averageMessage: average
-          ? i18n.translate('xpack.observability.ux.coreVitals.averageMessage', {
-              defaultMessage: ' and less than {bad}',
-              values: { bad: thresholds.bad },
-            })
-          : '',
-      },
-    }
-  );
+  return i18n.translate('xpack.apm.csm.dashboard.webVitals.palette.tooltip', {
+    defaultMessage:
+      '{percentage} % of users have {exp} experience because the {title} takes {moreOrLess} than {value}{averageMessage}.',
+    values: {
+      percentage,
+      title: title?.toLowerCase(),
+      exp: good ? CV_GOOD_LABEL : bad ? CV_POOR_LABEL : CV_AVERAGE_LABEL,
+      moreOrLess: bad || average ? MORE_LABEL : LESS_LABEL,
+      value: good || average ? thresholds.good : thresholds.bad,
+      averageMessage: average
+        ? i18n.translate('xpack.apm.rum.coreVitals.averageMessage', {
+            defaultMessage: ' and less than {bad}',
+            values: { bad: thresholds.bad },
+          })
+        : '',
+    },
+  });
 }
 
 export function CoreVitalItem({
