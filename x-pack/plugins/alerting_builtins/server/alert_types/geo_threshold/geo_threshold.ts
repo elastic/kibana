@@ -264,8 +264,8 @@ export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
 
     // Create alert instances
     movedEntities.forEach(({ entityName, currLocation, prevLocation }) => {
-      const toBoundaryName = shapesIdsNamesMap[currLocation.shapeId] || '';
-      const fromBoundaryName = shapesIdsNamesMap[prevLocation.shapeId] || '';
+      const toBoundaryName = shapesIdsNamesMap[currLocation.shapeId] || currLocation.shapeId;
+      const fromBoundaryName = shapesIdsNamesMap[prevLocation.shapeId] || prevLocation.shapeId;
       services
         .alertInstanceFactory(`${entityName}-${toBoundaryName || currLocation.shapeId}`)
         .scheduleActions(ActionGroupId, {
