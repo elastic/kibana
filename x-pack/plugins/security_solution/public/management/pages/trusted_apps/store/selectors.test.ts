@@ -4,13 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AsyncResourceState, TrustedAppsListPageState } from '../state';
+import {
+  AsyncResourceState,
+  TrustedAppsListPageLocation,
+  TrustedAppsListPageState,
+} from '../state';
 import { initialTrustedAppsPageState } from './reducer';
 import {
-  getCurrentListResourceState,
+  getListResourceState,
   getLastLoadedListResourceState,
-  getListCurrentPageIndex,
-  getListCurrentPageSize,
+  getCurrentLocationPageIndex,
+  getCurrentLocationPageSize,
   getListErrorMessage,
   getListItems,
   getListTotalItemsCount,
@@ -25,7 +29,6 @@ import {
 } from './selectors';
 
 import {
-  createDefaultListView,
   createDefaultPaginationInfo,
   createListComplexLoadingResourceState,
   createListFailedResourceState,
@@ -85,16 +88,21 @@ describe('selectors', () => {
 
     it('returns false when current loaded data is up to date', () => {
       const listView = createLoadedListViewWithPagination(initialNow);
+      const location: TrustedAppsListPageLocation = {
+        page_index: 0,
+        page_size: 10,
+        view_type: 'grid',
+      };
 
-      expect(needsRefreshOfListData({ ...initialState, listView, active: true })).toBe(false);
+      expect(needsRefreshOfListData({ ...initialState, listView, active: true, location })).toBe(
+        false
+      );
     });
   });
 
-  describe('getCurrentListResourceState()', () => {
+  describe('getListResourceState()', () => {
     it('returns current list resource state', () => {
-      const state = { ...initialState, listView: createDefaultListView(initialNow) };
-
-      expect(getCurrentListResourceState(state)).toStrictEqual(createUninitialisedResourceState());
+      expect(getListResourceState(initialState)).toStrictEqual(createUninitialisedResourceState());
     });
   });
 
@@ -103,14 +111,12 @@ describe('selectors', () => {
       const state = {
         ...initialState,
         listView: {
-          currentListResourceState: createListComplexLoadingResourceState(
+          listResourceState: createListComplexLoadingResourceState(
             createDefaultPaginationInfo(),
             200,
             initialNow
           ),
-          currentPaginationInfo: createDefaultPaginationInfo(),
           freshDataTimestamp: initialNow,
-          show: undefined,
         },
       };
 
@@ -122,23 +128,19 @@ describe('selectors', () => {
 
   describe('getListItems()', () => {
     it('returns empty list when no valid data loaded', () => {
-      const state = { ...initialState, listView: createDefaultListView(initialNow) };
-
-      expect(getListItems(state)).toStrictEqual([]);
+      expect(getListItems(initialState)).toStrictEqual([]);
     });
 
     it('returns last loaded list items', () => {
       const state = {
         ...initialState,
         listView: {
-          currentListResourceState: createListComplexLoadingResourceState(
+          listResourceState: createListComplexLoadingResourceState(
             createDefaultPaginationInfo(),
             200,
             initialNow
           ),
-          currentPaginationInfo: createDefaultPaginationInfo(),
           freshDataTimestamp: initialNow,
-          show: undefined,
         },
       };
 
@@ -150,23 +152,19 @@ describe('selectors', () => {
 
   describe('getListTotalItemsCount()', () => {
     it('returns 0 when no valid data loaded', () => {
-      const state = { ...initialState, listView: createDefaultListView(initialNow) };
-
-      expect(getListTotalItemsCount(state)).toBe(0);
+      expect(getListTotalItemsCount(initialState)).toBe(0);
     });
 
     it('returns last loaded total items count', () => {
       const state = {
         ...initialState,
         listView: {
-          currentListResourceState: createListComplexLoadingResourceState(
+          listResourceState: createListComplexLoadingResourceState(
             createDefaultPaginationInfo(),
             200,
             initialNow
           ),
-          currentPaginationInfo: createDefaultPaginationInfo(),
           freshDataTimestamp: initialNow,
-          show: undefined,
         },
       };
 
@@ -176,17 +174,25 @@ describe('selectors', () => {
 
   describe('getListCurrentPageIndex()', () => {
     it('returns page index', () => {
-      const state = { ...initialState, listView: createDefaultListView(initialNow) };
+      const location: TrustedAppsListPageLocation = {
+        page_index: 3,
+        page_size: 10,
+        view_type: 'grid',
+      };
 
-      expect(getListCurrentPageIndex(state)).toBe(0);
+      expect(getCurrentLocationPageIndex({ ...initialState, location })).toBe(3);
     });
   });
 
   describe('getListCurrentPageSize()', () => {
     it('returns page size', () => {
-      const state = { ...initialState, listView: createDefaultListView(initialNow) };
+      const location: TrustedAppsListPageLocation = {
+        page_index: 0,
+        page_size: 20,
+        view_type: 'grid',
+      };
 
-      expect(getListCurrentPageSize(state)).toBe(20);
+      expect(getCurrentLocationPageSize({ ...initialState, location })).toBe(20);
     });
   });
 
@@ -195,14 +201,12 @@ describe('selectors', () => {
       const state = {
         ...initialState,
         listView: {
-          currentListResourceState: createListComplexLoadingResourceState(
+          listResourceState: createListComplexLoadingResourceState(
             createDefaultPaginationInfo(),
             200,
             initialNow
           ),
-          currentPaginationInfo: createDefaultPaginationInfo(),
           freshDataTimestamp: initialNow,
-          show: undefined,
         },
       };
 
@@ -213,10 +217,8 @@ describe('selectors', () => {
       const state = {
         ...initialState,
         listView: {
-          currentListResourceState: createListFailedResourceState('Internal Server Error'),
-          currentPaginationInfo: createDefaultPaginationInfo(),
+          listResourceState: createListFailedResourceState('Internal Server Error'),
           freshDataTimestamp: initialNow,
-          show: undefined,
         },
       };
 
@@ -233,14 +235,12 @@ describe('selectors', () => {
       const state = {
         ...initialState,
         listView: {
-          currentListResourceState: createListComplexLoadingResourceState(
+          listResourceState: createListComplexLoadingResourceState(
             createDefaultPaginationInfo(),
             200,
             initialNow
           ),
-          currentPaginationInfo: createDefaultPaginationInfo(),
           freshDataTimestamp: initialNow,
-          show: undefined,
         },
       };
 
