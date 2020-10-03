@@ -136,7 +136,10 @@ export async function createAlert({
   alert,
 }: {
   http: HttpSetup;
-  alert: Omit<AlertWithoutId, 'createdBy' | 'updatedBy' | 'muteAll' | 'mutedInstanceIds'>;
+  alert: Omit<
+    AlertWithoutId,
+    'createdBy' | 'updatedBy' | 'muteAll' | 'mutedInstanceIds' | 'executionStatus'
+  >;
 }): Promise<Alert> {
   return await http.post(`${BASE_ALERT_API_PATH}/alert`, {
     body: JSON.stringify(alert),

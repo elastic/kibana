@@ -48,6 +48,7 @@ import { config as statusConfig } from './status';
 import { ContextService } from './context';
 import { RequestHandlerContext } from '.';
 import { InternalCoreSetup, InternalCoreStart, ServiceConfigDescriptor } from './internal_types';
+import { CoreRouteHandlerContext } from './core_route_handler_context';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
@@ -116,10 +117,13 @@ export class Server {
     });
     const legacyConfigSetup = await this.legacy.setupLegacyConfig();
 
-    // Immediately terminate in case of invalid configuration
-    // This needs to be done after plugin discovery
-    await this.configService.validate();
-    await ensureValidConfiguration(this.configService, legacyConfigSetup);
+    // rely on dev server to validate config, don't validate in the parent process
+    if (!this.env.isDevClusterMaster) {
+      // Immediately terminate in case of invalid configuration
+      // This needs to be done after plugin discovery
+      await this.configService.validate();
+      await ensureValidConfiguration(this.configService, legacyConfigSetup);
+    }
 
     const contextServiceSetup = this.context.setup({
       // We inject a fake "legacy plugin" with dependencies on every plugin so that legacy plugins:
@@ -279,25 +283,7 @@ export class Server {
       coreId,
       'core',
       async (context, req, res): Promise<RequestHandlerContext['core']> => {
-        const coreStart = this.coreStart!;
-        const savedObjectsClient = coreStart.savedObjects.getScopedClient(req);
-
-        return {
-          savedObjects: {
-            client: savedObjectsClient,
-            typeRegistry: coreStart.savedObjects.getTypeRegistry(),
-          },
-          elasticsearch: {
-            client: coreStart.elasticsearch.client.asScoped(req),
-            legacy: {
-              client: coreStart.elasticsearch.legacy.client.asScoped(req),
-            },
-          },
-          uiSettings: {
-            client: coreStart.uiSettings.asScopedToClient(savedObjectsClient),
-          },
-          auditor: coreStart.auditTrail.asScoped(req),
-        };
+        return new CoreRouteHandlerContext(this.coreStart!, req);
       }
     );
   }
