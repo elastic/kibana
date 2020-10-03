@@ -9252,7 +9252,6 @@
     "xpack.ingestManager.setupPage.elasticsearchApiKeyFlagText": "{apiKeyLink}。将 {apiKeyFlag} 设置为 {true}。",
     "xpack.ingestManager.setupPage.elasticsearchSecurityFlagText": "{esSecurityLink}。将 {securityFlag} 设置为 {true}。",
     "xpack.ingestManager.setupPage.elasticsearchSecurityLink": "Elasticsearch 安全",
-    "xpack.ingestManager.setupPage.enableFleet": "创建用户并启用 Fleet",
     "xpack.ingestManager.setupPage.enableText": "要使用 Fleet，必须创建 Elastic 用户。此用户可以创建 API 密钥并写入到 logs-* and metrics-*。",
     "xpack.ingestManager.setupPage.enableTitle": "启用 Fleet",
     "xpack.ingestManager.setupPage.encryptionKeyFlagText": "{encryptionKeyLink}。将 {keyFlag} 设置为至少 32 个字符的字母数字值。",
