@@ -49,11 +49,11 @@ export const EntityByExpression: FunctionComponent<Props> = ({
       fields.current.indexFields = indexFields.filter(
         (field: IFieldType) => ENTITY_TYPES.includes(field.type) && !field.name.startsWith('_')
       );
-      if (fields.current.indexFields.length) {
+      if (!entity && fields.current.indexFields.length) {
         setAlertParamsEntity(fields.current.indexFields[0].name);
       }
     }
-  }, [ENTITY_TYPES, indexFields, oldIndexFields, setAlertParamsEntity]);
+  }, [ENTITY_TYPES, indexFields, oldIndexFields, setAlertParamsEntity, entity]);
 
   const indexPopover = (
     <EuiFormRow id="entitySelect" fullWidth error={errors.index}>

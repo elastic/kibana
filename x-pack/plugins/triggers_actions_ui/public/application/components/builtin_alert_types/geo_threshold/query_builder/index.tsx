@@ -188,19 +188,12 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
       <EuiSpacer size="m" />
       <EuiFlexGrid columns={2}>
         <EuiFlexItem>
-          <EuiFormRow
-            fullWidth
-            compressed
-            label={labelForDelayOffset}
-            // isInvalid={errors.delayOffset.length > 0}
-            // error={errors.delayOffset}
-          >
+          <EuiFormRow fullWidth compressed label={labelForDelayOffset}>
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>
                 <EuiFieldNumber
                   fullWidth
                   min={0}
-                  // isInvalid={errors.delayOffset.length > 0}
                   compressed
                   value={delayOffset || 0}
                   name="delayOffset"
