@@ -23,12 +23,8 @@ import { formatStatValue } from '../../../../utils/format_stat_value';
 import { ChartContainer } from '../../chart_container';
 import { StyledStat } from '../../styled_stat';
 import { onBrushEnd } from '../helper';
-
-interface Props {
-  absoluteTime: { start?: number; end?: number };
-  relativeTime: { start: string; end: string };
-  bucketSize?: string;
-}
+import { useQueryParams } from '../../../../hooks/use_query_params';
+import { calculatetBucketSize } from '../../../../pages/overview';
 
 function getColorPerItem(series?: LogsFetchDataResponse['series']) {
   if (!series) {
@@ -45,22 +41,30 @@ function getColorPerItem(series?: LogsFetchDataResponse['series']) {
   return colorsPerItem;
 }
 
-export function LogsSection({ absoluteTime, relativeTime, bucketSize }: Props) {
+export function LogsSection() {
   const history = useHistory();
 
-  const { start, end } = absoluteTime;
+  const { absStart, absEnd, start, end } = useQueryParams();
+
+  const bucketSize = calculatetBucketSize({
+    start: absStart,
+    end: absEnd,
+  });
+
   const { data, status } = useFetcher(() => {
     if (start && end && bucketSize) {
       return getDataHandler('infra_logs')?.fetchData({
-        absoluteTime: { start, end },
-        relativeTime,
-        bucketSize,
+        absoluteTime: { start: absStart, end: absEnd },
+        relativeTime: { start, end },
+        bucketSize: bucketSize.intervalString,
       });
     }
-  }, [start, end, bucketSize, relativeTime]);
 
-  const min = moment.utc(absoluteTime.start).valueOf();
-  const max = moment.utc(absoluteTime.end).valueOf();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [start, end]);
+
+  const min = moment.utc(absStart).valueOf();
+  const max = moment.utc(absEnd).valueOf();
 
   const formatter = niceTimeFormatter([min, max]);
 

@@ -16,12 +16,8 @@ import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { Series } from '../../../../typings';
 import { ChartContainer } from '../../chart_container';
 import { StyledStat } from '../../styled_stat';
-
-interface Props {
-  absoluteTime: { start?: number; end?: number };
-  relativeTime: { start: string; end: string };
-  bucketSize?: string;
-}
+import { useQueryParams } from '../../../../hooks/use_query_params';
+import { calculatetBucketSize } from '../../../../pages/overview';
 
 /**
  * EuiProgress doesn't support custom color, when it does this component can be removed.
@@ -46,19 +42,26 @@ const StyledProgress = styled.div<{ color?: string }>`
   }
 `;
 
-export function MetricsSection({ absoluteTime, relativeTime, bucketSize }: Props) {
+export function MetricsSection() {
   const theme = useContext(ThemeContext);
 
-  const { start, end } = absoluteTime;
+  const { absStart, absEnd, start, end } = useQueryParams();
+
+  const bucketSize = calculatetBucketSize({
+    start: absStart,
+    end: absEnd,
+  });
+
   const { data, status } = useFetcher(() => {
     if (start && end && bucketSize) {
       return getDataHandler('infra_metrics')?.fetchData({
-        absoluteTime: { start, end },
-        relativeTime,
-        bucketSize,
+        absoluteTime: { start: absStart, end: absEnd },
+        relativeTime: { start, end },
+        bucketSize: bucketSize.intervalString,
       });
     }
-  }, [start, end, bucketSize, relativeTime]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [start, end]);
 
   const isLoading = status === FETCH_STATUS.LOADING;
 

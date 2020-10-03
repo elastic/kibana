@@ -28,30 +28,33 @@ import { Series } from '../../../../typings';
 import { ChartContainer } from '../../chart_container';
 import { StyledStat } from '../../styled_stat';
 import { onBrushEnd } from '../helper';
+import { useQueryParams } from '../../../../hooks/use_query_params';
+import { calculatetBucketSize } from '../../../../pages/overview';
 
-interface Props {
-  absoluteTime: { start?: number; end?: number };
-  relativeTime: { start: string; end: string };
-  bucketSize?: string;
-}
-
-export function UptimeSection({ absoluteTime, relativeTime, bucketSize }: Props) {
+export function UptimeSection() {
   const theme = useContext(ThemeContext);
   const history = useHistory();
 
-  const { start, end } = absoluteTime;
+  const { absStart, absEnd, start, end } = useQueryParams();
+
+  const bucketSize = calculatetBucketSize({
+    start: absStart,
+    end: absEnd,
+  });
+
   const { data, status } = useFetcher(() => {
     if (start && end && bucketSize) {
       return getDataHandler('uptime')?.fetchData({
-        absoluteTime: { start, end },
-        relativeTime,
-        bucketSize,
+        absoluteTime: { start: absStart, end: absEnd },
+        relativeTime: { start, end },
+        bucketSize: bucketSize.intervalString,
       });
     }
-  }, [start, end, bucketSize, relativeTime]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [start, end]);
 
-  const min = moment.utc(absoluteTime.start).valueOf();
-  const max = moment.utc(absoluteTime.end).valueOf();
+  const min = moment.utc(absStart).valueOf();
+  const max = moment.utc(absEnd).valueOf();
 
   const formatter = niceTimeFormatter([min, max]);
 

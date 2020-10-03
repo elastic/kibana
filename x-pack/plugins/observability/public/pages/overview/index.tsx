@@ -23,18 +23,16 @@ import { useTrackPageview } from '../../hooks/use_track_metric';
 import { RouteParams } from '../../routes';
 import { getNewsFeed } from '../../services/get_news_feed';
 import { getObservabilityAlerts } from '../../services/get_observability_alerts';
-import { getAbsoluteTime } from '../../utils/date';
 import { getBucketSize } from '../../utils/get_bucket_size';
 import { getEmptySections } from './empty_section';
 import { LoadingObservability } from './loading_observability';
-import { DataSections } from './data_sections';
 import { ObsvSharedContext } from '../../context/shared_data';
 
 interface Props {
   routeParams: RouteParams<'/overview'>;
 }
 
-function calculatetBucketSize({ start, end }: { start?: number; end?: number }) {
+export function calculatetBucketSize({ start, end }: { start?: number; end?: number }) {
   if (start && end) {
     return getBucketSize({ start, end, minInterval: '60s' });
   }
@@ -61,26 +59,11 @@ export function OverviewPage({ routeParams }: Props) {
 
   const timePickerTime = useKibanaUISettings<TimePickerTime>(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
 
-  const relativeTime = {
-    start: routeParams.query.rangeFrom ?? timePickerTime.from,
-    end: routeParams.query.rangeTo ?? timePickerTime.to,
-  };
-
-  const absoluteTime = {
-    start: getAbsoluteTime(relativeTime.start),
-    end: getAbsoluteTime(relativeTime.end, { roundUp: true }),
-  };
-
-  const bucketSize = calculatetBucketSize({
-    start: absoluteTime.start,
-    end: absoluteTime.end,
-  });
-
   const appEmptySections = getEmptySections({ core }).filter(({ id }) => {
     if (id === 'alert') {
       return alertStatus !== FETCH_STATUS.FAILURE && !alerts.length;
     }
-    return !hasData?.[id];
+    return hasData?.[id] === false;
   });
 
   return (
@@ -95,8 +78,8 @@ export function OverviewPage({ routeParams }: Props) {
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             <DatePicker
-              rangeFrom={relativeTime.start}
-              rangeTo={relativeTime.end}
+              rangeFrom={routeParams.query.rangeFrom ?? timePickerTime.from}
+              rangeTo={routeParams.query.rangeTo ?? timePickerTime.to}
               refreshInterval={refreshInterval}
               refreshPaused={refreshPaused}
             />
@@ -113,43 +96,27 @@ export function OverviewPage({ routeParams }: Props) {
         <EuiFlexGroup>
           <EuiFlexItem grow={6}>
             {/* Data sections */}
-            {showDataSections && (
+            {hasAnyData && (
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup direction="column">
-                  {hasData.infra_logs && (
+                  {hasData?.infra_logs !== false && (
                     <EuiFlexItem grow={false}>
-                      <LogsSection
-                        absoluteTime={absoluteTime}
-                        relativeTime={relativeTime}
-                        bucketSize={bucketSize?.intervalString}
-                      />
+                      <LogsSection />
                     </EuiFlexItem>
                   )}
-                  {hasData.infra_metrics && (
+                  {hasData?.infra_metrics !== false && (
                     <EuiFlexItem grow={false}>
-                      <MetricsSection
-                        absoluteTime={absoluteTime}
-                        relativeTime={relativeTime}
-                        bucketSize={bucketSize?.intervalString}
-                      />
+                      <MetricsSection />
                     </EuiFlexItem>
                   )}
-                  {hasData.apm && (
+                  {hasData?.apm !== false && (
                     <EuiFlexItem grow={false}>
-                      <APMSection
-                        absoluteTime={absoluteTime}
-                        relativeTime={relativeTime}
-                        bucketSize={bucketSize?.intervalString}
-                      />
+                      <APMSection />
                     </EuiFlexItem>
                   )}
-                  {hasData.uptime && (
+                  {hasData?.uptime !== false && (
                     <EuiFlexItem grow={false}>
-                      <UptimeSection
-                        absoluteTime={absoluteTime}
-                        relativeTime={relativeTime}
-                        bucketSize={bucketSize?.intervalString}
-                      />
+                      <UptimeSection />
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>

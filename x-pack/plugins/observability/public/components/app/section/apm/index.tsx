@@ -19,36 +19,39 @@ import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { ChartContainer } from '../../chart_container';
 import { StyledStat } from '../../styled_stat';
 import { onBrushEnd } from '../helper';
-
-interface Props {
-  absoluteTime: { start?: number; end?: number };
-  relativeTime: { start: string; end: string };
-  bucketSize?: string;
-}
+import { useQueryParams } from '../../../../hooks/use_query_params';
+import { calculatetBucketSize } from '../../../../pages/overview';
 
 function formatTpm(value?: number) {
   return numeral(value).format('0.00a');
 }
 
-export function APMSection({ absoluteTime, relativeTime, bucketSize }: Props) {
+export function APMSection() {
   const theme = useContext(ThemeContext);
   const history = useHistory();
 
-  const { start, end } = absoluteTime;
+  const { absStart, absEnd, start, end } = useQueryParams();
+
+  const bucketSize = calculatetBucketSize({
+    start: absStart,
+    end: absEnd,
+  });
+
   const { data, status } = useFetcher(() => {
     if (start && end && bucketSize) {
       return getDataHandler('apm')?.fetchData({
-        absoluteTime: { start, end },
-        relativeTime,
-        bucketSize,
+        absoluteTime: { start: absStart, end: absEnd },
+        relativeTime: { start, end },
+        bucketSize: bucketSize.intervalString,
       });
     }
-  }, [start, end, bucketSize, relativeTime]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [start, end]);
 
   const { appLink, stats, series } = data || {};
 
-  const min = moment.utc(absoluteTime.start).valueOf();
-  const max = moment.utc(absoluteTime.end).valueOf();
+  const min = moment.utc(absStart).valueOf();
+  const max = moment.utc(absEnd).valueOf();
 
   const formatter = niceTimeFormatter([min, max]);
 
