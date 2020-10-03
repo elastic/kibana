@@ -126,8 +126,6 @@ class OutputService {
     if (outputSO.error) {
       throw new Error(outputSO.error.message);
     }
-
-    return outputSO;
   }
 
   public async list(soClient: SavedObjectsClientContract) {
