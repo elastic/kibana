@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
 import { SPACES } from '../../common/lib/spaces';
 import { testCaseFailures, getTestScenarios } from '../../common/lib/saved_object_test_utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -76,21 +75,7 @@ export default function ({ getService }: FtrProviderContext) {
     return createTestDefinitions(testCases, false, overwrite, {
       spaceId,
       singleRequest: true,
-    }).concat(
-      ['namespace', 'namespaces'].map((key) => ({
-        title: `(bad request) when ${key} is specified on the saved object`,
-        request: [{ type: 'isolatedtype', id: 'some-id', [key]: 'any-value' }] as any,
-        responseStatusCode: 400,
-        responseBody: async (response: Record<string, any>) => {
-          expect(response.body).to.eql({
-            statusCode: 400,
-            error: 'Bad Request',
-            message: `[request body.0.${key}]: definition for this key is missing`,
-          });
-        },
-        overwrite,
-      }))
-    );
+    });
   };
 
   describe('_bulk_create', () => {
