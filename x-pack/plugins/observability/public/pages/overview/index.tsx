@@ -11,6 +11,10 @@ import { WithHeaderLayout } from '../../components/app/layout/with_header';
 import { NewsFeed } from '../../components/app/news_feed';
 import { Resources } from '../../components/app/resources';
 import { AlertsSection } from '../../components/app/section/alerts';
+import { APMSection } from '../../components/app/section/apm';
+import { LogsSection } from '../../components/app/section/logs';
+import { MetricsSection } from '../../components/app/section/metrics';
+import { UptimeSection } from '../../components/app/section/uptime';
 import { DatePicker, TimePickerTime } from '../../components/shared/data_picker';
 import { FETCH_STATUS, useFetcher } from '../../hooks/use_fetcher';
 import { UI_SETTINGS, useKibanaUISettings } from '../../hooks/use_kibana_ui_settings';
@@ -30,7 +34,7 @@ interface Props {
   routeParams: RouteParams<'/overview'>;
 }
 
-function calculateBucketSize({ start, end }: { start?: number; end?: number }) {
+function calculatetBucketSize({ start, end }: { start?: number; end?: number }) {
   if (start && end) {
     return getBucketSize({ start, end, minInterval: '60s' });
   }
@@ -67,7 +71,7 @@ export function OverviewPage({ routeParams }: Props) {
     end: getAbsoluteTime(relativeTime.end, { roundUp: true }),
   };
 
-  const bucketSize = calculateBucketSize({
+  const bucketSize = calculatetBucketSize({
     start: absoluteTime.start,
     end: absoluteTime.end,
   });
@@ -109,7 +113,48 @@ export function OverviewPage({ routeParams }: Props) {
         <EuiFlexGroup>
           <EuiFlexItem grow={6}>
             {/* Data sections */}
-            <DataSections bucketSize={bucketSize?.intervalString!} hasData={hasData} />
+            {showDataSections && (
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup direction="column">
+                  {hasData.infra_logs && (
+                    <EuiFlexItem grow={false}>
+                      <LogsSection
+                        absoluteTime={absoluteTime}
+                        relativeTime={relativeTime}
+                        bucketSize={bucketSize?.intervalString}
+                      />
+                    </EuiFlexItem>
+                  )}
+                  {hasData.infra_metrics && (
+                    <EuiFlexItem grow={false}>
+                      <MetricsSection
+                        absoluteTime={absoluteTime}
+                        relativeTime={relativeTime}
+                        bucketSize={bucketSize?.intervalString}
+                      />
+                    </EuiFlexItem>
+                  )}
+                  {hasData.apm && (
+                    <EuiFlexItem grow={false}>
+                      <APMSection
+                        absoluteTime={absoluteTime}
+                        relativeTime={relativeTime}
+                        bucketSize={bucketSize?.intervalString}
+                      />
+                    </EuiFlexItem>
+                  )}
+                  {hasData.uptime && (
+                    <EuiFlexItem grow={false}>
+                      <UptimeSection
+                        absoluteTime={absoluteTime}
+                        relativeTime={relativeTime}
+                        bucketSize={bucketSize?.intervalString}
+                      />
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            )}
 
             {/* Empty sections */}
             {!!appEmptySections.length && (
