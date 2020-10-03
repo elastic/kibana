@@ -69,7 +69,7 @@ export const CloneTransformSection: FC<Props> = ({ match, location }) => {
     try {
       if (indexPatternId === undefined) {
         throw new Error(
-          i18n.translate('xpack.transform.clone.errorPromptText', {
+          i18n.translate('xpack.transform.clone.fetchErrorPromptText', {
             defaultMessage: 'Could not fetch the Kibana index pattern ID.',
           })
         );

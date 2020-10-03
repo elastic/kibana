@@ -39,7 +39,7 @@ export const useCloneAction = (forceDisable: boolean) => {
 
         if (indexPatternId === undefined) {
           toastNotifications.addDanger(
-            i18n.translate('xpack.transform.clone.errorPromptText', {
+            i18n.translate('xpack.transform.clone.noIndexPatternErrorPromptText', {
               defaultMessage:
                 'Unable to clone the transform . No index pattern exists for {indexPattern}.',
               values: { indexPattern: indexPatternTitle },
