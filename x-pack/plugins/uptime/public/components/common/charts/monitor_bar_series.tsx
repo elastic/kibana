@@ -25,6 +25,7 @@ import { HistogramPoint } from '../../../../common/runtime_types';
 import { getChartDateLabel, seriesHasDownValues } from '../../../lib/helper';
 import { useUrlParams } from '../../../hooks';
 import { UptimeThemeContext } from '../../../contexts';
+import { getDateRangeFromChartElement } from './utils';
 
 export interface MonitorBarSeriesProps {
   /**
@@ -60,12 +61,7 @@ export const MonitorBarSeries = ({ histogramSeries, minInterval }: MonitorBarSer
   };
 
   const onBarClicked: ElementClickListener = ([elementData]) => {
-    const startRange = (elementData as XYChartElementEvent)[0].x;
-
-    updateUrlParams({
-      dateRangeStart: moment(startRange).toISOString(),
-      dateRangeEnd: moment(startRange).add(minInterval, 'ms').toISOString(),
-    });
+    updateUrlParams(getDateRangeFromChartElement(elementData as XYChartElementEvent, minInterval));
   };
 
   const id = 'downSeries';

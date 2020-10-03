@@ -27,6 +27,7 @@ import { UptimeThemeContext } from '../../../contexts';
 import { HistogramResult } from '../../../../common/runtime_types';
 import { useUrlParams } from '../../../hooks';
 import { ChartEmptyState } from './chart_empty_state';
+import { getDateRangeFromChartElement } from './utils';
 
 export interface PingHistogramComponentProps {
   /**
@@ -103,12 +104,9 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
     };
 
     const onBarClicked: ElementClickListener = ([elementData]) => {
-      const startRange = (elementData as XYChartElementEvent)[0].x;
-
-      updateUrlParams({
-        dateRangeStart: moment(startRange).toISOString(),
-        dateRangeEnd: moment(startRange).add(minInterval, 'ms').toISOString(),
-      });
+      updateUrlParams(
+        getDateRangeFromChartElement(elementData as XYChartElementEvent, minInterval)
+      );
     };
 
     const barData: BarPoint[] = [];
