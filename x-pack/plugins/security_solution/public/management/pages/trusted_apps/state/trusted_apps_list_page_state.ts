@@ -38,9 +38,12 @@ export interface TrustedAppCreateFailure {
   data: ServerApiError;
 }
 
+export type ViewType = 'list' | 'grid';
+
 export interface TrustedAppsListPageLocation {
   page_index: number;
   page_size: number;
+  view_type: ViewType;
   show?: 'create';
 }
 
