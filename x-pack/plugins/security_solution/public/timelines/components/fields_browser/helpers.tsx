@@ -144,7 +144,7 @@ export const mergeBrowserFieldsWithDefaultCategory = (
   }),
 });
 
-export const getColumnHeaderByTimelineIdAndField = (timelineId: string, fieldId: string) =>
+export const getAlertColumnHeader = (timelineId: string, fieldId: string) =>
   timelineId === TimelineId.detectionsPage || timelineId === TimelineId.detectionsRulesDetailsPage
     ? alertsHeaders.find((c) => c.id === fieldId) ?? {}
     : {};
