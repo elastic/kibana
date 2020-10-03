@@ -206,7 +206,7 @@ const getSavedObjectTypes = (
         ca_sha256: { type: 'keyword', index: false },
         fleet_enroll_username: { type: 'binary' },
         fleet_enroll_password: { type: 'binary' },
-        config: { type: 'text' },
+        config: { type: 'flattened' },
         config_yaml: { type: 'text' },
       },
     },
