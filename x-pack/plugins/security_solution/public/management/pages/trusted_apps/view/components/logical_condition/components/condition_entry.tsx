@@ -83,7 +83,7 @@ export const ConditionEntry = memo<ConditionEntryProps>(
             'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.path',
             { defaultMessage: 'Path' }
           ),
-          value: 'process.executable.text',
+          value: 'process.executable.caseless',
         },
       ];
     }, []);
@@ -130,6 +130,7 @@ export const ConditionEntry = memo<ConditionEntryProps>(
         alignItems="center"
         direction="row"
         data-test-subj={dataTestSubj}
+        responsive={false}
       >
         <EuiFlexItem grow={2}>
           <ConditionEntryCell
@@ -176,6 +177,7 @@ export const ConditionEntry = memo<ConditionEntryProps>(
             <EuiFieldText
               name="value"
               value={entry.value}
+              fullWidth
               required
               onChange={handleValueUpdate}
               onBlur={handleValueOnBlur}
