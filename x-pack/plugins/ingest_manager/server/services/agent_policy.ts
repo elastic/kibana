@@ -452,13 +452,14 @@ class AgentPolicyService {
         // TEMPORARY as we only support a default output
         ...[defaultOutput].reduce(
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          (outputs, { config: outputConfig, name, type, hosts, ca_sha256, api_key }) => {
+          (outputs, { config_yaml, name, type, hosts, ca_sha256, api_key }) => {
+            const configJs = config_yaml ? safeLoad(config_yaml) : {};
             outputs[name] = {
               type,
               hosts,
               ca_sha256,
               api_key,
-              ...outputConfig,
+              ...configJs,
             };
 
             if (options?.standalone) {

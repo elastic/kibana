@@ -23,6 +23,7 @@ export interface PutOutputRequest {
     hosts?: string[];
     ca_sha256?: string;
     config?: Record<string, any>;
+    config_yaml?: string;
   };
 }
 

@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText } from '@elastic/eui';
-import { safeLoad, safeDump } from 'js-yaml';
+import { safeLoad } from 'js-yaml';
 import { useComboInput, useCore, useGetSettings, useInput, sendPutSettings } from '../hooks';
 import { useGetOutputs, sendPutOutput } from '../hooks/use_request/outputs';
 import { isDiffPathProtocol } from '../../../../common/';
@@ -100,14 +100,9 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
         if (!outputId) {
           throw new Error('Unable to load outputs');
         }
-        console.log(
-          'onSubmit output config',
-          additionalYamlConfigInput.value,
-          safeLoad(additionalYamlConfigInput.value)
-        );
         const outputResponse = await sendPutOutput(outputId, {
           hosts: elasticsearchUrlInput.value,
-          config: safeLoad(additionalYamlConfigInput.value),
+          config_yaml: additionalYamlConfigInput.value,
         });
         if (outputResponse.error) {
           throw outputResponse.error;
@@ -151,9 +146,8 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
     if (output) {
       inputs.elasticsearchUrl.setValue(output.hosts || []);
       inputs.additionalYamlConfig.setValue(
-        output.config
-          ? safeDump(output.config)
-          : `# YAML settings here will be added to the Elasticsearch output section of each policy`
+        output.config_yaml ||
+          `# YAML settings here will be added to the Elasticsearch output section of each policy`
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
