@@ -41,11 +41,6 @@ const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProp
 
   const { http, notifications } = useKibana().services;
 
-  useEffect(() => {
-    onChange({ incidentTypes, severityCode });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const {
     isLoading: isLoadingIncidentTypes,
     incidentTypes: allIncidentTypes,

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { EuiFormRow, EuiSelect, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import * as i18n from './translations';
 
@@ -31,11 +31,6 @@ const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsPro
   ServiceNowFieldsType
 >> = ({ isEdit = true, fields, connector, onChange }) => {
   const { severity = null, urgency = null, impact = null } = fields ?? {};
-
-  useEffect(() => {
-    onChange({ severity, urgency, impact });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const listItems = useMemo(
     () => [

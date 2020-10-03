@@ -4,16 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { map } from 'lodash/fp';
-import {
-  EuiFormRow,
-  EuiSelectOption,
-  EuiSelect,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFormRow, EuiSelect, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import * as i18n from './translations';
 
 import { ConnectorTypes, JiraFieldsType } from '../../../../../../case/common/api/connectors';
@@ -32,14 +25,7 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
 }) => {
   const { issueType = null, priority = null, parent = null } = fields ?? {};
 
-  const [issueTypesSelectOptions, setIssueTypesSelectOptions] = useState<EuiSelectOption[]>([]);
-  const [prioritiesSelectOptions, setPrioritiesSelectOptions] = useState<EuiSelectOption[]>([]);
   const { http, notifications } = useKibana().services;
-
-  useEffect(() => {
-    onChange({ issueType, priority, parent });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const { isLoading: isLoadingIssueTypes, issueTypes } = useGetIssueTypes({
     http,
@@ -47,11 +33,26 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
     connector,
   });
 
+  const issueTypesSelectOptions = useMemo(
+    () =>
+      issueTypes.map((type) => ({
+        value: type.id ?? '',
+        text: type.name ?? '',
+      })),
+    [issueTypes]
+  );
+
+  const currentIssueType = useMemo(() => {
+    if (!issueType && issueTypesSelectOptions.length > 0) {
+      return issueTypesSelectOptions[0].value;
+    }
+    return issueType;
+  }, [issueType, issueTypesSelectOptions]);
   const { isLoading: isLoadingFields, fields: fieldsByIssueType } = useGetFieldsByIssueType({
     http,
     toastNotifications: notifications.toasts,
     connector,
-    issueType,
+    issueType: currentIssueType,
   });
 
   const hasPriority = useMemo(
@@ -63,36 +64,17 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
     () => Object.prototype.hasOwnProperty.call(fieldsByIssueType, 'parent'),
     [fieldsByIssueType]
   );
+  const prioritiesSelectOptions = useMemo(() => {
+    const priorities = fieldsByIssueType.priority?.allowedValues ?? [];
+    return map(
+      (p) => ({
+        value: p.name,
+        text: p.name,
+      }),
+      priorities
+    );
+  }, [fieldsByIssueType]);
 
-  useEffect(() => {
-    const options = issueTypes.map((type) => ({
-      value: type.id ?? '',
-      text: type.name ?? '',
-    }));
-
-    setIssueTypesSelectOptions(options);
-  }, [issueTypes]);
-
-  useEffect(() => {
-    if (issueType != null && fieldsByIssueType != null) {
-      const priorities = fieldsByIssueType.priority?.allowedValues ?? [];
-      const options = map(
-        (p) => ({
-          value: p.name,
-          text: p.name,
-        }),
-        priorities
-      );
-      setPrioritiesSelectOptions(options);
-    }
-  }, [fieldsByIssueType, issueType]);
-
-  // Set default issue type
-  useEffect(() => {
-    if (!issueType && issueTypesSelectOptions.length > 0) {
-      onChange({ ...fields, issueType: issueTypesSelectOptions[0].value as string });
-    }
-  }, [issueTypes, issueType, issueTypesSelectOptions, onChange, fields]);
   const listItems = useMemo(
     () => [
       ...(issueType != null
@@ -123,6 +105,19 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
     [issueType, issueTypes, hasParent, parent, hasPriority, priority]
   );
 
+  const onFieldChange = useCallback(
+    (key, value) => {
+      onChange({
+        ...fields,
+        issueType: currentIssueType,
+        priority,
+        parent,
+        [key]: value,
+      });
+    },
+    [currentIssueType, fields, onChange, parent, priority]
+  );
+
   return isEdit ? (
     <span data-test-subj={'connector-settings-jira'}>
       <EuiFormRow fullWidth label={i18n.ISSUE_TYPE}>
@@ -132,10 +127,8 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
           disabled={isLoadingIssueTypes || isLoadingFields}
           data-test-subj="issueTypeSelect"
           options={issueTypesSelectOptions}
-          value={issueType ?? ''}
-          onChange={(e) => {
-            onChange({ ...fields, issueType: e.target.value });
-          }}
+          value={currentIssueType ?? ''}
+          onChange={(e) => onFieldChange('issueType', e.target.value)}
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
@@ -150,9 +143,7 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
                     http={http}
                     toastNotifications={notifications.toasts}
                     actionConnector={connector}
-                    onChange={(parentIssueKey) => {
-                      onChange({ ...fields, parent: parentIssueKey });
-                    }}
+                    onChange={(parentIssueKey) => onFieldChange('parent', parentIssueKey)}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -160,28 +151,24 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
             <EuiSpacer size="m" />
           </>
         )}
-        {hasPriority && (
-          <>
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiFormRow fullWidth label={i18n.PRIORITY}>
-                  <EuiSelect
-                    fullWidth
-                    isLoading={isLoadingFields}
-                    disabled={isLoadingIssueTypes || isLoadingFields}
-                    data-test-subj="prioritySelect"
-                    options={prioritiesSelectOptions}
-                    value={priority ?? ''}
-                    hasNoInitialSelection
-                    onChange={(e) => {
-                      onChange({ ...fields, priority: e.target.value });
-                    }}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
-        )}
+        <>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFormRow fullWidth label={i18n.PRIORITY}>
+                <EuiSelect
+                  fullWidth
+                  isLoading={isLoadingFields}
+                  disabled={isLoadingIssueTypes || isLoadingFields}
+                  data-test-subj="prioritySelect"
+                  options={prioritiesSelectOptions}
+                  value={priority ?? ''}
+                  hasNoInitialSelection
+                  onChange={(e) => onFieldChange('priority', e.target.value)}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
       </>
     </span>
   ) : (

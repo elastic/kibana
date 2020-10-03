@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect, useReducer } from 'react';
+import React, { useCallback, useReducer } from 'react';
 import deepEqual from 'fast-deep-equal';
 import {
   EuiText,
@@ -19,7 +19,7 @@ import {
 import styled, { css } from 'styled-components';
 import { noop } from 'lodash/fp';
 
-import { Form, UseField, useForm, useFormData } from '../../../shared_imports';
+import { Form, UseField, useForm } from '../../../shared_imports';
 import { ConnectorTypeFields } from '../../../../../case/common/api/connectors';
 import { ConnectorSelector } from '../connector_selector/form';
 import { ActionConnector } from '../../../../../case/common/api/cases';
@@ -116,44 +116,32 @@ export const EditConnector = React.memo(
     });
 
     const { setFieldValue, submit } = form;
-    const [{ connectorId }] = useFormData<{
-      connectorId: string;
-    }>({
-      form,
-      watch: ['connectorId'],
-    });
+
     const [{ currentConnector, fields, editConnector }, dispatch] = useReducer(
       editConnectorReducer,
-      initialState
+      { ...initialState, fields: caseFields }
     );
 
-    const setCurrentConnector = useCallback(() => {
-      if (currentConnector == null || connectorId !== currentConnector.id) {
-        dispatch({
-          type: 'SET_CURRENT_CONNECTOR',
-          payload: getConnectorById(connectorId, connectors),
-        });
-      }
-    }, [connectorId, connectors, currentConnector]);
+    const onChangeConnector = useCallback(
+      (newConnectorId) => {
+        if (currentConnector == null || currentConnector.id !== newConnectorId) {
+          dispatch({
+            type: 'SET_CURRENT_CONNECTOR',
+            payload: getConnectorById(newConnectorId, connectors),
+          });
+          // on connector change, set fields from userActions
+          if (userActions.length > 0) {
+            dispatch({
+              type: 'SET_FIELDS',
+              payload: getConnectorFieldsFromUserActions(newConnectorId, userActions),
+            });
+          }
+        }
+      },
+      [currentConnector, connectors, userActions]
+    );
 
-    const setFields = useCallback(() => {
-      // Get fields of the connector from user actions when changing connector
-      if (userActions.length > 0 && currentConnector != null) {
-        dispatch({
-          type: 'SET_FIELDS',
-          payload: getConnectorFieldsFromUserActions(currentConnector.id, userActions),
-        });
-      }
-    }, [currentConnector, userActions]);
-
-    useEffect(() => {
-      setCurrentConnector();
-    }, [connectors, connectorId, setCurrentConnector]);
-    useEffect(() => {
-      setFields();
-    }, [currentConnector, setFields, userActions]);
-
-    const onFields = useCallback(
+    const onFieldsChange = useCallback(
       (newFields) => {
         if (!deepEqual(newFields, caseFields)) {
           dispatch({
@@ -242,6 +230,7 @@ export const EditConnector = React.memo(
                         isEdit: editConnector,
                         isLoading,
                       }}
+                      onChange={onChangeConnector}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -252,7 +241,7 @@ export const EditConnector = React.memo(
                 connector={currentConnector}
                 fields={fields}
                 isEdit={editConnector}
-                onChange={onFields}
+                onChange={onFieldsChange}
               />
             </EuiFlexItem>
             {editConnector && (

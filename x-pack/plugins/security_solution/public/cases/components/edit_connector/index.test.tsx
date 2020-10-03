@@ -13,17 +13,10 @@ import { TestProviders } from '../../../common/mock';
 import { connectorsMock } from '../../containers/configure/mock';
 import { waitFor } from '@testing-library/react';
 import { caseUserActions } from '../../containers/mock';
-import { useFormData } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form_data';
 
 jest.mock(
   '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form'
 );
-
-jest.mock(
-  '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form_data'
-);
-
-const useFormDataMock = useFormData as jest.Mock;
 
 const onSubmit = jest.fn();
 const defaultProps = {
@@ -43,7 +36,6 @@ describe('EditConnector ', () => {
     jest.clearAllMocks();
     jest.resetAllMocks();
     useFormMock.mockImplementation(() => ({ form: formHookMock }));
-    useFormDataMock.mockImplementation(() => [{ connectorId: 'none' }]);
   });
 
   it('Renders no connector, and then edit', () => {
