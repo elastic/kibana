@@ -5,7 +5,6 @@
  */
 
 import { ObservabilityApp } from '../../../typings/common';
-import { UXMetrics } from '../../components/shared/core_web_vitals';
 
 export interface Stat {
   type: 'number' | 'percent' | 'bytesPerSecond';
@@ -25,29 +24,17 @@ export interface FetchDataParams {
   absoluteTime: { start: number; end: number };
   relativeTime: { start: string; end: string };
   bucketSize: string;
-  serviceName?: string;
 }
-
-export interface HasDataParams {
-  absoluteTime: { start: number; end: number };
-}
-
-interface UXHasDataResponse {
-  hasData: boolean;
-  serviceName: string | number | undefined;
-}
-
-export type HasDataResponse = UXHasDataResponse | boolean;
 
 export type FetchData<T extends FetchDataResponse = FetchDataResponse> = (
   fetchDataParams: FetchDataParams
 ) => Promise<T>;
 
-export type HasData = (params?: HasDataParams) => Promise<HasDataResponse>;
+export type HasData = () => Promise<boolean>;
 
 export type ObservabilityFetchDataPlugins = Exclude<
   ObservabilityApp,
-  'observability' | 'stack_monitoring'
+  'observability' | 'stack_monitoring' | 'ux'
 >;
 
 export interface DataHandler<
@@ -102,14 +89,9 @@ export interface ApmFetchDataResponse extends FetchDataResponse {
   };
 }
 
-export interface UxFetchDataResponse extends FetchDataResponse {
-  coreWebVitals: UXMetrics;
-}
-
 export interface ObservabilityFetchDataResponse {
   apm: ApmFetchDataResponse;
   infra_metrics: MetricsFetchDataResponse;
   infra_logs: LogsFetchDataResponse;
   uptime: UptimeFetchDataResponse;
-  ux: UxFetchDataResponse;
 }
