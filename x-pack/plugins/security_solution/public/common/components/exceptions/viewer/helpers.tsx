@@ -6,12 +6,7 @@
 import moment from 'moment';
 
 import { entriesNested, ExceptionListItemSchema } from '../../../../lists_plugin_deps';
-import {
-  getEntryValue,
-  getExceptionOperatorSelect,
-  formatOperatingSystems,
-  getOperatingSystems,
-} from '../helpers';
+import { getEntryValue, getExceptionOperatorSelect, formatOperatingSystems } from '../helpers';
 import { FormattedEntry, BuilderEntry, DescriptionListItem } from '../types';
 import * as i18n from '../translations';
 
@@ -80,7 +75,7 @@ export const getDescriptionListContent = (
   const details = [
     {
       title: i18n.OPERATING_SYSTEM,
-      value: formatOperatingSystems(getOperatingSystems(exceptionItem._tags ?? [])),
+      value: formatOperatingSystems(exceptionItem.os_types),
     },
     {
       title: i18n.DATE_CREATED,
