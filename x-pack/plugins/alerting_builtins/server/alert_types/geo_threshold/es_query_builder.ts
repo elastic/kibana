@@ -10,7 +10,8 @@ import { Logger } from '../../types';
 
 export const OTHER_CATEGORY = 'other';
 // Consider dynamically obtaining from config?
-const MAX_QUERY_SIZE = 10000;
+const MAX_TOP_LEVEL_QUERY_SIZE = 10000;
+const MAX_SUB_AGG_QUERY_SIZE = 10000;
 
 export async function getShapesFilters(
   boundaryIndexTitle: string,
@@ -27,7 +28,7 @@ export async function getShapesFilters(
   const boundaryData: SearchResponse<Record<string, unknown>> = await callCluster('search', {
     index: boundaryIndexTitle,
     body: {
-      size: MAX_QUERY_SIZE,
+      size: MAX_TOP_LEVEL_QUERY_SIZE,
     },
   });
   boundaryData.hits.hits.forEach(({ _index, _id }) => {
@@ -85,7 +86,7 @@ export async function executeEsQueryFactory(
     const esQuery: Record<string, any> = {
       index,
       body: {
-        size: MAX_QUERY_SIZE,
+        size: MAX_TOP_LEVEL_QUERY_SIZE,
         aggs: {
           shapes: {
             filters: {
@@ -95,6 +96,7 @@ export async function executeEsQueryFactory(
             aggs: {
               entitySplit: {
                 terms: {
+                  size: MAX_SUB_AGG_QUERY_SIZE,
                   field: entity,
                 },
                 aggs: {
