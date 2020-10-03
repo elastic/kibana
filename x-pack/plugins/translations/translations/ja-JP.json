@@ -9253,7 +9253,6 @@
     "xpack.ingestManager.setupPage.elasticsearchApiKeyFlagText": "{apiKeyLink}.{apiKeyFlag}を{true}に設定します。",
     "xpack.ingestManager.setupPage.elasticsearchSecurityFlagText": "{esSecurityLink}.{securityFlag}を{true}に設定します。",
     "xpack.ingestManager.setupPage.elasticsearchSecurityLink": "Elasticsearchセキュリティ",
-    "xpack.ingestManager.setupPage.enableFleet": "ユーザーを作成してフリートを有効にます",
     "xpack.ingestManager.setupPage.enableText": "フリートを使用するには、Elasticユーザーを作成する必要があります。このユーザーは、APIキーを作成して、logs-*およびmetrics-*に書き込むことができます。",
     "xpack.ingestManager.setupPage.enableTitle": "フリートを有効にする",
     "xpack.ingestManager.setupPage.encryptionKeyFlagText": "{encryptionKeyLink}.{keyFlag}を32文字以上の英数字に設定します。",
