@@ -46,6 +46,9 @@ export type MakeSchemaFrom<Base> = {
 };
 
 export interface FetchClients {
+  /**
+   * @depricated use esClient in stead
+   */
   callCluster: LegacyAPICaller;
   esClient?: ElasticsearchClient;
 }
