@@ -17,5 +17,6 @@
  * under the License.
  */
 
-require('../src/setup_node_env/no_transpilation');
-require('@kbn/telemetry-tools').runTelemetryCheck();
+require('../apm')(process.env.ELASTIC_APM_PROXY_SERVICE_NAME || 'kibana-proxy');
+require('../setup_node_env');
+require('./cli');

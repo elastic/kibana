@@ -17,5 +17,7 @@
  * under the License.
  */
 
-require('../src/setup_node_env/no_transpilation');
-require('@kbn/telemetry-tools').runTelemetryCheck();
+require('../apm')();
+require('../setup_node_env/no_transpilation');
+require('../setup_node_env/babel_register/polyfill');
+require('./cli');
