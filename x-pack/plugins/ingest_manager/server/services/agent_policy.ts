@@ -445,13 +445,6 @@ class AgentPolicyService {
       return null;
     }
 
-    let settings: Settings;
-    try {
-      settings = await getSettings(soClient);
-    } catch (error) {
-      throw new Error('Default settings is not setup');
-    }
-
     const defaultOutputId = await outputService.getDefaultOutputId(soClient);
     if (!defaultOutputId) {
       throw new Error('Default output is not setup');
@@ -507,6 +500,12 @@ class AgentPolicyService {
 
     // only add settings if not in standalone
     if (!standalone) {
+      let settings: Settings;
+      try {
+        settings = await getSettings(soClient);
+      } catch (error) {
+        throw new Error('Default settings is not setup');
+      }
       if (!settings.kibana_urls) throw new Error('kibana_urls is missing');
       fullAgentPolicy.fleet = {
         kibana: {
