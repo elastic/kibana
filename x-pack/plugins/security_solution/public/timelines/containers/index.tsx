@@ -87,7 +87,7 @@ export const useTimelineEvents = ({
   const [timelineRequest, setTimelineRequest] = useState<TimelineEventsAllRequestOptions | null>(
     !skip
       ? {
-          fields,
+          fields: [],
           fieldRequested: fields,
           filterQuery: createFilter(filterQuery),
           id,
@@ -206,22 +206,20 @@ export const useTimelineEvents = ({
 
     setTimelineRequest((prevRequest) => {
       const myRequest = {
-        ...(prevRequest ?? {
-          fields,
-          fieldRequested: fields,
-          id,
-          factoryQueryType: TimelineEventsQueries.all,
-        }),
-        defaultIndex: indexNames,
-        docValueFields: docValueFields ?? [],
+        fields: [],
+        fieldRequested: fields,
         filterQuery: createFilter(filterQuery),
-        pagination: generateTablePaginationOptions(activePage, limit),
+        id,
         timerange: {
           interval: '12h',
           from: startDate,
           to: endDate,
         },
+        pagination: generateTablePaginationOptions(activePage, limit),
         sort,
+        defaultIndex: indexNames,
+        docValueFields: docValueFields ?? [],
+        factoryQueryType: TimelineEventsQueries.all,
       };
       if (
         !skip &&
