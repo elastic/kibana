@@ -8,7 +8,7 @@ import _ from 'lodash';
 import { SearchResponse } from 'elasticsearch';
 import { executeEsQueryFactory, getShapesFilters, OTHER_CATEGORY } from './es_query_builder';
 import { AlertServices, AlertTypeState } from '../../../../alerts/server';
-import { ActionGroupId, GEO_THRESHOLD_ID } from './alert_type';
+import { ActionGroupId, GEO_THRESHOLD_ID, GeoThresholdParams } from './alert_type';
 import { Logger } from '../../types';
 
 interface LatestEntityLocation {
@@ -181,23 +181,10 @@ export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
     previousStartedAt: Date | null;
     startedAt: Date;
     services: AlertServices;
-    params: {
-      index: string;
-      indexId: string;
-      geoField: string;
-      entity: string;
-      dateField: string;
-      trackingEvent: string;
-      boundaryType: string;
-      boundaryIndexTitle: string;
-      boundaryIndexId: string;
-      boundaryGeoField: string;
-      boundaryNameField?: string;
-      delayOffsetWithUnits?: string;
-    };
+    params: GeoThresholdParams;
     alertId: string;
     state: AlertTypeState;
-  }) {
+  }): AlertTypeState {
     const { shapesFilters, shapesIdsNamesMap } = state.shapesFilters
       ? state
       : await getShapesFilters(

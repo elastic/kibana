@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { lazy } from 'react';
-
+import { i18n } from '@kbn/i18n';
 import { AlertTypeModel } from '../../../../types';
 import { validateExpression } from './validation';
 import { GeoThresholdAlertParams } from './types';
@@ -13,7 +13,9 @@ import { AlertsContextValue } from '../../../context/alerts_context';
 export function getAlertType(): AlertTypeModel<GeoThresholdAlertParams, AlertsContextValue> {
   return {
     id: '.geo-threshold',
-    name: 'Tracking threshold',
+    name: i18n.translate('xpack.triggersActionsUI.geoThreshold.name.trackingThreshold', {
+      defaultMessage: 'Tracking threshold',
+    }),
     iconClass: 'globe',
     alertParamsExpression: lazy(() => import('./query_builder')),
     validate: validateExpression,
