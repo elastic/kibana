@@ -11,12 +11,7 @@
  * and manages the layout of the charts in the containing div.
  */
 
-import get from 'lodash/get';
-import each from 'lodash/each';
-import find from 'lodash/find';
-import sortBy from 'lodash/sortBy';
-import map from 'lodash/map';
-import reduce from 'lodash/reduce';
+import { get, each, find, sortBy, map, reduce } from 'lodash';
 
 import { buildConfig } from './explorer_chart_config_builder';
 import { chartLimits, getChartType } from '../../util/chart_utils';
