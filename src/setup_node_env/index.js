@@ -17,5 +17,5 @@
  * under the License.
  */
 
-require('./prebuilt_dev_only_entry');
-require('./babel_register');
+require('./no_transpilation');
+require('@kbn/optimizer').registerNodeAutoTranspilation();
