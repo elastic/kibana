@@ -419,6 +419,10 @@ export const getResult = (): RuleAlertType => ({
   muteAll: false,
   mutedInstanceIds: [],
   scheduledTaskId: '2dabe330-0702-11ea-8b50-773b89126888',
+  executionStatus: {
+    status: 'unknown',
+    lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+  },
 });
 
 export const getMlResult = (): RuleAlertType => {
@@ -630,6 +634,10 @@ export const getNotificationResult = (): RuleNotificationAlertType => ({
   mutedInstanceIds: [],
   scheduledTaskId: '62b3a130-6b70-11ea-9ce9-6b9818c4cbd7',
   updatedAt: new Date('2020-03-21T12:37:08.730Z'),
+  executionStatus: {
+    status: 'unknown',
+    lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+  },
 });
 
 export const getFindNotificationsResultWithSingleHit = (): FindHit<RuleNotificationAlertType> => ({

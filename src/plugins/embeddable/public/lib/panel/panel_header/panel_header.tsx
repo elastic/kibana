@@ -109,12 +109,11 @@ function renderTooltip(description: string) {
   );
 }
 
-const VISUALIZE_EMBEDDABLE_TYPE = 'visualization';
-type VisualizeEmbeddable = any;
+type EmbeddableWithDescription = IEmbeddable & { getDescription: () => string };
 
-function getViewDescription(embeddable: IEmbeddable | VisualizeEmbeddable) {
-  if (embeddable.type === VISUALIZE_EMBEDDABLE_TYPE) {
-    const description = embeddable.getVisualizationDescription();
+function getViewDescription(embeddable: IEmbeddable | EmbeddableWithDescription) {
+  if ('getDescription' in embeddable) {
+    const description = embeddable.getDescription();
 
     if (description) {
       return description;
@@ -137,7 +136,7 @@ export function PanelHeader({
 }: PanelHeaderProps) {
   const viewDescription = getViewDescription(embeddable);
   const showTitle = !hidePanelTitle && (!isViewMode || title || viewDescription !== '');
-  const showPanelBar = badges.length > 0 || notifications.length > 0 || showTitle;
+  const showPanelBar = !isViewMode || badges.length > 0 || notifications.length > 0 || showTitle;
   const classes = classNames('embPanel__header', {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     'embPanel__header--floater': !showPanelBar,
