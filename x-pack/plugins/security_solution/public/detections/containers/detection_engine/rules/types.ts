@@ -18,7 +18,14 @@ import {
   threshold,
   type,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { listArray } from '../../../../../common/detection_engine/schemas/types';
+import {
+  listArray,
+  threat_query,
+  threat_index,
+  threat_mapping,
+  threat_language,
+  threat_filters,
+} from '../../../../../common/detection_engine/schemas/types';
 import {
   CreateRulesSchema,
   PatchRulesSchema,
@@ -110,6 +117,11 @@ export const RuleSchema = t.intersection([
     status: t.string,
     status_date: t.string,
     threshold,
+    threat_query,
+    threat_filters,
+    threat_index,
+    threat_mapping,
+    threat_language,
     timeline_id: t.string,
     timeline_title: t.string,
     timestamp_override,

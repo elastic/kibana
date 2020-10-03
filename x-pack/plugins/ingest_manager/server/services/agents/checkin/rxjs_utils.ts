@@ -54,6 +54,8 @@ export function createRateLimiter(
   let countInCurrentInterval = 0;
 
   function createRateLimitOperator<T>(): Rx.OperatorFunction<T, T> {
+    const maxIntervalEnd = scheduler.now() + maxDelay;
+
     return Rx.pipe(
       concatMap(function rateLimit(value: T) {
         const now = scheduler.now();
@@ -61,9 +63,9 @@ export function createRateLimiter(
           countInCurrentInterval = 1;
           intervalEnd = now + ratelimitIntervalMs;
           return Rx.of(value);
-        } else if (intervalEnd >= now + maxDelay) {
-          // re-rate limit in the future to avoid to schedule too far in the future as some observer can unsubscribe
-          return Rx.of(value).pipe(delay(maxDelay, scheduler), createRateLimitOperator<T>());
+        } else if (intervalEnd >= maxIntervalEnd) {
+          // drop the value as it's never going to success as long polling timeout is going to happen before we can send the policy
+          return Rx.EMPTY;
         } else {
           if (++countInCurrentInterval > ratelimitRequestPerInterval) {
             countInCurrentInterval = 1;
