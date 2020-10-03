@@ -21,9 +21,9 @@ import Path from 'path';
 
 // @ts-expect-error no types available
 import * as LmdbStore from 'lmdb-store';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT, UPSTREAM_BRANCH } from '@kbn/dev-utils';
 
-const CACHE_DIR = Path.resolve(REPO_ROOT, 'data/node_auto_transpilation_cache');
+const CACHE_DIR = Path.resolve(REPO_ROOT, 'data/node_auto_transpilation_cache', UPSTREAM_BRANCH);
 const reportError = () => {
   // right now I'm not sure we need to worry about errors, the cache isn't actually
   // necessary, and if the cache is broken it should just rebuild on the next restart
