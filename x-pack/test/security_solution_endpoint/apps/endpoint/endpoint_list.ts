@@ -218,33 +218,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await deleteMetadataStream(getService);
         await deleteAllDocsFromMetadataCurrentIndex(getService);
       });
-      it('for the kql query: na, table shows an empty list', async () => {
-        await testSubjects.setValue('adminSearchBar', 'na');
-        await (await testSubjects.find('querySubmitButton')).click();
-        const expectedDataFromQuery = [
-          [
-            'Hostname',
-            'Agent Status',
-            'Integration Policy',
-            'Policy Status',
-            'Operating System',
-            'IP Address',
-            'Version',
-            'Last Active',
-            'Actions',
-          ],
-          ['No items found'],
-        ];
-
-        await pageObjects.endpoint.waitForTableToNotHaveData('endpointListTable');
-        const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
-        expect(tableData).to.eql(expectedDataFromQuery);
-      });
-
       it('for the kql query: HostDetails.Endpoint.policy.applied.id : "C2A9093E-E289-4C0A-AA44-8C32A414FA7A", table shows 2 items', async () => {
-        await testSubjects.setValue('adminSearchBar', ' ');
-        await (await testSubjects.find('querySubmitButton')).click();
-
         const endpointListTableTotal = await testSubjects.getVisibleText('endpointListTableTotal');
 
         await testSubjects.setValue(
@@ -292,6 +266,28 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           'endpointListTableTotal',
           endpointListTableTotal
         );
+        const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
+        expect(tableData).to.eql(expectedDataFromQuery);
+      });
+      it('for the kql query: na, table shows an empty list', async () => {
+        await testSubjects.setValue('adminSearchBar', 'na');
+        await (await testSubjects.find('querySubmitButton')).click();
+        const expectedDataFromQuery = [
+          [
+            'Hostname',
+            'Agent Status',
+            'Integration Policy',
+            'Policy Status',
+            'Operating System',
+            'IP Address',
+            'Version',
+            'Last Active',
+            'Actions',
+          ],
+          ['No items found'],
+        ];
+
+        await pageObjects.endpoint.waitForTableToNotHaveData('endpointListTable');
         const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
         expect(tableData).to.eql(expectedDataFromQuery);
       });
