@@ -8,12 +8,14 @@ import { getAlertType as getGeoThresholdAlertType } from './geo_threshold';
 import { getAlertType as getThresholdAlertType } from './threshold';
 import { TypeRegistry } from '../../type_registry';
 import { AlertTypeModel } from '../../../types';
+import { TriggersActionsUiConfigType } from '../../../plugin';
 
 export function registerBuiltInAlertTypes({
   alertTypeRegistry,
   triggerActionsUiConfig,
 }: {
   alertTypeRegistry: TypeRegistry<AlertTypeModel>;
+  triggerActionsUiConfig: TriggersActionsUiConfigType;
 }) {
   if (triggerActionsUiConfig.enableGeoTrackingThresholdAlert) {
     alertTypeRegistry.register(getGeoThresholdAlertType());

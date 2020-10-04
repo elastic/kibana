@@ -160,7 +160,7 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
         setBoundaryIndexPattern(_boundaryIndexPattern);
       }
       if (delayOffsetWithUnits) {
-        setDelayOffset(delayOffsetWithUnits.replace(/\D/g, ''));
+        setDelayOffset(+delayOffsetWithUnits.replace(/\D/g, ''));
       }
     };
     initToDefaultParams();
@@ -207,7 +207,7 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
                   fullWidth
                   compressed
                   value={delayOffsetUnit}
-                  options={getTimeOptions(alertInterval ?? 1)}
+                  options={getTimeOptions(+alertInterval ?? 1)}
                   onChange={(e) => {
                     setDelayOffsetUnit(e.target.value);
                   }}

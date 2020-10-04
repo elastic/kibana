@@ -7,13 +7,18 @@
 import sampleJsonResponse from './es_sample_response.json';
 import { getMovedEntities, transformResults } from '../geo_threshold';
 import { OTHER_CATEGORY } from '../es_query_builder';
+import { SearchResponse } from 'elasticsearch';
 
 describe('geo_threshold', () => {
   describe('transformResults', () => {
     const dateField = '@timestamp';
     const geoField = 'location';
     it('should correctly transform expected results', async () => {
-      const transformedResults = transformResults(sampleJsonResponse, dateField, geoField);
+      const transformedResults = transformResults(
+        (sampleJsonResponse as unknown) as SearchResponse<unknown>,
+        dateField,
+        geoField
+      );
       expect(transformedResults).toEqual([
         {
           dateInShape: '2020-09-28T18:01:41.190Z',

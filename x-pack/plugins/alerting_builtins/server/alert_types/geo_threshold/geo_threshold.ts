@@ -65,7 +65,7 @@ export function transformResults(
         });
       })
       .orderBy(['entityName', 'dateInShape'], ['asc', 'desc'])
-      .reduce((accu, el) => {
+      .reduce((accu: LatestEntityLocation[], el: LatestEntityLocation) => {
         if (!accu.length || el.entityName !== accu[accu.length - 1].entityName) {
           accu.push(el);
         }
@@ -154,7 +154,7 @@ export function getMovedEntities(
 
 function getOffsetTime(delayOffsetWithUnits: string, oldTime: Date): Date {
   const timeUnit = delayOffsetWithUnits.slice(-1);
-  const time = delayOffsetWithUnits.slice(0, -1);
+  const time: number = +delayOffsetWithUnits.slice(0, -1);
 
   const adjustedDate = new Date(oldTime.getTime());
   if (timeUnit === 's') {
@@ -184,7 +184,7 @@ export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
     params: GeoThresholdParams;
     alertId: string;
     state: AlertTypeState;
-  }): AlertTypeState {
+  }): Promise<AlertTypeState> {
     const { shapesFilters, shapesIdsNamesMap } = state.shapesFilters
       ? state
       : await getShapesFilters(
@@ -280,7 +280,7 @@ export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
     const prevLocationArr = _.chain(currLocationArr)
       .concat(state.prevLocationArr)
       .orderBy(['entityName', 'dateInShape'], ['asc', 'desc'])
-      .reduce((accu, el) => {
+      .reduce((accu: LatestEntityLocation[], el: LatestEntityLocation) => {
         if (!accu.length || el.entityName !== accu[accu.length - 1].entityName) {
           accu.push(el);
         }

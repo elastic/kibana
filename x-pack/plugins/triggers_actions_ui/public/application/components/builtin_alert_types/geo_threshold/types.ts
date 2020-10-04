@@ -21,6 +21,7 @@ export interface GeoThresholdAlertParams {
   boundaryIndexId: string;
   boundaryGeoField: string;
   boundaryNameField?: string;
+  delayOffsetWithUnits?: string;
 }
 
 // Will eventually include 'geo_shape'
