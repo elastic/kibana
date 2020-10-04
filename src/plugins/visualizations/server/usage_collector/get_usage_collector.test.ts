@@ -126,11 +126,11 @@ describe('Visualizations usage collector', () => {
   const usageCollector = getUsageCollector(configMock);
   const getMockCallCluster = (hits: unknown[]) =>
     (() => Promise.resolve({ hits: { hits } }) as unknown) as LegacyAPICaller;
-  let fetchClients: FetchClients;
+  // let fetchClients: FetchClients;
   const getMockFetchClients = (resp: unknown[]) => {
-    return (fetchClients = {
+    return {
       callCluster: getMockCallCluster(resp),
-    });
+    };
   };
 
   test('Should fit the shape', () => {

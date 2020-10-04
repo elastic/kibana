@@ -75,6 +75,11 @@ const mockedSavedObjects = [
 const getMockCallCluster = (hits?: unknown[]) =>
   jest.fn().mockReturnValue(Promise.resolve({ hits: { hits } }) as unknown) as LegacyAPICaller;
 
+const getMockFetchClients = (resp?: unknown[]) => {
+  return {
+    callCluster: getMockCallCluster(resp),
+  };
+};
 describe('Vega visualization usage collector', () => {
   const configMock = of({ kibana: { index: '' } });
   const usageCollector = getUsageCollector(configMock, {
@@ -109,20 +114,19 @@ describe('Vega visualization usage collector', () => {
   });
 
   test('Returns undefined when no results found (undefined)', async () => {
-    const result = await usageCollector.fetch(getMockCallCluster());
+    const result = await usageCollector.fetch(getMockFetchClients());
 
     expect(result).toBeUndefined();
   });
 
   test('Returns undefined when no results found (0 results)', async () => {
-    const result = await usageCollector.fetch(getMockCallCluster([]));
-
+    const result = await usageCollector.fetch(getMockFetchClients([]));
     expect(result).toBeUndefined();
   });
 
   test('Returns undefined when no vega saved objects found', async () => {
     const result = await usageCollector.fetch(
-      getMockCallCluster([
+      getMockFetchClients([
         {
           _id: 'visualization:myvis-123',
           _source: {
@@ -137,7 +141,7 @@ describe('Vega visualization usage collector', () => {
   });
 
   test('Should ingnore sample data visualizations', async () => {
-    const callCluster = getMockCallCluster([
+    const callCluster = getMockFetchClients([
       {
         _id: 'visualization:sampledata-123',
         _source: {
@@ -161,7 +165,7 @@ describe('Vega visualization usage collector', () => {
   });
 
   test('Summarizes visualizations response data', async () => {
-    const result = await usageCollector.fetch(getMockCallCluster(mockedSavedObjects));
+    const result = await usageCollector.fetch(getMockFetchClients(mockedSavedObjects));
 
     expect(result).toMatchObject({
       vega_lib_specs_total: 2,

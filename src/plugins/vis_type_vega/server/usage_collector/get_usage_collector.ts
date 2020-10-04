@@ -21,6 +21,7 @@ import { first } from 'rxjs/operators';
 import { SearchResponse } from 'elasticsearch';
 import { LegacyAPICaller, SavedObject } from 'src/core/server';
 
+import { FetchClients } from 'src/plugins/usage_collection/server';
 import {
   ConfigObservable,
   VegaSavedObjectAttributes,
@@ -65,10 +66,11 @@ const getDefaultVegaVisualizations = (home: UsageCollectorDependencies['home']) 
 };
 
 const getStats = async (
-  callCluster: LegacyAPICaller,
+  fetchClients: FetchClients,
   index: string,
   { home }: UsageCollectorDependencies
 ) => {
+  const { callCluster } = fetchClients;
   const searchParams = {
     size: 10000,
     index,
@@ -138,10 +140,10 @@ export function getUsageCollector(
   return {
     type: VEGA_USAGE_TYPE,
     isReady: () => true,
-    fetch: async (callCluster: LegacyAPICaller) => {
+    fetch: async (fetchClients: FetchClients) => {
       const { index } = (await config.pipe(first()).toPromise()).kibana;
 
-      return await getStats(callCluster, index, dependencies);
+      return await getStats(fetchClients, index, dependencies);
     },
   };
 }
