@@ -27,14 +27,45 @@ describe('FetcherTask', () => {
       const initializerContext = coreMock.createPluginInitializerContext({});
       const fetcherTask = new FetcherTask(initializerContext);
       const mockError = new Error('Some message.');
-      fetcherTask['getCurrentConfigs'] = async () => {
-        throw mockError;
-      };
+      const getCurrentConfigs = jest.fn().mockRejectedValue(mockError);
+      Object.assign(fetcherTask, {
+        getCurrentConfigs,
+      });
       const result = await fetcherTask['sendIfDue']();
       expect(result).toBe(undefined);
+      expect(getCurrentConfigs).toBeCalledTimes(1);
       expect(fetcherTask['logger'].warn).toBeCalledTimes(1);
       expect(fetcherTask['logger'].warn).toHaveBeenCalledWith(
         `Error fetching telemetry configs: ${mockError}`
+      );
+    });
+
+    it('fails when all collectors are not ready', async () => {
+      const initializerContext = coreMock.createPluginInitializerContext({});
+      const fetcherTask = new FetcherTask(initializerContext);
+      const getCurrentConfigs = jest.fn().mockResolvedValue({});
+      const areAllCollectorsReady = jest.fn().mockResolvedValue(false);
+      const shouldSendReport = jest.fn().mockReturnValue(true);
+      const fetchTelemetry = jest.fn();
+      const updateReportFailure = jest.fn();
+
+      Object.assign(fetcherTask, {
+        getCurrentConfigs,
+        areAllCollectorsReady,
+        shouldSendReport,
+        fetchTelemetry,
+        updateReportFailure,
+      });
+
+      await fetcherTask['sendIfDue']();
+
+      expect(fetchTelemetry).toBeCalledTimes(0);
+
+      expect(areAllCollectorsReady).toBeCalledTimes(1);
+      expect(updateReportFailure).toBeCalledTimes(1);
+      expect(fetcherTask['logger'].warn).toBeCalledTimes(1);
+      expect(fetcherTask['logger'].warn).toHaveBeenCalledWith(
+        `Error sending telemetry usage data. (Error: Not all collectors are ready.)`
       );
     });
   });

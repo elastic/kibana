@@ -94,6 +94,10 @@ export class FetcherTask {
     }
   }
 
+  private async areAllCollectorsReady() {
+    return await this.telemetryCollectionManager!.areAllCollectorsReady();
+  }
+
   private async sendIfDue() {
     if (this.isSending) {
       return;
@@ -113,6 +117,11 @@ export class FetcherTask {
 
     try {
       this.isSending = true;
+      const allCollectorsReady = await this.areAllCollectorsReady();
+
+      if (!allCollectorsReady) {
+        throw new Error('Not all collectors are ready.');
+      }
       const clusters = await this.fetchTelemetry();
       const { telemetryUrl } = telemetryConfig;
       for (const cluster of clusters) {
@@ -123,7 +132,7 @@ export class FetcherTask {
     } catch (err) {
       await this.updateReportFailure(telemetryConfig);
 
-      this.logger.warn(`Error sending telemetry usage data: ${err}`);
+      this.logger.warn(`Error sending telemetry usage data. (${err})`);
     }
     this.isSending = false;
   }
