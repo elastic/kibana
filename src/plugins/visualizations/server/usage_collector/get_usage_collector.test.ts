@@ -21,6 +21,7 @@ import moment from 'moment';
 import { of } from 'rxjs';
 
 import { LegacyAPICaller } from 'src/core/server';
+import { FetchClients } from 'src/plugins/usage_collection/server';
 import { getUsageCollector } from './get_usage_collector';
 
 const defaultMockSavedObjects = [
@@ -125,6 +126,12 @@ describe('Visualizations usage collector', () => {
   const usageCollector = getUsageCollector(configMock);
   const getMockCallCluster = (hits: unknown[]) =>
     (() => Promise.resolve({ hits: { hits } }) as unknown) as LegacyAPICaller;
+  let fetchClients: FetchClients;
+  const getMockFetchClients = (resp: unknown[]) => {
+    return (fetchClients = {
+      callCluster: getMockCallCluster(resp),
+    });
+  };
 
   test('Should fit the shape', () => {
     expect(usageCollector.type).toBe('visualization_types');
@@ -133,17 +140,17 @@ describe('Visualizations usage collector', () => {
   });
 
   test('Returns undefined when no results found (undefined)', async () => {
-    const result = await usageCollector.fetch(getMockCallCluster(undefined as any));
+    const result = await usageCollector.fetch(getMockFetchClients(undefined as any));
     expect(result).toBe(undefined);
   });
 
   test('Returns undefined when no results found (0 results)', async () => {
-    const result = await usageCollector.fetch(getMockCallCluster([]));
+    const result = await usageCollector.fetch(getMockFetchClients([]));
     expect(result).toBe(undefined);
   });
 
   test('Summarizes visualizations response data', async () => {
-    const result = await usageCollector.fetch(getMockCallCluster(defaultMockSavedObjects));
+    const result = await usageCollector.fetch(getMockFetchClients(defaultMockSavedObjects));
 
     expect(result).toMatchObject({
       shell_beads: {
@@ -197,8 +204,7 @@ describe('Visualizations usage collector', () => {
         saved_90_days_total: 3,
       },
     };
-
-    const result = await usageCollector.fetch(getMockCallCluster(enlargedMockSavedObjects));
+    const result = await usageCollector.fetch(getMockFetchClients(enlargedMockSavedObjects));
 
     expect(result).toMatchObject(expectedStats);
   });
