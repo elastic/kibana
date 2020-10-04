@@ -67,6 +67,9 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [CapabilitiesSetup](./kibana-plugin-core-server.capabilitiessetup.md) | APIs to manage the [Capabilities](./kibana-plugin-core-server.capabilities.md) that will be used by the application.<!-- -->Plugins relying on capabilities to toggle some of their features should register them during the setup phase using the <code>registerProvider</code> method.<!-- -->Plugins having the responsibility to restrict capabilities depending on a given context should register their capabilities switcher using the <code>registerSwitcher</code> method.<!-- -->Refers to the methods documentation for complete description and examples. |
 |  [CapabilitiesStart](./kibana-plugin-core-server.capabilitiesstart.md) | APIs to access the application [Capabilities](./kibana-plugin-core-server.capabilities.md)<!-- -->. |
 |  [ContextSetup](./kibana-plugin-core-server.contextsetup.md) | An object that handles registration of context providers and configuring handlers with context. |
+|  [CoreConfigUsageData](./kibana-plugin-core-server.coreconfigusagedata.md) | Usage data on this cluster's configuration of Core features |
+|  [CoreEnvironmentUsageData](./kibana-plugin-core-server.coreenvironmentusagedata.md) | Usage data on this Kibana node's runtime environment. |
+|  [CoreServicesUsageData](./kibana-plugin-core-server.coreservicesusagedata.md) | Usage data from Core services |
 |  [CoreSetup](./kibana-plugin-core-server.coresetup.md) | Context passed to the plugins <code>setup</code> method. |
 |  [CoreStart](./kibana-plugin-core-server.corestart.md) | Context passed to the plugins <code>start</code> method. |
 |  [CoreStatus](./kibana-plugin-core-server.corestatus.md) | Status of core services. |

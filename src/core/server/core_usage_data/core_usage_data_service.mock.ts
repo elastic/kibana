@@ -117,10 +117,6 @@ const createStartContractMock = () => {
             heapTotalBytes: 1,
             heapUsedBytes: 1,
           },
-          os: {
-            platform: 'darwin',
-            platformRelease: 'test',
-          },
         },
         services: {
           savedObjects: {
@@ -128,7 +124,7 @@ const createStartContractMock = () => {
               {
                 docsCount: 1,
                 docsDeleted: 1,
-                name: 'test_index',
+                alias: 'test_index',
                 primaryStoreSizeBytes: 1,
                 storeSizeBytes: 1,
               },

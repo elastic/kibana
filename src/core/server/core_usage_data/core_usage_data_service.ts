@@ -42,6 +42,24 @@ export interface StartDeps {
   elasticsearch: ElasticsearchServiceStart;
 }
 
+/**
+ * Because users can configure their Saved Object to any arbitrary index name,
+ * we need to map customized index names back to a "standard" index name.
+ *
+ * e.g. If a user configures `kibana.index: .my_saved_objects` we want to the
+ * collected data to be grouped under `.kibana` not ".my_saved_objects".
+ *
+ * This is rather brittle, but the option to configure index names might go
+ * away completely anyway (see #60053).
+ *
+ * @param index The index name configured for this SO type
+ * @param kibanaConfigIndex The default kibana index as configured by the user
+ * with `kibana.index`
+ */
+const kibanaOrTaskManagerIndex = (index: string, kibanaConfigIndex: string) => {
+  return index === kibanaConfigIndex ? '.kibana' : '.kibana_task_manager';
+};
+
 export class CoreUsageDataService implements CoreService<void, CoreUsageDataStart> {
   private elasticsearchConfig?: ElasticsearchConfigType;
   private configService: CoreContext['configService'];
@@ -67,32 +85,28 @@ export class CoreUsageDataService implements CoreService<void, CoreUsageDataStar
           .getTypeRegistry()
           .getAllTypes()
           .reduce((acc, type) => {
-            // TODO: Let the registry return `kibana.index` instead of reading
-            // the config value here.
-            const index =
-              savedObjects.getTypeRegistry().getIndex(type.name) || this.kibanaConfig!.index;
+            const index = type.indexPattern ?? this.kibanaConfig!.index;
             return index != null ? acc.add(index) : acc;
           }, new Set<string>())
           .values()
-      ).map((alias) => {
+      ).map((index) => {
         // The _cat/indices API returns the _index_ and doesn't return a way
         // to map back from the index to the alias. So we have to make an API
         // call for every alias
         return elasticsearch.client.asInternalUser.cat
           .indices<any[]>({
-            index: alias,
+            index,
             format: 'JSON',
             bytes: 'b',
           })
           .then(({ body }) => {
-            const index = body[0];
+            const stats = body[0];
             return {
-              name: index.index,
-              alias,
-              docsCount: index['docs.count'],
-              docsDeleted: index['docs.deleted'],
-              storeSizeBytes: index['store.size'],
-              primaryStoreSizeBytes: index['pri.store.size'],
+              alias: kibanaOrTaskManagerIndex(index, this.kibanaConfig!.index),
+              docsCount: stats['docs.count'],
+              docsDeleted: stats['docs.deleted'],
+              storeSizeBytes: stats['store.size'],
+              primaryStoreSizeBytes: stats['pri.store.size'],
             };
           });
       })
@@ -206,12 +220,6 @@ export class CoreUsageDataService implements CoreService<void, CoreUsageDataStar
           heapSizeLimit: this.opsMetrics.process.memory.heap.size_limit,
           heapTotalBytes: this.opsMetrics.process.memory.heap.total_in_bytes,
           heapUsedBytes: this.opsMetrics.process.memory.heap.used_in_bytes,
-        },
-        os: {
-          distro: this.opsMetrics.os.distro,
-          distroRelease: this.opsMetrics.os.distroRelease,
-          platform: this.opsMetrics.os.platform,
-          platformRelease: this.opsMetrics.os.platformRelease,
         },
       },
       services: {

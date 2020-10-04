@@ -68,10 +68,38 @@ describe('CoreUsageDataService', () => {
       it('returns core metrics for default config', () => {
         const metrics = metricsServiceMock.createInternalSetupContract();
         service.setup({ metrics });
+        const elasticsearch = elasticsearchServiceMock.createStart();
+        elasticsearch.client.asInternalUser.cat.indices.mockResolvedValueOnce({
+          body: [
+            {
+              name: '.kibana_task_manager_1',
+              'docs.count': 10,
+              'docs.deleted': 10,
+              'store.size': 1000,
+              'pri.store.size': 2000,
+            },
+          ],
+        } as any);
+        elasticsearch.client.asInternalUser.cat.indices.mockResolvedValueOnce({
+          body: [
+            {
+              name: '.kibana_1',
+              'docs.count': 20,
+              'docs.deleted': 20,
+              'store.size': 2000,
+              'pri.store.size': 4000,
+            },
+          ],
+        } as any);
+        const typeRegistry = savedObjectsServiceMock.createTypeRegistryMock();
+        typeRegistry.getAllTypes.mockReturnValue([
+          { name: 'type 1', indexPattern: '.kibana' },
+          { name: 'type 2', indexPattern: '.kibana_task_manager' },
+        ] as any);
 
         const { getCoreUsageData } = service.start({
-          savedObjects: savedObjectsServiceMock.createInternalStartContract(),
-          elasticsearch: elasticsearchServiceMock.createStart(),
+          savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
+          elasticsearch,
         });
         expect(getCoreUsageData()).resolves.toMatchInlineSnapshot(`
           Object {
@@ -169,16 +197,25 @@ describe('CoreUsageDataService', () => {
                 "heapTotalBytes": 1,
                 "heapUsedBytes": 1,
               },
-              "os": Object {
-                "distro": undefined,
-                "distroRelease": undefined,
-                "platform": "darwin",
-                "platformRelease": "test",
-              },
             },
             "services": Object {
               "savedObjects": Object {
-                "indices": Array [],
+                "indices": Array [
+                  Object {
+                    "alias": ".kibana",
+                    "docsCount": 10,
+                    "docsDeleted": 10,
+                    "primaryStoreSizeBytes": 2000,
+                    "storeSizeBytes": 1000,
+                  },
+                  Object {
+                    "alias": ".kibana_task_manager",
+                    "docsCount": 20,
+                    "docsDeleted": 20,
+                    "primaryStoreSizeBytes": 4000,
+                    "storeSizeBytes": 2000,
+                  },
+                ],
               },
             },
           }

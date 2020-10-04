@@ -100,12 +100,6 @@ export function getCoreUsageCollector(
           heapTotalBytes: { type: 'long' },
           heapUsedBytes: { type: 'long' },
         },
-        os: {
-          distro: { type: 'keyword' },
-          distroRelease: { type: 'keyword' },
-          platform: { type: 'keyword' },
-          platformRelease: { type: 'keyword' },
-        },
       },
       services: {
         savedObjects: {
@@ -114,7 +108,7 @@ export function getCoreUsageCollector(
             items: {
               docsCount: { type: 'long' },
               docsDeleted: { type: 'long' },
-              name: { type: 'text' },
+              alias: { type: 'text' },
               primaryStoreSizeBytes: { type: 'long' },
               storeSizeBytes: { type: 'long' },
             },
