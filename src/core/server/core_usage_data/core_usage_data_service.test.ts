@@ -73,7 +73,7 @@ describe('CoreUsageDataService', () => {
           savedObjects: savedObjectsServiceMock.createInternalStartContract(),
           elasticsearch: elasticsearchServiceMock.createStart(),
         });
-        expect(getCoreUsageData()).toMatchInlineSnapshot(`
+        expect(getCoreUsageData()).resolves.toMatchInlineSnapshot(`
           Object {
             "config": Object {
               "elasticsearch": Object {
@@ -170,8 +170,15 @@ describe('CoreUsageDataService', () => {
                 "heapUsedBytes": 1,
               },
               "os": Object {
+                "distro": undefined,
+                "distroRelease": undefined,
                 "platform": "darwin",
                 "platformRelease": "test",
+              },
+            },
+            "services": Object {
+              "savedObjects": Object {
+                "indices": Array [],
               },
             },
           }

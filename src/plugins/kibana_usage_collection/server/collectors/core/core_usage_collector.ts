@@ -32,7 +32,7 @@ export function getCoreUsageCollector(
 ) {
   return usageCollection.makeUsageCollector<CoreUsageData, { core: CoreUsageData }>({
     type: 'core',
-    isReady: () => true,
+    isReady: () => typeof getCoreUsageDataService() !== 'undefined',
     schema: {
       config: {
         elasticsearch: {

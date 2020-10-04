@@ -32,13 +32,15 @@ export interface CoreUsageData {
  */
 export interface CoreServicesUsageData {
   savedObjects: {
-    indices: Array<{
+    // scripts/telemetry_check.js does not support parsing Array<{...}> types
+    // eslint-disable-next-line @typescript-eslint/array-type
+    indices: {
       name: string;
       docsCount: number;
       docsDeleted: number;
       storeSizeBytes: number;
       primaryStoreSizeBytes: number;
-    }>;
+    }[];
   };
 }
 
