@@ -6,7 +6,7 @@
 
 import moment from 'moment';
 import { ISavedObjectsRepository, SavedObjectsClientContract } from 'kibana/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { CollectorFetchClients, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { PageViewParams, UptimeTelemetry, Usage } from './types';
 import { ESAPICaller } from '../framework';
 import { savedObjectsAdapter } from '../../saved_objects';
@@ -69,7 +69,9 @@ export class KibanaTelemetryAdapter {
           },
         },
       },
-      fetch: async (callCluster: ESAPICaller) => {
+      fetch: async (collectorFetchClients: CollectorFetchClients) => {
+        // callCluster: ESAPICaller
+        const { callCluster } = collectorFetchClients;
         const savedObjectsClient = getSavedObjectsClient()!;
         if (savedObjectsClient) {
           await this.countNoOfUniqueMonitorAndLocations(callCluster, savedObjectsClient);
