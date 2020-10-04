@@ -15,6 +15,8 @@ import {
   ThreatQuery,
   ThreatMapping,
   ThreatMappingEntries,
+  ThreatIndex,
+  ThreatLanguageOrUndefined,
 } from '../../../../../common/detection_engine/schemas/types/threat_mapping';
 import { PartialFilter, RuleTypeParams } from '../../types';
 import { AlertServices } from '../../../../../../alerts/server';
@@ -57,7 +59,8 @@ export interface CreateThreatSignalsOptions {
   threatFilters: PartialFilter[];
   threatQuery: ThreatQuery;
   buildRuleMessage: BuildRuleMessage;
-  threatIndex: string;
+  threatIndex: ThreatIndex;
+  threatLanguage: ThreatLanguageOrUndefined;
   name: string;
 }
 
@@ -93,7 +96,8 @@ export interface CreateThreatSignalOptions {
   threatFilters: PartialFilter[];
   threatQuery: ThreatQuery;
   buildRuleMessage: BuildRuleMessage;
-  threatIndex: string;
+  threatIndex: ThreatIndex;
+  threatLanguage: ThreatLanguageOrUndefined;
   name: string;
   currentThreatList: SearchResponse<ThreatListItem>;
   currentResult: SearchAfterAndBulkCreateReturnType;
@@ -138,6 +142,7 @@ export interface BooleanFilter {
 export interface GetThreatListOptions {
   callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
   query: string;
+  language: ThreatLanguageOrUndefined;
   index: string[];
   perPage?: number;
   searchAfter: string[] | undefined;

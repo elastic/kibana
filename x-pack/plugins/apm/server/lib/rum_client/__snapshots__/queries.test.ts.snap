@@ -61,7 +61,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
         ],
@@ -151,7 +151,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
         ],
@@ -167,27 +167,42 @@ exports[`rum client dashboard queries fetches long task metrics 1`] = `
 Object {
   "apm": Object {
     "events": Array [
-      "span",
+      "transaction",
     ],
   },
   "body": Object {
     "aggs": Object {
-      "transIds": Object {
-        "aggs": Object {
-          "longestLongTask": Object {
-            "max": Object {
-              "field": "span.duration.us",
-            },
+      "longTaskCount": Object {
+        "percentiles": Object {
+          "field": "transaction.experience.longtask.count",
+          "hdr": Object {
+            "number_of_significant_value_digits": 3,
           },
-          "sumLongTask": Object {
-            "sum": Object {
-              "field": "span.duration.us",
-            },
-          },
+          "percents": Array [
+            50,
+          ],
         },
-        "terms": Object {
-          "field": "transaction.id",
-          "size": 1000,
+      },
+      "longTaskMax": Object {
+        "percentiles": Object {
+          "field": "transaction.experience.longtask.max",
+          "hdr": Object {
+            "number_of_significant_value_digits": 3,
+          },
+          "percents": Array [
+            50,
+          ],
+        },
+      },
+      "longTaskSum": Object {
+        "percentiles": Object {
+          "field": "transaction.experience.longtask.sum",
+          "hdr": Object {
+            "number_of_significant_value_digits": 3,
+          },
+          "percents": Array [
+            50,
+          ],
         },
       },
     },
@@ -205,12 +220,17 @@ Object {
           },
           Object {
             "term": Object {
-              "span.type": "longtask",
+              "transaction.type": "page-load",
+            },
+          },
+          Object {
+            "exists": Object {
+              "field": "transaction.marks.navigationTiming.fetchStart",
             },
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
         ],
@@ -480,7 +500,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
         ],
@@ -532,7 +552,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
         ],
@@ -647,7 +667,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
           Object {
@@ -703,7 +723,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
         ],
