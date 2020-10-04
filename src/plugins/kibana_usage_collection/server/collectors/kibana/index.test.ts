@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { LegacyAPICaller } from 'kibana/server';
+
 import { pluginInitializerContextConfigMock } from '../../../../../core/server/mocks';
 import {
   CollectorOptions,
@@ -35,8 +37,16 @@ describe('telemetry_kibana', () => {
   });
 
   const legacyConfig$ = pluginInitializerContextConfigMock({}).legacy.globalConfig$;
-  const callCluster = jest.fn().mockImplementation(() => ({}));
+  // const callCluster = jest.fn().mockImplementation(() => ({}));
 
+  const getMockCallCluster = (hits?: unknown[]) =>
+    jest.fn().mockImplementation(() => ({})) as LegacyAPICaller;
+
+  const getMockFetchClients = (resp?: unknown[]) => {
+    return {
+      callCluster: getMockCallCluster(resp),
+    };
+  };
   beforeAll(() => registerKibanaUsageCollector(usageCollectionMock, legacyConfig$));
   afterAll(() => jest.clearAllTimers());
 
@@ -46,7 +56,7 @@ describe('telemetry_kibana', () => {
   });
 
   test('fetch', async () => {
-    expect(await collector.fetch(callCluster)).toStrictEqual({
+    expect(await collector.fetch(getMockFetchClients())).toStrictEqual({
       index: '.kibana-tests',
       dashboard: { total: 0 },
       visualization: { total: 0 },
