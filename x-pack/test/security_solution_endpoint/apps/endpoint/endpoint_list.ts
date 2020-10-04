@@ -218,14 +218,39 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await deleteMetadataStream(getService);
         await deleteAllDocsFromMetadataCurrentIndex(getService);
       });
-      it('for the kql query: HostDetails.Endpoint.policy.applied.id : "C2A9093E-E289-4C0A-AA44-8C32A414FA7A", table shows 2 items', async () => {
-        const endpointListTableTotal = await testSubjects.getVisibleText('endpointListTableTotal');
+      it('for the kql query: na, table shows an empty list', async () => {
+        const adminSearchBar = await testSubjects.find('adminSearchBar');
+        await adminSearchBar.clearValueWithKeyboard();
+        await adminSearchBar.type('na');
+        const querySubmitButton = await testSubjects.find('querySubmitButton');
+        querySubmitButton.click();
+        const expectedDataFromQuery = [
+          [
+            'Hostname',
+            'Agent Status',
+            'Integration Policy',
+            'Policy Status',
+            'Operating System',
+            'IP Address',
+            'Version',
+            'Last Active',
+            'Actions',
+          ],
+          ['No items found'],
+        ];
 
-        await testSubjects.setValue(
-          'adminSearchBar',
+        await pageObjects.endpoint.waitForTableToNotHaveData('endpointListTable');
+        const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
+        expect(tableData).to.eql(expectedDataFromQuery);
+      });
+      it('for the kql query: HostDetails.Endpoint.policy.applied.id : "C2A9093E-E289-4C0A-AA44-8C32A414FA7A", table shows 2 items', async () => {
+        const adminSearchBar = await testSubjects.find('adminSearchBar');
+        await adminSearchBar.clearValueWithKeyboard();
+        await adminSearchBar.type(
           'HostDetails.Endpoint.policy.applied.id : "C2A9093E-E289-4C0A-AA44-8C32A414FA7A" '
         );
-        await (await testSubjects.find('querySubmitButton')).click();
+        const querySubmitButton = await testSubjects.find('querySubmitButton');
+        querySubmitButton.click();
         const expectedDataFromQuery = [
           [
             'Hostname',
@@ -261,33 +286,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             '',
           ],
         ];
-
-        await pageObjects.endpoint.waitForVisibleTextToChange(
-          'endpointListTableTotal',
-          endpointListTableTotal
-        );
-        const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
-        expect(tableData).to.eql(expectedDataFromQuery);
-      });
-      it('for the kql query: na, table shows an empty list', async () => {
-        await testSubjects.setValue('adminSearchBar', 'na');
-        await (await testSubjects.find('querySubmitButton')).click();
-        const expectedDataFromQuery = [
-          [
-            'Hostname',
-            'Agent Status',
-            'Integration Policy',
-            'Policy Status',
-            'Operating System',
-            'IP Address',
-            'Version',
-            'Last Active',
-            'Actions',
-          ],
-          ['No items found'],
-        ];
-
-        await pageObjects.endpoint.waitForTableToNotHaveData('endpointListTable');
+        await pageObjects.endpoint.waitForTableToHaveData('endpointListTable');
         const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
         expect(tableData).to.eql(expectedDataFromQuery);
       });
