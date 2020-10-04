@@ -16,7 +16,7 @@ import {
 } from '../../../../../data_enhanced/common';
 import { InspectResponse } from '../../../types';
 import { ChartData } from '../../components/charts/common';
-import { getBucketRanges, getEqlAggsData, getInterval } from './helpers';
+import { getBucketRanges, getEqlAggsData, getInterval, getSequenceAggs } from './helpers';
 
 interface ApiParams {
   http: HttpStart;
@@ -64,72 +64,40 @@ export const getEqlPreview = async ({
   toTime,
   signal,
 }: AggsParams): Promise<EqlAggsResponse> => {
-  const { amount, intervalType } = getInterval(interval);
-  const bucketRanges = getBucketRanges(moment(fromTime), moment(toTime), [], amount, intervalType);
-
-  const inspectResponse = await data.search
-    .search<EqlSearchStrategyRequest, EqlSearchStrategyResponse>(
-      {
-        params: {
-          // @ts-expect-error allow_no_indices is missing on EqlSearch
-          allow_no_indices: true,
-          index: index.join(),
-          body: {
-            filter: {
-              range: {
-                '@timestamp': {
-                  gte: toTime,
-                  lte: fromTime,
-                },
-              },
-            },
-            query,
-          },
-        },
-      },
-      {
-        strategy: 'eql',
-        abortSignal: signal,
-      }
-    )
-    .toPromise();
-
-  // For the time being, EQL does not support aggs
-  // this is a temporary workaround :/
-  const responses = await Promise.allSettled(
-    bucketRanges.map((bucket) =>
-      data.search
-        .search<EqlSearchStrategyRequest, EqlSearchStrategyResponse>(
-          {
-            params: {
-              // @ts-expect-error allow_no_indices is missing on EqlSearch
-              allow_no_indices: true,
-              index: index.join(),
-              body: {
-                filter: {
-                  range: {
-                    '@timestamp': {
-                      gte: bucket.gte,
-                      lte: bucket.lte,
-                    },
+  try {
+    const response = await data.search
+      .search<EqlSearchStrategyRequest, EqlSearchStrategyResponse>(
+        {
+          params: {
+            // @ts-expect-error allow_no_indices is missing on EqlSearch
+            allow_no_indices: true,
+            index: index.join(),
+            body: {
+              filter: {
+                range: {
+                  '@timestamp': {
+                    gte: toTime,
+                    lte: fromTime,
                   },
                 },
-                query,
               },
+              query,
             },
           },
-          {
-            strategy: 'eql',
-            abortSignal: signal,
-          }
-        )
-        .toPromise()
-    )
-  );
+        },
+        {
+          strategy: 'eql',
+          abortSignal: signal,
+        }
+      )
+      .toPromise();
 
-  if (responses.every((r) => r.status === 'rejected')) {
-    throw new Error('Unable to fetch query preview');
-  } else {
-    return getEqlAggsData(inspectResponse, responses, toTime, fromTime, bucketRanges);
+    if (query.indexOf('sequence') !== -1) {
+      return getSequenceAggs(response, toTime, fromTime);
+    } else {
+      return getEqlAggsData(response, interval, toTime, fromTime);
+    }
+  } catch {
+    throw new Error();
   }
 };
