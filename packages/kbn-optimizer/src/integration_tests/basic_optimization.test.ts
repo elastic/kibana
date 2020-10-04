@@ -27,7 +27,13 @@ import del from 'del';
 import { toArray, tap, filter } from 'rxjs/operators';
 import { REPO_ROOT } from '@kbn/utils';
 import { ToolingLog } from '@kbn/dev-utils';
-import { runOptimizer, OptimizerConfig, OptimizerUpdate, logOptimizerState } from '@kbn/optimizer';
+import {
+  runOptimizer,
+  OptimizerConfig,
+  OptimizerUpdate,
+  logOptimizerState,
+  readLimits,
+} from '@kbn/optimizer';
 
 const TMP_DIR = Path.resolve(__dirname, '../__fixtures__/__tmp__');
 const MOCK_REPO_SRC = Path.resolve(__dirname, '../__fixtures__/mock_repo');
@@ -71,6 +77,9 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
     maxWorkerCount: 1,
     dist: false,
   });
+
+  expect(config.limits).toEqual(readLimits());
+  (config as any).limits = '<Limits>';
 
   expect(config).toMatchSnapshot('OptimizerConfig');
 

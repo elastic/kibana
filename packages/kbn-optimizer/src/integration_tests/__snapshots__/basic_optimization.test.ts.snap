@@ -57,6 +57,7 @@ OptimizerConfig {
   "cache": true,
   "dist": false,
   "inspectWorkers": false,
+  "limits": "<Limits>",
   "maxWorkerCount": 1,
   "plugins": Array [
     Object {

@@ -28,6 +28,7 @@ import { logOptimizerState } from './log_optimizer_state';
 import { OptimizerConfig } from './optimizer';
 import { reportOptimizerStats } from './report_optimizer_stats';
 import { runOptimizer } from './run_optimizer';
+import { validateLimitsForAllBundles } from './limits';
 
 run(
   async ({ log, flags }) => {
@@ -93,20 +94,30 @@ run(
       throw createFlagError('expected --filter to be one or more strings');
     }
 
+    const validateLimits = flags['validate-limits'] ?? false;
+    if (typeof validateLimits !== 'boolean') {
+      throw createFlagError('expected --validate-limits to have no value');
+    }
+
     const config = OptimizerConfig.create({
       repoRoot: REPO_ROOT,
       watch,
       maxWorkerCount,
-      oss,
+      oss: oss && !validateLimits,
       dist,
       cache,
-      examples,
+      examples: examples && !validateLimits,
       profileWebpack,
       extraPluginScanDirs,
       inspectWorkers,
       includeCoreBundle,
       filter,
     });
+
+    if (validateLimits) {
+      validateLimitsForAllBundles(log, config);
+      return;
+    }
 
     let update$ = runOptimizer(config);
 
@@ -134,6 +145,7 @@ run(
         'profile',
         'inspect-workers',
         'report-stats',
+        'validate-limits',
       ],
       string: ['workers', 'scan-dir', 'filter'],
       default: {
@@ -156,6 +168,7 @@ run(
         --scan-dir         add a directory to the list of directories scanned for plugins (specify as many times as necessary)
         --no-inspect-workers  when inspecting the parent process, don't inspect the workers
         --report-stats     attempt to report stats about this execution of the build to the kibana-ci-stats service using this name
+        --validate-limits  validate the limits.yml config to ensure that there are limits defined for every bundle
       `,
     },
   }

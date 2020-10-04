@@ -74,6 +74,7 @@ export function reportOptimizerStats(
 ) {
   return pipeClosure((update$: OptimizerUpdate$) => {
     let lastState: OptimizerState | undefined;
+
     return update$.pipe(
       materialize(),
       mergeMap(async (n) => {
@@ -82,66 +83,76 @@ export function reportOptimizerStats(
         }
 
         if (n.kind === 'C' && lastState) {
-          await reporter.metrics(
-            flatten(
-              config.bundles.map((bundle) => {
-                // make the cache read from the cache file since it was likely updated by the worker
-                bundle.cache.refresh();
+          const metrics = flatten(
+            config.bundles.map((bundle) => {
+              // make the cache read from the cache file since it was likely updated by the worker
+              bundle.cache.refresh();
 
-                const outputFiles = getFiles(bundle.outputDir);
-                const entryName = `${bundle.id}.${bundle.type}.js`;
-                const entry = outputFiles.find((f) => f.relPath === entryName);
-                if (!entry) {
-                  throw new Error(
-                    `Unable to find bundle entry named [${entryName}] in [${bundle.outputDir}]`
-                  );
-                }
-
-                const chunkPrefix = `${bundle.id}.chunk.`;
-                const asyncChunks = outputFiles.filter((f) => f.relPath.startsWith(chunkPrefix));
-                const miscFiles = outputFiles.filter(
-                  (f) => f !== entry && !asyncChunks.includes(f)
+              const outputFiles = getFiles(bundle.outputDir);
+              const entryName = `${bundle.id}.${bundle.type}.js`;
+              const entry = outputFiles.find((f) => f.relPath === entryName);
+              if (!entry) {
+                throw new Error(
+                  `Unable to find bundle entry named [${entryName}] in [${bundle.outputDir}]`
                 );
+              }
 
-                if (asyncChunks.length) {
-                  log.verbose(bundle.id, 'async chunks', asyncChunks);
-                }
-                if (miscFiles.length) {
-                  log.verbose(bundle.id, 'misc files', asyncChunks);
-                }
+              const chunkPrefix = `${bundle.id}.chunk.`;
+              const asyncChunks = outputFiles.filter((f) => f.relPath.startsWith(chunkPrefix));
+              const miscFiles = outputFiles.filter((f) => f !== entry && !asyncChunks.includes(f));
 
-                const sumSize = (files: Entry[]) =>
-                  files.reduce((acc: number, f) => acc + f.stats!.size, 0);
+              if (asyncChunks.length) {
+                log.verbose(bundle.id, 'async chunks', asyncChunks);
+              }
+              if (miscFiles.length) {
+                log.verbose(bundle.id, 'misc files', asyncChunks);
+              }
 
-                const metrics: CiStatsMetrics = [
-                  {
-                    group: `@kbn/optimizer bundle module count`,
-                    id: bundle.id,
-                    value: bundle.cache.getModuleCount() || 0,
-                  },
-                  {
-                    group: `page load bundle size`,
-                    id: bundle.id,
-                    value: entry.stats!.size,
-                  },
-                  {
-                    group: `async chunks size`,
-                    id: bundle.id,
-                    value: sumSize(asyncChunks),
-                  },
-                  {
-                    group: `miscellaneous assets size`,
-                    id: bundle.id,
-                    value: sumSize(miscFiles),
-                  },
-                ];
+              const sumSize = (files: Entry[]) =>
+                files.reduce((acc: number, f) => acc + f.stats!.size, 0);
 
-                log.info(bundle.id, 'metrics', metrics);
+              const bundleMetrics: CiStatsMetrics = [
+                {
+                  group: `@kbn/optimizer bundle module count`,
+                  id: bundle.id,
+                  value: bundle.cache.getModuleCount() || 0,
+                },
+                {
+                  group: `page load bundle size`,
+                  id: bundle.id,
+                  value: entry.stats!.size,
+                  limit: config.limits.pageLoadAssetSize[bundle.id],
+                  limitConfigPath: `packages/kbn-optimizer/limits.yml`,
+                },
+                {
+                  group: `async chunks size`,
+                  id: bundle.id,
+                  value: sumSize(asyncChunks),
+                },
+                {
+                  group: `miscellaneous assets size`,
+                  id: bundle.id,
+                  value: sumSize(miscFiles),
+                },
+              ];
 
-                return metrics;
-              })
-            )
+              log.debug(bundle.id, 'metrics', bundleMetrics);
+
+              return bundleMetrics;
+            })
           );
+
+          await reporter.metrics(metrics);
+
+          for (const metric of metrics) {
+            if (metric.limit != null && metric.value > metric.limit) {
+              const value = metric.value.toLocaleString();
+              const limit = metric.limit.toLocaleString();
+              log.warning(
+                `Metric [${metric.group}] for [${metric.id}] of [${value}] over the limit of [${limit}]`
+              );
+            }
+          }
         }
 
         return n;

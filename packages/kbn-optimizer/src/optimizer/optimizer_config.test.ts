@@ -22,6 +22,7 @@ jest.mock('./kibana_platform_plugins.ts');
 jest.mock('./get_plugin_bundles.ts');
 jest.mock('../common/theme_tags.ts');
 jest.mock('./filter_by_id.ts');
+jest.mock('../limits.ts');
 
 jest.mock('os', () => {
   const realOs = jest.requireActual('os');
@@ -385,6 +386,7 @@ describe('OptimizerConfig::create()', () => {
     .findKibanaPlatformPlugins;
   const getPluginBundles: jest.Mock = jest.requireMock('./get_plugin_bundles.ts').getPluginBundles;
   const filterById: jest.Mock = jest.requireMock('./filter_by_id.ts').filterById;
+  const readLimits: jest.Mock = jest.requireMock('../limits.ts').readLimits;
 
   beforeEach(() => {
     if ('mock' in OptimizerConfig.parseOptions) {
@@ -398,6 +400,7 @@ describe('OptimizerConfig::create()', () => {
     findKibanaPlatformPlugins.mockReturnValue(Symbol('new platform plugins'));
     getPluginBundles.mockReturnValue([Symbol('bundle1'), Symbol('bundle2')]);
     filterById.mockReturnValue(Symbol('filtered bundles'));
+    readLimits.mockReturnValue(Symbol('limits'));
 
     jest.spyOn(OptimizerConfig, 'parseOptions').mockImplementation((): {
       [key in keyof ParsedOptions]: any;
@@ -429,6 +432,7 @@ describe('OptimizerConfig::create()', () => {
         "cache": Symbol(parsed cache),
         "dist": Symbol(parsed dist),
         "inspectWorkers": Symbol(parsed inspect workers),
+        "limits": Symbol(limits),
         "maxWorkerCount": Symbol(parsed max worker count),
         "plugins": Symbol(new platform plugins),
         "profileWebpack": Symbol(parsed profile webpack),
