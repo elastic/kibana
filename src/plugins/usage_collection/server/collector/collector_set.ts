@@ -21,7 +21,6 @@ import { snakeCase } from 'lodash';
 import { Logger, LegacyAPICaller, ElasticsearchClient } from 'kibana/server';
 import { Collector, CollectorOptions } from './collector';
 import { UsageCollector } from './usage_collector';
-import { awaitBefore } from './await_before';
 
 interface CollectorSetConfig {
   logger: Logger;
