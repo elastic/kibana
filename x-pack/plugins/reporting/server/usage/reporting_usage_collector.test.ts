@@ -69,6 +69,11 @@ describe('license checks', () => {
     beforeAll(async () => {
       const plugins = getPluginsMock({ license: 'basic' });
       const callClusterMock = jest.fn(() => Promise.resolve(getResponseMock()));
+      const getMockFetchClients = (mockedCallCluster: any) => {
+        return {
+          callCluster: mockedCallCluster,
+        };
+      };
       const { fetch } = getReportingUsageCollector(
         mockCore,
         plugins.usageCollection,
@@ -78,7 +83,7 @@ describe('license checks', () => {
           return Promise.resolve(true);
         }
       );
-      usageStats = await fetch(callClusterMock as any);
+      usageStats = await fetch(getMockFetchClients(callClusterMock as any));
     });
 
     test('sets enables to true', async () => {
@@ -99,6 +104,11 @@ describe('license checks', () => {
     beforeAll(async () => {
       const plugins = getPluginsMock({ license: 'none' });
       const callClusterMock = jest.fn(() => Promise.resolve(getResponseMock()));
+      const getMockFetchClients = (mockedCallCluster: any) => {
+        return {
+          callCluster: mockedCallCluster,
+        };
+      };
       const { fetch } = getReportingUsageCollector(
         mockCore,
         plugins.usageCollection,
@@ -108,7 +118,7 @@ describe('license checks', () => {
           return Promise.resolve(true);
         }
       );
-      usageStats = await fetch(callClusterMock as any);
+      usageStats = await fetch(getMockFetchClients(callClusterMock as any));
     });
 
     test('sets enables to true', async () => {
@@ -129,6 +139,11 @@ describe('license checks', () => {
     beforeAll(async () => {
       const plugins = getPluginsMock({ license: 'platinum' });
       const callClusterMock = jest.fn(() => Promise.resolve(getResponseMock()));
+      const getMockFetchClients = (mockedCallCluster: any) => {
+        return {
+          callCluster: mockedCallCluster,
+        };
+      };
       const { fetch } = getReportingUsageCollector(
         mockCore,
         plugins.usageCollection,
@@ -138,7 +153,7 @@ describe('license checks', () => {
           return Promise.resolve(true);
         }
       );
-      usageStats = await fetch(callClusterMock as any);
+      usageStats = await fetch(getMockFetchClients(callClusterMock as any));
     });
 
     test('sets enables to true', async () => {
@@ -159,6 +174,11 @@ describe('license checks', () => {
     beforeAll(async () => {
       const plugins = getPluginsMock({ license: 'basic' });
       const callClusterMock = jest.fn(() => Promise.resolve({}));
+      const getMockFetchClients = (mockedCallCluster: any) => {
+        return {
+          callCluster: mockedCallCluster,
+        };
+      };
       const { fetch } = getReportingUsageCollector(
         mockCore,
         plugins.usageCollection,
@@ -168,7 +188,7 @@ describe('license checks', () => {
           return Promise.resolve(true);
         }
       );
-      usageStats = await fetch(callClusterMock as any);
+      usageStats = await fetch(getMockFetchClients(callClusterMock as any));
     });
 
     test('sets enables to true', async () => {
@@ -235,8 +255,12 @@ describe('data modeling', () => {
         } as SearchResponse) // prettier-ignore
       )
     );
-
-    const usageStats = await fetch(callClusterMock as any);
+    const getMockFetchClients = (mockedCallCluster: any) => {
+      return {
+        callCluster: mockedCallCluster,
+      };
+    };
+    const usageStats = await fetch(getMockFetchClients(callClusterMock as any));
     expect(usageStats).toMatchSnapshot();
   });
 
@@ -287,8 +311,12 @@ describe('data modeling', () => {
         } as SearchResponse) // prettier-ignore
       )
     );
-
-    const usageStats = await fetch(callClusterMock as any);
+    const getMockFetchClients = (mockedCallCluster: any) => {
+      return {
+        callCluster: mockedCallCluster,
+      };
+    };
+    const usageStats = await fetch(getMockFetchClients(callClusterMock as any));
     expect(usageStats).toMatchSnapshot();
   });
 
@@ -339,7 +367,12 @@ describe('data modeling', () => {
         } as SearchResponse)
       )
     );
-    const usageStats = await fetch(callClusterMock as any);
+    const getMockFetchClients = (mockedCallCluster: any) => {
+      return {
+        callCluster: mockedCallCluster,
+      };
+    };
+    const usageStats = await fetch(getMockFetchClients(callClusterMock as any));
     expect(usageStats).toMatchSnapshot();
   });
 

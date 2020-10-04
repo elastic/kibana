@@ -67,8 +67,6 @@ const defaultCallClusterMock = jest.fn().mockResolvedValue({
   },
 });
 
-// const getMockCallCluster = (res?: any) => defaultCallClusterMock;
-
 const getMockFetchClients = (mockedCallCluster: any) => {
   return {
     callCluster: mockedCallCluster,
