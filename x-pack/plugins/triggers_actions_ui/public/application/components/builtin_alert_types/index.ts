@@ -11,9 +11,12 @@ import { AlertTypeModel } from '../../../types';
 
 export function registerBuiltInAlertTypes({
   alertTypeRegistry,
+  triggerActionsUiConfig,
 }: {
   alertTypeRegistry: TypeRegistry<AlertTypeModel>;
 }) {
-  alertTypeRegistry.register(getGeoThresholdAlertType());
+  if (triggerActionsUiConfig.enableGeoTrackingThresholdAlert) {
+    alertTypeRegistry.register(getGeoThresholdAlertType());
+  }
   alertTypeRegistry.register(getThresholdAlertType());
 }

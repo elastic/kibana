@@ -1,7 +1,7 @@
 {
   "id": "triggers_actions_ui",
   "version": "kibana",
-  "server": false,
+  "server": true,
   "ui": true,
   "optionalPlugins": ["alerts", "alertingBuiltins"],
   "requiredPlugins": ["management", "charts", "data", "kibanaReact"],
