@@ -18,7 +18,7 @@
  */
 
 import { tapOnce } from './tap_once';
-import { from, Subject } from 'rxjs';
+import { from } from 'rxjs';
 
 describe('tapOnce', () => {
   test('should convert a dot.notated.string into a short string', async (done) => {
