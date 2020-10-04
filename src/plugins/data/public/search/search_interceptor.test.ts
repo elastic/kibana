@@ -203,16 +203,10 @@ describe('SearchInterceptor', () => {
             params: {},
           };
           try {
-            (searchMock.session as jest.Mocked<
-              ISessionService
-            >).getSessionTimeoutNotified.mockReturnValueOnce(false);
             await searchInterceptor.search(mockRequest, { sessionId: 'abc' }).toPromise();
           } catch (e) {
             expect(e).toBeInstanceOf(SearchTimeoutError);
             try {
-              (searchMock.session as jest.Mocked<
-                ISessionService
-              >).getSessionTimeoutNotified.mockReturnValueOnce(true);
               await searchInterceptor.search(mockRequest, { sessionId: 'abc' }).toPromise();
             } catch (e2) {
               expect(mockCoreSetup.notifications.toasts.addDanger).toBeCalledTimes(1);

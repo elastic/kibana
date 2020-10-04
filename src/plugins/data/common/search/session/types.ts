@@ -20,22 +20,20 @@
 import { IKibanaSearchRequest } from '..';
 
 export enum SessionStatus {
-  New,
-  Running,
-  Completed,
-  Timeout,
+  NEW,
+  RUNNING,
+  COMPLETED,
+  TIMEOUT,
 }
 
 export enum SearchStatus {
-  Running,
-  Done,
-  Error,
+  RUNNING,
+  DONE,
+  ERROR,
 }
 
 export interface ISessionService {
   getSessionId: () => string | undefined;
-  getSessionTimeoutNotified: () => boolean;
-  setSessionTimeoutNotified: () => void;
   start: () => void;
   clear: () => void;
   trackSearch: (request: IKibanaSearchRequest, sessionId: string | undefined) => void;

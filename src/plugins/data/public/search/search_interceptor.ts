@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, trimEnd } from 'lodash';
+import { get, memoize, trimEnd } from 'lodash';
 import { BehaviorSubject, throwError, timer, defer, from, Observable, NEVER } from 'rxjs';
 import { tap, catchError, finalize } from 'rxjs/operators';
 import { CoreStart, CoreSetup, ToastsSetup } from 'kibana/public';
@@ -171,24 +171,34 @@ export class SearchInterceptor {
     };
   }
 
+  private showTimeoutErrorToast = (e: SearchTimeoutError, sessionId?: string) => {
+    this.deps.toasts.addDanger({
+      title: 'Timed out',
+      text: toMountPoint(e.getErrorMessage(this.application)),
+    });
+  };
+
+  private showTimeoutErrorMemoized = memoize(
+    this.showTimeoutErrorToast,
+    (_: SearchTimeoutError, sessionId: string) => {
+      return sessionId;
+    }
+  );
+
   /**
-   * Right now we are throttling but we will hook this up with background sessions to show only one
-   * error notification per session.
+   * Show one error notification per session.
    * @internal
    */
   private showTimeoutError = (e: SearchTimeoutError, sessionId?: string) => {
-    if (!sessionId || !this.deps.session.getSessionTimeoutNotified()) {
-      this.deps.session.setSessionTimeoutNotified();
-
-      this.deps.toasts.addDanger({
-        title: 'Timed out',
-        text: toMountPoint(e.getErrorMessage(this.application)),
-      });
+    if (sessionId) {
+      this.showTimeoutErrorMemoized(e, sessionId);
+    } else {
+      this.showTimeoutErrorToast(e, sessionId);
     }
   };
 
   /**
-   * Searches using the given `search` method. Overrides the `AbortSignal` with one that will abort
+   * Searches using theג given `search` method. Overrides the `AbortSignal` with one that will abort
    * either when `cancelPending` is called, when the request times out, or when the original
    * `AbortSignal` is aborted. Updates `pendingCount$` when the request is started/finalized.
    *

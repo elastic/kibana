@@ -53,15 +53,15 @@ export class SessionService implements ISessionService {
       // Mark a session as running.
       // Also reopen a complete session, if a new search is run. We know this can happen because of follow up requests.
       if (
-        sessionInfo!.status === SessionStatus.New ||
-        sessionInfo!.status === SessionStatus.Completed
+        sessionInfo!.status === SessionStatus.NEW ||
+        sessionInfo!.status === SessionStatus.COMPLETED
       ) {
-        sessionInfo!.status = SessionStatus.Running;
+        sessionInfo!.status = SessionStatus.RUNNING;
       }
 
       // Add request info to the session
       sessionInfo!.requests[createRequestHash(request.params.body)] = {
-        status: SearchStatus.Running,
+        status: SearchStatus.RUNNING,
       };
     }
   }
@@ -79,13 +79,13 @@ export class SessionService implements ISessionService {
   public trackSearchComplete(request: IEsSearchRequest, sessionId?: string) {
     if (sessionId && request.params && request.params.body) {
       const sessionInfo = this.idMapping.get(sessionId);
-      sessionInfo!.requests[createRequestHash(request.params.body)].status = SearchStatus.Done;
+      sessionInfo!.requests[createRequestHash(request.params.body)].status = SearchStatus.DONE;
 
       // Mark session as done, if all requests are done
       Object.values(sessionInfo!.requests)
-        .map((requestInfo) => requestInfo.status === SearchStatus.Done)
+        .map((requestInfo) => requestInfo.status === SearchStatus.DONE)
         .every(() => {
-          sessionInfo!.status = SessionStatus.Completed;
+          sessionInfo!.status = SessionStatus.COMPLETED;
         });
     }
   }
@@ -96,9 +96,9 @@ export class SessionService implements ISessionService {
 
       // Mark request as errored, don't update session status
       if (e instanceof SearchTimeoutError) {
-        sessionInfo!.status = SessionStatus.Timeout;
+        sessionInfo!.status = SessionStatus.TIMEOUT;
       }
-      sessionInfo!.requests[createRequestHash(request.params.body)].status = SearchStatus.Error;
+      sessionInfo!.requests[createRequestHash(request.params.body)].status = SearchStatus.ERROR;
     }
   }
 
@@ -106,28 +106,12 @@ export class SessionService implements ISessionService {
     return this.sessionId;
   }
 
-  public getSessionTimeoutNotified(): boolean {
-    if (this.sessionId) {
-      const sessionInfo = this.idMapping.get(this.sessionId);
-      return sessionInfo!.timeoutNotified;
-    } else {
-      return false;
-    }
-  }
-
-  public setSessionTimeoutNotified() {
-    if (this.sessionId) {
-      const sessionInfo = this.idMapping.get(this.sessionId);
-      sessionInfo!.timeoutNotified = true;
-    }
-  }
-
   public start() {
     this.sessionId = uuid.v4();
 
     const sessionInfo = {
       requests: {},
-      status: SessionStatus.New,
+      status: SessionStatus.NEW,
       timeoutNotified: false,
     };
     this.idMapping.set(this.sessionId, sessionInfo);
@@ -136,6 +120,7 @@ export class SessionService implements ISessionService {
   }
 
   public clear() {
+    this.idMapping.clear();
     this.sessionId = undefined;
   }
 }

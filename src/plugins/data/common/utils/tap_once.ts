@@ -20,11 +20,20 @@
 import { Observable, concat } from 'rxjs';
 import { tap, take, share } from 'rxjs/operators';
 
+/**
+ * This operator will fire once per stream, even if there are no subscribers on it.
+ * @param fn tap finction
+ */
 export function tapOnce<T>(fn: (v: T) => any) {
   return (source$: Observable<T>) => {
-    const sharedSource$ = source$.pipe(share());
-    const tapped$ = sharedSource$.pipe(tap(fn), take(1));
-
-    return concat(tapped$, sharedSource$);
+    let first = true;
+    return source$.pipe(
+      tap((payload) => {
+        if (first) {
+          fn(payload);
+        }
+        first = false;
+      })
+    );
   };
 }
