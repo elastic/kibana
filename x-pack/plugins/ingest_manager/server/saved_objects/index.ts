@@ -347,6 +347,7 @@ export function registerEncryptedSavedObjects(
       'hosts',
       'ca_sha256',
       'config',
+      'config_yaml',
     ]),
   });
   encryptedSavedObjects.registerType({
