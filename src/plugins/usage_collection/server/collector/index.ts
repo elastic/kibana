@@ -24,6 +24,6 @@ export {
   SchemaField,
   MakeSchemaFrom,
   CollectorOptions,
-  FetchClients,
+  CollectorFetchClients,
 } from './collector';
 export { UsageCollector } from './usage_collector';

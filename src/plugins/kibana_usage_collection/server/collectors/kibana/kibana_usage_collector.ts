@@ -20,7 +20,7 @@
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { SharedGlobalConfig } from 'kibana/server';
-import { FetchClients, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { CollectorFetchClients, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { KIBANA_STATS_TYPE } from '../../../common/constants';
 import { getSavedObjectsCounts, KibanaSavedObjectCounts } from './get_saved_object_counts';
 
@@ -44,11 +44,11 @@ export function getKibanaUsageCollector(
       graph_workspace: { total: { type: 'long' } },
       timelion_sheet: { total: { type: 'long' } },
     },
-    async fetch(fetchClients: FetchClients) {
+    async fetch(collectorFetchClients: CollectorFetchClients) {
       const {
         kibana: { index },
       } = await legacyConfig$.pipe(take(1)).toPromise();
-      const { callCluster } = fetchClients;
+      const { callCluster } = collectorFetchClients;
       return {
         index,
         ...(await getSavedObjectsCounts(callCluster, index)),

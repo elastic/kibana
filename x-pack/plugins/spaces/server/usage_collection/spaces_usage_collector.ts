@@ -6,7 +6,7 @@
 
 import { LegacyCallAPIOptions } from 'src/core/server';
 import { take } from 'rxjs/operators';
-import { FetchClients, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { CollectorFetchClients, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { Observable } from 'rxjs';
 import { KIBANA_STATS_TYPE_MONITORING } from '../../../monitoring/common/constants';
 import { PluginsSetup } from '../plugin';
@@ -188,8 +188,8 @@ export function getSpacesUsageCollector(
       enabled: { type: 'boolean' },
       count: { type: 'long' },
     },
-    fetch: async (fetchClients: FetchClients) => {
-      const { callCluster } = fetchClients;
+    fetch: async (collectorFetchClients: CollectorFetchClients) => {
+      const { callCluster } = collectorFetchClients;
       const license = await deps.licensing.license$.pipe(take(1)).toPromise();
       const available = license.isAvailable; // some form of spaces is available for all valid licenses
 

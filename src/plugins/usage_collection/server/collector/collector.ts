@@ -45,7 +45,7 @@ export type MakeSchemaFrom<Base> = {
     : RecursiveMakeSchemaFrom<Required<Base>[Key]>;
 };
 
-export interface FetchClients {
+export interface CollectorFetchClients {
   /**
    * @depricated use esClient in stead
    */
@@ -56,7 +56,7 @@ export interface CollectorOptions<T = unknown, U = T> {
   type: string;
   init?: Function;
   schema?: MakeSchemaFrom<T>;
-  fetch: (fetchClients: FetchClients) => Promise<T> | T;
+  fetch: (collectorFetchClients: CollectorFetchClients) => Promise<T> | T;
   /*
    * A hook for allowing the fetched data payload to be organized into a typed
    * data model for internal bulk upload. See defaultFormatterForBulkUpload for

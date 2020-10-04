@@ -21,7 +21,6 @@ import moment from 'moment';
 import { of } from 'rxjs';
 
 import { LegacyAPICaller } from 'src/core/server';
-import { FetchClients } from 'src/plugins/usage_collection/server';
 import { getUsageCollector } from './get_usage_collector';
 
 const defaultMockSavedObjects = [
@@ -126,7 +125,7 @@ describe('Visualizations usage collector', () => {
   const usageCollector = getUsageCollector(configMock);
   const getMockCallCluster = (hits: unknown[]) =>
     (() => Promise.resolve({ hits: { hits } }) as unknown) as LegacyAPICaller;
-  // let fetchClients: FetchClients;
+  // let collectorFetchClients: CollectorFetchClients;
   const getMockFetchClients = (resp: unknown[]) => {
     return {
       callCluster: getMockCallCluster(resp),

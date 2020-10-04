@@ -18,7 +18,7 @@
  */
 
 import { get } from 'lodash';
-import { FetchClients } from 'src/plugins/usage_collection/server';
+import { CollectorFetchClients } from 'src/plugins/usage_collection/server';
 import { DEFAULT_QUERY_LANGUAGE, UI_SETTINGS } from '../../../common';
 
 const defaultSearchQueryLanguageSetting = DEFAULT_QUERY_LANGUAGE;
@@ -30,8 +30,8 @@ export interface Usage {
 }
 
 export function fetchProvider(index: string) {
-  return async (fetchClients: FetchClients): Promise<Usage> => {
-    const { callCluster } = fetchClients;
+  return async (collectorFetchClients: CollectorFetchClients): Promise<Usage> => {
+    const { callCluster } = collectorFetchClients;
     const [response, config] = await Promise.all([
       callCluster('get', {
         index,

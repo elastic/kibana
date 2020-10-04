@@ -19,7 +19,7 @@
 
 import { get } from 'lodash';
 import moment from 'moment';
-import { FetchClients } from '../../../../../usage_collection/server';
+import { CollectorFetchClients } from '../../../../../usage_collection/server';
 
 interface SearchHit {
   _id: string;
@@ -42,8 +42,8 @@ export interface TelemetryResponse {
 }
 
 export function fetchProvider(index: string) {
-  return async (fetchClients: FetchClients) => {
-    const { callCluster } = fetchClients;
+  return async (collectorFetchClients: CollectorFetchClients) => {
+    const { callCluster } = collectorFetchClients;
     const response = await callCluster('search', {
       index,
       body: {

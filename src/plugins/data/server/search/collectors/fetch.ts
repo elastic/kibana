@@ -20,7 +20,7 @@
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { SharedGlobalConfig } from 'kibana/server';
-import { FetchClients } from 'src/plugins/usage_collection/server';
+import { CollectorFetchClients } from 'src/plugins/usage_collection/server';
 import { Usage } from './register';
 
 interface SearchTelemetrySavedObject {
@@ -28,9 +28,9 @@ interface SearchTelemetrySavedObject {
 }
 
 export function fetchProvider(config$: Observable<SharedGlobalConfig>) {
-  return async (fetchClients: FetchClients): Promise<Usage> => {
+  return async (collectorFetchClients: CollectorFetchClients): Promise<Usage> => {
     const config = await config$.pipe(first()).toPromise();
-    const { callCluster } = fetchClients;
+    const { callCluster } = collectorFetchClients;
 
     const response = await callCluster<SearchTelemetrySavedObject>('search', {
       index: config.kibana.index,
