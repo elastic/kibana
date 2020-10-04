@@ -34,6 +34,7 @@ import { Attribution, ImmutableSourceProperty, ISource, SourceEditorArgs } from 
 import { DataRequestContext } from '../../actions';
 import { IStyle } from '../styles/style';
 import { getJoinAggKey } from '../../../common/get_agg_key';
+import { LICENSED_FEATURES } from '../../licensed_features';
 
 export interface ILayer {
   getBounds(dataRequestContext: DataRequestContext): Promise<MapExtent | null>;
@@ -91,6 +92,7 @@ export interface ILayer {
   showJoinEditor(): boolean;
   getJoinsDisabledReason(): string | null;
   isFittable(): Promise<boolean>;
+  getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
 }
 export type Footnote = {
   icon: ReactElement<any>;
@@ -537,5 +539,9 @@ export class AbstractLayer implements ILayer {
 
   supportsLabelsOnTop(): boolean {
     return false;
+  }
+
+  async getLicensedFeatures(): Promise<LICENSED_FEATURES[]> {
+    return [];
   }
 }
