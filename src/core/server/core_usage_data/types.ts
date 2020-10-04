@@ -144,12 +144,20 @@ export interface CoreConfigUsageData {
 }
 
 /**
- * Internal API for getting Core's usage data payload
+ * Internal API for getting Core's usage data payload.
+ *
+ * @note This API should never be used to drive application logic and is only
+ * intended for telemetry purposes.
+ *
  * @internal
  */
 export interface CoreUsageDataStart {
   /**
-   * Internal API for collecting Core usage data
+   * Internal API for getting Core's usage data payload.
+   *
+   * @note This API should never be used to drive application logic and is only
+   * intended for telemetry purposes.
+   *
    * @internal
    * */
   getCoreUsageData(): Promise<CoreUsageData>;

@@ -18,13 +18,7 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import {
-  CoreUsageData,
-  CoreUsageDataStart,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../core/server/core_usage_data/types';
-// telemetry_check is unable to check types which are re-exported, it only
-// works when pointed to the typescript file where the type was defined.
+import { CoreUsageData, CoreUsageDataStart } from '../../../../../core/server';
 
 export function getCoreUsageCollector(
   usageCollection: UsageCollectionSetup,
