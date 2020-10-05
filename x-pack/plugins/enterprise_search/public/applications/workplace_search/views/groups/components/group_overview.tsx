@@ -261,7 +261,7 @@ export const GroupOverview: React.FC = () => {
   return (
     <>
       <SetPageChrome text="Group Overview" />
-      <SendTelemetry action="viewed" metric="group overview" />
+      <SendTelemetry action="viewed" metric="group_overview" />
 
       <ViewContentHeader title={truncatedName} />
       <EuiSpacer />
