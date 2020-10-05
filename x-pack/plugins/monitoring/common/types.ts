@@ -41,7 +41,7 @@ export interface CommonAlertStackProductFilter extends CommonAlertFilter {
 
 export interface CommonAlertParamDetail {
   label: string;
-  type: AlertParamType;
+  type?: AlertParamType;
 }
 
 export interface CommonAlertParamDetails {
@@ -50,4 +50,15 @@ export interface CommonAlertParamDetails {
 
 export interface CommonAlertParams {
   [name: string]: string | number;
+}
+
+export interface ThreadPoolRejectionsAlertParams {
+  search: {
+    threshold: number;
+    enabled: boolean;
+  };
+  write: {
+    threshold: number;
+    enabled: boolean;
+  };
 }

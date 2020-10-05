@@ -269,18 +269,18 @@ export class BaseAlert {
   }
 
   protected async fetchData(
-    params: CommonAlertParams,
+    params: CommonAlertParams | unknown,
     callCluster: any,
     clusters: AlertCluster[],
     uiSettings: IUiSettingsClient,
     availableCcs: string[]
-  ): Promise<AlertData[]> {
+  ): Promise<Array<AlertData & unknown>> {
     // Child should implement
     throw new Error('Child classes must implement `fetchData`');
   }
 
   protected async processData(
-    data: AlertData[],
+    data: Array<AlertData & unknown>,
     clusters: AlertCluster[],
     services: AlertServices,
     logger: Logger,
@@ -365,16 +365,27 @@ export class BaseAlert {
     };
   }
 
-  protected getUiMessage(alertState: AlertState, item: AlertData): AlertMessage {
+  protected getUiMessage(
+    alertState: AlertState | unknown,
+    item: AlertData | unknown
+  ): AlertMessage {
     throw new Error('Child classes must implement `getUiMessage`');
   }
 
   protected executeActions(
     instance: AlertInstance,
-    instanceState: AlertInstanceState,
-    item: AlertData,
-    cluster: AlertCluster
+    instanceState: AlertInstanceState | unknown,
+    item: AlertData | unknown,
+    cluster?: AlertCluster | unknown
   ) {
     throw new Error('Child classes must implement `executeActions`');
+  }
+
+  protected createGlobalStateLink(link: string, clusterUuid: string, ccs?: string) {
+    const globalState = [`cluster_uuid:${clusterUuid}`];
+    if (ccs) {
+      globalState.push(`ccs:${ccs}`);
+    }
+    return `${this.kibanaUrl}/app/monitoring#/${link}?_g=(${globalState.toString()})`;
   }
 }

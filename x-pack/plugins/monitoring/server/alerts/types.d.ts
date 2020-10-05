@@ -41,6 +41,13 @@ export interface AlertDiskUsageState extends AlertState {
   nodeName?: string;
 }
 
+export interface AlertThreadPoolRejectionsState extends AlertState {
+  count?: number;
+  type?: 'SEARCH' | 'WRITE' | string;
+  nodeId: string;
+  nodeName?: string;
+}
+
 export interface AlertUiState {
   isFiring: boolean;
   severity: AlertSeverity;
@@ -92,6 +99,15 @@ export interface AlertCpuUsageNodeStats {
   ccs?: string;
 }
 
+export interface AlertThreadPoolRejectionsStats {
+  clusterUuid: string;
+  nodeId: string;
+  nodeName: string;
+  searchRejections?: number;
+  writeRejections?: number;
+  ccs?: string;
+}
+
 export interface AlertDiskUsageNodeStats {
   clusterUuid: string;
   nodeId: string;
@@ -113,7 +129,7 @@ export interface AlertData {
   instanceKey: string;
   clusterUuid: string;
   ccs?: string;
-  shouldFire: boolean;
+  shouldFire?: boolean;
   severity: AlertSeverity;
   meta: any;
 }
