@@ -51,11 +51,13 @@ export const NodeEventsInCategory = memo(function ({
   const events = useSelector((state: ResolverState) => selectors.nodeEventsInCategory(state));
 
   return (
-    <StyledPanel>
+    <>
       {eventCount === undefined || processEvent === null ? (
-        <PanelLoading />
+        <StyledPanel>
+          <PanelLoading />
+        </StyledPanel>
       ) : (
-        <>
+        <StyledPanel data-test-subj="resolver:panel:events-in-category">
           <NodeEventsInCategoryBreadcrumbs
             nodeName={eventModel.processNameSafeVersion(processEvent)}
             eventCategory={eventCategory}
@@ -65,9 +67,9 @@ export const NodeEventsInCategory = memo(function ({
           />
           <EuiSpacer size="l" />
           <NodeEventList eventCategory={eventCategory} nodeID={nodeID} events={events} />
-        </>
+        </StyledPanel>
       )}
-    </StyledPanel>
+    </>
   );
 });
 
