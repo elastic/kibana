@@ -31,7 +31,7 @@ enum ResultType {
 interface Render {
   type: ResultType.render;
   body: string;
-  statusCode?: number | undefined;
+  statusCode?: number;
 }
 
 interface Next {
