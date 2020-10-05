@@ -72,12 +72,7 @@ export const TrustedAppsPage = memo(() => {
         />
       }
       headerBackComponent={backButton}
-      subtitle={
-        <FormattedMessage
-          id="xpack.securitySolution.trustedapps.list.pageSubTitle"
-          defaultMessage={ABOUT_TRUSTED_APPS}
-        />
-      }
+      subtitle={ABOUT_TRUSTED_APPS}
       actions={addButton}
     >
       <TrustedAppsNotifications />
