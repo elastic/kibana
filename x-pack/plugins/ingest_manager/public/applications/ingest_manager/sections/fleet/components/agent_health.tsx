@@ -77,6 +77,14 @@ const Status = {
       />
     </EuiHealth>
   ),
+  Upgrading: (
+    <EuiHealth color="warning">
+      <FormattedMessage
+        id="xpack.ingestManager.agentHealth.updatingStatusText"
+        defaultMessage="Updating"
+      />
+    </EuiHealth>
+  ),
 };
 
 function getStatusComponent(agent: Agent): React.ReactElement {
@@ -95,6 +103,8 @@ function getStatusComponent(agent: Agent): React.ReactElement {
       return Status.Unenrolling;
     case 'enrolling':
       return Status.Enrolling;
+    case 'updating':
+      return Status.Upgrading;
     default:
       return Status.Online;
   }
