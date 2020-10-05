@@ -14,7 +14,7 @@ For additional *Vega* and *Vega-Lite* information, refer to the reference sectio
 * Automatic sizing
 * Default theme to match {kib}
 * Writing {es} queries using the time range and filters from dashboards
-* Using the Elastic Map Service in Vega maps
+* experimental[] Using the Elastic Map Service in Vega maps
 * Additional tooltip styling
 * Advanced setting to enable URL loading from any domain
 * Limited debugging support using the browser dev tools
