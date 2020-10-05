@@ -16,14 +16,20 @@ import { i18n } from '@kbn/i18n';
 import { truncate } from 'lodash';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
-import { NewsItem as INewsItem } from '../../../services/get_news_feed';
+import { getNewsFeed, NewsItem as INewsItem } from '../../../services/get_news_feed';
 import './index.scss';
+import { useFetcher } from '../../../hooks/use_fetcher';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 
-interface Props {
-  items: INewsItem[];
-}
+export function NewsFeed() {
+  const { core } = usePluginContext();
 
-export function NewsFeed({ items }: Props) {
+  const { data: newsFeed } = useFetcher(() => {
+    return getNewsFeed({ core });
+  }, [core]);
+
+  const items: INewsItem[] = (newsFeed?.items ?? []).slice(0, 5);
+
   return (
     // The news feed is manually added/edited, to prevent any errors caused by typos or missing fields,
     // wraps the component with EuiErrorBoundary to avoid breaking the entire page.

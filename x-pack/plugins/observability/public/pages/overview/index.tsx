@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { ThemeContext } from 'styled-components';
 import { EmptySection } from '../../components/app/empty_section';
 import { WithHeaderLayout } from '../../components/app/layout/with_header';
@@ -12,16 +12,13 @@ import { Resources } from '../../components/app/resources';
 import { AlertsSection } from '../../components/app/section/alerts';
 import { DatePicker, TimePickerTime } from '../../components/shared/data_picker';
 import { NewsFeed } from '../../components/app/news_feed';
-import { FETCH_STATUS, useFetcher } from '../../hooks/use_fetcher';
 import { UI_SETTINGS, useKibanaUISettings } from '../../hooks/use_kibana_ui_settings';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { RouteParams } from '../../routes';
-import { getObservabilityAlerts } from '../../services/get_observability_alerts';
 import { getBucketSize } from '../../utils/get_bucket_size';
 import { getEmptySections } from './empty_section';
 import { LoadingObservability } from './loading_observability';
 import { ObsvSharedContext } from '../../context/shared_data';
-import { getNewsFeed } from '../../services/get_news_feed';
 import { DataSections } from './data_sections';
 import { useTrackPageview } from '../..';
 
@@ -40,6 +37,8 @@ export function OverviewPage({ routeParams }: Props) {
 
   const { sharedData } = useContext(ObsvSharedContext);
 
+  const [alertEmptySection, setAlertEmptySection] = useState(false);
+
   const { hasAnyData, hasData } = sharedData ?? {};
 
   useTrackPageview({ app: 'observability', path: 'overview' });
@@ -47,18 +46,12 @@ export function OverviewPage({ routeParams }: Props) {
 
   const { core } = usePluginContext();
 
-  const { data: alerts = [], status: alertStatus } = useFetcher(() => {
-    return getObservabilityAlerts({ core });
-  }, [core]);
-
-  const { data: newsFeed } = useFetcher(() => getNewsFeed({ core }), [core]);
-
   const theme = useContext(ThemeContext);
   const { refreshInterval = 10000, refreshPaused = true } = routeParams.query;
 
   const appEmptySections = getEmptySections({ core }).filter(({ id }) => {
     if (id === 'alert') {
-      return alertStatus !== FETCH_STATUS.FAILURE && !alerts.length;
+      return alertEmptySection;
     }
     return hasData?.[id] === false;
   });
@@ -125,11 +118,7 @@ export function OverviewPage({ routeParams }: Props) {
           </EuiFlexItem>
 
           {/* Alert section */}
-          {!!alerts.length && (
-            <EuiFlexItem grow={3}>
-              <AlertsSection alerts={alerts} />
-            </EuiFlexItem>
-          )}
+          {hasAnyData && <AlertsSection setAlertEmptySection={setAlertEmptySection} />}
 
           {/* Resources section */}
           <EuiFlexItem grow={1}>
@@ -138,9 +127,9 @@ export function OverviewPage({ routeParams }: Props) {
                 <Resources />
               </EuiFlexItem>
 
-              {!!newsFeed?.items?.length && (
+              {hasAnyData && (
                 <EuiFlexItem grow={false}>
-                  <NewsFeed items={newsFeed.items.slice(0, 5)} />
+                  <NewsFeed />
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>
