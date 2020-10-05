@@ -33,7 +33,7 @@ export function WebCoreVitalsTitle() {
           }
           closePopover={closePopover}
         >
-          <div style={{ width: '300px' }}>
+          <div>
             <EuiText>
               <FormattedMessage
                 id="xpack.observability.ux.dashboard.webCoreVitals.help"
