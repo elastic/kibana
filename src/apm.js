@@ -38,13 +38,17 @@ module.exports = function (serviceName = name) {
   const conf = apmConfig.getConfig(serviceName);
   const apm = require('elastic-apm-node');
 
-  // Filter out username PII
+  // Filter out all user PII
   apm.addFilter((payload) => {
-    if (payload.context && payload.context.user && payload.context.user.username) {
-      delete payload.context.user.username;
+    try {
+      if (payload.context && payload.context.user && typeof payload.context.user === 'object') {
+        Object.keys(payload.context.user).forEach((key) => {
+          payload.context.user[key] = '[REDACTED]';
+        });
+      }
+    } finally {
+      return payload;
     }
-
-    return payload;
   });
 
   apm.start(conf);

@@ -30,10 +30,12 @@ const getDefaultConfig = (isDistributable: boolean): ApmAgentConfig => {
     return {
       active: false,
       globalLabels: {},
+      // Do not use a centralized controlled config
       centralConfig: false,
-      captureHeaders: false,
-      captureBody: false,
+      // Capture all exceptions that are not caught
       logUncaughtExceptions: true,
+      // Can be performance intensive, disabling by default
+      breakdownMetrics: false,
     };
   }
 
@@ -81,7 +83,8 @@ export class ApmConfiguration {
       const apmConfig = merge(
         getDefaultConfig(this.isDistributable),
         this.getConfigFromKibanaConfig(),
-        this.getDevConfig()
+        this.getDevConfig(),
+        this.getDistConfig()
       );
 
       const rev = this.getGitRev();
@@ -128,6 +131,19 @@ export class ApmConfiguration {
     } catch (e) {
       return {};
     }
+  }
+
+  /** Config keys that cannot be overridden in production builds */
+  private getDistConfig(): ApmAgentConfig {
+    if (!this.isDistributable) {
+      return {};
+    }
+
+    return {
+      // Headers & body may contain sensitive info
+      captureHeaders: false,
+      captureBody: 'off',
+    };
   }
 
   private getGitRev() {
