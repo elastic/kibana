@@ -22,6 +22,9 @@ image::user/reporting/images/share-button.png["Share"]
 The {report-features} are automatically enabled in {kib}. It runs a custom build of the Chromium web browser, which
 runs on the server in headless mode to load {kib} and capture the rendered {kib} charts as images.
 
+Please make sure that in the Kibana.yaml the following setting is: file xpack.reporting.enabled: true
+Review reporting settings here https://www.elastic.co/guide/en/kibana/current/reporting-settings-kb.html 
+
 Chromium is an open-source project not related to Elastic, but the Chromium binary for {kib} has been custom-built by Elastic to ensure it
 works with minimal setup. However, the {kib} server OS might still require additional dependencies for Chromium. See the
 <<reporting-troubleshooting-system-dependencies, Reporting troubleshooting>> section for more information about the system dependencies
