@@ -57,8 +57,6 @@ case $1 in
     if [ "$1" = "2" ]; then
       IS_UPGRADE=true
     fi
-
-    set_access
   ;;
 
   *)
