@@ -299,6 +299,13 @@ export function XYChart({
     yRight: true,
   };
 
+  const filteredBarLayers = filteredLayers.filter((layer) => layer.seriesType.includes('bar'));
+
+  const chartHasMoreThanOneBarSeries =
+    filteredBarLayers.length > 1 ||
+    filteredBarLayers.some((layer) => layer.accessors.length > 1) ||
+    filteredBarLayers.some((layer) => layer.splitAccessor);
+
   function calculateMinInterval() {
     // check all the tables to see if all of the rows have the same timestamp
     // that would mean that chart will draw a single bar
@@ -599,7 +606,12 @@ export function XYChart({
             groupId: yAxesConfiguration.find((axisConfiguration) =>
               axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)
             )?.groupId,
-            enableHistogramMode: isHistogram && (seriesType.includes('stacked') || !splitAccessor),
+            enableHistogramMode:
+              isHistogram &&
+              (seriesType.includes('stacked') || !splitAccessor) &&
+              (seriesType.includes('stacked') ||
+                !seriesType.includes('bar') ||
+                !chartHasMoreThanOneBarSeries),
             stackMode: seriesType.includes('percentage') ? StackMode.Percentage : undefined,
             timeZone,
             areaSeriesStyle: {
