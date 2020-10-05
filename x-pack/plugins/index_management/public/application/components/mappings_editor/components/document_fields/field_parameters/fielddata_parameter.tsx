@@ -60,10 +60,10 @@ export const FieldDataParameter = ({ field, defaultToggleValue }: Props) => {
     const nextMaxConfig = getConfig<number>('max', nextValueType);
 
     min.setValue(
-      nextMinConfig.deserializer?.(nextMinConfig.defaultValue) ?? nextMinConfig.defaultValue!
+      nextMinConfig.deserializer?.(nextMinConfig.defaultValue!) ?? nextMinConfig.defaultValue!
     );
     max.setValue(
-      nextMaxConfig.deserializer?.(nextMaxConfig.defaultValue) ?? nextMaxConfig.defaultValue!
+      nextMaxConfig.deserializer?.(nextMaxConfig.defaultValue!) ?? nextMaxConfig.defaultValue!
     );
 
     setValueType(nextValueType);
@@ -95,11 +95,11 @@ export const FieldDataParameter = ({ field, defaultToggleValue }: Props) => {
         fields={{
           min: {
             path: 'fielddata_frequency_filter.min',
-            config: getConfig('min'),
+            config: getConfig<number>('min'),
           },
           max: {
             path: 'fielddata_frequency_filter.max',
-            config: getConfig('max'),
+            config: getConfig<number>('max'),
           },
         }}
       >

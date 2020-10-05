@@ -22,7 +22,7 @@ import React from 'react';
 import { UseField, Props as UseFieldProps } from './use_field';
 import { FieldHook } from '../types';
 
-type FieldsArray = Array<{ id: string } & Omit<UseFieldProps<unknown>, 'children'>>;
+type FieldsArray = Array<{ id: string } & Omit<UseFieldProps<unknown, {}, unknown>, 'children'>>;
 
 interface Props<T> {
   fields: { [K in keyof T]: Exclude<UseFieldProps<T[K]>, 'children'> };

@@ -19,11 +19,11 @@
 
 import React, { FunctionComponent } from 'react';
 
-import { FieldHook, FieldConfig } from '../types';
+import { FieldHook, FieldConfig, FormData } from '../types';
 import { useField } from '../hooks';
 import { useFormContext } from '../form_context';
 
-export interface Props<T, FormType, I> {
+export interface Props<T, FormType = FormData, I = T> {
   path: string;
   config?: FieldConfig<T, FormType, I>;
   defaultValue?: T;

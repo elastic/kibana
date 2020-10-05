@@ -28,7 +28,7 @@ interface Props {
   path: string;
   initialNumberOfItems?: number;
   readDefaultValueOnForm?: boolean;
-  validations?: FieldConfig<any, ArrayItem[]>['validations'];
+  validations?: FieldConfig<ArrayItem[]>['validations'];
   children: (formFieldArray: FormArrayField) => JSX.Element;
 }
 
@@ -109,13 +109,13 @@ export const UseArray = ({
 
   // Create a new hook field with the "hasValue" set to false so we don't use its value to build the final form data.
   // Apart from that the field behaves like a normal field and is hooked into the form validation lifecycle.
-  const fieldConfigBase: FieldConfig<any, ArrayItem[]> & InternalFieldConfig<ArrayItem[]> = {
+  const fieldConfigBase: FieldConfig<ArrayItem[]> & InternalFieldConfig<ArrayItem[]> = {
     defaultValue: fieldDefaultValue,
     valueChangeDebounceTime: 0,
     isIncludedInOutput: false,
   };
 
-  const fieldConfig: FieldConfig<any, ArrayItem[]> & InternalFieldConfig<ArrayItem[]> = validations
+  const fieldConfig: FieldConfig<ArrayItem[]> & InternalFieldConfig<ArrayItem[]> = validations
     ? { validations, ...fieldConfigBase }
     : fieldConfigBase;
 

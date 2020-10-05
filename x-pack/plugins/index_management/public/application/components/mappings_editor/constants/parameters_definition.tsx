@@ -274,14 +274,14 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
         fieldConfig: {
           defaultValue: 0.01,
           serializer: (value: string) => (value === '' ? '' : toInt(value) / 100),
-          deserializer: (value) => Math.round(value * 100),
+          deserializer: (value: number) => Math.round(value * 100),
         } as FieldConfig,
       },
       max: {
         fieldConfig: {
           defaultValue: 1,
           serializer: (value: string) => (value === '' ? '' : toInt(value) / 100),
-          deserializer: (value) => Math.round(value * 100),
+          deserializer: (value: number) => Math.round(value * 100),
         } as FieldConfig,
       },
     },
@@ -949,8 +949,8 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
           ),
         },
       ],
-      serializer: (value: AliasOption[]) => (value.length === 0 ? '' : value[0].id),
-    } as FieldConfig<any, AliasOption[]>,
+      serializer: (value) => (value.length === 0 ? '' : value[0].id),
+    } as FieldConfig<string, {}, AliasOption[]>,
     targetTypesNotAllowed: ['object', 'nested', 'alias'] as DataType[],
     schema: t.string,
   },
