@@ -18,14 +18,11 @@ import {
 import { Immutable } from '../../../../../common/endpoint/types';
 import { AppAction } from '../../../../common/store/actions';
 import { TrustedApp } from '../../../../../common/endpoint/types/trusted_apps';
-import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
 
 import {
-  getCurrentLocationPageIndex,
-  getCurrentLocationPageSize,
   getListErrorMessage,
   getListItems,
-  getListTotalItemsCount,
+  getListPagination,
   isListLoading,
 } from '../store/selectors';
 
@@ -147,9 +144,7 @@ const getColumnDefinitions = (context: TrustedAppsListContext): ColumnsList => {
 
 export const TrustedAppsList = memo(() => {
   const [detailsMap, setDetailsMap] = useState<DetailsMap>({});
-  const pageIndex = useTrustedAppsSelector(getCurrentLocationPageIndex);
-  const pageSize = useTrustedAppsSelector(getCurrentLocationPageSize);
-  const totalItemCount = useTrustedAppsSelector(getListTotalItemsCount);
+  const pagination = useTrustedAppsSelector(getListPagination);
   const listItems = useTrustedAppsSelector(getListItems);
   const dispatch = useDispatch();
 
@@ -165,22 +160,11 @@ export const TrustedAppsList = memo(() => {
       itemId="id"
       itemIdToExpandedRowMap={detailsMap}
       isExpandable={true}
-      pagination={useMemo(
-        () => ({
-          pageIndex,
-          pageSize,
-          totalItemCount,
-          hidePerPageOptions: false,
-          pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
-        }),
-        [pageIndex, pageSize, totalItemCount]
-      )}
-      onChange={useTrustedAppsNavigateCallback(
-        ({ page }: { page: { index: number; size: number } }) => ({
-          page_index: page.index,
-          page_size: page.size,
-        })
-      )}
+      pagination={pagination}
+      onChange={useTrustedAppsNavigateCallback(({ page }) => ({
+        page_index: page.index,
+        page_size: page.size,
+      }))}
       data-test-subj="trustedAppsList"
     />
   );

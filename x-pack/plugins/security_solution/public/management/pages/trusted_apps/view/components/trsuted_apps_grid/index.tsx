@@ -4,26 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useEffect } from 'react';
+import React, { memo, useCallback, useEffect } from 'react';
 import {
   EuiTablePagination,
   EuiFlexGroup,
   EuiFlexItem,
   EuiProgress,
   EuiIcon,
-  EuiBasicTableProps,
   EuiText,
 } from '@elastic/eui';
 
-import { TrustedApp } from '../../../../../../../common/endpoint/types';
-import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../../../common/constants';
+import { Pagination } from '../../../state';
 
 import {
-  getCurrentLocationPageIndex,
-  getCurrentLocationPageSize,
   getListErrorMessage,
   getListItems,
-  getListTotalItemsCount,
+  getListPagination,
   isListLoading,
 } from '../../../store/selectors';
 
@@ -38,39 +34,37 @@ import { NO_RESULTS_MESSAGE } from '../../translations';
 import { TrustedAppCard } from '../trusted_app_card';
 
 export interface PaginationBarProps {
-  pagination: EuiBasicTableProps<TrustedApp>['pagination'];
-  onPageSizeChange: (pageSize: number) => void;
-  onPageChange: (pageIndex: number) => void;
+  pagination: Pagination;
+  onChange: (pagination: { size: number; index: number }) => void;
 }
 
-const PaginationBar = ({ pagination, onPageSizeChange, onPageChange }: PaginationBarProps) => {
-  const pageCount = pagination ? Math.ceil(pagination.totalItemCount / pagination.pageSize) : 0;
+const PaginationBar = ({ pagination, onChange }: PaginationBarProps) => {
+  const pageCount = Math.ceil(pagination.totalItemCount / pagination.pageSize);
 
   useEffect(() => {
-    if (pagination && pageCount > 0 && pageCount < pagination.pageIndex + 1) {
-      onPageChange(pageCount - 1);
+    if (pageCount > 0 && pageCount < pagination.pageIndex + 1) {
+      onChange({ index: pageCount - 1, size: pagination.pageSize });
     }
-  }, [pageCount, onPageChange, pagination]);
+  }, [pageCount, onChange, pagination]);
 
   return (
     <div>
       <EuiTablePagination
-        activePage={pagination?.pageIndex}
-        hidePerPageOptions={pagination?.hidePerPageOptions}
-        itemsPerPage={pagination?.pageSize}
-        itemsPerPageOptions={pagination?.pageSizeOptions}
+        activePage={pagination.pageIndex}
+        itemsPerPage={pagination.pageSize}
+        itemsPerPageOptions={pagination.pageSizeOptions}
         pageCount={pageCount}
-        onChangeItemsPerPage={onPageSizeChange}
-        onChangePage={onPageChange}
+        onChangeItemsPerPage={useCallback((size) => ({ index: 0, size }), [])}
+        onChangePage={useCallback((index) => ({ index, size: pagination.pageSize }), [
+          pagination.pageSize,
+        ])}
       />
     </div>
   );
 };
 
 export const TrustedAppsGrid = memo(() => {
-  const pageIndex = useTrustedAppsSelector(getCurrentLocationPageIndex);
-  const pageSize = useTrustedAppsSelector(getCurrentLocationPageSize);
-  const totalItemCount = useTrustedAppsSelector(getListTotalItemsCount);
+  const pagination = useTrustedAppsSelector(getListPagination);
   const listItems = useTrustedAppsSelector(getListItems);
   const isLoading = useTrustedAppsSelector(isListLoading);
   const error = useTrustedAppsSelector(getListErrorMessage);
@@ -79,12 +73,9 @@ export const TrustedAppsGrid = memo(() => {
     type: 'trustedAppDeletionDialogStarted',
     payload: { entry: trustedApp },
   }));
-  const handlePageSizeChange = useTrustedAppsNavigateCallback((newPageSize) => ({
-    page_index: 0,
-    page_size: newPageSize,
-  }));
-  const handlePageChange = useTrustedAppsNavigateCallback((newPageIndex) => ({
-    page_index: newPageIndex,
+  const handlePaginationChange = useTrustedAppsNavigateCallback(({ index, size }) => ({
+    page_index: index,
+    page_size: size,
   }));
 
   return (
@@ -114,17 +105,8 @@ export const TrustedAppsGrid = memo(() => {
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        {!error && totalItemCount > 0 && (
-          <PaginationBar
-            pagination={{
-              pageIndex,
-              pageSize,
-              totalItemCount,
-              pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
-            }}
-            onPageSizeChange={handlePageSizeChange}
-            onPageChange={handlePageChange}
-          />
+        {!error && pagination.totalItemCount > 0 && (
+          <PaginationBar pagination={pagination} onChange={handlePaginationChange} />
         )}
       </EuiFlexItem>
     </EuiFlexGroup>
