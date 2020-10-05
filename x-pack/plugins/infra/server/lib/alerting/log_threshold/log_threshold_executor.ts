@@ -340,11 +340,11 @@ type AlertInstanceUpdater = (
 
 export const updateAlertInstance: AlertInstanceUpdater = (alertInstance, state, actions) => {
   if (actions && actions.length > 0) {
+    const sharedContext = {
+      timestamp: new Date().toISOString(),
+    };
     actions.forEach((actionSet) => {
       const { actionGroup, context } = actionSet;
-      const sharedContext = {
-        timestamp: new Date().toISOString(),
-      };
       alertInstance.scheduleActions(actionGroup, { ...sharedContext, ...context });
     });
   }
