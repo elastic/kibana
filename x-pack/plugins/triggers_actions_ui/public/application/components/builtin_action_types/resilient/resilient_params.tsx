@@ -13,6 +13,8 @@ import {
   EuiTitle,
   EuiComboBoxOptionOption,
   EuiSelectOption,
+  EuiFormControlLayout,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isSome } from 'fp-ts/lib/Option';
@@ -231,17 +233,32 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
             label={i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.resilient.savedObjectIdFieldLabel',
               {
-                defaultMessage: 'Referenced Saved Object ID (optional)',
+                defaultMessage: 'Object ID (optional)',
               }
             )}
           >
-            <TextFieldWithMessageVariables
-              index={index}
-              editAction={editSubActionProperty}
-              messageVariables={messageVariables}
-              paramsProperty={'savedObjectId'}
-              inputTargetValue={savedObjectId}
-            />
+            <EuiFormControlLayout
+              fullWidth
+              append={
+                <EuiIconTip
+                  content={i18n.translate(
+                    'xpack.triggersActionsUI.components.builtinActionTypes.resilient.savedObjectIdFieldHelp',
+                    {
+                      defaultMessage:
+                        'IBM Resilient will associate this action with a Kibana Saved Object ID.',
+                    }
+                  )}
+                />
+              }
+            >
+              <TextFieldWithMessageVariables
+                index={index}
+                editAction={editSubActionProperty}
+                messageVariables={messageVariables}
+                paramsProperty={'savedObjectId'}
+                inputTargetValue={savedObjectId}
+              />
+            </EuiFormControlLayout>
           </EuiFormRow>
           <EuiSpacer size="m" />
         </Fragment>

@@ -7,12 +7,19 @@
 import React, { Fragment, useEffect, useState, useMemo } from 'react';
 import { map } from 'lodash/fp';
 import { isSome } from 'fp-ts/lib/Option';
-import { EuiFormRow, EuiComboBox, EuiSelectOption, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiSelect } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiFlexItem } from '@elastic/eui';
-import { EuiSpacer } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiComboBox,
+  EuiSelectOption,
+  EuiHorizontalRule,
+  EuiSelect,
+  EuiFormControlLayout,
+  EuiIconTip,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { ActionParamsProps } from '../../../../types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
@@ -246,28 +253,6 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
               <EuiSpacer size="m" />
             </>
           )}
-          {!isActionBeingConfiguredByAnAlert && (
-            <Fragment>
-              <EuiFormRow
-                fullWidth
-                label={i18n.translate(
-                  'xpack.triggersActionsUI.components.builtinActionTypes.jira.savedObjectIdFieldLabel',
-                  {
-                    defaultMessage: 'Referenced Saved Object ID (optional)',
-                  }
-                )}
-              >
-                <TextFieldWithMessageVariables
-                  index={index}
-                  editAction={editSubActionProperty}
-                  messageVariables={messageVariables}
-                  paramsProperty={'savedObjectId'}
-                  inputTargetValue={savedObjectId}
-                />
-              </EuiFormRow>
-              <EuiSpacer size="m" />
-            </Fragment>
-          )}
           <EuiFormRow
             fullWidth
             error={errors.title}
@@ -289,6 +274,45 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
             />
           </EuiFormRow>
           <EuiSpacer size="m" />
+          {!isActionBeingConfiguredByAnAlert && (
+            <Fragment>
+              <EuiFormRow
+                fullWidth
+                label={i18n.translate(
+                  'xpack.triggersActionsUI.components.builtinActionTypes.jira.savedObjectIdFieldLabel',
+                  {
+                    defaultMessage: 'Object ID (optional)',
+                  }
+                )}
+              >
+                <EuiFlexItem>
+                  <EuiFormControlLayout
+                    fullWidth
+                    append={
+                      <EuiIconTip
+                        content={i18n.translate(
+                          'xpack.triggersActionsUI.components.builtinActionTypes.jira.savedObjectIdFieldHelp',
+                          {
+                            defaultMessage:
+                              'Jira will associate this action with a Kibana Saved Object ID.',
+                          }
+                        )}
+                      />
+                    }
+                  >
+                    <TextFieldWithMessageVariables
+                      index={index}
+                      editAction={editSubActionProperty}
+                      messageVariables={messageVariables}
+                      paramsProperty={'savedObjectId'}
+                      inputTargetValue={savedObjectId}
+                    />
+                  </EuiFormControlLayout>
+                </EuiFlexItem>
+              </EuiFormRow>
+              <EuiSpacer size="m" />
+            </Fragment>
+          )}
           {hasLabels && (
             <>
               <EuiFlexGroup>

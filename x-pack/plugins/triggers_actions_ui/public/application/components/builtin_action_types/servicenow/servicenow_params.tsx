@@ -5,13 +5,17 @@
  */
 
 import React, { Fragment, useEffect } from 'react';
-import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiSelect } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiFlexItem } from '@elastic/eui';
-import { EuiSpacer } from '@elastic/eui';
-import { EuiTitle } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiSelect,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTitle,
+  EuiFormControlLayout,
+  EuiIconTip,
+} from '@elastic/eui';
 import { isSome } from 'fp-ts/lib/Option';
 import { ActionParamsProps } from '../../../../types';
 import { ServiceNowActionParams } from './types';
@@ -188,17 +192,32 @@ const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
             label={i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.savedObjectIdFieldLabel',
               {
-                defaultMessage: 'Referenced Saved Object ID (optional)',
+                defaultMessage: 'Object ID (optional)',
               }
             )}
           >
-            <TextFieldWithMessageVariables
-              index={index}
-              editAction={editSubActionProperty}
-              messageVariables={messageVariables}
-              paramsProperty={'savedObjectId'}
-              inputTargetValue={savedObjectId}
-            />
+            <EuiFormControlLayout
+              fullWidth
+              append={
+                <EuiIconTip
+                  content={i18n.translate(
+                    'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.savedObjectIdFieldHelp',
+                    {
+                      defaultMessage:
+                        'ServiceNow will associate this action with a Kibana Saved Object ID.',
+                    }
+                  )}
+                />
+              }
+            >
+              <TextFieldWithMessageVariables
+                index={index}
+                editAction={editSubActionProperty}
+                messageVariables={messageVariables}
+                paramsProperty={'savedObjectId'}
+                inputTargetValue={savedObjectId}
+              />
+            </EuiFormControlLayout>
           </EuiFormRow>
           <EuiSpacer size="m" />
         </Fragment>
