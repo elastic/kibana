@@ -208,7 +208,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('displays the correct table data for the kql queries', () => {
+    describe.skip('displays the correct table data for the kql queries', () => {
       before(async () => {
         await esArchiver.load('endpoint/metadata/destination_index', { useCreate: true });
         await pageObjects.endpoint.navigateToEndpointList();
