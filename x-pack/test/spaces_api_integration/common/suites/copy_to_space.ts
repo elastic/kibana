@@ -423,7 +423,7 @@ export function copyToSpaceTestSuiteFactory(
     const type = 'sharedtype';
     const v4 = new RegExp(/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i);
     const noConflictId = `${spaceId}_only`;
-    const exactMatchId = 'all_spaces';
+    const exactMatchId = 'each_space';
     const inexactMatchId = `conflict_1_${spaceId}`;
     const ambiguousConflictId = `conflict_2_${spaceId}`;
 
