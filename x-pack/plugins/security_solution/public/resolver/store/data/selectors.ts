@@ -666,7 +666,7 @@ export const nodeEventsInCategory = (state: DataState) => {
   return state.nodeEventsInCategory?.events ?? [];
 };
 
-export const userCanRequestMoreNodeEventsInCategory = createSelector(
+export const lastRelatedEventResponseContainsCursor = createSelector(
   (state: DataState) => state.nodeEventsInCategory,
   panelViewAndParameters,
   /* eslint-disable-next-line no-shadow */

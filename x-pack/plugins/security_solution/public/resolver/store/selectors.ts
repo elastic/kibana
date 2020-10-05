@@ -367,9 +367,9 @@ export const nodeEventsInCategory = composeSelectors(
 /**
  * Flag used to show a Load More Data button in the nodeEventsOfType panel view.
  */
-export const userCanRequestMoreNodeEventsInCategory = composeSelectors(
+export const lastRelatedEventResponseContainsCursor = composeSelectors(
   dataStateSelector,
-  dataSelectors.userCanRequestMoreNodeEventsInCategory
+  dataSelectors.lastRelatedEventResponseContainsCursor
 );
 
 /**

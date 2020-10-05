@@ -177,7 +177,7 @@ const NodeEventList = memo(function NodeEventList({
     });
   }, [dispatch]);
   const isLoading = useSelector(selectors.isLoadingMoreNodeEventsInCategory);
-  const hasMore = useSelector(selectors.userCanRequestMoreNodeEventsInCategory);
+  const hasMore = useSelector(selectors.lastRelatedEventResponseContainsCursor);
   return (
     <>
       {events.map((event, index) => (
