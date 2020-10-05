@@ -26,8 +26,6 @@ import { RedirectAppLinks } from '../../app_links';
 import { useKibana } from '../../context';
 import { useUiSetting$ } from '../../ui_settings';
 
-import './index.scss';
-
 interface Props {
   /** The path to set as the new default route in advanced settings */
   path: string;
@@ -49,8 +47,8 @@ export const OverviewPageFooter: FC<Props> = ({ path }) => {
     defaultRoute === path ? (
       <RedirectAppLinks application={application}>
         <EuiButtonEmpty
-          className="pageFooter__button"
-          flush="left"
+          className="kbnOverviewPageFooter__button"
+          flush="both"
           href={'/app/management/kibana/settings#defaultRoute'}
           iconType="home"
           size="xs"
@@ -63,8 +61,8 @@ export const OverviewPageFooter: FC<Props> = ({ path }) => {
       </RedirectAppLinks>
     ) : (
       <EuiButtonEmpty
-        className="pageFooter__button"
-        flush="left"
+        className="kbnOverviewPageFooter__button"
+        flush="both"
         iconType="home"
         onClick={() => {
           setDefaultRoute(path);
@@ -84,7 +82,7 @@ export const OverviewPageFooter: FC<Props> = ({ path }) => {
     );
 
   return (
-    <footer className="pageFooter">
+    <footer className="kbnOverviewPageFooter">
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <div>{isAdvancedSettingsEnabled ? defaultRoutebutton : null}</div>
@@ -94,9 +92,9 @@ export const OverviewPageFooter: FC<Props> = ({ path }) => {
           <div>
             <RedirectAppLinks application={application}>
               <EuiButtonEmpty
-                className="pageFooter__button"
+                className="kbnOverviewPageFooter__button"
                 data-test-subj="allPlugins"
-                flush="left"
+                flush="both"
                 href="/app/home#/feature_directory"
                 iconType="apps"
                 size="xs"

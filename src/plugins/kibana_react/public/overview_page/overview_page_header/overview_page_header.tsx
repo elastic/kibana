@@ -61,9 +61,11 @@ export const OverviewPageHeader: FC<Props> = ({
 
   return (
     <header
-      className={`pageHeader ${overlap ? 'pageHeader--hasOverlap' : 'pageHeader--noOverlap'}`}
+      className={`kbnOverviewPageHeader ${
+        overlap ? 'kbnOverviewPageHeader--hasOverlap' : 'kbnOverviewPageHeader--noOverlap'
+      }`}
     >
-      <div className="pageHeader__inner">
+      <div className="kbnOverviewPageHeader__inner">
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="m" responsive={false}>
@@ -75,7 +77,7 @@ export const OverviewPageHeader: FC<Props> = ({
 
               <EuiFlexItem>
                 <EuiTitle size="m">
-                  <h1 id="pageHeader__title">{title}</h1>
+                  <h1 id="kbnOverviewPageHeader__title">{title}</h1>
                 </EuiTitle>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -83,16 +85,16 @@ export const OverviewPageHeader: FC<Props> = ({
 
           {!hideToolbar && (
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup className="pageHeader__actions" responsive={false} wrap>
-                <EuiFlexItem className="pageHeader__actionItem" grow={false}>
+              <EuiFlexGroup className="kbnOverviewPageHeader__actions" responsive={false} wrap>
+                <EuiFlexItem className="kbnOverviewPageHeader__actionItem" grow={false}>
                   <RedirectAppLinks application={application}>
                     <EuiButtonEmpty
-                      className="pageHeader__actionButton"
-                      flush="left"
+                      className="kbnOverviewPageHeader__actionButton"
+                      flush="both"
                       href={'/app/home#/tutorial_directory'}
                       iconType="indexOpen"
                     >
-                      {i18n.translate('kibana-react.pageHeader.addDataButtonLabel', {
+                      {i18n.translate('kibana-react.kbnOverviewPageHeader.addDataButtonLabel', {
                         defaultMessage: 'Add data',
                       })}
                     </EuiButtonEmpty>
@@ -100,32 +102,35 @@ export const OverviewPageHeader: FC<Props> = ({
                 </EuiFlexItem>
 
                 {showManagementLink && isManagementEnabled ? (
-                  <EuiFlexItem className="pageHeader__actionItem" grow={false}>
+                  <EuiFlexItem className="kbnOverviewPageHeader__actionItem" grow={false}>
                     <RedirectAppLinks application={application}>
                       <EuiButtonEmpty
-                        className="pageHeader__actionButton"
-                        flush="left"
+                        className="kbnOverviewPageHeader__actionButton"
+                        flush="both"
                         iconType="gear"
                         href={'/app/management'}
                       >
-                        {i18n.translate('kibana-react.pageHeader.stackManagementButtonLabel', {
-                          defaultMessage: 'Manage',
-                        })}
+                        {i18n.translate(
+                          'kibana-react.kbnOverviewPageHeader.stackManagementButtonLabel',
+                          {
+                            defaultMessage: 'Manage',
+                          }
+                        )}
                       </EuiButtonEmpty>
                     </RedirectAppLinks>
                   </EuiFlexItem>
                 ) : null}
 
                 {showDevToolsLink && isDevToolsEnabled ? (
-                  <EuiFlexItem className="pageHeader__actionItem" grow={false}>
+                  <EuiFlexItem className="kbnOverviewPageHeader__actionItem" grow={false}>
                     <RedirectAppLinks application={application}>
                       <EuiButtonEmpty
-                        className="pageHeader__actionButton"
-                        flush="left"
+                        className="kbnOverviewPageHeader__actionButton"
+                        flush="both"
                         iconType="wrench"
                         href={'/app/dev_tools#/console'}
                       >
-                        {i18n.translate('kibana-react.pageHeader.devToolsButtonLabel', {
+                        {i18n.translate('kibana-react.kbnOverviewPageHeader.devToolsButtonLabel', {
                           defaultMessage: 'Dev tools',
                         })}
                       </EuiButtonEmpty>

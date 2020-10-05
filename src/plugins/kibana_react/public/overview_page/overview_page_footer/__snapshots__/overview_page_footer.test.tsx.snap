@@ -2,7 +2,7 @@
 
 exports[`OverviewPageFooter render 1`] = `
 <footer
-  className="pageFooter"
+  className="kbnOverviewPageFooter"
 >
   <EuiFlexGroup
     justifyContent="spaceBetween"
@@ -28,9 +28,9 @@ exports[`OverviewPageFooter render 1`] = `
           }
         >
           <EuiButtonEmpty
-            className="pageFooter__button"
+            className="kbnOverviewPageFooter__button"
             data-test-subj="allPlugins"
-            flush="left"
+            flush="both"
             href="/app/home#/feature_directory"
             iconType="apps"
             size="xs"

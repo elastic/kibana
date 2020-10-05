@@ -2,10 +2,10 @@
 
 exports[`OverviewPageHeader render 1`] = `
 <header
-  className="pageHeader pageHeader--noOverlap"
+  className="kbnOverviewPageHeader kbnOverviewPageHeader--noOverlap"
 >
   <div
-    className="pageHeader__inner"
+    className="kbnOverviewPageHeader__inner"
   >
     <EuiFlexGroup>
       <EuiFlexItem>
@@ -18,7 +18,7 @@ exports[`OverviewPageHeader render 1`] = `
               size="m"
             >
               <h1
-                id="pageHeader__title"
+                id="kbnOverviewPageHeader__title"
               >
                 Page Title
               </h1>
@@ -30,12 +30,12 @@ exports[`OverviewPageHeader render 1`] = `
         grow={false}
       >
         <EuiFlexGroup
-          className="pageHeader__actions"
+          className="kbnOverviewPageHeader__actions"
           responsive={false}
           wrap={true}
         >
           <EuiFlexItem
-            className="pageHeader__actionItem"
+            className="kbnOverviewPageHeader__actionItem"
             grow={false}
           >
             <mockConstructor
@@ -51,8 +51,8 @@ exports[`OverviewPageHeader render 1`] = `
               }
             >
               <EuiButtonEmpty
-                className="pageHeader__actionButton"
-                flush="left"
+                className="kbnOverviewPageHeader__actionButton"
+                flush="both"
                 href="/app/home#/tutorial_directory"
                 iconType="indexOpen"
               >
