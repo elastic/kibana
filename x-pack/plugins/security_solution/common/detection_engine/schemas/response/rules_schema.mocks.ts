@@ -87,7 +87,7 @@ export const getThreatMatchingSchemaMock = (anchorDate: string = ANCHOR_DATE): R
   return {
     ...getRulesSchemaMock(anchorDate),
     type: 'threat_match',
-    threat_index: 'index-123',
+    threat_index: ['index-123'],
     threat_mapping: [{ entries: [{ field: 'host.name', type: 'mapping', value: 'host.name' }] }],
     threat_query: '*:*',
     threat_filters: [

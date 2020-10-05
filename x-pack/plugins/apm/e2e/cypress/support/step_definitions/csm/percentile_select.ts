@@ -18,7 +18,7 @@ When('the user changes the selected percentile', () => {
 });
 
 Then(`it displays client metric related to that percentile`, () => {
-  const metrics = ['14 ms', '0.13 s', '55 '];
+  const metrics = ['14 ms', '131 ms', '55'];
 
   verifyClientMetrics(metrics, false);
 

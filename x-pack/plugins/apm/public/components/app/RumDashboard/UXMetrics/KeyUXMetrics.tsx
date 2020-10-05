@@ -6,16 +6,17 @@
 
 import React from 'react';
 import { EuiFlexItem, EuiStat, EuiFlexGroup } from '@elastic/eui';
-import { UXMetrics } from './index';
+import numeral from '@elastic/numeral';
 import {
   FCP_LABEL,
   LONGEST_LONG_TASK,
   NO_OF_LONG_TASK,
   SUM_LONG_TASKS,
   TBT_LABEL,
-} from '../CoreVitals/translations';
+} from './translations';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useUxQuery } from '../hooks/useUxQuery';
+import { UXMetrics } from '../../../../../../observability/public';
 
 export function formatToSec(
   value?: number | string,
@@ -77,7 +78,7 @@ export function KeyUXMetrics({ data, loading }: Props) {
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="s"
-          title={longTaskData?.noOfLongTasks ?? 0}
+          title={numeral(longTaskData?.noOfLongTasks ?? 0).format('0,0')}
           description={NO_OF_LONG_TASK}
           isLoading={status !== 'success'}
         />
