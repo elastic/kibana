@@ -348,7 +348,6 @@ export const config: {
             sniffInterval: Type<false | import("moment").Duration>;
             sniffOnConnectionFault: Type<boolean>;
             hosts: Type<string | string[]>;
-            preserveHost: Type<boolean>;
             username: Type<string | undefined>;
             password: Type<string | undefined>;
             requestHeadersWhitelist: Type<string | string[]>;
@@ -356,7 +355,6 @@ export const config: {
             shardTimeout: Type<import("moment").Duration>;
             requestTimeout: Type<import("moment").Duration>;
             pingTimeout: Type<import("moment").Duration>;
-            startupTimeout: Type<import("moment").Duration>;
             logQueries: Type<boolean>;
             ssl: import("@kbn/config-schema").ObjectType<{
                 verificationMode: Type<"none" | "certificate" | "full">;
@@ -1822,6 +1820,7 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
     // (undocumented)
     id?: string;
     migrationVersion?: SavedObjectsMigrationVersion;
+    namespaces?: string[];
     originId?: string;
     // (undocumented)
     references?: SavedObjectReference[];
@@ -1979,6 +1978,7 @@ export interface SavedObjectsCoreFieldMapping {
 export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
     id?: string;
     migrationVersion?: SavedObjectsMigrationVersion;
+    namespaces?: string[];
     originId?: string;
     overwrite?: boolean;
     // (undocumented)
@@ -2004,6 +2004,7 @@ export interface SavedObjectsDeleteFromNamespacesResponse {
 
 // @public (undocumented)
 export interface SavedObjectsDeleteOptions extends SavedObjectsBaseOptions {
+    force?: boolean;
     refresh?: MutatingOperationRefreshSetting;
 }
 

@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { EuiFlexItem, EuiStat, EuiFlexGroup } from '@elastic/eui';
+import numeral from '@elastic/numeral';
 import { UXMetrics } from './index';
 import {
   FCP_LABEL,
@@ -14,8 +15,8 @@ import {
   SUM_LONG_TASKS,
   TBT_LABEL,
 } from '../CoreVitals/translations';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { useFetcher } from '../../../../hooks/useFetcher';
+import { useUxQuery } from '../hooks/useUxQuery';
 
 export function formatToSec(
   value?: number | string,
@@ -36,33 +37,28 @@ interface Props {
 }
 
 export function KeyUXMetrics({ data, loading }: Props) {
-  const { urlParams, uiFilters } = useUrlParams();
-
-  const { start, end, serviceName, searchTerm } = urlParams;
+  const uxQuery = useUxQuery();
 
   const { data: longTaskData, status } = useFetcher(
     (callApmApi) => {
-      if (start && end && serviceName) {
+      if (uxQuery) {
         return callApmApi({
           pathname: '/api/apm/rum-client/long-task-metrics',
           params: {
             query: {
-              start,
-              end,
-              uiFilters: JSON.stringify(uiFilters),
-              urlQuery: searchTerm,
+              ...uxQuery,
             },
           },
         });
       }
       return Promise.resolve(null);
     },
-    [start, end, serviceName, uiFilters, searchTerm]
+    [uxQuery]
   );
 
   // Note: FCP value is in ms unit
   return (
-    <EuiFlexGroup responsive={false}>
+    <EuiFlexGroup wrap>
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="s"
@@ -82,7 +78,7 @@ export function KeyUXMetrics({ data, loading }: Props) {
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="s"
-          title={longTaskData?.noOfLongTasks ?? 0}
+          title={numeral(longTaskData?.noOfLongTasks ?? 0).format('0,0')}
           description={NO_OF_LONG_TASK}
           isLoading={status !== 'success'}
         />

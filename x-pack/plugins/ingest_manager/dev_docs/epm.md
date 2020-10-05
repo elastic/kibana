@@ -26,5 +26,5 @@ When a package is installed or upgraded, certain Kibana and Elasticsearch assets
 ### Generation
 
 - Index templates are generated from `YAML` files contained in the package.
-- There is one index template per dataset.
-- For the generation of an index template, all `yml` files contained in the package subdirectory `dataset/DATASET_NAME/fields/` are used.
+- There is one index template per data stream.
+- For the generation of an index template, all `yml` files contained in the package subdirectory `data_stream/DATASET_NAME/fields/` are used.

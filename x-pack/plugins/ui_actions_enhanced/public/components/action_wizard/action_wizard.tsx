@@ -250,7 +250,7 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
       data-test-subj={`${TEST_SUBJ_SELECTED_ACTION_FACTORY}-${actionFactory.id}`}
     >
       <header>
-        <EuiFlexGroup alignItems="center" gutterSize="s">
+        <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
           {actionFactory.getIconType(context) && (
             <EuiFlexItem grow={false}>
               <EuiIcon type={actionFactory.getIconType(context)!} size="m" />
@@ -342,7 +342,7 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
   };
 
   return (
-    <EuiFlexGroup gutterSize="m" wrap={true} style={firefoxBugFix}>
+    <EuiFlexGroup gutterSize="m" responsive={false} wrap={true} style={firefoxBugFix}>
       {ensureOrder(actionFactories).map((actionFactory) => (
         <EuiFlexItem grow={false} key={actionFactory.id}>
           <EuiToolTip
