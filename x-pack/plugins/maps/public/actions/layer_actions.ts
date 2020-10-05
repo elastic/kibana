@@ -14,6 +14,7 @@ import {
   getSelectedLayerId,
   getMapReady,
   getMapColors,
+  createLayerInstance,
 } from '../selectors/map_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
 import { cancelRequest } from '../reducers/non_serializable_instances';
@@ -42,6 +43,7 @@ import { ILayer } from '../classes/layers/layer';
 import { IVectorLayer } from '../classes/layers/vector_layer/vector_layer';
 import { LAYER_STYLE_TYPE, LAYER_TYPE } from '../../common/constants';
 import { IVectorStyle } from '../classes/styles/vector/vector_style';
+import { notifyLicensedFeatureUsage } from '../licensed_features';
 
 export function trackCurrentLayerState(layerId: string) {
   return {
@@ -108,7 +110,7 @@ export function cloneLayer(layerId: string) {
 }
 
 export function addLayer(layerDescriptor: LayerDescriptor) {
-  return (dispatch: Dispatch, getState: () => MapStoreState) => {
+  return async (dispatch: Dispatch, getState: () => MapStoreState) => {
     const isMapReady = getMapReady(getState());
     if (!isMapReady) {
       dispatch({
@@ -123,6 +125,10 @@ export function addLayer(layerDescriptor: LayerDescriptor) {
       layer: layerDescriptor,
     });
     dispatch<any>(syncDataForLayerId(layerDescriptor.id));
+
+    const layer = createLayerInstance(layerDescriptor);
+    const features = await layer.getLicensedFeatures();
+    features.forEach(notifyLicensedFeatureUsage);
   };
 }
 
