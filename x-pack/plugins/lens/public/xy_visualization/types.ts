@@ -428,6 +428,9 @@ export const visualizationTypes: VisualizationType[] = [
     label: i18n.translate('xpack.lens.xyVisualization.barHorizontalLabel', {
       defaultMessage: 'H. Bar',
     }),
+    searchLabel: i18n.translate('xpack.lens.xyVisualization.barHorizontalSearchLabel', {
+      defaultMessage: 'Horizontal bar',
+    }),
   },
   {
     id: 'bar_stacked',
@@ -449,6 +452,9 @@ export const visualizationTypes: VisualizationType[] = [
     label: i18n.translate('xpack.lens.xyVisualization.stackedBarHorizontalLabel', {
       defaultMessage: 'H. Stacked bar',
     }),
+    searchLabel: i18n.translate('xpack.lens.xyVisualization.stackedBarHorizontalSearchLabel', {
+      defaultMessage: 'Horizontal stacked bar',
+    }),
   },
   {
     id: 'bar_horizontal_percentage_stacked',
@@ -456,6 +462,12 @@ export const visualizationTypes: VisualizationType[] = [
     label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageBarHorizontalLabel', {
       defaultMessage: 'H. Percentage bar',
     }),
+    searchLabel: i18n.translate(
+      'xpack.lens.xyVisualization.stackedPercentageBarHorizontalSearchLabel',
+      {
+        defaultMessage: 'Horizontal percentage bar',
+      }
+    ),
   },
   {
     id: 'area',

@@ -191,8 +191,11 @@ export function ChartSwitch(props: Props) {
           }))
         )
       )
-        .filter((visualizationType) =>
-          visualizationType.label.toLowerCase().includes(searchTerm.toLowerCase())
+        .filter(
+          (visualizationType) =>
+            visualizationType.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (visualizationType.searchLabel &&
+              visualizationType.searchLabel.toLowerCase().includes(searchTerm.toLowerCase()))
         )
         .map((visualizationType) => ({
           ...visualizationType,
