@@ -29,6 +29,13 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should respond 200 to upgrade agent and update the agent SO', async () => {
       const kibanaVersion = await kibanaServer.version.get();
+      await kibanaServer.savedObjects.update({
+        id: 'agent1',
+        type: AGENT_SAVED_OBJECT_TYPE,
+        attributes: {
+          local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+        },
+      });
       await supertest
         .post(`/api/ingest_manager/fleet/agents/agent1/upgrade`)
         .set('kbn-xsrf', 'xxx')
@@ -45,6 +52,13 @@ export default function (providerContext: FtrProviderContext) {
     });
     it('should respond 200 to upgrade agent and update the agent SO without source_uri', async () => {
       const kibanaVersion = await kibanaServer.version.get();
+      await kibanaServer.savedObjects.update({
+        id: 'agent1',
+        type: AGENT_SAVED_OBJECT_TYPE,
+        attributes: {
+          local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+        },
+      });
       await supertest
         .post(`/api/ingest_manager/fleet/agents/agent1/upgrade`)
         .set('kbn-xsrf', 'xxx')
@@ -102,8 +116,21 @@ export default function (providerContext: FtrProviderContext) {
         .expect(400);
     });
 
+    it('should respond 400 if trying to upgrade an agent that is not upgradeable', async () => {
+      const kibanaVersion = await kibanaServer.version.get();
+      const res = await supertest
+        .post(`/api/ingest_manager/fleet/agents/agent1/upgrade`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          version: kibanaVersion,
+        })
+        .expect(400);
+      expect(res.body.message).to.equal('agent agent1 is not upgradeable');
+    });
+
     it('should respond 200 to bulk upgrade agents and update the agent SOs', async () => {
       const kibanaVersion = await kibanaServer.version.get();
+
       await supertest
         .post(`/api/ingest_manager/fleet/agents/bulk_upgrade`)
         .set('kbn-xsrf', 'xxx')
