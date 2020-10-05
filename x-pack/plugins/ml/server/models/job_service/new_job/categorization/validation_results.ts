@@ -123,7 +123,8 @@ export class ValidationResults {
   public createNullValueResult(examples: Array<string | null | undefined>) {
     const nullCount = examples.filter((e) => e === null).length;
 
-    // add check so message won't be added if all values are null
+    // if all values are null, VALIDATION_RESULT.NO_EXAMPLES will be raised
+    // so we don't need to display this warning as well
     if (nullCount !== examples.length) {
       if (nullCount / examples.length >= NULL_COUNT_PERCENT_LIMIT) {
         this._results.push({
