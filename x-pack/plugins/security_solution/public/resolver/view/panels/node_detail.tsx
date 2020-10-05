@@ -10,7 +10,7 @@ import React, { memo, useMemo, HTMLAttributes } from 'react';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { htmlIdGenerator, EuiSpacer, EuiTitle, EuiText, EuiTextColor, EuiLink } from '@elastic/eui';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage } from '@kbn/i18n/react';
 import styled from 'styled-components';
 import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 import { StyledDescriptionList, StyledTitle } from './styles';
