@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from '../../../common/types/workplace_search';
-
-export type TSpacerSize = 'xs' | 's' | 'm' | 'l' | 'xl' | 'xxl';
-
-export interface ISourcePriority {
-  [id: string]: number;
-}
+export const DEFAULT_META = {
+  page: {
+    current: 1,
+    size: 10,
+    total_pages: 0,
+    total_results: 0,
+  },
+};
