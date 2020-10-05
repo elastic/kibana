@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useCallback, useEffect } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import {
   EuiComboBox,
   EuiComboBoxOptionOption,
@@ -28,6 +28,7 @@ const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProp
   ResilientFieldsType
 >> = ({ isEdit = true, fields, connector, onChange }) => {
   const { incidentTypes = null, severityCode = null } = fields ?? {};
+
   const { http, notifications } = useKibana().services;
 
   const {
