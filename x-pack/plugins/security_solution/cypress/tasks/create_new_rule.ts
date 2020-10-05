@@ -190,16 +190,16 @@ export const fillDefineCustomRuleWithImportedQueryAndContinue = (
 ) => {
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
   cy.get(TIMELINE(rule.timelineId)).click();
-  cy.get(CUSTOM_QUERY_INPUT).invoke('text').should('eq', rule.customQuery);
+  cy.get(CUSTOM_QUERY_INPUT).should('have.text', rule.customQuery);
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 
   cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
 };
 
 export const fillScheduleRuleAndContinue = (rule: CustomRule | MachineLearningRule) => {
-  cy.get(RUNS_EVERY_INTERVAL).clear().type(rule.runsEvery.interval);
+  cy.get(RUNS_EVERY_INTERVAL).type('{selectall}').type(rule.runsEvery.interval);
   cy.get(RUNS_EVERY_TIME_TYPE).select(rule.runsEvery.timeType);
-  cy.get(LOOK_BACK_INTERVAL).clear().type(rule.lookBack.interval);
+  cy.get(LOOK_BACK_INTERVAL).type('{selectAll}').type(rule.lookBack.interval);
   cy.get(LOOK_BACK_TIME_TYPE).select(rule.lookBack.timeType);
 };
 
