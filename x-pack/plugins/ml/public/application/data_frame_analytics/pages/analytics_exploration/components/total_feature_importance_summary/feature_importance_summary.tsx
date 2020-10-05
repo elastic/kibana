@@ -188,10 +188,14 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
   const tickFormatter = useCallback((d) => Number(d.toPrecision(3)).toString(), []);
 
+  // do not expand by default if no feature importance data
+  const hasTotalFeatureImportance = useMemo(() => {
+    return totalFeatureImportance.length > 1;
+  }, [totalFeatureImportance]);
   return (
     <>
       <ExpandableSection
-        isExpanded={totalFeatureImportance.length > 1}
+        isExpanded={hasTotalFeatureImportance}
         dataTestId="FeatureImportanceSummary"
         title={
           <FormattedMessage
@@ -220,7 +224,7 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
           },
         ]}
         content={
-          totalFeatureImportance.length < 1 ? (
+          !hasTotalFeatureImportance ? (
             <EuiCallOut
               size="s"
               title={
