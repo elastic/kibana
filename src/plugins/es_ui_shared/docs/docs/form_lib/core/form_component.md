@@ -14,7 +14,7 @@ This component accepts the following props.
 
 **Type:** `FormHook`
 
-The form hook you've created with `useForm()`;
+The form hook you've created with `useForm()`.
 
 ```js
 const MyFormComponent = () => {
@@ -50,7 +50,7 @@ const MyFormComponent = () => {
 };
 ```
 
-By default, `<EuiForm />` wraps the form with a `<div>`. In some cases you might want proper semantic and wrap your form with the `<form>` element. This also allows the user to submit the form by hitting the "ENTER" key inside a field.
+By default, `<EuiForm />` wraps the form with a `<div>` element. In some cases semantic HTML is preferred: wrapping your form with the `<form>` element. This also allows the user to submit the form by hitting the "ENTER" key inside a field.
 
 ```js
 // Create a wrapper component with the <form> element
