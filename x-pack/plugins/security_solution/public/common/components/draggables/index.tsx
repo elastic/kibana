@@ -53,7 +53,7 @@ export const getDefaultWhenTooltipIsUnspecified = ({
 /**
  * Renders the content of the draggable, wrapped in a tooltip
  */
-const Content = React.memo<{
+export const Content = React.memo<{
   children?: React.ReactNode;
   field: string;
   tooltipContent?: React.ReactNode;

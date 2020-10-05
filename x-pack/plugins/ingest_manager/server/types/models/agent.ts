@@ -31,6 +31,7 @@ const AgentEventBase = {
       schema.literal('STOPPING'),
       schema.literal('STOPPED'),
       schema.literal('DEGRADED'),
+      schema.literal('UPDATING'),
     ]),
     // Action results
     schema.literal('DATA_DUMP'),
