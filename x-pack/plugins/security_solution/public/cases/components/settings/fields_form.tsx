@@ -17,12 +17,14 @@ interface Props extends Omit<SettingFieldsProps<ConnectorTypeFields['fields']>, 
 
 const SettingFieldsFormComponent: React.FC<Props> = ({ connector, isEdit, onChange, fields }) => {
   const { caseSettingsRegistry } = useCaseSettings();
+
   const onFieldsChange = useCallback(
     (newFields) => {
       onChange(newFields);
     },
     [onChange]
   );
+
   if (connector == null || connector.actionTypeId == null || connector.actionTypeId === '.none') {
     return null;
   }

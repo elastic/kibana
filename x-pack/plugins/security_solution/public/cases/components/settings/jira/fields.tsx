@@ -46,8 +46,10 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
     if (!issueType && issueTypesSelectOptions.length > 0) {
       return issueTypesSelectOptions[0].value;
     }
+
     return issueType;
   }, [issueType, issueTypesSelectOptions]);
+
   const { isLoading: isLoadingFields, fields: fieldsByIssueType } = useGetFieldsByIssueType({
     http,
     toastNotifications: notifications.toasts,
@@ -64,6 +66,7 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
     () => Object.prototype.hasOwnProperty.call(fieldsByIssueType, 'parent'),
     [fieldsByIssueType]
   );
+
   const prioritiesSelectOptions = useMemo(() => {
     const priorities = fieldsByIssueType.priority?.allowedValues ?? [];
     return map(
@@ -151,24 +154,26 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
             <EuiSpacer size="m" />
           </>
         )}
-        <>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiFormRow fullWidth label={i18n.PRIORITY}>
-                <EuiSelect
-                  fullWidth
-                  isLoading={isLoadingFields}
-                  disabled={isLoadingIssueTypes || isLoadingFields}
-                  data-test-subj="prioritySelect"
-                  options={prioritiesSelectOptions}
-                  value={priority ?? ''}
-                  hasNoInitialSelection
-                  onChange={(e) => onFieldChange('priority', e.target.value)}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
+        {hasPriority && (
+          <>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiFormRow fullWidth label={i18n.PRIORITY}>
+                  <EuiSelect
+                    fullWidth
+                    isLoading={isLoadingFields}
+                    disabled={isLoadingIssueTypes || isLoadingFields}
+                    data-test-subj="prioritySelect"
+                    options={prioritiesSelectOptions}
+                    value={priority ?? ''}
+                    hasNoInitialSelection
+                    onChange={(e) => onFieldChange('priority', e.target.value)}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
+        )}
       </>
     </span>
   ) : (

@@ -236,7 +236,7 @@ export const EditConnector = React.memo(
                 </EuiFlexGroup>
               </Form>
             </DisappearingFlexItem>
-            <EuiFlexItem data-test-subj={'blerg'}>
+            <EuiFlexItem data-test-subj="edit-connector-settings-fields-form-flex-item">
               <SettingFieldsForm
                 connector={currentConnector}
                 fields={fields}
