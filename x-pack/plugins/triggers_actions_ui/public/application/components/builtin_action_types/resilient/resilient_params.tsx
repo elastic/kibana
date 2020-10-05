@@ -245,7 +245,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
                     'xpack.triggersActionsUI.components.builtinActionTypes.resilient.savedObjectIdFieldHelp',
                     {
                       defaultMessage:
-                        'IBM Resilient will associate this action with a Kibana Saved Object ID.',
+                        'IBM Resilient will associate this action with the ID of a Kibana saved object.',
                     }
                   )}
                 />

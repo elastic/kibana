@@ -204,7 +204,7 @@ const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
                     'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.savedObjectIdFieldHelp',
                     {
                       defaultMessage:
-                        'ServiceNow will associate this action with a Kibana Saved Object ID.',
+                        'ServiceNow will associate this action with the ID of a Kibana saved object.',
                     }
                   )}
                 />

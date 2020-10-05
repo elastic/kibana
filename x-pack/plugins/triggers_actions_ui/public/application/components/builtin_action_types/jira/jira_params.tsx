@@ -294,7 +294,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
                           'xpack.triggersActionsUI.components.builtinActionTypes.jira.savedObjectIdFieldHelp',
                           {
                             defaultMessage:
-                              'Jira will associate this action with a Kibana Saved Object ID.',
+                              'JIRA will associate this action with the ID of a Kibana saved object.',
                           }
                         )}
                       />
