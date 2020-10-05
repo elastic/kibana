@@ -6,12 +6,13 @@
 
 import { makeDecorator } from '@storybook/addons';
 import { storiesOf } from '@storybook/react';
-import { AppMountContext, CoreStart } from 'kibana/public';
+import { CoreStart } from 'kibana/public';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 import { PluginContext } from '../../context/plugin_context';
 import { registerDataHandler, unregisterDataHandler } from '../../data_handler';
+import { ObservabilityPluginSetupDeps } from '../../plugin';
 import { EuiThemeProvider } from '../../typings';
 import { OverviewPage } from './';
 import { alertsFetchData } from './mock/alerts.mock';
@@ -36,7 +37,18 @@ const withCore = makeDecorator({
 
     return (
       <MemoryRouter>
-        <PluginContext.Provider value={{ core: options as CoreStart }}>
+        <PluginContext.Provider
+          value={{
+            core: options as CoreStart,
+            plugins: ({
+              data: {
+                query: {
+                  timefilter: { timefilter: { setTime: () => {}, getTime: () => ({}) } },
+                },
+              },
+            } as unknown) as ObservabilityPluginSetupDeps,
+          }}
+        >
           <EuiThemeProvider>{storyFn(context)}</EuiThemeProvider>
         </PluginContext.Provider>
       </MemoryRouter>
