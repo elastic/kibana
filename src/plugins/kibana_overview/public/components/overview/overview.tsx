@@ -109,9 +109,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
             description={app?.subtitle || ''}
             href={app.path}
             image={addBasePath(
-              `/plugins/${PLUGIN_ID}/assets/kibana_${appId}_${
-                IS_DARK_THEME ? 'dark' : 'light'
-              }_2x.png`
+              `/plugins/${PLUGIN_ID}/assets/kibana_${appId}_${IS_DARK_THEME ? 'dark' : 'light'}.svg`
             )}
             title={app.title}
             titleElement="h3"

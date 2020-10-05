@@ -48,7 +48,7 @@ export const GettingStarted: FC<Props> = ({ addBasePath, isDarkTheme, apps }) =>
   } = useKibana<CoreStart>();
   const gettingStartedGraphicURL = `/plugins/${PLUGIN_ID}/assets/kibana_montage_${
     isDarkTheme ? 'dark' : 'light'
-  }_2x.png`;
+  }.svg`;
 
   return (
     <section
