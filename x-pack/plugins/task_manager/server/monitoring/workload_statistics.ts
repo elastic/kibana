@@ -164,7 +164,7 @@ export function createWorkloadAggregator(
           aggregations?.idleTasks?.scheduleDensity
         )
       ) {
-        throw new Error(`Invalid workload: ${JSON.stringify({ aggregations, count })}`);
+        throw new Error(`Invalid workload: ${JSON.stringify(result)}`);
       }
 
       const taskTypes = (aggregations.taskType as AggregationResultOf<
@@ -189,7 +189,7 @@ export function createWorkloadAggregator(
         taskTypes: mapValues(keyBy(taskTypes, 'key'), ({ doc_count: docCount, status }) => {
           return {
             count: docCount,
-            status: mapValues(keyBy(status, 'key'), 'doc_count'),
+            status: mapValues(keyBy(status.buckets, 'key'), 'doc_count'),
           };
         }),
         schedule: schedules

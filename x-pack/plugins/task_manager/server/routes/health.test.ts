@@ -170,20 +170,25 @@ function mockHealthStats(overrides = {}) {
         workload: {
           timestamp: new Date().toISOString(),
           value: {
-            sum: 4,
+            count: 4,
             taskTypes: {
-              actions_telemetry: { sum: 2, status: { idle: 2 } },
-              alerting_telemetry: { sum: 1, status: { idle: 1 } },
-              session_cleanup: { sum: 1, status: { idle: 1 } },
+              actions_telemetry: { count: 2, status: { idle: 2 } },
+              alerting_telemetry: { count: 1, status: { idle: 1 } },
+              session_cleanup: { count: 1, status: { idle: 1 } },
             },
+            schedule: {},
+            overdue: 0,
+            scheduleDensity: [],
           },
         },
         runtime: {
           timestamp: new Date().toISOString(),
           value: {
             drift: [1000, 1000],
-            duration: [],
-            taskRunResultFrequency: [],
+            execution: {
+              duration: [],
+              resultFrequency: [],
+            },
             polling: {
               lastSuccessfulPoll: new Date().toISOString(),
               resultFrequency: ['NoTasksClaimed', 'NoTasksClaimed', 'NoTasksClaimed'],

@@ -61,7 +61,7 @@ import {
   tasksClaimedByOwner,
 } from './queries/mark_available_tasks_as_claimed';
 
-import { ESSearchResponse, ESSearchBody, ESSearchRequest } from '../../apm/typings/elasticsearch';
+import { ESSearchResponse, ESSearchBody } from '../../apm/typings/elasticsearch';
 
 export interface StoreOpts {
   callCluster: ElasticJs;

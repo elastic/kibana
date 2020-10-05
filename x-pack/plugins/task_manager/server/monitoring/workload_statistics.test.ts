@@ -551,7 +551,9 @@ function setTaskTypeCount(
     },
   ];
   return ({
-    count: buckets.reduce((sum, bucket) => sum + bucket.doc_count, 0),
+    hits: {
+      total: { value: buckets.reduce((sum, bucket) => sum + bucket.doc_count, 0) },
+    },
     aggregations: {
       ...aggregations,
       taskType: {
