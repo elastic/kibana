@@ -21,7 +21,7 @@ import { EsaggsExpressionFunctionDefinition } from '../../data/common/search/exp
 import { buildExpression, buildExpressionFunction } from '../../expressions/public';
 import { getVisSchemas, Vis, BuildPipelineParams } from '../../visualizations/public';
 import { TableExpressionFunctionDefinition } from './table_vis_fn';
-import { TableVisParams } from './types';
+import { TableVisConfig, TableVisParams } from './types';
 
 export const escapeString = (data: string): string => {
   return data.replace(/\\/g, `\\\\`).replace(/'/g, `\\'`);
@@ -62,7 +62,7 @@ export const toExpressionAst = (vis: Vis<TableVisParams>, params: BuildPipelineP
 
   const schemas = getVisSchemas(vis, params);
 
-  const visConfig = {
+  const visConfig: TableVisConfig = {
     ...vis.params,
     ...buildTableVisConfig(schemas, vis.params),
     title: vis.title,

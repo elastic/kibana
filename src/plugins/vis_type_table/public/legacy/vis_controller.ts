@@ -28,7 +28,7 @@ import { initTableVisLegacyModule } from './table_vis_legacy_module';
 // @ts-ignore
 import tableVisTemplate from './table_vis.html';
 import { TablePluginStartDependencies } from '../plugin';
-import { TableVisParams } from '../types';
+import { TableVisConfig } from '../types';
 import { TableContext } from '../table_vis_response_handler';
 
 const innerAngularName = 'kibana/table_vis';
@@ -75,7 +75,7 @@ export function getTableVisualizationControllerClass(
 
     async render(
       esResponse: TableContext,
-      visParams: TableVisParams,
+      visParams: TableVisConfig,
       handlers: IInterpreterRenderHandlers
     ): Promise<void> {
       await this.initLocalAngular();

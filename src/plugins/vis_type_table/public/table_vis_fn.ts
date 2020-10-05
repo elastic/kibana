@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { tableVisResponseHandler, TableContext } from './table_vis_response_handler';
 import { ExpressionFunctionDefinition, KibanaDatatable, Render } from '../../expressions/public';
-import { TableVisParams } from './types';
+import { TableVisConfig } from './types';
 
 export type Input = KibanaDatatable;
 
@@ -31,7 +31,7 @@ interface Arguments {
 export interface TableVisRenderValue {
   visData: TableContext;
   visType: 'table';
-  visConfig: TableVisParams;
+  visConfig: TableVisConfig;
 }
 
 export type TableExpressionFunctionDefinition = ExpressionFunctionDefinition<
