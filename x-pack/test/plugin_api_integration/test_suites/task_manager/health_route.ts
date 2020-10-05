@@ -75,7 +75,9 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('health', () => {
     it('should return basic configuration of task manager', async () => {
-      expect((await getHealth()).stats.configuration.value).to.eql({
+      const health = await getHealth();
+      expect(health.status).to.eql('green');
+      expect(health.stats.configuration.value).to.eql({
         poll_interval: 3000,
         max_poll_inactivity_cycles: 10,
         monitored_aggregated_stats_refresh_rate: monitoredAggregatedStatsRefreshRate,
@@ -86,7 +88,14 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should return the task manager workload', async () => {
-      const { workload } = (await getHealth()).stats;
+      const health = await getHealth();
+      const {
+        status,
+        stats: { workload },
+      } = health;
+
+      expect(status).to.eql('green');
+
       const sumSampleTaskInWorkload =
         (workload.value.taskTypes as {
           sampleTask?: { count: number };
