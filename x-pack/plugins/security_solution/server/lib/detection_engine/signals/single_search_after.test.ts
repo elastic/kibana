@@ -20,7 +20,6 @@ const buildRuleMessage = buildRuleMessageFactory({
   index: 'fakeindex',
   name: 'fake name',
 });
-
 describe('singleSearchAfter', () => {
   const mockService: AlertServicesMock = alertsMock.createAlertServices();
 

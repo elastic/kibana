@@ -380,19 +380,21 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             }}
           />
         </Form>
-        {formRuleType != null && formRuleType !== 'machine_learning' && (
-          <>
-            <EuiSpacer size="s" />
-            <PreviewQuery
-              dataTestSubj="something"
-              idAria="someAriaId"
-              ruleType={formRuleType}
-              index={index}
-              query={formQuery}
-              threshold={{ value: formThresholdValue, field: formThresholdField }}
-            />
-          </>
-        )}
+        {formRuleType != null &&
+          formRuleType !== 'machine_learning' &&
+          formRuleType !== 'threat_match' && (
+            <>
+              <EuiSpacer size="s" />
+              <PreviewQuery
+                dataTestSubj="something"
+                idAria="someAriaId"
+                ruleType={formRuleType}
+                index={index}
+                query={formQuery}
+                threshold={{ value: formThresholdValue, field: formThresholdField }}
+              />
+            </>
+          )}
       </StepContentWrapper>
 
       {!isUpdateView && (
