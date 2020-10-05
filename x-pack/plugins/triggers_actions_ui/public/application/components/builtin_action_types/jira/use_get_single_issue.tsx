@@ -61,7 +61,7 @@ export const useGetSingleIssue = ({
 
         if (!didCancel) {
           setIsLoading(false);
-          setIssue(res.data ?? {});
+          setIssue(res.data ?? null);
           if (res.status && res.status === 'error') {
             toastNotifications.addDanger({
               title: i18n.GET_ISSUE_API_ERROR(id),
@@ -71,6 +71,7 @@ export const useGetSingleIssue = ({
         }
       } catch (error) {
         if (!didCancel) {
+          setIsLoading(false);
           toastNotifications.addDanger({
             title: i18n.GET_ISSUE_API_ERROR(id),
             text: error.message,
