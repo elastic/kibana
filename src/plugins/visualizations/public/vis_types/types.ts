@@ -57,7 +57,7 @@ export interface VisType<TVisParams = unknown> {
    * It will be shown in the editor when editing/creating visualizations
    * of this type.
    */
-  readonly getDeprecationMessage?: (vis: Vis) => ReactElement<{}>;
+  readonly getInfoMessage?: (vis: Vis) => ReactElement<{}>;
 
   readonly toExpressionAst?: VisToExpressionAst<TVisParams>;
   readonly visualization?: VisualizationControllerConstructor;

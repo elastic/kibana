@@ -27,7 +27,7 @@ interface CommonBaseVisTypeOptions<TVisParams>
       VisType<TVisParams>,
       | 'description'
       | 'editor'
-      | 'getDeprecationMessage'
+      | 'getInfoMessage'
       | 'getSupportedTriggers'
       | 'hierarchicalData'
       | 'icon'
@@ -89,7 +89,7 @@ export class BaseVisType<TVisParams = VisParams> implements VisType<TVisParams> 
   public readonly useCustomNoDataScreen;
   public readonly inspectorAdapters;
   public readonly toExpressionAst;
-  public readonly getDeprecationMessage;
+  public readonly getInfoMessage;
 
   constructor(opts: BaseVisTypeOptions<TVisParams>) {
     if (!opts.icon && !opts.image) {
@@ -116,7 +116,7 @@ export class BaseVisType<TVisParams = VisParams> implements VisType<TVisParams> 
     this.useCustomNoDataScreen = opts.useCustomNoDataScreen ?? false;
     this.inspectorAdapters = opts.inspectorAdapters;
     this.toExpressionAst = opts.toExpressionAst;
-    this.getDeprecationMessage = opts.getDeprecationMessage;
+    this.getInfoMessage = opts.getInfoMessage;
   }
 
   public get schemas(): ISchemas {
