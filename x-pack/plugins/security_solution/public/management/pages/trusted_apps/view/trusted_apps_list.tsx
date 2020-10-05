@@ -5,9 +5,8 @@
  */
 
 import { Dispatch } from 'redux';
-import React, { memo, ReactNode, useCallback, useMemo, useState } from 'react';
+import React, { memo, ReactNode, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import {
   EuiBasicTable,
   EuiBasicTableColumn,
@@ -20,7 +19,6 @@ import { Immutable } from '../../../../../common/endpoint/types';
 import { AppAction } from '../../../../common/store/actions';
 import { TrustedApp } from '../../../../../common/endpoint/types/trusted_apps';
 import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
-import { getTrustedAppsListPath } from '../../../common/routing';
 
 import {
   getCurrentLocationPageIndex,
@@ -31,7 +29,7 @@ import {
   isListLoading,
 } from '../store/selectors';
 
-import { useTrustedAppsSelector } from './hooks';
+import { useTrustedAppsNavigateCallback, useTrustedAppsSelector } from './hooks';
 
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { ACTIONS_COLUMN_TITLE, LIST_ACTIONS, OS_TITLES, PROPERTY_TITLES } from './translations';
@@ -154,7 +152,6 @@ export const TrustedAppsList = memo(() => {
   const totalItemCount = useTrustedAppsSelector(getListTotalItemsCount);
   const listItems = useTrustedAppsSelector(getListItems);
   const dispatch = useDispatch();
-  const history = useHistory();
 
   return (
     <EuiBasicTable
@@ -178,16 +175,11 @@ export const TrustedAppsList = memo(() => {
         }),
         [pageIndex, pageSize, totalItemCount]
       )}
-      onChange={useCallback(
-        ({ page }: { page: { index: number; size: number } }) => {
-          history.push(
-            getTrustedAppsListPath({
-              page_index: page.index,
-              page_size: page.size,
-            })
-          );
-        },
-        [history]
+      onChange={useTrustedAppsNavigateCallback(
+        ({ page }: { page: { index: number; size: number } }) => ({
+          page_index: page.index,
+          page_size: page.size,
+        })
       )}
       data-test-subj="trustedAppsList"
     />

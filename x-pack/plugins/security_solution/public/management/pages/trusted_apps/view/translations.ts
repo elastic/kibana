@@ -74,3 +74,20 @@ export const LIST_ACTIONS = {
     ),
   },
 };
+export const GRID_VIEW_TOGGLE_LABEL = i18n.translate(
+  'xpack.securitySolution.trustedapps.view.toggle.grid',
+  {
+    defaultMessage: 'Grid view',
+  }
+);
+
+export const LIST_VIEW_TOGGLE_LABEL = i18n.translate(
+  'xpack.securitySolution.trustedapps.view.toggle.list',
+  {
+    defaultMessage: 'List view',
+  }
+);
+
+export const NO_RESULTS_MESSAGE = i18n.translate('xpack.securitySolution.trustedapps.noResults', {
+  defaultMessage: 'No items found',
+});
