@@ -8,7 +8,7 @@
 // configuration. It's intended for use in development and does not run in CI,
 // which runs the entire x-pack suite. Run `npx jest`.
 
-require('../../../src/setup_node_env/dev');
+require('../../../src/setup_node_env');
 
 const { createJestConfig } = require('../../dev-tools/jest/create_jest_config');
 const { resolve } = require('path');

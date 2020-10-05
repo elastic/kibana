@@ -17,7 +17,7 @@
  * under the License.
  */
 
-require('../../src/setup_node_env/dev');
+require('../../src/setup_node_env');
 
 const cp = require('child_process');
 const path = require('path');

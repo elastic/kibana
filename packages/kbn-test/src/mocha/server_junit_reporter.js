@@ -18,7 +18,7 @@
  */
 
 // when the reporter is loaded by mocha in child process it might be before setup_node_env
-require('../../../../src/setup_node_env/dev');
+require('../../../../src/setup_node_env');
 
 module.exports = require('./auto_junit_reporter').createAutoJUnitReporter({
   reportName: 'Server Mocha Tests',

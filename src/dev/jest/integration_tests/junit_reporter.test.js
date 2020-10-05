@@ -43,7 +43,7 @@ it(
   async () => {
     const result = await execa(
       process.execPath,
-      ['-r', require.resolve('../../../setup_node_env/dev'), require.resolve('jest/bin/jest')],
+      ['-r', require.resolve('../../../setup_node_env'), require.resolve('jest/bin/jest')],
       {
         cwd: FIXTURE_DIR,
         env: {

@@ -17,7 +17,4 @@
  * under the License.
  */
 
-require('./no_transpilation');
-require('@kbn/optimizer').registerNodeAutoTranspilation();
-// require polyfill after transpilation is setup so that polyfill is reduced to minimum set necessary
-require('./polyfill');
+import 'core-js/stable';

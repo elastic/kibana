@@ -17,5 +17,5 @@
  * under the License.
  */
 
-require('../src/setup_node_env/dev');
+require('../src/setup_node_env');
 require('../src/dev/prs/run_update_prs_cli');

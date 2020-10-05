@@ -5,5 +5,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-require('../../../../../src/setup_node_env/dev');
+require('../../../../../src/setup_node_env');
 require('./trusted_apps').cli();

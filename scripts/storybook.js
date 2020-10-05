@@ -17,5 +17,5 @@
  * under the License.
  */
 
-require('../src/setup_node_env/dev');
+require('../src/setup_node_env');
 require('../src/dev/storybook/run_storybook_cli');

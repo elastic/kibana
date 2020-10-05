@@ -17,7 +17,5 @@
  * under the License.
  */
 
-// require the polyfills after setting up the require hook so that @babel/preset-env
-// will spot the import in the polyfill file and replace it with the necessary polyfills
-// for the current node.js version
-require('core-js/stable');
+require('./no_transpilation');
+require('@kbn/optimizer').registerNodeAutoTranspilation();

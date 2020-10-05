@@ -179,4 +179,9 @@ export function registerNodeAutoTranspilation() {
       ignoreNodeModules: false,
     }
   );
+
+  // require the polyfills after setting up the require hook so that @babel/preset-env
+  // will spot the import in the polyfill file and replace it with the necessary polyfills
+  // for the current node.js version
+  require('./polyfill');
 }

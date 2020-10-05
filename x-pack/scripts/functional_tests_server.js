@@ -6,5 +6,5 @@
 
 process.env.ALLOW_PERFORMANCE_HOOKS_IN_TASK_MANAGER = true;
 
-require('../../src/setup_node_env/dev');
+require('../../src/setup_node_env');
 require('@kbn/test').startServersCli(require.resolve('../test/functional/config.js'));

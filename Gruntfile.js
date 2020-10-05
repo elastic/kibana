@@ -17,7 +17,7 @@
  * under the License.
  */
 
-require('./src/setup_node_env/dev');
+require('./src/setup_node_env');
 
 module.exports = function (grunt) {
   // set the config once before calling load-grunt-config

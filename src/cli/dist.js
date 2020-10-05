@@ -18,5 +18,6 @@
  */
 
 require('../apm')();
-require('../setup_node_env/dist');
+require('../setup_node_env/no_transpilation');
+require('core-js/stable');
 require('./cli');

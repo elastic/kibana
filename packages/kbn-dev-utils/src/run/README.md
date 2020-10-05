@@ -38,7 +38,7 @@ Define the script which will setup node and load the script source:
 ```js
 // scripts/my_task.js
 
-require('../src/setup_node_env/dev');
+require('../src/setup_node_env');
 require('../src/dev/my_task/run_my_task');
 ```
 

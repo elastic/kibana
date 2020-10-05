@@ -18,5 +18,5 @@
  */
 
 require('../apm')(process.env.ELASTIC_APM_PROXY_SERVICE_NAME || 'kibana-proxy');
-require('../setup_node_env/dev');
+require('../setup_node_env');
 require('./cli');
