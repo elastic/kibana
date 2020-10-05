@@ -7,7 +7,7 @@
   "type": "threat_match",
   "query": "*:*",
   "tags": ["tag_1", "tag_2"],
-  "threat_index": "mock-threat-list",
+  "threat_index": ["mock-threat-list"],
   "threat_query": "*:*",
   "threat_mapping": [
     {
