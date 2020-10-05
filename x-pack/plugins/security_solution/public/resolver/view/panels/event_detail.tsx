@@ -10,10 +10,10 @@
 
 import React, { memo, useMemo, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSpacer, EuiText, EuiDescriptionList, EuiTextColor, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
-import { FormattedMessage } from 'react-intl';
 import { StyledPanel } from '../styles';
 import {
   BoldCode,
