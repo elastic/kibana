@@ -10,7 +10,7 @@ import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { AgentSOAttributes } from '../../types';
 import { agentPolicyService } from '../agent_policy';
 import { getAgents, listAllAgents } from './crud';
-import { createAgentAction } from './actions';
+import { createAgentAction, bulkCreateAgentActions } from './actions';
 
 export async function reassignAgent(
   soClient: SavedObjectsClientContract,
@@ -63,7 +63,7 @@ export async function reassignAgents(
   const agentsToUpdate = agents.filter((agent) => agent.policy_id !== newAgentPolicyId);
 
   // Update the necessary agents
-  return await soClient.bulkUpdate<AgentSOAttributes>(
+  const res = await soClient.bulkUpdate<AgentSOAttributes>(
     agentsToUpdate.map((agent) => ({
       type: AGENT_SAVED_OBJECT_TYPE,
       id: agent.id,
@@ -73,4 +73,15 @@ export async function reassignAgents(
       },
     }))
   );
+  const now = new Date().toISOString();
+  await bulkCreateAgentActions(
+    soClient,
+    agentsToUpdate.map((agent) => ({
+      agent_id: agent.id,
+      created_at: now,
+      type: 'INTERNAL_POLICY_REASSIGN',
+    }))
+  );
+
+  return res;
 }
