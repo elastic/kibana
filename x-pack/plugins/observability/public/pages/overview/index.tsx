@@ -12,7 +12,6 @@ import { Resources } from '../../components/app/resources';
 import { AlertsSection } from '../../components/app/section/alerts';
 import { DatePicker, TimePickerTime } from '../../components/shared/data_picker';
 import { NewsFeed } from '../../components/app/news_feed';
-import { fetchHasData } from '../../data_handler';
 import { FETCH_STATUS, useFetcher } from '../../hooks/use_fetcher';
 import { UI_SETTINGS, useKibanaUISettings } from '../../hooks/use_kibana_ui_settings';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -103,17 +102,17 @@ export function OverviewPage({ routeParams }: Props) {
           }}
         />
 
-      <EuiFlexGroup>
-        <EuiFlexItem grow={6}>
-          {/* Data sections */}
-          {hasAnyData && (
-            <DataSections
-              hasData={hasData}
-              absoluteTime={absoluteTime}
-              relativeTime={relativeTime}
-              bucketSize={bucketSize?.intervalString!}
-            />
-          )}
+        <EuiFlexGroup>
+          <EuiFlexItem grow={6}>
+            {/* Data sections */}
+            {hasAnyData && (
+              <DataSections
+                hasData={hasData}
+                absoluteTime={absoluteTime}
+                relativeTime={relativeTime}
+                bucketSize={bucketSize?.intervalString!}
+              />
+            )}
 
             {/* Empty sections */}
             {!!appEmptySections.length && (
