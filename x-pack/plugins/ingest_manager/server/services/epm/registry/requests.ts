@@ -9,7 +9,7 @@ import pRetry from 'p-retry';
 import { streamToString } from './streams';
 import { appContextService } from '../../app_context';
 import { RegistryError, RegistryConnectionError, RegistryResponseError } from '../../../errors';
-import { getProxyAgent, getProxyForUrl } from './proxy';
+import { getProxyAgent, getRegistryProxyUrl } from './proxy';
 
 type FailedAttemptErrors = pRetry.FailedAttemptError | FetchError | Error;
 
@@ -84,13 +84,13 @@ function isSystemError(error: FailedAttemptErrors): boolean {
 }
 
 export function getFetchOptions(targetUrl: string): RequestInit | undefined {
-  const proxyUrl = getProxyForUrl(targetUrl);
+  const proxyUrl = getRegistryProxyUrl();
   if (!proxyUrl) {
     return undefined;
   }
 
   const logger = appContextService.getLogger();
-  logger.debug(`Using ${proxyUrl} from environment variable as proxy for ${targetUrl}`);
+  logger.debug(`Using ${proxyUrl} as proxy for ${targetUrl}`);
 
   return {
     agent: getProxyAgent({ proxyUrl, targetUrl }),

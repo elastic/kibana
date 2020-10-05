@@ -9,20 +9,18 @@ import HttpsProxyAgent, {
   HttpsProxyAgent as IHttpsProxyAgent,
   HttpsProxyAgentOptions,
 } from 'https-proxy-agent';
-import { getProxyForUrl as getProxyFromEnvForUrl } from 'proxy-from-env';
-
-export interface ProxySettings {
+import { appContextService } from '../../index';
+export interface RegistryProxySettings {
   proxyUrl: string;
   proxyHeaders?: Record<string, string>;
   proxyRejectUnauthorizedCertificates?: boolean;
 }
 
 type ProxyAgent = IHttpsProxyAgent | HttpProxyAgent;
-type GetProxyAgentParams = ProxySettings & { targetUrl: string };
+type GetProxyAgentParams = RegistryProxySettings & { targetUrl: string };
 
-export function getProxyForUrl(url: string): string {
-  // start with env values and can add from flags, defaults, etc later
-  const proxyUrl = getProxyFromEnvForUrl(url);
+export function getRegistryProxyUrl(): string | undefined {
+  const proxyUrl = appContextService.getConfig()?.registryProxyUrl;
   return proxyUrl;
 }
 

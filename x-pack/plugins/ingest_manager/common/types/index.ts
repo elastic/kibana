@@ -9,6 +9,7 @@ export * from './rest_spec';
 export interface IngestManagerConfigType {
   enabled: boolean;
   registryUrl?: string;
+  registryProxyUrl?: string;
   fleet: {
     enabled: boolean;
     tlsCheckDisabled: boolean;
