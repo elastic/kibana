@@ -22,8 +22,8 @@ import React, { createContext, useContext, useMemo } from 'react';
 import { FormData, FormHook } from './types';
 import { Subject } from './lib';
 
-export interface Context<T extends FormData = FormData> {
-  getFormData$: () => Subject<FormData>;
+export interface Context<T extends FormData = FormData, I = T> {
+  getFormData$: () => Subject<I>;
   getFormData: FormHook<T>['getFormData'];
 }
 
