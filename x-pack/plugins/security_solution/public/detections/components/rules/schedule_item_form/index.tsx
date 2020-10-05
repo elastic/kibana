@@ -62,10 +62,10 @@ const MyEuiSelect = styled(EuiSelect)`
   width: auto;
 `;
 
-const getNumberFromUserInput = (input: string): number => {
+const getNumberFromUserInput = (input: string, defaultValue = 0): number => {
   const number = parseInt(input, 10);
   if (Number.isNaN(number)) {
-    return 0;
+    return defaultValue;
   } else {
     return Math.min(number, Number.MAX_SAFE_INTEGER);
   }
@@ -93,11 +93,11 @@ export const ScheduleItem = ({
 
   const onChangeTimeVal = useCallback(
     (e) => {
-      const sanitizedValue = getNumberFromUserInput(e.target.value);
+      const sanitizedValue = getNumberFromUserInput(e.target.value, minimumValue);
       setTimeVal(sanitizedValue);
       setValue(`${sanitizedValue}${timeType}`);
     },
-    [setValue, timeType]
+    [minimumValue, setValue, timeType]
   );
 
   useEffect(() => {
