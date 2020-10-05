@@ -7,7 +7,6 @@
 /* eslint-disable react/display-name */
 
 import {
-  EuiBadge,
   EuiBasicTableColumn,
   EuiTableActionsColumnType,
   EuiText,
@@ -24,7 +23,6 @@ import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 import { getRuleDetailsUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { ActionToaster } from '../../../../../common/components/toasters';
-import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import { getStatusColor } from '../../../../components/rules/rule_status/helpers';
 import { RuleSwitch } from '../../../../components/rules/rule_switch';
 import { SeverityBadge } from '../../../../components/rules/severity_badge';
@@ -39,6 +37,7 @@ import { Action } from './reducer';
 import { LocalizedDateTooltip } from '../../../../../common/components/localized_date_tooltip';
 import * as detectionI18n from '../../translations';
 import { LinkAnchor } from '../../../../../common/components/links';
+import { TagsDisplay } from './tag_display';
 
 export const getActions = (
   dispatch: React.Dispatch<Action>,
@@ -207,22 +206,19 @@ export const getColumns = ({
         );
       },
       truncateText: true,
-      width: '10%',
+      width: '8%',
     },
     {
       field: 'tags',
       name: i18n.COLUMN_TAGS,
-      render: (value: Rule['tags']) => (
-        <TruncatableText data-test-subj="tags">
-          {value.map((tag, i) => (
-            <EuiBadge color="hollow" key={`${tag}-${i}`}>
-              {tag}
-            </EuiBadge>
-          ))}
-        </TruncatableText>
-      ),
+      render: (value: Rule['tags']) => {
+        if (value.length > 0) {
+          return <TagsDisplay tags={value} />;
+        }
+        return getEmptyTagValue();
+      },
       truncateText: true,
-      width: '14%',
+      width: '20%',
     },
     {
       align: 'center',
