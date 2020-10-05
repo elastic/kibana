@@ -144,6 +144,30 @@ describe('getAll', () => {
                     },
                   },
                 ],
+                "must_not": Array [
+                  Object {
+                    "bool": Object {
+                      "filter": Array [
+                        Object {
+                          "term": Object {
+                            "monitor.type": "browser",
+                          },
+                        },
+                        Object {
+                          "bool": Object {
+                            "must_not": Array [
+                              Object {
+                                "exists": Object {
+                                  "field": "summary",
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
               },
             },
             "size": 12,
@@ -198,6 +222,30 @@ describe('getAll', () => {
                     },
                   },
                 ],
+                "must_not": Array [
+                  Object {
+                    "bool": Object {
+                      "filter": Array [
+                        Object {
+                          "term": Object {
+                            "monitor.type": "browser",
+                          },
+                        },
+                        Object {
+                          "bool": Object {
+                            "must_not": Array [
+                              Object {
+                                "exists": Object {
+                                  "field": "summary",
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
               },
             },
             "size": 12,
@@ -249,6 +297,30 @@ describe('getAll', () => {
                         "gte": "now-1h",
                         "lte": "now",
                       },
+                    },
+                  },
+                ],
+                "must_not": Array [
+                  Object {
+                    "bool": Object {
+                      "filter": Array [
+                        Object {
+                          "term": Object {
+                            "monitor.type": "browser",
+                          },
+                        },
+                        Object {
+                          "bool": Object {
+                            "must_not": Array [
+                              Object {
+                                "exists": Object {
+                                  "field": "summary",
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
                     },
                   },
                 ],
@@ -311,6 +383,30 @@ describe('getAll', () => {
                     },
                   },
                 ],
+                "must_not": Array [
+                  Object {
+                    "bool": Object {
+                      "filter": Array [
+                        Object {
+                          "term": Object {
+                            "monitor.type": "browser",
+                          },
+                        },
+                        Object {
+                          "bool": Object {
+                            "must_not": Array [
+                              Object {
+                                "exists": Object {
+                                  "field": "summary",
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
               },
             },
             "size": 25,
@@ -367,6 +463,30 @@ describe('getAll', () => {
                   Object {
                     "term": Object {
                       "monitor.status": "down",
+                    },
+                  },
+                ],
+                "must_not": Array [
+                  Object {
+                    "bool": Object {
+                      "filter": Array [
+                        Object {
+                          "term": Object {
+                            "monitor.type": "browser",
+                          },
+                        },
+                        Object {
+                          "bool": Object {
+                            "must_not": Array [
+                              Object {
+                                "exists": Object {
+                                  "field": "summary",
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
                     },
                   },
                 ],

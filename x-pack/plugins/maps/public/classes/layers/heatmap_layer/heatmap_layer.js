@@ -31,6 +31,18 @@ export class HeatmapLayer extends VectorLayer {
     }
   }
 
+  getStyleForEditing() {
+    return this._style;
+  }
+
+  getStyle() {
+    return this._style;
+  }
+
+  getCurrentStyle() {
+    return this._style;
+  }
+
   _getPropKeyOfSelectedMetric() {
     const metricfields = this.getSource().getMetricFields();
     return metricfields[0].getName();

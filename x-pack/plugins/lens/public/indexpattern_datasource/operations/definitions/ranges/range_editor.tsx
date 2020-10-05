@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiButtonIcon,
   EuiToolTip,
+  EuiIconTip,
 } from '@elastic/eui';
 import { IFieldFormat } from 'src/plugins/data/public';
 import { RangeColumnParams, UpdateParamsFnType, MODES_TYPES } from './ranges';
@@ -45,8 +46,14 @@ const BaseRangeEditor = ({
   );
 
   const granularityLabel = i18n.translate('xpack.lens.indexPattern.ranges.granularity', {
-    defaultMessage: 'Granularity',
+    defaultMessage: 'Intervals granularity',
   });
+  const granularityLabelDescription = i18n.translate(
+    'xpack.lens.indexPattern.ranges.granularityDescription',
+    {
+      defaultMessage: 'Divides the field into evenly spaced intervals.',
+    }
+  );
   const decreaseButtonLabel = i18n.translate('xpack.lens.indexPattern.ranges.decreaseButtonLabel', {
     defaultMessage: 'Decrease granularity',
   });
@@ -57,7 +64,17 @@ const BaseRangeEditor = ({
   return (
     <>
       <EuiFormRow
-        label={granularityLabel}
+        label={
+          <>
+            {granularityLabel}{' '}
+            <EuiIconTip
+              position="right"
+              content={granularityLabelDescription}
+              type="questionInCircle"
+              color="subdued"
+            />
+          </>
+        }
         data-test-subj="indexPattern-ranges-section-label"
         labelType="legend"
         fullWidth
@@ -91,7 +108,7 @@ const BaseRangeEditor = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={decreaseButtonLabel} delay="long">
+            <EuiToolTip content={increaseButtonLabel} delay="long">
               <EuiButtonIcon
                 iconType="plusInCircle"
                 color="text"
@@ -108,7 +125,7 @@ const BaseRangeEditor = ({
 
       <EuiButtonEmpty size="xs" iconType="controlsHorizontal" onClick={() => onToggleEditor()}>
         {i18n.translate('xpack.lens.indexPattern.ranges.customIntervalsToggle', {
-          defaultMessage: 'Create custom intervals',
+          defaultMessage: 'Create custom ranges',
         })}
       </EuiButtonEmpty>
     </>
