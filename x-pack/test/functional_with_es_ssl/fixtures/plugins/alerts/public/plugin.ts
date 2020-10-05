@@ -19,7 +19,6 @@ export interface AlertingExamplePublicSetupDeps {
 }
 
 export class AlertingFixturePlugin implements Plugin<Setup, Start, AlertingExamplePublicSetupDeps> {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   public setup(core: CoreSetup, { alerts, triggersActionsUi }: AlertingExamplePublicSetupDeps) {
     alerts.registerNavigation(
       'alerting_fixture',

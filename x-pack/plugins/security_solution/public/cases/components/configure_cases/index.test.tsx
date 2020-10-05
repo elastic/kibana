@@ -38,7 +38,7 @@ const useGetUrlSearchMock = useGetUrlSearch as jest.Mock;
 
 describe('ConfigureCases', () => {
   beforeEach(() => {
-    useKibanaMock().services.triggersActionsUi  = ({
+    useKibanaMock().services.triggersActionsUi = ({
       actionTypeRegistry: actionTypeRegistryMock.create(),
     } as unknown) as TriggersAndActionsUIPublicPluginStart;
   });
