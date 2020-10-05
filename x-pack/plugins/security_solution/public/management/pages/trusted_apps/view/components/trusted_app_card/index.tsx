@@ -85,7 +85,9 @@ export const TrustedAppCard = memo(({ trustedApp, onDelete }: TrustedAppCardProp
       <ItemDetailsPropertySummary name={PROPERTY_TITLES.created_by} value={trustedApp.created_by} />
       <ItemDetailsPropertySummary
         name={PROPERTY_TITLES.description}
-        value={trimTextOverflow(trustedApp.description || '', 100)}
+        value={useMemo(() => trimTextOverflow(trustedApp.description || '', 100), [
+          trustedApp.description,
+        ])}
         title={trustedApp.description}
       />
 
