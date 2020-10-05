@@ -66,7 +66,10 @@ export function BucketNestingEditor({
           data-test-subj="indexPattern-nesting-switch"
           name="nestingSwitch"
           label={i18n.translate('xpack.lens.indexPattern.useAsTopLevelAgg', {
-            defaultMessage: 'Use as top level aggregation',
+            defaultMessage: 'Group by {columnName} first',
+            values: {
+              columnName: column.label,
+            },
           })}
           checked={!prevColumn}
           onChange={() => {
