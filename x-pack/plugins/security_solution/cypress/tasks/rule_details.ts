@@ -32,8 +32,22 @@ export const activatesRule = () => {
 };
 
 export const addsException = (exception: Exception) => {
-  cy.get(ADD_EXCEPTIONS_BTN).click();
+  cy.get(LOADING_SPINNER).should('exist');
+  cy.get(LOADING_SPINNER).should('not.exist');
+  cy.get(FIELD_INPUT).should('be.visible');
+  cy.get(FIELD_INPUT).type(`${exception.field}{enter}`);
+  cy.get(OPERATOR_INPUT).type(`${exception.operator}{enter}`);
+  exception.values.forEach((value) => {
+    cy.get(VALUES_INPUT).type(`${value}{enter}`);
+  });
+  cy.get(CLOSE_ALERTS_CHECKBOX).click({ force: true });
+  cy.get(CONFIRM_BTN).click();
+  cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
+  cy.get(CONFIRM_BTN).should('not.have.attr', 'disabled');
+};
 
+export const addsExceptionFromRuleSettings = (exception: Exception) => {
+  cy.get(ADD_EXCEPTIONS_BTN).click();
   cy.get(LOADING_SPINNER).should('exist');
   cy.get(LOADING_SPINNER).should('not.exist');
   cy.get(LOADING_SPINNER).should('exist');
