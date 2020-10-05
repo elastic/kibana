@@ -142,7 +142,7 @@ export class DatasourceComponent extends PureComponent {
         defaultIndex,
       });
 
-    const hasExpressionArgs = !!Object.values(stateArgs).some((a) => a && typeof a[0] === 'object');
+    const hasExpressionArgs = Object.values(stateArgs).some((a) => a && typeof a[0] === 'object');
 
     return (
       <Fragment>
