@@ -15,8 +15,9 @@ describe('Footer Timeline Component', () => {
   const loadMore = jest.fn();
   const onChangeItemsPerPage = jest.fn();
   const updatedAt = 1546878704036;
-  const totalCount = 15546;
+  const serverSideEventCount = 15546;
   const itemsCount = 2;
+  const totalCount = 10;
 
   describe('rendering', () => {
     test('it renders the default timeline footer', () => {
@@ -33,8 +34,8 @@ describe('Footer Timeline Component', () => {
           itemsPerPageOptions={[1, 5, 10, 20]}
           onChangeItemsPerPage={onChangeItemsPerPage}
           onChangePage={loadMore}
-          serverSideEventCount={totalCount}
-          totalPages={2}
+          serverSideEventCount={serverSideEventCount}
+          totalCount={totalCount}
         />
       );
 
@@ -55,8 +56,8 @@ describe('Footer Timeline Component', () => {
           itemsPerPageOptions={[1, 5, 10, 20]}
           onChangeItemsPerPage={onChangeItemsPerPage}
           onChangePage={loadMore}
-          serverSideEventCount={totalCount}
-          totalPages={2}
+          serverSideEventCount={serverSideEventCount}
+          totalCount={totalCount}
         />
       );
 
@@ -78,8 +79,8 @@ describe('Footer Timeline Component', () => {
             itemsPerPageOptions={[1, 5, 10, 20]}
             onChangeItemsPerPage={onChangeItemsPerPage}
             onChangePage={loadMore}
-            serverSideEventCount={totalCount}
-            totalPages={2}
+            serverSideEventCount={serverSideEventCount}
+            totalCount={totalCount}
           />
         </TestProviders>
       );
@@ -129,8 +130,8 @@ describe('Footer Timeline Component', () => {
           itemsPerPageOptions={[1, 5, 10, 20]}
           onChangeItemsPerPage={onChangeItemsPerPage}
           onChangePage={loadMore}
-          serverSideEventCount={totalCount}
-          totalPages={2}
+          serverSideEventCount={serverSideEventCount}
+          totalCount={totalCount}
         />
       );
 
@@ -152,8 +153,8 @@ describe('Footer Timeline Component', () => {
             itemsPerPageOptions={[1, 5, 10, 20]}
             onChangeItemsPerPage={onChangeItemsPerPage}
             onChangePage={loadMore}
-            serverSideEventCount={totalCount}
-            totalPages={2}
+            serverSideEventCount={serverSideEventCount}
+            totalCount={totalCount}
           />
         </TestProviders>
       );
@@ -179,8 +180,8 @@ describe('Footer Timeline Component', () => {
             itemsPerPageOptions={[1, 5, 10, 20]}
             onChangeItemsPerPage={onChangeItemsPerPage}
             onChangePage={loadMore}
-            serverSideEventCount={totalCount}
-            totalPages={2}
+            serverSideEventCount={serverSideEventCount}
+            totalCount={totalCount}
           />
         </TestProviders>
       );
@@ -204,8 +205,8 @@ describe('Footer Timeline Component', () => {
             itemsPerPageOptions={[1, 5, 10, 20]}
             onChangeItemsPerPage={onChangeItemsPerPage}
             onChangePage={loadMore}
-            serverSideEventCount={totalCount}
-            totalPages={2}
+            serverSideEventCount={serverSideEventCount}
+            totalCount={totalCount}
           />
         </TestProviders>
       );
@@ -231,8 +232,8 @@ describe('Footer Timeline Component', () => {
             itemsPerPageOptions={[1, 5, 10, 20]}
             onChangeItemsPerPage={onChangeItemsPerPage}
             onChangePage={loadMore}
-            serverSideEventCount={totalCount}
-            totalPages={2}
+            serverSideEventCount={serverSideEventCount}
+            totalCount={totalCount}
           />
         </TestProviders>
       );
@@ -256,8 +257,8 @@ describe('Footer Timeline Component', () => {
             itemsPerPageOptions={[1, 5, 10, 20]}
             onChangeItemsPerPage={onChangeItemsPerPage}
             onChangePage={loadMore}
-            serverSideEventCount={totalCount}
-            totalPages={2}
+            serverSideEventCount={serverSideEventCount}
+            totalCount={totalCount}
           />
         </TestProviders>
       );

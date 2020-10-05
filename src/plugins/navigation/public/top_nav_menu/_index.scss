@@ -1,3 +1,7 @@
+.kbnTopNavMenu {
+  margin-right: $euiSizeXS;
+}
+
 .kbnTopNavMenu > * > * {
   // TEMP fix to adjust spacing between EuiHeaderList__list items
   margin: 0 $euiSizeXS;
