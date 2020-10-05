@@ -20,7 +20,7 @@ describe('healthRoute', () => {
   it('registers the route', async () => {
     const router = httpServiceMock.createRouter();
 
-    healthRoute(router, Promise.resolve(of()), mockLogger(), 1000);
+    healthRoute(router, Promise.resolve(of()), mockLogger(), 1000, 1000);
 
     const [config] = router.get.mock.calls[0];
 

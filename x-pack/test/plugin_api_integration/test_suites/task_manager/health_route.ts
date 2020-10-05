@@ -13,6 +13,7 @@ import { ConcreteTaskInstance } from '../../../../plugins/task_manager/server';
 
 interface MonitoringStats {
   lastUpdate: string;
+  status: string;
   stats: {
     configuration: {
       timestamp: string;

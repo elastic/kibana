@@ -58,7 +58,7 @@ export class TaskManagerPlugin
       // if "hot" health stats are any more stale than the pollInterval (+1s buffer) consider the system unhealthy
       config.poll_interval + 1000,
       // if "cold" health stats are any more stale than the configured refresh, consider the system unhealthy
-      config.monitored_aggregated_stats_refresh_rate
+      config.monitored_aggregated_stats_refresh_rate + 1000
     );
 
     return {

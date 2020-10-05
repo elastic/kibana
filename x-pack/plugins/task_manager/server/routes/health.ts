@@ -15,7 +15,7 @@ import { Logger } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { throttleTime } from 'rxjs/operators';
-import { isString, isNumber } from 'lodash';
+import { isString } from 'lodash';
 import { MonitoringStats, summarizeMonitoringStats } from '../monitoring';
 
 enum HealthStatus {
