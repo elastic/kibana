@@ -188,7 +188,7 @@ exports[`GettingStarted dark mode on 1`] = `
     >
       <EuiImage
         alt="Kibana visualizations illustration"
-        url="/plugins/kibanaOverview/assets/kibana_montage_dark_2x.png"
+        url="/plugins/kibanaOverview/assets/kibana_montage_dark.svg"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -383,7 +383,7 @@ exports[`GettingStarted render 1`] = `
     >
       <EuiImage
         alt="Kibana visualizations illustration"
-        url="/plugins/kibanaOverview/assets/kibana_montage_light_2x.png"
+        url="/plugins/kibanaOverview/assets/kibana_montage_light.svg"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
