@@ -6,7 +6,7 @@
 
 import { Dispatch, MiddlewareAPI } from 'redux';
 import { isEqual } from 'lodash';
-import { ResolverPaginatedEvents, ResolverRelatedEvents } from '../../../../common/endpoint/types';
+import { ResolverPaginatedEvents } from '../../../../common/endpoint/types';
 
 import { ResolverState, DataAccessLayer, PanelViewAndParameters } from '../../types';
 import * as selectors from '../selectors';
@@ -15,16 +15,17 @@ import { ResolverAction } from '../actions';
 export function RelatedEventsFetcher(
   dataAccessLayer: DataAccessLayer,
   api: MiddlewareAPI<Dispatch<ResolverAction>, ResolverState>
-): (action: ResolverAction) => void {
+): () => void {
   let last: PanelViewAndParameters | undefined;
 
   // Call this after each state change.
   // This fetches the ResolverTree for the current entityID
   // if the entityID changes while
-  return async (action: ResolverAction) => {
+  return async () => {
     const state = api.getState();
 
     const newParams = selectors.panelViewAndParameters(state);
+    const isLoadingMoreEvents = selectors.isLoadingMoreNodeEventsInCategory(state);
     const oldParams = last;
     // Update this each time before fetching data (or even if we don't fetch data) so that subsequent actions that call this (concurrently) will have up to date info.
     last = newParams;
@@ -53,21 +54,8 @@ export function RelatedEventsFetcher(
             },
           });
         }
-      } else if (newParams.panelView === 'eventDetail') {
-        const nodeID = newParams.panelParameters.nodeID;
-
-        const result: ResolverRelatedEvents | undefined = await dataAccessLayer.relatedEvents(
-          nodeID
-        );
-
-        if (result) {
-          api.dispatch({
-            type: 'serverReturnedRelatedEventData',
-            payload: result,
-          });
-        }
       }
-    } else if (action.type === 'userRequestedAdditionalRelatedEvents') {
+    } else if (isLoadingMoreEvents) {
       const nodeEventsInCategory = state.data.nodeEventsInCategory;
       if (nodeEventsInCategory !== undefined) {
         const { nodeID, eventCategory, cursor } = nodeEventsInCategory;

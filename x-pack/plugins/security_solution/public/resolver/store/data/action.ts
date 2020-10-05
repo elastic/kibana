@@ -36,13 +36,10 @@ interface AppRequestedResolverData {
 
 interface AppRequestedRelatedEventData {
   readonly type: 'appRequestedRelatedEventData';
-
-  readonly payload: {};
 }
 
 interface UserRequestedAdditionalRelatedEvents {
   readonly type: 'userRequestedAdditionalRelatedEvents';
-  readonly payload: {};
 }
 
 interface ServerFailedToReturnNodeEventsInCategory {

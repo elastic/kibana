@@ -6,7 +6,6 @@
 
 import { DataAccessLayer } from '../../types';
 import { mockTreeWithOneNodeAndTwoPagesOfRelatedEvents } from '../../mocks/resolver_tree';
-import { relatedEventsPaginationSize } from '../factory';
 import {
   ResolverRelatedEvents,
   ResolverTree,
@@ -74,9 +73,9 @@ export function oneNodeWithPaginatedEvents(): {
           (event) => event.event?.category === category
         );
         if (after === undefined) {
-          events = eventsOfCategory.slice(0, relatedEventsPaginationSize);
+          events = eventsOfCategory.slice(0, 25);
         } else {
-          events = eventsOfCategory.slice(relatedEventsPaginationSize);
+          events = eventsOfCategory.slice(25);
         }
         return {
           events,

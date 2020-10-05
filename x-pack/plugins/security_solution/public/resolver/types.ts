@@ -235,11 +235,6 @@ export interface NodeEventsInCategoryState {
   lastCursorRequested?: null | string;
 
   /**
-   * Flag used to show a loading indicator for loading additional pages of related events.
-   */
-  loading?: boolean;
-
-  /**
    * Flag for showing an error message when fetching additional related events.
    */
   error?: boolean;

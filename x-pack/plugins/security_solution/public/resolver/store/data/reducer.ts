@@ -140,9 +140,6 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
             ...state,
             nodeEventsInCategory: updated,
           };
-          if (next.nodeEventsInCategory) {
-            next.nodeEventsInCategory.loading = false;
-          }
           return next;
         } else {
           // this should never happen. This reducer ensures that any `nodeEventsInCategory` that are in state are relevant to the `panelViewAndParameters`.
@@ -154,9 +151,6 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
           ...state,
           nodeEventsInCategory: action.payload,
         };
-        if (next.nodeEventsInCategory) {
-          next.nodeEventsInCategory.loading = false;
-        }
         return next;
       }
     } else {
@@ -164,32 +158,31 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
       return state;
     }
   } else if (action.type === 'userRequestedAdditionalRelatedEvents') {
-    const nextState: DataState = {
-      ...state,
-      nodeEventsInCategory: {
-        nodeID: '',
-        eventCategory: '',
-        events: [],
-        cursor: null,
-        ...state.nodeEventsInCategory,
-        loading: true,
-        lastCursorRequested: state.nodeEventsInCategory?.cursor,
-      },
-    };
-    return nextState;
+    if (state.nodeEventsInCategory) {
+      const nextState: DataState = {
+        ...state,
+        nodeEventsInCategory: {
+          ...state.nodeEventsInCategory,
+          lastCursorRequested: state.nodeEventsInCategory?.cursor,
+        },
+      };
+      return nextState;
+    } else {
+      return state;
+    }
   } else if (action.type === 'serverFailedToReturnNodeEventsInCategory') {
-    const nextState: DataState = {
-      ...state,
-      nodeEventsInCategory: {
-        nodeID: '',
-        eventCategory: '',
-        events: [],
-        cursor: null,
-        ...state.nodeEventsInCategory,
-        error: true,
-      },
-    };
-    return nextState;
+    if (state.nodeEventsInCategory) {
+      const nextState: DataState = {
+        ...state,
+        nodeEventsInCategory: {
+          ...state.nodeEventsInCategory,
+          error: true,
+        },
+      };
+      return nextState;
+    } else {
+      return state;
+    }
   } else if (action.type === 'appRequestedCurrentRelatedEventData') {
     const nextState: DataState = {
       ...state,

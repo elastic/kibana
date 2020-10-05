@@ -33,7 +33,7 @@ export const resolverMiddlewareFactory: MiddlewareFactory = (dataAccessLayer: Da
       next(action);
 
       resolverTreeFetcher();
-      relatedEventsFetcher(action);
+      relatedEventsFetcher();
       currentRelatedEventFetcher();
     };
   };

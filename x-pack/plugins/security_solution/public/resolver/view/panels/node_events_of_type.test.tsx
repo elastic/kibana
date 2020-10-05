@@ -50,7 +50,7 @@ describe(`Resolver: when analyzing a tree with only the origin and paginated rel
     simulatorInstance = undefined;
   });
 
-  describe(`when the URL query string is`, () => {
+  describe(`when the URL query string is showing a resolver with nodeID origin, panel view nodeEventsInCategory, and eventCategory registry`, () => {
     beforeEach(() => {
       memoryHistory.push({
         search: urlSearch(resolverComponentInstanceID, {
@@ -61,15 +61,16 @@ describe(`Resolver: when analyzing a tree with only the origin and paginated rel
     });
     it('should show the load more data button', async () => {
       await expect(
-        simulator().map(
-          () => simulator().testSubject('resolver:nodeEventsInCategory:loadMore').length
-        )
-      ).toYieldEqualTo(1);
-      await expect(
-        simulator().map(
-          () => simulator().testSubject('resolver:panel:node-events-in-category:event-link').length
-        )
-      ).toYieldEqualTo(25);
+        simulator().map(() => ({
+          loadMoreButton: simulator().testSubject('resolver:nodeEventsInCategory:loadMore').length,
+          visibleEvents: simulator().testSubject(
+            'resolver:panel:node-events-in-category:event-link'
+          ).length,
+        }))
+      ).toYieldEqualTo({
+        loadMoreButton: 1,
+        visibleEvents: 25,
+      });
     });
     describe('when the user clicks the load more button', () => {
       beforeEach(async () => {
@@ -78,18 +79,19 @@ describe(`Resolver: when analyzing a tree with only the origin and paginated rel
           loadMore.simulate('click', { button: 0 });
         }
       });
-      it('should hide the load more button and show all 31 events', async () => {
+      it('should hide the load more button and show all 30 events', async () => {
         await expect(
-          simulator().map(
-            () => simulator().testSubject('resolver:nodeEventsInCategory:loadMore').length
-          )
-        ).toYieldEqualTo(0);
-        await expect(
-          simulator().map(
-            () =>
-              simulator().testSubject('resolver:panel:node-events-in-category:event-link').length
-          )
-        ).toYieldEqualTo(30);
+          simulator().map(() => ({
+            loadMoreButton: simulator().testSubject('resolver:nodeEventsInCategory:loadMore')
+              .length,
+            visibleEvents: simulator().testSubject(
+              'resolver:panel:node-events-in-category:event-link'
+            ).length,
+          }))
+        ).toYieldEqualTo({
+          loadMoreButton: 0,
+          visibleEvents: 30,
+        });
       });
     });
   });

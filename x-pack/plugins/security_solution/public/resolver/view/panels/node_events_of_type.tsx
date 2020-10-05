@@ -63,12 +63,22 @@ export const NodeEventsInCategory = memo(function ({
         <StyledPanel data-test-subj="resolver:panel:events-in-category">
           {hasError ? (
             <EuiCallOut
-              title="Unable to load events."
+              title={i18n.translate(
+                'xpack.securitySolution.endpoint.resolver.panel.nodeEventsByType.errorPrimary',
+                {
+                  defaultMessage: 'Unable to load events.',
+                }
+              )}
               color="danger"
               iconType="alert"
               data-test-subj="resolver:nodeEventsInCategory:error"
             >
-              <p>{'An error occurred when fetching the events.'}</p>
+              <p>
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.resolver.panel.nodeEventsByType.errorPrimary"
+                  defaultMessage="An error occurred when fetching the events."
+                />
+              </p>
             </EuiCallOut>
           ) : (
             <>
@@ -164,7 +174,6 @@ const NodeEventList = memo(function NodeEventList({
   const handleLoadMore = useCallback(() => {
     dispatch({
       type: 'userRequestedAdditionalRelatedEvents',
-      payload: {},
     });
   }, [dispatch]);
   const isLoading = useSelector(selectors.isLoadingMoreNodeEventsInCategory);
@@ -187,7 +196,10 @@ const NodeEventList = memo(function NodeEventList({
             isLoading={isLoading}
             data-test-subj="resolver:nodeEventsInCategory:loadMore"
           >
-            {'Load More Data'}
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.resolver.panel.nodeEventsByType.loadMore"
+              defaultMessage="Load More Data"
+            />
           </EuiButton>
         </EuiFlexItem>
       )}
@@ -254,7 +266,7 @@ const NodeEventsInCategoryBreadcrumbs = memo(function ({
           text: (
             <FormattedMessage
               id="xpack.securitySolution.endpoint.resolver.panel.relatedEventList.numberOfEvents"
-              values={{ totalCount: eventCount || '0' }}
+              values={{ totalCount: eventCount }}
               defaultMessage="{totalCount} Events"
             />
           ),

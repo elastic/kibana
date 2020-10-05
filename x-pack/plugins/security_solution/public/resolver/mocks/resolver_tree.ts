@@ -6,7 +6,6 @@
 
 import { mockEndpointEvent } from './endpoint_event';
 import { ResolverTree, SafeResolverEvent } from '../../../common/endpoint/types';
-import { relatedEventsPaginationSize } from '../data_access_layer/factory';
 import * as eventModel from '../../../common/endpoint/models/event';
 
 export function mockTreeWithOneNodeAndTwoPagesOfRelatedEvents({
@@ -21,7 +20,8 @@ export function mockTreeWithOneNodeAndTwoPagesOfRelatedEvents({
     timestamp: 1600863932318,
   });
   const events = [];
-  const eventsToGenerate = relatedEventsPaginationSize + 5;
+  // page size is currently 25
+  const eventsToGenerate = 30;
   for (let i = 0; i < eventsToGenerate; i++) {
     const newEvent = mockEndpointEvent({
       entityID: originID,

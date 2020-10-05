@@ -15,8 +15,6 @@ import {
   SafeResolverEvent,
 } from '../../../common/endpoint/types';
 
-export const relatedEventsPaginationSize = 25;
-
 /**
  * The data access layer for resolver. All communication with the Kibana server is done through this object. This object is provided to Resolver. In tests, a mock data access layer can be used instead.
  */
@@ -52,7 +50,7 @@ export function dataAccessLayerFactory(
       after?: string
     ): Promise<ResolverPaginatedEvents> {
       return context.services.http.post('/api/endpoint/resolver/events', {
-        query: { afterEvent: after, limit: relatedEventsPaginationSize },
+        query: { afterEvent: after, limit: 25 },
         body: JSON.stringify({
           filter: `process.entity_id:"${entityID}" and event.category:"${category}"`,
         }),
