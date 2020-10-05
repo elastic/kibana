@@ -148,8 +148,8 @@ function parseAndVerifyDatasets(
   let dataStreamPaths: string[] = [];
   const dataStreams: RegistryDataStream[] = [];
 
-  // pick all paths matching name-version/dataset/DATASET_PATH/...
-  // from those, pick all unique dataset paths
+  // pick all paths matching name-version/data_stream/DATASTREAM_PATH/...
+  // from those, pick all unique data stream paths
   paths
     .filter((path) => path.startsWith(`${pkgName}-${pkgVersion}/data_stream/`))
     .forEach((path) => {
