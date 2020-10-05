@@ -28,7 +28,6 @@ import { OnChangeItemsPerPage, OnChangePage } from '../events';
 import { LastUpdatedAt } from './last_updated';
 import * as i18n from './translations';
 import { useEventDetailsWidthContext } from '../../../../common/components/events_viewer/event_details_width_context';
-import { PaginationEuiFlexItem } from '../../../../common/components/paginated_table';
 import { useManageTimeline } from '../../manage_timeline';
 
 export const isCompactFooter = (width: number): boolean => width < 600;
@@ -288,11 +287,6 @@ export const FooterComponent = ({
     totalCount,
   ]);
 
-  const PaginationWrapper = useMemo(
-    () => (totalCount > (activePage + 1) * itemsPerPage ? PaginationEuiFlexItem : EuiFlexItem),
-    [activePage, itemsPerPage, totalCount]
-  );
-
   useEffect(() => {
     if (paginationLoading && !isLoading) {
       setPaginationLoading(false);
@@ -369,15 +363,13 @@ export const FooterComponent = ({
               </b>
             </EuiText>
           ) : (
-            <PaginationWrapper>
-              <PagingControl
-                data-test-subj="paging-control"
-                totalPages={totalPages}
-                activePage={activePage}
-                onPageClick={handleChangePageClick}
-                isLoading={isLoading}
-              />
-            </PaginationWrapper>
+            <PagingControl
+              data-test-subj="paging-control"
+              totalPages={totalPages}
+              activePage={activePage}
+              onPageClick={handleChangePageClick}
+              isLoading={isLoading}
+            />
           )}
         </EuiFlexItem>
 
