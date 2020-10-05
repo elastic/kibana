@@ -164,7 +164,7 @@ export const JobSetupScreen = (props: Props) => {
               <p>
                 <FormattedMessage
                   id="xpack.infra.ml.steps.setupProcess.description"
-                  defaultMessage="Settings can not be changed once the jobs are created. You can recreate jobs anytime. In this case, the previously detected anomalies will be removed."
+                  defaultMessage="Settings can not be changed once the jobs are created. You can recreate jobs anytime. In this case, the previously detected anomalies are removed."
                 />
               </p>
             </EuiText>
@@ -183,7 +183,7 @@ export const JobSetupScreen = (props: Props) => {
                 description={
                   <FormattedMessage
                     id="xpack.infra.ml.steps.setupProcess.when.description"
-                    defaultMessage="By default, Machine Learning jobs analyze the past 4 weeks of data and continue to run indefinitely."
+                    defaultMessage="By default, machine learning jobs analyze the past 4 weeks of data and continue to run indefinitely."
                   />
                 }
               >
