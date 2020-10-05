@@ -33,7 +33,7 @@ export function getAssets(
 
     // if dataset, filter for them
     if (datasetName) {
-      const comparePath = `${packageInfo.name}-${packageInfo.version}/datastream/${datasetName}/`;
+      const comparePath = `${packageInfo.name}-${packageInfo.version}/data_stream/${datasetName}/`;
       if (!path.includes(comparePath)) {
         continue;
       }

@@ -31,8 +31,8 @@ const tests = [
       return true;
     },
     expected: [
-      'coredns-1.0.1/dataset/log/elasticsearch/ingest-pipeline/pipeline-plaintext.json',
-      'coredns-1.0.1/dataset/log/elasticsearch/ingest-pipeline/pipeline-json.json',
+      'coredns-1.0.1/data_stream/log/elasticsearch/ingest-pipeline/pipeline-plaintext.json',
+      'coredns-1.0.1/data_stream/log/elasticsearch/ingest-pipeline/pipeline-json.json',
     ],
   },
   {
@@ -60,7 +60,7 @@ const tests = [
   },
 ];
 
-test.skip('testGetAssets', () => {
+test('testGetAssets', () => {
   for (const value of tests) {
     // as needed to pretend it is an InstallablePackage
     const assets = getAssets(value.package as InstallablePackage, value.filter, value.dataset);
