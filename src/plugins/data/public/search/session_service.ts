@@ -33,43 +33,40 @@ interface RequestInfo {
 }
 
 interface SessionInfo {
+  sessionId: string;
   requests: Record<string, RequestInfo>;
   status: SessionStatus;
-  timeoutNotified: boolean;
 }
 export class SessionService implements ISessionService {
-  private sessionId?: string;
-  private readonly idMapping: Map<string, SessionInfo>;
+  private activeSession?: SessionInfo;
 
   constructor() {
-    this.idMapping = new Map();
     this.start();
   }
 
   public trackSearch(request: IEsSearchRequest, sessionId: string | undefined) {
-    if (sessionId && request.params && request.params.body) {
-      const sessionInfo = this.idMapping.get(sessionId);
+    if (sessionId && request.params && request.params.body && this.activeSession) {
+      const sessionInfo = this.activeSession;
 
       // Mark a session as running.
       // Also reopen a complete session, if a new search is run. We know this can happen because of follow up requests.
       if (
-        sessionInfo!.status === SessionStatus.NEW ||
-        sessionInfo!.status === SessionStatus.COMPLETED
+        sessionInfo.status === SessionStatus.NEW ||
+        sessionInfo.status === SessionStatus.COMPLETED
       ) {
-        sessionInfo!.status = SessionStatus.RUNNING;
+        sessionInfo.status = SessionStatus.RUNNING;
       }
 
       // Add request info to the session
-      sessionInfo!.requests[createRequestHash(request.params.body)] = {
+      sessionInfo.requests[createRequestHash(request.params.body)] = {
         status: SearchStatus.RUNNING,
       };
     }
   }
 
   public trackSearchId(request: IEsSearchRequest, sessionId: string | undefined, searchId: string) {
-    if (sessionId && request.params && request.params.body) {
-      const sessionInfo = this.idMapping.get(sessionId);
-      const requestInfo = sessionInfo!.requests[createRequestHash(request.params.body)];
+    if (sessionId && request.params && request.params.body && this.activeSession) {
+      const requestInfo = this.activeSession.requests[createRequestHash(request.params.body)];
       if (requestInfo) {
         requestInfo.searchId = searchId;
       }
@@ -77,50 +74,45 @@ export class SessionService implements ISessionService {
   }
 
   public trackSearchComplete(request: IEsSearchRequest, sessionId?: string) {
-    if (sessionId && request.params && request.params.body) {
-      const sessionInfo = this.idMapping.get(sessionId);
-      sessionInfo!.requests[createRequestHash(request.params.body)].status = SearchStatus.DONE;
+    if (sessionId && request.params && request.params.body && this.activeSession) {
+      this.activeSession.requests[createRequestHash(request.params.body)].status =
+        SearchStatus.DONE;
 
       // Mark session as done, if all requests are done
-      Object.values(sessionInfo!.requests)
+      Object.values(this.activeSession!.requests)
         .map((requestInfo) => requestInfo.status === SearchStatus.DONE)
         .every(() => {
-          sessionInfo!.status = SessionStatus.COMPLETED;
+          this.activeSession!.status = SessionStatus.COMPLETED;
         });
     }
   }
 
   public trackSearchError(request: IEsSearchRequest, sessionId?: string, e?: Error) {
-    if (sessionId && request.params && request.params.body) {
-      const sessionInfo = this.idMapping.get(sessionId);
-
+    if (sessionId && request.params && request.params.body && this.activeSession) {
       // Mark request as errored, don't update session status
       if (e instanceof SearchTimeoutError) {
-        sessionInfo!.status = SessionStatus.TIMEOUT;
+        this.activeSession.status = SessionStatus.TIMEOUT;
       }
-      sessionInfo!.requests[createRequestHash(request.params.body)].status = SearchStatus.ERROR;
+      this.activeSession.requests[createRequestHash(request.params.body)].status =
+        SearchStatus.ERROR;
     }
   }
 
   public getSessionId() {
-    return this.sessionId;
+    return this.activeSession?.sessionId;
   }
 
   public start() {
-    this.sessionId = uuid.v4();
-
-    const sessionInfo = {
-      requests: {},
+    this.activeSession = {
+      sessionId: uuid.v4(),
       status: SessionStatus.NEW,
-      timeoutNotified: false,
+      requests: {},
     };
-    this.idMapping.set(this.sessionId, sessionInfo);
 
-    return this.sessionId;
+    return this.activeSession.sessionId;
   }
 
   public clear() {
-    this.idMapping.clear();
-    this.sessionId = undefined;
+    this.activeSession = undefined;
   }
 }
