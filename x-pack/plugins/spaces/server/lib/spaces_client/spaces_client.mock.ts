@@ -10,7 +10,6 @@ import { SpacesClient } from './spaces_client';
 
 const createSpacesClientMock = () =>
   (({
-    canEnumerateSpaces: jest.fn().mockResolvedValue(true),
     getAll: jest.fn().mockResolvedValue([
       {
         id: DEFAULT_SPACE_ID,

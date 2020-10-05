@@ -85,7 +85,7 @@ export const TrustedAppsPage = memo(() => {
       {showAddFlout && (
         <CreateTrustedAppFlyout
           onClose={handleAddFlyoutClose}
-          size="s"
+          size="m"
           data-test-subj="addTrustedAppFlyout"
         />
       )}

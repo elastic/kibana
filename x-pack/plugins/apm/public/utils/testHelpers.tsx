@@ -24,6 +24,7 @@ import {
   ESSearchRequest,
 } from '../../typings/elasticsearch';
 import { MockApmPluginContextWrapper } from '../context/ApmPluginContext/MockApmPluginContext';
+import { UIFilters } from '../../typings/ui_filters';
 
 const originalConsoleWarn = console.warn; // eslint-disable-line no-console
 /**
@@ -115,7 +116,8 @@ interface MockSetup {
   apmEventClient: any;
   internalClient: any;
   config: APMConfig;
-  uiFiltersES: ESFilter[];
+  uiFilters: UIFilters;
+  esFilter: ESFilter[];
   indices: {
     /* eslint-disable @typescript-eslint/naming-convention */
     'apm_oss.sourcemapIndices': string;
@@ -176,7 +178,8 @@ export async function inspectSearchParams(
         },
       }
     ) as APMConfig,
-    uiFiltersES: [{ term: { 'my.custom.ui.filter': 'foo-bar' } }],
+    uiFilters: { environment: 'test' },
+    esFilter: [{ term: { 'service.environment': 'test' } }],
     indices: {
       /* eslint-disable @typescript-eslint/naming-convention */
       'apm_oss.sourcemapIndices': 'myIndex',
