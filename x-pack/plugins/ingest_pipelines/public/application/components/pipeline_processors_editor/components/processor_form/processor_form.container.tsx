@@ -70,6 +70,20 @@ export const ProcessorFormContainer: FunctionComponent<Props> = ({
         const { type, customOptions, fields } = data as FormData;
         const options = customOptions ? customOptions : fields;
 
+        /**
+         * We drive the state for the processor description outside of the form state so
+         * we add the description again here to avoid removing it because the form lib will
+         * not include it here.
+         *
+         * TODO: Add a ghost/invisible field to the form for the description field
+         *
+         * Also, not using processor?.options.description syntax because react eslint
+         * does not pick up processor dependency correctly.
+         */
+        if (processor && processor.options.description) {
+          options.description = processor.options.description;
+        }
+
         unsavedFormState.current = options;
 
         onSubmit({
@@ -82,7 +96,7 @@ export const ProcessorFormContainer: FunctionComponent<Props> = ({
         }
       }
     },
-    [form, onClose, onSubmit]
+    [processor, form, onClose, onSubmit]
   );
 
   const resetProcessors = useCallback(() => {
