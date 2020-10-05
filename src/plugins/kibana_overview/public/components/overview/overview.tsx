@@ -34,8 +34,8 @@ import { CoreStart } from 'kibana/public';
 import {
   RedirectAppLinks,
   useKibana,
-  PageFooter,
-  PageHeader,
+  OverviewPageFooter,
+  OverviewPageHeader,
 } from '../../../../../../src/plugins/kibana_react/public';
 import { FetchResult } from '../../../../../../src/plugins/newsfeed/public';
 import {
@@ -126,7 +126,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
 
   return (
     <main aria-labelledby="pageHeader__title" className="kbnOverviewWrapper">
-      <PageHeader
+      <OverviewPageHeader
         hideToolbar={isNewKibanaInstance}
         iconType="logoKibana"
         title={<FormattedMessage defaultMessage="Kibana" id="kibanaOverview.header.title" />}
@@ -251,7 +251,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
 
         <EuiHorizontalRule margin="xl" aria-hidden="true" />
 
-        <PageFooter path={PLUGIN_PATH} />
+        <OverviewPageFooter path={PLUGIN_PATH} />
       </div>
     </main>
   );
