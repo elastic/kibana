@@ -393,6 +393,11 @@ describe('create()', () => {
         "createdAt": "2019-02-12T21:01:22.479Z",
         "createdBy": "elastic",
         "enabled": true,
+        "executionStatus": Object {
+          "error": null,
+          "lastExecutionDate": "2019-02-12T21:01:22.479Z",
+          "status": "pending",
+        },
         "meta": Object {
           "versionApiKeyLastmodified": "v7.10.0",
         },
@@ -1034,6 +1039,11 @@ describe('create()', () => {
         muteAll: false,
         mutedInstanceIds: [],
         tags: ['foo'],
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending',
+          error: null,
+        },
       },
       {
         references: [
@@ -1150,6 +1160,11 @@ describe('create()', () => {
         muteAll: false,
         mutedInstanceIds: [],
         tags: ['foo'],
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending',
+          error: null,
+        },
       },
       {
         references: [
@@ -2506,6 +2521,11 @@ const BaseAlertInstanceSummarySavedObject: SavedObject<RawAlert> = {
     throttle: null,
     muteAll: false,
     mutedInstanceIds: [],
+    executionStatus: {
+      status: 'unknown',
+      lastExecutionDate: '2020-08-20T19:23:38Z',
+      error: null,
+    },
   },
   references: [],
 };
@@ -4130,14 +4150,13 @@ describe('update()', () => {
       expect(taskManager.runNow).not.toHaveBeenCalled();
     });
 
-    test('updating the alert should not wait for the rerun the task to complete', async (done) => {
+    test('updating the alert should not wait for the rerun the task to complete', async () => {
       const alertId = uuid.v4();
       const taskId = uuid.v4();
 
       mockApiCalls(alertId, taskId, { interval: '10s' }, { interval: '30s' });
 
       const resolveAfterAlertUpdatedCompletes = resolvable<{ id: string }>();
-      resolveAfterAlertUpdatedCompletes.then(() => done());
 
       taskManager.runNow.mockReset();
       taskManager.runNow.mockReturnValue(resolveAfterAlertUpdatedCompletes);
@@ -4165,7 +4184,6 @@ describe('update()', () => {
       });
 
       expect(taskManager.runNow).toHaveBeenCalled();
-
       resolveAfterAlertUpdatedCompletes.resolve({ id: alertId });
     });
 

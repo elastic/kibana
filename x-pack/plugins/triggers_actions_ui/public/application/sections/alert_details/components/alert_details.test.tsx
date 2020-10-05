@@ -15,6 +15,7 @@ import {
   EuiSwitch,
   EuiBetaBadge,
   EuiButtonEmpty,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ViewInApp } from './view_in_app';
@@ -139,6 +140,38 @@ describe('alert_details', () => {
       shallow(
         <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
       ).containsMatchingElement(<EuiBadge>{alertType.name}</EuiBadge>)
+    ).toBeTruthy();
+  });
+
+  it('renders the alert error banner with error message, when alert status is an error', () => {
+    const alert = mockAlert({
+      executionStatus: {
+        status: 'error',
+        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+        error: {
+          reason: 'unknown',
+          message: 'test',
+        },
+      },
+    });
+    const alertType = {
+      id: '.noop',
+      name: 'No Op',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      actionVariables: { context: [], state: [], params: [] },
+      defaultActionGroupId: 'default',
+      producer: ALERTS_FEATURE_ID,
+      authorizedConsumers,
+    };
+
+    expect(
+      shallow(
+        <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
+      ).containsMatchingElement(
+        <EuiText size="s" color="danger" data-test-subj="alertErrorMessageText">
+          {'test'}
+        </EuiText>
+      )
     ).toBeTruthy();
   });
 
@@ -757,6 +790,10 @@ function mockAlert(overloads: Partial<Alert> = {}): Alert {
     throttle: null,
     muteAll: false,
     mutedInstanceIds: [],
+    executionStatus: {
+      status: 'unknown',
+      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+    },
     ...overloads,
   };
 }
