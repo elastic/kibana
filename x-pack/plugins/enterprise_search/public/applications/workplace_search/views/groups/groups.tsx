@@ -123,7 +123,7 @@ export const Groups: React.FC = () => {
 
   return (
     <>
-      <SetPageChrome text="Groups" />
+      <SetPageChrome trail={['Groups']} />
       <SendTelemetry action="viewed" metric="groups" />
       <FlashMessages />
       <ViewContentHeader
