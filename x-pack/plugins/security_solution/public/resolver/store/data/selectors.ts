@@ -20,7 +20,7 @@ import {
 import { isGraphableProcess, isTerminatedProcess } from '../../models/process_event';
 import * as indexedProcessTreeModel from '../../models/indexed_process_tree';
 import * as eventModel from '../../../../common/endpoint/models/event';
-
+import * as nodeEventsInCategoryModel from './node_events_in_category_model';
 import {
   ResolverTree,
   ResolverNodeStats,
@@ -666,10 +666,73 @@ export const nodeEventsInCategory = (state: DataState) => {
   return state.nodeEventsInCategory?.events ?? [];
 };
 
-export const nodeEventsInCategoryAreLoading = (state: DataState) => {
-  return state.nodeEventsInCategory?.loading ?? false;
-};
+export const userCanRequestMoreNodeEventsInCategory = createSelector(
+  (state: DataState) => state.nodeEventsInCategory,
+  panelViewAndParameters,
+  /* eslint-disable-next-line no-shadow */
+  function (nodeEventsInCategory, panelViewAndParameters) {
+    if (
+      nodeEventsInCategory !== undefined &&
+      nodeEventsInCategoryModel.isRelevantToPanelViewAndParameters(
+        nodeEventsInCategory,
+        panelViewAndParameters
+      )
+    ) {
+      return nodeEventsInCategory.cursor !== null;
+    } else {
+      return false;
+    }
+  }
+);
 
-export const nodeEventsInCategoryNextCursor = (state: DataState) => {
-  return state.nodeEventsInCategory?.cursor ?? null;
-};
+export const hadErrorLoadingNodeEventsInCategory = createSelector(
+  (state: DataState) => state.nodeEventsInCategory,
+  panelViewAndParameters,
+  /* eslint-disable-next-line no-shadow */
+  function (nodeEventsInCategory, panelViewAndParameters) {
+    if (
+      nodeEventsInCategory !== undefined &&
+      nodeEventsInCategoryModel.isRelevantToPanelViewAndParameters(
+        nodeEventsInCategory,
+        panelViewAndParameters
+      )
+    ) {
+      return nodeEventsInCategory && nodeEventsInCategory.error === true;
+    } else {
+      return false;
+    }
+  }
+);
+
+export const isLoadingNodeEventsInCategory = createSelector(
+  (state: DataState) => state.nodeEventsInCategory,
+  panelViewAndParameters,
+  /* eslint-disable-next-line no-shadow */
+  function (nodeEventsInCategory, panelViewAndParameters) {
+    const { panelView } = panelViewAndParameters;
+    return panelView === 'nodeEventsInCategory' && nodeEventsInCategory === undefined;
+  }
+);
+
+export const isLoadingMoreNodeEventsInCategory = createSelector(
+  (state: DataState) => state.nodeEventsInCategory,
+  panelViewAndParameters,
+  /* eslint-disable-next-line no-shadow */
+  function (nodeEventsInCategory, panelViewAndParameters) {
+    if (
+      nodeEventsInCategory !== undefined &&
+      nodeEventsInCategoryModel.isRelevantToPanelViewAndParameters(
+        nodeEventsInCategory,
+        panelViewAndParameters
+      )
+    ) {
+      return (
+        nodeEventsInCategory &&
+        nodeEventsInCategory.lastCursorRequested !== null &&
+        nodeEventsInCategory.cursor !== nodeEventsInCategory.lastCursorRequested
+      );
+    } else {
+      return false;
+    }
+  }
+);

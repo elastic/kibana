@@ -6,7 +6,48 @@
 
 import { mockEndpointEvent } from './endpoint_event';
 import { ResolverTree, SafeResolverEvent } from '../../../common/endpoint/types';
+import { relatedEventsPaginationSize } from '../data_access_layer/factory';
 import * as eventModel from '../../../common/endpoint/models/event';
+
+export function mockTreeWithOneNodeAndTwoPagesOfRelatedEvents({
+  originID,
+}: {
+  originID: string;
+}): ResolverTree {
+  const originEvent: SafeResolverEvent = mockEndpointEvent({
+    entityID: originID,
+    processName: 'c',
+    parentEntityID: undefined,
+    timestamp: 1600863932318,
+  });
+  const events = [];
+  const eventsToGenerate = relatedEventsPaginationSize + 5;
+  for (let i = 0; i < eventsToGenerate; i++) {
+    const newEvent = mockEndpointEvent({
+      entityID: originID,
+      eventID: 'test',
+      eventType: 'access',
+      eventCategory: 'registry',
+      timestamp: 1600863932318,
+    });
+    events.push(newEvent);
+  }
+  return {
+    entityID: originID,
+    children: {
+      childNodes: [],
+      nextChild: null,
+    },
+    ancestry: {
+      nextAncestor: null,
+      ancestors: [],
+    },
+    lifecycle: [originEvent],
+    relatedEvents: { events, nextEvent: null },
+    relatedAlerts: { alerts: [], nextAlert: null },
+    stats: { events: { total: eventsToGenerate, byCategory: {} }, totalAlerts: 0 },
+  };
+}
 
 export function mockTreeWith2AncestorsAndNoChildren({
   originID,

@@ -163,7 +163,7 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
       // the action is stale, ignore it
       return state;
     }
-  } else if (action.type === 'appRequestedAdditionalRelatedEvents') {
+  } else if (action.type === 'userRequestedAdditionalRelatedEvents') {
     const nextState: DataState = {
       ...state,
       nodeEventsInCategory: {
@@ -173,6 +173,20 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
         cursor: null,
         ...state.nodeEventsInCategory,
         loading: true,
+        lastCursorRequested: state.nodeEventsInCategory?.cursor,
+      },
+    };
+    return nextState;
+  } else if (action.type === 'serverFailedToReturnNodeEventsInCategory') {
+    const nextState: DataState = {
+      ...state,
+      nodeEventsInCategory: {
+        nodeID: '',
+        eventCategory: '',
+        events: [],
+        cursor: null,
+        ...state.nodeEventsInCategory,
+        error: true,
       },
     };
     return nextState;

@@ -45,29 +45,22 @@ interface UserRequestedAdditionalRelatedEvents {
   readonly payload: {};
 }
 
-interface AppRequestedAdditionalRelatedEvents {
-  readonly type: 'appRequestedAdditionalRelatedEvents';
-  readonly payload: {};
-}
-
 interface ServerFailedToReturnNodeEventsInCategory {
   readonly type: 'serverFailedToReturnNodeEventsInCategory';
-}
-
-/**
- * When an additional page of related events is returned
- */
-interface ServerReturnedAdditionalRelatedEventData {
-  readonly type: 'serverReturnedAdditionalRelatedEventData';
-  readonly payload: ResolverRelatedEvents;
-}
-
-interface ServerFailedToReturnAdditionalRelatedEventData {
-  readonly type: 'serverFailedToReturnAdditionalRelatedEventData';
-  /**
-   * entity ID used to make the failed request
-   */
-  readonly payload: TreeFetcherParameters;
+  readonly payload: {
+    /**
+     * The cursor, if any, that can be used to retrieve more events.
+     */
+    cursor: string | null;
+    /**
+     * The nodeID that `events` are related to.
+     */
+    nodeID: string;
+    /**
+     * The category that `events` have in common.
+     */
+    eventCategory: string;
+  };
 }
 
 interface ServerFailedToReturnResolverData {
@@ -139,8 +132,5 @@ export type DataAction =
   | AppRequestedResolverData
   | AppRequestedRelatedEventData
   | UserRequestedAdditionalRelatedEvents
-  | AppRequestedAdditionalRelatedEvents
-  | ServerFailedToReturnAdditionalRelatedEventData
-  | ServerReturnedAdditionalRelatedEventData
   | ServerFailedToReturnNodeEventsInCategory
   | AppAbortedResolverDataRequest;

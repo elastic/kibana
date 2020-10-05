@@ -13,6 +13,7 @@ import {
   EuiHorizontalRule,
   EuiFlexItem,
   EuiButton,
+  EuiCallOut,
 } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
@@ -50,23 +51,38 @@ export const NodeEventsInCategory = memo(function ({
   );
   const events = useSelector((state: ResolverState) => selectors.nodeEventsInCategory(state));
 
+  const isLoading = useSelector(selectors.isLoadingNodeEventsInCategory);
+  const hasError = useSelector(selectors.hadErrorLoadingNodeEventsInCategory);
   return (
     <>
-      {eventCount === undefined || processEvent === null ? (
+      {isLoading || processEvent === null ? (
         <StyledPanel>
           <PanelLoading />
         </StyledPanel>
       ) : (
         <StyledPanel data-test-subj="resolver:panel:events-in-category">
-          <NodeEventsInCategoryBreadcrumbs
-            nodeName={eventModel.processNameSafeVersion(processEvent)}
-            eventCategory={eventCategory}
-            eventCount={eventCount}
-            nodeID={nodeID}
-            eventsInCategoryCount={eventsInCategoryCount}
-          />
-          <EuiSpacer size="l" />
-          <NodeEventList eventCategory={eventCategory} nodeID={nodeID} events={events} />
+          {hasError ? (
+            <EuiCallOut
+              title="Unable to load events."
+              color="danger"
+              iconType="alert"
+              data-test-subj="resolver:nodeEventsInCategory:error"
+            >
+              <p>{'An error occurred when fetching the events.'}</p>
+            </EuiCallOut>
+          ) : (
+            <>
+              <NodeEventsInCategoryBreadcrumbs
+                nodeName={eventModel.processNameSafeVersion(processEvent)}
+                eventCategory={eventCategory}
+                eventCount={eventCount}
+                nodeID={nodeID}
+                eventsInCategoryCount={eventsInCategoryCount}
+              />
+              <EuiSpacer size="l" />
+              <NodeEventList eventCategory={eventCategory} nodeID={nodeID} events={events} />
+            </>
+          )}
         </StyledPanel>
       )}
     </>
@@ -151,8 +167,8 @@ const NodeEventList = memo(function NodeEventList({
       payload: {},
     });
   }, [dispatch]);
-  const isLoading = useSelector(selectors.nodeEventsInCategoryAreLoading);
-  const hasMore = useSelector(selectors.nodeEventsInCategoryNextCursor);
+  const isLoading = useSelector(selectors.isLoadingMoreNodeEventsInCategory);
+  const hasMore = useSelector(selectors.userCanRequestMoreNodeEventsInCategory);
   return (
     <>
       {events.map((event, index) => (
@@ -163,7 +179,14 @@ const NodeEventList = memo(function NodeEventList({
       ))}
       {hasMore && (
         <EuiFlexItem grow={false}>
-          <EuiButton color={'primary'} size="s" fill onClick={handleLoadMore} isLoading={isLoading}>
+          <EuiButton
+            color={'primary'}
+            size="s"
+            fill
+            onClick={handleLoadMore}
+            isLoading={isLoading}
+            data-test-subj="resolver:nodeEventsInCategory:loadMore"
+          >
             {'Load More Data'}
           </EuiButton>
         </EuiFlexItem>
@@ -190,7 +213,7 @@ const NodeEventsInCategoryBreadcrumbs = memo(function ({
   /**
    * The events to list.
    */
-  eventCount: number;
+  eventCount: number | undefined;
   nodeID: string;
   /**
    * The count of events in the category that this list is showing.
@@ -231,7 +254,7 @@ const NodeEventsInCategoryBreadcrumbs = memo(function ({
           text: (
             <FormattedMessage
               id="xpack.securitySolution.endpoint.resolver.panel.relatedEventList.numberOfEvents"
-              values={{ totalCount: eventCount }}
+              values={{ totalCount: eventCount || '0' }}
               defaultMessage="{totalCount} Events"
             />
           ),

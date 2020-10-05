@@ -49,6 +49,7 @@ export function RelatedEventsFetcher(
               eventCategory: newParams.panelParameters.eventCategory,
               cursor: result.nextEvent,
               nodeID,
+              lastCursorRequested: null,
             },
           });
         }
@@ -69,10 +70,6 @@ export function RelatedEventsFetcher(
     } else if (action.type === 'userRequestedAdditionalRelatedEvents') {
       const nodeEventsInCategory = state.data.nodeEventsInCategory;
       if (nodeEventsInCategory !== undefined) {
-        api.dispatch({
-          type: 'appRequestedAdditionalRelatedEvents',
-          payload: {},
-        });
         const { nodeID, eventCategory, cursor } = nodeEventsInCategory;
         let result: ResolverPaginatedEvents | null = null;
         try {
@@ -88,6 +85,11 @@ export function RelatedEventsFetcher(
         } catch (error) {
           api.dispatch({
             type: 'serverFailedToReturnNodeEventsInCategory',
+            payload: {
+              nodeID,
+              eventCategory,
+              cursor,
+            },
           });
         }
 
