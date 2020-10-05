@@ -17,6 +17,5 @@
  * under the License.
  */
 
-require('../apm')();
 require('../setup_node_env/dist');
-require('./cli');
+require('./cli_keystore');
