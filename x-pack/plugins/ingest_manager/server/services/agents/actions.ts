@@ -136,7 +136,7 @@ export async function getAgentActionsForCheckin(
       'not',
       nodeTypes.function.buildNodeWithArgumentNodes('is', [
         nodeTypes.literal.buildNode(`${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.type`),
-        nodeTypes.literal.buildNode('INTERNAL_POLICY_REASSIGN'),
+        nodeTypes.literal.buildNode('INTERNAL*'),
         nodeTypes.literal.buildNode(false),
       ])
     ),

@@ -18,7 +18,13 @@ import { Node } from '../../../components/elasticsearch/node/node';
 import { labels } from '../../../components/elasticsearch/shard_allocation/lib/labels';
 import { nodesByIndices } from '../../../components/elasticsearch/shard_allocation/transformers/nodes_by_indices';
 import { MonitoringViewBaseController } from '../../base_controller';
-import { CODE_PATH_ELASTICSEARCH, ALERT_CPU_USAGE } from '../../../../common/constants';
+import {
+  CODE_PATH_ELASTICSEARCH,
+  ALERT_CPU_USAGE,
+  ALERT_MISSING_MONITORING_DATA,
+  ALERT_DISK_USAGE,
+  ALERT_MEMORY_USAGE,
+} from '../../../../common/constants';
 
 uiRoutes.when('/elasticsearch/nodes/:node', {
   template,
@@ -36,6 +42,13 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
       const nodeName = $route.current.params.node;
 
       super({
+        title: i18n.translate('xpack.monitoring.elasticsearch.node.overview.routeTitle', {
+          defaultMessage: 'Elasticsearch - Nodes - {nodeName} - Overview',
+          values: {
+            nodeName,
+          },
+        }),
+        telemetryPageViewTitle: 'elasticsearch_node',
         defaultData: {},
         getPageData,
         reactNodeId: 'monitoringElasticsearchNodeApp',
@@ -44,7 +57,12 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
         alerts: {
           shouldFetch: true,
           options: {
-            alertTypeIds: [ALERT_CPU_USAGE],
+            alertTypeIds: [
+              ALERT_CPU_USAGE,
+              ALERT_DISK_USAGE,
+              ALERT_MEMORY_USAGE,
+              ALERT_MISSING_MONITORING_DATA,
+            ],
             filters: [
               {
                 nodeUuid: nodeName,

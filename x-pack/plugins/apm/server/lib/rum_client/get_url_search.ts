@@ -5,19 +5,21 @@
  */
 
 import { mergeProjection } from '../../projections/util/merge_projection';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
+import {
+  TRANSACTION_DURATION,
+  TRANSACTION_URL,
+} from '../../../common/elasticsearch_fieldnames';
 
 export async function getUrlSearch({
   setup,
   urlQuery,
+  percentile,
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   urlQuery?: string;
+  percentile: number;
 }) {
   const projection = getRumPageLoadTransactionsProjection({
     setup,
@@ -30,19 +32,19 @@ export async function getUrlSearch({
       aggs: {
         totalUrls: {
           cardinality: {
-            field: 'url.full',
+            field: TRANSACTION_URL,
           },
         },
         urls: {
           terms: {
-            field: 'url.full',
+            field: TRANSACTION_URL,
             size: 10,
           },
           aggs: {
             medianPLD: {
               percentiles: {
-                field: 'transaction.duration.us',
-                percents: [50],
+                field: TRANSACTION_DURATION,
+                percents: [percentile],
               },
             },
           },
@@ -56,12 +58,14 @@ export async function getUrlSearch({
   const response = await apmEventClient.search(params);
   const { urls, totalUrls } = response.aggregations ?? {};
 
+  const pkey = percentile.toFixed(1);
+
   return {
     total: totalUrls?.value || 0,
     items: (urls?.buckets ?? []).map((bucket) => ({
       url: bucket.key as string,
       count: bucket.doc_count,
-      pld: bucket.medianPLD.values['50.0'] ?? 0,
+      pld: bucket.medianPLD.values[pkey] ?? 0,
     })),
   };
 }

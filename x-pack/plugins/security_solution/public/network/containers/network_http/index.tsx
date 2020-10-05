@@ -6,11 +6,11 @@
 
 import { noop } from 'lodash/fp';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { shallowEqual, useSelector } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import { ESTermQuery } from '../../../../common/typed_json';
-import { inputsModel, State } from '../../../common/store';
+import { inputsModel } from '../../../common/store';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
@@ -68,32 +68,40 @@ export const useNetworkHttp = ({
   type,
 }: UseNetworkHttp): [boolean, NetworkHttpArgs] => {
   const getHttpSelector = networkSelectors.httpSelector();
-  const { activePage, limit, sort } = useSelector(
-    (state: State) => getHttpSelector(state, type),
-    shallowEqual
+  const { activePage, limit, sort } = useShallowEqualSelector((state) =>
+    getHttpSelector(state, type)
   );
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
 
-  const [networkHttpRequest, setHostRequest] = useState<NetworkHttpRequestOptions>({
-    defaultIndex: indexNames,
-    factoryQueryType: NetworkQueries.http,
-    filterQuery: createFilter(filterQuery),
-    ip,
-    pagination: generateTablePaginationOptions(activePage, limit),
-    sort: sort as SortField,
-    timerange: {
-      interval: '12h',
-      from: startDate ? startDate : '',
-      to: endDate ? endDate : new Date(Date.now()).toISOString(),
-    },
-  });
+  const [networkHttpRequest, setHostRequest] = useState<NetworkHttpRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          factoryQueryType: NetworkQueries.http,
+          filterQuery: createFilter(filterQuery),
+          id: ID,
+          ip,
+          pagination: generateTablePaginationOptions(activePage, limit),
+          sort: sort as SortField,
+          timerange: {
+            interval: '12h',
+            from: startDate ? startDate : '',
+            to: endDate ? endDate : new Date(Date.now()).toISOString(),
+          },
+        }
+      : null
+  );
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
       setHostRequest((prevRequest) => {
+        if (!prevRequest) {
+          return prevRequest;
+        }
+
         return {
           ...prevRequest,
           pagination: generateTablePaginationOptions(newActivePage, limit),
@@ -122,7 +130,11 @@ export const useNetworkHttp = ({
   });
 
   const networkHttpSearch = useCallback(
-    (request: NetworkHttpRequestOptions) => {
+    (request: NetworkHttpRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -181,9 +193,11 @@ export const useNetworkHttp = ({
   useEffect(() => {
     setHostRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
         defaultIndex: indexNames,
+        factoryQueryType: NetworkQueries.http,
         filterQuery: createFilter(filterQuery),
+        id: ID,
         pagination: generateTablePaginationOptions(activePage, limit),
         sort: sort as SortField,
         timerange: {

@@ -24,6 +24,7 @@ import {
   CoreStart,
   Plugin,
   Logger,
+  IClusterClient,
 } from '../../../core/server';
 
 import {
@@ -66,6 +67,7 @@ export class TelemetryCollectionManagerPlugin
       setCollection: this.setCollection.bind(this),
       getOptInStats: this.getOptInStats.bind(this),
       getStats: this.getStats.bind(this),
+      areAllCollectorsReady: this.areAllCollectorsReady.bind(this),
     };
   }
 
@@ -74,6 +76,7 @@ export class TelemetryCollectionManagerPlugin
       setCollection: this.setCollection.bind(this),
       getOptInStats: this.getOptInStats.bind(this),
       getStats: this.getStats.bind(this),
+      areAllCollectorsReady: this.areAllCollectorsReady.bind(this),
     };
   }
 
@@ -86,6 +89,7 @@ export class TelemetryCollectionManagerPlugin
       title,
       priority,
       esCluster,
+      esClientGetter,
       statsGetter,
       clusterDetailsGetter,
       licenseGetter,
@@ -105,6 +109,9 @@ export class TelemetryCollectionManagerPlugin
       if (!esCluster) {
         throw Error('esCluster name must be set for the getCluster method.');
       }
+      if (!esClientGetter) {
+        throw Error('esClientGetter method not set.');
+      }
       if (!clusterDetailsGetter) {
         throw Error('Cluster UUIds method is not set.');
       }
@@ -118,6 +125,7 @@ export class TelemetryCollectionManagerPlugin
         clusterDetailsGetter,
         esCluster,
         title,
+        esClientGetter,
       });
       this.usageGetterMethodPriority = priority;
     }
@@ -126,6 +134,7 @@ export class TelemetryCollectionManagerPlugin
   private getStatsCollectionConfig(
     config: StatsGetterConfig,
     collection: Collection,
+    collectionEsClient: IClusterClient,
     usageCollection: UsageCollectionSetup
   ): StatsCollectionConfig {
     const { start, end, request } = config;
@@ -133,8 +142,11 @@ export class TelemetryCollectionManagerPlugin
     const callCluster = config.unencrypted
       ? collection.esCluster.asScoped(request).callAsCurrentUser
       : collection.esCluster.callAsInternalUser;
-
-    return { callCluster, start, end, usageCollection };
+    // Scope the new elasticsearch Client appropriately and pass to the stats collection config
+    const esClient = config.unencrypted
+      ? collectionEsClient.asScoped(config.request).asCurrentUser
+      : collectionEsClient.asInternalUser;
+    return { callCluster, start, end, usageCollection, esClient };
   }
 
   private async getOptInStats(optInStatus: boolean, config: StatsGetterConfig) {
@@ -142,32 +154,42 @@ export class TelemetryCollectionManagerPlugin
       return [];
     }
     for (const collection of this.collections) {
-      const statsCollectionConfig = this.getStatsCollectionConfig(
-        config,
-        collection,
-        this.usageCollection
-      );
-      try {
-        const optInStats = await this.getOptInStatsForCollection(
+      // first fetch the client and make sure it's not undefined.
+      const collectionEsClient = collection.esClientGetter();
+      if (collectionEsClient !== undefined) {
+        const statsCollectionConfig = this.getStatsCollectionConfig(
+          config,
           collection,
-          optInStatus,
-          statsCollectionConfig
+          collectionEsClient,
+          this.usageCollection
         );
-        if (optInStats && optInStats.length) {
-          this.logger.debug(`Got Opt In stats using ${collection.title} collection.`);
-          if (config.unencrypted) {
-            return optInStats;
+
+        try {
+          const optInStats = await this.getOptInStatsForCollection(
+            collection,
+            optInStatus,
+            statsCollectionConfig
+          );
+          if (optInStats && optInStats.length) {
+            this.logger.debug(`Got Opt In stats using ${collection.title} collection.`);
+            if (config.unencrypted) {
+              return optInStats;
+            }
+            return encryptTelemetry(optInStats, { useProdKey: this.isDistributable });
           }
-          return encryptTelemetry(optInStats, { useProdKey: this.isDistributable });
+        } catch (err) {
+          this.logger.debug(`Failed to collect any opt in stats with registered collections.`);
+          // swallow error to try next collection;
         }
-      } catch (err) {
-        this.logger.debug(`Failed to collect any opt in stats with registered collections.`);
-        // swallow error to try next collection;
       }
     }
 
     return [];
   }
+
+  private areAllCollectorsReady = async () => {
+    return await this.usageCollection?.areAllCollectorsReady();
+  };
 
   private getOptInStatsForCollection = async (
     collection: Collection,
@@ -192,28 +214,32 @@ export class TelemetryCollectionManagerPlugin
       return [];
     }
     for (const collection of this.collections) {
-      const statsCollectionConfig = this.getStatsCollectionConfig(
-        config,
-        collection,
-        this.usageCollection
-      );
-      try {
-        const usageData = await this.getUsageForCollection(collection, statsCollectionConfig);
-        if (usageData.length) {
-          this.logger.debug(`Got Usage using ${collection.title} collection.`);
-          if (config.unencrypted) {
-            return usageData;
-          }
-
-          return encryptTelemetry(usageData.filter(isClusterOptedIn), {
-            useProdKey: this.isDistributable,
-          });
-        }
-      } catch (err) {
-        this.logger.debug(
-          `Failed to collect any usage with registered collection ${collection.title}.`
+      const collectionEsClient = collection.esClientGetter();
+      if (collectionEsClient !== undefined) {
+        const statsCollectionConfig = this.getStatsCollectionConfig(
+          config,
+          collection,
+          collectionEsClient,
+          this.usageCollection
         );
-        // swallow error to try next collection;
+        try {
+          const usageData = await this.getUsageForCollection(collection, statsCollectionConfig);
+          if (usageData.length) {
+            this.logger.debug(`Got Usage using ${collection.title} collection.`);
+            if (config.unencrypted) {
+              return usageData;
+            }
+
+            return encryptTelemetry(usageData.filter(isClusterOptedIn), {
+              useProdKey: this.isDistributable,
+            });
+          }
+        } catch (err) {
+          this.logger.debug(
+            `Failed to collect any usage with registered collection ${collection.title}.`
+          );
+          // swallow error to try next collection;
+        }
       }
     }
 
