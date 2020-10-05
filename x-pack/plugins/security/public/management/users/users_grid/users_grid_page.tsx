@@ -192,6 +192,7 @@ export class UsersGridPage extends Component<Props, State> {
       toolsRight: this.renderToolsRight(),
       box: {
         incremental: true,
+        'data-test-subj': 'searchUsers',
       },
       onChange: (query: any) => {
         this.setState({
