@@ -12,7 +12,7 @@ import enzymeToJson from 'enzyme-to-json';
 import { Location } from 'history';
 import moment from 'moment';
 import { Moment } from 'moment-timezone';
-import { render, waitForElement } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { APMConfig } from '../../server';
@@ -75,10 +75,10 @@ export async function getRenderedHref(Component: React.FC, location: Location) {
       </MemoryRouter>
     </MockApmPluginContextWrapper>
   );
-
-  await waitForElement(() => el.container.querySelector('a'));
-
   const a = el.container.querySelector('a');
+
+  await waitFor(() => {}, { container: a! });
+
   return a ? a.getAttribute('href') : '';
 }
 
