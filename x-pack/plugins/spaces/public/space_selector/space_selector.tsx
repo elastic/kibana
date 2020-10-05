@@ -39,6 +39,7 @@ interface State {
   loading: boolean;
   searchTerm: string;
   spaces: Space[];
+  error?: Error;
 }
 
 export class SpaceSelector extends Component<Props, State> {
@@ -71,12 +72,20 @@ export class SpaceSelector extends Component<Props, State> {
     this.setState({ loading: true });
     const { spacesManager } = this.props;
 
-    spacesManager.getSpaces().then((spaces) => {
-      this.setState({
-        loading: false,
-        spaces,
+    spacesManager
+      .getSpaces()
+      .then((spaces) => {
+        this.setState({
+          loading: false,
+          spaces,
+        });
+      })
+      .catch((err) => {
+        this.setState({
+          loading: false,
+          error: err,
+        });
       });
-    });
   }
 
   public render() {
@@ -135,7 +144,7 @@ export class SpaceSelector extends Component<Props, State> {
               <SpaceCards spaces={filteredSpaces} serverBasePath={this.props.serverBasePath} />
             )}
 
-            {!this.state.loading && filteredSpaces.length === 0 && (
+            {!this.state.loading && !this.state.error && filteredSpaces.length === 0 && (
               <Fragment>
                 <EuiSpacer />
                 <EuiText
@@ -147,6 +156,23 @@ export class SpaceSelector extends Component<Props, State> {
                     id="xpack.spaces.spaceSelector.noSpacesMatchSearchCriteriaDescription"
                     defaultMessage="No spaces match search criteria"
                   />
+                </EuiText>
+              </Fragment>
+            )}
+
+            {!this.state.loading && this.state.error && (
+              <Fragment>
+                <EuiSpacer />
+                <EuiText
+                  color="subdued"
+                  // @ts-ignore
+                  textAlign="center"
+                >
+                  <FormattedMessage
+                    id="xpack.spaces.spaceSelector.errorLoadingSpacesDescription"
+                    defaultMessage="Error loading spaces"
+                  />
+                  &nbsp;({this.state.error.message})
                 </EuiText>
               </Fragment>
             )}
