@@ -11,12 +11,11 @@ import {
   DiscoverTransactionLink,
   getDiscoverQuery,
 } from '../DiscoverTransactionLink';
-import mockTransaction from './mockTransaction.json';
+import mockTransaction from './mock_transaction.json';
 
 describe('DiscoverTransactionLink component', () => {
   it('should render with data', () => {
-    // @ts-expect-error invalid json mock
-    const transaction: Transaction = mockTransaction;
+    const transaction = mockTransaction as Transaction;
 
     expect(
       shallow(<DiscoverTransactionLink transaction={transaction} />)
@@ -26,8 +25,7 @@ describe('DiscoverTransactionLink component', () => {
 
 describe('getDiscoverQuery', () => {
   it('should return the correct query params object', () => {
-    // @ts-expect-error invalid json mock
-    const transaction: Transaction = mockTransaction;
+    const transaction = mockTransaction as Transaction;
     const result = getDiscoverQuery(transaction);
     expect(result).toMatchSnapshot();
   });
