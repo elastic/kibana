@@ -36,7 +36,7 @@ export const CopyablePanelField = memo(
     const [isOpen, setIsOpen] = useState(false);
     const onMouseEnter = () => setIsOpen(true);
 
-    const buttonContent = memo(() => (
+    const ButtonContent = memo(() => (
       <StyledCopyableField
         borderColor={pillStroke}
         data-test-subj="resolver:panel:copyable-field"
@@ -53,7 +53,7 @@ export const CopyablePanelField = memo(
       <div onMouseLeave={onMouseLeave}>
         <EuiPopover
           anchorPosition={'downCenter'}
-          button={buttonContent}
+          button={<ButtonContent />}
           closePopover={onMouseLeave}
           hasArrow={false}
           isOpen={isOpen}
