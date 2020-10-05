@@ -12,6 +12,7 @@ import {
   DraggableWrapper,
 } from '../../../common/components/drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
+import { Content } from '../../../common/components/draggables';
 import { getOrEmptyTagFromValue } from '../../../common/components/empty_value';
 import { IPDetailsLink } from '../../../common/components/links';
 import { parseQueryValue } from '../../../timelines/components/timeline/body/renderers/parse_query_value';
@@ -122,7 +123,9 @@ const AddressLinksComponent: React.FC<{
               />
             </DragEffects>
           ) : (
-            <IPDetailsLink data-test-subj="ip-details" ip={address} />
+            <Content field={fieldName} tooltipContent={address}>
+              <IPDetailsLink data-test-subj="ip-details" ip={address} />
+            </Content>
           )
         }
         truncate={truncate}
