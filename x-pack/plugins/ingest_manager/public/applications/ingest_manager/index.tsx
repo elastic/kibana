@@ -66,7 +66,7 @@ const ErrorLayout = ({ children }: { children: JSX.Element }) => (
 
 const IngestManagerRoutes = memo<{ history: AppMountParameters['history']; basepath: string }>(
   ({ history, ...rest }) => {
-    const { fleet } = useConfig();
+    const { agents } = useConfig();
     const { notifications } = useCore();
 
     const [isPermissionsLoading, setIsPermissionsLoading] = useState<boolean>(false);
@@ -207,7 +207,7 @@ const IngestManagerRoutes = memo<{ history: AppMountParameters['history']; basep
                       <DataStreamApp />
                     </DefaultLayout>
                   </Route>
-                  <ProtectedRoute path={PAGE_ROUTING_PATHS.fleet} isAllowed={fleet.enabled}>
+                  <ProtectedRoute path={PAGE_ROUTING_PATHS.fleet} isAllowed={agents.enabled}>
                     <DefaultLayout section="fleet">
                       <FleetApp />
                     </DefaultLayout>

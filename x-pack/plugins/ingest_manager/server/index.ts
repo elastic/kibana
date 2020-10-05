@@ -22,12 +22,12 @@ export {
 export const config = {
   exposeToBrowser: {
     epm: true,
-    fleet: true,
+    agents: true,
   },
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     registryUrl: schema.maybe(schema.uri()),
-    fleet: schema.object({
+    agents: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       tlsCheckDisabled: schema.boolean({ defaultValue: false }),
       pollingRequestTimeout: schema.number({

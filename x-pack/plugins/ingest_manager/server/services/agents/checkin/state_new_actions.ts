@@ -166,7 +166,7 @@ export async function createAgentActionFromPolicyAction(
 }
 
 function getPollingTimeoutMs() {
-  const pollingTimeoutMs = appContextService.getConfig()?.fleet.pollingRequestTimeout ?? 0;
+  const pollingTimeoutMs = appContextService.getConfig()?.agents.pollingRequestTimeout ?? 0;
   // Set a timeout 20s before the real timeout to have a chance to respond an empty response before socket timeout
   return Math.max(
     pollingTimeoutMs - AGENT_POLLING_REQUEST_TIMEOUT_MARGIN_MS,
@@ -182,10 +182,10 @@ export function agentCheckinStateNewActionsFactory() {
   const pollingTimeoutMs = getPollingTimeoutMs();
 
   const rateLimiterIntervalMs =
-    appContextService.getConfig()?.fleet.agentPolicyRolloutRateLimitIntervalMs ??
+    appContextService.getConfig()?.agents.agentPolicyRolloutRateLimitIntervalMs ??
     AGENT_POLICY_ROLLOUT_RATE_LIMIT_INTERVAL_MS;
   const rateLimiterRequestPerInterval =
-    appContextService.getConfig()?.fleet.agentPolicyRolloutRateLimitRequestPerInterval ??
+    appContextService.getConfig()?.agents.agentPolicyRolloutRateLimitRequestPerInterval ??
     AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL;
   const rateLimiterMaxDelay = pollingTimeoutMs;
 
