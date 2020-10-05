@@ -32,6 +32,7 @@ interface CommonBaseVisTypeOptions {
   icon?: string;
   image?: string;
   stage?: 'experimental' | 'beta' | 'production';
+  group?: 'tools' | 'aggbased' | 'other';
   options?: Record<string, any>;
   visConfig?: Record<string, any>;
   editor?: any;
@@ -69,6 +70,7 @@ export class BaseVisType<TVisParams = VisParams> {
   icon?: string;
   image?: string;
   stage: 'experimental' | 'beta' | 'production';
+  group?: 'tools' | 'aggbased' | 'other';
   isExperimental: boolean;
   options: Record<string, any>;
   visualization: VisualizationControllerConstructor | undefined;
@@ -112,6 +114,7 @@ export class BaseVisType<TVisParams = VisParams> {
     this.editorConfig = _.defaultsDeep({}, opts.editorConfig, { collections: {} });
     this.options = _.defaultsDeep({}, opts.options, defaultOptions);
     this.stage = opts.stage || 'production';
+    this.group = opts.group || 'aggbased';
     this.isExperimental = opts.stage === 'experimental';
     this.hidden = opts.hidden || false;
     this.requestHandler = opts.requestHandler || 'courier';

@@ -124,6 +124,15 @@ export class TypesService {
        * returns all registered aliases
        */
       getAliases: visTypeAliasRegistry.get,
+      /**
+       * returns all visualizations of specific group
+       * @param {string} group - group type (aggbased | other | tools)
+       */
+      getByGroup: (group: string) => {
+        return [...Object.values(this.types)].filter((type) => {
+          return type.group === group;
+        });
+      },
     };
   }
 

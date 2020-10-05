@@ -29,6 +29,7 @@ export const markdownVisDefinition = {
   title: 'Markdown',
   isAccessible: true,
   icon: 'visText',
+  group: 'tools',
   description: i18n.translate('visTypeMarkdown.markdownDescription', {
     defaultMessage: 'Create a document using markdown syntax',
   }),

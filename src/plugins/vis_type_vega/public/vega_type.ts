@@ -37,10 +37,12 @@ export const createVegaTypeDefinition = (dependencies: VegaVisualizationDependen
     name: 'vega',
     title: 'Vega',
     description: i18n.translate('visTypeVega.type.vegaDescription', {
-      defaultMessage: 'Create custom visualizations using Vega and Vega-Lite',
+      defaultMessage:
+        'Use Vega library to develop new types of visualizations. Requires knowledge of Vega and programming.',
       description: 'Vega and Vega-Lite are product names and should not be translated',
     }),
     icon: 'visVega',
+    group: 'other',
     visConfig: { defaults: { spec: getDefaultSpec() } },
     editorConfig: {
       optionsTemplate: VegaVisEditor,

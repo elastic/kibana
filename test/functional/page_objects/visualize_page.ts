@@ -47,6 +47,10 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       await listingTable.clickNewButton('createVisualizationPromptButton');
     }
 
+    public async clickAggBasedVisualizations() {
+      await testSubjects.click('visGroupAggBasedExploreLink');
+    }
+
     public async createVisualizationPromptButton() {
       await testSubjects.click('createVisualizationPromptButton');
     }
@@ -57,6 +61,21 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       return $('button')
         .toArray()
         .map((chart) => $(chart).findTestSubject('visTypeTitle').text().trim());
+    }
+
+    public async getVisGroups() {
+      const chartTypeField = await testSubjects.find('visNewDialogGroups');
+      const $ = await chartTypeField.parseDomContent();
+      const visGroups: string[] = [];
+      $('button')
+        .toArray()
+        .map((chart) => {
+          const title = $(chart).findTestSubject('visGroupTitle').text().trim();
+          if (title) {
+            visGroups.push(title);
+          }
+        });
+      return visGroups;
     }
 
     public async waitForVisualizationSelectPage() {
@@ -72,11 +91,23 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       await common.navigateToApp('visualize');
       await header.waitUntilLoadingHasFinished();
       await this.clickNewVisualization();
+      // should add a wait for groups here
+    }
+
+    public async navigateToNewAggBasedVisualization() {
+      await common.navigateToApp('visualize');
+      await header.waitUntilLoadingHasFinished();
+      await this.clickNewVisualization();
+      await this.clickAggBasedVisualizations();
       await this.waitForVisualizationSelectPage();
     }
 
     public async hasVisType(type: string) {
       return await testSubjects.exists(`visType-${type}`);
+    }
+
+    public async clickVisGroup(group: string) {
+      await testSubjects.click(`visGroup-${group}`);
     }
 
     public async clickVisType(type: string) {
