@@ -80,13 +80,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private storage = new Storage(localStorage);
 
   /**
-   * Lazily instantiated subPlugins. see `subPlugins`.
+   * Lazily instantiated subPlugins.
+   * See `subPlugins` method.
    */
   private _subPlugins?: SubPlugins;
 
   /**
    * Lazily instantiated `SecurityAppStore`.
-   * See `store`.
+   * See `store` method.
    */
   private _store?: SecurityAppStore;
 
@@ -340,6 +341,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   /**
    * The dependencies needed to mount the applications. These are dynamically loaded for the sake of webpack bundling efficiency.
+   * Webpack is smart enough to only request (and download) this even when it is imported multiple times concurrently.
    */
   private lazyApplicationDependencies(): Promise<LazyApplicationDependencies> {
     /**
@@ -372,7 +374,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   }
 
   /**
-   * Lazily instantiate a `SecurityAppStore`.
+   * Lazily instantiate a `SecurityAppStore`. We lazily instantiate this because it requests large dynamic imports. We instantiate it once because each subPlugin needs to share the same reference.
    */
   private async store(coreStart: CoreStart, startPlugins: StartPlugins): Promise<SecurityAppStore> {
     if (!this._store) {
