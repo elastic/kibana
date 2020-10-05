@@ -17,7 +17,6 @@ import { transformError, buildSiemResponse } from '../utils';
 import { getRuleActionsSavedObject } from '../../rule_actions/get_rule_actions_saved_object';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import { ruleStatusServiceFactory } from '../../signals/rule_status_service';
 
 export const findRulesRoute = (router: IRouter) => {
   router.get(
@@ -69,20 +68,6 @@ export const findRulesRoute = (router: IRouter) => {
             Object.keys(rule.executionStatus).length !== 0 &&
             rule.executionStatus.status === 'error'
         );
-        if (failingRules.length > 0) {
-          // write failure statuses for failing rules
-          await Promise.all(
-            failingRules.map(async (rule) => {
-              const ruleStatusService = await ruleStatusServiceFactory({
-                alertId: rule.id,
-                ruleStatusClient,
-              });
-              return ruleStatusService.error(
-                `Reason: ${rule.executionStatus.error?.reason} Message: ${rule.executionStatus.error?.message}`
-              );
-            })
-          );
-        }
 
         const ruleStatuses = await Promise.all(
           rules.data.map(async (rule) => {
@@ -93,6 +78,11 @@ export const findRulesRoute = (router: IRouter) => {
               search: rule.id,
               searchFields: ['alertId'],
             });
+            if (failingRules.find((failingRule) => failingRule.id === rule.id)) {
+              if (results.saved_objects.length > 0) {
+                results.saved_objects[0].attributes.status = 'failed';
+              }
+            }
             return results;
           })
         );

@@ -14,6 +14,8 @@ import {
   findRulesStatusesSchema,
   FindRulesStatusesSchemaDecoded,
 } from '../../../../../common/detection_engine/schemas/request/find_rule_statuses_schema';
+import { findRules } from '../../rules/find_rules';
+import { ruleStatusServiceFactory } from '../../signals/rule_status_service';
 
 export const findRulesStatusesRoute = (router: IRouter) => {
   router.post(
@@ -38,6 +40,7 @@ export const findRulesStatusesRoute = (router: IRouter) => {
         return siemResponse.error({ statusCode: 404 });
       }
 
+      const ids = body.ids;
       // build return object with ids as keys and errors as values.
       /* looks like this
         {
@@ -46,37 +49,59 @@ export const findRulesStatusesRoute = (router: IRouter) => {
         }
     */
       try {
-        const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
-        const statuses = await body.ids.reduce<Promise<RuleStatusResponse | {}>>(
-          async (acc, id) => {
-            const lastFiveErrorsForId = await ruleStatusClient.find({
-              perPage: 6,
-              sortField: 'statusDate',
-              sortOrder: 'desc',
-              search: id,
-              searchFields: ['alertId'],
-            });
-            const accumulated = await acc;
+        const failingRules = await findRules({
+          alertsClient,
+          perPage: ids.length,
+          page: undefined,
+          sortField: undefined,
+          sortOrder: undefined,
+          filter: 'alert.attributes.executionStatus.status: "error"',
+          fields: ['executionStatus'],
+        });
 
-            // Array accessors can result in undefined but
-            // this is not represented in typescript for some reason,
-            // https://github.com/Microsoft/TypeScript/issues/11122
-            const currentStatus = convertToSnakeCase<IRuleStatusAttributes>(
-              lastFiveErrorsForId.saved_objects[0]?.attributes
+        const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
+
+        await Promise.all(
+          failingRules.data.map(async (rule) => {
+            const ruleStatusService = await ruleStatusServiceFactory({
+              alertId: rule.id,
+              ruleStatusClient,
+            });
+            return ruleStatusService.error(
+              `Reason: ${rule.executionStatus.error?.reason} Message: ${rule.executionStatus.error?.message}`
             );
-            const failures = lastFiveErrorsForId.saved_objects
-              .slice(1)
-              .map((errorItem) => convertToSnakeCase<IRuleStatusAttributes>(errorItem.attributes));
-            return {
-              ...accumulated,
-              [id]: {
-                current_status: currentStatus,
-                failures,
-              },
-            };
-          },
-          Promise.resolve<RuleStatusResponse>({})
+          })
         );
+
+        const statuses = await ids.reduce<Promise<RuleStatusResponse | {}>>(async (acc, id) => {
+          const accumulated = await acc;
+
+          const lastFiveErrorsForId = await ruleStatusClient.find({
+            perPage: 6,
+            sortField: 'statusDate',
+            sortOrder: 'desc',
+            search: id,
+            searchFields: ['alertId'],
+          });
+
+          // Array accessors can result in undefined but
+          // this is not represented in typescript for some reason,
+          // https://github.com/Microsoft/TypeScript/issues/11122
+          const currentStatus = convertToSnakeCase<IRuleStatusAttributes>(
+            lastFiveErrorsForId.saved_objects[0]?.attributes
+          );
+
+          const failures = lastFiveErrorsForId.saved_objects
+            .slice(1)
+            .map((errorItem) => convertToSnakeCase<IRuleStatusAttributes>(errorItem.attributes));
+          return {
+            ...accumulated,
+            [id]: {
+              current_status: currentStatus,
+              failures,
+            },
+          };
+        }, Promise.resolve<RuleStatusResponse>({}));
         return response.ok({ body: statuses });
       } catch (err) {
         const error = transformError(err);
