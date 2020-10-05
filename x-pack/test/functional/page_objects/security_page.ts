@@ -429,10 +429,7 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
           const globalSpaceOption = await find.byCssSelector(`#spaceOption_\\*`);
           await globalSpaceOption.click();
 
-          await testSubjects.click('basePrivilegeComboBox');
-
-          const privilegeOption = await find.byCssSelector(`#basePrivilege_${privilegeName}`);
-          await privilegeOption.click();
+          await testSubjects.click(`basePrivilege_${privilegeName}`);
 
           await testSubjects.click('createSpacePrivilegeButton');
         }
