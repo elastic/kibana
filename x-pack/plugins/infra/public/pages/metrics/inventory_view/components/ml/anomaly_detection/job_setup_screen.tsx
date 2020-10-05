@@ -164,7 +164,7 @@ export const JobSetupScreen = (props: Props) => {
               <p>
                 <FormattedMessage
                   id="xpack.infra.ml.steps.setupProcess.description"
-                  defaultMessage="Answer the following questions to configure Machine Learning jobs for Metrics. These settings can not be changed once the jobs are created. You can recreate these jobs later; however, any previously detected anomalies will be removed as a result."
+                  defaultMessage="Settings can not be changed once the jobs are created. You can recreate these jobs later; however, any previously detected anomalies will be removed as a result."
                 />
               </p>
             </EuiText>
@@ -183,7 +183,7 @@ export const JobSetupScreen = (props: Props) => {
                 description={
                   <FormattedMessage
                     id="xpack.infra.ml.steps.setupProcess.when.description"
-                    defaultMessage="By default, Machine Learning jobs will analyze the past 4 weeks of data and continue to run indefinitely. You can specify a different start date, end date, or both. We recommend that you run jobs indefinitely."
+                    defaultMessage="By default, Machine Learning jobs analyze the past 4 weeks of data and continue to run indefinitely. You can specify a different start date, end date, or both. We recommend that you run jobs indefinitely."
                   />
                 }
               >
@@ -267,7 +267,7 @@ export const JobSetupScreen = (props: Props) => {
             <EuiButton fill={true} fullWidth={false} onClick={createJobs}>
               <FormattedMessage
                 id="xpack.infra.ml.steps.setupProcess.enableButton"
-                defaultMessage="Enable Jobs"
+                defaultMessage="Enable jobs"
               />
             </EuiButton>
           </EuiFlexItem>
