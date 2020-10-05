@@ -20,28 +20,35 @@
 import { CoreSetup, PluginInitializerContext } from 'kibana/public';
 import { ExpressionRenderDefinition } from 'src/plugins/expressions';
 import { TablePluginStartDependencies } from '../plugin';
+import { TableVisRenderValue } from '../table_vis_fn';
+import { TableVisLegacyController } from './vis_controller';
 // import { VisualizationContainer } from '../../visualizations/public';
 
-const tableVisRegistry = new Map<HTMLElement, any>();
+const tableVisRegistry = new Map<HTMLElement, TableVisLegacyController>();
 
 export const getTableVisLegacyRenderer: (
   core: CoreSetup<TablePluginStartDependencies>,
   context: PluginInitializerContext
-) => ExpressionRenderDefinition<any> = (core, context) => ({
+) => ExpressionRenderDefinition<TableVisRenderValue> = (core, context) => ({
   name: 'table_vis',
   reuseDomNode: true,
   render: async (domNode, config, handlers) => {
-    handlers.onDestroy(() => {
-      tableVisRegistry.delete(domNode);
-    });
+    let registeredController = tableVisRegistry.get(domNode);
 
-    if (!tableVisRegistry.has(domNode)) {
+    if (!registeredController) {
       const { getTableVisualizationControllerClass } = await import('./vis_controller');
+
       const Controller = getTableVisualizationControllerClass(core, context);
-      tableVisRegistry.set(domNode, new Controller(domNode));
+      registeredController = new Controller(domNode);
+      tableVisRegistry.set(domNode, registeredController);
+
+      handlers.onDestroy(() => {
+        registeredController?.destroy();
+        tableVisRegistry.delete(domNode);
+      });
     }
 
-    await tableVisRegistry.get(domNode)?.render(config.visData, config.visConfig, handlers.uiState);
+    await registeredController.render(config.visData, config.visConfig, handlers.uiState);
     handlers.done();
   },
 });

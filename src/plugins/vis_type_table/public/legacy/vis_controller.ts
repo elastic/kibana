@@ -22,14 +22,20 @@ import $ from 'jquery';
 
 import './index.scss';
 
+import { PersistedState } from 'src/plugins/visualizations/public';
 import { getAngularModule } from './get_inner_angular';
 import { initTableVisLegacyModule } from './table_vis_legacy_module';
 // @ts-ignore
 import tableVisTemplate from './table_vis.html';
 import { TablePluginStartDependencies } from '../plugin';
 import { TableVisParams } from '../types';
+import { TableContext } from '../table_vis_response_handler';
 
 const innerAngularName = 'kibana/table_vis';
+
+export type TableVisLegacyController = InstanceType<
+  ReturnType<typeof getTableVisualizationControllerClass>
+>;
 
 export function getTableVisualizationControllerClass(
   core: CoreSetup<TablePluginStartDependencies>,
@@ -67,7 +73,11 @@ export function getTableVisualizationControllerClass(
       }
     }
 
-    async render(esResponse: object, visParams: TableVisParams, uiState: any): Promise<void> {
+    async render(
+      esResponse: TableContext,
+      visParams: TableVisParams,
+      uiState?: PersistedState
+    ): Promise<void> {
       await this.initLocalAngular();
 
       return new Promise(async (resolve, reject) => {

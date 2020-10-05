@@ -20,6 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { tableVisResponseHandler, TableContext } from './table_vis_response_handler';
 import { ExpressionFunctionDefinition, KibanaDatatable, Render } from '../../expressions/public';
+import { TableVisParams } from './types';
 
 export type Input = KibanaDatatable;
 
@@ -27,22 +28,17 @@ interface Arguments {
   visConfig: string | null;
 }
 
-type VisParams = Required<Arguments>;
-
-interface RenderValue {
+export interface TableVisRenderValue {
   visData: TableContext;
   visType: 'table';
-  visConfig: VisParams;
-  params: {
-    listenOnChange: boolean;
-  };
+  visConfig: TableVisParams;
 }
 
 export type TableExpressionFunctionDefinition = ExpressionFunctionDefinition<
   'kibana_table',
   Input,
   Arguments,
-  Render<RenderValue>
+  Render<TableVisRenderValue>
 >;
 
 export const createTableVisFn = (): TableExpressionFunctionDefinition => ({
@@ -70,9 +66,6 @@ export const createTableVisFn = (): TableExpressionFunctionDefinition => ({
         visData: convertedData,
         visType: 'table',
         visConfig,
-        params: {
-          listenOnChange: true,
-        },
       },
     };
   },
