@@ -90,7 +90,7 @@ export const useTimelineEvents = ({
           fields: [],
           fieldRequested: fields,
           filterQuery: createFilter(filterQuery),
-          id,
+          id: ID,
           timerange: {
             interval: '12h',
             from: startDate,

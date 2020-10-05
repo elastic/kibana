@@ -155,7 +155,7 @@ export const EventColumnView = React.memo<Props>(
           key="alert-context-menu"
           ecsRowData={ecsData}
           timelineId={timelineId}
-          disabled={ecsData.signal?.rule?.id == null}
+          disabled={eventType !== 'signal'}
           refetch={refetch}
         />,
       ],
