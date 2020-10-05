@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AsyncResourceState, TrustedAppsListPageState } from '../state';
+import {
+  AsyncResourceState,
+  TrustedAppsListPageLocation,
+  TrustedAppsListPageState,
+} from '../state';
 import { initialTrustedAppsPageState } from './reducer';
 import {
   getListResourceState,
@@ -84,7 +88,11 @@ describe('selectors', () => {
 
     it('returns false when current loaded data is up to date', () => {
       const listView = createLoadedListViewWithPagination(initialNow);
-      const location = { page_index: 0, page_size: 10 };
+      const location: TrustedAppsListPageLocation = {
+        page_index: 0,
+        page_size: 10,
+        view_type: 'grid',
+      };
 
       expect(needsRefreshOfListData({ ...initialState, listView, active: true, location })).toBe(
         false
@@ -166,17 +174,25 @@ describe('selectors', () => {
 
   describe('getListCurrentPageIndex()', () => {
     it('returns page index', () => {
-      const state = { ...initialState, location: { page_index: 3, page_size: 10 } };
+      const location: TrustedAppsListPageLocation = {
+        page_index: 3,
+        page_size: 10,
+        view_type: 'grid',
+      };
 
-      expect(getCurrentLocationPageIndex(state)).toBe(3);
+      expect(getCurrentLocationPageIndex({ ...initialState, location })).toBe(3);
     });
   });
 
   describe('getListCurrentPageSize()', () => {
     it('returns page size', () => {
-      const state = { ...initialState, location: { page_index: 0, page_size: 20 } };
+      const location: TrustedAppsListPageLocation = {
+        page_index: 0,
+        page_size: 20,
+        view_type: 'grid',
+      };
 
-      expect(getCurrentLocationPageSize(state)).toBe(20);
+      expect(getCurrentLocationPageSize({ ...initialState, location })).toBe(20);
     });
   });
 
