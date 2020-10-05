@@ -476,7 +476,7 @@ export class TaskStore {
     const {
       aggregations,
       hits: {
-        total: { value: sum },
+        total: { value: count },
       },
     } = (await this.callCluster('search', {
       index: this.index,
@@ -490,7 +490,7 @@ export class TaskStore {
       hits: { total: { value: number } };
     };
 
-    return { aggregations, sum };
+    return { aggregations, count };
   }
 
   private async updateByQuery(

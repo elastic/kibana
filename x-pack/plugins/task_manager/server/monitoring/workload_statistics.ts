@@ -30,15 +30,17 @@ interface StatusStat extends JsonObject {
 }
 interface TaskTypeStat extends JsonObject {
   [taskType: string]: {
-    sum: number;
+    count: number;
     status: StatusStat;
   };
 }
 
 export interface WorkloadStat extends JsonObject {
-  sum: number;
+  count: number;
   taskTypes: TaskTypeStat;
   schedule: Array<[string, number]>;
+  overdue: number;
+  scheduleDensity: number[];
 }
 
 export function createWorkloadAggregator(
@@ -105,7 +107,7 @@ export function createWorkloadAggregator(
     map(
       ({
         aggregations,
-        sum,
+        count,
       }: AggregationSearchResult<
         | 'taskType'
         | 'schedule'
@@ -125,7 +127,7 @@ export function createWorkloadAggregator(
             !isKeyedBuckets(aggregations.idleTasks.scheduleDensity.buckets)
           )
         ) {
-          throw new Error(`Invalid workload: ${JSON.stringify({ aggregations, sum })}`);
+          throw new Error(`Invalid workload: ${JSON.stringify({ aggregations, count })}`);
         }
 
         const {
@@ -138,7 +140,7 @@ export function createWorkloadAggregator(
         } = aggregations;
 
         const summary: WorkloadStat = {
-          sum,
+          count,
           taskTypes: mapValues(
             keyBy<AggregationBucketWithSubAgg<'status'>>(
               taskTypes as Array<AggregationBucketWithSubAgg<'status'>>,
@@ -146,7 +148,7 @@ export function createWorkloadAggregator(
             ),
             ({ doc_count: docCount, status }) => {
               return {
-                sum: docCount,
+                count: docCount,
                 status: mapValues(aggregationBucketsByKey(status), 'doc_count'),
               };
             }

@@ -20,7 +20,13 @@ interface MonitoringStats {
     };
     workload: {
       timestamp: string;
-      value: Record<string, object>;
+      value: {
+        count: number;
+        taskTypes: Record<string, object>;
+        schedule: Array<[string, number]>;
+        overdue: number;
+        scheduleDensity: number[];
+      };
     };
     runtime: {
       timestamp: string;
@@ -83,8 +89,8 @@ export default function ({ getService }: FtrProviderContext) {
       const { workload } = (await getHealth()).stats;
       const sumSampleTaskInWorkload =
         (workload.value.taskTypes as {
-          sampleTask?: { sum: number };
-        }).sampleTask?.sum ?? 0;
+          sampleTask?: { count: number };
+        }).sampleTask?.count ?? 0;
       const scheduledWorkload = (mapValues(
         keyBy(workload.value.schedule as Array<[string, number]>, ([interval, count]) => interval),
         ([, count]) => count
@@ -107,7 +113,7 @@ export default function ({ getService }: FtrProviderContext) {
         const workloadAfterScheduling = (await getHealth()).stats.workload.value;
 
         expect(
-          (workloadAfterScheduling.taskTypes as { sampleTask: { sum: number } }).sampleTask.sum
+          (workloadAfterScheduling.taskTypes as { sampleTask: { count: number } }).sampleTask.count
         ).to.eql(sumSampleTaskInWorkload + 2);
 
         const schedulesWorkloadAfterScheduling = (mapValues(
@@ -123,6 +129,20 @@ export default function ({ getService }: FtrProviderContext) {
         expect(schedulesWorkloadAfterScheduling['37s']).to.eql(1 + (scheduledWorkload['37s'] ?? 0));
         expect(schedulesWorkloadAfterScheduling['37m']).to.eql(1 + (scheduledWorkload['37m'] ?? 0));
       });
+    });
+
+    it('should return a breakdown of idleTasks in the task manager workload', async () => {
+      const {
+        workload: { value: workload },
+      } = (await getHealth()).stats;
+
+      expect(typeof workload.overdue).to.eql('number');
+
+      expect(Array.isArray(workload.scheduleDensity)).to.eql(true);
+
+      // test run with the default poll_interval of 3s and a monitored_aggregated_stats_refresh_rate of 5s,
+      // so we expect the scheduleDensity to span a minute (which means 20 buckets, as 60s / 3s = 20)
+      expect(workload.scheduleDensity.length).to.eql(20);
     });
 
     it('should return the task manager runtime stats', async () => {

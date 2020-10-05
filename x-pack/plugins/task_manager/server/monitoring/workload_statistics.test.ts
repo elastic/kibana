@@ -14,7 +14,7 @@ describe('Workload Statistics Aggregator', () => {
   test('queries the Task Store at a fixed interval for the current workload', async () => {
     const taskManager = taskManagerMock.create();
     taskManager.aggregate.mockResolvedValue(({
-      sum: 0,
+      count: 0,
       aggregations: {
         taskType: {
           buckets: [],
@@ -101,7 +101,7 @@ describe('Workload Statistics Aggregator', () => {
   });
 
   const mockAggregatedResult = ({
-    sum: 4,
+    count: 4,
     aggregations: {
       schedule: {
         doc_count_error_upper_bound: 0,
@@ -204,11 +204,11 @@ describe('Workload Statistics Aggregator', () => {
       workloadAggregator.pipe(first()).subscribe((result) => {
         expect(result.key).toEqual('workload');
         expect(result.value).toMatchObject({
-          sum: 4,
+          count: 4,
           taskTypes: {
-            actions_telemetry: { sum: 2, status: { idle: 2 } },
-            alerting_telemetry: { sum: 1, status: { idle: 1 } },
-            session_cleanup: { sum: 1, status: { idle: 1 } },
+            actions_telemetry: { count: 2, status: { idle: 2 } },
+            alerting_telemetry: { count: 1, status: { idle: 1 } },
+            session_cleanup: { count: 1, status: { idle: 1 } },
           },
         });
         resolve();
@@ -277,20 +277,20 @@ describe('Workload Statistics Aggregator', () => {
       workloadAggregator.pipe(take(2), bufferCount(2)).subscribe((results) => {
         expect(results[0].key).toEqual('workload');
         expect(results[0].value).toMatchObject({
-          sum: 5,
+          count: 5,
           taskTypes: {
-            actions_telemetry: { sum: 2, status: { idle: 2 } },
-            alerting_telemetry: { sum: 2, status: { idle: 2 } },
-            session_cleanup: { sum: 1, status: { idle: 1 } },
+            actions_telemetry: { count: 2, status: { idle: 2 } },
+            alerting_telemetry: { count: 2, status: { idle: 2 } },
+            session_cleanup: { count: 1, status: { idle: 1 } },
           },
         });
         expect(results[1].key).toEqual('workload');
         expect(results[1].value).toMatchObject({
-          sum: 5,
+          count: 5,
           taskTypes: {
-            actions_telemetry: { sum: 2, status: { idle: 2 } },
-            alerting_telemetry: { sum: 2, status: { idle: 1, failed: 1 } },
-            session_cleanup: { sum: 1, status: { idle: 1 } },
+            actions_telemetry: { count: 2, status: { idle: 2 } },
+            alerting_telemetry: { count: 2, status: { idle: 1, failed: 1 } },
+            session_cleanup: { count: 1, status: { idle: 1 } },
           },
         });
         resolve();
@@ -439,7 +439,7 @@ function setTaskTypeCount(
     },
   ];
   return ({
-    sum: buckets.reduce((sum, bucket) => sum + bucket.doc_count, 0),
+    count: buckets.reduce((sum, bucket) => sum + bucket.doc_count, 0),
     aggregations: {
       taskType: {
         doc_count_error_upper_bound: 0,

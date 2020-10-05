@@ -214,6 +214,6 @@ export function isBucketedAggregation<Name extends AggregationNames>(
 }
 
 export interface AggregationSearchResult<Name extends AggregationNames> {
-  sum: number;
+  count: number;
   aggregations: AggregationResult<Name>;
 }
