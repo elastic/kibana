@@ -49,10 +49,7 @@ export const Groups: React.FC = () => {
     filterValue,
   } = useValues(GroupsLogic);
 
-  const {
-    isFederatedAuth,
-    account: { canCreateInvitations },
-  } = useValues(AppLogic);
+  const { isFederatedAuth } = useValues(AppLogic);
 
   const hasMessages = messages.length > 0;
 
@@ -81,14 +78,13 @@ export const Groups: React.FC = () => {
   }
 
   const clearFilters = hasFiltersSet && <ClearFiltersLink />;
-  const inviteUsersButton =
-    !isFederatedAuth && canCreateInvitations ? (
-      <EuiLinkButton to={USERS_PATH} data-test-subj="InviteUsersButton">
-        {i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.inviteUsers.action', {
-          defaultMessage: 'Invite users',
-        })}
-      </EuiLinkButton>
-    ) : null;
+  const inviteUsersButton = !isFederatedAuth ? (
+    <EuiLinkButton to={USERS_PATH} data-test-subj="InviteUsersButton">
+      {i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.inviteUsers.action', {
+        defaultMessage: 'Invite users',
+      })}
+    </EuiLinkButton>
+  ) : null;
 
   const headerAction = (
     <EuiFlexGroup responsive={false} gutterSize="m">
