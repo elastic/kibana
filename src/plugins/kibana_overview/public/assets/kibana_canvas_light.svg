@@ -1,77 +1,69 @@
-<svg width="268" height="151" viewBox="0 0 268 151" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="268" height="151" fill="#F5F7FA"/>
-<g filter="url(#filter0_d)">
-<rect x="12" y="12" width="176" height="127" rx="2" fill="white"/>
-</g>
-<rect x="89" y="132" width="22" height="2" rx="1" fill="#AFB0B3"/>
-<path d="M115.5 131.5L117 133L115.5 134.5" stroke="#AFB0B3" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M85 131.5L83.5 133L85 134.5" stroke="#AFB0B3" stroke-linecap="round" stroke-linejoin="round"/>
-<rect x="60" y="21" width="82" height="16" rx="1" fill="white" stroke="#D3DAE6" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 2"/>
-<rect x="81" y="28" width="40" height="2" rx="1" fill="#54B399"/>
-<rect x="104" y="45" width="76" height="76" rx="1" fill="white" stroke="#D3DAE6" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 2"/>
-<rect x="116" y="81" width="22" height="2" rx="1" fill="#98A2B3"/>
-<rect x="112" y="81" width="2" height="2" rx="1" fill="#D36086"/>
-<rect x="146" y="81" width="2" height="2" rx="1" fill="#D36086"/>
-<rect x="150" y="81" width="22" height="2" rx="1" fill="#98A2B3"/>
-<rect x="112" y="65" width="60" height="8" rx="2" fill="#D36086"/>
-<rect x="116" y="87" width="22" height="2" rx="1" fill="#98A2B3"/>
-<rect x="112" y="87" width="2" height="2" rx="1" fill="#D36086"/>
-<rect x="146" y="87" width="2" height="2" rx="1" fill="#D36086"/>
-<rect x="150" y="87" width="22" height="2" rx="1" fill="#98A2B3"/>
-<rect x="116" y="93" width="22" height="2" rx="1" fill="#98A2B3"/>
-<rect x="112" y="93" width="2" height="2" rx="1" fill="#D36086"/>
-<rect x="146" y="93" width="2" height="2" rx="1" fill="#D36086"/>
-<rect x="150" y="93" width="22" height="2" rx="1" fill="#98A2B3"/>
-<rect x="116" y="99" width="22" height="2" rx="1" fill="#98A2B3"/>
-<rect x="112" y="99" width="2" height="2" rx="1" fill="#D36086"/>
-<rect x="146" y="99" width="2" height="2" rx="1" fill="#D36086"/>
-<rect x="150" y="99" width="22" height="2" rx="1" fill="#98A2B3"/>
-<rect x="20" y="45" width="76" height="76" rx="1" fill="white" stroke="#AFB0B3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 2"/>
-<rect x="18.5" y="43.5" width="3" height="3" fill="white" stroke="#AFB0B3" stroke-linecap="round" stroke-linejoin="round"/>
-<rect x="18.5" y="119.5" width="3" height="3" fill="white" stroke="#AFB0B3" stroke-linecap="round" stroke-linejoin="round"/>
-<rect x="94.5" y="119.5" width="3" height="3" fill="white" stroke="#AFB0B3" stroke-linecap="round" stroke-linejoin="round"/>
-<rect x="94.5" y="43.5" width="3" height="3" fill="white" stroke="#AFB0B3" stroke-linecap="round" stroke-linejoin="round"/>
-<rect x="56.5" y="43.5" width="3" height="3" fill="white" stroke="#AFB0B3" stroke-linecap="round" stroke-linejoin="round"/>
-<rect x="18.5" y="81.5" width="3" height="3" fill="white" stroke="#AFB0B3" stroke-linecap="round" stroke-linejoin="round"/>
-<rect x="56.5" y="119.5" width="3" height="3" fill="white" stroke="#AFB0B3" stroke-linecap="round" stroke-linejoin="round"/>
-<rect x="94.5" y="81.5" width="3" height="3" fill="white" stroke="#AFB0B3" stroke-linecap="round" stroke-linejoin="round"/>
-<rect x="47" y="104" width="22" height="2" rx="1" fill="#98A2B3"/>
-<path d="M41.0294 99.9706C37.673 96.6141 35.3872 92.3377 34.4612 87.6822C33.5351 83.0266 34.0104 78.201 35.8269 73.8156C37.6434 69.4302 40.7195 65.6819 44.6663 63.0447C48.6131 60.4076 53.2532 59 58 59C62.7468 59 67.3869 60.4076 71.3337 63.0447C75.2805 65.6819 78.3566 69.4302 80.1731 73.8156C81.9896 78.201 82.4649 83.0266 81.5388 87.6822C80.6128 92.3377 78.327 96.6141 74.9706 99.9706L69.3024 94.3024C71.5378 92.067 73.0601 89.2189 73.6769 86.1183C74.2936 83.0177 73.9771 79.8039 72.7673 76.8832C71.5575 73.9625 69.5088 71.4661 66.8802 69.7098C64.2517 67.9534 61.1613 67.016 58 67.016C54.8387 67.016 51.7483 67.9534 49.1198 69.7098C46.4912 71.4661 44.4425 73.9625 43.2327 76.8832C42.0229 79.8039 41.7064 83.0177 42.3231 86.1183C42.9399 89.2189 44.4622 92.067 46.6976 94.3024L41.0294 99.9706Z" fill="#D3DAE6"/>
-<path d="M41.0294 99.9706C38.7144 97.6555 36.8974 94.8912 35.6904 91.8478C34.4835 88.8044 33.9119 85.5462 34.011 82.2737C34.1101 79.0012 34.8777 75.7836 36.2666 72.8188C37.6555 69.8539 39.6363 67.2047 42.0872 65.0339C44.538 62.8631 47.4072 61.2167 50.518 60.1961C53.6289 59.1754 56.9157 58.802 60.1762 59.0989C63.4367 59.3957 66.602 60.3566 69.4774 61.9223C72.3527 63.488 74.8773 65.6255 76.8959 68.2032L70.5847 73.1453C69.2403 71.4286 67.5589 70.005 65.6439 68.9622C63.7289 67.9195 61.6208 67.2796 59.4493 67.0818C57.2778 66.8841 55.0888 67.1328 53.017 67.8126C50.9452 68.4923 49.0343 69.5888 47.4021 71.0346C45.7698 72.4803 44.4505 74.2447 43.5255 76.2193C42.6005 78.1939 42.0893 80.3368 42.0233 82.5163C41.9573 84.6958 42.338 86.8657 43.1418 88.8926C43.9457 90.9196 45.1558 92.7606 46.6976 94.3024L41.0294 99.9706Z" fill="#6092C0"/>
-<g filter="url(#filter1_d)">
-<rect x="200" y="12" width="56" height="127" rx="2" fill="white"/>
-</g>
-<rect x="204" y="56" width="22" height="2" rx="1" fill="#98A2B3"/>
-<rect x="204" y="98" width="22" height="2" rx="1" fill="#98A2B3"/>
-<rect x="204" y="120" width="22" height="2" rx="1" fill="#98A2B3"/>
-<rect x="204" y="104" width="9" height="4" rx="2" fill="#D3DAE6"/>
-<rect x="217" y="104" width="9" height="4" rx="2" fill="#D3DAE6"/>
-<rect x="230" y="104" width="9" height="4" rx="2" fill="#D3DAE6"/>
-<rect x="243" y="104" width="9" height="4" rx="2" fill="#D3DAE6"/>
-<rect x="204.5" y="24.5" width="47" height="7" rx="0.5" fill="white" stroke="#D3DAE6"/>
-<rect x="204.5" y="62.5" width="47" height="23" rx="0.5" fill="white" stroke="#D3DAE6"/>
-<rect x="204.5" y="36.5" width="21" height="7" rx="0.5" fill="white" stroke="#D3DAE6"/>
-<rect x="204.5" y="126.5" width="7" height="7" rx="0.5" fill="#54B399" stroke="#D3DAE6"/>
-<rect x="230.5" y="36.5" width="21" height="7" rx="0.5" fill="white" stroke="#D3DAE6"/>
-<rect x="204" y="16" width="27" height="2" rx="1" fill="#6A717D"/>
-<defs>
-<filter id="filter0_d" x="4" y="6" width="192" height="143" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-<feFlood flood-opacity="0" result="BackgroundImageFix"/>
-<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"/>
-<feOffset dy="2"/>
-<feGaussianBlur stdDeviation="4"/>
-<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0"/>
-<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow"/>
-<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow" result="shape"/>
-</filter>
-<filter id="filter1_d" x="192" y="6" width="72" height="143" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-<feFlood flood-opacity="0" result="BackgroundImageFix"/>
-<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"/>
-<feOffset dy="2"/>
-<feGaussianBlur stdDeviation="4"/>
-<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0"/>
-<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow"/>
-<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow" result="shape"/>
-</filter>
-</defs>
+<svg width="268" height="151" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path fill="#F5F7FA" d="M0 0h268v151H0z"/>
+  <g filter="url(#kibana_canvas_light__filter0_d)">
+    <rect x="12" y="12" width="176" height="127" rx="2" fill="#fff"/>
+  </g>
+  <rect x="89" y="132" width="22" height="2" rx="1" fill="#AFB0B3"/>
+  <path d="M115.5 131.5l1.5 1.5-1.5 1.5m-30.5-3l-1.5 1.5 1.5 1.5" stroke="#AFB0B3" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="60" y="21" width="82" height="16" rx="1" fill="#fff" stroke="#D3DAE6" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 2"/>
+  <rect x="81" y="28" width="40" height="2" rx="1" fill="#54B399"/>
+  <rect x="104" y="45" width="76" height="76" rx="1" fill="#fff" stroke="#D3DAE6" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 2"/>
+  <rect x="116" y="81" width="22" height="2" rx="1" fill="#98A2B3"/>
+  <rect x="112" y="81" width="2" height="2" rx="1" fill="#D36086"/>
+  <rect x="146" y="81" width="2" height="2" rx="1" fill="#D36086"/>
+  <rect x="150" y="81" width="22" height="2" rx="1" fill="#98A2B3"/>
+  <rect x="112" y="65" width="60" height="8" rx="2" fill="#D36086"/>
+  <rect x="116" y="87" width="22" height="2" rx="1" fill="#98A2B3"/>
+  <rect x="112" y="87" width="2" height="2" rx="1" fill="#D36086"/>
+  <rect x="146" y="87" width="2" height="2" rx="1" fill="#D36086"/>
+  <rect x="150" y="87" width="22" height="2" rx="1" fill="#98A2B3"/>
+  <rect x="116" y="93" width="22" height="2" rx="1" fill="#98A2B3"/>
+  <rect x="112" y="93" width="2" height="2" rx="1" fill="#D36086"/>
+  <rect x="146" y="93" width="2" height="2" rx="1" fill="#D36086"/>
+  <rect x="150" y="93" width="22" height="2" rx="1" fill="#98A2B3"/>
+  <rect x="116" y="99" width="22" height="2" rx="1" fill="#98A2B3"/>
+  <rect x="112" y="99" width="2" height="2" rx="1" fill="#D36086"/>
+  <rect x="146" y="99" width="2" height="2" rx="1" fill="#D36086"/>
+  <rect x="150" y="99" width="22" height="2" rx="1" fill="#98A2B3"/>
+  <rect x="20" y="45" width="76" height="76" rx="1" fill="#fff" stroke="#AFB0B3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 2"/>
+  <path fill="#fff" stroke="#AFB0B3" stroke-linecap="round" stroke-linejoin="round" d="M18.5 43.5h3v3h-3zm0 76h3v3h-3zm76 0h3v3h-3zm0-76h3v3h-3zm-38 0h3v3h-3zm-38 38h3v3h-3zm38 38h3v3h-3zm38-38h3v3h-3z"/>
+  <rect x="47" y="104" width="22" height="2" rx="1" fill="#98A2B3"/>
+  <path d="M41.03 99.97a24 24 0 1133.94 0l-5.668-5.668a15.984 15.984 0 10-22.604 0l-5.669 5.669z" fill="#D3DAE6"/>
+  <path d="M41.03 99.97a24.002 24.002 0 019.488-39.774 24 24 0 0126.378 8.007l-6.311 4.942a15.986 15.986 0 00-23.183-2.11 15.983 15.983 0 00-.704 23.267l-5.669 5.669z" fill="#6092C0"/>
+  <g filter="url(#kibana_canvas_light__filter1_d)">
+    <rect x="200" y="12" width="56" height="127" rx="2" fill="#fff"/>
+  </g>
+  <rect x="204" y="56" width="22" height="2" rx="1" fill="#98A2B3"/>
+  <rect x="204" y="98" width="22" height="2" rx="1" fill="#98A2B3"/>
+  <rect x="204" y="120" width="22" height="2" rx="1" fill="#98A2B3"/>
+  <rect x="204" y="104" width="9" height="4" rx="2" fill="#D3DAE6"/>
+  <rect x="217" y="104" width="9" height="4" rx="2" fill="#D3DAE6"/>
+  <rect x="230" y="104" width="9" height="4" rx="2" fill="#D3DAE6"/>
+  <rect x="243" y="104" width="9" height="4" rx="2" fill="#D3DAE6"/>
+  <rect x="204.5" y="24.5" width="47" height="7" rx=".5" fill="#fff" stroke="#D3DAE6"/>
+  <rect x="204.5" y="62.5" width="47" height="23" rx=".5" fill="#fff" stroke="#D3DAE6"/>
+  <rect x="204.5" y="36.5" width="21" height="7" rx=".5" fill="#fff" stroke="#D3DAE6"/>
+  <rect x="204.5" y="126.5" width="7" height="7" rx=".5" fill="#54B399" stroke="#D3DAE6"/>
+  <rect x="230.5" y="36.5" width="21" height="7" rx=".5" fill="#fff" stroke="#D3DAE6"/>
+  <rect x="204" y="16" width="27" height="2" rx="1" fill="#6A717D"/>
+  <defs>
+    <filter id="kibana_canvas_light__filter0_d" x="4" y="6" width="192" height="143" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feColorMatrix in="SourceAlpha" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"/>
+      <feOffset dy="2"/>
+      <feGaussianBlur stdDeviation="4"/>
+      <feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0"/>
+      <feBlend in2="BackgroundImageFix" result="effect1_dropShadow"/>
+      <feBlend in="SourceGraphic" in2="effect1_dropShadow" result="shape"/>
+    </filter>
+    <filter id="kibana_canvas_light__filter1_d" x="192" y="6" width="72" height="143" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feColorMatrix in="SourceAlpha" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"/>
+      <feOffset dy="2"/>
+      <feGaussianBlur stdDeviation="4"/>
+      <feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0"/>
+      <feBlend in2="BackgroundImageFix" result="effect1_dropShadow"/>
+      <feBlend in="SourceGraphic" in2="effect1_dropShadow" result="shape"/>
+    </filter>
+  </defs>
 </svg>
