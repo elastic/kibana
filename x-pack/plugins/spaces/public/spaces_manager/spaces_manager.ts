@@ -106,6 +106,12 @@ export class SpacesManager {
     });
   }
 
+  public async getShareSavedObjectPermissions(
+    type: string
+  ): Promise<{ shareToAllSpaces: boolean }> {
+    return this.http.get('/internal/spaces/_share_saved_object_permissions', { query: { type } });
+  }
+
   public async shareSavedObjectAdd(object: SavedObject, spaces: string[]): Promise<void> {
     return this.http.post(`/api/spaces/_share_saved_object_add`, {
       body: JSON.stringify({ object, spaces }),
