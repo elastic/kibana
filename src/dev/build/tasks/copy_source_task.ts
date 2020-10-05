@@ -40,7 +40,7 @@ export const CopySource: Task = {
         '!src/dev/**',
         // this is the dev-only entry
         '!src/setup_node_env/index.js',
-        '!**/public/**',
+        '!**/public/**/*.{js,ts,tsx,json}',
         'typings/**',
         'config/kibana.yml',
         'config/node.options',
