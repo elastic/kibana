@@ -40,8 +40,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return createdAlert;
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/77401
-  describe.skip('alerts', function () {
+  describe('alerts', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('alertsTab');
