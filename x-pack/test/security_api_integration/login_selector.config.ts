@@ -23,14 +23,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   const pkiKibanaCAPath = resolve(__dirname, '../pki_api_integration/fixtures/kibana_ca.crt');
 
-  const saml1IdPMetadataPath = resolve(
-    __dirname,
-    '../saml_api_integration/fixtures/idp_metadata.xml'
-  );
-  const saml2IdPMetadataPath = resolve(
-    __dirname,
-    '../saml_api_integration/fixtures/idp_metadata_2.xml'
-  );
+  const saml1IdPMetadataPath = resolve(__dirname, './fixtures/saml/idp_metadata.xml');
+  const saml2IdPMetadataPath = resolve(__dirname, './fixtures/saml/idp_metadata_2.xml');
 
   const servers = {
     ...xPackAPITestsConfig.get('servers'),
@@ -45,7 +39,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   };
 
   return {
-    testFiles: [require.resolve('./apis')],
+    testFiles: [require.resolve('./tests/login_selector')],
     servers,
     security: { disableTestUser: true },
     services: {
@@ -54,7 +48,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       supertestWithoutAuth: xPackAPITestsConfig.get('services.supertestWithoutAuth'),
     },
     junit: {
-      reportName: 'X-Pack Login Selector API Integration Tests',
+      reportName: 'X-Pack Security API Integration Tests (Login Selector)',
     },
 
     esTestCluster: {
