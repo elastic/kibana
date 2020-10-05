@@ -52,11 +52,15 @@ const DetailsSection = styled(EuiFlexItem)`
 `;
 
 const DescriptionListTitle = styled(EuiDescriptionListTitle)`
-  width: 40% !important;
+  &&& {
+    width: 40%;
+  }
 `;
 
 const DescriptionListDescription = styled(EuiDescriptionListDescription)`
-  width: 60% !important;
+  &&& {
+    width: 60%;
+  }
 `;
 
 interface ItemDetailsPropertySummaryProps {
