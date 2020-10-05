@@ -216,7 +216,7 @@ export const JobSetupScreen = (props: Props) => {
                 description={
                   <FormattedMessage
                     id="xpack.infra.ml.steps.setupProcess.partition.description"
-                    defaultMessage="Partitions allow you to build independent models for different groups of data that share similar behavior. For example, you may want to build seperate models for machine type or cloud availability zone so that anomalies are not weighted equally across groups."
+                    defaultMessage="Partitions enable you to build independent models for groups of data that share similar behavior. For example, you can partition by machine type or cloud availability zone."
                   />
                 }
               >
