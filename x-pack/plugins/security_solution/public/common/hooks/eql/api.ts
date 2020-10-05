@@ -8,6 +8,7 @@ import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/pub
 import {
   EqlSearchStrategyRequest,
   EqlSearchStrategyResponse,
+  EQL_SEARCH_STRATEGY,
 } from '../../../../../data_enhanced/common';
 import {
   getValidationErrors,
@@ -36,7 +37,7 @@ export const validateEql = async ({
         options: { ignore: [400] },
       },
       {
-        strategy: 'eql',
+        strategy: EQL_SEARCH_STRATEGY,
         abortSignal: signal,
       }
     )
