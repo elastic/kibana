@@ -24,6 +24,7 @@ import {
   migrateEnrollmentApiKeysToV7100,
   migratePackagePolicyToV7100,
   migrateSettingsToV7100,
+  migrateAgentActionToV7100,
 } from './migrations/to_v7_10_0';
 
 /*
@@ -32,7 +33,9 @@ import {
  * Please update typings in `/common/types` as well as
  * schemas in `/server/types` if mappings are updated.
  */
-const savedObjectTypes: { [key: string]: SavedObjectsType } = {
+const getSavedObjectTypes = (
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
+): { [key: string]: SavedObjectsType } => ({
   [GLOBAL_SETTINGS_SAVED_OBJECT_TYPE]: {
     name: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
     hidden: false,
@@ -68,6 +71,8 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         enrolled_at: { type: 'date' },
         unenrolled_at: { type: 'date' },
         unenrollment_started_at: { type: 'date' },
+        upgraded_at: { type: 'date' },
+        upgrade_started_at: { type: 'date' },
         access_api_key_id: { type: 'keyword' },
         version: { type: 'keyword' },
         user_provided_metadata: { type: 'flattened' },
@@ -106,6 +111,9 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         sent_at: { type: 'date' },
         created_at: { type: 'date' },
       },
+    },
+    migrations: {
+      '7.10.0': migrateAgentActionToV7100(encryptedSavedObjects),
     },
   },
   [AGENT_EVENT_SAVED_OBJECT_TYPE]: {
@@ -298,9 +306,13 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
       },
     },
   },
-};
+});
 
-export function registerSavedObjects(savedObjects: SavedObjectsServiceSetup) {
+export function registerSavedObjects(
+  savedObjects: SavedObjectsServiceSetup,
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
+) {
+  const savedObjectTypes = getSavedObjectTypes(encryptedSavedObjects);
   Object.values(savedObjectTypes).forEach((type) => {
     savedObjects.registerType(type);
   });

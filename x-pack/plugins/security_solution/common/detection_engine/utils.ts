@@ -17,6 +17,8 @@ export const hasNestedEntry = (entries: EntriesArray): boolean => {
   return found.length > 0;
 };
 
-export const isEqlRule = (ruleType: Type | undefined) => ruleType === 'eql';
-export const isThresholdRule = (ruleType: Type | undefined) => ruleType === 'threshold';
-export const isQueryRule = (ruleType: Type | undefined) => ruleType === 'query';
+export const isEqlRule = (ruleType: Type | undefined): boolean => ruleType === 'eql';
+export const isThresholdRule = (ruleType: Type | undefined): boolean => ruleType === 'threshold';
+export const isQueryRule = (ruleType: Type | undefined): boolean =>
+  ruleType === 'query' || ruleType === 'saved_query';
+export const isThreatMatchRule = (ruleType: Type): boolean => ruleType === 'threat_match';

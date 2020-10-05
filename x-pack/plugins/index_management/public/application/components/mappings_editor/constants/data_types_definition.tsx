@@ -13,6 +13,25 @@ import { documentationService } from '../../../services/documentation';
 import { MainType, SubType, DataType, DataTypeDefinition } from '../types';
 
 export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
+  runtime: {
+    value: 'runtime',
+    isBeta: true,
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.runtimeFieldDescription', {
+      defaultMessage: 'Runtime',
+    }),
+    // TODO: Add this once the page exists.
+    // documentation: {
+    //   main: '/runtime_field.html',
+    // },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.runtimeFieldLongDescription"
+          defaultMessage="Runtime fields define scripts that calculate field values at runtime."
+        />
+      </p>
+    ),
+  },
   text: {
     value: 'text',
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.textDescription', {
@@ -821,6 +840,55 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       </p>
     ),
   },
+  point: {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.pointDescription', {
+      defaultMessage: 'Point',
+    }),
+    value: 'point',
+    documentation: {
+      main: '/point.html',
+    },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.pointLongDescription"
+          defaultMessage="Point fields enable searching of {code} pairs that fall in a 2-dimensional planar coordinate system."
+          values={{
+            code: <EuiCode inline>{'x,y'}</EuiCode>,
+          }}
+        />
+      </p>
+    ),
+  },
+  version: {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.versionDescription', {
+      defaultMessage: 'Version',
+    }),
+    value: 'version',
+    documentation: {
+      main: '/version.html',
+    },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.versionLongDescription"
+          defaultMessage="Version fields are helpful to handle software version values. This field isn’t optimized for heavy wildcard, regex, or fuzzy searches. For these query types, use the {keywordType}."
+          values={{
+            keywordType: (
+              <EuiLink href={documentationService.getTypeDocLink('keyword')} target="_blank">
+                {i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.dataType.versionLongDescription.keywordTypeLink',
+                  {
+                    defaultMessage: 'keyword data type',
+                  }
+                )}
+              </EuiLink>
+            ),
+          }}
+        />
+      </p>
+    ),
+  },
   wildcard: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.wildcardDescription', {
       defaultMessage: 'Wildcard',
@@ -876,12 +944,15 @@ export const MAIN_TYPES: MainType[] = [
   'range',
   'rank_feature',
   'rank_features',
+  'runtime',
   'search_as_you_type',
   'shape',
   'text',
   'token_count',
   'histogram',
   'wildcard',
+  'point',
+  'version',
   'other',
 ];
 

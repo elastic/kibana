@@ -5,17 +5,11 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { EuiButton, CommonProps, EuiText, EuiSpacer } from '@elastic/eui';
+import { CommonProps, EuiText, EuiPanel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ConditionGroup, ConditionGroupProps } from './components/condition_group';
 
-const BUTTON_MIN_WIDTH = Object.freeze({ minWidth: '95px' });
-
-export type LogicalConditionBuilderProps = CommonProps &
-  ConditionGroupProps & {
-    onAndClicked: () => void;
-    isAndDisabled?: boolean;
-  };
+export type LogicalConditionBuilderProps = CommonProps & ConditionGroupProps;
 export const LogicalConditionBuilder = memo<LogicalConditionBuilderProps>(
   ({
     entries,
@@ -25,6 +19,7 @@ export const LogicalConditionBuilder = memo<LogicalConditionBuilderProps>(
     onAndClicked,
     onEntryRemove,
     onEntryChange,
+    onVisited,
     'data-test-subj': dataTestSubj,
   }) => {
     const getTestId = useCallback(
@@ -46,25 +41,13 @@ export const LogicalConditionBuilder = memo<LogicalConditionBuilderProps>(
               entries={entries}
               onEntryRemove={onEntryRemove}
               onEntryChange={onEntryChange}
+              onAndClicked={onAndClicked}
+              isAndDisabled={isAndDisabled}
+              onVisited={onVisited}
               data-test-subj={getTestId('group1')}
             />
           )}
         </div>
-        <EuiSpacer size="s" />
-        <EuiButton
-          fill
-          size="s"
-          iconType="plusInCircle"
-          onClick={onAndClicked}
-          data-test-subj={getTestId('AndButton')}
-          isDisabled={isAndDisabled}
-          style={BUTTON_MIN_WIDTH}
-        >
-          <FormattedMessage
-            id="xpack.securitySolution.trustedapps.logicalConditionBuilder.andOperator"
-            defaultMessage="AND"
-          />
-        </EuiButton>
       </div>
     );
   }
@@ -72,17 +55,16 @@ export const LogicalConditionBuilder = memo<LogicalConditionBuilderProps>(
 
 LogicalConditionBuilder.displayName = 'LogicalConditionBuilder';
 
-// FIXME:PT need to style this better.
 const NoEntries = memo(() => {
   return (
-    <div>
-      <EuiText>
+    <EuiPanel paddingSize="l">
+      <EuiText textAlign="center" size="s" color="subdued">
         <FormattedMessage
           id="xpack.securitySolution.trustedapps.logicalConditionBuilder.noEntries"
-          defaultMessage="No entries"
+          defaultMessage="No conditions defined"
         />
       </EuiText>
-    </div>
+    </EuiPanel>
   );
 });
 

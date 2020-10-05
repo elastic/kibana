@@ -14,6 +14,7 @@ import {
   HostPolicyResponseAppliedAction,
   HostPolicyResponseConfiguration,
   HostPolicyResponseActionStatus,
+  MetadataQueryStrategyVersions,
 } from '../../../../../common/endpoint/types';
 import { EndpointState, EndpointIndexUIQueryParams } from '../types';
 import { extractListPaginationParams } from '../../../common/routing';
@@ -54,9 +55,24 @@ export const isAutoRefreshEnabled = (state: Immutable<EndpointState>) => state.i
 
 export const autoRefreshInterval = (state: Immutable<EndpointState>) => state.autoRefreshInterval;
 
+export const areEndpointsEnrolling = (state: Immutable<EndpointState>) => {
+  return state.agentsWithEndpointsTotal > state.endpointsTotal;
+};
+
+export const agentsWithEndpointsTotalError = (state: Immutable<EndpointState>) =>
+  state.agentsWithEndpointsTotalError;
+
+export const endpointsTotalError = (state: Immutable<EndpointState>) => state.endpointsTotalError;
+const queryStrategyVersion = (state: Immutable<EndpointState>) => state.queryStrategyVersion;
+
 export const endpointPackageVersion = createSelector(
   endpointPackageInfo,
   (info) => info?.version ?? undefined
+);
+
+export const isTransformEnabled = createSelector(
+  queryStrategyVersion,
+  (version) => version !== MetadataQueryStrategyVersions.VERSION_1
 );
 
 /**

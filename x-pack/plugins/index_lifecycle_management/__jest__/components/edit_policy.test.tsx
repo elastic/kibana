@@ -503,6 +503,30 @@ describe('edit policy', () => {
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
       expect(findTestSubject(rendered, 'defaultAllocationWarning').exists()).toBeTruthy();
     });
+    test('should show default allocation notice when hot tier exists, but not warm tier', async () => {
+      http.setupNodeListResponse({
+        nodesByAttributes: {},
+        nodesByRoles: { data_hot: ['test'], data_cold: ['test'] },
+      });
+      const rendered = mountWithIntl(component);
+      noRollover(rendered);
+      setPolicyName(rendered, 'mypolicy');
+      await activatePhase(rendered, 'warm');
+      expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
+      expect(findTestSubject(rendered, 'defaultAllocationNotice').exists()).toBeTruthy();
+    });
+    test('should not show default allocation notice when node with "data" role exists', async () => {
+      http.setupNodeListResponse({
+        nodesByAttributes: {},
+        nodesByRoles: { data: ['test'] },
+      });
+      const rendered = mountWithIntl(component);
+      noRollover(rendered);
+      setPolicyName(rendered, 'mypolicy');
+      await activatePhase(rendered, 'warm');
+      expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
+      expect(findTestSubject(rendered, 'defaultAllocationNotice').exists()).toBeFalsy();
+    });
   });
   describe('cold phase', () => {
     beforeEach(() => {
@@ -610,115 +634,29 @@ describe('edit policy', () => {
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
       expect(findTestSubject(rendered, 'defaultAllocationWarning').exists()).toBeTruthy();
     });
-  });
-  describe('frozen phase', () => {
-    beforeEach(() => {
-      server.respondImmediately = true;
-      http.setupNodeListResponse();
-      httpRequestsMockHelpers.setNodesDetailsResponse('attribute:true', [
-        { nodeId: 'testNodeId', stats: { name: 'testNodeName', host: 'testHost' } },
-      ]);
-    });
-    test('should allow 0 for phase timing', async () => {
-      const rendered = mountWithIntl(component);
-      noRollover(rendered);
-      setPolicyName(rendered, 'mypolicy');
-      await activatePhase(rendered, 'frozen');
-      setPhaseAfter(rendered, 'frozen', 0);
-      save(rendered);
-      expectedErrorMessages(rendered, []);
-    });
-    test('should show positive number required error when trying to save cold phase with -1 for after', async () => {
-      const rendered = mountWithIntl(component);
-      noRollover(rendered);
-      setPolicyName(rendered, 'mypolicy');
-      await activatePhase(rendered, 'frozen');
-      setPhaseAfter(rendered, 'frozen', -1);
-      save(rendered);
-      expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
-    });
-    test('should show spinner for node attributes input when loading', async () => {
-      server.respondImmediately = false;
-      const rendered = mountWithIntl(component);
-      noRollover(rendered);
-      setPolicyName(rendered, 'mypolicy');
-      await activatePhase(rendered, 'frozen');
-      expect(rendered.find('.euiLoadingSpinner').exists()).toBeTruthy();
-      expect(rendered.find('.euiCallOut--warning').exists()).toBeFalsy();
-      expect(getNodeAttributeSelect(rendered, 'frozen').exists()).toBeFalsy();
-    });
-    test('should show warning instead of node attributes input when none exist', async () => {
+    test('should show default allocation notice when warm or hot tiers exists, but not cold tier', async () => {
       http.setupNodeListResponse({
         nodesByAttributes: {},
-        nodesByRoles: { data: ['node1'] },
+        nodesByRoles: { data_hot: ['test'], data_warm: ['test'] },
       });
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
-      await activatePhase(rendered, 'frozen');
+      await activatePhase(rendered, 'cold');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
-      openNodeAttributesSection(rendered, 'frozen');
-      expect(findTestSubject(rendered, 'noNodeAttributesWarning').exists()).toBeTruthy();
-      expect(getNodeAttributeSelect(rendered, 'frozen').exists()).toBeFalsy();
+      expect(findTestSubject(rendered, 'defaultAllocationNotice').exists()).toBeTruthy();
     });
-    test('should show node attributes input when attributes exist', async () => {
-      http.setupNodeListResponse();
-      const rendered = mountWithIntl(component);
-      noRollover(rendered);
-      setPolicyName(rendered, 'mypolicy');
-      await activatePhase(rendered, 'frozen');
-      expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
-      openNodeAttributesSection(rendered, 'frozen');
-      expect(findTestSubject(rendered, 'noNodeAttributesWarning').exists()).toBeFalsy();
-      const nodeAttributesSelect = getNodeAttributeSelect(rendered, 'frozen');
-      expect(nodeAttributesSelect.exists()).toBeTruthy();
-      expect(nodeAttributesSelect.find('option').length).toBe(2);
-    });
-    test('should show view node attributes link when attribute selected and show flyout when clicked', async () => {
-      http.setupNodeListResponse();
-      const rendered = mountWithIntl(component);
-      noRollover(rendered);
-      setPolicyName(rendered, 'mypolicy');
-      await activatePhase(rendered, 'frozen');
-      expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
-      openNodeAttributesSection(rendered, 'frozen');
-      expect(findTestSubject(rendered, 'noNodeAttributesWarning').exists()).toBeFalsy();
-      const nodeAttributesSelect = getNodeAttributeSelect(rendered, 'frozen');
-      expect(nodeAttributesSelect.exists()).toBeTruthy();
-      expect(findTestSubject(rendered, 'frozen-viewNodeDetailsFlyoutButton').exists()).toBeFalsy();
-      expect(nodeAttributesSelect.find('option').length).toBe(2);
-      nodeAttributesSelect.simulate('change', { target: { value: 'attribute:true' } });
-      rendered.update();
-      const flyoutButton = findTestSubject(rendered, 'frozen-viewNodeDetailsFlyoutButton');
-      expect(flyoutButton.exists()).toBeTruthy();
-      await act(async () => {
-        await flyoutButton.simulate('click');
-      });
-      rendered.update();
-      expect(rendered.find('.euiFlyout').exists()).toBeTruthy();
-    });
-    test('should show positive number required error when trying to save with -1 for index priority', async () => {
-      http.setupNodeListResponse();
-      const rendered = mountWithIntl(component);
-      noRollover(rendered);
-      setPolicyName(rendered, 'mypolicy');
-      await activatePhase(rendered, 'frozen');
-      setPhaseAfter(rendered, 'frozen', 1);
-      setPhaseIndexPriority(rendered, 'frozen', -1);
-      save(rendered);
-      expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
-    });
-    test('should show default allocation warning when no node roles are found', async () => {
+    test('should not show default allocation notice when node with "data" role exists', async () => {
       http.setupNodeListResponse({
         nodesByAttributes: {},
-        nodesByRoles: {},
+        nodesByRoles: { data: ['test'] },
       });
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
-      await activatePhase(rendered, 'frozen');
+      await activatePhase(rendered, 'cold');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
-      expect(findTestSubject(rendered, 'defaultAllocationWarning').exists()).toBeTruthy();
+      expect(findTestSubject(rendered, 'defaultAllocationNotice').exists()).toBeFalsy();
     });
   });
   describe('delete phase', () => {
