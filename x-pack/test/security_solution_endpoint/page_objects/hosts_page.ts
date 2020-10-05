@@ -124,7 +124,6 @@ export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrPro
         const EventText = await Events[i]._webElement.getText();
         const LinkText = await testSubjects.find('resolver:breadcrumbs:last');
         const linkText = await LinkText._webElement.getText();
-        // console.log(linkText);
         expect(EventText).to.equal(linkText);
       }
     },
