@@ -16,6 +16,7 @@ import {
   RegistryVarsEntry,
 } from '../../../../common/types';
 import { PackageInvalidArchiveError, PackageUnsupportedMediaTypeError } from '../../../errors';
+import { pkgToPkgKey } from '../registry';
 import { cacheGet, cacheSet, setArchiveFilelist } from '../registry/cache';
 import { unzipBuffer, untarBuffer, ArchiveEntry } from '../registry/extract';
 
@@ -110,7 +111,8 @@ function parseAndVerifyArchive(paths: string[]): ArchivePackage {
   }
 
   // Package name and version from the manifest must match those from the toplevel directory
-  if (toplevelDir !== `${manifest.name}-${manifest.version}`) {
+  const pkgKey = pkgToPkgKey({ name: manifest.name, version: manifest.version });
+  if (toplevelDir !== pkgKey) {
     throw new PackageInvalidArchiveError(
       `Name ${manifest.name} and version ${manifest.version} do not match top-level directory ${toplevelDir}`
     );
@@ -147,11 +149,12 @@ function parseAndVerifyDatasets(
   // A data stream is made up of a subdirectory of name-version/data_stream/, containing a manifest.yml
   let dataStreamPaths: string[] = [];
   const dataStreams: RegistryDataStream[] = [];
+  const pkgKey = pkgToPkgKey({ name: pkgName, version: pkgVersion });
 
   // pick all paths matching name-version/data_stream/DATASTREAM_PATH/...
   // from those, pick all unique data stream paths
   paths
-    .filter((path) => path.startsWith(`${pkgName}-${pkgVersion}/data_stream/`))
+    .filter((path) => path.startsWith(`${pkgKey}/data_stream/`))
     .forEach((path) => {
       const parts = path.split('/');
       if (parts.length > 2 && parts[2]) dataStreamPaths.push(parts[2]);
@@ -160,7 +163,7 @@ function parseAndVerifyDatasets(
   dataStreamPaths = uniq(dataStreamPaths);
 
   dataStreamPaths.forEach((dataStreamPath) => {
-    const manifestFile = `${pkgName}-${pkgVersion}/data_stream/${dataStreamPath}/manifest.yml`;
+    const manifestFile = `${pkgKey}/data_stream/${dataStreamPath}/manifest.yml`;
     const manifestBuffer = cacheGet(manifestFile);
     if (!paths.includes(manifestFile) || !manifestBuffer) {
       throw new PackageInvalidArchiveError(
