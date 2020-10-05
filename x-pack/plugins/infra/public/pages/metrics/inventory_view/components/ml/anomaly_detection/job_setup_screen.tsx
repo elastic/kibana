@@ -124,7 +124,7 @@ export const JobSetupScreen = (props: Props) => {
         <EuiTitle size="m">
           <h2>
             <FormattedMessage
-              defaultMessage="Enable Machine Learning for {nodeType}"
+              defaultMessage="Enable machine learning for {nodeType}"
               id="xpack.infra.ml.aomalyFlyout.jobSetup.flyoutHeader"
               values={{ nodeType: props.jobType }}
             />
