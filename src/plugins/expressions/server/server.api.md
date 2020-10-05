@@ -9,6 +9,7 @@ import { CoreStart } from 'src/core/server';
 import { Ensure } from '@kbn/utility-types';
 import { EventEmitter } from 'events';
 import { Observable } from 'rxjs';
+import { PersistedState } from 'src/plugins/visualizations/public';
 import { Plugin as Plugin_2 } from 'src/core/server';
 import { PluginInitializerContext } from 'src/core/server';
 import { UnwrapPromiseOrReturn } from '@kbn/utility-types';
@@ -716,6 +717,8 @@ export interface IInterpreterRenderHandlers {
     onDestroy: (fn: () => void) => void;
     // (undocumented)
     reload: () => void;
+    // (undocumented)
+    uiState?: PersistedState;
     // (undocumented)
     update: (params: any) => void;
 }
