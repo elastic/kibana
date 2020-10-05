@@ -20,8 +20,8 @@ import {
   StyledTime,
   GeneratedText,
   noTimestampRetrievedText,
-  CopyablePanelField,
 } from './panel_content_utilities';
+import { CopyablePanelField } from './copyable_panel_field';
 import { Breadcrumbs } from './breadcrumbs';
 import * as eventModel from '../../../../common/endpoint/models/event';
 import * as selectors from '../../store/selectors';
