@@ -194,8 +194,8 @@ export function ChartSwitch(props: Props) {
         .filter(
           (visualizationType) =>
             visualizationType.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (visualizationType.searchLabel &&
-              visualizationType.searchLabel.toLowerCase().includes(searchTerm.toLowerCase()))
+            (visualizationType.fullLabel &&
+              visualizationType.fullLabel.toLowerCase().includes(searchTerm.toLowerCase()))
         )
         .map((visualizationType) => ({
           ...visualizationType,
@@ -256,6 +256,7 @@ export function ChartSwitch(props: Props) {
           <EuiKeyPadMenuItem
             key={`${v.visualizationId}:${v.id}`}
             label={<span data-test-subj="visTypeTitle">{v.label}</span>}
+            title={v.fullLabel}
             role="menuitem"
             data-test-subj={`lnsChartSwitchPopover_${v.id}`}
             onClick={() => commitSelection(v.selection)}

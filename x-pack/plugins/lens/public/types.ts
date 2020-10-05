@@ -436,9 +436,9 @@ export interface VisualizationType {
    */
   label: string;
   /**
-   * Optional label used in chart type search if chart switcher is expanded
+   * Optional label used in chart type search if chart switcher is expanded and for tooltips
    */
-  searchLabel?: string;
+  fullLabel?: string;
 }
 
 export interface Visualization<T = unknown> {
