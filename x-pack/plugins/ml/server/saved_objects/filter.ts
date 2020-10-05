@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract, SavedObjectsFindOptions } from 'kibana/server';
 // import Boom from 'boom';
 import { ML_SAVED_OBJECT_TYPE } from './saved_objects';
 
@@ -19,20 +19,29 @@ interface JobObject {
 export type JobsInSpaces = ReturnType<typeof filterJobIdsFactory>;
 
 export function filterJobIdsFactory(savedObjectsClient: SavedObjectsClientContract) {
-  async function getJobObjects(jobType: JobType, jobId?: string, datafeedId?: string) {
-    const options = {
+  async function _getJobObjects(jobType?: JobType, jobId?: string, datafeedId?: string) {
+    const options: SavedObjectsFindOptions = {
       type: ML_SAVED_OBJECT_TYPE,
-      searchFields: ['type'],
-      search: `type: ${jobType}`,
+      searchFields: [],
+      search: '',
       perPage: 10000,
     };
 
+    if (jobType !== undefined) {
+      options.searchFields!.push('type');
+      options.search = `type: ${jobType}`;
+
+      if (jobId !== undefined || datafeedId !== undefined) {
+        options.search += ' AND ';
+      }
+    }
+
     if (jobId !== undefined) {
-      options.searchFields.push('job_id');
-      options.search += ` AND job_id: ${jobId} `;
+      options.searchFields!.push('job_id');
+      options.search += `job_id: ${jobId} `;
     } else if (datafeedId !== undefined) {
-      options.searchFields.push('datafeed_id');
-      options.search += ` AND datafeed_id: ${datafeedId} `;
+      options.searchFields!.push('datafeed_id');
+      options.search += `datafeed_id: ${datafeedId} `;
     }
 
     return await savedObjectsClient.find<JobObject>(options);
@@ -47,7 +56,7 @@ export function filterJobIdsFactory(savedObjectsClient: SavedObjectsClientContra
   }
 
   async function _deleteJob(jobType: JobType, jobId: string) {
-    const jobs = await getJobObjects(jobType, jobId);
+    const jobs = await _getJobObjects(jobType, jobId);
     const job = jobs.saved_objects[0];
     if (job === undefined) {
       throw new Error('job not found');
@@ -72,8 +81,12 @@ export function filterJobIdsFactory(savedObjectsClient: SavedObjectsClientContra
     await _deleteJob('data-frame-analytics', jobId);
   }
 
+  async function getAllJobObjects() {
+    return await _getJobObjects();
+  }
+
   async function addDatafeed(datafeedId: string, jobId: string) {
-    const jobs = await getJobObjects('anomaly-detector', jobId);
+    const jobs = await _getJobObjects('anomaly-detector', jobId);
     const job = jobs.saved_objects[0];
     if (job === undefined) {
       throw new Error('job not found');
@@ -85,7 +98,7 @@ export function filterJobIdsFactory(savedObjectsClient: SavedObjectsClientContra
   }
 
   async function deleteDatafeed(datafeedId: string) {
-    const jobs = await getJobObjects('anomaly-detector', undefined, datafeedId);
+    const jobs = await _getJobObjects('anomaly-detector', undefined, datafeedId);
     const job = jobs.saved_objects[0];
     if (job === undefined) {
       throw new Error('job not found');
@@ -97,7 +110,7 @@ export function filterJobIdsFactory(savedObjectsClient: SavedObjectsClientContra
   }
 
   async function getIds(jobType: JobType, idType: keyof JobObject) {
-    const jobs = await getJobObjects(jobType);
+    const jobs = await _getJobObjects(jobType);
     return jobs.saved_objects.map((o) => o.attributes[idType]);
   }
 
@@ -158,6 +171,7 @@ export function filterJobIdsFactory(savedObjectsClient: SavedObjectsClientContra
   }
 
   return {
+    getAllJobObjects,
     createAnomalyDetectionJob,
     createDataFrameAnalyticsJob,
     deleteAnomalyDetectionJob,

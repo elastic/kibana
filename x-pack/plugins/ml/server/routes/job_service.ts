@@ -25,8 +25,6 @@ import { jobIdSchema } from './schemas/anomaly_detectors_schema';
 import { jobServiceProvider } from '../models/job_service';
 import { categorizationExamplesProvider } from '../models/job_service/new_job';
 
-// import { MlSummaryJob } from '../../common/types/anomaly_detection_jobs';
-
 /**
  * Routes for job service
  */
