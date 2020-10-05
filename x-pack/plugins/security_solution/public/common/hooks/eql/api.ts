@@ -9,15 +9,15 @@ import {
   EqlSearchStrategyRequest,
   EqlSearchStrategyResponse,
 } from '../../../../../data_enhanced/common';
-import { EqlValidationSchema as EqlValidationRequest } from '../../../../common/detection_engine/schemas/request/eql_validation_schema';
-import { EqlValidationSchema as EqlValidationResponse } from '../../../../common/detection_engine/schemas/response/eql_validation_schema';
 import {
   getValidationErrors,
   isErrorResponse,
   isValidationErrorResponse,
 } from '../../../../common/search_strategy/eql';
 
-interface Params extends EqlValidationRequest {
+interface Params {
+  index: string[];
+  query: string;
   data: DataPublicPluginStart;
   signal: AbortSignal;
 }
@@ -27,7 +27,7 @@ export const validateEql = async ({
   index,
   query,
   signal,
-}: Params): Promise<EqlValidationResponse> => {
+}: Params): Promise<{ valid: boolean; errors: string[] }> => {
   const { rawResponse: response } = await data.search
     .search<EqlSearchStrategyRequest, EqlSearchStrategyResponse>(
       {
