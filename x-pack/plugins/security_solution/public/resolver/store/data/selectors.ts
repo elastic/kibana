@@ -729,7 +729,7 @@ export const isLoadingMoreNodeEventsInCategory = createSelector(
       return (
         nodeEventsInCategory &&
         nodeEventsInCategory.lastCursorRequested !== null &&
-        nodeEventsInCategory.cursor !== nodeEventsInCategory.lastCursorRequested
+        nodeEventsInCategory.cursor === nodeEventsInCategory.lastCursorRequested
       );
     } else {
       return false;

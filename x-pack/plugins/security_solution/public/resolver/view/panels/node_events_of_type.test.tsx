@@ -89,7 +89,7 @@ describe(`Resolver: when analyzing a tree with only the origin and paginated rel
             () =>
               simulator().testSubject('resolver:panel:node-events-in-category:event-link').length
           )
-        ).toYieldEqualTo(31);
+        ).toYieldEqualTo(30);
       });
     });
   });

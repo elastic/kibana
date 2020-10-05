@@ -76,7 +76,7 @@ export function oneNodeWithPaginatedEvents(): {
         if (after === undefined) {
           events = eventsOfCategory.slice(0, relatedEventsPaginationSize);
         } else {
-          events = eventsOfCategory.slice(relatedEventsPaginationSize - 1);
+          events = eventsOfCategory.slice(relatedEventsPaginationSize);
         }
         return {
           events,
