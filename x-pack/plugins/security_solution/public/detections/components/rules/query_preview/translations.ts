@@ -41,25 +41,11 @@ export const QUERY_GRAPH_COUNT = i18n.translate(
   }
 );
 
-export const QUERY_PREVIEW_GRAPH_NAME = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryGraphPreviewName',
-  {
-    defaultMessage: 'Hits',
-  }
-);
-
 export const QUERY_PREVIEW_TITLE = (hits: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.queryPreview.queryPreviewGraphTitle', {
     values: { hits },
     defaultMessage: '{hits} {hits, plural, =1 {hit} other {hits}}',
   });
-
-export const QUERY_PREVIEW_ERROR = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryGraphPreviewFetchError',
-  {
-    defaultMessage: 'Query preview failure',
-  }
-);
 
 export const QUERY_PREVIEW_NOISE_WARNING = i18n.translate(
   'xpack.securitySolution.detectionEngine.queryPreview.queryGraphPreviewNoiseWarning',
@@ -77,7 +63,7 @@ export const QUERY_PREVIEW_NO_HITS_WARNING = i18n.translate(
 );
 
 export const PREVIEW_QUERY_ERROR = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryGraphPreviewNoiseWarning',
+  'xpack.securitySolution.detectionEngine.queryPreview.queryGraphPreviewError',
   {
     defaultMessage: 'Error fetching preview',
   }
