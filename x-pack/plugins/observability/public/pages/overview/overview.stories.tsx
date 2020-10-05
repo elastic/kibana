@@ -6,7 +6,7 @@
 
 import { makeDecorator } from '@storybook/addons';
 import { storiesOf } from '@storybook/react';
-import { AppMountContext } from 'kibana/public';
+import { CoreStart } from 'kibana/public';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
@@ -36,7 +36,7 @@ const withCore = makeDecorator({
 
     return (
       <MemoryRouter>
-        <PluginContext.Provider value={{ core: options as AppMountContext['core'] }}>
+        <PluginContext.Provider value={{ core: options as CoreStart }}>
           <EuiThemeProvider>{storyFn(context)}</EuiThemeProvider>
         </PluginContext.Provider>
       </MemoryRouter>
@@ -119,7 +119,7 @@ const core = ({
       return euiSettings[key];
     },
   },
-} as unknown) as AppMountContext['core'];
+} as unknown) as CoreStart;
 
 const coreWithAlerts = ({
   ...core,
@@ -127,7 +127,7 @@ const coreWithAlerts = ({
     ...core.http,
     get: alertsFetchData,
   },
-} as unknown) as AppMountContext['core'];
+} as unknown) as CoreStart;
 
 const coreWithNewsFeed = ({
   ...core,
@@ -135,7 +135,7 @@ const coreWithNewsFeed = ({
     ...core.http,
     get: newsFeedFetchData,
   },
-} as unknown) as AppMountContext['core'];
+} as unknown) as CoreStart;
 
 const coreAlertsThrowsError = ({
   ...core,
@@ -145,7 +145,7 @@ const coreAlertsThrowsError = ({
       throw new Error('Error fetching Alerts data');
     },
   },
-} as unknown) as AppMountContext['core'];
+} as unknown) as CoreStart;
 
 storiesOf('app/Overview', module)
   .addDecorator(withCore(core))
