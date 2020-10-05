@@ -269,7 +269,7 @@ which will load the visualization's editor.
 |The Kibana actions plugin provides a framework to create executable actions. You can:
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/stack_alerts/README.md[stackAlerts]
+|{kib-repo}blob/{branch}/x-pack/plugins/alerting_builtins/README.md[alertingBuiltins]
 |This plugin provides alertTypes shipped with Kibana for use with the
 the alerts plugin.  When enabled, it will register
 the built-in alertTypes with the alerting plugin, register associated HTTP
