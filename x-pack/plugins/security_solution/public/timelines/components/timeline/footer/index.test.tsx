@@ -36,6 +36,7 @@ describe('Footer Timeline Component', () => {
           onChangePage={loadMore}
           serverSideEventCount={serverSideEventCount}
           totalCount={totalCount}
+          showMorePagesIndicator
         />
       );
 
@@ -58,6 +59,7 @@ describe('Footer Timeline Component', () => {
           onChangePage={loadMore}
           serverSideEventCount={serverSideEventCount}
           totalCount={totalCount}
+          showMorePagesIndicator
         />
       );
 
@@ -81,6 +83,7 @@ describe('Footer Timeline Component', () => {
             onChangePage={loadMore}
             serverSideEventCount={serverSideEventCount}
             totalCount={totalCount}
+            showMorePagesIndicator
           />
         </TestProviders>
       );
@@ -132,6 +135,7 @@ describe('Footer Timeline Component', () => {
           onChangePage={loadMore}
           serverSideEventCount={serverSideEventCount}
           totalCount={totalCount}
+          showMorePagesIndicator
         />
       );
 
@@ -155,6 +159,7 @@ describe('Footer Timeline Component', () => {
             onChangePage={loadMore}
             serverSideEventCount={serverSideEventCount}
             totalCount={totalCount}
+            showMorePagesIndicator
           />
         </TestProviders>
       );
@@ -182,6 +187,7 @@ describe('Footer Timeline Component', () => {
             onChangePage={loadMore}
             serverSideEventCount={serverSideEventCount}
             totalCount={totalCount}
+            showMorePagesIndicator
           />
         </TestProviders>
       );
@@ -207,6 +213,7 @@ describe('Footer Timeline Component', () => {
             onChangePage={loadMore}
             serverSideEventCount={serverSideEventCount}
             totalCount={totalCount}
+            showMorePagesIndicator
           />
         </TestProviders>
       );
@@ -234,6 +241,7 @@ describe('Footer Timeline Component', () => {
             onChangePage={loadMore}
             serverSideEventCount={serverSideEventCount}
             totalCount={totalCount}
+            showMorePagesIndicator
           />
         </TestProviders>
       );
@@ -259,6 +267,7 @@ describe('Footer Timeline Component', () => {
             onChangePage={loadMore}
             serverSideEventCount={serverSideEventCount}
             totalCount={totalCount}
+            showMorePagesIndicator
           />
         </TestProviders>
       );
