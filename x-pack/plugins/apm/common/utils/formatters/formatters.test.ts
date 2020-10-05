@@ -38,8 +38,8 @@ describe('formatters', () => {
       expect(asDecimalOrInteger(0)).toEqual('0');
     });
     it('formats as integer when number is above or equals 10 ', () => {
-      expect(asDecimalOrInteger(10)).toEqual('10');
-      expect(asDecimalOrInteger(15)).toEqual('15');
+      expect(asDecimalOrInteger(10.123)).toEqual('10');
+      expect(asDecimalOrInteger(15.123)).toEqual('15');
     });
     it('formats as decimal when number is below 10 ', () => {
       expect(asDecimalOrInteger(0.25435632645)).toEqual('0.3');
