@@ -101,8 +101,9 @@ class AgentPolicyService {
     const results = await soClient.find<AgentPolicySOAttributes>({
       type: SAVED_OBJECT_TYPE,
       searchFields: ['name'],
-      search: name,
+      search: encodeURIComponent(name),
     });
+
     return results;
   }
 

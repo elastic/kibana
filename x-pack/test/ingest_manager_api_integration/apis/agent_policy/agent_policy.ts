@@ -110,6 +110,20 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(400);
       });
+
+      it('should return a 409 if name already exists', async () => {
+        const {
+          body: { item },
+        } = await supertest.get(`/api/ingest_manager/agent_policies/${TEST_POLICY_ID}`).expect(200);
+
+        await supertest
+          .post(`/api/ingest_manager/agent_policies/${TEST_POLICY_ID}/copy`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: item.name,
+          })
+          .expect(409);
+      });
     });
   });
 }

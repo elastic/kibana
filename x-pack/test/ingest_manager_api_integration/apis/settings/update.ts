@@ -28,7 +28,8 @@ export default function (providerContext: FtrProviderContext) {
           name: 'test',
           description: '',
           namespace: 'default',
-        });
+        })
+        .expect(200);
       const { body: testPolicy2PostRes } = await supertest
         .post(`/api/ingest_manager/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
@@ -36,11 +37,13 @@ export default function (providerContext: FtrProviderContext) {
           name: 'test2',
           description: '',
           namespace: 'default',
-        });
+        })
+        .expect(200);
       await supertest
         .put(`/api/ingest_manager/settings`)
         .set('kbn-xsrf', 'xxxx')
-        .send({ kibana_urls: ['http://localhost:1232/abc', 'http://localhost:1232/abc'] });
+        .send({ kibana_urls: ['http://localhost:1232/abc', 'http://localhost:1232/abc'] })
+        .expect(200);
 
       const getTestPolicy1Res = await kibanaServer.savedObjects.get({
         type: 'ingest-agent-policies',
@@ -62,12 +65,13 @@ export default function (providerContext: FtrProviderContext) {
           name: 'test',
           description: '',
           namespace: 'default',
-        });
-
+        })
+        .expect(200);
       await supertest
         .put(`/api/ingest_manager/settings`)
         .set('kbn-xsrf', 'xxxx')
-        .send({ kibana_urls: ['http://localhost:1232/abc', 'http://localhost:1232/abc'] });
+        .send({ kibana_urls: ['http://localhost:1232/abc', 'http://localhost:1232/abc'] })
+        .expect(200);
 
       const res = await esClient.search({
         index: '.kibana',
@@ -87,7 +91,7 @@ export default function (providerContext: FtrProviderContext) {
         },
       });
 
-      expect(res.hits.hits.length).equal(2);
+      expect(res.hits.total).equal(2);
     });
   });
 }
