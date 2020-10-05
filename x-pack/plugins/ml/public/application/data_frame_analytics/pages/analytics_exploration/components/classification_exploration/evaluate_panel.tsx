@@ -411,7 +411,14 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
                               showSortSelector: false,
                             }}
                             popoverContents={popoverContents}
-                            gridStyle={{ rowHover: 'none' }}
+                            gridStyle={{
+                              border: 'all',
+                              fontSize: 's',
+                              cellPadding: 's',
+                              stripes: false,
+                              rowHover: 'none',
+                              header: 'shade',
+                            }}
                             trailingControlColumns={
                               showTrailingColumns === true && showFullColumns === false
                                 ? getTrailingControlColumns(extraColumns, setShowFullColumns)
