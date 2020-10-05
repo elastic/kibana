@@ -227,6 +227,10 @@ export const useTimelineEvents = ({
         },
       };
 
+      const newActivePage = deepEqual(prevSearchParameters, currentSearchParameters)
+        ? activePage
+        : 0;
+
       const currentRequest = {
         defaultIndex: indexNames,
         docValueFields: docValueFields ?? [],
@@ -236,7 +240,7 @@ export const useTimelineEvents = ({
         filterQuery: createFilter(filterQuery),
         id,
         pagination: {
-          activePage: deepEqual(prevSearchParameters, currentSearchParameters) ? activePage : 0,
+          activePage: newActivePage,
           querySize: limit,
         },
         sort,
@@ -246,6 +250,10 @@ export const useTimelineEvents = ({
           to: endDate,
         },
       };
+
+      if (activePage !== newActivePage) {
+        setActivePage(newActivePage);
+      }
 
       if (
         !skip &&
