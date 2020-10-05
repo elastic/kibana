@@ -8,16 +8,18 @@ import Boom from 'boom';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { ShareSavedObjectsToSpaceFlyout } from './share_to_space_flyout';
 import { ShareToSpaceForm } from './share_to_space_form';
-import { EuiLoadingSpinner, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { Space } from '../../../common/model/space';
 import { findTestSubject } from 'test_utils/find_test_subject';
 import { SelectableSpacesControl } from './selectable_spaces_control';
 import { act } from '@testing-library/react';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { SpacesManager } from '../../spaces_manager';
+import { coreMock } from '../../../../../../src/core/public/mocks';
 import { ToastsApi } from 'src/core/public';
 import { EuiCallOut } from '@elastic/eui';
 import { CopySavedObjectsToSpaceFlyout } from '../../copy_saved_objects_to_space/components';
+import { NoSpacesAvailable } from './no_spaces_available';
 import { SavedObjectsManagementRecord } from 'src/plugins/saved_objects_management/public';
 
 interface SetupOpts {
@@ -63,6 +65,8 @@ const setup = async (opts: SetupOpts = {}) => {
     ]
   );
 
+  mockSpacesManager.getShareSavedObjectPermissions.mockResolvedValue({ shareToAllSpaces: true });
+
   const mockToastNotifications = {
     addError: jest.fn(),
     addSuccess: jest.fn(),
@@ -81,6 +85,14 @@ const setup = async (opts: SetupOpts = {}) => {
     namespaces: opts.namespaces || ['my-active-space', 'space-1'],
   } as SavedObjectsManagementRecord;
 
+  const { getStartServices } = coreMock.createSetup();
+  const startServices = coreMock.createStart();
+  startServices.application.capabilities = {
+    ...startServices.application.capabilities,
+    spaces: { manage: true },
+  };
+  getStartServices.mockResolvedValue([startServices, , ,]);
+
   const wrapper = mountWithIntl(
     <ShareSavedObjectsToSpaceFlyout
       savedObject={savedObjectToShare}
@@ -88,6 +100,7 @@ const setup = async (opts: SetupOpts = {}) => {
       toastNotifications={(mockToastNotifications as unknown) as ToastsApi}
       onClose={onClose}
       onObjectUpdated={onObjectUpdated}
+      getStartServices={getStartServices}
     />
   );
 
@@ -111,7 +124,7 @@ describe('ShareToSpaceFlyout', () => {
     const { wrapper } = await setup({ returnBeforeSpacesLoad: true });
 
     expect(wrapper.find(ShareToSpaceForm)).toHaveLength(0);
-    expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(0);
+    expect(wrapper.find(NoSpacesAvailable)).toHaveLength(0);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
 
     await act(async () => {
@@ -121,26 +134,28 @@ describe('ShareToSpaceFlyout', () => {
 
     expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
-    expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(0);
+    expect(wrapper.find(NoSpacesAvailable)).toHaveLength(0);
   });
 
-  it('shows a message within an EuiEmptyPrompt when no spaces are available', async () => {
-    const { wrapper, onClose } = await setup({ mockSpaces: [] });
+  it('shows a message within a NoSpacesAvailable when no spaces are available', async () => {
+    const { wrapper, onClose } = await setup({
+      mockSpaces: [{ id: 'my-active-space', name: 'my active space', disabledFeatures: [] }],
+    });
 
-    expect(wrapper.find(ShareToSpaceForm)).toHaveLength(0);
+    expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
-    expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
+    expect(wrapper.find(NoSpacesAvailable)).toHaveLength(1);
     expect(onClose).toHaveBeenCalledTimes(0);
   });
 
-  it('shows a message within an EuiEmptyPrompt when only the active space is available', async () => {
+  it('shows a message within a NoSpacesAvailable when only the active space is available', async () => {
     const { wrapper, onClose } = await setup({
       mockSpaces: [{ id: 'my-active-space', name: '', disabledFeatures: [] }],
     });
 
-    expect(wrapper.find(ShareToSpaceForm)).toHaveLength(0);
+    expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
-    expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
+    expect(wrapper.find(NoSpacesAvailable)).toHaveLength(1);
     expect(onClose).toHaveBeenCalledTimes(0);
   });
 
@@ -176,9 +191,9 @@ describe('ShareToSpaceFlyout', () => {
 
     expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
-    expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(0);
+    expect(wrapper.find(NoSpacesAvailable)).toHaveLength(0);
 
-    const copyButton = findTestSubject(wrapper, 'sts-copy-button'); // this button is only present in the warning callout
+    const copyButton = findTestSubject(wrapper, 'sts-copy-link'); // this link is only present in the warning callout
 
     await act(async () => {
       copyButton.simulate('click');
@@ -199,7 +214,7 @@ describe('ShareToSpaceFlyout', () => {
 
     expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
-    expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(0);
+    expect(wrapper.find(NoSpacesAvailable)).toHaveLength(0);
 
     // Using props callback instead of simulating clicks,
     // because EuiSelectable uses a virtualized list, which isn't easily testable via test subjects
@@ -230,7 +245,7 @@ describe('ShareToSpaceFlyout', () => {
 
     expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
-    expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(0);
+    expect(wrapper.find(NoSpacesAvailable)).toHaveLength(0);
 
     // Using props callback instead of simulating clicks,
     // because EuiSelectable uses a virtualized list, which isn't easily testable via test subjects
@@ -263,7 +278,7 @@ describe('ShareToSpaceFlyout', () => {
 
     expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
-    expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(0);
+    expect(wrapper.find(NoSpacesAvailable)).toHaveLength(0);
 
     // Using props callback instead of simulating clicks,
     // because EuiSelectable uses a virtualized list, which isn't easily testable via test subjects
@@ -302,7 +317,7 @@ describe('ShareToSpaceFlyout', () => {
 
     expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
-    expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(0);
+    expect(wrapper.find(NoSpacesAvailable)).toHaveLength(0);
 
     // Using props callback instead of simulating clicks,
     // because EuiSelectable uses a virtualized list, which isn't easily testable via test subjects
@@ -341,7 +356,7 @@ describe('ShareToSpaceFlyout', () => {
 
     expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
-    expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(0);
+    expect(wrapper.find(NoSpacesAvailable)).toHaveLength(0);
 
     // Using props callback instead of simulating clicks,
     // because EuiSelectable uses a virtualized list, which isn't easily testable via test subjects
