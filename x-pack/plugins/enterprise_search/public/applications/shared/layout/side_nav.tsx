@@ -13,7 +13,7 @@ import { EuiIcon, EuiTitle, EuiText, EuiLink as EuiLinkExternal } from '@elastic
 import { EuiLink } from '../react_router_helpers';
 
 import { ENTERPRISE_SEARCH_PLUGIN } from '../../../../common/constants';
-import { stripTrailingSlash } from '../../../../common/strip_trailing_slash';
+import { stripTrailingSlash } from '../../../../common/strip_slashes';
 
 import { NavContext, INavContext } from './layout';
 

@@ -30,6 +30,7 @@ import {
   sendSetup,
   sendGetPermissionsCheck,
   licenseService,
+  KibanaVersionContext,
 } from './hooks';
 import { PackageInstallProvider } from './sections/epm/hooks';
 import { FleetStatusProvider } from './hooks/use_fleet_status';
@@ -235,6 +236,7 @@ const IngestManagerApp = ({
   startDeps,
   config,
   history,
+  kibanaVersion,
 }: {
   basepath: string;
   coreStart: CoreStart;
@@ -242,6 +244,7 @@ const IngestManagerApp = ({
   startDeps: IngestManagerStartDeps;
   config: IngestManagerConfigType;
   history: AppMountParameters['history'];
+  kibanaVersion: string;
 }) => {
   const isDarkMode = useObservable<boolean>(coreStart.uiSettings.get$('theme:darkMode'));
   return (
@@ -249,9 +252,11 @@ const IngestManagerApp = ({
       <KibanaContextProvider services={{ ...coreStart }}>
         <DepsContext.Provider value={{ setup: setupDeps, start: startDeps }}>
           <ConfigContext.Provider value={config}>
-            <EuiThemeProvider darkMode={isDarkMode}>
-              <IngestManagerRoutes history={history} basepath={basepath} />
-            </EuiThemeProvider>
+            <KibanaVersionContext.Provider value={kibanaVersion}>
+              <EuiThemeProvider darkMode={isDarkMode}>
+                <IngestManagerRoutes history={history} basepath={basepath} />
+              </EuiThemeProvider>
+            </KibanaVersionContext.Provider>
           </ConfigContext.Provider>
         </DepsContext.Provider>
       </KibanaContextProvider>
@@ -264,7 +269,8 @@ export function renderApp(
   { element, appBasePath, history }: AppMountParameters,
   setupDeps: IngestManagerSetupDeps,
   startDeps: IngestManagerStartDeps,
-  config: IngestManagerConfigType
+  config: IngestManagerConfigType,
+  kibanaVersion: string
 ) {
   ReactDOM.render(
     <IngestManagerApp
@@ -274,6 +280,7 @@ export function renderApp(
       startDeps={startDeps}
       config={config}
       history={history}
+      kibanaVersion={kibanaVersion}
     />,
     element
   );
