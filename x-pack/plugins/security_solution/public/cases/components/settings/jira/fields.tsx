@@ -24,7 +24,6 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
   onChange,
 }) => {
   const { issueType = null, priority = null, parent = null } = fields ?? {};
-
   const { http, notifications } = useKibana().services;
 
   const { isLoading: isLoadingIssueTypes, issueTypes } = useGetIssueTypes({
@@ -53,8 +52,17 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
         });
       }
       return issueTypesSelectOptions[0].value;
+    } else if (
+      issueTypesSelectOptions.length > 0 &&
+      !issueTypesSelectOptions.some(({ value }) => value === issueType)
+    ) {
+      onChange({
+        issueType: issueTypesSelectOptions[0].value,
+        parent,
+        priority,
+      });
+      return issueTypesSelectOptions[0].value;
     }
-
     return issueType;
   }, [isEdit, issueType, issueTypesSelectOptions, onChange, parent, priority]);
 
@@ -131,7 +139,6 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
     },
     [currentIssueType, fields, onChange, parent, priority]
   );
-
   return isEdit ? (
     <span data-test-subj={'connector-settings-jira'}>
       <EuiFormRow fullWidth label={i18n.ISSUE_TYPE}>
