@@ -1,0 +1,129 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import React, { FC } from 'react';
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
+import { EuiDataGridColumn, EuiSpacer } from '@elastic/eui';
+
+import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
+
+import { getToastNotifications } from '../../../../../util/dependency_cache';
+import { useColorRange, ColorRangeLegend } from '../../../../../components/color_range_legend';
+import { DataGrid, UseIndexDataReturnType } from '../../../../../components/data_grid';
+import { SavedSearchQuery } from '../../../../../contexts/ml';
+
+import { defaultSearchQuery, DataFrameAnalyticsConfig } from '../../../../common';
+
+import { ExpandableSection, ExpandableSectionProps } from '../expandable_section';
+import { IndexPatternPrompt } from '../index_pattern_prompt';
+
+const getResultsSectionHeaderItems = (
+  columnsWithCharts: EuiDataGridColumn[],
+  tableItems: Array<Record<string, any>>,
+  rowCount: number,
+  colorRange?: ReturnType<typeof useColorRange>
+): ExpandableSectionProps['headerItems'] => {
+  return columnsWithCharts.length > 0 && tableItems.length > 0
+    ? [
+        {
+          id: 'explorationTableTotalDocs',
+          label: (
+            <FormattedMessage
+              id="xpack.ml.dataframe.analytics.exploration.explorationTableTotalDocsLabel"
+              defaultMessage="Total docs"
+            />
+          ),
+          value: rowCount,
+        },
+        ...(colorRange !== undefined
+          ? [
+              {
+                id: 'colorRangeLegend',
+                value: (
+                  <ColorRangeLegend
+                    colorRange={colorRange}
+                    title={i18n.translate(
+                      'xpack.ml.dataframe.analytics.exploration.colorRangeLegendTitle',
+                      {
+                        defaultMessage: 'Feature influence score',
+                      }
+                    )}
+                  />
+                ),
+              },
+            ]
+          : []),
+      ]
+    : 'loading';
+};
+
+interface ExpandableSectionResultsProps {
+  colorRange?: ReturnType<typeof useColorRange>;
+  indexData: UseIndexDataReturnType;
+  indexPattern?: IndexPattern;
+  jobConfig?: DataFrameAnalyticsConfig;
+  needsDestIndexPattern: boolean;
+  searchQuery: SavedSearchQuery;
+}
+
+export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
+  colorRange,
+  indexData,
+  indexPattern,
+  jobConfig,
+  needsDestIndexPattern,
+  searchQuery,
+}) => {
+  const { columnsWithCharts, tableItems } = indexData;
+
+  // Results section header items and content
+  const resultsSectionHeaderItems = getResultsSectionHeaderItems(
+    columnsWithCharts,
+    tableItems,
+    indexData.rowCount,
+    colorRange
+  );
+  const resultsSectionContent = (
+    <>
+      {jobConfig !== undefined && needsDestIndexPattern && (
+        <IndexPatternPrompt destIndex={jobConfig.dest.index} />
+      )}
+      {(columnsWithCharts.length > 0 || searchQuery !== defaultSearchQuery) &&
+        indexPattern !== undefined && (
+          <>
+            <EuiSpacer size="s" />
+            {columnsWithCharts.length > 0 && tableItems.length > 0 && (
+              <DataGrid
+                {...indexData}
+                dataTestSubj="mlExplorationDataGrid"
+                toastNotifications={getToastNotifications()}
+              />
+            )}
+          </>
+        )}
+    </>
+  );
+
+  return (
+    <>
+      <ExpandableSection
+        dataTestId="results"
+        content={resultsSectionContent}
+        headerItems={resultsSectionHeaderItems}
+        title={
+          <FormattedMessage
+            id="xpack.ml.dataframe.analytics.exploration.explorationTableTitle"
+            defaultMessage="Results"
+          />
+        }
+      />
+      <EuiSpacer size="m" />
+    </>
+  );
+};

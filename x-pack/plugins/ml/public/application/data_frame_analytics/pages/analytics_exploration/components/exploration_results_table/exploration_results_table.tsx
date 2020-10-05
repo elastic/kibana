@@ -6,32 +6,27 @@
 
 import React, { Fragment, FC, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
 import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
-import { DataGrid } from '../../../../../components/data_grid';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 
 import {
   DataFrameAnalyticsConfig,
-  MAX_COLUMNS,
   SEARCH_SIZE,
   defaultSearchQuery,
-  getAnalysisType,
   getDefaultTrainingFilterQuery,
 } from '../../../../common';
-import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/use_columns';
 import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
-import { ExplorationTitle } from '../exploration_title';
 import { ExplorationQueryBar } from '../exploration_query_bar';
-import { IndexPatternPrompt } from '../index_pattern_prompt';
 
 import { useExplorationResults } from './use_exploration_results';
 import { useMlKibana } from '../../../../../contexts/kibana';
-import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
 import { useUrlState } from '../../../../../util/url_state';
+
+import { ExpandableSectionResults } from '../expandable_section';
 
 const showingDocs = i18n.translate(
   'xpack.ml.dataframe.analytics.explorationResults.documentsShownHelpText',
@@ -115,8 +110,6 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
       }
     }, []);
 
-    const analysisType = getAnalysisType(jobConfig.analysis);
-
     const classificationData = useExplorationResults(
       indexPattern,
       jobConfig,
@@ -125,83 +118,43 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
       mlApiServices
     );
 
-    const docFieldsCount = classificationData.columnsWithCharts.length;
-    const { columnsWithCharts, tableItems, visibleColumns } = classificationData;
+    const { tableItems } = classificationData;
 
     if (jobConfig === undefined || classificationData === undefined) {
       return null;
     }
 
     return (
-      <EuiPanel
-        grow={false}
-        id="mlDataFrameAnalyticsTableResultsPanel"
-        data-test-subj="mlDFAnalyticsExplorationTablePanel"
-      >
-        {needsDestIndexPattern && <IndexPatternPrompt destIndex={jobConfig.dest.index} />}
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+      <>
+        <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <ExplorationTitle title={title} />
-              </EuiFlexItem>
-              {jobStatus !== undefined && (
-                <EuiFlexItem grow={false}>
-                  <span>{getTaskStateBadge(jobStatus)}</span>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-              <EuiFlexItem style={{ textAlign: 'right' }}>
-                {docFieldsCount > MAX_COLUMNS && (
-                  <EuiText size="s">
-                    {i18n.translate(
-                      'xpack.ml.dataframe.analytics.explorationResults.fieldSelection',
-                      {
-                        defaultMessage:
-                          '{selectedFieldsLength, number} of {docFieldsCount, number} {docFieldsCount, plural, one {field} other {fields}} selected',
-                        values: { selectedFieldsLength: visibleColumns.length, docFieldsCount },
-                      }
-                    )}
-                  </EuiText>
-                )}
+            <EuiSpacer size="s" />
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem>
+                <ExplorationQueryBar
+                  indexPattern={indexPattern}
+                  setSearchQuery={setSearchQuery}
+                  defaultQueryString={defaultQueryString}
+                  filters={filters}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
+            <EuiFormRow
+              helpText={tableItems.length === SEARCH_SIZE ? showingFirstDocs : showingDocs}
+            >
+              <Fragment />
+            </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
-        {(columnsWithCharts.length > 0 || searchQuery !== defaultSearchQuery) && (
-          <EuiFlexGroup direction="column">
-            <EuiFlexItem grow={false}>
-              <EuiSpacer size="s" />
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem>
-                  <ExplorationQueryBar
-                    indexPattern={indexPattern}
-                    setSearchQuery={setSearchQuery}
-                    defaultQueryString={defaultQueryString}
-                    filters={filters}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiFormRow
-                helpText={tableItems.length === SEARCH_SIZE ? showingFirstDocs : showingDocs}
-              >
-                <Fragment />
-              </EuiFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <DataGrid
-                {...classificationData}
-                dataTestSubj="mlExplorationDataGrid"
-                toastNotifications={getToastNotifications()}
-                analysisType={(analysisType as unknown) as DataFrameAnalysisConfigType}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
-      </EuiPanel>
+        <EuiSpacer size="m" />
+        <ExpandableSectionResults
+          indexData={classificationData}
+          indexPattern={indexPattern}
+          jobConfig={jobConfig}
+          needsDestIndexPattern={needsDestIndexPattern}
+          searchQuery={searchQuery}
+        />
+      </>
     );
   }
 );

@@ -6,13 +6,14 @@
 
 import React, { FC, useState } from 'react';
 
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiText } from '@elastic/eui';
 
 import { useResultsViewConfig, DataFrameAnalyticsConfig } from '../../../../common';
 import { ResultsSearchQuery, defaultSearchQuery } from '../../../../common/analytics';
 
 import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
 
+import { ExpandableSectionAnalytics } from '../expandable_section';
 import { ExplorationResultsTable } from '../exploration_results_table';
 import { JobConfigErrorCallout } from '../job_config_error_callout';
 import { LoadingPanel } from '../loading_panel';
@@ -61,8 +62,21 @@ export const ExplorationPageWrapper: FC<Props> = ({
       />
     );
   }
+
   return (
     <>
+      {typeof jobConfig?.description !== 'undefined' && (
+        <>
+          <EuiText>{jobConfig?.description}</EuiText>
+          <EuiSpacer size="m" />
+        </>
+      )}
+
+      {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
+      {isLoadingJobConfig === false && jobConfig !== undefined && isInitialized === true && (
+        <ExpandableSectionAnalytics jobId={jobConfig.id} />
+      )}
+
       {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
       {isLoadingJobConfig === false && jobConfig !== undefined && isInitialized === true && (
         <EvaluatePanel jobConfig={jobConfig} jobStatus={jobStatus} searchQuery={searchQuery} />
@@ -70,12 +84,10 @@ export const ExplorationPageWrapper: FC<Props> = ({
       {isLoadingJobConfig === true && totalFeatureImportance === undefined && <LoadingPanel />}
       {isLoadingJobConfig === false && totalFeatureImportance !== undefined && (
         <>
-          <EuiSpacer />
           <FeatureImportanceSummaryPanel totalFeatureImportance={totalFeatureImportance} />
         </>
       )}
 
-      <EuiSpacer />
       {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
       {isLoadingJobConfig === false &&
         jobConfig !== undefined &&
