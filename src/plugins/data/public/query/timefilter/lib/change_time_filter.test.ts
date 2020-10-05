@@ -45,8 +45,8 @@ describe('changeTimeFilter()', () => {
 
     const { to, from } = timefilter.getTime();
 
-    expect(to).toBe(new Date(lt).toISOString());
-    expect(from).toBe(new Date(gt).toISOString());
+    expect(to).toBe(new Date(lt - 1).toISOString());
+    expect(from).toBe(new Date(gt + 1).toISOString());
   });
 
   test('should change the timefilter to match the range gte/lte', () => {

@@ -26,9 +26,11 @@ export function convertRangeFilterToTimeRange(filter: RangeFilter) {
   const key = keys(filter.range)[0];
   const values = filter.range[key];
 
+  const EPSILON = 1;
+
   return {
-    from: moment(values.gt || values.gte),
-    to: moment(values.lt || values.lte),
+    from: values.gt ? moment(values.gt).add(EPSILON) : moment(values.gte),
+    to: values.lt ? moment(values.lt).subtract(EPSILON) : moment(values.lte),
   };
 }
 
