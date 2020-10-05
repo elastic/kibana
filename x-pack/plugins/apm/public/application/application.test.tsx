@@ -42,6 +42,13 @@ describe('renderApp', () => {
       licensing: { license$: new Observable() },
       triggers_actions_ui: { actionTypeRegistry: {}, alertTypeRegistry: {} },
       usageCollection: { reportUiStats: () => {} },
+      data: {
+        query: {
+          timefilter: {
+            timefilter: { setTime: () => {}, getTime: () => ({}) },
+          },
+        },
+      },
     };
     const params = {
       element: document.createElement('div'),

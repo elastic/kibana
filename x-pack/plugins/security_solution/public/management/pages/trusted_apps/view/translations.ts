@@ -24,7 +24,7 @@ export const OS_TITLES: Readonly<{ [K in TrustedApp['os']]: string }> = {
 };
 
 export const PROPERTY_TITLES: Readonly<
-  { [K in keyof Omit<TrustedApp, 'id' | 'description' | 'entries'>]: string }
+  { [K in keyof Omit<TrustedApp, 'id' | 'entries'>]: string }
 > = {
   name: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.name', {
     defaultMessage: 'Name',
@@ -37,6 +37,9 @@ export const PROPERTY_TITLES: Readonly<
   }),
   created_by: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.createdBy', {
     defaultMessage: 'Created By',
+  }),
+  description: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.description', {
+    defaultMessage: 'Description',
   }),
 };
 
