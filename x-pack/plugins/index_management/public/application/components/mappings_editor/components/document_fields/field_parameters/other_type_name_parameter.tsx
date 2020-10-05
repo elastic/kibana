@@ -71,7 +71,12 @@ const CustomTextField = ({ field }: Props) => {
     [setValue]
   );
 
-  return <TextField field={transformedField} euiFieldProps={{ onChange }} />;
+  return (
+    <TextField
+      field={transformedField}
+      euiFieldProps={{ onChange, 'data-test-subj': 'fieldSubType' }}
+    />
+  );
 };
 
 export const OtherTypeNameParameter = () => (
