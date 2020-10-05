@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       const time = await PageObjects.timePicker.getTimeConfig();
       expect(time.start).to.equal('Sep 21, 2015 @ 09:00:00.000');
-      expect(time.end).to.equal('Sep 21, 2015 @ 12:00:00.000');
+      expect(time.end).to.equal('Sep 21, 2015 @ 11:59:59.999');
       const hasIpFilter = await filterBar.hasFilter('ip', '97.220.3.248');
       expect(hasIpFilter).to.be(true);
     });
