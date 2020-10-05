@@ -7,22 +7,18 @@ exports[`ValueAxisOptions component should init with the default set of props 1`
     options={
       Array [
         Object {
-          "disabled": false,
           "text": "Top",
           "value": "top",
         },
         Object {
-          "disabled": true,
           "text": "Left",
           "value": "left",
         },
         Object {
-          "disabled": true,
           "text": "Right",
           "value": "right",
         },
         Object {
-          "disabled": false,
           "text": "Bottom",
           "value": "bottom",
         },
