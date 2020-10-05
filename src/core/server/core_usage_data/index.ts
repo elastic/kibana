@@ -16,11 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+export { CoreUsageDataStart } from './types';
+export { CoreUsageDataService } from './core_usage_data_service';
 
-export { registerUiMetricUsageCollector } from './ui_metric';
-export { registerManagementUsageCollector } from './management';
-export { registerApplicationUsageCollector } from './application_usage';
-export { registerKibanaUsageCollector } from './kibana';
-export { registerOpsStatsCollector } from './ops_stats';
-export { registerCspCollector } from './csp';
-export { registerCoreUsageCollector } from './core';
+// Because of #79265 we need to explicity import, then export these types for
+// scripts/telemetry_check.js to work as expected
+import {
+  CoreUsageData,
+  CoreConfigUsageData,
+  CoreEnvironmentUsageData,
+  CoreServicesUsageData,
+} from './types';
+
+export { CoreUsageData, CoreConfigUsageData, CoreEnvironmentUsageData, CoreServicesUsageData };
