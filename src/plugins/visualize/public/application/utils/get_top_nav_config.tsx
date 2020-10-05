@@ -21,6 +21,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { TopNavMenuData } from 'src/plugins/navigation/public';
+import { AppMountParameters } from 'kibana/public';
 import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeInput } from '../../../../visualizations/public';
 import {
   showSaveModal,
@@ -38,8 +39,6 @@ import {
 import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from './breadcrumbs';
 import { EmbeddableStateTransfer } from '../../../../embeddable/public';
-import { ConfirmModal } from './confirm_modal';
-import { showConfirmModal } from './show_visualize_confirm_modal';
 
 interface TopNavConfigParams {
   hasUnsavedChanges: boolean;
@@ -53,6 +52,7 @@ interface TopNavConfigParams {
   visualizationIdFromUrl?: string;
   stateTransfer: EmbeddableStateTransfer;
   embeddableId?: string;
+  onAppLeave: AppMountParameters['onAppLeave'];
 }
 
 export const getTopNavConfig = (
@@ -68,6 +68,7 @@ export const getTopNavConfig = (
     visualizationIdFromUrl,
     stateTransfer,
     embeddableId,
+    onAppLeave,
   }: TopNavConfigParams,
   {
     application,
@@ -182,30 +183,6 @@ export const getTopNavConfig = (
     }
   };
 
-  const confirmModal = (
-    <ConfirmModal
-      onConfirm={navigateToOriginatingApp}
-      onCancel={() => {}}
-      title={i18n.translate('visualize.confirmModal.title', {
-        defaultMessage: 'Unsaved changes',
-      })}
-      description={i18n.translate('visualize.confirmModal.confirmTextDescription', {
-        defaultMessage: 'Leave Visualize editor with unsaved changes?',
-      })}
-    />
-  );
-
-  const cancelAndReturn = () => {
-    if (!originatingApp) {
-      return;
-    }
-    if (hasUnappliedChanges || hasUnsavedChanges) {
-      showConfirmModal(confirmModal, I18nContext);
-    } else {
-      navigateToOriginatingApp();
-    }
-  };
-
   const topNavMenu: TopNavMenuData[] = [
     {
       id: 'inspector',
@@ -257,6 +234,31 @@ export const getTopNavConfig = (
       // disable the Share button if no action specified
       disableButton: !share || !!embeddableId,
     },
+    ...(originatingApp === 'dashboards' || originatingApp === 'canvas'
+      ? [
+          {
+            id: 'cancel',
+            label: i18n.translate('visualize.topNavMenu.cancelButtonLabel', {
+              defaultMessage: 'Cancel',
+            }),
+            emphasize: false,
+            description: i18n.translate('visualize.topNavMenu.cancelButtonAriaLabel', {
+              defaultMessage: 'Return to the last app without saving changes',
+            }),
+            testId: 'visualizeCancelAndReturnButton',
+            tooltip() {
+              if (hasUnappliedChanges || hasUnsavedChanges) {
+                return i18n.translate('visualize.topNavMenu.cancelAndReturnButtonTooltip', {
+                  defaultMessage: 'Discard your changes before finishing',
+                });
+              }
+            },
+            run: async () => {
+              return navigateToOriginatingApp();
+            },
+          },
+        ]
+      : []),
     ...(visualizeCapabilities.save && !embeddableId
       ? [
           {
@@ -338,31 +340,6 @@ export const getTopNavConfig = (
               } else if (savedVis) {
                 showSaveModal(saveModal, I18nContext);
               }
-            },
-          },
-        ]
-      : []),
-    ...(originatingApp === 'dashboards' || originatingApp === 'canvas'
-      ? [
-          {
-            id: 'cancel',
-            label: i18n.translate('visualize.topNavMenu.cancelButtonLabel', {
-              defaultMessage: 'Cancel',
-            }),
-            emphasize: false,
-            description: i18n.translate('visualize.topNavMenu.cancelButtonAriaLabel', {
-              defaultMessage: 'Return to the last app without saving changes',
-            }),
-            testId: 'visualizeCancelAndReturnButton',
-            tooltip() {
-              if (hasUnappliedChanges || hasUnsavedChanges) {
-                return i18n.translate('visualize.topNavMenu.cancelAndReturnButtonTooltip', {
-                  defaultMessage: 'Discard your changes before finishing',
-                });
-              }
-            },
-            run: async () => {
-              return cancelAndReturn();
             },
           },
         ]
