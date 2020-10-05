@@ -15,12 +15,12 @@ addDecorator((storyFn) => (
   <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
 ));
 
-const useRenderStory = (state: ControlPanelProps['state']) => {
-  const [selectedOption, setSelectedOption] = useState<ViewType>(state.currentViewType);
+const useRenderStory = (props: Omit<ControlPanelProps, 'onViewTypeChange'>) => {
+  const [selectedOption, setSelectedOption] = useState<ViewType>(props.currentViewType);
 
   return (
     <ControlPanel
-      state={{ ...state, currentViewType: selectedOption }}
+      {...{ ...props, currentViewType: selectedOption }}
       onViewTypeChange={setSelectedOption}
     />
   );
@@ -28,11 +28,11 @@ const useRenderStory = (state: ControlPanelProps['state']) => {
 
 storiesOf('TrustedApps/ControlPanel', module)
   .add('list view selected', () => {
-    return useRenderStory({ totalItemsCount: 0, currentViewType: 'list' });
+    return useRenderStory({ totalItemCount: 0, currentViewType: 'list' });
   })
   .add('plural totals', () => {
-    return useRenderStory({ totalItemsCount: 200, currentViewType: 'grid' });
+    return useRenderStory({ totalItemCount: 200, currentViewType: 'grid' });
   })
   .add('singular totals', () => {
-    return useRenderStory({ totalItemsCount: 1, currentViewType: 'grid' });
+    return useRenderStory({ totalItemCount: 1, currentViewType: 'grid' });
   });
