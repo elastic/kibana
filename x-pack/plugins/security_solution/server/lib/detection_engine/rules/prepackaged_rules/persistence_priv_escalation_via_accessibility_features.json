@@ -9,7 +9,7 @@
   "language": "kuery",
   "license": "Elastic License",
   "name": "Potential Modification of Accessibility Binaries",
-  "query": "event.code:1 and process.parent.name:winlogon.exe and process.name:(atbroker.exe or displayswitch.exe or magnify.exe or narrator.exe or osk.exe or sethc.exe or utilman.exe)",
+  "query": "event.category:process and event.type:(start or process_started) and process.parent.name:winlogon.exe and not process.name:(atbroker.exe or displayswitch.exe or magnify.exe or narrator.exe or osk.exe or sethc.exe or utilman.exe)",
   "risk_score": 21,
   "rule_id": "7405ddf1-6c8e-41ce-818f-48bea6bcaed8",
   "severity": "low",
@@ -50,5 +50,5 @@
     }
   ],
   "type": "query",
-  "version": 3
+  "version": 4
 }
