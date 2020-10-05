@@ -21,53 +21,64 @@ export const PREVIEW_SELECT_ARIA = i18n.translate(
 );
 
 export const QUERY_PREVIEW_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.queryPreviewLabel',
+  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewLabel',
   {
     defaultMessage: 'Preview query results',
   }
 );
 
 export const QUERY_PREVIEW_HELP_TEXT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.queryPreviewHelpText',
+  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewHelpText',
   {
     defaultMessage: 'Select a timeframe of data to preview query results',
   }
 );
 
 export const QUERY_GRAPH_COUNT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.queryGraphCountLabel',
+  'xpack.securitySolution.detectionEngine.queryPreview.queryGraphCountLabel',
   {
     defaultMessage: 'Count',
   }
 );
 
 export const QUERY_PREVIEW_GRAPH_NAME = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.queryGraphPreviewName',
+  'xpack.securitySolution.detectionEngine.queryPreview.queryGraphPreviewName',
   {
     defaultMessage: 'Hits',
   }
 );
 
 export const QUERY_PREVIEW_TITLE = (hits: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.queryPreviewGraphTitle',
-    {
-      values: { hits },
-      defaultMessage: '{hits} {hits, plural, =1 {hit} other {hits}}',
-    }
-  );
+  i18n.translate('xpack.securitySolution.detectionEngine.queryPreview.queryPreviewGraphTitle', {
+    values: { hits },
+    defaultMessage: '{hits} {hits, plural, =1 {hit} other {hits}}',
+  });
 
 export const QUERY_PREVIEW_ERROR = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.queryGraphPreviewFetchError',
+  'xpack.securitySolution.detectionEngine.queryPreview.queryGraphPreviewFetchError',
   {
     defaultMessage: 'Query preview failure',
   }
 );
 
 export const QUERY_PREVIEW_NOISE_WARNING = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.queryGraphPreviewNoiseWarning',
+  'xpack.securitySolution.detectionEngine.queryPreview.queryGraphPreviewNoiseWarning',
   {
     defaultMessage:
       'Noise warning: This rule may cause a lot of noise. Consider narrowing your query.',
+  }
+);
+
+export const QUERY_PREVIEW_NO_HITS_WARNING = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryPreview.queryNoHitsWarning',
+  {
+    defaultMessage: 'No hits were found with your current query. Consider widening your query.',
+  }
+);
+
+export const PREVIEW_QUERY_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryPreview.queryGraphPreviewNoiseWarning',
+  {
+    defaultMessage: 'Error fetching preview',
   }
 );

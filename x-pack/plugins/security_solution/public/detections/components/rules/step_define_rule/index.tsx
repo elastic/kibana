@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import React, { FC, memo, useCallback, useState, useEffect } from 'react';
 import styled from 'styled-components';
 // Prefer importing entire lodash library, e.g. import { get } from "lodash"
@@ -381,14 +381,17 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           />
         </Form>
         {formRuleType != null && formRuleType !== 'machine_learning' && (
-          <PreviewQuery
-            dataTestSubj="something"
-            idAria="someAriaId"
-            ruleType={formRuleType}
-            index={index}
-            query={formQuery}
-            threshold={{ value: formThresholdValue, field: formThresholdField }}
-          />
+          <>
+            <EuiSpacer size="s" />
+            <PreviewQuery
+              dataTestSubj="something"
+              idAria="someAriaId"
+              ruleType={formRuleType}
+              index={index}
+              query={formQuery}
+              threshold={{ value: formThresholdValue, field: formThresholdField }}
+            />
+          </>
         )}
       </StepContentWrapper>
 

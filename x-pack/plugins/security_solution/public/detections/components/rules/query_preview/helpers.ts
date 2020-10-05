@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ScaleType } from '@elastic/charts';
+import { Position, ScaleType } from '@elastic/charts';
 import { EuiSelectOption } from '@elastic/eui';
 
 import * as i18n from './translations';
@@ -32,7 +32,11 @@ export const getTimeframeOptions = (ruleType: Type): EuiSelectOption[] => {
   }
 };
 
-export const getHistogramConfig = (to: string, from: string): ChartSeriesConfigs => {
+export const getHistogramConfig = (
+  to: string,
+  from: string,
+  showLegend: boolean
+): ChartSeriesConfigs => {
   return {
     series: {
       xScaleType: ScaleType.Time,
@@ -46,7 +50,9 @@ export const getHistogramConfig = (to: string, from: string): ChartSeriesConfigs
     },
     yAxisTitle: i18n.QUERY_GRAPH_COUNT,
     settings: {
-      showLegend: false,
+      legendPosition: Position.Right,
+      showLegend,
+      showLegendExtra: showLegend,
       theme: {
         scales: {
           barsPadding: 0.08,

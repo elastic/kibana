@@ -3,8 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useState, useMemo } from 'react';
+import React, { useCallback, useState, useMemo, useEffect } from 'react';
+import { Unit } from '@elastic/datemath';
+import { getOr } from 'lodash/fp';
 
+import { IndexPattern } from 'src/plugins/data/public';
+import * as i18n from './translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
@@ -22,6 +26,7 @@ import { MatrixHistogramType } from '../../../../../common/search_strategy/secur
 import { useEqlPreview } from '../../../../common/hooks/eql';
 import { InspectQuery } from '../../../../common/store/inputs/model';
 import { ChartData } from '../../../../common/components/charts/common';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
 export const ID = 'queryPreviewHistogramQuery';
 
@@ -42,36 +47,52 @@ export const PreviewQuery = ({
   index,
   threshold,
 }: PreviewQueryProps) => {
+  // how far back to look like 'now-6m'
   const [toTime, setTo] = useState('');
+  // the more recent time like 'now'
   const [fromTime, setFrom] = useState('');
   const { data } = useKibana().services;
   const [, { indexPatterns }] = useFetchIndex(index);
+  const { addError } = useAppToasts();
   // TODO: deal with errors
   const {
+    error: customQueryError,
     start: startCustomQuery,
     result: customQueryResult,
     loading: customQueryLoading,
   } = useMatrixHistogramAsync();
-  const { start: startEql, result: eqlQueryResult, loading: eqlQueryLoading } = useEqlPreview();
+  const {
+    error: eqlError,
+    start: startEql,
+    result: eqlQueryResult,
+    loading: eqlQueryLoading,
+  } = useEqlPreview();
+
+  const queryString = useMemo((): string => getOr('', 'query.query', query), [query]);
+  const language = useMemo((): Language => getOr('kuery', 'query.language', query), [query]);
 
   const handleCalculateTimeRange = useCallback(
-    (interval: string): { to: string; from: string } => {
+    (interval: Unit): { to: string; from: string } => {
       const rangeFilter: RangeFilter | undefined = data.query.timefilter.timefilter.createFilter(
-        { ...indexPatterns, timeFieldName: '@timestamp' },
+        { ...indexPatterns, timeFieldName: '@timestamp' } as IndexPattern,
         { from: `now-1${interval}`, to: 'now' }
       );
 
-      const to = rangeFilter != null ? `${rangeFilter.range['@timestamp'].gte}` : '';
-      const from = rangeFilter != null ? `${rangeFilter.range['@timestamp'].lte}` : '';
-      setTo(to);
-      setFrom(from);
-      return { to, from };
+      const to = rangeFilter != null ? `${rangeFilter.range['@timestamp'].gte}` : null;
+      const from = rangeFilter != null ? `${rangeFilter.range['@timestamp'].lte}` : null;
+
+      if (to != null && from != null) {
+        setTo(to);
+        setFrom(from);
+      }
+
+      return { to: to ?? toTime, from: from ?? fromTime };
     },
-    [data, indexPatterns]
+    [data, indexPatterns, toTime, fromTime]
   );
 
-  const handleEqlPreviewQuery = useCallback(
-    (queryString: string, to: string, from: string, interval: string): void => {
+  const handlePreviewEqlQuery = useCallback(
+    (to: string, from: string, interval: Unit): void => {
       startEql({
         data,
         index,
@@ -81,13 +102,13 @@ export const PreviewQuery = ({
         interval,
       });
     },
-    [data, index, startEql]
+    [data, index, startEql, queryString]
   );
 
-  const handlePreviewCustomQuery = useCallback(
+  const handlePreviewNonEqlQuery = useCallback(
     (filterQuery: ESQueryStringQuery | undefined, to: string, from: string): void => {
       const thresholdField =
-        threshold != null && threshold.field[0] != null
+        ruleType === 'threshold' && threshold != null && threshold.field[0] != null
           ? { ...threshold, field: threshold.field[0] }
           : undefined;
       startCustomQuery({
@@ -101,43 +122,41 @@ export const PreviewQuery = ({
         threshold: thresholdField,
       });
     },
-    [index, data, startCustomQuery, threshold]
+    [index, data, startCustomQuery, threshold, ruleType]
   );
 
   const handlePreviewClick = useCallback(
-    (interval: string) => {
+    (interval: Unit) => {
       const { to, from } = handleCalculateTimeRange(interval);
-      const q =
-        query != null && query.query != null && typeof query.query.query === 'string'
-          ? query.query.query
-          : '';
-      const filterQuery =
-        q.trim() !== ''
-          ? {
-              ...((getQueryFilter(
-                q,
-                query.query.language as Language,
-                [],
-                index,
-                [],
-                true
-              ) as unknown) as ESQueryStringQuery),
-            }
-          : undefined;
 
       if (ruleType === 'eql') {
-        handleEqlPreviewQuery(q, to, from, interval);
+        handlePreviewEqlQuery(to, from, interval);
       } else {
-        handlePreviewCustomQuery(filterQuery, to, from);
+        const filterQuery =
+          queryString.trim() !== ''
+            ? {
+                ...((getQueryFilter(
+                  queryString,
+                  language,
+                  [],
+                  index,
+                  [],
+                  true
+                ) as unknown) as ESQueryStringQuery),
+              }
+            : undefined;
+
+        handlePreviewNonEqlQuery(filterQuery, to, from);
       }
     },
     [
       handleCalculateTimeRange,
-      query,
-      index,
       ruleType,
-      handleEqlPreviewQuery,
-      handlePreviewCustomQuery,
+      handlePreviewEqlQuery,
+      queryString,
+      language,
+      index,
+      handlePreviewNonEqlQuery,
     ]
   );
 
@@ -163,6 +182,18 @@ export const PreviewQuery = ({
     }
   }, [ruleType, eqlQueryResult, customQueryResult]);
 
+  useEffect((): void => {
+    if (customQueryError != null) {
+      addError(customQueryError, { title: i18n.PREVIEW_QUERY_ERROR });
+    }
+  }, [customQueryError, addError]);
+
+  useEffect((): void => {
+    if (eqlError != null) {
+      addError(eqlError, { title: i18n.PREVIEW_QUERY_ERROR });
+    }
+  }, [eqlError, addError]);
+
   return (
     <PreviewQueryHistogram
       dataTestSubj={dataTestSubj}
@@ -170,12 +201,13 @@ export const PreviewQuery = ({
       onPreviewClick={handlePreviewClick}
       totalHits={queryResult.totalHits}
       data={queryResult.data}
-      query={query}
+      query={queryString}
       to={toTime}
       from={fromTime}
       inspect={queryResult.inspect}
       isLoading={eqlQueryLoading || customQueryLoading}
       ruleType={ruleType}
+      errorExists={customQueryError != null || eqlError != null}
     />
   );
 };

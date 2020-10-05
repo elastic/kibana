@@ -3,18 +3,19 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import moment, { unitOfTime } from 'moment';
+import moment from 'moment';
+import { Unit } from '@elastic/datemath';
 
-import { IKibanaSearchResponse } from '../../../../../../../src/plugins/data/common/search/types';
 import { EqlSearchStrategyResponse } from '../../../../../data_enhanced/common';
-import { EqlAggsResponse } from './api';
+import { InspectResponse } from '../../../types';
+import { EqlPreviewResponse } from './api';
 
 // Calculates which 5 min bucket segment, event should be
 // sorted into
 export const calculateBucketForHour = (eventTimestamp: number, relativeNow: number): number => {
   const diff: number = relativeNow - eventTimestamp;
   const minutes: number = Math.floor(diff / 60000);
-  return Math.ceil(minutes / 5) * 5;
+  return Math.ceil(minutes / 2) * 2;
 };
 
 // Calculates which 1 hour bucket segment, event should be
@@ -25,27 +26,36 @@ export const calculateBucketForDay = (eventTimestamp: number, relativeNow: numbe
   return Math.ceil(minutes / 60);
 };
 
+export const formatInspect = (response): InspectResponse => {
+  if (response != null) {
+    return {
+      dsl: [JSON.stringify(response.meta.request.params, null, 2)] ?? [],
+      response: [JSON.stringify(response.body, null, 2)] ?? [],
+    };
+  }
+
+  return {
+    dsl: [],
+    response: [],
+  };
+};
+
 // NOTE: Eql does not support aggregations, this is an in-memory
 // hand-spun aggregation for the events to give the user a visual
 // representation of their query results
 export const getEqlAggsData = (
-  response: EqlSearchStrategyResponse<IKibanaSearchResponse>,
-  range: unitOfTime.DurationConstructor,
+  response: EqlSearchStrategyResponse<unknown>,
+  range: Unit,
   to: string,
   from: string
-): EqlAggsResponse => {
-  const inspectDsl: string[] = [JSON.stringify(response.rawResponse.meta.request.params, null, 2)];
-  const inspectResponse: string[] = [JSON.stringify(response.rawResponse.body, null, 2)];
+): EqlPreviewResponse => {
+  const { dsl, response: inspectResponse } = formatInspect(response.rawResponse);
   // The upper bound of the timestamps
   const relativeNow: number = Date.parse(from);
-  const accumulator: Record<string, { timestamp: string; total: number }> = getInterval(
-    range,
-    from,
-    relativeNow
-  );
+  const accumulator = getInterval(range, relativeNow);
 
   if (response.rawResponse.body.hits != null && response.rawResponse.body.hits.events != null) {
-    const buckets = response.rawResponse.body.hits.events.reduce<EqlAggsResponse>((acc, hit) => {
+    const buckets = response.rawResponse.body.hits.events.reduce<EqlPreviewResponse>((acc, hit) => {
       const eventTimestamp: number = Date.parse(hit._source['@timestamp']);
       const bucket =
         range === 'h'
@@ -67,7 +77,7 @@ export const getEqlAggsData = (
       lte: from,
       gte: to,
       inspect: {
-        dsl: inspectDsl,
+        dsl,
         response: inspectResponse,
       },
     };
@@ -79,34 +89,37 @@ export const getEqlAggsData = (
     lte: from,
     gte: to,
     inspect: {
-      dsl: inspectDsl,
+      dsl,
       response: inspectResponse,
     },
   };
 };
 
+export const createIntervalArray = (start: number, end: number, multiplier: number) => {
+  return Array(end - start + 1)
+    .fill(0)
+    .map((_, idx) => start + idx * multiplier);
+};
+
 export const getInterval = (
-  range: unitOfTime.DurationConstructor,
-  from: string,
+  range: Unit,
   relativeNow: number
 ): Record<string, { timestamp: string; total: number }> => {
   switch (range) {
     case 'h':
-      return [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60].reduce((acc, int) => {
+      return createIntervalArray(0, 30, 2).reduce((acc, int) => {
         return {
           ...acc,
           [int]: { timestamp: moment(relativeNow).subtract(int, 'm').format('x'), total: 0 },
         };
       }, {});
     case 'd':
-      return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
-        .map((i) => i)
-        .reduce((acc, int) => {
-          return {
-            ...acc,
-            [int]: { timestamp: moment(relativeNow).subtract(int, 'h').format('x'), total: 0 },
-          };
-        }, {});
+      return createIntervalArray(0, 24, 1).reduce((acc, int) => {
+        return {
+          ...acc,
+          [int]: { timestamp: moment(relativeNow).subtract(int, 'h').format('x'), total: 0 },
+        };
+      }, {});
     default:
       throw new Error('Invalid time range selected');
   }
@@ -116,26 +129,27 @@ export const getSequenceAggs = (
   response: EqlSearchStrategyResponse,
   to: string,
   from: string
-): EqlAggsResponse => {
+): EqlPreviewResponse => {
+  const { dsl, response: inspectResponse } = formatInspect(response.rawResponse);
   const hits = response.rawResponse.body.hits ?? [];
   const data = hits.sequences.map((sequence, i) => {
     return sequence.events.map((seqEvent) => {
       return {
         x: seqEvent._source['@timestamp'],
         y: 1,
-        g: `Event ${i}`,
+        g: `Seq. ${i + 1}`,
       };
     });
   });
 
   return {
     data: data.flat(),
-    totalCount: 5,
+    totalCount: response.rawResponse.body.hits.total.value,
     lte: from,
     gte: to,
     inspect: {
-      dsl: [JSON.stringify(response.rawResponse.meta.request.params)],
-      response: [JSON.stringify(response.rawResponse.body, null, 2)],
+      dsl,
+      response: inspectResponse,
     },
   };
 };

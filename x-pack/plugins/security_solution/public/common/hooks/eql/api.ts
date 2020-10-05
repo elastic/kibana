@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import moment from 'moment';
+import { Unit } from '@elastic/datemath';
 
 import { HttpStart } from '../../../../../../../src/core/public';
 import { DETECTION_ENGINE_EQL_VALIDATION_URL } from '../../../../common/constants';
@@ -16,7 +16,7 @@ import {
 } from '../../../../../data_enhanced/common';
 import { InspectResponse } from '../../../types';
 import { ChartData } from '../../components/charts/common';
-import { getBucketRanges, getEqlAggsData, getInterval, getSequenceAggs } from './helpers';
+import { getEqlAggsData, getSequenceAggs } from './helpers';
 
 interface ApiParams {
   http: HttpStart;
@@ -41,7 +41,7 @@ export const validateEql = async ({
 
 interface AggsParams extends EqlValidationRequest {
   data: DataPublicPluginStart;
-  interval: string;
+  interval: Unit;
   fromTime: string;
   toTime: string;
   signal: AbortSignal;
@@ -82,6 +82,7 @@ export const getEqlPreview = async ({
                 },
               },
               query,
+              size: 50,
             },
           },
         },
@@ -97,7 +98,7 @@ export const getEqlPreview = async ({
     } else {
       return getEqlAggsData(response, interval, toTime, fromTime);
     }
-  } catch {
-    throw new Error();
+  } catch (err) {
+    throw new Error(JSON.stringify(err));
   }
 };
