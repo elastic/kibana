@@ -21,7 +21,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { HttpSetup, ApplicationStart, DocLinksStart } from 'kibana/public';
 import { ReducerAction } from './connector_reducer';
-import { ActionConnector, IErrorObject, ActionTypeModel } from '../../../types';
+import {
+  ActionConnector,
+  IErrorObject,
+  ActionTypeModel,
+  UserConfiguredActionConnector,
+} from '../../../types';
 import { TypeRegistry } from '../../type_registry';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 
@@ -44,8 +49,11 @@ export function validateBaseProperties(actionObject: ActionConnector) {
   return validationResult;
 }
 
-interface ActionConnectorProps {
-  connector: ActionConnector;
+interface ActionConnectorProps<
+  ConnectorConfig = Record<string, any>,
+  ConnectorSecrets = Record<string, any>
+> {
+  connector: UserConfiguredActionConnector<ConnectorConfig, ConnectorSecrets>;
   dispatch: React.Dispatch<ReducerAction>;
   actionTypeName: string;
   serverError?: {

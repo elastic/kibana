@@ -6,9 +6,9 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ActionTypeModel, ValidationResult } from '../../../../types';
-import { SlackActionParams, SlackActionConnector } from '../types';
+import { SlackActionParams, SlackSecrets, SlackActionConnector } from '../types';
 
-export function getActionType(): ActionTypeModel<SlackActionConnector, SlackActionParams> {
+export function getActionType(): ActionTypeModel<unknown, SlackSecrets, SlackActionParams> {
   return {
     id: '.slack',
     iconClass: 'logoSlack',
