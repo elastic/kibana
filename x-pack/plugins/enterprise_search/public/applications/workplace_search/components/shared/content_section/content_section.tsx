@@ -35,7 +35,7 @@ export const ContentSection: React.FC<IContentSectionProps> = ({
   headerSpacer,
   testSubj,
 }) => (
-  <div className={className} data-test-subj={testSubj}>
+  <div className={`${className} content-section`} data-test-subj={testSubj}>
     {title && (
       <>
         <ViewContentHeader title={title} titleSize="s" description={description} action={action} />
@@ -44,7 +44,5 @@ export const ContentSection: React.FC<IContentSectionProps> = ({
       </>
     )}
     {children}
-    <EuiSpacer size="xxl" />
-    <EuiSpacer size="xs" />
   </div>
 );
