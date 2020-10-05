@@ -101,7 +101,7 @@ export default function ({ config: storybookConfig }: { config: Configuration })
     htmlWebpackPlugin.options.template = require.resolve('../lib/templates/index.ejs');
   }
 
-  // @ts-expect-error There's a long error here about the types of the
+  // @ts-ignore There's a long error here about the types of the
   // incompatibility of Configuration, but it looks like it just may be Webpack
   // type definition related.
   return webpackMerge(storybookConfig, config);
