@@ -107,7 +107,9 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
   const resultsSectionContent = (
     <>
       {jobConfig !== undefined && needsDestIndexPattern && (
-        <IndexPatternPrompt destIndex={jobConfig.dest.index} />
+        <div className="mlExpandableSection-contentPadding">
+          <IndexPatternPrompt destIndex={jobConfig.dest.index} />
+        </div>
       )}
       {(columnsWithCharts.length > 0 || searchQuery !== defaultSearchQuery) &&
         indexPattern !== undefined && (
