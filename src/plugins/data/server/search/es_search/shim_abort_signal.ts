@@ -17,10 +17,25 @@
  * under the License.
  */
 
-export { esSearchStrategyProvider } from './es_search_strategy';
-export * from './get_default_search_params';
-export { getTotalLoaded } from './get_total_loaded';
-export * from './to_snake_case';
-export { shimAbortSignal } from './shim_abort_signal';
+import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 
-export { ES_SEARCH_STRATEGY, IEsSearchRequest, IEsSearchResponse } from '../../../common';
+/**
+ *
+ * @internal
+ * NOTE: Temporary workaround until https://github.com/elastic/elasticsearch-js/issues/1297
+ * is resolved
+ *
+ * @param promise a TransportRequestPromise
+ * @param signal optional AbortSignal
+ *
+ * @returns a TransportRequestPromise that will be aborted if the signal is aborted
+ */
+export const shimAbortSignal = <T extends TransportRequestPromise<unknown>>(
+  promise: T,
+  signal: AbortSignal | undefined
+): T => {
+  if (signal) {
+    signal.addEventListener('abort', () => promise.abort());
+  }
+  return promise;
+};
