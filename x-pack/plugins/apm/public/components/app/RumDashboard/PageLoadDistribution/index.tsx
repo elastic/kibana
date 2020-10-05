@@ -72,7 +72,7 @@ export function PageLoadDistribution() {
   };
 
   return (
-    <div data-cy="pageLoadDist" style={FULL_HEIGHT}>
+    <div data-cy="pageLoadDist">
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="xs">
