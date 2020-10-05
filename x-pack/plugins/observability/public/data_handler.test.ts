@@ -5,13 +5,6 @@
  */
 import { registerDataHandler, getDataHandler } from './data_handler';
 import moment from 'moment';
-import {
-  ApmFetchDataResponse,
-  LogsFetchDataResponse,
-  MetricsFetchDataResponse,
-  UptimeFetchDataResponse,
-  UxFetchDataResponse,
-} from './typings';
 
 const params = {
   absoluteTime: {

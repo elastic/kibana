@@ -9,25 +9,25 @@ import * as fetcherHook from '../../../../hooks/use_fetcher';
 import { render } from '../../../../utils/test_helper';
 import { UXSection } from './';
 import { response } from './mock_data/ux.mock';
+import * as queryParamsHook from '../../../../hooks/use_query_params';
 
 describe('UXSection', () => {
+  beforeEach(() => {
+    jest.spyOn(queryParamsHook, 'useQueryParams').mockReturnValue({
+      start: 'now-15m',
+      end: 'now',
+      absStart: moment('2020-06-29T11:38:23.747Z').valueOf(),
+      absEnd: moment('2020-06-29T12:08:23.748Z').valueOf(),
+    });
+  });
+
   it('renders with core web vitals', () => {
     jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
       data: response,
       status: fetcherHook.FETCH_STATUS.SUCCESS,
       refetch: jest.fn(),
     });
-    const { getByText, getAllByText } = render(
-      <UXSection
-        absoluteTime={{
-          start: moment('2020-06-29T11:38:23.747Z').valueOf(),
-          end: moment('2020-06-29T12:08:23.748Z').valueOf(),
-        }}
-        relativeTime={{ start: 'now-15m', end: 'now' }}
-        bucketSize="60s"
-        serviceName="elastic-co-frontend"
-      />
-    );
+    const { getByText, getAllByText } = render(<UXSection serviceName="elastic-co-frontend" />);
 
     expect(getByText('User Experience')).toBeInTheDocument();
     expect(getByText('View in app')).toBeInTheDocument();
@@ -65,15 +65,7 @@ describe('UXSection', () => {
       refetch: jest.fn(),
     });
     const { getByText, queryAllByText, getAllByText } = render(
-      <UXSection
-        absoluteTime={{
-          start: moment('2020-06-29T11:38:23.747Z').valueOf(),
-          end: moment('2020-06-29T12:08:23.748Z').valueOf(),
-        }}
-        relativeTime={{ start: 'now-15m', end: 'now' }}
-        bucketSize="60s"
-        serviceName="elastic-co-frontend"
-      />
+      <UXSection serviceName="elastic-co-frontend" />
     );
 
     expect(getByText('User Experience')).toBeInTheDocument();

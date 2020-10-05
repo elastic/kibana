@@ -8,8 +8,8 @@ import React, { createContext, useMemo, useState } from 'react';
 import { HasDataResponse, ObservabilityFetchDataPlugins } from '../typings/fetch_overview_data';
 
 interface SharedData {
-  hasData: Record<ObservabilityFetchDataPlugins, HasDataResponse> | null;
-  hasAnyData?: boolean;
+  hasData: Record<ObservabilityFetchDataPlugins, HasDataResponse | undefined> | null;
+  hasAnyData?: HasDataResponse;
 }
 
 interface DefaultData {

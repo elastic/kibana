@@ -64,6 +64,7 @@ describe('Manage Has Data Component', () => {
     jest.spyOn(hasDataHooks, 'useApmHasData').mockReturnValue({
       data: true,
       status: fetcherHook.FETCH_STATUS.SUCCESS,
+      refetch: jest.fn(),
     });
 
     render(<HelperComponent />);
