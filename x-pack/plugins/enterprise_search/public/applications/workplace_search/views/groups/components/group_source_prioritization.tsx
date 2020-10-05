@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { ChangeEvent } from 'react';
+import React, { ChangeEvent, MouseEvent } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -101,8 +101,10 @@ export const GroupSourcePrioritization: React.FC = () => {
       {HEADER_ACTION_TEXT}
     </EuiButton>
   );
-  const handleSliderChange = (id: string, e: ChangeEvent<HTMLInputElement>) =>
-    updatePriority(id, (e.target.value as unknown) as number);
+  const handleSliderChange = (
+    id: string,
+    e: ChangeEvent<HTMLInputElement> | MouseEvent<HTMLButtonElement>
+  ) => updatePriority(id, Number((e.target as HTMLInputElement).value));
   const hasSources = contentSources.length > 0;
 
   const zeroState = (
@@ -159,7 +161,9 @@ export const GroupSourcePrioritization: React.FC = () => {
                     max={10}
                     step={1}
                     value={activeSourcePriorities[id]}
-                    onChange={(e) => handleSliderChange(id, e as ChangeEvent<HTMLInputElement>)}
+                    onChange={(e: ChangeEvent<HTMLInputElement> | MouseEvent<HTMLButtonElement>) =>
+                      handleSliderChange(id, e)
+                    }
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false} style={{ paddingRight: 1 }}>
