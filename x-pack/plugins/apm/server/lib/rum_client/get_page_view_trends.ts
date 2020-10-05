@@ -5,23 +5,21 @@
  */
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { BreakdownItem } from '../../../typings/ui_filters';
 
 export async function getPageViewTrends({
   setup,
   breakdowns,
+  urlQuery,
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   breakdowns?: string;
   urlQuery?: string;
 }) {
   const projection = getRumPageLoadTransactionsProjection({
     setup,
+    urlQuery,
   });
   let breakdownItem: BreakdownItem | null = null;
   if (breakdowns) {
@@ -46,7 +44,7 @@ export async function getPageViewTrends({
                   terms: {
                     field: breakdownItem.fieldName,
                     size: 9,
-                    missing: 'Other',
+                    missing: 'Others',
                   },
                 },
               }
@@ -103,7 +101,7 @@ export async function getPageViewTrends({
         });
         // Top 9 plus others, get a diff from parent bucket total
         if (bCount > top9Count) {
-          res.Other = bCount - top9Count;
+          res.Others = bCount - top9Count;
         }
       }
 

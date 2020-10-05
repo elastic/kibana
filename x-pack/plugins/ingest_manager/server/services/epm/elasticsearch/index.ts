@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Dataset } from '../../../types';
+import { RegistryDataStream } from '../../../types';
 
 /**
  * Creates the base name for Elasticsearch assets in the form of
- * {type}-{id}
+ * {type}-{dataset}
  */
-export function getDatasetAssetBaseName(dataset: Dataset): string {
-  return `${dataset.type}-${dataset.name}`;
+export function getRegistryDataStreamAssetBaseName(dataStream: RegistryDataStream): string {
+  return `${dataStream.type}-${dataStream.dataset}`;
 }

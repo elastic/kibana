@@ -10,12 +10,14 @@ import React from 'react';
 import { TestProviders } from '../../../../common/mock/test_providers';
 
 import { FooterComponent, PagingControlComponent } from './index';
-import { mockData } from './mock';
 
 describe('Footer Timeline Component', () => {
   const loadMore = jest.fn();
   const onChangeItemsPerPage = jest.fn();
   const updatedAt = 1546878704036;
+  const serverSideEventCount = 15546;
+  const itemsCount = 2;
+  const totalCount = 10;
 
   describe('rendering', () => {
     test('it renders the default timeline footer', () => {
@@ -27,13 +29,13 @@ describe('Footer Timeline Component', () => {
           id={'timeline-id'}
           isLive={false}
           isLoading={false}
-          itemsCount={mockData.Events.edges.length}
+          itemsCount={itemsCount}
           itemsPerPage={2}
           itemsPerPageOptions={[1, 5, 10, 20]}
           onChangeItemsPerPage={onChangeItemsPerPage}
           onChangePage={loadMore}
-          serverSideEventCount={mockData.Events.totalCount}
-          totalPages={2}
+          serverSideEventCount={serverSideEventCount}
+          totalCount={totalCount}
         />
       );
 
@@ -49,13 +51,13 @@ describe('Footer Timeline Component', () => {
           id={'timeline-id'}
           isLive={false}
           isLoading={true}
-          itemsCount={mockData.Events.edges.length}
+          itemsCount={itemsCount}
           itemsPerPage={2}
           itemsPerPageOptions={[1, 5, 10, 20]}
           onChangeItemsPerPage={onChangeItemsPerPage}
           onChangePage={loadMore}
-          serverSideEventCount={mockData.Events.totalCount}
-          totalPages={2}
+          serverSideEventCount={serverSideEventCount}
+          totalCount={totalCount}
         />
       );
 
@@ -72,13 +74,13 @@ describe('Footer Timeline Component', () => {
             id={'timeline-id'}
             isLive={false}
             isLoading={false}
-            itemsCount={mockData.Events.edges.length}
+            itemsCount={itemsCount}
             itemsPerPage={2}
             itemsPerPageOptions={[1, 5, 10, 20]}
             onChangeItemsPerPage={onChangeItemsPerPage}
             onChangePage={loadMore}
-            serverSideEventCount={mockData.Events.totalCount}
-            totalPages={2}
+            serverSideEventCount={serverSideEventCount}
+            totalCount={totalCount}
           />
         </TestProviders>
       );
@@ -123,13 +125,13 @@ describe('Footer Timeline Component', () => {
           id={'timeline-id'}
           isLive={false}
           isLoading={true}
-          itemsCount={mockData.Events.edges.length}
+          itemsCount={itemsCount}
           itemsPerPage={2}
           itemsPerPageOptions={[1, 5, 10, 20]}
           onChangeItemsPerPage={onChangeItemsPerPage}
           onChangePage={loadMore}
-          serverSideEventCount={mockData.Events.totalCount}
-          totalPages={2}
+          serverSideEventCount={serverSideEventCount}
+          totalCount={totalCount}
         />
       );
 
@@ -146,13 +148,13 @@ describe('Footer Timeline Component', () => {
             id={'timeline-id'}
             isLive={false}
             isLoading={false}
-            itemsCount={mockData.Events.edges.length}
+            itemsCount={itemsCount}
             itemsPerPage={1}
             itemsPerPageOptions={[1, 5, 10, 20]}
             onChangeItemsPerPage={onChangeItemsPerPage}
             onChangePage={loadMore}
-            serverSideEventCount={mockData.Events.totalCount}
-            totalPages={2}
+            serverSideEventCount={serverSideEventCount}
+            totalCount={totalCount}
           />
         </TestProviders>
       );
@@ -173,13 +175,13 @@ describe('Footer Timeline Component', () => {
             id={'timeline-id'}
             isLive={false}
             isLoading={false}
-            itemsCount={mockData.Events.edges.length}
+            itemsCount={itemsCount}
             itemsPerPage={2}
             itemsPerPageOptions={[1, 5, 10, 20]}
             onChangeItemsPerPage={onChangeItemsPerPage}
             onChangePage={loadMore}
-            serverSideEventCount={mockData.Events.totalCount}
-            totalPages={2}
+            serverSideEventCount={serverSideEventCount}
+            totalCount={totalCount}
           />
         </TestProviders>
       );
@@ -198,13 +200,13 @@ describe('Footer Timeline Component', () => {
             id={'timeline-id'}
             isLive={false}
             isLoading={false}
-            itemsCount={mockData.Events.edges.length}
+            itemsCount={itemsCount}
             itemsPerPage={1}
             itemsPerPageOptions={[1, 5, 10, 20]}
             onChangeItemsPerPage={onChangeItemsPerPage}
             onChangePage={loadMore}
-            serverSideEventCount={mockData.Events.totalCount}
-            totalPages={2}
+            serverSideEventCount={serverSideEventCount}
+            totalCount={totalCount}
           />
         </TestProviders>
       );
@@ -225,13 +227,13 @@ describe('Footer Timeline Component', () => {
             id={'timeline-id'}
             isLive={true}
             isLoading={false}
-            itemsCount={mockData.Events.edges.length}
+            itemsCount={itemsCount}
             itemsPerPage={2}
             itemsPerPageOptions={[1, 5, 10, 20]}
             onChangeItemsPerPage={onChangeItemsPerPage}
             onChangePage={loadMore}
-            serverSideEventCount={mockData.Events.totalCount}
-            totalPages={2}
+            serverSideEventCount={serverSideEventCount}
+            totalCount={totalCount}
           />
         </TestProviders>
       );
@@ -250,13 +252,13 @@ describe('Footer Timeline Component', () => {
             id={'timeline-id'}
             isLive={false}
             isLoading={false}
-            itemsCount={mockData.Events.edges.length}
+            itemsCount={itemsCount}
             itemsPerPage={2}
             itemsPerPageOptions={[1, 5, 10, 20]}
             onChangeItemsPerPage={onChangeItemsPerPage}
             onChangePage={loadMore}
-            serverSideEventCount={mockData.Events.totalCount}
-            totalPages={2}
+            serverSideEventCount={serverSideEventCount}
+            totalCount={totalCount}
           />
         </TestProviders>
       );
