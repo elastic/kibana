@@ -2,7 +2,7 @@
 
 This API returns the metrics for the Kibana server and usage stats. It allows the [Metricbeat Kibana module](https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-module-kibana.html) to collect the [stats metricset](https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-metricset-kibana-stats.html).
 
-By default, it returns the simplest level of stats; consisting on the Kibana server's ops metrics, version, status, and basic config like the server name, host, port, and locale.
+By default, it returns the simplest level of stats; consisting of the Kibana server's ops metrics, version, status, and basic config like the server name, host, port, and locale.
 
 However, the information detailed above can be extended, with the combination of the following 3 query parameters:
 

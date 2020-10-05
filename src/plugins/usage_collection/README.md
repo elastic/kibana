@@ -328,5 +328,5 @@ The only caveat is that it makes it harder to consume in Kibana when analysing e
 
 # Routes registered by this plugin
 
-- `/api/ui_metric/report`: Used by UI Metrics to report the metrics to the server
+- `/api/ui_metric/report`: Used by `ui_metrics` usage collector instances to report their usage data to the server
 - `/api/stats`: Get the metrics and usage ([details](./server/routes/stats/README.md))
