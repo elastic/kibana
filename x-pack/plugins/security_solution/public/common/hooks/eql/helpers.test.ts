@@ -6,6 +6,10 @@
 import dateMath from '@elastic/datemath';
 
 import { EqlSearchStrategyResponse } from '../../../../../data_enhanced/common';
+import { Source } from './types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { EqlSearchResponse } from '../../../../server/lib/types';
+
 import {
   calculateBucketForHour,
   calculateBucketForDay,
@@ -14,15 +18,15 @@ import {
   getInterval,
   getSequenceAggs,
 } from './helpers';
+import { Connection } from '@elastic/elasticsearch';
 
-const getMockResponse = () =>
-  (({
+const getMockResponse = (): EqlSearchStrategyResponse<EqlSearchResponse<Source>> =>
+  ({
     id: 'some-id',
     isPartial: false,
     isRunning: false,
     rawResponse: {
       body: {
-        id: 'some-id',
         is_partial: false,
         is_running: false,
         timed_out: false,
@@ -30,21 +34,29 @@ const getMockResponse = () =>
         hits: {
           events: [
             {
+              _index: 'index',
+              _id: '1',
               _source: {
                 '@timestamp': '2020-10-04T15:16:54.368707900Z',
               },
             },
             {
+              _index: 'index',
+              _id: '2',
               _source: {
                 '@timestamp': '2020-10-04T15:50:54.368707900Z',
               },
             },
             {
+              _index: 'index',
+              _id: '3',
               _source: {
                 '@timestamp': '2020-10-04T15:06:54.368707900Z',
               },
             },
             {
+              _index: 'index',
+              _id: '4',
               _source: {
                 '@timestamp': '2020-10-04T15:15:54.368707900Z',
               },
@@ -52,34 +64,37 @@ const getMockResponse = () =>
           ],
           total: {
             value: 4,
+            relation: '',
           },
         },
       },
-      total: { value: 10, relation: 'eq' },
       headers: {},
-      hits: {},
       meta: {
         request: {
           params: {
             method: 'GET',
             path: '/_eql/search/',
-            querystring: 'wait_for_completion_timeout=100ms&keep_alive=1m',
-            timeout: 30000,
           },
+          options: {},
+          id: '',
         },
+        context: {},
+        name: '',
+        connection: {} as Connection,
+        attempts: 1,
+        aborted: false,
       },
       statusCode: 200,
     },
-  } as unknown) as EqlSearchStrategyResponse<unknown>);
+  } as EqlSearchStrategyResponse<EqlSearchResponse<Source>>);
 
-const getMockSequenceResponse = () =>
+const getMockSequenceResponse = (): EqlSearchStrategyResponse<EqlSearchResponse<Source>> =>
   (({
     id: 'some-id',
     isPartial: false,
     isRunning: false,
     rawResponse: {
       body: {
-        id: 'some-id',
         is_partial: false,
         is_running: false,
         timed_out: false,
@@ -87,13 +102,18 @@ const getMockSequenceResponse = () =>
         hits: {
           sequences: [
             {
+              join_keys: [],
               events: [
                 {
+                  _index: 'index',
+                  _id: '1',
                   _source: {
                     '@timestamp': '2020-10-04T15:16:54.368707900Z',
                   },
                 },
                 {
+                  _index: 'index',
+                  _id: '2',
                   _source: {
                     '@timestamp': '2020-10-04T15:50:54.368707900Z',
                   },
@@ -101,13 +121,18 @@ const getMockSequenceResponse = () =>
               ],
             },
             {
+              join_keys: [],
               events: [
                 {
+                  _index: 'index',
+                  _id: '3',
                   _source: {
                     '@timestamp': '2020-10-04T15:06:54.368707900Z',
                   },
                 },
                 {
+                  _index: 'index',
+                  _id: '4',
                   _source: {
                     '@timestamp': '2020-10-04T15:15:54.368707900Z',
                   },
@@ -117,25 +142,29 @@ const getMockSequenceResponse = () =>
           ],
           total: {
             value: 4,
+            relation: '',
           },
         },
       },
-      total: { value: 10, relation: 'eq' },
       headers: {},
-      hits: {},
       meta: {
         request: {
           params: {
             method: 'GET',
             path: '/_eql/search/',
-            querystring: 'wait_for_completion_timeout=100ms&keep_alive=1m',
-            timeout: 30000,
           },
+          options: {},
+          id: '',
         },
+        context: {},
+        name: '',
+        connection: {} as Connection,
+        attempts: 1,
+        aborted: false,
       },
       statusCode: 200,
     },
-  } as unknown) as EqlSearchStrategyResponse<unknown>);
+  } as unknown) as EqlSearchStrategyResponse<EqlSearchResponse<Source>>);
 
 describe('eql/helpers', () => {
   describe('calculateBucketForHour', () => {
@@ -295,24 +324,36 @@ describe('eql/helpers', () => {
         rawResponse: {
           ...mockResponse.rawResponse,
           body: {
+            is_partial: false,
+            is_running: false,
+            timed_out: false,
+            took: 15,
             hits: {
               events: [
                 {
+                  _index: 'index',
+                  _id: '1',
                   _source: {
                     '@timestamp': '2020-10-04T15:16:54.368707900Z',
                   },
                 },
                 {
+                  _index: 'index',
+                  _id: '2',
                   _source: {
                     '@timestamp': '2020-10-04T05:50:54.368707900Z',
                   },
                 },
                 {
+                  _index: 'index',
+                  _id: '3',
                   _source: {
                     '@timestamp': '2020-10-04T18:06:54.368707900Z',
                   },
                 },
                 {
+                  _index: 'index',
+                  _id: '4',
                   _source: {
                     '@timestamp': '2020-10-04T23:15:54.368707900Z',
                   },
@@ -320,6 +361,7 @@ describe('eql/helpers', () => {
               ],
               total: {
                 value: 4,
+                relation: '',
               },
             },
           },
@@ -376,7 +418,7 @@ describe('eql/helpers', () => {
       expect(aggs.totalCount).toEqual(4);
     });
 
-    test('it returns empty array for "data" if response returns no hits', () => {
+    test('it returns array with each item having a "total" of 0 if response returns no hits', () => {
       const mockResponse = getMockResponse();
       const response = {
         ...mockResponse,
@@ -388,7 +430,12 @@ describe('eql/helpers', () => {
             is_running: false,
             timed_out: false,
             took: 15,
-            hits: {},
+            hits: {
+              total: {
+                value: 0,
+                relation: '',
+              },
+            },
           },
         },
       };
@@ -401,7 +448,39 @@ describe('eql/helpers', () => {
       );
 
       expect(aggs).toEqual({
-        data: [],
+        data: [
+          { g: 'hits', x: 1601827200368, y: 0 },
+          { g: 'hits', x: 1601827080368, y: 0 },
+          { g: 'hits', x: 1601826960368, y: 0 },
+          { g: 'hits', x: 1601826840368, y: 0 },
+          { g: 'hits', x: 1601826720368, y: 0 },
+          { g: 'hits', x: 1601826600368, y: 0 },
+          { g: 'hits', x: 1601826480368, y: 0 },
+          { g: 'hits', x: 1601826360368, y: 0 },
+          { g: 'hits', x: 1601826240368, y: 0 },
+          { g: 'hits', x: 1601826120368, y: 0 },
+          { g: 'hits', x: 1601826000368, y: 0 },
+          { g: 'hits', x: 1601825880368, y: 0 },
+          { g: 'hits', x: 1601825760368, y: 0 },
+          { g: 'hits', x: 1601825640368, y: 0 },
+          { g: 'hits', x: 1601825520368, y: 0 },
+          { g: 'hits', x: 1601825400368, y: 0 },
+          { g: 'hits', x: 1601825280368, y: 0 },
+          { g: 'hits', x: 1601825160368, y: 0 },
+          { g: 'hits', x: 1601825040368, y: 0 },
+          { g: 'hits', x: 1601824920368, y: 0 },
+          { g: 'hits', x: 1601824800368, y: 0 },
+          { g: 'hits', x: 1601824680368, y: 0 },
+          { g: 'hits', x: 1601824560368, y: 0 },
+          { g: 'hits', x: 1601824440368, y: 0 },
+          { g: 'hits', x: 1601824320368, y: 0 },
+          { g: 'hits', x: 1601824200368, y: 0 },
+          { g: 'hits', x: 1601824080368, y: 0 },
+          { g: 'hits', x: 1601823960368, y: 0 },
+          { g: 'hits', x: 1601823840368, y: 0 },
+          { g: 'hits', x: 1601823720368, y: 0 },
+          { g: 'hits', x: 1601823600368, y: 0 },
+        ],
         gte: '2020-10-04T15:00:00.368707900Z',
         inspect: {
           dsl: [JSON.stringify(response.rawResponse.meta.request.params, null, 2)],

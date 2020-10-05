@@ -14,9 +14,10 @@ import {
   EqlSearchStrategyRequest,
   EqlSearchStrategyResponse,
 } from '../../../../../data_enhanced/common';
-import { InspectResponse } from '../../../types';
-import { ChartData } from '../../components/charts/common';
 import { getEqlAggsData, getSequenceAggs } from './helpers';
+import { EqlPreviewResponse, Source } from './types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { EqlSearchResponse } from '../../../../server/lib/types';
 
 interface ApiParams {
   http: HttpStart;
@@ -47,14 +48,6 @@ interface AggsParams extends EqlValidationRequest {
   signal: AbortSignal;
 }
 
-export interface EqlAggsResponse {
-  data: ChartData[];
-  totalCount: number;
-  lte: string;
-  gte: string;
-  inspect: InspectResponse;
-}
-
 export const getEqlPreview = async ({
   data,
   index,
@@ -63,10 +56,10 @@ export const getEqlPreview = async ({
   fromTime,
   toTime,
   signal,
-}: AggsParams): Promise<EqlAggsResponse> => {
+}: AggsParams): Promise<EqlPreviewResponse> => {
   try {
     const response = await data.search
-      .search<EqlSearchStrategyRequest, EqlSearchStrategyResponse>(
+      .search<EqlSearchStrategyRequest, EqlSearchStrategyResponse<EqlSearchResponse<Source>>>(
         {
           params: {
             // @ts-expect-error allow_no_indices is missing on EqlSearch
