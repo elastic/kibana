@@ -31,7 +31,7 @@ export function registerApmAlerts(
 - Service name: \\{\\{context.serviceName\\}\\}
 - Environment: \\{\\{context.environment\\}\\}
 - Threshold: \\{\\{context.threshold\\}\\} errors
-- Triggered value: \\{\\{context.triggerValue\\}\\} errors over the last \\{\\{context.intervalSize\\}\\}\\{\\{context.intervalUnit\\}\\}`,
+- Triggered value: \\{\\{context.triggerValue\\}\\} errors over the last \\{\\{context.interval\\}\\}`,
       }
     ),
   });
@@ -58,7 +58,7 @@ export function registerApmAlerts(
 - Type: \\{\\{context.transactionType\\}\\}
 - Environment: \\{\\{context.environment\\}\\}
 - Threshold: \\{\\{context.threshold\\}\\}ms
-- Triggered value: \\{\\{context.triggerValue\\}\\} over the last \\{\\{context.intervalSize\\}\\}\\{\\{context.intervalUnit\\}\\}`,
+- Triggered value: \\{\\{context.triggerValue\\}\\} over the last \\{\\{context.interval\\}\\}`,
       }
     ),
   });
@@ -85,7 +85,7 @@ export function registerApmAlerts(
 - Type: \\{\\{context.transactionType\\}\\}
 - Environment: \\{\\{context.environment\\}\\}
 - Threshold: \\{\\{context.threshold\\}\\}%
-- Triggered value: \\{\\{context.triggerValue\\}\\}% of errors over the last \\{\\{context.intervalSize\\}\\}\\{\\{context.intervalUnit\\}\\}`,
+- Triggered value: \\{\\{context.triggerValue\\}\\}% of errors over the last \\{\\{context.interval\\}\\}`,
       }
     ),
   });

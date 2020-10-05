@@ -45,24 +45,14 @@ export const apmActionVariables = {
     ),
     name: 'triggerValue',
   },
-  windowSize: {
+  interval: {
     description: i18n.translate(
       'xpack.apm.alerts.action_variables.intervalSize',
       {
         defaultMessage:
-          'The interval size the alert will use to check for any incident',
+          'The length and unit of the time period where the alert conditions were met',
       }
     ),
-    name: 'intervalSize',
-  },
-  windowUnit: {
-    description: i18n.translate(
-      'xpack.apm.alerts.action_variables.intervalUnit',
-      {
-        defaultMessage:
-          'The interval unit the alert will use to check for any incident',
-      }
-    ),
-    name: 'intervalUnit',
+    name: 'interval',
   },
 };

@@ -64,8 +64,7 @@ export function registerTransactionDurationAlertType({
         apmActionVariables.environment,
         apmActionVariables.threshold,
         apmActionVariables.triggerValue,
-        apmActionVariables.windowSize,
-        apmActionVariables.windowUnit,
+        apmActionVariables.interval,
       ],
     },
     producer: 'apm',
@@ -153,8 +152,7 @@ export function registerTransactionDurationAlertType({
             environment,
             threshold,
             triggerValue: transactionDurationFormatted,
-            intervalSize: alertParams.windowSize,
-            intervalUnit: alertParams.windowUnit,
+            interval: `${alertParams.windowSize}${alertParams.windowUnit}`,
           });
         });
       }

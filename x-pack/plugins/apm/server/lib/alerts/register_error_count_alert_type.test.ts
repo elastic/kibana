@@ -117,32 +117,28 @@ describe('Error count alert', () => {
       environment: 'env-foo',
       threshold: 1,
       triggerValue: 2,
-      intervalSize: 5,
-      intervalUnit: 'm',
+      interval: '5m',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'foo',
       environment: 'env-foo-2',
       threshold: 1,
       triggerValue: 2,
-      intervalSize: 5,
-      intervalUnit: 'm',
+      interval: '5m',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'bar',
       environment: 'env-bar',
       threshold: 1,
       triggerValue: 2,
-      intervalSize: 5,
-      intervalUnit: 'm',
+      interval: '5m',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'bar',
       environment: 'env-bar-2',
       threshold: 1,
       triggerValue: 2,
-      intervalSize: 5,
-      intervalUnit: 'm',
+      interval: '5m',
     });
   });
   it('sends alerts with service name', async () => {
@@ -194,16 +190,14 @@ describe('Error count alert', () => {
       environment: undefined,
       threshold: 1,
       triggerValue: 2,
-      intervalSize: 5,
-      intervalUnit: 'm',
+      interval: '5m',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'bar',
       environment: undefined,
       threshold: 1,
       triggerValue: 2,
-      intervalSize: 5,
-      intervalUnit: 'm',
+      interval: '5m',
     });
   });
 });
