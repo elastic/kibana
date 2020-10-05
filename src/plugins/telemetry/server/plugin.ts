@@ -18,7 +18,7 @@
  */
 
 import { URL } from 'url';
-import { Observable, ReplaySubject } from 'rxjs';
+import { AsyncSubject, Observable } from 'rxjs';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
   TelemetryCollectionManagerPluginSetup,
@@ -85,7 +85,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   /**
    * @private Used to mark the completion of the old UI Settings migration
    */
-  private readonly oldUiSettingsHandled$ = new ReplaySubject<boolean>(1);
+  private readonly oldUiSettingsHandled$ = new AsyncSubject();
   private savedObjectsClient?: ISavedObjectsRepository;
   private elasticsearchClient?: IClusterClient;
 
@@ -165,10 +165,6 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     };
   }
 
-  public stop() {
-    this.oldUiSettingsHandled$.complete();
-  }
-
   private async handleOldUiSettings(uiSettings: UiSettingsServiceStart) {
     const savedObjectsClient = new SavedObjectsClient(this.savedObjectsClient!);
     const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
@@ -180,6 +176,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     }
     // Set the mark in the ReplySubject so all the methods that require this method to be completed before working, can move on
     this.oldUiSettingsHandled$.next(true);
+    this.oldUiSettingsHandled$.complete();
   }
 
   private async startFetcherWhenOldSettingsAreHandled(
