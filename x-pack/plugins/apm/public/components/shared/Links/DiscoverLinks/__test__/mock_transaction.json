@@ -1,6 +1,7 @@
 {
   "agent": {
     "hostname": "227453131a17",
+    "name": "go",
     "type": "apm-server",
     "version": "7.0.0"
   },
@@ -91,9 +92,7 @@
     },
     "name": "GET /api/products/:id/customers",
     "span_count": {
-      "dropped": {
-        "total": 0
-      },
+      "dropped": 0,
       "started": 1
     },
     "id": "8b60bd32ecc6e150",

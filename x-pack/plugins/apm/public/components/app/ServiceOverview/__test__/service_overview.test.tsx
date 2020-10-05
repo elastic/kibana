@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { render, wait, waitForElement } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { CoreStart } from 'kibana/public';
 import { merge } from 'lodash';
 import React, { FunctionComponent, ReactChild } from 'react';
@@ -129,11 +129,11 @@ describe('Service Overview -> View', () => {
       ],
     });
 
-    const { container, getByText } = renderServiceOverview();
+    const { container, findByText } = renderServiceOverview();
 
     // wait for requests to be made
-    await wait(() => expect(httpGet).toHaveBeenCalledTimes(1));
-    await waitForElement(() => getByText('My Python Service'));
+    await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(1));
+    await findByText('My Python Service');
 
     expect(container.querySelectorAll('.euiTableRow')).toMatchSnapshot();
   });
@@ -145,16 +145,14 @@ describe('Service Overview -> View', () => {
       items: [],
     });
 
-    const { container, getByText } = renderServiceOverview();
+    const { container, findByText } = renderServiceOverview();
 
     // wait for requests to be made
-    await wait(() => expect(httpGet).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(1));
 
     // wait for elements to be rendered
-    await waitForElement(() =>
-      getByText(
-        "Looks like you don't have any APM services installed. Let's add some!"
-      )
+    await findByText(
+      "Looks like you don't have any APM services installed. Let's add some!"
     );
 
     expect(container.querySelectorAll('.euiTableRow')).toMatchSnapshot();
@@ -167,11 +165,11 @@ describe('Service Overview -> View', () => {
       items: [],
     });
 
-    const { container, getByText } = renderServiceOverview();
+    const { container, findByText } = renderServiceOverview();
 
     // wait for requests to be made
-    await wait(() => expect(httpGet).toHaveBeenCalledTimes(1));
-    await waitForElement(() => getByText('No services found'));
+    await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(1));
+    await findByText('No services found');
 
     expect(container.querySelectorAll('.euiTableRow')).toMatchSnapshot();
   });
@@ -187,7 +185,7 @@ describe('Service Overview -> View', () => {
       renderServiceOverview();
 
       // wait for requests to be made
-      await wait(() => expect(httpGet).toHaveBeenCalledTimes(1));
+      await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(1));
 
       expect(addWarning).toHaveBeenLastCalledWith(
         expect.objectContaining({
@@ -208,7 +206,7 @@ describe('Service Overview -> View', () => {
       renderServiceOverview();
 
       // wait for requests to be made
-      await wait(() => expect(httpGet).toHaveBeenCalledTimes(1));
+      await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(1));
 
       expect(addWarning).not.toHaveBeenCalled();
     });
@@ -234,7 +232,7 @@ describe('Service Overview -> View', () => {
       const { queryByText } = renderServiceOverview();
 
       // wait for requests to be made
-      await wait(() => expect(httpGet).toHaveBeenCalledTimes(1));
+      await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(1));
 
       expect(queryByText('Health')).toBeNull();
     });
@@ -261,7 +259,7 @@ describe('Service Overview -> View', () => {
       const { queryAllByText } = renderServiceOverview();
 
       // wait for requests to be made
-      await wait(() => expect(httpGet).toHaveBeenCalledTimes(1));
+      await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(1));
 
       expect(queryAllByText('Health').length).toBeGreaterThan(1);
     });
