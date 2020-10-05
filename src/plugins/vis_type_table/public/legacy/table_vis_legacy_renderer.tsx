@@ -48,7 +48,7 @@ export const getTableVisLegacyRenderer: (
       });
     }
 
-    await registeredController.render(config.visData, config.visConfig, handlers.uiState);
+    await registeredController.render(config.visData, config.visConfig, handlers);
     handlers.done();
   },
 });

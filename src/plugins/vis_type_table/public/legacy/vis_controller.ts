@@ -22,7 +22,7 @@ import $ from 'jquery';
 
 import './index.scss';
 
-import { PersistedState } from 'src/plugins/visualizations/public';
+import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { getAngularModule } from './get_inner_angular';
 import { initTableVisLegacyModule } from './table_vis_legacy_module';
 // @ts-ignore
@@ -76,7 +76,7 @@ export function getTableVisualizationControllerClass(
     async render(
       esResponse: TableContext,
       visParams: TableVisParams,
-      uiState?: PersistedState
+      handlers: IInterpreterRenderHandlers
     ): Promise<void> {
       await this.initLocalAngular();
 
@@ -103,7 +103,8 @@ export function getTableVisualizationControllerClass(
 
         if (!this.$scope && this.$compile) {
           this.$scope = this.$rootScope.$new();
-          this.$scope.uiState = uiState;
+          this.$scope.uiState = handlers.uiState;
+          this.$scope.filter = handlers.event;
           updateScope();
           this.el.find('div').append(this.$compile(tableVisTemplate)(this.$scope));
           this.$scope.$apply();

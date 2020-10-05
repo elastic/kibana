@@ -44,15 +44,18 @@ export function KbnRows($compile) {
             }
 
             $scope.filter({
-              data: [
-                {
-                  table: $scope.table,
-                  row: $scope.rows.findIndex((r) => r === row),
-                  column: $scope.table.columns.findIndex((c) => c.id === column.id),
-                  value,
-                },
-              ],
-              negate,
+              name: 'filterBucket',
+              data: {
+                data: [
+                  {
+                    table: $scope.table,
+                    row: $scope.rows.findIndex((r) => r === row),
+                    column: $scope.table.columns.findIndex((c) => c.id === column.id),
+                    value,
+                  },
+                ],
+                negate,
+              },
             });
           };
 
