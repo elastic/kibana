@@ -241,13 +241,7 @@ describe('Utils', () => {
         },
         2,
         2,
-        extraCaseData,
-        {
-          id: 'none',
-          name: 'none',
-          type: ConnectorTypes.none,
-          fields: null,
-        }
+        extraCaseData
       );
       expect(res).toEqual({
         page: 1,
@@ -255,13 +249,7 @@ describe('Utils', () => {
         total: mockCases.length,
         cases: flattenCaseSavedObjects(
           mockCases.map((obj) => ({ ...obj, score: 1 })),
-          extraCaseData,
-          {
-            id: 'none',
-            name: 'none',
-            type: ConnectorTypes.none,
-            fields: null,
-          }
+          extraCaseData
         ),
         count_open_cases: 2,
         count_closed_cases: 2,
@@ -273,12 +261,7 @@ describe('Utils', () => {
     it('flattens correctly', () => {
       const extraCaseData = [{ caseId: mockCases[0].id, totalComments: 2 }];
 
-      const res = flattenCaseSavedObjects([mockCases[0]], extraCaseData, {
-        id: 'none',
-        name: 'none',
-        type: ConnectorTypes.none,
-        fields: null,
-      });
+      const res = flattenCaseSavedObjects([mockCases[0]], extraCaseData);
 
       expect(res).toEqual([
         {
@@ -317,12 +300,7 @@ describe('Utils', () => {
 
     it('it handles total comments correctly when caseId is not in extraCaseData', () => {
       const extraCaseData = [{ caseId: mockCases[0].id, totalComments: 0 }];
-      const res = flattenCaseSavedObjects([mockCases[0]], extraCaseData, {
-        id: 'none',
-        name: 'none',
-        type: ConnectorTypes.none,
-        fields: null,
-      });
+      const res = flattenCaseSavedObjects([mockCases[0]], extraCaseData);
 
       expect(res).toEqual([
         {
@@ -368,12 +346,7 @@ describe('Utils', () => {
       ];
 
       // @ts-ignore this is to update old case saved objects to include connector
-      const res = flattenCaseSavedObjects([mockCaseNoConnectorId], extraCaseData, {
-        id: 'none',
-        name: 'none',
-        type: ConnectorTypes.none,
-        fields: null,
-      });
+      const res = flattenCaseSavedObjects([mockCaseNoConnectorId], extraCaseData);
 
       expect(res).toEqual([
         {
@@ -417,12 +390,6 @@ describe('Utils', () => {
       const res = flattenCaseSavedObject({
         savedObject: myCase,
         totalComment: 2,
-        caseConfigureConnector: {
-          id: 'none',
-          name: 'none',
-          type: ConnectorTypes.none,
-          fields: null,
-        },
       });
 
       expect(res).toEqual({
@@ -444,12 +411,6 @@ describe('Utils', () => {
       const res = flattenCaseSavedObject({
         savedObject: myCase,
         totalComment: 2,
-        caseConfigureConnector: {
-          id: 'none',
-          name: 'none',
-          type: ConnectorTypes.none,
-          fields: null,
-        },
       });
 
       expect(res).toEqual({
@@ -472,12 +433,6 @@ describe('Utils', () => {
         savedObject: myCase,
         comments,
         totalComment: 2,
-        caseConfigureConnector: {
-          id: 'none',
-          name: 'none',
-          type: ConnectorTypes.none,
-          fields: null,
-        },
       });
 
       expect(res).toEqual({
@@ -496,12 +451,6 @@ describe('Utils', () => {
     it('inserts missing connector', () => {
       const extraCaseData = {
         totalComment: 2,
-        caseConfigureConnector: {
-          id: '789',
-          name: 'My connector 3',
-          type: ConnectorTypes.jira,
-          fields: {},
-        },
       };
 
       const res = flattenCaseSavedObject({
@@ -515,10 +464,10 @@ describe('Utils', () => {
         closed_at: null,
         closed_by: null,
         connector: {
-          id: '789',
-          name: 'My connector 3',
-          type: ConnectorTypes.jira,
-          fields: {},
+          id: 'none',
+          name: 'none',
+          type: ConnectorTypes.none,
+          fields: null,
         },
         created_at: '2019-11-25T21:54:48.952Z',
         created_by: {

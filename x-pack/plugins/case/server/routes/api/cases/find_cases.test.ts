@@ -89,6 +89,6 @@ describe('FIND all cases', () => {
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
-    expect(response.payload.cases[0].connector.id).toEqual('789');
+    expect(response.payload.cases[0].connector.id).toEqual('none');
   });
 });

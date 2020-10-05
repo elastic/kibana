@@ -94,26 +94,23 @@ export const getCaseToUpdate = (
           ...acc,
           [key]: value,
         };
-      } else if (currentValue == null && key === 'connector' && value !== currentValue) {
-        return {
-          ...acc,
-          [key]: value,
-        };
       }
       return acc;
     },
     { id: queryCase.id, version: queryCase.version }
   );
 
+export const getNoneCaseConnector = () => ({
+  id: 'none',
+  name: 'none',
+  type: ConnectorTypes.none,
+  fields: null,
+});
+
 export const getConnectorFromConfiguration = (
   caseConfigure: SavedObjectsFindResponse<ESCasesConfigureAttributes>
 ): CaseConnector => {
-  let caseConnector = {
-    id: 'none',
-    name: 'none',
-    type: ConnectorTypes.none,
-    fields: null,
-  };
+  let caseConnector = getNoneCaseConnector();
   if (
     caseConfigure.saved_objects.length > 0 &&
     caseConfigure.saved_objects[0].attributes.connector
@@ -121,7 +118,7 @@ export const getConnectorFromConfiguration = (
     caseConnector = {
       id: caseConfigure.saved_objects[0].attributes.connector.id,
       name: caseConfigure.saved_objects[0].attributes.connector.name,
-      type: caseConfigure.saved_objects[0].attributes.connector.type as ConnectorTypes,
+      type: caseConfigure.saved_objects[0].attributes.connector.type,
       fields: null,
     };
   }
@@ -132,21 +129,22 @@ export const transformCaseConnectorToEsConnector = (connector: CaseConnector): E
   id: connector?.id ?? 'none',
   name: connector?.name ?? 'none',
   type: connector?.type ?? '.none',
-  fields: connector?.fields
-    ? Object.entries(connector.fields).reduce<ESConnectorFields>(
-        (acc, [key, value]) => [
-          ...acc,
-          {
-            key,
-            value,
-          },
-        ],
-        []
-      )
-    : [],
+  fields:
+    connector?.fields != null
+      ? Object.entries(connector.fields).reduce<ESConnectorFields>(
+          (acc, [key, value]) => [
+            ...acc,
+            {
+              key,
+              value,
+            },
+          ],
+          []
+        )
+      : [],
 });
 
-export const transformESConnectorToCaseConnector = (connector: ESCaseConnector): CaseConnector => {
+export const transformESConnectorToCaseConnector = (connector?: ESCaseConnector): CaseConnector => {
   const connectorTypeField = {
     type: connector?.type ?? '.none',
     fields:

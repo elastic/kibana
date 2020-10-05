@@ -20,7 +20,6 @@ import {
   CommentResponse,
   CommentsResponse,
   CommentAttributes,
-  CaseConnector,
   ESCaseConnector,
   ESCaseAttributes,
 } from '../../../common/api';
@@ -94,21 +93,19 @@ export const transformCases = (
   cases: SavedObjectsFindResponse<ESCaseAttributes>,
   countOpenCases: number,
   countClosedCases: number,
-  totalCommentByCase: TotalCommentByCase[],
-  caseConfigureConnector: CaseConnector
+  totalCommentByCase: TotalCommentByCase[]
 ): CasesFindResponse => ({
   page: cases.page,
   per_page: cases.per_page,
   total: cases.total,
-  cases: flattenCaseSavedObjects(cases.saved_objects, totalCommentByCase, caseConfigureConnector),
+  cases: flattenCaseSavedObjects(cases.saved_objects, totalCommentByCase),
   count_open_cases: countOpenCases,
   count_closed_cases: countClosedCases,
 });
 
 export const flattenCaseSavedObjects = (
   savedObjects: Array<SavedObject<ESCaseAttributes>>,
-  totalCommentByCase: TotalCommentByCase[],
-  caseConfigureConnector: CaseConnector
+  totalCommentByCase: TotalCommentByCase[]
 ): CaseResponse[] =>
   savedObjects.reduce((acc: CaseResponse[], savedObject: SavedObject<ESCaseAttributes>) => {
     return [
@@ -117,7 +114,6 @@ export const flattenCaseSavedObjects = (
         savedObject,
         totalComment:
           totalCommentByCase.find((tc) => tc.caseId === savedObject.id)?.totalComments ?? 0,
-        caseConfigureConnector,
       }),
     ];
   }, []);
@@ -126,21 +122,17 @@ export const flattenCaseSavedObject = ({
   savedObject,
   comments = [],
   totalComment = 0,
-  caseConfigureConnector,
 }: {
   savedObject: SavedObject<ESCaseAttributes>;
   comments?: Array<SavedObject<CommentAttributes>>;
   totalComment?: number;
-  caseConfigureConnector: CaseConnector;
 }): CaseResponse => ({
   id: savedObject.id,
   version: savedObject.version ?? '0',
   comments: flattenCommentSavedObjects(comments),
   totalComment,
   ...savedObject.attributes,
-  connector: savedObject.attributes.connector
-    ? transformESConnectorToCaseConnector(savedObject.attributes.connector)
-    : caseConfigureConnector,
+  connector: transformESConnectorToCaseConnector(savedObject.attributes.connector),
 });
 
 export const transformComments = (
