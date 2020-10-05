@@ -48,6 +48,7 @@ Since `tsc` doesn't support circular project references, the migration order doe
 }
 ```
 If your plugin imports a file not listed in `include`, the build will fail with the next message `File ‘…’ is not listed within the file list of project …’. Projects must list all files or use an 'include' pattern.`
+
 3. Build you plugin `./node_modules/.bin/tsc -b src/plugins/my_plugin`. Fix errors if `tsc` cannot generate type declarations for your project.
 4. Add your project reference to `references` property of `tsconfig.refs.json`
 5. Add your plugin to `references` property and plugin folder to `exclude` property of the `tsconfig.json` it used to belong to (for example, for `src/plugins/**` it's `tsconfig.json`; for `x-pack/plugins/**` it’s `x-pack/tsconfig.json`).
