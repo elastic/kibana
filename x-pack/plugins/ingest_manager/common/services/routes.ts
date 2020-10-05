@@ -135,6 +135,9 @@ export const agentRouteService = {
   getReassignPath: (agentId: string) =>
     AGENT_API_ROUTES.REASSIGN_PATTERN.replace('{agentId}', agentId),
   getBulkReassignPath: () => AGENT_API_ROUTES.BULK_REASSIGN_PATTERN,
+  getUpgradePath: (agentId: string) =>
+    AGENT_API_ROUTES.UPGRADE_PATTERN.replace('{agentId}', agentId),
+  getBulkUpgradePath: () => AGENT_API_ROUTES.BULK_UPGRADE_PATTERN,
   getListPath: () => AGENT_API_ROUTES.LIST_PATTERN,
   getStatusPath: () => AGENT_API_ROUTES.STATUS_PATTERN,
 };
