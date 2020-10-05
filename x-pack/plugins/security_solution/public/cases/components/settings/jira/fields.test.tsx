@@ -126,7 +126,7 @@ describe('JiraParamsFields renders', () => {
         target: { value: '10007' },
       });
 
-    expect(onChange).toHaveBeenCalledWith({ issueType: '10007', parent: null, priority: 'High' });
+    expect(onChange).toHaveBeenCalledWith({ issueType: '10007', parent: null, priority: null });
   });
 
   test('it sets priority correctly', async () => {
@@ -142,11 +142,15 @@ describe('JiraParamsFields renders', () => {
     expect(onChange).toHaveBeenCalledWith({ issueType: '10006', parent: null, priority: '2' });
   });
 
-  // need to find a way to do this not in useEffect
-  test.skip('it resets priority when changing issue type', async () => {
+  test('it resets priority when changing issue type', async () => {
     const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
+    wrapper
+      .find('select[data-test-subj="issueTypeSelect"]')
+      .first()
+      .simulate('change', {
+        target: { value: '10007' },
+      });
 
-    wrapper.setProps({ fields: { issueType: '10007' } });
     expect(onChange).toBeCalledWith({ issueType: '10007', parent: null, priority: null });
   });
 });

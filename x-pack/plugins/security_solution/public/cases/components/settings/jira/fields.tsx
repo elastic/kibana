@@ -131,7 +131,9 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
           data-test-subj="issueTypeSelect"
           options={issueTypesSelectOptions}
           value={currentIssueType ?? ''}
-          onChange={(e) => onFieldChange('issueType', e.target.value)}
+          onChange={(e) => {
+            onChange({ ...fields, issueType: e.target.value, priority: null, parent: null });
+          }}
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
