@@ -4,7 +4,7 @@ title: Field hook
 sidebar_label: Field hook
 ---
 
-When you use the  `<UseField />` component you receive back a `field` hook object that you can connect to your React components.  
+When you use the  `<UseField />` component you receive a `field` hook object that you can connect to your React components.  
 
 This hook has the following properties and handlers:
 
@@ -50,7 +50,7 @@ The field state value.
 
 **Type:** `ValidationError[]`
 
-An array of possible validation error. Each error has a required `message` property and any other meta data returned by your validation(s).
+An array of possible validation errors. Each error has a required `message` property and any other meta data returned by your validation(s).
 
 ### isValid
 
@@ -80,7 +80,7 @@ Flag that indicates if this field has run at least once its validation(s). The v
 
 **Type:** `boolean`
 
-Flag that indicates if the field value is changing. If you have set the [`valuechangedebouncetime`](use_field.md#valuechangedebouncetime) to `0`, then this state is the same as the `isValidating` state. But if you have increased the `valuechangedebouncetime` time, then you will have a minimum value changing time. This is useful if you want to display your validation errors after a certain amount of time has passed.
+Flag that indicates if the field value is changing. If you have set the [`valueChangeDebounceTime`](use_field.md#valuechangedebouncetime) to `0`, then this state is the same as the `isValidating` state. But if you have increased the `valueChangeDebounceTime` time, then you will have a minimum value changing time. This is useful if you want to display your validation errors after a certain amount of time has passed.
 
 ## Handlers
 
@@ -90,7 +90,7 @@ Flag that indicates if the field value is changing. If you have set the [`valuec
 **Returns:** `void`
 
 Handler to set the value of the field.  
-You can either pass the value directly either provide a callback that will receive the previous field value and you will have to return the next value.
+You can either pass the value directly or provide a callback that will receive the previous field value and you will have to return the next value.
 
 ### onChange()
 
@@ -169,16 +169,16 @@ You rarely need to manually call this method as it is automatically done for you
 
 #### Example where you might need this method:
 
-The user changes the value inside one of your component and you receive this value in a `onChange` handler. Before updating the field value with `setValue()` you want to validate this value and maybe prevent to field `value` to be updated at all.
+The user changes the value inside one of your components and you receive this value in an `onChange` handler. Before updating the field value with `setValue()`, you want to validate this value and maybe prevent the field `value` to be updated at all.
 
 ### reset()
 
 **Arguments:** `options?: { resetValue?: boolean; defaultValue?: T }`  
 **Returns:** `T | undefined`
 
-Resets the field to its initial state. It accetps an optional object of configuration:
+Resets the field to its initial state. It accepts an optional configuration object:
 
-- `resetValue` (default: `true`). Flag to indicate if we want to not only reset the field state (`errors`, `isPristine`...) but also the field value. If set to `true` will put back the default value passed to the field, or to the form, or declared on the field config (in that order).
+- `resetValue` (default: `true`). Flag to indicate if we want to not only reset the field state (`errors`, `isPristine`...) but also the field value. If set to `true`, it will put back the default value passed to the field, or to the form, or declared on the field config (in that order).
 
 - `defaultValue`. In some cases you might not want to reset the field to the default value initiallly provided. In this case you can provide a new `defaultValue` value when resetting.
 
