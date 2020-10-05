@@ -370,6 +370,8 @@ export function registerEncryptedSavedObjects(
       'unenrolled_at',
       'unenrollment_started_at',
       'packages',
+      'upgraded_at',
+      'upgrade_started_at',
     ]),
   });
   encryptedSavedObjects.registerType({
