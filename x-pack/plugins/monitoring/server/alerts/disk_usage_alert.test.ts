@@ -89,7 +89,6 @@ describe('DiskUsageAlert', () => {
     };
     const kibanaUrl = 'http://localhost:5601';
 
-    const hasScheduledActions = jest.fn();
     const replaceState = jest.fn();
     const scheduleActions = jest.fn();
     const getState = jest.fn();
@@ -98,7 +97,6 @@ describe('DiskUsageAlert', () => {
         callCluster: jest.fn(),
         alertInstanceFactory: jest.fn().mockImplementation(() => {
           return {
-            hasScheduledActions,
             replaceState,
             scheduleActions,
             getState,

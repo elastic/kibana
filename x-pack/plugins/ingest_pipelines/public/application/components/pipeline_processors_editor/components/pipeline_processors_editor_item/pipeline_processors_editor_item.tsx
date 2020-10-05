@@ -159,6 +159,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                   color={isDimmed ? 'subdued' : undefined}
                 >
                   <EuiLink
+                    tabIndex={isEditorNotInIdleMode ? -1 : 0}
                     disabled={isEditorNotInIdleMode}
                     onClick={() => {
                       editor.setMode({
