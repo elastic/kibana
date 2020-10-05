@@ -205,7 +205,7 @@ export const ruleStatusRequest = () =>
   requestMock.create({
     method: 'post',
     path: `${DETECTION_ENGINE_RULES_URL}/_find_statuses`,
-    body: { ids: ['someId'] },
+    body: { ids: ['1ea5a820-4da1-4e82-92a1-2b43a7bece08'] },
   });
 
 export const getImportRulesRequest = (hapiStream?: HapiReadableStream) =>

@@ -68,48 +68,6 @@ describe('find_rules', () => {
         status_code: 500,
       });
     });
-
-    test('catches error if rule status client throws error', async () => {
-      // rule status service throws an error when trying to write an error status
-      mockedRuleStatusServiceFactory?.error.mockImplementationOnce(async () => {
-        throw new Error('ruleStatusServiceFactory Test error');
-      });
-      const failingExecutionRule = getFindResultWithSingleHit();
-      failingExecutionRule.data[0].executionStatus = {
-        status: 'error',
-        lastExecutionDate: failingExecutionRule.data[0].executionStatus.lastExecutionDate,
-        error: {
-          reason: 'read',
-          message: 'oops',
-        },
-      };
-      clients.alertsClient.find.mockResolvedValue({
-        ...failingExecutionRule,
-      });
-      const response = await server.inject(getFindRequest(), context);
-      expect(response.status).toEqual(500);
-      expect(response.body).toEqual({
-        message: 'ruleStatusServiceFactory Test error',
-        status_code: 500,
-      });
-    });
-
-    test('returns success if rule status client writes an error status', async () => {
-      const failingExecutionRule = getFindResultWithSingleHit();
-      failingExecutionRule.data[0].executionStatus = {
-        status: 'error',
-        lastExecutionDate: failingExecutionRule.data[0].executionStatus.lastExecutionDate,
-        error: {
-          reason: 'read',
-          message: 'oops',
-        },
-      };
-      clients.alertsClient.find.mockResolvedValue({
-        ...failingExecutionRule,
-      });
-      const response = await server.inject(getFindRequest(), context);
-      expect(response.status).toEqual(200);
-    });
   });
 
   describe('request validation', () => {
