@@ -29,6 +29,7 @@ export interface CoreUsageData {
 
 /**
  * Usage data from Core services
+ * @internal
  */
 export interface CoreServicesUsageData {
   savedObjects: {
@@ -47,6 +48,7 @@ export interface CoreServicesUsageData {
 
 /**
  * Usage data on this Kibana node's runtime environment.
+ * @internal
  */
 export interface CoreEnvironmentUsageData {
   memory: {
@@ -59,6 +61,7 @@ export interface CoreEnvironmentUsageData {
 
 /**
  * Usage data on this cluster's configuration of Core features
+ * @internal
  */
 export interface CoreConfigUsageData {
   elasticsearch: {

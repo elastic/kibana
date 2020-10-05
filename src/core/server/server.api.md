@@ -401,9 +401,7 @@ export interface ContextSetup {
     createContextContainer<THandler extends HandlerFunction<any>>(): IContextContainer<THandler>;
 }
 
-// Warning: (ae-missing-release-tag) "CoreConfigUsageData" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public
+// @internal
 export interface CoreConfigUsageData {
     // (undocumented)
     elasticsearch: {
@@ -472,9 +470,7 @@ export interface CoreConfigUsageData {
     };
 }
 
-// Warning: (ae-missing-release-tag) "CoreEnvironmentUsageData" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public
+// @internal
 export interface CoreEnvironmentUsageData {
     // (undocumented)
     memory: {
@@ -487,9 +483,7 @@ export interface CoreEnvironmentUsageData {
 // @internal (undocumented)
 export type CoreId = symbol;
 
-// Warning: (ae-missing-release-tag) "CoreServicesUsageData" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public
+// @internal
 export interface CoreServicesUsageData {
     // (undocumented)
     savedObjects: {
