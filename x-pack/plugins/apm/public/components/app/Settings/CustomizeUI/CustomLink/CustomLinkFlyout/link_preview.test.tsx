@@ -10,7 +10,7 @@ import {
   getNodeText,
   getByTestId,
   act,
-  wait,
+  waitFor,
 } from '@testing-library/react';
 import * as apmApi from '../../../../../../services/rest/createCallApmApi';
 
@@ -82,7 +82,7 @@ describe('LinkPreview', () => {
         filters={[{ key: '', value: '' }]}
       />
     );
-    await wait(() => expect(callApmApiSpy).toHaveBeenCalled());
+    await waitFor(() => expect(callApmApiSpy).toHaveBeenCalled());
     expect(getElementValue(container, 'preview-label')).toEqual('foo');
     expect(
       (getByTestId(container, 'preview-link') as HTMLAnchorElement).text

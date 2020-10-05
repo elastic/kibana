@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { act, wait } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
 import cytoscape from 'cytoscape';
 import React, { ReactNode } from 'react';
 import { MockApmPluginContextWrapper } from '../../../context/ApmPluginContext/MockApmPluginContext';
@@ -60,7 +60,7 @@ describe('EmptyBanner', () => {
 
       await act(async () => {
         cy.add({ data: { id: 'test id' } });
-        await wait(() => {
+        await waitFor(() => {
           expect(component.container.children.length).toBeGreaterThan(0);
         });
       });
