@@ -7,6 +7,7 @@
 import { ConfigSchema } from '.';
 import {
   FetchDataParams,
+  HasDataParams,
   ObservabilityPluginSetup,
 } from '../../observability/public';
 import {
@@ -98,6 +99,30 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         fetchData: async (params: FetchDataParams) => {
           const dataHelper = await getApmDataHelper();
           return await dataHelper.fetchOverviewPageData(params);
+        },
+      });
+
+      const getUxDataHelper = async () => {
+        const {
+          fetchUxOverviewDate,
+          hasRumData,
+          createCallApmApi,
+        } = await import('./components/app/RumDashboard/ux_overview_fetchers');
+        // have to do this here as well in case app isn't mounted yet
+        createCallApmApi(core.http);
+
+        return { fetchUxOverviewDate, hasRumData };
+      };
+
+      plugins.observability.dashboard.register({
+        appName: 'ux',
+        hasData: async (params?: HasDataParams) => {
+          const dataHelper = await getUxDataHelper();
+          return await dataHelper.hasRumData(params!);
+        },
+        fetchData: async (params: FetchDataParams) => {
+          const dataHelper = await getUxDataHelper();
+          return await dataHelper.fetchUxOverviewDate(params);
         },
       });
     }

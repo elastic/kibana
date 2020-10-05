@@ -139,34 +139,6 @@ describe('MetricsAxisOptions component', () => {
       const updatedSeries = [{ ...chart, data: { id: agg.id, label: agg.makeLabel() } }];
       expect(setValue).toHaveBeenCalledWith(SERIES_PARAMS, updatedSeries);
     });
-
-    it('should update visType when one seriesParam', () => {
-      const component = mount(<MetricsAxisOptions {...defaultProps} />);
-      expect(defaultProps.vis.type.type).toBe(ChartType.Area);
-
-      component.setProps({
-        stateParams: {
-          ...defaultProps.stateParams,
-          seriesParams: [{ ...chart, type: ChartType.Line }],
-        },
-      });
-
-      expect(defaultProps.vis.setState).toHaveBeenLastCalledWith({ type: ChartType.Line });
-    });
-
-    it('should set histogram visType when multiple seriesParam', () => {
-      const component = mount(<MetricsAxisOptions {...defaultProps} />);
-      expect(defaultProps.vis.type.type).toBe(ChartType.Area);
-
-      component.setProps({
-        stateParams: {
-          ...defaultProps.stateParams,
-          seriesParams: [chart, { ...chart, type: ChartType.Line }],
-        },
-      });
-
-      expect(defaultProps.vis.setState).toHaveBeenLastCalledWith({ type: ChartType.Histogram });
-    });
   });
 
   describe('updateAxisTitle', () => {

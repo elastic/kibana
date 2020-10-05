@@ -64,7 +64,7 @@ export const NotFound: React.FC<NotFoundProps> = ({ product = {} }) => {
 
   return (
     <>
-      <SetPageChrome isRoot />
+      <SetPageChrome />
       <SendTelemetry action="error" metric="not_found" />
 
       <EuiPageContent>

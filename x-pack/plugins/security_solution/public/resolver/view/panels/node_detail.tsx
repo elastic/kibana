@@ -38,13 +38,17 @@ export const NodeDetail = memo(function ({ nodeID }: { nodeID: string }) {
     selectors.processEventForID(state)(nodeID)
   );
   return (
-    <StyledPanel>
+    <>
       {processEvent === null ? (
-        <PanelLoading />
+        <StyledPanel>
+          <PanelLoading />
+        </StyledPanel>
       ) : (
-        <NodeDetailView nodeID={nodeID} processEvent={processEvent} />
+        <StyledPanel data-test-subj="resolver:panel:node-detail">
+          <NodeDetailView nodeID={nodeID} processEvent={processEvent} />
+        </StyledPanel>
       )}
-    </StyledPanel>
+    </>
   );
 });
 

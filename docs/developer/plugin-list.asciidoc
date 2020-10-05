@@ -16,7 +16,7 @@ NOTE:
 [discrete]
 === src/plugins
 
-[%header,cols=2*] 
+[%header,cols=2*]
 |===
 |Name
 |Description
@@ -259,7 +259,7 @@ which will load the visualization's editor.
 [discrete]
 === x-pack/plugins
 
-[%header,cols=2*] 
+[%header,cols=2*]
 |===
 |Name
 |Description
@@ -515,16 +515,16 @@ As a developer you can reuse and extend built-in alerts and actions UI functiona
 in their infrastructure.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/drilldowns/url_drilldown/README.md[urlDrilldown]
+|NOTE: This plugin contains implementation of URL drilldown. For drilldowns infrastructure code refer to ui_actions_enhanced plugin.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/watcher/README.md[watcher]
 |This plugins adopts some conventions in addition to or in place of conventions in Kibana (at the time of the plugin's creation):
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/xpack_legacy/README.md[xpackLegacy]
 |Contains HTTP endpoints and UiSettings that are slated for removal.
-
-
-|{kib-repo}blob/{branch}/x-pack/plugins/drilldowns/url_drilldown/README.md[urlDrilldown]
-|NOTE: This plugin contains implementation of URL drilldown. For drilldowns infrastructure code refer to ui_actions_enhanced plugin.
 
 
 |===

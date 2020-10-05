@@ -1090,4 +1090,8 @@ export class VectorLayer extends AbstractLayer {
     });
     return targetFeature ? targetFeature : null;
   }
+
+  async getLicensedFeatures() {
+    return await this._source.getLicensedFeatures();
+  }
 }

@@ -5,7 +5,6 @@
  */
 
 import expect from '@kbn/expect';
-import { REPO_ROOT } from '@kbn/dev-utils';
 
 export default function ({ getService, getPageObjects, updateBaselines }) {
   const screenshot = getService('screenshots');
@@ -15,7 +14,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
 
   describe('check metricbeat Dashboard', function () {
     before(async function () {
-      await esArchiver.load(`${REPO_ROOT}/../integration-test/test/es_archives/metricbeat`);
+      await esArchiver.load('metricbeat');
 
       // this navigateToActualURL takes the place of navigating to the dashboard landing page,
       // filtering on the dashboard name, selecting it, setting the timepicker, and going to full screen

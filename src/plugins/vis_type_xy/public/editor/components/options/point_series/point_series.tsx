@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -40,9 +40,13 @@ export function PointSeriesOptions(
   >
 ) {
   const { stateParams, setValue, vis, aggs } = props;
-  const hasBarChart = stateParams.seriesParams.some(
-    ({ type, data: { id: paramId } }) =>
-      type === ChartType.Histogram && aggs.aggs.find(({ id }) => id === paramId)?.enabled
+  const hasBarChart = useMemo(
+    () =>
+      stateParams.seriesParams.some(
+        ({ type, data: { id: paramId } }) =>
+          type === ChartType.Histogram && aggs.aggs.find(({ id }) => id === paramId)?.enabled
+      ),
+    [stateParams.seriesParams, aggs.aggs]
   );
 
   return (
