@@ -23,6 +23,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiCallOut,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
@@ -135,6 +136,9 @@ export const EndpointList = () => {
     autoRefreshInterval,
     isAutoRefreshEnabled,
     patternsError,
+    areEndpointsEnrolling,
+    agentsWithEndpointsTotalError,
+    endpointsTotalError,
     isTransformEnabled,
   } = useEndpointSelector(selector);
   const { formatUrl, search } = useFormatUrl(SecurityPageName.administration);
@@ -486,7 +490,7 @@ export const EndpointList = () => {
   }, [formatUrl, queryParams, search, agentPolicies, services?.application?.getUrlForApp]);
 
   const renderTableOrEmptyState = useMemo(() => {
-    if (endpointsExist) {
+    if (endpointsExist || areEndpointsEnrolling) {
       return (
         <EuiBasicTable
           data-test-subj="endpointListTable"
@@ -528,6 +532,7 @@ export const EndpointList = () => {
     handleSelectableOnChange,
     selectionOptions,
     handleCreatePolicyClick,
+    areEndpointsEnrolling,
   ]);
 
   const hasListData = listData && listData.length > 0;
@@ -543,6 +548,10 @@ export const EndpointList = () => {
   const refreshInterval = useMemo(() => {
     return !endpointsExist ? DEFAULT_POLL_INTERVAL : autoRefreshInterval;
   }, [endpointsExist, autoRefreshInterval]);
+
+  const hasErrorFindingTotals = useMemo(() => {
+    return endpointsTotalError || agentsWithEndpointsTotalError ? true : false;
+  }, [endpointsTotalError, agentsWithEndpointsTotalError]);
 
   const shouldShowKQLBar = useMemo(() => {
     return endpointsExist && !patternsError && isTransformEnabled;
@@ -567,6 +576,21 @@ export const EndpointList = () => {
     >
       {hasSelectedEndpoint && <EndpointDetailsFlyout />}
       <>
+        {areEndpointsEnrolling && !hasErrorFindingTotals && (
+          <>
+            <EuiCallOut
+              size="s"
+              data-test-subj="endpointsEnrollingNotification"
+              title={
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.list.endpointsEnrolling"
+                  defaultMessage="Endpoints are enrolling and will display soon"
+                />
+              }
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
         <EuiFlexGroup>
           {shouldShowKQLBar && (
             <EuiFlexItem>

@@ -16,7 +16,7 @@ To visualize the Shakespeare data and compare the number of speaking parts in th
 . Click *Create new*, then click *Lens* on the *New Visualization* window.
 +
 [role="screenshot"]
-image::images/tutorial-visualize-wizard-step-1.png[Bar chart]
+image::images/tutorial-visualize-wizard-step-1.png[Image showing different options for your new visualization]
 
 . Make sure the index pattern is *shakes*.
 
@@ -39,7 +39,7 @@ image::images/tutorial-visualize-wizard-step-1.png[Bar chart]
 .. In the *Label* field, enter `Speaking Parts`. 
 +
 [role="screenshot"]
-image::images/tutorial-visualize-bar-1.5.png[Bar chart]
+image::images/tutorial-visualize-bar-1.5.png[Bar chart showing the speaking parts  data]
 
 . *Save* the chart with the name `Bar Example`.
 +
@@ -85,7 +85,7 @@ Since the default search matches all documents, the pie contains a single slice.
 The pie chart displays the proportion of the 1,000 accounts that fall into each of the ranges.
 +
 [role="screenshot"]
-image::images/tutorial-visualize-pie-2.png[Pie chart]
+image::images/tutorial-visualize-pie-2.png[Pie chart displaying accounts that fall into each of the ranges, scaled to 1000 accounts]
 
 . Add another bucket aggregation that displays the ages of the account holders.
 
@@ -99,7 +99,7 @@ The break down of the ages of the account holders are displayed
 in a ring around the balance ranges.
 +
 [role="screenshot"]
-image::images/tutorial-visualize-pie-3.png[Final pie chart]
+image::images/tutorial-visualize-pie-3.png[Final pie chart showing all of the changes]
 
 . Click *Save*, then enter `Pie Example` in the *Title* field.
 
@@ -119,7 +119,7 @@ To visualize geographic information in the log file data, use <<maps,Maps>>.
 .. Set the *End date* to `May 20, 2015 @ 12:00:00.000`.
 +
 [role="screenshot"]
-image::images/gs_maps_time_filter.png[Time filter for Maps tutorial]
+image::images/gs_maps_time_filter.png[Image showing the time filter for Maps tutorial]
 
 .. Click *Update*
 
@@ -140,7 +140,7 @@ image::images/gs_maps_time_filter.png[Time filter for Maps tutorial]
 .. From the *Border color* dropdown, select *#FFF*, then click *Save & close*.
 +
 [role="screenshot"]
-image::images/tutorial-visualize-map-2.png[Map]
+image::images/tutorial-visualize-map-2.png[Example of a map visualization]
 
 . Click *Save*, then enter `Map Example` in the *Title* field.
 
@@ -170,12 +170,12 @@ The Markdown widget uses **markdown** syntax.
 The Markdown renders in the preview pane.
 +
 [role="screenshot"]
-image::images/tutorial-visualize-md-2.png[]
+image::images/tutorial-visualize-md-2.png[Image showing example markdown editing field]
 
 . Click *Save*, then enter `Markdown Example` in the *Title* field.
 
 [role="screenshot"]
-image::images/tutorial-dashboard.png[]
+image::images/tutorial-dashboard.png[Final visualization with bar chart, pie chart, map, and markdown text field]
 
 [float]
 === Next steps
