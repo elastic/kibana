@@ -52,6 +52,7 @@ export {
   KibanaAssetReference,
   ElasticsearchAssetType,
   RegistryPackage,
+  InstallablePackage,
   AssetType,
   Installable,
   KibanaAssetType,
@@ -68,6 +69,7 @@ export {
   Settings,
   SettingsSOAttributes,
   InstallType,
+  InstallSource,
   // Agent Request types
   PostAgentEnrollRequest,
   PostAgentCheckinRequest,
