@@ -53,12 +53,6 @@ describe('GET case', () => {
     expect(response.payload).toEqual(
       flattenCaseSavedObject({
         savedObject,
-        caseConfigureConnector: {
-          id: 'none',
-          name: 'none',
-          type: ConnectorTypes.none,
-          fields: null,
-        },
       })
     );
     expect(response.payload.comments).toEqual([]);
@@ -189,9 +183,9 @@ describe('GET case', () => {
     expect(response.status).toEqual(200);
     expect(response.payload.connector).toEqual({
       fields: null,
-      id: '789',
-      name: 'My connector 3',
-      type: '.jira',
+      id: 'none',
+      name: 'none',
+      type: '.none',
     });
   });
 

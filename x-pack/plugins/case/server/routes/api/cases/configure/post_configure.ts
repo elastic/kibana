@@ -17,6 +17,10 @@ import {
 import { RouteDeps } from '../../types';
 import { wrapError, escapeHatch } from '../../utils';
 import { CASE_CONFIGURE_URL } from '../../../../../common/constants';
+import {
+  transformCaseConnectorToEsConnector,
+  transformESConnectorToCaseConnector,
+} from '../helpers';
 
 export function initPostCaseConfigure({ caseConfigureService, caseService, router }: RouteDeps) {
   router.post(
@@ -51,11 +55,7 @@ export function initPostCaseConfigure({ caseConfigureService, caseService, route
           client,
           attributes: {
             ...query,
-            connector: {
-              ...query.connector,
-              // Reserve for future implementations
-              fields: null,
-            },
+            connector: transformCaseConnectorToEsConnector(query.connector),
             created_at: creationDate,
             created_by: { email, full_name, username },
             updated_at: null,
@@ -67,7 +67,7 @@ export function initPostCaseConfigure({ caseConfigureService, caseService, route
           body: CaseConfigureResponseRt.encode({
             ...post.attributes,
             // Reserve for future implementations
-            connector: { ...post.attributes.connector, fields: null },
+            connector: transformESConnectorToCaseConnector(post.attributes.connector),
             version: post.version ?? '',
           }),
         });

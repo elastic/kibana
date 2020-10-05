@@ -6,6 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 import Boom from 'boom';
+import isEmpty from 'lodash/isEmpty';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
@@ -16,11 +17,6 @@ import { CaseExternalServiceRequestRt, CaseResponseRt, throwErrors } from '../..
 import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
 import { RouteDeps } from '../types';
 import { CASE_DETAILS_URL } from '../../../../common/constants';
-import {
-  getConnectorFromConfiguration,
-  transformCaseConnectorToEsConnector,
-  transformESConnectorToCaseConnector,
-} from './helpers';
 
 export function initPushCaseUserActionApi({
   caseConfigureService,
@@ -98,14 +94,13 @@ export function initPushCaseUserActionApi({
           ...query,
         };
 
-        const caseConfigureConnector = getConnectorFromConfiguration(myCaseConfigure);
+        const updateConnector = myCase.attributes.connector;
 
-        // old case may not have new attribute connector_id, so we default to the configured system
-        const updateConnector =
-          myCase.attributes.connector ??
-          transformCaseConnectorToEsConnector(caseConfigureConnector);
-
-        if (!connectors.some((connector) => connector.id === updateConnector.id)) {
+        if (
+          isEmpty(updateConnector) ||
+          (updateConnector != null && updateConnector.id === 'none') ||
+          !connectors.some((connector) => connector.id === updateConnector.id)
+        ) {
           throw Boom.notFound('Connector not found or set to none');
         }
 
@@ -125,7 +120,6 @@ export function initPushCaseUserActionApi({
               external_service: externalService,
               updated_at: pushedDate,
               updated_by: { username, full_name, email },
-              connector: updateConnector,
             },
             version: myCase.version,
           }),
@@ -194,7 +188,6 @@ export function initPushCaseUserActionApi({
                   references: origComment?.references ?? [],
                 };
               }),
-              caseConfigureConnector: transformESConnectorToCaseConnector(updateConnector),
             })
           ),
         });

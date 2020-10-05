@@ -235,6 +235,13 @@ export const EditConnector = React.memo(
               </Form>
             </DisappearingFlexItem>
             <EuiFlexItem data-test-subj="edit-connector-settings-fields-form-flex-item">
+              {(currentConnector == null || currentConnector?.id === 'none') && // Connector is none or not defined.
+                !(currentConnector === null && selectedConnector !== 'none') && // Connector has not been deleted.
+                !editConnector && (
+                  <EuiText size="s">
+                    <span>{i18n.NO_CONNECTOR}</span>
+                  </EuiText>
+                )}
               <SettingFieldsForm
                 connector={currentConnector}
                 fields={fields}

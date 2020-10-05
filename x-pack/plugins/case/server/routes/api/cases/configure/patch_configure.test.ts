@@ -51,6 +51,7 @@ describe('PATCH configuration', () => {
     expect(res.payload).toEqual(
       expect.objectContaining({
         ...mockCaseConfigure[0].attributes,
+        connector: { fields: null, id: 'none', name: 'none', type: '.none' },
         closure_type: 'close-by-pushing',
         updated_at: '2020-04-09T09:43:51.778Z',
         updated_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
@@ -83,6 +84,7 @@ describe('PATCH configuration', () => {
     expect(res.payload).toEqual(
       expect.objectContaining({
         ...mockCaseConfigure[0].attributes,
+        connector: { fields: null, id: 'none', name: 'none', type: '.none' },
         closure_type: 'close-by-pushing',
         updated_at: '2020-04-09T09:43:51.778Z',
         updated_by: { email: null, full_name: null, username: null },

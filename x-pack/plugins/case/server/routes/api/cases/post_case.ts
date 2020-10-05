@@ -76,7 +76,6 @@ export function initPostCaseApi({
           body: CaseResponseRt.encode(
             flattenCaseSavedObject({
               savedObject: newCase,
-              caseConfigureConnector,
             })
           ),
         });

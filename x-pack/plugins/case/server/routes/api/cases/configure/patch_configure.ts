@@ -17,7 +17,10 @@ import {
 import { RouteDeps } from '../../types';
 import { wrapError, escapeHatch } from '../../utils';
 import { CASE_CONFIGURE_URL } from '../../../../../common/constants';
-import { transformCaseConnectorToEsConnector } from '../helpers';
+import {
+  transformCaseConnectorToEsConnector,
+  transformESConnectorToCaseConnector,
+} from '../helpers';
 
 export function initPatchCaseConfigure({ caseConfigureService, caseService, router }: RouteDeps) {
   router.patch(
@@ -70,12 +73,7 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
           body: CaseConfigureResponseRt.encode({
             ...myCaseConfigure.saved_objects[0].attributes,
             ...patch.attributes,
-            connector: {
-              ...(patch.attributes.connector
-                ? patch.attributes.connector
-                : myCaseConfigure.saved_objects[0].attributes.connector),
-              fields: null,
-            },
+            connector: transformESConnectorToCaseConnector(patch.attributes.connector),
             version: patch.version ?? '',
           }),
         });
