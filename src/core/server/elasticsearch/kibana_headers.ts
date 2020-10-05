@@ -18,5 +18,5 @@
  */
 
 export const KIBANA_HEADERS = {
-  'User-Agent': 'Kibana',
+  'X-elastic-product-origin': 'kibana',
 };
