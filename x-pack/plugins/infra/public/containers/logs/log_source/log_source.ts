@@ -7,7 +7,7 @@
 import createContainer from 'constate';
 import { useCallback, useMemo, useState } from 'react';
 import { useMountedState } from 'react-use';
-import { HttpSetup } from 'src/core/public';
+import type { HttpHandler } from 'src/core/public';
 import {
   LogSourceConfiguration,
   LogSourceConfigurationProperties,
@@ -26,13 +26,7 @@ export {
   LogSourceStatus,
 };
 
-export const useLogSource = ({
-  sourceId,
-  fetch,
-}: {
-  sourceId: string;
-  fetch: HttpSetup['fetch'];
-}) => {
+export const useLogSource = ({ sourceId, fetch }: { sourceId: string; fetch: HttpHandler }) => {
   const getIsMounted = useMountedState();
   const [sourceConfiguration, setSourceConfiguration] = useState<
     LogSourceConfiguration | undefined
