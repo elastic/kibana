@@ -346,8 +346,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
      * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
      * See https://webpack.js.org/api/module-methods/#magic-comments
      */
-    /* webpackChunkName: "lazyApplicationDependencies" */ './lazy_application_dependencies';
-    return import('./lazy_application_dependencies');
+    return import(
+      /* webpackChunkName: "lazy_application_dependencies" */
+      './lazy_application_dependencies'
+    );
   }
 
   /**
