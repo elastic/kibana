@@ -90,7 +90,7 @@ export const useTimelineEvents = ({
           fields,
           fieldRequested: fields,
           filterQuery: createFilter(filterQuery),
-          id,
+          id: ID,
           timerange: {
             interval: '12h',
             from: startDate,
@@ -215,6 +215,7 @@ export const useTimelineEvents = ({
         defaultIndex: indexNames,
         docValueFields: docValueFields ?? [],
         filterQuery: createFilter(filterQuery),
+        id: ID,
         pagination: generateTablePaginationOptions(activePage, limit),
         timerange: {
           interval: '12h',
