@@ -47,5 +47,6 @@ export function useTrustedAppsStoreActionCallback(
 ) {
   const dispatch = useDispatch();
 
-  return useCallback((...args) => dispatch(callback(...args)), [dispatch, callback]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  return useCallback((...args) => dispatch(callback(...args)), [dispatch]);
 }
