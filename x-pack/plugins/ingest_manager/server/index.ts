@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginInitializerContext } from 'src/core/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
 import { IngestManagerPlugin } from './plugin';
 import {
   AGENT_POLICY_ROLLOUT_RATE_LIMIT_INTERVAL_MS,
@@ -19,11 +19,15 @@ export {
   ExternalCallback,
 } from './plugin';
 
-export const config = {
+export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
     epm: true,
     agents: true,
   },
+  deprecations: ({ renameFromRoot }) => [
+    renameFromRoot('xpack.ingestManager.fleet', 'xpack.fleet.agents'),
+    renameFromRoot('xpack.ingestManager', 'xpack.fleet'),
+  ],
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     registryUrl: schema.maybe(schema.uri()),
