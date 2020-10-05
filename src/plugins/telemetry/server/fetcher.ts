@@ -22,7 +22,10 @@ import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 // @ts-ignore
 import fetch from 'node-fetch';
-import { TelemetryCollectionManagerPluginStart } from 'src/plugins/telemetry_collection_manager/server';
+import {
+  TelemetryCollectionManagerPluginStart,
+  UsageStatsPayload,
+} from 'src/plugins/telemetry_collection_manager/server';
 import {
   PluginInitializerContext,
   Logger,
@@ -94,6 +97,10 @@ export class FetcherTask {
     }
   }
 
+  private async areAllCollectorsReady() {
+    return (await this.telemetryCollectionManager?.areAllCollectorsReady()) ?? false;
+  }
+
   private async sendIfDue() {
     if (this.isSending) {
       return;
@@ -103,7 +110,7 @@ export class FetcherTask {
     try {
       telemetryConfig = await this.getCurrentConfigs();
     } catch (err) {
-      this.logger.warn(`Error fetching telemetry configs: ${err}`);
+      this.logger.warn(`Error getting telemetry configs. (${err})`);
       return;
     }
 
@@ -111,9 +118,22 @@ export class FetcherTask {
       return;
     }
 
+    let clusters: Array<UsageStatsPayload | string> = [];
+    this.isSending = true;
+
     try {
-      this.isSending = true;
-      const clusters = await this.fetchTelemetry();
+      const allCollectorsReady = await this.areAllCollectorsReady();
+      if (!allCollectorsReady) {
+        throw new Error('Not all collectors are ready.');
+      }
+      clusters = await this.fetchTelemetry();
+    } catch (err) {
+      this.logger.warn(`Error fetching usage. (${err})`);
+      this.isSending = false;
+      return;
+    }
+
+    try {
       const { telemetryUrl } = telemetryConfig;
       for (const cluster of clusters) {
         await this.sendTelemetry(telemetryUrl, cluster);
@@ -123,7 +143,7 @@ export class FetcherTask {
     } catch (err) {
       await this.updateReportFailure(telemetryConfig);
 
-      this.logger.warn(`Error sending telemetry usage data: ${err}`);
+      this.logger.warn(`Error sending telemetry usage data. (${err})`);
     }
     this.isSending = false;
   }
