@@ -9,7 +9,7 @@ import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiDataGridColumn, EuiSpacer } from '@elastic/eui';
+import { EuiDataGridColumn, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
@@ -18,10 +18,25 @@ import { useColorRange, ColorRangeLegend } from '../../../../../components/color
 import { DataGrid, UseIndexDataReturnType } from '../../../../../components/data_grid';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
 
-import { defaultSearchQuery, DataFrameAnalyticsConfig } from '../../../../common';
+import { defaultSearchQuery, DataFrameAnalyticsConfig, SEARCH_SIZE } from '../../../../common';
 
 import { ExpandableSection, ExpandableSectionProps } from '../expandable_section';
 import { IndexPatternPrompt } from '../index_pattern_prompt';
+
+const showingDocs = i18n.translate(
+  'xpack.ml.dataframe.analytics.explorationResults.documentsShownHelpText',
+  {
+    defaultMessage: 'Showing documents for which predictions exist',
+  }
+);
+
+const showingFirstDocs = i18n.translate(
+  'xpack.ml.dataframe.analytics.explorationResults.firstDocumentsShownHelpText',
+  {
+    defaultMessage: 'Showing first {searchSize} documents for which predictions exist',
+    values: { searchSize: SEARCH_SIZE },
+  }
+);
 
 const getResultsSectionHeaderItems = (
   columnsWithCharts: EuiDataGridColumn[],
@@ -97,7 +112,9 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
       {(columnsWithCharts.length > 0 || searchQuery !== defaultSearchQuery) &&
         indexPattern !== undefined && (
           <>
-            <EuiSpacer size="s" />
+            <EuiText size="xs" color="subdued" className="mlExpandableSection-contentPadding">
+              {tableItems.length === SEARCH_SIZE ? showingFirstDocs : showingDocs}
+            </EuiText>
             {columnsWithCharts.length > 0 && tableItems.length > 0 && (
               <DataGrid
                 {...indexData}
