@@ -6,10 +6,9 @@ sidebar_label: Getting started
 
 The core exposes the main building blocks (hooks and components) needed to build your form.
 
-It is important to note that the core **is not** responsible for rendering UI. Its responsibility is to return form and fields **state and handlers** that you can to connect to React components. The core of the form lib is agnostic of any UI rendering the form.
+It is important to note that the core **is not** responsible for rendering UI. Its responsibility is to return form and fields **state and handlers** that you can connect to React components. The core of the form lib is agnostic of any UI rendering the form.
 
-In Kibana we work with [the EUI component library](https://elastic.github.io/eui) and have created field components that wrap EUI components. With these components connection with the form lib is already done for you.  
-The takeaway is: the core of the form lib is agnostic of any UI rendering the form.
+In Kibana we work with [the EUI component library](https://elastic.github.io/eui) and have created [field components](../helpers/components.md) that wrap EUI components. With these components, connection with the form lib is already done for you.  
 
 ## Getting started
 
