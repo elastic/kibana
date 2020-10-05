@@ -11,15 +11,23 @@ export interface Props {
   placeholder: string;
   ariaLabel: string;
   onChange: (value: string) => void;
-  disabled: boolean;
+  /**
+   * Whether the containing element of the text input can be focused.
+   *
+   * If it cannot be focused, this component cannot switch to showing
+   * the text input field.
+   *
+   * Defaults to false.
+   */
+  disabled?: boolean;
   text?: string;
 }
 
 function _InlineTextInput({
-  disabled,
   placeholder,
   text,
   ariaLabel,
+  disabled = false,
   onChange,
 }: Props): React.ReactElement<any, any> | null {
   const [isShowingTextInput, setIsShowingTextInput] = useState<boolean>(false);
@@ -75,7 +83,11 @@ function _InlineTextInput({
       />
     </div>
   ) : (
-    <div className={containerClasses} tabIndex={0} onFocus={() => setIsShowingTextInput(true)}>
+    <div
+      className={containerClasses}
+      tabIndex={disabled ? -1 : 0}
+      onFocus={() => setIsShowingTextInput(true)}
+    >
       <EuiText size="s" color="subdued">
         <div className="pipelineProcessorsEditor__item__description">
           {text || <em>{placeholder}</em>}
