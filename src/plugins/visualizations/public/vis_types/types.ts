@@ -18,7 +18,7 @@
  */
 
 import { IconType } from '@elastic/eui';
-import { ReactElement } from 'react';
+import React from 'react';
 import { Adapters } from 'src/plugins/inspector';
 import { ISchemas } from 'src/plugins/vis_default_editor/public';
 import { TriggerContextMapping } from '../../../ui_actions/public';
@@ -57,7 +57,7 @@ export interface VisType<TVisParams = unknown> {
    * It will be shown in the editor when editing/creating visualizations
    * of this type.
    */
-  readonly getInfoMessage?: (vis: Vis) => ReactElement<{}>;
+  readonly getInfoMessage?: (vis: Vis) => React.ReactNode;
 
   readonly toExpressionAst?: VisToExpressionAst<TVisParams>;
   readonly visualization?: VisualizationControllerConstructor;
