@@ -43,7 +43,7 @@ export const MyComponent = () => {
   
   const onClickSubmit = async () => {
     // We validate all the form fields and set the "isValid" state to true or false
-    const { isValid, data } await form.submit();
+    const { isValid, data } = await form.submit();
   
     if (isValid) {
       // ...
@@ -116,7 +116,7 @@ The form id. If none was provided, "default" will be returned.
 
 **Returns:** `Promise<{ data: T | {}, isValid: boolean }>`
 
-This handlers submits the form and returns its data and validity. If the form is not valid, the data will be `null` as only valid data is passed through the `serializer(s)` before being returned.
+This handler submits the form and returns its data and validity. If the form is not valid, the data will be `null` as only valid data is passed through the `serializer(s)` before being returned.
 
 ```js
 const { data, isValid } = await form.submit();
@@ -147,7 +147,7 @@ const { name: nameField }  = form.getFields();
 **Arguments:** `options?: { unflatten?: boolean }`  
 **Returns:** `T | R`
 
-Return the form data. It accepts an optional options with an `unflatten` parameter (defaults to `true`). If you are only interested in the raw form data, pass `unflatten: false` to the handler ([read more about the "Raw" data state here](in_out_raw_state.md#raw-data-state)).
+Return the form data. Accepts an optional `options` with an `unflatten` parameter (defaults to `true`). If you are only interested in the raw form data, pass `unflatten: false` to the handler ([read more about the "Raw" data state here](in_out_raw_state.md#raw-data-state)).
 
 ```js
 const formData  = form.getFormData();
@@ -159,7 +159,7 @@ const rawFormData  = form.getFormData({ unflatten: false });
 
 **Returns:** `string[]`
 
-Returns an array with of all errors in the form.
+Returns an array of all errors in the form.
 
 ```js
 const errors  = form.getErrors();
@@ -169,11 +169,11 @@ const errors  = form.getErrors();
 
 **Arguments:** `options?: { resetValues?: boolean; defaultValue?: any }` 
 
-Resets the form to its initial state. It accetps an optional object of configuration:
+Resets the form to its initial state. It accepts an optional configuration object:
 
-- `resetValues` (default: `true`). Flag to indicate if we want to not only reset the form state (`isValid`, `isSubmitted`...) but also the field values. If set to `true` will put back the default value passed to the form or declared on the field config (in that order).
+- `resetValues` (default: `true`). Flag to indicate if we want to not only reset the form state (`isValid`, `isSubmitted`...) but also the field values. If set to `true` all form values will be reset to their default value. Remember: default field values can be set in [different ways](./link-to-place-where-we-talk-about-it).
 
-- `defaultValue`. In some cases you might not want to reset the form to the default value initiallly provided to the form (probably because it is data that came from the server and you want a clean form). In this case you can provide a new `defaultValue` object when resetting.
+- `defaultValue`. In some cases you might not want to reset the form to the default value initially provided to the form (probably because it is data that came from the server and you want a clean form). In this case you can provide a new `defaultValue` object when resetting.
 
 ```js
 // Reset to the defaultValue object passed to the form
@@ -201,7 +201,7 @@ form.setFieldValue('name', 'John');
 
 **Arguments:** `fieldName: string, errors: ValidationError[]` 
 
-Sets a field errors imperatively.
+Sets field errors imperatively.
 
 ```js
 form.setFieldErrors('name', [{ message: 'There is an error in the field' }]);
