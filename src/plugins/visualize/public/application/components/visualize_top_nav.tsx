@@ -139,9 +139,12 @@ const TopNav = ({
 
   useEffect(() => {
     onAppLeave((actions) => {
-      // Confirm when the user has made any changes to an existing doc
+      // Confirm when the user has made any changes to an existing visualizations
       // or when the user has configured something without saving
-      if (hasUnappliedChanges || hasUnsavedChanges) {
+      if (
+        ((originatingApp && originatingApp === 'dashboards') || originatingApp === 'canvas') &&
+        (hasUnappliedChanges || hasUnsavedChanges)
+      ) {
         return actions.confirm(
           i18n.translate('visualize.confirmModal.confirmTextDescription', {
             defaultMessage: 'Leave Visualize editor with unsaved changes?',
@@ -154,7 +157,13 @@ const TopNav = ({
         return actions.default();
       }
     });
-  }, [onAppLeave, hasUnappliedChanges, hasUnsavedChanges, visualizeCapabilities.save]);
+  }, [
+    onAppLeave,
+    hasUnappliedChanges,
+    hasUnsavedChanges,
+    visualizeCapabilities.save,
+    originatingApp,
+  ]);
 
   useEffect(() => {
     if (!vis.data.indexPattern) {
