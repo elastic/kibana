@@ -148,6 +148,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const index = formIndex || initialState.index;
   const threatIndex = formThreatIndex || initialState.threatIndex;
   const ruleType = formRuleType || initialState.ruleType;
+  const queryBarQuery =
+    formQuery != null ? formQuery.query.query : '' || initialState.queryBar.query.query;
   const [indexPatternsLoading, { browserFields, indexPatterns }] = useFetchIndex(index);
 
   const [
@@ -380,21 +382,20 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             }}
           />
         </Form>
-        {formRuleType != null &&
-          formRuleType !== 'machine_learning' &&
-          formRuleType !== 'threat_match' && (
-            <>
-              <EuiSpacer size="s" />
-              <PreviewQuery
-                dataTestSubj="something"
-                idAria="someAriaId"
-                ruleType={formRuleType}
-                index={index}
-                query={formQuery}
-                threshold={{ value: formThresholdValue, field: formThresholdField }}
-              />
-            </>
-          )}
+        {ruleType !== 'machine_learning' && ruleType !== 'threat_match' && (
+          <>
+            <EuiSpacer size="s" />
+            <PreviewQuery
+              dataTestSubj="something"
+              idAria="someAriaId"
+              ruleType={ruleType}
+              index={index}
+              query={formQuery}
+              isDisabled={queryBarQuery.trim() === ''}
+              threshold={{ value: formThresholdValue, field: formThresholdField }}
+            />
+          </>
+        )}
       </StepContentWrapper>
 
       {!isUpdateView && (

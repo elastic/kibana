@@ -37,6 +37,7 @@ interface PreviewQueryProps {
   index: string[];
   ruleType: Type;
   threshold: Threshold | undefined;
+  isDisabled: boolean;
 }
 
 export const PreviewQuery = ({
@@ -46,6 +47,7 @@ export const PreviewQuery = ({
   query,
   index,
   threshold,
+  isDisabled,
 }: PreviewQueryProps) => {
   // how far back to look like 'now-6m'
   const [toTime, setTo] = useState('');
@@ -208,6 +210,7 @@ export const PreviewQuery = ({
       isLoading={eqlQueryLoading || customQueryLoading}
       ruleType={ruleType}
       errorExists={customQueryError != null || eqlError != null}
+      isDisabled={isDisabled}
     />
   );
 };

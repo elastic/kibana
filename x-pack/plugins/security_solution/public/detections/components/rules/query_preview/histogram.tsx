@@ -64,6 +64,7 @@ interface PreviewQueryHistogramProps {
   inspect: InspectQuery;
   ruleType: Type;
   errorExists: boolean;
+  isDisabled: boolean;
   onPreviewClick: (arg: Unit) => void;
 }
 
@@ -80,6 +81,7 @@ export const PreviewQueryHistogram = ({
   inspect,
   ruleType,
   errorExists,
+  isDisabled,
 }: PreviewQueryHistogramProps) => {
   const [timeframeOptions, setTimeframeOptions] = useState<EuiSelectOption[]>([]);
   const [showHistogram, setShowHistogram] = useState(false);
@@ -136,11 +138,11 @@ export const PreviewQueryHistogram = ({
               value={timeframe}
               onChange={handleSelectPreviewTimeframe}
               aria-label={i18n.PREVIEW_SELECT_ARIA}
-              disabled={query.trim() === ''}
+              disabled={isDisabled}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <PreviewButton fill isDisabled={query.trim() === ''} onClick={handlePreviewClicked}>
+            <PreviewButton fill isDisabled={isDisabled} onClick={handlePreviewClicked}>
               {i18n.PREVIEW_LABEL}
             </PreviewButton>
           </EuiFlexItem>

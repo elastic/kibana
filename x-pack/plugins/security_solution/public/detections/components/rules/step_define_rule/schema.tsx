@@ -40,7 +40,7 @@ export const schema: FormSchema<DefineStepRule> = {
     fieldsToValidateOnChange: ['index', 'queryBar'],
     type: FIELD_TYPES.COMBO_BOX,
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fiedIndexPatternsLabel',
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fiedIndexPatternsLabel',
       {
         defaultMessage: 'Index patterns',
       }
@@ -172,13 +172,13 @@ export const schema: FormSchema<DefineStepRule> = {
   },
   timeline: {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldTimelineTemplateLabel',
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldTimelineTemplateLabel',
       {
         defaultMessage: 'Timeline template',
       }
     ),
     helpText: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldTimelineTemplateHelpText',
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldTimelineTemplateHelpText',
       {
         defaultMessage: 'Select which timeline to use when investigating generated alerts.',
       }
@@ -194,13 +194,13 @@ export const schema: FormSchema<DefineStepRule> = {
     field: {
       type: FIELD_TYPES.COMBO_BOX,
       label: i18n.translate(
-        'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdFieldLabel',
+        'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThresholdFieldLabel',
         {
           defaultMessage: 'Field',
         }
       ),
       helpText: i18n.translate(
-        'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdFieldHelpText',
+        'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThresholdFieldHelpText',
         {
           defaultMessage: 'Select a field to group results by',
         }
@@ -209,7 +209,7 @@ export const schema: FormSchema<DefineStepRule> = {
     value: {
       type: FIELD_TYPES.NUMBER,
       label: i18n.translate(
-        'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdValueLabel',
+        'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThresholdValueLabel',
         {
           defaultMessage: 'Threshold',
         }
