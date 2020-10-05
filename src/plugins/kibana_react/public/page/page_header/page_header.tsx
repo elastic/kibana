@@ -28,7 +28,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'kibana/public';
-import { RedirectAppLinks, useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { RedirectAppLinks } from '../../app_links';
+import { useKibana } from '../../context';
 
 import './index.scss';
 

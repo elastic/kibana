@@ -22,11 +22,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'kibana/public';
-import {
-  RedirectAppLinks,
-  useKibana,
-  useUiSetting$,
-} from '../../../../../../src/plugins/kibana_react/public';
+import { RedirectAppLinks } from '../../app_links';
+import { useKibana } from '../../context';
+import { useUiSetting$ } from '../../ui_settings';
 
 import './index.scss';
 
