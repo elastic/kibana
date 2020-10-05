@@ -22,11 +22,13 @@ import {
   HeatmapElementEvent,
   HeatmapConfig,
   ElementClickListener,
+  TooltipValue,
 } from '@elastic/charts';
 import moment from 'moment';
 import { HeatmapBrushEvent } from '@elastic/charts/dist/chart_types/heatmap/layout/types/config_types';
 
 import { i18n } from '@kbn/i18n';
+import { TooltipSettings } from '@elastic/charts/dist/specs/settings';
 import { SwimLanePagination } from './swimlane_pagination';
 import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
 import { ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../../../common';
@@ -34,6 +36,8 @@ import { DeepPartial } from '../../../common/types/common';
 import { TimeBuckets as TimeBucketsClass } from '../util/time_buckets';
 import { SWIMLANE_TYPE, SwimlaneType } from './explorer_constants';
 import { mlEscape } from '../util/string_utils';
+import { FormattedTooltip } from '../components/chart_tooltip/chart_tooltip';
+import { formatHumanReadableDateTime } from '../../../common/util/date_utils';
 
 /**
  * Ignore insignificant resize, e.g. browser scrollbar appearance.
@@ -46,6 +50,44 @@ const LEGEND_HEIGHT = 70;
 export function isViewBySwimLaneData(arg: any): arg is ViewBySwimLaneData {
   return arg && arg.hasOwnProperty('cardinality');
 }
+
+/**
+ * Provides a custom tooltip for the anomaly swim lane chart.
+ */
+const SwimLaneTooltip = (fieldName?: string): FC<{ values: TooltipValue[] }> => ({ values }) => {
+  const [value] = values;
+  const [laneLabel, date] = value.label.split(' - ');
+
+  // Display date using same format as Kibana visualizations.
+  const formattedDate = formatHumanReadableDateTime(new Date(date).getTime());
+  const tooltipData: TooltipValue[] = [{ label: formattedDate } as TooltipValue];
+
+  if (fieldName !== undefined) {
+    tooltipData.push({
+      label: fieldName,
+      value: laneLabel,
+      // @ts-ignore
+      seriesIdentifier: {
+        key: laneLabel,
+      },
+      valueAccessor: 'fieldName',
+    });
+  }
+  tooltipData.push({
+    label: i18n.translate('xpack.ml.explorer.swimlane.maxAnomalyScoreLabel', {
+      defaultMessage: 'Max anomaly score',
+    }),
+    value: value.formattedValue,
+    color: value.color,
+    // @ts-ignore
+    seriesIdentifier: {
+      key: laneLabel,
+    },
+    valueAccessor: 'anomaly_score',
+  });
+
+  return <FormattedTooltip tooltipData={tooltipData} />;
+};
 
 export interface ExplorerSwimlaneProps {
   filterActive?: boolean;
@@ -232,6 +274,13 @@ export const SwimlaneContainer: FC<
     [swimlaneType, swimlaneData?.fieldName, swimlaneData?.interval]
   );
 
+  const tooltipOptions: TooltipSettings = {
+    placement: 'auto',
+    fallbackPlacements: ['left'],
+    boundary: 'chart',
+    customTooltip: SwimLaneTooltip(swimlaneData.fieldName),
+  };
+
   // A resize observer is required to compute the bucket span based on the chart width to fetch the data accordingly
   return (
     <EuiResizeObserver onResize={resizeHandler}>
@@ -262,6 +311,7 @@ export const SwimlaneContainer: FC<
                     max: swimlaneData.latest * 1000,
                     minInterval: swimlaneData.interval * 1000,
                   }}
+                  tooltip={tooltipOptions}
                 />
                 <Heatmap
                   id={id}
