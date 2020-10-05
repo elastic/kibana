@@ -64,7 +64,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     ],
   ];
 
-  // Failing: See https://github.com/elastic/kibana/issues/77278
   describe('endpoint list', function () {
     this.tags('ciGroup7');
     const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -223,7 +222,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await adminSearchBar.clearValueWithKeyboard();
         await adminSearchBar.type('na');
         const querySubmitButton = await testSubjects.find('querySubmitButton');
-        querySubmitButton.click();
+        await querySubmitButton.click();
         const expectedDataFromQuery = [
           [
             'Hostname',
@@ -250,7 +249,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           'HostDetails.Endpoint.policy.applied.id : "C2A9093E-E289-4C0A-AA44-8C32A414FA7A" '
         );
         const querySubmitButton = await testSubjects.find('querySubmitButton');
-        querySubmitButton.click();
+        await querySubmitButton.click();
         const expectedDataFromQuery = [
           [
             'Hostname',
