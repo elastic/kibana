@@ -150,7 +150,6 @@ export const ResultsLinks: FC<Props> = ({
 
   function openInDiscover(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
-    const application = getApplication();
     getApplication().navigateToUrl(discoverLink);
   }
 
