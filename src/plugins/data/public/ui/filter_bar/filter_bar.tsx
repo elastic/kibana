@@ -112,7 +112,7 @@ function FilterBarUI(props: Props) {
           repositionOnScroll
         >
           <EuiFlexItem grow={false}>
-            <div style={{ width: 400 }}>
+            <div style={{ width: 420, maxWidth: '100%' }}>
               <FilterEditor
                 filter={newFilter}
                 indexPatterns={props.indexPatterns}
