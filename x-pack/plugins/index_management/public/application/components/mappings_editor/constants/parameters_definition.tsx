@@ -168,7 +168,7 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
             },
           ];
         }
-        return [];
+        return [{ value: '' }];
       },
       serializer: (fieldType: ComboBoxOption[] | undefined) =>
         fieldType && fieldType.length ? fieldType[0].value : fieldType,
