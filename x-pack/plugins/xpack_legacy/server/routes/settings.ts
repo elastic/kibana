@@ -42,6 +42,9 @@ export function registerSettingsRoute({
     },
     async (context, req, res) => {
       const { callAsCurrentUser } = context.core.elasticsearch.legacy.client;
+      const collectorFetchClients = {
+        callCluster: callAsCurrentUser,
+      };
 
       const settingsCollector = usageCollection.getCollectorByType(KIBANA_SETTINGS_TYPE) as
         | KibanaSettingsCollector
@@ -51,7 +54,7 @@ export function registerSettingsRoute({
       }
 
       const settings =
-        (await settingsCollector.fetch(callAsCurrentUser)) ??
+        (await settingsCollector.fetch(collectorFetchClients)) ??
         settingsCollector.getEmailValueStructure(null);
       const { cluster_uuid: uuid } = await callAsCurrentUser('info', {
         filterPath: 'cluster_uuid',

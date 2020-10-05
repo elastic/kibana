@@ -5,7 +5,6 @@
  */
 
 import { first, map } from 'rxjs/operators';
-import { LegacyAPICaller } from 'kibana/server';
 import { CollectorFetchClients, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { ReportingCore } from '../';
 import { ExportTypesRegistry } from '../lib/export_types_registry';

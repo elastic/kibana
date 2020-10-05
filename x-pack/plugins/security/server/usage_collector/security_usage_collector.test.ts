@@ -35,6 +35,9 @@ describe('Security UsageCollector', () => {
   };
 
   const clusterClient = elasticsearchServiceMock.createLegacyClusterClient();
+  const collectorFetchClients = {
+    callCluster: clusterClient.asScoped().callAsCurrentUser,
+  };
 
   describe('initialization', () => {
     it('handles an undefined usage collector', () => {
@@ -68,7 +71,7 @@ describe('Security UsageCollector', () => {
 
     const usage = await usageCollection
       .getCollectorByType('security')
-      ?.fetch(clusterClient.asScoped().callAsCurrentUser);
+      ?.fetch(collectorFetchClients);
 
     expect(usage).toEqual({
       auditLoggingEnabled: false,
@@ -89,7 +92,7 @@ describe('Security UsageCollector', () => {
 
     const usage = await usageCollection
       .getCollectorByType('security')
-      ?.fetch(clusterClient.asScoped().callAsCurrentUser);
+      ?.fetch(collectorFetchClients);
 
     expect(usage).toEqual({
       auditLoggingEnabled: false,
@@ -133,7 +136,7 @@ describe('Security UsageCollector', () => {
 
       const usage = await usageCollection
         .getCollectorByType('security')
-        ?.fetch(clusterClient.asScoped().callAsCurrentUser);
+        ?.fetch(collectorFetchClients);
 
       expect(usage).toEqual({
         auditLoggingEnabled: false,
@@ -182,7 +185,7 @@ describe('Security UsageCollector', () => {
 
       const usage = await usageCollection
         .getCollectorByType('security')
-        ?.fetch(clusterClient.asScoped().callAsCurrentUser);
+        ?.fetch(collectorFetchClients);
 
       expect(usage).toEqual({
         auditLoggingEnabled: false,
@@ -220,7 +223,7 @@ describe('Security UsageCollector', () => {
 
       const usage = await usageCollection
         .getCollectorByType('security')
-        ?.fetch(clusterClient.asScoped().callAsCurrentUser);
+        ?.fetch(collectorFetchClients);
 
       expect(usage).toEqual({
         auditLoggingEnabled: false,
@@ -258,7 +261,7 @@ describe('Security UsageCollector', () => {
 
       const usage = await usageCollection
         .getCollectorByType('security')
-        ?.fetch(clusterClient.asScoped().callAsCurrentUser);
+        ?.fetch(collectorFetchClients);
 
       expect(usage).toEqual({
         auditLoggingEnabled: false,
@@ -299,7 +302,7 @@ describe('Security UsageCollector', () => {
 
       const usage = await usageCollection
         .getCollectorByType('security')
-        ?.fetch(clusterClient.asScoped().callAsCurrentUser);
+        ?.fetch(collectorFetchClients);
 
       expect(usage).toEqual({
         auditLoggingEnabled: false,
@@ -338,7 +341,7 @@ describe('Security UsageCollector', () => {
 
       const usage = await usageCollection
         .getCollectorByType('security')
-        ?.fetch(clusterClient.asScoped().callAsCurrentUser);
+        ?.fetch(collectorFetchClients);
 
       expect(usage).toEqual({
         auditLoggingEnabled: false,
@@ -366,7 +369,7 @@ describe('Security UsageCollector', () => {
 
       const usage = await usageCollection
         .getCollectorByType('security')
-        ?.fetch(clusterClient.asScoped().callAsCurrentUser);
+        ?.fetch(collectorFetchClients);
 
       expect(usage).toEqual({
         auditLoggingEnabled: true,
@@ -392,7 +395,7 @@ describe('Security UsageCollector', () => {
 
       const usage = await usageCollection
         .getCollectorByType('security')
-        ?.fetch(clusterClient.asScoped().callAsCurrentUser);
+        ?.fetch(collectorFetchClients);
 
       expect(usage).toEqual({
         auditLoggingEnabled: false,
@@ -422,7 +425,7 @@ describe('Security UsageCollector', () => {
 
       const usage = await usageCollection
         .getCollectorByType('security')
-        ?.fetch(clusterClient.asScoped().callAsCurrentUser);
+        ?.fetch(collectorFetchClients);
 
       expect(usage).toEqual({
         auditLoggingEnabled: false,
@@ -450,7 +453,7 @@ describe('Security UsageCollector', () => {
 
       const usage = await usageCollection
         .getCollectorByType('security')
-        ?.fetch(clusterClient.asScoped().callAsCurrentUser);
+        ?.fetch(collectorFetchClients);
 
       expect(usage).toEqual({
         auditLoggingEnabled: false,
