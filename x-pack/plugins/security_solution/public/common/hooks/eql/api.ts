@@ -8,8 +8,8 @@ import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/pub
 import {
   EqlSearchStrategyRequest,
   EqlSearchStrategyResponse,
-  EQL_SEARCH_STRATEGY,
 } from '../../../../../data_enhanced/common';
+import { EQL_SEARCH_STRATEGY } from '../../../../../data_enhanced/public';
 import {
   getValidationErrors,
   isErrorResponse,
