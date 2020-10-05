@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../../server/lib/helpers/setup_request';
+import { Setup, SetupTimeRange } from '../../server/lib/helpers/setup_request';
 import {
   AGENT_NAME,
   TRANSACTION_TYPE,
@@ -22,10 +18,10 @@ export function getRumPageLoadTransactionsProjection({
   setup,
   urlQuery,
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   urlQuery?: string;
 }) {
-  const { start, end, uiFiltersES } = setup;
+  const { start, end, esFilter } = setup;
 
   const bool = {
     filter: [
@@ -49,7 +45,7 @@ export function getRumPageLoadTransactionsProjection({
             },
           ]
         : []),
-      ...uiFiltersES,
+      ...esFilter,
     ],
   };
 
@@ -68,9 +64,9 @@ export function getRumPageLoadTransactionsProjection({
 export function getRumErrorsProjection({
   setup,
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
 }) {
-  const { start, end, uiFiltersES } = setup;
+  const { start, end, esFilter: esFilter } = setup;
 
   const bool = {
     filter: [
@@ -82,7 +78,7 @@ export function getRumErrorsProjection({
           [SERVICE_LANGUAGE_NAME]: 'javascript',
         },
       },
-      ...uiFiltersES,
+      ...esFilter,
     ],
   };
 

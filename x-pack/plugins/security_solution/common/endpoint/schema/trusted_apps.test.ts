@@ -76,7 +76,7 @@ describe('When invoking Trusted Apps Schema', () => {
       os: 'windows',
       entries: [
         {
-          field: 'process.executable.text',
+          field: 'process.executable.caseless',
           type: 'match',
           operator: 'included',
           value: 'c:/programs files/Anti-Virus',
@@ -204,7 +204,7 @@ describe('When invoking Trusted Apps Schema', () => {
             field: 'process.hash.*',
             value: 'A4370C0CF81686C0B696FA6261c9d3e0d810ae704ab8301839dffd5d5112f476',
           },
-          { field: 'process.executable.text', value: '/tmp/dir1' },
+          { field: 'process.executable.caseless', value: '/tmp/dir1' },
         ].forEach((partialEntry) => {
           const bodyMsg3 = {
             ...getCreateTrustedAppItem(),
