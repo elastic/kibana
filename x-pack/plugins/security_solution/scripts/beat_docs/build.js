@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-require('../../../../../src/setup_node_env');
+require('../../../../../src/setup_node_env/dev');
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 const extract = require('extract-zip');

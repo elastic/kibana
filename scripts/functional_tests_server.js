@@ -17,5 +17,5 @@
  * under the License.
  */
 
-require('../src/setup_node_env');
+require('../src/setup_node_env/dev');
 require('@kbn/test').startServersCli(require.resolve('../test/functional/config.js'));

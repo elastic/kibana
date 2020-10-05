@@ -16,5 +16,5 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-require('../src/setup_node_env');
+require('../src/setup_node_env/dev');
 require('../src/dev/typescript/build_refs').runBuildRefs();

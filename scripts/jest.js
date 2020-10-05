@@ -32,5 +32,5 @@
 var resolve = require('path').resolve;
 process.argv.push('--config', resolve(__dirname, '../src/dev/jest/config.js'));
 
-require('../src/setup_node_env');
+require('../src/setup_node_env/dev');
 require('../src/dev/jest/cli');

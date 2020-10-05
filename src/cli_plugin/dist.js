@@ -17,5 +17,5 @@
  * under the License.
  */
 
-require('../src/setup_node_env/dev');
-require('../src/dev/run_i18n_integrate');
+require('../setup_node_env/dist');
+require('./cli');

@@ -31,7 +31,7 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/examples/config.js'),
 ];
 
-require('../src/setup_node_env');
+require('../src/setup_node_env/dev');
 require('@kbn/test').runTestsCli([
   // eslint-disable-next-line no-restricted-syntax
   ...alwaysImportedTests,

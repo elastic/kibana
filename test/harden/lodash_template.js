@@ -17,7 +17,7 @@
  * under the License.
  */
 
-require('../../src/setup_node_env');
+require('../../src/setup_node_env/dev');
 const _ = require('lodash');
 const template = require('lodash/template');
 const fp = require('lodash/fp');
