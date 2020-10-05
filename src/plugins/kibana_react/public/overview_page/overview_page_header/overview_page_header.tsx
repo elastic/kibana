@@ -42,7 +42,7 @@ interface Props {
   title: JSX.Element | string;
 }
 
-export const PageHeader: FC<Props> = ({
+export const OverviewPageHeader: FC<Props> = ({
   hideToolbar,
   iconType,
   overlap,

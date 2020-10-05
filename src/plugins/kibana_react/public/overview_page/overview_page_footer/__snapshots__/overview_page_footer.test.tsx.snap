@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`PageFooter render 1`] = `
+exports[`OverviewPageFooter render 1`] = `
 <footer
   className="pageFooter"
 >

@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { PageFooter } from './page_footer';
+import { OverviewPageFooter } from './overview_page_footer';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 jest.mock('../../app_links', () => ({
@@ -40,9 +40,9 @@ jest.mock('../../ui_settings', () => ({
 
 afterEach(() => jest.clearAllMocks());
 
-describe('PageFooter', () => {
+describe('OverviewPageFooter', () => {
   test('render', () => {
-    const component = shallowWithIntl(<PageFooter path="new-default-route" />);
+    const component = shallowWithIntl(<OverviewPageFooter path="new-default-route" />);
     expect(component).toMatchSnapshot();
   });
 });

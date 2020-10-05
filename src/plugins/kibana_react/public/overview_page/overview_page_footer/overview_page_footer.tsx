@@ -33,7 +33,7 @@ interface Props {
   path: string;
 }
 
-export const PageFooter: FC<Props> = ({ path }) => {
+export const OverviewPageFooter: FC<Props> = ({ path }) => {
   const [defaultRoute, setDefaultRoute] = useUiSetting$<string>('defaultRoute');
   const {
     services: {

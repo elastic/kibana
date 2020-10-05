@@ -17,30 +17,5 @@
  * under the License.
  */
 
-import React from 'react';
-import { PageHeader } from './page_header';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-
-jest.mock('../../app_links', () => ({
-  RedirectAppLinks: jest.fn((element: JSX.Element) => element),
-}));
-
-jest.mock('../../context', () => ({
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      application: { capabilities: { navLinks: { management: true, dev_tools: true } } },
-      notifications: { toast: { addSuccess: jest.fn() } },
-    },
-  }),
-}));
-
-afterAll(() => jest.clearAllMocks());
-
-const mockTitle = 'Page Title';
-
-describe('PageHeader', () => {
-  test('render', () => {
-    const component = shallowWithIntl(<PageHeader title={mockTitle} />);
-    expect(component).toMatchSnapshot();
-  });
-});
+export * from './overview_page_footer';
+export * from './overview_page_header';
