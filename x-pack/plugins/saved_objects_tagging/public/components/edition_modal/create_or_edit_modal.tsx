@@ -23,8 +23,9 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { TagAttributes } from '../../../common/types';
+import { TagAttributes } from '../../../common';
 import { TagBadge } from '../../components';
 import { getRandomColor, TagValidation } from './utils';
 
@@ -49,7 +50,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
   const [validation, setValidation] = useState<TagValidation>({ valid: false });
 
   // we don't want this value to change when the user edit the name.
-  // eslint-disable-next-line
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const initialName = useMemo(() => tag.title, []);
 
   const setTitle = useMemo(() => setField('title'), [setField]);
@@ -97,7 +98,12 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
         <EuiForm data-test-subj="savedObjectEditForm" role="form">
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
             <EuiFlexItem>
-              <EuiFormRow fullWidth={true} label={'Name'}>
+              <EuiFormRow
+                fullWidth={true}
+                label={i18n.translate('xpack.savedObjectsTagging.tagAttributeLabels.name', {
+                  defaultMessage: 'Name',
+                })}
+              >
                 <EuiFieldText
                   value={tag.title}
                   onChange={(e) => setTitle(e.target.value)}
@@ -108,7 +114,9 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
             <EuiFlexItem>
               <EuiFormRow
                 fullWidth={true}
-                label={'Color'}
+                label={i18n.translate('xpack.savedObjectsTagging.tagAttributeLabels.color', {
+                  defaultMessage: 'Color',
+                })}
                 labelAppend={
                   <EuiButtonEmpty
                     onClick={() => setColor(getRandomColor())}
@@ -134,10 +142,15 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
           <EuiSpacer size="s" />
           <EuiFormRow
             fullWidth={true}
-            label={'Description'}
+            label={i18n.translate('xpack.savedObjectsTagging.tagAttributeLabels.description', {
+              defaultMessage: 'Description',
+            })}
             labelAppend={
               <EuiText size="xs" color="subdued">
-                Optional
+                <FormattedMessage
+                  id={'xpack.savedObjectsTagging.management.optionalFieldText'}
+                  defaultMessage={'Optional'}
+                />
               </EuiText>
             }
           >
@@ -158,7 +171,10 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
             <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="baseline">
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued">
-                  Preview
+                  <FormattedMessage
+                    id={'xpack.savedObjectsTagging.management.tagPreviewText'}
+                    defaultMessage={'Preview'}
+                  />
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>

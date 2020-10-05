@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TagAttributes } from '../../../common/types';
+import { TagAttributes } from '../../../common';
 
 export interface TagValidation {
   valid: boolean;

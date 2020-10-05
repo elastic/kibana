@@ -25,7 +25,7 @@ export class SavedObjectTaggingPlugin
     const kibanaSection = management.sections.section.kibana;
     kibanaSection.registerApp({
       id: tagManagementSectionId,
-      title: i18n.translate('xpack.tags.managementSectionLabel', {
+      title: i18n.translate('xpack.savedObjectsTagging.management.sectionLabel', {
         defaultMessage: 'Tags',
       }),
       order: 2,

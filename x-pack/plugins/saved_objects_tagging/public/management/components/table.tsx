@@ -7,6 +7,7 @@
 import React, { useRef, useEffect, FC } from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import { Action as EuiTableAction } from '@elastic/eui/src/components/basic_table/action_types';
+import { i18n } from '@kbn/i18n';
 import { TagsCapabilities, TagWithRelations } from '../../../common';
 import { TagBadge } from '../../components';
 
@@ -52,8 +53,15 @@ export const TagTable: FC<TagTableProps> = ({
   const actions: Array<EuiTableAction<TagWithRelations>> = [];
   if (capabilities.edit) {
     actions.push({
-      name: 'Edit',
-      description: 'Edit this tag',
+      name: i18n.translate('xpack.savedObjectsTagging.management.table.actions.edit.title', {
+        defaultMessage: 'Edit',
+      }),
+      description: i18n.translate(
+        'xpack.savedObjectsTagging.management.table.actions.edit.description',
+        {
+          defaultMessage: 'Edit this tag',
+        }
+      ),
       type: 'icon',
       icon: 'pencil',
       onClick: (object: TagWithRelations) => onEdit(object),
@@ -62,8 +70,15 @@ export const TagTable: FC<TagTableProps> = ({
   }
   if (capabilities.delete) {
     actions.push({
-      name: 'Delete',
-      description: 'Delete this tag',
+      name: i18n.translate('xpack.savedObjectsTagging.management.table.actions.delete.title', {
+        defaultMessage: 'Delete',
+      }),
+      description: i18n.translate(
+        'xpack.savedObjectsTagging.management.table.actions.delete.description',
+        {
+          defaultMessage: 'Delete this tag',
+        }
+      ),
       type: 'icon',
       icon: 'trash',
       onClick: (object: TagWithRelations) => onDelete(object),
@@ -74,7 +89,9 @@ export const TagTable: FC<TagTableProps> = ({
   const columns = [
     {
       field: 'name',
-      name: 'Name',
+      name: i18n.translate('xpack.savedObjectsTagging.management.table.columns.name', {
+        defaultMessage: 'Name',
+      }),
       sortable: (tag: TagWithRelations) => tag.title,
       'data-test-subj': 'tagsTableRowName',
       render: (name: string, tag: TagWithRelations) => {
@@ -83,14 +100,18 @@ export const TagTable: FC<TagTableProps> = ({
     },
     {
       field: 'description',
-      name: 'Description',
+      name: i18n.translate('xpack.savedObjectsTagging.management.table.columns.description', {
+        defaultMessage: 'Description',
+      }),
       sortable: true,
       'data-test-subj': 'tagsTableRowDescription',
     },
     ...(actions.length
       ? [
           {
-            name: 'Actions',
+            name: i18n.translate('xpack.savedObjectsTagging.management.table.columns.actions', {
+              defaultMessage: 'Actions',
+            }),
             width: '100px',
             actions,
           },

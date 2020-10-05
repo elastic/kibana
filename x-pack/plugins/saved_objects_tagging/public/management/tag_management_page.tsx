@@ -88,15 +88,35 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
 
   const deleteTag = useCallback(
     async (tag: TagWithRelations) => {
-      const confirmed = await overlays.openConfirm('Are you sure?', {
-        title: 'Delete tag',
-        confirmButtonText: 'Delete',
-        buttonColor: 'danger',
-      });
+      const confirmed = await overlays.openConfirm(
+        i18n.translate('xpack.savedObjectsTagging.modals.confirmDelete.text', {
+          defaultMessage: 'Are you sure you want to delete tag "{name}"?',
+          values: {
+            name: tag.title,
+          },
+        }),
+        {
+          title: i18n.translate('xpack.savedObjectsTagging.modals.confirmDelete.title', {
+            defaultMessage: 'Delete tag',
+          }),
+          confirmButtonText: i18n.translate(
+            'xpack.savedObjectsTagging.modals.confirmDelete.confirmButtonText',
+            {
+              defaultMessage: 'Delete',
+            }
+          ),
+          buttonColor: 'danger',
+        }
+      );
       if (confirmed) {
         await tagClient.delete(tag.id);
         notifications.toasts.addSuccess({
-          title: 'Deleted tag',
+          title: i18n.translate('xpack.savedObjectsTagging.notifications.deleteTagSuccessTitle', {
+            defaultMessage: 'Tag "{name}" was deleted.',
+            values: {
+              name: tag.title,
+            },
+          }),
         });
         fetchTags();
       }
