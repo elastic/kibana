@@ -15,13 +15,12 @@ import { inputsModel } from '../../common/store';
 import { useKibana } from '../../common/lib/kibana';
 import { createFilter } from '../../common/containers/helpers';
 import { DocValueFields } from '../../common/containers/query_template';
-import { generateTablePaginationOptions } from '../../common/components/paginated_table/helpers';
 import { timelineActions } from '../../timelines/store/timeline';
 import { detectionsTimelineIds, skipQueryForDetectionsPage } from './helpers';
 import { getInspectResponse } from '../../helpers';
 import {
   Direction,
-  PageInfoPaginated,
+  PaginationInputPaginated,
   TimelineEventsQueries,
   TimelineEventsAllStrategyResponse,
   TimelineEventsAllRequestOptions,
@@ -37,7 +36,7 @@ export interface TimelineArgs {
   id: string;
   inspect: InspectResponse;
   loadPage: LoadPage;
-  pageInfo: PageInfoPaginated;
+  pageInfo: Pick<PaginationInputPaginated, 'activePage' | 'querySize'>;
   refetch: inputsModel.Refetch;
   totalCount: number;
   updatedAt: number;
@@ -62,6 +61,10 @@ const getTimelineEvents = (timelineEdges: TimelineEdges[]): TimelineItem[] =>
   timelineEdges.map((e: TimelineEdges) => e.node);
 
 const ID = 'timelineEventsQuery';
+const initSortDefault = {
+  field: '@timestamp',
+  direction: Direction.asc,
+};
 
 export const useTimelineEvents = ({
   docValueFields,
@@ -72,10 +75,7 @@ export const useTimelineEvents = ({
   filterQuery,
   startDate,
   limit,
-  sort = {
-    field: '@timestamp',
-    direction: Direction.asc,
-  },
+  sort = initSortDefault,
   skip = false,
 }: UseTimelineEventsProps): [boolean, TimelineArgs] => {
   const dispatch = useDispatch();
@@ -96,7 +96,10 @@ export const useTimelineEvents = ({
             from: startDate,
             to: endDate,
           },
-          pagination: generateTablePaginationOptions(activePage, limit),
+          pagination: {
+            activePage,
+            querySize: limit,
+          },
           sort,
           defaultIndex: indexNames,
           docValueFields: docValueFields ?? [],
@@ -130,8 +133,7 @@ export const useTimelineEvents = ({
     totalCount: -1,
     pageInfo: {
       activePage: 0,
-      fakeTotalCount: 0,
-      showMorePagesIndicator: false,
+      querySize: 0,
     },
     events: [],
     loadPage: wrappedLoadPage,
@@ -205,7 +207,25 @@ export const useTimelineEvents = ({
     }
 
     setTimelineRequest((prevRequest) => {
-      const myRequest = {
+      const prevSearchParameters = {
+        filterQuery: prevRequest?.filterQuery ?? '',
+        timerange: prevRequest?.timerange ?? {},
+        querySize: prevRequest?.pagination.querySize ?? 0,
+        sort: prevRequest?.sort ?? initSortDefault,
+      };
+
+      const currentSearchParameters = {
+        filterQuery: createFilter(filterQuery),
+        timerange: {
+          interval: '12h',
+          from: startDate,
+          to: endDate,
+        },
+        querySize: limit,
+        sort,
+      };
+
+      const currentRequest = {
         fields: [],
         fieldRequested: fields,
         filterQuery: createFilter(filterQuery),
@@ -215,18 +235,22 @@ export const useTimelineEvents = ({
           from: startDate,
           to: endDate,
         },
-        pagination: generateTablePaginationOptions(activePage, limit),
+        pagination: {
+          activePage: deepEqual(prevSearchParameters, currentSearchParameters) ? activePage : 0,
+          querySize: limit,
+        },
         sort,
         defaultIndex: indexNames,
         docValueFields: docValueFields ?? [],
         factoryQueryType: TimelineEventsQueries.all,
       };
+
       if (
         !skip &&
         !skipQueryForDetectionsPage(id, indexNames) &&
-        !deepEqual(prevRequest, myRequest)
+        !deepEqual(prevRequest, currentRequest)
       ) {
-        return myRequest;
+        return currentRequest;
       }
       return prevRequest;
     });

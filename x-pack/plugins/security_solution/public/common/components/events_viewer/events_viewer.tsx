@@ -307,8 +307,7 @@ const EventsViewerComponent: React.FC<Props> = ({
                     itemsPerPageOptions={itemsPerPageOptions}
                     onChangeItemsPerPage={onChangeItemsPerPage}
                     onChangePage={loadPage}
-                    serverSideEventCount={totalCountMinusDeleted}
-                    totalCount={pageInfo.fakeTotalCount}
+                    totalCount={totalCountMinusDeleted}
                   />
                 )
               }

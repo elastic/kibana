@@ -222,7 +222,6 @@ interface FooterProps {
   itemsPerPageOptions: number[];
   onChangeItemsPerPage: OnChangeItemsPerPage;
   onChangePage: OnChangePage;
-  serverSideEventCount: number;
   totalCount: number;
 }
 
@@ -239,7 +238,6 @@ export const FooterComponent = ({
   itemsPerPageOptions,
   onChangeItemsPerPage,
   onChangePage,
-  serverSideEventCount,
   totalCount,
 }: FooterProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -339,7 +337,7 @@ export const FooterComponent = ({
               items={rowItems}
               itemsCount={itemsCount}
               onClick={onButtonClick}
-              serverSideEventCount={serverSideEventCount}
+              serverSideEventCount={totalCount}
             />
           </EuiFlexGroup>
         </EuiFlexItem>
