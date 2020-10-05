@@ -20,10 +20,14 @@ import {
 
 import { cloneDeep } from 'lodash';
 import { useUpdateEffect } from 'react-use';
+import { AggName } from '../../../../../../common/types/aggregations';
 import { dictionaryToArray } from '../../../../../../common/types/common';
+import {
+  PivotSupportedAggs,
+  PIVOT_SUPPORTED_AGGS,
+} from '../../../../../../common/types/pivot_aggs';
 
 import {
-  AggName,
   isAggName,
   isPivotAggsConfigPercentiles,
   isPivotAggsConfigWithUiSupport,
@@ -31,9 +35,8 @@ import {
   PERCENTILES_AGG_DEFAULT_PERCENTS,
   PivotAggsConfig,
   PivotAggsConfigWithUiSupportDict,
-  PIVOT_SUPPORTED_AGGS,
 } from '../../../../common';
-import { isPivotAggsWithExtendedForm, PivotSupportedAggs } from '../../../../common/pivot_aggs';
+import { isPivotAggsWithExtendedForm } from '../../../../common/pivot_aggs';
 import { getAggFormConfig } from '../step_define/common/get_agg_form_config';
 
 interface Props {

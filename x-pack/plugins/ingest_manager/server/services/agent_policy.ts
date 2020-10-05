@@ -21,18 +21,19 @@ import {
   ListWithKuery,
 } from '../types';
 import { DeleteAgentPolicyResponse, storedPackagePoliciesToAgentInputs } from '../../common';
-import { listAgents } from './agents';
+import { createAgentPolicyAction, listAgents } from './agents';
 import { packagePolicyService } from './package_policy';
 import { outputService } from './output';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 import { getSettings } from './settings';
+import { normalizeKuery } from './saved_object';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
 class AgentPolicyService {
   private triggerAgentPolicyUpdatedEvent = async (
     soClient: SavedObjectsClientContract,
-    action: string,
+    action: 'created' | 'updated' | 'deleted',
     agentPolicyId: string
   ) => {
     return agentPolicyUpdateEventHandler(soClient, action, agentPolicyId);
@@ -66,6 +67,10 @@ class AgentPolicyService {
       updated_at: new Date().toISOString(),
       updated_by: user ? user.username : 'system',
     });
+
+    if (options.bumpRevision) {
+      await this.triggerAgentPolicyUpdatedEvent(soClient, 'updated', id);
+    }
 
     return (await this.get(soClient, id)) as AgentPolicy;
   }
@@ -162,13 +167,7 @@ class AgentPolicyService {
       sortOrder,
       page,
       perPage,
-      // To ensure users don't need to know about SO data structure...
-      filter: kuery
-        ? kuery.replace(
-            new RegExp(`${SAVED_OBJECT_TYPE}\.`, 'g'),
-            `${SAVED_OBJECT_TYPE}.attributes.`
-          )
-        : undefined,
+      filter: kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined,
     });
 
     const agentPolicies = await Promise.all(
@@ -259,7 +258,11 @@ class AgentPolicyService {
     id: string,
     options?: { user?: AuthenticatedUser }
   ): Promise<AgentPolicy> {
-    return this._update(soClient, id, {}, options?.user);
+    const res = await this._update(soClient, id, {}, options?.user);
+
+    await this.triggerAgentPolicyUpdatedEvent(soClient, 'updated', id);
+
+    return res;
   }
   public async bumpAllAgentPolicies(
     soClient: SavedObjectsClientContract,
@@ -278,7 +281,15 @@ class AgentPolicyService {
       };
       return policy;
     });
-    return soClient.bulkUpdate<AgentPolicySOAttributes>(bumpedPolicies);
+    const res = await soClient.bulkUpdate<AgentPolicySOAttributes>(bumpedPolicies);
+
+    await Promise.all(
+      currentPolicies.saved_objects.map((policy) =>
+        this.triggerAgentPolicyUpdatedEvent(soClient, 'updated', policy.id)
+      )
+    );
+
+    return res;
   }
 
   public async assignPackagePolicies(
@@ -381,6 +392,32 @@ class AgentPolicyService {
     return {
       id,
     };
+  }
+
+  public async createFleetPolicyChangeAction(
+    soClient: SavedObjectsClientContract,
+    agentPolicyId: string
+  ) {
+    const policy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId);
+    if (!policy || !policy.revision) {
+      return;
+    }
+    const packages = policy.inputs.reduce<string[]>((acc, input) => {
+      const packageName = input.meta?.package?.name;
+      if (packageName && acc.indexOf(packageName) < 0) {
+        acc.push(packageName);
+      }
+      return acc;
+    }, []);
+
+    await createAgentPolicyAction(soClient, {
+      type: 'POLICY_CHANGE',
+      data: { policy },
+      ack_data: { packages },
+      created_at: new Date().toISOString(),
+      policy_id: policy.id,
+      policy_revision: policy.revision,
+    });
   }
 
   public async getFullAgentPolicy(

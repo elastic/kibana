@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import './config_panel.scss';
 
 import React, { useMemo, memo } from 'react';
 import { EuiFlexItem, EuiToolTip, EuiButton, EuiForm } from '@elastic/eui';
@@ -120,6 +121,9 @@ function LayerPanels(
         <EuiFlexItem grow={true}>
           <EuiToolTip
             className="eui-fullWidth"
+            title={i18n.translate('xpack.lens.xyChart.addLayer', {
+              defaultMessage: 'Add a layer',
+            })}
             content={i18n.translate('xpack.lens.xyChart.addLayerTooltip', {
               defaultMessage:
                 'Use multiple layers to combine chart types or visualize different index patterns.',
@@ -132,9 +136,6 @@ function LayerPanels(
               size="s"
               data-test-subj="lnsLayerAddButton"
               aria-label={i18n.translate('xpack.lens.xyChart.addLayerButton', {
-                defaultMessage: 'Add layer',
-              })}
-              title={i18n.translate('xpack.lens.xyChart.addLayerButton', {
                 defaultMessage: 'Add layer',
               })}
               onClick={() => {

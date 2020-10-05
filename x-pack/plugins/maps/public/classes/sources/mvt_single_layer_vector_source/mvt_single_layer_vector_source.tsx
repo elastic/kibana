@@ -179,7 +179,7 @@ export class MVTSingleLayerVectorSource
 
   getBoundsForFilters(
     boundsFilters: BoundsFilters,
-    registerCancelCallback: (requestToken: symbol, callback: () => void) => void
+    registerCancelCallback: (callback: () => void) => void
   ): MapExtent | null {
     return null;
   }
@@ -192,7 +192,19 @@ export class MVTSingleLayerVectorSource
     return false;
   }
 
-  async filterAndFormatPropertiesToHtml(
+  isBoundsAware() {
+    return false;
+  }
+
+  getSourceTooltipContent() {
+    return { tooltipContent: null, areResultsTrimmed: false };
+  }
+
+  async getLeftJoinFields() {
+    return [];
+  }
+
+  async getTooltipProperties(
     properties: GeoJsonProperties,
     featureId?: string | number
   ): Promise<ITooltipProperty[]> {

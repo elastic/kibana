@@ -154,12 +154,6 @@ module.exports = function () {
       args: ['scripts/test_hardening.js'],
     }),
 
-    test_package_safer_lodash_set: scriptWithGithubChecks({
-      title: '@elastic/safer-lodash-set tests',
-      cmd: YARN,
-      args: ['--cwd', 'packages/elastic-safer-lodash-set', 'test'],
-    }),
-
     apiIntegrationTests: scriptWithGithubChecks({
       title: 'API integration tests',
       cmd: NODE,
@@ -246,10 +240,6 @@ module.exports = function () {
       args: ['scripts/check_licenses', '--dev'],
     }),
 
-    verifyDependencyVersions: gruntTaskWithGithubChecks(
-      'Verify dependency versions',
-      'verifyDependencyVersions'
-    ),
     test_jest: gruntTaskWithGithubChecks('Jest tests', 'test:jest'),
     test_jest_integration: gruntTaskWithGithubChecks(
       'Jest integration tests',

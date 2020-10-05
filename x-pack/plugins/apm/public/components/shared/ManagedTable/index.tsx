@@ -33,7 +33,20 @@ interface Props<T> {
   hidePerPageOptions?: boolean;
   noItemsMessage?: React.ReactNode;
   sortItems?: boolean;
+  sortFn?: (
+    items: T[],
+    sortField: string,
+    sortDirection: 'asc' | 'desc'
+  ) => T[];
   pagination?: boolean;
+}
+
+function defaultSortFn<T extends any>(
+  items: T[],
+  sortField: string,
+  sortDirection: 'asc' | 'desc'
+) {
+  return orderBy(items, sortField, sortDirection);
 }
 
 function UnoptimizedManagedTable<T>(props: Props<T>) {
@@ -48,6 +61,7 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
     hidePerPageOptions = true,
     noItemsMessage,
     sortItems = true,
+    sortFn = defaultSortFn,
     pagination = true,
   } = props;
 
@@ -62,11 +76,11 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
 
   const renderedItems = useMemo(() => {
     const sortedItems = sortItems
-      ? orderBy(items, sortField, sortDirection as 'asc' | 'desc')
+      ? sortFn(items, sortField, sortDirection as 'asc' | 'desc')
       : items;
 
     return sortedItems.slice(page * pageSize, (page + 1) * pageSize);
-  }, [page, pageSize, sortField, sortDirection, items, sortItems]);
+  }, [page, pageSize, sortField, sortDirection, items, sortItems, sortFn]);
 
   const sort = useMemo(() => {
     return {

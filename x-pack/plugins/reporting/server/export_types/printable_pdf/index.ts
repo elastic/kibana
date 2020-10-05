@@ -12,23 +12,21 @@ import {
   LICENSE_TYPE_TRIAL,
   PDF_JOB_TYPE as jobType,
 } from '../../../common/constants';
-import { CreateJobFn, WorkerExecuteFn, ExportTypeDefinition } from '../../types';
-import { scheduleTaskFnFactory } from './create_job';
+import { CreateJobFn, ExportTypeDefinition, RunTaskFn } from '../../types';
+import { createJobFnFactory } from './create_job';
 import { runTaskFnFactory } from './execute_job';
 import { metadata } from './metadata';
-import { JobParamsPDF, ScheduledTaskParamsPDF } from './types';
+import { JobParamsPDF, TaskPayloadPDF } from './types';
 
 export const getExportType = (): ExportTypeDefinition<
-  JobParamsPDF,
   CreateJobFn<JobParamsPDF>,
-  ScheduledTaskParamsPDF,
-  WorkerExecuteFn<ScheduledTaskParamsPDF>
+  RunTaskFn<TaskPayloadPDF>
 > => ({
   ...metadata,
   jobType,
   jobContentEncoding: 'base64',
   jobContentExtension: 'pdf',
-  scheduleTaskFnFactory,
+  createJobFnFactory,
   runTaskFnFactory,
   validLicenses: [
     LICENSE_TYPE_TRIAL,

@@ -10,6 +10,9 @@
 readonly links: {
         readonly dashboard: {
             readonly drilldowns: string;
+            readonly drilldownsTriggerPicker: string;
+            readonly urlDrilldownTemplateSyntax: string;
+            readonly urlDrilldownVariables: string;
         };
         readonly filebeat: {
             readonly base: string;
@@ -88,6 +91,7 @@ readonly links: {
             readonly gettingStarted: string;
         };
         readonly query: {
+            readonly eql: string;
             readonly luceneQuerySyntax: string;
             readonly queryDsl: string;
             readonly kueryQuerySyntax: string;

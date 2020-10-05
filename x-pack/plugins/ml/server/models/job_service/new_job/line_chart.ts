@@ -89,7 +89,7 @@ function processSearchResults(resp: any, fields: string[]): ProcessedResults {
   return {
     success: true,
     results: tempResults,
-    totalResults: resp.hits.total,
+    totalResults: resp.hits.total.value,
   };
 }
 
@@ -107,14 +107,14 @@ function getSearchJsonFromConfig(
   const json = {
     index: indexPatternTitle,
     size: 0,
-    rest_total_hits_as_int: true,
+    track_total_hits: true,
     body: {
       query: {},
       aggs: {
         times: {
           date_histogram: {
             field: timeField,
-            interval: intervalMs,
+            fixed_interval: `${intervalMs}ms`,
             min_doc_count: 0,
             extended_bounds: {
               min: start,

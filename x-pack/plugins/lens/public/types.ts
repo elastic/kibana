@@ -57,8 +57,12 @@ export interface EditorFrameInstance {
 
 export interface EditorFrameSetup {
   // generic type on the API functions to pull the "unknown vs. specific type" error into the implementation
-  registerDatasource: <T, P>(datasource: Datasource<T, P> | Promise<Datasource<T, P>>) => void;
-  registerVisualization: <T>(visualization: Visualization<T> | Promise<Visualization<T>>) => void;
+  registerDatasource: <T, P>(
+    datasource: Datasource<T, P> | (() => Promise<Datasource<T, P>>)
+  ) => void;
+  registerVisualization: <T>(
+    visualization: Visualization<T> | (() => Promise<Visualization<T>>)
+  ) => void;
 }
 
 export interface EditorFrameStart {
@@ -157,7 +161,7 @@ export interface Datasource<T = unknown, P = unknown> {
   renderDimensionEditor: (domElement: Element, props: DatasourceDimensionEditorProps<T>) => void;
   renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps<T>) => void;
   canHandleDrop: (props: DatasourceDimensionDropProps<T>) => boolean;
-  onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => boolean;
+  onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => false | true | { deleted: string };
 
   toExpression: (state: T, layerId: string) => Ast | string | null;
 
@@ -221,13 +225,29 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
 
 export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T> & {
   dragDropContext: DragContextState;
-  togglePopover: () => void;
+  onClick: () => void;
 };
 
 export interface DatasourceLayerPanelProps<T> {
   layerId: string;
   state: T;
   setState: StateSetter<T>;
+}
+
+export interface DraggedOperation {
+  layerId: string;
+  groupId: string;
+  columnId: string;
+}
+
+export function isDraggedOperation(
+  operationCandidate: unknown
+): operationCandidate is DraggedOperation {
+  return (
+    typeof operationCandidate === 'object' &&
+    operationCandidate !== null &&
+    'columnId' in operationCandidate
+  );
 }
 
 export type DatasourceDimensionDropProps<T> = SharedDimensionProps & {
@@ -401,8 +421,7 @@ export interface FramePublicAPI {
 
 export interface VisualizationType {
   id: string;
-  icon?: IconType;
-  largeIcon?: IconType;
+  icon: IconType;
   label: string;
 }
 
@@ -500,7 +519,8 @@ export interface Visualization<T = unknown> {
 
   toExpression: (
     state: T,
-    datasourceLayers: Record<string, DatasourcePublicAPI>
+    datasourceLayers: Record<string, DatasourcePublicAPI>,
+    attributes?: Partial<{ title: string; description: string }>
   ) => Ast | string | null;
   /**
    * Expression to render a preview version of the chart in very constrained space.

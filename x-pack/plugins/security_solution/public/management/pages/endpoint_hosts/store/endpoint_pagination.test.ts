@@ -26,6 +26,10 @@ import {
 } from '../../../../common/store/test_utils';
 import { getEndpointListPath } from '../../../common/routing';
 
+jest.mock('../../policy/store/policy_list/services/ingest', () => ({
+  sendGetAgentPolicyList: () => Promise.resolve({ items: [] }),
+  sendGetEndpointSecurityPackage: () => Promise.resolve({}),
+}));
 describe('endpoint list pagination: ', () => {
   let fakeCoreStart: jest.Mocked<CoreStart>;
   let depsStart: DepsStartMock;
@@ -77,6 +81,7 @@ describe('endpoint list pagination: ', () => {
       expect(fakeHttpServices.post).toHaveBeenCalledWith('/api/endpoint/metadata', {
         body: JSON.stringify({
           paging_properties: [{ page_index: '0' }, { page_size: '10' }],
+          filters: { kql: '' },
         }),
       });
     });

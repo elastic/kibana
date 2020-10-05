@@ -20,7 +20,7 @@ export const PolicyTable: React.FunctionComponent<Props & RouteComponentProps> =
   navigateToApp,
   history,
 }) => {
-  const { data: policies, isLoading, error, sendRequest } = useLoadPoliciesList(true);
+  const { data: policies, isLoading, error, resendRequest } = useLoadPoliciesList(true);
 
   if (isLoading) {
     return (
@@ -53,7 +53,7 @@ export const PolicyTable: React.FunctionComponent<Props & RouteComponentProps> =
           </p>
         }
         actions={
-          <EuiButton onClick={sendRequest} iconType="refresh" color="danger">
+          <EuiButton onClick={resendRequest} iconType="refresh" color="danger">
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.policyTable.policiesReloadButton"
               defaultMessage="Try again"
@@ -69,7 +69,7 @@ export const PolicyTable: React.FunctionComponent<Props & RouteComponentProps> =
       policies={policies || []}
       history={history}
       navigateToApp={navigateToApp}
-      updatePolicies={sendRequest}
+      updatePolicies={resendRequest}
     />
   );
 };

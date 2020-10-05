@@ -5,7 +5,7 @@
  */
 
 import { merge } from 'lodash';
-import { Server } from 'hapi';
+
 import { SavedObjectsClient } from 'src/core/server';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
 import {
@@ -31,10 +31,6 @@ export interface ApmIndicesConfig {
 }
 
 export type ApmIndicesName = keyof ApmIndicesConfig;
-
-export type ScopedSavedObjectsClient = ReturnType<
-  Server['savedObjects']['getScopedSavedObjectsClient']
->;
 
 async function getApmIndicesSavedObject(
   savedObjectsClient: ISavedObjectsClient

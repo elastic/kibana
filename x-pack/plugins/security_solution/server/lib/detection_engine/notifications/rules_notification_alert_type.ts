@@ -14,7 +14,7 @@ import { RuleAlertAttributes } from '../signals/types';
 import { siemRuleActionGroups } from '../signals/siem_rule_action_groups';
 import { scheduleNotificationActions } from './schedule_notification_actions';
 import { getNotificationResultsLink } from './utils';
-import { parseScheduleDates } from '../../../../common/detection_engine/utils';
+import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 
 export const rulesNotificationAlertType = ({
   logger,

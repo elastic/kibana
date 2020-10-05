@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 import { DocLinksService, DocLinksStart } from './doc_links_service';
 

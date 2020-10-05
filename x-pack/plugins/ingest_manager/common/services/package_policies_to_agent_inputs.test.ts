@@ -117,6 +117,7 @@ describe('Ingest Manager - storedPackagePoliciesToAgentInputs', () => {
       {
         id: 'some-uuid',
         name: 'mock-package-policy',
+        revision: 1,
         type: 'test-logs',
         data_stream: { namespace: 'default' },
         use_output: 'default',
@@ -159,6 +160,7 @@ describe('Ingest Manager - storedPackagePoliciesToAgentInputs', () => {
       {
         id: 'some-uuid',
         name: 'mock-package-policy',
+        revision: 1,
         type: 'test-logs',
         data_stream: { namespace: 'default' },
         use_output: 'default',

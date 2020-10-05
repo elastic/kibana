@@ -17,6 +17,7 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
           aria-controls="accordion-variables"
           aria-expanded={false}
           className="euiAccordion__button"
+          id="generated-id"
           onClick={[Function]}
           type="button"
         >

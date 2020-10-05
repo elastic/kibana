@@ -8,14 +8,20 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { ServiceNodeMetrics } from '.';
 import { MockApmPluginContextWrapper } from '../../../context/ApmPluginContext/MockApmPluginContext';
+import { RouteComponentProps } from 'react-router-dom';
 
 describe('ServiceNodeMetrics', () => {
   describe('render', () => {
     it('renders', () => {
+      const props = ({} as unknown) as RouteComponentProps<{
+        serviceName: string;
+        serviceNodeName: string;
+      }>;
+
       expect(() =>
         shallow(
           <MockApmPluginContextWrapper>
-            <ServiceNodeMetrics />
+            <ServiceNodeMetrics {...props} />
           </MockApmPluginContextWrapper>
         )
       ).not.toThrowError();

@@ -24,8 +24,9 @@ import { endpointMiddlewareFactory } from './middleware';
 import { getEndpointListPath } from '../../../common/routing';
 
 jest.mock('../../policy/store/policy_list/services/ingest', () => ({
-  sendGetEndpointSecurityPackage: () => Promise.resolve({}),
   sendGetAgentConfigList: () => Promise.resolve({ items: [] }),
+  sendGetAgentPolicyList: () => Promise.resolve({ items: [] }),
+  sendGetEndpointSecurityPackage: () => Promise.resolve({}),
 }));
 
 describe('endpoint list middleware', () => {
@@ -72,6 +73,7 @@ describe('endpoint list middleware', () => {
     expect(fakeHttpServices.post).toHaveBeenCalledWith('/api/endpoint/metadata', {
       body: JSON.stringify({
         paging_properties: [{ page_index: '0' }, { page_size: '10' }],
+        filters: { kql: '' },
       }),
     });
     expect(listData(getState())).toEqual(apiResponse.hosts);
@@ -100,6 +102,7 @@ describe('endpoint list middleware', () => {
     expect(fakeHttpServices.post).toHaveBeenCalledWith('/api/endpoint/metadata', {
       body: JSON.stringify({
         paging_properties: [{ page_index: '0' }, { page_size: '10' }],
+        filters: { kql: '' },
       }),
     });
     expect(listData(getState())).toEqual(apiResponse.hosts);

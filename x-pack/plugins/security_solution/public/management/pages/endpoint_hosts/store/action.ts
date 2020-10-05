@@ -13,6 +13,7 @@ import { ServerApiError } from '../../../../common/types';
 import { GetPolicyListResponse } from '../../policy/types';
 import { GetPackagesResponse } from '../../../../../../ingest_manager/common';
 import { EndpointState } from '../types';
+import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 
 interface ServerReturnedEndpointList {
   type: 'serverReturnedEndpointList';
@@ -81,11 +82,25 @@ interface ServerReturnedEndpointNonExistingPolicies {
   payload: EndpointState['nonExistingPolicies'];
 }
 
+interface ServerReturnedEndpointAgentPolicies {
+  type: 'serverReturnedEndpointAgentPolicies';
+  payload: EndpointState['agentPolicies'];
+}
+
 interface ServerReturnedEndpointExistValue {
   type: 'serverReturnedEndpointExistValue';
   payload: boolean;
 }
 
+interface ServerReturnedMetadataPatterns {
+  type: 'serverReturnedMetadataPatterns';
+  payload: IIndexPattern[];
+}
+
+interface ServerFailedToReturnMetadataPatterns {
+  type: 'serverFailedToReturnMetadataPatterns';
+  payload: ServerApiError;
+}
 interface UserUpdatedEndpointListRefreshOptions {
   type: 'userUpdatedEndpointListRefreshOptions';
   payload: {
@@ -96,6 +111,26 @@ interface UserUpdatedEndpointListRefreshOptions {
 
 interface AppRequestedEndpointList {
   type: 'appRequestedEndpointList';
+}
+
+interface ServerReturnedAgenstWithEndpointsTotal {
+  type: 'serverReturnedAgenstWithEndpointsTotal';
+  payload: number;
+}
+
+interface ServerFailedToReturnAgenstWithEndpointsTotal {
+  type: 'serverFailedToReturnAgenstWithEndpointsTotal';
+  payload: ServerApiError;
+}
+
+interface ServerReturnedEndpointsTotal {
+  type: 'serverReturnedEndpointsTotal';
+  payload: number;
+}
+
+interface ServerFailedToReturnEndpointsTotal {
+  type: 'serverFailedToReturnEndpointsTotal';
+  payload: ServerApiError;
 }
 
 export type EndpointAction =
@@ -112,6 +147,13 @@ export type EndpointAction =
   | ServerReturnedEndpointExistValue
   | ServerCancelledPolicyItemsLoading
   | ServerReturnedEndpointPackageInfo
+  | ServerReturnedMetadataPatterns
+  | ServerFailedToReturnMetadataPatterns
   | AppRequestedEndpointList
   | ServerReturnedEndpointNonExistingPolicies
-  | UserUpdatedEndpointListRefreshOptions;
+  | ServerReturnedAgenstWithEndpointsTotal
+  | ServerReturnedEndpointAgentPolicies
+  | UserUpdatedEndpointListRefreshOptions
+  | ServerReturnedEndpointsTotal
+  | ServerFailedToReturnAgenstWithEndpointsTotal
+  | ServerFailedToReturnEndpointsTotal;

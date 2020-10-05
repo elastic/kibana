@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { sortBy } from 'lodash';
 
 import { AppNavLinkStatus, DEFAULT_APP_CATEGORIES } from '../../../core/public';
-import { KibanaLegacySetup } from '../../kibana_legacy/public';
+import { UrlForwardingSetup } from '../../url_forwarding/public';
 import { CreateDevToolArgs, DevToolApp, createDevToolApp } from './dev_tool';
 
 import './index.scss';
@@ -51,7 +51,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
     return sortBy([...this.devTools.values()], 'order');
   }
 
-  public setup(coreSetup: CoreSetup, { kibanaLegacy }: { kibanaLegacy: KibanaLegacySetup }) {
+  public setup(coreSetup: CoreSetup, { urlForwarding }: { urlForwarding: UrlForwardingSetup }) {
     const { application: applicationSetup, getStartServices } = coreSetup;
 
     applicationSetup.register({
@@ -60,7 +60,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
         defaultMessage: 'Dev Tools',
       }),
       updater$: this.appStateUpdater,
-      euiIconType: 'devToolsApp',
+      euiIconType: 'logoElastic',
       order: 9010,
       category: DEFAULT_APP_CATEGORIES.management,
       mount: async (params: AppMountParameters) => {
@@ -75,7 +75,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
       },
     });
 
-    kibanaLegacy.forwardApp('dev_tools', 'dev_tools');
+    urlForwarding.forwardApp('dev_tools', 'dev_tools');
 
     return {
       register: (devToolArgs: CreateDevToolArgs) => {

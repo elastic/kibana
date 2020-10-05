@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getErrorMessage } from '../../../../common/util/errors';
+import type { SearchResponse7 } from '../../../../common/types/es_client';
+import { extractErrorMessage } from '../../../../common/util/errors';
 
-import { EsSorting, SearchResponse7, UseDataGridReturnType } from '../../components/data_grid';
+import { EsSorting, UseDataGridReturnType, getProcessedFields } from '../../components/data_grid';
 import { ml } from '../../services/ml_api_service';
 
 import { isKeywordAndTextType } from '../common/fields';
@@ -46,9 +47,12 @@ export const getIndexData = async (
         }, {} as EsSorting);
 
       const { pageIndex, pageSize } = pagination;
+      // TODO: remove results_field from `fields` when possible
       const resp: SearchResponse7 = await ml.esSearch({
         index: jobConfig.dest.index,
         body: {
+          fields: ['*'],
+          _source: jobConfig.dest.results_field,
           query: searchQuery,
           from: pageIndex * pageSize,
           size: pageSize,
@@ -57,12 +61,15 @@ export const getIndexData = async (
       });
 
       setRowCount(resp.hits.total.value);
+      const docs = resp.hits.hits.map((d) => ({
+        ...getProcessedFields(d.fields),
+        [jobConfig.dest.results_field]: d._source[jobConfig.dest.results_field],
+      }));
 
-      const docs = resp.hits.hits.map((d) => d._source);
       setTableItems(docs);
       setStatus(INDEX_STATUS.LOADED);
     } catch (e) {
-      setErrorMessage(getErrorMessage(e));
+      setErrorMessage(extractErrorMessage(e));
       setStatus(INDEX_STATUS.ERROR);
     }
   }

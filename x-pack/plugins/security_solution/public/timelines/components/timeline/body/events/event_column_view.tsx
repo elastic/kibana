@@ -6,9 +6,10 @@
 
 import React, { useCallback, useMemo } from 'react';
 import uuid from 'uuid';
-import { useSelector, shallowEqual } from 'react-redux';
 
-import { TimelineNonEcsData, Ecs } from '../../../../../graphql/types';
+import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
+import { Ecs } from '../../../../../../common/ecs';
+import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { Note } from '../../../../../common/lib/note';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import { AssociateNote, UpdateNote } from '../../../notes/helpers';
@@ -27,7 +28,6 @@ import { AlertContextMenu } from '../../../../../detections/components/alerts_ta
 import { InvestigateInTimelineAction } from '../../../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
 import { AddEventNoteAction } from '../actions/add_note_icon_item';
 import { PinEventAction } from '../actions/pin_event_action';
-import { StoreState } from '../../../../../common/store/types';
 import { inputsModel } from '../../../../../common/store';
 import { TimelineId } from '../../../../../../common/types/timeline';
 
@@ -95,10 +95,9 @@ export const EventColumnView = React.memo<Props>(
     toggleShowNotes,
     updateNote,
   }) => {
-    const { timelineType, status } = useSelector<StoreState, TimelineModel>(
-      (state) => state.timeline.timelineById[timelineId],
-      shallowEqual
-    );
+    const { eventType: timelineEventType, timelineType, status } = useShallowEqualSelector<
+      TimelineModel
+    >((state) => state.timeline.timelineById[timelineId]);
 
     const handlePinClicked = useCallback(
       () =>
@@ -152,14 +151,17 @@ export const EventColumnView = React.memo<Props>(
               />,
             ]
           : []),
-        <AlertContextMenu
-          key="alert-context-menu"
-          ecsRowData={ecsData}
-          nonEcsRowData={data}
-          timelineId={timelineId}
-          disabled={eventType !== 'signal'}
-          refetch={refetch}
-        />,
+        ...(timelineEventType !== 'raw'
+          ? [
+              <AlertContextMenu
+                key="alert-context-menu"
+                ecsRowData={ecsData}
+                timelineId={timelineId}
+                disabled={eventType !== 'signal'}
+                refetch={refetch}
+              />,
+            ]
+          : []),
       ],
       [
         associateNote,
@@ -176,6 +178,7 @@ export const EventColumnView = React.memo<Props>(
         showNotes,
         status,
         timelineId,
+        timelineEventType,
         timelineType,
         toggleShowNotes,
         updateNote,

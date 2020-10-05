@@ -9,15 +9,65 @@ import {
   SavedObjectsServiceStart,
   SavedObjectsClientContract,
 } from 'src/core/server';
-import { AgentService, IngestManagerStartContract } from '../../../ingest_manager/server';
+import {
+  AgentService,
+  IngestManagerStartContract,
+  PackageService,
+} from '../../../ingest_manager/server';
 import { getPackagePolicyCreateCallback } from './ingest_integration';
 import { ManifestManager } from './services/artifacts';
-import { ExceptionListClient } from '../../../lists/server';
+import { MetadataQueryStrategy } from './types';
+import { MetadataQueryStrategyVersions } from '../../common/endpoint/types';
+import {
+  metadataQueryStrategyV1,
+  metadataQueryStrategyV2,
+} from './routes/metadata/support/query_strategies';
+import { ElasticsearchAssetType } from '../../../ingest_manager/common/types/models';
+import { metadataTransformPrefix } from '../../common/endpoint/constants';
+
+export interface MetadataService {
+  queryStrategy(
+    savedObjectsClient: SavedObjectsClientContract,
+    version?: MetadataQueryStrategyVersions
+  ): Promise<MetadataQueryStrategy>;
+}
+
+export const createMetadataService = (packageService: PackageService): MetadataService => {
+  return {
+    async queryStrategy(
+      savedObjectsClient: SavedObjectsClientContract,
+      version?: MetadataQueryStrategyVersions
+    ): Promise<MetadataQueryStrategy> {
+      if (version === MetadataQueryStrategyVersions.VERSION_1) {
+        return metadataQueryStrategyV1();
+      }
+      if (!packageService) {
+        throw new Error('package service is uninitialized');
+      }
+
+      if (version === MetadataQueryStrategyVersions.VERSION_2 || !version) {
+        const assets = await packageService.getInstalledEsAssetReferences(
+          savedObjectsClient,
+          'endpoint'
+        );
+        const expectedTransformAssets = assets.filter(
+          (ref) =>
+            ref.type === ElasticsearchAssetType.transform &&
+            ref.id.startsWith(metadataTransformPrefix)
+        );
+        if (expectedTransformAssets && expectedTransformAssets.length === 1) {
+          return metadataQueryStrategyV2();
+        }
+        return metadataQueryStrategyV1();
+      }
+      return metadataQueryStrategyV1();
+    },
+  };
+};
 
 export type EndpointAppContextServiceStartContract = Partial<
-  Pick<IngestManagerStartContract, 'agentService'>
+  Pick<IngestManagerStartContract, 'agentService' | 'packageService'>
 > & {
-  exceptionsListService: ExceptionListClient;
   logger: Logger;
   manifestManager?: ManifestManager;
   registerIngestCallback?: IngestManagerStartContract['registerExternalCallback'];
@@ -32,13 +82,13 @@ export class EndpointAppContextService {
   private agentService: AgentService | undefined;
   private manifestManager: ManifestManager | undefined;
   private savedObjectsStart: SavedObjectsServiceStart | undefined;
-  private exceptionsListService: ExceptionListClient | undefined;
+  private metadataService: MetadataService | undefined;
 
   public start(dependencies: EndpointAppContextServiceStartContract) {
     this.agentService = dependencies.agentService;
-    this.exceptionsListService = dependencies.exceptionsListService;
     this.manifestManager = dependencies.manifestManager;
     this.savedObjectsStart = dependencies.savedObjectsStart;
+    this.metadataService = createMetadataService(dependencies.packageService!);
 
     if (this.manifestManager && dependencies.registerIngestCallback) {
       dependencies.registerIngestCallback(
@@ -54,11 +104,8 @@ export class EndpointAppContextService {
     return this.agentService;
   }
 
-  public getExceptionsList() {
-    if (!this.exceptionsListService) {
-      throw new Error('exceptionsListService not set');
-    }
-    return this.exceptionsListService;
+  public getMetadataService(): MetadataService | undefined {
+    return this.metadataService;
   }
 
   public getManifestManager(): ManifestManager | undefined {

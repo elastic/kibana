@@ -23,7 +23,7 @@ import {
 import { ApplicationStart } from 'kibana/public';
 import { RouteComponentProps } from 'react-router-dom';
 import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
-import { PolicyFromES } from '../../services/policies/types';
+import { PolicyFromES } from '../../../../common/types';
 import { filterItems } from '../../services';
 import { TableContent } from './components/table_content';
 

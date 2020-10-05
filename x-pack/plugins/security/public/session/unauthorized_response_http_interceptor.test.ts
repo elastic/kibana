@@ -7,7 +7,7 @@
 // @ts-ignore
 import fetchMock from 'fetch-mock/es5/client';
 import { SessionExpired } from './session_expired';
-import { setup } from '../../../../../src/test_utils/public/http_test_setup';
+import { setup } from '../../../../../src/core/test_helpers/http_test_setup';
 import { UnauthorizedResponseHttpInterceptor } from './unauthorized_response_http_interceptor';
 jest.mock('./session_expired');
 

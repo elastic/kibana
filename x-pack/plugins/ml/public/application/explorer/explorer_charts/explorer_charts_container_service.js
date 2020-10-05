@@ -11,12 +11,7 @@
  * and manages the layout of the charts in the containing div.
  */
 
-import get from 'lodash/get';
-import each from 'lodash/each';
-import find from 'lodash/find';
-import sortBy from 'lodash/sortBy';
-import map from 'lodash/map';
-import reduce from 'lodash/reduce';
+import { get, each, find, sortBy, map, reduce } from 'lodash';
 
 import { buildConfig } from './explorer_chart_config_builder';
 import { chartLimits, getChartType } from '../../util/chart_utils';
@@ -111,7 +106,7 @@ export const anomalyDataChange = function (
 
   // Query 1 - load the raw metric data.
   function getMetricData(config, range) {
-    const { jobId, detectorIndex, entityFields, interval } = config;
+    const { jobId, detectorIndex, entityFields, bucketSpanSeconds } = config;
 
     const job = mlJobService.getJob(jobId);
 
@@ -122,14 +117,14 @@ export const anomalyDataChange = function (
       return mlResultsService
         .getMetricData(
           config.datafeedConfig.indices,
-          config.entityFields,
+          entityFields,
           datafeedQuery,
           config.metricFunction,
           config.metricFieldName,
           config.timeField,
           range.min,
           range.max,
-          config.interval
+          bucketSpanSeconds * 1000
         )
         .toPromise();
     } else {
@@ -175,7 +170,14 @@ export const anomalyDataChange = function (
         };
 
         return mlResultsService
-          .getModelPlotOutput(jobId, detectorIndex, criteriaFields, range.min, range.max, interval)
+          .getModelPlotOutput(
+            jobId,
+            detectorIndex,
+            criteriaFields,
+            range.min,
+            range.max,
+            bucketSpanSeconds * 1000
+          )
           .toPromise()
           .then((resp) => {
             // Return data in format required by the explorer charts.
@@ -218,7 +220,7 @@ export const anomalyDataChange = function (
         [config.jobId],
         range.min,
         range.max,
-        config.interval,
+        config.bucketSpanSeconds * 1000,
         1,
         MAX_SCHEDULED_EVENTS
       )
@@ -252,7 +254,7 @@ export const anomalyDataChange = function (
       config.timeField,
       range.min,
       range.max,
-      config.interval
+      config.bucketSpanSeconds * 1000
     );
   }
 

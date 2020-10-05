@@ -17,47 +17,20 @@
  * under the License.
  */
 
-import { Observable } from 'rxjs';
 import { PackageInfo } from 'kibana/server';
-import { LegacyApiCaller } from './legacy/es_client';
 import { ISearchInterceptor } from './search_interceptor';
-import { ISearchSource, SearchSourceFields } from './search_source';
 import { SearchUsageCollector } from './collectors';
 import { AggsSetup, AggsSetupDependencies, AggsStartDependencies, AggsStart } from './aggs';
-import {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-  IEsSearchRequest,
-  IEsSearchResponse,
-} from '../../common/search';
+import { ISearchGeneric, ISearchStartSearchSource } from '../../common/search';
 import { IndexPatternsContract } from '../../common/index_patterns/index_patterns';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
 
-export interface ISearchOptions {
-  signal?: AbortSignal;
-  strategy?: string;
-}
-
-export type ISearch = (
-  request: IKibanaSearchRequest,
-  options?: ISearchOptions
-) => Observable<IKibanaSearchResponse>;
-
-export type ISearchGeneric = <
-  SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest,
-  SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse
->(
-  request: SearchStrategyRequest,
-  options?: ISearchOptions
-) => Observable<SearchStrategyResponse>;
-
-export interface ISearchStartLegacy {
-  esClient: LegacyApiCaller;
-}
+export { ISearchStartSearchSource };
 
 export interface SearchEnhancements {
   searchInterceptor: ISearchInterceptor;
 }
+
 /**
  * The setup contract exposed by the Search plugin exposes the search strategy extension
  * point.
@@ -71,18 +44,29 @@ export interface ISearchSetup {
   __enhance: (enhancements: SearchEnhancements) => void;
 }
 
+/**
+ * search service
+ * @public
+ */
 export interface ISearchStart {
-  aggs: AggsStart;
-  search: ISearchGeneric;
-  searchSource: {
-    create: (fields?: SearchSourceFields) => Promise<ISearchSource>;
-    createEmpty: () => ISearchSource;
-  };
   /**
-   * @deprecated
-   * @internal
+   * agg config sub service
+   * {@link AggsStart}
+   *
    */
-  __LEGACY: ISearchStartLegacy;
+  aggs: AggsStart;
+  /**
+   * low level search
+   * {@link ISearchGeneric}
+   */
+  search: ISearchGeneric;
+
+  showError: (e: Error) => void;
+  /**
+   * high level search
+   * {@link ISearchStartSearchSource}
+   */
+  searchSource: ISearchStartSearchSource;
 }
 
 export { SEARCH_EVENT_TYPE } from './collectors';

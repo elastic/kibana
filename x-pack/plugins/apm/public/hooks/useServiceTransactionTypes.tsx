@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { useParams } from 'react-router-dom';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useFetcher } from './useFetcher';
 
 const INITIAL_DATA = { transactionTypes: [] };
 
 export function useServiceTransactionTypes(urlParams: IUrlParams) {
-  const { serviceName, start, end } = urlParams;
+  const { serviceName } = useParams<{ serviceName?: string }>();
+  const { start, end } = urlParams;
   const { data = INITIAL_DATA } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end) {

@@ -6,13 +6,13 @@
 
 import { EuiToolTip } from '@elastic/eui';
 import React, { FC } from 'react';
-import { isEqual, cloneDeep } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { IIndexPattern } from 'src/plugins/data/common';
 import { DeepReadonly } from '../../../../../../../common/types/common';
 import { DataFrameAnalyticsConfig, isOutlierAnalysis } from '../../../../common';
 import { isClassificationAnalysis, isRegressionAnalysis } from '../../../../common/analytics';
-import { DEFAULT_RESULTS_FIELD } from '../../../../common/constants';
+import { DEFAULT_RESULTS_FIELD } from '../../../../../../../common/constants/data_frame_analytics';
 import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
 import { DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES } from '../../hooks/use_create_analytics_form';
 import { State } from '../../hooks/use_create_analytics_form/state';

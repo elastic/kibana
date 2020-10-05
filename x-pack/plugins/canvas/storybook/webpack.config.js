@@ -176,6 +176,10 @@ module.exports = async ({ config: storybookConfig }) => {
         /(lib)?\/ui_metric/,
         path.resolve(__dirname, '../tasks/mocks/uiMetric')
       ),
+      new webpack.NormalModuleReplacementPlugin(
+        /lib\/es_service/,
+        path.resolve(__dirname, '../tasks/mocks/esService')
+      ),
     ],
     resolve: {
       extensions: ['.ts', '.tsx', '.scss', '.mjs', '.html'],
@@ -184,8 +188,6 @@ module.exports = async ({ config: storybookConfig }) => {
           __dirname,
           '../tasks/mocks/uiAbsoluteToParsedUrl'
         ),
-        ui: path.resolve(KIBANA_ROOT, 'src/legacy/ui/public'),
-        ng_mock$: path.resolve(KIBANA_ROOT, 'src/test_utils/public/ng_mock'),
       },
     },
   };

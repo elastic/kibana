@@ -31,7 +31,7 @@ import {
   UIM_TEMPLATE_DETAIL_PANEL_ALIASES_TAB,
   UIM_TEMPLATE_DETAIL_PANEL_PREVIEW_TAB,
 } from '../../../../../../common/constants';
-import { SendRequestResponse } from '../../../../../shared_imports';
+import { UseRequestResponse } from '../../../../../shared_imports';
 import { TemplateDeleteModal, SectionLoading, SectionError, Error } from '../../../../components';
 import { useLoadIndexTemplate } from '../../../../services/api';
 import { decodePathFromReactRouter } from '../../../../services/routing';
@@ -92,7 +92,7 @@ export interface Props {
   onClose: () => void;
   editTemplate: (name: string, isLegacy?: boolean) => void;
   cloneTemplate: (name: string, isLegacy?: boolean) => void;
-  reload: () => Promise<SendRequestResponse>;
+  reload: UseRequestResponse['resendRequest'];
 }
 
 export const TemplateDetailsContent = ({
@@ -161,9 +161,7 @@ export const TemplateDetailsContent = ({
     }
 
     if (templateDetails) {
-      const {
-        template: { settings, mappings, aliases },
-      } = templateDetails;
+      const { template: { settings, mappings, aliases } = {} } = templateDetails;
 
       const tabToComponentMap: Record<string, React.ReactNode> = {
         [SUMMARY_TAB_ID]: <TabSummary templateDetails={templateDetails} />,

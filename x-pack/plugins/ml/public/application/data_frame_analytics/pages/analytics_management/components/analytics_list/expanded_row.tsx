@@ -11,7 +11,7 @@ import { EuiIcon, EuiLoadingSpinner, EuiTabbedContent } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_utils';
+import { formatHumanReadableDateTimeSeconds } from '../../../../../../../common/util/date_utils';
 
 import { DataFrameAnalyticsListRow } from './common';
 import { ExpandedRowDetailsPane, SectionConfig, SectionItem } from './expanded_row_details_pane';

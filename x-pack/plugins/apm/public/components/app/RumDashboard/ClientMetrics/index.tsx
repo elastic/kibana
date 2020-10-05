@@ -6,10 +6,13 @@
 import * as React from 'react';
 import numeral from '@elastic/numeral';
 import styled from 'styled-components';
+import { useContext, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiToolTip } from '@elastic/eui';
 import { useFetcher } from '../../../../hooks/useFetcher';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { I18LABELS } from '../translations';
+import { useUxQuery } from '../hooks/useUxQuery';
+import { formatToSec } from '../UXMetrics/KeyUXMetrics';
+import { CsmSharedContext } from '../CsmSharedContext';
 
 const ClFlexGroup = styled(EuiFlexGroup)`
   flex-direction: row;
@@ -20,54 +23,64 @@ const ClFlexGroup = styled(EuiFlexGroup)`
 `;
 
 export function ClientMetrics() {
-  const { urlParams, uiFilters } = useUrlParams();
-
-  const { start, end, serviceName } = urlParams;
+  const uxQuery = useUxQuery();
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (start && end && serviceName) {
+      if (uxQuery) {
         return callApmApi({
           pathname: '/api/apm/rum/client-metrics',
           params: {
-            query: { start, end, uiFilters: JSON.stringify(uiFilters) },
+            query: {
+              ...uxQuery,
+            },
           },
         });
       }
       return Promise.resolve(null);
     },
-    [start, end, serviceName, uiFilters]
+    [uxQuery]
   );
 
+  const { setSharedData } = useContext(CsmSharedContext);
+
+  useEffect(() => {
+    setSharedData({ totalPageViews: data?.pageViews?.value ?? 0 });
+  }, [data, setSharedData]);
+
   const STAT_STYLE = { width: '240px' };
+
+  const pageViewsTotal = data?.pageViews?.value ?? 0;
 
   return (
     <ClFlexGroup responsive={false}>
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
-          titleSize="s"
-          title={
-            (((data?.backEnd?.value ?? 0) * 1000).toFixed(0) ?? '-') + ' ms'
-          }
+          titleSize="l"
+          title={formatToSec(data?.backEnd?.value ?? 0, 'ms')}
           description={I18LABELS.backEnd}
           isLoading={status !== 'success'}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
-          titleSize="s"
-          title={(data?.frontEnd?.value?.toFixed(2) ?? '-') + ' s'}
+          titleSize="l"
+          title={formatToSec(data?.frontEnd?.value ?? 0, 'ms')}
           description={I18LABELS.frontEnd}
           isLoading={status !== 'success'}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
-          titleSize="s"
+          titleSize="l"
           title={
-            <EuiToolTip content={data?.pageViews?.value}>
-              <>{numeral(data?.pageViews?.value).format('0 a') ?? '-'}</>
-            </EuiToolTip>
+            pageViewsTotal < 10000 ? (
+              numeral(pageViewsTotal).format('0,0')
+            ) : (
+              <EuiToolTip content={numeral(pageViewsTotal).format('0,0')}>
+                <>{numeral(pageViewsTotal).format('0 a')}</>
+              </EuiToolTip>
+            )
           }
           description={I18LABELS.pageViews}
           isLoading={status !== 'success'}

@@ -24,19 +24,18 @@ import { set } from '@elastic/safer-lodash-set';
 import { FormHook, FieldHook, FormData, FieldConfig, FieldsMap, FormConfig } from '../types';
 import { mapFormFields, unflattenObject, Subject, Subscription } from '../lib';
 
-const DEFAULT_ERROR_DISPLAY_TIMEOUT = 500;
 const DEFAULT_OPTIONS = {
-  errorDisplayDelay: DEFAULT_ERROR_DISPLAY_TIMEOUT,
+  valueChangeDebounceTime: 500,
   stripEmptyFields: true,
 };
 
-interface UseFormReturn<T extends FormData> {
-  form: FormHook<T>;
+interface UseFormReturn<T extends FormData, I extends FormData> {
+  form: FormHook<T, I>;
 }
 
-export function useForm<T extends FormData = FormData>(
-  formConfig?: FormConfig<T>
-): UseFormReturn<T> {
+export function useForm<T extends FormData = FormData, I extends FormData = T>(
+  formConfig?: FormConfig<T, I>
+): UseFormReturn<T, I> {
   const { onSubmit, schema, serializer, deserializer, options, id = 'default', defaultValue } =
     formConfig ?? {};
 
@@ -48,9 +47,9 @@ export function useForm<T extends FormData = FormData>(
 
       const filtered = Object.entries(_defaultValue as object)
         .filter(({ 1: value }) => value !== undefined)
-        .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
+        .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {} as T);
 
-      return deserializer ? (deserializer(filtered) as any) : filtered;
+      return deserializer ? deserializer(filtered) : filtered;
     },
     [deserializer]
   );
@@ -61,13 +60,13 @@ export function useForm<T extends FormData = FormData>(
 
   const defaultValueDeserialized = useRef(defaultValueMemoized);
 
-  const { errorDisplayDelay, stripEmptyFields: doStripEmptyFields } = options ?? {};
+  const { valueChangeDebounceTime, stripEmptyFields: doStripEmptyFields } = options ?? {};
   const formOptions = useMemo(
     () => ({
       stripEmptyFields: doStripEmptyFields ?? DEFAULT_OPTIONS.stripEmptyFields,
-      errorDisplayDelay: errorDisplayDelay ?? DEFAULT_OPTIONS.errorDisplayDelay,
+      valueChangeDebounceTime: valueChangeDebounceTime ?? DEFAULT_OPTIONS.valueChangeDebounceTime,
     }),
-    [errorDisplayDelay, doStripEmptyFields]
+    [valueChangeDebounceTime, doStripEmptyFields]
   );
 
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -93,21 +92,27 @@ export function useForm<T extends FormData = FormData>(
     return formData$.current;
   }, []);
 
-  const fieldsToArray = useCallback(() => Object.values(fieldsRefs.current), []);
+  const fieldsToArray = useCallback<() => FieldHook[]>(() => Object.values(fieldsRefs.current), []);
 
-  const stripEmptyFields = useCallback(
-    (fields: FieldsMap): FieldsMap => {
-      if (formOptions.stripEmptyFields) {
-        return Object.entries(fields).reduce((acc, [key, field]) => {
-          if (typeof field.value !== 'string' || field.value.trim() !== '') {
-            acc[key] = field;
-          }
+  const getFieldsForOutput = useCallback(
+    (fields: FieldsMap, opts: { stripEmptyFields: boolean }): FieldsMap => {
+      return Object.entries(fields).reduce((acc, [key, field]) => {
+        if (!field.__isIncludedInOutput) {
           return acc;
-        }, {} as FieldsMap);
-      }
-      return fields;
+        }
+
+        if (opts.stripEmptyFields) {
+          const isFieldEmpty = typeof field.value === 'string' && field.value.trim() === '';
+          if (isFieldEmpty) {
+            return acc;
+          }
+        }
+
+        acc[key] = field;
+        return acc;
+      }, {} as FieldsMap);
     },
-    [formOptions]
+    []
   );
 
   const updateFormDataAt: FormHook<T>['__updateFormDataAt'] = useCallback(
@@ -133,10 +138,12 @@ export function useForm<T extends FormData = FormData>(
   const getFormData: FormHook<T>['getFormData'] = useCallback(
     (getDataOptions: Parameters<FormHook<T>['getFormData']>[0] = { unflatten: true }) => {
       if (getDataOptions.unflatten) {
-        const nonEmptyFields = stripEmptyFields(fieldsRefs.current);
-        const fieldsValue = mapFormFields(nonEmptyFields, (field) => field.__serializeValue());
+        const fieldsToOutput = getFieldsForOutput(fieldsRefs.current, {
+          stripEmptyFields: formOptions.stripEmptyFields,
+        });
+        const fieldsValue = mapFormFields(fieldsToOutput, (field) => field.__serializeValue());
         return serializer
-          ? (serializer(unflattenObject(fieldsValue)) as T)
+          ? (serializer(unflattenObject(fieldsValue) as I) as T)
           : (unflattenObject(fieldsValue) as T);
       }
 
@@ -148,7 +155,7 @@ export function useForm<T extends FormData = FormData>(
         {} as T
       );
     },
-    [stripEmptyFields, serializer]
+    [getFieldsForOutput, formOptions.stripEmptyFields, serializer]
   );
 
   const getErrors: FormHook['getErrors'] = useCallback(() => {
@@ -166,6 +173,24 @@ export function useForm<T extends FormData = FormData>(
   }, [isValid, fieldsToArray]);
 
   const isFieldValid = (field: FieldHook) => field.isValid && !field.isValidating;
+
+  const waitForFieldsToFinishValidating = useCallback(async () => {
+    let areSomeFieldValidating = fieldsToArray().some((field) => field.isValidating);
+    if (!areSomeFieldValidating) {
+      return;
+    }
+
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        areSomeFieldValidating = fieldsToArray().some((field) => field.isValidating);
+        if (areSomeFieldValidating) {
+          // Recursively wait for all the fields to finish validating.
+          return waitForFieldsToFinishValidating().then(resolve);
+        }
+        resolve();
+      }, 100);
+    });
+  }, [fieldsToArray]);
 
   const validateFields: FormHook<T>['__validateFields'] = useCallback(
     async (fieldNames) => {
@@ -196,18 +221,25 @@ export function useForm<T extends FormData = FormData>(
       // To know the current form validity, we will then merge the "validationResult" _with_ the fieldsRefs object state,
       // the "validationResult" taking presedence over the fieldsRefs values.
       const formFieldsValidity = fieldsToArray().map((field) => {
+        const hasUpdatedValidity = validationResultByPath[field.path] !== undefined;
         const _isValid = validationResultByPath[field.path] ?? field.isValid;
-        const _isValidated =
-          validationResultByPath[field.path] !== undefined ? true : field.isValidated;
-        return [_isValid, _isValidated];
+        const _isValidated = hasUpdatedValidity ? true : field.isValidated;
+        const _isValidating = hasUpdatedValidity ? false : field.isValidating;
+        return {
+          isValid: _isValid,
+          isValidated: _isValidated,
+          isValidating: _isValidating,
+        };
       });
 
-      const areAllFieldsValidated = formFieldsValidity.every(({ 1: isValidated }) => isValidated);
+      const areAllFieldsValidated = formFieldsValidity.every((field) => field.isValidated);
+      const areSomeFieldValidating = formFieldsValidity.some((field) => field.isValidating);
 
       // If *not* all the fiels have been validated, the validity of the form is unknown, thus still "undefined"
-      const isFormValid = areAllFieldsValidated
-        ? formFieldsValidity.every(([_isValid]) => _isValid)
-        : undefined;
+      const isFormValid =
+        areAllFieldsValidated && areSomeFieldValidating === false
+          ? formFieldsValidity.every((field) => field.isValid)
+          : undefined;
 
       setIsValid(isFormValid);
 
@@ -217,6 +249,14 @@ export function useForm<T extends FormData = FormData>(
   );
 
   const validateAllFields = useCallback(async (): Promise<boolean> => {
+    // Maybe some field are being validated because of their async validation(s).
+    // We make sure those validations have finished executing before proceeding.
+    await waitForFieldsToFinishValidating();
+
+    if (!isMounted.current) {
+      return false;
+    }
+
     const fieldsArray = fieldsToArray();
     const fieldsToValidate = fieldsArray.filter((field) => !field.isValidated);
 
@@ -230,7 +270,7 @@ export function useForm<T extends FormData = FormData>(
 
     setIsValid(isFormValid);
     return isFormValid!;
-  }, [fieldsToArray, validateFields]);
+  }, [fieldsToArray, validateFields, waitForFieldsToFinishValidating]);
 
   const addField: FormHook<T>['__addField'] = useCallback(
     (field) => {
@@ -295,7 +335,7 @@ export function useForm<T extends FormData = FormData>(
 
   const getFields: FormHook<T>['getFields'] = useCallback(() => fieldsRefs.current, []);
 
-  const getFieldDefaultValue: FormHook['getFieldDefaultValue'] = useCallback(
+  const getFieldDefaultValue: FormHook['__getFieldDefaultValue'] = useCallback(
     (fieldName) => get(defaultValueDeserialized.current, fieldName),
     []
   );
@@ -402,13 +442,13 @@ export function useForm<T extends FormData = FormData>(
       getFields,
       getFormData,
       getErrors,
-      getFieldDefaultValue,
       reset,
       __options: formOptions,
       __getFormData$: getFormData$,
       __updateFormDataAt: updateFormDataAt,
       __updateDefaultValueAt: updateDefaultValueAt,
       __readFieldConfigFromSchema: readFieldConfigFromSchema,
+      __getFieldDefaultValue: getFieldDefaultValue,
       __addField: addField,
       __removeField: removeField,
       __validateFields: validateFields,

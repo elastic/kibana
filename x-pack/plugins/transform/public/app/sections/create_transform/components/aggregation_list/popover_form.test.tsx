@@ -7,7 +7,10 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { AggName, PIVOT_SUPPORTED_AGGS, PivotAggsConfig } from '../../../../common';
+import { AggName } from '../../../../../../common/types/aggregations';
+import { PIVOT_SUPPORTED_AGGS } from '../../../../../../common/types/pivot_aggs';
+
+import { PivotAggsConfig } from '../../../../common';
 
 import { PopoverForm } from './popover_form';
 

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SafeResolverEvent } from './../../../../common/endpoint/types/index';
+
 import {
   ResolverRelatedEvents,
   ResolverTree,
@@ -12,7 +14,12 @@ import {
 import { mockTreeWithNoProcessEvents } from '../../mocks/resolver_tree';
 import { DataAccessLayer } from '../../types';
 
-type EmptiableRequests = 'relatedEvents' | 'resolverTree' | 'entities' | 'indexPatterns';
+type EmptiableRequests =
+  | 'relatedEvents'
+  | 'resolverTree'
+  | 'entities'
+  | 'eventsWithEntityIDAndCategory'
+  | 'event';
 
 interface Metadata<T> {
   /**
@@ -44,6 +51,7 @@ export function emptifyMock<T>(
   return {
     metadata,
     dataAccessLayer: {
+      ...dataAccessLayer,
       /**
        * Fetch related events for an entity ID
        */
@@ -57,6 +65,24 @@ export function emptifyMock<T>(
           : dataAccessLayer.relatedEvents(...args);
       },
 
+      async eventsWithEntityIDAndCategory(
+        ...args
+      ): Promise<{
+        events: SafeResolverEvent[];
+        nextEvent: string | null;
+      }> {
+        return dataShouldBeEmpty.includes('eventsWithEntityIDAndCategory')
+          ? {
+              events: [],
+              nextEvent: null,
+            }
+          : dataAccessLayer.eventsWithEntityIDAndCategory(...args);
+      },
+
+      async event(...args): Promise<SafeResolverEvent | null> {
+        return dataShouldBeEmpty.includes('event') ? null : dataAccessLayer.event(...args);
+      },
+
       /**
        * Fetch a ResolverTree for a entityID
        */
@@ -64,15 +90,6 @@ export function emptifyMock<T>(
         return dataShouldBeEmpty.includes('resolverTree')
           ? Promise.resolve(mockTreeWithNoProcessEvents())
           : dataAccessLayer.resolverTree(...args);
-      },
-
-      /**
-       * Get an array of index patterns that contain events.
-       */
-      indexPatterns(...args): string[] {
-        return dataShouldBeEmpty.includes('indexPatterns')
-          ? []
-          : dataAccessLayer.indexPatterns(...args);
       },
 
       /**

@@ -51,7 +51,7 @@ describe('Observability dashboard data', () => {
       );
       const response = await fetchOverviewPageData(params);
       expect(response).toEqual({
-        appLink: '/app/apm#/services?rangeFrom=now-15m&rangeTo=now',
+        appLink: '/app/apm/services?rangeFrom=now-15m&rangeTo=now',
         stats: {
           services: {
             type: 'number',
@@ -82,7 +82,7 @@ describe('Observability dashboard data', () => {
       );
       const response = await fetchOverviewPageData(params);
       expect(response).toEqual({
-        appLink: '/app/apm#/services?rangeFrom=now-15m&rangeTo=now',
+        appLink: '/app/apm/services?rangeFrom=now-15m&rangeTo=now',
         stats: {
           services: {
             type: 'number',
@@ -109,7 +109,7 @@ describe('Observability dashboard data', () => {
       );
       const response = await fetchOverviewPageData(params);
       expect(response).toEqual({
-        appLink: '/app/apm#/services?rangeFrom=now-15m&rangeTo=now',
+        appLink: '/app/apm/services?rangeFrom=now-15m&rangeTo=now',
         stats: {
           services: {
             type: 'number',

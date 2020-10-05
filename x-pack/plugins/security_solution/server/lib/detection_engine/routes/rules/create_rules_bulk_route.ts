@@ -27,6 +27,7 @@ import { buildRouteValidation } from '../../../../utils/build_validation/route_v
 import { transformBulkError, createBulkErrorObject, buildSiemResponse } from '../utils';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { PartialFilter } from '../../types';
+import { isMlRule } from '../../../../../common/machine_learning/helpers';
 
 export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
   router.post(
@@ -68,6 +69,7 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
               building_block_type: buildingBlockType,
               description,
               enabled,
+              event_category_override: eventCategoryOverride,
               false_positives: falsePositives,
               from,
               query: queryOrUndefined,
@@ -90,6 +92,11 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
               severity_mapping: severityMapping,
               tags,
               threat,
+              threat_filters: threatFilters,
+              threat_index: threatIndex,
+              threat_mapping: threatMapping,
+              threat_query: threatQuery,
+              threat_language: threatLanguage,
               threshold,
               throttle,
               timestamp_override: timestampOverride,
@@ -112,13 +119,10 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
                 });
               }
 
-              const query =
-                type !== 'machine_learning' && queryOrUndefined == null ? '' : queryOrUndefined;
+              const query = !isMlRule(type) && queryOrUndefined == null ? '' : queryOrUndefined;
 
               const language =
-                type !== 'machine_learning' && languageOrUndefined == null
-                  ? 'kuery'
-                  : languageOrUndefined;
+                !isMlRule(type) && languageOrUndefined == null ? 'kuery' : languageOrUndefined;
 
               // TODO: Fix these either with an is conversion or by better typing them within io-ts
               const actions: RuleAlertAction[] = actionsRest as RuleAlertAction[];
@@ -151,6 +155,7 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
                 buildingBlockType,
                 description,
                 enabled,
+                eventCategoryOverride,
                 falsePositives,
                 from,
                 immutable: false,
@@ -178,6 +183,11 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
                 to,
                 type,
                 threat,
+                threatFilters,
+                threatMapping,
+                threatQuery,
+                threatIndex,
+                threatLanguage,
                 threshold,
                 timestampOverride,
                 references,

@@ -129,7 +129,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
-          .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
+          .attach('file', getSimpleRuleAsNdjson(['rule-1'], true), 'rules.ndjson')
           .expect(200);
 
         const { body } = await supertest
@@ -189,6 +189,56 @@ export default ({ getService }: FtrProviderContext): void => {
           errors: [],
           success: true,
           success_count: 2,
+        });
+      });
+
+      // import is very slow in 7.10+ due to the alerts client find api
+      // when importing 100 rules it takes about 30 seconds for this
+      // test to complete so at 10 rules completing in about 10 seconds
+      // I figured this is enough to make sure the import route is doing its job.
+      it('should be able to import 10 rules', async () => {
+        const ruleIds = new Array(10).fill(undefined).map((_, index) => `rule-${index}`);
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .set('kbn-xsrf', 'true')
+          .attach('file', getSimpleRuleAsNdjson(ruleIds, false), 'rules.ndjson')
+          .expect(200);
+
+        expect(body).to.eql({
+          errors: [],
+          success: true,
+          success_count: 10,
+        });
+      });
+
+      // uncomment the below test once we speed up the alerts client find api
+      // in another PR.
+      // it('should be able to import 10000 rules', async () => {
+      //   const ruleIds = new Array(10000).fill(undefined).map((_, index) => `rule-${index}`);
+      //   const { body } = await supertest
+      //     .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+      //     .set('kbn-xsrf', 'true')
+      //     .attach('file', getSimpleRuleAsNdjson(ruleIds, false), 'rules.ndjson')
+      //     .expect(200);
+
+      //   expect(body).to.eql({
+      //     errors: [],
+      //     success: true,
+      //     success_count: 10000,
+      //   });
+      // });
+
+      it('should NOT be able to import more than 10,000 rules', async () => {
+        const ruleIds = new Array(10001).fill(undefined).map((_, index) => `rule-${index}`);
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .set('kbn-xsrf', 'true')
+          .attach('file', getSimpleRuleAsNdjson(ruleIds, false), 'rules.ndjson')
+          .expect(500);
+
+        expect(body).to.eql({
+          status_code: 500,
+          message: "Can't import more than 10000 rules",
         });
       });
 
@@ -280,7 +330,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
-          .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
+          .attach('file', getSimpleRuleAsNdjson(['rule-1'], true), 'rules.ndjson')
           .expect(200);
 
         const simpleRule = getSimpleRule('rule-1');
@@ -372,13 +422,17 @@ export default ({ getService }: FtrProviderContext): void => {
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
-          .attach('file', getSimpleRuleAsNdjson(['rule-1', 'rule-2']), 'rules.ndjson')
+          .attach('file', getSimpleRuleAsNdjson(['rule-1', 'rule-2'], true), 'rules.ndjson')
           .expect(200);
 
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
-          .attach('file', getSimpleRuleAsNdjson(['rule-1', 'rule-2', 'rule-3']), 'rules.ndjson')
+          .attach(
+            'file',
+            getSimpleRuleAsNdjson(['rule-1', 'rule-2', 'rule-3'], true),
+            'rules.ndjson'
+          )
           .expect(200);
 
         const { body: bodyOfRule1 } = await supertest

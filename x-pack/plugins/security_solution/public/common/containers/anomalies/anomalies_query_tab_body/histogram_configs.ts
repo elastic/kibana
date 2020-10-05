@@ -8,7 +8,7 @@ import {
   MatrixHistogramOption,
   MatrixHistogramConfigs,
 } from '../../../components/matrix_histogram/types';
-import { HistogramType } from '../../../../graphql/types';
+import { MatrixHistogramType } from '../../../../../common/search_strategy/security_solution/matrix_histogram';
 
 export const anomaliesStackByOptions: MatrixHistogramOption[] = [
   {
@@ -24,7 +24,7 @@ export const histogramConfigs: MatrixHistogramConfigs = {
     anomaliesStackByOptions.find((o) => o.text === DEFAULT_STACK_BY) ?? anomaliesStackByOptions[0],
   errorMessage: i18n.ERROR_FETCHING_ANOMALIES_DATA,
   hideHistogramIfEmpty: true,
-  histogramType: HistogramType.anomalies,
+  histogramType: MatrixHistogramType.anomalies,
   stackByOptions: anomaliesStackByOptions,
   subtitle: undefined,
   title: i18n.ANOMALIES_TITLE,

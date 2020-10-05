@@ -20,8 +20,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   );
 
   const kibanaPort = kibanaFunctionalConfig.get('servers.kibana.port');
-  const idpPath = resolve(__dirname, '../saml_api_integration/fixtures/saml_provider/metadata.xml');
-  const samlIdPPlugin = resolve(__dirname, '../saml_api_integration/fixtures/saml_provider');
+  const idpPath = resolve(
+    __dirname,
+    '../security_api_integration/fixtures/saml/saml_provider/metadata.xml'
+  );
+  const samlIdPPlugin = resolve(
+    __dirname,
+    '../security_api_integration/fixtures/saml/saml_provider'
+  );
 
   return {
     testFiles: [resolve(__dirname, './tests/login_selector')],
@@ -76,7 +82,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     screenshots: { directory: resolve(__dirname, 'screenshots') },
 
     junit: {
-      reportName: 'Chrome X-Pack Security Functional Tests',
+      reportName: 'Chrome X-Pack Security Functional Tests (Login Selector)',
     },
   };
 }

@@ -11,7 +11,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { pick } from 'lodash';
 import { alertStateSchema, AlertingFrameworkHealth } from '../../../../alerts/common';
 import { BASE_ALERT_API_PATH } from '../constants';
-import { Alert, AlertType, AlertWithoutId, AlertTaskState, AlertStatus } from '../../types';
+import { Alert, AlertType, AlertUpdates, AlertTaskState, AlertInstanceSummary } from '../../types';
 
 export async function loadAlertTypes({ http }: { http: HttpSetup }): Promise<AlertType[]> {
   return await http.get(`${BASE_ALERT_API_PATH}/list_alert_types`);
@@ -48,14 +48,14 @@ export async function loadAlertState({
     });
 }
 
-export async function loadAlertStatus({
+export async function loadAlertInstanceSummary({
   http,
   alertId,
 }: {
   http: HttpSetup;
   alertId: string;
-}): Promise<AlertStatus> {
-  return await http.get(`${BASE_ALERT_API_PATH}/alert/${alertId}/status`);
+}): Promise<AlertInstanceSummary> {
+  return await http.get(`${BASE_ALERT_API_PATH}/alert/${alertId}/_instance_summary`);
 }
 
 export async function loadAlerts({
@@ -64,12 +64,14 @@ export async function loadAlerts({
   searchText,
   typesFilter,
   actionTypesFilter,
+  alertStatusesFilter,
 }: {
   http: HttpSetup;
   page: { index: number; size: number };
   searchText?: string;
   typesFilter?: string[];
   actionTypesFilter?: string[];
+  alertStatusesFilter?: string[];
 }): Promise<{
   page: number;
   perPage: number;
@@ -90,6 +92,9 @@ export async function loadAlerts({
         ')',
       ].join('')
     );
+  }
+  if (alertStatusesFilter && alertStatusesFilter.length) {
+    filters.push(`alert.attributes.executionStatus.status:(${alertStatusesFilter.join(' or ')})`);
   }
   return await http.get(`${BASE_ALERT_API_PATH}/_find`, {
     query: {
@@ -130,7 +135,10 @@ export async function createAlert({
   alert,
 }: {
   http: HttpSetup;
-  alert: Omit<AlertWithoutId, 'createdBy' | 'updatedBy' | 'muteAll' | 'mutedInstanceIds'>;
+  alert: Omit<
+    AlertUpdates,
+    'createdBy' | 'updatedBy' | 'muteAll' | 'mutedInstanceIds' | 'executionStatus'
+  >;
 }): Promise<Alert> {
   return await http.post(`${BASE_ALERT_API_PATH}/alert`, {
     body: JSON.stringify(alert),
@@ -143,7 +151,7 @@ export async function updateAlert({
   id,
 }: {
   http: HttpSetup;
-  alert: Pick<AlertWithoutId, 'throttle' | 'name' | 'tags' | 'schedule' | 'params' | 'actions'>;
+  alert: Pick<AlertUpdates, 'throttle' | 'name' | 'tags' | 'schedule' | 'params' | 'actions'>;
   id: string;
 }): Promise<Alert> {
   return await http.put(`${BASE_ALERT_API_PATH}/alert/${id}`, {

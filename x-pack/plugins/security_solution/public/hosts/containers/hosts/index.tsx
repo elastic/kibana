@@ -7,29 +7,33 @@
 import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
 
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
-import { HostsEdges, PageInfoPaginated } from '../../../graphql/types';
 import { inputsModel, State } from '../../../common/store';
 import { createFilter } from '../../../common/containers/helpers';
 import { useKibana } from '../../../common/lib/kibana';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { hostsModel, hostsSelectors } from '../../store';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
 import {
+  HostsEdges,
+  PageInfoPaginated,
   DocValueFields,
   HostsQueries,
   HostsRequestOptions,
   HostsStrategyResponse,
-} from '../../../../common/search_strategy/security_solution';
+} from '../../../../common/search_strategy';
 import { ESTermQuery } from '../../../../common/typed_json';
 
 import * as i18n from './translations';
-import { AbortError } from '../../../../../../../src/plugins/data/common';
+import {
+  AbortError,
+  isCompleteResponse,
+  isErrorResponse,
+} from '../../../../../../../src/plugins/data/common';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 
-const ID = 'hostsQuery';
+const ID = 'hostsAllQuery';
 
 type LoadPage = (newActivePage: number) => void;
 export interface HostsArgs {
@@ -49,6 +53,7 @@ interface UseAllHost {
   docValueFields?: DocValueFields[];
   filterQuery?: ESTermQuery | string;
   endDate: string;
+  indexNames: string[];
   skip?: boolean;
   startDate: string;
   type: hostsModel.HostsType;
@@ -58,40 +63,48 @@ export const useAllHost = ({
   docValueFields,
   filterQuery,
   endDate,
+  indexNames,
   skip = false,
   startDate,
   type,
 }: UseAllHost): [boolean, HostsArgs] => {
   const getHostsSelector = hostsSelectors.hostsSelector();
-  const { activePage, direction, limit, sortField } = useSelector((state: State) =>
+  const { activePage, direction, limit, sortField } = useShallowEqualSelector((state: State) =>
     getHostsSelector(state, type)
   );
-  const { data, notifications, uiSettings } = useKibana().services;
+  const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
-  const [hostsRequest, setHostRequest] = useState<HostsRequestOptions>({
-    defaultIndex,
-    docValueFields: docValueFields ?? [],
-    factoryQueryType: HostsQueries.hosts,
-    filterQuery: createFilter(filterQuery),
-    pagination: generateTablePaginationOptions(activePage, limit),
-    timerange: {
-      interval: '12h',
-      from: startDate,
-      to: endDate,
-    },
-    sort: {
-      direction,
-      field: sortField,
-    },
-    // inspect: isInspected,
-  });
+  const [hostsRequest, setHostRequest] = useState<HostsRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          docValueFields: docValueFields ?? [],
+          factoryQueryType: HostsQueries.hosts,
+          filterQuery: createFilter(filterQuery),
+          id: ID,
+          pagination: generateTablePaginationOptions(activePage, limit),
+          timerange: {
+            interval: '12h',
+            from: startDate,
+            to: endDate,
+          },
+          sort: {
+            direction,
+            field: sortField,
+          },
+        }
+      : null
+  );
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
       setHostRequest((prevRequest) => {
+        if (!prevRequest) {
+          return prevRequest;
+        }
+
         return {
           ...prevRequest,
           pagination: generateTablePaginationOptions(newActivePage, limit),
@@ -122,7 +135,11 @@ export const useAllHost = ({
   });
 
   const hostsSearch = useCallback(
-    (request: HostsRequestOptions) => {
+    (request: HostsRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -131,11 +148,11 @@ export const useAllHost = ({
         const searchSubscription$ = data.search
           .search<HostsRequestOptions, HostsStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
-            signal: abortCtrl.current.signal,
+            abortSignal: abortCtrl.current.signal,
           })
           .subscribe({
             next: (response) => {
-              if (!response.isPartial && !response.isRunning) {
+              if (isCompleteResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                   setHostsResponse((prevResponse) => ({
@@ -148,7 +165,7 @@ export const useAllHost = ({
                   }));
                 }
                 searchSubscription$.unsubscribe();
-              } else if (response.isPartial && !response.isRunning) {
+              } else if (isErrorResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                 }
@@ -178,10 +195,12 @@ export const useAllHost = ({
   useEffect(() => {
     setHostRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
-        defaultIndex,
+        ...(prevRequest ?? {}),
+        defaultIndex: indexNames,
         docValueFields: docValueFields ?? [],
+        factoryQueryType: HostsQueries.hosts,
         filterQuery: createFilter(filterQuery),
+        id: ID,
         pagination: generateTablePaginationOptions(activePage, limit),
         timerange: {
           interval: '12h',
@@ -200,11 +219,11 @@ export const useAllHost = ({
     });
   }, [
     activePage,
-    defaultIndex,
     direction,
     docValueFields,
     endDate,
     filterQuery,
+    indexNames,
     limit,
     skip,
     startDate,

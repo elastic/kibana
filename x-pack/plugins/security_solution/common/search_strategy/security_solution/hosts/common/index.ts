@@ -6,7 +6,7 @@
 
 import { CloudEcs } from '../../../../ecs/cloud';
 import { HostEcs, OsEcs } from '../../../../ecs/host';
-import { Maybe, SearchHit, TotalValue } from '../..';
+import { Hit, Hits, Maybe, SearchHit, StringOrNumber, TotalValue } from '../../../common';
 
 export enum HostPolicyResponseActionStatus {
   success = 'success',
@@ -98,3 +98,15 @@ export interface HostAggEsData extends SearchHit {
   sort: string[];
   aggregations: HostAggEsItem;
 }
+
+export interface HostHit extends Hit {
+  _source: {
+    '@timestamp'?: string;
+    host: HostEcs;
+  };
+  cursor?: string;
+  firstSeen?: string;
+  sort?: StringOrNumber[];
+}
+
+export type HostHits = Hits<number, HostHit>;

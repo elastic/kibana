@@ -45,7 +45,7 @@ function doZoom(
 ) {
   if (cy) {
     const level = cy.zoom() + increment;
-    // @ts-ignore `.position()` _does_ work on a NodeCollection. It returns the position of the first element in the collection.
+    // @ts-expect-error `.position()` _does_ work on a NodeCollection. It returns the position of the first element in the collection.
     const primaryCenter = cy.nodes('.primary').position();
     const { x1, y1, w, h } = cy.nodes().boundingBox({});
     const graphCenter = { x: x1 + w / 2, y: y1 + h / 2 };
@@ -67,7 +67,7 @@ function useDebugDownloadUrl(cy?: cytoscape.Core) {
   // Handle elements changes to update the download URL
   useEffect(() => {
     const elementsHandler: cytoscape.EventHandler = (event) => {
-      // @ts-ignore The `true` argument to `cy.json` is to flatten the elements
+      // @ts-expect-error The `true` argument to `cy.json` is to flatten the elements
       // (instead of having them broken into nodes/edges.) DefinitelyTyped has
       // this wrong.
       const elementsJson = event.cy.json(true)?.elements.map((element) => ({

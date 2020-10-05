@@ -35,12 +35,15 @@ import { useTimefilter } from '../../contexts/kibana';
 import { isViewBySwimLaneData } from '../../explorer/swimlane_container';
 import { JOB_ID } from '../../../../common/constants/anomalies';
 
-export const explorerRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
+export const explorerRouteFactory = (
+  navigateToPath: NavigateToPath,
+  basePath: string
+): MlRoute => ({
   path: '/explorer',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
-    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
     {
       text: i18n.translate('xpack.ml.anomalyDetection.anomalyExplorerLabel', {
         defaultMessage: 'Anomaly Explorer',
@@ -73,7 +76,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const [globalState, setGlobalState] = useUrlState('_g');
   const [lastRefresh, setLastRefresh] = useState(0);
   const [stoppedPartitions, setStoppedPartitions] = useState<string[] | undefined>();
-
+  const [invalidTimeRangeError, setInValidTimeRangeError] = useState<boolean>(false);
   const timefilter = useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true });
 
   const { jobIds } = useJobSelection(jobsWithTimeRange);
@@ -99,6 +102,9 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   // `timefilter.getBounds()` to update `bounds` in this component's state.
   useEffect(() => {
     if (globalState?.time !== undefined) {
+      if (globalState.time.mode === 'invalid') {
+        setInValidTimeRangeError(true);
+      }
       timefilter.setTime({
         from: globalState.time.from,
         to: globalState.time.to,
@@ -215,10 +221,8 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
       loadExplorerData({
         ...loadExplorerDataConfig,
         swimlaneLimit:
-          explorerState?.viewBySwimlaneData &&
-          isViewBySwimLaneData(explorerState?.viewBySwimlaneData)
-            ? explorerState?.viewBySwimlaneData.cardinality
-            : undefined,
+          isViewBySwimLaneData(explorerState?.viewBySwimlaneData) &&
+          explorerState?.viewBySwimlaneData.cardinality,
       });
     }
   }, [JSON.stringify(loadExplorerDataConfig)]);
@@ -236,6 +240,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
           showCharts,
           severity: tableSeverity.val,
           stoppedPartitions,
+          invalidTimeRangeError,
         }}
       />
     </div>

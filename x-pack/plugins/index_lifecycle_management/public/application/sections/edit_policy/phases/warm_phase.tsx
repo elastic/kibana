@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, PureComponent } from 'react';
+import React, { Fragment, FunctionComponent } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -18,6 +18,8 @@ import {
   EuiDescribedFormGroup,
 } from '@elastic/eui';
 
+import { Phases, WarmPhase as WarmPhaseInterface } from '../../../../../common/types';
+import { PhaseValidationErrors } from '../../../services/policies/policy_validation';
 import {
   LearnMoreLink,
   ActiveBadge,
@@ -25,50 +27,52 @@ import {
   OptionalLabel,
   ErrableFormRow,
   SetPriorityInput,
-  NodeAllocation,
   MinAgeInput,
+  DescribedFormField,
+  Forcemerge,
 } from '../components';
+import { DataTierAllocationField } from './shared';
 
-import { Phases, WarmPhase as WarmPhaseInterface } from '../../../services/policies/types';
-import { PhaseValidationErrors } from '../../../services/policies/policy_validation';
-
-const shrinkLabel = i18n.translate('xpack.indexLifecycleMgmt.warmPhase.shrinkIndexLabel', {
-  defaultMessage: 'Shrink index',
-});
-
-const moveToWarmPhaseOnRolloverLabel = i18n.translate(
-  'xpack.indexLifecycleMgmt.warmPhase.moveToWarmPhaseOnRolloverLabel',
-  {
-    defaultMessage: 'Move to warm phase on rollover',
-  }
-);
-
-const forcemergeLabel = i18n.translate('xpack.indexLifecycleMgmt.warmPhase.forceMergeDataLabel', {
-  defaultMessage: 'Force merge data',
-});
+const i18nTexts = {
+  shrinkLabel: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.shrinkIndexLabel', {
+    defaultMessage: 'Shrink index',
+  }),
+  moveToWarmPhaseOnRolloverLabel: i18n.translate(
+    'xpack.indexLifecycleMgmt.warmPhase.moveToWarmPhaseOnRolloverLabel',
+    {
+      defaultMessage: 'Move to warm phase on rollover',
+    }
+  ),
+  dataTierAllocation: {
+    description: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.dataTier.description', {
+      defaultMessage: 'Move data to nodes optimized for less-frequent, read-only access.',
+    }),
+  },
+};
 
 const warmProperty: keyof Phases = 'warm';
 const phaseProperty = (propertyName: keyof WarmPhaseInterface) => propertyName;
 
 interface Props {
-  setPhaseData: (key: keyof WarmPhaseInterface & string, value: boolean | string) => void;
+  setPhaseData: (
+    key: keyof WarmPhaseInterface & string,
+    value: boolean | string | undefined
+  ) => void;
   phaseData: WarmPhaseInterface;
   isShowingErrors: boolean;
   errors?: PhaseValidationErrors<WarmPhaseInterface>;
   hotPhaseRolloverEnabled: boolean;
 }
-export class WarmPhase extends PureComponent<Props> {
-  render() {
-    const {
-      setPhaseData,
-      phaseData,
-      errors,
-      isShowingErrors,
-      hotPhaseRolloverEnabled,
-    } = this.props;
-
-    return (
-      <div id="warmPhaseContent" aria-live="polite" role="region" aria-relevant="additions">
+export const WarmPhase: FunctionComponent<Props> = ({
+  setPhaseData,
+  phaseData,
+  errors,
+  isShowingErrors,
+  hotPhaseRolloverEnabled,
+}) => {
+  return (
+    <div id="warmPhaseContent" aria-live="polite" role="region" aria-relevant="additions">
+      <>
         <EuiDescribedFormGroup
           title={
             <div>
@@ -119,7 +123,7 @@ export class WarmPhase extends PureComponent<Props> {
                   <EuiFormRow id={`${warmProperty}-${phaseProperty('warmPhaseOnRollover')}`}>
                     <EuiSwitch
                       data-test-subj="warmPhaseOnRolloverSwitch"
-                      label={moveToWarmPhaseOnRolloverLabel}
+                      label={i18nTexts.moveToWarmPhaseOnRolloverLabel}
                       id={`${warmProperty}-${phaseProperty('warmPhaseOnRollover')}`}
                       checked={phaseData.warmPhaseOnRollover}
                       onChange={(e) => {
@@ -141,58 +145,75 @@ export class WarmPhase extends PureComponent<Props> {
                     />
                   </Fragment>
                 ) : null}
-
-                <EuiSpacer />
-
-                <NodeAllocation<WarmPhaseInterface>
-                  phase={warmProperty}
-                  setPhaseData={setPhaseData}
-                  errors={errors}
-                  phaseData={phaseData}
-                  isShowingErrors={isShowingErrors}
-                />
-
-                <EuiFlexGroup>
-                  <EuiFlexItem grow={false} style={{ maxWidth: 188 }}>
-                    <ErrableFormRow
-                      id={`${warmProperty}-${phaseProperty('selectedReplicaCount')}`}
-                      label={
-                        <Fragment>
-                          <FormattedMessage
-                            id="xpack.indexLifecycleMgmt.warmPhase.numberOfReplicasLabel"
-                            defaultMessage="Number of replicas"
-                          />
-                          <OptionalLabel />
-                        </Fragment>
-                      }
-                      isShowingErrors={isShowingErrors}
-                      errors={errors?.selectedReplicaCount}
-                      helpText={i18n.translate(
-                        'xpack.indexLifecycleMgmt.warmPhase.replicaCountHelpText',
-                        {
-                          defaultMessage: 'By default, the number of replicas remains the same.',
-                        }
-                      )}
-                    >
-                      <EuiFieldNumber
-                        id={`${warmProperty}-${phaseProperty('selectedReplicaCount')}`}
-                        value={phaseData.selectedReplicaCount}
-                        onChange={(e) => {
-                          setPhaseData('selectedReplicaCount', e.target.value);
-                        }}
-                        min={0}
-                      />
-                    </ErrableFormRow>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-
-                <EuiSpacer size="m" />
               </Fragment>
             ) : null}
           </Fragment>
         </EuiDescribedFormGroup>
+
         {phaseData.phaseEnabled ? (
           <Fragment>
+            {/* Data tier allocation section */}
+            <DataTierAllocationField
+              description={i18nTexts.dataTierAllocation.description}
+              phase={warmProperty}
+              setPhaseData={setPhaseData}
+              isShowingErrors={isShowingErrors}
+              phaseData={phaseData}
+            />
+
+            <DescribedFormField
+              title={
+                <h3>
+                  {i18n.translate('xpack.indexLifecycleMgmt.warmPhase.replicasTitle', {
+                    defaultMessage: 'Replicas',
+                  })}
+                </h3>
+              }
+              description={i18n.translate(
+                'xpack.indexLifecycleMgmt.warmPhase.numberOfReplicasDescription',
+                {
+                  defaultMessage:
+                    'Set the number of replicas. Remains the same as the previous phase by default.',
+                }
+              )}
+              switchProps={{
+                label: i18n.translate(
+                  'xpack.indexLifecycleMgmt.editPolicy.warmPhase.numberOfReplicas.switchLabel',
+                  { defaultMessage: 'Set replicas' }
+                ),
+                initialValue: Boolean(phaseData.selectedReplicaCount),
+                onChange: (v) => {
+                  if (!v) {
+                    setPhaseData('selectedReplicaCount', '');
+                  }
+                },
+              }}
+              fullWidth
+            >
+              <ErrableFormRow
+                id={`${warmProperty}-${phaseProperty('selectedReplicaCount')}`}
+                label={
+                  <Fragment>
+                    <FormattedMessage
+                      id="xpack.indexLifecycleMgmt.warmPhase.numberOfReplicasLabel"
+                      defaultMessage="Number of replicas"
+                    />
+                    <OptionalLabel />
+                  </Fragment>
+                }
+                isShowingErrors={isShowingErrors}
+                errors={errors?.selectedReplicaCount}
+              >
+                <EuiFieldNumber
+                  id={`${warmProperty}-${phaseProperty('selectedReplicaCount')}`}
+                  value={phaseData.selectedReplicaCount}
+                  onChange={(e) => {
+                    setPhaseData('selectedReplicaCount', e.target.value);
+                  }}
+                  min={0}
+                />
+              </ErrableFormRow>
+            </DescribedFormField>
             <EuiDescribedFormGroup
               title={
                 <h3>
@@ -221,8 +242,8 @@ export class WarmPhase extends PureComponent<Props> {
                   onChange={(e) => {
                     setPhaseData(phaseProperty('shrinkEnabled'), e.target.checked);
                   }}
-                  label={shrinkLabel}
-                  aria-label={shrinkLabel}
+                  label={i18nTexts.shrinkLabel}
+                  aria-label={i18nTexts.shrinkLabel}
                   aria-controls="shrinkContent"
                 />
 
@@ -263,64 +284,13 @@ export class WarmPhase extends PureComponent<Props> {
                 </div>
               </Fragment>
             </EuiDescribedFormGroup>
-            <EuiDescribedFormGroup
-              title={
-                <h3>
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.forceMergeDataText"
-                    defaultMessage="Force merge"
-                  />
-                </h3>
-              }
-              description={
-                <EuiTextColor color="subdued">
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.forceMergeDataExplanationText"
-                    defaultMessage="Reduce the number of segments in your shard by merging smaller files and clearing deleted ones."
-                  />{' '}
-                  <LearnMoreLink docPath="indices-forcemerge.html" />
-                </EuiTextColor>
-              }
-              titleSize="xs"
-              fullWidth
-            >
-              <EuiSwitch
-                data-test-subj="forceMergeSwitch"
-                label={forcemergeLabel}
-                aria-label={forcemergeLabel}
-                checked={phaseData.forceMergeEnabled}
-                onChange={(e) => {
-                  setPhaseData(phaseProperty('forceMergeEnabled'), e.target.checked);
-                }}
-                aria-controls="forcemergeContent"
-              />
-
-              <EuiSpacer />
-              <div id="forcemergeContent" aria-live="polite" role="region">
-                {phaseData.forceMergeEnabled ? (
-                  <ErrableFormRow
-                    id={`${warmProperty}-${phaseProperty('selectedForceMergeSegments')}`}
-                    label={i18n.translate(
-                      'xpack.indexLifecycleMgmt.warmPhase.numberOfSegmentsLabel',
-                      {
-                        defaultMessage: 'Number of segments',
-                      }
-                    )}
-                    isShowingErrors={isShowingErrors}
-                    errors={errors?.selectedForceMergeSegments}
-                  >
-                    <EuiFieldNumber
-                      id={`${warmProperty}-${phaseProperty('selectedForceMergeSegments')}`}
-                      value={phaseData.selectedForceMergeSegments}
-                      onChange={(e) => {
-                        setPhaseData(phaseProperty('selectedForceMergeSegments'), e.target.value);
-                      }}
-                      min={1}
-                    />
-                  </ErrableFormRow>
-                ) : null}
-              </div>
-            </EuiDescribedFormGroup>
+            <Forcemerge
+              phase={'warm'}
+              phaseData={phaseData}
+              setPhaseData={setPhaseData}
+              isShowingErrors={isShowingErrors}
+              errors={errors}
+            />
             <SetPriorityInput<WarmPhaseInterface>
               errors={errors}
               phaseData={phaseData}
@@ -330,7 +300,7 @@ export class WarmPhase extends PureComponent<Props> {
             />
           </Fragment>
         ) : null}
-      </div>
-    );
-  }
-}
+      </>
+    </div>
+  );
+};

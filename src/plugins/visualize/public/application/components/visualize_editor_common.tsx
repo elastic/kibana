@@ -79,6 +79,7 @@ export const VisualizeEditorCommon = ({
         />
       )}
       {visInstance?.vis?.type?.isExperimental && <ExperimentalVisInfo />}
+      {visInstance?.vis?.type?.getInfoMessage?.(visInstance.vis)}
       {visInstance && (
         <EuiScreenReaderOnly>
           <h1>

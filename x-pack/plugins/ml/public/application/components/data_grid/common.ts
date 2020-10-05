@@ -37,7 +37,7 @@ import {
   OUTLIER_SCORE,
   TOP_CLASSES,
 } from '../../data_frame_analytics/common/constants';
-import { formatHumanReadableDateTimeSeconds } from '../../util/date_utils';
+import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
 import { getNestedProperty } from '../../util/object_utils';
 import { mlFieldFormatService } from '../../services/field_format_service';
 
@@ -119,11 +119,12 @@ export const getDataGridSchemasFromFieldTypes = (fieldTypes: FieldTypes, results
       schema = 'numeric';
     }
 
-    if (
-      field.includes(`${resultsField}.${FEATURE_IMPORTANCE}`) ||
-      field.includes(`${resultsField}.${TOP_CLASSES}`)
-    ) {
+    if (field.includes(`${resultsField}.${TOP_CLASSES}`)) {
       schema = 'json';
+    }
+
+    if (field.includes(`${resultsField}.${FEATURE_IMPORTANCE}`)) {
+      schema = 'featureImportance';
     }
 
     return { id: field, schema, isSortable };
@@ -250,10 +251,6 @@ export const useRenderCellValue = (
         return cellValue ? 'true' : 'false';
       }
 
-      if (typeof cellValue === 'object' && cellValue !== null) {
-        return JSON.stringify(cellValue);
-      }
-
       return cellValue;
     };
   }, [indexPattern?.fields, pagination.pageIndex, pagination.pageSize, tableItems]);
@@ -317,4 +314,17 @@ export const showDataGridColumnChartErrorMessageToast = (
       values: { error: error !== '' ? error : e },
     })
   );
+};
+
+// helper function to transform { [key]: [val] } => { [key]: val }
+// for when `fields` is used in es.search since response is always an array of values
+// since response always returns an array of values for each field
+export const getProcessedFields = (originalObj: object) => {
+  const obj: { [key: string]: any } = { ...originalObj };
+  for (const key of Object.keys(obj)) {
+    if (Array.isArray(obj[key]) && obj[key].length === 1) {
+      obj[key] = obj[key][0];
+    }
+  }
+  return obj;
 };

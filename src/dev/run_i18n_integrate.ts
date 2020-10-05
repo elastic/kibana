@@ -111,6 +111,7 @@ run(
       const reporter = new ErrorReporter();
       const messages: Map<string, { message: string }> = new Map();
       await list.run({ messages, reporter });
+      process.exitCode = 0;
     } catch (error) {
       process.exitCode = 1;
       if (error instanceof ErrorReporter) {
@@ -120,6 +121,7 @@ run(
         log.error(error);
       }
     }
+    process.exit();
   },
   {
     flags: {

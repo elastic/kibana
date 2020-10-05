@@ -4,33 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { mean } from 'lodash';
+import { EventOutcome } from '../../../common/event_outcome';
 import {
-  HTTP_RESPONSE_STATUS_CODE,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
   SERVICE_NAME,
+  EVENT_OUTCOME,
 } from '../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeFilter } from '../../../common/utils/range_filter';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getBucketSize } from '../helpers/get_bucket_size';
+import {
+  getProcessorEventForAggregatedTransactions,
+  getTransactionDurationFieldForAggregatedTransactions,
+} from '../helpers/aggregated_transactions';
 
 export async function getErrorRate({
   serviceName,
   transactionType,
   transactionName,
   setup,
+  searchAggregatedTransactions,
 }: {
   serviceName: string;
   transactionType?: string;
   transactionName?: string;
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
+  searchAggregatedTransactions: boolean;
 }) {
-  const { start, end, uiFiltersES, apmEventClient } = setup;
+  const { start, end, esFilter, apmEventClient } = setup;
 
   const transactionNamefilter = transactionName
     ? [{ term: { [TRANSACTION_NAME]: transactionName } }]
@@ -42,15 +44,21 @@ export async function getErrorRate({
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
     { range: rangeFilter(start, end) },
-    { exists: { field: HTTP_RESPONSE_STATUS_CODE } },
+    {
+      terms: { [EVENT_OUTCOME]: [EventOutcome.failure, EventOutcome.success] },
+    },
     ...transactionNamefilter,
     ...transactionTypefilter,
-    ...uiFiltersES,
+    ...esFilter,
   ];
 
   const params = {
     apm: {
-      events: [ProcessorEvent.transaction],
+      events: [
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
+      ],
     },
     body: {
       size: 0,
@@ -59,13 +67,24 @@ export async function getErrorRate({
         total_transactions: {
           date_histogram: {
             field: '@timestamp',
-            fixed_interval: getBucketSize(start, end, 'auto').intervalString,
+            fixed_interval: getBucketSize(start, end).intervalString,
             min_doc_count: 0,
             extended_bounds: { min: start, max: end },
           },
           aggs: {
-            erroneous_transactions: {
-              filter: { range: { [HTTP_RESPONSE_STATUS_CODE]: { gte: 400 } } },
+            [EVENT_OUTCOME]: {
+              terms: {
+                field: EVENT_OUTCOME,
+              },
+              aggs: {
+                count: {
+                  value_count: {
+                    field: getTransactionDurationFieldForAggregatedTransactions(
+                      searchAggregatedTransactions
+                    ),
+                  },
+                },
+              },
             },
           },
         },
@@ -78,21 +97,24 @@ export async function getErrorRate({
   const noHits = resp.hits.total.value === 0;
 
   const erroneousTransactionsRate =
-    resp.aggregations?.total_transactions.buckets.map(
-      ({
-        key,
-        doc_count: totalTransactions,
-        erroneous_transactions: erroneousTransactions,
-      }) => {
-        const errornousTransactionsCount =
-          // @ts-expect-error
-          erroneousTransactions.doc_count;
-        return {
-          x: key,
-          y: errornousTransactionsCount / totalTransactions,
-        };
-      }
-    ) || [];
+    resp.aggregations?.total_transactions.buckets.map((bucket) => {
+      const successful =
+        bucket[EVENT_OUTCOME].buckets.find(
+          (eventOutcomeBucket) =>
+            eventOutcomeBucket.key === EventOutcome.success
+        )?.count.value ?? 0;
+
+      const failed =
+        bucket[EVENT_OUTCOME].buckets.find(
+          (eventOutcomeBucket) =>
+            eventOutcomeBucket.key === EventOutcome.failure
+        )?.count.value ?? 0;
+
+      return {
+        x: bucket.key,
+        y: failed / (successful + failed),
+      };
+    }) || [];
 
   const average = mean(
     erroneousTransactionsRate

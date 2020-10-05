@@ -17,23 +17,27 @@
  * under the License.
  */
 
-import { trimEnd } from 'lodash';
-import { BehaviorSubject, throwError, timer, Subscription, defer, from, Observable } from 'rxjs';
-import { finalize, filter } from 'rxjs/operators';
-import { Toast, CoreStart, ToastsSetup, CoreSetup } from 'kibana/public';
-import { getCombinedSignal, AbortError } from '../../common/utils';
-import { IEsSearchRequest, IEsSearchResponse, ES_SEARCH_STRATEGY } from '../../common/search';
-import { ISearchOptions } from './types';
-import { getLongQueryNotification } from './long_query_notification';
+import { get, trimEnd, debounce } from 'lodash';
+import { BehaviorSubject, throwError, timer, defer, from, Observable, NEVER } from 'rxjs';
+import { catchError, finalize } from 'rxjs/operators';
+import { CoreStart, CoreSetup, ToastsSetup } from 'kibana/public';
+import {
+  getCombinedSignal,
+  AbortError,
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchOptions,
+  ES_SEARCH_STRATEGY,
+} from '../../common';
 import { SearchUsageCollector } from './collectors';
-
-const LONG_QUERY_NOTIFICATION_DELAY = 10000;
+import { SearchTimeoutError, PainlessError, isPainlessError, TimeoutErrorMode } from './errors';
+import { toMountPoint } from '../../../kibana_react/public';
 
 export interface SearchInterceptorDeps {
-  toasts: ToastsSetup;
   http: CoreSetup['http'];
   uiSettings: CoreSetup['uiSettings'];
   startServices: Promise<[CoreStart, any, unknown]>;
+  toasts: ToastsSetup;
   usageCollector?: SearchUsageCollector;
 }
 
@@ -51,59 +55,64 @@ export class SearchInterceptor {
   protected pendingCount$ = new BehaviorSubject(0);
 
   /**
-   * The subscriptions from scheduling the automatic timeout for each request.
-   * @internal
-   */
-  protected timeoutSubscriptions: Subscription = new Subscription();
-
-  /**
-   * The current long-running toast (if there is one).
-   * @internal
-   */
-  protected longRunningToast?: Toast;
-
-  /**
    * @internal
    */
   protected application!: CoreStart['application'];
 
-  /**
-   * This class should be instantiated with a `requestTimeout` corresponding with how many ms after
-   * requests are initiated that they should automatically cancel.
-   * @param toasts The `core.notifications.toasts` service
-   * @param application  The `core.application` service
-   * @param requestTimeout Usually config value `elasticsearch.requestTimeout`
+  /*
+   * @internal
    */
-  constructor(
-    protected readonly deps: SearchInterceptorDeps,
-    protected readonly requestTimeout?: number
-  ) {
+  constructor(protected readonly deps: SearchInterceptorDeps) {
     this.deps.http.addLoadingCountSource(this.pendingCount$);
 
     this.deps.startServices.then(([coreStart]) => {
       this.application = coreStart.application;
     });
+  }
 
-    // When search requests go out, a notification is scheduled allowing users to continue the
-    // request past the timeout. When all search requests complete, we remove the notification.
-    this.getPendingCount$()
-      .pipe(filter((count) => count === 0))
-      .subscribe(this.hideToast);
+  /*
+   * @returns `TimeoutErrorMode` indicating what action should be taken in case of a request timeout based on license and permissions.
+   * @internal
+   */
+  protected getTimeoutMode() {
+    return TimeoutErrorMode.UPGRADE;
+  }
+
+  /*
+   * @returns `Error` a search service specific error or the original error, if a specific error can't be recognized.
+   * @internal
+   */
+  protected handleSearchError(
+    e: any,
+    request: IKibanaSearchRequest,
+    timeoutSignal: AbortSignal,
+    appAbortSignal?: AbortSignal
+  ): Error {
+    if (timeoutSignal.aborted || get(e, 'body.message') === 'Request timed out') {
+      // Handle a client or a server side timeout
+      const err = new SearchTimeoutError(e, this.getTimeoutMode());
+
+      // Show the timeout error here, so that it's shown regardless of how an application chooses to handle errors.
+      this.showTimeoutError(err);
+      return err;
+    } else if (appAbortSignal?.aborted) {
+      // In the case an application initiated abort, throw the existing AbortError.
+      return e;
+    } else if (isPainlessError(e)) {
+      return new PainlessError(e, request);
+    } else {
+      return e;
+    }
   }
 
   /**
-   * Returns an `Observable` over the current number of pending searches. This could mean that one
-   * of the search requests is still in flight, or that it has only received partial responses.
+   * @internal
    */
-  public getPendingCount$() {
-    return this.pendingCount$.asObservable();
-  }
-
   protected runSearch(
-    request: IEsSearchRequest,
+    request: IKibanaSearchRequest,
     signal: AbortSignal,
     strategy?: string
-  ): Observable<IEsSearchResponse> {
+  ): Observable<IKibanaSearchResponse> {
     const { id, ...searchRequest } = request;
     const path = trimEnd(`/internal/search/${strategy || ES_SEARCH_STRATEGY}/${id || ''}`, '/');
     const body = JSON.stringify(searchRequest);
@@ -118,44 +127,22 @@ export class SearchInterceptor {
   }
 
   /**
-   * Searches using the given `search` method. Overrides the `AbortSignal` with one that will abort
-   * either when `cancelPending` is called, when the request times out, or when the original
-   * `AbortSignal` is aborted. Updates `pendingCount$` when the request is started/finalized.
+   * @internal
    */
-  public search(
-    request: IEsSearchRequest,
-    options?: ISearchOptions
-  ): Observable<IEsSearchResponse> {
-    // Defer the following logic until `subscribe` is actually called
-    return defer(() => {
-      if (options?.signal?.aborted) {
-        return throwError(new AbortError());
-      }
-
-      const { combinedSignal, cleanup } = this.setupTimers(options);
-      this.pendingCount$.next(this.pendingCount$.getValue() + 1);
-
-      return this.runSearch(request, combinedSignal, options?.strategy).pipe(
-        finalize(() => {
-          this.pendingCount$.next(this.pendingCount$.getValue() - 1);
-          cleanup();
-        })
-      );
-    });
-  }
-
-  protected setupTimers(options?: ISearchOptions) {
+  protected setupAbortSignal({
+    abortSignal,
+    timeout,
+  }: {
+    abortSignal?: AbortSignal;
+    timeout?: number;
+  }) {
     // Schedule this request to automatically timeout after some interval
     const timeoutController = new AbortController();
     const { signal: timeoutSignal } = timeoutController;
-    const timeout$ = timer(this.requestTimeout);
+    const timeout$ = timeout ? timer(timeout) : NEVER;
     const subscription = timeout$.subscribe(() => {
       timeoutController.abort();
     });
-    this.timeoutSubscriptions.add(subscription);
-
-    // Schedule the notification to allow users to cancel or wait beyond the timeout
-    const notificationSubscription = timer(LONG_QUERY_NOTIFICATION_DELAY).subscribe(this.showToast);
 
     // Get a combined `AbortSignal` that will be aborted whenever the first of the following occurs:
     // 1. The user manually aborts (via `cancelPending`)
@@ -164,53 +151,100 @@ export class SearchInterceptor {
     const signals = [
       this.abortController.signal,
       timeoutSignal,
-      ...(options?.signal ? [options.signal] : []),
+      ...(abortSignal ? [abortSignal] : []),
     ];
 
     const combinedSignal = getCombinedSignal(signals);
     const cleanup = () => {
-      this.timeoutSubscriptions.remove(subscription);
-      notificationSubscription.unsubscribe();
+      subscription.unsubscribe();
     };
 
     combinedSignal.addEventListener('abort', cleanup);
 
     return {
       combinedSignal,
+      timeoutSignal,
       cleanup,
     };
   }
 
   /**
-   *  @internal
+   * Right now we are throttling but we will hook this up with background sessions to show only one
+   * error notification per session.
+   * @internal
    */
-  protected showToast = () => {
-    if (this.longRunningToast) return;
-    this.longRunningToast = this.deps.toasts.addInfo(
-      {
-        title: 'Your query is taking a while',
-        text: getLongQueryNotification({
-          application: this.application,
-        }),
-      },
-      {
-        toastLifeTimeMs: 1000000,
-      }
-    );
-  };
+  private showTimeoutError = debounce(
+    (e: SearchTimeoutError) => {
+      this.deps.toasts.addDanger({
+        title: 'Timed out',
+        text: toMountPoint(e.getErrorMessage(this.application)),
+      });
+    },
+    30000,
+    { leading: true, trailing: false }
+  );
 
   /**
-   *  @internal
+   * Searches using the given `search` method. Overrides the `AbortSignal` with one that will abort
+   * either when `cancelPending` is called, when the request times out, or when the original
+   * `AbortSignal` is aborted. Updates `pendingCount$` when the request is started/finalized.
+   *
+   * @param request
+   * @options
+   * @returns `Observalbe` emitting the search response or an error.
    */
-  protected hideToast = () => {
-    if (this.longRunningToast) {
-      this.deps.toasts.remove(this.longRunningToast);
-      delete this.longRunningToast;
-      if (this.deps.usageCollector) {
-        this.deps.usageCollector.trackLongQueryDialogDismissed();
+  public search(
+    request: IKibanaSearchRequest,
+    options?: ISearchOptions
+  ): Observable<IKibanaSearchResponse> {
+    // Defer the following logic until `subscribe` is actually called
+    return defer(() => {
+      if (options?.abortSignal?.aborted) {
+        return throwError(new AbortError());
       }
+
+      const { timeoutSignal, combinedSignal, cleanup } = this.setupAbortSignal({
+        abortSignal: options?.abortSignal,
+      });
+      this.pendingCount$.next(this.pendingCount$.getValue() + 1);
+
+      return this.runSearch(request, combinedSignal, options?.strategy).pipe(
+        catchError((e: any) => {
+          return throwError(
+            this.handleSearchError(e, request, timeoutSignal, options?.abortSignal)
+          );
+        }),
+        finalize(() => {
+          this.pendingCount$.next(this.pendingCount$.getValue() - 1);
+          cleanup();
+        })
+      );
+    });
+  }
+
+  /*
+   *
+   */
+  public showError(e: Error) {
+    if (e instanceof AbortError) return;
+
+    if (e instanceof SearchTimeoutError) {
+      // The SearchTimeoutError is shown by the interceptor in getSearchError (regardless of how the app chooses to handle errors)
+      return;
     }
-  };
+
+    if (e instanceof PainlessError) {
+      this.deps.toasts.addDanger({
+        title: 'Search Error',
+        text: toMountPoint(e.getErrorMessage(this.application)),
+      });
+      return;
+    }
+
+    this.deps.toasts.addError(e, {
+      title: 'Search Error',
+    });
+  }
 }
 
 export type ISearchInterceptor = PublicMethodsOf<SearchInterceptor>;

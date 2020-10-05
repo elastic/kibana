@@ -23,7 +23,7 @@ import {
   UngroupedSearchQueryResponse,
   GroupedSearchQueryResponse,
   GroupedSearchQueryResponseRT,
-} from '../../../../common/alerting/logs/types';
+} from '../../../../common/alerting/logs/log_threshold/types';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 
 const COMPOSITE_GROUP_SIZE = 40;
@@ -50,8 +50,8 @@ export async function getChartPreviewData(
   const { rangeFilter } = buildFiltersFromCriteria(expandedAlertParams, timestampField);
 
   const query = isGrouped
-    ? getGroupedESQuery(expandedAlertParams, sourceConfiguration.configuration, indexPattern)
-    : getUngroupedESQuery(expandedAlertParams, sourceConfiguration.configuration, indexPattern);
+    ? getGroupedESQuery(expandedAlertParams, timestampField, indexPattern)
+    : getUngroupedESQuery(expandedAlertParams, timestampField, indexPattern);
 
   if (!query) {
     throw new Error('ES query could not be built from the provided alert params');

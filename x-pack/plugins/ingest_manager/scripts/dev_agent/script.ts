@@ -14,7 +14,11 @@ import {
   PostAgentEnrollRequest,
   PostAgentEnrollResponse,
 } from '../../common/types';
+import * as kibanaPackage from '../../package.json';
 
+// @ts-ignore
+// Using the ts-ignore because we are importing directly from a json to a script file
+const version = kibanaPackage.version;
 const CHECKIN_INTERVAL = 3000; // 3 seconds
 
 type Agent = Pick<_Agent, 'id' | 'access_api_key'>;
@@ -104,6 +108,7 @@ async function enroll(kibanaURL: string, apiKey: string, log: ToolingLog): Promi
         ip: '127.0.0.1',
         system: `${os.type()} ${os.release()}`,
         memory: os.totalmem(),
+        elastic: { agent: { version } },
       },
       user_provided: {
         dev_agent_version: '0.0.1',

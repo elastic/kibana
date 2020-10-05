@@ -6,7 +6,7 @@
 
 import { SearchResponse } from 'elasticsearch';
 import { ILegacyScopedClusterClient } from 'kibana/server';
-import { ResolverEvent } from '../../../../../common/endpoint/types';
+import { SafeResolverEvent } from '../../../../../common/endpoint/types';
 import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { legacyEventIndexPattern } from './legacy_event_index_pattern';
 import { MSearchQuery } from './multi_searcher';
@@ -19,7 +19,7 @@ import { MSearchQuery } from './multi_searcher';
  * @param R the is the type after transforming ES's response. Making this definable let's us set whether it is a resolver event
  * or something else.
  */
-export abstract class ResolverQuery<T, R = ResolverEvent> implements MSearchQuery {
+export abstract class ResolverQuery<T, R = SafeResolverEvent> implements MSearchQuery {
   /**
    *
    * @param indexPattern the index pattern to use in the query for finding indices with documents in ES.
@@ -77,7 +77,7 @@ export abstract class ResolverQuery<T, R = ResolverEvent> implements MSearchQuer
    * @param ids a single more multiple unique node ids (e.g. entity_id or unique_pid)
    */
   async searchAndFormat(client: ILegacyScopedClusterClient, ids: string | string[]): Promise<T> {
-    const res: SearchResponse<ResolverEvent> = await this.search(client, ids);
+    const res: SearchResponse<R> = await this.search(client, ids);
     return this.formatResponse(res);
   }
 
@@ -113,5 +113,5 @@ export abstract class ResolverQuery<T, R = ResolverEvent> implements MSearchQuer
    * @param response a SearchResponse from ES resulting from executing this query
    * @returns the translated ES response into a structured object
    */
-  public abstract formatResponse(response: SearchResponse<ResolverEvent>): T;
+  public abstract formatResponse(response: SearchResponse<R>): T;
 }

@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import each from 'lodash/each';
-import find from 'lodash/find';
-import get from 'lodash/get';
-import filter from 'lodash/filter';
+import { each, find, get, filter } from 'lodash';
 
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -21,7 +18,7 @@ import { buildConfigFromDetector } from '../util/chart_config_builder';
 import { mlResultsService } from '../services/results_service';
 import { ModelPlotOutput } from '../services/results_service/result_service_rx';
 import { Job } from '../../../common/types/anomaly_detection_jobs';
-import { EntityField } from '../..';
+import { EntityField } from '../../../common/util/anomaly_utils';
 
 function getMetricData(
   job: Job,
@@ -29,7 +26,7 @@ function getMetricData(
   entityFields: EntityField[],
   earliestMs: number,
   latestMs: number,
-  interval: string
+  intervalMs: number
 ): Observable<ModelPlotOutput> {
   if (
     isModelPlotChartableForDetector(job, detectorIndex) &&
@@ -76,7 +73,7 @@ function getMetricData(
       criteriaFields,
       earliestMs,
       latestMs,
-      interval
+      intervalMs
     );
   } else {
     const obj: ModelPlotOutput = {
@@ -96,7 +93,7 @@ function getMetricData(
         chartConfig.timeField,
         earliestMs,
         latestMs,
-        interval
+        intervalMs
       )
       .pipe(
         map((resp) => {

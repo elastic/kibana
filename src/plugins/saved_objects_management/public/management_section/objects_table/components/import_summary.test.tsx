@@ -70,7 +70,7 @@ describe('ImportSummary', () => {
     const wrapper = shallowWithI18nProvider(<ImportSummary {...props} />);
 
     expect(findHeader(wrapper).childAt(0).props()).toEqual(
-      expect.objectContaining({ values: { importCount: 1 } })
+      expect.not.objectContaining({ values: expect.anything() }) // no importCount for singular
     );
     const countCreated = findCountCreated(wrapper);
     expect(countCreated).toHaveLength(1);
@@ -90,7 +90,7 @@ describe('ImportSummary', () => {
     const wrapper = shallowWithI18nProvider(<ImportSummary {...props} />);
 
     expect(findHeader(wrapper).childAt(0).props()).toEqual(
-      expect.objectContaining({ values: { importCount: 1 } })
+      expect.not.objectContaining({ values: expect.anything() }) // no importCount for singular
     );
     expect(findCountCreated(wrapper)).toHaveLength(0);
     const countOverwritten = findCountOverwritten(wrapper);
@@ -110,7 +110,7 @@ describe('ImportSummary', () => {
     const wrapper = shallowWithI18nProvider(<ImportSummary {...props} />);
 
     expect(findHeader(wrapper).childAt(0).props()).toEqual(
-      expect.objectContaining({ values: { importCount: 1 } })
+      expect.not.objectContaining({ values: expect.anything() }) // no importCount for singular
     );
     expect(findCountCreated(wrapper)).toHaveLength(0);
     expect(findCountOverwritten(wrapper)).toHaveLength(0);

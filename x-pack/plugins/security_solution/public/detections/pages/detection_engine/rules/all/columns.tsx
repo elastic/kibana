@@ -7,7 +7,6 @@
 /* eslint-disable react/display-name */
 
 import {
-  EuiBadge,
   EuiBasicTableColumn,
   EuiTableActionsColumnType,
   EuiText,
@@ -24,7 +23,6 @@ import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 import { getRuleDetailsUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { ActionToaster } from '../../../../../common/components/toasters';
-import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import { getStatusColor } from '../../../../components/rules/rule_status/helpers';
 import { RuleSwitch } from '../../../../components/rules/rule_switch';
 import { SeverityBadge } from '../../../../components/rules/severity_badge';
@@ -39,6 +37,7 @@ import { Action } from './reducer';
 import { LocalizedDateTooltip } from '../../../../../common/components/localized_date_tooltip';
 import * as detectionI18n from '../../translations';
 import { LinkAnchor } from '../../../../../common/components/links';
+import { TagsDisplay } from './tag_display';
 
 export const getActions = (
   dispatch: React.Dispatch<Action>,
@@ -47,6 +46,7 @@ export const getActions = (
   reFetchRules: (refreshPrePackagedRule?: boolean) => void
 ) => [
   {
+    'data-test-subj': 'editRuleAction',
     description: i18n.EDIT_RULE_SETTINGS,
     icon: 'controlsHorizontal',
     name: i18n.EDIT_RULE_SETTINGS,
@@ -99,7 +99,6 @@ interface GetColumns {
   reFetchRules: (refreshPrePackagedRule?: boolean) => void;
 }
 
-// Michael: Are we able to do custom, in-table-header filters, as shown in my wireframes?
 export const getColumns = ({
   dispatch,
   dispatchToaster,
@@ -127,7 +126,8 @@ export const getColumns = ({
         </LinkAnchor>
       ),
       truncateText: true,
-      width: '24%',
+      width: '20%',
+      sortable: true,
     },
     {
       field: 'risk_score',
@@ -138,14 +138,14 @@ export const getColumns = ({
         </EuiText>
       ),
       truncateText: true,
-      width: '14%',
+      width: '10%',
     },
     {
       field: 'severity',
       name: i18n.COLUMN_SEVERITY,
       render: (value: Rule['severity']) => <SeverityBadge value={value} />,
       truncateText: true,
-      width: '16%',
+      width: '12%',
     },
     {
       field: 'status_date',
@@ -160,7 +160,7 @@ export const getColumns = ({
         );
       },
       truncateText: true,
-      width: '20%',
+      width: '14%',
     },
     {
       field: 'status',
@@ -174,21 +174,49 @@ export const getColumns = ({
           </>
         );
       },
-      width: '16%',
+      width: '12%',
       truncateText: true,
+    },
+    {
+      field: 'updated_at',
+      name: i18n.COLUMN_LAST_UPDATE,
+      render: (value: Rule['updated_at']) => {
+        return value == null ? (
+          getEmptyTagValue()
+        ) : (
+          <LocalizedDateTooltip fieldName={i18n.COLUMN_LAST_UPDATE} date={new Date(value)}>
+            <FormattedRelative value={value} />
+          </LocalizedDateTooltip>
+        );
+      },
+      sortable: true,
+      truncateText: true,
+      width: '14%',
+    },
+    {
+      field: 'version',
+      name: i18n.COLUMN_VERSION,
+      render: (value: Rule['version']) => {
+        return value == null ? (
+          getEmptyTagValue()
+        ) : (
+          <EuiText data-test-subj="version" size="s">
+            {value}
+          </EuiText>
+        );
+      },
+      truncateText: true,
+      width: '8%',
     },
     {
       field: 'tags',
       name: i18n.COLUMN_TAGS,
-      render: (value: Rule['tags']) => (
-        <TruncatableText data-test-subj="tags">
-          {value.map((tag, i) => (
-            <EuiBadge color="hollow" key={`${tag}-${i}`}>
-              {tag}
-            </EuiBadge>
-          ))}
-        </TruncatableText>
-      ),
+      render: (value: Rule['tags']) => {
+        if (value.length > 0) {
+          return <TagsDisplay tags={value} />;
+        }
+        return getEmptyTagValue();
+      },
       truncateText: true,
       width: '20%',
     },
