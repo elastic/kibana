@@ -64,6 +64,18 @@ import { MetricsServiceSetup, MetricsServiceStart } from './metrics';
 import { StatusServiceSetup } from './status';
 import { Auditor, AuditTrailSetup, AuditTrailStart } from './audit_trail';
 import { AppenderConfigType, appendersSchema, LoggingServiceSetup } from './logging';
+import { CoreUsageDataStart } from './core_usage_data';
+
+// Because of #79265 we need to explicity import, then export these types for
+// scripts/telemetry_check.js to work as expected
+import {
+  CoreUsageData,
+  CoreConfigUsageData,
+  CoreEnvironmentUsageData,
+  CoreServicesUsageData,
+} from './core_usage_data';
+
+export { CoreUsageData, CoreConfigUsageData, CoreEnvironmentUsageData, CoreServicesUsageData };
 
 export { AuditableEvent, Auditor, AuditorFactory, AuditTrailSetup } from './audit_trail';
 export { bootstrap } from './bootstrap';
@@ -349,6 +361,8 @@ export {
   StatusServiceSetup,
 } from './status';
 
+export { CoreUsageDataStart } from './core_usage_data';
+
 /**
  * Plugin specific context passed to a route handler.
  *
@@ -456,6 +470,8 @@ export interface CoreStart {
   uiSettings: UiSettingsServiceStart;
   /** {@link AuditTrailSetup} */
   auditTrail: AuditTrailStart;
+  /** @internal {@link CoreUsageDataStart} */
+  coreUsageData: CoreUsageDataStart;
 }
 
 export {
