@@ -80,9 +80,11 @@ export const TrustedAppsGrid = memo(() => {
 
   return (
     <EuiFlexGroup direction="column">
-      <EuiFlexItem grow={false}>
-        {isLoading && <EuiProgress size="xs" color="primary" />}
-      </EuiFlexItem>
+      {isLoading && (
+        <EuiFlexItem grow={false}>
+          <EuiProgress size="xs" color="primary" />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem>
         {error && (
           <div className="euiTextAlign--center">
@@ -104,11 +106,11 @@ export const TrustedAppsGrid = memo(() => {
           </EuiFlexGroup>
         )}
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        {!error && pagination.totalItemCount > 0 && (
+      {!error && pagination.totalItemCount > 0 && (
+        <EuiFlexItem grow={false}>
           <PaginationBar pagination={pagination} onChange={handlePaginationChange} />
-        )}
-      </EuiFlexItem>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 });
