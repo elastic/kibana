@@ -14,12 +14,7 @@ const ColoredSpan = styled.div`
   cursor: pointer;
 `;
 
-const getSpanStyle = (
-  position: number,
-  inFocus: boolean,
-  hexCode: string,
-  percentage: number
-) => {
+const getSpanStyle = (position: number, inFocus: boolean, hexCode: string, percentage: number) => {
   let first = position === 0 || percentage === 100;
   let last = position === 2 || percentage === 100;
   if (percentage === 100) {
