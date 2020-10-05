@@ -1,13 +1,17 @@
 [[get-started]]
 == Quick start
 
-To quickly get up and running with {kib}, set up on Cloud, then add a sample data set that you can use to explore and analyze.
+To quickly get up and running with {kib}, set up on Cloud, then add a sample data set that you can explore and analyze.
+
+When you've finished, you'll know how to:
+
+* <<explore-the-data,Explore the data with *Discover*.>>
+
+* <<view-and-analyze-the-data,Gain insight into the data with *Dashboard*.>>
 
 [float]
-=== Required privileges 
-When security is enabled, you must have `read`, `write`, and `manage` privileges
-on the `kibana_sample_data_*` indices. For more information, refer to
-{ref}/security-privileges.html[Security privileges].
+=== Before you begin 
+When security is enabled, you must have `read`, `write`, and `manage` privileges on the `kibana_sample_data_*` indices. For more information, refer to {ref}/security-privileges.html[Security privileges].
 
 [float]
 [[set-up-on-cloud]]
@@ -21,9 +25,7 @@ include::{docs-root}/shared/cloud/ess-getting-started.asciidoc[]
 
 Sample data sets come with sample visualizations, dashboards, and more to help you explore {kib} without adding your own data.
 
-. Go to the home page.
-
-. Click *Try our sample data*.
+. From the home page, click *Try our sample data*.
 
 . On the *Sample eCommerce orders* card, click *Add data*.
 +
@@ -32,12 +34,9 @@ image::getting-started/images/add-sample-data.png[]
 
 [float]
 [[explore-the-data]]
-[[query-the-data]]
 == Explore the data
 
-With *Discover*, use {ref}/query-dsl-query-string-query.html#query-string-syntax[Elasticsearch
-queries] and filters to explore your data. *Discover* displays an interactive histogram that shows the distribution of 
-of data, or documents, over time, and a table that lists the fields for each document that matches the index. By default, all fields are shown for each matching document.
+*Discover* displays an interactive histogram that shows the distribution of of data, or documents, over time, and a table that lists the fields for each document that matches the index. By default, all fields are shown for each matching document.
 
 . Open the menu, then click *Discover*.
 
@@ -46,7 +45,7 @@ of data, or documents, over time, and a table that lists the fields for each doc
 [role="screenshot"]
 image::images/tutorial-discover-2.png[]
 
-. To focus in on the documents you want to view., use the <<kuery-query,{kib} Query Language>>. In the *KQL* search field, enter:
+. To focus in on the documents you want to view, use the <<kuery-query,{kib} Query Language>>. In the *KQL* search field, enter:
 +
 [source,text]
 products.taxless_price >= 60 AND category : Women's Clothing
@@ -62,20 +61,19 @@ For example, when you add the *category* field, the table displays the product c
 +
 [role="screenshot"]
 image::images/tutorial-discover-3.png[]
-
++
 For more information, refer to <<discover, *Discover*>>.
 
 [float]
 [[view-and-analyze-the-data]]
 == View and analyze the data
 
-Gain insight into your data with *Dashboard*, which is a collection of panels that you can 
-use to view and analyze your data. Panels contain visualizations, interactive controls, Markdown, and more.
+A dashboard is a collection of panels that you can use to view and analyze the data. Panels contain visualizations, interactive controls, Markdown, and more.
 
 . Open the menu, then click *Dashboard*. 
 
 . Click *[eCommerce] Revenue Dashboard*.
-
++
 [role="screenshot"]
 image::getting-started/images/tutorial-sample-dashboard.png[]
 
@@ -100,14 +98,14 @@ For example, to view the orders for Wednesday, select *day_of_week* from the *Fi
 image::getting-started/images/tutorial-sample-filter2.png[]
 
 . When you are done, remove the filters.
-
++
 For more information, refer to <<dashboard,*Dashboard*>>.
 
 [float]
 [[create-a-visualization]]
-== Create a visualization
+=== Create a visualization
 
-Use *Lens* to create a treemap that shows the top regions and manufacturersthen, then add it to the dashboard.
+To create a treemap that shows the top regions and manufacturers, use *Lens*, then add the treemap to the dashboard.
 
 . From the {kib} toolbar, click *Edit*, then click *Create new*.
 
@@ -119,17 +117,26 @@ Use *Lens* to create a treemap that shows the top regions and manufacturersthen,
 
 * *manufacturer.keyword*
 +
+. From the visualization dropdown, select *Treemap*.
++
 [role="screenshot"]
-image::getting-started/images/tutorial-treemap.png[Treemap in Lens that shows the top regions and manufacturers from the Ecommerce sample data]
+image::getting-started/images/tutorial-visualization-dropdown.png[Visualization dropdown with Treemap selected]
 
-. Click *Save, enter a title, then click *Save and return*.
+. Click *Save*.
+
+. On the *Save Lens visualization*, enter a title and make sure *Add to Dashboard after saving* is selected, then click *Save and return*.
++
+The treemap appears as the last visualization on the dashboard.
++
+[role="screenshot"]
+image::getting-started/images/tutorial-final-dashboard.gif[Final dashboard with new treemap visualization]
 +
 For more information, refer to <<lens, *Lens*>>.
 
 [float]
-[[quick-start-next-steps]]
-== Next steps
+[[quick-start-whats-next]]
+== What's next?
 
 If you are you ready to add your own data, refer to <<connect-to-elasticsearch,Add data to {kib}>>.
 
-If you want to ingest your data, refer to <<ingest-manager, Ingest Manager>>.
+If you want to ingest your data, refer to {ingest-guide}/ingest-management-getting-started.html[Quick start: Get logs and metrics into the Elastic Stack].
