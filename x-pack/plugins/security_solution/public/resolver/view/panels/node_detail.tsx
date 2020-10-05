@@ -17,6 +17,7 @@ import { StyledDescriptionList, StyledTitle } from './styles';
 import * as selectors from '../../store/selectors';
 import * as eventModel from '../../../../common/endpoint/models/event';
 import { GeneratedText } from './panel_content_utilities';
+import { CopyablePanelField } from './copyable_panel_field';
 import { Breadcrumbs } from './breadcrumbs';
 import { processPath, processPID } from '../../models/process_event';
 import { CubeForProcess } from './cube_for_process';
@@ -131,7 +132,12 @@ const NodeDetailView = memo(function ({
       .map((entry) => {
         return {
           ...entry,
-          description: <GeneratedText>{String(entry.description)}</GeneratedText>,
+          description: (
+            <CopyablePanelField
+              textToCopy={String(entry.description)}
+              content={<GeneratedText>{String(entry.description)}</GeneratedText>}
+            />
+          ),
         };
       });
 

@@ -21,6 +21,7 @@ import {
   GeneratedText,
   noTimestampRetrievedText,
 } from './panel_content_utilities';
+import { CopyablePanelField } from './copyable_panel_field';
 import { Breadcrumbs } from './breadcrumbs';
 import * as eventModel from '../../../../common/endpoint/models/event';
 import * as selectors from '../../store/selectors';
@@ -156,7 +157,12 @@ function EventDetailFields({ event }: { event: SafeResolverEvent }) {
         namespace: <GeneratedText>{key}</GeneratedText>,
         descriptions: deepObjectEntries(value).map(([path, fieldValue]) => ({
           title: <GeneratedText>{path.join('.')}</GeneratedText>,
-          description: <GeneratedText>{String(fieldValue)}</GeneratedText>,
+          description: (
+            <CopyablePanelField
+              textToCopy={String(fieldValue)}
+              content={<GeneratedText>{String(fieldValue)}</GeneratedText>}
+            />
+          ),
         })),
       };
       returnValue.push(section);
