@@ -27,7 +27,7 @@ import {
 } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
-import { Action } from 'src/plugins/ui_actions/public';
+import { Action, ActionExecutionContext } from 'src/plugins/ui_actions/public';
 import { PanelOptionsMenu } from './panel_options_menu';
 import { IEmbeddable } from '../../embeddables';
 import { EmbeddableContext, panelBadgeTrigger, panelNotificationTrigger } from '../../triggers';
@@ -68,7 +68,14 @@ function renderNotifications(
     const context = { embeddable };
 
     let badge = notification.MenuItem ? (
-      React.createElement(uiToReactComponent(notification.MenuItem))
+      <span key={notification.id}>
+        {React.createElement(uiToReactComponent(notification.MenuItem), {
+          context: {
+            embeddable,
+            trigger: panelNotificationTrigger,
+          },
+        })}
+      </span>
     ) : (
       <EuiNotificationBadge
         data-test-subj={`embeddablePanelNotification-${notification.id}`}
