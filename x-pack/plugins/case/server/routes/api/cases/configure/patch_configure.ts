@@ -73,7 +73,9 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
           body: CaseConfigureResponseRt.encode({
             ...myCaseConfigure.saved_objects[0].attributes,
             ...patch.attributes,
-            connector: transformESConnectorToCaseConnector(patch.attributes.connector),
+            connector: transformESConnectorToCaseConnector(
+              patch.attributes.connector ?? myCaseConfigure.saved_objects[0].attributes.connector
+            ),
             version: patch.version ?? '',
           }),
         });
