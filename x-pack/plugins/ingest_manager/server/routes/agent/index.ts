@@ -16,6 +16,7 @@ import {
   AGENT_API_ROUTES,
   AGENT_API_ROUTES_7_9,
   LIMITED_CONCURRENCY_ROUTE_TAG,
+  AGENT_POLLING_REQUEST_TIMEOUT_MARGIN_MS,
 } from '../../constants';
 import {
   GetAgentsRequestSchema,
@@ -35,6 +36,7 @@ import {
   PostBulkAgentReassignRequestSchema,
   PostAgentEnrollRequestBodyJSONSchema,
   PostAgentUpgradeRequestSchema,
+  PostBulkAgentUpgradeRequestSchema,
 } from '../../types';
 import {
   getAgentsHandler,
@@ -54,7 +56,7 @@ import { postNewAgentActionHandlerBuilder } from './actions_handlers';
 import { appContextService } from '../../services';
 import { postAgentUnenrollHandler, postBulkAgentsUnenrollHandler } from './unenroll_handler';
 import { IngestManagerConfigType } from '../..';
-import { postAgentUpgradeHandler } from './upgrade_handler';
+import { postAgentUpgradeHandler, postBulkAgentsUpgradeHandler } from './upgrade_handler';
 
 const ajv = new Ajv({
   coerceTypes: true,
@@ -128,7 +130,8 @@ export const registerRoutes = (router: IRouter, config: IngestManagerConfigType)
       },
       options: {
         tags: [],
-        ...(pollingRequestTimeout
+        // If the timeout is too short, do not set socket idle timeout and rely on Kibana global socket timeout
+        ...(pollingRequestTimeout && pollingRequestTimeout > AGENT_POLLING_REQUEST_TIMEOUT_MARGIN_MS
           ? {
               timeout: {
                 idleSocket: pollingRequestTimeout,
@@ -281,6 +284,15 @@ export const registerRoutes = (router: IRouter, config: IngestManagerConfigType)
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
     postAgentUpgradeHandler
+  );
+  // bulk upgrade
+  router.post(
+    {
+      path: AGENT_API_ROUTES.BULK_UPGRADE_PATTERN,
+      validate: PostBulkAgentUpgradeRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    postBulkAgentsUpgradeHandler
   );
   // Bulk reassign
   router.post(

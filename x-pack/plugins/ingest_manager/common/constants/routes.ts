@@ -92,6 +92,7 @@ export const AGENT_API_ROUTES = {
   BULK_REASSIGN_PATTERN: `${API_ROOT}/agents/bulk_reassign`,
   STATUS_PATTERN: `${API_ROOT}/agent-status`,
   UPGRADE_PATTERN: `${API_ROOT}/agents/{agentId}/upgrade`,
+  BULK_UPGRADE_PATTERN: `${API_ROOT}/agents/bulk_upgrade`,
 };
 export const AGENT_API_ROUTES_7_9 = {
   CHECKIN_PATTERN: `${FLEET_API_ROOT_7_9}/agents/{agentId}/checkin`,

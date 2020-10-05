@@ -19,8 +19,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertestWithoutAuth = getSupertestWithoutAuth(providerContext);
   const esClient = getService('es');
 
-  // Failing: See https://github.com/elastic/kibana/issues/75241
-  describe.skip('fleet_agent_flow', () => {
+  describe('fleet_agent_flow', () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await esArchiver.load('empty_kibana');

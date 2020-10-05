@@ -192,6 +192,7 @@ export default function (providerContext: FtrProviderContext) {
           install_version: '0.1.0',
           install_status: 'installed',
           install_started_at: res.attributes.install_started_at,
+          install_source: 'registry',
         });
       });
     });

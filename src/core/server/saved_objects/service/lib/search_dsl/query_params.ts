@@ -22,7 +22,7 @@ type KueryNode = any;
 
 import { getRootPropertiesObjects, IndexMapping } from '../../../mappings';
 import { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
-import { DEFAULT_NAMESPACE_STRING } from '../utils';
+import { ALL_NAMESPACES_STRING, DEFAULT_NAMESPACE_STRING } from '../utils';
 
 /**
  * Gets the types based on the type. Uses mappings to support
@@ -84,7 +84,10 @@ function getClauseForType(
   if (registry.isMultiNamespace(type)) {
     return {
       bool: {
-        must: [{ term: { type } }, { terms: { namespaces } }],
+        must: [
+          { term: { type } },
+          { terms: { namespaces: [...namespaces, ALL_NAMESPACES_STRING] } },
+        ],
         must_not: [{ exists: { field: 'namespace' } }],
       },
     };
