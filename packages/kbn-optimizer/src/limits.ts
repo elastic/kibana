@@ -23,12 +23,13 @@ import dedent from 'dedent';
 import Yaml from 'js-yaml';
 import { createFailError, ToolingLog } from '@kbn/dev-utils';
 
-import { OptimizerConfig } from './optimizer';
+import { OptimizerConfig, getMetrics } from './optimizer';
 
+const LIMITS_PATH = require.resolve('../limits.yml');
 const diff = <T>(a: T[], b: T[]): T[] => a.filter((item) => !b.includes(item));
 
 export function readLimits() {
-  return Yaml.safeLoad(Fs.readFileSync(require.resolve('../limits.yml'), 'utf8'));
+  return Yaml.safeLoad(Fs.readFileSync(LIMITS_PATH, 'utf8'));
 }
 
 export function validateLimitsForAllBundles(log: ToolingLog, config: OptimizerConfig) {
@@ -61,4 +62,20 @@ export function validateLimitsForAllBundles(log: ToolingLog, config: OptimizerCo
   }
 
   log.success('limits.yml file valid');
+}
+
+export function updateBundleLimits(log: ToolingLog, config: OptimizerConfig) {
+  const metrics = getMetrics(log, config);
+
+  const number = (input: number) => input.toLocaleString('en').split(',').join('_');
+
+  let yaml = `pageLoadAssetSize:\n`;
+  for (const metric of metrics.sort((a, b) => a.id.localeCompare(b.id))) {
+    if (metric.group === 'page load bundle size') {
+      yaml += `  ${metric.id}: ${number(metric.value + 5000)}\n`;
+    }
+  }
+
+  Fs.writeFileSync(LIMITS_PATH, yaml);
+  log.success(`wrote updated limits to ${LIMITS_PATH}`);
 }

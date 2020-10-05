@@ -28,7 +28,7 @@ import { logOptimizerState } from './log_optimizer_state';
 import { OptimizerConfig } from './optimizer';
 import { reportOptimizerStats } from './report_optimizer_stats';
 import { runOptimizer } from './run_optimizer';
-import { validateLimitsForAllBundles } from './limits';
+import { validateLimitsForAllBundles, updateBundleLimits } from './limits';
 
 run(
   async ({ log, flags }) => {
@@ -99,14 +99,19 @@ run(
       throw createFlagError('expected --validate-limits to have no value');
     }
 
+    const updateLimits = flags['update-limits'] ?? false;
+    if (typeof updateLimits !== 'boolean') {
+      throw createFlagError('expected --update-limits to have no value');
+    }
+
     const config = OptimizerConfig.create({
       repoRoot: REPO_ROOT,
       watch,
       maxWorkerCount,
-      oss: oss && !validateLimits,
-      dist,
+      oss: oss && !(validateLimits || updateLimits),
+      dist: dist || updateLimits,
       cache,
-      examples: examples && !validateLimits,
+      examples: examples && !(validateLimits || updateLimits),
       profileWebpack,
       extraPluginScanDirs,
       inspectWorkers,
@@ -132,6 +137,10 @@ run(
     }
 
     await update$.pipe(logOptimizerState(log, config)).toPromise();
+
+    if (updateLimits) {
+      updateBundleLimits(log, config);
+    }
   },
   {
     flags: {
@@ -146,6 +155,7 @@ run(
         'inspect-workers',
         'report-stats',
         'validate-limits',
+        'update-limits',
       ],
       string: ['workers', 'scan-dir', 'filter'],
       default: {
@@ -164,11 +174,12 @@ run(
         --no-cache         disable the cache
         --filter           comma-separated list of bundle id filters, results from multiple flags are merged, * and ! are supported
         --no-examples      don't build the example plugins
-        --dist             create bundles that are suitable for inclusion in the Kibana distributable
+        --dist             create bundles that are suitable for inclusion in the Kibana distributable, enabled when running with --update-limits
         --scan-dir         add a directory to the list of directories scanned for plugins (specify as many times as necessary)
         --no-inspect-workers  when inspecting the parent process, don't inspect the workers
         --report-stats     attempt to report stats about this execution of the build to the kibana-ci-stats service using this name
         --validate-limits  validate the limits.yml config to ensure that there are limits defined for every bundle
+        --update-limits    run a build and rewrite the limits file to include the current bundle sizes +5kb
       `,
     },
   }
