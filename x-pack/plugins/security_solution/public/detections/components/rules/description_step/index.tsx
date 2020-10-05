@@ -9,6 +9,7 @@ import { isEmpty, chunk, get, pick, isNumber } from 'lodash/fp';
 import React, { memo, useState } from 'react';
 import styled from 'styled-components';
 
+import { ThreatMapping } from '../../../../../common/detection_engine/schemas/types';
 import {
   IIndexPattern,
   Filter,
@@ -36,11 +37,13 @@ import {
   buildRiskScoreDescription,
   buildRuleTypeDescription,
   buildThresholdDescription,
+  buildThreatMappingDescription,
 } from './helpers';
 import { buildMlJobDescription } from './ml_job_description';
 import { buildActionsDescription } from './actions_description';
 import { buildThrottleDescription } from './throttle_description';
 import { Type } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { THREAT_QUERY_LABEL } from './translations';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
   &.euiDescriptionList--column .euiDescriptionList__title {
@@ -122,9 +125,7 @@ export const StepRuleDescriptionComponent = <T,>({
   );
 };
 
-export const StepRuleDescription = memo(
-  StepRuleDescriptionComponent
-) as typeof StepRuleDescriptionComponent;
+export const StepRuleDescription = memo(StepRuleDescriptionComponent);
 
 export const buildListItems = <T,>(
   data: unknown,
@@ -156,6 +157,7 @@ export const addFilterStateIfNotThere = (filters: Filter[]): Filter[] => {
   });
 };
 
+/* eslint complexity: ["error", 21]*/
 export const getDescriptionItem = (
   field: string,
   label: string,
@@ -189,7 +191,7 @@ export const getDescriptionItem = (
   } else if (field === 'falsePositives') {
     const values: string[] = get(field, data);
     return buildUnorderedListArrayDescription(label, field, values);
-  } else if (Array.isArray(get(field, data))) {
+  } else if (Array.isArray(get(field, data)) && field !== 'threatMapping') {
     const values: string[] = get(field, data);
     return buildStringArrayDescription(label, field, values);
   } else if (field === 'riskScore') {
@@ -214,6 +216,22 @@ export const getDescriptionItem = (
     return buildRuleTypeDescription(label, ruleType);
   } else if (field === 'kibanaSiemAppUrl') {
     return [];
+  } else if (field === 'threatQueryBar') {
+    const filters = addFilterStateIfNotThere(get('threatQueryBar.filters', data) ?? []);
+    const query = get('threatQueryBar.query.query', data);
+    const savedId = get('threatQueryBar.saved_id', data);
+    return buildQueryBarDescription({
+      field,
+      filters,
+      filterManager,
+      query,
+      savedId,
+      indexPatterns,
+      queryLabel: THREAT_QUERY_LABEL,
+    });
+  } else if (field === 'threatMapping') {
+    const threatMap: ThreatMapping = get(field, data);
+    return buildThreatMappingDescription(label, threatMap);
   }
 
   const description: string = get(field, data);

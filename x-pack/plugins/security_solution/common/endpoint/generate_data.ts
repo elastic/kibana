@@ -110,6 +110,12 @@ const Mac: OSFields[] = [];
 
 const OS: OSFields[] = [...Windows, ...Mac, ...Linux];
 
+const POLICY_RESPONSE_STATUSES: HostPolicyResponseActionStatus[] = [
+  HostPolicyResponseActionStatus.success,
+  HostPolicyResponseActionStatus.failure,
+  HostPolicyResponseActionStatus.warning,
+];
+
 const APPLIED_POLICIES: Array<{
   name: string;
   id: string;
@@ -123,6 +129,11 @@ const APPLIED_POLICIES: Array<{
   {
     name: 'With Eventing',
     id: 'C2A9093E-E289-4C0A-AA44-8C32A414FA7A',
+    status: HostPolicyResponseActionStatus.success,
+  },
+  {
+    name: 'Detect Malware Only',
+    id: '47d7965d-6869-478b-bd9c-fb0d2bb3959f',
     status: HostPolicyResponseActionStatus.success,
   },
 ];
@@ -364,15 +375,12 @@ export class EndpointDocGenerator {
   }
 
   /**
-   * Creates new random policy id for the host to simulate new policy application
+   * Updates the current Host common record applied Policy to a different one from the list
+   * of random choices and gives it a random policy response status.
    */
-  public updatePolicyId() {
-    this.commonInfo.Endpoint.policy.applied.id = this.randomChoice(APPLIED_POLICIES).id;
-    this.commonInfo.Endpoint.policy.applied.status = this.randomChoice([
-      HostPolicyResponseActionStatus.success,
-      HostPolicyResponseActionStatus.failure,
-      HostPolicyResponseActionStatus.warning,
-    ]);
+  public updateHostPolicyData() {
+    this.commonInfo.Endpoint.policy.applied = this.randomChoice(APPLIED_POLICIES);
+    this.commonInfo.Endpoint.policy.applied.status = this.randomChoice(POLICY_RESPONSE_STATUSES);
   }
 
   private createHostData(): HostInfo {
@@ -1207,6 +1215,7 @@ export class EndpointDocGenerator {
           install_version: '0.5.0',
           install_status: 'installed',
           install_started_at: '2020-06-24T14:41:23.098Z',
+          install_source: 'registry',
         },
         references: [],
         updated_at: '2020-06-24T14:41:23.098Z',

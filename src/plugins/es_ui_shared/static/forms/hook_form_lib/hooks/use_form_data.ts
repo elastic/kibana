@@ -63,7 +63,11 @@ export const useFormData = <T extends object = FormData>(options: Options = {}):
           ? (watch as string[])
           : ([watch] as string[]);
 
-        if (valuesToWatchArray.some((value) => previousRawData.current[value] !== raw[value])) {
+        if (
+          valuesToWatchArray.some(
+            (value) => previousRawData.current[value] !== raw[value as keyof T]
+          )
+        ) {
           previousRawData.current = raw;
           // Only update the state if one of the field we watch has changed.
           setFormData(raw);

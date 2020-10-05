@@ -51,17 +51,24 @@ export const useHostsKpiHosts = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
-  const [hostsKpiHostsRequest, setHostsKpiHostsRequest] = useState<HostsKpiHostsRequestOptions>({
-    defaultIndex: indexNames,
-    factoryQueryType: HostsKpiQueries.kpiHosts,
-    filterQuery: createFilter(filterQuery),
-    id: ID,
-    timerange: {
-      interval: '12h',
-      from: startDate,
-      to: endDate,
-    },
-  });
+  const [
+    hostsKpiHostsRequest,
+    setHostsKpiHostsRequest,
+  ] = useState<HostsKpiHostsRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          factoryQueryType: HostsKpiQueries.kpiHosts,
+          filterQuery: createFilter(filterQuery),
+          id: ID,
+          timerange: {
+            interval: '12h',
+            from: startDate,
+            to: endDate,
+          },
+        }
+      : null
+  );
 
   const [hostsKpiHostsResponse, setHostsKpiHostsResponse] = useState<HostsKpiHostsArgs>({
     hosts: 0,
@@ -76,7 +83,11 @@ export const useHostsKpiHosts = ({
   });
 
   const hostsKpiHostsSearch = useCallback(
-    (request: HostsKpiHostsRequestOptions) => {
+    (request: HostsKpiHostsRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -134,9 +145,11 @@ export const useHostsKpiHosts = ({
   useEffect(() => {
     setHostsKpiHostsRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
         defaultIndex: indexNames,
+        factoryQueryType: HostsKpiQueries.kpiHosts,
         filterQuery: createFilter(filterQuery),
+        id: ID,
         timerange: {
           interval: '12h',
           from: startDate,
