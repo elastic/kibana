@@ -250,6 +250,10 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
     return null;
   }
 
+  const triggerLinkA11yText = i18n.translate('xpack.lens.configure.editConfig', {
+    defaultMessage: 'Click to edit configuration or drag to move',
+  });
+
   if (currentFieldIsInvalid) {
     return (
       <EuiToolTip
@@ -264,7 +268,7 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
             })}
           </p>
         }
-        anchorClassName="lnsLayerPanel__anchor"
+        anchorClassName="eui-displayBlock"
       >
         <EuiLink
           color="danger"
@@ -272,12 +276,8 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
           className="lnsLayerPanel__triggerLink"
           onClick={props.onClick}
           data-test-subj="lns-dimensionTrigger"
-          aria-label={i18n.translate('xpack.lens.configure.editConfig', {
-            defaultMessage: 'Edit configuration',
-          })}
-          title={i18n.translate('xpack.lens.configure.editConfig', {
-            defaultMessage: 'Edit configuration',
-          })}
+          aria-label={triggerLinkA11yText}
+          title={triggerLinkA11yText}
         >
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
@@ -296,12 +296,8 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
       className="lnsLayerPanel__triggerLink"
       onClick={props.onClick}
       data-test-subj="lns-dimensionTrigger"
-      aria-label={i18n.translate('xpack.lens.configure.editConfig', {
-        defaultMessage: 'Edit configuration',
-      })}
-      title={i18n.translate('xpack.lens.configure.editConfig', {
-        defaultMessage: 'Edit configuration',
-      })}
+      aria-label={triggerLinkA11yText}
+      title={triggerLinkA11yText}
     >
       {uniqueLabel}
     </EuiLink>
