@@ -5,9 +5,10 @@
  */
 
 import React from 'react';
-import { EuiBasicTable, EuiButtonIcon, EuiCopy } from '@elastic/eui';
+import { EuiBasicTable, EuiButtonIcon, EuiCopy, EuiEmptyPrompt } from '@elastic/eui';
 import { useActions, useValues } from 'kea';
 import { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -126,6 +127,32 @@ export const CredentialsList: React.FC = () => {
     totalItemCount: meta.page ? meta.page.total_results : 0,
     hidePerPageOptions: true,
   };
+
+  if (items.length < 1) {
+    return (
+      <EuiEmptyPrompt
+        iconType="editorStrike"
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.enterpriseSearch.appSearch.credentials.empty.title"
+              defaultMessage="No API Keys have been created yet."
+            />
+          </h2>
+        }
+        body={
+          <>
+            <p>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.appSearch.credentials.empty.body"
+                defaultMessage="Click Create a key to make your first one."
+              />
+            </p>
+          </>
+        }
+      />
+    );
+  }
 
   const onTableChange = ({ page }: CriteriaWithPagination<IApiToken>) => {
     const { index: current } = page;

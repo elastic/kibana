@@ -11,10 +11,10 @@ import { useValues, useActions } from 'kea';
 
 import { CredentialsList } from './credentials_list';
 import { Credential } from './credential';
-import { EuiBasicTable, EuiCopy } from '@elastic/eui';
+import { EuiBasicTable, EuiCopy, EuiEmptyPrompt } from '@elastic/eui';
+import { HiddenText } from '../../../../shared/hidden_text';
 import { IApiToken } from '../types';
 import { ADMIN, PRIVATE } from '../constants';
-import { HiddenText } from '../../../../shared/hidden_text';
 
 describe('Credentials', () => {
   const apiToken: IApiToken = {
@@ -56,7 +56,11 @@ describe('Credentials', () => {
   });
 
   it('renders', () => {
-    mockKea({});
+    mockKea({
+      values: {
+        apiTokens: [apiToken],
+      },
+    });
     const wrapper = shallow(<CredentialsList />);
     expect(wrapper.find(EuiBasicTable)).toHaveLength(1);
   });
@@ -87,10 +91,24 @@ describe('Credentials', () => {
     });
   });
 
+  describe('empty state', () => {
+    it('renders an EuiEmptyState when no credentials are available', () => {
+      mockKea({
+        values: {
+          apiTokens: [],
+        },
+      });
+      const wrapper = shallow(<CredentialsList />);
+      expect(wrapper.exists(EuiEmptyPrompt)).toBe(true);
+      expect(wrapper.exists(EuiBasicTable)).toBe(false);
+    });
+  });
+
   describe('pagination', () => {
     it('derives pagination from meta object', () => {
       mockKea({
         values: {
+          apiTokens: [apiToken],
           meta: {
             page: {
               current: 6,
@@ -115,6 +133,7 @@ describe('Credentials', () => {
     it('will default pagination values if `page` is not available', () => {
       mockKea({
         values: {
+          apiTokens: [apiToken],
           meta: {},
         },
       });
@@ -139,6 +158,9 @@ describe('Credentials', () => {
 
     beforeEach(() => {
       mockKea({
+        values: {
+          apiTokens: [apiToken],
+        },
         actions: {
           showCredentialsForm,
           deleteApiKey,
@@ -303,7 +325,10 @@ describe('Credentials', () => {
     it('will handle pagination by calling `fetchCredentials`', () => {
       const fetchCredentials = jest.fn();
 
-      mockKea({ actions: { fetchCredentials } });
+      mockKea({
+        values: { apiTokens: [apiToken] },
+        actions: { fetchCredentials },
+      });
       const wrapper = shallow(<CredentialsList />);
       const onChange = wrapper.find(EuiBasicTable).props().onChange;
 
