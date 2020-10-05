@@ -25,11 +25,7 @@ import 'angular-mocks';
 
 import { getAngularModule } from '../get_inner_angular';
 import { initTableVisLegacyModule } from '../table_vis_legacy_module';
-import { coreMock } from '../../../../core/public/mocks';
-
-jest.mock('../../../kibana_legacy/public/angular/angular_config', () => ({
-  configureAppAngularModule: () => {},
-}));
+import { coreMock } from '../../../../../core/public/mocks';
 
 interface Sort {
   columnIndex: number;
