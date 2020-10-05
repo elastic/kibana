@@ -86,12 +86,9 @@ function CustomExtentsOptions({
   return (
     <>
       <SwitchOption
-        label={i18n.translate(
-          'visTypeXy.controls.pointSeries.valueAxes.scaleToDataBoundsLabel',
-          {
-            defaultMessage: 'Scale to data bounds',
-          }
-        )}
+        label={i18n.translate('visTypeXy.controls.pointSeries.valueAxes.scaleToDataBoundsLabel', {
+          defaultMessage: 'Scale to data bounds',
+        })}
         paramName="defaultYExtents"
         value={axisScale.defaultYExtents}
         setValue={onDefaultYExtentsChange}

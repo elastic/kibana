@@ -46,6 +46,7 @@ import { DataPublicPluginStart } from '../../data/public';
 import { setFormatService, setDataActions, setKibanaLegacy } from './services';
 import { KibanaLegacyStart } from '../../kibana_legacy/public';
 import { NEW_CHART_UI } from '../../vis_type_xy/public';
+import { BasicVislibParams } from './types';
 
 export interface VisTypeVislibDependencies {
   uiSettings: IUiSettingsClient;
@@ -87,7 +88,9 @@ export class VisTypeVislibPlugin implements Plugin<void, void> {
         createHeatmapVisTypeDefinition,
         createGaugeVisTypeDefinition,
         createGoalVisTypeDefinition,
-      ].forEach((vis) => visualizations.createBaseVisualization(vis(visualizationDependencies)));
+      ].forEach((vis) =>
+        visualizations.createBaseVisualization<BasicVislibParams>(vis(visualizationDependencies))
+      );
       [createVisTypeVislibVisFn(), createPieVisFn()].forEach(expressions.registerFunction);
     } else {
       // Register all vis types
@@ -100,7 +103,9 @@ export class VisTypeVislibPlugin implements Plugin<void, void> {
         createHorizontalBarVisTypeDefinition,
         createGaugeVisTypeDefinition,
         createGoalVisTypeDefinition,
-      ].forEach((vis) => visualizations.createBaseVisualization(vis(visualizationDependencies)));
+      ].forEach((vis) =>
+        visualizations.createBaseVisualization<BasicVislibParams>(vis(visualizationDependencies))
+      );
       [createVisTypeVislibVisFn(), createPieVisFn()].forEach(expressions.registerFunction);
     }
   }

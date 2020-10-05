@@ -23,7 +23,11 @@ import React, { RefObject } from 'react';
 import { Position } from '@elastic/charts';
 
 import { mountReactNode } from '../../../core/public/utils';
-import { VisParams, ExprVis } from '../../visualizations/public';
+import {
+  VisParams,
+  ExprVis,
+  VisualizationControllerConstructor,
+} from '../../visualizations/public';
 
 import { VisTypeVislibDependencies } from './plugin';
 import { VisLegend, CUSTOM_LEGEND_VIS_TYPES } from './vislib/components/legend';
@@ -36,7 +40,9 @@ const legendClassName = {
   right: 'visLib--legend-right',
 };
 
-export const createVislibVisController = (deps: VisTypeVislibDependencies) => {
+export const createVislibVisController = (
+  deps: VisTypeVislibDependencies
+): VisualizationControllerConstructor => {
   return class VislibVisController {
     unmount: (() => void) | null = null;
     visParams?: VisParams;

@@ -18,12 +18,16 @@
  */
 
 import { xyVisTypes } from '../../vis_type_xy/public';
+import { BaseVisTypeOptions } from '../../visualizations/public';
 
 import { createVislibVisController } from './vis_controller';
 import { VisTypeVislibDependencies } from './plugin';
-import { toExpressionAst } from './to_expression_ast';
+import { toExpressionAst } from './to_ast';
+import { BasicVislibParams } from './types';
 
-export const createHorizontalBarVisTypeDefinition = (deps: VisTypeVislibDependencies) => ({
+export const createHorizontalBarVisTypeDefinition = (
+  deps: VisTypeVislibDependencies
+): BaseVisTypeOptions<BasicVislibParams> => ({
   ...xyVisTypes.horizontalBar(),
   toExpressionAst,
   visualization: createVislibVisController(deps),

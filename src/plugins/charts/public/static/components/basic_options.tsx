@@ -20,7 +20,6 @@
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { Position } from '@elastic/charts';
 
 import { VisOptionsProps } from '../../../../vis_default_editor/public';
 
@@ -29,7 +28,7 @@ import { SelectOption } from './select';
 
 interface BasicOptionsParams {
   addTooltip: boolean;
-  legendPosition: Position;
+  legendPosition: string;
 }
 
 function BasicOptions<VisParams extends BasicOptionsParams>({

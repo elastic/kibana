@@ -21,11 +21,12 @@ import moment from 'moment';
 import { get } from 'lodash';
 
 import { Vis, VisToExpressionAst } from '../../visualizations/public';
+import { EsaggsExpressionFunctionDefinition } from '../../data/public';
+import { buildExpression, buildExpressionFunction } from '../../expressions/public';
+
 import { DateHistogramParams, Dimensions, HistogramParams, VisParams } from './types';
 import { VisTypeXyExpressionFunctionDefinition } from './xy_vis_fn';
-import { buildExpression, buildExpressionFunction } from '../../expressions/public';
 import { ChartType } from '../common';
-import { EsaggsExpressionFunctionDefinition } from '../../data/public';
 
 export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params, schemas) => {
   const dimensions: Dimensions = {

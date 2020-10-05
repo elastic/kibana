@@ -58,9 +58,15 @@ interface VisualizationBaseVisTypeOptions extends CommonBaseVisTypeOptions {
   visualization: VisualizationControllerConstructor | undefined;
 }
 
+interface CombinedVisTypeOptions<TVisParams> extends CommonBaseVisTypeOptions {
+  toExpressionAst: VisToExpressionAst<TVisParams>;
+  visualization: VisualizationControllerConstructor;
+}
+
 export type BaseVisTypeOptions<TVisParams = VisParams> =
   | ExpressionBaseVisTypeOptions<TVisParams>
-  | VisualizationBaseVisTypeOptions;
+  | VisualizationBaseVisTypeOptions
+  | CombinedVisTypeOptions<TVisParams>;
 
 export class BaseVisType<TVisParams = VisParams> {
   name: string;

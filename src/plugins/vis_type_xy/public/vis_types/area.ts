@@ -37,7 +37,7 @@ import {
   XyVisTypeDefinition,
 } from '../types';
 import { VisComponent } from '../vis_component';
-import { toExpressionAst } from '../to_expression_ast';
+import { toExpressionAst } from '../to_ast';
 import { ChartType } from '../../common';
 import { getConfigCollections } from '../editor/collections';
 import { getOptionTabs } from '../editor/common_config';

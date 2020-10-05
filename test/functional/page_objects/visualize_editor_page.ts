@@ -319,18 +319,18 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       await header.waitUntilLoadingHasFinished();
     }
 
-    public async toggleAggregationEditor(agg: string) {
+    public async toggleAggregationEditor(agg: string | number) {
       await find.clickByCssSelector(
         `[data-test-subj="visEditorAggAccordion${agg}"] .euiAccordion__button`
       );
       await header.waitUntilLoadingHasFinished();
     }
 
-    public async toggleOtherBucket(agg = 2) {
+    public async toggleOtherBucket(agg: string | number = 2) {
       await testSubjects.click(`visEditorAggAccordion${agg} > otherBucketSwitch`);
     }
 
-    public async toggleMissingBucket(agg = 2) {
+    public async toggleMissingBucket(agg: string | number = 2) {
       await testSubjects.click(`visEditorAggAccordion${agg} > missingBucketSwitch`);
     }
 

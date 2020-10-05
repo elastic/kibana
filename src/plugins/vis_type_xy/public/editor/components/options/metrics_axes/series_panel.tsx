@@ -58,13 +58,10 @@ function SeriesPanel({ seriesParams, ...chartProps }: SeriesPanelProps) {
           initialIsOpen={index === 0}
           buttonContent={chart.data.label}
           buttonContentClassName="visEditorSidebar__aggGroupAccordionButtonContent eui-textTruncate"
-          aria-label={i18n.translate(
-            'visTypeXy.controls.pointSeries.seriesAccordionAriaLabel',
-            {
-              defaultMessage: 'Toggle {agg} options',
-              values: { agg: chart.data.label },
-            }
-          )}
+          aria-label={i18n.translate('visTypeXy.controls.pointSeries.seriesAccordionAriaLabel', {
+            defaultMessage: 'Toggle {agg} options',
+            values: { agg: chart.data.label },
+          })}
         >
           <>
             <EuiSpacer size="m" />

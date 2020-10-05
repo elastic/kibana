@@ -30,7 +30,6 @@ export function plugin(initializerContext: PluginInitializerContext) {
 /** @public static code */
 export { Vis } from './vis';
 export { TypesService } from './vis_types/types_service';
-export type { BaseVisTypeOptions } from './vis_types/base_vis_type';
 export { VISUALIZE_EMBEDDABLE_TYPE, VIS_EVENT_TO_TRIGGER } from './embeddable';
 export { VisualizationContainer, VisualizationNoResults } from './components';
 export { getSchemas as getVisSchemas } from './legacy/build_pipeline';
@@ -48,6 +47,7 @@ export { SchemaConfig, BuildPipelineParams } from './legacy/build_pipeline';
 export { updateOldState } from './legacy/vis_update_state';
 export { PersistedState } from './persisted_state';
 export {
+  VisualizationControllerConstructor,
   VisualizationController,
   SavedVisState,
   ISavedVis,

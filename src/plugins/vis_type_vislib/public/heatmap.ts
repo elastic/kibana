@@ -18,20 +18,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
 import { Position } from '@elastic/charts';
+
 import { RangeValues, Schemas } from '../../vis_default_editor/public';
 import { AggGroupNames } from '../../data/public';
 import { ColorSchemas, ColorSchemaParams } from '../../charts/public';
-import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
+import { VIS_EVENT_TO_TRIGGER, BaseVisTypeOptions } from '../../visualizations/public';
 import { ValueAxis, ScaleType, AxisType } from '../../vis_type_xy/public';
 
 import { HeatmapOptions, getHeatmapCollections } from './editor';
 import { createVislibVisController } from './vis_controller';
 import { TimeMarker } from './vislib/visualizations/time_marker';
-import { CommonVislibParams } from './types';
+import { CommonVislibParams, BasicVislibParams } from './types';
 import { VisTypeVislibDependencies } from './plugin';
-import { toExpressionAst } from './to_expression_ast';
+import { toExpressionAst } from './to_ast';
 
 export interface HeatmapVisParams extends CommonVislibParams, ColorSchemaParams {
   type: 'heatmap';
@@ -45,7 +45,9 @@ export interface HeatmapVisParams extends CommonVislibParams, ColorSchemaParams 
   times: TimeMarker[];
 }
 
-export const createHeatmapVisTypeDefinition = (deps: VisTypeVislibDependencies) => ({
+export const createHeatmapVisTypeDefinition = (
+  deps: VisTypeVislibDependencies
+): BaseVisTypeOptions<BasicVislibParams> & { events: any } => ({
   name: 'heatmap',
   title: i18n.translate('visTypeVislib.heatmap.heatmapTitle', { defaultMessage: 'Heat Map' }),
   icon: 'heatmap',

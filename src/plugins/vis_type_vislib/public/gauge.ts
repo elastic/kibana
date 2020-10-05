@@ -22,11 +22,12 @@ import { i18n } from '@kbn/i18n';
 import { ColorMode, ColorSchemas, ColorSchemaParams, Labels, Style } from '../../charts/public';
 import { RangeValues, Schemas } from '../../vis_default_editor/public';
 import { AggGroupNames } from '../../data/public';
+import { BaseVisTypeOptions } from '../../visualizations/public';
 
 import { createVislibVisController } from './vis_controller';
 import { VisTypeVislibDependencies } from './plugin';
-import { toExpressionAst } from './to_expression_ast';
-import { Alignment, GaugeType } from './types';
+import { toExpressionAst } from './to_ast';
+import { Alignment, GaugeType, BasicVislibParams } from './types';
 import { getGaugeCollections, GaugeOptions } from './editor';
 
 export interface Gauge extends ColorSchemaParams {
@@ -57,7 +58,9 @@ export interface GaugeVisParams {
   gauge: Gauge;
 }
 
-export const createGaugeVisTypeDefinition = (deps: VisTypeVislibDependencies) => ({
+export const createGaugeVisTypeDefinition = (
+  deps: VisTypeVislibDependencies
+): BaseVisTypeOptions<BasicVislibParams> => ({
   name: 'gauge',
   title: i18n.translate('visTypeVislib.gauge.gaugeTitle', { defaultMessage: 'Gauge' }),
   icon: 'visGauge',
