@@ -20,7 +20,11 @@ import { SavedSearchQuery } from '../../../../../contexts/ml';
 
 import { defaultSearchQuery, DataFrameAnalyticsConfig, SEARCH_SIZE } from '../../../../common';
 
-import { ExpandableSection, ExpandableSectionProps } from '../expandable_section';
+import {
+  ExpandableSection,
+  ExpandableSectionProps,
+  HEADER_ITEMS_LOADING,
+} from '../expandable_section';
 import { IndexPatternPrompt } from '../index_pattern_prompt';
 
 const showingDocs = i18n.translate(
@@ -75,7 +79,7 @@ const getResultsSectionHeaderItems = (
             ]
           : []),
       ]
-    : 'loading';
+    : HEADER_ITEMS_LOADING;
 };
 
 interface ExpandableSectionResultsProps {

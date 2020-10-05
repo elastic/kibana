@@ -23,7 +23,11 @@ import {
 } from '../../../analytics_management/components/analytics_list/common';
 import { ExpandedRow } from '../../../analytics_management/components/analytics_list/expanded_row';
 
-import { ExpandableSection, ExpandableSectionProps } from './expandable_section';
+import {
+  ExpandableSection,
+  ExpandableSectionProps,
+  HEADER_ITEMS_LOADING,
+} from './expandable_section';
 
 const getAnalyticsSectionHeaderItems = (
   expandedRowItem: DataFrameAnalyticsListRow | undefined
@@ -61,7 +65,7 @@ const getAnalyticsSectionHeaderItems = (
           value: expandedRowItem.config.dest.index,
         },
       ]
-    : 'loading';
+    : HEADER_ITEMS_LOADING;
 };
 
 interface ExpandableSectionAnalyticsProps {

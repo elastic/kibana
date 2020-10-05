@@ -29,11 +29,13 @@ const isHeaderItems = (arg: any): arg is HeaderItem[] => {
   return Array.isArray(arg);
 };
 
+export const HEADER_ITEMS_LOADING = 'header_items_loading';
+
 export interface ExpandableSectionProps {
   content: ReactNode;
   contentPadding?: boolean;
   docsLink?: ReactNode;
-  headerItems?: HeaderItem[] | 'loading';
+  headerItems?: HeaderItem[] | typeof HEADER_ITEMS_LOADING;
   isExpanded?: boolean;
   dataTestId: string;
   title: ReactNode;
@@ -74,7 +76,7 @@ export const ExpandableSection: FC<ExpandableSectionProps> = ({
           </EuiFlexItem>
           {docsLink !== undefined && <EuiFlexItem grow={false}>{docsLink}</EuiFlexItem>}
         </EuiFlexGroup>
-        {headerItems === 'loading' && <EuiLoadingContent lines={1} />}
+        {headerItems === HEADER_ITEMS_LOADING && <EuiLoadingContent lines={1} />}
         {isHeaderItems(headerItems) && (
           <EuiFlexGroup>
             {headerItems.map(({ label, value, id }) => (

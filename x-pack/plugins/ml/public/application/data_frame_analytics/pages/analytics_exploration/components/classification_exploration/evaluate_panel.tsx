@@ -38,7 +38,7 @@ import {
   ANALYSIS_CONFIG_TYPE,
 } from '../../../../common/analytics';
 
-import { ExpandableSection } from '../expandable_section';
+import { ExpandableSection, HEADER_ITEMS_LOADING } from '../expandable_section';
 
 import {
   getColumnData,
@@ -342,7 +342,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
                     ]
                   : []),
               ]
-            : 'loading'
+            : HEADER_ITEMS_LOADING
         }
         contentPadding={true}
         content={
