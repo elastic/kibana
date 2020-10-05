@@ -132,11 +132,11 @@ export const RangePopover = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFieldNumber
-              value={isFinite(to) ? Number(to) : ''}
+              value={isValidNumber(to) ? Number(to) : ''}
               onChange={({ target }) => {
                 const newRange = {
                   ...tempRange,
-                  to: target.value !== '' ? Number(target.value) : -Infinity,
+                  to: target.value !== '' ? Number(target.value) : Infinity,
                 };
                 setTempRange(newRange);
                 saveRangeAndReset(newRange);
@@ -208,15 +208,15 @@ export const AdvancedRangeEditor = ({
 
   return (
     <EuiFormRow
-      label={i18n.translate('xpack.lens.indexPattern.ranges.intervals', {
-        defaultMessage: 'Intervals',
+      label={i18n.translate('xpack.lens.indexPattern.ranges.customRanges', {
+        defaultMessage: 'Ranges',
       })}
       labelAppend={
         <EuiText size="xs">
           <EuiLink color="danger" onClick={onToggleEditor}>
             <EuiIcon size="s" type="cross" color="danger" />{' '}
-            {i18n.translate('xpack.lens.indexPattern.ranges.customIntervalsRemoval', {
-              defaultMessage: 'Remove custom intervals',
+            {i18n.translate('xpack.lens.indexPattern.ranges.customRangesRemoval', {
+              defaultMessage: 'Remove custom ranges',
             })}
           </EuiLink>
         </EuiText>
@@ -286,8 +286,8 @@ export const AdvancedRangeEditor = ({
             addNewRange();
             setIsOpenByCreation(true);
           }}
-          label={i18n.translate('xpack.lens.indexPattern.ranges.addInterval', {
-            defaultMessage: 'Add interval',
+          label={i18n.translate('xpack.lens.indexPattern.ranges.addRange', {
+            defaultMessage: 'Add range',
           })}
         />
       </>

@@ -27,6 +27,7 @@ import * as APIKeysService from '../../api_keys';
 import {
   AGENT_SAVED_OBJECT_TYPE,
   AGENT_UPDATE_ACTIONS_INTERVAL_MS,
+  AGENT_POLLING_REQUEST_TIMEOUT_MARGIN_MS,
   AGENT_POLICY_ROLLOUT_RATE_LIMIT_INTERVAL_MS,
   AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL,
 } from '../../../constants';
@@ -37,8 +38,6 @@ import {
 } from '../actions';
 import { appContextService } from '../../app_context';
 import { toPromiseAbortable, AbortError, createRateLimiter } from './rxjs_utils';
-
-const RATE_LIMIT_MAX_DELAY_MS = 5 * 60 * 1000; // 5 minutes
 
 function getInternalUserSOClient() {
   const fakeRequest = ({
@@ -116,10 +115,21 @@ export async function createAgentActionFromPolicyAction(
   agent: Agent,
   policyAction: AgentPolicyAction
 ) {
-  // Transform the policy action for agent version <=  7.9 for BWC
+  // Transform the policy action for agent version <=  7.9.x for BWC
   const agentVersion = semver.parse((agent.local_metadata?.elastic as any)?.agent?.version);
   const agentPolicyAction: AgentPolicyAction | AgentPolicyActionV7_9 =
-    agentVersion && semver.lt(agentVersion, '7.10.0')
+    agentVersion &&
+    semver.lt(
+      agentVersion,
+      // A prerelease tag is added here so that agent versions with prerelease tags can be compared
+      // correctly using `semvar`
+      '7.10.0-SNAPSHOT',
+      // `@types/semvar` is out of date with the version of `semvar` we use and doesn't have a
+      // corresponding release version we can update the typing to :( so, the typing error is
+      // suppressed here even though it is supported by `semvar`
+      // @ts-expect-error
+      { includePrerelease: true }
+    )
       ? {
           ...policyAction,
           type: 'CONFIG_CHANGE',
@@ -155,19 +165,29 @@ export async function createAgentActionFromPolicyAction(
   return [newAgentAction];
 }
 
+function getPollingTimeoutMs() {
+  const pollingTimeoutMs = appContextService.getConfig()?.fleet.pollingRequestTimeout ?? 0;
+  // Set a timeout 20s before the real timeout to have a chance to respond an empty response before socket timeout
+  return Math.max(
+    pollingTimeoutMs - AGENT_POLLING_REQUEST_TIMEOUT_MARGIN_MS,
+    AGENT_POLLING_REQUEST_TIMEOUT_MARGIN_MS
+  );
+}
+
 export function agentCheckinStateNewActionsFactory() {
   // Shared Observables
   const agentPolicies$ = new Map<string, Observable<AgentPolicyAction>>();
   const newActions$ = createNewActionsSharedObservable();
   // Rx operators
-  const pollingTimeoutMs = appContextService.getConfig()?.fleet.pollingRequestTimeout ?? 0;
+  const pollingTimeoutMs = getPollingTimeoutMs();
+
   const rateLimiterIntervalMs =
     appContextService.getConfig()?.fleet.agentPolicyRolloutRateLimitIntervalMs ??
     AGENT_POLICY_ROLLOUT_RATE_LIMIT_INTERVAL_MS;
   const rateLimiterRequestPerInterval =
     appContextService.getConfig()?.fleet.agentPolicyRolloutRateLimitRequestPerInterval ??
     AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL;
-  const rateLimiterMaxDelay = Math.min(RATE_LIMIT_MAX_DELAY_MS, pollingTimeoutMs);
+  const rateLimiterMaxDelay = pollingTimeoutMs;
 
   const rateLimiter = createRateLimiter(
     rateLimiterIntervalMs,
@@ -193,10 +213,7 @@ export function agentCheckinStateNewActionsFactory() {
     }
 
     const stream$ = agentPolicy$.pipe(
-      timeout(
-        // Set a timeout 3s before the real timeout to have a chance to respond an empty response before socket timeout
-        Math.max(pollingTimeoutMs - 3000, 3000)
-      ),
+      timeout(pollingTimeoutMs),
       filter(
         (action) =>
           agent.policy_id !== undefined &&
