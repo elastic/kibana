@@ -371,7 +371,7 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       if (showConfirmModal) {
         await retry.waitFor(
           'confirm modal to show',
-          async () => await testSubjects.exists('visualizeConfirmModal')
+          async () => await testSubjects.exists('appLeaveConfirmModal')
         );
         await testSubjects.exists('confirmModalConfirmButton');
         await testSubjects.click('confirmModalConfirmButton');
