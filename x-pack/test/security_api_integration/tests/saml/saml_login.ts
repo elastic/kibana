@@ -9,7 +9,11 @@ import url from 'url';
 import { delay } from 'bluebird';
 import expect from '@kbn/expect';
 import request, { Cookie } from 'request';
-import { getLogoutRequest, getSAMLRequestId, getSAMLResponse } from '../../fixtures/saml_tools';
+import {
+  getLogoutRequest,
+  getSAMLRequestId,
+  getSAMLResponse,
+} from '../../fixtures/saml/saml_tools';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
