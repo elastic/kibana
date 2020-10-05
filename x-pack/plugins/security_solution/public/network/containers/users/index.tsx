@@ -80,6 +80,7 @@ export const useNetworkUsers = ({
           factoryQueryType: NetworkQueries.users,
           filterQuery: createFilter(filterQuery),
           flowTarget,
+          id,
           ip,
           pagination: generateTablePaginationOptions(activePage, limit),
           sort,

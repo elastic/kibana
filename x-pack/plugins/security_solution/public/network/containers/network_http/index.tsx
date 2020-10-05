@@ -82,6 +82,7 @@ export const useNetworkHttp = ({
           defaultIndex: indexNames,
           factoryQueryType: NetworkQueries.http,
           filterQuery: createFilter(filterQuery),
+          id: ID,
           ip,
           pagination: generateTablePaginationOptions(activePage, limit),
           sort: sort as SortField,

@@ -5,7 +5,7 @@
  */
 
 import { noop } from 'lodash/fp';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import { ESTermQuery } from '../../../../common/typed_json';
@@ -73,6 +73,7 @@ export const useNetworkTopCountries = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
+  const queryId = useMemo(() => `${ID}-${flowTarget}`, [flowTarget]);
 
   const [
     networkTopCountriesRequest,
@@ -84,6 +85,7 @@ export const useNetworkTopCountries = ({
           factoryQueryType: NetworkQueries.topCountries,
           filterQuery: createFilter(filterQuery),
           flowTarget,
+          id: queryId,
           pagination: generateTablePaginationOptions(activePage, limit),
           sort,
           timerange: {
@@ -115,7 +117,7 @@ export const useNetworkTopCountries = ({
     NetworkTopCountriesArgs
   >({
     networkTopCountries: [],
-    id: `${ID}-${flowTarget}`,
+    id: queryId,
     inspect: {
       dsl: [],
       response: [],
@@ -200,7 +202,7 @@ export const useNetworkTopCountries = ({
         factoryQueryType: NetworkQueries.topCountries,
         filterQuery: createFilter(filterQuery),
         flowTarget,
-        id: ID,
+        id: queryId,
         pagination: generateTablePaginationOptions(activePage, limit),
         sort,
         timerange: {
@@ -214,7 +216,18 @@ export const useNetworkTopCountries = ({
       }
       return prevRequest;
     });
-  }, [activePage, indexNames, endDate, filterQuery, limit, startDate, sort, skip, flowTarget]);
+  }, [
+    activePage,
+    indexNames,
+    endDate,
+    filterQuery,
+    limit,
+    startDate,
+    sort,
+    skip,
+    flowTarget,
+    queryId,
+  ]);
 
   useEffect(() => {
     networkTopCountriesSearch(networkTopCountriesRequest);

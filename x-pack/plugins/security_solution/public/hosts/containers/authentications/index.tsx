@@ -88,6 +88,7 @@ export const useAuthentications = ({
           docValueFields: docValueFields ?? [],
           factoryQueryType: HostsQueries.authentications,
           filterQuery: createFilter(filterQuery),
+          id: ID,
           pagination: generateTablePaginationOptions(activePage, limit),
           timerange: {
             interval: '12h',
