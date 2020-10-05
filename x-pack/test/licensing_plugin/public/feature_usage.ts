@@ -25,19 +25,6 @@ export default function (ftrContext: FtrProviderContext) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'security']);
 
-  const registerFeature = async (featureName: string, licenseType: LicenseType) => {
-    await browser.executeAsync(
-      async (feature, type, cb) => {
-        const { setup } = window._coreProvider;
-        const licensing: LicensingPluginSetup = setup.plugins.licensing;
-        await licensing.featureUsage.register(feature, type);
-        cb();
-      },
-      featureName,
-      licenseType
-    );
-  };
-
   const notifyFeatureUsage = async (featureName: string, lastUsed: number) => {
     await browser.executeAsync(
       async (feature, time, cb) => {
@@ -57,12 +44,10 @@ export default function (ftrContext: FtrProviderContext) {
     });
 
     it('allows to register features to the server', async () => {
-      await registerFeature('test-client-A', 'gold');
-      await registerFeature('test-client-B', 'enterprise');
-
       const response = await supertest.get('/api/licensing/feature_usage').expect(200);
       const features = response.body.features.map(({ name }: FeatureUsage) => name);
 
+      // These were registered by the plugin in ../plugins/test_feature_usage
       expect(features).to.contain('test-client-A');
       expect(features).to.contain('test-client-B');
     });
