@@ -174,8 +174,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     } catch (error) {
       this.logger.warn('Unable to update legacy telemetry configs.');
     }
-    // Set the mark in the ReplySubject so all the methods that require this method to be completed before working, can move on
-    this.oldUiSettingsHandled$.next(true);
+    // Set the mark in the AsyncSubject as complete so all the methods that require this method to be completed before working, can move on
     this.oldUiSettingsHandled$.complete();
   }
 
