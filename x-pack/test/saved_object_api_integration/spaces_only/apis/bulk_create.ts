@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
 import { SPACES } from '../../common/lib/spaces';
 import { testCaseFailures, getTestScenarios } from '../../common/lib/saved_object_test_utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -39,6 +38,7 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
       ...fail409(!overwrite && spaceId === SPACE_2_ID),
       expectedNamespaces,
     },
+    { ...CASES.MULTI_NAMESPACE_ALL_SPACES, ...fail409(!overwrite) },
     {
       ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
       ...fail409(!overwrite || (spaceId !== DEFAULT_SPACE_ID && spaceId !== SPACE_1_ID)),
@@ -59,6 +59,8 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
     { ...CASES.NEW_SINGLE_NAMESPACE_OBJ, expectedNamespaces },
     { ...CASES.NEW_MULTI_NAMESPACE_OBJ, expectedNamespaces },
     CASES.NEW_NAMESPACE_AGNOSTIC_OBJ,
+    CASES.NEW_EACH_SPACE_OBJ,
+    CASES.NEW_ALL_SPACES_OBJ,
   ];
 };
 
@@ -73,21 +75,7 @@ export default function ({ getService }: FtrProviderContext) {
     return createTestDefinitions(testCases, false, overwrite, {
       spaceId,
       singleRequest: true,
-    }).concat(
-      ['namespace', 'namespaces'].map((key) => ({
-        title: `(bad request) when ${key} is specified on the saved object`,
-        request: [{ type: 'isolatedtype', id: 'some-id', [key]: 'any-value' }] as any,
-        responseStatusCode: 400,
-        responseBody: async (response: Record<string, any>) => {
-          expect(response.body).to.eql({
-            statusCode: 400,
-            error: 'Bad Request',
-            message: `[request body.0.${key}]: definition for this key is missing`,
-          });
-        },
-        overwrite,
-      }))
-    );
+    });
   };
 
   describe('_bulk_create', () => {

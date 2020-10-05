@@ -6,6 +6,7 @@
 
 import {
   CpuUsageAlert,
+  MissingMonitoringDataAlert,
   DiskUsageAlert,
   NodesChangedAlert,
   ClusterHealthAlert,
@@ -19,6 +20,7 @@ import {
   ALERT_CLUSTER_HEALTH,
   ALERT_LICENSE_EXPIRATION,
   ALERT_CPU_USAGE,
+  ALERT_MISSING_MONITORING_DATA,
   ALERT_DISK_USAGE,
   ALERT_NODES_CHANGED,
   ALERT_LOGSTASH_VERSION_MISMATCH,
@@ -31,6 +33,7 @@ export const BY_TYPE = {
   [ALERT_CLUSTER_HEALTH]: ClusterHealthAlert,
   [ALERT_LICENSE_EXPIRATION]: LicenseExpirationAlert,
   [ALERT_CPU_USAGE]: CpuUsageAlert,
+  [ALERT_MISSING_MONITORING_DATA]: MissingMonitoringDataAlert,
   [ALERT_DISK_USAGE]: DiskUsageAlert,
   [ALERT_NODES_CHANGED]: NodesChangedAlert,
   [ALERT_LOGSTASH_VERSION_MISMATCH]: LogstashVersionMismatchAlert,
