@@ -24,13 +24,5 @@ Then(`it displays list of relevant js errors`, () => {
       .eq(0)
       .invoke('text')
       .should('eq', 'Error messageTest CaptureErrorImpacted page loads100.0 %');
-
-    cy.get('tr.euiTableRow', DEFAULT_TIMEOUT)
-      .eq(1)
-      .invoke('text')
-      .should(
-        'eq',
-        'Error messageUncaught Error: Test Error in dashboardImpacted page loads100.0 %'
-      );
   });
 });
