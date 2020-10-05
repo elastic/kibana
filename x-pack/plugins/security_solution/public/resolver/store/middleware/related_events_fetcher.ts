@@ -30,68 +30,64 @@ export function RelatedEventsFetcher(
     // Update this each time before fetching data (or even if we don't fetch data) so that subsequent actions that call this (concurrently) will have up to date info.
     last = newParams;
 
+    async function fetchEvents({
+      nodeID,
+      eventCategory,
+      cursor,
+    }: {
+      nodeID: string;
+      eventCategory: string;
+      cursor: string | null;
+    }) {
+      let result: ResolverPaginatedEvents | null = null;
+      try {
+        if (cursor) {
+          result = await dataAccessLayer.eventsWithEntityIDAndCategory(
+            nodeID,
+            eventCategory,
+            cursor
+          );
+        } else {
+          result = await dataAccessLayer.eventsWithEntityIDAndCategory(nodeID, eventCategory);
+        }
+      } catch (error) {
+        api.dispatch({
+          type: 'serverFailedToReturnNodeEventsInCategory',
+          payload: {
+            nodeID,
+            eventCategory,
+            cursor,
+          },
+        });
+      }
+
+      if (result) {
+        api.dispatch({
+          type: 'serverReturnedNodeEventsInCategory',
+          payload: {
+            events: result.events,
+            eventCategory,
+            cursor: result.nextEvent,
+            nodeID,
+          },
+        });
+      }
+    }
+
     // If the panel view params have changed and the current panel view is either `nodeEventsInCategory` or `eventDetail`, then fetch the related events for that nodeID.
     if (!isEqual(newParams, oldParams)) {
       if (newParams.panelView === 'nodeEventsInCategory') {
         const nodeID = newParams.panelParameters.nodeID;
-
-        const result:
-          | ResolverPaginatedEvents
-          | undefined = await dataAccessLayer.eventsWithEntityIDAndCategory(
+        fetchEvents({
           nodeID,
-          newParams.panelParameters.eventCategory
-        );
-
-        if (result) {
-          api.dispatch({
-            type: 'serverReturnedNodeEventsInCategory',
-            payload: {
-              events: result.events,
-              eventCategory: newParams.panelParameters.eventCategory,
-              cursor: result.nextEvent,
-              nodeID,
-              lastCursorRequested: null,
-            },
-          });
-        }
+          eventCategory: newParams.panelParameters.eventCategory,
+          cursor: null,
+        });
       }
     } else if (isLoadingMoreEvents) {
       const nodeEventsInCategory = state.data.nodeEventsInCategory;
       if (nodeEventsInCategory !== undefined) {
-        const { nodeID, eventCategory, cursor } = nodeEventsInCategory;
-        let result: ResolverPaginatedEvents | null = null;
-        try {
-          if (cursor) {
-            result = await dataAccessLayer.eventsWithEntityIDAndCategory(
-              nodeID,
-              eventCategory,
-              cursor
-            );
-          } else {
-            result = await dataAccessLayer.eventsWithEntityIDAndCategory(nodeID, eventCategory);
-          }
-        } catch (error) {
-          api.dispatch({
-            type: 'serverFailedToReturnNodeEventsInCategory',
-            payload: {
-              nodeID,
-              eventCategory,
-              cursor,
-            },
-          });
-        }
-
-        if (result) {
-          api.dispatch({
-            type: 'serverReturnedNodeEventsInCategory',
-            payload: {
-              events: result.events,
-              eventCategory,
-              cursor: result.nextEvent,
-              nodeID,
-            },
-          });
-        }
+        fetchEvents(nodeEventsInCategory);
       }
     }
   };

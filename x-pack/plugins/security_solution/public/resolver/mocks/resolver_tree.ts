@@ -25,7 +25,7 @@ export function mockTreeWithOneNodeAndTwoPagesOfRelatedEvents({
   for (let i = 0; i < eventsToGenerate; i++) {
     const newEvent = mockEndpointEvent({
       entityID: originID,
-      eventID: 'test',
+      eventID: `test-${i}`,
       eventType: 'access',
       eventCategory: 'registry',
       timestamp: 1600863932318,

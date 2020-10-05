@@ -75,7 +75,7 @@ export const NodeEventsInCategory = memo(function ({
             >
               <p>
                 <FormattedMessage
-                  id="xpack.securitySolution.endpoint.resolver.panel.nodeEventsByType.errorPrimary"
+                  id="xpack.securitySolution.endpoint.resolver.panel.nodeEventsByType.errorSecondary"
                   defaultMessage="An error occurred when fetching the events."
                 />
               </p>
