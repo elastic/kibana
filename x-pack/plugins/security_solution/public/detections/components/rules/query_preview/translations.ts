@@ -55,10 +55,10 @@ export const QUERY_PREVIEW_NOISE_WARNING = i18n.translate(
   }
 );
 
-export const QUERY_PREVIEW_NO_HITS_WARNING = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryNoHitsWarning',
+export const QUERY_PREVIEW_NO_HITS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryPreview.queryNoHits',
   {
-    defaultMessage: 'No hits were found with your current query. Consider widening your query.',
+    defaultMessage: 'No hits were found.',
   }
 );
 

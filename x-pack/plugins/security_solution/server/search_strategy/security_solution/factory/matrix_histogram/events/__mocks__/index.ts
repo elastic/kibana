@@ -98,7 +98,6 @@ export const expectedThresholdDsl = {
       eventActionGroup: {
         terms: {
           field: 'host.name',
-          missing: 'All others',
           order: { _count: 'desc' },
           size: 10,
           min_doc_count: 200,

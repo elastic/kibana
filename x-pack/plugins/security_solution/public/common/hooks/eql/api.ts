@@ -71,11 +71,16 @@ export const getEqlPreview = async ({
                   '@timestamp': {
                     gte: toTime,
                     lte: fromTime,
+                    format: 'strict_date_optional_time',
                   },
                 },
               },
               query,
-              size: 50,
+              // EQL requires a cap, otherwise it defaults to 10
+              // It also sorts on ascending order, capping it at
+              // something smaller like 20, made it so that some of
+              // the more recent events weren't returned
+              size: 100,
             },
           },
         },
@@ -87,7 +92,7 @@ export const getEqlPreview = async ({
       .toPromise();
 
     if (query.indexOf('sequence') !== -1) {
-      return getSequenceAggs(response, toTime, fromTime);
+      return getSequenceAggs(response, interval, toTime, fromTime);
     } else {
       return getEqlAggsData(response, interval, toTime, fromTime);
     }

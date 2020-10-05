@@ -25,7 +25,7 @@ import * as i18n from './translations';
 import { Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { BarChart } from '../../../../common/components/charts/barchart';
-import { HITS_THRESHOLD, getHistogramConfig, getTimeframeOptions } from './helpers';
+import { getHistogramConfig, getTimeframeOptions } from './helpers';
 import { ChartData } from '../../../../common/components/charts/common';
 import { InspectQuery } from '../../../../common/store/inputs/model';
 import { InspectButton } from '../../../../common/components/inspect';
@@ -65,6 +65,7 @@ interface PreviewQueryHistogramProps {
   ruleType: Type;
   errorExists: boolean;
   isDisabled: boolean;
+  warnings: string[];
   onPreviewClick: (arg: Unit) => void;
 }
 
@@ -82,10 +83,10 @@ export const PreviewQueryHistogram = ({
   ruleType,
   errorExists,
   isDisabled,
+  warnings,
 }: PreviewQueryHistogramProps) => {
   const [timeframeOptions, setTimeframeOptions] = useState<EuiSelectOption[]>([]);
   const [showHistogram, setShowHistogram] = useState(false);
-  const [noiseWarningThreshold, setNoiseWarningThreshold] = useState(1);
   const [timeframe, setTimeframe] = useState<Unit>('h');
   const { setQuery, isInitializing } = useGlobalTime();
   const ruleTypeRef = useRef<Type>('query');
@@ -94,7 +95,6 @@ export const PreviewQueryHistogram = ({
     target: { value },
   }: React.ChangeEvent<HTMLSelectElement>): void => {
     setTimeframe(value as Unit);
-    setNoiseWarningThreshold(HITS_THRESHOLD[value]);
     setShowHistogram(false);
   };
 
@@ -187,22 +187,25 @@ export const PreviewQueryHistogram = ({
               />
             </EuiFlexItem>
           </GraphContainer>
-          <EuiSpacer />
         </>
       )}
-      {showHistogram && totalHits > noiseWarningThreshold && (
-        <EuiCallOut color="warning" iconType="help">
-          <EuiText>
-            <p>{i18n.QUERY_PREVIEW_NOISE_WARNING}</p>
-          </EuiText>
-        </EuiCallOut>
-      )}
+      {warnings.length > 0 &&
+        warnings.map((warning) => (
+          <>
+            <EuiSpacer size="s" />
+            <EuiCallOut color="warning" iconType="help">
+              <EuiText>
+                <p>{warning}</p>
+              </EuiText>
+            </EuiCallOut>
+          </>
+        ))}
       {showHistogram && !isLoading && !errorExists && totalHits === 0 && (
-        <EuiCallOut color="warning" iconType="help">
+        <EuiCallOut color="primary" iconType="help">
           <EuiFlexGroup direction="row" justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiText>
-                <p>{i18n.QUERY_PREVIEW_NO_HITS_WARNING}</p>
+                <p>{i18n.QUERY_PREVIEW_NO_HITS}</p>
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

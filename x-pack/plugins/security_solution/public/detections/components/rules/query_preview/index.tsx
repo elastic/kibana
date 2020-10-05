@@ -159,21 +159,24 @@ export const PreviewQuery = ({
     totalHits: number;
     data: ChartData[];
     inspect: InspectQuery;
+    warnings: string[];
   } => {
     if (ruleType === 'eql' && eqlQueryResult != null) {
       return {
         totalHits: eqlQueryResult.totalCount,
         data: eqlQueryResult.data,
         inspect: eqlQueryResult.inspect,
+        warnings: eqlQueryResult.warnings,
       };
     } else if (customQueryResult != null) {
       return {
         totalHits: customQueryResult.totalCount,
         data: customQueryResult.data,
         inspect: customQueryResult.inspect,
+        warnings: [],
       };
     } else {
-      return { totalHits: 0, data: [], inspect: { dsl: [], response: [] } };
+      return { totalHits: 0, data: [], inspect: { dsl: [], response: [] }, warnings: [] };
     }
   }, [ruleType, eqlQueryResult, customQueryResult]);
 
@@ -204,6 +207,7 @@ export const PreviewQuery = ({
       ruleType={ruleType}
       errorExists={customQueryError != null || eqlError != null}
       isDisabled={isDisabled}
+      warnings={queryResult.warnings}
     />
   );
 };

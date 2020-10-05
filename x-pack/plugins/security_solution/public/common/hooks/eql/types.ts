@@ -12,6 +12,7 @@ export interface EqlPreviewResponse {
   lte: string;
   gte: string;
   inspect: InspectResponse;
+  warnings: string[];
 }
 
 export interface Source {

@@ -11,8 +11,11 @@ import { InspectResponse } from '../../../types';
 import { EqlPreviewResponse, Source } from './types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { EqlSearchResponse } from '../../../../server/lib/types';
+import { HITS_THRESHOLD } from '../../../detections/components/rules/query_preview/helpers';
 
 type EqlAggBuckets = Record<string, { timestamp: string; total: number }>;
+
+export const EQL_QUERY_EVENT_SIZE = 100;
 
 // Calculates which 5 min bucket segment, event should be
 // sorted into
@@ -28,6 +31,30 @@ export const calculateBucketForDay = (eventTimestamp: number, relativeNow: numbe
   const diff: number = relativeNow - eventTimestamp;
   const minutes: number = Math.floor(diff / 60000);
   return Math.ceil(minutes / 60);
+};
+
+export const constructWarnings = (timestampIssue: boolean, hits: number, range: Unit): string[] => {
+  let warnings: string[] = [];
+
+  if (timestampIssue) {
+    warnings = ['Unable to find "@timestamp" field on events'];
+  }
+
+  if (hits === EQL_QUERY_EVENT_SIZE) {
+    warnings = [
+      ...warnings,
+      `Hit query cap size of ${EQL_QUERY_EVENT_SIZE}. This query could produce more hits than the ${EQL_QUERY_EVENT_SIZE} shown`,
+    ];
+  }
+
+  if (hits > HITS_THRESHOLD[range]) {
+    warnings = [
+      ...warnings,
+      'Noise warning: This rule may cause a lot of noise. Consider narrowing your query. This is based on a linear progression of 1 alert per hour.',
+    ];
+  }
+
+  return warnings;
 };
 
 export const formatInspect = (
@@ -61,12 +88,16 @@ export const getEqlAggsData = (
   const accumulator: EqlAggBuckets = getInterval(range, relativeNow);
   const events = response.rawResponse.body.hits.events ?? [];
   const totalCount = response.rawResponse.body.hits.total.value;
+  let timestampNotFound = false;
+
   const buckets = events.reduce<EqlAggBuckets>((acc, hit) => {
-    if (hit._source['@timestamp'] == null) {
-      throw new Error('No event timestamp found');
+    const timestamp = hit._source['@timestamp'];
+    if (timestamp == null) {
+      timestampNotFound = true;
+      return acc;
     }
 
-    const eventTimestamp: number = Date.parse(hit._source['@timestamp']);
+    const eventTimestamp: number = Date.parse(timestamp);
     const bucket =
       range === 'h'
         ? calculateBucketForHour(eventTimestamp, relativeNow)
@@ -80,15 +111,20 @@ export const getEqlAggsData = (
     return { x: Number(buckets[key].timestamp), y: buckets[key].total, g: 'hits' };
   });
 
+  const isAllZeros = data.every(({ y }) => y === 0);
+
+  const warnings = constructWarnings(timestampNotFound, totalCount, range);
+
   return {
     data,
-    totalCount,
+    totalCount: isAllZeros ? 0 : totalCount,
     lte: from,
     gte: to,
     inspect: {
       dsl,
       response: inspectResponse,
     },
+    warnings,
   };
 };
 
@@ -121,14 +157,21 @@ export const getInterval = (range: Unit, relativeNow: number): EqlAggBuckets => 
 
 export const getSequenceAggs = (
   response: EqlSearchStrategyResponse<EqlSearchResponse<Source>>,
+  range: Unit,
   to: string,
   from: string
 ): EqlPreviewResponse => {
   const { dsl, response: inspectResponse } = formatInspect(response);
   const sequences = response.rawResponse.body.hits.sequences ?? [];
   const totalCount = response.rawResponse.body.hits.total.value;
+  let timestampNotFound = false;
+
   const data = sequences.map((sequence, i) => {
     return sequence.events.map((seqEvent) => {
+      if (seqEvent._source['@timestamp'] == null) {
+        timestampNotFound = true;
+        return {};
+      }
       return {
         x: seqEvent._source['@timestamp'],
         y: 1,
@@ -136,6 +179,8 @@ export const getSequenceAggs = (
       };
     });
   });
+
+  const warnings = constructWarnings(timestampNotFound, totalCount, range);
 
   return {
     data: data.flat(),
@@ -146,5 +191,6 @@ export const getSequenceAggs = (
       dsl,
       response: inspectResponse,
     },
+    warnings,
   };
 };

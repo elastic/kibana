@@ -61,7 +61,7 @@ export const buildEventsHistogramQuery = ({
         eventActionGroup: {
           terms: {
             field: threshold.field ?? stackByField,
-            ...missing,
+            ...(threshold.field != null ? {} : missing),
             order: {
               _count: 'desc',
             },
