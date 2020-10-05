@@ -315,12 +315,12 @@ describe('getOperationTypesForField', () => {
               },
               Object {
                 "field": "bytes",
-                "operationType": "min",
+                "operationType": "max",
                 "type": "field",
               },
               Object {
                 "field": "bytes",
-                "operationType": "max",
+                "operationType": "min",
                 "type": "field",
               },
               Object {
@@ -336,6 +336,11 @@ describe('getOperationTypesForField', () => {
               Object {
                 "field": "source",
                 "operationType": "cardinality",
+                "type": "field",
+              },
+              Object {
+                "field": "bytes",
+                "operationType": "median",
                 "type": "field",
               },
             ],
