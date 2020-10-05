@@ -91,16 +91,15 @@ export function actionsMenuContent(
       },
       onClick: (item) => {
         const indexPatternNames = getIndexPatternNames();
-        const jobIndicesAvailable = item.datafeedIndices.every((dfiName) => {
-          return indexPatternNames.some((ipName) => ipName === dfiName);
-        });
+        const indexPatternTitle = item.datafeedIndices.join(',');
+        const jobIndicesAvailable = indexPatternNames.includes(indexPatternTitle);
 
         if (!jobIndicesAvailable) {
           getToastNotifications().addDanger(
             i18n.translate('xpack.ml.jobsList.managementActions.noSourceIndexPatternForClone', {
               defaultMessage:
-                'Unable to clone the anomaly detection job {jobId}. No index pattern available for source index.',
-              values: { jobId: item.id },
+                'Unable to clone the anomaly detection job {jobId}. No index pattern exists for index {indexPatternTitle}.',
+              values: { jobId: item.id, indexPatternTitle },
             })
           );
         } else {
