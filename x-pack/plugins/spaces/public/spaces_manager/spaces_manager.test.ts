@@ -104,4 +104,24 @@ describe('SpacesManager', () => {
       );
     });
   });
+
+  describe('#getShareSavedObjectPermissions', () => {
+    it('retrieves share permissions for the specified type and returns result', async () => {
+      const coreStart = coreMock.createStart();
+      const shareToAllSpaces = Symbol();
+      coreStart.http.get.mockResolvedValue({ shareToAllSpaces });
+      const spacesManager = new SpacesManager(coreStart.http);
+      expect(coreStart.http.get).toHaveBeenCalledTimes(1); // initial call to get active space
+
+      const result = await spacesManager.getShareSavedObjectPermissions('foo');
+      expect(coreStart.http.get).toHaveBeenCalledTimes(2);
+      expect(coreStart.http.get).toHaveBeenLastCalledWith(
+        '/internal/spaces/_share_saved_object_permissions',
+        {
+          query: { type: 'foo' },
+        }
+      );
+      expect(result).toEqual({ shareToAllSpaces });
+    });
+  });
 });

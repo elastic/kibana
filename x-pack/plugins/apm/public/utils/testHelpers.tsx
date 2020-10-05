@@ -12,7 +12,7 @@ import enzymeToJson from 'enzyme-to-json';
 import { Location } from 'history';
 import moment from 'moment';
 import { Moment } from 'moment-timezone';
-import { render, waitForElement } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { APMConfig } from '../../server';
@@ -24,6 +24,8 @@ import {
   ESSearchRequest,
 } from '../../typings/elasticsearch';
 import { MockApmPluginContextWrapper } from '../context/ApmPluginContext/MockApmPluginContext';
+import { UrlParamsProvider } from '../context/UrlParamsContext';
+import { UIFilters } from '../../typings/ui_filters';
 
 const originalConsoleWarn = console.warn; // eslint-disable-line no-console
 /**
@@ -67,14 +69,16 @@ export async function getRenderedHref(Component: React.FC, location: Location) {
   const el = render(
     <MockApmPluginContextWrapper>
       <MemoryRouter initialEntries={[location]}>
-        <Component />
+        <UrlParamsProvider>
+          <Component />
+        </UrlParamsProvider>
       </MemoryRouter>
     </MockApmPluginContextWrapper>
   );
-
-  await waitForElement(() => el.container.querySelector('a'));
-
   const a = el.container.querySelector('a');
+
+  await waitFor(() => {}, { container: a! });
+
   return a ? a.getAttribute('href') : '';
 }
 
@@ -115,7 +119,8 @@ interface MockSetup {
   apmEventClient: any;
   internalClient: any;
   config: APMConfig;
-  uiFiltersES: ESFilter[];
+  uiFilters: UIFilters;
+  esFilter: ESFilter[];
   indices: {
     /* eslint-disable @typescript-eslint/naming-convention */
     'apm_oss.sourcemapIndices': string;
@@ -176,7 +181,8 @@ export async function inspectSearchParams(
         },
       }
     ) as APMConfig,
-    uiFiltersES: [{ term: { 'my.custom.ui.filter': 'foo-bar' } }],
+    uiFilters: { environment: 'test' },
+    esFilter: [{ term: { 'service.environment': 'test' } }],
     indices: {
       /* eslint-disable @typescript-eslint/naming-convention */
       'apm_oss.sourcemapIndices': 'myIndex',

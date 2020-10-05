@@ -29,6 +29,8 @@ import { getDefaultSpec } from './default_spec';
 import { createInspectorAdapters } from './vega_inspector';
 import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
 
+import { getInfoMessage } from './components/experimental_map_vis_info';
+
 export const createVegaTypeDefinition = (dependencies: VegaVisualizationDependencies) => {
   const requestHandler = createVegaRequestHandler(dependencies);
   const visualization = createVegaVisualization(dependencies);
@@ -36,6 +38,7 @@ export const createVegaTypeDefinition = (dependencies: VegaVisualizationDependen
   return {
     name: 'vega',
     title: 'Vega',
+    getInfoMessage,
     description: i18n.translate('visTypeVega.type.vegaDescription', {
       defaultMessage: 'Create custom visualizations using Vega and Vega-Lite',
       description: 'Vega and Vega-Lite are product names and should not be translated',
