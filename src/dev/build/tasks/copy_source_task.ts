@@ -35,6 +35,7 @@ export const CopySource: Task = {
         '!src/fixtures/**',
         '!src/cli/cluster/**',
         '!src/cli/repl/**',
+        '!src/cli/dev.js',
         '!src/functional_test_runner/**',
         '!src/dev/**',
         '!src/setup_node_env/babel_register/index.js',
