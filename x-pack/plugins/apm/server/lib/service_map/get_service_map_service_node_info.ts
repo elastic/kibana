@@ -8,7 +8,6 @@ import {
   TRANSACTION_REQUEST,
   TRANSACTION_PAGE_LOAD,
 } from '../../../common/transaction_types';
-import { UIFilters } from '../../../typings/ui_filters';
 import {
   SERVICE_NAME,
   METRIC_SYSTEM_CPU_PERCENT,
@@ -53,9 +52,8 @@ export async function getServiceMapServiceNodeInfo({
   serviceName,
   setup,
   searchAggregatedTransactions,
-  uiFilters,
-}: Options & { serviceName: string; uiFilters: UIFilters }) {
-  const { start, end } = setup;
+}: Options & { serviceName: string }) {
+  const { start, end, uiFilters } = setup;
 
   const filter: ESFilter[] = [
     { range: rangeFilter(start, end) },
@@ -105,7 +103,8 @@ async function getErrorStats({
 }) {
   const setupWithBlankUiFilters = {
     ...setup,
-    uiFiltersES: getEnvironmentUiFilterES(environment),
+    uiFilters: { environment },
+    esFilter: getEnvironmentUiFilterES(environment),
   };
   const { noHits, average } = await getErrorRate({
     setup: setupWithBlankUiFilters,

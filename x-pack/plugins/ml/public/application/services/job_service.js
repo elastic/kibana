@@ -15,7 +15,7 @@ import { isWebUrl } from '../util/url_utils';
 import { ML_DATA_PREVIEW_COUNT } from '../../../common/util/job_utils';
 import { TIME_FORMAT } from '../../../common/constants/time_format';
 import { parseInterval } from '../../../common/util/parse_interval';
-import { validateTimeRange } from '../util/date_utils';
+import { validateTimeRange } from '../../../common/util/date_utils';
 
 let jobs = [];
 let datafeedIds = {};
