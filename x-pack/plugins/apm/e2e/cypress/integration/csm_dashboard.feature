@@ -10,7 +10,7 @@ Feature: CSM Dashboard
     Then should have correct client metrics
 
   Scenario: JS Errors
-    When a user is on the user experience
+    When a user browses the APM UI application for RUM Data
     Then it displays list of relevant js errors
 
   Scenario: Percentile select
