@@ -17,8 +17,8 @@ import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import { getCoreVitalTooltipMessage, Thresholds } from './CoreVitalItem';
-import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
+import { getCoreVitalTooltipMessage, Thresholds } from './core_vital_item';
+import { useUiSetting$ } from '../../../../../../../src/plugins/kibana_react/public';
 import {
   LEGEND_NEEDS_IMPROVEMENT_LABEL,
   LEGEND_GOOD_LABEL,
@@ -37,9 +37,7 @@ const StyledSpan = styled.span<{
 }>`
   &:hover {
     background-color: ${(props) =>
-      props.darkMode
-        ? euiDarkVars.euiColorLightestShade
-        : euiLightVars.euiColorLightestShade};
+      props.darkMode ? euiDarkVars.euiColorLightestShade : euiLightVars.euiColorLightestShade};
   }
 `;
 
@@ -50,20 +48,11 @@ interface Props {
   title: string;
 }
 
-export function PaletteLegends({
-  ranks,
-  title,
-  onItemHover,
-  thresholds,
-}: Props) {
+export function PaletteLegends({ ranks, title, onItemHover, thresholds }: Props) {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
   const palette = euiPaletteForStatus(3);
-  const labels = [
-    LEGEND_GOOD_LABEL,
-    LEGEND_NEEDS_IMPROVEMENT_LABEL,
-    LEGEND_POOR_LABEL,
-  ];
+  const labels = [LEGEND_GOOD_LABEL, LEGEND_NEEDS_IMPROVEMENT_LABEL, LEGEND_POOR_LABEL];
 
   return (
     <EuiFlexGroup responsive={false} gutterSize="s">
@@ -79,19 +68,14 @@ export function PaletteLegends({
           }}
         >
           <EuiToolTip
-            content={getCoreVitalTooltipMessage(
-              thresholds,
-              ind,
-              title,
-              ranks[ind]
-            )}
+            content={getCoreVitalTooltipMessage(thresholds, ind, title, ranks[ind])}
             position="bottom"
           >
             <StyledSpan darkMode={darkMode}>
               <PaletteLegend color={color}>
                 <EuiText size="xs">
                   <FormattedMessage
-                    id="xpack.apm.rum.coreVitals.paletteLegend.rankPercentage"
+                    id="xpack.observability.ux.coreVitals.paletteLegend.rankPercentage"
                     defaultMessage="{labelsInd} ({ranksInd}%)"
                     values={{
                       labelsInd: labels[ind],
