@@ -751,7 +751,7 @@ describe('xy_expression', () => {
     });
 
     test('onElementClick returns correct context data', () => {
-      const geometry: GeometryValue = { x: 5, y: 1, accessor: 'y1', mark: null };
+      const geometry: GeometryValue = { x: 5, y: 1, accessor: 'y1', mark: null, datum: {} };
       const series = {
         key: 'spec{d}yAccessor{d}splitAccessors{b-2}',
         specId: 'd',
@@ -896,7 +896,12 @@ describe('xy_expression', () => {
 
     test('it applies histogram mode to the series for single series', () => {
       const { data, args } = sampleArgs();
-      const firstLayer: LayerArgs = { ...args.layers[0], seriesType: 'bar', isHistogram: true };
+      const firstLayer: LayerArgs = {
+        ...args.layers[0],
+        accessors: ['b'],
+        seriesType: 'bar',
+        isHistogram: true,
+      };
       delete firstLayer.splitAccessor;
       const component = shallow(
         <XYChart
@@ -911,7 +916,48 @@ describe('xy_expression', () => {
         />
       );
       expect(component.find(BarSeries).at(0).prop('enableHistogramMode')).toEqual(true);
-      expect(component.find(BarSeries).at(1).prop('enableHistogramMode')).toEqual(true);
+    });
+
+    test('it does not apply histogram mode to more than one bar series for unstacked bar chart', () => {
+      const { data, args } = sampleArgs();
+      const firstLayer: LayerArgs = { ...args.layers[0], seriesType: 'bar', isHistogram: true };
+      delete firstLayer.splitAccessor;
+      const component = shallow(
+        <XYChart
+          data={data}
+          args={{ ...args, layers: [firstLayer] }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+      expect(component.find(BarSeries).at(0).prop('enableHistogramMode')).toEqual(false);
+      expect(component.find(BarSeries).at(1).prop('enableHistogramMode')).toEqual(false);
+    });
+
+    test('it applies histogram mode to more than one the series for unstacked line/area chart', () => {
+      const { data, args } = sampleArgs();
+      const firstLayer: LayerArgs = { ...args.layers[0], seriesType: 'line', isHistogram: true };
+      delete firstLayer.splitAccessor;
+      const secondLayer: LayerArgs = { ...args.layers[0], seriesType: 'line', isHistogram: true };
+      delete secondLayer.splitAccessor;
+      const component = shallow(
+        <XYChart
+          data={data}
+          args={{ ...args, layers: [firstLayer, secondLayer] }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+      expect(component.find(LineSeries).at(0).prop('enableHistogramMode')).toEqual(true);
+      expect(component.find(LineSeries).at(1).prop('enableHistogramMode')).toEqual(true);
     });
 
     test('it applies histogram mode to the series for stacked series', () => {
