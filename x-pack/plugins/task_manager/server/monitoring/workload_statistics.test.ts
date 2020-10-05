@@ -233,7 +233,7 @@ describe('Workload Statistics Aggregator', () => {
     });
   });
 
-  test('returns a histogram of the upcoming workload', async () => {
+  test('returns a histogram of the upcoming workload for the upcoming minute when refresh rate is high', async () => {
     const taskManager = taskManagerMock.create();
     taskManager.aggregate.mockResolvedValue(mockAggregatedResult);
 
@@ -249,6 +249,91 @@ describe('Workload Statistics Aggregator', () => {
           // [0, 0, 0, 0,  0,  0,  0,  0, 2,  2,  5,  0,  0,  0,  0,  0,  0,  1,  0,  0 ]
           //  Above you see each bucket and the number of scheduled tasks we expect to have in them
           scheduleDensity: [0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 5, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+        });
+        resolve();
+      });
+    });
+  });
+
+  test('returns a histogram of the upcoming workload for twice refresh rate when rate is low', async () => {
+    const taskManager = taskManagerMock.create();
+    taskManager.aggregate.mockResolvedValue(mockAggregatedResult);
+
+    const workloadAggregator = createWorkloadAggregator(taskManager, 60 * 1000, 3000, mockLogger());
+
+    return new Promise((resolve) => {
+      workloadAggregator.pipe(first()).subscribe((result) => {
+        expect(result.key).toEqual('workload');
+        expect(result.value).toMatchObject({
+          // same schedule density as in previous test, but window of 40 buckets ((60s refresh * 2) / 3s = 40)
+          scheduleDensity: [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            2,
+            2,
+            5,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            ...new Array(20).fill(0),
+          ],
+        });
+        resolve();
+      });
+    });
+  });
+
+  test('returns a histogram of the upcoming workload maxed out at 50 buckets when rate is too low', async () => {
+    const taskManager = taskManagerMock.create();
+    taskManager.aggregate.mockResolvedValue(mockAggregatedResult);
+
+    const workloadAggregator = createWorkloadAggregator(
+      taskManager,
+      15 * 60 * 1000,
+      3000,
+      mockLogger()
+    );
+
+    return new Promise((resolve) => {
+      workloadAggregator.pipe(first()).subscribe((result) => {
+        expect(result.key).toEqual('workload');
+        expect(result.value).toMatchObject({
+          // same schedule density as in previous test, but window of 40 buckets ((60s refresh * 2) / 3s = 40)
+          scheduleDensity: [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            2,
+            2,
+            5,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            ...new Array(30).fill(0),
+          ],
         });
         resolve();
       });

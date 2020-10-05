@@ -43,6 +43,9 @@ export interface WorkloadStat extends JsonObject {
   scheduleDensity: number[];
 }
 
+// Set an upper bound just in case a customer sets a really high refresh rate
+const MAX_SHCEDULE_DENSITY_BUCKETS = 50;
+
 export function createWorkloadAggregator(
   taskManager: TaskManager,
   refreshInterval: number,
@@ -51,9 +54,9 @@ export function createWorkloadAggregator(
 ): AggregatedStatProvider<WorkloadStat> {
   // calculate scheduleDensity going two refreshIntervals or 1 minute into into the future
   // (the longer of the two)
-  const scheduleDensityBuckets = Math.max(
-    Math.round(60000 / pollInterval),
-    Math.round((refreshInterval * 2) / pollInterval)
+  const scheduleDensityBuckets = Math.min(
+    Math.max(Math.round(60000 / pollInterval), Math.round((refreshInterval * 2) / pollInterval)),
+    MAX_SHCEDULE_DENSITY_BUCKETS
   );
 
   return timer(0, refreshInterval).pipe(
