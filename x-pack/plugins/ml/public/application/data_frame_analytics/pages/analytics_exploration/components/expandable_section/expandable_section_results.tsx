@@ -13,6 +13,11 @@ import { EuiDataGridColumn, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
+import {
+  isClassificationAnalysis,
+  isRegressionAnalysis,
+} from '../../../../../../../common/util/analytics_utils';
+
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 import { useColorRange, ColorRangeLegend } from '../../../../../components/color_range_legend';
 import { DataGrid, UseIndexDataReturnType } from '../../../../../components/data_grid';
@@ -115,12 +120,16 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
           <IndexPatternPrompt destIndex={jobConfig.dest.index} />
         </div>
       )}
+      {jobConfig !== undefined &&
+        (isRegressionAnalysis(jobConfig.analysis) ||
+          isClassificationAnalysis(jobConfig.analysis)) && (
+          <EuiText size="xs" color="subdued" className="mlExpandableSection-contentPadding">
+            {tableItems.length === SEARCH_SIZE ? showingFirstDocs : showingDocs}
+          </EuiText>
+        )}
       {(columnsWithCharts.length > 0 || searchQuery !== defaultSearchQuery) &&
         indexPattern !== undefined && (
           <>
-            <EuiText size="xs" color="subdued" className="mlExpandableSection-contentPadding">
-              {tableItems.length === SEARCH_SIZE ? showingFirstDocs : showingDocs}
-            </EuiText>
             {columnsWithCharts.length > 0 && tableItems.length > 0 && (
               <DataGrid
                 {...indexData}
