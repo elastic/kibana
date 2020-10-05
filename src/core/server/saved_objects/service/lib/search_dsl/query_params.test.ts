@@ -22,6 +22,7 @@ import { esKuery } from '../../../es_query';
 type KueryNode = any;
 
 import { typeRegistryMock } from '../../../saved_objects_type_registry.mock';
+import { ALL_NAMESPACES_STRING } from '../utils';
 import { getQueryParams } from './query_params';
 
 const registry = typeRegistryMock.create();
@@ -52,9 +53,10 @@ const ALL_TYPE_SUBSETS = ALL_TYPES.reduce(
 
 const createTypeClause = (type: string, namespaces?: string[]) => {
   if (registry.isMultiNamespace(type)) {
+    const array = [...(namespaces ?? ['default']), ALL_NAMESPACES_STRING];
     return {
       bool: {
-        must: expect.arrayContaining([{ terms: { namespaces: namespaces ?? ['default'] } }]),
+        must: expect.arrayContaining([{ terms: { namespaces: array } }]),
         must_not: [{ exists: { field: 'namespace' } }],
       },
     };

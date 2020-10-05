@@ -9,6 +9,8 @@ import moment from 'moment';
 import memoizeOne from 'memoize-one';
 import { useLocation } from 'react-router-dom';
 
+import styled from 'styled-components';
+import { EuiFlexItem } from '@elastic/eui';
 import { ActionVariable } from '../../../../../../triggers_actions_ui/public';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { assertUnreachable } from '../../../../../common/utility_types';
@@ -377,3 +379,8 @@ export const getActionMessageParams = memoizeOne((ruleType: Type | undefined): A
 // typed as null not undefined as the initial state for this value is null.
 export const userHasNoPermissions = (canUserCRUD: boolean | null): boolean =>
   canUserCRUD != null ? !canUserCRUD : false;
+
+export const MaxWidthEuiFlexItem = styled(EuiFlexItem)`
+  max-width: 1000px;
+  overflow: hidden;
+`;
