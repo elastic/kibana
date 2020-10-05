@@ -15,3 +15,21 @@ export function ensureDatetimeIsWithinRange(
   expect(diff).to.be.greaterThan(expectedDiff - buffer);
   expect(diff).to.be.lessThan(expectedDiff + buffer);
 }
+
+export function ensureDatetimesAreOrdered(dates: Array<Date | string | number>) {
+  const dateStrings = dates.map(normalizeDate);
+  const sortedDateStrings = dateStrings.slice().sort();
+  expect(dateStrings).to.eql(sortedDateStrings);
+}
+
+function normalizeDate(date: Date | string | number): string {
+  if (typeof date === 'number') return new Date(date).toISOString();
+  if (date instanceof Date) return date.toISOString();
+
+  const dateString = `${date}`;
+  const dateNumber = Date.parse(dateString);
+  if (isNaN(dateNumber)) {
+    throw new Error(`invalid date string: "${dateString}"`);
+  }
+  return new Date(dateNumber).toISOString();
+}

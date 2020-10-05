@@ -10,7 +10,7 @@ import React, { memo, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiText, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
 import { useSelector } from 'react-redux';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { StyledPanel } from '../styles';
 import { BoldCode, noTimestampRetrievedText, StyledTime } from './panel_content_utilities';
 import { Breadcrumbs } from './breadcrumbs';
@@ -45,11 +45,13 @@ export const NodeEventsInCategory = memo(function ({
   const events = useSelector((state: ResolverState) => selectors.nodeEventsInCategory(state));
 
   return (
-    <StyledPanel>
+    <>
       {eventCount === undefined || processEvent === null ? (
-        <PanelLoading />
+        <StyledPanel>
+          <PanelLoading />
+        </StyledPanel>
       ) : (
-        <>
+        <StyledPanel data-test-subj="resolver:panel:events-in-category">
           <NodeEventsInCategoryBreadcrumbs
             nodeName={eventModel.processNameSafeVersion(processEvent)}
             eventCategory={eventCategory}
@@ -59,9 +61,9 @@ export const NodeEventsInCategory = memo(function ({
           />
           <EuiSpacer size="l" />
           <NodeEventList eventCategory={eventCategory} nodeID={nodeID} events={events} />
-        </>
+        </StyledPanel>
       )}
-    </StyledPanel>
+    </>
   );
 });
 
