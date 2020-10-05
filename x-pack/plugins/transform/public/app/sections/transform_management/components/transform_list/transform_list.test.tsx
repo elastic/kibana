@@ -9,17 +9,8 @@ import React from 'react';
 
 import { TransformList } from './transform_list';
 
-jest.mock('../../../../../shared_imports', () => ({
-  createSavedSearchesLoader: jest.fn(),
-}));
-jest.mock('../../../../../app/app_dependencies', () => ({
-  useAppDependencies: () => ({
-    savedObjects: jest.fn(),
-    data: jest.fn(),
-    ml: { extractErrorMessage: jest.fn() },
-  }),
-  useToastNotifications: () => ({ addDanger: jest.fn() }),
-}));
+jest.mock('../../../../../shared_imports');
+jest.mock('../../../../../app/app_dependencies');
 
 describe('Transform: Transform List <TransformList />', () => {
   test('Minimal initialization', () => {

@@ -8,17 +8,8 @@ import { renderHook } from '@testing-library/react-hooks';
 
 import { useColumns } from './use_columns';
 
-jest.mock('../../../../../shared_imports', () => ({
-  createSavedSearchesLoader: jest.fn(),
-}));
-jest.mock('../../../../../app/app_dependencies', () => ({
-  useAppDependencies: () => ({
-    savedObjects: jest.fn(),
-    data: jest.fn(),
-    ml: { extractErrorMessage: jest.fn() },
-  }),
-  useToastNotifications: () => ({ addDanger: jest.fn() }),
-}));
+jest.mock('../../../../../shared_imports');
+jest.mock('../../../../../app/app_dependencies');
 
 describe('Transform: Job List Columns', () => {
   test('useColumns()', () => {
