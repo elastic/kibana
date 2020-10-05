@@ -20,6 +20,7 @@ import {
   GeometryValue,
   XYChartSeriesIdentifier,
   StackMode,
+  SettingsSpec,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
@@ -337,9 +338,6 @@ export function XYChart({
   }
 
   const isTimeViz = data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time');
-  const isHistogramViz = filteredLayers.every(
-    (l) => l.xScaleType === 'time' || l.xScaleType === 'linear'
-  );
 
   const xDomain = isTimeViz
     ? {
@@ -383,29 +381,14 @@ export function XYChart({
     return style;
   };
 
-  return (
-    <Chart>
-      <Settings
-        showLegend={
-          legend.isVisible && !legend.showSingleSeries
-            ? chartHasMoreThanOneSeries
-            : legend.isVisible
-        }
-        legendPosition={legend.position}
-        showLegendExtra={false}
-        theme={chartTheme}
-        baseTheme={chartBaseTheme}
-        tooltip={{
-          headerFormatter: (d) => safeXAccessorLabelRenderer(d.value),
-        }}
-        rotation={shouldRotate ? 90 : 0}
-        xDomain={xDomain}
-        onBrushEnd={({ x }) => {
+  const extraSettings: Partial<SettingsSpec> = isTimeViz
+    ? {
+        onBrushEnd: ({ x }) => {
           if (!x) {
             return;
           }
           const [min, max] = x;
-          if (!xAxisColumn || !isHistogramViz) {
+          if (!xAxisColumn) {
             return;
           }
 
@@ -425,7 +408,28 @@ export function XYChart({
             timeFieldName,
           };
           onSelectRange(context);
+        },
+      }
+    : {};
+
+  return (
+    <Chart>
+      <Settings
+        {...extraSettings}
+        showLegend={
+          legend.isVisible && !legend.showSingleSeries
+            ? chartHasMoreThanOneSeries
+            : legend.isVisible
+        }
+        legendPosition={legend.position}
+        showLegendExtra={false}
+        theme={chartTheme}
+        baseTheme={chartBaseTheme}
+        tooltip={{
+          headerFormatter: (d) => safeXAccessorLabelRenderer(d.value),
         }}
+        rotation={shouldRotate ? 90 : 0}
+        xDomain={xDomain}
         onElementClick={([[geometry, series]]) => {
           // for xyChart series is always XYChartSeriesIdentifier and geometry is always type of GeometryValue
           const xySeries = series as XYChartSeriesIdentifier;

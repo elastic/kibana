@@ -750,7 +750,7 @@ describe('xy_expression', () => {
       });
     });
 
-    test('onBrushEnd returns correct context data for number histogram data', () => {
+    test('onBrushEnd is not defined for number histogram data', () => {
       const { args } = sampleArgs();
 
       const numberLayer: LayerArgs = {
@@ -821,14 +821,7 @@ describe('xy_expression', () => {
         />
       );
 
-      wrapper.find(Settings).first().prop('onBrushEnd')!({ x: [5, 8] });
-
-      expect(onSelectRange).toHaveBeenCalledWith({
-        column: 0,
-        table: numberHistogramData.tables.numberLayer,
-        range: [5, 8],
-        timeFieldName: undefined,
-      });
+      expect(wrapper.find(Settings).first().prop('onBrushEnd')).not.toBeDefined();
     });
 
     test('onElementClick returns correct context data', () => {
