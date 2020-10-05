@@ -3,7 +3,6 @@
 exports[`Storyshots components/WorkpadHeader/ViewMenu edit mode 1`] = `
 <div
   className="euiPopover euiPopover--anchorDownLeft"
-  container={null}
   onKeyDown={[Function]}
   onMouseDown={[Function]}
   onMouseUp={[Function]}
@@ -36,7 +35,6 @@ exports[`Storyshots components/WorkpadHeader/ViewMenu edit mode 1`] = `
 exports[`Storyshots components/WorkpadHeader/ViewMenu read only mode 1`] = `
 <div
   className="euiPopover euiPopover--anchorDownLeft"
-  container={null}
   onKeyDown={[Function]}
   onMouseDown={[Function]}
   onMouseUp={[Function]}
@@ -69,7 +67,6 @@ exports[`Storyshots components/WorkpadHeader/ViewMenu read only mode 1`] = `
 exports[`Storyshots components/WorkpadHeader/ViewMenu with autoplay enabled 1`] = `
 <div
   className="euiPopover euiPopover--anchorDownLeft"
-  container={null}
   onKeyDown={[Function]}
   onMouseDown={[Function]}
   onMouseUp={[Function]}
@@ -102,7 +99,6 @@ exports[`Storyshots components/WorkpadHeader/ViewMenu with autoplay enabled 1`] 
 exports[`Storyshots components/WorkpadHeader/ViewMenu with refresh enabled 1`] = `
 <div
   className="euiPopover euiPopover--anchorDownLeft"
-  container={null}
   onKeyDown={[Function]}
   onMouseDown={[Function]}
   onMouseUp={[Function]}

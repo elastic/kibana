@@ -23,7 +23,13 @@ import { Observable } from 'rxjs';
 import { ApiResponse } from '@elastic/elasticsearch';
 import { SearchUsage } from '../collectors/usage';
 import { toSnakeCase } from './to_snake_case';
-import { ISearchStrategy, getDefaultSearchParams, getTotalLoaded, getShardTimeout } from '..';
+import {
+  ISearchStrategy,
+  getDefaultSearchParams,
+  getTotalLoaded,
+  getShardTimeout,
+  shimAbortSignal,
+} from '..';
 
 export const esSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -52,10 +58,10 @@ export const esSearchStrategyProvider = (
       });
 
       try {
-        // Temporary workaround until https://github.com/elastic/elasticsearch-js/issues/1297
-        const promise = context.core.elasticsearch.client.asCurrentUser.search(params);
-        if (options?.abortSignal)
-          options.abortSignal.addEventListener('abort', () => promise.abort());
+        const promise = shimAbortSignal(
+          context.core.elasticsearch.client.asCurrentUser.search(params),
+          options?.abortSignal
+        );
         const { body: rawResponse } = (await promise) as ApiResponse<SearchResponse<any>>;
 
         if (usage) usage.trackSuccess(rawResponse.took);
