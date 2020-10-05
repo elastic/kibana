@@ -129,12 +129,10 @@ export const EditConnector = React.memo(
             type: 'SET_CURRENT_CONNECTOR',
             payload: getConnectorById(newConnectorId, connectors),
           });
-          if (userActions.length > 0) {
-            dispatch({
-              type: 'SET_FIELDS',
-              payload: getConnectorFieldsFromUserActions(newConnectorId, userActions),
-            });
-          }
+          dispatch({
+            type: 'SET_FIELDS',
+            payload: getConnectorFieldsFromUserActions(newConnectorId, userActions),
+          });
         }
       },
       [currentConnector, connectors, userActions]
@@ -189,7 +187,6 @@ export const EditConnector = React.memo(
         payload: true,
       });
     }, [dispatch]);
-
     return (
       <EuiText>
         <MyFlexGroup alignItems="center" gutterSize="xs" justifyContent="spaceBetween">
