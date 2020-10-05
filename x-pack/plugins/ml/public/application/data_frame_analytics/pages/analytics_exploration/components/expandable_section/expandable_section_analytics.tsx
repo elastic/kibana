@@ -32,40 +32,46 @@ import {
 const getAnalyticsSectionHeaderItems = (
   expandedRowItem: DataFrameAnalyticsListRow | undefined
 ): ExpandableSectionProps['headerItems'] => {
-  return expandedRowItem !== undefined
-    ? [
-        {
-          id: 'analysisTypeLabel',
-          label: (
-            <FormattedMessage
-              id="xpack.ml.dataframe.analytics.exploration.analysisTypeLabel"
-              defaultMessage="Type"
-            />
-          ),
-          value: expandedRowItem.job_type,
-        },
-        {
-          id: 'analysisSourceIndexLabel',
-          label: (
-            <FormattedMessage
-              id="xpack.ml.dataframe.analytics.exploration.analysisSourceIndexLabel"
-              defaultMessage="Source index"
-            />
-          ),
-          value: expandedRowItem.config.source.index,
-        },
-        {
-          id: 'analysisDestinationIndexLabel',
-          label: (
-            <FormattedMessage
-              id="xpack.ml.dataframe.analytics.exploration.analysisDestinationIndexLabel"
-              defaultMessage="Destination index"
-            />
-          ),
-          value: expandedRowItem.config.dest.index,
-        },
-      ]
-    : HEADER_ITEMS_LOADING;
+  if (expandedRowItem === undefined) {
+    return HEADER_ITEMS_LOADING;
+  }
+
+  const sourceIndex = Array.isArray(expandedRowItem.config.source.index)
+    ? expandedRowItem.config.source.index.join()
+    : expandedRowItem.config.source.index;
+
+  return [
+    {
+      id: 'analysisTypeLabel',
+      label: (
+        <FormattedMessage
+          id="xpack.ml.dataframe.analytics.exploration.analysisTypeLabel"
+          defaultMessage="Type"
+        />
+      ),
+      value: expandedRowItem.job_type,
+    },
+    {
+      id: 'analysisSourceIndexLabel',
+      label: (
+        <FormattedMessage
+          id="xpack.ml.dataframe.analytics.exploration.analysisSourceIndexLabel"
+          defaultMessage="Source index"
+        />
+      ),
+      value: sourceIndex,
+    },
+    {
+      id: 'analysisDestinationIndexLabel',
+      label: (
+        <FormattedMessage
+          id="xpack.ml.dataframe.analytics.exploration.analysisDestinationIndexLabel"
+          defaultMessage="Destination index"
+        />
+      ),
+      value: expandedRowItem.config.dest.index,
+    },
+  ];
 };
 
 interface ExpandableSectionAnalyticsProps {
