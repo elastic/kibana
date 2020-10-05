@@ -15,7 +15,7 @@ export function MachineLearningDataFrameAnalyticsResultsProvider({
 
   return {
     async assertRegressionEvaluatePanelElementsExists() {
-      await testSubjects.existOrFail('mlDFAnalyticsRegressionExplorationEvaluatePanel');
+      await testSubjects.existOrFail('mlDFExpandableSection-RegressionEvaluation');
       await testSubjects.existOrFail('mlDFAnalyticsRegressionGenMSEstat');
       await testSubjects.existOrFail('mlDFAnalyticsRegressionGenRSquaredStat');
       await testSubjects.existOrFail('mlDFAnalyticsRegressionTrainingMSEstat');
@@ -27,7 +27,7 @@ export function MachineLearningDataFrameAnalyticsResultsProvider({
     },
 
     async assertClassificationEvaluatePanelElementsExists() {
-      await testSubjects.existOrFail('mlDFAnalyticsClassificationExplorationEvaluatePanel');
+      await testSubjects.existOrFail('mlDFExpandableSection-ClassificationEvaluation');
       await testSubjects.existOrFail('mlDFAnalyticsClassificationExplorationConfusionMatrix');
     },
 
