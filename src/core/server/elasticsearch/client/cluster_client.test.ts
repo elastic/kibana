@@ -278,6 +278,52 @@ describe('ClusterClient', () => {
       });
     });
 
+    it('respect the precedence of config headers over default headers', () => {
+      const headerKey = Object.keys(KIBANA_HEADERS)[0];
+      const config = createConfig({
+        customHeaders: {
+          [headerKey]: 'foo',
+        },
+      });
+      getAuthHeaders.mockReturnValue({});
+
+      const clusterClient = new ClusterClient(config, logger, getAuthHeaders);
+      const request = httpServerMock.createKibanaRequest();
+
+      clusterClient.asScoped(request);
+
+      expect(scopedClient.child).toHaveBeenCalledTimes(1);
+      expect(scopedClient.child).toHaveBeenCalledWith({
+        headers: {
+          [headerKey]: 'foo',
+          'x-opaque-id': expect.any(String),
+        },
+      });
+    });
+
+    it('respect the precedence of request headers over default headers', () => {
+      const headerKey = Object.keys(KIBANA_HEADERS)[0];
+      const config = createConfig({
+        requestHeadersWhitelist: [headerKey],
+      });
+      getAuthHeaders.mockReturnValue({});
+
+      const clusterClient = new ClusterClient(config, logger, getAuthHeaders);
+      const request = httpServerMock.createKibanaRequest({
+        headers: { [headerKey]: 'foo' },
+      });
+
+      clusterClient.asScoped(request);
+
+      expect(scopedClient.child).toHaveBeenCalledTimes(1);
+      expect(scopedClient.child).toHaveBeenCalledWith({
+        headers: {
+          [headerKey]: 'foo',
+          'x-opaque-id': expect.any(String),
+        },
+      });
+    });
+
     it('respect the precedence of x-opaque-id header over config headers', () => {
       const config = createConfig({
         customHeaders: {

@@ -37,7 +37,7 @@ const createConfig = (
 };
 
 describe('parseClientOptions', () => {
-  it('includes `KIBANA_HEADERS`', () => {
+  it('includes headers designing the HTTP request as originating from Kibana by default', () => {
     const config = createConfig({});
 
     expect(parseClientOptions(config, false)).toEqual(
@@ -64,6 +64,25 @@ describe('parseClientOptions', () => {
             ...KIBANA_HEADERS,
             foo: 'bar',
             hello: 'dolly',
+          },
+        })
+      );
+    });
+
+    it('`customHeaders` take precedence to default kibana headers', () => {
+      const customHeader = {
+        [Object.keys(KIBANA_HEADERS)[0]]: 'foo',
+      };
+      const config = createConfig({
+        customHeaders: {
+          ...customHeader,
+        },
+      });
+
+      expect(parseClientOptions(config, false)).toEqual(
+        expect.objectContaining({
+          headers: {
+            ...customHeader,
           },
         })
       );

@@ -18,5 +18,5 @@
  */
 
 export const KIBANA_HEADERS = {
-  'X-elastic-product-origin': 'kibana',
+  'x-elastic-product-origin': 'kibana',
 };
