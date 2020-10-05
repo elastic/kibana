@@ -177,8 +177,14 @@ function parseAndVerifyDatasets(
       );
     }
 
-    const { title: datasetTitle, release, ingest_pipeline: ingestPipeline, type } = manifest;
-    if (!(datasetTitle && release && type)) {
+    const {
+      title: dataStreamTitle,
+      release,
+      ingest_pipeline: ingestPipeline,
+      type,
+      dataset,
+    } = manifest;
+    if (!(dataStreamTitle && release && type)) {
       throw new PackageInvalidArchiveError(
         `Invalid manifest for data stream '${dataStreamPath}': one or more fields missing of 'title', 'release', 'type'`
       );
@@ -187,8 +193,8 @@ function parseAndVerifyDatasets(
 
     // default ingest pipeline name see https://github.com/elastic/package-registry/blob/master/util/dataset.go#L26
     return dataStreams.push({
-      dataset: `${pkgName}.${dataStreamPath}`,
-      title: datasetTitle,
+      dataset: dataset || `${pkgName}.${dataStreamPath}`,
+      title: dataStreamTitle,
       release,
       package: pkgName,
       ingest_pipeline: ingestPipeline || 'default',
