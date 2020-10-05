@@ -5,7 +5,7 @@
  */
 
 export default function ({ loadTestFile }) {
-  describe.skip('Ingest Manager Endpoints', function () {
+  describe('Ingest Manager Endpoints', function () {
     this.tags('ciGroup7');
     // Ingest Manager setup
     loadTestFile(require.resolve('./setup'));
