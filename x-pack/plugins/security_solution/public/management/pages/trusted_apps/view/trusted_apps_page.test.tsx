@@ -18,7 +18,7 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
 
 describe('When on the Trusted Apps Page', () => {
   const expectedAboutInfo =
-    'Add a trusted application to improve performance, alleviate conflicts with other applications running on your hosts, or reduce false positive alerts. Trusted applications will be applied to hosts running Endpoint Security.';
+    'Add a trusted application to improve performance or alleviate conflicts with other applications running on your hosts. Trusted applications will be applied to hosts running Endpoint Security.';
 
   let history: AppContextTestRender['history'];
   let coreStart: AppContextTestRender['coreStart'];

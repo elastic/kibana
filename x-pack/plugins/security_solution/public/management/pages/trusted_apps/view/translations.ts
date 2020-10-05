@@ -13,7 +13,7 @@ import {
 
 export const ABOUT_TRUSTED_APPS = i18n.translate('xpack.securitySolution.trustedapps.aboutInfo', {
   defaultMessage:
-    'Add a trusted application to improve performance, alleviate conflicts with other applications running on your hosts, or reduce false positive alerts. Trusted applications will be applied to hosts running Endpoint Security.',
+    'Add a trusted application to improve performance or alleviate conflicts with other applications running on your hosts. Trusted applications will be applied to hosts running Endpoint Security.',
 });
 
 export const OS_TITLES: Readonly<{ [K in TrustedApp['os']]: string }> = {
