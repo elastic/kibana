@@ -1822,6 +1822,7 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
     // (undocumented)
     id?: string;
     migrationVersion?: SavedObjectsMigrationVersion;
+    namespaces?: string[];
     originId?: string;
     // (undocumented)
     references?: SavedObjectReference[];
@@ -1979,6 +1980,7 @@ export interface SavedObjectsCoreFieldMapping {
 export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
     id?: string;
     migrationVersion?: SavedObjectsMigrationVersion;
+    namespaces?: string[];
     originId?: string;
     overwrite?: boolean;
     // (undocumented)
@@ -2004,6 +2006,7 @@ export interface SavedObjectsDeleteFromNamespacesResponse {
 
 // @public (undocumented)
 export interface SavedObjectsDeleteOptions extends SavedObjectsBaseOptions {
+    force?: boolean;
     refresh?: MutatingOperationRefreshSetting;
 }
 

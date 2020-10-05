@@ -1543,7 +1543,7 @@
                           }
                         },
                         "format_version": "1.0.0",
-                        "datasets": [
+                        "data_streams": [
                           {
                             "title": "CoreDNS logs",
                             "name": "log",
@@ -1764,7 +1764,7 @@
                             ]
                           }
                         },
-                        "datasets": [
+                        "data_streams": [
                           {
                             "id": "endpoint",
                             "title": "Endpoint Events",
@@ -3961,7 +3961,7 @@
           "format_version": {
             "type": "string"
           },
-          "datasets": {
+          "data_streams": {
             "type": "array",
             "items": {
               "type": "object",
