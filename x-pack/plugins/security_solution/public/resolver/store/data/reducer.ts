@@ -19,7 +19,7 @@ const initialState: DataState = {
   relatedEvents: new Map(),
   resolverComponentInstanceID: undefined,
 };
-
+/* eslint-disable complexity */
 export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialState, action) => {
   if (action.type === 'appReceivedNewExternalProperties') {
     const nextState: DataState = {
@@ -167,6 +167,10 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
     const nextState: DataState = {
       ...state,
       nodeEventsInCategory: {
+        nodeID: '',
+        eventCategory: '',
+        events: [],
+        cursor: null,
         ...state.nodeEventsInCategory,
         loading: true,
       },

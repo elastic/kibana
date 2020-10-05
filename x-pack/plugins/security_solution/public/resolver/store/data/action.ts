@@ -50,6 +50,10 @@ interface AppRequestedAdditionalRelatedEvents {
   readonly payload: {};
 }
 
+interface ServerFailedToReturnNodeEventsInCategory {
+  readonly type: 'serverFailedToReturnNodeEventsInCategory';
+}
+
 /**
  * When an additional page of related events is returned
  */
@@ -138,4 +142,5 @@ export type DataAction =
   | AppRequestedAdditionalRelatedEvents
   | ServerFailedToReturnAdditionalRelatedEventData
   | ServerReturnedAdditionalRelatedEventData
+  | ServerFailedToReturnNodeEventsInCategory
   | AppAbortedResolverDataRequest;

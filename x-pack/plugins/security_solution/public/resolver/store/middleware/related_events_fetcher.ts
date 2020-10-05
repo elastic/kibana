@@ -75,14 +75,20 @@ export function RelatedEventsFetcher(
         });
         const { nodeID, eventCategory, cursor } = nodeEventsInCategory;
         let result: ResolverPaginatedEvents | null = null;
-        if (cursor) {
-          result = await dataAccessLayer.eventsWithEntityIDAndCategory(
-            nodeID,
-            eventCategory,
-            cursor
-          );
-        } else {
-          result = await dataAccessLayer.eventsWithEntityIDAndCategory(nodeID, eventCategory);
+        try {
+          if (cursor) {
+            result = await dataAccessLayer.eventsWithEntityIDAndCategory(
+              nodeID,
+              eventCategory,
+              cursor
+            );
+          } else {
+            result = await dataAccessLayer.eventsWithEntityIDAndCategory(nodeID, eventCategory);
+          }
+        } catch (error) {
+          api.dispatch({
+            type: 'serverFailedToReturnNodeEventsInCategory',
+          });
         }
 
         if (result) {
