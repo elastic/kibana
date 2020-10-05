@@ -44,7 +44,7 @@ interface CommonBaseVisTypeOptions {
   useCustomNoDataScreen?: boolean;
   inspectorAdapters?: Adapters | (() => Adapters);
   isDeprecated?: boolean;
-  getDeprecationMessage?: (vis: Vis) => ReactElement<any>;
+  getInfoMessage?: (vis: Vis) => ReactElement<{}> | null;
 }
 
 interface ExpressionBaseVisTypeOptions<TVisParams> extends CommonBaseVisTypeOptions {
@@ -84,8 +84,7 @@ export class BaseVisType<TVisParams = VisParams> {
   useCustomNoDataScreen: boolean;
   inspectorAdapters?: Adapters | (() => Adapters);
   toExpressionAst?: VisToExpressionAst<TVisParams>;
-  isDeprecated: boolean;
-  getDeprecationMessage?: (vis: Vis) => ReactElement<any>;
+  getInfoMessage?: (vis: Vis) => ReactElement<{}> | null;
 
   constructor(opts: BaseVisTypeOptions<TVisParams>) {
     if (!opts.icon && !opts.image) {
@@ -123,8 +122,7 @@ export class BaseVisType<TVisParams = VisParams> {
     this.useCustomNoDataScreen = opts.useCustomNoDataScreen || false;
     this.inspectorAdapters = opts.inspectorAdapters;
     this.toExpressionAst = opts.toExpressionAst;
-    this.isDeprecated = opts.isDeprecated || false;
-    this.getDeprecationMessage = opts.getDeprecationMessage;
+    this.getInfoMessage = opts.getInfoMessage;
   }
 
   public get schemas() {

@@ -6,6 +6,9 @@
 
 export { BaseAlert } from './base_alert';
 export { CpuUsageAlert } from './cpu_usage_alert';
+export { MissingMonitoringDataAlert } from './missing_monitoring_data_alert';
+export { DiskUsageAlert } from './disk_usage_alert';
+export { MemoryUsageAlert } from './memory_usage_alert';
 export { ClusterHealthAlert } from './cluster_health_alert';
 export { LicenseExpirationAlert } from './license_expiration_alert';
 export { NodesChangedAlert } from './nodes_changed_alert';
