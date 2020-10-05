@@ -148,7 +148,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       getIsOptedIn: async () => {
         await this.oldUiSettingsHandled$.pipe(take(1)).toPromise(); // Wait for the old settings to be handled
         const internalRepository = new SavedObjectsClient(savedObjectsInternalRepository);
-        const telemetrySavedObject = await getTelemetrySavedObject(internalRepository!);
+        const telemetrySavedObject = await getTelemetrySavedObject(internalRepository);
         const config = await this.config$.pipe(take(1)).toPromise();
         const allowChangingOptInStatus = config.allowChangingOptInStatus;
         const configTelemetryOptIn = typeof config.optIn === 'undefined' ? null : config.optIn;
