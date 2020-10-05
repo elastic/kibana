@@ -15,7 +15,6 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const dockerServers = getService('dockerServers');
-  const log = getService('log');
 
   const testPkgArchiveTgz = path.join(
     path.dirname(__filename),
