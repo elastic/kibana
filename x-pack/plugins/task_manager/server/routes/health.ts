@@ -15,18 +15,25 @@ import { Logger } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { throttleTime } from 'rxjs/operators';
-import { isString } from 'lodash';
+import { isString, isNumber } from 'lodash';
 import { MonitoringStats, summarizeMonitoringStats } from '../monitoring';
+
+enum HealthStatus {
+  Green = 'green',
+  Yellow = 'yellow',
+  Red = 'red',
+}
 
 export function healthRoute(
   router: IRouter,
   monitoringStats: Promise<Observable<MonitoringStats>>,
   logger: Logger,
-  requiredFreshness: number
+  requiredHotStatsFreshness: number,
+  requiredColdStatsFreshness: number
 ) {
   /* Log Task Manager stats as a Debug log line at a fixed interval */
   monitoringStats.then((monitoringStats$) => {
-    monitoringStats$.pipe(throttleTime(requiredFreshness)).subscribe((stats) => {
+    monitoringStats$.pipe(throttleTime(requiredHotStatsFreshness)).subscribe((stats) => {
       logger.debug(JSON.stringify(summarizeMonitoringStats(stats)));
     });
   });
@@ -46,38 +53,52 @@ export function healthRoute(
       const timestamp = new Date(now).toISOString();
 
       /**
-       * If the monitored stats aren't fresh, return an `500 internalError` with
-       * the stats in the body of the api call. This makes it easier for monitoring
-       * services to mark the service as broken
+       * If the monitored stats aren't fresh, return a red status
        */
-      if (
-        now -
-          getOldestTimestamp(
-            stats.lastUpdate,
-            stats.stats.runtime?.value.polling.lastSuccessfulPoll
-          ) >
-        requiredFreshness
-      ) {
-        return res.internalError({
-          body: {
-            message: new Error('Task Manager monitored stats are out of date'),
-            attributes: { timestamp, ...summarizeMonitoringStats(stats) },
-          },
-        });
-      }
+      const healthStatus =
+        hasExpiredHotTimestamps(stats, now, requiredHotStatsFreshness) ||
+        hasExpiredColdTimestamps(stats, now, requiredColdStatsFreshness)
+          ? HealthStatus.Red
+          : HealthStatus.Green;
+
       return res.ok({
-        body: { timestamp, ...summarizeMonitoringStats(stats) },
+        body: { timestamp, status: healthStatus, ...summarizeMonitoringStats(stats) },
       });
     }
   );
 }
 
-function getOldestTimestamp(...timestamps: unknown[]): number {
-  return Math.min(
-    ...timestamps
-      .map((timestamp) => (isString(timestamp) ? Date.parse(timestamp) : NaN))
-      .filter((timestamp) => !isNaN(timestamp))
+/**
+ * If certain "hot" stats are not fresh, then the _health api will should return a Red status
+ * @param stats The monitored stats
+ * @param now The time to compare against
+ * @param requiredFreshness How fresh should these stats be
+ */
+function hasExpiredHotTimestamps(
+  stats: MonitoringStats,
+  now: number,
+  requiredFreshness: number
+): boolean {
+  return (
+    now -
+      getOldestTimestamp(stats.lastUpdate, stats.stats.runtime?.value.polling.lastSuccessfulPoll) >
+    requiredFreshness
   );
+}
+
+function hasExpiredColdTimestamps(
+  stats: MonitoringStats,
+  now: number,
+  requiredFreshness: number
+): boolean {
+  return now - getOldestTimestamp(stats.stats.workload?.timestamp) > requiredFreshness;
+}
+
+function getOldestTimestamp(...timestamps: unknown[]): number {
+  const validTimestamps = timestamps
+    .map((timestamp) => (isString(timestamp) ? Date.parse(timestamp) : NaN))
+    .filter((timestamp) => !isNaN(timestamp));
+  return validTimestamps.length ? Math.min(...validTimestamps) : 0;
 }
 
 async function getLatestStats(monitoringStats$: Observable<MonitoringStats>) {

@@ -39,7 +39,7 @@ describe('healthRoute', () => {
 
     const stats = Promise.resolve(new Subject<MonitoringStats>());
 
-    healthRoute(router, stats, logger, 1000);
+    healthRoute(router, stats, logger, 1000, 60000);
 
     const stats$ = await stats;
 
@@ -59,11 +59,11 @@ describe('healthRoute', () => {
     expect(logger.debug).toHaveBeenCalledTimes(2);
   });
 
-  it('returns an error response if the stats are no longer fresh', async () => {
+  it('returns a red status if the stats have not been updated within the required hot freshness', async () => {
     const router = httpServiceMock.createRouter();
 
     const mockStat = mockHealthStats();
-    healthRoute(router, Promise.resolve(of(mockStat)), mockLogger(), 1000);
+    healthRoute(router, Promise.resolve(of(mockStat)), mockLogger(), 1000, 60000);
 
     const [, handler] = router.get.mock.calls[0];
 
@@ -73,7 +73,8 @@ describe('healthRoute', () => {
 
     expect(await handler(context, req, res)).toMatchObject({
       body: {
-        attributes: summarizeMonitoringStats(
+        status: 'red',
+        ...summarizeMonitoringStats(
           mockHealthStats({
             lastUpdate: expect.any(String),
             stats: {
@@ -94,12 +95,58 @@ describe('healthRoute', () => {
             },
           })
         ),
-        message: new Error('Task Manager monitored stats are out of date'),
       },
     });
   });
 
-  it('returns an error response if the poller hasnt polled within the required freshness', async () => {
+  it('returns a red status if the workload stats have not been updated within the required cold freshness', async () => {
+    const router = httpServiceMock.createRouter();
+
+    const lastUpdateOfWorkload = new Date(Date.now() - 120000).toISOString();
+    const mockStat = mockHealthStats({
+      stats: {
+        workload: {
+          timestamp: lastUpdateOfWorkload,
+        },
+      },
+    });
+    healthRoute(router, Promise.resolve(of(mockStat)), mockLogger(), 5000, 60000);
+
+    const [, handler] = router.get.mock.calls[0];
+
+    const [context, req, res] = mockHandlerArguments({}, {}, ['ok', 'internalError']);
+
+    await sleep(2000);
+
+    expect(await handler(context, req, res)).toMatchObject({
+      body: {
+        status: 'red',
+        ...summarizeMonitoringStats(
+          mockHealthStats({
+            lastUpdate: expect.any(String),
+            stats: {
+              configuration: {
+                timestamp: expect.any(String),
+              },
+              workload: {
+                timestamp: expect.any(String),
+              },
+              runtime: {
+                timestamp: expect.any(String),
+                value: {
+                  polling: {
+                    lastSuccessfulPoll: expect.any(String),
+                  },
+                },
+              },
+            },
+          })
+        ),
+      },
+    });
+  });
+
+  it('returns a red status if the poller hasnt polled within the required hot freshness', async () => {
     const router = httpServiceMock.createRouter();
 
     const lastSuccessfulPoll = new Date(Date.now() - 2000).toISOString();
@@ -114,7 +161,7 @@ describe('healthRoute', () => {
         },
       },
     });
-    healthRoute(router, Promise.resolve(of(mockStat)), mockLogger(), 1000);
+    healthRoute(router, Promise.resolve(of(mockStat)), mockLogger(), 1000, 60000);
 
     const [, handler] = router.get.mock.calls[0];
 
@@ -122,7 +169,8 @@ describe('healthRoute', () => {
 
     expect(await handler(context, req, res)).toMatchObject({
       body: {
-        attributes: summarizeMonitoringStats(
+        status: 'red',
+        ...summarizeMonitoringStats(
           mockHealthStats({
             lastUpdate: expect.any(String),
             stats: {
@@ -143,7 +191,6 @@ describe('healthRoute', () => {
             },
           })
         ),
-        message: new Error('Task Manager monitored stats are out of date'),
       },
     });
   });
@@ -184,7 +231,7 @@ function mockHealthStats(overrides = {}) {
         runtime: {
           timestamp: new Date().toISOString(),
           value: {
-            drift: [1000, 1000],
+            drift: [1000, 60000],
             execution: {
               duration: [],
               resultFrequency: [],
