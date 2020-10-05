@@ -18,7 +18,7 @@
  */
 
 import { URL } from 'url';
-import { Observable } from 'rxjs';
+import { Observable, ReplaySubject } from 'rxjs';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
   TelemetryCollectionManagerPluginSetup,
@@ -30,11 +30,11 @@ import {
   PluginInitializerContext,
   ISavedObjectsRepository,
   CoreStart,
-  IUiSettingsClient,
   SavedObjectsClient,
   Plugin,
   Logger,
   IClusterClient,
+  UiSettingsServiceStart,
 } from '../../../core/server';
 import { registerRoutes } from './routes';
 import { registerCollection } from './telemetry_collection';
@@ -82,8 +82,11 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   private readonly config$: Observable<TelemetryConfigType>;
   private readonly isDev: boolean;
   private readonly fetcherTask: FetcherTask;
+  /**
+   * @private Used to mark the completion of the old UI Settings migration
+   */
+  private readonly oldUiSettingsHandled$ = new ReplaySubject<boolean>(1);
   private savedObjectsClient?: ISavedObjectsRepository;
-  private uiSettingsClient?: IUiSettingsClient;
   private elasticsearchClient?: IClusterClient;
 
   constructor(initializerContext: PluginInitializerContext<TelemetryConfigType>) {
@@ -133,20 +136,18 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
   public start(core: CoreStart, { telemetryCollectionManager }: TelemetryPluginsDepsStart) {
     const { savedObjects, uiSettings, elasticsearch } = core;
-    this.savedObjectsClient = savedObjects.createInternalRepository();
-    const savedObjectsClient = new SavedObjectsClient(this.savedObjectsClient);
-    this.uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
+    const savedObjectsInternalRepository = savedObjects.createInternalRepository();
+    this.savedObjectsClient = savedObjectsInternalRepository;
     this.elasticsearchClient = elasticsearch.client;
 
-    handleOldSettings(savedObjectsClient, this.uiSettingsClient).catch((error) => {
-      this.logger.warn('Unable to update legacy telemetry configs.');
-    });
-
-    this.fetcherTask.start(core, { telemetryCollectionManager });
+    // Not catching nor awaiting these promises because they should never reject
+    this.handleOldUiSettings(uiSettings);
+    this.startFetcherWhenOldSettingsAreHandled(core, telemetryCollectionManager);
 
     return {
       getIsOptedIn: async () => {
-        const internalRepository = new SavedObjectsClient(savedObjects.createInternalRepository());
+        await this.oldUiSettingsHandled$.pipe(take(1)).toPromise(); // Wait for the old settings to be handled
+        const internalRepository = new SavedObjectsClient(savedObjectsInternalRepository);
         const telemetrySavedObject = await getTelemetrySavedObject(internalRepository!);
         const config = await this.config$.pipe(take(1)).toPromise();
         const allowChangingOptInStatus = config.allowChangingOptInStatus;
@@ -162,6 +163,31 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
         return isOptedIn === true;
       },
     };
+  }
+
+  public stop() {
+    this.oldUiSettingsHandled$.complete();
+  }
+
+  private async handleOldUiSettings(uiSettings: UiSettingsServiceStart) {
+    const savedObjectsClient = new SavedObjectsClient(this.savedObjectsClient!);
+    const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
+
+    try {
+      await handleOldSettings(savedObjectsClient, uiSettingsClient);
+    } catch (error) {
+      this.logger.warn('Unable to update legacy telemetry configs.');
+    }
+    // Set the mark in the ReplySubject so all the methods that require this method to be completed before working, can move on
+    this.oldUiSettingsHandled$.next(true);
+  }
+
+  private async startFetcherWhenOldSettingsAreHandled(
+    core: CoreStart,
+    telemetryCollectionManager: TelemetryCollectionManagerPluginStart
+  ) {
+    await this.oldUiSettingsHandled$.pipe(take(1)).toPromise(); // Wait for the old settings to be handled
+    this.fetcherTask.start(core, { telemetryCollectionManager });
   }
 
   private registerMappings(registerType: SavedObjectsRegisterType) {
