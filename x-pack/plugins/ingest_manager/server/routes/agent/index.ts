@@ -11,7 +11,12 @@
 
 import { IRouter, RouteValidationResultFactory } from 'src/core/server';
 import Ajv from 'ajv';
-import { PLUGIN_ID, AGENT_API_ROUTES, LIMITED_CONCURRENCY_ROUTE_TAG } from '../../constants';
+import {
+  PLUGIN_ID,
+  AGENT_API_ROUTES,
+  LIMITED_CONCURRENCY_ROUTE_TAG,
+  AGENT_POLLING_REQUEST_TIMEOUT_MARGIN_MS,
+} from '../../constants';
 import {
   GetAgentsRequestSchema,
   GetOneAgentRequestSchema,
@@ -124,7 +129,8 @@ export const registerRoutes = (router: IRouter, config: IngestManagerConfigType)
       },
       options: {
         tags: [],
-        ...(pollingRequestTimeout
+        // If the timeout is too short, do not set socket idle timeout and rely on Kibana global socket timeout
+        ...(pollingRequestTimeout && pollingRequestTimeout > AGENT_POLLING_REQUEST_TIMEOUT_MARGIN_MS
           ? {
               timeout: {
                 idleSocket: pollingRequestTimeout,
