@@ -5,18 +5,18 @@
  */
 
 import { EuiSuperDatePicker } from '@elastic/eui';
-import { wait } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import { mount } from 'enzyme';
 import { createMemoryHistory } from 'history';
 import React, { ReactNode } from 'react';
 import { Router } from 'react-router-dom';
-import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
+import { MockApmPluginContextWrapper } from '../../../context/ApmPluginContext/MockApmPluginContext';
 import {
   UrlParamsContext,
   useUiFilters,
-} from '../../../../context/UrlParamsContext';
-import { IUrlParams } from '../../../../context/UrlParamsContext/types';
-import { DatePicker } from '../index';
+} from '../../../context/UrlParamsContext';
+import { IUrlParams } from '../../../context/UrlParamsContext/types';
+import { DatePicker } from './';
 
 const history = createMemoryHistory();
 const mockHistoryPush = jest.spyOn(history, 'push');
@@ -124,7 +124,7 @@ describe('DatePicker', () => {
     });
     expect(mockRefreshTimeRange).not.toHaveBeenCalled();
     jest.advanceTimersByTime(1000);
-    await wait();
+    await waitFor(() => {});
     expect(mockRefreshTimeRange).toHaveBeenCalled();
     wrapper.unmount();
   });
@@ -134,7 +134,7 @@ describe('DatePicker', () => {
     mountDatePicker({ refreshPaused: true, refreshInterval: 1000 });
     expect(mockRefreshTimeRange).not.toHaveBeenCalled();
     jest.advanceTimersByTime(1000);
-    await wait();
+    await waitFor(() => {});
     expect(mockRefreshTimeRange).not.toHaveBeenCalled();
   });
 });

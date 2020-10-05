@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent, wait } from '@testing-library/react';
+import { render, fireEvent, waitFor } from '@testing-library/react';
 import { MissingJobsAlert } from './AnomalyDetectionSetupLink';
 import * as hooks from '../../../../hooks/useFetcher';
 
@@ -33,7 +33,7 @@ async function renderTooltipAnchor({
     fireEvent.mouseOver(toolTipAnchor);
 
     // wait for tooltip text to be in the DOM
-    await wait(() => {
+    await waitFor(() => {
       const toolTipText = baseElement.querySelector('.euiToolTipPopover')
         ?.textContent;
       expect(toolTipText).not.toBe(undefined);
