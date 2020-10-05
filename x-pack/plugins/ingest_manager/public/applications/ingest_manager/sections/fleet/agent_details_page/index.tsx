@@ -97,7 +97,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         <EuiFlexItem>
           <EuiText>
             <h1>
-              {isLoading ? (
+              {isLoading && isInitialRequest ? (
                 <Loading />
               ) : typeof agentData?.item?.local_metadata?.host === 'object' &&
                 typeof agentData?.item?.local_metadata?.host?.hostname === 'string' ? (
@@ -116,7 +116,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [agentData?.item?.local_metadata?.host, agentId, getHref, isLoading]
+    [agentData?.item?.local_metadata?.host, agentId, getHref, isInitialRequest, isLoading]
   );
 
   const headerRightContent = useMemo(
