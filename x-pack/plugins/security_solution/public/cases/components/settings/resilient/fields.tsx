@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import {
   EuiComboBox,
   EuiComboBoxOptionOption,
@@ -29,15 +29,9 @@ const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProp
 >> = ({ isEdit = true, fields, connector, onChange }) => {
   const { incidentTypes = null, severityCode = null } = fields ?? {};
 
-  const [incidentTypesComboBoxOptions, setIncidentTypesComboBoxOptions] = useState<
-    Array<EuiComboBoxOptionOption<string>>
-  >([]);
-
   const [selectedIncidentTypesComboBoxOptions, setSelectedIncidentTypesComboBoxOptions] = useState<
     Array<EuiComboBoxOptionOption<string>>
   >([]);
-
-  const [severitySelectOptions, setSeveritySelectOptions] = useState<EuiSelectOption[]>([]);
 
   const { http, notifications } = useKibana().services;
 
@@ -56,25 +50,27 @@ const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProp
     connector,
   });
 
-  useEffect(() => {
-    const options = severity.map((s) => ({
-      value: s.id.toString(),
-      text: s.name,
-    }));
+  const severitySelectOptions: EuiSelectOption[] = useMemo(
+    () =>
+      severity.map((s) => ({
+        value: s.id.toString(),
+        text: s.name,
+      })),
+    [severity]
+  );
 
-    setSeveritySelectOptions(options);
-  }, [connector, severity]);
-
-  useEffect(() => {
-    setIncidentTypesComboBoxOptions(
+  const incidentTypesComboBoxOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(
+    () =>
       allIncidentTypes
         ? allIncidentTypes.map((type: { id: number; name: string }) => ({
             label: type.name,
             value: type.id.toString(),
           }))
-        : []
-    );
+        : [],
+    [allIncidentTypes]
+  );
 
+  useEffect(() => {
     const allIncidentTypesAsObject = allIncidentTypes.reduce(
       (acc, type) => ({ ...acc, [type.id.toString()]: type.name }),
       {} as Record<string, string>
@@ -91,19 +87,17 @@ const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProp
         : []
     );
   }, [connector, allIncidentTypes, incidentTypes]);
+
   const listItems = useMemo(
     () => [
       ...(incidentTypes != null
         ? [
             {
               title: i18n.INCIDENT_TYPES_LABEL,
-              description: incidentTypes.map((incident, i) =>
-                incidentTypes.length - 1 < i ? (
-                  <span key={`${incident}-${i}`}>{`${incident}, `}</span>
-                ) : (
-                  <span key={`${incident}-${i}`}>{incident}</span>
-                )
-              ),
+              description: allIncidentTypes
+                .filter((type) => incidentTypes.includes(type.id.toString()))
+                .map((type) => type.name)
+                .join(', '),
             },
           ]
         : []),
@@ -111,13 +105,28 @@ const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProp
         ? [
             {
               title: i18n.SEVERITY_LABEL,
-              description: severityCode,
+              description:
+                severity.find((severityObj) => severityObj.id.toString() === severityCode)?.name ??
+                '',
             },
           ]
         : []),
     ],
-    [incidentTypes, severityCode]
+    [incidentTypes, severityCode, allIncidentTypes, severity]
   );
+
+  const onFieldChange = useCallback(
+    (key, value) => {
+      onChange({
+        ...fields,
+        incidentTypes,
+        severityCode,
+        [key]: value,
+      });
+    },
+    [incidentTypes, severityCode, onChange, fields]
+  );
+
   return isEdit ? (
     <span data-test-subj={'connector-settings-resilient'}>
       <EuiFormRow fullWidth label={i18n.INCIDENT_TYPES_LABEL}>
@@ -137,16 +146,14 @@ const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProp
               }))
             );
 
-            onChange({
-              ...fields,
-              incidentTypes: selectedOptions.map(
-                (selectedOption) => selectedOption.value ?? selectedOption.label
-              ),
-            });
+            onFieldChange(
+              'incidentTypes',
+              selectedOptions.map((selectedOption) => selectedOption.value ?? selectedOption.label)
+            );
           }}
           onBlur={() => {
             if (!incidentTypes) {
-              onChange({ ...fields, incidentTypes: [] });
+              onFieldChange('incidentTypes', []);
             }
           }}
           isClearable={true}
@@ -162,9 +169,7 @@ const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProp
           data-test-subj="severitySelect"
           options={severitySelectOptions}
           value={severityCode ?? undefined}
-          onChange={(e) => {
-            onChange({ ...fields, severityCode: e.target.value });
-          }}
+          onChange={(e) => onFieldChange('severityCode', e.target.value)}
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
