@@ -62,6 +62,15 @@ const MyEuiSelect = styled(EuiSelect)`
   width: auto;
 `;
 
+const getNumberFromUserInput = (input: string): number => {
+  const number = parseInt(input, 10);
+  if (Number.isNaN(number)) {
+    return 0;
+  } else {
+    return Math.min(number, Number.MAX_SAFE_INTEGER);
+  }
+};
+
 export const ScheduleItem = ({
   dataTestSubj,
   field,
@@ -84,7 +93,7 @@ export const ScheduleItem = ({
 
   const onChangeTimeVal = useCallback(
     (e) => {
-      const sanitizedValue: number = parseInt(e.target.value, 10);
+      const sanitizedValue = getNumberFromUserInput(e.target.value);
       setTimeVal(sanitizedValue);
       setValue(`${sanitizedValue}${timeType}`);
     },
@@ -155,6 +164,7 @@ export const ScheduleItem = ({
         <EuiFieldNumber
           fullWidth
           min={minimumValue}
+          max={Number.MAX_SAFE_INTEGER}
           onChange={onChangeTimeVal}
           value={timeVal}
           data-test-subj="interval"
