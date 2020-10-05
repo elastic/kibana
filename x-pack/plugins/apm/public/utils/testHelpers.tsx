@@ -25,6 +25,7 @@ import {
 } from '../../typings/elasticsearch';
 import { MockApmPluginContextWrapper } from '../context/ApmPluginContext/MockApmPluginContext';
 import { UIFilters } from '../../typings/ui_filters';
+import { UrlParamsProvider } from '../context/UrlParamsContext';
 
 const originalConsoleWarn = console.warn; // eslint-disable-line no-console
 /**
@@ -68,7 +69,9 @@ export async function getRenderedHref(Component: React.FC, location: Location) {
   const el = render(
     <MockApmPluginContextWrapper>
       <MemoryRouter initialEntries={[location]}>
-        <Component />
+        <UrlParamsProvider>
+          <Component />
+        </UrlParamsProvider>
       </MemoryRouter>
     </MockApmPluginContextWrapper>
   );
