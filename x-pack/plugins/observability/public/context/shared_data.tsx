@@ -5,19 +5,19 @@
  */
 
 import React, { createContext, useMemo, useState } from 'react';
-import { HasDataResponse, ObservabilityFetchDataPlugins } from '../typings/fetch_overview_data';
+import { ObservabilityFetchDataPlugins } from '../typings/fetch_overview_data';
 
 interface SharedData {
-  hasData: Record<ObservabilityFetchDataPlugins, HasDataResponse | undefined> | null;
-  hasAnyData?: HasDataResponse;
+  hasData: Record<ObservabilityFetchDataPlugins, boolean | undefined> | null;
+  hasAnyData?: boolean;
 }
 
-interface Index {
+interface DefaultData {
   sharedData: SharedData | null;
   setSharedData: (data: SharedData) => void;
 }
 
-const defaultContext: Index = {
+const defaultContext: DefaultData = {
   sharedData: null,
   setSharedData: (d) => {
     throw new Error('setSharedData was not initialized, set it when you invoke the context');

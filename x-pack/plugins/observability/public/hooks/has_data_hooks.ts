@@ -4,29 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useFetcher } from './use_fetcher';
+import { FETCH_STATUS, FetcherResult, useFetcher } from './use_fetcher';
 import { getDataHandler } from '../data_handler';
 
+function parseResult(result: FetcherResult<boolean>) {
+  if (result.status === FETCH_STATUS.FAILURE) {
+    return { ...result, data: false };
+  }
+  return result;
+}
+
 export function useApmHasData() {
-  return useFetcher(() => getDataHandler('apm')?.hasData(), []);
+  const result = useFetcher(() => getDataHandler('apm')?.hasData(), []);
+  return parseResult(result);
 }
 
 export function useInfraLogsHasData() {
-  return useFetcher(() => getDataHandler('infra_logs')?.hasData(), []);
+  const result = useFetcher(() => getDataHandler('infra_logs')?.hasData(), []);
+
+  return parseResult(result);
 }
 
 export function useInfraMetricsHasData() {
-  return useFetcher(() => getDataHandler('infra_metrics')?.hasData(), []);
+  const result = useFetcher(() => getDataHandler('infra_metrics')?.hasData(), []);
+  return parseResult(result);
 }
 
 export function useUptimeHasData() {
-  return useFetcher(() => getDataHandler('uptime')?.hasData(), []);
-}
-
-export function useUxHasData({ start, end }: { start: number; end: number }) {
-  return useFetcher(
-    () => getDataHandler('ux')?.hasData({ absoluteTime: { start, end } }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
+  const result = useFetcher(() => getDataHandler('uptime')?.hasData(), []);
+  return parseResult(result);
 }

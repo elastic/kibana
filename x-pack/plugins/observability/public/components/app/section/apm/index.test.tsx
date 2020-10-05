@@ -4,29 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
+import moment from 'moment';
 import * as fetcherHook from '../../../../hooks/use_fetcher';
 import { render } from '../../../../utils/test_helper';
 import { APMSection } from './';
 import { response } from './mock_data/apm.mock';
-import moment from 'moment';
+import * as queryParamsHook from '../../../../hooks/use_query_params';
 
 describe('APMSection', () => {
+  beforeEach(() => {
+    jest.spyOn(queryParamsHook, 'useQueryParams').mockReturnValue({
+      start: 'now-15m',
+      end: 'now',
+      absStart: moment('2020-06-29T11:38:23.747Z').valueOf(),
+      absEnd: moment('2020-06-29T12:08:23.748Z').valueOf(),
+    });
+  });
+
   it('renders with transaction series and stats', () => {
     jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
       data: response,
       status: fetcherHook.FETCH_STATUS.SUCCESS,
       refetch: jest.fn(),
     });
-    const { getByText, queryAllByTestId } = render(
-      <APMSection
-        absoluteTime={{
-          start: moment('2020-06-29T11:38:23.747Z').valueOf(),
-          end: moment('2020-06-29T12:08:23.748Z').valueOf(),
-        }}
-        relativeTime={{ start: 'now-15m', end: 'now' }}
-        bucketSize="60s"
-      />
-    );
+
+    const { getByText, queryAllByTestId } = render(<APMSection />);
 
     expect(getByText('APM')).toBeInTheDocument();
     expect(getByText('View in app')).toBeInTheDocument();
@@ -40,16 +42,7 @@ describe('APMSection', () => {
       status: fetcherHook.FETCH_STATUS.LOADING,
       refetch: jest.fn(),
     });
-    const { getByText, queryAllByText, getByTestId } = render(
-      <APMSection
-        absoluteTime={{
-          start: moment('2020-06-29T11:38:23.747Z').valueOf(),
-          end: moment('2020-06-29T12:08:23.748Z').valueOf(),
-        }}
-        relativeTime={{ start: 'now-15m', end: 'now' }}
-        bucketSize="60s"
-      />
-    );
+    const { getByText, queryAllByText, getByTestId } = render(<APMSection />);
 
     expect(getByText('APM')).toBeInTheDocument();
     expect(getByTestId('loading')).toBeInTheDocument();
