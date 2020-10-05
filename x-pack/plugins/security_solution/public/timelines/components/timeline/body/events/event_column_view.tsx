@@ -95,9 +95,9 @@ export const EventColumnView = React.memo<Props>(
     toggleShowNotes,
     updateNote,
   }) => {
-    const { timelineType, status } = useShallowEqualSelector<TimelineModel>(
-      (state) => state.timeline.timelineById[timelineId]
-    );
+    const { eventType: timelineEventType, timelineType, status } = useShallowEqualSelector<
+      TimelineModel
+    >((state) => state.timeline.timelineById[timelineId]);
 
     const handlePinClicked = useCallback(
       () =>
@@ -151,14 +151,17 @@ export const EventColumnView = React.memo<Props>(
               />,
             ]
           : []),
-        <AlertContextMenu
-          key="alert-context-menu"
-          ecsRowData={ecsData}
-          nonEcsRowData={data}
-          timelineId={timelineId}
-          disabled={eventType !== 'signal'}
-          refetch={refetch}
-        />,
+        ...(timelineEventType !== 'raw'
+          ? [
+              <AlertContextMenu
+                key="alert-context-menu"
+                ecsRowData={ecsData}
+                timelineId={timelineId}
+                disabled={eventType !== 'signal'}
+                refetch={refetch}
+              />,
+            ]
+          : []),
       ],
       [
         associateNote,
@@ -175,6 +178,7 @@ export const EventColumnView = React.memo<Props>(
         showNotes,
         status,
         timelineId,
+        timelineEventType,
         timelineType,
         toggleShowNotes,
         updateNote,

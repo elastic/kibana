@@ -37,26 +37,32 @@ describe('Color Palette', () => {
 
   it('should throw an error if input is not a number', () => {
     expect(() => {
+      // @ts-expect-error
       createColorPalette(string);
     }).toThrowError();
 
     expect(() => {
+      // @ts-expect-error
       createColorPalette(bool);
     }).toThrowError();
 
     expect(() => {
+      // @ts-expect-error
       createColorPalette(nullValue);
     }).toThrowError();
 
     expect(() => {
+      // @ts-expect-error
       createColorPalette(emptyArr);
     }).toThrowError();
 
     expect(() => {
+      // @ts-expect-error
       createColorPalette(emptyObject);
     }).toThrowError();
 
     expect(() => {
+      // @ts-expect-error
       createColorPalette();
     }).toThrowError();
   });
