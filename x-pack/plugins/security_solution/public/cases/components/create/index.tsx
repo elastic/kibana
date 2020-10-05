@@ -81,7 +81,7 @@ export const Create = React.memo(() => {
   const { connector: configureConnector, loading: isLoadingCaseConfigure } = useCaseConfigure();
   const { tags: tagOptions } = useGetTags();
 
-  const [bleepBlorp, setConnector] = useState<ActionConnector | null>(null);
+  const [connector, setConnector] = useState<ActionConnector | null>(null);
   const [options, setOptions] = useState(
     tagOptions.map((label) => ({
       label,
@@ -123,13 +123,13 @@ export const Create = React.memo(() => {
   });
   const onChangeConnector = useCallback(
     (newConnectorId) => {
-      if (bleepBlorp == null || bleepBlorp.id !== newConnectorId) {
+      if (connector == null || connector.id !== newConnectorId) {
         setConnector(getConnectorById(newConnectorId, connectors) ?? null);
         // Reset setting fields when changing connector
         setFields(null);
       }
     },
-    [bleepBlorp, connectors]
+    [connector, connectors]
   );
 
   const onDescriptionChange = useCallback((newValue) => setFieldValue('description', newValue), [
@@ -263,7 +263,7 @@ export const Create = React.memo(() => {
             <Container>
               <SettingFieldsForm
                 isEdit={true}
-                connector={bleepBlorp}
+                connector={connector}
                 onChange={setFields}
                 fields={fields}
               />
@@ -273,7 +273,7 @@ export const Create = React.memo(() => {
       ),
     }),
     [
-      bleepBlorp,
+      connector,
       connectors,
       currentConnectorId,
       fields,
