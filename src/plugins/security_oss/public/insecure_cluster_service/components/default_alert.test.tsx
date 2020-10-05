@@ -17,14 +17,21 @@
  * under the License.
  */
 
-require('../src/setup_node_env');
-require('@kbn/test').runTestsCli([
-  require.resolve('../test/functional/config.js'),
-  require.resolve('../test/api_integration/config.js'),
-  require.resolve('../test/plugin_functional/config.ts'),
-  require.resolve('../test/interpreter_functional/config.ts'),
-  require.resolve('../test/ui_capabilities/newsfeed_err/config.ts'),
-  require.resolve('../test/examples/config.js'),
-  require.resolve('../test/new_visualize_flow/config.js'),
-  require.resolve('../test/security_functional/config.ts'),
-]);
+import { defaultAlertText } from './default_alert';
+
+describe('defaultAlertText', () => {
+  it('creates a valid MountPoint that can cleanup correctly', () => {
+    const mountPoint = defaultAlertText(jest.fn());
+
+    const el = document.createElement('div');
+    const unmount = mountPoint(el);
+
+    expect(el.querySelectorAll('[data-test-subj="insecureClusterDefaultAlertText"]')).toHaveLength(
+      1
+    );
+
+    unmount();
+
+    expect(el).toMatchInlineSnapshot(`<div />`);
+  });
+});

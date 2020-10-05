@@ -16,15 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { FtrProviderContext } from '../functional/ftr_provider_context';
 
-require('../src/setup_node_env');
-require('@kbn/test').runTestsCli([
-  require.resolve('../test/functional/config.js'),
-  require.resolve('../test/api_integration/config.js'),
-  require.resolve('../test/plugin_functional/config.ts'),
-  require.resolve('../test/interpreter_functional/config.ts'),
-  require.resolve('../test/ui_capabilities/newsfeed_err/config.ts'),
-  require.resolve('../test/examples/config.js'),
-  require.resolve('../test/new_visualize_flow/config.js'),
-  require.resolve('../test/security_functional/config.ts'),
-]);
+// eslint-disable-next-line import/no-default-export
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('Security OSS', function () {
+    this.tags(['skipCloud', 'ciGroup2']);
+    loadTestFile(require.resolve('./insecure_cluster_warning'));
+  });
+}

@@ -93,6 +93,7 @@ kibana_vars=(
     path.data
     pid.file
     regionmap
+    security.showInsecureClusterWarning
     server.basePath
     server.customResponseHeaders
     server.compression.enabled

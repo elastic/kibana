@@ -17,14 +17,19 @@
  * under the License.
  */
 
-require('../src/setup_node_env');
-require('@kbn/test').runTestsCli([
-  require.resolve('../test/functional/config.js'),
-  require.resolve('../test/api_integration/config.js'),
-  require.resolve('../test/plugin_functional/config.ts'),
-  require.resolve('../test/interpreter_functional/config.ts'),
-  require.resolve('../test/ui_capabilities/newsfeed_err/config.ts'),
-  require.resolve('../test/examples/config.js'),
-  require.resolve('../test/new_visualize_flow/config.js'),
-  require.resolve('../test/security_functional/config.ts'),
-]);
+import { TypeOf } from '@kbn/config-schema';
+
+import { PluginConfigDescriptor, PluginInitializerContext } from 'kibana/server';
+import { ConfigSchema } from './config';
+import { SecurityOssPlugin } from './plugin';
+
+export { SecurityOssPluginSetup } from './plugin';
+
+export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
+  schema: ConfigSchema,
+  exposeToBrowser: {
+    showInsecureClusterWarning: true,
+  },
+};
+
+export const plugin = (context: PluginInitializerContext) => new SecurityOssPlugin(context);
