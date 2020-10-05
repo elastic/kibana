@@ -6,15 +6,12 @@
 
 import { IIndexPattern } from '../../../../../src/plugins/data/common/index_patterns';
 import { MapSettings } from '../reducers/map';
-import {
-  EmbeddableInput,
-  EmbeddableOutput,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../src/plugins/embeddable/public/lib/embeddables';
+import { EmbeddableInput, EmbeddableOutput } from '../../../../../src/plugins/embeddable/public';
 import { Filter, Query, RefreshInterval, TimeRange } from '../../../../../src/plugins/data/common';
 import { LayerDescriptor, MapCenterAndZoom } from '../../common/descriptor_types';
 
 export interface MapEmbeddableConfig {
+  description?: string;
   editUrl?: string;
   editApp?: string;
   editPath?: string;
