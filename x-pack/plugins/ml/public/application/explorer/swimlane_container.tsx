@@ -25,12 +25,15 @@ import {
 } from '@elastic/charts';
 import moment from 'moment';
 import { HeatmapBrushEvent } from '@elastic/charts/dist/chart_types/heatmap/layout/types/config_types';
-import { ExplorerSwimlaneProps } from './explorer_swimlane';
 
+import { i18n } from '@kbn/i18n';
 import { SwimLanePagination } from './swimlane_pagination';
-import { ViewBySwimLaneData } from './explorer_utils';
+import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
 import { ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../../../common';
 import { DeepPartial } from '../../../common/types/common';
+import { TimeBuckets as TimeBucketsClass } from '../util/time_buckets';
+import { SWIMLANE_TYPE, SwimlaneType } from './explorer_constants';
+import { mlEscape } from '../util/string_utils';
 
 /**
  * Ignore insignificant resize, e.g. browser scrollbar appearance.
@@ -44,12 +47,23 @@ export function isViewBySwimLaneData(arg: any): arg is ViewBySwimLaneData {
   return arg && arg.hasOwnProperty('cardinality');
 }
 
+export interface ExplorerSwimlaneProps {
+  filterActive?: boolean;
+  maskAll?: boolean;
+  timeBuckets: InstanceType<typeof TimeBucketsClass>;
+  swimlaneData: OverallSwimlaneData | ViewBySwimLaneData;
+  swimlaneType: SwimlaneType;
+  selection?: AppStateSelectedCells;
+  onCellsSelection: (payload?: AppStateSelectedCells) => void;
+  'data-test-subj'?: string;
+}
+
 /**
  * Anomaly swim lane container responsible for handling resizing, pagination and
  * providing swim lane vis with required props.
  */
 export const SwimlaneContainer: FC<
-  Omit<ExplorerSwimlaneProps, 'chartWidth' | 'tooltipService' | 'parentRef'> & {
+  ExplorerSwimlaneProps & {
     onResize: (width: number) => void;
     fromPage?: number;
     perPage?: number;
@@ -57,11 +71,13 @@ export const SwimlaneContainer: FC<
     onPaginationChange?: (arg: { perPage?: number; fromPage?: number }) => void;
     isLoading: boolean;
     noDataWarning: string | JSX.Element | null;
+    /**
+     * Unique id of the chart
+     */
     id: string;
   }
 > = ({
   id,
-  children,
   onResize,
   perPage,
   fromPage,
@@ -69,7 +85,13 @@ export const SwimlaneContainer: FC<
   onPaginationChange,
   isLoading,
   noDataWarning,
-  ...props
+  filterActive,
+  swimlaneData,
+  swimlaneType,
+  selection,
+  onCellsSelection,
+  timeBuckets,
+  maskAll,
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
 
@@ -88,11 +110,7 @@ export const SwimlaneContainer: FC<
     [chartWidth]
   );
 
-  const showSwimlane =
-    props.swimlaneData &&
-    props.swimlaneData.laneLabels &&
-    props.swimlaneData.laneLabels.length > 0 &&
-    props.swimlaneData.points.length > 0;
+  const showSwimlane = swimlaneData?.laneLabels?.length > 0 && swimlaneData.points.length > 0;
 
   const isPaginationVisible =
     (showSwimlane || isLoading) &&
@@ -101,13 +119,24 @@ export const SwimlaneContainer: FC<
     fromPage &&
     perPage;
 
-  const rowsCount = props?.swimlaneData?.laneLabels?.length ?? 0;
+  const rowsCount = swimlaneData?.laneLabels?.length ?? 0;
 
   const swimLanePoints = useMemo(() => {
-    return props.swimlaneData.points
-      .map((v) => ({ ...v, time: v.time * 1000 }))
+    const showFilterContext = filterActive === true && swimlaneType === SWIMLANE_TYPE.OVERALL;
+
+    return swimlaneData.points
+      .map((v) => {
+        const formatted = { ...v, time: v.time * 1000 };
+        if (showFilterContext) {
+          formatted.laneLabel = i18n.translate('xpack.ml.explorer.overallSwimlaneUnfilteredLabel', {
+            defaultMessage: '{label} (unfiltered)',
+            values: { label: mlEscape(v.laneLabel) },
+          });
+        }
+        return formatted;
+      })
       .filter((v) => v.value > 0);
-  }, [props.swimlaneData.points]);
+  }, [swimlaneData.points, filterActive, swimlaneType]);
 
   const containerHeight = useMemo(() => {
     // Persists container height during loading to prevent page from jumping
@@ -120,18 +149,30 @@ export const SwimlaneContainer: FC<
     }
   }, [isLoading, containerHeight]);
 
-  const highlightedData = props.selection
-    ? { x: props.selection.times.map((v) => v * 1000), y: props.selection.lanes }
-    : undefined;
+  const highlightedData = useMemo(() => {
+    if (!selection) return;
+
+    if (
+      (swimlaneType !== selection.type ||
+        (swimlaneData.fieldName !== undefined &&
+          swimlaneData.fieldName !== selection.viewByFieldName)) &&
+      filterActive === false
+    ) {
+      // Not this swimlane which was selected.
+      return;
+    }
+
+    return { x: selection.times.map((v) => v * 1000), y: selection.lanes };
+  }, [selection, swimlaneType]);
 
   const swimLaneConfig: DeepPartial<HeatmapConfig> = useMemo(
     () => ({
       onBrushEnd: (e: HeatmapBrushEvent) => {
-        props.onCellsSelection({
+        onCellsSelection({
           lanes: e.y as string[],
           times: e.x.map((v) => (v as number) / 1000),
-          type: props.swimlaneType,
-          viewByFieldName: props.swimlaneData.fieldName,
+          type: swimlaneType,
+          viewByFieldName: swimlaneData.fieldName,
         });
       },
       grid: {
@@ -166,13 +207,13 @@ export const SwimlaneContainer: FC<
         // eui color subdued
         fill: `#98A2B3`,
         formatter: (v: number) => {
-          props.timeBuckets.setInterval(`${props.swimlaneData.interval}s`);
-          const a = props.timeBuckets.getScaledDateFormat();
+          timeBuckets.setInterval(`${swimlaneData.interval}s`);
+          const a = timeBuckets.getScaledDateFormat();
           return moment(v).format(a);
         },
       },
     }),
-    [props.swimlaneType, props.swimlaneData?.fieldName]
+    [swimlaneType, swimlaneData?.fieldName]
   );
 
   // @ts-ignore
@@ -182,13 +223,13 @@ export const SwimlaneContainer: FC<
       const startTime = (cell.datum.x as number) / 1000;
       const payload = {
         lanes: [String(cell.datum.y)],
-        times: [startTime, startTime + props.swimlaneData.interval],
-        type: props.swimlaneType,
-        viewByFieldName: props.swimlaneData.fieldName,
+        times: [startTime, startTime + swimlaneData.interval],
+        type: swimlaneType,
+        viewByFieldName: swimlaneData.fieldName,
       };
-      props.onCellsSelection(payload);
+      onCellsSelection(payload);
     },
-    [props.swimlaneType, props.swimlaneData?.fieldName, props.swimlaneData?.interval]
+    [swimlaneType, swimlaneData?.fieldName, swimlaneData?.interval]
   );
 
   // A resize observer is required to compute the bucket span based on the chart width to fetch the data accordingly
@@ -217,9 +258,9 @@ export const SwimlaneContainer: FC<
                   showLegend
                   legendPosition="top"
                   xDomain={{
-                    min: props.swimlaneData.earliest * 1000,
-                    max: props.swimlaneData.latest * 1000,
-                    minInterval: props.swimlaneData.interval * 1000,
+                    min: swimlaneData.earliest * 1000,
+                    max: swimlaneData.latest * 1000,
+                    minInterval: swimlaneData.interval * 1000,
                   }}
                 />
                 <Heatmap
