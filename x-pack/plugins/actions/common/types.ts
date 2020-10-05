@@ -26,9 +26,10 @@ export interface ActionResult {
 }
 
 // the result returned from an action type executor function
+const ActionTypeExecutorResultStatusValues = ['ok', 'error'] as const;
 export interface ActionTypeExecutorResult<Data> {
   actionId: string;
-  status: 'ok' | 'error';
+  status: typeof ActionTypeExecutorResultStatusValues[number];
   message?: string;
   serviceMessage?: string;
   data?: Data;
@@ -41,8 +42,7 @@ export function isActionTypeExecutorResult(
   const unsafeResult = result as ActionTypeExecutorResult<unknown>;
   return (
     unsafeResult &&
-    typeof unsafeResult === 'object' &&
     typeof unsafeResult?.actionId === 'string' &&
-    (unsafeResult?.status === 'ok' || unsafeResult?.status === 'error')
+    ActionTypeExecutorResultStatusValues.includes(unsafeResult?.status)
   );
 }
