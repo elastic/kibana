@@ -13,7 +13,6 @@ import { AnomaliesActionGroupData, AnomalyHit } from './anomalies';
 import { DnsHistogramGroupData } from './dns';
 import { AuthenticationsActionGroupData } from './authentications';
 import { EventsActionGroupData, EventHit } from './events';
-import { Threshold } from '../../../detection_engine/schemas/common/schemas';
 
 export * from './alerts';
 export * from './anomalies';
@@ -36,7 +35,7 @@ export interface MatrixHistogramRequestOptions extends RequestBasicOptions {
   timerange: TimerangeInput;
   histogramType: MatrixHistogramType;
   stackByField: string;
-  threshold?: Threshold | undefined;
+  threshold?: { field: string | undefined; value: number } | undefined;
   inspect?: Maybe<Inspect>;
 }
 

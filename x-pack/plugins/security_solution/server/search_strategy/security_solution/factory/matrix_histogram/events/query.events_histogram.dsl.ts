@@ -56,6 +56,25 @@ export const buildEventsHistogramQuery = ({
           }
         : {};
 
+    if (threshold != null) {
+      return {
+        eventActionGroup: {
+          terms: {
+            field: threshold.field ?? stackByField,
+            ...missing,
+            order: {
+              _count: 'desc',
+            },
+            size: 10,
+            min_doc_count: threshold.value,
+          },
+          aggs: {
+            events: dateHistogram,
+          },
+        },
+      };
+    }
+
     return {
       eventActionGroup: {
         terms: {
@@ -70,16 +89,6 @@ export const buildEventsHistogramQuery = ({
           events: dateHistogram,
         },
       },
-      ...(threshold != null
-        ? {
-            threshold: {
-              terms: {
-                field: threshold.field,
-                min_doc_count: threshold.value,
-              },
-            },
-          }
-        : {}),
     };
   };
 

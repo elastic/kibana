@@ -15,11 +15,7 @@ import { getQueryFilter } from '../../../../../common/detection_engine/get_query
 import { ESQueryStringQuery } from '../../../../../common/typed_json';
 import { FieldValueQueryBar } from '../query_bar';
 import { RangeFilter } from '../../../../../../../../src/plugins/data/common/es_query';
-import {
-  Language,
-  Threshold,
-  Type,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
+import { Language, Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { useMatrixHistogramAsync } from '../../../../common/containers/matrix_histogram/use_matrix_histogram_async';
 import { PreviewQueryHistogram } from './histogram';
 import { MatrixHistogramType } from '../../../../../common/search_strategy/security_solution/matrix_histogram';
@@ -36,7 +32,7 @@ interface PreviewQueryProps {
   query: FieldValueQueryBar | undefined;
   index: string[];
   ruleType: Type;
-  threshold: Threshold | undefined;
+  threshold: { field: string | undefined; value: number } | undefined;
   isDisabled: boolean;
 }
 
@@ -56,7 +52,6 @@ export const PreviewQuery = ({
   const { data } = useKibana().services;
   const [, { indexPatterns }] = useFetchIndex(index);
   const { addError } = useAppToasts();
-  // TODO: deal with errors
   const {
     error: customQueryError,
     start: startCustomQuery,
@@ -110,9 +105,7 @@ export const PreviewQuery = ({
   const handlePreviewNonEqlQuery = useCallback(
     (filterQuery: ESQueryStringQuery | undefined, to: string, from: string): void => {
       const thresholdField =
-        ruleType === 'threshold' && threshold != null && threshold.field[0] != null
-          ? { ...threshold, field: threshold.field[0] }
-          : undefined;
+        ruleType === 'threshold' && threshold != null ? { ...threshold } : undefined;
       startCustomQuery({
         data,
         endDate: from,
