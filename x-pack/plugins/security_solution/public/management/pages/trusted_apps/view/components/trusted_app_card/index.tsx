@@ -54,11 +54,11 @@ const getEntriesColumnDefinitions = (): Array<EuiTableFieldDataColumnType<Entry>
 
 interface TrustedAppCardProps {
   trustedApp: Immutable<TrustedApp>;
-  onDelete: (id: string) => void;
+  onDelete: (trustedApp: Immutable<TrustedApp>) => void;
 }
 
 export const TrustedAppCard = memo(({ trustedApp, onDelete }: TrustedAppCardProps) => {
-  const handleDelete = useCallback(() => onDelete(trustedApp.id), [onDelete, trustedApp.id]);
+  const handleDelete = useCallback(() => onDelete(trustedApp), [onDelete, trustedApp]);
 
   return (
     <ItemDetailsCard>
