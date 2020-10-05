@@ -3,18 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { render } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import { shallow } from 'enzyme';
 import React, { ReactNode } from 'react';
 import { MemoryRouter, RouteComponentProps } from 'react-router-dom';
-import { TraceLink } from '../';
-import { ApmPluginContextValue } from '../../../../context/ApmPluginContext';
+import { TraceLink } from './';
+import { ApmPluginContextValue } from '../../../context/ApmPluginContext';
 import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
-} from '../../../../context/ApmPluginContext/MockApmPluginContext';
-import * as hooks from '../../../../hooks/useFetcher';
-import * as urlParamsHooks from '../../../../hooks/useUrlParams';
+} from '../../../context/ApmPluginContext/MockApmPluginContext';
+import * as hooks from '../../../hooks/useFetcher';
+import * as urlParamsHooks from '../../../hooks/useUrlParams';
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
@@ -43,13 +43,18 @@ describe('TraceLink', () => {
     jest.clearAllMocks();
   });
 
-  it('renders a transition page', () => {
+  it('renders a transition page', async () => {
     const props = ({
       match: { params: { traceId: 'x' } },
     } as unknown) as RouteComponentProps<{ traceId: string }>;
-    const component = render(<TraceLink {...props} />, renderOptions);
+    let result;
+    act(() => {
+      const component = render(<TraceLink {...props} />, renderOptions);
 
-    expect(component.getByText('Fetching trace...')).toBeDefined();
+      result = component.getByText('Fetching trace...');
+    });
+    await waitFor(() => {});
+    expect(result).toBeDefined();
   });
 
   describe('when no transaction is found', () => {
