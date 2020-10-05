@@ -8,6 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { isEmpty } from 'lodash';
+import { asDecimalOrInteger } from '../../../common/utils/formatters';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { EventOutcome } from '../../../common/event_outcome';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
@@ -171,9 +172,7 @@ export function registerTransactionErrorRateAlertType({
             transactionType,
             environment,
             threshold: alertParams.threshold,
-            triggerValue: String(
-              parseFloat(transactionErrorRate.toPrecision(3))
-            ),
+            triggerValue: asDecimalOrInteger(transactionErrorRate),
             interval: `${alertParams.windowSize}${alertParams.windowUnit}`,
           });
         }
