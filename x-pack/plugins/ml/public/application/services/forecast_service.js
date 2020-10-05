@@ -6,9 +6,7 @@
 
 // Service for carrying out requests to run ML forecasts and to obtain
 // data on forecasts that have been performed.
-import get from 'lodash/get';
-import find from 'lodash/find';
-import each from 'lodash/each';
+import { get, find, each } from 'lodash';
 import { map } from 'rxjs/operators';
 
 import { ml } from './ml_api_service';

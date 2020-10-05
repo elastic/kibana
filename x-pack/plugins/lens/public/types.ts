@@ -519,7 +519,8 @@ export interface Visualization<T = unknown> {
 
   toExpression: (
     state: T,
-    datasourceLayers: Record<string, DatasourcePublicAPI>
+    datasourceLayers: Record<string, DatasourcePublicAPI>,
+    attributes?: Partial<{ title: string; description: string }>
   ) => Ast | string | null;
   /**
    * Expression to render a preview version of the chart in very constrained space.

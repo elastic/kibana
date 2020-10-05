@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { Status } from '../instances/status';
 
-export function ApmOverview({ stats, metrics, ...props }) {
+export function ApmOverview({ stats, metrics, alerts, ...props }) {
   const seriesToShow = [
     metrics.apm_responses_valid,
     metrics.apm_responses_errors,
@@ -54,7 +54,7 @@ export function ApmOverview({ stats, metrics, ...props }) {
           </h1>
         </EuiScreenReaderOnly>
         <EuiPanel>
-          <Status stats={stats} />
+          <Status stats={stats} alerts={alerts} />
         </EuiPanel>
         <EuiSpacer size="m" />
         <EuiPageContent>

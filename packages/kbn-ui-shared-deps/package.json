@@ -9,7 +9,7 @@
     "kbn:watch": "node scripts/build --dev --watch"
   },
   "dependencies": {
-    "@elastic/charts": "21.1.2",
+    "@elastic/charts": "23.0.0",
     "@elastic/eui": "29.0.0",
     "@elastic/numeral": "^2.5.0",
     "@kbn/i18n": "1.0.0",
@@ -17,7 +17,7 @@
     "abortcontroller-polyfill": "^1.4.0",
     "angular": "^1.8.0",
     "compression-webpack-plugin": "^4.0.0",
-    "core-js": "^3.2.1",
+    "core-js": "^3.6.5",
     "custom-event-polyfill": "^0.3.0",
     "jquery": "^3.5.0",
     "lodash": "^4.17.20",

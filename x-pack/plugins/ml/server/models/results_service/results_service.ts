@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import sortBy from 'lodash/sortBy';
-import slice from 'lodash/slice';
-import get from 'lodash/get';
+import { sortBy, slice, get } from 'lodash';
 import moment from 'moment';
 import { SearchResponse } from 'elasticsearch';
 import { IScopedClusterClient } from 'kibana/server';
