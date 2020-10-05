@@ -125,7 +125,7 @@ export const Groups: React.FC = () => {
     <>
       <SetPageChrome text="Groups" />
       <SendTelemetry action="viewed" metric="groups" />
-      {hasMessages && <FlashMessages />}
+      <FlashMessages />
       <ViewContentHeader
         title={i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.heading', {
           defaultMessage: 'Manage groups',
