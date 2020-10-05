@@ -29,7 +29,7 @@ interface Props {
   routeParams: RouteParams<'/overview'>;
 }
 
-function calculateBucketSize({ start, end }: { start?: number; end?: number }) {
+export function calculateBucketSize({ start, end }: { start?: number; end?: number }) {
   if (start && end) {
     return getBucketSize({ start, end, minInterval: '60s' });
   }
@@ -37,16 +37,6 @@ function calculateBucketSize({ start, end }: { start?: number; end?: number }) {
 
 export function OverviewPage({ routeParams }: Props) {
   const timePickerTime = useKibanaUISettings<TimePickerTime>(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
-
-  const relativeTime = {
-    start: routeParams.query.rangeFrom ?? timePickerTime.from,
-    end: routeParams.query.rangeTo ?? timePickerTime.to,
-  };
-
-  const absoluteTime = {
-    start: getAbsoluteTime(relativeTime.start) as number,
-    end: getAbsoluteTime(relativeTime.end, { roundUp: true }) as number,
-  };
 
   const { sharedData } = useContext(ObsvSharedContext);
 
@@ -65,8 +55,6 @@ export function OverviewPage({ routeParams }: Props) {
 
   const theme = useContext(ThemeContext);
   const { refreshInterval = 10000, refreshPaused = true } = routeParams.query;
-
-  const timePickerTime = useKibanaUISettings<TimePickerTime>(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
 
   const appEmptySections = getEmptySections({ core }).filter(({ id }) => {
     if (id === 'alert') {
@@ -105,14 +93,7 @@ export function OverviewPage({ routeParams }: Props) {
         <EuiFlexGroup>
           <EuiFlexItem grow={6}>
             {/* Data sections */}
-            {hasAnyData && (
-              <DataSections
-                hasData={hasData}
-                absoluteTime={absoluteTime}
-                relativeTime={relativeTime}
-                bucketSize={bucketSize?.intervalString!}
-              />
-            )}
+            {hasAnyData && <DataSections hasData={hasData} />}
 
             {/* Empty sections */}
             {!!appEmptySections.length && (

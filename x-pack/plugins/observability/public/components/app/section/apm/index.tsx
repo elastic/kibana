@@ -20,7 +20,7 @@ import { ChartContainer } from '../../chart_container';
 import { StyledStat } from '../../styled_stat';
 import { onBrushEnd } from '../helper';
 import { useQueryParams } from '../../../../hooks/use_query_params';
-import { calculatetBucketSize } from '../../../../pages/overview';
+import { calculateBucketSize } from '../../../../pages/overview';
 
 function formatTpm(value?: number) {
   return numeral(value).format('0.00a');
@@ -32,7 +32,7 @@ export function APMSection() {
 
   const { absStart, absEnd, start, end } = useQueryParams();
 
-  const bucketSize = calculatetBucketSize({
+  const bucketSize = calculateBucketSize({
     start: absStart,
     end: absEnd,
   });

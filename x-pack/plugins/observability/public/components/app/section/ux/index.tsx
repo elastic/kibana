@@ -10,27 +10,32 @@ import { SectionContainer } from '../';
 import { getDataHandler } from '../../../../data_handler';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { CoreVitals } from '../../../shared/core_web_vitals';
+import { useQueryParams } from '../../../../hooks/use_query_params';
+import { calculateBucketSize } from '../../../../pages/overview';
 
 interface Props {
   serviceName: string;
-  bucketSize: string;
-  absoluteTime: { start?: number; end?: number };
-  relativeTime: { start: string; end: string };
 }
 
-export function UXSection({ serviceName, bucketSize, absoluteTime, relativeTime }: Props) {
-  const { start, end } = absoluteTime;
+export function UXSection({ serviceName }: Props) {
+  const { absStart, absEnd, start, end } = useQueryParams();
+
+  const bucketSize = calculateBucketSize({
+    start: absStart,
+    end: absEnd,
+  });
 
   const { data, status } = useFetcher(() => {
     if (start && end) {
       return getDataHandler('ux')?.fetchData({
-        absoluteTime: { start, end },
-        relativeTime,
         serviceName,
-        bucketSize,
+        absoluteTime: { start: absStart, end: absEnd },
+        relativeTime: { start, end },
+        bucketSize: bucketSize?.intervalString!,
       });
     }
-  }, [start, end, relativeTime, serviceName, bucketSize]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [start, end, serviceName]);
 
   const isLoading = status === FETCH_STATUS.LOADING;
 

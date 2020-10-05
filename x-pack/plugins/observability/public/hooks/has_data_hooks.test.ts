@@ -11,12 +11,15 @@ import {
   LogsFetchDataResponse,
   MetricsFetchDataResponse,
   UptimeFetchDataResponse,
+  UxFetchDataResponse,
+  UXHasDataResponse,
 } from '../typings/fetch_overview_data';
 import {
   useApmHasData,
   useInfraLogsHasData,
   useInfraMetricsHasData,
   useUptimeHasData,
+  useUXHasData,
 } from './has_data_hooks';
 
 describe('Has data hooks', () => {
@@ -35,11 +38,13 @@ describe('Has data hooks', () => {
     metrics: metricsR,
     apm: apmR,
     uptime: uptimeR,
+    ux: uxR,
   }: {
     logs: boolean;
     metrics: boolean;
     apm: boolean;
     uptime: boolean;
+    ux: boolean | UXHasDataResponse;
   }) => {
     const { result: infra, waitFor: logsWF } = renderHook(() => useInfraLogsHasData());
     await logsWF(() => infra.current.status === 'failure');
@@ -56,6 +61,12 @@ describe('Has data hooks', () => {
     const { result: uptime, waitFor: uptimeWF } = renderHook(() => useUptimeHasData());
     await uptimeWF(() => uptime.current.status === 'failure');
     expect(uptime.current.data).toBe(uptimeR);
+
+    const { result: ux, waitFor: uxWF } = renderHook(() =>
+      useUXHasData({ end: 1601922946605, start: 1601922046605 })
+    );
+    await uxWF(() => ux.current.status === 'failure');
+    expect(ux.current.data).toBe(uxR);
   };
 
   beforeEach(() => {
@@ -63,6 +74,7 @@ describe('Has data hooks', () => {
     unregisterDataHandler({ appName: 'infra_logs' });
     unregisterDataHandler({ appName: 'infra_metrics' });
     unregisterDataHandler({ appName: 'uptime' });
+    unregisterDataHandler({ appName: 'ux' });
   });
 
   it('returns false when an exception happens', async () => {
@@ -95,7 +107,15 @@ describe('Has data hooks', () => {
       },
     });
 
-    checkResults({ logs: false, metrics: false, apm: false, uptime: false });
+    registerDataHandler({
+      appName: 'ux',
+      fetchData: async () => (({} as unknown) as UxFetchDataResponse),
+      hasData: async () => {
+        throw new Error('BOOM');
+      },
+    });
+
+    checkResults({ logs: false, metrics: false, apm: false, uptime: false, ux: false });
   });
 
   it('returns true when has data and false when an exception happens', async () => {
@@ -124,7 +144,15 @@ describe('Has data hooks', () => {
       },
     });
 
-    checkResults({ logs: true, metrics: false, apm: true, uptime: false });
+    registerDataHandler({
+      appName: 'ux',
+      fetchData: async () => (({} as unknown) as UxFetchDataResponse),
+      hasData: async () => {
+        throw new Error('BOOM');
+      },
+    });
+
+    checkResults({ logs: true, metrics: false, apm: true, uptime: false, ux: false });
   });
 
   it('returns true when has data', async () => {
@@ -149,7 +177,15 @@ describe('Has data hooks', () => {
       hasData: async () => true,
     });
 
-    checkResults({ logs: true, metrics: true, apm: true, uptime: true });
+    const uxResponse = { hasData: true, serviceName: 'elastic-co' };
+
+    registerDataHandler({
+      appName: 'ux',
+      fetchData: async () => (({} as unknown) as UxFetchDataResponse),
+      hasData: async () => uxResponse,
+    });
+
+    checkResults({ logs: true, metrics: true, apm: true, uptime: true, ux: uxResponse });
   });
 
   it('returns false when has no data', async () => {
@@ -174,10 +210,16 @@ describe('Has data hooks', () => {
       hasData: async () => false,
     });
 
-    checkResults({ logs: false, metrics: false, apm: false, uptime: false });
+    registerDataHandler({
+      appName: 'ux',
+      fetchData: async () => (({} as unknown) as UxFetchDataResponse),
+      hasData: async () => false,
+    });
+
+    checkResults({ logs: false, metrics: false, apm: false, uptime: false, ux: false });
   });
 
   it('returns false when has data was not registered', async () => {
-    checkResults({ logs: false, metrics: false, apm: false, uptime: false });
+    checkResults({ logs: false, metrics: false, apm: false, uptime: false, ux: false });
   });
 });

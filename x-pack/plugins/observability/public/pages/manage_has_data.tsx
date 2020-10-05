@@ -11,22 +11,27 @@ import {
   useInfraLogsHasData,
   useInfraMetricsHasData,
   useUptimeHasData,
+  useUXHasData,
 } from '../hooks/has_data_hooks';
+import { useQueryParams } from '../hooks/use_query_params';
 
 export function ManageHasDataFetches() {
   const { setSharedData } = useContext(ObsvSharedContext);
 
   const history = useHistory();
 
+  const { absStart, absEnd } = useQueryParams();
+
   const { data: logs, status: logsStatus } = useInfraLogsHasData();
   const { data: metrics, status: metricsStatus } = useInfraMetricsHasData();
   const { data: apm, status: apmStatus } = useApmHasData();
   const { data: uptime, status: uptimeStatus } = useUptimeHasData();
+  const { data: ux, status: uxStatus } = useUXHasData({ start: absStart, end: absEnd });
 
   const isOverViewPage = useRouteMatch('/overview');
 
   useEffect(() => {
-    const hasAnyData = logs || metrics || apm || uptime;
+    const hasAnyData = logs || metrics || apm || uptime || ux;
 
     if (!isOverViewPage) {
       if (hasAnyData) {
@@ -35,6 +40,7 @@ export function ManageHasDataFetches() {
         logsStatus === 'success' &&
         metricsStatus === 'success' &&
         apmStatus === 'success' &&
+        uxStatus === 'success' &&
         uptimeStatus === 'success'
       ) {
         history.push({ pathname: '/landing' });
@@ -42,16 +48,17 @@ export function ManageHasDataFetches() {
     }
 
     const hasData = {
-      infra_logs: logs,
-      infra_metrics: metrics,
       apm,
       uptime,
+      ux,
+      infra_logs: logs,
+      infra_metrics: metrics,
     };
 
     setSharedData({ hasData, hasAnyData });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [logs, metrics, apm, uptime, history]);
+  }, [logs, metrics, apm, uptime, ux, history]);
 
   return null;
 }

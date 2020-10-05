@@ -24,7 +24,7 @@ import { ChartContainer } from '../../chart_container';
 import { StyledStat } from '../../styled_stat';
 import { onBrushEnd } from '../helper';
 import { useQueryParams } from '../../../../hooks/use_query_params';
-import { calculatetBucketSize } from '../../../../pages/overview';
+import { calculateBucketSize } from '../../../../pages/overview';
 
 function getColorPerItem(series?: LogsFetchDataResponse['series']) {
   if (!series) {
@@ -46,7 +46,7 @@ export function LogsSection() {
 
   const { absStart, absEnd, start, end } = useQueryParams();
 
-  const bucketSize = calculatetBucketSize({
+  const bucketSize = calculateBucketSize({
     start: absStart,
     end: absEnd,
   });

@@ -29,7 +29,7 @@ import { ChartContainer } from '../../chart_container';
 import { StyledStat } from '../../styled_stat';
 import { onBrushEnd } from '../helper';
 import { useQueryParams } from '../../../../hooks/use_query_params';
-import { calculatetBucketSize } from '../../../../pages/overview';
+import { calculateBucketSize } from '../../../../pages/overview';
 
 export function UptimeSection() {
   const theme = useContext(ThemeContext);
@@ -37,7 +37,7 @@ export function UptimeSection() {
 
   const { absStart, absEnd, start, end } = useQueryParams();
 
-  const bucketSize = calculatetBucketSize({
+  const bucketSize = calculateBucketSize({
     start: absStart,
     end: absEnd,
   });

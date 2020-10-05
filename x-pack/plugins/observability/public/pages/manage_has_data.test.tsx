@@ -17,12 +17,7 @@ function HelperComponent() {
 
   setDataValue(sharedData);
 
-  return (
-    <>
-      {JSON.stringify(sharedData)}
-      <ManageHasDataFetches />
-    </>
-  );
+  return <ManageHasDataFetches />;
 }
 
 describe('Manage Has Data Component', () => {
@@ -40,6 +35,7 @@ describe('Manage Has Data Component', () => {
         infra_logs: undefined,
         infra_metrics: undefined,
         uptime: undefined,
+        ux: undefined,
       },
     });
   });
@@ -59,6 +55,7 @@ describe('Manage Has Data Component', () => {
         infra_logs: false,
         infra_metrics: false,
         uptime: false,
+        ux: false,
       },
     });
   });
@@ -78,6 +75,7 @@ describe('Manage Has Data Component', () => {
         infra_logs: false,
         infra_metrics: false,
         uptime: false,
+        ux: false,
       },
     });
   });

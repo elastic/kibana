@@ -7,7 +7,6 @@ import React from 'react';
 import { render as testLibRender } from '@testing-library/react';
 import { CoreStart } from 'kibana/public';
 import { of } from 'rxjs';
-import { of } from 'rxjs';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
@@ -25,7 +24,7 @@ export const core = ({
     get: (key: string) => true,
     get$: (key: string) => of(true),
   },
-} as unknown) as AppMountContext['core'];
+} as unknown) as CoreStart;
 
 export const render = (component: React.ReactNode) => {
   const history = createMemoryHistory();

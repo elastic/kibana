@@ -18,60 +18,36 @@ import {
 } from '../../typings/fetch_overview_data';
 
 interface Props {
-  bucketSize: string;
-  absoluteTime: { start?: number; end?: number };
-  relativeTime: { start: string; end: string };
-  hasData: Record<ObservabilityFetchDataPlugins, HasDataResponse>;
+  hasData?: Record<ObservabilityFetchDataPlugins, HasDataResponse> | null;
 }
 
-export function DataSections({ bucketSize, hasData, absoluteTime, relativeTime }: Props) {
+export function DataSections({ hasData }: Props) {
   return (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup direction="column">
         {hasData?.infra_logs && (
           <EuiFlexItem grow={false}>
-            <LogsSection
-              bucketSize={bucketSize}
-              absoluteTime={absoluteTime}
-              relativeTime={relativeTime}
-            />
+            <LogsSection />
           </EuiFlexItem>
         )}
         {hasData?.infra_metrics && (
           <EuiFlexItem grow={false}>
-            <MetricsSection
-              bucketSize={bucketSize}
-              absoluteTime={absoluteTime}
-              relativeTime={relativeTime}
-            />
+            <MetricsSection />
           </EuiFlexItem>
         )}
         {hasData?.apm && (
           <EuiFlexItem grow={false}>
-            <APMSection
-              bucketSize={bucketSize}
-              absoluteTime={absoluteTime}
-              relativeTime={relativeTime}
-            />
+            <APMSection />
           </EuiFlexItem>
         )}
         {hasData?.uptime && (
           <EuiFlexItem grow={false}>
-            <UptimeSection
-              bucketSize={bucketSize}
-              absoluteTime={absoluteTime}
-              relativeTime={relativeTime}
-            />
+            <UptimeSection />
           </EuiFlexItem>
         )}
         {hasData?.ux && (
           <EuiFlexItem grow={false}>
-            <UXSection
-              serviceName={(hasData.ux as UXHasDataResponse).serviceName as string}
-              bucketSize={bucketSize}
-              absoluteTime={absoluteTime}
-              relativeTime={relativeTime}
-            />
+            <UXSection serviceName={(hasData.ux as UXHasDataResponse).serviceName as string} />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

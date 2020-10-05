@@ -6,8 +6,9 @@
 
 import { FETCH_STATUS, FetcherResult, useFetcher } from './use_fetcher';
 import { getDataHandler } from '../data_handler';
+import { HasDataResponse } from '../typings/fetch_overview_data';
 
-function parseResult(result: FetcherResult<boolean>) {
+function parseResult(result: FetcherResult<HasDataResponse> & { refetch: () => void }) {
   if (result.status === FETCH_STATUS.FAILURE) {
     return { ...result, data: false };
   }
@@ -32,5 +33,16 @@ export function useInfraMetricsHasData() {
 
 export function useUptimeHasData() {
   const result = useFetcher(() => getDataHandler('uptime')?.hasData(), []);
+  return parseResult(result);
+}
+
+// absolute time is only passed to ux has data hooks,
+// it should not be passed to any other has data hook
+export function useUXHasData(absTime: { start: number; end: number }) {
+  const result = useFetcher(
+    () => getDataHandler('ux')?.hasData({ absoluteTime: absTime }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
   return parseResult(result);
 }
