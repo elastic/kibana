@@ -30,6 +30,7 @@ import {
   PostBulkAgentReassignRequestSchema,
   PostAgentEnrollRequestBodyJSONSchema,
   PostAgentUpgradeRequestSchema,
+  PostBulkAgentUpgradeRequestSchema,
 } from '../../types';
 import {
   getAgentsHandler,
@@ -49,7 +50,7 @@ import { postNewAgentActionHandlerBuilder } from './actions_handlers';
 import { appContextService } from '../../services';
 import { postAgentUnenrollHandler, postBulkAgentsUnenrollHandler } from './unenroll_handler';
 import { IngestManagerConfigType } from '../..';
-import { postAgentUpgradeHandler } from './upgrade_handler';
+import { postAgentUpgradeHandler, postBulkAgentsUpgradeHandler } from './upgrade_handler';
 
 const ajv = new Ajv({
   coerceTypes: true,
@@ -225,6 +226,15 @@ export const registerRoutes = (router: IRouter, config: IngestManagerConfigType)
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
     postAgentUpgradeHandler
+  );
+  // bulk upgrade
+  router.post(
+    {
+      path: AGENT_API_ROUTES.BULK_UPGRADE_PATTERN,
+      validate: PostBulkAgentUpgradeRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    postBulkAgentsUpgradeHandler
   );
   // Bulk reassign
   router.post(

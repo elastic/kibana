@@ -208,27 +208,22 @@ export function InnerWorkspacePanel({
       >
         <h2>
           <strong>
-            {expression === null ? (
-              <FormattedMessage
-                id="xpack.lens.editorFrame.emptyWorkspace"
-                defaultMessage="Drop some fields here to start"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.lens.editorFrame.emptyWorkspaceSimple"
-                defaultMessage="Drop field here"
-              />
-            )}
+            {expression === null
+              ? i18n.translate('xpack.lens.editorFrame.emptyWorkspace', {
+                  defaultMessage: 'Drop some fields here to start',
+                })
+              : i18n.translate('xpack.lens.editorFrame.emptyWorkspaceSimple', {
+                  defaultMessage: 'Drop field here',
+                })}
           </strong>
         </h2>
         <DropIllustration aria-hidden={true} className="lnsWorkspacePanel__dropIllustration" />
         {expression === null && (
           <>
             <p>
-              <FormattedMessage
-                id="xpack.lens.editorFrame.emptyWorkspaceHeading"
-                defaultMessage="Lens is a new tool for creating visualizations"
-              />
+              {i18n.translate('xpack.lens.editorFrame.emptyWorkspaceHeading', {
+                defaultMessage: 'Lens is a new tool for creating visualization',
+              })}
             </p>
             <p>
               <small>
@@ -237,10 +232,9 @@ export function InnerWorkspacePanel({
                   target="_blank"
                   external
                 >
-                  <FormattedMessage
-                    id="xpack.lens.editorFrame.goToForums"
-                    defaultMessage="Make requests and give feedback"
-                  />
+                  {i18n.translate('xpack.lens.editorFrame.goToForums', {
+                    defaultMessage: 'Make requests and give feedback',
+                  })}
                 </EuiLink>
               </small>
             </p>

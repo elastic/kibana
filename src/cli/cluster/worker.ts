@@ -24,7 +24,7 @@ import { EventEmitter } from 'events';
 import { BinderFor } from './binder_for';
 import { fromRoot } from '../../core/server/utils';
 
-const cliPath = fromRoot('src/cli');
+const cliPath = fromRoot('src/cli/dev');
 const baseArgs = _.difference(process.argv.slice(2), ['--no-watch']);
 const baseArgv = [process.execPath, cliPath].concat(baseArgs);
 

@@ -25,10 +25,8 @@ import { Document } from '../persistence/saved_object_store';
 import { mergeTables } from './merge_tables';
 import { formatColumn } from './format_column';
 import { EmbeddableFactory, LensEmbeddableStartServices } from './embeddable/embeddable_factory';
-import { getActiveDatasourceIdFromDoc } from './editor_frame/state_management';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { DashboardStart } from '../../../../../src/plugins/dashboard/public';
-import { persistedStateToExpression } from './editor_frame/state_helpers';
 import { LensAttributeService } from '../lens_attribute_service';
 
 export interface EditorFrameSetupPlugins {
@@ -76,6 +74,8 @@ export class EditorFrameService {
       collectAsyncDefinitions(this.datasources),
       collectAsyncDefinitions(this.visualizations),
     ]);
+
+    const { persistedStateToExpression } = await import('../async_services');
 
     return await persistedStateToExpression(resolvedDatasources, resolvedVisualizations, doc);
   }
@@ -133,7 +133,7 @@ export class EditorFrameService {
           const firstDatasourceId = Object.keys(resolvedDatasources)[0];
           const firstVisualizationId = Object.keys(resolvedVisualizations)[0];
 
-          const { EditorFrame } = await import('../async_services');
+          const { EditorFrame, getActiveDatasourceIdFromDoc } = await import('../async_services');
 
           render(
             <I18nProvider>
