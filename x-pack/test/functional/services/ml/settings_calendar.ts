@@ -121,7 +121,7 @@ export function MachineLearningSettingsCalendarProvider(
 
     async openCalendarEditForm(calendarId: string) {
       await testSubjects.click(this.rowSelector(calendarId, 'mlEditCalendarLink'));
-      await testSubjects.existOrFail('mlPageCalendarEdit');
+      await testSubjects.existOrFail('mlPageCalendarEdit > mlCalendarFormEdit', { timeout: 5000 });
     },
 
     async assertApplyToAllJobsSwitchEnabled(expectedValue: boolean) {
@@ -224,6 +224,15 @@ export function MachineLearningSettingsCalendarProvider(
       );
     },
 
+    async assertCalendarTitleValue(expectedCalendarId: string) {
+      const actualValue = await testSubjects.getVisibleText('mlCalendarTitle');
+      const expectedValue = `Calendar ${expectedCalendarId}`;
+      expect(actualValue).to.eql(
+        expectedValue,
+        `Calendar title should be '${expectedValue}' (got '${actualValue}')`
+      );
+    },
+
     async setCalendarId(calendarId: string) {
       await mlCommonUI.setValueWithChecks('mlCalendarIdInput', calendarId, {
         clearWithKeyboard: true,
@@ -271,13 +280,13 @@ export function MachineLearningSettingsCalendarProvider(
     async navigateToCalendarCreationPage() {
       await testSubjects.existOrFail('mlCalendarButtonCreate');
       await testSubjects.click('mlCalendarButtonCreate');
-      await testSubjects.existOrFail('mlPageCalendarEdit');
+      await testSubjects.existOrFail('mlPageCalendarEdit > mlCalendarFormNew', { timeout: 5000 });
     },
 
     async openNewCalendarEventForm() {
       await testSubjects.existOrFail('mlCalendarNewEventButton');
       await testSubjects.click('mlCalendarNewEventButton');
-      await testSubjects.existOrFail('mlPageCalendarEdit');
+      await testSubjects.existOrFail('mlCalendarEventForm');
     },
 
     async assertCalendarEventDescriptionValue(expectedValue: string) {

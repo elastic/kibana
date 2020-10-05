@@ -34,6 +34,8 @@ export interface UseMatrixHistogramArgs {
   totalCount: number;
 }
 
+const ID = 'matrixHistogramQuery';
+
 export const useMatrixHistogram = ({
   endDate,
   errorMessage,
@@ -54,6 +56,7 @@ export const useMatrixHistogram = ({
     factoryQueryType: MatrixHistogramQuery,
     filterQuery: createFilter(filterQuery),
     histogramType,
+    id: ID,
     timerange: {
       interval: '12h',
       from: startDate,
@@ -134,18 +137,20 @@ export const useMatrixHistogram = ({
         ...prevRequest,
         defaultIndex: indexNames,
         filterQuery: createFilter(filterQuery),
+        histogramType,
         timerange: {
           interval: '12h',
           from: startDate,
           to: endDate,
         },
+        stackByField,
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [indexNames, endDate, filterQuery, startDate]);
+  }, [indexNames, endDate, filterQuery, startDate, stackByField, histogramType]);
 
   useEffect(() => {
     hostsSearch(matrixHistogramRequest);

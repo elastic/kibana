@@ -37,13 +37,14 @@ export const ExecutorSubActionSchema = schema.oneOf([
 ]);
 
 export const ExecutorSubActionPushParamsSchema = schema.object({
-  savedObjectId: schema.string(),
+  savedObjectId: schema.nullable(schema.string()),
   title: schema.string(),
   description: schema.nullable(schema.string()),
   externalId: schema.nullable(schema.string()),
   issueType: schema.nullable(schema.string()),
   priority: schema.nullable(schema.string()),
   labels: schema.nullable(schema.arrayOf(schema.string())),
+  parent: schema.nullable(schema.string()),
   // TODO: modify later to string[] - need for support Case schema
   comments: schema.nullable(schema.arrayOf(CommentSchema)),
   ...EntityInformation,
@@ -60,6 +61,8 @@ export const ExecutorSubActionGetIssueTypesParamsSchema = schema.object({});
 export const ExecutorSubActionGetFieldsByIssueTypeParamsSchema = schema.object({
   id: schema.string(),
 });
+export const ExecutorSubActionGetIssuesParamsSchema = schema.object({ title: schema.string() });
+export const ExecutorSubActionGetIssueParamsSchema = schema.object({ id: schema.string() });
 
 export const ExecutorParamsSchema = schema.oneOf([
   schema.object({
@@ -81,5 +84,13 @@ export const ExecutorParamsSchema = schema.oneOf([
   schema.object({
     subAction: schema.literal('fieldsByIssueType'),
     subActionParams: ExecutorSubActionGetFieldsByIssueTypeParamsSchema,
+  }),
+  schema.object({
+    subAction: schema.literal('issues'),
+    subActionParams: ExecutorSubActionGetIssuesParamsSchema,
+  }),
+  schema.object({
+    subAction: schema.literal('issue'),
+    subActionParams: ExecutorSubActionGetIssueParamsSchema,
   }),
 ]);
