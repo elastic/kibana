@@ -5,8 +5,7 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiIconTip, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 interface Props {
@@ -17,23 +16,21 @@ const SERVICE_LABEL = i18n.translate('xpack.observability.ux.coreWebVitals.servi
   defaultMessage: 'Service',
 });
 
+const SERVICE_LABEL_HELP = i18n.translate('xpack.observability.ux.service.help', {
+  defaultMessage: 'The RUM service with the most traffic is selected',
+});
+
 export function ServiceName({ name }: Props) {
   return (
     <>
-      <EuiText>
+      <EuiText size="s">
         {SERVICE_LABEL}
-        <EuiToolTip
-          content={
-            <EuiText>
-              <FormattedMessage
-                id="xpack.observability.ux.service.help"
-                defaultMessage="Most traffic"
-              />
-            </EuiText>
-          }
-        >
-          <EuiIcon color={'text'} type={'questionInCircle'} />
-        </EuiToolTip>
+        <EuiIconTip
+          color="text"
+          aria-label={SERVICE_LABEL_HELP}
+          type="questionInCircle"
+          content={SERVICE_LABEL_HELP}
+        />
       </EuiText>
       <EuiTitle size="s">
         <h3>{name}</h3>

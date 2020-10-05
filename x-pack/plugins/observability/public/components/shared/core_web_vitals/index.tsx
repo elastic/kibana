@@ -49,6 +49,7 @@ export function CoreVitals({ data, loading, displayServiceName, serviceName }: P
   return (
     <>
       <WebCoreVitalsTitle />
+      <EuiSpacer size="s" />
       {displayServiceName && <ServiceName name={serviceName!} />}
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="xl" justifyContent={'spaceBetween'} wrap>
