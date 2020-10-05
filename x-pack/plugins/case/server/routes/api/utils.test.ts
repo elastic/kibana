@@ -433,7 +433,7 @@ describe('Utils', () => {
         ...myCase.attributes,
         connector: {
           ...myCase.attributes.connector,
-          fields: { issueType: 'Task', priority: 'High' },
+          fields: { issueType: 'Task', priority: 'High', parent: null },
         },
       });
     });
@@ -460,7 +460,7 @@ describe('Utils', () => {
         ...myCase.attributes,
         connector: {
           ...myCase.attributes.connector,
-          fields: { issueType: 'Task', priority: 'High' },
+          fields: { issueType: 'Task', priority: 'High', parent: null },
         },
       });
     });
@@ -488,7 +488,7 @@ describe('Utils', () => {
         ...myCase.attributes,
         connector: {
           ...myCase.attributes.connector,
-          fields: { issueType: 'Task', priority: 'High' },
+          fields: { issueType: 'Task', priority: 'High', parent: null },
         },
       });
     });
