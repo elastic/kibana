@@ -21,7 +21,10 @@ import {
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { DataPluginSetup, DataPluginStart } from '../../../../src/plugins/data/server/plugin';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
-import { PluginSetupContract as AlertingSetup } from '../../alerts/server';
+import {
+  PluginSetupContract as AlertingSetup,
+  PluginStartContract as AlertPluginStartContract,
+} from '../../alerts/server';
 import { SecurityPluginSetup as SecuritySetup } from '../../security/server';
 import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 import { MlPluginSetup as MlSetup } from '../../ml/server';
@@ -86,6 +89,7 @@ export interface SetupPlugins {
 }
 
 export interface StartPlugins {
+  alerts: AlertPluginStartContract;
   data: DataPluginStart;
   ingestManager?: IngestManagerStartContract;
   taskManager?: TaskManagerStartContract;
@@ -111,10 +115,10 @@ const securitySubPlugins = [
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private readonly logger: Logger;
   private readonly config$: Observable<ConfigType>;
-  private config: ConfigType | undefined;
+  private config?: ConfigType;
   private context: PluginInitializerContext;
   private appClientFactory: AppClientFactory;
-  private securitySetup: SecuritySetup | undefined;
+  private setupPlugins?: SetupPlugins;
   private readonly endpointAppContextService = new EndpointAppContextService();
   private readonly telemetryEventsSender: TelemetryEventsSender;
 
@@ -128,7 +132,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.logger = context.logger.get('plugins', APP_ID);
     this.config$ = createConfig$(context);
     this.appClientFactory = new AppClientFactory();
-    this.securitySetup = undefined;
     // Cache up to three artifacts with a max retention of 5 mins each
     this.exceptionsCache = new LRU<string, Buffer>({ max: 3, maxAge: 1000 * 60 * 5 });
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
@@ -138,9 +141,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   public async setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins) {
     this.logger.debug('plugin setup');
-    if (plugins.security) {
-      this.securitySetup = plugins.security!;
-    }
+    this.setupPlugins = plugins;
 
     const config = await this.config$.pipe(first()).toPromise();
     this.config = config;
@@ -345,8 +346,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       agentService: plugins.ingestManager?.agentService,
       packageService: plugins.ingestManager?.packageService,
       appClientFactory: this.appClientFactory,
-      securitySetup: this.securitySetup,
-      config: this.config,
+      security: this.setupPlugins!.security!,
+      alerts: plugins.alerts,
+      config: this.config!,
       logger: this.logger,
       manifestManager,
       registerIngestCallback,

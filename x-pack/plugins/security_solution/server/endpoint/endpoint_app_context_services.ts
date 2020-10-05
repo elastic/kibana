@@ -15,6 +15,7 @@ import {
   IngestManagerStartContract,
   PackageService,
 } from '../../../ingest_manager/server';
+import { PluginStartContract as AlertsPluginStartContract } from '../../../alerts/server';
 import { getPackagePolicyCreateCallback } from './ingest_integration';
 import { ManifestManager } from './services/artifacts';
 import { MetadataQueryStrategy } from './types';
@@ -74,7 +75,8 @@ export type EndpointAppContextServiceStartContract = Partial<
   logger: Logger;
   manifestManager?: ManifestManager;
   appClientFactory: AppClientFactory;
-  securitySetup?: SecurityPluginSetup;
+  security: SecurityPluginSetup;
+  alerts: AlertsPluginStartContract;
   config: ConfigType;
   registerIngestCallback?: IngestManagerStartContract['registerExternalCallback'];
   savedObjectsStart: SavedObjectsServiceStart;
@@ -104,7 +106,8 @@ export class EndpointAppContextService {
           this.manifestManager,
           dependencies.appClientFactory,
           dependencies.config.maxTimelineImportExportSize,
-          dependencies.securitySetup
+          dependencies.security,
+          dependencies.alerts
         )
       );
     }

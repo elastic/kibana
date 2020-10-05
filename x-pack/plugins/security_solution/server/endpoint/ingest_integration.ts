@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PluginStartContract as AlertsStartContract } from '../../../alerts/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import { ExternalCallback } from '../../../ingest_manager/server';
 import { KibanaRequest, Logger, RequestHandlerContext } from '../../../../../src/core/server';
@@ -80,7 +81,8 @@ export const getPackagePolicyCreateCallback = (
   manifestManager: ManifestManager,
   appClientFactory: AppClientFactory,
   maxTimelineImportExportSize: number,
-  securitySetup?: SecurityPluginSetup
+  securitySetup: SecurityPluginSetup,
+  alerts: AlertsStartContract
 ): ExternalCallback[1] => {
   const handlePackagePolicyCreate = async (
     newPackagePolicy: NewPackagePolicy,
@@ -104,9 +106,9 @@ export const getPackagePolicyCreateCallback = (
       createPrepackagedRules(
         context,
         appClient,
-        undefined,
-        maxTimelineImportExportSize,
-        frameworkRequest
+        alerts.getAlertsClientWithRequest(request),
+        frameworkRequest,
+        maxTimelineImportExportSize
       ),
     ]);
 
