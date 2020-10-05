@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-
 import { useCallback } from 'react';
+
 import { State } from '../../../../common/store';
 
 import {
@@ -15,8 +15,9 @@ import {
   MANAGEMENT_STORE_GLOBAL_NAMESPACE as GLOBAL_NS,
 } from '../../../common/constants';
 
-import { TrustedAppsListPageLocation, TrustedAppsListPageState } from '../state';
+import { AppAction } from '../../../../common/store/actions';
 import { getTrustedAppsListPath } from '../../../common/routing';
+import { TrustedAppsListPageLocation, TrustedAppsListPageState } from '../state';
 import { getCurrentLocation } from '../store/selectors';
 
 export function useTrustedAppsSelector<R>(selector: (state: TrustedAppsListPageState) => R): R {
@@ -39,4 +40,12 @@ export function useTrustedAppsNavigateCallback(callback: NavigationCallback) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [history, location]
   );
+}
+
+export function useTrustedAppsStoreActionCallback(
+  callback: (...args: Parameters<Parameters<typeof useCallback>[0]>) => AppAction
+) {
+  const dispatch = useDispatch();
+
+  return useCallback((...args) => dispatch(callback(...args)), [dispatch, callback]);
 }
