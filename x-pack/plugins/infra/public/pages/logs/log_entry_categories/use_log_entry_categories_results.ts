@@ -13,6 +13,7 @@ import {
 import { useTrackedPromise, CanceledPromiseError } from '../../../utils/use_tracked_promise';
 import { callGetTopLogEntryCategoriesAPI } from './service_calls/get_top_log_entry_categories';
 import { callGetLogEntryCategoryDatasetsAPI } from './service_calls/get_log_entry_category_datasets';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 type TopLogEntryCategories = GetLogEntryCategoriesSuccessResponsePayload['data']['categories'];
 type LogEntryCategoryDatasets = GetLogEntryCategoryDatasetsSuccessResponsePayload['data']['datasets'];
@@ -34,6 +35,7 @@ export const useLogEntryCategoriesResults = ({
   sourceId: string;
   startTime: number;
 }) => {
+  const { services } = useKibanaContextForPlugin();
   const [topLogEntryCategories, setTopLogEntryCategories] = useState<TopLogEntryCategories>([]);
   const [logEntryCategoryDatasets, setLogEntryCategoryDatasets] = useState<
     LogEntryCategoryDatasets
@@ -44,11 +46,14 @@ export const useLogEntryCategoriesResults = ({
       cancelPreviousOn: 'creation',
       createPromise: async () => {
         return await callGetTopLogEntryCategoriesAPI(
-          sourceId,
-          startTime,
-          endTime,
-          categoriesCount,
-          filteredDatasets
+          {
+            sourceId,
+            startTime,
+            endTime,
+            categoryCount: categoriesCount,
+            datasets: filteredDatasets,
+          },
+          services.http.fetch
         );
       },
       onResolve: ({ data: { categories } }) => {
@@ -71,7 +76,10 @@ export const useLogEntryCategoriesResults = ({
     {
       cancelPreviousOn: 'creation',
       createPromise: async () => {
-        return await callGetLogEntryCategoryDatasetsAPI(sourceId, startTime, endTime);
+        return await callGetLogEntryCategoryDatasetsAPI(
+          { sourceId, startTime, endTime },
+          services.http.fetch
+        );
       },
       onResolve: ({ data: { datasets } }) => {
         setLogEntryCategoryDatasets(datasets);
