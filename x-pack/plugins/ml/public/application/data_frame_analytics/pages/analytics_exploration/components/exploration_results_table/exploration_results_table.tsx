@@ -125,7 +125,7 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
     }
 
     return (
-      <>
+      <div data-test-subj="mlDFAnalyticsExplorationTablePanel">
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
             <EuiSpacer size="s" />
@@ -154,7 +154,7 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
           needsDestIndexPattern={needsDestIndexPattern}
           searchQuery={searchQuery}
         />
-      </>
+      </div>
     );
   }
 );
