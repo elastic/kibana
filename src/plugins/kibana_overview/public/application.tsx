@@ -33,7 +33,7 @@ export const renderApp = (
 ) => {
   const { notifications, http } = core;
   const { newsfeed, home, navigation } = deps;
-  const newsfeed$ = newsfeed?.createNewsFeed$(NewsfeedApiEndpoint.KIBANA);
+  const newsfeed$ = newsfeed?.createNewsFeed$(NewsfeedApiEndpoint.KIBANA_ANALYTICS);
   const navLinks = core.chrome.navLinks.getAll();
   const solutions = home.featureCatalogue
     .getSolutions()
