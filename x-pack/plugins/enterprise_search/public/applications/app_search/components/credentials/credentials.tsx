@@ -19,6 +19,7 @@ import {
   EuiButton,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
+  EuiLoadingContent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -41,11 +42,6 @@ export const Credentials: React.FC = () => {
     };
   }, []);
 
-  // TODO
-  // if (dataLoading) { return <Loading /> }
-  if (dataLoading) {
-    return null;
-  }
   return (
     <>
       <SetPageChrome
@@ -68,35 +64,44 @@ export const Credentials: React.FC = () => {
       </EuiPageHeader>
       <EuiPageContentBody>
         <EuiPanel className="eui-textCenter">
-          <EuiTitle size="s">
-            <h2>
-              {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.apiEndpoint', {
-                defaultMessage: 'Endpoint',
-              })}
-            </h2>
-          </EuiTitle>
-          <EuiCopy
-            textToCopy={externalUrl.enterpriseSearchUrl}
-            afterMessage={i18n.translate('xpack.enterpriseSearch.appSearch.credentials.copied', {
-              defaultMessage: 'Copied',
-            })}
-          >
-            {(copy) => (
-              <>
-                <EuiButtonIcon
-                  onClick={copy}
-                  iconType="copyClipboard"
-                  aria-label={i18n.translate(
-                    'xpack.enterpriseSearch.appSearch.credentials.copyApiEndpoint',
-                    {
-                      defaultMessage: 'Copy API Endpoint to clipboard.',
-                    }
-                  )}
-                />
-                {externalUrl.enterpriseSearchUrl}
-              </>
-            )}
-          </EuiCopy>
+          {!!dataLoading ? (
+            <EuiLoadingContent lines={3} />
+          ) : (
+            <>
+              <EuiTitle size="s">
+                <h2>
+                  {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.apiEndpoint', {
+                    defaultMessage: 'Endpoint',
+                  })}
+                </h2>
+              </EuiTitle>
+              <EuiCopy
+                textToCopy={externalUrl.enterpriseSearchUrl}
+                afterMessage={i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.credentials.copied',
+                  {
+                    defaultMessage: 'Copied',
+                  }
+                )}
+              >
+                {(copy) => (
+                  <>
+                    <EuiButtonIcon
+                      onClick={copy}
+                      iconType="copyClipboard"
+                      aria-label={i18n.translate(
+                        'xpack.enterpriseSearch.appSearch.credentials.copyApiEndpoint',
+                        {
+                          defaultMessage: 'Copy API Endpoint to clipboard.',
+                        }
+                      )}
+                    />
+                    {externalUrl.enterpriseSearchUrl}
+                  </>
+                )}
+              </EuiCopy>
+            </>
+          )}
         </EuiPanel>
         <EuiSpacer size="xxl" />
         <EuiPageContentHeader responsive={false}>
@@ -110,22 +115,22 @@ export const Credentials: React.FC = () => {
             </EuiTitle>
           </EuiPageContentHeaderSection>
           <EuiPageContentHeaderSection>
-            <EuiButton
-              color="primary"
-              data-test-subj="CreateAPIKeyButton"
-              fill={true}
-              onClick={() => showCredentialsForm()}
-            >
-              {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.createKey', {
-                defaultMessage: 'Create a key',
-              })}
-            </EuiButton>
+            {!dataLoading && (
+              <EuiButton
+                color="primary"
+                data-test-subj="CreateAPIKeyButton"
+                fill={true}
+                onClick={() => showCredentialsForm()}
+              >
+                {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.createKey', {
+                  defaultMessage: 'Create a key',
+                })}
+              </EuiButton>
+            )}
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
         <EuiSpacer size="s" />
-        <EuiPanel>
-          <CredentialsList />
-        </EuiPanel>
+        <EuiPanel>{!!dataLoading ? <EuiLoadingContent lines={3} /> : <CredentialsList />}</EuiPanel>
       </EuiPageContentBody>
     </>
   );
