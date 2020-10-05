@@ -15,27 +15,26 @@ import { TrustedAppsNotifications } from './trusted_apps_notifications';
 import { CreateTrustedAppFlyout } from './components/create_trusted_app_flyout';
 import { getTrustedAppsListPath } from '../../../common/routing';
 import { useTrustedAppsSelector } from './hooks';
-import { getListCurrentShowValue, getListUrlSearchParams } from '../store/selectors';
+import { getCurrentLocation } from '../store/selectors';
 import { TrustedAppsListPageRouteState } from '../../../../../common/endpoint/types';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 
 export const TrustedAppsPage = memo(() => {
   const history = useHistory();
   const { state: routeState } = useLocation<TrustedAppsListPageRouteState | undefined>();
-  const urlParams = useTrustedAppsSelector(getListUrlSearchParams);
-  const showAddFlout = useTrustedAppsSelector(getListCurrentShowValue) === 'create';
+  const location = useTrustedAppsSelector(getCurrentLocation);
   const handleAddButtonClick = useCallback(() => {
     history.push(
       getTrustedAppsListPath({
-        ...urlParams,
+        ...location,
         show: 'create',
       })
     );
-  }, [history, urlParams]);
+  }, [history, location]);
   const handleAddFlyoutClose = useCallback(() => {
-    const { show, ...paginationParamsOnly } = urlParams;
+    const { show, ...paginationParamsOnly } = location;
     history.push(getTrustedAppsListPath(paginationParamsOnly));
-  }, [history, urlParams]);
+  }, [history, location]);
 
   const backButton = useMemo(() => {
     if (routeState && routeState.onBackButtonNavigateTo) {
@@ -50,7 +49,7 @@ export const TrustedAppsPage = memo(() => {
     <EuiButton
       fill
       iconType="plusInCircle"
-      isDisabled={showAddFlout}
+      isDisabled={location.show === 'create'}
       onClick={handleAddButtonClick}
       data-test-subj="trustedAppsListAddButton"
     >
@@ -82,7 +81,7 @@ export const TrustedAppsPage = memo(() => {
     >
       <TrustedAppsNotifications />
       <TrustedAppDeletionDialog />
-      {showAddFlout && (
+      {location.show === 'create' && (
         <CreateTrustedAppFlyout
           onClose={handleAddFlyoutClose}
           size="m"
