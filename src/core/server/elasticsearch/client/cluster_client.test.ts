@@ -24,7 +24,7 @@ import { GetAuthHeaders } from '../../http';
 import { elasticsearchClientMock } from './mocks';
 import { ClusterClient } from './cluster_client';
 import { ElasticsearchClientConfig } from './client_config';
-import { KIBANA_HEADERS } from '../kibana_headers';
+import { DEFAULT_HEADERS } from '../default_headers';
 
 const createConfig = (
   parts: Partial<ElasticsearchClientConfig> = {}
@@ -128,7 +128,7 @@ describe('ClusterClient', () => {
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith({
-        headers: { ...KIBANA_HEADERS, foo: 'bar', 'x-opaque-id': expect.any(String) },
+        headers: { ...DEFAULT_HEADERS, foo: 'bar', 'x-opaque-id': expect.any(String) },
       });
     });
 
@@ -148,7 +148,7 @@ describe('ClusterClient', () => {
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith({
-        headers: { ...KIBANA_HEADERS, authorization: 'auth', 'x-opaque-id': expect.any(String) },
+        headers: { ...DEFAULT_HEADERS, authorization: 'auth', 'x-opaque-id': expect.any(String) },
       });
     });
 
@@ -172,7 +172,7 @@ describe('ClusterClient', () => {
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith({
-        headers: { ...KIBANA_HEADERS, authorization: 'auth', 'x-opaque-id': expect.any(String) },
+        headers: { ...DEFAULT_HEADERS, authorization: 'auth', 'x-opaque-id': expect.any(String) },
       });
     });
 
@@ -194,7 +194,7 @@ describe('ClusterClient', () => {
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith({
         headers: {
-          ...KIBANA_HEADERS,
+          ...DEFAULT_HEADERS,
           foo: 'bar',
           hello: 'dolly',
           'x-opaque-id': expect.any(String),
@@ -216,7 +216,7 @@ describe('ClusterClient', () => {
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith({
         headers: {
-          ...KIBANA_HEADERS,
+          ...DEFAULT_HEADERS,
           'x-opaque-id': 'my-fake-id',
         },
       });
@@ -242,7 +242,7 @@ describe('ClusterClient', () => {
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith({
         headers: {
-          ...KIBANA_HEADERS,
+          ...DEFAULT_HEADERS,
           foo: 'auth',
           hello: 'dolly',
           'x-opaque-id': expect.any(String),
@@ -270,7 +270,7 @@ describe('ClusterClient', () => {
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith({
         headers: {
-          ...KIBANA_HEADERS,
+          ...DEFAULT_HEADERS,
           foo: 'request',
           hello: 'dolly',
           'x-opaque-id': expect.any(String),
@@ -279,7 +279,7 @@ describe('ClusterClient', () => {
     });
 
     it('respect the precedence of config headers over default headers', () => {
-      const headerKey = Object.keys(KIBANA_HEADERS)[0];
+      const headerKey = Object.keys(DEFAULT_HEADERS)[0];
       const config = createConfig({
         customHeaders: {
           [headerKey]: 'foo',
@@ -302,7 +302,7 @@ describe('ClusterClient', () => {
     });
 
     it('respect the precedence of request headers over default headers', () => {
-      const headerKey = Object.keys(KIBANA_HEADERS)[0];
+      const headerKey = Object.keys(DEFAULT_HEADERS)[0];
       const config = createConfig({
         requestHeadersWhitelist: [headerKey],
       });
@@ -343,7 +343,7 @@ describe('ClusterClient', () => {
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith({
         headers: {
-          ...KIBANA_HEADERS,
+          ...DEFAULT_HEADERS,
           'x-opaque-id': 'from request',
         },
       });
@@ -367,7 +367,7 @@ describe('ClusterClient', () => {
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith({
-        headers: { ...KIBANA_HEADERS, authorization: 'auth' },
+        headers: { ...DEFAULT_HEADERS, authorization: 'auth' },
       });
     });
 
@@ -391,7 +391,7 @@ describe('ClusterClient', () => {
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith({
-        headers: { ...KIBANA_HEADERS, foo: 'bar' },
+        headers: { ...DEFAULT_HEADERS, foo: 'bar' },
       });
     });
   });

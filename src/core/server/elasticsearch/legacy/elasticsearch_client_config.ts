@@ -25,7 +25,7 @@ import url from 'url';
 import { pick } from '@kbn/std';
 import { Logger } from '../../logging';
 import { ElasticsearchConfig } from '../elasticsearch_config';
-import { KIBANA_HEADERS } from '../kibana_headers';
+import { DEFAULT_HEADERS } from '../default_headers';
 
 /**
  * @privateRemarks Config that consumers can pass to the Elasticsearch JS client is complex and includes
@@ -132,7 +132,7 @@ export function parseElasticsearchClientConfig(
         path: uri.pathname,
         query: uri.query,
         headers: {
-          ...KIBANA_HEADERS,
+          ...DEFAULT_HEADERS,
           ...config.customHeaders,
         },
       };

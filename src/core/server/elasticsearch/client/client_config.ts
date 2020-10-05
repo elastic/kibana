@@ -22,7 +22,7 @@ import { URL } from 'url';
 import { Duration } from 'moment';
 import { ClientOptions, NodeOptions } from '@elastic/elasticsearch';
 import { ElasticsearchConfig } from '../elasticsearch_config';
-import { KIBANA_HEADERS } from '../kibana_headers';
+import { DEFAULT_HEADERS } from '../default_headers';
 
 /**
  * Configuration options to be used to create a {@link IClusterClient | cluster client} using the
@@ -63,7 +63,7 @@ export function parseClientOptions(
     sniffOnStart: config.sniffOnStart,
     sniffOnConnectionFault: config.sniffOnConnectionFault,
     headers: {
-      ...KIBANA_HEADERS,
+      ...DEFAULT_HEADERS,
       ...config.customHeaders,
     },
   };

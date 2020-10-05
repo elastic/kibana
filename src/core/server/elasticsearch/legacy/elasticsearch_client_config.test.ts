@@ -23,7 +23,7 @@ import {
   LegacyElasticsearchClientConfig,
   parseElasticsearchClientConfig,
 } from './elasticsearch_client_config';
-import { KIBANA_HEADERS } from '../kibana_headers';
+import { DEFAULT_HEADERS } from '../default_headers';
 const logger = loggingSystemMock.create();
 afterEach(() => jest.clearAllMocks());
 
@@ -348,7 +348,7 @@ describe('#auth', () => {
 
 describe('#customHeaders', () => {
   test('override the default headers', () => {
-    const headerKey = Object.keys(KIBANA_HEADERS)[0];
+    const headerKey = Object.keys(DEFAULT_HEADERS)[0];
     const parsedConfig = parseElasticsearchClientConfig(
       {
         apiVersion: 'master',

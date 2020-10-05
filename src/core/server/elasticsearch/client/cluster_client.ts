@@ -26,7 +26,7 @@ import { ElasticsearchClient } from './types';
 import { configureClient } from './configure_client';
 import { ElasticsearchClientConfig } from './client_config';
 import { ScopedClusterClient, IScopedClusterClient } from './scoped_cluster_client';
-import { KIBANA_HEADERS } from '../kibana_headers';
+import { DEFAULT_HEADERS } from '../default_headers';
 
 const noop = () => undefined;
 
@@ -109,7 +109,7 @@ export class ClusterClient implements ICustomClusterClient {
     }
 
     return {
-      ...KIBANA_HEADERS,
+      ...DEFAULT_HEADERS,
       ...this.config.customHeaders,
       ...scopedHeaders,
     };

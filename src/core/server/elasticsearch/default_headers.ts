@@ -17,6 +17,8 @@
  * under the License.
  */
 
-export const KIBANA_HEADERS = {
+import { deepFreeze } from '@kbn/std';
+
+export const DEFAULT_HEADERS = deepFreeze({
   'x-elastic-product-origin': 'kibana',
-};
+});
