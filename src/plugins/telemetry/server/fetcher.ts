@@ -22,7 +22,10 @@ import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 // @ts-ignore
 import fetch from 'node-fetch';
-import { TelemetryCollectionManagerPluginStart } from 'src/plugins/telemetry_collection_manager/server';
+import {
+  TelemetryCollectionManagerPluginStart,
+  UsageStatsPayload,
+} from 'src/plugins/telemetry_collection_manager/server';
 import {
   PluginInitializerContext,
   Logger,
@@ -107,7 +110,7 @@ export class FetcherTask {
     try {
       telemetryConfig = await this.getCurrentConfigs();
     } catch (err) {
-      this.logger.warn(`Error fetching telemetry configs: ${err}`);
+      this.logger.warn(`Error getting telemetry configs. (${err})`);
       return;
     }
 
@@ -115,14 +118,22 @@ export class FetcherTask {
       return;
     }
 
-    try {
-      this.isSending = true;
-      const allCollectorsReady = await this.areAllCollectorsReady();
+    let clusters: Array<UsageStatsPayload | string> = [];
+    this.isSending = true;
 
+    try {
+      const allCollectorsReady = await this.areAllCollectorsReady();
       if (!allCollectorsReady) {
         throw new Error('Not all collectors are ready.');
       }
-      const clusters = await this.fetchTelemetry();
+      clusters = await this.fetchTelemetry();
+    } catch (err) {
+      this.logger.warn(`Error fetching usage. (${err})`);
+      this.isSending = false;
+      return;
+    }
+
+    try {
       const { telemetryUrl } = telemetryConfig;
       for (const cluster of clusters) {
         await this.sendTelemetry(telemetryUrl, cluster);
