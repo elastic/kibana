@@ -181,6 +181,14 @@ interface PagingControlProps {
   totalPages: number;
 }
 
+const TimelinePaginationContainer = styled.div<{ hideLastPage: boolean }>`
+  ul.euiPagination__list {
+    li.euiPagination__item:last-child {
+      ${({ hideLastPage }) => `${hideLastPage ? 'display:none' : ''}`};
+    }
+  }
+`;
+
 export const PagingControlComponent: React.FC<PagingControlProps> = ({
   activePage,
   isLoading,
@@ -196,12 +204,14 @@ export const PagingControlComponent: React.FC<PagingControlProps> = ({
   }
 
   return (
-    <EuiPagination
-      data-test-subj="timeline-pagination"
-      pageCount={totalPages}
-      activePage={activePage}
-      onPageClick={onPageClick}
-    />
+    <TimelinePaginationContainer hideLastPage={totalPages > 9999}>
+      <EuiPagination
+        data-test-subj="timeline-pagination"
+        pageCount={totalPages}
+        activePage={activePage}
+        onPageClick={onPageClick}
+      />
+    </TimelinePaginationContainer>
   );
 };
 
