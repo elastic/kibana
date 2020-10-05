@@ -163,6 +163,15 @@ describe('EQL search strategy', () => {
           })
         );
       });
+
+      it('passes transport options for an existing request', async () => {
+        const eqlSearch = await eqlSearchStrategyProvider(mockLogger);
+        await eqlSearch.search(mockContext, { id: 'my-search-id', options: { ignore: [400] } });
+        const [[, requestOptions]] = mockEqlGet.mock.calls;
+
+        expect(mockEqlSearch).not.toHaveBeenCalled();
+        expect(requestOptions).toEqual(expect.objectContaining({ ignore: [400] }));
+      });
     });
   });
 });

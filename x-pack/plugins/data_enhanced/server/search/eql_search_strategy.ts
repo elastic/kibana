@@ -32,12 +32,16 @@ export const eqlSearchStrategyProvider = (
       const eqlClient = context.core.elasticsearch.client.asCurrentUser.eql;
       const uiSettingsClient = await context.core.uiSettings.client;
       const asyncOptions = getAsyncOptions();
+      const searchOptions = toSnakeCase({ ...request.options });
 
       if (request.id) {
-        promise = eqlClient.get({
-          id: request.id,
-          ...toSnakeCase(asyncOptions),
-        });
+        promise = eqlClient.get(
+          {
+            id: request.id,
+            ...toSnakeCase(asyncOptions),
+          },
+          searchOptions
+        );
       } else {
         const { ignoreThrottled, ignoreUnavailable } = await getDefaultSearchParams(
           uiSettingsClient
@@ -48,11 +52,10 @@ export const eqlSearchStrategyProvider = (
           ...asyncOptions,
           ...request.params,
         });
-        const searchOptions = toSnakeCase({ ...request.options });
 
         promise = eqlClient.search(
           searchParams as EqlSearchStrategyRequest['params'],
-          searchOptions as EqlSearchStrategyRequest['options']
+          searchOptions
         );
       }
 
