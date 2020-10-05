@@ -33,19 +33,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.navigateToNewVisualization();
     });
 
-    it('should show the correct vis groups', async function () {
-      const expectedChartGroups = ['TSVB', 'Vega'];
+    it('should show the correct vis types for the first step', async function () {
+      const expectedChartTypes = ['TSVB', 'Vega'];
       if (!isOss) {
-        expectedChartGroups.push('Maps', 'Lens');
-        expectedChartGroups.sort();
+        expectedChartTypes.push('Maps', 'Lens');
+        expectedChartTypes.sort();
       }
       log.debug('oss= ' + isOss);
 
       // find all the chart types and make sure there all there
-      const chartGroups = (await PageObjects.visualize.getVisGroups()).sort();
-      log.debug('returned chart groups = ' + chartGroups);
-      log.debug('expected chart groups = ' + expectedChartGroups);
-      expect(chartGroups).to.eql(expectedChartGroups);
+      const chartTypes = (await PageObjects.visualize.getPromotedVisTypes()).sort();
+      log.debug('returned chart groups = ' + chartTypes);
+      log.debug('expected chart groups = ' + expectedChartTypes);
+      expect(chartTypes).to.eql(expectedChartTypes);
     });
 
     it('should show the correct agg based chart types', async function () {

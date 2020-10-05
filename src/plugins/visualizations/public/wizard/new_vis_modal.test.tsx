@@ -172,7 +172,7 @@ describe('NewVisModal', () => {
         savedObjects={{} as SavedObjectsStart}
       />
     );
-    expect(wrapper.find('[data-test-subj="visGroup-vis2"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="visType-vis2"]').exists()).toBe(true);
   });
 
   describe('open editor', () => {
@@ -189,7 +189,7 @@ describe('NewVisModal', () => {
           savedObjects={{} as SavedObjectsStart}
         />
       );
-      const visCard = wrapper.find('[data-test-subj="visGroup-vis"]').at(0);
+      const visCard = wrapper.find('[data-test-subj="visType-vis"]').at(0);
       visCard.simulate('click');
       expect(window.location.assign).toBeCalledWith('testbasepath/app/visualize#/create?type=vis');
     });
@@ -208,7 +208,7 @@ describe('NewVisModal', () => {
           savedObjects={{} as SavedObjectsStart}
         />
       );
-      const visCard = wrapper.find('[data-test-subj="visGroup-vis"]').at(0);
+      const visCard = wrapper.find('[data-test-subj="visType-vis"]').at(0);
       visCard.simulate('click');
       expect(window.location.assign).toBeCalledWith(
         'testbasepath/app/visualize#/create?type=vis&foo=true&bar=42'
@@ -234,7 +234,7 @@ describe('NewVisModal', () => {
           savedObjects={{} as SavedObjectsStart}
         />
       );
-      const visCard = wrapper.find('[data-test-subj="visGroup-visWithAliasUrl"]').at(0);
+      const visCard = wrapper.find('[data-test-subj="visType-visWithAliasUrl"]').at(0);
       visCard.simulate('click');
       expect(stateTransfer.navigateToEditor).toBeCalledWith('otherApp', {
         path: '#/aliasUrl',
@@ -259,7 +259,7 @@ describe('NewVisModal', () => {
           savedObjects={{} as SavedObjectsStart}
         />
       );
-      const visCard = wrapper.find('[data-test-subj="visGroup-visWithAliasUrl"]').at(0);
+      const visCard = wrapper.find('[data-test-subj="visType-visWithAliasUrl"]').at(0);
       visCard.simulate('click');
       expect(navigateToApp).toBeCalledWith('otherApp', { path: '#/aliasUrl' });
       expect(onClose).toHaveBeenCalled();

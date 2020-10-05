@@ -392,15 +392,15 @@ exports[`AggBasedSelection filter for visualization types should render as expec
                     >
                       <EuiTitle
                         className="euiCard__title"
-                        id="iede90c41-070b-11eb-8292-db10e4149e2fTitle"
+                        id="i41fa9f21-071a-11eb-8770-55e834db6122Title"
                         size="xs"
                       >
                         <span
                           className="euiTitle euiTitle--xsmall euiCard__title"
-                          id="iede90c41-070b-11eb-8292-db10e4149e2fTitle"
+                          id="i41fa9f21-071a-11eb-8770-55e834db6122Title"
                         >
                           <button
-                            aria-describedby=" iede90c41-070b-11eb-8292-db10e4149e2fDescription"
+                            aria-describedby=" i41fa9f21-071a-11eb-8770-55e834db6122Description"
                             className="euiCard__titleButton"
                             disabled={false}
                             onClick={[Function]}
@@ -415,12 +415,12 @@ exports[`AggBasedSelection filter for visualization types should render as expec
                       </EuiTitle>
                       <EuiText
                         className="euiCard__description"
-                        id="iede90c41-070b-11eb-8292-db10e4149e2fDescription"
+                        id="i41fa9f21-071a-11eb-8770-55e834db6122Description"
                         size="s"
                       >
                         <div
                           className="euiText euiText--small euiCard__description"
-                          id="iede90c41-070b-11eb-8292-db10e4149e2fDescription"
+                          id="i41fa9f21-071a-11eb-8770-55e834db6122Description"
                         >
                           <p />
                         </div>
@@ -491,15 +491,15 @@ exports[`AggBasedSelection filter for visualization types should render as expec
                     >
                       <EuiTitle
                         className="euiCard__title"
-                        id="iede90c43-070b-11eb-8292-db10e4149e2fTitle"
+                        id="i41fac631-071a-11eb-8770-55e834db6122Title"
                         size="xs"
                       >
                         <span
                           className="euiTitle euiTitle--xsmall euiCard__title"
-                          id="iede90c43-070b-11eb-8292-db10e4149e2fTitle"
+                          id="i41fac631-071a-11eb-8770-55e834db6122Title"
                         >
                           <button
-                            aria-describedby=" iede90c43-070b-11eb-8292-db10e4149e2fDescription"
+                            aria-describedby=" i41fac631-071a-11eb-8770-55e834db6122Description"
                             className="euiCard__titleButton"
                             disabled={false}
                             onClick={[Function]}
@@ -514,12 +514,12 @@ exports[`AggBasedSelection filter for visualization types should render as expec
                       </EuiTitle>
                       <EuiText
                         className="euiCard__description"
-                        id="iede90c43-070b-11eb-8292-db10e4149e2fDescription"
+                        id="i41fac631-071a-11eb-8770-55e834db6122Description"
                         size="s"
                       >
                         <div
                           className="euiText euiText--small euiCard__description"
-                          id="iede90c43-070b-11eb-8292-db10e4149e2fDescription"
+                          id="i41fac631-071a-11eb-8770-55e834db6122Description"
                         >
                           <p />
                         </div>
@@ -592,15 +592,15 @@ exports[`AggBasedSelection filter for visualization types should render as expec
                     >
                       <EuiTitle
                         className="euiCard__title"
-                        id="iede93351-070b-11eb-8292-db10e4149e2fTitle"
+                        id="i41fac633-071a-11eb-8770-55e834db6122Title"
                         size="xs"
                       >
                         <span
                           className="euiTitle euiTitle--xsmall euiCard__title"
-                          id="iede93351-070b-11eb-8292-db10e4149e2fTitle"
+                          id="i41fac633-071a-11eb-8770-55e834db6122Title"
                         >
                           <button
-                            aria-describedby="iede93351-070b-11eb-8292-db10e4149e2fBetaBadge iede93351-070b-11eb-8292-db10e4149e2fDescription"
+                            aria-describedby="i41fac633-071a-11eb-8770-55e834db6122BetaBadge i41fac633-071a-11eb-8770-55e834db6122Description"
                             className="euiCard__titleButton"
                             disabled={true}
                             onClick={[Function]}
@@ -615,12 +615,12 @@ exports[`AggBasedSelection filter for visualization types should render as expec
                       </EuiTitle>
                       <EuiText
                         className="euiCard__description"
-                        id="iede93351-070b-11eb-8292-db10e4149e2fDescription"
+                        id="i41fac633-071a-11eb-8770-55e834db6122Description"
                         size="s"
                       >
                         <div
                           className="euiText euiText--small euiCard__description"
-                          id="iede93351-070b-11eb-8292-db10e4149e2fDescription"
+                          id="i41fac633-071a-11eb-8770-55e834db6122Description"
                         >
                           <p />
                         </div>
@@ -631,7 +631,7 @@ exports[`AggBasedSelection filter for visualization types should render as expec
                     >
                       <EuiBetaBadge
                         className="euiCard__betaBadge"
-                        id="iede93351-070b-11eb-8292-db10e4149e2fBetaBadge"
+                        id="i41fac633-071a-11eb-8770-55e834db6122BetaBadge"
                         label="Experimental"
                         tooltipContent="This visualization might be changed or removed in a future release and is not subject to the support SLA."
                       >
@@ -649,7 +649,7 @@ exports[`AggBasedSelection filter for visualization types should render as expec
                           >
                             <span
                               className="euiBetaBadge euiCard__betaBadge"
-                              id="iede93351-070b-11eb-8292-db10e4149e2fBetaBadge"
+                              id="i41fac633-071a-11eb-8770-55e834db6122BetaBadge"
                               onBlur={[Function]}
                               onFocus={[Function]}
                               tabIndex={0}
@@ -725,15 +725,15 @@ exports[`AggBasedSelection filter for visualization types should render as expec
                     >
                       <EuiTitle
                         className="euiCard__title"
-                        id="iede93353-070b-11eb-8292-db10e4149e2fTitle"
+                        id="i41faed41-071a-11eb-8770-55e834db6122Title"
                         size="xs"
                       >
                         <span
                           className="euiTitle euiTitle--xsmall euiCard__title"
-                          id="iede93353-070b-11eb-8292-db10e4149e2fTitle"
+                          id="i41faed41-071a-11eb-8770-55e834db6122Title"
                         >
                           <button
-                            aria-describedby=" iede93353-070b-11eb-8292-db10e4149e2fDescription"
+                            aria-describedby=" i41faed41-071a-11eb-8770-55e834db6122Description"
                             className="euiCard__titleButton"
                             disabled={true}
                             onClick={[Function]}
@@ -748,12 +748,12 @@ exports[`AggBasedSelection filter for visualization types should render as expec
                       </EuiTitle>
                       <EuiText
                         className="euiCard__description"
-                        id="iede93353-070b-11eb-8292-db10e4149e2fDescription"
+                        id="i41faed41-071a-11eb-8770-55e834db6122Description"
                         size="s"
                       >
                         <div
                           className="euiText euiText--small euiCard__description"
-                          id="iede93353-070b-11eb-8292-db10e4149e2fDescription"
+                          id="i41faed41-071a-11eb-8770-55e834db6122Description"
                         >
                           <p />
                         </div>

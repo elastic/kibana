@@ -31,11 +31,13 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should not show legacy region map visualizion in create menu', async () => {
+      await PageObjects.visualize.clickAggBasedVisualizations();
       const hasLegecyViz = await PageObjects.visualize.hasRegionMap();
       expect(hasLegecyViz).to.equal(false);
     });
 
     it('should not show legacy tilemap map visualizion in create menu', async () => {
+      await PageObjects.visualize.clickAggBasedVisualizations();
       const hasLegecyViz = await PageObjects.visualize.hasTileMap();
       expect(hasLegecyViz).to.equal(false);
     });

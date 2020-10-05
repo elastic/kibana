@@ -63,19 +63,19 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
         .map((chart) => $(chart).findTestSubject('visTypeTitle').text().trim());
     }
 
-    public async getVisGroups() {
+    public async getPromotedVisTypes() {
       const chartTypeField = await testSubjects.find('visNewDialogGroups');
       const $ = await chartTypeField.parseDomContent();
-      const visGroups: string[] = [];
+      const promotedVisTypes: string[] = [];
       $('button')
         .toArray()
         .map((chart) => {
-          const title = $(chart).findTestSubject('visGroupTitle').text().trim();
+          const title = $(chart).findTestSubject('visTypeTitle').text().trim();
           if (title) {
-            visGroups.push(title);
+            promotedVisTypes.push(title);
           }
         });
-      return visGroups;
+      return promotedVisTypes;
     }
 
     public async waitForVisualizationSelectPage() {
@@ -104,10 +104,6 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
 
     public async hasVisType(type: string) {
       return await testSubjects.exists(`visType-${type}`);
-    }
-
-    public async clickVisGroup(group: string) {
-      await testSubjects.click(`visGroup-${group}`);
     }
 
     public async clickVisType(type: string) {

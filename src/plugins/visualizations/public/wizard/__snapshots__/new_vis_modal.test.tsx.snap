@@ -185,6 +185,7 @@ exports[`NewVisModal should render as expected 1`] = `
                 </div>
                 <div
                   class="euiModalBody"
+                  data-test-subj="visNewDialogGroups"
                 >
                   <div
                     class="euiModalBody__overflow"
@@ -202,9 +203,9 @@ exports[`NewVisModal should render as expected 1`] = `
                         class="euiFlexItem"
                       >
                         <div
-                          aria-describedby="visGroupDescription-vis"
+                          aria-describedby="visTypeDescription-vis"
                           class="euiCard euiCard--paddingMedium euiCard--centerAligned euiCard--horizontal euiCard--isClickable euiCard--hasIcon"
-                          data-test-subj="visGroup-vis"
+                          data-test-subj="visType-vis"
                           data-vis-stage="production"
                         >
                           <div
@@ -221,14 +222,14 @@ exports[`NewVisModal should render as expected 1`] = `
                           >
                             <span
                               class="euiTitle euiTitle--xsmall euiCard__title"
-                              id="ie04205b1-070b-11eb-a558-6f89949345a3Title"
+                              id="i81def9b1-071a-11eb-ac1f-41fee99a465bTitle"
                             >
                               <button
-                                aria-describedby=" ie04205b1-070b-11eb-a558-6f89949345a3Description"
+                                aria-describedby=" i81def9b1-071a-11eb-ac1f-41fee99a465bDescription"
                                 class="euiCard__titleButton"
                               >
                                 <span
-                                  data-test-subj="visGroupTitle"
+                                  data-test-subj="visTypeTitle"
                                 >
                                   Vis Type 1
                                 </span>
@@ -236,7 +237,7 @@ exports[`NewVisModal should render as expected 1`] = `
                             </span>
                             <div
                               class="euiText euiText--small euiCard__description"
-                              id="ie04205b1-070b-11eb-a558-6f89949345a3Description"
+                              id="i81def9b1-071a-11eb-ac1f-41fee99a465bDescription"
                             >
                               <p />
                             </div>
@@ -247,9 +248,9 @@ exports[`NewVisModal should render as expected 1`] = `
                         class="euiFlexItem"
                       >
                         <div
-                          aria-describedby="visGroupDescription-vis2"
+                          aria-describedby="visTypeDescription-vis2"
                           class="euiCard euiCard--paddingMedium euiCard--centerAligned euiCard--horizontal euiCard--isClickable euiCard--hasIcon"
-                          data-test-subj="visGroup-vis2"
+                          data-test-subj="visType-vis2"
                           data-vis-stage="production"
                         >
                           <div
@@ -266,14 +267,14 @@ exports[`NewVisModal should render as expected 1`] = `
                           >
                             <span
                               class="euiTitle euiTitle--xsmall euiCard__title"
-                              id="ie0427ae1-070b-11eb-a558-6f89949345a3Title"
+                              id="i81df47d1-071a-11eb-ac1f-41fee99a465bTitle"
                             >
                               <button
-                                aria-describedby=" ie0427ae1-070b-11eb-a558-6f89949345a3Description"
+                                aria-describedby=" i81df47d1-071a-11eb-ac1f-41fee99a465bDescription"
                                 class="euiCard__titleButton"
                               >
                                 <span
-                                  data-test-subj="visGroupTitle"
+                                  data-test-subj="visTypeTitle"
                                 >
                                   Vis Type 2
                                 </span>
@@ -281,7 +282,7 @@ exports[`NewVisModal should render as expected 1`] = `
                             </span>
                             <div
                               class="euiText euiText--small euiCard__description"
-                              id="ie0427ae1-070b-11eb-a558-6f89949345a3Description"
+                              id="i81df47d1-071a-11eb-ac1f-41fee99a465bDescription"
                             >
                               <p />
                             </div>
@@ -292,9 +293,9 @@ exports[`NewVisModal should render as expected 1`] = `
                         class="euiFlexItem"
                       >
                         <div
-                          aria-describedby="visGroupDescription-visWithAliasUrl"
+                          aria-describedby="visTypeDescription-visWithAliasUrl"
                           class="euiCard euiCard--paddingMedium euiCard--centerAligned euiCard--horizontal euiCard--isClickable euiCard--hasIcon"
-                          data-test-subj="visGroup-visWithAliasUrl"
+                          data-test-subj="visType-visWithAliasUrl"
                           data-vis-stage="alias"
                         >
                           <div
@@ -311,14 +312,14 @@ exports[`NewVisModal should render as expected 1`] = `
                           >
                             <span
                               class="euiTitle euiTitle--xsmall euiCard__title"
-                              id="ie042a1f1-070b-11eb-a558-6f89949345a3Title"
+                              id="i81df6ee1-071a-11eb-ac1f-41fee99a465bTitle"
                             >
                               <button
-                                aria-describedby=" ie042a1f1-070b-11eb-a558-6f89949345a3Description"
+                                aria-describedby=" i81df6ee1-071a-11eb-ac1f-41fee99a465bDescription"
                                 class="euiCard__titleButton"
                               >
                                 <span
-                                  data-test-subj="visGroupTitle"
+                                  data-test-subj="visTypeTitle"
                                 >
                                   Vis with alias Url
                                 </span>
@@ -326,7 +327,7 @@ exports[`NewVisModal should render as expected 1`] = `
                             </span>
                             <div
                               class="euiText euiText--small euiCard__description"
-                              id="ie042a1f1-070b-11eb-a558-6f89949345a3Description"
+                              id="i81df6ee1-071a-11eb-ac1f-41fee99a465bDescription"
                             >
                               <p />
                             </div>
@@ -365,7 +366,7 @@ exports[`NewVisModal should render as expected 1`] = `
                           >
                             <span
                               class="euiTitle euiTitle--xsmall euiCard__title"
-                              id="ie042f011-070b-11eb-a558-6f89949345a3Title"
+                              id="i81dfbd01-071a-11eb-ac1f-41fee99a465bTitle"
                             >
                               <span
                                 data-test-subj="visGroupAggBasedTitle"
@@ -375,7 +376,7 @@ exports[`NewVisModal should render as expected 1`] = `
                             </span>
                             <div
                               class="euiText euiText--small euiCard__description"
-                              id="ie042f011-070b-11eb-a558-6f89949345a3Description"
+                              id="i81dfbd01-071a-11eb-ac1f-41fee99a465bDescription"
                             >
                               <p>
                                 A set of frequently used visualizations that allows you to plot aggregated data to find trends, spikes and dips you need to know about
@@ -406,7 +407,7 @@ exports[`NewVisModal should render as expected 1`] = `
                           >
                             <span
                               class="euiTitle euiTitle--xsmall euiCard__title"
-                              id="ie0431721-070b-11eb-a558-6f89949345a3Title"
+                              id="i81dfe411-071a-11eb-ac1f-41fee99a465bTitle"
                             >
                               <span
                                 data-test-subj="visGroup-tools"
@@ -416,7 +417,7 @@ exports[`NewVisModal should render as expected 1`] = `
                             </span>
                             <div
                               class="euiText euiText--small euiCard__description"
-                              id="ie0431721-070b-11eb-a558-6f89949345a3Description"
+                              id="i81dfe411-071a-11eb-ac1f-41fee99a465bDescription"
                             >
                               <p />
                             </div>
@@ -435,6 +436,7 @@ exports[`NewVisModal should render as expected 1`] = `
                               >
                                 <button
                                   class="euiLink euiLink--primary"
+                                  data-test-subj="visType-vis3"
                                   type="button"
                                 >
                                   Vis3
@@ -588,9 +590,12 @@ exports[`NewVisModal should render as expected 1`] = `
                       </EuiModalHeaderTitle>
                     </div>
                   </EuiModalHeader>
-                  <EuiModalBody>
+                  <EuiModalBody
+                    data-test-subj="visNewDialogGroups"
+                  >
                     <div
                       className="euiModalBody"
+                      data-test-subj="visNewDialogGroups"
                     >
                       <div
                         className="euiModalBody__overflow"
@@ -635,8 +640,8 @@ exports[`NewVisModal should render as expected 1`] = `
                                   className="euiFlexItem"
                                 >
                                   <EuiCard
-                                    aria-describedby="visGroupDescription-vis"
-                                    data-test-subj="visGroup-vis"
+                                    aria-describedby="visTypeDescription-vis"
+                                    data-test-subj="visType-vis"
                                     data-vis-stage="production"
                                     description=""
                                     icon={
@@ -650,7 +655,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                     onClick={[Function]}
                                     title={
                                       <span
-                                        data-test-subj="visGroupTitle"
+                                        data-test-subj="visTypeTitle"
                                       >
                                         Vis Type 1
                                       </span>
@@ -658,9 +663,9 @@ exports[`NewVisModal should render as expected 1`] = `
                                     titleSize="xs"
                                   >
                                     <div
-                                      aria-describedby="visGroupDescription-vis"
+                                      aria-describedby="visTypeDescription-vis"
                                       className="euiCard euiCard--paddingMedium euiCard--centerAligned euiCard--horizontal euiCard--isClickable euiCard--hasIcon"
-                                      data-test-subj="visGroup-vis"
+                                      data-test-subj="visType-vis"
                                       data-vis-stage="production"
                                       onClick={[Function]}
                                     >
@@ -686,20 +691,20 @@ exports[`NewVisModal should render as expected 1`] = `
                                       >
                                         <EuiTitle
                                           className="euiCard__title"
-                                          id="ie04205b1-070b-11eb-a558-6f89949345a3Title"
+                                          id="i81def9b1-071a-11eb-ac1f-41fee99a465bTitle"
                                           size="xs"
                                         >
                                           <span
                                             className="euiTitle euiTitle--xsmall euiCard__title"
-                                            id="ie04205b1-070b-11eb-a558-6f89949345a3Title"
+                                            id="i81def9b1-071a-11eb-ac1f-41fee99a465bTitle"
                                           >
                                             <button
-                                              aria-describedby=" ie04205b1-070b-11eb-a558-6f89949345a3Description"
+                                              aria-describedby=" i81def9b1-071a-11eb-ac1f-41fee99a465bDescription"
                                               className="euiCard__titleButton"
                                               onClick={[Function]}
                                             >
                                               <span
-                                                data-test-subj="visGroupTitle"
+                                                data-test-subj="visTypeTitle"
                                               >
                                                 Vis Type 1
                                               </span>
@@ -708,12 +713,12 @@ exports[`NewVisModal should render as expected 1`] = `
                                         </EuiTitle>
                                         <EuiText
                                           className="euiCard__description"
-                                          id="ie04205b1-070b-11eb-a558-6f89949345a3Description"
+                                          id="i81def9b1-071a-11eb-ac1f-41fee99a465bDescription"
                                           size="s"
                                         >
                                           <div
                                             className="euiText euiText--small euiCard__description"
-                                            id="ie04205b1-070b-11eb-a558-6f89949345a3Description"
+                                            id="i81def9b1-071a-11eb-ac1f-41fee99a465bDescription"
                                           >
                                             <p />
                                           </div>
@@ -746,8 +751,8 @@ exports[`NewVisModal should render as expected 1`] = `
                                   className="euiFlexItem"
                                 >
                                   <EuiCard
-                                    aria-describedby="visGroupDescription-vis2"
-                                    data-test-subj="visGroup-vis2"
+                                    aria-describedby="visTypeDescription-vis2"
+                                    data-test-subj="visType-vis2"
                                     data-vis-stage="production"
                                     description=""
                                     icon={
@@ -761,7 +766,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                     onClick={[Function]}
                                     title={
                                       <span
-                                        data-test-subj="visGroupTitle"
+                                        data-test-subj="visTypeTitle"
                                       >
                                         Vis Type 2
                                       </span>
@@ -769,9 +774,9 @@ exports[`NewVisModal should render as expected 1`] = `
                                     titleSize="xs"
                                   >
                                     <div
-                                      aria-describedby="visGroupDescription-vis2"
+                                      aria-describedby="visTypeDescription-vis2"
                                       className="euiCard euiCard--paddingMedium euiCard--centerAligned euiCard--horizontal euiCard--isClickable euiCard--hasIcon"
-                                      data-test-subj="visGroup-vis2"
+                                      data-test-subj="visType-vis2"
                                       data-vis-stage="production"
                                       onClick={[Function]}
                                     >
@@ -797,20 +802,20 @@ exports[`NewVisModal should render as expected 1`] = `
                                       >
                                         <EuiTitle
                                           className="euiCard__title"
-                                          id="ie0427ae1-070b-11eb-a558-6f89949345a3Title"
+                                          id="i81df47d1-071a-11eb-ac1f-41fee99a465bTitle"
                                           size="xs"
                                         >
                                           <span
                                             className="euiTitle euiTitle--xsmall euiCard__title"
-                                            id="ie0427ae1-070b-11eb-a558-6f89949345a3Title"
+                                            id="i81df47d1-071a-11eb-ac1f-41fee99a465bTitle"
                                           >
                                             <button
-                                              aria-describedby=" ie0427ae1-070b-11eb-a558-6f89949345a3Description"
+                                              aria-describedby=" i81df47d1-071a-11eb-ac1f-41fee99a465bDescription"
                                               className="euiCard__titleButton"
                                               onClick={[Function]}
                                             >
                                               <span
-                                                data-test-subj="visGroupTitle"
+                                                data-test-subj="visTypeTitle"
                                               >
                                                 Vis Type 2
                                               </span>
@@ -819,12 +824,12 @@ exports[`NewVisModal should render as expected 1`] = `
                                         </EuiTitle>
                                         <EuiText
                                           className="euiCard__description"
-                                          id="ie0427ae1-070b-11eb-a558-6f89949345a3Description"
+                                          id="i81df47d1-071a-11eb-ac1f-41fee99a465bDescription"
                                           size="s"
                                         >
                                           <div
                                             className="euiText euiText--small euiCard__description"
-                                            id="ie0427ae1-070b-11eb-a558-6f89949345a3Description"
+                                            id="i81df47d1-071a-11eb-ac1f-41fee99a465bDescription"
                                           >
                                             <p />
                                           </div>
@@ -854,8 +859,8 @@ exports[`NewVisModal should render as expected 1`] = `
                                   className="euiFlexItem"
                                 >
                                   <EuiCard
-                                    aria-describedby="visGroupDescription-visWithAliasUrl"
-                                    data-test-subj="visGroup-visWithAliasUrl"
+                                    aria-describedby="visTypeDescription-visWithAliasUrl"
+                                    data-test-subj="visType-visWithAliasUrl"
                                     data-vis-stage="alias"
                                     description=""
                                     icon={
@@ -869,7 +874,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                     onClick={[Function]}
                                     title={
                                       <span
-                                        data-test-subj="visGroupTitle"
+                                        data-test-subj="visTypeTitle"
                                       >
                                         Vis with alias Url
                                       </span>
@@ -877,9 +882,9 @@ exports[`NewVisModal should render as expected 1`] = `
                                     titleSize="xs"
                                   >
                                     <div
-                                      aria-describedby="visGroupDescription-visWithAliasUrl"
+                                      aria-describedby="visTypeDescription-visWithAliasUrl"
                                       className="euiCard euiCard--paddingMedium euiCard--centerAligned euiCard--horizontal euiCard--isClickable euiCard--hasIcon"
-                                      data-test-subj="visGroup-visWithAliasUrl"
+                                      data-test-subj="visType-visWithAliasUrl"
                                       data-vis-stage="alias"
                                       onClick={[Function]}
                                     >
@@ -905,20 +910,20 @@ exports[`NewVisModal should render as expected 1`] = `
                                       >
                                         <EuiTitle
                                           className="euiCard__title"
-                                          id="ie042a1f1-070b-11eb-a558-6f89949345a3Title"
+                                          id="i81df6ee1-071a-11eb-ac1f-41fee99a465bTitle"
                                           size="xs"
                                         >
                                           <span
                                             className="euiTitle euiTitle--xsmall euiCard__title"
-                                            id="ie042a1f1-070b-11eb-a558-6f89949345a3Title"
+                                            id="i81df6ee1-071a-11eb-ac1f-41fee99a465bTitle"
                                           >
                                             <button
-                                              aria-describedby=" ie042a1f1-070b-11eb-a558-6f89949345a3Description"
+                                              aria-describedby=" i81df6ee1-071a-11eb-ac1f-41fee99a465bDescription"
                                               className="euiCard__titleButton"
                                               onClick={[Function]}
                                             >
                                               <span
-                                                data-test-subj="visGroupTitle"
+                                                data-test-subj="visTypeTitle"
                                               >
                                                 Vis with alias Url
                                               </span>
@@ -927,12 +932,12 @@ exports[`NewVisModal should render as expected 1`] = `
                                         </EuiTitle>
                                         <EuiText
                                           className="euiCard__description"
-                                          id="ie042a1f1-070b-11eb-a558-6f89949345a3Description"
+                                          id="i81df6ee1-071a-11eb-ac1f-41fee99a465bDescription"
                                           size="s"
                                         >
                                           <div
                                             className="euiText euiText--small euiCard__description"
-                                            id="ie042a1f1-070b-11eb-a558-6f89949345a3Description"
+                                            id="i81df6ee1-071a-11eb-ac1f-41fee99a465bDescription"
                                           >
                                             <p />
                                           </div>
@@ -1018,12 +1023,12 @@ exports[`NewVisModal should render as expected 1`] = `
                                     >
                                       <EuiTitle
                                         className="euiCard__title"
-                                        id="ie042f011-070b-11eb-a558-6f89949345a3Title"
+                                        id="i81dfbd01-071a-11eb-ac1f-41fee99a465bTitle"
                                         size="xs"
                                       >
                                         <span
                                           className="euiTitle euiTitle--xsmall euiCard__title"
-                                          id="ie042f011-070b-11eb-a558-6f89949345a3Title"
+                                          id="i81dfbd01-071a-11eb-ac1f-41fee99a465bTitle"
                                         >
                                           <span
                                             data-test-subj="visGroupAggBasedTitle"
@@ -1034,12 +1039,12 @@ exports[`NewVisModal should render as expected 1`] = `
                                       </EuiTitle>
                                       <EuiText
                                         className="euiCard__description"
-                                        id="ie042f011-070b-11eb-a558-6f89949345a3Description"
+                                        id="i81dfbd01-071a-11eb-ac1f-41fee99a465bDescription"
                                         size="s"
                                       >
                                         <div
                                           className="euiText euiText--small euiCard__description"
-                                          id="ie042f011-070b-11eb-a558-6f89949345a3Description"
+                                          id="i81dfbd01-071a-11eb-ac1f-41fee99a465bDescription"
                                         >
                                           <p>
                                             A set of frequently used visualizations that allows you to plot aggregated data to find trends, spikes and dips you need to know about
@@ -1099,12 +1104,12 @@ exports[`NewVisModal should render as expected 1`] = `
                                     >
                                       <EuiTitle
                                         className="euiCard__title"
-                                        id="ie0431721-070b-11eb-a558-6f89949345a3Title"
+                                        id="i81dfe411-071a-11eb-ac1f-41fee99a465bTitle"
                                         size="xs"
                                       >
                                         <span
                                           className="euiTitle euiTitle--xsmall euiCard__title"
-                                          id="ie0431721-070b-11eb-a558-6f89949345a3Title"
+                                          id="i81dfe411-071a-11eb-ac1f-41fee99a465bTitle"
                                         >
                                           <span
                                             data-test-subj="visGroup-tools"
@@ -1115,12 +1120,12 @@ exports[`NewVisModal should render as expected 1`] = `
                                       </EuiTitle>
                                       <EuiText
                                         className="euiCard__description"
-                                        id="ie0431721-070b-11eb-a558-6f89949345a3Description"
+                                        id="i81dfe411-071a-11eb-ac1f-41fee99a465bDescription"
                                         size="s"
                                       >
                                         <div
                                           className="euiText euiText--small euiCard__description"
-                                          id="ie0431721-070b-11eb-a558-6f89949345a3Description"
+                                          id="i81dfe411-071a-11eb-ac1f-41fee99a465bDescription"
                                         >
                                           <p />
                                         </div>
@@ -1170,10 +1175,12 @@ exports[`NewVisModal should render as expected 1`] = `
                                                 className="euiFlexItem"
                                               >
                                                 <EuiLink
+                                                  data-test-subj="visType-vis3"
                                                   onClick={[Function]}
                                                 >
                                                   <button
                                                     className="euiLink euiLink--primary"
+                                                    data-test-subj="visType-vis3"
                                                     onClick={[Function]}
                                                     type="button"
                                                   >

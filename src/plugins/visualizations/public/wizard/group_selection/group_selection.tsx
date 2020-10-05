@@ -176,11 +176,11 @@ const VisGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
     <EuiFlexItem>
       <EuiCard
         titleSize="xs"
-        title={<span data-test-subj="visGroupTitle">{visType.title}</span>}
+        title={<span data-test-subj="visTypeTitle">{visType.title}</span>}
         onClick={onClick}
-        data-test-subj={`visGroup-${visType.name}`}
+        data-test-subj={`visType-${visType.name}`}
         data-vis-stage={!('aliasPath' in visType) ? visType.stage : 'alias'}
-        aria-describedby={`visGroupDescription-${visType.name}`}
+        aria-describedby={`visTypeDescription-${visType.name}`}
         description={visType.description || ''}
         layout="horizontal"
         icon={<EuiIcon type={visType.icon || 'empty'} size="xl" color="secondary" />}
@@ -197,7 +197,9 @@ const ToolsGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
         <EuiIcon type={visType.icon || 'empty'} size="l" />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiLink onClick={onClick}>{visType.title}</EuiLink>
+        <EuiLink data-test-subj={`visType-${visType.name}`} onClick={onClick}>
+          {visType.title}
+        </EuiLink>
         <EuiText color="subdued" size="s">
           {visType.description}
         </EuiText>
