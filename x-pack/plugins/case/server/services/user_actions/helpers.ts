@@ -6,6 +6,7 @@
 
 import { SavedObject, SavedObjectsUpdateResponse } from 'kibana/server';
 import { get, isPlainObject, isString } from 'lodash';
+import deepEqual from 'fast-deep-equal';
 
 import {
   CaseUserActionAttributes,
@@ -158,7 +159,7 @@ export const buildCaseUserActions = ({
               ? transformESConnectorToCaseConnector(updatedItem.attributes.connector)
               : get(updatedItem, ['attributes', field]);
 
-          if (isString(origValue) && isString(updatedValue)) {
+          if (isString(origValue) && isString(updatedValue) && origValue !== updatedValue) {
             userActions = [
               ...userActions,
               buildCaseUserActionItem({
@@ -200,7 +201,11 @@ export const buildCaseUserActions = ({
                 }),
               ];
             }
-          } else if (isPlainObject(origValue) && isPlainObject(updatedValue)) {
+          } else if (
+            isPlainObject(origValue) &&
+            isPlainObject(updatedValue) &&
+            !deepEqual(origValue, updatedValue)
+          ) {
             userActions = [
               ...userActions,
               buildCaseUserActionItem({
