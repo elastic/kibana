@@ -3,41 +3,41 @@ pageLoadAssetSize:
   alerts: 96_936
   apm: 50_340
   apmOss: 8_996
-  beatsManagement: 455_715
+  beatsManagement: 178_135
   bfetch: 31_874
   Bundle:
   canvas: 1_055_965
   charts: 149_211
   cloud: 11_076
   console: 36_091
-  core: 681_949
+  core: 682_045
   crossClusterReplication: 55_408
-  dashboard: 588_912
-  dashboardEnhanced: 49_143
+  dashboard: 588_972
+  dashboardEnhanced: 55_646
   dashboardMode: 12_716
   data: 1_415_843
-  dataEnhanced: 40_162
+  dataEnhanced: 40_192
   devTools: 28_637
   discover: 94_982
-  discoverEnhanced: 34_904
+  discoverEnhanced: 32_730
   embeddable: 302_688
   embeddableEnhanced: 31_145
   enterpriseSearch: 25_484
-  esUiShared: 314_930
+  esUiShared: 316_654
   expressions: 214_136
   features: 21_211
   fileUpload: 14_717
   globalSearch: 33_548
-  globalSearchBar: 34_422
+  globalSearchBar: 34_743
   globalSearchProviders: 15_554
   graph: 21_215
   grokdebugger: 16_779
   home: 32_372
   indexLifecycleManagement: 97_032
-  indexManagement: 130_599
+  indexManagement: 130_766
   indexPatternManagement: 144_222
   infra: 187_885
-  ingestManager: 528_995
+  ingestManager: 558_923
   ingestPipelines: 48_003
   inputControlVis: 162_675
   inspector: 138_711
@@ -54,12 +54,12 @@ pageLoadAssetSize:
   mapsLegacy: 106_817
   mapsLegacyLicensing: 10_214
   ml: 64_944
-  monitoring: 233_047
+  monitoring: 258_618
   navigation: 27_443
   newsfeed: 27_628
   observability: 58_642
   painlessLab: 169_748
-  regionMap: 56_105
+  regionMap: 56_098
   remoteClusters: 41_327
   reporting: 173_418
   rollup: 87_204
@@ -68,18 +68,18 @@ pageLoadAssetSize:
   searchprofiler: 57_080
   security: 172_250
   securitySolution: 606_205
-  share: 86_784
+  share: 89_061
   snapshotRestore: 69_032
-  spaces: 357_173
+  spaces: 377_915
   telemetry: 81_832
   telemetryManagementSection: 42_443
-  tileMap: 55_257
+  tileMap: 55_250
   timelion: 19_920
   transform: 31_007
   triggers_actions_ui: 156_543
   uiActions: 87_533
-  uiActionsEnhanced: 333_430
-  upgradeAssistant: 71_251
+  uiActionsEnhanced: 339_652
+  upgradeAssistant: 71_270
   uptime: 30_833
   urlDrilldown: 24_174
   urlForwarding: 22_554
@@ -91,9 +91,9 @@ pageLoadAssetSize:
   visTypeTagcloud: 27_605
   visTypeTimelion: 41_933
   visTypeTimeseries: 145_195
-  visTypeVega: 142_183
-  visTypeVislib: 233_049
+  visTypeVega: 143_573
+  visTypeVislib: 232_838
   visTypeXy: 10_255
-  visualizations: 283_763
+  visualizations: 283_742
   visualize: 47_384
   watcher: 33_598
