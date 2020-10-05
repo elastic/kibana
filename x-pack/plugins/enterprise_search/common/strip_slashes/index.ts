@@ -5,9 +5,14 @@
  */
 
 /**
- * Small helper for stripping trailing slashes from URLs or paths
+ * Helpers for stripping trailing or leading slashes from URLs or paths
  * (usually ones that come in from React Router or API endpoints)
  */
+
 export const stripTrailingSlash = (url: string): string => {
   return url && url.endsWith('/') ? url.slice(0, -1) : url;
+};
+
+export const stripLeadingSlash = (path: string): string => {
+  return path && path.startsWith('/') ? path.substring(1) : path;
 };
