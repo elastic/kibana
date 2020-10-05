@@ -61,6 +61,7 @@ export class RangeFilterManager extends FilterManager {
    * @return {object} range filter
    */
   createFilter(value: SliderValue): RangeFilter {
+    if (!this.indexPattern) return {} as RangeFilter;
     const newFilter = esFilters.buildRangeFilter(
       // TODO: Fix type to be required
       this.indexPattern.fields.getByName(this.fieldName) as IFieldType,

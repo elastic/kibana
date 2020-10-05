@@ -25,7 +25,7 @@ export abstract class FilterManager {
   constructor(
     public controlId: string,
     public fieldName: string,
-    public indexPattern: IndexPattern,
+    public indexPattern: IndexPattern | null,
     public queryFilter: QueryFilterManager
   ) {}
 
@@ -41,12 +41,12 @@ export abstract class FilterManager {
 
   abstract getValueFromFilterBar(): any;
 
-  getIndexPattern(): IndexPattern {
+  getIndexPattern(): IndexPattern | null {
     return this.indexPattern;
   }
 
   getField() {
-    return this.indexPattern.fields.getByName(this.fieldName);
+    return this.indexPattern?.fields.getByName(this.fieldName);
   }
 
   findFilters(): Filter[] {

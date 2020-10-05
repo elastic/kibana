@@ -31,13 +31,14 @@ export class PhraseFilterManager extends FilterManager {
   constructor(
     controlId: string,
     fieldName: string,
-    indexPattern: IndexPattern,
+    indexPattern: IndexPattern | null,
     queryFilter: QueryFilterManager
   ) {
     super(controlId, fieldName, indexPattern, queryFilter);
   }
 
   createFilter(phrases: any): PhraseFilter {
+    if (!this.indexPattern) return {} as PhraseFilter;
     let newFilter: PhraseFilter;
     const value = this.indexPattern.fields.getByName(this.fieldName);
 
