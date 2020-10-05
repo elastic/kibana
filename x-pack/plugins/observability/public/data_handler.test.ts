@@ -5,6 +5,13 @@
  */
 import { registerDataHandler, getDataHandler } from './data_handler';
 import moment from 'moment';
+import {
+  ApmFetchDataResponse,
+  LogsFetchDataResponse,
+  MetricsFetchDataResponse,
+  UptimeFetchDataResponse,
+  UxFetchDataResponse,
+} from './typings';
 
 const params = {
   absoluteTime: {
@@ -262,6 +269,60 @@ describe('registerDataHandler', () => {
       expect(hasData).toBeTruthy();
     });
   });
+  describe('Ux', () => {
+    registerDataHandler({
+      appName: 'ux',
+      fetchData: async () => {
+        return {
+          title: 'User Experience',
+          appLink: '/ux',
+          coreWebVitals: {
+            cls: '0.01',
+            fid: 5,
+            lcp: 1464.3333333333333,
+            tbt: 232.92166666666665,
+            fcp: 1154.8,
+            lcpRanks: [73, 16, 11],
+            fidRanks: [85, 4, 11],
+            clsRanks: [88, 7, 5],
+          },
+        };
+      },
+      hasData: async () => ({ hasData: true, serviceName: 'elastic-co-frontend' }),
+    });
+
+    it('registered data handler', () => {
+      const dataHandler = getDataHandler('ux');
+      expect(dataHandler?.fetchData).toBeDefined();
+      expect(dataHandler?.hasData).toBeDefined();
+    });
+
+    it('returns data when fetchData is called', async () => {
+      const dataHandler = getDataHandler('ux');
+      const response = await dataHandler?.fetchData(params);
+      expect(response).toEqual({
+        title: 'User Experience',
+        appLink: '/ux',
+        coreWebVitals: {
+          cls: '0.01',
+          fid: 5,
+          lcp: 1464.3333333333333,
+          tbt: 232.92166666666665,
+          fcp: 1154.8,
+          lcpRanks: [73, 16, 11],
+          fidRanks: [85, 4, 11],
+          clsRanks: [88, 7, 5],
+        },
+      });
+    });
+
+    it('returns true when hasData is called', async () => {
+      const dataHandler = getDataHandler('ux');
+      const hasData = await dataHandler?.hasData();
+      expect(hasData).toBeTruthy();
+    });
+  });
+
   describe('Metrics', () => {
     registerDataHandler({
       appName: 'infra_metrics',

@@ -5,7 +5,8 @@
  */
 import React from 'react';
 import { render as testLibRender } from '@testing-library/react';
-import { AppMountContext } from 'kibana/public';
+import { CoreStart } from 'kibana/public';
+import { of } from 'rxjs';
 import { of } from 'rxjs';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';

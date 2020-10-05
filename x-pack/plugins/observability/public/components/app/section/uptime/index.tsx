@@ -126,7 +126,7 @@ export function UptimeSection() {
             defaultMessage: 'Down',
           })}
           series={series?.down}
-          ticktFormatter={formatter}
+          tickFormatter={formatter}
           color={downColor}
         />
         <UptimeBarSeries
@@ -135,7 +135,7 @@ export function UptimeSection() {
             defaultMessage: 'Up',
           })}
           series={series?.up}
-          ticktFormatter={formatter}
+          tickFormatter={formatter}
           color={upColor}
         />
       </ChartContainer>
@@ -148,13 +148,13 @@ function UptimeBarSeries({
   label,
   series,
   color,
-  ticktFormatter,
+  tickFormatter,
 }: {
   id: string;
   label: string;
   series?: Series;
   color: string;
-  ticktFormatter: TickFormatter;
+  tickFormatter: TickFormatter;
 }) {
   if (!series) {
     return null;
@@ -181,7 +181,7 @@ function UptimeBarSeries({
         position={Position.Bottom}
         showOverlappingTicks={false}
         showOverlappingLabels={false}
-        tickFormat={ticktFormatter}
+        tickFormat={tickFormatter}
       />
       <Axis
         id="y-axis"
