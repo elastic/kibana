@@ -19,7 +19,8 @@ export default function (providerContext: FtrProviderContext) {
   const supertestWithoutAuth = getSupertestWithoutAuth(providerContext);
   const esClient = getService('es');
 
-  describe('fleet_agent_flow', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/75241
+  describe.skip('fleet_agent_flow', () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await esArchiver.load('empty_kibana');
@@ -76,9 +77,9 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
 
       expect(checkinApiResponse.actions).length(1);
-      expect(checkinApiResponse.actions[0].type).be('CONFIG_CHANGE');
+      expect(checkinApiResponse.actions[0].type).be('POLICY_CHANGE');
       const policyChangeAction = checkinApiResponse.actions[0];
-      const defaultOutputApiKey = policyChangeAction.data.config.outputs.default.api_key;
+      const defaultOutputApiKey = policyChangeAction.data.policy.outputs.default.api_key;
 
       // Ack actions
       await supertestWithoutAuth

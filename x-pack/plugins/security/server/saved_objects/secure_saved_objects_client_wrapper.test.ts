@@ -120,7 +120,7 @@ const expectSuccess = async (fn: Function, args: Record<string, any>, action?: s
 const expectPrivilegeCheck = async (
   fn: Function,
   args: Record<string, any>,
-  namespacesOverride?: Array<undefined | string>
+  namespaceOrNamespaces: string | undefined | Array<undefined | string>
 ) => {
   clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementation(
     getMockCheckPrivilegesFailure
@@ -135,7 +135,7 @@ const expectPrivilegeCheck = async (
   expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledTimes(1);
   expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledWith(
     actions,
-    namespacesOverride ?? args.options?.namespace ?? args.options?.namespaces
+    namespaceOrNamespaces
   );
 };
 
@@ -154,7 +154,7 @@ const expectObjectNamespaceFiltering = async (
   );
 
   const authorizedNamespace = args.options?.namespace || 'default';
-  const namespaces = ['some-other-namespace', authorizedNamespace];
+  const namespaces = ['some-other-namespace', '*', authorizedNamespace];
   const returnValue = { namespaces, foo: 'bar' };
   // we don't know which base client method will be called; mock them all
   clientOpts.baseClient.create.mockReturnValue(returnValue as any);
@@ -164,14 +164,15 @@ const expectObjectNamespaceFiltering = async (
   clientOpts.baseClient.deleteFromNamespaces.mockReturnValue(returnValue as any);
 
   const result = await fn.bind(client)(...Object.values(args));
-  expect(result).toEqual(expect.objectContaining({ namespaces: [authorizedNamespace, '?'] }));
+  // we will never redact the "All Spaces" ID
+  expect(result).toEqual(expect.objectContaining({ namespaces: ['*', authorizedNamespace, '?'] }));
 
   expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledTimes(
     privilegeChecks + 1
   );
   expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenLastCalledWith(
     'login:',
-    namespaces
+    namespaces.filter((x) => x !== '*') // when we check what namespaces to redact, we don't check privileges for '*', only actual space IDs
   );
 };
 
@@ -282,8 +283,7 @@ describe('#addToNamespaces', () => {
   const newNs2 = 'bar-namespace';
   const namespaces = [newNs1, newNs2];
   const currentNs = 'default';
-  const privilege1 = `mock-saved_object:${type}/create`;
-  const privilege2 = `mock-saved_object:${type}/update`;
+  const privilege = `mock-saved_object:${type}/share_to_space`;
 
   test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
     await expectGeneralError(client.addToNamespaces, { type, id, namespaces });
@@ -305,7 +305,7 @@ describe('#addToNamespaces', () => {
       'addToNamespacesCreate',
       [type],
       namespaces.sort(),
-      [{ privilege: privilege1, spaceId: newNs1 }],
+      [{ privilege, spaceId: newNs1 }],
       { id, type, namespaces, options: {} }
     );
     expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -332,7 +332,7 @@ describe('#addToNamespaces', () => {
       'addToNamespacesUpdate',
       [type],
       [currentNs],
-      [{ privilege: privilege2, spaceId: currentNs }],
+      [{ privilege, spaceId: currentNs }],
       { id, type, namespaces, options: {} }
     );
     expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledTimes(1);
@@ -350,7 +350,7 @@ describe('#addToNamespaces', () => {
     expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).toHaveBeenNthCalledWith(
       1,
       USERNAME,
-      'addToNamespacesCreate', // action for privilege check is 'create', but auditAction is 'addToNamespacesCreate'
+      'addToNamespacesCreate', // action for privilege check is 'share_to_space', but auditAction is 'addToNamespacesCreate'
       [type],
       namespaces.sort(),
       { type, id, namespaces, options: {} }
@@ -358,7 +358,7 @@ describe('#addToNamespaces', () => {
     expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).toHaveBeenNthCalledWith(
       2,
       USERNAME,
-      'addToNamespacesUpdate', // action for privilege check is 'update', but auditAction is 'addToNamespacesUpdate'
+      'addToNamespacesUpdate', // action for privilege check is 'share_to_space', but auditAction is 'addToNamespacesUpdate'
       [type],
       [currentNs],
       { type, id, namespaces, options: {} }
@@ -378,12 +378,12 @@ describe('#addToNamespaces', () => {
     expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledTimes(2);
     expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenNthCalledWith(
       1,
-      [privilege1],
+      [privilege],
       namespaces
     );
     expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenNthCalledWith(
       2,
-      [privilege2],
+      [privilege],
       undefined // default namespace
     );
   });
@@ -398,7 +398,7 @@ describe('#bulkCreate', () => {
   const attributes = { some: 'attr' };
   const obj1 = Object.freeze({ type: 'foo', otherThing: 'sup', attributes });
   const obj2 = Object.freeze({ type: 'bar', otherThing: 'everyone', attributes });
-  const options = Object.freeze({ namespace: 'some-ns' });
+  const namespace = 'some-ns';
 
   test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
     const objects = [obj1];
@@ -407,6 +407,7 @@ describe('#bulkCreate', () => {
 
   test(`throws decorated ForbiddenError when unauthorized`, async () => {
     const objects = [obj1, obj2];
+    const options = { namespace };
     await expectForbiddenError(client.bulkCreate, { objects, options });
   });
 
@@ -415,17 +416,33 @@ describe('#bulkCreate', () => {
     clientOpts.baseClient.bulkCreate.mockReturnValue(apiCallReturnValue as any);
 
     const objects = [obj1, obj2];
+    const options = { namespace };
     const result = await expectSuccess(client.bulkCreate, { objects, options });
     expect(result).toEqual(apiCallReturnValue);
   });
 
   test(`checks privileges for user, actions, and namespace`, async () => {
     const objects = [obj1, obj2];
-    await expectPrivilegeCheck(client.bulkCreate, { objects, options });
+    const options = { namespace };
+    await expectPrivilegeCheck(client.bulkCreate, { objects, options }, [namespace]);
+  });
+
+  test(`checks privileges for user, actions, namespace, and namespaces`, async () => {
+    const objects = [
+      { ...obj1, namespaces: 'another-ns' },
+      { ...obj2, namespaces: 'yet-another-ns' },
+    ];
+    const options = { namespace };
+    await expectPrivilegeCheck(client.bulkCreate, { objects, options }, [
+      namespace,
+      'another-ns',
+      'yet-another-ns',
+    ]);
   });
 
   test(`filters namespaces that the user doesn't have access to`, async () => {
     const objects = [obj1, obj2];
+    const options = { namespace };
     await expectObjectsNamespaceFiltering(client.bulkCreate, { objects, options });
   });
 });
@@ -433,7 +450,7 @@ describe('#bulkCreate', () => {
 describe('#bulkGet', () => {
   const obj1 = Object.freeze({ type: 'foo', id: 'foo-id' });
   const obj2 = Object.freeze({ type: 'bar', id: 'bar-id' });
-  const options = Object.freeze({ namespace: 'some-ns' });
+  const namespace = 'some-ns';
 
   test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
     const objects = [obj1];
@@ -442,6 +459,7 @@ describe('#bulkGet', () => {
 
   test(`throws decorated ForbiddenError when unauthorized`, async () => {
     const objects = [obj1, obj2];
+    const options = { namespace };
     await expectForbiddenError(client.bulkGet, { objects, options });
   });
 
@@ -450,17 +468,20 @@ describe('#bulkGet', () => {
     clientOpts.baseClient.bulkGet.mockReturnValue(apiCallReturnValue as any);
 
     const objects = [obj1, obj2];
+    const options = { namespace };
     const result = await expectSuccess(client.bulkGet, { objects, options });
     expect(result).toEqual(apiCallReturnValue);
   });
 
   test(`checks privileges for user, actions, and namespace`, async () => {
     const objects = [obj1, obj2];
-    await expectPrivilegeCheck(client.bulkGet, { objects, options });
+    const options = { namespace };
+    await expectPrivilegeCheck(client.bulkGet, { objects, options }, namespace);
   });
 
   test(`filters namespaces that the user doesn't have access to`, async () => {
     const objects = [obj1, obj2];
+    const options = { namespace };
     await expectObjectsNamespaceFiltering(client.bulkGet, { objects, options });
   });
 });
@@ -468,7 +489,7 @@ describe('#bulkGet', () => {
 describe('#bulkUpdate', () => {
   const obj1 = Object.freeze({ type: 'foo', id: 'foo-id', attributes: { some: 'attr' } });
   const obj2 = Object.freeze({ type: 'bar', id: 'bar-id', attributes: { other: 'attr' } });
-  const options = Object.freeze({ namespace: 'some-ns' });
+  const namespace = 'some-ns';
 
   test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
     const objects = [obj1];
@@ -477,6 +498,7 @@ describe('#bulkUpdate', () => {
 
   test(`throws decorated ForbiddenError when unauthorized`, async () => {
     const objects = [obj1, obj2];
+    const options = { namespace };
     await expectForbiddenError(client.bulkUpdate, { objects, options });
   });
 
@@ -485,14 +507,16 @@ describe('#bulkUpdate', () => {
     clientOpts.baseClient.bulkUpdate.mockReturnValue(apiCallReturnValue as any);
 
     const objects = [obj1, obj2];
+    const options = { namespace };
     const result = await expectSuccess(client.bulkUpdate, { objects, options });
     expect(result).toEqual(apiCallReturnValue);
   });
 
   test(`checks privileges for user, actions, and namespace`, async () => {
     const objects = [obj1, obj2];
-    const namespacesOverride = [options.namespace]; // the bulkCreate function checks privileges as an array
-    await expectPrivilegeCheck(client.bulkUpdate, { objects, options }, namespacesOverride);
+    const options = { namespace };
+    const namespaces = [options.namespace]; // the bulkUpdate function always checks privileges as an array
+    await expectPrivilegeCheck(client.bulkUpdate, { objects, options }, namespaces);
   });
 
   test(`checks privileges for object namespaces if present`, async () => {
@@ -500,13 +524,14 @@ describe('#bulkUpdate', () => {
       { ...obj1, namespace: 'foo-ns' },
       { ...obj2, namespace: 'bar-ns' },
     ];
-    const namespacesOverride = [undefined, 'foo-ns', 'bar-ns'];
-    // use the default namespace for the options
-    await expectPrivilegeCheck(client.bulkUpdate, { objects, options: {} }, namespacesOverride);
+    const namespaces = [undefined, 'foo-ns', 'bar-ns'];
+    const options = {}; // use the default namespace for the options
+    await expectPrivilegeCheck(client.bulkUpdate, { objects, options }, namespaces);
   });
 
   test(`filters namespaces that the user doesn't have access to`, async () => {
     const objects = [obj1, obj2];
+    const options = { namespace };
     await expectObjectsNamespaceFiltering(client.bulkUpdate, { objects, options });
   });
 });
@@ -514,7 +539,7 @@ describe('#bulkUpdate', () => {
 describe('#checkConflicts', () => {
   const obj1 = Object.freeze({ type: 'foo', id: 'foo-id' });
   const obj2 = Object.freeze({ type: 'bar', id: 'bar-id' });
-  const options = Object.freeze({ namespace: 'some-ns' });
+  const namespace = 'some-ns';
 
   test(`throws decorated GeneralError when checkPrivileges.globally rejects promise`, async () => {
     const objects = [obj1, obj2];
@@ -523,6 +548,7 @@ describe('#checkConflicts', () => {
 
   test(`throws decorated ForbiddenError when unauthorized`, async () => {
     const objects = [obj1, obj2];
+    const options = { namespace };
     await expectForbiddenError(client.checkConflicts, { objects, options }, 'checkConflicts');
   });
 
@@ -531,6 +557,7 @@ describe('#checkConflicts', () => {
     clientOpts.baseClient.checkConflicts.mockResolvedValue(apiCallReturnValue as any);
 
     const objects = [obj1, obj2];
+    const options = { namespace };
     const result = await expectSuccess(
       client.checkConflicts,
       { objects, options },
@@ -541,20 +568,22 @@ describe('#checkConflicts', () => {
 
   test(`checks privileges for user, actions, and namespace`, async () => {
     const objects = [obj1, obj2];
-    await expectPrivilegeCheck(client.checkConflicts, { objects, options });
+    const options = { namespace };
+    await expectPrivilegeCheck(client.checkConflicts, { objects, options }, namespace);
   });
 });
 
 describe('#create', () => {
   const type = 'foo';
   const attributes = { some_attr: 's' };
-  const options = Object.freeze({ namespace: 'some-ns' });
+  const namespace = 'some-ns';
 
   test(`throws decorated GeneralError when checkPrivileges.globally rejects promise`, async () => {
     await expectGeneralError(client.create, { type });
   });
 
   test(`throws decorated ForbiddenError when unauthorized`, async () => {
+    const options = { namespace };
     await expectForbiddenError(client.create, { type, attributes, options });
   });
 
@@ -562,15 +591,27 @@ describe('#create', () => {
     const apiCallReturnValue = Symbol();
     clientOpts.baseClient.create.mockResolvedValue(apiCallReturnValue as any);
 
+    const options = { namespace };
     const result = await expectSuccess(client.create, { type, attributes, options });
     expect(result).toBe(apiCallReturnValue);
   });
 
   test(`checks privileges for user, actions, and namespace`, async () => {
-    await expectPrivilegeCheck(client.create, { type, attributes, options });
+    const options = { namespace };
+    await expectPrivilegeCheck(client.create, { type, attributes, options }, [namespace]);
+  });
+
+  test(`checks privileges for user, actions, namespace, and namespaces`, async () => {
+    const options = { namespace, namespaces: ['another-ns', 'yet-another-ns'] };
+    await expectPrivilegeCheck(client.create, { type, attributes, options }, [
+      namespace,
+      'another-ns',
+      'yet-another-ns',
+    ]);
   });
 
   test(`filters namespaces that the user doesn't have access to`, async () => {
+    const options = { namespace };
     await expectObjectNamespaceFiltering(client.create, { type, attributes, options });
   });
 });
@@ -578,13 +619,14 @@ describe('#create', () => {
 describe('#delete', () => {
   const type = 'foo';
   const id = `${type}-id`;
-  const options = Object.freeze({ namespace: 'some-ns' });
+  const namespace = 'some-ns';
 
   test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
     await expectGeneralError(client.delete, { type, id });
   });
 
   test(`throws decorated ForbiddenError when unauthorized`, async () => {
+    const options = { namespace };
     await expectForbiddenError(client.delete, { type, id, options });
   });
 
@@ -592,18 +634,21 @@ describe('#delete', () => {
     const apiCallReturnValue = Symbol();
     clientOpts.baseClient.delete.mockReturnValue(apiCallReturnValue as any);
 
+    const options = { namespace };
     const result = await expectSuccess(client.delete, { type, id, options });
     expect(result).toBe(apiCallReturnValue);
   });
 
   test(`checks privileges for user, actions, and namespace`, async () => {
-    await expectPrivilegeCheck(client.delete, { type, id, options });
+    const options = { namespace };
+    await expectPrivilegeCheck(client.delete, { type, id, options }, namespace);
   });
 });
 
 describe('#find', () => {
   const type1 = 'foo';
   const type2 = 'bar';
+  const namespaces = ['some-ns'];
 
   test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
     await expectGeneralError(client.find, { type: type1 });
@@ -634,7 +679,7 @@ describe('#find', () => {
     const apiCallReturnValue = { saved_objects: [], foo: 'bar' };
     clientOpts.baseClient.find.mockReturnValue(apiCallReturnValue as any);
 
-    const options = Object.freeze({ type: type1, namespaces: ['some-ns'] });
+    const options = { type: type1, namespaces };
     const result = await expectSuccess(client.find, { options });
     expect(clientOpts.baseClient.find.mock.calls[0][0]).toEqual({
       ...options,
@@ -699,19 +744,19 @@ describe('#find', () => {
       getMockCheckPrivilegesSuccess
     );
 
-    const options = Object.freeze({ type: [type1, type2], namespaces: ['some-ns'] });
+    const options = { type: [type1, type2], namespaces };
     await expect(client.find(options)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"_find across namespaces is not permitted when the Spaces plugin is disabled."`
     );
   });
 
   test(`checks privileges for user, actions, and namespaces`, async () => {
-    const options = Object.freeze({ type: [type1, type2], namespaces: ['some-ns'] });
-    await expectPrivilegeCheck(client.find, { options });
+    const options = { type: [type1, type2], namespaces };
+    await expectPrivilegeCheck(client.find, { options }, namespaces);
   });
 
   test(`filters namespaces that the user doesn't have access to`, async () => {
-    const options = Object.freeze({ type: [type1, type2], namespaces: ['some-ns'] });
+    const options = { type: [type1, type2], namespaces };
     await expectObjectsNamespaceFiltering(client.find, { options });
   });
 });
@@ -719,13 +764,14 @@ describe('#find', () => {
 describe('#get', () => {
   const type = 'foo';
   const id = `${type}-id`;
-  const options = Object.freeze({ namespace: 'some-ns' });
+  const namespace = 'some-ns';
 
   test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
     await expectGeneralError(client.get, { type, id });
   });
 
   test(`throws decorated ForbiddenError when unauthorized`, async () => {
+    const options = { namespace };
     await expectForbiddenError(client.get, { type, id, options });
   });
 
@@ -733,15 +779,18 @@ describe('#get', () => {
     const apiCallReturnValue = Symbol();
     clientOpts.baseClient.get.mockReturnValue(apiCallReturnValue as any);
 
+    const options = { namespace };
     const result = await expectSuccess(client.get, { type, id, options });
     expect(result).toBe(apiCallReturnValue);
   });
 
   test(`checks privileges for user, actions, and namespace`, async () => {
-    await expectPrivilegeCheck(client.get, { type, id, options });
+    const options = { namespace };
+    await expectPrivilegeCheck(client.get, { type, id, options }, namespace);
   });
 
   test(`filters namespaces that the user doesn't have access to`, async () => {
+    const options = { namespace };
     await expectObjectNamespaceFiltering(client.get, { type, id, options });
   });
 });
@@ -752,7 +801,7 @@ describe('#deleteFromNamespaces', () => {
   const namespace1 = 'foo-namespace';
   const namespace2 = 'bar-namespace';
   const namespaces = [namespace1, namespace2];
-  const privilege = `mock-saved_object:${type}/delete`;
+  const privilege = `mock-saved_object:${type}/share_to_space`;
 
   test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
     await expectGeneralError(client.deleteFromNamespaces, { type, id, namespaces });
@@ -771,7 +820,7 @@ describe('#deleteFromNamespaces', () => {
     expect(clientOpts.auditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledTimes(1);
     expect(clientOpts.auditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
       USERNAME,
-      'deleteFromNamespaces', // action for privilege check is 'delete', but auditAction is 'deleteFromNamespaces'
+      'deleteFromNamespaces', // action for privilege check is 'share_to_space', but auditAction is 'deleteFromNamespaces'
       [type],
       namespaces.sort(),
       [{ privilege, spaceId: namespace1 }],
@@ -791,7 +840,7 @@ describe('#deleteFromNamespaces', () => {
     expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledTimes(1);
     expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(
       USERNAME,
-      'deleteFromNamespaces', // action for privilege check is 'delete', but auditAction is 'deleteFromNamespaces'
+      'deleteFromNamespaces', // action for privilege check is 'share_to_space', but auditAction is 'deleteFromNamespaces'
       [type],
       namespaces.sort(),
       { type, id, namespaces, options: {} }
@@ -821,13 +870,14 @@ describe('#update', () => {
   const type = 'foo';
   const id = `${type}-id`;
   const attributes = { some: 'attr' };
-  const options = Object.freeze({ namespace: 'some-ns' });
+  const namespace = 'some-ns';
 
   test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
     await expectGeneralError(client.update, { type, id, attributes });
   });
 
   test(`throws decorated ForbiddenError when unauthorized`, async () => {
+    const options = { namespace };
     await expectForbiddenError(client.update, { type, id, attributes, options });
   });
 
@@ -835,15 +885,18 @@ describe('#update', () => {
     const apiCallReturnValue = Symbol();
     clientOpts.baseClient.update.mockReturnValue(apiCallReturnValue as any);
 
+    const options = { namespace };
     const result = await expectSuccess(client.update, { type, id, attributes, options });
     expect(result).toBe(apiCallReturnValue);
   });
 
   test(`checks privileges for user, actions, and namespace`, async () => {
-    await expectPrivilegeCheck(client.update, { type, id, attributes, options });
+    const options = { namespace };
+    await expectPrivilegeCheck(client.update, { type, id, attributes, options }, namespace);
   });
 
   test(`filters namespaces that the user doesn't have access to`, async () => {
+    const options = { namespace };
     await expectObjectNamespaceFiltering(client.update, { type, id, attributes, options });
   });
 });
