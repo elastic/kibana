@@ -12,30 +12,30 @@ import { ViewType } from '../../../state';
 import { ViewTypeToggle } from '../view_type_toggle';
 
 export interface ControlPanelProps {
-  state: {
-    totalItemsCount: number;
-    currentViewType: ViewType;
-  };
+  totalItemCount: number;
+  currentViewType: ViewType;
   onViewTypeChange: (value: ViewType) => void;
 }
 
-export const ControlPanel = memo(({ state, onViewTypeChange }: ControlPanelProps) => {
-  return (
-    <EuiFlexGroup direction="row" alignItems="center">
-      <EuiFlexItem grow={1}>
-        <EuiText color="subdued" size="xs">
-          {i18n.translate('xpack.securitySolution.trustedapps.list.totalCount', {
-            defaultMessage:
-              '{totalItemCount, plural, one {# trusted application} other {# trusted applications}}',
-            values: { totalItemCount: state.totalItemsCount },
-          })}
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <ViewTypeToggle selectedOption={state.currentViewType} onToggle={onViewTypeChange} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-});
+export const ControlPanel = memo<ControlPanelProps>(
+  ({ totalItemCount, currentViewType, onViewTypeChange }) => {
+    return (
+      <EuiFlexGroup direction="row" alignItems="center">
+        <EuiFlexItem grow={1}>
+          <EuiText color="subdued" size="xs">
+            {i18n.translate('xpack.securitySolution.trustedapps.list.totalCount', {
+              defaultMessage:
+                '{totalItemCount, plural, one {# trusted application} other {# trusted applications}}',
+              values: { totalItemCount },
+            })}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <ViewTypeToggle selectedOption={currentViewType} onToggle={onViewTypeChange} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+);
 
 ControlPanel.displayName = 'ControlPanel';

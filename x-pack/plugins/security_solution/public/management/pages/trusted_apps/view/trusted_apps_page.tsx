@@ -94,7 +94,8 @@ export const TrustedAppsPage = memo(() => {
       <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem grow={false}>
           <ControlPanel
-            state={{ totalItemsCount, currentViewType: location.view_type }}
+            totalItemCount={totalItemsCount}
+            currentViewType={location.view_type}
             onViewTypeChange={handleViewTypeChange}
           />
 

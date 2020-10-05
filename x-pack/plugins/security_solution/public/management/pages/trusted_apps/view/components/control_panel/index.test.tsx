@@ -7,42 +7,47 @@ import { render } from '@testing-library/react';
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { ControlPanel, ControlPanelProps } from '.';
+import { ControlPanel } from '.';
 
 describe('control_panel', () => {
   describe('ControlPanel', () => {
     it('should render grid selection correctly', () => {
-      const state: ControlPanelProps['state'] = { currentViewType: 'grid', totalItemsCount: 0 };
-      const element = shallow(<ControlPanel state={state} onViewTypeChange={() => {}} />);
+      const element = shallow(
+        <ControlPanel currentViewType={'grid'} totalItemCount={0} onViewTypeChange={() => {}} />
+      );
 
       expect(element).toMatchSnapshot();
     });
 
     it('should render list selection correctly', () => {
-      const state: ControlPanelProps['state'] = { currentViewType: 'list', totalItemsCount: 0 };
-      const element = shallow(<ControlPanel state={state} onViewTypeChange={() => {}} />);
+      const element = shallow(
+        <ControlPanel currentViewType={'list'} totalItemCount={0} onViewTypeChange={() => {}} />
+      );
 
       expect(element).toMatchSnapshot();
     });
 
     it('should render singular count correctly', () => {
-      const state: ControlPanelProps['state'] = { currentViewType: 'grid', totalItemsCount: 1 };
-      const element = shallow(<ControlPanel state={state} onViewTypeChange={() => {}} />);
+      const element = shallow(
+        <ControlPanel currentViewType={'grid'} totalItemCount={1} onViewTypeChange={() => {}} />
+      );
 
       expect(element).toMatchSnapshot();
     });
 
     it('should render plural count correctly', () => {
-      const state: ControlPanelProps['state'] = { currentViewType: 'grid', totalItemsCount: 100 };
-      const element = shallow(<ControlPanel state={state} onViewTypeChange={() => {}} />);
+      const element = shallow(
+        <ControlPanel currentViewType={'grid'} totalItemCount={100} onViewTypeChange={() => {}} />
+      );
 
       expect(element).toMatchSnapshot();
     });
 
     it('should trigger onViewTypeChange', async () => {
       const onToggle = jest.fn();
-      const state: ControlPanelProps['state'] = { currentViewType: 'list', totalItemsCount: 100 };
-      const element = render(<ControlPanel state={state} onViewTypeChange={onToggle} />);
+      const element = render(
+        <ControlPanel currentViewType={'list'} totalItemCount={100} onViewTypeChange={onToggle} />
+      );
 
       (await element.findAllByTestId('viewTypeToggleButton'))[0].click();
 
