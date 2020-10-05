@@ -383,6 +383,8 @@ export type LayerArgs = LayerConfig & {
 
 // Arguments to XY chart expression, with computed properties
 export interface XYArgs {
+  title?: string;
+  description?: string;
   xTitle: string;
   yTitle: string;
   yRightTitle: string;
