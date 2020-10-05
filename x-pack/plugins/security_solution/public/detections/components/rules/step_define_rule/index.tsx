@@ -143,8 +143,16 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     },
   ] = (useFormData({
     form,
-    watch: ['index', 'ruleType', 'queryBar', 'threatIndex', 'threshold.value', 'threshold.field'],
-  }) as unknown) as [Partial<DefineStepRule>];
+    watch: ['index', 'ruleType', 'queryBar', 'threshold.value', 'threshold.field', 'threatIndex'],
+  }) as unknown) as [
+    Partial<
+      DefineStepRule & {
+        'threshold.value': number | undefined;
+        'threshold.field': string[] | undefined;
+      }
+    >
+  ];
+
   const index = formIndex || initialState.index;
   const threatIndex = formThreatIndex || initialState.threatIndex;
   const ruleType = formRuleType || initialState.ruleType;
@@ -392,7 +400,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               index={index}
               query={formQuery}
               isDisabled={queryBarQuery.trim() === ''}
-              threshold={{ value: formThresholdValue, field: formThresholdField }}
+              threshold={
+                formThresholdValue != null && formThresholdField != null
+                  ? { value: formThresholdValue, field: formThresholdField[0] }
+                  : undefined
+              }
             />
           </>
         )}

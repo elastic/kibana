@@ -39,7 +39,7 @@ export const getMatrixHistorgram = async ({
   threshold,
   signal,
 }: GetMatrixHistogramProps): Promise<GetMatrixHistogramReturnArgs> => {
-  const request = {
+  const request: MatrixHistogramRequestOptions = {
     defaultIndex: indexNames,
     factoryQueryType: MatrixHistogramQuery,
     filterQuery: createFilter(filterQuery),
