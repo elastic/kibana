@@ -4,15 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Stackframe } from '../../../../../typings/es_schemas/raw/fields/stackframe';
-import { getGroupedStackframes } from '../index';
-import stacktracesMock from './stacktraces.json';
+import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
+import { getGroupedStackframes } from './';
+import stacktracesMock from './__fixtures__/stacktraces.json';
 
-describe('Stacktrace/index', () => {
+describe('Stacktrace', () => {
   describe('getGroupedStackframes', () => {
-    it('should collapse the library frames into a set of grouped stackframes', () => {
+    it('collapses the library frames into a set of grouped stackframes', () => {
       const result = getGroupedStackframes(stacktracesMock as Stackframe[]);
-      expect(result).toMatchSnapshot();
+      expect(
+        getGroupedStackframes(stacktracesMock as Stackframe[]).every(
+          (group) => group.stackframes.length > 0
+        )
+      ).toEqual(true);
     });
 
     it('should group stackframes when `library_frame` is identical and `exclude_from_grouping` is false', () => {
