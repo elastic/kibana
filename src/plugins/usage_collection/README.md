@@ -37,10 +37,20 @@ All you need to provide is a `type` for organizing your fields, `schema` field t
     ```
 
 3. Creating and registering a Usage Collector. Ideally collectors would be defined in a separate directory `server/collectors/register.ts`.
+    ```ts
+    // src/plugins/usage_collection/server/collector/collector.ts
+    export interface CollectorFetchClients {
+      /**
+      * @depricated use esClient in stead
+      */
+      callCluster: LegacyAPICaller;
+      esClient?: ElasticsearchClient;
+    }
+    ```
 
     ```ts
     // server/collectors/register.ts
-    import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+    import { UsageCollectionSetup, CollectorFetchClients } from 'src/plugins/usage_collection/server';
     import { APICluster } from 'kibana/server';
 
     interface Usage {
@@ -48,6 +58,8 @@ All you need to provide is a `type` for organizing your fields, `schema` field t
         total: number,
       },
     }
+
+
 
     export function registerMyPluginUsageCollector(usageCollection?: UsageCollectionSetup): void {
       // usageCollection is an optional dependency, so make sure to return if it is not registered.
@@ -63,7 +75,7 @@ All you need to provide is a `type` for organizing your fields, `schema` field t
             total: 'long',
           },
         },
-        fetch: async ({ callCluster, esClient }: { callCluster?: APICluster, esClient?: IClusterClient }) => {
+        fetch: async (collectorFetchClients: CollecorFetchClients) => {
 
         // query ES and get some data
         // summarize the data into a model
