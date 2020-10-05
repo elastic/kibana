@@ -11,7 +11,6 @@ import stacktracesMock from './__fixtures__/stacktraces.json';
 describe('Stacktrace', () => {
   describe('getGroupedStackframes', () => {
     it('collapses the library frames into a set of grouped stackframes', () => {
-      const result = getGroupedStackframes(stacktracesMock as Stackframe[]);
       expect(
         getGroupedStackframes(stacktracesMock as Stackframe[]).every(
           (group) => group.stackframes.length > 0
