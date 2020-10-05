@@ -49,6 +49,7 @@ const createTestCases = (overwrite: boolean) => {
   const group2 = [
     // when overwrite=true, all of the objects in this group are created successfully, so we can check the created object attributes
     CASES.NEW_MULTI_NAMESPACE_OBJ,
+    { ...CASES.MULTI_NAMESPACE_ALL_SPACES, ...fail409(!overwrite) },
     { ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, ...fail409(!overwrite) },
     { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1, ...destinationId() },
     { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_2, ...destinationId() },

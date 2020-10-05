@@ -29,8 +29,8 @@ import {
   MetricsServiceSetup,
   ServiceStatus,
   ServiceStatusLevels,
-} from '../../../../core/server';
-import { CollectorSet } from '../collector';
+} from '../../../../../core/server';
+import { CollectorSet } from '../../collector';
 
 const STATS_NOT_READY_MESSAGE = i18n.translate('usageCollection.stats.notReadyMessage', {
   defaultMessage: 'Stats are not ready yet. Please try again later.',
@@ -96,10 +96,12 @@ export function registerStatsRoute({
       let extended;
       if (isExtended) {
         const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
-        const collectorsReady = await collectorSet.areAllCollectorsReady();
 
-        if (shouldGetUsage && !collectorsReady) {
-          return res.customError({ statusCode: 503, body: { message: STATS_NOT_READY_MESSAGE } });
+        if (shouldGetUsage) {
+          const collectorsReady = await collectorSet.areAllCollectorsReady();
+          if (!collectorsReady) {
+            return res.customError({ statusCode: 503, body: { message: STATS_NOT_READY_MESSAGE } });
+          }
         }
 
         const usagePromise = shouldGetUsage ? getUsage(callCluster) : Promise.resolve({});
@@ -147,9 +149,8 @@ export function registerStatsRoute({
         }
       }
 
-      // Guranteed to resolve immediately due to replay effect on getOpsMetrics$
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      const { collected_at, ...lastMetrics } = await metrics
+      // Guaranteed to resolve immediately due to replay effect on getOpsMetrics$
+      const { collected_at: collectedAt, ...lastMetrics } = await metrics
         .getOpsMetrics$()
         .pipe(first())
         .toPromise();
@@ -168,7 +169,7 @@ export function registerStatsRoute({
           snapshot: SNAPSHOT_REGEX.test(config.kibanaVersion),
           status: ServiceStatusToLegacyState[overallStatus.level.toString()],
         },
-        last_updated: collected_at.toISOString(),
+        last_updated: collectedAt.toISOString(),
         collection_interval_in_millis: metrics.collectionInterval,
       });
 
