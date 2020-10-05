@@ -39,7 +39,7 @@ export interface StartPlugins {
   inspector: InspectorStart;
   ingestManager?: IngestManagerStart;
   lists?: ListsPluginStart;
-  newsfeed?: NewsfeedStart;
+  newsfeed?: NewsfeedPublicPluginStart;
   triggersActionsUi: TriggersActionsStart;
   uiActions: UiActionsStart;
   ml?: MlPluginStart;
