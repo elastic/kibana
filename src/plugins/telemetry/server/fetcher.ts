@@ -98,7 +98,7 @@ export class FetcherTask {
   }
 
   private async areAllCollectorsReady() {
-    return await this.telemetryCollectionManager!.areAllCollectorsReady();
+    return (await this.telemetryCollectionManager?.areAllCollectorsReady()) ?? false;
   }
 
   private async sendIfDue() {
