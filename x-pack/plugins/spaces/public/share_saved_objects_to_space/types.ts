@@ -17,6 +17,6 @@ export interface ShareSavedObjectsToSpaceResponse {
   [spaceId: string]: SavedObjectsImportResponse;
 }
 
-export interface SpaceTarget extends Space {
+export interface SpaceTarget extends Omit<Space, 'disabledFeatures'> {
   isActiveSpace: boolean;
 }
