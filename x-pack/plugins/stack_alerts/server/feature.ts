@@ -11,8 +11,8 @@ import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 
 export const BUILT_IN_ALERTS_FEATURE = {
   id: BUILT_IN_ALERTS_FEATURE_ID,
-  name: i18n.translate('xpack.alertingBuiltins.featureRegistry.actionsFeatureName', {
-    defaultMessage: 'Built-In Alerts',
+  name: i18n.translate('xpack.stackAlerts.featureRegistry.actionsFeatureName', {
+    defaultMessage: 'Stack Alerts',
   }),
   icon: 'bell',
   app: [],

@@ -38,7 +38,7 @@ function validateParams(anyParams: unknown): string | undefined {
   const { thresholdComparator, threshold }: Params = anyParams as Params;
 
   if (betweenComparators.has(thresholdComparator) && threshold.length === 1) {
-    return i18n.translate('xpack.alertingBuiltins.indexThreshold.invalidThreshold2ErrorMessage', {
+    return i18n.translate('xpack.stackAlerts.indexThreshold.invalidThreshold2ErrorMessage', {
       defaultMessage:
         '[threshold]: must have two elements for the "{thresholdComparator}" comparator',
       values: {

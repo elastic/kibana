@@ -127,9 +127,9 @@ server    log   [17:32:10.060] [warning][actions][actions][plugins] \
 
 The following endpoints are provided for this alert type:
 
-- `POST /api/alerting_builtins/index_threshold/_indices`
-- `POST /api/alerting_builtins/index_threshold/_fields`
-- `POST /api/alerting_builtins/index_threshold/_time_series_query`
+- `POST /api/stack_alerts/index_threshold/_indices`
+- `POST /api/stack_alerts/index_threshold/_fields`
+- `POST /api/stack_alerts/index_threshold/_time_series_query`
 
 ### `POST .../_indices`
 
@@ -200,7 +200,7 @@ provide a "preview" of the alert during creation/editing based on recent data,
 and could be used to show a "simulation" of the the alert over an arbitrary
 range of time.
 
-The endpoint is `POST /api/alerting_builtins/index_threshold/_time_series_query`.
+The endpoint is `POST /api/stack_alerts/index_threshold/_time_series_query`.
 The request and response bodies are specifed in 
 [`lib/core_query_types.ts`][it-core-query]
 and
@@ -214,7 +214,7 @@ for the last 10 seconds.
 This example uses [now-iso][] to generate iso date strings.
 
 ```console
-curl -k  "https://elastic:changeme@localhost:5601/api/alerting_builtins/index_threshold/_time_series_query" \
+curl -k  "https://elastic:changeme@localhost:5601/api/stack_alerts/index_threshold/_time_series_query" \
     -H "kbn-xsrf: foo" -H "content-type: application/json"   -d "{
     \"index\":           \"es-hb-sim\",
     \"timeField\":       \"@timestamp\",
@@ -257,7 +257,7 @@ curl -k  "https://elastic:changeme@localhost:5601/api/alerting_builtins/index_th
 To get the current value of the calculated metric, you can leave off the date:
 
 ```
-curl -k  "https://elastic:changeme@localhost:5601/api/alerting_builtins/index_threshold/_time_series_query" \
+curl -k  "https://elastic:changeme@localhost:5601/api/stack_alerts/index_threshold/_time_series_query" \
     -H "kbn-xsrf: foo" -H "content-type: application/json"   -d '{
     "index":           "es-hb-sim",
     "timeField":       "@timestamp",
@@ -290,7 +290,7 @@ curl -k  "https://elastic:changeme@localhost:5601/api/alerting_builtins/index_th
 ## service functions
 
 A single service function is available that provides the functionality
-of the http endpoint `POST /api/alerting_builtins/index_threshold/_time_series_query`,
+of the http endpoint `POST /api/stack_alerts/index_threshold/_time_series_query`,
 but as an API for Kibana plugins.  The function is available as
 `alertingService.indexThreshold.timeSeriesQuery()`
 

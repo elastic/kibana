@@ -34,23 +34,20 @@ export function addMessages(
   baseContext: BaseActionContext,
   params: Params
 ): ActionContext {
-  const title = i18n.translate(
-    'xpack.alertingBuiltins.indexThreshold.alertTypeContextSubjectTitle',
-    {
-      defaultMessage: 'alert {name} group {group} exceeded threshold',
-      values: {
-        name: alertInfo.name,
-        group: baseContext.group,
-      },
-    }
-  );
+  const title = i18n.translate('xpack.stackAlerts.indexThreshold.alertTypeContextSubjectTitle', {
+    defaultMessage: 'alert {name} group {group} exceeded threshold',
+    values: {
+      name: alertInfo.name,
+      group: baseContext.group,
+    },
+  });
 
   const agg = params.aggField ? `${params.aggType}(${params.aggField})` : `${params.aggType}`;
   const humanFn = `${agg} ${params.thresholdComparator} ${params.threshold.join(',')}`;
 
   const window = `${params.timeWindowSize}${params.timeWindowUnit}`;
   const message = i18n.translate(
-    'xpack.alertingBuiltins.indexThreshold.alertTypeContextMessageDescription',
+    'xpack.stackAlerts.indexThreshold.alertTypeContextMessageDescription',
     {
       defaultMessage:
         'alert {name} group {group} value {value} exceeded threshold {function} over {window} on {date}',

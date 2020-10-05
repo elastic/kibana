@@ -33,7 +33,7 @@ export class AlertingBuiltinsPlugin implements Plugin<IService, IService> {
       service: this.service,
       router: core.http.createRouter(),
       alerts,
-      baseRoute: '/api/alerting_builtins',
+      baseRoute: '/api/stack_alerts',
     });
     return this.service;
   }
