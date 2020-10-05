@@ -20,6 +20,11 @@ describe('renderApp', () => {
       chrome: { docTitle: { change: () => {} }, setBreadcrumbs: () => {} },
       i18n: { Context: ({ children }: { children: React.ReactNode }) => children },
       uiSettings: { get: () => false },
+      http: {
+        basePath: {
+          prepend: jest.fn(),
+        },
+      },
     } as unknown) as CoreStart;
     const params = ({
       element: window.document.createElement('div'),
