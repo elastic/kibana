@@ -70,7 +70,7 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
 }
 
 export type FormSchema<T extends FormData = FormData> = {
-  [K in keyof T]?: FieldConfig<T[K], T> | FormSchema<T[K]>;
+  [K in keyof T]?: FieldConfig<T[K], T, any> | FormSchema<T[K]>;
 };
 
 export interface FormConfig<T extends FormData = FormData, I extends FormData = T> {
@@ -102,13 +102,13 @@ export interface FormOptions {
   stripEmptyFields?: boolean;
 }
 
-export interface FieldHook<T = unknown> {
+export interface FieldHook<T = unknown, I = T> {
   readonly path: string;
   readonly label?: string;
   readonly labelAppend?: string | ReactNode;
   readonly helpText?: string | ReactNode;
   readonly type: string;
-  readonly value: T;
+  readonly value: I;
   readonly errors: ValidationError[];
   readonly isValid: boolean;
   readonly isPristine: boolean;
@@ -120,31 +120,31 @@ export interface FieldHook<T = unknown> {
     errorCode?: string;
   }) => string | null;
   onChange: (event: ChangeEvent<{ name?: string; value: string; checked?: boolean }>) => void;
-  setValue: (value: T | ((prevValue: T) => T)) => void;
+  setValue: (value: I | ((prevValue: I) => I)) => void;
   setErrors: (errors: ValidationError[]) => void;
   clearErrors: (type?: string | string[]) => void;
   validate: (validateData?: {
     formData?: any;
-    value?: T;
+    value?: I;
     validationType?: string;
   }) => FieldValidateResponse | Promise<FieldValidateResponse>;
   reset: (options?: { resetValue?: boolean; defaultValue?: T }) => unknown | undefined;
   // Flag to indicate if the field value will be included in the form data outputted
   // when calling form.getFormData();
   __isIncludedInOutput: boolean;
-  __serializeValue: (rawValue?: T) => unknown;
+  __serializeValue: (internalValue?: I) => T;
 }
 
-export interface FieldConfig<ValueType = unknown, T extends FormData = FormData> {
+export interface FieldConfig<T = unknown, FormType extends FormData = FormData, I = T> {
   readonly label?: string;
   readonly labelAppend?: string | ReactNode;
   readonly helpText?: string | ReactNode;
   readonly type?: string;
-  readonly defaultValue?: ValueType;
-  readonly validations?: Array<ValidationConfig<T, string, ValueType>>;
+  readonly defaultValue?: T;
+  readonly validations?: Array<ValidationConfig<FormType, string, I>>;
   readonly formatters?: FormatterFunc[];
-  readonly deserializer?: SerializerFunc<ValueType, any>;
-  readonly serializer?: SerializerFunc<any, ValueType>;
+  readonly deserializer?: SerializerFunc<I, T>;
+  readonly serializer?: SerializerFunc<T, I>;
   readonly fieldsToValidateOnChange?: string[];
   readonly valueChangeDebounceTime?: number;
 }
@@ -199,11 +199,11 @@ type FormatterFunc = (value: any, formData: FormData) => unknown;
 type FieldValue = unknown;
 
 export interface ValidationConfig<
-  T extends FormData = any,
-  E extends string = string,
-  V = unknown
+  FormType extends FormData = any,
+  Error extends string = string,
+  ValueType = unknown
 > {
-  validator: ValidationFunc<T, E, V>;
+  validator: ValidationFunc<FormType, Error, ValueType>;
   type?: string;
   /**
    * By default all validation are blockers, which means that if they fail, the field is invalid.

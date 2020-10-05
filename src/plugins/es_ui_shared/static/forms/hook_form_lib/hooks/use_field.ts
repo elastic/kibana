@@ -19,7 +19,14 @@
 
 import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 
-import { FormHook, FieldHook, FieldConfig, FieldValidateResponse, ValidationError } from '../types';
+import {
+  FormHook,
+  FieldHook,
+  FieldConfig,
+  FieldValidateResponse,
+  ValidationError,
+  FormData,
+} from '../types';
 import { FIELD_TYPES, VALIDATION_TYPES } from '../constants';
 
 export interface InternalFieldConfig<T> {
@@ -27,11 +34,11 @@ export interface InternalFieldConfig<T> {
   isIncludedInOutput?: boolean;
 }
 
-export const useField = <T>(
-  form: FormHook,
+export const useField = <T, FormType = FormData, I = T>(
+  form: FormHook<FormType>,
   path: string,
-  config: FieldConfig<T> & InternalFieldConfig<T> = {},
-  valueChangeListener?: (value: T) => void
+  config: FieldConfig<T, FormType, I> & InternalFieldConfig<T> = {},
+  valueChangeListener?: (value: I) => void
 ) => {
   const {
     type = FIELD_TYPES.TEXT,
@@ -68,7 +75,7 @@ export const useField = <T>(
     [initialValue, deserializer]
   );
 
-  const [value, setStateValue] = useState<T>(deserializeValue);
+  const [value, setStateValue] = useState<I>(deserializeValue);
   const [errors, setErrors] = useState<ValidationError[]>([]);
   const [isPristine, setPristine] = useState(true);
   const [isValidating, setValidating] = useState(false);
@@ -84,9 +91,9 @@ export const useField = <T>(
 
   // -- HELPERS
   // ----------------------------------
-  const serializeValue: FieldHook<T>['__serializeValue'] = useCallback(
-    (rawValue: T = value) => {
-      return serializer ? serializer(rawValue) : rawValue;
+  const serializeValue: FieldHook<T, I>['__serializeValue'] = useCallback(
+    (internalValue: I = value) => {
+      return serializer ? serializer(internalValue) : ((internalValue as unknown) as T);
     },
     [serializer, value]
   );
@@ -201,7 +208,7 @@ export const useField = <T>(
       validationTypeToValidate,
     }: {
       formData: any;
-      value: T;
+      value: I;
       validationTypeToValidate?: string;
     }): ValidationError[] | Promise<ValidationError[]> => {
       if (!validations) {
@@ -333,7 +340,7 @@ export const useField = <T>(
    * If a validationType is provided then only that validation will be executed,
    * skipping the other type of validation that might exist.
    */
-  const validate: FieldHook<T>['validate'] = useCallback(
+  const validate: FieldHook<T, I>['validate'] = useCallback(
     (validationData = {}) => {
       const {
         formData = getFormData({ unflatten: false }),
@@ -386,14 +393,14 @@ export const useField = <T>(
    *
    * @param newValue The new value to assign to the field
    */
-  const setValue: FieldHook<T>['setValue'] = useCallback(
+  const setValue: FieldHook<T, I>['setValue'] = useCallback(
     (newValue) => {
       setStateValue((prev) => {
-        let formattedValue: T;
+        let formattedValue: I;
         if (typeof newValue === 'function') {
-          formattedValue = formatInputValue<T>((newValue as Function)(prev));
+          formattedValue = formatInputValue<I>((newValue as Function)(prev));
         } else {
-          formattedValue = formatInputValue<T>(newValue);
+          formattedValue = formatInputValue<I>(newValue);
         }
         return formattedValue;
       });
@@ -401,7 +408,7 @@ export const useField = <T>(
     [formatInputValue]
   );
 
-  const _setErrors: FieldHook<T>['setErrors'] = useCallback((_errors) => {
+  const _setErrors: FieldHook<T, I>['setErrors'] = useCallback((_errors) => {
     setErrors(
       _errors.map((error) => ({
         validationType: VALIDATION_TYPES.FIELD,
@@ -416,13 +423,13 @@ export const useField = <T>(
    *
    * @param event Form input change event
    */
-  const onChange: FieldHook<T>['onChange'] = useCallback(
+  const onChange: FieldHook<T, I>['onChange'] = useCallback(
     (event) => {
       const newValue = {}.hasOwnProperty.call(event!.target, 'checked')
         ? event.target.checked
         : event.target.value;
 
-      setValue((newValue as unknown) as T);
+      setValue((newValue as unknown) as I);
     },
     [setValue]
   );
@@ -437,7 +444,7 @@ export const useField = <T>(
    *
    * @param validationType The validation type to return error messages from
    */
-  const getErrorsMessages: FieldHook<T>['getErrorsMessages'] = useCallback(
+  const getErrorsMessages: FieldHook<T, I>['getErrorsMessages'] = useCallback(
     (args = {}) => {
       const { errorCode, validationType = VALIDATION_TYPES.FIELD } = args;
       const errorMessages = errors.reduce((messages, error) => {
@@ -458,7 +465,7 @@ export const useField = <T>(
     [errors]
   );
 
-  const reset: FieldHook<T>['reset'] = useCallback(
+  const reset: FieldHook<T, I>['reset'] = useCallback(
     (resetOptions = { resetValue: true }) => {
       const { resetValue = true, defaultValue: updatedDefaultValue } = resetOptions;
 
@@ -481,7 +488,7 @@ export const useField = <T>(
   // Don't take into account non blocker validation. Some are just warning (like trying to add a wrong ComboBox item)
   const isValid = errors.filter((e) => e.__isBlocking__ !== false).length === 0;
 
-  const field = useMemo<FieldHook<T>>(() => {
+  const field = useMemo<FieldHook<T, I>>(() => {
     return {
       path,
       type,
