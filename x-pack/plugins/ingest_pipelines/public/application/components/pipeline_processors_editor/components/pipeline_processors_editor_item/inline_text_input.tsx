@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import classNames from 'classnames';
-import React, { FunctionComponent, useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import { EuiFieldText, EuiText, keys } from '@elastic/eui';
 
 export interface Props {
@@ -15,13 +15,13 @@ export interface Props {
   text?: string;
 }
 
-export const InlineTextInput: FunctionComponent<Props> = ({
+function _InlineTextInput({
   disabled,
   placeholder,
   text,
   ariaLabel,
   onChange,
-}) => {
+}: Props): React.ReactElement<any, any> | null {
   const [isShowingTextInput, setIsShowingTextInput] = useState<boolean>(false);
   const [textValue, setTextValue] = useState<string>(text ?? '');
 
@@ -79,4 +79,6 @@ export const InlineTextInput: FunctionComponent<Props> = ({
       </EuiText>
     </div>
   );
-};
+}
+
+export const InlineTextInput = memo(_InlineTextInput);

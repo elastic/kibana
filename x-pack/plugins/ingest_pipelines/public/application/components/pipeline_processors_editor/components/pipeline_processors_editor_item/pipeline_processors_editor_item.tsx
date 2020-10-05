@@ -5,7 +5,7 @@
  */
 
 import classNames from 'classnames';
-import React, { FunctionComponent, memo } from 'react';
+import React, { FunctionComponent, memo, useCallback } from 'react';
 import {
   EuiButtonToggle,
   EuiFlexGroup,
@@ -88,6 +88,32 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
       // eslint-disable-next-line @typescript-eslint/naming-convention
       'pipelineProcessorsEditor__item--displayNone': isInMoveMode && !processor.options.description,
     });
+
+    const onDescriptionChange = useCallback(
+      (nextDescription) => {
+        let nextOptions: Record<string, any>;
+        if (!nextDescription) {
+          const { description: _description, ...restOptions } = processor.options;
+          nextOptions = restOptions;
+        } else {
+          nextOptions = {
+            ...processor.options,
+            description: nextDescription,
+          };
+        }
+        processorsDispatch({
+          type: 'updateProcessor',
+          payload: {
+            processor: {
+              ...processor,
+              options: nextOptions,
+            },
+            selector,
+          },
+        });
+      },
+      [processor, processorsDispatch, selector]
+    );
 
     const renderMoveButton = () => {
       const label = !isMovingThisProcessor
@@ -175,28 +201,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
               <EuiFlexItem className={inlineTextInputContainerClasses} grow={false}>
                 <InlineTextInput
                   disabled={isEditorNotInIdleMode}
-                  onChange={(nextDescription) => {
-                    let nextOptions: Record<string, any>;
-                    if (!nextDescription) {
-                      const { description: _description, ...restOptions } = processor.options;
-                      nextOptions = restOptions;
-                    } else {
-                      nextOptions = {
-                        ...processor.options,
-                        description: nextDescription,
-                      };
-                    }
-                    processorsDispatch({
-                      type: 'updateProcessor',
-                      payload: {
-                        processor: {
-                          ...processor,
-                          options: nextOptions,
-                        },
-                        selector,
-                      },
-                    });
-                  }}
+                  onChange={onDescriptionChange}
                   ariaLabel={i18nTexts.processorTypeLabel({ type: processor.type })}
                   text={description}
                   placeholder={i18nTexts.descriptionPlaceholder}

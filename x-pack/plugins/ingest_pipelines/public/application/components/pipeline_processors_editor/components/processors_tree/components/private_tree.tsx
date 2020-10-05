@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent, MutableRefObject, useEffect } from 'react';
+import React, { FunctionComponent, MutableRefObject, useEffect, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AutoSizer, List, WindowScroller } from 'react-virtualized';
 
@@ -65,6 +65,10 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
   windowScrollerRef,
   listRef,
 }) => {
+  const selectors: string[][] = useMemo(() => {
+    return processors.map((_, idx) => selector.concat(String(idx)));
+  }, [processors, selector]);
+
   const renderRow = ({
     idx,
     info,
@@ -169,7 +173,7 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
                           const below = processors[idx + 1];
                           const info: ProcessorInfo = {
                             id: processor.id,
-                            selector: selector.concat(String(idx)),
+                            selector: selectors[idx],
                             aboveId: above?.id,
                             belowId: below?.id,
                           };
