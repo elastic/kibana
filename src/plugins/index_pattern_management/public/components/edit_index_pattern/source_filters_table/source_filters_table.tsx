@@ -30,7 +30,7 @@ export interface SourceFiltersTableProps {
   filterFilter: string;
   fieldWildcardMatcher: Function;
   onAddOrRemoveFilter?: Function;
-  saveIndexPattern: DataPublicPluginStart['indexPatterns']['save'];
+  saveIndexPattern: DataPublicPluginStart['indexPatterns']['updateSavedObject'];
 }
 
 export interface SourceFiltersTableState {

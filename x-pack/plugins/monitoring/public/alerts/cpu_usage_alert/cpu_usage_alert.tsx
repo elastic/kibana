@@ -6,9 +6,9 @@
 import React from 'react';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
-import { validate } from './validation';
 import { ALERT_CPU_USAGE } from '../../../common/constants';
-import { Expression } from './expression';
+import { validate } from '../components/duration/validation';
+import { Expression, Props } from '../components/duration/expression';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { CpuUsageAlert } from '../../../server/alerts';
 
@@ -18,7 +18,7 @@ export function createCpuUsageAlertType(): AlertTypeModel {
     id: ALERT_CPU_USAGE,
     name: alert.label,
     iconClass: 'bell',
-    alertParamsExpression: (props: any) => (
+    alertParamsExpression: (props: Props) => (
       <Expression {...props} paramDetails={CpuUsageAlert.paramDetails} />
     ),
     validate,

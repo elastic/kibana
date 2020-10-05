@@ -28,7 +28,6 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
 
-  // Flaky: https://github.com/elastic/kibana/issues/71216
   describe('doc link in discover', function contextSize() {
     beforeEach(async function () {
       log.debug('load kibana index with default index pattern');

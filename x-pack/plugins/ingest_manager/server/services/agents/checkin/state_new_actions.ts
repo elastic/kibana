@@ -3,25 +3,31 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import semver from 'semver';
 import { timer, from, Observable, TimeoutError } from 'rxjs';
 import { omit } from 'lodash';
 import {
   shareReplay,
   distinctUntilKeyChanged,
   switchMap,
-  mergeMap,
   merge,
   filter,
   timeout,
   take,
 } from 'rxjs/operators';
 import { SavedObjectsClientContract, KibanaRequest } from 'src/core/server';
-import { Agent, AgentAction, AgentPolicyAction, AgentSOAttributes } from '../../../types';
+import {
+  Agent,
+  AgentAction,
+  AgentPolicyAction,
+  AgentPolicyActionV7_9,
+  AgentSOAttributes,
+} from '../../../types';
 import * as APIKeysService from '../../api_keys';
 import {
   AGENT_SAVED_OBJECT_TYPE,
   AGENT_UPDATE_ACTIONS_INTERVAL_MS,
+  AGENT_POLLING_REQUEST_TIMEOUT_MARGIN_MS,
   AGENT_POLICY_ROLLOUT_RATE_LIMIT_INTERVAL_MS,
   AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL,
 } from '../../../constants';
@@ -104,15 +110,40 @@ async function getOrCreateAgentDefaultOutputAPIKey(
   return outputAPIKey.key;
 }
 
-async function createAgentActionFromPolicyAction(
+export async function createAgentActionFromPolicyAction(
   soClient: SavedObjectsClientContract,
   agent: Agent,
   policyAction: AgentPolicyAction
 ) {
+  // Transform the policy action for agent version <=  7.9.x for BWC
+  const agentVersion = semver.parse((agent.local_metadata?.elastic as any)?.agent?.version);
+  const agentPolicyAction: AgentPolicyAction | AgentPolicyActionV7_9 =
+    agentVersion &&
+    semver.lt(
+      agentVersion,
+      // A prerelease tag is added here so that agent versions with prerelease tags can be compared
+      // correctly using `semvar`
+      '7.10.0-SNAPSHOT',
+      // `@types/semvar` is out of date with the version of `semvar` we use and doesn't have a
+      // corresponding release version we can update the typing to :( so, the typing error is
+      // suppressed here even though it is supported by `semvar`
+      // @ts-expect-error
+      { includePrerelease: true }
+    )
+      ? {
+          ...policyAction,
+          type: 'CONFIG_CHANGE',
+          data: {
+            config: policyAction.data.policy,
+          },
+        }
+      : policyAction;
+
+  // Create agent action
   const newAgentAction: AgentAction = Object.assign(
     omit(
       // Faster than clone
-      JSON.parse(JSON.stringify(policyAction)) as AgentPolicyAction,
+      JSON.parse(JSON.stringify(agentPolicyAction)) as AgentPolicyAction,
       'policy_id',
       'policy_revision'
     ),
@@ -122,12 +153,25 @@ async function createAgentActionFromPolicyAction(
   );
 
   // Mutate the policy to set the api token for this agent
-  newAgentAction.data.config.outputs.default.api_key = await getOrCreateAgentDefaultOutputAPIKey(
-    soClient,
-    agent
-  );
+  const apiKey = await getOrCreateAgentDefaultOutputAPIKey(soClient, agent);
+  if (newAgentAction.data.policy) {
+    newAgentAction.data.policy.outputs.default.api_key = apiKey;
+  }
+  // BWC for agent <= 7.9
+  else if (newAgentAction.data.config) {
+    newAgentAction.data.config.outputs.default.api_key = apiKey;
+  }
 
   return [newAgentAction];
+}
+
+function getPollingTimeoutMs() {
+  const pollingTimeoutMs = appContextService.getConfig()?.fleet.pollingRequestTimeout ?? 0;
+  // Set a timeout 20s before the real timeout to have a chance to respond an empty response before socket timeout
+  return Math.max(
+    pollingTimeoutMs - AGENT_POLLING_REQUEST_TIMEOUT_MARGIN_MS,
+    AGENT_POLLING_REQUEST_TIMEOUT_MARGIN_MS
+  );
 }
 
 export function agentCheckinStateNewActionsFactory() {
@@ -135,11 +179,20 @@ export function agentCheckinStateNewActionsFactory() {
   const agentPolicies$ = new Map<string, Observable<AgentPolicyAction>>();
   const newActions$ = createNewActionsSharedObservable();
   // Rx operators
-  const rateLimiter = createRateLimiter(
+  const pollingTimeoutMs = getPollingTimeoutMs();
+
+  const rateLimiterIntervalMs =
     appContextService.getConfig()?.fleet.agentPolicyRolloutRateLimitIntervalMs ??
-      AGENT_POLICY_ROLLOUT_RATE_LIMIT_INTERVAL_MS,
+    AGENT_POLICY_ROLLOUT_RATE_LIMIT_INTERVAL_MS;
+  const rateLimiterRequestPerInterval =
     appContextService.getConfig()?.fleet.agentPolicyRolloutRateLimitRequestPerInterval ??
-      AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL
+    AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL;
+  const rateLimiterMaxDelay = pollingTimeoutMs;
+
+  const rateLimiter = createRateLimiter(
+    rateLimiterIntervalMs,
+    rateLimiterRequestPerInterval,
+    rateLimiterMaxDelay
   );
 
   async function subscribeToNewActions(
@@ -160,10 +213,7 @@ export function agentCheckinStateNewActionsFactory() {
     }
 
     const stream$ = agentPolicy$.pipe(
-      timeout(
-        // Set a timeout 3s before the real timeout to have a chance to respond an empty response before socket timeout
-        Math.max((appContextService.getConfig()?.fleet.pollingRequestTimeout ?? 0) - 3000, 3000)
-      ),
+      timeout(pollingTimeoutMs),
       filter(
         (action) =>
           agent.policy_id !== undefined &&
@@ -173,9 +223,9 @@ export function agentCheckinStateNewActionsFactory() {
           (!agent.policy_revision || action.policy_revision > agent.policy_revision)
       ),
       rateLimiter(),
-      mergeMap((policyAction) => createAgentActionFromPolicyAction(soClient, agent, policyAction)),
+      switchMap((policyAction) => createAgentActionFromPolicyAction(soClient, agent, policyAction)),
       merge(newActions$),
-      mergeMap(async (data) => {
+      switchMap(async (data) => {
         if (!data) {
           return;
         }
