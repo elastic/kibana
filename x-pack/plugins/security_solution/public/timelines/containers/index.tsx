@@ -208,41 +208,43 @@ export const useTimelineEvents = ({
 
     setTimelineRequest((prevRequest) => {
       const prevSearchParameters = {
+        defaultIndex: prevRequest?.defaultIndex ?? [],
         filterQuery: prevRequest?.filterQuery ?? '',
-        timerange: prevRequest?.timerange ?? {},
         querySize: prevRequest?.pagination.querySize ?? 0,
         sort: prevRequest?.sort ?? initSortDefault,
+        timerange: prevRequest?.timerange ?? {},
       };
 
       const currentSearchParameters = {
+        defaultIndex: indexNames,
         filterQuery: createFilter(filterQuery),
+        querySize: limit,
+        sort,
         timerange: {
           interval: '12h',
           from: startDate,
           to: endDate,
         },
-        querySize: limit,
-        sort,
       };
 
       const currentRequest = {
-        fields: [],
+        defaultIndex: indexNames,
+        docValueFields: docValueFields ?? [],
+        factoryQueryType: TimelineEventsQueries.all,
         fieldRequested: fields,
+        fields: [],
         filterQuery: createFilter(filterQuery),
         id,
-        timerange: {
-          interval: '12h',
-          from: startDate,
-          to: endDate,
-        },
         pagination: {
           activePage: deepEqual(prevSearchParameters, currentSearchParameters) ? activePage : 0,
           querySize: limit,
         },
         sort,
-        defaultIndex: indexNames,
-        docValueFields: docValueFields ?? [],
-        factoryQueryType: TimelineEventsQueries.all,
+        timerange: {
+          interval: '12h',
+          from: startDate,
+          to: endDate,
+        },
       };
 
       if (
