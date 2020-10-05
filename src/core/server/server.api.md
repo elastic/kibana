@@ -401,8 +401,101 @@ export interface ContextSetup {
     createContextContainer<THandler extends HandlerFunction<any>>(): IContextContainer<THandler>;
 }
 
+// @internal
+export interface CoreConfigUsageData {
+    // (undocumented)
+    elasticsearch: {
+        sniffOnStart: boolean;
+        sniffIntervalMs?: number;
+        sniffOnConnectionFault: boolean;
+        numberOfHostsConfigured: number;
+        requestHeadersWhitelistConfigured: boolean;
+        customHeadersConfigured: boolean;
+        shardTimeoutMs: number;
+        requestTimeoutMs: number;
+        pingTimeoutMs: number;
+        logQueries: boolean;
+        ssl: {
+            verificationMode: 'none' | 'certificate' | 'full';
+            certificateAuthoritiesConfigured: boolean;
+            certificateConfigured: boolean;
+            keyConfigured: boolean;
+            keystoreConfigured: boolean;
+            truststoreConfigured: boolean;
+            alwaysPresentCertificate: boolean;
+        };
+        apiVersion: string;
+        healthCheckDelayMs: number;
+    };
+    // (undocumented)
+    http: {
+        basePathConfigured: boolean;
+        maxPayloadInBytes: number;
+        rewriteBasePath: boolean;
+        keepaliveTimeout: number;
+        socketTimeout: number;
+        compression: {
+            enabled: boolean;
+            referrerWhitelistConfigured: boolean;
+        };
+        xsrf: {
+            disableProtection: boolean;
+            whitelistConfigured: boolean;
+        };
+        requestId: {
+            allowFromAnyIp: boolean;
+            ipAllowlistConfigured: boolean;
+        };
+        ssl: {
+            certificateAuthoritiesConfigured: boolean;
+            certificateConfigured: boolean;
+            cipherSuites: string[];
+            keyConfigured: boolean;
+            keystoreConfigured: boolean;
+            truststoreConfigured: boolean;
+            redirectHttpFromPortConfigured: boolean;
+            supportedProtocols: string[];
+            clientAuthentication: 'none' | 'optional' | 'required';
+        };
+    };
+    // (undocumented)
+    logging: {
+        appendersTypesUsed: string[];
+        loggersConfiguredCount: number;
+    };
+    // (undocumented)
+    savedObjects: {
+        maxImportPayloadBytes: number;
+        maxImportExportSizeBytes: number;
+    };
+}
+
+// @internal
+export interface CoreEnvironmentUsageData {
+    // (undocumented)
+    memory: {
+        heapTotalBytes: number;
+        heapUsedBytes: number;
+        heapSizeLimit: number;
+    };
+}
+
 // @internal (undocumented)
 export type CoreId = symbol;
+
+// @internal
+export interface CoreServicesUsageData {
+    // (undocumented)
+    savedObjects: {
+        indices: {
+            alias: string;
+            docsCount: number;
+            docsDeleted: number;
+            storeSizeBytes: number;
+            primaryStoreSizeBytes: number;
+        }[];
+    };
+}
 
 // @public
 export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
@@ -438,6 +531,8 @@ export interface CoreStart {
     auditTrail: AuditTrailStart;
     // (undocumented)
     capabilities: CapabilitiesStart;
+    // @internal (undocumented)
+    coreUsageData: CoreUsageDataStart;
     // (undocumented)
     elasticsearch: ElasticsearchServiceStart;
     // (undocumented)
@@ -456,6 +551,21 @@ export interface CoreStatus {
     elasticsearch: ServiceStatus;
     // (undocumented)
     savedObjects: ServiceStatus;
+}
+
+// @internal
+export interface CoreUsageData {
+    // (undocumented)
+    config: CoreConfigUsageData;
+    // (undocumented)
+    environment: CoreEnvironmentUsageData;
+    // (undocumented)
+    services: CoreServicesUsageData;
+}
+
+// @internal
+export interface CoreUsageDataStart {
+    getCoreUsageData(): Promise<CoreUsageData>;
 }
 
 // @public (undocumented)
@@ -1820,6 +1930,7 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
     // (undocumented)
     id?: string;
     migrationVersion?: SavedObjectsMigrationVersion;
+    namespaces?: string[];
     originId?: string;
     // (undocumented)
     references?: SavedObjectReference[];
@@ -1977,6 +2088,7 @@ export interface SavedObjectsCoreFieldMapping {
 export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
     id?: string;
     migrationVersion?: SavedObjectsMigrationVersion;
+    namespaces?: string[];
     originId?: string;
     overwrite?: boolean;
     // (undocumented)
@@ -2002,6 +2114,7 @@ export interface SavedObjectsDeleteFromNamespacesResponse {
 
 // @public (undocumented)
 export interface SavedObjectsDeleteOptions extends SavedObjectsBaseOptions {
+    force?: boolean;
     refresh?: MutatingOperationRefreshSetting;
 }
 
