@@ -114,6 +114,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private config: ConfigType | undefined;
   private context: PluginInitializerContext;
   private appClientFactory: AppClientFactory;
+  private securitySetup: SecuritySetup | undefined;
   private readonly endpointAppContextService = new EndpointAppContextService();
   private readonly telemetryEventsSender: TelemetryEventsSender;
 
@@ -127,6 +128,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.logger = context.logger.get('plugins', APP_ID);
     this.config$ = createConfig$(context);
     this.appClientFactory = new AppClientFactory();
+    this.securitySetup = undefined;
     // Cache up to three artifacts with a max retention of 5 mins each
     this.exceptionsCache = new LRU<string, Buffer>({ max: 3, maxAge: 1000 * 60 * 5 });
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
@@ -136,6 +138,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   public async setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins) {
     this.logger.debug('plugin setup');
+    if (plugins.security) {
+      this.securitySetup = plugins.security!;
+    }
 
     const config = await this.config$.pipe(first()).toPromise();
     this.config = config;
@@ -340,7 +345,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       agentService: plugins.ingestManager?.agentService,
       packageService: plugins.ingestManager?.packageService,
       appClientFactory: this.appClientFactory,
-      config: this.config!,
+      securitySetup: this.securitySetup,
+      config: this.config,
       logger: this.logger,
       manifestManager,
       registerIngestCallback,

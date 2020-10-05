@@ -9,6 +9,7 @@ import {
   SavedObjectsServiceStart,
   SavedObjectsClientContract,
 } from 'src/core/server';
+import { SecurityPluginSetup } from '../../../security/server';
 import {
   AgentService,
   IngestManagerStartContract,
@@ -73,6 +74,7 @@ export type EndpointAppContextServiceStartContract = Partial<
   logger: Logger;
   manifestManager?: ManifestManager;
   appClientFactory: AppClientFactory;
+  securitySetup?: SecurityPluginSetup;
   config: ConfigType;
   registerIngestCallback?: IngestManagerStartContract['registerExternalCallback'];
   savedObjectsStart: SavedObjectsServiceStart;
@@ -101,7 +103,8 @@ export class EndpointAppContextService {
           dependencies.logger,
           this.manifestManager,
           dependencies.appClientFactory,
-          dependencies.config.maxTimelineImportExportSize
+          dependencies.config.maxTimelineImportExportSize,
+          dependencies.securitySetup
         )
       );
     }
