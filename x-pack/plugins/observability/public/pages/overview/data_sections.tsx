@@ -18,7 +18,7 @@ import {
 } from '../../typings/fetch_overview_data';
 
 interface Props {
-  hasData?: Record<ObservabilityFetchDataPlugins, HasDataResponse> | null;
+  hasData?: Record<ObservabilityFetchDataPlugins, HasDataResponse | undefined> | null;
 }
 
 export function DataSections({ hasData }: Props) {
