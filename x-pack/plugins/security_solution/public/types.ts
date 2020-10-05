@@ -28,7 +28,7 @@ import { MlPluginSetup, MlPluginStart } from '../../ml/public';
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
   security: SecurityPluginSetup;
-  triggers_actions_ui: TriggersActionsSetup;
+  triggersActionsUi: TriggersActionsSetup;
   usageCollection?: UsageCollectionSetup;
   ml?: MlPluginSetup;
 }
@@ -39,8 +39,8 @@ export interface StartPlugins {
   inspector: InspectorStart;
   ingestManager?: IngestManagerStart;
   lists?: ListsPluginStart;
-  newsfeed?: NewsfeedPublicPluginStart;
-  triggers_actions_ui: TriggersActionsStart;
+  newsfeed?: NewsfeedStart;
+  triggersActionsUi: TriggersActionsStart;
   uiActions: UiActionsStart;
   ml?: MlPluginStart;
 }
