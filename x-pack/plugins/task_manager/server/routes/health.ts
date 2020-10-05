@@ -19,9 +19,9 @@ import { isString } from 'lodash';
 import { MonitoringStats, summarizeMonitoringStats } from '../monitoring';
 
 enum HealthStatus {
-  Green = 'green',
-  Yellow = 'yellow',
-  Red = 'red',
+  OK = 'OK',
+  Warning = 'warn',
+  Error = 'error',
 }
 
 export function healthRoute(
@@ -31,10 +31,26 @@ export function healthRoute(
   requiredHotStatsFreshness: number,
   requiredColdStatsFreshness: number
 ) {
+  function calculateStatus(stats: MonitoringStats) {
+    const now = Date.now();
+    const timestamp = new Date(now).toISOString();
+
+    /**
+     * If the monitored stats aren't fresh, return a red status
+     */
+    const healthStatus =
+      hasExpiredHotTimestamps(stats, now, requiredHotStatsFreshness) ||
+      hasExpiredColdTimestamps(stats, now, requiredColdStatsFreshness)
+        ? HealthStatus.Error
+        : HealthStatus.OK;
+
+    return { timestamp, status: healthStatus, ...summarizeMonitoringStats(stats) };
+  }
+
   /* Log Task Manager stats as a Debug log line at a fixed interval */
   monitoringStats.then((monitoringStats$) => {
     monitoringStats$.pipe(throttleTime(requiredHotStatsFreshness)).subscribe((stats) => {
-      logger.debug(JSON.stringify(summarizeMonitoringStats(stats)));
+      logger.debug(JSON.stringify(calculateStatus(stats)));
     });
   });
 
@@ -48,21 +64,8 @@ export function healthRoute(
       req: KibanaRequest<unknown, unknown, unknown>,
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse> {
-      const stats = await getLatestStats(await monitoringStats);
-      const now = Date.now();
-      const timestamp = new Date(now).toISOString();
-
-      /**
-       * If the monitored stats aren't fresh, return a red status
-       */
-      const healthStatus =
-        hasExpiredHotTimestamps(stats, now, requiredHotStatsFreshness) ||
-        hasExpiredColdTimestamps(stats, now, requiredColdStatsFreshness)
-          ? HealthStatus.Red
-          : HealthStatus.Green;
-
       return res.ok({
-        body: { timestamp, status: healthStatus, ...summarizeMonitoringStats(stats) },
+        body: calculateStatus(await getLatestStats(await monitoringStats)),
       });
     }
   );

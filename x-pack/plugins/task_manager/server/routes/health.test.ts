@@ -59,7 +59,7 @@ describe('healthRoute', () => {
     expect(logger.debug).toHaveBeenCalledTimes(2);
   });
 
-  it('returns a red status if the stats have not been updated within the required hot freshness', async () => {
+  it('returns a error status if the stats have not been updated within the required hot freshness', async () => {
     const router = httpServiceMock.createRouter();
 
     const mockStat = mockHealthStats();
@@ -73,7 +73,7 @@ describe('healthRoute', () => {
 
     expect(await handler(context, req, res)).toMatchObject({
       body: {
-        status: 'red',
+        status: 'error',
         ...summarizeMonitoringStats(
           mockHealthStats({
             lastUpdate: expect.any(String),
@@ -99,7 +99,7 @@ describe('healthRoute', () => {
     });
   });
 
-  it('returns a red status if the workload stats have not been updated within the required cold freshness', async () => {
+  it('returns a error status if the workload stats have not been updated within the required cold freshness', async () => {
     const router = httpServiceMock.createRouter();
 
     const lastUpdateOfWorkload = new Date(Date.now() - 120000).toISOString();
@@ -120,7 +120,7 @@ describe('healthRoute', () => {
 
     expect(await handler(context, req, res)).toMatchObject({
       body: {
-        status: 'red',
+        status: 'error',
         ...summarizeMonitoringStats(
           mockHealthStats({
             lastUpdate: expect.any(String),
@@ -146,7 +146,7 @@ describe('healthRoute', () => {
     });
   });
 
-  it('returns a red status if the poller hasnt polled within the required hot freshness', async () => {
+  it('returns a error status if the poller hasnt polled within the required hot freshness', async () => {
     const router = httpServiceMock.createRouter();
 
     const lastSuccessfulPoll = new Date(Date.now() - 2000).toISOString();
@@ -169,7 +169,7 @@ describe('healthRoute', () => {
 
     expect(await handler(context, req, res)).toMatchObject({
       body: {
-        status: 'red',
+        status: 'error',
         ...summarizeMonitoringStats(
           mockHealthStats({
             lastUpdate: expect.any(String),
