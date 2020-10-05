@@ -42,7 +42,7 @@ export function isActionTypeExecutorResult(
   return (
     unsafeResult &&
     typeof unsafeResult === 'object' &&
-    unsafeResult?.actionId === 'string' &&
+    typeof unsafeResult?.actionId === 'string' &&
     (unsafeResult?.status === 'ok' || unsafeResult?.status === 'error')
   );
 }
