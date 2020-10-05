@@ -25,8 +25,8 @@ export const getConnectorFieldsFromUserActions = (id: string, userActions: CaseU
       }
     }
 
-    return {};
+    return null;
   } catch {
-    return {};
+    return null;
   }
 };
