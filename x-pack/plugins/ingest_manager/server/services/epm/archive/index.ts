@@ -126,7 +126,7 @@ function parseAndVerifyArchive(paths: string[]): ArchivePackage {
     );
   }
 
-  const dataStreams = parseAndVerifyDatasets(paths, name, version);
+  const dataStreams = parseAndVerifyDataStreams(paths, name, version);
   const policyTemplates = parseAndVerifyPolicyTemplates(manifest);
 
   return {
@@ -141,7 +141,7 @@ function parseAndVerifyArchive(paths: string[]): ArchivePackage {
   };
 }
 
-function parseAndVerifyDatasets(
+function parseAndVerifyDataStreams(
   paths: string[],
   pkgName: string,
   pkgVersion: string

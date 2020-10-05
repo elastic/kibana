@@ -38,7 +38,7 @@ export const installTemplates = async (
     installablePackage.name,
     ElasticsearchAssetType.indexTemplate
   );
-  // build templates per dataset from yml files
+  // build templates per data stream from yml files
   const dataStreams = installablePackage.data_streams;
   if (!dataStreams) return [];
   // get template refs to save
