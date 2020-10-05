@@ -14,6 +14,14 @@ jest.mock('../../../../common/lib/kibana', () => ({
     services: {
       application: {
         getUrlForApp: jest.fn(),
+        capabilities: {
+          siem: {
+            crud: true,
+          },
+          actions: {
+            read: true,
+          },
+        },
       },
       triggersActionsUi: {
         actionTypeRegistry: jest.fn(),

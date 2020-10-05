@@ -9,22 +9,11 @@ export { XJsonMode } from '@kbn/ace';
 export { UseRequestConfig, useRequest } from '../../../../src/plugins/es_ui_shared/public';
 
 export {
-  getFieldType,
-  extractErrorMessage,
-  formatHumanReadableDateTimeSeconds,
-  getDataGridSchemaFromKibanaFieldType,
-  getFieldsFromKibanaIndexPattern,
-  multiColumnSortFactory,
-  showDataGridColumnChartErrorMessageToast,
-  useDataGrid,
-  useRenderCellValue,
-  ChartData,
-  DataGrid,
+  getMlSharedImports,
+  GetMlSharedImportsReturnType,
+  UseIndexDataReturnType,
   EsSorting,
   RenderCellValue,
-  UseDataGridReturnType,
-  UseIndexDataReturnType,
-  INDEX_STATUS,
 } from '../../ml/public';
 
 import { XJson } from '../../../../src/plugins/es_ui_shared/public';

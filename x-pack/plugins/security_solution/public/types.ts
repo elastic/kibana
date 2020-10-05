@@ -23,12 +23,14 @@ import { SecurityPluginSetup } from '../../security/public';
 import { AppFrontendLibs } from './common/lib/lib';
 import { ResolverPluginSetup } from './resolver/types';
 import { Inspect } from '../common/search_strategy';
+import { MlPluginSetup, MlPluginStart } from '../../ml/public';
 
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
   security: SecurityPluginSetup;
   triggersActionsUi: TriggersActionsSetup;
   usageCollection?: UsageCollectionSetup;
+  ml?: MlPluginSetup;
 }
 
 export interface StartPlugins {
@@ -40,6 +42,7 @@ export interface StartPlugins {
   newsfeed?: NewsfeedStart;
   triggersActionsUi: TriggersActionsStart;
   uiActions: UiActionsStart;
+  ml?: MlPluginStart;
 }
 
 export type StartServices = CoreStart &
