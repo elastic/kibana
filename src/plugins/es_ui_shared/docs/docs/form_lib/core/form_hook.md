@@ -62,7 +62,8 @@ export const MyComponent = () => {
 }
 ```
 
-* calling the `validate()` handler on the form. As you can see in the example below, if you don't use the `form.submit()`, you have to manually declare and update the `isSubmitting` and `isSubmitted` states.
+* calling the `validate()` handler on the form. As you can see in the example below, if you don't use the `form.submit()`, you have to manually declare and update the `isSubmitting` and `isSubmitted` states.  
+**Note:** It is usually better to use `form.submit()`, but you might need at some stage to know the form validity without updating its `isSubmitted` state, and that's what `validate()` is for.
 
 ```js
 export const MyComponent = ({ onFormUpdate }: Props) => {
@@ -171,7 +172,7 @@ const errors  = form.getErrors();
 
 Resets the form to its initial state. It accepts an optional configuration object:
 
-- `resetValues` (default: `true`). Flag to indicate if we want to not only reset the form state (`isValid`, `isSubmitted`...) but also the field values. If set to `true` all form values will be reset to their default value. Remember: default field values can be set in [different ways](./link-to-place-where-we-talk-about-it).
+- `resetValues` (default: `true`). Flag to indicate if we want to not only reset the form state (`isValid`, `isSubmitted`...) but also the field values. If set to `true` all form values will be reset to their default value. Remember: default field values can be set in [different ways](./default_value).
 
 - `defaultValue`. In some cases you might not want to reset the form to the default value initially provided to the form (probably because it is data that came from the server and you want a clean form). In this case you can provide a new `defaultValue` object when resetting.
 
