@@ -109,6 +109,13 @@ function getSeverityTypes() {
   });
 }
 
+/**
+ * Return formatted severity score.
+ */
+export function getFormattedSeverityScore(score: number) {
+  return score < 1 ? '< 1' : score.toFixed(2);
+}
+
 // Returns a severity label (one of critical, major, minor, warning or unknown)
 // for the supplied normalized anomaly score (a value between 0 and 100).
 export function getSeverity(normalizedScore: number): SeverityType {
