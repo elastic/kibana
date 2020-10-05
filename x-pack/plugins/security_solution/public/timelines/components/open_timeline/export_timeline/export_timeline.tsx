@@ -23,7 +23,7 @@ const ExportTimeline: React.FC<{
   onComplete?: () => void;
 }> = ({ onComplete, isEnableDownloader, exportedIds, getExportedData }) => {
   const [, dispatchToaster] = useStateToaster();
-  const { detailName: timelineType } = useParams<{ detailName: string | undefined }>();
+  const { tabName: timelineType } = useParams<{ tabName: TimelineType }>();
 
   const onExportSuccess = useCallback(
     (exportCount) => {
