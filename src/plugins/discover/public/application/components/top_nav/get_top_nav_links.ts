@@ -20,20 +20,13 @@ import { i18n } from '@kbn/i18n';
 import { Capabilities } from '../../../../../../core/types';
 
 export const getTopNavLinks = (
-  onNewSearch,
-  onSaveSearch,
-  onOpenSearch,
-  onShareSearch,
-  onInspectSearch,
-  uiCapabilities
-): {
-  onNewSearch: () => void;
-  onSaveSearch: () => void;
-  onOpenSearch: () => void;
-  onShareSearch: () => void;
-  onInspectSearch: () => void;
-  uiCapabilities: Capabilities;
-} => {
+  onNewSearch: () => void,
+  onSaveSearch: () => void,
+  onOpenSearch: () => void,
+  onShareSearch: () => void,
+  onInspectSearch: () => void,
+  uiCapabilities: Capabilities
+) => {
   const newSearch = {
     id: 'new',
     label: i18n.translate('discover.localMenu.localMenu.newSearchTitle', {

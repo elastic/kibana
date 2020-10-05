@@ -21,17 +21,18 @@ import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../
 import { getSortForSearchSource } from '../angular/doc_table';
 import { IndexPattern, SearchSource } from '../../../../data/common';
 import { AppState } from '../angular/discover_state';
+import { SortOrder } from '../../saved_searches/types';
 
 const getSharingDataFields = async (
-  getFieldCounts,
-  selectedFields,
-  timeFieldName,
-  hideTimeColumn
+  getFieldCounts: () => Promise<Record<string, number>>,
+  selectedFields: string[],
+  timeFieldName: string,
+  hideTimeColumn: boolean
 ) => {
   if (selectedFields.length === 1 && selectedFields[0] === '_source') {
     const fieldCounts = await getFieldCounts();
     return {
-      searchFields: null,
+      searchFields: undefined,
       selectFields: Object.keys(fieldCounts).sort(),
     };
   }
@@ -55,24 +56,29 @@ export async function getSharingData(
 
   const { searchFields, selectFields } = await getSharingDataFields(
     getFieldCounts,
-    state.columns,
-    indexPattern.timeFieldName,
+    state.columns || [],
+    indexPattern.timeFieldName || '',
     config.get(DOC_HIDE_TIME_COLUMN_SETTING)
   );
   searchSource.setField('fields', searchFields);
   searchSource.setField(
     'sort',
-    getSortForSearchSource(state.sort, indexPattern, config.get(SORT_DEFAULT_ORDER_SETTING))
+    getSortForSearchSource(
+      state.sort as SortOrder[],
+      indexPattern,
+      config.get(SORT_DEFAULT_ORDER_SETTING)
+    )
   );
   searchSource.setField('highlight', null);
-  searchSource.setField('highlightAll', null);
+  searchSource.setField('highlightAll', undefined);
   searchSource.setField('aggs', null);
-  searchSource.setField('size', null);
+  searchSource.setField('size', undefined);
 
   const body = await searchSource.getSearchRequestBody();
+  const index = searchSource.getField('index')!;
   return {
     searchRequest: {
-      index: searchSource.getField('index').title,
+      index: index.title,
       body,
     },
     fields: selectFields,
@@ -80,6 +86,6 @@ export async function getSharingData(
     conflictedTypesFields: indexPattern.fields
       .filter((f) => f.type === 'conflict')
       .map((f) => f.name),
-    indexPatternId: searchSource.getField('index').id,
+    indexPatternId: index.id,
   };
 }

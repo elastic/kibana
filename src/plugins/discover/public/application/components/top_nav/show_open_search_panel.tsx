@@ -19,11 +19,18 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { I18nStart } from 'kibana/public';
 import { OpenSearchPanel } from './open_search_panel';
 
 let isOpen = false;
 
-export function showOpenSearchPanel({ makeUrl, I18nContext }) {
+export function showOpenSearchPanel({
+  makeUrl,
+  I18nContext,
+}: {
+  makeUrl: (path: string) => string;
+  I18nContext: I18nStart['Context'];
+}) {
   if (isOpen) {
     return;
   }

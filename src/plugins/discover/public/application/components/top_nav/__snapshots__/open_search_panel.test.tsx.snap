@@ -3,7 +3,7 @@
 exports[`render 1`] = `
 <EuiFlyout
   data-test-subj="loadSearchForm"
-  onClose={[Function]}
+  onClose={[MockFunction]}
   ownFocus={true}
 >
   <EuiFlyoutHeader
@@ -54,7 +54,7 @@ exports[`render 1`] = `
         <EuiButton
           fill={true}
           href="/app/management/kibana/objects?_a=(tab:search)"
-          onClick={[Function]}
+          onClick={[MockFunction]}
         >
           <FormattedMessage
             defaultMessage="Manage searches"

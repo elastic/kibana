@@ -24,7 +24,7 @@ jest.mock('../../../kibana_services', () => {
   return {
     getServices: () => ({
       core: { uiSettings: {}, savedObjects: {} },
-      addBasePath: (path) => path,
+      addBasePath: (path: string) => path,
     }),
   };
 });
@@ -32,6 +32,6 @@ jest.mock('../../../kibana_services', () => {
 import { OpenSearchPanel } from './open_search_panel';
 
 test('render', () => {
-  const component = shallow(<OpenSearchPanel onClose={() => {}} makeUrl={() => {}} />);
+  const component = shallow(<OpenSearchPanel onClose={jest.fn()} makeUrl={jest.fn()} />);
   expect(component).toMatchSnapshot();
 });
