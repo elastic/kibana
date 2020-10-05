@@ -56,7 +56,7 @@ export function getTableVisualizationControllerClass(
     getInjector() {
       if (!this.injector) {
         const mountpoint = document.createElement('div');
-        mountpoint.setAttribute('style', 'height: 100%; width: 100%;');
+        mountpoint.className = 'visualization';
         this.injector = angular.bootstrap(mountpoint, [innerAngularName]);
         this.el.append(mountpoint);
       }

@@ -22,7 +22,6 @@ import { ExpressionRenderDefinition } from 'src/plugins/expressions';
 import { TablePluginStartDependencies } from '../plugin';
 import { TableVisRenderValue } from '../table_vis_fn';
 import { TableVisLegacyController } from './vis_controller';
-// import { VisualizationContainer } from '../../visualizations/public';
 
 const tableVisRegistry = new Map<HTMLElement, TableVisLegacyController>();
 
