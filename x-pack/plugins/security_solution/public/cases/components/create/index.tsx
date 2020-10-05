@@ -262,10 +262,10 @@ export const Create = React.memo(() => {
           <EuiFlexItem>
             <Container>
               <SettingFieldsForm
-                isEdit={true}
                 connector={connector}
-                onChange={setFields}
                 fields={fields}
+                isEdit={true}
+                onChange={setFields}
               />
             </Container>
           </EuiFlexItem>

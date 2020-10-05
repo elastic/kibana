@@ -38,7 +38,7 @@ describe('EditConnector ', () => {
     useFormMock.mockImplementation(() => ({ form: formHookMock }));
   });
 
-  it('Renders no connector, and then edit', () => {
+  it('Renders no connector, and then edit', async () => {
     const wrapper = mount(
       <TestProviders>
         <EditConnector {...defaultProps} />
@@ -53,7 +53,7 @@ describe('EditConnector ', () => {
     wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
     wrapper.update();
     wrapper.find('button[data-test-subj="dropdown-connector-resilient-2"]').simulate('click');
-    wrapper.update();
+    await waitFor(() => wrapper.update());
 
     expect(wrapper.find(`[data-test-subj="edit-connectors-submit"]`).last().exists()).toBeTruthy();
   });
@@ -128,13 +128,15 @@ describe('EditConnector ', () => {
     });
   });
 
-  it('Renders loading spinner', () => {
+  it('Renders loading spinner', async () => {
     const props = { ...defaultProps, isLoading: true };
     const wrapper = mount(
       <TestProviders>
         <EditConnector {...props} />
       </TestProviders>
     );
-    expect(wrapper.find(`[data-test-subj="connector-loading"]`).last().exists()).toBeTruthy();
+    await waitFor(() =>
+      expect(wrapper.find(`[data-test-subj="connector-loading"]`).last().exists()).toBeTruthy()
+    );
   });
 });

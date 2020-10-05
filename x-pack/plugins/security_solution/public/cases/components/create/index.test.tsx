@@ -101,8 +101,6 @@ describe('Create case', () => {
     useFormDataMock.mockImplementation(() => [
       {
         description: sampleData.description,
-        tags: sampleData.tags,
-        connectorId: sampleData.connector.id,
       },
     ]);
     useConnectorsMock.mockReturnValue(sampleConnectorData);
@@ -208,21 +206,7 @@ describe('Create case', () => {
           ...sampleConnectorData,
           connectors: connectorsMock,
         });
-        useFormDataMock
-          .mockReturnValueOnce([
-            {
-              description: sampleData.description,
-              tags: sampleData.tags,
-              connectorId: sampleData.connector.id,
-            },
-          ])
-          .mockReturnValue([
-            {
-              description: sampleData.description,
-              tags: sampleData.tags,
-              connectorId: testId,
-            },
-          ]);
+
         const wrapper = mount(
           <TestProviders>
             <Router history={mockHistory}>
@@ -233,7 +217,11 @@ describe('Create case', () => {
 
         await waitFor(() => {
           expect(wrapper.find(`[data-test-subj="${dataTestSubj}"]`).exists()).toBeFalsy();
+          wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+          wrapper.find(`button[data-test-subj="dropdown-connector-${testId}"]`).simulate('click');
+          wrapper.update();
         });
+
         await waitFor(() => {
           wrapper.update();
           expect(wrapper.find(`[data-test-subj="${dataTestSubj}"]`).exists()).toBeTruthy();
