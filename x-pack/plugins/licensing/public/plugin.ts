@@ -117,7 +117,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     return {
       refresh: refreshManually,
       license$,
-      featureUsage: this.featureUsage.setup({ http: core.http }),
+      featureUsage: this.featureUsage.setup(),
     };
   }
 
