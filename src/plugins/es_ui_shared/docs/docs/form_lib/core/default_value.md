@@ -10,7 +10,7 @@ There are multiple places where you can define the default value of a field. Not
 
 1. As a prop on the `<UseField path="name" defaultValue="John" />` component
 2. In the **form** `defaultValue` config passed to `useForm({ defaultValue: { ... } })`
-3. In the **field** `defaultValue` config parameter (either passed as prop to `<UseFielld />` prop or declared inside a form Schema)
+3. In the **field** `defaultValue` config parameter (either passed as prop to `<UseField />` prop or declared inside a form schema)
 4. If no default value is found above, it defaults to `""` (empty string)
 
 ### As a prop on `<UseField />`
@@ -52,7 +52,7 @@ const { form } = useForm({ defaultValue: fetchedData });
 
 ### In the field `defaultValue` config parameter of the field config
 
-When you are creating a new resource, the form is empty and there is no data coming from the server to map. You still migth want to define a default value for your fields.
+When you are creating a new resource, the form is empty and there is no data coming from the server to map. You still might want to define a default value for your fields.
 
 ```js
 interface Props {
@@ -91,4 +91,3 @@ export const MyComponent = ({ fetchedData }: Props) => {
   );
 }
 ```
-
