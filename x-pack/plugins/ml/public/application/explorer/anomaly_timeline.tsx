@@ -223,6 +223,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             onResize={explorerService.setSwimlaneContainerWidth}
             isLoading={loading}
             noDataWarning={<NoOverallData />}
+            showTimeline={false}
           />
 
           <EuiSpacer size="m" />

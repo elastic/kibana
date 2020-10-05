@@ -120,6 +120,10 @@ export const SwimlaneContainer: FC<
      * Unique id of the chart
      */
     id: string;
+    /**
+     * Enables/disables timeline on the X-axis.
+     */
+    showTimeline?: boolean;
   }
 > = ({
   id,
@@ -137,6 +141,7 @@ export const SwimlaneContainer: FC<
   onCellsSelection,
   timeBuckets,
   maskAll,
+  showTimeline = true,
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
 
@@ -255,6 +260,7 @@ export const SwimlaneContainer: FC<
               padding: 8,
             },
             xAxisLabel: {
+              visible: showTimeline,
               // eui color subdued
               fill: `#98A2B3`,
               formatter: (v: number) => {
