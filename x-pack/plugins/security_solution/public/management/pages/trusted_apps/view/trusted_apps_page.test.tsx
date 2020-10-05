@@ -44,14 +44,6 @@ describe('When on the Trusted Apps Page', () => {
     window.scrollTo = jest.fn();
   });
 
-  it('should render expected set of list columns', () => {
-    const { getByTestId } = render();
-    const tableColumns = Array.from(
-      getByTestId('trustedAppsList').querySelectorAll('table th')
-    ).map((th) => (th.textContent || '').trim());
-    expect(tableColumns).toEqual(['Name', 'OS', 'Date Created', 'Created By', 'Actions']);
-  });
-
   it('should display a Add Trusted App button', async () => {
     const { getByTestId } = render();
     const addButton = await getByTestId('trustedAppsListAddButton');

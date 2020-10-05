@@ -27,15 +27,14 @@ export const ViewTypeToggle = memo(({ selectedOption, onToggle }: ViewTypeToggle
 
   return (
     <EuiButtonGroup
-      name="coarsness"
-      legend="This is a basic group"
+      color="primary"
+      idSelected={selectedOption}
+      data-test-subj="viewTypeToggleButton"
       options={[
         { id: 'grid', iconType: 'grid', label: GRID_VIEW_TOGGLE_LABEL },
         { id: 'list', iconType: 'list', label: LIST_VIEW_TOGGLE_LABEL },
       ]}
-      idSelected={selectedOption}
       onChange={handleChange}
-      color="primary"
     />
   );
 });

@@ -22,8 +22,8 @@ import { useTrustedAppsNavigateCallback, useTrustedAppsSelector } from './hooks'
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { CreateTrustedAppFlyout } from './components/create_trusted_app_flyout';
 import { ControlPanel } from './components/control_panel';
-import { TrustedAppsGrid } from './components/trsuted_apps_grid';
-import { TrustedAppsList } from './trusted_apps_list';
+import { TrustedAppsGrid } from './components/trusted_apps_grid';
+import { TrustedAppsList } from './components/trusted_apps_list';
 import { TrustedAppDeletionDialog } from './trusted_app_deletion_dialog';
 import { TrustedAppsNotifications } from './trusted_apps_notifications';
 import { TrustedAppsListPageRouteState } from '../../../../../common/endpoint/types';

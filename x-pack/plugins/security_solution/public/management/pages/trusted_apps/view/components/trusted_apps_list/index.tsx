@@ -15,22 +15,23 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 
-import { Immutable } from '../../../../../common/endpoint/types';
-import { AppAction } from '../../../../common/store/actions';
-import { TrustedApp } from '../../../../../common/endpoint/types/trusted_apps';
+import { Immutable } from '../../../../../../../common/endpoint/types';
+import { AppAction } from '../../../../../../common/store/actions';
+import { TrustedApp } from '../../../../../../../common/endpoint/types/trusted_apps';
 
 import {
   getListErrorMessage,
   getListItems,
   getListPagination,
   isListLoading,
-} from '../store/selectors';
+} from '../../../store/selectors';
 
-import { useTrustedAppsNavigateCallback, useTrustedAppsSelector } from './hooks';
+import { FormattedDate } from '../../../../../../common/components/formatted_date';
 
-import { FormattedDate } from '../../../../common/components/formatted_date';
-import { ACTIONS_COLUMN_TITLE, LIST_ACTIONS, OS_TITLES, PROPERTY_TITLES } from './translations';
-import { TrustedAppCard } from './components/trusted_app_card';
+import { useTrustedAppsNavigateCallback, useTrustedAppsSelector } from '../../hooks';
+
+import { ACTIONS_COLUMN_TITLE, LIST_ACTIONS, OS_TITLES, PROPERTY_TITLES } from '../../translations';
+import { TrustedAppCard } from '../trusted_app_card';
 
 interface DetailsMap {
   [K: string]: ReactNode;

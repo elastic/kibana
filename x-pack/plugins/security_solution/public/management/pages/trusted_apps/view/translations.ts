@@ -74,6 +74,14 @@ export const LIST_ACTIONS = {
     ),
   },
 };
+
+export const CARD_DELETE_BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.trustedapps.card.removeButtonLabel',
+  {
+    defaultMessage: 'Remove',
+  }
+);
+
 export const GRID_VIEW_TOGGLE_LABEL = i18n.translate(
   'xpack.securitySolution.trustedapps.view.toggle.grid',
   {

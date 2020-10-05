@@ -5,7 +5,6 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiTableFieldDataColumnType } from '@elastic/eui';
 
 import {
@@ -23,7 +22,12 @@ import {
   ItemDetailsPropertySummary,
 } from '../../../../../../common/components/item_details_card';
 
-import { OS_TITLES, PROPERTY_TITLES, ENTRY_PROPERTY_TITLES } from '../../translations';
+import {
+  OS_TITLES,
+  PROPERTY_TITLES,
+  ENTRY_PROPERTY_TITLES,
+  CARD_DELETE_BUTTON_LABEL,
+} from '../../translations';
 
 type Entry = MacosLinuxConditionEntry | WindowsConditionEntry;
 
@@ -83,10 +87,13 @@ export const TrustedAppCard = memo(({ trustedApp, onDelete }: TrustedAppCardProp
         responsive
       />
 
-      <ItemDetailsAction size="s" color="danger" onClick={handleDelete}>
-        {i18n.translate('xpack.securitySolution.trustedapps.card.removeButtonLabel', {
-          defaultMessage: 'Remove',
-        })}
+      <ItemDetailsAction
+        size="s"
+        color="danger"
+        onClick={handleDelete}
+        data-test-subj="trustedAppDeleteButton"
+      >
+        {CARD_DELETE_BUTTON_LABEL}
       </ItemDetailsAction>
     </ItemDetailsCard>
   );
