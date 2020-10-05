@@ -9,6 +9,7 @@ import createContainer from 'constate';
 import { useSetState } from 'react-use';
 import { TimeKey } from '../../../../common/time';
 import { datemathToEpochMillis, isValidDatemath } from '../../../utils/datemath';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 type TimeKeyOrNull = TimeKey | null;
 
@@ -55,7 +56,6 @@ export interface LogPositionCallbacks {
   updateDateRange: (newDateRage: Partial<DateRange>) => void;
 }
 
-const DEFAULT_DATE_RANGE = { startDateExpression: 'now-1d', endDateExpression: 'now' };
 const DESIRED_BUFFER_PAGES = 2;
 
 const useVisibleMidpoint = (middleKey: TimeKeyOrNull, targetPosition: TimeKeyOrNull) => {
@@ -81,6 +81,13 @@ const useVisibleMidpoint = (middleKey: TimeKeyOrNull, targetPosition: TimeKeyOrN
 };
 
 export const useLogPositionState: () => LogPositionStateParams & LogPositionCallbacks = () => {
+  const { services } = useKibanaContextForPlugin();
+  const { from: sharedFrom, to: sharedTo } = services.data.query.timefilter.timefilter.getTime();
+  const DEFAULT_DATE_RANGE = {
+    startDateExpression: sharedFrom || 'now-1d',
+    endDateExpression: sharedTo || 'now',
+  };
+
   // Flag to determine if `LogPositionState` has been fully initialized.
   //
   // When the page loads, there might be initial state in the URL. We want to
@@ -109,6 +116,15 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
     endTimestamp: datemathToEpochMillis(DEFAULT_DATE_RANGE.endDateExpression, 'up')!,
     timestampsLastUpdate: Date.now(),
   });
+
+  useEffect(() => {
+    // Share timestamp changes with the rest of Kibana
+    const { startDateExpression, endDateExpression } = dateRange;
+    services.data.query.timefilter.timefilter.setTime({
+      from: startDateExpression,
+      to: endDateExpression,
+    });
+  }, [dateRange, services.data.query.timefilter.timefilter]);
 
   const { startKey, middleKey, endKey, pagesBeforeStart, pagesAfterEnd } = visiblePositions;
 
