@@ -101,11 +101,14 @@ export async function getPackageInfo(options: {
   pkgVersion: string;
 }): Promise<PackageInfo> {
   const { savedObjectsClient, pkgName, pkgVersion } = options;
-  const [item, savedObject, latestPackage, assets] = await Promise.all([
-    Registry.fetchInfo(pkgName, pkgVersion),
+  const [
+    savedObject,
+    latestPackage,
+    { paths: assets, registryPackageInfo: item },
+  ] = await Promise.all([
     getInstallationObject({ savedObjectsClient, pkgName }),
     Registry.fetchFindLatestPackage(pkgName),
-    Registry.getArchiveInfo(pkgName, pkgVersion),
+    Registry.loadRegistryPackage(pkgName, pkgVersion),
   ]);
 
   // add properties that aren't (or aren't yet) on Registry response
