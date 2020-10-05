@@ -5,16 +5,37 @@
  */
 
 import { first, take, bufferCount } from 'rxjs/operators';
-import { createWorkloadAggregator, padBuckets } from './workload_statistics';
+import { WorkloadAggregation, createWorkloadAggregator, padBuckets } from './workload_statistics';
 import { taskManagerMock } from '../task_manager.mock';
-import { AggregationSearchResult, KeyedAggregationBucket } from '../queries/aggregation_clauses';
 import { mockLogger } from '../test_utils';
+import { ConcreteTaskInstance } from '../task';
+import { ESSearchResponse } from '../../../apm/typings/elasticsearch';
+import { AggregationResultOf } from '../../../apm/typings/elasticsearch/aggregations';
+
+type MockESResult = ESSearchResponse<
+  ConcreteTaskInstance,
+  {
+    body: WorkloadAggregation;
+  }
+>;
 
 describe('Workload Statistics Aggregator', () => {
   test('queries the Task Store at a fixed interval for the current workload', async () => {
     const taskManager = taskManagerMock.create();
-    taskManager.aggregate.mockResolvedValue(({
-      count: 0,
+    taskManager.aggregate.mockResolvedValue({
+      hits: {
+        hits: [],
+        max_score: 0,
+        total: { value: 0, relation: 'eq' },
+      },
+      took: 1,
+      timed_out: false,
+      _shards: {
+        total: 1,
+        successful: 1,
+        skipped: 1,
+        failed: 0,
+      },
       aggregations: {
         taskType: {
           buckets: [],
@@ -44,7 +65,7 @@ describe('Workload Statistics Aggregator', () => {
           },
         },
       },
-    } as unknown) as AggregationSearchResult<string>);
+    } as MockESResult);
 
     const workloadAggregator = createWorkloadAggregator(taskManager, 10, 3000, mockLogger());
 
@@ -100,12 +121,22 @@ describe('Workload Statistics Aggregator', () => {
     });
   });
 
-  const mockAggregatedResult = ({
-    count: 4,
+  const mockAggregatedResult: MockESResult = {
+    hits: {
+      hits: [],
+      max_score: 0,
+      total: { value: 4, relation: 'eq' },
+    },
+    took: 1,
+    timed_out: false,
+    _shards: {
+      total: 1,
+      successful: 1,
+      skipped: 1,
+      failed: 0,
+    },
     aggregations: {
       schedule: {
-        doc_count_error_upper_bound: 0,
-        sum_other_doc_count: 0,
         buckets: [
           {
             key: '3600s',
@@ -122,15 +153,11 @@ describe('Workload Statistics Aggregator', () => {
         ],
       },
       taskType: {
-        doc_count_error_upper_bound: 0,
-        sum_other_doc_count: 0,
         buckets: [
           {
             key: 'actions_telemetry',
             doc_count: 2,
             status: {
-              doc_count_error_upper_bound: 0,
-              sum_other_doc_count: 0,
               buckets: [
                 {
                   key: 'idle',
@@ -143,8 +170,6 @@ describe('Workload Statistics Aggregator', () => {
             key: 'alerting_telemetry',
             doc_count: 1,
             status: {
-              doc_count_error_upper_bound: 0,
-              sum_other_doc_count: 0,
               buckets: [
                 {
                   key: 'idle',
@@ -157,8 +182,6 @@ describe('Workload Statistics Aggregator', () => {
             key: 'session_cleanup',
             doc_count: 1,
             status: {
-              doc_count_error_upper_bound: 0,
-              sum_other_doc_count: 0,
               buckets: [
                 {
                   key: 'idle',
@@ -192,11 +215,11 @@ describe('Workload Statistics Aggregator', () => {
         },
       },
     },
-  } as unknown) as AggregationSearchResult<string>;
+  };
 
   test('returns a summary of the workload by task type', async () => {
     const taskManager = taskManagerMock.create();
-    taskManager.aggregate.mockResolvedValue(mockAggregatedResult);
+    taskManager.aggregate.mockResolvedValue(mockAggregatedResult as MockESResult);
 
     const workloadAggregator = createWorkloadAggregator(taskManager, 10, 3000, mockLogger());
 
@@ -218,7 +241,7 @@ describe('Workload Statistics Aggregator', () => {
 
   test('returns a count of the overdue workload', async () => {
     const taskManager = taskManagerMock.create();
-    taskManager.aggregate.mockResolvedValue(mockAggregatedResult);
+    taskManager.aggregate.mockResolvedValue(mockAggregatedResult as MockESResult);
 
     const workloadAggregator = createWorkloadAggregator(taskManager, 10, 3000, mockLogger());
 
@@ -235,7 +258,7 @@ describe('Workload Statistics Aggregator', () => {
 
   test('returns a histogram of the upcoming workload for the upcoming minute when refresh rate is high', async () => {
     const taskManager = taskManagerMock.create();
-    taskManager.aggregate.mockResolvedValue(mockAggregatedResult);
+    taskManager.aggregate.mockResolvedValue(mockAggregatedResult as MockESResult);
 
     const workloadAggregator = createWorkloadAggregator(taskManager, 10, 3000, mockLogger());
 
@@ -257,7 +280,7 @@ describe('Workload Statistics Aggregator', () => {
 
   test('returns a histogram of the upcoming workload for twice refresh rate when rate is low', async () => {
     const taskManager = taskManagerMock.create();
-    taskManager.aggregate.mockResolvedValue(mockAggregatedResult);
+    taskManager.aggregate.mockResolvedValue(mockAggregatedResult as MockESResult);
 
     const workloadAggregator = createWorkloadAggregator(taskManager, 60 * 1000, 3000, mockLogger());
 
@@ -297,7 +320,7 @@ describe('Workload Statistics Aggregator', () => {
 
   test('returns a histogram of the upcoming workload maxed out at 50 buckets when rate is too low', async () => {
     const taskManager = taskManagerMock.create();
-    taskManager.aggregate.mockResolvedValue(mockAggregatedResult);
+    taskManager.aggregate.mockResolvedValue(mockAggregatedResult as MockESResult);
 
     const workloadAggregator = createWorkloadAggregator(
       taskManager,
@@ -504,12 +527,16 @@ describe('padBuckets', () => {
 });
 
 function setTaskTypeCount(
-  { aggregations: { taskType: taskTypeAgg, ...otherAggs } }: AggregationSearchResult<string>,
+  { aggregations }: MockESResult,
   taskType: string,
   status: Record<string, number>
 ) {
+  const taskTypes = aggregations!.taskType as AggregationResultOf<
+    WorkloadAggregation['aggs']['taskType'],
+    {}
+  >;
   const buckets = [
-    ...(taskTypeAgg.buckets as KeyedAggregationBucket[]).filter(({ key }) => key !== taskType),
+    ...taskTypes.buckets.filter(({ key }) => key !== taskType),
     {
       key: taskType,
       doc_count: Object.values(status).reduce((sum, count) => sum + count, 0),
@@ -526,14 +553,14 @@ function setTaskTypeCount(
   return ({
     count: buckets.reduce((sum, bucket) => sum + bucket.doc_count, 0),
     aggregations: {
+      ...aggregations,
       taskType: {
         doc_count_error_upper_bound: 0,
         sum_other_doc_count: 0,
         buckets,
       },
-      ...otherAggs,
     },
-  } as unknown) as AggregationSearchResult<string>;
+  } as {}) as MockESResult;
 }
 
 /** *
@@ -557,23 +584,31 @@ function mockHistogram(
   const fromDate = new Date(from);
   const toDate = new Date(to);
   return {
+    key: `${fromDate.toISOString()}-${toDate.toISOString()}`,
     from,
     from_as_string: fromDate.toISOString(),
     to,
     to_as_string: toDate.toISOString(),
     doc_count: foundBuckets.reduce((sum: number, count) => sum + (count ?? 0), 0),
     histogram: {
-      buckets: foundBuckets.reduce((histogramBuckets, count, index) => {
-        if (typeof count === 'number') {
-          const key = new Date(findFrom + index * interval);
-          histogramBuckets.push({
-            key_as_string: key.toISOString(),
-            key: key.getTime(),
-            doc_count: count,
-          });
-        }
-        return histogramBuckets;
-      }, [] as KeyedAggregationBucket[]),
+      buckets: foundBuckets.reduce(
+        (histogramBuckets, count, index) => {
+          if (typeof count === 'number') {
+            const key = new Date(findFrom + index * interval);
+            histogramBuckets.push({
+              key_as_string: key.toISOString(),
+              key: key.getTime(),
+              doc_count: count,
+            });
+          }
+          return histogramBuckets;
+        },
+        [] as Array<{
+          key_as_string: string;
+          key: number;
+          doc_count: number;
+        }>
+      ),
     },
   };
 }

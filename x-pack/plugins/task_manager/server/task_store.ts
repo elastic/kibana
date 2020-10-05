@@ -60,11 +60,8 @@ import {
   SortByRunAtAndRetryAt,
   tasksClaimedByOwner,
 } from './queries/mark_available_tasks_as_claimed';
-import {
-  AggregationQuery,
-  AggregationSearchResult,
-  AggregationResult,
-} from './queries/aggregation_clauses';
+
+import { ESSearchResponse, ESSearchBody, ESSearchRequest } from '../../apm/typings/elasticsearch';
 
 export interface StoreOpts {
   callCluster: ElasticJs;
@@ -84,11 +81,8 @@ export interface SearchOpts {
   search_after?: unknown[];
 }
 
-export interface AggregationOpts {
-  aggs: AggregationQuery;
-  query?: object;
-  size?: number;
-}
+export type AggregationOpts = Pick<Required<ESSearchBody>, 'aggs'> &
+  Pick<ESSearchBody, 'query' | 'size'>;
 
 export interface UpdateByQuerySearchOpts extends SearchOpts {
   script?: object;
@@ -469,28 +463,20 @@ export class TaskStore {
     };
   }
 
-  public async aggregate<AggregationName extends string>({
+  public async aggregate<TSearchRequest extends AggregationOpts>({
     aggs,
+    query,
     size = 0,
-  }: AggregationOpts): Promise<AggregationSearchResult<AggregationName>> {
-    const {
-      aggregations,
-      hits: {
-        total: { value: count },
-      },
-    } = (await this.callCluster('search', {
+  }: AggregationOpts) {
+    return this.callCluster('search', {
       index: this.index,
       ignoreUnavailable: true,
       body: ensureAggregationOnlyReturnsTaskObjects({
+        query,
         aggs,
         size,
       }),
-    })) as {
-      aggregations: AggregationResult<AggregationName>;
-      hits: { total: { value: number } };
-    };
-
-    return { aggregations, count };
+    }) as Promise<ESSearchResponse<ConcreteTaskInstance, { body: TSearchRequest }>>;
   }
 
   private async updateByQuery(

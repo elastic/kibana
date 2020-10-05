@@ -9,21 +9,12 @@ import { concatMap, map, catchError } from 'rxjs/operators';
 import { Logger } from 'src/core/server';
 import { JsonObject } from 'src/plugins/kibana_utils/common';
 import { keyBy, mapValues } from 'lodash';
+import { ESSearchResponse } from '../../../apm/typings/elasticsearch';
 import { AggregatedStatProvider } from './runtime_statistics_aggregator';
 import { TaskManager } from '../task_manager';
-import {
-  AggregationSearchResult,
-  AggregationBucketWithSubAgg,
-  isBucketedAggregation,
-  isAggregationBucket,
-  isKeyedBuckets,
-  isBucketsWithNumericKey,
-  aggregationBucketsByKey,
-  KeyedAggregationBucket,
-  getStringKeyOfBucket,
-  RangeAggregationBucket,
-} from '../queries/aggregation_clauses';
+import { ConcreteTaskInstance } from '../task';
 import { parseIntervalAsSecond, asInterval } from '../lib/intervals';
+import { AggregationResultOf } from '../../../apm/typings/elasticsearch/aggregations';
 
 interface StatusStat extends JsonObject {
   [status: string]: number;
@@ -43,6 +34,56 @@ export interface WorkloadStat extends JsonObject {
   scheduleDensity: number[];
 }
 
+export interface WorkloadAggregation {
+  aggs: {
+    taskType: {
+      terms: { field: string };
+      aggs: {
+        status: {
+          terms: { field: string };
+        };
+      };
+    };
+    schedule: {
+      terms: { field: string };
+    };
+    idleTasks: {
+      filter: {
+        term: { 'task.status': string };
+      };
+      aggs: {
+        scheduleDensity: {
+          range: {
+            field: string;
+            ranges: [{ from: string; to: string }];
+          };
+          aggs: {
+            histogram: {
+              date_histogram: {
+                field: string;
+                fixed_interval: string;
+              };
+            };
+          };
+        };
+        overdue: {
+          filter: {
+            range: {
+              'task.runAt': { lt: string };
+            };
+          };
+        };
+      };
+    };
+  };
+}
+
+// The type of a bucket in the scheduleDensity range aggregation
+type ScheduleDensityResult = AggregationResultOf<
+  WorkloadAggregation['aggs']['idleTasks']['aggs']['scheduleDensity'],
+  {}
+>['buckets'][0];
+
 // Set an upper bound just in case a customer sets a really high refresh rate
 const MAX_SHCEDULE_DENSITY_BUCKETS = 50;
 
@@ -61,7 +102,7 @@ export function createWorkloadAggregator(
 
   return timer(0, refreshInterval).pipe(
     concatMap(() =>
-      taskManager.aggregate({
+      taskManager.aggregate<WorkloadAggregation>({
         aggs: {
           taskType: {
             terms: { field: 'task.taskType' },
@@ -107,71 +148,65 @@ export function createWorkloadAggregator(
         },
       })
     ),
-    map(
-      ({
+    map((result: ESSearchResponse<ConcreteTaskInstance, { body: WorkloadAggregation }>) => {
+      const {
         aggregations,
-        count,
-      }: AggregationSearchResult<
-        | 'taskType'
-        | 'schedule'
-        | 'status'
-        | 'scheduleDensity'
-        | 'histogram'
-        | 'overdue'
-        | 'idleTasks'
-      >) => {
-        if (
-          !isBucketedAggregation(aggregations.taskType) ||
-          !isBucketedAggregation(aggregations.schedule) ||
-          !(
-            !isBucketedAggregation(aggregations.idleTasks) &&
-            isAggregationBucket(aggregations.idleTasks.overdue) &&
-            isBucketedAggregation(aggregations.idleTasks.scheduleDensity) &&
-            !isKeyedBuckets(aggregations.idleTasks.scheduleDensity.buckets)
-          )
-        ) {
-          throw new Error(`Invalid workload: ${JSON.stringify({ aggregations, count })}`);
-        }
+        hits: {
+          total: { value: count },
+        },
+      } = result;
 
-        const {
-          taskType: { buckets: taskTypes = [] } = {},
-          schedule: { buckets: schedules = [] } = {},
-          idleTasks: {
-            overdue: { doc_count: overdue } = { doc_count: 0 },
-            scheduleDensity: { buckets: [scheduleDensity] = [] } = {},
-          } = {},
-        } = aggregations;
-
-        const summary: WorkloadStat = {
-          count,
-          taskTypes: mapValues(
-            keyBy<AggregationBucketWithSubAgg<'status'>>(
-              taskTypes as Array<AggregationBucketWithSubAgg<'status'>>,
-              'key'
-            ),
-            ({ doc_count: docCount, status }) => {
-              return {
-                count: docCount,
-                status: mapValues(aggregationBucketsByKey(status), 'doc_count'),
-              };
-            }
-          ),
-          schedule: (schedules as KeyedAggregationBucket[])
-            .sort(
-              (scheduleLeft, scheduleRight) =>
-                parseIntervalAsSecond(getStringKeyOfBucket(scheduleLeft)) -
-                parseIntervalAsSecond(getStringKeyOfBucket(scheduleRight))
-            )
-            .map((schedule) => [getStringKeyOfBucket(schedule), schedule.doc_count]),
-          overdue,
-          scheduleDensity: padBuckets(scheduleDensityBuckets, pollInterval, scheduleDensity),
-        };
-        return {
-          key: 'workload',
-          value: summary,
-        };
+      if (
+        !(
+          aggregations?.taskType &&
+          aggregations?.schedule &&
+          aggregations?.idleTasks?.overdue &&
+          aggregations?.idleTasks?.scheduleDensity
+        )
+      ) {
+        throw new Error(`Invalid workload: ${JSON.stringify({ aggregations, count })}`);
       }
-    ),
+
+      const taskTypes = (aggregations.taskType as AggregationResultOf<
+        WorkloadAggregation['aggs']['taskType'],
+        {}
+      >).buckets;
+      const schedules = (aggregations.schedule as AggregationResultOf<
+        WorkloadAggregation['aggs']['schedule'],
+        {}
+      >).buckets;
+
+      const {
+        overdue: { doc_count: overdue },
+        scheduleDensity: { buckets: [scheduleDensity] = [] } = {},
+      } = aggregations.idleTasks as AggregationResultOf<
+        WorkloadAggregation['aggs']['idleTasks'],
+        {}
+      >;
+
+      const summary: WorkloadStat = {
+        count,
+        taskTypes: mapValues(keyBy(taskTypes, 'key'), ({ doc_count: docCount, status }) => {
+          return {
+            count: docCount,
+            status: mapValues(keyBy(status, 'key'), 'doc_count'),
+          };
+        }),
+        schedule: schedules
+          .sort(
+            (scheduleLeft, scheduleRight) =>
+              parseIntervalAsSecond(scheduleLeft.key as string) -
+              parseIntervalAsSecond(scheduleRight.key as string)
+          )
+          .map((schedule) => [schedule.key as string, schedule.doc_count]),
+        overdue,
+        scheduleDensity: padBuckets(scheduleDensityBuckets, pollInterval, scheduleDensity),
+      };
+      return {
+        key: 'workload',
+        value: summary,
+      };
+    }),
     catchError((ex: Error, caught) => {
       logger.error(`[WorkloadAggregator]: ${ex}`);
       // continue to pull values from the same observable
@@ -183,19 +218,10 @@ export function createWorkloadAggregator(
 export function padBuckets(
   scheduleDensityBuckets: number,
   pollInterval: number,
-  scheduleDensity: unknown
+  scheduleDensity: ScheduleDensityResult
 ): number[] {
-  const { histogram, doc_count: docCount, from } = scheduleDensity as AggregationBucketWithSubAgg<
-    'histogram',
-    RangeAggregationBucket
-  >;
-
-  if (
-    docCount &&
-    histogram &&
-    !isKeyedBuckets(histogram.buckets) &&
-    isBucketsWithNumericKey(histogram.buckets)
-  ) {
+  if (scheduleDensity.from && scheduleDensity.histogram?.buckets?.length) {
+    const { histogram, from } = scheduleDensity;
     const firstBucket = histogram.buckets[0].key;
     const bucketsToPadBeforeFirstBucket = bucketsBetween(from, firstBucket, pollInterval);
     const bucketsToPadAfterLast =
@@ -204,7 +230,7 @@ export function padBuckets(
       ...(bucketsToPadBeforeFirstBucket > 0
         ? new Array(bucketsToPadBeforeFirstBucket).fill(0)
         : []),
-      ...histogram.buckets.map((bucket, index) => bucket.doc_count),
+      ...histogram.buckets.map((bucket) => bucket.doc_count),
       ...(bucketsToPadAfterLast > 0 ? new Array(bucketsToPadAfterLast).fill(0) : []),
     ];
   }

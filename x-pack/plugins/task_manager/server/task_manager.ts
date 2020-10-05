@@ -12,6 +12,7 @@ import { performance } from 'perf_hooks';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, some, map as mapOptional, getOrElse } from 'fp-ts/lib/Option';
 
+import { ESSearchResponse } from '../../apm/typings/elasticsearch';
 import {
   SavedObjectsSerializer,
   ILegacyScopedClusterClient,
@@ -69,7 +70,6 @@ import {
 import { identifyEsError } from './lib/identify_es_error';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
 import { BufferedTaskStore } from './buffered_task_store';
-import { AggregationSearchResult } from './queries/aggregation_clauses';
 
 const VERSION_CONFLICT_STATUS = 409;
 
@@ -399,11 +399,11 @@ export class TaskManager {
    * @param opts - The query options used to filter tasks
    * @returns {Promise<FetchResult>}
    */
-  public async aggregate<AggregationName extends string>(
+  public async aggregate<TSearchRequest extends AggregationOpts>(
     opts: AggregationOpts
-  ): Promise<AggregationSearchResult<AggregationName>> {
+  ): Promise<ESSearchResponse<ConcreteTaskInstance, { body: TSearchRequest }>> {
     await this.waitUntilStarted();
-    return this.store.aggregate<AggregationName>(opts);
+    return this.store.aggregate<TSearchRequest>(opts);
   }
 
   /**
