@@ -459,7 +459,11 @@ export class MapsAppView extends React.Component<Props, State> {
         {this._renderTopNav()}
         <h1 className="euiScreenReaderOnly">{`screenTitle placeholder`}</h1>
         <div id="react-maps-root">
-          <MapContainer addFilters={this._addFilter} />
+          <MapContainer
+            addFilters={this._addFilter}
+            title={this.props.savedMap.title}
+            description={this.props.savedMap.description}
+          />
         </div>
       </div>
     ) : null;
