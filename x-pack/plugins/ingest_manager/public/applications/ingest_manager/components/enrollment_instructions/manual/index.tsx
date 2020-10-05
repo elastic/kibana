@@ -30,7 +30,7 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
     kibanaCASha256 ? ` --ca_sha256=${kibanaCASha256}` : ''
   }`;
 
-  const linuxMaxCommand = `./elastic-agent install -f ${enrollArgs}`;
+  const linuxMacCommand = `./elastic-agent install -f ${enrollArgs}`;
 
   const windowsCommand = `.\\elastic-agent.exe install -f ${enrollArgs}`;
 
@@ -39,7 +39,7 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
       <EuiText>
         <FormattedMessage
           id="xpack.ingestManager.enrollmentInstructions.descriptionText"
-          defaultMessage="From the agent’s directory, run the appropriate command to install, enroll and start an Elastic Agent. You can reuse these commands to setup agents on more than one machine. Be sure to run the install steps as a user with Administrator privilege on the system."
+          defaultMessage="From the agent directory, run the appropriate command to install, enroll, and start an Elastic Agent. You can reuse these commands to set up agents on more than one host. Requires administrator privileges."
         />
       </EuiText>
       <EuiSpacer size="l" />
@@ -53,7 +53,7 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
-        <CommandCode>{linuxMaxCommand}</CommandCode>
+        <CommandCode>{linuxMacCommand}</CommandCode>
       </EuiCodeBlock>
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
