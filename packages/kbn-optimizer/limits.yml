@@ -1,15 +1,15 @@
 pageLoadAssetSize:
   advancedSettings: 17_596
   alerts: 96_936
-  apm: 50_340
+  apm: 52_378
   apmOss: 8_996
   beatsManagement: 178_135
   bfetch: 31_874
-  canvas: 1_055_965
+  canvas: 1_056_461
   charts: 149_211
   cloud: 11_076
   console: 36_091
-  core: 682_045
+  core: 682_068
   crossClusterReplication: 55_408
   dashboard: 588_972
   dashboardEnhanced: 55_646
@@ -19,7 +19,7 @@ pageLoadAssetSize:
   devTools: 28_637
   discover: 94_982
   discoverEnhanced: 32_730
-  embeddable: 302_688
+  embeddable: 302_696
   embeddableEnhanced: 31_145
   enterpriseSearch: 25_484
   esUiShared: 316_654
@@ -27,7 +27,7 @@ pageLoadAssetSize:
   features: 21_211
   fileUpload: 14_717
   globalSearch: 33_548
-  globalSearchBar: 34_743
+  globalSearchBar: 52_888
   globalSearchProviders: 15_554
   graph: 21_215
   grokdebugger: 16_779
@@ -35,8 +35,8 @@ pageLoadAssetSize:
   indexLifecycleManagement: 97_032
   indexManagement: 130_766
   indexPatternManagement: 144_222
-  infra: 187_885
-  ingestManager: 558_923
+  infra: 187_873
+  ingestManager: 559_465
   ingestPipelines: 48_003
   inputControlVis: 162_675
   inspector: 138_711
@@ -46,17 +46,17 @@ pageLoadAssetSize:
   lens: 82_860
   licenseManagement: 31_817
   licensing: 28_693
-  lists: 173_697
+  lists: 173_665
   logstash: 43_548
   management: 36_112
-  maps: 173_393
+  maps: 173_452
   mapsLegacy: 106_817
   mapsLegacyLicensing: 10_214
   ml: 64_944
-  monitoring: 258_618
-  navigation: 27_443
+  monitoring: 258_612
+  navigation: 27_269
   newsfeed: 27_628
-  observability: 58_642
+  observability: 77_897
   painlessLab: 169_748
   regionMap: 56_098
   remoteClusters: 41_327
@@ -66,7 +66,7 @@ pageLoadAssetSize:
   savedObjectsManagement: 90_503
   searchprofiler: 57_080
   security: 172_250
-  securitySolution: 606_205
+  securitySolution: 606_247
   share: 89_061
   snapshotRestore: 69_032
   spaces: 377_915
@@ -75,11 +75,11 @@ pageLoadAssetSize:
   tileMap: 55_250
   timelion: 19_920
   transform: 31_007
-  triggers_actions_ui: 156_543
+  triggersActionsUi: 156_610
   uiActions: 87_533
   uiActionsEnhanced: 339_652
   upgradeAssistant: 71_270
-  uptime: 30_833
+  uptime: 30_825
   urlDrilldown: 24_174
   urlForwarding: 22_554
   usageCollection: 29_762
@@ -89,7 +89,7 @@ pageLoadAssetSize:
   visTypeTable: 84_706
   visTypeTagcloud: 27_605
   visTypeTimelion: 41_933
-  visTypeTimeseries: 145_195
+  visTypeTimeseries: 145_203
   visTypeVega: 143_573
   visTypeVislib: 232_838
   visTypeXy: 10_255
