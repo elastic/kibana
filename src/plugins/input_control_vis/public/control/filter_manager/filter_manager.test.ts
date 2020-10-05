@@ -48,7 +48,7 @@ describe('FilterManager', function () {
     let filterManager: FilterManagerTest;
     beforeEach(() => {
       kbnFilters = [];
-      filterManager = new FilterManagerTest(controlId, 'field1', indexPatternMock, queryFilterMock);
+      filterManager = new FilterManagerTest(controlId, 'field1', queryFilterMock, indexPatternMock);
     });
 
     test('should not find filters that are not controlled by any visualization', function () {

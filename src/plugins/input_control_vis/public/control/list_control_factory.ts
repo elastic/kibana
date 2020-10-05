@@ -218,7 +218,7 @@ export async function listControlFactory(
   try {
     indexPattern = await dataPluginStart.indexPatterns.get(controlParams.indexPattern);
   } catch (e) {
-    indexPattern = null;
+    // invalid index pattern id
   }
 
   // dynamic options are only allowed on String fields but the setting defaults to true so it could
@@ -234,8 +234,8 @@ export async function listControlFactory(
     new PhraseFilterManager(
       controlParams.id,
       controlParams.fieldName,
-      indexPattern,
-      deps.data.query.filterManager
+      deps.data.query.filterManager,
+      indexPattern
     ),
     useTimeFilter,
     dataPluginStart.search.searchSource,

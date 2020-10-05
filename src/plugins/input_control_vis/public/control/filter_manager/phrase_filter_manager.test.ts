@@ -48,8 +48,8 @@ describe('PhraseFilterManager', function () {
       filterManager = new PhraseFilterManager(
         controlId,
         'field1',
-        indexPatternMock,
-        queryFilterMock
+        queryFilterMock,
+        indexPatternMock
       );
     });
 
@@ -89,10 +89,10 @@ describe('PhraseFilterManager', function () {
       constructor(
         id: string,
         fieldName: string,
-        indexPattern: IndexPattern,
-        queryFilter: QueryFilterManager
+        queryFilter: QueryFilterManager,
+        indexPattern?: IndexPattern
       ) {
-        super(id, fieldName, indexPattern, queryFilter);
+        super(id, fieldName, queryFilter, indexPattern);
         this.mockFilters = [];
       }
 
@@ -112,8 +112,8 @@ describe('PhraseFilterManager', function () {
       filterManager = new MockFindFiltersPhraseFilterManager(
         controlId,
         'field1',
-        indexPatternMock,
-        queryFilterMock
+        queryFilterMock,
+        indexPatternMock
       );
     });
 

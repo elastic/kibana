@@ -31,25 +31,25 @@ export class PhraseFilterManager extends FilterManager {
   constructor(
     controlId: string,
     fieldName: string,
-    indexPattern: IndexPattern | null,
-    queryFilter: QueryFilterManager
+    queryFilter: QueryFilterManager,
+    indexPattern?: IndexPattern
   ) {
-    super(controlId, fieldName, indexPattern, queryFilter);
+    super(controlId, fieldName, queryFilter, indexPattern);
   }
 
   createFilter(phrases: any): PhraseFilter {
-    if (!this.indexPattern) return {} as PhraseFilter;
+    const indexPattern = this.indexPattern!;
     let newFilter: PhraseFilter;
-    const value = this.indexPattern.fields.getByName(this.fieldName);
+    const value = indexPattern.fields.getByName(this.fieldName);
 
     if (!value) {
       throw new Error(`Unable to find field with name: ${this.fieldName} on indexPattern`);
     }
 
     if (phrases.length === 1) {
-      newFilter = esFilters.buildPhraseFilter(value, phrases[0], this.indexPattern);
+      newFilter = esFilters.buildPhraseFilter(value, phrases[0], indexPattern);
     } else {
-      newFilter = esFilters.buildPhrasesFilter(value, phrases, this.indexPattern);
+      newFilter = esFilters.buildPhrasesFilter(value, phrases, indexPattern);
     }
 
     newFilter.meta.key = this.fieldName;

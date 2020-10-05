@@ -139,7 +139,7 @@ export async function rangeControlFactory(
   try {
     indexPattern = await dataPluginStart.indexPatterns.get(controlParams.indexPattern);
   } catch (e) {
-    indexPattern = null;
+    // invalid index pattern id
   }
 
   return new RangeControl(
@@ -147,8 +147,8 @@ export async function rangeControlFactory(
     new RangeFilterManager(
       controlParams.id,
       controlParams.fieldName,
-      indexPattern,
-      deps.data.query.filterManager
+      deps.data.query.filterManager,
+      indexPattern
     ),
     useTimeFilter,
     dataPluginStart.search.searchSource,

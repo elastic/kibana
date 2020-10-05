@@ -52,8 +52,8 @@ describe('RangeFilterManager', function () {
       filterManager = new RangeFilterManager(
         controlId,
         'field1',
-        indexPatternMock,
-        queryFilterMock
+        queryFilterMock,
+        indexPatternMock
       );
     });
 
@@ -75,10 +75,10 @@ describe('RangeFilterManager', function () {
       constructor(
         id: string,
         fieldName: string,
-        indexPattern: IndexPattern,
-        queryFilter: QueryFilterManager
+        queryFilter: QueryFilterManager,
+        indexPattern?: IndexPattern
       ) {
-        super(id, fieldName, indexPattern, queryFilter);
+        super(id, fieldName, queryFilter, indexPattern);
         this.mockFilters = [];
       }
 
@@ -98,8 +98,8 @@ describe('RangeFilterManager', function () {
       filterManager = new MockFindFiltersRangeFilterManager(
         controlId,
         'field1',
-        indexPatternMock,
-        queryFilterMock
+        queryFilterMock,
+        indexPatternMock
       );
     });
 
