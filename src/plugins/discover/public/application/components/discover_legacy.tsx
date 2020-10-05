@@ -181,7 +181,6 @@ export function DiscoverLegacy({
             legacy={true}
             sidebarClassName={sidebarClassName}
           />
-          {/* </div> */}
           <EuiHideFor sizes={['xs', 's']}>
             <EuiButtonIcon
               iconType={isSidebarClosed ? 'menuRight' : 'menuLeft'}
@@ -211,7 +210,7 @@ export function DiscoverLegacy({
               </div>
             </span>
             {resultState === 'ready' && (
-              <div className="dscWrapper__contentx">
+              <>
                 <SkipBottomButton onClick={onSkipBottomButtonClick} />
                 <HitsCounter
                   hits={hits > 0 ? hits : 0}
@@ -299,7 +298,7 @@ export function DiscoverLegacy({
                     )}
                   </section>
                 </div>
-              </div>
+              </>
             )}
           </div>
         </div>

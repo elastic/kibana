@@ -84,6 +84,7 @@ discover-app {
   flex-direction: column;
   display: flex;
   overflow: hidden;
+  height: calc(100vh - #{$euiSizeXL * 6.5});
 
   @include euiBreakpoint('m', 'l', 'xl') {
     margin-right: $euiSize;

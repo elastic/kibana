@@ -136,15 +136,14 @@ export function Discover({
               setIndexPattern={setIndexPattern}
             />
             <>
-              {resultState === 'none' && (
-                <DiscoverNoResults
-                  timeFieldName={opts.timefield}
-                  queryLanguage={state.query.language}
-                />
-              )}
-              {resultState === 'uninitialized' && <DiscoverUninitialized onRefresh={fetch} />}
-
               <div className="dscWrapper__content">
+                {resultState === 'none' && (
+                  <DiscoverNoResults
+                    timeFieldName={opts.timefield}
+                    queryLanguage={state.query.language}
+                  />
+                )}
+                {resultState === 'uninitialized' && <DiscoverUninitialized onRefresh={fetch} />}
                 {resultState === 'loading' && (
                   <>
                     {fetchError && <DiscoverFetchError fetchError={fetchError} />}
