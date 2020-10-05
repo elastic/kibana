@@ -93,6 +93,7 @@ export const PreviewQueryHistogram = ({
   }: React.ChangeEvent<HTMLSelectElement>): void => {
     setTimeframe(value as Unit);
     setNoiseWarningThreshold(HITS_THRESHOLD[value]);
+    setShowHistogram(false);
   };
 
   const handlePreviewClicked = useCallback((): void => {
@@ -107,6 +108,7 @@ export const PreviewQueryHistogram = ({
     }
   }, [setQuery, inspect, isLoading, isInitializing]);
 
+  // reset when rule type changes
   useEffect((): void => {
     const options = getTimeframeOptions(ruleType);
 
