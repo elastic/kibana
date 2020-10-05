@@ -97,10 +97,10 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     });
   }
 
-  public async setup(
+  public setup(
     { elasticsearch, http, savedObjects }: CoreSetup,
     { usageCollection, telemetryCollectionManager }: TelemetryPluginsDepsSetup
-  ): Promise<TelemetryPluginSetup> {
+  ): TelemetryPluginSetup {
     const currentKibanaVersion = this.currentKibanaVersion;
     const config$ = this.config$;
     const isDev = this.isDev;
@@ -131,18 +131,16 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     };
   }
 
-  public async start(core: CoreStart, { telemetryCollectionManager }: TelemetryPluginsDepsStart) {
+  public start(core: CoreStart, { telemetryCollectionManager }: TelemetryPluginsDepsStart) {
     const { savedObjects, uiSettings, elasticsearch } = core;
     this.savedObjectsClient = savedObjects.createInternalRepository();
     const savedObjectsClient = new SavedObjectsClient(this.savedObjectsClient);
     this.uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
     this.elasticsearchClient = elasticsearch.client;
 
-    try {
-      await handleOldSettings(savedObjectsClient, this.uiSettingsClient);
-    } catch (error) {
+    handleOldSettings(savedObjectsClient, this.uiSettingsClient).catch((error) => {
       this.logger.warn('Unable to update legacy telemetry configs.');
-    }
+    });
 
     this.fetcherTask.start(core, { telemetryCollectionManager });
 
