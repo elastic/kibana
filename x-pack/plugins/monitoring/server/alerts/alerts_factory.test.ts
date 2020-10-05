@@ -63,6 +63,6 @@ describe('AlertsFactory', () => {
 
   it('should get all', () => {
     const alerts = AlertsFactory.getAll();
-    expect(alerts.length).toBe(9);
+    expect(alerts.length).toBe(10);
   });
 });

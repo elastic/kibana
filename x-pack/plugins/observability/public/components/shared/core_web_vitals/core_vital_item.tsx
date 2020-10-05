@@ -4,16 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiFlexGroup,
-  euiPaletteForStatus,
-  EuiSpacer,
-  EuiStat,
-} from '@elastic/eui';
+import { EuiFlexGroup, euiPaletteForStatus, EuiSpacer, EuiStat } from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { PaletteLegends } from './PaletteLegends';
-import { ColorPaletteFlexItem } from './ColorPaletteFlexItem';
+import { PaletteLegends } from './palette_legends';
+import { ColorPaletteFlexItem } from './color_palette_flex_item';
 import {
   CV_AVERAGE_LABEL,
   CV_GOOD_LABEL,
@@ -45,7 +40,7 @@ export function getCoreVitalTooltipMessage(
   const bad = position === 2;
   const average = !good && !bad;
 
-  return i18n.translate('xpack.apm.csm.dashboard.webVitals.palette.tooltip', {
+  return i18n.translate('xpack.observability.ux.dashboard.webVitals.palette.tooltip', {
     defaultMessage:
       '{percentage} % of users have {exp} experience because the {title} takes {moreOrLess} than {value}{averageMessage}.',
     values: {
@@ -55,7 +50,7 @@ export function getCoreVitalTooltipMessage(
       moreOrLess: bad || average ? MORE_LABEL : LESS_LABEL,
       value: good || average ? thresholds.good : thresholds.bad,
       averageMessage: average
-        ? i18n.translate('xpack.apm.rum.coreVitals.averageMessage', {
+        ? i18n.translate('xpack.observability.ux.coreVitals.averageMessage', {
             defaultMessage: ' and less than {bad}',
             values: { bad: thresholds.bad },
           })
@@ -64,13 +59,7 @@ export function getCoreVitalTooltipMessage(
   });
 }
 
-export function CoreVitalItem({
-  loading,
-  title,
-  value,
-  thresholds,
-  ranks = [100, 0, 0],
-}: Props) {
+export function CoreVitalItem({ loading, title, value, thresholds, ranks = [100, 0, 0] }: Props) {
   const palette = euiPaletteForStatus(3);
 
   const [inFocusInd, setInFocusInd] = useState<number | null>(null);
@@ -100,12 +89,7 @@ export function CoreVitalItem({
             position={ind}
             inFocus={inFocusInd !== ind && inFocusInd !== null}
             percentage={ranks[ind]}
-            tooltip={getCoreVitalTooltipMessage(
-              thresholds,
-              ind,
-              title,
-              ranks[ind]
-            )}
+            tooltip={getCoreVitalTooltipMessage(thresholds, ind, title, ranks[ind])}
           />
         ))}
       </EuiFlexGroup>
