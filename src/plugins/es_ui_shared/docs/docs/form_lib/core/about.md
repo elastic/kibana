@@ -13,7 +13,7 @@ The takeaway is: the core of the form lib is agnostic of any UI rendering the fo
 
 ## Getting started
 
-The three required component to build a form are
+The three required components to build a form are:
 
 - `useForm()` hook to declare a new form
 - `<Form />` component that will wrap your form and create a context for it
@@ -42,7 +42,7 @@ export const UserForm = () => {
 2. We then wrap our form with the `<Form />` component, providing the `form` that we have just created.
 3. Finally, we declared two fields with the `<UseField />` component, providing a unique `path` for each one of them.
 
-If you were to run this code in the browser and click on the "Submit" button nothing would happen as we haven't defined yet any handler to execute when submitting the form. Let's do that now along with providing a `UserFormData` interface to the form, which we will get back in our `onSubmit` handler.
+If you were to run this code in the browser and click on the "Submit" button nothing would happen as we haven't defined any handler to execute when submitting the form. Let's do that now along with providing a `UserFormData` interface to the form, which we will get back in our `onSubmit` handler.
 
 ```js
 import { useForm, Form, UseField, FormConfig } from 'src/plugins/es_ui_shared/public';
@@ -76,4 +76,4 @@ export const UserForm = () => {
 
 Great! We have our first working form. No state to worry about, just a simple declarative way to build our fields.
 
-Those of you who are attentive might have noticed that the above form _does_ render the fields in the UI although we said earlier that the core of the form lib is not responsile for any UI rendering. This is because the `<UseField />` has a fallback mechanism to render an `<input type="text" />` and hook to the field `value` and `onChange`. Unless you have styled your `input` elements and don't require other field types like `checkbox` or `select`, you will probably want to customize how the the `<UseField />` renders. We will see that in a future section.
+Those of you who are attentive might have noticed that the above form _does_ render the fields in the UI although we said earlier that the core of the form lib is not responsible for any UI rendering. This is because the `<UseField />` has a fallback mechanism to render an `<input type="text" />` and hook to the field `value` and `onChange`. Unless you have styled your `input` elements and don't require other field types like `checkbox` or `select`, you will probably want to customize how the the `<UseField />` renders. We will see that in a future section.
