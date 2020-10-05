@@ -77,19 +77,18 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
-  /**
-   * The dependencies needed to mount the applications. These are dynamically loaded for the sake of webpack bundling efficiency.
-   */
-  private lazyApplicationDependencies(): Promise<LazyApplicationDependencies> {
-    /**
-     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
-     * See https://webpack.js.org/api/module-methods/#magic-comments
-     */
-    /* webpackChunkName: "lazyApplicationDependencies" */ './lazy_application_dependencies';
-    return import('./lazy_application_dependencies');
-  }
-
   private storage = new Storage(localStorage);
+
+  /**
+   * Lazily instantiated subPlugins. see `subPlugins`.
+   */
+  private _subPlugins?: SubPlugins;
+
+  /**
+   * Lazily instantiated `SecurityAppStore`.
+   * See `store`.
+   */
+  private _store?: SecurityAppStore;
 
   public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins): PluginSetup {
     initTelemetry(plugins.usageCollection, APP_ID);
@@ -135,28 +134,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       return services;
     })();
 
-    /**
-     * Lazily instantiated `SecurityAppStore`.
-     * See `store`.
-     */
-    let _store: Promise<SecurityAppStore> | undefined;
-
-    /**
-     * Lazily create and return the `SecurityAppStore` that is needed by each of the subPlugin applications.
-     * This needs to be done lazily because it dynamically imports a large bundle.
-     * The store needs to be create only once because each subPlugin must share the same reference.
-     */
-    // TODO, rename this `store`.
-    const storeFactory: () => Promise<SecurityAppStore> = async () => {
-      if (!_store) {
-        _store = (async () => {
-          const [coreStart, startPlugins] = await core.getStartServices();
-          return this.storeFactory(coreStart, startPlugins, this.storage);
-        })();
-      }
-      return _store;
-    };
-
     core.application.register({
       exactRoute: true,
       id: APP_ID,
@@ -178,8 +155,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_OVERVIEW_PATH,
       mount: async (params: AppMountParameters) => {
-        const [coreStart] = await core.getStartServices();
-        const store = await storeFactory();
+        const [coreStart, startPlugins] = await core.getStartServices();
         const { overview: subPlugin } = await this.subPlugins();
         const { renderApp, composeLibs } = await this.lazyApplicationDependencies();
 
@@ -187,7 +163,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           ...composeLibs(coreStart),
           ...params,
           services: await startServices,
-          store,
+          store: await this.store(coreStart, startPlugins),
           SubPluginRoutes: subPlugin.start().SubPluginRoutes,
         });
       },
@@ -201,8 +177,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_DETECTIONS_PATH,
       mount: async (params: AppMountParameters) => {
-        const [coreStart] = await core.getStartServices();
-        const store = await storeFactory();
+        const [coreStart, startPlugins] = await core.getStartServices();
         const { detections: subPlugin } = await this.subPlugins();
         const { renderApp, composeLibs } = await this.lazyApplicationDependencies();
 
@@ -210,7 +185,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           ...composeLibs(coreStart),
           ...params,
           services: await startServices,
-          store,
+          store: await this.store(coreStart, startPlugins),
           SubPluginRoutes: subPlugin.start(this.storage).SubPluginRoutes,
         });
       },
@@ -224,15 +199,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_HOSTS_PATH,
       mount: async (params: AppMountParameters) => {
-        const [coreStart] = await core.getStartServices();
-        const store = await storeFactory();
+        const [coreStart, startPlugins] = await core.getStartServices();
         const { hosts: subPlugin } = await this.subPlugins();
         const { renderApp, composeLibs } = await this.lazyApplicationDependencies();
         return renderApp({
           ...composeLibs(coreStart),
           ...params,
           services: await startServices,
-          store,
+          store: await this.store(coreStart, startPlugins),
           SubPluginRoutes: subPlugin.start(this.storage).SubPluginRoutes,
         });
       },
@@ -246,15 +220,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_NETWORK_PATH,
       mount: async (params: AppMountParameters) => {
-        const [coreStart] = await core.getStartServices();
-        const store = await storeFactory();
+        const [coreStart, startPlugins] = await core.getStartServices();
         const { network: subPlugin } = await this.subPlugins();
         const { renderApp, composeLibs } = await this.lazyApplicationDependencies();
         return renderApp({
           ...composeLibs(coreStart),
           ...params,
           services: await startServices,
-          store,
+          store: await this.store(coreStart, startPlugins),
           SubPluginRoutes: subPlugin.start(this.storage).SubPluginRoutes,
         });
       },
@@ -268,15 +241,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_TIMELINES_PATH,
       mount: async (params: AppMountParameters) => {
-        const [coreStart] = await core.getStartServices();
-        const store = await storeFactory();
+        const [coreStart, startPlugins] = await core.getStartServices();
         const { timelines: subPlugin } = await this.subPlugins();
         const { renderApp, composeLibs } = await this.lazyApplicationDependencies();
         return renderApp({
           ...composeLibs(coreStart),
           ...params,
           services: await startServices,
-          store,
+          store: await this.store(coreStart, startPlugins),
           SubPluginRoutes: subPlugin.start().SubPluginRoutes,
         });
       },
@@ -290,15 +262,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_CASES_PATH,
       mount: async (params: AppMountParameters) => {
-        const [coreStart] = await core.getStartServices();
-        const store = await storeFactory();
+        const [coreStart, startPlugins] = await core.getStartServices();
         const { cases: subPlugin } = await this.subPlugins();
         const { renderApp, composeLibs } = await this.lazyApplicationDependencies();
         return renderApp({
           ...composeLibs(coreStart),
           ...params,
           services: await startServices,
-          store,
+          store: await this.store(coreStart, startPlugins),
           SubPluginRoutes: subPlugin.start().SubPluginRoutes,
         });
       },
@@ -313,14 +284,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       appRoute: APP_MANAGEMENT_PATH,
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
-        const store = await storeFactory();
         const { management: managementSubPlugin } = await this.subPlugins();
         const { renderApp, composeLibs } = await this.lazyApplicationDependencies();
         return renderApp({
           ...composeLibs(coreStart),
           ...params,
           services: await startServices,
-          store,
+          store: await this.store(coreStart, startPlugins),
           SubPluginRoutes: managementSubPlugin.start(coreStart, startPlugins).SubPluginRoutes,
         });
       },
@@ -369,12 +339,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   }
 
   /**
-   * Lazily instantiated subPlugins. see `subPlugins`.
+   * The dependencies needed to mount the applications. These are dynamically loaded for the sake of webpack bundling efficiency.
    */
-  private _subPlugins?: SubPlugins;
+  private lazyApplicationDependencies(): Promise<LazyApplicationDependencies> {
+    /**
+     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
+     * See https://webpack.js.org/api/module-methods/#magic-comments
+     */
+    /* webpackChunkName: "lazyApplicationDependencies" */ './lazy_application_dependencies';
+    return import('./lazy_application_dependencies');
+  }
 
   /**
-   * Lazily instantiated subPlugins.
+   * Lazily instantiated subPlugins. This should be instantiated just once.
    */
   private async subPlugins(): Promise<SubPlugins> {
     if (!this._subPlugins) {
@@ -393,85 +370,84 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   }
 
   /**
-   * Used to lazily instantiate a `SecurityAppStore`.
+   * Lazily instantiate a `SecurityAppStore`.
    */
-  private async storeFactory(
-    coreStart: CoreStart,
-    startPlugins: StartPlugins,
-    storage: Storage
-  ): Promise<SecurityAppStore> {
-    const defaultIndicesName = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
-    const [
-      { composeLibs, createStore, createInitialState },
-      kibanaIndexPatterns,
-      {
-        detections: detectionsSubPlugin,
-        hosts: hostsSubPlugin,
-        network: networkSubPlugin,
-        timelines: timelinesSubPlugin,
-        management: managementSubPlugin,
-      },
-      configIndexPatterns,
-    ] = await Promise.all([
-      this.lazyApplicationDependencies(),
-      startPlugins.data.indexPatterns.getIdsWithTitle(),
-      this.subPlugins(),
-      startPlugins.data.search
-        .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
-          { indices: defaultIndicesName, onlyCheckIfIndicesExist: false },
+  private async store(coreStart: CoreStart, startPlugins: StartPlugins): Promise<SecurityAppStore> {
+    if (!this._store) {
+      const defaultIndicesName = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
+      const [
+        { composeLibs, createStore, createInitialState },
+        kibanaIndexPatterns,
+        {
+          detections: detectionsSubPlugin,
+          hosts: hostsSubPlugin,
+          network: networkSubPlugin,
+          timelines: timelinesSubPlugin,
+          management: managementSubPlugin,
+        },
+        configIndexPatterns,
+      ] = await Promise.all([
+        this.lazyApplicationDependencies(),
+        startPlugins.data.indexPatterns.getIdsWithTitle(),
+        this.subPlugins(),
+        startPlugins.data.search
+          .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
+            { indices: defaultIndicesName, onlyCheckIfIndicesExist: false },
+            {
+              strategy: 'securitySolutionIndexFields',
+            }
+          )
+          .toPromise(),
+      ]);
+
+      const { apolloClient } = composeLibs(coreStart);
+      const appLibs: AppObservableLibs = { apolloClient, kibana: coreStart };
+      const libs$ = new BehaviorSubject(appLibs);
+
+      const detectionsStart = detectionsSubPlugin.start(this.storage);
+      const hostsStart = hostsSubPlugin.start(this.storage);
+      const networkStart = networkSubPlugin.start(this.storage);
+      const timelinesStart = timelinesSubPlugin.start();
+      const managementSubPluginStart = managementSubPlugin.start(coreStart, startPlugins);
+
+      const timelineInitialState = {
+        timeline: {
+          ...timelinesStart.store.initialState.timeline!,
+          timelineById: {
+            ...timelinesStart.store.initialState.timeline!.timelineById,
+            ...detectionsStart.storageTimelines!.timelineById,
+            ...hostsStart.storageTimelines!.timelineById,
+            ...networkStart.storageTimelines!.timelineById,
+          },
+        },
+      };
+
+      this._store = createStore(
+        createInitialState(
           {
-            strategy: 'securitySolutionIndexFields',
+            ...hostsStart.store.initialState,
+            ...networkStart.store.initialState,
+            ...timelineInitialState,
+            ...managementSubPluginStart.store.initialState,
+          },
+          {
+            kibanaIndexPatterns,
+            configIndexPatterns: configIndexPatterns.indicesExist,
           }
-        )
-        .toPromise(),
-    ]);
-
-    const { apolloClient } = composeLibs(coreStart);
-    const appLibs: AppObservableLibs = { apolloClient, kibana: coreStart };
-    const libs$ = new BehaviorSubject(appLibs);
-
-    const detectionsStart = detectionsSubPlugin.start(storage);
-    const hostsStart = hostsSubPlugin.start(storage);
-    const networkStart = networkSubPlugin.start(storage);
-    const timelinesStart = timelinesSubPlugin.start();
-    const managementSubPluginStart = managementSubPlugin.start(coreStart, startPlugins);
-
-    const timelineInitialState = {
-      timeline: {
-        ...timelinesStart.store.initialState.timeline!,
-        timelineById: {
-          ...timelinesStart.store.initialState.timeline!.timelineById,
-          ...detectionsStart.storageTimelines!.timelineById,
-          ...hostsStart.storageTimelines!.timelineById,
-          ...networkStart.storageTimelines!.timelineById,
-        },
-      },
-    };
-
-    return createStore(
-      createInitialState(
+        ),
         {
-          ...hostsStart.store.initialState,
-          ...networkStart.store.initialState,
-          ...timelineInitialState,
-          ...managementSubPluginStart.store.initialState,
+          ...hostsStart.store.reducer,
+          ...networkStart.store.reducer,
+          ...timelinesStart.store.reducer,
+          ...managementSubPluginStart.store.reducer,
         },
-        {
-          kibanaIndexPatterns,
-          configIndexPatterns: configIndexPatterns.indicesExist,
-        }
-      ),
-      {
-        ...hostsStart.store.reducer,
-        ...networkStart.store.reducer,
-        ...timelinesStart.store.reducer,
-        ...managementSubPluginStart.store.reducer,
-      },
-      libs$.pipe(pluck('apolloClient')),
-      libs$.pipe(pluck('kibana')),
-      storage,
-      [...(managementSubPluginStart.store.middleware ?? [])]
-    );
+        libs$.pipe(pluck('apolloClient')),
+        libs$.pipe(pluck('kibana')),
+        this.storage,
+        [...(managementSubPluginStart.store.middleware ?? [])]
+      );
+    }
+    return this._store;
   }
 }
 
