@@ -223,7 +223,6 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
 
 export const fillDefineEqlRuleAndContinue = (rule: CustomRule) => {
   cy.get(EQL_QUERY_INPUT).type(rule.customQuery);
-  cy.get(EQL_QUERY_INPUT).invoke('text').should('eq', rule.customQuery);
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 
   cy.get(EQL_QUERY_INPUT).should('not.exist');
