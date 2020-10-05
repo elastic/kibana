@@ -101,17 +101,6 @@ const apmPerAgentSchema: Pick<
     python: agentSchema,
     ruby: agentSchema,
     'rum-js': agentSchema,
-    otlp: agentSchema,
-    'opentelemetry/cpp': agentSchema,
-    'opentelemetry/dotnet': agentSchema,
-    'opentelemetry/erlang': agentSchema,
-    'opentelemetry/go': agentSchema,
-    'opentelemetry/java': agentSchema,
-    'opentelemetry/nodejs': agentSchema,
-    'opentelemetry/php': agentSchema,
-    'opentelemetry/python': agentSchema,
-    'opentelemetry/ruby': agentSchema,
-    'opentelemetry/webjs': agentSchema,
   },
 };
 
