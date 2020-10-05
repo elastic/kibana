@@ -278,3 +278,6 @@ To match on a single nested document:
 -------------------
 level1.level2:{ prop1:foo and prop2:bar }
 -------------------
+
+IMPORTANT: {kib} is unable to perform aggregations across fields that contain nested objects, and is unable to search on nested objects when Lucene Query Syntax is used in
+the query bar. Using `include_in_parent` or `copy_to` as a workaround is unsupported and can stop functioning in future releases.
