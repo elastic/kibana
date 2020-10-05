@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiTitle } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
 import React, { useEffect, useState, FormEvent, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -121,9 +120,6 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
 
   return (
     <>
-      <EuiTitle size="xxs" textTransform="uppercase">
-        <h4>{I18LABELS.url}</h4>
-      </EuiTitle>
       <SelectableUrlList
         loading={isLoading}
         onInputChange={onInputChange}

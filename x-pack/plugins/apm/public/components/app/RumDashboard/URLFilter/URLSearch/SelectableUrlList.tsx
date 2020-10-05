@@ -4,17 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FormEvent, SetStateAction, useRef, useState } from 'react';
+import React, {
+  FormEvent,
+  SetStateAction,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiPopover,
+  EuiInputPopover,
   EuiPopoverTitle,
   EuiSelectable,
   EuiSelectableMessage,
+  EuiPopoverFooter,
+  EuiButton,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import {
   formatOptions,
   selectableRenderOptions,
@@ -52,6 +61,20 @@ export function SelectableUrlList({
   const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
 
   const titleRef = useRef<HTMLDivElement>(null);
+
+  const onEnterKey = (e) => {
+    if (e.key.toLowerCase() === 'enter') {
+      onTermChange();
+      setPopoverIsOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    searchRef?.addEventListener('keydown', onEnterKey);
+    return () => {
+      searchRef?.removeEventListener('keydown', onEnterKey);
+    };
+  });
 
   const searchOnFocus = (e: React.FocusEvent<HTMLInputElement>) => {
     setPopoverIsOpen(true);
@@ -142,25 +165,46 @@ export function SelectableUrlList({
       listProps={{
         rowHeight: 68,
         showIcons: true,
+        onFocusBadge: false,
       }}
       loadingMessage={loadingMessage}
       emptyMessage={emptyMessage}
       noMatchesMessage={emptyMessage}
     >
       {(list, search) => (
-        <EuiPopover
+        <EuiInputPopover
+          fullWidth
           panelPaddingSize="none"
           isOpen={popoverIsOpen}
           display={'block'}
           panelRef={setPopoverRef}
           button={search}
           closePopover={closePopover}
+          anchorPosition={'downLeft'}
         >
           <div style={{ width: 600, maxWidth: '100%' }}>
             <PopOverTitle />
             {list}
+            <EuiPopoverFooter>
+              <EuiFlexGroup style={{ justifyContent: 'flex-end' }}>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    fill
+                    size="s"
+                    onClick={() => {
+                      onTermChange();
+                      closePopover();
+                    }}
+                  >
+                    {i18n.translate('xpack.apm.applyOptions', {
+                      defaultMessage: 'Apply options',
+                    })}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPopoverFooter>
           </div>
-        </EuiPopover>
+        </EuiInputPopover>
       )}
     </EuiSelectable>
   );
