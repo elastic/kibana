@@ -181,7 +181,7 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
         <h5>
           <FormattedMessage
             id="xpack.triggersActionsUI.geoThreshold.selectOffset"
-            defaultMessage="Select offset (optional):"
+            defaultMessage="Select offset (optional)"
           />
         </h5>
       </EuiTitle>
@@ -222,7 +222,7 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
         <h5>
           <FormattedMessage
             id="xpack.triggersActionsUI.geoThreshold.selectEntity"
-            defaultMessage="Select entity:"
+            defaultMessage="Select entity"
           />
         </h5>
       </EuiTitle>
@@ -252,7 +252,7 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
         <h5>
           <FormattedMessage
             id="xpack.triggersActionsUI.geoThreshold.selectIndex"
-            defaultMessage="Define the condition:"
+            defaultMessage="Define the condition"
           />
         </h5>
       </EuiTitle>
