@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import {
   EuiComboBox,
   EuiComboBoxOptionOption,
@@ -28,10 +28,6 @@ const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProp
   ResilientFieldsType
 >> = ({ isEdit = true, fields, connector, onChange }) => {
   const { incidentTypes = null, severityCode = null } = fields ?? {};
-
-  const [selectedIncidentTypesComboBoxOptions, setSelectedIncidentTypesComboBoxOptions] = useState<
-    Array<EuiComboBoxOptionOption<string>>
-  >([]);
 
   const { http, notifications } = useKibana().services;
 
@@ -69,25 +65,6 @@ const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProp
         : [],
     [allIncidentTypes]
   );
-
-  useEffect(() => {
-    const allIncidentTypesAsObject = allIncidentTypes.reduce(
-      (acc, type) => ({ ...acc, [type.id.toString()]: type.name }),
-      {} as Record<string, string>
-    );
-
-    setSelectedIncidentTypesComboBoxOptions(
-      incidentTypes
-        ? incidentTypes
-            .map((type) => ({
-              label: allIncidentTypesAsObject[type.toString()],
-              value: type.toString(),
-            }))
-            .filter((type) => type.label != null)
-        : []
-    );
-  }, [connector, allIncidentTypes, incidentTypes]);
-
   const listItems = useMemo(
     () => [
       ...(incidentTypes != null
@@ -127,49 +104,64 @@ const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProp
     [incidentTypes, severityCode, onChange, fields]
   );
 
+  const selectedIncidentTypesComboBoxOptionsMemo = useMemo(() => {
+    const allIncidentTypesAsObject = allIncidentTypes.reduce(
+      (acc, type) => ({ ...acc, [type.id.toString()]: type.name }),
+      {} as Record<string, string>
+    );
+    return incidentTypes
+      ? incidentTypes
+          .map((type) => ({
+            label: allIncidentTypesAsObject[type.toString()],
+            value: type.toString(),
+          }))
+          .filter((type) => type.label != null)
+      : [];
+  }, [allIncidentTypes, incidentTypes]);
+
+  const onIncidentChange = useCallback(
+    (selectedOptions: Array<{ label: string; value?: string }>) => {
+      onFieldChange(
+        'incidentTypes',
+        selectedOptions.map((selectedOption) => selectedOption.value ?? selectedOption.label)
+      );
+    },
+    [onFieldChange]
+  );
+
+  const onIncidentBlur = useCallback(() => {
+    if (!incidentTypes) {
+      onFieldChange('incidentTypes', []);
+    }
+  }, [incidentTypes, onFieldChange]);
+
   return isEdit ? (
     <span data-test-subj={'connector-settings-resilient'}>
       <EuiFormRow fullWidth label={i18n.INCIDENT_TYPES_LABEL}>
         <EuiComboBox
-          fullWidth
-          isLoading={isLoadingIncidentTypes}
-          isDisabled={isLoadingIncidentTypes}
           data-test-subj="incidentTypeComboBox"
-          options={incidentTypesComboBoxOptions}
-          selectedOptions={selectedIncidentTypesComboBoxOptions}
-          placeholder={i18n.INCIDENT_TYPES_PLACEHOLDER}
-          onChange={(selectedOptions: Array<{ label: string; value?: string }>) => {
-            setSelectedIncidentTypesComboBoxOptions(
-              selectedOptions.map((selectedOption) => ({
-                label: selectedOption.label,
-                value: selectedOption.value,
-              }))
-            );
-
-            onFieldChange(
-              'incidentTypes',
-              selectedOptions.map((selectedOption) => selectedOption.value ?? selectedOption.label)
-            );
-          }}
-          onBlur={() => {
-            if (!incidentTypes) {
-              onFieldChange('incidentTypes', []);
-            }
-          }}
+          fullWidth
           isClearable={true}
+          isDisabled={isLoadingIncidentTypes}
+          isLoading={isLoadingIncidentTypes}
+          onBlur={onIncidentBlur}
+          onChange={onIncidentChange}
+          options={incidentTypesComboBoxOptions}
+          placeholder={i18n.INCIDENT_TYPES_PLACEHOLDER}
+          selectedOptions={selectedIncidentTypesComboBoxOptionsMemo}
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
       <EuiFormRow fullWidth label={i18n.SEVERITY_LABEL}>
         <EuiSelect
-          isLoading={isLoadingSeverity}
+          data-test-subj="severitySelect"
           disabled={isLoadingSeverity}
           fullWidth
           hasNoInitialSelection
-          data-test-subj="severitySelect"
+          isLoading={isLoadingSeverity}
+          onChange={(e) => onFieldChange('severityCode', e.target.value)}
           options={severitySelectOptions}
           value={severityCode ?? undefined}
-          onChange={(e) => onFieldChange('severityCode', e.target.value)}
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
@@ -177,9 +169,9 @@ const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProp
   ) : (
     <ConnectorCard
       connectorType={ConnectorTypes.resilient}
-      title={connector.name}
-      listItems={listItems}
       isLoading={isLoadingIncidentTypes || isLoadingSeverity}
+      listItems={listItems}
+      title={connector.name}
     />
   );
 };

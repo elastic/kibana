@@ -129,7 +129,6 @@ export const EditConnector = React.memo(
             type: 'SET_CURRENT_CONNECTOR',
             payload: getConnectorById(newConnectorId, connectors),
           });
-          // on connector change, set fields from userActions
           if (userActions.length > 0) {
             dispatch({
               type: 'SET_FIELDS',
@@ -143,14 +142,14 @@ export const EditConnector = React.memo(
 
     const onFieldsChange = useCallback(
       (newFields) => {
-        if (!deepEqual(newFields, caseFields)) {
+        if (!deepEqual(newFields, fields)) {
           dispatch({
             type: 'SET_FIELDS',
             payload: newFields,
           });
         }
       },
-      [caseFields, dispatch]
+      [fields, dispatch]
     );
 
     const onError = useCallback(() => {

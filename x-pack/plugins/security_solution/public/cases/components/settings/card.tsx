@@ -45,7 +45,7 @@ const ConnectorCardDisplay: React.FC<ConnectorCardProps> = ({
     [listItems]
   );
   const icon = useMemo(
-    () => <EuiIcon size="l" type={connectorsConfiguration[`${connectorType}`]?.logo ?? ''} />,
+    () => <EuiIcon size="xl" type={connectorsConfiguration[`${connectorType}`]?.logo ?? ''} />,
     [connectorType]
   );
   return (
@@ -54,10 +54,11 @@ const ConnectorCardDisplay: React.FC<ConnectorCardProps> = ({
       {!isLoading && (
         <EuiCard
           data-test-subj={`settings-connector-card`}
-          display="plain"
           description={description}
+          display="plain"
           icon={icon}
           layout="horizontal"
+          paddingSize="none"
           title={title}
           titleSize="xs"
         />

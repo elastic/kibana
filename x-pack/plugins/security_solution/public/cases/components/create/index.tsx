@@ -81,49 +81,15 @@ export const Create = React.memo(() => {
   const { connector: configureConnector, loading: isLoadingCaseConfigure } = useCaseConfigure();
   const { tags: tagOptions } = useGetTags();
 
-  const [connector, setConnector] = useState<ActionConnector | null>(null);
+  const [bleepBlorp, setConnector] = useState<ActionConnector | null>(null);
   const [options, setOptions] = useState(
     tagOptions.map((label) => ({
       label,
     }))
   );
 
-  const [fields, setFields] = useState<ConnectorFields>(null);
-
-  const { form } = useForm<FormProps>({
-    defaultValue: initialCaseValue,
-    options: { stripEmptyFields: false },
-    schema,
-  });
-
-  const { submit, setFieldValue } = form;
-  const [{ connectorId, tags, description }] = useFormData<{
-    connectorId: string;
-    tags: string[];
-    description: string;
-  }>({
-    form,
-    watch: ['connectorId', 'tags', 'description'],
-  });
-
-  useEffect(() => {
-    setConnector(getConnectorById(connectorId, connectors) ?? null);
-  }, [connectors, connectorId]);
-
-  useEffect(() => {
-    if (!isLoadingCaseConfigure) {
-      setFieldValue(
-        'connectorId',
-        normalizeCaseConnector(connectors, configureConnector)?.id ?? 'none'
-      );
-    }
-  }, [connectors, configureConnector, isLoadingCaseConfigure, setFieldValue]);
-
-  // Reset setting fields when changing connector
-  useEffect(() => {
-    setFields(null);
-  }, [connectorId]);
-
+  // This values uses useEffect to update, not useMemo,
+  // because we need to setState on it from the jsx
   useEffect(
     () =>
       setOptions(
@@ -134,27 +100,37 @@ export const Create = React.memo(() => {
     [tagOptions]
   );
 
-  useEffect(() => {
-    if (tags == null) {
-      return;
-    }
+  const [fields, setFields] = useState<ConnectorFields>(null);
 
-    const current: string[] = options.map((opt) => opt.label);
-    const newOptions = tags.reduce((acc: string[], item: string) => {
-      if (!acc.includes(item)) {
-        return [...acc, item];
+  const { form } = useForm<FormProps>({
+    defaultValue: initialCaseValue,
+    options: { stripEmptyFields: false },
+    schema,
+  });
+  const currentConnectorId = useMemo(
+    () =>
+      !isLoadingCaseConfigure
+        ? normalizeCaseConnector(connectors, configureConnector)?.id ?? 'none'
+        : null,
+    [configureConnector, connectors, isLoadingCaseConfigure]
+  );
+  const { submit, setFieldValue } = form;
+  const [{ description }] = useFormData<{
+    description: string;
+  }>({
+    form,
+    watch: ['description'],
+  });
+  const onChangeConnector = useCallback(
+    (newConnectorId) => {
+      if (bleepBlorp == null || bleepBlorp.id !== newConnectorId) {
+        setConnector(getConnectorById(newConnectorId, connectors) ?? null);
+        // Reset setting fields when changing connector
+        setFields(null);
       }
-      return acc;
-    }, current);
-
-    if (!isEqual(current, newOptions)) {
-      setOptions(
-        newOptions.map((label: string) => ({
-          label,
-        }))
-      );
-    }
-  }, [tags, options]);
+    },
+    [bleepBlorp, connectors]
+  );
 
   const onDescriptionChange = useCallback((newValue) => setFieldValue('description', newValue), [
     setFieldValue,
@@ -274,10 +250,12 @@ export const Create = React.memo(() => {
                 componentProps={{
                   connectors,
                   dataTestSubj: 'caseConnectors',
+                  defaultValue: currentConnectorId,
                   disabled: isLoadingConnectors,
                   idAria: 'caseConnectors',
                   isLoading,
                 }}
+                onChange={onChangeConnector}
               />
             </Container>
           </EuiFlexItem>
@@ -285,7 +263,7 @@ export const Create = React.memo(() => {
             <Container>
               <SettingFieldsForm
                 isEdit={true}
-                connector={connector}
+                connector={bleepBlorp}
                 onChange={setFields}
                 fields={fields}
               />
@@ -294,7 +272,15 @@ export const Create = React.memo(() => {
         </EuiFlexGroup>
       ),
     }),
-    [isLoadingConnectors, connectors, isLoading, connector, fields]
+    [
+      bleepBlorp,
+      connectors,
+      currentConnectorId,
+      fields,
+      isLoading,
+      isLoadingConnectors,
+      onChangeConnector,
+    ]
   );
 
   const allSteps = useMemo(() => [firstStep, secondStep], [firstStep, secondStep]);
