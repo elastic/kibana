@@ -4,7 +4,7 @@ title: <UseArray />
 sidebar_label: <UseArray />
 ---
 
-Use the `<UseArray />` component whenever you want to let the user add or remove fields in your form. Those fields will always be part of an array. Either an array of _values_, either an array of _objects_.  
+Use the `<UseArray />` component whenever you want to let the user add or remove fields in your form. Those fields will always be part of an array. Either an array of _values_, or an array of _objects_.  
 If you need those dynamic fields to be returned differently, you can [use a `serializer`](use_field.md#serializer) to transform the array.  
 There are no limits to how nested arrays and fields can be.
 
@@ -51,7 +51,7 @@ The array path. It can be any valid [`lodash.set()` path](https://lodash.com/doc
 
 Define the number of items you want to have by default in the array. It is only used when there are no `defaultValue` found for the array. If there is a default value found, the number of items will be the length of the array.
 
-Those items are not fields yet, there are objects that you will receive back in the child function (see below).
+Those items are not fields yet, they are objects that you will receive back in the child function (see below).
 
 ### validations
 
