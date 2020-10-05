@@ -23,7 +23,7 @@ function _InlineTextInput({
   onChange,
 }: Props): React.ReactElement<any, any> | null {
   const [isShowingTextInput, setIsShowingTextInput] = useState<boolean>(false);
-  const [textValue, setTextValue] = useState<string>(text ?? '');
+  const [textValue, setTextValue] = useState<string>(() => text ?? '');
 
   const containerClasses = classNames('pipelineProcessorsEditor__item__textContainer', {
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -38,6 +38,10 @@ function _InlineTextInput({
       onChange(textValue);
     });
   }, [setIsShowingTextInput, onChange, textValue]);
+
+  useEffect(() => {
+    setTextValue(text ?? '');
+  }, [text]);
 
   useEffect(() => {
     const keyboardListener = (event: KeyboardEvent) => {

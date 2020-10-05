@@ -19,6 +19,7 @@ export type OnSubmitHandler = (processor: ProcessorFormOnSubmitArg) => void;
 export type OnFormUpdateHandler = (form: OnFormUpdateArg<any>) => void;
 
 export interface Fields {
+  type: string;
   fields: { [key: string]: any };
 }
 
@@ -57,8 +58,28 @@ export const ProcessorFormContainer: FunctionComponent<Props> = ({
     return { ...processor, options } as ProcessorInternal;
   }, [processor, unsavedFormState]);
 
+  const formSerializer = useCallback(
+    (formState) => {
+      return {
+        type: formState.type,
+        fields: formState.customOptions
+          ? {
+              ...formState.customOptions,
+            }
+          : {
+              ...formState.fields,
+              // The description field is not editable in processor forms currently. We re-add it here or it will be
+              // stripped.
+              description: processor ? processor.options.description : undefined,
+            },
+      };
+    },
+    [processor]
+  );
+
   const { form } = useForm({
     defaultValue: { fields: getProcessor().options },
+    serializer: formSerializer,
   });
   const { subscribe } = form;
 
@@ -67,22 +88,7 @@ export const ProcessorFormContainer: FunctionComponent<Props> = ({
       const { isValid, data } = await form.submit();
 
       if (isValid) {
-        const { type, customOptions, fields } = data as FormData;
-        const options = customOptions ? customOptions : fields;
-
-        /**
-         * We drive the state for the processor description outside of the form state so
-         * we add the description again here to avoid removing it because the form lib will
-         * not include it here.
-         *
-         * TODO: Add a ghost/invisible field to the form for the description field
-         *
-         * Also, not using processor?.options.description syntax because react eslint
-         * does not pick up processor dependency correctly.
-         */
-        if (processor && processor.options.description) {
-          options.description = processor.options.description;
-        }
+        const { type, fields: options } = data as FormData;
 
         unsavedFormState.current = options;
 
@@ -96,7 +102,7 @@ export const ProcessorFormContainer: FunctionComponent<Props> = ({
         }
       }
     },
-    [processor, form, onClose, onSubmit]
+    [form, onClose, onSubmit]
   );
 
   const resetProcessors = useCallback(() => {
