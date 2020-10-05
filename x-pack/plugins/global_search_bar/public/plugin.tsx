@@ -34,7 +34,14 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}> {
     core.chrome.navControls.registerCenter({
       order: 1000,
       mount: (target) =>
-        this.mount(target, globalSearch, core.application.navigateToUrl, trackUiMetric),
+        this.mount(
+          target,
+          globalSearch,
+          core.application.navigateToUrl,
+          core.http.basePath.prepend('/plugins/globalSearchBar/assets/'),
+          core.uiSettings.get('theme:darkMode'),
+          trackUiMetric
+        ),
     });
     return {};
   }
@@ -43,6 +50,8 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}> {
     targetDomElement: HTMLElement,
     globalSearch: GlobalSearchPluginStart,
     navigateToUrl: ApplicationStart['navigateToUrl'],
+    basePathUrl: string,
+    darkMode: boolean,
     trackUiMetric: (metricType: UiStatsMetricType, eventName: string | string[]) => void
   ) {
     ReactDOM.render(
@@ -50,6 +59,8 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}> {
         <SearchBar
           globalSearch={globalSearch.find}
           navigateToUrl={navigateToUrl}
+          basePathUrl={basePathUrl}
+          darkMode={darkMode}
           trackUiMetric={trackUiMetric}
         />
       </I18nProvider>,

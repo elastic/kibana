@@ -15,6 +15,20 @@ Array [
 ]
 `;
 
+exports[`SearchBar only display results from the last search 1`] = `
+Array [
+  "Visualize • Kibana",
+  "Map • Kibana",
+]
+`;
+
+exports[`SearchBar only display results from the last search 2`] = `
+Array [
+  "Visualize • Kibana",
+  "Map • Kibana",
+]
+`;
+
 exports[`SearchBar supports keyboard shortcuts 1`] = `
 <input
   aria-activedescendant=""

@@ -10,6 +10,7 @@ import {
   EuiFlexItem,
   EuiHeaderSectionItemButton,
   EuiIcon,
+  EuiImage,
   EuiSelectableMessage,
   EuiSelectableTemplateSitewide,
   EuiSelectableTemplateSitewideOption,
@@ -19,16 +20,19 @@ import { METRIC_TYPE, UiStatsMetricType } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ApplicationStart } from 'kibana/public';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useEvent from 'react-use/lib/useEvent';
 import useMountedState from 'react-use/lib/useMountedState';
+import { Subscription } from 'rxjs';
 import { GlobalSearchPluginStart, GlobalSearchResult } from '../../../global_search/public';
 
 interface Props {
   globalSearch: GlobalSearchPluginStart['find'];
   navigateToUrl: ApplicationStart['navigateToUrl'];
   trackUiMetric: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
+  basePathUrl: string;
+  darkMode: boolean;
 }
 
 const clearField = (field: HTMLInputElement) => {
@@ -44,51 +48,81 @@ const clearField = (field: HTMLInputElement) => {
 const cleanMeta = (str: string) => (str.charAt(0).toUpperCase() + str.slice(1)).replace(/-/g, ' ');
 const blurEvent = new FocusEvent('blur');
 
-export function SearchBar({ globalSearch, navigateToUrl, trackUiMetric }: Props) {
+const sortByScore = (a: GlobalSearchResult, b: GlobalSearchResult): number => {
+  if (a.score < b.score) return 1;
+  if (a.score > b.score) return -1;
+  return 0;
+};
+
+const sortByTitle = (a: GlobalSearchResult, b: GlobalSearchResult): number => {
+  const titleA = a.title.toUpperCase(); // ignore upper and lowercase
+  const titleB = b.title.toUpperCase(); // ignore upper and lowercase
+  if (titleA < titleB) return -1;
+  if (titleA > titleB) return 1;
+  return 0;
+};
+
+const resultToOption = (result: GlobalSearchResult): EuiSelectableTemplateSitewideOption => {
+  const { id, title, url, icon, type, meta } = result;
+  const option: EuiSelectableTemplateSitewideOption = {
+    key: id,
+    label: title,
+    url,
+  };
+
+  if (icon) {
+    option.icon = { type: icon };
+  }
+
+  if (type === 'application') {
+    option.meta = [{ text: meta?.categoryLabel as string }];
+  } else {
+    option.meta = [{ text: cleanMeta(type) }];
+  }
+
+  return option;
+};
+
+export function SearchBar({
+  globalSearch,
+  navigateToUrl,
+  trackUiMetric,
+  basePathUrl,
+  darkMode,
+}: Props) {
   const isMounted = useMountedState();
   const [searchValue, setSearchValue] = useState<string>('');
   const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
   const [buttonRef, setButtonRef] = useState<HTMLDivElement | null>(null);
+  const searchSubscription = useRef<Subscription | null>(null);
   const [options, _setOptions] = useState([] as EuiSelectableTemplateSitewideOption[]);
   const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
   const setOptions = useCallback(
     (_options: GlobalSearchResult[]) => {
-      if (!isMounted()) return;
+      if (!isMounted()) {
+        return;
+      }
 
-      _setOptions([
-        ..._options.map(({ id, title, url, icon, type, meta }) => {
-          const option: EuiSelectableTemplateSitewideOption = {
-            key: id,
-            label: title,
-            url,
-            type,
-          };
-
-          if (icon) option.icon = { type: icon };
-
-          if (type === 'application') option.meta = [{ text: meta?.categoryLabel as string }];
-          else option.meta = [{ text: cleanMeta(type) }];
-
-          return option;
-        }),
-      ]);
+      _setOptions(_options.map(resultToOption));
     },
     [isMounted, _setOptions]
   );
 
   useDebounce(
     () => {
+      // cancel pending search if not completed yet
+      if (searchSubscription.current) {
+        searchSubscription.current.unsubscribe();
+        searchSubscription.current = null;
+      }
+
       let arr: GlobalSearchResult[] = [];
       if (searchValue.length !== 0) trackUiMetric(METRIC_TYPE.COUNT, 'search_request');
-      globalSearch(searchValue, {}).subscribe({
+      searchSubscription.current = globalSearch(searchValue, {}).subscribe({
         next: ({ results }) => {
           if (searchValue.length > 0) {
-            arr = [...results, ...arr].sort((a, b) => {
-              if (a.score < b.score) return 1;
-              if (a.score > b.score) return -1;
-              return 0;
-            });
+            arr = [...results, ...arr].sort(sortByScore);
             setOptions(arr);
             return;
           }
@@ -96,13 +130,7 @@ export function SearchBar({ globalSearch, navigateToUrl, trackUiMetric }: Props)
           // if searchbar is empty, filter to only applications and sort alphabetically
           results = results.filter(({ type }: GlobalSearchResult) => type === 'application');
 
-          arr = [...results, ...arr].sort((a, b) => {
-            const titleA = a.title.toUpperCase(); // ignore upper and lowercase
-            const titleB = b.title.toUpperCase(); // ignore upper and lowercase
-            if (titleA < titleB) return -1;
-            if (titleA > titleB) return 1;
-            return 0;
-          });
+          arr = [...results, ...arr].sort(sortByTitle);
 
           setOptions(arr);
         },
@@ -154,6 +182,34 @@ export function SearchBar({ globalSearch, navigateToUrl, trackUiMetric }: Props)
     }
   };
 
+  const emptyMessage = (
+    <EuiSelectableMessage style={{ minHeight: 300 }}>
+      <EuiImage
+        alt={i18n.translate('xpack.globalSearchBar.searchBar.noResultsImageAlt', {
+          defaultMessage: 'Illustration of black hole',
+        })}
+        size="fullWidth"
+        url={`${basePathUrl}illustration_product_no_search_results_${
+          darkMode ? 'dark' : 'light'
+        }.svg`}
+      />
+      <EuiText size="m">
+        <p>
+          <FormattedMessage
+            id="xpack.globalSearchBar.searchBar.noResultsHeading"
+            defaultMessage="No results found"
+          />
+        </p>
+      </EuiText>
+      <p>
+        <FormattedMessage
+          id="xpack.globalSearchBar.searchBar.noResults"
+          defaultMessage="Try searching for applications, dashboards, visualizations, and more."
+        />
+      </p>
+    </EuiSelectableMessage>
+  );
+
   useEvent('keydown', onKeyDown);
 
   return (
@@ -188,22 +244,8 @@ export function SearchBar({ globalSearch, navigateToUrl, trackUiMetric }: Props)
         repositionOnScroll: true,
         buttonRef: setButtonRef,
       }}
-      emptyMessage={
-        <EuiSelectableMessage style={{ minHeight: 300 }}>
-          <p>
-            <FormattedMessage
-              id="xpack.globalSearchBar.searchBar.noResultsHeading"
-              defaultMessage="No results found"
-            />
-          </p>
-          <p>
-            <FormattedMessage
-              id="xpack.globalSearchBar.searchBar.noResults"
-              defaultMessage="Try searching for applications and saved objects by name."
-            />
-          </p>
-        </EuiSelectableMessage>
-      }
+      emptyMessage={emptyMessage}
+      noMatchesMessage={emptyMessage}
       popoverFooter={
         <EuiText color="subdued" size="xs">
           <EuiFlexGroup
