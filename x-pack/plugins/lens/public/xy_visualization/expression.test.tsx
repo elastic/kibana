@@ -750,6 +750,87 @@ describe('xy_expression', () => {
       });
     });
 
+    test('onBrushEnd returns correct context data for number histogram data', () => {
+      const { args } = sampleArgs();
+
+      const numberLayer: LayerArgs = {
+        layerId: 'numberLayer',
+        hide: false,
+        xAccessor: 'xAccessorId',
+        yScaleType: 'linear',
+        xScaleType: 'linear',
+        isHistogram: true,
+        seriesType: 'bar_stacked',
+        accessors: ['yAccessorId'],
+      };
+
+      const numberHistogramData: LensMultiTable = {
+        type: 'lens_multitable',
+        tables: {
+          numberLayer: {
+            type: 'kibana_datatable',
+            rows: [
+              {
+                xAccessorId: 5,
+                yAccessorId: 1,
+              },
+              {
+                xAccessorId: 7,
+                yAccessorId: 1,
+              },
+              {
+                xAccessorId: 8,
+                yAccessorId: 1,
+              },
+              {
+                xAccessorId: 10,
+                yAccessorId: 1,
+              },
+            ],
+            columns: [
+              {
+                id: 'xAccessorId',
+                name: 'bytes',
+              },
+              {
+                id: 'yAccessorId',
+                name: 'Count of records',
+              },
+            ],
+          },
+        },
+        dateRange: {
+          fromDate: new Date('2020-04-01T16:14:16.246Z'),
+          toDate: new Date('2020-04-01T17:15:41.263Z'),
+        },
+      };
+
+      const wrapper = mountWithIntl(
+        <XYChart
+          data={numberHistogramData}
+          args={{
+            ...args,
+            layers: [numberLayer],
+          }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      wrapper.find(Settings).first().prop('onBrushEnd')!({ x: [5, 8] });
+
+      expect(onSelectRange).toHaveBeenCalledWith({
+        column: 0,
+        table: numberHistogramData.tables.numberLayer,
+        range: [5, 8],
+        timeFieldName: undefined,
+      });
+    });
+
     test('onElementClick returns correct context data', () => {
       const geometry: GeometryValue = { x: 5, y: 1, accessor: 'y1', mark: null, datum: {} };
       const series = {

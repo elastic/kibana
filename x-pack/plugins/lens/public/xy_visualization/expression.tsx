@@ -337,6 +337,9 @@ export function XYChart({
   }
 
   const isTimeViz = data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time');
+  const isHistogramViz = filteredLayers.every(
+    (l) => l.xScaleType === 'time' || l.xScaleType === 'linear'
+  );
 
   const xDomain = isTimeViz
     ? {
@@ -402,8 +405,7 @@ export function XYChart({
             return;
           }
           const [min, max] = x;
-          // in the future we want to make it also for histogram
-          if (!xAxisColumn || !isTimeViz) {
+          if (!xAxisColumn || !isHistogramViz) {
             return;
           }
 
@@ -412,7 +414,9 @@ export function XYChart({
           const xAxisColumnIndex = table.columns.findIndex(
             (el) => el.id === filteredLayers[0].xAccessor
           );
-          const timeFieldName = table.columns[xAxisColumnIndex]?.meta?.aggConfigParams?.field;
+          const timeFieldName = isTimeViz
+            ? table.columns[xAxisColumnIndex]?.meta?.aggConfigParams?.field
+            : undefined;
 
           const context: LensBrushEvent['data'] = {
             range: [min, max],
