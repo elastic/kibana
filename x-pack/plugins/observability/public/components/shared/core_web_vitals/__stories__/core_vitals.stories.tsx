@@ -8,7 +8,7 @@ import React, { ComponentType } from 'react';
 import { IntlProvider } from 'react-intl';
 import { Observable } from 'rxjs';
 import { CoreStart } from 'src/core/public';
-import { createKibanaReactContext } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { createKibanaReactContext } from '../../../../../../../../src/plugins/kibana_react/public';
 import { CoreVitalItem } from '../core_vital_item';
 import { LCP_LABEL } from '../translations';
 import { EuiThemeProvider } from '../../../../typings';
