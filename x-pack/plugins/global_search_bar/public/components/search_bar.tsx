@@ -68,6 +68,7 @@ const resultToOption = (result: GlobalSearchResult): EuiSelectableTemplateSitewi
     key: id,
     label: title,
     url,
+    type,
   };
 
   if (icon) {
