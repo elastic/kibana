@@ -34,6 +34,8 @@ export interface UseMatrixHistogramArgs {
   totalCount: number;
 }
 
+const ID = 'matrixHistogramQuery';
+
 export const useMatrixHistogram = ({
   endDate,
   errorMessage,
@@ -54,6 +56,7 @@ export const useMatrixHistogram = ({
     factoryQueryType: MatrixHistogramQuery,
     filterQuery: createFilter(filterQuery),
     histogramType,
+    id: ID,
     timerange: {
       interval: '12h',
       from: startDate,
