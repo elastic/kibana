@@ -21,14 +21,20 @@ import React from 'react';
 import { PageFooter } from './page_footer';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-jest.mock('../../../../../../src/plugins/kibana_react/public', () => ({
+jest.mock('../../app_links', () => ({
+  RedirectAppLinks: jest.fn((element: JSX.Element) => element),
+}));
+
+jest.mock('../../context', () => ({
   useKibana: jest.fn().mockReturnValue({
     services: {
       application: { capabilities: { advancedSettings: { show: true } } },
       notifications: { toast: { addSuccess: jest.fn() } },
     },
   }),
-  RedirectAppLinks: jest.fn((element: JSX.Element) => element),
+}));
+
+jest.mock('../../ui_settings', () => ({
   useUiSetting$: jest.fn().mockReturnValue(['path-to-default-route', jest.fn()]),
 }));
 

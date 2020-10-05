@@ -21,13 +21,17 @@ import React from 'react';
 import { PageHeader } from './page_header';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-jest.mock('../../../../../../src/plugins/kibana_react/public', () => ({
+jest.mock('../../app_links', () => ({
+  RedirectAppLinks: jest.fn((element: JSX.Element) => element),
+}));
+
+jest.mock('../../context', () => ({
   useKibana: jest.fn().mockReturnValue({
     services: {
       application: { capabilities: { navLinks: { management: true, dev_tools: true } } },
+      notifications: { toast: { addSuccess: jest.fn() } },
     },
   }),
-  RedirectAppLinks: jest.fn((element: JSX.Element) => element),
 }));
 
 afterAll(() => jest.clearAllMocks());
