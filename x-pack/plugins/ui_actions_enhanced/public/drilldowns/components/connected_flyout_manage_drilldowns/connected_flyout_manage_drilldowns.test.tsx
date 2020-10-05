@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { cleanup, fireEvent, render, wait } from '@testing-library/react/pure';
+import { fireEvent, render, wait, cleanup } from '@testing-library/react';
 import { createFlyoutManageDrilldowns } from './connected_flyout_manage_drilldowns';
 import {
   mockGetTriggerInfo,
@@ -29,9 +29,6 @@ const FlyoutManageDrilldowns = createFlyoutManageDrilldowns({
   toastService: toasts,
   getTrigger: mockGetTriggerInfo,
 });
-
-// https://github.com/elastic/kibana/issues/59469
-afterEach(cleanup);
 
 beforeEach(() => {
   storage.clear();
