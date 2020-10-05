@@ -179,6 +179,7 @@ const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProp
       connectorType={ConnectorTypes.resilient}
       title={connector.name}
       listItems={listItems}
+      isLoading={isLoadingIncidentTypes || isLoadingSeverity}
     />
   );
 };

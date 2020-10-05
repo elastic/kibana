@@ -112,6 +112,7 @@ const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsPro
       connectorType={ConnectorTypes.servicenow}
       title={connector.name}
       listItems={listItems}
+      isLoading={false}
     />
   );
 };

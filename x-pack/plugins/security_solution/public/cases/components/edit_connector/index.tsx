@@ -212,7 +212,6 @@ export const EditConnector = React.memo(
         </MyFlexGroup>
         <EuiHorizontalRule margin="xs" />
         <MyFlexGroup gutterSize="none">
-          {isLoading && <EuiLoadingSpinner data-test-subj="connector-loading" />}
           <EuiFlexGroup data-test-subj="edit-connectors" direction="column">
             <DisappearingFlexItem $isHidden={!editConnector}>
               <Form form={form}>

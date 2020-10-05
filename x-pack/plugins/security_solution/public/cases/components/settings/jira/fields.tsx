@@ -183,6 +183,7 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
       connectorType={ConnectorTypes.jira}
       title={connector.name}
       listItems={listItems}
+      isLoading={isLoadingIssueTypes || isLoadingFields}
     />
   );
 };

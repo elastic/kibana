@@ -5,7 +5,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiCard, EuiIcon } from '@elastic/eui';
+import { EuiCard, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { connectorsConfiguration } from '../../../common/lib/connectors/config';
@@ -15,6 +15,7 @@ interface ConnectorCardProps {
   connectorType: ConnectorTypes;
   title: string;
   listItems: Array<{ title: string; description: React.ReactNode }>;
+  isLoading: boolean;
 }
 
 const StyledText = styled.span`
@@ -27,6 +28,7 @@ const ConnectorCardDisplay: React.FC<ConnectorCardProps> = ({
   connectorType,
   title,
   listItems,
+  isLoading,
 }) => {
   const description = useMemo(
     () => (
@@ -47,15 +49,20 @@ const ConnectorCardDisplay: React.FC<ConnectorCardProps> = ({
     [connectorType]
   );
   return (
-    <EuiCard
-      data-test-subj={`settings-connector-card`}
-      display="plain"
-      description={description}
-      icon={icon}
-      layout="horizontal"
-      title={title}
-      titleSize="xs"
-    />
+    <>
+      {isLoading && <EuiLoadingSpinner data-test-subj="settings-connector-card-loading" />}
+      {!isLoading && (
+        <EuiCard
+          data-test-subj={`settings-connector-card`}
+          display="plain"
+          description={description}
+          icon={icon}
+          layout="horizontal"
+          title={title}
+          titleSize="xs"
+        />
+      )}
+    </>
   );
 };
 
