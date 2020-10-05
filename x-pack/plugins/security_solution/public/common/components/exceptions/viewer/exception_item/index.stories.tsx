@@ -17,7 +17,7 @@ addDecorator((storyFn) => (
   <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
 ));
 
-storiesOf('Components|ExceptionItem', module)
+storiesOf('Components/ExceptionItem', module)
   .add('with os', () => {
     const payload = getExceptionListItemSchemaMock();
     payload.description = '';

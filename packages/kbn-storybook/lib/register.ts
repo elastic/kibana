@@ -17,10 +17,19 @@
  * under the License.
  */
 
-export function getState() {
-  return {
-    assets: {
-      yay: { value: 'here is your image' },
-    },
-  };
-}
+import { addons } from '@storybook/addons';
+import { create } from '@storybook/theming';
+
+// This configures the "Manager", or main outer view of Storybook. It is an
+// addon that's loaded by the `managerEntries` part of the preset in ../preset.js.
+addons.setConfig({
+  theme: create({
+    base: 'light',
+    brandTitle: 'Kibana Storybook',
+    brandUrl: 'https://github.com/elastic/kibana/tree/master/packages/kbn-storybook',
+  }),
+  showPanel: false,
+  isFullscreen: false,
+  panelPosition: 'bottom',
+  isToolshown: true,
+});
