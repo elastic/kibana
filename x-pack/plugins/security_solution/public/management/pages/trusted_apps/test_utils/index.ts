@@ -4,9 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ServerApiError } from '../../../../common/types';
+import { combineReducers, createStore } from 'redux';
 import { TrustedApp } from '../../../../../common/endpoint/types';
 import { RoutingAction } from '../../../../common/store/routing';
+
+import {
+  MANAGEMENT_DEFAULT_PAGE,
+  MANAGEMENT_DEFAULT_PAGE_SIZE,
+  MANAGEMENT_STORE_GLOBAL_NAMESPACE,
+  MANAGEMENT_STORE_TRUSTED_APPS_NAMESPACE,
+} from '../../../common/constants';
 
 import {
   AsyncResourceState,
@@ -20,30 +27,36 @@ import {
   UninitialisedResourceState,
 } from '../state';
 
+import { trustedAppsPageReducer } from '../store/reducer';
 import { TrustedAppsListResourceStateChanged } from '../store/action';
-import { initialTrustedAppsPageState } from '../store/reducer';
 
 const OS_LIST: Array<TrustedApp['os']> = ['windows', 'macos', 'linux'];
 
-export const createSampleTrustedApps = (paginationInfo: PaginationInfo): TrustedApp[] => {
-  return [...new Array(paginationInfo.size).keys()].map((i) => ({
-    id: String(paginationInfo.index + i),
-    name: `trusted app ${paginationInfo.index + i}`,
-    description: `Trusted App ${paginationInfo.index + i}`,
+export const createSampleTrustedApp = (i: number): TrustedApp => {
+  return {
+    id: String(i),
+    name: `trusted app ${i}`,
+    description: `Trusted App ${i}`,
     created_at: '1 minute ago',
     created_by: 'someone',
     os: OS_LIST[i % 3],
     entries: [],
-  }));
+  };
+};
+
+export const createSampleTrustedApps = (paginationInfo: PaginationInfo): TrustedApp[] => {
+  return [...new Array(paginationInfo.size).keys()].map(createSampleTrustedApp);
 };
 
 export const createTrustedAppsListData = (
   paginationInfo: PaginationInfo,
-  totalItemsCount: number
+  totalItemsCount: number,
+  timestamp: number
 ) => ({
   items: createSampleTrustedApps(paginationInfo),
   totalItemsCount,
   paginationInfo,
+  timestamp,
 });
 
 export const createServerApiError = (message: string) => ({
@@ -58,10 +71,11 @@ export const createUninitialisedResourceState = (): UninitialisedResourceState =
 
 export const createListLoadedResourceState = (
   paginationInfo: PaginationInfo,
-  totalItemsCount: number
+  totalItemsCount: number,
+  timestamp: number
 ): LoadedResourceState<TrustedAppsListData> => ({
   type: 'LoadedResourceState',
-  data: createTrustedAppsListData(paginationInfo, totalItemsCount),
+  data: createTrustedAppsListData(paginationInfo, totalItemsCount, timestamp),
 });
 
 export const createListFailedResourceState = (
@@ -82,50 +96,32 @@ export const createListLoadingResourceState = (
 
 export const createListComplexLoadingResourceState = (
   paginationInfo: PaginationInfo,
-  totalItemsCount: number
+  totalItemsCount: number,
+  timestamp: number
 ): LoadingResourceState<TrustedAppsListData> =>
   createListLoadingResourceState(
     createListFailedResourceState(
       'Internal Server Error',
-      createListLoadedResourceState(paginationInfo, totalItemsCount)
+      createListLoadedResourceState(paginationInfo, totalItemsCount, timestamp)
     )
   );
 
-export const createDefaultPaginationInfo = () => ({ index: 0, size: 20 });
-
-export const createDefaultListView = () => ({
-  ...initialTrustedAppsPageState.listView,
-  currentListResourceState: createUninitialisedResourceState(),
-  currentPaginationInfo: createDefaultPaginationInfo(),
-});
-
-export const createLoadingListViewWithPagination = (
-  currentPaginationInfo: PaginationInfo,
-  previousState: StaleResourceState<TrustedAppsListData> = createUninitialisedResourceState()
-): TrustedAppsListPageState['listView'] => ({
-  ...initialTrustedAppsPageState.listView,
-  currentListResourceState: { type: 'LoadingResourceState', previousState },
-  currentPaginationInfo,
+export const createDefaultPaginationInfo = () => ({
+  index: MANAGEMENT_DEFAULT_PAGE,
+  size: MANAGEMENT_DEFAULT_PAGE_SIZE,
 });
 
 export const createLoadedListViewWithPagination = (
+  freshDataTimestamp: number,
   paginationInfo: PaginationInfo = createDefaultPaginationInfo(),
-  currentPaginationInfo: PaginationInfo = createDefaultPaginationInfo(),
   totalItemsCount: number = 200
 ): TrustedAppsListPageState['listView'] => ({
-  ...initialTrustedAppsPageState.listView,
-  currentListResourceState: createListLoadedResourceState(paginationInfo, totalItemsCount),
-  currentPaginationInfo,
-});
-
-export const createFailedListViewWithPagination = (
-  currentPaginationInfo: PaginationInfo,
-  error: ServerApiError,
-  lastLoadedState?: LoadedResourceState<TrustedAppsListData>
-): TrustedAppsListPageState['listView'] => ({
-  ...initialTrustedAppsPageState.listView,
-  currentListResourceState: { type: 'FailedResourceState', error, lastLoadedState },
-  currentPaginationInfo,
+  listResourceState: createListLoadedResourceState(
+    paginationInfo,
+    totalItemsCount,
+    freshDataTimestamp
+  ),
+  freshDataTimestamp,
 });
 
 export const createUserChangedUrlAction = (path: string, search: string = ''): RoutingAction => {
@@ -138,3 +134,13 @@ export const createTrustedAppsListResourceStateChangedAction = (
   type: 'trustedAppsListResourceStateChanged',
   payload: { newState },
 });
+
+export const createGlobalNoMiddlewareStore = () => {
+  return createStore(
+    combineReducers({
+      [MANAGEMENT_STORE_GLOBAL_NAMESPACE]: combineReducers({
+        [MANAGEMENT_STORE_TRUSTED_APPS_NAMESPACE]: trustedAppsPageReducer,
+      }),
+    })
+  );
+};

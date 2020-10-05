@@ -22,6 +22,7 @@ import { esKuery } from '../../../es_query';
 type KueryNode = any;
 
 import { typeRegistryMock } from '../../../saved_objects_type_registry.mock';
+import { ALL_NAMESPACES_STRING } from '../utils';
 import { getQueryParams } from './query_params';
 
 const registry = typeRegistryMock.create();
@@ -49,6 +50,41 @@ const ALL_TYPE_SUBSETS = ALL_TYPES.reduce(
 )
   .filter((x) => x.length) // exclude empty set
   .map((x) => (x.length === 1 ? x[0] : x)); // if a subset is a single string, destructure it
+
+const createTypeClause = (type: string, namespaces?: string[]) => {
+  if (registry.isMultiNamespace(type)) {
+    const array = [...(namespaces ?? ['default']), ALL_NAMESPACES_STRING];
+    return {
+      bool: {
+        must: expect.arrayContaining([{ terms: { namespaces: array } }]),
+        must_not: [{ exists: { field: 'namespace' } }],
+      },
+    };
+  } else if (registry.isSingleNamespace(type)) {
+    const nonDefaultNamespaces = namespaces?.filter((n) => n !== 'default') ?? [];
+    const should: any = [];
+    if (nonDefaultNamespaces.length > 0) {
+      should.push({ terms: { namespace: nonDefaultNamespaces } });
+    }
+    if (namespaces?.includes('default')) {
+      should.push({ bool: { must_not: [{ exists: { field: 'namespace' } }] } });
+    }
+    return {
+      bool: {
+        must: [{ term: { type } }],
+        should: expect.arrayContaining(should),
+        minimum_should_match: 1,
+        must_not: [{ exists: { field: 'namespaces' } }],
+      },
+    };
+  }
+  // isNamespaceAgnostic
+  return {
+    bool: expect.objectContaining({
+      must_not: [{ exists: { field: 'namespace' } }, { exists: { field: 'namespaces' } }],
+    }),
+  };
+};
 
 /**
  * Note: these tests cases are defined in the order they appear in the source code, for readability's sake
@@ -198,40 +234,6 @@ describe('#getQueryParams', () => {
     });
 
     describe('`namespaces` parameter', () => {
-      const createTypeClause = (type: string, namespaces?: string[]) => {
-        if (registry.isMultiNamespace(type)) {
-          return {
-            bool: {
-              must: expect.arrayContaining([{ terms: { namespaces: namespaces ?? ['default'] } }]),
-              must_not: [{ exists: { field: 'namespace' } }],
-            },
-          };
-        } else if (registry.isSingleNamespace(type)) {
-          const nonDefaultNamespaces = namespaces?.filter((n) => n !== 'default') ?? [];
-          const should: any = [];
-          if (nonDefaultNamespaces.length > 0) {
-            should.push({ terms: { namespace: nonDefaultNamespaces } });
-          }
-          if (namespaces?.includes('default')) {
-            should.push({ bool: { must_not: [{ exists: { field: 'namespace' } }] } });
-          }
-          return {
-            bool: {
-              must: [{ term: { type } }],
-              should: expect.arrayContaining(should),
-              minimum_should_match: 1,
-              must_not: [{ exists: { field: 'namespaces' } }],
-            },
-          };
-        }
-        // isNamespaceAgnostic
-        return {
-          bool: expect.objectContaining({
-            must_not: [{ exists: { field: 'namespace' } }, { exists: { field: 'namespaces' } }],
-          }),
-        };
-      };
-
       const expectResult = (result: Result, ...typeClauses: any) => {
         expect(result.query.bool.filter).toEqual(
           expect.arrayContaining([
@@ -279,6 +281,37 @@ describe('#getQueryParams', () => {
 
       it('filters results for specified `default` namespace for appropriate type/s', () => {
         test(['default']);
+      });
+    });
+
+    describe('`typeToNamespacesMap` parameter', () => {
+      const expectResult = (result: Result, ...typeClauses: any) => {
+        expect(result.query.bool.filter).toEqual(
+          expect.arrayContaining([
+            { bool: expect.objectContaining({ should: typeClauses, minimum_should_match: 1 }) },
+          ])
+        );
+      };
+
+      it('supersedes `type` and `namespaces` parameters', () => {
+        const result = getQueryParams({
+          mappings,
+          registry,
+          type: ['pending', 'saved', 'shared', 'global'],
+          namespaces: ['foo', 'bar', 'default'],
+          typeToNamespacesMap: new Map([
+            ['pending', ['foo']], // 'pending' is only authorized in the 'foo' namespace
+            // 'saved' is not authorized in any namespaces
+            ['shared', ['bar', 'default']], // 'shared' is only authorized in the 'bar' and 'default' namespaces
+            ['global', ['foo', 'bar', 'default']], // 'global' is authorized in all namespaces (which are ignored anyway)
+          ]),
+        });
+        expectResult(
+          result,
+          createTypeClause('pending', ['foo']),
+          createTypeClause('shared', ['bar', 'default']),
+          createTypeClause('global')
+        );
       });
     });
   });

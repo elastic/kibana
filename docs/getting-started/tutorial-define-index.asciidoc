@@ -24,7 +24,7 @@ index named `shakespeare,` and the accounts data set, which has an index named
 . In the *Index pattern name* field, enter `shakes*`.
 +
 [role="screenshot"]
-image::images/tutorial-pattern-1.png[shakes* index patterns]
+image::images/tutorial-pattern-1.png[Image showing how to enter shakes* in Index Pattern Name field]
 
 . Click *Next step*.
 
@@ -45,7 +45,12 @@ contains the time series data.
 . From the *Time field* dropdown, select *@timestamp, then click *Create index pattern*.
 +
 [role="screenshot"]
-image::images/tutorial_index_patterns.png[All tutorial index patterns]
+image::images/tutorial_index_patterns.png[Image showing how to create an index pattern]
 
+NOTE: When you define an index pattern, the indices that match that pattern must
+exist in Elasticsearch and they must contain data. To check if the indices are
+available, open the menu, go to *Dev Tools > Console*, then enter `GET _cat/indices`. Alternately, use
+`curl -XGET "http://localhost:9200/_cat/indices"`.
+For Windows, run `Invoke-RestMethod -Uri "http://localhost:9200/_cat/indices"` in Powershell.
 
 

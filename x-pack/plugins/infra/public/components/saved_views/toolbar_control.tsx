@@ -13,10 +13,9 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
-import { EuiPopover } from '@elastic/eui';
+import { EuiPopover, EuiLink } from '@elastic/eui';
 import { EuiListGroup, EuiListGroupItem } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
-import { EuiButtonIcon } from '@elastic/eui';
 import { SavedViewCreateModal } from './create_modal';
 import { SavedViewUpdateModal } from './update_modal';
 import { SavedViewManageViewsFlyout } from './manage_views_flyout';
@@ -151,15 +150,6 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
         <EuiPopover
           button={
             <EuiFlexGroup gutterSize={'s'} alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  aria-label={i18n.translate('xpack.infra.savedView.changeView', {
-                    defaultMessage: 'Change view',
-                  })}
-                  onClick={showSavedViewMenu}
-                  iconType="globe"
-                />
-              </EuiFlexItem>
               <EuiFlexItem>
                 <EuiDescriptionList
                   style={{ cursor: 'pointer' }}
@@ -172,13 +162,15 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
                       id="xpack.infra.savedView.currentView"
                     />
                   </EuiDescriptionListTitle>
-                  <EuiDescriptionListDescription>
-                    {currentView
-                      ? currentView.name
-                      : i18n.translate('xpack.infra.savedView.unknownView', {
-                          defaultMessage: 'No view selected',
-                        })}
-                  </EuiDescriptionListDescription>
+                  <EuiLink>
+                    <EuiDescriptionListDescription>
+                      {currentView
+                        ? currentView.name
+                        : i18n.translate('xpack.infra.savedView.unknownView', {
+                            defaultMessage: 'No view selected',
+                          })}
+                    </EuiDescriptionListDescription>
+                  </EuiLink>
                 </EuiDescriptionList>
               </EuiFlexItem>
             </EuiFlexGroup>

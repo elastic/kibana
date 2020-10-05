@@ -7,6 +7,7 @@
 import { ConfigSchema } from '.';
 import {
   FetchDataParams,
+  HasDataParams,
   ObservabilityPluginSetup,
 } from '../../observability/public';
 import {
@@ -36,12 +37,14 @@ import { featureCatalogueEntry } from './featureCatalogueEntry';
 import { toggleAppLinkInNav } from './toggleAppLinkInNav';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { registerApmAlerts } from './components/alerting/register_apm_alerts';
+import { MlPluginSetup, MlPluginStart } from '../../ml/public';
 
 export type ApmPluginSetup = void;
 export type ApmPluginStart = void;
 
 export interface ApmPluginSetupDeps {
   alerts?: AlertingPluginPublicSetup;
+  ml?: MlPluginSetup;
   data: DataPublicPluginSetup;
   features: FeaturesPluginSetup;
   home?: HomePublicPluginSetup;
@@ -52,6 +55,7 @@ export interface ApmPluginSetupDeps {
 
 export interface ApmPluginStartDeps {
   alerts?: AlertingPluginPublicStart;
+  ml?: MlPluginStart;
   data: DataPublicPluginStart;
   home: void;
   licensing: void;
@@ -97,6 +101,30 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           return await dataHelper.fetchOverviewPageData(params);
         },
       });
+
+      const getUxDataHelper = async () => {
+        const {
+          fetchUxOverviewDate,
+          hasRumData,
+          createCallApmApi,
+        } = await import('./components/app/RumDashboard/ux_overview_fetchers');
+        // have to do this here as well in case app isn't mounted yet
+        createCallApmApi(core.http);
+
+        return { fetchUxOverviewDate, hasRumData };
+      };
+
+      plugins.observability.dashboard.register({
+        appName: 'ux',
+        hasData: async (params?: HasDataParams) => {
+          const dataHelper = await getUxDataHelper();
+          return await dataHelper.hasRumData(params!);
+        },
+        fetchData: async (params: FetchDataParams) => {
+          const dataHelper = await getUxDataHelper();
+          return await dataHelper.fetchUxOverviewDate(params);
+        },
+      });
     }
 
     core.application.register({
@@ -120,8 +148,8 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     });
 
     core.application.register({
-      id: 'csm',
-      title: 'Client Side Monitoring',
+      id: 'ux',
+      title: 'User Experience',
       order: 8500,
       euiIconType: 'logoObservability',
       category: DEFAULT_APP_CATEGORIES.observability,

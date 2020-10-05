@@ -7,20 +7,19 @@
 import { EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
 import React, { FC, memo, useCallback, useState, useEffect } from 'react';
 import styled from 'styled-components';
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import isEqual from 'lodash/isEqual';
 
+import { IndexPattern } from 'src/plugins/data/public';
 import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
-import { useFetchIndexPatterns } from '../../../containers/detection_engine/rules';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { useUiSetting$ } from '../../../../common/lib/kibana';
-import {
-  filterRuleFieldsForType,
-  RuleFields,
-} from '../../../pages/detection_engine/rules/create/helpers';
+import { filterRuleFieldsForType } from '../../../pages/detection_engine/rules/create/helpers';
 import {
   DefineStepRule,
   RuleStep,
@@ -46,8 +45,14 @@ import {
 } from '../../../../shared_imports';
 import { schema } from './schema';
 import * as i18n from './translations';
-import { isEqlRule, isThresholdRule } from '../../../../../common/detection_engine/utils';
+import {
+  isEqlRule,
+  isThreatMatchRule,
+  isThresholdRule,
+} from '../../../../../common/detection_engine/utils';
 import { EqlQueryBar } from '../eql_query_bar';
+import { ThreatMatchInput } from '../threatmatch_input';
+import { useFetchIndex } from '../../../../common/containers/source';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -60,11 +65,18 @@ const stepDefineDefaultValue: DefineStepRule = {
   index: [],
   machineLearningJobId: '',
   ruleType: 'query',
+  threatIndex: [],
   queryBar: {
     query: { query: '', language: 'kuery' },
     filters: [],
     saved_id: undefined,
   },
+  threatQueryBar: {
+    query: { query: '*:*', language: 'kuery' },
+    filters: [],
+    saved_id: undefined,
+  },
+  threatMapping: [],
   threshold: {
     field: [],
     value: '200',
@@ -119,16 +131,21 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     schema,
   });
   const { getFields, getFormData, reset, submit } = form;
-  const [{ index: formIndex, ruleType: formRuleType }] = (useFormData({
-    form,
-    watch: ['index', 'ruleType'],
-  }) as unknown) as [Partial<DefineStepRule>];
+  const [{ index: formIndex, ruleType: formRuleType, threatIndex: formThreatIndex }] = (useFormData(
+    {
+      form,
+      watch: ['index', 'ruleType', 'threatIndex'],
+    }
+  ) as unknown) as [Partial<DefineStepRule>];
   const index = formIndex || initialState.index;
+  const threatIndex = formThreatIndex || initialState.threatIndex;
   const ruleType = formRuleType || initialState.ruleType;
-  const [{ browserFields, indexPatterns, isLoading: indexPatternsLoading }] = useFetchIndexPatterns(
-    index,
-    RuleStep.defineRule
-  );
+  const [indexPatternsLoading, { browserFields, indexPatterns }] = useFetchIndex(index);
+
+  const [
+    threatIndexPatternsLoading,
+    { browserFields: threatBrowserFields, indexPatterns: threatIndexPatterns },
+  ] = useFetchIndex(threatIndex);
 
   // reset form when rule type changes
   useEffect(() => {
@@ -147,7 +164,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
   const getData = useCallback(async () => {
     const result = await submit();
-    return result?.isValid
+    return result.isValid
       ? result
       : {
           isValid: false,
@@ -185,12 +202,25 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [browserFields]
   );
 
+  const ThreatMatchInputChildren = useCallback(
+    ({ threatMapping }) => (
+      <ThreatMatchInput
+        threatBrowserFields={threatBrowserFields}
+        indexPatterns={indexPatterns as IndexPattern}
+        threatIndexPatterns={threatIndexPatterns as IndexPattern}
+        threatMapping={threatMapping}
+        threatIndexPatternsLoading={threatIndexPatternsLoading}
+      />
+    ),
+    [threatBrowserFields, threatIndexPatternsLoading, threatIndexPatterns, indexPatterns]
+  );
+
   return isReadOnlyView ? (
     <StepContentWrapper data-test-subj="definitionRule" addPadding={addPadding}>
       <StepRuleDescription
         columns={descriptionColumns}
         indexPatterns={indexPatterns}
-        schema={filterRuleFieldsForType(schema as typeof schema & RuleFields, ruleType)}
+        schema={filterRuleFieldsForType(schema, ruleType)}
         data={filterRuleFieldsForType(initialState, ruleType)}
       />
     </StepContentWrapper>
@@ -203,7 +233,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             component={SelectRuleType}
             componentProps={{
               describedByIds: ['detectionEngineStepDefineRuleType'],
-              isReadOnly: isUpdateView,
+              isUpdateView,
               hasValidLicense: hasMlLicense(mlCapabilities),
               isMlAdmin: hasMlAdminPermissions(mlCapabilities),
             }}
@@ -241,6 +271,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     isLoading: indexPatternsLoading,
                     dataTestSubj: 'detectionEngineStepDefineRuleEqlQueryBar',
                   }}
+                  config={{
+                    ...schema.queryBar,
+                    label: i18n.EQL_QUERY_BAR_LABEL,
+                  }}
                 />
               ) : (
                 <UseField
@@ -248,6 +282,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   path="queryBar"
                   config={{
                     ...schema.queryBar,
+                    label: i18n.QUERY_BAR_LABEL,
                     labelAppend: (
                       <MyLabelButton
                         data-test-subj="importQueryFromSavedTimeline"
@@ -307,6 +342,23 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 }}
               >
                 {ThresholdInputChildren}
+              </UseMultiFields>
+            </>
+          </RuleTypeEuiFormRow>
+          <RuleTypeEuiFormRow
+            $isVisible={isThreatMatchRule(ruleType)}
+            data-test-subj="threatMatchInput"
+            fullWidth
+          >
+            <>
+              <UseMultiFields
+                fields={{
+                  threatMapping: {
+                    path: 'threatMapping',
+                  },
+                }}
+              >
+                {ThreatMatchInputChildren}
               </UseMultiFields>
             </>
           </RuleTypeEuiFormRow>

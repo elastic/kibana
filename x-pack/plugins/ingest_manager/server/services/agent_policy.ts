@@ -26,13 +26,14 @@ import { packagePolicyService } from './package_policy';
 import { outputService } from './output';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 import { getSettings } from './settings';
+import { normalizeKuery } from './saved_object';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
 class AgentPolicyService {
   private triggerAgentPolicyUpdatedEvent = async (
     soClient: SavedObjectsClientContract,
-    action: string,
+    action: 'created' | 'updated' | 'deleted',
     agentPolicyId: string
   ) => {
     return agentPolicyUpdateEventHandler(soClient, action, agentPolicyId);
@@ -166,13 +167,7 @@ class AgentPolicyService {
       sortOrder,
       page,
       perPage,
-      // To ensure users don't need to know about SO data structure...
-      filter: kuery
-        ? kuery.replace(
-            new RegExp(`${SAVED_OBJECT_TYPE}\.`, 'g'),
-            `${SAVED_OBJECT_TYPE}.attributes.`
-          )
-        : undefined,
+      filter: kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined,
     });
 
     const agentPolicies = await Promise.all(
@@ -263,7 +258,11 @@ class AgentPolicyService {
     id: string,
     options?: { user?: AuthenticatedUser }
   ): Promise<AgentPolicy> {
-    return this._update(soClient, id, {}, options?.user);
+    const res = await this._update(soClient, id, {}, options?.user);
+
+    await this.triggerAgentPolicyUpdatedEvent(soClient, 'updated', id);
+
+    return res;
   }
   public async bumpAllAgentPolicies(
     soClient: SavedObjectsClientContract,
@@ -282,7 +281,15 @@ class AgentPolicyService {
       };
       return policy;
     });
-    return soClient.bulkUpdate<AgentPolicySOAttributes>(bumpedPolicies);
+    const res = await soClient.bulkUpdate<AgentPolicySOAttributes>(bumpedPolicies);
+
+    await Promise.all(
+      currentPolicies.saved_objects.map((policy) =>
+        this.triggerAgentPolicyUpdatedEvent(soClient, 'updated', policy.id)
+      )
+    );
+
+    return res;
   }
 
   public async assignPackagePolicies(
@@ -404,8 +411,8 @@ class AgentPolicyService {
     }, []);
 
     await createAgentPolicyAction(soClient, {
-      type: 'CONFIG_CHANGE',
-      data: { config: policy } as any,
+      type: 'POLICY_CHANGE',
+      data: { policy },
       ack_data: { packages },
       created_at: new Date().toISOString(),
       policy_id: policy.id,

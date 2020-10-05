@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
+import { useValues } from 'kea';
 import { EuiPageContent, EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { sendTelemetry } from '../../../../shared/telemetry';
+import { HttpLogic } from '../../../../shared/http';
+import { getAppSearchUrl } from '../../../../shared/enterprise_search_url';
 import { SetAppSearchChrome as SetPageChrome } from '../../../../shared/kibana_chrome';
-import { KibanaContext, IKibanaContext } from '../../../../index';
 import { CREATE_ENGINES_PATH } from '../../../routes';
 
 import { EngineOverviewHeader } from './header';
@@ -18,10 +20,7 @@ import { EngineOverviewHeader } from './header';
 import './empty_state.scss';
 
 export const EmptyState: React.FC = () => {
-  const {
-    externalUrl: { getAppSearchUrl },
-    http,
-  } = useContext(KibanaContext) as IKibanaContext;
+  const { http } = useValues(HttpLogic);
 
   const buttonProps = {
     href: getAppSearchUrl(CREATE_ENGINES_PATH),
@@ -37,7 +36,7 @@ export const EmptyState: React.FC = () => {
 
   return (
     <>
-      <SetPageChrome isRoot />
+      <SetPageChrome />
       <EngineOverviewHeader />
       <EuiPageContent className="emptyState">
         <EuiEmptyPrompt

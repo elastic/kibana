@@ -54,6 +54,7 @@ export { metricsServiceMock } from './metrics/metrics_service.mock';
 export { renderingMock } from './rendering/rendering_service.mock';
 export { statusServiceMock } from './status/status_service.mock';
 export { contextServiceMock } from './context/context_service.mock';
+export { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
 
 export function pluginInitializerContextConfigMock<T>(config: T) {
   const globalConfig: SharedGlobalConfig = {
@@ -66,7 +67,6 @@ export function pluginInitializerContextConfigMock<T>(config: T) {
       shardTimeout: duration('30s'),
       requestTimeout: duration('30s'),
       pingTimeout: duration('30s'),
-      startupTimeout: duration('30s'),
     },
     path: { data: '/tmp' },
     savedObjects: {

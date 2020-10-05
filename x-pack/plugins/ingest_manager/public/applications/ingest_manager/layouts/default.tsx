@@ -83,8 +83,8 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
                     disabled={!fleet?.enabled}
                   >
                     <FormattedMessage
-                      id="xpack.ingestManager.appNavigation.fleetLinkText"
-                      defaultMessage="Fleet"
+                      id="xpack.ingestManager.appNavigation.agentsLinkText"
+                      defaultMessage="Agents"
                     />
                   </EuiTab>
                   <EuiTab isSelected={section === 'data_stream'} href={getHref('data_streams')}>

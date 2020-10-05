@@ -31,6 +31,7 @@ export const fieldsMapping: Readonly<StatItems[]> = [
 const HostsKpiHostsComponent: React.FC<HostsKpiProps> = ({
   filterQuery,
   from,
+  indexNames,
   to,
   narrowDateRange,
   setQuery,
@@ -39,6 +40,7 @@ const HostsKpiHostsComponent: React.FC<HostsKpiProps> = ({
   const [loading, { refetch, id, inspect, ...data }] = useHostsKpiHosts({
     filterQuery,
     endDate: to,
+    indexNames,
     startDate: from,
     skip,
   });
