@@ -307,7 +307,7 @@ function parseAndVerifyInputs(manifestInputs: any, location: string): RegistryIn
       const { type, title: inputTitle, description, vars } = input;
       if (!(type && inputTitle)) {
         throw new PackageInvalidArchiveError(
-          `Invalid top-level manifest: one of mandatory fields 'name', 'title', 'description', 'input' missing in input: ${input}`
+          `Invalid top-level manifest: one of mandatory fields 'type', 'title' missing in input: ${input}`
         );
       }
       const parsedVars = parseAndVerifyVars(vars, location);
