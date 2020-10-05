@@ -40,7 +40,7 @@ export const CopySource: Task = {
         '!src/dev/**',
         '!src/setup_node_env/babel_register/index.js',
         '!src/setup_node_env/babel_register/register.js',
-        '!**/public/**',
+        '!**/public/**/*.{js,ts,tsx,json}',
         'typings/**',
         'config/kibana.yml',
         'config/node.options',
