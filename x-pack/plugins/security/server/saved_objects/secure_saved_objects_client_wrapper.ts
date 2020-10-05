@@ -18,6 +18,7 @@ import {
   SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsUtils,
 } from '../../../../../src/core/server';
+import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
 import { SecurityAuditLogger } from '../audit';
 import { Actions, CheckSavedObjectsPrivileges } from '../authorization';
 import { CheckPrivilegesResponse } from '../authorization/types';
@@ -85,7 +86,8 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     options: SavedObjectsCreateOptions = {}
   ) {
     const args = { type, attributes, options };
-    await this.ensureAuthorized(type, 'create', options.namespace, { args });
+    const namespaces = [options.namespace, ...(options.namespaces || [])];
+    await this.ensureAuthorized(type, 'create', namespaces, { args });
 
     const savedObject = await this.baseClient.create(type, attributes, options);
     return await this.redactSavedObjectNamespaces(savedObject);
@@ -111,12 +113,16 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     options: SavedObjectsBaseOptions = {}
   ) {
     const args = { objects, options };
-    await this.ensureAuthorized(
-      this.getUniqueObjectTypes(objects),
-      'bulk_create',
-      options.namespace,
-      { args }
+    const namespaces = objects.reduce(
+      (acc, { namespaces: initialNamespaces = [] }) => {
+        return acc.concat(initialNamespaces);
+      },
+      [options.namespace]
     );
+
+    await this.ensureAuthorized(this.getUniqueObjectTypes(objects), 'bulk_create', namespaces, {
+      args,
+    });
 
     const response = await this.baseClient.bulkCreate(objects, options);
     return await this.redactSavedObjectsNamespaces(response);
@@ -207,17 +213,17 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   ) {
     const args = { type, id, namespaces, options };
     const { namespace } = options;
-    // To share an object, the user must have the "create" permission in each of the destination namespaces.
-    await this.ensureAuthorized(type, 'create', namespaces, {
+    // To share an object, the user must have the "share_to_space" permission in each of the destination namespaces.
+    await this.ensureAuthorized(type, 'share_to_space', namespaces, {
       args,
       auditAction: 'addToNamespacesCreate',
     });
 
-    // To share an object, the user must also have the "update" permission in one or more of the source namespaces. Because the
-    // `addToNamespaces` operation is scoped to the current namespace, we can just check if the user has the "update" permission in the
-    // current namespace. If the user has permission, but the saved object doesn't exist in this namespace, the base client operation will
-    // result in a 404 error.
-    await this.ensureAuthorized(type, 'update', namespace, {
+    // To share an object, the user must also have the "share_to_space" permission in one or more of the source namespaces. Because the
+    // `addToNamespaces` operation is scoped to the current namespace, we can just check if the user has the "share_to_space" permission in
+    // the current namespace. If the user has permission, but the saved object doesn't exist in this namespace, the base client operation
+    // will result in a 404 error.
+    await this.ensureAuthorized(type, 'share_to_space', namespace, {
       args,
       auditAction: 'addToNamespacesUpdate',
     });
@@ -233,8 +239,8 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     options: SavedObjectsDeleteFromNamespacesOptions = {}
   ) {
     const args = { type, id, namespaces, options };
-    // To un-share an object, the user must have the "delete" permission in each of the target namespaces.
-    await this.ensureAuthorized(type, 'delete', namespaces, {
+    // To un-share an object, the user must have the "share_to_space" permission in each of the target namespaces.
+    await this.ensureAuthorized(type, 'share_to_space', namespaces, {
       args,
       auditAction: 'deleteFromNamespaces',
     });
@@ -383,7 +389,9 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   }
 
   private redactAndSortNamespaces(spaceIds: string[], privilegeMap: Record<string, boolean>) {
-    return spaceIds.map((x) => (privilegeMap[x] ? x : '?')).sort(namespaceComparator);
+    return spaceIds
+      .map((x) => (x === ALL_SPACES_ID || privilegeMap[x] ? x : UNKNOWN_SPACE))
+      .sort(namespaceComparator);
   }
 
   private async redactSavedObjectNamespaces<T extends SavedObjectNamespaces>(
@@ -397,7 +405,12 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       return savedObject;
     }
 
-    const privilegeMap = await this.getNamespacesPrivilegeMap(savedObject.namespaces);
+    const namespaces = savedObject.namespaces.filter((x) => x !== ALL_SPACES_ID); // all users can see the "all spaces" ID
+    if (namespaces.length === 0) {
+      return savedObject;
+    }
+
+    const privilegeMap = await this.getNamespacesPrivilegeMap(namespaces);
 
     return {
       ...savedObject,
@@ -412,7 +425,9 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       return response;
     }
     const { saved_objects: savedObjects } = response;
-    const namespaces = uniq(savedObjects.flatMap((savedObject) => savedObject.namespaces || []));
+    const namespaces = uniq(
+      savedObjects.flatMap((savedObject) => savedObject.namespaces || [])
+    ).filter((x) => x !== ALL_SPACES_ID); // all users can see the "all spaces" ID
     if (namespaces.length === 0) {
       return response;
     }
@@ -445,9 +460,9 @@ function uniq<T>(arr: T[]): T[] {
 function namespaceComparator(a: string, b: string) {
   const A = a.toUpperCase();
   const B = b.toUpperCase();
-  if (A === '?' && B !== '?') {
+  if (A === UNKNOWN_SPACE && B !== UNKNOWN_SPACE) {
     return 1;
-  } else if (A !== '?' && B === '?') {
+  } else if (A !== UNKNOWN_SPACE && B === UNKNOWN_SPACE) {
     return -1;
   }
   return A > B ? 1 : A < B ? -1 : 0;
