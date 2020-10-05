@@ -98,20 +98,34 @@ export const getPackagePolicyCreateCallback = (
     const appClient = appClientFactory.create(request);
     const frameworkRequest = await buildFrameworkRequest(context, securitySetup, request);
 
-    // get most recent manifest
-    // while creating detection index & rules (if necessary)
-    const [manifest] = await Promise.all([
-      getManifest(logger, manifestManager),
-      createDetectionIndex(context, appClient),
-      createPrepackagedRules(
+    // Create detection index & rules (if necessary). move past any failure, this is just a convenience
+    try {
+      await createDetectionIndex(context, appClient);
+      await createPrepackagedRules(
         context,
         appClient,
         alerts.getAlertsClientWithRequest(request),
         frameworkRequest,
         maxTimelineImportExportSize
-      ),
-    ]);
+      );
+    } catch (err) {
+      if (err.statusCode === 409) {
+        logger.debug('Detection index may already exist. Not recreating index or rules');
+      } else if (err.statusCode === 404) {
+        logger.warn(
+          'Unable to automatically create detection index and rules: dependency not satisfied'
+        );
+      } else if (err.statusCode === 400) {
+        logger.warn('Unable to populate detection rules, signals index not created properly');
+      } else {
+        logger.error(
+          `Unable to create detection rules automatically (${err.statusCode}): ${err.message}`
+        );
+      }
+    }
 
+    // get most recent manifest
+    const manifest = await getManifest(logger, manifestManager);
     const serializedManifest = manifest.toEndpointFormat();
     if (!manifestDispatchSchema.is(serializedManifest)) {
       // This should not happen.
