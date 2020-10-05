@@ -54,7 +54,7 @@ Then(`it displays list of relevant js errors`, () => {
       .invoke('text')
       .should(
         'eq',
-        'Error messageUncaught Error: Test Error in dashboardImpacted page loads100.0 %'
+        'Error messageUncaught Error: Test Error in ordersImpacted page loads100.0 %'
       );
   });
 });
