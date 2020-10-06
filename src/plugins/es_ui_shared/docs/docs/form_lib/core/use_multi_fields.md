@@ -79,7 +79,7 @@ The children of `<UseMultiField />` is a function child which receives a map of 
 
 ## Typescript value type
 
-You can provided the field value type for each field (`unknown` by default) on the component. 
+You can provide the field value type for each field (`unknown` by default) on the component. 
 
 ```js
 interface Fields {
