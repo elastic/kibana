@@ -22,6 +22,7 @@ import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { CoreStart, ChromeBreadcrumb } from 'src/core/public';
 import { DataPublicPluginStart } from '../../../data/public';
+import { TaggingApi } from '../../../saved_objects_tagging_oss/public';
 import {
   ISavedObjectsManagementServiceRegistry,
   SavedObjectsManagementActionServiceStart,
@@ -32,6 +33,7 @@ import { SavedObjectsTable } from './objects_table';
 const SavedObjectsTablePage = ({
   coreStart,
   dataStart,
+  taggingApi,
   allowedTypes,
   serviceRegistry,
   actionRegistry,
@@ -40,6 +42,7 @@ const SavedObjectsTablePage = ({
 }: {
   coreStart: CoreStart;
   dataStart: DataPublicPluginStart;
+  taggingApi?: TaggingApi;
   allowedTypes: string[];
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
   actionRegistry: SavedObjectsManagementActionServiceStart;
@@ -66,6 +69,7 @@ const SavedObjectsTablePage = ({
       serviceRegistry={serviceRegistry}
       actionRegistry={actionRegistry}
       columnRegistry={columnRegistry}
+      taggingApi={taggingApi}
       savedObjectsClient={coreStart.savedObjects.client}
       indexPatterns={dataStart.indexPatterns}
       search={dataStart.search}

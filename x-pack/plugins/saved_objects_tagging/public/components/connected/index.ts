@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { TagsClient, ITagInternalClient } from './tags_client';
-export { TagsCache, ITagsChangeListener, ITagsCache } from './tags_cache';
+export { getConnectedTagListComponent } from './connected_tag_list';

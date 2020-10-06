@@ -37,6 +37,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { TaggingApi } from '../../../../../saved_objects_tagging_oss/public';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
 import { SavedObjectWithMetadata } from '../../../types';
 import {
@@ -46,6 +47,7 @@ import {
 } from '../../../services';
 
 export interface TableProps {
+  taggingApi?: TaggingApi;
   basePath: IBasePath;
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
@@ -161,6 +163,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       basePath,
       actionRegistry,
       columnRegistry,
+      taggingApi,
     } = this.props;
 
     const pagination = {
@@ -240,6 +243,25 @@ export class Table extends PureComponent<TableProps, TableState> {
           );
         },
       } as EuiTableFieldDataColumnType<SavedObjectWithMetadata<any>>,
+      ...(taggingApi
+        ? [
+            {
+              field: 'references',
+              name: i18n.translate('savedObjectsManagement.objectsTable.table.columnTagsName', {
+                defaultMessage: 'Tags',
+              }),
+              description: i18n.translate(
+                'savedObjectsManagement.objectsTable.table.columnTagsDescription',
+                { defaultMessage: 'Tags associated with this saved object' }
+              ),
+              sortable: false,
+              'data-test-subj': 'savedObjectsTableRowTags',
+              render: (references: any[], object: SavedObjectWithMetadata) => {
+                return <taggingApi.ui.TagList object={object} />;
+              },
+            },
+          ]
+        : []),
       ...columnRegistry.getAll().map((column) => {
         return {
           ...column.euiColumn,

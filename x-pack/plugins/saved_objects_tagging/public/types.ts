@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ITagsClient } from '../common/types';
+import type { TaggingApi } from '../../../../src/plugins/saved_objects_tagging_oss/public';
 
-export interface SavedObjectTaggingPluginStart {
-  tags: ITagsClient;
-}
+export type SavedObjectTaggingPluginStart = TaggingApi;

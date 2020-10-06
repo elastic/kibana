@@ -4,5 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { TagsClient, ITagInternalClient } from './tags_client';
-export { TagsCache, ITagsChangeListener, ITagsCache } from './tags_cache';
+export { TagBadge, TagBadgeProps } from './tag_badge';
+export { TagList, TagListProps } from './tag_list';
+export { TagComboBox, TagComboBoxProps } from './tag_combo_box';

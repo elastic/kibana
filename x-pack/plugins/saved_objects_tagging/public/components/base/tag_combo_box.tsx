@@ -6,7 +6,7 @@
 
 import React, { FC, useMemo, useCallback } from 'react';
 import { EuiComboBox, EuiHealth, EuiHighlight, EuiComboBoxOptionOption } from '@elastic/eui';
-import { Tag } from '../../common';
+import { Tag } from '../../../common';
 
 type TagComboBoxOptions = EuiComboBoxOptionOption<Tag>;
 

@@ -4,6 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { TagBadge, TagBadgeProps } from './tag_badge';
-export { TagList, TagListProps } from './tag_list';
-export { TagComboBox, TagComboBoxProps } from './tag_combo_box';
+export {
+  TagComboBox,
+  TagComboBoxProps,
+  TagList,
+  TagListProps,
+  TagBadge,
+  TagBadgeProps,
+} from './base';

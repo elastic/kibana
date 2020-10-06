@@ -5,28 +5,15 @@
  */
 
 import { SavedObject } from 'src/core/types';
-
-export interface Tag {
-  id: string;
-  title: string;
-  description: string;
-  color: string;
-}
-
-export interface TagAttributes {
-  title: string;
-  description: string;
-  color: string;
-}
-
-export interface ITagsClient {
-  create(attributes: TagAttributes): Promise<Tag>;
-  get(id: string): Promise<Tag>;
-  getAll(): Promise<Tag[]>;
-  delete(id: string): Promise<void>;
-  update(id: string, attributes: TagAttributes): Promise<Tag>;
-}
+import type { Tag, TagAttributes } from '../../../../src/plugins/saved_objects_tagging_oss/common';
 
 export type TagSavedObject = SavedObject<TagAttributes>;
 
 export type TagWithRelations = Tag;
+
+// re-export types from oss definition
+export type {
+  Tag,
+  TagAttributes,
+  ITagsClient,
+} from '../../../../src/plugins/saved_objects_tagging_oss/common';

@@ -6,7 +6,7 @@
 
 import React, { FC } from 'react';
 import { EuiBadge } from '@elastic/eui';
-import { Tag, TagAttributes } from '../../common/types';
+import { Tag, TagAttributes } from '../../../common/types';
 
 export interface TagBadgeProps {
   tag: Tag | TagAttributes;

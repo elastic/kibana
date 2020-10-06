@@ -56,6 +56,7 @@ import {
   ApplicationStart,
 } from 'src/core/public';
 import { RedirectAppLinks } from '../../../../kibana_react/public';
+import { TaggingApi } from '../../../../saved_objects_tagging_oss/public';
 import { IndexPatternsContract } from '../../../../data/public';
 import {
   parseQuery,
@@ -90,6 +91,7 @@ export interface SavedObjectsTableProps {
   columnRegistry: SavedObjectsManagementColumnServiceStart;
   savedObjectsClient: SavedObjectsClientContract;
   indexPatterns: IndexPatternsContract;
+  taggingApi?: TaggingApi;
   http: HttpStart;
   search: DataPublicPluginStart['search'];
   overlays: OverlayStart;
@@ -750,7 +752,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       isSearching,
       savedObjectCounts,
     } = this.state;
-    const { http, allowedTypes, applications } = this.props;
+    const { http, taggingApi, allowedTypes, applications } = this.props;
 
     const selectionConfig = {
       onSelectionChange: this.onSelectionChanged,
@@ -778,6 +780,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         <RedirectAppLinks application={applications}>
           <Table
             basePath={http.basePath}
+            taggingApi={taggingApi}
             itemId={'id'}
             actionRegistry={this.props.actionRegistry}
             columnRegistry={this.props.columnRegistry}
