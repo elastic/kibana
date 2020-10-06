@@ -39,7 +39,7 @@ import { Toast } from 'src/core/public';
 import { IDataPluginServices, IIndexPattern, Query } from '../..';
 import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';
 
-import { withKibana, KibanaReactContextValue, toMountPoint } from '../../../../kibana_react/public';
+import { KibanaReactContextValue, toMountPoint } from '../../../../kibana_react/public';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { PersistedLog, getQueryLog, matchPairs, toUser, fromUser } from '../../query';
@@ -93,7 +93,9 @@ const KEY_CODES = {
   END: 35,
 };
 
-export class QueryStringInputUI extends Component<Props, State> {
+// Needed for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default class QueryStringInputUI extends Component<Props, State> {
   public state: State = {
     isSuggestionsVisible: false,
     index: null,
@@ -546,7 +548,7 @@ export class QueryStringInputUI extends Component<Props, State> {
 
   public componentWillUnmount() {
     if (this.abortController) this.abortController.abort();
-    this.updateSuggestions.cancel();
+    if (this.updateSuggestions.cancel) this.updateSuggestions.cancel();
     this.componentIsUnmounting = true;
     window.removeEventListener('resize', this.handleAutoHeight);
     window.removeEventListener('scroll', this.handleListUpdate, { capture: true });
@@ -690,5 +692,3 @@ export class QueryStringInputUI extends Component<Props, State> {
     );
   }
 }
-
-export const QueryStringInput: React.FC<QueryStringInputProps> = withKibana(QueryStringInputUI);

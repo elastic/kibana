@@ -34,7 +34,7 @@ storiesOf('components/FlyoutManageDrilldowns', module)
     <EuiFlyout onClose={() => {}}>
       <FlyoutManageDrilldowns
         dynamicActionManager={mockDynamicActionManager}
-        supportedTriggers={['VALUE_CLICK_TRIGGER', 'SELECT_RANGE_TRIGGER', 'FILTER_TRIGGER']}
+        triggers={['VALUE_CLICK_TRIGGER', 'SELECT_RANGE_TRIGGER', 'FILTER_TRIGGER']}
       />
     </EuiFlyout>
   ))
@@ -42,7 +42,7 @@ storiesOf('components/FlyoutManageDrilldowns', module)
     <EuiFlyout onClose={() => {}}>
       <FlyoutManageDrilldowns
         dynamicActionManager={mockDynamicActionManager}
-        supportedTriggers={['FILTER_TRIGGER']}
+        triggers={['FILTER_TRIGGER']}
       />
     </EuiFlyout>
   ));
