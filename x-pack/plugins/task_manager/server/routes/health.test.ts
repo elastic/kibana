@@ -10,7 +10,7 @@ import { httpServiceMock } from 'src/core/server/mocks';
 import { healthRoute } from './health';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { sleep, mockLogger } from '../test_utils';
-import { MonitoringStats, summarizeMonitoringStats, HealthStatus } from '../monitoring';
+import { MonitoringStats, summarizeMonitoringStats } from '../monitoring';
 
 describe('healthRoute', () => {
   beforeEach(() => {
