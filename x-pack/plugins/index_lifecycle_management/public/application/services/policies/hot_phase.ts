@@ -26,6 +26,7 @@ const hotPhaseInitialization: HotPhase = {
   selectedMaxSizeStoredUnits: 'gb',
   forceMergeEnabled: false,
   selectedForceMergeSegments: '',
+  bestCompressionEnabled: false,
   phaseIndexPriority: '',
   selectedMaxDocuments: '',
 };
@@ -64,6 +65,8 @@ export const hotPhaseFromES = (phaseSerialized?: SerializedHotPhase): HotPhase =
       const forcemerge = actions.forcemerge;
       phase.forceMergeEnabled = true;
       phase.selectedForceMergeSegments = forcemerge.max_num_segments.toString();
+      // only accepted value for index_codec
+      phase.bestCompressionEnabled = forcemerge.index_codec === 'best_compression';
     }
 
     if (actions.set_priority) {
@@ -105,6 +108,10 @@ export const hotPhaseToES = (
       esPhase.actions.forcemerge = {
         max_num_segments: parseInt(phase.selectedForceMergeSegments, 10),
       };
+      if (phase.bestCompressionEnabled) {
+        // only accepted value for index_codec
+        esPhase.actions.forcemerge.index_codec = 'best_compression';
+      }
     } else {
       delete esPhase.actions.forcemerge;
     }

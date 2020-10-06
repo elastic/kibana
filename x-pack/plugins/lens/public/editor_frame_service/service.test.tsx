@@ -41,7 +41,8 @@ describe('editor_frame service', () => {
       (async () => {
         pluginInstance.setup(
           coreMock.createSetup() as CoreSetup<MockedStartDependencies>,
-          pluginSetupDependencies
+          pluginSetupDependencies,
+          jest.fn()
         );
         const publicAPI = pluginInstance.start(coreMock.createStart(), pluginStartDependencies);
         const instance = await publicAPI.createInstance();
@@ -52,6 +53,10 @@ describe('editor_frame service', () => {
           query: { query: '', language: 'lucene' },
           filters: [],
           showNoDataPopover: jest.fn(),
+          initialContext: {
+            indexPatternId: '1',
+            fieldName: 'test',
+          },
         });
         instance.unmount();
       })()
@@ -61,7 +66,8 @@ describe('editor_frame service', () => {
   it('should not have child nodes after unmount', async () => {
     pluginInstance.setup(
       coreMock.createSetup() as CoreSetup<MockedStartDependencies>,
-      pluginSetupDependencies
+      pluginSetupDependencies,
+      jest.fn()
     );
     const publicAPI = pluginInstance.start(coreMock.createStart(), pluginStartDependencies);
     const instance = await publicAPI.createInstance();

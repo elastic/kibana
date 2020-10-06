@@ -93,7 +93,7 @@ export function savedMap(): ExpressionFunctionDefinition<
 
           mapCenter: center,
           hideFilterActions: true,
-          title: args.title ? args.title : undefined,
+          title: args.title === null ? undefined : args.title,
           isLayerTOCOpen: false,
           hiddenLayers: args.hideLayer || [],
         },

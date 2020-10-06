@@ -134,6 +134,25 @@ export class IndexPatternsService {
   };
 
   /**
+   * Get list of index pattern ids with titles
+   * @param refresh Force refresh of index pattern list
+   */
+  getIdsWithTitle = async (
+    refresh: boolean = false
+  ): Promise<Array<{ id: string; title: string }>> => {
+    if (!this.savedObjectsCache || refresh) {
+      await this.refreshSavedObjectsCache();
+    }
+    if (!this.savedObjectsCache) {
+      return [];
+    }
+    return this.savedObjectsCache.map((obj) => ({
+      id: obj?.id,
+      title: obj?.attributes?.title,
+    }));
+  };
+
+  /**
    * Clear index pattern list cache
    * @param id optionally clear a single id
    */
@@ -497,7 +516,8 @@ export class IndexPatternsService {
 
   async updateSavedObject(
     indexPattern: IndexPattern,
-    saveAttempts: number = 0
+    saveAttempts: number = 0,
+    ignoreErrors: boolean = false
   ): Promise<void | Error> {
     if (!indexPattern.id) return;
 
@@ -548,6 +568,9 @@ export class IndexPatternsService {
           }
 
           if (unresolvedCollision) {
+            if (ignoreErrors) {
+              return;
+            }
             const title = i18n.translate('data.indexPatterns.unableWriteLabel', {
               defaultMessage:
                 'Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.',
@@ -567,7 +590,7 @@ export class IndexPatternsService {
           indexPatternCache.clear(indexPattern.id!);
 
           // Try the save again
-          return this.updateSavedObject(indexPattern, saveAttempts);
+          return this.updateSavedObject(indexPattern, saveAttempts, ignoreErrors);
         }
         throw err;
       });

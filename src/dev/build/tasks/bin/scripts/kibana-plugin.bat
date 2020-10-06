@@ -32,7 +32,7 @@ IF EXIST "%CONFIG_DIR%\node.options" (
 set "NODE_OPTIONS=--no-warnings %NODE_OPTIONS%"
 
 TITLE Kibana Server
-"%NODE%" "%DIR%\src\cli_plugin" %*
+"%NODE%" "%DIR%\src\cli_plugin\dist" %*
 
 :finally
 

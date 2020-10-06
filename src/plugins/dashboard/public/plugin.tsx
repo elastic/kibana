@@ -117,7 +117,7 @@ declare module '../../share/public' {
 
 export type DashboardUrlGenerator = UrlGeneratorContract<typeof DASHBOARD_APP_URL_GENERATOR>;
 
-interface DashboardFeatureFlagConfig {
+export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
 }
 
@@ -145,7 +145,7 @@ interface StartDependencies {
   savedObjects: SavedObjectsStart;
 }
 
-export type Setup = void;
+export type DashboardSetup = void;
 
 export interface DashboardStart {
   getSavedDashboardLoader: () => SavedObjectLoader;
@@ -164,7 +164,7 @@ export interface DashboardStart {
     R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
   >(
     type: string,
-    options?: AttributeServiceOptions<A>
+    options: AttributeServiceOptions<A>
   ) => AttributeService<A, V, R>;
 }
 
@@ -180,7 +180,7 @@ declare module '../../../plugins/ui_actions/public' {
 }
 
 export class DashboardPlugin
-  implements Plugin<Setup, DashboardStart, SetupDependencies, StartDependencies> {
+  implements Plugin<DashboardSetup, DashboardStart, SetupDependencies, StartDependencies> {
   constructor(private initializerContext: PluginInitializerContext) {}
 
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
@@ -193,17 +193,8 @@ export class DashboardPlugin
 
   public setup(
     core: CoreSetup<StartDependencies, DashboardStart>,
-    {
-      share,
-      uiActions,
-      embeddable,
-      home,
-      kibanaLegacy,
-      urlForwarding,
-      data,
-      usageCollection,
-    }: SetupDependencies
-  ): Setup {
+    { share, uiActions, embeddable, home, urlForwarding, data, usageCollection }: SetupDependencies
+  ): DashboardSetup {
     this.dashboardFeatureFlagConfig = this.initializerContext.config.get<
       DashboardFeatureFlagConfig
     >();
@@ -491,12 +482,10 @@ export class DashboardPlugin
         new AttributeService(
           type,
           showSaveModal,
-          core.savedObjects.client,
-          core.overlays,
           core.i18n.Context,
           core.notifications.toasts,
-          embeddable.getEmbeddableFactory,
-          options
+          options,
+          embeddable.getEmbeddableFactory
         ),
     };
   }

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import type { HttpHandler } from 'src/core/public';
 import {
   ValidateLogEntryDatasetsResponsePayload,
   ValidationIndicesResponsePayload,
@@ -23,24 +24,35 @@ export interface ModuleDescriptor<JobType extends string> {
   jobTypes: JobType[];
   bucketSpan: number;
   getJobIds: (spaceId: string, sourceId: string) => Record<JobType, string>;
-  getJobSummary: (spaceId: string, sourceId: string) => Promise<FetchJobStatusResponsePayload>;
-  getModuleDefinition: () => Promise<GetMlModuleResponsePayload>;
+  getJobSummary: (
+    spaceId: string,
+    sourceId: string,
+    fetch: HttpHandler
+  ) => Promise<FetchJobStatusResponsePayload>;
+  getModuleDefinition: (fetch: HttpHandler) => Promise<GetMlModuleResponsePayload>;
   setUpModule: (
     start: number | undefined,
     end: number | undefined,
     datasetFilter: DatasetFilter,
-    sourceConfiguration: ModuleSourceConfiguration
+    sourceConfiguration: ModuleSourceConfiguration,
+    fetch: HttpHandler
   ) => Promise<SetupMlModuleResponsePayload>;
-  cleanUpModule: (spaceId: string, sourceId: string) => Promise<DeleteJobsResponsePayload>;
+  cleanUpModule: (
+    spaceId: string,
+    sourceId: string,
+    fetch: HttpHandler
+  ) => Promise<DeleteJobsResponsePayload>;
   validateSetupIndices: (
     indices: string[],
-    timestampField: string
+    timestampField: string,
+    fetch: HttpHandler
   ) => Promise<ValidationIndicesResponsePayload>;
   validateSetupDatasets: (
     indices: string[],
     timestampField: string,
     startTime: number,
-    endTime: number
+    endTime: number,
+    fetch: HttpHandler
   ) => Promise<ValidateLogEntryDatasetsResponsePayload>;
 }
 
@@ -50,43 +62,3 @@ export interface ModuleSourceConfiguration {
   spaceId: string;
   timestampField: string;
 }
-
-interface ManyCategoriesWarningReason {
-  type: 'manyCategories';
-  categoriesDocumentRatio: number;
-}
-
-interface ManyDeadCategoriesWarningReason {
-  type: 'manyDeadCategories';
-  deadCategoriesRatio: number;
-}
-
-interface ManyRareCategoriesWarningReason {
-  type: 'manyRareCategories';
-  rareCategoriesRatio: number;
-}
-
-interface NoFrequentCategoriesWarningReason {
-  type: 'noFrequentCategories';
-}
-
-interface SingleCategoryWarningReason {
-  type: 'singleCategory';
-}
-
-export type CategoryQualityWarningReason =
-  | ManyCategoriesWarningReason
-  | ManyDeadCategoriesWarningReason
-  | ManyRareCategoriesWarningReason
-  | NoFrequentCategoriesWarningReason
-  | SingleCategoryWarningReason;
-
-export type CategoryQualityWarningReasonType = CategoryQualityWarningReason['type'];
-
-export interface CategoryQualityWarning {
-  type: 'categoryQualityWarning';
-  jobId: string;
-  reasons: CategoryQualityWarningReason[];
-}
-
-export type QualityWarning = CategoryQualityWarning;

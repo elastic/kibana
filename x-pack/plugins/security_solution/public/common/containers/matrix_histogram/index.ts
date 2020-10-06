@@ -5,14 +5,13 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { isEmpty, noop } from 'lodash/fp';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { noop } from 'lodash/fp';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { MatrixHistogramQueryProps } from '../../components/matrix_histogram/types';
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { inputsModel } from '../../../common/store';
 import { createFilter } from '../../../common/containers/helpers';
-import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
+import { useKibana } from '../../../common/lib/kibana';
 import {
   MatrixHistogramQuery,
   MatrixHistogramRequestOptions,
@@ -35,33 +34,29 @@ export interface UseMatrixHistogramArgs {
   totalCount: number;
 }
 
+const ID = 'matrixHistogramQuery';
+
 export const useMatrixHistogram = ({
   endDate,
   errorMessage,
   filterQuery,
   histogramType,
-  indexToAdd,
+  indexNames,
   stackByField,
   startDate,
 }: MatrixHistogramQueryProps): [boolean, UseMatrixHistogramArgs] => {
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const [configIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
-  const defaultIndex = useMemo<string[]>(() => {
-    if (indexToAdd != null && !isEmpty(indexToAdd)) {
-      return [...configIndex, ...indexToAdd];
-    }
-    return configIndex;
-  }, [configIndex, indexToAdd]);
   const [loading, setLoading] = useState(false);
   const [matrixHistogramRequest, setMatrixHistogramRequest] = useState<
     MatrixHistogramRequestOptions
   >({
-    defaultIndex,
+    defaultIndex: indexNames,
     factoryQueryType: MatrixHistogramQuery,
     filterQuery: createFilter(filterQuery),
     histogramType,
+    id: ID,
     timerange: {
       interval: '12h',
       from: startDate,
@@ -140,20 +135,22 @@ export const useMatrixHistogram = ({
     setMatrixHistogramRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        defaultIndex,
+        defaultIndex: indexNames,
         filterQuery: createFilter(filterQuery),
+        histogramType,
         timerange: {
           interval: '12h',
           from: startDate,
           to: endDate,
         },
+        stackByField,
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [defaultIndex, endDate, filterQuery, startDate]);
+  }, [indexNames, endDate, filterQuery, startDate, stackByField, histogramType]);
 
   useEffect(() => {
     hostsSearch(matrixHistogramRequest);

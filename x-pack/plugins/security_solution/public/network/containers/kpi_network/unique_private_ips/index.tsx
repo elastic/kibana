@@ -8,7 +8,6 @@ import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
 import { inputsModel } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -45,6 +44,7 @@ export interface NetworkKpiUniquePrivateIpsArgs {
 interface UseNetworkKpiUniquePrivateIps {
   filterQuery?: ESTermQuery | string;
   endDate: string;
+  indexNames: string[];
   skip?: boolean;
   startDate: string;
 }
@@ -52,27 +52,32 @@ interface UseNetworkKpiUniquePrivateIps {
 export const useNetworkKpiUniquePrivateIps = ({
   filterQuery,
   endDate,
+  indexNames,
   skip = false,
   startDate,
 }: UseNetworkKpiUniquePrivateIps): [boolean, NetworkKpiUniquePrivateIpsArgs] => {
-  const { data, notifications, uiSettings } = useKibana().services;
+  const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
-  const [networkKpiUniquePrivateIpsRequest, setNetworkKpiUniquePrivateIpsRequest] = useState<
-    NetworkKpiUniquePrivateIpsRequestOptions
-  >({
-    defaultIndex,
-    factoryQueryType: NetworkKpiQueries.uniquePrivateIps,
-    filterQuery: createFilter(filterQuery),
-    id: ID,
-    timerange: {
-      interval: '12h',
-      from: startDate,
-      to: endDate,
-    },
-  });
+  const [
+    networkKpiUniquePrivateIpsRequest,
+    setNetworkKpiUniquePrivateIpsRequest,
+  ] = useState<NetworkKpiUniquePrivateIpsRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          factoryQueryType: NetworkKpiQueries.uniquePrivateIps,
+          filterQuery: createFilter(filterQuery),
+          id: ID,
+          timerange: {
+            interval: '12h',
+            from: startDate,
+            to: endDate,
+          },
+        }
+      : null
+  );
 
   const [networkKpiUniquePrivateIpsResponse, setNetworkKpiUniquePrivateIpsResponse] = useState<
     NetworkKpiUniquePrivateIpsArgs
@@ -91,7 +96,11 @@ export const useNetworkKpiUniquePrivateIps = ({
   });
 
   const networkKpiUniquePrivateIpsSearch = useCallback(
-    (request: NetworkKpiUniquePrivateIpsRequestOptions) => {
+    (request: NetworkKpiUniquePrivateIpsRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -155,9 +164,11 @@ export const useNetworkKpiUniquePrivateIps = ({
   useEffect(() => {
     setNetworkKpiUniquePrivateIpsRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
-        defaultIndex,
+        ...(prevRequest ?? {}),
+        defaultIndex: indexNames,
+        factoryQueryType: NetworkKpiQueries.uniquePrivateIps,
         filterQuery: createFilter(filterQuery),
+        id: ID,
         timerange: {
           interval: '12h',
           from: startDate,
@@ -169,7 +180,7 @@ export const useNetworkKpiUniquePrivateIps = ({
       }
       return prevRequest;
     });
-  }, [defaultIndex, endDate, filterQuery, skip, startDate]);
+  }, [indexNames, endDate, filterQuery, skip, startDate]);
 
   useEffect(() => {
     networkKpiUniquePrivateIpsSearch(networkKpiUniquePrivateIpsRequest);

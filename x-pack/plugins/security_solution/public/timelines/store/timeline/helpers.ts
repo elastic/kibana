@@ -22,6 +22,7 @@ import {
 import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/model';
 import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import {
+  TimelineEventsType,
   TimelineTypeLiteral,
   TimelineType,
   RowRendererId,
@@ -29,7 +30,7 @@ import {
 import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
 
 import { timelineDefaults } from './defaults';
-import { ColumnHeaderOptions, KqlMode, TimelineModel, EventType } from './model';
+import { ColumnHeaderOptions, KqlMode, TimelineModel } from './model';
 import { TimelineById } from './types';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
@@ -139,6 +140,7 @@ interface AddNewTimelineParams {
   filters?: Filter[];
   id: string;
   itemsPerPage?: number;
+  indexNames: string[];
   kqlQuery?: {
     filterQuery: SerializedFilterQuery | null;
     filterQueryDraft: KueryFilterQuery | null;
@@ -159,6 +161,7 @@ export const addNewTimeline = ({
   filters = timelineDefaults.filters,
   id,
   itemsPerPage = timelineDefaults.itemsPerPage,
+  indexNames,
   kqlQuery = { filterQuery: null, filterQueryDraft: null },
   sort = timelineDefaults.sort,
   show = false,
@@ -186,6 +189,7 @@ export const addNewTimeline = ({
       excludedRowRendererIds,
       filters,
       itemsPerPage,
+      indexNames,
       kqlQuery,
       sort,
       show,
@@ -667,7 +671,7 @@ export const updateTimelineTitle = ({
 
 interface UpdateTimelineEventTypeParams {
   id: string;
-  eventType: EventType;
+  eventType: TimelineEventsType;
   timelineById: TimelineById;
 }
 
@@ -1205,17 +1209,20 @@ export const updateTimelinePerPageOptions = ({
 
 const removeAndProvider = (andProviderId: string, providerId: string, timeline: TimelineModel) => {
   const providerIndex = timeline.dataProviders.findIndex((p) => p.id === providerId);
-  const providerAndIndex = timeline.dataProviders[providerIndex].and.findIndex(
+  const providerAndIndex = timeline.dataProviders[providerIndex]?.and.findIndex(
     (p) => p.id === andProviderId
   );
+
   return [
     ...timeline.dataProviders.slice(0, providerIndex),
     {
       ...timeline.dataProviders[providerIndex],
-      and: [
-        ...timeline.dataProviders[providerIndex].and.slice(0, providerAndIndex),
-        ...timeline.dataProviders[providerIndex].and.slice(providerAndIndex + 1),
-      ],
+      and: timeline.dataProviders[providerIndex]?.and
+        ? [
+            ...timeline.dataProviders[providerIndex]?.and.slice(0, providerAndIndex),
+            ...timeline.dataProviders[providerIndex]?.and.slice(providerAndIndex + 1),
+          ]
+        : [],
     },
     ...timeline.dataProviders.slice(providerIndex + 1),
   ];
@@ -1225,7 +1232,7 @@ const removeProvider = (providerId: string, timeline: TimelineModel) => {
   const providerIndex = timeline.dataProviders.findIndex((p) => p.id === providerId);
   return [
     ...timeline.dataProviders.slice(0, providerIndex),
-    ...(timeline.dataProviders[providerIndex].and.length
+    ...(timeline.dataProviders[providerIndex]?.and.length
       ? [
           {
             ...timeline.dataProviders[providerIndex].and.slice(0, 1)[0],

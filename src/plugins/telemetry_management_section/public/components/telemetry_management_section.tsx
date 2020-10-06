@@ -34,7 +34,8 @@ import { i18n } from '@kbn/i18n';
 import { TelemetryPluginSetup } from 'src/plugins/telemetry/public';
 import { PRIVACY_STATEMENT_URL } from '../../../telemetry/common/constants';
 import { OptInExampleFlyout } from './opt_in_example_flyout';
-import { Field } from '../../../advanced_settings/public';
+import { OptInSecurityExampleFlyout } from './opt_in_security_example_flyout';
+import { LazyField } from '../../../advanced_settings/public';
 import { ToastsStart } from '../../../../core/public';
 
 type TelemetryService = TelemetryPluginSetup['telemetryService'];
@@ -53,6 +54,7 @@ interface Props {
 interface State {
   processing: boolean;
   showExample: boolean;
+  showSecurityExample: boolean;
   queryMatches: boolean | null;
   enabled: boolean;
 }
@@ -61,6 +63,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
   state: State = {
     processing: false,
     showExample: false,
+    showSecurityExample: false,
     queryMatches: null,
     enabled: this.props.telemetryService.getIsOptedIn() || false,
   };
@@ -87,7 +90,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
 
   render() {
     const { telemetryService } = this.props;
-    const { showExample, queryMatches, enabled, processing } = this.state;
+    const { showExample, showSecurityExample, queryMatches, enabled, processing } = this.state;
 
     if (!telemetryService.getCanChangeOptInStatus()) {
       return null;
@@ -105,6 +108,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
             onClose={this.toggleExample}
           />
         )}
+        {showSecurityExample && <OptInSecurityExampleFlyout onClose={this.toggleSecurityExample} />}
         <EuiPanel paddingSize="l">
           <EuiForm>
             <EuiText>
@@ -119,7 +123,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
 
             {this.maybeGetAppliesSettingMessage()}
             <EuiSpacer size="s" />
-            <Field
+            <LazyField
               setting={
                 {
                   type: 'boolean',
@@ -197,12 +201,25 @@ export class TelemetryManagementSection extends Component<Props, State> {
         />
       </p>
       <p>
-        <EuiLink onClick={this.toggleExample}>
-          <FormattedMessage
-            id="telemetry.seeExampleOfWhatWeCollectLinkText"
-            defaultMessage="See an example of what we collect"
-          />
-        </EuiLink>
+        <FormattedMessage
+          id="telemetry.seeExamplesOfWhatWeCollect"
+          defaultMessage="See examples of the {clusterData} and {endpointSecurityData} that we collect."
+          values={{
+            clusterData: (
+              <EuiLink onClick={this.toggleExample}>
+                <FormattedMessage id="telemetry.clusterData" defaultMessage="cluster data" />
+              </EuiLink>
+            ),
+            endpointSecurityData: (
+              <EuiLink onClick={this.toggleSecurityExample}>
+                <FormattedMessage
+                  id="telemetry.securityData"
+                  defaultMessage="endpoint security data"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
       </p>
     </Fragment>
   );
@@ -243,6 +260,12 @@ export class TelemetryManagementSection extends Component<Props, State> {
   toggleExample = () => {
     this.setState({
       showExample: !this.state.showExample,
+    });
+  };
+
+  toggleSecurityExample = () => {
+    this.setState({
+      showSecurityExample: !this.state.showSecurityExample,
     });
   };
 }

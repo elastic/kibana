@@ -10,7 +10,6 @@ import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
 import { inputsModel } from '../../../../common/store';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
@@ -29,7 +28,7 @@ import {
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
-const ID = 'hostDetailsQuery';
+const ID = 'hostsDetailsQuery';
 
 export interface HostDetailsArgs {
   id: string;
@@ -41,9 +40,10 @@ export interface HostDetailsArgs {
 }
 
 interface UseHostDetails {
-  id?: string;
-  hostName: string;
   endDate: string;
+  hostName: string;
+  id?: string;
+  indexNames: string[];
   skip?: boolean;
   startDate: string;
 }
@@ -51,25 +51,30 @@ interface UseHostDetails {
 export const useHostDetails = ({
   endDate,
   hostName,
+  indexNames,
+  id = ID,
   skip = false,
   startDate,
-  id = ID,
 }: UseHostDetails): [boolean, HostDetailsArgs] => {
-  const { data, notifications, uiSettings } = useKibana().services;
+  const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
-  const [hostDetailsRequest, setHostDetailsRequest] = useState<HostDetailsRequestOptions>({
-    defaultIndex,
-    hostName,
-    factoryQueryType: HostsQueries.details,
-    timerange: {
-      interval: '12h',
-      from: startDate,
-      to: endDate,
-    },
-  });
+  const [hostDetailsRequest, setHostDetailsRequest] = useState<HostDetailsRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          hostName,
+          id,
+          factoryQueryType: HostsQueries.details,
+          timerange: {
+            interval: '12h',
+            from: startDate,
+            to: endDate,
+          },
+        }
+      : null
+  );
 
   const [hostDetailsResponse, setHostDetailsResponse] = useState<HostDetailsArgs>({
     endDate,
@@ -84,7 +89,11 @@ export const useHostDetails = ({
   });
 
   const hostDetailsSearch = useCallback(
-    (request: HostDetailsRequestOptions) => {
+    (request: HostDetailsRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -141,9 +150,11 @@ export const useHostDetails = ({
   useEffect(() => {
     setHostDetailsRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
-        defaultIndex,
+        ...(prevRequest ?? {}),
+        defaultIndex: indexNames,
+        factoryQueryType: HostsQueries.details,
         hostName,
+        id: ID,
         timerange: {
           interval: '12h',
           from: startDate,
@@ -155,7 +166,7 @@ export const useHostDetails = ({
       }
       return prevRequest;
     });
-  }, [defaultIndex, endDate, hostName, startDate, skip]);
+  }, [endDate, hostName, indexNames, startDate, skip]);
 
   useEffect(() => {
     hostDetailsSearch(hostDetailsRequest);
