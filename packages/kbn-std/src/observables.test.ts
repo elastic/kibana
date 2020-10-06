@@ -58,7 +58,7 @@ describe('firstValueFrom()', () => {
       unsubscribed = subscriber.closed;
     });
 
-    await expect(optionalFirstValueFrom(source)).resolves.toMatchInlineSnapshot(`1`);
+    await expect(firstValueFrom(source)).resolves.toMatchInlineSnapshot(`1`);
     if (!unsubscribed) {
       throw new Error('expected source to be unsubscribed');
     }
