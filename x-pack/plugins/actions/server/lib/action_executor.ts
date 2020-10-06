@@ -175,11 +175,11 @@ export class ActionExecutor {
       logger.warn(`action execution failure: ${actionLabel}: ${event.error.message}`);
     } else {
       event.event.outcome = 'failure';
-      event.message = `action execution returned unexpected result: ${actionLabel}`;
+      event.message = `action execution returned unexpected result: ${actionLabel}: "${result.status}"`;
       event.error = event.error || {};
       event.error.message = 'action execution returned unexpected result';
       logger.warn(
-        `action execution failure: ${actionLabel}: returned unexpected result ${result.status}`
+        `action execution failure: ${actionLabel}: returned unexpected result "${result.status}"`
       );
     }
 

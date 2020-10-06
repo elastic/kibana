@@ -369,7 +369,7 @@ test('logs a warning when alert executor returns invalid status', async () => {
   executorMock.mockResolvedValue(alertExecutionStatus);
   await actionExecutor.execute(executeParams);
   expect(loggerMock.warn).toBeCalledWith(
-    'action execution failure: test:1: action-1: returned unexpected result invalid-status'
+    'action execution failure: test:1: action-1: returned unexpected result "invalid-status"'
   );
 });
 
