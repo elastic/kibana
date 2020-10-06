@@ -20,9 +20,9 @@ import {
   Settings,
   Heatmap,
   HeatmapElementEvent,
-  HeatmapConfig,
   ElementClickListener,
   TooltipValue,
+  HeatmapSpec,
 } from '@elastic/charts';
 import moment from 'moment';
 import { HeatmapBrushEvent } from '@elastic/charts/dist/chart_types/heatmap/layout/types/config_types';
@@ -32,7 +32,6 @@ import { TooltipSettings } from '@elastic/charts/dist/specs/settings';
 import { SwimLanePagination } from './swimlane_pagination';
 import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
 import { ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../../../common';
-import { DeepPartial } from '../../../common/types/common';
 import { TimeBuckets as TimeBucketsClass } from '../util/time_buckets';
 import { SWIMLANE_TYPE, SwimlaneType } from './explorer_constants';
 import { mlEscape } from '../util/string_utils';
@@ -48,7 +47,8 @@ import './_explorer.scss';
 const RESIZE_IGNORED_DIFF_PX = 20;
 const RESIZE_THROTTLE_TIME_MS = 500;
 const CELL_HEIGHT = 30;
-const LEGEND_HEIGHT = 70;
+const LEGEND_HEIGHT = 34;
+const Y_AXIS_HEIGHT = 24;
 
 export function isViewBySwimLaneData(arg: any): arg is ViewBySwimLaneData {
   return arg && arg.hasOwnProperty('cardinality');
@@ -92,7 +92,7 @@ const SwimLaneTooltip = (fieldName?: string): FC<{ values: TooltipValue[] }> => 
   return <FormattedTooltip tooltipData={tooltipData} />;
 };
 
-export interface ExplorerSwimlaneProps {
+export interface SwimlaneProps {
   filterActive?: boolean;
   maskAll?: boolean;
   timeBuckets: InstanceType<typeof TimeBucketsClass>;
@@ -101,31 +101,28 @@ export interface ExplorerSwimlaneProps {
   selection?: AppStateSelectedCells;
   onCellsSelection: (payload?: AppStateSelectedCells) => void;
   'data-test-subj'?: string;
+  onResize: (width: number) => void;
+  fromPage?: number;
+  perPage?: number;
+  swimlaneLimit?: number;
+  onPaginationChange?: (arg: { perPage?: number; fromPage?: number }) => void;
+  isLoading: boolean;
+  noDataWarning: string | JSX.Element | null;
+  /**
+   * Unique id of the chart
+   */
+  id: string;
+  /**
+   * Enables/disables timeline on the X-axis.
+   */
+  showTimeline?: boolean;
 }
 
 /**
  * Anomaly swim lane container responsible for handling resizing, pagination and
  * providing swim lane vis with required props.
  */
-export const SwimlaneContainer: FC<
-  ExplorerSwimlaneProps & {
-    onResize: (width: number) => void;
-    fromPage?: number;
-    perPage?: number;
-    swimlaneLimit?: number;
-    onPaginationChange?: (arg: { perPage?: number; fromPage?: number }) => void;
-    isLoading: boolean;
-    noDataWarning: string | JSX.Element | null;
-    /**
-     * Unique id of the chart
-     */
-    id: string;
-    /**
-     * Enables/disables timeline on the X-axis.
-     */
-    showTimeline?: boolean;
-  }
-> = ({
+export const SwimlaneContainer: FC<SwimlaneProps> = ({
   id,
   onResize,
   perPage,
@@ -194,7 +191,9 @@ export const SwimlaneContainer: FC<
 
   const containerHeight = useMemo(() => {
     // Persists container height during loading to prevent page from jumping
-    return isLoading ? containerHeightRef.current : rowsCount * CELL_HEIGHT + LEGEND_HEIGHT;
+    return isLoading
+      ? containerHeightRef.current
+      : rowsCount * CELL_HEIGHT + LEGEND_HEIGHT + Y_AXIS_HEIGHT;
   }, [isLoading, rowsCount]);
 
   useEffect(() => {
@@ -203,7 +202,7 @@ export const SwimlaneContainer: FC<
     }
   }, [isLoading, containerHeight]);
 
-  const highlightedData = useMemo(() => {
+  const highlightedData: HeatmapSpec['highlightedData'] = useMemo(() => {
     if (!selection) return;
 
     if (
@@ -219,7 +218,7 @@ export const SwimlaneContainer: FC<
     return { x: selection.times.map((v) => v * 1000), y: selection.lanes };
   }, [selection, swimlaneType]);
 
-  const swimLaneConfig: DeepPartial<HeatmapConfig> = useMemo(
+  const swimLaneConfig: HeatmapSpec['config'] = useMemo(
     () =>
       showSwimlane
         ? {
@@ -233,7 +232,6 @@ export const SwimlaneContainer: FC<
             },
             grid: {
               cellHeight: {
-                min: CELL_HEIGHT / 2,
                 max: CELL_HEIGHT, // 'fill',
               },
               stroke: {
