@@ -149,7 +149,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
               <EuiText size="xs" color="subdued">
                 <FormattedMessage
                   id="xpack.savedObjectsTagging.management.optionalFieldText"
-                  defaultMessage={'Optional'}
+                  defaultMessage="Optional"
                 />
               </EuiText>
             }
@@ -173,7 +173,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
                 <EuiText size="xs" color="subdued">
                   <FormattedMessage
                     id="xpack.savedObjectsTagging.management.tagPreviewText"
-                    defaultMessage={'Preview'}
+                    defaultMessage="Preview"
                   />
                 </EuiText>
               </EuiFlexItem>
