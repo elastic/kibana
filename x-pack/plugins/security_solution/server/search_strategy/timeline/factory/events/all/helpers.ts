@@ -11,8 +11,7 @@ import { toArray } from '../../../../helpers/to_array';
 export const formatTimelineData = (
   dataFields: readonly string[],
   ecsFields: readonly string[],
-  hit: EventHit,
-  fieldMap: Readonly<Record<string, string>>
+  hit: EventHit
 ) =>
   uniq([...ecsFields, ...dataFields]).reduce<TimelineEdges>(
     (flattenedFields, fieldName) => {
@@ -25,14 +24,7 @@ export const formatTimelineData = (
         flattenedFields.cursor.value = hit.sort[0];
         flattenedFields.cursor.tiebreaker = hit.sort[1];
       }
-      return mergeTimelineFieldsWithHit(
-        fieldName,
-        flattenedFields,
-        fieldMap,
-        hit,
-        dataFields,
-        ecsFields
-      );
+      return mergeTimelineFieldsWithHit(fieldName, flattenedFields, hit, dataFields, ecsFields);
     },
     {
       node: { ecs: { _id: '' }, data: [], _id: '', _index: '' },
@@ -48,13 +40,12 @@ const specialFields = ['_id', '_index', '_type', '_score'];
 const mergeTimelineFieldsWithHit = <T>(
   fieldName: string,
   flattenedFields: T,
-  fieldMap: Readonly<Record<string, string>>,
   hit: { _source: {} },
   dataFields: readonly string[],
   ecsFields: readonly string[]
 ) => {
-  if (fieldMap[fieldName] != null || dataFields.includes(fieldName)) {
-    const esField = dataFields.includes(fieldName) ? fieldName : fieldMap[fieldName];
+  if (fieldName != null || dataFields.includes(fieldName)) {
+    const esField = fieldName;
     if (has(esField, hit._source) || specialFields.includes(esField)) {
       const objectWithProperty = {
         node: {

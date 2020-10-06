@@ -9,6 +9,5 @@ import { services as apiIntegrationServices } from '../api_integration/services'
 
 export const services = {
   ...commonServices,
-  legacyEs: apiIntegrationServices.legacyEs,
   supertestWithoutAuth: apiIntegrationServices.supertestWithoutAuth,
 };

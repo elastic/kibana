@@ -22,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async function () {
       const { body: agentPolicyResponse } = await supertest
-        .post(`/api/ingest_manager/agent_policies`)
+        .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
           name: 'Test policy',
@@ -34,7 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should work with valid values', async function () {
       if (server.enabled) {
         await supertest
-          .post(`/api/ingest_manager/package_policies`)
+          .post(`/api/fleet/package_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'filetest-1',
@@ -59,7 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return a 400 with an empty namespace', async function () {
       if (server.enabled) {
         await supertest
-          .post(`/api/ingest_manager/package_policies`)
+          .post(`/api/fleet/package_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'filetest-1',
@@ -84,7 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return a 400 with an invalid namespace', async function () {
       if (server.enabled) {
         await supertest
-          .post(`/api/ingest_manager/package_policies`)
+          .post(`/api/fleet/package_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'filetest-1',
@@ -102,7 +102,7 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(400);
         await supertest
-          .post(`/api/ingest_manager/package_policies`)
+          .post(`/api/fleet/package_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'filetest-1',
@@ -128,7 +128,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should not allow multiple limited packages on the same agent policy', async function () {
       if (server.enabled) {
         await supertest
-          .post(`/api/ingest_manager/package_policies`)
+          .post(`/api/fleet/package_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'endpoint-1',
@@ -146,7 +146,7 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(200);
         await supertest
-          .post(`/api/ingest_manager/package_policies`)
+          .post(`/api/fleet/package_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'endpoint-2',
@@ -171,7 +171,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return a 500 if there is another package policy with the same name', async function () {
       if (server.enabled) {
         await supertest
-          .post(`/api/ingest_manager/package_policies`)
+          .post(`/api/fleet/package_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'same-name-test-1',
@@ -189,7 +189,7 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(200);
         await supertest
-          .post(`/api/ingest_manager/package_policies`)
+          .post(`/api/fleet/package_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'same-name-test-1',
