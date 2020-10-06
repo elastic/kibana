@@ -1936,8 +1936,8 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
     attributes: T;
     // (undocumented)
     id?: string;
+    initialNamespaces?: string[];
     migrationVersion?: SavedObjectsMigrationVersion;
-    namespaces?: string[];
     originId?: string;
     // (undocumented)
     references?: SavedObjectReference[];
@@ -2094,8 +2094,8 @@ export interface SavedObjectsCoreFieldMapping {
 // @public (undocumented)
 export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
     id?: string;
+    initialNamespaces?: string[];
     migrationVersion?: SavedObjectsMigrationVersion;
-    namespaces?: string[];
     originId?: string;
     overwrite?: boolean;
     // (undocumented)
