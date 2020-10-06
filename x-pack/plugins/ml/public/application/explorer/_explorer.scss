@@ -57,9 +57,10 @@ $borderRadius: $euiBorderRadius / 2;
   }
 
   .echLegendList {
-    margin-left: 170px !important;
     display: flex !important;
     justify-content: space-between !important;
     flex-wrap: nowrap;
+    position: absolute;
+    right: 0;
   }
 }
