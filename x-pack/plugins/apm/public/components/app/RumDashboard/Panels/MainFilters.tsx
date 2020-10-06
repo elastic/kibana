@@ -6,12 +6,12 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { URLFilter } from '../URLFilter';
 import { EnvironmentFilter } from '../../../shared/EnvironmentFilter';
 import { ServiceNameFilter } from '../URLFilter/ServiceNameFilter';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { RUM_AGENT_NAMES } from '../../../../../common/agent_name';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { UserPercentile } from '../UserPercentile';
 
 export function MainFilters() {
   const {
@@ -37,10 +37,7 @@ export function MainFilters() {
   );
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <URLFilter />
-      </EuiFlexItem>
+    <>
       <EuiFlexItem grow={false}>
         <ServiceNameFilter
           loading={status !== 'success'}
@@ -48,8 +45,11 @@ export function MainFilters() {
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
+        <UserPercentile />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} style={{ maxWidth: 200 }}>
         <EnvironmentFilter />
       </EuiFlexItem>
-    </EuiFlexGroup>
+    </>
   );
 }

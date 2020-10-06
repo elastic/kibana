@@ -11,7 +11,7 @@ import { Projection } from '../../../../common/projections';
 import { RumDashboard } from './RumDashboard';
 
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
-import { MainFilters } from './Panels/MainFilters';
+import { URLFilter } from './URLFilter';
 
 export function RumOverview() {
   useTrackPageview({ app: 'ux', path: 'home' });
@@ -29,10 +29,12 @@ export function RumOverview() {
   return (
     <>
       <EuiSpacer size="m" />
-      <MainFilters />
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
-          <LocalUIFilters {...localUIFiltersConfig} showCount={true} />
+          <LocalUIFilters {...localUIFiltersConfig} showCount={true}>
+            <URLFilter />
+            <EuiSpacer size="s" />
+          </LocalUIFilters>
         </EuiFlexItem>
         <EuiFlexItem grow={7}>
           <RumDashboard />
