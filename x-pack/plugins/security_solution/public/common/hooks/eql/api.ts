@@ -16,6 +16,7 @@ import {
 } from '../../../../../data_enhanced/common';
 import { getEqlAggsData, getSequenceAggs } from './helpers';
 import { EqlPreviewResponse, Source } from './types';
+import { hasEqlSequenceQuery } from '../../../../common/detection_engine/utils';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { EqlSearchResponse } from '../../../../server/lib/types';
 
@@ -91,7 +92,7 @@ export const getEqlPreview = async ({
       )
       .toPromise();
 
-    if (query.indexOf('sequence') !== -1) {
+    if (hasEqlSequenceQuery(query)) {
       return getSequenceAggs(response, interval, toTime, fromTime);
     } else {
       return getEqlAggsData(response, interval, toTime, fromTime);
