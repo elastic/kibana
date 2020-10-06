@@ -17,6 +17,23 @@
  * under the License.
  */
 
-export * from './embeddable';
-export * from './actions';
-export type { RenderDeps } from './application';
+import React from 'react';
+import { EuiLoadingContent, EuiDelayRender } from '@elastic/eui';
+import type { ShardFailureOpenModalButtonProps } from './shard_failure_open_modal_button';
+
+const Fallback = () => (
+  <EuiDelayRender>
+    <EuiLoadingContent lines={1} />
+  </EuiDelayRender>
+);
+
+const LazyShardFailureOpenModalButton = React.lazy(
+  () => import('./shard_failure_open_modal_button')
+);
+export const ShardFailureOpenModalButton = (props: ShardFailureOpenModalButtonProps) => (
+  <React.Suspense fallback={<Fallback />}>
+    <LazyShardFailureOpenModalButton {...props} />
+  </React.Suspense>
+);
+
+export type { ShardFailureRequest } from './shard_failure_types';
