@@ -16,7 +16,7 @@ import { Sources } from './sources';
 import { Note } from './note/saved_object';
 import { PinnedEvent } from './pinned_event/saved_object';
 import { Timeline } from './timeline/saved_object';
-import { SearchTypes } from './detection_engine/signals/types';
+import { TotalValue, BaseHit, Explanation } from '../../common/detection_engine/types';
 
 export * from './hosts';
 
@@ -40,15 +40,28 @@ export interface SiemContext {
   user: AuthenticatedUser | null;
 }
 
-export interface TotalValue {
-  value: number;
-  relation: string;
+export interface ShardsResponse {
+  total: number;
+  successful: number;
+  failed: number;
+  skipped: number;
+  failures?: ShardError[];
 }
 
-export interface BaseHit<T> {
-  _index: string;
-  _id: string;
-  _source: T;
+export interface ShardError {
+  shard: number;
+  index: string;
+  node: string;
+  reason: {
+    type: string;
+    reason: string;
+    index_uuid: string;
+    index: string;
+    caused_by: {
+      type: string;
+      reason: string;
+    };
+  };
 }
 
 export interface SearchResponse<T> {
@@ -77,53 +90,6 @@ export interface SearchResponse<T> {
   };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   aggregations?: any;
-}
-
-export interface EqlSequence<T> {
-  join_keys: SearchTypes[];
-  events: Array<BaseHit<T>>;
-}
-
-export interface EqlSearchResponse<T> {
-  is_partial: boolean;
-  is_running: boolean;
-  took: number;
-  timed_out: boolean;
-  hits: {
-    total: TotalValue;
-    sequences?: Array<EqlSequence<T>>;
-    events?: Array<BaseHit<T>>;
-  };
-}
-
-export interface ShardsResponse {
-  total: number;
-  successful: number;
-  failed: number;
-  skipped: number;
-  failures?: ShardError[];
-}
-
-export interface ShardError {
-  shard: number;
-  index: string;
-  node: string;
-  reason: {
-    type: string;
-    reason: string;
-    index_uuid: string;
-    index: string;
-    caused_by: {
-      type: string;
-      reason: string;
-    };
-  };
-}
-
-export interface Explanation {
-  value: number;
-  description: string;
-  details: Explanation[];
 }
 
 export type SearchHit = SearchResponse<object>['hits']['hits'][0];
