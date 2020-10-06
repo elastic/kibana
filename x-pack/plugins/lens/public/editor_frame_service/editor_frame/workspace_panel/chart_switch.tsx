@@ -15,10 +15,11 @@ import {
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSelectableMessage,
 } from '@elastic/eui';
 import { flatten } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { Visualization, FramePublicAPI, Datasource } from '../../../types';
 import { Action } from '../state_management';
 import { getSuggestions, switchToSuggestion, Suggestion } from '../suggestion_helpers';
@@ -233,7 +234,7 @@ export function ChartSwitch(props: Props) {
       anchorPosition="downLeft"
     >
       <EuiPopoverTitle>
-        <EuiFlexGroup alignItems="center">
+        <EuiFlexGroup alignItems="center" responsive={false}>
           <EuiFlexItem>
             {i18n.translate('xpack.lens.configPanel.chartType', {
               defaultMessage: 'Chart type',
@@ -281,12 +282,15 @@ export function ChartSwitch(props: Props) {
         ))}
       </EuiKeyPadMenu>
       {searchTerm && (visualizationTypes || []).length === 0 && (
-        <EuiCallOut
-          size="s"
-          title={i18n.translate('xpack.lens.chartSwitch.noResults', {
-            defaultMessage: 'No chart types found, please change search.',
-          })}
-        />
+        <EuiSelectableMessage>
+          <FormattedMessage
+            id="xpack.lens.chartSwitch.noResults"
+            defaultMessage="No results found for {term}."
+            values={{
+              term: <strong>{searchTerm}</strong>,
+            }}
+          />
+        </EuiSelectableMessage>
       )}
     </EuiPopover>
   );

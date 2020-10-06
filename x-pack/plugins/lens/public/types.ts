@@ -431,7 +431,7 @@ export interface FramePublicAPI {
 }
 
 /**
- * A visualization type advertized to the user in the chart switcher
+ * A visualization type advertised to the user in the chart switcher
  */
 export interface VisualizationType {
   /**
@@ -443,7 +443,7 @@ export interface VisualizationType {
    */
   icon: IconType;
   /**
-   * Visible ;abel used in the chart switcher and above the workspace panel in collapsed state
+   * Visible label used in the chart switcher and above the workspace panel in collapsed state
    */
   label: string;
   /**
