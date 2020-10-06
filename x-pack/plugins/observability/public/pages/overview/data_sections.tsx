@@ -14,7 +14,7 @@ import { UXSection } from '../../components/app/section/ux';
 import { ObservabilityHasDataResponse } from '../../typings/fetch_overview_data';
 
 interface Props {
-  hasData?: ObservabilityHasDataResponse;
+  hasData?: Partial<ObservabilityHasDataResponse>;
 }
 
 export function DataSections({ hasData }: Props) {

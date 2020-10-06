@@ -12,7 +12,7 @@ import { createMemoryHistory } from 'history';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { PluginContext } from '../context/plugin_context';
 import { EuiThemeProvider } from '../typings';
-import { ObsvSharedContextProvider } from '../context/shared_data';
+import { HasDataContextProvider } from '../context/has_data_context';
 
 export const core = ({
   http: {
@@ -32,9 +32,9 @@ export const render = (component: React.ReactNode) => {
     <PluginContext.Provider value={{ core }}>
       <KibanaContextProvider services={{ ...core }}>
         <EuiThemeProvider>
-          <ObsvSharedContextProvider>
+          <HasDataContextProvider>
             <Router history={history}>{component}</Router>
-          </ObsvSharedContextProvider>
+          </HasDataContextProvider>
         </EuiThemeProvider>
       </KibanaContextProvider>
     </PluginContext.Provider>
