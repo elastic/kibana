@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -36,23 +43,34 @@ export const SyntheticsCallout = () => {
         <p>
           <FormattedMessage
             id="xpack.uptime.overview.pageHeader.syntheticsCallout.content"
-            defaultMessage="Elastic Uptime now supports synthetic browser monitors! Learn how to use them {here}."
-            values={{ here: <a href="https://elastic.co/synthetics">here</a> }}
+            defaultMessage="Uptime is now previewing support for scripted multi-step availability checks. This means you can interact with elements of a webpage and check the availability of an entire journey (such as making a purchase or signing into a system) instead of just a simple single page up/down check. Please click below to read more and, if you'd like to be one of the first to use these capabilities, you can download our preview synthetics agent and view your synthetic checks in Uptime."
           />
         </p>
-        <EuiButton
-          onClick={() => {
-            if (shouldShow) {
-              hideSyntheticsCallout();
-              setShouldShow(false);
-            }
-          }}
-        >
-          <FormattedMessage
-            id="xpack.uptime.overview.pageHeader.syntheticsCallout.dismissButtonText"
-            defaultMessage="Dismiss"
-          />
-        </EuiButton>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiButton href="https://elastic.co/syntheics">
+              <FormattedMessage
+                id="xpack.uptime.overview.pageHeader.syntheticsCallout.announcementLink"
+                defaultMessage="Read announcement"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              onClick={() => {
+                if (shouldShow) {
+                  hideSyntheticsCallout();
+                  setShouldShow(false);
+                }
+              }}
+            >
+              <FormattedMessage
+                id="xpack.uptime.overview.pageHeader.syntheticsCallout.dismissButtonText"
+                defaultMessage="Dismiss"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiCallOut>
       <EuiSpacer size="s" />
     </>

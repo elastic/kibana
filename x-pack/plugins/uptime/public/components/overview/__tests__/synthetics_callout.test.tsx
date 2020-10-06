@@ -32,28 +32,39 @@ describe('SyntheticsCallout', () => {
         >
           <p>
             <FormattedMessage
-              defaultMessage="Elastic Uptime now supports synthetic browser monitors! Learn how to use them {here}."
+              defaultMessage="Uptime is now previewing support for scripted multi-step availability checks. This means you can interact with elements of a webpage and check the availability of an entire journey (such as making a purchase or signing into a system) instead of just a simple single page up/down check. Please click below to read more and, if you'd like to be one of the first to use these capabilities, you can download our preview synthetics agent and view your synthetic checks in Uptime."
               id="xpack.uptime.overview.pageHeader.syntheticsCallout.content"
-              values={
-                Object {
-                  "here": <a
-                    href="https://elastic.co/synthetics"
-                  >
-                    here
-                  </a>,
-                }
-              }
-            />
-          </p>
-          <EuiButton
-            onClick={[Function]}
-          >
-            <FormattedMessage
-              defaultMessage="Dismiss"
-              id="xpack.uptime.overview.pageHeader.syntheticsCallout.dismissButtonText"
               values={Object {}}
             />
-          </EuiButton>
+          </p>
+          <EuiFlexGroup>
+            <EuiFlexItem
+              grow={false}
+            >
+              <EuiButton
+                href="https://elastic.co/syntheics"
+              >
+                <FormattedMessage
+                  defaultMessage="Read announcement"
+                  id="xpack.uptime.overview.pageHeader.syntheticsCallout.announcementLink"
+                  values={Object {}}
+                />
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <EuiButtonEmpty
+                onClick={[Function]}
+              >
+                <FormattedMessage
+                  defaultMessage="Dismiss"
+                  id="xpack.uptime.overview.pageHeader.syntheticsCallout.dismissButtonText"
+                  values={Object {}}
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiCallOut>
         <EuiSpacer
           size="s"
@@ -81,28 +92,39 @@ describe('SyntheticsCallout', () => {
         >
           <p>
             <FormattedMessage
-              defaultMessage="Elastic Uptime now supports synthetic browser monitors! Learn how to use them {here}."
+              defaultMessage="Uptime is now previewing support for scripted multi-step availability checks. This means you can interact with elements of a webpage and check the availability of an entire journey (such as making a purchase or signing into a system) instead of just a simple single page up/down check. Please click below to read more and, if you'd like to be one of the first to use these capabilities, you can download our preview synthetics agent and view your synthetic checks in Uptime."
               id="xpack.uptime.overview.pageHeader.syntheticsCallout.content"
-              values={
-                Object {
-                  "here": <a
-                    href="https://elastic.co/synthetics"
-                  >
-                    here
-                  </a>,
-                }
-              }
-            />
-          </p>
-          <EuiButton
-            onClick={[Function]}
-          >
-            <FormattedMessage
-              defaultMessage="Dismiss"
-              id="xpack.uptime.overview.pageHeader.syntheticsCallout.dismissButtonText"
               values={Object {}}
             />
-          </EuiButton>
+          </p>
+          <EuiFlexGroup>
+            <EuiFlexItem
+              grow={false}
+            >
+              <EuiButton
+                href="https://elastic.co/syntheics"
+              >
+                <FormattedMessage
+                  defaultMessage="Read announcement"
+                  id="xpack.uptime.overview.pageHeader.syntheticsCallout.announcementLink"
+                  values={Object {}}
+                />
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <EuiButtonEmpty
+                onClick={[Function]}
+              >
+                <FormattedMessage
+                  defaultMessage="Dismiss"
+                  id="xpack.uptime.overview.pageHeader.syntheticsCallout.dismissButtonText"
+                  values={Object {}}
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiCallOut>
         <EuiSpacer
           size="s"

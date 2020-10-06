@@ -31,28 +31,49 @@ Array [
       class="euiText euiText--small"
     >
       <p>
-        Elastic Uptime now supports synthetic browser monitors! Learn how to use them 
-        <a
-          href="https://elastic.co/synthetics"
-        >
-          here
-        </a>
-        .
+        Uptime is now previewing support for scripted multi-step availability checks. This means you can interact with elements of a webpage and check the availability of an entire journey (such as making a purchase or signing into a system) instead of just a simple single page up/down check. Please click below to read more and, if you'd like to be one of the first to use these capabilities, you can download our preview synthetics agent and view your synthetic checks in Uptime.
       </p>
-      <button
-        class="euiButton euiButton--primary"
-        type="button"
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
       >
-        <span
-          class="euiButtonContent euiButton__content"
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
         >
-          <span
-            class="euiButton__text"
+          <a
+            class="euiButton euiButton--primary"
+            href="https://elastic.co/syntheics"
+            rel=""
           >
-            Dismiss
-          </span>
-        </span>
-      </button>
+            <span
+              class="euiButtonContent euiButton__content"
+            >
+              <span
+                class="euiButton__text"
+              >
+                Read announcement
+              </span>
+            </span>
+          </a>
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <button
+            class="euiButtonEmpty euiButtonEmpty--primary"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonEmpty__content"
+            >
+              <span
+                class="euiButtonEmpty__text"
+              >
+                Dismiss
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>,
   @media only screen and (max-width:1024px) and (min-width:868px) {
@@ -323,28 +344,49 @@ Array [
       class="euiText euiText--small"
     >
       <p>
-        Elastic Uptime now supports synthetic browser monitors! Learn how to use them 
-        <a
-          href="https://elastic.co/synthetics"
-        >
-          here
-        </a>
-        .
+        Uptime is now previewing support for scripted multi-step availability checks. This means you can interact with elements of a webpage and check the availability of an entire journey (such as making a purchase or signing into a system) instead of just a simple single page up/down check. Please click below to read more and, if you'd like to be one of the first to use these capabilities, you can download our preview synthetics agent and view your synthetic checks in Uptime.
       </p>
-      <button
-        class="euiButton euiButton--primary"
-        type="button"
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
       >
-        <span
-          class="euiButtonContent euiButton__content"
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
         >
-          <span
-            class="euiButton__text"
+          <a
+            class="euiButton euiButton--primary"
+            href="https://elastic.co/syntheics"
+            rel=""
           >
-            Dismiss
-          </span>
-        </span>
-      </button>
+            <span
+              class="euiButtonContent euiButton__content"
+            >
+              <span
+                class="euiButton__text"
+              >
+                Read announcement
+              </span>
+            </span>
+          </a>
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <button
+            class="euiButtonEmpty euiButtonEmpty--primary"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonEmpty__content"
+            >
+              <span
+                class="euiButtonEmpty__text"
+              >
+                Dismiss
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>,
   @media only screen and (max-width:1024px) and (min-width:868px) {
@@ -521,28 +563,49 @@ Array [
       class="euiText euiText--small"
     >
       <p>
-        Elastic Uptime now supports synthetic browser monitors! Learn how to use them 
-        <a
-          href="https://elastic.co/synthetics"
-        >
-          here
-        </a>
-        .
+        Uptime is now previewing support for scripted multi-step availability checks. This means you can interact with elements of a webpage and check the availability of an entire journey (such as making a purchase or signing into a system) instead of just a simple single page up/down check. Please click below to read more and, if you'd like to be one of the first to use these capabilities, you can download our preview synthetics agent and view your synthetic checks in Uptime.
       </p>
-      <button
-        class="euiButton euiButton--primary"
-        type="button"
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
       >
-        <span
-          class="euiButtonContent euiButton__content"
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
         >
-          <span
-            class="euiButton__text"
+          <a
+            class="euiButton euiButton--primary"
+            href="https://elastic.co/syntheics"
+            rel=""
           >
-            Dismiss
-          </span>
-        </span>
-      </button>
+            <span
+              class="euiButtonContent euiButton__content"
+            >
+              <span
+                class="euiButton__text"
+              >
+                Read announcement
+              </span>
+            </span>
+          </a>
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <button
+            class="euiButtonEmpty euiButtonEmpty--primary"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonEmpty__content"
+            >
+              <span
+                class="euiButtonEmpty__text"
+              >
+                Dismiss
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>,
   <div
