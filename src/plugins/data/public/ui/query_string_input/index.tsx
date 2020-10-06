@@ -19,10 +19,9 @@
 
 import React from 'react';
 import { EuiLoadingContent, EuiDelayRender } from '@elastic/eui';
-import { IIndexPattern, Filter } from '../..';
-
-type CancelFnType = () => void;
-type SubmitFnType = (filters: Filter[]) => void;
+import { withKibana } from '../../../../kibana_react/public';
+import type { QueryBarTopRowProps } from './query_bar_top_row';
+import type { QueryStringInputProps } from './query_string_input';
 
 const Fallback = () => (
   <EuiDelayRender>
@@ -30,22 +29,17 @@ const Fallback = () => (
   </EuiDelayRender>
 );
 
-const LazyApplyFiltersPopoverContent = React.lazy(() => import('./apply_filter_popover_content'));
+const LazyQueryBarTopRow = React.lazy(() => import('./query_bar_top_row'));
+export const QueryBarTopRow = (props: QueryBarTopRowProps) => (
+  <React.Suspense fallback={<Fallback />}>
+    <LazyQueryBarTopRow {...props} />
+  </React.Suspense>
+);
 
-export const applyFiltersPopover = (
-  filters: Filter[],
-  indexPatterns: IIndexPattern[],
-  onCancel: CancelFnType,
-  onSubmit: SubmitFnType
-) => {
-  return (
-    <React.Suspense fallback={<Fallback />}>
-      <LazyApplyFiltersPopoverContent
-        indexPatterns={indexPatterns}
-        filters={filters}
-        onCancel={onCancel}
-        onSubmit={onSubmit}
-      />
-    </React.Suspense>
-  );
-};
+const LazyQueryStringInputUI = withKibana(React.lazy(() => import('./query_string_input')));
+export const QueryStringInput = (props: QueryStringInputProps) => (
+  <React.Suspense fallback={<Fallback />}>
+    <LazyQueryStringInputUI {...props} />
+  </React.Suspense>
+);
+export type { QueryStringInputProps };

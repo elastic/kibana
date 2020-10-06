@@ -17,5 +17,15 @@
  * under the License.
  */
 
-export { ShardFailureRequest } from './shard_failure_types';
-export { ShardFailureOpenModalButton } from './shard_failure_open_modal_button';
+import _ from 'lodash';
+import React from 'react';
+
+import { SavedObjectsClientContract } from 'src/core/public';
+import { IndexPatternSelect, IndexPatternSelectProps } from './';
+
+// Takes in stateful runtime dependencies and pre-wires them to the component
+export function createIndexPatternSelect(savedObjectsClient: SavedObjectsClientContract) {
+  return (props: Omit<IndexPatternSelectProps, 'savedObjectsClient'>) => (
+    <IndexPatternSelect {...props} savedObjectsClient={savedObjectsClient} />
+  );
+}
