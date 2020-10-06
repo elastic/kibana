@@ -3,13 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import semver from 'semver';
-import { timer, from, Observable, TimeoutError } from 'rxjs';
+import { timer, from, Observable, TimeoutError, of, EMPTY } from 'rxjs';
 import { omit } from 'lodash';
 import {
   shareReplay,
+  share,
   distinctUntilKeyChanged,
   switchMap,
+  concatMap,
   merge,
   filter,
   timeout,
@@ -38,6 +41,7 @@ import {
 } from '../actions';
 import { appContextService } from '../../app_context';
 import { toPromiseAbortable, AbortError, createRateLimiter } from './rxjs_utils';
+import { getAgent } from '../crud';
 
 function getInternalUserSOClient() {
   const fakeRequest = ({
@@ -69,7 +73,8 @@ function createNewActionsSharedObservable(): Observable<AgentAction[]> {
       lastTimestamp = new Date().toISOString();
       return from(getNewActionsSince(internalSOClient, timestamp));
     }),
-    shareReplay({ refCount: true, bufferSize: 1 })
+    filter((data) => data.length > 0),
+    share()
   );
 }
 
@@ -201,6 +206,18 @@ export function agentCheckinStateNewActionsFactory() {
     rateLimiterMaxDelay
   );
 
+  function getOrCreateAgentPolicyObservable(agentPolicyId: string) {
+    if (!agentPolicies$.has(agentPolicyId)) {
+      agentPolicies$.set(agentPolicyId, createAgentPolicyActionSharedObservable(agentPolicyId));
+    }
+    const agentPolicy$ = agentPolicies$.get(agentPolicyId);
+    if (!agentPolicy$) {
+      throw new Error(`Invalid state, no observable for policy ${agentPolicyId}`);
+    }
+
+    return agentPolicy$;
+  }
+
   async function subscribeToNewActions(
     soClient: SavedObjectsClientContract,
     agent: Agent,
@@ -209,14 +226,7 @@ export function agentCheckinStateNewActionsFactory() {
     if (!agent.policy_id) {
       throw new Error('Agent does not have a policy');
     }
-    const agentPolicyId = agent.policy_id;
-    if (!agentPolicies$.has(agentPolicyId)) {
-      agentPolicies$.set(agentPolicyId, createAgentPolicyActionSharedObservable(agentPolicyId));
-    }
-    const agentPolicy$ = agentPolicies$.get(agentPolicyId);
-    if (!agentPolicy$) {
-      throw new Error(`Invalid state, no observable for policy ${agentPolicyId}`);
-    }
+    const agentPolicy$ = getOrCreateAgentPolicyObservable(agent.policy_id);
 
     const stream$ = agentPolicy$.pipe(
       timeout(pollingTimeoutMs),
@@ -229,25 +239,43 @@ export function agentCheckinStateNewActionsFactory() {
           (!agent.policy_revision || action.policy_revision > agent.policy_revision)
       ),
       rateLimiter(),
-      switchMap((policyAction) => createAgentActionFromPolicyAction(soClient, agent, policyAction)),
+      concatMap((policyAction) => createAgentActionFromPolicyAction(soClient, agent, policyAction)),
       merge(newActions$),
-      switchMap(async (data) => {
-        if (!data) {
-          return;
+      concatMap((data: AgentAction[] | undefined) => {
+        if (data === undefined) {
+          return EMPTY;
         }
         const newActions = data.filter((action) => action.agent_id === agent.id);
         if (newActions.length === 0) {
-          return;
+          return EMPTY;
         }
 
-        return newActions;
+        const hasConfigReassign = newActions.some(
+          (action) => action.type === 'INTERNAL_POLICY_REASSIGN'
+        );
+        if (hasConfigReassign) {
+          return from(getAgent(soClient, agent.id)).pipe(
+            concatMap((refreshedAgent) => {
+              if (!refreshedAgent.policy_id) {
+                throw new Error('Agent does not have a policy assigned');
+              }
+              const newAgentPolicy$ = getOrCreateAgentPolicyObservable(refreshedAgent.policy_id);
+              return newAgentPolicy$;
+            }),
+            rateLimiter(),
+            concatMap((policyAction) =>
+              createAgentActionFromPolicyAction(soClient, agent, policyAction)
+            )
+          );
+        }
+
+        return of(newActions);
       }),
       filter((data) => data !== undefined),
       take(1)
     );
     try {
       const data = await toPromiseAbortable(stream$, options?.signal);
-
       return data || [];
     } catch (err) {
       if (err instanceof TimeoutError || err instanceof AbortError) {
