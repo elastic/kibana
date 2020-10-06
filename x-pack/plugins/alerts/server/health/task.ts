@@ -18,7 +18,7 @@ export const HEALTH_TASK_TYPE = 'alerting_health_check';
 
 export const HEALTH_TASK_ID = `Alerting-${HEALTH_TASK_TYPE}`;
 
-export async function initializeAlertingHealth(
+export function initializeAlertingHealth(
   logger: Logger,
   taskManager: TaskManagerSetupContract,
   getBasePath: GetBasePathFunction,
@@ -29,11 +29,7 @@ export async function initializeAlertingHealth(
   }>
 ) {
   const request = getFakeKibanaRequest(getBasePath);
-  registerAlertingHealthCheckTask(
-    logger,
-    taskManager,
-    (await getAlertsClientWithRequest(request)).getAlertsClient()
-  );
+  registerAlertingHealthCheckTask(logger, taskManager, getAlertsClientWithRequest(request));
 }
 
 export function scheduleAlertingHealthCheck(
@@ -66,7 +62,9 @@ function getFakeKibanaRequest(getBasePath: GetBasePathFunction) {
 function registerAlertingHealthCheckTask(
   logger: Logger,
   taskManager: TaskManagerSetupContract,
-  alertsClient: AlertsClient
+  alertsClient: Promise<{
+    getAlertsClient: () => AlertsClient;
+  }>
 ) {
   taskManager.registerTaskDefinitions({
     [HEALTH_TASK_TYPE]: {
@@ -91,13 +89,20 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
   }
 }
 
-export function healthCheckTaskRunner(logger: Logger, alertsClient: AlertsClient) {
+export function healthCheckTaskRunner(
+  logger: Logger,
+  alertsClient: Promise<{
+    getAlertsClient: () => AlertsClient;
+  }>
+) {
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
     return {
       async run() {
         try {
-          const alertingHealthStatus = await alertsClient.hasDecryptionFailures();
+          const alertingHealthStatus = await (
+            await alertsClient.getAlertsClient()
+          ).hasDecryptionFailures();
           return {
             state: {
               runs: (state.runs || 0) + 1,

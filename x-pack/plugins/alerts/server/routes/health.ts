@@ -57,6 +57,7 @@ export function healthRoute(
             path: '/_xpack/usage',
           });
 
+        const alertsClient = context.alerting.getAlertsClient();
         const hasDecryptionFailures = await alertsClient.hasDecryptionFailures();
 
         const frameworkHealth: AlertingFrameworkHealth = {
