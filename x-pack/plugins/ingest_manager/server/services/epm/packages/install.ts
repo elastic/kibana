@@ -288,8 +288,6 @@ async function installPackage({
   installType: InstallType;
   installSource: InstallSource;
 }): Promise<AssetReference[]> {
-  const logger = appContextService.getLogger();
-
   const toSaveESIndexPatterns = generateESIndexPatterns(packageInfo.data_streams);
 
   // add the package installation to the saved object.
@@ -314,7 +312,12 @@ async function installPackage({
       install_source: installSource,
     });
   }
-  const installIndexPatternPromise = installIndexPatterns(savedObjectsClient, pkgName, pkgVersion);
+  // TODO without doing an await here I get an unhandled promise rejection
+  const installIndexPatternPromise = await installIndexPatterns(
+    savedObjectsClient,
+    pkgName,
+    pkgVersion
+  );
 
   const kibanaAssets = await getKibanaAssets(paths);
   if (installedPkg)
@@ -328,7 +331,8 @@ async function installPackage({
     pkgName,
     kibanaAssets
   );
-  const installKibanaAssetsPromise = installKibanaAssets({
+  // TODO without doing an await here I get an unhandled promise rejection
+  const installKibanaAssetsPromise = await installKibanaAssets({
     savedObjectsClient,
     pkgName,
     kibanaAssets,
@@ -388,7 +392,8 @@ async function installPackage({
     id: template.templateName,
     type: ElasticsearchAssetType.indexTemplate,
   }));
-  await Promise.all([installKibanaAssetsPromise, installIndexPatternPromise]);
+  // TODO fix then once the unhandled promise rejection is figured out
+  // await Promise.all([installKibanaAssetsPromise, installIndexPatternPromise]);
 
   // update to newly installed version when all assets are successfully installed
   if (installedPkg) await updateVersion(savedObjectsClient, pkgName, pkgVersion);
