@@ -1218,32 +1218,6 @@
   dependencies:
     "@elastic/apm-rum-core" "^5.7.0"
 
-"@elastic/charts@23.1.1":
-  version "23.1.1"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-23.1.1.tgz#01f51d80f4ba7291dd68fe75f23a71f77e44dce9"
-  integrity sha512-qoDBzo4r2Aeh2JmbpWxkN+xI/PZ7HyNr91HLqewadMCnSR2tqviBrUySttX/SpBxE/0VoN4gd/T8vcjCt2a/GQ==
-  dependencies:
-    "@popperjs/core" "^2.4.0"
-    chroma-js "^2.1.0"
-    classnames "^2.2.6"
-    d3-array "^1.2.4"
-    d3-collection "^1.0.7"
-    d3-color "^1.4.0"
-    d3-interpolate "^1.4.0"
-    d3-scale "^1.0.7"
-    d3-shape "^1.3.4"
-    newtype-ts "^0.2.4"
-    path2d-polyfill "^0.4.2"
-    prop-types "^15.7.2"
-    re-reselect "^3.4.0"
-    react-redux "^7.1.0"
-    redux "^4.0.4"
-    reselect "^4.0.0"
-    resize-observer-polyfill "^1.5.1"
-    ts-debounce "^1.0.0"
-    utility-types "^3.10.0"
-    uuid "^3.3.2"
-
 "@elastic/charts@23.2.0":
   version "23.2.0"
   resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-23.2.0.tgz#4266cf5d7864cac2bc274846ee96172d6fe47230"
