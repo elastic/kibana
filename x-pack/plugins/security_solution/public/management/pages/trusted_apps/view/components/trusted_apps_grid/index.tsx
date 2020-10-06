@@ -54,9 +54,10 @@ const PaginationBar = ({ pagination, onChange }: PaginationBarProps) => {
         itemsPerPage={pagination.pageSize}
         itemsPerPageOptions={pagination.pageSizeOptions}
         pageCount={pageCount}
-        onChangeItemsPerPage={useCallback((size) => ({ index: 0, size }), [])}
-        onChangePage={useCallback((index) => ({ index, size: pagination.pageSize }), [
+        onChangeItemsPerPage={useCallback((size) => onChange({ index: 0, size }), [onChange])}
+        onChangePage={useCallback((index) => onChange({ index, size: pagination.pageSize }), [
           pagination.pageSize,
+          onChange,
         ])}
       />
     </div>
