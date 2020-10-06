@@ -65,10 +65,8 @@ describe('usePostPushToService', () => {
     title: pushedCase.title,
     updatedAt: pushedCase.updatedAt,
     updatedBy: serviceConnectorUser,
-    issueType: 'Task',
-    parent: null,
-    priority: 'Low',
   };
+
   const sampleCaseServices = {
     '123': {
       ...basicPush,
@@ -87,6 +85,7 @@ describe('usePostPushToService', () => {
       hasDataToPush: false,
     },
   };
+
   it('init', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UsePostPushToService>(() =>
@@ -224,7 +223,6 @@ describe('usePostPushToService', () => {
     const result = formatServiceRequestData(pushedCase, connector as CaseConnector, caseServices);
     expect(result).toEqual({
       ...sampleServiceRequestData,
-      ...connector.fields,
       externalId: 'other_external_id',
     });
   });
@@ -242,7 +240,6 @@ describe('usePostPushToService', () => {
     const result = formatServiceRequestData(pushedCase, connector as CaseConnector, caseServices);
     expect(result).toEqual({
       ...sampleServiceRequestData,
-      ...connector.fields,
       externalId: null,
     });
   });

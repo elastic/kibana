@@ -76,15 +76,9 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
     toastNotifications: notifications.toasts,
   });
 
-  const hasPriority = useMemo(
-    () => Object.prototype.hasOwnProperty.call(fieldsByIssueType, 'priority'),
-    [fieldsByIssueType]
-  );
+  const hasPriority = useMemo(() => fieldsByIssueType.priority != null, [fieldsByIssueType]);
 
-  const hasParent = useMemo(
-    () => Object.prototype.hasOwnProperty.call(fieldsByIssueType, 'parent'),
-    [fieldsByIssueType]
-  );
+  const hasParent = useMemo(() => fieldsByIssueType.parent != null, [fieldsByIssueType]);
 
   const prioritiesSelectOptions = useMemo(() => {
     const priorities = fieldsByIssueType.priority?.allowedValues ?? [];
@@ -164,10 +158,8 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
                 <EuiFormRow fullWidth label={i18n.PARENT_ISSUE}>
                   <SearchIssues
                     actionConnector={connector}
-                    http={http}
                     onChange={(parentIssueKey) => onFieldChange('parent', parentIssueKey)}
                     selectedValue={parent}
-                    toastNotifications={notifications.toasts}
                   />
                 </EuiFormRow>
               </EuiFlexItem>

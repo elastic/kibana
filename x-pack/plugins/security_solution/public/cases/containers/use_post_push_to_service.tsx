@@ -195,7 +195,6 @@ export const formatServiceRequestData = (
     description,
     externalId: actualExternalService?.externalId ?? null,
     title,
-    ...(connector.fields ?? {}),
     updatedAt,
     updatedBy:
       updatedBy != null

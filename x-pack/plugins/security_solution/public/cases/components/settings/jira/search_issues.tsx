@@ -7,7 +7,7 @@
 import React, { useMemo, useEffect, useCallback, useState, memo } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { HttpSetup, ToastsApi } from 'kibana/public';
+import { useKibana } from '../../../../common/lib/kibana';
 import { ActionConnector } from '../../../containers/types';
 import { useGetIssues } from './use_get_issues';
 import { useGetSingleIssue } from './use_get_single_issue';
@@ -15,38 +15,28 @@ import * as i18n from './translations';
 
 interface Props {
   selectedValue: string | null;
-  http: HttpSetup;
-  toastNotifications: Pick<
-    ToastsApi,
-    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
-  >;
   actionConnector?: ActionConnector;
   onChange: (parentIssueKey: string) => void;
 }
 
-const SearchIssuesComponent: React.FC<Props> = ({
-  selectedValue,
-  http,
-  toastNotifications,
-  actionConnector,
-  onChange,
-}) => {
+const SearchIssuesComponent: React.FC<Props> = ({ selectedValue, actionConnector, onChange }) => {
   const [query, setQuery] = useState<string | null>(null);
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
     []
   );
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
+  const { http, notifications } = useKibana().services;
 
   const { isLoading: isLoadingIssues, issues } = useGetIssues({
     http,
-    toastNotifications,
+    toastNotifications: notifications.toasts,
     actionConnector,
     query,
   });
 
   const { isLoading: isLoadingSingleIssue, issue: singleIssue } = useGetSingleIssue({
     http,
-    toastNotifications,
+    toastNotifications: notifications.toasts,
     actionConnector,
     id: selectedValue,
   });
