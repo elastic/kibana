@@ -196,7 +196,9 @@ describe('useForm() hook', () => {
       });
 
       expect(isValid).toBe(false);
-      expect(data).toEqual({}); // Don't build the object (and call the serializers()) when invalid
+      // If the form is not valid, we don't build the final object to avoid
+      // calling the serializer(s) with invalid values.
+      expect(data).toEqual({});
     });
   });
 

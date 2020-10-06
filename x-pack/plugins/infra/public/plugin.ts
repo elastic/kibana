@@ -9,7 +9,6 @@ import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { createMetricThresholdAlertType } from './alerting/metric_threshold';
 import { createInventoryMetricAlertType } from './alerting/inventory';
 import { getAlertType as getLogsAlertType } from './alerting/log_threshold';
-import { registerStartSingleton } from './legacy_singletons';
 import { registerFeatures } from './register_feature';
 import {
   InfraClientSetupDeps,
@@ -29,9 +28,9 @@ export class Plugin implements InfraClientPluginClass {
       registerFeatures(pluginsSetup.home);
     }
 
-    pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(createInventoryMetricAlertType());
-    pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(getLogsAlertType());
-    pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(createMetricThresholdAlertType());
+    pluginsSetup.triggersActionsUi.alertTypeRegistry.register(createInventoryMetricAlertType());
+    pluginsSetup.triggersActionsUi.alertTypeRegistry.register(getLogsAlertType());
+    pluginsSetup.triggersActionsUi.alertTypeRegistry.register(createMetricThresholdAlertType());
 
     if (pluginsSetup.observability) {
       pluginsSetup.observability.dashboard.register({
@@ -98,9 +97,7 @@ export class Plugin implements InfraClientPluginClass {
     });
   }
 
-  start(core: InfraClientCoreStart, _plugins: InfraClientStartDeps) {
-    registerStartSingleton(core);
-  }
+  start(_core: InfraClientCoreStart, _plugins: InfraClientStartDeps) {}
 
   stop() {}
 }
