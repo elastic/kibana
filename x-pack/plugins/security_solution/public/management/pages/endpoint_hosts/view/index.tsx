@@ -586,7 +586,6 @@ export const EndpointList = () => {
                 values={{
                   agentsLink: (
                     <LinkToApp
-                      data-test-subj="agentPolicyLink"
                       appId="ingestManager"
                       appPath={`#${pagePathGetters.fleet_agent_list({
                         kuery: 'fleet-agents.packages : "endpoint"',
