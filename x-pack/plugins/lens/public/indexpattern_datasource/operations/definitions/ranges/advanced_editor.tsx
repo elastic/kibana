@@ -164,20 +164,25 @@ export const RangePopover = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>
-      <LabelInput
-        value={label || ''}
-        onChange={(newLabel) => {
-          const newRange = {
-            ...tempRange,
-            label: newLabel,
-          };
-          setTempRange(newRange);
-          saveRangeAndReset(newRange);
-        }}
-        placeholder=""
-        onSubmit={onSubmit}
-        dataTestSubj="indexPattern-ranges-label"
-      />
+      <EuiFormRow>
+        <LabelInput
+          value={label || ''}
+          onChange={(newLabel) => {
+            const newRange = {
+              ...tempRange,
+              label: newLabel,
+            };
+            setTempRange(newRange);
+            saveRangeAndReset(newRange);
+          }}
+          placeholder={i18n.translate(
+            'xpack.lens.indexPattern.ranges.customRangeLabelPlaceholder',
+            { defaultMessage: 'Custom label' }
+          )}
+          onSubmit={onSubmit}
+          dataTestSubj="indexPattern-ranges-label"
+        />
+      </EuiFormRow>
     </EuiPopover>
   );
 };
