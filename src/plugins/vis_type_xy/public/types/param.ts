@@ -154,6 +154,7 @@ export interface VisParams {
   seriesParams: SeriesParam[];
   dimensions: Dimensions;
   radiusRatio: number;
+  times: TimeMarker[]; // For compatibility with vislib
   /**
    * flag to indicate old vislib visualizations
    * used for backwards compatibility including colors

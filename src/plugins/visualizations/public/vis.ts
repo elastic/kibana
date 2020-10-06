@@ -85,7 +85,7 @@ const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?:
 type PartialVisState = Assign<SerializedVis, { data: Partial<SerializedVisData> }>;
 
 export class Vis<TVisParams = VisParams> {
-  public readonly type: VisType;
+  public readonly type: VisType<TVisParams>;
   public readonly id?: string;
   public title: string = '';
   public description: string = '';
@@ -98,14 +98,14 @@ export class Vis<TVisParams = VisParams> {
   public readonly uiState: PersistedState;
 
   constructor(visType: string, visState: SerializedVis = {} as any) {
-    this.type = this.getType(visType);
+    this.type = this.getType<TVisParams>(visType);
     this.params = this.getParams(visState.params);
     this.uiState = new PersistedState(visState.uiState);
     this.id = visState.id;
   }
 
-  private getType(visType: string) {
-    const type = getTypes().get(visType);
+  private getType<TVisParams>(visType: string) {
+    const type = getTypes().get<TVisParams>(visType);
     if (!type) {
       const errorMessage = i18n.translate('visualizations.visualizationTypeInvalidMessage', {
         defaultMessage: 'Invalid visualization type "{visType}"',
@@ -119,7 +119,7 @@ export class Vis<TVisParams = VisParams> {
   }
 
   private getParams(params: VisParams) {
-    return defaults({}, cloneDeep(params || {}), cloneDeep(this.type.visConfig.defaults || {}));
+    return defaults({}, cloneDeep(params ?? {}), cloneDeep(this.type.visConfig?.defaults ?? {}));
   }
 
   async setState(state: PartialVisState) {
@@ -201,10 +201,6 @@ export class Vis<TVisParams = VisParams> {
         savedSearchId: this.data.savedSearchId,
       },
     };
-  }
-
-  toExpressionAst() {
-    return this.type.toExpressionAst(this.params);
   }
 
   // deprecated

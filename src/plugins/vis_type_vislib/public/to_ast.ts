@@ -112,7 +112,7 @@ function getEsaggsFn(vis: Vis<BasicVislibParams & { showPartialRows?: any }>) {
   return buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
     index: vis.data.indexPattern!.id!,
     metricsAtAllLevels: vis.isHierarchical(),
-    partialRows: vis.type.requiresPartialRows || vis.params.showPartialRows || false,
+    partialRows: vis.params.showPartialRows ?? false,
     aggConfigs: JSON.stringify(vis.data.aggs!.aggs),
     includeFormatHints: false,
   });

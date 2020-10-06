@@ -231,7 +231,7 @@ export class IngestManagerPlugin
       registerEPMRoutes(router);
 
       // Conditional config routes
-      if (config.fleet.enabled) {
+      if (config.agents.enabled) {
         const isESOUsingEphemeralEncryptionKey =
           deps.encryptedSavedObjects.usingEphemeralEncryptionKey;
         if (isESOUsingEphemeralEncryptionKey) {

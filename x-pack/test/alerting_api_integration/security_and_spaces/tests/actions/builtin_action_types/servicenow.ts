@@ -68,6 +68,9 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
         description: 'a description',
         externalId: null,
         title: 'a title',
+        severity: '1',
+        urgency: '1',
+        impact: '1',
         updatedAt: '2020-06-17T04:37:45.147Z',
         updatedBy: { fullName: null, username: 'elastic' },
       },
@@ -443,6 +446,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
+
           expect(proxyHaveBeenCalled).to.equal(true);
           expect(result).to.eql({
             status: 'ok',

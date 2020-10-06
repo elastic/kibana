@@ -19,16 +19,15 @@
 
 import { ReactNode } from 'react';
 
-import { BaseVisTypeOptions, VisToExpressionAst } from '../../../visualizations/public';
+import { BaseVisTypeOptions } from '../../../visualizations/public';
 import { VisParams } from './param';
 
-export type XyVisTypeDefinition = Omit<BaseVisTypeOptions<VisParams>, 'visualization'> & {
+export type XyVisTypeDefinition = BaseVisTypeOptions<VisParams> & {
   events: {
     brush: {
       disabled: boolean;
     };
   };
-  toExpressionAst: VisToExpressionAst<VisParams>;
   visConfig: {
     component: ReactNode;
     defaults: Omit<VisParams, 'dimensions'>;

@@ -47,7 +47,7 @@ import { createSharedServices, SharedServices } from './shared_services';
 import { getPluginPrivileges } from '../common/types/capabilities';
 import { setupCapabilitiesSwitcher } from './lib/capabilities';
 import { registerKibanaSettings } from './lib/register_settings';
-import { inferenceRoutes } from './routes/inference';
+import { trainedModelsRoutes } from './routes/trained_models';
 
 export type MlPluginSetup = SharedServices;
 export type MlPluginStart = void;
@@ -153,7 +153,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
     initMlServerLog({ log: this.log });
     initMlTelemetry(coreSetup, plugins.usageCollection);
 
-    inferenceRoutes(routeInit);
+    trainedModelsRoutes(routeInit);
 
     return {
       ...createSharedServices(

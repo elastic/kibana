@@ -22,7 +22,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it("should bump all agent policy's revision", async function () {
       const { body: testPolicy1PostRes } = await supertest
-        .post(`/api/ingest_manager/agent_policies`)
+        .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
           name: 'test',
@@ -30,7 +30,7 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
         });
       const { body: testPolicy2PostRes } = await supertest
-        .post(`/api/ingest_manager/agent_policies`)
+        .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
           name: 'test2',
@@ -38,7 +38,7 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
         });
       await supertest
-        .put(`/api/ingest_manager/settings`)
+        .put(`/api/fleet/settings`)
         .set('kbn-xsrf', 'xxxx')
         .send({ kibana_urls: ['http://localhost:1232/abc', 'http://localhost:1232/abc'] });
 
@@ -56,7 +56,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should create agent actions', async function () {
       const { body: testPolicyRes } = await supertest
-        .post(`/api/ingest_manager/agent_policies`)
+        .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
           name: 'test',
@@ -65,7 +65,7 @@ export default function (providerContext: FtrProviderContext) {
         });
 
       await supertest
-        .put(`/api/ingest_manager/settings`)
+        .put(`/api/fleet/settings`)
         .set('kbn-xsrf', 'xxxx')
         .send({ kibana_urls: ['http://localhost:1232/abc', 'http://localhost:1232/abc'] });
 
