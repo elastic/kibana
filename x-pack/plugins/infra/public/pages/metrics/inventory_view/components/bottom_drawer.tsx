@@ -80,6 +80,7 @@ const BottomActionTopBar = euiStyled(EuiFlexGroup).attrs({
 })`
  margin-bottom: 0;
  height: 48px;
+ background-color: ${(props) => props.theme.eui.euiColorEmptyShade};
 `;
 
 const ShowHideButton = euiStyled(EuiButtonEmpty).attrs({ size: 's' })`
