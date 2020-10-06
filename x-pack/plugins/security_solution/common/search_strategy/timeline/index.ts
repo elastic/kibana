@@ -14,13 +14,7 @@ import {
   TimelineEventsLastEventTimeRequestOptions,
   TimelineEventsLastEventTimeStrategyResponse,
 } from './events';
-import {
-  DocValueFields,
-  PaginationInput,
-  PaginationInputPaginated,
-  TimerangeInput,
-  SortField,
-} from '../common';
+import { DocValueFields, PaginationInputPaginated, TimerangeInput, SortField } from '../common';
 
 export * from './events';
 
@@ -34,14 +28,9 @@ export interface TimelineRequestBasicOptions extends IEsSearchRequest {
   factoryQueryType?: TimelineFactoryQueryTypes;
 }
 
-export interface TimelineRequestOptions<Field = string> extends TimelineRequestBasicOptions {
-  pagination: PaginationInput;
-  sort: SortField<Field>;
-}
-
 export interface TimelineRequestOptionsPaginated<Field = string>
   extends TimelineRequestBasicOptions {
-  pagination: PaginationInputPaginated;
+  pagination: Pick<PaginationInputPaginated, 'activePage' | 'querySize'>;
   sort: SortField<Field>;
 }
 

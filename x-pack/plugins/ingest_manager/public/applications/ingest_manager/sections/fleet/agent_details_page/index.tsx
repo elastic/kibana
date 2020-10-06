@@ -19,6 +19,7 @@ import {
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { EuiIconTip } from '@elastic/eui';
 import { Agent, AgentPolicy, AgentDetailsReassignPolicyAction } from '../../../types';
 import { PAGE_ROUTING_PATHS } from '../../../constants';
 import { Loading, Error } from '../../../components';
@@ -28,12 +29,14 @@ import {
   useLink,
   useBreadcrumbs,
   useCore,
+  useKibanaVersion,
 } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
 import { AgentHealth } from '../components';
 import { AgentRefreshContext } from './hooks';
 import { AgentEventsTable, AgentDetailsActionMenu, AgentDetailsContent } from './components';
 import { useIntraAppState } from '../../../hooks/use_intra_app_state';
+import { isAgentUpgradeable } from '../../../services';
 
 const Divider = styled.div`
   width: 0;
@@ -46,6 +49,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     params: { agentId, tabId = '' },
   } = useRouteMatch<{ agentId: string; tabId?: string }>();
   const { getHref } = useLink();
+  const kibanaVersion = useKibanaVersion();
   const {
     isLoading,
     isInitialRequest,
@@ -93,8 +97,10 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         <EuiFlexItem>
           <EuiText>
             <h1>
-              {typeof agentData?.item?.local_metadata?.host === 'object' &&
-              typeof agentData?.item?.local_metadata?.host?.hostname === 'string' ? (
+              {isLoading && isInitialRequest ? (
+                <Loading />
+              ) : typeof agentData?.item?.local_metadata?.host === 'object' &&
+                typeof agentData?.item?.local_metadata?.host?.hostname === 'string' ? (
                 agentData.item.local_metadata.host.hostname
               ) : (
                 <FormattedMessage
@@ -110,8 +116,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-    [agentData, agentId, getHref]
+    [agentData?.item?.local_metadata?.host, agentId, getHref, isInitialRequest, isLoading]
   );
 
   const headerRightContent = useMemo(
@@ -142,6 +147,45 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
               ) : (
                 agentData.item.policy_id || '-'
               ),
+            },
+            { isDivider: true },
+            {
+              label: i18n.translate('xpack.ingestManager.agentDetails.agentVersionLabel', {
+                defaultMessage: 'Agent version',
+              }),
+              content:
+                typeof agentData.item.local_metadata.elastic === 'object' &&
+                typeof agentData.item.local_metadata.elastic.agent === 'object' &&
+                typeof agentData.item.local_metadata.elastic.agent.version === 'string' ? (
+                  <EuiFlexGroup gutterSize="s">
+                    <EuiFlexItem grow={false} className="eui-textNoWrap">
+                      {agentData.item.local_metadata.elastic.agent.version}
+                    </EuiFlexItem>
+                    {isAgentUpgradeable(agentData.item, kibanaVersion) ? (
+                      <EuiFlexItem grow={false}>
+                        <EuiIconTip
+                          aria-label={i18n.translate(
+                            'xpack.ingestManager.agentDetails.upgradeAvailableTooltip',
+                            {
+                              defaultMessage: 'Upgrade available',
+                            }
+                          )}
+                          size="m"
+                          type="alert"
+                          color="warning"
+                          content={i18n.translate(
+                            'xpack.ingestManager.agentDetails.upgradeAvailableTooltip',
+                            {
+                              defaultMessage: 'Upgrade available',
+                            }
+                          )}
+                        />
+                      </EuiFlexItem>
+                    ) : null}
+                  </EuiFlexGroup>
+                ) : (
+                  '-'
+                ),
             },
             { isDivider: true },
             {

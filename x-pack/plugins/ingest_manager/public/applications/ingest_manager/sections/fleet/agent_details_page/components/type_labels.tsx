@@ -119,6 +119,14 @@ export const SUBTYPE_LABEL: { [key in AgentEvent['subtype']]: JSX.Element } = {
       />
     </EuiBadge>
   ),
+  UPDATING: (
+    <EuiBadge color="hollow">
+      <FormattedMessage
+        id="xpack.ingestManager.agentEventSubtype.updatingLabel"
+        defaultMessage="Updating"
+      />
+    </EuiBadge>
+  ),
   UNKNOWN: (
     <EuiBadge color="hollow">
       <FormattedMessage

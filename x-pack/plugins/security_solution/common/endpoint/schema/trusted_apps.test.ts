@@ -348,6 +348,21 @@ describe('When invoking Trusted Apps Schema', () => {
           });
         }).toThrow();
       });
+
+      it('should trim hash value before validation', () => {
+        expect(() => {
+          body.validate({
+            ...getCreateTrustedAppItem(),
+            entries: [
+              {
+                ...getTrustedAppItemEntryItem(),
+                field: 'process.hash.*',
+                value: `  ${VALID_HASH_MD5}  \r\n`,
+              },
+            ],
+          });
+        }).not.toThrow();
+      });
     });
   });
 });
