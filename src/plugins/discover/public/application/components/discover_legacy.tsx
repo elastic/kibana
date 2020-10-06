@@ -40,6 +40,7 @@ import {
   TimeRange,
   Query,
   IndexPatternAttributes,
+  DataPublicPluginStart,
 } from '../../../../data/public';
 import { Chart } from '../angular/helpers/point_series';
 import { AppState } from '../angular/discover_state';
@@ -53,6 +54,7 @@ export interface DiscoverLegacyProps {
   addColumn: (column: string) => void;
   fetch: () => void;
   fetchCounter: number;
+  fetchError: Error;
   fieldCounts: Record<string, number>;
   histogramData: Chart;
   hits: number;
@@ -73,6 +75,7 @@ export interface DiscoverLegacyProps {
     sampleSize: number;
     fixedScroll: (el: HTMLElement) => void;
     setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
+    data: DataPublicPluginStart;
   };
   resetQuery: () => void;
   resultState: string;
@@ -94,6 +97,7 @@ export function DiscoverLegacy({
   fetch,
   fetchCounter,
   fieldCounts,
+  fetchError,
   histogramData,
   hits,
   indexPattern,
@@ -208,6 +212,8 @@ export function DiscoverLegacy({
                 <DiscoverNoResults
                   timeFieldName={opts.timefield}
                   queryLanguage={state.query ? state.query.language : ''}
+                  data={opts.data}
+                  error={fetchError}
                 />
               )}
               {resultState === 'uninitialized' && <DiscoverUninitialized onRefresh={fetch} />}
