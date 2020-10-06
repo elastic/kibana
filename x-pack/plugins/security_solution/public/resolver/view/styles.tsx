@@ -25,7 +25,7 @@ export const NodeSubMenu = styled(NodeSubMenuComponents)`
     background: transparent;
     position: absolute;
     top: 4.5em;
-    contain: content;
+    overflow-x: visible;
     width: 12em;
     z-index: 2;
     backdrop-filter: blur(5px);
