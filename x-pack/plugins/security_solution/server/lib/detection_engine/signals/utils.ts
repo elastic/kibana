@@ -523,13 +523,12 @@ export const lastValidDate = (result: SignalSearchResponse): Date | undefined =>
   if (result.hits.hits.length === 0) {
     return undefined;
   } else {
-    const lastElementTimeStamp =
-      result.hits.hits[result.hits.hits.length - 1]._source['@timestamp'];
-    const isValid = lastElementTimeStamp != null && moment(lastElementTimeStamp).isValid();
+    const lastTimestamp = result.hits.hits[result.hits.hits.length - 1]._source['@timestamp'];
+    const isValid = lastTimestamp != null && moment(lastTimestamp).isValid();
     if (!isValid) {
       return undefined;
     } else {
-      return new Date(lastElementTimeStamp);
+      return new Date(lastTimestamp);
     }
   }
 };
