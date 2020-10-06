@@ -31,19 +31,16 @@ export const mockAttributeService = <
   R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
 >(
   type: string,
-  options?: AttributeServiceOptions<A>,
+  options: AttributeServiceOptions<A>,
   customCore?: jest.Mocked<CoreStart>
 ): AttributeService<A, V, R> => {
   const core = customCore ? customCore : coreMock.createStart();
-  const service = new AttributeService<A, V, R>(
+  return new AttributeService<A, V, R>(
     type,
     jest.fn(),
-    core.savedObjects.client,
-    core.overlays,
     core.i18n.Context,
     core.notifications.toasts,
-    jest.fn().mockReturnValue(() => ({ getDisplayName: () => type })),
-    options
+    options,
+    jest.fn().mockReturnValue(() => ({ getDisplayName: () => type }))
   );
-  return service;
 };

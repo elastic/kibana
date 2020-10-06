@@ -25,16 +25,16 @@ export default function apiTest({ getService }: FtrProviderContext) {
     describe('when calling the endpoint for listing jobs', () => {
       it('returns an error because the user does not have access', async () => {
         const { body } = await getJobs();
-        expect(body.statusCode).to.be(404);
-        expect(body.error).to.be('Not Found');
+        expect(body.statusCode).to.be(403);
+        expect(body.error).to.be('Forbidden');
       });
     });
 
     describe('when calling create endpoint', () => {
       it('returns an error because the user does not have access', async () => {
         const { body } = await createJobs(['production', 'staging']);
-        expect(body.statusCode).to.be(404);
-        expect(body.error).to.be('Not Found');
+        expect(body.statusCode).to.be(403);
+        expect(body.error).to.be('Forbidden');
       });
     });
   });

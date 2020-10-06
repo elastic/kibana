@@ -1531,8 +1531,15 @@ export interface OnPreResponseInfo {
 }
 
 // @public
+export interface OnPreResponseRender {
+    body: string;
+    headers?: ResponseHeaders;
+}
+
+// @public
 export interface OnPreResponseToolkit {
     next: (responseExtensions?: OnPreResponseExtensions) => OnPreResponseResult;
+    render: (responseRender: OnPreResponseRender) => OnPreResponseResult;
 }
 
 // Warning: (ae-forgotten-export) The symbol "OnPreRoutingResult" needs to be exported by the entry point index.d.ts
@@ -1929,8 +1936,8 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
     attributes: T;
     // (undocumented)
     id?: string;
+    initialNamespaces?: string[];
     migrationVersion?: SavedObjectsMigrationVersion;
-    namespaces?: string[];
     originId?: string;
     // (undocumented)
     references?: SavedObjectReference[];
@@ -2087,8 +2094,8 @@ export interface SavedObjectsCoreFieldMapping {
 // @public (undocumented)
 export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
     id?: string;
+    initialNamespaces?: string[];
     migrationVersion?: SavedObjectsMigrationVersion;
-    namespaces?: string[];
     originId?: string;
     overwrite?: boolean;
     // (undocumented)

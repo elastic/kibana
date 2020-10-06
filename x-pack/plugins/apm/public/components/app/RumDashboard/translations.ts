@@ -92,7 +92,7 @@ export const I18LABELS = {
     }
   ),
   searchByUrl: i18n.translate('xpack.apm.rum.filters.searchByUrl', {
-    defaultMessage: 'Search by url',
+    defaultMessage: 'Search by URL',
   }),
   getSearchResultsLabel: (total: number) =>
     i18n.translate('xpack.apm.rum.filters.searchResults', {
@@ -107,9 +107,6 @@ export const I18LABELS = {
   }),
   url: i18n.translate('xpack.apm.rum.filters.url', {
     defaultMessage: 'Url',
-  }),
-  matchThisQuery: i18n.translate('xpack.apm.rum.filters.url.matchThisQuery', {
-    defaultMessage: 'Match this query',
   }),
   loadingResults: i18n.translate('xpack.apm.rum.filters.url.loadingResults', {
     defaultMessage: 'Loading results',
