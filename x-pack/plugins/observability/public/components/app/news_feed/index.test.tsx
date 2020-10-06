@@ -7,6 +7,7 @@ import React from 'react';
 import { NewsItem } from '../../../services/get_news_feed';
 import { render } from '../../../utils/test_helper';
 import { NewsFeed } from './';
+import * as fetcherHook from '../../../hooks/use_fetcher';
 
 const newsFeedItems = [
   {
@@ -56,11 +57,16 @@ const newsFeedItems = [
     },
   },
 ] as NewsItem[];
+
 describe('News', () => {
   it('renders resources with all elements', () => {
-    const { getByText, getAllByText, queryAllByTestId } = render(
-      <NewsFeed items={newsFeedItems} />
-    );
+    jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
+      data: { items: newsFeedItems },
+      status: fetcherHook.FETCH_STATUS.SUCCESS,
+      refetch: jest.fn(),
+    });
+
+    const { getByText, getAllByText, queryAllByTestId } = render(<NewsFeed />);
     expect(getByText("What's new")).toBeInTheDocument();
     expect(getAllByText('Read full story').length).toEqual(3);
     expect(queryAllByTestId('news_image').length).toEqual(1);
