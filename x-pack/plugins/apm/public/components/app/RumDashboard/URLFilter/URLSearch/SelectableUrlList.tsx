@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FormEvent, SetStateAction, useRef, useState } from 'react';
+import React, {
+  FormEvent,
+  SetStateAction,
+  useRef,
+  useState,
+  KeyboardEvent,
+} from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -82,12 +88,14 @@ export function SelectableUrlList({
 
   const titleRef = useRef<HTMLDivElement>(null);
 
-  const onEnterKey = (evt: KeyboardEvent) => {
+  const onEnterKey = (evt: KeyboardEvent<HTMLInputElement>) => {
     if (evt.key.toLowerCase() === 'enter') {
       onTermChange();
       setPopoverIsOpen(false);
     }
   };
+
+  // @ts-ignore - not sure, why it's not working
   useEvent('keydown', onEnterKey, searchRef);
 
   const searchOnFocus = (e: React.FocusEvent<HTMLInputElement>) => {
