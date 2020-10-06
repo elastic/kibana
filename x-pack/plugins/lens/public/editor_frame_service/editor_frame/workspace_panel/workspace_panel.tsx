@@ -59,10 +59,8 @@ export interface WorkspacePanelProps {
   visualizeTriggerFieldContext?: VisualizeFieldContext;
 }
 
-export const WorkspacePanel = debouncedComponent(InnerWorkspacePanel);
-
 // Exported for testing purposes only.
-export function InnerWorkspacePanel({
+export function WorkspacePanel({
   activeDatasourceId,
   activeVisualizationId,
   visualizationMap,
@@ -272,52 +270,16 @@ export function InnerWorkspacePanel({
         </EuiFlexGroup>
       );
     }
-
-    return (
-      <div className="lnsExpressionRenderer">
-        <ExpressionRendererComponent
-          className="lnsExpressionRenderer__component"
-          padding="m"
-          expression={expression!}
-          searchContext={context}
-          reload$={autoRefreshFetch$}
-          onEvent={onEvent}
-          renderError={(errorMessage?: string | null) => {
-            return (
-              <EuiFlexGroup style={{ maxWidth: '100%' }} direction="column" alignItems="center">
-                <EuiFlexItem>
-                  <EuiIcon type="alert" size="xl" color="danger" />
-                </EuiFlexItem>
-                <EuiFlexItem data-test-subj="expression-failure">
-                  <FormattedMessage
-                    id="xpack.lens.editorFrame.dataFailure"
-                    defaultMessage="An error occurred when loading data."
-                  />
-                </EuiFlexItem>
-                {errorMessage ? (
-                  <EuiFlexItem className="eui-textBreakAll" grow={false}>
-                    <EuiButtonEmpty
-                      onClick={() => {
-                        setLocalState((prevState) => ({
-                          ...prevState,
-                          expandError: !prevState.expandError,
-                        }));
-                      }}
-                    >
-                      {i18n.translate('xpack.lens.editorFrame.expandRenderingErrorButton', {
-                        defaultMessage: 'Show details of error',
-                      })}
-                    </EuiButtonEmpty>
-
-                    {localState.expandError ? errorMessage : null}
-                  </EuiFlexItem>
-                ) : null}
-              </EuiFlexGroup>
-            );
-          }}
-        />
-      </div>
-    );
+    const props = {
+      expression,
+      context,
+      autoRefreshFetch$,
+      onEvent,
+      setLocalState,
+      localState,
+      ExpressionRendererComponent,
+    };
+    return <VisualizationWrapper {...props} />;
   }
 
   return (
@@ -347,3 +309,62 @@ export function InnerWorkspacePanel({
     </WorkspacePanelWrapper>
   );
 }
+
+const InnerVisualizationWrapper = (props) => {
+  const {
+    expression,
+    context,
+    autoRefreshFetch$,
+    onEvent,
+    setLocalState,
+    localState,
+    ExpressionRendererComponent,
+  } = props;
+  return (
+    <div className="lnsExpressionRenderer">
+      <ExpressionRendererComponent
+        className="lnsExpressionRenderer__component"
+        padding="m"
+        expression={expression!}
+        searchContext={context}
+        reload$={autoRefreshFetch$}
+        onEvent={onEvent}
+        renderError={(errorMessage?: string | null) => {
+          return (
+            <EuiFlexGroup style={{ maxWidth: '100%' }} direction="column" alignItems="center">
+              <EuiFlexItem>
+                <EuiIcon type="alert" size="xl" color="danger" />
+              </EuiFlexItem>
+              <EuiFlexItem data-test-subj="expression-failure">
+                <FormattedMessage
+                  id="xpack.lens.editorFrame.dataFailure"
+                  defaultMessage="An error occurred when loading data."
+                />
+              </EuiFlexItem>
+              {errorMessage ? (
+                <EuiFlexItem className="eui-textBreakAll" grow={false}>
+                  <EuiButtonEmpty
+                    onClick={() => {
+                      setLocalState((prevState) => ({
+                        ...prevState,
+                        expandError: !prevState.expandError,
+                      }));
+                    }}
+                  >
+                    {i18n.translate('xpack.lens.editorFrame.expandRenderingErrorButton', {
+                      defaultMessage: 'Show details of error',
+                    })}
+                  </EuiButtonEmpty>
+
+                  {localState.expandError ? errorMessage : null}
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+          );
+        }}
+      />
+    </div>
+  );
+};
+
+export const VisualizationWrapper = debouncedComponent(InnerVisualizationWrapper);
