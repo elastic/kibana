@@ -25,11 +25,12 @@ import {
   EuiLoadingSpinner,
   EuiLink,
   EuiHorizontalRule,
+  EuiLoadingContent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { HttpStart, IHttpFetchError, NotificationsStart } from 'src/core/public';
-import { LoginSelector } from '../../../../../common/login_state';
+import type { LoginSelector, LoginSelectorProvider } from '../../../../../common/login_state';
 import { LoginValidator } from './validate_login';
 
 interface Props {
@@ -39,12 +40,12 @@ interface Props {
   infoMessage?: string;
   loginAssistanceMessage: string;
   loginHelp?: string;
+  authProviderHint?: string;
 }
 
 interface State {
   loadingState:
-    | { type: LoadingStateType.None }
-    | { type: LoadingStateType.Form }
+    | { type: LoadingStateType.None | LoadingStateType.Form | LoadingStateType.AutoLogin }
     | { type: LoadingStateType.Selector; providerName: string };
   username: string;
   password: string;
@@ -59,6 +60,7 @@ enum LoadingStateType {
   None,
   Form,
   Selector,
+  AutoLogin,
 }
 
 enum MessageType {
@@ -76,11 +78,26 @@ export enum PageMode {
 export class LoginForm extends Component<Props, State> {
   private readonly validator: LoginValidator;
 
+  /**
+   * Optional provider that was suggested by the `authProviderHint={providerName}` query string parameter. If provider
+   * doesn't require Kibana native login form then login process is triggered automatically, otherwise Login Selector
+   * just switches to the Login Form mode.
+   */
+  private readonly suggestedProvider?: LoginSelectorProvider;
+
   constructor(props: Props) {
     super(props);
     this.validator = new LoginValidator({ shouldValidate: false });
 
-    const mode = this.showLoginSelector() ? PageMode.Selector : PageMode.Form;
+    this.suggestedProvider = this.props.authProviderHint
+      ? this.props.selector.providers.find(({ name }) => name === this.props.authProviderHint)
+      : undefined;
+
+    // Switch to the Form mode right away if provider from the hint requires it.
+    const mode =
+      this.showLoginSelector() && !this.suggestedProvider?.usesLoginForm
+        ? PageMode.Selector
+        : PageMode.Form;
 
     this.state = {
       loadingState: { type: LoadingStateType.None },
@@ -94,7 +111,17 @@ export class LoginForm extends Component<Props, State> {
     };
   }
 
+  async componentDidMount() {
+    if (this.suggestedProvider?.usesLoginForm === false) {
+      await this.loginWithSelector({ provider: this.suggestedProvider, autoLogin: true });
+    }
+  }
+
   public render() {
+    if (this.isLoadingState(LoadingStateType.AutoLogin)) {
+      return this.renderAutoLoginOverlay();
+    }
+
     return (
       <Fragment>
         {this.renderLoginAssistanceMessage()}
@@ -267,7 +294,7 @@ export class LoginForm extends Component<Props, State> {
             onClick={() =>
               provider.usesLoginForm
                 ? this.onPageModeChange(PageMode.Form)
-                : this.loginWithSelector(provider.type, provider.name)
+                : this.loginWithSelector({ provider })
             }
             className={`secLoginCard ${
               this.isLoadingState(LoadingStateType.Selector, provider.name)
@@ -360,6 +387,32 @@ export class LoginForm extends Component<Props, State> {
     return null;
   };
 
+  private renderAutoLoginOverlay = () => {
+    return (
+      <Fragment>
+        <EuiPanel data-test-subj="loginSelector" paddingSize="none">
+          {this.props.selector.providers.map(() => (
+            <EuiLoadingContent className="secLoginCard secLoginCard-autoLogin" lines={2} />
+          ))}
+        </EuiPanel>
+        <EuiSpacer />
+        <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="m" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" className="eui-textCenter">
+              <FormattedMessage
+                id="xpack.security.loginPage.autoLoginAuthenticatingLabel"
+                defaultMessage="Authenticating…"
+              />
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="m" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </Fragment>
+    );
+  };
+
   private setUsernameInputRef(ref: HTMLInputElement) {
     if (ref) {
       ref.focus();
@@ -438,9 +491,17 @@ export class LoginForm extends Component<Props, State> {
     }
   };
 
-  private loginWithSelector = async (providerType: string, providerName: string) => {
+  private loginWithSelector = async ({
+    provider: { type: providerType, name: providerName },
+    autoLogin,
+  }: {
+    provider: LoginSelectorProvider;
+    autoLogin?: boolean;
+  }) => {
     this.setState({
-      loadingState: { type: LoadingStateType.Selector, providerName },
+      loadingState: autoLogin
+        ? { type: LoadingStateType.AutoLogin }
+        : { type: LoadingStateType.Selector, providerName },
       message: { type: MessageType.None },
     });
 
@@ -466,7 +527,9 @@ export class LoginForm extends Component<Props, State> {
     }
   };
 
-  private isLoadingState(type: LoadingStateType.None | LoadingStateType.Form): boolean;
+  private isLoadingState(
+    type: LoadingStateType.None | LoadingStateType.Form | LoadingStateType.AutoLogin
+  ): boolean;
   private isLoadingState(type: LoadingStateType.Selector, providerName: string): boolean;
   private isLoadingState(type: LoadingStateType, providerName?: string) {
     const { loadingState } = this.state;

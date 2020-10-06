@@ -131,12 +131,18 @@ export class SecurityNavControl extends Component<Props, State> {
     };
 
     const logoutMenuItem = {
-      name: (
-        <FormattedMessage
-          id="xpack.security.navControlComponent.logoutLinkText"
-          defaultMessage="Log out"
-        />
-      ),
+      name:
+        authenticatedUser?.authentication_provider.type === 'anonymous' ? (
+          <FormattedMessage
+            id="xpack.security.navControlComponent.loginLinkText"
+            defaultMessage="Log in"
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.security.navControlComponent.logoutLinkText"
+            defaultMessage="Log out"
+          />
+        ),
       icon: <EuiIcon type="exit" size="m" />,
       href: logoutUrl,
       'data-test-subj': 'logoutLink',
