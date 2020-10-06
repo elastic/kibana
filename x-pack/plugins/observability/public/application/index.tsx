@@ -65,7 +65,7 @@ export const renderApp = (
 
   ReactDOM.render(
     <KibanaContextProvider services={{ ...core, ...plugins }}>
-      <PluginContext.Provider value={{ core }}>
+      <PluginContext.Provider value={{ core, plugins }}>
         <Router history={history}>
           <EuiThemeProvider darkMode={isDarkMode}>
             <i18nCore.Context>

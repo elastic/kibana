@@ -138,9 +138,12 @@ Review:
 * <<development-unit-tests>>
 * <<stability>>
 * <<security-best-practices>>
+* <<typescript>>
 
 include::navigation.asciidoc[leveloffset=+1]
 
 include::stability.asciidoc[leveloffset=+1]
 
 include::security.asciidoc[leveloffset=+1]
+
+include::typescript.asciidoc[leveloffset=+1]
