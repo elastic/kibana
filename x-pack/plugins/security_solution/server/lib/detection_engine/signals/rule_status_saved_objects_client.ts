@@ -31,9 +31,7 @@ export const ruleStatusSavedObjectsClientFactory = (
 ): RuleStatusSavedObjectsClient => ({
   find: (options) =>
     savedObjectsClient.find<IRuleStatusAttributes>({ ...options, type: ruleStatusSavedObjectType }),
-  create: (attributes) =>
-    savedObjectsClient.create(ruleStatusSavedObjectType, attributes, { refresh: false }),
-  update: (id, attributes) =>
-    savedObjectsClient.update(ruleStatusSavedObjectType, id, attributes, { refresh: false }),
-  delete: (id) => savedObjectsClient.delete(ruleStatusSavedObjectType, id, { refresh: false }),
+  create: (attributes) => savedObjectsClient.create(ruleStatusSavedObjectType, attributes),
+  update: (id, attributes) => savedObjectsClient.update(ruleStatusSavedObjectType, id, attributes),
+  delete: (id) => savedObjectsClient.delete(ruleStatusSavedObjectType, id),
 });

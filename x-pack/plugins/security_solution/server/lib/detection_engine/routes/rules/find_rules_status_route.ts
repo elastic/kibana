@@ -7,15 +7,13 @@
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { RuleStatusResponse, IRuleStatusAttributes } from '../../rules/types';
-import { transformError, convertToSnakeCase, buildSiemResponse } from '../utils';
+import { RuleStatusResponse } from '../../rules/types';
+import { transformError, buildSiemResponse, mergeStatuses, getFailingRules } from '../utils';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import {
   findRulesStatusesSchema,
   FindRulesStatusesSchemaDecoded,
 } from '../../../../../common/detection_engine/schemas/request/find_rule_statuses_schema';
-import { findRules } from '../../rules/find_rules';
-import { ruleStatusServiceFactory } from '../../signals/rule_status_service';
 
 /**
  * Given a list of rule ids, return the current status and
@@ -49,35 +47,11 @@ export const findRulesStatusesRoute = (router: IRouter) => {
 
       const ids = body.ids;
       try {
-        const failingRules = await findRules({
-          alertsClient,
-          perPage: ids.length,
-          page: undefined,
-          sortField: undefined,
-          sortOrder: undefined,
-          filter: `alert.attributes.executionStatus.status: "error" AND (${ids
-            .map((id) => `alert.attributes.id:${id}`)
-            .join(' or ')})`,
-          fields: ['executionStatus'],
-        });
-
         const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
+        const failingRules = await getFailingRules(ids, alertsClient);
 
-        await Promise.all(
-          failingRules.data.map(async (rule) => {
-            const ruleStatusService = await ruleStatusServiceFactory({
-              alertId: rule.id,
-              ruleStatusClient,
-            });
-            return ruleStatusService.error(
-              `Reason: ${rule.executionStatus.error?.reason} Message: ${rule.executionStatus.error?.message}`
-            );
-          })
-        );
-
-        const statuses = await ids.reduce<Promise<RuleStatusResponse | {}>>(async (acc, id) => {
+        const statuses = await ids.reduce(async (acc, id) => {
           const accumulated = await acc;
-
           const lastFiveErrorsForId = await ruleStatusClient.find({
             perPage: 6,
             sortField: 'statusDate',
@@ -86,24 +60,33 @@ export const findRulesStatusesRoute = (router: IRouter) => {
             searchFields: ['alertId'],
           });
 
-          // Array accessors can result in undefined but
-          // this is not represented in typescript for some reason,
-          // https://github.com/Microsoft/TypeScript/issues/11122
-          const currentStatus = convertToSnakeCase<IRuleStatusAttributes>(
-            lastFiveErrorsForId.saved_objects[0]?.attributes
-          );
+          if (lastFiveErrorsForId.saved_objects.length === 0) {
+            return accumulated;
+          }
 
-          const failures = lastFiveErrorsForId.saved_objects
-            .slice(1)
-            .map((errorItem) => convertToSnakeCase<IRuleStatusAttributes>(errorItem.attributes));
-          return {
-            ...accumulated,
-            [id]: {
-              current_status: currentStatus,
-              failures,
-            },
-          };
+          const failingRule = failingRules[id];
+          const lastFailureAt = lastFiveErrorsForId.saved_objects[0].attributes.lastFailureAt;
+
+          if (
+            failingRule != null &&
+            (lastFailureAt == null ||
+              new Date(failingRule.executionStatus.lastExecutionDate) > new Date(lastFailureAt))
+          ) {
+            const currentStatus = lastFiveErrorsForId.saved_objects[0];
+            currentStatus.attributes.lastFailureMessage = `Reason: ${failingRule.executionStatus.error?.reason} Message: ${failingRule.executionStatus.error?.message}`;
+            currentStatus.attributes.lastFailureAt = failingRule.executionStatus.lastExecutionDate.toISOString();
+            currentStatus.attributes.statusDate = failingRule.executionStatus.lastExecutionDate.toISOString();
+            currentStatus.attributes.status = 'failed';
+            const updatedLastFiveErrorsSO = [
+              currentStatus,
+              ...lastFiveErrorsForId.saved_objects.slice(1),
+            ];
+
+            return mergeStatuses(id, updatedLastFiveErrorsSO, accumulated);
+          }
+          return mergeStatuses(id, [...lastFiveErrorsForId.saved_objects], accumulated);
         }, Promise.resolve<RuleStatusResponse>({}));
+
         return response.ok({ body: statuses });
       } catch (err) {
         const error = transformError(err);

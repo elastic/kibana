@@ -75,9 +75,11 @@ export const findRulesRoute = (router: IRouter) => {
               search: rule.id,
               searchFields: ['alertId'],
             });
-            if (failingRules.find((failingRule) => failingRule.id === rule.id)) {
+            const failingRule = failingRules.find((badRule) => badRule.id === rule.id);
+            if (failingRule != null) {
               if (results.saved_objects.length > 0) {
                 results.saved_objects[0].attributes.status = 'failed';
+                results.saved_objects[0].attributes.lastFailureAt = failingRule.executionStatus.lastExecutionDate.toISOString();
               }
             }
             return results;
