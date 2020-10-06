@@ -42,7 +42,7 @@ describe('SyntheticsCallout', () => {
               grow={false}
             >
               <EuiButton
-                href="https://elastic.co/syntheics"
+                href="https://www.elastic.co/what-is/synthetic-monitoring"
               >
                 <FormattedMessage
                   defaultMessage="Read announcement"
@@ -102,7 +102,7 @@ describe('SyntheticsCallout', () => {
               grow={false}
             >
               <EuiButton
-                href="https://elastic.co/syntheics"
+                href="https://www.elastic.co/what-is/synthetic-monitoring"
               >
                 <FormattedMessage
                   defaultMessage="Read announcement"
