@@ -6,10 +6,10 @@
 
 import React from 'react';
 import { ReactWrapper, shallow } from 'enzyme';
-import { Stackframe } from '../../../../../typings/es_schemas/raw/fields/stackframe';
-import { mountWithTheme } from '../../../../utils/testHelpers';
-import { Stackframe as StackframeComponent } from '../Stackframe';
-import stacktracesMock from './stacktraces.json';
+import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
+import { mountWithTheme } from '../../../utils/testHelpers';
+import { Stackframe as StackframeComponent } from './Stackframe';
+import stacktracesMock from './__fixtures__/stacktraces.json';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
   return {
@@ -27,8 +27,12 @@ describe('Stackframe', () => {
       );
     });
 
-    it('should render correctly', () => {
-      expect(wrapper).toMatchSnapshot();
+    it('renders', () => {
+      expect(() =>
+        mountWithTheme(
+          <StackframeComponent id="test" stackframe={stacktracesMock[0]} />
+        )
+      ).not.toThrowError();
     });
 
     it('should render FrameHeading, Context and Variables', () => {
