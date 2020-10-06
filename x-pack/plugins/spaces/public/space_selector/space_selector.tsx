@@ -15,6 +15,7 @@ import {
   EuiPageBody,
   EuiPageContent,
   EuiPageHeader,
+  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -159,13 +160,21 @@ export class SpaceSelector extends Component<Props, State> {
             {!this.state.loading && this.state.error && (
               <Fragment>
                 <EuiSpacer />
-                <EuiText color="subdued" textAlign="center">
-                  <FormattedMessage
-                    id="xpack.spaces.spaceSelector.errorLoadingSpacesDescription"
-                    defaultMessage="Error loading spaces ({message})"
-                    values={{ message: this.state.error.message }}
-                  />
-                </EuiText>
+                <EuiPanel>
+                  <EuiText color="danger" style={{ textAlign: 'center' }}>
+                    <FormattedMessage
+                      id="xpack.spaces.spaceSelector.errorLoadingSpacesDescription"
+                      defaultMessage="Error loading spaces ({message})"
+                      values={{ message: this.state.error.message }}
+                    />
+                  </EuiText>
+                  <EuiText style={{ textAlign: 'center' }}>
+                    <FormattedMessage
+                      id="xpack.spaces.spaceSelector.contactSysAdminDescription"
+                      defaultMessage="Contact your system administrator."
+                    />
+                  </EuiText>
+                </EuiPanel>
               </Fragment>
             )}
           </EuiPageContent>
