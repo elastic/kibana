@@ -99,12 +99,11 @@ export class UpdateSourceEditor extends Component {
       });
     });
 
-    const mvtSupported = supportsMvt(indexPattern, geoField.name);
     this.setState({
       supportsClustering: supportsGeoTileAgg(geoField),
-      supportsMvt: mvtSupported,
+      supportsMvt: true,
       clusteringDisabledReason: getGeoTileAggNotSupportedReason(geoField),
-      mvtDisabledReason: mvtSupported ? null : getMvtDisabledReason(),
+      mvtDisabledReason: null,
       sourceFields: sourceFields,
       termFields: getTermsFields(indexPattern.fields), //todo change term fields to use fields
       sortFields: indexPattern.fields.filter(
