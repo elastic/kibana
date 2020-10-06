@@ -159,8 +159,6 @@ export class CreateSourceEditor extends Component {
             this.state.indexPattern,
             this.state.geoFieldName
           )}
-          supportsMvt={true}
-          mvtDisabledReason={null}
           clusteringDisabledReason={
             this.state.indexPattern
               ? getGeoTileAggNotSupportedReason(
