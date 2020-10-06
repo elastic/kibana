@@ -579,31 +579,33 @@ export const EndpointList = () => {
       <>
         {areEndpointsEnrolling && !hasErrorFindingTotals && (
           <>
-            <EuiCallOut
-              size="s"
-              data-test-subj="endpointsEnrollingNotification"
-            >
-                              <FormattedMessage
-                  id="xpack.securitySolution.endpoint.list.endpointsEnrolling"
-                  defaultMessage="Endpoints are enrolling. {agentsLink} to track progress."
-                  values={{
-                    agentsLink: (
-                      <LinkToApp
-                        data-test-subj="agentPolicyLink"
-                        appId="ingestManager"
-                        appPath={`#${pagePathGetters.fleet_agent_list({kuery: 'fleet-agents.packages : "endpoint"'})}`}
-                        href={`${services?.application?.getUrlForApp(
-                          'ingestManager'
-                        )}#${pagePathGetters.fleet_agent_list({kuery: 'fleet-agents.packages : "endpoint"'})}`}
-                      >
-                        <FormattedMessage
-                          id="xpack.securitySolution.endpoint.list.endpointsEnrolling.viewAgentsLink"
-                          defaultMessage="View agents"
-                          />
-                        </LinkToApp>
-                    ),
-                  }} />
-              </EuiCallOut>
+            <EuiCallOut size="s" data-test-subj="endpointsEnrollingNotification">
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.list.endpointsEnrolling"
+                defaultMessage="Endpoints are enrolling. {agentsLink} to track progress."
+                values={{
+                  agentsLink: (
+                    <LinkToApp
+                      data-test-subj="agentPolicyLink"
+                      appId="ingestManager"
+                      appPath={`#${pagePathGetters.fleet_agent_list({
+                        kuery: 'fleet-agents.packages : "endpoint"',
+                      })}`}
+                      href={`${services?.application?.getUrlForApp(
+                        'ingestManager'
+                      )}#${pagePathGetters.fleet_agent_list({
+                        kuery: 'fleet-agents.packages : "endpoint"',
+                      })}`}
+                    >
+                      <FormattedMessage
+                        id="xpack.securitySolution.endpoint.list.endpointsEnrolling.viewAgentsLink"
+                        defaultMessage="View agents"
+                      />
+                    </LinkToApp>
+                  ),
+                }}
+              />
+            </EuiCallOut>
             <EuiSpacer size="m" />
           </>
         )}
