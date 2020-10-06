@@ -2,10 +2,10 @@
 
 exports[`Overview render 1`] = `
 <main
-  aria-labelledby="pageHeader__title"
+  aria-labelledby="kbnOverviewPageHeader__title"
   className="kbnOverviewWrapper"
 >
-  <Component
+  <mockConstructor
     hideToolbar={false}
     iconType="logoKibana"
     title={
@@ -229,7 +229,7 @@ exports[`Overview render 1`] = `
       aria-hidden="true"
       margin="xl"
     />
-    <Component
+    <mockConstructor
       path="/app/kibana_overview"
     />
   </div>
@@ -238,10 +238,10 @@ exports[`Overview render 1`] = `
 
 exports[`Overview without features 1`] = `
 <main
-  aria-labelledby="pageHeader__title"
+  aria-labelledby="kbnOverviewPageHeader__title"
   className="kbnOverviewWrapper"
 >
-  <Component
+  <mockConstructor
     hideToolbar={false}
     iconType="logoKibana"
     title={
@@ -465,7 +465,7 @@ exports[`Overview without features 1`] = `
       aria-hidden="true"
       margin="xl"
     />
-    <Component
+    <mockConstructor
       path="/app/kibana_overview"
     />
   </div>
@@ -474,10 +474,10 @@ exports[`Overview without features 1`] = `
 
 exports[`Overview without solutions 1`] = `
 <main
-  aria-labelledby="pageHeader__title"
+  aria-labelledby="kbnOverviewPageHeader__title"
   className="kbnOverviewWrapper"
 >
-  <Component
+  <mockConstructor
     hideToolbar={false}
     iconType="logoKibana"
     title={
@@ -590,7 +590,7 @@ exports[`Overview without solutions 1`] = `
       aria-hidden="true"
       margin="xl"
     />
-    <Component
+    <mockConstructor
       path="/app/kibana_overview"
     />
   </div>

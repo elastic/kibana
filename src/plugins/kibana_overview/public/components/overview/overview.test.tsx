@@ -32,8 +32,8 @@ jest.mock('../../../../../../src/plugins/kibana_react/public', () => ({
     },
   }),
   RedirectAppLinks: jest.fn((element: JSX.Element) => element),
-  PageFooter: jest.fn().mockReturnValue(<></>),
-  PageHeader: jest.fn().mockReturnValue(<></>),
+  OverviewPageFooter: jest.fn().mockReturnValue(<></>),
+  OverviewPageHeader: jest.fn().mockReturnValue(<></>),
 }));
 
 afterAll(() => jest.clearAllMocks());

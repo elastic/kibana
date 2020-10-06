@@ -35,6 +35,11 @@ jest.mock('../kibana_services', () => ({
   }),
 }));
 
+jest.mock('../../../../../../src/plugins/kibana_react/public', () => ({
+  OverviewPageFooter: jest.fn().mockReturnValue(<></>),
+  OverviewPageHeader: jest.fn().mockReturnValue(<></>),
+}));
+
 describe('home', () => {
   let defaultProps;
 

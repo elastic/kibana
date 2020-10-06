@@ -2,11 +2,11 @@
 
 exports[`home change home route should render a link to change the default route in advanced settings if advanced settings is enabled 1`] = `
 <main
-  aria-labelledby="pageHeader__title"
+  aria-labelledby="kbnOverviewPageHeader__title"
   className="homWrapper"
   data-test-subj="homeApp"
 >
-  <OverviewPageHeader
+  <mockConstructor
     overlap={0}
     showDevToolsLink={true}
     showManagementLink={true}
@@ -41,7 +41,7 @@ exports[`home change home route should render a link to change the default route
       aria-hidden="true"
       margin="xl"
     />
-    <OverviewPageFooter
+    <mockConstructor
       path="/app/home"
     />
   </div>
@@ -50,11 +50,11 @@ exports[`home change home route should render a link to change the default route
 
 exports[`home directories should not render directory entry when showOnHomePage is false 1`] = `
 <main
-  aria-labelledby="pageHeader__title"
+  aria-labelledby="kbnOverviewPageHeader__title"
   className="homWrapper"
   data-test-subj="homeApp"
 >
-  <OverviewPageHeader
+  <mockConstructor
     overlap={0}
     showDevToolsLink={true}
     showManagementLink={true}
@@ -89,7 +89,7 @@ exports[`home directories should not render directory entry when showOnHomePage 
       aria-hidden="true"
       margin="xl"
     />
-    <OverviewPageFooter
+    <mockConstructor
       path="/app/home"
     />
   </div>
@@ -98,11 +98,11 @@ exports[`home directories should not render directory entry when showOnHomePage 
 
 exports[`home directories should render ADMIN directory entry in "Manage your data" panel 1`] = `
 <main
-  aria-labelledby="pageHeader__title"
+  aria-labelledby="kbnOverviewPageHeader__title"
   className="homWrapper"
   data-test-subj="homeApp"
 >
-  <OverviewPageHeader
+  <mockConstructor
     overlap={0}
     showDevToolsLink={true}
     showManagementLink={true}
@@ -149,7 +149,7 @@ exports[`home directories should render ADMIN directory entry in "Manage your da
       aria-hidden="true"
       margin="xl"
     />
-    <OverviewPageFooter
+    <mockConstructor
       path="/app/home"
     />
   </div>
@@ -158,11 +158,11 @@ exports[`home directories should render ADMIN directory entry in "Manage your da
 
 exports[`home directories should render DATA directory entry in "Ingest your data" panel 1`] = `
 <main
-  aria-labelledby="pageHeader__title"
+  aria-labelledby="kbnOverviewPageHeader__title"
   className="homWrapper"
   data-test-subj="homeApp"
 >
-  <OverviewPageHeader
+  <mockConstructor
     overlap={0}
     showDevToolsLink={true}
     showManagementLink={true}
@@ -209,7 +209,7 @@ exports[`home directories should render DATA directory entry in "Ingest your dat
       aria-hidden="true"
       margin="xl"
     />
-    <OverviewPageFooter
+    <mockConstructor
       path="/app/home"
     />
   </div>
@@ -218,11 +218,11 @@ exports[`home directories should render DATA directory entry in "Ingest your dat
 
 exports[`home directories should render solutions in the "solution section" 1`] = `
 <main
-  aria-labelledby="pageHeader__title"
+  aria-labelledby="kbnOverviewPageHeader__title"
   className="homWrapper"
   data-test-subj="homeApp"
 >
-  <OverviewPageHeader
+  <mockConstructor
     overlap={4}
     showDevToolsLink={true}
     showManagementLink={true}
@@ -309,7 +309,7 @@ exports[`home directories should render solutions in the "solution section" 1`] 
       aria-hidden="true"
       margin="xl"
     />
-    <OverviewPageFooter
+    <mockConstructor
       path="/app/home"
     />
   </div>
@@ -318,11 +318,11 @@ exports[`home directories should render solutions in the "solution section" 1`] 
 
 exports[`home header render 1`] = `
 <main
-  aria-labelledby="pageHeader__title"
+  aria-labelledby="kbnOverviewPageHeader__title"
   className="homWrapper"
   data-test-subj="homeApp"
 >
-  <OverviewPageHeader
+  <mockConstructor
     overlap={0}
     showDevToolsLink={true}
     showManagementLink={true}
@@ -357,7 +357,7 @@ exports[`home header render 1`] = `
       aria-hidden="true"
       margin="xl"
     />
-    <OverviewPageFooter
+    <mockConstructor
       path="/app/home"
     />
   </div>
@@ -366,11 +366,11 @@ exports[`home header render 1`] = `
 
 exports[`home header should show "Dev tools" link if console is available 1`] = `
 <main
-  aria-labelledby="pageHeader__title"
+  aria-labelledby="kbnOverviewPageHeader__title"
   className="homWrapper"
   data-test-subj="homeApp"
 >
-  <OverviewPageHeader
+  <mockConstructor
     overlap={0}
     showDevToolsLink={true}
     showManagementLink={true}
@@ -417,7 +417,7 @@ exports[`home header should show "Dev tools" link if console is available 1`] = 
       aria-hidden="true"
       margin="xl"
     />
-    <OverviewPageFooter
+    <mockConstructor
       path="/app/home"
     />
   </div>
@@ -426,11 +426,11 @@ exports[`home header should show "Dev tools" link if console is available 1`] = 
 
 exports[`home header should show "Manage" link if stack management is available 1`] = `
 <main
-  aria-labelledby="pageHeader__title"
+  aria-labelledby="kbnOverviewPageHeader__title"
   className="homWrapper"
   data-test-subj="homeApp"
 >
-  <OverviewPageHeader
+  <mockConstructor
     overlap={0}
     showDevToolsLink={true}
     showManagementLink={true}
@@ -465,7 +465,7 @@ exports[`home header should show "Manage" link if stack management is available 
       aria-hidden="true"
       margin="xl"
     />
-    <OverviewPageFooter
+    <mockConstructor
       path="/app/home"
     />
   </div>
@@ -474,11 +474,11 @@ exports[`home header should show "Manage" link if stack management is available 
 
 exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
 <main
-  aria-labelledby="pageHeader__title"
+  aria-labelledby="kbnOverviewPageHeader__title"
   className="homWrapper"
   data-test-subj="homeApp"
 >
-  <OverviewPageHeader
+  <mockConstructor
     overlap={0}
     showDevToolsLink={true}
     showManagementLink={true}
@@ -513,7 +513,7 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
       aria-hidden="true"
       margin="xl"
     />
-    <OverviewPageFooter
+    <mockConstructor
       path="/app/home"
     />
   </div>
@@ -522,11 +522,11 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
 
 exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when there are index patterns 1`] = `
 <main
-  aria-labelledby="pageHeader__title"
+  aria-labelledby="kbnOverviewPageHeader__title"
   className="homWrapper"
   data-test-subj="homeApp"
 >
-  <OverviewPageHeader
+  <mockConstructor
     overlap={0}
     showDevToolsLink={true}
     showManagementLink={true}
@@ -561,7 +561,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
       aria-hidden="true"
       margin="xl"
     />
-    <OverviewPageFooter
+    <mockConstructor
       path="/app/home"
     />
   </div>
@@ -570,11 +570,11 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
 
 exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when there are no index patterns 1`] = `
 <main
-  aria-labelledby="pageHeader__title"
+  aria-labelledby="kbnOverviewPageHeader__title"
   className="homWrapper"
   data-test-subj="homeApp"
 >
-  <OverviewPageHeader
+  <mockConstructor
     overlap={0}
     showDevToolsLink={true}
     showManagementLink={true}
@@ -609,7 +609,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
       aria-hidden="true"
       margin="xl"
     />
-    <OverviewPageFooter
+    <mockConstructor
       path="/app/home"
     />
   </div>
@@ -618,11 +618,11 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
 
 exports[`home should render home component 1`] = `
 <main
-  aria-labelledby="pageHeader__title"
+  aria-labelledby="kbnOverviewPageHeader__title"
   className="homWrapper"
   data-test-subj="homeApp"
 >
-  <OverviewPageHeader
+  <mockConstructor
     overlap={0}
     showDevToolsLink={true}
     showManagementLink={true}
@@ -657,7 +657,7 @@ exports[`home should render home component 1`] = `
       aria-hidden="true"
       margin="xl"
     />
-    <OverviewPageFooter
+    <mockConstructor
       path="/app/home"
     />
   </div>
@@ -666,11 +666,11 @@ exports[`home should render home component 1`] = `
 
 exports[`home welcome should show the normal home page if loading fails 1`] = `
 <main
-  aria-labelledby="pageHeader__title"
+  aria-labelledby="kbnOverviewPageHeader__title"
   className="homWrapper"
   data-test-subj="homeApp"
 >
-  <OverviewPageHeader
+  <mockConstructor
     overlap={0}
     showDevToolsLink={true}
     showManagementLink={true}
@@ -705,7 +705,7 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
       aria-hidden="true"
       margin="xl"
     />
-    <OverviewPageFooter
+    <mockConstructor
       path="/app/home"
     />
   </div>
@@ -714,11 +714,11 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
 
 exports[`home welcome should show the normal home page if welcome screen is disabled locally 1`] = `
 <main
-  aria-labelledby="pageHeader__title"
+  aria-labelledby="kbnOverviewPageHeader__title"
   className="homWrapper"
   data-test-subj="homeApp"
 >
-  <OverviewPageHeader
+  <mockConstructor
     overlap={0}
     showDevToolsLink={true}
     showManagementLink={true}
@@ -753,7 +753,7 @@ exports[`home welcome should show the normal home page if welcome screen is disa
       aria-hidden="true"
       margin="xl"
     />
-    <OverviewPageFooter
+    <mockConstructor
       path="/app/home"
     />
   </div>
@@ -769,11 +769,11 @@ exports[`home welcome should show the welcome screen if enabled, and there are n
 
 exports[`home welcome stores skip welcome setting if skipped 1`] = `
 <main
-  aria-labelledby="pageHeader__title"
+  aria-labelledby="kbnOverviewPageHeader__title"
   className="homWrapper"
   data-test-subj="homeApp"
 >
-  <OverviewPageHeader
+  <mockConstructor
     overlap={0}
     showDevToolsLink={true}
     showManagementLink={true}
@@ -808,7 +808,7 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
       aria-hidden="true"
       margin="xl"
     />
-    <OverviewPageFooter
+    <mockConstructor
       path="/app/home"
     />
   </div>
