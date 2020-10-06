@@ -131,7 +131,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     options: { stripEmptyFields: false },
     schema,
   });
-  const { getFields, getFormData, reset, submit } = form;
+  const { getErrors, getFields, getFormData, reset, submit } = form;
   const [
     {
       index: formIndex,
@@ -152,12 +152,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       }
     >
   ];
-
   const index = formIndex || initialState.index;
   const threatIndex = formThreatIndex || initialState.threatIndex;
   const ruleType = formRuleType || initialState.ruleType;
   const queryBarQuery =
     formQuery != null ? formQuery.query.query : '' || initialState.queryBar.query.query;
+  const errorExists = getErrors().length > 0;
   const [indexPatternsLoading, { browserFields, indexPatterns }] = useFetchIndex(index);
 
   const [
@@ -399,7 +399,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               ruleType={ruleType}
               index={index}
               query={formQuery}
-              isDisabled={queryBarQuery.trim() === ''}
+              isDisabled={queryBarQuery.trim() === '' || errorExists}
               threshold={
                 formThresholdValue != null && formThresholdField != null
                   ? { value: formThresholdValue, field: formThresholdField[0] }
