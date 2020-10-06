@@ -4568,11 +4568,6 @@
   dependencies:
     "@types/node" "*"
 
-proxy-from-env@1.0.0, proxy-from-env@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/proxy-from-env/-/proxy-from-env-1.0.0.tgz#33c50398f70ea7eb96d21f7b817630a55791c7ee"
-  integrity sha1-M8UDmPcOp+uW0h97gXYwpVeRx+4=
-
 "@types/podium@*", "@types/podium@^1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@types/podium/-/podium-1.0.0.tgz#bfaa2151be2b1d6109cc69f7faa9dac2cba3bb20"
@@ -4609,13 +4604,6 @@ proxy-from-env@1.0.0, proxy-from-env@^1.0.0:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/@types/proper-lockfile/-/proper-lockfile-3.0.1.tgz#dd770a2abce3adbcce3bd1ed892ce2f5f17fbc86"
   integrity sha512-ODOjqxmaNs0Zkij+BJovsNJRSX7BJrr681o8ZnNTNIcTermvVFzLpz/XFtfg3vNrlPVTJY1l4e9h2LvHoxC1lg==
-
-"@types/proxy-from-env@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@types/proxy-from-env/-/proxy-from-env-1.0.1.tgz#b5f3e99230ca4518af196c18267055fc51f892b7"
-  integrity sha512-luG++TFHyS61eKcfkR1CVV6a1GMNXDjtqEQIIfaSHax75xp0HU3SlezjOi1yqubJwrG8e9DeW59n6wTblIDwFg==
-  dependencies:
-    "@types/node" "*"
 
 "@types/puppeteer@^1.20.1":
   version "1.20.1"
@@ -22216,6 +22204,11 @@ proxy-addr@~2.0.5:
   dependencies:
     forwarded "~0.1.2"
     ipaddr.js "1.9.0"
+
+proxy-from-env@1.0.0, proxy-from-env@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/proxy-from-env/-/proxy-from-env-1.0.0.tgz#33c50398f70ea7eb96d21f7b817630a55791c7ee"
+  integrity sha1-M8UDmPcOp+uW0h97gXYwpVeRx+4=
 
 proxyquire@1.8.0:
   version "1.8.0"
