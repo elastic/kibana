@@ -8,7 +8,6 @@
 
 import { Logger, KibanaRequest } from 'src/core/server';
 
-import moment from 'moment';
 import {
   SIGNALS_ID,
   DEFAULT_SEARCH_AFTER_PAGE_SIZE,
@@ -526,9 +525,7 @@ export const signalRulesAlertType = ({
             await ruleStatusService.success('succeeded', {
               bulkCreateTimeDurations: result.bulkCreateTimes,
               searchAfterTimeDurations: result.searchAfterTimes,
-              lastLookBackDate: moment(result.lastLookBackDate).isValid()
-                ? result.lastLookBackDate?.toISOString()
-                : undefined,
+              lastLookBackDate: result.lastLookBackDate?.toISOString(),
             });
           }
         } else {
@@ -540,9 +537,7 @@ export const signalRulesAlertType = ({
           await ruleStatusService.error(errorMessage, {
             bulkCreateTimeDurations: result.bulkCreateTimes,
             searchAfterTimeDurations: result.searchAfterTimes,
-            lastLookBackDate: moment(result.lastLookBackDate).isValid()
-              ? result.lastLookBackDate?.toISOString()
-              : undefined,
+            lastLookBackDate: result.lastLookBackDate?.toISOString(),
           });
         }
       } catch (error) {
@@ -556,9 +551,7 @@ export const signalRulesAlertType = ({
         await ruleStatusService.error(message, {
           bulkCreateTimeDurations: result.bulkCreateTimes,
           searchAfterTimeDurations: result.searchAfterTimes,
-          lastLookBackDate: moment(result.lastLookBackDate).isValid()
-            ? result.lastLookBackDate?.toISOString()
-            : undefined,
+          lastLookBackDate: result.lastLookBackDate?.toISOString(),
         });
       }
     },
