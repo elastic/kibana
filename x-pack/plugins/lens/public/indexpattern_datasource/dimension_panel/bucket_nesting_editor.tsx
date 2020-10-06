@@ -6,14 +6,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFormRow,
-  EuiSwitch,
-  EuiSelect,
-  EuiIconTip,
-  EuiFlexItem,
-  EuiFlexGroup,
-} from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, EuiSelect } from '@elastic/eui';
 import { IndexPatternLayer, IndexPatternField } from '../types';
 import { hasField } from '../utils';
 import { IndexPatternColumn } from '../operations';
@@ -69,34 +62,21 @@ export function BucketNestingEditor({
     });
     return (
       <EuiFormRow label={useAsTopLevelAggCopy} display="columnCompressedSwitch">
-        <EuiFlexGroup gutterSize="m">
-          <EuiFlexItem grow={false}>
-            {' '}
-            <EuiIconTip
-              content={i18n.translate('xpack.lens.indexPattern.useAsTopLevelAggTooltip', {
-                defaultMessage: 'Group by this field first',
-              })}
-              position="bottom"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiSwitch
-              compressed
-              label={useAsTopLevelAggCopy}
-              showLabel={false}
-              data-test-subj="indexPattern-nesting-switch"
-              name="nestingSwitch"
-              checked={!prevColumn}
-              onChange={() => {
-                if (prevColumn) {
-                  setColumns(nestColumn(layer.columnOrder, columnId, target.value));
-                } else {
-                  setColumns(nestColumn(layer.columnOrder, target.value, columnId));
-                }
-              }}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiSwitch
+          compressed
+          label={useAsTopLevelAggCopy}
+          showLabel={false}
+          data-test-subj="indexPattern-nesting-switch"
+          name="nestingSwitch"
+          checked={!prevColumn}
+          onChange={() => {
+            if (prevColumn) {
+              setColumns(nestColumn(layer.columnOrder, columnId, target.value));
+            } else {
+              setColumns(nestColumn(layer.columnOrder, target.value, columnId));
+            }
+          }}
+        />
       </EuiFormRow>
     );
   }
