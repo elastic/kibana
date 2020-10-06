@@ -35,6 +35,11 @@ jest.mock('../kibana_services', () => ({
   }),
 }));
 
+jest.mock('../../../../../../src/plugins/kibana_react/public', () => ({
+  OverviewPageFooter: jest.fn().mockReturnValue(<></>),
+  OverviewPageHeader: jest.fn().mockReturnValue(<></>),
+}));
+
 describe('home', () => {
   let defaultProps;
 
@@ -142,7 +147,7 @@ describe('home', () => {
         id: 'kibana',
         title: 'Kibana',
         subtitle: 'Visualize & analyze',
-        descriptions: ['Analyze data in dashboards'],
+        appDescriptions: ['Analyze data in dashboards'],
         icon: 'logoKibana',
         path: 'kibana_landing_page',
         order: 1,
@@ -151,7 +156,7 @@ describe('home', () => {
         id: 'solution-2',
         title: 'Solution two',
         subtitle: 'Subtitle for solution two',
-        descriptions: ['Example use case'],
+        appDescriptions: ['Example use case'],
         icon: 'empty',
         path: 'path-to-solution-two',
         order: 2,
@@ -160,7 +165,7 @@ describe('home', () => {
         id: 'solution-3',
         title: 'Solution three',
         subtitle: 'Subtitle for solution three',
-        descriptions: ['Example use case'],
+        appDescriptions: ['Example use case'],
         icon: 'empty',
         path: 'path-to-solution-three',
         order: 3,
@@ -169,7 +174,7 @@ describe('home', () => {
         id: 'solution-4',
         title: 'Solution four',
         subtitle: 'Subtitle for solution four',
-        descriptions: ['Example use case'],
+        appDescriptions: ['Example use case'],
         icon: 'empty',
         path: 'path-to-solution-four',
         order: 4,
