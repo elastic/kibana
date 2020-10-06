@@ -26,6 +26,7 @@ import { pick } from '@kbn/std';
 import { Logger } from '../../logging';
 import { ElasticsearchConfig } from '../elasticsearch_config';
 import { HttpAgentFactory } from '../http_agent_factory';
+import { DEFAULT_HEADERS } from '../default_headers';
 
 /**
  * @privateRemarks Config that consumers can pass to the Elasticsearch JS client is complex and includes
@@ -132,7 +133,10 @@ export function parseElasticsearchClientConfig(
         protocol: uri.protocol,
         path: uri.pathname,
         query: uri.query,
-        headers: config.customHeaders,
+        headers: {
+          ...DEFAULT_HEADERS,
+          ...config.customHeaders,
+        },
       };
 
       if (needsAuth) {
