@@ -1,5 +1,5 @@
 {
-  "name": "kbn_top_nav",
+  "name": "session_notifications",
   "version": "1.0.0",
   "main": "target/test/plugin_functional/plugins/session_notifications",
   "kibana": {

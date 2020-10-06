@@ -32,7 +32,6 @@ import {
   SearchSourceService,
   SearchSourceDependencies,
   ISessionService,
-  IEsSearchRequest,
 } from '../../common/search';
 import { getCallMsearch } from './legacy';
 import { AggsService, AggsStartDependencies } from './aggs';

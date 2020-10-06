@@ -19,7 +19,7 @@
 
 import { CoreSetup, CoreStart } from '../../../../core/public';
 import { coreMock } from '../../../../core/public/mocks';
-import { IEsSearchRequest, ISessionService } from '../../common/search';
+import { IEsSearchRequest } from '../../common/search';
 import { SearchInterceptor } from './search_interceptor';
 import { AbortError } from '../../common';
 import { SearchTimeoutError, PainlessError, TimeoutErrorMode } from './errors';
@@ -293,63 +293,6 @@ describe('SearchInterceptor', () => {
           done();
         };
         response.subscribe({ error });
-      });
-    });
-
-    describe('search tracking', () => {
-      let mockedSession: jest.Mocked<ISessionService>;
-      beforeEach(() => {
-        mockedSession = searchMock.session as jest.Mocked<ISessionService>;
-      });
-
-      test("shouldn't call tracking if no sessionId was provided", async () => {
-        const mockResponse: any = { result: 200 };
-        mockCoreSetup.http.fetch.mockResolvedValueOnce(mockResponse);
-        const mockRequest: IEsSearchRequest = {
-          params: {},
-        };
-        const response = searchInterceptor.search(mockRequest);
-
-        await response.toPromise();
-
-        expect(mockedSession.trackSearch).not.toBeCalled();
-        expect(mockedSession.trackSearchComplete).not.toBeCalled();
-        expect(mockedSession.trackSearchError).not.toBeCalled();
-        expect(mockedSession.trackSearchId).not.toBeCalled();
-      });
-
-      test('should call trackSearchComplete if successful', async () => {
-        const mockResponse: any = { result: 200 };
-        mockCoreSetup.http.fetch.mockResolvedValueOnce(mockResponse);
-        const mockRequest: IEsSearchRequest = {
-          params: {},
-        };
-        const response = searchInterceptor.search(mockRequest, { sessionId: 'abc' });
-
-        await response.toPromise();
-
-        expect(mockedSession.trackSearch).toBeCalledTimes(1);
-        expect(mockedSession.trackSearchComplete).toBeCalledTimes(1);
-        expect(mockedSession.trackSearchError).not.toBeCalled();
-        expect(mockedSession.trackSearchId).not.toBeCalled();
-      });
-
-      test('should call trackSearchError if there was an error', async () => {
-        const mockResponse: any = { result: 500, message: 'Internal Error' };
-        mockCoreSetup.http.fetch.mockRejectedValueOnce(mockResponse);
-        const mockRequest: IEsSearchRequest = {
-          params: {},
-        };
-        const response = searchInterceptor.search(mockRequest, { sessionId: 'abc' });
-
-        try {
-          await response.toPromise();
-        } catch (e) {
-          expect(mockedSession.trackSearch).toBeCalledTimes(1);
-          expect(mockedSession.trackSearchError).toBeCalledTimes(1);
-          expect(mockedSession.trackSearchComplete).not.toBeCalled();
-          expect(mockedSession.trackSearchId).not.toBeCalled();
-        }
       });
     });
   });

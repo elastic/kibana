@@ -24,9 +24,6 @@ export function getSessionServiceMock(): jest.Mocked<ISessionService> {
     clear: jest.fn(),
     start: jest.fn(),
     getSessionId: jest.fn(),
-    trackSearch: jest.fn(),
-    trackSearchId: jest.fn(),
-    trackSearchComplete: jest.fn(),
-    trackSearchError: jest.fn(),
+    getSession$: jest.fn(),
   };
 }
