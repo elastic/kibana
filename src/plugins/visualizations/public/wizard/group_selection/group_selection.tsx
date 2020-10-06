@@ -112,7 +112,7 @@ function GroupSelection(props: GroupSelectionProps) {
                       'A set of frequently used visualizations that allows you to plot aggregated data to find trends, spikes and dips you need to know about',
                   }
                 )}
-                icon={<EuiIcon type="snowflake" size="xl" color="secondary" />}
+                icon={<EuiIcon type="heatmap" size="xl" color="secondary" />}
               >
                 <EuiLink
                   data-test-subj="visGroupAggBasedExploreLink"

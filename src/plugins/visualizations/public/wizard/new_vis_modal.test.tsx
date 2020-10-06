@@ -111,22 +111,6 @@ describe('NewVisModal', () => {
     jest.clearAllMocks();
   });
 
-  it('should render as expected', () => {
-    const wrapper = mountWithIntl(
-      <NewVisModal
-        isOpen={true}
-        onClose={() => null}
-        visTypesRegistry={visTypes}
-        addBasePath={addBasePath}
-        uiSettings={uiSettings}
-        application={{} as ApplicationStart}
-        docLinks={docLinks as DocLinksStart}
-        savedObjects={{} as SavedObjectsStart}
-      />
-    );
-    expect(wrapper).toMatchSnapshot();
-  });
-
   it('should show the aggbased group but not the visualization assigned to this group', () => {
     const wrapper = mountWithIntl(
       <NewVisModal

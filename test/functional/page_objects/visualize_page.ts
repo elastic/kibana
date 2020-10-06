@@ -51,6 +51,10 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.click('visGroupAggBasedExploreLink');
     }
 
+    public async goBacktoGroups() {
+      await testSubjects.click('goBackLink');
+    }
+
     public async createVisualizationPromptButton() {
       await testSubjects.click('createVisualizationPromptButton');
     }
@@ -87,11 +91,20 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       });
     }
 
+    public async waitForGroupsSelectPage() {
+      await retry.try(async () => {
+        const visualizeSelectGroupStep = await testSubjects.find('visNewDialogGroups');
+        if (!(await visualizeSelectGroupStep.isDisplayed())) {
+          throw new Error('wait for vis groups select step');
+        }
+      });
+    }
+
     public async navigateToNewVisualization() {
       await common.navigateToApp('visualize');
       await header.waitUntilLoadingHasFinished();
       await this.clickNewVisualization();
-      // should add a wait for groups here
+      await this.waitForGroupsSelectPage();
     }
 
     public async navigateToNewAggBasedVisualization() {

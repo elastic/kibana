@@ -125,7 +125,7 @@ describe('AggBasedSelection', () => {
       );
       const searchBox = wrapper.find('input[data-test-subj="filterVisType"]');
       searchBox.simulate('change', { target: { value: 'with' } });
-      expect(wrapper).toMatchSnapshot();
+      expect(wrapper.find('[data-test-subj="visType-visWithSearch"]').exists()).toBe(true);
     });
   });
 

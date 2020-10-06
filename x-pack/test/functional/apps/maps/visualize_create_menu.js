@@ -37,12 +37,12 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should not show legacy tilemap map visualizion in create menu', async () => {
-      await PageObjects.visualize.clickAggBasedVisualizations();
       const hasLegecyViz = await PageObjects.visualize.hasTileMap();
       expect(hasLegecyViz).to.equal(false);
     });
 
     it('should take users to Maps application when Maps is clicked', async () => {
+      await PageObjects.visualize.goBacktoGroups();
       await PageObjects.visualize.clickMapsApp();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.maps.waitForLayersToLoad();
