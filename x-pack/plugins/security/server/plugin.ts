@@ -7,15 +7,17 @@
 import { combineLatest } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 import { TypeOf } from '@kbn/config-schema';
+import { deepFreeze } from '@kbn/std';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { SecurityOssPluginSetup } from 'src/plugins/security_oss/server';
 import {
-  deepFreeze,
   CoreSetup,
   CoreStart,
   Logger,
   PluginInitializerContext,
 } from '../../../../src/core/server';
 import { SpacesPluginSetup } from '../../spaces/server';
+import { PluginSetupContract as FeaturesSetupContract } from '../../features/server';
 import {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,
@@ -31,6 +33,7 @@ import { SecurityLicenseService, SecurityLicense } from '../common/licensing';
 import { setupSavedObjects } from './saved_objects';
 import { AuditService, SecurityAuditLogger, AuditServiceSetup } from './audit';
 import { SecurityFeatureUsageService, SecurityFeatureUsageServiceStart } from './feature_usage';
+import { securityFeatures } from './features';
 import { ElasticsearchService } from './elasticsearch';
 import { SessionManagementService } from './session_management';
 import { registerSecurityUsageCollector } from './usage_collector';
@@ -38,6 +41,11 @@ import { registerSecurityUsageCollector } from './usage_collector';
 export type SpacesService = Pick<
   SpacesPluginSetup['spacesService'],
   'getSpaceId' | 'namespaceToSpaceId'
+>;
+
+export type FeaturesService = Pick<
+  FeaturesSetupContract,
+  'getKibanaFeatures' | 'getElasticsearchFeatures'
 >;
 
 /**
@@ -77,6 +85,7 @@ export interface PluginSetupDependencies {
   licensing: LicensingPluginSetup;
   taskManager: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
+  securityOss?: SecurityOssPluginSetup;
 }
 
 export interface PluginStartDependencies {
@@ -126,7 +135,7 @@ export class Plugin {
 
   public async setup(
     core: CoreSetup<PluginStartDependencies>,
-    { features, licensing, taskManager, usageCollection }: PluginSetupDependencies
+    { features, licensing, taskManager, usageCollection, securityOss }: PluginSetupDependencies
   ) {
     const [config, legacyConfig] = await combineLatest([
       this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
@@ -145,6 +154,17 @@ export class Plugin {
     const { license } = this.securityLicenseService.setup({
       license$: licensing.license$,
     });
+
+    if (securityOss) {
+      license.features$.subscribe(({ allowRbac }) => {
+        const showInsecureClusterWarning = !allowRbac;
+        securityOss.showInsecureClusterWarning$.next(showInsecureClusterWarning);
+      });
+    }
+
+    securityFeatures.forEach((securityFeature) =>
+      features.registerElasticsearchFeature(securityFeature)
+    );
 
     const { clusterClient } = this.elasticsearchService.setup({
       elasticsearch: core.elasticsearch,
@@ -188,6 +208,7 @@ export class Plugin {
       packageVersion: this.initializerContext.env.packageInfo.version,
       getSpacesService: this.getSpacesService,
       features,
+      getCurrentUser: authc.getCurrentUser,
     });
 
     setupSavedObjects({
@@ -211,7 +232,7 @@ export class Plugin {
       getFeatures: () =>
         core
           .getStartServices()
-          .then(([, { features: featuresStart }]) => featuresStart.getFeatures()),
+          .then(([, { features: featuresStart }]) => featuresStart.getKibanaFeatures()),
       getFeatureUsageService: this.getFeatureUsageService,
     });
 

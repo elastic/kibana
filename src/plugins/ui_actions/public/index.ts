@@ -33,7 +33,10 @@ export {
   IncompatibleActionError,
 } from './actions';
 export { buildContextMenuForActions } from './context_menu';
-export { Presentable as UiActionsPresentable } from './util';
+export {
+  Presentable as UiActionsPresentable,
+  PresentableGrouping as UiActionsPresentableGrouping,
+} from './util';
 export {
   Trigger,
   TriggerContext,
@@ -56,6 +59,7 @@ export {
   VisualizeFieldContext,
   ACTION_VISUALIZE_FIELD,
   ACTION_VISUALIZE_GEO_FIELD,
+  ACTION_VISUALIZE_LENS_FIELD,
 } from './types';
 export {
   ActionByType,

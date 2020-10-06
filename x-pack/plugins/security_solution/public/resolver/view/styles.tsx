@@ -3,8 +3,63 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { EuiPanel, EuiCallOut } from '@elastic/eui';
 import styled from 'styled-components';
-import { Panel } from './panels';
+import { NodeSubMenuComponents } from './submenu';
+
+/**
+ * See `NodeSubMenuComponents`
+ */
+export const NodeSubMenu = styled(NodeSubMenuComponents)`
+  margin: 2px 0 0 0;
+  padding: 0;
+  border: none;
+  display: flex;
+  flex-flow: column;
+
+  &.options {
+    font-size: 0.8rem;
+    display: flex;
+    flex-flow: row wrap;
+    background: transparent;
+    position: absolute;
+    top: 4.5em;
+    contain: content;
+    width: 12em;
+    z-index: 2;
+  }
+
+  &.options .item {
+    margin: 0.25ch 0.35ch 0.35ch 0;
+    padding: 0.35em 0.5em;
+    height: fit-content;
+    width: fit-content;
+    border-radius: 2px;
+    line-height: 0.8;
+  }
+
+  &.options .item button {
+    appearance: none;
+    height: fit-content;
+    width: fit-content;
+    line-height: 0.8;
+    outline-style: none;
+    border-color: transparent;
+    box-shadow: none;
+  }
+
+  &.options .item button:focus {
+    outline-style: none;
+    border-color: transparent;
+    box-shadow: none;
+    text-decoration: underline;
+  }
+
+  &.options .item button:active {
+    transform: scale(0.95);
+  }
+`;
 
 /**
  * The top level DOM element for Resolver
@@ -40,7 +95,7 @@ export const StyledMapContainer = styled.div<{ backgroundColor: string }>`
 /**
  * The Panel, styled for use in `ResolverMap`.
  */
-export const StyledPanel = styled(Panel)`
+export const StyledPanel = styled(EuiPanel)`
   position: absolute;
   left: 0;
   top: 0;
@@ -59,4 +114,27 @@ export const GraphContainer = styled.div`
   display: flex;
   flex-grow: 1;
   contain: layout;
+`;
+
+/**
+ * See `RelatedEventLimitWarning`
+ */
+export const LimitWarningsEuiCallOut = styled(EuiCallOut)`
+  flex-flow: row wrap;
+  display: block;
+  align-items: baseline;
+  margin-top: 1em;
+
+  & .euiCallOutHeader {
+    display: inline;
+    margin-right: 0.25em;
+  }
+
+  & .euiText {
+    display: inline;
+  }
+
+  & .euiText p {
+    display: inline;
+  }
 `;

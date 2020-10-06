@@ -77,7 +77,7 @@ export const getTypeLabelFromType = (type: DataType) =>
 export const getFieldConfig = <T = unknown>(
   param: ParameterName,
   prop?: string
-): FieldConfig<any, T> => {
+): FieldConfig<T> => {
   if (prop !== undefined) {
     if (
       !(PARAMETERS_DEFINITION[param] as any).props ||

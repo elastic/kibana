@@ -4,20 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Feature, FeatureConfig } from '../../../../../features/public';
+import { KibanaFeature, KibanaFeatureConfig } from '../../../../../features/public';
 
 export const createFeature = (
-  config: Pick<FeatureConfig, 'id' | 'name' | 'subFeatures' | 'reserved' | 'privilegesTooltip'> & {
+  config: Pick<
+    KibanaFeatureConfig,
+    'id' | 'name' | 'subFeatures' | 'reserved' | 'privilegesTooltip'
+  > & {
     excludeFromBaseAll?: boolean;
     excludeFromBaseRead?: boolean;
-    privileges?: FeatureConfig['privileges'];
+    privileges?: KibanaFeatureConfig['privileges'];
+    category?: KibanaFeatureConfig['category'];
   }
 ) => {
-  const { excludeFromBaseAll, excludeFromBaseRead, privileges, ...rest } = config;
-  return new Feature({
+  const { excludeFromBaseAll, excludeFromBaseRead, privileges, category, ...rest } = config;
+  return new KibanaFeature({
     icon: 'discoverApp',
     navLinkId: 'discover',
     app: [],
+    category: category ?? { id: 'foo', label: 'foo' },
     catalogue: [],
     privileges:
       privileges === null

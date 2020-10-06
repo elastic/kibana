@@ -6,6 +6,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
+import { TestPipelineFlyoutTab } from './test_pipeline_tabs';
 
 const i18nTexts = {
   buttonLabel: i18n.translate('xpack.ingestPipelines.pipelineEditor.testPipeline.buttonLabel', {
@@ -14,16 +15,15 @@ const i18nTexts = {
 };
 
 interface Props {
-  openTestPipelineFlyout: () => void;
+  openFlyout: (activeFlyoutTab: TestPipelineFlyoutTab) => void;
 }
 
-export const AddDocumentsButton: FunctionComponent<Props> = ({ openTestPipelineFlyout }) => {
+export const AddDocumentsButton: FunctionComponent<Props> = ({ openFlyout }) => {
   return (
     <EuiButtonEmpty
       size="s"
-      onClick={openTestPipelineFlyout}
+      onClick={() => openFlyout('documents')}
       data-test-subj="addDocumentsButton"
-      iconType="plusInCircleFilled"
     >
       {i18nTexts.buttonLabel}
     </EuiButtonEmpty>

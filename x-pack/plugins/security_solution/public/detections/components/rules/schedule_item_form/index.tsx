@@ -149,6 +149,7 @@ export const ScheduleItem = ({
             options={timeTypeOptions}
             onChange={onChangeTimeType}
             value={timeType}
+            data-test-subj="timeType"
             {...rest}
           />
         }
@@ -158,6 +159,7 @@ export const ScheduleItem = ({
           min={minimumValue}
           onChange={onChangeTimeVal}
           value={timeVal}
+          data-test-subj="interval"
           {...rest}
         />
       </EuiFormControlLayout>

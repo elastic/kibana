@@ -6,7 +6,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiFieldNumber, EuiComboBox } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, EuiSpacer, EuiRange } from '@elastic/eui';
 import { IndexPatternColumn } from '../indexpattern';
 
 const supportedFormats: Record<string, { title: string }> = {
@@ -57,80 +57,84 @@ export function FormatSelector(props: FormatSelectorProps) {
     }),
   };
 
+  const label = i18n.translate('xpack.lens.indexPattern.columnFormatLabel', {
+    defaultMessage: 'Value format',
+  });
+
+  const decimalsLabel = i18n.translate('xpack.lens.indexPattern.decimalPlacesLabel', {
+    defaultMessage: 'Decimals',
+  });
+
   return (
     <>
-      <EuiFormRow
-        label={i18n.translate('xpack.lens.indexPattern.columnFormatLabel', {
-          defaultMessage: 'Value format',
-        })}
-        display="rowCompressed"
-      >
-        <EuiComboBox
-          fullWidth
-          compressed
-          isClearable={false}
-          data-test-subj="indexPattern-dimension-format"
-          singleSelection={{ asPlainText: true }}
-          options={[
-            defaultOption,
-            ...Object.entries(supportedFormats).map(([id, format]) => ({
-              value: id,
-              label: format.title ?? id,
-            })),
-          ]}
-          selectedOptions={
-            currentFormat
-              ? [
-                  {
-                    value: currentFormat.id,
-                    label: selectedFormat?.title ?? currentFormat.id,
-                  },
-                ]
-              : [defaultOption]
-          }
-          onChange={(choices) => {
-            if (choices.length === 0) {
-              return;
+      <EuiFormRow label={label} display="columnCompressed" fullWidth>
+        <div>
+          <EuiComboBox
+            fullWidth
+            compressed
+            isClearable={false}
+            data-test-subj="indexPattern-dimension-format"
+            aria-label={label}
+            singleSelection={{ asPlainText: true }}
+            options={[
+              defaultOption,
+              ...Object.entries(supportedFormats).map(([id, format]) => ({
+                value: id,
+                label: format.title ?? id,
+              })),
+            ]}
+            selectedOptions={
+              currentFormat
+                ? [
+                    {
+                      value: currentFormat.id,
+                      label: selectedFormat?.title ?? currentFormat.id,
+                    },
+                  ]
+                : [defaultOption]
             }
+            onChange={(choices) => {
+              if (choices.length === 0) {
+                return;
+              }
 
-            if (!choices[0].value) {
-              onChange();
-              return;
-            }
-            onChange({
-              id: choices[0].value,
-              params: { decimals: state.decimalPlaces },
-            });
-          }}
-        />
-      </EuiFormRow>
-
-      {currentFormat ? (
-        <EuiFormRow
-          label={i18n.translate('xpack.lens.indexPattern.decimalPlacesLabel', {
-            defaultMessage: 'Decimals',
-          })}
-          display="rowCompressed"
-        >
-          <EuiFieldNumber
-            data-test-subj="indexPattern-dimension-formatDecimals"
-            value={state.decimalPlaces}
-            min={0}
-            max={20}
-            onChange={(e) => {
-              setState({ decimalPlaces: Number(e.target.value) });
+              if (!choices[0].value) {
+                onChange();
+                return;
+              }
               onChange({
-                id: (selectedColumn.params as { format: { id: string } }).format.id,
-                params: {
-                  decimals: Number(e.target.value),
-                },
+                id: choices[0].value,
+                params: { decimals: state.decimalPlaces },
               });
             }}
-            compressed
-            fullWidth
           />
-        </EuiFormRow>
-      ) : null}
+          {currentFormat ? (
+            <>
+              <EuiSpacer size="xs" />
+              <EuiRange
+                showInput="inputWithPopover"
+                min={0}
+                max={20}
+                value={state.decimalPlaces}
+                onChange={(e) => {
+                  setState({ decimalPlaces: Number(e.currentTarget.value) });
+                  onChange({
+                    id: (selectedColumn.params as { format: { id: string } }).format.id,
+                    params: {
+                      decimals: Number(e.currentTarget.value),
+                    },
+                  });
+                }}
+                data-test-subj="indexPattern-dimension-formatDecimals"
+                compressed
+                fullWidth
+                prepend={decimalsLabel}
+                aria-label={decimalsLabel}
+              />
+            </>
+          ) : null}
+        </div>
+      </EuiFormRow>
     </>
   );
 }

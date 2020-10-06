@@ -21,7 +21,9 @@ import {
   EuiText,
   EuiCallOut,
 } from '@elastic/eui';
-import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules';
+
+import { hasEqlSequenceQuery, isEqlRule } from '../../../../../common/detection_engine/utils';
+import { useFetchIndex } from '../../../containers/source';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
 import {
@@ -39,7 +41,6 @@ import { AddExceptionComments } from '../add_exception_comments';
 import {
   enrichExistingExceptionItemWithComments,
   enrichExceptionItemsWithOS,
-  getOperatingSystems,
   entryHasListType,
   entryHasNonEcsType,
   lowercaseHashValues,
@@ -108,14 +109,11 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   >([]);
   const { addError, addSuccess } = useAppToasts();
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
-  const [
-    { isLoading: isSignalIndexPatternLoading, indexPatterns: signalIndexPatterns },
-  ] = useFetchIndexPatterns(signalIndexName !== null ? [signalIndexName] : [], 'signals');
-
-  const [{ isLoading: isIndexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
-    ruleIndices,
-    'rules'
+  const [isSignalIndexPatternLoading, { indexPatterns: signalIndexPatterns }] = useFetchIndex(
+    signalIndexName !== null ? [signalIndexName] : []
   );
+
+  const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(ruleIndices);
 
   const handleExceptionUpdateError = useCallback(
     (error: Error, statusCode: number | null, message: string | null) => {
@@ -230,8 +228,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
       },
     ];
     if (exceptionListType === 'endpoint') {
-      const osTypes = exceptionItem._tags ? getOperatingSystems(exceptionItem._tags) : [];
-      enriched = lowercaseHashValues(enrichExceptionItemsWithOS(enriched, osTypes));
+      enriched = lowercaseHashValues(enrichExceptionItemsWithOS(enriched, exceptionItem.os_types));
     }
     return enriched;
   }, [exceptionItemsToAdd, exceptionItem, comment, exceptionListType]);
@@ -240,9 +237,22 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     if (addOrUpdateExceptionItems !== null) {
       const bulkCloseIndex =
         shouldBulkCloseAlert && signalIndexName !== null ? [signalIndexName] : undefined;
-      addOrUpdateExceptionItems(enrichExceptionItems(), undefined, bulkCloseIndex);
+      addOrUpdateExceptionItems(ruleId, enrichExceptionItems(), undefined, bulkCloseIndex);
     }
-  }, [addOrUpdateExceptionItems, enrichExceptionItems, shouldBulkCloseAlert, signalIndexName]);
+  }, [
+    addOrUpdateExceptionItems,
+    ruleId,
+    enrichExceptionItems,
+    shouldBulkCloseAlert,
+    signalIndexName,
+  ]);
+
+  const isRuleEQLSequenceStatement = useMemo((): boolean => {
+    if (maybeRule != null) {
+      return isEqlRule(maybeRule.type) && hasEqlSequenceQuery(maybeRule.query);
+    }
+    return false;
+  }, [maybeRule]);
 
   return (
     <EuiOverlayMask onClick={onCancel}>
@@ -263,6 +273,15 @@ export const EditExceptionModal = memo(function EditExceptionModal({
         {!isSignalIndexLoading && !addExceptionIsLoading && !isIndexPatternLoading && (
           <>
             <ModalBodySection className="builder-section">
+              {isRuleEQLSequenceStatement && (
+                <>
+                  <EuiCallOut
+                    data-test-subj="eql-sequence-callout"
+                    title={i18n.EDIT_EXCEPTION_SEQUENCE_WARNING}
+                  />
+                  <EuiSpacer />
+                </>
+              )}
               <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
               <EuiSpacer />
               <ExceptionBuilderComponent

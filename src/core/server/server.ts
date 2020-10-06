@@ -16,7 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import apm from 'elastic-apm-node';
+import { config as pathConfig } from '@kbn/utils';
+import { mapToObject } from '@kbn/std';
 import { ConfigService, Env, RawConfigurationProvider, coreDeprecationProvider } from './config';
 import { CoreApp } from './core_app';
 import { AuditTrailService } from './audit_trail';
@@ -31,7 +33,7 @@ import { PluginsService, config as pluginsConfig } from './plugins';
 import { SavedObjectsService } from '../server/saved_objects';
 import { MetricsService, opsConfig } from './metrics';
 import { CapabilitiesService } from './capabilities';
-import { EnvironmentService } from './environment';
+import { EnvironmentService, config as pidConfig } from './environment';
 import { StatusService } from './status/status_service';
 
 import { config as cspConfig } from './csp';
@@ -39,15 +41,15 @@ import { config as elasticsearchConfig } from './elasticsearch';
 import { config as httpConfig } from './http';
 import { config as loggingConfig } from './logging';
 import { config as devConfig } from './dev';
-import { config as pathConfig } from './path';
 import { config as kibanaConfig } from './kibana_config';
 import { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects';
 import { config as uiSettingsConfig } from './ui_settings';
 import { config as statusConfig } from './status';
-import { mapToObject } from '../utils';
 import { ContextService } from './context';
 import { RequestHandlerContext } from '.';
 import { InternalCoreSetup, InternalCoreStart, ServiceConfigDescriptor } from './internal_types';
+import { CoreUsageDataService } from './core_usage_data';
+import { CoreRouteHandlerContext } from './core_route_handler_context';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
@@ -71,6 +73,7 @@ export class Server {
   private readonly logging: LoggingService;
   private readonly coreApp: CoreApp;
   private readonly auditTrail: AuditTrailService;
+  private readonly coreUsageData: CoreUsageDataService;
 
   #pluginsInitialized?: boolean;
   private coreStart?: InternalCoreStart;
@@ -102,10 +105,12 @@ export class Server {
     this.httpResources = new HttpResourcesService(core);
     this.auditTrail = new AuditTrailService(core);
     this.logging = new LoggingService(core);
+    this.coreUsageData = new CoreUsageDataService(core);
   }
 
   public async setup() {
     this.log.debug('setting up server');
+    const setupTransaction = apm.startTransaction('server_setup', 'kibana_platform');
 
     const environmentSetup = await this.environment.setup();
 
@@ -113,11 +118,15 @@ export class Server {
     const { pluginTree, uiPlugins } = await this.plugins.discover({
       environment: environmentSetup,
     });
-    const legacyPlugins = await this.legacy.discoverPlugins();
+    const legacyConfigSetup = await this.legacy.setupLegacyConfig();
 
-    // Immediately terminate in case of invalid configuration
-    await this.configService.validate();
-    await ensureValidConfiguration(this.configService, legacyPlugins);
+    // rely on dev server to validate config, don't validate in the parent process
+    if (!this.env.isDevClusterMaster) {
+      // Immediately terminate in case of invalid configuration
+      // This needs to be done after plugin discovery
+      await this.configService.validate();
+      await ensureValidConfiguration(this.configService, legacyConfigSetup);
+    }
 
     const contextServiceSetup = this.context.setup({
       // We inject a fake "legacy plugin" with dependencies on every plugin so that legacy plugins:
@@ -152,18 +161,20 @@ export class Server {
       savedObjects: savedObjectsSetup,
     });
 
-    await this.metrics.setup({ http: httpSetup });
+    const metricsSetup = await this.metrics.setup({ http: httpSetup });
 
     const statusSetup = await this.status.setup({
       elasticsearch: elasticsearchServiceSetup,
       pluginDependencies: pluginTree.asNames,
       savedObjects: savedObjectsSetup,
+      environment: environmentSetup,
+      http: httpSetup,
+      metrics: metricsSetup,
     });
 
     const renderingSetup = await this.rendering.setup({
       http: httpSetup,
       status: statusSetup,
-      legacyPlugins,
       uiPlugins,
     });
 
@@ -175,6 +186,8 @@ export class Server {
     const loggingSetup = this.logging.setup({
       loggingSystem: this.loggingSystem,
     });
+
+    this.coreUsageData.setup({ metrics: metricsSetup });
 
     const coreSetup: InternalCoreSetup = {
       capabilities: capabilitiesSetup,
@@ -189,6 +202,7 @@ export class Server {
       httpResources: httpResourcesSetup,
       auditTrail: auditTrailSetup,
       logging: loggingSetup,
+      metrics: metricsSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
@@ -203,24 +217,33 @@ export class Server {
     this.registerCoreContext(coreSetup);
     this.coreApp.setup(coreSetup);
 
+    setupTransaction?.end();
     return coreSetup;
   }
 
   public async start() {
     this.log.debug('starting server');
+    const startTransaction = apm.startTransaction('server_start', 'kibana_platform');
+
     const auditTrailStart = this.auditTrail.start();
 
     const elasticsearchStart = await this.elasticsearch.start({
       auditTrail: auditTrailStart,
     });
+    const soStartSpan = startTransaction?.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await this.savedObjects.start({
       elasticsearch: elasticsearchStart,
       pluginsInitialized: this.#pluginsInitialized,
     });
+    soStartSpan?.end();
     const capabilitiesStart = this.capabilities.start();
     const uiSettingsStart = await this.uiSettings.start();
     const metricsStart = await this.metrics.start();
     const httpStart = this.http.getStartContract();
+    const coreUsageDataStart = this.coreUsageData.start({
+      elasticsearch: elasticsearchStart,
+      savedObjects: savedObjectsStart,
+    });
 
     this.coreStart = {
       capabilities: capabilitiesStart,
@@ -230,6 +253,7 @@ export class Server {
       savedObjects: savedObjectsStart,
       uiSettings: uiSettingsStart,
       auditTrail: auditTrailStart,
+      coreUsageData: coreUsageDataStart,
     };
 
     const pluginsStart = await this.plugins.start(this.coreStart);
@@ -244,10 +268,7 @@ export class Server {
 
     await this.http.start();
 
-    await this.rendering.start({
-      legacy: this.legacy,
-    });
-
+    startTransaction?.end();
     return this.coreStart;
   }
 
@@ -272,25 +293,7 @@ export class Server {
       coreId,
       'core',
       async (context, req, res): Promise<RequestHandlerContext['core']> => {
-        const coreStart = this.coreStart!;
-        const savedObjectsClient = coreStart.savedObjects.getScopedClient(req);
-
-        return {
-          savedObjects: {
-            client: savedObjectsClient,
-            typeRegistry: coreStart.savedObjects.getTypeRegistry(),
-          },
-          elasticsearch: {
-            client: coreStart.elasticsearch.client.asScoped(req),
-            legacy: {
-              client: coreStart.elasticsearch.legacy.client.asScoped(req),
-            },
-          },
-          uiSettings: {
-            client: coreStart.uiSettings.asScopedToClient(savedObjectsClient),
-          },
-          auditor: coreStart.auditTrail.asScoped(req),
-        };
+        return new CoreRouteHandlerContext(this.coreStart!, req);
       }
     );
   }
@@ -310,6 +313,7 @@ export class Server {
       uiSettingsConfig,
       opsConfig,
       statusConfig,
+      pidConfig,
     ];
 
     this.configService.addDeprecationProvider(rootConfigPath, coreDeprecationProvider);

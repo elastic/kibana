@@ -121,7 +121,18 @@ export class AdvancedSettingsComponent extends Component<
       setTimeout(() => {
         const id = hash.replace('#', '');
         const element = document.getElementById(id);
-        const globalNavOffset = document.getElementById('headerGlobalNav')?.offsetHeight || 0;
+
+        let globalNavOffset = 0;
+
+        const globalNavBars = document
+          .getElementById('globalHeaderBars')
+          ?.getElementsByClassName('euiHeader');
+
+        if (globalNavBars) {
+          Array.from(globalNavBars).forEach((navBar) => {
+            globalNavOffset += (navBar as HTMLDivElement).offsetHeight;
+          });
+        }
 
         if (element) {
           element.scrollIntoView();

@@ -32,6 +32,7 @@ import { UseIndexDataReturnType } from './types';
 import { DecisionPathPopover } from './feature_importance/decision_path_popover';
 import { TopClasses } from '../../../../common/types/feature_importance';
 import { DEFAULT_RESULTS_FIELD } from '../../../../common/constants/data_frame_analytics';
+import { DataFrameAnalysisConfigType } from '../../../../common/types/data_frame_analytics';
 
 // TODO Fix row hovering + bar highlighting
 // import { hoveredRow$ } from './column_chart';
@@ -44,7 +45,7 @@ export const DataGridTitle: FC<{ title: string }> = ({ title }) => (
 
 interface PropsWithoutHeader extends UseIndexDataReturnType {
   baseline?: number;
-  analysisType?: ANALYSIS_CONFIG_TYPE;
+  analysisType?: DataFrameAnalysisConfigType;
   resultsField?: string;
   dataTestSubj: string;
   toastNotifications: CoreSetup['notifications']['toasts'];
@@ -97,6 +98,14 @@ export const DataGrid: FC<Props> = memo(
     //     onMouseLeave: () => hoveredRow$.next(null),
     //   };
     // };
+
+    // If the charts are visible, hide the column actions icon.
+    const columnsWithChartsActionized = columnsWithCharts.map((d) => {
+      if (chartsVisible === true) {
+        d.actions = false;
+      }
+      return d;
+    });
 
     const popOverContent = useMemo(() => {
       return analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
@@ -187,6 +196,40 @@ export const DataGrid: FC<Props> = memo(
       );
     }
 
+    let errorCallout;
+
+    if (status === INDEX_STATUS.ERROR) {
+      // if it's a searchBar syntax error leave the table visible so they can try again
+      if (errorMessage && !errorMessage.includes('failed to create query')) {
+        errorCallout = (
+          <EuiCallOut
+            title={i18n.translate('xpack.ml.dataframe.analytics.exploration.querySyntaxError', {
+              defaultMessage:
+                'An error occurred loading the index data. Please ensure your query syntax is valid.',
+            })}
+            color="danger"
+            iconType="cross"
+          >
+            <p>{errorMessage}</p>
+          </EuiCallOut>
+        );
+      } else {
+        errorCallout = (
+          <EuiCallOut
+            title={i18n.translate('xpack.ml.dataGrid.indexDataError', {
+              defaultMessage: 'An error occurred loading the index data.',
+            })}
+            color="danger"
+            iconType="cross"
+          >
+            <EuiCodeBlock language="json" fontSize="s" paddingSize="s" isCopyable>
+              {errorMessage}
+            </EuiCodeBlock>
+          </EuiCallOut>
+        );
+      }
+    }
+
     return (
       <div data-test-subj={`${dataTestSubj} ${status === INDEX_STATUS.ERROR ? 'error' : 'loaded'}`}>
         {isWithHeader(props) && (
@@ -210,26 +253,16 @@ export const DataGrid: FC<Props> = memo(
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
-        {status === INDEX_STATUS.ERROR && (
+        {errorCallout !== undefined && (
           <div data-test-subj={`${dataTestSubj} error`}>
-            <EuiCallOut
-              title={i18n.translate('xpack.ml.dataGrid.indexDataError', {
-                defaultMessage: 'An error occurred loading the index data.',
-              })}
-              color="danger"
-              iconType="cross"
-            >
-              <EuiCodeBlock language="json" fontSize="s" paddingSize="s" isCopyable>
-                {errorMessage}
-              </EuiCodeBlock>
-            </EuiCallOut>
+            {errorCallout}
             <EuiSpacer size="m" />
           </div>
         )}
         <div className="mlDataGrid">
           <EuiDataGrid
             aria-label={isWithHeader(props) ? props.title : ''}
-            columns={columnsWithCharts.map((c) => {
+            columns={columnsWithChartsActionized.map((c) => {
               c.initialWidth = 165;
               return c;
             })}

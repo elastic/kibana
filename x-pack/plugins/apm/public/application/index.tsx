@@ -24,8 +24,6 @@ import { routes } from '../components/app/Main/route_config';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
 import { ApmPluginContext } from '../context/ApmPluginContext';
 import { LicenseProvider } from '../context/LicenseContext';
-import { LoadingIndicatorProvider } from '../context/LoadingIndicatorContext';
-import { LocationProvider } from '../context/LocationContext';
 import { UrlParamsProvider } from '../context/UrlParamsContext';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { ApmPluginSetupDeps } from '../plugin';
@@ -92,22 +90,18 @@ export function ApmAppRoot({
             docLinks: core.docLinks,
             capabilities: core.application.capabilities,
             toastNotifications: core.notifications.toasts,
-            actionTypeRegistry: plugins.triggers_actions_ui.actionTypeRegistry,
-            alertTypeRegistry: plugins.triggers_actions_ui.alertTypeRegistry,
+            actionTypeRegistry: plugins.triggersActionsUi.actionTypeRegistry,
+            alertTypeRegistry: plugins.triggersActionsUi.alertTypeRegistry,
           }}
         >
           <KibanaContextProvider services={{ ...core, ...plugins }}>
             <i18nCore.Context>
               <Router history={history}>
-                <LocationProvider>
-                  <UrlParamsProvider>
-                    <LoadingIndicatorProvider>
-                      <LicenseProvider>
-                        <App />
-                      </LicenseProvider>
-                    </LoadingIndicatorProvider>
-                  </UrlParamsProvider>
-                </LocationProvider>
+                <UrlParamsProvider>
+                  <LicenseProvider>
+                    <App />
+                  </LicenseProvider>
+                </UrlParamsProvider>
               </Router>
             </i18nCore.Context>
           </KibanaContextProvider>

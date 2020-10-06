@@ -48,11 +48,9 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
                 <button
                   aria-haspopup="true"
                   aria-labelledby="undefined generated-id"
-                  aria-selected={true}
                   className="euiSuperSelectControl euiSuperSelectControl--compressed"
                   onClick={[Function]}
                   onKeyDown={[Function]}
-                  role="option"
                   type="button"
                 />
                 <div
@@ -217,7 +215,6 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
       >
         <div
           className="euiPopover euiPopover--anchorDownCenter"
-          container={null}
           id="color-picker-popover"
           onKeyDown={[Function]}
           onMouseDown={[Function]}
@@ -529,11 +526,9 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
                 <button
                   aria-haspopup="true"
                   aria-labelledby="undefined generated-id"
-                  aria-selected={true}
                   className="euiSuperSelectControl euiSuperSelectControl--compressed"
                   onClick={[Function]}
                   onKeyDown={[Function]}
-                  role="option"
                   type="button"
                 />
                 <div
@@ -698,7 +693,6 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
       >
         <div
           className="euiPopover euiPopover--anchorDownCenter"
-          container={null}
           id="color-picker-popover"
           onKeyDown={[Function]}
           onMouseDown={[Function]}

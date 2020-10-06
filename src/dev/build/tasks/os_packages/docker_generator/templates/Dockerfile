@@ -58,6 +58,11 @@ RUN curl -L -o /usr/local/bin/dumb-init https://github.com/Yelp/dumb-init/releas
 RUN echo "37f2c1f0372a45554f1b89924fbb134fc24c3756efaedf11e07f599494e0eff9  /usr/local/bin/dumb-init" | sha256sum -c -
 RUN chmod +x /usr/local/bin/dumb-init
 
+RUN mkdir /usr/share/fonts/local
+RUN curl -L -o /usr/share/fonts/local/NotoSansCJK-Regular.ttc https://github.com/googlefonts/noto-cjk/raw/NotoSansV2.001/NotoSansCJK-Regular.ttc
+RUN echo "5dcd1c336cc9344cb77c03a0cd8982ca8a7dc97d620fd6c9c434e02dcb1ceeb3  /usr/share/fonts/local/NotoSansCJK-Regular.ttc" | sha256sum -c -
+RUN fc-cache -v
+
 # Bring in Kibana from the initial stage.
 COPY --from=builder --chown=1000:0 /usr/share/kibana /usr/share/kibana
 WORKDIR /usr/share/kibana
@@ -85,7 +90,6 @@ RUN groupadd --gid 1000 kibana && \
     useradd --uid 1000 --gid 1000 \
       --home-dir /usr/share/kibana --no-create-home \
       kibana
-USER kibana
 
 LABEL org.label-schema.build-date="{{dockerBuildDate}}" \
   org.label-schema.license="{{license}}" \
@@ -115,7 +119,12 @@ LABEL name="Kibana" \
   release="1" \
   summary="Kibana" \
   description="Your window into the Elastic Stack."
+
+RUN mkdir /licenses && \
+    cp LICENSE.txt /licenses/LICENSE
 {{/ubi}}
+
+USER kibana
 
 ENTRYPOINT ["/usr/local/bin/dumb-init", "--"]
 

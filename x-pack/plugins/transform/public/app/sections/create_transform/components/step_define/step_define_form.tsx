@@ -22,7 +22,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { DataGrid } from '../../../../../shared_imports';
+import { PivotAggDict } from '../../../../../../common/types/pivot_aggs';
+import { PivotGroupByDict } from '../../../../../../common/types/pivot_group_by';
 
 import {
   getIndexDevConsoleStatement,
@@ -30,10 +31,8 @@ import {
 } from '../../../../common/data_grid';
 
 import {
-  getPreviewRequestBody,
-  PivotAggDict,
+  getPreviewTransformRequestBody,
   PivotAggsConfigDict,
-  PivotGroupByDict,
   PivotGroupByConfigDict,
   PivotSupportedGroupByAggs,
   PivotAggsConfig,
@@ -41,7 +40,7 @@ import {
 import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
 import { useIndexData } from '../../../../hooks/use_index_data';
 import { usePivotData } from '../../../../hooks/use_pivot_data';
-import { useToastNotifications } from '../../../../app_dependencies';
+import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { SearchItems } from '../../../../hooks/use_search_items';
 
 import { AdvancedPivotEditor } from '../advanced_pivot_editor';
@@ -65,6 +64,9 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
   const { searchItems } = props;
   const { indexPattern } = searchItems;
 
+  const {
+    ml: { DataGrid },
+  } = useAppDependencies();
   const toastNotifications = useToastNotifications();
   const stepDefineForm = useStepDefineForm(props);
 
@@ -87,7 +89,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     toastNotifications,
   };
 
-  const previewRequest = getPreviewRequestBody(
+  const previewRequest = getPreviewTransformRequestBody(
     indexPattern.title,
     pivotQuery,
     pivotGroupByArr,

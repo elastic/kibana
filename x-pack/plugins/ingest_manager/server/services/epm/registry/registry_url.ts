@@ -28,17 +28,19 @@ const getDefaultRegistryUrl = (): string => {
   }
 };
 
+// Custom registry URL is currently only for internal Elastic development and is unsupported
 export const getRegistryUrl = (): string => {
-  const license = licenseService.getLicenseInformation();
   const customUrl = appContextService.getConfig()?.registryUrl;
-  const isGoldPlus = license?.isAvailable && license?.isActive && license?.hasAtLeast('gold');
+  const isEnterprise = licenseService.isEnterprise();
 
-  if (customUrl && isGoldPlus) {
+  if (customUrl && isEnterprise) {
     return customUrl;
   }
 
   if (customUrl) {
-    appContextService.getLogger().warn('Gold license is required to use a custom registry url.');
+    appContextService
+      .getLogger()
+      .warn('Enterprise license is required to use a custom registry url.');
   }
 
   return getDefaultRegistryUrl();

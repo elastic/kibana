@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEqlRule } from '../../../../../common/detection_engine/utils';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
@@ -24,6 +25,7 @@ import { transformError, buildSiemResponse } from '../utils';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import { PartialFilter } from '../../types';
+import { isMlRule } from '../../../../../common/machine_learning/helpers';
 
 export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void => {
   router.post(
@@ -52,6 +54,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
         building_block_type: buildingBlockType,
         description,
         enabled,
+        event_category_override: eventCategoryOverride,
         false_positives: falsePositives,
         from,
         query: queryOrUndefined,
@@ -77,6 +80,11 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
         tags,
         threat,
         threshold,
+        threat_filters: threatFilters,
+        threat_index: threatIndex,
+        threat_query: threatQuery,
+        threat_mapping: threatMapping,
+        threat_language: threatLanguage,
         throttle,
         timestamp_override: timestampOverride,
         to,
@@ -86,11 +94,10 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
         exceptions_list: exceptionsList,
       } = request.body;
       try {
-        const query =
-          type !== 'machine_learning' && queryOrUndefined == null ? '' : queryOrUndefined;
+        const query = !isMlRule(type) && queryOrUndefined == null ? '' : queryOrUndefined;
 
         const language =
-          type !== 'machine_learning' && languageOrUndefined == null
+          !isMlRule(type) && !isEqlRule(type) && languageOrUndefined == null
             ? 'kuery'
             : languageOrUndefined;
 
@@ -136,6 +143,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
           buildingBlockType,
           description,
           enabled,
+          eventCategoryOverride,
           falsePositives,
           from,
           immutable: false,
@@ -164,6 +172,11 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
           type,
           threat,
           threshold,
+          threatFilters,
+          threatIndex,
+          threatQuery,
+          threatMapping,
+          threatLanguage,
           timestampOverride,
           references,
           note,

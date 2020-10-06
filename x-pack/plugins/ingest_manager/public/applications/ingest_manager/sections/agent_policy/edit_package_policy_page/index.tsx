@@ -43,28 +43,15 @@ import { StepConfigurePackagePolicy } from '../create_package_policy_page/step_c
 import { StepDefinePackagePolicy } from '../create_package_policy_page/step_define_package_policy';
 
 export const EditPackagePolicyPage: React.FunctionComponent = () => {
+  const { notifications } = useCore();
   const {
-    notifications,
-    chrome: { getIsNavDrawerLocked$ },
-    uiSettings,
-  } = useCore();
-  const {
-    fleet: { enabled: isFleetEnabled },
+    agents: { enabled: isFleetEnabled },
   } = useConfig();
   const {
     params: { policyId, packagePolicyId },
   } = useRouteMatch<{ policyId: string; packagePolicyId: string }>();
   const history = useHistory();
   const { getHref, getPath } = useLink();
-  const [isNavDrawerLocked, setIsNavDrawerLocked] = useState(false);
-
-  useEffect(() => {
-    const subscription = getIsNavDrawerLocked$().subscribe((newIsNavDrawerLocked: boolean) => {
-      setIsNavDrawerLocked(newIsNavDrawerLocked);
-    });
-
-    return () => subscription.unsubscribe();
-  });
 
   // Agent policy, package info, and package policy states
   const [isLoadingData, setIsLoadingData] = useState<boolean>(true);
@@ -346,16 +333,7 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
           )}
           {configurePackage}
           <EuiSpacer size="l" />
-          {/* TODO #64541 - Remove classes */}
-          <EuiBottomBar
-            className={
-              uiSettings.get('pageNavigation') === 'legacy'
-                ? isNavDrawerLocked
-                  ? 'ingestManager__bottomBar-isNavDrawerLocked'
-                  : 'ingestManager__bottomBar'
-                : undefined
-            }
-          >
+          <EuiBottomBar>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem grow={false}>
                 {agentPolicy && packageInfo && formState === 'INVALID' ? (

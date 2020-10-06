@@ -20,13 +20,12 @@ import {
 import { APMRouteDefinition } from '../application/routes';
 import { renderAsRedirectTo } from '../components/app/Main/route_config';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
-import { RumHome } from '../components/app/RumDashboard/RumHome';
+import { RumHome, UX_LABEL } from '../components/app/RumDashboard/RumHome';
 import { ApmPluginContext } from '../context/ApmPluginContext';
-import { LoadingIndicatorProvider } from '../context/LoadingIndicatorContext';
 import { UrlParamsProvider } from '../context/UrlParamsContext';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { ConfigSchema } from '../index';
-import { ApmPluginSetupDeps } from '../plugin';
+import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { px, units } from '../style/variables';
 
@@ -39,8 +38,8 @@ export const rumRoutes: APMRouteDefinition[] = [
   {
     exact: true,
     path: '/',
-    render: renderAsRedirectTo('/csm'),
-    breadcrumb: 'Client Side Monitoring',
+    render: renderAsRedirectTo('/ux'),
+    breadcrumb: UX_LABEL,
   },
 ];
 
@@ -70,11 +69,13 @@ export function CsmAppRoot({
   deps,
   history,
   config,
+  corePlugins: { embeddable },
 }: {
   core: CoreStart;
   deps: ApmPluginSetupDeps;
   history: AppMountParameters['history'];
   config: ConfigSchema;
+  corePlugins: ApmPluginStartDeps;
 }) {
   const i18nCore = core.i18n;
   const plugins = deps;
@@ -86,13 +87,11 @@ export function CsmAppRoot({
   return (
     <RedirectAppLinks application={core.application}>
       <ApmPluginContext.Provider value={apmPluginContextValue}>
-        <KibanaContextProvider services={{ ...core, ...plugins }}>
+        <KibanaContextProvider services={{ ...core, ...plugins, embeddable }}>
           <i18nCore.Context>
             <Router history={history}>
               <UrlParamsProvider>
-                <LoadingIndicatorProvider>
-                  <CsmApp />
-                </LoadingIndicatorProvider>
+                <CsmApp />
               </UrlParamsProvider>
             </Router>
           </i18nCore.Context>
@@ -110,12 +109,19 @@ export const renderApp = (
   core: CoreStart,
   deps: ApmPluginSetupDeps,
   { element, history }: AppMountParameters,
-  config: ConfigSchema
+  config: ConfigSchema,
+  corePlugins: ApmPluginStartDeps
 ) => {
   createCallApmApi(core.http);
 
   ReactDOM.render(
-    <CsmAppRoot core={core} deps={deps} history={history} config={config} />,
+    <CsmAppRoot
+      core={core}
+      deps={deps}
+      history={history}
+      config={config}
+      corePlugins={corePlugins}
+    />,
     element
   );
   return () => {

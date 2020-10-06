@@ -24,7 +24,7 @@ import getopts from 'getopts';
 
 import { execInProjects } from './exec_in_projects';
 import { filterProjectsByFlag } from './projects';
-import { buildRefs } from './build_refs';
+import { buildAllRefs } from './build_refs';
 
 export async function runTypeCheckCli() {
   const extraFlags: string[] = [];
@@ -80,7 +80,7 @@ export async function runTypeCheckCli() {
     process.exit();
   }
 
-  await buildRefs(log);
+  await buildAllRefs(log);
 
   const tscArgs = [
     // composite project cannot be used with --noEmit
@@ -98,7 +98,7 @@ export async function runTypeCheckCli() {
   }
 
   execInProjects(log, projects, process.execPath, (project) => [
-    '--max-old-space-size=4096',
+    '--max-old-space-size=5120',
     require.resolve('typescript/bin/tsc'),
     ...['--project', project.tsConfigPath],
     ...tscArgs,

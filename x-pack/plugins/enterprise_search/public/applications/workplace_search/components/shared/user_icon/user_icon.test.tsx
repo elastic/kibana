@@ -15,7 +15,7 @@ describe('SourcesTable', () => {
   it('renders with picture', () => {
     const wrapper = shallow(<UserIcon {...users[0]} />);
 
-    expect(wrapper.find('.avatar')).toHaveLength(1);
+    expect(wrapper.find('.user-icon')).toHaveLength(1);
     expect(wrapper.find('.avatar__image')).toHaveLength(1);
   });
 
@@ -26,7 +26,7 @@ describe('SourcesTable', () => {
     };
     const wrapper = shallow(<UserIcon {...user} />);
 
-    expect(wrapper.find('.avatar')).toHaveLength(1);
+    expect(wrapper.find('.user-icon')).toHaveLength(1);
     expect(wrapper.find('.avatar__text')).toHaveLength(1);
   });
 

@@ -11,66 +11,127 @@ import {
 } from '../../../../../src/core/server';
 import { RawAlert } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
+import {
+  APP_ID as SIEM_APP_ID,
+  SERVER_APP_ID as SIEM_SERVER_APP_ID,
+} from '../../../security_solution/common/constants';
+
+export const LEGACY_LAST_MODIFIED_VERSION = 'pre-7.10.0';
+
+type AlertMigration = (
+  doc: SavedObjectUnsanitizedDoc<RawAlert>
+) => SavedObjectUnsanitizedDoc<RawAlert>;
 
 export function getMigrations(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ): SavedObjectMigrationMap {
-  const alertsMigration = changeAlertingConsumer(encryptedSavedObjects, 'alerting', 'alerts');
-
-  const infrastructureMigration = changeAlertingConsumer(
-    encryptedSavedObjects,
-    'metrics',
-    'infrastructure'
+  const migrationWhenRBACWasIntroduced = encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
+    function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<RawAlert> {
+      // migrate all documents in 7.10 in order to add the "meta" RBAC field
+      return true;
+    },
+    pipeMigrations(
+      markAsLegacyAndChangeConsumer,
+      setAlertIdAsDefaultDedupkeyOnPagerDutyActions,
+      initializeExecutionStatus
+    )
   );
 
   return {
-    '7.10.0': (doc: SavedObjectUnsanitizedDoc<RawAlert>, context: SavedObjectMigrationContext) => {
-      if (doc.attributes.consumer === 'alerting') {
-        return executeMigration(doc, context, alertsMigration);
-      } else if (doc.attributes.consumer === 'metrics') {
-        return executeMigration(doc, context, infrastructureMigration);
-      }
-      return doc;
+    '7.10.0': executeMigrationWithErrorHandling(migrationWhenRBACWasIntroduced, '7.10.0'),
+  };
+}
+
+function executeMigrationWithErrorHandling(
+  migrationFunc: SavedObjectMigrationFn<RawAlert, RawAlert>,
+  version: string
+) {
+  return (doc: SavedObjectUnsanitizedDoc<RawAlert>, context: SavedObjectMigrationContext) => {
+    try {
+      return migrationFunc(doc, context);
+    } catch (ex) {
+      context.log.error(
+        `encryptedSavedObject ${version} migration failed for alert ${doc.id} with error: ${ex.message}`,
+        { alertDocument: doc }
+      );
+    }
+    return doc;
+  };
+}
+
+const consumersToChange: Map<string, string> = new Map(
+  Object.entries({
+    alerting: 'alerts',
+    metrics: 'infrastructure',
+    [SIEM_APP_ID]: SIEM_SERVER_APP_ID,
+  })
+);
+
+function markAsLegacyAndChangeConsumer(
+  doc: SavedObjectUnsanitizedDoc<RawAlert>
+): SavedObjectUnsanitizedDoc<RawAlert> {
+  const {
+    attributes: { consumer },
+  } = doc;
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      consumer: consumersToChange.get(consumer) ?? consumer,
+      // mark any alert predating 7.10 as a legacy alert
+      meta: {
+        versionApiKeyLastmodified: LEGACY_LAST_MODIFIED_VERSION,
+      },
     },
   };
 }
 
-function executeMigration(
-  doc: SavedObjectUnsanitizedDoc<RawAlert>,
-  context: SavedObjectMigrationContext,
-  migrationFunc: SavedObjectMigrationFn<RawAlert, RawAlert>
-) {
-  try {
-    return migrationFunc(doc, context);
-  } catch (ex) {
-    context.log.error(
-      `encryptedSavedObject migration failed for alert ${doc.id} with error: ${ex.message}`,
-      { alertDocument: doc }
-    );
-  }
-  return doc;
+function setAlertIdAsDefaultDedupkeyOnPagerDutyActions(
+  doc: SavedObjectUnsanitizedDoc<RawAlert>
+): SavedObjectUnsanitizedDoc<RawAlert> {
+  const { attributes } = doc;
+  return {
+    ...doc,
+    attributes: {
+      ...attributes,
+      ...(attributes.actions
+        ? {
+            actions: attributes.actions.map((action) => {
+              if (action.actionTypeId !== '.pagerduty' || action.params.eventAction === 'trigger') {
+                return action;
+              }
+              return {
+                ...action,
+                params: {
+                  ...action.params,
+                  dedupKey: action.params.dedupKey ?? '{{alertId}}',
+                },
+              };
+            }),
+          }
+        : {}),
+    },
+  };
 }
 
-function changeAlertingConsumer(
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
-  from: string,
-  to: string
-): SavedObjectMigrationFn<RawAlert, RawAlert> {
-  return encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
-    function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<RawAlert> {
-      return doc.attributes.consumer === from;
+function initializeExecutionStatus(
+  doc: SavedObjectUnsanitizedDoc<RawAlert>
+): SavedObjectUnsanitizedDoc<RawAlert> {
+  const { attributes } = doc;
+  return {
+    ...doc,
+    attributes: {
+      ...attributes,
+      executionStatus: {
+        status: 'pending',
+        lastExecutionDate: new Date().toISOString(),
+        error: null,
+      },
     },
-    (doc: SavedObjectUnsanitizedDoc<RawAlert>): SavedObjectUnsanitizedDoc<RawAlert> => {
-      const {
-        attributes: { consumer },
-      } = doc;
-      return {
-        ...doc,
-        attributes: {
-          ...doc.attributes,
-          consumer: consumer === from ? to : consumer,
-        },
-      };
-    }
-  );
+  };
+}
+
+function pipeMigrations(...migrations: AlertMigration[]): AlertMigration {
+  return (doc: SavedObjectUnsanitizedDoc<RawAlert>) =>
+    migrations.reduce((migratedDoc, nextMigration) => nextMigration(migratedDoc), doc);
 }

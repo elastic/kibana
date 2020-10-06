@@ -44,7 +44,7 @@ export function getNodes(req, lsIndexPattern, { clusterUuid }) {
       collapse: {
         field: 'logstash_stats.logstash.uuid',
       },
-      sort: [{ timestamp: { order: 'desc' } }],
+      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
       _source: [
         'timestamp',
         'logstash_stats.process.cpu.percent',

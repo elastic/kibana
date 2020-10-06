@@ -15,10 +15,12 @@ import {
   apolloClient,
   mockTimelineApolloResult,
   mockTimelineDetailsApollo,
+  mockTimelineDetails,
 } from '../../../common/mock/';
 import { CreateTimeline, UpdateTimelineLoading } from './types';
-import { Ecs } from '../../../graphql/types';
+import { Ecs } from '../../../../common/ecs';
 import { TimelineId, TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import { ISearchStart } from '../../../../../../../src/plugins/data/public';
 
 jest.mock('apollo-client');
 
@@ -27,6 +29,7 @@ describe('alert actions', () => {
   const unix = moment(anchor).valueOf();
   let createTimeline: CreateTimeline;
   let updateTimelineIsLoading: UpdateTimelineLoading;
+  let searchStrategyClient: ISearchStart;
   let clock: sinon.SinonFakeTimers;
 
   beforeEach(() => {
@@ -39,6 +42,12 @@ describe('alert actions', () => {
 
     createTimeline = jest.fn() as jest.Mocked<CreateTimeline>;
     updateTimelineIsLoading = jest.fn() as jest.Mocked<UpdateTimelineLoading>;
+    searchStrategyClient = {
+      aggs: {} as ISearchStart['aggs'],
+      showError: jest.fn(),
+      search: jest.fn().mockResolvedValue({ data: mockTimelineDetails }),
+      searchSource: {} as ISearchStart['searchSource'],
+    };
 
     jest.spyOn(apolloClient, 'query').mockImplementation((obj) => {
       const id = get('variables.id', obj);
@@ -64,6 +73,7 @@ describe('alert actions', () => {
           ecsData: mockEcsDataWithAlert,
           nonEcsData: [],
           updateTimelineIsLoading,
+          searchStrategyClient,
         });
 
         expect(updateTimelineIsLoading).toHaveBeenCalledTimes(1);
@@ -80,6 +90,7 @@ describe('alert actions', () => {
           ecsData: mockEcsDataWithAlert,
           nonEcsData: [],
           updateTimelineIsLoading,
+          searchStrategyClient,
         });
         const expected = {
           from: '2018-11-05T18:58:25.937Z',
@@ -197,6 +208,7 @@ describe('alert actions', () => {
             highlightedDropAndProviderId: '',
             historyIds: [],
             id: '',
+            indexNames: [],
             isFavorite: false,
             isLive: false,
             isLoading: false,
@@ -267,6 +279,7 @@ describe('alert actions', () => {
           ecsData: mockEcsDataWithAlert,
           nonEcsData: [],
           updateTimelineIsLoading,
+          searchStrategyClient,
         });
         const createTimelineArg = (createTimeline as jest.Mock).mock.calls[0][0];
 
@@ -296,6 +309,7 @@ describe('alert actions', () => {
           ecsData: mockEcsDataWithAlert,
           nonEcsData: [],
           updateTimelineIsLoading,
+          searchStrategyClient,
         });
         const createTimelineArg = (createTimeline as jest.Mock).mock.calls[0][0];
 
@@ -314,6 +328,7 @@ describe('alert actions', () => {
           ecsData: mockEcsDataWithAlert,
           nonEcsData: [],
           updateTimelineIsLoading,
+          searchStrategyClient,
         });
 
         expect(updateTimelineIsLoading).toHaveBeenCalledWith({
@@ -336,6 +351,7 @@ describe('alert actions', () => {
           signal: {
             rule: {
               ...mockEcsDataWithAlert.signal?.rule!,
+              // @ts-expect-error
               timeline_id: null,
             },
           },
@@ -347,6 +363,7 @@ describe('alert actions', () => {
           ecsData: ecsDataMock,
           nonEcsData: [],
           updateTimelineIsLoading,
+          searchStrategyClient,
         });
 
         expect(updateTimelineIsLoading).not.toHaveBeenCalled();
@@ -372,6 +389,7 @@ describe('alert actions', () => {
           ecsData: ecsDataMock,
           nonEcsData: [],
           updateTimelineIsLoading,
+          searchStrategyClient,
         });
 
         expect(updateTimelineIsLoading).not.toHaveBeenCalled();

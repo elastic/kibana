@@ -41,24 +41,29 @@ import { setServices } from './application/kibana_services';
 import { DataPublicPluginStart } from '../../data/public';
 import { TelemetryPluginStart } from '../../telemetry/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
-import { KibanaLegacySetup, KibanaLegacyStart } from '../../kibana_legacy/public';
+import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
 import { AppNavLinkStatus } from '../../../core/public';
 import { PLUGIN_ID, HOME_APP_BASE_PATH } from '../common/constants';
 
 export interface HomePluginStartDependencies {
   data: DataPublicPluginStart;
   telemetry?: TelemetryPluginStart;
-  kibanaLegacy: KibanaLegacyStart;
+  urlForwarding: UrlForwardingStart;
 }
 
 export interface HomePluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;
-  kibanaLegacy: KibanaLegacySetup;
+  urlForwarding: UrlForwardingSetup;
 }
 
 export class HomePublicPlugin
   implements
-    Plugin<HomePublicPluginSetup, void, HomePluginSetupDependencies, HomePluginStartDependencies> {
+    Plugin<
+      HomePublicPluginSetup,
+      HomePublicPluginStart,
+      HomePluginSetupDependencies,
+      HomePluginStartDependencies
+    > {
   private readonly featuresCatalogueRegistry = new FeatureCatalogueRegistry();
   private readonly environmentService = new EnvironmentService();
   private readonly tutorialService = new TutorialService();
@@ -67,7 +72,7 @@ export class HomePublicPlugin
 
   public setup(
     core: CoreSetup<HomePluginStartDependencies>,
-    { kibanaLegacy, usageCollection }: HomePluginSetupDependencies
+    { urlForwarding, usageCollection }: HomePluginSetupDependencies
   ): HomePublicPluginSetup {
     core.application.register({
       id: PLUGIN_ID,
@@ -79,7 +84,7 @@ export class HomePublicPlugin
           : () => {};
         const [
           coreStart,
-          { telemetry, data, kibanaLegacy: kibanaLegacyStart },
+          { telemetry, data, urlForwarding: urlForwardingStart },
         ] = await core.getStartServices();
         setServices({
           trackUiMetric,
@@ -97,7 +102,7 @@ export class HomePublicPlugin
           getBasePath: core.http.basePath.get,
           indexPatternService: data.indexPatterns,
           environmentService: this.environmentService,
-          kibanaLegacy: kibanaLegacyStart,
+          urlForwarding: urlForwardingStart,
           homeConfig: this.initializerContext.config.get(),
           tutorialService: this.tutorialService,
           featureCatalogue: this.featuresCatalogueRegistry,
@@ -109,7 +114,7 @@ export class HomePublicPlugin
         return await renderApp(params.element, coreStart, params.history);
       },
     });
-    kibanaLegacy.forwardApp('home', 'home');
+    urlForwarding.forwardApp('home', 'home');
 
     const featureCatalogue = { ...this.featuresCatalogueRegistry.setup() };
 
@@ -128,39 +133,6 @@ export class HomePublicPlugin
       order: 500,
     });
 
-    featureCatalogue.registerSolution({
-      id: 'kibana',
-      title: i18n.translate('home.kibana.featureCatalogue.title', {
-        defaultMessage: 'Kibana',
-      }),
-      subtitle: i18n.translate('home.kibana.featureCatalogue.subtitle', {
-        defaultMessage: 'Visualize & analyze',
-      }),
-      descriptions: [
-        i18n.translate('home.kibana.featureCatalogueDescription1', {
-          defaultMessage: 'Analyze data in dashboards.',
-        }),
-        i18n.translate('home.kibana.featureCatalogueDescription2', {
-          defaultMessage: 'Search and find insights.',
-        }),
-        i18n.translate('home.kibana.featureCatalogueDescription3', {
-          defaultMessage: 'Design pixel-perfect reports.',
-        }),
-        i18n.translate('home.kibana.featureCatalogueDescription4', {
-          defaultMessage: 'Plot geographic data.',
-        }),
-        i18n.translate('home.kibana.featureCatalogueDescription5', {
-          defaultMessage: 'Model, predict, and detect.',
-        }),
-        i18n.translate('home.kibana.featureCatalogueDescription6', {
-          defaultMessage: 'Reveal patterns and relationships.',
-        }),
-      ],
-      icon: 'logoKibana',
-      path: '/app/dashboards',
-      order: 400,
-    });
-
     return {
       featureCatalogue,
       environment: { ...this.environmentService.setup() },
@@ -170,7 +142,7 @@ export class HomePublicPlugin
 
   public start(
     { application: { capabilities, currentAppId$ }, http }: CoreStart,
-    { kibanaLegacy }: HomePluginStartDependencies
+    { urlForwarding }: HomePluginStartDependencies
   ) {
     this.featuresCatalogueRegistry.start({ capabilities });
 
@@ -184,10 +156,12 @@ export class HomePublicPlugin
         if (appId === 'home') {
           // ...navigate to default app set by `kibana.defaultAppId`.
           // This doesn't do anything as along as the default settings are kept.
-          kibanaLegacy.navigateToDefaultApp({ overwriteHash: false });
+          urlForwarding.navigateToDefaultApp({ overwriteHash: false });
         }
       });
     }
+
+    return { featureCatalogue: this.featuresCatalogueRegistry };
   }
 }
 
@@ -211,4 +185,7 @@ export interface HomePublicPluginSetup {
    */
 
   environment: EnvironmentSetup;
+}
+export interface HomePublicPluginStart {
+  featureCatalogue: FeatureCatalogueRegistry;
 }

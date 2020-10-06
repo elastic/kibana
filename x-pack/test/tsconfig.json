@@ -1,7 +1,8 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "tsBuildInfoFile": "../../build/tsbuildinfo/x-pack/test",
+    // overhead is too significant
+    "incremental": false,
     "types": [
       "mocha",
       "node",
@@ -14,5 +15,12 @@
   ],
   "exclude": [
     "../typings/jest.d.ts"
+  ],
+  "references": [
+    { "path": "../../src/core/tsconfig.json" },
+    { "path": "../../src/plugins/kibana_utils/tsconfig.json" },
+    { "path": "../../src/plugins/kibana_react/tsconfig.json" },
+    { "path": "../plugins/licensing/tsconfig.json" },
+    { "path": "../plugins/global_search/tsconfig.json" },
   ]
 }

@@ -1,3 +1,4 @@
+[role="xpack"]
 [[drilldowns]]
 == Use drilldowns for dashboard actions
 

@@ -22,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should return a 200 and the events for a given agent', async () => {
       const { body: apiResponse } = await supertest
-        .get(`/api/ingest_manager/fleet/agents/agent1/events`)
+        .get(`/api/fleet/agents/agent1/events`)
         .expect(200);
       expect(apiResponse).to.have.keys(['list', 'total', 'page']);
       expect(apiResponse.total).to.be(2);
@@ -31,6 +31,25 @@ export default function ({ getService }: FtrProviderContext) {
       const event = apiResponse.list[0];
       expect(event).to.have.keys('type', 'subtype', 'message', 'payload');
       expect(event.payload).to.have.keys('previous_state');
+    });
+
+    it('should return a 400 when given an invalid "kuery" value', async () => {
+      await supertest
+        .get(`/api/fleet/agents/agent1/events?kuery=m`) // missing saved object type
+        .expect(400);
+    });
+    it('should accept a valid "kuery" value', async () => {
+      const filter = encodeURIComponent('fleet-agent-events.subtype : "STOPPED"');
+      const { body: apiResponse } = await supertest
+        .get(`/api/fleet/agents/agent1/events?kuery=${filter}`)
+        .expect(200);
+
+      expect(apiResponse).to.have.keys(['list', 'total', 'page']);
+      expect(apiResponse.total).to.be(1);
+      expect(apiResponse.page).to.be(1);
+
+      const event = apiResponse.list[0];
+      expect(event.subtype).to.eql('STOPPED');
     });
   });
 }

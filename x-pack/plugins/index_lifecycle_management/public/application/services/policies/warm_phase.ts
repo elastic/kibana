@@ -16,6 +16,9 @@ import {
   positiveNumbersAboveZeroErrorMessage,
 } from './policy_validation';
 
+import { determineDataTierAllocationType } from '../../lib';
+import { serializePhaseWithAllocation } from './shared';
+
 const warmPhaseInitialization: WarmPhase = {
   phaseEnabled: false,
   warmPhaseOnRollover: false,
@@ -27,7 +30,9 @@ const warmPhaseInitialization: WarmPhase = {
   selectedPrimaryShardCount: '',
   forceMergeEnabled: false,
   selectedForceMergeSegments: '',
+  bestCompressionEnabled: false,
   phaseIndexPriority: '',
+  dataTierAllocationType: 'default',
 };
 
 export const warmPhaseFromES = (phaseSerialized?: SerializedWarmPhase): WarmPhase => {
@@ -38,6 +43,12 @@ export const warmPhaseFromES = (phaseSerialized?: SerializedWarmPhase): WarmPhas
   }
 
   phase.phaseEnabled = true;
+
+  if (phaseSerialized.actions.allocate) {
+    phase.dataTierAllocationType = determineDataTierAllocationType(
+      phaseSerialized.actions.allocate
+    );
+  }
 
   if (phaseSerialized.min_age) {
     if (phaseSerialized.min_age === '0ms') {
@@ -66,12 +77,20 @@ export const warmPhaseFromES = (phaseSerialized?: SerializedWarmPhase): WarmPhas
       const forcemerge = actions.forcemerge;
       phase.forceMergeEnabled = true;
       phase.selectedForceMergeSegments = forcemerge.max_num_segments.toString();
+      // only accepted value for index_codec
+      phase.bestCompressionEnabled = forcemerge.index_codec === 'best_compression';
     }
 
     if (actions.shrink) {
       phase.shrinkEnabled = true;
       phase.selectedPrimaryShardCount = actions.shrink.number_of_shards
         ? actions.shrink.number_of_shards.toString()
+        : '';
+    }
+
+    if (actions.set_priority) {
+      phase.phaseIndexPriority = actions.set_priority.priority
+        ? actions.set_priority.priority.toString()
         : '';
     }
   }
@@ -99,19 +118,7 @@ export const warmPhaseToES = (
     delete esPhase.min_age;
   }
 
-  esPhase.actions = esPhase.actions ? { ...esPhase.actions } : {};
-
-  if (phase.selectedNodeAttrs) {
-    const [name, value] = phase.selectedNodeAttrs.split(':');
-    esPhase.actions.allocate = esPhase.actions.allocate || ({} as AllocateAction);
-    esPhase.actions.allocate.require = {
-      [name]: value,
-    };
-  } else {
-    if (esPhase.actions.allocate) {
-      delete esPhase.actions.allocate.require;
-    }
-  }
+  esPhase.actions = serializePhaseWithAllocation(phase, esPhase.actions);
 
   if (isNumber(phase.selectedReplicaCount)) {
     esPhase.actions.allocate = esPhase.actions.allocate || ({} as AllocateAction);
@@ -138,6 +145,10 @@ export const warmPhaseToES = (
     esPhase.actions.forcemerge = {
       max_num_segments: parseInt(phase.selectedForceMergeSegments, 10),
     };
+    if (phase.bestCompressionEnabled) {
+      // only accepted value for index_codec
+      esPhase.actions.forcemerge.index_codec = 'best_compression';
+    }
   } else {
     delete esPhase.actions.forcemerge;
   }

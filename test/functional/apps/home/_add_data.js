@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.common.navigateToUrl('home', 'tutorial_directory', { useActualUrl: true });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.try(async () => {
-        const tutorialExists = await PageObjects.home.doesSynopsisExist('netflow');
+        const tutorialExists = await PageObjects.home.doesSynopsisExist('netflowlogs');
         expect(tutorialExists).to.be(true);
       });
     });

@@ -31,7 +31,7 @@ export let kbnUrlStateStorage: IKbnUrlStateStorage;
 
 export async function renderApp(
   context: AppMountContext,
-  { appBasePath, element, history, onAppLeave }: AppMountParameters
+  { appBasePath, element, history, onAppLeave, setHeaderActionMenu }: AppMountParameters
 ) {
   goToSpecifiedPath = (path) => history.push(path);
   kbnUrlStateStorage = createKbnUrlStateStorage({
@@ -40,7 +40,15 @@ export async function renderApp(
     ...withNotifyOnErrors(getToasts()),
   });
 
-  render(<App history={history} appBasePath={appBasePath} onAppLeave={onAppLeave} />, element);
+  render(
+    <App
+      history={history}
+      appBasePath={appBasePath}
+      onAppLeave={onAppLeave}
+      setHeaderActionMenu={setHeaderActionMenu}
+    />,
+    element
+  );
 
   return () => {
     unmountComponentAtNode(element);
@@ -51,9 +59,10 @@ interface Props {
   history: AppMountParameters['history'] | RouteComponentProps['history'];
   appBasePath: AppMountParameters['appBasePath'];
   onAppLeave: AppMountParameters['onAppLeave'];
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
 
-const App: React.FC<Props> = ({ history, appBasePath, onAppLeave }) => {
+const App: React.FC<Props> = ({ history, appBasePath, onAppLeave, setHeaderActionMenu }) => {
   const store = getStore();
   const I18nContext = getCoreI18n().Context;
 
@@ -87,6 +96,7 @@ const App: React.FC<Props> = ({ history, appBasePath, onAppLeave }) => {
                 <LoadMapAndRender
                   savedMapId={props.match.params.savedMapId}
                   onAppLeave={onAppLeave}
+                  setHeaderActionMenu={setHeaderActionMenu}
                   stateTransfer={stateTransfer}
                   originatingApp={originatingApp}
                 />
@@ -98,6 +108,7 @@ const App: React.FC<Props> = ({ history, appBasePath, onAppLeave }) => {
               render={() => (
                 <LoadMapAndRender
                   onAppLeave={onAppLeave}
+                  setHeaderActionMenu={setHeaderActionMenu}
                   stateTransfer={stateTransfer}
                   originatingApp={originatingApp}
                 />

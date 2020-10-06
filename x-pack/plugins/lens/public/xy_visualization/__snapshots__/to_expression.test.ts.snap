@@ -5,6 +5,31 @@ Object {
   "chain": Array [
     Object {
       "arguments": Object {
+        "axisTitlesVisibilitySettings": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "x": Array [
+                    true,
+                  ],
+                  "yLeft": Array [
+                    true,
+                  ],
+                  "yRight": Array [
+                    true,
+                  ],
+                },
+                "function": "lens_xy_axisTitlesVisibilityConfig",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+        "description": Array [
+          "",
+        ],
         "fittingFunction": Array [
           "Carry",
         ],
@@ -16,7 +41,10 @@ Object {
                   "x": Array [
                     false,
                   ],
-                  "y": Array [
+                  "yLeft": Array [
+                    true,
+                  ],
+                  "yRight": Array [
                     true,
                   ],
                 },
@@ -92,12 +120,6 @@ Object {
             "type": "expression",
           },
         ],
-        "showXAxisTitle": Array [
-          true,
-        ],
-        "showYAxisTitle": Array [
-          true,
-        ],
         "tickLabelsVisibilitySettings": Array [
           Object {
             "chain": Array [
@@ -106,7 +128,10 @@ Object {
                   "x": Array [
                     false,
                   ],
-                  "y": Array [
+                  "yLeft": Array [
+                    true,
+                  ],
+                  "yRight": Array [
                     true,
                   ],
                 },
@@ -117,7 +142,13 @@ Object {
             "type": "expression",
           },
         ],
+        "title": Array [
+          "",
+        ],
         "xTitle": Array [
+          "",
+        ],
+        "yRightTitle": Array [
           "",
         ],
         "yTitle": Array [

@@ -12,7 +12,7 @@ import { ConfigType } from '../';
 import { IAccess } from './check_access';
 
 import { IInitialAppData } from '../../common/types';
-import { stripTrailingSlash } from '../../common/strip_trailing_slash';
+import { stripTrailingSlash } from '../../common/strip_slashes';
 
 interface IParams {
   request: KibanaRequest;
@@ -89,13 +89,12 @@ export const callEnterpriseSearchConfigAPI = async ({
       },
       appSearch: {
         accountId: data?.current_user?.app_search?.account?.id,
-        onBoardingComplete: !!data?.current_user?.app_search?.account?.onboarding_complete,
+        onboardingComplete: !!data?.current_user?.app_search?.account?.onboarding_complete,
         role: {
           id: data?.current_user?.app_search?.role?.id,
           roleType: data?.current_user?.app_search?.role?.role_type,
           ability: {
             accessAllEngines: !!data?.current_user?.app_search?.role?.ability?.access_all_engines,
-            destroy: data?.current_user?.app_search?.role?.ability?.destroy || [],
             manage: data?.current_user?.app_search?.role?.ability?.manage || [],
             edit: data?.current_user?.app_search?.role?.ability?.edit || [],
             view: data?.current_user?.app_search?.role?.ability?.view || [],

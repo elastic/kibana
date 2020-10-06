@@ -19,13 +19,13 @@ describe('getServiceMapServiceNodeInfo', () => {
             }),
         },
         indices: {},
+        uiFilters: { environment: 'test environment' },
       } as unknown) as Setup & SetupTimeRange;
-      const environment = 'test environment';
       const serviceName = 'test service name';
       const result = await getServiceMapServiceNodeInfo({
-        uiFilters: { environment },
         setup,
         serviceName,
+        searchAggregatedTransactions: false,
       });
 
       expect(result).toEqual({
@@ -52,19 +52,27 @@ describe('getServiceMapServiceNodeInfo', () => {
         apmEventClient: {
           search: () =>
             Promise.resolve({
-              hits: { total: { value: 1 } },
+              aggregations: {
+                count: { value: 1 },
+                duration: { value: null },
+                avgCpuUsage: { value: null },
+                avgMemoryUsage: { value: null },
+              },
             }),
         },
         indices: {},
         start: 1593460053026000,
         end: 1593497863217000,
+        config: {
+          'xpack.apm.metricsInterval': 30,
+        },
+        uiFilters: { environment: 'test environment' },
       } as unknown) as Setup & SetupTimeRange;
-      const environment = 'test environment';
       const serviceName = 'test service name';
       const result = await getServiceMapServiceNodeInfo({
-        uiFilters: { environment },
         setup,
         serviceName,
+        searchAggregatedTransactions: false,
       });
 
       expect(result).toEqual({

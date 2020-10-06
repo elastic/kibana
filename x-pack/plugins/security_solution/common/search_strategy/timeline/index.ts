@@ -3,45 +3,22 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { IEsSearchRequest } from '../../../../../../src/plugins/data/common';
 import { ESQuery } from '../../typed_json';
-import { Ecs } from '../../ecs';
 import {
-  CursorType,
-  Maybe,
-  TimerangeInput,
-  DocValueFields,
-  PaginationInput,
-  PaginationInputPaginated,
-  SortField,
-} from '../common';
-import { TimelineDetailsRequestOptions, TimelineDetailsStrategyResponse } from './details';
+  TimelineEventsQueries,
+  TimelineEventsAllRequestOptions,
+  TimelineEventsAllStrategyResponse,
+  TimelineEventsDetailsRequestOptions,
+  TimelineEventsDetailsStrategyResponse,
+  TimelineEventsLastEventTimeRequestOptions,
+  TimelineEventsLastEventTimeStrategyResponse,
+} from './events';
+import { DocValueFields, PaginationInputPaginated, TimerangeInput, SortField } from '../common';
 
-export * from './details';
+export * from './events';
 
-export enum TimelineQueries {
-  details = 'details',
-}
-
-export type TimelineFactoryQueryTypes = TimelineQueries;
-
-export interface TimelineEdges {
-  node: TimelineItem;
-  cursor: CursorType;
-}
-
-export interface TimelineItem {
-  _id: string;
-  _index?: Maybe<string>;
-  data: TimelineNonEcsData[];
-  ecs: Ecs;
-}
-
-export interface TimelineNonEcsData {
-  field: string;
-  value?: Maybe<string[] | string>;
-}
+export type TimelineFactoryQueryTypes = TimelineEventsQueries;
 
 export interface TimelineRequestBasicOptions extends IEsSearchRequest {
   timerange: TimerangeInput;
@@ -51,20 +28,28 @@ export interface TimelineRequestBasicOptions extends IEsSearchRequest {
   factoryQueryType?: TimelineFactoryQueryTypes;
 }
 
-export interface TimelineRequestOptions extends TimelineRequestBasicOptions {
-  pagination: PaginationInput;
-  sortField?: SortField;
-}
-
-export interface TimelineRequestOptionsPaginated extends TimelineRequestBasicOptions {
-  pagination: PaginationInputPaginated;
-  sortField?: SortField;
+export interface TimelineRequestOptionsPaginated<Field = string>
+  extends TimelineRequestBasicOptions {
+  pagination: Pick<PaginationInputPaginated, 'activePage' | 'querySize'>;
+  sort: SortField<Field>;
 }
 
 export type TimelineStrategyResponseType<
   T extends TimelineFactoryQueryTypes
-> = T extends TimelineQueries.details ? TimelineDetailsStrategyResponse : never;
+> = T extends TimelineEventsQueries.all
+  ? TimelineEventsAllStrategyResponse
+  : T extends TimelineEventsQueries.details
+  ? TimelineEventsDetailsStrategyResponse
+  : T extends TimelineEventsQueries.lastEventTime
+  ? TimelineEventsLastEventTimeStrategyResponse
+  : never;
 
 export type TimelineStrategyRequestType<
   T extends TimelineFactoryQueryTypes
-> = T extends TimelineQueries.details ? TimelineDetailsRequestOptions : never;
+> = T extends TimelineEventsQueries.all
+  ? TimelineEventsAllRequestOptions
+  : T extends TimelineEventsQueries.details
+  ? TimelineEventsDetailsRequestOptions
+  : T extends TimelineEventsQueries.lastEventTime
+  ? TimelineEventsLastEventTimeRequestOptions
+  : never;

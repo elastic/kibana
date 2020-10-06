@@ -178,6 +178,7 @@ export const TimeSeries = ({
             useDefaultGroupDomain,
             y1AccessorFormat,
             y0AccessorFormat,
+            tickFormat,
           },
           sortIndex
         ) => {
@@ -209,6 +210,7 @@ export const TimeSeries = ({
                 sortIndex={sortIndex}
                 y1AccessorFormat={y1AccessorFormat}
                 y0AccessorFormat={y0AccessorFormat}
+                tickFormat={tickFormat}
               />
             );
           }
@@ -235,6 +237,7 @@ export const TimeSeries = ({
                 sortIndex={sortIndex}
                 y1AccessorFormat={y1AccessorFormat}
                 y0AccessorFormat={y0AccessorFormat}
+                tickFormat={tickFormat}
               />
             );
           }
