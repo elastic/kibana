@@ -282,6 +282,14 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
+    async findIndexPattern(name: string) {
+      await retry.try(async () => {
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await this.clickKibanaIndexPatterns();
+      });
+      return await find.byXPath(`//a[descendant::*[text()='${name}']]`);
+    }
+
     async clickIndexPatternByName(name: string) {
       const indexLink = await find.byXPath(`//a[descendant::*[text()='${name}']]`);
       await indexLink.click();

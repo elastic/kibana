@@ -17,30 +17,17 @@
  * under the License.
  */
 
-import uuid from 'uuid';
-import { Subject } from 'rxjs';
-import { ISessionService } from '../../common/search';
+import { CoreStart, Plugin } from 'kibana/public';
+import { AppPluginDependencies } from './types';
 
-export class SessionService implements ISessionService {
-  private sessionId?: string;
-  private session$: Subject<string | undefined> = new Subject();
-
-  public getSessionId() {
-    return this.sessionId;
+export class SessionNotificationsPlugin implements Plugin {
+  public setup() {}
+  public start(core: CoreStart, { data }: AppPluginDependencies) {
+    data.search.session.getSession$().subscribe((sessionId?: string) => {
+      core.notifications.toasts.addInfo(`sessionId: ${sessionId}`, {
+        toastLifeTimeMs: 60000,
+      });
+    });
   }
-
-  public getSession$() {
-    return this.session$.asObservable();
-  }
-
-  public start() {
-    this.sessionId = uuid.v4();
-    this.session$.next(this.sessionId);
-    return this.sessionId;
-  }
-
-  public clear() {
-    this.sessionId = undefined;
-    this.session$.next(this.sessionId);
-  }
+  public stop() {}
 }

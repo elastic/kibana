@@ -17,12 +17,19 @@
  * under the License.
  */
 
+import { Observable } from 'rxjs';
+
 export interface ISessionService {
   /**
    * Returns the active session ID
    * @returns The active session ID
    */
   getSessionId: () => string | undefined;
+  /**
+   * Returns the observable that emits an update every time the session ID changes
+   * @returns `Observable`
+   */
+  getSession$: () => Observable<string | undefined>;
   /**
    * Starts a new session
    */

@@ -33,9 +33,13 @@ export default function ({
         '../functional/fixtures/es_archiver/getting_started/shakespeare'
       );
       await PageObjects.common.navigateToApp('settings');
-      await PageObjects.settings.createIndexPattern('shakespeare', '');
+      if (!(await PageObjects.settings.findIndexPattern('shakespeare'))) {
+        await PageObjects.settings.createIndexPattern('shakespeare', '');
+      }
     });
+
     loadTestFile(require.resolve('./index_patterns'));
     loadTestFile(require.resolve('./search'));
+    loadTestFile(require.resolve('./session'));
   });
 }

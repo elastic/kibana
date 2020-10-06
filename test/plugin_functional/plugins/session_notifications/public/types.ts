@@ -17,30 +17,8 @@
  * under the License.
  */
 
-import uuid from 'uuid';
-import { Subject } from 'rxjs';
-import { ISessionService } from '../../common/search';
+import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 
-export class SessionService implements ISessionService {
-  private sessionId?: string;
-  private session$: Subject<string | undefined> = new Subject();
-
-  public getSessionId() {
-    return this.sessionId;
-  }
-
-  public getSession$() {
-    return this.session$.asObservable();
-  }
-
-  public start() {
-    this.sessionId = uuid.v4();
-    this.session$.next(this.sessionId);
-    return this.sessionId;
-  }
-
-  public clear() {
-    this.sessionId = undefined;
-    this.session$.next(this.sessionId);
-  }
+export interface AppPluginDependencies {
+  data: DataPublicPluginStart;
 }

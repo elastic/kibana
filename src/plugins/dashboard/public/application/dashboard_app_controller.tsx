@@ -396,8 +396,6 @@ export class DashboardAppController {
         refreshInterval: timefilter.getRefreshInterval(),
       };
       $scope.panels = dashboardStateManager.getPanels();
-
-      searchService.session.start();
     };
 
     updateState();
