@@ -26,10 +26,26 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
   const { issueType = null, priority = null, parent = null } = fields ?? {};
   const { http, notifications } = useKibana().services;
 
+  const handleIssueType = useCallback(
+    (issueTypeSelectOptions: Array<{ value: string; text: string }>) => {
+      if (issueType == null && issueTypeSelectOptions.length > 0) {
+        // if there is no issue type set in the edit view, set it to default
+        if (isEdit) {
+          onChange({
+            issueType: issueTypeSelectOptions[0].value,
+            parent,
+            priority,
+          });
+        }
+      }
+    },
+    [isEdit, issueType, onChange, parent, priority]
+  );
   const { isLoading: isLoadingIssueTypes, issueTypes } = useGetIssueTypes({
     connector,
     http,
     toastNotifications: notifications.toasts,
+    handleIssueType,
   });
 
   const issueTypesSelectOptions = useMemo(
@@ -43,28 +59,15 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
 
   const currentIssueType = useMemo(() => {
     if (!issueType && issueTypesSelectOptions.length > 0) {
-      // if there is no issue type set in the edit view, set it to default
-      if (isEdit) {
-        onChange({
-          issueType: issueTypesSelectOptions[0].value,
-          parent,
-          priority,
-        });
-      }
       return issueTypesSelectOptions[0].value;
     } else if (
       issueTypesSelectOptions.length > 0 &&
       !issueTypesSelectOptions.some(({ value }) => value === issueType)
     ) {
-      onChange({
-        issueType: issueTypesSelectOptions[0].value,
-        parent,
-        priority,
-      });
       return issueTypesSelectOptions[0].value;
     }
     return issueType;
-  }, [isEdit, issueType, issueTypesSelectOptions, onChange, parent, priority]);
+  }, [issueType, issueTypesSelectOptions]);
 
   const { isLoading: isLoadingFields, fields: fieldsByIssueType } = useGetFieldsByIssueType({
     connector,

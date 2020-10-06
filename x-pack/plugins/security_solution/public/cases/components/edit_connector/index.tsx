@@ -129,16 +129,14 @@ export const EditConnector = React.memo(
             type: 'SET_CURRENT_CONNECTOR',
             payload: getConnectorById(newConnectorId, connectors),
           });
-          if (userActions.length > 0) {
-            dispatch({
-              type: 'SET_FIELDS',
-              payload: getConnectorFieldsFromUserActions(newConnectorId, userActions),
-            });
-          }
-        } else if (fields === null && userActions.length > 0) {
           dispatch({
             type: 'SET_FIELDS',
-            payload: getConnectorFieldsFromUserActions(newConnectorId, userActions),
+            payload: getConnectorFieldsFromUserActions(newConnectorId, userActions ?? []),
+          });
+        } else if (fields === null) {
+          dispatch({
+            type: 'SET_FIELDS',
+            payload: getConnectorFieldsFromUserActions(newConnectorId, userActions ?? []),
           });
         }
       },

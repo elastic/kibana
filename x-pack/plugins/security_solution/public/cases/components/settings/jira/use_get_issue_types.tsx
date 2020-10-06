@@ -18,6 +18,7 @@ interface Props {
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
   >;
   connector?: ActionConnector;
+  handleIssueType: (options: Array<{ value: string; text: string }>) => void;
 }
 
 export interface UseGetIssueTypes {
@@ -29,6 +30,7 @@ export const useGetIssueTypes = ({
   http,
   connector,
   toastNotifications,
+  handleIssueType,
 }: Props): UseGetIssueTypes => {
   const [isLoading, setIsLoading] = useState(true);
   const [issueTypes, setIssueTypes] = useState<IssueTypes>([]);
@@ -54,7 +56,12 @@ export const useGetIssueTypes = ({
 
         if (!didCancel) {
           setIsLoading(false);
+          const asOptions = (res.data ?? []).map((type) => ({
+            text: type.name ?? '',
+            value: type.id ?? '',
+          }));
           setIssueTypes(res.data ?? []);
+          handleIssueType(asOptions);
           if (res.status && res.status === 'error') {
             toastNotifications.addDanger({
               title: i18n.ISSUE_TYPES_API_ERROR,
@@ -81,7 +88,7 @@ export const useGetIssueTypes = ({
       setIsLoading(false);
       abortCtrl.current.abort();
     };
-  }, [http, connector, toastNotifications]);
+  }, [http, connector, toastNotifications, handleIssueType]);
 
   return {
     issueTypes,
