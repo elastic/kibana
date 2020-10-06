@@ -36,7 +36,6 @@ import {
   HEADER_ITEMS_LOADING,
 } from '../expandable_section';
 import { IndexPatternPrompt } from '../index_pattern_prompt';
-import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
 
 const showingDocs = i18n.translate(
   'xpack.ml.dataframe.analytics.explorationResults.documentsShownHelpText',
@@ -120,9 +119,7 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
     colorRange
   );
   const analysisType =
-    jobConfig && jobConfig.analysis
-      ? (getAnalysisType(jobConfig.analysis) as DataFrameAnalysisConfigType)
-      : undefined;
+    jobConfig && jobConfig.analysis ? getAnalysisType(jobConfig.analysis) : undefined;
   const resultsSectionContent = (
     <>
       {jobConfig !== undefined && needsDestIndexPattern && (
