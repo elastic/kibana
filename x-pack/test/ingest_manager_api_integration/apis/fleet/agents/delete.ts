@@ -60,12 +60,12 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.unload('fleet/agents');
     });
 
-    it('should return a 404 if user lacks fleet-write permissions', async () => {
+    it('should return a 403 if user lacks fleet-write permissions', async () => {
       const { body: apiResponse } = await supertest
         .delete(`/api/fleet/agents/agent1`)
         .auth(users.fleet_user.username, users.fleet_user.password)
         .set('kbn-xsrf', 'xx')
-        .expect(404);
+        .expect(403);
 
       expect(apiResponse).not.to.eql({
         action: 'deleted',
