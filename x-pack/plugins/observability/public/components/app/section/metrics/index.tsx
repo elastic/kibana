@@ -9,15 +9,16 @@ import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import styled, { ThemeContext } from 'styled-components';
-import { calculateBucketSize } from '../../../../utils/calculate_bucket_size';
 import { SectionContainer } from '../';
 import { getDataHandler } from '../../../../data_handler';
 import { useChartTheme } from '../../../../hooks/use_chart_theme';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { useRouteParams } from '../../../../hooks/use_route_params';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import { Series } from '../../../../typings';
+import { calculateBucketSize } from '../../../../utils/calculate_bucket_size';
 import { ChartContainer } from '../../chart_container';
 import { StyledStat } from '../../styled_stat';
-import { useQueryParams } from '../../../../hooks/use_query_params';
 
 /**
  * EuiProgress doesn't support custom color, when it does this component can be removed.
@@ -45,7 +46,8 @@ const StyledProgress = styled.div<{ color?: string }>`
 export function MetricsSection() {
   const theme = useContext(ThemeContext);
 
-  const { absStart, absEnd, start, end } = useQueryParams();
+  const { rangeFrom, rangeTo } = useRouteParams('/overview').query;
+  const { absStart, absEnd } = useTimeRange({ rangeFrom, rangeTo });
 
   const bucketSize = calculateBucketSize({
     start: absStart,
@@ -53,15 +55,15 @@ export function MetricsSection() {
   });
 
   const { data, status } = useFetcher(() => {
-    if (start && end && bucketSize) {
+    if (rangeFrom && rangeTo && bucketSize) {
       return getDataHandler('infra_metrics')?.fetchData({
         absoluteTime: { start: absStart, end: absEnd },
-        relativeTime: { start, end },
+        relativeTime: { start: rangeFrom, end: rangeTo },
         bucketSize: bucketSize.intervalString,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [start, end]);
+  }, [rangeFrom, rangeTo]);
 
   const isLoading = status === FETCH_STATUS.LOADING;
 

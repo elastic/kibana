@@ -4,23 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import { isEmpty } from 'lodash';
 import React, { useContext, useState } from 'react';
 import { ThemeContext } from 'styled-components';
-import { isEmpty } from 'lodash';
+import { useTrackPageview } from '../..';
 import { EmptySection } from '../../components/app/empty_section';
 import { WithHeaderLayout } from '../../components/app/layout/with_header';
+import { NewsFeed } from '../../components/app/news_feed';
 import { Resources } from '../../components/app/resources';
 import { AlertsSection } from '../../components/app/section/alerts';
-import { DatePicker, TimePickerTime } from '../../components/shared/data_picker';
-import { NewsFeed } from '../../components/app/news_feed';
-import { UI_SETTINGS, useKibanaUISettings } from '../../hooks/use_kibana_ui_settings';
+import { DatePicker } from '../../components/shared/data_picker';
+import { useHasDataContext } from '../../hooks/use_has_data_context';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { RouteParams } from '../../routes';
+import { DataSections } from './data_sections';
 import { getEmptySections } from './empty_section';
 import { LoadingObservability } from './loading_observability';
-import { DataSections } from './data_sections';
-import { useTrackPageview } from '../..';
-import { useHasDataContext } from '../../hooks/use_has_data_context';
 
 interface Props {
   routeParams: RouteParams<'/overview'>;
@@ -29,14 +28,11 @@ interface Props {
 export function OverviewPage({ routeParams }: Props) {
   useTrackPageview({ app: 'observability', path: 'overview' });
   useTrackPageview({ app: 'observability', path: 'overview', delay: 15000 });
-  const { core, plugins } = usePluginContext();
+  const { core } = usePluginContext();
   const theme = useContext(ThemeContext);
   const [alertEmptySection, setAlertEmptySection] = useState(false);
 
-  const timePickerDefaults = useKibanaUISettings<TimePickerTime>(
-    UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
-  );
-  const timePickerSharedState = plugins.data.query.timefilter.timefilter.getTime();
+  const { rangeFrom, rangeTo, refreshInterval = 10000, refreshPaused = true } = routeParams.query;
 
   const { hasData } = useHasDataContext();
 
@@ -44,19 +40,12 @@ export function OverviewPage({ routeParams }: Props) {
     return <LoadingObservability />;
   }
 
-  const { refreshInterval = 10000, refreshPaused = true } = routeParams.query;
-
   const appEmptySections = getEmptySections({ core }).filter(({ id }) => {
     if (id === 'alert') {
       return alertEmptySection;
     }
     return hasData?.[id] === false;
   });
-
-  const relativeTime = {
-    start: routeParams.query.rangeFrom || timePickerSharedState.from || timePickerDefaults.from,
-    end: routeParams.query.rangeTo || timePickerSharedState.to || timePickerDefaults.to,
-  };
 
   return (
     <WithHeaderLayout
@@ -68,8 +57,8 @@ export function OverviewPage({ routeParams }: Props) {
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <DatePicker
-            rangeFrom={relativeTime.start}
-            rangeTo={relativeTime.end}
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
             refreshInterval={refreshInterval}
             refreshPaused={refreshPaused}
           />

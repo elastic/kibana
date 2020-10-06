@@ -45,7 +45,7 @@ function App() {
             core.chrome.docTitle.change(getTitleFromBreadCrumbs(breadcrumb));
           }, [core, breadcrumb]);
 
-          const { query, path: pathParams } = useRouteParams(route.params);
+          const { query, path: pathParams } = useRouteParams(path);
           return route.handler({ query, path: pathParams });
         };
         return <Route key={path} path={path} exact={true} component={Wrapper} />;

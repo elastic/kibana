@@ -4,20 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import moment from 'moment';
 import * as fetcherHook from '../../../../hooks/use_fetcher';
 import { render } from '../../../../utils/test_helper';
 import { APMSection } from './';
 import { response } from './mock_data/apm.mock';
-import * as queryParamsHook from '../../../../hooks/use_query_params';
+import * as routeParamsHook from '../../../../hooks/use_route_params';
 
 describe('APMSection', () => {
   beforeEach(() => {
-    jest.spyOn(queryParamsHook, 'useQueryParams').mockReturnValue({
-      start: 'now-15m',
-      end: 'now',
-      absStart: moment('2020-06-29T11:38:23.747Z').valueOf(),
-      absEnd: moment('2020-06-29T12:08:23.748Z').valueOf(),
+    jest.spyOn(routeParamsHook, 'useRouteParams').mockReturnValue({
+      query: { rangeFrom: 'now-15m', rangeTo: 'now' },
+      path: {},
     });
   });
 

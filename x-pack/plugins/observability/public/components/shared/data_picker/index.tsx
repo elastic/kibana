@@ -9,6 +9,7 @@ import React, { useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { UI_SETTINGS, useKibanaUISettings } from '../../../hooks/use_kibana_ui_settings';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
+import { useTimeRange } from '../../../hooks/use_time_range';
 import { fromQuery, toQuery } from '../../../utils/url';
 
 export interface TimePickerTime {
@@ -26,8 +27,8 @@ export interface TimePickerRefreshInterval {
 }
 
 interface Props {
-  rangeFrom: string;
-  rangeTo: string;
+  rangeFrom?: string;
+  rangeTo?: string;
   refreshPaused: boolean;
   refreshInterval: number;
 }
@@ -37,16 +38,30 @@ export function DatePicker({ rangeFrom, rangeTo, refreshPaused, refreshInterval 
   const history = useHistory();
   const { plugins } = usePluginContext();
 
-  useEffect(() => {
-    plugins.data.query.timefilter.timefilter.setTime({
-      from: rangeFrom,
-      to: rangeTo,
-    });
-  }, [plugins, rangeFrom, rangeTo]);
-
   const timePickerQuickRanges = useKibanaUISettings<TimePickerQuickRange[]>(
     UI_SETTINGS.TIMEPICKER_QUICK_RANGES
   );
+
+  const timeRange = useTimeRange({ rangeFrom, rangeTo });
+
+  useEffect(() => {
+    if (rangeFrom && rangeTo) {
+      plugins.data.query.timefilter.timefilter.setTime({
+        from: rangeFrom,
+        to: rangeTo,
+      });
+      return;
+    }
+
+    history.replace({
+      ...location,
+      search: fromQuery({
+        ...toQuery(location.search),
+        rangeFrom: timeRange.rangeFrom,
+        rangeTo: timeRange.rangeTo,
+      }),
+    });
+  }, [plugins, location, history, timeRange, rangeFrom, rangeTo]);
 
   const commonlyUsedRanges = timePickerQuickRanges.map(({ from, to, display }) => ({
     start: from,

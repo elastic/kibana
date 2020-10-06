@@ -6,19 +6,21 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { calculateBucketSize } from '../../../../utils/calculate_bucket_size';
 import { SectionContainer } from '../';
 import { getDataHandler } from '../../../../data_handler';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { useRouteParams } from '../../../../hooks/use_route_params';
+import { useTimeRange } from '../../../../hooks/use_time_range';
+import { calculateBucketSize } from '../../../../utils/calculate_bucket_size';
 import { CoreVitals } from '../../../shared/core_web_vitals';
-import { useQueryParams } from '../../../../hooks/use_query_params';
 
 interface Props {
   serviceName: string;
 }
 
 export function UXSection({ serviceName }: Props) {
-  const { absStart, absEnd, start, end } = useQueryParams();
+  const { rangeFrom, rangeTo } = useRouteParams('/overview').query;
+  const { absStart, absEnd } = useTimeRange({ rangeFrom, rangeTo });
 
   const bucketSize = calculateBucketSize({
     start: absStart,
@@ -26,16 +28,16 @@ export function UXSection({ serviceName }: Props) {
   });
 
   const { data, status } = useFetcher(() => {
-    if (start && end) {
+    if (rangeFrom && rangeTo) {
       return getDataHandler('ux')?.fetchData({
         serviceName,
         absoluteTime: { start: absStart, end: absEnd },
-        relativeTime: { start, end },
+        relativeTime: { start: rangeFrom, end: rangeTo },
         bucketSize: bucketSize?.intervalString!,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [start, end, serviceName]);
+  }, [rangeFrom, rangeTo, serviceName]);
 
   const isLoading = status === FETCH_STATUS.LOADING;
 

@@ -12,15 +12,16 @@ import moment from 'moment';
 import React, { useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ThemeContext } from 'styled-components';
-import { calculateBucketSize } from '../../../../utils/calculate_bucket_size';
 import { SectionContainer } from '../';
 import { getDataHandler } from '../../../../data_handler';
 import { useChartTheme } from '../../../../hooks/use_chart_theme';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { useRouteParams } from '../../../../hooks/use_route_params';
+import { useTimeRange } from '../../../../hooks/use_time_range';
+import { calculateBucketSize } from '../../../../utils/calculate_bucket_size';
 import { ChartContainer } from '../../chart_container';
 import { StyledStat } from '../../styled_stat';
 import { onBrushEnd } from '../helper';
-import { useQueryParams } from '../../../../hooks/use_query_params';
 
 function formatTpm(value?: number) {
   return numeral(value).format('0.00a');
@@ -30,7 +31,8 @@ export function APMSection() {
   const theme = useContext(ThemeContext);
   const history = useHistory();
 
-  const { absStart, absEnd, start, end } = useQueryParams();
+  const { rangeFrom, rangeTo } = useRouteParams('/overview').query;
+  const { absStart, absEnd } = useTimeRange({ rangeFrom, rangeTo });
 
   const bucketSize = calculateBucketSize({
     start: absStart,
@@ -38,15 +40,15 @@ export function APMSection() {
   });
 
   const { data, status } = useFetcher(() => {
-    if (start && end && bucketSize) {
+    if (rangeFrom && rangeTo && bucketSize) {
       return getDataHandler('apm')?.fetchData({
         absoluteTime: { start: absStart, end: absEnd },
-        relativeTime: { start, end },
+        relativeTime: { start: rangeFrom, end: rangeTo },
         bucketSize: bucketSize.intervalString,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [start, end]);
+  }, [rangeFrom, rangeTo]);
 
   const { appLink, stats, series } = data || {};
 

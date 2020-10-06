@@ -6,7 +6,9 @@
 
 import React, { createContext, useEffect, useState } from 'react';
 import { getDataHandler } from '../data_handler';
-import { useQueryParams } from '../hooks/use_query_params';
+import { useFetcher } from '../hooks/use_fetcher';
+import { useRouteParams } from '../hooks/use_route_params';
+import { useTimeRange } from '../hooks/use_time_range';
 import {
   ObservabilityFetchDataPlugins,
   ObservabilityHasDataResponse,
@@ -20,47 +22,77 @@ export interface HasDataContextValue {
 export const HasDataContext = createContext({} as HasDataContextValue);
 
 export function HasDataContextProvider({ children }: { children: React.ReactNode }) {
-  const { absStart, absEnd } = useQueryParams();
+  const { rangeFrom, rangeTo } = useRouteParams('/overview').query;
+  const { absStart, absEnd } = useTimeRange({ rangeFrom, rangeTo });
+
   const [hasData, setHasData] = useState<HasDataContextValue['hasData']>();
 
-  useEffect(
-    () => {
-      getDataHandler('apm')
-        ?.hasData()
-        .then((hasApmData) => {
-          setHasData((currState) => ({ ...currState, apm: hasApmData }));
-        });
-      getDataHandler('infra_logs')
-        ?.hasData()
-        .then((hasInfraData) => {
-          setHasData((currState) => ({ ...currState, infra_logs: hasInfraData }));
-        });
-      getDataHandler('infra_metrics')
-        ?.hasData()
-        .then((hasMetricsData) => {
-          setHasData((currState) => ({ ...currState, infra_metrics: hasMetricsData }));
-        });
-      getDataHandler('uptime')
-        ?.hasData()
-        .then((hasUptimeData) => {
-          setHasData((currState) => ({ ...currState, uptime: hasUptimeData }));
-        });
-      getDataHandler('ux')
-        ?.hasData({ absoluteTime: { start: absStart, end: absEnd } })
-        .then((hasUxData) => {
-          setHasData((currState) => ({ ...currState, ux: hasUxData }));
-        });
-    },
+  const { data: hasApmData, status: apmStatus } = useFetcher(
+    () => getDataHandler('apm')?.hasData(),
+    []
+  );
+  useEffect(() => {
+    setHasData((currState) => ({ ...currState, apm: hasApmData }));
+  }, [hasApmData]);
+
+  const { data: hasLogsData, status: logsStatus } = useFetcher(
+    () => getDataHandler('infra_logs')?.hasData(),
+    []
+  );
+  useEffect(() => {
+    setHasData((currState) => ({ ...currState, infra_logs: hasLogsData }));
+  }, [hasLogsData]);
+
+  const { data: hasMetricsData, status: metricsStatus } = useFetcher(
+    () => getDataHandler('infra_metrics')?.hasData(),
+    []
+  );
+  useEffect(() => {
+    setHasData((currState) => ({ ...currState, infra_metrics: hasMetricsData }));
+  }, [hasMetricsData]);
+
+  const { data: hasUptimeData, status: uptimeStatus } = useFetcher(
+    () => getDataHandler('uptime')?.hasData(),
+    []
+  );
+  useEffect(() => {
+    setHasData((currState) => ({ ...currState, uptime: hasUptimeData }));
+  }, [hasUptimeData]);
+
+  const { data: hasUxData, status: uxStatus } = useFetcher(
+    () => getDataHandler('ux')?.hasData({ absoluteTime: { start: absStart, end: absEnd } }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
+  useEffect(() => {
+    setHasData((currState) => ({ ...currState, ux: hasUxData }));
+  }, [hasUxData]);
 
-  const hasAnyData =
+  const allRequestCompleted =
+    apmStatus !== 'loading' &&
+    logsStatus !== 'loading' &&
+    metricsStatus !== 'loading' &&
+    uptimeStatus !== 'loading' &&
+    uxStatus !== 'loading';
+
+  const hasSomeData =
     hasData &&
     (Object.keys(hasData) as ObservabilityFetchDataPlugins[]).some((app) => {
       const _hasData = app === 'ux' ? hasData[app]?.hasData : hasData[app];
       return _hasData === true;
     });
+
+  // When hasSomeData is false, checks if all request have complete, if they do, hasAnyData is set to false;
+  let hasAnyData;
+  if (hasSomeData !== undefined) {
+    if (hasSomeData === false) {
+      if (allRequestCompleted === true) {
+        hasAnyData = false;
+      }
+    } else {
+      hasAnyData = true;
+    }
+  }
 
   return <HasDataContext.Provider value={{ hasData, hasAnyData }} children={children} />;
 }

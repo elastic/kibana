@@ -5,26 +5,25 @@
  */
 
 import { Axis, BarSeries, niceTimeFormatter, Position, ScaleType, Settings } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, euiPaletteColorBlind } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, euiPaletteColorBlind, EuiSpacer, EuiTitle } from '@elastic/eui';
 import numeral from '@elastic/numeral';
+import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import moment from 'moment';
 import React, { Fragment } from 'react';
 import { useHistory } from 'react-router-dom';
-import { EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { EuiSpacer } from '@elastic/eui';
-import { calculateBucketSize } from '../../../../utils/calculate_bucket_size';
 import { SectionContainer } from '../';
 import { getDataHandler } from '../../../../data_handler';
 import { useChartTheme } from '../../../../hooks/use_chart_theme';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { useRouteParams } from '../../../../hooks/use_route_params';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import { LogsFetchDataResponse } from '../../../../typings';
+import { calculateBucketSize } from '../../../../utils/calculate_bucket_size';
 import { formatStatValue } from '../../../../utils/format_stat_value';
 import { ChartContainer } from '../../chart_container';
 import { StyledStat } from '../../styled_stat';
 import { onBrushEnd } from '../helper';
-import { useQueryParams } from '../../../../hooks/use_query_params';
 
 function getColorPerItem(series?: LogsFetchDataResponse['series']) {
   if (!series) {
@@ -44,7 +43,8 @@ function getColorPerItem(series?: LogsFetchDataResponse['series']) {
 export function LogsSection() {
   const history = useHistory();
 
-  const { absStart, absEnd, start, end } = useQueryParams();
+  const { rangeFrom, rangeTo } = useRouteParams('/overview').query;
+  const { absStart, absEnd } = useTimeRange({ rangeFrom, rangeTo });
 
   const bucketSize = calculateBucketSize({
     start: absStart,
@@ -52,16 +52,16 @@ export function LogsSection() {
   });
 
   const { data, status } = useFetcher(() => {
-    if (start && end && bucketSize) {
+    if (rangeFrom && rangeTo && bucketSize) {
       return getDataHandler('infra_logs')?.fetchData({
         absoluteTime: { start: absStart, end: absEnd },
-        relativeTime: { start, end },
+        relativeTime: { start: rangeFrom, end: rangeTo },
         bucketSize: bucketSize.intervalString,
       });
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [start, end]);
+  }, [rangeFrom, rangeTo]);
 
   const min = moment.utc(absStart).valueOf();
   const max = moment.utc(absEnd).valueOf();
