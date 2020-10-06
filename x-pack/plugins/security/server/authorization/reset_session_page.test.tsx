@@ -18,7 +18,7 @@ describe('ResetSessionPage', () => {
       <ResetSessionPage
         logoutUrl="/path/to/logout"
         styleSheetPaths={['/some-css-file.css', '/some-other-css-file.css']}
-        uiPublicUrl="/path/to/ui"
+        basePath="/path/to/base"
       />
     );
 
