@@ -18,8 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
-import { BaseVisTypeOptions, VisGroups } from 'src/plugins/visualizations/public';
+import { VisGroups, BaseVisTypeOptions } from '../../visualizations/public';
 import { createInputControlVisController } from './vis_controller';
 import { getControlsTab } from './components/editor/controls_tab';
 import { OptionsTab } from './components/editor/options_tab';
