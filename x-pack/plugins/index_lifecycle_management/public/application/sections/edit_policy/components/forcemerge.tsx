@@ -27,7 +27,7 @@ const forcemergeLabel = i18n.translate('xpack.indexLifecycleMgmt.forcemerge.enab
 const bestCompressionLabel = i18n.translate(
   'xpack.indexLifecycleMgmt.forcemerge.bestCompressionLabel',
   {
-    defaultMessage: 'Enable higher compression ratio codec',
+    defaultMessage: 'Compress stored fields',
   }
 );
 
@@ -105,8 +105,7 @@ export const Forcemerge: React.FunctionComponent<Props> = ({
               helpText={
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.editPolicy.forceMerge.bestCompressionText"
-                  defaultMessage="Uses DEFLATE for a higher compression ratio but slower stored fields performance
-                  than the default LZ4 codec."
+                  defaultMessage="Use higher compression for stored fields at the cost of slower performance."
                 />
               }
             >
