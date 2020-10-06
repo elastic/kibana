@@ -6,9 +6,6 @@ exports[`TrustedAppsGrid renders correctly initially 1`] = `
     class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
-    />
-    <div
       class="euiFlexItem"
     >
       <div
@@ -21,9 +18,6 @@ exports[`TrustedAppsGrid renders correctly initially 1`] = `
         </div>
       </div>
     </div>
-    <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
-    />
   </div>
 </div>
 `;
@@ -34,9 +28,6 @@ exports[`TrustedAppsGrid renders correctly when failed loading data for the firs
     class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
-    />
-    <div
       class="euiFlexItem"
     >
       <div
@@ -50,9 +41,6 @@ exports[`TrustedAppsGrid renders correctly when failed loading data for the firs
         Intenal Server Error
       </div>
     </div>
-    <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
-    />
   </div>
 </div>
 `;
@@ -63,9 +51,6 @@ exports[`TrustedAppsGrid renders correctly when failed loading data for the seco
     class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
-    />
-    <div
       class="euiFlexItem"
     >
       <div
@@ -79,9 +64,6 @@ exports[`TrustedAppsGrid renders correctly when failed loading data for the seco
         Intenal Server Error
       </div>
     </div>
-    <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
-    />
   </div>
 </div>
 `;
@@ -96,11 +78,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
   padding: 16px;
 }
 
-.c1 {
+.c1.c1.c1 {
   width: 40%;
 }
 
-.c2 {
+.c2.c2.c2 {
   width: 60%;
 }
 
@@ -108,9 +90,6 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
   <div
     class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
   >
-    <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
-    />
     <div
       class="euiFlexItem"
     >
@@ -146,7 +125,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        trusted app 0
+                        <span
+                          title=""
+                        >
+                          trusted app 0
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -156,7 +139,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        Windows
+                        <span
+                          title=""
+                        >
+                          Windows
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -166,7 +153,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        1 minute ago
+                        <span
+                          title=""
+                        >
+                          1 minute ago
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -176,7 +167,25 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        someone
+                        <span
+                          title=""
+                        >
+                          someone
+                        </span>
+                      </dd>
+                      <dt
+                        class="euiDescriptionList__title c1"
+                      >
+                        Description
+                      </dt>
+                      <dd
+                        class="euiDescriptionList__description c2"
+                      >
+                        <span
+                          title="Trusted App 0"
+                        >
+                          Trusted App 0
+                        </span>
                       </dd>
                     </dl>
                   </div>
@@ -376,7 +385,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        trusted app 1
+                        <span
+                          title=""
+                        >
+                          trusted app 1
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -386,7 +399,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        Mac OS
+                        <span
+                          title=""
+                        >
+                          Mac OS
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -396,7 +413,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        1 minute ago
+                        <span
+                          title=""
+                        >
+                          1 minute ago
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -406,7 +427,25 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        someone
+                        <span
+                          title=""
+                        >
+                          someone
+                        </span>
+                      </dd>
+                      <dt
+                        class="euiDescriptionList__title c1"
+                      >
+                        Description
+                      </dt>
+                      <dd
+                        class="euiDescriptionList__description c2"
+                      >
+                        <span
+                          title="Trusted App 1"
+                        >
+                          Trusted App 1
+                        </span>
                       </dd>
                     </dl>
                   </div>
@@ -606,7 +645,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        trusted app 2
+                        <span
+                          title=""
+                        >
+                          trusted app 2
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -616,7 +659,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        Linux
+                        <span
+                          title=""
+                        >
+                          Linux
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -626,7 +673,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        1 minute ago
+                        <span
+                          title=""
+                        >
+                          1 minute ago
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -636,7 +687,25 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        someone
+                        <span
+                          title=""
+                        >
+                          someone
+                        </span>
+                      </dd>
+                      <dt
+                        class="euiDescriptionList__title c1"
+                      >
+                        Description
+                      </dt>
+                      <dd
+                        class="euiDescriptionList__description c2"
+                      >
+                        <span
+                          title="Trusted App 2"
+                        >
+                          Trusted App 2
+                        </span>
                       </dd>
                     </dl>
                   </div>
@@ -836,7 +905,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        trusted app 3
+                        <span
+                          title=""
+                        >
+                          trusted app 3
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -846,7 +919,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        Windows
+                        <span
+                          title=""
+                        >
+                          Windows
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -856,7 +933,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        1 minute ago
+                        <span
+                          title=""
+                        >
+                          1 minute ago
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -866,7 +947,25 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        someone
+                        <span
+                          title=""
+                        >
+                          someone
+                        </span>
+                      </dd>
+                      <dt
+                        class="euiDescriptionList__title c1"
+                      >
+                        Description
+                      </dt>
+                      <dd
+                        class="euiDescriptionList__description c2"
+                      >
+                        <span
+                          title="Trusted App 3"
+                        >
+                          Trusted App 3
+                        </span>
                       </dd>
                     </dl>
                   </div>
@@ -1066,7 +1165,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        trusted app 4
+                        <span
+                          title=""
+                        >
+                          trusted app 4
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -1076,7 +1179,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        Mac OS
+                        <span
+                          title=""
+                        >
+                          Mac OS
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -1086,7 +1193,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        1 minute ago
+                        <span
+                          title=""
+                        >
+                          1 minute ago
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -1096,7 +1207,25 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        someone
+                        <span
+                          title=""
+                        >
+                          someone
+                        </span>
+                      </dd>
+                      <dt
+                        class="euiDescriptionList__title c1"
+                      >
+                        Description
+                      </dt>
+                      <dd
+                        class="euiDescriptionList__description c2"
+                      >
+                        <span
+                          title="Trusted App 4"
+                        >
+                          Trusted App 4
+                        </span>
                       </dd>
                     </dl>
                   </div>
@@ -1296,7 +1425,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        trusted app 5
+                        <span
+                          title=""
+                        >
+                          trusted app 5
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -1306,7 +1439,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        Linux
+                        <span
+                          title=""
+                        >
+                          Linux
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -1316,7 +1453,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        1 minute ago
+                        <span
+                          title=""
+                        >
+                          1 minute ago
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -1326,7 +1467,25 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        someone
+                        <span
+                          title=""
+                        >
+                          someone
+                        </span>
+                      </dd>
+                      <dt
+                        class="euiDescriptionList__title c1"
+                      >
+                        Description
+                      </dt>
+                      <dd
+                        class="euiDescriptionList__description c2"
+                      >
+                        <span
+                          title="Trusted App 5"
+                        >
+                          Trusted App 5
+                        </span>
                       </dd>
                     </dl>
                   </div>
@@ -1526,7 +1685,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        trusted app 6
+                        <span
+                          title=""
+                        >
+                          trusted app 6
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -1536,7 +1699,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        Windows
+                        <span
+                          title=""
+                        >
+                          Windows
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -1546,7 +1713,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        1 minute ago
+                        <span
+                          title=""
+                        >
+                          1 minute ago
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -1556,7 +1727,25 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        someone
+                        <span
+                          title=""
+                        >
+                          someone
+                        </span>
+                      </dd>
+                      <dt
+                        class="euiDescriptionList__title c1"
+                      >
+                        Description
+                      </dt>
+                      <dd
+                        class="euiDescriptionList__description c2"
+                      >
+                        <span
+                          title="Trusted App 6"
+                        >
+                          Trusted App 6
+                        </span>
                       </dd>
                     </dl>
                   </div>
@@ -1756,7 +1945,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        trusted app 7
+                        <span
+                          title=""
+                        >
+                          trusted app 7
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -1766,7 +1959,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        Mac OS
+                        <span
+                          title=""
+                        >
+                          Mac OS
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -1776,7 +1973,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        1 minute ago
+                        <span
+                          title=""
+                        >
+                          1 minute ago
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -1786,7 +1987,25 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        someone
+                        <span
+                          title=""
+                        >
+                          someone
+                        </span>
+                      </dd>
+                      <dt
+                        class="euiDescriptionList__title c1"
+                      >
+                        Description
+                      </dt>
+                      <dd
+                        class="euiDescriptionList__description c2"
+                      >
+                        <span
+                          title="Trusted App 7"
+                        >
+                          Trusted App 7
+                        </span>
                       </dd>
                     </dl>
                   </div>
@@ -1986,7 +2205,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        trusted app 8
+                        <span
+                          title=""
+                        >
+                          trusted app 8
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -1996,7 +2219,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        Linux
+                        <span
+                          title=""
+                        >
+                          Linux
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -2006,7 +2233,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        1 minute ago
+                        <span
+                          title=""
+                        >
+                          1 minute ago
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -2016,7 +2247,25 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        someone
+                        <span
+                          title=""
+                        >
+                          someone
+                        </span>
+                      </dd>
+                      <dt
+                        class="euiDescriptionList__title c1"
+                      >
+                        Description
+                      </dt>
+                      <dd
+                        class="euiDescriptionList__description c2"
+                      >
+                        <span
+                          title="Trusted App 8"
+                        >
+                          Trusted App 8
+                        </span>
                       </dd>
                     </dl>
                   </div>
@@ -2216,7 +2465,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        trusted app 9
+                        <span
+                          title=""
+                        >
+                          trusted app 9
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -2226,7 +2479,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        Windows
+                        <span
+                          title=""
+                        >
+                          Windows
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -2236,7 +2493,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        1 minute ago
+                        <span
+                          title=""
+                        >
+                          1 minute ago
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -2246,7 +2507,25 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        someone
+                        <span
+                          title=""
+                        >
+                          someone
+                        </span>
+                      </dd>
+                      <dt
+                        class="euiDescriptionList__title c1"
+                      >
+                        Description
+                      </dt>
+                      <dd
+                        class="euiDescriptionList__description c2"
+                      >
+                        <span
+                          title="Trusted App 9"
+                        >
+                          Trusted App 9
+                        </span>
                       </dd>
                     </dl>
                   </div>
@@ -2656,9 +2935,6 @@ exports[`TrustedAppsGrid renders correctly when loading data for the first time 
         </div>
       </div>
     </div>
-    <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
-    />
   </div>
 </div>
 `;
@@ -2673,11 +2949,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
   padding: 16px;
 }
 
-.c1 {
+.c1.c1.c1 {
   width: 40%;
 }
 
-.c2 {
+.c2.c2.c2 {
   width: 60%;
 }
 
@@ -2727,7 +3003,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        trusted app 0
+                        <span
+                          title=""
+                        >
+                          trusted app 0
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -2737,7 +3017,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        Windows
+                        <span
+                          title=""
+                        >
+                          Windows
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -2747,7 +3031,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        1 minute ago
+                        <span
+                          title=""
+                        >
+                          1 minute ago
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -2757,7 +3045,25 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        someone
+                        <span
+                          title=""
+                        >
+                          someone
+                        </span>
+                      </dd>
+                      <dt
+                        class="euiDescriptionList__title c1"
+                      >
+                        Description
+                      </dt>
+                      <dd
+                        class="euiDescriptionList__description c2"
+                      >
+                        <span
+                          title="Trusted App 0"
+                        >
+                          Trusted App 0
+                        </span>
                       </dd>
                     </dl>
                   </div>
@@ -2957,7 +3263,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        trusted app 1
+                        <span
+                          title=""
+                        >
+                          trusted app 1
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -2967,7 +3277,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        Mac OS
+                        <span
+                          title=""
+                        >
+                          Mac OS
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -2977,7 +3291,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        1 minute ago
+                        <span
+                          title=""
+                        >
+                          1 minute ago
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -2987,7 +3305,25 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        someone
+                        <span
+                          title=""
+                        >
+                          someone
+                        </span>
+                      </dd>
+                      <dt
+                        class="euiDescriptionList__title c1"
+                      >
+                        Description
+                      </dt>
+                      <dd
+                        class="euiDescriptionList__description c2"
+                      >
+                        <span
+                          title="Trusted App 1"
+                        >
+                          Trusted App 1
+                        </span>
                       </dd>
                     </dl>
                   </div>
@@ -3187,7 +3523,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        trusted app 2
+                        <span
+                          title=""
+                        >
+                          trusted app 2
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -3197,7 +3537,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        Linux
+                        <span
+                          title=""
+                        >
+                          Linux
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -3207,7 +3551,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        1 minute ago
+                        <span
+                          title=""
+                        >
+                          1 minute ago
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -3217,7 +3565,25 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        someone
+                        <span
+                          title=""
+                        >
+                          someone
+                        </span>
+                      </dd>
+                      <dt
+                        class="euiDescriptionList__title c1"
+                      >
+                        Description
+                      </dt>
+                      <dd
+                        class="euiDescriptionList__description c2"
+                      >
+                        <span
+                          title="Trusted App 2"
+                        >
+                          Trusted App 2
+                        </span>
                       </dd>
                     </dl>
                   </div>
@@ -3417,7 +3783,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        trusted app 3
+                        <span
+                          title=""
+                        >
+                          trusted app 3
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -3427,7 +3797,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        Windows
+                        <span
+                          title=""
+                        >
+                          Windows
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -3437,7 +3811,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        1 minute ago
+                        <span
+                          title=""
+                        >
+                          1 minute ago
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -3447,7 +3825,25 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        someone
+                        <span
+                          title=""
+                        >
+                          someone
+                        </span>
+                      </dd>
+                      <dt
+                        class="euiDescriptionList__title c1"
+                      >
+                        Description
+                      </dt>
+                      <dd
+                        class="euiDescriptionList__description c2"
+                      >
+                        <span
+                          title="Trusted App 3"
+                        >
+                          Trusted App 3
+                        </span>
                       </dd>
                     </dl>
                   </div>
@@ -3647,7 +4043,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        trusted app 4
+                        <span
+                          title=""
+                        >
+                          trusted app 4
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -3657,7 +4057,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        Mac OS
+                        <span
+                          title=""
+                        >
+                          Mac OS
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -3667,7 +4071,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        1 minute ago
+                        <span
+                          title=""
+                        >
+                          1 minute ago
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -3677,7 +4085,25 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        someone
+                        <span
+                          title=""
+                        >
+                          someone
+                        </span>
+                      </dd>
+                      <dt
+                        class="euiDescriptionList__title c1"
+                      >
+                        Description
+                      </dt>
+                      <dd
+                        class="euiDescriptionList__description c2"
+                      >
+                        <span
+                          title="Trusted App 4"
+                        >
+                          Trusted App 4
+                        </span>
                       </dd>
                     </dl>
                   </div>
@@ -3877,7 +4303,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        trusted app 5
+                        <span
+                          title=""
+                        >
+                          trusted app 5
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -3887,7 +4317,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        Linux
+                        <span
+                          title=""
+                        >
+                          Linux
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -3897,7 +4331,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        1 minute ago
+                        <span
+                          title=""
+                        >
+                          1 minute ago
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -3907,7 +4345,25 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        someone
+                        <span
+                          title=""
+                        >
+                          someone
+                        </span>
+                      </dd>
+                      <dt
+                        class="euiDescriptionList__title c1"
+                      >
+                        Description
+                      </dt>
+                      <dd
+                        class="euiDescriptionList__description c2"
+                      >
+                        <span
+                          title="Trusted App 5"
+                        >
+                          Trusted App 5
+                        </span>
                       </dd>
                     </dl>
                   </div>
@@ -4107,7 +4563,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        trusted app 6
+                        <span
+                          title=""
+                        >
+                          trusted app 6
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -4117,7 +4577,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        Windows
+                        <span
+                          title=""
+                        >
+                          Windows
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -4127,7 +4591,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        1 minute ago
+                        <span
+                          title=""
+                        >
+                          1 minute ago
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -4137,7 +4605,25 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        someone
+                        <span
+                          title=""
+                        >
+                          someone
+                        </span>
+                      </dd>
+                      <dt
+                        class="euiDescriptionList__title c1"
+                      >
+                        Description
+                      </dt>
+                      <dd
+                        class="euiDescriptionList__description c2"
+                      >
+                        <span
+                          title="Trusted App 6"
+                        >
+                          Trusted App 6
+                        </span>
                       </dd>
                     </dl>
                   </div>
@@ -4337,7 +4823,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        trusted app 7
+                        <span
+                          title=""
+                        >
+                          trusted app 7
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -4347,7 +4837,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        Mac OS
+                        <span
+                          title=""
+                        >
+                          Mac OS
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -4357,7 +4851,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        1 minute ago
+                        <span
+                          title=""
+                        >
+                          1 minute ago
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -4367,7 +4865,25 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        someone
+                        <span
+                          title=""
+                        >
+                          someone
+                        </span>
+                      </dd>
+                      <dt
+                        class="euiDescriptionList__title c1"
+                      >
+                        Description
+                      </dt>
+                      <dd
+                        class="euiDescriptionList__description c2"
+                      >
+                        <span
+                          title="Trusted App 7"
+                        >
+                          Trusted App 7
+                        </span>
                       </dd>
                     </dl>
                   </div>
@@ -4567,7 +5083,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        trusted app 8
+                        <span
+                          title=""
+                        >
+                          trusted app 8
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -4577,7 +5097,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        Linux
+                        <span
+                          title=""
+                        >
+                          Linux
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -4587,7 +5111,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        1 minute ago
+                        <span
+                          title=""
+                        >
+                          1 minute ago
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -4597,7 +5125,25 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        someone
+                        <span
+                          title=""
+                        >
+                          someone
+                        </span>
+                      </dd>
+                      <dt
+                        class="euiDescriptionList__title c1"
+                      >
+                        Description
+                      </dt>
+                      <dd
+                        class="euiDescriptionList__description c2"
+                      >
+                        <span
+                          title="Trusted App 8"
+                        >
+                          Trusted App 8
+                        </span>
                       </dd>
                     </dl>
                   </div>
@@ -4797,7 +5343,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        trusted app 9
+                        <span
+                          title=""
+                        >
+                          trusted app 9
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -4807,7 +5357,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        Windows
+                        <span
+                          title=""
+                        >
+                          Windows
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -4817,7 +5371,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        1 minute ago
+                        <span
+                          title=""
+                        >
+                          1 minute ago
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -4827,7 +5385,25 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        someone
+                        <span
+                          title=""
+                        >
+                          someone
+                        </span>
+                      </dd>
+                      <dt
+                        class="euiDescriptionList__title c1"
+                      >
+                        Description
+                      </dt>
+                      <dd
+                        class="euiDescriptionList__description c2"
+                      >
+                        <span
+                          title="Trusted App 9"
+                        >
+                          Trusted App 9
+                        </span>
                       </dd>
                     </dl>
                   </div>
@@ -5222,11 +5798,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
   padding: 16px;
 }
 
-.c1 {
+.c1.c1.c1 {
   width: 40%;
 }
 
-.c2 {
+.c2.c2.c2 {
   width: 60%;
 }
 
@@ -5234,9 +5810,6 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
   <div
     class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
   >
-    <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
-    />
     <div
       class="euiFlexItem"
     >
@@ -5272,7 +5845,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        trusted app 0
+                        <span
+                          title=""
+                        >
+                          trusted app 0
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -5282,7 +5859,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        Windows
+                        <span
+                          title=""
+                        >
+                          Windows
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -5292,7 +5873,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        1 minute ago
+                        <span
+                          title=""
+                        >
+                          1 minute ago
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -5302,7 +5887,25 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        someone
+                        <span
+                          title=""
+                        >
+                          someone
+                        </span>
+                      </dd>
+                      <dt
+                        class="euiDescriptionList__title c1"
+                      >
+                        Description
+                      </dt>
+                      <dd
+                        class="euiDescriptionList__description c2"
+                      >
+                        <span
+                          title="Trusted App 0"
+                        >
+                          Trusted App 0
+                        </span>
                       </dd>
                     </dl>
                   </div>
@@ -5502,7 +6105,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        trusted app 1
+                        <span
+                          title=""
+                        >
+                          trusted app 1
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -5512,7 +6119,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        Mac OS
+                        <span
+                          title=""
+                        >
+                          Mac OS
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -5522,7 +6133,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        1 minute ago
+                        <span
+                          title=""
+                        >
+                          1 minute ago
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -5532,7 +6147,25 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        someone
+                        <span
+                          title=""
+                        >
+                          someone
+                        </span>
+                      </dd>
+                      <dt
+                        class="euiDescriptionList__title c1"
+                      >
+                        Description
+                      </dt>
+                      <dd
+                        class="euiDescriptionList__description c2"
+                      >
+                        <span
+                          title="Trusted App 1"
+                        >
+                          Trusted App 1
+                        </span>
                       </dd>
                     </dl>
                   </div>
@@ -5732,7 +6365,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        trusted app 2
+                        <span
+                          title=""
+                        >
+                          trusted app 2
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -5742,7 +6379,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        Linux
+                        <span
+                          title=""
+                        >
+                          Linux
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -5752,7 +6393,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        1 minute ago
+                        <span
+                          title=""
+                        >
+                          1 minute ago
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -5762,7 +6407,25 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        someone
+                        <span
+                          title=""
+                        >
+                          someone
+                        </span>
+                      </dd>
+                      <dt
+                        class="euiDescriptionList__title c1"
+                      >
+                        Description
+                      </dt>
+                      <dd
+                        class="euiDescriptionList__description c2"
+                      >
+                        <span
+                          title="Trusted App 2"
+                        >
+                          Trusted App 2
+                        </span>
                       </dd>
                     </dl>
                   </div>
@@ -5962,7 +6625,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        trusted app 3
+                        <span
+                          title=""
+                        >
+                          trusted app 3
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -5972,7 +6639,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        Windows
+                        <span
+                          title=""
+                        >
+                          Windows
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -5982,7 +6653,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        1 minute ago
+                        <span
+                          title=""
+                        >
+                          1 minute ago
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -5992,7 +6667,25 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        someone
+                        <span
+                          title=""
+                        >
+                          someone
+                        </span>
+                      </dd>
+                      <dt
+                        class="euiDescriptionList__title c1"
+                      >
+                        Description
+                      </dt>
+                      <dd
+                        class="euiDescriptionList__description c2"
+                      >
+                        <span
+                          title="Trusted App 3"
+                        >
+                          Trusted App 3
+                        </span>
                       </dd>
                     </dl>
                   </div>
@@ -6192,7 +6885,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        trusted app 4
+                        <span
+                          title=""
+                        >
+                          trusted app 4
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -6202,7 +6899,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        Mac OS
+                        <span
+                          title=""
+                        >
+                          Mac OS
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -6212,7 +6913,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        1 minute ago
+                        <span
+                          title=""
+                        >
+                          1 minute ago
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -6222,7 +6927,25 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        someone
+                        <span
+                          title=""
+                        >
+                          someone
+                        </span>
+                      </dd>
+                      <dt
+                        class="euiDescriptionList__title c1"
+                      >
+                        Description
+                      </dt>
+                      <dd
+                        class="euiDescriptionList__description c2"
+                      >
+                        <span
+                          title="Trusted App 4"
+                        >
+                          Trusted App 4
+                        </span>
                       </dd>
                     </dl>
                   </div>
@@ -6422,7 +7145,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        trusted app 5
+                        <span
+                          title=""
+                        >
+                          trusted app 5
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -6432,7 +7159,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        Linux
+                        <span
+                          title=""
+                        >
+                          Linux
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -6442,7 +7173,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        1 minute ago
+                        <span
+                          title=""
+                        >
+                          1 minute ago
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -6452,7 +7187,25 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        someone
+                        <span
+                          title=""
+                        >
+                          someone
+                        </span>
+                      </dd>
+                      <dt
+                        class="euiDescriptionList__title c1"
+                      >
+                        Description
+                      </dt>
+                      <dd
+                        class="euiDescriptionList__description c2"
+                      >
+                        <span
+                          title="Trusted App 5"
+                        >
+                          Trusted App 5
+                        </span>
                       </dd>
                     </dl>
                   </div>
@@ -6652,7 +7405,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        trusted app 6
+                        <span
+                          title=""
+                        >
+                          trusted app 6
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -6662,7 +7419,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        Windows
+                        <span
+                          title=""
+                        >
+                          Windows
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -6672,7 +7433,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        1 minute ago
+                        <span
+                          title=""
+                        >
+                          1 minute ago
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -6682,7 +7447,25 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        someone
+                        <span
+                          title=""
+                        >
+                          someone
+                        </span>
+                      </dd>
+                      <dt
+                        class="euiDescriptionList__title c1"
+                      >
+                        Description
+                      </dt>
+                      <dd
+                        class="euiDescriptionList__description c2"
+                      >
+                        <span
+                          title="Trusted App 6"
+                        >
+                          Trusted App 6
+                        </span>
                       </dd>
                     </dl>
                   </div>
@@ -6882,7 +7665,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        trusted app 7
+                        <span
+                          title=""
+                        >
+                          trusted app 7
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -6892,7 +7679,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        Mac OS
+                        <span
+                          title=""
+                        >
+                          Mac OS
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -6902,7 +7693,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        1 minute ago
+                        <span
+                          title=""
+                        >
+                          1 minute ago
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -6912,7 +7707,25 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        someone
+                        <span
+                          title=""
+                        >
+                          someone
+                        </span>
+                      </dd>
+                      <dt
+                        class="euiDescriptionList__title c1"
+                      >
+                        Description
+                      </dt>
+                      <dd
+                        class="euiDescriptionList__description c2"
+                      >
+                        <span
+                          title="Trusted App 7"
+                        >
+                          Trusted App 7
+                        </span>
                       </dd>
                     </dl>
                   </div>
@@ -7112,7 +7925,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        trusted app 8
+                        <span
+                          title=""
+                        >
+                          trusted app 8
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -7122,7 +7939,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        Linux
+                        <span
+                          title=""
+                        >
+                          Linux
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -7132,7 +7953,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        1 minute ago
+                        <span
+                          title=""
+                        >
+                          1 minute ago
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -7142,7 +7967,25 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        someone
+                        <span
+                          title=""
+                        >
+                          someone
+                        </span>
+                      </dd>
+                      <dt
+                        class="euiDescriptionList__title c1"
+                      >
+                        Description
+                      </dt>
+                      <dd
+                        class="euiDescriptionList__description c2"
+                      >
+                        <span
+                          title="Trusted App 8"
+                        >
+                          Trusted App 8
+                        </span>
                       </dd>
                     </dl>
                   </div>
@@ -7342,7 +8185,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        trusted app 9
+                        <span
+                          title=""
+                        >
+                          trusted app 9
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -7352,7 +8199,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        Windows
+                        <span
+                          title=""
+                        >
+                          Windows
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -7362,7 +8213,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        1 minute ago
+                        <span
+                          title=""
+                        >
+                          1 minute ago
+                        </span>
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -7372,7 +8227,25 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        someone
+                        <span
+                          title=""
+                        >
+                          someone
+                        </span>
+                      </dd>
+                      <dt
+                        class="euiDescriptionList__title c1"
+                      >
+                        Description
+                      </dt>
+                      <dd
+                        class="euiDescriptionList__description c2"
+                      >
+                        <span
+                          title="Trusted App 9"
+                        >
+                          Trusted App 9
+                        </span>
                       </dd>
                     </dl>
                   </div>
