@@ -10,7 +10,7 @@ import { useMemo } from 'react';
 import { useUiSetting } from '../../../../../../src/plugins/kibana_react/public';
 
 type ResolverColorNames =
-  | 'copyableBackground'
+  | 'copyableFieldBackground'
   | 'descriptionText'
   | 'full'
   | 'graphControls'
@@ -33,7 +33,7 @@ export function useColors(): ColorMap {
   const theme = isDarkMode ? euiThemeAmsterdamDark : euiThemeAmsterdamLight;
   return useMemo(() => {
     return {
-      copyableBackground: theme.euiColorLightShade,
+      copyableFieldBackground: theme.euiColorLightShade,
       descriptionText: theme.euiTextColor,
       full: theme.euiColorFullShade,
       graphControls: theme.euiColorDarkestShade,
