@@ -29,7 +29,7 @@ interface Props {
   agentPolicies?: AgentPolicy[];
 }
 
-const RUN_INSTRUCTIONS = './elastic-agent run';
+const RUN_INSTRUCTIONS = './elastic-agent install';
 
 export const StandaloneInstructions = React.memo<Props>(({ agentPolicies }) => {
   const { getHref } = useLink();
@@ -131,7 +131,7 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicies }) => {
           <EuiText>
             <FormattedMessage
               id="xpack.ingestManager.agentEnrollment.stepRunAgentDescription"
-              defaultMessage="From the agent directory, run these commands to enroll and start an Elastic Agent. You can reuse these commands to set up agents on more than one host. Requires administrator privileges."
+              defaultMessage="From the agent directory, run this command to install, enroll and start an Elastic Agent. You can reuse this command to set up agents on more than one host. Requires administrator privileges."
             />
             <EuiSpacer size="m" />
             <EuiCodeBlock fontSize="m">{RUN_INSTRUCTIONS}</EuiCodeBlock>

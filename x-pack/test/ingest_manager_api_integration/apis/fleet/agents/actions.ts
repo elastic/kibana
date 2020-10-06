@@ -22,7 +22,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should return a 200 if this a valid actions request', async () => {
       const { body: apiResponse } = await supertest
-        .post(`/api/ingest_manager/fleet/agents/agent1/actions`)
+        .post(`/api/fleet/agents/agent1/actions`)
         .set('kbn-xsrf', 'xx')
         .send({
           action: {
@@ -38,7 +38,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should return a 400 when request does not have type information', async () => {
       const { body: apiResponse } = await supertest
-        .post(`/api/ingest_manager/fleet/agents/agent1/actions`)
+        .post(`/api/fleet/agents/agent1/actions`)
         .set('kbn-xsrf', 'xx')
         .send({
           action: {
@@ -54,7 +54,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should return a 404 when agent does not exist', async () => {
       const { body: apiResponse } = await supertest
-        .post(`/api/ingest_manager/fleet/agents/agent100/actions`)
+        .post(`/api/fleet/agents/agent100/actions`)
         .set('kbn-xsrf', 'xx')
         .send({
           action: {
