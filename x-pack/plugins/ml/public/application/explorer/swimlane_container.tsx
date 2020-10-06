@@ -226,12 +226,12 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
           swimlaneData.fieldName !== selection.viewByFieldName)) &&
       filterActive === false
     ) {
-      // Not this swimlane which was selected.
+      // Not this swim lane which was selected.
       return;
     }
 
     return { x: selection.times.map((v) => v * 1000), y: selection.lanes };
-  }, [selection, swimlaneType]);
+  }, [selection, swimlaneType, swimlaneData.fieldName]);
 
   const swimLaneConfig: HeatmapSpec['config'] = useMemo(
     () =>
