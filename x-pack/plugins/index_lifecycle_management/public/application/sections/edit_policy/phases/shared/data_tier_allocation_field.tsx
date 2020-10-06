@@ -6,8 +6,9 @@
 
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
+import { useKibana } from '../../../../../shared_imports';
 import { PhaseWithAllocationAction, PhaseWithAllocation } from '../../../../../../common/types';
 import { PhaseValidationErrors } from '../../../../services/policies/policy_validation';
 import { getAvailableNodeRoleForPhase } from '../../../../lib/data_tiers';
@@ -18,6 +19,7 @@ import {
   DefaultAllocationNotice,
   NoNodeAttributesWarning,
   NodesDataProvider,
+  CloudDataTierCallout,
 } from '../../components/data_tier_allocation';
 
 const i18nTexts = {
@@ -46,17 +48,20 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({
   isShowingErrors,
   errors,
 }) => {
+  const {
+    services: { cloud },
+  } = useKibana();
   return (
     <NodesDataProvider>
-      {(nodesData) => {
-        const hasNodeAttrs = Boolean(Object.keys(nodesData.nodesByAttributes ?? {}).length);
+      {({ nodesByRoles, nodesByAttributes }) => {
+        const hasNodeAttrs = Boolean(Object.keys(nodesByAttributes ?? {}).length);
 
         const renderDefaultAllocationNotice = () => {
           if (phaseData.dataTierAllocationType !== 'default') {
             return null;
           }
 
-          const allocationNodeRole = getAvailableNodeRoleForPhase(phase, nodesData.nodesByRoles);
+          const allocationNodeRole = getAvailableNodeRoleForPhase(phase, nodesByRoles);
           if (
             allocationNodeRole !== 'none' &&
             isNodeRoleFirstPreference(phase, allocationNodeRole)
@@ -64,7 +69,12 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({
             return null;
           }
 
-          return <DefaultAllocationNotice phase={phase} targetNodeRole={allocationNodeRole} />;
+          return (
+            <>
+              <EuiSpacer size="s" />
+              <DefaultAllocationNotice phase={phase} targetNodeRole={allocationNodeRole} />
+            </>
+          );
         };
 
         const renderNodeAttributesWarning = () => {
@@ -74,7 +84,37 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({
           if (hasNodeAttrs) {
             return null;
           }
-          return <NoNodeAttributesWarning phase={phase} />;
+          return (
+            <>
+              <EuiSpacer size="s" />
+              <NoNodeAttributesWarning phase={phase} />
+            </>
+          );
+        };
+
+        const renderCloudCallout = () => {
+          const isCloudEnabled = cloud?.isCloudEnabled ?? false;
+          if (
+            phase !== 'cold' ||
+            !isCloudEnabled ||
+            phaseData.dataTierAllocationType !== 'default'
+          ) {
+            return null;
+          }
+
+          /**
+           * Check whether there are any data_cold tier roles
+           */
+          if (nodesByRoles.data_cold?.length) {
+            return null;
+          }
+
+          return (
+            <>
+              <EuiSpacer size="s" />
+              <CloudDataTierCallout />
+            </>
+          );
         };
 
         return (
@@ -92,12 +132,13 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({
                   setPhaseData={setPhaseData}
                   phaseData={phaseData}
                   isShowingErrors={isShowingErrors}
-                  nodes={nodesData.nodesByAttributes}
+                  nodes={nodesByAttributes}
                 />
 
-                {/* Data tier related warnings */}
+                {/* Data tier related warnings and call-to-action notices */}
                 {renderDefaultAllocationNotice()}
                 {renderNodeAttributesWarning()}
+                {renderCloudCallout()}
               </>
             </EuiFormRow>
           </EuiDescribedFormGroup>

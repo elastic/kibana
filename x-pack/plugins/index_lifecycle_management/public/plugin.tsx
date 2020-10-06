@@ -31,7 +31,7 @@ export class IndexLifecycleManagementPlugin {
         getStartServices,
       } = coreSetup;
 
-      const { usageCollection, management, indexManagement, home } = plugins;
+      const { usageCollection, management, indexManagement, home, cloud } = plugins;
 
       // Initialize services even if the app isn't mounted, because they're used by index management extensions.
       initHttp(http);
@@ -65,7 +65,8 @@ export class IndexLifecycleManagementPlugin {
             I18nContext,
             history,
             navigateToApp,
-            getUrlForApp
+            getUrlForApp,
+            cloud
           );
 
           return () => {

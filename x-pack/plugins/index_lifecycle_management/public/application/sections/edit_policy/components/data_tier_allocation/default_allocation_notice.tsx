@@ -102,10 +102,5 @@ export const DefaultAllocationNotice: FunctionComponent<Props> = ({ phase, targe
       </EuiCallOut>
     );
 
-  return (
-    <>
-      <EuiSpacer size="s" />
-      {content}
-    </>
-  );
+  return content;
 };
