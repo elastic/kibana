@@ -24,16 +24,16 @@ import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/bas
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import { StatsBar, ModelsBarStats } from '../../../../../components/stats_bar';
-import { useInferenceApiService } from '../../../../../services/ml_api_service/inference';
+import { useTrainedModelsApiService } from '../../../../../services/ml_api_service/trained_models';
 import { ModelsTableToConfigMapping } from './index';
 import { DeleteModelsModal } from './delete_models_modal';
 import { useMlKibana, useMlUrlGenerator, useNotifications } from '../../../../../contexts/kibana';
 import { ExpandedRow } from './expanded_row';
 import {
-  ModelConfigResponse,
+  TrainedModelConfigResponse,
   ModelPipelines,
   TrainedModelStat,
-} from '../../../../../../../common/types/inference';
+} from '../../../../../../../common/types/trained_models';
 import {
   getAnalysisType,
   REFRESH_ANALYTICS_LIST_STATE,
@@ -48,7 +48,7 @@ import { timeFormatter } from '../../../../../../../common/util/date_utils';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
-export type ModelItem = ModelConfigResponse & {
+export type ModelItem = TrainedModelConfigResponse & {
   type?: string;
   stats?: Stats;
   pipelines?: ModelPipelines['pipelines'] | null;
@@ -66,7 +66,7 @@ export const ModelsList: FC = () => {
 
   const canDeleteDataFrameAnalytics = capabilities.ml.canDeleteDataFrameAnalytics as boolean;
 
-  const inferenceApiService = useInferenceApiService();
+  const trainedModelsApiService = useTrainedModelsApiService();
   const { toasts } = useNotifications();
 
   const [searchQueryText, setSearchQueryText] = useState('');
@@ -110,7 +110,7 @@ export const ModelsList: FC = () => {
    */
   const fetchData = useCallback(async () => {
     try {
-      const response = await inferenceApiService.getInferenceModel(undefined, {
+      const response = await trainedModelsApiService.getTrainedModels(undefined, {
         with_pipelines: true,
         size: 1000,
       });
@@ -146,7 +146,7 @@ export const ModelsList: FC = () => {
       }
     } catch (error) {
       toasts.addError(new Error(error.body?.message), {
-        title: i18n.translate('xpack.ml.inference.modelsList.fetchFailedErrorMessage', {
+        title: i18n.translate('xpack.ml.trainedModels.modelsList.fetchFailedErrorMessage', {
           defaultMessage: 'Models fetch failed',
         }),
       });
@@ -166,8 +166,8 @@ export const ModelsList: FC = () => {
       total: {
         show: true,
         value: items.length,
-        label: i18n.translate('xpack.ml.inference.modelsList.totalAmountLabel', {
-          defaultMessage: 'Total inference trained models',
+        label: i18n.translate('xpack.ml.trainedModels.modelsList.totalAmountLabel', {
+          defaultMessage: 'Total trained models',
         }),
       },
     };
@@ -182,7 +182,7 @@ export const ModelsList: FC = () => {
     try {
       const {
         trained_model_stats: modelsStatsResponse,
-      } = await inferenceApiService.getInferenceModelStats(modelIdsToFetch);
+      } = await trainedModelsApiService.getTrainedModelStats(modelIdsToFetch);
 
       for (const { model_id: id, ...stats } of modelsStatsResponse) {
         const model = models.find((m) => m.model_id === id);
@@ -191,7 +191,7 @@ export const ModelsList: FC = () => {
       return true;
     } catch (error) {
       toasts.addError(new Error(error.body.message), {
-        title: i18n.translate('xpack.ml.inference.modelsList.fetchModelStatsErrorMessage', {
+        title: i18n.translate('xpack.ml.trainedModels.modelsList.fetchModelStatsErrorMessage', {
           defaultMessage: 'Fetch model stats failed',
         }),
       });
@@ -221,7 +221,7 @@ export const ModelsList: FC = () => {
       setModelsToDelete(models as ModelItemFull[]);
     } else {
       toasts.addDanger(
-        i18n.translate('xpack.ml.inference.modelsList.unableToDeleteModelsErrorMessage', {
+        i18n.translate('xpack.ml.trainedModels.modelsList.unableToDeleteModelsErrorMessage', {
           defaultMessage: 'Unable to delete models',
         })
       );
@@ -236,7 +236,7 @@ export const ModelsList: FC = () => {
 
     try {
       await Promise.all(
-        modelsToDeleteIds.map((modelId) => inferenceApiService.deleteInferenceModel(modelId))
+        modelsToDeleteIds.map((modelId) => trainedModelsApiService.deleteTrainedModel(modelId))
       );
       setItems(
         items.filter(
@@ -244,7 +244,7 @@ export const ModelsList: FC = () => {
         )
       );
       toasts.addSuccess(
-        i18n.translate('xpack.ml.inference.modelsList.successfullyDeletedMessage', {
+        i18n.translate('xpack.ml.trainedModels.modelsList.successfullyDeletedMessage', {
           defaultMessage:
             '{modelsCount, plural, one {Model {modelsToDeleteIds}} other {# models}} {modelsCount, plural, one {has} other {have}} been successfully deleted',
           values: {
@@ -255,7 +255,7 @@ export const ModelsList: FC = () => {
       );
     } catch (error) {
       toasts.addError(new Error(error?.body?.message), {
-        title: i18n.translate('xpack.ml.inference.modelsList.fetchDeletionErrorMessage', {
+        title: i18n.translate('xpack.ml.trainedModels.modelsList.fetchDeletionErrorMessage', {
           defaultMessage: '{modelsCount, plural, one {Model} other {Models}} deletion failed',
           values: {
             modelsCount: modelsToDeleteIds.length,
@@ -270,10 +270,10 @@ export const ModelsList: FC = () => {
    */
   const actions: Array<Action<ModelItem>> = [
     {
-      name: i18n.translate('xpack.ml.inference.modelsList.viewTrainingDataActionLabel', {
+      name: i18n.translate('xpack.ml.trainedModels.modelsList.viewTrainingDataActionLabel', {
         defaultMessage: 'View training data',
       }),
-      description: i18n.translate('xpack.ml.inference.modelsList.viewTrainingDataActionLabel', {
+      description: i18n.translate('xpack.ml.trainedModels.modelsList.viewTrainingDataActionLabel', {
         defaultMessage: 'View training data',
       }),
       icon: 'visTable',
@@ -298,10 +298,10 @@ export const ModelsList: FC = () => {
       isPrimary: true,
     },
     {
-      name: i18n.translate('xpack.ml.inference.modelsList.deleteModelActionLabel', {
+      name: i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
         defaultMessage: 'Delete model',
       }),
-      description: i18n.translate('xpack.ml.inference.modelsList.deleteModelActionLabel', {
+      description: i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
         defaultMessage: 'Delete model',
       }),
       icon: 'trash',
@@ -341,10 +341,10 @@ export const ModelsList: FC = () => {
           onClick={toggleDetails.bind(null, item)}
           aria-label={
             itemIdToExpandedRowMap[item.model_id]
-              ? i18n.translate('xpack.ml.inference.modelsList.collapseRow', {
+              ? i18n.translate('xpack.ml.trainedModels.modelsList.collapseRow', {
                   defaultMessage: 'Collapse',
                 })
-              : i18n.translate('xpack.ml.inference.modelsList.expandRow', {
+              : i18n.translate('xpack.ml.trainedModels.modelsList.expandRow', {
                   defaultMessage: 'Expand',
                 })
           }
@@ -354,7 +354,7 @@ export const ModelsList: FC = () => {
     },
     {
       field: ModelsTableToConfigMapping.id,
-      name: i18n.translate('xpack.ml.inference.modelsList.modelIdHeader', {
+      name: i18n.translate('xpack.ml.trainedModels.modelsList.modelIdHeader', {
         defaultMessage: 'ID',
       }),
       sortable: true,
@@ -362,7 +362,7 @@ export const ModelsList: FC = () => {
     },
     {
       field: ModelsTableToConfigMapping.type,
-      name: i18n.translate('xpack.ml.inference.modelsList.typeHeader', {
+      name: i18n.translate('xpack.ml.trainedModels.modelsList.typeHeader', {
         defaultMessage: 'Type',
       }),
       sortable: true,
@@ -371,7 +371,7 @@ export const ModelsList: FC = () => {
     },
     {
       field: ModelsTableToConfigMapping.createdAt,
-      name: i18n.translate('xpack.ml.inference.modelsList.createdAtHeader', {
+      name: i18n.translate('xpack.ml.trainedModels.modelsList.createdAtHeader', {
         defaultMessage: 'Created at',
       }),
       dataType: 'date',
@@ -379,7 +379,7 @@ export const ModelsList: FC = () => {
       sortable: true,
     },
     {
-      name: i18n.translate('xpack.ml.inference.modelsList.actionsHeader', {
+      name: i18n.translate('xpack.ml.trainedModels.modelsList.actionsHeader', {
         defaultMessage: 'Actions',
       }),
       actions,
@@ -413,7 +413,7 @@ export const ModelsList: FC = () => {
           <EuiTitle size="s">
             <h5>
               <FormattedMessage
-                id="xpack.ml.inference.modelsList.selectedModelsMessage"
+                id="xpack.ml.trainedModels.modelsList.selectedModelsMessage"
                 defaultMessage="{modelsCount, plural, one{# model} other {# models}} selected"
                 values={{ modelsCount: selectedModels.length }}
               />
@@ -423,7 +423,7 @@ export const ModelsList: FC = () => {
         <EuiFlexItem>
           <EuiButton color="danger" onClick={prepareModelsForDeletion.bind(null, selectedModels)}>
             <FormattedMessage
-              id="xpack.ml.inference.modelsList.deleteModelsButtonLabel"
+              id="xpack.ml.trainedModels.modelsList.deleteModelsButtonLabel"
               defaultMessage="Delete"
             />
           </EuiButton>
@@ -438,10 +438,10 @@ export const ModelsList: FC = () => {
     ? {
         selectableMessage: (selectable, item) => {
           return selectable
-            ? i18n.translate('xpack.ml.inference.modelsList.selectableMessage', {
+            ? i18n.translate('xpack.ml.trainedModels.modelsList.selectableMessage', {
                 defaultMessage: 'Select a model',
               })
-            : i18n.translate('xpack.ml.inference.modelsList.disableSelectableMessage', {
+            : i18n.translate('xpack.ml.trainedModels.modelsList.disableSelectableMessage', {
                 defaultMessage: 'Model has associated pipelines',
               });
         },

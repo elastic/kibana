@@ -12,19 +12,19 @@ import {
   optionalModelIdSchema,
 } from './schemas/inference_schema';
 import { modelsProvider } from '../models/data_frame_analytics';
-import { InferenceConfigResponse } from '../../common/types/inference';
+import { InferenceConfigResponse } from '../../common/types/trained_models';
 
-export function inferenceRoutes({ router, mlLicense }: RouteInitialization) {
+export function trainedModelsRoutes({ router, mlLicense }: RouteInitialization) {
   /**
    * @apiGroup Inference
    *
-   * @api {get} /api/ml/inference/:modelId Get info of a trained inference model
+   * @api {get} /api/ml/trained_models/:modelId Get info of a trained inference model
    * @apiName GetInferenceModel
    * @apiDescription Retrieves configuration information for a trained inference model.
    */
   router.get(
     {
-      path: '/api/ml/inference/{modelId?}',
+      path: '/api/ml/trained_models/{modelId?}',
       validate: {
         params: optionalModelIdSchema,
         query: getInferenceQuerySchema,
@@ -70,13 +70,13 @@ export function inferenceRoutes({ router, mlLicense }: RouteInitialization) {
   /**
    * @apiGroup Inference
    *
-   * @api {get} /api/ml/inference/:modelId/_stats Get stats of a trained inference model
+   * @api {get} /api/ml/trained_models/:modelId/_stats Get stats of a trained inference model
    * @apiName GetInferenceModelStats
    * @apiDescription Retrieves usage information for trained inference models.
    */
   router.get(
     {
-      path: '/api/ml/inference/{modelId}/_stats',
+      path: '/api/ml/trained_models/{modelId}/_stats',
       validate: {
         params: modelIdSchema,
       },
@@ -102,13 +102,13 @@ export function inferenceRoutes({ router, mlLicense }: RouteInitialization) {
   /**
    * @apiGroup Inference
    *
-   * @api {get} /api/ml/inference/:modelId/pipelines Get model pipelines
+   * @api {get} /api/ml/trained_models/:modelId/pipelines Get model pipelines
    * @apiName GetModelPipelines
    * @apiDescription Retrieves pipelines associated with a model
    */
   router.get(
     {
-      path: '/api/ml/inference/{modelId}/pipelines',
+      path: '/api/ml/trained_models/{modelId}/pipelines',
       validate: {
         params: modelIdSchema,
       },
@@ -132,13 +132,13 @@ export function inferenceRoutes({ router, mlLicense }: RouteInitialization) {
   /**
    * @apiGroup Inference
    *
-   * @api {delete} /api/ml/inference/:modelId Get stats of a trained inference model
+   * @api {delete} /api/ml/trained_models/:modelId Get stats of a trained inference model
    * @apiName DeleteInferenceModel
    * @apiDescription Deletes an existing trained inference model that is currently not referenced by an ingest pipeline.
    */
   router.delete(
     {
-      path: '/api/ml/inference/{modelId}',
+      path: '/api/ml/trained_models/{modelId}',
       validate: {
         params: modelIdSchema,
       },
