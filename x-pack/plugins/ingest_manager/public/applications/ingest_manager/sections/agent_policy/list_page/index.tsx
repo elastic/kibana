@@ -74,7 +74,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
   const { getHref, getPath } = useLink();
   const hasWriteCapabilites = useCapabilities().write;
   const {
-    fleet: { enabled: isFleetEnabled },
+    agents: { enabled: isFleetEnabled },
   } = useConfig();
 
   // Table and search states
