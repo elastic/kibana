@@ -183,6 +183,7 @@ module.exports = async ({ config }) => {
     new webpack.NormalModuleReplacementPlugin(/lib\/download_workpad/, path.resolve(__dirname, '../tasks/mocks/downloadWorkpad')),
     new webpack.NormalModuleReplacementPlugin(/(lib)?\/custom_element_service/, path.resolve(__dirname, '../tasks/mocks/customElementService')),
     new webpack.NormalModuleReplacementPlugin(/(lib)?\/ui_metric/, path.resolve(__dirname, '../tasks/mocks/uiMetric')),
+    new webpack.NormalModuleReplacementPlugin(/lib\/es_service/, path.resolve(__dirname, '../tasks/mocks/esService')),
   );
 
   // Tell Webpack about relevant extensions
