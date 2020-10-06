@@ -15,6 +15,7 @@ import { TaskManager } from '../task_manager';
 import { ConcreteTaskInstance } from '../task';
 import { parseIntervalAsSecond, asInterval } from '../lib/intervals';
 import { AggregationResultOf } from '../../../apm/typings/elasticsearch/aggregations';
+import { HealthStatus } from './monitoring_stats_stream';
 
 interface StatusStat extends JsonObject {
   [status: string]: number;
@@ -245,4 +246,13 @@ function bucketsBetween(from: number, to: number, interval: number) {
     count++;
   }
   return count;
+}
+
+export function summarizeWorkloadStat(
+  workloadStats: WorkloadStat
+): { value: WorkloadStat; status: HealthStatus } {
+  return {
+    value: workloadStats,
+    status: HealthStatus.OK,
+  };
 }

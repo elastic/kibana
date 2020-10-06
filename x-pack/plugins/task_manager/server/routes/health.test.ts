@@ -10,7 +10,7 @@ import { httpServiceMock } from 'src/core/server/mocks';
 import { healthRoute } from './health';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { sleep, mockLogger } from '../test_utils';
-import { MonitoringStats, summarizeMonitoringStats } from '../monitoring';
+import { MonitoringStats, summarizeMonitoringStats, HealthStatus } from '../monitoring';
 
 describe('healthRoute', () => {
   beforeEach(() => {
@@ -49,20 +49,34 @@ describe('healthRoute', () => {
     await sleep(600);
     stats$.next(nextMockStat);
 
-    expect(logger.debug).toHaveBeenCalledWith(JSON.stringify(summarizeMonitoringStats(mockStat)));
-    expect(logger.debug).not.toHaveBeenCalledWith(
-      JSON.stringify(summarizeMonitoringStats(skippedMockStat))
-    );
-    expect(logger.debug).toHaveBeenCalledWith(
-      JSON.stringify(summarizeMonitoringStats(nextMockStat))
-    );
+    const firstDebug = JSON.parse(logger.debug.mock.calls[0][0]);
+    expect(firstDebug).toMatchObject({
+      timestamp: expect.any(String),
+      status: expect.any(String),
+      ...summarizeMonitoringStats(mockStat),
+    });
+
+    const secondDebug = JSON.parse(logger.debug.mock.calls[1][0]);
+    expect(secondDebug).not.toMatchObject({
+      timestamp: expect.any(String),
+      status: expect.any(String),
+      ...summarizeMonitoringStats(skippedMockStat),
+    });
+    expect(secondDebug).toMatchObject({
+      timestamp: expect.any(String),
+      status: expect.any(String),
+      ...summarizeMonitoringStats(nextMockStat),
+    });
+
     expect(logger.debug).toHaveBeenCalledTimes(2);
   });
 
-  it('returns a error status if the stats have not been updated within the required hot freshness', async () => {
+  it('returns a error status if the overall stats have not been updated within the required hot freshness', async () => {
     const router = httpServiceMock.createRouter();
 
-    const mockStat = mockHealthStats();
+    const mockStat = mockHealthStats({
+      lastUpdate: new Date(Date.now() - 1500).toISOString(),
+    });
     healthRoute(router, Promise.resolve(of(mockStat)), mockLogger(), 1000, 60000);
 
     const [, handler] = router.get.mock.calls[0];

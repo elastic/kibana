@@ -63,7 +63,7 @@ describe('Task Run Statistics', () => {
           // Use 'summarizeTaskRunStat' to receive summarize stats
           map(({ key, value }: AggregatedStat<TaskRunStat>) => ({
             key,
-            value: summarizeTaskRunStat(value),
+            value: summarizeTaskRunStat(value).value,
           })),
           take(runAtDrift.length),
           bufferCount(runAtDrift.length)
@@ -126,7 +126,7 @@ describe('Task Run Statistics', () => {
           // Use 'summarizeTaskRunStat' to receive summarize stats
           map(({ key, value }: AggregatedStat<TaskRunStat>) => ({
             key,
-            value: summarizeTaskRunStat(value),
+            value: summarizeTaskRunStat(value).value,
           })),
           take(runDurations.length * 2),
           bufferCount(runDurations.length * 2)
@@ -219,7 +219,7 @@ describe('Task Run Statistics', () => {
           // Use 'summarizeTaskRunStat' to receive summarize stats
           map(({ key, value }: AggregatedStat<TaskRunStat>) => ({
             key,
-            value: summarizeTaskRunStat(value),
+            value: summarizeTaskRunStat(value).value,
           })),
           take(10),
           bufferCount(10)
@@ -292,7 +292,7 @@ describe('Task Run Statistics', () => {
           // Use 'summarizeTaskRunStat' to receive summarize stats
           map(({ key, value }: AggregatedStat<TaskRunStat>) => ({
             key,
-            value: summarizeTaskRunStat(value),
+            value: summarizeTaskRunStat(value).value,
           })),
           tap(() => {
             expectedTimestamp.push(new Date().toISOString());

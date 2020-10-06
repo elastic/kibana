@@ -29,6 +29,7 @@ import {
   createRunningAveragedStat,
   createMapOfRunningAveragedStats,
 } from './task_run_calcultors';
+import { HealthStatus } from './monitoring_stats_stream';
 
 interface FillPoolStat extends JsonObject {
   lastSuccessfulPoll: string;
@@ -160,22 +161,25 @@ export function summarizeTaskRunStat({
   polling: { lastSuccessfulPoll, resultFrequency: pollingResultFrequency },
   drift,
   execution: { duration, resultFrequency: executionResultFrequency },
-}: TaskRunStat): SummarizedTaskRunStat {
+}: TaskRunStat): { value: SummarizedTaskRunStat; status: HealthStatus } {
   return {
-    polling: {
-      ...(lastSuccessfulPoll ? { lastSuccessfulPoll } : {}),
-      resultFrequency: {
-        ...DEFAULT_POLLING_FREQUENCIES,
-        ...calculateFrequency<FillPoolResult>(pollingResultFrequency as FillPoolResult[]),
+    value: {
+      polling: {
+        ...(lastSuccessfulPoll ? { lastSuccessfulPoll } : {}),
+        resultFrequency: {
+          ...DEFAULT_POLLING_FREQUENCIES,
+          ...calculateFrequency<FillPoolResult>(pollingResultFrequency as FillPoolResult[]),
+        },
+      },
+      drift: calculateRunningAverage(drift),
+      execution: {
+        duration: mapValues(duration, (typedDurations) => calculateRunningAverage(typedDurations)),
+        resultFrequency: mapValues(executionResultFrequency, (typedResultFrequencies) => ({
+          ...DEFAULT_TASK_RUN_FREQUENCIES,
+          ...calculateFrequency<TaskRunResult>(typedResultFrequencies),
+        })),
       },
     },
-    drift: calculateRunningAverage(drift),
-    execution: {
-      duration: mapValues(duration, (typedDurations) => calculateRunningAverage(typedDurations)),
-      resultFrequency: mapValues(executionResultFrequency, (typedResultFrequencies) => ({
-        ...DEFAULT_TASK_RUN_FREQUENCIES,
-        ...calculateFrequency<TaskRunResult>(typedResultFrequencies),
-      })),
-    },
+    status: HealthStatus.OK,
   };
 }

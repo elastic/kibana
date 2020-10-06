@@ -16,6 +16,7 @@ import {
 
 export {
   MonitoringStats,
+  HealthStatus,
   RawMonitoringStats,
   summarizeMonitoringStats,
   createAggregators,

@@ -16,13 +16,12 @@ import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { throttleTime } from 'rxjs/operators';
 import { isString } from 'lodash';
-import { MonitoringStats, summarizeMonitoringStats } from '../monitoring';
-
-enum HealthStatus {
-  OK = 'OK',
-  Warning = 'warn',
-  Error = 'error',
-}
+import {
+  MonitoringStats,
+  summarizeMonitoringStats,
+  HealthStatus,
+  RawMonitoringStats,
+} from '../monitoring';
 
 export function healthRoute(
   router: IRouter,
@@ -31,20 +30,25 @@ export function healthRoute(
   requiredHotStatsFreshness: number,
   requiredColdStatsFreshness: number
 ) {
-  function calculateStatus(stats: MonitoringStats) {
+  function calculateStatus(monitoredStats: MonitoringStats) {
     const now = Date.now();
     const timestamp = new Date(now).toISOString();
+
+    const summarizedStats = summarizeMonitoringStats(monitoredStats);
 
     /**
      * If the monitored stats aren't fresh, return a red status
      */
     const healthStatus =
-      hasExpiredHotTimestamps(stats, now, requiredHotStatsFreshness) ||
-      hasExpiredColdTimestamps(stats, now, requiredColdStatsFreshness)
+      hasStatus(summarizedStats.stats, HealthStatus.Error) ||
+      hasExpiredHotTimestamps(summarizedStats, now, requiredHotStatsFreshness) ||
+      hasExpiredColdTimestamps(summarizedStats, now, requiredColdStatsFreshness)
         ? HealthStatus.Error
+        : hasStatus(summarizedStats.stats, HealthStatus.Warning)
+        ? HealthStatus.Warning
         : HealthStatus.OK;
 
-    return { timestamp, status: healthStatus, ...summarizeMonitoringStats(stats) };
+    return { timestamp, status: healthStatus, ...summarizedStats };
   }
 
   /* Log Task Manager stats as a Debug log line at a fixed interval */
@@ -73,28 +77,37 @@ export function healthRoute(
 
 /**
  * If certain "hot" stats are not fresh, then the _health api will should return a Red status
- * @param stats The monitored stats
+ * @param monitoringStats The monitored stats
  * @param now The time to compare against
  * @param requiredFreshness How fresh should these stats be
  */
 function hasExpiredHotTimestamps(
-  stats: MonitoringStats,
+  monitoringStats: RawMonitoringStats,
   now: number,
   requiredFreshness: number
 ): boolean {
   return (
     now -
-      getOldestTimestamp(stats.lastUpdate, stats.stats.runtime?.value.polling.lastSuccessfulPoll) >
+      getOldestTimestamp(
+        monitoringStats.lastUpdate,
+        monitoringStats.stats.runtime?.value.polling.lastSuccessfulPoll
+      ) >
     requiredFreshness
   );
 }
 
 function hasExpiredColdTimestamps(
-  stats: MonitoringStats,
+  monitoringStats: RawMonitoringStats,
   now: number,
   requiredFreshness: number
 ): boolean {
-  return now - getOldestTimestamp(stats.stats.workload?.timestamp) > requiredFreshness;
+  return now - getOldestTimestamp(monitoringStats.stats.workload?.timestamp) > requiredFreshness;
+}
+
+function hasStatus(stats: RawMonitoringStats['stats'], status: HealthStatus): boolean {
+  return Object.values(stats)
+    .map((stat) => stat?.status === status)
+    .includes(true);
 }
 
 function getOldestTimestamp(...timestamps: unknown[]): number {

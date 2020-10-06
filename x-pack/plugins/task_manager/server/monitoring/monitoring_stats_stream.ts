@@ -10,8 +10,17 @@ import { pick } from 'lodash';
 import { Logger } from 'src/core/server';
 import { JsonObject } from 'src/plugins/kibana_utils/common';
 import { TaskManager } from '../task_manager';
-import { createWorkloadAggregator, WorkloadStat } from './workload_statistics';
-import { createTaskRunAggregator, summarizeTaskRunStat, TaskRunStat } from './task_run_statistics';
+import {
+  createWorkloadAggregator,
+  summarizeWorkloadStat,
+  WorkloadStat,
+} from './workload_statistics';
+import {
+  createTaskRunAggregator,
+  summarizeTaskRunStat,
+  TaskRunStat,
+  SummarizedTaskRunStat,
+} from './task_run_statistics';
 import { TaskManagerConfig } from '../config';
 import { AggregatedStatProvider } from './runtime_statistics_aggregator';
 
@@ -31,29 +40,33 @@ type ConfigStat = Pick<TaskManagerConfig, typeof CONFIG_FIELDS_TO_EXPOSE[number]
 export interface MonitoringStats {
   lastUpdate: string;
   stats: {
-    configuration: {
-      timestamp: string;
-      value: ConfigStat;
-    };
-    workload?: {
-      timestamp: string;
-      value: WorkloadStat;
-    };
-    runtime?: {
-      timestamp: string;
-      value: TaskRunStat;
-    };
+    configuration: MonitoredStat<ConfigStat>;
+    workload?: MonitoredStat<WorkloadStat>;
+    runtime?: MonitoredStat<TaskRunStat>;
   };
 }
 
-interface MonitoredStat {
-  timestamp: string;
-  value: JsonObject;
+export enum HealthStatus {
+  OK = 'OK',
+  Warning = 'warn',
+  Error = 'error',
 }
+
+interface MonitoredStat<T> {
+  timestamp: string;
+  value: T;
+}
+type RawMonitoredStat<T extends JsonObject> = MonitoredStat<T> & {
+  status: HealthStatus;
+};
 
 export interface RawMonitoringStats {
   lastUpdate: string;
-  stats: Record<string, MonitoredStat>;
+  stats: {
+    configuration: RawMonitoredStat<JsonObject>;
+    workload?: RawMonitoredStat<WorkloadStat>;
+    runtime?: RawMonitoredStat<SummarizedTaskRunStat>;
+  };
 }
 
 export function createAggregators(
@@ -100,17 +113,28 @@ export function createMonitoringStatsStream(
 
 export function summarizeMonitoringStats({
   lastUpdate,
-  stats: { runtime, ...otherStats },
+  stats: { runtime, workload, configuration },
 }: MonitoringStats): RawMonitoringStats {
   return {
     lastUpdate,
     stats: {
-      ...((otherStats as unknown) as RawMonitoringStats['stats']),
+      configuration: {
+        ...configuration,
+        status: HealthStatus.OK,
+      },
       ...(runtime
         ? {
             runtime: {
-              ...runtime,
-              value: summarizeTaskRunStat(runtime.value),
+              timestamp: runtime.timestamp,
+              ...summarizeTaskRunStat(runtime.value),
+            },
+          }
+        : {}),
+      ...(workload
+        ? {
+            workload: {
+              timestamp: workload.timestamp,
+              ...summarizeWorkloadStat(workload.value),
             },
           }
         : {}),
