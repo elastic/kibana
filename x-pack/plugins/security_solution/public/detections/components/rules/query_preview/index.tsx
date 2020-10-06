@@ -207,6 +207,7 @@ export const PreviewQuery = ({
       ruleType={ruleType}
       errorExists={customQueryError != null || eqlError != null}
       isDisabled={isDisabled}
+      threshold={threshold}
       warnings={queryResult.warnings}
     />
   );

@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { getOr } from 'lodash/fp';
+
 import { useAsync, withOptionalSignal } from '../../../shared_imports';
 import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 import { MatrixHistogramQueryProps } from '../../components/matrix_histogram/types';
@@ -23,7 +25,7 @@ export interface GetMatrixHistogramProps extends Omit<MatrixHistogramQueryProps,
 }
 
 export interface GetMatrixHistogramReturnArgs {
-  data: MatrixHistogramData[];
+  data: MatrixHistogramData[] | Array<{ x: string; y: number; g: string }>;
   inspect: InspectResponse;
   totalCount: number;
 }
@@ -61,6 +63,21 @@ export const getMatrixHistorgram = async ({
     .toPromise();
 
   if (isCompleteResponse(response)) {
+    if (threshold != null && threshold.field != null) {
+      const buckets: Array<{
+        key: string;
+        doc_count: number;
+      }> = getOr([], 'rawResponse.aggregations.eventActionGroup.buckets', response);
+      return {
+        data: buckets.map<{ x: string; y: number; g: string }>(({ key, doc_count: docCount }) => ({
+          x: key,
+          y: docCount,
+          g: key,
+        })),
+        inspect: getInspectResponse(response, { dsl: [], response: [] }),
+        totalCount: buckets.length,
+      };
+    }
     return {
       data: response.matrixHistogramData,
       inspect: getInspectResponse(response, { dsl: [], response: [] }),

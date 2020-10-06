@@ -25,7 +25,7 @@ import * as i18n from './translations';
 import { Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { BarChart } from '../../../../common/components/charts/barchart';
-import { getHistogramConfig, getTimeframeOptions } from './helpers';
+import { getHistogramConfig, getTimeframeOptions, getThresholdHistogramConfig } from './helpers';
 import { ChartData } from '../../../../common/components/charts/common';
 import { InspectQuery } from '../../../../common/store/inputs/model';
 import { InspectButton } from '../../../../common/components/inspect';
@@ -66,6 +66,7 @@ interface PreviewQueryHistogramProps {
   errorExists: boolean;
   isDisabled: boolean;
   warnings: string[];
+  threshold: { field: string | undefined; value: number } | undefined;
   onPreviewClick: (arg: Unit) => void;
 }
 
@@ -82,6 +83,7 @@ export const PreviewQueryHistogram = ({
   inspect,
   ruleType,
   errorExists,
+  threshold,
   isDisabled,
   warnings,
 }: PreviewQueryHistogramProps) => {
@@ -164,7 +166,9 @@ export const PreviewQueryHistogram = ({
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="xs">
                     <h2 data-test-subj="header-section-title">
-                      {i18n.QUERY_PREVIEW_TITLE(totalHits)}
+                      {ruleType === 'threshold' && threshold != null && threshold.field != null
+                        ? i18n.QUERY_PREVIEW_THRESHOLD_WITH_FIELD_TITLE(totalHits)
+                        : i18n.QUERY_PREVIEW_TITLE(totalHits)}
                     </h2>
                   </EuiTitle>
                 </EuiFlexItem>
@@ -173,14 +177,18 @@ export const PreviewQueryHistogram = ({
                   <InspectButton
                     queryId={ID}
                     inspectIndex={0}
-                    title={i18n.QUERY_PREVIEW_TITLE(totalHits)}
+                    title={i18n.QUERY_PREVIEW_INSPECT_TITLE}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={1}>
               <BarChart
-                configs={getHistogramConfig(to, from, query.includes('sequence'))}
+                configs={
+                  ruleType === 'threshold' && threshold != null && threshold.field != null
+                    ? getThresholdHistogramConfig()
+                    : getHistogramConfig(to, from, query.includes('sequence'))
+                }
                 barChart={[{ key: 'hits', value: data }]}
                 stackByField={undefined}
                 timelineId={undefined}

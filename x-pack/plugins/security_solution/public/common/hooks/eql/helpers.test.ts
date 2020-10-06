@@ -18,19 +18,12 @@ import {
   getInterval,
   getSequenceAggs,
 } from './helpers';
-import { Connection } from '@elastic/elasticsearch';
 
 const getMockResponse = (): EqlSearchStrategyResponse<EqlSearchResponse<Source>> =>
   ({
     id: 'some-id',
-    isPartial: false,
-    isRunning: false,
     rawResponse: {
       body: {
-        is_partial: false,
-        is_running: false,
-        timed_out: false,
-        took: 15,
         hits: {
           events: [
             {
@@ -68,7 +61,6 @@ const getMockResponse = (): EqlSearchStrategyResponse<EqlSearchResponse<Source>>
           },
         },
       },
-      headers: {},
       meta: {
         request: {
           params: {
@@ -78,11 +70,6 @@ const getMockResponse = (): EqlSearchStrategyResponse<EqlSearchResponse<Source>>
           options: {},
           id: '',
         },
-        context: {},
-        name: '',
-        connection: {} as Connection,
-        attempts: 1,
-        aborted: false,
       },
       statusCode: 200,
     },
@@ -91,14 +78,8 @@ const getMockResponse = (): EqlSearchStrategyResponse<EqlSearchResponse<Source>>
 const getMockSequenceResponse = (): EqlSearchStrategyResponse<EqlSearchResponse<Source>> =>
   (({
     id: 'some-id',
-    isPartial: false,
-    isRunning: false,
     rawResponse: {
       body: {
-        is_partial: false,
-        is_running: false,
-        timed_out: false,
-        took: 15,
         hits: {
           sequences: [
             {
@@ -146,7 +127,6 @@ const getMockSequenceResponse = (): EqlSearchStrategyResponse<EqlSearchResponse<
           },
         },
       },
-      headers: {},
       meta: {
         request: {
           params: {
@@ -156,11 +136,6 @@ const getMockSequenceResponse = (): EqlSearchStrategyResponse<EqlSearchResponse<
           options: {},
           id: '',
         },
-        context: {},
-        name: '',
-        connection: {} as Connection,
-        attempts: 1,
-        aborted: false,
       },
       statusCode: 200,
     },
@@ -692,6 +667,7 @@ describe('eql/helpers', () => {
       const mockResponse = getMockSequenceResponse();
       const sequenceAggs = getSequenceAggs(
         mockResponse,
+        'h',
         '2020-10-04T15:00:00.368707900Z',
         '2020-10-04T16:00:00.368707900Z'
       );

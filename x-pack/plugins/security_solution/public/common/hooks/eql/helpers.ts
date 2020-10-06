@@ -17,7 +17,7 @@ type EqlAggBuckets = Record<string, { timestamp: string; total: number }>;
 
 export const EQL_QUERY_EVENT_SIZE = 100;
 
-// Calculates which 5 min bucket segment, event should be
+// Calculates which 2 min bucket segment, event should be
 // sorted into
 export const calculateBucketForHour = (eventTimestamp: number, relativeNow: number): number => {
   const diff: number = relativeNow - eventTimestamp;

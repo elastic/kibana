@@ -74,3 +74,40 @@ export const getHistogramConfig = (
     customHeight: 200,
   };
 };
+
+export const getThresholdHistogramConfig = (): ChartSeriesConfigs => {
+  return {
+    series: {
+      xScaleType: ScaleType.Linear,
+      yScaleType: ScaleType.Linear,
+      stackAccessors: ['g'],
+    },
+    axis: {
+      tickSize: 8,
+    },
+    yAxisTitle: i18n.QUERY_GRAPH_COUNT,
+    settings: {
+      legendPosition: Position.Right,
+      showLegend: true,
+      showLegendExtra: true,
+      theme: {
+        scales: {
+          barsPadding: 0.08,
+        },
+        chartMargins: {
+          left: 0,
+          right: 0,
+          top: 0,
+          bottom: 0,
+        },
+        chartPaddings: {
+          left: 0,
+          right: 0,
+          top: 0,
+          bottom: 0,
+        },
+      },
+    },
+    customHeight: 200,
+  };
+};
