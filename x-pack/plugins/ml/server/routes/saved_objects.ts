@@ -4,23 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { schema } from '@kbn/config-schema';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import { checksFactory } from '../saved_objects';
-
-import { Job } from '../../common/types/anomaly_detection_jobs';
-import { Datafeed } from '../../common/types/anomaly_detection_jobs';
-
-interface JobStatus {
-  jobId: string;
-  type: string;
-  datafeedId?: string;
-  checks: {
-    jobExists: boolean;
-    datafeedExists?: boolean;
-    datafeedMapped?: boolean;
-  };
-}
 
 /**
  * Routes for job service
@@ -69,15 +56,18 @@ export function savedObjectsRoutes({ router, mlLicense }: RouteInitialization) {
   router.get(
     {
       path: '/api/ml/saved_objects/repair',
-      validate: false,
+      validate: {
+        query: schema.object({ simulate: schema.maybe(schema.boolean()) }),
+      },
       options: {
         tags: ['access:ml:canStartStopDatafeed'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async ({ client, mlClient, request, response, jobsInSpaces }) => {
       try {
+        const { simulate } = request.query;
         const { repairJobs } = checksFactory(client, jobsInSpaces);
-        const savedObjects = await repairJobs();
+        const savedObjects = await repairJobs(simulate);
 
         return response.ok({
           body: savedObjects,

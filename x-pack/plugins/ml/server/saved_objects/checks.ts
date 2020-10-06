@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  IScopedClusterClient,
-  SavedObjectsClientContract,
-  SavedObjectsFindOptions,
-} from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { JobsInSpaces, JobType } from './filter';
 import { ML_SAVED_OBJECT_TYPE } from './saved_objects';
@@ -63,17 +59,17 @@ export function checksFactory(client: IScopedClusterClient, jobsInSpaces: JobsIn
       const type: JobType = attributes.type;
       const jobId = attributes.job_id;
       const datafeedId = type === 'anomaly-detector' ? attributes.datafeed_id : undefined;
-      const jobExists =
-        type === 'anomaly-detector'
-          ? adJobs.jobs.some((j) => j.job_id === jobId)
-          : dfaJobs.data_frame_analytics.some((j) => j.id === jobId);
 
+      let jobExists = false;
       let datafeedExists: boolean | undefined;
       let datafeedMapped: boolean | undefined;
 
       if (type === 'anomaly-detector') {
-        datafeedExists = datafeeds.datafeeds.some((j) => j.datafeed_id === datafeedId);
+        jobExists = adJobs.jobs.some((j) => j.job_id === jobId);
+        datafeedExists = datafeeds.datafeeds.some((j) => j.job_id === jobId);
         datafeedMapped = datafeeds.datafeeds.some((j) => j.datafeed_id === datafeedId);
+      } else {
+        jobExists = dfaJobs.data_frame_analytics.some((j) => j.id === jobId);
       }
 
       return {
@@ -89,13 +85,12 @@ export function checksFactory(client: IScopedClusterClient, jobsInSpaces: JobsIn
     });
 
     const anomalyDetectors = adJobs.jobs.map(({ job_id: jobId }) => {
-      // const datafeedId = datafeeds.datafeeds.find((df) => df.job_id === jobId)?.datafeed_id;
+      const datafeedId = datafeeds.datafeeds.find((df) => df.job_id === jobId)?.datafeed_id;
       return {
         jobId,
-        // datafeedId: datafeedId ?? null,
+        datafeedId: datafeedId ?? null,
         checks: {
           savedObjectExits: nonSpaceADObjectIds.has(jobId),
-          // savedObjectExits: savedObjects.some((s) => s.jobId === j.job_id),
         },
       };
     });
@@ -105,7 +100,6 @@ export function checksFactory(client: IScopedClusterClient, jobsInSpaces: JobsIn
         jobId,
         checks: {
           savedObjectExits: nonSpaceDFAObjectIds.has(jobId),
-          // savedObjectExits: savedObjects.some((s) => s.jobId === j.id),
         },
       };
     });
@@ -122,7 +116,7 @@ export function checksFactory(client: IScopedClusterClient, jobsInSpaces: JobsIn
     };
   }
 
-  async function repairJobs() {
+  async function repairJobs(simulate: boolean = false) {
     const results: {
       savedObjectsCreated: string[];
       savedObjectsDeleted: string[];
@@ -139,29 +133,50 @@ export function checksFactory(client: IScopedClusterClient, jobsInSpaces: JobsIn
     for (const job of status.jobs.anomalyDetectors) {
       if (job.checks.savedObjectExits === false) {
         results.savedObjectsCreated.push(job.jobId);
+        if (simulate === false) {
+          await jobsInSpaces.createAnomalyDetectionJob(job.jobId);
+          if (job.datafeedId !== null) {
+            //
+            await jobsInSpaces.addDatafeed(job.datafeedId, job.jobId);
+          }
+        }
       }
     }
     for (const job of status.jobs.dataFrameAnalytics) {
       if (job.checks.savedObjectExits === false) {
         results.savedObjectsCreated.push(job.jobId);
+        if (simulate === false) {
+          //
+          await jobsInSpaces.createDataFrameAnalyticsJob(job.jobId);
+        }
       }
     }
 
     for (const job of status.savedObjects.anomalyDetectors) {
       if (job.checks.jobExists === false) {
         results.savedObjectsDeleted.push(job.jobId);
+        if (simulate === false) {
+          //
+          await jobsInSpaces.deleteAnomalyDetectionJob(job.jobId);
+        }
       }
     }
     for (const job of status.savedObjects.dataFrameAnalytics) {
       if (job.checks.jobExists === false) {
         results.savedObjectsDeleted.push(job.jobId);
+        if (simulate === false) {
+          //
+          await jobsInSpaces.deleteDataFrameAnalyticsJob(job.jobId);
+        }
       }
     }
 
     for (const job of status.savedObjects.anomalyDetectors) {
       if (job.checks.datafeedExists === true && job.checks.datafeedMapped === false) {
+        //
         results.datafeedsCreated.push(job.jobId);
       } else if (job.checks.datafeedExists === false && job.checks.datafeedMapped === true) {
+        //
         results.datafeedsDeleted.push(job.jobId);
       }
     }
