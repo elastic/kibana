@@ -73,7 +73,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
 
   const existingPolicy = getPolicyByName(policies, policyName);
 
-  const [policy, setPolicy] = useState<Policy>(
+  const [policy, setPolicy] = useState<Policy>(() =>
     existingPolicy ? deserializePolicy(existingPolicy) : initializeNewPolicy(policyName)
   );
 
@@ -296,6 +296,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
 
             <HotPhase
               errors={errors?.hot}
+              defaultValue={existingPolicy?.policy.phases.hot}
               isShowingErrors={isShowingErrors && !!errors && Object.keys(errors.hot).length > 0}
               setPhaseData={setHotPhaseData}
               phaseData={policy.phases.hot}
