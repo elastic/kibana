@@ -131,7 +131,11 @@ export class Home extends Component {
     }
 
     return (
-      <main aria-labelledby="pageHeader__title" className="homWrapper" data-test-subj="homeApp">
+      <main
+        aria-labelledby="kbnOverviewPageHeader__title"
+        className="homWrapper"
+        data-test-subj="homeApp"
+      >
         <OverviewPageHeader
           overlap={solutions.length}
           showDevToolsLink

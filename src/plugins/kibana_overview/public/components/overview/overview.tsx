@@ -125,7 +125,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   const remainingApps = kibanaApps.map(({ id }) => id).filter((id) => !mainApps.includes(id));
 
   return (
-    <main aria-labelledby="pageHeader__title" className="kbnOverviewWrapper">
+    <main aria-labelledby="kbnOverviewPageHeader__title" className="kbnOverviewWrapper">
       <OverviewPageHeader
         hideToolbar={isNewKibanaInstance}
         iconType="logoKibana"
