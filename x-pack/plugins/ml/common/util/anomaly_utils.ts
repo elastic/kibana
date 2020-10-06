@@ -112,8 +112,8 @@ function getSeverityTypes() {
 /**
  * Return formatted severity score.
  */
-export function getFormattedSeverityScore(score: number) {
-  return score < 1 ? '< 1' : score.toFixed(2);
+export function getFormattedSeverityScore(score: number): string {
+  return score < 1 ? '< 1' : String(parseInt(String(score), 10));
 }
 
 // Returns a severity label (one of critical, major, minor, warning or unknown)

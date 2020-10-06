@@ -174,17 +174,6 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     [chartWidth]
   );
 
-  const showSwimlane = swimlaneData?.laneLabels?.length > 0 && swimlaneData?.points.length > 0;
-
-  const isPaginationVisible =
-    (showSwimlane || isLoading) &&
-    swimlaneLimit !== undefined &&
-    onPaginationChange &&
-    fromPage &&
-    perPage;
-
-  const rowsCount = swimlaneData?.laneLabels?.length ?? 0;
-
   const swimLanePoints = useMemo(() => {
     const showFilterContext = filterActive === true && swimlaneType === SWIMLANE_TYPE.OVERALL;
 
@@ -205,6 +194,17 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
       })
       .filter((v) => v.value > 0);
   }, [swimlaneData?.points, filterActive, swimlaneType]);
+
+  const showSwimlane = swimlaneData?.laneLabels?.length > 0 && swimLanePoints.length > 0;
+
+  const isPaginationVisible =
+    (showSwimlane || isLoading) &&
+    swimlaneLimit !== undefined &&
+    onPaginationChange &&
+    fromPage &&
+    perPage;
+
+  const rowsCount = swimlaneData?.laneLabels?.length ?? 0;
 
   const containerHeight = useMemo(() => {
     // Persists container height during loading to prevent page from jumping
