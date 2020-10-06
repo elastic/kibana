@@ -160,7 +160,7 @@ export class SpaceSelector extends Component<Props, State> {
             {!this.state.loading && this.state.error && (
               <Fragment>
                 <EuiSpacer />
-                <EuiPanel>
+                <EuiPanel className="spcSpaceSelector__errorPanel">
                   <EuiText color="danger" style={{ textAlign: 'center' }}>
                     <FormattedMessage
                       id="xpack.spaces.spaceSelector.errorLoadingSpacesDescription"
