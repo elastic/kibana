@@ -13,7 +13,17 @@ import {
   KibanaAssetType,
 } from '../../../types';
 
-export { bulkInstallPackages, isBulkInstallError } from './bulk_install_packages';
+export {
+  bulkInstallPackages,
+  isBulkInstallError,
+  isCriticalInstallError,
+} from './bulk_install_packages';
+export {
+  isUpgrade,
+  upgradePackage,
+  BulkInstallResponse,
+  IBulkInstallPackageError,
+} from './upgrade';
 export {
   getCategories,
   getFile,
@@ -26,8 +36,6 @@ export {
 } from './get';
 
 export {
-  BulkInstallResponse,
-  IBulkInstallPackageError,
   handleInstallPackageFailure,
   installPackageFromRegistry,
   installPackageByUpload,

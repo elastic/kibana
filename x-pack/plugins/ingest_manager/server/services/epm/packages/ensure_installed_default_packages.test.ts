@@ -11,9 +11,9 @@ jest.mock('./install');
 jest.mock('./bulk_install_packages');
 jest.mock('./get');
 
-import { bulkInstallPackages, isBulkInstallError } from './bulk_install_packages';
+import { bulkInstallPackages, isCriticalInstallError } from './bulk_install_packages';
 const { ensureInstalledDefaultPackages } = jest.requireActual('./install');
-const { isBulkInstallError: actualIsBulkInstallError } = jest.requireActual(
+const { isCriticalInstallError: actualIsCriticalInstallError } = jest.requireActual(
   './bulk_install_packages'
 );
 import { getInstallation } from './get';
@@ -26,14 +26,14 @@ import { createAppContextStartContractMock } from '../../../mocks';
 const mockedBulkInstallPackages = bulkInstallPackages as jest.MockedFunction<
   typeof bulkInstallPackages
 >;
-const mockedIsBulkInstallError = isBulkInstallError as jest.MockedFunction<
-  typeof isBulkInstallError
+const mockedIsCriticalInstallError = isCriticalInstallError as jest.MockedFunction<
+  typeof isCriticalInstallError
 >;
 const mockedGetInstallation = getInstallation as jest.MockedFunction<typeof getInstallation>;
 
 // I was unable to get the actual implementation set in the `jest.mock()` call at the top to work
-// so this will set the `isBulkInstallError` function back to the actual implementation
-mockedIsBulkInstallError.mockImplementation(actualIsBulkInstallError);
+// so this will set the `isCriticalInstallError` function back to the actual implementation
+mockedIsCriticalInstallError.mockImplementation(actualIsCriticalInstallError);
 
 const mockInstallation: SavedObject<Installation> = {
   id: 'test-pkg',
@@ -80,7 +80,7 @@ describe('ensureInstalledDefaultPackages', () => {
     const resp = await ensureInstalledDefaultPackages(soClient, jest.fn());
     expect(resp).toEqual([mockInstallation.attributes]);
   });
-  it('should throw the first Error it finds', async () => {
+  it('should throw the first critical Error it finds', async () => {
     class SomeCustomError extends Error {}
     mockedGetInstallation.mockImplementation(async () => {
       return mockInstallation.attributes;
@@ -102,8 +102,14 @@ describe('ensureInstalledDefaultPackages', () => {
           statusCode: 200,
         },
         {
+          name: 'failure two',
+          error: new Error('zzz'),
+          criticalFailure: false,
+        },
+        {
           name: 'failure one',
           error: new SomeCustomError('abc 123'),
+          criticalFailure: true,
         },
         {
           name: 'success three',
@@ -111,10 +117,6 @@ describe('ensureInstalledDefaultPackages', () => {
           newVersion: '',
           oldVersion: '',
           statusCode: 200,
-        },
-        {
-          name: 'failure two',
-          error: new Error('zzz'),
         },
       ];
     });
