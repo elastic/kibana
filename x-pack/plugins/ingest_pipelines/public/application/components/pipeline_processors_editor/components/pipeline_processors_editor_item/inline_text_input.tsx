@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import classNames from 'classnames';
-import React, { FunctionComponent, useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import { EuiFieldText, EuiText, keys } from '@elastic/eui';
 
 export interface Props {
@@ -23,15 +23,15 @@ export interface Props {
   text?: string;
 }
 
-export const InlineTextInput: FunctionComponent<Props> = ({
+function _InlineTextInput({
   placeholder,
   text,
   ariaLabel,
   disabled = false,
   onChange,
-}) => {
+}: Props): React.ReactElement<any, any> | null {
   const [isShowingTextInput, setIsShowingTextInput] = useState<boolean>(false);
-  const [textValue, setTextValue] = useState<string>(text ?? '');
+  const [textValue, setTextValue] = useState<string>(() => text ?? '');
 
   const containerClasses = classNames('pipelineProcessorsEditor__item__textContainer', {
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -46,6 +46,10 @@ export const InlineTextInput: FunctionComponent<Props> = ({
       onChange(textValue);
     });
   }, [setIsShowingTextInput, onChange, textValue]);
+
+  useEffect(() => {
+    setTextValue(text ?? '');
+  }, [text]);
 
   useEffect(() => {
     const keyboardListener = (event: KeyboardEvent) => {
@@ -91,4 +95,6 @@ export const InlineTextInput: FunctionComponent<Props> = ({
       </EuiText>
     </div>
   );
-};
+}
+
+export const InlineTextInput = memo(_InlineTextInput);

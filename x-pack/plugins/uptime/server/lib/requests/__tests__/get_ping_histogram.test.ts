@@ -140,8 +140,8 @@ describe('getPingHistogram', () => {
     const result = await getPingHistogram({
       callES: mockEsClient,
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
-      from: '1234',
-      to: '5678',
+      from: 'now-15m',
+      to: 'now',
       filters: JSON.stringify(searchFilter),
       monitorId: undefined,
     });
