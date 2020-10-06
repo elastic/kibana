@@ -7,7 +7,8 @@
 import { SavedObjectsClientContract } from 'src/core/server';
 import { AgentSOAttributes, AgentAction, AgentActionSOAttributes } from '../../types';
 import { AGENT_ACTION_SAVED_OBJECT_TYPE, AGENT_SAVED_OBJECT_TYPE } from '../../constants';
-import { createAgentAction } from './actions';
+import { bulkCreateAgentActions, createAgentAction } from './actions';
+import { getAgents, listAllAgents } from './crud';
 
 export async function sendUpgradeAgentAction({
   soClient,
@@ -18,7 +19,7 @@ export async function sendUpgradeAgentAction({
   soClient: SavedObjectsClientContract;
   agentId: string;
   version: string;
-  sourceUri: string;
+  sourceUri: string | undefined;
 }) {
   const now = new Date().toISOString();
   const data = {
@@ -50,12 +51,62 @@ export async function ackAgentUpgraded(
   if (!version) throw new Error('version missing from UPGRADE action');
   await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentAction.agent_id, {
     upgraded_at: new Date().toISOString(),
-    local_metadata: {
-      elastic: {
-        agent: {
-          version,
-        },
-      },
-    },
+    upgrade_started_at: undefined,
   });
+}
+
+export async function sendUpgradeAgentsActions(
+  soClient: SavedObjectsClientContract,
+  options:
+    | {
+        agentIds: string[];
+        sourceUri: string | undefined;
+        version: string;
+      }
+    | {
+        kuery: string;
+        sourceUri: string | undefined;
+        version: string;
+      }
+) {
+  // Filter out agents currently unenrolling, agents unenrolled
+  const agents =
+    'agentIds' in options
+      ? await getAgents(soClient, options.agentIds)
+      : (
+          await listAllAgents(soClient, {
+            kuery: options.kuery,
+            showInactive: false,
+          })
+        ).agents;
+  const agentsToUpdate = agents.filter(
+    (agent) => !agent.unenrollment_started_at && !agent.unenrolled_at
+  );
+  const now = new Date().toISOString();
+  const data = {
+    version: options.version,
+    source_uri: options.sourceUri,
+  };
+  // Create upgrade action for each agent
+  await bulkCreateAgentActions(
+    soClient,
+    agentsToUpdate.map((agent) => ({
+      agent_id: agent.id,
+      created_at: now,
+      data,
+      ack_data: data,
+      type: 'UPGRADE',
+    }))
+  );
+
+  return await soClient.bulkUpdate<AgentSOAttributes>(
+    agentsToUpdate.map((agent) => ({
+      type: AGENT_SAVED_OBJECT_TYPE,
+      id: agent.id,
+      attributes: {
+        upgraded_at: undefined,
+        upgrade_started_at: now,
+      },
+    }))
+  );
 }
