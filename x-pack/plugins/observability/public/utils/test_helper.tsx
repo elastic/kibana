@@ -13,6 +13,7 @@ import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/p
 import { PluginContext } from '../context/plugin_context';
 import { EuiThemeProvider } from '../typings';
 import { HasDataContextProvider } from '../context/has_data_context';
+import { ObservabilityPluginSetupDeps } from '../plugin';
 
 export const core = ({
   http: {
@@ -26,10 +27,14 @@ export const core = ({
   },
 } as unknown) as CoreStart;
 
+const plugins = ({
+  data: { query: { timefilter: { timefilter: { setTime: jest.fn() } } } },
+} as unknown) as ObservabilityPluginSetupDeps;
+
 export const render = (component: React.ReactNode) => {
   const history = createMemoryHistory();
   return testLibRender(
-    <PluginContext.Provider value={{ core }}>
+    <PluginContext.Provider value={{ core, plugins }}>
       <KibanaContextProvider services={{ ...core }}>
         <EuiThemeProvider>
           <HasDataContextProvider>

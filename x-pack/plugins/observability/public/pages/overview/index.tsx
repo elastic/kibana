@@ -36,10 +36,14 @@ export function calculateBucketSize({ start, end }: { start?: number; end?: numb
 export function OverviewPage({ routeParams }: Props) {
   useTrackPageview({ app: 'observability', path: 'overview' });
   useTrackPageview({ app: 'observability', path: 'overview', delay: 15000 });
-  const { core } = usePluginContext();
+  const { core, plugins } = usePluginContext();
   const theme = useContext(ThemeContext);
-  const timePickerTime = useKibanaUISettings<TimePickerTime>(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
   const [alertEmptySection, setAlertEmptySection] = useState(false);
+
+  const timePickerDefaults = useKibanaUISettings<TimePickerTime>(
+    UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
+  );
+  const timePickerSharedState = plugins.data.query.timefilter.timefilter.getTime();
 
   const { hasData } = useHasDataContext();
 
@@ -56,6 +60,11 @@ export function OverviewPage({ routeParams }: Props) {
     return hasData?.[id] === false;
   });
 
+  const relativeTime = {
+    start: routeParams.query.rangeFrom || timePickerSharedState.from || timePickerDefaults.from,
+    end: routeParams.query.rangeTo || timePickerSharedState.to || timePickerDefaults.to,
+  };
+
   return (
     <WithHeaderLayout
       headerColor={theme.eui.euiColorEmptyShade}
@@ -66,8 +75,8 @@ export function OverviewPage({ routeParams }: Props) {
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <DatePicker
-            rangeFrom={routeParams.query.rangeFrom ?? timePickerTime.from}
-            rangeTo={routeParams.query.rangeTo ?? timePickerTime.to}
+            rangeFrom={relativeTime.start}
+            rangeTo={relativeTime.end}
             refreshInterval={refreshInterval}
             refreshPaused={refreshPaused}
           />

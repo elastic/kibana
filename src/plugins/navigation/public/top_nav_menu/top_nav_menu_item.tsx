@@ -52,7 +52,7 @@ export function TopNavMenuItem(props: TopNavMenuData) {
       {upperFirst(props.label || props.id!)}
     </EuiButton>
   ) : (
-    <EuiHeaderLink size="xs" isActive {...commonButtonProps}>
+    <EuiHeaderLink size="xs" color="primary" {...commonButtonProps}>
       {upperFirst(props.label || props.id!)}
     </EuiHeaderLink>
   );
