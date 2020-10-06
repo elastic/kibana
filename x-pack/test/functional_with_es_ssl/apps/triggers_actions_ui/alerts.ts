@@ -40,8 +40,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return createdAlert;
   }
 
-  async function deleteAlert(alertId: string) {
-    await supertest.delete(`/api/alerts/alert/${alertId}`).set('kbn-xsrf', 'foo').expect(204, '');
+  async function getAlertsByName(name: string) {
+    const {
+      body: { data: alerts },
+    } = await supertest.get(`/api/alerts/_find?search=${name}&search_fields=name`).expect(200);
+
+    return alerts;
+  }
+
+  async function deleteAlerts(alertIds: string[]) {
+    alertIds.forEach(async (alertId: string) => {
+      await supertest.delete(`/api/alerts/alert/${alertId}`).set('kbn-xsrf', 'foo').expect(204, '');
+    });
   }
 
   describe('alerts', function () {
@@ -107,6 +117,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           interval: '1m',
         },
       ]);
+
+      // clean up created alert
+      const alertsToDelete = await getAlertsByName(alertName);
+      await deleteAlerts(alertsToDelete.map((alertItem: { id: string }) => alertItem.id));
     });
 
     it('should display alerts in alphabetical order', async () => {
@@ -123,9 +137,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(searchResults[1].name).to.eql('b');
       expect(searchResults[2].name).to.eql('c');
 
-      await deleteAlert(a.id);
-      await deleteAlert(b.id);
-      await deleteAlert(c.id);
+      await deleteAlerts([a.id, b.id, c.id]);
     });
 
     it('should search for alert', async () => {
@@ -133,13 +145,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
-      expect(searchResults.shift()).to.eql({
-        name: createdAlert.name,
-        tagsText: 'foo, bar',
-        alertType: 'Test: Noop',
-        interval: '1m',
-      });
-      await deleteAlert(createdAlert.id);
+      expect(searchResults).to.eql([
+        {
+          name: createdAlert.name,
+          tagsText: 'foo, bar',
+          alertType: 'Test: Noop',
+          interval: '1m',
+        },
+      ]);
+      await deleteAlerts([createdAlert.id]);
     });
 
     it('should search for tags', async () => {
@@ -147,16 +161,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.triggersActionsUI.searchAlerts(`${createdAlert.name} foo`);
 
       const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
-      expect(searchResults.shift()).to.eql({
-        name: createdAlert.name,
-        tagsText: 'foo, bar',
-        alertType: 'Test: Noop',
-        interval: '1m',
-      });
-      await deleteAlert(createdAlert.id);
+      expect(searchResults).to.eql([
+        {
+          name: createdAlert.name,
+          tagsText: 'foo, bar',
+          alertType: 'Test: Noop',
+          interval: '1m',
+        },
+      ]);
+      await deleteAlerts([createdAlert.id]);
     });
 
-    it('should display an empty list when search removes all alerts', async () => {
+    it('should display an empty list when search did not return any alerts', async () => {
       await pageObjects.triggersActionsUI.searchAlerts(`An Alert That For Sure Doesn't Exist!`);
 
       expect(await pageObjects.triggersActionsUI.isAlertsListDisplayed()).to.eql(true);
@@ -177,7 +193,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const disableSwitchAfterDisable = await testSubjects.find('disableSwitch');
       const isChecked = await disableSwitchAfterDisable.getAttribute('aria-checked');
       expect(isChecked).to.eql('true');
-      await deleteAlert(createdAlert.id);
+      await deleteAlerts([createdAlert.id]);
     });
 
     it('should re-enable single alert', async () => {
@@ -201,7 +217,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const disableSwitchAfterReEnable = await testSubjects.find('disableSwitch');
       const isChecked = await disableSwitchAfterReEnable.getAttribute('aria-checked');
       expect(isChecked).to.eql('false');
-      await deleteAlert(createdAlert.id);
+      await deleteAlerts([createdAlert.id]);
     });
 
     it('should mute single alert', async () => {
@@ -219,7 +235,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const muteSwitchAfterMute = await testSubjects.find('muteSwitch');
       const isChecked = await muteSwitchAfterMute.getAttribute('aria-checked');
       expect(isChecked).to.eql('true');
-      await deleteAlert(createdAlert.id);
+      await deleteAlerts([createdAlert.id]);
     });
 
     it('should unmute single alert', async () => {
@@ -243,7 +259,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const muteSwitchAfterUnmute = await testSubjects.find('muteSwitch');
       const isChecked = await muteSwitchAfterUnmute.getAttribute('aria-checked');
       expect(isChecked).to.eql('false');
-      await deleteAlert(createdAlert.id);
+      await deleteAlerts([createdAlert.id]);
     });
 
     it('should delete single alert', async () => {
@@ -258,13 +274,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
       await testSubjects.missingOrFail('deleteIdsConfirmation');
 
-      const toastTitle = await pageObjects.common.closeToast();
-      expect(toastTitle).to.eql('Deleted 1 alert');
-      await pageObjects.common.navigateToApp('triggersActions');
+      await retry.try(async () => {
+        const toastTitle = await pageObjects.common.closeToast();
+        expect(toastTitle).to.eql('Deleted 1 alert');
+      });
+
       await pageObjects.triggersActionsUI.searchAlerts(secondAlert.name);
       const searchResultsAfterDelete = await pageObjects.triggersActionsUI.getAlertsList();
       expect(searchResultsAfterDelete.length).to.eql(0);
-      await deleteAlert(firstAlert.id);
+      await deleteAlerts([firstAlert.id]);
     });
 
     it('should mute all selection', async () => {
@@ -287,7 +305,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const muteSwitch = await testSubjects.find('muteSwitch');
       const isChecked = await muteSwitch.getAttribute('aria-checked');
       expect(isChecked).to.eql('true');
-      await deleteAlert(createdAlert.id);
+      await deleteAlerts([createdAlert.id]);
     });
 
     it('should unmute all selection', async () => {
@@ -312,7 +330,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const muteSwitch = await testSubjects.find('muteSwitch');
       const isChecked = await muteSwitch.getAttribute('aria-checked');
       expect(isChecked).to.eql('false');
-      await deleteAlert(createdAlert.id);
+      await deleteAlerts([createdAlert.id]);
     });
 
     it('should disable all selection', async () => {
@@ -335,7 +353,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const disableSwitch = await testSubjects.find('disableSwitch');
       const isChecked = await disableSwitch.getAttribute('aria-checked');
       expect(isChecked).to.eql('true');
-      await deleteAlert(createdAlert.id);
+      await deleteAlerts([createdAlert.id]);
     });
 
     it('should enable all selection', async () => {
@@ -360,7 +378,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const disableSwitch = await testSubjects.find('disableSwitch');
       const isChecked = await disableSwitch.getAttribute('aria-checked');
       expect(isChecked).to.eql('false');
-      await deleteAlert(createdAlert.id);
+      await deleteAlerts([createdAlert.id]);
     });
 
     it('should delete all selection', async () => {
@@ -387,11 +405,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
       await testSubjects.missingOrFail('deleteIdsConfirmation');
 
+      await retry.try(async () => {
+        const toastTitle = await pageObjects.common.closeToast();
+        expect(toastTitle).to.eql('Deleted 10 alerts');
+      });
+
       await pageObjects.triggersActionsUI.searchAlerts(namePrefix);
       const searchResultsAfterDelete = await pageObjects.triggersActionsUI.getAlertsList();
       expect(searchResultsAfterDelete).to.have.length(2);
       expect(searchResultsAfterDelete[0].name).to.eql(createdAlertsSecondPage[0].name);
       expect(searchResultsAfterDelete[1].name).to.eql(createdAlertsSecondPage[1].name);
+
+      await deleteAlerts([createdAlertsSecondPage[0].id, createdAlertsSecondPage[1].id]);
     });
   });
 };
