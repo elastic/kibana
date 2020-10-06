@@ -12,6 +12,7 @@ import { IndexPattern } from 'src/plugins/data/public';
 import {
   getIndexPatternSelectComponent,
   getIndexPatternService,
+  getSavedObjectsClient,
   getHttp,
 } from '../kibana_services';
 import { ES_GEO_FIELD_TYPES } from '../../common/constants';
@@ -40,7 +41,7 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
     this._isMounted = true;
   }
 
-  _onIndexPatternSelect = async (indexPatternId: string) => {
+  _onIndexPatternSelect = async (indexPatternId?: string) => {
     if (!indexPatternId || indexPatternId.length === 0) {
       return;
     }
@@ -123,7 +124,7 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
         >
           <IndexPatternSelect
             isDisabled={this.state.noGeoIndexPatternsExist}
-            indexPatternId={this.props.value}
+            indexPatternId={this.props.value ? this.props.value : ''}
             onChange={this._onIndexPatternSelect}
             placeholder={i18n.translate('xpack.maps.indexPatternSelectPlaceholder', {
               defaultMessage: 'Select index pattern',
@@ -131,6 +132,7 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
             fieldTypes={ES_GEO_FIELD_TYPES}
             onNoIndexPatterns={this._onNoIndexPatterns}
             isClearable={false}
+            savedObjectsClient={getSavedObjectsClient()}
           />
         </EuiFormRow>
       </>

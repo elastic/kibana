@@ -24,7 +24,11 @@ import { GeoIndexPatternSelect } from '../../../components/geo_index_pattern_sel
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { getGeoFields, getSourceFields, getTermsFields } from '../../../index_pattern_util';
 import { getEmsFileLayers } from '../../../meta';
-import { getIndexPatternSelectComponent, getIndexPatternService } from '../../../kibana_services';
+import {
+  getIndexPatternSelectComponent,
+  getIndexPatternService,
+  getSavedObjectsClient,
+} from '../../../kibana_services';
 import {
   createEmsChoroplethLayerDescriptor,
   createEsChoroplethLayerDescriptor,
@@ -60,7 +64,7 @@ interface State {
   leftGeoField: string | null;
   leftEmsJoinField: string | null;
   leftElasticsearchJoinField: string | null;
-  rightIndexPatternId: string | null;
+  rightIndexPatternId: string;
   rightIndexPatternTitle: string | null;
   rightTermsFields: IFieldType[];
   rightJoinField: string | null;
@@ -79,7 +83,7 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
     leftGeoField: null,
     leftEmsJoinField: null,
     leftElasticsearchJoinField: null,
-    rightIndexPatternId: null,
+    rightIndexPatternId: '',
     rightIndexPatternTitle: null,
     rightTermsFields: [],
     rightJoinField: null,
@@ -201,7 +205,7 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
     this.setState({ leftEmsJoinField: selectedOptions[0].value! }, this._previewLayer);
   };
 
-  _onRightIndexPatternChange = (indexPatternId: string) => {
+  _onRightIndexPatternChange = (indexPatternId?: string) => {
     if (!indexPatternId) {
       return;
     }
@@ -254,14 +258,14 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
             leftIndexPatternId: this.state.leftIndexPattern!.id,
             leftGeoField: this.state.leftGeoField!,
             leftJoinField: this.state.leftElasticsearchJoinField!,
-            rightIndexPatternId: this.state.rightIndexPatternId!,
+            rightIndexPatternId: this.state.rightIndexPatternId,
             rightIndexPatternTitle: this.state.rightIndexPatternTitle!,
             rightTermField: this.state.rightJoinField!,
           })
         : createEmsChoroplethLayerDescriptor({
             leftEmsFileId: this.state.leftEmsFileId!,
             leftEmsField: this.state.leftEmsJoinField!,
-            rightIndexPatternId: this.state.rightIndexPatternId!,
+            rightIndexPatternId: this.state.rightIndexPatternId,
             rightIndexPatternTitle: this.state.rightIndexPatternTitle!,
             rightTermField: this.state.rightJoinField!,
           });
@@ -437,6 +441,7 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
             indexPatternId={this.state.rightIndexPatternId}
             onChange={this._onRightIndexPatternChange}
             isClearable={false}
+            savedObjectsClient={getSavedObjectsClient()}
           />
         </EuiFormRow>
 

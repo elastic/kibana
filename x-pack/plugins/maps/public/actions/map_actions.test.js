@@ -289,7 +289,7 @@ describe('map_actions', () => {
             type: 'SET_QUERY',
           },
         ],
-        [undefined], // dispatch<any>(syncDataForAllLayers());
+        [undefined], // dispatch(syncDataForAllLayers());
       ]);
     });
 
