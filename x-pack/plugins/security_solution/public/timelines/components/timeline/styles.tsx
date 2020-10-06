@@ -173,13 +173,22 @@ export const EventsTbody = styled.div.attrs(({ className = '' }) => ({
 
 export const EventsTrGroup = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__trGroup ${className}`,
-}))<{ className?: string; eventType: Omit<TimelineEventsType, 'all'>; showLeftBorder: boolean }>`
+}))<{
+  className?: string;
+  eventType: Omit<TimelineEventsType, 'all'>;
+  isBuildingBlockType: boolean;
+  showLeftBorder: boolean;
+}>`
   border-bottom: ${({ theme }) => theme.eui.euiBorderWidthThin} solid
     ${({ theme }) => theme.eui.euiColorLightShade};
-  ${({ theme, eventType, showLeftBorder }) =>
+  ${({ theme, eventType, isBuildingBlockType, showLeftBorder }) =>
     showLeftBorder
       ? `border-left: 4px solid
     ${eventType === 'raw' ? theme.eui.euiColorLightShade : theme.eui.euiColorWarning}`
+      : ''};
+  ${({ isBuildingBlockType, showLeftBorder }) =>
+    isBuildingBlockType
+      ? `background: repeating-linear-gradient(127deg, rgba(245, 167, 0, 0.2), rgba(245, 167, 0, 0.2) 1px, rgba(245, 167, 0, 0.05) 2px, rgba(245, 167, 0, 0.05) 10px);`
       : ''};
 
   &:hover {
@@ -207,7 +216,13 @@ export const EventsTrSupplement = styled.div.attrs(({ className = '' }) => ({
 }))<{ className: string }>`
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   line-height: ${({ theme }) => theme.eui.euiLineHeight};
-  padding: 0 ${({ theme }) => theme.eui.paddingSizes.xs} 0 52px;
+  padding: 0 ${({ theme }) => theme.eui.paddingSizes.m};
+  .euiAccordion + div {
+    background-color: ${({ theme }) => theme.eui.euiColorEmptyShade};
+    padding: 0 ${({ theme }) => theme.eui.paddingSizes.s};
+    border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
+    border-radius: ${({ theme }) => theme.eui.paddingSizes.xs};
+  }
 `;
 
 export const EventsTdGroupActions = styled.div.attrs(({ className = '' }) => ({

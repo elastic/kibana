@@ -32,12 +32,13 @@ import {
 } from '../utils';
 import { VisualizeServices } from '../types';
 import { VisualizeEditorCommon } from './visualize_editor_common';
+import { VisualizeAppProps } from '../app';
 
-export const VisualizeByValueEditor = () => {
+export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const [originatingApp, setOriginatingApp] = useState<string>();
   const { services } = useKibana<VisualizeServices>();
   const [eventEmitter] = useState(new EventEmitter());
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(true);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [embeddableId, setEmbeddableId] = useState<string>();
   const [valueInput, setValueInput] = useState<VisualizeInput>();
 
@@ -100,6 +101,7 @@ export const VisualizeByValueEditor = () => {
       setHasUnsavedChanges={setHasUnsavedChanges}
       visEditorRef={visEditorRef}
       embeddableId={embeddableId}
+      onAppLeave={onAppLeave}
     />
   );
 };

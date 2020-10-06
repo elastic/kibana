@@ -1,10 +1,10 @@
 {
-  "id": "triggers_actions_ui",
+  "id": "triggersActionsUi",
   "version": "kibana",
-  "server": false,
+  "server": true,
   "ui": true,
-  "optionalPlugins": ["alerts", "alertingBuiltins"],
-  "requiredPlugins": ["management", "charts", "data"],
+  "optionalPlugins": ["alerts", "stackAlerts"],
+  "requiredPlugins": ["management", "charts", "data", "kibanaReact"],
   "configPath": ["xpack", "trigger_actions_ui"],
   "extraPublicDirs": ["public/common", "public/common/constants"],
   "requiredBundles": ["alerts", "esUiShared"]

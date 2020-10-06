@@ -10,7 +10,6 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiPanel,
-  EuiResizableContainer,
 } from '@elastic/eui';
 import React from 'react';
 import { ClientMetrics } from './ClientMetrics';
@@ -21,10 +20,8 @@ import { PageLoadAndViews } from './Panels/PageLoadAndViews';
 import { VisitorBreakdownsPanel } from './Panels/VisitorBreakdowns';
 import { useBreakPoints } from './hooks/useBreakPoints';
 
-export const FULL_HEIGHT = { height: '100%' };
-
 export function RumDashboard() {
-  const { isLarge, isSmall } = useBreakPoints();
+  const { isSmall } = useBreakPoints();
 
   return (
     <EuiFlexGroup direction={isSmall ? 'row' : 'column'} gutterSize="s">
@@ -45,22 +42,10 @@ export function RumDashboard() {
         <UXMetrics />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiResizableContainer
-          style={{ height: isLarge ? '1400px' : '850px' }}
-          direction="vertical"
-        >
-          {(EuiResizablePanel, EuiResizableButton) => (
-            <>
-              <EuiResizablePanel initialSize={40} minSize="40%">
-                <PageLoadAndViews />
-              </EuiResizablePanel>
-              <EuiResizableButton />
-              <EuiResizablePanel initialSize={60} minSize="10%">
-                <VisitorBreakdownsPanel />
-              </EuiResizablePanel>
-            </>
-          )}
-        </EuiResizableContainer>
+        <PageLoadAndViews />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <VisitorBreakdownsPanel />
       </EuiFlexItem>
       <EuiFlexItem>
         <ImpactfulMetrics />
