@@ -14,6 +14,7 @@ import { useHistory } from 'react-router-dom';
 import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
+import { calculateBucketSize } from '../../../../utils/calculate_bucket_size';
 import { SectionContainer } from '../';
 import { getDataHandler } from '../../../../data_handler';
 import { useChartTheme } from '../../../../hooks/use_chart_theme';
@@ -24,7 +25,6 @@ import { ChartContainer } from '../../chart_container';
 import { StyledStat } from '../../styled_stat';
 import { onBrushEnd } from '../helper';
 import { useQueryParams } from '../../../../hooks/use_query_params';
-import { calculateBucketSize } from '../../../../pages/overview';
 
 function getColorPerItem(series?: LogsFetchDataResponse['series']) {
   if (!series) {

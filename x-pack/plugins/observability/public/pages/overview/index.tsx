@@ -16,7 +16,6 @@ import { NewsFeed } from '../../components/app/news_feed';
 import { UI_SETTINGS, useKibanaUISettings } from '../../hooks/use_kibana_ui_settings';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { RouteParams } from '../../routes';
-import { getBucketSize } from '../../utils/get_bucket_size';
 import { getEmptySections } from './empty_section';
 import { LoadingObservability } from './loading_observability';
 import { DataSections } from './data_sections';
@@ -25,12 +24,6 @@ import { useHasDataContext } from '../../hooks/use_has_data_context';
 
 interface Props {
   routeParams: RouteParams<'/overview'>;
-}
-
-export function calculateBucketSize({ start, end }: { start?: number; end?: number }) {
-  if (start && end) {
-    return getBucketSize({ start, end, minInterval: '60s' });
-  }
 }
 
 export function OverviewPage({ routeParams }: Props) {

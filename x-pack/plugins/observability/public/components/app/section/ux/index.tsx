@@ -6,12 +6,12 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { calculateBucketSize } from '../../../../utils/calculate_bucket_size';
 import { SectionContainer } from '../';
 import { getDataHandler } from '../../../../data_handler';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { CoreVitals } from '../../../shared/core_web_vitals';
 import { useQueryParams } from '../../../../hooks/use_query_params';
-import { calculateBucketSize } from '../../../../pages/overview';
 
 interface Props {
   serviceName: string;
