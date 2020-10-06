@@ -102,11 +102,12 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
   }, [nodeType, metricsHostsAnomalies, metricsK8sAnomalies]);
 
   const metricLabel = toMetricOpt(metric.type)?.textLC;
+  const metricPopoverLabel = toMetricOpt(metric.type)?.text;
 
   const chartMetric = {
     color: Color.color0,
     aggregation: 'avg' as MetricsExplorerAggregation,
-    label: metricLabel,
+    label: metricPopoverLabel,
   };
 
   const dateFormatter = useMemo(() => {
@@ -335,11 +336,11 @@ const TimelineLoadingContainer = euiStyled.div`
 `;
 
 const noHistoryDataTitle = i18n.translate('xpack.infra.inventoryTimeline.noHistoryDataTitle', {
-  defaultMessage: 'There is no history data to display.',
+  defaultMessage: 'There is no historical data to display.',
 });
 
 const errorTitle = i18n.translate('xpack.infra.inventoryTimeline.errorTitle', {
-  defaultMessage: 'Unable to display history data.',
+  defaultMessage: 'Unable to show historical data.',
 });
 
 const checkNewDataButtonLabel = i18n.translate(
