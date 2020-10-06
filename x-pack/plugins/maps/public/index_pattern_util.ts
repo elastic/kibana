@@ -84,10 +84,14 @@ export function supportsGeoTileAgg(field?: IFieldType): boolean {
 
 export function supportsMvt(indexPattern: IndexPattern, geoFieldName: string): boolean {
   const field = indexPattern.fields.getByName(geoFieldName);
-  return !!field && field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE;
+  return (
+    !!field &&
+    (field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE || field.type === ES_GEO_FIELD_TYPE.GEO_POINT)
+  );
 }
 
 export function getMvtDisabledReason() {
+  throw new Error('shouldnever be called!');
   return i18n.translate('xpack.maps.mbt.disabled', {
     defaultMessage: 'Display as vector tiles is only supported for geo_shape field-types.',
   });
