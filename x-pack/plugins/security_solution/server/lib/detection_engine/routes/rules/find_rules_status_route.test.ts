@@ -6,16 +6,8 @@
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { getFindResultStatus, ruleStatusRequest, getResult } from '../__mocks__/request_responses';
-import {
-  serverMock,
-  requestContextMock,
-  requestMock,
-  ruleStatusServiceFactoryMock,
-  ruleStatusSavedObjectsClientFactory,
-  RuleStatusServiceMock,
-} from '../__mocks__';
+import { serverMock, requestContextMock, requestMock } from '../__mocks__';
 import { findRulesStatusesRoute } from './find_rules_status_route';
-import { ruleStatusServiceFactory } from '../../signals/rule_status_service';
 import { RuleStatusResponse } from '../../rules/types';
 
 jest.mock('../../signals/rule_status_service');
@@ -23,16 +15,10 @@ jest.mock('../../signals/rule_status_service');
 describe('find_statuses', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
-  let mockedRuleStatusServiceFactory: RuleStatusServiceMock | null | undefined;
 
   beforeEach(async () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
-    mockedRuleStatusServiceFactory = await ruleStatusServiceFactoryMock({
-      alertId: 'fakeId',
-      ruleStatusClient: ruleStatusSavedObjectsClientFactory(clients.savedObjectsClient),
-    });
-    (ruleStatusServiceFactory as jest.Mock).mockReturnValue(mockedRuleStatusServiceFactory);
     clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus()); // successful status search
     clients.alertsClient.get.mockResolvedValue(getResult());
     findRulesStatusesRoute(server.router);

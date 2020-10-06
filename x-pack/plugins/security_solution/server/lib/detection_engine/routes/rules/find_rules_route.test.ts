@@ -11,31 +11,17 @@ import {
   getFindResultWithSingleHit,
   getFindResultStatus,
 } from '../__mocks__/request_responses';
-import {
-  requestContextMock,
-  serverMock,
-  requestMock,
-  ruleStatusServiceFactoryMock,
-  ruleStatusSavedObjectsClientFactory,
-  RuleStatusServiceMock,
-} from '../__mocks__';
+import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { findRulesRoute } from './find_rules_route';
-import { ruleStatusServiceFactory } from '../../signals/rule_status_service';
 
 jest.mock('../../signals/rule_status_service');
 describe('find_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
-  let mockedRuleStatusServiceFactory: RuleStatusServiceMock | null | undefined;
 
   beforeEach(async () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
-    mockedRuleStatusServiceFactory = await ruleStatusServiceFactoryMock({
-      alertId: 'fakeId',
-      ruleStatusClient: ruleStatusSavedObjectsClientFactory(clients.savedObjectsClient),
-    });
-    (ruleStatusServiceFactory as jest.Mock).mockReturnValue(mockedRuleStatusServiceFactory);
 
     clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
     clients.alertsClient.get.mockResolvedValue(getResult());
