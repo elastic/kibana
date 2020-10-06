@@ -12,7 +12,7 @@ import {
   TimeframeMap1d,
   TimeframeMapAll,
 } from './types';
-import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
+import { ElasticAgentName } from '../../../typings/es_schemas/ui/fields/agent';
 
 const long: { type: 'long' } = { type: 'long' };
 
@@ -34,7 +34,7 @@ const timeframeMapSchema: MakeSchemaFrom<TimeframeMap> = {
   ...timeframeMapAllSchema,
 };
 
-const agentSchema: MakeSchemaFrom<APMUsage>['agents'][AgentName] = {
+const agentSchema: MakeSchemaFrom<APMUsage>['agents'][ElasticAgentName] = {
   agent: {
     version: { type: 'array', items: { type: 'keyword' } },
   },
