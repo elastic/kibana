@@ -52,11 +52,15 @@ export const PostTrustedAppCreateRequestSchema = {
 
             usedFields.push(field);
 
-            if (
-              field === 'process.hash.*' &&
-              (!hashLengths.includes(value.length) || hasInvalidCharacters.test(value))
-            ) {
-              return `Invalid hash value [${value}]`;
+            if (field === 'process.hash.*') {
+              const trimmedValue = value.trim();
+
+              if (
+                !hashLengths.includes(trimmedValue.length) ||
+                hasInvalidCharacters.test(trimmedValue)
+              ) {
+                return `Invalid hash value [${value}]`;
+              }
             }
           }
         },
