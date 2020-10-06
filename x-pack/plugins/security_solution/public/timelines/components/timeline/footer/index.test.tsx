@@ -17,7 +17,6 @@ describe('Footer Timeline Component', () => {
   const updatedAt = 1546878704036;
   const serverSideEventCount = 15546;
   const itemsCount = 2;
-  const totalCount = 10;
 
   describe('rendering', () => {
     test('it renders the default timeline footer', () => {
@@ -34,9 +33,7 @@ describe('Footer Timeline Component', () => {
           itemsPerPageOptions={[1, 5, 10, 20]}
           onChangeItemsPerPage={onChangeItemsPerPage}
           onChangePage={loadMore}
-          serverSideEventCount={serverSideEventCount}
-          totalCount={totalCount}
-          showMorePagesIndicator
+          totalCount={serverSideEventCount}
         />
       );
 
@@ -57,9 +54,7 @@ describe('Footer Timeline Component', () => {
           itemsPerPageOptions={[1, 5, 10, 20]}
           onChangeItemsPerPage={onChangeItemsPerPage}
           onChangePage={loadMore}
-          serverSideEventCount={serverSideEventCount}
-          totalCount={totalCount}
-          showMorePagesIndicator
+          totalCount={serverSideEventCount}
         />
       );
 
@@ -81,9 +76,7 @@ describe('Footer Timeline Component', () => {
             itemsPerPageOptions={[1, 5, 10, 20]}
             onChangeItemsPerPage={onChangeItemsPerPage}
             onChangePage={loadMore}
-            serverSideEventCount={serverSideEventCount}
-            totalCount={totalCount}
-            showMorePagesIndicator
+            totalCount={serverSideEventCount}
           />
         </TestProviders>
       );
@@ -95,6 +88,7 @@ describe('Footer Timeline Component', () => {
       const wrapper = shallow(
         <PagingControlComponent
           activePage={0}
+          totalCount={30}
           totalPages={3}
           onPageClick={loadMore}
           isLoading={true}
@@ -110,6 +104,7 @@ describe('Footer Timeline Component', () => {
       const wrapper = shallow(
         <PagingControlComponent
           activePage={0}
+          totalCount={30}
           totalPages={3}
           onPageClick={loadMore}
           isLoading={false}
@@ -133,9 +128,7 @@ describe('Footer Timeline Component', () => {
           itemsPerPageOptions={[1, 5, 10, 20]}
           onChangeItemsPerPage={onChangeItemsPerPage}
           onChangePage={loadMore}
-          serverSideEventCount={serverSideEventCount}
-          totalCount={totalCount}
-          showMorePagesIndicator
+          totalCount={serverSideEventCount}
         />
       );
 
@@ -157,9 +150,7 @@ describe('Footer Timeline Component', () => {
             itemsPerPageOptions={[1, 5, 10, 20]}
             onChangeItemsPerPage={onChangeItemsPerPage}
             onChangePage={loadMore}
-            serverSideEventCount={serverSideEventCount}
-            totalCount={totalCount}
-            showMorePagesIndicator
+            totalCount={serverSideEventCount}
           />
         </TestProviders>
       );
@@ -185,9 +176,7 @@ describe('Footer Timeline Component', () => {
             itemsPerPageOptions={[1, 5, 10, 20]}
             onChangeItemsPerPage={onChangeItemsPerPage}
             onChangePage={loadMore}
-            serverSideEventCount={serverSideEventCount}
-            totalCount={totalCount}
-            showMorePagesIndicator
+            totalCount={serverSideEventCount}
           />
         </TestProviders>
       );
@@ -211,9 +200,7 @@ describe('Footer Timeline Component', () => {
             itemsPerPageOptions={[1, 5, 10, 20]}
             onChangeItemsPerPage={onChangeItemsPerPage}
             onChangePage={loadMore}
-            serverSideEventCount={serverSideEventCount}
-            totalCount={totalCount}
-            showMorePagesIndicator
+            totalCount={serverSideEventCount}
           />
         </TestProviders>
       );
@@ -239,9 +226,7 @@ describe('Footer Timeline Component', () => {
             itemsPerPageOptions={[1, 5, 10, 20]}
             onChangeItemsPerPage={onChangeItemsPerPage}
             onChangePage={loadMore}
-            serverSideEventCount={serverSideEventCount}
-            totalCount={totalCount}
-            showMorePagesIndicator
+            totalCount={serverSideEventCount}
           />
         </TestProviders>
       );
@@ -265,9 +250,7 @@ describe('Footer Timeline Component', () => {
             itemsPerPageOptions={[1, 5, 10, 20]}
             onChangeItemsPerPage={onChangeItemsPerPage}
             onChangePage={loadMore}
-            serverSideEventCount={serverSideEventCount}
-            totalCount={totalCount}
-            showMorePagesIndicator
+            totalCount={serverSideEventCount}
           />
         </TestProviders>
       );
