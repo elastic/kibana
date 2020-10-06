@@ -462,6 +462,7 @@ describe('eql/helpers', () => {
         },
         lte: '2020-10-04T16:00:00.368707900Z',
         totalCount: 0,
+        warnings: [],
       });
     });
   });

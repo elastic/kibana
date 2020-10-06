@@ -19,6 +19,7 @@ interface GetBarchartConfigsProps {
   onBrushEnd: UpdateDateRange;
   yTickFormatter?: (value: number) => string;
   showLegend?: boolean;
+  yTitle?: string | undefined;
 }
 
 export const DEFAULT_CHART_HEIGHT = 174;
@@ -32,6 +33,7 @@ export const getBarchartConfigs = ({
   onBrushEnd,
   yTickFormatter,
   showLegend,
+  yTitle,
 }: GetBarchartConfigsProps): BarchartConfigs => ({
   series: {
     xScaleType: ScaleType.Time,
@@ -43,6 +45,7 @@ export const getBarchartConfigs = ({
     yTickFormatter: yTickFormatter != null ? yTickFormatter : DEFAULT_Y_TICK_FORMATTER,
     tickSize: 8,
   },
+  yAxisTitle: yTitle,
   settings: {
     legendPosition: legendPosition ?? Position.Right,
     onBrushEnd,

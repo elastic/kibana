@@ -105,6 +105,7 @@ export interface BarchartConfigs {
     yTickFormatter: TickFormatter;
     tickSize: number;
   };
+  yAxisTitle: string | undefined;
   settings: {
     legendPosition: Position;
     onBrushEnd: UpdateDateRange;

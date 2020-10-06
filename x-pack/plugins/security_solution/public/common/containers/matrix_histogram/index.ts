@@ -5,7 +5,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { noop } from 'lodash/fp';
+import { getOr, noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { MatrixHistogramQueryProps } from '../../components/matrix_histogram/types';
@@ -44,7 +44,15 @@ export const useMatrixHistogram = ({
   indexNames,
   stackByField,
   startDate,
-}: MatrixHistogramQueryProps): [boolean, UseMatrixHistogramArgs] => {
+  threshold,
+}: MatrixHistogramQueryProps): [
+  boolean,
+  UseMatrixHistogramArgs,
+  Array<{
+    key: string;
+    doc_count: number;
+  }>
+] => {
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
@@ -63,6 +71,7 @@ export const useMatrixHistogram = ({
       to: endDate,
     },
     stackByField,
+    threshold,
   });
 
   const [matrixHistogramResponse, setMatrixHistogramResponse] = useState<UseMatrixHistogramArgs>({
@@ -74,6 +83,12 @@ export const useMatrixHistogram = ({
     refetch: refetch.current,
     totalCount: -1,
   });
+  const [matrixHistogramBuckets, setMatrixHistogramBuckets] = useState<
+    Array<{
+      key: string;
+      doc_count: number;
+    }>
+  >([]);
 
   const hostsSearch = useCallback(
     (request: MatrixHistogramRequestOptions) => {
@@ -91,6 +106,10 @@ export const useMatrixHistogram = ({
             next: (response) => {
               if (isCompleteResponse(response)) {
                 if (!didCancel) {
+                  const histogramBuckets: Array<{
+                    key: string;
+                    doc_count: number;
+                  }> = getOr([], 'rawResponse.aggregations.eventActionGroup.buckets', response);
                   setLoading(false);
                   setMatrixHistogramResponse((prevResponse) => ({
                     ...prevResponse,
@@ -99,6 +118,7 @@ export const useMatrixHistogram = ({
                     refetch: refetch.current,
                     totalCount: response.totalCount,
                   }));
+                  setMatrixHistogramBuckets(histogramBuckets);
                 }
                 searchSubscription$.unsubscribe();
               } else if (isErrorResponse(response)) {
@@ -144,17 +164,18 @@ export const useMatrixHistogram = ({
           to: endDate,
         },
         stackByField,
+        threshold,
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [indexNames, endDate, filterQuery, startDate, stackByField, histogramType]);
+  }, [indexNames, endDate, filterQuery, startDate, stackByField, histogramType, threshold]);
 
   useEffect(() => {
     hostsSearch(matrixHistogramRequest);
   }, [matrixHistogramRequest, hostsSearch]);
 
-  return [loading, matrixHistogramResponse];
+  return [loading, matrixHistogramResponse, matrixHistogramBuckets];
 };

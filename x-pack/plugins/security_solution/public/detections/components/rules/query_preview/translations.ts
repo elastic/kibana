@@ -23,7 +23,7 @@ export const PREVIEW_SELECT_ARIA = i18n.translate(
 export const QUERY_PREVIEW_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewLabel',
   {
-    defaultMessage: 'Preview query results',
+    defaultMessage: 'Quick query preview',
   }
 );
 
@@ -82,5 +82,21 @@ export const PREVIEW_QUERY_ERROR = i18n.translate(
   'xpack.securitySolution.detectionEngine.queryPreview.queryGraphPreviewError',
   {
     defaultMessage: 'Error fetching preview',
+  }
+);
+
+export const PREVIEW_QUERY_DISCLAIMER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryPreview.queryGraphDisclaimer',
+  {
+    defaultMessage:
+      'Note: This preview excludes effects of rule exceptions and timestamp overrides.',
+  }
+);
+
+export const PREVIEW_QUERY_DISCLAIMER_EQL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryPreview.queryGraphDisclaimerEql',
+  {
+    defaultMessage:
+      'Note: This preview excludes effects of rule exceptions and timestamp overrides, and is limited to 100 results.',
   }
 );

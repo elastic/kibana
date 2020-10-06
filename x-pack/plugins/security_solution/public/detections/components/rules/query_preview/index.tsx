@@ -6,25 +6,42 @@
 import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import { Unit } from '@elastic/datemath';
 import { getOr } from 'lodash/fp';
+import styled from 'styled-components';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSelect,
+  EuiFormRow,
+  EuiButton,
+  EuiCallOut,
+  EuiSelectOption,
+  EuiText,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { IndexPattern } from 'src/plugins/data/public';
 import * as i18n from './translations';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useFetchIndex } from '../../../../common/containers/source';
-import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
 import { ESQueryStringQuery } from '../../../../../common/typed_json';
+import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
+import { useFetchIndex } from '../../../../common/containers/source';
 import { FieldValueQueryBar } from '../query_bar';
-import { RangeFilter } from '../../../../../../../../src/plugins/data/common/es_query';
+import { Filter, RangeFilter } from '../../../../../../../../src/plugins/data/common/es_query';
 import { Language, Type } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { useMatrixHistogramAsync } from '../../../../common/containers/matrix_histogram/use_matrix_histogram_async';
-import { PreviewQueryHistogram } from './histogram';
-import { MatrixHistogramType } from '../../../../../common/search_strategy/security_solution/matrix_histogram';
+import { PreviewEqlQueryHistogram } from './eql_histogram';
 import { useEqlPreview } from '../../../../common/hooks/eql';
-import { InspectQuery } from '../../../../common/store/inputs/model';
-import { ChartData } from '../../../../common/components/charts/common';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { PreviewNonEqlQueryHistogram } from './non_eql_histogram';
+import { getTimeframeOptions } from './helpers';
+import { PreviewThresholdQueryHistogram } from './threshold_histogram';
 
-export const ID = 'queryPreviewHistogramQuery';
+const Select = styled(EuiSelect)`
+  width: ${({ theme }) => theme.eui.euiSuperDatePickerWidth};
+`;
+
+const PreviewButton = styled(EuiButton)`
+  margin-left: 0;
+`;
 
 interface PreviewQueryProps {
   dataTestSubj: string;
@@ -45,19 +62,17 @@ export const PreviewQuery = ({
   threshold,
   isDisabled,
 }: PreviewQueryProps) => {
-  // how far back to look like 'now-6m'
-  const [toTime, setTo] = useState('');
-  // the more recent time like 'now'
-  const [fromTime, setFrom] = useState('');
   const { data } = useKibana().services;
   const [, { indexPatterns }] = useFetchIndex(index);
   const { addError } = useAppToasts();
-  const {
-    error: customQueryError,
-    start: startCustomQuery,
-    result: customQueryResult,
-    loading: customQueryLoading,
-  } = useMatrixHistogramAsync();
+
+  const [timeframeOptions, setTimeframeOptions] = useState<EuiSelectOption[]>([]);
+  const [showHistogram, setShowHistogram] = useState(false);
+  const [timeframe, setTimeframe] = useState<Unit>('h');
+  const [warnings, setWarnings] = useState<string[]>([]);
+  const [queryFilter, setQueryFilter] = useState<ESQueryStringQuery | undefined>(undefined);
+  const [toTime, setTo] = useState('');
+  const [fromTime, setFrom] = useState('');
   const {
     error: eqlError,
     start: startEql,
@@ -67,6 +82,7 @@ export const PreviewQuery = ({
 
   const queryString = useMemo((): string => getOr('', 'query.query', query), [query]);
   const language = useMemo((): Language => getOr('kuery', 'query.language', query), [query]);
+  const filters = useMemo((): Filter[] => (query != null ? query.filters : []), [query]);
 
   const handleCalculateTimeRange = useCallback(
     (interval: Unit): { to: string; from: string } => {
@@ -102,89 +118,45 @@ export const PreviewQuery = ({
     [data, index, startEql, queryString]
   );
 
-  const handlePreviewNonEqlQuery = useCallback(
-    (filterQuery: ESQueryStringQuery | undefined, to: string, from: string): void => {
-      const thresholdField =
-        ruleType === 'threshold' && threshold != null ? { ...threshold } : undefined;
-      startCustomQuery({
-        data,
-        endDate: from,
-        filterQuery,
-        histogramType: MatrixHistogramType.events,
-        indexNames: index,
-        startDate: to,
-        stackByField: 'event.category',
-        threshold: thresholdField,
-      });
-    },
-    [index, data, startCustomQuery, threshold, ruleType]
-  );
+  const handleSelectPreviewTimeframe = ({
+    target: { value },
+  }: React.ChangeEvent<HTMLSelectElement>): void => {
+    setTimeframe(value as Unit);
+    setShowHistogram(false);
+  };
 
-  const handlePreviewClick = useCallback(
-    (interval: Unit) => {
-      const { to, from } = handleCalculateTimeRange(interval);
+  const handlePreviewClicked = useCallback((): void => {
+    const { to, from } = handleCalculateTimeRange(timeframe);
 
-      if (ruleType === 'eql') {
-        handlePreviewEqlQuery(to, from, interval);
-      } else {
-        const filterQuery =
-          queryString.trim() !== ''
-            ? {
-                ...((getQueryFilter(
-                  queryString,
-                  language,
-                  [],
-                  index,
-                  [],
-                  true
-                ) as unknown) as ESQueryStringQuery),
-              }
-            : undefined;
-
-        handlePreviewNonEqlQuery(filterQuery, to, from);
-      }
-    },
-    [
-      handleCalculateTimeRange,
-      ruleType,
-      handlePreviewEqlQuery,
-      queryString,
-      language,
-      index,
-      handlePreviewNonEqlQuery,
-    ]
-  );
-
-  const queryResult = useMemo((): {
-    totalHits: number;
-    data: ChartData[];
-    inspect: InspectQuery;
-    warnings: string[];
-  } => {
-    if (ruleType === 'eql' && eqlQueryResult != null) {
-      return {
-        totalHits: eqlQueryResult.totalCount,
-        data: eqlQueryResult.data,
-        inspect: eqlQueryResult.inspect,
-        warnings: eqlQueryResult.warnings,
-      };
-    } else if (customQueryResult != null) {
-      return {
-        totalHits: customQueryResult.totalCount,
-        data: customQueryResult.data,
-        inspect: customQueryResult.inspect,
-        warnings: [],
-      };
+    if (ruleType === 'eql') {
+      setShowHistogram(true);
+      handlePreviewEqlQuery(to, from, timeframe);
     } else {
-      return { totalHits: 0, data: [], inspect: { dsl: [], response: [] }, warnings: [] };
+      const builtFilterQuery = {
+        ...((getQueryFilter(
+          queryString,
+          language,
+          filters,
+          index,
+          [],
+          true
+        ) as unknown) as ESQueryStringQuery),
+      };
+      if (builtFilterQuery != null) {
+        setShowHistogram(true);
+      }
+      setQueryFilter(builtFilterQuery);
     }
-  }, [ruleType, eqlQueryResult, customQueryResult]);
-
-  useEffect((): void => {
-    if (customQueryError != null) {
-      addError(customQueryError, { title: i18n.PREVIEW_QUERY_ERROR });
-    }
-  }, [customQueryError, addError]);
+  }, [
+    filters,
+    handleCalculateTimeRange,
+    handlePreviewEqlQuery,
+    index,
+    language,
+    queryString,
+    ruleType,
+    timeframe,
+  ]);
 
   useEffect((): void => {
     if (eqlError != null) {
@@ -192,23 +164,114 @@ export const PreviewQuery = ({
     }
   }, [eqlError, addError]);
 
+  // reset when rule type changes
+  useEffect((): void => {
+    const options = getTimeframeOptions(ruleType);
+
+    setShowHistogram(false);
+    setTimeframe('h');
+    setTimeframeOptions(options);
+    setWarnings([]);
+  }, [ruleType]);
+
+  // reset when timeframe or query changes
+  useEffect((): void => {
+    setShowHistogram(false);
+    setWarnings([]);
+  }, [timeframe, queryString]);
+
+  useEffect((): void => {
+    if (eqlQueryResult != null) {
+      setWarnings((prevWarnings) => {
+        if (eqlQueryResult.warnings.join() !== prevWarnings.join()) {
+          return eqlQueryResult.warnings;
+        }
+
+        return prevWarnings;
+      });
+    }
+  }, [eqlQueryResult]);
+
+  const thresholdFieldExists = useMemo(
+    (): boolean => threshold != null && threshold.field != null && threshold.field.trim() !== '',
+    [threshold]
+  );
+
+  const showNonEqlHistogram = useMemo((): boolean => {
+    return (
+      ruleType === 'query' ||
+      ruleType === 'saved_query' ||
+      (ruleType === 'threshold' && !thresholdFieldExists)
+    );
+  }, [ruleType, thresholdFieldExists]);
+
   return (
-    <PreviewQueryHistogram
-      dataTestSubj={dataTestSubj}
-      idAria={idAria}
-      onPreviewClick={handlePreviewClick}
-      totalHits={queryResult.totalHits}
-      data={queryResult.data}
-      query={queryString}
-      to={toTime}
-      from={fromTime}
-      inspect={queryResult.inspect}
-      isLoading={eqlQueryLoading || customQueryLoading}
-      ruleType={ruleType}
-      errorExists={customQueryError != null || eqlError != null}
-      isDisabled={isDisabled}
-      threshold={threshold}
-      warnings={queryResult.warnings}
-    />
+    <>
+      <EuiFormRow
+        label={i18n.QUERY_PREVIEW_LABEL}
+        helpText={i18n.QUERY_PREVIEW_HELP_TEXT}
+        error={undefined}
+        isInvalid={false}
+        data-test-subj={dataTestSubj}
+        describedByIds={idAria ? [idAria] : undefined}
+      >
+        <EuiFlexGroup>
+          <EuiFlexItem grow={1}>
+            <Select
+              id="queryPreviewSelect"
+              options={timeframeOptions}
+              value={timeframe}
+              onChange={handleSelectPreviewTimeframe}
+              aria-label={i18n.PREVIEW_SELECT_ARIA}
+              disabled={isDisabled}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <PreviewButton fill isDisabled={isDisabled} onClick={handlePreviewClicked}>
+              {i18n.PREVIEW_LABEL}
+            </PreviewButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFormRow>
+      <EuiSpacer size="s" />
+      {showNonEqlHistogram && showHistogram && (
+        <PreviewNonEqlQueryHistogram
+          filterQuery={queryFilter}
+          index={index}
+          from={fromTime}
+          to={toTime}
+        />
+      )}
+      {ruleType === 'threshold' && thresholdFieldExists && showHistogram && (
+        <PreviewThresholdQueryHistogram
+          filterQuery={queryFilter}
+          index={index}
+          from={fromTime}
+          to={toTime}
+          threshold={threshold}
+        />
+      )}
+      {ruleType === 'eql' && eqlQueryResult != null && showHistogram && !eqlQueryLoading && (
+        <PreviewEqlQueryHistogram
+          to={toTime}
+          from={fromTime}
+          totalHits={eqlQueryResult.totalCount}
+          data={eqlQueryResult.data}
+          inspect={eqlQueryResult.inspect}
+          query={queryString}
+        />
+      )}
+      {warnings.length > 0 &&
+        warnings.map((warning) => (
+          <>
+            <EuiSpacer size="s" />
+            <EuiCallOut color="warning" iconType="help">
+              <EuiText>
+                <p>{warning}</p>
+              </EuiText>
+            </EuiCallOut>
+          </>
+        ))}
+    </>
   );
 };
