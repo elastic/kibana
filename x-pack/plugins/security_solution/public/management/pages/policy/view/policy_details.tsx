@@ -203,6 +203,7 @@ export const PolicyDetails = React.memo(() => {
       )}
       <WrapperPage noTimeline data-test-subj="policyDetailsPage">
         <HeaderPage
+          hideSourcerer={true}
           title={policyItem.name}
           backOptions={{
             text: i18n.translate('xpack.securitySolution.endpoint.policy.details.backToListTitle', {

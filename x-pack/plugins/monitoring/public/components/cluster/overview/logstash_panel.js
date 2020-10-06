@@ -15,6 +15,7 @@ import {
   LOGSTASH,
   LOGSTASH_SYSTEM_ID,
   ALERT_LOGSTASH_VERSION_MISMATCH,
+  ALERT_MISSING_MONITORING_DATA,
 } from '../../../../common/constants';
 
 import {
@@ -40,7 +41,7 @@ import { shouldShowAlertBadge } from '../../../alerts/lib/should_show_alert_badg
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 import { SetupModeFeature } from '../../../../common/enums';
 
-const NODES_PANEL_ALERTS = [ALERT_LOGSTASH_VERSION_MISMATCH];
+const NODES_PANEL_ALERTS = [ALERT_LOGSTASH_VERSION_MISMATCH, ALERT_MISSING_MONITORING_DATA];
 
 export function LogstashPanel(props) {
   const { setupMode } = props;
@@ -111,7 +112,7 @@ export function LogstashPanel(props) {
             </EuiTitle>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column" data-test-subj="logstash_overview">
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.logstashPanel.eventsReceivedLabel"
                   defaultMessage="Events Received"
@@ -120,7 +121,7 @@ export function LogstashPanel(props) {
               <EuiDescriptionListDescription data-test-subj="lsEventsReceived">
                 {formatNumber(props.events_in_total, '0.[0]a')}
               </EuiDescriptionListDescription>
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.logstashPanel.eventsEmittedLabel"
                   defaultMessage="Events Emitted"
@@ -172,7 +173,7 @@ export function LogstashPanel(props) {
             </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.logstashPanel.uptimeLabel"
                   defaultMessage="Uptime"
@@ -181,7 +182,7 @@ export function LogstashPanel(props) {
               <EuiDescriptionListDescription data-test-subj="lsUptime">
                 {props.max_uptime ? formatNumber(props.max_uptime, 'time_since') : 0}
               </EuiDescriptionListDescription>
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.logstashPanel.jvmHeapLabel"
                   defaultMessage="{javaVirtualMachine} Heap"
@@ -248,7 +249,7 @@ export function LogstashPanel(props) {
             </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.logstashPanel.withMemoryQueuesLabel"
                   defaultMessage="With Memory Queues"
@@ -257,7 +258,7 @@ export function LogstashPanel(props) {
               <EuiDescriptionListDescription>
                 {queueTypes[LOGSTASH.QUEUE_TYPES.MEMORY] || 0}
               </EuiDescriptionListDescription>
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.logstashPanel.withPersistentQueuesLabel"
                   defaultMessage="With Persistent Queues"

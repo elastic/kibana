@@ -20,6 +20,7 @@ export interface Field {
   index?: boolean;
   required?: boolean;
   multi_fields?: Fields;
+  normalizer?: string;
   doc_values?: boolean;
   copy_to?: string;
   analyzer?: string;

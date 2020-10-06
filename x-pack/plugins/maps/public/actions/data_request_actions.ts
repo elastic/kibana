@@ -40,14 +40,14 @@ import { ILayer } from '../classes/layers/layer';
 import { IVectorLayer } from '../classes/layers/vector_layer/vector_layer';
 import { DataMeta, MapExtent, MapFilters } from '../../common/descriptor_types';
 import { DataRequestAbortError } from '../classes/util/data_request';
-import { scaleBounds, turfBboxToBounds } from '../../common/elasticsearch_geo_utils';
+import { scaleBounds, turfBboxToBounds } from '../../common/elasticsearch_util';
 import { IVectorStyle } from '../classes/styles/vector/vector_style';
 
 const FIT_TO_BOUNDS_SCALE_FACTOR = 0.1;
 
 export type DataRequestContext = {
   startLoading(dataId: string, requestToken: symbol, meta: DataMeta): void;
-  stopLoading(dataId: string, requestToken: symbol, data: object, meta: DataMeta): void;
+  stopLoading(dataId: string, requestToken: symbol, data: object, meta?: DataMeta): void;
   onLoadError(dataId: string, requestToken: symbol, errorMessage: string): void;
   updateSourceData(newData: unknown): void;
   isRequestStillActive(dataId: string, requestToken: symbol): boolean;

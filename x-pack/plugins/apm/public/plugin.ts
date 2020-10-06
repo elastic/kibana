@@ -36,12 +36,14 @@ import { featureCatalogueEntry } from './featureCatalogueEntry';
 import { toggleAppLinkInNav } from './toggleAppLinkInNav';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { registerApmAlerts } from './components/alerting/register_apm_alerts';
+import { MlPluginSetup, MlPluginStart } from '../../ml/public';
 
 export type ApmPluginSetup = void;
 export type ApmPluginStart = void;
 
 export interface ApmPluginSetupDeps {
   alerts?: AlertingPluginPublicSetup;
+  ml?: MlPluginSetup;
   data: DataPublicPluginSetup;
   features: FeaturesPluginSetup;
   home?: HomePublicPluginSetup;
@@ -52,6 +54,7 @@ export interface ApmPluginSetupDeps {
 
 export interface ApmPluginStartDeps {
   alerts?: AlertingPluginPublicStart;
+  ml?: MlPluginStart;
   data: DataPublicPluginStart;
   home: void;
   licensing: void;
@@ -120,8 +123,8 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     });
 
     core.application.register({
-      id: 'csm',
-      title: 'Client Side Monitoring',
+      id: 'ux',
+      title: 'User Experience',
       order: 8500,
       euiIconType: 'logoObservability',
       category: DEFAULT_APP_CATEGORIES.observability,
