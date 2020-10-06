@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { memoize } from 'lodash';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
-import { asDecimal, asInteger } from './formatters';
+import { asDecimalOrInteger, asInteger } from './formatters';
 import { TimeUnit } from './datetime';
 import { Maybe } from '../../../typings/common';
 
@@ -30,14 +30,6 @@ export type TimeFormatter = (
 ) => ConvertedDuration;
 
 type TimeFormatterBuilder = (max: number) => TimeFormatter;
-
-function asDecimalOrInteger(value: number) {
-  // exact 0 or above 10 should not have decimal
-  if (value === 0 || value >= 10) {
-    return asInteger(value);
-  }
-  return asDecimal(value);
-}
 
 function getUnitLabelAndConvertedValue(
   unitKey: DurationTimeUnit,

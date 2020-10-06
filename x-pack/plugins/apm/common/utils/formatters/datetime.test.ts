@@ -8,7 +8,7 @@ import {
   asRelativeDateTimeRange,
   asAbsoluteDateTime,
   getDateDifference,
-} from '../datetime';
+} from './datetime';
 
 describe('date time formatters', () => {
   beforeAll(() => {
