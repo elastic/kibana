@@ -36,7 +36,7 @@ export const PreviewThresholdQueryHistogram = ({
 }: PreviewThresholdQueryHistogramProps) => {
   const { setQuery, isInitializing } = useGlobalTime();
 
-  const [isLoading, { inspect, refetch }, buckets] = useMatrixHistogram({
+  const [isLoading, { inspect, refetch, buckets }] = useMatrixHistogram({
     errorMessage: i18n.PREVIEW_QUERY_ERROR,
     endDate: from,
     startDate: to,
@@ -54,21 +54,14 @@ export const PreviewThresholdQueryHistogram = ({
   }, [setQuery, inspect, isLoading, isInitializing, refetch]);
 
   const { data, totalCount } = useMemo(() => {
-    if (buckets != null) {
-      return {
-        data: buckets.map<{ x: string; y: number; g: string }>(({ key, doc_count: docCount }) => ({
-          x: key,
-          y: docCount,
-          g: key,
-        })),
-        totalCount: buckets.length,
-      };
-    } else {
-      return {
-        data: [],
-        totalCount: 0,
-      };
-    }
+    return {
+      data: buckets.map<{ x: string; y: number; g: string }>(({ key, doc_count: docCount }) => ({
+        x: key,
+        y: docCount,
+        g: key,
+      })),
+      totalCount: buckets.length,
+    };
   }, [buckets]);
 
   return (

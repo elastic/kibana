@@ -32,6 +32,10 @@ export interface UseMatrixHistogramArgs {
   inspect: InspectResponse;
   refetch: inputsModel.Refetch;
   totalCount: number;
+  buckets: Array<{
+    key: string;
+    doc_count: number;
+  }>;
 }
 
 const ID = 'matrixHistogramQuery';
@@ -45,14 +49,7 @@ export const useMatrixHistogram = ({
   stackByField,
   startDate,
   threshold,
-}: MatrixHistogramQueryProps): [
-  boolean,
-  UseMatrixHistogramArgs,
-  Array<{
-    key: string;
-    doc_count: number;
-  }>
-] => {
+}: MatrixHistogramQueryProps): [boolean, UseMatrixHistogramArgs] => {
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
@@ -82,13 +79,8 @@ export const useMatrixHistogram = ({
     },
     refetch: refetch.current,
     totalCount: -1,
+    buckets: [],
   });
-  const [matrixHistogramBuckets, setMatrixHistogramBuckets] = useState<
-    Array<{
-      key: string;
-      doc_count: number;
-    }>
-  >([]);
 
   const hostsSearch = useCallback(
     (request: MatrixHistogramRequestOptions) => {
@@ -117,8 +109,8 @@ export const useMatrixHistogram = ({
                     inspect: getInspectResponse(response, prevResponse.inspect),
                     refetch: refetch.current,
                     totalCount: response.totalCount,
+                    buckets: histogramBuckets,
                   }));
-                  setMatrixHistogramBuckets(histogramBuckets);
                 }
                 searchSubscription$.unsubscribe();
               } else if (isErrorResponse(response)) {
@@ -177,5 +169,5 @@ export const useMatrixHistogram = ({
     hostsSearch(matrixHistogramRequest);
   }, [matrixHistogramRequest, hostsSearch]);
 
-  return [loading, matrixHistogramResponse, matrixHistogramBuckets];
+  return [loading, matrixHistogramResponse];
 };
