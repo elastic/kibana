@@ -22,7 +22,7 @@ type OnSuccessCallback = (agentPolicyDeleted: string) => void;
 export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({ children }) => {
   const { notifications } = useCore();
   const {
-    fleet: { enabled: isFleetEnabled },
+    agents: { enabled: isFleetEnabled },
   } = useConfig();
   const [agentPolicy, setAgentPolicy] = useState<string>();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);

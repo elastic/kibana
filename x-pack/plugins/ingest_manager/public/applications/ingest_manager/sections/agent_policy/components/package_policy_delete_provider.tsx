@@ -30,7 +30,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
 }) => {
   const { notifications } = useCore();
   const {
-    fleet: { enabled: isFleetEnabled },
+    agents: { enabled: isFleetEnabled },
   } = useConfig();
   const [packagePolicies, setPackagePolicies] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
