@@ -29,6 +29,10 @@ export interface TestPipelineConfig {
   verbose?: boolean;
 }
 
+export interface TestPipelineFlyoutForm {
+  documents: string | Document[];
+}
+
 export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
   onClose,
   activeTab,
@@ -48,7 +52,7 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
     config: { documents: cachedDocuments, verbose: cachedVerbose },
   } = testPipelineData;
 
-  const { form } = useForm({
+  const { form } = useForm<TestPipelineFlyoutForm>({
     defaultValue: {
       documents: cachedDocuments || '',
     },
