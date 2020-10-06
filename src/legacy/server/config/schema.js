@@ -25,6 +25,10 @@ const HANDLED_IN_NEW_PLATFORM = Joi.any().description(
 );
 export default () =>
   Joi.object({
+    elastic: Joi.object({
+      apm: HANDLED_IN_NEW_PLATFORM,
+    }).default(),
+
     pkg: Joi.object({
       version: Joi.string().default(Joi.ref('$version')),
       branch: Joi.string().default(Joi.ref('$branch')),
@@ -38,12 +42,8 @@ export default () =>
       prod: Joi.boolean().default(Joi.ref('$prod')),
     }).default(),
 
-    dev: Joi.object({
-      basePathProxyTarget: Joi.number().default(5603),
-    }).default(),
-
+    dev: HANDLED_IN_NEW_PLATFORM,
     pid: HANDLED_IN_NEW_PLATFORM,
-
     csp: HANDLED_IN_NEW_PLATFORM,
 
     server: Joi.object({
@@ -125,10 +125,7 @@ export default () =>
 
     ops: Joi.object({
       interval: Joi.number().default(5000),
-      cGroupOverrides: Joi.object().keys({
-        cpuPath: Joi.string().default(),
-        cpuAcctPath: Joi.string().default(),
-      }),
+      cGroupOverrides: HANDLED_IN_NEW_PLATFORM,
     }).default(),
 
     // still used by the legacy i18n mixin
@@ -139,15 +136,8 @@ export default () =>
     }).default(),
 
     path: HANDLED_IN_NEW_PLATFORM,
-
-    stats: Joi.object({
-      maximumWaitTimeForAllCollectorsInS: Joi.number().default(60),
-    }).default(),
-
-    status: Joi.object({
-      allowAnonymous: Joi.boolean().default(false),
-    }).default(),
-
+    stats: HANDLED_IN_NEW_PLATFORM,
+    status: HANDLED_IN_NEW_PLATFORM,
     map: HANDLED_IN_NEW_PLATFORM,
 
     i18n: Joi.object({
@@ -163,8 +153,5 @@ export default () =>
       autocompleteTimeout: Joi.number().integer().min(1).default(1000),
     }).default(),
 
-    savedObjects: Joi.object({
-      maxImportPayloadBytes: Joi.number().default(10485760),
-      maxImportExportSize: Joi.number().default(10000),
-    }).default(),
+    savedObjects: HANDLED_IN_NEW_PLATFORM,
   }).default();

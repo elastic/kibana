@@ -18,7 +18,7 @@ import {
 } from './operations';
 import { operationDefinitions } from './operations/definitions';
 import { TermsIndexPatternColumn } from './operations/definitions/terms';
-import { hasField } from './utils';
+import { hasField, hasInvalidReference } from './utils';
 import {
   IndexPattern,
   IndexPatternPrivateState,
@@ -90,6 +90,7 @@ export function getDatasourceSuggestionsForField(
   indexPatternId: string,
   field: IndexPatternField
 ): IndexPatternSugestion[] {
+  if (hasInvalidReference(state)) return [];
   const layers = Object.keys(state.layers);
   const layerIds = layers.filter((id) => state.layers[id].indexPatternId === indexPatternId);
 
@@ -115,6 +116,25 @@ export function getDatasourceSuggestionsForField(
       return getExistingLayerSuggestionsForField(state, mostEmptyLayerId, field);
     }
   }
+}
+
+// Called when the user navigates from Discover to Lens (Visualize button)
+export function getDatasourceSuggestionsForVisualizeField(
+  state: IndexPatternPrivateState,
+  indexPatternId: string,
+  fieldName: string
+): IndexPatternSugestion[] {
+  const layers = Object.keys(state.layers);
+  const layerIds = layers.filter((id) => state.layers[id].indexPatternId === indexPatternId);
+  // Identify the field by the indexPatternId and the fieldName
+  const indexPattern = state.indexPatterns[indexPatternId];
+  const field = indexPattern.fields.find((fld) => fld.name === fieldName);
+
+  if (layerIds.length !== 0 || !field) return [];
+  const newId = generateId();
+  return getEmptyLayerSuggestionsForField(state, newId, indexPatternId, field).concat(
+    getEmptyLayerSuggestionsForField({ ...state, layers: {} }, newId, indexPatternId, field)
+  );
 }
 
 function getBucketOperation(field: IndexPatternField) {
@@ -380,6 +400,7 @@ function createNewLayerWithMetricAggregation(
 export function getDatasourceSuggestionsFromCurrentState(
   state: IndexPatternPrivateState
 ): Array<DatasourceSuggestion<IndexPatternPrivateState>> {
+  if (hasInvalidReference(state)) return [];
   const layers = Object.entries(state.layers || {});
   if (layers.length > 1) {
     // Return suggestions that reduce the data to each layer individually
@@ -471,7 +492,6 @@ export function getDatasourceSuggestionsFromCurrentState(
             suggestions.push(createChangedNestingSuggestion(state, layerId));
           }
         }
-
         return suggestions;
       })
   );
@@ -483,11 +503,15 @@ function createChangedNestingSuggestion(state: IndexPatternPrivateState, layerId
   const updatedLayer = { ...layer, columnOrder: [secondBucket, firstBucket, ...rest] };
   const currentFields = state.indexPatterns[state.currentIndexPatternId].fields;
   const firstBucketLabel =
-    currentFields.find((field) => field.name === layer.columns[firstBucket].sourceField)
-      ?.displayName || '';
+    currentFields.find((field) => {
+      const column = layer.columns[firstBucket];
+      return hasField(column) && column.sourceField === field.name;
+    })?.displayName || '';
   const secondBucketLabel =
-    currentFields.find((field) => field.name === layer.columns[secondBucket].sourceField)
-      ?.displayName || '';
+    currentFields.find((field) => {
+      const column = layer.columns[secondBucket];
+      return hasField(column) && column.sourceField === field.name;
+    })?.displayName || '';
 
   return buildSuggestion({
     state,

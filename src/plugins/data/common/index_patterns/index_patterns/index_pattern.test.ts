@@ -89,7 +89,6 @@ describe('IndexPattern', () => {
 
   describe('api', () => {
     test('should have expected properties', () => {
-      expect(indexPattern).toHaveProperty('popularizeField');
       expect(indexPattern).toHaveProperty('getScriptedFields');
       expect(indexPattern).toHaveProperty('getNonScriptedFields');
       expect(indexPattern).toHaveProperty('addScriptedField');
@@ -179,8 +178,7 @@ describe('IndexPattern', () => {
       await indexPattern.addScriptedField(
         scriptedField.name,
         scriptedField.script,
-        scriptedField.type,
-        'lang'
+        scriptedField.type
       );
 
       const scriptedFields = indexPattern.getScriptedFields();
@@ -206,7 +204,7 @@ describe('IndexPattern', () => {
       const scriptedField = last(scriptedFields) as any;
       expect.assertions(1);
       try {
-        await indexPattern.addScriptedField(scriptedField.name, "'new script'", 'string', 'lang');
+        await indexPattern.addScriptedField(scriptedField.name, "'new script'", 'string');
       } catch (e) {
         expect(e).toBeInstanceOf(DuplicateField);
       }
@@ -239,52 +237,6 @@ describe('IndexPattern', () => {
       expect(restoredPattern.title).toEqual(indexPattern.title);
       expect(restoredPattern.timeFieldName).toEqual(indexPattern.timeFieldName);
       expect(restoredPattern.fields.length).toEqual(indexPattern.fields.length);
-    });
-  });
-
-  describe('popularizeField', () => {
-    test('should increment the popularity count by default', () => {
-      indexPattern.fields.forEach(async (field) => {
-        const oldCount = field.count || 0;
-
-        await indexPattern.popularizeField(field.name);
-
-        expect(field.count).toEqual(oldCount + 1);
-      });
-    });
-
-    test('should increment the popularity count', () => {
-      indexPattern.fields.forEach(async (field) => {
-        const oldCount = field.count || 0;
-        const incrementAmount = 4;
-
-        await indexPattern.popularizeField(field.name, incrementAmount);
-
-        expect(field.count).toEqual(oldCount + incrementAmount);
-      });
-    });
-
-    test('should decrement the popularity count', () => {
-      indexPattern.fields.forEach(async (field) => {
-        const oldCount = field.count || 0;
-        const incrementAmount = 4;
-        const decrementAmount = -2;
-
-        await indexPattern.popularizeField(field.name, incrementAmount);
-        await indexPattern.popularizeField(field.name, decrementAmount);
-
-        expect(field.count).toEqual(oldCount + incrementAmount + decrementAmount);
-      });
-    });
-
-    test('should not go below 0', () => {
-      indexPattern.fields.forEach(async (field) => {
-        const decrementAmount = -Number.MAX_VALUE;
-
-        await indexPattern.popularizeField(field.name, decrementAmount);
-
-        expect(field.count).toEqual(0);
-      });
     });
   });
 });

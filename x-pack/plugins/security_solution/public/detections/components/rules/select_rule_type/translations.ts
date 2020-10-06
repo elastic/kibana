@@ -62,3 +62,17 @@ export const THRESHOLD_TYPE_DESCRIPTION = i18n.translate(
     defaultMessage: 'Aggregate query results to detect when number of matches exceeds threshold.',
   }
 );
+
+export const THREAT_MATCH_TYPE_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.threatMatchTitle',
+  {
+    defaultMessage: 'Threat Match',
+  }
+);
+
+export const THREAT_MATCH_TYPE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.threatMatchDescription',
+  {
+    defaultMessage: 'Upload value lists to write rules around a list of known bad attributes',
+  }
+);

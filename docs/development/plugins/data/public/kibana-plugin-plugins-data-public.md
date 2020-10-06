@@ -16,13 +16,13 @@
 |  [FilterManager](./kibana-plugin-plugins-data-public.filtermanager.md) |  |
 |  [IndexPattern](./kibana-plugin-plugins-data-public.indexpattern.md) |  |
 |  [IndexPatternField](./kibana-plugin-plugins-data-public.indexpatternfield.md) |  |
-|  [IndexPatternSelect](./kibana-plugin-plugins-data-public.indexpatternselect.md) |  |
 |  [IndexPatternsService](./kibana-plugin-plugins-data-public.indexpatternsservice.md) |  |
 |  [OptionedParamType](./kibana-plugin-plugins-data-public.optionedparamtype.md) |  |
+|  [PainlessError](./kibana-plugin-plugins-data-public.painlesserror.md) |  |
 |  [Plugin](./kibana-plugin-plugins-data-public.plugin.md) |  |
-|  [RequestTimeoutError](./kibana-plugin-plugins-data-public.requesttimeouterror.md) | Class used to signify that a request timed out. Useful for applications to conditionally handle this type of error differently than other errors. |
 |  [SearchInterceptor](./kibana-plugin-plugins-data-public.searchinterceptor.md) |  |
 |  [SearchSource](./kibana-plugin-plugins-data-public.searchsource.md) | \* |
+|  [SearchTimeoutError](./kibana-plugin-plugins-data-public.searchtimeouterror.md) | Request Failure - When an entire multi request fails |
 |  [TimeHistory](./kibana-plugin-plugins-data-public.timehistory.md) |  |
 
 ## Enumerations
@@ -35,6 +35,7 @@
 |  [METRIC\_TYPES](./kibana-plugin-plugins-data-public.metric_types.md) |  |
 |  [QuerySuggestionTypes](./kibana-plugin-plugins-data-public.querysuggestiontypes.md) |  |
 |  [SortDirection](./kibana-plugin-plugins-data-public.sortdirection.md) |  |
+|  [TimeoutErrorMode](./kibana-plugin-plugins-data-public.timeouterrormode.md) |  |
 
 ## Functions
 
@@ -111,7 +112,6 @@
 |  [extractSearchSourceReferences](./kibana-plugin-plugins-data-public.extractsearchsourcereferences.md) |  |
 |  [fieldFormats](./kibana-plugin-plugins-data-public.fieldformats.md) |  |
 |  [fieldList](./kibana-plugin-plugins-data-public.fieldlist.md) |  |
-|  [FilterBar](./kibana-plugin-plugins-data-public.filterbar.md) |  |
 |  [getKbnTypeNames](./kibana-plugin-plugins-data-public.getkbntypenames.md) | Get the esTypes known by all kbnFieldTypes {<!-- -->Array<string>} |
 |  [indexPatterns](./kibana-plugin-plugins-data-public.indexpatterns.md) |  |
 |  [injectSearchSourceReferences](./kibana-plugin-plugins-data-public.injectsearchsourcereferences.md) |  |
@@ -158,6 +158,7 @@
 |  [IMetricAggType](./kibana-plugin-plugins-data-public.imetricaggtype.md) |  |
 |  [IndexPatternAggRestrictions](./kibana-plugin-plugins-data-public.indexpatternaggrestrictions.md) |  |
 |  [IndexPatternsContract](./kibana-plugin-plugins-data-public.indexpatternscontract.md) |  |
+|  [IndexPatternSelectProps](./kibana-plugin-plugins-data-public.indexpatternselectprops.md) |  |
 |  [InputTimeRange](./kibana-plugin-plugins-data-public.inputtimerange.md) |  |
 |  [ISearch](./kibana-plugin-plugins-data-public.isearch.md) |  |
 |  [ISearchGeneric](./kibana-plugin-plugins-data-public.isearchgeneric.md) |  |

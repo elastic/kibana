@@ -5,6 +5,7 @@
  */
 
 export type StaticPage =
+  | 'base'
   | 'overview'
   | 'integrations'
   | 'integrations_all'
@@ -62,6 +63,7 @@ export const pagePathGetters: {
   {
     [key in DynamicPage]: (values: DynamicPagePathValues) => string;
   } = {
+  base: () => '/',
   overview: () => '/',
   integrations: () => '/integrations',
   integrations_all: () => '/integrations',

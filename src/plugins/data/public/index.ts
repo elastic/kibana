@@ -50,7 +50,7 @@ import {
   COMPARE_ALL_OPTIONS,
 } from '../common';
 
-import { FilterLabel } from './ui/filter_bar';
+import { FilterLabel } from './ui';
 
 import {
   generateFilters,
@@ -365,8 +365,6 @@ export {
   ISearchGeneric,
   ISearchSource,
   parseSearchSourceJSON,
-  RequestTimeoutError,
-  SearchError,
   SearchInterceptor,
   SearchInterceptorDeps,
   SearchRequest,
@@ -375,6 +373,11 @@ export {
   // expression functions and types
   EsdslExpressionFunctionDefinition,
   EsRawResponseExpressionTypeDefinition,
+  // errors
+  SearchError,
+  SearchTimeoutError,
+  TimeoutErrorMode,
+  PainlessError,
 } from './search';
 
 export type { SearchSource } from './search';
@@ -418,10 +421,9 @@ export {
   SearchBar,
   SearchBarProps,
   StatefulSearchBarProps,
-  FilterBar,
+  IndexPatternSelectProps,
   QueryStringInput,
   QueryStringInputProps,
-  IndexPatternSelect,
 } from './ui';
 
 /**

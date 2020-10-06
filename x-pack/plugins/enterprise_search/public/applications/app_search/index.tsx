@@ -4,20 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Route, Redirect, Switch } from 'react-router-dom';
 import { useActions, useValues } from 'kea';
 
+import { EuiPage, EuiPageBody } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { KibanaContext, IKibanaContext } from '../index';
 import { getAppSearchUrl } from '../shared/enterprise_search_url';
+import { KibanaLogic } from '../shared/kibana';
 import { HttpLogic } from '../shared/http';
 import { AppLogic } from './app_logic';
 import { IInitialAppData } from '../../../common/types';
 
 import { APP_SEARCH_PLUGIN } from '../../../common/constants';
-import { Layout, SideNav, SideNavLink } from '../shared/layout';
+import { SideNav, SideNavLink } from '../shared/layout';
 
 import {
   ROOT_PATH,
@@ -34,7 +35,7 @@ import { NotFound } from '../shared/not_found';
 import { EngineOverview } from './components/engine_overview';
 
 export const AppSearch: React.FC<IInitialAppData> = (props) => {
-  const { config } = useContext(KibanaContext) as IKibanaContext;
+  const { config } = useValues(KibanaLogic);
   return !config.host ? <AppSearchUnconfigured /> : <AppSearchConfigured {...props} />;
 };
 
@@ -52,7 +53,7 @@ export const AppSearchUnconfigured: React.FC = () => (
 export const AppSearchConfigured: React.FC<IInitialAppData> = (props) => {
   const { initializeAppData } = useActions(AppLogic);
   const { hasInitialized } = useValues(AppLogic);
-  const { errorConnecting, readOnlyMode } = useValues(HttpLogic);
+  const { errorConnecting } = useValues(HttpLogic);
 
   useEffect(() => {
     if (!hasInitialized) initializeAppData(props);
@@ -64,23 +65,25 @@ export const AppSearchConfigured: React.FC<IInitialAppData> = (props) => {
         <SetupGuide />
       </Route>
       <Route>
-        <Layout navigation={<AppSearchNav />} readOnlyMode={readOnlyMode}>
-          {errorConnecting ? (
-            <ErrorConnecting />
-          ) : (
-            <Switch>
-              <Route exact path={ROOT_PATH}>
-                <Redirect to={ENGINES_PATH} />
-              </Route>
-              <Route exact path={ENGINES_PATH}>
-                <EngineOverview />
-              </Route>
-              <Route>
-                <NotFound product={APP_SEARCH_PLUGIN} />
-              </Route>
-            </Switch>
-          )}
-        </Layout>
+        <EuiPage>
+          <EuiPageBody restrictWidth>
+            {errorConnecting ? (
+              <ErrorConnecting />
+            ) : (
+              <Switch>
+                <Route exact path={ROOT_PATH}>
+                  <Redirect to={ENGINES_PATH} />
+                </Route>
+                <Route exact path={ENGINES_PATH}>
+                  <EngineOverview />
+                </Route>
+                <Route>
+                  <NotFound product={APP_SEARCH_PLUGIN} />
+                </Route>
+              </Switch>
+            )}
+          </EuiPageBody>
+        </EuiPage>
       </Route>
     </Switch>
   );

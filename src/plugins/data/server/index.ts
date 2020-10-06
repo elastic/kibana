@@ -214,11 +214,13 @@ export {
   ISearchSetup,
   ISearchStart,
   toSnakeCase,
+  getAsyncOptions,
   getDefaultSearchParams,
   getShardTimeout,
   getTotalLoaded,
   shimHitsTotal,
   usageProvider,
+  shimAbortSignal,
   SearchUsage,
 } from './search';
 
@@ -287,6 +289,7 @@ export {
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
     autocomplete: true,
+    search: true,
   },
   schema: configSchema,
 };

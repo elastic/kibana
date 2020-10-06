@@ -11,15 +11,16 @@ import { PieVisualizationState } from './types';
 
 export function toExpression(
   state: PieVisualizationState,
-  datasourceLayers: Record<string, DatasourcePublicAPI>
+  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  attributes: Partial<{ title: string; description: string }> = {}
 ) {
-  return expressionHelper(state, datasourceLayers, false);
+  return expressionHelper(state, datasourceLayers, { ...attributes, isPreview: false });
 }
 
 function expressionHelper(
   state: PieVisualizationState,
   datasourceLayers: Record<string, DatasourcePublicAPI>,
-  isPreview: boolean
+  attributes: { isPreview: boolean; title?: string; description?: string } = { isPreview: false }
 ): Ast | null {
   const layer = state.layers[0];
   const datasource = datasourceLayers[layer.layerId];
@@ -37,8 +38,10 @@ function expressionHelper(
         type: 'function',
         function: 'lens_pie',
         arguments: {
+          title: [attributes.title || ''],
+          description: [attributes.description || ''],
           shape: [state.shape],
-          hideLabels: [isPreview],
+          hideLabels: [attributes.isPreview],
           groups: operations.map((o) => o.columnId),
           metric: [layer.metric],
           numberDisplay: [layer.numberDisplay],
@@ -57,5 +60,5 @@ export function toPreviewExpression(
   state: PieVisualizationState,
   datasourceLayers: Record<string, DatasourcePublicAPI>
 ) {
-  return expressionHelper(state, datasourceLayers, true);
+  return expressionHelper(state, datasourceLayers, { isPreview: true });
 }

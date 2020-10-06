@@ -383,6 +383,8 @@ export type LayerArgs = LayerConfig & {
 
 // Arguments to XY chart expression, with computed properties
 export interface XYArgs {
+  title?: string;
+  description?: string;
   xTitle: string;
   yTitle: string;
   yRightTitle: string;
@@ -424,6 +426,9 @@ export const visualizationTypes: VisualizationType[] = [
     id: 'bar_horizontal',
     icon: LensIconChartBarHorizontal,
     label: i18n.translate('xpack.lens.xyVisualization.barHorizontalLabel', {
+      defaultMessage: 'H. Bar',
+    }),
+    fullLabel: i18n.translate('xpack.lens.xyVisualization.barHorizontalFullLabel', {
       defaultMessage: 'Horizontal bar',
     }),
   },
@@ -438,22 +443,31 @@ export const visualizationTypes: VisualizationType[] = [
     id: 'bar_percentage_stacked',
     icon: LensIconChartBarPercentage,
     label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageBarLabel', {
-      defaultMessage: 'Bar percentage',
+      defaultMessage: 'Percentage bar',
     }),
   },
   {
     id: 'bar_horizontal_stacked',
     icon: LensIconChartBarHorizontalStacked,
     label: i18n.translate('xpack.lens.xyVisualization.stackedBarHorizontalLabel', {
-      defaultMessage: 'Stacked horizontal bar',
+      defaultMessage: 'H. Stacked bar',
+    }),
+    fullLabel: i18n.translate('xpack.lens.xyVisualization.stackedBarHorizontalFullLabel', {
+      defaultMessage: 'Horizontal stacked bar',
     }),
   },
   {
     id: 'bar_horizontal_percentage_stacked',
     icon: LensIconChartBarHorizontalPercentage,
     label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageBarHorizontalLabel', {
-      defaultMessage: 'Horizontal bar percentage',
+      defaultMessage: 'H. Percentage bar',
     }),
+    fullLabel: i18n.translate(
+      'xpack.lens.xyVisualization.stackedPercentageBarHorizontalFullLabel',
+      {
+        defaultMessage: 'Horizontal percentage bar',
+      }
+    ),
   },
   {
     id: 'area',
@@ -473,7 +487,7 @@ export const visualizationTypes: VisualizationType[] = [
     id: 'area_percentage_stacked',
     icon: LensIconChartAreaPercentage,
     label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageAreaLabel', {
-      defaultMessage: 'Area percentage',
+      defaultMessage: 'Percentage area',
     }),
   },
   {

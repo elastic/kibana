@@ -131,11 +131,27 @@ export const relatedEventTotalCount: (
   dataSelectors.relatedEventTotalCount
 );
 
-export const relatedEventCountByType: (
+export const relatedEventCountByCategory: (
   state: ResolverState
-) => (nodeID: string, eventType: string) => number | undefined = composeSelectors(
+) => (nodeID: string, eventCategory: string) => number | undefined = composeSelectors(
   dataStateSelector,
-  dataSelectors.relatedEventCountByType
+  dataSelectors.relatedEventCountByCategory
+);
+
+/**
+ * the loading state of the current related event data for the `event_detail` view
+ */
+export const isCurrentRelatedEventLoading = composeSelectors(
+  dataStateSelector,
+  dataSelectors.isCurrentRelatedEventLoading
+);
+
+/**
+ * the current related event data for the `event_detail` view
+ */
+export const currentRelatedEventData = composeSelectors(
+  dataStateSelector,
+  dataSelectors.currentRelatedEventData
 );
 
 /**
@@ -312,7 +328,7 @@ export const panelViewAndParameters = composeSelectors(
 export const relativeHref = composeSelectors(uiStateSelector, uiSelectors.relativeHref);
 
 /**
- * @deprecated
+ * @deprecated use `useLinkProps`
  */
 export const relatedEventsRelativeHrefs = composeSelectors(
   uiStateSelector,
@@ -320,11 +336,63 @@ export const relatedEventsRelativeHrefs = composeSelectors(
 );
 
 /**
- * @deprecated
+ * Total count of events related to `nodeID`.
+ * Based on `ResolverNodeStats`
  */
-export const relatedEventDetailHrefs = composeSelectors(
-  uiStateSelector,
-  uiSelectors.relatedEventDetailHrefs
+export const totalRelatedEventCountForNode = composeSelectors(
+  dataStateSelector,
+  dataSelectors.totalRelatedEventCountForNode
+);
+
+/**
+ * Count of events with `category` related to `nodeID`.
+ * Based on `ResolverNodeStats`
+ * Used to populate the breadcrumbs in the `nodeEventsInCategory` panel.
+ */
+export const relatedEventCountOfTypeForNode = composeSelectors(
+  dataStateSelector,
+  dataSelectors.relatedEventCountOfTypeForNode
+);
+
+/**
+ * Events related to the panel node that are in the panel category.
+ * Used to populate the breadcrumbs in the `nodeEventsInCategory` panel.
+ * NB: This cannot tell the view loading information. For example, this does not tell the view if data has been request or if data failed to load.
+ */
+export const nodeEventsInCategory = composeSelectors(
+  dataStateSelector,
+  dataSelectors.nodeEventsInCategory
+);
+
+/**
+ * Flag used to show a Load More Data button in the nodeEventsOfType panel view.
+ */
+export const lastRelatedEventResponseContainsCursor = composeSelectors(
+  dataStateSelector,
+  dataSelectors.lastRelatedEventResponseContainsCursor
+);
+
+/**
+ * Flag to show an error message when loading more related events.
+ */
+export const hadErrorLoadingNodeEventsInCategory = composeSelectors(
+  dataStateSelector,
+  dataSelectors.hadErrorLoadingNodeEventsInCategory
+);
+/**
+ * Flag used to show a loading view for the initial loading of related events.
+ */
+export const isLoadingNodeEventsInCategory = composeSelectors(
+  dataStateSelector,
+  dataSelectors.isLoadingNodeEventsInCategory
+);
+
+/**
+ * Flag used to show a loading state for any additional related events.
+ */
+export const isLoadingMoreNodeEventsInCategory = composeSelectors(
+  dataStateSelector,
+  dataSelectors.isLoadingMoreNodeEventsInCategory
 );
 
 /**

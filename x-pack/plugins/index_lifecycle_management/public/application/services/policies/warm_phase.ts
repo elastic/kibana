@@ -30,6 +30,7 @@ const warmPhaseInitialization: WarmPhase = {
   selectedPrimaryShardCount: '',
   forceMergeEnabled: false,
   selectedForceMergeSegments: '',
+  bestCompressionEnabled: false,
   phaseIndexPriority: '',
   dataTierAllocationType: 'default',
 };
@@ -76,12 +77,20 @@ export const warmPhaseFromES = (phaseSerialized?: SerializedWarmPhase): WarmPhas
       const forcemerge = actions.forcemerge;
       phase.forceMergeEnabled = true;
       phase.selectedForceMergeSegments = forcemerge.max_num_segments.toString();
+      // only accepted value for index_codec
+      phase.bestCompressionEnabled = forcemerge.index_codec === 'best_compression';
     }
 
     if (actions.shrink) {
       phase.shrinkEnabled = true;
       phase.selectedPrimaryShardCount = actions.shrink.number_of_shards
         ? actions.shrink.number_of_shards.toString()
+        : '';
+    }
+
+    if (actions.set_priority) {
+      phase.phaseIndexPriority = actions.set_priority.priority
+        ? actions.set_priority.priority.toString()
         : '';
     }
   }
@@ -136,6 +145,10 @@ export const warmPhaseToES = (
     esPhase.actions.forcemerge = {
       max_num_segments: parseInt(phase.selectedForceMergeSegments, 10),
     };
+    if (phase.bestCompressionEnabled) {
+      // only accepted value for index_codec
+      esPhase.actions.forcemerge.index_codec = 'best_compression';
+    }
   } else {
     delete esPhase.actions.forcemerge;
   }

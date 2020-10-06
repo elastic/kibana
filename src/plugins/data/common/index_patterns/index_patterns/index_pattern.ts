@@ -68,7 +68,6 @@ export class IndexPattern implements IIndexPattern {
   public metaFields: string[];
   // savedObject version
   public version: string | undefined;
-  private savedObjectsClient: SavedObjectsClientCommon;
   public sourceFilters?: SourceFilter[];
   private originalSavedObjectBody: SavedObjectBody = {};
   private shortDotsEnable: boolean = false;
@@ -76,13 +75,11 @@ export class IndexPattern implements IIndexPattern {
 
   constructor({
     spec = {},
-    savedObjectsClient,
     fieldFormats,
     shortDotsEnable = false,
     metaFields = [],
   }: IndexPatternDeps) {
     // set dependencies
-    this.savedObjectsClient = savedObjectsClient;
     this.fieldFormats = fieldFormats;
     // set config
     this.shortDotsEnable = shortDotsEnable;
@@ -217,12 +214,7 @@ export class IndexPattern implements IIndexPattern {
    * @param fieldType
    * @param lang
    */
-  async addScriptedField(
-    name: string,
-    script: string,
-    fieldType: string = 'string',
-    lang: string = 'painless'
-  ) {
+  async addScriptedField(name: string, script: string, fieldType: string = 'string') {
     const scriptedFields = this.getScriptedFields();
     const names = _.map(scriptedFields, 'name');
 
@@ -235,7 +227,7 @@ export class IndexPattern implements IIndexPattern {
       script,
       type: fieldType,
       scripted: true,
-      lang,
+      lang: 'painless',
       aggregatable: true,
       searchable: true,
       count: 0,
@@ -252,39 +244,6 @@ export class IndexPattern implements IIndexPattern {
     const field = this.fields.getByName(fieldName);
     if (field) {
       this.fields.remove(field);
-    }
-  }
-
-  async popularizeField(fieldName: string, unit = 1) {
-    /**
-     * This function is just used by Discover and it's high likely to be removed in the near future
-     * It doesn't use the save function to skip the error message that's displayed when
-     * a user adds several columns in a higher frequency that the changes can be persisted to ES
-     * resulting in 409 errors
-     */
-    if (!this.id) return;
-    const field = this.fields.getByName(fieldName);
-    if (!field) {
-      return;
-    }
-    const count = Math.max((field.count || 0) + unit, 0);
-    if (field.count === count) {
-      return;
-    }
-    field.count = count;
-
-    try {
-      const res = await this.savedObjectsClient.update(
-        'index-pattern',
-        this.id,
-        this.getAsSavedObjectBody(),
-        {
-          version: this.version,
-        }
-      );
-      this.version = res.version;
-    } catch (e) {
-      // no need for an error message here
     }
   }
 
@@ -305,13 +264,9 @@ export class IndexPattern implements IIndexPattern {
     return timeField && timeField.esTypes && timeField.esTypes.indexOf('date_nanos') !== -1;
   }
 
-  isTimeBasedWildcard(): boolean {
-    return this.isTimeBased() && this.isWildcard();
-  }
-
   getTimeField() {
     if (!this.timeFieldName || !this.fields || !this.fields.getByName) return undefined;
-    return this.fields.getByName(this.timeFieldName) || undefined;
+    return this.fields.getByName(this.timeFieldName);
   }
 
   getFieldByName(name: string): IndexPatternField | undefined {
@@ -321,13 +276,6 @@ export class IndexPattern implements IIndexPattern {
 
   getAggregationRestrictions() {
     return this.typeMeta?.aggs;
-  }
-
-  /**
-   * Does this index pattern title include a '*'
-   */
-  private isWildcard() {
-    return _.includes(this.title, '*');
   }
 
   /**
