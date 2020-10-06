@@ -17,4 +17,19 @@
  * under the License.
  */
 
-export { SuggestionsComponent } from './suggestions_component';
+import React from 'react';
+import { EuiLoadingContent, EuiDelayRender } from '@elastic/eui';
+import type { SuggestionsComponentProps } from './suggestions_component';
+
+const Fallback = () => (
+  <EuiDelayRender>
+    <EuiLoadingContent lines={1} />
+  </EuiDelayRender>
+);
+
+const LazySuggestionsComponent = React.lazy(() => import('./suggestions_component'));
+export const SuggestionsComponent = (props: SuggestionsComponentProps) => (
+  <React.Suspense fallback={<Fallback />}>
+    <LazySuggestionsComponent {...props} />
+  </React.Suspense>
+);

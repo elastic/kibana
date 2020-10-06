@@ -19,10 +19,7 @@
 
 import React from 'react';
 import { EuiLoadingContent, EuiDelayRender } from '@elastic/eui';
-import { IIndexPattern, Filter } from '../..';
-
-type CancelFnType = () => void;
-type SubmitFnType = (filters: Filter[]) => void;
+import type { ShardFailureOpenModalButtonProps } from './shard_failure_open_modal_button';
 
 const Fallback = () => (
   <EuiDelayRender>
@@ -30,22 +27,13 @@ const Fallback = () => (
   </EuiDelayRender>
 );
 
-const LazyApplyFiltersPopoverContent = React.lazy(() => import('./apply_filter_popover_content'));
+const LazyShardFailureOpenModalButton = React.lazy(
+  () => import('./shard_failure_open_modal_button')
+);
+export const ShardFailureOpenModalButton = (props: ShardFailureOpenModalButtonProps) => (
+  <React.Suspense fallback={<Fallback />}>
+    <LazyShardFailureOpenModalButton {...props} />
+  </React.Suspense>
+);
 
-export const applyFiltersPopover = (
-  filters: Filter[],
-  indexPatterns: IIndexPattern[],
-  onCancel: CancelFnType,
-  onSubmit: SubmitFnType
-) => {
-  return (
-    <React.Suspense fallback={<Fallback />}>
-      <LazyApplyFiltersPopoverContent
-        indexPatterns={indexPatterns}
-        filters={filters}
-        onCancel={onCancel}
-        onSubmit={onSubmit}
-      />
-    </React.Suspense>
-  );
-};
+export type { ShardFailureRequest } from './shard_failure_types';

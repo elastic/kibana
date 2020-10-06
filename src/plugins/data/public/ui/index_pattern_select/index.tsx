@@ -17,4 +17,22 @@
  * under the License.
  */
 
-export * from './index_pattern_select';
+import React from 'react';
+import { EuiLoadingContent, EuiDelayRender } from '@elastic/eui';
+import type { IndexPatternSelectProps } from './index_pattern_select';
+
+const Fallback = () => (
+  <EuiDelayRender>
+    <EuiLoadingContent lines={1} />
+  </EuiDelayRender>
+);
+
+const LazyIndexPatternSelect = React.lazy(() => import('./index_pattern_select'));
+export const IndexPatternSelect = (props: IndexPatternSelectProps) => (
+  <React.Suspense fallback={<Fallback />}>
+    <LazyIndexPatternSelect {...props} />
+  </React.Suspense>
+);
+
+export * from './create_index_pattern_select';
+export type { IndexPatternSelectProps } from './index_pattern_select';

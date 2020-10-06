@@ -17,5 +17,19 @@
  * under the License.
  */
 
-export { FilterBar } from './filter_bar';
-export { FilterLabel } from './filter_editor/lib/filter_label';
+import React from 'react';
+import { EuiLoadingContent, EuiDelayRender } from '@elastic/eui';
+import type { FilterLabelProps } from './filter_editor/lib/filter_label';
+
+const Fallback = () => (
+  <EuiDelayRender>
+    <EuiLoadingContent lines={1} />
+  </EuiDelayRender>
+);
+
+const LazyFilterLabel = React.lazy(() => import('./filter_editor/lib/filter_label'));
+export const FilterLabel = (props: FilterLabelProps) => (
+  <React.Suspense fallback={<Fallback />}>
+    <LazyFilterLabel {...props} />
+  </React.Suspense>
+);
