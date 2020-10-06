@@ -11,7 +11,7 @@ import * as Registry from '../../registry';
 import {
   ElasticsearchAssetType,
   EsAssetReference,
-  RegistryPackage,
+  InstallablePackage,
 } from '../../../../../common/types/models';
 import { CallESAsCurrentUser } from '../../../../types';
 import { getInstallation } from '../../packages';
@@ -24,14 +24,14 @@ interface TransformInstallation {
 }
 
 export const installTransform = async (
-  registryPackage: RegistryPackage,
+  installablePackage: InstallablePackage,
   paths: string[],
   callCluster: CallESAsCurrentUser,
   savedObjectsClient: SavedObjectsClientContract
 ) => {
   const installation = await getInstallation({
     savedObjectsClient,
-    pkgName: registryPackage.name,
+    pkgName: installablePackage.name,
   });
   let previousInstalledTransformEsAssets: EsAssetReference[] = [];
   if (installation) {
@@ -46,13 +46,13 @@ export const installTransform = async (
     previousInstalledTransformEsAssets.map((asset) => asset.id)
   );
 
-  const installNameSuffix = `${registryPackage.version}`;
+  const installNameSuffix = `${installablePackage.version}`;
   const transformPaths = paths.filter((path) => isTransform(path));
   let installedTransforms: EsAssetReference[] = [];
   if (transformPaths.length > 0) {
     const transformRefs = transformPaths.reduce<EsAssetReference[]>((acc, path) => {
       acc.push({
-        id: getTransformNameForInstallation(registryPackage, path, installNameSuffix),
+        id: getTransformNameForInstallation(installablePackage, path, installNameSuffix),
         type: ElasticsearchAssetType.transform,
       });
 
@@ -60,11 +60,15 @@ export const installTransform = async (
     }, []);
 
     // get and save transform refs before installing transforms
-    await saveInstalledEsRefs(savedObjectsClient, registryPackage.name, transformRefs);
+    await saveInstalledEsRefs(savedObjectsClient, installablePackage.name, transformRefs);
 
     const transforms: TransformInstallation[] = transformPaths.map((path: string) => {
       return {
-        installationName: getTransformNameForInstallation(registryPackage, path, installNameSuffix),
+        installationName: getTransformNameForInstallation(
+          installablePackage,
+          path,
+          installNameSuffix
+        ),
         content: getAsset(path).toString('utf-8'),
       };
     });
@@ -79,14 +83,14 @@ export const installTransform = async (
   if (previousInstalledTransformEsAssets.length > 0) {
     const currentInstallation = await getInstallation({
       savedObjectsClient,
-      pkgName: registryPackage.name,
+      pkgName: installablePackage.name,
     });
 
     // remove the saved object reference
     await deleteTransformRefs(
       savedObjectsClient,
       currentInstallation?.installed_es || [],
-      registryPackage.name,
+      installablePackage.name,
       previousInstalledTransformEsAssets.map((asset) => asset.id),
       installedTransforms.map((installed) => installed.id)
     );
@@ -123,12 +127,12 @@ async function handleTransformInstall({
 }
 
 const getTransformNameForInstallation = (
-  registryPackage: RegistryPackage,
+  installablePackage: InstallablePackage,
   path: string,
   suffix: string
 ) => {
   const pathPaths = path.split('/');
   const filename = pathPaths?.pop()?.split('.')[0];
   const folderName = pathPaths?.pop();
-  return `${registryPackage.name}.${folderName}-${filename}-${suffix}`;
+  return `${installablePackage.name}.${folderName}-${filename}-${suffix}`;
 };
