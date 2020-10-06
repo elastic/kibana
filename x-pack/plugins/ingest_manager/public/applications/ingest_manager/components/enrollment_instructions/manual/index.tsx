@@ -26,7 +26,7 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
   apiKey,
   kibanaCASha256,
 }) => {
-  const enrollArgs = `${kibanaUrl} ${apiKey.api_key}${
+  const enrollArgs = `--kibana-url=${kibanaUrl} --enrollment-token=${apiKey.api_key}${
     kibanaCASha256 ? ` --ca_sha256=${kibanaCASha256}` : ''
   }`;
 

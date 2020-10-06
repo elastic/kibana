@@ -13,7 +13,7 @@ import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { shallow } from 'enzyme';
 
-import { SideNav, SideNavLink } from '../shared/layout';
+import { Layout, SideNav, SideNavLink } from '../shared/layout';
 import { SetupGuide } from './components/setup_guide';
 import { ErrorConnecting } from './components/error_connecting';
 import { EngineOverview } from './components/engine_overview';
@@ -51,9 +51,11 @@ describe('AppSearchConfigured', () => {
     setMockActions({ initializeAppData: () => {} });
   });
 
-  it('renders', () => {
+  it('renders with layout', () => {
     const wrapper = shallow(<AppSearchConfigured />);
 
+    expect(wrapper.find(Layout)).toHaveLength(1);
+    expect(wrapper.find(Layout).prop('readOnlyMode')).toBeFalsy();
     expect(wrapper.find(EngineOverview)).toHaveLength(1);
   });
 
@@ -82,6 +84,14 @@ describe('AppSearchConfigured', () => {
     const wrapper = shallow(<AppSearchConfigured />);
 
     expect(wrapper.find(ErrorConnecting)).toHaveLength(1);
+  });
+
+  it('passes readOnlyMode state', () => {
+    setMockValues({ myRole: {}, readOnlyMode: true });
+
+    const wrapper = shallow(<AppSearchConfigured />);
+
+    expect(wrapper.find(Layout).prop('readOnlyMode')).toEqual(true);
   });
 
   describe('ability checks', () => {
