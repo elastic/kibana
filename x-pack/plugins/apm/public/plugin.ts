@@ -49,7 +49,7 @@ export interface ApmPluginSetupDeps {
   features: FeaturesPluginSetup;
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
-  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   observability?: ObservabilityPluginSetup;
 }
 
@@ -59,7 +59,7 @@ export interface ApmPluginStartDeps {
   data: DataPublicPluginStart;
   home: void;
   licensing: void;
-  triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   embeddable: EmbeddableStart;
 }
 
@@ -173,6 +173,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   }
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     toggleAppLinkInNav(core, this.initializerContext.config.get());
-    registerApmAlerts(plugins.triggers_actions_ui.alertTypeRegistry);
+    registerApmAlerts(plugins.triggersActionsUi.alertTypeRegistry);
   }
 }
