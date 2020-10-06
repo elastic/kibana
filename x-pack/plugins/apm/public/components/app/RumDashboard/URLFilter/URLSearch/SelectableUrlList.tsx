@@ -22,14 +22,23 @@ import {
   EuiSelectableMessage,
   EuiPopoverFooter,
   EuiButton,
+  EuiText,
+  EuiIcon,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import styled from 'styled-components';
 import {
   formatOptions,
   selectableRenderOptions,
   UrlOption,
 } from './RenderOption';
 import { I18LABELS } from '../../translations';
+
+const StyledRow = styled.div`
+  text-align: center;
+  padding-top: 8px;
+`;
 
 interface Props {
   data: {
@@ -178,12 +187,28 @@ export function SelectableUrlList({
           isOpen={popoverIsOpen}
           display={'block'}
           panelRef={setPopoverRef}
-          button={search}
+          input={search}
           closePopover={closePopover}
           anchorPosition={'downLeft'}
         >
           <div style={{ width: 600, maxWidth: '100%' }}>
             <PopOverTitle />
+            <StyledRow>
+              <EuiText size="s">
+                <FormattedMessage
+                  id="euiComboBoxOptionsList.createCustomOption"
+                  defaultMessage="Hit Enter {icon} to include all urls matching {searchValue}"
+                  values={{
+                    searchValue: <strong>{searchValue}</strong>,
+                    icon: (
+                      <EuiIcon size="s" type="returnKey">
+                        {searchValue}
+                      </EuiIcon>
+                    ),
+                  }}
+                />
+              </EuiText>
+            </StyledRow>
             {list}
             <EuiPopoverFooter>
               <EuiFlexGroup style={{ justifyContent: 'flex-end' }}>
