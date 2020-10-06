@@ -212,17 +212,19 @@ export const rumJSErrors = createRoute(() => ({
       uiFiltersRt,
       rangeRt,
       t.type({ pageSize: t.string, pageIndex: t.string }),
+      t.partial({ urlQuery: t.string }),
     ]),
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
     const {
-      query: { pageSize, pageIndex },
+      query: { pageSize, pageIndex, urlQuery },
     } = context.params;
 
     return getJSErrors({
       setup,
+      urlQuery,
       pageSize: Number(pageSize),
       pageIndex: Number(pageIndex),
     });
