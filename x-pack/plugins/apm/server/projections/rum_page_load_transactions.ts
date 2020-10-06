@@ -63,8 +63,10 @@ export function getRumPageLoadTransactionsProjection({
 
 export function getRumErrorsProjection({
   setup,
+  urlQuery,
 }: {
   setup: Setup & SetupTimeRange;
+  urlQuery?: string;
 }) {
   const { start, end, esFilter: esFilter } = setup;
 
@@ -79,6 +81,17 @@ export function getRumErrorsProjection({
         },
       },
       ...esFilter,
+      ...(urlQuery
+        ? [
+            {
+              wildcard: {
+                'url.full': {
+                  value: `*${urlQuery}*`,
+                },
+              },
+            },
+          ]
+        : []),
     ],
   };
 

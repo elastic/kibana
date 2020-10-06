@@ -5,7 +5,7 @@
     "xpack.uiActionsEnhanced": "plugins/ui_actions_enhanced",
     "xpack.alerts": "plugins/alerts",
     "xpack.eventLog": "plugins/event_log",
-    "xpack.alertingBuiltins": "plugins/alerting_builtins",
+    "xpack.stackAlerts": "plugins/stack_alerts",
     "xpack.apm": "plugins/apm",
     "xpack.beatsManagement": "plugins/beats_management",
     "xpack.canvas": "plugins/canvas",

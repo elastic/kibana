@@ -75,8 +75,9 @@ const refreshListIfNeeded = async (
           type: 'LoadedResourceState',
           data: {
             items: response.data,
+            pageIndex,
+            pageSize,
             totalItemsCount: response.total,
-            paginationInfo: { index: pageIndex, size: pageSize },
             timestamp: Date.now(),
           },
         })
