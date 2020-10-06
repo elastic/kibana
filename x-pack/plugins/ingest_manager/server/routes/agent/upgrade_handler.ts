@@ -16,6 +16,8 @@ import * as AgentService from '../../services/agents';
 import { appContextService } from '../../services';
 import { defaultIngestErrorHandler } from '../../errors';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
+import { savedObjectToAgent } from '../../services/agents/saved_objects';
+import { isAgentUpgradeable } from '../../../common/services';
 
 export const postAgentUpgradeHandler: RequestHandler<
   TypeOf<typeof PostAgentUpgradeRequestSchema.params>,
@@ -35,15 +37,25 @@ export const postAgentUpgradeHandler: RequestHandler<
       },
     });
   }
-  const agent = await soClient.get<AgentSOAttributes>(
+  const agentSO = await soClient.get<AgentSOAttributes>(
     AGENT_SAVED_OBJECT_TYPE,
     request.params.agentId
   );
-  if (agent.attributes.unenrollment_started_at || agent.attributes.unenrolled_at) {
+  if (agentSO.attributes.unenrollment_started_at || agentSO.attributes.unenrolled_at) {
     return response.customError({
       statusCode: 400,
       body: {
-        message: `cannot upgrade an unenrolling or unenrolled agent`,
+        message: 'cannot upgrade an unenrolling or unenrolled agent',
+      },
+    });
+  }
+
+  const agent = savedObjectToAgent(agentSO);
+  if (!isAgentUpgradeable(agent, kibanaVersion)) {
+    return response.customError({
+      statusCode: 400,
+      body: {
+        message: `agent ${request.params.agentId} is not upgradeable`,
       },
     });
   }

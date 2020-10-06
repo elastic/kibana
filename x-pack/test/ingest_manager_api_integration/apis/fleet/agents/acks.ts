@@ -50,7 +50,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should return a 401 if this a not a valid acks access', async () => {
       await supertest
-        .post(`/api/ingest_manager/fleet/agents/agent1/acks`)
+        .post(`/api/fleet/agents/agent1/acks`)
         .set('kbn-xsrf', 'xx')
         .set('Authorization', 'ApiKey NOT_A_VALID_TOKEN')
         .send({
@@ -61,7 +61,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should return a 200 if this a valid acks request', async () => {
       const { body: apiResponse } = await supertest
-        .post(`/api/ingest_manager/fleet/agents/agent1/acks`)
+        .post(`/api/fleet/agents/agent1/acks`)
         .set('kbn-xsrf', 'xx')
         .set(
           'Authorization',
@@ -92,7 +92,7 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
       expect(apiResponse.action).to.be('acks');
       const { body: eventResponse } = await supertest
-        .get(`/api/ingest_manager/fleet/agents/agent1/events`)
+        .get(`/api/fleet/agents/agent1/events`)
         .set('kbn-xsrf', 'xx')
         .set(
           'Authorization',
@@ -121,7 +121,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should return a 400 when request event list contains event for another agent id', async () => {
       const { body: apiResponse } = await supertest
-        .post(`/api/ingest_manager/fleet/agents/agent1/acks`)
+        .post(`/api/fleet/agents/agent1/acks`)
         .set('kbn-xsrf', 'xx')
         .set(
           'Authorization',
@@ -148,7 +148,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should return a 400 when request event list contains action that does not belong to agent current actions', async () => {
       const { body: apiResponse } = await supertest
-        .post(`/api/ingest_manager/fleet/agents/agent1/acks`)
+        .post(`/api/fleet/agents/agent1/acks`)
         .set('kbn-xsrf', 'xx')
         .set(
           'Authorization',
@@ -182,7 +182,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should return a 400 when request event list contains action types that are not allowed for acknowledgement', async () => {
       const { body: apiResponse } = await supertest
-        .post(`/api/ingest_manager/fleet/agents/agent1/acks`)
+        .post(`/api/fleet/agents/agent1/acks`)
         .set('kbn-xsrf', 'xx')
         .set(
           'Authorization',
@@ -209,7 +209,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('ack upgrade should update fleet-agent SO', async () => {
       const { body: actionRes } = await supertest
-        .post(`/api/ingest_manager/fleet/agents/agent1/actions`)
+        .post(`/api/fleet/agents/agent1/actions`)
         .set('kbn-xsrf', 'xx')
         .set(
           'Authorization',
@@ -224,7 +224,7 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
       const actionId = actionRes.item.id;
       await supertest
-        .post(`/api/ingest_manager/fleet/agents/agent1/acks`)
+        .post(`/api/fleet/agents/agent1/acks`)
         .set('kbn-xsrf', 'xx')
         .set(
           'Authorization',

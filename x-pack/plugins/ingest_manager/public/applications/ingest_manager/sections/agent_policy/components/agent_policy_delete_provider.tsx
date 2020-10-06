@@ -22,7 +22,7 @@ type OnSuccessCallback = (agentPolicyDeleted: string) => void;
 export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({ children }) => {
   const { notifications } = useCore();
   const {
-    fleet: { enabled: isFleetEnabled },
+    agents: { enabled: isFleetEnabled },
   } = useConfig();
   const [agentPolicy, setAgentPolicy] = useState<string>();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -93,7 +93,7 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({ chil
     }
     setIsLoadingAgentsCount(true);
     const { data } = await sendRequest<{ total: number }>({
-      path: `/api/ingest_manager/fleet/agents`,
+      path: `/api/fleet/agents`,
       method: 'get',
       query: {
         kuery: `${AGENT_SAVED_OBJECT_TYPE}.policy_id : ${agentPolicyToCheck}`,

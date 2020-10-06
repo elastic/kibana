@@ -20,11 +20,11 @@ export default function (providerContext: FtrProviderContext) {
   const metricsTemplateName = `metrics-${pkgName}.test_metrics`;
 
   const uninstallPackage = async (pkg: string) => {
-    await supertest.delete(`/api/ingest_manager/epm/packages/${pkg}`).set('kbn-xsrf', 'xxxx');
+    await supertest.delete(`/api/fleet/epm/packages/${pkg}`).set('kbn-xsrf', 'xxxx');
   };
   const installPackage = async (pkg: string) => {
     await supertest
-      .post(`/api/ingest_manager/epm/packages/${pkg}`)
+      .post(`/api/fleet/epm/packages/${pkg}`)
       .set('kbn-xsrf', 'xxxx')
       .send({ force: true });
   };
@@ -192,6 +192,7 @@ export default function (providerContext: FtrProviderContext) {
           install_version: '0.1.0',
           install_status: 'installed',
           install_started_at: res.attributes.install_started_at,
+          install_source: 'registry',
         });
       });
     });

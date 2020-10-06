@@ -19,7 +19,7 @@ export const getFleetStatusHandler: RequestHandler = async (context, request, re
     const isTLSEnabled = appContextService.getHttpSetup().getServerInfo().protocol === 'https';
     const isProductionMode = appContextService.getIsProductionMode();
     const isCloud = appContextService.getCloud()?.isCloudEnabled ?? false;
-    const isTLSCheckDisabled = appContextService.getConfig()?.fleet?.tlsCheckDisabled ?? false;
+    const isTLSCheckDisabled = appContextService.getConfig()?.agents?.tlsCheckDisabled ?? false;
     const isUsingEphemeralEncryptionKey = appContextService.getEncryptedSavedObjectsSetup()
       .usingEphemeralEncryptionKey;
 

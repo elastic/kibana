@@ -303,6 +303,7 @@ const getSavedObjectTypes = (
         install_started_at: { type: 'date' },
         install_version: { type: 'keyword' },
         install_status: { type: 'keyword' },
+        install_source: { type: 'keyword' },
       },
     },
   },
