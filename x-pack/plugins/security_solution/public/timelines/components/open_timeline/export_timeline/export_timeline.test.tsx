@@ -29,7 +29,10 @@ jest.mock('.', () => {
 });
 
 jest.mock('react-router-dom', () => {
+  const actual = jest.requireActual('react-router-dom');
+
   return {
+    ...actual,
     useParams: jest.fn(),
   };
 });
