@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'settings', 'security', 'maps']);
+  const PageObjects = getPageObjects(['common', 'error', 'maps', 'settings', 'security']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
   const globalNav = getService('globalNav');
@@ -266,19 +266,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).to.not.contain('Maps');
       });
 
-      it(`returns a 404`, async () => {
+      it(`returns a 403`, async () => {
         await PageObjects.common.navigateToActualUrl('maps', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        const messageText = await PageObjects.common.getBodyText();
-        expect(messageText).to.eql(
-          JSON.stringify({
-            statusCode: 404,
-            error: 'Not Found',
-            message: 'Not Found',
-          })
-        );
+        PageObjects.error.expectForbidden();
       });
     });
   });

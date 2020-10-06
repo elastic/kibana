@@ -4,8 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import querystring from 'querystring';
+
+import React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { Subscription, Observable } from 'rxjs';
+import * as UiSharedDeps from '@kbn/ui-shared-deps';
+
 import type { Capabilities as UICapabilities } from '../../../../../src/core/types';
+
 import {
   LoggerFactory,
   KibanaRequest,
@@ -43,6 +50,8 @@ import { APPLICATION_PREFIX } from '../../common/constants';
 import { SecurityLicense } from '../../common/licensing';
 import { CheckPrivilegesWithRequest } from './types';
 import { OnlineStatusRetryScheduler } from '../elasticsearch';
+import { canRedirectRequest } from '../authentication';
+import { ResetSessionPage } from './reset_session_page';
 import { AuthenticatedUser } from '..';
 
 export { Actions } from './actions';
@@ -51,6 +60,7 @@ export { featurePrivilegeIterator } from './privileges';
 
 interface AuthorizationServiceSetupParams {
   packageVersion: string;
+  buildNumber: number;
   http: HttpServiceSetup;
   capabilities: CapabilitiesSetup;
   clusterClient: ILegacyClusterClient;
@@ -89,6 +99,7 @@ export class AuthorizationService {
     http,
     capabilities,
     packageVersion,
+    buildNumber,
     clusterClient,
     license,
     loggers,
@@ -153,6 +164,35 @@ export class AuthorizationService {
 
     initAPIAuthorization(http, authz, loggers.get('api-authorization'));
     initAppAuthorization(http, authz, loggers.get('app-authorization'), features);
+
+    http.registerOnPreResponse((request, preResponse, toolkit) => {
+      if (preResponse.statusCode === 403 && canRedirectRequest(request)) {
+        const basePath = http.basePath.get(request);
+        const next = `${basePath}${request.url.path}`;
+        const regularBundlePath = `${basePath}/${buildNumber}/bundles`;
+
+        const logoutUrl = http.basePath.prepend(
+          `/api/security/logout?${querystring.stringify({ next })}`
+        );
+        const styleSheetPaths = [
+          `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.baseCssDistFilename}`,
+          `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.lightCssDistFilename}`,
+          `${basePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
+          `${basePath}/ui/legacy_light_theme.css`,
+        ];
+
+        const body = renderToStaticMarkup(
+          <ResetSessionPage
+            logoutUrl={logoutUrl}
+            styleSheetPaths={styleSheetPaths}
+            basePath={basePath}
+          />
+        );
+
+        return toolkit.render({ body, headers: { 'Content-Security-Policy': http.csp.header } });
+      }
+      return toolkit.next();
+    });
 
     return authz;
   }
