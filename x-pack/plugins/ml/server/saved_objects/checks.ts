@@ -20,7 +20,6 @@ interface JobStatus {
   checks: {
     jobExists: boolean;
     datafeedExists?: boolean;
-    datafeedMapped?: boolean;
   };
 }
 
@@ -50,12 +49,10 @@ export function checksFactory(client: IScopedClusterClient, jobsInSpaces: JobsIn
 
       let jobExists = false;
       let datafeedExists: boolean | undefined;
-      let datafeedMapped: boolean | undefined;
 
       if (type === 'anomaly-detector') {
         jobExists = adJobs.jobs.some((j) => j.job_id === jobId);
-        datafeedExists = datafeeds.datafeeds.some((j) => j.job_id === jobId);
-        datafeedMapped = datafeeds.datafeeds.some((j) => j.datafeed_id === datafeedId);
+        datafeedExists = datafeeds.datafeeds.some((d) => d.job_id === jobId);
       } else {
         jobExists = dfaJobs.data_frame_analytics.some((j) => j.id === jobId);
       }
@@ -67,7 +64,6 @@ export function checksFactory(client: IScopedClusterClient, jobsInSpaces: JobsIn
         checks: {
           jobExists,
           datafeedExists,
-          datafeedMapped,
         },
       };
     });
@@ -139,14 +135,18 @@ export function checksFactory(client: IScopedClusterClient, jobsInSpaces: JobsIn
     const results: {
       savedObjectsCreated: string[];
       savedObjectsDeleted: string[];
-      datafeedsCreated: string[];
+      datafeedsAdded: string[];
       datafeedsDeleted: string[];
     } = {
       savedObjectsCreated: [],
       savedObjectsDeleted: [],
-      datafeedsCreated: [],
+      datafeedsAdded: [],
       datafeedsDeleted: [],
     };
+
+    const { body: datafeeds } = await client.asInternalUser.ml.getDatafeeds<{
+      datafeeds: Datafeed[];
+    }>();
 
     const status = await checkStatus();
     for (const job of status.jobs.anomalyDetectors) {
@@ -191,12 +191,27 @@ export function checksFactory(client: IScopedClusterClient, jobsInSpaces: JobsIn
     }
 
     for (const job of status.savedObjects.anomalyDetectors) {
-      if (job.checks.datafeedExists === true && job.checks.datafeedMapped === false) {
+      if (job.checks.datafeedExists === true && job.datafeedId === null) {
         //
-        results.datafeedsCreated.push(job.jobId);
-      } else if (job.checks.datafeedExists === false && job.checks.datafeedMapped === true) {
-        //
+        results.datafeedsAdded.push(job.jobId);
+        if (simulate === false) {
+          //
+          const df = datafeeds.datafeeds.find((d) => d.job_id === job.jobId);
+          if (df !== undefined) {
+            await jobsInSpaces.addDatafeed(df.datafeed_id, job.jobId);
+          }
+        }
+      } else if (
+        job.checks.jobExists === true &&
+        job.checks.datafeedExists === false &&
+        job.datafeedId !== null &&
+        job.datafeedId !== undefined
+      ) {
         results.datafeedsDeleted.push(job.jobId);
+        if (simulate === false) {
+          //
+          await jobsInSpaces.deleteDatafeed(job.datafeedId);
+        }
       }
     }
     return results;
