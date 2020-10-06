@@ -67,6 +67,7 @@ import { getTopNavLinks } from '../components/top_nav/get_top_nav_links';
 import { onSaveSearch } from '../components/top_nav/on_save_search';
 import { getSharingData } from '../helpers/get_sharing_data';
 import { updateSearchSource } from '../helpers/update_search_source';
+import { persistSavedSearch } from '../helpers/persist_saved_search';
 
 const {
   core,
@@ -566,15 +567,8 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
       }
     });
   });
-
   async function saveDataSource(saveOptions) {
-    await $scope.updateDataSource();
-
-    savedSearch.columns = $scope.state.columns;
-    savedSearch.sort = $scope.state.sort;
-
-    try {
-      const id = await savedSearch.save(saveOptions);
+    function onSuccess(id) {
       $scope.$evalAsync(() => {
         if (id) {
           toastNotifications.addSuccess({
@@ -603,8 +597,9 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
           }
         }
       });
-      return { id };
-    } catch (saveError) {
+    }
+
+    function onError(error, savedSearch) {
       toastNotifications.addDanger({
         title: i18n.translate('discover.notifications.notSavedSearchTitle', {
           defaultMessage: `Search '{savedSearchTitle}' was not saved.`,
@@ -612,12 +607,21 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
             savedSearchTitle: savedSearch.title,
           },
         }),
-        text: saveError.message,
+        text: error.message,
       });
-      return { error: saveError };
     }
+    return persistSavedSearch({
+      config,
+      data,
+      indexPattern: $scope.indexPattern,
+      onError,
+      onSuccess,
+      searchSource: $scope.searchSource,
+      savedSearch,
+      saveOptions,
+      state: $scope.state,
+    });
   }
-
   $scope.opts.fetch = $scope.fetch = function () {
     // ignore requests to fetch before the app inits
     if (!init.complete) return;

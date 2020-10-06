@@ -16,24 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { IndexPattern } from '../../kibana_services';
 
-import { ISearchSource } from '../../../data/public';
-import { SavedObjectSaveOpts } from '../../../saved_objects/public';
+export function getFieldCounts(rows: Array<Record<string, any>>, indexPattern: IndexPattern) {
+  const counts: Record<string, number> = {};
 
-export type SortOrder = [string, string];
-export interface SavedSearch {
-  readonly id: string;
-  title: string;
-  searchSource: ISearchSource;
-  description?: string;
-  columns: string[];
-  sort: SortOrder[];
-  destroy: () => void;
-  save: (saveOptions: SavedObjectSaveOpts) => Promise<string>;
-  lastSavedTitle?: string;
-  copyOnSave?: boolean;
-}
-export interface SavedSearchLoader {
-  get: (id: string) => Promise<SavedSearch>;
-  urlFor: (id: string) => string;
+  for (const hit of rows) {
+    const fields = Object.keys(indexPattern.flattenHit(hit));
+    for (const fieldName of fields) {
+      counts[fieldName] = (counts[fieldName] || 0) + 1;
+    }
+  }
+
+  return counts;
 }

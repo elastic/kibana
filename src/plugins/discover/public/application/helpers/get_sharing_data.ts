@@ -50,7 +50,7 @@ export async function getSharingData(
   state: AppState,
   indexPattern: IndexPattern,
   config: IUiSettingsClient,
-  getFieldCounts: any
+  getFieldCounts: () => Promise<Record<string, number>>
 ) {
   const searchSource = currentSearchSource.createCopy();
 
