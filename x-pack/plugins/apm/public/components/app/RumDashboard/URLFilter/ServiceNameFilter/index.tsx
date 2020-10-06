@@ -62,9 +62,12 @@ function ServiceNameFilter({ loading, serviceNames }: Props) {
   return (
     <>
       <EuiSelect
-        prepend={i18n.translate('xpack.apm.localFilters.titles.serviceName', {
-          defaultMessage: 'Web Application',
-        })}
+        prepend={i18n.translate(
+          'xpack.apm.ux.localFilters.titles.webApplication',
+          {
+            defaultMessage: 'Web Application',
+          }
+        )}
         isLoading={loading}
         data-cy="serviceNameFilter"
         options={options}

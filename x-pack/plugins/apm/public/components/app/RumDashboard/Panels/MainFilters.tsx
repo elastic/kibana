@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import { EnvironmentFilter } from '../../../shared/EnvironmentFilter';
 import { ServiceNameFilter } from '../URLFilter/ServiceNameFilter';
 import { useFetcher } from '../../../../hooks/useFetcher';
