@@ -125,6 +125,12 @@ export class TypesService {
        */
       getAliases: visTypeAliasRegistry.get,
       /**
+       * unregisters a visualization alias by its name
+       * alias is a visualization type without implementation, it just redirects somewhere in kibana
+       * @param {string} visTypeAliasName - visualization alias name
+       */
+      unRegisterAlias: visTypeAliasRegistry.remove,
+      /**
        * returns all visualizations of specific group
        * @param {string} group - group type (aggbased | other | tools)
        */

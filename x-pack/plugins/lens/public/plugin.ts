@@ -9,7 +9,7 @@ import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/p
 import { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
 import { DashboardStart } from 'src/plugins/dashboard/public';
 import { ExpressionsSetup, ExpressionsStart } from 'src/plugins/expressions/public';
-import { VisualizationsSetup } from 'src/plugins/visualizations/public';
+import { VisualizationsSetup, VisualizationsStart } from 'src/plugins/visualizations/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { UrlForwardingSetup } from 'src/plugins/url_forwarding/public';
 import { GlobalSearchPluginSetup } from '../../global_search/public';
@@ -54,6 +54,7 @@ export interface LensPluginStartDependencies {
   uiActions: UiActionsStart;
   dashboard: DashboardStart;
   embeddable?: EmbeddableStart;
+  visualizations: VisualizationsStart;
 }
 export class LensPlugin {
   private datatableVisualization: DatatableVisualization;
@@ -155,6 +156,7 @@ export class LensPlugin {
   start(core: CoreStart, startDependencies: LensPluginStartDependencies) {
     this.attributeService = getLensAttributeService(core, startDependencies);
     this.createEditorFrame = this.editorFrameService.start(core, startDependencies).createInstance;
+    startDependencies.visualizations.unRegisterAlias('lensOss');
   }
 
   stop() {

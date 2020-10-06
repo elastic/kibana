@@ -1,0 +1,8 @@
+{
+    "id": "mapsOSS",
+    "version": "kibana",
+    "ui": true,
+    "requiredPlugins": [
+      "visualizations"
+    ]
+  }

@@ -62,6 +62,7 @@ function GroupSelection(props: GroupSelectionProps) {
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody data-test-subj="visNewDialogGroups">
+        <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="l">
           {orderBy(props.visTypesRegistry.getAliases(), ['title', ['asc']]).map((visType) => (
             <VisGroup
@@ -178,6 +179,15 @@ const VisGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
         titleSize="xs"
         title={<span data-test-subj="visTypeTitle">{visType.title}</span>}
         onClick={onClick}
+        isDisabled={visType.disabled}
+        betaBadgeLabel={visType.disabled ? 'Basic' : undefined}
+        betaBadgeTooltipContent={
+          visType.disabled
+            ? i18n.translate('visualizations.newVisWizard.basicLicenseRequired', {
+                defaultMessage: 'This feature requires a Basic License',
+              })
+            : undefined
+        }
         data-test-subj={`visType-${visType.name}`}
         data-vis-stage={!('aliasPath' in visType) ? visType.stage : 'alias'}
         aria-describedby={`visTypeDescription-${visType.name}`}

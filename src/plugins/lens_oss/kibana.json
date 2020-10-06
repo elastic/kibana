@@ -1,0 +1,8 @@
+{
+    "id": "lensOSS",
+    "version": "kibana",
+    "ui": true,
+    "requiredPlugins": [
+      "visualizations"
+    ]
+  }

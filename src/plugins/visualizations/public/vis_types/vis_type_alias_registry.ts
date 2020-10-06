@@ -55,6 +55,7 @@ export interface VisTypeAlias {
   icon: string;
   promotion?: VisTypeAliasPromotion;
   description: string;
+  disabled?: boolean;
   getSupportedTriggers?: () => Array<keyof TriggerContextMapping>;
   stage: 'experimental' | 'beta' | 'production';
 
@@ -64,11 +65,12 @@ export interface VisTypeAlias {
   };
 }
 
-const registry: VisTypeAlias[] = [];
+let registry: VisTypeAlias[] = [];
 
 interface VisTypeAliasRegistry {
   get: () => VisTypeAlias[];
   add: (newVisTypeAlias: VisTypeAlias) => void;
+  remove: (visTypeAliasName: string) => void;
 }
 
 export const visTypeAliasRegistry: VisTypeAliasRegistry = {
@@ -78,5 +80,8 @@ export const visTypeAliasRegistry: VisTypeAliasRegistry = {
       throw new Error(`${newVisTypeAlias.name} already registered`);
     }
     registry.push(newVisTypeAlias);
+  },
+  remove: (visTypeAliasName) => {
+    registry = registry.filter((visTypeAlias) => visTypeAlias.name !== visTypeAliasName);
   },
 };

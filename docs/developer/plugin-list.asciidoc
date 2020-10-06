@@ -126,11 +126,19 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 |WARNING: Missing README.
 
 
+|{kib-repo}blob/{branch}/src/plugins/lens_oss[lensOSS]
+|WARNING: Missing README.
+
+
 |{kib-repo}blob/{branch}/src/plugins/management[management]
 |WARNING: Missing README.
 
 
 |{kib-repo}blob/{branch}/src/plugins/maps_legacy[mapsLegacy]
+|WARNING: Missing README.
+
+
+|{kib-repo}blob/{branch}/src/plugins/maps_oss[mapsOSS]
 |WARNING: Missing README.
 
 
