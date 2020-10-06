@@ -33,14 +33,13 @@
 }
 
 .globalFilterItem-isError, .globalFilterItem-isWarning {
-  text-decoration: none;
-
   .globalFilterLabel__value {
     font-weight: $euiFontWeightBold;
   }
 }
 
 .globalFilterItem-isError {
+  text-decoration: none;
   .globalFilterLabel__value {
     color: makeHighContrastColor($euiColorDangerText, $euiColorLightShade);
   }
