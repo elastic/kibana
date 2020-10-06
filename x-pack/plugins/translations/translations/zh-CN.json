@@ -14887,7 +14887,6 @@
     "xpack.securitySolution.case.configureCases.incidentManagementSystemLabel": "事件管理系统",
     "xpack.securitySolution.case.configureCases.incidentManagementSystemTitle": "连接到外部事件管理系统",
     "xpack.securitySolution.case.configureCases.mappingFieldNotMapped": "未映射",
-    "xpack.securitySolution.case.configureCases.noConnector": "未选择连接器",
     "xpack.securitySolution.case.configureCases.updateConnector": "更新连接器",
     "xpack.securitySolution.case.configureCases.updateSelectedConnector": "更新 { connectorName }",
     "xpack.securitySolution.case.configureCases.warningMessage": "选定的连接器已删除。选择不同的连接器或创建新的连接器。",
