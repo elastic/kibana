@@ -18,11 +18,14 @@ const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('useGetIssueTypes', () => {
   const { http, notifications } = useKibanaMock().services;
+  const handleIssueType = jest.fn();
+
+  beforeEach(() => jest.clearAllMocks());
 
   test('init', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetIssueTypes>(() =>
-        useGetIssueTypes({ http, toastNotifications: notifications.toasts })
+        useGetIssueTypes({ http, toastNotifications: notifications.toasts, handleIssueType })
       );
       await waitForNextUpdate();
       expect(result.current).toEqual({ isLoading: true, issueTypes: [] });
@@ -32,7 +35,12 @@ describe('useGetIssueTypes', () => {
   test('fetch issue types', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetIssueTypes>(() =>
-        useGetIssueTypes({ http, toastNotifications: notifications.toasts, connector })
+        useGetIssueTypes({
+          http,
+          toastNotifications: notifications.toasts,
+          connector,
+          handleIssueType,
+        })
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -52,6 +60,27 @@ describe('useGetIssueTypes', () => {
     });
   });
 
+  test('handleIssueType is called', async () => {
+    await act(async () => {
+      const { waitForNextUpdate } = renderHook<string, UseGetIssueTypes>(() =>
+        useGetIssueTypes({
+          http,
+          toastNotifications: notifications.toasts,
+          connector,
+          handleIssueType,
+        })
+      );
+
+      await waitForNextUpdate();
+      await waitForNextUpdate();
+
+      expect(handleIssueType).toHaveBeenCalledWith([
+        { text: 'Task', value: '10006' },
+        { text: 'Bug', value: '10007' },
+      ]);
+    });
+  });
+
   test('unhappy path', async () => {
     const spyOnGetCaseConfigure = jest.spyOn(api, 'getIssueTypes');
     spyOnGetCaseConfigure.mockImplementation(() => {
@@ -60,7 +89,12 @@ describe('useGetIssueTypes', () => {
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetIssueTypes>(() =>
-        useGetIssueTypes({ http, toastNotifications: notifications.toasts, connector })
+        useGetIssueTypes({
+          http,
+          toastNotifications: notifications.toasts,
+          connector,
+          handleIssueType,
+        })
       );
 
       await waitForNextUpdate();
