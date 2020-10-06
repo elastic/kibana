@@ -23,6 +23,7 @@ import cpy from 'cpy';
 import del from 'del';
 import { toArray } from 'rxjs/operators';
 import { createAbsolutePathSerializer } from '@kbn/dev-utils';
+import { allValuesFrom } from '@kbn/std';
 
 import { getMtimes } from '../optimizer/get_mtimes';
 import { OptimizerConfig } from '../optimizer/optimizer_config';
@@ -78,9 +79,7 @@ it('emits "bundle cached" event when everything is updated', async () => {
     bundleRefExportIds: [],
   });
 
-  const cacheEvents = await getBundleCacheEvent$(config, optimizerCacheKey)
-    .pipe(toArray())
-    .toPromise();
+  const cacheEvents = await allValuesFrom(getBundleCacheEvent$(config, optimizerCacheKey));
 
   expect(cacheEvents).toMatchInlineSnapshot(`
     Array [
@@ -119,9 +118,7 @@ it('emits "bundle not cached" event when cacheKey is up to date but caching is d
     bundleRefExportIds: [],
   });
 
-  const cacheEvents = await getBundleCacheEvent$(config, optimizerCacheKey)
-    .pipe(toArray())
-    .toPromise();
+  const cacheEvents = await allValuesFrom(getBundleCacheEvent$(config, optimizerCacheKey));
 
   expect(cacheEvents).toMatchInlineSnapshot(`
     Array [
@@ -160,9 +157,7 @@ it('emits "bundle not cached" event when optimizerCacheKey is missing', async ()
     bundleRefExportIds: [],
   });
 
-  const cacheEvents = await getBundleCacheEvent$(config, optimizerCacheKey)
-    .pipe(toArray())
-    .toPromise();
+  const cacheEvents = await allValuesFrom(getBundleCacheEvent$(config, optimizerCacheKey));
 
   expect(cacheEvents).toMatchInlineSnapshot(`
     Array [
@@ -201,9 +196,7 @@ it('emits "bundle not cached" event when optimizerCacheKey is outdated, includes
     bundleRefExportIds: [],
   });
 
-  const cacheEvents = await getBundleCacheEvent$(config, optimizerCacheKey)
-    .pipe(toArray())
-    .toPromise();
+  const cacheEvents = await allValuesFrom(getBundleCacheEvent$(config, optimizerCacheKey));
 
   expect(cacheEvents).toMatchInlineSnapshot(`
     Array [
@@ -247,9 +240,7 @@ it('emits "bundle not cached" event when bundleRefExportIds is outdated, include
     bundleRefExportIds: ['plugin/bar/public'],
   });
 
-  const cacheEvents = await getBundleCacheEvent$(config, optimizerCacheKey)
-    .pipe(toArray())
-    .toPromise();
+  const cacheEvents = await allValuesFrom(getBundleCacheEvent$(config, optimizerCacheKey));
 
   expect(cacheEvents).toMatchInlineSnapshot(`
     Array [
@@ -292,9 +283,7 @@ it('emits "bundle not cached" event when cacheKey is missing', async () => {
     bundleRefExportIds: [],
   });
 
-  const cacheEvents = await getBundleCacheEvent$(config, optimizerCacheKey)
-    .pipe(toArray())
-    .toPromise();
+  const cacheEvents = await allValuesFrom(getBundleCacheEvent$(config, optimizerCacheKey));
 
   expect(cacheEvents).toMatchInlineSnapshot(`
     Array [
@@ -333,9 +322,7 @@ it('emits "bundle not cached" event when cacheKey is outdated', async () => {
 
   jest.spyOn(bundle, 'createCacheKey').mockImplementation(() => 'new');
 
-  const cacheEvents = await getBundleCacheEvent$(config, optimizerCacheKey)
-    .pipe(toArray())
-    .toPromise();
+  const cacheEvents = await allValuesFrom(getBundleCacheEvent$(config, optimizerCacheKey));
 
   expect(cacheEvents).toMatchInlineSnapshot(`
     Array [
