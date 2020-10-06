@@ -5,9 +5,11 @@
  */
 import React from 'react';
 import { render as testLibRender } from '@testing-library/react';
-import { AppMountContext } from 'kibana/public';
+import { CoreStart } from 'kibana/public';
 import { PluginContext } from '../context/plugin_context';
 import { EuiThemeProvider } from '../typings';
+import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import { ObservabilityPluginSetupDeps } from '../plugin';
 
 export const core = ({
   http: {
@@ -15,12 +17,18 @@ export const core = ({
       prepend: jest.fn(),
     },
   },
-} as unknown) as AppMountContext['core'];
+} as unknown) as CoreStart;
+
+const plugins = ({
+  data: { query: { timefilter: { timefilter: { setTime: jest.fn() } } } },
+} as unknown) as ObservabilityPluginSetupDeps;
 
 export const render = (component: React.ReactNode) => {
   return testLibRender(
-    <PluginContext.Provider value={{ core }}>
-      <EuiThemeProvider>{component}</EuiThemeProvider>
-    </PluginContext.Provider>
+    <KibanaContextProvider services={{ ...core }}>
+      <PluginContext.Provider value={{ core, plugins }}>
+        <EuiThemeProvider>{component}</EuiThemeProvider>
+      </PluginContext.Provider>
+    </KibanaContextProvider>
   );
 };
