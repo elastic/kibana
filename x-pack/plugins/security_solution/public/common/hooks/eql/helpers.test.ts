@@ -7,8 +7,7 @@ import dateMath from '@elastic/datemath';
 
 import { EqlSearchStrategyResponse } from '../../../../../data_enhanced/common';
 import { Source } from './types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { EqlSearchResponse } from '../../../../server/lib/types';
+import { EqlSearchResponse } from '../../../../common/detection_engine/types';
 
 import {
   calculateBucketForHour,

@@ -46,7 +46,7 @@ import {
   sampleDocSearchResultsNoSortIdNoHits,
   repeatedSearchResultsWithSortId,
 } from './__mocks__/es_results';
-import { ShardError } from '../../types';
+import { ShardError } from '../../../../common/detection_engine/types';
 
 const buildRuleMessage = buildRuleMessageFactory({
   id: 'fake id',

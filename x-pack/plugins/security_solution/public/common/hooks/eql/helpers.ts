@@ -9,8 +9,7 @@ import { Unit } from '@elastic/datemath';
 import { EqlSearchStrategyResponse } from '../../../../../data_enhanced/common';
 import { InspectResponse } from '../../../types';
 import { EqlPreviewResponse, Source } from './types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { EqlSearchResponse } from '../../../../server/lib/types';
+import { EqlSearchResponse } from '../../../../common/detection_engine/types';
 import { HITS_THRESHOLD } from '../../../detections/components/rules/query_preview/helpers';
 
 type EqlAggBuckets = Record<string, { timestamp: string; total: number }>;

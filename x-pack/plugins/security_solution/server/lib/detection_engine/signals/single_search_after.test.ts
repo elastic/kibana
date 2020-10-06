@@ -11,8 +11,8 @@ import {
 } from './__mocks__/es_results';
 import { singleSearchAfter } from './single_search_after';
 import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
-import { ShardError } from '../../types';
 import { buildRuleMessageFactory } from './rule_messages';
+import { ShardError } from '../../../../common/detection_engine/types';
 
 const buildRuleMessage = buildRuleMessageFactory({
   id: 'fake id',

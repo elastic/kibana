@@ -17,8 +17,7 @@ import {
 import { getEqlAggsData, getSequenceAggs } from './helpers';
 import { EqlPreviewResponse, Source } from './types';
 import { hasEqlSequenceQuery } from '../../../../common/detection_engine/utils';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { EqlSearchResponse } from '../../../../server/lib/types';
+import { EqlSearchResponse } from '../../../../common/detection_engine/types';
 
 interface ApiParams {
   http: HttpStart;
