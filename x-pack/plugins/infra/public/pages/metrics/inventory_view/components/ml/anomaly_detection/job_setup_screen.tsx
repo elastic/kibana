@@ -183,7 +183,7 @@ export const JobSetupScreen = (props: Props) => {
                 description={
                   <FormattedMessage
                     id="xpack.infra.ml.steps.setupProcess.when.description"
-                    defaultMessage="By default, machine learning jobs analyze the past 4 weeks of data and continue to run indefinitely."
+                    defaultMessage="By default, machine learning jobs analyze the last 4 weeks of data and continue to run indefinitely."
                   />
                 }
               >
