@@ -49,6 +49,10 @@ interface VisCardProps {
   visType: VisType | VisTypeAlias;
 }
 
+function isVisTypeAlias(type: VisType | VisTypeAlias): type is VisTypeAlias {
+  return 'aliasPath' in type;
+}
+
 function GroupSelection(props: GroupSelectionProps) {
   const visualizeGuideLink = props.docLinks.links.dashboard.guide;
   return (
@@ -179,10 +183,10 @@ const VisGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
         titleSize="xs"
         title={<span data-test-subj="visTypeTitle">{visType.title}</span>}
         onClick={onClick}
-        isDisabled={visType.disabled}
-        betaBadgeLabel={visType.disabled ? 'Basic' : undefined}
+        isDisabled={isVisTypeAlias(visType) && visType.disabled}
+        betaBadgeLabel={isVisTypeAlias(visType) && visType.disabled ? 'Basic' : undefined}
         betaBadgeTooltipContent={
-          visType.disabled
+          isVisTypeAlias(visType) && visType.disabled
             ? i18n.translate('visualizations.newVisWizard.basicLicenseRequired', {
                 defaultMessage: 'This feature requires a Basic License',
               })

@@ -314,11 +314,11 @@ exports[`AggBasedSelection filter for visualization types should render as expec
               id="visualizations.newVisWizard.resultsFound"
               values={
                 Object {
-                  "resultCount": 2,
+                  "resultCount": 1,
                 }
               }
             >
-              2 types found
+              1 type found
             </FormattedMessage>
           </span>
         </EuiScreenReaderOnly>
@@ -332,105 +332,6 @@ exports[`AggBasedSelection filter for visualization types should render as expec
             className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--wrap"
             data-test-subj="visNewDialogTypes"
           >
-            <EuiFlexItem
-              grow={false}
-              key="visWithAliasUrl"
-            >
-              <div
-                className="euiFlexItem euiFlexItem--flexGrowZero"
-              >
-                <EuiCard
-                  aria-describedby="visTypeDescription-visWithAliasUrl"
-                  className="visNewVisDialog__card"
-                  data-test-subj="visType-visWithAliasUrl"
-                  data-vis-stage="alias"
-                  description=""
-                  icon={
-                    <EuiIcon
-                      color="secondary"
-                      size="l"
-                      type="empty"
-                    />
-                  }
-                  isDisabled={false}
-                  layout="horizontal"
-                  onClick={[Function]}
-                  title={
-                    <span
-                      data-test-subj="visTypeTitle"
-                    >
-                      Vis with alias Url
-                    </span>
-                  }
-                  titleSize="xs"
-                >
-                  <div
-                    aria-describedby="visTypeDescription-visWithAliasUrl"
-                    className="euiCard euiCard--paddingMedium euiCard--centerAligned euiCard--horizontal euiCard--isClickable euiCard--hasIcon visNewVisDialog__card"
-                    data-test-subj="visType-visWithAliasUrl"
-                    data-vis-stage="alias"
-                    onClick={[Function]}
-                  >
-                    <div
-                      className="euiCard__top"
-                    >
-                      <EuiIcon
-                        className="euiCard__icon"
-                        color="secondary"
-                        size="l"
-                        type="empty"
-                      >
-                        <div
-                          className="euiCard__icon"
-                          color="secondary"
-                          data-euiicon-type="empty"
-                          size="l"
-                        />
-                      </EuiIcon>
-                    </div>
-                    <div
-                      className="euiCard__content"
-                    >
-                      <EuiTitle
-                        className="euiCard__title"
-                        id="i1a88b9b1-07c2-11eb-9ff6-6d5f9d126a5fTitle"
-                        size="xs"
-                      >
-                        <span
-                          className="euiTitle euiTitle--xsmall euiCard__title"
-                          id="i1a88b9b1-07c2-11eb-9ff6-6d5f9d126a5fTitle"
-                        >
-                          <button
-                            aria-describedby=" i1a88b9b1-07c2-11eb-9ff6-6d5f9d126a5fDescription"
-                            className="euiCard__titleButton"
-                            disabled={false}
-                            onClick={[Function]}
-                          >
-                            <span
-                              data-test-subj="visTypeTitle"
-                            >
-                              Vis with alias Url
-                            </span>
-                          </button>
-                        </span>
-                      </EuiTitle>
-                      <EuiText
-                        className="euiCard__description"
-                        id="i1a88b9b1-07c2-11eb-9ff6-6d5f9d126a5fDescription"
-                        size="s"
-                      >
-                        <div
-                          className="euiText euiText--small euiCard__description"
-                          id="i1a88b9b1-07c2-11eb-9ff6-6d5f9d126a5fDescription"
-                        >
-                          <p />
-                        </div>
-                      </EuiText>
-                    </div>
-                  </div>
-                </EuiCard>
-              </div>
-            </EuiFlexItem>
             <EuiFlexItem
               grow={false}
               key="visWithSearch"
@@ -492,15 +393,15 @@ exports[`AggBasedSelection filter for visualization types should render as expec
                     >
                       <EuiTitle
                         className="euiCard__title"
-                        id="i1a88b9b3-07c2-11eb-9ff6-6d5f9d126a5fTitle"
+                        id="i9f2a7f11-07cb-11eb-a0d5-bbd399401d2aTitle"
                         size="xs"
                       >
                         <span
                           className="euiTitle euiTitle--xsmall euiCard__title"
-                          id="i1a88b9b3-07c2-11eb-9ff6-6d5f9d126a5fTitle"
+                          id="i9f2a7f11-07cb-11eb-a0d5-bbd399401d2aTitle"
                         >
                           <button
-                            aria-describedby=" i1a88b9b3-07c2-11eb-9ff6-6d5f9d126a5fDescription"
+                            aria-describedby=" i9f2a7f11-07cb-11eb-a0d5-bbd399401d2aDescription"
                             className="euiCard__titleButton"
                             disabled={false}
                             onClick={[Function]}
@@ -515,12 +416,12 @@ exports[`AggBasedSelection filter for visualization types should render as expec
                       </EuiTitle>
                       <EuiText
                         className="euiCard__description"
-                        id="i1a88b9b3-07c2-11eb-9ff6-6d5f9d126a5fDescription"
+                        id="i9f2a7f11-07cb-11eb-a0d5-bbd399401d2aDescription"
                         size="s"
                       >
                         <div
                           className="euiText euiText--small euiCard__description"
-                          id="i1a88b9b3-07c2-11eb-9ff6-6d5f9d126a5fDescription"
+                          id="i9f2a7f11-07cb-11eb-a0d5-bbd399401d2aDescription"
                         >
                           <p />
                         </div>
@@ -593,15 +494,15 @@ exports[`AggBasedSelection filter for visualization types should render as expec
                     >
                       <EuiTitle
                         className="euiCard__title"
-                        id="i1a88e0c1-07c2-11eb-9ff6-6d5f9d126a5fTitle"
+                        id="i9f2a7f13-07cb-11eb-a0d5-bbd399401d2aTitle"
                         size="xs"
                       >
                         <span
                           className="euiTitle euiTitle--xsmall euiCard__title"
-                          id="i1a88e0c1-07c2-11eb-9ff6-6d5f9d126a5fTitle"
+                          id="i9f2a7f13-07cb-11eb-a0d5-bbd399401d2aTitle"
                         >
                           <button
-                            aria-describedby="i1a88e0c1-07c2-11eb-9ff6-6d5f9d126a5fBetaBadge i1a88e0c1-07c2-11eb-9ff6-6d5f9d126a5fDescription"
+                            aria-describedby="i9f2a7f13-07cb-11eb-a0d5-bbd399401d2aBetaBadge i9f2a7f13-07cb-11eb-a0d5-bbd399401d2aDescription"
                             className="euiCard__titleButton"
                             disabled={true}
                             onClick={[Function]}
@@ -616,12 +517,12 @@ exports[`AggBasedSelection filter for visualization types should render as expec
                       </EuiTitle>
                       <EuiText
                         className="euiCard__description"
-                        id="i1a88e0c1-07c2-11eb-9ff6-6d5f9d126a5fDescription"
+                        id="i9f2a7f13-07cb-11eb-a0d5-bbd399401d2aDescription"
                         size="s"
                       >
                         <div
                           className="euiText euiText--small euiCard__description"
-                          id="i1a88e0c1-07c2-11eb-9ff6-6d5f9d126a5fDescription"
+                          id="i9f2a7f13-07cb-11eb-a0d5-bbd399401d2aDescription"
                         >
                           <p />
                         </div>
@@ -632,7 +533,7 @@ exports[`AggBasedSelection filter for visualization types should render as expec
                     >
                       <EuiBetaBadge
                         className="euiCard__betaBadge"
-                        id="i1a88e0c1-07c2-11eb-9ff6-6d5f9d126a5fBetaBadge"
+                        id="i9f2a7f13-07cb-11eb-a0d5-bbd399401d2aBetaBadge"
                         label="Experimental"
                         tooltipContent="This visualization might be changed or removed in a future release and is not subject to the support SLA."
                       >
@@ -650,7 +551,7 @@ exports[`AggBasedSelection filter for visualization types should render as expec
                           >
                             <span
                               className="euiBetaBadge euiCard__betaBadge"
-                              id="i1a88e0c1-07c2-11eb-9ff6-6d5f9d126a5fBetaBadge"
+                              id="i9f2a7f13-07cb-11eb-a0d5-bbd399401d2aBetaBadge"
                               onBlur={[Function]}
                               onFocus={[Function]}
                               tabIndex={0}
@@ -726,15 +627,15 @@ exports[`AggBasedSelection filter for visualization types should render as expec
                     >
                       <EuiTitle
                         className="euiCard__title"
-                        id="i1a8907d1-07c2-11eb-9ff6-6d5f9d126a5fTitle"
+                        id="i9f2aa621-07cb-11eb-a0d5-bbd399401d2aTitle"
                         size="xs"
                       >
                         <span
                           className="euiTitle euiTitle--xsmall euiCard__title"
-                          id="i1a8907d1-07c2-11eb-9ff6-6d5f9d126a5fTitle"
+                          id="i9f2aa621-07cb-11eb-a0d5-bbd399401d2aTitle"
                         >
                           <button
-                            aria-describedby=" i1a8907d1-07c2-11eb-9ff6-6d5f9d126a5fDescription"
+                            aria-describedby=" i9f2aa621-07cb-11eb-a0d5-bbd399401d2aDescription"
                             className="euiCard__titleButton"
                             disabled={true}
                             onClick={[Function]}
@@ -749,12 +650,111 @@ exports[`AggBasedSelection filter for visualization types should render as expec
                       </EuiTitle>
                       <EuiText
                         className="euiCard__description"
-                        id="i1a8907d1-07c2-11eb-9ff6-6d5f9d126a5fDescription"
+                        id="i9f2aa621-07cb-11eb-a0d5-bbd399401d2aDescription"
                         size="s"
                       >
                         <div
                           className="euiText euiText--small euiCard__description"
-                          id="i1a8907d1-07c2-11eb-9ff6-6d5f9d126a5fDescription"
+                          id="i9f2aa621-07cb-11eb-a0d5-bbd399401d2aDescription"
+                        >
+                          <p />
+                        </div>
+                      </EuiText>
+                    </div>
+                  </div>
+                </EuiCard>
+              </div>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+              key="vis3"
+            >
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <EuiCard
+                  aria-describedby="visTypeDescription-vis3"
+                  className="visNewVisDialog__card"
+                  data-test-subj="visType-vis3"
+                  data-vis-stage="production"
+                  description=""
+                  icon={
+                    <EuiIcon
+                      color="secondary"
+                      size="l"
+                      type="empty"
+                    />
+                  }
+                  isDisabled={true}
+                  layout="horizontal"
+                  onClick={[Function]}
+                  title={
+                    <span
+                      data-test-subj="visTypeTitle"
+                    >
+                      Vis Type 3
+                    </span>
+                  }
+                  titleSize="xs"
+                >
+                  <div
+                    aria-describedby="visTypeDescription-vis3"
+                    className="euiCard euiCard--paddingMedium euiCard--centerAligned euiCard--horizontal euiCard--isClickable euiCard--hasIcon euiCard-isDisabled visNewVisDialog__card"
+                    data-test-subj="visType-vis3"
+                    data-vis-stage="production"
+                    onClick={[Function]}
+                  >
+                    <div
+                      className="euiCard__top"
+                    >
+                      <EuiIcon
+                        className="euiCard__icon"
+                        color="secondary"
+                        size="l"
+                        type="empty"
+                      >
+                        <div
+                          className="euiCard__icon"
+                          color="secondary"
+                          data-euiicon-type="empty"
+                          size="l"
+                        />
+                      </EuiIcon>
+                    </div>
+                    <div
+                      className="euiCard__content"
+                    >
+                      <EuiTitle
+                        className="euiCard__title"
+                        id="i9f2aa623-07cb-11eb-a0d5-bbd399401d2aTitle"
+                        size="xs"
+                      >
+                        <span
+                          className="euiTitle euiTitle--xsmall euiCard__title"
+                          id="i9f2aa623-07cb-11eb-a0d5-bbd399401d2aTitle"
+                        >
+                          <button
+                            aria-describedby=" i9f2aa623-07cb-11eb-a0d5-bbd399401d2aDescription"
+                            className="euiCard__titleButton"
+                            disabled={true}
+                            onClick={[Function]}
+                          >
+                            <span
+                              data-test-subj="visTypeTitle"
+                            >
+                              Vis Type 3
+                            </span>
+                          </button>
+                        </span>
+                      </EuiTitle>
+                      <EuiText
+                        className="euiCard__description"
+                        id="i9f2aa623-07cb-11eb-a0d5-bbd399401d2aDescription"
+                        size="s"
+                      >
+                        <div
+                          className="euiText euiText--small euiCard__description"
+                          id="i9f2aa623-07cb-11eb-a0d5-bbd399401d2aDescription"
                         >
                           <p />
                         </div>

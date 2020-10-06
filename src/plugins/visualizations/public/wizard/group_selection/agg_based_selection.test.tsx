@@ -56,12 +56,10 @@ describe('AggBasedSelection', () => {
       ...defaultVisTypeParams,
     },
     {
-      name: 'visWithAliasUrl',
-      title: 'Vis with alias Url',
+      name: 'vis3',
+      title: 'Vis Type 3',
       stage: 'production',
       group: 'aggbased',
-      aliasApp: 'otherApp',
-      aliasPath: '#/aliasUrl',
     },
     {
       name: 'visWithSearch',
@@ -73,11 +71,11 @@ describe('AggBasedSelection', () => {
   ] as VisType[];
 
   const visTypes: TypesStart = {
-    get: (id: string) => {
-      return _visTypes.find((vis) => vis.name === id) as VisType;
+    get<T>(id: string): VisType<T> {
+      return (_visTypes.find((vis) => vis.name === id) as unknown) as VisType<T>;
     },
     all: () => {
-      return _visTypes as VisType[];
+      return (_visTypes as unknown) as VisType[];
     },
     getAliases: () => [],
     unRegisterAlias: () => [],

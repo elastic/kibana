@@ -54,25 +54,23 @@ describe('GroupSelection', () => {
       title: 'Vis with alias Url',
       stage: 'production',
       group: 'other',
-      aliasApp: 'otherApp',
-      aliasPath: '#/aliasUrl',
     },
   ] as VisType[];
 
   const visTypesRegistry = (visTypes: VisType[]): TypesStart => {
     return {
-      get: (id: string) => {
-        return visTypes.find((vis) => vis.name === id) as VisType;
+      get<T>(id: string): VisType<T> {
+        return (visTypes.find((vis) => vis.name === id) as unknown) as VisType<T>;
       },
       all: () => {
-        return visTypes as VisType[];
+        return (visTypes as unknown) as VisType[];
       },
       getAliases: () => [],
       unRegisterAlias: () => [],
       getByGroup: (group: VisGroups) => {
-        return visTypes.filter((type) => {
+        return (visTypes.filter((type) => {
           return type.group === group;
-        }) as VisType[];
+        }) as unknown) as VisType[];
       },
     };
   };
@@ -130,10 +128,10 @@ describe('GroupSelection', () => {
       group: 'aggbased',
       stage: 'production',
       ...defaultVisTypeParams,
-    } as VisType;
+    };
     const wrapper = mountWithIntl(
       <GroupSelection
-        visTypesRegistry={visTypesRegistry([..._visTypes, aggBasedVisType])}
+        visTypesRegistry={visTypesRegistry([..._visTypes, aggBasedVisType] as VisType[])}
         docLinks={docLinks as DocLinksStart}
         toggleGroups={jest.fn()}
         onVisTypeSelected={jest.fn()}
@@ -161,10 +159,10 @@ describe('GroupSelection', () => {
       stage: 'production',
       group: 'tools',
       ...defaultVisTypeParams,
-    } as VisType;
+    };
     const wrapper = mountWithIntl(
       <GroupSelection
-        visTypesRegistry={visTypesRegistry([..._visTypes, toolsVisType])}
+        visTypesRegistry={visTypesRegistry([..._visTypes, toolsVisType] as VisType[])}
         docLinks={docLinks as DocLinksStart}
         toggleGroups={jest.fn()}
         onVisTypeSelected={jest.fn()}
@@ -181,10 +179,10 @@ describe('GroupSelection', () => {
       group: 'aggbased',
       stage: 'production',
       ...defaultVisTypeParams,
-    } as VisType;
+    };
     const wrapper = mountWithIntl(
       <GroupSelection
-        visTypesRegistry={visTypesRegistry([..._visTypes, aggBasedVisType])}
+        visTypesRegistry={visTypesRegistry([..._visTypes, aggBasedVisType] as VisType[])}
         docLinks={docLinks as DocLinksStart}
         toggleGroups={toggleGroups}
         onVisTypeSelected={jest.fn()}

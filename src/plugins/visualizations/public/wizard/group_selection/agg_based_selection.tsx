@@ -40,12 +40,13 @@ import { memoizeLast } from '../../legacy/memoize';
 import { VisTypeAlias } from '../../vis_types/vis_type_alias_registry';
 import { VisType, TypesStart, VisGroups } from '../../vis_types';
 
-export interface VisTypeListEntry extends VisType {
+interface VisTypeListEntry {
+  type: VisType | VisTypeAlias;
   highlighted: boolean;
 }
 
-export interface VisTypeAliasListEntry extends VisTypeAlias {
-  highlighted: boolean;
+function isVisTypeAlias(type: VisType | VisTypeAlias): type is VisTypeAlias {
+  return 'aliasPath' in type;
 }
 
 interface AggBasedSelectionProps {
@@ -132,10 +133,7 @@ class AggBasedSelection extends React.Component<AggBasedSelectionProps, AggBased
     );
   }
 
-  private filteredVisTypes(
-    visTypes: TypesStart,
-    query: string
-  ): Array<VisTypeListEntry | VisTypeAliasListEntry> {
+  private filteredVisTypes(visTypes: TypesStart, query: string): VisTypeListEntry[] {
     const types = visTypes.getByGroup(VisGroups.AGGBASED).filter((type) => {
       // Filter out all lab visualizations if lab mode is not enabled
       if (!this.props.showExperimental && type.stage === 'experimental') {
@@ -150,9 +148,9 @@ class AggBasedSelection extends React.Component<AggBasedSelectionProps, AggBased
       return true;
     });
 
-    let entries: Array<VisTypeListEntry | VisTypeAliasListEntry>;
+    let entries: VisTypeListEntry[];
     if (!query) {
-      entries = types.map((type) => ({ ...type, highlighted: false }));
+      entries = types.map((type) => ({ type, highlighted: false }));
     } else {
       const q = query.toLowerCase();
       entries = types.map((type) => {
@@ -160,16 +158,20 @@ class AggBasedSelection extends React.Component<AggBasedSelectionProps, AggBased
           type.name.toLowerCase().includes(q) ||
           type.title.toLowerCase().includes(q) ||
           (typeof type.description === 'string' && type.description.toLowerCase().includes(q));
-        return { ...type, highlighted: matchesQuery };
+        return { type, highlighted: matchesQuery };
       });
     }
 
-    return orderBy(entries, ['highlighted', 'promotion', 'title'], ['desc', 'asc', 'asc']);
+    return orderBy(
+      entries,
+      ['highlighted', 'type.promotion', 'type.title'],
+      ['desc', 'asc', 'asc']
+    );
   }
 
-  private renderVisType = (visType: VisTypeListEntry | VisTypeAliasListEntry) => {
+  private renderVisType = (visType: VisTypeListEntry) => {
     let stage = {};
-    if (!('aliasPath' in visType) && visType.stage === 'experimental') {
+    if (!isVisTypeAlias(visType.type) && visType.type.stage === 'experimental') {
       stage = {
         betaBadgeLabel: i18n.translate('visualizations.newVisWizard.experimentalTitle', {
           defaultMessage: 'Experimental',
@@ -179,7 +181,7 @@ class AggBasedSelection extends React.Component<AggBasedSelectionProps, AggBased
             'This visualization might be changed or removed in a future release and is not subject to the support SLA.',
         }),
       };
-    } else if ('aliasPath' in visType && visType.stage === 'beta') {
+    } else if (isVisTypeAlias(visType.type) && visType.type.stage === 'beta') {
       const aliasDescription = i18n.translate('visualizations.newVisWizard.betaDescription', {
         defaultMessage:
           'This visualization is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features',
@@ -193,22 +195,22 @@ class AggBasedSelection extends React.Component<AggBasedSelectionProps, AggBased
     }
 
     const isDisabled = this.state.query !== '' && !visType.highlighted;
-    const onClick = () => this.props.onVisTypeSelected(visType);
+    const onClick = () => this.props.onVisTypeSelected(visType.type);
 
     return (
-      <EuiFlexItem key={visType.name} grow={false}>
+      <EuiFlexItem key={visType.type.name} grow={false}>
         <EuiCard
           className="visNewVisDialog__card"
           titleSize="xs"
-          title={<span data-test-subj="visTypeTitle">{visType.title}</span>}
+          title={<span data-test-subj="visTypeTitle">{visType.type.title}</span>}
           onClick={onClick}
-          data-test-subj={`visType-${visType.name}`}
-          data-vis-stage={!('aliasPath' in visType) ? visType.stage : 'alias'}
-          aria-describedby={`visTypeDescription-${visType.name}`}
-          description={visType.description || ''}
+          data-test-subj={`visType-${visType.type.name}`}
+          data-vis-stage={!('aliasPath' in visType) ? visType.type.stage : 'alias'}
+          aria-describedby={`visTypeDescription-${visType.type.name}`}
+          description={visType.type.description || ''}
           layout="horizontal"
           isDisabled={isDisabled}
-          icon={<EuiIcon type={visType.icon || 'empty'} size="l" color="secondary" />}
+          icon={<EuiIcon type={visType.type.icon || 'empty'} size="l" color="secondary" />}
           {...stage}
         />
       </EuiFlexItem>

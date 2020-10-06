@@ -74,18 +74,18 @@ describe('NewVisModal', () => {
     },
   ];
   const visTypes: TypesStart = {
-    get: (id: string) => {
-      return _visTypes.find((vis) => vis.name === id) as VisType;
+    get<T>(id: string): VisType<T> {
+      return (_visTypes.find((vis) => vis.name === id) as unknown) as VisType<T>;
     },
     all: () => {
-      return _visTypes as VisType[];
+      return (_visTypes as unknown) as VisType[];
     },
     getAliases: () => [],
     unRegisterAlias: () => [],
     getByGroup: (group: VisGroups) => {
-      return _visTypes.filter((type) => {
+      return (_visTypes.filter((type) => {
         return type.group === group;
-      }) as VisType[];
+      }) as unknown) as VisType[];
     },
   };
   const addBasePath = (url: string) => `testbasepath${url}`;
