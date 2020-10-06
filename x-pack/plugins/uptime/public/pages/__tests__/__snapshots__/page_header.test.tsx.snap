@@ -3,6 +3,70 @@
 exports[`PageHeader shallow renders extra links: page_header_with_extra_links 1`] = `
 Array [
   @media only screen and (max-width:1024px) and (min-width:868px) {
+
+}
+
+@media only screen and (max-width:880px) {
+
+}
+
+<div
+    class="euiCallOut euiCallOut--primary"
+  >
+    <div
+      class="euiCallOutHeader"
+    >
+      <div
+        aria-hidden="true"
+        class="euiCallOutHeader__icon"
+        data-euiicon-type="beaker"
+      />
+      <span
+        class="euiCallOutHeader__title"
+      >
+        Elastic Synthetics
+      </span>
+    </div>
+    <div
+      class="euiText euiText--small"
+    >
+      <p>
+        Elastic Uptime now supports synthetic browser monitors! Learn how to use them 
+        <a
+          href="https://elastic.co/synthetics"
+        >
+          here
+        </a>
+        .
+      </p>
+      <button
+        class="euiButton euiButton--primary"
+        type="button"
+      >
+        <span
+          class="euiButtonContent euiButton__content"
+        >
+          <span
+            class="euiButton__text"
+          >
+            Dismiss
+          </span>
+        </span>
+      </button>
+    </div>
+  </div>,
+  @media only screen and (max-width:1024px) and (min-width:868px) {
+
+}
+
+@media only screen and (max-width:880px) {
+
+}
+
+<div
+    class="euiSpacer euiSpacer--s"
+  />,
+  @media only screen and (max-width:1024px) and (min-width:868px) {
   .c0.c0.c0 .euiSuperDatePicker__flexWrapper {
     width: 500px;
   }
@@ -231,6 +295,70 @@ Array [
 exports[`PageHeader shallow renders with the date picker: page_header_with_date_picker 1`] = `
 Array [
   @media only screen and (max-width:1024px) and (min-width:868px) {
+
+}
+
+@media only screen and (max-width:880px) {
+
+}
+
+<div
+    class="euiCallOut euiCallOut--primary"
+  >
+    <div
+      class="euiCallOutHeader"
+    >
+      <div
+        aria-hidden="true"
+        class="euiCallOutHeader__icon"
+        data-euiicon-type="beaker"
+      />
+      <span
+        class="euiCallOutHeader__title"
+      >
+        Elastic Synthetics
+      </span>
+    </div>
+    <div
+      class="euiText euiText--small"
+    >
+      <p>
+        Elastic Uptime now supports synthetic browser monitors! Learn how to use them 
+        <a
+          href="https://elastic.co/synthetics"
+        >
+          here
+        </a>
+        .
+      </p>
+      <button
+        class="euiButton euiButton--primary"
+        type="button"
+      >
+        <span
+          class="euiButtonContent euiButton__content"
+        >
+          <span
+            class="euiButton__text"
+          >
+            Dismiss
+          </span>
+        </span>
+      </button>
+    </div>
+  </div>,
+  @media only screen and (max-width:1024px) and (min-width:868px) {
+
+}
+
+@media only screen and (max-width:880px) {
+
+}
+
+<div
+    class="euiSpacer euiSpacer--s"
+  />,
+  @media only screen and (max-width:1024px) and (min-width:868px) {
   .c0.c0.c0 .euiSuperDatePicker__flexWrapper {
     width: 500px;
   }
@@ -372,6 +500,54 @@ Array [
 
 exports[`PageHeader shallow renders without the date picker: page_header_no_date_picker 1`] = `
 Array [
+  <div
+    class="euiCallOut euiCallOut--primary"
+  >
+    <div
+      class="euiCallOutHeader"
+    >
+      <div
+        aria-hidden="true"
+        class="euiCallOutHeader__icon"
+        data-euiicon-type="beaker"
+      />
+      <span
+        class="euiCallOutHeader__title"
+      >
+        Elastic Synthetics
+      </span>
+    </div>
+    <div
+      class="euiText euiText--small"
+    >
+      <p>
+        Elastic Uptime now supports synthetic browser monitors! Learn how to use them 
+        <a
+          href="https://elastic.co/synthetics"
+        >
+          here
+        </a>
+        .
+      </p>
+      <button
+        class="euiButton euiButton--primary"
+        type="button"
+      >
+        <span
+          class="euiButtonContent euiButton__content"
+        >
+          <span
+            class="euiButton__text"
+          >
+            Dismiss
+          </span>
+        </span>
+      </button>
+    </div>
+  </div>,
+  <div
+    class="euiSpacer euiSpacer--s"
+  />,
   <div
     class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap"
   >
