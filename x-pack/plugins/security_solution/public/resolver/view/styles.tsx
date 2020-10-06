@@ -28,7 +28,6 @@ export const NodeSubMenu = styled(NodeSubMenuComponents)`
     contain: content;
     width: 12em;
     z-index: 2;
-    backdrop-filter: blur(5px);
   }
 
   &.options .item {
