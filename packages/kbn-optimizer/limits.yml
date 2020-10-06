@@ -1,7 +1,7 @@
 pageLoadAssetSize:
   advancedSettings: 17_596
   alerts: 96_936
-  apm: 52_378
+  apm: 54_385
   apmOss: 8_996
   beatsManagement: 178_135
   bfetch: 31_874
@@ -11,15 +11,15 @@ pageLoadAssetSize:
   console: 36_091
   core: 682_068
   crossClusterReplication: 55_408
-  dashboard: 588_972
+  dashboard: 587_988
   dashboardEnhanced: 55_646
   dashboardMode: 12_716
-  data: 1_415_843
+  data: 1_161_035
   dataEnhanced: 40_192
   devTools: 28_637
   discover: 94_982
   discoverEnhanced: 32_730
-  embeddable: 302_696
+  embeddable: 302_792
   embeddableEnhanced: 31_145
   enterpriseSearch: 25_484
   esUiShared: 316_654
@@ -32,18 +32,18 @@ pageLoadAssetSize:
   graph: 21_215
   grokdebugger: 16_779
   home: 32_372
-  indexLifecycleManagement: 97_032
-  indexManagement: 130_766
+  indexLifecycleManagement: 97_090
+  indexManagement: 130_608
   indexPatternManagement: 144_222
   infra: 187_873
-  ingestManager: 559_465
+  ingestManager: 555_174
   ingestPipelines: 48_003
   inputControlVis: 162_675
   inspector: 138_711
   kibanaLegacy: 97_711
   kibanaReact: 132_073
   kibanaUtils: 188_829
-  lens: 82_860
+  lens: 86_624
   licenseManagement: 31_817
   licensing: 28_693
   lists: 173_665
@@ -65,34 +65,35 @@ pageLoadAssetSize:
   savedObjects: 98_518
   savedObjectsManagement: 90_503
   searchprofiler: 57_080
-  security: 172_250
-  securitySolution: 606_178
+  security: 179_027
+  securityOss: 20_806
+  securitySolution: 606_237
   share: 89_061
   snapshotRestore: 69_032
   spaces: 377_915
   telemetry: 81_832
   telemetryManagementSection: 42_443
-  tileMap: 55_250
+  tileMap: 55_337
   timelion: 19_920
   transform: 31_007
-  triggersActionsUi: 156_610
-  uiActions: 87_533
+  triggersActionsUi: 160_006
+  uiActions: 87_717
   uiActionsEnhanced: 339_652
-  upgradeAssistant: 71_270
+  upgradeAssistant: 71_241
   uptime: 30_825
   urlDrilldown: 24_174
   urlForwarding: 22_554
   usageCollection: 29_762
   visDefaultEditor: 40_178
   visTypeMarkdown: 20_896
-  visTypeMetric: 32_820
-  visTypeTable: 84_706
-  visTypeTagcloud: 27_605
+  visTypeMetric: 32_790
+  visTypeTable: 84_934
+  visTypeTagcloud: 27_575
   visTypeTimelion: 41_933
   visTypeTimeseries: 145_203
   visTypeVega: 143_573
   visTypeVislib: 232_838
   visTypeXy: 10_255
-  visualizations: 283_742
-  visualize: 47_384
+  visualizations: 285_025
+  visualize: 47_431
   watcher: 33_598
