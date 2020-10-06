@@ -6,7 +6,15 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiSwitch, EuiSelect } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiSwitch,
+  EuiSelect,
+  EuiIconTip,
+  EuiSpacer,
+  EuiFlexItem,
+  EuiFlexGroup,
+} from '@elastic/eui';
 import { IndexPatternLayer, IndexPatternField } from '../types';
 import { hasField } from '../utils';
 import { IndexPatternColumn } from '../operations';
@@ -54,32 +62,42 @@ export function BucketNestingEditor({
 
   if (aggColumns.length === 1) {
     const [target] = aggColumns;
+    const useAsTopLevelAggCopy = i18n.translate('xpack.lens.indexPattern.useAsTopLevelAgg', {
+      defaultMessage: 'Group by {columnName} first',
+      values: {
+        columnName: column.label,
+      },
+    });
     return (
-      <EuiFormRow
-        label={i18n.translate('xpack.lens.indexPattern.grouping', {
-          defaultMessage: 'Grouping',
-        })}
-        display="columnCompressedSwitch"
-      >
-        <EuiSwitch
-          compressed
-          data-test-subj="indexPattern-nesting-switch"
-          name="nestingSwitch"
-          label={i18n.translate('xpack.lens.indexPattern.useAsTopLevelAgg', {
-            defaultMessage: 'Group by {columnName} first',
-            values: {
-              columnName: column.label,
-            },
-          })}
-          checked={!prevColumn}
-          onChange={() => {
-            if (prevColumn) {
-              setColumns(nestColumn(layer.columnOrder, columnId, target.value));
-            } else {
-              setColumns(nestColumn(layer.columnOrder, target.value, columnId));
-            }
-          }}
-        />
+      <EuiFormRow label={useAsTopLevelAggCopy} display="columnCompressedSwitch">
+        <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem grow={false}>
+            {' '}
+            <EuiIconTip
+              content={i18n.translate('xpack.lens.indexPattern.useAsTopLevelAggTooltip', {
+                defaultMessage: 'Group by this field first',
+              })}
+              position="bottom"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiSwitch
+              compressed
+              label={useAsTopLevelAggCopy}
+              showLabel={false}
+              data-test-subj="indexPattern-nesting-switch"
+              name="nestingSwitch"
+              checked={!prevColumn}
+              onChange={() => {
+                if (prevColumn) {
+                  setColumns(nestColumn(layer.columnOrder, columnId, target.value));
+                } else {
+                  setColumns(nestColumn(layer.columnOrder, target.value, columnId));
+                }
+              }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFormRow>
     );
   }
