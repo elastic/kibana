@@ -5,7 +5,7 @@
  */
 import { IRouter } from 'src/core/server';
 
-import { PLUGIN_ID, FLEET_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../constants';
+import { PLUGIN_ID, AGENTS_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../constants';
 import { IngestManagerConfigType } from '../../../common';
 import {
   getFleetStatusHandler,
@@ -30,7 +30,7 @@ export const registerIngestManagerSetupRoute = (router: IRouter) => {
 export const registerCreateFleetSetupRoute = (router: IRouter) => {
   router.post(
     {
-      path: FLEET_SETUP_API_ROUTES.CREATE_PATTERN,
+      path: AGENTS_SETUP_API_ROUTES.CREATE_PATTERN,
       validate: PostFleetSetupRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
@@ -41,7 +41,7 @@ export const registerCreateFleetSetupRoute = (router: IRouter) => {
 export const registerGetFleetStatusRoute = (router: IRouter) => {
   router.get(
     {
-      path: FLEET_SETUP_API_ROUTES.INFO_PATTERN,
+      path: AGENTS_SETUP_API_ROUTES.INFO_PATTERN,
       validate: false,
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
@@ -53,7 +53,7 @@ export const registerRoutes = (router: IRouter, config: IngestManagerConfigType)
   // Ingest manager setup
   registerIngestManagerSetupRoute(router);
 
-  if (!config.fleet.enabled) {
+  if (!config.agents.enabled) {
     return;
   }
 

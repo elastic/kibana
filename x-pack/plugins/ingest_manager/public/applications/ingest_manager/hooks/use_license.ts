@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { LicenseService } from '../services';
+import { LicenseService } from '../../../../common/services/license';
 
 export const licenseService = new LicenseService();
 
