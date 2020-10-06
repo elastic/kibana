@@ -45,6 +45,7 @@ exports[`trusted_app_card TrustedAppCard should render correctly 1`] = `
         Object {
           "field": "operator",
           "name": "Operator",
+          "render": [Function],
           "sortable": false,
           "truncateText": true,
           "width": "20%",
@@ -117,6 +118,7 @@ exports[`trusted_app_card TrustedAppCard should trim long descriptions 1`] = `
         Object {
           "field": "operator",
           "name": "Operator",
+          "render": [Function],
           "sortable": false,
           "truncateText": true,
           "width": "20%",
