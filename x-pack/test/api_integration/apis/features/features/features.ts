@@ -107,7 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
             'savedObjectsManagement',
             'ml',
             'apm',
-            'builtInAlerts',
+            'stackAlerts',
             'canvas',
             'infrastructure',
             'logs',

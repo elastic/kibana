@@ -110,6 +110,10 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 |This plugin contains several helpers and services to integrate pieces of the legacy Kibana app with the new Kibana platform.
 
 
+|{kib-repo}blob/{branch}/src/plugins/kibana_overview/README.md[kibanaOverview]
+|An overview page highlighting Kibana apps
+
+
 |{kib-repo}blob/{branch}/src/plugins/kibana_react/README.md[kibanaReact]
 |Tools for building React applications in Kibana.
 
@@ -272,13 +276,6 @@ which will load the visualization's editor.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/actions/README.md[actions]
 |The Kibana actions plugin provides a framework to create executable actions. You can:
-
-
-|{kib-repo}blob/{branch}/x-pack/plugins/alerting_builtins/README.md[alertingBuiltins]
-|This plugin provides alertTypes shipped with Kibana for use with the
-the alerts plugin.  When enabled, it will register
-the built-in alertTypes with the alerting plugin, register associated HTTP
-routes, etc.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/alerts/README.md[alerts]
@@ -484,6 +481,13 @@ using the CURL scripts in the scripts folder.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/spaces[spaces]
 |WARNING: Missing README.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/stack_alerts/README.md[stackAlerts]
+|This plugin provides alertTypes shipped with Kibana for use with the
+the alerts plugin.  When enabled, it will register
+the alertTypes by the Stack in the alerting plugin, register associated HTTP
+routes, etc.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/task_manager[taskManager]
