@@ -11,7 +11,6 @@ import {
   EuiSwitch,
   EuiSelect,
   EuiIconTip,
-  EuiSpacer,
   EuiFlexItem,
   EuiFlexGroup,
 } from '@elastic/eui';
