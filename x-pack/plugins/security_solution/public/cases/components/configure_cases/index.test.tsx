@@ -25,6 +25,7 @@ import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { useGetUrlSearch } from '../../../common/components/navigation/use_get_url_search';
 
 import { connectors, searchURL, useCaseConfigureResponse, useConnectorsResponse } from './__mock__';
+import { ConnectorTypes } from '../../../../../case/common/api/connectors';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../containers/configure/use_connectors');
@@ -38,7 +39,7 @@ const useGetUrlSearchMock = useGetUrlSearch as jest.Mock;
 
 describe('ConfigureCases', () => {
   beforeEach(() => {
-    useKibanaMock().services.triggers_actions_ui = ({
+    useKibanaMock().services.triggersActionsUi = ({
       actionTypeRegistry: actionTypeRegistryMock.create(),
     } as unknown) as TriggersAndActionsUIPublicPluginStart;
   });
@@ -62,17 +63,17 @@ describe('ConfigureCases', () => {
     });
 
     test('it renders the ActionsConnectorsContextProvider', () => {
-      // Components from triggers_actions_ui do not have a data-test-subj
+      // Components from triggersActionsUi  do not have a data-test-subj
       expect(wrapper.find(ActionsConnectorsContextProvider).exists()).toBeTruthy();
     });
 
     test('it renders the ConnectorAddFlyout', () => {
-      // Components from triggers_actions_ui do not have a data-test-subj
+      // Components from triggersActionsUi  do not have a data-test-subj
       expect(wrapper.find(ConnectorAddFlyout).exists()).toBeTruthy();
     });
 
     test('it does NOT render the ConnectorEditFlyout', () => {
-      // Components from triggers_actions_ui do not have a data-test-subj
+      // Components from triggersActionsUi  do not have a data-test-subj
       expect(wrapper.find(ConnectorEditFlyout).exists()).toBeFalsy();
     });
 
@@ -90,11 +91,19 @@ describe('ConfigureCases', () => {
       useCaseConfigureMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
         closureType: 'close-by-user',
-        connectorId: 'not-id',
-        connectorName: 'unchanged',
+        connector: {
+          id: 'not-id',
+          name: 'unchanged',
+          type: ConnectorTypes.none,
+          fields: null,
+        },
         currentConfiguration: {
-          connectorName: 'unchanged',
-          connectorId: 'not-id',
+          connector: {
+            id: 'not-id',
+            name: 'unchanged',
+            type: ConnectorTypes.none,
+            fields: null,
+          },
           closureType: 'close-by-user',
         },
       }));
@@ -126,11 +135,19 @@ describe('ConfigureCases', () => {
         ...useCaseConfigureResponse,
         mapping: connectors[0].config.incidentConfiguration.mapping,
         closureType: 'close-by-user',
-        connectorId: 'servicenow-1',
-        connectorName: 'unchanged',
+        connector: {
+          id: 'servicenow-1',
+          name: 'unchanged',
+          type: ConnectorTypes.servicenow,
+          fields: null,
+        },
         currentConfiguration: {
-          connectorName: 'unchanged',
-          connectorId: 'servicenow-1',
+          connector: {
+            id: 'servicenow-1',
+            name: 'unchanged',
+            type: ConnectorTypes.servicenow,
+            fields: null,
+          },
           closureType: 'close-by-user',
         },
       }));
@@ -213,11 +230,19 @@ describe('ConfigureCases', () => {
         ...useCaseConfigureResponse,
         mapping: connectors[1].config.incidentConfiguration.mapping,
         closureType: 'close-by-user',
-        connectorId: 'servicenow-2',
-        connectorName: 'unchanged',
+        connector: {
+          id: 'resilient-2',
+          name: 'unchanged',
+          type: ConnectorTypes.resilient,
+          fields: null,
+        },
         currentConfiguration: {
-          connectorName: 'unchanged',
-          connectorId: 'servicenow-1',
+          connector: {
+            id: 'servicenow-1',
+            name: 'unchanged',
+            type: ConnectorTypes.servicenow,
+            fields: null,
+          },
           closureType: 'close-by-user',
         },
       }));
@@ -258,7 +283,12 @@ describe('ConfigureCases', () => {
     beforeEach(() => {
       useCaseConfigureMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
-        connectorId: 'servicenow-1',
+        connector: {
+          id: 'servicenow-1',
+          name: 'SN',
+          type: ConnectorTypes.servicenow,
+          fields: null,
+        },
         persistLoading: true,
       }));
 
@@ -327,11 +357,19 @@ describe('ConfigureCases', () => {
         ...useCaseConfigureResponse,
         mapping: connectors[0].config.incidentConfiguration.mapping,
         closureType: 'close-by-user',
-        connectorId: 'servicenow-1',
-        connectorName: 'My connector',
+        connector: {
+          id: 'resilient-2',
+          name: 'My connector',
+          type: ConnectorTypes.resilient,
+          fields: null,
+        },
         currentConfiguration: {
-          connectorName: 'My connector',
-          connectorId: 'My connector',
+          connector: {
+            id: 'My connector',
+            name: 'My connector',
+            type: ConnectorTypes.jira,
+            fields: null,
+          },
           closureType: 'close-by-user',
         },
         persistCaseConfigure,
@@ -345,13 +383,17 @@ describe('ConfigureCases', () => {
     test('it submits the configuration correctly when changing connector', () => {
       wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
       wrapper.update();
-      wrapper.find('button[data-test-subj="dropdown-connector-servicenow-2"]').simulate('click');
+      wrapper.find('button[data-test-subj="dropdown-connector-resilient-2"]').simulate('click');
       wrapper.update();
 
       expect(persistCaseConfigure).toHaveBeenCalled();
       expect(persistCaseConfigure).toHaveBeenCalledWith({
-        connectorId: 'servicenow-2',
-        connectorName: 'My Connector 2',
+        connector: {
+          id: 'resilient-2',
+          name: 'My Connector 2',
+          type: ConnectorTypes.resilient,
+          fields: null,
+        },
         closureType: 'close-by-user',
       });
     });
@@ -360,18 +402,28 @@ describe('ConfigureCases', () => {
       useCaseConfigureMock
         .mockImplementationOnce(() => ({
           ...useCaseConfigureResponse,
-          connectorId: 'servicenow-1',
+          connector: {
+            id: 'servicenow-1',
+            name: 'My connector',
+            type: ConnectorTypes.servicenow,
+            fields: null,
+          },
         }))
         .mockImplementation(() => ({
           ...useCaseConfigureResponse,
-          connectorId: 'servicenow-2',
+          connector: {
+            id: 'resilient-2',
+            name: 'My connector 2',
+            type: ConnectorTypes.resilient,
+            fields: null,
+          },
         }));
 
       wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
 
       wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
       wrapper.update();
-      wrapper.find('button[data-test-subj="dropdown-connector-servicenow-2"]').simulate('click');
+      wrapper.find('button[data-test-subj="dropdown-connector-resilient-2"]').simulate('click');
       wrapper.update();
 
       expect(
@@ -393,11 +445,19 @@ describe('closure options', () => {
       ...useCaseConfigureResponse,
       mapping: connectors[0].config.incidentConfiguration.mapping,
       closureType: 'close-by-user',
-      connectorId: 'servicenow-1',
-      connectorName: 'My connector',
+      connector: {
+        id: 'servicenow-1',
+        name: 'My connector',
+        type: ConnectorTypes.servicenow,
+        fields: null,
+      },
       currentConfiguration: {
-        connectorName: 'My connector',
-        connectorId: 'My connector',
+        connector: {
+          id: 'My connector',
+          name: 'My connector',
+          type: ConnectorTypes.jira,
+          fields: null,
+        },
         closureType: 'close-by-user',
       },
       persistCaseConfigure,
@@ -414,8 +474,12 @@ describe('closure options', () => {
 
     expect(persistCaseConfigure).toHaveBeenCalled();
     expect(persistCaseConfigure).toHaveBeenCalledWith({
-      connectorId: 'servicenow-1',
-      connectorName: 'My Connector',
+      connector: {
+        id: 'servicenow-1',
+        name: 'My connector',
+        type: ConnectorTypes.servicenow,
+        fields: null,
+      },
       closureType: 'close-by-pushing',
     });
   });
@@ -427,11 +491,19 @@ describe('user interactions', () => {
       ...useCaseConfigureResponse,
       mapping: connectors[1].config.incidentConfiguration.mapping,
       closureType: 'close-by-user',
-      connectorId: 'servicenow-2',
-      connectorName: 'unchanged',
+      connector: {
+        id: 'resilient-2',
+        name: 'unchanged',
+        type: ConnectorTypes.resilient,
+        fields: null,
+      },
       currentConfiguration: {
-        connectorName: 'unchanged',
-        connectorId: 'servicenow-2',
+        connector: {
+          id: 'resilient-2',
+          name: 'unchanged',
+          type: ConnectorTypes.servicenow,
+          fields: null,
+        },
         closureType: 'close-by-user',
       },
     }));

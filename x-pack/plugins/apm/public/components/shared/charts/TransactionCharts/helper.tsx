@@ -5,10 +5,10 @@
  */
 
 import { flatten } from 'lodash';
+import { TimeFormatter } from '../../../../../common/utils/formatters';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
 import { TimeSeries, Coordinate } from '../../../../../typings/timeseries';
-import { TimeFormatter } from '../../../../utils/formatters';
 
 export function getResponseTimeTickFormatter(formatter: TimeFormatter) {
   return (t: number) => {

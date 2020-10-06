@@ -109,6 +109,7 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
       {
         layerList,
         title: savedMap.title,
+        description: savedMap.description,
         editUrl: getHttp().basePath.prepend(getExistingMapPath(savedObjectId)),
         editApp: APP_ID,
         editPath: `/${MAP_PATH}/${savedObjectId}`,

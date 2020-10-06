@@ -68,6 +68,9 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
         description: 'a description',
         externalId: null,
         title: 'a title',
+        severity: '1',
+        urgency: '1',
+        impact: '1',
         updatedAt: '2020-06-17T04:37:45.147Z',
         updatedBy: { fullName: null, username: 'elastic' },
       },
@@ -343,25 +346,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.savedObjectId]: expected value of type [string] but got [undefined]',
-              });
-            });
-        });
-
-        it('should handle failing with a simulated success without savedObjectId', async () => {
-          await supertest
-            .post(`/api/actions/action/${simulatedActionId}/_execute`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              params: { subAction: 'pushToService', subActionParams: {} },
-            })
-            .then((resp: any) => {
-              expect(resp.body).to.eql({
-                actionId: simulatedActionId,
-                status: 'error',
-                retry: false,
-                message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.savedObjectId]: expected value of type [string] but got [undefined]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.title]: expected value of type [string] but got [undefined]',
               });
             });
         });
@@ -461,6 +446,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
+
           expect(proxyHaveBeenCalled).to.equal(true);
           expect(result).to.eql({
             status: 'ok',
