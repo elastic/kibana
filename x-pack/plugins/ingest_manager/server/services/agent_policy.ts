@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { uniq } from 'lodash';
+import { safeLoad } from 'js-yaml';
 import { SavedObjectsClientContract, SavedObjectsBulkUpdateResponse } from 'src/core/server';
 import { AuthenticatedUser } from '../../../security/server';
 import {
@@ -20,7 +21,12 @@ import {
   AgentPolicyStatus,
   ListWithKuery,
 } from '../types';
-import { DeleteAgentPolicyResponse, storedPackagePoliciesToAgentInputs } from '../../common';
+import {
+  DeleteAgentPolicyResponse,
+  Settings,
+  storedPackagePoliciesToAgentInputs,
+} from '../../common';
+import { AgentPolicyNameExistsError } from '../errors';
 import { createAgentPolicyAction, listAgents } from './agents';
 import { packagePolicyService } from './package_policy';
 import { outputService } from './output';
@@ -452,13 +458,14 @@ class AgentPolicyService {
         // TEMPORARY as we only support a default output
         ...[defaultOutput].reduce(
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          (outputs, { config: outputConfig, name, type, hosts, ca_sha256, api_key }) => {
+          (outputs, { config_yaml, name, type, hosts, ca_sha256, api_key }) => {
+            const configJs = config_yaml ? safeLoad(config_yaml) : {};
             outputs[name] = {
               type,
               hosts,
               ca_sha256,
               api_key,
-              ...outputConfig,
+              ...configJs,
             };
 
             if (options?.standalone) {
@@ -494,7 +501,7 @@ class AgentPolicyService {
 
     // only add settings if not in standalone
     if (!standalone) {
-      let settings;
+      let settings: Settings;
       try {
         settings = await getSettings(soClient);
       } catch (error) {
