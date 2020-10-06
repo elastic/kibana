@@ -55,10 +55,7 @@ export function BucketNestingEditor({
   if (aggColumns.length === 1) {
     const [target] = aggColumns;
     const useAsTopLevelAggCopy = i18n.translate('xpack.lens.indexPattern.useAsTopLevelAgg', {
-      defaultMessage: 'Group by {columnName} first',
-      values: {
-        columnName: column.label,
-      },
+      defaultMessage: 'Group by this field first',
     });
     return (
       <EuiFormRow label={useAsTopLevelAggCopy} display="columnCompressedSwitch">
