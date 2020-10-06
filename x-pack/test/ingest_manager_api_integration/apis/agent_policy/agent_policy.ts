@@ -12,10 +12,10 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
   describe('ingest_manager_agent_policies', () => {
-    describe('POST /api/ingest_manager/agent_policies', () => {
+    describe('POST /api/fleet/agent_policies', () => {
       it('should work with valid values', async () => {
         await supertest
-          .post(`/api/ingest_manager/agent_policies`)
+          .post(`/api/fleet/agent_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'TEST',
@@ -26,7 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return a 400 with an empty namespace', async () => {
         await supertest
-          .post(`/api/ingest_manager/agent_policies`)
+          .post(`/api/fleet/agent_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'TEST',
@@ -37,7 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return a 400 with an invalid namespace', async () => {
         await supertest
-          .post(`/api/ingest_manager/agent_policies`)
+          .post(`/api/fleet/agent_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'TEST',
@@ -47,7 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('POST /api/ingest_manager/agent_policies/{agentPolicyId}/copy', () => {
+    describe('POST /api/fleet/agent_policies/{agentPolicyId}/copy', () => {
       before(async () => {
         await esArchiver.loadIfNeeded('fleet/agents');
       });
@@ -61,7 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
         const {
           body: { item },
         } = await supertest
-          .post(`/api/ingest_manager/agent_policies/${TEST_POLICY_ID}/copy`)
+          .post(`/api/fleet/agent_policies/${TEST_POLICY_ID}/copy`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'Copied policy',
@@ -84,7 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return a 404 with invalid source policy', async () => {
         await supertest
-          .post(`/api/ingest_manager/agent_policies/INVALID_POLICY_ID/copy`)
+          .post(`/api/fleet/agent_policies/INVALID_POLICY_ID/copy`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'Copied policy',
@@ -95,7 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return a 400 with invalid payload', async () => {
         await supertest
-          .post(`/api/ingest_manager/agent_policies/${TEST_POLICY_ID}/copy`)
+          .post(`/api/fleet/agent_policies/${TEST_POLICY_ID}/copy`)
           .set('kbn-xsrf', 'xxxx')
           .send({})
           .expect(400);
@@ -103,7 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return a 400 with invalid name', async () => {
         await supertest
-          .post(`/api/ingest_manager/agent_policies/${TEST_POLICY_ID}/copy`)
+          .post(`/api/fleet/agent_policies/${TEST_POLICY_ID}/copy`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: '',
