@@ -30,8 +30,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     port,
   });
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/72102
-  describe.skip('When on the Endpoint Policy Details Page', function () {
+  describe('When on the Endpoint Policy Details Page', function () {
     this.tags(['ciGroup7']);
 
     describe('with an invalid policy id', () => {

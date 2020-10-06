@@ -109,13 +109,13 @@ export class DiskUsageAlert extends BaseAlert {
 
   protected filterAlertInstance(alertInstance: RawAlertInstance, filters: CommonAlertFilter[]) {
     const alertInstanceStates = alertInstance.state?.alertStates as AlertDiskUsageState[];
-    const nodeUuid = filters?.find((filter) => filter.nodeUuid);
+    const nodeFilter = filters?.find((filter) => filter.nodeUuid);
 
-    if (!filters || !filters.length || !alertInstanceStates?.length || !nodeUuid) {
+    if (!filters || !filters.length || !alertInstanceStates?.length || !nodeFilter?.nodeUuid) {
       return true;
     }
 
-    const nodeAlerts = alertInstanceStates.filter(({ nodeId }) => nodeId === nodeUuid);
+    const nodeAlerts = alertInstanceStates.filter(({ nodeId }) => nodeId === nodeFilter.nodeUuid);
     return Boolean(nodeAlerts.length);
   }
 
@@ -160,7 +160,7 @@ export class DiskUsageAlert extends BaseAlert {
           i18n.translate('xpack.monitoring.alerts.diskUsage.ui.nextSteps.tuneDisk', {
             defaultMessage: '#start_linkTune for disk usage#end_link',
           }),
-          `{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/tune-for-disk-usage.html`
+          `{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/tune-for-disk-usage.html`
         ),
         createLink(
           i18n.translate('xpack.monitoring.alerts.diskUsage.ui.nextSteps.identifyIndices', {
@@ -173,19 +173,19 @@ export class DiskUsageAlert extends BaseAlert {
           i18n.translate('xpack.monitoring.alerts.diskUsage.ui.nextSteps.ilmPolicies', {
             defaultMessage: '#start_linkImplement ILM policies#end_link',
           }),
-          `{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/index-lifecycle-management.html`
+          `{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/index-lifecycle-management.html`
         ),
         createLink(
           i18n.translate('xpack.monitoring.alerts.diskUsage.ui.nextSteps.addMoreNodes', {
             defaultMessage: '#start_linkAdd more data nodes#end_link',
           }),
-          `{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/add-elasticsearch-nodes.html`
+          `{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/add-elasticsearch-nodes.html`
         ),
         createLink(
           i18n.translate('xpack.monitoring.alerts.diskUsage.ui.nextSteps.resizeYourDeployment', {
             defaultMessage: '#start_linkResize your deployment (ECE)#end_link',
           }),
-          `{elasticWebsiteUrl}/guide/en/cloud-enterprise/current/ece-resize-deployment.html`
+          `{elasticWebsiteUrl}guide/en/cloud-enterprise/current/ece-resize-deployment.html`
         ),
       ],
       tokens: [
@@ -331,7 +331,7 @@ export class DiskUsageAlert extends BaseAlert {
 
       const alertInstanceState = { alertStates: newAlertStates };
       instance.replaceState(alertInstanceState);
-      if (newAlertStates.length && !instance.hasScheduledActions()) {
+      if (newAlertStates.length) {
         this.executeActions(instance, alertInstanceState, null, cluster);
         state.lastExecutedAction = currentUTC;
       }

@@ -32,7 +32,10 @@ import { updateActionConnector, executeAction } from '../../lib/action_connector
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { PLUGIN } from '../../constants/plugin';
-import { ActionTypeExecutorResult } from '../../../../../actions/common';
+import {
+  ActionTypeExecutorResult,
+  isActionTypeExecutorResult,
+} from '../../../../../actions/common';
 import './connector_edit_flyout.scss';
 
 export interface ConnectorEditProps {
@@ -204,13 +207,24 @@ export const ConnectorEditFlyout = ({
 
   const onExecutAction = () => {
     setIsExecutinAction(true);
-    return executeAction({ id: connector.id, params: testExecutionActionParams, http }).then(
-      (result) => {
+    return executeAction({ id: connector.id, params: testExecutionActionParams, http })
+      .then((result) => {
         setIsExecutinAction(false);
         setTestExecutionResult(some(result));
         return result;
-      }
-    );
+      })
+      .catch((ex: Error | ActionTypeExecutorResult<unknown>) => {
+        const result: ActionTypeExecutorResult<unknown> = isActionTypeExecutorResult(ex)
+          ? ex
+          : {
+              actionId: connector.id,
+              status: 'error',
+              message: ex.message,
+            };
+        setIsExecutinAction(false);
+        setTestExecutionResult(some(result));
+        return result;
+      });
   };
 
   const onSaveClicked = async (closeAfterSave: boolean = true) => {
