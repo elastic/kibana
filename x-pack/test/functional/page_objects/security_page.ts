@@ -88,10 +88,10 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
         if (await find.existsByCssSelector(rawDataTabLocator)) {
           await find.clickByCssSelector(rawDataTabLocator);
         }
-        await PageObjects.error.expectForbidden();
+        await testSubjects.existOrFail('ResetSessionButton');
       });
       log.debug(
-        `Finished login process, found forbidden message. currentUrl = ${await browser.getCurrentUrl()}`
+        `Finished login process, found reset session button message. currentUrl = ${await browser.getCurrentUrl()}`
       );
       return;
     }

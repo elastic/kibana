@@ -71,9 +71,11 @@ export const GenericDownloaderComponent = ({
               anchorRef.current.href = objectURL; // eslint-disable-line require-atomic-updates
               anchorRef.current.download = filename; // eslint-disable-line require-atomic-updates
               anchorRef.current.click();
-              window.URL.revokeObjectURL(objectURL);
-            }
 
+              if (typeof window.URL.revokeObjectURL === 'function') {
+                window.URL.revokeObjectURL(objectURL);
+              }
+            }
             if (onExportSuccess != null) {
               onExportSuccess(ids.length);
             }
