@@ -4,13 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fieldLabels as jiraFieldLabels } from './jira';
-import { fieldLabels as resilientFieldLabels } from './resilient';
-import { fieldLabels as serviceNowFieldLabels } from './servicenow';
+import { CaseSettingsRegistry } from './types';
+import { createCaseSettingsRegistry } from './settings_registry';
+import { getCaseSetting as getJiraCaseSetting } from './jira';
+import { getCaseSetting as getResilientCaseSetting } from './resilient';
+import { getCaseSetting as getServiceNowCaseSetting } from './servicenow';
+import {
+  JiraFieldsType,
+  ServiceNowFieldsType,
+  ResilientFieldsType,
+} from '../../../../../case/common/api/connectors';
 
-export const connectorsFieldLabels: Record<string, Record<string, string> | null> = {
-  '.jira': jiraFieldLabels,
-  '.resilient': resilientFieldLabels,
-  '.servicenow': serviceNowFieldLabels,
-  '.none': null,
+interface GetCaseSettingReturn {
+  caseSettingsRegistry: CaseSettingsRegistry;
+}
+
+function registerCaseSettings(caseSettingsRegistry: CaseSettingsRegistry) {
+  caseSettingsRegistry.register<JiraFieldsType>(getJiraCaseSetting());
+  caseSettingsRegistry.register<ResilientFieldsType>(getResilientCaseSetting());
+  caseSettingsRegistry.register<ServiceNowFieldsType>(getServiceNowCaseSetting());
+}
+
+const caseSettingsRegistry = createCaseSettingsRegistry();
+registerCaseSettings(caseSettingsRegistry);
+
+export const getCaseSettings = (): GetCaseSettingReturn => {
+  return {
+    caseSettingsRegistry,
+  };
 };

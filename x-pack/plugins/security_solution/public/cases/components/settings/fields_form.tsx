@@ -8,7 +8,7 @@ import React, { memo, Suspense, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
 import { CaseSettingsConnector, SettingFieldsProps } from './types';
-import { useCaseSettings } from './use_case_settings';
+import { getCaseSettings } from '.';
 import { ConnectorTypeFields } from '../../../../../case/common/api/connectors';
 
 interface Props extends Omit<SettingFieldsProps<ConnectorTypeFields['fields']>, 'connector'> {
@@ -16,7 +16,7 @@ interface Props extends Omit<SettingFieldsProps<ConnectorTypeFields['fields']>, 
 }
 
 const SettingFieldsFormComponent: React.FC<Props> = ({ connector, isEdit, onChange, fields }) => {
-  const { caseSettingsRegistry } = useCaseSettings();
+  const { caseSettingsRegistry } = getCaseSettings();
 
   const onFieldsChange = useCallback(
     (newFields) => {
@@ -29,8 +29,9 @@ const SettingFieldsFormComponent: React.FC<Props> = ({ connector, isEdit, onChan
     return null;
   }
 
-  const caseSetting = caseSettingsRegistry.get(connector.actionTypeId);
-  const FieldsComponent = caseSetting.caseSettingFieldsComponent;
+  const { caseSettingFieldsComponent: FieldsComponent } = caseSettingsRegistry.get(
+    connector.actionTypeId
+  );
 
   return (
     <>
