@@ -44,8 +44,7 @@ export function UserPercentile() {
     if (!percentile) {
       updatePercentile(DEFAULT_P);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  });
 
   const options = [
     {

@@ -23,11 +23,10 @@ import React, { Component } from 'react';
 import { Required } from '@kbn/utility-types';
 import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
 
-import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../core/public';
+import { SavedObjectsClientContract, SimpleSavedObject } from 'src/core/public';
 import { getTitle } from '../../../common/index_patterns/lib';
 
 export type IndexPatternSelectProps = Required<
-  // Omit<EuiComboBoxProps<any>, 'isLoading' | 'onSearchChange' | 'options' | 'selectedOptions' | 'append' | 'prepend' | 'sortMatchesBy'>,
   Omit<EuiComboBoxProps<any>, 'isLoading' | 'onSearchChange' | 'options' | 'selectedOptions'>,
   'onChange' | 'placeholder'
 > & {
@@ -59,14 +58,9 @@ const getIndexPatterns = async (
   return resp.savedObjects;
 };
 
-// Takes in stateful runtime dependencies and pre-wires them to the component
-export function createIndexPatternSelect(savedObjectsClient: SavedObjectsClientContract) {
-  return (props: Omit<IndexPatternSelectProps, 'savedObjectsClient'>) => (
-    <IndexPatternSelect {...props} savedObjectsClient={savedObjectsClient} />
-  );
-}
-
-export class IndexPatternSelect extends Component<IndexPatternSelectProps> {
+// Needed for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default class IndexPatternSelect extends Component<IndexPatternSelectProps> {
   private isMounted: boolean = false;
   state: IndexPatternSelectState;
 

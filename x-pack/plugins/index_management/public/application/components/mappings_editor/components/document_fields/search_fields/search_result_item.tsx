@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { SearchResult } from '../../../types';
 import { TYPE_DEFINITION } from '../../../constants';
 import { useDispatch } from '../../../mappings_state_context';
-import { getTypeLabelFromField } from '../../../lib';
+import { getTypeLabelFromType } from '../../../lib';
 import { DeleteFieldProvider } from '../fields/delete_field_provider';
 
 interface Props {
@@ -121,7 +121,7 @@ export const SearchResultItem = React.memo(function FieldListItemFlatComponent({
                         dataType: TYPE_DEFINITION[source.type].label,
                       },
                     })
-                  : getTypeLabelFromField(source)}
+                  : getTypeLabelFromType(source.type)}
               </EuiBadge>
             </EuiFlexItem>
 
