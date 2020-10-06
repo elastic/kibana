@@ -44,7 +44,7 @@ export interface TrainedModelStat {
   };
 }
 
-export interface ModelConfigResponse {
+export interface TrainedModelConfigResponse {
   created_by: string;
   create_time: string;
   default_field_map: Record<string, string>;
@@ -79,5 +79,5 @@ export interface ModelPipelines {
  * Get inference response from the ES endpoint
  */
 export interface InferenceConfigResponse {
-  trained_model_configs: ModelConfigResponse[];
+  trained_model_configs: TrainedModelConfigResponse[];
 }
