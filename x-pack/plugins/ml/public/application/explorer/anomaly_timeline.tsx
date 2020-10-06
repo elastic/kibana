@@ -18,6 +18,7 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiContextMenuItem,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -156,6 +157,16 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
+                {selectedCells ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty size="xs" onClick={setSelectedCells.bind(null, undefined)}>
+                      <FormattedMessage
+                        id="xpack.ml.anomalySwimLane.clearSelectionLabel"
+                        defaultMessage="Clear selection"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                ) : null}
                 <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
                   <div className="panel-sub-title">
                     {viewByLoadedForTimeFormatted && (
