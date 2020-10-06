@@ -1,0 +1,23 @@
+.embPanel__expandPanelBadge {
+  transition: all $euiAnimSpeedFast $euiAnimSlightResistance;
+}
+
+.embPanel .embPanel__expandPanelBadge {
+  opacity: 0; /* 1 */
+
+  &:focus {
+    opacity: 1; /* 2 */
+  }
+}
+
+.embPanel:hover {
+  .embPanel__expandPanelBadge {
+    opacity: 1;
+  }
+}
+
+.embPanel--editing {
+  .embPanel__expandPanelBadge {
+    opacity: 1; /* 3 */
+  }
+}

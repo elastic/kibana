@@ -24,11 +24,11 @@ import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
 
 export const ACTION_EXPAND_PANEL = 'togglePanel';
 
-function isDashboard(embeddable: IEmbeddable): embeddable is DashboardContainer {
+export function isDashboard(embeddable: IEmbeddable): embeddable is DashboardContainer {
   return embeddable.type === DASHBOARD_CONTAINER_TYPE;
 }
 
-function isExpanded(embeddable: IEmbeddable) {
+export function isExpanded(embeddable: IEmbeddable) {
   if (!embeddable.parent || !isDashboard(embeddable.parent)) {
     throw new IncompatibleActionError();
   }

@@ -92,6 +92,9 @@ import {
   ACTION_LIBRARY_NOTIFICATION,
   LibraryNotificationActionContext,
   LibraryNotificationAction,
+  ACTION_EXPAND_PANEL_SHORTCUT,
+  ExpandPanelShortcutActionContext,
+  ExpandPanelShortcutAction,
 } from './application';
 import {
   createDashboardUrlGenerator,
@@ -171,6 +174,7 @@ export interface DashboardStart {
 declare module '../../../plugins/ui_actions/public' {
   export interface ActionContextMapping {
     [ACTION_EXPAND_PANEL]: ExpandPanelActionContext;
+    [ACTION_EXPAND_PANEL_SHORTCUT]: ExpandPanelShortcutActionContext;
     [ACTION_REPLACE_PANEL]: ReplacePanelActionContext;
     [ACTION_CLONE_PANEL]: ClonePanelActionContext;
     [ACTION_ADD_TO_LIBRARY]: AddToLibraryActionContext;
@@ -201,6 +205,11 @@ export class DashboardPlugin
     const expandPanelAction = new ExpandPanelAction();
     uiActions.registerAction(expandPanelAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction.id);
+
+    const expandPanelShortcutAction = new ExpandPanelShortcutAction(expandPanelAction);
+    uiActions.registerAction(expandPanelShortcutAction);
+    uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, expandPanelShortcutAction.id);
+
     const startServices = core.getStartServices();
 
     if (share) {

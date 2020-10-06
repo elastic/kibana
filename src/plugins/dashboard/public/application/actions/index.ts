@@ -23,6 +23,11 @@ export {
   ACTION_EXPAND_PANEL,
 } from './expand_panel_action';
 export {
+  ExpandPanelShortcutAction,
+  ExpandPanelShortcutActionContext,
+  ACTION_EXPAND_PANEL_SHORTCUT,
+} from './expand_panel_shortcut_action';
+export {
   ReplacePanelAction,
   ReplacePanelActionContext,
   ACTION_REPLACE_PANEL,

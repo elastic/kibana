@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiButtonIcon } from '@elastic/eui';
 import { IEmbeddable, ViewMode, isReferenceOrValueEmbeddable } from '../../embeddable_plugin';
 import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
 import { reactToUiComponent } from '../../../../kibana_react/public';
@@ -42,15 +42,13 @@ export class LibraryNotificationAction implements ActionByType<typeof ACTION_LIB
   private icon = 'folderCheck';
 
   public readonly MenuItem = reactToUiComponent(() => (
-    <EuiBadge
+    <EuiButtonIcon
       data-test-subj={`embeddablePanelNotification-${this.id}`}
       iconType={this.icon}
       key={this.id}
-      style={{ marginTop: '2px', marginRight: '4px' }}
-      color="hollow"
-    >
-      {this.displayName}
-    </EuiBadge>
+      style={{ marginTop: '-1px' }}
+      color="text"
+    />
   ));
 
   public getDisplayName({ embeddable }: LibraryNotificationActionContext) {
