@@ -10,6 +10,7 @@ import { CommonAlertParamDetails } from '../../../../common/types';
 import { AlertParamDuration } from '../../flyout_expressions/alert_param_duration';
 import { AlertParamType } from '../../../../common/enums';
 import { AlertParamPercentage } from '../../flyout_expressions/alert_param_percentage';
+import { AlertParamNumber } from '../../flyout_expressions/alert_param_number';
 
 export interface Props {
   alertParams: { [property: string]: any };
@@ -45,6 +46,17 @@ export const Expression: React.FC<Props> = (props) => {
             name={alertParamName}
             label={details.label}
             percentage={value}
+            errors={errors[alertParamName]}
+            setAlertParams={setAlertParams}
+          />
+        );
+      case AlertParamType.Number:
+        return (
+          <AlertParamNumber
+            key={alertParamName}
+            name={alertParamName}
+            label={details.label}
+            value={value}
             errors={errors[alertParamName]}
             setAlertParams={setAlertParams}
           />

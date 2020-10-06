@@ -53,12 +53,6 @@ export interface CommonAlertParams {
 }
 
 export interface ThreadPoolRejectionsAlertParams {
-  search: {
-    threshold: number;
-    enabled: boolean;
-  };
-  write: {
-    threshold: number;
-    enabled: boolean;
-  };
+  threshold: number;
+  duration: string;
 }

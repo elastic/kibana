@@ -7,50 +7,33 @@
 import { get } from 'lodash';
 import { AlertCluster, AlertThreadPoolRejectionsStats } from '../../alerts/types';
 
-interface MaxField {
-  max: {
-    field: 'node_stats.thread_pool.search.rejected' | 'node_stats.thread_pool.write.rejected';
-  };
-}
-
-interface RejectionsType {
-  max_search_rejections?: MaxField;
-  max_write_rejections?: MaxField;
-}
-
-const getRejectionsType = (search: boolean = true, write: boolean = true) => {
-  const rejections: RejectionsType = {
-    max_search_rejections: {
-      max: {
-        field: 'node_stats.thread_pool.search.rejected',
-      },
-    },
-    max_write_rejections: {
-      max: {
-        field: 'node_stats.thread_pool.write.rejected',
-      },
-    },
-  };
-  if (!search) {
-    delete rejections.max_search_rejections;
-  }
-  if (!write) {
-    delete rejections.max_write_rejections;
-  }
-  return rejections;
-};
-
 const invalidNumberValue = (value: number) => {
   return isNaN(value) || value === undefined || value === null;
 };
+
+const getTopHits = (threadType: string, order: string) => ({
+  top_hits: {
+    sort: [
+      {
+        timestamp: {
+          order,
+        },
+      },
+    ],
+    _source: {
+      includes: [`node_stats.thread_pool.${threadType}.rejected`, 'source_node.name'],
+    },
+    size: 1,
+  },
+});
 
 export async function fetchThreadPoolRejectionStats(
   callCluster: any,
   clusters: AlertCluster[],
   index: string,
   size: number,
-  searchRejections?: boolean,
-  writeRejections?: boolean
+  threadType: string,
+  duration: string
 ): Promise<AlertThreadPoolRejectionsStats[]> {
   const clustersIds = clusters.map((cluster) => cluster.clusterUuid);
   const params = {
@@ -74,7 +57,7 @@ export async function fetchThreadPoolRejectionStats(
             {
               range: {
                 timestamp: {
-                  gte: 'now-5m',
+                  gte: `now-${duration}`,
                 },
               },
             },
@@ -94,18 +77,11 @@ export async function fetchThreadPoolRejectionStats(
                 size,
               },
               aggs: {
-                index: {
-                  terms: {
-                    field: '_index',
-                    size: 1,
-                  },
+                most_recent: {
+                  ...getTopHits(threadType, 'asc'),
                 },
-                ...getRejectionsType(searchRejections, writeRejections),
-                name: {
-                  terms: {
-                    field: 'source_node.name',
-                    size: 1,
-                  },
+                least_recent: {
+                  ...getTopHits(threadType, 'desc'),
                 },
               },
             },
@@ -125,20 +101,38 @@ export async function fetchThreadPoolRejectionStats(
 
   for (const clusterBucket of clusterBuckets) {
     for (const node of clusterBucket.nodes.buckets) {
-      const indexName = get(node, 'index.buckets[0].key', '');
-      const searchRejectionsValue = Number(get(node, 'max_search_rejections.value'));
-      const writeRejectionsValue = Number(get(node, 'max_write_rejections.value'));
-      if (invalidNumberValue(searchRejectionsValue) && invalidNumberValue(writeRejectionsValue)) {
+      const mostRecentDoc = get(node, 'most_recent.hits.hits[0]');
+      mostRecentDoc.timestamp = mostRecentDoc.sort[0];
+
+      const leastRecentDoc = get(node, 'least_recent.hits.hits[0]');
+      leastRecentDoc.timestamp = leastRecentDoc.sort[0];
+
+      if (!mostRecentDoc || mostRecentDoc.timestamp === leastRecentDoc.timestamp) {
         continue;
       }
-      stats.push({
-        searchRejections: searchRejectionsValue,
-        writeRejections: writeRejectionsValue,
+
+      const rejectedPath = `_source.node_stats.thread_pool.${threadType}.rejected`;
+      const newRejectionCount = Number(get(mostRecentDoc, rejectedPath));
+      const oldRejectionCount = Number(get(leastRecentDoc, rejectedPath));
+
+      if (invalidNumberValue(newRejectionCount) || invalidNumberValue(oldRejectionCount)) {
+        continue;
+      }
+
+      const rejectionCount =
+        oldRejectionCount > newRejectionCount
+          ? newRejectionCount
+          : newRejectionCount - oldRejectionCount;
+      const indexName = mostRecentDoc._index;
+      const nodeName = get(mostRecentDoc, '_source.source_node.name') || node.key;
+      const nodeStat = {
+        rejectionCount,
         clusterUuid: clusterBucket.key,
         nodeId: node.key,
-        nodeName: get(node, 'name.buckets[0].key') || node.key,
+        nodeName,
         ccs: indexName.includes(':') ? indexName.split(':')[0] : null,
-      });
+      };
+      stats.push(nodeStat);
     }
   }
   return stats;

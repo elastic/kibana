@@ -6,57 +6,53 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Expression } from './expression';
+import { EuiSpacer } from '@elastic/eui';
+import { Expression, Props } from '../components/duration/expression';
 
-import {
-  AlertTypeModel,
-  AlertTypeParamsExpressionProps,
-} from '../../../../triggers_actions_ui/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ThreadPoolRejectionsAlert } from '../../../server/alerts';
+import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
 
-interface ThreadPoolRejectionsParam {
-  threshold: number;
-  enabled: boolean;
-}
-
-interface ParamDetails {
-  search: { label: string };
-  write: { label: string };
-  [key: string]: { label: string };
-}
+import { CommonAlertParamDetails } from '../../../common/types';
 
 interface ThreadPoolTypes {
-  [key: string]: ThreadPoolRejectionsParam;
+  [key: string]: unknown;
 }
 
-export interface Props extends AlertTypeParamsExpressionProps {
-  paramDetails: ParamDetails;
-  alertParams: { [key: string]: unknown };
+interface ThreadPoolRejectionAlertClass {
+  TYPE: string;
+  LABEL: string;
+  PARAM_DETAILS: CommonAlertParamDetails;
 }
 
-export function createThreadPoolRejectionsAlertType(): AlertTypeModel {
+export function createThreadPoolRejectionsAlertType(
+  threadPoolAlertClass: ThreadPoolRejectionAlertClass
+): AlertTypeModel {
   return {
-    id: ThreadPoolRejectionsAlert.TYPE,
-    name: ThreadPoolRejectionsAlert.LABEL,
+    id: threadPoolAlertClass.TYPE,
+    name: threadPoolAlertClass.LABEL,
     iconClass: 'bell',
     alertParamsExpression: (props: Props) => (
-      <Expression {...props} paramDetails={ThreadPoolRejectionsAlert.PARAM_DETAILS} />
+      <>
+        <EuiSpacer />
+        <Expression {...props} paramDetails={threadPoolAlertClass.PARAM_DETAILS} />
+      </>
     ),
-    validate: (recentState: ThreadPoolTypes) => {
+    validate: (inputValues: ThreadPoolTypes) => {
       const errors: { [key: string]: string[] } = {};
-      for (const key in recentState) {
-        if (!recentState.hasOwnProperty(key)) {
-          continue;
-        }
-        const value = recentState[key].threshold;
-        if (value < 0) {
-          const errStr = i18n.translate('xpack.monitoring.alerts.validation.lessThanZero', {
-            defaultMessage: `This value can not be less than zero`,
-          });
-          errors[key] = [errStr];
-        }
+      const value = inputValues.threshold as number;
+      if (value < 0) {
+        const errStr = i18n.translate('xpack.monitoring.alerts.validation.lessThanZero', {
+          defaultMessage: 'This value can not be less than zero',
+        });
+        errors.threshold = [errStr];
       }
+
+      if (!inputValues.duration) {
+        const errStr = i18n.translate('xpack.monitoring.alerts.validation.duration', {
+          defaultMessage: 'A valid duration is required.',
+        });
+        errors.duration = [errStr];
+      }
+
       return { errors };
     },
     defaultActionMessage: '{{context.internalFullMessage}}',

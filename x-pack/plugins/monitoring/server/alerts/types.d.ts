@@ -12,7 +12,9 @@ export interface AlertEnableAction {
 }
 
 export interface AlertInstanceState {
-  alertStates: Array<AlertState | AlertCpuUsageState | AlertDiskUsageState>;
+  alertStates: Array<
+    AlertState | AlertCpuUsageState | AlertDiskUsageState | AlertThreadPoolRejectionsState
+  >;
   [x: string]: unknown;
 }
 
@@ -47,8 +49,8 @@ export interface AlertMemoryUsageState extends AlertNodeState {
 }
 
 export interface AlertThreadPoolRejectionsState extends AlertState {
-  count?: number;
-  type?: 'SEARCH' | 'WRITE' | string;
+  rejectionCount: number;
+  type: string;
   nodeId: string;
   nodeName?: string;
 }
@@ -111,8 +113,7 @@ export interface AlertThreadPoolRejectionsStats {
   clusterUuid: string;
   nodeId: string;
   nodeName: string;
-  searchRejections?: number;
-  writeRejections?: number;
+  rejectionCount: number;
   ccs?: string;
 }
 

@@ -29,6 +29,11 @@ import { createDiskUsageAlertType } from './alerts/disk_usage_alert';
 import { createThreadPoolRejectionsAlertType } from './alerts/thread_pool_rejections_alert';
 import { createMemoryUsageAlertType } from './alerts/memory_usage_alert';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ThreadPoolSearchRejectionsAlert } from '../server/alerts';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ThreadPoolWriteRejectionsAlert } from '../server/alerts';
+
 interface MonitoringSetupPluginDependencies {
   home?: HomePublicPluginSetup;
   cloud?: { isCloudEnabled: boolean };
@@ -79,7 +84,10 @@ export class MonitoringPlugin
     alertTypeRegistry.register(createDiskUsageAlertType());
     alertTypeRegistry.register(createMemoryUsageAlertType());
     alertTypeRegistry.register(createMissingMonitoringDataAlertType());
-    alertTypeRegistry.register(createThreadPoolRejectionsAlertType());
+    alertTypeRegistry.register(
+      createThreadPoolRejectionsAlertType(ThreadPoolSearchRejectionsAlert)
+    );
+    alertTypeRegistry.register(createThreadPoolRejectionsAlertType(ThreadPoolWriteRejectionsAlert));
 
     const legacyAlertTypes = createLegacyAlertTypes();
     for (const legacyAlertType of legacyAlertTypes) {
