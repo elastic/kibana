@@ -12,6 +12,18 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
   describe('ingest_manager_agent_policies', () => {
+    const createdPolicyIds: string[] = [];
+    after(async () => {
+      const deletedPromises = createdPolicyIds.map((agentPolicyId) =>
+        supertest
+          .post(`/api/fleet/agent_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ agentPolicyId })
+          .expect(200)
+      );
+      await Promise.all(deletedPromises);
+    });
+
     describe('POST /api/fleet/agent_policies', () => {
       it('should work with valid values', async () => {
         await supertest
@@ -44,6 +56,27 @@ export default function ({ getService }: FtrProviderContext) {
             namespace: 'InvalidNamespace',
           })
           .expect(400);
+      });
+
+      it('should return a 409 if policy already exists with name given', async () => {
+        const sharedBody = {
+          name: 'Name 1',
+          namespace: 'default',
+        };
+
+        // first one succeeds
+        await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(sharedBody)
+          .expect(200);
+
+        // second one fails because name exists
+        await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(sharedBody)
+          .expect(409);
       });
     });
 
@@ -109,6 +142,90 @@ export default function ({ getService }: FtrProviderContext) {
             name: '',
           })
           .expect(400);
+      });
+
+      it('should return a 409 if policy already exists with name given', async () => {
+        const {
+          body: { item },
+        } = await supertest.get(`/api/fleet/agent_policies/${TEST_POLICY_ID}`).expect(200);
+
+        await supertest
+          .post(`/api/fleet/agent_policies/${TEST_POLICY_ID}/copy`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: item.name,
+          })
+          .expect(409);
+      });
+    });
+
+    describe('PUT /api/fleet/agent_policies/{agentPolicyId}', () => {
+      it('should work with valid values', async () => {
+        const {
+          body: { item: originalPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Initial name',
+            description: 'Initial description',
+            namespace: 'default',
+          })
+          .expect(200);
+
+        const {
+          body: { item: updatedPolicy },
+        } = await supertest
+          .put(`/api/fleet/agent_policies/${originalPolicy.id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Updated name',
+            description: 'Updated description',
+            namespace: 'default',
+          })
+          .expect(200);
+        createdPolicyIds.push(updatedPolicy.id);
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        const { id, updated_at, ...newPolicy } = updatedPolicy;
+
+        expect(newPolicy).to.eql({
+          name: 'Updated name',
+          description: 'Updated description',
+          namespace: 'default',
+          revision: 2,
+          updated_by: 'elastic',
+          package_policies: [],
+        });
+      });
+
+      it('should return a 409 if policy already exists with name given', async () => {
+        const sharedBody = {
+          name: 'Initial name',
+          description: 'Initial description',
+          namespace: 'default',
+        };
+
+        await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(sharedBody)
+          .expect(200);
+
+        const { body } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(sharedBody)
+          .expect(409);
+
+        expect(body.message).to.match(/already exists?/);
+
+        // same name, different namespace
+        sharedBody.namespace = 'different';
+        await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(sharedBody)
+          .expect(200);
       });
     });
   });
