@@ -25,7 +25,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { protocol, hostname, port } = kbnTestServer;
 
   const kibanaUrl = Url.format({
-    protocol,
     hostname,
     port,
   });
@@ -237,6 +236,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           fleet: {
             kibana: {
               hosts: [kibanaUrl],
+              protocol,
             },
           },
           revision: 3,

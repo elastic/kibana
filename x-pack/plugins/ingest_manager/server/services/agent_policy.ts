@@ -532,10 +532,16 @@ class AgentPolicyService {
       } catch (error) {
         throw new Error('Default settings is not setup');
       }
-      if (!settings.kibana_urls) throw new Error('kibana_urls is missing');
+      if (!settings.kibana_urls || !settings.kibana_urls.length)
+        throw new Error('kibana_urls is missing');
+      const hostsWithoutProtocol = settings.kibana_urls.map((url) => {
+        const parsedURL = new URL(url);
+        return `${parsedURL.host}${parsedURL.pathname !== '/' ? parsedURL.pathname : ''}`;
+      });
       fullAgentPolicy.fleet = {
         kibana: {
-          hosts: settings.kibana_urls,
+          protocol: new URL(settings.kibana_urls[0]).protocol.replace(':', ''),
+          hosts: hostsWithoutProtocol,
         },
       };
     }
