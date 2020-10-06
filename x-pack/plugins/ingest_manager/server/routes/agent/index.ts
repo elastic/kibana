@@ -152,7 +152,8 @@ export const registerRoutes = (router: IRouter, config: IngestManagerConfigType)
       },
       options: {
         tags: [],
-        ...(pollingRequestTimeout
+        // If the timeout is too short, do not set socket idle timeout and rely on Kibana global socket timeout
+        ...(pollingRequestTimeout && pollingRequestTimeout > AGENT_POLLING_REQUEST_TIMEOUT_MARGIN_MS
           ? {
               timeout: {
                 idleSocket: pollingRequestTimeout,
