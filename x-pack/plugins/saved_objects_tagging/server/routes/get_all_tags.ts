@@ -13,13 +13,13 @@ export const registerGetAllTagsRoute = (router: IRouter) => {
       path: `${tagsApiPrefix}/get_all`,
       validate: {},
     },
-    async (ctx, req, res) => {
+    router.handleLegacyErrors(async (ctx, req, res) => {
       const tags = await ctx.tags!.tagsClient.getAll();
       return res.ok({
         body: {
           tags,
         },
       });
-    }
+    })
   );
 };

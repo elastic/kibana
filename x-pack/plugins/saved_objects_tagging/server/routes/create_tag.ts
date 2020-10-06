@@ -20,13 +20,13 @@ export const registerCreateTagRoute = (router: IRouter) => {
         }),
       },
     },
-    async (ctx, req, res) => {
+    router.handleLegacyErrors(async (ctx, req, res) => {
       const tag = await ctx.tags!.tagsClient.create(req.body);
       return res.ok({
         body: {
           tag,
         },
       });
-    }
+    })
   );
 };

@@ -148,7 +148,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
             labelAppend={
               <EuiText size="xs" color="subdued">
                 <FormattedMessage
-                  id={'xpack.savedObjectsTagging.management.optionalFieldText'}
+                  id="xpack.savedObjectsTagging.management.optionalFieldText"
                   defaultMessage={'Optional'}
                 />
               </EuiText>
@@ -172,7 +172,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued">
                   <FormattedMessage
-                    id={'xpack.savedObjectsTagging.management.tagPreviewText'}
+                    id="xpack.savedObjectsTagging.management.tagPreviewText"
                     defaultMessage={'Preview'}
                   />
                 </EuiText>

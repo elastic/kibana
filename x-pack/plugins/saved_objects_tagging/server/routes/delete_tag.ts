@@ -18,10 +18,10 @@ export const registerDeleteTagRoute = (router: IRouter) => {
         }),
       },
     },
-    async (ctx, req, res) => {
+    router.handleLegacyErrors(async (ctx, req, res) => {
       const { id } = req.params;
       await ctx.tags!.tagsClient.delete(id);
       return res.ok();
-    }
+    })
   );
 };

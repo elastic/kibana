@@ -23,7 +23,7 @@ export const registerUpdateTagRoute = (router: IRouter) => {
         }),
       },
     },
-    async (ctx, req, res) => {
+    router.handleLegacyErrors(async (ctx, req, res) => {
       const { id } = req.params;
       const tag = await ctx.tags!.tagsClient.update(id, req.body);
       return res.ok({
@@ -31,6 +31,6 @@ export const registerUpdateTagRoute = (router: IRouter) => {
           tag,
         },
       });
-    }
+    })
   );
 };

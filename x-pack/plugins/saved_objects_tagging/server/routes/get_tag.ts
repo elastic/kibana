@@ -18,7 +18,7 @@ export const registerGetTagRoute = (router: IRouter) => {
         }),
       },
     },
-    async (ctx, req, res) => {
+    router.handleLegacyErrors(async (ctx, req, res) => {
       const { id } = req.params;
       const tag = await ctx.tags!.tagsClient.get(id);
       return res.ok({
@@ -26,6 +26,6 @@ export const registerGetTagRoute = (router: IRouter) => {
           tag,
         },
       });
-    }
+    })
   );
 };

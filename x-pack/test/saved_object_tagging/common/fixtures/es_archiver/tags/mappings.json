@@ -1,0 +1,165 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {},
+    "index": ".kibana",
+    "mappings": {
+      "dynamic": "strict",
+      "properties": {
+        "config": {
+          "dynamic": "true",
+          "properties": {
+            "buildNum": {
+              "type": "keyword"
+            },
+            "defaultIndex": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        },
+        "index-pattern": {
+          "properties": {
+            "fieldFormatMap": {
+              "type": "text"
+            },
+            "fields": {
+              "type": "text"
+            },
+            "intervalName": {
+              "type": "keyword"
+            },
+            "notExpandable": {
+              "type": "boolean"
+            },
+            "sourceFilters": {
+              "type": "text"
+            },
+            "timeFieldName": {
+              "type": "keyword"
+            },
+            "title": {
+              "type": "text"
+            }
+          }
+        },
+        "namespace": {
+          "type": "keyword"
+        },
+        "namespaces": {
+          "type": "keyword"
+        },
+        "originId": {
+          "type": "keyword"
+        },
+        "server": {
+          "properties": {
+            "uuid": {
+              "type": "keyword"
+            }
+          }
+        },
+        "tag": {
+          "properties": {
+            "title": {
+              "type": "text"
+            },
+            "description": {
+              "type": "text"
+            },
+            "color": {
+              "type": "text"
+            }
+          }
+        },
+        "space": {
+          "properties": {
+            "_reserved": {
+              "type": "boolean"
+            },
+            "color": {
+              "type": "keyword"
+            },
+            "description": {
+              "type": "text"
+            },
+            "disabledFeatures": {
+              "type": "keyword"
+            },
+            "initials": {
+              "type": "keyword"
+            },
+            "name": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 2048,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        },
+        "timelion-sheet": {
+          "properties": {
+            "description": {
+              "type": "text"
+            },
+            "hits": {
+              "type": "integer"
+            },
+            "kibanaSavedObjectMeta": {
+              "properties": {
+                "searchSourceJSON": {
+                  "type": "text"
+                }
+              }
+            },
+            "timelion_chart_height": {
+              "type": "integer"
+            },
+            "timelion_columns": {
+              "type": "integer"
+            },
+            "timelion_interval": {
+              "type": "keyword"
+            },
+            "timelion_other_interval": {
+              "type": "keyword"
+            },
+            "timelion_rows": {
+              "type": "integer"
+            },
+            "timelion_sheet": {
+              "type": "text"
+            },
+            "title": {
+              "type": "text"
+            },
+            "version": {
+              "type": "integer"
+            }
+          }
+        },
+        "type": {
+          "type": "keyword"
+        },
+        "updated_at": {
+          "type": "date"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "auto_expand_replicas": "0-1",
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
