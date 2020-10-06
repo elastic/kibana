@@ -20,13 +20,14 @@ import {
   AgentPolicyStatus,
   ListWithKuery,
 } from '../types';
+import { AgentPolicyNameExistsError } from '../errors';
 import { DeleteAgentPolicyResponse, storedPackagePoliciesToAgentInputs } from '../../common';
 import { createAgentPolicyAction, listAgents } from './agents';
 import { packagePolicyService } from './package_policy';
 import { outputService } from './output';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 import { getSettings } from './settings';
-import { normalizeKuery } from './saved_object';
+import { normalizeKuery, escapeSearchQueryPhrase } from './saved_object';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
@@ -101,6 +102,7 @@ class AgentPolicyService {
     agentPolicy: NewAgentPolicy,
     options?: { id?: string; user?: AuthenticatedUser }
   ): Promise<AgentPolicy> {
+    await this.requireUniqueName(soClient, agentPolicy);
     const newSo = await soClient.create<AgentPolicySOAttributes>(
       SAVED_OBJECT_TYPE,
       {
@@ -117,6 +119,30 @@ class AgentPolicyService {
     }
 
     return { id: newSo.id, ...newSo.attributes };
+  }
+
+  public async requireUniqueName(
+    soClient: SavedObjectsClientContract,
+    { name, namespace }: Pick<NewAgentPolicy, 'name' | 'namespace'>
+  ) {
+    const results = await soClient.find<AgentPolicySOAttributes>({
+      type: SAVED_OBJECT_TYPE,
+      searchFields: ['namespace', 'name'],
+      search: `${namespace} + ${escapeSearchQueryPhrase(name)}`,
+    });
+
+    if (results.total) {
+      const policies = results.saved_objects;
+      const isSinglePolicy = policies.length === 1;
+      const policyList = isSinglePolicy ? policies[0].id : policies.map(({ id }) => id).join(',');
+      const existClause = isSinglePolicy
+        ? `Agent Policy '${policyList}' already exists`
+        : `Agent Policies '${policyList}' already exist`;
+
+      throw new AgentPolicyNameExistsError(
+        `${existClause} in '${namespace}' namespace with name '${name}'`
+      );
+    }
   }
 
   public async get(
@@ -204,6 +230,12 @@ class AgentPolicyService {
     agentPolicy: Partial<AgentPolicy>,
     options?: { user?: AuthenticatedUser }
   ): Promise<AgentPolicy> {
+    if (agentPolicy.name && agentPolicy.namespace) {
+      await this.requireUniqueName(soClient, {
+        name: agentPolicy.name,
+        namespace: agentPolicy.namespace,
+      });
+    }
     return this._update(soClient, id, agentPolicy, options?.user);
   }
 
