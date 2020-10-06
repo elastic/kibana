@@ -9,7 +9,8 @@ export * from './rest_spec';
 export interface IngestManagerConfigType {
   enabled: boolean;
   registryUrl?: string;
-  fleet: {
+  registryProxyUrl?: string;
+  agents: {
     enabled: boolean;
     tlsCheckDisabled: boolean;
     pollingRequestTimeout: number;

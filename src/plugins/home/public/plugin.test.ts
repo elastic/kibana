@@ -52,23 +52,6 @@ describe('HomePublicPlugin', () => {
       );
     });
 
-    test('registers kibana solution to feature catalogue', async () => {
-      const setup = await new HomePublicPlugin(mockInitializerContext).setup(
-        coreMock.createSetup() as any,
-        {
-          urlForwarding: urlForwardingPluginMock.createSetupContract(),
-        }
-      );
-      expect(setup).toHaveProperty('featureCatalogue');
-      expect(setup.featureCatalogue.registerSolution).toHaveBeenCalledTimes(1);
-      expect(setup.featureCatalogue.registerSolution).toHaveBeenCalledWith(
-        expect.objectContaining({
-          icon: 'logoKibana',
-          id: 'kibana',
-        })
-      );
-    });
-
     test('wires up and returns registry', async () => {
       const setup = await new HomePublicPlugin(mockInitializerContext).setup(
         coreMock.createSetup() as any,
