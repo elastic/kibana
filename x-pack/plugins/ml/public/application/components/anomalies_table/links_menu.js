@@ -26,7 +26,7 @@ import { getFieldTypeFromMapping } from '../../services/mapping_service';
 import { ml } from '../../services/ml_api_service';
 import { mlJobService } from '../../services/job_service';
 import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_utils';
-import { formatHumanReadableDateTimeSeconds } from '../../util/date_utils';
+import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
 import { getIndexPatternIdFromName } from '../../util/index_utils';
 import { replaceStringTokens } from '../../util/string_utils';
 import { ML_APP_URL_GENERATOR, ML_PAGES } from '../../../../common/constants/ml_url_generator';

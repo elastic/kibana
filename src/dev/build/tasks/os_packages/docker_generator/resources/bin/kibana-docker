@@ -93,6 +93,7 @@ kibana_vars=(
     path.data
     pid.file
     regionmap
+    security.showInsecureClusterWarning
     server.basePath
     server.customResponseHeaders
     server.compression.enabled
@@ -159,6 +160,7 @@ kibana_vars=(
     xpack.code.security.gitHostWhitelist
     xpack.code.security.gitProtocolWhitelist
     xpack.encryptedSavedObjects.encryptionKey
+    xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys
     xpack.graph.enabled
     xpack.graph.canEditDrillDownUrls
     xpack.graph.savePolicy

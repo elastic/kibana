@@ -19,7 +19,9 @@ import {
   EuiSpacer,
   EuiFormRow,
   EuiText,
+  EuiCallOut,
 } from '@elastic/eui';
+import { hasEqlSequenceQuery, isEqlRule } from '../../../../../common/detection_engine/utils';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
   ExceptionListItemSchema,
@@ -30,6 +32,7 @@ import * as i18nCommon from '../../../translations';
 import * as i18n from './translations';
 import * as sharedI18n from '../translations';
 import { Ecs } from '../../../../../common/ecs';
+import { osTypeArray, OsTypeArray } from '../../../../../common/shared_imports';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useKibana } from '../../../lib/kibana';
 import { ExceptionBuilderComponent } from '../builder';
@@ -211,12 +214,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
 
   const initialExceptionItems = useMemo((): ExceptionsBuilderExceptionItem[] => {
     if (exceptionListType === 'endpoint' && alertData != null && ruleExceptionList) {
-      return defaultEndpointExceptionItems(
-        exceptionListType,
-        ruleExceptionList.list_id,
-        ruleName,
-        alertData
-      );
+      return defaultEndpointExceptionItems(ruleExceptionList.list_id, ruleName, alertData);
     } else {
       return [];
     }
@@ -265,11 +263,11 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     [setShouldBulkCloseAlert]
   );
 
-  const retrieveAlertOsTypes = useCallback((): string[] => {
-    const osDefaults = ['windows', 'macos'];
+  const retrieveAlertOsTypes = useCallback((): OsTypeArray => {
+    const osDefaults: OsTypeArray = ['windows', 'macos'];
     if (alertData != null) {
       const osTypes = alertData.host && alertData.host.os && alertData.host.os.family;
-      if (osTypes != null && osTypes.length > 0) {
+      if (osTypeArray.is(osTypes) && osTypes != null && osTypes.length > 0) {
         return osTypes;
       }
       return osDefaults;
@@ -316,13 +314,21 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     [fetchOrCreateListError, exceptionItemsToAdd]
   );
 
+  const addExceptionMessage =
+    exceptionListType === 'endpoint' ? i18n.ADD_ENDPOINT_EXCEPTION : i18n.ADD_EXCEPTION;
+
+  const isRuleEQLSequenceStatement = useMemo((): boolean => {
+    if (maybeRule != null) {
+      return isEqlRule(maybeRule.type) && hasEqlSequenceQuery(maybeRule.query);
+    }
+    return false;
+  }, [maybeRule]);
+
   return (
     <EuiOverlayMask onClick={onCancel}>
       <Modal onClose={onCancel} data-test-subj="add-exception-modal">
         <ModalHeader>
-          <EuiModalHeaderTitle>
-            {exceptionListType === 'endpoint' ? i18n.ADD_ENDPOINT_EXCEPTION : i18n.ADD_EXCEPTION}
-          </EuiModalHeaderTitle>
+          <EuiModalHeaderTitle>{addExceptionMessage}</EuiModalHeaderTitle>
           <ModalHeaderSubtitle className="eui-textTruncate" title={ruleName}>
             {ruleName}
           </ModalHeaderSubtitle>
@@ -356,6 +362,15 @@ export const AddExceptionModal = memo(function AddExceptionModal({
           ruleExceptionList && (
             <>
               <ModalBodySection className="builder-section">
+                {isRuleEQLSequenceStatement && (
+                  <>
+                    <EuiCallOut
+                      data-test-subj="eql-sequence-callout"
+                      title={i18n.ADD_EXCEPTION_SEQUENCE_WARNING}
+                    />
+                    <EuiSpacer />
+                  </>
+                )}
                 <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
                 <EuiSpacer />
                 <ExceptionBuilderComponent
@@ -429,7 +444,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
               isDisabled={isSubmitButtonDisabled}
               fill
             >
-              {i18n.ADD_EXCEPTION}
+              {addExceptionMessage}
             </EuiButton>
           </EuiModalFooter>
         )}

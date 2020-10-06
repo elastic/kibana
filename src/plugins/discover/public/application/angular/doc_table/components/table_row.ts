@@ -18,6 +18,7 @@
  */
 
 import { find, template } from 'lodash';
+import { stringify } from 'query-string';
 import $ from 'jquery';
 import rison from 'rison-node';
 import '../../doc_viewer';
@@ -25,7 +26,7 @@ import '../../doc_viewer';
 import openRowHtml from './table_row/open.html';
 import detailsHtml from './table_row/details.html';
 
-import { dispatchRenderComplete } from '../../../../../../kibana_utils/public';
+import { dispatchRenderComplete, url } from '../../../../../../kibana_utils/public';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../../common';
 import cellTemplateHtml from '../components/table_row/cell.html';
 import truncateByHeightTemplateHtml from '../components/table_row/truncate_by_height.html';
@@ -49,7 +50,7 @@ interface LazyScope extends ng.IScope {
   [key: string]: any;
 }
 
-export function createTableRowDirective($compile: ng.ICompileService, $httpParamSerializer: any) {
+export function createTableRowDirective($compile: ng.ICompileService) {
   const cellTemplate = template(noWhiteSpace(cellTemplateHtml));
   const truncateByHeightTemplate = template(noWhiteSpace(truncateByHeightTemplateHtml));
 
@@ -114,26 +115,25 @@ export function createTableRowDirective($compile: ng.ICompileService, $httpParam
       };
 
       $scope.getContextAppHref = () => {
-        const path = `#/context/${encodeURIComponent($scope.indexPattern.id)}/${encodeURIComponent(
-          $scope.row._id
-        )}`;
         const globalFilters: any = getServices().filterManager.getGlobalFilters();
         const appFilters: any = getServices().filterManager.getAppFilters();
-        const hash = $httpParamSerializer({
-          _g: encodeURI(
-            rison.encode({
+
+        const hash = stringify(
+          url.encodeQuery({
+            _g: rison.encode({
               filters: globalFilters || [],
-            })
-          ),
-          _a: encodeURI(
-            rison.encode({
+            }),
+            _a: rison.encode({
               columns: $scope.columns,
               filters: (appFilters || []).map(esFilters.disableFilter),
-            })
-          ),
-        });
+            }),
+          }),
+          { encode: false, sort: false }
+        );
 
-        return `${path}?${hash}`;
+        return `#/context/${encodeURIComponent($scope.indexPattern.id)}/${encodeURIComponent(
+          $scope.row._id
+        )}?${hash}`;
       };
 
       // create a tr element that lists the value for each *column*

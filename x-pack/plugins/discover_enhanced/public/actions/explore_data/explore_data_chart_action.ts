@@ -13,7 +13,7 @@ import {
   ApplyGlobalFilterActionContext,
   esFilters,
 } from '../../../../../../src/plugins/data/public';
-import { KibanaURL } from './kibana_url';
+import { KibanaURL } from '../../../../../../src/plugins/share/public';
 import * as shared from './shared';
 import { AbstractExploreDataAction } from './abstract_explore_data_action';
 

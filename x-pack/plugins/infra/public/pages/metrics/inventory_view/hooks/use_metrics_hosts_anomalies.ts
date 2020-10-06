@@ -5,6 +5,7 @@
  */
 
 import { useMemo, useState, useCallback, useEffect, useReducer } from 'react';
+import { HttpHandler } from 'src/core/public';
 import {
   INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH,
   Metric,
@@ -16,8 +17,8 @@ import {
   getMetricsHostsAnomaliesSuccessReponsePayloadRT,
 } from '../../../../../common/http_api/infra_ml';
 import { useTrackedPromise } from '../../../../utils/use_tracked_promise';
-import { npStart } from '../../../../legacy_singletons';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 
 export type SortOptions = Sort;
 export type PaginationOptions = Pick<Pagination, 'pageSize'>;
@@ -149,6 +150,7 @@ export const useMetricsHostsAnomaliesResults = ({
   onGetMetricsHostsAnomaliesDatasetsError?: (error: Error) => void;
   filteredDatasets?: string[];
 }) => {
+  const { services } = useKibanaContextForPlugin();
   const initStateReducer = (stateDefaults: ReducerStateDefaults): ReducerState => {
     return {
       ...stateDefaults,
@@ -177,15 +179,18 @@ export const useMetricsHostsAnomaliesResults = ({
           paginationCursor,
         } = reducerState;
         return await callGetMetricHostsAnomaliesAPI(
-          sourceId,
-          queryStartTime,
-          queryEndTime,
-          metric,
-          sortOptions,
           {
-            ...paginationOptions,
-            cursor: paginationCursor,
-          }
+            sourceId,
+            startTime: queryStartTime,
+            endTime: queryEndTime,
+            metric,
+            sort: sortOptions,
+            pagination: {
+              ...paginationOptions,
+              cursor: paginationCursor,
+            },
+          },
+          services.http.fetch
         );
       },
       onResolve: ({ data: { anomalies, paginationCursors: requestCursors, hasMoreEntries } }) => {
@@ -288,15 +293,21 @@ export const useMetricsHostsAnomaliesResults = ({
   };
 };
 
+interface RequestArgs {
+  sourceId: string;
+  startTime: number;
+  endTime: number;
+  metric: Metric;
+  sort: Sort;
+  pagination: Pagination;
+}
+
 export const callGetMetricHostsAnomaliesAPI = async (
-  sourceId: string,
-  startTime: number,
-  endTime: number,
-  metric: Metric,
-  sort: Sort,
-  pagination: Pagination
+  requestArgs: RequestArgs,
+  fetch: HttpHandler
 ) => {
-  const response = await npStart.http.fetch(INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH, {
+  const { sourceId, startTime, endTime, metric, sort, pagination } = requestArgs;
+  const response = await fetch(INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH, {
     method: 'POST',
     body: JSON.stringify(
       getMetricsHostsAnomaliesRequestPayloadRT.encode({
