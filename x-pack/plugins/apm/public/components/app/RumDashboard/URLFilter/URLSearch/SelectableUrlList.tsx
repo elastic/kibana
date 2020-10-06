@@ -196,7 +196,7 @@ export function SelectableUrlList({
               <StyledRow darkMode={darkMode}>
                 <EuiText size="s">
                   <FormattedMessage
-                    id="euiComboBoxOptionsList.createCustomOption"
+                    id="xpack.apm.ux.url.hitEnter.include"
                     defaultMessage="Hit {icon} to include all urls matching {searchValue}"
                     values={{
                       searchValue: <strong>{searchValue}</strong>,
