@@ -994,6 +994,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                                     >
                                       <button
                                         class="euiButton euiButton--danger euiButton--small"
+                                        data-test-subj="trustedAppDeleteButton"
                                         type="button"
                                       >
                                         <span
