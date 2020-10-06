@@ -79,6 +79,15 @@ describe('getFormatWithAggs', () => {
     expect(getFormat).toHaveBeenCalledTimes(1);
   });
 
+  test('returns custom label for range if provided', () => {
+    const mapping = { id: 'range', params: {} };
+    const getFieldFormat = getFormatWithAggs(getFormat);
+    const format = getFieldFormat(mapping);
+
+    expect(format.convert({ gte: 1, lt: 20, label: 'custom' })).toBe('custom');
+    expect(getFormat).toHaveBeenCalledTimes(1);
+  });
+
   test('creates custom format for terms', () => {
     const mapping = {
       id: 'terms',

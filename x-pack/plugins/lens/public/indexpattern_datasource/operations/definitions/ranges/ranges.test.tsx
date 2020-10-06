@@ -152,6 +152,25 @@ describe('ranges', () => {
         })
       );
     });
+
+    it('should include custom labels', () => {
+      setToRangeMode();
+      (state.layers.first.columns.col1 as RangeIndexPatternColumn).params.ranges = [
+        { from: 0, to: 100, label: 'customlabel' },
+      ];
+
+      const esAggsConfig = rangeOperation.toEsAggsConfig(
+        state.layers.first.columns.col1 as RangeIndexPatternColumn,
+        'col1',
+        {} as IndexPattern
+      );
+
+      expect((esAggsConfig as { params: unknown }).params).toEqual(
+        expect.objectContaining({
+          ranges: [{ from: 0, to: 100, label: 'customlabel' }],
+        })
+      );
+    });
   });
 
   describe('getPossibleOperationForField', () => {

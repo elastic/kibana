@@ -23,10 +23,17 @@ export class RangeKey {
   [id]: string;
   gte: string | number;
   lt: string | number;
+  label?: string;
 
-  constructor(bucket: any) {
+  constructor(
+    bucket: any,
+    allRanges?: Array<{ from: string | number; to: string | number; label?: string }>
+  ) {
     this.gte = bucket.from == null ? -Infinity : bucket.from;
     this.lt = bucket.to == null ? +Infinity : bucket.to;
+    this.label = allRanges
+      ? allRanges.find((range) => range.from === bucket.from && range.to === bucket.to)?.label
+      : undefined;
 
     this[id] = RangeKey.idBucket(bucket);
   }

@@ -61,7 +61,7 @@ function getEsAggsParams({ sourceField, params }: RangeIndexPatternColumn) {
       field: sourceField,
       ranges: params.ranges.filter(isValidRange).map<Partial<RangeType>>((range) => {
         if (isFullRange(range)) {
-          return { from: range.from, to: range.to };
+          return { from: range.from, to: range.to, label: range.label };
         }
         const partialRange: Partial<RangeType> = {};
         // be careful with the fields to set on partial ranges
