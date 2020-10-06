@@ -190,7 +190,7 @@ export class AuthorizationService {
           />
         );
 
-        return toolkit.render(body);
+        return toolkit.render({ body });
       }
       return toolkit.next();
     });

@@ -1303,7 +1303,7 @@ describe('OnPreResponse', () => {
     });
 
     registerOnPreResponse((req, res, t) => {
-      return t.render('overridden');
+      return t.render({ body: 'overridden' });
     });
 
     await server.start();
@@ -1311,6 +1311,41 @@ describe('OnPreResponse', () => {
     const result = await supertest(innerServer.listener).get('/').expect(200, 'overridden');
 
     expect(result.header['original-header-a']).toBe('A');
+  });
+
+  it('supports rendering a different response body + headers', async () => {
+    const { registerOnPreResponse, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
+    const router = createRouter('/');
+
+    router.get({ path: '/', validate: false }, (context, req, res) => {
+      return res.ok({
+        headers: {
+          'Original-Header-A': 'A',
+          'Original-Header-B': 'B',
+        },
+        body: 'original',
+      });
+    });
+
+    registerOnPreResponse((req, res, t) => {
+      return t.render({
+        headers: {
+          'Original-Header-A': 'AA',
+          'New-Header-C': 'C',
+        },
+        body: 'overridden',
+      });
+    });
+
+    await server.start();
+
+    const result = await supertest(innerServer.listener).get('/').expect(200, 'overridden');
+
+    expect(result.header['original-header-a']).toBe('AA');
+    expect(result.header['original-header-b']).toBe('B');
+    expect(result.header['new-header-c']).toBe('C');
   });
 });
 

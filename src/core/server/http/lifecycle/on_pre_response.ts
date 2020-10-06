@@ -31,6 +31,7 @@ enum ResultType {
 interface Render {
   type: ResultType.render;
   body: string;
+  headers?: ResponseHeaders;
 }
 
 interface Next {
@@ -42,6 +43,17 @@ interface Next {
  * @internal
  */
 type OnPreResponseResult = Render | Next;
+
+/**
+ * Additional data to extend a response when rendering a new body
+ * @public
+ */
+export interface OnPreResponseRender {
+  /** additional headers to attach to the response */
+  headers?: ResponseHeaders;
+  /** the body to use in the response */
+  body: string;
+}
 
 /**
  * Additional data to extend a response.
@@ -61,8 +73,8 @@ export interface OnPreResponseInfo {
 }
 
 const preResponseResult = {
-  render(body: string): OnPreResponseResult {
-    return { type: ResultType.render, body };
+  render(responseRender: OnPreResponseRender): OnPreResponseResult {
+    return { type: ResultType.render, body: responseRender.body, headers: responseRender?.headers };
   },
   isRender(result: OnPreResponseResult): result is Render {
     return result && result.type === ResultType.render;
@@ -80,7 +92,7 @@ const preResponseResult = {
  * @public
  */
 export interface OnPreResponseToolkit {
-  render: (html: string) => OnPreResponseResult;
+  render: (responseRender: OnPreResponseRender) => OnPreResponseResult;
   /** To pass request to the next handler */
   next: (responseExtensions?: OnPreResponseExtensions) => OnPreResponseResult;
 }
@@ -140,6 +152,9 @@ export function adoptToHapiOnPreResponseFormat(fn: OnPreResponseHandler, log: Lo
 
           const originalHeaders = isBoom(response) ? response.output.headers : response.headers;
           setHeaders(overriddenResponse, originalHeaders);
+          if (result.headers) {
+            setHeaders(overriddenResponse, result.headers);
+          }
 
           return overriddenResponse;
         } else {
