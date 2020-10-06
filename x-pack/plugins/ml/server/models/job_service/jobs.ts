@@ -152,17 +152,17 @@ export function jobsProvider(client: IScopedClusterClient) {
   async function jobsSummary(jobIds: string[] = []) {
     const fullJobsList: CombinedJobWithStats[] = await createFullJobsList();
     const fullJobsIds = fullJobsList.map((job) => job.job_id);
-
     let auditMessagesByJob: { [id: string]: AuditMessage } = {};
-    let auditMessages: AuditMessage[] = [];
-    // even if there are errors getting the audit messages, we still want to show the full job list
+
+    // even if there are errors getting the audit messages, we still want to show the full list
     try {
-      auditMessages = await getAuditMessagesSummary(fullJobsIds);
-    } finally {
+      const auditMessages: AuditMessage[] = await getAuditMessagesSummary(fullJobsIds);
       auditMessagesByJob = auditMessages.reduce((acc, cur) => {
         acc[cur.job_id] = cur;
         return acc;
       }, auditMessagesByJob);
+    } catch (e) {
+      // fail silently
     }
 
     const deletingStr = i18n.translate('xpack.ml.models.jobService.deletingJob', {
