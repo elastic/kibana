@@ -17,18 +17,10 @@
  * under the License.
  */
 
-import { getConfig, isKibanaDistributable } from '../../../apm';
+import { getConfig } from '../../../apm';
 import agent from 'elastic-apm-node';
 
-const apmEnabled = !isKibanaDistributable && process.env.ELASTIC_APM_ACTIVE === 'true';
-
-export function apmImport() {
-  return apmEnabled ? 'import { init } from "@elastic/apm-rum"' : '';
-}
-
-export function apmInit(config) {
-  return apmEnabled ? `init(${config})` : '';
-}
+const apmEnabled = getConfig()?.active;
 
 export function getApmConfig(requestPath) {
   if (!apmEnabled) {
@@ -36,11 +28,9 @@ export function getApmConfig(requestPath) {
   }
   const config = {
     ...getConfig('kibana-frontend'),
-    ...{
-      active: true,
-      pageLoadTransactionName: requestPath,
-    },
+    pageLoadTransactionName: requestPath,
   };
+
   /**
    * Get current active backend transaction to make distrubuted tracing
    * work for rendering the app
