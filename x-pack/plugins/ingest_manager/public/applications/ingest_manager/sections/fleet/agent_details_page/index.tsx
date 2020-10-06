@@ -97,8 +97,10 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         <EuiFlexItem>
           <EuiText>
             <h1>
-              {typeof agentData?.item?.local_metadata?.host === 'object' &&
-              typeof agentData?.item?.local_metadata?.host?.hostname === 'string' ? (
+              {isLoading && isInitialRequest ? (
+                <Loading />
+              ) : typeof agentData?.item?.local_metadata?.host === 'object' &&
+                typeof agentData?.item?.local_metadata?.host?.hostname === 'string' ? (
                 agentData.item.local_metadata.host.hostname
               ) : (
                 <FormattedMessage
@@ -114,8 +116,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-    [agentData, agentId, getHref]
+    [agentData?.item?.local_metadata?.host, agentId, getHref, isInitialRequest, isLoading]
   );
 
   const headerRightContent = useMemo(
