@@ -42,8 +42,9 @@ export function OverviewPage({ routeParams }: Props) {
   // read time from state and update the url
   const timePickerSharedState = plugins.data.query.timefilter.timefilter.getTime();
 
-  const timePickerTime = useKibanaUISettings<TimePickerTime>(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
-
+  const timePickerDefaults = useKibanaUISettings<TimePickerTime>(
+    UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
+  );
   const relativeTime = {
     start: routeParams.query.rangeFrom || timePickerSharedState.from || timePickerDefaults.from,
     end: routeParams.query.rangeTo || timePickerSharedState.to || timePickerDefaults.to,
@@ -64,9 +65,6 @@ export function OverviewPage({ routeParams }: Props) {
   const { data: newsFeed } = useFetcher(() => getNewsFeed({ core }), [core]);
 
   const theme = useContext(ThemeContext);
-  const timePickerDefaults = useKibanaUISettings<TimePickerTime>(
-    UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
-  );
 
   const result = useFetcher(
     () => fetchHasData(absoluteTime),
