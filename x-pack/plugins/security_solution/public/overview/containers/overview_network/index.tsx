@@ -55,16 +55,24 @@ export const useNetworkOverview = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
-  const [overviewNetworkRequest, setNetworkRequest] = useState<NetworkOverviewRequestOptions>({
-    defaultIndex: indexNames,
-    factoryQueryType: NetworkQueries.overview,
-    filterQuery: createFilter(filterQuery),
-    timerange: {
-      interval: '12h',
-      from: startDate,
-      to: endDate,
-    },
-  });
+  const [
+    overviewNetworkRequest,
+    setNetworkRequest,
+  ] = useState<NetworkOverviewRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          factoryQueryType: NetworkQueries.overview,
+          filterQuery: createFilter(filterQuery),
+          id: ID,
+          timerange: {
+            interval: '12h',
+            from: startDate,
+            to: endDate,
+          },
+        }
+      : null
+  );
 
   const [overviewNetworkResponse, setNetworkOverviewResponse] = useState<NetworkOverviewArgs>({
     overviewNetwork: {},
@@ -78,7 +86,11 @@ export const useNetworkOverview = ({
   });
 
   const overviewNetworkSearch = useCallback(
-    (request: NetworkOverviewRequestOptions) => {
+    (request: NetworkOverviewRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -135,9 +147,11 @@ export const useNetworkOverview = ({
   useEffect(() => {
     setNetworkRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
         defaultIndex: indexNames,
+        factoryQueryType: NetworkQueries.overview,
         filterQuery: createFilter(filterQuery),
+        id: ID,
         timerange: {
           interval: '12h',
           from: startDate,
