@@ -168,9 +168,9 @@ export class SpaceSelector extends Component<Props, State> {
                 >
                   <FormattedMessage
                     id="xpack.spaces.spaceSelector.errorLoadingSpacesDescription"
-                    defaultMessage="Error loading spaces"
+                    defaultMessage="Error loading spaces ({message})"
+                    values={{ message: this.state.error.message }}
                   />
-                  &nbsp;({this.state.error.message})
                 </EuiText>
               </Fragment>
             )}
