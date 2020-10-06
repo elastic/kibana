@@ -7,7 +7,7 @@
 import { UMElasticsearchQueryFn } from '../adapters';
 
 export interface GetMonitorStatusParams {
-  filters?: any;
+  filters?: string | { [key: string]: object };
   locations: string[];
   numTimes: number;
   timerange: { from: string; to: string };
@@ -50,10 +50,19 @@ const getLocationClause = (locations: string[]) => ({
 export const getMonitorStatus: UMElasticsearchQueryFn<
   GetMonitorStatusParams,
   GetMonitorStatusResult[]
-> = async ({ callES, dynamicSettings, filters, locations, numTimes, timerange: { from, to } }) => {
+> = async ({
+  callES,
+  dynamicSettings,
+  filters: filterInput,
+  locations,
+  numTimes,
+  timerange: { from, to },
+}) => {
   const queryResults: Array<Promise<GetMonitorStatusResult[]>> = [];
   let afterKey: MonitorStatusKey | undefined;
 
+  const filters: { [key: string]: object } =
+    typeof filterInput === 'string' ? JSON.parse(filterInput) : filterInput;
   const STATUS = 'down';
   do {
     // today this value is hardcoded. In the future we may support
