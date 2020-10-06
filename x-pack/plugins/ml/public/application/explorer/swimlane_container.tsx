@@ -154,6 +154,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   timeBuckets,
   maskAll,
   showTimeline = true,
+  'data-test-subj': dataTestSubj,
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
 
@@ -336,7 +337,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
             }}
             grow={false}
           >
-            <div style={{ height: `${containerHeight}px` }}>
+            <div style={{ height: `${containerHeight}px` }} data-test-subj={dataTestSubj}>
               {showSwimlane && !isLoading && (
                 <Chart className={'mlSwimLaneContainer'}>
                   <Settings
