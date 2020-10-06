@@ -337,9 +337,7 @@ export function XYChart({
   }
 
   const isTimeViz = data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time');
-  const isHistogramViz = filteredLayers.every(
-    (l) => l.xScaleType === 'time' || l.xScaleType === 'linear'
-  );
+  const isHistogramViz = filteredLayers.every((l) => l.isHistogram);
 
   const xDomain = isTimeViz
     ? {
