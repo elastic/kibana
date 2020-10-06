@@ -48,7 +48,7 @@ export const SyntheticsCallout = () => {
         </p>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiButton href="https://elastic.co/syntheics">
+            <EuiButton href="https://www.elastic.co/what-is/synthetic-monitoring">
               <FormattedMessage
                 id="xpack.uptime.overview.pageHeader.syntheticsCallout.announcementLink"
                 defaultMessage="Read announcement"
