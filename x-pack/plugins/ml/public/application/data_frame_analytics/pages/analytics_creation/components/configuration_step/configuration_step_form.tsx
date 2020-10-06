@@ -109,7 +109,6 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     ...indexData,
     dataTestSubj: 'mlAnalyticsCreationDataGrid',
     toastNotifications,
-    analysisType: jobType,
   };
 
   const isJobTypeWithDepVar =
