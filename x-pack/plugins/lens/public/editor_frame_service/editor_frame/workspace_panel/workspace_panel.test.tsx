@@ -15,7 +15,14 @@ import {
   DatasourceMock,
   createMockFramePublicAPI,
 } from '../../mocks';
-import { InnerWorkspacePanel, WorkspacePanelProps } from './workspace_panel';
+
+jest.mock('../../../debounced_component', () => {
+  return {
+    debouncedComponent: (fn: unknown) => fn,
+  };
+});
+
+import { WorkspacePanel, WorkspacePanelProps } from './workspace_panel';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
 import { DragDrop, ChildDragDropProvider } from '../../../drag_drop';
@@ -64,7 +71,7 @@ describe('workspace_panel', () => {
 
   it('should render an explanatory text if no visualization is active', () => {
     instance = mount(
-      <InnerWorkspacePanel
+      <WorkspacePanel
         activeDatasourceId={'mock'}
         datasourceStates={{}}
         datasourceMap={{}}
@@ -87,7 +94,7 @@ describe('workspace_panel', () => {
 
   it('should render an explanatory text if the visualization does not produce an expression', () => {
     instance = mount(
-      <InnerWorkspacePanel
+      <WorkspacePanel
         activeDatasourceId={'mock'}
         datasourceStates={{}}
         datasourceMap={{}}
@@ -110,7 +117,7 @@ describe('workspace_panel', () => {
 
   it('should render an explanatory text if the datasource does not produce an expression', () => {
     instance = mount(
-      <InnerWorkspacePanel
+      <WorkspacePanel
         activeDatasourceId={'mock'}
         datasourceStates={{}}
         datasourceMap={{}}
@@ -140,7 +147,7 @@ describe('workspace_panel', () => {
     mockDatasource.getLayers.mockReturnValue(['first']);
 
     instance = mount(
-      <InnerWorkspacePanel
+      <WorkspacePanel
         activeDatasourceId={'mock'}
         datasourceStates={{
           mock: {
@@ -213,7 +220,7 @@ describe('workspace_panel', () => {
     mockDatasource.getLayers.mockReturnValue(['first']);
 
     instance = mount(
-      <InnerWorkspacePanel
+      <WorkspacePanel
         activeDatasourceId={'mock'}
         datasourceStates={{
           mock: {
@@ -260,7 +267,7 @@ describe('workspace_panel', () => {
     mockDatasource2.getLayers.mockReturnValue(['second', 'third']);
 
     instance = mount(
-      <InnerWorkspacePanel
+      <WorkspacePanel
         activeDatasourceId={'mock'}
         datasourceStates={{
           mock: {
@@ -345,7 +352,7 @@ describe('workspace_panel', () => {
 
     await act(async () => {
       instance = mount(
-        <InnerWorkspacePanel
+        <WorkspacePanel
           activeDatasourceId={'mock'}
           datasourceStates={{
             mock: {
@@ -381,6 +388,7 @@ describe('workspace_panel', () => {
         },
       });
     });
+
     instance.update();
 
     expect(expressionRendererMock).toHaveBeenCalledTimes(2);
@@ -400,7 +408,7 @@ describe('workspace_panel', () => {
     expressionRendererMock = jest.fn((_arg) => <span />);
     await act(async () => {
       instance = mount(
-        <InnerWorkspacePanel
+        <WorkspacePanel
           activeDatasourceId={'mock'}
           datasourceStates={{
             mock: {
@@ -455,7 +463,7 @@ describe('workspace_panel', () => {
     };
 
     instance = mount(
-      <InnerWorkspacePanel
+      <WorkspacePanel
         activeDatasourceId={'mock'}
         datasourceStates={{
           mock: {
@@ -493,7 +501,7 @@ describe('workspace_panel', () => {
 
     await act(async () => {
       instance = mount(
-        <InnerWorkspacePanel
+        <WorkspacePanel
           activeDatasourceId={'mock'}
           datasourceStates={{
             mock: {
@@ -537,7 +545,7 @@ describe('workspace_panel', () => {
 
     await act(async () => {
       instance = mount(
-        <InnerWorkspacePanel
+        <WorkspacePanel
           activeDatasourceId={'mock'}
           datasourceStates={{
             mock: {
@@ -592,7 +600,7 @@ describe('workspace_panel', () => {
     function initComponent(draggingContext: unknown = draggedField) {
       instance = mount(
         <ChildDragDropProvider dragging={draggingContext} setDragging={() => {}}>
-          <InnerWorkspacePanel
+          <WorkspacePanel
             activeDatasourceId={'mock'}
             datasourceStates={{
               mock: {
