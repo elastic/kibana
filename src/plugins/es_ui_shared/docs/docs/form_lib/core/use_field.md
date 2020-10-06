@@ -80,7 +80,7 @@ A label for the field.
 
 An second label for the field.
 
-When the `<UseField />` is used in pair with one of the helper components provided that wrap the EUI form fields, this prop is forwarded to the `<EuiFormRow />` `labelAppend` prop.  As per [the EUI docs](https://elastic.github.io/eui/#/forms/form-layouts): _it adds an extra node to the right of the form label without being contained inside the form label. Good for things like documentation links._
+When `<UseField />` is paired with one of [the helper components](../helpers/components) that wrap the EUI form fields, this prop is forwarded to the `<EuiFormRow />` `labelAppend` prop.  As per [the EUI docs](https://elastic.github.io/eui/#/forms/form-layouts): _it adds an extra node to the right of the form label without being contained inside the form label. Good for things like documentation links._
 
 #### helpText
 
@@ -121,7 +121,7 @@ export const MyFormComponent = () => {
 };
 ```
 
-The above example could be written a bit simpler with a form schema and the `getUseField` helper.
+The above example could be written a bit simpler with a form schema and [the `getUseField` helper](#getusefield).
 
 ```js
 import { Form, getUseField, Field, FIELD_TYPES } from '<path-to-form-lib>';
@@ -157,7 +157,7 @@ export const MyFormComponent = () => {
 
 An array of validation to run against the field value. Although it would be possible to have a single validation that does multiple checks, it often makes the code clearer to have single purpose validation that return a single error if there is one.
 
-If any of the validation fails, the other validations don't run unless the `exitOnFail` parameter (`false` by default) is set to `true`.
+If any of the validation fails, the other validations don't run unless [the `exitOnFail` parameter](#exitonfail) (`false` by default) is set to `true`.
 
 **Note:** There are already many reusable field validators. Check if there isn't already one for your use case before writing your own.
 
