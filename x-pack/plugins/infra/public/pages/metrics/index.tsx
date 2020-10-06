@@ -128,7 +128,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                           <EuiFlexItem grow={false}>
                             <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
                           </EuiFlexItem>
-                          <EuiFlexItem grow={false} style={{ textAlign: 'center' }}>
+                          <EuiFlexItem grow={false}>
                             <Route path={'/explorer'} component={MetricsAlertDropdown} />
                             <Route path={'/inventory'} component={InventoryAlertDropdown} />
                           </EuiFlexItem>
