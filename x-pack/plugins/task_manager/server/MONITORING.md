@@ -87,7 +87,7 @@ For example, if you _curl_ the `/api/task_manager/_health` endpoint, you might g
 	"stats": {
 		"configuration": {      /* current configuration of TM */
 			"timestamp": "2020-10-05T17:56:06.507Z",
-      "status": "OK",
+			"status": "OK",
 			"value": {
 				"max_workers": 10,
 				"poll_interval": 3000,
@@ -99,7 +99,7 @@ For example, if you _curl_ the `/api/task_manager/_health` endpoint, you might g
 		},
 		"workload": {  /* The workload of this deployment */
 			"timestamp": "2020-10-05T17:57:06.534Z",
-      "status": "OK",
+			"status": "OK",
 			"value": {
 				"count": 6,        /* count of tasks in the system */
 				"taskTypes": {   /* what tasks are there and what status are they in */
@@ -159,7 +159,7 @@ For example, if you _curl_ the `/api/task_manager/_health` endpoint, you might g
 		},
 		"runtime": {
 			"timestamp": "2020-10-05T17:57:55.411Z",
-      "status": "OK",
+			"status": "OK",
 			"value": {
 				"polling": {
 				        /* When was the last polling cycle? */
