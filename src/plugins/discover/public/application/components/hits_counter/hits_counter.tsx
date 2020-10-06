@@ -40,7 +40,13 @@ export interface HitsCounterProps {
 export function HitsCounter({ hits, showResetButton, onResetQuery }: HitsCounterProps) {
   return (
     <I18nProvider>
-      <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="center" alignItems="center">
+      <EuiFlexGroup
+        className="dscHitsCounter"
+        gutterSize="s"
+        responsive={false}
+        justifyContent="center"
+        alignItems="center"
+      >
         <EuiFlexItem grow={false}>
           <EuiText>
             <strong data-test-subj="discoverQueryHits">{formatNumWithCommas(hits)}</strong>{' '}
