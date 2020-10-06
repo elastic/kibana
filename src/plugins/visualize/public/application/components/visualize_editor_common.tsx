@@ -78,7 +78,7 @@ export const VisualizeEditorCommon = ({
           embeddableId={embeddableId}
         />
       )}
-      {visInstance?.vis?.type?.isExperimental && <ExperimentalVisInfo />}
+      {visInstance?.vis?.type?.stage === 'experimental' && <ExperimentalVisInfo />}
       {visInstance?.vis?.type?.getInfoMessage?.(visInstance.vis)}
       {visInstance && (
         <EuiScreenReaderOnly>

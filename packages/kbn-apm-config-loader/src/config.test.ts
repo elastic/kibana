@@ -42,12 +42,13 @@ describe('ApmConfiguration', () => {
     resetAllMocks();
   });
 
-  it('sets the correct service name', () => {
+  it('sets the correct service name and version', () => {
     packageMock.raw = {
       version: '9.2.1',
     };
     const config = new ApmConfiguration(mockedRootDir, {}, false);
-    expect(config.getConfig('myservice').serviceName).toBe('myservice-9_2_1');
+    expect(config.getConfig('myservice').serviceName).toBe('myservice');
+    expect(config.getConfig('myservice').serviceVersion).toBe('9.2.1');
   });
 
   it('sets the git revision from `git rev-parse` command in non distribution mode', () => {

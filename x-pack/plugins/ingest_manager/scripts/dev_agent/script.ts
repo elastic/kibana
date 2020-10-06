@@ -79,7 +79,7 @@ async function checkin(kibanaURL: string, agent: Agent, log: ToolingLog) {
       },
     ],
   };
-  const res = await fetch(`${kibanaURL}/api/ingest_manager/fleet/agents/${agent.id}/checkin`, {
+  const res = await fetch(`${kibanaURL}/api/fleet/agents/${agent.id}/checkin`, {
     method: 'POST',
     body: JSON.stringify(body),
     headers: {
@@ -116,7 +116,7 @@ async function enroll(kibanaURL: string, apiKey: string, log: ToolingLog): Promi
       },
     },
   };
-  const res = await fetch(`${kibanaURL}/api/ingest_manager/fleet/agents/enroll`, {
+  const res = await fetch(`${kibanaURL}/api/fleet/agents/enroll`, {
     method: 'POST',
     body: JSON.stringify(body),
     headers: {
