@@ -40,6 +40,7 @@ import { formatHumanReadableDateTime } from '../../../common/util/date_utils';
 import { getFormattedSeverityScore } from '../../../common/util/anomaly_utils';
 
 import './_explorer.scss';
+import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
 
 /**
  * Ignore insignificant resize, e.g. browser scrollbar appearance.
@@ -273,6 +274,9 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
               // eui color subdued
               fill: `#6a717d`,
               padding: 8,
+              formatter: (laneLabel: string) => {
+                return laneLabel === '' ? EMPTY_FIELD_VALUE_LABEL : laneLabel;
+              },
             },
             xAxisLabel: {
               visible: showTimeline,
