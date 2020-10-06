@@ -4,14 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiIconTip,
-  euiPaletteForStatus,
-  EuiSpacer,
-  EuiStat,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiIconTip, euiPaletteForStatus, EuiSpacer, EuiStat } from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { PaletteLegends } from './palette_legends';
