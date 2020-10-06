@@ -23,9 +23,12 @@ import React from 'react';
 import { SavedObjectsClientContract } from 'src/core/public';
 import { IndexPatternSelect, IndexPatternSelectProps } from './';
 
+// savedObjectsClient is provided and thus not a required prop for consumers
+export type IndexPatternSelectPublicProps = Omit<IndexPatternSelectProps, 'savedObjectsClient'>;
+
 // Takes in stateful runtime dependencies and pre-wires them to the component
 export function createIndexPatternSelect(savedObjectsClient: SavedObjectsClientContract) {
-  return (props: Omit<IndexPatternSelectProps, 'savedObjectsClient'>) => (
+  return (props: IndexPatternSelectPublicProps) => (
     <IndexPatternSelect {...props} savedObjectsClient={savedObjectsClient} />
   );
 }

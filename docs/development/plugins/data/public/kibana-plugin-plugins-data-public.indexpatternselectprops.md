@@ -7,7 +7,8 @@
 <b>Signature:</b>
 
 ```typescript
-export declare type IndexPatternSelectProps = Required<Omit<EuiComboBoxProps<any>, 'isLoading' | 'onSearchChange' | 'options' | 'selectedOptions'>, 'onChange' | 'placeholder'> & {
+export declare type IndexPatternSelectProps = Required<Omit<EuiComboBoxProps<any>, 'isLoading' | 'onSearchChange' | 'options' | 'selectedOptions' | 'onChange'>, 'placeholder'> & {
+    onChange: (indexPatternId?: string) => void;
     indexPatternId: string;
     fieldTypes?: string[];
     onNoIndexPatterns?: () => void;

@@ -16,6 +16,6 @@ export interface DataPublicPluginStartUi
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [IndexPatternSelect](./kibana-plugin-plugins-data-public.datapublicpluginstartui.indexpatternselect.md) | <code>React.ComponentType&lt;IndexPatternSelectProps&gt;</code> |  |
+|  [IndexPatternSelect](./kibana-plugin-plugins-data-public.datapublicpluginstartui.indexpatternselect.md) | <code>React.ComponentType&lt;IndexPatternSelectPublicProps&gt;</code> |  |
 |  [SearchBar](./kibana-plugin-plugins-data-public.datapublicpluginstartui.searchbar.md) | <code>React.ComponentType&lt;StatefulSearchBarProps&gt;</code> |  |
 

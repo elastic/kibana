@@ -445,8 +445,10 @@ export interface DataPublicPluginStartActions {
 //
 // @public
 export interface DataPublicPluginStartUi {
+    // Warning: (ae-forgotten-export) The symbol "IndexPatternSelectPublicProps" needs to be exported by the entry point index.d.ts
+    //
     // (undocumented)
-    IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
+    IndexPatternSelect: React.ComponentType<IndexPatternSelectPublicProps>;
     // (undocumented)
     SearchBar: React.ComponentType<StatefulSearchBarProps>;
 }
@@ -1290,7 +1292,8 @@ export type IndexPatternsContract = PublicMethodsOf<IndexPatternsService>;
 // Warning: (ae-missing-release-tag) "IndexPatternSelectProps" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type IndexPatternSelectProps = Required<Omit<EuiComboBoxProps<any>, 'isLoading' | 'onSearchChange' | 'options' | 'selectedOptions'>, 'onChange' | 'placeholder'> & {
+export type IndexPatternSelectProps = Required<Omit<EuiComboBoxProps<any>, 'isLoading' | 'onSearchChange' | 'options' | 'selectedOptions' | 'onChange'>, 'placeholder'> & {
+    onChange: (indexPatternId?: string) => void;
     indexPatternId: string;
     fieldTypes?: string[];
     onNoIndexPatterns?: () => void;

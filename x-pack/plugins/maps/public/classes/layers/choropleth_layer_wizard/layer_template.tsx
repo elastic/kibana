@@ -24,11 +24,7 @@ import { GeoIndexPatternSelect } from '../../../components/geo_index_pattern_sel
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { getGeoFields, getSourceFields, getTermsFields } from '../../../index_pattern_util';
 import { getEmsFileLayers } from '../../../meta';
-import {
-  getIndexPatternSelectComponent,
-  getIndexPatternService,
-  getSavedObjectsClient,
-} from '../../../kibana_services';
+import { getIndexPatternSelectComponent, getIndexPatternService } from '../../../kibana_services';
 import {
   createEmsChoroplethLayerDescriptor,
   createEsChoroplethLayerDescriptor,
@@ -441,7 +437,6 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
             indexPatternId={this.state.rightIndexPatternId}
             onChange={this._onRightIndexPatternChange}
             isClearable={false}
-            savedObjectsClient={getSavedObjectsClient()}
           />
         </EuiFormRow>
 

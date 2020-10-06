@@ -28,7 +28,8 @@ import { createFiltersFromRangeSelectAction, createFiltersFromValueClickAction }
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
 import { QuerySetup, QueryStart } from './query';
 import { IndexPatternsContract } from './index_patterns';
-import { IndexPatternSelectProps, StatefulSearchBarProps } from './ui';
+import { StatefulSearchBarProps } from './ui';
+import { IndexPatternSelectPublicProps } from './ui/index_pattern_select';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 
 export interface DataPublicPluginEnhancements {
@@ -63,7 +64,7 @@ export interface DataPublicPluginSetup {
  * Data plugin prewired UI components
  */
 export interface DataPublicPluginStartUi {
-  IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
+  IndexPatternSelect: React.ComponentType<IndexPatternSelectPublicProps>;
   SearchBar: React.ComponentType<StatefulSearchBarProps>;
 }
 
