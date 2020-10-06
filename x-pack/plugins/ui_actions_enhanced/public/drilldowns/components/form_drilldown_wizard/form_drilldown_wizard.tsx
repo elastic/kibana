@@ -6,7 +6,8 @@
 
 import React from 'react';
 import { EuiFieldText, EuiForm, EuiFormRow, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiCallOut } from '@elastic/eui';
+import { EuiCode } from '@elastic/eui';
 import { txtDrilldownAction, txtNameOfDrilldown, txtUntitledDrilldown } from './i18n';
 import {
   ActionFactory,
@@ -15,6 +16,7 @@ import {
 } from '../../../dynamic_actions';
 import { ActionWizard } from '../../../components/action_wizard';
 import { Trigger, TriggerId } from '../../../../../../../src/plugins/ui_actions/public';
+import { txtGetMoreActions } from './i18n';
 
 const GET_MORE_ACTIONS_LINK = 'https://www.elastic.co/subscriptions';
 
@@ -46,7 +48,7 @@ export interface FormDrilldownWizardProps<
   /**
    * List of possible triggers in current context
    */
-  supportedTriggers: TriggerId[];
+  triggers: TriggerId[];
 
   triggerPickerDocsLink?: string;
 }
@@ -62,9 +64,20 @@ export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
   actionFactoryContext,
   onSelectedTriggersChange,
   getTriggerInfo,
-  supportedTriggers,
+  triggers,
   triggerPickerDocsLink,
 }) => {
+  if (!triggers || !triggers.length) {
+    // Below callout is not translated, because this message is only for developers.
+    return (
+      <EuiCallOut title="Sorry, there was an error" color="danger" iconType="alert">
+        <p>
+          No triggers provided in <EuiCode>trigger</EuiCode> prop.
+        </p>
+      </EuiCallOut>
+    );
+  }
+
   const nameFragment = (
     <EuiFormRow label={txtNameOfDrilldown}>
       <EuiFieldText
@@ -89,10 +102,7 @@ export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
         external
         data-test-subj={'getMoreActionsLink'}
       >
-        <FormattedMessage
-          id="xpack.uiActionsEnhanced.drilldowns.components.FormDrilldownWizard.getMoreActionsLinkLabel"
-          defaultMessage="Get more actions"
-        />
+        {txtGetMoreActions}
       </EuiLink>
     </EuiText>
   );
@@ -114,7 +124,7 @@ export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
         context={actionFactoryContext}
         onSelectedTriggersChange={onSelectedTriggersChange}
         getTriggerInfo={getTriggerInfo}
-        supportedTriggers={supportedTriggers}
+        triggers={triggers}
         triggerPickerDocsLink={triggerPickerDocsLink}
       />
     </EuiFormRow>

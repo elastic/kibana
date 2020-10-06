@@ -304,6 +304,7 @@ const getSavedObjectTypes = (
         install_started_at: { type: 'date' },
         install_version: { type: 'keyword' },
         install_status: { type: 'keyword' },
+        install_source: { type: 'keyword' },
       },
     },
   },
@@ -372,6 +373,8 @@ export function registerEncryptedSavedObjects(
       'unenrolled_at',
       'unenrollment_started_at',
       'packages',
+      'upgraded_at',
+      'upgrade_started_at',
     ]),
   });
   encryptedSavedObjects.registerType({
