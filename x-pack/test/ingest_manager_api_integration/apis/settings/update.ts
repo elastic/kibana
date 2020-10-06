@@ -20,16 +20,28 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
     setupIngest(providerContext);
 
+    const createdAgentPolicyIds: string[] = [];
+    after(async () => {
+      const deletedPromises = createdAgentPolicyIds.map((agentPolicyId) =>
+        supertest
+          .post(`/api/ingest_manager/agent_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ agentPolicyId })
+          .expect(200)
+      );
+      await Promise.all(deletedPromises);
+    });
     it("should bump all agent policy's revision", async function () {
       const { body: testPolicy1PostRes } = await supertest
         .post(`/api/ingest_manager/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: 'test',
+          name: 'test 1',
           description: '',
           namespace: 'default',
-        })
-        .expect(200);
+        });
+      createdAgentPolicyIds.push(testPolicy1PostRes.item.id);
+
       const { body: testPolicy2PostRes } = await supertest
         .post(`/api/ingest_manager/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
@@ -37,8 +49,9 @@ export default function (providerContext: FtrProviderContext) {
           name: 'test2',
           description: '',
           namespace: 'default',
-        })
-        .expect(200);
+        });
+      createdAgentPolicyIds.push(testPolicy2PostRes.item.id);
+
       await supertest
         .put(`/api/ingest_manager/settings`)
         .set('kbn-xsrf', 'xxxx')
@@ -65,8 +78,9 @@ export default function (providerContext: FtrProviderContext) {
           name: 'test',
           description: '',
           namespace: 'default',
-        })
-        .expect(200);
+        });
+      createdAgentPolicyIds.push(testPolicyRes.item.id);
+
       await supertest
         .put(`/api/ingest_manager/settings`)
         .set('kbn-xsrf', 'xxxx')
@@ -91,7 +105,7 @@ export default function (providerContext: FtrProviderContext) {
         },
       });
 
-      expect(res.hits.total).equal(2);
+      expect(res.hits.hits.length).equal(2);
     });
   });
 }

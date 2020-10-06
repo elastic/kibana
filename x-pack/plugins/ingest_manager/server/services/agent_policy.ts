@@ -27,7 +27,7 @@ import { packagePolicyService } from './package_policy';
 import { outputService } from './output';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 import { getSettings } from './settings';
-import { normalizeKuery } from './saved_object';
+import { normalizeKuery, escapeSearchQueryPhrase } from './saved_object';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
@@ -101,7 +101,7 @@ class AgentPolicyService {
     const results = await soClient.find<AgentPolicySOAttributes>({
       type: SAVED_OBJECT_TYPE,
       searchFields: ['name'],
-      search: encodeURIComponent(name),
+      search: escapeSearchQueryPhrase(name),
     });
 
     return results;
@@ -112,10 +112,7 @@ class AgentPolicyService {
     agentPolicy: NewAgentPolicy,
     options?: { id?: string; user?: AuthenticatedUser }
   ): Promise<AgentPolicy> {
-    const existingSo = await this.findByName(soClient, agentPolicy.name);
-    if (existingSo.total) {
-      throw new AgentPolicyNameExistsError('Agent Policy with that name aleady exists');
-    }
+    await this.requireUniqueName(soClient, agentPolicy.name);
     const newSo = await soClient.create<AgentPolicySOAttributes>(
       SAVED_OBJECT_TYPE,
       {
@@ -132,6 +129,23 @@ class AgentPolicyService {
     }
 
     return { id: newSo.id, ...newSo.attributes };
+  }
+
+  public async requireUniqueName(
+    soClient: SavedObjectsClientContract,
+    name: NewAgentPolicy['name']
+  ) {
+    const results = await this.findByName(soClient, name);
+    if (results.total) {
+      const policies = results.saved_objects;
+      const isSinglePolicy = policies.length === 1;
+      const policyList = isSinglePolicy ? policies[0].id : policies.map(({ id }) => id).join(',');
+      const existClause = isSinglePolicy
+        ? `Agent Policy '${policyList}' already exists`
+        : `Agent Policies '${policyList}' already exist`;
+
+      throw new AgentPolicyNameExistsError(`${existClause} with name '${name}'`);
+    }
   }
 
   public async get(
@@ -220,10 +234,7 @@ class AgentPolicyService {
     options?: { user?: AuthenticatedUser }
   ): Promise<AgentPolicy> {
     if (agentPolicy.name) {
-      const existingSo = await this.findByName(soClient, agentPolicy.name);
-      if (existingSo.total) {
-        throw new AgentPolicyNameExistsError('Agent Policy with that name aleady exists');
-      }
+      await this.requireUniqueName(soClient, agentPolicy.name);
     }
     return this._update(soClient, id, agentPolicy, options?.user);
   }
