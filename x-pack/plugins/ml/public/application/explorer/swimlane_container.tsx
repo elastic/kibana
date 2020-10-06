@@ -250,7 +250,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
             grid: {
               cellHeight: {
                 min: CELL_HEIGHT,
-                max: CELL_HEIGHT, // 'fill',
+                max: CELL_HEIGHT,
               },
               stroke: {
                 width: 1,
@@ -341,7 +341,10 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
             }}
             grow={false}
           >
-            <div style={{ height: `${containerHeight}px` }} data-test-subj={dataTestSubj}>
+            <div
+              style={{ height: `${containerHeight}px`, position: 'relative' }}
+              data-test-subj={dataTestSubj}
+            >
               {showSwimlane && !isLoading && (
                 <Chart className={'mlSwimLaneContainer'}>
                   <Settings
@@ -385,24 +388,32 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                   />
                 </Chart>
               )}
-            </div>
 
-            {isLoading && (
-              <EuiText textAlign={'center'}>
-                <EuiLoadingChart
-                  size="xl"
-                  mono={true}
-                  data-test-subj="mlSwimLaneLoadingIndicator"
+              {isLoading && (
+                <EuiText
+                  textAlign={'center'}
+                  style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%,-50%)',
+                  }}
+                >
+                  <EuiLoadingChart
+                    size="xl"
+                    mono={true}
+                    data-test-subj="mlSwimLaneLoadingIndicator"
+                  />
+                </EuiText>
+              )}
+              {!isLoading && !showSwimlane && (
+                <EuiEmptyPrompt
+                  titleSize="xs"
+                  style={{ padding: 0 }}
+                  title={<h2>{noDataWarning}</h2>}
                 />
-              </EuiText>
-            )}
-            {!isLoading && !showSwimlane && (
-              <EuiEmptyPrompt
-                titleSize="xs"
-                style={{ padding: 0 }}
-                title={<h2>{noDataWarning}</h2>}
-              />
-            )}
+              )}
+            </div>
           </EuiFlexItem>
 
           {isPaginationVisible && (
