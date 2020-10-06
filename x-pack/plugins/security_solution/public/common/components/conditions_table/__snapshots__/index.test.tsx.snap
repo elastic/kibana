@@ -1,0 +1,174 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`conditions_table ConditionsTable should render multi item table with and badge correctly 1`] = `
+<EuiFlexGroup
+  direction="row"
+  gutterSize="none"
+>
+  <EuiHideFor
+    sizes={
+      Array [
+        "xs",
+        "s",
+      ]
+    }
+  >
+    <Styled(EuiFlexItem)
+      grow={false}
+    >
+      <AndOrBadge
+        includeAntennas={true}
+        type="and"
+      />
+    </Styled(EuiFlexItem)>
+  </EuiHideFor>
+  <EuiFlexItem
+    grow={1}
+  >
+    <EuiBasicTable
+      columns={
+        Array [
+          Object {
+            "field": "name",
+            "name": "Name",
+            "textOnly": true,
+            "width": "50%",
+          },
+          Object {
+            "field": "value",
+            "name": "Value",
+            "textOnly": true,
+            "width": "50%",
+          },
+        ]
+      }
+      items={
+        Array [
+          Object {
+            "name": "item 0",
+            "value": "value 0",
+          },
+          Object {
+            "name": "item 1",
+            "value": "value 1",
+          },
+          Object {
+            "name": "item 2",
+            "value": "value 2",
+          },
+        ]
+      }
+      noItemsMessage="No items found"
+      responsive={true}
+      tableLayout="fixed"
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`conditions_table ConditionsTable should render multi item table with or badge correctly 1`] = `
+<EuiFlexGroup
+  direction="row"
+  gutterSize="none"
+>
+  <EuiHideFor
+    sizes={
+      Array [
+        "xs",
+        "s",
+      ]
+    }
+  >
+    <Styled(EuiFlexItem)
+      grow={false}
+    >
+      <AndOrBadge
+        includeAntennas={true}
+        type="or"
+      />
+    </Styled(EuiFlexItem)>
+  </EuiHideFor>
+  <EuiFlexItem
+    grow={1}
+  >
+    <EuiBasicTable
+      columns={
+        Array [
+          Object {
+            "field": "name",
+            "name": "Name",
+            "textOnly": true,
+            "width": "50%",
+          },
+          Object {
+            "field": "value",
+            "name": "Value",
+            "textOnly": true,
+            "width": "50%",
+          },
+        ]
+      }
+      items={
+        Array [
+          Object {
+            "name": "item 0",
+            "value": "value 0",
+          },
+          Object {
+            "name": "item 1",
+            "value": "value 1",
+          },
+          Object {
+            "name": "item 2",
+            "value": "value 2",
+          },
+        ]
+      }
+      noItemsMessage="No items found"
+      responsive={true}
+      tableLayout="fixed"
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`conditions_table ConditionsTable should render single item table correctly 1`] = `
+<EuiFlexGroup
+  direction="row"
+  gutterSize="none"
+>
+  <EuiFlexItem
+    grow={1}
+  >
+    <EuiBasicTable
+      columns={
+        Array [
+          Object {
+            "field": "name",
+            "name": "Name",
+            "textOnly": true,
+            "width": "50%",
+          },
+          Object {
+            "field": "value",
+            "name": "Value",
+            "textOnly": true,
+            "width": "50%",
+          },
+        ]
+      }
+      items={
+        Array [
+          Object {
+            "name": "item 0",
+            "value": "value 0",
+          },
+        ]
+      }
+      noItemsMessage="No items found"
+      responsive={true}
+      tableLayout="fixed"
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

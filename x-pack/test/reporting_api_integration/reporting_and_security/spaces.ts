@@ -33,7 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
       tap(() => log.debug(`report at ${downloadPath} is done`)),
       map((response) => response.text),
       first(),
-      timeout(15000)
+      timeout(120000)
     );
   };
 
@@ -62,7 +62,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should use formats from non-default spaces', async () => {
-        setSpaceConfig('non_default_space', {
+        await setSpaceConfig('non_default_space', {
           'csv:separator': ';',
           'csv:quoteValues': false,
           'dateFormat:tz': 'US/Alaska',
@@ -82,7 +82,10 @@ export default function ({ getService }: FtrProviderContext) {
       it(`should use browserTimezone in jobParams for date formatting`, async () => {
         const tzParam = 'America/Phoenix';
         const tzSettings = 'Browser';
-        setSpaceConfig('non_default_space', { 'csv:separator': ';', 'dateFormat:tz': tzSettings });
+        await setSpaceConfig('non_default_space', {
+          'csv:separator': ';',
+          'dateFormat:tz': tzSettings,
+        });
         const path = await reportingAPI.postJobJSON(`/api/reporting/generate/csv`, {
           jobParams: `(browserTimezone:${tzParam},conflictedTypesFields:!(),fields:!(order_date,category,customer_full_name,taxful_total_price,currency),indexPatternId:aac3e500-f2c7-11ea-8250-fb138aa491e7,metaFields:!(_source,_id,_type,_index,_score),objectType:search,searchRequest:(body:(_source:(includes:!(order_date,category,customer_full_name,taxful_total_price,currency)),docvalue_fields:!((field:order_date,format:date_time)),query:(bool:(filter:!((match_all:()),(range:(order_date:(format:strict_date_optional_time,gte:'2019-05-30T05:09:59.743Z',lte:'2019-07-26T08:47:09.682Z')))),must:!(),must_not:!(),should:!())),script_fields:(),sort:!((order_date:(order:desc,unmapped_type:boolean))),stored_fields:!(order_date,category,customer_full_name,taxful_total_price,currency),version:!t),index:'ec*'),title:'EC SEARCH from DEFAULT')`,
         });
@@ -105,8 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/76551
-    it.skip('should complete a job of PNG export of a dashboard in non-default space', async () => {
+    it('should complete a job of PNG export of a dashboard in non-default space', async () => {
       const downloadPath = await reportingAPI.postJobJSON(
         `/s/non_default_space/api/reporting/generate/png`,
         {
@@ -119,8 +121,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(reportCompleted).to.not.be(null);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/76551
-    it.skip('should complete a job of PDF export of a dashboard in non-default space', async () => {
+    it('should complete a job of PDF export of a dashboard in non-default space', async () => {
       const downloadPath = await reportingAPI.postJobJSON(
         `/s/non_default_space/api/reporting/generate/printablePdf`,
         {

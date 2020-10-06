@@ -5,17 +5,10 @@
  */
 
 import React, { useState, useEffect, useMemo, useContext, useCallback } from 'react';
+import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiImage,
-  EuiText,
-  EuiButtonEmpty,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiButtonEmpty, EuiLink } from '@elastic/eui';
 import { CoreStart, CoreSetup } from 'kibana/public';
 import { ExecutionContextSearch } from 'src/plugins/expressions';
 import {
@@ -35,10 +28,14 @@ import { getSuggestions, switchToSuggestion } from '../suggestion_helpers';
 import { buildExpression } from '../expression_helpers';
 import { debouncedComponent } from '../../../debounced_component';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
-import { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
+import {
+  UiActionsStart,
+  VisualizeFieldContext,
+} from '../../../../../../../src/plugins/ui_actions/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public';
 import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
+import { DropIllustration } from '../../../assets/drop_illustration';
 
 export interface WorkspacePanelProps {
   activeVisualizationId: string | null;
@@ -59,6 +56,7 @@ export interface WorkspacePanelProps {
   core: CoreStart | CoreSetup;
   plugins: { uiActions?: UiActionsStart; data: DataPublicPluginStart };
   title?: string;
+  visualizeTriggerFieldContext?: VisualizeFieldContext;
 }
 
 export const WorkspacePanel = debouncedComponent(InnerWorkspacePanel);
@@ -77,12 +75,8 @@ export function InnerWorkspacePanel({
   plugins,
   ExpressionRenderer: ExpressionRendererComponent,
   title,
+  visualizeTriggerFieldContext,
 }: WorkspacePanelProps) {
-  const IS_DARK_THEME = core.uiSettings.get('theme:darkMode');
-  const emptyStateGraphicURL = IS_DARK_THEME
-    ? '/plugins/lens/assets/lens_app_graphic_dark_2x.png'
-    : '/plugins/lens/assets/lens_app_graphic_light_2x.png';
-
   const dragDropContext = useContext(DragContext);
 
   const suggestionForDraggedField = useMemo(
@@ -210,52 +204,61 @@ export function InnerWorkspacePanel({
 
   function renderEmptyWorkspace() {
     return (
-      <div className="eui-textCenter">
-        <EuiText textAlign="center" grow={false} color="subdued" data-test-subj="empty-workspace">
-          <h3>
-            <FormattedMessage
-              id="xpack.lens.editorFrame.emptyWorkspace"
-              defaultMessage="Drop some fields here to start"
-            />
-          </h3>
-          <EuiImage
-            style={{ width: 360 }}
-            url={core.http.basePath.prepend(emptyStateGraphicURL)}
-            alt=""
-          />
-          <p>
-            <FormattedMessage
-              id="xpack.lens.editorFrame.emptyWorkspaceHeading"
-              defaultMessage="Lens is a new tool for creating visualizations"
-            />
-          </p>
-          <p>
-            <small>
-              <EuiLink
-                href="https://www.elastic.co/products/kibana/feedback"
-                target="_blank"
-                external
-              >
-                <FormattedMessage
-                  id="xpack.lens.editorFrame.goToForums"
-                  defaultMessage="Make requests and give feedback"
-                />
-              </EuiLink>
-            </small>
-          </p>
-        </EuiText>
-      </div>
+      <EuiText
+        className={classNames('lnsWorkspacePanel__emptyContent')}
+        textAlign="center"
+        color="subdued"
+        data-test-subj="empty-workspace"
+        size="s"
+      >
+        <h2>
+          <strong>
+            {expression === null
+              ? i18n.translate('xpack.lens.editorFrame.emptyWorkspace', {
+                  defaultMessage: 'Drop some fields here to start',
+                })
+              : i18n.translate('xpack.lens.editorFrame.emptyWorkspaceSimple', {
+                  defaultMessage: 'Drop field here',
+                })}
+          </strong>
+        </h2>
+        <DropIllustration aria-hidden={true} className="lnsWorkspacePanel__dropIllustration" />
+        {expression === null && (
+          <>
+            <p>
+              {i18n.translate('xpack.lens.editorFrame.emptyWorkspaceHeading', {
+                defaultMessage: 'Lens is a new tool for creating visualization',
+              })}
+            </p>
+            <p>
+              <small>
+                <EuiLink
+                  href="https://www.elastic.co/products/kibana/feedback"
+                  target="_blank"
+                  external
+                >
+                  {i18n.translate('xpack.lens.editorFrame.goToForums', {
+                    defaultMessage: 'Make requests and give feedback',
+                  })}
+                </EuiLink>
+              </small>
+            </p>
+          </>
+        )}
+      </EuiText>
     );
   }
 
   function renderVisualization() {
-    if (expression === null) {
+    // we don't want to render the emptyWorkspace on visualizing field from Discover
+    // as it is specific for the drag and drop functionality and can confuse the users
+    if (expression === null && !visualizeTriggerFieldContext) {
       return renderEmptyWorkspace();
     }
 
     if (localState.expressionBuildError) {
       return (
-        <EuiFlexGroup direction="column" alignItems="center">
+        <EuiFlexGroup style={{ maxWidth: '100%' }} direction="column" alignItems="center">
           <EuiFlexItem>
             <EuiIcon type="alert" size="xl" color="danger" />
           </EuiFlexItem>
@@ -281,7 +284,7 @@ export function InnerWorkspacePanel({
           onEvent={onEvent}
           renderError={(errorMessage?: string | null) => {
             return (
-              <EuiFlexGroup direction="column" alignItems="center">
+              <EuiFlexGroup style={{ maxWidth: '100%' }} direction="column" alignItems="center">
                 <EuiFlexItem>
                   <EuiIcon type="alert" size="xl" color="danger" />
                 </EuiFlexItem>
@@ -330,12 +333,16 @@ export function InnerWorkspacePanel({
       visualizationMap={visualizationMap}
     >
       <DragDrop
+        className="lnsWorkspacePanel__dragDrop"
         data-test-subj="lnsWorkspace"
         draggable={false}
         droppable={Boolean(suggestionForDraggedField)}
         onDrop={onDrop}
       >
-        {renderVisualization()}
+        <div>
+          {renderVisualization()}
+          {Boolean(suggestionForDraggedField) && expression !== null && renderEmptyWorkspace()}
+        </div>
       </DragDrop>
     </WorkspacePanelWrapper>
   );

@@ -6,20 +6,29 @@
 
 import React, { Fragment, useEffect, useState, useMemo } from 'react';
 import { map } from 'lodash/fp';
-import { EuiFormRow, EuiComboBox, EuiSelectOption, EuiHorizontalRule } from '@elastic/eui';
+import { isSome } from 'fp-ts/lib/Option';
 import { i18n } from '@kbn/i18n';
-import { EuiSelect } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiFlexItem } from '@elastic/eui';
-import { EuiSpacer } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiComboBox,
+  EuiSelectOption,
+  EuiHorizontalRule,
+  EuiSelect,
+  EuiFormControlLayout,
+  EuiIconTip,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
 
-import { useAppDependencies } from '../../../app_context';
 import { ActionParamsProps } from '../../../../types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
 import { JiraActionParams } from './types';
 import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
+import { SearchIssues } from './search_issues';
+import { extractActionVariable } from '../extract_action_variable';
 
 const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionParams>> = ({
   actionParams,
@@ -28,14 +37,19 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
   errors,
   messageVariables,
   actionConnector,
+  http,
+  toastNotifications,
 }) => {
-  const { title, description, comments, issueType, priority, labels, savedObjectId } =
+  const { title, description, comments, issueType, priority, labels, parent, savedObjectId } =
     actionParams.subActionParams || {};
 
   const [issueTypesSelectOptions, setIssueTypesSelectOptions] = useState<EuiSelectOption[]>([]);
   const [firstLoad, setFirstLoad] = useState(false);
   const [prioritiesSelectOptions, setPrioritiesSelectOptions] = useState<EuiSelectOption[]>([]);
-  const { http, toastNotifications } = useAppDependencies();
+
+  const isActionBeingConfiguredByAnAlert = messageVariables
+    ? isSome(extractActionVariable(messageVariables, 'alertId'))
+    : false;
 
   useEffect(() => {
     setFirstLoad(true);
@@ -62,6 +76,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
   const hasPriority = useMemo(() => Object.prototype.hasOwnProperty.call(fields, 'priority'), [
     fields,
   ]);
+  const hasParent = useMemo(() => Object.prototype.hasOwnProperty.call(fields, 'parent'), [fields]);
 
   useEffect(() => {
     const options = issueTypes.map((type) => ({
@@ -125,7 +140,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
     if (!actionParams.subAction) {
       editAction('subAction', 'pushToService', index);
     }
-    if (!savedObjectId && messageVariables?.find((variable) => variable.name === 'alertId')) {
+    if (!savedObjectId && isActionBeingConfiguredByAnAlert) {
       editSubActionProperty('savedObjectId', '{{alertId}}');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -179,6 +194,34 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
           />
         </EuiFormRow>
         <EuiHorizontalRule />
+        {hasParent && (
+          <>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiFormRow
+                  fullWidth
+                  label={i18n.translate(
+                    'xpack.triggersActionsUI.components.builtinActionTypes.jira.parentIssueSearchLabel',
+                    {
+                      defaultMessage: 'Parent issue',
+                    }
+                  )}
+                >
+                  <SearchIssues
+                    selectedValue={parent}
+                    http={http}
+                    toastNotifications={toastNotifications}
+                    actionConnector={actionConnector}
+                    onChange={(parentIssueKey) => {
+                      editSubActionProperty('parent', parentIssueKey);
+                    }}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="m" />
+          </>
+        )}
         <>
           {hasPriority && (
             <>
@@ -231,6 +274,45 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
             />
           </EuiFormRow>
           <EuiSpacer size="m" />
+          {!isActionBeingConfiguredByAnAlert && (
+            <Fragment>
+              <EuiFormRow
+                fullWidth
+                label={i18n.translate(
+                  'xpack.triggersActionsUI.components.builtinActionTypes.jira.savedObjectIdFieldLabel',
+                  {
+                    defaultMessage: 'Object ID (optional)',
+                  }
+                )}
+              >
+                <EuiFlexItem>
+                  <EuiFormControlLayout
+                    fullWidth
+                    append={
+                      <EuiIconTip
+                        content={i18n.translate(
+                          'xpack.triggersActionsUI.components.builtinActionTypes.jira.savedObjectIdFieldHelp',
+                          {
+                            defaultMessage:
+                              'JIRA will associate this action with the ID of a Kibana saved object.',
+                          }
+                        )}
+                      />
+                    }
+                  >
+                    <TextFieldWithMessageVariables
+                      index={index}
+                      editAction={editSubActionProperty}
+                      messageVariables={messageVariables}
+                      paramsProperty={'savedObjectId'}
+                      inputTargetValue={savedObjectId}
+                    />
+                  </EuiFormControlLayout>
+                </EuiFlexItem>
+              </EuiFormRow>
+              <EuiSpacer size="m" />
+            </Fragment>
+          )}
           {hasLabels && (
             <>
               <EuiFlexGroup>

@@ -7,7 +7,7 @@
 /* eslint-disable react/display-name */
 
 import React from 'react';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { LimitWarningsEuiCallOut } from './styles';
 
 const lineageLimitMessage = (
@@ -63,11 +63,11 @@ const RelatedLimitTitleMessage = React.memo(function ({
  * Limit warning for hitting the /events API limit
  */
 export const RelatedEventLimitWarning = React.memo(function ({
-  eventType,
+  eventCategory,
   numberActuallyDisplayed,
   numberMissing,
 }: {
-  eventType: string;
+  eventCategory: string;
   numberActuallyDisplayed: number;
   numberMissing: number;
 }) {
@@ -79,13 +79,13 @@ export const RelatedEventLimitWarning = React.memo(function ({
       size="s"
       title={
         <RelatedLimitTitleMessage
-          category={eventType}
+          category={eventCategory}
           numberOfEventsDisplayed={numberActuallyDisplayed}
         />
       }
     >
       <p>
-        <RelatedEventsLimitMessage category={eventType} numberOfEventsMissing={numberMissing} />
+        <RelatedEventsLimitMessage category={eventCategory} numberOfEventsMissing={numberMissing} />
       </p>
     </LimitWarningsEuiCallOut>
   );

@@ -388,6 +388,7 @@ module.exports = {
      */
     {
       files: [
+        '**/*.stories.tsx',
         'x-pack/test/apm_api_integration/**/*.ts',
         'x-pack/test/functional/apps/**/*.js',
         'x-pack/plugins/apm/**/*.js',
@@ -1227,6 +1228,21 @@ module.exports = {
       ],
       rules: {
         '@typescript-eslint/prefer-ts-expect-error': 'error',
+      },
+    },
+    {
+      files: [
+        '**/public/**/*.{js,mjs,ts,tsx}',
+        '**/common/**/*.{js,mjs,ts,tsx}',
+        'packages/**/*.{js,mjs,ts,tsx}',
+      ],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            patterns: ['lodash/*', '!lodash/fp'],
+          },
+        ],
       },
     },
   ],

@@ -10,7 +10,7 @@ import { AlertType } from '../../../common/alert_types';
 import { ApmPluginStartDeps } from '../../plugin';
 
 export function registerApmAlerts(
-  alertTypeRegistry: ApmPluginStartDeps['triggers_actions_ui']['alertTypeRegistry']
+  alertTypeRegistry: ApmPluginStartDeps['triggersActionsUi']['alertTypeRegistry']
 ) {
   alertTypeRegistry.register({
     id: AlertType.ErrorCount,
@@ -23,6 +23,17 @@ export function registerApmAlerts(
       errors: [],
     }),
     requiresAppContext: true,
+    defaultActionMessage: i18n.translate(
+      'xpack.apm.alertTypes.errorCount.defaultActionMessage',
+      {
+        defaultMessage: `\\{\\{alertName\\}\\} alert is firing because of the following conditions:
+
+- Service name: \\{\\{context.serviceName\\}\\}
+- Environment: \\{\\{context.environment\\}\\}
+- Threshold: \\{\\{context.threshold\\}\\} errors
+- Triggered value: \\{\\{context.triggerValue\\}\\} errors over the last \\{\\{context.interval\\}\\}`,
+      }
+    ),
   });
 
   alertTypeRegistry.register({
@@ -38,6 +49,18 @@ export function registerApmAlerts(
       errors: [],
     }),
     requiresAppContext: true,
+    defaultActionMessage: i18n.translate(
+      'xpack.apm.alertTypes.transactionDuration.defaultActionMessage',
+      {
+        defaultMessage: `\\{\\{alertName\\}\\} alert is firing because of the following conditions:
+
+- Service name: \\{\\{context.serviceName\\}\\}
+- Type: \\{\\{context.transactionType\\}\\}
+- Environment: \\{\\{context.environment\\}\\}
+- Threshold: \\{\\{context.threshold\\}\\}ms
+- Triggered value: \\{\\{context.triggerValue\\}\\} over the last \\{\\{context.interval\\}\\}`,
+      }
+    ),
   });
 
   alertTypeRegistry.register({
@@ -53,6 +76,18 @@ export function registerApmAlerts(
       errors: [],
     }),
     requiresAppContext: true,
+    defaultActionMessage: i18n.translate(
+      'xpack.apm.alertTypes.transactionErrorRate.defaultActionMessage',
+      {
+        defaultMessage: `\\{\\{alertName\\}\\} alert is firing because of the following conditions:
+
+- Service name: \\{\\{context.serviceName\\}\\}
+- Type: \\{\\{context.transactionType\\}\\}
+- Environment: \\{\\{context.environment\\}\\}
+- Threshold: \\{\\{context.threshold\\}\\}%
+- Triggered value: \\{\\{context.triggerValue\\}\\}% of errors over the last \\{\\{context.interval\\}\\}`,
+      }
+    ),
   });
 
   alertTypeRegistry.register({
@@ -68,5 +103,18 @@ export function registerApmAlerts(
       errors: [],
     }),
     requiresAppContext: true,
+    defaultActionMessage: i18n.translate(
+      'xpack.apm.alertTypes.transactionDurationAnomaly.defaultActionMessage',
+      {
+        defaultMessage: `\\{\\{alertName\\}\\} alert is firing because of the following conditions:
+
+- Service name: \\{\\{context.serviceName\\}\\}
+- Type: \\{\\{context.transactionType\\}\\}
+- Environment: \\{\\{context.environment\\}\\}
+- Severity threshold: \\{\\{context.threshold\\}\\}
+- Severity value: \\{\\{context.thresholdValue\\}\\}
+`,
+      }
+    ),
   });
 }

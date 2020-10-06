@@ -5,10 +5,10 @@
  */
 
 import { createContext } from 'react';
-import { AppMountContext } from 'kibana/public';
+import { CoreStart } from 'kibana/public';
 
 export interface PluginContextValue {
-  core: AppMountContext['core'];
+  core: CoreStart;
 }
 
 export const PluginContext = createContext({} as PluginContextValue);

@@ -6,11 +6,11 @@
 
 import { noop } from 'lodash/fp';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { shallowEqual, useSelector } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import { ESTermQuery } from '../../../../common/typed_json';
-import { inputsModel, State } from '../../../common/store';
+import { inputsModel } from '../../../common/store';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
@@ -66,35 +66,48 @@ export const useNetworkTopNFlow = ({
   type,
 }: UseNetworkTopNFlow): [boolean, NetworkTopNFlowArgs] => {
   const getTopNFlowSelector = networkSelectors.topNFlowSelector();
-  const { activePage, limit, sort } = useSelector(
-    (state: State) => getTopNFlowSelector(state, type, flowTarget),
-    shallowEqual
+  const { activePage, limit, sort } = useShallowEqualSelector((state) =>
+    getTopNFlowSelector(state, type, flowTarget)
   );
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
 
-  const [networkTopNFlowRequest, setTopNFlowRequest] = useState<NetworkTopNFlowRequestOptions>({
-    defaultIndex: indexNames,
-    factoryQueryType: NetworkQueries.topNFlow,
-    filterQuery: createFilter(filterQuery),
-    flowTarget,
-    pagination: generateTablePaginationOptions(activePage, limit),
-    sort,
-    timerange: {
-      interval: '12h',
-      from: startDate ? startDate : '',
-      to: endDate ? endDate : new Date(Date.now()).toISOString(),
-    },
-  });
+  const [
+    networkTopNFlowRequest,
+    setTopNFlowRequest,
+  ] = useState<NetworkTopNFlowRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          factoryQueryType: NetworkQueries.topNFlow,
+          filterQuery: createFilter(filterQuery),
+          flowTarget,
+          id: ID,
+          pagination: generateTablePaginationOptions(activePage, limit),
+          sort,
+          timerange: {
+            interval: '12h',
+            from: startDate ? startDate : '',
+            to: endDate ? endDate : new Date(Date.now()).toISOString(),
+          },
+        }
+      : null
+  );
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
-      setTopNFlowRequest((prevRequest) => ({
-        ...prevRequest,
-        pagination: generateTablePaginationOptions(newActivePage, limit),
-      }));
+      setTopNFlowRequest((prevRequest) => {
+        if (!prevRequest) {
+          return prevRequest;
+        }
+
+        return {
+          ...prevRequest,
+          pagination: generateTablePaginationOptions(newActivePage, limit),
+        };
+      });
     },
     [limit]
   );
@@ -118,7 +131,11 @@ export const useNetworkTopNFlow = ({
   });
 
   const networkTopNFlowSearch = useCallback(
-    (request: NetworkTopNFlowRequestOptions) => {
+    (request: NetworkTopNFlowRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -177,9 +194,12 @@ export const useNetworkTopNFlow = ({
   useEffect(() => {
     setTopNFlowRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
         defaultIndex: indexNames,
+        factoryQueryType: NetworkQueries.topNFlow,
         filterQuery: createFilter(filterQuery),
+        flowTarget,
+        id: ID,
         pagination: generateTablePaginationOptions(activePage, limit),
         timerange: {
           interval: '12h',
@@ -193,7 +213,7 @@ export const useNetworkTopNFlow = ({
       }
       return prevRequest;
     });
-  }, [activePage, indexNames, endDate, filterQuery, limit, startDate, sort, skip]);
+  }, [activePage, indexNames, endDate, filterQuery, limit, startDate, sort, skip, flowTarget]);
 
   useEffect(() => {
     networkTopNFlowSearch(networkTopNFlowRequest);

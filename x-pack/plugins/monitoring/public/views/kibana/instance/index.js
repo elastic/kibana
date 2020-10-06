@@ -27,7 +27,12 @@ import {
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
 import { DetailStatus } from '../../../components/kibana/detail_status';
 import { MonitoringViewBaseController } from '../../base_controller';
-import { CODE_PATH_KIBANA, ALERT_KIBANA_VERSION_MISMATCH } from '../../../../common/constants';
+import {
+  CODE_PATH_KIBANA,
+  ALERT_KIBANA_VERSION_MISMATCH,
+  ALERT_MISSING_MONITORING_DATA,
+  KIBANA_SYSTEM_ID,
+} from '../../../../common/constants';
 import { AlertsCallout } from '../../../alerts/callout';
 
 function getPageData($injector) {
@@ -67,6 +72,7 @@ uiRoutes.when('/kibana/instances/:uuid', {
     constructor($injector, $scope) {
       super({
         title: `Kibana - ${get($scope.pageData, 'kibanaSummary.name')}`,
+        telemetryPageViewTitle: 'kibana_instance',
         defaultData: {},
         getPageData,
         reactNodeId: 'monitoringKibanaInstanceApp',
@@ -75,7 +81,12 @@ uiRoutes.when('/kibana/instances/:uuid', {
         alerts: {
           shouldFetch: true,
           options: {
-            alertTypeIds: [ALERT_KIBANA_VERSION_MISMATCH],
+            alertTypeIds: [ALERT_KIBANA_VERSION_MISMATCH, ALERT_MISSING_MONITORING_DATA],
+            filters: [
+              {
+                stackProduct: KIBANA_SYSTEM_ID,
+              },
+            ],
           },
         },
       });
@@ -86,7 +97,6 @@ uiRoutes.when('/kibana/instances/:uuid', {
           if (!data || !data.metrics) {
             return;
           }
-
           this.setTitle(`Kibana - ${get(data, 'kibanaSummary.name')}`);
           this.setPageTitle(
             i18n.translate('xpack.monitoring.kibana.instance.pageTitle', {
@@ -104,7 +114,15 @@ uiRoutes.when('/kibana/instances/:uuid', {
                   <DetailStatus stats={data.kibanaSummary} />
                 </EuiPanel>
                 <EuiSpacer size="m" />
-                <AlertsCallout alerts={this.alerts} />
+                <AlertsCallout
+                  alerts={this.alerts}
+                  nextStepsFilter={(nextStep) => {
+                    if (nextStep.text.includes('Kibana instances')) {
+                      return false;
+                    }
+                    return true;
+                  }}
+                />
                 <EuiPageContent>
                   <EuiFlexGrid columns={2} gutterSize="s">
                     <EuiFlexItem grow={true}>

@@ -32,12 +32,12 @@
       "technique": [
         {
           "id": "T1219",
-          "name": "Remote Access Tools",
+          "name": "Remote Access Software",
           "reference": "https://attack.mitre.org/techniques/T1219/"
         }
       ]
     }
   ],
   "type": "query",
-  "version": 4
+  "version": 5
 }
