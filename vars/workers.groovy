@@ -6,17 +6,17 @@ def label(size) {
     case 'flyweight':
       return 'flyweight'
     case 's':
-      return 'docker && linux && immutable'
+      return 'docker && linux && immutable && gobld/image:family/elastic-kibana-ci-centos-7-nocache'
     case 's-highmem':
-      return 'docker && tests-s'
+      return 'docker && tests-s && gobld/image:family/elastic-kibana-ci-centos-7-nocache'
     case 'l':
-      return 'docker && tests-l'
+      return 'docker && tests-l && gobld/image:family/elastic-kibana-ci-centos-7-nocache'
     case 'xl':
-      return 'docker && tests-xl'
+      return 'docker && tests-xl && gobld/image:family/elastic-kibana-ci-centos-7-nocache'
     case 'xl-highmem':
-      return 'docker && tests-xl-highmem'
+      return 'docker && tests-xl-highmem && gobld/image:family/elastic-kibana-ci-centos-7-nocache'
     case 'xxl':
-      return 'docker && tests-xxl'
+      return 'docker && tests-xxl && gobld/image:family/elastic-kibana-ci-centos-7-nocache'
   }
 
   error "unknown size '${size}'"
