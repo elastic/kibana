@@ -15,7 +15,7 @@ import { IngestManagerConfigType } from '../index';
 describe('registerLimitedConcurrencyRoutes', () => {
   test(`doesn't call registerOnPreAuth if maxConcurrentConnections is 0`, async () => {
     const mockSetup = coreMock.createSetup();
-    const mockConfig = { fleet: { maxConcurrentConnections: 0 } } as IngestManagerConfigType;
+    const mockConfig = { agents: { maxConcurrentConnections: 0 } } as IngestManagerConfigType;
     registerLimitedConcurrencyRoutes(mockSetup, mockConfig);
 
     expect(mockSetup.http.registerOnPreAuth).not.toHaveBeenCalled();
@@ -23,7 +23,7 @@ describe('registerLimitedConcurrencyRoutes', () => {
 
   test(`calls registerOnPreAuth once if maxConcurrentConnections is 1`, async () => {
     const mockSetup = coreMock.createSetup();
-    const mockConfig = { fleet: { maxConcurrentConnections: 1 } } as IngestManagerConfigType;
+    const mockConfig = { agents: { maxConcurrentConnections: 1 } } as IngestManagerConfigType;
     registerLimitedConcurrencyRoutes(mockSetup, mockConfig);
 
     expect(mockSetup.http.registerOnPreAuth).toHaveBeenCalledTimes(1);
@@ -31,7 +31,7 @@ describe('registerLimitedConcurrencyRoutes', () => {
 
   test(`calls registerOnPreAuth once if maxConcurrentConnections is 1000`, async () => {
     const mockSetup = coreMock.createSetup();
-    const mockConfig = { fleet: { maxConcurrentConnections: 1000 } } as IngestManagerConfigType;
+    const mockConfig = { agents: { maxConcurrentConnections: 1000 } } as IngestManagerConfigType;
     registerLimitedConcurrencyRoutes(mockSetup, mockConfig);
 
     expect(mockSetup.http.registerOnPreAuth).toHaveBeenCalledTimes(1);

@@ -7,7 +7,6 @@ exports[`AddData render 1`] = `
 >
   <EuiFlexGroup
     alignItems="center"
-    responsive={false}
   >
     <EuiFlexItem
       grow={1}
@@ -27,20 +26,24 @@ exports[`AddData render 1`] = `
       </EuiTitle>
     </EuiFlexItem>
     <EuiFlexItem
+      className="homDataAdd__actions"
       grow={false}
     >
-      <EuiButtonEmpty
-        flush="right"
-        href="#/tutorial_directory/sampleData"
-        iconType="visTable"
-        size="xs"
-      >
-        <FormattedMessage
-          defaultMessage="Try our sample data"
-          id="home.addData.sampleDataButtonLabel"
-          values={Object {}}
-        />
-      </EuiButtonEmpty>
+      <div>
+        <EuiButtonEmpty
+          className="homDataAdd__actionButton"
+          flush="left"
+          href="#/tutorial_directory/sampleData"
+          iconType="visTable"
+          size="xs"
+        >
+          <FormattedMessage
+            defaultMessage="Try our sample data"
+            id="home.addData.sampleDataButtonLabel"
+            values={Object {}}
+          />
+        </EuiButtonEmpty>
+      </div>
     </EuiFlexItem>
   </EuiFlexGroup>
   <EuiSpacer
