@@ -40,7 +40,24 @@ function calculatetBucketSize({ start, end }: { start?: number; end?: number }) 
 }
 
 export function OverviewPage({ routeParams }: Props) {
-  const { core } = usePluginContext();
+  const { core, plugins } = usePluginContext();
+
+  // read time from state and update the url
+  const timePickerSharedState = plugins.data.query.timefilter.timefilter.getTime();
+
+  const timePickerDefaults = useKibanaUISettings<TimePickerTime>(
+    UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
+  );
+
+  const relativeTime = {
+    start: routeParams.query.rangeFrom || timePickerSharedState.from || timePickerDefaults.from,
+    end: routeParams.query.rangeTo || timePickerSharedState.to || timePickerDefaults.to,
+  };
+
+  const absoluteTime = {
+    start: getAbsoluteTime(relativeTime.start) as number,
+    end: getAbsoluteTime(relativeTime.end, { roundUp: true }) as number,
+  };
 
   useTrackPageview({ app: 'observability', path: 'overview' });
   useTrackPageview({ app: 'observability', path: 'overview', delay: 15000 });
