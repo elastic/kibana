@@ -126,8 +126,9 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/src/plugins/lens_oss[lensOSS]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/src/plugins/lens_oss/README.md[lensOSS]
+|The lens_oss plugins registers the lens visualization on OSS.
+It is registered as disabled. The x-pack plugin should unregister this.
 
 
 |{kib-repo}blob/{branch}/src/plugins/management[management]
@@ -138,8 +139,9 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/src/plugins/maps_oss[mapsOSS]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/src/plugins/maps_oss/README.md[mapsOSS]
+|The maps_oss plugins registers the maps visualization on OSS.
+It is registered as disabled. The x-pack plugin should unregister this.
 
 
 |{kib-repo}blob/{branch}/src/plugins/navigation/README.md[navigation]
