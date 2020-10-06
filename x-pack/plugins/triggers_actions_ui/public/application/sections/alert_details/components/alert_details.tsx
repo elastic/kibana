@@ -177,6 +177,8 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                             dataFieldsFormats: dataPlugin.fieldFormats,
                             reloadAlerts: setAlert,
                             capabilities,
+                            dataUi: dataPlugin.ui,
+                            dataIndexPatterns: dataPlugin.indexPatterns,
                           }}
                         >
                           <AlertEdit

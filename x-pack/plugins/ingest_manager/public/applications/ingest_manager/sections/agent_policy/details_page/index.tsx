@@ -75,14 +75,18 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
         <EuiFlexItem>
           <EuiText className="eui-textBreakWord">
             <h1>
-              {(agentPolicy && agentPolicy.name) || (
-                <FormattedMessage
-                  id="xpack.ingestManager.policyDetails.policyDetailsTitle"
-                  defaultMessage="Policy '{id}'"
-                  values={{
-                    id: policyId,
-                  }}
-                />
+              {isLoading ? (
+                <Loading />
+              ) : (
+                (agentPolicy && agentPolicy.name) || (
+                  <FormattedMessage
+                    id="xpack.ingestManager.policyDetails.policyDetailsTitle"
+                    defaultMessage="Policy '{id}'"
+                    values={{
+                      id: policyId,
+                    }}
+                  />
+                )
               )}
             </h1>
           </EuiText>
@@ -98,7 +102,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
         ) : null}
       </EuiFlexGroup>
     ),
-    [getHref, agentPolicy, policyId]
+    [getHref, isLoading, agentPolicy, policyId]
   );
 
   const enrollmentCancelClickHandler = useCallback(() => {
