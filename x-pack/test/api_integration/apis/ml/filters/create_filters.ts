@@ -38,10 +38,10 @@ export default ({ getService }: FtrProviderContext) => {
         items: ['104.236.210.185'],
       },
       expected: {
-        responseCode: 404,
+        responseCode: 403,
         responseBody: {
-          error: 'Not Found',
-          message: 'Not Found',
+          error: 'Forbidden',
+          message: 'Forbidden',
         },
       },
     },
@@ -54,10 +54,10 @@ export default ({ getService }: FtrProviderContext) => {
         items: ['104.236.210.185'],
       },
       expected: {
-        responseCode: 404,
+        responseCode: 403,
         responseBody: {
-          error: 'Not Found',
-          message: 'Not Found',
+          error: 'Forbidden',
+          message: 'Forbidden',
         },
       },
     },
