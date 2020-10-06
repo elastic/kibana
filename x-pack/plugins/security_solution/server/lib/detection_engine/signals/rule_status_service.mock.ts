@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from '../../../../../../../../src/core/server';
-import { RuleStatusSavedObjectsClient } from '../../signals/rule_status_saved_objects_client';
-import { RuleStatusService } from '../../signals/rule_status_service';
+import { SavedObjectsClientContract } from '../../../../../../../src/core/server';
+import { RuleStatusSavedObjectsClient } from './rule_status_saved_objects_client';
+import { RuleStatusService } from './rule_status_service';
 
 export type RuleStatusServiceMock = jest.Mocked<RuleStatusService>;
 
