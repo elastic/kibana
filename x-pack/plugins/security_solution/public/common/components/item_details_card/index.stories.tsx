@@ -14,7 +14,7 @@ addDecorator((storyFn) => (
   <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
 ));
 
-storiesOf('Components|ItemDetailsCard', module).add('default', () => {
+storiesOf('Components/ItemDetailsCard', module).add('default', () => {
   return (
     <ItemDetailsCard>
       <ItemDetailsPropertySummary name={'property 1'} value={'value 1'} />

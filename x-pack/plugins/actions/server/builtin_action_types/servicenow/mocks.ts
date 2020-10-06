@@ -75,7 +75,7 @@ const executorParams: ExecutorSubActionPushParams = {
   comment: 'test-alert comment',
   severity: '1',
   urgency: '2',
-  impact: '1',
+  impact: '3',
   comments: [
     {
       commentId: 'case-comment-1',

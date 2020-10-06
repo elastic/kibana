@@ -46,7 +46,7 @@ any data that you send to the API is properly formed.
 `references`::
   (Optional, array) Objects with `name`, `id`, and `type` properties that describe the other saved objects that this object references. Use `name` in attributes to refer to the other saved object, but never the `id`, which can update automatically during migrations or import/export.
 
-`namespaces`::
+`initialNamespaces`::
   (Optional, string array) Identifiers for the <<xpack-spaces,spaces>> in which this object should be created. If this is not provided, the
   object will be created in the current space.
 
