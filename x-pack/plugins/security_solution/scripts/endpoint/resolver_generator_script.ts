@@ -11,7 +11,7 @@ import { KbnClient, ToolingLog } from '@kbn/dev-utils';
 import { AxiosResponse } from 'axios';
 import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
 import { ANCESTRY_LIMIT } from '../../common/endpoint/generate_data';
-import { FLEET_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../../ingest_manager/common/constants';
+import { AGENTS_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../../ingest_manager/common/constants';
 import {
   CreateFleetSetupResponse,
   PostIngestSetupResponse,
@@ -60,7 +60,7 @@ async function doIngestSetup(kbnClient: KbnClient) {
   // Setup Fleet
   try {
     const setupResponse = (await kbnClient.request({
-      path: FLEET_SETUP_API_ROUTES.CREATE_PATTERN,
+      path: AGENTS_SETUP_API_ROUTES.CREATE_PATTERN,
       method: 'POST',
     })) as AxiosResponse<CreateFleetSetupResponse>;
 
