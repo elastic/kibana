@@ -80,10 +80,7 @@ export const useResultsViewConfig = (jobId: string) => {
               const inferenceModel = inferenceModels.find(
                 (model) => model.metadata?.analytics_config?.id === jobId
               );
-              if (
-                Array.isArray(inferenceModel?.metadata?.total_feature_importance) === true &&
-                inferenceModel?.metadata?.total_feature_importance.length > 0
-              ) {
+              if (Array.isArray(inferenceModel?.metadata?.total_feature_importance) === true) {
                 setTotalFeatureImportance(inferenceModel?.metadata?.total_feature_importance);
               }
             } catch (e) {
