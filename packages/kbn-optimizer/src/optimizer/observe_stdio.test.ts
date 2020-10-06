@@ -39,5 +39,11 @@ it('notifies on every line, uncluding partial content at the end without a newli
         })
       )
     )
-  ).resolves.toMatchInlineSnapshot();
+  ).resolves.toMatchInlineSnapshot(`
+          Array [
+            "foo",
+            "bar",
+            "baz",
+          ]
+        `);
 });
