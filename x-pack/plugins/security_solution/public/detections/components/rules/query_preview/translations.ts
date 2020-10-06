@@ -41,6 +41,13 @@ export const QUERY_GRAPH_COUNT = i18n.translate(
   }
 );
 
+export const QUERY_GRAPH_HITS_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryPreview.queryGraphHitsTitle',
+  {
+    defaultMessage: 'Hits',
+  }
+);
+
 export const QUERY_PREVIEW_TITLE = (hits: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.queryPreview.queryPreviewGraphTitle', {
     values: { hits },

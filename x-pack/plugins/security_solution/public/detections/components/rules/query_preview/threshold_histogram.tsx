@@ -5,17 +5,17 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
 
 import * as i18n from './translations';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { BarChart } from '../../../../common/components/charts/barchart';
 import { getThresholdHistogramConfig } from './helpers';
-import { InspectButton } from '../../../../common/components/inspect';
 import { useMatrixHistogram } from '../../../../common/containers/matrix_histogram';
 import { MatrixHistogramType } from '../../../../../common/search_strategy/security_solution/matrix_histogram';
 import { ESQueryStringQuery } from '../../../../../common/typed_json';
 import { Panel } from '../../../../common/components/panel';
+import { HeaderSection } from '../../../../common/components/header_section';
 
 export const ID = 'queryPreviewThresholdHistogramQuery';
 
@@ -77,23 +77,12 @@ export const PreviewThresholdQueryHistogram = ({
         <Panel height={300}>
           <EuiFlexGroup gutterSize="none" direction="column">
             <EuiFlexItem grow={1}>
-              <EuiFlexGroup direction="row" justifyContent="center">
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="xs">
-                    <h2 data-test-subj="header-section-title">
-                      {i18n.QUERY_PREVIEW_THRESHOLD_WITH_FIELD_TITLE(totalCount)}
-                    </h2>
-                  </EuiTitle>
-                </EuiFlexItem>
-
-                <EuiFlexItem grow={false}>
-                  <InspectButton
-                    queryId={ID}
-                    inspectIndex={0}
-                    title={i18n.QUERY_PREVIEW_INSPECT_TITLE}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <HeaderSection
+                id={ID}
+                title={i18n.QUERY_GRAPH_HITS_TITLE}
+                titleSize="xs"
+                subtitle={i18n.QUERY_PREVIEW_THRESHOLD_WITH_FIELD_TITLE(totalCount)}
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={1}>
               <BarChart

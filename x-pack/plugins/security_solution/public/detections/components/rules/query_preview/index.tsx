@@ -19,14 +19,12 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { IndexPattern } from 'src/plugins/data/public';
 import * as i18n from './translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ESQueryStringQuery } from '../../../../../common/typed_json';
 import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
-import { useFetchIndex } from '../../../../common/containers/source';
 import { FieldValueQueryBar } from '../query_bar';
-import { Filter, RangeFilter } from '../../../../../../../../src/plugins/data/common/es_query';
+import { Filter } from '../../../../../../../../src/plugins/data/common/es_query';
 import { Language, Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { PreviewEqlQueryHistogram } from './eql_histogram';
 import { useEqlPreview } from '../../../../common/hooks/eql';
@@ -34,6 +32,7 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { PreviewNonEqlQueryHistogram } from './non_eql_histogram';
 import { getTimeframeOptions } from './helpers';
 import { PreviewThresholdQueryHistogram } from './threshold_histogram';
+import { formatDate } from '../../../../common/components/super_date_picker';
 
 const Select = styled(EuiSelect)`
   width: ${({ theme }) => theme.eui.euiSuperDatePickerWidth};
@@ -63,7 +62,6 @@ export const PreviewQuery = ({
   isDisabled,
 }: PreviewQueryProps) => {
   const { data } = useKibana().services;
-  const [, { indexPatterns }] = useFetchIndex(index);
   const { addError } = useAppToasts();
 
   const [timeframeOptions, setTimeframeOptions] = useState<EuiSelectOption[]>([]);
@@ -84,39 +82,24 @@ export const PreviewQuery = ({
   const language = useMemo((): Language => getOr('kuery', 'query.language', query), [query]);
   const filters = useMemo((): Filter[] => (query != null ? query.filters : []), [query]);
 
-  const handleCalculateTimeRange = useCallback(
-    (interval: Unit): { to: string; from: string } => {
-      const rangeFilter: RangeFilter | undefined = data.query.timefilter.timefilter.createFilter(
-        { ...indexPatterns, timeFieldName: '@timestamp' } as IndexPattern,
-        { from: `now-1${interval}`, to: 'now' }
-      );
+  const handleCalculateTimeRange = useCallback((): void => {
+    const from = formatDate('now');
+    const to = formatDate(`now-1${timeframe}`);
 
-      const to = rangeFilter != null ? `${rangeFilter.range['@timestamp'].gte}` : null;
-      const from = rangeFilter != null ? `${rangeFilter.range['@timestamp'].lte}` : null;
+    setTo(to);
+    setFrom(from);
+  }, [timeframe]);
 
-      if (to != null && from != null) {
-        setTo(to);
-        setFrom(from);
-      }
-
-      return { to: to ?? toTime, from: from ?? fromTime };
-    },
-    [data, indexPatterns, toTime, fromTime]
-  );
-
-  const handlePreviewEqlQuery = useCallback(
-    (to: string, from: string, interval: Unit): void => {
-      startEql({
-        data,
-        index,
-        query: queryString,
-        fromTime: from,
-        toTime: to,
-        interval,
-      });
-    },
-    [data, index, startEql, queryString]
-  );
+  const handlePreviewEqlQuery = useCallback((): void => {
+    startEql({
+      data,
+      index,
+      query: queryString,
+      fromTime,
+      toTime,
+      interval: timeframe,
+    });
+  }, [startEql, data, index, queryString, fromTime, toTime, timeframe]);
 
   const handleSelectPreviewTimeframe = ({
     target: { value },
@@ -126,11 +109,11 @@ export const PreviewQuery = ({
   };
 
   const handlePreviewClicked = useCallback((): void => {
-    const { to, from } = handleCalculateTimeRange(timeframe);
+    handleCalculateTimeRange();
 
     if (ruleType === 'eql') {
       setShowHistogram(true);
-      handlePreviewEqlQuery(to, from, timeframe);
+      handlePreviewEqlQuery();
     } else {
       const builtFilterQuery = {
         ...((getQueryFilter(
@@ -155,7 +138,6 @@ export const PreviewQuery = ({
     language,
     queryString,
     ruleType,
-    timeframe,
   ]);
 
   useEffect((): void => {

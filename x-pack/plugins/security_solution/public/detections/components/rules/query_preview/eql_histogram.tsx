@@ -5,17 +5,16 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer, EuiText } from '@elastic/eui';
-import styled from 'styled-components';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 
 import * as i18n from './translations';
 import { BarChart } from '../../../../common/components/charts/barchart';
 import { getHistogramConfig } from './helpers';
 import { ChartData } from '../../../../common/components/charts/common';
 import { InspectQuery } from '../../../../common/store/inputs/model';
-import { InspectButton } from '../../../../common/components/inspect';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { Panel } from '../../../../common/components/panel';
+import { HeaderSection } from '../../../../common/components/header_section';
 
 export const ID = 'queryEqlPreviewHistogramQuery';
 
@@ -50,23 +49,12 @@ export const PreviewEqlQueryHistogram = ({
         <Panel height={300}>
           <EuiFlexGroup gutterSize="none" direction="column">
             <EuiFlexItem grow={1}>
-              <EuiFlexGroup direction="row" justifyContent="center">
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="xs">
-                    <h2 data-test-subj="header-section-title">
-                      {i18n.QUERY_PREVIEW_TITLE(totalHits)}
-                    </h2>
-                  </EuiTitle>
-                </EuiFlexItem>
-
-                <EuiFlexItem grow={false}>
-                  <InspectButton
-                    queryId={ID}
-                    inspectIndex={0}
-                    title={i18n.QUERY_PREVIEW_INSPECT_TITLE}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <HeaderSection
+                id={ID}
+                title={i18n.QUERY_GRAPH_HITS_TITLE}
+                titleSize="xs"
+                subtitle={i18n.QUERY_PREVIEW_THRESHOLD_WITH_FIELD_TITLE(totalHits)}
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={1}>
               <BarChart

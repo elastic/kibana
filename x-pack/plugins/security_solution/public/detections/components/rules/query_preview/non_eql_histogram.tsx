@@ -33,8 +33,9 @@ const histogramConfigs: MatrixHistogramConfigs = {
   errorMessage: i18n.PREVIEW_QUERY_ERROR,
   histogramType: MatrixHistogramType.events,
   stackByOptions,
-  title: '',
+  title: i18n.QUERY_GRAPH_HITS_TITLE,
   titleSize: 'xs',
+  subtitle: i18n.QUERY_PREVIEW_TITLE,
   hideHistogramIfEmpty: true,
 };
 
@@ -61,8 +62,7 @@ export const PreviewNonEqlQueryHistogram = ({
       indexNames={index}
       setQuery={setQuery}
       startDate={to}
-      showLegend={false}
-      legendPosition={undefined}
+      panelHeight={328}
       yTitle={i18n.QUERY_GRAPH_COUNT}
       footerChildren={
         <EuiFlexItem grow={false}>
