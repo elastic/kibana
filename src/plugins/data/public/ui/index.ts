@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export { IndexPatternSelectProps } from './index_pattern_select';
+export { IndexPatternSelectProps, IndexPatternSelectPublicProps } from './index_pattern_select';
 export { FilterLabel } from './filter_bar';
 export { QueryStringInput, QueryStringInputProps } from './query_string_input';
 export { SearchBar, SearchBarProps, StatefulSearchBarProps } from './search_bar';

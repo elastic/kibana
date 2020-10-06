@@ -20,13 +20,13 @@
 import React, { ComponentType } from 'react';
 import { injectI18n, InjectedIntlProps } from '@kbn/i18n/react';
 import { EuiFormRow } from '@elastic/eui';
-import { IndexPatternSelectProps } from 'src/plugins/data/public';
+import { IndexPatternSelectPublicProps } from 'src/plugins/data/public';
 
 export type IndexPatternSelectFormRowUiProps = InjectedIntlProps & {
   onChange: (opt: any) => void;
   indexPatternId: string;
   controlIndex: number;
-  IndexPatternSelect: ComponentType<IndexPatternSelectProps>;
+  IndexPatternSelect: ComponentType<IndexPatternSelectPublicProps>;
 };
 
 function IndexPatternSelectFormRowUi(props: IndexPatternSelectFormRowUiProps) {
@@ -49,8 +49,6 @@ function IndexPatternSelectFormRowUi(props: IndexPatternSelectFormRowUiProps) {
         indexPatternId={indexPatternId}
         onChange={onChange}
         data-test-subj={selectId}
-        // TODO: supply actual savedObjectsClient here
-        savedObjectsClient={{} as any}
       />
     </EuiFormRow>
   );

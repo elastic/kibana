@@ -422,6 +422,7 @@ export {
   SearchBarProps,
   StatefulSearchBarProps,
   IndexPatternSelectProps,
+  IndexPatternSelectPublicProps,
   QueryStringInput,
   QueryStringInputProps,
 } from './ui';
