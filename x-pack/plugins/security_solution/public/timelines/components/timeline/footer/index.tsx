@@ -178,6 +178,7 @@ interface PagingControlProps {
   activePage: number;
   isLoading: boolean;
   onPageClick: OnChangePage;
+  totalCount: number;
   totalPages: number;
 }
 
@@ -193,6 +194,7 @@ export const PagingControlComponent: React.FC<PagingControlProps> = ({
   activePage,
   isLoading,
   onPageClick,
+  totalCount,
   totalPages,
 }) => {
   if (isLoading) {
@@ -204,7 +206,7 @@ export const PagingControlComponent: React.FC<PagingControlProps> = ({
   }
 
   return (
-    <TimelinePaginationContainer hideLastPage={totalPages > 9999}>
+    <TimelinePaginationContainer hideLastPage={totalCount > 9999}>
       <EuiPagination
         data-test-subj="timeline-pagination"
         pageCount={totalPages}
@@ -375,6 +377,7 @@ export const FooterComponent = ({
           ) : (
             <PagingControl
               data-test-subj="paging-control"
+              totalCount={totalCount}
               totalPages={totalPages}
               activePage={activePage}
               onPageClick={handleChangePageClick}

@@ -88,6 +88,7 @@ describe('Footer Timeline Component', () => {
       const wrapper = shallow(
         <PagingControlComponent
           activePage={0}
+          totalCount={30}
           totalPages={3}
           onPageClick={loadMore}
           isLoading={true}
@@ -103,6 +104,7 @@ describe('Footer Timeline Component', () => {
       const wrapper = shallow(
         <PagingControlComponent
           activePage={0}
+          totalCount={30}
           totalPages={3}
           onPageClick={loadMore}
           isLoading={false}
