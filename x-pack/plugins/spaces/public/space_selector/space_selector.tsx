@@ -149,7 +149,6 @@ export class SpaceSelector extends Component<Props, State> {
                 <EuiSpacer />
                 <EuiText
                   color="subdued"
-                  // @ts-ignore
                   textAlign="center"
                 >
                   <FormattedMessage
@@ -165,7 +164,6 @@ export class SpaceSelector extends Component<Props, State> {
                 <EuiSpacer />
                 <EuiText
                   color="subdued"
-                  // @ts-ignore
                   textAlign="center"
                 >
                   <FormattedMessage
@@ -189,7 +187,6 @@ export class SpaceSelector extends Component<Props, State> {
     return (
       <EuiFlexItem className="spcSpaceSelector__searchHolder">
         {
-          // @ts-ignore onSearch doesn't exist on EuiFieldSearch
           <EuiFieldSearch
             className="spcSpaceSelector__searchField"
             placeholder={i18n.translate('xpack.spaces.spaceSelector.findSpacePlaceholder', {
