@@ -21,7 +21,7 @@ import { tapOnce } from './tap_once';
 import { from } from 'rxjs';
 
 describe('tapOnce', () => {
-  test('should convert a dot.notated.string into a short string', async (done) => {
+  test('should fire on the first item of a stream, without interrupting it', async (done) => {
     const tester = jest.fn();
     const nextTester = jest.fn();
     from([1, 2, 3, 4])

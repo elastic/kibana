@@ -21,8 +21,8 @@ import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 /**
- * This operator will fire once per stream, even if there are no subscribers on it.
- * @param fn tap finction
+ * This operator will fire once per stream, even if there are multiple subscribers on it.
+ * @param fn tap function
  */
 export function tapOnce<T>(fn: (v: T) => any) {
   return (source$: Observable<T>) => {

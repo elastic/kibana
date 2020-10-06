@@ -368,8 +368,6 @@ export class VisualizeEmbeddable
   };
 
   private async updateHandler() {
-    getSearch().session.start();
-
     const expressionParams: IExpressionLoaderParams = {
       searchContext: {
         timeRange: this.timeRange,

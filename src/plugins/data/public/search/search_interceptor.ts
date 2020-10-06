@@ -19,7 +19,7 @@
 
 import { get, memoize, trimEnd } from 'lodash';
 import { BehaviorSubject, throwError, timer, defer, from, Observable, NEVER } from 'rxjs';
-import { tap, catchError, finalize } from 'rxjs/operators';
+import { catchError, finalize } from 'rxjs/operators';
 import { CoreStart, CoreSetup, ToastsSetup } from 'kibana/public';
 import {
   getCombinedSignal,
@@ -198,7 +198,7 @@ export class SearchInterceptor {
   };
 
   /**
-   * Searches using theג given `search` method. Overrides the `AbortSignal` with one that will abort
+   * Searches using the given `search` method. Overrides the `AbortSignal` with one that will abort
    * either when `cancelPending` is called, when the request times out, or when the original
    * `AbortSignal` is aborted. Updates `pendingCount$` when the request is started/finalized.
    *
@@ -220,22 +220,8 @@ export class SearchInterceptor {
         abortSignal: options?.abortSignal,
       });
       this.pendingCount$.next(this.pendingCount$.getValue() + 1);
-
-      if (options?.sessionId) {
-        this.deps.session.trackSearch(request, options?.sessionId);
-      }
       return this.runSearch(request, combinedSignal, options?.strategy).pipe(
-        tap({
-          next: (r) => {
-            if (options?.sessionId) {
-              this.deps.session.trackSearchComplete(request, options?.sessionId);
-            }
-          },
-        }),
         catchError((e: Error) => {
-          if (options?.sessionId) {
-            this.deps.session.trackSearchError(request, options?.sessionId, e);
-          }
           return throwError(this.handleSearchError(e, request, timeoutSignal, options));
         }),
         finalize(() => {

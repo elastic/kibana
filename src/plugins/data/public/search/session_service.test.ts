@@ -17,18 +17,22 @@
  * under the License.
  */
 
-export interface ISessionService {
-  /**
-   * Returns the active session ID
-   * @returns The active session ID
-   */
-  getSessionId: () => string | undefined;
-  /**
-   * Starts a new session
-   */
-  start: () => string;
-  /**
-   * Clears the active session.
-   */
-  clear: () => void;
-}
+import { SessionService } from './session_service';
+import { ISessionService } from '../../common';
+
+describe('Session service', () => {
+  let sessionService: ISessionService;
+
+  beforeEach(() => {
+    sessionService = new SessionService();
+  });
+
+  describe('Session management', () => {
+    it('Creates and clears a session', async () => {
+      sessionService.start();
+      expect(sessionService.getSessionId()).not.toBeUndefined();
+      sessionService.clear();
+      expect(sessionService.getSessionId()).toBeUndefined();
+    });
+  });
+});

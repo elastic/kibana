@@ -18,101 +18,29 @@
  */
 
 import uuid from 'uuid';
-import {
-  ISessionService,
-  IEsSearchRequest,
-  createRequestHash,
-  SearchStatus,
-  SessionStatus,
-} from '../../common/search';
-import { SearchTimeoutError } from '.';
+import { Subject } from 'rxjs';
+import { ISessionService } from '../../common/search';
 
-interface RequestInfo {
-  searchId?: string;
-  status: SearchStatus;
-}
-
-interface SessionInfo {
-  sessionId: string;
-  requests: Record<string, RequestInfo>;
-  status: SessionStatus;
-}
 export class SessionService implements ISessionService {
-  private activeSession?: SessionInfo;
-
-  constructor() {
-    this.start();
-  }
-
-  public trackSearch(request: IEsSearchRequest, sessionId: string | undefined) {
-    if (sessionId && request.params && request.params.body && this.activeSession) {
-      const sessionInfo = this.activeSession;
-
-      // Mark a session as running.
-      // Also reopen a complete session, if a new search is run. We know this can happen because of follow up requests.
-      if (
-        sessionInfo.status === SessionStatus.NEW ||
-        sessionInfo.status === SessionStatus.COMPLETED
-      ) {
-        sessionInfo.status = SessionStatus.RUNNING;
-      }
-
-      // Add request info to the session
-      sessionInfo.requests[createRequestHash(request.params.body)] = {
-        status: SearchStatus.RUNNING,
-      };
-    }
-  }
-
-  public trackSearchId(request: IEsSearchRequest, sessionId: string | undefined, searchId: string) {
-    if (sessionId && request.params && request.params.body && this.activeSession) {
-      const requestInfo = this.activeSession.requests[createRequestHash(request.params.body)];
-      if (requestInfo) {
-        requestInfo.searchId = searchId;
-      }
-    }
-  }
-
-  public trackSearchComplete(request: IEsSearchRequest, sessionId?: string) {
-    if (sessionId && request.params && request.params.body && this.activeSession) {
-      this.activeSession.requests[createRequestHash(request.params.body)].status =
-        SearchStatus.DONE;
-
-      // Mark session as done, if all requests are done
-      Object.values(this.activeSession!.requests)
-        .map((requestInfo) => requestInfo.status === SearchStatus.DONE)
-        .every(() => {
-          this.activeSession!.status = SessionStatus.COMPLETED;
-        });
-    }
-  }
-
-  public trackSearchError(request: IEsSearchRequest, sessionId?: string, e?: Error) {
-    if (sessionId && request.params && request.params.body && this.activeSession) {
-      // Mark request as errored, don't update session status
-      if (e instanceof SearchTimeoutError) {
-        this.activeSession.status = SessionStatus.TIMEOUT;
-      }
-      this.activeSession.requests[createRequestHash(request.params.body)].status =
-        SearchStatus.ERROR;
-    }
-  }
+  private sessionId?: string;
+  private session$: Subject<string | undefined> = new Subject();
 
   public getSessionId() {
-    return this.activeSession?.sessionId;
+    return this.sessionId;
+  }
+
+  public getSession$() {
+    return this.session$;
   }
 
   public start() {
-    this.activeSession = {
-      sessionId: uuid.v4(),
-      status: SessionStatus.NEW,
-      requests: {},
-    };
-
-    return this.activeSession.sessionId;
+    this.sessionId = uuid.v4();
+    this.session$.next(this.sessionId);
+    return this.sessionId;
   }
 
   public clear() {
-    this.activeSession = undefined;
+    this.sessionId = undefined;
+    this.session$.next(this.sessionId);
   }
 }
