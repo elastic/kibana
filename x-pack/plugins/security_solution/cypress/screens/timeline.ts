@@ -29,6 +29,8 @@ export const COMBO_BOX = '.euiComboBoxOption__content';
 
 export const CREATE_NEW_TIMELINE = '[data-test-subj="timeline-new"]';
 
+export const CREATE_NEW_TIMELINE_TEMPLATE = '[data-test-subj="template-timeline-new"]';
+
 export const DRAGGABLE_HEADER =
   '[data-test-subj="events-viewer-panel"] [data-test-subj="headers-group"] [data-test-subj="draggable-header"]';
 
