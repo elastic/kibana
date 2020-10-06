@@ -26,6 +26,7 @@ export const EMS_TILES_VECTOR_TILE_PATH = 'vector/tile';
 
 export const MAP_SAVED_OBJECT_TYPE = 'map';
 export const APP_ID = 'maps';
+export const APP_ID_OSS = 'mapsOss';
 export const APP_ICON = 'gisApp';
 export const APP_ICON_SOLUTION = 'logoKibana';
 export const INITIAL_LAYERS_KEY = 'initialLayers';

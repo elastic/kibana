@@ -34,7 +34,7 @@ import {
   ACTION_VISUALIZE_FIELD,
   VISUALIZE_FIELD_TRIGGER,
 } from '../../../../src/plugins/ui_actions/public';
-import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common';
+import { NOT_INTERNATIONALIZED_PRODUCT_NAME, OSS_PLUGIN_ID } from '../common';
 import { EditorFrameStart } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
@@ -161,7 +161,8 @@ export class LensPlugin {
   start(core: CoreStart, startDependencies: LensPluginStartDependencies) {
     this.attributeService = getLensAttributeService(core, startDependencies);
     this.createEditorFrame = this.editorFrameService.start(core, startDependencies).createInstance;
-    startDependencies.visualizations.unRegisterAlias('lensOss');
+    // unregisters the OSS alias
+    startDependencies.visualizations.unRegisterAlias(OSS_PLUGIN_ID);
     // unregisters the Visualize action and registers the lens one
     if (startDependencies.uiActions.hasAction(ACTION_VISUALIZE_FIELD)) {
       startDependencies.uiActions.unregisterAction(ACTION_VISUALIZE_FIELD);

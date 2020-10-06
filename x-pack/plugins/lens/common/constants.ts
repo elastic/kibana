@@ -5,6 +5,7 @@
  */
 
 export const PLUGIN_ID = 'lens';
+export const OSS_PLUGIN_ID = 'lensOss';
 export const LENS_EMBEDDABLE_TYPE = 'lens';
 export const NOT_INTERNATIONALIZED_PRODUCT_NAME = 'Lens Visualizations';
 export const BASE_API_URL = '/api/lens';
