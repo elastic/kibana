@@ -105,7 +105,7 @@ describe('CoreUsageDataService', () => {
           Object {
             "config": Object {
               "elasticsearch": Object {
-                "apiVersion": "master",
+                "apiVersion": "7.x",
                 "customHeadersConfigured": false,
                 "healthCheckDelayMs": 2500,
                 "logQueries": false,
