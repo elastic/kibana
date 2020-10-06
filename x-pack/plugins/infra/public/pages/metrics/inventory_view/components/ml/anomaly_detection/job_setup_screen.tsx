@@ -164,7 +164,7 @@ export const JobSetupScreen = (props: Props) => {
               <p>
                 <FormattedMessage
                   id="xpack.infra.ml.steps.setupProcess.description"
-                  defaultMessage="Settings can not be changed once the jobs are created. You can recreate jobs anytime. In this case, the previously detected anomalies are removed."
+                  defaultMessage="Settings can not be changed once the jobs are created. You can recreate jobs anytime, however, the previously detected anomalies are removed."
                 />
               </p>
             </EuiText>
