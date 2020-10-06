@@ -3,25 +3,22 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useContext, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { ObsvSharedContext } from '../../context/shared_data';
-import { LoadingObservability } from '../overview/loading_observability';
+import { useHasDataContext } from '../../hooks/use_has_data_context';
 
 export function HomePage() {
   const history = useHistory();
 
-  const { sharedData } = useContext(ObsvSharedContext);
-
-  const { hasAnyData } = sharedData ?? {};
+  const { hasAnyData } = useHasDataContext();
 
   useEffect(() => {
-    if (hasAnyData) {
+    if (hasAnyData === true) {
       history.push({ pathname: '/overview' });
+    } else if (hasAnyData === false) {
+      history.push({ pathname: '/landing' });
     }
+  }, [hasAnyData, history]);
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  return !hasAnyData ? <LoadingObservability /> : null;
+  return <></>;
 }

@@ -4,21 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React from 'react';
+import { APMSection } from '../../components/app/section/apm';
 import { LogsSection } from '../../components/app/section/logs';
 import { MetricsSection } from '../../components/app/section/metrics';
-import { APMSection } from '../../components/app/section/apm';
 import { UptimeSection } from '../../components/app/section/uptime';
 import { UXSection } from '../../components/app/section/ux';
-import {
-  HasDataResponse,
-  ObservabilityFetchDataPlugins,
-  UXHasDataResponse,
-} from '../../typings/fetch_overview_data';
+import { ObservabilityHasDataResponse } from '../../typings/fetch_overview_data';
 
 interface Props {
-  hasData?: Record<ObservabilityFetchDataPlugins, HasDataResponse | undefined> | null;
+  hasData?: ObservabilityHasDataResponse;
 }
 
 export function DataSections({ hasData }: Props) {
@@ -47,7 +43,7 @@ export function DataSections({ hasData }: Props) {
         )}
         {hasData?.ux && (
           <EuiFlexItem grow={false}>
-            <UXSection serviceName={(hasData.ux as UXHasDataResponse).serviceName as string} />
+            <UXSection serviceName={hasData.ux.serviceName as string} />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
