@@ -35,18 +35,6 @@ interface SavedObjectJob {
 export function checksFactory(client: IScopedClusterClient, jobsInSpaces: JobsInSpaces) {
   async function checkStatus() {
     const { saved_objects: jobObjects } = await jobsInSpaces.getAllJobObjects();
-    const nonSpaceSavedObjects = await _loadAllJobSavedObjects();
-    const nonSpaceADObjectIds = new Set(
-      nonSpaceSavedObjects
-        .filter(({ type }) => type === 'anomaly-detector')
-        .map(({ jobId }) => jobId)
-    );
-    const nonSpaceDFAObjectIds = new Set(
-      nonSpaceSavedObjects
-        .filter(({ type }) => type === 'data-frame-analytics')
-        .map(({ jobId }) => jobId)
-    );
-
     const { body: adJobs } = await client.asInternalUser.ml.getJobs<{ jobs: Job[] }>();
     const { body: datafeeds } = await client.asInternalUser.ml.getDatafeeds<{
       datafeeds: Datafeed[];
@@ -84,25 +72,56 @@ export function checksFactory(client: IScopedClusterClient, jobsInSpaces: JobsIn
       };
     });
 
-    const anomalyDetectors = adJobs.jobs.map(({ job_id: jobId }) => {
-      const datafeedId = datafeeds.datafeeds.find((df) => df.job_id === jobId)?.datafeed_id;
-      return {
-        jobId,
-        datafeedId: datafeedId ?? null,
-        checks: {
-          savedObjectExits: nonSpaceADObjectIds.has(jobId),
-        },
-      };
-    });
+    const nonSpaceSavedObjects = await _loadAllJobSavedObjects();
+    const nonSpaceADObjectIds = new Set(
+      nonSpaceSavedObjects
+        .filter(({ type }) => type === 'anomaly-detector')
+        .map(({ jobId }) => jobId)
+    );
+    const nonSpaceDFAObjectIds = new Set(
+      nonSpaceSavedObjects
+        .filter(({ type }) => type === 'data-frame-analytics')
+        .map(({ jobId }) => jobId)
+    );
 
-    const dataFrameAnalytics = dfaJobs.data_frame_analytics.map(({ id: jobId }) => {
-      return {
-        jobId,
-        checks: {
-          savedObjectExits: nonSpaceDFAObjectIds.has(jobId),
-        },
-      };
-    });
+    const adObjectIds = new Set(
+      savedObjects.filter(({ type }) => type === 'anomaly-detector').map(({ jobId }) => jobId)
+    );
+    const dfaObjectIds = new Set(
+      savedObjects.filter(({ type }) => type === 'data-frame-analytics').map(({ jobId }) => jobId)
+    );
+
+    const anomalyDetectors = adJobs.jobs
+      .filter(({ job_id: jobId }) => {
+        // only list jobs which are in the current space (adObjectIds)
+        // or are not in any spaces (nonSpaceADObjectIds)
+        return adObjectIds.has(jobId) === true || nonSpaceADObjectIds.has(jobId) === false;
+      })
+      .map(({ job_id: jobId }) => {
+        const datafeedId = datafeeds.datafeeds.find((df) => df.job_id === jobId)?.datafeed_id;
+        return {
+          jobId,
+          datafeedId: datafeedId ?? null,
+          checks: {
+            savedObjectExits: nonSpaceADObjectIds.has(jobId),
+          },
+        };
+      });
+
+    const dataFrameAnalytics = dfaJobs.data_frame_analytics
+      .filter(({ id: jobId }) => {
+        // only list jobs which are in the current space (dfaObjectIds)
+        // or are not in any spaces (nonSpaceDFAObjectIds)
+        return dfaObjectIds.has(jobId) === true || nonSpaceDFAObjectIds.has(jobId) === false;
+      })
+      .map(({ id: jobId }) => {
+        return {
+          jobId,
+          checks: {
+            savedObjectExits: nonSpaceDFAObjectIds.has(jobId),
+          },
+        };
+      });
 
     return {
       savedObjects: {
