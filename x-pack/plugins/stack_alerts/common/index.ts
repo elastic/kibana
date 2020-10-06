@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const BUILT_IN_ALERTS_FEATURE_ID = 'stackAlerts';
+export const STACK_ALERTS_FEATURE_ID = 'stackAlerts';

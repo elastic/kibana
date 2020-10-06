@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { Service } from '../../types';
-import { BUILT_IN_ALERTS_FEATURE_ID } from '../../../common';
+import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import { getGeoThresholdExecutor } from './geo_threshold';
 import {
   ActionGroup,
@@ -223,7 +223,7 @@ export function getAlertType(
     actionGroups: [{ id: ActionGroupId, name: actionGroupName }],
     defaultActionGroupId: ActionGroupId,
     executor: getGeoThresholdExecutor(service),
-    producer: BUILT_IN_ALERTS_FEATURE_ID,
+    producer: STACK_ALERTS_FEATURE_ID,
     validate: {
       params: ParamsSchema,
     },

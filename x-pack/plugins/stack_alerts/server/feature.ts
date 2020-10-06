@@ -7,11 +7,11 @@
 import { i18n } from '@kbn/i18n';
 import { ID as IndexThreshold } from './alert_types/index_threshold/alert_type';
 import { GEO_THRESHOLD_ID as GeoThreshold } from './alert_types/geo_threshold/alert_type';
-import { BUILT_IN_ALERTS_FEATURE_ID } from '../common';
+import { STACK_ALERTS_FEATURE_ID } from '../common';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 
 export const BUILT_IN_ALERTS_FEATURE = {
-  id: BUILT_IN_ALERTS_FEATURE_ID,
+  id: STACK_ALERTS_FEATURE_ID,
   name: i18n.translate('xpack.stackAlerts.featureRegistry.actionsFeatureName', {
     defaultMessage: 'Stack Alerts',
   }),
