@@ -331,6 +331,9 @@ export const getTopNavConfig = (
                 />
               );
               const isSaveAsButton = anchorElement.classList.contains('saveAsButton');
+              onAppLeave((actions) => {
+                return actions.default();
+              });
               if (
                 originatingApp === 'dashboards' &&
                 dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables &&
@@ -376,6 +379,9 @@ export const getTopNavConfig = (
                 confirmOverwrite: false,
                 returnToOrigin: true,
               };
+              onAppLeave((actions) => {
+                return actions.default();
+              });
               if (
                 originatingApp === 'dashboards' &&
                 dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables &&

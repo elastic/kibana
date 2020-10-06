@@ -153,9 +153,8 @@ const TopNav = ({
             defaultMessage: 'Unsaved changes',
           })
         );
-      } else {
-        return actions.default();
       }
+      return actions.default();
     });
   }, [
     onAppLeave,
