@@ -14920,7 +14920,6 @@
     "xpack.securitySolution.case.configureCases.incidentManagementSystemLabel": "インシデント管理システム",
     "xpack.securitySolution.case.configureCases.incidentManagementSystemTitle": "外部のインシデント管理システムに接続",
     "xpack.securitySolution.case.configureCases.mappingFieldNotMapped": "マップされません",
-    "xpack.securitySolution.case.configureCases.noConnector": "コネクターを選択していません",
     "xpack.securitySolution.case.configureCases.updateConnector": "コネクターを更新",
     "xpack.securitySolution.case.configureCases.updateSelectedConnector": "{ connectorName }を更新",
     "xpack.securitySolution.case.configureCases.warningMessage": "選択したコネクターが削除されました。別のコネクターを選択するか、新しいコネクターを作成してください。",

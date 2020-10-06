@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { CasePostRequest, CasesConfigureRequest } from '../../../../common/api';
+import { CasePostRequest, CasesConfigureRequest, ConnectorTypes } from '../../../../common/api';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FindActionResult } from '../../../../../actions/server/types';
 
@@ -11,6 +11,12 @@ export const newCase: CasePostRequest = {
   title: 'My new case',
   description: 'A description',
   tags: ['new', 'case'],
+  connector: {
+    id: 'none',
+    name: 'none',
+    type: ConnectorTypes.none,
+    fields: null,
+  },
 };
 
 export const getActions = (): FindActionResult[] => [
@@ -59,7 +65,11 @@ export const getActions = (): FindActionResult[] => [
 ];
 
 export const newConfiguration: CasesConfigureRequest = {
-  connector_id: '456',
-  connector_name: 'My connector 2',
+  connector: {
+    id: '456',
+    name: 'My connector 2',
+    type: ConnectorTypes.jira,
+    fields: null,
+  },
   closure_type: 'close-by-pushing',
 };
