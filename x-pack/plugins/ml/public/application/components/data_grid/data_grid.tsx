@@ -45,7 +45,7 @@ export const DataGridTitle: FC<{ title: string }> = ({ title }) => (
 
 interface PropsWithoutHeader extends UseIndexDataReturnType {
   baseline?: number;
-  analysisType?: DataFrameAnalysisConfigType;
+  analysisType?: DataFrameAnalysisConfigType | 'unknown';
   resultsField?: string;
   dataTestSubj: string;
   toastNotifications: CoreSetup['notifications']['toasts'];

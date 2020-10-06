@@ -11,8 +11,6 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { EuiButton as EuiLinkButton } from '../../../shared/react_router_helpers';
-import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 
 import { AppLogic } from '../../app_logic';
 
@@ -123,8 +121,6 @@ export const Groups: React.FC = () => {
 
   return (
     <>
-      <SetPageChrome trail={['Groups']} />
-      <SendTelemetry action="viewed" metric="groups" />
       <FlashMessages />
       <ViewContentHeader
         title={i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.heading', {

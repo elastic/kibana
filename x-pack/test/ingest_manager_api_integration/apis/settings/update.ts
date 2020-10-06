@@ -20,15 +20,28 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
     setupIngest(providerContext);
 
+    const createdAgentPolicyIds: string[] = [];
+    after(async () => {
+      const deletedPromises = createdAgentPolicyIds.map((agentPolicyId) =>
+        supertest
+          .post(`/api/fleet/agent_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ agentPolicyId })
+          .expect(200)
+      );
+      await Promise.all(deletedPromises);
+    });
     it("should bump all agent policy's revision", async function () {
       const { body: testPolicy1PostRes } = await supertest
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: 'test',
+          name: 'test 1',
           description: '',
           namespace: 'default',
         });
+      createdAgentPolicyIds.push(testPolicy1PostRes.item.id);
+
       const { body: testPolicy2PostRes } = await supertest
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
@@ -37,10 +50,13 @@ export default function (providerContext: FtrProviderContext) {
           description: '',
           namespace: 'default',
         });
+      createdAgentPolicyIds.push(testPolicy2PostRes.item.id);
+
       await supertest
         .put(`/api/fleet/settings`)
         .set('kbn-xsrf', 'xxxx')
-        .send({ kibana_urls: ['http://localhost:1232/abc', 'http://localhost:1232/abc'] });
+        .send({ kibana_urls: ['http://localhost:1232/abc', 'http://localhost:1232/abc'] })
+        .expect(200);
 
       const getTestPolicy1Res = await kibanaServer.savedObjects.get({
         type: 'ingest-agent-policies',
@@ -63,11 +79,13 @@ export default function (providerContext: FtrProviderContext) {
           description: '',
           namespace: 'default',
         });
+      createdAgentPolicyIds.push(testPolicyRes.item.id);
 
       await supertest
         .put(`/api/fleet/settings`)
         .set('kbn-xsrf', 'xxxx')
-        .send({ kibana_urls: ['http://localhost:1232/abc', 'http://localhost:1232/abc'] });
+        .send({ kibana_urls: ['http://localhost:1232/abc', 'http://localhost:1232/abc'] })
+        .expect(200);
 
       const res = await esClient.search({
         index: '.kibana',

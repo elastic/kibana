@@ -18,11 +18,11 @@ import { ListLayout } from './components/list_layout';
 export const FleetApp: React.FunctionComponent = () => {
   useBreadcrumbs('fleet');
   const core = useCore();
-  const { fleet } = useConfig();
+  const { agents } = useConfig();
 
   const fleetStatus = useFleetStatus();
 
-  if (!fleet.enabled) return null;
+  if (!agents.enabled) return null;
   if (fleetStatus.isLoading) {
     return <Loading />;
   }

@@ -269,7 +269,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 'data-test-subj': 'detectionEngineStepAboutRuleLicense',
                 euiFieldProps: {
                   fullWidth: true,
-                  isDisabled: isLoading,
+                  disabled: isLoading,
                   placeholder: '',
                 },
               }}

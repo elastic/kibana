@@ -59,7 +59,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     application: { navigateToApp },
   } = useCore();
   const {
-    fleet: { enabled: isFleetEnabled },
+    agents: { enabled: isFleetEnabled },
   } = useConfig();
   const {
     params: { policyId, pkgkey },

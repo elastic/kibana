@@ -31,5 +31,10 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./configure/get_connectors'));
     loadTestFile(require.resolve('./configure/patch_configure'));
     loadTestFile(require.resolve('./configure/post_configure'));
+
+    // Migrations
+    loadTestFile(require.resolve('./cases/migrations'));
+    loadTestFile(require.resolve('./configure/migrations'));
+    loadTestFile(require.resolve('./cases/user_actions/migrations'));
   });
 };
