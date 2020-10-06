@@ -1218,10 +1218,10 @@
   dependencies:
     "@elastic/apm-rum-core" "^5.7.0"
 
-"@elastic/charts@23.1.1":
-  version "23.1.1"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-23.1.1.tgz#01f51d80f4ba7291dd68fe75f23a71f77e44dce9"
-  integrity sha512-qoDBzo4r2Aeh2JmbpWxkN+xI/PZ7HyNr91HLqewadMCnSR2tqviBrUySttX/SpBxE/0VoN4gd/T8vcjCt2a/GQ==
+"@elastic/charts@23.2.1":
+  version "23.2.1"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-23.2.1.tgz#1f48629fe4597655a7f119fd019c4d5a2cbaf252"
+  integrity sha512-L2jUPAWwE0xLry6DcqcngVLCa9R32pfz5jW1fyOJRWSq1Fay2swOw4joBe8PmHpvl2s8EwWi9qWBORR1z3hUeQ==
   dependencies:
     "@popperjs/core" "^2.4.0"
     chroma-js "^2.1.0"
@@ -3844,11 +3844,6 @@
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@types/delete-empty/-/delete-empty-2.0.0.tgz#1647ae9e68f708a6ba778531af667ec55bc61964"
   integrity sha512-sq+kwx8zA9BSugT9N+Jr8/uWjbHMZ+N/meJEzRyT3gmLq/WMtx/iSIpvdpmBUi/cvXl6Kzpvve8G2ESkabFwmg==
-
-"@types/dragselect@^1.13.1":
-  version "1.13.1"
-  resolved "https://registry.yarnpkg.com/@types/dragselect/-/dragselect-1.13.1.tgz#f19b7b41063a7c9d5963194c83c3c364e84d46ee"
-  integrity sha512-3m0fvSM0cSs0DXvprytV/ZY92hNX3jJuEb/vkdqU+4QMzV2jxYKgBFTuaT2fflqbmfzUqHHIkGP55WIuigElQw==
 
 "@types/ejs@^3.0.4":
   version "3.0.4"
@@ -11024,11 +11019,6 @@ downgrade-root@^1.0.0:
   dependencies:
     default-uid "^1.0.0"
     is-root "^1.0.0"
-
-dragselect@1.13.1:
-  version "1.13.1"
-  resolved "https://registry.yarnpkg.com/dragselect/-/dragselect-1.13.1.tgz#aa4166e1164b51ed5ee0cd89e0c5310a9c35be6a"
-  integrity sha512-spfUz6/sNnlY4fF/OxPBwaKLa5hVz6V+fq5XhVuD+h47RAkA75TMkfvr4AoWUh5Ufq3V1oIAbfu+sjc9QbewoA==
 
 dtrace-provider@~0.8:
   version "0.8.8"

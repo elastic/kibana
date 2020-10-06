@@ -10,10 +10,10 @@ import { HttpService } from '../http_service';
 import { basePath } from './index';
 import { useMlKibana } from '../../contexts/kibana';
 import {
-  ModelConfigResponse,
+  TrainedModelConfigResponse,
   ModelPipelines,
   TrainedModelStat,
-} from '../../../../common/types/inference';
+} from '../../../../common/types/trained_models';
 
 export interface InferenceQueryParams {
   decompress_definition?: boolean;
@@ -47,7 +47,7 @@ export interface InferenceStatsResponse {
  * Service with APIs calls to perform inference operations.
  * @param httpService
  */
-export function inferenceApiProvider(httpService: HttpService) {
+export function trainedModelsApiProvider(httpService: HttpService) {
   const apiBasePath = basePath();
 
   return {
@@ -58,14 +58,14 @@ export function inferenceApiProvider(httpService: HttpService) {
      *                  Fetches all In case nothing is provided.
      * @param params - Optional query params
      */
-    getInferenceModel(modelId?: string | string[], params?: InferenceQueryParams) {
+    getTrainedModels(modelId?: string | string[], params?: InferenceQueryParams) {
       let model = modelId ?? '';
       if (Array.isArray(modelId)) {
         model = modelId.join(',');
       }
 
-      return httpService.http<ModelConfigResponse[]>({
-        path: `${apiBasePath}/inference${model && `/${model}`}`,
+      return httpService.http<TrainedModelConfigResponse[]>({
+        path: `${apiBasePath}/trained_models${model && `/${model}`}`,
         method: 'GET',
         ...(params ? { query: params as HttpFetchQuery } : {}),
       });
@@ -78,14 +78,14 @@ export function inferenceApiProvider(httpService: HttpService) {
      *                  Fetches all In case nothing is provided.
      * @param params - Optional query params
      */
-    getInferenceModelStats(modelId?: string | string[], params?: InferenceStatsQueryParams) {
+    getTrainedModelStats(modelId?: string | string[], params?: InferenceStatsQueryParams) {
       let model = modelId ?? '_all';
       if (Array.isArray(modelId)) {
         model = modelId.join(',');
       }
 
       return httpService.http<InferenceStatsResponse>({
-        path: `${apiBasePath}/inference/${model}/_stats`,
+        path: `${apiBasePath}/trained_models/${model}/_stats`,
         method: 'GET',
       });
     },
@@ -95,14 +95,14 @@ export function inferenceApiProvider(httpService: HttpService) {
      *
      * @param modelId - Model ID, collection of Model IDs.
      */
-    getInferenceModelPipelines(modelId: string | string[]) {
+    getTrainedModelPipelines(modelId: string | string[]) {
       let model = modelId;
       if (Array.isArray(modelId)) {
         model = modelId.join(',');
       }
 
       return httpService.http<ModelPipelines[]>({
-        path: `${apiBasePath}/inference/${model}/pipelines`,
+        path: `${apiBasePath}/trained_models/${model}/pipelines`,
         method: 'GET',
       });
     },
@@ -112,25 +112,25 @@ export function inferenceApiProvider(httpService: HttpService) {
      *
      * @param modelId - Model ID
      */
-    deleteInferenceModel(modelId: string) {
+    deleteTrainedModel(modelId: string) {
       return httpService.http<any>({
-        path: `${apiBasePath}/inference/${modelId}`,
+        path: `${apiBasePath}/trained_models/${modelId}`,
         method: 'DELETE',
       });
     },
   };
 }
 
-type InferenceApiService = ReturnType<typeof inferenceApiProvider>;
+type TrainedModelsApiService = ReturnType<typeof trainedModelsApiProvider>;
 
 /**
- * Hooks for accessing {@link InferenceApiService} in React components.
+ * Hooks for accessing {@link TrainedModelsApiService} in React components.
  */
-export function useInferenceApiService(): InferenceApiService {
+export function useTrainedModelsApiService(): TrainedModelsApiService {
   const {
     services: {
       mlServices: { httpService },
     },
   } = useMlKibana();
-  return useMemo(() => inferenceApiProvider(httpService), [httpService]);
+  return useMemo(() => trainedModelsApiProvider(httpService), [httpService]);
 }

@@ -170,12 +170,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).not.to.contain('APM');
       });
 
-      it(`renders not found page`, async () => {
+      it(`renders no permission page`, async () => {
         await PageObjects.common.navigateToUrl('apm', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await PageObjects.error.expectNotFound();
+        await PageObjects.error.expectForbidden();
       });
     });
   });
