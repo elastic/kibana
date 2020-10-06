@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { BaseVisTypeOptions } from 'src/plugins/visualizations/public';
+import { BaseVisTypeOptions, VisGroups } from 'src/plugins/visualizations/public';
 import { createInputControlVisController } from './vis_controller';
 import { getControlsTab } from './components/editor/controls_tab';
 import { OptionsTab } from './components/editor/options_tab';
@@ -37,7 +37,7 @@ export function createInputControlVisTypeDefinition(
       defaultMessage: 'Controls',
     }),
     icon: 'controlsHorizontal',
-    group: 'tools',
+    group: VisGroups.TOOLS,
     description: i18n.translate('inputControl.register.controlsDescription', {
       defaultMessage: 'Create interactive controls for easy dashboard manipulation.',
     }),
