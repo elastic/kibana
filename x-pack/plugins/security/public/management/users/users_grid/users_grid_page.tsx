@@ -276,12 +276,18 @@ export class UsersGridPage extends Component<Props, State> {
 
   private handleDelete = (usernames: string[], errors: string[]) => {
     const { users } = this.state;
+    const filteredUsers = users.filter(({ username }) => {
+      return !usernames.includes(username) || errors.includes(username);
+    });
     this.setState({
       selection: [],
       showDeleteConfirmation: false,
-      users: users.filter(({ username }) => {
-        return !usernames.includes(username) || errors.includes(username);
-      }),
+      users: filteredUsers,
+      visibleUsers: this.getVisibleUsers(
+        filteredUsers,
+        this.state.filter,
+        this.state.includeReservedUsers
+      ),
     });
   };
 
