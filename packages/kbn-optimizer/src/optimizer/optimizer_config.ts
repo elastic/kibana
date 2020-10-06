@@ -161,7 +161,8 @@ export class OptimizerConfig {
       Path.resolve(repoRoot, 'src/plugins'),
       ...(oss ? [] : [Path.resolve(repoRoot, 'x-pack/plugins')]),
       Path.resolve(repoRoot, 'plugins'),
-      ...(examples ? [Path.resolve('examples'), Path.resolve('x-pack/examples')] : []),
+      ...(examples ? [Path.resolve('examples')] : []),
+      ...(examples && !oss ? [Path.resolve('x-pack/examples')] : []),
       Path.resolve(repoRoot, '../kibana-extra'),
     ];
     if (!pluginScanDirs.every((p) => Path.isAbsolute(p))) {

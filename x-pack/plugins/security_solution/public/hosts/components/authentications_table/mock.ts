@@ -3,11 +3,34 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { SearchResponse } from 'elasticsearch';
+import { HostAuthenticationsStrategyResponse } from '../../../../common/search_strategy/security_solution/hosts/authentications';
 
-import { AuthenticationsData } from '../../../graphql/types';
-
-export const mockData: { Authentications: AuthenticationsData } = {
+export const mockData: { Authentications: HostAuthenticationsStrategyResponse } = {
   Authentications: {
+    rawResponse: {
+      aggregations: {
+        group_by_users: {
+          buckets: [
+            {
+              key: 'SYSTEM',
+              doc_count: 4,
+              failures: {
+                doc_count: 0,
+                lastFailure: { hits: { total: 0, max_score: null, hits: [] } },
+                hits: { total: 0, max_score: null, hits: [] },
+              },
+              successes: {
+                doc_count: 4,
+                lastSuccess: { hits: { total: 4, max_score: null } },
+              },
+            },
+          ],
+          doc_count_error_upper_bound: -1,
+          sum_other_doc_count: 566,
+        },
+      },
+    } as SearchResponse<unknown>,
     totalCount: 54,
     edges: [
       {

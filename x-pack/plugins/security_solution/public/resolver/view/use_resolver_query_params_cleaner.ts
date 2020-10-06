@@ -6,8 +6,9 @@
 
 import { useRef, useEffect } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
-
-import { useQueryStringKeys } from './use_query_string_keys';
+import { useSelector } from 'react-redux';
+import * as selectors from '../store/selectors';
+import { parameterName } from '../store/parameter_name';
 /**
  * Cleanup any query string keys that were added by this Resolver instance.
  * This works by having a React effect that just has behavior in the 'cleanup' function.
@@ -23,15 +24,15 @@ export function useResolverQueryParamCleaner() {
   searchRef.current = useLocation().search;
 
   const history = useHistory();
+  const resolverComponentInstanceID = useSelector(selectors.resolverComponentInstanceID);
 
-  const { idKey, eventKey } = useQueryStringKeys();
+  const resolverKey = parameterName(resolverComponentInstanceID);
 
   useEffect(() => {
     /**
      * Keep track of the old query string keys so we can remove them.
      */
-    const oldIdKey = idKey;
-    const oldEventKey = eventKey;
+    const oldResolverKey = resolverKey;
     /**
      * When `idKey` or `eventKey` changes (such as when the `resolverComponentInstanceID` has changed) or when the component unmounts, remove any state from the query string.
      */
@@ -44,10 +45,9 @@ export function useResolverQueryParamCleaner() {
       /**
        * Remove old keys from the url
        */
-      urlSearchParams.delete(oldIdKey);
-      urlSearchParams.delete(oldEventKey);
+      urlSearchParams.delete(oldResolverKey);
       const relativeURL = { search: urlSearchParams.toString() };
       history.replace(relativeURL);
     };
-  }, [idKey, eventKey, history]);
+  }, [resolverKey, history]);
 }

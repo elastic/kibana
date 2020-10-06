@@ -7,5 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-toSpec?: () => FieldSpec;
+toSpec?: (options?: {
+        getFormatterForField?: IndexPattern['getFormatterForField'];
+    }) => FieldSpec;
 ```

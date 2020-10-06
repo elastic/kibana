@@ -351,7 +351,9 @@ describe('#asScoped', () => {
 
   test('passes x-opaque-id header with request id', () => {
     clusterClient.asScoped(
-      httpServerMock.createKibanaRequest({ kibanaRequestState: { requestId: 'alpha' } })
+      httpServerMock.createKibanaRequest({
+        kibanaRequestState: { requestId: 'alpha', requestUuid: 'ignore-this-id' },
+      })
     );
 
     expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);

@@ -57,7 +57,7 @@ export class ExpandPanelAction implements ActionByType<typeof ACTION_EXPAND_PANE
           defaultMessage: 'Minimize',
         })
       : i18n.translate('dashboard.actions.toggleExpandPanelMenuItem.notExpandedDisplayName', {
-          defaultMessage: 'Full screen',
+          defaultMessage: 'Maximize panel',
         });
   }
 

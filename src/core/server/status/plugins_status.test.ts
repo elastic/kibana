@@ -161,13 +161,13 @@ describe('PluginStatusService', () => {
         },
         b: {
           level: ServiceStatusLevels.degraded,
-          summary: '[2] services are degraded',
+          summary: '[savedObjects]: savedObjects degraded',
           detail: 'See the status page for more information',
           meta: expect.any(Object),
         },
         c: {
           level: ServiceStatusLevels.degraded,
-          summary: '[3] services are degraded',
+          summary: '[savedObjects]: savedObjects degraded',
           detail: 'See the status page for more information',
           meta: expect.any(Object),
         },
@@ -186,13 +186,13 @@ describe('PluginStatusService', () => {
         },
         b: {
           level: ServiceStatusLevels.critical,
-          summary: '[2] services are critical',
+          summary: '[elasticsearch]: elasticsearch critical',
           detail: 'See the status page for more information',
           meta: expect.any(Object),
         },
         c: {
           level: ServiceStatusLevels.critical,
-          summary: '[3] services are critical',
+          summary: '[elasticsearch]: elasticsearch critical',
           detail: 'See the status page for more information',
           meta: expect.any(Object),
         },
@@ -312,9 +312,9 @@ describe('PluginStatusService', () => {
       pluginA$.next(available);
       pluginA$.next(degraded);
       // Waiting for the debounce timeout should cut a new update
-      await delay(100);
+      await delay(500);
       pluginA$.next(available);
-      await delay(100);
+      await delay(500);
       subscription.unsubscribe();
 
       expect(statusUpdates).toMatchInlineSnapshot(`

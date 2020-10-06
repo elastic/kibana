@@ -89,6 +89,7 @@ interface Props {
     alertOnNoData?: boolean;
   };
   alertInterval: string;
+  alertThrottle: string;
   alertsContext: AlertsContextValue<AlertContextMeta>;
   setAlertParams(key: string, value: any): void;
   setAlertProperty(key: string, value: any): void;
@@ -104,7 +105,14 @@ const defaultExpression = {
 } as InventoryMetricConditions;
 
 export const Expressions: React.FC<Props> = (props) => {
-  const { setAlertParams, alertParams, errors, alertsContext, alertInterval } = props;
+  const {
+    setAlertParams,
+    alertParams,
+    errors,
+    alertsContext,
+    alertInterval,
+    alertThrottle,
+  } = props;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
     type: 'metrics',
@@ -378,6 +386,7 @@ export const Expressions: React.FC<Props> = (props) => {
       <EuiSpacer size={'m'} />
       <AlertPreview
         alertInterval={alertInterval}
+        alertThrottle={alertThrottle}
         alertType={METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID}
         alertParams={pick(alertParams, 'criteria', 'nodeType', 'sourceId', 'filterQuery')}
         validate={validateMetricThreshold}

@@ -140,24 +140,25 @@ describe('Alerts', () => {
           waitForAlerts();
 
           const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeClosed;
-          cy.get(NUMBER_OF_ALERTS).invoke('text').should('eq', expectedNumberOfAlerts.toString());
-          cy.get(SHOWING_ALERTS)
-            .invoke('text')
-            .should('eql', `Showing ${expectedNumberOfAlerts.toString()} alerts`);
+          cy.get(NUMBER_OF_ALERTS).should('have.text', expectedNumberOfAlerts.toString());
+          cy.get(SHOWING_ALERTS).should(
+            'have.text',
+            `Showing ${expectedNumberOfAlerts.toString()} alerts`
+          );
 
           goToClosedAlerts();
           waitForAlerts();
 
-          cy.get(NUMBER_OF_ALERTS)
-            .invoke('text')
-            .should('eql', numberOfAlertsToBeClosed.toString());
-          cy.get(SHOWING_ALERTS)
-            .invoke('text')
-            .should('eql', `Showing ${numberOfAlertsToBeClosed.toString()} alert`);
+          cy.get(NUMBER_OF_ALERTS).should('have.text', numberOfAlertsToBeClosed.toString());
+          cy.get(SHOWING_ALERTS).should(
+            'have.text',
+            `Showing ${numberOfAlertsToBeClosed.toString()} alert`
+          );
           cy.get(ALERTS).should('have.length', numberOfAlertsToBeClosed);
         });
     });
   });
+
   context('Opening alerts', () => {
     beforeEach(() => {
       esArchiverLoad('closed_alerts');
@@ -186,24 +187,25 @@ describe('Alerts', () => {
           waitForAlerts();
 
           const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeOpened;
-          cy.get(NUMBER_OF_ALERTS).invoke('text').should('eq', expectedNumberOfAlerts.toString());
-          cy.get(SHOWING_ALERTS)
-            .invoke('text')
-            .should('eql', `Showing ${expectedNumberOfAlerts.toString()} alerts`);
+          cy.get(NUMBER_OF_ALERTS).should('have.text', expectedNumberOfAlerts.toString());
+          cy.get(SHOWING_ALERTS).should(
+            'have.text',
+            `Showing ${expectedNumberOfAlerts.toString()} alerts`
+          );
 
           goToOpenedAlerts();
           waitForAlerts();
 
-          cy.get(NUMBER_OF_ALERTS)
-            .invoke('text')
-            .should('eql', numberOfAlertsToBeOpened.toString());
-          cy.get(SHOWING_ALERTS)
-            .invoke('text')
-            .should('eql', `Showing ${numberOfAlertsToBeOpened.toString()} alert`);
+          cy.get(NUMBER_OF_ALERTS).should('have.text', numberOfAlertsToBeOpened.toString());
+          cy.get(SHOWING_ALERTS).should(
+            'have.text',
+            `Showing ${numberOfAlertsToBeOpened.toString()} alert`
+          );
           cy.get(ALERTS).should('have.length', numberOfAlertsToBeOpened);
         });
     });
   });
+
   context('Marking alerts as in-progress', () => {
     beforeEach(() => {
       esArchiverLoad('alerts');
@@ -228,23 +230,25 @@ describe('Alerts', () => {
           cy.reload();
           goToOpenedAlerts();
           waitForAlertsToBeLoaded();
-          waitForAlerts();
 
           const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeMarkedInProgress;
-          cy.get(NUMBER_OF_ALERTS).invoke('text').should('eq', expectedNumberOfAlerts.toString());
-          cy.get(SHOWING_ALERTS)
-            .invoke('text')
-            .should('eql', `Showing ${expectedNumberOfAlerts.toString()} alerts`);
+          cy.get(NUMBER_OF_ALERTS).should('have.text', expectedNumberOfAlerts.toString());
+          cy.get(SHOWING_ALERTS).should(
+            'have.text',
+            `Showing ${expectedNumberOfAlerts.toString()} alerts`
+          );
 
           goToInProgressAlerts();
           waitForAlerts();
 
-          cy.get(NUMBER_OF_ALERTS)
-            .invoke('text')
-            .should('eql', numberOfAlertsToBeMarkedInProgress.toString());
-          cy.get(SHOWING_ALERTS)
-            .invoke('text')
-            .should('eql', `Showing ${numberOfAlertsToBeMarkedInProgress.toString()} alert`);
+          cy.get(NUMBER_OF_ALERTS).should(
+            'have.text',
+            numberOfAlertsToBeMarkedInProgress.toString()
+          );
+          cy.get(SHOWING_ALERTS).should(
+            'have.text',
+            `Showing ${numberOfAlertsToBeMarkedInProgress.toString()} alert`
+          );
           cy.get(ALERTS).should('have.length', numberOfAlertsToBeMarkedInProgress);
         });
     });

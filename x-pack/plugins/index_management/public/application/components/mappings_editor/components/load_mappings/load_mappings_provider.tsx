@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -134,9 +134,9 @@ export const LoadMappingsProvider = ({ onJson, children }: Props) => {
     state.json !== undefined && state.errors !== undefined ? 'validationResult' : 'json';
   const i18nTexts = getTexts(view, state.errors?.length);
 
-  const onJsonUpdate: OnJsonEditorUpdateHandler = (jsonUpdateData) => {
+  const onJsonUpdate: OnJsonEditorUpdateHandler = useCallback((jsonUpdateData) => {
     jsonContent.current = jsonUpdateData;
-  };
+  }, []);
 
   const openModal: OpenJsonModalFunc = () => {
     setState({ isModalOpen: true });

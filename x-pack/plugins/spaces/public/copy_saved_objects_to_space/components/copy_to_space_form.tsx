@@ -51,7 +51,7 @@ export const CopyToSpaceForm = (props: Props) => {
         label={
           <FormattedMessage
             id="xpack.spaces.management.copyToSpace.selectSpacesLabel"
-            defaultMessage="Select space(s):"
+            defaultMessage="Select spaces"
           />
         }
         fullWidth

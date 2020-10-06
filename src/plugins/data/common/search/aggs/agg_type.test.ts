@@ -147,6 +147,9 @@ describe('AggType Class', () => {
               },
             },
           },
+          aggConfigs: {
+            indexPattern: { getFormatterForField: () => ({ toJSON: () => ({ id: 'format' }) }) },
+          },
         } as unknown) as IAggConfig;
         const aggType = new AggType({
           name: 'name',

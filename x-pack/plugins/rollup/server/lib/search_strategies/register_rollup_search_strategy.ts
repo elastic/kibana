@@ -4,27 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ILegacyScopedClusterClient } from 'src/core/server';
 import {
-  AbstractSearchRequest,
   DefaultSearchCapabilities,
   AbstractSearchStrategy,
+  ReqFacade,
 } from '../../../../../../src/plugins/vis_type_timeseries/server';
-import { CallWithRequestFactoryShim } from '../../types';
 import { getRollupSearchStrategy } from './rollup_search_strategy';
-import { getRollupSearchRequest } from './rollup_search_request';
 import { getRollupSearchCapabilities } from './rollup_search_capabilities';
 
 export const registerRollupSearchStrategy = (
-  callWithRequestFactory: CallWithRequestFactoryShim,
-  addSearchStrategy: (searchStrategy: any) => void
+  addSearchStrategy: (searchStrategy: any) => void,
+  getRollupService: (reg: ReqFacade) => Promise<ILegacyScopedClusterClient>
 ) => {
-  const RollupSearchRequest = getRollupSearchRequest(AbstractSearchRequest);
   const RollupSearchCapabilities = getRollupSearchCapabilities(DefaultSearchCapabilities);
   const RollupSearchStrategy = getRollupSearchStrategy(
     AbstractSearchStrategy,
-    RollupSearchRequest,
     RollupSearchCapabilities,
-    callWithRequestFactory
+    getRollupService
   );
 
   addSearchStrategy(new RollupSearchStrategy());

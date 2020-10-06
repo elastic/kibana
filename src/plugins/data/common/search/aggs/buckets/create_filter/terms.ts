@@ -27,7 +27,7 @@ import {
 
 export const createFilterTerms = (aggConfig: IBucketAggConfig, key: string, params: any) => {
   const field = aggConfig.params.field;
-  const indexPattern = field.indexPattern;
+  const indexPattern = aggConfig.aggConfigs.indexPattern;
 
   if (key === '__other__') {
     const terms = params.terms;

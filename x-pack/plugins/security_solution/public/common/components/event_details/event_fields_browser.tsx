@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { BrowserFields, getAllFieldsByName } from '../../containers/source';
-import { DetailItem } from '../../../graphql/types';
+import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 import { OnUpdateColumns } from '../../../timelines/components/timeline/events';
 
 import { getColumns } from './columns';
@@ -19,7 +19,7 @@ import { search } from './helpers';
 interface Props {
   browserFields: BrowserFields;
   columnHeaders: ColumnHeaderOptions[];
-  data: DetailItem[];
+  data: TimelineEventsDetailsItem[];
   eventId: string;
   onUpdateColumns: OnUpdateColumns;
   timelineId: string;

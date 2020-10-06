@@ -5,6 +5,7 @@
  */
 
 export * from './default_actions_array';
+export * from './default_array';
 export * from './default_boolean_false';
 export * from './default_boolean_true';
 export * from './default_empty_string';
@@ -33,4 +34,5 @@ export * from './positive_integer';
 export * from './positive_integer_greater_than_zero';
 export * from './references_default_array';
 export * from './risk_score';
+export * from './threat_mapping';
 export * from './uuid';

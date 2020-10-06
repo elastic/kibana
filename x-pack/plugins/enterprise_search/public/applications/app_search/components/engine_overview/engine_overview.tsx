@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useValues } from 'kea';
 import {
   EuiPageContent,
   EuiPageContentHeader,
@@ -12,13 +13,13 @@ import {
   EuiTitle,
   EuiSpacer,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 import { FlashMessages } from '../../../shared/flash_messages';
-import { LicenseContext, ILicenseContext, hasPlatinumLicense } from '../../../shared/licensing';
-import { KibanaContext, IKibanaContext } from '../../../index';
+import { HttpLogic } from '../../../shared/http';
+import { LicensingLogic } from '../../../shared/licensing';
 
 import { EngineIcon } from './assets/engine_icon';
 import { MetaEngineIcon } from './assets/meta_engine_icon';
@@ -38,8 +39,8 @@ interface ISetEnginesCallbacks {
 }
 
 export const EngineOverview: React.FC = () => {
-  const { http } = useContext(KibanaContext) as IKibanaContext;
-  const { license } = useContext(LicenseContext) as ILicenseContext;
+  const { http } = useValues(HttpLogic);
+  const { hasPlatinumLicense } = useValues(LicensingLogic);
 
   const [isLoading, setIsLoading] = useState(true);
   const [engines, setEngines] = useState([]);
@@ -71,20 +72,20 @@ export const EngineOverview: React.FC = () => {
   }, [enginesPage]);
 
   useEffect(() => {
-    if (hasPlatinumLicense(license)) {
+    if (hasPlatinumLicense) {
       const params = { type: 'meta', pageIndex: metaEnginesPage };
       const callbacks = { setResults: setMetaEngines, setResultsTotal: setMetaEnginesTotal };
 
       setEnginesData(params, callbacks);
     }
-  }, [license, metaEnginesPage]);
+  }, [hasPlatinumLicense, metaEnginesPage]);
 
   if (isLoading) return <LoadingState />;
   if (!engines.length) return <EmptyState />;
 
   return (
     <>
-      <SetPageChrome isRoot />
+      <SetPageChrome />
       <SendTelemetry action="viewed" metric="engines_overview" />
 
       <EngineOverviewHeader />
@@ -94,10 +95,9 @@ export const EngineOverview: React.FC = () => {
           <EuiTitle size="s">
             <h2>
               <EngineIcon />
-              <FormattedMessage
-                id="xpack.enterpriseSearch.appSearch.enginesOverview.engines"
-                defaultMessage="Engines"
-              />
+              {i18n.translate('xpack.enterpriseSearch.appSearch.enginesOverview.engines', {
+                defaultMessage: 'Engines',
+              })}
             </h2>
           </EuiTitle>
         </EuiPageContentHeader>
@@ -119,10 +119,9 @@ export const EngineOverview: React.FC = () => {
               <EuiTitle size="s">
                 <h2>
                   <MetaEngineIcon />
-                  <FormattedMessage
-                    id="xpack.enterpriseSearch.appSearch.enginesOverview.metaEngines"
-                    defaultMessage="Meta Engines"
-                  />
+                  {i18n.translate('xpack.enterpriseSearch.appSearch.enginesOverview.metaEngines', {
+                    defaultMessage: 'Meta Engines',
+                  })}
                 </h2>
               </EuiTitle>
             </EuiPageContentHeader>

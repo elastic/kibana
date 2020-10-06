@@ -60,22 +60,21 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.unload('fleet/agents');
     });
 
-    it('should return a 404 if user lacks fleet-write permissions', async () => {
+    it('should return a 403 if user lacks fleet-write permissions', async () => {
       const { body: apiResponse } = await supertest
-        .delete(`/api/ingest_manager/fleet/agents/agent1`)
+        .delete(`/api/fleet/agents/agent1`)
         .auth(users.fleet_user.username, users.fleet_user.password)
         .set('kbn-xsrf', 'xx')
-        .expect(404);
+        .expect(403);
 
       expect(apiResponse).not.to.eql({
-        success: true,
         action: 'deleted',
       });
     });
 
     it('should return a 404 if there is no agent to delete', async () => {
       await supertest
-        .delete(`/api/ingest_manager/fleet/agents/i-do-not-exist`)
+        .delete(`/api/fleet/agents/i-do-not-exist`)
         .auth(users.fleet_admin.username, users.fleet_admin.password)
         .set('kbn-xsrf', 'xx')
         .expect(404);
@@ -83,12 +82,11 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should return a 200 after deleting an agent', async () => {
       const { body: apiResponse } = await supertest
-        .delete(`/api/ingest_manager/fleet/agents/agent1`)
+        .delete(`/api/fleet/agents/agent1`)
         .auth(users.fleet_admin.username, users.fleet_admin.password)
         .set('kbn-xsrf', 'xx')
         .expect(200);
       expect(apiResponse).to.eql({
-        success: true,
         action: 'deleted',
       });
     });

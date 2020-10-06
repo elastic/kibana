@@ -102,6 +102,7 @@ export function getPluginPrivileges() {
       ...privilege,
       api: userMlCapabilitiesKeys.map((k) => `ml:${k}`),
       catalogue: [PLUGIN_ID],
+      management: { insightsAndAlerting: [] },
       ui: userMlCapabilitiesKeys,
       savedObject: {
         all: [],

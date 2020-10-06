@@ -93,6 +93,16 @@ const indexPattern1 = ({
       searchable: true,
       esTypes: ['keyword'],
     },
+    {
+      name: 'scripted',
+      displayName: 'Scripted',
+      type: 'string',
+      searchable: true,
+      aggregatable: true,
+      scripted: true,
+      lang: 'painless',
+      script: '1234',
+    },
     documentField,
   ],
 } as unknown) as IndexPattern;
@@ -156,12 +166,13 @@ const indexPattern2 = ({
       aggregatable: true,
       searchable: true,
       scripted: true,
+      lang: 'painless',
+      script: '1234',
       aggregationRestrictions: {
         terms: {
           agg: 'terms',
         },
       },
-      esTypes: ['keyword'],
     },
     documentField,
   ],
@@ -186,7 +197,7 @@ function mockClient() {
 function mockIndexPatternsService() {
   return ({
     get: jest.fn(async (id: '1' | '2') => {
-      return sampleIndexPatternsFromService[id];
+      return { ...sampleIndexPatternsFromService[id], metaFields: [] };
     }),
   } as unknown) as Pick<IndexPatternsContract, 'get'>;
 }
@@ -237,6 +248,7 @@ describe('loader', () => {
           get: jest.fn(async () => ({
             id: 'foo',
             title: 'Foo index',
+            metaFields: [],
             typeMeta: {
               aggs: {
                 date_histogram: {
@@ -283,6 +295,55 @@ describe('loader', () => {
       ).toEqual({
         date_histogram: { agg: 'date_histogram', fixed_interval: 'm' },
       });
+    });
+
+    it('should map meta flag', async () => {
+      const cache = await loadIndexPatterns({
+        cache: {},
+        patterns: ['foo'],
+        indexPatternsService: ({
+          get: jest.fn(async () => ({
+            id: 'foo',
+            title: 'Foo index',
+            metaFields: ['timestamp'],
+            typeMeta: {
+              aggs: {
+                date_histogram: {
+                  timestamp: {
+                    agg: 'date_histogram',
+                    fixed_interval: 'm',
+                  },
+                },
+                sum: {
+                  bytes: {
+                    agg: 'sum',
+                  },
+                },
+              },
+            },
+            fields: [
+              {
+                name: 'timestamp',
+                displayName: 'timestampLabel',
+                type: 'date',
+                aggregatable: true,
+                searchable: true,
+              },
+              {
+                name: 'bytes',
+                displayName: 'bytes',
+                type: 'number',
+                aggregatable: true,
+                searchable: true,
+              },
+            ],
+          })),
+        } as unknown) as Pick<IndexPatternsContract, 'get'>,
+      });
+
+      expect(cache.foo.fields.find((f: IndexPatternField) => f.name === 'timestamp')!.meta).toEqual(
+        true
+      );
     });
   });
 
@@ -377,6 +438,34 @@ describe('loader', () => {
       });
       expect(storage.set).toHaveBeenCalledWith('lens-settings', {
         indexPatternId: '2',
+      });
+    });
+
+    it('should use the indexPatternId of the visualize trigger field, if provided', async () => {
+      const storage = createMockStorage();
+      const state = await loadInitialState({
+        savedObjectsClient: mockClient(),
+        indexPatternsService: mockIndexPatternsService(),
+        storage,
+        initialContext: {
+          indexPatternId: '1',
+          fieldName: '',
+        },
+      });
+
+      expect(state).toMatchObject({
+        currentIndexPatternId: '1',
+        indexPatternRefs: [
+          { id: '1', title: sampleIndexPatterns['1'].title },
+          { id: '2', title: sampleIndexPatterns['2'].title },
+        ],
+        indexPatterns: {
+          '1': sampleIndexPatterns['1'],
+        },
+        layers: {},
+      });
+      expect(storage.set).toHaveBeenCalledWith('lens-settings', {
+        indexPatternId: '1',
       });
     });
 

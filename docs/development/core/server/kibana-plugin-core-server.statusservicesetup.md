@@ -74,6 +74,7 @@ core.status.set(
 |  [core$](./kibana-plugin-core-server.statusservicesetup.core_.md) | <code>Observable&lt;CoreStatus&gt;</code> | Current status for all Core services. |
 |  [dependencies$](./kibana-plugin-core-server.statusservicesetup.dependencies_.md) | <code>Observable&lt;Record&lt;string, ServiceStatus&gt;&gt;</code> | Current status for all plugins this plugin depends on. Each key of the <code>Record</code> is a plugin id. |
 |  [derivedStatus$](./kibana-plugin-core-server.statusservicesetup.derivedstatus_.md) | <code>Observable&lt;ServiceStatus&gt;</code> | The status of this plugin as derived from its dependencies. |
+|  [isStatusPageAnonymous](./kibana-plugin-core-server.statusservicesetup.isstatuspageanonymous.md) | <code>() =&gt; boolean</code> | Whether or not the status HTTP APIs are available to unauthenticated users when an authentication provider is present. |
 |  [overall$](./kibana-plugin-core-server.statusservicesetup.overall_.md) | <code>Observable&lt;ServiceStatus&gt;</code> | Overall system status for all of Kibana. |
 
 ## Methods

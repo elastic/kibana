@@ -40,7 +40,6 @@ export const networkHttp: SecuritySolutionFactory<NetworkQueries.http> = {
     const edges = networkHttpEdges.splice(cursorStart, querySize - cursorStart);
     const inspect = {
       dsl: [inspectStringifyObject(buildHttpQuery(options))],
-      response: [inspectStringifyObject(response)],
     };
     const showMorePagesIndicator = totalCount > fakeTotalCount;
 
@@ -49,7 +48,7 @@ export const networkHttp: SecuritySolutionFactory<NetworkQueries.http> = {
       edges,
       inspect,
       pageInfo: {
-        activePage: activePage ? activePage : 0,
+        activePage: activePage ?? 0,
         fakeTotalCount,
         showMorePagesIndicator,
       },

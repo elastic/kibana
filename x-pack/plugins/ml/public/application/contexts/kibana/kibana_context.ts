@@ -22,6 +22,6 @@ interface StartPlugins {
   share: SharePluginStart;
 }
 export type StartServices = CoreStart &
-  StartPlugins & { kibanaVersion: string } & MlServicesContext;
+  StartPlugins & { appName: string; kibanaVersion: string } & MlServicesContext;
 export const useMlKibana = () => useKibana<StartServices>();
 export type MlKibanaReactContextValue = KibanaReactContextValue<StartServices>;

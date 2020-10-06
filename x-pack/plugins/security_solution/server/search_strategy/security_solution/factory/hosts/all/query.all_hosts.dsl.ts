@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty, isString } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 import { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
 import {
   Direction,
   HostsRequestOptions,
   SortField,
   HostsFields,
-} from '../../../../../../common/search_strategy/security_solution';
+} from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 import { assertUnreachable } from '../../../../../../common/utility_types';
 
@@ -24,7 +24,7 @@ export const buildHostsQuery = ({
   timerange: { from, to },
 }: HostsRequestOptions): ISearchRequestParams => {
   const filter = [
-    ...createQueryFilterClauses(isString(filterQuery) ? JSON.parse(filterQuery) : filterQuery),
+    ...createQueryFilterClauses(filterQuery),
     {
       range: {
         '@timestamp': {

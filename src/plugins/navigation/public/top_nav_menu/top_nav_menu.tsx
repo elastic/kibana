@@ -18,44 +18,49 @@
  */
 
 import React, { ReactElement } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiHeaderLinks } from '@elastic/eui';
 import classNames from 'classnames';
 
 import { MountPoint } from '../../../../core/public';
 import { MountPointPortal } from '../../../kibana_react/public';
-import { StatefulSearchBarProps, DataPublicPluginStart } from '../../../data/public';
+import {
+  StatefulSearchBarProps,
+  DataPublicPluginStart,
+  SearchBarProps,
+} from '../../../data/public';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
 
-export type TopNavMenuProps = StatefulSearchBarProps & {
-  config?: TopNavMenuData[];
-  showSearchBar?: boolean;
-  showQueryBar?: boolean;
-  showQueryInput?: boolean;
-  showDatePicker?: boolean;
-  showFilterBar?: boolean;
-  data?: DataPublicPluginStart;
-  className?: string;
-  /**
-   * If provided, the menu part of the component will be rendered as a portal inside the given mount point.
-   *
-   * This is meant to be used with the `setHeaderActionMenu` core API.
-   *
-   * @example
-   * ```ts
-   * export renderApp = ({ element, history, setHeaderActionMenu }: AppMountParameters) => {
-   *   const topNavConfig = ...; // TopNavMenuProps
-   *   return (
-   *     <Router history=history>
-   *       <TopNavMenu {...topNavConfig} setMenuMountPoint={setHeaderActionMenu}>
-   *       <MyRoutes />
-   *     </Router>
-   *   )
-   * }
-   * ```
-   */
-  setMenuMountPoint?: (menuMount: MountPoint | undefined) => void;
-};
+export type TopNavMenuProps = StatefulSearchBarProps &
+  Omit<SearchBarProps, 'kibana' | 'intl' | 'timeHistory'> & {
+    config?: TopNavMenuData[];
+    showSearchBar?: boolean;
+    showQueryBar?: boolean;
+    showQueryInput?: boolean;
+    showDatePicker?: boolean;
+    showFilterBar?: boolean;
+    data?: DataPublicPluginStart;
+    className?: string;
+    /**
+     * If provided, the menu part of the component will be rendered as a portal inside the given mount point.
+     *
+     * This is meant to be used with the `setHeaderActionMenu` core API.
+     *
+     * @example
+     * ```ts
+     * export renderApp = ({ element, history, setHeaderActionMenu }: AppMountParameters) => {
+     *   const topNavConfig = ...; // TopNavMenuProps
+     *   return (
+     *     <Router history=history>
+     *       <TopNavMenu {...topNavConfig} setMenuMountPoint={setHeaderActionMenu}>
+     *       <MyRoutes />
+     *     </Router>
+     *   )
+     * }
+     * ```
+     */
+    setMenuMountPoint?: (menuMount: MountPoint | undefined) => void;
+  };
 
 /*
  * Top Nav Menu is a convenience wrapper component for:
@@ -76,31 +81,16 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
   function renderItems(): ReactElement[] | null {
     if (!config || config.length === 0) return null;
     return config.map((menuItem: TopNavMenuData, i: number) => {
-      return (
-        <EuiFlexItem
-          grow={false}
-          key={`nav-menu-${i}`}
-          className={menuItem.emphasize ? 'kbnTopNavItemEmphasized' : ''}
-        >
-          <TopNavMenuItem {...menuItem} />
-        </EuiFlexItem>
-      );
+      return <TopNavMenuItem key={`nav-menu-${i}`} {...menuItem} />;
     });
   }
 
   function renderMenu(className: string): ReactElement | null {
     if (!config || config.length === 0) return null;
     return (
-      <EuiFlexGroup
-        data-test-subj="top-nav"
-        justifyContent="flexStart"
-        alignItems="center"
-        gutterSize="none"
-        className={className}
-        responsive={false}
-      >
+      <EuiHeaderLinks data-test-subj="top-nav" gutterSize="xs" className={className}>
         {renderItems()}
-      </EuiFlexGroup>
+      </EuiHeaderLinks>
     );
   }
 

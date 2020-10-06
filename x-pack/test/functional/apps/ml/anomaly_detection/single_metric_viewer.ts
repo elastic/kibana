@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { Job, Datafeed } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
@@ -60,9 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ml.testExecution.logTestStep('open job in single metric viewer');
       await ml.jobTable.waitForJobsToLoad();
-      await ml.jobTable.filterWithSearchString(JOB_CONFIG.job_id);
-      const rows = await ml.jobTable.parseJobTable();
-      expect(rows.filter((row) => row.id === JOB_CONFIG.job_id)).to.have.length(1);
+      await ml.jobTable.filterWithSearchString(JOB_CONFIG.job_id, 1);
 
       await ml.jobTable.clickOpenJobInSingleMetricViewerButton(JOB_CONFIG.job_id);
       await ml.commonUI.waitForMlLoadingIndicatorToDisappear();

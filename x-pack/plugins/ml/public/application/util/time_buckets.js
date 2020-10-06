@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import isPlainObject from 'lodash/isPlainObject';
-import isString from 'lodash/isString';
-import ary from 'lodash/ary';
-import sortBy from 'lodash/sortBy';
-import assign from 'lodash/assign';
+import { isPlainObject, isString, ary, sortBy, assign } from 'lodash';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 

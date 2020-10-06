@@ -20,7 +20,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { MetricVisComponent, MetricVisComponentProps } from './metric_vis_component';
+import MetricVisComponent, { MetricVisComponentProps } from './metric_vis_component';
 
 jest.mock('../services', () => ({
   getFormatService: () => ({

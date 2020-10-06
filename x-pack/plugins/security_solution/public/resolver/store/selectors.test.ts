@@ -14,6 +14,7 @@ import {
   mockTreeWithNoAncestorsAnd2Children,
 } from '../mocks/resolver_tree';
 import { SafeResolverEvent } from '../../../common/endpoint/types';
+import { mockTreeFetcherParameters } from '../mocks/tree_fetcher_parameters';
 
 describe('resolver selectors', () => {
   const actions: ResolverAction[] = [];
@@ -43,7 +44,7 @@ describe('resolver selectors', () => {
               secondAncestorID,
             }),
             // this value doesn't matter
-            databaseDocumentID: '',
+            parameters: mockTreeFetcherParameters(),
           },
         });
       });
@@ -77,7 +78,7 @@ describe('resolver selectors', () => {
           payload: {
             result: mockTreeWithNoAncestorsAnd2Children({ originID, firstChildID, secondChildID }),
             // this value doesn't matter
-            databaseDocumentID: '',
+            parameters: mockTreeFetcherParameters(),
           },
         });
       });

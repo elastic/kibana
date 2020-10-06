@@ -24,7 +24,7 @@ import {
   createPromiseFromStreams,
   createSplitStream,
   createMapStream,
-} from '../../../legacy/utils/streams';
+} from '../../../core/server/utils';
 
 // creates a stream that skips empty lines unless they are followed by
 // another line, preventing the empty lines produced by splitStream

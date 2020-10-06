@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface ServiceNowActionConnector {
-  config: ServiceNowConfig;
-  secrets: ServiceNowSecrets;
-}
+import { CasesConfigurationMapping } from '../case_mappings';
+import { UserConfiguredActionConnector } from '../../../../types';
+
+export type ServiceNowActionConnector = UserConfiguredActionConnector<
+  ServiceNowConfig,
+  ServiceNowSecrets
+>;
 
 export interface ServiceNowActionParams {
   subAction: string;
@@ -27,20 +30,13 @@ interface IncidentConfiguration {
   mapping: CasesConfigurationMapping[];
 }
 
-interface ServiceNowConfig {
+export interface ServiceNowConfig {
   apiUrl: string;
   incidentConfiguration?: IncidentConfiguration;
   isCaseOwned?: boolean;
 }
 
-interface ServiceNowSecrets {
+export interface ServiceNowSecrets {
   username: string;
   password: string;
-}
-
-// to remove
-export interface CasesConfigurationMapping {
-  source: string;
-  target: string;
-  actionType: string;
 }

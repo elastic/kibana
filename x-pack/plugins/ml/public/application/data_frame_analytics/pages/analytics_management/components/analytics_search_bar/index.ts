@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { AnalyticsSearchBar, filterAnalytics } from './analytics_search_bar';
+export { AnalyticsSearchBar, filterAnalytics, filterAnalyticsModels } from './analytics_search_bar';

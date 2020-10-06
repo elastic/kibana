@@ -4,48 +4,51 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useState, useCallback, useMemo } from 'react';
+import React, { FC, useState, useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  Direction,
+  EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiInMemoryTable,
   EuiTitle,
   EuiButton,
-  EuiSearchBarProps,
+  EuiSearchBar,
   EuiSpacer,
   EuiButtonIcon,
   EuiBadge,
+  SearchFilterConfig,
 } from '@elastic/eui';
-// @ts-ignore
-import { formatDate } from '@elastic/eui/lib/services/format';
+
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import { StatsBar, ModelsBarStats } from '../../../../../components/stats_bar';
-import { useInferenceApiService } from '../../../../../services/ml_api_service/inference';
+import { useTrainedModelsApiService } from '../../../../../services/ml_api_service/trained_models';
 import { ModelsTableToConfigMapping } from './index';
-import { TIME_FORMAT } from '../../../../../../../common/constants/time_format';
 import { DeleteModelsModal } from './delete_models_modal';
-import { useMlKibana, useNotifications } from '../../../../../contexts/kibana';
+import { useMlKibana, useMlUrlGenerator, useNotifications } from '../../../../../contexts/kibana';
 import { ExpandedRow } from './expanded_row';
-import { getResultsUrl } from '../analytics_list/common';
 import {
-  ModelConfigResponse,
+  TrainedModelConfigResponse,
   ModelPipelines,
   TrainedModelStat,
-} from '../../../../../../../common/types/inference';
+} from '../../../../../../../common/types/trained_models';
 import {
+  getAnalysisType,
   REFRESH_ANALYTICS_LIST_STATE,
   refreshAnalyticsList$,
   useRefreshAnalyticsList,
 } from '../../../../common';
+import { useTableSettings } from '../analytics_list/use_table_settings';
+import { filterAnalyticsModels, AnalyticsSearchBar } from '../analytics_search_bar';
+import { ML_PAGES } from '../../../../../../../common/constants/ml_url_generator';
+import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
+import { timeFormatter } from '../../../../../../../common/util/date_utils';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
-export type ModelItem = ModelConfigResponse & {
+export type ModelItem = TrainedModelConfigResponse & {
   type?: string;
   stats?: Stats;
   pipelines?: ModelPipelines['pipelines'] | null;
@@ -59,35 +62,55 @@ export const ModelsList: FC = () => {
       application: { navigateToUrl, capabilities },
     },
   } = useMlKibana();
+  const urlGenerator = useMlUrlGenerator();
 
   const canDeleteDataFrameAnalytics = capabilities.ml.canDeleteDataFrameAnalytics as boolean;
 
-  const inferenceApiService = useInferenceApiService();
+  const trainedModelsApiService = useTrainedModelsApiService();
   const { toasts } = useNotifications();
 
   const [searchQueryText, setSearchQueryText] = useState('');
-
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
-  const [sortField, setSortField] = useState<string>(ModelsTableToConfigMapping.id);
-  const [sortDirection, setSortDirection] = useState<Direction>('asc');
-
+  const [filteredModels, setFilteredModels] = useState<ModelItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [items, setItems] = useState<ModelItem[]>([]);
   const [selectedModels, setSelectedModels] = useState<ModelItem[]>([]);
-
   const [modelsToDelete, setModelsToDelete] = useState<ModelItemFull[]>([]);
-
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
   );
+
+  const updateFilteredItems = (queryClauses: any) => {
+    if (queryClauses.length) {
+      const filtered = filterAnalyticsModels(items, queryClauses);
+      setFilteredModels(filtered);
+    } else {
+      setFilteredModels(items);
+    }
+  };
+
+  const filterList = () => {
+    if (searchQueryText !== '') {
+      const query = EuiSearchBar.Query.parse(searchQueryText);
+      let clauses: any = [];
+      if (query && query.ast !== undefined && query.ast.clauses !== undefined) {
+        clauses = query.ast.clauses;
+      }
+      updateFilteredItems(clauses);
+    } else {
+      updateFilteredItems([]);
+    }
+  };
+
+  useEffect(() => {
+    filterList();
+  }, [searchQueryText, items]);
 
   /**
    * Fetches inference trained models.
    */
   const fetchData = useCallback(async () => {
     try {
-      const response = await inferenceApiService.getInferenceModel(undefined, {
+      const response = await trainedModelsApiService.getTrainedModels(undefined, {
         with_pipelines: true,
         size: 1000,
       });
@@ -123,7 +146,7 @@ export const ModelsList: FC = () => {
       }
     } catch (error) {
       toasts.addError(new Error(error.body?.message), {
-        title: i18n.translate('xpack.ml.inference.modelsList.fetchFailedErrorMessage', {
+        title: i18n.translate('xpack.ml.trainedModels.modelsList.fetchFailedErrorMessage', {
           defaultMessage: 'Models fetch failed',
         }),
       });
@@ -143,8 +166,8 @@ export const ModelsList: FC = () => {
       total: {
         show: true,
         value: items.length,
-        label: i18n.translate('xpack.ml.inference.modelsList.totalAmountLabel', {
-          defaultMessage: 'Total inference trained models',
+        label: i18n.translate('xpack.ml.trainedModels.modelsList.totalAmountLabel', {
+          defaultMessage: 'Total trained models',
         }),
       },
     };
@@ -159,7 +182,7 @@ export const ModelsList: FC = () => {
     try {
       const {
         trained_model_stats: modelsStatsResponse,
-      } = await inferenceApiService.getInferenceModelStats(modelIdsToFetch);
+      } = await trainedModelsApiService.getTrainedModelStats(modelIdsToFetch);
 
       for (const { model_id: id, ...stats } of modelsStatsResponse) {
         const model = models.find((m) => m.model_id === id);
@@ -168,7 +191,7 @@ export const ModelsList: FC = () => {
       return true;
     } catch (error) {
       toasts.addError(new Error(error.body.message), {
-        title: i18n.translate('xpack.ml.inference.modelsList.fetchModelStatsErrorMessage', {
+        title: i18n.translate('xpack.ml.trainedModels.modelsList.fetchModelStatsErrorMessage', {
           defaultMessage: 'Fetch model stats failed',
         }),
       });
@@ -198,7 +221,7 @@ export const ModelsList: FC = () => {
       setModelsToDelete(models as ModelItemFull[]);
     } else {
       toasts.addDanger(
-        i18n.translate('xpack.ml.inference.modelsList.unableToDeleteModelsErrorMessage', {
+        i18n.translate('xpack.ml.trainedModels.modelsList.unableToDeleteModelsErrorMessage', {
           defaultMessage: 'Unable to delete models',
         })
       );
@@ -213,7 +236,7 @@ export const ModelsList: FC = () => {
 
     try {
       await Promise.all(
-        modelsToDeleteIds.map((modelId) => inferenceApiService.deleteInferenceModel(modelId))
+        modelsToDeleteIds.map((modelId) => trainedModelsApiService.deleteTrainedModel(modelId))
       );
       setItems(
         items.filter(
@@ -221,7 +244,7 @@ export const ModelsList: FC = () => {
         )
       );
       toasts.addSuccess(
-        i18n.translate('xpack.ml.inference.modelsList.successfullyDeletedMessage', {
+        i18n.translate('xpack.ml.trainedModels.modelsList.successfullyDeletedMessage', {
           defaultMessage:
             '{modelsCount, plural, one {Model {modelsToDeleteIds}} other {# models}} {modelsCount, plural, one {has} other {have}} been successfully deleted',
           values: {
@@ -232,7 +255,7 @@ export const ModelsList: FC = () => {
       );
     } catch (error) {
       toasts.addError(new Error(error?.body?.message), {
-        title: i18n.translate('xpack.ml.inference.modelsList.fetchDeletionErrorMessage', {
+        title: i18n.translate('xpack.ml.trainedModels.modelsList.fetchDeletionErrorMessage', {
           defaultMessage: '{modelsCount, plural, one {Model} other {Models}} deletion failed',
           values: {
             modelsCount: modelsToDeleteIds.length,
@@ -247,30 +270,38 @@ export const ModelsList: FC = () => {
    */
   const actions: Array<Action<ModelItem>> = [
     {
-      name: i18n.translate('xpack.ml.inference.modelsList.viewTrainingDataActionLabel', {
+      name: i18n.translate('xpack.ml.trainedModels.modelsList.viewTrainingDataActionLabel', {
         defaultMessage: 'View training data',
       }),
-      description: i18n.translate('xpack.ml.inference.modelsList.viewTrainingDataActionLabel', {
+      description: i18n.translate('xpack.ml.trainedModels.modelsList.viewTrainingDataActionLabel', {
         defaultMessage: 'View training data',
       }),
-      icon: 'list',
+      icon: 'visTable',
       type: 'icon',
       available: (item) => item.metadata?.analytics_config?.id,
       onClick: async (item) => {
-        await navigateToUrl(
-          getResultsUrl(
-            item.metadata?.analytics_config.id,
-            Object.keys(item.metadata?.analytics_config.analysis)[0]
-          )
-        );
+        if (item.metadata?.analytics_config === undefined) return;
+
+        const url = await urlGenerator.createUrl({
+          page: ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
+          pageState: {
+            jobId: item.metadata?.analytics_config.id as string,
+            analysisType: getAnalysisType(
+              item.metadata?.analytics_config.analysis
+            ) as DataFrameAnalysisConfigType,
+            defaultIsTraining: true,
+          },
+        });
+
+        await navigateToUrl(url);
       },
       isPrimary: true,
     },
     {
-      name: i18n.translate('xpack.ml.inference.modelsList.deleteModelActionLabel', {
+      name: i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
         defaultMessage: 'Delete model',
       }),
-      description: i18n.translate('xpack.ml.inference.modelsList.deleteModelActionLabel', {
+      description: i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
         defaultMessage: 'Delete model',
       }),
       icon: 'trash',
@@ -310,10 +341,10 @@ export const ModelsList: FC = () => {
           onClick={toggleDetails.bind(null, item)}
           aria-label={
             itemIdToExpandedRowMap[item.model_id]
-              ? i18n.translate('xpack.ml.inference.modelsList.collapseRow', {
+              ? i18n.translate('xpack.ml.trainedModels.modelsList.collapseRow', {
                   defaultMessage: 'Collapse',
                 })
-              : i18n.translate('xpack.ml.inference.modelsList.expandRow', {
+              : i18n.translate('xpack.ml.trainedModels.modelsList.expandRow', {
                   defaultMessage: 'Expand',
                 })
           }
@@ -323,7 +354,7 @@ export const ModelsList: FC = () => {
     },
     {
       field: ModelsTableToConfigMapping.id,
-      name: i18n.translate('xpack.ml.inference.modelsList.modelIdHeader', {
+      name: i18n.translate('xpack.ml.trainedModels.modelsList.modelIdHeader', {
         defaultMessage: 'ID',
       }),
       sortable: true,
@@ -331,7 +362,7 @@ export const ModelsList: FC = () => {
     },
     {
       field: ModelsTableToConfigMapping.type,
-      name: i18n.translate('xpack.ml.inference.modelsList.typeHeader', {
+      name: i18n.translate('xpack.ml.trainedModels.modelsList.typeHeader', {
         defaultMessage: 'Type',
       }),
       sortable: true,
@@ -340,106 +371,66 @@ export const ModelsList: FC = () => {
     },
     {
       field: ModelsTableToConfigMapping.createdAt,
-      name: i18n.translate('xpack.ml.inference.modelsList.createdAtHeader', {
+      name: i18n.translate('xpack.ml.trainedModels.modelsList.createdAtHeader', {
         defaultMessage: 'Created at',
       }),
       dataType: 'date',
-      render: (date: string) => formatDate(date, TIME_FORMAT),
+      render: timeFormatter,
       sortable: true,
     },
     {
-      name: i18n.translate('xpack.ml.inference.modelsList.actionsHeader', {
+      name: i18n.translate('xpack.ml.trainedModels.modelsList.actionsHeader', {
         defaultMessage: 'Actions',
       }),
       actions,
     },
   ];
 
-  const pagination = {
-    initialPageIndex: pageIndex,
-    initialPageSize: pageSize,
-    totalItemCount: items.length,
-    pageSizeOptions: [10, 20, 50],
-    hidePerPageOptions: false,
-  };
+  const filters: SearchFilterConfig[] =
+    inferenceTypesOptions && inferenceTypesOptions.length > 0
+      ? [
+          {
+            type: 'field_value_selection',
+            field: 'type',
+            name: i18n.translate('xpack.ml.dataframe.analyticsList.typeFilter', {
+              defaultMessage: 'Type',
+            }),
+            multiSelect: 'or',
+            options: inferenceTypesOptions,
+          },
+        ]
+      : [];
 
-  const sorting = {
-    sort: {
-      field: sortField,
-      direction: sortDirection,
-    },
-  };
-  const search: EuiSearchBarProps = {
-    query: searchQueryText,
-    onChange: (searchChange) => {
-      if (searchChange.error !== null) {
-        return false;
-      }
-      setSearchQueryText(searchChange.queryText);
-      return true;
-    },
-    box: {
-      incremental: true,
-    },
-    ...(inferenceTypesOptions && inferenceTypesOptions.length > 0
-      ? {
-          filters: [
-            {
-              type: 'field_value_selection',
-              field: 'type',
-              name: i18n.translate('xpack.ml.dataframe.analyticsList.typeFilter', {
-                defaultMessage: 'Type',
-              }),
-              multiSelect: 'or',
-              options: inferenceTypesOptions,
-            },
-          ],
-        }
-      : {}),
-    ...(selectedModels.length > 0
-      ? {
-          toolsLeft: (
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="s">
-                  <h5>
-                    <FormattedMessage
-                      id="xpack.ml.inference.modelsList.selectedModelsMessage"
-                      defaultMessage="{modelsCount, plural, one{# model} other {# models}} selected"
-                      values={{ modelsCount: selectedModels.length }}
-                    />
-                  </h5>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiButton
-                  color="danger"
-                  onClick={prepareModelsForDeletion.bind(null, selectedModels)}
-                >
-                  <FormattedMessage
-                    id="xpack.ml.inference.modelsList.deleteModelsButtonLabel"
-                    defaultMessage="Delete"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ),
-        }
-      : {}),
-  };
+  const { onTableChange, pageOfItems, pagination, sorting } = useTableSettings<ModelItem>(
+    ModelsTableToConfigMapping.id,
+    filteredModels
+  );
 
-  const onTableChange: EuiInMemoryTable<ModelItem>['onTableChange'] = ({
-    page = { index: 0, size: 10 },
-    sort = { field: ModelsTableToConfigMapping.id, direction: 'asc' },
-  }) => {
-    const { index, size } = page;
-    setPageIndex(index);
-    setPageSize(size);
-
-    const { field, direction } = sort;
-    setSortField(field);
-    setSortDirection(direction);
-  };
+  const toolsLeft = (
+    <EuiFlexItem grow={false}>
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="s">
+            <h5>
+              <FormattedMessage
+                id="xpack.ml.trainedModels.modelsList.selectedModelsMessage"
+                defaultMessage="{modelsCount, plural, one{# model} other {# models}} selected"
+                values={{ modelsCount: selectedModels.length }}
+              />
+            </h5>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiButton color="danger" onClick={prepareModelsForDeletion.bind(null, selectedModels)}>
+            <FormattedMessage
+              id="xpack.ml.trainedModels.modelsList.deleteModelsButtonLabel"
+              defaultMessage="Delete"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  );
 
   const isSelectionAllowed = canDeleteDataFrameAnalytics;
 
@@ -447,10 +438,10 @@ export const ModelsList: FC = () => {
     ? {
         selectableMessage: (selectable, item) => {
           return selectable
-            ? i18n.translate('xpack.ml.inference.modelsList.selectableMessage', {
+            ? i18n.translate('xpack.ml.trainedModels.modelsList.selectableMessage', {
                 defaultMessage: 'Select a model',
               })
-            : i18n.translate('xpack.ml.inference.modelsList.disableSelectableMessage', {
+            : i18n.translate('xpack.ml.trainedModels.modelsList.disableSelectableMessage', {
                 defaultMessage: 'Model has associated pipelines',
               });
         },
@@ -473,21 +464,31 @@ export const ModelsList: FC = () => {
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <div data-test-subj="mlModelsTableContainer">
-        <EuiInMemoryTable
-          allowNeutralSort={false}
+        <EuiFlexGroup alignItems="center">
+          {selectedModels.length > 0 && toolsLeft}
+          <EuiFlexItem>
+            <AnalyticsSearchBar
+              filters={filters}
+              searchQueryText={searchQueryText}
+              setSearchQueryText={setSearchQueryText}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="l" />
+        <EuiBasicTable<ModelItem>
           columns={columns}
           hasActions={true}
           isExpandable={true}
-          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           isSelectable={false}
-          items={items}
+          items={pageOfItems}
           itemId={ModelsTableToConfigMapping.id}
+          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           loading={isLoading}
-          onTableChange={onTableChange}
-          pagination={pagination}
-          sorting={sorting}
-          search={search}
+          onChange={onTableChange}
           selection={selection}
+          pagination={pagination!}
+          sorting={sorting}
+          data-test-subj={isLoading ? 'mlModelsTable loading' : 'mlModelsTable loaded'}
           rowProps={(item) => ({
             'data-test-subj': `mlModelsTableRow row-${item.model_id}`,
           })}

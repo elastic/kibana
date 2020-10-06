@@ -21,12 +21,12 @@ jest.mock('react-router-dom', () => {
   };
 });
 jest.mock('../../overview/components/events_by_dataset');
-jest.mock('../../common/containers/source', () => {
-  const originalModule = jest.requireActual('../../common/containers/source');
+jest.mock('../../common/containers/sourcerer', () => {
+  const originalModule = jest.requireActual('../../common/containers/sourcerer');
 
   return {
     ...originalModule,
-    useWithSource: jest.fn().mockReturnValue({
+    useSourcererScope: jest.fn().mockReturnValue({
       indicesExist: true,
     }),
   };

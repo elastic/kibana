@@ -126,7 +126,7 @@ export const WatchVisualization = () => {
     isLoading,
     data: watchVisualizationData,
     error,
-    sendRequest: reload,
+    resendRequest: reload,
   } = useGetWatchVisualizationData(watchWithoutActions, visualizeOptions);
 
   useEffect(

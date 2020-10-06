@@ -24,3 +24,11 @@ export * from './editor_size';
 export * from './vis_options_props';
 export * from './utils';
 export { ISchemas, Schemas, Schema } from './schemas';
+
+/** dummy plugin, we just want visDefaultEditor to have its own bundle */
+export function plugin() {
+  return new (class VisDefaultEditor {
+    setup() {}
+    start() {}
+  })();
+}

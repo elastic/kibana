@@ -6,8 +6,7 @@
 
 import { SearchResponse } from 'elasticsearch';
 import { ILegacyScopedClusterClient } from 'kibana/server';
-import { ResolverEvent } from '../../../../../common/endpoint/types';
-import { ChildrenQuery } from '../queries/children';
+import { ChildEvent, ChildrenQuery } from '../queries/children';
 import { QueryInfo } from '../queries/multi_searcher';
 import { QueryHandler } from './fetch';
 import { ChildrenNodesHelper } from './children_helper';
@@ -46,7 +45,7 @@ export class ChildrenStartQueryHandler implements QueryHandler<ChildrenNodesHelp
     this.limitLeft = 0;
   }
 
-  private handleResponse = (response: SearchResponse<ResolverEvent>) => {
+  private handleResponse = (response: SearchResponse<ChildEvent>) => {
     const results = this.query.formatResponse(response);
     this.nodesToQuery = this.childrenHelper.addStartEvents(this.nodesToQuery, results) ?? new Set();
 

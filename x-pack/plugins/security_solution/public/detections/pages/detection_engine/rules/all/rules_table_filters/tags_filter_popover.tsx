@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import React, {
+  ChangeEvent,
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import {
   EuiFilterButton,
   EuiFilterSelectItem,
@@ -13,10 +21,13 @@ import {
   EuiPanel,
   EuiPopover,
   EuiText,
+  EuiFieldSearch,
+  EuiPopoverTitle,
 } from '@elastic/eui';
 import styled from 'styled-components';
 import * as i18n from '../../translations';
 import { toggleSelectedGroup } from '../../../../../../common/components/ml_popover/jobs_table/filters/toggle_selected_group';
+import { caseInsensitiveSort } from '../helpers';
 
 interface TagsFilterPopoverProps {
   selectedTags: string[];
@@ -26,9 +37,19 @@ interface TagsFilterPopoverProps {
   isLoading: boolean; // TO DO reimplement?
 }
 
+const PopoverContentWrapper = styled.div`
+  width: 275px;
+`;
+
 const ScrollableDiv = styled.div`
   max-height: 250px;
-  overflow: auto;
+  overflow-y: auto;
+`;
+
+const TagOverflowContainer = styled.span`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 /**
@@ -37,12 +58,38 @@ const ScrollableDiv = styled.div`
  * @param tags to display for filtering
  * @param onSelectedTagsChanged change listener to be notified when tag selection changes
  */
-export const TagsFilterPopoverComponent = ({
+const TagsFilterPopoverComponent = ({
   tags,
   selectedTags,
   onSelectedTagsChanged,
 }: TagsFilterPopoverProps) => {
+  const sortedTags = useMemo(() => caseInsensitiveSort(tags), [tags]);
   const [isTagPopoverOpen, setIsTagPopoverOpen] = useState(false);
+  const [searchInput, setSearchInput] = useState('');
+  const [filterTags, setFilterTags] = useState(sortedTags);
+
+  const tagsComponent = useMemo(() => {
+    return filterTags.map((tag, index) => (
+      <EuiFilterSelectItem
+        checked={selectedTags.includes(tag) ? 'on' : undefined}
+        key={`${index}-${tag}`}
+        onClick={() => toggleSelectedGroup(tag, selectedTags, onSelectedTagsChanged)}
+        title={tag}
+      >
+        <TagOverflowContainer>{tag}</TagOverflowContainer>
+      </EuiFilterSelectItem>
+    ));
+  }, [onSelectedTagsChanged, selectedTags, filterTags]);
+
+  const onSearchInputChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    setSearchInput(event.target.value);
+  }, []);
+
+  useEffect(() => {
+    setFilterTags(
+      sortedTags.filter((tag) => tag.toLowerCase().includes(searchInput.toLowerCase()))
+    );
+  }, [sortedTags, searchInput]);
 
   return (
     <EuiPopover
@@ -64,26 +111,27 @@ export const TagsFilterPopoverComponent = ({
       panelPaddingSize="none"
       repositionOnScroll
     >
-      <ScrollableDiv>
-        {tags.map((tag, index) => (
-          <EuiFilterSelectItem
-            checked={selectedTags.includes(tag) ? 'on' : undefined}
-            key={`${index}-${tag}`}
-            onClick={() => toggleSelectedGroup(tag, selectedTags, onSelectedTagsChanged)}
-          >
-            {`${tag}`}
-          </EuiFilterSelectItem>
-        ))}
-      </ScrollableDiv>
-      {tags.length === 0 && (
-        <EuiFlexGroup gutterSize="m" justifyContent="spaceAround">
-          <EuiFlexItem grow={true}>
-            <EuiPanel>
-              <EuiText>{i18n.NO_TAGS_AVAILABLE}</EuiText>
-            </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
+      <PopoverContentWrapper>
+        <EuiPopoverTitle>
+          <EuiFieldSearch
+            placeholder="Search tags"
+            value={searchInput}
+            onChange={onSearchInputChange}
+            isClearable
+            aria-label="Rules tag search"
+          />
+        </EuiPopoverTitle>
+        <ScrollableDiv>{tagsComponent}</ScrollableDiv>
+        {filterTags.length === 0 && (
+          <EuiFlexGroup gutterSize="m" justifyContent="spaceAround">
+            <EuiFlexItem grow={true}>
+              <EuiPanel>
+                <EuiText>{i18n.NO_TAGS_AVAILABLE}</EuiText>
+              </EuiPanel>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+      </PopoverContentWrapper>
     </EuiPopover>
   );
 };

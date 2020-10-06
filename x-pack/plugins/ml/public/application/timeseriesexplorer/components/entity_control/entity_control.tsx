@@ -141,6 +141,7 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
         onSearchChange={this.onSearchChange}
         isClearable={false}
         renderOption={this.renderOption}
+        data-test-subj={`mlSingleMetricViewerEntitySelection ${entity.fieldName}`}
       />
     );
 

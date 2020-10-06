@@ -5,64 +5,89 @@
  */
 
 import React from 'react';
-import { BreakdownGroup } from './BreakdownGroup';
-import { BreakdownItem } from '../../../../../typings/ui_filters';
+import { EuiSuperSelect } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import {
   CLIENT_GEO_COUNTRY_ISO_CODE,
   USER_AGENT_DEVICE,
   USER_AGENT_NAME,
   USER_AGENT_OS,
 } from '../../../../../common/elasticsearch_fieldnames';
+import { BreakdownItem } from '../../../../../typings/ui_filters';
 
 interface Props {
-  id: string;
-  selectedBreakdowns: BreakdownItem[];
-  onBreakdownChange: (values: BreakdownItem[]) => void;
+  selectedBreakdown: BreakdownItem | null;
+  onBreakdownChange: (value: BreakdownItem | null) => void;
+  dataTestSubj: string;
 }
 
 export function BreakdownFilter({
-  id,
-  selectedBreakdowns,
+  selectedBreakdown,
   onBreakdownChange,
+  dataTestSubj,
 }: Props) {
-  const categories: BreakdownItem[] = [
+  const NO_BREAKDOWN = 'noBreakdown';
+
+  const items: BreakdownItem[] = [
     {
-      name: 'Browser',
+      name: i18n.translate('xpack.apm.csm.breakDownFilter.noBreakdown', {
+        defaultMessage: 'No breakdown',
+      }),
+      fieldName: NO_BREAKDOWN,
       type: 'category',
-      count: 0,
-      selected: selectedBreakdowns.some(({ name }) => name === 'Browser'),
+    },
+    {
+      name: i18n.translate('xpack.apm.csm.breakdownFilter.browser', {
+        defaultMessage: 'Browser',
+      }),
       fieldName: USER_AGENT_NAME,
+      type: 'category',
     },
     {
-      name: 'OS',
-      type: 'category',
-      count: 0,
-      selected: selectedBreakdowns.some(({ name }) => name === 'OS'),
+      name: i18n.translate('xpack.apm.csm.breakdownFilter.os', {
+        defaultMessage: 'OS',
+      }),
       fieldName: USER_AGENT_OS,
+      type: 'category',
     },
     {
-      name: 'Device',
-      type: 'category',
-      count: 0,
-      selected: selectedBreakdowns.some(({ name }) => name === 'Device'),
+      name: i18n.translate('xpack.apm.csm.breakdownFilter.device', {
+        defaultMessage: 'Device',
+      }),
       fieldName: USER_AGENT_DEVICE,
+      type: 'category',
     },
     {
-      name: 'Location',
-      type: 'category',
-      count: 0,
-      selected: selectedBreakdowns.some(({ name }) => name === 'Location'),
+      name: i18n.translate('xpack.apm.csm.breakdownFilter.location', {
+        defaultMessage: 'Location',
+      }),
       fieldName: CLIENT_GEO_COUNTRY_ISO_CODE,
+      type: 'category',
     },
   ];
 
+  const options = items.map(({ name, fieldName }) => ({
+    inputDisplay: fieldName === NO_BREAKDOWN ? name : <strong>{name}</strong>,
+    value: fieldName,
+    dropdownDisplay: name,
+  }));
+
+  const onOptionChange = (value: string) => {
+    if (value === NO_BREAKDOWN) {
+      onBreakdownChange(null);
+    } else {
+      onBreakdownChange(items.find(({ fieldName }) => fieldName === value)!);
+    }
+  };
+
   return (
-    <BreakdownGroup
-      id={id}
-      items={categories}
-      onChange={(selValues: BreakdownItem[]) => {
-        onBreakdownChange(selValues);
-      }}
+    <EuiSuperSelect
+      fullWidth
+      compressed
+      options={options}
+      valueOfSelected={selectedBreakdown?.fieldName ?? NO_BREAKDOWN}
+      onChange={(value) => onOptionChange(value)}
+      data-test-subj={dataTestSubj}
     />
   );
 }

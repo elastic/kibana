@@ -14,6 +14,7 @@ import {
   RouteValidationResultFactory,
   RouteValidationError,
 } from '../../../../../../src/core/server';
+import { excess, GenericIntersectionC } from '../runtime_types';
 
 type RequestValidationResult<T> =
   | {
@@ -34,6 +35,23 @@ export const buildRouteValidation = <T extends rt.Mixed, A = rt.TypeOf<T>>(
   pipe(
     schema.decode(inputValue),
     (decoded) => exactCheck(inputValue, decoded),
+    fold<rt.Errors, A, RequestValidationResult<A>>(
+      (errors: rt.Errors) => validationResult.badRequest(formatErrors(errors).join()),
+      (validatedInput: A) => validationResult.ok(validatedInput)
+    )
+  );
+
+export const buildRouteValidationWithExcess = <
+  T extends rt.InterfaceType<rt.Props> | GenericIntersectionC | rt.PartialType<rt.Props>,
+  A = rt.TypeOf<T>
+>(
+  schema: T
+): RouteValidationFunction<A> => (
+  inputValue: unknown,
+  validationResult: RouteValidationResultFactory
+) =>
+  pipe(
+    excess(schema).decode(inputValue),
     fold<rt.Errors, A, RequestValidationResult<A>>(
       (errors: rt.Errors) => validationResult.badRequest(formatErrors(errors).join()),
       (validatedInput: A) => validationResult.ok(validatedInput)

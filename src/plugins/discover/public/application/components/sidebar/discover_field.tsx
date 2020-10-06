@@ -133,6 +133,9 @@ export function DiscoverField({
           iconType="plusInCircleFilled"
           className="dscSidebarItem__action"
           onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
+            if (ev.type === 'click') {
+              ev.currentTarget.focus();
+            }
             ev.preventDefault();
             ev.stopPropagation();
             toggleDisplay(field);
@@ -155,6 +158,9 @@ export function DiscoverField({
           iconType="cross"
           className="dscSidebarItem__action"
           onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
+            if (ev.type === 'click') {
+              ev.currentTarget.focus();
+            }
             ev.preventDefault();
             ev.stopPropagation();
             toggleDisplay(field);
@@ -163,6 +169,19 @@ export function DiscoverField({
           aria-label={removeLabelAria}
         />
       </EuiToolTip>
+    );
+  }
+
+  if (field.type === '_source') {
+    return (
+      <FieldButton
+        size="s"
+        className="dscSidebarItem"
+        dataTestSubj={`field-${field.name}-showDetails`}
+        fieldIcon={dscFieldIcon}
+        fieldAction={actionButton}
+        fieldName={fieldName}
+      />
     );
   }
 
@@ -178,7 +197,7 @@ export function DiscoverField({
           onClick={() => {
             togglePopover();
           }}
-          buttonProps={{ 'data-test-subj': `field-${field.name}-showDetails` }}
+          dataTestSubj={`field-${field.name}-showDetails`}
           fieldIcon={dscFieldIcon}
           fieldAction={actionButton}
           fieldName={fieldName}

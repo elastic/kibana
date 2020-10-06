@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import moment from 'moment';
 import '../../../common/mock/match_media';
 import { getField } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
 
@@ -18,6 +18,8 @@ import {
 import { getOperators, checkEmptyValue, paramIsValid, getGenericComboBoxProps } from './helpers';
 
 describe('helpers', () => {
+  // @ts-ignore
+  moment.suppressDeprecationWarnings = true;
   describe('#getOperators', () => {
     test('it returns "isOperator" if passed in field is "undefined"', () => {
       const operator = getOperators(undefined);

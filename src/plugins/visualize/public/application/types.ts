@@ -33,6 +33,7 @@ import {
   ChromeStart,
   ToastsStart,
   ScopedHistory,
+  AppMountParameters,
 } from 'kibana/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
 import {
@@ -43,7 +44,7 @@ import {
 import { SharePluginStart } from 'src/plugins/share/public';
 import { SavedObjectsStart, SavedObject } from 'src/plugins/saved_objects/public';
 import { EmbeddableStart } from 'src/plugins/embeddable/public';
-import { KibanaLegacyStart } from 'src/plugins/kibana_legacy/public';
+import { UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import { DashboardStart } from '../../../dashboard/public';
 
 export type PureVisState = SavedVisState;
@@ -95,7 +96,7 @@ export interface VisualizeServices extends CoreStart {
   embeddable: EmbeddableStart;
   history: History;
   kbnUrlStateStorage: IKbnUrlStateStorage;
-  kibanaLegacy: KibanaLegacyStart;
+  urlForwarding: UrlForwardingStart;
   pluginInitializerContext: PluginInitializerContext;
   chrome: ChromeStart;
   data: DataPublicPluginStart;
@@ -112,6 +113,7 @@ export interface VisualizeServices extends CoreStart {
   restorePreviousUrl: () => void;
   scopedHistory: ScopedHistory;
   dashboard: DashboardStart;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
 
 export interface SavedVisInstance {

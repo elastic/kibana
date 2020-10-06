@@ -4,10 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 export function getCcsIndexPattern(indexPattern: string, remotes: string[]): string {
-  return `${indexPattern},${indexPattern
-    .split(',')
-    .map((pattern) => {
-      return remotes.map((remoteName) => `${remoteName}:${pattern}`).join(',');
-    })
-    .join(',')}`;
+  if (remotes.length === 0) {
+    return indexPattern;
+  }
+  const patternsToAdd = [];
+  for (const index of indexPattern.split(',')) {
+    for (const remote of remotes) {
+      patternsToAdd.push(`${remote}:${index}`);
+    }
+  }
+  return [...indexPattern.split(','), ...patternsToAdd].join(',');
 }

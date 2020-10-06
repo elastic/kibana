@@ -4,25 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import fetch, { FetchError, Response } from 'node-fetch';
+import fetch, { FetchError, Response, RequestInit } from 'node-fetch';
 import pRetry from 'p-retry';
 import { streamToString } from './streams';
-import { RegistryError } from '../../../errors';
+import { appContextService } from '../../app_context';
+import { RegistryError, RegistryConnectionError, RegistryResponseError } from '../../../errors';
+import { getProxyAgent, getRegistryProxyUrl } from './proxy';
 
 type FailedAttemptErrors = pRetry.FailedAttemptError | FetchError | Error;
 
 // not sure what to call this function, but we're not exporting it
 async function registryFetch(url: string) {
-  const response = await fetch(url);
-
+  const response = await fetch(url, getFetchOptions(url));
   if (response.ok) {
     return response;
   } else {
     // 4xx & 5xx responses
-    // exit without retry & throw RegistryError
-    throw new pRetry.AbortError(
-      new RegistryError(`Error connecting to package registry at ${url}: ${response.statusText}`)
-    );
+    const { status, statusText, url: resUrl } = response;
+    const message = `'${status} ${statusText}' error response from package registry at ${
+      resUrl || url
+    }`;
+    const responseError = new RegistryResponseError(message);
+
+    throw new pRetry.AbortError(responseError);
   }
 }
 
@@ -38,17 +42,24 @@ export async function getResponse(url: string): Promise<Response> {
         // and let the others through without retrying
         //
         // throwing in onFailedAttempt will abandon all retries & fail the request
-        // we only want to retry system errors, so throw a RegistryError for everything else
+        // we only want to retry system errors, so re-throw for everything else
         if (!isSystemError(error)) {
-          throw new RegistryError(
-            `Error connecting to package registry at ${url}: ${error.message}`
-          );
+          throw error;
         }
       },
     });
     return response;
-  } catch (e) {
-    throw new RegistryError(`Error connecting to package registry at ${url}: ${e.message}`);
+  } catch (error) {
+    // isSystemError here means we didn't succeed after max retries
+    if (isSystemError(error)) {
+      throw new RegistryConnectionError(`Error connecting to package registry: ${error.message}`);
+    }
+    // don't wrap our own errors
+    if (error instanceof RegistryError) {
+      throw error;
+    } else {
+      throw new RegistryError(error);
+    }
   }
 }
 
@@ -70,4 +81,18 @@ function isFetchError(error: FailedAttemptErrors): error is FetchError {
 
 function isSystemError(error: FailedAttemptErrors): boolean {
   return isFetchError(error) && error.type === 'system';
+}
+
+export function getFetchOptions(targetUrl: string): RequestInit | undefined {
+  const proxyUrl = getRegistryProxyUrl();
+  if (!proxyUrl) {
+    return undefined;
+  }
+
+  const logger = appContextService.getLogger();
+  logger.debug(`Using ${proxyUrl} as proxy for ${targetUrl}`);
+
+  return {
+    agent: getProxyAgent({ proxyUrl, targetUrl }),
+  };
 }

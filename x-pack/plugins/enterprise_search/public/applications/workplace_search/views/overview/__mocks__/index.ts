@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { setMockValues, mockValues, mockActions } from './overview_logic.mock';
+export { setMockValues, mockOverviewValues, mockActions } from './overview_logic.mock';

@@ -51,9 +51,6 @@ export class SearchAPI {
       searchRequests.map((request) => {
         const requestId = request.name;
         const params = getSearchParamsFromRequest(request, {
-          esShardTimeout: this.dependencies.injectedMetadata.getInjectedVar(
-            'esShardTimeout'
-          ) as number,
           getConfig: this.dependencies.uiSettings.get.bind(this.dependencies.uiSettings),
         });
 
@@ -62,7 +59,7 @@ export class SearchAPI {
           requestResponders[requestId].json(params.body);
         }
 
-        return search({ params }, { signal: this.abortSignal }).pipe(
+        return search({ params }, { abortSignal: this.abortSignal }).pipe(
           tap((data) => this.inspectSearchResult(data, requestResponders[requestId])),
           map((data) => ({
             name: requestId,

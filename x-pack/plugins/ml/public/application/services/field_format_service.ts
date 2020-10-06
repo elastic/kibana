@@ -77,7 +77,7 @@ class FieldFormatService {
       const fieldList = fullIndexPattern.fields;
       const field = fieldList.getByName(fieldName);
       if (field !== undefined) {
-        fieldFormat = field.format;
+        fieldFormat = fullIndexPattern.getFormatterForField(field);
       }
     }
 
@@ -104,7 +104,9 @@ class FieldFormatService {
               if (dtr.field_name !== undefined && esAgg !== 'cardinality') {
                 const field = fieldList.getByName(dtr.field_name);
                 if (field !== undefined) {
-                  formatsByDetector[dtr.detector_index!] = field.format;
+                  formatsByDetector[dtr.detector_index!] = indexPatternData.getFormatterForField(
+                    field
+                  );
                 }
               }
             });

@@ -37,7 +37,7 @@
             {
               "agg": "date_histogram",
               "delay": "1d",
-              "interval": "5m",
+              "fixed_interval": "5m",
               "time_zone": "UTC"
             }
           ],
@@ -123,7 +123,7 @@
             {
               "agg": "date_histogram",
               "delay": "1d",
-              "interval": "5m",
+              "fixed_interval": "5m",
               "time_zone": "UTC"
             }
           ],
@@ -174,7 +174,7 @@
             {
               "agg": "date_histogram",
               "delay": "1d",
-              "interval": "5m",
+              "fixed_interval": "5m",
               "time_zone": "UTC"
             }
           ]

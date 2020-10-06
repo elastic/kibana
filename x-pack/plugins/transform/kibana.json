@@ -7,7 +7,8 @@
     "data",
     "home",
     "licensing",
-    "management"
+    "management",
+    "features"
   ],
   "optionalPlugins": [
     "security",
@@ -15,11 +16,11 @@
   ],
   "configPath": ["xpack", "transform"],
   "requiredBundles": [
-    "ml",
     "esUiShared",
     "discover",
     "kibanaUtils",
     "kibanaReact",
-    "savedObjects"
+    "savedObjects",
+    "ml"
   ]
 }

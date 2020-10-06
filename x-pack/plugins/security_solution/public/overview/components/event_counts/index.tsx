@@ -31,6 +31,7 @@ const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
 
 interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'setQuery'> {
   filters?: Filter[];
+  indexNames: string[];
   indexPattern: IIndexPattern;
   query?: Query;
 }
@@ -38,6 +39,7 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'setQuery'> {
 const EventCountsComponent: React.FC<Props> = ({
   filters = NO_FILTERS,
   from,
+  indexNames,
   indexPattern,
   query = DEFAULT_QUERY,
   setQuery,
@@ -56,6 +58,7 @@ const EventCountsComponent: React.FC<Props> = ({
             queries: [query],
             filters: [...filters, ...filterHostData],
           })}
+          indexNames={indexNames}
           startDate={from}
           setQuery={setQuery}
         />
@@ -72,6 +75,7 @@ const EventCountsComponent: React.FC<Props> = ({
             queries: [query],
             filters: [...filters, ...filterNetworkData],
           })}
+          indexNames={indexNames}
           startDate={from}
           setQuery={setQuery}
         />

@@ -152,6 +152,6 @@ describe('connector_edit_flyout', () => {
 
     const preconfiguredBadge = wrapper.find('[data-test-subj="preconfiguredBadge"]');
     expect(preconfiguredBadge.exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="saveEditedActionButton"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="saveAndCloseEditedActionButton"]').exists()).toBeFalsy();
   });
 });

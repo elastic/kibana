@@ -20,6 +20,7 @@
 import React, { Component, RefObject, createRef } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import classNames from 'classnames';
 import {
   EuiTextArea,
   EuiOutsideClickDetector,
@@ -38,15 +39,14 @@ import { Toast } from 'src/core/public';
 import { IDataPluginServices, IIndexPattern, Query } from '../..';
 import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';
 
-import { withKibana, KibanaReactContextValue, toMountPoint } from '../../../../kibana_react/public';
+import { KibanaReactContextValue, toMountPoint } from '../../../../kibana_react/public';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { PersistedLog, getQueryLog, matchPairs, toUser, fromUser } from '../../query';
 import { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { SuggestionsComponent } from '..';
 
-interface Props {
-  kibana: KibanaReactContextValue<IDataPluginServices>;
+export interface QueryStringInputProps {
   indexPatterns: Array<IIndexPattern | string>;
   query: Query;
   disableAutoFocus?: boolean;
@@ -62,6 +62,12 @@ interface Props {
   onSubmit?: (query: Query) => void;
   dataTestSubj?: string;
   size?: SuggestionsListSize;
+  className?: string;
+  isInvalid?: boolean;
+}
+
+interface Props extends QueryStringInputProps {
+  kibana: KibanaReactContextValue<IDataPluginServices>;
 }
 
 interface State {
@@ -87,7 +93,9 @@ const KEY_CODES = {
   END: 35,
 };
 
-export class QueryStringInputUI extends Component<Props, State> {
+// Needed for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default class QueryStringInputUI extends Component<Props, State> {
   public state: State = {
     isSuggestionsVisible: false,
     index: null,
@@ -439,7 +447,7 @@ export class QueryStringInputUI extends Component<Props, State> {
     // Send telemetry info every time the user opts in or out of kuery
     // As a result it is important this function only ever gets called in the
     // UI component's change handler.
-    this.services.http.post('/api/kibana/kql_opt_in_telemetry', {
+    this.services.http.post('/api/kibana/kql_opt_in_stats', {
       body: JSON.stringify({ opt_in: language === 'kuery' }),
     });
 
@@ -540,16 +548,19 @@ export class QueryStringInputUI extends Component<Props, State> {
 
   public componentWillUnmount() {
     if (this.abortController) this.abortController.abort();
-    this.updateSuggestions.cancel();
+    if (this.updateSuggestions.cancel) this.updateSuggestions.cancel();
     this.componentIsUnmounting = true;
     window.removeEventListener('resize', this.handleAutoHeight);
-    window.removeEventListener('scroll', this.handleListUpdate);
+    window.removeEventListener('scroll', this.handleListUpdate, { capture: true });
   }
 
-  handleListUpdate = () =>
-    this.setState({
+  handleListUpdate = () => {
+    if (this.componentIsUnmounting) return;
+
+    return this.setState({
       queryBarRect: this.queryBarInputDivRefInstance.current?.getBoundingClientRect(),
     });
+  };
 
   handleAutoHeight = () => {
     if (this.inputRef !== null && document.activeElement === this.inputRef) {
@@ -586,9 +597,13 @@ export class QueryStringInputUI extends Component<Props, State> {
       'aria-owns': 'kbnTypeahead__items',
     };
     const ariaCombobox = { ...isSuggestionsVisible, role: 'combobox' };
+    const className = classNames(
+      'euiFormControlLayout euiFormControlLayout--group kbnQueryBar__wrap',
+      this.props.className
+    );
 
     return (
-      <div className="euiFormControlLayout euiFormControlLayout--group kbnQueryBar__wrap">
+      <div className={className}>
         {this.props.prepend}
         <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
           <div
@@ -600,10 +615,11 @@ export class QueryStringInputUI extends Component<Props, State> {
             })}
             aria-haspopup="true"
             aria-expanded={this.state.isSuggestionsVisible}
+            data-skip-axe="aria-required-children"
           >
             <div
               role="search"
-              className="euiFormControlLayout__childrenWrapper kuiLocalSearchAssistedInput"
+              className="euiFormControlLayout__childrenWrapper kbnQueryBar__textareaWrap"
               ref={this.queryBarInputDivRefInstance}
             >
               <EuiTextArea
@@ -647,6 +663,7 @@ export class QueryStringInputUI extends Component<Props, State> {
                 }
                 role="textbox"
                 data-test-subj={this.props.dataTestSubj || 'queryInput'}
+                isInvalid={this.props.isInvalid}
               >
                 {this.getQueryString()}
               </EuiTextArea>
@@ -675,5 +692,3 @@ export class QueryStringInputUI extends Component<Props, State> {
     );
   }
 }
-
-export const QueryStringInput = withKibana(QueryStringInputUI);

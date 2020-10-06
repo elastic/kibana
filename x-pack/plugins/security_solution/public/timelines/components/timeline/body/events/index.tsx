@@ -8,7 +8,10 @@ import React from 'react';
 
 import { inputsModel } from '../../../../../common/store';
 import { BrowserFields, DocValueFields } from '../../../../../common/containers/source';
-import { TimelineItem, TimelineNonEcsData } from '../../../../../graphql/types';
+import {
+  TimelineItem,
+  TimelineNonEcsData,
+} from '../../../../../../common/search_strategy/timeline';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import { Note } from '../../../../../common/lib/note';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';

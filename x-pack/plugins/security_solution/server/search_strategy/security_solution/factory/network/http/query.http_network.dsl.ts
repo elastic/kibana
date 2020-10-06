@@ -6,10 +6,7 @@
 
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
-import {
-  NetworkHttpRequestOptions,
-  SortField,
-} from '../../../../../../common/search_strategy/security_solution';
+import { NetworkHttpRequestOptions, SortField } from '../../../../../../common/search_strategy';
 
 const getCountAgg = () => ({
   http_count: {
@@ -72,6 +69,7 @@ export const buildHttpQuery = ({
     size: 0,
     track_total_hits: false,
   };
+
   return dslQuery;
 };
 

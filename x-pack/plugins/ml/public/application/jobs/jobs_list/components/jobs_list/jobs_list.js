@@ -7,19 +7,19 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import sortBy from 'lodash/sortBy';
+import { sortBy } from 'lodash';
 import moment from 'moment';
 
 import { toLocaleString } from '../../../../util/string_utils';
 import { ResultLinks, actionsMenuContent } from '../job_actions';
 import { JobDescription } from './job_description';
 import { JobIcon } from '../../../../components/job_message_icon';
-import { getJobIdUrl, TAB_IDS } from '../../../../util/get_selected_ids_url';
 import { TIME_FORMAT } from '../../../../../../common/constants/time_format';
 
-import { EuiBadge, EuiBasicTable, EuiButtonIcon, EuiLink, EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiBadge, EuiBasicTable, EuiButtonIcon, EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { AnomalyDetectionJobIdLink } from './job_id_link';
 
 const PAGE_SIZE = 10;
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
@@ -71,7 +71,7 @@ export class JobsList extends Component {
       return id;
     }
 
-    return <EuiLink href={getJobIdUrl(TAB_IDS.ANOMALY_DETECTION, id)}>{id}</EuiLink>;
+    return <AnomalyDetectionJobIdLink key={id} id={id} />;
   }
 
   getPageOfJobs(index, size, sortField, sortDirection) {
@@ -241,7 +241,7 @@ export class JobsList extends Component {
         name: i18n.translate('xpack.ml.jobsList.actionsLabel', {
           defaultMessage: 'Actions',
         }),
-        render: (item) => <ResultLinks jobs={[item]} />,
+        render: (item) => <ResultLinks jobs={[item]} isManagementTable={isManagementTable} />,
       },
     ];
 

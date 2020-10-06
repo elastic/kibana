@@ -47,10 +47,10 @@ export class KibanaTelemetryAdapter {
             autoRefreshEnabled: {
               type: 'boolean',
             },
-            autorefreshInterval: { type: 'long' },
-            dateRangeEnd: { type: 'date' },
-            dateRangeStart: { type: 'date' },
-            monitor_frequency: { type: 'long' },
+            autorefreshInterval: { type: 'array', items: { type: 'long' } },
+            dateRangeEnd: { type: 'array', items: { type: 'date' } },
+            dateRangeStart: { type: 'array', items: { type: 'date' } },
+            monitor_frequency: { type: 'array', items: { type: 'long' } },
             monitor_name_stats: {
               avg_length: { type: 'float' },
               max_length: { type: 'long' },

@@ -22,6 +22,7 @@ import {
   Output,
   DEFAULT_AGENT_POLICIES_PACKAGES,
 } from '../../common';
+import { SO_SEARCH_LIMIT } from '../constants';
 import { getPackageInfo } from './epm/packages';
 import { packagePolicyService } from './package_policy';
 import { generateEnrollmentAPIKey } from './api_keys';
@@ -159,7 +160,7 @@ export async function setupFleet(
   });
 
   const { items: agentPolicies } = await agentPolicyService.list(soClient, {
-    perPage: 10000,
+    perPage: SO_SEARCH_LIMIT,
   });
 
   await Promise.all(
@@ -169,6 +170,12 @@ export async function setupFleet(
         agentPolicyId: agentPolicy.id,
       });
     })
+  );
+
+  await Promise.all(
+    agentPolicies.map((agentPolicy) =>
+      agentPolicyService.createFleetPolicyChangeAction(soClient, agentPolicy.id)
+    )
   );
 }
 

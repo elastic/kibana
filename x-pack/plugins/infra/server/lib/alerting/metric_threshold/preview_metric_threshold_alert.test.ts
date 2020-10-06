@@ -16,11 +16,14 @@ describe('Previewing the metric threshold alert type', () => {
         ...baseParams,
         lookback: 'h',
         alertInterval: '1m',
+        alertThrottle: '1m',
+        alertOnNoData: true,
       });
-      const [firedResults, noDataResults, errorResults] = ungroupedResult;
+      const [firedResults, noDataResults, errorResults, notifications] = ungroupedResult;
       expect(firedResults).toBe(30);
       expect(noDataResults).toBe(0);
       expect(errorResults).toBe(0);
+      expect(notifications).toBe(30);
     });
 
     test('returns the expected results using a bucket interval shorter than the alert interval', async () => {
@@ -28,22 +31,42 @@ describe('Previewing the metric threshold alert type', () => {
         ...baseParams,
         lookback: 'h',
         alertInterval: '3m',
+        alertThrottle: '3m',
+        alertOnNoData: true,
       });
-      const [firedResults, noDataResults, errorResults] = ungroupedResult;
+      const [firedResults, noDataResults, errorResults, notifications] = ungroupedResult;
       expect(firedResults).toBe(10);
       expect(noDataResults).toBe(0);
       expect(errorResults).toBe(0);
+      expect(notifications).toBe(10);
     });
     test('returns the expected results using a bucket interval longer than the alert interval', async () => {
       const [ungroupedResult] = await previewMetricThresholdAlert({
         ...baseParams,
         lookback: 'h',
         alertInterval: '30s',
+        alertThrottle: '30s',
+        alertOnNoData: true,
       });
-      const [firedResults, noDataResults, errorResults] = ungroupedResult;
+      const [firedResults, noDataResults, errorResults, notifications] = ungroupedResult;
       expect(firedResults).toBe(60);
       expect(noDataResults).toBe(0);
       expect(errorResults).toBe(0);
+      expect(notifications).toBe(60);
+    });
+    test('returns the expected results using a throttle interval longer than the alert interval', async () => {
+      const [ungroupedResult] = await previewMetricThresholdAlert({
+        ...baseParams,
+        lookback: 'h',
+        alertInterval: '1m',
+        alertThrottle: '3m',
+        alertOnNoData: true,
+      });
+      const [firedResults, noDataResults, errorResults, notifications] = ungroupedResult;
+      expect(firedResults).toBe(30);
+      expect(noDataResults).toBe(0);
+      expect(errorResults).toBe(0);
+      expect(notifications).toBe(15);
     });
   });
   describe('querying with a groupBy parameter', () => {
@@ -56,15 +79,19 @@ describe('Previewing the metric threshold alert type', () => {
         },
         lookback: 'h',
         alertInterval: '1m',
+        alertThrottle: '1m',
+        alertOnNoData: true,
       });
-      const [firedResultsA, noDataResultsA, errorResultsA] = resultA;
+      const [firedResultsA, noDataResultsA, errorResultsA, notificationsA] = resultA;
       expect(firedResultsA).toBe(30);
       expect(noDataResultsA).toBe(0);
       expect(errorResultsA).toBe(0);
-      const [firedResultsB, noDataResultsB, errorResultsB] = resultB;
+      expect(notificationsA).toBe(30);
+      const [firedResultsB, noDataResultsB, errorResultsB, notificationsB] = resultB;
       expect(firedResultsB).toBe(60);
       expect(noDataResultsB).toBe(0);
       expect(errorResultsB).toBe(0);
+      expect(notificationsB).toBe(60);
     });
   });
   describe('querying a data set with a period of No Data', () => {
@@ -82,11 +109,14 @@ describe('Previewing the metric threshold alert type', () => {
         },
         lookback: 'h',
         alertInterval: '1m',
+        alertThrottle: '1m',
+        alertOnNoData: true,
       });
-      const [firedResults, noDataResults, errorResults] = ungroupedResult;
+      const [firedResults, noDataResults, errorResults, notifications] = ungroupedResult;
       expect(firedResults).toBe(25);
       expect(noDataResults).toBe(10);
       expect(errorResults).toBe(0);
+      expect(notifications).toBe(35);
     });
   });
 });

@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import { PluginConfigDescriptor } from 'kibana/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from 'kibana/server';
 
 import { configSchema, ConfigSchema } from '../config';
+import { VisTypeVegaPlugin } from './plugin';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
@@ -32,7 +33,8 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   ],
 };
 
-export const plugin = () => ({
-  setup() {},
-  start() {},
-});
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new VisTypeVegaPlugin(initializerContext);
+}
+
+export { VisTypeVegaPluginStart, VisTypeVegaPluginSetup } from './types';

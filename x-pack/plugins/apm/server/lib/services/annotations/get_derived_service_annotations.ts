@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { isNumber } from 'lodash';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import { Annotation, AnnotationType } from '../../../../common/annotations';
 import { SetupTimeRange, Setup } from '../../helpers/setup_request';
 import { ESFilter } from '../../../../typings/elasticsearch';
@@ -14,20 +13,29 @@ import {
   SERVICE_VERSION,
 } from '../../../../common/elasticsearch_fieldnames';
 import { getEnvironmentUiFilterES } from '../../helpers/convert_ui_filters/get_environment_ui_filter_es';
+import {
+  getDocumentTypeFilterForAggregatedTransactions,
+  getProcessorEventForAggregatedTransactions,
+} from '../../helpers/aggregated_transactions';
 
 export async function getDerivedServiceAnnotations({
   setup,
   serviceName,
   environment,
+  searchAggregatedTransactions,
 }: {
   serviceName: string;
   environment?: string;
   setup: Setup & SetupTimeRange;
+  searchAggregatedTransactions: boolean;
 }) {
   const { start, end, apmEventClient } = setup;
 
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
+    ...getDocumentTypeFilterForAggregatedTransactions(
+      searchAggregatedTransactions
+    ),
     ...getEnvironmentUiFilterES(environment),
   ];
 
@@ -35,7 +43,11 @@ export async function getDerivedServiceAnnotations({
     (
       await apmEventClient.search({
         apm: {
-          events: [ProcessorEvent.transaction],
+          events: [
+            getProcessorEventForAggregatedTransactions(
+              searchAggregatedTransactions
+            ),
+          ],
         },
         body: {
           size: 0,
@@ -62,7 +74,11 @@ export async function getDerivedServiceAnnotations({
     versions.map(async (version) => {
       const response = await apmEventClient.search({
         apm: {
-          events: [ProcessorEvent.transaction],
+          events: [
+            getProcessorEventForAggregatedTransactions(
+              searchAggregatedTransactions
+            ),
+          ],
         },
         body: {
           size: 0,

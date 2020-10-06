@@ -162,12 +162,15 @@ describe('VegaParser._resolveEsQueries', () => {
 
   function check(spec, expected, warnCount) {
     return async () => {
-      const vp = new VegaParser(spec, searchApiStub, 0, 0, {
-        getFileLayers: async () => [{ name: 'file1', url: 'url1' }],
-        getUrlForRegionLayer: async (layer) => {
-          return layer.url;
-        },
-      });
+      const mockGetServiceSettings = async () => {
+        return {
+          getFileLayers: async () => [{ name: 'file1', url: 'url1' }],
+          getUrlForRegionLayer: async (layer) => {
+            return layer.url;
+          },
+        };
+      };
+      const vp = new VegaParser(spec, searchApiStub, 0, 0, mockGetServiceSettings);
       await vp._resolveDataUrls();
 
       expect(vp.spec).toEqual(expected);
@@ -368,43 +371,95 @@ describe('VegaParser._parseConfig', () => {
   test('_hostConfig', check({ _hostConfig: { a: 1 } }, { a: 1 }, {}, 1));
 });
 
-describe('VegaParser._calcSizing', () => {
-  function check(
-    spec,
-    useResize,
-    paddingWidth,
-    paddingHeight,
-    isVegaLite,
-    expectedSpec,
-    warnCount
-  ) {
+describe('VegaParser._compileWithAutosize', () => {
+  function check(spec, useResize, expectedSpec, warnCount) {
     return async () => {
       expectedSpec = expectedSpec || cloneDeep(spec);
       const vp = new VegaParser(spec);
-      vp.isVegaLite = !!isVegaLite;
-      vp._calcSizing();
+      vp._compileWithAutosize();
       expect(vp.useResize).toEqual(useResize);
-      expect(vp.paddingWidth).toEqual(paddingWidth);
-      expect(vp.paddingHeight).toEqual(paddingHeight);
       expect(vp.spec).toEqual(expectedSpec);
       expect(vp.warnings).toHaveLength(warnCount || 0);
     };
   }
 
-  test('no size', check({ autosize: {} }, false, 0, 0));
-  test('fit', check({ autosize: 'fit' }, true, 0, 0));
-  test('fit obj', check({ autosize: { type: 'fit' } }, true, 0, 0));
-  test('padding const', check({ autosize: 'fit', padding: 10 }, true, 20, 20));
   test(
-    'padding obj',
-    check({ autosize: 'fit', padding: { left: 5, bottom: 7, right: 6, top: 8 } }, true, 11, 15)
+    'empty config',
+    check({}, true, {
+      autosize: { type: 'fit', contains: 'padding' },
+      width: 'container',
+      height: 'container',
+    })
   );
   test(
-    'width height',
-    check({ autosize: 'fit', width: 1, height: 2 }, true, 0, 0, false, false, 1)
+    'no warnings for default config',
+    check({ width: 'container', height: 'container' }, true, {
+      autosize: { type: 'fit', contains: 'padding' },
+      width: 'container',
+      height: 'container',
+    })
   );
   test(
-    'VL width height',
-    check({ autosize: 'fit', width: 1, height: 2 }, true, 0, 0, true, { autosize: 'fit' }, 0)
+    'warning when attempting to use invalid setting',
+    check(
+      { width: '300', height: '300' },
+      true,
+      {
+        autosize: { type: 'fit', contains: 'padding' },
+        width: 'container',
+        height: 'container',
+      },
+      1
+    )
   );
+  test(
+    'autosize none',
+    check({ autosize: 'none' }, false, { autosize: { type: 'none', contains: 'padding' } })
+  );
+  test(
+    'autosize=fit',
+    check({ autosize: 'fit' }, true, {
+      autosize: { type: 'fit', contains: 'padding' },
+      width: 'container',
+      height: 'container',
+    })
+  );
+  test(
+    'autosize=pad',
+    check({ autosize: 'pad' }, true, {
+      autosize: { type: 'pad', contains: 'padding' },
+      width: 'container',
+      height: 'container',
+    })
+  );
+  test(
+    'empty autosize object',
+    check({ autosize: {} }, true, {
+      autosize: { type: 'fit', contains: 'padding' },
+      height: 'container',
+      width: 'container',
+    })
+  );
+  test(
+    'warning on falsy arguments',
+    check(
+      { autosize: false },
+      true,
+      {
+        autosize: { type: 'fit', contains: 'padding' },
+        height: 'container',
+        width: 'container',
+      },
+      1
+    )
+  );
+  test(
+    'partial autosize object',
+    check({ autosize: { contains: 'content' } }, true, {
+      autosize: { contains: 'content', type: 'fit' },
+      height: 'container',
+      width: 'container',
+    })
+  );
+  test('autosize signals are ignored', check({ autosize: { signal: 'asdf' } }, undefined));
 });

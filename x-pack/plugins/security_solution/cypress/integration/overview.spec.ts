@@ -13,7 +13,8 @@ import { OVERVIEW_URL } from '../urls/navigation';
 
 describe('Overview Page', () => {
   before(() => {
-    cy.stubSecurityApi('overview');
+    cy.stubSearchStrategyApi('overviewHostQuery', 'overview_search_strategy');
+    cy.stubSearchStrategyApi('overviewNetworkQuery', 'overview_search_strategy');
     loginAndWaitForPage(OVERVIEW_URL);
   });
 

@@ -20,10 +20,9 @@ export class SearchProfilerServerPlugin implements Plugin {
     this.licenseStatus = { valid: false };
   }
 
-  async setup({ http }: CoreSetup, { licensing, elasticsearch }: AppServerPluginDependencies) {
+  async setup({ http }: CoreSetup, { licensing }: AppServerPluginDependencies) {
     const router = http.createRouter();
     profileRoute.register({
-      elasticsearch,
       router,
       getLicenseStatus: () => this.licenseStatus,
       log: this.log,

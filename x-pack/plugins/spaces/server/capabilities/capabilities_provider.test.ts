@@ -10,6 +10,9 @@ describe('Capabilities provider', () => {
   it('provides the expected capabilities', () => {
     expect(capabilitiesProvider()).toMatchInlineSnapshot(`
       Object {
+        "catalogue": Object {
+          "spaces": true,
+        },
         "management": Object {
           "kibana": Object {
             "spaces": true,

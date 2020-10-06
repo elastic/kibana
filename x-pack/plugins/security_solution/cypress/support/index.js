@@ -21,9 +21,10 @@
 
 // Import commands.js using ES2015 syntax:
 import './commands';
+import 'cypress-promise/register';
 
 Cypress.Cookies.defaults({
-  whitelist: 'sid',
+  preserve: 'sid',
 });
 
 Cypress.on('uncaught:exception', (err) => {

@@ -8,7 +8,6 @@ import React from 'react';
 import { Store, createStore, applyMiddleware } from 'redux';
 import { mount, ReactWrapper } from 'enzyme';
 import { History as HistoryPackageHistoryInterface, createMemoryHistory } from 'history';
-import { CoreStart } from '../../../../../../../src/core/public';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { spyMiddlewareFactory } from '../spy_middleware_factory';
 import { resolverMiddlewareFactory } from '../../store/middleware';
@@ -17,6 +16,7 @@ import { MockResolver } from './mock_resolver';
 import { ResolverState, DataAccessLayer, SpyMiddleware, SideEffectSimulator } from '../../types';
 import { ResolverAction } from '../../store/actions';
 import { sideEffectSimulatorFactory } from '../../view/side_effect_simulator_factory';
+import { getUiSettings } from '../../mocks/get_ui_settings';
 
 /**
  * Test a Resolver instance using jest, enzyme, and a mock data layer.
@@ -49,6 +49,7 @@ export class Simulator {
     dataAccessLayer,
     resolverComponentInstanceID,
     databaseDocumentID,
+    indices,
     history,
   }: {
     /**
@@ -60,9 +61,13 @@ export class Simulator {
      */
     resolverComponentInstanceID: string;
     /**
+     * Indices that the backend would use to find the document ID.
+     */
+    indices: string[];
+    /**
      * a databaseDocumentID to pass to Resolver. Resolver will use this in requests to the mock data layer.
      */
-    databaseDocumentID?: string;
+    databaseDocumentID: string;
     history?: HistoryPackageHistoryInterface<never>;
   }) {
     // create the spy middleware (for debugging tests)
@@ -86,7 +91,9 @@ export class Simulator {
     this.history = history ?? createMemoryHistory();
 
     // Used for `KibanaContextProvider`
-    const coreStart: CoreStart = coreMock.createStart();
+    const coreStart = coreMock.createStart();
+
+    coreStart.uiSettings.get.mockImplementation(getUiSettings);
 
     this.sideEffectSimulator = sideEffectSimulatorFactory();
 
@@ -99,6 +106,7 @@ export class Simulator {
         store={this.store}
         coreStart={coreStart}
         databaseDocumentID={databaseDocumentID}
+        indices={indices}
       />
     );
   }
@@ -122,6 +130,20 @@ export class Simulator {
    */
   public set resolverComponentInstanceID(value: string) {
     this.wrapper.setProps({ resolverComponentInstanceID: value });
+  }
+
+  /**
+   * Change the indices (updates the React component props.)
+   */
+  public set indices(value: string[]) {
+    this.wrapper.setProps({ indices: value });
+  }
+
+  /**
+   * Get the indices (updates the React component props.)
+   */
+  public get indices(): string[] {
+    return this.wrapper.prop('indices');
   }
 
   /**
@@ -276,10 +298,7 @@ export class Simulator {
       const title = titles.at(index).text();
       const description = descriptions.at(index).text();
 
-      // Exclude timestamp since we can't currently calculate the expected description for it from tests
-      if (title !== '@timestamp') {
-        entries.push([title, description]);
-      }
+      entries.push([title, description]);
     }
     return entries;
   }

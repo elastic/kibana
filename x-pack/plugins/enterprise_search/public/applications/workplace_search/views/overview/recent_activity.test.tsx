@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../../../__mocks__/shallow_usecontext.mock';
 import './__mocks__/overview_logic.mock';
 import { setMockValues } from './__mocks__';
 
@@ -12,6 +11,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { EuiEmptyPrompt, EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { RecentActivity, RecentActivityItem } from './recent_activity';
 
@@ -60,5 +60,20 @@ describe('RecentActivity', () => {
     expect(wrapper.find('.activity--error')).toHaveLength(1);
     expect(wrapper.find('.activity--error__label')).toHaveLength(1);
     expect(wrapper.find(EuiLink).prop('color')).toEqual('danger');
+  });
+
+  it('renders recent activity message for default org name', () => {
+    setMockValues({
+      organization: {
+        name: 'foo',
+        defaultOrgName: 'foo',
+      },
+    });
+    const wrapper = shallow(<RecentActivity />);
+    const emptyPrompt = wrapper.find(EuiEmptyPrompt).dive();
+
+    expect(emptyPrompt.find(FormattedMessage).prop('defaultMessage')).toEqual(
+      'Your organization has no recent activity'
+    );
   });
 });

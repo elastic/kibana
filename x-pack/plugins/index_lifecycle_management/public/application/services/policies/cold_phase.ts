@@ -5,16 +5,18 @@
  */
 
 import { isEmpty } from 'lodash';
+import { AllocateAction, ColdPhase, SerializedColdPhase } from '../../../../common/types';
 import { serializedPhaseInitialization } from '../../constants';
-import { AllocateAction, ColdPhase, SerializedColdPhase } from './types';
 import { isNumber, splitSizeAndUnits } from './policy_serialization';
 import {
   numberRequiredMessage,
   PhaseValidationErrors,
   positiveNumberRequiredMessage,
 } from './policy_validation';
+import { determineDataTierAllocationType } from '../../lib';
+import { serializePhaseWithAllocation } from './shared';
 
-const coldPhaseInitialization: ColdPhase = {
+export const coldPhaseInitialization: ColdPhase = {
   phaseEnabled: false,
   selectedMinimumAge: '0',
   selectedMinimumAgeUnits: 'd',
@@ -22,6 +24,7 @@ const coldPhaseInitialization: ColdPhase = {
   selectedReplicaCount: '',
   freezeEnabled: false,
   phaseIndexPriority: '',
+  dataTierAllocationType: 'default',
 };
 
 export const coldPhaseFromES = (phaseSerialized?: SerializedColdPhase): ColdPhase => {
@@ -31,6 +34,12 @@ export const coldPhaseFromES = (phaseSerialized?: SerializedColdPhase): ColdPhas
   }
 
   phase.phaseEnabled = true;
+
+  if (phaseSerialized.actions.allocate) {
+    phase.dataTierAllocationType = determineDataTierAllocationType(
+      phaseSerialized.actions.allocate
+    );
+  }
 
   if (phaseSerialized.min_age) {
     const { size: minAge, units: minAgeUnits } = splitSizeAndUnits(phaseSerialized.min_age);
@@ -80,27 +89,13 @@ export const coldPhaseToES = (
     esPhase.min_age = `${phase.selectedMinimumAge}${phase.selectedMinimumAgeUnits}`;
   }
 
-  esPhase.actions = esPhase.actions ? { ...esPhase.actions } : {};
-
-  if (phase.selectedNodeAttrs) {
-    const [name, value] = phase.selectedNodeAttrs.split(':');
-    esPhase.actions.allocate = esPhase.actions.allocate || ({} as AllocateAction);
-    esPhase.actions.allocate.require = {
-      [name]: value,
-    };
-  } else {
-    if (esPhase.actions.allocate) {
-      // @ts-expect-error
-      delete esPhase.actions.allocate.require;
-    }
-  }
+  esPhase.actions = serializePhaseWithAllocation(phase, esPhase.actions);
 
   if (isNumber(phase.selectedReplicaCount)) {
     esPhase.actions.allocate = esPhase.actions.allocate || ({} as AllocateAction);
     esPhase.actions.allocate.number_of_replicas = parseInt(phase.selectedReplicaCount, 10);
   } else {
     if (esPhase.actions.allocate) {
-      // @ts-expect-error
       delete esPhase.actions.allocate.number_of_replicas;
     }
   }

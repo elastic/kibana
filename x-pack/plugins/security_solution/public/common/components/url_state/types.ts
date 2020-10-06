@@ -22,11 +22,13 @@ import { DispatchUpdateTimeline } from '../../../timelines/components/open_timel
 import { NavTab } from '../navigation/types';
 
 import { CONSTANTS, UrlStateType } from './constants';
+import { SourcererScopePatterns } from '../../store/sourcerer/model';
 
 export const ALL_URL_STATE_KEYS: KeyUrlState[] = [
   CONSTANTS.appQuery,
   CONSTANTS.filters,
   CONSTANTS.savedQuery,
+  CONSTANTS.sourcerer,
   CONSTANTS.timerange,
   CONSTANTS.timeline,
 ];
@@ -36,6 +38,7 @@ export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
     CONSTANTS.appQuery,
     CONSTANTS.filters,
     CONSTANTS.savedQuery,
+    CONSTANTS.sourcerer,
     CONSTANTS.timerange,
     CONSTANTS.timeline,
   ],
@@ -43,6 +46,7 @@ export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
     CONSTANTS.appQuery,
     CONSTANTS.filters,
     CONSTANTS.savedQuery,
+    CONSTANTS.sourcerer,
     CONSTANTS.timerange,
     CONSTANTS.timeline,
   ],
@@ -51,6 +55,7 @@ export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
     CONSTANTS.appQuery,
     CONSTANTS.filters,
     CONSTANTS.savedQuery,
+    CONSTANTS.sourcerer,
     CONSTANTS.timerange,
     CONSTANTS.timeline,
   ],
@@ -58,6 +63,7 @@ export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
     CONSTANTS.appQuery,
     CONSTANTS.filters,
     CONSTANTS.savedQuery,
+    CONSTANTS.sourcerer,
     CONSTANTS.timerange,
     CONSTANTS.timeline,
   ],
@@ -65,6 +71,7 @@ export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
     CONSTANTS.appQuery,
     CONSTANTS.filters,
     CONSTANTS.savedQuery,
+    CONSTANTS.sourcerer,
     CONSTANTS.timerange,
     CONSTANTS.timeline,
   ],
@@ -72,6 +79,7 @@ export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
     CONSTANTS.appQuery,
     CONSTANTS.filters,
     CONSTANTS.savedQuery,
+    CONSTANTS.sourcerer,
     CONSTANTS.timerange,
     CONSTANTS.timeline,
   ],
@@ -93,6 +101,7 @@ export interface UrlState {
   [CONSTANTS.appQuery]?: Query;
   [CONSTANTS.filters]?: Filter[];
   [CONSTANTS.savedQuery]?: string;
+  [CONSTANTS.sourcerer]: SourcererScopePatterns;
   [CONSTANTS.timerange]: UrlInputsModel;
   [CONSTANTS.timeline]: TimelineUrl;
 }

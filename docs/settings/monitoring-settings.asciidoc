@@ -33,13 +33,18 @@ For more information, see
 |===
 | `monitoring.enabled`
   | Set to `true` (default) to enable the {monitor-features} in {kib}. Unlike the
-  `monitoring.ui.enabled` setting, when this setting is `false`, the
+  <<monitoring-ui-enabled, `monitoring.ui.enabled`>> setting, when this setting is `false`, the
   monitoring back-end does not run and {kib} stats are not sent to the monitoring
   cluster.
 
+a|`monitoring.cluster_alerts.`
+`email_notifications.email_address` {ess-icon}
+    | Specifies the email address where you want to receive cluster alerts.
+    See <<cluster-alert-email-notifications, email notifications>> for details.
+
 | `monitoring.ui.elasticsearch.hosts`
   | Specifies the location of the {es} cluster where your monitoring data is stored.
-  By default, this is the same as `elasticsearch.hosts`. This setting enables
+  By default, this is the same as <<elasticsearch-hosts, `elasticsearch.hosts`>>. This setting enables
   you to use a single {kib} instance to search and visualize data in your
   production cluster as well as monitor data sent to a dedicated monitoring
   cluster.
@@ -53,7 +58,7 @@ For more information, see
   cluster uses the authenticated user's credentials, which must be the same on
   both the {es} monitoring cluster and the {es} production cluster. +
   +
-  If not set, {kib} uses the value of the `elasticsearch.username` setting.
+  If not set, {kib} uses the value of the <<elasticsearch-user-passwd, `elasticsearch.username`>> setting.
 
 | `monitoring.ui.elasticsearch.password`
   | Specifies the password used by {kib} monitoring to establish a persistent connection
@@ -64,11 +69,11 @@ For more information, see
   cluster uses the authenticated user's credentials, which must be the same on
   both the {es} monitoring cluster and the {es} production cluster. +
   +
-  If not set, {kib} uses the value of the `elasticsearch.password` setting.
+  If not set, {kib} uses the value of the <<elasticsearch-user-passwd, `elasticsearch.password`>> setting.
 
 | `monitoring.ui.elasticsearch.pingTimeout`
   | Specifies the time in milliseconds to wait for {es} to respond to internal
-  health checks. By default, it matches the `elasticsearch.pingTimeout` setting,
+  health checks. By default, it matches the <<elasticsearch-pingTimeout, `elasticsearch.pingTimeout`>> setting,
   which has a default value of `30000`.
 
 |===
@@ -85,7 +90,7 @@ These settings control how data is collected from {kib}.
   | Set to `true` (default) to enable data collection from the {kib} NodeJS server
   for {kib} dashboards to be featured in *{stack-monitor-app}*.
 
-| `monitoring.kibana.collection.interval`
+| `monitoring.kibana.collection.interval` {ess-icon}
   | Specifies the number of milliseconds to wait in between data sampling on the
   {kib} NodeJS server for the metrics that are displayed in the {kib} dashboards.
   Defaults to `10000` (10 seconds).
@@ -107,11 +112,11 @@ about configuring {kib}, see
   | Specifies the number of log entries to display in *{stack-monitor-app}*.
   Defaults to `10`. The maximum value is `50`.
 
-| `monitoring.ui.enabled`
+|[[monitoring-ui-enabled]] `monitoring.ui.enabled`
   | Set to `false` to hide *{stack-monitor-app}*. The monitoring back-end
     continues to run as an agent for sending {kib} stats to the monitoring
     cluster. Defaults to `true`.
-  
+
 | `monitoring.ui.logs.index`
   | Specifies the name of the indices that are shown on the
   <<logs-monitor-page,*Logs*>> page in *{stack-monitor-app}*. The default value
@@ -124,7 +129,7 @@ about configuring {kib}, see
   {ref}/search-aggregations-bucket-terms-aggregation.html#search-aggregations-bucket-terms-aggregation-size[Terms Aggregation].
   Defaults to `10000`.
 
-| `monitoring.ui.min_interval_seconds`
+| `monitoring.ui.min_interval_seconds` {ess-icon}
   | Specifies the minimum number of seconds that a time bucket in a chart can
   represent. Defaults to 10. If you modify the
   `monitoring.ui.collection.interval` in `elasticsearch.yml`, use the same
@@ -143,7 +148,7 @@ container, then Cgroup statistics are not useful.
 
 [cols="2*<"]
 |===
-| `monitoring.ui.container.elasticsearch.enabled`
+| `monitoring.ui.container.elasticsearch.enabled` {ess-icon}
   | For {es} clusters that are running in containers, this setting changes the
   *Node Listing* to display the CPU utilization based on the reported Cgroup
   statistics. It also adds the calculated Cgroup CPU utilization to the

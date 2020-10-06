@@ -115,6 +115,7 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
       data-test-subj="mlAnomalySwimlaneEmbeddableWrapper"
     >
       <SwimlaneContainer
+        id={id}
         data-test-subj={`mlSwimLaneEmbeddable_${embeddableContext.id}`}
         timeBuckets={timeBuckets}
         swimlaneData={swimlaneData!}
@@ -145,3 +146,7 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
     </div>
   );
 };
+
+// required for dynamic import using React.lazy()
+// eslint-disable-next-line import/no-default-export
+export default EmbeddableSwimLaneContainer;

@@ -99,7 +99,7 @@ function buildRequest(req, config, esIndexPattern) {
       'aggregations.by_follower_index.buckets.by_shard_id.buckets.follower_lag_ops.value',
     ],
     body: {
-      sort: [{ timestamp: { order: 'desc' } }],
+      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
       query: {
         bool: {
           must: [

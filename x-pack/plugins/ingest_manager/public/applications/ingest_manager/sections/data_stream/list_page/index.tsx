@@ -64,7 +64,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
   const { pagination, pageSizeOptions } = usePagination();
 
   // Fetch data streams
-  const { isLoading, data: dataStreamsData, sendRequest } = useGetDataStreams();
+  const { isLoading, data: dataStreamsData, resendRequest } = useGetDataStreams();
 
   // Some policies retrieved, set up table props
   const columns = useMemo(() => {
@@ -241,7 +241,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
               key="reloadButton"
               color="primary"
               iconType="refresh"
-              onClick={() => sendRequest()}
+              onClick={() => resendRequest()}
             >
               <FormattedMessage
                 id="xpack.ingestManager.dataStreamList.reloadDataStreamsButtonText"

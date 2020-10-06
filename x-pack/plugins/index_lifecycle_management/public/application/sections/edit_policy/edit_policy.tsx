@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState, useCallback } from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
+
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -25,10 +27,9 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-
 import { toasts } from '../../services/notification';
 
-import { Phases, Policy, PolicyFromES } from '../../services/policies/types';
+import { Phases, Policy, PolicyFromES } from '../../../../common/types';
 import {
   validatePolicy,
   ValidationErrors,
@@ -42,9 +43,9 @@ import {
 } from '../../services/policies/policy_serialization';
 
 import { ErrableFormRow, LearnMoreLink, PolicyJsonFlyout } from './components';
-import { ColdPhase, DeletePhase, FrozenPhase, HotPhase, WarmPhase } from './phases';
+import { ColdPhase, DeletePhase, HotPhase, WarmPhase } from './phases';
 
-interface Props {
+export interface Props {
   policies: PolicyFromES[];
   policyName: string;
   getUrlForApp: (
@@ -54,7 +55,7 @@ interface Props {
       absolute?: boolean;
     }
   ) => string;
-  history: any;
+  history: RouteComponentProps['history'];
 }
 export const EditPolicy: React.FunctionComponent<Props> = ({
   policies,
@@ -118,15 +119,35 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
     setIsShowingPolicyJsonFlyout(!isShowingPolicyJsonFlyout);
   };
 
-  const setPhaseData = (phase: keyof Phases, key: string, value: any) => {
-    setPolicy({
-      ...policy,
-      phases: {
-        ...policy.phases,
-        [phase]: { ...policy.phases[phase], [key]: value },
-      },
-    });
-  };
+  const setPhaseData = useCallback(
+    (phase: keyof Phases, key: string, value: any) => {
+      setPolicy((nextPolicy) => ({
+        ...nextPolicy,
+        phases: {
+          ...nextPolicy.phases,
+          [phase]: { ...nextPolicy.phases[phase], [key]: value },
+        },
+      }));
+    },
+    [setPolicy]
+  );
+
+  const setHotPhaseData = useCallback(
+    (key: string, value: any) => setPhaseData('hot', key, value),
+    [setPhaseData]
+  );
+  const setWarmPhaseData = useCallback(
+    (key: string, value: any) => setPhaseData('warm', key, value),
+    [setPhaseData]
+  );
+  const setColdPhaseData = useCallback(
+    (key: string, value: any) => setPhaseData('cold', key, value),
+    [setPhaseData]
+  );
+  const setDeletePhaseData = useCallback(
+    (key: string, value: any) => setPhaseData('delete', key, value),
+    [setPhaseData]
+  );
 
   const setWarmPhaseOnRollover = (value: boolean) => {
     setPolicy({
@@ -276,7 +297,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
             <HotPhase
               errors={errors?.hot}
               isShowingErrors={isShowingErrors && !!errors && Object.keys(errors.hot).length > 0}
-              setPhaseData={(key, value) => setPhaseData('hot', key, value)}
+              setPhaseData={setHotPhaseData}
               phaseData={policy.phases.hot}
               setWarmPhaseOnRollover={setWarmPhaseOnRollover}
             />
@@ -286,7 +307,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
             <WarmPhase
               errors={errors?.warm}
               isShowingErrors={isShowingErrors && !!errors && Object.keys(errors.warm).length > 0}
-              setPhaseData={(key, value) => setPhaseData('warm', key, value)}
+              setPhaseData={setWarmPhaseData}
               phaseData={policy.phases.warm}
               hotPhaseRolloverEnabled={policy.phases.hot.rolloverEnabled}
             />
@@ -296,18 +317,8 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
             <ColdPhase
               errors={errors?.cold}
               isShowingErrors={isShowingErrors && !!errors && Object.keys(errors.cold).length > 0}
-              setPhaseData={(key, value) => setPhaseData('cold', key, value)}
+              setPhaseData={setColdPhaseData}
               phaseData={policy.phases.cold}
-              hotPhaseRolloverEnabled={policy.phases.hot.rolloverEnabled}
-            />
-
-            <EuiHorizontalRule />
-
-            <FrozenPhase
-              errors={errors?.frozen}
-              isShowingErrors={isShowingErrors && !!errors && Object.keys(errors.frozen).length > 0}
-              setPhaseData={(key, value) => setPhaseData('frozen', key, value)}
-              phaseData={policy.phases.frozen}
               hotPhaseRolloverEnabled={policy.phases.hot.rolloverEnabled}
             />
 
@@ -317,7 +328,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
               errors={errors?.delete}
               isShowingErrors={isShowingErrors && !!errors && Object.keys(errors.delete).length > 0}
               getUrlForApp={getUrlForApp}
-              setPhaseData={(key, value) => setPhaseData('delete', key, value)}
+              setPhaseData={setDeletePhaseData}
               phaseData={policy.phases.delete}
               hotPhaseRolloverEnabled={policy.phases.hot.rolloverEnabled}
             />

@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
-  EuiForm,
   EuiFormRow,
   EuiSwitch,
   EuiSwitchEvent,
@@ -37,12 +36,16 @@ export interface DateHistogramIndexPatternColumn extends FieldBasedIndexPatternC
   };
 }
 
-export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatternColumn> = {
+export const dateHistogramOperation: OperationDefinition<
+  DateHistogramIndexPatternColumn,
+  'field'
+> = {
   type: 'date_histogram',
   displayName: i18n.translate('xpack.lens.indexPattern.dateHistogram', {
     defaultMessage: 'Date histogram',
   }),
-  priority: 3, // Higher than any metric
+  input: 'field',
+  priority: 5, // Highest priority level used
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
       type === 'date' &&
@@ -137,7 +140,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       },
     };
   },
-  paramEditor: ({ state, setState, currentColumn: currentColumn, layerId, dateRange, data }) => {
+  paramEditor: ({ state, setState, currentColumn, layerId, dateRange, data }) => {
     const field =
       currentColumn &&
       state.indexPatterns[state.layers[layerId].indexPatternId].fields.find(
@@ -180,15 +183,16 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
     };
 
     return (
-      <EuiForm>
+      <>
         {!intervalIsRestricted && (
-          <EuiFormRow>
+          <EuiFormRow display="rowCompressed" hasChildLabel={false}>
             <EuiSwitch
               label={i18n.translate('xpack.lens.indexPattern.dateHistogram.autoInterval', {
                 defaultMessage: 'Customize time interval',
               })}
               checked={currentColumn.params.interval !== autoInterval}
               onChange={onChangeAutoInterval}
+              compressed
             />
           </EuiFormRow>
         )}
@@ -197,6 +201,8 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
             label={i18n.translate('xpack.lens.indexPattern.dateHistogram.minimumInterval', {
               defaultMessage: 'Minimum interval',
             })}
+            fullWidth
+            display="rowCompressed"
           >
             {intervalIsRestricted ? (
               <FormattedMessage
@@ -208,9 +214,10 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
               />
             ) : (
               <>
-                <EuiFlexGroup>
+                <EuiFlexGroup responsive={false} gutterSize="s">
                   <EuiFlexItem>
                     <EuiFieldNumber
+                      compressed
                       data-test-subj="lensDateHistogramValue"
                       value={
                         typeof interval.value === 'number' || interval.value === ''
@@ -229,6 +236,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiSelect
+                      compressed
                       data-test-subj="lensDateHistogramUnit"
                       value={interval.unit}
                       onChange={(e) => {
@@ -309,7 +317,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
             )}
           </EuiFormRow>
         )}
-      </EuiForm>
+      </>
     );
   },
 };

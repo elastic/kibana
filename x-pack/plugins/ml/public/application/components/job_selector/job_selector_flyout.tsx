@@ -237,7 +237,7 @@ export const JobSelectorFlyout: FC<JobSelectorFlyoutProps> = ({
                 <EuiFlexItem grow={false}>
                   <EuiSwitch
                     label={i18n.translate('xpack.ml.jobSelector.applyTimerangeSwitchLabel', {
-                      defaultMessage: 'Apply timerange',
+                      defaultMessage: 'Apply time range',
                     })}
                     checked={applyTimeRange}
                     onChange={toggleTimerangeSwitch}

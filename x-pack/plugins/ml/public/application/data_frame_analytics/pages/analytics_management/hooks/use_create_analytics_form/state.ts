@@ -8,13 +8,14 @@ import { DeepPartial, DeepReadonly } from '../../../../../../../common/types/com
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
 
-import { ANALYSIS_CONFIG_TYPE, defaultSearchQuery } from '../../../../common/analytics';
+import { defaultSearchQuery, getAnalysisType } from '../../../../common/analytics';
 import { CloneDataFrameAnalyticsConfig } from '../../components/action_clone';
 import {
   DataFrameAnalyticsConfig,
   DataFrameAnalyticsId,
+  DataFrameAnalysisConfigType,
 } from '../../../../../../../common/types/data_frame_analytics';
-
+import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
 export enum DEFAULT_MODEL_MEMORY_LIMIT {
   regression = '100mb',
   outlier_detection = '50mb',
@@ -28,7 +29,7 @@ export const UNSET_CONFIG_ITEM = '--';
 export type EsIndexName = string;
 export type DependentVariable = string;
 export type IndexPatternTitle = string;
-export type AnalyticsJobType = ANALYSIS_CONFIG_TYPE | undefined;
+export type AnalyticsJobType = DataFrameAnalysisConfigType | undefined;
 type IndexPatternId = string;
 export type SourceIndexMap = Record<
   IndexPatternTitle,
@@ -290,8 +291,7 @@ export function getFormStateFromJobConfig(
   analyticsJobConfig: Readonly<CloneDataFrameAnalyticsConfig>,
   isClone: boolean = true
 ): Partial<State['form']> {
-  const jobType = Object.keys(analyticsJobConfig.analysis)[0] as ANALYSIS_CONFIG_TYPE;
-
+  const jobType = getAnalysisType(analyticsJobConfig.analysis) as DataFrameAnalysisConfigType;
   const resultState: Partial<State['form']> = {
     jobType,
     description: analyticsJobConfig.description ?? '',
@@ -301,7 +301,8 @@ export function getFormStateFromJobConfig(
       : analyticsJobConfig.source.index,
     modelMemoryLimit: analyticsJobConfig.model_memory_limit,
     maxNumThreads: analyticsJobConfig.max_num_threads,
-    includes: analyticsJobConfig.analyzed_fields.includes,
+    includes: analyticsJobConfig.analyzed_fields?.includes ?? [],
+    jobConfigQuery: analyticsJobConfig.source.query || defaultSearchQuery,
   };
 
   if (isClone === false) {

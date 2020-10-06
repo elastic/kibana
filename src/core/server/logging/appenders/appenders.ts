@@ -17,14 +17,17 @@
  * under the License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import { assertNever } from '@kbn/std';
+import { DisposableAppender } from '@kbn/logging';
 
-import { assertNever } from '../../../utils';
-import { LegacyAppender } from '../../legacy/logging/appenders/legacy_appender';
+import {
+  LegacyAppender,
+  LegacyAppenderConfig,
+} from '../../legacy/logging/appenders/legacy_appender';
 import { Layouts } from '../layouts/layouts';
-import { LogRecord } from '../log_record';
-import { ConsoleAppender } from './console/console_appender';
-import { FileAppender } from './file/file_appender';
+import { ConsoleAppender, ConsoleAppenderConfig } from './console/console_appender';
+import { FileAppender, FileAppenderConfig } from './file/file_appender';
 
 /**
  * Config schema for validting the shape of the `appenders` key in in {@link LoggerContextConfigType} or
@@ -39,26 +42,7 @@ export const appendersSchema = schema.oneOf([
 ]);
 
 /** @public */
-export type AppenderConfigType = TypeOf<typeof appendersSchema>;
-
-/**
- * Entity that can append `LogRecord` instances to file, stdout, memory or whatever
- * is implemented internally. It's supposed to be used by `Logger`.
- * @internal
- */
-export interface Appender {
-  append(record: LogRecord): void;
-}
-
-/**
- * This interface should be additionally implemented by the `Appender`'s if they are supposed
- * to be properly disposed. It's intentionally separated from `Appender` interface so that `Logger`
- * that interacts with `Appender` doesn't have control over appender lifetime.
- * @internal
- */
-export interface DisposableAppender extends Appender {
-  dispose: () => void;
-}
+export type AppenderConfigType = ConsoleAppenderConfig | FileAppenderConfig | LegacyAppenderConfig;
 
 /** @internal */
 export class Appenders {

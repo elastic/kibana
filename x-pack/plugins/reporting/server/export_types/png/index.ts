@@ -12,23 +12,21 @@ import {
   LICENSE_TYPE_TRIAL,
   PNG_JOB_TYPE as jobType,
 } from '../../../common/constants';
-import { CreateJobFn, WorkerExecuteFn, ExportTypeDefinition } from '../../types';
-import { scheduleTaskFnFactory } from './create_job';
+import { CreateJobFn, ExportTypeDefinition, RunTaskFn } from '../../types';
+import { createJobFnFactory } from './create_job';
 import { runTaskFnFactory } from './execute_job';
 import { metadata } from './metadata';
-import { JobParamsPNG, ScheduledTaskParamsPNG } from './types';
+import { JobParamsPNG, TaskPayloadPNG } from './types';
 
 export const getExportType = (): ExportTypeDefinition<
-  JobParamsPNG,
   CreateJobFn<JobParamsPNG>,
-  ScheduledTaskParamsPNG,
-  WorkerExecuteFn<ScheduledTaskParamsPNG>
+  RunTaskFn<TaskPayloadPNG>
 > => ({
   ...metadata,
   jobType,
   jobContentEncoding: 'base64',
   jobContentExtension: 'PNG',
-  scheduleTaskFnFactory,
+  createJobFnFactory,
   runTaskFnFactory,
   validLicenses: [
     LICENSE_TYPE_TRIAL,

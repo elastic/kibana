@@ -6,7 +6,12 @@
 import React from 'react';
 
 import { StateProvider } from './mappings_state_context';
+import { IndexSettingsProvider } from './index_settings_context';
 
 export const MappingsEditorProvider: React.FC = ({ children }) => {
-  return <StateProvider>{children}</StateProvider>;
+  return (
+    <StateProvider>
+      <IndexSettingsProvider>{children}</IndexSettingsProvider>
+    </StateProvider>
+  );
 };

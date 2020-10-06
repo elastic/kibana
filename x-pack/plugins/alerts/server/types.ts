@@ -24,6 +24,8 @@ import {
   AlertTypeState,
   AlertInstanceContext,
   AlertInstanceState,
+  AlertExecutionStatuses,
+  AlertExecutionStatusErrorReasons,
 } from '../common';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
@@ -111,6 +113,22 @@ export interface RawAlertAction extends SavedObjectAttributes {
   params: AlertActionParams;
 }
 
+export interface AlertMeta extends SavedObjectAttributes {
+  versionApiKeyLastmodified?: string;
+}
+
+// note that the `error` property is "null-able", as we're doing a partial
+// update on the alert when we update this data, but need to ensure we
+// delete any previous error if the current status has no error
+export interface RawAlertExecutionStatus extends SavedObjectAttributes {
+  status: AlertExecutionStatuses;
+  lastExecutionDate: string;
+  error: null | {
+    reason: AlertExecutionStatusErrorReasons;
+    message: string;
+  };
+}
+
 export type PartialAlert = Pick<Alert, 'id'> & Partial<Omit<Alert, 'id'>>;
 
 export interface RawAlert extends SavedObjectAttributes {
@@ -122,7 +140,7 @@ export interface RawAlert extends SavedObjectAttributes {
   schedule: SavedObjectAttributes;
   actions: RawAlertAction[];
   params: SavedObjectAttributes;
-  scheduledTaskId?: string;
+  scheduledTaskId?: string | null;
   createdBy: string | null;
   updatedBy: string | null;
   createdAt: string;
@@ -131,6 +149,8 @@ export interface RawAlert extends SavedObjectAttributes {
   throttle: string | null;
   muteAll: boolean;
   mutedInstanceIds: string[];
+  meta?: AlertMeta;
+  executionStatus: RawAlertExecutionStatus;
 }
 
 export type AlertInfoParams = Pick<

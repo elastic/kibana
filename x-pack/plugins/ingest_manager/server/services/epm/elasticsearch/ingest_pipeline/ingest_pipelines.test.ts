@@ -7,7 +7,7 @@
 import { readFileSync } from 'fs';
 import path from 'path';
 import { rewriteIngestPipeline, getPipelineNameForInstallation } from './install';
-import { Dataset } from '../../../../types';
+import { RegistryDataStream } from '../../../../types';
 
 test('a json-format pipeline with pipeline references is correctly rewritten', () => {
   const inputStandard = readFileSync(
@@ -106,8 +106,8 @@ test('a yml-format pipeline with no pipeline references stays unchanged', () => 
 });
 
 test('getPipelineNameForInstallation gets correct name', () => {
-  const dataset: Dataset = {
-    name: 'coredns.log',
+  const dataStream: RegistryDataStream = {
+    dataset: 'coredns.log',
     title: 'CoreDNS logs',
     release: 'ga',
     type: 'logs',
@@ -118,19 +118,19 @@ test('getPipelineNameForInstallation gets correct name', () => {
   const packageVersion = '1.0.1';
   const pipelineRefName = 'pipeline-json';
   const pipelineEntryNameForInstallation = getPipelineNameForInstallation({
-    pipelineName: dataset.ingest_pipeline,
-    dataset,
+    pipelineName: dataStream.ingest_pipeline,
+    dataStream,
     packageVersion,
   });
   const pipelineRefNameForInstallation = getPipelineNameForInstallation({
     pipelineName: pipelineRefName,
-    dataset,
+    dataStream,
     packageVersion,
   });
   expect(pipelineEntryNameForInstallation).toBe(
-    `${dataset.type}-${dataset.name}-${packageVersion}`
+    `${dataStream.type}-${dataStream.dataset}-${packageVersion}`
   );
   expect(pipelineRefNameForInstallation).toBe(
-    `${dataset.type}-${dataset.name}-${packageVersion}-${pipelineRefName}`
+    `${dataStream.type}-${dataStream.dataset}-${packageVersion}-${pipelineRefName}`
   );
 });

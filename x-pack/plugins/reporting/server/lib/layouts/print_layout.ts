@@ -9,10 +9,16 @@ import { EvaluateFn, SerializableOrJSHandle } from 'puppeteer';
 import { LevelLogger } from '../';
 import { HeadlessChromiumDriver } from '../../browsers';
 import { CaptureConfig } from '../../types';
-import { getDefaultLayoutSelectors, LayoutSelectorDictionary, LayoutTypes, Size } from './';
+import {
+  getDefaultLayoutSelectors,
+  LayoutInstance,
+  LayoutSelectorDictionary,
+  LayoutTypes,
+  Size,
+} from './';
 import { Layout } from './layout';
 
-export class PrintLayout extends Layout {
+export class PrintLayout extends Layout implements LayoutInstance {
   public readonly selectors: LayoutSelectorDictionary = {
     ...getDefaultLayoutSelectors(),
     screenshot: '[data-shared-item]',

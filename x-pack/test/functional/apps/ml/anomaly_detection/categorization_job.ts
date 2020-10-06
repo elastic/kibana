@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../../plugins/ml/common/constants/categorization_job';
@@ -109,7 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('job creation displays the time range step');
       await ml.jobWizardCommon.assertTimeRangeSectionExists();
 
-      await ml.testExecution.logTestStep('job creation sets the timerange');
+      await ml.testExecution.logTestStep('job creation sets the time range');
       await ml.jobWizardCommon.clickUseFullDataButton(
         'Apr 5, 2019 @ 11:25:35.770',
         'Nov 21, 2019 @ 06:01:13.914'
@@ -202,9 +201,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.navigation.navigateToJobManagement();
 
       await ml.jobTable.waitForJobsToLoad();
-      await ml.jobTable.filterWithSearchString(jobId);
-      const rows = await ml.jobTable.parseJobTable();
-      expect(rows.filter((row) => row.id === jobId)).to.have.length(1);
+      await ml.jobTable.filterWithSearchString(jobId, 1);
 
       await ml.testExecution.logTestStep(
         'job creation displays details for the created job in the job list'
@@ -233,7 +230,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('job cloning displays the time range step');
       await ml.jobWizardCommon.assertTimeRangeSectionExists();
 
-      await ml.testExecution.logTestStep('job cloning sets the timerange');
+      await ml.testExecution.logTestStep('job cloning sets the time range');
       await ml.jobWizardCommon.clickUseFullDataButton(
         'Apr 5, 2019 @ 11:25:35.770',
         'Nov 21, 2019 @ 06:01:13.914'
@@ -320,9 +317,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.navigation.navigateToJobManagement();
 
       await ml.jobTable.waitForJobsToLoad();
-      await ml.jobTable.filterWithSearchString(jobIdClone);
-      const rows = await ml.jobTable.parseJobTable();
-      expect(rows.filter((row) => row.id === jobIdClone)).to.have.length(1);
+      await ml.jobTable.filterWithSearchString(jobIdClone, 1);
 
       await ml.testExecution.logTestStep(
         'job cloning displays details for the created job in the job list'
@@ -353,9 +348,7 @@ export default function ({ getService }: FtrProviderContext) {
         'job deletion does not display the deleted job in the job list any more'
       );
       await ml.jobTable.waitForJobsToLoad();
-      await ml.jobTable.filterWithSearchString(jobIdClone);
-      const rows = await ml.jobTable.parseJobTable();
-      expect(rows.filter((row) => row.id === jobIdClone)).to.have.length(0);
+      await ml.jobTable.filterWithSearchString(jobIdClone, 0);
 
       await ml.testExecution.logTestStep(
         'job deletion does not have results for the deleted job any more'

@@ -109,7 +109,7 @@ export class UiActionsExecutionService {
   }
 
   private async executeMultipleActions(tasks: ExecuteActionTask[]) {
-    const panel = await buildContextMenuForActions({
+    const panels = await buildContextMenuForActions({
       actions: tasks.map(({ action, context, trigger }) => ({
         action,
         context,
@@ -121,7 +121,7 @@ export class UiActionsExecutionService {
         session.close();
       },
     });
-    const session = openContextMenu([panel], {
+    const session = openContextMenu(panels, {
       'data-test-subj': 'multipleActionsContextMenu',
     });
   }

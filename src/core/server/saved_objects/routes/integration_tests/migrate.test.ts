@@ -18,7 +18,7 @@
  */
 
 import { migratorInstanceMock } from './migrate.test.mocks';
-import * as kbnTestServer from '../../../../../test_utils/kbn_server';
+import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 
 describe('SavedObjects /_migrate endpoint', () => {
   let root: ReturnType<typeof kbnTestServer.createRoot>;

@@ -19,16 +19,20 @@ import {
   EuiSpacer,
   EuiFormRow,
   EuiText,
+  EuiCallOut,
 } from '@elastic/eui';
+import { hasEqlSequenceQuery, isEqlRule } from '../../../../../common/detection_engine/utils';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
   ExceptionListType,
 } from '../../../../../public/lists_plugin_deps';
+import * as i18nCommon from '../../../translations';
 import * as i18n from './translations';
 import * as sharedI18n from '../translations';
-import { TimelineNonEcsData, Ecs } from '../../../../graphql/types';
+import { Ecs } from '../../../../../common/ecs';
+import { osTypeArray, OsTypeArray } from '../../../../../common/shared_imports';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useKibana } from '../../../lib/kibana';
 import { ExceptionBuilderComponent } from '../builder';
@@ -45,27 +49,21 @@ import {
   defaultEndpointExceptionItems,
   entryHasListType,
   entryHasNonEcsType,
-  getMappedNonEcsValue,
 } from '../helpers';
 import { ErrorInfo, ErrorCallout } from '../error_callout';
-import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules';
+import { ExceptionsBuilderExceptionItem } from '../types';
+import { useFetchIndex } from '../../../containers/source';
 
-export interface AddExceptionModalBaseProps {
+export interface AddExceptionModalProps {
   ruleName: string;
   ruleId: string;
   exceptionListType: ExceptionListType;
   ruleIndices: string[];
-  alertData?: {
-    ecsData: Ecs;
-    nonEcsData: TimelineNonEcsData[];
-  };
-}
-
-export interface AddExceptionModalProps extends AddExceptionModalBaseProps {
+  alertData?: Ecs;
+  alertStatus?: Status;
   onCancel: () => void;
   onConfirm: (didCloseAlert: boolean, didBulkCloseAlert: boolean) => void;
   onRuleChange?: () => void;
-  alertStatus?: Status;
 }
 
 const Modal = styled(EuiModal)`
@@ -118,28 +116,37 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
   >([]);
   const [fetchOrCreateListError, setFetchOrCreateListError] = useState<ErrorInfo | null>(null);
-  const { addError, addSuccess } = useAppToasts();
+  const { addError, addSuccess, addWarning } = useAppToasts();
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
-  const [
-    { isLoading: isSignalIndexPatternLoading, indexPatterns: signalIndexPatterns },
-  ] = useFetchIndexPatterns(signalIndexName !== null ? [signalIndexName] : [], 'signals');
-
-  const [{ isLoading: isIndexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
-    ruleIndices,
-    'rules'
+  const memoSignalIndexName = useMemo(() => (signalIndexName !== null ? [signalIndexName] : []), [
+    signalIndexName,
+  ]);
+  const [isSignalIndexPatternLoading, { indexPatterns: signalIndexPatterns }] = useFetchIndex(
+    memoSignalIndexName
   );
+  const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(ruleIndices);
 
   const onError = useCallback(
-    (error: Error) => {
+    (error: Error): void => {
       addError(error, { title: i18n.ADD_EXCEPTION_ERROR });
       onCancel();
     },
     [addError, onCancel]
   );
-  const onSuccess = useCallback(() => {
-    addSuccess(i18n.ADD_EXCEPTION_SUCCESS);
-    onConfirm(shouldCloseAlert, shouldBulkCloseAlert);
-  }, [addSuccess, onConfirm, shouldBulkCloseAlert, shouldCloseAlert]);
+
+  const onSuccess = useCallback(
+    (updated: number, conflicts: number): void => {
+      addSuccess(i18n.ADD_EXCEPTION_SUCCESS);
+      onConfirm(shouldCloseAlert, shouldBulkCloseAlert);
+      if (conflicts > 0) {
+        addWarning({
+          title: i18nCommon.UPDATE_ALERT_STATUS_FAILED(conflicts),
+          text: i18nCommon.UPDATE_ALERT_STATUS_FAILED_DETAILED(updated, conflicts),
+        });
+      }
+    },
+    [addSuccess, addWarning, onConfirm, shouldBulkCloseAlert, shouldCloseAlert]
+  );
 
   const [{ isLoading: addExceptionIsLoading }, addOrUpdateExceptionItems] = useAddOrUpdateException(
     {
@@ -190,7 +197,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   );
 
   const handleFetchOrCreateExceptionListError = useCallback(
-    (error: Error, statusCode: number | null, message: string | null) => {
+    (error: Error, statusCode: number | null, message: string | null): void => {
       setFetchOrCreateListError({
         reason: error.message,
         code: statusCode,
@@ -209,20 +216,15 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     onSuccess: handleRuleChange,
   });
 
-  const initialExceptionItems = useMemo(() => {
-    if (exceptionListType === 'endpoint' && alertData !== undefined && ruleExceptionList) {
-      return defaultEndpointExceptionItems(
-        exceptionListType,
-        ruleExceptionList.list_id,
-        ruleName,
-        alertData.nonEcsData
-      );
+  const initialExceptionItems = useMemo((): ExceptionsBuilderExceptionItem[] => {
+    if (exceptionListType === 'endpoint' && alertData != null && ruleExceptionList) {
+      return defaultEndpointExceptionItems(ruleExceptionList.list_id, ruleName, alertData);
     } else {
       return [];
     }
   }, [alertData, exceptionListType, ruleExceptionList, ruleName]);
 
-  useEffect(() => {
+  useEffect((): void => {
     if (isSignalIndexPatternLoading === false && isSignalIndexLoading === false) {
       setShouldDisableBulkClose(
         entryHasListType(exceptionItemsToAdd) ||
@@ -238,49 +240,48 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     signalIndexPatterns,
   ]);
 
-  useEffect(() => {
+  useEffect((): void => {
     if (shouldDisableBulkClose === true) {
       setShouldBulkCloseAlert(false);
     }
   }, [shouldDisableBulkClose]);
 
   const onCommentChange = useCallback(
-    (value: string) => {
+    (value: string): void => {
       setComment(value);
     },
     [setComment]
   );
 
   const onCloseAlertCheckboxChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
+    (event: React.ChangeEvent<HTMLInputElement>): void => {
       setShouldCloseAlert(event.currentTarget.checked);
     },
     [setShouldCloseAlert]
   );
 
   const onBulkCloseAlertCheckboxChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
+    (event: React.ChangeEvent<HTMLInputElement>): void => {
       setShouldBulkCloseAlert(event.currentTarget.checked);
     },
     [setShouldBulkCloseAlert]
   );
 
-  const retrieveAlertOsTypes = useCallback(() => {
-    const osDefaults = ['windows', 'macos'];
-    if (alertData) {
-      const osTypes = getMappedNonEcsValue({
-        data: alertData.nonEcsData,
-        fieldName: 'host.os.family',
-      });
-      if (osTypes.length === 0) {
-        return osDefaults;
+  const retrieveAlertOsTypes = useCallback((): OsTypeArray => {
+    const osDefaults: OsTypeArray = ['windows', 'macos'];
+    if (alertData != null) {
+      const osTypes = alertData.host && alertData.host.os && alertData.host.os.family;
+      if (osTypeArray.is(osTypes) && osTypes != null && osTypes.length > 0) {
+        return osTypes;
       }
-      return osTypes;
+      return osDefaults;
     }
     return osDefaults;
   }, [alertData]);
 
-  const enrichExceptionItems = useCallback(() => {
+  const enrichExceptionItems = useCallback((): Array<
+    ExceptionListItemSchema | CreateExceptionListItemSchema
+  > => {
     let enriched: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> = [];
     enriched =
       comment !== ''
@@ -293,15 +294,16 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     return enriched;
   }, [comment, exceptionItemsToAdd, exceptionListType, retrieveAlertOsTypes]);
 
-  const onAddExceptionConfirm = useCallback(() => {
-    if (addOrUpdateExceptionItems !== null) {
-      const alertIdToClose = shouldCloseAlert && alertData ? alertData.ecsData._id : undefined;
+  const onAddExceptionConfirm = useCallback((): void => {
+    if (addOrUpdateExceptionItems != null) {
+      const alertIdToClose = shouldCloseAlert && alertData ? alertData._id : undefined;
       const bulkCloseIndex =
-        shouldBulkCloseAlert && signalIndexName !== null ? [signalIndexName] : undefined;
-      addOrUpdateExceptionItems(enrichExceptionItems(), alertIdToClose, bulkCloseIndex);
+        shouldBulkCloseAlert && signalIndexName != null ? [signalIndexName] : undefined;
+      addOrUpdateExceptionItems(ruleId, enrichExceptionItems(), alertIdToClose, bulkCloseIndex);
     }
   }, [
     addOrUpdateExceptionItems,
+    ruleId,
     enrichExceptionItems,
     shouldCloseAlert,
     shouldBulkCloseAlert,
@@ -317,13 +319,21 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     [fetchOrCreateListError, exceptionItemsToAdd, errorsExist]
   );
 
+  const addExceptionMessage =
+    exceptionListType === 'endpoint' ? i18n.ADD_ENDPOINT_EXCEPTION : i18n.ADD_EXCEPTION;
+
+  const isRuleEQLSequenceStatement = useMemo((): boolean => {
+    if (maybeRule != null) {
+      return isEqlRule(maybeRule.type) && hasEqlSequenceQuery(maybeRule.query);
+    }
+    return false;
+  }, [maybeRule]);
+
   return (
     <EuiOverlayMask onClick={onCancel}>
       <Modal onClose={onCancel} data-test-subj="add-exception-modal">
         <ModalHeader>
-          <EuiModalHeaderTitle>
-            {exceptionListType === 'endpoint' ? i18n.ADD_ENDPOINT_EXCEPTION : i18n.ADD_EXCEPTION}
-          </EuiModalHeaderTitle>
+          <EuiModalHeaderTitle>{addExceptionMessage}</EuiModalHeaderTitle>
           <ModalHeaderSubtitle className="eui-textTruncate" title={ruleName}>
             {ruleName}
           </ModalHeaderSubtitle>
@@ -357,6 +367,15 @@ export const AddExceptionModal = memo(function AddExceptionModal({
           ruleExceptionList && (
             <>
               <ModalBodySection className="builder-section">
+                {isRuleEQLSequenceStatement && (
+                  <>
+                    <EuiCallOut
+                      data-test-subj="eql-sequence-callout"
+                      title={i18n.ADD_EXCEPTION_SEQUENCE_WARNING}
+                    />
+                    <EuiSpacer />
+                  </>
+                )}
                 <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
                 <EuiSpacer />
                 <ExceptionBuilderComponent
@@ -430,7 +449,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
               isDisabled={isSubmitButtonDisabled}
               fill
             >
-              {i18n.ADD_EXCEPTION}
+              {addExceptionMessage}
             </EuiButton>
           </EuiModalFooter>
         )}

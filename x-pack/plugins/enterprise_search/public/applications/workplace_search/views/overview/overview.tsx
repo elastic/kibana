@@ -14,6 +14,7 @@ import { useActions, useValues } from 'kea';
 import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 
+import { AppLogic } from '../../app_logic';
 import { OverviewLogic } from './overview_logic';
 
 import { Loading } from '../../components/shared/loading';
@@ -44,15 +45,12 @@ const HEADER_DESCRIPTION = i18n.translate(
 );
 
 export const Overview: React.FC = () => {
-  const { initializeOverview } = useActions(OverviewLogic);
-
   const {
-    dataLoading,
-    hasUsers,
-    hasOrgSources,
-    isOldAccount,
     organization: { name: orgName, defaultOrgName },
-  } = useValues(OverviewLogic);
+  } = useValues(AppLogic);
+
+  const { initializeOverview } = useActions(OverviewLogic);
+  const { dataLoading, hasUsers, hasOrgSources, isOldAccount } = useValues(OverviewLogic);
 
   useEffect(() => {
     initializeOverview();
@@ -67,7 +65,7 @@ export const Overview: React.FC = () => {
 
   return (
     <EuiPage restrictWidth>
-      <SetPageChrome isRoot />
+      <SetPageChrome />
       <SendTelemetry action="viewed" metric="overview" />
 
       <EuiPageBody>

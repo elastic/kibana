@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -12,7 +11,8 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const editedDescription = 'Edited description';
 
-  describe('outlier detection creation', function () {
+  // https://github.com/elastic/kibana/issues/79777
+  describe.skip('outlier detection creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/ihp_outlier');
       await ml.testResources.createIndexPatternIfNeeded('ft_ihp_outlier', '@timestamp');
@@ -163,13 +163,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('displays the created job in the analytics table');
           await ml.dataFrameAnalyticsTable.refreshAnalyticsTable();
-          await ml.dataFrameAnalyticsTable.filterWithSearchString(testData.jobId);
-          const rows = await ml.dataFrameAnalyticsTable.parseAnalyticsTable();
-          const filteredRows = rows.filter((row) => row.id === testData.jobId);
-          expect(filteredRows).to.have.length(
-            1,
-            `Filtered analytics table should have 1 row for job id '${testData.jobId}' (got matching items '${filteredRows}')`
-          );
+          await ml.dataFrameAnalyticsTable.filterWithSearchString(testData.jobId, 1);
 
           await ml.testExecution.logTestStep(
             'displays details for the created job in the analytics table'
@@ -224,8 +218,10 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.api.assertIndicesNotEmpty(testData.destinationIndex);
 
           await ml.testExecution.logTestStep('displays the results view for created job');
-          await ml.dataFrameAnalyticsTable.openResultsView();
-          await ml.dataFrameAnalytics.assertOutlierTablePanelExists();
+          await ml.dataFrameAnalyticsTable.openResultsView(testData.jobId);
+          await ml.dataFrameAnalyticsResults.assertOutlierTablePanelExists();
+          await ml.dataFrameAnalyticsResults.assertResultsTableExists();
+          await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
         });
       });
     }

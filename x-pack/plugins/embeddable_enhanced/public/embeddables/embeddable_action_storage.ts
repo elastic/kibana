@@ -5,6 +5,7 @@
  */
 
 import {
+  DynamicActionsState,
   UiActionsEnhancedAbstractActionStorage as AbstractActionStorage,
   UiActionsEnhancedSerializedEvent as SerializedEvent,
 } from '../../../ui_actions_enhanced/public';
@@ -13,12 +14,12 @@ import {
   EmbeddableOutput,
   IEmbeddable,
 } from '../../../../../src/plugins/embeddable/public';
+import { SerializableState } from '../../../../../src/plugins/kibana_utils/common';
 
 export interface EmbeddableWithDynamicActionsInput extends EmbeddableInput {
   enhancements?: {
-    dynamicActions?: {
-      events: SerializedEvent[];
-    };
+    dynamicActions: DynamicActionsState;
+    [key: string]: SerializableState;
   };
 }
 

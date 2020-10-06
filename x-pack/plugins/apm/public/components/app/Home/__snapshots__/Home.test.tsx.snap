@@ -18,6 +18,7 @@ exports[`Home component should render services 1`] = `
           "currentAppId$": Observable {
             "_isScalar": false,
           },
+          "navigateToUrl": [Function],
         },
         "chrome": Object {
           "docTitle": Object {
@@ -33,6 +34,7 @@ exports[`Home component should render services 1`] = `
         },
         "http": Object {
           "basePath": Object {
+            "get": [Function],
             "prepend": [Function],
           },
         },
@@ -50,7 +52,28 @@ exports[`Home component should render services 1`] = `
           "get$": [Function],
         },
       },
-      "plugins": Object {},
+      "plugins": Object {
+        "data": Object {
+          "query": Object {
+            "timefilter": Object {
+              "timefilter": Object {
+                "getTime": [Function],
+                "setTime": [Function],
+              },
+            },
+          },
+        },
+        "ml": Object {
+          "urlGenerator": MlUrlGenerator {
+            "createUrl": [Function],
+            "id": "ML_APP_URL_GENERATOR",
+            "params": Object {
+              "appBasePath": "/app/ml",
+              "useHash": false,
+            },
+          },
+        },
+      },
     }
   }
 >
@@ -78,6 +101,7 @@ exports[`Home component should render traces 1`] = `
           "currentAppId$": Observable {
             "_isScalar": false,
           },
+          "navigateToUrl": [Function],
         },
         "chrome": Object {
           "docTitle": Object {
@@ -93,6 +117,7 @@ exports[`Home component should render traces 1`] = `
         },
         "http": Object {
           "basePath": Object {
+            "get": [Function],
             "prepend": [Function],
           },
         },
@@ -110,7 +135,28 @@ exports[`Home component should render traces 1`] = `
           "get$": [Function],
         },
       },
-      "plugins": Object {},
+      "plugins": Object {
+        "data": Object {
+          "query": Object {
+            "timefilter": Object {
+              "timefilter": Object {
+                "getTime": [Function],
+                "setTime": [Function],
+              },
+            },
+          },
+        },
+        "ml": Object {
+          "urlGenerator": MlUrlGenerator {
+            "createUrl": [Function],
+            "id": "ML_APP_URL_GENERATOR",
+            "params": Object {
+              "appBasePath": "/app/ml",
+              "useHash": false,
+            },
+          },
+        },
+      },
     }
   }
 >

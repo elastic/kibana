@@ -7,13 +7,20 @@
 import React, { FC, Fragment } from 'react';
 import { EuiCard, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useNavigateToPath } from '../../../../../contexts/kibana';
+import { useMlKibana, useMlUrlGenerator } from '../../../../../contexts/kibana';
+import { ML_PAGES } from '../../../../../../../common/constants/ml_url_generator';
 
 export const BackToListPanel: FC = () => {
-  const navigateToPath = useNavigateToPath();
+  const urlGenerator = useMlUrlGenerator();
+  const {
+    services: {
+      application: { navigateToUrl },
+    },
+  } = useMlKibana();
 
   const redirectToAnalyticsManagementPage = async () => {
-    await navigateToPath('/data_frame_analytics');
+    const url = await urlGenerator.createUrl({ page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE });
+    await navigateToUrl(url);
   };
 
   return (

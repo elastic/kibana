@@ -58,7 +58,7 @@ export const updateAlertStatus = async ({
 }: UpdateAlertStatusProps): Promise<UpdateDocumentByQueryResponse> =>
   KibanaServices.get().http.fetch(DETECTION_ENGINE_SIGNALS_STATUS_URL, {
     method: 'POST',
-    body: JSON.stringify({ status, ...query }),
+    body: JSON.stringify({ conflicts: 'proceed', status, ...query }),
     signal,
   });
 

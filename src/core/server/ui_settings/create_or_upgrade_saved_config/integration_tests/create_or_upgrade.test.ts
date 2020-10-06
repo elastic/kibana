@@ -24,7 +24,7 @@ import {
   TestElasticsearchUtils,
   TestKibanaUtils,
   TestUtils,
-} from '../../../../../test_utils/kbn_server';
+} from '../../../../test_helpers/kbn_server';
 import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
 import { loggingSystemMock } from '../../../logging/logging_system.mock';
 import { httpServerMock } from '../../../http/http_server.mocks';
@@ -36,8 +36,6 @@ describe('createOrUpgradeSavedConfig()', () => {
   let esServer: TestElasticsearchUtils;
   let kbn: TestKibanaUtils;
 
-  let kbnServer: TestKibanaUtils['kbnServer'];
-
   beforeAll(async function () {
     servers = createTestServers({
       adjustTimeout: (t) => {
@@ -46,10 +44,8 @@ describe('createOrUpgradeSavedConfig()', () => {
     });
     esServer = await servers.startES();
     kbn = await servers.startKibana();
-    kbnServer = kbn.kbnServer;
 
-    const savedObjects = kbnServer.server.savedObjects;
-    savedObjectsClient = savedObjects.getScopedSavedObjectsClient(
+    savedObjectsClient = kbn.coreStart.savedObjects.getScopedClient(
       httpServerMock.createKibanaRequest()
     );
 

@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { HotPhase, SerializedHotPhase } from '../../../../common/types';
 import { serializedPhaseInitialization } from '../../constants';
 import { isNumber, splitSizeAndUnits } from './policy_serialization';
-import { HotPhase, SerializedHotPhase } from './types';
 import {
   maximumAgeRequiredMessage,
   maximumDocumentsRequiredMessage,
@@ -24,6 +24,9 @@ const hotPhaseInitialization: HotPhase = {
   selectedMaxAgeUnits: 'd',
   selectedMaxSizeStored: '',
   selectedMaxSizeStoredUnits: 'gb',
+  forceMergeEnabled: false,
+  selectedForceMergeSegments: '',
+  bestCompressionEnabled: false,
   phaseIndexPriority: '',
   selectedMaxDocuments: '',
 };
@@ -56,6 +59,14 @@ export const hotPhaseFromES = (phaseSerialized?: SerializedHotPhase): HotPhase =
       if (rollover.max_docs) {
         phase.selectedMaxDocuments = rollover.max_docs.toString();
       }
+    }
+
+    if (actions.forcemerge) {
+      const forcemerge = actions.forcemerge;
+      phase.forceMergeEnabled = true;
+      phase.selectedForceMergeSegments = forcemerge.max_num_segments.toString();
+      // only accepted value for index_codec
+      phase.bestCompressionEnabled = forcemerge.index_codec === 'best_compression';
     }
 
     if (actions.set_priority) {
@@ -93,8 +104,23 @@ export const hotPhaseToES = (
     if (isNumber(phase.selectedMaxDocuments)) {
       esPhase.actions.rollover.max_docs = parseInt(phase.selectedMaxDocuments, 10);
     }
+    if (phase.forceMergeEnabled && isNumber(phase.selectedForceMergeSegments)) {
+      esPhase.actions.forcemerge = {
+        max_num_segments: parseInt(phase.selectedForceMergeSegments, 10),
+      };
+      if (phase.bestCompressionEnabled) {
+        // only accepted value for index_codec
+        esPhase.actions.forcemerge.index_codec = 'best_compression';
+      }
+    } else {
+      delete esPhase.actions.forcemerge;
+    }
   } else {
     delete esPhase.actions.rollover;
+    // forcemerge is only allowed if rollover is enabled
+    if (esPhase.actions.forcemerge) {
+      delete esPhase.actions.forcemerge;
+    }
   }
 
   if (isNumber(phase.phaseIndexPriority)) {
@@ -146,6 +172,15 @@ export const validateHotPhase = (phase: HotPhase): PhaseValidationErrors<HotPhas
     }
     if (isNumber(phase.selectedMaxDocuments) && parseInt(phase.selectedMaxDocuments, 10) < 1) {
       phaseErrors.selectedMaxDocuments = [positiveNumbersAboveZeroErrorMessage];
+    }
+
+    // if forcemerge is enabled, force merge segments needs to be a number above zero
+    if (phase.forceMergeEnabled) {
+      if (!isNumber(phase.selectedForceMergeSegments)) {
+        phaseErrors.selectedForceMergeSegments = [numberRequiredMessage];
+      } else if (parseInt(phase.selectedForceMergeSegments, 10) < 1) {
+        phaseErrors.selectedForceMergeSegments = [positiveNumbersAboveZeroErrorMessage];
+      }
     }
   }
 

@@ -61,12 +61,12 @@ const AppRoot = React.memo(
       storeFactory,
       ResolverWithoutProviders,
       mocks: {
-        dataAccessLayer: { noAncestorsTwoChildren },
+        dataAccessLayer: { noAncestorsTwoChildrenWithRelatedEventsOnOrigin },
       },
     } = resolverPluginSetup;
     const dataAccessLayer: DataAccessLayer = useMemo(
-      () => noAncestorsTwoChildren().dataAccessLayer,
-      [noAncestorsTwoChildren]
+      () => noAncestorsTwoChildrenWithRelatedEventsOnOrigin().dataAccessLayer,
+      [noAncestorsTwoChildrenWithRelatedEventsOnOrigin]
     );
 
     const store = useMemo(() => {
@@ -82,6 +82,7 @@ const AppRoot = React.memo(
                 <ResolverWithoutProviders
                   databaseDocumentID=""
                   resolverComponentInstanceID="test"
+                  indices={[]}
                 />
               </Wrapper>
             </Provider>

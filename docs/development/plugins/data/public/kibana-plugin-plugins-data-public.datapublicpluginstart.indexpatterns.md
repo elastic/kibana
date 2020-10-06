@@ -4,6 +4,8 @@
 
 ## DataPublicPluginStart.indexPatterns property
 
+index patterns service [IndexPatternsContract](./kibana-plugin-plugins-data-public.indexpatternscontract.md)
+
 <b>Signature:</b>
 
 ```typescript

@@ -72,7 +72,7 @@ export function mapNodesVersionCompatibility(
   kibanaVersion: string,
   ignoreVersionMismatch: boolean
 ): NodesVersionCompatibility {
-  if (Object.keys(nodesInfo.nodes).length === 0) {
+  if (Object.keys(nodesInfo.nodes ?? {}).length === 0) {
     return {
       isCompatible: false,
       message: 'Unable to retrieve version information from Elasticsearch nodes.',

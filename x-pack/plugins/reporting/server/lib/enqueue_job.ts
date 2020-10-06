@@ -6,13 +6,14 @@
 
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { ReportingCore } from '../';
-import { CreateJobBaseParams, CreateJobFn, ReportingUser } from '../types';
+import { durationToNumber } from '../../common/schema_utils';
+import { BaseParams, ReportingUser } from '../types';
 import { LevelLogger } from './';
 import { Report } from './store';
 
 export type EnqueueJobFn = (
   exportTypeId: string,
-  jobParams: CreateJobBaseParams,
+  jobParams: BaseParams,
   user: ReportingUser,
   context: RequestHandlerContext,
   request: KibanaRequest
@@ -23,32 +24,46 @@ export function enqueueJobFactory(
   parentLogger: LevelLogger
 ): EnqueueJobFn {
   const logger = parentLogger.clone(['queue-job']);
+  const config = reporting.getConfig();
+  const jobSettings = {
+    timeout: durationToNumber(config.get('queue', 'timeout')),
+    browser_type: config.get('capture', 'browser', 'type'),
+    max_attempts: config.get('capture', 'maxAttempts'),
+    priority: 10, // unused
+  };
 
   return async function enqueueJob(
     exportTypeId: string,
-    jobParams: CreateJobBaseParams,
+    jobParams: BaseParams,
     user: ReportingUser,
     context: RequestHandlerContext,
     request: KibanaRequest
   ) {
-    type ScheduleTaskFnType = CreateJobFn<CreateJobBaseParams>;
-
     const exportType = reporting.getExportTypesRegistry().getById(exportTypeId);
 
     if (exportType == null) {
       throw new Error(`Export type ${exportTypeId} does not exist in the registry!`);
     }
 
-    const [scheduleTask, { store }] = await Promise.all([
-      exportType.scheduleTaskFnFactory(reporting, logger) as ScheduleTaskFnType,
+    const [createJob, { store }] = await Promise.all([
+      exportType.createJobFnFactory(reporting, logger),
       reporting.getPluginStartDeps(),
     ]);
 
-    // add encrytped headers
-    const payload = await scheduleTask(jobParams, context, request);
+    const job = await createJob(jobParams, context, request);
+    const pendingReport = new Report({
+      jobtype: exportType.jobType,
+      created_by: user ? user.username : false,
+      payload: job,
+      meta: {
+        objectType: jobParams.objectType,
+        layout: jobParams.layout?.id,
+      },
+      ...jobSettings,
+    });
 
     // store the pending report, puts it in the Reporting Management UI table
-    const report = await store.addReport(exportType.jobType, user, payload);
+    const report = await store.addReport(pendingReport);
 
     logger.info(`Scheduled ${exportType.name} report: ${report._id}`);
 

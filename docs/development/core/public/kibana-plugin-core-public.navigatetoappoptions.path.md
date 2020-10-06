@@ -4,7 +4,7 @@
 
 ## NavigateToAppOptions.path property
 
-optional path inside application to deep link to. If undefined, will use [the app's default path](./kibana-plugin-core-public.appbase.defaultpath.md)<!-- -->\` as default.
+optional path inside application to deep link to. If undefined, will use [the app's default path](./kibana-plugin-core-public.app.defaultpath.md)<!-- -->\` as default.
 
 <b>Signature:</b>
 

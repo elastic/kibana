@@ -59,7 +59,9 @@ export const getIpRangeBucketAgg = () =>
     getSerializedFormat(agg) {
       return {
         id: 'ip_range',
-        params: agg.params.field ? agg.params.field.format.toJSON() : {},
+        params: agg.params.field
+          ? agg.aggConfigs.indexPattern.getFormatterForField(agg.params.field).toJSON()
+          : {},
       };
     },
     makeLabel(aggConfig) {

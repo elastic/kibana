@@ -165,8 +165,7 @@ export const mockRuleWithEverything = (id: string): Rule => ({
 });
 
 // TODO: update types mapping
-export const mockAboutStepRule = (isNew = false): AboutStepRule => ({
-  isNew,
+export const mockAboutStepRule = (): AboutStepRule => ({
   author: ['Elastic'],
   isAssociatedToEndpointList: false,
   isBuildingBlock: false,
@@ -200,33 +199,33 @@ export const mockAboutStepRule = (isNew = false): AboutStepRule => ({
   note: '# this is some markdown documentation',
 });
 
-export const mockActionsStepRule = (isNew = false, enabled = false): ActionsStepRule => ({
-  isNew,
+export const mockActionsStepRule = (enabled = false): ActionsStepRule => ({
   actions: [],
   kibanaSiemAppUrl: 'http://localhost:5601/app/siem',
   enabled,
   throttle: 'no_actions',
 });
 
-export const mockDefineStepRule = (isNew = false): DefineStepRule => ({
-  isNew,
+export const mockDefineStepRule = (): DefineStepRule => ({
   ruleType: 'query',
   anomalyThreshold: 50,
   machineLearningJobId: '',
   index: ['filebeat-'],
   queryBar: mockQueryBar,
+  threatQueryBar: mockQueryBar,
+  threatMapping: [],
   timeline: {
     id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
     title: 'Titled timeline',
   },
+  threatIndex: [],
   threshold: {
     field: [''],
     value: '100',
   },
 });
 
-export const mockScheduleStepRule = (isNew = false): ScheduleStepRule => ({
-  isNew,
+export const mockScheduleStepRule = (): ScheduleStepRule => ({
   interval: '5m',
   from: '6m',
   to: 'now',

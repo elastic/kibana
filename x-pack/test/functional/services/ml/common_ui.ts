@@ -78,5 +78,13 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
         await testSubjects.missingOrFail('mlLoadingIndicator');
       });
     },
+
+    async assertKibanaHomeFileDataVisLinkExists() {
+      await testSubjects.existOrFail('homeSynopsisLinkml_file_data_visualizer');
+    },
+
+    async assertKibanaHomeFileDataVisLinkNotExists() {
+      await testSubjects.missingOrFail('homeSynopsisLinkml_file_data_visualizer');
+    },
   };
 }

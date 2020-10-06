@@ -26,11 +26,7 @@ import { MlPluginSetup } from '../../ml/server';
 import { ObservabilityPluginSetup } from '../../observability/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { TaskManagerSetupContract } from '../../task_manager/server';
-import {
-  APM_FEATURE,
-  APM_SERVICE_MAPS_FEATURE_NAME,
-  APM_SERVICE_MAPS_LICENSE_TYPE,
-} from './feature';
+import { APM_FEATURE, registerFeaturesUsage } from './feature';
 import { registerApmAlerts } from './lib/alerts/register_apm_alerts';
 import { createApmTelemetry } from './lib/apm_telemetry';
 import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_objects_client';
@@ -101,6 +97,7 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
         usageCollector: plugins.usageCollection,
         taskManager: plugins.taskManager,
         logger: this.logger,
+        kibanaVersion: this.initContext.env.packageInfo.version,
       });
     }
 
@@ -126,11 +123,9 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
       };
     });
 
-    plugins.features.registerFeature(APM_FEATURE);
-    plugins.licensing.featureUsage.register(
-      APM_SERVICE_MAPS_FEATURE_NAME,
-      APM_SERVICE_MAPS_LICENSE_TYPE
-    );
+    plugins.features.registerKibanaFeature(APM_FEATURE);
+
+    registerFeaturesUsage({ licensingPlugin: plugins.licensing });
 
     createApmApi().init(core, {
       config$: mergedConfig$,

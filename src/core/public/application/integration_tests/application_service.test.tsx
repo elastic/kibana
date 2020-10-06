@@ -25,11 +25,9 @@ import { createRenderer } from './utils';
 import { ApplicationService } from '../application_service';
 import { httpServiceMock } from '../../http/http_service.mock';
 import { contextServiceMock } from '../../context/context_service.mock';
-import { injectedMetadataServiceMock } from '../../injected_metadata/injected_metadata_service.mock';
 import { MockLifecycle } from '../test_types';
 import { overlayServiceMock } from '../../overlays/overlay_service.mock';
 import { AppMountParameters } from '../types';
-import { ScopedHistory } from '../scoped_history';
 import { Observable } from 'rxjs';
 import { MountPoint } from 'kibana/public';
 
@@ -56,10 +54,8 @@ describe('ApplicationService', () => {
     setupDeps = {
       http,
       context: contextServiceMock.createSetupContract(),
-      injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
       history: history as any,
     };
-    setupDeps.injectedMetadata.getLegacyMode.mockReturnValue(false);
     startDeps = { http, overlays: overlayServiceMock.createStartContract() };
     service = new ApplicationService();
   });
@@ -146,54 +142,6 @@ describe('ApplicationService', () => {
 
         expect(history.entries.map((entry) => entry.pathname)).toEqual(['/', '/app/app1/bar']);
       });
-    });
-  });
-
-  describe('redirects', () => {
-    beforeAll(() => {
-      Object.defineProperty(window, 'location', {
-        value: {
-          reload: jest.fn(),
-        },
-      });
-    });
-
-    it('to full path when navigating to legacy app', async () => {
-      const redirectTo = jest.fn();
-
-      // In the real application, we use a BrowserHistory instance configured with `basename`. However, in tests we must
-      // use MemoryHistory which does not support `basename`. In order to emulate this behavior, we will wrap this
-      // instance with a ScopedHistory configured with a basepath.
-      history.push(setupDeps.http.basePath.get()); // ScopedHistory constructor will fail if underlying history is not currently at basePath.
-      const { register, registerLegacyApp } = service.setup({
-        ...setupDeps,
-        redirectTo,
-        history: new ScopedHistory(history, setupDeps.http.basePath.get()),
-      });
-
-      register(Symbol(), {
-        id: 'app1',
-        title: 'App1',
-        mount: ({ onAppLeave }: AppMountParameters) => {
-          onAppLeave((actions) => actions.default());
-          return () => undefined;
-        },
-      });
-      registerLegacyApp({
-        id: 'myLegacyTestApp',
-        appUrl: '/app/myLegacyTestApp',
-        title: 'My Legacy Test App',
-      });
-
-      const { navigateToApp, getComponent } = await service.start(startDeps);
-
-      update = createRenderer(getComponent());
-
-      await navigate('/test/app/app1');
-      await act(() => navigateToApp('myLegacyTestApp', { path: '#/some-path' }));
-
-      expect(redirectTo).toHaveBeenCalledWith('/test/app/myLegacyTestApp#/some-path');
-      expect(window.location.reload).toHaveBeenCalled();
     });
   });
 

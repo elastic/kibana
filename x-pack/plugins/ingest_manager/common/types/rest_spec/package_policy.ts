@@ -18,7 +18,6 @@ export interface GetPackagePoliciesResponse {
   total: number;
   page: number;
   perPage: number;
-  success: boolean;
 }
 
 export interface GetOnePackagePolicyRequest {
@@ -29,7 +28,6 @@ export interface GetOnePackagePolicyRequest {
 
 export interface GetOnePackagePolicyResponse {
   item: PackagePolicy;
-  success: boolean;
 }
 
 export interface CreatePackagePolicyRequest {
@@ -38,7 +36,6 @@ export interface CreatePackagePolicyRequest {
 
 export interface CreatePackagePolicyResponse {
   item: PackagePolicy;
-  success: boolean;
 }
 
 export type UpdatePackagePolicyRequest = GetOnePackagePolicyRequest & {

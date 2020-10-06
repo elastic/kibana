@@ -103,7 +103,6 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
         }),
       };
 
-      // eslint-disable-next-line no-unused-expressions
       navigateToApp?.('logs', { path: `/stream?${stringify(params)}` });
     },
     [queryTimeRange, navigateToApp]

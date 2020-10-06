@@ -7,19 +7,29 @@
 export const DEFAULT_INITIAL_APP_DATA = {
   readOnlyMode: false,
   ilmEnabled: true,
+  isFederatedAuth: false,
   configuredLimits: {
-    maxDocumentByteSize: 102400,
-    maxEnginesPerMetaEngine: 15,
+    appSearch: {
+      engine: {
+        maxDocumentByteSize: 102400,
+        maxEnginesPerMetaEngine: 15,
+      },
+    },
+    workplaceSearch: {
+      customApiSource: {
+        maxDocumentByteSize: 102400,
+        totalFields: 64,
+      },
+    },
   },
   appSearch: {
     accountId: 'some-id-string',
-    onBoardingComplete: true,
+    onboardingComplete: true,
     role: {
       id: 'account_id:somestring|user_oid:somestring',
       roleType: 'owner',
       ability: {
         accessAllEngines: true,
-        destroy: ['session'],
         manage: ['account_credentials', 'account_engines'], // etc
         edit: ['LocoMoco::Account'], // etc
         view: ['Engine'], // etc
@@ -29,17 +39,16 @@ export const DEFAULT_INITIAL_APP_DATA = {
     },
   },
   workplaceSearch: {
-    canCreateInvitations: true,
-    isFederatedAuth: false,
     organization: {
       name: 'ACME Donuts',
       defaultOrgName: 'My Organization',
     },
-    fpAccount: {
+    account: {
       id: 'some-id-string',
       groups: ['Default', 'Cats'],
       isAdmin: true,
       canCreatePersonalSources: true,
+      canCreateInvitations: true,
       isCurated: false,
       viewedOnboardingPage: true,
     },

@@ -7,6 +7,7 @@ exports[`AddItemPopover calls addItems with multiple items on clicking Add butto
     button={
       <EuiButton
         color="primary"
+        data-test-subj="mlFilterListOpenNewItemsPopoverButton"
         iconSide="right"
         iconType="arrowDown"
         isDisabled={false}
@@ -46,6 +47,7 @@ exports[`AddItemPopover calls addItems with multiple items on clicking Add butto
         labelType="label"
       >
         <EuiTextArea
+          data-test-subj="mlFilterListAddItemTextArea"
           onChange={[Function]}
           value=""
         />
@@ -70,6 +72,7 @@ exports[`AddItemPopover calls addItems with multiple items on clicking Add butto
         grow={false}
       >
         <EuiButton
+          data-test-subj="mlFilterListAddItemsButton"
           disabled={true}
           onClick={[Function]}
         >
@@ -92,6 +95,7 @@ exports[`AddItemPopover opens the popover onButtonClick 1`] = `
     button={
       <EuiButton
         color="primary"
+        data-test-subj="mlFilterListOpenNewItemsPopoverButton"
         iconSide="right"
         iconType="arrowDown"
         isDisabled={false}
@@ -131,6 +135,7 @@ exports[`AddItemPopover opens the popover onButtonClick 1`] = `
         labelType="label"
       >
         <EuiTextArea
+          data-test-subj="mlFilterListAddItemTextArea"
           onChange={[Function]}
           value=""
         />
@@ -155,6 +160,7 @@ exports[`AddItemPopover opens the popover onButtonClick 1`] = `
         grow={false}
       >
         <EuiButton
+          data-test-subj="mlFilterListAddItemsButton"
           disabled={true}
           onClick={[Function]}
         >
@@ -177,6 +183,7 @@ exports[`AddItemPopover renders the popover 1`] = `
     button={
       <EuiButton
         color="primary"
+        data-test-subj="mlFilterListOpenNewItemsPopoverButton"
         iconSide="right"
         iconType="arrowDown"
         isDisabled={false}
@@ -216,6 +223,7 @@ exports[`AddItemPopover renders the popover 1`] = `
         labelType="label"
       >
         <EuiTextArea
+          data-test-subj="mlFilterListAddItemTextArea"
           onChange={[Function]}
           value=""
         />
@@ -240,6 +248,7 @@ exports[`AddItemPopover renders the popover 1`] = `
         grow={false}
       >
         <EuiButton
+          data-test-subj="mlFilterListAddItemsButton"
           disabled={true}
           onClick={[Function]}
         >

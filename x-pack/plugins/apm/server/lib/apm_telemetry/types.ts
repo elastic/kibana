@@ -20,7 +20,7 @@ export interface AggregatedTransactionsCounts {
   transaction_count: number;
 }
 
-export type APMDataTelemetry = DeepPartial<{
+export interface APMUsage {
   has_any_services: boolean;
   services_per_agent: Record<AgentName, number>;
   version: {
@@ -29,6 +29,11 @@ export type APMDataTelemetry = DeepPartial<{
       major: number;
       patch: number;
     };
+  };
+  environments: {
+    services_without_environments: number;
+    services_with_multiple_environments: number;
+    top_environments: string[];
   };
   aggregated_transactions: {
     current_implementation: AggregatedTransactionsCounts;
@@ -134,6 +139,8 @@ export type APMDataTelemetry = DeepPartial<{
     | 'cardinality',
     { took: { ms: number } }
   >;
-}>;
+}
+
+export type APMDataTelemetry = DeepPartial<APMUsage>;
 
 export type APMTelemetry = APMDataTelemetry;

@@ -19,6 +19,11 @@ jest.mock('../../contexts/kibana/kibana_context', () => {
     useMlKibana: () => {
       return {
         services: {
+          chrome: { docTitle: { change: jest.fn() } },
+          application: { getUrlForApp: jest.fn(), navigateToUrl: jest.fn() },
+          share: {
+            urlGenerators: { getUrlGenerator: jest.fn() },
+          },
           uiSettings: { get: jest.fn() },
           data: {
             query: {

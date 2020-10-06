@@ -904,11 +904,13 @@ describe('createConfig()', () => {
         },
         "sortedProviders": Array [
           Object {
+            "hasAccessAgreement": false,
             "name": "saml",
             "order": 0,
             "type": "saml",
           },
           Object {
+            "hasAccessAgreement": false,
             "name": "basic",
             "order": 1,
             "type": "basic",
@@ -982,6 +984,63 @@ describe('createConfig()', () => {
     ).toBe(true);
   });
 
+  it('indicates which providers have the access agreement enabled', () => {
+    expect(
+      createConfig(
+        ConfigSchema.validate({
+          authc: {
+            providers: {
+              basic: { basic1: { order: 3 } },
+              saml: {
+                saml1: { order: 2, realm: 'saml1', accessAgreement: { message: 'foo' } },
+                saml2: { order: 1, realm: 'saml2' },
+              },
+              oidc: {
+                oidc1: { order: 0, realm: 'oidc1', accessAgreement: { message: 'foo' } },
+                oidc2: { order: 4, realm: 'oidc2' },
+              },
+            },
+          },
+        }),
+        loggingSystemMock.create().get(),
+        { isTLSEnabled: true }
+      ).authc.sortedProviders
+    ).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "hasAccessAgreement": true,
+          "name": "oidc1",
+          "order": 0,
+          "type": "oidc",
+        },
+        Object {
+          "hasAccessAgreement": false,
+          "name": "saml2",
+          "order": 1,
+          "type": "saml",
+        },
+        Object {
+          "hasAccessAgreement": true,
+          "name": "saml1",
+          "order": 2,
+          "type": "saml",
+        },
+        Object {
+          "hasAccessAgreement": false,
+          "name": "basic1",
+          "order": 3,
+          "type": "basic",
+        },
+        Object {
+          "hasAccessAgreement": false,
+          "name": "oidc2",
+          "order": 4,
+          "type": "oidc",
+        },
+      ]
+    `);
+  });
+
   it('correctly sorts providers based on the `order`', () => {
     expect(
       createConfig(
@@ -1000,26 +1059,31 @@ describe('createConfig()', () => {
     ).toMatchInlineSnapshot(`
       Array [
         Object {
+          "hasAccessAgreement": false,
           "name": "oidc1",
           "order": 0,
           "type": "oidc",
         },
         Object {
+          "hasAccessAgreement": false,
           "name": "saml2",
           "order": 1,
           "type": "saml",
         },
         Object {
+          "hasAccessAgreement": false,
           "name": "saml1",
           "order": 2,
           "type": "saml",
         },
         Object {
+          "hasAccessAgreement": false,
           "name": "basic1",
           "order": 3,
           "type": "basic",
         },
         Object {
+          "hasAccessAgreement": false,
           "name": "oidc2",
           "order": 4,
           "type": "oidc",

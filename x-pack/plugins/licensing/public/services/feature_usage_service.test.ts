@@ -29,6 +29,13 @@ describe('FeatureUsageService', () => {
           }),
         });
       });
+
+      it('does not call endpoint if on anonymous path', async () => {
+        http.anonymousPaths.isAnonymous.mockReturnValue(true);
+        const setup = service.setup({ http });
+        await setup.register('my-feature', 'platinum');
+        expect(http.post).not.toHaveBeenCalled();
+      });
     });
   });
 
@@ -63,6 +70,14 @@ describe('FeatureUsageService', () => {
             lastUsed: now.getTime(),
           }),
         });
+      });
+
+      it('does not call endpoint if on anonymous path', async () => {
+        http.anonymousPaths.isAnonymous.mockReturnValue(true);
+        service.setup({ http });
+        const start = service.start({ http });
+        await start.notifyUsage('my-feature', 42);
+        expect(http.post).not.toHaveBeenCalled();
       });
     });
   });

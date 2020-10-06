@@ -70,14 +70,16 @@ export function Popover({ focusedServiceName }: PopoverProps) {
     if (cy) {
       cy.on('select', 'node', selectHandler);
       cy.on('unselect', 'node', deselect);
-      cy.on('data viewport', deselect);
+      cy.on('viewport', deselect);
+      cy.on('drag', 'node', deselect);
     }
 
     return () => {
       if (cy) {
         cy.removeListener('select', 'node', selectHandler);
         cy.removeListener('unselect', 'node', deselect);
-        cy.removeListener('data viewport', undefined, deselect);
+        cy.removeListener('viewport', undefined, deselect);
+        cy.removeListener('drag', 'node', deselect);
       }
     };
   }, [cy, deselect]);

@@ -70,7 +70,7 @@ export function getClustersState(req, esIndexPattern, clusters) {
       collapse: {
         field: 'cluster_uuid',
       },
-      sort: { timestamp: { order: 'desc' } },
+      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
     },
   };
 

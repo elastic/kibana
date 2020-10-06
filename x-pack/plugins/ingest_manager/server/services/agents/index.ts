@@ -9,6 +9,7 @@ export * from './events';
 export * from './checkin';
 export * from './enroll';
 export * from './unenroll';
+export * from './upgrade';
 export * from './status';
 export * from './crud';
 export * from './update';

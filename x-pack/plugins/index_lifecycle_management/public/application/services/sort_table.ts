@@ -5,7 +5,7 @@
  */
 
 import { sortBy } from 'lodash';
-import { PolicyFromES } from './policies/types';
+import { PolicyFromES } from '../../../common/types';
 
 export const sortTable = (
   array: PolicyFromES[] = [],

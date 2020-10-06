@@ -4,6 +4,8 @@
 
 ## ISearchOptions.strategy property
 
+Use this option to force using a specific server side search strategy. Leave empty to use the default strategy.
+
 <b>Signature:</b>
 
 ```typescript

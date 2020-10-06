@@ -29,10 +29,20 @@ import { SavedSearchQuery } from '../../../../../contexts/ml';
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 
 import { getIndexData, getIndexFields, DataFrameAnalyticsConfig } from '../../../../common';
-import { DEFAULT_RESULTS_FIELD, FEATURE_INFLUENCE } from '../../../../common/constants';
-import { sortExplorationResultsFields, ML__ID_COPY } from '../../../../common/fields';
+import { FEATURE_INFLUENCE } from '../../../../common/constants';
+import { DEFAULT_RESULTS_FIELD } from '../../../../../../../common/constants/data_frame_analytics';
+import {
+  sortExplorationResultsFields,
+  ML__ID_COPY,
+  ML__INCREMENTAL_ID,
+} from '../../../../common/fields';
 
 import { getFeatureCount, getOutlierScoreFieldName } from './common';
+
+interface FeatureInfluence {
+  feature_name: string;
+  influence: number;
+}
 
 export const useOutlierData = (
   indexPattern: IndexPattern | undefined,
@@ -60,7 +70,7 @@ export const useOutlierData = (
     // reduce default selected rows from 20 to 8 for performance reasons.
     8,
     // by default, hide feature-influence columns and the doc id copy
-    (d) => !d.includes(`.${FEATURE_INFLUENCE}.`) && d !== ML__ID_COPY
+    (d) => !d.includes(`.${FEATURE_INFLUENCE}.`) && d !== ML__ID_COPY && d !== ML__INCREMENTAL_ID
   );
 
   useEffect(() => {
@@ -137,9 +147,16 @@ export const useOutlierData = (
       // column with feature values get color coded by its corresponding influencer value
       if (
         fullItem[resultsField] !== undefined &&
-        fullItem[resultsField][`${FEATURE_INFLUENCE}.${columnId}`] !== undefined
+        fullItem[resultsField][FEATURE_INFLUENCE] !== undefined &&
+        fullItem[resultsField][FEATURE_INFLUENCE].find(
+          (d: FeatureInfluence) => d.feature_name === columnId
+        ) !== undefined
       ) {
-        backgroundColor = colorRange(fullItem[resultsField][`${FEATURE_INFLUENCE}.${columnId}`]);
+        backgroundColor = colorRange(
+          fullItem[resultsField][FEATURE_INFLUENCE].find(
+            (d: FeatureInfluence) => d.feature_name === columnId
+          ).influence
+        );
       }
 
       // column with influencer values get color coded by its own value

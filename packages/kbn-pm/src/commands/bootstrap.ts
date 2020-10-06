@@ -25,6 +25,8 @@ import { Project } from '../utils/project';
 import { ICommand } from './';
 import { getAllChecksums } from '../utils/project_checksums';
 import { BootstrapCacheFile } from '../utils/bootstrap_cache_file';
+import { readYarnLock } from '../utils/yarn_lock';
+import { validateYarnLock } from '../utils/validate_yarn_lock';
 
 export const BootstrapCommand: ICommand = {
   description: 'Install dependencies and crosslink projects',
@@ -54,6 +56,10 @@ export const BootstrapCommand: ICommand = {
       }
     }
 
+    const yarnLock = await readYarnLock(kbn);
+
+    await validateYarnLock(kbn, yarnLock);
+
     await linkProjectExecutables(projects, projectGraph);
 
     /**
@@ -63,7 +69,7 @@ export const BootstrapCommand: ICommand = {
      * have to, as it will slow down the bootstrapping process.
      */
 
-    const checksums = await getAllChecksums(kbn, log);
+    const checksums = await getAllChecksums(kbn, log, yarnLock);
     const caches = new Map<Project, { file: BootstrapCacheFile; valid: boolean }>();
     let cachedProjectCount = 0;
 

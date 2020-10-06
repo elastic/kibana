@@ -53,6 +53,7 @@ export default function ({ getService, loadTestFile }) {
       loadTestFile(require.resolve('./embeddable_rendering'));
       loadTestFile(require.resolve('./create_and_add_embeddables'));
       loadTestFile(require.resolve('./edit_embeddable_redirects'));
+      loadTestFile(require.resolve('./edit_visualizations'));
       loadTestFile(require.resolve('./time_zones'));
       loadTestFile(require.resolve('./dashboard_options'));
       loadTestFile(require.resolve('./data_shared_attributes'));
@@ -96,7 +97,9 @@ export default function ({ getService, loadTestFile }) {
 
       loadTestFile(require.resolve('./dashboard_time_picker'));
       loadTestFile(require.resolve('./bwc_shared_urls'));
-      loadTestFile(require.resolve('./panel_controls'));
+      loadTestFile(require.resolve('./panel_replacing'));
+      loadTestFile(require.resolve('./panel_cloning'));
+      loadTestFile(require.resolve('./panel_context_menu'));
       loadTestFile(require.resolve('./dashboard_state'));
     });
 

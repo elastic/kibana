@@ -268,8 +268,13 @@ export function resetJob(jobCreator: JobCreatorType, navigateToPath: NavigateToP
   navigateToPath('/jobs/new_job');
 }
 
-export function advancedStartDatafeed(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
-  stashCombinedJob(jobCreator, false, false);
+export function advancedStartDatafeed(
+  jobCreator: JobCreatorType | null,
+  navigateToPath: NavigateToPath
+) {
+  if (jobCreator !== null) {
+    stashCombinedJob(jobCreator, false, false);
+  }
   navigateToPath('/jobs');
 }
 

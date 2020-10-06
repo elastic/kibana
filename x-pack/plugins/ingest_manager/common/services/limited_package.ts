@@ -7,7 +7,7 @@ import { PackageInfo, AgentPolicy, PackagePolicy } from '../types';
 
 // Assume packages only ever include 1 config template for now
 export const isPackageLimited = (packageInfo: PackageInfo): boolean => {
-  return packageInfo.config_templates?.[0]?.multiple === false;
+  return packageInfo.policy_templates?.[0]?.multiple === false;
 };
 
 export const doesAgentPolicyAlreadyIncludePackage = (

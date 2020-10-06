@@ -224,9 +224,7 @@ export default function ({ getService, getPageObjects }) {
         await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.header.awaitKibanaChrome();
-        await queryBar.setQuery('');
-        // To remove focus of the of the search bar so date/time picker can show
-        await PageObjects.discover.selectIndexPattern(defaultSettings.defaultIndex);
+        await queryBar.clearQuery();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
 
         log.debug(

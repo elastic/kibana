@@ -17,13 +17,13 @@ import {
   toArray,
 } from 'rxjs/operators';
 import { HeadlessChromiumDriverFactory } from '../../browsers';
+import { CaptureConfig } from '../../types';
 import {
-  CaptureConfig,
   ElementsPositionAndAttribute,
   ScreenshotObservableOpts,
   ScreenshotResults,
   ScreenshotsObservableFn,
-} from '../../types';
+} from './';
 import { checkPageIsOpen } from './check_browser_open';
 import { DEFAULT_PAGELOAD_SELECTOR } from './constants';
 import { getElementPositionAndAttributes } from './get_element_position_data';

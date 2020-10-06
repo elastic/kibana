@@ -6,20 +6,36 @@
 
 import { IRouter } from 'kibana/server';
 import {
+  DeleteTrustedAppsRequestSchema,
   GetTrustedAppsRequestSchema,
   PostTrustedAppCreateRequestSchema,
 } from '../../../../common/endpoint/schema/trusted_apps';
 import {
   TRUSTED_APPS_CREATE_API,
+  TRUSTED_APPS_DELETE_API,
   TRUSTED_APPS_LIST_API,
 } from '../../../../common/endpoint/constants';
-import { getTrustedAppsCreateRouteHandler, getTrustedAppsListRouteHandler } from './handlers';
+import {
+  getTrustedAppsCreateRouteHandler,
+  getTrustedAppsDeleteRouteHandler,
+  getTrustedAppsListRouteHandler,
+} from './handlers';
 import { EndpointAppContext } from '../../types';
 
 export const registerTrustedAppsRoutes = (
   router: IRouter,
   endpointAppContext: EndpointAppContext
 ) => {
+  // DELETE one
+  router.delete(
+    {
+      path: TRUSTED_APPS_DELETE_API,
+      validate: DeleteTrustedAppsRequestSchema,
+      options: { authRequired: true },
+    },
+    getTrustedAppsDeleteRouteHandler(endpointAppContext)
+  );
+
   // GET list
   router.get(
     {

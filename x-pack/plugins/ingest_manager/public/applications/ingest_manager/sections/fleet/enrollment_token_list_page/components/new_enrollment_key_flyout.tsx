@@ -133,7 +133,7 @@ export const NewEnrollmentTokenFlyout: React.FunctionComponent<Props> = ({
           <h2 id="FleetNewEnrollmentKeyFlyoutTitle">
             <FormattedMessage
               id="xpack.ingestManager.newEnrollmentKey.flyoutTitle"
-              defaultMessage="Create a new enrollment token"
+              defaultMessage="Create enrollment token"
             />
           </h2>
         </EuiTitle>

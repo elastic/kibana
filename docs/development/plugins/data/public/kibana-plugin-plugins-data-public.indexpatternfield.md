@@ -14,24 +14,22 @@ export declare class IndexPatternField implements IFieldType
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(indexPattern, spec, displayName, onNotification)](./kibana-plugin-plugins-data-public.indexpatternfield._constructor_.md) |  | Constructs a new instance of the <code>IndexPatternField</code> class |
+|  [(constructor)(spec, displayName)](./kibana-plugin-plugins-data-public.indexpatternfield._constructor_.md) |  | Constructs a new instance of the <code>IndexPatternField</code> class |
 
 ## Properties
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
 |  [aggregatable](./kibana-plugin-plugins-data-public.indexpatternfield.aggregatable.md) |  | <code>boolean</code> |  |
-|  [conflictDescriptions](./kibana-plugin-plugins-data-public.indexpatternfield.conflictdescriptions.md) |  | <code>Record&lt;string, string[]&gt; &#124; undefined</code> |  |
-|  [count](./kibana-plugin-plugins-data-public.indexpatternfield.count.md) |  | <code>number</code> |  |
+|  [conflictDescriptions](./kibana-plugin-plugins-data-public.indexpatternfield.conflictdescriptions.md) |  | <code>Record&lt;string, string[]&gt; &#124; undefined</code> | Description of field type conflicts across different indices in the same index pattern |
+|  [count](./kibana-plugin-plugins-data-public.indexpatternfield.count.md) |  | <code>number</code> | Count is used for field popularity |
 |  [displayName](./kibana-plugin-plugins-data-public.indexpatternfield.displayname.md) |  | <code>string</code> |  |
 |  [esTypes](./kibana-plugin-plugins-data-public.indexpatternfield.estypes.md) |  | <code>string[] &#124; undefined</code> |  |
 |  [filterable](./kibana-plugin-plugins-data-public.indexpatternfield.filterable.md) |  | <code>boolean</code> |  |
-|  [format](./kibana-plugin-plugins-data-public.indexpatternfield.format.md) |  | <code>FieldFormat</code> |  |
-|  [indexPattern](./kibana-plugin-plugins-data-public.indexpatternfield.indexpattern.md) |  | <code>IndexPattern</code> |  |
-|  [lang](./kibana-plugin-plugins-data-public.indexpatternfield.lang.md) |  | <code>string &#124; undefined</code> |  |
+|  [lang](./kibana-plugin-plugins-data-public.indexpatternfield.lang.md) |  | <code>string &#124; undefined</code> | Script field language |
 |  [name](./kibana-plugin-plugins-data-public.indexpatternfield.name.md) |  | <code>string</code> |  |
 |  [readFromDocValues](./kibana-plugin-plugins-data-public.indexpatternfield.readfromdocvalues.md) |  | <code>boolean</code> |  |
-|  [script](./kibana-plugin-plugins-data-public.indexpatternfield.script.md) |  | <code>string &#124; undefined</code> |  |
+|  [script](./kibana-plugin-plugins-data-public.indexpatternfield.script.md) |  | <code>string &#124; undefined</code> | Script field code |
 |  [scripted](./kibana-plugin-plugins-data-public.indexpatternfield.scripted.md) |  | <code>boolean</code> |  |
 |  [searchable](./kibana-plugin-plugins-data-public.indexpatternfield.searchable.md) |  | <code>boolean</code> |  |
 |  [sortable](./kibana-plugin-plugins-data-public.indexpatternfield.sortable.md) |  | <code>boolean</code> |  |
@@ -45,5 +43,5 @@ export declare class IndexPatternField implements IFieldType
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
 |  [toJSON()](./kibana-plugin-plugins-data-public.indexpatternfield.tojson.md) |  |  |
-|  [toSpec()](./kibana-plugin-plugins-data-public.indexpatternfield.tospec.md) |  |  |
+|  [toSpec({ getFormatterForField, })](./kibana-plugin-plugins-data-public.indexpatternfield.tospec.md) |  |  |
 

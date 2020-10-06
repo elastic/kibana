@@ -116,7 +116,7 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
               try {
                 const { data, error } = await createAgentPolicy();
                 setIsLoading(false);
-                if (data?.success) {
+                if (data) {
                   notifications.toasts.addSuccess(
                     i18n.translate(
                       'xpack.ingestManager.createAgentPolicy.successNotificationTitle',

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import * as kbnTestServer from '../../../../test_utils/kbn_server';
+import * as kbnTestServer from '../../../../core/test_helpers/kbn_server';
 
 let root;
 beforeAll(async () => {

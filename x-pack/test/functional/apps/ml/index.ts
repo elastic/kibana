@@ -20,10 +20,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     after(async () => {
       await ml.securityCommon.cleanMlUsers();
       await ml.securityCommon.cleanMlRoles();
-
       await ml.testResources.deleteSavedSearches();
       await ml.testResources.deleteDashboards();
-
       await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
       await ml.testResources.deleteIndexPatternByTitle('ft_ecommerce');
       await ml.testResources.deleteIndexPatternByTitle('ft_categorization');
@@ -31,7 +29,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.testResources.deleteIndexPatternByTitle('ft_bank_marketing');
       await ml.testResources.deleteIndexPatternByTitle('ft_ihp_outlier');
       await ml.testResources.deleteIndexPatternByTitle('ft_egs_regression');
-
       await esArchiver.unload('ml/farequote');
       await esArchiver.unload('ml/ecommerce');
       await esArchiver.unload('ml/categorization');
@@ -39,14 +36,16 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await esArchiver.unload('ml/bm_classification');
       await esArchiver.unload('ml/ihp_outlier');
       await esArchiver.unload('ml/egs_regression');
-
       await ml.testResources.resetKibanaTimeZone();
+      await ml.securityUI.logout();
     });
 
     loadTestFile(require.resolve('./feature_controls'));
+    loadTestFile(require.resolve('./permissions'));
     loadTestFile(require.resolve('./pages'));
     loadTestFile(require.resolve('./anomaly_detection'));
     loadTestFile(require.resolve('./data_visualizer'));
     loadTestFile(require.resolve('./data_frame_analytics'));
+    loadTestFile(require.resolve('./settings'));
   });
 }

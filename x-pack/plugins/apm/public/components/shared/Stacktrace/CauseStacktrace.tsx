@@ -12,7 +12,6 @@ import { px, unit, units } from '../../../style/variables';
 import { Stacktrace } from '.';
 import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
 
-// @ts-ignore Styled Components has trouble inferring the types of the default props here.
 const Accordion = styled(EuiAccordion)`
   border-top: ${({ theme }) => theme.eui.euiBorderThin};
   margin-top: ${px(units.half)};
