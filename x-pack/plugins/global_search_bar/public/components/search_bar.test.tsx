@@ -15,10 +15,6 @@ import { GlobalSearchBatchedResults, GlobalSearchResult } from '../../../global_
 import { globalSearchPluginMock } from '../../../global_search/public/mocks';
 import { SearchBar } from './search_bar';
 
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
-  htmlIdGenerator: () => () => 'mockId',
-}));
-
 type Result = { id: string; type: string } | string;
 
 const createResult = (result: Result): GlobalSearchResult => {
@@ -74,8 +70,8 @@ describe('SearchBar', () => {
     );
   };
 
-  const getDisplayedOptionsLabel = () => {
-    return getSelectableProps(component).options.map((option: any) => option.label);
+  const getDisplayedOptionsTitle = () => {
+    return getSelectableProps(component).options.map((option: any) => option.title);
   };
 
   it('correctly filters and sorts results', async () => {
@@ -94,6 +90,7 @@ describe('SearchBar', () => {
         navigateToUrl={applications.navigateToUrl}
         basePathUrl={basePathUrl}
         darkMode={darkMode}
+        trackUiMetric={jest.fn()}
       />
     );
 
@@ -104,12 +101,12 @@ describe('SearchBar', () => {
 
     expect(searchService.find).toHaveBeenCalledTimes(1);
     expect(searchService.find).toHaveBeenCalledWith('', {});
-    expect(getSelectableProps(component).options).toMatchSnapshot();
+    expect(getDisplayedOptionsTitle()).toMatchSnapshot();
 
     await simulateTypeChar('d');
     update();
 
-    expect(getSelectableProps(component).options).toMatchSnapshot();
+    expect(getDisplayedOptionsTitle()).toMatchSnapshot();
     expect(searchService.find).toHaveBeenCalledTimes(2);
     expect(searchService.find).toHaveBeenCalledWith('d', {});
   });
@@ -121,6 +118,7 @@ describe('SearchBar', () => {
         navigateToUrl={applications.navigateToUrl}
         basePathUrl={basePathUrl}
         darkMode={darkMode}
+        trackUiMetric={jest.fn()}
       />
     );
 
@@ -152,6 +150,7 @@ describe('SearchBar', () => {
         navigateToUrl={applications.navigateToUrl}
         basePathUrl={basePathUrl}
         darkMode={darkMode}
+        trackUiMetric={jest.fn()}
       />
     );
 
@@ -163,14 +162,12 @@ describe('SearchBar', () => {
     await simulateTypeChar('d');
     update();
 
-    expect(getDisplayedOptionsLabel().length).toBe(2);
-    expect(getDisplayedOptionsLabel()).toEqual(expect.arrayContaining(['Visualize', 'Map']));
+    expect(getDisplayedOptionsTitle()).toMatchSnapshot();
 
     firstSearchTrigger.next(true);
 
     update();
 
-    expect(getDisplayedOptionsLabel().length).toBe(2);
-    expect(getDisplayedOptionsLabel()).toEqual(expect.arrayContaining(['Visualize', 'Map']));
+    expect(getDisplayedOptionsTitle()).toMatchSnapshot();
   });
 });

@@ -11,12 +11,15 @@ import styled from 'styled-components';
 import { ValuesType } from 'utility-types';
 import { orderBy } from 'lodash';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
-import { asPercent } from '../../../../../common/utils/formatters';
+import {
+  asPercent,
+  asDecimal,
+  asMillisecondDuration,
+} from '../../../../../common/utils/formatters';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ServiceListAPIResponse } from '../../../../../server/lib/services/get_services';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { fontSizes, px, truncate, unit } from '../../../../style/variables';
-import { asDecimal, asMillisecondDuration } from '../../../../utils/formatters';
 import { ManagedTable, ITableColumn } from '../../../shared/ManagedTable';
 import { EnvironmentBadge } from '../../../shared/EnvironmentBadge';
 import { TransactionOverviewLink } from '../../../shared/Links/apm/TransactionOverviewLink';

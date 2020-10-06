@@ -28,6 +28,7 @@ import { TrustedAppDeletionDialog } from './trusted_app_deletion_dialog';
 import { TrustedAppsNotifications } from './trusted_apps_notifications';
 import { TrustedAppsListPageRouteState } from '../../../../../common/endpoint/types';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
+import { ABOUT_TRUSTED_APPS } from './translations';
 
 export const TrustedAppsPage = memo(() => {
   const { state: routeState } = useLocation<TrustedAppsListPageRouteState | undefined>();
@@ -74,12 +75,7 @@ export const TrustedAppsPage = memo(() => {
         />
       }
       headerBackComponent={backButton}
-      subtitle={
-        <FormattedMessage
-          id="xpack.securitySolution.trustedapps.list.pageSubTitle"
-          defaultMessage="View and configure trusted applications"
-        />
-      }
+      subtitle={ABOUT_TRUSTED_APPS}
       actions={addButton}
     >
       <TrustedAppsNotifications />

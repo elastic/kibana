@@ -17,6 +17,9 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
 }));
 
 describe('When on the Trusted Apps Page', () => {
+  const expectedAboutInfo =
+    'Add a trusted application to improve performance or alleviate conflicts with other applications running on your hosts. Trusted applications will be applied to hosts running Endpoint Security.';
+
   let history: AppContextTestRender['history'];
   let coreStart: AppContextTestRender['coreStart'];
   let waitForAction: MiddlewareActionSpyHelper['waitForAction'];
@@ -42,6 +45,11 @@ describe('When on the Trusted Apps Page', () => {
       history.push('/trusted_apps');
     });
     window.scrollTo = jest.fn();
+  });
+
+  it('should display subtitle info about trusted apps', async () => {
+    const { getByTestId } = render();
+    expect(getByTestId('header-panel-subtitle').textContent).toEqual(expectedAboutInfo);
   });
 
   it('should display a Add Trusted App button', async () => {
@@ -179,6 +187,12 @@ describe('When on the Trusted Apps Page', () => {
         });
 
         afterEach(() => resolveHttpPost());
+
+        it('should display info about Trusted Apps', async () => {
+          expect(renderResult.getByTestId('addTrustedAppFlyout-about').textContent).toEqual(
+            expectedAboutInfo
+          );
+        });
 
         it('should disable the Cancel button', async () => {
           expect(
