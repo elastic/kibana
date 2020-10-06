@@ -27,7 +27,8 @@ This architecture imposes several limitations to which we must comply:
 
 [discrete]
 ==== Prerequisites
-Since `tsc` doesn't support circular project references, the migration order does matter. You can migrate your plugin only when all the plugin dependencies already have migrated. It creates a situation where commonly used plugins (such as `data` or `kibana_react`) have to migrate first.
+Since project refs rely on generated `d.ts` files, the migration order does matter. You can migrate your plugin only when all the plugin dependencies already have migrated. It creates a situation where commonly used plugins (such as `data` or `kibana_react`) have to migrate first.
+https://github.com/elastic/kibana/issues/79343 is going to provide a tool for identifying a plugin dependency tree.
 
 [discrete]
 ==== Implementation
