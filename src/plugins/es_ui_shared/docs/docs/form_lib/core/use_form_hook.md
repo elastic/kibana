@@ -105,7 +105,7 @@ When you provide a `defaultValue` to the form, you might want to parse the objec
 **Note:** It is recommended to keep this pure function _outside_ your component and not declare it inline on the hook.  
 
 ```js
-import { Form, useForm, useFormData, Field, FIELD_TYPES, FormDataProvider } from '<es_ui_shared>/public';
+import { Form, useForm, useFormData, Field, FIELD_TYPES, FormDataProvider } from '<path-to-form-lib>';
 
 // Data coming from the server
 const fetchedData = {
@@ -135,7 +135,7 @@ export const MyComponent = ({ fetchedData }: Props) => {
   // We can now use our "showAddress" internal field in the UI
   return (
     <Form form={form}>
-      <UseField path="name" config={{ type: FieldType:Text }} component={Field} />
+      <UseField path="name" config={{ type: FIELD_TYPES.TEXT }} component={Field} />
       <UseField path="showAddress" config={{ type: FIELD_TYPES.TOGGLE }} component={Field} />
       {/* Show the street address when the toggle is "true" */}
       {showAddress ? <UseField path="address.street" /> : null}
