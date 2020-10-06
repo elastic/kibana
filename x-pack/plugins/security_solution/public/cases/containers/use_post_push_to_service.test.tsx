@@ -65,6 +65,9 @@ describe('usePostPushToService', () => {
     title: pushedCase.title,
     updatedAt: pushedCase.updatedAt,
     updatedBy: serviceConnectorUser,
+    issueType: 'Task',
+    parent: null,
+    priority: 'Low',
   };
 
   const sampleCaseServices = {
@@ -223,6 +226,7 @@ describe('usePostPushToService', () => {
     const result = formatServiceRequestData(pushedCase, connector as CaseConnector, caseServices);
     expect(result).toEqual({
       ...sampleServiceRequestData,
+      ...connector.fields,
       externalId: 'other_external_id',
     });
   });
@@ -240,6 +244,7 @@ describe('usePostPushToService', () => {
     const result = formatServiceRequestData(pushedCase, connector as CaseConnector, caseServices);
     expect(result).toEqual({
       ...sampleServiceRequestData,
+      ...connector.fields,
       externalId: null,
     });
   });
