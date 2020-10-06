@@ -27,6 +27,7 @@ import {
   PROPERTY_TITLES,
   ENTRY_PROPERTY_TITLES,
   CARD_DELETE_BUTTON_LABEL,
+  CONDITION_FIELD_TITLE,
 } from '../../translations';
 
 type Entry = MacosLinuxConditionEntry | WindowsConditionEntry;
@@ -47,6 +48,9 @@ const getEntriesColumnDefinitions = (): Array<EuiTableFieldDataColumnType<Entry>
     truncateText: true,
     textOnly: true,
     width: '30%',
+    render(field: MacosLinuxConditionEntry['field'], entry: Entry) {
+      return CONDITION_FIELD_TITLE[field];
+    },
   },
   {
     field: 'operator',
