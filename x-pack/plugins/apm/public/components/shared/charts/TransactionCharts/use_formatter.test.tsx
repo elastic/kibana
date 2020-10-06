@@ -5,9 +5,9 @@
  */
 import React from 'react';
 import { TimeSeries } from '../../../../../typings/timeseries';
-import { toMicroseconds } from '../../../../utils/formatters';
 import { useFormatter } from './use_formatter';
 import { render, fireEvent, act } from '@testing-library/react';
+import { toMicroseconds } from '../../../../../common/utils/formatters';
 
 function MockComponent({
   timeSeries,
