@@ -147,10 +147,7 @@ export class SpaceSelector extends Component<Props, State> {
             {!this.state.loading && !this.state.error && filteredSpaces.length === 0 && (
               <Fragment>
                 <EuiSpacer />
-                <EuiText
-                  color="subdued"
-                  textAlign="center"
-                >
+                <EuiText color="subdued" textAlign="center">
                   <FormattedMessage
                     id="xpack.spaces.spaceSelector.noSpacesMatchSearchCriteriaDescription"
                     defaultMessage="No spaces match search criteria"
@@ -162,10 +159,7 @@ export class SpaceSelector extends Component<Props, State> {
             {!this.state.loading && this.state.error && (
               <Fragment>
                 <EuiSpacer />
-                <EuiText
-                  color="subdued"
-                  textAlign="center"
-                >
+                <EuiText color="subdued" textAlign="center">
                   <FormattedMessage
                     id="xpack.spaces.spaceSelector.errorLoadingSpacesDescription"
                     defaultMessage="Error loading spaces ({message})"
