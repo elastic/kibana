@@ -81,3 +81,11 @@ export function supportsGeoTileAgg(field?: IFieldType): boolean {
     getAggregatableGeoFieldTypes().includes(field.type)
   );
 }
+
+export function getSourceFields(fields: IFieldType[]): IFieldType[] {
+  return fields.filter((field) => {
+    // Multi fields are not stored in _source and only exist in index.
+    const isMultiField = field.subType && field.subType.multi;
+    return !isMultiField && !indexPatterns.isNestedField(field);
+  });
+}
