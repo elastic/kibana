@@ -8,27 +8,29 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHeaderSectionItemButton,
+  EuiIcon,
+  EuiImage,
+  EuiSelectableMessage,
   EuiSelectableTemplateSitewide,
   EuiSelectableTemplateSitewideOption,
   EuiText,
-  EuiIcon,
-  EuiImage,
-  EuiHeaderSectionItemButton,
-  EuiSelectableMessage,
 } from '@elastic/eui';
+import { METRIC_TYPE, UiStatsMetricType } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Subscription } from 'rxjs';
 import { ApplicationStart } from 'kibana/public';
-import React, { useCallback, useState, useRef } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useEvent from 'react-use/lib/useEvent';
 import useMountedState from 'react-use/lib/useMountedState';
+import { Subscription } from 'rxjs';
 import { GlobalSearchPluginStart, GlobalSearchResult } from '../../../global_search/public';
 
 interface Props {
   globalSearch: GlobalSearchPluginStart['find'];
   navigateToUrl: ApplicationStart['navigateToUrl'];
+  trackUiMetric: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
   basePathUrl: string;
   darkMode: boolean;
 }
@@ -66,6 +68,7 @@ const resultToOption = (result: GlobalSearchResult): EuiSelectableTemplateSitewi
     key: id,
     label: title,
     url,
+    type,
   };
 
   if (icon) {
@@ -81,10 +84,17 @@ const resultToOption = (result: GlobalSearchResult): EuiSelectableTemplateSitewi
   return option;
 };
 
-export function SearchBar({ globalSearch, navigateToUrl, basePathUrl, darkMode }: Props) {
+export function SearchBar({
+  globalSearch,
+  navigateToUrl,
+  trackUiMetric,
+  basePathUrl,
+  darkMode,
+}: Props) {
   const isMounted = useMountedState();
   const [searchValue, setSearchValue] = useState<string>('');
   const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
+  const [buttonRef, setButtonRef] = useState<HTMLDivElement | null>(null);
   const searchSubscription = useRef<Subscription | null>(null);
   const [options, _setOptions] = useState([] as EuiSelectableTemplateSitewideOption[]);
   const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
@@ -109,6 +119,7 @@ export function SearchBar({ globalSearch, navigateToUrl, basePathUrl, darkMode }
       }
 
       let arr: GlobalSearchResult[] = [];
+      if (searchValue.length !== 0) trackUiMetric(METRIC_TYPE.COUNT, 'search_request');
       searchSubscription.current = globalSearch(searchValue, {}).subscribe({
         next: ({ results }) => {
           if (searchValue.length > 0) {
@@ -125,9 +136,9 @@ export function SearchBar({ globalSearch, navigateToUrl, basePathUrl, darkMode }
           setOptions(arr);
         },
         error: () => {
-          // TODO #74430 - add telemetry to see if errors are happening
           // Not doing anything on error right now because it'll either just show the previous
           // results or empty results which is basically what we want anyways
+          trackUiMetric(METRIC_TYPE.COUNT, 'unhandled_error');
         },
         complete: () => {},
       });
@@ -138,16 +149,31 @@ export function SearchBar({ globalSearch, navigateToUrl, basePathUrl, darkMode }
 
   const onKeyDown = (event: KeyboardEvent) => {
     if (event.key === '/' && (isMac ? event.metaKey : event.ctrlKey)) {
+      event.preventDefault();
+      trackUiMetric(METRIC_TYPE.COUNT, 'shortcut_used');
       if (searchRef) {
-        event.preventDefault();
         searchRef.focus();
+      } else if (buttonRef) {
+        (buttonRef.children[0] as HTMLButtonElement).click();
       }
     }
   };
 
   const onChange = (selected: EuiSelectableTemplateSitewideOption[]) => {
     // @ts-ignore - ts error is "union type is too complex to express"
-    const { url } = selected.find(({ checked }) => checked === 'on');
+    const { url, type, key } = selected.find(({ checked }) => checked === 'on');
+
+    if (type === 'application') {
+      trackUiMetric(METRIC_TYPE.CLICK, [
+        'user_navigated_to_application',
+        `user_navigated_to_application_${key.toLowerCase().replaceAll(' ', '_')}`, // which application
+      ]);
+    } else {
+      trackUiMetric(METRIC_TYPE.CLICK, [
+        'user_navigated_to_saved_object',
+        `user_navigated_to_saved_object_${type}`, // which type of saved object
+      ]);
+    }
 
     navigateToUrl(url);
     (document.activeElement as HTMLElement).blur();
@@ -211,9 +237,13 @@ export function SearchBar({ globalSearch, navigateToUrl, basePathUrl, darkMode }
         placeholder: i18n.translate('xpack.globalSearchBar.searchBar.placeholder', {
           defaultMessage: 'Search Elastic',
         }),
+        onFocus: () => {
+          trackUiMetric(METRIC_TYPE.COUNT, 'search_focus');
+        },
       }}
       popoverProps={{
         repositionOnScroll: true,
+        buttonRef: setButtonRef,
       }}
       emptyMessage={emptyMessage}
       noMatchesMessage={emptyMessage}

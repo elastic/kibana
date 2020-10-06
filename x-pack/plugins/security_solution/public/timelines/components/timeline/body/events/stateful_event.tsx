@@ -33,7 +33,7 @@ import { EventsTrGroup, EventsTrSupplement, EventsTrSupplementContainer } from '
 import { ColumnRenderer } from '../renderers/column_renderer';
 import { getRowRenderer } from '../renderers/get_row_renderer';
 import { RowRenderer } from '../renderers/row_renderer';
-import { getEventType } from '../helpers';
+import { isEventBuildingBlockType, getEventType } from '../helpers';
 import { NoteCards } from '../../../notes/note_cards';
 import { useEventDetailsWidthContext } from '../../../../../common/components/events_viewer/event_details_width_context';
 import { EventColumnView } from './event_column_view';
@@ -183,6 +183,7 @@ const StatefulEventComponent: React.FC<Props> = ({
             className={STATEFUL_EVENT_CSS_CLASS_NAME}
             data-test-subj="event"
             eventType={getEventType(event.ecs)}
+            isBuildingBlockType={isEventBuildingBlockType(event.ecs)}
             showLeftBorder={!isEventViewer}
             ref={divElement}
           >

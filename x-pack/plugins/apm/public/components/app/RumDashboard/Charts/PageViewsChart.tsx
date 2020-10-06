@@ -90,7 +90,7 @@ export function PageViewsChart({ data, loading }: Props) {
     : EUI_CHARTS_THEME_LIGHT;
 
   return (
-    <ChartWrapper loading={loading} height="calc(100% - 72px)">
+    <ChartWrapper loading={loading} height="250px">
       {(!loading || data) && (
         <Chart>
           <Settings

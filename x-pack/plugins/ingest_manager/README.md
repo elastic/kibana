@@ -8,7 +8,8 @@
   - [code for adding the routes](https://github.com/elastic/kibana/blob/1f27d349533b1c2865c10c45b2cf705d7416fb36/x-pack/plugins/ingest_manager/server/plugin.ts#L115-L133)
   - [Integration tests](server/integration_tests/router.test.ts)
 - Both EPM and Fleet require `ingestManager` be enabled. They are not standalone features.
-- For Gold+ license, a custom package registry URL can be used by setting `xpack.ingestManager.registryUrl=http://localhost:8080`
+- For Enterprise license, a custom package registry URL can be used by setting `xpack.ingestManager.registryUrl=http://localhost:8080`
+  - This property is currently only for internal Elastic development and is unsupported
 
 ## Fleet Requirements
 
