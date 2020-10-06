@@ -33,7 +33,7 @@ const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 class AgentPolicyService {
   private triggerAgentPolicyUpdatedEvent = async (
     soClient: SavedObjectsClientContract,
-    action: string,
+    action: 'created' | 'updated' | 'deleted',
     agentPolicyId: string
   ) => {
     return agentPolicyUpdateEventHandler(soClient, action, agentPolicyId);
@@ -258,7 +258,11 @@ class AgentPolicyService {
     id: string,
     options?: { user?: AuthenticatedUser }
   ): Promise<AgentPolicy> {
-    return this._update(soClient, id, {}, options?.user);
+    const res = await this._update(soClient, id, {}, options?.user);
+
+    await this.triggerAgentPolicyUpdatedEvent(soClient, 'updated', id);
+
+    return res;
   }
   public async bumpAllAgentPolicies(
     soClient: SavedObjectsClientContract,
@@ -277,7 +281,15 @@ class AgentPolicyService {
       };
       return policy;
     });
-    return soClient.bulkUpdate<AgentPolicySOAttributes>(bumpedPolicies);
+    const res = await soClient.bulkUpdate<AgentPolicySOAttributes>(bumpedPolicies);
+
+    await Promise.all(
+      currentPolicies.saved_objects.map((policy) =>
+        this.triggerAgentPolicyUpdatedEvent(soClient, 'updated', policy.id)
+      )
+    );
+
+    return res;
   }
 
   public async assignPackagePolicies(

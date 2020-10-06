@@ -80,7 +80,15 @@ describe('test agent checkin new action services', () => {
       expect(
         await createAgentActionFromPolicyAction(
           mockSavedObjectsClient,
-          { ...mockAgent, local_metadata: { elastic: { agent: { version: '7.10.1-SNAPSHOT' } } } },
+          { ...mockAgent, local_metadata: { elastic: { agent: { version: '7.10.0-SNAPSHOT' } } } },
+          mockPolicyAction
+        )
+      ).toEqual(expectedResult);
+
+      expect(
+        await createAgentActionFromPolicyAction(
+          mockSavedObjectsClient,
+          { ...mockAgent, local_metadata: { elastic: { agent: { version: '7.10.2' } } } },
           mockPolicyAction
         )
       ).toEqual(expectedResult);
@@ -131,7 +139,7 @@ describe('test agent checkin new action services', () => {
       expect(
         await createAgentActionFromPolicyAction(
           mockSavedObjectsClient,
-          { ...mockAgent, local_metadata: { elastic: { agent: { version: '7.9.1-SNAPSHOT' } } } },
+          { ...mockAgent, local_metadata: { elastic: { agent: { version: '7.9.3' } } } },
           mockPolicyAction
         )
       ).toEqual(expectedResult);
@@ -139,7 +147,7 @@ describe('test agent checkin new action services', () => {
       expect(
         await createAgentActionFromPolicyAction(
           mockSavedObjectsClient,
-          { ...mockAgent, local_metadata: { elastic: { agent: { version: '7.9.3' } } } },
+          { ...mockAgent, local_metadata: { elastic: { agent: { version: '7.9.1-SNAPSHOT' } } } },
           mockPolicyAction
         )
       ).toEqual(expectedResult);

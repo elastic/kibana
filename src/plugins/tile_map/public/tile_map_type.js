@@ -33,8 +33,7 @@ export function createTileMapTypeDefinition(dependencies) {
 
   return {
     name: 'tile_map',
-    isDeprecated: true,
-    getDeprecationMessage,
+    getInfoMessage: getDeprecationMessage,
     title: i18n.translate('tileMap.vis.mapTitle', {
       defaultMessage: 'Coordinate Map',
     }),
@@ -56,7 +55,6 @@ export function createTileMapTypeDefinition(dependencies) {
         wms: uiSettings.get('visualization:tileMap:WMSdefaults'),
       },
     },
-    requiresPartialRows: true,
     visualization: CoordinateMapsVisualization,
     responseHandler: convertToGeoJson,
     editorConfig: {

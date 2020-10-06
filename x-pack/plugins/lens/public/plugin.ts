@@ -29,10 +29,15 @@ import { PieVisualization, PieVisualizationPluginSetupPlugins } from './pie_visu
 import { stopReportManager } from './lens_ui_telemetry';
 import { AppNavLinkStatus } from '../../../../src/core/public';
 
-import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
+import {
+  UiActionsStart,
+  ACTION_VISUALIZE_FIELD,
+  VISUALIZE_FIELD_TRIGGER,
+} from '../../../../src/plugins/ui_actions/public';
 import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common';
 import { EditorFrameStart } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
+import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
 import { getSearchProvider } from './search_provider';
 
 import { getLensAttributeService, LensAttributeService } from './lens_attribute_service';
@@ -155,6 +160,14 @@ export class LensPlugin {
   start(core: CoreStart, startDependencies: LensPluginStartDependencies) {
     this.attributeService = getLensAttributeService(core, startDependencies);
     this.createEditorFrame = this.editorFrameService.start(core, startDependencies).createInstance;
+    // unregisters the Visualize action and registers the lens one
+    if (startDependencies.uiActions.hasAction(ACTION_VISUALIZE_FIELD)) {
+      startDependencies.uiActions.unregisterAction(ACTION_VISUALIZE_FIELD);
+    }
+    startDependencies.uiActions.addTriggerAction(
+      VISUALIZE_FIELD_TRIGGER,
+      visualizeFieldAction(core.application)
+    );
   }
 
   stop() {

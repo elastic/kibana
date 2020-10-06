@@ -249,13 +249,13 @@ describe('Table Vis - Controller', () => {
     const vis = getRangeVis({ showPartialRows: true });
     initController(vis);
 
-    expect(vis.type.hierarchicalData(vis)).toEqual(true);
+    expect((vis.type.hierarchicalData as Function)(vis)).toEqual(true);
   });
 
   test('passes partialRows:false to tabify based on the vis params', () => {
     const vis = getRangeVis({ showPartialRows: false });
     initController(vis);
 
-    expect(vis.type.hierarchicalData(vis)).toEqual(false);
+    expect((vis.type.hierarchicalData as Function)(vis)).toEqual(false);
   });
 });

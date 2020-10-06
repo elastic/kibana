@@ -50,7 +50,6 @@ function getForecastsSummary(job, query, earliestMs, maxResults) {
     ml.results
       .anomalySearch({
         size: maxResults,
-        rest_total_hits_as_int: true,
         body: {
           query: {
             bool: {
@@ -61,7 +60,7 @@ function getForecastsSummary(job, query, earliestMs, maxResults) {
         },
       })
       .then((resp) => {
-        if (resp.hits.total !== 0) {
+        if (resp.hits.total.value > 0) {
           obj.forecasts = resp.hits.hits.map((hit) => hit._source);
         }
 
@@ -344,7 +343,6 @@ function getForecastRequestStats(job, forecastId) {
     ml.results
       .anomalySearch({
         size: 1,
-        rest_total_hits_as_int: true,
         body: {
           query: {
             bool: {
@@ -354,7 +352,7 @@ function getForecastRequestStats(job, forecastId) {
         },
       })
       .then((resp) => {
-        if (resp.hits.total !== 0) {
+        if (resp.hits.total.value > 0) {
           obj.stats = resp.hits.hits[0]._source;
         }
         resolve(obj);

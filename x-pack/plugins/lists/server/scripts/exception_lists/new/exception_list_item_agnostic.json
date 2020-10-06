@@ -1,12 +1,12 @@
 {
   "list_id": "endpoint_list",
   "item_id": "endpoint_list_item",
-  "_tags": ["endpoint", "process", "malware", "os:linux"],
   "tags": ["user added string for a tag", "malware"],
   "type": "simple",
   "description": "This is a sample agnostic endpoint type exception",
   "name": "Sample Endpoint Exception List",
   "namespace_type": "agnostic",
+  "os_types": ["linux"],
   "entries": [
     {
       "field": "actingProcess.file.signer",

@@ -26,25 +26,35 @@ import { i18n } from '@kbn/i18n';
 import { Option, none, some } from 'fp-ts/lib/Option';
 import { ActionConnectorForm, validateBaseProperties } from './action_connector_form';
 import { TestConnectorForm } from './test_connector_form';
-import { ActionConnectorTableItem, ActionConnector, IErrorObject } from '../../../types';
+import { ActionConnector, IErrorObject } from '../../../types';
 import { connectorReducer } from './connector_reducer';
 import { updateActionConnector, executeAction } from '../../lib/action_connector_api';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { PLUGIN } from '../../constants/plugin';
-import { ActionTypeExecutorResult } from '../../../../../actions/common';
+import {
+  ActionTypeExecutorResult,
+  isActionTypeExecutorResult,
+} from '../../../../../actions/common';
 import './connector_edit_flyout.scss';
 
 export interface ConnectorEditProps {
-  initialConnector: ActionConnectorTableItem;
+  initialConnector: ActionConnector;
   editFlyoutVisible: boolean;
   setEditFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  tab?: EditConectorTabs;
+}
+
+export enum EditConectorTabs {
+  Configuration = 'configuration',
+  Test = 'test',
 }
 
 export const ConnectorEditFlyout = ({
   initialConnector,
   editFlyoutVisible,
   setEditFlyoutVisibility,
+  tab = EditConectorTabs.Configuration,
 }: ConnectorEditProps) => {
   const {
     http,
@@ -61,7 +71,7 @@ export const ConnectorEditFlyout = ({
     connector: { ...initialConnector, secrets: {} },
   });
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [selectedTab, setTab] = useState<'config' | 'test'>('config');
+  const [selectedTab, setTab] = useState<EditConectorTabs>(tab);
 
   const [hasChanges, setHasChanges] = useState<boolean>(false);
   const setConnector = (key: string, value: any) => {
@@ -89,10 +99,12 @@ export const ConnectorEditFlyout = ({
   }
 
   const actionTypeModel = actionTypeRegistry.get(connector.actionTypeId);
-  const errorsInConnectorConfig = {
-    ...actionTypeModel?.validateConnector(connector).errors,
-    ...validateBaseProperties(connector).errors,
-  } as IErrorObject;
+  const errorsInConnectorConfig = (!connector.isPreconfigured
+    ? {
+        ...actionTypeModel?.validateConnector(connector).errors,
+        ...validateBaseProperties(connector).errors,
+      }
+    : {}) as IErrorObject;
   const hasErrorsInConnectorConfig = !!Object.keys(errorsInConnectorConfig).find(
     (errorKey) => errorsInConnectorConfig[errorKey].length >= 1
   );
@@ -195,13 +207,24 @@ export const ConnectorEditFlyout = ({
 
   const onExecutAction = () => {
     setIsExecutinAction(true);
-    return executeAction({ id: connector.id, params: testExecutionActionParams, http }).then(
-      (result) => {
+    return executeAction({ id: connector.id, params: testExecutionActionParams, http })
+      .then((result) => {
         setIsExecutinAction(false);
         setTestExecutionResult(some(result));
         return result;
-      }
-    );
+      })
+      .catch((ex: Error | ActionTypeExecutorResult<unknown>) => {
+        const result: ActionTypeExecutorResult<unknown> = isActionTypeExecutorResult(ex)
+          ? ex
+          : {
+              actionId: connector.id,
+              status: 'error',
+              message: ex.message,
+            };
+        setIsExecutinAction(false);
+        setTestExecutionResult(some(result));
+        return result;
+      });
   };
 
   const onSaveClicked = async (closeAfterSave: boolean = true) => {
@@ -232,18 +255,18 @@ export const ConnectorEditFlyout = ({
         </EuiFlexGroup>
         <EuiTabs className="connectorEditFlyoutTabs">
           <EuiTab
-            onClick={() => setTab('config')}
+            onClick={() => setTab(EditConectorTabs.Configuration)}
             data-test-subj="configureConnectorTab"
-            isSelected={'config' === selectedTab}
+            isSelected={EditConectorTabs.Configuration === selectedTab}
           >
             {i18n.translate('xpack.triggersActionsUI.sections.editConnectorForm.tabText', {
               defaultMessage: 'Configuration',
             })}
           </EuiTab>
           <EuiTab
-            onClick={() => setTab('test')}
+            onClick={() => setTab(EditConectorTabs.Test)}
             data-test-subj="testConnectorTab"
-            isSelected={'test' === selectedTab}
+            isSelected={EditConectorTabs.Test === selectedTab}
           >
             {i18n.translate('xpack.triggersActionsUI.sections.testConnectorForm.tabText', {
               defaultMessage: 'Test',
@@ -252,7 +275,7 @@ export const ConnectorEditFlyout = ({
         </EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {selectedTab === 'config' ? (
+        {selectedTab === EditConectorTabs.Configuration ? (
           !connector.isPreconfigured ? (
             <ActionConnectorForm
               connector={connector}

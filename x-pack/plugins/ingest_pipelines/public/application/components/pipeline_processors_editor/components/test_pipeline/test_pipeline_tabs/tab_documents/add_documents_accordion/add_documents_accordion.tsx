@@ -23,13 +23,13 @@ const i18nTexts = {
   addDocumentsButton: i18n.translate(
     'xpack.ingestPipelines.pipelineEditor.addDocumentsAccordion.addDocumentsButtonLabel',
     {
-      defaultMessage: 'Add documents from index',
+      defaultMessage: 'Add a test document from an index',
     }
   ),
   addDocumentsDescription: i18n.translate(
     'xpack.ingestPipelines.pipelineEditor.addDocumentsAccordion.contentDescriptionText',
     {
-      defaultMessage: 'Provide the index name and document ID of the indexed document to test.',
+      defaultMessage: `Provide the document's index and document ID.`,
     }
   ),
 };

@@ -25,6 +25,8 @@ import {
   JiraExecutorResultData,
   ExecutorSubActionGetFieldsByIssueTypeParams,
   ExecutorSubActionGetIssueTypesParams,
+  ExecutorSubActionGetIssuesParams,
+  ExecutorSubActionGetIssueParams,
 } from './types';
 import * as i18n from './translations';
 import { Logger } from '../../../../../../src/core/server';
@@ -37,7 +39,13 @@ interface GetActionTypeParams {
   configurationUtilities: ActionsConfigurationUtilities;
 }
 
-const supportedSubActions: string[] = ['pushToService', 'issueTypes', 'fieldsByIssueType'];
+const supportedSubActions: string[] = [
+  'pushToService',
+  'issueTypes',
+  'fieldsByIssueType',
+  'issues',
+  'issue',
+];
 
 // action type definition
 export function getActionType(
@@ -134,6 +142,22 @@ async function executor(
     data = await api.fieldsByIssueType({
       externalService,
       params: getFieldsByIssueTypeParams,
+    });
+  }
+
+  if (subAction === 'issues') {
+    const getIssuesParams = subActionParams as ExecutorSubActionGetIssuesParams;
+    data = await api.issues({
+      externalService,
+      params: getIssuesParams,
+    });
+  }
+
+  if (subAction === 'issue') {
+    const getIssueParams = subActionParams as ExecutorSubActionGetIssueParams;
+    data = await api.issue({
+      externalService,
+      params: getIssueParams,
     });
   }
 
