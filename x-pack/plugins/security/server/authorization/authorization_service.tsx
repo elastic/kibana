@@ -180,17 +180,16 @@ export class AuthorizationService {
           `${basePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
           `${basePath}/ui/legacy_light_theme.css`,
         ];
-        const uiPublicUrl = `${basePath}/ui`;
 
         const body = renderToStaticMarkup(
           <ResetSessionPage
             logoutUrl={logoutUrl}
             styleSheetPaths={styleSheetPaths}
-            uiPublicUrl={uiPublicUrl}
+            basePath={basePath}
           />
         );
 
-        return toolkit.render({ body });
+        return toolkit.render({ body, headers: { 'Content-Security-Policy': http.csp.header } });
       }
       return toolkit.next();
     });

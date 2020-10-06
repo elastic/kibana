@@ -32,12 +32,13 @@ appendIconComponentCache({
 export function ResetSessionPage({
   logoutUrl,
   styleSheetPaths,
-  uiPublicUrl,
+  basePath,
 }: {
   logoutUrl: string;
   styleSheetPaths: string[];
-  uiPublicUrl: string;
+  basePath: string;
 }) {
+  const uiPublicUrl = `${basePath}/ui`;
   return (
     <html lang={i18n.getLocale()}>
       <head>
@@ -69,6 +70,7 @@ export function ResetSessionPage({
           href={`${uiPublicUrl}/favicons/safari-pinned-tab.svg`}
         />
         <link rel="shortcut icon" href={`${uiPublicUrl}/favicons/favicon.ico`} />
+        <script src={`${basePath}/internal/security/reset_session_page.js`} />
         <meta name="msapplication-config" content={`${uiPublicUrl}/favicons/browserconfig.xml`} />
         <meta name="theme-color" content="#ffffff" />
       </head>
@@ -108,9 +110,7 @@ export function ResetSessionPage({
                         defaultMessage="Log in as different user"
                       />
                     </EuiButton>,
-                    <EuiButtonEmpty
-                      href="javascript:window.history.back();" // eslint-disable-line no-script-url
-                    >
+                    <EuiButtonEmpty id="goBackButton">
                       <FormattedMessage
                         id="xpack.security.resetSession.goBackButtonLabel"
                         defaultMessage="Go back"
