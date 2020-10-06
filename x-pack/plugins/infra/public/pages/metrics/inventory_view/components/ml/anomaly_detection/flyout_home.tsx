@@ -109,7 +109,7 @@ export const FlyoutHome = (props: Props) => {
           </div>
 
           <EuiSpacer size="l" />
-          {hostJobSummaries.length > 0 && (
+          {(hostJobSummaries.length > 0 || k8sJobSummaries.length > 0) && (
             <>
               <JobsEnabledCallout
                 hasHostJobs={hostJobSummaries.length > 0}
