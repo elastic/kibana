@@ -119,7 +119,7 @@ export const registerRoutes = (router: IRouter, config: IngestManagerConfigType)
     getAgentsHandler
   );
 
-  const pollingRequestTimeout = config.fleet.pollingRequestTimeout;
+  const pollingRequestTimeout = config.agents.pollingRequestTimeout;
   // Agent checkin
   router.post(
     {

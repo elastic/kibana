@@ -25,7 +25,7 @@ const FleetStatusContext = React.createContext<FleetStatus | undefined>(undefine
 export const FleetStatusProvider: React.FC = ({ children }) => {
   const config = useConfig();
   const [state, setState] = useState<FleetStatusState>({
-    enabled: config.fleet.enabled,
+    enabled: config.agents.enabled,
     isLoading: false,
     isReady: false,
   });

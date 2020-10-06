@@ -7,5 +7,5 @@
 import { IngestManagerConfigType } from '..';
 
 export const getIsFleetEnabled = (config: IngestManagerConfigType) => {
-  return config.fleet.enabled;
+  return config.agents.enabled;
 };
