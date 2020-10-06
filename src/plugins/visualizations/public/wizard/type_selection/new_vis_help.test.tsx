@@ -31,7 +31,6 @@ describe('NewVisHelp', () => {
               aliasApp: 'myApp',
               aliasPath: '/my/fancy/new/thing',
               description: 'Some desc',
-              highlighted: false,
               icon: 'whatever',
               name: 'whatever',
               promotion: {
