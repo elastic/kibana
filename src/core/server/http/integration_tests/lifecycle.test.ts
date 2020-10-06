@@ -1286,6 +1286,23 @@ describe('OnPreResponse', () => {
 
     expect(requestBody).toStrictEqual({});
   });
+
+  it('supports rendering a different response body', async () => {
+    const { registerOnPreResponse, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
+    const router = createRouter('/');
+
+    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'original' }));
+
+    registerOnPreResponse((req, res, t) => {
+      return t.render('overridden');
+    });
+
+    await server.start();
+
+    await supertest(innerServer.listener).get('/').expect(200, 'overridden');
+  });
 });
 
 describe('run interceptors in the right order', () => {
