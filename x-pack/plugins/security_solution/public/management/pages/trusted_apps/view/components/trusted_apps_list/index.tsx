@@ -5,9 +5,8 @@
  */
 
 import { Dispatch } from 'redux';
-import React, { memo, ReactNode, useCallback, useMemo, useState } from 'react';
+import React, { memo, ReactNode, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import {
   EuiBasicTable,
   EuiBasicTableColumn,
@@ -16,26 +15,23 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 
-import { Immutable } from '../../../../../common/endpoint/types';
-import { AppAction } from '../../../../common/store/actions';
-import { TrustedApp } from '../../../../../common/endpoint/types/trusted_apps';
-import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
-import { getTrustedAppsListPath } from '../../../common/routing';
+import { Immutable } from '../../../../../../../common/endpoint/types';
+import { AppAction } from '../../../../../../common/store/actions';
+import { TrustedApp } from '../../../../../../../common/endpoint/types/trusted_apps';
 
 import {
-  getCurrentLocationPageIndex,
-  getCurrentLocationPageSize,
   getListErrorMessage,
   getListItems,
-  getListTotalItemsCount,
+  getListPagination,
   isListLoading,
-} from '../store/selectors';
+} from '../../../store/selectors';
 
-import { useTrustedAppsSelector } from './hooks';
+import { FormattedDate } from '../../../../../../common/components/formatted_date';
 
-import { FormattedDate } from '../../../../common/components/formatted_date';
-import { ACTIONS_COLUMN_TITLE, LIST_ACTIONS, OS_TITLES, PROPERTY_TITLES } from './translations';
-import { TrustedAppCard } from './components/trusted_app_card';
+import { useTrustedAppsNavigateCallback, useTrustedAppsSelector } from '../../hooks';
+
+import { ACTIONS_COLUMN_TITLE, LIST_ACTIONS, OS_TITLES, PROPERTY_TITLES } from '../../translations';
+import { TrustedAppCard } from '../trusted_app_card';
 
 interface DetailsMap {
   [K: string]: ReactNode;
@@ -149,12 +145,9 @@ const getColumnDefinitions = (context: TrustedAppsListContext): ColumnsList => {
 
 export const TrustedAppsList = memo(() => {
   const [detailsMap, setDetailsMap] = useState<DetailsMap>({});
-  const pageIndex = useTrustedAppsSelector(getCurrentLocationPageIndex);
-  const pageSize = useTrustedAppsSelector(getCurrentLocationPageSize);
-  const totalItemCount = useTrustedAppsSelector(getListTotalItemsCount);
+  const pagination = useTrustedAppsSelector(getListPagination);
   const listItems = useTrustedAppsSelector(getListItems);
   const dispatch = useDispatch();
-  const history = useHistory();
 
   return (
     <EuiBasicTable
@@ -168,27 +161,11 @@ export const TrustedAppsList = memo(() => {
       itemId="id"
       itemIdToExpandedRowMap={detailsMap}
       isExpandable={true}
-      pagination={useMemo(
-        () => ({
-          pageIndex,
-          pageSize,
-          totalItemCount,
-          hidePerPageOptions: false,
-          pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
-        }),
-        [pageIndex, pageSize, totalItemCount]
-      )}
-      onChange={useCallback(
-        ({ page }: { page: { index: number; size: number } }) => {
-          history.push(
-            getTrustedAppsListPath({
-              page_index: page.index,
-              page_size: page.size,
-            })
-          );
-        },
-        [history]
-      )}
+      pagination={pagination}
+      onChange={useTrustedAppsNavigateCallback(({ page }) => ({
+        page_index: page.index,
+        page_size: page.size,
+      }))}
       data-test-subj="trustedAppsList"
     />
   );

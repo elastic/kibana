@@ -9,7 +9,6 @@ import { Provider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
-import { TrustedAppsList } from './trusted_apps_list';
 import {
   createSampleTrustedApp,
   createListFailedResourceState,
@@ -18,7 +17,9 @@ import {
   createTrustedAppsListResourceStateChangedAction,
   createUserChangedUrlAction,
   createGlobalNoMiddlewareStore,
-} from '../test_utils';
+} from '../../../test_utils';
+
+import { TrustedAppsGrid } from '.';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
@@ -35,10 +36,10 @@ const renderList = (store: ReturnType<typeof createGlobalNoMiddlewareStore>) => 
     </Provider>
   );
 
-  return render(<TrustedAppsList />, { wrapper: Wrapper });
+  return render(<TrustedAppsGrid />, { wrapper: Wrapper });
 };
 
-describe('TrustedAppsList', () => {
+describe('TrustedAppsGrid', () => {
   it('renders correctly initially', () => {
     expect(renderList(createGlobalNoMiddlewareStore()).container).toMatchSnapshot();
   });
@@ -70,7 +71,7 @@ describe('TrustedAppsList', () => {
 
     store.dispatch(
       createTrustedAppsListResourceStateChangedAction(
-        createListLoadedResourceState({ index: 0, size: 20 }, 200, now)
+        createListLoadedResourceState({ pageSize: 10 }, now)
       )
     );
 
@@ -82,7 +83,7 @@ describe('TrustedAppsList', () => {
 
     store.dispatch(
       createTrustedAppsListResourceStateChangedAction(
-        createListLoadedResourceState({ index: 0, size: 20 }, 200, now)
+        createListLoadedResourceState({ pageSize: 10 }, now)
       )
     );
     store.dispatch(createUserChangedUrlAction('/trusted_apps', '?page_index=2&page_size=50'));
@@ -95,9 +96,7 @@ describe('TrustedAppsList', () => {
 
     store.dispatch(
       createTrustedAppsListResourceStateChangedAction(
-        createListLoadingResourceState(
-          createListLoadedResourceState({ index: 0, size: 20 }, 200, now)
-        )
+        createListLoadingResourceState(createListLoadedResourceState({ pageSize: 10 }, now))
       )
     );
 
@@ -111,7 +110,7 @@ describe('TrustedAppsList', () => {
       createTrustedAppsListResourceStateChangedAction(
         createListFailedResourceState(
           'Intenal Server Error',
-          createListLoadedResourceState({ index: 0, size: 20 }, 200, now)
+          createListLoadedResourceState({ pageSize: 10 }, now)
         )
       )
     );
@@ -119,33 +118,17 @@ describe('TrustedAppsList', () => {
     expect(renderList(store).container).toMatchSnapshot();
   });
 
-  it('renders correctly when item details expanded', async () => {
-    const store = createGlobalNoMiddlewareStore();
-
-    store.dispatch(
-      createTrustedAppsListResourceStateChangedAction(
-        createListLoadedResourceState({ index: 0, size: 20 }, 200, now)
-      )
-    );
-
-    const element = renderList(store);
-
-    (await element.findAllByTestId('trustedAppsListItemExpandButton'))[0].click();
-
-    expect(element.container).toMatchSnapshot();
-  });
-
   it('triggers deletion dialog when delete action clicked', async () => {
     const store = createGlobalNoMiddlewareStore();
 
     store.dispatch(
       createTrustedAppsListResourceStateChangedAction(
-        createListLoadedResourceState({ index: 0, size: 20 }, 200, now)
+        createListLoadedResourceState({ pageSize: 10 }, now)
       )
     );
     store.dispatch = jest.fn();
 
-    (await renderList(store).findAllByTestId('trustedAppDeleteAction'))[0].click();
+    (await renderList(store).findAllByTestId('trustedAppDeleteButton'))[0].click();
 
     expect(store.dispatch).toBeCalledWith({
       type: 'trustedAppDeletionDialogStarted',
