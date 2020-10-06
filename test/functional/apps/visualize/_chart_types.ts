@@ -33,18 +33,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.navigateToNewVisualization();
     });
 
-    it('should show the correct vis types for the first step', async function () {
-      const expectedChartTypes = ['TSVB', 'Vega'];
-      if (!isOss) {
-        expectedChartTypes.push('Maps', 'Lens');
-        expectedChartTypes.sort();
-      }
+    it('should show the promoted vis types for the first step', async function () {
+      const expectedChartTypes = ['Lens', 'Maps', 'TSVB', 'Vega'];
       log.debug('oss= ' + isOss);
 
       // find all the chart types and make sure there all there
       const chartTypes = (await PageObjects.visualize.getPromotedVisTypes()).sort();
-      log.debug('returned chart groups = ' + chartTypes);
-      log.debug('expected chart groups = ' + expectedChartTypes);
+      log.debug('returned chart types = ' + chartTypes);
+      log.debug('expected chart types = ' + expectedChartTypes);
       expect(chartTypes).to.eql(expectedChartTypes);
     });
 

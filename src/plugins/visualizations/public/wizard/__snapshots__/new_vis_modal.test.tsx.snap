@@ -191,6 +191,9 @@ exports[`NewVisModal should render as expected 1`] = `
                     class="euiModalBody__overflow"
                   >
                     <div
+                      class="euiSpacer euiSpacer--s"
+                    />
+                    <div
                       class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                     />
                     <div
@@ -222,10 +225,10 @@ exports[`NewVisModal should render as expected 1`] = `
                           >
                             <span
                               class="euiTitle euiTitle--xsmall euiCard__title"
-                              id="i81def9b1-071a-11eb-ac1f-41fee99a465bTitle"
+                              id="i68635071-07bb-11eb-8cee-232c95d1d604Title"
                             >
                               <button
-                                aria-describedby=" i81def9b1-071a-11eb-ac1f-41fee99a465bDescription"
+                                aria-describedby=" i68635071-07bb-11eb-8cee-232c95d1d604Description"
                                 class="euiCard__titleButton"
                               >
                                 <span
@@ -237,7 +240,7 @@ exports[`NewVisModal should render as expected 1`] = `
                             </span>
                             <div
                               class="euiText euiText--small euiCard__description"
-                              id="i81def9b1-071a-11eb-ac1f-41fee99a465bDescription"
+                              id="i68635071-07bb-11eb-8cee-232c95d1d604Description"
                             >
                               <p />
                             </div>
@@ -267,10 +270,10 @@ exports[`NewVisModal should render as expected 1`] = `
                           >
                             <span
                               class="euiTitle euiTitle--xsmall euiCard__title"
-                              id="i81df47d1-071a-11eb-ac1f-41fee99a465bTitle"
+                              id="i68639e91-07bb-11eb-8cee-232c95d1d604Title"
                             >
                               <button
-                                aria-describedby=" i81df47d1-071a-11eb-ac1f-41fee99a465bDescription"
+                                aria-describedby=" i68639e91-07bb-11eb-8cee-232c95d1d604Description"
                                 class="euiCard__titleButton"
                               >
                                 <span
@@ -282,7 +285,7 @@ exports[`NewVisModal should render as expected 1`] = `
                             </span>
                             <div
                               class="euiText euiText--small euiCard__description"
-                              id="i81df47d1-071a-11eb-ac1f-41fee99a465bDescription"
+                              id="i68639e91-07bb-11eb-8cee-232c95d1d604Description"
                             >
                               <p />
                             </div>
@@ -312,10 +315,10 @@ exports[`NewVisModal should render as expected 1`] = `
                           >
                             <span
                               class="euiTitle euiTitle--xsmall euiCard__title"
-                              id="i81df6ee1-071a-11eb-ac1f-41fee99a465bTitle"
+                              id="i6863ecb0-07bb-11eb-8cee-232c95d1d604Title"
                             >
                               <button
-                                aria-describedby=" i81df6ee1-071a-11eb-ac1f-41fee99a465bDescription"
+                                aria-describedby=" i6863ecb0-07bb-11eb-8cee-232c95d1d604Description"
                                 class="euiCard__titleButton"
                               >
                                 <span
@@ -327,7 +330,7 @@ exports[`NewVisModal should render as expected 1`] = `
                             </span>
                             <div
                               class="euiText euiText--small euiCard__description"
-                              id="i81df6ee1-071a-11eb-ac1f-41fee99a465bDescription"
+                              id="i6863ecb0-07bb-11eb-8cee-232c95d1d604Description"
                             >
                               <p />
                             </div>
@@ -366,7 +369,7 @@ exports[`NewVisModal should render as expected 1`] = `
                           >
                             <span
                               class="euiTitle euiTitle--xsmall euiCard__title"
-                              id="i81dfbd01-071a-11eb-ac1f-41fee99a465bTitle"
+                              id="i686413c1-07bb-11eb-8cee-232c95d1d604Title"
                             >
                               <span
                                 data-test-subj="visGroupAggBasedTitle"
@@ -376,7 +379,7 @@ exports[`NewVisModal should render as expected 1`] = `
                             </span>
                             <div
                               class="euiText euiText--small euiCard__description"
-                              id="i81dfbd01-071a-11eb-ac1f-41fee99a465bDescription"
+                              id="i686413c1-07bb-11eb-8cee-232c95d1d604Description"
                             >
                               <p>
                                 A set of frequently used visualizations that allows you to plot aggregated data to find trends, spikes and dips you need to know about
@@ -407,7 +410,7 @@ exports[`NewVisModal should render as expected 1`] = `
                           >
                             <span
                               class="euiTitle euiTitle--xsmall euiCard__title"
-                              id="i81dfe411-071a-11eb-ac1f-41fee99a465bTitle"
+                              id="i686461e1-07bb-11eb-8cee-232c95d1d604Title"
                             >
                               <span
                                 data-test-subj="visGroup-tools"
@@ -417,7 +420,7 @@ exports[`NewVisModal should render as expected 1`] = `
                             </span>
                             <div
                               class="euiText euiText--small euiCard__description"
-                              id="i81dfe411-071a-11eb-ac1f-41fee99a465bDescription"
+                              id="i686461e1-07bb-11eb-8cee-232c95d1d604Description"
                             >
                               <p />
                             </div>
@@ -600,6 +603,13 @@ exports[`NewVisModal should render as expected 1`] = `
                       <div
                         className="euiModalBody__overflow"
                       >
+                        <EuiSpacer
+                          size="s"
+                        >
+                          <div
+                            className="euiSpacer euiSpacer--s"
+                          />
+                        </EuiSpacer>
                         <EuiFlexGroup
                           gutterSize="l"
                         >
@@ -691,15 +701,15 @@ exports[`NewVisModal should render as expected 1`] = `
                                       >
                                         <EuiTitle
                                           className="euiCard__title"
-                                          id="i81def9b1-071a-11eb-ac1f-41fee99a465bTitle"
+                                          id="i68635071-07bb-11eb-8cee-232c95d1d604Title"
                                           size="xs"
                                         >
                                           <span
                                             className="euiTitle euiTitle--xsmall euiCard__title"
-                                            id="i81def9b1-071a-11eb-ac1f-41fee99a465bTitle"
+                                            id="i68635071-07bb-11eb-8cee-232c95d1d604Title"
                                           >
                                             <button
-                                              aria-describedby=" i81def9b1-071a-11eb-ac1f-41fee99a465bDescription"
+                                              aria-describedby=" i68635071-07bb-11eb-8cee-232c95d1d604Description"
                                               className="euiCard__titleButton"
                                               onClick={[Function]}
                                             >
@@ -713,12 +723,12 @@ exports[`NewVisModal should render as expected 1`] = `
                                         </EuiTitle>
                                         <EuiText
                                           className="euiCard__description"
-                                          id="i81def9b1-071a-11eb-ac1f-41fee99a465bDescription"
+                                          id="i68635071-07bb-11eb-8cee-232c95d1d604Description"
                                           size="s"
                                         >
                                           <div
                                             className="euiText euiText--small euiCard__description"
-                                            id="i81def9b1-071a-11eb-ac1f-41fee99a465bDescription"
+                                            id="i68635071-07bb-11eb-8cee-232c95d1d604Description"
                                           >
                                             <p />
                                           </div>
@@ -802,15 +812,15 @@ exports[`NewVisModal should render as expected 1`] = `
                                       >
                                         <EuiTitle
                                           className="euiCard__title"
-                                          id="i81df47d1-071a-11eb-ac1f-41fee99a465bTitle"
+                                          id="i68639e91-07bb-11eb-8cee-232c95d1d604Title"
                                           size="xs"
                                         >
                                           <span
                                             className="euiTitle euiTitle--xsmall euiCard__title"
-                                            id="i81df47d1-071a-11eb-ac1f-41fee99a465bTitle"
+                                            id="i68639e91-07bb-11eb-8cee-232c95d1d604Title"
                                           >
                                             <button
-                                              aria-describedby=" i81df47d1-071a-11eb-ac1f-41fee99a465bDescription"
+                                              aria-describedby=" i68639e91-07bb-11eb-8cee-232c95d1d604Description"
                                               className="euiCard__titleButton"
                                               onClick={[Function]}
                                             >
@@ -824,12 +834,12 @@ exports[`NewVisModal should render as expected 1`] = `
                                         </EuiTitle>
                                         <EuiText
                                           className="euiCard__description"
-                                          id="i81df47d1-071a-11eb-ac1f-41fee99a465bDescription"
+                                          id="i68639e91-07bb-11eb-8cee-232c95d1d604Description"
                                           size="s"
                                         >
                                           <div
                                             className="euiText euiText--small euiCard__description"
-                                            id="i81df47d1-071a-11eb-ac1f-41fee99a465bDescription"
+                                            id="i68639e91-07bb-11eb-8cee-232c95d1d604Description"
                                           >
                                             <p />
                                           </div>
@@ -910,15 +920,15 @@ exports[`NewVisModal should render as expected 1`] = `
                                       >
                                         <EuiTitle
                                           className="euiCard__title"
-                                          id="i81df6ee1-071a-11eb-ac1f-41fee99a465bTitle"
+                                          id="i6863ecb0-07bb-11eb-8cee-232c95d1d604Title"
                                           size="xs"
                                         >
                                           <span
                                             className="euiTitle euiTitle--xsmall euiCard__title"
-                                            id="i81df6ee1-071a-11eb-ac1f-41fee99a465bTitle"
+                                            id="i6863ecb0-07bb-11eb-8cee-232c95d1d604Title"
                                           >
                                             <button
-                                              aria-describedby=" i81df6ee1-071a-11eb-ac1f-41fee99a465bDescription"
+                                              aria-describedby=" i6863ecb0-07bb-11eb-8cee-232c95d1d604Description"
                                               className="euiCard__titleButton"
                                               onClick={[Function]}
                                             >
@@ -932,12 +942,12 @@ exports[`NewVisModal should render as expected 1`] = `
                                         </EuiTitle>
                                         <EuiText
                                           className="euiCard__description"
-                                          id="i81df6ee1-071a-11eb-ac1f-41fee99a465bDescription"
+                                          id="i6863ecb0-07bb-11eb-8cee-232c95d1d604Description"
                                           size="s"
                                         >
                                           <div
                                             className="euiText euiText--small euiCard__description"
-                                            id="i81df6ee1-071a-11eb-ac1f-41fee99a465bDescription"
+                                            id="i6863ecb0-07bb-11eb-8cee-232c95d1d604Description"
                                           >
                                             <p />
                                           </div>
@@ -1023,12 +1033,12 @@ exports[`NewVisModal should render as expected 1`] = `
                                     >
                                       <EuiTitle
                                         className="euiCard__title"
-                                        id="i81dfbd01-071a-11eb-ac1f-41fee99a465bTitle"
+                                        id="i686413c1-07bb-11eb-8cee-232c95d1d604Title"
                                         size="xs"
                                       >
                                         <span
                                           className="euiTitle euiTitle--xsmall euiCard__title"
-                                          id="i81dfbd01-071a-11eb-ac1f-41fee99a465bTitle"
+                                          id="i686413c1-07bb-11eb-8cee-232c95d1d604Title"
                                         >
                                           <span
                                             data-test-subj="visGroupAggBasedTitle"
@@ -1039,12 +1049,12 @@ exports[`NewVisModal should render as expected 1`] = `
                                       </EuiTitle>
                                       <EuiText
                                         className="euiCard__description"
-                                        id="i81dfbd01-071a-11eb-ac1f-41fee99a465bDescription"
+                                        id="i686413c1-07bb-11eb-8cee-232c95d1d604Description"
                                         size="s"
                                       >
                                         <div
                                           className="euiText euiText--small euiCard__description"
-                                          id="i81dfbd01-071a-11eb-ac1f-41fee99a465bDescription"
+                                          id="i686413c1-07bb-11eb-8cee-232c95d1d604Description"
                                         >
                                           <p>
                                             A set of frequently used visualizations that allows you to plot aggregated data to find trends, spikes and dips you need to know about
@@ -1104,12 +1114,12 @@ exports[`NewVisModal should render as expected 1`] = `
                                     >
                                       <EuiTitle
                                         className="euiCard__title"
-                                        id="i81dfe411-071a-11eb-ac1f-41fee99a465bTitle"
+                                        id="i686461e1-07bb-11eb-8cee-232c95d1d604Title"
                                         size="xs"
                                       >
                                         <span
                                           className="euiTitle euiTitle--xsmall euiCard__title"
-                                          id="i81dfe411-071a-11eb-ac1f-41fee99a465bTitle"
+                                          id="i686461e1-07bb-11eb-8cee-232c95d1d604Title"
                                         >
                                           <span
                                             data-test-subj="visGroup-tools"
@@ -1120,12 +1130,12 @@ exports[`NewVisModal should render as expected 1`] = `
                                       </EuiTitle>
                                       <EuiText
                                         className="euiCard__description"
-                                        id="i81dfe411-071a-11eb-ac1f-41fee99a465bDescription"
+                                        id="i686461e1-07bb-11eb-8cee-232c95d1d604Description"
                                         size="s"
                                       >
                                         <div
                                           className="euiText euiText--small euiCard__description"
-                                          id="i81dfe411-071a-11eb-ac1f-41fee99a465bDescription"
+                                          id="i686461e1-07bb-11eb-8cee-232c95d1d604Description"
                                         >
                                           <p />
                                         </div>
