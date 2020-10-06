@@ -30,8 +30,8 @@ type CacheRefreshHandler = () => Tag[] | Promise<Tag[]>;
  */
 export class TagsCache implements ITagsCache, ITagsChangeListener {
   private readonly internal$: BehaviorSubject<Tag[]>;
-  private readonly public$: Subject<Tag[]>;
-  private readonly stop$: Subject;
+  private readonly public$: Observable<Tag[]>;
+  private readonly stop$: Subject<void>;
 
   constructor(private readonly refresher: CacheRefreshHandler) {
     this.stop$ = new Subject();
