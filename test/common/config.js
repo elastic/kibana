@@ -50,6 +50,7 @@ export default function () {
         `--home.disableWelcomeScreen=true`,
         // Needed for async search functional tests to introduce a delay
         `--data.search.aggs.shardDelay.enabled=true`,
+        `--security.showInsecureClusterWarning=false`,
         '--telemetry.banner=false',
         '--telemetry.optIn=false',
         // These are *very* important to have them pointing to staging

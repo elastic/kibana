@@ -11,7 +11,13 @@
 
 import { IRouter, RouteValidationResultFactory } from 'src/core/server';
 import Ajv from 'ajv';
-import { PLUGIN_ID, AGENT_API_ROUTES, LIMITED_CONCURRENCY_ROUTE_TAG } from '../../constants';
+import {
+  PLUGIN_ID,
+  AGENT_API_ROUTES,
+  AGENT_API_ROUTES_7_9,
+  LIMITED_CONCURRENCY_ROUTE_TAG,
+  AGENT_POLLING_REQUEST_TIMEOUT_MARGIN_MS,
+} from '../../constants';
 import {
   GetAgentsRequestSchema,
   GetOneAgentRequestSchema,
@@ -30,6 +36,7 @@ import {
   PostBulkAgentReassignRequestSchema,
   PostAgentEnrollRequestBodyJSONSchema,
   PostAgentUpgradeRequestSchema,
+  PostBulkAgentUpgradeRequestSchema,
 } from '../../types';
 import {
   getAgentsHandler,
@@ -49,7 +56,7 @@ import { postNewAgentActionHandlerBuilder } from './actions_handlers';
 import { appContextService } from '../../services';
 import { postAgentUnenrollHandler, postBulkAgentsUnenrollHandler } from './unenroll_handler';
 import { IngestManagerConfigType } from '../..';
-import { postAgentUpgradeHandler } from './upgrade_handler';
+import { postAgentUpgradeHandler, postBulkAgentsUpgradeHandler } from './upgrade_handler';
 
 const ajv = new Ajv({
   coerceTypes: true,
@@ -112,7 +119,7 @@ export const registerRoutes = (router: IRouter, config: IngestManagerConfigType)
     getAgentsHandler
   );
 
-  const pollingRequestTimeout = config.fleet.pollingRequestTimeout;
+  const pollingRequestTimeout = config.agents.pollingRequestTimeout;
   // Agent checkin
   router.post(
     {
@@ -123,7 +130,30 @@ export const registerRoutes = (router: IRouter, config: IngestManagerConfigType)
       },
       options: {
         tags: [],
-        ...(pollingRequestTimeout
+        // If the timeout is too short, do not set socket idle timeout and rely on Kibana global socket timeout
+        ...(pollingRequestTimeout && pollingRequestTimeout > AGENT_POLLING_REQUEST_TIMEOUT_MARGIN_MS
+          ? {
+              timeout: {
+                idleSocket: pollingRequestTimeout,
+              },
+            }
+          : {}),
+      },
+    },
+    postAgentCheckinHandler
+  );
+  // BWC for agent <= 7.9
+  router.post(
+    {
+      path: AGENT_API_ROUTES_7_9.CHECKIN_PATTERN,
+      validate: {
+        params: makeValidator(PostAgentCheckinRequestParamsJSONSchema),
+        body: makeValidator(PostAgentCheckinRequestBodyJSONSchema),
+      },
+      options: {
+        tags: [],
+        // If the timeout is too short, do not set socket idle timeout and rely on Kibana global socket timeout
+        ...(pollingRequestTimeout && pollingRequestTimeout > AGENT_POLLING_REQUEST_TIMEOUT_MARGIN_MS
           ? {
               timeout: {
                 idleSocket: pollingRequestTimeout,
@@ -146,11 +176,41 @@ export const registerRoutes = (router: IRouter, config: IngestManagerConfigType)
     },
     postAgentEnrollHandler
   );
+  // BWC for agent <= 7.9
+  router.post(
+    {
+      path: AGENT_API_ROUTES_7_9.ENROLL_PATTERN,
+      validate: {
+        body: makeValidator(PostAgentEnrollRequestBodyJSONSchema),
+      },
+      options: { tags: [LIMITED_CONCURRENCY_ROUTE_TAG] },
+    },
+    postAgentEnrollHandler
+  );
 
   // Agent acks
   router.post(
     {
       path: AGENT_API_ROUTES.ACKS_PATTERN,
+      validate: {
+        params: makeValidator(PostAgentAcksRequestParamsJSONSchema),
+        body: makeValidator(PostAgentAcksRequestBodyJSONSchema),
+      },
+      options: { tags: [LIMITED_CONCURRENCY_ROUTE_TAG] },
+    },
+    postAgentAcksHandlerBuilder({
+      acknowledgeAgentActions: AgentService.acknowledgeAgentActions,
+      authenticateAgentWithAccessToken: AgentService.authenticateAgentWithAccessToken,
+      getSavedObjectsClientContract: appContextService.getInternalUserSOClient.bind(
+        appContextService
+      ),
+      saveAgentEvents: AgentService.saveAgentEvents,
+    })
+  );
+  // BWC for agent <= 7.9
+  router.post(
+    {
+      path: AGENT_API_ROUTES_7_9.ACKS_PATTERN,
       validate: {
         params: makeValidator(PostAgentAcksRequestParamsJSONSchema),
         body: makeValidator(PostAgentAcksRequestBodyJSONSchema),
@@ -225,6 +285,15 @@ export const registerRoutes = (router: IRouter, config: IngestManagerConfigType)
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
     postAgentUpgradeHandler
+  );
+  // bulk upgrade
+  router.post(
+    {
+      path: AGENT_API_ROUTES.BULK_UPGRADE_PATTERN,
+      validate: PostBulkAgentUpgradeRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    postBulkAgentsUpgradeHandler
   );
   // Bulk reassign
   router.post(
