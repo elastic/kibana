@@ -57,9 +57,12 @@ export function healthRoute(
             path: '/_xpack/usage',
           });
 
+        const hasDecryptionFailures = await alertsClient.hasDecryptionFailures();
+
         const frameworkHealth: AlertingFrameworkHealth = {
           isSufficientlySecure: !isSecurityEnabled || (isSecurityEnabled && isTLSEnabled),
           hasPermanentEncryptionKey: !encryptedSavedObjects.usingEphemeralEncryptionKey,
+          hasDecryptionFailures,
         };
 
         return res.ok({

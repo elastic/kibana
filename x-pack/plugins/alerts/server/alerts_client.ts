@@ -396,6 +396,17 @@ export class AlertsClient {
     };
   }
 
+  public async hasDecryptionFailures(): Promise<boolean> {
+    const { total } = await this.unsecuredSavedObjectsClient.find<RawAlert>({
+      page: 0,
+      perPage: 0,
+      filter:
+        'alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.reason:decrypt',
+      type: 'alert',
+    });
+    return total > 0;
+  }
+
   public async delete({ id }: { id: string }) {
     let taskIdToRemove: string | undefined | null;
     let apiKeyToInvalidate: string | null = null;

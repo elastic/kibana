@@ -97,17 +97,11 @@ export function healthCheckTaskRunner(logger: Logger, alertsClient: AlertsClient
     return {
       async run() {
         try {
-          const alertClientAlerts = await alertsClient.find({
-            options: {
-              filter: `alert.attributes.alertTypeId:${'.index-threshold'}`,
-              page: 0,
-              perPage: 0,
-            },
-          });
+          const alertingHealthStatus = await alertsClient.hasDecryptionFailures();
           return {
             state: {
               runs: (state.runs || 0) + 1,
-              isHealthy: alertClientAlerts.total === 0,
+              isHealthy: alertingHealthStatus,
             },
             runAt: getNextHour(),
           };
