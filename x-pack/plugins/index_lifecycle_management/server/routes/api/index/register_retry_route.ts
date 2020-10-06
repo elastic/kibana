@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { schema } from '@kbn/config-schema';
 import { ElasticsearchClient } from 'kibana/server';
 
@@ -27,7 +28,7 @@ const bodySchema = schema.object({
   indexNames: schema.arrayOf(schema.string()),
 });
 
-export function registerRetryRoute({ router, license, lib }: RouteDependencies) {
+export function registerRetryRoute({ router, license }: RouteDependencies) {
   router.post(
     { path: addBasePath('/index/retry'), validate: { body: bodySchema } },
     license.guardApiRoute(async (context, request, response) => {
@@ -38,10 +39,10 @@ export function registerRetryRoute({ router, license, lib }: RouteDependencies) 
         await retryLifecycle(context.core.elasticsearch.client.asCurrentUser, indexNames);
         return response.ok();
       } catch (e) {
-        if (lib.isEsError(e)) {
+        if (e instanceof ResponseError) {
           return response.customError({
             statusCode: e.statusCode,
-            body: e,
+            body: { message: e.body.error?.reason },
           });
         }
         // Case: default
