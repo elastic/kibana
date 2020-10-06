@@ -1293,7 +1293,14 @@ describe('OnPreResponse', () => {
     );
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'original' }));
+    router.get({ path: '/', validate: false }, (context, req, res) => {
+      return res.ok({
+        headers: {
+          'Original-Header-A': 'A',
+        },
+        body: 'original',
+      });
+    });
 
     registerOnPreResponse((req, res, t) => {
       return t.render('overridden');
@@ -1301,7 +1308,9 @@ describe('OnPreResponse', () => {
 
     await server.start();
 
-    await supertest(innerServer.listener).get('/').expect(200, 'overridden');
+    const result = await supertest(innerServer.listener).get('/').expect(200, 'overridden');
+
+    expect(result.header['original-header-a']).toBe('A');
   });
 });
 

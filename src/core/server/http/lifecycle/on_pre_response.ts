@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Lifecycle, Request, ResponseToolkit as HapiResponseToolkit } from 'hapi';
+import { Lifecycle, Request, ResponseObject, ResponseToolkit as HapiResponseToolkit } from 'hapi';
 import Boom from 'boom';
 import { Logger } from '../../logging';
 
@@ -132,13 +132,16 @@ export function adoptToHapiOnPreResponseFormat(fn: OnPreResponseHandler, log: Lo
               };
             } else {
               findHeadersIntersection(response.headers, result.headers, log);
-              for (const [headerName, headerValue] of Object.entries(result.headers)) {
-                response.header(headerName, headerValue as any); // hapi types don't specify string[] as valid value
-              }
+              setHeaders(response, result.headers);
             }
           }
         } else if (preResponseResult.isRender(result)) {
-          return responseToolkit.response(result.body).code(statusCode);
+          const overriddenResponse = responseToolkit.response(result.body).code(statusCode);
+
+          const originalHeaders = isBoom(response) ? response.output.headers : response.headers;
+          setHeaders(overriddenResponse, originalHeaders);
+
+          return overriddenResponse;
         } else {
           throw new Error(
             `Unexpected result from OnPreResponse. Expected OnPreResponseResult, but given: ${result}.`
@@ -156,6 +159,12 @@ export function adoptToHapiOnPreResponseFormat(fn: OnPreResponseHandler, log: Lo
 
 function isBoom(response: any): response is Boom {
   return response instanceof Boom;
+}
+
+function setHeaders(response: ResponseObject, headers: ResponseHeaders) {
+  for (const [headerName, headerValue] of Object.entries(headers)) {
+    response.header(headerName, headerValue as any); // hapi types don't specify string[] as valid value
+  }
 }
 
 // NOTE: responseHeaders contains not a full list of response headers, but only explicitly set on a response object.
