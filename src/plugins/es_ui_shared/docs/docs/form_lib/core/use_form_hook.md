@@ -6,7 +6,7 @@ sidebar_label: useForm()
 
 **Returns:** [`FormHook`](form_hook.md)
 
-Use the `useForm` hook to declare a new form object. As we have seen in the ["Getting started"](about.md), you can use it without any additional configuration. It does accept an optional `config` object with the following configuration (all parameters are optionals).
+Use the `useForm` hook to declare a new form object. As we have seen in the ["Getting started"](about.md), you can use it without any additional configuration. It does accept an optional `config` object with the following configuration (all parameters are optional).
 
 ## Configuration
 
@@ -16,7 +16,7 @@ Use the `useForm` hook to declare a new form object. As we have seen in the ["Ge
 **Returns:** `Promise<void>`
 
 The `onSubmit` handler is executed when calling `form.submit()`. It receives the form data and a boolean for the validity of the form.
-Meanwhile the form is being submitted, the form `isSubmitting` state will be set to `true`. This can be useful to change the state of the submit button in the UI.
+When the form is submitted `isSubmitting` will be set to `true` then back to `false` after the `onSubmit` handler has run. This can be useful to change the state of the submit button in the UI.
 
 ```js
 interface MyFormData {
@@ -38,7 +38,7 @@ const onFormSubmit = async (data: MyFormData, isValid: boolean): Promise<void> =
 const { form } = useForm<MyFormData>({ onSubmit: onFormSubmit });
 
 // JSX
-<button onClick{form.submit}>Send form</button>
+<button disabled={form.isSubmitting} onClick{form.submit}>Send form</button>
 ```
 
 ### defaultValue
@@ -206,7 +206,7 @@ You can optionally give an id to the form, that will be attached to the `form` o
 **Type:** `number` (ms)
 **Default:** 500
 
-When a field value changes, for example when we hit a key inside a text field, its `isChangingValue` state is set to `true`. Then, after all the validations have run for the field, the `isChangingValue` state is back to `false`. The time it take between those two state change entirely depend on the time it take to run the validations. If the validations are all synchronous, the time will be `0`. If there are some asynchronous validations, (e.g. making an HTTP request to validate the value on the server), the "value change" duration will be the time it takes to run all the async validations.
+When a field value changes, for example when we hit a key inside a text field, its `isChangingValue` state is set to `true`. Then, after all the validations have run for the field, the `isChangingValue` state is back to `false`. The time it take between those two state changes entirely depends on the time it takes to run the validations. If the validations are all synchronous, the time will be `0`. If there are some asynchronous validations, (e.g. making an HTTP request to validate the value on the server), the "value change" duration will be the time it takes to run all the async validations.
 
 With this option, you can define the minimum time you'd like to have between the two state change, so the `isChangingValue` state will stay `true` for at least the amount of milliseconds defined here. This is useful for example if you want to display possible errors on the field after a minimum of time has passed since the last value change.
 
