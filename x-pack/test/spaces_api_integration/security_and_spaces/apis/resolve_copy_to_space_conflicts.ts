@@ -21,7 +21,7 @@ export default function resolveCopyToSpaceConflictsTestSuite({ getService }: Tes
     createExpectNonOverriddenResponseWithoutReferences,
     createExpectOverriddenResponseWithReferences,
     createExpectOverriddenResponseWithoutReferences,
-    expectForbiddenResponse,
+    expectRouteForbiddenResponse,
     createExpectUnauthorizedAtSpaceWithReferencesResult,
     createExpectReadonlyAtSpaceWithReferencesResult,
     createExpectUnauthorizedAtSpaceWithoutReferencesResult,
@@ -64,23 +64,23 @@ export default function resolveCopyToSpaceConflictsTestSuite({ getService }: Tes
         tests: {
           withReferencesNotOverwriting: {
             statusCode: 403,
-            response: expectForbiddenResponse,
+            response: expectRouteForbiddenResponse,
           },
           withReferencesOverwriting: {
             statusCode: 403,
-            response: expectForbiddenResponse,
+            response: expectRouteForbiddenResponse,
           },
           withoutReferencesOverwriting: {
             statusCode: 403,
-            response: expectForbiddenResponse,
+            response: expectRouteForbiddenResponse,
           },
           withoutReferencesNotOverwriting: {
             statusCode: 403,
-            response: expectForbiddenResponse,
+            response: expectRouteForbiddenResponse,
           },
           nonExistentSpace: {
             statusCode: 403,
-            response: expectForbiddenResponse,
+            response: expectRouteForbiddenResponse,
           },
           multiNamespaceTestCases: createMultiNamespaceTestCases(spaceId, 'noAccess'),
         },

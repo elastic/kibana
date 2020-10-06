@@ -200,7 +200,7 @@ export function resolveCopyToSpaceConflictsSuite(
     expect(visualization.attributes.title).to.eql(`CTS vis 3 from ${destination} space`);
   };
 
-  const expectForbiddenResponse = async (resp: TestResponse) => {
+  const expectRouteForbiddenResponse = async (resp: TestResponse) => {
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
@@ -208,7 +208,7 @@ export function resolveCopyToSpaceConflictsSuite(
     });
   };
 
-  const expectNotFoundResponse = async (resp: TestResponse) => {
+  const expectRouteNotFoundResponse = async (resp: TestResponse) => {
     expect(resp.body).to.eql({
       statusCode: 404,
       error: 'Not Found',
@@ -324,7 +324,7 @@ export function resolveCopyToSpaceConflictsSuite(
 
     const createRetries = (overwriteRetry: Record<string, any>) => ({ space_2: [overwriteRetry] });
     const getResult = (response: TestResponse) => (response.body as CopyResponse).space_2;
-    const expectForbiddenESResponse = (response: TestResponse) => {
+    const expectSavedObjectForbiddenResponse = (response: TestResponse) => {
       expect(response.body).to.eql({
         space_2: {
           success: false,
@@ -335,7 +335,7 @@ export function resolveCopyToSpaceConflictsSuite(
         },
       });
     };
-    const expectSuccessESResponse = (
+    const expectSavedObjectSuccessResponse = (
       response: TestResponse,
       id: string,
       destinationId?: string
@@ -362,12 +362,12 @@ export function resolveCopyToSpaceConflictsSuite(
         statusCode,
         response: async (response: TestResponse) => {
           if (outcome === 'authorized') {
-            expectSuccessESResponse(response, exactMatchId);
+            expectSavedObjectSuccessResponse(response, exactMatchId);
           } else if (outcome === 'noAccess') {
-            expectForbiddenResponse(response);
+            expectRouteForbiddenResponse(response);
           } else {
             // unauthorized read/write
-            expectForbiddenESResponse(response);
+            expectSavedObjectForbiddenResponse(response);
           }
         },
       },
@@ -383,12 +383,12 @@ export function resolveCopyToSpaceConflictsSuite(
         statusCode,
         response: async (response: TestResponse) => {
           if (outcome === 'authorized') {
-            expectSuccessESResponse(response, inexactMatchId, 'conflict_1_space_2');
+            expectSavedObjectSuccessResponse(response, inexactMatchId, 'conflict_1_space_2');
           } else if (outcome === 'noAccess') {
-            expectForbiddenResponse(response);
+            expectRouteForbiddenResponse(response);
           } else {
             // unauthorized read/write
-            expectForbiddenESResponse(response);
+            expectSavedObjectForbiddenResponse(response);
           }
         },
       },
@@ -404,12 +404,12 @@ export function resolveCopyToSpaceConflictsSuite(
         statusCode,
         response: async (response: TestResponse) => {
           if (outcome === 'authorized') {
-            expectSuccessESResponse(response, ambiguousConflictId, 'conflict_2_space_2');
+            expectSavedObjectSuccessResponse(response, ambiguousConflictId, 'conflict_2_space_2');
           } else if (outcome === 'noAccess') {
-            expectForbiddenResponse(response);
+            expectRouteForbiddenResponse(response);
           } else {
             // unauthorized read/write
-            expectForbiddenESResponse(response);
+            expectSavedObjectForbiddenResponse(response);
           }
         },
       },
@@ -535,8 +535,8 @@ export function resolveCopyToSpaceConflictsSuite(
 
   return {
     resolveCopyToSpaceConflictsTest,
-    expectForbiddenResponse,
-    expectNotFoundResponse,
+    expectRouteForbiddenResponse,
+    expectRouteNotFoundResponse,
     createExpectOverriddenResponseWithReferences,
     createExpectOverriddenResponseWithoutReferences,
     createExpectNonOverriddenResponseWithReferences,

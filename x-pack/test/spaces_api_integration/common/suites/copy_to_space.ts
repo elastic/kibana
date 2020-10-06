@@ -124,7 +124,7 @@ export function copyToSpaceTestSuiteFactory(
     });
   };
 
-  const expectForbiddenResponse = async (resp: TestResponse) => {
+  const expectRouteForbiddenResponse = async (resp: TestResponse) => {
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
@@ -132,7 +132,7 @@ export function copyToSpaceTestSuiteFactory(
     });
   };
 
-  const expectNotFoundResponse = async (resp: TestResponse) => {
+  const expectRouteNotFoundResponse = async (resp: TestResponse) => {
     expect(resp.body).to.eql({
       statusCode: 404,
       error: 'Not Found',
@@ -436,7 +436,7 @@ export function copyToSpaceTestSuiteFactory(
     const ambiguousConflictId = `conflict_2_${spaceId}`;
 
     const getResult = (response: TestResponse) => (response.body as CopyResponse).space_2;
-    const expectForbiddenESResponse = (response: TestResponse) => {
+    const expectSavedObjectForbiddenResponse = (response: TestResponse) => {
       expect(response.body).to.eql({
         space_2: {
           success: false,
@@ -464,10 +464,10 @@ export function copyToSpaceTestSuiteFactory(
             expect(successResults).to.eql([{ type, id: noConflictId, meta, destinationId }]);
             expect(errors).to.be(undefined);
           } else if (outcome === 'noAccess') {
-            expectForbiddenResponse(response);
+            expectRouteForbiddenResponse(response);
           } else {
             // unauthorized read/write
-            expectForbiddenESResponse(response);
+            expectSavedObjectForbiddenResponse(response);
           }
         },
       },
@@ -494,10 +494,10 @@ export function copyToSpaceTestSuiteFactory(
               ]);
             }
           } else if (outcome === 'noAccess') {
-            expectForbiddenResponse(response);
+            expectRouteForbiddenResponse(response);
           } else {
             // unauthorized read/write
-            expectForbiddenESResponse(response);
+            expectSavedObjectForbiddenResponse(response);
           }
         },
       },
@@ -533,10 +533,10 @@ export function copyToSpaceTestSuiteFactory(
               ]);
             }
           } else if (outcome === 'noAccess') {
-            expectForbiddenResponse(response);
+            expectRouteForbiddenResponse(response);
           } else {
             // unauthorized read/write
-            expectForbiddenESResponse(response);
+            expectSavedObjectForbiddenResponse(response);
           }
         },
       },
@@ -569,10 +569,10 @@ export function copyToSpaceTestSuiteFactory(
               },
             ]);
           } else if (outcome === 'noAccess') {
-            expectForbiddenResponse(response);
+            expectRouteForbiddenResponse(response);
           } else {
             // unauthorized read/write
-            expectForbiddenESResponse(response);
+            expectSavedObjectForbiddenResponse(response);
           }
         },
       },
@@ -751,8 +751,8 @@ export function copyToSpaceTestSuiteFactory(
     expectNoConflictsForNonExistentSpaceResult,
     createExpectWithConflictsOverwritingResult,
     createExpectWithConflictsWithoutOverwritingResult,
-    expectForbiddenResponse,
-    expectNotFoundResponse,
+    expectRouteForbiddenResponse,
+    expectRouteNotFoundResponse,
     createExpectUnauthorizedAtSpaceWithReferencesResult,
     createExpectUnauthorizedAtSpaceWithoutReferencesResult,
     createMultiNamespaceTestCases,
