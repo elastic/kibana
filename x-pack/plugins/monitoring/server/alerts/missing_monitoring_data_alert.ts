@@ -309,13 +309,6 @@ export class MissingMonitoringDataAlert extends BaseAlert {
       return;
     }
 
-    const ccs = instanceState.alertStates.reduce((accum: string, state): string => {
-      if (state.ccs) {
-        return state.ccs;
-      }
-      return accum;
-    }, '');
-
     const firingCount = instanceState.alertStates.filter((alertState) => alertState.ui.isFiring)
       .length;
     const firingStackProducts = instanceState.alertStates
@@ -336,12 +329,10 @@ export class MissingMonitoringDataAlert extends BaseAlert {
       const fullActionText = i18n.translate('xpack.monitoring.alerts.missingData.fullAction', {
         defaultMessage: 'View what monitoring data we do have for these stack products.',
       });
-      const globalState = [`cluster_uuid:${cluster.clusterUuid}`];
-      if (ccs) {
-        globalState.push(`ccs:${ccs}`);
-      }
-      const url = `${this.kibanaUrl}/app/monitoring#overview?_g=(${globalState.join(',')})`;
-      const action = `[${fullActionText}](${url})`;
+
+      const ccs = instanceState.alertStates.find((state) => state.ccs)?.ccs;
+      const globalStateLink = this.createGlobalStateLink('overview', cluster.clusterUuid, ccs);
+      const action = `[${fullActionText}](${globalStateLink})`;
       const internalShortMessage = i18n.translate(
         'xpack.monitoring.alerts.missingData.firing.internalShortMessage',
         {

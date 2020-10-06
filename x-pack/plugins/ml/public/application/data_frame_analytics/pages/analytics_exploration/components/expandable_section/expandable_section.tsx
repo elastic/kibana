@@ -29,9 +29,13 @@ const isHeaderItems = (arg: any): arg is HeaderItem[] => {
   return Array.isArray(arg);
 };
 
+export const HEADER_ITEMS_LOADING = 'header_items_loading';
+
 export interface ExpandableSectionProps {
   content: ReactNode;
-  headerItems?: HeaderItem[] | 'loading';
+  contentPadding?: boolean;
+  docsLink?: ReactNode;
+  headerItems?: HeaderItem[] | typeof HEADER_ITEMS_LOADING;
   isExpanded?: boolean;
   dataTestId: string;
   title: ReactNode;
@@ -45,8 +49,10 @@ export const ExpandableSection: FC<ExpandableSectionProps> = ({
   // callback.
   isExpanded: isExpandedDefault = true,
   content,
+  contentPadding = false,
   dataTestId,
   title,
+  docsLink,
 }) => {
   const [isExpanded, setIsExpanded] = useState(isExpandedDefault);
   const toggleExpanded = () => {
@@ -56,16 +62,21 @@ export const ExpandableSection: FC<ExpandableSectionProps> = ({
   return (
     <EuiPanel paddingSize="none" data-test-subj={`mlDFExpandableSection-${dataTestId}`}>
       <div className="mlExpandableSection">
-        <EuiButtonEmpty
-          onClick={toggleExpanded}
-          iconType={isExpanded ? 'arrowUp' : 'arrowDown'}
-          size="l"
-          iconSide="right"
-          flush="left"
-        >
-          {title}
-        </EuiButtonEmpty>
-        {headerItems === 'loading' && <EuiLoadingContent lines={1} />}
+        <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              onClick={toggleExpanded}
+              iconType={isExpanded ? 'arrowUp' : 'arrowDown'}
+              size="l"
+              iconSide="right"
+              flush="left"
+            >
+              {title}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          {docsLink !== undefined && <EuiFlexItem grow={false}>{docsLink}</EuiFlexItem>}
+        </EuiFlexGroup>
+        {headerItems === HEADER_ITEMS_LOADING && <EuiLoadingContent lines={1} />}
         {isHeaderItems(headerItems) && (
           <EuiFlexGroup>
             {headerItems.map(({ label, value, id }) => (
@@ -82,13 +93,19 @@ export const ExpandableSection: FC<ExpandableSectionProps> = ({
                     <EuiBadge>{value}</EuiBadge>
                   </>
                 )}
-                {label === undefined && value}
+                {label === undefined && (
+                  <EuiText size="xs" color="subdued">
+                    {value}
+                  </EuiText>
+                )}
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
         )}
       </div>
-      {isExpanded && content}
+      {isExpanded && (
+        <div className={contentPadding ? 'mlExpandableSection-contentPadding' : ''}>{content}</div>
+      )}
     </EuiPanel>
   );
 };
