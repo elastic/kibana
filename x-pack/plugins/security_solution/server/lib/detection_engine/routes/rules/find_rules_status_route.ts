@@ -17,6 +17,13 @@ import {
 import { findRules } from '../../rules/find_rules';
 import { ruleStatusServiceFactory } from '../../signals/rule_status_service';
 
+/**
+ * Given a list of rule ids, return the current status and
+ * last five errors for each associated rule.
+ *
+ * @param router
+ * @returns RuleStatusResponse
+ */
 export const findRulesStatusesRoute = (router: IRouter) => {
   router.post(
     {
@@ -41,13 +48,6 @@ export const findRulesStatusesRoute = (router: IRouter) => {
       }
 
       const ids = body.ids;
-      // build return object with ids as keys and errors as values.
-      /* looks like this
-        {
-            "someAlertId": [{"myerrorobject": "some error value"}, etc..],
-            "anotherAlertId": ...
-        }
-    */
       try {
         const failingRules = await findRules({
           alertsClient,
@@ -55,7 +55,9 @@ export const findRulesStatusesRoute = (router: IRouter) => {
           page: undefined,
           sortField: undefined,
           sortOrder: undefined,
-          filter: 'alert.attributes.executionStatus.status: "error"',
+          filter: `alert.attributes.executionStatus.status: "error" AND (${ids
+            .map((id) => `alert.attributes.id:${id}`)
+            .join(' or ')})`,
           fields: ['executionStatus'],
         });
 

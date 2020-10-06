@@ -63,10 +63,7 @@ export const findRulesRoute = (router: IRouter) => {
         // which we are filtering on and will write a failure status
         // for any rules found to be in a failing state into our rule status saved objects
         const failingRules = rules.data.filter(
-          (rule) =>
-            rule.executionStatus != null &&
-            Object.keys(rule.executionStatus).length !== 0 &&
-            rule.executionStatus.status === 'error'
+          (rule) => rule.executionStatus != null && rule.executionStatus.status === 'error'
         );
 
         const ruleStatuses = await Promise.all(
