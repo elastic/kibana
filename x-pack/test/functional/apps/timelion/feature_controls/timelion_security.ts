@@ -67,7 +67,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows timelion navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Timelion']);
+        expect(navLinks).to.eql(['Overview', 'Timelion']);
       });
 
       it(`allows a timelion sheet to be created`, async () => {
@@ -119,7 +119,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows timelion navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Timelion']);
+        expect(navLinks).to.eql(['Overview', 'Timelion']);
       });
 
       it(`does not allow a timelion sheet to be created`, async () => {

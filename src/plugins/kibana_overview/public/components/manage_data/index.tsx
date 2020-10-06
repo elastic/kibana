@@ -17,6 +17,4 @@
  * under the License.
  */
 
-.homDataManage__content .euiIcon__fillSecondary {
-  fill: $euiColorDarkestShade;
-}
+export * from './manage_data';
