@@ -16,7 +16,7 @@ import {
   EuiLoadingSpinner,
   EuiButtonIcon,
 } from '@elastic/eui';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { noop } from 'lodash/fp';
 
 import { Form, UseField, useForm } from '../../../shared_imports';
@@ -46,7 +46,7 @@ interface EditConnectorProps {
 }
 
 const MyFlexGroup = styled(EuiFlexGroup)`
-  ${({ theme }) => css`
+  ${({ theme }) => `
     margin-top: ${theme.eui.euiSizeM};
     p {
       font-size: ${theme.eui.euiSizeM};
@@ -56,7 +56,7 @@ const MyFlexGroup = styled(EuiFlexGroup)`
 const DisappearingFlexItem = styled(EuiFlexItem)`
   ${({ $isHidden }: { $isHidden: boolean }) =>
     $isHidden &&
-    css`
+    `
       margin: 0 !important;
     `}
 `;
