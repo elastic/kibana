@@ -207,7 +207,7 @@ export default function (providerContext: FtrProviderContext) {
       const enrollmentAPIToken = enrollmentApiKeyResponse.item.api_key;
       // Enroll agent
       const { body: enrollmentResponse } = await supertestWithoutAuth
-        .post(`/api/fleet/agents/enroll`)
+        .post(`/api/ingest_manager/fleet/agents/enroll`)
         .set('kbn-xsrf', 'xxx')
         .set('Authorization', `ApiKey ${enrollmentAPIToken}`)
         .send({
@@ -225,7 +225,7 @@ export default function (providerContext: FtrProviderContext) {
 
       // Agent checkin
       const { body: checkinApiResponse } = await supertestWithoutAuth
-        .post(`/api/fleet/agents/${enrollmentResponse.item.id}/checkin`)
+        .post(`/api/ingest_manager/fleet/agents/${enrollmentResponse.item.id}/checkin`)
         .set('kbn-xsrf', 'xx')
         .set('Authorization', `ApiKey ${agentAccessAPIKey}`)
         .send({
@@ -240,7 +240,7 @@ export default function (providerContext: FtrProviderContext) {
 
       // Ack actions
       await supertestWithoutAuth
-        .post(`/api/fleet/agents/${enrollmentResponse.item.id}/acks`)
+        .post(`/api/ingest_manager/fleet/agents/${enrollmentResponse.item.id}/acks`)
         .set('Authorization', `ApiKey ${agentAccessAPIKey}`)
         .set('kbn-xsrf', 'xx')
 
@@ -261,7 +261,7 @@ export default function (providerContext: FtrProviderContext) {
 
       // Second agent checkin
       const { body: secondCheckinApiResponse } = await supertestWithoutAuth
-        .post(`/api/fleet/agents/${enrollmentResponse.item.id}/checkin`)
+        .post(`/api/ingest_manager/fleet/agents/${enrollmentResponse.item.id}/checkin`)
         .set('kbn-xsrf', 'xx')
         .set('Authorization', `ApiKey ${agentAccessAPIKey}`)
         .send({
@@ -288,7 +288,7 @@ export default function (providerContext: FtrProviderContext) {
 
       //  Checkin after unenrollment
       const { body: checkinAfterUnenrollResponse } = await supertestWithoutAuth
-        .post(`/api/fleet/agents/${enrollmentResponse.item.id}/checkin`)
+        .post(`/api/ingest_manager/fleet/agents/${enrollmentResponse.item.id}/checkin`)
         .set('kbn-xsrf', 'xx')
         .set('Authorization', `ApiKey ${agentAccessAPIKey}`)
         .send({
@@ -302,7 +302,7 @@ export default function (providerContext: FtrProviderContext) {
 
       //  ack unenroll actions
       await supertestWithoutAuth
-        .post(`/api/fleet/agents/${enrollmentResponse.item.id}/acks`)
+        .post(`/api/ingest_manager/fleet/agents/${enrollmentResponse.item.id}/acks`)
         .set('Authorization', `ApiKey ${agentAccessAPIKey}`)
         .set('kbn-xsrf', 'xx')
         .send({
@@ -322,7 +322,7 @@ export default function (providerContext: FtrProviderContext) {
 
       // Checkin after unenrollment acknowledged
       await supertestWithoutAuth
-        .post(`/api/fleet/agents/${enrollmentResponse.item.id}/checkin`)
+        .post(`/api/ingest_manager/fleet/agents/${enrollmentResponse.item.id}/checkin`)
         .set('kbn-xsrf', 'xx')
         .set('Authorization', `ApiKey ${agentAccessAPIKey}`)
         .send({
