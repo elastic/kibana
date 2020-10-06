@@ -17,14 +17,18 @@
  * under the License.
  */
 
-require('../src/setup_node_env');
-require('@kbn/test').runTestsCli([
-  require.resolve('../test/functional/config.js'),
-  require.resolve('../test/api_integration/config.js'),
-  require.resolve('../test/plugin_functional/config.ts'),
-  require.resolve('../test/interpreter_functional/config.ts'),
-  require.resolve('../test/ui_capabilities/newsfeed_err/config.ts'),
-  require.resolve('../test/examples/config.js'),
-  require.resolve('../test/new_visualize_flow/config.js'),
-  require.resolve('../test/security_functional/config.ts'),
-]);
+import { mockInsecureClusterService } from './insecure_cluster_service/insecure_cluster_service.mock';
+import { SecurityOssPluginSetup, SecurityOssPluginStart } from './plugin';
+
+export const mockSecurityOssPlugin = {
+  createSetup: () => {
+    return {
+      insecureCluster: mockInsecureClusterService.createSetup(),
+    } as DeeplyMockedKeys<SecurityOssPluginSetup>;
+  },
+  createStart: () => {
+    return {
+      insecureCluster: mockInsecureClusterService.createStart(),
+    } as DeeplyMockedKeys<SecurityOssPluginStart>;
+  },
+};
