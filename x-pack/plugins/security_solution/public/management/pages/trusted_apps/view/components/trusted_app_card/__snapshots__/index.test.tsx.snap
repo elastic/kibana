@@ -62,6 +62,7 @@ exports[`trusted_app_card TrustedAppCard should render correctly 1`] = `
   />
   <ItemDetailsAction
     color="danger"
+    data-test-subj="trustedAppDeleteButton"
     onClick={[Function]}
     size="s"
   >
