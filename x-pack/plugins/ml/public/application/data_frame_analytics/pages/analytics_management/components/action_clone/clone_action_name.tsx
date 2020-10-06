@@ -345,7 +345,7 @@ export const useNavigateToWizardWithClonedJob = () => {
 
   return async (item: DataFrameAnalyticsListRow) => {
     const sourceIndex = Array.isArray(item.config.source.index)
-      ? item.config.source.index[0]
+      ? item.config.source.index.join(',')
       : item.config.source.index;
     let sourceIndexId;
 
