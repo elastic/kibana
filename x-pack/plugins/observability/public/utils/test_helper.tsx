@@ -28,7 +28,13 @@ export const core = ({
 } as unknown) as CoreStart;
 
 const plugins = ({
-  data: { query: { timefilter: { timefilter: { setTime: jest.fn() } } } },
+  data: {
+    query: {
+      timefilter: {
+        timefilter: { setTime: jest.fn(), getTime: jest.fn().mockImplementation(() => ({})) },
+      },
+    },
+  },
 } as unknown) as ObservabilityPluginSetupDeps;
 
 export const render = (component: React.ReactNode) => {
@@ -36,11 +42,11 @@ export const render = (component: React.ReactNode) => {
   return testLibRender(
     <PluginContext.Provider value={{ core, plugins }}>
       <KibanaContextProvider services={{ ...core }}>
-        <EuiThemeProvider>
-          <HasDataContextProvider>
-            <Router history={history}>{component}</Router>
-          </HasDataContextProvider>
-        </EuiThemeProvider>
+        <Router history={history}>
+          <EuiThemeProvider>
+            <HasDataContextProvider>{component}</HasDataContextProvider>
+          </EuiThemeProvider>
+        </Router>
       </KibanaContextProvider>
     </PluginContext.Provider>
   );

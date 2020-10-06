@@ -14,6 +14,13 @@ describe('renderApp', () => {
   it('renders', async () => {
     const plugins = ({
       usageCollection: { reportUiStats: () => {} },
+      data: {
+        query: {
+          timefilter: {
+            timefilter: { setTime: jest.fn(), getTime: jest.fn().mockImplementation(() => ({})) },
+          },
+        },
+      },
     } as unknown) as ObservabilityPluginSetupDeps;
     const core = ({
       application: { currentAppId$: new Observable(), navigateToUrl: () => {} },
