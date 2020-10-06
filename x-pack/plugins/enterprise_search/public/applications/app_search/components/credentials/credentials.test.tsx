@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import '../../../__mocks__/kea.mock';
-import '../../../__mocks__/shallow_useeffect.mock';
+import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { shallow } from 'enzyme';
 import { useValues, useActions } from 'kea';
 
@@ -14,8 +14,6 @@ import { Credentials } from './credentials';
 import { EuiCopy, EuiPageContentBody } from '@elastic/eui';
 
 import { externalUrl } from '../../../shared/enterprise_search_url';
-
-const getUseEffectUnmountHandler = () => (useEffect as jest.Mock).mock.calls[0][0]();
 
 describe('Credentials', () => {
   const mockKea = ({ values = {}, actions = {} }) => {
@@ -54,7 +52,6 @@ describe('Credentials', () => {
     const resetCredentials = jest.fn();
     mockKea({ actions: { resetCredentials } });
     shallow(<Credentials />);
-    const unmountHandler = getUseEffectUnmountHandler();
     unmountHandler();
     expect(resetCredentials).toHaveBeenCalledTimes(1);
   });
