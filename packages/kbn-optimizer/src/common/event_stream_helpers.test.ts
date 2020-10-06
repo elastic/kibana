@@ -18,7 +18,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { toArray, take } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
 import { allValuesFrom } from '@kbn/std';
 
 import { summarizeEventStream } from './event_stream_helpers';

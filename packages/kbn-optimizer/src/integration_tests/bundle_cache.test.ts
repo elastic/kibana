@@ -21,7 +21,6 @@ import Path from 'path';
 
 import cpy from 'cpy';
 import del from 'del';
-import { toArray } from 'rxjs/operators';
 import { createAbsolutePathSerializer } from '@kbn/dev-utils';
 import { allValuesFrom } from '@kbn/std';
 
