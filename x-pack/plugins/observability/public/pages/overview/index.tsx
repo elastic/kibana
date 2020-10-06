@@ -40,7 +40,7 @@ function calculatetBucketSize({ start, end }: { start?: number; end?: number }) 
 }
 
 export function OverviewPage({ routeParams }: Props) {
-  const { core } = usePluginContext();
+  const { core, plugins } = usePluginContext();
 
   useTrackPageview({ app: 'observability', path: 'overview' });
   useTrackPageview({ app: 'observability', path: 'overview', delay: 15000 });
@@ -52,7 +52,11 @@ export function OverviewPage({ routeParams }: Props) {
   const { data: newsFeed } = useFetcher(() => getNewsFeed({ core }), [core]);
 
   const theme = useContext(ThemeContext);
-  const timePickerTime = useKibanaUISettings<TimePickerTime>(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
+  const timePickerDefaults = useKibanaUISettings<TimePickerTime>(
+    UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
+  );
+  // read time from state and update the url
+  const timePickerSharedState = plugins.data.query.timefilter.timefilter.getTime();
 
   const result = useFetcher(() => fetchHasData(), []);
   const hasData = result.data;
@@ -64,8 +68,8 @@ export function OverviewPage({ routeParams }: Props) {
   const { refreshInterval = 10000, refreshPaused = true } = routeParams.query;
 
   const relativeTime = {
-    start: routeParams.query.rangeFrom ?? timePickerTime.from,
-    end: routeParams.query.rangeTo ?? timePickerTime.to,
+    start: routeParams.query.rangeFrom || timePickerSharedState.from || timePickerDefaults.from,
+    end: routeParams.query.rangeTo || timePickerSharedState.to || timePickerDefaults.to,
   };
 
   const absoluteTime = {
