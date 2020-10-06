@@ -15,6 +15,7 @@
 /src/plugins/dashboard/ @elastic/kibana-app
 /src/plugins/discover/ @elastic/kibana-app
 /src/plugins/input_control_vis/ @elastic/kibana-app
+/src/plugins/lens_oss/ @elastic/kibana-app
 /src/plugins/management/ @elastic/kibana-app
 /src/plugins/kibana_legacy/ @elastic/kibana-app
 /src/plugins/timelion/ @elastic/kibana-app
@@ -170,6 +171,7 @@
 /x-pack/test/functional/apps/maps/ @elastic/kibana-gis
 /x-pack/test/functional/es_archives/maps/ @elastic/kibana-gis
 /x-pack/test/visual_regression/tests/maps/index.js @elastic/kibana-gis
+/src/plugins/maps_oss @elastic/kibana-gis
 #CC# /src/legacy/core_plugins/region_map @elastic/kibana-gis
 #CC# /src/legacy/core_plugins/tile_map @elastic/kibana-gis
 #CC# /src/plugins/maps_legacy/ @elastic/kibana-gis
