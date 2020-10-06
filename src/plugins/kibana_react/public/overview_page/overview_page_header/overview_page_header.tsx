@@ -40,6 +40,7 @@ interface Props {
   showDevToolsLink?: boolean;
   showManagementLink?: boolean;
   title: JSX.Element | string;
+  addBasePath: (path: string) => string;
 }
 
 export const OverviewPageHeader: FC<Props> = ({
@@ -49,6 +50,7 @@ export const OverviewPageHeader: FC<Props> = ({
   showDevToolsLink,
   showManagementLink,
   title,
+  addBasePath,
 }) => {
   const {
     services: { application },
@@ -91,7 +93,7 @@ export const OverviewPageHeader: FC<Props> = ({
                     <EuiButtonEmpty
                       className="kbnOverviewPageHeader__actionButton"
                       flush="both"
-                      href={'/app/home#/tutorial_directory'}
+                      href={addBasePath('/app/home#/tutorial_directory')}
                       iconType="indexOpen"
                     >
                       {i18n.translate('kibana-react.kbnOverviewPageHeader.addDataButtonLabel', {
@@ -108,7 +110,7 @@ export const OverviewPageHeader: FC<Props> = ({
                         className="kbnOverviewPageHeader__actionButton"
                         flush="both"
                         iconType="gear"
-                        href={'/app/management'}
+                        href={addBasePath('/app/management')}
                       >
                         {i18n.translate(
                           'kibana-react.kbnOverviewPageHeader.stackManagementButtonLabel',
@@ -128,7 +130,7 @@ export const OverviewPageHeader: FC<Props> = ({
                         className="kbnOverviewPageHeader__actionButton"
                         flush="both"
                         iconType="wrench"
-                        href={'/app/dev_tools#/console'}
+                        href={addBasePath('/app/dev_tools#/console')}
                       >
                         {i18n.translate('kibana-react.kbnOverviewPageHeader.devToolsButtonLabel', {
                           defaultMessage: 'Dev tools',

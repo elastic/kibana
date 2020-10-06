@@ -28,10 +28,11 @@ import { FeatureCatalogueEntry } from '../../../../../../src/plugins/home/public
 import { Synopsis } from '../synopsis';
 
 interface Props {
+  addBasePath: (path: string) => string;
   features: FeatureCatalogueEntry[];
 }
 
-export const ManageData: FC<Props> = ({ features }) => {
+export const ManageData: FC<Props> = ({ addBasePath, features }) => {
   const {
     services: { application },
   } = useKibana<CoreStart>();
@@ -65,7 +66,7 @@ export const ManageData: FC<Props> = ({ features }) => {
                     description={feature.description}
                     iconType={feature.icon}
                     title={feature.title}
-                    url={feature.path}
+                    url={addBasePath(feature.path)}
                     wrapInPanel
                   />
                 </RedirectAppLinks>

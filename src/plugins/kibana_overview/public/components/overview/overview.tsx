@@ -107,7 +107,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
         <RedirectAppLinks application={application}>
           <EuiCard
             description={app?.subtitle || ''}
-            href={app.path}
+            href={addBasePath(app.path)}
             image={addBasePath(
               `/plugins/${PLUGIN_ID}/assets/kibana_${appId}_${IS_DARK_THEME ? 'dark' : 'light'}.svg`
             )}
@@ -127,6 +127,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   return (
     <main aria-labelledby="kbnOverviewPageHeader__title" className="kbnOverviewWrapper">
       <OverviewPageHeader
+        addBasePath={addBasePath}
         hideToolbar={isNewKibanaInstance}
         iconType="logoKibana"
         title={<FormattedMessage defaultMessage="Kibana" id="kibanaOverview.header.title" />}
@@ -207,7 +208,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
                             <EuiCard
                               className="kbnOverviewSolution"
                               description={description ? description : ''}
-                              href={path}
+                              href={addBasePath(path)}
                               icon={
                                 <EuiToken
                                   className="kbnOverviewSolution__icon"
@@ -236,11 +237,11 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
                     }`}
                   >
                     <EuiFlexItem>
-                      <AddData features={addDataFeatures} />
+                      <AddData addBasePath={addBasePath} features={addDataFeatures} />
                     </EuiFlexItem>
 
                     <EuiFlexItem>
-                      <ManageData features={manageDataFeatures} />
+                      <ManageData addBasePath={addBasePath} features={manageDataFeatures} />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 )}
@@ -251,7 +252,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
 
         <EuiHorizontalRule margin="xl" aria-hidden="true" />
 
-        <OverviewPageFooter path={PLUGIN_PATH} />
+        <OverviewPageFooter addBasePath={addBasePath} path={PLUGIN_PATH} />
       </div>
     </main>
   );

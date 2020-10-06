@@ -66,14 +66,18 @@ const mockFeatures = [
   },
 ];
 
+const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
+
 describe('ManageData', () => {
   test('render', () => {
-    const component = shallowWithIntl(<ManageData features={mockFeatures} />);
+    const component = shallowWithIntl(
+      <ManageData addBasePath={addBasePathMock} features={mockFeatures} />
+    );
     expect(component).toMatchSnapshot();
   });
 
   test('render empty without any features', () => {
-    const component = shallowWithIntl(<ManageData features={[]} />);
+    const component = shallowWithIntl(<ManageData addBasePath={addBasePathMock} features={[]} />);
     expect(component).toMatchSnapshot();
   });
 });

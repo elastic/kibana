@@ -6,6 +6,70 @@ exports[`Overview render 1`] = `
   className="kbnOverviewWrapper"
 >
   <mockConstructor
+    addBasePath={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            "kibana_landing_page",
+          ],
+          Array [
+            "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-two",
+          ],
+          Array [
+            "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-three",
+          ],
+          Array [
+            "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-four",
+          ],
+          Array [
+            "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": "kibana_landing_page",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-two",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-three",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-four",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+          },
+        ],
+      }
+    }
     hideToolbar={false}
     iconType="logoKibana"
     title={
@@ -230,6 +294,70 @@ exports[`Overview render 1`] = `
       margin="xl"
     />
     <mockConstructor
+      addBasePath={
+        [MockFunction] {
+          "calls": Array [
+            Array [
+              "kibana_landing_page",
+            ],
+            Array [
+              "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-two",
+            ],
+            Array [
+              "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-three",
+            ],
+            Array [
+              "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-four",
+            ],
+            Array [
+              "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": "kibana_landing_page",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-two",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-three",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-four",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+            },
+          ],
+        }
+      }
       path="/app/kibana_overview"
     />
   </div>
@@ -242,6 +370,126 @@ exports[`Overview without features 1`] = `
   className="kbnOverviewWrapper"
 >
   <mockConstructor
+    addBasePath={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            "kibana_landing_page",
+          ],
+          Array [
+            "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-two",
+          ],
+          Array [
+            "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-three",
+          ],
+          Array [
+            "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-four",
+          ],
+          Array [
+            "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+          ],
+          Array [
+            "kibana_landing_page",
+          ],
+          Array [
+            "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-two",
+          ],
+          Array [
+            "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-three",
+          ],
+          Array [
+            "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-four",
+          ],
+          Array [
+            "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": "kibana_landing_page",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-two",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-three",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-four",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "kibana_landing_page",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-two",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-three",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-four",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+          },
+        ],
+      }
+    }
     hideToolbar={false}
     iconType="logoKibana"
     title={
@@ -466,6 +714,126 @@ exports[`Overview without features 1`] = `
       margin="xl"
     />
     <mockConstructor
+      addBasePath={
+        [MockFunction] {
+          "calls": Array [
+            Array [
+              "kibana_landing_page",
+            ],
+            Array [
+              "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-two",
+            ],
+            Array [
+              "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-three",
+            ],
+            Array [
+              "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-four",
+            ],
+            Array [
+              "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+            ],
+            Array [
+              "kibana_landing_page",
+            ],
+            Array [
+              "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-two",
+            ],
+            Array [
+              "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-three",
+            ],
+            Array [
+              "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-four",
+            ],
+            Array [
+              "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": "kibana_landing_page",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-two",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-three",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-four",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "kibana_landing_page",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-two",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-three",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-four",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+            },
+          ],
+        }
+      }
       path="/app/kibana_overview"
     />
   </div>
@@ -478,6 +846,70 @@ exports[`Overview without solutions 1`] = `
   className="kbnOverviewWrapper"
 >
   <mockConstructor
+    addBasePath={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            "kibana_landing_page",
+          ],
+          Array [
+            "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-two",
+          ],
+          Array [
+            "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-three",
+          ],
+          Array [
+            "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-four",
+          ],
+          Array [
+            "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": "kibana_landing_page",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-two",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-three",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-four",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+          },
+        ],
+      }
+    }
     hideToolbar={false}
     iconType="logoKibana"
     title={
@@ -575,11 +1007,139 @@ exports[`Overview without solutions 1`] = `
         >
           <EuiFlexItem>
             <AddData
+              addBasePath={
+                [MockFunction] {
+                  "calls": Array [
+                    Array [
+                      "kibana_landing_page",
+                    ],
+                    Array [
+                      "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-two",
+                    ],
+                    Array [
+                      "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-three",
+                    ],
+                    Array [
+                      "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-four",
+                    ],
+                    Array [
+                      "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+                    ],
+                  ],
+                  "results": Array [
+                    Object {
+                      "type": "return",
+                      "value": "kibana_landing_page",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-two",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-three",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-four",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+                    },
+                  ],
+                }
+              }
               features={Array []}
             />
           </EuiFlexItem>
           <EuiFlexItem>
             <ManageData
+              addBasePath={
+                [MockFunction] {
+                  "calls": Array [
+                    Array [
+                      "kibana_landing_page",
+                    ],
+                    Array [
+                      "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-two",
+                    ],
+                    Array [
+                      "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-three",
+                    ],
+                    Array [
+                      "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-four",
+                    ],
+                    Array [
+                      "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+                    ],
+                  ],
+                  "results": Array [
+                    Object {
+                      "type": "return",
+                      "value": "kibana_landing_page",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-two",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-three",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-four",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+                    },
+                  ],
+                }
+              }
               features={Array []}
             />
           </EuiFlexItem>
@@ -591,6 +1151,70 @@ exports[`Overview without solutions 1`] = `
       margin="xl"
     />
     <mockConstructor
+      addBasePath={
+        [MockFunction] {
+          "calls": Array [
+            Array [
+              "kibana_landing_page",
+            ],
+            Array [
+              "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-two",
+            ],
+            Array [
+              "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-three",
+            ],
+            Array [
+              "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-four",
+            ],
+            Array [
+              "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": "kibana_landing_page",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-two",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-three",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-four",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+            },
+          ],
+        }
+      }
       path="/app/kibana_overview"
     />
   </div>

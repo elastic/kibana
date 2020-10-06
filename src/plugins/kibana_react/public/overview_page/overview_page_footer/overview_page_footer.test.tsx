@@ -40,9 +40,13 @@ jest.mock('../../ui_settings', () => ({
 
 afterEach(() => jest.clearAllMocks());
 
+const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
+
 describe('OverviewPageFooter', () => {
   test('render', () => {
-    const component = shallowWithIntl(<OverviewPageFooter path="new-default-route" />);
+    const component = shallowWithIntl(
+      <OverviewPageFooter addBasePath={addBasePathMock} path="new-default-route" />
+    );
     expect(component).toMatchSnapshot();
   });
 });

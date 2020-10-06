@@ -37,10 +37,13 @@ jest.mock('../../context', () => ({
 afterAll(() => jest.clearAllMocks());
 
 const mockTitle = 'Page Title';
+const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
 
 describe('OverviewPageHeader', () => {
   test('render', () => {
-    const component = shallowWithIntl(<OverviewPageHeader title={mockTitle} />);
+    const component = shallowWithIntl(
+      <OverviewPageHeader addBasePath={addBasePathMock} title={mockTitle} />
+    );
     expect(component).toMatchSnapshot();
   });
 });

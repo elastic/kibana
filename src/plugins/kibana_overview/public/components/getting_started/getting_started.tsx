@@ -100,7 +100,11 @@ export const GettingStarted: FC<Props> = ({ addBasePath, isDarkTheme, apps }) =>
             <EuiSpacer size="xl" />
 
             <RedirectAppLinks application={application}>
-              <EuiButton fill iconType="indexOpen" href={'/app/management/kibana/indexPatterns'}>
+              <EuiButton
+                fill
+                iconType="indexOpen"
+                href={addBasePath('/app/management/kibana/indexPatterns')}
+              >
                 <FormattedMessage
                   defaultMessage="Add your data"
                   id="kibanaOverview.gettingStarted.addDataButtonLabel"

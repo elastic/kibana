@@ -55,9 +55,13 @@ const mockFeatures = [
   },
 ];
 
+const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
+
 describe('AddData', () => {
   test('render', () => {
-    const component = shallowWithIntl(<AddData features={mockFeatures} />);
+    const component = shallowWithIntl(
+      <AddData addBasePath={addBasePathMock} features={mockFeatures} />
+    );
     expect(component).toMatchSnapshot();
   });
 });

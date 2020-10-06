@@ -27,11 +27,12 @@ import { useKibana } from '../../context';
 import { useUiSetting$ } from '../../ui_settings';
 
 interface Props {
+  addBasePath: (path: string) => string;
   /** The path to set as the new default route in advanced settings */
   path: string;
 }
 
-export const OverviewPageFooter: FC<Props> = ({ path }) => {
+export const OverviewPageFooter: FC<Props> = ({ addBasePath, path }) => {
   const [defaultRoute, setDefaultRoute] = useUiSetting$<string>('defaultRoute');
   const {
     services: {
@@ -49,7 +50,7 @@ export const OverviewPageFooter: FC<Props> = ({ path }) => {
         <EuiButtonEmpty
           className="kbnOverviewPageFooter__button"
           flush="both"
-          href={'/app/management/kibana/settings#defaultRoute'}
+          href={addBasePath('/app/management/kibana/settings#defaultRoute')}
           iconType="home"
           size="xs"
         >
@@ -95,7 +96,7 @@ export const OverviewPageFooter: FC<Props> = ({ path }) => {
                 className="kbnOverviewPageFooter__button"
                 data-test-subj="allPlugins"
                 flush="both"
-                href="/app/home#/feature_directory"
+                href={addBasePath('/app/home#/feature_directory')}
                 iconType="apps"
                 size="xs"
               >

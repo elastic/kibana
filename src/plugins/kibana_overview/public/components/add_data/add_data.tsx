@@ -28,10 +28,11 @@ import { FeatureCatalogueEntry } from '../../../../../../src/plugins/home/public
 import { Synopsis } from '../synopsis';
 
 interface Props {
+  addBasePath: (path: string) => string;
   features: FeatureCatalogueEntry[];
 }
 
-export const AddData: FC<Props> = ({ features }) => {
+export const AddData: FC<Props> = ({ addBasePath, features }) => {
   const {
     services: { application },
   } = useKibana<CoreStart>();
@@ -55,7 +56,7 @@ export const AddData: FC<Props> = ({ features }) => {
             <EuiButtonEmpty
               className="kbnOverviewDataAdd__actionButton"
               flush="left"
-              href="#/tutorial_directory/sampleData"
+              href={addBasePath('#/tutorial_directory/sampleData')}
               iconType="visTable"
               size="xs"
             >
@@ -79,7 +80,7 @@ export const AddData: FC<Props> = ({ features }) => {
                 description={feature.description}
                 iconType={feature.icon}
                 title={feature.title}
-                url={feature.path}
+                url={addBasePath(feature.path)}
                 wrapInPanel
               />
             </RedirectAppLinks>
@@ -91,6 +92,7 @@ export const AddData: FC<Props> = ({ features }) => {
 };
 
 AddData.propTypes = {
+  addBasePath: PropTypes.func.isRequired,
   features: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,

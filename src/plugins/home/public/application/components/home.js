@@ -137,6 +137,7 @@ export class Home extends Component {
         data-test-subj="homeApp"
       >
         <OverviewPageHeader
+          addBasePath={addBasePath}
           overlap={solutions.length}
           showDevToolsLink
           showManagementLink
@@ -170,7 +171,7 @@ export class Home extends Component {
 
           <EuiHorizontalRule margin="xl" aria-hidden="true" />
 
-          <OverviewPageFooter path={HOME_APP_BASE_PATH} />
+          <OverviewPageFooter addBasePath={addBasePath} path={HOME_APP_BASE_PATH} />
         </div>
       </main>
     );
