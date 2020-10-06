@@ -14,6 +14,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('dashboard/async_search');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
+      await kibanaServer.uiSettings.replace({ 'search:timeout': 10000 });
     });
 
     after(async () => {

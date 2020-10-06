@@ -16,18 +16,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.gotoDashboardEditMode('Not Delayed');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.missingOrFail('embeddableErrorMessage');
+      await testSubjects.missingOrFail('embeddableErrorLabel');
       const data = await PageObjects.visChart.getBarChartData('Sum of bytes');
       expect(data.length).to.be(5);
     });
 
     it('delayed should load', async () => {
       await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.gotoDashboardEditMode('Delayed');
+      await PageObjects.dashboard.gotoDashboardEditMode('Delayed 5s');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.missingOrFail('embeddableErrorMessage');
+      await testSubjects.missingOrFail('embeddableErrorLabel');
       const data = await PageObjects.visChart.getBarChartData('');
       expect(data.length).to.be(5);
+    });
+
+    it('timed out should show error', async () => {
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.gotoDashboardEditMode('Delayed 15s');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('embeddableErrorLabel');
+      await testSubjects.existOrFail('searchTimeoutError');
     });
   });
 }
