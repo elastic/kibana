@@ -15,7 +15,7 @@ addDecorator((storyFn) => (
   <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
 ));
 
-storiesOf('Components|ConditionsTable', module)
+storiesOf('Components/ConditionsTable', module)
   .add('single item', () => {
     return <ConditionsTable items={createItems(1)} columns={TEST_COLUMNS} badge="and" />;
   })

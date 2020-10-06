@@ -10,7 +10,7 @@ export interface IngestManagerConfigType {
   enabled: boolean;
   registryUrl?: string;
   registryProxyUrl?: string;
-  fleet: {
+  agents: {
     enabled: boolean;
     tlsCheckDisabled: boolean;
     pollingRequestTimeout: number;
