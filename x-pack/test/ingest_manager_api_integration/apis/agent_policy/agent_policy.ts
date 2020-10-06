@@ -217,6 +217,14 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(409);
 
         expect(body.message).to.match(/already exists?/);
+
+        // same name, different namespace
+        sharedBody.namespace = 'different';
+        await supertest
+          .post(`/api/ingest_manager/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(sharedBody)
+          .expect(200);
       });
     });
   });
