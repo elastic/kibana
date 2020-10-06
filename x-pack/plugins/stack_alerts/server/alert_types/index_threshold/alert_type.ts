@@ -10,7 +10,7 @@ import { Params, ParamsSchema } from './alert_type_params';
 import { ActionContext, BaseActionContext, addMessages } from './action_context';
 import { TimeSeriesQuery } from './lib/time_series_query';
 import { Service } from '../../types';
-import { BUILT_IN_ALERTS_FEATURE_ID } from '../../../common';
+import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 
 export const ID = '.index-threshold';
 
@@ -22,54 +22,54 @@ export const ComparatorFnNames = new Set(ComparatorFns.keys());
 export function getAlertType(service: Service): AlertType<Params, {}, {}, ActionContext> {
   const { logger } = service;
 
-  const alertTypeName = i18n.translate('xpack.alertingBuiltins.indexThreshold.alertTypeTitle', {
+  const alertTypeName = i18n.translate('xpack.stackAlerts.indexThreshold.alertTypeTitle', {
     defaultMessage: 'Index threshold',
   });
 
   const actionGroupName = i18n.translate(
-    'xpack.alertingBuiltins.indexThreshold.actionGroupThresholdMetTitle',
+    'xpack.stackAlerts.indexThreshold.actionGroupThresholdMetTitle',
     {
       defaultMessage: 'Threshold Met',
     }
   );
 
   const actionVariableContextGroupLabel = i18n.translate(
-    'xpack.alertingBuiltins.indexThreshold.actionVariableContextGroupLabel',
+    'xpack.stackAlerts.indexThreshold.actionVariableContextGroupLabel',
     {
       defaultMessage: 'The group that exceeded the threshold.',
     }
   );
 
   const actionVariableContextDateLabel = i18n.translate(
-    'xpack.alertingBuiltins.indexThreshold.actionVariableContextDateLabel',
+    'xpack.stackAlerts.indexThreshold.actionVariableContextDateLabel',
     {
       defaultMessage: 'The date the alert exceeded the threshold.',
     }
   );
 
   const actionVariableContextValueLabel = i18n.translate(
-    'xpack.alertingBuiltins.indexThreshold.actionVariableContextValueLabel',
+    'xpack.stackAlerts.indexThreshold.actionVariableContextValueLabel',
     {
       defaultMessage: 'The value that exceeded the threshold.',
     }
   );
 
   const actionVariableContextMessageLabel = i18n.translate(
-    'xpack.alertingBuiltins.indexThreshold.actionVariableContextMessageLabel',
+    'xpack.stackAlerts.indexThreshold.actionVariableContextMessageLabel',
     {
       defaultMessage: 'A pre-constructed message for the alert.',
     }
   );
 
   const actionVariableContextTitleLabel = i18n.translate(
-    'xpack.alertingBuiltins.indexThreshold.actionVariableContextTitleLabel',
+    'xpack.stackAlerts.indexThreshold.actionVariableContextTitleLabel',
     {
       defaultMessage: 'A pre-constructed title for the alert.',
     }
   );
 
   const actionVariableContextThresholdLabel = i18n.translate(
-    'xpack.alertingBuiltins.indexThreshold.actionVariableContextThresholdLabel',
+    'xpack.stackAlerts.indexThreshold.actionVariableContextThresholdLabel',
     {
       defaultMessage:
         "An array of values to use as the threshold; 'between' and 'notBetween' require two values, the others require one.",
@@ -77,7 +77,7 @@ export function getAlertType(service: Service): AlertType<Params, {}, {}, Action
   );
 
   const actionVariableContextThresholdComparatorLabel = i18n.translate(
-    'xpack.alertingBuiltins.indexThreshold.actionVariableContextThresholdComparatorLabel',
+    'xpack.stackAlerts.indexThreshold.actionVariableContextThresholdComparatorLabel',
     {
       defaultMessage: 'A comparison function to use to determine if the threshold as been met.',
     }
@@ -115,7 +115,7 @@ export function getAlertType(service: Service): AlertType<Params, {}, {}, Action
       ],
     },
     executor,
-    producer: BUILT_IN_ALERTS_FEATURE_ID,
+    producer: STACK_ALERTS_FEATURE_ID,
   };
 
   async function executor(options: AlertExecutorOptions<Params, {}, {}, ActionContext>) {
@@ -174,7 +174,7 @@ export function getAlertType(service: Service): AlertType<Params, {}, {}, Action
 }
 
 export function getInvalidComparatorMessage(comparator: string) {
-  return i18n.translate('xpack.alertingBuiltins.indexThreshold.invalidComparatorErrorMessage', {
+  return i18n.translate('xpack.stackAlerts.indexThreshold.invalidComparatorErrorMessage', {
     defaultMessage: 'invalid thresholdComparator specified: {comparator}',
     values: {
       comparator,
