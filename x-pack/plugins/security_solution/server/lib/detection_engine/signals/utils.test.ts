@@ -45,6 +45,7 @@ import {
   sampleEmptyDocSearchResults,
   sampleDocSearchResultsNoSortIdNoHits,
   repeatedSearchResultsWithSortId,
+  sampleDocSearchResultsNoSortId,
 } from './__mocks__/es_results';
 import { ShardError } from '../../types';
 
@@ -966,6 +967,20 @@ describe('utils', () => {
       searchResult._shards.failed = 0;
       const { success } = createSearchAfterReturnTypeFromResponse({ searchResult });
       expect(success).toEqual(true);
+    });
+
+    test('It will not set an invalid date time stamp from a non-existent @timestamp when the index is not 100% ECS compliant', () => {
+      const searchResult = sampleDocSearchResultsNoSortId();
+      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = undefined;
+      const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({ searchResult });
+      expect(lastLookBackDate).toEqual(null);
+    });
+
+    test('It will not set an invalid date time stamp from a null @timestamp when the index is not 100% ECS compliant', () => {
+      const searchResult = sampleDocSearchResultsNoSortId();
+      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = null;
+      const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({ searchResult });
+      expect(lastLookBackDate).toEqual(null);
     });
   });
 

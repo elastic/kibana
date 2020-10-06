@@ -522,8 +522,9 @@ export const createSearchAfterReturnTypeFromResponse = ({
   return createSearchAfterReturnType({
     success: searchResult._shards.failed === 0,
     lastLookBackDate:
-      searchResult.hits.hits.length > 0
-        ? new Date(searchResult.hits.hits[searchResult.hits.hits.length - 1]?._source['@timestamp'])
+      searchResult.hits.hits.length > 0 &&
+      searchResult.hits.hits[searchResult.hits.hits.length - 1]?._source['@timestamp'] != null
+        ? new Date(searchResult.hits.hits[searchResult.hits.hits.length - 1]._source['@timestamp'])
         : undefined,
   });
 };

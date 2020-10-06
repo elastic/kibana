@@ -544,5 +544,23 @@ describe('rules_notification_alert_type', () => {
       expect(logger.error.mock.calls[0][0]).toContain('An error occurred during rule execution');
       expect(ruleStatusService.error).toHaveBeenCalled();
     });
+
+    it('should not do throws when the date time is "invalid"', async () => {
+      const result: SearchAfterAndBulkCreateReturnType = {
+        success: false,
+        searchAfterTimes: [],
+        bulkCreateTimes: [],
+        lastLookBackDate: new Date('undefined'), // This will do a throw if you do new Date('undefined').toISOString() and we can get this from the alerting froma
+        createdSignalsCount: 0,
+        errors: ['Error that bubbled up.'],
+      };
+      (searchAfterAndBulkCreate as jest.Mock).mockResolvedValue(result);
+      await alert.executor(payload);
+      expect(logger.error).toHaveBeenCalled();
+      expect(logger.error.mock.calls[0][0]).toContain(
+        'Bulk Indexing of signals failed: Error that bubbled up. name: "Detect Root/Admin Users" id: "04128c15-0d1b-4716-a4c5-46997ac7f3bd" rule id: "rule-1" signals index: ".siem-signals"'
+      );
+      expect(ruleStatusService.error).toHaveBeenCalled();
+    });
   });
 });
