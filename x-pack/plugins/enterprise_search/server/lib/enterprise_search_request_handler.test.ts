@@ -116,14 +116,14 @@ describe('EnterpriseSearchRequestHandler', () => {
         );
       });
 
-      it('will correctly encode query string parameters', async () => {
+      it('correctly encodes paths and query string parameters', async () => {
         const requestHandler = enterpriseSearchRequestHandler.createRequest({
-          path: '/api/example',
+          path: '/api/some example',
         });
         await makeAPICall(requestHandler, { query: { 'page[current]': 1 } });
 
         EnterpriseSearchAPI.shouldHaveBeenCalledWith(
-          'http://localhost:3002/api/example?page%5Bcurrent%5D=1'
+          'http://localhost:3002/api/some%20example?page%5Bcurrent%5D=1'
         );
       });
     });
