@@ -127,7 +127,7 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
           const path = `${type}${id ? `/${id}` : ''}`;
           const requestBody = {
             attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-            ...(initialNamespaces && { namespaces: initialNamespaces }),
+            ...(initialNamespaces && { initialNamespaces }),
           };
           const query = test.overwrite ? '?overwrite=true' : '';
           await supertest
