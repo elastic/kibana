@@ -72,6 +72,7 @@ const createInstance = async () => {
       embeddable: embeddablePluginMock.createStartContract(),
       dashboard: dashboardPluginMock.createStartContract(),
       getAttributeService: jest.fn(),
+      savedObjectsClient: coreMock.createStart().savedObjects.client,
     });
 
   return {
