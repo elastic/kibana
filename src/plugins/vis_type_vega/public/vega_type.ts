@@ -27,7 +27,7 @@ import { createVegaRequestHandler } from './vega_request_handler';
 import { createVegaVisualization } from './vega_visualization';
 import { getDefaultSpec } from './default_spec';
 import { createInspectorAdapters } from './vega_inspector';
-import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
+import { VIS_EVENT_TO_TRIGGER, VisGroups } from '../../visualizations/public';
 
 import { getInfoMessage } from './components/experimental_map_vis_info';
 
@@ -45,7 +45,7 @@ export const createVegaTypeDefinition = (dependencies: VegaVisualizationDependen
       description: 'Vega and Vega-Lite are product names and should not be translated',
     }),
     icon: 'visVega',
-    group: 'other',
+    group: VisGroups.OTHER,
     visConfig: { defaults: { spec: getDefaultSpec() } },
     editorConfig: {
       optionsTemplate: VegaVisEditor,

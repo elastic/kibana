@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { TypesStart, VisType } from '../vis_types';
+import { TypesStart, VisType, VisGroups } from '../vis_types';
 import { NewVisModal } from './new_vis_modal';
 import { ApplicationStart, SavedObjectsStart, DocLinksStart } from '../../../../core/public';
 import { embeddablePluginMock } from '../../../embeddable/public/mocks';
@@ -81,7 +81,8 @@ describe('NewVisModal', () => {
       return _visTypes as VisType[];
     },
     getAliases: () => [],
-    getByGroup: (group: string) => {
+    unRegisterAlias: () => [],
+    getByGroup: (group: VisGroups) => {
       return _visTypes.filter((type) => {
         return type.group === group;
       }) as VisType[];

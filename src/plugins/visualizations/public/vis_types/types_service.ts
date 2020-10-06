@@ -19,7 +19,7 @@
 
 import { IconType } from '@elastic/eui';
 import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
-import { BaseVisType, BaseVisTypeOptions } from './base_vis_type';
+import { BaseVisType, BaseVisTypeOptions, VisGroups } from './base_vis_type';
 import { ReactVisType, ReactVisTypeOptions } from './react_vis_type';
 import { TriggerContextMapping } from '../../../ui_actions/public';
 
@@ -132,9 +132,9 @@ export class TypesService {
       unRegisterAlias: visTypeAliasRegistry.remove,
       /**
        * returns all visualizations of specific group
-       * @param {string} group - group type (aggbased | other | tools)
+       * @param {VisGroups} group - group type (aggbased | other | tools)
        */
-      getByGroup: (group: string) => {
+      getByGroup: (group: VisGroups) => {
         return [...Object.values(this.types)].filter((type) => {
           return type.group === group;
         });

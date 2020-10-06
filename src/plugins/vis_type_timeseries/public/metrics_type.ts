@@ -25,7 +25,7 @@ import { EditorController } from './application';
 // @ts-ignore
 import { PANEL_TYPES } from '../common/panel_types';
 import { VisEditor } from './application/components/vis_editor_lazy';
-import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
+import { VIS_EVENT_TO_TRIGGER, VisGroups } from '../../visualizations/public';
 
 export const metricsVisDefinition = {
   name: 'metrics',
@@ -35,7 +35,7 @@ export const metricsVisDefinition = {
       'Advanced time series editor that allows user to use complex calculations and add annotations.',
   }),
   icon: 'visVisualBuilder',
-  group: 'other',
+  group: VisGroups.OTHER,
   visConfig: {
     defaults: {
       id: '61ca57f0-469d-11e7-af02-69e470af7417',

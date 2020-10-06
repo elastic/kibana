@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { TypesStart, VisType } from '../../vis_types';
+import { TypesStart, VisType, VisGroups } from '../../vis_types';
 import { AggBasedSelection } from './agg_based_selection';
 
 describe('AggBasedSelection', () => {
@@ -80,7 +80,8 @@ describe('AggBasedSelection', () => {
       return _visTypes as VisType[];
     },
     getAliases: () => [],
-    getByGroup: (group: string) => {
+    unRegisterAlias: () => [],
+    getByGroup: (group: VisGroups) => {
       return _visTypes.filter((type) => {
         return type.group === group;
       }) as VisType[];

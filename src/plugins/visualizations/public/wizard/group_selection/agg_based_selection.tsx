@@ -38,7 +38,7 @@ import {
 
 import { memoizeLast } from '../../legacy/memoize';
 import { VisTypeAlias } from '../../vis_types/vis_type_alias_registry';
-import { VisType, TypesStart } from '../../vis_types';
+import { VisType, TypesStart, VisGroups } from '../../vis_types';
 
 export interface VisTypeListEntry extends VisType {
   highlighted: boolean;
@@ -136,7 +136,7 @@ class AggBasedSelection extends React.Component<AggBasedSelectionProps, AggBased
     visTypes: TypesStart,
     query: string
   ): Array<VisTypeListEntry | VisTypeAliasListEntry> {
-    const types = visTypes.getByGroup('aggbased').filter((type) => {
+    const types = visTypes.getByGroup(VisGroups.AGGBASED).filter((type) => {
       // Filter out all lab visualizations if lab mode is not enabled
       if (!this.props.showExperimental && type.stage === 'experimental') {
         return false;

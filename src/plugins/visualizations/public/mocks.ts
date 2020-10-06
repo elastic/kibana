@@ -40,6 +40,8 @@ const createStartContract = (): VisualizationsStart => ({
   get: jest.fn(),
   all: jest.fn(),
   getAliases: jest.fn(),
+  getByGroup: jest.fn(),
+  unRegisterAlias: jest.fn(),
   savedVisualizationsLoader: {
     get: jest.fn(),
   } as any,

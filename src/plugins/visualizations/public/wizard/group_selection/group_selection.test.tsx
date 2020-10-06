@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { TypesStart, VisType } from '../../vis_types';
+import { TypesStart, VisType, VisGroups } from '../../vis_types';
 import { GroupSelection } from './group_selection';
 import { DocLinksStart } from '../../../../../core/public';
 
@@ -68,7 +68,8 @@ describe('GroupSelection', () => {
         return visTypes as VisType[];
       },
       getAliases: () => [],
-      getByGroup: (group: string) => {
+      unRegisterAlias: () => [],
+      getByGroup: (group: VisGroups) => {
         return visTypes.filter((type) => {
           return type.group === group;
         }) as VisType[];

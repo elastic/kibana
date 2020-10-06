@@ -35,7 +35,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { DocLinksStart } from '../../../../../core/public';
 import { VisTypeAlias } from '../../vis_types/vis_type_alias_registry';
-import { VisType, TypesStart } from '../../vis_types';
+import { VisType, TypesStart, VisGroups } from '../../vis_types';
 
 interface GroupSelectionProps {
   onVisTypeSelected: (visType: VisType | VisTypeAlias) => void;
@@ -74,7 +74,7 @@ function GroupSelection(props: GroupSelectionProps) {
         </EuiFlexGroup>
         <EuiSpacer />
         <EuiFlexGroup gutterSize="l">
-          {orderBy(props.visTypesRegistry.getByGroup('other'), ['title', ['asc']]).map(
+          {orderBy(props.visTypesRegistry.getByGroup(VisGroups.OTHER), ['title', ['asc']]).map(
             (visType) => (
               <VisGroup
                 visType={visType}
@@ -87,7 +87,7 @@ function GroupSelection(props: GroupSelectionProps) {
         <EuiSpacer size="xl" />
         <EuiSpacer size="xl" />
         <EuiFlexGroup gutterSize="l">
-          {props.visTypesRegistry.getByGroup('aggbased').length > 0 && (
+          {props.visTypesRegistry.getByGroup(VisGroups.AGGBASED).length > 0 && (
             <EuiFlexItem>
               <EuiCard
                 titleSize="xs"
@@ -122,7 +122,7 @@ function GroupSelection(props: GroupSelectionProps) {
               </EuiCard>
             </EuiFlexItem>
           )}
-          {props.visTypesRegistry.getByGroup('tools').length > 0 && (
+          {props.visTypesRegistry.getByGroup(VisGroups.TOOLS).length > 0 && (
             <EuiFlexItem>
               <EuiCard
                 titleSize="xs"
@@ -138,7 +138,7 @@ function GroupSelection(props: GroupSelectionProps) {
                 description=""
                 className="visNewVisDialog__toolsCard"
               >
-                {props.visTypesRegistry.getByGroup('tools').map((visType) => (
+                {props.visTypesRegistry.getByGroup(VisGroups.TOOLS).map((visType) => (
                   <ToolsGroup
                     visType={visType}
                     key={visType.name}

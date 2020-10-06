@@ -24,6 +24,12 @@ import { TriggerContextMapping } from '../../../ui_actions/public';
 import { Adapters } from '../../../inspector/public';
 import { Vis } from '../vis';
 
+export enum VisGroups {
+  OTHER = 'other',
+  TOOLS = 'tools',
+  AGGBASED = 'aggbased',
+}
+
 interface CommonBaseVisTypeOptions {
   name: string;
   title: string;
@@ -32,7 +38,7 @@ interface CommonBaseVisTypeOptions {
   icon?: string;
   image?: string;
   stage?: 'experimental' | 'beta' | 'production';
-  group?: 'tools' | 'aggbased' | 'other';
+  group?: VisGroups.TOOLS | VisGroups.AGGBASED | VisGroups.OTHER;
   options?: Record<string, any>;
   visConfig?: Record<string, any>;
   editor?: any;
@@ -70,7 +76,7 @@ export class BaseVisType<TVisParams = VisParams> {
   icon?: string;
   image?: string;
   stage: 'experimental' | 'beta' | 'production';
-  group?: 'tools' | 'aggbased' | 'other';
+  group?: VisGroups.TOOLS | VisGroups.AGGBASED | VisGroups.OTHER;
   isExperimental: boolean;
   options: Record<string, any>;
   visualization: VisualizationControllerConstructor | undefined;
@@ -114,7 +120,7 @@ export class BaseVisType<TVisParams = VisParams> {
     this.editorConfig = _.defaultsDeep({}, opts.editorConfig, { collections: {} });
     this.options = _.defaultsDeep({}, opts.options, defaultOptions);
     this.stage = opts.stage || 'production';
-    this.group = opts.group || 'aggbased';
+    this.group = opts.group || VisGroups.AGGBASED;
     this.isExperimental = opts.stage === 'experimental';
     this.hidden = opts.hidden || false;
     this.requestHandler = opts.requestHandler || 'courier';
