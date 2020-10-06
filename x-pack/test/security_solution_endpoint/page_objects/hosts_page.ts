@@ -110,7 +110,7 @@ export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrPro
     /**
      * Runs Nodes Events
      */
-    async runNodeEvents() {
+    async runNodeEvents(expectedData: string[]) {
       await testSubjects.exists('resolver:submenu:button', { timeout: 400 });
       const NodeSubmenuButtons = await testSubjects.findAll('resolver:submenu:button');
       for (let b = 0; b < NodeSubmenuButtons.length; b++) {
@@ -121,10 +121,11 @@ export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrPro
       for (let i = 0; i < NodeSubmenuItems.length; i++) {
         await (await testSubjects.findAll('resolver:map:node-submenu-item'))[i].click();
         const Events = await testSubjects.findAll('resolver:map:node-submenu-item');
-        const EventText = await Events[i]._webElement.getText();
+        const EventName = await Events[i]._webElement.getText();
         const LinkText = await testSubjects.find('resolver:breadcrumbs:last');
         const linkText = await LinkText._webElement.getText();
-        expect(EventText).to.equal(linkText);
+        expect(EventName).to.equal(linkText);
+        expect(EventName).to.equal(expectedData[i]);
       }
     },
     /**

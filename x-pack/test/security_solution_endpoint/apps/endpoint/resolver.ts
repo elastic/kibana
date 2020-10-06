@@ -195,11 +195,26 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('Check Child events for event.file Node', async () => {
-        await pageObjects.hosts.runNodeEvents();
+        const expectedData = [
+          '17 authentication',
+          '1 registry',
+          '17 session',
+          '8 file',
+          '1 registry',
+        ];
+        await pageObjects.hosts.runNodeEvents(expectedData);
       });
     });
 
     describe('Resolver Tree events', function () {
+      const expectedData = [
+        '17 authentication',
+        '1 registry',
+        '17 session',
+        '80 registry',
+        '8 network',
+        '60 registry',
+      ];
       before(async () => {
         await esArchiver.load('empty_kibana');
         await esArchiver.load('endpoint/resolver_tree/events', { useCreate: true });
@@ -215,7 +230,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.hosts.executeQueryAndOpenResolver(
           'event.dataset : endpoint.events.process'
         );
-        await pageObjects.hosts.runNodeEvents();
+        await pageObjects.hosts.runNodeEvents(expectedData);
       });
 
       it('Check Child events for event.security Node', async () => {
@@ -223,7 +238,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.hosts.executeQueryAndOpenResolver(
           'event.dataset : endpoint.events.security'
         );
-        await pageObjects.hosts.runNodeEvents();
+        await pageObjects.hosts.runNodeEvents(expectedData);
       });
 
       it('Check Child events for event.registry Node', async () => {
@@ -231,7 +246,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.hosts.executeQueryAndOpenResolver(
           'event.dataset : endpoint.events.registry'
         );
-        await pageObjects.hosts.runNodeEvents();
+        await pageObjects.hosts.runNodeEvents(expectedData);
       });
 
       it('Check Child events for event.network Node', async () => {
@@ -239,7 +254,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.hosts.executeQueryAndOpenResolver(
           'event.dataset : endpoint.events.network'
         );
-        await pageObjects.hosts.runNodeEvents();
+        await pageObjects.hosts.runNodeEvents(expectedData);
       });
     });
   });
