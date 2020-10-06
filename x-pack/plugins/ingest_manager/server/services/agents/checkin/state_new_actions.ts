@@ -167,6 +167,12 @@ export async function createAgentActionFromPolicyAction(
 
 function getPollingTimeoutMs() {
   const pollingTimeoutMs = appContextService.getConfig()?.fleet.pollingRequestTimeout ?? 0;
+
+  // If polling timeout is too short do not use margin
+  if (pollingTimeoutMs <= AGENT_POLLING_REQUEST_TIMEOUT_MARGIN_MS) {
+    return pollingTimeoutMs;
+  }
+
   // Set a timeout 20s before the real timeout to have a chance to respond an empty response before socket timeout
   return Math.max(
     pollingTimeoutMs - AGENT_POLLING_REQUEST_TIMEOUT_MARGIN_MS,

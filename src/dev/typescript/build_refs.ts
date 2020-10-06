@@ -38,17 +38,11 @@ async function buildRefs(log: ToolingLog, projectPath: string) {
 
 export async function runBuildRefs() {
   run(
-    async ({ log, flags }) => {
-      await buildRefs(log, flags.project as string);
+    async ({ log }) => {
+      await buildAllRefs(log);
     },
     {
       description: 'Build TypeScript projects',
-      flags: {
-        string: ['project'],
-        help: `
---project          Required, path to the tsconfig.refs.file
-        `,
-      },
     }
   );
 }

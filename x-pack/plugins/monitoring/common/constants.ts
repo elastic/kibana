@@ -236,6 +236,7 @@ export const ALERT_NODES_CHANGED = `${ALERT_PREFIX}alert_nodes_changed`;
 export const ALERT_ELASTICSEARCH_VERSION_MISMATCH = `${ALERT_PREFIX}alert_elasticsearch_version_mismatch`;
 export const ALERT_KIBANA_VERSION_MISMATCH = `${ALERT_PREFIX}alert_kibana_version_mismatch`;
 export const ALERT_LOGSTASH_VERSION_MISMATCH = `${ALERT_PREFIX}alert_logstash_version_mismatch`;
+export const ALERT_MEMORY_USAGE = `${ALERT_PREFIX}alert_jvm_memory_usage`;
 export const ALERT_MISSING_MONITORING_DATA = `${ALERT_PREFIX}alert_missing_monitoring_data`;
 export const ALERT_THREAD_POOL_REJECTIONS = `${ALERT_PREFIX}alert_thread_pool_rejections_data`;
 
@@ -251,6 +252,7 @@ export const ALERTS = [
   ALERT_ELASTICSEARCH_VERSION_MISMATCH,
   ALERT_KIBANA_VERSION_MISMATCH,
   ALERT_LOGSTASH_VERSION_MISMATCH,
+  ALERT_MEMORY_USAGE,
   ALERT_MISSING_MONITORING_DATA,
   ALERT_THREAD_POOL_REJECTIONS,
 ];

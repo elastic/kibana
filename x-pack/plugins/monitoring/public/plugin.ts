@@ -27,11 +27,12 @@ import { createMissingMonitoringDataAlertType } from './alerts/missing_monitorin
 import { createLegacyAlertTypes } from './alerts/legacy_alert';
 import { createDiskUsageAlertType } from './alerts/disk_usage_alert';
 import { createThreadPoolRejectionsAlertType } from './alerts/thread_pool_rejections_alert';
+import { createMemoryUsageAlertType } from './alerts/memory_usage_alert';
 
 interface MonitoringSetupPluginDependencies {
   home?: HomePublicPluginSetup;
   cloud?: { isCloudEnabled: boolean };
-  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   usageCollection: UsageCollectionSetup;
 }
 
@@ -73,11 +74,13 @@ export class MonitoringPlugin
       });
     }
 
-    const { alertTypeRegistry } = plugins.triggers_actions_ui;
+    const { alertTypeRegistry } = plugins.triggersActionsUi;
     alertTypeRegistry.register(createCpuUsageAlertType());
-    alertTypeRegistry.register(createMissingMonitoringDataAlertType());
     alertTypeRegistry.register(createDiskUsageAlertType());
+    alertTypeRegistry.register(createMemoryUsageAlertType());
+    alertTypeRegistry.register(createMissingMonitoringDataAlertType());
     alertTypeRegistry.register(createThreadPoolRejectionsAlertType());
+
     const legacyAlertTypes = createLegacyAlertTypes();
     for (const legacyAlertType of legacyAlertTypes) {
       alertTypeRegistry.register(legacyAlertType);
@@ -101,7 +104,7 @@ export class MonitoringPlugin
           isCloud: Boolean(plugins.cloud?.isCloudEnabled),
           pluginInitializerContext: this.initializerContext,
           externalConfig: this.getExternalConfig(),
-          triggersActionsUi: plugins.triggers_actions_ui,
+          triggersActionsUi: plugins.triggersActionsUi,
           usageCollection: plugins.usageCollection,
         };
 

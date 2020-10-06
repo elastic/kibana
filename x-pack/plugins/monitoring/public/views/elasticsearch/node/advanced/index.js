@@ -23,6 +23,7 @@ import {
   ALERT_THREAD_POOL_REJECTIONS,
   ALERT_MISSING_MONITORING_DATA,
   ALERT_DISK_USAGE,
+  ALERT_MEMORY_USAGE,
 } from '../../../../../common/constants';
 
 function getPageData($injector) {
@@ -77,6 +78,7 @@ uiRoutes.when('/elasticsearch/nodes/:node/advanced', {
               ALERT_CPU_USAGE,
               ALERT_DISK_USAGE,
               ALERT_THREAD_POOL_REJECTIONS,
+              ALERT_MEMORY_USAGE,
               ALERT_MISSING_MONITORING_DATA,
             ],
             filters: [

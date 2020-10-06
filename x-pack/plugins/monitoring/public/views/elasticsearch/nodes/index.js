@@ -22,6 +22,7 @@ import {
   ALERT_THREAD_POOL_REJECTIONS,
   ALERT_MISSING_MONITORING_DATA,
   ALERT_DISK_USAGE,
+  ALERT_MEMORY_USAGE,
 } from '../../../../common/constants';
 
 uiRoutes.when('/elasticsearch/nodes', {
@@ -93,6 +94,7 @@ uiRoutes.when('/elasticsearch/nodes', {
               ALERT_CPU_USAGE,
               ALERT_DISK_USAGE,
               ALERT_THREAD_POOL_REJECTIONS,
+              ALERT_MEMORY_USAGE,
               ALERT_MISSING_MONITORING_DATA,
             ],
             filters: [

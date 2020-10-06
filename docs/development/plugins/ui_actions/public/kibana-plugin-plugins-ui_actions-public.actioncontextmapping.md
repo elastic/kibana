@@ -17,4 +17,5 @@ export interface ActionContextMapping
 |  [""](./kibana-plugin-plugins-ui_actions-public.actioncontextmapping.__.md) | <code>BaseContext</code> |  |
 |  [ACTION\_VISUALIZE\_FIELD](./kibana-plugin-plugins-ui_actions-public.actioncontextmapping.action_visualize_field.md) | <code>VisualizeFieldContext</code> |  |
 |  [ACTION\_VISUALIZE\_GEO\_FIELD](./kibana-plugin-plugins-ui_actions-public.actioncontextmapping.action_visualize_geo_field.md) | <code>VisualizeFieldContext</code> |  |
+|  [ACTION\_VISUALIZE\_LENS\_FIELD](./kibana-plugin-plugins-ui_actions-public.actioncontextmapping.action_visualize_lens_field.md) | <code>VisualizeFieldContext</code> |  |
 

@@ -8,7 +8,7 @@
     "embeddable",
     "features",
     "licensing",
-    "triggers_actions_ui",
+    "triggersActionsUi",
     "usageCollection"
   ],
   "server": true,
