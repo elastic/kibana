@@ -19,7 +19,7 @@ import {
 import { factory as policyConfigFactory } from '../../../plugins/security_solution/common/endpoint/models/policy_config';
 import { Immutable } from '../../../plugins/security_solution/common/endpoint/types';
 
-const INGEST_API_ROOT = '/api/ingest_manager';
+const INGEST_API_ROOT = '/api/fleet';
 const INGEST_API_AGENT_POLICIES = `${INGEST_API_ROOT}/agent_policies`;
 const INGEST_API_AGENT_POLICIES_DELETE = `${INGEST_API_AGENT_POLICIES}/delete`;
 const INGEST_API_PACKAGE_POLICIES = `${INGEST_API_ROOT}/package_policies`;

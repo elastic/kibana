@@ -78,14 +78,14 @@ export function getIdentifierDeclarationFromSource(node: ts.Node, source: ts.Sou
   const identifierName = node.getText();
   const identifierDefinition: ts.Node = (source as any).locals.get(identifierName);
   if (!identifierDefinition) {
-    throw new Error(`Unable to fine identifier in source ${identifierName}`);
+    throw new Error(`Unable to find identifier in source ${identifierName}`);
   }
   const declarations = (identifierDefinition as any).declarations as ts.Node[];
 
   const latestDeclaration: ts.Node | false | undefined =
     Array.isArray(declarations) && declarations[declarations.length - 1];
   if (!latestDeclaration) {
-    throw new Error(`Unable to fine declaration for identifier ${identifierName}`);
+    throw new Error(`Unable to find declaration for identifier ${identifierName}`);
   }
 
   return latestDeclaration;
@@ -124,7 +124,9 @@ export function getVariableValue(node: ts.Node, program: ts.Program): string | R
   }
 
   throw Error(
-    `Unsupported Node: cannot get value of node (${node.getText()}) of kind ${node.kind}`
+    `Unsupported Node: cannot get value of node (${node.getText()}) of kind ${node.kind} [${
+      ts.SyntaxKind[node.kind]
+    }]`
   );
 }
 

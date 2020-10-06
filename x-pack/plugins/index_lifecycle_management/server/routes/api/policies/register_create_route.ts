@@ -55,6 +55,7 @@ const allocateSchema = schema.maybe(
 const forcemergeSchema = schema.maybe(
   schema.object({
     max_num_segments: schema.number(),
+    index_codec: schema.maybe(schema.literal('best_compression')),
   })
 );
 

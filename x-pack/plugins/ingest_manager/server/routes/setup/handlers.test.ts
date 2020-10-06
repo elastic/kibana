@@ -31,7 +31,7 @@ describe('ingestManagerSetupHandler', () => {
     response = httpServerMock.createResponseFactory();
     request = httpServerMock.createKibanaRequest({
       method: 'post',
-      path: '/api/ingest_manager/setup',
+      path: '/api/fleet/setup',
     });
     // prevents `Logger not set.` and other appContext errors
     appContextService.start(createAppContextStartContractMock());
