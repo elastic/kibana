@@ -400,9 +400,6 @@ describe('Policy serialization', () => {
           name: 'test',
           phases: {
             hot: { actions: {} },
-            warm: {
-              actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
-            },
           },
         }
       )
@@ -498,6 +495,77 @@ describe('Policy serialization', () => {
           ...coldPhaseInitialization,
         },
         delete: { ...defaultNewDeletePhase },
+      },
+    });
+  });
+
+  test('delete "best_compression" codec for forcemerge if disabled in UI', () => {
+    expect(
+      serializePolicy(
+        {
+          name: 'test',
+          phases: {
+            hot: {
+              ...defaultNewHotPhase,
+              forceMergeEnabled: true,
+              selectedForceMergeSegments: '1',
+              bestCompressionEnabled: false,
+            },
+            warm: {
+              ...defaultNewWarmPhase,
+              phaseEnabled: true,
+              forceMergeEnabled: true,
+              selectedForceMergeSegments: '1',
+              bestCompressionEnabled: false,
+            },
+            cold: {
+              ...defaultNewColdPhase,
+            },
+            delete: { ...defaultNewDeletePhase },
+          },
+        },
+        {
+          name: 'test',
+          phases: {
+            hot: { actions: {} },
+            warm: {
+              actions: {
+                forcemerge: {
+                  max_num_segments: 1,
+                  index_codec: 'best_compression',
+                },
+              },
+            },
+          },
+        }
+      )
+    ).toEqual({
+      name: 'test',
+      phases: {
+        hot: {
+          actions: {
+            rollover: {
+              max_age: '30d',
+              max_size: '50gb',
+            },
+            forcemerge: {
+              max_num_segments: 1,
+            },
+            set_priority: {
+              priority: 100,
+            },
+          },
+        },
+        warm: {
+          actions: {
+            forcemerge: {
+              max_num_segments: 1,
+            },
+            set_priority: {
+              priority: 50,
+            },
+          },
+        },
       },
     });
   });
