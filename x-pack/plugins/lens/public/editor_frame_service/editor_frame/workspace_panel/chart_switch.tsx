@@ -12,9 +12,14 @@ import {
   EuiPopoverTitle,
   EuiKeyPadMenu,
   EuiKeyPadMenuItem,
+  EuiFieldSearch,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSelectableMessage,
 } from '@elastic/eui';
 import { flatten } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { Visualization, FramePublicAPI, Datasource } from '../../../types';
 import { Action } from '../state_management';
 import { getSuggestions, switchToSuggestion, Suggestion } from '../suggestion_helpers';
@@ -173,6 +178,8 @@ export function ChartSwitch(props: Props) {
     };
   }
 
+  const [searchTerm, setSearchTerm] = useState('');
+
   const visualizationTypes = useMemo(
     () =>
       flyoutOpen &&
@@ -184,10 +191,17 @@ export function ChartSwitch(props: Props) {
             icon: t.icon,
           }))
         )
-      ).map((visualizationType) => ({
-        ...visualizationType,
-        selection: getSelection(visualizationType.visualizationId, visualizationType.id),
-      })),
+      )
+        .filter(
+          (visualizationType) =>
+            visualizationType.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (visualizationType.fullLabel &&
+              visualizationType.fullLabel.toLowerCase().includes(searchTerm.toLowerCase()))
+        )
+        .map((visualizationType) => ({
+          ...visualizationType,
+          selection: getSelection(visualizationType.visualizationId, visualizationType.id),
+        })),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       flyoutOpen,
@@ -195,6 +209,7 @@ export function ChartSwitch(props: Props) {
       props.framePublicAPI,
       props.visualizationId,
       props.visualizationState,
+      searchTerm,
     ]
   );
 
@@ -219,15 +234,30 @@ export function ChartSwitch(props: Props) {
       anchorPosition="downLeft"
     >
       <EuiPopoverTitle>
-        {i18n.translate('xpack.lens.configPanel.selectVisualization', {
-          defaultMessage: 'Select a visualization',
-        })}
+        <EuiFlexGroup alignItems="center" responsive={false}>
+          <EuiFlexItem>
+            {i18n.translate('xpack.lens.configPanel.chartType', {
+              defaultMessage: 'Chart type',
+            })}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFieldSearch
+              compressed
+              fullWidth={false}
+              className="lnsChartSwitch__search"
+              value={searchTerm}
+              data-test-subj="lnsChartSwitchSearch"
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPopoverTitle>
       <EuiKeyPadMenu>
         {(visualizationTypes || []).map((v) => (
           <EuiKeyPadMenuItem
             key={`${v.visualizationId}:${v.id}`}
             label={<span data-test-subj="visTypeTitle">{v.label}</span>}
+            title={v.fullLabel}
             role="menuitem"
             data-test-subj={`lnsChartSwitchPopover_${v.id}`}
             onClick={() => commitSelection(v.selection)}
@@ -251,6 +281,17 @@ export function ChartSwitch(props: Props) {
           </EuiKeyPadMenuItem>
         ))}
       </EuiKeyPadMenu>
+      {searchTerm && (visualizationTypes || []).length === 0 && (
+        <EuiSelectableMessage>
+          <FormattedMessage
+            id="xpack.lens.chartSwitch.noResults"
+            defaultMessage="No results found for {term}."
+            values={{
+              term: <strong>{searchTerm}</strong>,
+            }}
+          />
+        </EuiSelectableMessage>
+      )}
     </EuiPopover>
   );
 
