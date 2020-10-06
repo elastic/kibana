@@ -40,7 +40,7 @@ describe('renderApp', () => {
     const { core, config } = mockApmPluginContextValue;
     const plugins = {
       licensing: { license$: new Observable() },
-      triggers_actions_ui: { actionTypeRegistry: {}, alertTypeRegistry: {} },
+      triggersActionsUi: { actionTypeRegistry: {}, alertTypeRegistry: {} },
       usageCollection: { reportUiStats: () => {} },
       data: {
         query: {

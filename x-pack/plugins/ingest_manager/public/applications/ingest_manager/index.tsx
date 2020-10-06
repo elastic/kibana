@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import styled from 'styled-components';
 import { EuiErrorBoundary, EuiPanel, EuiEmptyPrompt, EuiCode } from '@elastic/eui';
 import { CoreStart, AppMountParameters } from 'src/core/public';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { EuiThemeProvider } from '../../../../xpack_legacy/common';
 import {
   IngestManagerSetupDeps,
@@ -33,10 +34,9 @@ import {
   KibanaVersionContext,
 } from './hooks';
 import { PackageInstallProvider } from './sections/epm/hooks';
-import { FleetStatusProvider } from './hooks/use_fleet_status';
-import './index.scss';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { FleetStatusProvider, useBreadcrumbs } from './hooks';
 import { IntraAppStateProvider } from './hooks/use_intra_app_state';
+import './index.scss';
 
 export interface ProtectedRouteProps extends RouteProps {
   isAllowed?: boolean;
@@ -67,7 +67,9 @@ const ErrorLayout = ({ children }: { children: JSX.Element }) => (
 
 const IngestManagerRoutes = memo<{ history: AppMountParameters['history']; basepath: string }>(
   ({ history, ...rest }) => {
+    useBreadcrumbs('base');
     const { agents } = useConfig();
+
     const { notifications } = useCore();
 
     const [isPermissionsLoading, setIsPermissionsLoading] = useState<boolean>(false);
