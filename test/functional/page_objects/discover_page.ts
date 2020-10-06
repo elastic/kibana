@@ -158,7 +158,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
 
       await browser.dragAndDrop(
         { location: el, offset: { x: -300, y: 20 } },
-        { location: el, offset: { x: -100, y: 30 } }
+        { location: el, offset: { x: -100, y: 30 } },
+        200
       );
     }
 

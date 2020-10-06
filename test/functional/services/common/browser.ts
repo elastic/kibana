@@ -218,11 +218,13 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      *
      * @param {{element: WebElementWrapper | {x: number, y: number}, offset: {x: number, y: number}}} from
      * @param {{element: WebElementWrapper | {x: number, y: number}, offset: {x: number, y: number}}} to
+     * @param delay in ms
      * @return {Promise<void>}
      */
     public async dragAndDrop(
       from: { offset?: { x: any; y: any }; location: any },
-      to: { offset?: { x: any; y: any }; location: any }
+      to: { offset?: { x: any; y: any }; location: any },
+      delay = 0
     ) {
       // The offset should be specified in pixels relative to the center of the element's bounding box
       const getW3CPoint = (data: any) => {
@@ -237,7 +239,13 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       const startPoint = getW3CPoint(from);
       const endPoint = getW3CPoint(to);
       await this.getActions().move({ x: 0, y: 0 }).perform();
-      return await this.getActions().move(startPoint).press().move(endPoint).release().perform();
+      return await this.getActions()
+        .move(startPoint)
+        .press()
+        .pause(delay)
+        .move(endPoint)
+        .release()
+        .perform();
     }
 
     /**
