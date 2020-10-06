@@ -58,7 +58,11 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
   );
   const [showTimeline] = useShowTimeline();
 
-  const { browserFields, indexPattern, indicesExist } = useSourcererScope();
+  const { browserFields, indexPattern, indicesExist } = useSourcererScope(
+    subPluginId.current === DETECTIONS_SUB_PLUGIN_ID
+      ? SourcererScopeName.detections
+      : SourcererScopeName.default
+  );
   // side effect: this will attempt to upgrade the endpoint package if it is not up to date
   // this will run when a user navigates to the Security Solution app and when they navigate between
   // tabs in the app. This is useful for keeping the endpoint package as up to date as possible until
