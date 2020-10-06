@@ -21,28 +21,28 @@ export type TrackingEvent = 'entered' | 'exited';
 export const ActionGroupId = 'tracking threshold met';
 
 const actionVariableContextToEntityDateTimeLabel = i18n.translate(
-  'xpack.alertingBuiltins.geoThreshold.actionVariableContextToEntityDateTimeLabel',
+  'xpack.stackAlerts.geoThreshold.actionVariableContextToEntityDateTimeLabel',
   {
     defaultMessage: `The time the entity was detected in the current boundary`,
   }
 );
 
 const actionVariableContextFromEntityDateTimeLabel = i18n.translate(
-  'xpack.alertingBuiltins.geoThreshold.actionVariableContextFromEntityDateTimeLabel',
+  'xpack.stackAlerts.geoThreshold.actionVariableContextFromEntityDateTimeLabel',
   {
     defaultMessage: `The last time the entity was recorded in the previous boundary`,
   }
 );
 
 const actionVariableContextToEntityLocationLabel = i18n.translate(
-  'xpack.alertingBuiltins.geoThreshold.actionVariableContextToEntityLocationLabel',
+  'xpack.stackAlerts.geoThreshold.actionVariableContextToEntityLocationLabel',
   {
     defaultMessage: 'The most recently captured location of the entity',
   }
 );
 
 const actionVariableContextCrossingLineLabel = i18n.translate(
-  'xpack.alertingBuiltins.geoThreshold.actionVariableContextCrossingLineLabel',
+  'xpack.stackAlerts.geoThreshold.actionVariableContextCrossingLineLabel',
   {
     defaultMessage:
       'GeoJSON line connecting the two locations that were used to determine the crossing event',
@@ -50,63 +50,63 @@ const actionVariableContextCrossingLineLabel = i18n.translate(
 );
 
 const actionVariableContextFromEntityLocationLabel = i18n.translate(
-  'xpack.alertingBuiltins.geoThreshold.actionVariableContextFromEntityLocationLabel',
+  'xpack.stackAlerts.geoThreshold.actionVariableContextFromEntityLocationLabel',
   {
     defaultMessage: 'The previously captured location of the entity',
   }
 );
 
 const actionVariableContextToBoundaryIdLabel = i18n.translate(
-  'xpack.alertingBuiltins.geoThreshold.actionVariableContextCurrentBoundaryIdLabel',
+  'xpack.stackAlerts.geoThreshold.actionVariableContextCurrentBoundaryIdLabel',
   {
     defaultMessage: 'The current boundary id containing the entity (if any)',
   }
 );
 
 const actionVariableContextToBoundaryNameLabel = i18n.translate(
-  'xpack.alertingBuiltins.geoThreshold.actionVariableContextToBoundaryNameLabel',
+  'xpack.stackAlerts.geoThreshold.actionVariableContextToBoundaryNameLabel',
   {
     defaultMessage: 'The boundary (if any) the entity has crossed into and is currently located',
   }
 );
 
 const actionVariableContextFromBoundaryNameLabel = i18n.translate(
-  'xpack.alertingBuiltins.geoThreshold.actionVariableContextFromBoundaryNameLabel',
+  'xpack.stackAlerts.geoThreshold.actionVariableContextFromBoundaryNameLabel',
   {
     defaultMessage: 'The boundary (if any) the entity has crossed from and was previously located',
   }
 );
 
 const actionVariableContextFromBoundaryIdLabel = i18n.translate(
-  'xpack.alertingBuiltins.geoThreshold.actionVariableContextFromBoundaryIdLabel',
+  'xpack.stackAlerts.geoThreshold.actionVariableContextFromBoundaryIdLabel',
   {
     defaultMessage: 'The previous boundary id containing the entity (if any)',
   }
 );
 
 const actionVariableContextToEntityDocumentIdLabel = i18n.translate(
-  'xpack.alertingBuiltins.geoThreshold.actionVariableContextCrossingDocumentIdLabel',
+  'xpack.stackAlerts.geoThreshold.actionVariableContextCrossingDocumentIdLabel',
   {
     defaultMessage: 'The id of the crossing entity document',
   }
 );
 
 const actionVariableContextFromEntityDocumentIdLabel = i18n.translate(
-  'xpack.alertingBuiltins.geoThreshold.actionVariableContextFromEntityDocumentIdLabel',
+  'xpack.stackAlerts.geoThreshold.actionVariableContextFromEntityDocumentIdLabel',
   {
     defaultMessage: 'The id of the crossing entity document',
   }
 );
 
 const actionVariableContextTimeOfDetectionLabel = i18n.translate(
-  'xpack.alertingBuiltins.geoThreshold.actionVariableContextTimeOfDetectionLabel',
+  'xpack.stackAlerts.geoThreshold.actionVariableContextTimeOfDetectionLabel',
   {
     defaultMessage: 'The alert interval end time this change was recorded',
   }
 );
 
 const actionVariableContextEntityIdLabel = i18n.translate(
-  'xpack.alertingBuiltins.geoThreshold.actionVariableContextEntityIdLabel',
+  'xpack.stackAlerts.geoThreshold.actionVariableContextEntityIdLabel',
   {
     defaultMessage: 'The entity ID of the document that triggered the alert',
   }
@@ -206,12 +206,12 @@ export function getAlertType(
     params?: ActionVariable[];
   };
 } {
-  const alertTypeName = i18n.translate('xpack.alertingBuiltins.geoThreshold.alertTypeTitle', {
+  const alertTypeName = i18n.translate('xpack.stackAlerts.geoThreshold.alertTypeTitle', {
     defaultMessage: 'Geo tracking threshold',
   });
 
   const actionGroupName = i18n.translate(
-    'xpack.alertingBuiltins.geoThreshold.actionGroupThresholdMetTitle',
+    'xpack.stackAlerts.geoThreshold.actionGroupThresholdMetTitle',
     {
       defaultMessage: 'Tracking threshold met',
     }
