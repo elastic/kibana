@@ -108,7 +108,7 @@ export function createTableRowDirective($compile: ng.ICompileService, $httpParam
       });
 
       $scope.inlineFilter = function inlineFilter($event: any, type: string) {
-        const column = $($event.target).data().column;
+        const column = $($event.currentTarget).data().column;
         const field = $scope.indexPattern.fields.getByName(column);
         $scope.filter(field, $scope.flattenedRow[column], type);
       };
