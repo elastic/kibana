@@ -5,7 +5,6 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiTableFieldDataColumnType } from '@elastic/eui';
 
 import {
@@ -23,9 +22,22 @@ import {
   ItemDetailsPropertySummary,
 } from '../../../../../../common/components/item_details_card';
 
-import { OS_TITLES, PROPERTY_TITLES, ENTRY_PROPERTY_TITLES } from '../../translations';
+import {
+  OS_TITLES,
+  PROPERTY_TITLES,
+  ENTRY_PROPERTY_TITLES,
+  CARD_DELETE_BUTTON_LABEL,
+} from '../../translations';
 
 type Entry = MacosLinuxConditionEntry | WindowsConditionEntry;
+
+const trimTextOverflow = (text: string, maxSize: number) => {
+  if (text.length > maxSize) {
+    return `${text.substr(0, maxSize)}...`;
+  } else {
+    return text;
+  }
+};
 
 const getEntriesColumnDefinitions = (): Array<EuiTableFieldDataColumnType<Entry>> => [
   {
@@ -54,11 +66,11 @@ const getEntriesColumnDefinitions = (): Array<EuiTableFieldDataColumnType<Entry>
 
 interface TrustedAppCardProps {
   trustedApp: Immutable<TrustedApp>;
-  onDelete: (id: string) => void;
+  onDelete: (trustedApp: Immutable<TrustedApp>) => void;
 }
 
 export const TrustedAppCard = memo(({ trustedApp, onDelete }: TrustedAppCardProps) => {
-  const handleDelete = useCallback(() => onDelete(trustedApp.id), [onDelete, trustedApp.id]);
+  const handleDelete = useCallback(() => onDelete(trustedApp), [onDelete, trustedApp]);
 
   return (
     <ItemDetailsCard>
@@ -75,6 +87,13 @@ export const TrustedAppCard = memo(({ trustedApp, onDelete }: TrustedAppCardProp
         }
       />
       <ItemDetailsPropertySummary name={PROPERTY_TITLES.created_by} value={trustedApp.created_by} />
+      <ItemDetailsPropertySummary
+        name={PROPERTY_TITLES.description}
+        value={useMemo(() => trimTextOverflow(trustedApp.description || '', 100), [
+          trustedApp.description,
+        ])}
+        title={trustedApp.description}
+      />
 
       <ConditionsTable
         columns={useMemo(() => getEntriesColumnDefinitions(), [])}
@@ -83,10 +102,13 @@ export const TrustedAppCard = memo(({ trustedApp, onDelete }: TrustedAppCardProp
         responsive
       />
 
-      <ItemDetailsAction size="s" color="danger" onClick={handleDelete}>
-        {i18n.translate('xpack.securitySolution.trustedapps.card.removeButtonLabel', {
-          defaultMessage: 'Remove',
-        })}
+      <ItemDetailsAction
+        size="s"
+        color="danger"
+        onClick={handleDelete}
+        data-test-subj="trustedAppDeleteButton"
+      >
+        {CARD_DELETE_BUTTON_LABEL}
       </ItemDetailsAction>
     </ItemDetailsCard>
   );

@@ -12,7 +12,7 @@ import d3 from 'd3';
 import { scaleUtc } from 'd3-scale';
 import { mean } from 'lodash';
 import React from 'react';
-import { asRelativeDateTimeRange } from '../../../../utils/formatters';
+import { asRelativeDateTimeRange } from '../../../../../common/utils/formatters';
 import { getTimezoneOffsetInMs } from '../../../shared/charts/CustomPlot/getTimezoneOffsetInMs';
 // @ts-expect-error
 import Histogram from '../../../shared/charts/Histogram';
