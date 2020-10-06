@@ -10,7 +10,6 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 import { timeline as timelineTemplate } from '../objects/timeline';
 
 import { TIMELINE_TEMPLATES_URL } from '../urls/navigation';
-import { TOASTER } from '../screens/configure_cases';
 import { openTimelineUsingToggle } from '../tasks/security_main';
 import { addNameToTimeline, closeTimeline, createNewTimelineTemplate } from '../tasks/timeline';
 
@@ -39,7 +38,6 @@ describe('Export timelines', () => {
     await exportTimeline(timelineId);
 
     cy.wait('@export').then((response) => {
-      cy.get(TOASTER).should('have.text', 'exported 1 timeline template');
       cy.wrap(JSON.parse(response.xhr.responseText).templateTimelineId).should(
         'eql',
         templateTimelineId

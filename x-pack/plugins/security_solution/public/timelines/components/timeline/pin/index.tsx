@@ -29,7 +29,7 @@ export const Pin = React.memo<Props>(
     const isTemplate = timelineType === TimelineType.template;
     return (
       <EuiButtonIcon
-        aria-label={pinned ? i18n.PINNED : i18n.UNPINNED}
+        aria-label={pinned ? i18n.PINNED : isTemplate ? i18n.DISABLE_PIN : i18n.UNPINNED}
         data-test-subj="pin"
         iconSize={iconSize}
         iconType={getPinIcon(pinned)}
