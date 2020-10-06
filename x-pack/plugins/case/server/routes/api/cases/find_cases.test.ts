@@ -22,6 +22,7 @@ describe('FIND all cases', () => {
   beforeAll(async () => {
     routeHandler = await createRoute(initFindCasesApi, 'get');
   });
+
   it(`gets all the cases`, async () => {
     const request = httpServerMock.createKibanaRequest({
       path: `${CASES_URL}/_find`,
@@ -38,7 +39,8 @@ describe('FIND all cases', () => {
     expect(response.status).toEqual(200);
     expect(response.payload.cases).toHaveLength(4);
   });
-  it(`has proper connector id on cases with configured id`, async () => {
+
+  it(`has proper connector id on cases with configured connector`, async () => {
     const request = httpServerMock.createKibanaRequest({
       path: `${CASES_URL}/_find`,
       method: 'get',
@@ -52,8 +54,9 @@ describe('FIND all cases', () => {
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
-    expect(response.payload.cases[2].connector_id).toEqual('123');
+    expect(response.payload.cases[2].connector.id).toEqual('123');
   });
+
   it(`adds 'none' connector id to cases without when 3rd party unconfigured`, async () => {
     const request = httpServerMock.createKibanaRequest({
       path: `${CASES_URL}/_find`,
@@ -68,8 +71,9 @@ describe('FIND all cases', () => {
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
-    expect(response.payload.cases[0].connector_id).toEqual('none');
+    expect(response.payload.cases[0].connector.id).toEqual('none');
   });
+
   it(`adds default connector id to cases without when 3rd party configured`, async () => {
     const request = httpServerMock.createKibanaRequest({
       path: `${CASES_URL}/_find`,
@@ -85,6 +89,6 @@ describe('FIND all cases', () => {
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
-    expect(response.payload.cases[0].connector_id).toEqual('123');
+    expect(response.payload.cases[0].connector.id).toEqual('none');
   });
 });
