@@ -6,6 +6,7 @@
 import React from 'react';
 import { render as testLibRender } from '@testing-library/react';
 import { CoreStart } from 'kibana/public';
+import { of } from 'rxjs';
 import { PluginContext } from '../context/plugin_context';
 import { EuiThemeProvider } from '../typings';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
@@ -16,6 +17,10 @@ export const core = ({
     basePath: {
       prepend: jest.fn(),
     },
+  },
+  uiSettings: {
+    get: (key: string) => true,
+    get$: (key: string) => of(true),
   },
 } as unknown) as CoreStart;
 
