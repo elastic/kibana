@@ -137,6 +137,7 @@
 /src/plugins/home/public @elastic/kibana-core-ui
 /src/plugins/home/server/*.ts @elastic/kibana-core-ui
 /src/plugins/home/server/services/ @elastic/kibana-core-ui
+/src/plugins/kibana_overview/ @elastic/kibana-core-ui
 /x-pack/plugins/global_search_bar/ @elastic/kibana-core-ui
 #CC# /src/legacy/core_plugins/newsfeed @elastic/kibana-core-ui
 #CC# /src/legacy/server/sample_data/ @elastic/kibana-core-ui
