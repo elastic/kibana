@@ -19,7 +19,6 @@ import {
   DISCOVER_APP_URL_GENERATOR,
   DiscoverUrlGeneratorState,
 } from '../../../../../../../../../src/plugins/discover/public';
-import { getApplication } from '../../../../util/dependency_cache';
 
 const RECHECK_DELAY_MS = 3000;
 
@@ -51,6 +50,7 @@ export const ResultsLinks: FC<Props> = ({
 
   const {
     services: {
+      application: { navigateToApp, navigateToUrl },
       share: {
         urlGenerators: { getUrlGenerator },
       },
@@ -150,17 +150,17 @@ export const ResultsLinks: FC<Props> = ({
 
   function openInDiscover(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
-    getApplication().navigateToUrl(discoverLink);
+    navigateToUrl(discoverLink);
   }
 
   function openIndexManagement(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
-    getApplication().navigateToApp('management', { path: '/data/index_management/indices' });
+    navigateToApp('management', { path: '/data/index_management/indices' });
   }
 
   function openIndexPatternManagement(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
-    getApplication().navigateToApp('management', {
+    navigateToApp('management', {
       path: `/kibana/indexPatterns${createIndexPattern ? `/patterns/${indexPatternId}` : ''}`,
     });
   }
