@@ -514,6 +514,26 @@ export const createErrorsFromShard = ({ errors }: { errors: ShardError[] }): str
   });
 };
 
+/**
+ * Given a SignalSearchResponse this will return a valid last date if it can find one, otherwise it
+ * will return undefined.
+ * @param result The result to try and parse out the timestamp.
+ */
+export const lastValidDate = (result: SignalSearchResponse): Date | undefined => {
+  if (result.hits.hits.length === 0) {
+    return undefined;
+  } else {
+    const lastElementTimeStamp =
+      result.hits.hits[result.hits.hits.length - 1]._source['@timestamp'];
+    const isValid = lastElementTimeStamp != null && moment(lastElementTimeStamp).isValid();
+    if (!isValid) {
+      return undefined;
+    } else {
+      return new Date(lastElementTimeStamp);
+    }
+  }
+};
+
 export const createSearchAfterReturnTypeFromResponse = ({
   searchResult,
 }: {
@@ -521,11 +541,7 @@ export const createSearchAfterReturnTypeFromResponse = ({
 }): SearchAfterAndBulkCreateReturnType => {
   return createSearchAfterReturnType({
     success: searchResult._shards.failed === 0,
-    lastLookBackDate:
-      searchResult.hits.hits.length > 0 &&
-      searchResult.hits.hits[searchResult.hits.hits.length - 1]?._source['@timestamp'] != null
-        ? new Date(searchResult.hits.hits[searchResult.hits.hits.length - 1]._source['@timestamp'])
-        : undefined,
+    lastLookBackDate: lastValidDate(searchResult),
   });
 };
 
