@@ -430,10 +430,26 @@ export interface FramePublicAPI {
   removeLayers: (layerIds: string[]) => void;
 }
 
+/**
+ * A visualization type advertised to the user in the chart switcher
+ */
 export interface VisualizationType {
+  /**
+   * Unique id of the visualization type within the visualization defining it
+   */
   id: string;
+  /**
+   * Icon used in the chart switcher
+   */
   icon: IconType;
+  /**
+   * Visible label used in the chart switcher and above the workspace panel in collapsed state
+   */
   label: string;
+  /**
+   * Optional label used in chart type search if chart switcher is expanded and for tooltips
+   */
+  fullLabel?: string;
 }
 
 export interface Visualization<T = unknown> {

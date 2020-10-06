@@ -6,13 +6,14 @@
 
 import { isEmpty, uniqBy } from 'lodash/fp';
 import { useCallback, useEffect, useState } from 'react';
+import deepEqual from 'fast-deep-equal';
 
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
+import { CaseFullExternalService } from '../../../../case/common/api/cases';
 import { getCaseUserActions } from './api';
 import * as i18n from './translations';
 import { CaseExternalService, CaseUserActions, ElasticUser } from './types';
 import { convertToCamelCase, parseString } from './utils';
-import { CaseFullExternalService } from '../../../../case/common/api/cases';
 
 export interface CaseService extends CaseExternalService {
   firstPushIndex: number;
@@ -49,6 +50,30 @@ export interface UseGetCaseUserActions extends CaseUserActionsState {
 
 const getExternalService = (value: string): CaseExternalService | null =>
   convertToCamelCase<CaseFullExternalService, CaseExternalService>(parseString(`${value}`));
+
+const connectorHasChangedFields = (action: CaseUserActions, connectorId: string): boolean => {
+  if (action.action !== 'update' || action.actionField[0] !== 'connector') {
+    return false;
+  }
+
+  const oldValue = parseString(`${action.oldValue}`);
+  const newValue = parseString(`${action.newValue}`);
+
+  if (oldValue == null || newValue == null) {
+    return false;
+  }
+
+  if (oldValue.id !== connectorId || newValue.id !== connectorId) {
+    return false;
+  }
+
+  if (oldValue.id !== newValue.id) {
+    return false;
+  }
+
+  return !deepEqual(oldValue.fields, newValue.fields);
+};
+
 interface CommentsAndIndex {
   commentId: string;
   commentIndex: number;
@@ -62,18 +87,24 @@ export const getPushedInfo = (
   hasDataToPush: boolean;
 } => {
   const hasDataToPushForConnector = (connectorId: string) => {
-    const userActionsForPushLessServiceUpdates = caseUserActions.filter(
-      (mua) =>
-        (mua.action !== 'push-to-service' &&
-          !(mua.action === 'update' && mua.actionField[0] === 'connector_id')) ||
-        (mua.action === 'push-to-service' &&
-          connectorId === getExternalService(`${mua.newValue}`)?.connectorId)
-    );
+    const userActionsForPushLessServiceUpdates = caseUserActions.filter((mua) => {
+      if (mua.action !== 'push-to-service') {
+        if (mua.action === 'update' && mua.actionField[0] === 'connector') {
+          return connectorHasChangedFields(mua, connectorId);
+        } else {
+          return true;
+        }
+      } else {
+        return connectorId === getExternalService(`${mua.newValue}`)?.connectorId;
+      }
+    });
+
     return (
       userActionsForPushLessServiceUpdates[userActionsForPushLessServiceUpdates.length - 1]
         .action !== 'push-to-service'
     );
   };
+
   const commentsAndIndex = caseUserActions.reduce<CommentsAndIndex[]>(
     (bacc, mua, index) =>
       mua.actionField[0] === 'comment' && mua.commentId != null
