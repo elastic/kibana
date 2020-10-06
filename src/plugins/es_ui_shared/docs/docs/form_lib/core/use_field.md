@@ -78,7 +78,7 @@ A label for the field.
 
 **Type:** `string | ReactNode`
 
-An second label for the field.
+A second label for the field.
 
 When `<UseField />` is paired with one of [the helper components](../helpers/components) that wrap the EUI form fields, this prop is forwarded to the `<EuiFormRow />` `labelAppend` prop.  As per [the EUI docs](https://elastic.github.io/eui/#/forms/form-layouts): _it adds an extra node to the right of the form label without being contained inside the form label. Good for things like documentation links._
 
@@ -163,7 +163,7 @@ If any of the validation fails, the other validations don't run unless [the `exi
 
 The `ValidationConfig` accepts the following parameters:
 
-##### validator` (Required
+##### validator (Required)
 
 **Type:** `ValidationFunc`  
 **Arguments:** `data: ValidationFuncArg`  
@@ -171,7 +171,7 @@ The `ValidationConfig` accepts the following parameters:
 
 A validator function to execute. It can be synchronous or asynchronous.
 
-**Note:** Have a look a [the validation examples](../examples/validation.md) for different usecases.
+**Note:** Have a look a [the validation examples](../examples/validation.md) for different use cases.
 
 This function receives a data argument with the following properties:
 
@@ -180,7 +180,7 @@ This function receives a data argument with the following properties:
 * `form.getFormData` - A handler to build the form data
 * `form.getFields` - A handler to access the form fields
 * `formData` - The raw form data
-* `errors` - And array of any previous validation error
+* `errors` - An array of any previous validation errors
 
 ##### type
 
@@ -247,7 +247,7 @@ export const MyFormComponent = () => {
 
 **Type:** `SerializerFunc`
 
-This is the reverese process of the `deserializer`. It is only executed when getting the form data (with `form.submit()` or `form.getFormData()`).
+This is the reverse process of the `deserializer`. It is only executed when getting the form data (with `form.submit()` or `form.getFormData()`).
 
 ```js
 // Continuing the example above
@@ -370,7 +370,7 @@ const MyFormComponent = () => {
 
 ## Typescript value type
 
-You can provided the value type (`unknown` by default) on the component. 
+You can provide the value type (`unknown` by default) on the component. 
 
 ```js
 <UseField<string> path="name" defaultValue="mustBeAString" />
