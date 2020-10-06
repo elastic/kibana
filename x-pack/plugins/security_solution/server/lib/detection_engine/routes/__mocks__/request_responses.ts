@@ -205,7 +205,7 @@ export const ruleStatusRequest = () =>
   requestMock.create({
     method: 'post',
     path: `${DETECTION_ENGINE_RULES_URL}/_find_statuses`,
-    body: { ids: ['1ea5a820-4da1-4e82-92a1-2b43a7bece08'] },
+    body: { ids: ['04128c15-0d1b-4716-a4c5-46997ac7f3bd'] },
   });
 
 export const getImportRulesRequest = (hapiStream?: HapiReadableStream) =>
@@ -534,7 +534,7 @@ export const getFindResultStatus = (): SavedObjectsFindResponse<
       type: 'my-type',
       id: 'e0b86950-4e9f-11ea-bdbd-07b56aa159b3',
       attributes: {
-        alertId: '1ea5a820-4da1-4e82-92a1-2b43a7bece08',
+        alertId: '04128c15-0d1b-4716-a4c5-46997ac7f3bc',
         statusDate: '2020-02-18T15:26:49.783Z',
         status: 'succeeded',
         lastFailureAt: undefined,

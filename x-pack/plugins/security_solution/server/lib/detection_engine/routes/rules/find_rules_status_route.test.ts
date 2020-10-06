@@ -5,11 +5,7 @@
  */
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import {
-  getFindResultStatus,
-  getFindResultWithSingleHit,
-  ruleStatusRequest,
-} from '../__mocks__/request_responses';
+import { getFindResultStatus, ruleStatusRequest, getResult } from '../__mocks__/request_responses';
 import {
   serverMock,
   requestContextMock,
@@ -38,7 +34,7 @@ describe('find_statuses', () => {
     });
     (ruleStatusServiceFactory as jest.Mock).mockReturnValue(mockedRuleStatusServiceFactory);
     clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus()); // successful status search
-    clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    clients.alertsClient.get.mockResolvedValue(getResult());
     findRulesStatusesRoute(server.router);
   });
 
@@ -67,65 +63,29 @@ describe('find_statuses', () => {
       });
     });
 
-    test('catches error if rule status client throws error', async () => {
-      // rule status service throws an error when trying to write an error status
-      mockedRuleStatusServiceFactory?.error.mockImplementationOnce(async () => {
-        throw new Error('ruleStatusServiceFactory Test error');
-      });
-      const failingExecutionRule = getFindResultWithSingleHit();
-      failingExecutionRule.data[0].executionStatus = {
-        status: 'error',
-        lastExecutionDate: failingExecutionRule.data[0].executionStatus.lastExecutionDate,
-        error: {
-          reason: 'read',
-          message: 'oops',
-        },
-      };
-      clients.alertsClient.find.mockResolvedValue({
-        ...failingExecutionRule,
-      });
-      const response = await server.inject(ruleStatusRequest(), context);
-      expect(response.status).toEqual(500);
-      expect(response.body).toEqual({
-        message: 'ruleStatusServiceFactory Test error',
-        status_code: 500,
-      });
-    });
-
-    // ensures we are writing a failed status if the executionStatus of the rule
-    // is in an error state.
     test('returns success if rule status client writes an error status', async () => {
       // 0. task manager tried to run the rule but couldn't, so the alerting framework
       // wrote an error to the executionStatus.
-      const failingExecutionRule = getFindResultWithSingleHit();
-      failingExecutionRule.data[0].executionStatus = {
+      const failingExecutionRule = getResult();
+      failingExecutionRule.executionStatus = {
         status: 'error',
-        lastExecutionDate: failingExecutionRule.data[0].executionStatus.lastExecutionDate,
+        lastExecutionDate: failingExecutionRule.executionStatus.lastExecutionDate,
         error: {
           reason: 'read',
           message: 'oops',
         },
       };
 
-      // 1. findRules api found a rule where the executionStatus was 'error'
-      clients.alertsClient.find.mockResolvedValue({
+      // 1. getFailingRules api found a rule where the executionStatus was 'error'
+      clients.alertsClient.get.mockResolvedValue({
         ...failingExecutionRule,
       });
-
-      // 2. mocked ruleStatusService.error writes error status to the last-five-failures list
-
-      // mock a 'failed' status to be resolved by the rulesStatusClient.find
-      const foundStatusWithError = getFindResultStatus();
-      foundStatusWithError.saved_objects[0].attributes.status = 'failed';
-
-      // 3. represents ruleStatusClient.find
-      clients.savedObjectsClient.find.mockResolvedValue(foundStatusWithError);
 
       const response = await server.inject(ruleStatusRequest(), context);
       const body: RuleStatusResponse = response.body;
       expect(response.status).toEqual(200);
       expect(body[ruleStatusRequest().body.ids[0]].current_status?.status).toEqual('failed');
-      expect(mockedRuleStatusServiceFactory?.error).toHaveBeenCalledWith(
+      expect(body[ruleStatusRequest().body.ids[0]].current_status?.last_failure_message).toEqual(
         'Reason: read Message: oops'
       );
     });
