@@ -427,10 +427,10 @@ describe('#bulkCreate', () => {
     await expectPrivilegeCheck(client.bulkCreate, { objects, options }, [namespace]);
   });
 
-  test(`checks privileges for user, actions, namespace, and namespaces`, async () => {
+  test(`checks privileges for user, actions, namespace, and initialNamespaces`, async () => {
     const objects = [
-      { ...obj1, namespaces: 'another-ns' },
-      { ...obj2, namespaces: 'yet-another-ns' },
+      { ...obj1, initialNamespaces: 'another-ns' },
+      { ...obj2, initialNamespaces: 'yet-another-ns' },
     ];
     const options = { namespace };
     await expectPrivilegeCheck(client.bulkCreate, { objects, options }, [
@@ -601,8 +601,8 @@ describe('#create', () => {
     await expectPrivilegeCheck(client.create, { type, attributes, options }, [namespace]);
   });
 
-  test(`checks privileges for user, actions, namespace, and namespaces`, async () => {
-    const options = { namespace, namespaces: ['another-ns', 'yet-another-ns'] };
+  test(`checks privileges for user, actions, namespace, and initialNamespaces`, async () => {
+    const options = { namespace, initialNamespaces: ['another-ns', 'yet-another-ns'] };
     await expectPrivilegeCheck(client.create, { type, attributes, options }, [
       namespace,
       'another-ns',
