@@ -61,7 +61,7 @@ const SwimLaneTooltip = (fieldName?: string): FC<{ values: TooltipValue[] }> => 
   const tooltipData: TooltipValue[] = [];
 
   if (values.length === 1 && fieldName) {
-    // Y-axis tooltip
+    // Y-axis tooltip for viewBy swim lane
     const [yAxis] = values;
     // @ts-ignore
     tooltipData.push({ skipHeader: true });
@@ -73,7 +73,7 @@ const SwimLaneTooltip = (fieldName?: string): FC<{ values: TooltipValue[] }> => 
         key: yAxis.value,
       },
     });
-  } else {
+  } else if (values.length === 3) {
     // Cell tooltip
     const [xAxis, yAxis, cell] = values;
 
@@ -208,8 +208,8 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     // Persists container height during loading to prevent page from jumping
     return isLoading
       ? containerHeightRef.current
-      : rowsCount * CELL_HEIGHT + LEGEND_HEIGHT + Y_AXIS_HEIGHT;
-  }, [isLoading, rowsCount]);
+      : rowsCount * CELL_HEIGHT + LEGEND_HEIGHT + (showTimeline ? Y_AXIS_HEIGHT : 0);
+  }, [isLoading, rowsCount, showTimeline]);
 
   useEffect(() => {
     if (!isLoading) {
@@ -218,11 +218,11 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   }, [isLoading, containerHeight]);
 
   const highlightedData: HeatmapSpec['highlightedData'] = useMemo(() => {
-    if (!selection) return;
+    if (!selection || !swimlaneData) return;
 
     if (
       (swimlaneType !== selection.type ||
-        (swimlaneData.fieldName !== undefined &&
+        (swimlaneData?.fieldName !== undefined &&
           swimlaneData.fieldName !== selection.viewByFieldName)) &&
       filterActive === false
     ) {
@@ -231,7 +231,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     }
 
     return { x: selection.times.map((v) => v * 1000), y: selection.lanes };
-  }, [selection, swimlaneType, swimlaneData.fieldName]);
+  }, [selection, swimlaneData, swimlaneType]);
 
   const swimLaneConfig: HeatmapSpec['config'] = useMemo(
     () =>
@@ -247,6 +247,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
             },
             grid: {
               cellHeight: {
+                min: CELL_HEIGHT,
                 max: CELL_HEIGHT, // 'fill',
               },
               stroke: {
@@ -285,6 +286,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
             brushMask: {
               fill: 'rgb(247 247 247 / 50%)',
             },
+            maxLegendHeight: LEGEND_HEIGHT,
           }
         : {},
     [showSwimlane, swimlaneType, swimlaneData?.fieldName]
