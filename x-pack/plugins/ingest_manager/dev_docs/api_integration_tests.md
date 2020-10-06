@@ -1,32 +1,36 @@
 # API integration tests
 
 Many API integration tests for Ingest Manager trigger at some point a connection to the package registry, and retrieval of some packages. If these connections are made to a package registry deployment outside of Kibana CI, these tests can fail at any time for two reasons:
-* the deployed registry is temporarily unavailable
-* the packages served by the registry do not match the expectation of the code under test
+
+- the deployed registry is temporarily unavailable
+- the packages served by the registry do not match the expectation of the code under test
 
 For that reason, we run a dockerized version of the package registry in Kibana CI. For this to work, our tests must run against a custom test configuration and be kept in a custom directory, `x-pack/test/ingest_manager_api_integration`.
 
 ## How to run the tests locally
 
 Usually, having the test server and the test runner in two different shells is most efficient, as it is possible to keep the server running and only rerun the test runner as often as needed. To do so, in one shell in the main `kibana` directory, run:
+
 ```
 $ export INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT=12345
 $ yarn test:ftr:server --config x-pack/test/ingest_manager_api_integration/config.ts
 ```
 
 In another shell in the same directory, run
+
 ```
 $ export INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT=12345
 $ yarn test:ftr:runner --config x-pack/test/ingest_manager_api_integration/config.ts
 ```
 
 However, it is also possible to **alternatively** run everything in one go, again from the main `kibana` directory:
+
 ```
 $ export INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT=12345
 $ yarn test:ftr --config x-pack/test/ingest_manager_api_integration/config.ts
 ```
-Port `12345` is used as an example here, it can be anything, but the environment variable has to be present for the tests to run at all.
 
+Port `12345` is used as an example here, it can be anything, but the environment variable has to be present for the tests to run at all.
 
 ## DockerServers service setup
 
@@ -50,9 +54,9 @@ The main configuration for the `DockerServers` service for our tests can be foun
       './apis/fixtures/test_packages'
     )}:/registry/packages/test-packages`,
   ];
-  ```
+```
 
-  `-v` mounts local paths into the docker image. The first one puts a custom configuration file into the correct place in the docker container, the second one mounts a directory containing additional packages.
+`-v` mounts local paths into the docker image. The first one puts a custom configuration file into the correct place in the docker container, the second one mounts a directory containing additional packages.
 
 ### Specify the docker image to use
 
@@ -82,7 +86,7 @@ Also, not every developer has `docker` installed on their workstation, so it mus
     it('fetches a .json search file', async function () {
       if (server.enabled) {
         await supertest
-          .get('/api/ingest_manager/epm/packages/filetest/0.1.0/kibana/search/sample_search.json')
+          .get('/api/fleet/epm/packages/filetest/0.1.0/kibana/search/sample_search.json')
           .set('kbn-xsrf', 'xxx')
           .expect('Content-Type', 'application/json; charset=utf-8')
           .expect(200);
@@ -104,7 +108,7 @@ If the tests are skipped in this way, they are marked in the test summary as `pe
        │ warn disabling tests because DockerServers service is not enabled, set INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT to run them
        └-> lists all packages from the registry
        └-> "after all" hook
-[...]  
+[...]
            │
            │1 passing (233ms)
            │6 pending
