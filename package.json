@@ -65,7 +65,7 @@
     "kbn:watch": "node scripts/kibana --dev --logging.json=false",
     "build:types": "rm -rf ./target/types && tsc --p tsconfig.types.json",
     "docs:acceptApiChanges": "node --max-old-space-size=6144 scripts/check_published_api_changes.js --accept",
-    "kbn:bootstrap": "node scripts/build_ts_refs --project tsconfig.refs.json && node scripts/register_git_hook",
+    "kbn:bootstrap": "node scripts/build_ts_refs && node scripts/register_git_hook",
     "spec_to_console": "node scripts/spec_to_console",
     "backport-skip-ci": "backport --prDescription \"[skip-ci]\"",
     "storybook": "node scripts/storybook",
@@ -117,7 +117,7 @@
   "dependencies": {
     "@elastic/datemath": "5.0.3",
     "@elastic/elasticsearch": "7.9.1",
-    "@elastic/eui": "29.0.0",
+    "@elastic/eui": "29.3.0",
     "@elastic/good": "8.1.1-kibana2",
     "@elastic/numeral": "^2.5.0",
     "@elastic/request-crypto": "1.1.4",

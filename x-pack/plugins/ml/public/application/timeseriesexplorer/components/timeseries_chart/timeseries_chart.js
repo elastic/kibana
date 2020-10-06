@@ -672,7 +672,7 @@ class TimeseriesChartIntl extends Component {
 
       // if annotations are present, we extend yMax to avoid overlap
       // between annotation labels, chart lines and anomalies.
-      if (focusAnnotationData && focusAnnotationData.length > 0) {
+      if (showAnnotations && focusAnnotationData && focusAnnotationData.length > 0) {
         const levels = getAnnotationLevels(focusAnnotationData);
         const maxLevel = d3.max(Object.keys(levels).map((key) => levels[key]));
         // TODO needs revisiting to be a more robust normalization

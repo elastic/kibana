@@ -509,10 +509,10 @@ class JobService {
                 fields[job.data_description.time_field] = {};
               }
 
-              // console.log('fields: ', fields);
               const fieldsList = Object.keys(fields);
               if (fieldsList.length) {
-                body._source = fieldsList;
+                body.fields = fieldsList;
+                body._source = false;
               }
             }
 
