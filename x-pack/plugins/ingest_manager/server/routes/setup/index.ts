@@ -53,7 +53,7 @@ export const registerRoutes = (router: IRouter, config: IngestManagerConfigType)
   // Ingest manager setup
   registerIngestManagerSetupRoute(router);
 
-  if (!config.fleet.enabled) {
+  if (!config.agents.enabled) {
     return;
   }
 
