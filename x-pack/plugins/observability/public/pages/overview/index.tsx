@@ -44,7 +44,7 @@ export function OverviewPage({ routeParams }: Props) {
     if (id === 'alert') {
       return alertEmptySection;
     }
-    return hasData?.[id] === false;
+    return hasData?.[id] === undefined || hasData?.[id] === false;
   });
 
   return (

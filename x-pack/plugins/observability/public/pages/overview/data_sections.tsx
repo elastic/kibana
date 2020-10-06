@@ -21,22 +21,22 @@ export function DataSections({ hasData }: Props) {
   return (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup direction="column">
-        {hasData?.infra_logs !== false && (
+        {hasData?.infra_logs && (
           <EuiFlexItem grow={false}>
             <LogsSection />
           </EuiFlexItem>
         )}
-        {hasData?.infra_metrics !== false && (
+        {hasData?.infra_metrics && (
           <EuiFlexItem grow={false}>
             <MetricsSection />
           </EuiFlexItem>
         )}
-        {hasData?.apm !== false && (
+        {hasData?.apm && (
           <EuiFlexItem grow={false}>
             <APMSection />
           </EuiFlexItem>
         )}
-        {hasData?.uptime !== false && (
+        {hasData?.uptime && (
           <EuiFlexItem grow={false}>
             <UptimeSection />
           </EuiFlexItem>
