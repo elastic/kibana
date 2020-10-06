@@ -58,36 +58,51 @@ export function isViewBySwimLaneData(arg: any): arg is ViewBySwimLaneData {
  * Provides a custom tooltip for the anomaly swim lane chart.
  */
 const SwimLaneTooltip = (fieldName?: string): FC<{ values: TooltipValue[] }> => ({ values }) => {
-  const [value] = values;
-  const [laneLabel, date] = value.label.split(' - ');
+  const tooltipData: TooltipValue[] = [];
 
-  // Display date using same format as Kibana visualizations.
-  const formattedDate = formatHumanReadableDateTime(new Date(date).getTime());
-  const tooltipData: TooltipValue[] = [{ label: formattedDate } as TooltipValue];
-
-  if (fieldName !== undefined) {
+  if (values.length === 1 && fieldName) {
+    // Y-axis tooltip
+    const [yAxis] = values;
+    // @ts-ignore
+    tooltipData.push({ skipHeader: true });
     tooltipData.push({
       label: fieldName,
-      value: laneLabel,
+      value: yAxis.value,
       // @ts-ignore
       seriesIdentifier: {
-        key: laneLabel,
+        key: yAxis.value,
       },
-      valueAccessor: 'fieldName',
+    });
+  } else {
+    // Cell tooltip
+    const [xAxis, yAxis, cell] = values;
+
+    // Display date using same format as Kibana visualizations.
+    const formattedDate = formatHumanReadableDateTime(parseInt(xAxis.value, 10));
+    tooltipData.push({ label: formattedDate } as TooltipValue);
+
+    if (fieldName !== undefined) {
+      tooltipData.push({
+        label: fieldName,
+        value: yAxis.value,
+        // @ts-ignore
+        seriesIdentifier: {
+          key: yAxis.value,
+        },
+      });
+    }
+    tooltipData.push({
+      label: i18n.translate('xpack.ml.explorer.swimlane.maxAnomalyScoreLabel', {
+        defaultMessage: 'Max anomaly score',
+      }),
+      value: cell.formattedValue,
+      color: cell.color,
+      // @ts-ignore
+      seriesIdentifier: {
+        key: cell.value,
+      },
     });
   }
-  tooltipData.push({
-    label: i18n.translate('xpack.ml.explorer.swimlane.maxAnomalyScoreLabel', {
-      defaultMessage: 'Max anomaly score',
-    }),
-    value: value.formattedValue,
-    color: value.color,
-    // @ts-ignore
-    seriesIdentifier: {
-      key: laneLabel,
-    },
-    valueAccessor: 'anomaly_score',
-  });
 
   return <FormattedTooltip tooltipData={tooltipData} />;
 };
@@ -266,6 +281,9 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                 const a = timeBuckets.getScaledDateFormat();
                 return moment(v).format(a);
               },
+            },
+            brushMask: {
+              fill: 'rgb(247 247 247 / 50%)',
             },
           }
         : {},
