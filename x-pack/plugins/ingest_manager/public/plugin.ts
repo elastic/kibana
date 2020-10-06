@@ -23,7 +23,8 @@ import { BASE_PATH } from './applications/ingest_manager/constants';
 
 import { IngestManagerConfigType } from '../common/types';
 import { setupRouteService, appRoutesService } from '../common';
-import { setHttpClient, licenseService } from './applications/ingest_manager/hooks';
+import { licenseService } from './applications/ingest_manager/hooks/use_license';
+import { setHttpClient } from './applications/ingest_manager/hooks/use_request/use_request';
 import {
   TutorialDirectoryNotice,
   TutorialDirectoryHeaderLink,

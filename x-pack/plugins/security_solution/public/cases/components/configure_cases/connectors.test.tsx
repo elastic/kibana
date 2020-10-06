@@ -58,10 +58,10 @@ describe('Connectors', () => {
 
   test('the connector is changed successfully', () => {
     wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
-    wrapper.find('button[data-test-subj="dropdown-connector-servicenow-2"]').simulate('click');
+    wrapper.find('button[data-test-subj="dropdown-connector-resilient-2"]').simulate('click');
 
     expect(onChangeConnector).toHaveBeenCalled();
-    expect(onChangeConnector).toHaveBeenCalledWith('servicenow-2');
+    expect(onChangeConnector).toHaveBeenCalledWith('resilient-2');
   });
 
   test('the connector is changed successfully to none', () => {
