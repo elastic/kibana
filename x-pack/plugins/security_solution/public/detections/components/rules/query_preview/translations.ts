@@ -74,7 +74,7 @@ export const QUERY_PREVIEW_NOISE_WARNING = i18n.translate(
   'xpack.securitySolution.detectionEngine.queryPreview.queryGraphPreviewNoiseWarning',
   {
     defaultMessage:
-      'Noise warning: This rule may cause a lot of noise. Consider narrowing your query.',
+      'Noise warning: This rule may cause a lot of noise. Consider narrowing your query. This is based on a linear progression of 1 alert per hour.',
   }
 );
 
@@ -105,5 +105,22 @@ export const PREVIEW_QUERY_DISCLAIMER_EQL = i18n.translate(
   {
     defaultMessage:
       'Note: This preview excludes effects of rule exceptions and timestamp overrides, and is limited to 100 results.',
+  }
+);
+
+export const PREVIEW_WARNING_CAP_HIT = (cap: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewGraphCapHitWarning',
+    {
+      values: { cap },
+      defaultMessage:
+        'Hit query cap size of {cap}. This query could produce more hits than the {cap} shown.',
+    }
+  );
+
+export const PREVIEW_WARNING_TIMESTAMP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewGraphTimestampWarning',
+  {
+    defaultMessage: 'Unable to find "@timestamp" field on events.',
   }
 );

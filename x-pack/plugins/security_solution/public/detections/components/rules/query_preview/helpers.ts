@@ -32,11 +32,7 @@ export const getTimeframeOptions = (ruleType: Type): EuiSelectOption[] => {
   }
 };
 
-export const getHistogramConfig = (
-  to: string,
-  from: string,
-  showLegend: boolean
-): ChartSeriesConfigs => {
+export const getHistogramConfig = (to: string, from: string): ChartSeriesConfigs => {
   return {
     series: {
       xScaleType: ScaleType.Time,
@@ -51,8 +47,8 @@ export const getHistogramConfig = (
     yAxisTitle: i18n.QUERY_GRAPH_COUNT,
     settings: {
       legendPosition: Position.Right,
-      showLegend,
-      showLegendExtra: showLegend,
+      showLegend: true,
+      showLegendExtra: true,
       theme: {
         scales: {
           barsPadding: 0.08,
@@ -75,7 +71,7 @@ export const getHistogramConfig = (
   };
 };
 
-export const getThresholdHistogramConfig = (): ChartSeriesConfigs => {
+export const getThresholdHistogramConfig = (height: number | undefined): ChartSeriesConfigs => {
   return {
     series: {
       xScaleType: ScaleType.Linear,
@@ -108,6 +104,6 @@ export const getThresholdHistogramConfig = (): ChartSeriesConfigs => {
         },
       },
     },
-    customHeight: 200,
+    customHeight: height ?? 200,
   };
 };

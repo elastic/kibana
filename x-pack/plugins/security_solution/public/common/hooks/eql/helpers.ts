@@ -6,6 +6,7 @@
 import moment from 'moment';
 import { Unit } from '@elastic/datemath';
 
+import * as i18n from '../../../detections/components/rules/query_preview/translations';
 import { EqlSearchStrategyResponse } from '../../../../../data_enhanced/common';
 import { InspectResponse } from '../../../types';
 import { EqlPreviewResponse, Source } from './types';
@@ -36,21 +37,15 @@ export const constructWarnings = (timestampIssue: boolean, hits: number, range: 
   let warnings: string[] = [];
 
   if (timestampIssue) {
-    warnings = ['Unable to find "@timestamp" field on events'];
+    warnings = [i18n.PREVIEW_WARNING_TIMESTAMP];
   }
 
   if (hits === EQL_QUERY_EVENT_SIZE) {
-    warnings = [
-      ...warnings,
-      `Hit query cap size of ${EQL_QUERY_EVENT_SIZE}. This query could produce more hits than the ${EQL_QUERY_EVENT_SIZE} shown`,
-    ];
+    warnings = [...warnings, i18n.PREVIEW_WARNING_CAP_HIT(EQL_QUERY_EVENT_SIZE)];
   }
 
   if (hits > HITS_THRESHOLD[range]) {
-    warnings = [
-      ...warnings,
-      'Noise warning: This rule may cause a lot of noise. Consider narrowing your query. This is based on a linear progression of 1 alert per hour.',
-    ];
+    warnings = [...warnings, i18n.QUERY_PREVIEW_NOISE_WARNING];
   }
 
   return warnings;

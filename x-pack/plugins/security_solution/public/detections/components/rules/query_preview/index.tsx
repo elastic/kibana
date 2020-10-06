@@ -240,7 +240,6 @@ export const PreviewQuery = ({
           totalHits={eqlQueryResult.totalCount}
           data={eqlQueryResult.data}
           inspect={eqlQueryResult.inspect}
-          query={queryString}
         />
       )}
       {warnings.length > 0 &&

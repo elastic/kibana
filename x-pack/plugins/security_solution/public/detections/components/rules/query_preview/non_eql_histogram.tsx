@@ -36,7 +36,7 @@ const histogramConfigs: MatrixHistogramConfigs = {
   title: i18n.QUERY_GRAPH_HITS_TITLE,
   titleSize: 'xs',
   subtitle: i18n.QUERY_PREVIEW_TITLE,
-  hideHistogramIfEmpty: true,
+  hideHistogramIfEmpty: false,
 };
 
 interface PreviewNonEqlQueryHistogramProps {

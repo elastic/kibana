@@ -16,6 +16,7 @@ import { MatrixHistogramType } from '../../../../../common/search_strategy/secur
 import { ESQueryStringQuery } from '../../../../../common/typed_json';
 import { Panel } from '../../../../common/components/panel';
 import { HeaderSection } from '../../../../common/components/header_section';
+import { ChartSeriesConfigs } from '../../../../common/components/charts/common';
 
 export const ID = 'queryPreviewThresholdHistogramQuery';
 
@@ -64,38 +65,38 @@ export const PreviewThresholdQueryHistogram = ({
     };
   }, [buckets]);
 
+  const barConfig = useMemo((): ChartSeriesConfigs => getThresholdHistogramConfig(200), []);
+
   return (
     <>
-      {totalCount > 0 && (
-        <Panel height={300}>
-          <EuiFlexGroup gutterSize="none" direction="column">
-            <EuiFlexItem grow={1}>
-              <HeaderSection
-                id={ID}
-                title={i18n.QUERY_GRAPH_HITS_TITLE}
-                titleSize="xs"
-                subtitle={i18n.QUERY_PREVIEW_THRESHOLD_WITH_FIELD_TITLE(totalCount)}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={1}>
-              <BarChart
-                configs={getThresholdHistogramConfig()}
-                barChart={[{ key: 'hits', value: data }]}
-                stackByField={undefined}
-                timelineId={undefined}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <>
-                <EuiSpacer />
-                <EuiText size="s" color="subdued">
-                  <p>{i18n.PREVIEW_QUERY_DISCLAIMER}</p>
-                </EuiText>
-              </>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </Panel>
-      )}
+      <Panel height={300}>
+        <EuiFlexGroup gutterSize="none" direction="column">
+          <EuiFlexItem grow={1}>
+            <HeaderSection
+              id={ID}
+              title={i18n.QUERY_GRAPH_HITS_TITLE}
+              titleSize="xs"
+              subtitle={i18n.QUERY_PREVIEW_THRESHOLD_WITH_FIELD_TITLE(totalCount)}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={1}>
+            <BarChart
+              configs={barConfig}
+              barChart={[{ key: 'hits', value: data }]}
+              stackByField={undefined}
+              timelineId={undefined}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <>
+              <EuiSpacer />
+              <EuiText size="s" color="subdued">
+                <p>{i18n.PREVIEW_QUERY_DISCLAIMER}</p>
+              </EuiText>
+            </>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </Panel>
     </>
   );
 };
