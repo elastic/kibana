@@ -31,7 +31,6 @@ enum ResultType {
 interface Render {
   type: ResultType.render;
   body: string;
-  statusCode?: number;
 }
 
 interface Next {
@@ -62,8 +61,8 @@ export interface OnPreResponseInfo {
 }
 
 const preResponseResult = {
-  render(body: string, statusCode?: number | undefined): OnPreResponseResult {
-    return { type: ResultType.render, body, statusCode };
+  render(body: string): OnPreResponseResult {
+    return { type: ResultType.render, body };
   },
   isRender(result: OnPreResponseResult): result is Render {
     return result && result.type === ResultType.render;
@@ -139,7 +138,7 @@ export function adoptToHapiOnPreResponseFormat(fn: OnPreResponseHandler, log: Lo
             }
           }
         } else if (preResponseResult.isRender(result)) {
-          return responseToolkit.response(result.body).code(result.statusCode || statusCode);
+          return responseToolkit.response(result.body).code(statusCode);
         } else {
           throw new Error(
             `Unexpected result from OnPreResponse. Expected OnPreResponseResult, but given: ${result}.`
