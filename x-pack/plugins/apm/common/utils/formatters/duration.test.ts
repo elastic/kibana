@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { asDuration, toMicroseconds, asMillisecondDuration } from '../duration';
+import { asDuration, toMicroseconds, asMillisecondDuration } from './duration';
 
 describe('duration formatters', () => {
   describe('asDuration', () => {
