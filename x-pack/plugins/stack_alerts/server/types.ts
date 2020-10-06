@@ -18,7 +18,7 @@ export {
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 
 // this plugin's dependendencies
-export interface AlertingBuiltinsDeps {
+export interface StackAlertsDeps {
   alerts: AlertingSetup;
   features: FeaturesPluginSetup;
 }

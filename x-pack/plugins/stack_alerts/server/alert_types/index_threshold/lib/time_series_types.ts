@@ -66,7 +66,7 @@ function validateBody(anyParams: unknown): string | undefined {
     }
 
     if (epochStart !== epochEnd && !interval) {
-      return i18n.translate('xpack.alertingBuiltins.indexThreshold.intervalRequiredErrorMessage', {
+      return i18n.translate('xpack.stackAlerts.indexThreshold.intervalRequiredErrorMessage', {
         defaultMessage: '[interval]: must be specified if [dateStart] does not equal [dateEnd]',
       });
     }
@@ -84,7 +84,7 @@ function validateBody(anyParams: unknown): string | undefined {
 function validateDate(dateString: string): string | undefined {
   const parsed = Date.parse(dateString);
   if (isNaN(parsed)) {
-    return i18n.translate('xpack.alertingBuiltins.indexThreshold.invalidDateErrorMessage', {
+    return i18n.translate('xpack.stackAlerts.indexThreshold.invalidDateErrorMessage', {
       defaultMessage: 'invalid date {date}',
       values: {
         date: dateString,
@@ -97,7 +97,7 @@ export function validateDuration(duration: string): string | undefined {
   try {
     parseDuration(duration);
   } catch (err) {
-    return i18n.translate('xpack.alertingBuiltins.indexThreshold.invalidDurationErrorMessage', {
+    return i18n.translate('xpack.stackAlerts.indexThreshold.invalidDurationErrorMessage', {
       defaultMessage: 'invalid duration: "{duration}"',
       values: {
         duration,
