@@ -78,7 +78,7 @@ export class KibanaOverviewPlugin
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
       euiIconType: PLUGIN_ICON,
-      order: 1,
+      order: -2000,
       updater$: appUpdater$,
       appRoute: PLUGIN_PATH,
       async mount(params: AppMountParameters) {
