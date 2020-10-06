@@ -7,6 +7,7 @@
 import useDebounce from 'react-use/lib/useDebounce';
 import React, { useEffect, useState, FormEvent, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
+import { EuiTitle } from '@elastic/eui';
 import { useUrlParams } from '../../../../../hooks/useUrlParams';
 import { useFetcher } from '../../../../../hooks/useFetcher';
 import { I18LABELS } from '../../translations';
@@ -23,7 +24,9 @@ interface Props {
 export function URLSearch({ onChange: onFilterChange }: Props) {
   const history = useHistory();
 
-  const { uiFilters } = useUrlParams();
+  const { uiFilters, urlParams } = useUrlParams();
+
+  const { searchTerm } = urlParams;
 
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
 
@@ -83,6 +86,12 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
     setCheckedUrls(uiFilters.transactionUrl || []);
   }, [uiFilters]);
 
+  useEffect(() => {
+    if (searchTerm && searchValue === '') {
+      updateSearchTerm('');
+    }
+  }, [searchValue, updateSearchTerm, searchTerm]);
+
   const onChange = (updatedOptions: UrlOption[]) => {
     const clickedItems = updatedOptions.filter(
       (option) => option.checked === 'on'
@@ -120,6 +129,9 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
 
   return (
     <>
+      <EuiTitle size="xxs" textTransform="uppercase">
+        <h4>{I18LABELS.url}</h4>
+      </EuiTitle>
       <SelectableUrlList
         loading={isLoading}
         onInputChange={onInputChange}
