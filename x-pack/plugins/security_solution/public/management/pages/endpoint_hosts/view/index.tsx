@@ -570,7 +570,7 @@ export const EndpointList = () => {
       subtitle={
         <FormattedMessage
           id="xpack.securitySolution.endpoint.list.pageSubTitle"
-          defaultMessage="Hosts running Elastic Endpoint Security"
+          defaultMessage="Hosts running Endpoint Security"
         />
       }
     >
