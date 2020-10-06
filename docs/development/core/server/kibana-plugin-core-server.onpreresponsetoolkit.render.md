@@ -4,8 +4,10 @@
 
 ## OnPreResponseToolkit.render property
 
+To override the response with a different body
+
 <b>Signature:</b>
 
 ```typescript
-render: (html: string) => OnPreResponseResult;
+render: (responseRender: OnPreResponseRender) => OnPreResponseResult;
 ```

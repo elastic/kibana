@@ -92,6 +92,7 @@ const preResponseResult = {
  * @public
  */
 export interface OnPreResponseToolkit {
+  /** To override the response with a different body */
   render: (responseRender: OnPreResponseRender) => OnPreResponseResult;
   /** To pass request to the next handler */
   next: (responseExtensions?: OnPreResponseExtensions) => OnPreResponseResult;
