@@ -93,7 +93,7 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
 
   const listItems = useMemo(
     () => [
-      ...(issueType != null
+      ...(issueType != null && issueType.length > 0
         ? [
             {
               title: i18n.ISSUE_TYPE,
@@ -101,7 +101,7 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
             },
           ]
         : []),
-      ...(hasParent && parent
+      ...(parent != null && parent.length > 0
         ? [
             {
               title: i18n.PARENT_ISSUE,
@@ -109,7 +109,7 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
             },
           ]
         : []),
-      ...(hasPriority && priority
+      ...(priority != null && priority.length > 0
         ? [
             {
               title: i18n.PRIORITY,
@@ -118,7 +118,7 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
           ]
         : []),
     ],
-    [issueType, issueTypes, hasParent, parent, hasPriority, priority]
+    [issueType, issueTypes, parent, priority]
   );
 
   const onFieldChange = useCallback(

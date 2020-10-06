@@ -124,7 +124,15 @@ export const EditConnector = React.memo(
 
     const onChangeConnector = useCallback(
       (newConnectorId) => {
-        if (currentConnector == null || currentConnector.id !== newConnectorId) {
+        // Init
+        if (currentConnector == null) {
+          dispatch({
+            type: 'SET_CURRENT_CONNECTOR',
+            payload: getConnectorById(newConnectorId, connectors),
+          });
+        }
+        // change connect on dropdown action
+        else if (currentConnector.id !== newConnectorId) {
           dispatch({
             type: 'SET_CURRENT_CONNECTOR',
             payload: getConnectorById(newConnectorId, connectors),

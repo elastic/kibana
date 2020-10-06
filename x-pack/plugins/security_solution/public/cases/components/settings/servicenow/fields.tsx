@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { EuiFormRow, EuiSelect, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import * as i18n from './translations';
 
@@ -34,7 +34,7 @@ const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsPro
 
   const listItems = useMemo(
     () => [
-      ...(urgency != null
+      ...(urgency != null && urgency.length > 0
         ? [
             {
               title: i18n.URGENCY,
@@ -42,7 +42,7 @@ const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsPro
             },
           ]
         : []),
-      ...(severity != null
+      ...(severity != null && severity.length > 0
         ? [
             {
               title: i18n.SEVERITY,
@@ -50,7 +50,7 @@ const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsPro
             },
           ]
         : []),
-      ...(impact != null
+      ...(impact != null && impact.length > 0
         ? [
             {
               title: i18n.IMPACT,
@@ -61,6 +61,13 @@ const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsPro
     ],
     [urgency, severity, impact]
   );
+
+  // We need to set them up at initialization
+  useEffect(() => {
+    onChange({ impact, severity, urgency });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return isEdit ? (
     <span data-test-subj={'connector-settings-sn'}>
       <EuiFormRow fullWidth label={i18n.URGENCY}>

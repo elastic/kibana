@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useEffect } from 'react';
 import {
   EuiComboBox,
   EuiComboBoxOptionOption,
@@ -67,7 +67,7 @@ const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProp
   );
   const listItems = useMemo(
     () => [
-      ...(incidentTypes != null
+      ...(incidentTypes != null && incidentTypes.length > 0
         ? [
             {
               title: i18n.INCIDENT_TYPES_LABEL,
@@ -78,7 +78,7 @@ const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProp
             },
           ]
         : []),
-      ...(severityCode != null
+      ...(severityCode != null && severityCode.length > 0
         ? [
             {
               title: i18n.SEVERITY_LABEL,
@@ -134,6 +134,12 @@ const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProp
       onFieldChange('incidentTypes', []);
     }
   }, [incidentTypes, onFieldChange]);
+
+  // We need to set them up at initialization
+  useEffect(() => {
+    onChange({ incidentTypes, severityCode });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return isEdit ? (
     <span data-test-subj={'connector-settings-resilient'}>
