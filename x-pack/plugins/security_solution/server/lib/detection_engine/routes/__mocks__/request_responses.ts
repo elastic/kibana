@@ -17,6 +17,7 @@ import {
   DETECTION_ENGINE_PREPACKAGED_URL,
   DETECTION_ENGINE_EQL_VALIDATION_URL,
 } from '../../../../../common/constants';
+import { ShardsResponse } from '../../../types';
 import {
   RuleAlertType,
   IRuleSavedAttributesSavedObjectAttributes,
@@ -29,7 +30,7 @@ import { SetSignalsStatusSchemaDecoded } from '../../../../../common/detection_e
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/create_rules_schema.mock';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { getEqlValidationSchemaMock } from '../../../../../common/detection_engine/schemas/request/eql_validation_schema.mock';
-import { EqlSearchResponse, ShardsResponse } from '../../../../../common/detection_engine/types';
+import { EqlSearchResponse } from '../../../../../common/detection_engine/types';
 
 export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],

@@ -26,7 +26,8 @@ import { BuildRuleMessage } from './rule_messages';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { hasLargeValueList } from '../../../../common/detection_engine/utils';
 import { MAX_EXCEPTION_LIST_SIZE } from '../../../../../lists/common/constants';
-import { ShardError } from '../../../../common/detection_engine/types';
+import { ShardError } from '../../types';
+
 interface SortExceptionsReturn {
   exceptionsWithValueLists: ExceptionListItemSchema[];
   exceptionsWithoutValueLists: ExceptionListItemSchema[];

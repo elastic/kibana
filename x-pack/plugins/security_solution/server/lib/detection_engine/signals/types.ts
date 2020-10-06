@@ -14,8 +14,8 @@ import {
   AlertExecutorOptions,
   AlertServices,
 } from '../../../../../alerts/server';
+import { SearchResponse } from '../../types';
 import {
-  SearchResponse,
   EqlSearchResponse,
   BaseHit,
   RuleAlertAction,
