@@ -30,7 +30,7 @@ export interface GetMatrixHistogramReturnArgs {
   totalCount: number;
 }
 
-export const getMatrixHistorgram = async ({
+export const getMatrixHistogram = async ({
   data,
   endDate,
   filterQuery,
@@ -94,6 +94,6 @@ export const getMatrixHistorgram = async ({
   }
 };
 
-const getMatrixHistogramWithOptionalSignal = withOptionalSignal(getMatrixHistorgram);
+const getMatrixHistogramWithOptionalSignal = withOptionalSignal(getMatrixHistogram);
 
 export const useMatrixHistogramAsync = () => useAsync(getMatrixHistogramWithOptionalSignal);
