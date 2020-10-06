@@ -11,9 +11,10 @@
     "urlForwarding",
     "visualizations",
     "dashboard",
-    "charts"
+    "charts",
+    "uiActions"
   ],
-  "optionalPlugins": ["embeddable", "usageCollection", "taskManager", "uiActions", "globalSearch"],
+  "optionalPlugins": ["embeddable", "usageCollection", "taskManager", "globalSearch"],
   "configPath": ["xpack", "lens"],
   "extraPublicDirs": ["common/constants"],
   "requiredBundles": ["savedObjects", "kibanaUtils", "kibanaReact", "embeddable"]
