@@ -129,7 +129,7 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
 
   return (
     <>
-      <EuiTitle size="xxs" textTransform="uppercase">
+      <EuiTitle size="xxxs" textTransform="uppercase">
         <h4>{I18LABELS.url}</h4>
       </EuiTitle>
       <SelectableUrlList
