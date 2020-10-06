@@ -454,30 +454,38 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
       Object {
         "culprit": "elasticapm.contrib.django.client.capture",
         "groupId": "a0ce2c8978ef92cdf2ff163ae28576ee",
+        "handled": true,
         "latestOccurrenceAt": "2018-01-10T10:06:37.561Z",
         "message": "About to blow up!",
         "occurrenceCount": 75,
+        "type": "AssertionError",
       },
       Object {
         "culprit": "opbeans.views.oopsie",
         "groupId": "f3ac95493913cc7a3cfec30a19d2120a",
+        "handled": true,
         "latestOccurrenceAt": "2018-01-10T10:06:37.630Z",
         "message": "AssertionError: ",
         "occurrenceCount": 75,
+        "type": "AssertionError",
       },
       Object {
         "culprit": "opbeans.tasks.update_stats",
         "groupId": "e90863d04b7a692435305f09bbe8c840",
+        "handled": true,
         "latestOccurrenceAt": "2018-01-10T10:06:36.859Z",
         "message": "AssertionError: Bad luck!",
         "occurrenceCount": 24,
+        "type": "AssertionError",
       },
       Object {
         "culprit": "opbeans.views.customer",
         "groupId": "8673d8bf7a032e387c101bafbab0d2bc",
+        "handled": true,
         "latestOccurrenceAt": "2018-01-10T10:06:13.211Z",
         "message": "Customer with ID 8517 not found",
         "occurrenceCount": 15,
+        "type": "AssertionError",
       },
     ]
   }
@@ -818,7 +826,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   query={
                     Object {
                       "end": "2018-01-10T10:06:41.050Z",
-                      "kuery": "error.exception.type:undefined",
+                      "kuery": "error.exception.type:AssertionError",
                       "page": 0,
                       "serviceName": "opbeans-python",
                       "start": "2018-01-10T09:51:41.050Z",
@@ -826,16 +834,21 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                     }
                   }
                   serviceName="opbeans-python"
+                  title="AssertionError"
                 >
                   <EuiLink
                     className="c1"
-                    href="/basepath/app/apm/services/opbeans-python/errors?page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:undefined"
+                    href="/basepath/app/apm/services/opbeans-python/errors?page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:AssertionError"
+                    title="AssertionError"
                   >
                     <a
                       className="euiLink euiLink--primary c1"
-                      href="/basepath/app/apm/services/opbeans-python/errors?page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:undefined"
+                      href="/basepath/app/apm/services/opbeans-python/errors?page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:AssertionError"
                       rel="noreferrer"
-                    />
+                      title="AssertionError"
+                    >
+                      AssertionError
+                    </a>
                   </EuiLink>
                 </Styled(ErrorOverviewLink)>
               </div>
@@ -1052,7 +1065,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   query={
                     Object {
                       "end": "2018-01-10T10:06:41.050Z",
-                      "kuery": "error.exception.type:undefined",
+                      "kuery": "error.exception.type:AssertionError",
                       "page": 0,
                       "serviceName": "opbeans-python",
                       "start": "2018-01-10T09:51:41.050Z",
@@ -1060,16 +1073,21 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                     }
                   }
                   serviceName="opbeans-python"
+                  title="AssertionError"
                 >
                   <EuiLink
                     className="c1"
-                    href="/basepath/app/apm/services/opbeans-python/errors?page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:undefined"
+                    href="/basepath/app/apm/services/opbeans-python/errors?page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:AssertionError"
+                    title="AssertionError"
                   >
                     <a
                       className="euiLink euiLink--primary c1"
-                      href="/basepath/app/apm/services/opbeans-python/errors?page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:undefined"
+                      href="/basepath/app/apm/services/opbeans-python/errors?page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:AssertionError"
                       rel="noreferrer"
-                    />
+                      title="AssertionError"
+                    >
+                      AssertionError
+                    </a>
                   </EuiLink>
                 </Styled(ErrorOverviewLink)>
               </div>
@@ -1286,7 +1304,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   query={
                     Object {
                       "end": "2018-01-10T10:06:41.050Z",
-                      "kuery": "error.exception.type:undefined",
+                      "kuery": "error.exception.type:AssertionError",
                       "page": 0,
                       "serviceName": "opbeans-python",
                       "start": "2018-01-10T09:51:41.050Z",
@@ -1294,16 +1312,21 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                     }
                   }
                   serviceName="opbeans-python"
+                  title="AssertionError"
                 >
                   <EuiLink
                     className="c1"
-                    href="/basepath/app/apm/services/opbeans-python/errors?page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:undefined"
+                    href="/basepath/app/apm/services/opbeans-python/errors?page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:AssertionError"
+                    title="AssertionError"
                   >
                     <a
                       className="euiLink euiLink--primary c1"
-                      href="/basepath/app/apm/services/opbeans-python/errors?page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:undefined"
+                      href="/basepath/app/apm/services/opbeans-python/errors?page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:AssertionError"
                       rel="noreferrer"
-                    />
+                      title="AssertionError"
+                    >
+                      AssertionError
+                    </a>
                   </EuiLink>
                 </Styled(ErrorOverviewLink)>
               </div>
@@ -1520,7 +1543,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   query={
                     Object {
                       "end": "2018-01-10T10:06:41.050Z",
-                      "kuery": "error.exception.type:undefined",
+                      "kuery": "error.exception.type:AssertionError",
                       "page": 0,
                       "serviceName": "opbeans-python",
                       "start": "2018-01-10T09:51:41.050Z",
@@ -1528,16 +1551,21 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                     }
                   }
                   serviceName="opbeans-python"
+                  title="AssertionError"
                 >
                   <EuiLink
                     className="c1"
-                    href="/basepath/app/apm/services/opbeans-python/errors?page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:undefined"
+                    href="/basepath/app/apm/services/opbeans-python/errors?page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:AssertionError"
+                    title="AssertionError"
                   >
                     <a
                       className="euiLink euiLink--primary c1"
-                      href="/basepath/app/apm/services/opbeans-python/errors?page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:undefined"
+                      href="/basepath/app/apm/services/opbeans-python/errors?page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:AssertionError"
                       rel="noreferrer"
-                    />
+                      title="AssertionError"
+                    >
+                      AssertionError
+                    </a>
                   </EuiLink>
                 </Styled(ErrorOverviewLink)>
               </div>
