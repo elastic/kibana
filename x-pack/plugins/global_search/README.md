@@ -39,7 +39,7 @@ Results from providers registered from the client-side `registerResultProvider` 
 not be available when performing a search from the server-side. For this reason, prefer
 registering providers using the server-side API when possible.
 
-Refer to the [RFC](rfcs/text/0011_global_search.md#result_provider_registration) for more details
+Refer to the [RFC](../../../rfcs/text/0011_global_search.md#result_provider_registration) for more details
 
 ### Search completion cause
 

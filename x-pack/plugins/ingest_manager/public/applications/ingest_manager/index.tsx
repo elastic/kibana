@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import styled from 'styled-components';
 import { EuiErrorBoundary, EuiPanel, EuiEmptyPrompt, EuiCode } from '@elastic/eui';
 import { CoreStart, AppMountParameters } from 'src/core/public';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { EuiThemeProvider } from '../../../../xpack_legacy/common';
 import {
   IngestManagerSetupDeps,
@@ -30,12 +31,12 @@ import {
   sendSetup,
   sendGetPermissionsCheck,
   licenseService,
+  KibanaVersionContext,
 } from './hooks';
 import { PackageInstallProvider } from './sections/epm/hooks';
-import { FleetStatusProvider } from './hooks/use_fleet_status';
-import './index.scss';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { FleetStatusProvider, useBreadcrumbs } from './hooks';
 import { IntraAppStateProvider } from './hooks/use_intra_app_state';
+import './index.scss';
 
 export interface ProtectedRouteProps extends RouteProps {
   isAllowed?: boolean;
@@ -66,6 +67,7 @@ const ErrorLayout = ({ children }: { children: JSX.Element }) => (
 
 const IngestManagerRoutes = memo<{ history: AppMountParameters['history']; basepath: string }>(
   ({ history, ...rest }) => {
+    useBreadcrumbs('base');
     const { fleet } = useConfig();
     const { notifications } = useCore();
 
@@ -235,6 +237,7 @@ const IngestManagerApp = ({
   startDeps,
   config,
   history,
+  kibanaVersion,
 }: {
   basepath: string;
   coreStart: CoreStart;
@@ -242,6 +245,7 @@ const IngestManagerApp = ({
   startDeps: IngestManagerStartDeps;
   config: IngestManagerConfigType;
   history: AppMountParameters['history'];
+  kibanaVersion: string;
 }) => {
   const isDarkMode = useObservable<boolean>(coreStart.uiSettings.get$('theme:darkMode'));
   return (
@@ -249,9 +253,11 @@ const IngestManagerApp = ({
       <KibanaContextProvider services={{ ...coreStart }}>
         <DepsContext.Provider value={{ setup: setupDeps, start: startDeps }}>
           <ConfigContext.Provider value={config}>
-            <EuiThemeProvider darkMode={isDarkMode}>
-              <IngestManagerRoutes history={history} basepath={basepath} />
-            </EuiThemeProvider>
+            <KibanaVersionContext.Provider value={kibanaVersion}>
+              <EuiThemeProvider darkMode={isDarkMode}>
+                <IngestManagerRoutes history={history} basepath={basepath} />
+              </EuiThemeProvider>
+            </KibanaVersionContext.Provider>
           </ConfigContext.Provider>
         </DepsContext.Provider>
       </KibanaContextProvider>
@@ -264,7 +270,8 @@ export function renderApp(
   { element, appBasePath, history }: AppMountParameters,
   setupDeps: IngestManagerSetupDeps,
   startDeps: IngestManagerStartDeps,
-  config: IngestManagerConfigType
+  config: IngestManagerConfigType,
+  kibanaVersion: string
 ) {
   ReactDOM.render(
     <IngestManagerApp
@@ -274,6 +281,7 @@ export function renderApp(
       startDeps={startDeps}
       config={config}
       history={history}
+      kibanaVersion={kibanaVersion}
     />,
     element
   );
