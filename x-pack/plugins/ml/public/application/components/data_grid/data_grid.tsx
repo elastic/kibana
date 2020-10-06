@@ -101,7 +101,9 @@ export const DataGrid: FC<Props> = memo(
 
     // If the charts are visible, hide the column actions icon.
     const columnsWithChartsActionized = columnsWithCharts.map((d) => {
-      d.actions = !chartsVisible;
+      if (chartsVisible === true) {
+        d.actions = false;
+      }
       return d;
     });
 
