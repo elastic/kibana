@@ -7,6 +7,7 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import { EuiTableFieldDataColumnType } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import {
   Immutable,
   TrustedApp,
@@ -58,6 +59,11 @@ const getEntriesColumnDefinitions = (): Array<EuiTableFieldDataColumnType<Entry>
     sortable: false,
     truncateText: true,
     width: '20%',
+    render() {
+      return i18n.translate('xpack.securitySolution.trustedapps.card.operator.includes', {
+        defaultMessage: 'is',
+      });
+    },
   },
   {
     field: 'value',
