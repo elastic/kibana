@@ -13,6 +13,7 @@ import {
   LensByReferenceInput,
 } from './editor_frame_service/embeddable/embeddable';
 import { SavedObjectIndexStore, DOC_TYPE } from './persistence';
+import { checkForDuplicateTitle, OnSaveProps } from '../../../../src/plugins/saved_objects/public';
 
 export type LensAttributeService = AttributeService<
   LensSavedObjectAttributes,
@@ -30,7 +31,7 @@ export function getLensAttributeService(
     LensByValueInput,
     LensByReferenceInput
   >(DOC_TYPE, {
-    customSaveMethod: async (
+    saveMethod: async (
       type: string,
       attributes: LensSavedObjectAttributes,
       savedObjectId?: string
@@ -42,11 +43,34 @@ export function getLensAttributeService(
       });
       return { id: savedDoc.savedObjectId };
     },
-    customUnwrapMethod: (savedObject) => {
+    unwrapMethod: async (savedObjectId: string): Promise<LensSavedObjectAttributes> => {
+      const savedObject = await core.savedObjects.client.get<LensSavedObjectAttributes>(
+        DOC_TYPE,
+        savedObjectId
+      );
       return {
         ...savedObject.attributes,
         references: savedObject.references,
       };
+    },
+    checkForDuplicateTitle: (props: OnSaveProps) => {
+      const savedObjectsClient = core.savedObjects.client;
+      const overlays = core.overlays;
+      return checkForDuplicateTitle(
+        {
+          title: props.newTitle,
+          copyOnSave: false,
+          lastSavedTitle: '',
+          getEsType: () => DOC_TYPE,
+          getDisplayName: () => DOC_TYPE,
+        },
+        props.isTitleDuplicateConfirmed,
+        props.onTitleDuplicate,
+        {
+          savedObjectsClient,
+          overlays,
+        }
+      );
     },
   });
 }
