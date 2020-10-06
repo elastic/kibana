@@ -19,17 +19,29 @@ interface GetCaseSettingReturn {
   caseSettingsRegistry: CaseSettingsRegistry;
 }
 
-function registerCaseSettings(caseSettingsRegistry: CaseSettingsRegistry) {
-  caseSettingsRegistry.register<JiraFieldsType>(getJiraCaseSetting());
-  caseSettingsRegistry.register<ResilientFieldsType>(getResilientCaseSetting());
-  caseSettingsRegistry.register<ServiceNowFieldsType>(getServiceNowCaseSetting());
+class CaseSettings {
+  private caseSettingsRegistry: CaseSettingsRegistry;
+
+  constructor() {
+    this.caseSettingsRegistry = createCaseSettingsRegistry();
+    this.init();
+  }
+
+  private init() {
+    this.caseSettingsRegistry.register<JiraFieldsType>(getJiraCaseSetting());
+    this.caseSettingsRegistry.register<ResilientFieldsType>(getResilientCaseSetting());
+    this.caseSettingsRegistry.register<ServiceNowFieldsType>(getServiceNowCaseSetting());
+  }
+
+  registry(): CaseSettingsRegistry {
+    return this.caseSettingsRegistry;
+  }
 }
 
-const caseSettingsRegistry = createCaseSettingsRegistry();
-registerCaseSettings(caseSettingsRegistry);
+const caseSettings = new CaseSettings();
 
 export const getCaseSettings = (): GetCaseSettingReturn => {
   return {
-    caseSettingsRegistry,
+    caseSettingsRegistry: caseSettings.registry(),
   };
 };
