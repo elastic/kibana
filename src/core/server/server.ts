@@ -48,6 +48,8 @@ import { config as statusConfig } from './status';
 import { ContextService } from './context';
 import { RequestHandlerContext } from '.';
 import { InternalCoreSetup, InternalCoreStart, ServiceConfigDescriptor } from './internal_types';
+import { CoreUsageDataService } from './core_usage_data';
+import { CoreRouteHandlerContext } from './core_route_handler_context';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
@@ -71,6 +73,7 @@ export class Server {
   private readonly logging: LoggingService;
   private readonly coreApp: CoreApp;
   private readonly auditTrail: AuditTrailService;
+  private readonly coreUsageData: CoreUsageDataService;
 
   #pluginsInitialized?: boolean;
   private coreStart?: InternalCoreStart;
@@ -102,6 +105,7 @@ export class Server {
     this.httpResources = new HttpResourcesService(core);
     this.auditTrail = new AuditTrailService(core);
     this.logging = new LoggingService(core);
+    this.coreUsageData = new CoreUsageDataService(core);
   }
 
   public async setup() {
@@ -180,6 +184,8 @@ export class Server {
       loggingSystem: this.loggingSystem,
     });
 
+    this.coreUsageData.setup({ metrics: metricsSetup });
+
     const coreSetup: InternalCoreSetup = {
       capabilities: capabilitiesSetup,
       context: contextServiceSetup,
@@ -231,6 +237,10 @@ export class Server {
     const uiSettingsStart = await this.uiSettings.start();
     const metricsStart = await this.metrics.start();
     const httpStart = this.http.getStartContract();
+    const coreUsageDataStart = this.coreUsageData.start({
+      elasticsearch: elasticsearchStart,
+      savedObjects: savedObjectsStart,
+    });
 
     this.coreStart = {
       capabilities: capabilitiesStart,
@@ -240,6 +250,7 @@ export class Server {
       savedObjects: savedObjectsStart,
       uiSettings: uiSettingsStart,
       auditTrail: auditTrailStart,
+      coreUsageData: coreUsageDataStart,
     };
 
     const pluginsStart = await this.plugins.start(this.coreStart);
@@ -279,25 +290,7 @@ export class Server {
       coreId,
       'core',
       async (context, req, res): Promise<RequestHandlerContext['core']> => {
-        const coreStart = this.coreStart!;
-        const savedObjectsClient = coreStart.savedObjects.getScopedClient(req);
-
-        return {
-          savedObjects: {
-            client: savedObjectsClient,
-            typeRegistry: coreStart.savedObjects.getTypeRegistry(),
-          },
-          elasticsearch: {
-            client: coreStart.elasticsearch.client.asScoped(req),
-            legacy: {
-              client: coreStart.elasticsearch.legacy.client.asScoped(req),
-            },
-          },
-          uiSettings: {
-            client: coreStart.uiSettings.asScopedToClient(savedObjectsClient),
-          },
-          auditor: coreStart.auditTrail.asScoped(req),
-        };
+        return new CoreRouteHandlerContext(this.coreStart!, req);
       }
     );
   }

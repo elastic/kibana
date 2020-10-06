@@ -6,8 +6,7 @@
 
 import { useState } from 'react';
 import { Direction, EuiBasicTableProps, EuiTableSortingType } from '@elastic/eui';
-import sortBy from 'lodash/sortBy';
-import get from 'lodash/get';
+import { sortBy, get } from 'lodash';
 
 const PAGE_SIZE = 10;
 const PAGE_SIZE_OPTIONS = [10, 25, 50];

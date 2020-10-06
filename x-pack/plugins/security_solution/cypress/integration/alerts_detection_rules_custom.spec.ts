@@ -93,7 +93,7 @@ import {
   goToScheduleStepTab,
   waitForTheRuleToBeExecuted,
 } from '../tasks/create_new_rule';
-import { saveEditedRule } from '../tasks/edit_rule';
+import { saveEditedRule, waitForKibana } from '../tasks/edit_rule';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 import { refreshPage } from '../tasks/security_header';
@@ -290,6 +290,7 @@ describe('Custom detection rules deletion and edition', () => {
   context('Edition', () => {
     it('Allows a rule to be edited', () => {
       editFirstRule();
+      waitForKibana();
 
       // expect define step to populate
       cy.get(CUSTOM_QUERY_INPUT).should('have.text', existingRule.customQuery);

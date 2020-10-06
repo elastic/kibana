@@ -280,6 +280,7 @@ describe('Lens App', () => {
             },
             "doc": undefined,
             "filters": Array [],
+            "initialContext": undefined,
             "onChange": [Function],
             "onError": [Function],
             "query": Object {
