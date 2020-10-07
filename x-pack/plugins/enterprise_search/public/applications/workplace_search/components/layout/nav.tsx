@@ -13,6 +13,7 @@ import { getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
 import { SideNav, SideNavLink } from '../../../shared/layout';
 
 import { GroupSubNav } from '../../views/groups/components/group_sub_nav';
+import { NAV } from '../../views/groups/constants';
 
 import {
   ORG_SOURCES_PATH,
@@ -38,9 +39,7 @@ export const WorkplaceSearchNav: React.FC = () => {
         })}
       </SideNavLink>
       <SideNavLink to={GROUPS_PATH} subNav={<GroupSubNav />}>
-        {i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.groups', {
-          defaultMessage: 'Groups',
-        })}
+        {NAV.GROUPS}
       </SideNavLink>
       <SideNavLink isExternal to={getWorkplaceSearchUrl(`#${ROLE_MAPPINGS_PATH}`)}>
         {i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.roleMappings', {

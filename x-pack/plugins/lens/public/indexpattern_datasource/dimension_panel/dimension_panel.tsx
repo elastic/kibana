@@ -229,6 +229,13 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
   return true;
 }
 
+function wrapOnDot(str?: string) {
+  // u200B is a non-width white-space character, which allows
+  // the browser to efficiently word-wrap right after the dot
+  // without us having to draw a lot of extra DOM elements, etc
+  return str ? str.replace(/\./g, '.\u200B') : '';
+}
+
 export const IndexPatternDimensionTriggerComponent = function IndexPatternDimensionTrigger(
   props: IndexPatternDimensionTriggerProps
 ) {
@@ -249,6 +256,7 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
   if (!selectedColumn) {
     return null;
   }
+  const formattedLabel = wrapOnDot(uniqueLabel);
 
   const triggerLinkA11yText = i18n.translate('xpack.lens.configure.editConfig', {
     defaultMessage: 'Click to edit configuration or drag to move',
@@ -299,7 +307,7 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
       aria-label={triggerLinkA11yText}
       title={triggerLinkA11yText}
     >
-      {uniqueLabel}
+      {formattedLabel}
     </EuiLink>
   );
 };
