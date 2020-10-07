@@ -70,9 +70,10 @@ describe('Credentials', () => {
     mockKea({});
     const copyMock = jest.fn();
     const wrapper = shallow(<Credentials />);
-    const copyEl = shallow(wrapper.find(EuiCopy).props().children(copyMock));
+    // We wrap children in a div so that `shallow` can render it.
+    const copyEl = shallow(<div>{wrapper.find(EuiCopy).props().children(copyMock)}</div>);
     expect(copyEl.find('EuiButtonIcon').props().onClick).toEqual(copyMock);
-    expect(copyEl.find('span').text()).toEqual('http://localhost:3002');
+    expect(copyEl.text().replace('<EuiButtonIcon />', '')).toEqual('http://localhost:3002');
   });
 
   it('will show the Crendentials Flyout when the Create API Key button is pressed', () => {
