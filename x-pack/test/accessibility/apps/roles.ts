@@ -88,20 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('a11y test for view privilege summary panel', async () => {
       await PageObjects.security.clickElasticsearchRoles();
-      await PageObjects.security.addRole('a11yRole', {
-        elasticsearch: {
-          indices: [
-            {
-              names: ['logstash-*'],
-              privileges: ['read', 'view_index_metadata'],
-            },
-          ],
-        },
-        kibana: {
-          global: ['all'],
-        },
-      });
-      await testSubjects.click('edit-role-action-a11yRole');
+      await testSubjects.click('edit-role-action-global_canvas_all');
       await testSubjects.click('viewPrivilegeSummaryButton');
 
       await a11y.testAppSnapshot();
@@ -110,7 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('a11y test for select and delete a role in roles listing table', async () => {
-      await testSubjects.click('checkboxSelectRow-a11yRole');
+      await testSubjects.click('checkboxSelectRow-antimeridian_points_reader');
       await a11y.testAppSnapshot();
       await testSubjects.click('deleteRoleButton');
       await a11y.testAppSnapshot();
