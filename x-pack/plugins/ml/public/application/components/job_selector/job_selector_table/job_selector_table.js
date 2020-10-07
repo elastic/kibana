@@ -26,6 +26,7 @@ export function JobSelectorTable({
   selectedIds,
   singleSelection,
   timeseriesOnly,
+  withTimeRangeSelector,
 }) {
   const [sortableProperties, setSortableProperties] = useState();
   const [currentTab, setCurrentTab] = useState('Jobs');
@@ -125,15 +126,18 @@ export function JobSelectorTable({
             <JobSelectorBadge key={`${group}-key`} id={group} isGroup={true} />
           )),
       },
-      {
+    ];
+
+    if (withTimeRangeSelector) {
+      columns.push({
         label: 'time range',
         id: 'timerange',
         alignment: LEFT_ALIGNMENT,
         render: ({ timeRange = {}, isRunning }) => (
           <TimeRangeBar timerange={timeRange} isRunning={isRunning} ganttBarWidth={ganttBarWidth} />
         ),
-      },
-    ];
+      });
+    }
 
     const filters = [
       {
@@ -190,15 +194,18 @@ export function JobSelectorTable({
         alignment: CENTER_ALIGNMENT,
         render: ({ jobIds = [] }) => jobIds.length,
       },
-      {
+    ];
+
+    if (withTimeRangeSelector) {
+      groupColumns.push({
         label: 'time range',
         id: 'timerange',
         alignment: LEFT_ALIGNMENT,
         render: ({ timeRange = {} }) => (
           <TimeRangeBar timerange={timeRange} ganttBarWidth={ganttBarWidth} />
         ),
-      },
-    ];
+      });
+    }
 
     return (
       <CustomSelectionTable
@@ -242,4 +249,5 @@ JobSelectorTable.propTypes = {
   selectedIds: PropTypes.array.isRequired,
   singleSelection: PropTypes.bool,
   timeseriesOnly: PropTypes.bool,
+  withTimeRangeSelector: PropTypes.bool,
 };

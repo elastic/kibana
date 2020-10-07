@@ -244,6 +244,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
               selectedIds={newSelection}
               singleSelection={singleSelection}
               timeseriesOnly={timeseriesOnly}
+              withTimeRangeSelector={withTimeRangeSelector}
             />
           </EuiFlyoutBody>
           <EuiFlyoutFooter>
