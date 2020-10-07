@@ -400,13 +400,8 @@ const updateExistingIndex = async ({
   delete mappings.properties.stream;
   delete mappings.properties.data_stream;
 
-  // get the data_stream values from the index template to compose data stream name
-  const indexMappings = await getIndexMappings(indexName, callCluster);
-  const dataStream = indexMappings[indexName].mappings.properties.data_stream.properties;
-  if (!dataStream.type.value || !dataStream.dataset.value || !dataStream.namespace.value)
-    throw new Error(`data_stream values are missing from the index template ${indexName}`);
-  const dataStreamName = `${dataStream.type.value}-${dataStream.dataset.value}-${dataStream.namespace.value}`;
-
+  const [, dsType, dsTemplateName, dsNamespace] = indexName.split('-');
+  const dataStreamName = `${dsType}-${dsTemplateName}-${dsNamespace}`;
   // try to update the mappings first
   try {
     await callCluster('indices.putMapping', {
@@ -436,16 +431,5 @@ const updateExistingIndex = async ({
     });
   } catch (err) {
     throw new Error(`could not update index template settings for ${indexName}`);
-  }
-};
-
-const getIndexMappings = async (indexName: string, callCluster: CallESAsCurrentUser) => {
-  try {
-    const indexMappings = await callCluster('indices.getMapping', {
-      index: indexName,
-    });
-    return indexMappings;
-  } catch (err) {
-    throw new Error(`could not get mapping from ${indexName}`);
   }
 };
