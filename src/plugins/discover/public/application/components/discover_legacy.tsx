@@ -18,7 +18,14 @@
  */
 import React, { useState, useCallback, useEffect } from 'react';
 import classNames from 'classnames';
-import { EuiButtonEmpty, EuiButtonIcon, EuiHideFor } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiButtonToggle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHideFor,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { IUiSettingsClient, MountPoint } from 'kibana/public';
@@ -48,7 +55,7 @@ import { SavedSearch } from '../../saved_searches';
 import { SavedObject } from '../../../../../core/types';
 import { Vis } from '../../../../visualizations/public';
 import { TopNavMenuData } from '../../../../navigation/public';
-import { DiscoverSidebarResponsive } from './sidebar/discover_sidebar_responsive';
+import { DiscoverSidebarResponsive } from './sidebar';
 
 export interface DiscoverLegacyProps {
   addColumn: (column: string) => void;
@@ -122,6 +129,7 @@ export function DiscoverLegacy({
   updateSavedQueryId,
   vis,
 }: DiscoverLegacyProps) {
+  const [toggleOn, toggleChart] = useState(true);
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
   const { TopNavMenu } = getServices().navigation.ui;
   const { savedSearch, indexPatternList } = opts;
@@ -212,23 +220,43 @@ export function DiscoverLegacy({
             {resultState === 'ready' && (
               <>
                 <SkipBottomButton onClick={onSkipBottomButtonClick} />
-                <HitsCounter
-                  hits={hits > 0 ? hits : 0}
-                  showResetButton={!!(savedSearch && savedSearch.id)}
-                  onResetQuery={resetQuery}
-                />
-                {opts.timefield && (
-                  <TimechartHeader
-                    dateFormat={opts.config.get('dateFormat')}
-                    timeRange={timeRange}
-                    options={search.aggs.intervalOptions}
-                    onChangeInterval={onChangeInterval}
-                    stateInterval={state.interval || ''}
-                    bucketInterval={bucketInterval}
-                  />
-                )}
+                <div className="dscResultCount">
+                  <EuiFlexGroup justifyContent="spaceBetween">
+                    <EuiFlexItem
+                      grow={false}
+                      className="dscResuntCount__title eui-textTruncate eui-textNoWrap"
+                    >
+                      <HitsCounter
+                        hits={hits > 0 ? hits : 0}
+                        showResetButton={!!(savedSearch && savedSearch.id)}
+                        onResetQuery={resetQuery}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem className="dscResultCount__actions">
+                      <TimechartHeader
+                        dateFormat={opts.config.get('dateFormat')}
+                        timeRange={timeRange}
+                        options={search.aggs.intervalOptions}
+                        onChangeInterval={onChangeInterval}
+                        stateInterval={state.interval || ''}
+                        bucketInterval={bucketInterval}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem className="dscResultCount__toggle" grow={false}>
+                      <EuiButtonToggle
+                        label={toggleOn ? 'Hide chart' : 'Show chart'}
+                        iconType={toggleOn ? 'eyeClosed' : 'eye'}
+                        onChange={(e: any) => {
+                          toggleChart(e.target.checked);
+                        }}
+                        isSelected={toggleOn}
+                        isEmpty
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </div>
 
-                {opts.timefield && (
+                {toggleOn && opts.timefield && (
                   <section
                     aria-label={i18n.translate('discover.histogramOfFoundDocumentsAriaLabel', {
                       defaultMessage: 'Histogram of found documents',
@@ -286,7 +314,11 @@ export function DiscoverLegacy({
                               values={{ sampleSize: opts.sampleSize }}
                             />
 
-                            <EuiButtonEmpty onClick={() => window.scrollTo(0, 0)}>
+                            <EuiButtonEmpty
+                              onClick={(ev) => {
+                                ev.currentTarget.parentNode.parentNode.parentNode.scrollTo(0, 0);
+                              }}
+                            >
                               <FormattedMessage
                                 id="discover.backToTopLinkText"
                                 defaultMessage="Back to top."
