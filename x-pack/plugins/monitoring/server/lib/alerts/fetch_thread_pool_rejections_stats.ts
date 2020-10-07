@@ -17,6 +17,7 @@ const getTopHits = (threadType: string, order: string) => ({
       {
         timestamp: {
           order,
+          unmapped_type: 'long',
         },
       },
     ],
@@ -78,10 +79,10 @@ export async function fetchThreadPoolRejectionStats(
               },
               aggs: {
                 most_recent: {
-                  ...getTopHits(threadType, 'asc'),
+                  ...getTopHits(threadType, 'desc'),
                 },
                 least_recent: {
-                  ...getTopHits(threadType, 'desc'),
+                  ...getTopHits(threadType, 'asc'),
                 },
               },
             },
@@ -127,6 +128,7 @@ export async function fetchThreadPoolRejectionStats(
       const nodeName = get(mostRecentDoc, '_source.source_node.name') || node.key;
       const nodeStat = {
         rejectionCount,
+        type: threadType,
         clusterUuid: clusterBucket.key,
         nodeId: node.key,
         nodeName,

@@ -148,25 +148,26 @@ export class ThreadPoolRejectionsAlertBase extends BaseAlert {
     alertState: AlertThreadPoolRejectionsState,
     rejectionCount: number
   ): AlertMessage {
-    const { nodeName, nodeId, type } = alertState;
+    const { nodeName, nodeId } = alertState;
     return {
       text: i18n.translate('xpack.monitoring.alerts.threadPoolRejections.ui.firingMessage', {
         defaultMessage: `Node #start_link{nodeName}#end_link is reporting {rejectionCount} {type} rejections at #absolute`,
         values: {
           nodeName,
-          type,
+          type: this.threadPoolType,
           rejectionCount,
         },
       }),
       nextSteps: [
         createLink(
           i18n.translate(
-            'xpack.monitoring.alerts.threadPoolRejections.ui.nextSteps.tuneThreadPools',
+            'xpack.monitoring.alerts.threadPoolRejections.ui.nextSteps.monitorThisNode',
             {
-              defaultMessage: '#start_linkTune thread pools#end_link',
+              defaultMessage: `#start_linkMonitor this node#end_link`,
             }
           ),
-          `{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/modules-threadpool.html`
+          `elasticsearch/nodes/${nodeId}/advanced`,
+          AlertMessageTokenType.Link
         ),
         createLink(
           i18n.translate(
@@ -191,6 +192,15 @@ export class ThreadPoolRejectionsAlertBase extends BaseAlert {
             }
           ),
           `{elasticWebsiteUrl}guide/en/cloud-enterprise/current/ece-resize-deployment.html`
+        ),
+        createLink(
+          i18n.translate(
+            'xpack.monitoring.alerts.threadPoolRejections.ui.nextSteps.threadPoolSettings',
+            {
+              defaultMessage: '#start_linkThread pool settings#end_link',
+            }
+          ),
+          `{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/modules-threadpool.html`
         ),
       ],
       tokens: [
