@@ -24,6 +24,9 @@ import { ISearchSetup, ISearchStart, SearchEnhancements } from './types';
 import { handleResponse } from './fetch';
 import {
   IEsSearchRequest,
+  IEsSearchResponse,
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
   ISearchGeneric,
   ISearchOptions,
   SearchSourceService,
@@ -117,8 +120,14 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     const searchSourceDependencies: SearchSourceDependencies = {
       getConfig: uiSettings.get.bind(uiSettings),
-      search: (request: IEsSearchRequest, options: ISearchOptions) => {
-        return search(request, options).toPromise();
+      search: <
+        SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
+        SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
+      >(
+        request: SearchStrategyRequest,
+        options: ISearchOptions
+      ) => {
+        return search(request, options).toPromise() as Promise<SearchStrategyResponse>;
       },
       onResponse: handleResponse,
       legacy: {

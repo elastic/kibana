@@ -19,13 +19,14 @@
 import { i18n } from '@kbn/i18n';
 import { AggGroupNames } from '../../data/public';
 import { Schemas } from '../../vis_default_editor/public';
-import { Vis } from '../../visualizations/public';
+import { BaseVisTypeOptions } from '../../visualizations/public';
 
 import { TableOptions } from './components/table_vis_options_lazy';
 import { VIS_EVENT_TO_TRIGGER } from '../../../plugins/visualizations/public';
 import { toExpressionAst } from './to_ast';
+import { TableVisParams } from './types';
 
-export const tableVisTypeDefinition = {
+export const tableVisTypeDefinition: BaseVisTypeOptions<TableVisParams> = {
   name: 'table',
   title: i18n.translate('visTypeTable.tableVisTitle', {
     defaultMessage: 'Data Table',
@@ -90,7 +91,7 @@ export const tableVisTypeDefinition = {
     ]),
   },
   toExpressionAst,
-  hierarchicalData: (vis: Vis) => {
+  hierarchicalData: (vis) => {
     return Boolean(vis.params.showPartialRows || vis.params.showMetricsAtAllLevels);
   },
 };

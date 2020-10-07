@@ -5,15 +5,7 @@
  */
 
 import React, { FC, useCallback, useMemo } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   Chart,
@@ -38,6 +30,9 @@ import {
 } from '../../../../../../../common/types/feature_importance';
 
 import { useMlKibana } from '../../../../../contexts/kibana';
+
+import { ExpandableSection } from '../expandable_section';
+
 const { euiColorMediumShade } = euiVars;
 const axisColor = euiColorMediumShade;
 
@@ -193,72 +188,85 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
   const tickFormatter = useCallback((d) => Number(d.toPrecision(3)).toString(), []);
 
+  // do not expand by default if no feature importance data
+  const hasTotalFeatureImportance = useMemo(() => totalFeatureImportance.length > 1, [
+    totalFeatureImportance,
+  ]);
   return (
-    <EuiPanel>
-      <div>
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-          <EuiFlexItem>
-            <EuiFlexGroup gutterSize="xs">
-              <EuiTitle size="xs">
-                <span>
-                  <FormattedMessage
-                    id="xpack.ml.dataframe.analytics.exploration.featureImportanceSummaryTitle"
-                    defaultMessage="Total feature importance"
-                  />
-                </span>
-              </EuiTitle>
-              <EuiFlexItem grow={false}>
-                <EuiIconTip content={tooltipContent} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiSpacer />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              target="_blank"
-              iconType="help"
-              iconSide="left"
-              color="primary"
-              href={`${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-feature-importance.html`}
+    <>
+      <ExpandableSection
+        isExpanded={hasTotalFeatureImportance}
+        dataTestId="FeatureImportanceSummary"
+        title={
+          <FormattedMessage
+            id="xpack.ml.dataframe.analytics.exploration.featureImportanceSummaryTitle"
+            defaultMessage="Total feature importance"
+          />
+        }
+        docsLink={
+          <EuiButtonEmpty
+            target="_blank"
+            iconType="help"
+            iconSide="left"
+            color="primary"
+            href={`${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-feature-importance.html`}
+          >
+            <FormattedMessage
+              id="xpack.ml.dataframe.analytics.exploration.featureImportanceDocsLink"
+              defaultMessage="Feature importance docs"
+            />
+          </EuiButtonEmpty>
+        }
+        headerItems={[
+          {
+            id: 'FeatureImportanceSummary',
+            value: tooltipContent,
+          },
+        ]}
+        content={
+          !hasTotalFeatureImportance ? (
+            <EuiCallOut
+              size="s"
+              title={
+                <FormattedMessage
+                  id="xpack.ml.dataframe.analytics.exploration.noTotalFeatureImportanceCalloutMessage"
+                  defaultMessage="Total feature importance data is not available; the data set is uniform and the features have no significant impact on the prediction."
+                />
+              }
+            />
+          ) : (
+            <Chart
+              size={{
+                width: '100%',
+                height: chartHeight,
+              }}
             >
-              <FormattedMessage
-                id="xpack.ml.dataframe.analytics.exploration.featureImportanceDocsLink"
-                defaultMessage="Feature importance docs"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
-      <Chart
-        size={{
-          width: '100%',
-          height: chartHeight,
-        }}
-      >
-        <Settings rotation={90} theme={theme} showLegend={showLegend} />
+              <Settings rotation={90} theme={theme} showLegend={showLegend} />
 
-        <Axis
-          id="x-axis"
-          title={i18n.translate(
-            'xpack.ml.dataframe.analytics.exploration.featureImportanceXAxisTitle',
-            {
-              defaultMessage: 'Feature importance average magnitude',
-            }
-          )}
-          position={Position.Bottom}
-          tickFormat={tickFormatter}
-        />
-        <Axis id="y-axis" title="" position={Position.Left} />
-        <BarSeries
-          id="magnitude"
-          xScaleType={ScaleType.Ordinal}
-          yScaleType={ScaleType.Linear}
-          data={plotData}
-          {...barSeriesSpec}
-        />
-      </Chart>
-    </EuiPanel>
+              <Axis
+                id="x-axis"
+                title={i18n.translate(
+                  'xpack.ml.dataframe.analytics.exploration.featureImportanceXAxisTitle',
+                  {
+                    defaultMessage: 'Feature importance average magnitude',
+                  }
+                )}
+                position={Position.Bottom}
+                tickFormat={tickFormatter}
+              />
+              <Axis id="y-axis" title="" position={Position.Left} />
+              <BarSeries
+                id="magnitude"
+                xScaleType={ScaleType.Ordinal}
+                yScaleType={ScaleType.Linear}
+                data={plotData}
+                {...barSeriesSpec}
+              />
+            </Chart>
+          )
+        }
+      />
+      <EuiSpacer size="m" />
+    </>
   );
 };
