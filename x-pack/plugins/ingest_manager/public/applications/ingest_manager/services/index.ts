@@ -26,4 +26,5 @@ export {
   doesAgentPolicyAlreadyIncludePackage,
   isValidNamespace,
   LicenseService,
+  isAgentUpgradeable,
 } from '../../../../common';

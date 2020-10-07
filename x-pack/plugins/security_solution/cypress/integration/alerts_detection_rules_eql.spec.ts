@@ -88,11 +88,11 @@ const expectedNumberOfAlerts = 7;
 const expectedNumberOfSequenceAlerts = 1;
 
 describe('Detection rules, EQL', () => {
-  before(() => {
+  beforeEach(() => {
     esArchiverLoad('timeline');
   });
 
-  after(() => {
+  afterEach(() => {
     esArchiverUnload('timeline');
   });
 

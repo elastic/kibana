@@ -190,7 +190,7 @@ export function PanelHeader({
         </span>
       </EuiToolTip>
     ) : (
-      titleComponent
+      <span className="embPanel__titleInner">{titleComponent}</span>
     );
   };
 

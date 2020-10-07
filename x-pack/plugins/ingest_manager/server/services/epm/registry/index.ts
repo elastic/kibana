@@ -12,6 +12,7 @@ import {
   AssetsGroupedByServiceByType,
   CategoryId,
   CategorySummaryList,
+  InstallSource,
   KibanaAssetType,
   RegistryPackage,
   RegistrySearchResults,
@@ -21,17 +22,16 @@ import {
   cacheGet,
   cacheSet,
   cacheDelete,
-  cacheHas,
-  getArchiveLocation,
-  setArchiveLocation,
-  deleteArchiveLocation,
+  getArchiveFilelist,
+  setArchiveFilelist,
+  deleteArchiveFilelist,
 } from './cache';
 import { ArchiveEntry, untarBuffer, unzipBuffer } from './extract';
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { streamToBuffer } from './streams';
 import { getRegistryUrl } from './registry_url';
 import { appContextService } from '../..';
-import { PackageNotFoundError } from '../../../errors';
+import { PackageNotFoundError, PackageCacheError } from '../../../errors';
 
 export { ArchiveEntry } from './extract';
 
@@ -132,14 +132,14 @@ export async function fetchCategories(params?: CategoriesParams): Promise<Catego
   return fetchUrl(url.toString()).then(JSON.parse);
 }
 
-export async function getArchiveInfo(
+export async function unpackRegistryPackageToCache(
   pkgName: string,
   pkgVersion: string,
   filter = (entry: ArchiveEntry): boolean => true
 ): Promise<string[]> {
   const paths: string[] = [];
-  const archiveBuffer = await getOrFetchArchiveBuffer(pkgName, pkgVersion);
-  const bufferExtractor = getBufferExtractor(pkgName, pkgVersion);
+  const { archiveBuffer, archivePath } = await fetchArchiveBuffer(pkgName, pkgVersion);
+  const bufferExtractor = getBufferExtractor(archivePath);
   await bufferExtractor(archiveBuffer, filter, (entry: ArchiveEntry) => {
     const { path, buffer } = entry;
     const { file } = pathParts(path);
@@ -151,6 +151,22 @@ export async function getArchiveInfo(
   });
 
   return paths;
+}
+
+export async function loadRegistryPackage(
+  pkgName: string,
+  pkgVersion: string
+): Promise<{ paths: string[]; registryPackageInfo: RegistryPackage }> {
+  let paths = getArchiveFilelist(pkgName, pkgVersion);
+  if (!paths || paths.length === 0) {
+    paths = await unpackRegistryPackageToCache(pkgName, pkgVersion);
+    setArchiveFilelist(pkgName, pkgVersion, paths);
+  }
+
+  // TODO: cache this as well?
+  const registryPackageInfo = await fetchInfo(pkgName, pkgVersion);
+
+  return { paths, registryPackageInfo };
 }
 
 export function pathParts(path: string): AssetParts {
@@ -183,45 +199,39 @@ export function pathParts(path: string): AssetParts {
   } as AssetParts;
 }
 
-export function getBufferExtractor(pkgName: string, pkgVersion: string) {
-  const archiveLocation = getArchiveLocation(pkgName, pkgVersion);
-  if (!archiveLocation) throw new Error(`no archive location for ${pkgName} ${pkgVersion}`);
-  const isZip = archiveLocation.endsWith('.zip');
+export function getBufferExtractor(archivePath: string) {
+  const isZip = archivePath.endsWith('.zip');
   const bufferExtractor = isZip ? unzipBuffer : untarBuffer;
 
   return bufferExtractor;
 }
 
-async function getOrFetchArchiveBuffer(pkgName: string, pkgVersion: string): Promise<Buffer> {
-  const key = getArchiveLocation(pkgName, pkgVersion);
-  let buffer = key && cacheGet(key);
-  if (!buffer) {
-    buffer = await fetchArchiveBuffer(pkgName, pkgVersion);
-  }
-
-  if (buffer) {
-    return buffer;
-  } else {
-    throw new Error(`no archive buffer for ${key}`);
-  }
-}
-
-export async function ensureCachedArchiveInfo(name: string, version: string) {
-  const pkgkey = getArchiveLocation(name, version);
-  if (!pkgkey || !cacheHas(pkgkey)) {
-    await getArchiveInfo(name, version);
+export async function ensureCachedArchiveInfo(
+  name: string,
+  version: string,
+  installSource: InstallSource = 'registry'
+) {
+  const paths = getArchiveFilelist(name, version);
+  if (!paths || paths.length === 0) {
+    if (installSource === 'registry') {
+      await loadRegistryPackage(name, version);
+    } else {
+      throw new PackageCacheError(
+        `Package ${name}-${version} not cached. If it was uploaded, try uninstalling and reinstalling manually.`
+      );
+    }
   }
 }
 
-async function fetchArchiveBuffer(pkgName: string, pkgVersion: string): Promise<Buffer> {
+async function fetchArchiveBuffer(
+  pkgName: string,
+  pkgVersion: string
+): Promise<{ archiveBuffer: Buffer; archivePath: string }> {
   const { download: archivePath } = await fetchInfo(pkgName, pkgVersion);
   const archiveUrl = `${getRegistryUrl()}${archivePath}`;
-  const buffer = await getResponseStream(archiveUrl).then(streamToBuffer);
+  const archiveBuffer = await getResponseStream(archiveUrl).then(streamToBuffer);
 
-  setArchiveLocation(pkgName, pkgVersion, archivePath);
-  cacheSet(archivePath, buffer);
-
-  return buffer;
+  return { archiveBuffer, archivePath };
 }
 
 export function getAsset(key: string) {
@@ -250,16 +260,14 @@ export function groupPathsByService(paths: string[]): AssetsGroupedByServiceByTy
   };
 }
 
-export const deletePackageCache = (name: string, version: string, paths: string[]) => {
-  const archiveLocation = getArchiveLocation(name, version);
-  if (archiveLocation) {
-    // delete cached archive
-    cacheDelete(archiveLocation);
+export const deletePackageCache = (name: string, version: string) => {
+  // get cached archive filelist
+  const paths = getArchiveFilelist(name, version);
 
-    // delete cached archive location
-    deleteArchiveLocation(name, version);
-  }
-  // delete cached archive contents
-  // this has been populated in Registry.getArchiveInfo()
-  paths.forEach((path) => cacheDelete(path));
+  // delete cached archive filelist
+  deleteArchiveFilelist(name, version);
+
+  // delete cached archive files
+  // this has been populated in unpackRegistryPackageToCache()
+  paths?.forEach((path) => cacheDelete(path));
 };

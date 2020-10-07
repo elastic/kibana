@@ -12,6 +12,7 @@ import {
   DraggableWrapper,
 } from '../../../common/components/drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
+import { Content } from '../../../common/components/draggables';
 import { getOrEmptyTagFromValue } from '../../../common/components/empty_value';
 import { NetworkDetailsLink } from '../../../common/components/links';
 import { parseQueryValue } from '../../../timelines/components/timeline/body/renderers/parse_query_value';
@@ -148,9 +149,11 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
           <Provider dataProvider={dataProviderProp} />
         </DragEffects>
       ) : (
-        <NetworkDetailsLink data-test-subj="network-details" ip={address} />
+        <Content field={fieldName} tooltipContent={address}>
+          <NetworkDetailsLink data-test-subj="network-details" ip={address} />
+        </Content>
       ),
-    [address, dataProviderProp]
+    [address, dataProviderProp, fieldName]
   );
 
   return (

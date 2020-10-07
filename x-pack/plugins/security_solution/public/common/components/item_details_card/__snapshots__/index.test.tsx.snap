@@ -200,7 +200,11 @@ exports[`item_details_card ItemDetailsPropertySummary should render correctly 1`
     name 1
   </Styled(EuiDescriptionListTitle)>
   <Styled(EuiDescriptionListDescription)>
-    value 1
+    <span
+      title=""
+    >
+      value 1
+    </span>
   </Styled(EuiDescriptionListDescription)>
 </Fragment>
 `;
