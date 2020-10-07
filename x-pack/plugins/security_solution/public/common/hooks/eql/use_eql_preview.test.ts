@@ -59,8 +59,6 @@ describe('useEqlPreview', () => {
 
       result.current[1](params);
 
-      // await waitForNextUpdate();
-
       const mockCalls = (useKibana().services.data.search.search as jest.Mock).mock.calls;
 
       expect(mockCalls.length).toEqual(1);
