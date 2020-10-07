@@ -164,7 +164,7 @@ export interface DashboardStart {
     R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
   >(
     type: string,
-    options?: AttributeServiceOptions<A>
+    options: AttributeServiceOptions<A>
   ) => AttributeService<A, V, R>;
 }
 
@@ -395,6 +395,9 @@ export class DashboardPlugin
         title: i18n.translate('dashboard.featureCatalogue.dashboardTitle', {
           defaultMessage: 'Dashboard',
         }),
+        subtitle: i18n.translate('dashboard.featureCatalogue.dashboardSubtitle', {
+          defaultMessage: 'Analyze data in dashboards.',
+        }),
         description: i18n.translate('dashboard.featureCatalogue.dashboardDescription', {
           defaultMessage: 'Display and share a collection of visualizations and saved searches.',
         }),
@@ -402,6 +405,8 @@ export class DashboardPlugin
         path: `/app/dashboards#${DashboardConstants.LANDING_PAGE_PATH}`,
         showOnHomePage: false,
         category: FeatureCatalogueCategory.DATA,
+        solutionId: 'kibana',
+        order: 100,
       });
     }
   }
@@ -482,12 +487,10 @@ export class DashboardPlugin
         new AttributeService(
           type,
           showSaveModal,
-          core.savedObjects.client,
-          core.overlays,
           core.i18n.Context,
           core.notifications.toasts,
-          embeddable.getEmbeddableFactory,
-          options
+          options,
+          embeddable.getEmbeddableFactory
         ),
     };
   }

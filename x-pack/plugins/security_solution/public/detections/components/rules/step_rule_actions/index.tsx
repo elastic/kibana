@@ -72,7 +72,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   const {
     services: {
       application,
-      triggers_actions_ui: { actionTypeRegistry },
+      triggersActionsUi: { actionTypeRegistry },
     },
   } = useKibana();
   const kibanaAbsoluteUrl = useMemo(

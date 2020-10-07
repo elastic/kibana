@@ -15,10 +15,11 @@ import {
   CasePatchRequest,
   excess,
   throwErrors,
+  ESCasePatchRequest,
 } from '../../../../common/api';
 import { escapeHatch, wrapError, flattenCaseSavedObject } from '../utils';
 import { RouteDeps } from '../types';
-import { getCaseToUpdate, getConnectorId } from './helpers';
+import { getCaseToUpdate, transformCaseConnectorToEsConnector } from './helpers';
 import { buildCaseUserActions } from '../../../services/user_actions/helpers';
 import { CASES_URL } from '../../../../common/constants';
 
@@ -43,14 +44,10 @@ export function initPatchCasesApi({
           fold(throwErrors(Boom.badRequest), identity)
         );
 
-        const [myCases, myCaseConfigure] = await Promise.all([
-          caseService.getCases({
-            client,
-            caseIds: query.cases.map((q) => q.id),
-          }),
-          caseConfigureService.find({ client }),
-        ]);
-        const caseConfigureConnectorId = getConnectorId(myCaseConfigure);
+        const myCases = await caseService.getCases({
+          client,
+          caseIds: query.cases.map((q) => q.id),
+        });
 
         let nonExistingCases: CasePatchRequest[] = [];
         const conflictedCases = query.cases.filter((q) => {
@@ -76,16 +73,25 @@ export function initPatchCasesApi({
               .join(', ')} has been updated. Please refresh before saving additional updates.`
           );
         }
-        const updateCases: CasePatchRequest[] = query.cases.map((thisCase) => {
-          const currentCase = myCases.saved_objects.find((c) => c.id === thisCase.id);
+
+        const updateCases: ESCasePatchRequest[] = query.cases.map((updateCase) => {
+          const currentCase = myCases.saved_objects.find((c) => c.id === updateCase.id);
+          const { connector, ...thisCase } = updateCase;
           return currentCase != null
-            ? getCaseToUpdate(currentCase.attributes, thisCase)
+            ? getCaseToUpdate(currentCase.attributes, {
+                ...thisCase,
+                ...(connector != null
+                  ? { connector: transformCaseConnectorToEsConnector(connector) }
+                  : {}),
+              })
             : { id: thisCase.id, version: thisCase.version };
         });
+
         const updateFilterCases = updateCases.filter((updateCase) => {
           const { id, version, ...updateCaseAttributes } = updateCase;
           return Object.keys(updateCaseAttributes).length > 0;
         });
+
         if (updateFilterCases.length > 0) {
           // eslint-disable-next-line @typescript-eslint/naming-convention
           const { username, full_name, email } = await caseService.getUser({ request, response });
@@ -133,7 +139,6 @@ export function initPatchCasesApi({
                   references: myCase.references,
                   version: updatedCase?.version ?? myCase.version,
                 },
-                caseConfigureConnectorId,
               });
             });
 

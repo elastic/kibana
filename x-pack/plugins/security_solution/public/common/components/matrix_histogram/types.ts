@@ -70,6 +70,7 @@ export interface MatrixHistogramQueryProps {
   stackByField: string;
   startDate: string;
   histogramType: MatrixHistogramType;
+  threshold?: { field: string | undefined; value: number } | undefined;
 }
 
 export interface MatrixHistogramProps extends MatrixHistogramBasicProps {
@@ -104,6 +105,7 @@ export interface BarchartConfigs {
     yTickFormatter: TickFormatter;
     tickSize: number;
   };
+  yAxisTitle: string | undefined;
   settings: {
     legendPosition: Position;
     onBrushEnd: UpdateDateRange;
