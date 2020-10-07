@@ -11,11 +11,7 @@ import { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  CredentialsLogic,
-  ICredentialsLogicActions,
-  ICredentialsLogicValues,
-} from '../credentials_logic';
+import { CredentialsLogic } from '../credentials_logic';
 import { IApiToken } from '../types';
 import { TOKEN_TYPE_DISPLAY_NAMES } from '../constants';
 import { apiTokenSort } from '../utils/api_token_sort';
@@ -24,9 +20,9 @@ import { getModeDisplayText, getEnginesDisplayText } from '../utils';
 export const CredentialsList: React.FC = () => {
   const { deleteApiKey, fetchCredentials, showCredentialsForm } = useActions(
     CredentialsLogic
-  ) as ICredentialsLogicActions;
+  );
 
-  const { apiTokens, meta } = useValues(CredentialsLogic) as ICredentialsLogicValues;
+  const { apiTokens, meta } = useValues(CredentialsLogic);
 
   const items = apiTokens.slice().sort(apiTokenSort);
 
