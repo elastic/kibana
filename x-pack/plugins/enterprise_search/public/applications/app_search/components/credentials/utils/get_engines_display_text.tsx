@@ -10,16 +10,17 @@ import { IApiToken } from '../types';
 
 export const getEnginesDisplayText = (apiToken: IApiToken): JSX.Element | string => {
   const { type, access_all_engines: accessAll, engines = [] } = apiToken;
-  const engineList = () => (
+  if (type === ApiTokenTypes.Admin) {
+    return '--';
+  }
+  if (accessAll) {
+    return ALL;
+  }
+  return (
     <ul>
       {engines.map((engine) => (
         <li key={engine}>{engine}</li>
       ))}
     </ul>
   );
-
-  if (type === ApiTokenTypes.Admin) {
-    return '--';
-  }
-  return accessAll ? ALL : engineList();
 };
