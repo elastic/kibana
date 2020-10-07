@@ -273,6 +273,65 @@ export default function ({ getService }) {
               });
             }));
       });
+
+      describe('`has_reference` and `has_reference_operator` parameters', () => {
+        before(() => esArchiver.load('saved_objects/references'));
+        after(() => esArchiver.unload('saved_objects/references'));
+
+        it('search for a reference', async () => {
+          await supertest
+            .get('/api/saved_objects/_find')
+            .query({
+              type: 'visualization',
+              has_reference: JSON.stringify({ type: 'ref-type', id: 'ref-1' }),
+            })
+            .expect(200)
+            .then((resp) => {
+              const objects = resp.body.saved_objects;
+              expect(objects.map((obj) => obj.id)).to.eql(['only-ref-1', 'ref-1-and-ref-2']);
+            });
+        });
+
+        it('search for multiple references with OR operator', async () => {
+          await supertest
+            .get('/api/saved_objects/_find')
+            .query({
+              type: 'visualization',
+              has_reference: JSON.stringify([
+                { type: 'ref-type', id: 'ref-1' },
+                { type: 'ref-type', id: 'ref-2' },
+              ]),
+              has_reference_operator: 'OR',
+            })
+            .expect(200)
+            .then((resp) => {
+              const objects = resp.body.saved_objects;
+              expect(objects.map((obj) => obj.id)).to.eql([
+                'only-ref-1',
+                'ref-1-and-ref-2',
+                'only-ref-2',
+              ]);
+            });
+        });
+
+        it('search for multiple references with AND operator', async () => {
+          await supertest
+            .get('/api/saved_objects/_find')
+            .query({
+              type: 'visualization',
+              has_reference: JSON.stringify([
+                { type: 'ref-type', id: 'ref-1' },
+                { type: 'ref-type', id: 'ref-2' },
+              ]),
+              has_reference_operator: 'AND',
+            })
+            .expect(200)
+            .then((resp) => {
+              const objects = resp.body.saved_objects;
+              expect(objects.map((obj) => obj.id)).to.eql(['ref-1-and-ref-2']);
+            });
+        });
+      });
     });
 
     describe('without kibana index', () => {
