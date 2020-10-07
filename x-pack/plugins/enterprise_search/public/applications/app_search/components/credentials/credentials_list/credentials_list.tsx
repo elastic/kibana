@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiBasicTable, EuiButtonIcon, EuiCopy } from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn, EuiButtonIcon, EuiCopy } from '@elastic/eui';
 import { useActions, useValues } from 'kea';
 import { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 
@@ -30,7 +30,7 @@ export const CredentialsList: React.FC = () => {
 
   const items = apiTokens.slice().sort(apiTokenSort);
 
-  const columns = [
+  const columns: Array<EuiBasicTableColumn<IApiToken>> = [
     {
       name: 'Name',
       width: '12%',
@@ -80,32 +80,32 @@ export const CredentialsList: React.FC = () => {
       render: (item: IApiToken) => getEnginesDisplayText(item),
     },
     {
-      width: '4%',
-      render: (item: IApiToken) => {
-        return (
-          <EuiButtonIcon
-            onClick={() => showCredentialsForm(item)}
-            iconType="pencil"
-            aria-label={i18n.translate('xpack.enterpriseSearch.appSearch.credentials.editKey', {
-              defaultMessage: 'Edit API Key',
-            })}
-          />
-        );
-      },
-    },
-    {
-      width: '4%',
-      render: (item: IApiToken) => {
-        return (
-          <EuiButtonIcon
-            onClick={() => item.name && deleteApiKey(item.name)}
-            iconType="trash"
-            aria-label={i18n.translate('xpack.enterpriseSearch.appSearch.credentials.deleteKey', {
-              defaultMessage: 'Delete API Key',
-            })}
-          />
-        );
-      },
+      actions: [
+        {
+          name: i18n.translate('xpack.enterpriseSearch.actions.edit', {
+            defaultMessage: 'Edit',
+          }),
+          description: i18n.translate('xpack.enterpriseSearch.appSearch.credentials.editKey', {
+            defaultMessage: 'Edit API Key',
+          }),
+          type: 'icon',
+          icon: 'pencil',
+          color: 'primary',
+          onClick: (item: IApiToken) => showCredentialsForm(item),
+        },
+        {
+          name: i18n.translate('xpack.enterpriseSearch.actions.delete', {
+            defaultMessage: 'Delete',
+          }),
+          description: i18n.translate('xpack.enterpriseSearch.appSearch.credentials.deleteKey', {
+            defaultMessage: 'Delete API Key',
+          }),
+          type: 'icon',
+          icon: 'trash',
+          color: 'danger',
+          onClick: (item: IApiToken) => item.name && deleteApiKey(item.name),
+        },
+      ],
     },
   ];
 

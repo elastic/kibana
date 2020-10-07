@@ -131,6 +131,7 @@ describe('Credentials', () => {
   describe('columns', () => {
     let columns: Array<{
       render: (token: object) => any;
+      actions: any;
     }>;
     const showCredentialsForm = jest.fn();
     const deleteApiKey = jest.fn();
@@ -230,45 +231,25 @@ describe('Credentials', () => {
       });
     });
 
-    describe('column 6 (edit)', () => {
+    describe('column 6 (edit action)', () => {
       const token = apiToken;
-      let wrapper: any;
-
-      beforeEach(() => {
-        const column = columns[5];
-        wrapper = shallow(column.render(token));
-      });
-
-      it('renders a button', () => {
-        expect(wrapper.type()).toEqual('button');
-      });
 
       it('calls showCredentialsForm when clicked', () => {
-        const onClick = wrapper.props().onClick;
-        onClick();
+        const action = columns[5].actions[0];
+        action.onClick(token);
         expect(showCredentialsForm).toHaveBeenCalledWith(token);
       });
     });
 
-    describe('column 7 (delete)', () => {
+    describe('column 7 (delete action)', () => {
       const token = {
         ...apiToken,
         name: 'some-name',
       };
-      let wrapper: any;
-
-      beforeEach(() => {
-        const column = columns[6];
-        wrapper = shallow(column.render(token));
-      });
-
-      it('renders a button', () => {
-        expect(wrapper.type()).toEqual('button');
-      });
 
       it('calls deleteApiKey when clicked', () => {
-        const onClick = wrapper.props().onClick;
-        onClick();
+        const action = columns[5].actions[1];
+        action.onClick(token);
         expect(deleteApiKey).toHaveBeenCalledWith('some-name');
       });
     });
