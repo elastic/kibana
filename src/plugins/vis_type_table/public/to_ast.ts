@@ -23,10 +23,6 @@ import { getVisSchemas, Vis, BuildPipelineParams } from '../../visualizations/pu
 import { TableExpressionFunctionDefinition } from './table_vis_fn';
 import { TableVisConfig, TableVisParams } from './types';
 
-export const escapeString = (data: string): string => {
-  return data.replace(/\\/g, `\\\\`).replace(/'/g, `\\'`);
-};
-
 const buildTableVisConfig = (
   schemas: ReturnType<typeof getVisSchemas>,
   visParams: TableVisParams
@@ -69,7 +65,7 @@ export const toExpressionAst = (vis: Vis<TableVisParams>, params: BuildPipelineP
   };
 
   const table = buildExpressionFunction<TableExpressionFunctionDefinition>('kibana_table', {
-    visConfig: escapeString(JSON.stringify(visConfig)),
+    visConfig: JSON.stringify(visConfig),
   });
 
   const ast = buildExpression([esaggs, table]);

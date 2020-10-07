@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`tagcloud vis toExpressionAst function should match snapshot params fulfilled 1`] = `
+exports[`table vis toExpressionAst function should match snapshot based on params & dimensions 1`] = `
 Object {
   "chain": Array [
     Object {
@@ -38,7 +38,7 @@ Object {
 }
 `;
 
-exports[`tagcloud vis toExpressionAst function should match snapshot without params 1`] = `
+exports[`table vis toExpressionAst function should match snapshot without params 1`] = `
 Object {
   "chain": Array [
     Object {

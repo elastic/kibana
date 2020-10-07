@@ -5,9 +5,6 @@ Object {
   "as": "table_vis",
   "type": "render",
   "value": Object {
-    "params": Object {
-      "listenOnChange": true,
-    },
     "visConfig": Object {
       "dimensions": Object {
         "buckets": Array [],
