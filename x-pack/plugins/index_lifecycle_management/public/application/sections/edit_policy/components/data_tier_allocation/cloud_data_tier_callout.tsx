@@ -13,7 +13,8 @@ const i18nTexts = {
     defaultMessage: 'No cold tier found',
   }),
   body: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.cloudDataTierCallout.body', {
-    defaultMessage: 'Please activate the cold tier in Cloud UI.',
+    defaultMessage:
+      'Data in this phase will be allocated to hot and warm tier nodes. Go to the Cloud UI to create a cold tier.',
   }),
 };
 
