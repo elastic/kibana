@@ -39,6 +39,7 @@ import { dataPluginMock } from '../../data/public/mocks';
 import { inspectorPluginMock } from '../../inspector/public/mocks';
 import { uiActionsPluginMock } from '../../ui_actions/public/mocks';
 
+export { mockAttributeService } from './lib/attribute_service/attribute_service.mock';
 export type Setup = jest.Mocked<EmbeddableSetup>;
 export type Start = jest.Mocked<EmbeddableStart>;
 

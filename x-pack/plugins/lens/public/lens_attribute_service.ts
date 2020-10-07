@@ -6,7 +6,7 @@
 
 import { CoreStart } from '../../../../src/core/public';
 import { LensPluginStartDependencies } from './plugin';
-import { AttributeService } from '../../../../src/plugins/dashboard/public';
+import { AttributeService } from '../../../../src/plugins/embeddable/public';
 import {
   LensSavedObjectAttributes,
   LensByValueInput,
