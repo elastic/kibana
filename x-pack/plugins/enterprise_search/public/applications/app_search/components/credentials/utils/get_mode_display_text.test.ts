@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ApiTokenTypes, READ_ONLY, READ_WRITE, SEARCH_DISPLAY, WRITE_ONLY } from '../constants';
+import { ApiTokenTypes } from '../constants';
 import { IApiToken } from '../types';
 
 import { getModeDisplayText } from './get_mode_display_text';
@@ -20,21 +20,21 @@ const apiToken: IApiToken = {
 
 describe('getModeDisplayText', () => {
   it('will return read/write when read and write are enabled', () => {
-    expect(getModeDisplayText({ ...apiToken, read: true, write: true })).toEqual(READ_WRITE);
+    expect(getModeDisplayText({ ...apiToken, read: true, write: true })).toEqual('read/write');
   });
 
   it('will return read-only when only read is enabled', () => {
-    expect(getModeDisplayText({ ...apiToken, read: true, write: false })).toEqual(READ_ONLY);
+    expect(getModeDisplayText({ ...apiToken, read: true, write: false })).toEqual('read-only');
   });
 
   it('will return write-only when only write is enabled', () => {
-    expect(getModeDisplayText({ ...apiToken, read: false, write: true })).toEqual(WRITE_ONLY);
+    expect(getModeDisplayText({ ...apiToken, read: false, write: true })).toEqual('write-only');
   });
 
   it('will return "search" if the key is a search key, regardless of read/write state', () => {
     expect(
       getModeDisplayText({ ...apiToken, type: ApiTokenTypes.Search, read: false, write: true })
-    ).toEqual(SEARCH_DISPLAY);
+    ).toEqual('search');
   });
 
   it('will return "--" if the key is an admin key, regardless of read/write state', () => {
@@ -49,6 +49,6 @@ describe('getModeDisplayText', () => {
         name: 'test',
         type: ApiTokenTypes.Private,
       })
-    ).toEqual(READ_ONLY);
+    ).toEqual('read-only');
   });
 });
