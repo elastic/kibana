@@ -128,6 +128,7 @@ export class AggConfig {
     getTimeRange(): import("../../../public").TimeRange | undefined;
     // (undocumented)
     getValue(bucket: any): any;
+    getValueBucketPath(): string;
     // (undocumented)
     id: string;
     // (undocumented)
