@@ -244,7 +244,7 @@ The format is a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h',
 [[audit-logging-settings]]
 ===== Audit logging settings
 
-You can enable audit logging to support compliance, accountability and security. When enabled Kibana will capture:
+You can enable audit logging to support compliance, accountability and security. When enabled {kib} will capture:
 
 - Who performed an action
 - What action was performed
