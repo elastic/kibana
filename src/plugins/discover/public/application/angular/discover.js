@@ -54,13 +54,14 @@ import {
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
 import { validateTimeRange } from '../helpers/validate_time_range';
 import { popularizeField } from '../helpers/popularize_field';
-
+import { getSwitchIndexPatternAppState } from '../helpers/get_switch_index_pattern_app_state';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
 import { addFatalError } from '../../../../kibana_legacy/public';
 import {
   DEFAULT_COLUMNS_SETTING,
   SAMPLE_SIZE_SETTING,
   SEARCH_ON_PAGE_LOAD_SETTING,
+  MODIFY_COLUMNS_ON_SWITCH,
 } from '../../../common';
 import { resolveIndexPatternLoading } from './helpers/resolve_index_pattern';
 import { getTopNavLinks } from '../components/top_nav/get_top_nav_links';
@@ -258,6 +259,11 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
 
     if (!_.isEqual(newStatePartial, oldStatePartial)) {
       $scope.$evalAsync(async () => {
+        if (oldStatePartial.index !== newStatePartial.index) {
+          //in case of index switch the route has currently to be reloaded, legacy
+          return;
+        }
+
         $scope.state = { ...newState };
 
         // detect changes that should trigger fetching of new data
@@ -282,8 +288,18 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
   });
 
   $scope.setIndexPattern = async (id) => {
-    await replaceUrlAppState({ index: id });
-    $route.reload();
+    const nextIndexPattern = await indexPatterns.get(id);
+    if (nextIndexPattern) {
+      const nextAppState = getSwitchIndexPatternAppState(
+        $scope.indexPattern,
+        nextIndexPattern,
+        $scope.state.columns,
+        $scope.state.sort,
+        config.get(MODIFY_COLUMNS_ON_SWITCH)
+      );
+      await replaceUrlAppState(nextAppState);
+      $route.reload();
+    }
   };
 
   // update data source when filters update

@@ -45,6 +45,9 @@ const getSharingDataFields = async (
   };
 };
 
+/**
+ * Preparing data to share the current state as link or CSV/Report
+ */
 export async function getSharingData(
   currentSearchSource: SearchSource,
   state: AppState,

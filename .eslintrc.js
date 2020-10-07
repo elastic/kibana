@@ -1046,9 +1046,7 @@ module.exports = {
      */
     {
       // typescript only for front and back end
-      files: [
-        'x-pack/plugins/{alerts,alerting_builtins,actions,task_manager,event_log}/**/*.{ts,tsx}',
-      ],
+      files: ['x-pack/plugins/{alerts,stack_alerts,actions,task_manager,event_log}/**/*.{ts,tsx}'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },

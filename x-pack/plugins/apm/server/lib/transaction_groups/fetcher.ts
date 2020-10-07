@@ -15,11 +15,7 @@ import { getTransactionGroupsProjection } from '../../projections/transaction_gr
 import { mergeProjection } from '../../projections/util/merge_projection';
 import { PromiseReturnType } from '../../../../observability/typings/common';
 import { AggregationOptionsByType } from '../../../typings/elasticsearch/aggregations';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   getAverages,
   getSums,
@@ -57,7 +53,7 @@ export type TransactionGroupRequestBase = ReturnType<
   };
 };
 
-export type TransactionGroupSetup = Setup & SetupTimeRange & SetupUIFilters;
+export type TransactionGroupSetup = Setup & SetupTimeRange;
 
 function getItemsWithRelativeImpact(
   setup: TransactionGroupSetup,

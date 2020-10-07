@@ -85,6 +85,14 @@ export const xyChart: ExpressionFunctionDefinition<
     defaultMessage: 'An X/Y chart',
   }),
   args: {
+    title: {
+      types: ['string'],
+      help: 'The chart title.',
+    },
+    description: {
+      types: ['string'],
+      help: '',
+    },
     xTitle: {
       types: ['string'],
       help: i18n.translate('xpack.lens.xyChart.xTitle.help', {
@@ -215,7 +223,12 @@ export function XYChartReportable(props: XYChartRenderProps) {
   }, [setState]);
 
   return (
-    <VisualizationContainer className="lnsXyExpression__container" isReady={state.isReady}>
+    <VisualizationContainer
+      className="lnsXyExpression__container"
+      isReady={state.isReady}
+      reportTitle={props.args.title}
+      reportDescription={props.args.description}
+    >
       <MemoizedChart {...props} />
     </VisualizationContainer>
   );
@@ -285,6 +298,13 @@ export function XYChart({
     yLeft: true,
     yRight: true,
   };
+
+  const filteredBarLayers = filteredLayers.filter((layer) => layer.seriesType.includes('bar'));
+
+  const chartHasMoreThanOneBarSeries =
+    filteredBarLayers.length > 1 ||
+    filteredBarLayers.some((layer) => layer.accessors.length > 1) ||
+    filteredBarLayers.some((layer) => layer.splitAccessor);
 
   function calculateMinInterval() {
     // check all the tables to see if all of the rows have the same timestamp
@@ -586,7 +606,12 @@ export function XYChart({
             groupId: yAxesConfiguration.find((axisConfiguration) =>
               axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)
             )?.groupId,
-            enableHistogramMode: isHistogram && (seriesType.includes('stacked') || !splitAccessor),
+            enableHistogramMode:
+              isHistogram &&
+              (seriesType.includes('stacked') || !splitAccessor) &&
+              (seriesType.includes('stacked') ||
+                !seriesType.includes('bar') ||
+                !chartHasMoreThanOneBarSeries),
             stackMode: seriesType.includes('percentage') ? StackMode.Percentage : undefined,
             timeZone,
             areaSeriesStyle: {

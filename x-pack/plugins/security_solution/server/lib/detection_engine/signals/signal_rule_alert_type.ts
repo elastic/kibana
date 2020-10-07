@@ -8,6 +8,7 @@
 
 import { Logger, KibanaRequest } from 'src/core/server';
 
+import { get } from 'lodash';
 import {
   SIGNALS_ID,
   DEFAULT_SEARCH_AFTER_PAGE_SIZE,
@@ -56,6 +57,7 @@ import { ruleStatusServiceFactory } from './rule_status_service';
 import { buildRuleMessageFactory } from './rule_messages';
 import { ruleStatusSavedObjectsClientFactory } from './rule_status_saved_objects_client';
 import { getNotificationResultsLink } from '../notifications/utils';
+import { TelemetryEventsSender } from '../../telemetry/sender';
 import { buildEqlSearchRequest } from '../../../../common/detection_engine/get_query_filter';
 import { bulkInsertSignals } from './single_bulk_create';
 import { buildSignalFromEvent, buildSignalGroupFromSequence } from './build_bulk_body';
@@ -63,11 +65,13 @@ import { createThreatSignals } from './threat_mapping/create_threat_signals';
 
 export const signalRulesAlertType = ({
   logger,
+  eventsTelemetry,
   version,
   ml,
   lists,
 }: {
   logger: Logger;
+  eventsTelemetry: TelemetryEventsSender | undefined;
   version: string;
   ml: SetupPlugins['ml'];
   lists: SetupPlugins['lists'] | undefined;
@@ -109,9 +113,22 @@ export const signalRulesAlertType = ({
         threatQuery,
         threatIndex,
         threatMapping,
+        threatLanguage,
         type,
         exceptionsList,
       } = params;
+      const outputIndexTemplateMapping: unknown = await services.callCluster(
+        'indices.getTemplate',
+        { name: outputIndex }
+      );
+      const signalMappingVersion: number | undefined = get(outputIndexTemplateMapping, [
+        outputIndex,
+        'version',
+      ]);
+      if (signalMappingVersion !== undefined && typeof signalMappingVersion !== 'number') {
+        throw new Error('Found non-numeric value for "version" in output index template');
+      }
+
       const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
       let hasError: boolean = false;
       let result = createSearchAfterReturnType();
@@ -369,6 +386,7 @@ export const signalRulesAlertType = ({
             previousStartedAt,
             listClient,
             logger,
+            eventsTelemetry,
             alertId,
             outputIndex,
             params,
@@ -385,6 +403,7 @@ export const signalRulesAlertType = ({
             throttle,
             threatFilters: threatFilters ?? [],
             threatQuery,
+            threatLanguage,
             buildRuleMessage,
             threatIndex,
           });
@@ -409,6 +428,7 @@ export const signalRulesAlertType = ({
             ruleParams: params,
             services,
             logger,
+            eventsTelemetry,
             id: alertId,
             inputIndexPattern: inputIndex,
             signalsIndex: outputIndex,
@@ -429,7 +449,16 @@ export const signalRulesAlertType = ({
           });
         } else if (isEqlRule(type)) {
           if (query === undefined) {
-            throw new Error('eql query rule must have a query defined');
+            throw new Error('EQL query rule must have a query defined');
+          }
+          const MIN_EQL_RULE_TEMPLATE_VERSION = 2;
+          if (
+            signalMappingVersion === undefined ||
+            signalMappingVersion < MIN_EQL_RULE_TEMPLATE_VERSION
+          ) {
+            throw new Error(
+              `EQL based rules require an update to version ${MIN_EQL_RULE_TEMPLATE_VERSION} of the detection alerts index mapping`
+            );
           }
           const inputIndex = await getInputIndex(services, version, index);
           const request = buildEqlSearchRequest(
@@ -455,7 +484,7 @@ export const signalRulesAlertType = ({
             );
           } else if (response.hits.events !== undefined) {
             newSignals = response.hits.events.map((event) =>
-              wrapSignal(buildSignalFromEvent(event, savedObject), outputIndex)
+              wrapSignal(buildSignalFromEvent(event, savedObject, true), outputIndex)
             );
           } else {
             throw new Error(

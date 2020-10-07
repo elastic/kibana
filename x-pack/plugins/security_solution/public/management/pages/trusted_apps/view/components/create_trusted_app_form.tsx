@@ -23,7 +23,7 @@ import {
   TrustedApp,
 } from '../../../../../../common/endpoint/types';
 import { LogicalConditionBuilderProps } from './logical_condition/logical_condition_builder';
-import { OS_TITLES } from '../constants';
+import { OS_TITLES } from '../translations';
 import {
   isMacosLinuxTrustedAppCondition,
   isTrustedAppSupportedOs,
@@ -410,6 +410,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
             value={formValues.description}
             onChange={handleDomChangeEvents}
             fullWidth
+            maxLength={256}
             data-test-subj={getTestId('descriptionField')}
           />
         </EuiFormRow>

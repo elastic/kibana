@@ -167,7 +167,7 @@ export class VisualizeEmbeddable
         typeof inspectorAdapters === 'function' ? inspectorAdapters() : inspectorAdapters;
     }
   }
-  public getVisualizationDescription() {
+  public getDescription() {
     return this.vis.description;
   }
 

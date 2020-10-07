@@ -19,6 +19,9 @@
 import { i18n } from '@kbn/i18n';
 import { Capabilities } from '../../../../../../core/types';
 
+/**
+ * Helper function to build the top nav links
+ */
 export const getTopNavLinks = (
   onNewSearch: () => void,
   onSaveSearch: () => void,

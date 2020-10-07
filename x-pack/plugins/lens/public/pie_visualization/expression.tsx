@@ -37,6 +37,14 @@ export const pie: ExpressionFunctionDefinition<
     defaultMessage: 'Pie renderer',
   }),
   args: {
+    title: {
+      types: ['string'],
+      help: 'The chart title.',
+    },
+    description: {
+      types: ['string'],
+      help: '',
+    },
     groups: {
       types: ['string'],
       multi: true,
