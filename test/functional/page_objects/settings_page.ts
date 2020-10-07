@@ -334,7 +334,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
           await this.clickIndexPatternByName(indexPatternName);
           return;
         }
-        
+
         await PageObjects.header.waitUntilLoadingHasFinished();
         await this.clickAddNewIndexPatternButton();
         if (!isStandardIndexPattern) {
