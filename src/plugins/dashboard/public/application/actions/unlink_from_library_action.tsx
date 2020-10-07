@@ -97,7 +97,6 @@ export class UnlinkFromLibraryAction implements ActionByType<typeof ACTION_UNLIN
         })
       : i18n.translate('dashboard.panel.unlinkFromLibrary.successMessage', {
           defaultMessage: `Panel was unlinked from the visualize library`,
-          values: { panelTitle: embeddable.getTitle() },
         });
     this.toasts.addSuccess({
       title,
