@@ -38,12 +38,12 @@ export const CredentialsList: React.FC = () => {
     },
     {
       name: 'Type',
-      width: '18%',
+      width: '15%',
       render: (item: IApiToken) => TOKEN_TYPE_DISPLAY_NAMES[item.type],
     },
     {
       name: 'Key',
-      width: '43%',
+      width: '36%',
       render: (item: IApiToken) => (
         <EuiCopy
           textToCopy={item.key || ''}
@@ -103,7 +103,7 @@ export const CredentialsList: React.FC = () => {
           type: 'icon',
           icon: 'trash',
           color: 'danger',
-          onClick: (item: IApiToken) => item.name && deleteApiKey(item.name),
+          onClick: (item: IApiToken) => deleteApiKey(item.name),
         },
       ],
     },
