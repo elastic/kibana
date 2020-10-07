@@ -96,7 +96,7 @@ export class IndexPattern implements IIndexPattern {
 
     // set values
     this.id = spec.id;
-    this.fieldFormatMap = this.fieldSpecsToFieldFormatMap(spec.fields);
+    this.fieldFormatMap = spec.fieldFormats || {};
 
     this.version = spec.version;
 
@@ -128,18 +128,6 @@ export class IndexPattern implements IIndexPattern {
   resetOriginalSavedObjectBody = () => {
     this.originalSavedObjectBody = this.getAsSavedObjectBody();
   };
-
-  /**
-   * Extracts FieldFormatMap from FieldSpec map
-   * @param fldList FieldSpec map
-   */
-  private fieldSpecsToFieldFormatMap = (fldList: IndexPatternSpec['fields'] = {}) =>
-    Object.values(fldList).reduce<Record<string, SerializedFieldFormat>>((col, fieldSpec) => {
-      if (fieldSpec.format) {
-        col[fieldSpec.name] = { ...fieldSpec.format };
-      }
-      return col;
-    }, {});
 
   getComputedFields() {
     const scriptFields: any = {};

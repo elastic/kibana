@@ -35,7 +35,6 @@ import {
   IndexPatternSpec,
   IndexPatternAttributes,
   FieldSpec,
-  FieldFormatMap,
   IndexPatternFieldMap,
 } from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
@@ -297,20 +296,6 @@ export class IndexPatternsService {
   };
 
   /**
-   * Applies a set of formats to a set of fields
-   * @param fieldSpecs
-   * @param fieldFormatMap
-   */
-  private addFormatsToFields = (fieldSpecs: FieldSpec[], fieldFormatMap: FieldFormatMap) => {
-    Object.entries(fieldFormatMap).forEach(([fieldName, value]) => {
-      const field = fieldSpecs.find((fld: FieldSpec) => fld.name === fieldName);
-      if (field) {
-        field.format = value;
-      }
-    });
-  };
-
-  /**
    * Converts field array to map
    * @param fields
    */
@@ -345,8 +330,6 @@ export class IndexPatternsService {
     const parsedTypeMeta = typeMeta ? JSON.parse(typeMeta) : undefined;
     const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
     const parsedFields: FieldSpec[] = fields ? JSON.parse(fields) : [];
-
-    this.addFormatsToFields(parsedFields, parsedFieldFormatMap);
 
     return {
       id,
@@ -414,16 +397,9 @@ export class IndexPatternsService {
       }
     }
 
-    const parsedFieldFormats: FieldFormatMap = savedObject.attributes.fieldFormatMap
+    spec.fieldFormats = savedObject.attributes.fieldFormatMap
       ? JSON.parse(savedObject.attributes.fieldFormatMap)
       : {};
-
-    Object.entries(parsedFieldFormats).forEach(([fieldName, value]) => {
-      const field = spec.fields?.[fieldName];
-      if (field) {
-        field.format = value;
-      }
-    });
 
     const indexPattern = await this.create(spec, true);
     indexPatternCache.set(id, indexPattern);
