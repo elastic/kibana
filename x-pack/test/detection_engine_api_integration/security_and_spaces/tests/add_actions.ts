@@ -79,7 +79,7 @@ export default ({ getService }: FtrProviderContext) => {
             .set('kbn-xsrf', 'true')
             .send({ ids: [rule.id] })
             .expect(200);
-          return body[rule.id].current_status?.status === 'succeeded';
+          return body[rule.id]?.current_status?.status === 'succeeded';
         });
 
         // expected result for status should be 'succeeded'
@@ -118,7 +118,7 @@ export default ({ getService }: FtrProviderContext) => {
             .set('kbn-xsrf', 'true')
             .send({ ids: [rule.id] })
             .expect(200);
-          return body[rule.id].current_status?.status === 'succeeded';
+          return body[rule.id]?.current_status?.status === 'succeeded';
         });
 
         // expected result for status should be 'succeeded'

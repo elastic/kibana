@@ -17,9 +17,6 @@
  * under the License.
  */
 
-// Local page variables
-$homePageWidth: 1200px;
-
 .homWrapper {
   background-color: $euiColorEmptyShade;
   display: flex;
@@ -27,37 +24,9 @@ $homePageWidth: 1200px;
   min-height: calc(100vh - #{$euiHeaderHeightCompensation});
 }
 
-.homHeader {
-  background-color: $euiPageBackgroundColor;
-  border-bottom: $euiBorderWidthThin solid $euiColorLightShade;
-}
-
-.homHeader__inner {
-  margin: 0 auto;
-  max-width: $homePageWidth;
-  padding: $euiSizeXL $euiSize;
-
-  .homHeader--hasSolutions & {
-    padding-bottom: $euiSizeXL + $euiSizeL;
-  }
-}
-
-#homHeader__title {
-  @include euiBreakpoint('xs', 's') {
-    text-align: center;
-  }
-}
-
-.homHeader__actionItem {
-  @include euiBreakpoint('xs', 's') {
-    margin-bottom: 0 !important;
-    margin-top: 0 !important;
-  }
-}
-
 .homContent {
   margin: 0 auto;
-  max-width: $homePageWidth;
+  max-width: 1200px;
   padding: $euiSizeXL $euiSize;
   width: 100%;
 }
