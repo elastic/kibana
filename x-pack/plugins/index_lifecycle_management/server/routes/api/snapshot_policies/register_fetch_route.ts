@@ -14,7 +14,7 @@ async function fetchSnapshotPolicies(client: ElasticsearchClient): Promise<any> 
   return response.body;
 }
 
-export function registerFetchRoute({ router, license, lib }: RouteDependencies) {
+export function registerFetchRoute({ router, license }: RouteDependencies) {
   router.get(
     { path: addBasePath('/snapshot_policies'), validate: false },
     license.guardApiRoute(async (context, request, response) => {
@@ -24,10 +24,10 @@ export function registerFetchRoute({ router, license, lib }: RouteDependencies) 
         );
         return response.ok({ body: Object.keys(policiesByName) });
       } catch (e) {
-        if (lib.isEsError(e)) {
+        if (e.name === 'ResponseError') {
           return response.customError({
             statusCode: e.statusCode,
-            body: e,
+            body: { message: e.body.error?.reason },
           });
         }
         // Case: default

@@ -80,7 +80,7 @@ const querySchema = schema.object({
   legacy: schema.maybe(schema.oneOf([schema.literal('true'), schema.literal('false')])),
 });
 
-export function registerFetchRoute({ router, license, lib }: RouteDependencies) {
+export function registerFetchRoute({ router, license }: RouteDependencies) {
   router.get(
     { path: addBasePath('/templates'), validate: { query: querySchema } },
     license.guardApiRoute(async (context, request, response) => {
@@ -93,10 +93,10 @@ export function registerFetchRoute({ router, license, lib }: RouteDependencies) 
         const okResponse = { body: filterTemplates(templates, isLegacy) };
         return response.ok(okResponse);
       } catch (e) {
-        if (lib.isEsError(e)) {
+        if (e.name === 'ResponseError') {
           return response.customError({
             statusCode: e.statusCode,
-            body: e,
+            body: { message: e.body.error?.reason },
           });
         }
         // Case: default

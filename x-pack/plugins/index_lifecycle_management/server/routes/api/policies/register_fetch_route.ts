@@ -57,7 +57,7 @@ const querySchema = schema.object({
   withIndices: schema.boolean({ defaultValue: false }),
 });
 
-export function registerFetchRoute({ router, license, lib }: RouteDependencies) {
+export function registerFetchRoute({ router, license }: RouteDependencies) {
   router.get(
     { path: addBasePath('/policies'), validate: { query: querySchema } },
     license.guardApiRoute(async (context, request, response) => {
@@ -76,10 +76,10 @@ export function registerFetchRoute({ router, license, lib }: RouteDependencies) 
         }
         return response.ok({ body: formatPolicies(policiesMap) });
       } catch (e) {
-        if (lib.isEsError(e)) {
+        if (e.name === 'ResponseError') {
           return response.customError({
             statusCode: e.statusCode,
-            body: e,
+            body: { message: e.body.error?.reason },
           });
         }
         // Case: default

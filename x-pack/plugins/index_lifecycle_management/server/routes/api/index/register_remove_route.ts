@@ -26,7 +26,7 @@ const bodySchema = schema.object({
   indexNames: schema.arrayOf(schema.string()),
 });
 
-export function registerRemoveRoute({ router, license, lib }: RouteDependencies) {
+export function registerRemoveRoute({ router, license }: RouteDependencies) {
   router.post(
     { path: addBasePath('/index/remove'), validate: { body: bodySchema } },
     license.guardApiRoute(async (context, request, response) => {
@@ -37,10 +37,10 @@ export function registerRemoveRoute({ router, license, lib }: RouteDependencies)
         await removeLifecycle(context.core.elasticsearch.client.asCurrentUser, indexNames);
         return response.ok();
       } catch (e) {
-        if (lib.isEsError(e)) {
+        if (e.name === 'ResponseError') {
           return response.customError({
             statusCode: e.statusCode,
-            body: e,
+            body: { message: e.body.error?.reason },
           });
         }
         // Case: default

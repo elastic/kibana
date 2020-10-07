@@ -133,7 +133,7 @@ const bodySchema = schema.object({
   }),
 });
 
-export function registerCreateRoute({ router, license, lib }: RouteDependencies) {
+export function registerCreateRoute({ router, license }: RouteDependencies) {
   router.post(
     { path: addBasePath('/policies'), validate: { body: bodySchema } },
     license.guardApiRoute(async (context, request, response) => {
@@ -144,10 +144,10 @@ export function registerCreateRoute({ router, license, lib }: RouteDependencies)
         await createPolicy(context.core.elasticsearch.client.asCurrentUser, name, phases);
         return response.ok();
       } catch (e) {
-        if (lib.isEsError(e)) {
+        if (e.name === 'ResponseError') {
           return response.customError({
             statusCode: e.statusCode,
-            body: e,
+            body: { message: e.body.error?.reason },
           });
         }
         // Case: default

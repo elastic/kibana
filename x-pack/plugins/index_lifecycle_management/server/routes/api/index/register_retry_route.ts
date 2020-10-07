@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { schema } from '@kbn/config-schema';
 import { ElasticsearchClient } from 'kibana/server';
 
@@ -39,7 +38,7 @@ export function registerRetryRoute({ router, license }: RouteDependencies) {
         await retryLifecycle(context.core.elasticsearch.client.asCurrentUser, indexNames);
         return response.ok();
       } catch (e) {
-        if (e instanceof ResponseError) {
+        if (e.name === 'ResponseError') {
           return response.customError({
             statusCode: e.statusCode,
             body: { message: e.body.error?.reason },

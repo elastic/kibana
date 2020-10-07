@@ -32,7 +32,7 @@ const bodySchema = schema.object({
   alias: schema.maybe(schema.string()),
 });
 
-export function registerAddPolicyRoute({ router, license, lib }: RouteDependencies) {
+export function registerAddPolicyRoute({ router, license }: RouteDependencies) {
   router.post(
     { path: addBasePath('/index/add'), validate: { body: bodySchema } },
     license.guardApiRoute(async (context, request, response) => {
@@ -48,10 +48,10 @@ export function registerAddPolicyRoute({ router, license, lib }: RouteDependenci
         );
         return response.ok();
       } catch (e) {
-        if (lib.isEsError(e)) {
+        if (e.name === 'ResponseError') {
           return response.customError({
             statusCode: e.statusCode,
-            body: e,
+            body: { message: e.body.error?.reason },
           });
         }
         // Case: default

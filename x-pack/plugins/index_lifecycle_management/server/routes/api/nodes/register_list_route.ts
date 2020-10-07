@@ -45,7 +45,7 @@ function convertStatsIntoList(
   );
 }
 
-export function registerListRoute({ router, config, license, lib }: RouteDependencies) {
+export function registerListRoute({ router, config, license }: RouteDependencies) {
   const { filteredNodeAttributes } = config;
 
   const NODE_ATTRS_KEYS_TO_IGNORE: string[] = [
@@ -73,10 +73,10 @@ export function registerListRoute({ router, config, license, lib }: RouteDepende
         );
         return response.ok({ body });
       } catch (e) {
-        if (lib.isEsError(e)) {
+        if (e.name === 'ResponseError') {
           return response.customError({
             statusCode: e.statusCode,
-            body: e,
+            body: { message: e.body.error?.reason },
           });
         }
         // Case: default

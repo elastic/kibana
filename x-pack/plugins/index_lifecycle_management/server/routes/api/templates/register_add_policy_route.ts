@@ -92,7 +92,7 @@ const querySchema = schema.object({
   legacy: schema.maybe(schema.oneOf([schema.literal('true'), schema.literal('false')])),
 });
 
-export function registerAddPolicyRoute({ router, license, lib }: RouteDependencies) {
+export function registerAddPolicyRoute({ router, license }: RouteDependencies) {
   router.post(
     { path: addBasePath('/template'), validate: { body: bodySchema, query: querySchema } },
     license.guardApiRoute(async (context, request, response) => {
@@ -119,10 +119,10 @@ export function registerAddPolicyRoute({ router, license, lib }: RouteDependenci
         }
         return response.ok();
       } catch (e) {
-        if (lib.isEsError(e)) {
+        if (e.name === 'ResponseError') {
           return response.customError({
             statusCode: e.statusCode,
-            body: e,
+            body: { message: e.body.error?.reason },
           });
         }
         // Case: default

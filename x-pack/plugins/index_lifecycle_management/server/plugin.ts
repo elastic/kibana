@@ -22,7 +22,6 @@ import { Dependencies } from './types';
 import { registerApiRoutes } from './routes';
 import { License } from './services';
 import { IndexLifecycleManagementConfig } from './config';
-import { isEsError } from './shared_imports';
 
 const indexLifecycleDataEnricher = async (
   indicesList: IndexWithoutIlm[],
@@ -99,9 +98,6 @@ export class IndexLifecycleManagementServerPlugin implements Plugin<void, void, 
       router,
       config,
       license: this.license,
-      lib: {
-        isEsError,
-      },
     });
 
     if (config.ui.enabled) {

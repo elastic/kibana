@@ -29,7 +29,7 @@ const paramsSchema = schema.object({
   nodeAttrs: schema.string(),
 });
 
-export function registerDetailsRoute({ router, license, lib }: RouteDependencies) {
+export function registerDetailsRoute({ router, license }: RouteDependencies) {
   router.get(
     { path: addBasePath('/nodes/{nodeAttrs}/details'), validate: { params: paramsSchema } },
     license.guardApiRoute(async (context, request, response) => {
@@ -41,10 +41,10 @@ export function registerDetailsRoute({ router, license, lib }: RouteDependencies
         const okResponse = { body: findMatchingNodes(statsResponse.body, nodeAttrs) };
         return response.ok(okResponse);
       } catch (e) {
-        if (lib.isEsError(e)) {
+        if (e.name === 'ResponseError') {
           return response.customError({
             statusCode: e.statusCode,
-            body: e,
+            body: { message: e.body.error?.reason },
           });
         }
         // Case: default
