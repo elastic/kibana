@@ -1215,6 +1215,7 @@ export class EndpointDocGenerator {
           install_version: '0.5.0',
           install_status: 'installed',
           install_started_at: '2020-06-24T14:41:23.098Z',
+          install_source: 'registry',
         },
         references: [],
         updated_at: '2020-06-24T14:41:23.098Z',

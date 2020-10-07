@@ -8,7 +8,7 @@ import { CoreStart } from '../../../../src/core/public';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
-import { Start as NewsfeedStart } from '../../../../src/plugins/newsfeed/public';
+import { NewsfeedPublicPluginStart } from '../../../../src/plugins/newsfeed/public';
 import { Start as InspectorStart } from '../../../../src/plugins/inspector/public';
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
@@ -28,7 +28,7 @@ import { MlPluginSetup, MlPluginStart } from '../../ml/public';
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
   security: SecurityPluginSetup;
-  triggers_actions_ui: TriggersActionsSetup;
+  triggersActionsUi: TriggersActionsSetup;
   usageCollection?: UsageCollectionSetup;
   ml?: MlPluginSetup;
 }
@@ -39,8 +39,8 @@ export interface StartPlugins {
   inspector: InspectorStart;
   ingestManager?: IngestManagerStart;
   lists?: ListsPluginStart;
-  newsfeed?: NewsfeedStart;
-  triggers_actions_ui: TriggersActionsStart;
+  newsfeed?: NewsfeedPublicPluginStart;
+  triggersActionsUi: TriggersActionsStart;
   uiActions: UiActionsStart;
   ml?: MlPluginStart;
 }
