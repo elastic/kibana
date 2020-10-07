@@ -26,7 +26,7 @@ export function getLensAttributeService(
   startDependencies: LensPluginStartDependencies
 ): LensAttributeService {
   const savedObjectStore = new SavedObjectIndexStore(core.savedObjects.client);
-  return startDependencies.dashboard.getAttributeService<
+  return startDependencies.embeddable.getAttributeService<
     LensSavedObjectAttributes,
     LensByValueInput,
     LensByReferenceInput

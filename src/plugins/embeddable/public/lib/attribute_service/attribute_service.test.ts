@@ -19,8 +19,8 @@
 
 import { ATTRIBUTE_SERVICE_KEY } from './attribute_service';
 import { mockAttributeService } from './attribute_service.mock';
-import { coreMock } from '../../../../core/public/mocks';
-import { OnSaveProps } from '../../../saved_objects/public/save_modal';
+import { coreMock } from '../../../../../core/public/mocks';
+import { OnSaveProps } from 'src/plugins/saved_objects/public/save_modal';
 
 interface TestAttributes {
   title: string;

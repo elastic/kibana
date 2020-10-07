@@ -20,17 +20,17 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
+import { I18nStart, NotificationsStart } from 'src/core/public';
+import { SavedObjectSaveModal, OnSaveProps, SaveResult } from '../../../../saved_objects/public';
 import {
   EmbeddableInput,
   SavedObjectEmbeddableInput,
   isSavedObjectEmbeddableInput,
   IEmbeddable,
   Container,
-  EmbeddableStart,
   EmbeddableFactoryNotFoundError,
-} from '../embeddable_plugin';
-import { I18nStart, NotificationsStart } from '../../../../core/public';
-import { SavedObjectSaveModal, OnSaveProps, SaveResult } from '../../../saved_objects/public';
+} from '../index';
+import { EmbeddableStart } from '../../plugin';
 
 /**
  * The attribute service is a shared, generic service that embeddables can use to provide the functionality
