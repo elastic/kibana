@@ -154,7 +154,7 @@ describe('Credentials', () => {
 
       it('renders correctly', () => {
         const column = columns[0];
-        const wrapper = shallow(column.render(token));
+        const wrapper = shallow(<div>{column.render(token)}</div>);
         expect(wrapper.text()).toEqual('some-name');
       });
     });
@@ -167,7 +167,7 @@ describe('Credentials', () => {
 
       it('renders correctly', () => {
         const column = columns[1];
-        const wrapper = shallow(column.render(token));
+        const wrapper = shallow(<div>{column.render(token)}</div>);
         expect(wrapper.text()).toEqual('Private API Key');
       });
     });
@@ -181,7 +181,7 @@ describe('Credentials', () => {
       const subject = (token: object): [any, any] => {
         const copyMock = jest.fn();
         const column = columns[2];
-        const wrapper = shallow(column.render(token));
+        const wrapper = shallow(<div>{column.render(token)}</div>);
         const children = wrapper.find(EuiCopy).props().children;
         const copyEl = shallow(children(copyMock));
         return [copyMock, copyEl];
@@ -211,7 +211,7 @@ describe('Credentials', () => {
 
       it('renders correctly', () => {
         const column = columns[3];
-        const wrapper = shallow(column.render(token));
+        const wrapper = shallow(<div>{column.render(token)}</div>);
         expect(wrapper.text()).toEqual('--');
       });
     });
@@ -225,7 +225,7 @@ describe('Credentials', () => {
 
       it('renders correctly', () => {
         const column = columns[4];
-        const wrapper = shallow(column.render(token));
+        const wrapper = shallow(<div>{column.render(token)}</div>);
         expect(wrapper.text()).toEqual('all');
       });
     });

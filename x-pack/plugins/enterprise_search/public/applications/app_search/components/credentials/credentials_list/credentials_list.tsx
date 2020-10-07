@@ -32,64 +32,52 @@ export const CredentialsList: React.FC = () => {
 
   const columns = [
     {
-      name: 'Test',
+      name: 'Name',
       width: '12%',
-      render: (item: IApiToken) => {
-        return <div>{item.name}</div>;
-      },
+      render: (item: IApiToken) => item.name,
     },
     {
       name: 'Type',
       width: '18%',
-      render: (item: IApiToken) => {
-        return <div>{TOKEN_TYPE_DISPLAY_NAMES[item.type]}</div>;
-      },
+      render: (item: IApiToken) => TOKEN_TYPE_DISPLAY_NAMES[item.type],
     },
     {
       name: 'Key',
       width: '43%',
-      render: (item: IApiToken) => {
-        return (
-          <div>
-            <EuiCopy
-              textToCopy={item.key || ''}
-              afterMessage={i18n.translate('xpack.enterpriseSearch.appSearch.credentials.copied', {
-                defaultMessage: 'Copied',
-              })}
-            >
-              {(copy) => (
-                <div>
-                  <EuiButtonIcon
-                    onClick={copy}
-                    iconType="copyClipboard"
-                    aria-label={i18n.translate(
-                      'xpack.enterpriseSearch.appSearch.credentials.copyApiKey',
-                      {
-                        defaultMessage: 'Copy API Key to clipboard',
-                      }
-                    )}
-                  />
-                  {item.key}
-                </div>
-              )}
-            </EuiCopy>
-          </div>
-        );
-      },
+      render: (item: IApiToken) => (
+        <EuiCopy
+          textToCopy={item.key || ''}
+          afterMessage={i18n.translate('xpack.enterpriseSearch.appSearch.credentials.copied', {
+            defaultMessage: 'Copied',
+          })}
+        >
+          {(copy) => (
+            <div>
+              <EuiButtonIcon
+                onClick={copy}
+                iconType="copyClipboard"
+                aria-label={i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.credentials.copyApiKey',
+                  {
+                    defaultMessage: 'Copy API Key to clipboard',
+                  }
+                )}
+              />
+              {item.key}
+            </div>
+          )}
+        </EuiCopy>
+      ),
     },
     {
       name: 'Modes',
       width: '10%',
-      render: (item: IApiToken) => {
-        return <div>{getModeDisplayText(item)}</div>;
-      },
+      render: (item: IApiToken) => getModeDisplayText(item),
     },
     {
       name: 'Engines',
-      width: '10%',
-      render: (item: IApiToken) => {
-        return <div>{getEnginesDisplayText(item)}</div>;
-      },
+      width: '18%',
+      render: (item: IApiToken) => getEnginesDisplayText(item),
     },
     {
       width: '4%',
