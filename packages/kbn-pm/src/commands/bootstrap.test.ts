@@ -75,7 +75,8 @@ afterEach(() => {
   jest.restoreAllMocks();
 });
 
-test('handles dependencies of dependencies', async () => {
+// FLAKY: https://github.com/elastic/kibana/issues/79891
+test.skip('handles dependencies of dependencies', async () => {
   const kibana = createProject({
     dependencies: {
       bar: '1.0.0',
@@ -141,7 +142,8 @@ test('handles dependencies of dependencies', async () => {
   `);
 });
 
-test('does not run installer if no deps in package', async () => {
+// FLAKY: https://github.com/elastic/kibana/issues/79891
+test.skip('does not run installer if no deps in package', async () => {
   const kibana = createProject({
     dependencies: {
       bar: '1.0.0',
