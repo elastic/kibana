@@ -12,8 +12,6 @@ import {
   EuiPageHeaderSection,
   EuiTitle,
   EuiPageContentBody,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiPanel,
   EuiCopy,
   EuiButtonIcon,
