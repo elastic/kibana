@@ -61,6 +61,8 @@ export interface ExpressionExecutionParams {
   searchSessionId?: string;
 
   inspectorAdapters?: Adapters;
+
+  partial?: boolean;
 }
 
 /**

@@ -151,10 +151,11 @@ export class ExpressionLoader {
       inspectorAdapters: params.inspectorAdapters,
       searchSessionId: params.searchSessionId,
       debug: params.debug,
+      partial: params.partial,
     });
 
     const prevDataHandler = this.execution;
-    const data = await prevDataHandler.getData();
+    const data = await prevDataHandler.getData().toPromise();
     if (this.execution !== prevDataHandler) {
       return;
     }
@@ -162,7 +163,11 @@ export class ExpressionLoader {
   };
 
   private render(data: Data): void {
-    this.renderHandler.render(data, this.params.uiState);
+    this.renderHandler.render(
+      data,
+      this.params.uiState,
+      (this.execution?.inspect() as Adapters).partial
+    );
   }
 
   private setParams(params?: IExpressionLoaderParams) {
@@ -187,6 +192,7 @@ export class ExpressionLoader {
       this.params.searchSessionId = params.searchSessionId;
     }
     this.params.debug = Boolean(params.debug);
+    this.params.partial = Boolean(params.partial);
 
     this.params.inspectorAdapters = (params.inspectorAdapters ||
       this.execution?.inspect()) as Adapters;

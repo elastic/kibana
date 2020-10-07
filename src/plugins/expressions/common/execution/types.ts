@@ -59,6 +59,8 @@ export interface ExecutionContext<
    */
   getSearchSessionId: () => string | undefined;
 
+  isPartial: () => boolean;
+
   /**
    * Allows to fetch saved objects from ElasticSearch. In browser `getSavedObject`
    * function is provided automatically by the Expressions plugin. On the server

@@ -17,9 +17,11 @@
  * under the License.
  */
 
-import { get, hasIn } from 'lodash';
+import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { map, switchMap } from 'rxjs/operators';
 import { Datatable, DatatableColumn } from 'src/plugins/expressions/public';
+import { combineLatest, from } from 'rxjs';
 import { PersistedState } from '../../../../../plugins/visualizations/public';
 import { Adapters } from '../../../../../plugins/inspector/public';
 
@@ -70,7 +72,7 @@ export interface RequestHandlerParams {
 
 const name = 'esaggs';
 
-const handleCourierRequest = async ({
+const handleCourierRequest = ({
   searchSource,
   aggs,
   timeRange,
@@ -150,15 +152,87 @@ const handleCourierRequest = async ({
   );
   request.stats(getRequestInspectorStats(requestSearchSource));
 
+  const resolvedTimeRange = timeRange && calculateBounds(timeRange);
+
   try {
-    const response = await requestSearchSource.fetch({
-      abortSignal,
-      sessionId: searchSessionId,
-    });
+    return requestSearchSource
+      .fetchPartial({
+        abortSignal,
+        sessionId: searchSessionId,
+      })
+      .pipe(
+        map((response) => {
+          request.stats(getResponseInspectorStats(response, searchSource)).ok({ json: response });
 
-    request.stats(getResponseInspectorStats(response, searchSource)).ok({ json: response });
+          const parsedTimeRange = timeRange ? calculateBounds(timeRange) : null;
+          const tabifyParams = {
+            metricsAtAllLevels,
+            partialRows,
+            timeRange: parsedTimeRange
+              ? { from: parsedTimeRange.min, to: parsedTimeRange.max, timeFields: allTimeFields }
+              : undefined,
+          };
 
-    (searchSource as any).rawResponse = response;
+          (searchSource as any).finalResponse = response;
+
+          const tabifiedResponse = tabifyAggResponse(
+            aggs,
+            (searchSource as any).finalResponse,
+            tabifyParams
+          );
+
+          (searchSource as any).tabifiedResponse = tabifiedResponse;
+
+          inspectorAdapters.data.setTabularLoader(
+            () =>
+              buildTabularInspectorData((searchSource as any).tabifiedResponse, {
+                queryFilter: filterManager,
+                deserializeFieldFormat: getFieldFormats().deserialize,
+              }),
+            { returnsFormattedValues: true }
+          );
+
+          (searchSource as any).rawResponse = response;
+
+          return tabifiedResponse;
+        }),
+        map((response) => {
+          const table: Datatable = {
+            type: 'datatable',
+            rows: response.rows,
+            columns: response.columns.map((column) => {
+              const cleanedColumn: DatatableColumn = {
+                id: column.id,
+                name: column.name,
+                meta: {
+                  type: column.aggConfig.params.field?.type || 'number',
+                  field: column.aggConfig.params.field?.name,
+                  index: indexPattern?.title,
+                  params: column.aggConfig.toSerializedFieldFormat(),
+                  source: 'esaggs',
+                  sourceParams: {
+                    indexPatternId: indexPattern?.id,
+                    appliedTimeRange:
+                      column.aggConfig.params.field?.name &&
+                      timeRange &&
+                      timeFields &&
+                      timeFields.includes(column.aggConfig.params.field?.name)
+                        ? {
+                            from: resolvedTimeRange?.min?.toISOString(),
+                            to: resolvedTimeRange?.max?.toISOString(),
+                          }
+                        : undefined,
+                    ...column.aggConfig.serialize(),
+                  },
+                },
+              };
+              return cleanedColumn;
+            }),
+          };
+
+          return table;
+        })
+      );
   } catch (e) {
     // Log any error during request to the inspector
     request.error({ json: e });
@@ -169,49 +243,6 @@ const handleCourierRequest = async ({
       request.json(req);
     });
   }
-
-  // Note that rawResponse is not deeply cloned here, so downstream applications using courier
-  // must take care not to mutate it, or it could have unintended side effects, e.g. displaying
-  // response data incorrectly in the inspector.
-  let resp = (searchSource as any).rawResponse;
-  for (const agg of aggs.aggs) {
-    if (hasIn(agg, 'type.postFlightRequest')) {
-      resp = await agg.type.postFlightRequest(
-        resp,
-        aggs,
-        agg,
-        requestSearchSource,
-        inspectorAdapters.requests,
-        abortSignal
-      );
-    }
-  }
-
-  (searchSource as any).finalResponse = resp;
-
-  const parsedTimeRange = timeRange ? calculateBounds(timeRange) : null;
-  const tabifyParams = {
-    metricsAtAllLevels,
-    partialRows,
-    timeRange: parsedTimeRange
-      ? { from: parsedTimeRange.min, to: parsedTimeRange.max, timeFields: allTimeFields }
-      : undefined,
-  };
-
-  const response = tabifyAggResponse(aggs, (searchSource as any).finalResponse, tabifyParams);
-
-  (searchSource as any).tabifiedResponse = response;
-
-  inspectorAdapters.data.setTabularLoader(
-    () =>
-      buildTabularInspectorData((searchSource as any).tabifiedResponse, {
-        queryFilter: filterManager,
-        deserializeFieldFormat: getFieldFormats().deserialize,
-      }),
-    { returnsFormattedValues: true }
-  );
-
-  return response;
 };
 
 export const esaggs = (): EsaggsExpressionFunctionDefinition => ({
@@ -252,72 +283,42 @@ export const esaggs = (): EsaggsExpressionFunctionDefinition => ({
       multi: true,
     },
   },
-  async fn(input, args, { inspectorAdapters, abortSignal, getSearchSessionId }) {
+  fn(input, args, { inspectorAdapters, abortSignal, getSearchSessionId, isPartial }) {
     const indexPatterns = getIndexPatterns();
     const { filterManager } = getQueryService();
     const searchService = getSearchService();
 
     const aggConfigsState = JSON.parse(args.aggConfigs);
-    const indexPattern = await indexPatterns.get(args.index);
-    const aggs = searchService.aggs.createAggConfigs(indexPattern, aggConfigsState);
 
-    // we should move searchSource creation inside courier request handler
-    const searchSource = await searchService.searchSource.create();
+    inspectorAdapters.partial = isPartial();
 
-    searchSource.setField('index', indexPattern);
-    searchSource.setField('size', 0);
-
-    const resolvedTimeRange = input?.timeRange && calculateBounds(input.timeRange);
-
-    const response = await handleCourierRequest({
-      searchSource,
-      aggs,
-      indexPattern,
-      timeRange: get(input, 'timeRange', undefined),
-      query: get(input, 'query', undefined) as any,
-      filters: get(input, 'filters', undefined),
-      timeFields: args.timeFields,
-      metricsAtAllLevels: args.metricsAtAllLevels,
-      partialRows: args.partialRows,
-      inspectorAdapters: inspectorAdapters as Adapters,
-      filterManager,
-      abortSignal: (abortSignal as unknown) as AbortSignal,
-      searchSessionId: getSearchSessionId(),
-    });
-
-    const table: Datatable = {
-      type: 'datatable',
-      rows: response.rows,
-      columns: response.columns.map((column) => {
-        const cleanedColumn: DatatableColumn = {
-          id: column.id,
-          name: column.name,
-          meta: {
-            type: column.aggConfig.params.field?.type || 'number',
-            field: column.aggConfig.params.field?.name,
-            index: indexPattern.title,
-            params: column.aggConfig.toSerializedFieldFormat(),
-            source: 'esaggs',
-            sourceParams: {
-              indexPatternId: indexPattern.id,
-              appliedTimeRange:
-                column.aggConfig.params.field?.name &&
-                input?.timeRange &&
-                args.timeFields &&
-                args.timeFields.includes(column.aggConfig.params.field?.name)
-                  ? {
-                      from: resolvedTimeRange?.min?.toISOString(),
-                      to: resolvedTimeRange?.max?.toISOString(),
-                    }
-                  : undefined,
-              ...column.aggConfig.serialize(),
-            },
-          },
-        };
-        return cleanedColumn;
+    return combineLatest([
+      from(indexPatterns.get(args.index)),
+      from(searchService.searchSource.create()),
+    ]).pipe(
+      map(([indexPattern, searchSource]) => {
+        const aggs = searchService.aggs.createAggConfigs(indexPattern, aggConfigsState);
+        searchSource.setField('index', indexPattern);
+        searchSource.setField('size', 0);
+        return { aggs, indexPattern, searchSource };
       }),
-    };
-
-    return table;
+      switchMap(({ aggs, indexPattern, searchSource }) => {
+        return handleCourierRequest({
+          searchSource,
+          aggs,
+          indexPattern,
+          timeRange: get(input, 'timeRange', undefined),
+          query: get(input, 'query', undefined) as any,
+          filters: get(input, 'filters', undefined),
+          timeFields: args.timeFields,
+          metricsAtAllLevels: args.metricsAtAllLevels,
+          partialRows: args.partialRows,
+          inspectorAdapters: inspectorAdapters as Adapters,
+          filterManager,
+          abortSignal: (abortSignal as unknown) as AbortSignal,
+          searchSessionId: getSearchSessionId(),
+        });
+      })
+    );
   },
 });

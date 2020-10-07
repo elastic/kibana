@@ -18,10 +18,11 @@
  */
 
 import { Datatable, ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { Observable } from 'rxjs';
 import { KibanaContext } from './kibana_context_type';
 
 type Input = KibanaContext | null;
-type Output = Promise<Datatable>;
+type Output = Observable<Datatable>;
 
 interface Arguments {
   index: string;

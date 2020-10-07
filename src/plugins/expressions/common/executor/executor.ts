@@ -42,6 +42,7 @@ export interface ExpressionExecOptions {
    * function are saved and are available for introspection.
    */
   debug?: boolean;
+  partial?: boolean;
 }
 
 export class TypesRegistry implements IRegistry<ExpressionType> {
@@ -167,14 +168,13 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
    * @param context Extra global context object that will be merged into the
    *    expression global context object that is provided to each function to allow side-effects.
    */
-  public async run<Input, Output>(
+  public run<Input, Output>(
     ast: string | ExpressionAstExpression,
     input: Input,
     params: ExpressionExecutionParams = {}
   ) {
     const execution = this.createExecution(ast, params);
-    execution.start(input);
-    return (await execution.result) as Output;
+    return execution.start(input);
   }
 
   public createExecution<Input = unknown, Output = unknown>(

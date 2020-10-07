@@ -71,7 +71,8 @@
 
 import { setWith } from '@elastic/safer-lodash-set';
 import { uniqueId, uniq, extend, pick, difference, omit, isObject, keys, isFunction } from 'lodash';
-import { map } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
+import { from } from 'rxjs';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
@@ -270,6 +271,21 @@ export class SearchSource {
   }
 
   /**
+   * Fetch this source and reject the returned Promise on error
+   *
+   * @async
+   */
+  fetchPartial(options: ISearchOptions = {}) {
+    return from(this.requestIsStarting(options)).pipe(
+      switchMap(() => {
+        const searchRequest = this.flatten();
+        this.history = [searchRequest];
+        return this.fetchAsync(searchRequest, options);
+      })
+    );
+  }
+
+  /**
    *  Add a handler that will be notified whenever requests start
    *  @param  {Function} handler
    *  @return {undefined}
@@ -314,6 +330,18 @@ export class SearchSource {
     return search({ params, indexType: searchRequest.indexType }, options)
       .pipe(map(({ rawResponse }) => onResponse(searchRequest, rawResponse)))
       .toPromise();
+  }
+
+  private fetchAsync(searchRequest: SearchRequest, options: ISearchOptions) {
+    const { search, getConfig, onResponse } = this.dependencies;
+
+    const params = getSearchParamsFromRequest(searchRequest, {
+      getConfig,
+    });
+
+    return search({ params, indexType: searchRequest.indexType }, options).pipe(
+      map(({ rawResponse }) => onResponse(searchRequest, rawResponse))
+    );
   }
 
   /**

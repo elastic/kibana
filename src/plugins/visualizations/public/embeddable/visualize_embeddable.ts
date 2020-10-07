@@ -377,6 +377,7 @@ export class VisualizeEmbeddable
       searchSessionId: this.input.searchSessionId,
       uiState: this.vis.uiState,
       inspectorAdapters: this.inspectorAdapters,
+      partial: true,
     };
     if (this.abortController) {
       this.abortController.abort();

@@ -100,8 +100,7 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
     this.name = name;
     this.type = type;
     this.aliases = aliases || [];
-    this.fn = (input, params, handlers) =>
-      Promise.resolve(fn(input, params, handlers as ExecutionContext));
+    this.fn = (input, params, handlers) => fn(input, params, handlers as ExecutionContext);
     this.help = help || '';
     this.inputTypes = inputTypes || context?.types;
     this.disabled = disabled || false;

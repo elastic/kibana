@@ -47,6 +47,7 @@ export const VisualizationContainer = ({
   return (
     <div className={classes}>
       <Suspense fallback={fallBack}>
+        {handlers.isPartial() && <div>loading</div>}
         {showNoResult ? <VisualizationNoResults onInit={() => handlers.done()} /> : children}
       </Suspense>
     </div>

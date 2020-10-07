@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { Observable } from 'rxjs';
 import { Execution } from './execution';
 import { ExpressionValueError } from '../expression_types/specs';
 import { ExpressionAstExpression } from '../ast';
@@ -48,19 +49,8 @@ export class ExecutionContract<Input = unknown, Output = unknown, InspectorAdapt
    * wraps that error into `ExpressionValueError` type and returns that.
    * This function never throws.
    */
-  getData = async (): Promise<Output | ExpressionValueError> => {
-    try {
-      return await this.execution.result;
-    } catch (e) {
-      return {
-        type: 'error',
-        error: {
-          name: e.name,
-          message: e.message,
-          stack: e.stack,
-        },
-      };
-    }
+  getData = (): Observable<Output | ExpressionValueError> => {
+    return this.execution.result;
   };
 
   /**

@@ -92,10 +92,13 @@ export class ExpressionRenderHandler {
       event: (data) => {
         this.eventsSubject.next(data);
       },
+      isPartial: () => {
+        return false;
+      },
     };
   }
 
-  render = async (data: any, uiState: any = {}) => {
+  render = async (data: any, uiState: any = {}, partial: boolean = false) => {
     if (!data || typeof data !== 'object') {
       return this.handleRenderError(new Error('invalid data provided to the expression renderer'));
     }
@@ -120,6 +123,7 @@ export class ExpressionRenderHandler {
         .get(data.as)!
         .render(this.element, data.value, {
           ...this.handlers,
+          isPartial: () => partial,
           uiState,
         } as any);
     } catch (e) {
