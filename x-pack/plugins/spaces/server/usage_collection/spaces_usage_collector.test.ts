@@ -9,7 +9,10 @@ import * as Rx from 'rxjs';
 import { PluginsSetup } from '../plugin';
 import { KibanaFeature } from '../../../features/server';
 import { ILicense, LicensingPluginSetup } from '../../../licensing/server';
-import { pluginInitializerContextConfigMock } from 'src/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  pluginInitializerContextConfigMock,
+} from 'src/core/server/mocks';
 
 interface SetupOpts {
   license?: Partial<ILicense>;
@@ -67,9 +70,10 @@ const defaultCallClusterMock = jest.fn().mockResolvedValue({
   },
 });
 
-const getMockFetchClients = (mockedCallCluster: any) => {
+const getMockFetchClients = (mockedCallCluster: jest.Mock) => {
   return {
     callCluster: mockedCallCluster,
+    esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
   };
 };
 

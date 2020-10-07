@@ -66,11 +66,10 @@ const getDefaultVegaVisualizations = (home: UsageCollectorDependencies['home']) 
 };
 
 const getStats = async (
-  collectorFetchClients: CollectorFetchClients,
+  { callCluster }: CollectorFetchClients,
   index: string,
   { home }: UsageCollectorDependencies
 ) => {
-  const { callCluster } = collectorFetchClients;
   const searchParams = {
     size: 10000,
     index,

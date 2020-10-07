@@ -5,6 +5,7 @@
  */
 
 import { createCloudUsageCollector } from './cloud_usage_collector';
+import { createCollectorFetchClientsMock } from 'src/plugins/usage_collection/server/usage_collection.mock';
 
 const mockUsageCollection = () => ({
   makeUsageCollector: jest.fn().mockImplementation((args: any) => ({ ...args })),
@@ -25,9 +26,7 @@ describe('createCloudUsageCollector', () => {
       const mockConfigs = getMockConfigs(true);
       const usageCollection = mockUsageCollection() as any;
       const collector = createCloudUsageCollector(usageCollection, mockConfigs);
-      const collectorFetchClients = {
-        callCluster: {} as any, // Sending any as the callCluster client because it's not needed in this collector but TS requires it when calling it.
-      };
+      const collectorFetchClients = createCollectorFetchClientsMock();
 
       expect((await collector.fetch(collectorFetchClients)).isCloudEnabled).toBe(true); // Adding the await because the fetch can be a Promise or a synchronous method and TS complains in the test if not awaited
     });

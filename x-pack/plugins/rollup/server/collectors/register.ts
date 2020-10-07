@@ -211,8 +211,7 @@ export function registerRollupUsageCollector(
         total: { type: 'long' },
       },
     },
-    fetch: async (collectorFetchClients: CollectorFetchClients) => {
-      const { callCluster } = collectorFetchClients;
+    fetch: async ({ callCluster }: CollectorFetchClients) => {
       const rollupIndexPatterns = await fetchRollupIndexPatterns(kibanaIndex, callCluster);
       const rollupIndexPatternToFlagMap = createIdToFlagMap(rollupIndexPatterns);
 

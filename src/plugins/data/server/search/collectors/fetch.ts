@@ -28,9 +28,8 @@ interface SearchTelemetrySavedObject {
 }
 
 export function fetchProvider(config$: Observable<SharedGlobalConfig>) {
-  return async (collectorFetchClients: CollectorFetchClients): Promise<Usage> => {
+  return async ({ callCluster }: CollectorFetchClients): Promise<Usage> => {
     const config = await config$.pipe(first()).toPromise();
-    const { callCluster } = collectorFetchClients;
 
     const response = await callCluster<SearchTelemetrySavedObject>('search', {
       index: config.kibana.index,

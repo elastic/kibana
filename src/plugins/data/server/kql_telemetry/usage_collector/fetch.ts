@@ -30,8 +30,7 @@ export interface Usage {
 }
 
 export function fetchProvider(index: string) {
-  return async (collectorFetchClients: CollectorFetchClients): Promise<Usage> => {
-    const { callCluster } = collectorFetchClients;
+  return async ({ callCluster }: CollectorFetchClients): Promise<Usage> => {
     const [response, config] = await Promise.all([
       callCluster('get', {
         index,

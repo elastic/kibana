@@ -100,8 +100,7 @@ export function getUsageCollector(config: Observable<{ kibana: { index: string }
   return {
     type: VIS_USAGE_TYPE,
     isReady: () => true,
-    fetch: async (collectorFetchClients: CollectorFetchClients) => {
-      const { callCluster } = collectorFetchClients;
+    fetch: async ({ callCluster }: CollectorFetchClients) => {
       const index = (await config.pipe(first()).toPromise()).kibana.index;
       return await getStats(callCluster, index);
     },

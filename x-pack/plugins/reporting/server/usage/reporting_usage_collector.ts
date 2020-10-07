@@ -36,8 +36,7 @@ export function getReportingUsageCollector(
 ) {
   return usageCollection.makeUsageCollector<ReportingUsageType, XpackBulkUpload>({
     type: 'reporting',
-    fetch: (collectorFetchClients: CollectorFetchClients) => {
-      const { callCluster } = collectorFetchClients;
+    fetch: ({ callCluster }: CollectorFetchClients) => {
       const config = reporting.getConfig();
       return getReportingUsage(config, getLicense, callCluster, exportTypesRegistry);
     },

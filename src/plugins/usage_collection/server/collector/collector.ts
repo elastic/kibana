@@ -47,10 +47,15 @@ export type MakeSchemaFrom<Base> = {
 
 export interface CollectorFetchClients {
   /**
-   * @depricated use esClient in stead
+   * @depricated Scoped Legacy Elasticsearch client: use esClient instead
    */
   callCluster: LegacyAPICaller;
-  esClient?: ElasticsearchClient;
+  /**
+   * Request-scoped Elasticsearch client:
+   * - When users are requesting a sample of data, it is scoped to their role to avoid exposing data they should't read
+   * - When building the telemetry data payload to report to the remote cluster, the requests are scoped to the `kibana` internal user
+   */
+  esClient: ElasticsearchClient;
 }
 export interface CollectorOptions<T = unknown, U = T> {
   type: string;

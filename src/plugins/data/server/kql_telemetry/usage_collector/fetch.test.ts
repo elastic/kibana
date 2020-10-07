@@ -20,6 +20,7 @@
 import { fetchProvider } from './fetch';
 import { LegacyAPICaller } from 'kibana/server';
 import { CollectorFetchClients } from 'src/plugins/usage_collection/server';
+import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
 
 jest.mock('../../../common', () => ({
   DEFAULT_QUERY_LANGUAGE: 'lucene',
@@ -82,6 +83,7 @@ function setupMockCallCluster(
     throw new Error('invalid call');
   }) as unknown) as LegacyAPICaller;
 }
+const esClientMock = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
 describe('makeKQLUsageCollector', () => {
   describe('fetch method', () => {
@@ -93,6 +95,7 @@ describe('makeKQLUsageCollector', () => {
       setupMockCallCluster({ optInCount: 1 }, 'kuery');
       collectorFetchClients = {
         callCluster,
+        esClient: esClientMock,
       };
       const fetchResponse = await fetch(collectorFetchClients);
       expect(fetchResponse.optInCount).toBe(1);
@@ -103,6 +106,7 @@ describe('makeKQLUsageCollector', () => {
       setupMockCallCluster({ optInCount: 1 }, 'kuery');
       collectorFetchClients = {
         callCluster,
+        esClient: esClientMock,
       };
       const fetchResponse = await fetch(collectorFetchClients);
       expect(fetchResponse.defaultQueryLanguage).toBe('kuery');
@@ -113,6 +117,7 @@ describe('makeKQLUsageCollector', () => {
       setupMockCallCluster({ optInCount: 1 }, null);
       collectorFetchClients = {
         callCluster,
+        esClient: esClientMock,
       };
       const fetchResponse = await fetch(collectorFetchClients);
       expect(fetchResponse.defaultQueryLanguage).toBe('lucene');
@@ -122,6 +127,7 @@ describe('makeKQLUsageCollector', () => {
       setupMockCallCluster({ optInCount: 1 }, undefined);
       collectorFetchClients = {
         callCluster,
+        esClient: esClientMock,
       };
       const fetchResponse = await fetch(collectorFetchClients);
       expect(fetchResponse.defaultQueryLanguage).toBe('default-lucene');
@@ -131,6 +137,7 @@ describe('makeKQLUsageCollector', () => {
       setupMockCallCluster(null, 'kuery');
       collectorFetchClients = {
         callCluster,
+        esClient: esClientMock,
       };
       const fetchResponse = await fetch(collectorFetchClients);
       expect(fetchResponse.optInCount).toBe(0);
@@ -141,6 +148,7 @@ describe('makeKQLUsageCollector', () => {
       setupMockCallCluster(null, 'missingConfigDoc');
       collectorFetchClients = {
         callCluster,
+        esClient: esClientMock,
       };
       const fetchResponse = await fetch(collectorFetchClients);
       expect(fetchResponse.defaultQueryLanguage).toBe('default-lucene');

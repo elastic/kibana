@@ -44,11 +44,10 @@ export function getKibanaUsageCollector(
       graph_workspace: { total: { type: 'long' } },
       timelion_sheet: { total: { type: 'long' } },
     },
-    async fetch(collectorFetchClients: CollectorFetchClients) {
+    async fetch({ callCluster }: CollectorFetchClients) {
       const {
         kibana: { index },
       } = await legacyConfig$.pipe(take(1)).toPromise();
-      const { callCluster } = collectorFetchClients;
       return {
         index,
         ...(await getSavedObjectsCounts(callCluster, index)),

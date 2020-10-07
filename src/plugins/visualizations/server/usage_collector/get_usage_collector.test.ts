@@ -20,7 +20,7 @@
 import moment from 'moment';
 import { of } from 'rxjs';
 
-import { LegacyAPICaller } from 'src/core/server';
+import { createCollectorFetchClientsMock } from 'src/plugins/usage_collection/server/usage_collection.mock';
 import { getUsageCollector } from './get_usage_collector';
 
 const defaultMockSavedObjects = [
@@ -123,13 +123,10 @@ const enlargedMockSavedObjects = [
 describe('Visualizations usage collector', () => {
   const configMock = of({ kibana: { index: '' } });
   const usageCollector = getUsageCollector(configMock);
-  const getMockCallCluster = (hits: unknown[]) =>
-    (() => Promise.resolve({ hits: { hits } }) as unknown) as LegacyAPICaller;
-  // let collectorFetchClients: CollectorFetchClients;
-  const getMockFetchClients = (resp: unknown[]) => {
-    return {
-      callCluster: getMockCallCluster(resp),
-    };
+  const getMockFetchClients = (hits?: unknown[]) => {
+    const fetchParamsMock = createCollectorFetchClientsMock();
+    fetchParamsMock.callCluster.mockResolvedValue({ hits: { hits } });
+    return fetchParamsMock;
   };
 
   test('Should fit the shape', () => {

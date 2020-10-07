@@ -19,9 +19,9 @@
 
 import { of } from 'rxjs';
 
-import { LegacyAPICaller } from 'src/core/server';
 import { getUsageCollector } from './get_usage_collector';
 import { HomeServerPluginSetup } from '../../../home/server';
+import { createCollectorFetchClientsMock } from 'src/plugins/usage_collection/server/usage_collection.mock';
 
 const mockedSavedObjects = [
   // vega-lite lib spec
@@ -72,14 +72,12 @@ const mockedSavedObjects = [
   },
 ];
 
-const getMockCallCluster = (hits?: unknown[]) =>
-  jest.fn().mockReturnValue(Promise.resolve({ hits: { hits } }) as unknown) as LegacyAPICaller;
-
-const getMockFetchClients = (resp?: unknown[]) => {
-  return {
-    callCluster: getMockCallCluster(resp),
-  };
+const getMockFetchClients = (hits?: unknown[]) => {
+  const fetchParamsMock = createCollectorFetchClientsMock();
+  fetchParamsMock.callCluster.mockResolvedValue({ hits: { hits } });
+  return fetchParamsMock;
 };
+
 describe('Vega visualization usage collector', () => {
   const configMock = of({ kibana: { index: '' } });
   const usageCollector = getUsageCollector(configMock, {

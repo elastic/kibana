@@ -22,6 +22,7 @@ import { LegacyAPICaller } from 'kibana/server';
 import { pluginInitializerContextConfigMock } from '../../../../../core/server/mocks';
 import {
   CollectorOptions,
+  createCollectorFetchClientsMock,
   createUsageCollectionSetupMock,
 } from '../../../../usage_collection/server/usage_collection.mock';
 
@@ -37,16 +38,13 @@ describe('telemetry_kibana', () => {
   });
 
   const legacyConfig$ = pluginInitializerContextConfigMock({}).legacy.globalConfig$;
-  // const callCluster = jest.fn().mockImplementation(() => ({}));
 
-  const getMockCallCluster = (hits?: unknown[]) =>
-    jest.fn().mockImplementation(() => ({})) as LegacyAPICaller;
-
-  const getMockFetchClients = (resp?: unknown[]) => {
-    return {
-      callCluster: getMockCallCluster(resp),
-    };
+  const getMockFetchClients = (hits?: unknown[]) => {
+    const fetchParamsMock = createCollectorFetchClientsMock();
+    fetchParamsMock.callCluster.mockResolvedValue({ hits: { hits } });
+    return fetchParamsMock;
   };
+
   beforeAll(() => registerKibanaUsageCollector(usageCollectionMock, legacyConfig$));
   afterAll(() => jest.clearAllTimers());
 

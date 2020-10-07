@@ -188,8 +188,7 @@ export function getSpacesUsageCollector(
       enabled: { type: 'boolean' },
       count: { type: 'long' },
     },
-    fetch: async (collectorFetchClients: CollectorFetchClients) => {
-      const { callCluster } = collectorFetchClients;
+    fetch: async ({ callCluster }: CollectorFetchClients) => {
       const license = await deps.licensing.license$.pipe(take(1)).toPromise();
       const available = license.isAvailable; // some form of spaces is available for all valid licenses
 

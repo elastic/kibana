@@ -5,7 +5,7 @@
  */
 
 import { KibanaTelemetryAdapter } from '../kibana_telemetry_adapter';
-
+import { createCollectorFetchClientsMock } from 'src/plugins/usage_collection/server/usage_collection.mock';
 jest
   .spyOn(KibanaTelemetryAdapter, 'countNoOfUniqueMonitorAndLocations')
   .mockResolvedValue(undefined as any);
@@ -13,7 +13,12 @@ jest
 describe('KibanaTelemetryAdapter', () => {
   let usageCollection: any;
   let getSavedObjectsClient: any;
-  let collector: { type: string; fetch: () => Promise<any>; isReady: () => boolean };
+  let collectorFetchParams: any;
+  let collector: {
+    type: string;
+    fetch: (collectorFetchParams: any) => Promise<any>;
+    isReady: () => boolean;
+  };
   beforeEach(() => {
     usageCollection = {
       makeUsageCollector: (val: any) => {
@@ -23,6 +28,7 @@ describe('KibanaTelemetryAdapter', () => {
     getSavedObjectsClient = () => {
       return {};
     };
+    collectorFetchParams = createCollectorFetchClientsMock();
   });
 
   it('collects monitor and overview data', async () => {
@@ -49,7 +55,7 @@ describe('KibanaTelemetryAdapter', () => {
       autoRefreshEnabled: true,
       autorefreshInterval: 30,
     });
-    const result = await collector.fetch();
+    const result = await collector.fetch(collectorFetchParams);
     expect(result).toMatchSnapshot();
   });
 
@@ -87,7 +93,7 @@ describe('KibanaTelemetryAdapter', () => {
       autoRefreshEnabled: true,
       autorefreshInterval: 30,
     });
-    const result = await collector.fetch();
+    const result = await collector.fetch(collectorFetchParams);
     expect(result).toMatchSnapshot();
   });
 

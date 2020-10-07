@@ -69,9 +69,7 @@ export class KibanaTelemetryAdapter {
           },
         },
       },
-      fetch: async (collectorFetchClients: CollectorFetchClients) => {
-        // callCluster: ESAPICaller
-        const { callCluster } = collectorFetchClients;
+      fetch: async ({ callCluster }: CollectorFetchClients) => {
         const savedObjectsClient = getSavedObjectsClient()!;
         if (savedObjectsClient) {
           await this.countNoOfUniqueMonitorAndLocations(callCluster, savedObjectsClient);

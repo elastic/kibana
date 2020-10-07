@@ -42,8 +42,7 @@ export interface TelemetryResponse {
 }
 
 export function fetchProvider(index: string) {
-  return async (collectorFetchClients: CollectorFetchClients) => {
-    const { callCluster } = collectorFetchClients;
+  return async ({ callCluster }: CollectorFetchClients) => {
     const response = await callCluster('search', {
       index,
       body: {
