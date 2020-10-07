@@ -100,7 +100,7 @@ export class SavedObjectLoader {
   mapHitSource(
     source: Record<string, unknown>,
     id: string,
-    references: SavedObjectsFindOptionsReference[]
+    references: SavedObjectsFindOptionsReference[] = []
   ) {
     source.id = id;
     source.url = this.urlFor(id);
@@ -117,9 +117,9 @@ export class SavedObjectLoader {
   mapSavedObjectApiHits(hit: {
     attributes: Record<string, unknown>;
     id: string;
-    references: SavedObjectsFindOptionsReference[];
+    references?: SavedObjectsFindOptionsReference[];
   }) {
-    return this.mapHitSource(hit.attributes, hit.id, hit.references);
+    return this.mapHitSource(hit.attributes, hit.id, hit.references || []);
   }
 
   /**
