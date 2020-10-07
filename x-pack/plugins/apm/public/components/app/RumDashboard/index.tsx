@@ -5,22 +5,13 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useTrackPageview } from '../../../../../observability/public';
 import { Projection } from '../../../../common/projections';
 import { RumDashboard } from './RumDashboard';
-import { useUrlParams } from '../../../hooks/useUrlParams';
-import { useFetcher } from '../../../hooks/useFetcher';
-import { RUM_AGENT_NAMES } from '../../../../common/agent_name';
-import { EnvironmentFilter } from '../../shared/EnvironmentFilter';
-import { URLFilter } from './URLFilter';
+
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
-import { ServiceNameFilter } from './URLFilter/ServiceNameFilter';
+import { URLFilter } from './URLFilter';
 
 export function RumOverview() {
   useTrackPageview({ app: 'ux', path: 'home' });
@@ -35,46 +26,14 @@ export function RumOverview() {
     return config;
   }, []);
 
-  const {
-    urlParams: { start, end },
-  } = useUrlParams();
-
-  const { data, status } = useFetcher(
-    (callApmApi) => {
-      if (start && end) {
-        return callApmApi({
-          pathname: '/api/apm/rum-client/services',
-          params: {
-            query: {
-              start,
-              end,
-              uiFilters: JSON.stringify({ agentName: RUM_AGENT_NAMES }),
-            },
-          },
-        });
-      }
-    },
-    [start, end]
-  );
-
   return (
     <>
       <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
-          <EnvironmentFilter />
-          <EuiSpacer />
-
           <LocalUIFilters {...localUIFiltersConfig} showCount={true}>
-            <>
-              <ServiceNameFilter
-                loading={status !== 'success'}
-                serviceNames={data ?? []}
-              />
-              <EuiSpacer size="xl" />
-              <URLFilter />
-              <EuiHorizontalRule margin="none" />{' '}
-            </>
+            <URLFilter />
+            <EuiSpacer size="s" />
           </LocalUIFilters>
         </EuiFlexItem>
         <EuiFlexItem grow={7}>

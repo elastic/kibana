@@ -179,5 +179,89 @@ describe('metric_expression', () => {
         </VisualizationContainer>
       `);
     });
+
+    test('it renders an EmptyPlaceholder when no tables is passed as data', () => {
+      const { data, noAttributesArgs } = sampleArgs();
+
+      expect(
+        shallow(
+          <MetricChart
+            data={{ ...data, tables: {} }}
+            args={noAttributesArgs}
+            formatFactory={(x) => x as IFieldFormat}
+          />
+        )
+      ).toMatchInlineSnapshot(`
+              <EmptyPlaceholder
+                icon={[Function]}
+              />
+          `);
+    });
+
+    test('it renders an EmptyPlaceholder when null value is passed as data', () => {
+      const { data, noAttributesArgs } = sampleArgs();
+
+      data.tables.l1.rows[0].a = null;
+
+      expect(
+        shallow(
+          <MetricChart
+            data={data}
+            args={noAttributesArgs}
+            formatFactory={(x) => x as IFieldFormat}
+          />
+        )
+      ).toMatchInlineSnapshot(`
+        <EmptyPlaceholder
+          icon={[Function]}
+        />
+      `);
+    });
+
+    test('it renders 0 value', () => {
+      const { data, noAttributesArgs } = sampleArgs();
+
+      data.tables.l1.rows[0].a = 0;
+
+      expect(
+        shallow(
+          <MetricChart
+            data={data}
+            args={noAttributesArgs}
+            formatFactory={(x) => x as IFieldFormat}
+          />
+        )
+      ).toMatchInlineSnapshot(`
+        <VisualizationContainer
+          className="lnsMetricExpression__container"
+          reportDescription=""
+          reportTitle=""
+        >
+          <AutoScale>
+            <div
+              data-test-subj="lns_metric_value"
+              style={
+                Object {
+                  "fontSize": "60pt",
+                  "fontWeight": 600,
+                }
+              }
+            >
+              0
+            </div>
+            <div
+              data-test-subj="lns_metric_title"
+              style={
+                Object {
+                  "fontSize": "24pt",
+                }
+              }
+            >
+              My fanci metric chart
+            </div>
+          </AutoScale>
+        </VisualizationContainer>
+      `);
+    });
   });
 });
