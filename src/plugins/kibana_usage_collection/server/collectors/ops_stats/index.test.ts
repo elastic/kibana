@@ -21,10 +21,17 @@ import { Subject } from 'rxjs';
 import {
   CollectorOptions,
   createUsageCollectionSetupMock,
+  createCollectorFetchClientsMock,
 } from '../../../../usage_collection/server/usage_collection.mock';
 
 import { registerOpsStatsCollector } from './';
 import { OpsMetrics } from '../../../../../core/server';
+
+const getMockFetchClients = (resp?: any) => {
+  const fetchParamsMock = createCollectorFetchClientsMock();
+  fetchParamsMock.callCluster.mockResolvedValue(resp);
+  return fetchParamsMock;
+};
 
 describe('telemetry_ops_stats', () => {
   let collector: CollectorOptions;
@@ -36,9 +43,6 @@ describe('telemetry_ops_stats', () => {
   });
 
   const metrics$ = new Subject<OpsMetrics>();
-  const collectorFetchClients = {
-    callCluster: jest.fn(),
-  };
 
   const metric: OpsMetrics = {
     collected_at: new Date('2020-01-01 01:00:00'),
@@ -94,7 +98,7 @@ describe('telemetry_ops_stats', () => {
   test('should return something when there is a metric', async () => {
     metrics$.next(metric);
     expect(collector.isReady()).toBe(true);
-    expect(await collector.fetch(collectorFetchClients)).toMatchSnapshot({
+    expect(await collector.fetch(getMockFetchClients())).toMatchSnapshot({
       concurrent_connections: 20,
       os: {
         load: {

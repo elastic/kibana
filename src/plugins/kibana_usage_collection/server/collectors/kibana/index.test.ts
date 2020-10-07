@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
-
 import { pluginInitializerContextConfigMock } from '../../../../../core/server/mocks';
 import {
   CollectorOptions,
