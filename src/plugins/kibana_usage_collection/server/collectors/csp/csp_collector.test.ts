@@ -20,14 +20,17 @@
 import { CspConfig, ICspConfig } from '../../../../../core/server';
 import { createCspCollector } from './csp_collector';
 import { httpServiceMock } from '../../../../../core/server/mocks';
+import { createCollectorFetchClientsMock } from 'src/plugins/usage_collection/server/usage_collection.mock';
 
+const getMockFetchClients = (resp?: any) => {
+  const fetchParamsMock = createCollectorFetchClientsMock();
+  fetchParamsMock.callCluster.mockResolvedValue(resp);
+  return fetchParamsMock;
+};
 describe('csp collector', () => {
   let httpMock: ReturnType<typeof httpServiceMock.createSetupContract>;
-  const mockCallCluster = null as any;
   // changed for consistency with expected implementation
-  const mockCollectorFetchClients = {
-    callCluster: mockCallCluster,
-  };
+  const mockCollectorFetchClients = getMockFetchClients();
 
   function updateCsp(config: Partial<ICspConfig>) {
     httpMock.csp = new CspConfig(config);
