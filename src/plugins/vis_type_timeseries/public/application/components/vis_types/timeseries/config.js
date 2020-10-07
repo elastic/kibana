@@ -38,8 +38,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import { getDefaultQueryLanguage } from '../../lib/get_default_query_language';
-import { QueryBarWrapper } from '../../query_bar_wrapper';
+import { SeriesConfigQueryBarWithIgnoreGlobalFilter } from '../../series_config_query_bar_with_ignore_global_filter';
 
 import { isPercentDisabled } from '../../lib/stacked';
 import { STACKED_OPTIONS } from '../../../visualizations/constants/chart';
@@ -392,44 +391,12 @@ export const TimeseriesConfig = injectI18n(function (props) {
 
       <EuiHorizontalRule margin="s" />
       <EuiFlexGroup margin="s">
-        <EuiFlexItem>
-          <EuiFormRow
-            id={htmlId('series_filter')}
-            label={
-              <FormattedMessage
-                id="visTypeTimeseries.timeSeries.filterLabel"
-                defaultMessage="Filter"
-              />
-            }
-            fullWidth
-          >
-            <QueryBarWrapper
-              query={{
-                language:
-                  model.filter && model.filter.language
-                    ? model.filter.language
-                    : getDefaultQueryLanguage(),
-                query: model.filter && model.filter.query ? model.filter.query : '',
-              }}
-              onChange={(filter) => props.onChange({ filter })}
-              indexPatterns={[seriesIndexPattern]}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFormLabel>
-            <FormattedMessage
-              id="visTypeTimeseries.timeSeries.optionsTab.ignoreGlobalFilterLabel"
-              defaultMessage="Ignore global filter?"
-            />
-          </EuiFormLabel>
-          <EuiSpacer size="s" />
-          <YesNo
-            value={model.ignore_global_filter}
-            name="ignore_global_filter"
-            onChange={props.onChange}
-          />
-        </EuiFlexItem>
+        <SeriesConfigQueryBarWithIgnoreGlobalFilter
+          model={model}
+          onChange={props.onChange}
+          panel={props.panel}
+          indexPatternForQuery={seriesIndexPattern}
+        />
       </EuiFlexGroup>
       <EuiHorizontalRule margin="s" />
 
@@ -600,6 +567,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
 TimeseriesConfig.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
+  panel: PropTypes.object,
   onChange: PropTypes.func,
   indexPatternForQuery: PropTypes.string,
   seriesQuantity: PropTypes.object,
