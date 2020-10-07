@@ -61,6 +61,14 @@ export interface SavedObjectStatusMeta {
 }
 
 /**
+ * @public
+ */
+export interface SavedObjectsFindOptionsReference {
+  type: string;
+  id: string;
+}
+
+/**
  *
  * @public
  */
@@ -85,7 +93,13 @@ export interface SavedObjectsFindOptions {
    * be modified. If used in conjunction with `searchFields`, both are concatenated together.
    */
   rootSearchFields?: string[];
-  hasReference?: { type: string; id: string };
+
+  hasReference?: SavedObjectsFindOptionsReference | SavedObjectsFindOptionsReference[];
+  hasReferenceOperator?: 'AND' | 'OR';
+
+  /**
+   * The search operator to use with the provided filter. Defaults to `OR`
+   */
   defaultSearchOperator?: 'AND' | 'OR';
   filter?: string | KueryNode;
   namespaces?: string[];

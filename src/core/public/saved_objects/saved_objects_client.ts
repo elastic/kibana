@@ -305,6 +305,7 @@ export class SavedObjectsClient {
       defaultSearchOperator: 'default_search_operator',
       fields: 'fields',
       hasReference: 'has_reference',
+      hasReferenceOperator: 'has_reference_operator',
       page: 'page',
       perPage: 'per_page',
       search: 'search',
