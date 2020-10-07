@@ -86,7 +86,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     options: SavedObjectsCreateOptions = {}
   ) {
     const args = { type, attributes, options };
-    const namespaces = [options.namespace, ...(options.namespaces || [])];
+    const namespaces = [options.namespace, ...(options.initialNamespaces || [])];
     await this.ensureAuthorized(type, 'create', namespaces, { args });
 
     const savedObject = await this.baseClient.create(type, attributes, options);
@@ -114,7 +114,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   ) {
     const args = { objects, options };
     const namespaces = objects.reduce(
-      (acc, { namespaces: initialNamespaces = [] }) => {
+      (acc, { initialNamespaces = [] }) => {
         return acc.concat(initialNamespaces);
       },
       [options.namespace]
