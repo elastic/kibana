@@ -5,7 +5,7 @@
  */
 
 import { AlertingPlugin, AlertingPluginsSetup, AlertingPluginsStart } from './plugin';
-import { coreMock } from '../../../../src/core/server/mocks';
+import { coreMock, statusServiceMock } from '../../../../src/core/server/mocks';
 import { licensingMock } from '../../licensing/server/mocks';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { taskManagerMock } from '../../task_manager/server/mocks';
@@ -22,6 +22,7 @@ describe('Alerting Plugin', () => {
 
       const coreSetup = coreMock.createSetup();
       const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
+      const statusMock = statusServiceMock.createSetupContract();
       await plugin.setup(
         ({
           ...coreSetup,
@@ -29,6 +30,7 @@ describe('Alerting Plugin', () => {
             ...coreSetup.http,
             route: jest.fn(),
           },
+          status: statusMock,
         } as unknown) as CoreSetup<AlertingPluginsStart, unknown>,
         ({
           licensing: licensingMock.createSetup(),
@@ -38,6 +40,7 @@ describe('Alerting Plugin', () => {
         } as unknown) as AlertingPluginsSetup
       );
 
+      expect(statusMock.set).toHaveBeenCalledTimes(1);
       expect(encryptedSavedObjectsSetup.usingEphemeralEncryptionKey).toEqual(true);
       expect(context.logger.get().warn).toHaveBeenCalledWith(
         'APIs are disabled due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml.'

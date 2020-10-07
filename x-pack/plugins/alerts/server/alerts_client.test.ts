@@ -2931,6 +2931,161 @@ describe('find()', () => {
   });
 });
 
+describe('hasDecryptionFailures()', () => {
+  const listedTypes = new Set([
+    {
+      actionGroups: [],
+      actionVariables: undefined,
+      defaultActionGroupId: 'default',
+      id: 'myType',
+      name: 'myType',
+      producer: 'myApp',
+    },
+  ]);
+  beforeAll(() => {
+    alertTypeRegistry.list.mockReturnValue(listedTypes);
+  });
+
+  test('return true if some of alerts has a decryption error', async () => {
+    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+      total: 2,
+      per_page: 10,
+      page: 1,
+      saved_objects: [
+        {
+          id: '1',
+          type: 'alert',
+          attributes: {
+            alertTypeId: 'myType',
+            schedule: { interval: '10s' },
+            params: {
+              bar: true,
+            },
+            createdAt: new Date().toISOString(),
+            actions: [
+              {
+                group: 'default',
+                actionRef: 'action_0',
+                params: {
+                  foo: true,
+                },
+              },
+            ],
+            executionStatus: {
+              status: 'error',
+              lastExecutionDate: new Date().toISOString(),
+              error: {
+                reason: 'decrypt',
+                message: 'Failed decrypt',
+              },
+            },
+          },
+          score: 1,
+          references: [
+            {
+              name: 'action_0',
+              type: 'action',
+              id: '1',
+            },
+          ],
+        },
+        {
+          id: '2',
+          type: 'alert',
+          attributes: {
+            alertTypeId: 'myType',
+            schedule: { interval: '1s' },
+            params: {
+              bar: true,
+            },
+            createdAt: new Date().toISOString(),
+            actions: [],
+            executionStatus: {
+              status: 'ok',
+              lastExecutionDate: new Date().toISOString(),
+            },
+          },
+          score: 1,
+          references: [],
+        },
+      ],
+    });
+    const alertsClient = new AlertsClient(alertsClientParams);
+    const result = await alertsClient.hasDecryptionFailures();
+    expect(result).toBe(true);
+    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
+  });
+
+  test('return false if no alerts with a decryption error', async () => {
+    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+      total: 2,
+      per_page: 10,
+      page: 1,
+      saved_objects: [
+        {
+          id: '1',
+          type: 'alert',
+          attributes: {
+            alertTypeId: 'myType',
+            schedule: { interval: '10s' },
+            params: {
+              bar: true,
+            },
+            createdAt: new Date().toISOString(),
+            actions: [
+              {
+                group: 'default',
+                actionRef: 'action_0',
+                params: {
+                  foo: true,
+                },
+              },
+            ],
+            executionStatus: {
+              status: 'error',
+              lastExecutionDate: new Date().toISOString(),
+              error: {
+                reason: 'unknown',
+                message: 'Failed',
+              },
+            },
+          },
+          score: 1,
+          references: [
+            {
+              name: 'action_0',
+              type: 'action',
+              id: '1',
+            },
+          ],
+        },
+        {
+          id: '2',
+          type: 'alert',
+          attributes: {
+            alertTypeId: 'myType',
+            schedule: { interval: '1s' },
+            params: {
+              bar: true,
+            },
+            createdAt: new Date().toISOString(),
+            actions: [],
+            executionStatus: {
+              status: 'ok',
+              lastExecutionDate: new Date().toISOString(),
+            },
+          },
+          score: 1,
+          references: [],
+        },
+      ],
+    });
+    const alertsClient = new AlertsClient(alertsClientParams);
+    const result = await alertsClient.hasDecryptionFailures();
+    expect(result).toBe(false);
+  });
+});
+
 describe('delete()', () => {
   let alertsClient: AlertsClient;
   const existingAlert = {

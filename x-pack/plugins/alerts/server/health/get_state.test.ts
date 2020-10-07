@@ -1,0 +1,74 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+import { taskManagerMock } from '../../../task_manager/server/task_manager.mock';
+import { healthStatus$ } from '.';
+import { TaskStatus } from '../../../task_manager/server';
+
+describe('healthStatus$()', () => {
+  const mockTaskManager = taskManagerMock.start();
+
+  it('should return an object with the "unavailable" level and proper summary of "Alerting framework is unhealthy"', async () => {
+    mockTaskManager.get.mockReturnValue(
+      new Promise((_resolve, _reject) => {
+        return {
+          id: 'test',
+          attempts: 0,
+          status: TaskStatus.Running,
+          version: '123',
+          runAt: new Date(),
+          scheduledAt: new Date(),
+          startedAt: new Date(),
+          retryAt: new Date(Date.now() + 5 * 60 * 1000),
+          state: {
+            runs: 1,
+            isHealthy: false,
+          },
+          taskType: 'alerting:alerting_health_check',
+          params: {
+            alertId: '1',
+          },
+          ownerId: null,
+        };
+      })
+    );
+    healthStatus$(mockTaskManager).subscribe(
+      (val: { level: Readonly<unknown>; summary: string }) => {
+        expect(val.level).toBe(false);
+      }
+    );
+  });
+
+  it('should return an object with the "available" level and proper summary of "Alerting framework is healthy"', async () => {
+    mockTaskManager.get.mockReturnValue(
+      new Promise((_resolve, _reject) => {
+        return {
+          id: 'test',
+          attempts: 0,
+          status: TaskStatus.Running,
+          version: '123',
+          runAt: new Date(),
+          scheduledAt: new Date(),
+          startedAt: new Date(),
+          retryAt: new Date(Date.now() + 5 * 60 * 1000),
+          state: {
+            runs: 1,
+            isHealthy: true,
+          },
+          taskType: 'alerting:alerting_health_check',
+          params: {
+            alertId: '1',
+          },
+          ownerId: null,
+        };
+      })
+    );
+    healthStatus$(mockTaskManager).subscribe(
+      (val: { level: Readonly<unknown>; summary: string }) => {
+        expect(val.level).toBe(true);
+      }
+    );
+  });
+});
