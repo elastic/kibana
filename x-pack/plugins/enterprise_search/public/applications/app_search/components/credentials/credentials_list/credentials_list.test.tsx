@@ -60,7 +60,7 @@ describe('Credentials', () => {
   });
 
   describe('items', () => {
-    it('sorts itmes by id', () => {
+    it('sorts items by id', () => {
       mockKea({
         values: {
           apiTokens: [
