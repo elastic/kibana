@@ -77,7 +77,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .send({ ids: [resBody.id] })
           .expect(200);
-        return body[resBody.id].current_status?.status === 'succeeded';
+        return body[resBody.id]?.current_status?.status === 'succeeded';
       });
 
       // query the single rule from _find

@@ -7,6 +7,7 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import { EuiTableFieldDataColumnType } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import {
   Immutable,
   TrustedApp,
@@ -27,6 +28,7 @@ import {
   PROPERTY_TITLES,
   ENTRY_PROPERTY_TITLES,
   CARD_DELETE_BUTTON_LABEL,
+  CONDITION_FIELD_TITLE,
 } from '../../translations';
 
 type Entry = MacosLinuxConditionEntry | WindowsConditionEntry;
@@ -47,6 +49,9 @@ const getEntriesColumnDefinitions = (): Array<EuiTableFieldDataColumnType<Entry>
     truncateText: true,
     textOnly: true,
     width: '30%',
+    render(field: MacosLinuxConditionEntry['field'], entry: Entry) {
+      return CONDITION_FIELD_TITLE[field];
+    },
   },
   {
     field: 'operator',
@@ -54,6 +59,11 @@ const getEntriesColumnDefinitions = (): Array<EuiTableFieldDataColumnType<Entry>
     sortable: false,
     truncateText: true,
     width: '20%',
+    render() {
+      return i18n.translate('xpack.securitySolution.trustedapps.card.operator.includes', {
+        defaultMessage: 'is',
+      });
+    },
   },
   {
     field: 'value',

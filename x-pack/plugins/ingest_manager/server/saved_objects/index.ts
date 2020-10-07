@@ -207,6 +207,7 @@ const getSavedObjectTypes = (
         fleet_enroll_username: { type: 'binary' },
         fleet_enroll_password: { type: 'binary' },
         config: { type: 'flattened' },
+        config_yaml: { type: 'text' },
       },
     },
   },
@@ -347,6 +348,7 @@ export function registerEncryptedSavedObjects(
       'hosts',
       'ca_sha256',
       'config',
+      'config_yaml',
     ]),
   });
   encryptedSavedObjects.registerType({
