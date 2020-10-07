@@ -67,7 +67,7 @@ export const readRulesRoute = (router: IRouter) => {
             search: rule.id,
             searchFields: ['alertId'],
           });
-          const currentStatus = ruleStatuses.saved_objects[0];
+          const [currentStatus] = ruleStatuses.saved_objects;
           if (currentStatus != null && rule.executionStatus.status === 'error') {
             currentStatus.attributes.lastFailureMessage = `Reason: ${rule.executionStatus.error?.reason} Message: ${rule.executionStatus.error?.message}`;
             currentStatus.attributes.lastFailureAt = rule.executionStatus.lastExecutionDate.toISOString();
