@@ -44,7 +44,7 @@ export const dashboardSavedObjectType: SavedObjectsType = {
   mappings: {
     properties: {
       description: { type: 'text' },
-      hits: { type: 'integer', index: false },
+      hits: { type: 'integer', index: false, doc_values: false },
       kibanaSavedObjectMeta: {
         properties: { searchSourceJSON: { type: 'text', index: false } },
       },
