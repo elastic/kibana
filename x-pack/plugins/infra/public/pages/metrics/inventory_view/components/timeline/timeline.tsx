@@ -27,7 +27,7 @@ import { EuiIcon } from '@elastic/eui';
 import { useUiSetting } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { toMetricOpt } from '../../../../../../common/snapshot_metric_i18n';
 import { MetricsExplorerAggregation } from '../../../../../../common/http_api';
-import { Color } from '../../../../../../common/color_palette';
+import { colorTransformer, Color } from '../../../../../../common/color_palette';
 import { useSourceContext } from '../../../../../containers/source';
 import { useTimeline } from '../../hooks/use_timeline';
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
@@ -226,7 +226,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon color={chartMetric.color} type={'dot'} />
+                  <EuiIcon color={colorTransformer(chartMetric.color)} type={'dot'} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size={'xs'}>
