@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { registerEmbeddables } from './embeddables';
-export { registerFeature } from './register_feature';
-export { registerManagementSection } from './application/management';
-export { registerMlUiActions } from './ui_actions';
+import { TestFeatureUsagePlugin } from './plugin';
+
+export const plugin = () => new TestFeatureUsagePlugin();
