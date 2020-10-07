@@ -6,11 +6,9 @@
 
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
-import { useLocation } from 'react-router-dom';
-import rison, { RisonValue } from 'rison-node';
-import url from 'url';
 import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
-import { getTimepickerRisonData, TimepickerRisonData } from '../rison_helpers';
+import { useMlHref, ML_PAGES } from '../../../../../../ml/public';
+import { useUrlParams } from '../../../../hooks/useUrlParams';
 
 interface MlRisonData {
   ml?: {
@@ -26,28 +24,41 @@ interface Props {
 }
 
 export function MLLink({ children, path = '', query = {}, external }: Props) {
-  const { core } = useApmPluginContext();
-  const location = useLocation();
+  const {
+    core,
+    plugins: { ml },
+  } = useApmPluginContext();
 
-  const risonQuery: MlRisonData & TimepickerRisonData = getTimepickerRisonData(
-    location.search
-  );
-
-  if (query.ml) {
-    risonQuery.ml = query.ml;
+  let jobIds: string[] = [];
+  if (query.ml?.jobIds) {
+    jobIds = query.ml.jobIds;
   }
+  const { urlParams } = useUrlParams();
+  const { rangeFrom, rangeTo, refreshInterval, refreshPaused } = urlParams;
 
-  const href = url.format({
-    pathname: core.http.basePath.prepend('/app/ml'),
-    hash: `${path}?_g=${rison.encode(
-      risonQuery as RisonValue
-    )}&mlManagement=${rison.encode({ groupIds: ['apm'] })}`,
+  // default to link to ML Anomaly Detection jobs management page
+  const mlADLink = useMlHref(ml, core.http.basePath.get(), {
+    page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+    pageState: {
+      jobId: jobIds,
+      groupIds: ['apm'],
+      globalState: {
+        time:
+          rangeFrom !== undefined && rangeTo !== undefined
+            ? { from: rangeFrom, to: rangeTo }
+            : undefined,
+        refreshInterval:
+          refreshPaused !== undefined && refreshInterval !== undefined
+            ? { pause: refreshPaused, value: refreshInterval }
+            : undefined,
+      },
+    },
   });
 
   return (
     <EuiLink
       children={children}
-      href={href}
+      href={mlADLink}
       external={external}
       target={external ? '_blank' : undefined}
     />

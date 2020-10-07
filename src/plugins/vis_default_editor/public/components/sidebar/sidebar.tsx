@@ -30,18 +30,18 @@ import {
 } from 'src/plugins/visualizations/public';
 import { TimeRange } from 'src/plugins/data/public';
 import { SavedObject } from 'src/plugins/saved_objects/public';
-import { DefaultEditorNavBar, OptionTab } from './navbar';
+import { DefaultEditorNavBar } from './navbar';
 import { DefaultEditorControls } from './controls';
 import { setStateParamValue, useEditorReducer, useEditorFormState, discardChanges } from './state';
 import { DefaultEditorAggCommonProps } from '../agg_common_props';
 import { SidebarTitle } from './sidebar_title';
 import { Schema } from '../../schemas';
+import { useOptionTabs } from './use_option_tabs';
 
 interface DefaultEditorSideBarProps {
   embeddableHandler: VisualizeEmbeddableContract;
   isCollapsed: boolean;
   onClickCollapse: () => void;
-  optionTabs: OptionTab[];
   uiState: PersistedState;
   vis: Vis;
   isLinkedSearch: boolean;
@@ -54,7 +54,6 @@ function DefaultEditorSideBar({
   embeddableHandler,
   isCollapsed,
   onClickCollapse,
-  optionTabs,
   uiState,
   vis,
   isLinkedSearch,
@@ -62,10 +61,10 @@ function DefaultEditorSideBar({
   savedSearch,
   timeRange,
 }: DefaultEditorSideBarProps) {
-  const [selectedTab, setSelectedTab] = useState(optionTabs[0].name);
   const [isDirty, setDirty] = useState(false);
   const [state, dispatch] = useEditorReducer(vis, eventEmitter);
   const { formState, setTouched, setValidity, resetValidity } = useEditorFormState();
+  const [optionTabs, setSelectedTab] = useOptionTabs(vis);
 
   const responseAggs = useMemo(() => (state.data.aggs ? state.data.aggs.getResponseAggs() : []), [
     state.data.aggs,
@@ -201,31 +200,23 @@ function DefaultEditorSideBar({
             )}
 
             {optionTabs.length > 1 && (
-              <DefaultEditorNavBar
-                optionTabs={optionTabs}
-                selectedTab={selectedTab}
-                setSelectedTab={setSelectedTab}
-              />
+              <DefaultEditorNavBar optionTabs={optionTabs} setSelectedTab={setSelectedTab} />
             )}
 
-            {optionTabs.map(({ editor: Editor, name }) => {
-              const isTabSelected = selectedTab === name;
-
-              return (
-                <div
-                  key={name}
-                  className={`visEditorSidebar__config ${
-                    isTabSelected ? '' : 'visEditorSidebar__config-isHidden'
-                  }`}
-                >
-                  <Editor
-                    isTabSelected={isTabSelected}
-                    {...(name === 'data' ? dataTabProps : optionTabProps)}
-                    timeRange={timeRange}
-                  />
-                </div>
-              );
-            })}
+            {optionTabs.map(({ editor: Editor, name, isSelected = false }) => (
+              <div
+                key={name}
+                className={`visEditorSidebar__config ${
+                  isSelected ? '' : 'visEditorSidebar__config-isHidden'
+                }`}
+              >
+                <Editor
+                  isTabSelected={isSelected}
+                  {...(name === 'data' ? dataTabProps : optionTabProps)}
+                  timeRange={timeRange}
+                />
+              </div>
+            ))}
           </form>
         </EuiFlexItem>
 

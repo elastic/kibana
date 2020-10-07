@@ -15,49 +15,66 @@ import styled from 'styled-components';
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
 import { StyledPanel } from '../styles';
-import { BoldCode, StyledTime, GeneratedText, formatDate } from './panel_content_utilities';
+import {
+  BoldCode,
+  StyledTime,
+  GeneratedText,
+  noTimestampRetrievedText,
+} from './panel_content_utilities';
 import { Breadcrumbs } from './breadcrumbs';
 import * as eventModel from '../../../../common/endpoint/models/event';
 import * as selectors from '../../store/selectors';
 import { PanelLoading } from './panel_loading';
+import { PanelContentError } from './panel_content_error';
 import { ResolverState } from '../../types';
 import { DescriptiveName } from './descriptive_name';
 import { useLinkProps } from '../use_link_props';
 import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { deepObjectEntries } from './deep_object_entries';
+import { useFormattedDate } from './use_formatted_date';
+
+const eventDetailRequestError = i18n.translate(
+  'xpack.securitySolution.resolver.panel.eventDetail.requestError',
+  {
+    defaultMessage: 'Event details were unable to be retrieved',
+  }
+);
 
 export const EventDetail = memo(function EventDetail({
   nodeID,
   eventID,
-  eventType,
+  eventCategory: eventType,
 }: {
   nodeID: string;
   eventID: string;
   /** The event type to show in the breadcrumbs */
-  eventType: string;
+  eventCategory: string;
 }) {
-  const event = useSelector((state: ResolverState) =>
-    selectors.eventByID(state)({ nodeID, eventID })
-  );
+  const isEventLoading = useSelector(selectors.isCurrentRelatedEventLoading);
+  const isProcessTreeLoading = useSelector(selectors.isTreeLoading);
+
+  const isLoading = isEventLoading || isProcessTreeLoading;
+
+  const event = useSelector(selectors.currentRelatedEventData);
   const processEvent = useSelector((state: ResolverState) =>
     selectors.processEventForID(state)(nodeID)
   );
-  if (event && processEvent) {
-    return (
-      <EventDetailContents
-        nodeID={nodeID}
-        event={event}
-        processEvent={processEvent}
-        eventType={eventType}
-      />
-    );
-  } else {
-    return (
-      <StyledPanel>
-        <PanelLoading />
-      </StyledPanel>
-    );
-  }
+  return isLoading ? (
+    <StyledPanel>
+      <PanelLoading />
+    </StyledPanel>
+  ) : event ? (
+    <EventDetailContents
+      nodeID={nodeID}
+      event={event}
+      processEvent={processEvent}
+      eventType={eventType}
+    />
+  ) : (
+    <StyledPanel>
+      <PanelContentError translatedErrorMessage={eventDetailRequestError} />
+    </StyledPanel>
+  );
 });
 
 /**
@@ -76,20 +93,17 @@ const EventDetailContents = memo(function ({
    * Event type to use in the breadcrumbs
    */
   eventType: string;
-  processEvent: SafeResolverEvent;
+  processEvent: SafeResolverEvent | null;
 }) {
-  const formattedDate = useMemo(() => {
-    const timestamp = eventModel.timestampSafeVersion(event);
-    if (timestamp !== undefined) {
-      return formatDate(new Date(timestamp));
-    }
-  }, [event]);
+  const timestamp = eventModel.timestampSafeVersion(event);
+  const formattedDate = useFormattedDate(timestamp) || noTimestampRetrievedText;
+  const nodeName = processEvent ? eventModel.processNameSafeVersion(processEvent) : null;
 
   return (
-    <StyledPanel>
+    <StyledPanel data-test-subj="resolver:panel:event-detail">
       <EventDetailBreadcrumbs
         nodeID={nodeID}
-        nodeName={eventModel.processNameSafeVersion(processEvent)}
+        nodeName={nodeName}
         event={event}
         breadcrumbEventCategory={eventType}
       />
@@ -186,12 +200,12 @@ function EventDetailBreadcrumbs({
   breadcrumbEventCategory,
 }: {
   nodeID: string;
-  nodeName?: string;
+  nodeName: string | null | undefined;
   event: SafeResolverEvent;
   breadcrumbEventCategory: string;
 }) {
   const countByCategory = useSelector((state: ResolverState) =>
-    selectors.relatedEventCountByType(state)(nodeID, breadcrumbEventCategory)
+    selectors.relatedEventCountByCategory(state)(nodeID, breadcrumbEventCategory)
   );
   const relatedEventCount: number | undefined = useSelector((state: ResolverState) =>
     selectors.relatedEventTotalCount(state)(nodeID)
@@ -210,12 +224,12 @@ function EventDetailBreadcrumbs({
     panelParameters: { nodeID },
   });
 
-  const nodeEventsOfTypeLinkNavProps = useLinkProps({
-    panelView: 'nodeEventsOfType',
-    panelParameters: { nodeID, eventType: breadcrumbEventCategory },
+  const nodeEventsInCategoryLinkNavProps = useLinkProps({
+    panelView: 'nodeEventsInCategory',
+    panelParameters: { nodeID, eventCategory: breadcrumbEventCategory },
   });
   const breadcrumbs = useMemo(() => {
-    return [
+    const crumbs = [
       {
         text: i18n.translate(
           'xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.events',
@@ -224,10 +238,6 @@ function EventDetailBreadcrumbs({
           }
         ),
         ...nodesLinkNavProps,
-      },
-      {
-        text: nodeName,
-        ...nodeDetailLinkNavProps,
       },
       {
         text: (
@@ -247,12 +257,21 @@ function EventDetailBreadcrumbs({
             defaultMessage="{count} {category}"
           />
         ),
-        ...nodeEventsOfTypeLinkNavProps,
+        ...nodeEventsInCategoryLinkNavProps,
       },
       {
         text: <DescriptiveName event={event} />,
       },
     ];
+
+    if (nodeName) {
+      crumbs.splice(1, 0, {
+        text: nodeName,
+        ...nodeDetailLinkNavProps,
+      });
+    }
+
+    return crumbs;
   }, [
     breadcrumbEventCategory,
     countByCategory,
@@ -262,7 +281,7 @@ function EventDetailBreadcrumbs({
     nodeName,
     relatedEventCount,
     nodesLinkNavProps,
-    nodeEventsOfTypeLinkNavProps,
+    nodeEventsInCategoryLinkNavProps,
   ]);
   return <Breadcrumbs breadcrumbs={breadcrumbs} />;
 }

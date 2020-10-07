@@ -333,7 +333,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subAction]: expected value to equal [pushToService]\n- [3.subAction]: expected value to equal [issueTypes]\n- [4.subAction]: expected value to equal [fieldsByIssueType]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subAction]: expected value to equal [pushToService]\n- [3.subAction]: expected value to equal [issueTypes]\n- [4.subAction]: expected value to equal [fieldsByIssueType]\n- [5.subAction]: expected value to equal [issues]\n- [6.subAction]: expected value to equal [issue]',
               });
             });
         });
@@ -351,7 +351,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.savedObjectId]: expected value of type [string] but got [undefined]\n- [3.subAction]: expected value to equal [issueTypes]\n- [4.subAction]: expected value to equal [fieldsByIssueType]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.savedObjectId]: expected value of type [string] but got [undefined]\n- [3.subAction]: expected value to equal [issueTypes]\n- [4.subAction]: expected value to equal [fieldsByIssueType]\n- [5.subAction]: expected value to equal [issues]\n- [6.subAction]: expected value to equal [issue]',
               });
             });
         });
@@ -369,7 +369,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.savedObjectId]: expected value of type [string] but got [undefined]\n- [3.subAction]: expected value to equal [issueTypes]\n- [4.subAction]: expected value to equal [fieldsByIssueType]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.savedObjectId]: expected value of type [string] but got [undefined]\n- [3.subAction]: expected value to equal [issueTypes]\n- [4.subAction]: expected value to equal [fieldsByIssueType]\n- [5.subAction]: expected value to equal [issues]\n- [6.subAction]: expected value to equal [issue]',
               });
             });
         });
@@ -392,7 +392,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.title]: expected value of type [string] but got [undefined]\n- [3.subAction]: expected value to equal [issueTypes]\n- [4.subAction]: expected value to equal [fieldsByIssueType]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.title]: expected value of type [string] but got [undefined]\n- [3.subAction]: expected value to equal [issueTypes]\n- [4.subAction]: expected value to equal [fieldsByIssueType]\n- [5.subAction]: expected value to equal [issues]\n- [6.subAction]: expected value to equal [issue]',
               });
             });
         });
@@ -420,7 +420,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.commentId]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]\n- [3.subAction]: expected value to equal [issueTypes]\n- [4.subAction]: expected value to equal [fieldsByIssueType]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.commentId]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]\n- [3.subAction]: expected value to equal [issueTypes]\n- [4.subAction]: expected value to equal [fieldsByIssueType]\n- [5.subAction]: expected value to equal [issues]\n- [6.subAction]: expected value to equal [issue]',
               });
             });
         });
@@ -448,7 +448,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.comment]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]\n- [3.subAction]: expected value to equal [issueTypes]\n- [4.subAction]: expected value to equal [fieldsByIssueType]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.comment]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]\n- [3.subAction]: expected value to equal [issueTypes]\n- [4.subAction]: expected value to equal [fieldsByIssueType]\n- [5.subAction]: expected value to equal [issues]\n- [6.subAction]: expected value to equal [issue]',
               });
             });
         });

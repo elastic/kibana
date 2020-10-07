@@ -67,8 +67,8 @@ export interface RegistryPackage {
   assets?: string[];
   internal?: boolean;
   format_version: string;
-  datasets?: Dataset[];
-  config_templates?: RegistryConfigTemplate[];
+  data_streams?: RegistryDataStream[];
+  policy_templates?: RegistryPolicyTemplate[];
   download: string;
   path: string;
 }
@@ -80,7 +80,7 @@ interface RegistryImage {
   size?: string;
   type?: string;
 }
-export interface RegistryConfigTemplate {
+export interface RegistryPolicyTemplate {
   name: string;
   title: string;
   description: string;
@@ -127,8 +127,8 @@ export type RegistrySearchResult = Pick<
   | 'internal'
   | 'download'
   | 'path'
-  | 'datasets'
-  | 'config_templates'
+  | 'data_streams'
+  | 'policy_templates'
 >;
 
 export type ScreenshotItem = RegistryImage;
@@ -174,9 +174,9 @@ export type ElasticsearchAssetTypeToParts = Record<
   ElasticsearchAssetParts[]
 >;
 
-export interface Dataset {
+export interface RegistryDataStream {
   type: string;
-  name: string;
+  dataset: string;
   title: string;
   release: string;
   streams?: RegistryStream[];

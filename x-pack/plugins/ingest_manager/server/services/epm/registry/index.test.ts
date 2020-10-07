@@ -41,11 +41,11 @@ const testPaths = [
     },
   },
   {
-    path: 'coredns-1.0.1/dataset/stats/fields/coredns.stats.yml',
+    path: 'coredns-1.0.1/data_stream/stats/fields/coredns.stats.yml',
     assetParts: {
       dataset: 'stats',
       file: 'coredns.stats.yml',
-      path: 'coredns-1.0.1/dataset/stats/fields/coredns.stats.yml',
+      path: 'coredns-1.0.1/data_stream/stats/fields/coredns.stats.yml',
       pkgkey: 'coredns-1.0.1',
       service: '',
       type: 'fields',

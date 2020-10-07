@@ -37,6 +37,8 @@ export const CopySource: Task = {
         '!src/cli/repl/**',
         '!src/functional_test_runner/**',
         '!src/dev/**',
+        '!src/setup_node_env/babel_register/index.js',
+        '!src/setup_node_env/babel_register/register.js',
         '!**/public/**',
         'typings/**',
         'config/kibana.yml',

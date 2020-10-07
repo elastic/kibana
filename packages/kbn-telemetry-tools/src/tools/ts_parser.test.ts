@@ -25,6 +25,7 @@ import { parsedNestedCollector } from './__fixture__/parsed_nested_collector';
 import { parsedExternallyDefinedCollector } from './__fixture__/parsed_externally_defined_collector';
 import { parsedImportedUsageInterface } from './__fixture__/parsed_imported_usage_interface';
 import { parsedImportedSchemaCollector } from './__fixture__/parsed_imported_schema';
+import { parsedSchemaDefinedWithSpreadsCollector } from './__fixture__/parsed_schema_defined_with_spreads_collector';
 
 export function loadFixtureProgram(fixtureName: string) {
   const fixturePath = path.resolve(
@@ -60,6 +61,12 @@ describe('parseUsageCollection', () => {
     const { program, sourceFile } = loadFixtureProgram('working_collector');
     const result = [...parseUsageCollection(sourceFile, program)];
     expect(result).toEqual([parsedWorkingCollector]);
+  });
+
+  it('parses collector with schema defined as union of spreads', () => {
+    const { program, sourceFile } = loadFixtureProgram('schema_defined_with_spreads_collector');
+    const result = [...parseUsageCollection(sourceFile, program)];
+    expect(result).toEqual([parsedSchemaDefinedWithSpreadsCollector]);
   });
 
   it('parses nested collectors', () => {

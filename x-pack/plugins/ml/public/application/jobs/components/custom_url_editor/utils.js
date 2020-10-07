@@ -296,11 +296,10 @@ export function getTestUrl(job, customUrl) {
   return new Promise((resolve, reject) => {
     ml.results
       .anomalySearch({
-        rest_total_hits_as_int: true,
         body,
       })
       .then((resp) => {
-        if (resp.hits.total > 0) {
+        if (resp.hits.total.value > 0) {
           const record = resp.hits.hits[0]._source;
           testUrl = replaceTokensInUrlValue(customUrl, bucketSpanSecs, record, 'timestamp');
           resolve(testUrl);

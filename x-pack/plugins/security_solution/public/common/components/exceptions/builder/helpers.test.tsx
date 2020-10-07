@@ -90,9 +90,9 @@ const getMockNestedParentBuilderEntry = (): FormattedBuilderEntry => ({
 
 const mockEndpointFields = [
   {
-    name: 'file.path.text',
+    name: 'file.path.caseless',
     type: 'string',
-    esTypes: ['text'],
+    esTypes: ['keyword'],
     count: 0,
     scripted: false,
     searchable: true,
@@ -303,8 +303,8 @@ describe('Exception builder helpers', () => {
             {
               aggregatable: false,
               count: 0,
-              esTypes: ['text'],
-              name: 'file.path.text',
+              esTypes: ['keyword'],
+              name: 'file.path.caseless',
               readFromDocValues: false,
               scripted: false,
               searchable: true,

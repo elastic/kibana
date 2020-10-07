@@ -402,7 +402,7 @@ export const CaseView = React.memo(({ caseId, userCanCrud }: Props) => {
   }
   if (isLoading) {
     return (
-      <MyEuiFlexGroup justifyContent="center" alignItems="center">
+      <MyEuiFlexGroup gutterSize="none" justifyContent="center" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiLoadingSpinner data-test-subj="case-view-loading" size="xl" />
         </EuiFlexItem>

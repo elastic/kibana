@@ -174,30 +174,36 @@ export const EventsCount = React.memo(EventsCountComponent);
 
 EventsCount.displayName = 'EventsCount';
 
-export const PagingControlComponent = ({
-  activePage,
-  isLoading,
-  onPageClick,
-  totalPages,
-}: {
+interface PagingControlProps {
   activePage: number;
   isLoading: boolean;
   onPageClick: OnChangePage;
   totalPages: number;
-}) => (
-  <>
-    {isLoading ? (
-      `${i18n.LOADING}...`
-    ) : (
-      <EuiPagination
-        data-test-subj="timeline-pagination"
-        pageCount={totalPages}
-        activePage={activePage}
-        onPageClick={onPageClick}
-      />
-    )}
-  </>
-);
+}
+
+export const PagingControlComponent: React.FC<PagingControlProps> = ({
+  activePage,
+  isLoading,
+  onPageClick,
+  totalPages,
+}) => {
+  if (isLoading) {
+    return <>{`${i18n.LOADING}...`}</>;
+  }
+
+  if (!totalPages) {
+    return null;
+  }
+
+  return (
+    <EuiPagination
+      data-test-subj="timeline-pagination"
+      pageCount={totalPages}
+      activePage={activePage}
+      onPageClick={onPageClick}
+    />
+  );
+};
 
 PagingControlComponent.displayName = 'PagingControlComponent';
 
@@ -217,7 +223,7 @@ interface FooterProps {
   onChangeItemsPerPage: OnChangeItemsPerPage;
   onChangePage: OnChangePage;
   serverSideEventCount: number;
-  totalPages: number;
+  totalCount: number;
 }
 
 /** Renders a loading indicator and paging controls */
@@ -234,7 +240,7 @@ export const FooterComponent = ({
   onChangeItemsPerPage,
   onChangePage,
   serverSideEventCount,
-  totalPages,
+  totalCount,
 }: FooterProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [paginationLoading, setPaginationLoading] = useState(false);
@@ -259,6 +265,30 @@ export const FooterComponent = ({
   ]);
   const closePopover = useCallback(() => setIsPopoverOpen(false), [setIsPopoverOpen]);
 
+  const rowItems = useMemo(
+    () =>
+      itemsPerPageOptions &&
+      itemsPerPageOptions.map((item) => (
+        <EuiContextMenuItem
+          key={item}
+          icon={itemsPerPage === item ? 'check' : 'empty'}
+          data-test-subj={`items-per-page-option-${item}`}
+          onClick={() => {
+            closePopover();
+            onChangeItemsPerPage(item);
+          }}
+        >
+          {`${item} ${i18n.ROWS}`}
+        </EuiContextMenuItem>
+      )),
+    [closePopover, itemsPerPage, itemsPerPageOptions, onChangeItemsPerPage]
+  );
+
+  const totalPages = useMemo(() => Math.ceil(totalCount / itemsPerPage), [
+    itemsPerPage,
+    totalCount,
+  ]);
+
   useEffect(() => {
     if (paginationLoading && !isLoading) {
       setPaginationLoading(false);
@@ -278,22 +308,6 @@ export const FooterComponent = ({
       </LoadingPanelContainer>
     );
   }
-
-  const rowItems =
-    itemsPerPageOptions &&
-    itemsPerPageOptions.map((item) => (
-      <EuiContextMenuItem
-        key={item}
-        icon={itemsPerPage === item ? 'check' : 'empty'}
-        data-test-subj={`items-per-page-option-${item}`}
-        onClick={() => {
-          closePopover();
-          onChangeItemsPerPage(item);
-        }}
-      >
-        {`${item} ${i18n.ROWS}`}
-      </EuiContextMenuItem>
-    ));
 
   return (
     <FooterContainer

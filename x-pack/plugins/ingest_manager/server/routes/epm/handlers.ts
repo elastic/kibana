@@ -13,7 +13,9 @@ import {
   GetCategoriesResponse,
   GetPackagesResponse,
   GetLimitedPackagesResponse,
+  BulkInstallPackageInfo,
   BulkInstallPackagesResponse,
+  IBulkInstallPackageHTTPError,
 } from '../../../common';
 import {
   GetCategoriesRequestSchema,
@@ -26,21 +28,21 @@ import {
   BulkUpgradePackagesFromRegistryRequestSchema,
 } from '../../types';
 import {
+  BulkInstallResponse,
+  bulkInstallPackages,
   getCategories,
   getPackages,
   getFile,
   getPackageInfo,
+  handleInstallPackageFailure,
   installPackage,
+  isBulkInstallError,
   removeInstallation,
   getLimitedPackages,
   getInstallationObject,
 } from '../../services/epm/packages';
-import { defaultIngestErrorHandler } from '../../errors';
+import { defaultIngestErrorHandler, ingestErrorToResponseOptions } from '../../errors';
 import { splitPkgKey } from '../../services/epm/registry';
-import {
-  handleInstallPackageFailure,
-  bulkInstallPackages,
-} from '../../services/epm/packages/install';
 
 export const getCategoriesHandler: RequestHandler<
   undefined,
@@ -171,6 +173,21 @@ export const installPackageFromRegistryHandler: RequestHandler<
   }
 };
 
+const bulkInstallServiceResponseToHttpEntry = (
+  result: BulkInstallResponse
+): BulkInstallPackageInfo | IBulkInstallPackageHTTPError => {
+  if (isBulkInstallError(result)) {
+    const { statusCode, body } = ingestErrorToResponseOptions(result.error);
+    return {
+      name: result.name,
+      statusCode,
+      error: body.message,
+    };
+  } else {
+    return result;
+  }
+};
+
 export const bulkInstallPackagesFromRegistryHandler: RequestHandler<
   undefined,
   undefined,
@@ -178,13 +195,14 @@ export const bulkInstallPackagesFromRegistryHandler: RequestHandler<
 > = async (context, request, response) => {
   const savedObjectsClient = context.core.savedObjects.client;
   const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
-  const res = await bulkInstallPackages({
+  const bulkInstalledResponses = await bulkInstallPackages({
     savedObjectsClient,
     callCluster,
     packagesToUpgrade: request.body.packages,
   });
+  const payload = bulkInstalledResponses.map(bulkInstallServiceResponseToHttpEntry);
   const body: BulkInstallPackagesResponse = {
-    response: res,
+    response: payload,
   };
   return response.ok({ body });
 };

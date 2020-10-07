@@ -31,6 +31,7 @@ describe('getServiceAnnotations', () => {
             searchAggregatedTransactions: false,
           }),
         {
+          // @ts-expect-error invalid json mock
           mockResponse: () => noVersions,
         }
       );
@@ -50,6 +51,7 @@ describe('getServiceAnnotations', () => {
             searchAggregatedTransactions: false,
           }),
         {
+          // @ts-expect-error invalid json mock
           mockResponse: () => oneVersion,
         }
       );
@@ -74,6 +76,7 @@ describe('getServiceAnnotations', () => {
             searchAggregatedTransactions: false,
           }),
         {
+          // @ts-expect-error invalid json mock
           mockResponse: () => responses.shift(),
         }
       );

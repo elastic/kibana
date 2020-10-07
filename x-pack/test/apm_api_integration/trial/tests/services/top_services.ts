@@ -60,8 +60,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expectSnapshot(healthStatuses).toMatchInline(`
             Array [
               "healthy",
+              undefined,
               "healthy",
-              "healthy",
+              undefined,
               "healthy",
               "healthy",
               "healthy",

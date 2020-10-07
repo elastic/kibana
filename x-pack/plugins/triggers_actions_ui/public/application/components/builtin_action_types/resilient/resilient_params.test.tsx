@@ -10,13 +10,9 @@ import { DocLinksStart } from 'kibana/public';
 
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
+import { coreMock } from 'src/core/public/mocks';
 
-jest.mock('../../../app_context', () => {
-  const post = jest.fn();
-  return {
-    useAppDependencies: jest.fn(() => ({ http: { post } })),
-  };
-});
+const mocks = coreMock.createSetup();
 
 jest.mock('./use_get_incident_types');
 jest.mock('./use_get_severity');
@@ -92,6 +88,8 @@ describe('ResilientParamsFields renders', () => {
         index={0}
         messageVariables={[]}
         docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
+        toastNotifications={mocks.notifications.toasts}
+        http={mocks.http}
         actionConnector={connector}
       />
     );
@@ -114,6 +112,8 @@ describe('ResilientParamsFields renders', () => {
         index={0}
         messageVariables={[]}
         docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
+        toastNotifications={mocks.notifications.toasts}
+        http={mocks.http}
         actionConnector={connector}
       />
     );
@@ -137,6 +137,8 @@ describe('ResilientParamsFields renders', () => {
         index={0}
         messageVariables={[]}
         docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
+        toastNotifications={mocks.notifications.toasts}
+        http={mocks.http}
         actionConnector={connector}
       />
     );
@@ -157,6 +159,8 @@ describe('ResilientParamsFields renders', () => {
         index={0}
         messageVariables={[]}
         docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
+        toastNotifications={mocks.notifications.toasts}
+        http={mocks.http}
         actionConnector={connector}
       />
     );
@@ -180,6 +184,8 @@ describe('ResilientParamsFields renders', () => {
         index={0}
         messageVariables={[]}
         docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
+        toastNotifications={mocks.notifications.toasts}
+        http={mocks.http}
         actionConnector={connector}
       />
     );

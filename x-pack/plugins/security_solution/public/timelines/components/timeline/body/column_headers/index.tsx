@@ -200,6 +200,22 @@ export const ColumnHeadersComponent = ({
     [globalFullScreen, timelineId, timelineFullScreen]
   );
 
+  const DroppableContent = useCallback(
+    (dropProvided, snapshot) => (
+      <>
+        <EventsThGroupData
+          data-test-subj="headers-group"
+          ref={dropProvided.innerRef}
+          isDragging={snapshot.isDraggingOver}
+          {...dropProvided.droppableProps}
+        >
+          {ColumnHeaderList}
+        </EventsThGroupData>
+      </>
+    ),
+    [ColumnHeaderList]
+  );
+
   return (
     <EventsThead data-test-subj="column-headers">
       <EventsTrHeader>
@@ -275,18 +291,7 @@ export const ColumnHeadersComponent = ({
           type={DRAG_TYPE_FIELD}
           renderClone={renderClone}
         >
-          {(dropProvided, snapshot) => (
-            <>
-              <EventsThGroupData
-                data-test-subj="headers-group"
-                ref={dropProvided.innerRef}
-                isDragging={snapshot.isDraggingOver}
-                {...dropProvided.droppableProps}
-              >
-                {ColumnHeaderList}
-              </EventsThGroupData>
-            </>
-          )}
+          {DroppableContent}
         </Droppable>
       </EventsTrHeader>
     </EventsThead>

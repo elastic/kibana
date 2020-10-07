@@ -26,7 +26,6 @@ import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/plugins/visualizatio
 import { coreMock, httpServiceMock } from '../../../../../../src/core/public/mocks';
 import { IBasePath } from '../../../../../../src/core/public';
 import { AttributeService } from '../../../../../../src/plugins/dashboard/public';
-import { Ast } from '@kbn/interpreter/common';
 import { LensAttributeService } from '../../lens_attribute_service';
 
 jest.mock('../../../../../../src/plugins/inspector/public/', () => ({
@@ -103,8 +102,14 @@ describe('embeddable', () => {
         indexPatternService: {} as IndexPatternsContract,
         editable: true,
         getTrigger,
-        documentToExpression: () => Promise.resolve({} as Ast),
-        toExpressionString: () => 'my | expression',
+        documentToExpression: () =>
+          Promise.resolve({
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
+          }),
       },
       {} as LensEmbeddableInput
     );
@@ -112,7 +117,8 @@ describe('embeddable', () => {
     embeddable.render(mountpoint);
 
     expect(expressionRenderer).toHaveBeenCalledTimes(1);
-    expect(expressionRenderer.mock.calls[0][0]!.expression).toEqual('my | expression');
+    expect(expressionRenderer.mock.calls[0][0]!.expression).toEqual(`my
+| expression`);
   });
 
   it('should re-render if new input is pushed', async () => {
@@ -129,8 +135,14 @@ describe('embeddable', () => {
         indexPatternService: {} as IndexPatternsContract,
         editable: true,
         getTrigger,
-        documentToExpression: () => Promise.resolve({} as Ast),
-        toExpressionString: () => 'my | expression',
+        documentToExpression: () =>
+          Promise.resolve({
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
+          }),
       },
       { id: '123' } as LensEmbeddableInput
     );
@@ -162,8 +174,14 @@ describe('embeddable', () => {
         indexPatternService: {} as IndexPatternsContract,
         editable: true,
         getTrigger,
-        documentToExpression: () => Promise.resolve({} as Ast),
-        toExpressionString: () => 'my | expression',
+        documentToExpression: () =>
+          Promise.resolve({
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
+          }),
       },
       input
     );
@@ -208,8 +226,14 @@ describe('embeddable', () => {
         indexPatternService: {} as IndexPatternsContract,
         editable: true,
         getTrigger,
-        documentToExpression: () => Promise.resolve({} as Ast),
-        toExpressionString: () => 'my | expression',
+        documentToExpression: () =>
+          Promise.resolve({
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
+          }),
       },
       input
     );
@@ -237,8 +261,14 @@ describe('embeddable', () => {
         indexPatternService: {} as IndexPatternsContract,
         editable: true,
         getTrigger,
-        documentToExpression: () => Promise.resolve({} as Ast),
-        toExpressionString: () => 'my | expression',
+        documentToExpression: () =>
+          Promise.resolve({
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
+          }),
       },
       { id: '123' } as LensEmbeddableInput
     );
@@ -270,8 +300,14 @@ describe('embeddable', () => {
         indexPatternService: {} as IndexPatternsContract,
         editable: true,
         getTrigger,
-        documentToExpression: () => Promise.resolve({} as Ast),
-        toExpressionString: () => 'my | expression',
+        documentToExpression: () =>
+          Promise.resolve({
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
+          }),
       },
       { id: '123', timeRange, query, filters } as LensEmbeddableInput
     );
@@ -311,8 +347,14 @@ describe('embeddable', () => {
         indexPatternService: {} as IndexPatternsContract,
         editable: true,
         getTrigger,
-        documentToExpression: () => Promise.resolve({} as Ast),
-        toExpressionString: () => 'my | expression',
+        documentToExpression: () =>
+          Promise.resolve({
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
+          }),
       },
       { id: '123', timeRange, query, filters } as LensEmbeddableInput
     );

@@ -48,12 +48,12 @@ export function getTopNavConfig(
           ];
     case ViewMode.EDIT:
       return [
-        getCreateNewConfig(actions[TopNavIds.VISUALIZE]),
-        getSaveConfig(actions[TopNavIds.SAVE]),
-        getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE]),
-        getAddConfig(actions[TopNavIds.ADD_EXISTING]),
         getOptionsConfig(actions[TopNavIds.OPTIONS]),
         getShareConfig(actions[TopNavIds.SHARE]),
+        getAddConfig(actions[TopNavIds.ADD_EXISTING]),
+        getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE]),
+        getSaveConfig(actions[TopNavIds.SAVE]),
+        getCreateNewConfig(actions[TopNavIds.VISUALIZE]),
       ];
     default:
       return [];
@@ -79,7 +79,9 @@ function getFullScreenConfig(action: NavAction) {
  */
 function getEditConfig(action: NavAction) {
   return {
+    emphasize: true,
     id: 'edit',
+    iconType: 'pencil',
     label: i18n.translate('dashboard.topNave.editButtonAriaLabel', {
       defaultMessage: 'edit',
     }),
@@ -168,7 +170,7 @@ function getAddConfig(action: NavAction) {
 function getCreateNewConfig(action: NavAction) {
   return {
     emphasize: true,
-    iconType: 'plusInCircle',
+    iconType: 'plusInCircleFilled',
     id: 'addNew',
     label: i18n.translate('dashboard.topNave.addNewButtonAriaLabel', {
       defaultMessage: 'Create new',

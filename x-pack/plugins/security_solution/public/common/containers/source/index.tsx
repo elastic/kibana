@@ -8,7 +8,7 @@ import { set } from '@elastic/safer-lodash-set/fp';
 import { keyBy, pick, isEmpty, isEqual, isUndefined } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useDispatch, useSelector, shallowEqual } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { IIndexPattern } from 'src/plugins/data/public';
 
 import { useKibana } from '../../lib/kibana';
@@ -20,11 +20,10 @@ import {
   BrowserFields,
 } from '../../../../common/search_strategy/index_fields';
 import { AbortError } from '../../../../../../../src/plugins/data/common';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import * as i18n from './translations';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
-
-import { State } from '../../store';
 import { DocValueFields } from '../../../../common/search_strategy/common';
 
 export { BrowserField, BrowserFields, DocValueFields };
@@ -201,9 +200,8 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
     () => sourcererSelectors.getIndexNamesSelectedSelector(),
     []
   );
-  const indexNames = useSelector<State, string[]>(
-    (state) => indexNamesSelectedSelector(state, sourcererScopeName),
-    shallowEqual
+  const indexNames = useShallowEqualSelector<string[]>((state) =>
+    indexNamesSelectedSelector(state, sourcererScopeName)
   );
 
   const setLoading = useCallback(

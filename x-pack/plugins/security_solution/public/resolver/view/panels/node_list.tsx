@@ -32,7 +32,6 @@ import {
 } from './styles';
 import * as eventModel from '../../../../common/endpoint/models/event';
 import * as selectors from '../../store/selectors';
-import { formatter } from './panel_content_utilities';
 import { Breadcrumbs } from './breadcrumbs';
 import { CubeForProcess } from './cube_for_process';
 import { LimitWarning } from '../limit_warnings';
@@ -41,6 +40,8 @@ import { useLinkProps } from '../use_link_props';
 import { useColors } from '../use_colors';
 import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { ResolverAction } from '../../store/actions';
+import { useFormattedDate } from './use_formatted_date';
+import { getEmptyTagValue } from '../../../common/components/empty_value';
 
 interface ProcessTableView {
   name?: string;
@@ -80,18 +81,7 @@ export const NodeList = memo(() => {
         dataType: 'date',
         sortable: true,
         render(eventDate?: Date) {
-          return eventDate ? (
-            formatter.format(eventDate)
-          ) : (
-            <EuiBadge color="warning">
-              {i18n.translate(
-                'xpack.securitySolution.endpoint.resolver.panel.table.row.timestampInvalidLabel',
-                {
-                  defaultMessage: 'invalid',
-                }
-              )}
-            </EuiBadge>
-          );
+          return <NodeDetailTimestamp eventDate={eventDate} />;
         },
       },
     ],
@@ -220,3 +210,9 @@ function NodeDetailLink({
     </EuiButtonEmpty>
   );
 }
+
+const NodeDetailTimestamp = memo(({ eventDate }: { eventDate: Date | undefined }) => {
+  const formattedDate = useFormattedDate(eventDate);
+
+  return formattedDate ? <>{formattedDate}</> : getEmptyTagValue();
+});

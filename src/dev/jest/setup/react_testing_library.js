@@ -19,14 +19,13 @@
 
 import '@testing-library/jest-dom';
 /**
- * Have to import "/pure" here to not register afterEach() hook clean up
- * in the very beginning. There are couple tests which fail with clean up hook.
- * On CI they run before first test which imports '@testing-library/react'
- * and registers afterEach hook so the whole suite is passing.
- * This have to be fixed as we depend on test order execution
+ * PLEASE NOTE:
+ * Importing '@testing-library/react' registers an `afterEach(cleanup)` side effect.
+ * It has tricky code that flushes pending promises, that previously led to unpredictable test failures
  * https://github.com/elastic/kibana/issues/59469
+ * But since newer versions it has stabilised itself
  */
-import { configure } from '@testing-library/react/pure';
+import { configure } from '@testing-library/react';
 
 // instead of default 'data-testid', use kibana's 'data-test-subj'
 configure({ testIdAttribute: 'data-test-subj', asyncUtilTimeout: 4500 });

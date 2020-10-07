@@ -11,7 +11,7 @@ import moment from 'moment';
 import 'moment-timezone';
 import ReactDOM from 'react-dom';
 
-import initStoryshots, { multiSnapshotWithOptions } from '@storybook/addon-storyshots';
+// import initStoryshots, { multiSnapshotWithOptions } from '@storybook/addon-storyshots';
 // @ts-expect-error untyped library
 import styleSheetSerializer from 'jest-styled-components/src/styleSheetSerializer';
 import { addSerializer } from 'jest-specific-snapshot';
@@ -104,9 +104,12 @@ if (!fs.existsSync(cssDir)) {
 addSerializer(styleSheetSerializer);
 
 // Initialize Storyshots and build the Jest Snapshots
-initStoryshots({
-  configPath: path.resolve(__dirname, './../storybook'),
-  test: multiSnapshotWithOptions({}),
-  // Don't snapshot tests that start with 'redux'
-  storyNameRegex: /^((?!.*?redux).)*$/,
-});
+// Commenting this out until after #75357 is merged and Jest gets updated.
+// initStoryshots({
+//   configPath: path.resolve(__dirname, './../storybook'),
+//   test: multiSnapshotWithOptions({}),
+//   // Don't snapshot tests that start with 'redux'
+//   storyNameRegex: /^((?!.*?redux).)*$/,
+// });
+
+test.todo('Storyshots');

@@ -126,7 +126,7 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
       <EuiFlexItem>
         <EuiText>
           <h1>
-            <FormattedMessage id="xpack.ingestManager.fleet.pageTitle" defaultMessage="Fleet" />
+            <FormattedMessage id="xpack.ingestManager.agents.pageTitle" defaultMessage="Agents" />
           </h1>
         </EuiText>
       </EuiFlexItem>
@@ -134,7 +134,7 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
         <EuiText color="subdued">
           <p>
             <FormattedMessage
-              id="xpack.ingestManager.fleet.pageSubtitle"
+              id="xpack.ingestManager.agents.pageSubtitle"
               defaultMessage="Manage and deploy policy updates to a group of agents of any size."
             />
           </p>

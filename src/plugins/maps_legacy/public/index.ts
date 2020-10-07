@@ -63,6 +63,7 @@ export * from './common/types';
 export { ORIGIN } from './common/constants/origin';
 
 export { WmsOptions } from './components/wms_options';
+export { LegacyMapDeprecationMessage } from './components/legacy_map_deprecation_message';
 
 export { lazyLoadMapsLegacyModules } from './lazy_load_bundle';
 

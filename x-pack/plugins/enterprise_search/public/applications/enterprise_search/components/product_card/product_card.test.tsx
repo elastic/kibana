@@ -5,9 +5,9 @@
  */
 
 import '../../../__mocks__/kea.mock';
-import '../../../__mocks__/shallow_usecontext.mock';
 
-import React, { useContext } from 'react';
+import React from 'react';
+import { useValues } from 'kea';
 import { shallow } from 'enzyme';
 
 import { EuiCard } from '@elastic/eui';
@@ -27,7 +27,6 @@ describe('ProductCard', () => {
   });
 
   it('renders an App Search card', () => {
-    (useContext as jest.Mock).mockImplementationOnce(() => ({ config: { host: 'localhost' } }));
     const wrapper = shallow(<ProductCard product={APP_SEARCH_PLUGIN} image="as.jpg" />);
     const card = wrapper.find(EuiCard).dive().shallow();
 
@@ -43,7 +42,6 @@ describe('ProductCard', () => {
   });
 
   it('renders a Workplace Search card', () => {
-    (useContext as jest.Mock).mockImplementationOnce(() => ({ config: { host: 'localhost' } }));
     const wrapper = shallow(<ProductCard product={WORKPLACE_SEARCH_PLUGIN} image="ws.jpg" />);
     const card = wrapper.find(EuiCard).dive().shallow();
 
@@ -61,7 +59,7 @@ describe('ProductCard', () => {
   });
 
   it('renders correct button text when host not present', () => {
-    (useContext as jest.Mock).mockImplementation(() => ({ config: { host: '' } }));
+    (useValues as jest.Mock).mockImplementation(() => ({ config: { host: '' } }));
 
     const wrapper = shallow(<ProductCard product={WORKPLACE_SEARCH_PLUGIN} image="ws.jpg" />);
     const card = wrapper.find(EuiCard).dive().shallow();

@@ -6,21 +6,23 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { warnAndSkipTest } from '../../helpers';
+import { skipIfNoDockerRegistry } from '../../helpers';
+import { setupIngest } from '../fleet/agents/services';
 
-export default function ({ getService }: FtrProviderContext) {
-  const log = getService('log');
+export default function (providerContext: FtrProviderContext) {
+  const { getService } = providerContext;
   const supertest = getService('supertest');
-  const dockerServers = getService('dockerServers');
 
-  const server = dockerServers.get('registry');
   // use function () {} and not () => {} here
   // because `this` has to point to the Mocha context
   // see https://mochajs.org/#arrow-functions
 
   describe('EPM - list', async function () {
-    it('lists all packages from the registry', async function () {
-      if (server.enabled) {
+    skipIfNoDockerRegistry(providerContext);
+    setupIngest(providerContext);
+
+    describe('list api tests', async () => {
+      it('lists all packages from the registry', async function () {
         const fetchPackageList = async () => {
           const response = await supertest
             .get('/api/ingest_manager/epm/packages')
@@ -30,13 +32,9 @@ export default function ({ getService }: FtrProviderContext) {
         };
         const listResponse = await fetchPackageList();
         expect(listResponse.response.length).not.to.be(0);
-      } else {
-        warnAndSkipTest(this, log);
-      }
-    });
+      });
 
-    it('lists all limited packages from the registry', async function () {
-      if (server.enabled) {
+      it('lists all limited packages from the registry', async function () {
         const fetchLimitedPackageList = async () => {
           const response = await supertest
             .get('/api/ingest_manager/epm/packages/limited')
@@ -46,9 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
         };
         const listResponse = await fetchLimitedPackageList();
         expect(listResponse.response).to.eql(['endpoint']);
-      } else {
-        warnAndSkipTest(this, log);
-      }
+      });
     });
   });
 }

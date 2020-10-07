@@ -17,7 +17,6 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { ActionParamsProps } from '../../../../types';
-import { useAppDependencies } from '../../../app_context';
 import { ResilientActionParams } from './types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
@@ -32,9 +31,10 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
   errors,
   messageVariables,
   actionConnector,
+  http,
+  toastNotifications,
 }) => {
   const [firstLoad, setFirstLoad] = useState(false);
-  const { http, toastNotifications } = useAppDependencies();
   const { title, description, comments, incidentTypes, severityCode, savedObjectId } =
     actionParams.subActionParams || {};
 

@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../__mocks__/shallow_usecontext.mock';
-
-import React, { useContext } from 'react';
+import React from 'react';
 import { shallow } from 'enzyme';
 import { EuiPage } from '@elastic/eui';
 
@@ -19,12 +17,11 @@ import { ErrorConnecting } from './components/error_connecting';
 import { ProductSelector } from './components/product_selector';
 
 describe('EnterpriseSearch', () => {
-  beforeEach(() => {
-    (useValues as jest.Mock).mockReturnValue({ errorConnecting: false });
-    (useContext as jest.Mock).mockImplementationOnce(() => ({ config: { host: 'localhost' } }));
-  });
-
   it('renders the Setup Guide and Product Selector', () => {
+    (useValues as jest.Mock).mockReturnValue({
+      errorConnecting: false,
+      config: { host: 'localhost' },
+    });
     const wrapper = shallow(<EnterpriseSearch />);
 
     expect(wrapper.find(SetupGuide)).toHaveLength(1);
@@ -32,9 +29,10 @@ describe('EnterpriseSearch', () => {
   });
 
   it('renders the error connecting prompt when host is not configured', () => {
-    (useValues as jest.Mock).mockReturnValueOnce({ errorConnecting: true });
-    (useContext as jest.Mock).mockImplementationOnce(() => ({ config: { host: '' } }));
-
+    (useValues as jest.Mock).mockReturnValueOnce({
+      errorConnecting: true,
+      config: { host: '' },
+    });
     const wrapper = shallow(<EnterpriseSearch />);
 
     expect(wrapper.find(ErrorConnecting)).toHaveLength(1);

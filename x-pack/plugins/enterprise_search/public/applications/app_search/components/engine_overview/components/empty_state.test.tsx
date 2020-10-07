@@ -5,7 +5,6 @@
  */
 
 import '../../../../__mocks__/kea.mock';
-import '../../../../__mocks__/shallow_usecontext.mock';
 
 import React from 'react';
 import { shallow } from 'enzyme';

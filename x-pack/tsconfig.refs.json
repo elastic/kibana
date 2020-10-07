@@ -1,0 +1,6 @@
+{
+  "include": [],
+  "references": [
+    { "path": "./plugins/licensing/tsconfig.json" }
+  ]
+}

@@ -64,7 +64,7 @@ export function getTableVisualizationControllerClass(
       }
     }
 
-    async render(esResponse: object, visParams: VisParams) {
+    async render(esResponse: object, visParams: VisParams): Promise<void> {
       getKibanaLegacy().loadFontAwesome();
       await this.initLocalAngular();
 

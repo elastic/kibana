@@ -53,6 +53,8 @@ export const createExternalService = (
   const getIssueTypeFieldsOldAPIURL = `${url}/${BASE_URL}/issue/createmeta?projectKeys=${projectKey}&issuetypeIds={issueTypeId}&expand=projects.issuetypes.fields`;
   const getIssueTypesUrl = `${url}/${BASE_URL}/issue/createmeta/${projectKey}/issuetypes`;
   const getIssueTypeFieldsUrl = `${url}/${BASE_URL}/issue/createmeta/${projectKey}/issuetypes/{issueTypeId}`;
+  const searchUrl = `${url}/${BASE_URL}/search`;
+
   const axiosInstance = axios.create({
     auth: { username: email, password: apiToken },
   });
@@ -90,6 +92,10 @@ export const createExternalService = (
       fields = { ...fields, priority: { name: incident.priority } };
     }
 
+    if (incident.parent) {
+      fields = { ...fields, parent: { key: incident.parent } };
+    }
+
     return fields;
   };
 
@@ -118,6 +124,17 @@ export const createExternalService = (
         },
       };
     }, {});
+
+  const normalizeSearchResults = (
+    issues: Array<{ id: string; key: string; fields: { summary: string } }>
+  ) =>
+    issues.map((issue) => ({ id: issue.id, key: issue.key, title: issue.fields?.summary ?? null }));
+
+  const normalizeIssue = (issue: { id: string; key: string; fields: { summary: string } }) => ({
+    id: issue.id,
+    key: issue.key,
+    title: issue.fields?.summary ?? null,
+  });
 
   const getIncident = async (id: string) => {
     try {
@@ -378,6 +395,57 @@ export const createExternalService = (
     }
   };
 
+  const getIssues = async (title: string) => {
+    const query = `${searchUrl}?jql=${encodeURIComponent(
+      `project="${projectKey}" and summary ~"${title}"`
+    )}`;
+
+    try {
+      const res = await request({
+        axios: axiosInstance,
+        method: 'get',
+        url: query,
+        logger,
+        proxySettings,
+      });
+
+      return normalizeSearchResults(res.data?.issues ?? []);
+    } catch (error) {
+      throw new Error(
+        getErrorMessage(
+          i18n.NAME,
+          `Unable to get issues. Error: ${error.message}. Reason: ${createErrorMessage(
+            error.response?.data?.errors ?? {}
+          )}`
+        )
+      );
+    }
+  };
+
+  const getIssue = async (id: string) => {
+    const getIssueUrl = `${incidentUrl}/${id}`;
+    try {
+      const res = await request({
+        axios: axiosInstance,
+        method: 'get',
+        url: getIssueUrl,
+        logger,
+        proxySettings,
+      });
+
+      return normalizeIssue(res.data ?? {});
+    } catch (error) {
+      throw new Error(
+        getErrorMessage(
+          i18n.NAME,
+          `Unable to get issue with id ${id}. Error: ${error.message}. Reason: ${createErrorMessage(
+            error.response?.data?.errors ?? {}
+          )}`
+        )
+      );
+    }
+  };
+
   return {
     getIncident,
     createIncident,
@@ -386,5 +454,7 @@ export const createExternalService = (
     getCapabilities,
     getIssueTypes,
     getFieldsByIssueType,
+    getIssues,
+    getIssue,
   };
 };

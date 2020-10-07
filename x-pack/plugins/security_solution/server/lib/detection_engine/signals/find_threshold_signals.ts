@@ -12,6 +12,7 @@ import { singleSearchAfter } from './single_search_after';
 import { AlertServices } from '../../../../../alerts/server';
 import { Logger } from '../../../../../../../src/core/server';
 import { SignalSearchResponse } from './types';
+import { BuildRuleMessage } from './rule_messages';
 
 interface FindThresholdSignalsParams {
   from: string;
@@ -21,6 +22,7 @@ interface FindThresholdSignalsParams {
   logger: Logger;
   filter: unknown;
   threshold: Threshold;
+  buildRuleMessage: BuildRuleMessage;
 }
 
 export const findThresholdSignals = async ({
@@ -31,6 +33,7 @@ export const findThresholdSignals = async ({
   logger,
   filter,
   threshold,
+  buildRuleMessage,
 }: FindThresholdSignalsParams): Promise<{
   searchResult: SignalSearchResponse;
   searchDuration: string;
@@ -59,5 +62,6 @@ export const findThresholdSignals = async ({
     logger,
     filter,
     pageSize: 0,
+    buildRuleMessage,
   });
 };

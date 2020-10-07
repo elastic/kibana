@@ -8,15 +8,10 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty } from '@elastic/eui';
 
-import { IExternalUrl } from '../../../shared/enterprise_search_url';
+import { externalUrl, getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
 
-interface IProps {
-  externalUrl: IExternalUrl;
-}
-
-export const WorkplaceSearchHeaderActions: React.FC<IProps> = ({ externalUrl }) => {
-  const { enterpriseSearchUrl, getWorkplaceSearchUrl } = externalUrl;
-  if (!enterpriseSearchUrl) return null;
+export const WorkplaceSearchHeaderActions: React.FC = () => {
+  if (!externalUrl.enterpriseSearchUrl) return null;
 
   return (
     <EuiButtonEmpty href={getWorkplaceSearchUrl('/search')} target="_blank" iconType="search">

@@ -15,6 +15,7 @@ import mockTransaction from './mockTransaction.json';
 
 describe('DiscoverTransactionLink component', () => {
   it('should render with data', () => {
+    // @ts-expect-error invalid json mock
     const transaction: Transaction = mockTransaction;
 
     expect(
@@ -25,6 +26,7 @@ describe('DiscoverTransactionLink component', () => {
 
 describe('getDiscoverQuery', () => {
   it('should return the correct query params object', () => {
+    // @ts-expect-error invalid json mock
     const transaction: Transaction = mockTransaction;
     const result = getDiscoverQuery(transaction);
     expect(result).toMatchSnapshot();

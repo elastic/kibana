@@ -37,6 +37,18 @@ export const I18LABELS = {
       defaultMessage: 'Page load distribution',
     }
   ),
+  jsErrors: i18n.translate(
+    'xpack.apm.rum.dashboard.impactfulMetrics.jsErrors',
+    {
+      defaultMessage: 'JavaScript errors',
+    }
+  ),
+  highTrafficPages: i18n.translate(
+    'xpack.apm.rum.dashboard.impactfulMetrics.highTrafficPages',
+    {
+      defaultMessage: 'High traffic pages',
+    }
+  ),
   resetZoom: i18n.translate('xpack.apm.rum.dashboard.resetZoom.label', {
     defaultMessage: 'Reset zoom',
   }),
@@ -104,6 +116,42 @@ export const I18LABELS = {
   }),
   noResults: i18n.translate('xpack.apm.rum.filters.url.noResults', {
     defaultMessage: 'No results available',
+  }),
+  totalErrors: i18n.translate('xpack.apm.rum.jsErrors.totalErrors', {
+    defaultMessage: 'Total errors',
+  }),
+  errorRate: i18n.translate('xpack.apm.rum.jsErrors.errorRate', {
+    defaultMessage: 'Error rate',
+  }),
+  errorMessage: i18n.translate('xpack.apm.rum.jsErrors.errorMessage', {
+    defaultMessage: 'Error message',
+  }),
+  impactedPageLoads: i18n.translate(
+    'xpack.apm.rum.jsErrors.impactedPageLoads',
+    {
+      defaultMessage: 'Impacted page loads',
+    }
+  ),
+  percentile: i18n.translate('xpack.apm.ux.percentile.label', {
+    defaultMessage: 'Percentile',
+  }),
+  percentile50thMedian: i18n.translate('xpack.apm.ux.percentile.50thMedian', {
+    defaultMessage: '50th (Median)',
+  }),
+  percentile75th: i18n.translate('xpack.apm.ux.percentile.75th', {
+    defaultMessage: '75th',
+  }),
+  percentile90th: i18n.translate('xpack.apm.ux.percentile.90th', {
+    defaultMessage: '90th',
+  }),
+  percentile95th: i18n.translate('xpack.apm.ux.percentile.95th', {
+    defaultMessage: '95th',
+  }),
+  percentile99th: i18n.translate('xpack.apm.ux.percentile.99th', {
+    defaultMessage: '99th',
+  }),
+  noData: i18n.translate('xpack.apm.ux.visitorBreakdown.noData', {
+    defaultMessage: 'No data.',
   }),
 };
 

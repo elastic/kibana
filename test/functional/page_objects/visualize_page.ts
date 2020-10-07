@@ -70,6 +70,7 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
 
     public async navigateToNewVisualization() {
       await common.navigateToApp('visualize');
+      await header.waitUntilLoadingHasFinished();
       await this.clickNewVisualization();
       await this.waitForVisualizationSelectPage();
     }

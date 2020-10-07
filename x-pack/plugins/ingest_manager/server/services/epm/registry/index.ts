@@ -158,12 +158,12 @@ export function pathParts(path: string): AssetParts {
 
   let [pkgkey, service, type, file] = path.split('/');
 
-  // if it's a dataset
-  if (service === 'dataset') {
+  // if it's a data stream
+  if (service === 'data_stream') {
     // save the dataset name
     dataset = type;
-    // drop the `dataset/dataset-name` portion & re-parse
-    [pkgkey, service, type, file] = path.replace(`dataset/${dataset}/`, '').split('/');
+    // drop the `data_stream/dataset-name` portion & re-parse
+    [pkgkey, service, type, file] = path.replace(`data_stream/${dataset}/`, '').split('/');
   }
 
   // This is to cover for the fields.yml files inside the "fields" directory

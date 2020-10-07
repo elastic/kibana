@@ -4,18 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { FieldFilter as Filter } from '../../../../../../../../src/plugins/data/common';
 import {
   CLIENT_GEO_COUNTRY_ISO_CODE,
   SERVICE_NAME,
+  TRANSACTION_URL,
   USER_AGENT_DEVICE,
   USER_AGENT_NAME,
   USER_AGENT_OS,
 } from '../../../../../common/elasticsearch_fieldnames';
 
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../../../../src/plugins/apm_oss/public';
+
+const getWildcardFilter = (field: string, value: string): Filter => {
+  return {
+    meta: {
+      index: APM_STATIC_INDEX_PATTERN_ID,
+      alias: null,
+      negate: false,
+      disabled: false,
+      type: 'term',
+      key: field,
+      params: { query: value },
+    },
+    query: { wildcard: { [field]: { value: `*${value}*` } } },
+  };
+};
 
 const getMatchFilter = (field: string, value: string): Filter => {
   return {
@@ -28,7 +44,7 @@ const getMatchFilter = (field: string, value: string): Filter => {
       key: field,
       params: { query: value },
     },
-    query: { match_phrase: { [field]: value } },
+    query: { term: { [field]: value } },
   };
 };
 
@@ -52,14 +68,13 @@ const getMultiMatchFilter = (field: string, values: string[]): Filter => {
     },
   };
 };
+
 export const useMapFilters = (): Filter[] => {
   const { urlParams, uiFilters } = useUrlParams();
 
-  const { serviceName } = urlParams;
+  const { serviceName, searchTerm } = urlParams;
 
-  const { browser, device, os, location } = uiFilters;
-
-  const [mapFilters, setMapFilters] = useState<Filter[]>([]);
+  const { browser, device, os, location, transactionUrl } = uiFilters;
 
   const existFilter: Filter = {
     meta: {
@@ -76,7 +91,7 @@ export const useMapFilters = (): Filter[] => {
     },
   };
 
-  useEffect(() => {
+  return useMemo(() => {
     const filters = [existFilter];
     if (serviceName) {
       filters.push(getMatchFilter(SERVICE_NAME, serviceName));
@@ -93,10 +108,15 @@ export const useMapFilters = (): Filter[] => {
     if (location) {
       filters.push(getMultiMatchFilter(CLIENT_GEO_COUNTRY_ISO_CODE, location));
     }
+    if (transactionUrl) {
+      filters.push(getMultiMatchFilter(TRANSACTION_URL, transactionUrl));
+    }
+    if (searchTerm) {
+      filters.push(getWildcardFilter(TRANSACTION_URL, searchTerm));
+    }
 
-    setMapFilters(filters);
+    return filters;
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [serviceName, browser, device, os, location]);
-
-  return mapFilters;
+  }, [serviceName, browser, device, os, location, searchTerm]);
 };

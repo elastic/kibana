@@ -9,9 +9,9 @@ import * as Registry from '../registry';
 import { ensureCachedArchiveInfo } from '../registry';
 
 // paths from RegistryPackage are routes to the assets on EPR
-// e.g. `/package/nginx/1.2.0/dataset/access/fields/fields.yml`
+// e.g. `/package/nginx/1.2.0/data_stream/access/fields/fields.yml`
 // paths for ArchiveEntry are routes to the assets in the archive
-// e.g. `nginx-1.2.0/dataset/access/fields/fields.yml`
+// e.g. `nginx-1.2.0/data_stream/access/fields/fields.yml`
 // RegistryPackage paths have a `/package/` prefix compared to ArchiveEntry paths
 // and different package and version structure
 const EPR_PATH_PREFIX = '/package';
@@ -37,7 +37,7 @@ export function getAssets(
 
     // if dataset, filter for them
     if (datasetName) {
-      const comparePath = `${packageInfo.path}/dataset/${datasetName}/`;
+      const comparePath = `${packageInfo.path}/data_stream/${datasetName}/`;
       if (!path.includes(comparePath)) {
         continue;
       }

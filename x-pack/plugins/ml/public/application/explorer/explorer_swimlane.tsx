@@ -10,15 +10,7 @@
 
 import React from 'react';
 import './_explorer.scss';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import isEqual from 'lodash/isEqual';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import uniq from 'lodash/uniq';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import get from 'lodash/get';
+import { isEqual, uniq, get } from 'lodash';
 import d3 from 'd3';
 import moment from 'moment';
 import DragSelect from 'dragselect';
@@ -27,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { Subject, Subscription } from 'rxjs';
 import { TooltipValue } from '@elastic/charts';
 import { htmlIdGenerator } from '@elastic/eui';
-import { formatHumanReadableDateTime } from '../util/date_utils';
+import { formatHumanReadableDateTime } from '../../../common/util/date_utils';
 import { numTicksForDateFormat } from '../util/chart_utils';
 import { getSeverityColor } from '../../../common/util/anomaly_utils';
 import { mlEscape } from '../util/string_utils';

@@ -9,8 +9,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
-
+import React from 'react';
+import { useValues } from 'kea';
 import {
   EuiPage,
   EuiPageBody,
@@ -24,10 +24,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { KibanaContext, IKibanaContext } from '../../../index';
-
 import { APP_SEARCH_PLUGIN, WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
-
+import { KibanaLogic } from '../../../shared/kibana';
 import { SetEnterpriseSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 
@@ -45,12 +43,11 @@ interface IProductSelectorProps {
 
 export const ProductSelector: React.FC<IProductSelectorProps> = ({ access }) => {
   const { hasAppSearchAccess, hasWorkplaceSearchAccess } = access;
-  const {
-    config: { host },
-  } = useContext(KibanaContext) as IKibanaContext;
+  const { config } = useValues(KibanaLogic);
 
-  const shouldShowAppSearchCard = !host || hasAppSearchAccess;
-  const shouldShowWorkplaceSearchCard = !host || hasWorkplaceSearchAccess;
+  // If Enterprise Search hasn't been set up yet, show all products. Otherwise, only show products the user has access to
+  const shouldShowAppSearchCard = !config.host || hasAppSearchAccess;
+  const shouldShowWorkplaceSearchCard = !config.host || hasWorkplaceSearchAccess;
 
   return (
     <EuiPage restrictWidth className="enterpriseSearchOverview">

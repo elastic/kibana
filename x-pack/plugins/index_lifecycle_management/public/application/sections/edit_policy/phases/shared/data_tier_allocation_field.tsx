@@ -9,15 +9,16 @@ import { i18n } from '@kbn/i18n';
 import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 
 import { PhaseWithAllocationAction, PhaseWithAllocation } from '../../../../../../common/types';
+import { PhaseValidationErrors } from '../../../../services/policies/policy_validation';
+import { getAvailableNodeRoleForPhase } from '../../../../lib/data_tiers';
+import { isNodeRoleFirstPreference } from '../../../../lib/data_tiers/is_node_role_first_preference';
 
 import {
   DataTierAllocation,
-  DefaultAllocationWarning,
+  DefaultAllocationNotice,
   NoNodeAttributesWarning,
   NodesDataProvider,
 } from '../../components/data_tier_allocation';
-import { PhaseValidationErrors } from '../../../../services/policies/policy_validation';
-import { isPhaseDefaultDataAllocationCompatible } from '../../../../lib/data_tiers';
 
 const i18nTexts = {
   title: i18n.translate('xpack.indexLifecycleMgmt.common.dataTier.title', {
@@ -48,8 +49,33 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({
   return (
     <NodesDataProvider>
       {(nodesData) => {
-        const isCompatible = isPhaseDefaultDataAllocationCompatible(phase, nodesData.nodesByRoles);
         const hasNodeAttrs = Boolean(Object.keys(nodesData.nodesByAttributes ?? {}).length);
+
+        const renderDefaultAllocationNotice = () => {
+          if (phaseData.dataTierAllocationType !== 'default') {
+            return null;
+          }
+
+          const allocationNodeRole = getAvailableNodeRoleForPhase(phase, nodesData.nodesByRoles);
+          if (
+            allocationNodeRole !== 'none' &&
+            isNodeRoleFirstPreference(phase, allocationNodeRole)
+          ) {
+            return null;
+          }
+
+          return <DefaultAllocationNotice phase={phase} targetNodeRole={allocationNodeRole} />;
+        };
+
+        const renderNodeAttributesWarning = () => {
+          if (phaseData.dataTierAllocationType !== 'custom') {
+            return null;
+          }
+          if (hasNodeAttrs) {
+            return null;
+          }
+          return <NoNodeAttributesWarning phase={phase} />;
+        };
 
         return (
           <EuiDescribedFormGroup
@@ -70,14 +96,8 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({
                 />
 
                 {/* Data tier related warnings */}
-
-                {phaseData.dataTierAllocationType === 'default' && !isCompatible && (
-                  <DefaultAllocationWarning phase={phase} />
-                )}
-
-                {phaseData.dataTierAllocationType === 'custom' && !hasNodeAttrs && (
-                  <NoNodeAttributesWarning phase={phase} />
-                )}
+                {renderDefaultAllocationNotice()}
+                {renderNodeAttributesWarning()}
               </>
             </EuiFormRow>
           </EuiDescribedFormGroup>

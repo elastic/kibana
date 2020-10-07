@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui/dist/eui_charts_theme';
 import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ChartWrapper } from '../ChartWrapper';
+import { I18LABELS } from '../translations';
 
 const StyleChart = styled.div`
   height: 100%;
@@ -49,7 +50,7 @@ export function VisitorBreakdownChart({ loading, options }: Props) {
     : EUI_CHARTS_THEME_LIGHT;
 
   return (
-    <ChartWrapper loading={loading} height="245px" maxWidth="430px">
+    <ChartWrapper loading={loading} height="calc(100% - 72px)" maxWidth="430px">
       <StyleChart>
         <Chart>
           <Settings
@@ -59,7 +60,9 @@ export function VisitorBreakdownChart({ loading, options }: Props) {
           />
           <Partition
             id="spec_1"
-            data={options || []}
+            data={
+              options?.length ? options : [{ count: 1, name: I18LABELS.noData }]
+            }
             valueAccessor={(d: Datum) => d.count as number}
             valueGetter="percent"
             percentFormatter={(d: number) =>

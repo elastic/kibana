@@ -7,6 +7,7 @@
 import { singleSearchAfter } from './single_search_after';
 import { singleBulkCreate } from './single_bulk_create';
 import { filterEventsAgainstList } from './filter_events_with_list';
+import { sendAlertTelemetryEvents } from './send_telemetry_events';
 import {
   createSearchAfterReturnType,
   createSearchAfterReturnTypeFromResponse,
@@ -25,6 +26,7 @@ export const searchAfterAndBulkCreate = async ({
   services,
   listClient,
   logger,
+  eventsTelemetry,
   id,
   inputIndexPattern,
   signalsIndex,
@@ -80,6 +82,7 @@ export const searchAfterAndBulkCreate = async ({
 
         // perform search_after with optionally undefined sortId
         const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
+          buildRuleMessage,
           searchAfterSortId: sortId,
           index: inputIndexPattern,
           from: tuple.from.toISOString(),
@@ -153,6 +156,7 @@ export const searchAfterAndBulkCreate = async ({
             success: bulkSuccess,
             errors: bulkErrors,
           } = await singleBulkCreate({
+            buildRuleMessage,
             filteredEvents,
             ruleParams,
             services,
@@ -185,6 +189,14 @@ export const searchAfterAndBulkCreate = async ({
           logger.debug(buildRuleMessage(`signalsCreatedCount: ${signalsCreatedCount}`));
           logger.debug(
             buildRuleMessage(`filteredEvents.hits.hits: ${filteredEvents.hits.hits.length}`)
+          );
+
+          sendAlertTelemetryEvents(
+            logger,
+            eventsTelemetry,
+            filteredEvents,
+            ruleParams,
+            buildRuleMessage
           );
         }
 

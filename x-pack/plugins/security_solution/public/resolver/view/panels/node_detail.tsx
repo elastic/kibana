@@ -16,7 +16,7 @@ import { EuiDescriptionListProps } from '@elastic/eui/src/components/description
 import { StyledDescriptionList, StyledTitle } from './styles';
 import * as selectors from '../../store/selectors';
 import * as eventModel from '../../../../common/endpoint/models/event';
-import { formatDate, GeneratedText } from './panel_content_utilities';
+import { GeneratedText } from './panel_content_utilities';
 import { Breadcrumbs } from './breadcrumbs';
 import { processPath, processPID } from '../../models/process_event';
 import { CubeForProcess } from './cube_for_process';
@@ -26,6 +26,7 @@ import { ResolverState } from '../../types';
 import { PanelLoading } from './panel_loading';
 import { StyledPanel } from '../styles';
 import { useLinkProps } from '../use_link_props';
+import { useFormattedDate } from './use_formatted_date';
 
 const StyledCubeForProcess = styled(CubeForProcess)`
   position: relative;
@@ -37,13 +38,17 @@ export const NodeDetail = memo(function ({ nodeID }: { nodeID: string }) {
     selectors.processEventForID(state)(nodeID)
   );
   return (
-    <StyledPanel>
+    <>
       {processEvent === null ? (
-        <PanelLoading />
+        <StyledPanel>
+          <PanelLoading />
+        </StyledPanel>
       ) : (
-        <NodeDetailView nodeID={nodeID} processEvent={processEvent} />
+        <StyledPanel data-test-subj="resolver:panel:node-detail">
+          <NodeDetailView nodeID={nodeID} processEvent={processEvent} />
+        </StyledPanel>
       )}
-    </StyledPanel>
+    </>
   );
 });
 
@@ -65,10 +70,10 @@ const NodeDetailView = memo(function ({
   const relatedEventTotal = useSelector((state: ResolverState) => {
     return selectors.relatedEventTotalCount(state)(nodeID);
   });
-  const processInfoEntry: EuiDescriptionListProps['listItems'] = useMemo(() => {
-    const eventTime = eventModel.eventTimestamp(processEvent);
-    const dateTime = eventTime === undefined ? null : formatDate(eventTime);
+  const eventTime = eventModel.eventTimestamp(processEvent);
+  const dateTime = useFormattedDate(eventTime);
 
+  const processInfoEntry: EuiDescriptionListProps['listItems'] = useMemo(() => {
     const createdEntry = {
       title: '@timestamp',
       description: dateTime,
@@ -131,7 +136,7 @@ const NodeDetailView = memo(function ({
       });
 
     return processDescriptionListData;
-  }, [processEvent]);
+  }, [dateTime, processEvent]);
 
   const nodesLinkNavProps = useLinkProps({
     panelView: 'nodes',

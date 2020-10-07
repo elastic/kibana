@@ -136,6 +136,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
         expectSnapshot(body).toMatchInline(`
           Array [
             "ALL_OPTION_VALUE",
+            "elastic-co-frontend",
             "opbeans-dotnet",
             "opbeans-go",
             "opbeans-java",

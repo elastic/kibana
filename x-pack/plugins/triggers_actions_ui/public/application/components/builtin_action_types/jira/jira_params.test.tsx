@@ -7,19 +7,16 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import JiraParamsFields from './jira_params';
 import { DocLinksStart } from 'kibana/public';
+import { coreMock } from 'src/core/public/mocks';
 
 import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
-
-jest.mock('../../../app_context', () => {
-  const post = jest.fn();
-  return {
-    useAppDependencies: jest.fn(() => ({ http: { post } })),
-  };
-});
+import { ActionConnector } from '../../../../types';
 
 jest.mock('./use_get_issue_types');
 jest.mock('./use_get_fields_by_issue_type');
+
+const mocks = coreMock.createSetup();
 
 const useGetIssueTypesMock = useGetIssueTypes as jest.Mock;
 const useGetFieldsByIssueTypeMock = useGetFieldsByIssueType as jest.Mock;
@@ -35,9 +32,11 @@ const actionParams = {
     priority: 'High',
     savedObjectId: '123',
     externalId: null,
+    parent: null,
   },
 };
-const connector = {
+
+const connector: ActionConnector = {
   secrets: {},
   config: {},
   id: 'test',
@@ -93,6 +92,8 @@ describe('JiraParamsFields renders', () => {
         index={0}
         messageVariables={[]}
         docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
+        toastNotifications={mocks.notifications.toasts}
+        http={mocks.http}
         actionConnector={connector}
       />
     );
@@ -118,6 +119,8 @@ describe('JiraParamsFields renders', () => {
         index={0}
         messageVariables={[]}
         docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
+        toastNotifications={mocks.notifications.toasts}
+        http={mocks.http}
         actionConnector={connector}
       />
     );
@@ -141,6 +144,8 @@ describe('JiraParamsFields renders', () => {
         index={0}
         messageVariables={[]}
         docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
+        toastNotifications={mocks.notifications.toasts}
+        http={mocks.http}
         actionConnector={connector}
       />
     );
@@ -164,6 +169,8 @@ describe('JiraParamsFields renders', () => {
         index={0}
         messageVariables={[]}
         docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
+        toastNotifications={mocks.notifications.toasts}
+        http={mocks.http}
         actionConnector={connector}
       />
     );
@@ -191,6 +198,8 @@ describe('JiraParamsFields renders', () => {
         index={0}
         messageVariables={[]}
         docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
+        toastNotifications={mocks.notifications.toasts}
+        http={mocks.http}
         actionConnector={connector}
       />
     );
@@ -218,6 +227,8 @@ describe('JiraParamsFields renders', () => {
         index={0}
         messageVariables={[]}
         docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
+        toastNotifications={mocks.notifications.toasts}
+        http={mocks.http}
         actionConnector={connector}
       />
     );
@@ -229,5 +240,6 @@ describe('JiraParamsFields renders', () => {
     expect(wrapper.find('[data-test-subj="prioritySelect"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-subj="descriptionTextArea"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-subj="labelsComboBox"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="search-parent-issues"]').exists()).toBeFalsy();
   });
 });

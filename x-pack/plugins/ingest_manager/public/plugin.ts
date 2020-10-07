@@ -78,7 +78,7 @@ export class IngestManagerPlugin
     core.application.register({
       id: PLUGIN_ID,
       category: DEFAULT_APP_CATEGORIES.management,
-      title: i18n.translate('xpack.ingestManager.appTitle', { defaultMessage: 'Ingest Manager' }),
+      title: i18n.translate('xpack.ingestManager.appTitle', { defaultMessage: 'Fleet' }),
       order: 9020,
       euiIconType: 'logoElastic',
       async mount(params: AppMountParameters) {

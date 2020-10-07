@@ -6,7 +6,7 @@
 
 import { EuiToolTip } from '@elastic/eui';
 import React, { FC } from 'react';
-import { isEqual, cloneDeep } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { IIndexPattern } from 'src/plugins/data/common';
 import { DeepReadonly } from '../../../../../../../common/types/common';

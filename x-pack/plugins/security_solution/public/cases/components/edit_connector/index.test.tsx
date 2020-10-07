@@ -11,9 +11,8 @@ import { EditConnector } from './index';
 import { getFormMock, useFormMock } from '../__mock__/form';
 import { TestProviders } from '../../../common/mock';
 import { connectorsMock } from '../../containers/configure/mock';
-// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
-import { wait as waitFor } from '@testing-library/react';
-import { act } from 'react-dom/test-utils';
+import { waitFor } from '@testing-library/react';
+
 jest.mock(
   '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form'
 );
@@ -67,10 +66,8 @@ describe('EditConnector ', () => {
 
     expect(wrapper.find(`[data-test-subj="edit-connectors-submit"]`).last().exists()).toBeTruthy();
 
-    await act(async () => {
-      wrapper.find(`[data-test-subj="edit-connectors-submit"]`).last().simulate('click');
-      await waitFor(() => expect(onSubmit.mock.calls[0][0]).toBe(sampleConnector));
-    });
+    wrapper.find(`[data-test-subj="edit-connectors-submit"]`).last().simulate('click');
+    await waitFor(() => expect(onSubmit.mock.calls[0][0]).toBe(sampleConnector));
   });
 
   it('Revert to initial external service on error', async () => {
@@ -90,12 +87,10 @@ describe('EditConnector ', () => {
 
     expect(wrapper.find(`[data-test-subj="edit-connectors-submit"]`).last().exists()).toBeTruthy();
 
-    await act(async () => {
-      wrapper.find(`[data-test-subj="edit-connectors-submit"]`).last().simulate('click');
-      await waitFor(() => {
-        wrapper.update();
-        expect(formHookMock.setFieldValue).toHaveBeenCalledWith('connector', 'none');
-      });
+    wrapper.find(`[data-test-subj="edit-connectors-submit"]`).last().simulate('click');
+    await waitFor(() => {
+      wrapper.update();
+      expect(formHookMock.setFieldValue).toHaveBeenCalledWith('connector', 'none');
     });
   });
 
@@ -114,15 +109,13 @@ describe('EditConnector ', () => {
     wrapper.find('button[data-test-subj="dropdown-connector-servicenow-2"]').simulate('click');
     wrapper.update();
 
-    await act(async () => {
-      wrapper.find(`[data-test-subj="edit-connectors-cancel"]`).last().simulate('click');
-      await waitFor(() => {
-        wrapper.update();
-        expect(formHookMock.setFieldValue).toBeCalledWith(
-          'connector',
-          defaultProps.selectedConnector
-        );
-      });
+    wrapper.find(`[data-test-subj="edit-connectors-cancel"]`).last().simulate('click');
+    await waitFor(() => {
+      wrapper.update();
+      expect(formHookMock.setFieldValue).toBeCalledWith(
+        'connector',
+        defaultProps.selectedConnector
+      );
     });
   });
 

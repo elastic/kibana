@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiHorizontalRule, EuiRadio, EuiSelect, htmlIdGenerator } from '@elastic/eui';
 import { IndexPatternLayer, IndexPatternField } from '../types';
 import { hasField } from '../utils';
+import { IndexPatternColumn } from '../operations';
 
 const generator = htmlIdGenerator('lens-nesting');
 
@@ -19,6 +20,10 @@ function nestColumn(columnOrder: string[], outer: string, inner: string) {
   result.splice(outerPosition + 1, 0, inner);
 
   return result;
+}
+
+function getFieldName(fieldMap: Record<string, IndexPatternField>, column: IndexPatternColumn) {
+  return hasField(column) ? fieldMap[column.sourceField]?.displayName || column.sourceField : '';
 }
 
 export function BucketNestingEditor({
@@ -39,7 +44,7 @@ export function BucketNestingEditor({
     .map(([value, c]) => ({
       value,
       text: c.label,
-      fieldName: hasField(c) ? fieldMap[c.sourceField].displayName : '',
+      fieldName: getFieldName(fieldMap, c),
       operationType: c.operationType,
     }));
 
@@ -47,7 +52,7 @@ export function BucketNestingEditor({
     return null;
   }
 
-  const fieldName = hasField(column) ? fieldMap[column.sourceField].displayName : '';
+  const fieldName = getFieldName(fieldMap, column);
 
   const prevColumn = layer.columnOrder[layer.columnOrder.indexOf(columnId) - 1];
 

@@ -16,6 +16,7 @@ import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/
 import { ExplorationResultsTable } from '../exploration_results_table';
 import { JobConfigErrorCallout } from '../job_config_error_callout';
 import { LoadingPanel } from '../loading_panel';
+import { FeatureImportanceSummaryPanelProps } from '../total_feature_importance_summary/feature_importance_summary';
 
 export interface EvaluatePanelProps {
   jobConfig: DataFrameAnalyticsConfig;
@@ -27,9 +28,17 @@ interface Props {
   jobId: string;
   title: string;
   EvaluatePanel: FC<EvaluatePanelProps>;
+  FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProps>;
+  defaultIsTraining?: boolean;
 }
 
-export const ExplorationPageWrapper: FC<Props> = ({ jobId, title, EvaluatePanel }) => {
+export const ExplorationPageWrapper: FC<Props> = ({
+  jobId,
+  title,
+  EvaluatePanel,
+  FeatureImportanceSummaryPanel,
+  defaultIsTraining,
+}) => {
   const {
     indexPattern,
     isInitialized,
@@ -39,6 +48,7 @@ export const ExplorationPageWrapper: FC<Props> = ({ jobId, title, EvaluatePanel 
     jobConfigErrorMessage,
     jobStatus,
     needsDestIndexPattern,
+    totalFeatureImportance,
   } = useResultsViewConfig(jobId);
   const [searchQuery, setSearchQuery] = useState<ResultsSearchQuery>(defaultSearchQuery);
 
@@ -57,6 +67,14 @@ export const ExplorationPageWrapper: FC<Props> = ({ jobId, title, EvaluatePanel 
       {isLoadingJobConfig === false && jobConfig !== undefined && isInitialized === true && (
         <EvaluatePanel jobConfig={jobConfig} jobStatus={jobStatus} searchQuery={searchQuery} />
       )}
+      {isLoadingJobConfig === true && totalFeatureImportance === undefined && <LoadingPanel />}
+      {isLoadingJobConfig === false && totalFeatureImportance !== undefined && (
+        <>
+          <EuiSpacer />
+          <FeatureImportanceSummaryPanel totalFeatureImportance={totalFeatureImportance} />
+        </>
+      )}
+
       <EuiSpacer />
       {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
       {isLoadingJobConfig === false &&
@@ -70,6 +88,7 @@ export const ExplorationPageWrapper: FC<Props> = ({ jobId, title, EvaluatePanel 
             needsDestIndexPattern={needsDestIndexPattern}
             setEvaluateSearchQuery={setSearchQuery}
             title={title}
+            defaultIsTraining={defaultIsTraining}
           />
         )}
     </>

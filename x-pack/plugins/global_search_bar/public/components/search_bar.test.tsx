@@ -8,6 +8,7 @@ import React from 'react';
 import { wait } from '@testing-library/react';
 import { of } from 'rxjs';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { httpServiceMock, uiSettingsServiceMock } from '../../../../../src/core/public/mocks';
 import {
   GlobalSearchBatchedResults,
   GlobalSearchPluginStart,
@@ -47,6 +48,10 @@ const getSearchProps: any = (component: any) => component.find('EuiFieldSearch')
 describe('SearchBar', () => {
   let searchService: GlobalSearchPluginStart;
   let findSpy: jest.SpyInstance;
+  const http = httpServiceMock.createSetupContract({ basePath: '/test' });
+  const basePathUrl = http.basePath.prepend('/plugins/globalSearchBar/assets/');
+  const uiSettings = uiSettingsServiceMock.createStartContract();
+  const darkMode = uiSettings.get('theme:darkMode');
 
   beforeEach(() => {
     searchService = globalSearchPluginMock.createStartContract();
@@ -66,7 +71,12 @@ describe('SearchBar', () => {
       .mockReturnValueOnce(of(createBatch('Discover', { id: 'My Dashboard', type: 'test' })));
 
     const component = mountWithIntl(
-      <SearchBar globalSearch={searchService.find} navigateToUrl={navigate} />
+      <SearchBar
+        globalSearch={searchService.find}
+        navigateToUrl={navigate}
+        basePathUrl={basePathUrl}
+        darkMode={darkMode}
+      />
     );
 
     expect(findSpy).toHaveBeenCalledTimes(0);
@@ -85,7 +95,14 @@ describe('SearchBar', () => {
   });
 
   it('supports keyboard shortcuts', () => {
-    mountWithIntl(<SearchBar globalSearch={searchService.find} navigateToUrl={jest.fn()} />);
+    mountWithIntl(
+      <SearchBar
+        globalSearch={searchService.find}
+        navigateToUrl={jest.fn()}
+        basePathUrl={basePathUrl}
+        darkMode={darkMode}
+      />
+    );
 
     const searchEvent = new KeyboardEvent('keydown', {
       key: '/',

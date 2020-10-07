@@ -613,6 +613,7 @@ export class QueryStringInputUI extends Component<Props, State> {
             })}
             aria-haspopup="true"
             aria-expanded={this.state.isSuggestionsVisible}
+            data-skip-axe="aria-required-children"
           >
             <div
               role="search"

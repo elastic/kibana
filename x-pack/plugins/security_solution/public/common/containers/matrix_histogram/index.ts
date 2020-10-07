@@ -134,18 +134,20 @@ export const useMatrixHistogram = ({
         ...prevRequest,
         defaultIndex: indexNames,
         filterQuery: createFilter(filterQuery),
+        histogramType,
         timerange: {
           interval: '12h',
           from: startDate,
           to: endDate,
         },
+        stackByField,
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [indexNames, endDate, filterQuery, startDate]);
+  }, [indexNames, endDate, filterQuery, startDate, stackByField, histogramType]);
 
   useEffect(() => {
     hostsSearch(matrixHistogramRequest);

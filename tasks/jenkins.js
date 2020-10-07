@@ -31,7 +31,6 @@ module.exports = function (grunt) {
     'run:checkFileCasing',
     'run:checkLockfileSymlinks',
     'run:licenses',
-    'run:verifyDependencyVersions',
     'run:verifyNotice',
     'run:mocha',
     'run:test_jest',

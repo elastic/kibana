@@ -15,11 +15,13 @@ import { inputsModel } from '../../common/store';
 import { useKibana } from '../../common/lib/kibana';
 import { createFilter } from '../../common/containers/helpers';
 import { DocValueFields } from '../../common/containers/query_template';
+import { generateTablePaginationOptions } from '../../common/components/paginated_table/helpers';
 import { timelineActions } from '../../timelines/store/timeline';
 import { detectionsTimelineIds, skipQueryForDetectionsPage } from './helpers';
 import { getInspectResponse } from '../../helpers';
 import {
   Direction,
+  PageInfoPaginated,
   TimelineEventsQueries,
   TimelineEventsAllStrategyResponse,
   TimelineEventsAllRequestOptions,
@@ -35,10 +37,7 @@ export interface TimelineArgs {
   id: string;
   inspect: InspectResponse;
   loadPage: LoadPage;
-  pageInfo: {
-    activePage: number;
-    totalPages: number;
-  };
+  pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
   totalCount: number;
   updatedAt: number;
@@ -97,10 +96,7 @@ export const useTimelineEvents = ({
             from: startDate,
             to: endDate,
           },
-          pagination: {
-            activePage,
-            querySize: limit,
-          },
+          pagination: generateTablePaginationOptions(activePage, limit),
           sort,
           defaultIndex: indexNames,
           docValueFields: docValueFields ?? [],
@@ -134,7 +130,8 @@ export const useTimelineEvents = ({
     totalCount: -1,
     pageInfo: {
       activePage: 0,
-      totalPages: 0,
+      fakeTotalCount: 0,
+      showMorePagesIndicator: false,
     },
     events: [],
     loadPage: wrappedLoadPage,
@@ -218,10 +215,7 @@ export const useTimelineEvents = ({
         defaultIndex: indexNames,
         docValueFields: docValueFields ?? [],
         filterQuery: createFilter(filterQuery),
-        pagination: {
-          activePage,
-          querySize: limit,
-        },
+        pagination: generateTablePaginationOptions(activePage, limit),
         timerange: {
           interval: '12h',
           from: startDate,

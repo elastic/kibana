@@ -96,7 +96,7 @@ function setRumAgent(item) {
   if (item.body) {
     item.body = item.body.replace(
       '"name":"client"',
-      '"name":"opbean-client-rum"'
+      '"name":"elastic-frontend"'
     );
   }
 }

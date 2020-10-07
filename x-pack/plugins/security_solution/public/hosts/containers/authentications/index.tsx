@@ -6,7 +6,6 @@
 
 import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { shallowEqual, useSelector } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import {
@@ -26,7 +25,8 @@ import {
 } from '../../../../common/search_strategy';
 import { ESTermQuery } from '../../../../common/typed_json';
 
-import { inputsModel, State } from '../../../common/store';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { inputsModel } from '../../../common/store';
 import { createFilter } from '../../../common/containers/helpers';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
 import { useKibana } from '../../../common/lib/kibana';
@@ -71,9 +71,8 @@ export const useAuthentications = ({
   skip,
 }: UseAuthentications): [boolean, AuthenticationArgs] => {
   const getAuthenticationsSelector = hostsSelectors.authenticationsSelector();
-  const { activePage, limit } = useSelector(
-    (state: State) => getAuthenticationsSelector(state, type),
-    shallowEqual
+  const { activePage, limit } = useShallowEqualSelector((state) =>
+    getAuthenticationsSelector(state, type)
   );
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);

@@ -32,8 +32,7 @@ export default function (providerContext: FtrProviderContext) {
       .send({ force: true });
   };
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/72102
-  describe.skip('updates all assets when updating a package to a different version', async () => {
+  describe('updates all assets when updating a package to a different version', async () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await installPackage(pkgKey);

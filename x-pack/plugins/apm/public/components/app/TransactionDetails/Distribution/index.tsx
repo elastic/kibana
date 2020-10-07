@@ -13,7 +13,7 @@ import { ValuesType } from 'utility-types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TransactionDistributionAPIResponse } from '../../../../../server/lib/transactions/distribution';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IBucket } from '../../../../../server/lib/transactions/distribution/get_buckets/transform';
+import { DistributionBucket } from '../../../../../server/lib/transactions/distribution/get_buckets';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { getDurationFormatter } from '../../../../utils/formatters';
 // @ts-expect-error
@@ -30,7 +30,10 @@ interface IChartPoint {
   };
 }
 
-export function getFormattedBuckets(buckets: IBucket[], bucketSize: number) {
+export function getFormattedBuckets(
+  buckets: DistributionBucket[],
+  bucketSize: number
+) {
   if (!buckets) {
     return [];
   }

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './expression.scss';
+
 import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
@@ -31,6 +33,7 @@ export interface DatatableColumns {
 
 interface Args {
   title: string;
+  description?: string;
   columns: DatatableColumns & { type: 'lens_datatable_columns' };
 }
 
@@ -69,6 +72,10 @@ export const datatable: ExpressionFunctionDefinition<
       help: i18n.translate('xpack.lens.datatable.titleLabel', {
         defaultMessage: 'Title',
       }),
+    },
+    description: {
+      types: ['string'],
+      help: '',
     },
     columns: {
       types: ['lens_datatable_columns'],
@@ -205,7 +212,10 @@ export function DatatableComponent(props: DatatableRenderProps) {
   }
 
   return (
-    <VisualizationContainer>
+    <VisualizationContainer
+      reportTitle={props.args.title}
+      reportDescription={props.args.description}
+    >
       <EuiBasicTable
         className="lnsDataTable"
         data-test-subj="lnsDataTable"

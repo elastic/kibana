@@ -1,0 +1,66 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`trusted_app_card TrustedAppCard should render correctly 1`] = `
+<ItemDetailsCard>
+  <ItemPropertySummary
+    name="Name"
+    value="trusted app 4"
+  />
+  <ItemPropertySummary
+    name="OS"
+    value="Mac OS"
+  />
+  <ItemPropertySummary
+    name="Date Created"
+    value={
+      <Memo(FormattedDate)
+        className="eui-textTruncate"
+        fieldName="Date Created"
+        value="1 minute ago"
+      />
+    }
+  />
+  <ItemPropertySummary
+    name="Created By"
+    value="someone"
+  />
+  <ConditionsTable
+    badge="and"
+    columns={
+      Array [
+        Object {
+          "field": "field",
+          "name": "Field",
+          "sortable": false,
+          "textOnly": true,
+          "truncateText": true,
+          "width": "30%",
+        },
+        Object {
+          "field": "operator",
+          "name": "Operator",
+          "sortable": false,
+          "truncateText": true,
+          "width": "20%",
+        },
+        Object {
+          "field": "value",
+          "name": "Value",
+          "sortable": false,
+          "truncateText": true,
+          "width": "60%",
+        },
+      ]
+    }
+    items={Array []}
+    responsive={true}
+  />
+  <ItemDetailsAction
+    color="danger"
+    onClick={[Function]}
+    size="s"
+  >
+    Remove
+  </ItemDetailsAction>
+</ItemDetailsCard>
+`;

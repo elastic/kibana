@@ -4,21 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import isPlainObject from 'lodash/isPlainObject';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import isString from 'lodash/isString';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import ary from 'lodash/ary';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import sortBy from 'lodash/sortBy';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import assign from 'lodash/assign';
+import { isPlainObject, isString, ary, sortBy, assign } from 'lodash';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 

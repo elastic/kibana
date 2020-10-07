@@ -19,15 +19,13 @@ import {
   EuiBadge,
   SearchFilterConfig,
 } from '@elastic/eui';
-// @ts-ignore
-import { formatDate } from '@elastic/eui/lib/services/format';
+
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import { StatsBar, ModelsBarStats } from '../../../../../components/stats_bar';
 import { useInferenceApiService } from '../../../../../services/ml_api_service/inference';
 import { ModelsTableToConfigMapping } from './index';
-import { TIME_FORMAT } from '../../../../../../../common/constants/time_format';
 import { DeleteModelsModal } from './delete_models_modal';
 import { useMlKibana, useMlUrlGenerator, useNotifications } from '../../../../../contexts/kibana';
 import { ExpandedRow } from './expanded_row';
@@ -46,6 +44,7 @@ import { useTableSettings } from '../analytics_list/use_table_settings';
 import { filterAnalyticsModels, AnalyticsSearchBar } from '../analytics_search_bar';
 import { ML_PAGES } from '../../../../../../../common/constants/ml_url_generator';
 import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
+import { timeFormatter } from '../../../../../../../common/util/date_utils';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
@@ -277,7 +276,7 @@ export const ModelsList: FC = () => {
       description: i18n.translate('xpack.ml.inference.modelsList.viewTrainingDataActionLabel', {
         defaultMessage: 'View training data',
       }),
-      icon: 'list',
+      icon: 'visTable',
       type: 'icon',
       available: (item) => item.metadata?.analytics_config?.id,
       onClick: async (item) => {
@@ -290,6 +289,7 @@ export const ModelsList: FC = () => {
             analysisType: getAnalysisType(
               item.metadata?.analytics_config.analysis
             ) as DataFrameAnalysisConfigType,
+            defaultIsTraining: true,
           },
         });
 
@@ -375,7 +375,7 @@ export const ModelsList: FC = () => {
         defaultMessage: 'Created at',
       }),
       dataType: 'date',
-      render: (date: string) => formatDate(date, TIME_FORMAT),
+      render: timeFormatter,
       sortable: true,
     },
     {

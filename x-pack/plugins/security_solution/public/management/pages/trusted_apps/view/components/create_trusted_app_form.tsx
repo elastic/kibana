@@ -23,7 +23,7 @@ import {
   TrustedApp,
 } from '../../../../../../common/endpoint/types';
 import { LogicalConditionBuilderProps } from './logical_condition/logical_condition_builder';
-import { OS_TITLES } from '../constants';
+import { OS_TITLES } from '../translations';
 import {
   isMacosLinuxTrustedAppCondition,
   isTrustedAppSupportedOs,

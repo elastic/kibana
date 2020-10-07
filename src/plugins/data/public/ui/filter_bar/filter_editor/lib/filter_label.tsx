@@ -22,13 +22,15 @@ import { EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { existsOperator, isOneOfOperator } from './filter_operators';
 import { Filter, FILTERS } from '../../../../../common';
+import type { FilterLabelStatus } from '../../filter_item';
 
 interface Props {
   filter: Filter;
   valueLabel?: string;
+  filterLabelStatus?: FilterLabelStatus;
 }
 
-export function FilterLabel({ filter, valueLabel }: Props) {
+export function FilterLabel({ filter, valueLabel, filterLabelStatus }: Props) {
   const prefixText = filter.meta.negate
     ? ` ${i18n.translate('data.filter.filterBar.negatedFilterPrefix', {
         defaultMessage: 'NOT ',
@@ -50,6 +52,7 @@ export function FilterLabel({ filter, valueLabel }: Props) {
       <Fragment>
         {prefix}
         {filter.meta.alias}
+        {filterLabelStatus && <>: {getValue(valueLabel)}</>}
       </Fragment>
     );
   }
