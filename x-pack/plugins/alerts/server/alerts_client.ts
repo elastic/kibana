@@ -397,12 +397,14 @@ export class AlertsClient {
   }
 
   public async hasDecryptionFailures(): Promise<boolean> {
-    const { total, saved_objects: data } = await this.unsecuredSavedObjectsClient.find<RawAlert>({
+    const { saved_objects: data } = await this.unsecuredSavedObjectsClient.find<RawAlert>({
       filter: 'alert.attributes.executionStatus.status:error',
       fields: ['executionStatus'],
       type: 'alert',
     });
-    return data.filter((item) => item.attributes.executionStatus.reason === 'decrypt').length > 0;
+    return (
+      data.filter((item) => item.attributes.executionStatus.error?.reason === 'decrypt').length > 0
+    );
   }
 
   public async delete({ id }: { id: string }) {

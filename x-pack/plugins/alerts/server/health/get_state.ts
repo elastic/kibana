@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { interval, Observable, of } from 'rxjs';
+import { interval } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 import { get } from 'lodash';
 import { ServiceStatusLevels } from '../../../../../src/core/server';
@@ -25,29 +25,27 @@ async function getLatestTaskState(taskManager: TaskManagerStartContract) {
   return null;
 }
 
-export const healthStatus$ = (taskManager: TaskManagerStartContract): Observable<unknown> => {
+export const healthStatus$ = (taskManager: TaskManagerStartContract) => {
   return interval(1000).pipe(
     switchMap(async () => {
       const doc = await getLatestTaskState(taskManager);
       const body = get(doc, 'state');
       if (body?.isHealthy) {
-        return of({
+        return {
           level: ServiceStatusLevels.available,
           summary: 'Alerting framework is healthy',
-        } as unknown);
+        };
       } else {
-        return of({
+        return {
           level: ServiceStatusLevels.unavailable,
           summary: 'Alerting framework is unhealthy',
-        } as unknown);
+        };
       }
     }),
-    catchError((error) =>
-      of({
-        level: ServiceStatusLevels.unavailable,
-        summary: `Alerting framework is unhealthy`,
-        meta: { error },
-      } as unknown)
-    )
+    catchError(async (error) => ({
+      level: ServiceStatusLevels.unavailable,
+      summary: `Alerting framework is unhealthy`,
+      meta: { error },
+    }))
   );
 };

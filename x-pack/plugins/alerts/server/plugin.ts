@@ -194,7 +194,7 @@ export class AlertingPlugin {
       core.status.set(
         combineLatest([core.status.derivedStatus$, healthStatus$(startPlugins.taskManager)]).pipe(
           map(([derivedStatus, healthStatus]) => {
-            if ((healthStatus as ServiceStatus).level > derivedStatus.level) {
+            if (healthStatus.level > derivedStatus.level) {
               return healthStatus as ServiceStatus;
             } else {
               return derivedStatus;

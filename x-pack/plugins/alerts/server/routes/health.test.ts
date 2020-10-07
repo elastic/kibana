@@ -11,6 +11,8 @@ import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockLicenseState } from '../lib/license_state.mock';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
+import { alertsClientMock } from '../alerts_client.mock';
+const alertsClient = alertsClientMock.create();
 
 jest.mock('../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
@@ -18,6 +20,7 @@ jest.mock('../lib/license_api_access.ts', () => ({
 
 beforeEach(() => {
   jest.resetAllMocks();
+  alertsClient.hasDecryptionFailures.mockResolvedValue(true);
 });
 
 describe('healthRoute', () => {
@@ -46,7 +49,7 @@ describe('healthRoute', () => {
     const esClient = elasticsearchServiceMock.createLegacyClusterClient();
     esClient.callAsInternalUser.mockReturnValue(Promise.resolve({}));
 
-    const [context, req, res] = mockHandlerArguments({ esClient }, {}, ['ok']);
+    const [context, req, res] = mockHandlerArguments({ esClient, alertsClient }, {}, ['ok']);
 
     await handler(context, req, res);
 
@@ -75,11 +78,12 @@ describe('healthRoute', () => {
     const esClient = elasticsearchServiceMock.createLegacyClusterClient();
     esClient.callAsInternalUser.mockReturnValue(Promise.resolve({}));
 
-    const [context, req, res] = mockHandlerArguments({ esClient }, {}, ['ok']);
+    const [context, req, res] = mockHandlerArguments({ esClient, alertsClient }, {}, ['ok']);
 
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
+          "hasDecryptionFailures": true,
           "hasPermanentEncryptionKey": false,
           "isSufficientlySecure": true,
         },
@@ -99,11 +103,12 @@ describe('healthRoute', () => {
     const esClient = elasticsearchServiceMock.createLegacyClusterClient();
     esClient.callAsInternalUser.mockReturnValue(Promise.resolve({}));
 
-    const [context, req, res] = mockHandlerArguments({ esClient }, {}, ['ok']);
+    const [context, req, res] = mockHandlerArguments({ esClient, alertsClient }, {}, ['ok']);
 
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
+          "hasDecryptionFailures": true,
           "hasPermanentEncryptionKey": true,
           "isSufficientlySecure": true,
         },
@@ -123,11 +128,12 @@ describe('healthRoute', () => {
     const esClient = elasticsearchServiceMock.createLegacyClusterClient();
     esClient.callAsInternalUser.mockReturnValue(Promise.resolve({ security: {} }));
 
-    const [context, req, res] = mockHandlerArguments({ esClient }, {}, ['ok']);
+    const [context, req, res] = mockHandlerArguments({ esClient, alertsClient }, {}, ['ok']);
 
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
+          "hasDecryptionFailures": true,
           "hasPermanentEncryptionKey": true,
           "isSufficientlySecure": true,
         },
@@ -147,11 +153,12 @@ describe('healthRoute', () => {
     const esClient = elasticsearchServiceMock.createLegacyClusterClient();
     esClient.callAsInternalUser.mockReturnValue(Promise.resolve({ security: { enabled: true } }));
 
-    const [context, req, res] = mockHandlerArguments({ esClient }, {}, ['ok']);
+    const [context, req, res] = mockHandlerArguments({ esClient, alertsClient }, {}, ['ok']);
 
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
+          "hasDecryptionFailures": true,
           "hasPermanentEncryptionKey": true,
           "isSufficientlySecure": false,
         },
@@ -173,11 +180,12 @@ describe('healthRoute', () => {
       Promise.resolve({ security: { enabled: true, ssl: {} } })
     );
 
-    const [context, req, res] = mockHandlerArguments({ esClient }, {}, ['ok']);
+    const [context, req, res] = mockHandlerArguments({ esClient, alertsClient }, {}, ['ok']);
 
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
+          "hasDecryptionFailures": true,
           "hasPermanentEncryptionKey": true,
           "isSufficientlySecure": false,
         },
@@ -199,11 +207,12 @@ describe('healthRoute', () => {
       Promise.resolve({ security: { enabled: true, ssl: { http: { enabled: true } } } })
     );
 
-    const [context, req, res] = mockHandlerArguments({ esClient }, {}, ['ok']);
+    const [context, req, res] = mockHandlerArguments({ esClient, alertsClient }, {}, ['ok']);
 
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
+          "hasDecryptionFailures": true,
           "hasPermanentEncryptionKey": true,
           "isSufficientlySecure": true,
         },
