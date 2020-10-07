@@ -118,7 +118,7 @@ This content has moved. See
 == Adding a policy to an index
 
 This content has moved. See
-{ref}/index-lifecycle-management.html[ILM: Manage the index lifecycle].
+{ref}/set-up-lifecycle-policy.html[Configure a lifecycle policy].
 
 [role="exclude",id="creating-index-lifecycle-policies"]
 == Creating an index lifecycle policy
