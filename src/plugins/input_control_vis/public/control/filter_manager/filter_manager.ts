@@ -19,14 +19,22 @@
 
 import _ from 'lodash';
 
-import { FilterManager as QueryFilterManager, IndexPattern, Filter } from '../../../../data/public';
+import {
+  FilterManager as QueryFilterManager,
+  IndexPattern,
+  Filter,
+  IndexPatternsContract,
+} from '../../../../data/public';
 
 export abstract class FilterManager {
+  protected indexPattern: IndexPattern | undefined;
+
   constructor(
     public controlId: string,
     public fieldName: string,
-    public queryFilter: QueryFilterManager,
-    public indexPattern?: IndexPattern
+    private indexPatternId: string,
+    private indexPatternsService: IndexPatternsContract,
+    protected queryFilter: QueryFilterManager
   ) {}
 
   /**
@@ -41,6 +49,16 @@ export abstract class FilterManager {
 
   abstract getValueFromFilterBar(): any;
 
+  async init() {
+    try {
+      if (!this.indexPattern) {
+        this.indexPattern = await this.indexPatternsService.get(this.indexPatternId);
+      }
+    } catch (e) {
+      // invalid index pattern id
+    }
+  }
+
   getIndexPattern(): IndexPattern | undefined {
     return this.indexPattern;
   }
@@ -54,7 +72,7 @@ export abstract class FilterManager {
       this.queryFilter.getAppFilters(),
       this.queryFilter.getGlobalFilters(),
     ]);
-    return kbnFilters.filter((kbnFilter) => {
+    return kbnFilters.filter((kbnFilter: Filter) => {
       return _.get(kbnFilter, 'meta.controlledBy') === this.controlId;
     });
   }

@@ -23,7 +23,7 @@ import { FilterManager } from './filter_manager';
 import {
   PhraseFilter,
   esFilters,
-  IndexPattern,
+  IndexPatternsContract,
   FilterManager as QueryFilterManager,
 } from '../../../../data/public';
 
@@ -31,14 +31,15 @@ export class PhraseFilterManager extends FilterManager {
   constructor(
     controlId: string,
     fieldName: string,
-    queryFilter: QueryFilterManager,
-    indexPattern?: IndexPattern
+    indexPatternId: string,
+    indexPatternService: IndexPatternsContract,
+    queryFilter: QueryFilterManager
   ) {
-    super(controlId, fieldName, queryFilter, indexPattern);
+    super(controlId, fieldName, indexPatternId, indexPatternService, queryFilter);
   }
 
   createFilter(phrases: any): PhraseFilter {
-    const indexPattern = this.indexPattern!;
+    const indexPattern = this.getIndexPattern()!;
     let newFilter: PhraseFilter;
     const value = indexPattern.fields.getByName(this.fieldName);
 

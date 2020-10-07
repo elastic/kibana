@@ -135,23 +135,19 @@ export async function rangeControlFactory(
 ): Promise<RangeControl> {
   const [, { data: dataPluginStart }] = await deps.core.getStartServices();
 
-  let indexPattern;
-  try {
-    indexPattern = await dataPluginStart.indexPatterns.get(controlParams.indexPattern);
-  } catch (e) {
-    // invalid index pattern id
-  }
-
-  return new RangeControl(
+  const rangeControl = new RangeControl(
     controlParams,
     new RangeFilterManager(
       controlParams.id,
       controlParams.fieldName,
-      deps.data.query.filterManager,
-      indexPattern
+      controlParams.indexPattern,
+      dataPluginStart.indexPatterns,
+      deps.data.query.filterManager
     ),
     useTimeFilter,
     dataPluginStart.search.searchSource,
     deps
   );
+  await rangeControl.filterManager.init();
+  return rangeControl;
 }
