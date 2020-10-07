@@ -15,7 +15,7 @@
     "inspector",
     "licensing",
     "maps",
-    "triggers_actions_ui",
+    "triggersActionsUi",
     "uiActions"
   ],
   "optionalPlugins": [

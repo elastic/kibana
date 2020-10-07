@@ -100,7 +100,13 @@ export const TrustedAppDeletionDialog = memo(() => {
               {translations.cancelButton}
             </EuiButtonEmpty>
 
-            <EuiButton fill onClick={onConfirm} isLoading={isBusy} data-test-subj={CONFIRM_SUBJ}>
+            <EuiButton
+              fill
+              color="danger"
+              onClick={onConfirm}
+              isLoading={isBusy}
+              data-test-subj={CONFIRM_SUBJ}
+            >
               {translations.confirmButton}
             </EuiButton>
           </EuiModalFooter>

@@ -5,35 +5,23 @@
  */
 
 import React from 'react';
-import { EuiPanel, EuiResizableContainer } from '@elastic/eui';
-import { FULL_HEIGHT } from '../RumDashboard';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { PageLoadDistribution } from '../PageLoadDistribution';
 import { PageViewsTrend } from '../PageViewsTrend';
-import { useBreakPoints } from '../hooks/useBreakPoints';
 
 export function PageLoadAndViews() {
-  const { isLarge } = useBreakPoints();
-
   return (
-    <EuiResizableContainer
-      style={FULL_HEIGHT}
-      direction={isLarge ? 'vertical' : 'horizontal'}
-    >
-      {(EuiResizablePanel, EuiResizableButton) => (
-        <>
-          <EuiResizablePanel initialSize={50} minSize="20%">
-            <EuiPanel style={FULL_HEIGHT}>
-              <PageLoadDistribution />
-            </EuiPanel>
-          </EuiResizablePanel>
-          <EuiResizableButton />
-          <EuiResizablePanel initialSize={50} minSize="20%">
-            <EuiPanel style={FULL_HEIGHT}>
-              <PageViewsTrend />
-            </EuiPanel>
-          </EuiResizablePanel>
-        </>
-      )}
-    </EuiResizableContainer>
+    <EuiFlexGroup gutterSize="s" wrap>
+      <EuiFlexItem style={{ flexBasis: 650 }}>
+        <EuiPanel>
+          <PageLoadDistribution />
+        </EuiPanel>
+      </EuiFlexItem>
+      <EuiFlexItem style={{ flexBasis: 650 }}>
+        <EuiPanel>
+          <PageViewsTrend />
+        </EuiPanel>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

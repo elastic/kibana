@@ -73,28 +73,77 @@ export interface RuleFields {
   index: unknown;
   ruleType: unknown;
   threshold?: unknown;
+  threatIndex?: unknown;
+  threatQueryBar?: unknown;
+  threatMapping?: unknown;
+  threatLanguage?: unknown;
 }
-type QueryRuleFields<T> = Omit<T, 'anomalyThreshold' | 'machineLearningJobId' | 'threshold'>;
-type ThresholdRuleFields<T> = Omit<T, 'anomalyThreshold' | 'machineLearningJobId'>;
-type MlRuleFields<T> = Omit<T, 'queryBar' | 'index' | 'threshold'>;
+
+type QueryRuleFields<T> = Omit<
+  T,
+  | 'anomalyThreshold'
+  | 'machineLearningJobId'
+  | 'threshold'
+  | 'threatIndex'
+  | 'threatQueryBar'
+  | 'threatMapping'
+>;
+type ThresholdRuleFields<T> = Omit<
+  T,
+  'anomalyThreshold' | 'machineLearningJobId' | 'threatIndex' | 'threatQueryBar' | 'threatMapping'
+>;
+type MlRuleFields<T> = Omit<
+  T,
+  'queryBar' | 'index' | 'threshold' | 'threatIndex' | 'threatQueryBar' | 'threatMapping'
+>;
+type ThreatMatchRuleFields<T> = Omit<T, 'anomalyThreshold' | 'machineLearningJobId' | 'threshold'>;
 
 const isMlFields = <T>(
-  fields: QueryRuleFields<T> | MlRuleFields<T> | ThresholdRuleFields<T>
+  fields: QueryRuleFields<T> | MlRuleFields<T> | ThresholdRuleFields<T> | ThreatMatchRuleFields<T>
 ): fields is MlRuleFields<T> => has('anomalyThreshold', fields);
 
 const isThresholdFields = <T>(
-  fields: QueryRuleFields<T> | MlRuleFields<T> | ThresholdRuleFields<T>
+  fields: QueryRuleFields<T> | MlRuleFields<T> | ThresholdRuleFields<T> | ThreatMatchRuleFields<T>
 ): fields is ThresholdRuleFields<T> => has('threshold', fields);
 
-export const filterRuleFieldsForType = <T extends RuleFields>(fields: T, type: Type) => {
+const isThreatMatchFields = <T>(
+  fields: QueryRuleFields<T> | MlRuleFields<T> | ThresholdRuleFields<T> | ThreatMatchRuleFields<T>
+): fields is ThreatMatchRuleFields<T> => has('threatIndex', fields);
+
+export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
+  fields: T,
+  type: Type
+): QueryRuleFields<T> | MlRuleFields<T> | ThresholdRuleFields<T> | ThreatMatchRuleFields<T> => {
   switch (type) {
     case 'machine_learning':
-      const { index, queryBar, threshold, ...mlRuleFields } = fields;
+      const {
+        index,
+        queryBar,
+        threshold,
+        threatIndex,
+        threatQueryBar,
+        threatMapping,
+        ...mlRuleFields
+      } = fields;
       return mlRuleFields;
     case 'threshold':
-      const { anomalyThreshold, machineLearningJobId, ...thresholdRuleFields } = fields;
+      const {
+        anomalyThreshold,
+        machineLearningJobId,
+        threatIndex: _removedThreatIndex,
+        threatQueryBar: _removedThreatQueryBar,
+        threatMapping: _removedThreatMapping,
+        ...thresholdRuleFields
+      } = fields;
       return thresholdRuleFields;
     case 'threat_match':
+      const {
+        anomalyThreshold: _removedAnomalyThreshold,
+        machineLearningJobId: _removedMachineLearningJobId,
+        threshold: _removedThreshold,
+        ...threatMatchRuleFields
+      } = fields;
+      return threatMatchRuleFields;
     case 'query':
     case 'saved_query':
     case 'eql':
@@ -102,6 +151,9 @@ export const filterRuleFieldsForType = <T extends RuleFields>(fields: T, type: T
         anomalyThreshold: _a,
         machineLearningJobId: _m,
         threshold: _t,
+        threatIndex: __removedThreatIndex,
+        threatQueryBar: __removedThreatQueryBar,
+        threatMapping: __removedThreatMapping,
         ...queryRuleFields
       } = fields;
       return queryRuleFields;
@@ -139,6 +191,18 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
             value: parseInt(ruleFields.threshold?.value, 10) ?? 0,
           },
         }),
+      }
+    : isThreatMatchFields(ruleFields)
+    ? {
+        index: ruleFields.index,
+        filters: ruleFields.queryBar?.filters,
+        language: ruleFields.queryBar?.query?.language,
+        query: ruleFields.queryBar?.query?.query as string,
+        saved_id: ruleFields.queryBar?.saved_id,
+        threat_index: ruleFields.threatIndex,
+        threat_query: ruleFields.threatQueryBar?.query?.query as string,
+        threat_mapping: ruleFields.threatMapping,
+        threat_language: ruleFields.threatQueryBar?.query?.language,
       }
     : {
         index: ruleFields.index,

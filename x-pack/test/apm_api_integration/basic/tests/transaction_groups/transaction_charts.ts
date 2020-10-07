@@ -19,7 +19,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   // url parameters
   const start = encodeURIComponent(metadata.start);
   const end = encodeURIComponent(metadata.end);
-  const uiFilters = encodeURIComponent(JSON.stringify({}));
+  const uiFilters = encodeURIComponent(JSON.stringify({ environment: 'testing' }));
 
   describe('Transaction charts', () => {
     describe('when data is not loaded ', () => {

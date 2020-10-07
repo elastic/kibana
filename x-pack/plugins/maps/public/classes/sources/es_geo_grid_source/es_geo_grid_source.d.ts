@@ -10,6 +10,7 @@ import {
   MapFilters,
   MapQuery,
   VectorSourceSyncMeta,
+  VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { GRID_RESOLUTION } from '../../../../common/constants';
 import { IField } from '../../fields/field';
@@ -35,13 +36,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
   getLayerName(): string;
 
   getUrlTemplateWithMeta(
-    searchFilters: MapFilters & {
-      applyGlobalQuery: boolean;
-      fieldNames: string[];
-      geogridPrecision?: number;
-      sourceQuery: MapQuery;
-      sourceMeta: VectorSourceSyncMeta;
-    }
+    searchFilters: VectorSourceRequestMeta
   ): Promise<{
     layerName: string;
     urlTemplate: string;

@@ -26,8 +26,8 @@ import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/plugins/visualizatio
 import { coreMock, httpServiceMock } from '../../../../../../src/core/public/mocks';
 import { IBasePath } from '../../../../../../src/core/public';
 import { AttributeService } from '../../../../../../src/plugins/dashboard/public';
-import { Ast } from '@kbn/interpreter/common';
 import { LensAttributeService } from '../../lens_attribute_service';
+import { OnSaveProps } from '../../../../../../src/plugins/saved_objects/public/save_modal';
 
 jest.mock('../../../../../../src/plugins/inspector/public/', () => ({
   isAvailable: false,
@@ -45,6 +45,30 @@ const savedVis: Document = {
   title: 'My title',
   visualizationType: '',
 };
+const defaultSaveMethod = (
+  type: string,
+  testAttributes: LensSavedObjectAttributes,
+  savedObjectId?: string
+): Promise<{ id: string }> => {
+  return new Promise(() => {
+    return { id: '123' };
+  });
+};
+const defaultUnwrapMethod = (savedObjectId: string): Promise<LensSavedObjectAttributes> => {
+  return new Promise(() => {
+    return { ...savedVis };
+  });
+};
+const defaultCheckForDuplicateTitle = (props: OnSaveProps): Promise<true> => {
+  return new Promise(() => {
+    return true;
+  });
+};
+const options = {
+  saveMethod: defaultSaveMethod,
+  unwrapMethod: defaultUnwrapMethod,
+  checkForDuplicateTitle: defaultCheckForDuplicateTitle,
+};
 
 const attributeServiceMockFromSavedVis = (document: Document): LensAttributeService => {
   const core = coreMock.createStart();
@@ -52,14 +76,7 @@ const attributeServiceMockFromSavedVis = (document: Document): LensAttributeServ
     LensSavedObjectAttributes,
     LensByValueInput,
     LensByReferenceInput
-  >(
-    'lens',
-    jest.fn(),
-    core.savedObjects.client,
-    core.overlays,
-    core.i18n.Context,
-    core.notifications.toasts
-  );
+  >('lens', jest.fn(), core.i18n.Context, core.notifications.toasts, options);
   service.unwrapAttributes = jest.fn((input: LensByValueInput | LensByReferenceInput) => {
     return Promise.resolve({ ...document } as LensSavedObjectAttributes);
   });
@@ -103,8 +120,14 @@ describe('embeddable', () => {
         indexPatternService: {} as IndexPatternsContract,
         editable: true,
         getTrigger,
-        documentToExpression: () => Promise.resolve({} as Ast),
-        toExpressionString: () => 'my | expression',
+        documentToExpression: () =>
+          Promise.resolve({
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
+          }),
       },
       {} as LensEmbeddableInput
     );
@@ -112,7 +135,8 @@ describe('embeddable', () => {
     embeddable.render(mountpoint);
 
     expect(expressionRenderer).toHaveBeenCalledTimes(1);
-    expect(expressionRenderer.mock.calls[0][0]!.expression).toEqual('my | expression');
+    expect(expressionRenderer.mock.calls[0][0]!.expression).toEqual(`my
+| expression`);
   });
 
   it('should re-render if new input is pushed', async () => {
@@ -129,8 +153,14 @@ describe('embeddable', () => {
         indexPatternService: {} as IndexPatternsContract,
         editable: true,
         getTrigger,
-        documentToExpression: () => Promise.resolve({} as Ast),
-        toExpressionString: () => 'my | expression',
+        documentToExpression: () =>
+          Promise.resolve({
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
+          }),
       },
       { id: '123' } as LensEmbeddableInput
     );
@@ -162,8 +192,14 @@ describe('embeddable', () => {
         indexPatternService: {} as IndexPatternsContract,
         editable: true,
         getTrigger,
-        documentToExpression: () => Promise.resolve({} as Ast),
-        toExpressionString: () => 'my | expression',
+        documentToExpression: () =>
+          Promise.resolve({
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
+          }),
       },
       input
     );
@@ -208,8 +244,14 @@ describe('embeddable', () => {
         indexPatternService: {} as IndexPatternsContract,
         editable: true,
         getTrigger,
-        documentToExpression: () => Promise.resolve({} as Ast),
-        toExpressionString: () => 'my | expression',
+        documentToExpression: () =>
+          Promise.resolve({
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
+          }),
       },
       input
     );
@@ -237,8 +279,14 @@ describe('embeddable', () => {
         indexPatternService: {} as IndexPatternsContract,
         editable: true,
         getTrigger,
-        documentToExpression: () => Promise.resolve({} as Ast),
-        toExpressionString: () => 'my | expression',
+        documentToExpression: () =>
+          Promise.resolve({
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
+          }),
       },
       { id: '123' } as LensEmbeddableInput
     );
@@ -270,8 +318,14 @@ describe('embeddable', () => {
         indexPatternService: {} as IndexPatternsContract,
         editable: true,
         getTrigger,
-        documentToExpression: () => Promise.resolve({} as Ast),
-        toExpressionString: () => 'my | expression',
+        documentToExpression: () =>
+          Promise.resolve({
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
+          }),
       },
       { id: '123', timeRange, query, filters } as LensEmbeddableInput
     );
@@ -311,8 +365,14 @@ describe('embeddable', () => {
         indexPatternService: {} as IndexPatternsContract,
         editable: true,
         getTrigger,
-        documentToExpression: () => Promise.resolve({} as Ast),
-        toExpressionString: () => 'my | expression',
+        documentToExpression: () =>
+          Promise.resolve({
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
+          }),
       },
       { id: '123', timeRange, query, filters } as LensEmbeddableInput
     );

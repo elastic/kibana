@@ -248,16 +248,25 @@ export const getSimpleMlRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> =
 export const deleteAllAlerts = async (es: Client, retryCount = 20): Promise<void> => {
   if (retryCount > 0) {
     try {
-      await es.deleteByQuery({
+      const result = await es.deleteByQuery({
         index: '.kibana',
         q: 'type:alert',
         wait_for_completion: true,
         refresh: true,
+        conflicts: 'proceed',
         body: {},
       });
+      // deleteByQuery will cause version conflicts as alerts are being updated
+      // by background processes; the code below accounts for that
+      if (result.body.version_conflicts !== 0) {
+        throw new Error(`Version conflicts for ${result.body.version_conflicts} alerts`);
+      }
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.log(`Failure trying to deleteAllAlerts, retries left are: ${retryCount - 1}`, err);
+      console.log(`Error in deleteAllAlerts(), retries left: ${retryCount - 1}`, err);
+
+      // retry, counting down, and delay a bit before
+      await new Promise((resolve) => setTimeout(resolve, 250));
       await deleteAllAlerts(es, retryCount - 1);
     }
   } else {

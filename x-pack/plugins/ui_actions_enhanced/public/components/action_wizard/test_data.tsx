@@ -254,7 +254,7 @@ export function Demo({ actionFactories }: { actionFactories: Array<ActionFactory
           });
         }}
         getTriggerInfo={mockGetTriggerInfo}
-        supportedTriggers={[VALUE_CLICK_TRIGGER, APPLY_FILTER_TRIGGER, SELECT_RANGE_TRIGGER]}
+        triggers={[VALUE_CLICK_TRIGGER, APPLY_FILTER_TRIGGER, SELECT_RANGE_TRIGGER]}
       />
       <div style={{ marginTop: '44px' }} />
       <hr />

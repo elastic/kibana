@@ -171,11 +171,17 @@ describe('metric_visualization', () => {
                 "accessor": Array [
                   "a",
                 ],
+                "description": Array [
+                  "",
+                ],
+                "metricTitle": Array [
+                  "shazm",
+                ],
                 "mode": Array [
                   "full",
                 ],
                 "title": Array [
-                  "shazm",
+                  "",
                 ],
               },
               "function": "lens_metric_chart",

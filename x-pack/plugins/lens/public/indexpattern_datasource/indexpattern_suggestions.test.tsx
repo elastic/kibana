@@ -10,6 +10,7 @@ import { IndexPatternPrivateState } from './types';
 import {
   getDatasourceSuggestionsForField,
   getDatasourceSuggestionsFromCurrentState,
+  getDatasourceSuggestionsForVisualizeField,
 } from './indexpattern_suggestions';
 
 jest.mock('./loader');
@@ -147,7 +148,7 @@ function testInitialState(): IndexPatternPrivateState {
 
             // Private
             operationType: 'terms',
-            sourceField: 'op',
+            sourceField: 'dest',
             params: {
               size: 5,
               orderBy: { type: 'alphabetical' },
@@ -1077,6 +1078,70 @@ describe('IndexPattern Data Source suggestions', () => {
       });
     });
   });
+  describe('#getDatasourceSuggestionsForVisualizeField', () => {
+    describe('with no layer', () => {
+      function stateWithoutLayer() {
+        return {
+          ...testInitialState(),
+          layers: {},
+        };
+      }
+
+      it('should return an empty array if the field does not exist', () => {
+        const suggestions = getDatasourceSuggestionsForVisualizeField(
+          stateWithoutLayer(),
+          '1',
+          'field_not_exist'
+        );
+
+        expect(suggestions).toEqual([]);
+      });
+
+      it('should apply a bucketed aggregation for a string field', () => {
+        const suggestions = getDatasourceSuggestionsForVisualizeField(
+          stateWithoutLayer(),
+          '1',
+          'source'
+        );
+
+        expect(suggestions).toContainEqual(
+          expect.objectContaining({
+            state: expect.objectContaining({
+              layers: {
+                id1: expect.objectContaining({
+                  columnOrder: ['id2', 'id3'],
+                  columns: {
+                    id2: expect.objectContaining({
+                      operationType: 'terms',
+                      sourceField: 'source',
+                      params: expect.objectContaining({ size: 5 }),
+                    }),
+                    id3: expect.objectContaining({
+                      operationType: 'count',
+                    }),
+                  },
+                }),
+              },
+            }),
+            table: {
+              changeType: 'initial',
+              label: undefined,
+              isMultiRow: true,
+              columns: [
+                expect.objectContaining({
+                  columnId: 'id2',
+                }),
+                expect.objectContaining({
+                  columnId: 'id3',
+                }),
+              ],
+              layerId: 'id1',
+            },
+          })
+        );
+      });
+    });
+  });
 
   describe('#getDatasourceSuggestionsFromCurrentState', () => {
     it('returns no suggestions if there are no columns', () => {
@@ -1115,7 +1180,7 @@ describe('IndexPattern Data Source suggestions', () => {
 
                 // Private
                 operationType: 'terms',
-                sourceField: 'op',
+                sourceField: 'dest',
                 params: {
                   size: 5,
                   orderBy: { type: 'alphabetical' },
@@ -1615,7 +1680,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 isBucketed: true,
 
                 operationType: 'date_histogram',
-                sourceField: 'field2',
+                sourceField: 'timestamp',
                 params: {
                   interval: 'd',
                 },
@@ -1626,7 +1691,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 isBucketed: true,
 
                 operationType: 'terms',
-                sourceField: 'field1',
+                sourceField: 'dest',
                 params: { size: 5, orderBy: { type: 'alphabetical' }, orderDirection: 'asc' },
               },
               id3: {
@@ -1635,7 +1700,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 isBucketed: false,
 
                 operationType: 'avg',
-                sourceField: 'field1',
+                sourceField: 'bytes',
               },
             },
             columnOrder: ['id1', 'id2', 'id3'],
@@ -1651,6 +1716,38 @@ describe('IndexPattern Data Source suggestions', () => {
           }),
         })
       );
+    });
+
+    it('does not generate suggestions if invalid fields are referenced', () => {
+      const initialState = testInitialState();
+      const state: IndexPatternPrivateState = {
+        indexPatternRefs: [],
+        existingFields: {},
+        currentIndexPatternId: '1',
+        indexPatterns: expectedIndexPatterns,
+        isFirstExistenceFetch: false,
+        layers: {
+          first: {
+            ...initialState.layers.first,
+            columns: {
+              ...initialState.layers.first.columns,
+              col2: {
+                label: 'Top 5',
+                dataType: 'string',
+                isBucketed: true,
+
+                operationType: 'terms',
+                sourceField: 'nonExistingField',
+                params: { size: 5, orderBy: { type: 'alphabetical' }, orderDirection: 'asc' },
+              },
+            },
+            columnOrder: ['col1', 'col2'],
+          },
+        },
+      };
+
+      const suggestions = getDatasourceSuggestionsFromCurrentState(state);
+      expect(suggestions).toEqual([]);
     });
   });
 });

@@ -73,7 +73,11 @@ export function buildExpression({
   datasourceMap,
   datasourceStates,
   datasourceLayers,
+  title,
+  description,
 }: {
+  title?: string;
+  description?: string;
   visualization: Visualization | null;
   visualizationState: unknown;
   datasourceMap: Record<string, Datasource>;
@@ -89,7 +93,10 @@ export function buildExpression({
   if (visualization === null) {
     return null;
   }
-  const visualizationExpression = visualization.toExpression(visualizationState, datasourceLayers);
+  const visualizationExpression = visualization.toExpression(visualizationState, datasourceLayers, {
+    title,
+    description,
+  });
 
   const completeExpression = prependDatasourceExpression(
     visualizationExpression,
