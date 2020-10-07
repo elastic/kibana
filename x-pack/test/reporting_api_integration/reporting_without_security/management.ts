@@ -40,10 +40,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('Displays new jobs', async () => {
-      // post new job
       await PageObjects.common.navigateToApp('reporting');
       await testSubjects.existOrFail('reportJobListing', { timeout: 200000 });
 
+      // post new job
       const { status } = await postJobJSON(`/api/reporting/generate/png`, {
         jobParams: JOB_PARAMS_ECOM_MARKDOWN,
       });
