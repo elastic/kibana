@@ -75,6 +75,13 @@ export default function (providerContext: FtrProviderContext) {
       packagePolicyId2 = packagePolicyResponse2.item.id;
     });
 
+    after(async function () {
+      await supertest
+        .post(`/api/fleet/agent_policies/delete`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ agentPolicyId });
+    });
+
     it('should work with valid values', async function () {
       await supertest
         .put(`/api/fleet/package_policies/${packagePolicyId}`)
@@ -92,8 +99,7 @@ export default function (providerContext: FtrProviderContext) {
             title: 'For File Tests',
             version: '0.1.0',
           },
-        })
-        .expect(200);
+        });
     });
 
     it('should return a 500 if there is another package policy with the same name', async function () {
