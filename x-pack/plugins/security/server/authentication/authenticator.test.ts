@@ -1374,6 +1374,14 @@ describe('Authenticator', () => {
             '/mock-server-basepath/login?next=%2Fmock-server-basepath%2Fpath'
           )
         );
+
+        // Unauthenticated session should be treated as non-existent one.
+        mockOptions.session.get.mockResolvedValue({ ...mockSessVal, username: undefined });
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.redirectTo(
+            '/mock-server-basepath/login?next=%2Fmock-server-basepath%2Fpath'
+          )
+        );
         expect(mockBasicAuthenticationProvider.authenticate).not.toHaveBeenCalled();
       });
     });
@@ -1585,26 +1593,6 @@ describe('Authenticator', () => {
 
         await expect(authenticator.authenticate(request)).resolves.toEqual(
           AuthenticationResult.succeeded(mockUser, {
-            state: 'some-state',
-            authResponseHeaders: { 'WWW-Authenticate': 'Negotiate' },
-          })
-        );
-      });
-
-      it('does not redirect to Overwritten Session if session was unauthenticated before this authentication attempt', async () => {
-        const request = httpServerMock.createKibanaRequest();
-        mockOptions.session.get.mockResolvedValue({ ...mockSessVal, username: undefined });
-
-        const newMockUser = mockAuthenticatedUser({ username: 'new-username' });
-        mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
-          AuthenticationResult.succeeded(newMockUser, {
-            state: 'some-state',
-            authResponseHeaders: { 'WWW-Authenticate': 'Negotiate' },
-          })
-        );
-
-        await expect(authenticator.authenticate(request)).resolves.toEqual(
-          AuthenticationResult.succeeded(newMockUser, {
             state: 'some-state',
             authResponseHeaders: { 'WWW-Authenticate': 'Negotiate' },
           })

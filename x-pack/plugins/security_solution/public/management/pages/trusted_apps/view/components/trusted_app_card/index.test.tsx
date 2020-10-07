@@ -18,5 +18,15 @@ describe('trusted_app_card', () => {
 
       expect(element).toMatchSnapshot();
     });
+
+    it('should trim long descriptions', () => {
+      const trustedApp = {
+        ...createSampleTrustedApp(4),
+        description: [...new Array(40).keys()].map((index) => `item${index}`).join(' '),
+      };
+      const element = shallow(<TrustedAppCard trustedApp={trustedApp} onDelete={() => {}} />);
+
+      expect(element).toMatchSnapshot();
+    });
   });
 });

@@ -138,11 +138,6 @@ exports[`Header rendering renders correctly against snapshot 1`] = `
         },
       ]
     }
-    onDataProviderEdited={[MockFunction]}
-    onDataProviderRemoved={[MockFunction]}
-    onToggleDataProviderEnabled={[MockFunction]}
-    onToggleDataProviderExcluded={[MockFunction]}
-    onToggleDataProviderType={[MockFunction]}
     timelineId="foo"
   />
   <Connect(StatefulSearchOrFilterComponent)

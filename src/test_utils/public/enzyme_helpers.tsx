@@ -18,13 +18,13 @@
  */
 
 /**
- * Components using the react-intl module require access to the intl context.
+ * Components using the @kbn/i18n module require access to the intl context.
  * This is not available when mounting single components in Enzyme.
  * These helper functions aim to address that and wrap a valid,
  * intl context around them.
  */
 
-import { I18nProvider, InjectedIntl, intlShape } from '@kbn/i18n/react';
+import { I18nProvider, InjectedIntl, intlShape, __IntlProvider } from '@kbn/i18n/react';
 import { mount, ReactWrapper, render, shallow } from 'enzyme';
 import React, { ReactElement, ValidationMap } from 'react';
 
@@ -33,7 +33,7 @@ const { intl } = (mount(
   <I18nProvider>
     <br />
   </I18nProvider>
-).find('IntlProvider') as ReactWrapper<{}, {}, import('react-intl').IntlProvider>)
+).find('IntlProvider') as ReactWrapper<{}, {}, __IntlProvider>)
   .instance()
   .getChildContext();
 
@@ -52,7 +52,7 @@ function getOptions(context = {}, childContextTypes: ValidationMap<any> = {}, pr
 }
 
 /**
- * When using React-Intl `injectIntl` on components, props.intl is required.
+ * When using @kbn/i18n `injectI18n` on components, props.intl is required.
  */
 function nodeWithIntlProp<T>(node: ReactElement<T>): ReactElement<T & { intl: InjectedIntl }> {
   return React.cloneElement<any>(node, { intl });

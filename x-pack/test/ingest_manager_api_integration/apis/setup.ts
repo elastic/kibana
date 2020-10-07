@@ -13,7 +13,7 @@ export default function (providerContext: FtrProviderContext) {
   const es = getService('es');
   describe('ingest manager setup', async () => {
     before(async () => {
-      await supertest.post(`/api/ingest_manager/setup`).set('kbn-xsrf', 'xxx').send();
+      await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').send();
     });
 
     it('should have installed placeholder indices', async function () {

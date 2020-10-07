@@ -29,13 +29,13 @@ export const GetTrustedAppsRequestSchema = {
 export const PostTrustedAppCreateRequestSchema = {
   body: schema.object({
     name: schema.string({ minLength: 1 }),
-    description: schema.maybe(schema.string({ minLength: 0, defaultValue: '' })),
+    description: schema.maybe(schema.string({ minLength: 0, maxLength: 256, defaultValue: '' })),
     os: schema.oneOf([schema.literal('linux'), schema.literal('macos'), schema.literal('windows')]),
     entries: schema.arrayOf(
       schema.object({
         field: schema.oneOf([
           schema.literal('process.hash.*'),
-          schema.literal('process.path.text'),
+          schema.literal('process.executable.caseless'),
         ]),
         type: schema.literal('match'),
         operator: schema.literal('included'),
@@ -52,11 +52,15 @@ export const PostTrustedAppCreateRequestSchema = {
 
             usedFields.push(field);
 
-            if (
-              field === 'process.hash.*' &&
-              (!hashLengths.includes(value.length) || hasInvalidCharacters.test(value))
-            ) {
-              return `Invalid hash value [${value}]`;
+            if (field === 'process.hash.*') {
+              const trimmedValue = value.trim();
+
+              if (
+                !hashLengths.includes(trimmedValue.length) ||
+                hasInvalidCharacters.test(trimmedValue)
+              ) {
+                return `Invalid hash value [${value}]`;
+              }
             }
           }
         },

@@ -43,7 +43,7 @@ describe('Port', () => {
     );
 
     expect(
-      wrapper.find('[data-test-subj="draggable-content-destination.ip"]').find('a').first().props()
+      wrapper.find('[data-test-subj="draggable-truncatable-content"]').find('a').first().props()
         .href
     ).toEqual('/ip/10.1.2.3/source');
   });
