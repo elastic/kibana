@@ -20,7 +20,7 @@ export const userLoginEvent: AuditEventDecorator<UserEventArgs> = (
   ...event,
   message: authenticationResult.user
     ? `User [${authenticationResult.user.username}] logged in using ${authentication_type} provider [name=${authentication_provider}]`
-    : `Failed attemp to login using ${authentication_type} provider [name=${authentication_provider}]`,
+    : `Failed attempt to login using ${authentication_type} provider [name=${authentication_provider}]`,
   event: {
     action: 'user_login',
     category: 'authentication',
