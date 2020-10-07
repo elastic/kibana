@@ -7,8 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-hasReference?: {
-        type: string;
-        id: string;
-    };
+hasReference?: SavedObjectsFindOptionsReference | SavedObjectsFindOptionsReference[];
 ```
