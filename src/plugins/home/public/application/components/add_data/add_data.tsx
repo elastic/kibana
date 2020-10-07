@@ -34,7 +34,7 @@ interface Props {
 
 export const AddData: FC<Props> = ({ addBasePath, features }) => (
   <section className="homDataAdd" aria-labelledby="homDataAdd__title">
-    <EuiFlexGroup alignItems="center" responsive={false}>
+    <EuiFlexGroup alignItems="center">
       <EuiFlexItem grow={1}>
         <EuiTitle size="s">
           <h2 id="homDataAdd__title">
@@ -43,18 +43,21 @@ export const AddData: FC<Props> = ({ addBasePath, features }) => (
         </EuiTitle>
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          iconType="visTable"
-          href="#/tutorial_directory/sampleData"
-          size="xs"
-          flush="right"
-        >
-          <FormattedMessage
-            id="home.addData.sampleDataButtonLabel"
-            defaultMessage="Try our sample data"
-          />
-        </EuiButtonEmpty>
+      <EuiFlexItem className="homDataAdd__actions" grow={false}>
+        <div>
+          <EuiButtonEmpty
+            className="homDataAdd__actionButton"
+            flush="left"
+            href="#/tutorial_directory/sampleData"
+            iconType="visTable"
+            size="xs"
+          >
+            <FormattedMessage
+              id="home.addData.sampleDataButtonLabel"
+              defaultMessage="Try our sample data"
+            />
+          </EuiButtonEmpty>
+        </div>
       </EuiFlexItem>
     </EuiFlexGroup>
 

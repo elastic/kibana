@@ -6,13 +6,13 @@ Learn how to use *Lens*, *Vega*, and *Timelion* by going through one of the step
 [[lens-tutorial]]
 === Compare sales over time with Lens
 
-Ready to create your own visualization with Lens? Use the following tutorial to create a visualization that lets you compare sales over time.
+Ready to create your own visualization with *Lens*? Use the following tutorial to create a visualization that lets you compare sales over time.
 
 [float]
 [[lens-before-begin]]
 ==== Before you begin
 
-To start, you'll need to add the <<add-sample-data, sample ecommerce data>>.
+To start, add the <<add-sample-data, sample ecommerce data>>.
 
 [float]
 ==== Build the visualization
@@ -23,16 +23,16 @@ Drag and drop your data onto the visualization builder pane.
 
 . Click image:images/time-filter-calendar.png[], then click *Last 7 days*. 
 +
-The fields in the data panel update.
+The *Available fields* automatically update.
 
 . Drag and drop the *taxful_total_price* data field to the visualization builder pane.
 +
 [role="screenshot"]
 image::images/lens_tutorial_1.png[Lens tutorial]
 
-To display the average order prices over time, *Lens* automatically added in *order_date* field.
+To display the average order prices over time, *Lens* automatically added *order_date* to the *X-axis*.
 
-To break down your data, drag the *category.keyword* field to the visualization builder pane. Lens
+To break down your data, drag and drop the *category.keyword* field to the visualization builder pane. Lens
 knows that you want to show the top categories and compare them across the dates,
 and creates a chart that compares the sales for each of the top three categories:
 
@@ -45,30 +45,33 @@ image::images/lens_tutorial_2.png[Lens tutorial]
 
 Make your visualization look exactly how you want with the customization options.
 
-. Click *Average of taxful_total_price*, then change the *Label* to `Sales`.
+. Click *Average of taxful_total_price*, then change the *Display name* to Sales.
 +
 [role="screenshot"]
 image::images/lens_tutorial_3.1.png[Lens tutorial]
+
+. Click *Close*.
 
 . Click *Top values of category.keyword*, then change *Number of values* to `10`.
 +
 [role="screenshot"]
 image::images/lens_tutorial_3.2.png[Lens tutorial]
+
+. Click *Close*.
 +
 The visualization updates to show there are only six available categories.
-+
-Look at the *Suggestions*. An area chart is not an option, but for the sales data, a stacked area chart might be the best option.
 
-. To switch the chart type, click *Stacked bar chart* in the column, then click *Stacked area* from the *Select a visualizations* window.
+. Look at the *Suggestions*. An area chart is not an option, but for the sales data, a stacked area chart might be the best option. 
+To switch the chart type, click *Stacked bar chart*, then click *Stacked area* from the *Select a visualization* dropdown.
 +
 [role="screenshot"]
 image::images/lens_tutorial_3.png[Lens tutorial]
 
 [float]
 [[lens-tutorial-next-steps]]
-==== Next steps
+==== What's next?
 
-Now that you've created your visualization, you can add it to a <<dashboard,dashboard>> or <<canvas,Canvas workpad>>.
+Now that you've created your *Lens* visualization, add it to a <<dashboard,dashboard>> or <<canvas,Canvas workpad>>.
 
 [[vega-lite-tutorial-create-your-first-visualizations]]
 === Create your first visualization with Vega-Lite

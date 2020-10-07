@@ -410,6 +410,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
             value={formValues.description}
             onChange={handleDomChangeEvents}
             fullWidth
+            maxLength={256}
             data-test-subj={getTestId('descriptionField')}
           />
         </EuiFormRow>
