@@ -6,8 +6,8 @@
 
 import React from 'react';
 import { EuiBasicTable, EuiBasicTableColumn, EuiButtonIcon, EuiCopy } from '@elastic/eui';
-import { useActions, useValues } from 'kea';
 import { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
+import { useActions, useValues } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
@@ -18,9 +18,7 @@ import { apiTokenSort } from '../utils/api_token_sort';
 import { getModeDisplayText, getEnginesDisplayText } from '../utils';
 
 export const CredentialsList: React.FC = () => {
-  const { deleteApiKey, fetchCredentials, showCredentialsForm } = useActions(
-    CredentialsLogic
-  );
+  const { deleteApiKey, fetchCredentials, showCredentialsForm } = useActions(CredentialsLogic);
 
   const { apiTokens, meta } = useValues(CredentialsLogic);
 
