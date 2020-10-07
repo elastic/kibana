@@ -28,8 +28,8 @@ export function getFilterParams(filter: Filter) {
     case FILTERS.RANGE:
       const { gte, gt, lte, lt } = (filter as RangeFilter).meta.params;
       return {
-        from: gte || gt,
-        to: lt || lte,
+        from: gte || gte === 0 ? gte : gt,
+        to: lt || lt === 0 ? lt : lte,
       };
   }
 }
