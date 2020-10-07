@@ -38,7 +38,7 @@ export const ToolbarWrapper = (props: Props) => {
   } = useWaffleOptionsContext();
   const { createDerivedIndexPattern } = useSourceContext();
   return (
-    <EuiFlexGroup responsive={false} gutterSize="m">
+    <>
       <EuiFlexItem grow={false}>
         <WaffleInventorySwitcher />
       </EuiFlexItem>
@@ -62,7 +62,7 @@ export const ToolbarWrapper = (props: Props) => {
         customMetrics,
         changeCustomMetrics,
       })}
-    </EuiFlexGroup>
+    </>
   );
 };
 
