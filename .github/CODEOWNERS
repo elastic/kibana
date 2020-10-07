@@ -137,6 +137,7 @@
 /src/plugins/home/public @elastic/kibana-core-ui
 /src/plugins/home/server/*.ts @elastic/kibana-core-ui
 /src/plugins/home/server/services/ @elastic/kibana-core-ui
+/src/plugins/kibana_overview/ @elastic/kibana-core-ui
 /x-pack/plugins/global_search_bar/ @elastic/kibana-core-ui
 #CC# /src/legacy/core_plugins/newsfeed @elastic/kibana-core-ui
 #CC# /src/legacy/server/sample_data/ @elastic/kibana-core-ui
@@ -316,7 +317,7 @@ x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kib
 #CC# /x-pack/legacy/plugins/alerting/ @elastic/kibana-alerting-services
 #CC# /x-pack/legacy/plugins/task_manager @elastic/kibana-alerting-services
 #CC# /x-pack/legacy/plugins/triggers_actions_ui/ @elastic/kibana-alerting-services
-#CC# /x-pack/plugins/alerting_builtins @elastic/kibana-alerting-services
+#CC# /x-pack/plugins/stack_alerts @elastic/kibana-alerting-services
 
 # Enterprise Search
 # Shared

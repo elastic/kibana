@@ -115,6 +115,7 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
       data-test-subj="mlAnomalySwimlaneEmbeddableWrapper"
     >
       <SwimlaneContainer
+        id={id}
         data-test-subj={`mlSwimLaneEmbeddable_${embeddableContext.id}`}
         timeBuckets={timeBuckets}
         swimlaneData={swimlaneData!}

@@ -16,10 +16,9 @@ import {
 import { buildRule, buildRuleWithoutOverrides, buildRuleWithOverrides } from './build_rule';
 import { additionalSignalFields, buildSignal } from './build_signal';
 import { buildEventTypeSignal } from './build_event_type_signal';
-import { RuleAlertAction } from '../../../../common/detection_engine/types';
+import { EqlSequence, RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams } from '../types';
 import { generateSignalId, wrapBuildingBlocks, wrapSignal } from './utils';
-import { EqlSequence } from '../../types';
 
 interface BuildBulkBodyParams {
   doc: SignalSourceHit;
