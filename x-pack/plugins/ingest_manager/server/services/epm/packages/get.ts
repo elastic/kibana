@@ -26,10 +26,6 @@ export async function getCategories(options: Registry.CategoriesParams) {
   return Registry.fetchCategories(options);
 }
 
-// TODO this function is odd to me, it will use `fetchList` to get the **latest** packages and then squash them together
-// with the installed saved objects which could be on a completely separate version.
-// This causes issues for the `getPackageKeysByStatus` function because it is used in places that assumes it will
-// retrieve the `installed` information for a package and instead it gets the latest information
 export async function getPackages(
   options: {
     savedObjectsClient: SavedObjectsClientContract;
@@ -37,11 +33,12 @@ export async function getPackages(
 ) {
   const { savedObjectsClient, experimental, category } = options;
   // todo remove the .then and see if that fixes the unhandled promise rejection
-  /* const registryItems = await Registry.fetchList({ category, experimental }).then((items) => {
+  const registryItems = await Registry.fetchList({ category, experimental }).then((items) => {
     return items.map((item) =>
       Object.assign({}, item, { title: item.title || nameAsTitle(item.name) })
     );
-  }); */
+  });
+
   // get the installed packages
   const packageSavedObjects = await getPackageSavedObjects(savedObjectsClient);
 
@@ -50,27 +47,14 @@ export async function getPackages(
     (o) => !o.attributes.internal
   );
 
-  /* const packageList = registryItems
+  const packageList = registryItems
     .map((item) =>
       createInstallableFrom(
         item,
         savedObjectsVisible.find(({ id }) => id === item.name)
       )
     )
-    .sort(sortByName); */
-  const packageList: Array<Installable<RegistrySearchResult>> = [];
-  // todo use promise settled
-  for (const savedObject of savedObjectsVisible) {
-    const regPack = (
-      await Registry.loadRegistryPackage(savedObject.id, savedObject.attributes.version)
-    ).registryPackageInfo;
-    packageList.push(
-      createInstallableFrom(
-        Object.assign({}, regPack, { title: regPack.title || nameAsTitle(regPack.name) }),
-        savedObject
-      )
-    );
-  }
+    .sort(sortByName);
   return packageList;
 }
 
@@ -113,8 +97,15 @@ export async function getPackageKeysByStatus(
   const allPackages = await getPackages({ savedObjectsClient });
   return allPackages.reduce<Array<{ pkgName: string; pkgVersion: string }>>((acc, pkg) => {
     if (pkg.status === status) {
-      acc.push({ pkgName: pkg.name, pkgVersion: pkg.version });
+      if (pkg.status === InstallationStatus.installed) {
+        // if we're looking for installed packages grab the version from the saved object because `getPackages` will
+        // return the latest package information from the registry
+        acc.push({ pkgName: pkg.name, pkgVersion: pkg.savedObject.attributes.version });
+      } else {
+        acc.push({ pkgName: pkg.name, pkgVersion: pkg.version });
+      }
     }
+
     return acc;
   }, []);
 }

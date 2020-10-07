@@ -30,13 +30,13 @@ interface UpgradePackageParams {
   latestPkg: UnwrapPromise<ReturnType<typeof Registry.fetchFindLatestPackage>>;
   pkgToUpgrade: string;
 }
-export const upgradePackage = async ({
+export async function upgradePackage({
   savedObjectsClient,
   callCluster,
   installedPkg,
   latestPkg,
   pkgToUpgrade,
-}: UpgradePackageParams): Promise<BulkInstallResponse> => {
+}: UpgradePackageParams): Promise<BulkInstallResponse> {
   if (!installedPkg || semver.gt(latestPkg.version, installedPkg.attributes.version)) {
     const pkgkey = Registry.pkgToPkgKey({
       name: latestPkg.name,
@@ -82,7 +82,7 @@ export const upgradePackage = async ({
       ],
     };
   }
-};
+}
 
 export function isUpgrade({
   installedPkg,

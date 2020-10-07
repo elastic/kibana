@@ -312,12 +312,6 @@ async function installPackage({
       install_source: installSource,
     });
   }
-  // TODO without doing an await here I get an unhandled promise rejection
-  const installIndexPatternPromise = await installIndexPatterns(
-    savedObjectsClient,
-    pkgName,
-    pkgVersion
-  );
 
   const kibanaAssets = await getKibanaAssets(paths);
   if (installedPkg)
@@ -331,12 +325,18 @@ async function installPackage({
     pkgName,
     kibanaAssets
   );
-  // TODO without doing an await here I get an unhandled promise rejection
-  const installKibanaAssetsPromise = await installKibanaAssets({
+
+  // If these calls are not immediately passed to the Promise.all they could get an unhandled promise rejection
+  // this could happen if the registry returns a failure response
+  const installIndexPatternPromise = installIndexPatterns(savedObjectsClient, pkgName, pkgVersion);
+
+  const installKibanaAssetsPromise = installKibanaAssets({
     savedObjectsClient,
     pkgName,
     kibanaAssets,
   });
+
+  await Promise.all([installIndexPatternPromise, installKibanaAssetsPromise]);
 
   // the rest of the installation must happen in sequential order
 
@@ -392,8 +392,6 @@ async function installPackage({
     id: template.templateName,
     type: ElasticsearchAssetType.indexTemplate,
   }));
-  // TODO fix then once the unhandled promise rejection is figured out
-  // await Promise.all([installKibanaAssetsPromise, installIndexPatternPromise]);
 
   // update to newly installed version when all assets are successfully installed
   if (installedPkg) await updateVersion(savedObjectsClient, pkgName, pkgVersion);
