@@ -20,7 +20,6 @@
 import _ from 'lodash';
 import { Subject, BehaviorSubject } from 'rxjs';
 import moment from 'moment';
-import { timeEnd } from 'console';
 import { areRefreshIntervalsDifferent, areTimeRangesDifferent } from './lib/diff_time_picker_vals';
 import { getForceNow } from './lib/get_force_now';
 import { TimefilterConfig, InputTimeRange, TimeRangeBounds } from './types';
