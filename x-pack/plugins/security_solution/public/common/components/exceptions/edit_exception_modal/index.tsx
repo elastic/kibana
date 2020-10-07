@@ -110,8 +110,11 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   >([]);
   const { addError, addSuccess } = useAppToasts();
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
+  const memoSignalIndexName = useMemo(() => (signalIndexName !== null ? [signalIndexName] : []), [
+    signalIndexName,
+  ]);
   const [isSignalIndexPatternLoading, { indexPatterns: signalIndexPatterns }] = useFetchIndex(
-    signalIndexName !== null ? [signalIndexName] : []
+    memoSignalIndexName
   );
 
   const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(ruleIndices);
