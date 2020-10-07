@@ -36,6 +36,8 @@ import { FormatEditorSamples } from '../../samples';
 import { LabelTemplateFlyout } from './label_template_flyout';
 
 import { UrlTemplateFlyout } from './url_template_flyout';
+import type { IndexPatternManagmentContextValue } from '../../../../../../types';
+import { context as contextType } from '../../../../../../../../kibana_react/public';
 
 interface OnChangeParam {
   type: string;
@@ -66,13 +68,19 @@ export class UrlFormatEditor extends DefaultFormatEditor<
   UrlFormatEditorFormatParams,
   UrlFormatEditorFormatState
 > {
+  static contextType = contextType;
   static formatId = 'url';
   iconPattern: string;
 
-  constructor(props: FormatEditorProps<UrlFormatEditorFormatParams>) {
-    super(props);
+  constructor(
+    props: FormatEditorProps<UrlFormatEditorFormatParams>,
+    context: IndexPatternManagmentContextValue
+  ) {
+    super(props, context);
 
-    this.iconPattern = `/plugins/indexPatternManagement/assets/icons/{{value}}.png`;
+    this.iconPattern = context.services.http.basePath.prepend(
+      `/plugins/indexPatternManagement/assets/icons/{{value}}.png`
+    );
 
     this.state = {
       ...this.state,
