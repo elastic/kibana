@@ -1,0 +1,49 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`OverviewPageFooter render 1`] = `
+<footer
+  className="kbnOverviewPageFooter"
+>
+  <EuiFlexGroup
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <div />
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <div>
+        <mockConstructor
+          application={
+            Object {
+              "capabilities": Object {
+                "advancedSettings": Object {
+                  "show": true,
+                },
+              },
+            }
+          }
+        >
+          <EuiButtonEmpty
+            className="kbnOverviewPageFooter__button"
+            data-test-subj="allPlugins"
+            flush="both"
+            href="/app/home#/feature_directory"
+            iconType="apps"
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="View app directory"
+              id="kibana-react.pageFooter.appDirectoryButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </mockConstructor>
+      </div>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</footer>
+`;

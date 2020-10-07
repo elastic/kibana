@@ -36,6 +36,7 @@ exports[`trusted_app_card TrustedAppCard should render correctly 1`] = `
         Object {
           "field": "field",
           "name": "Field",
+          "render": [Function],
           "sortable": false,
           "textOnly": true,
           "truncateText": true,
@@ -44,6 +45,7 @@ exports[`trusted_app_card TrustedAppCard should render correctly 1`] = `
         Object {
           "field": "operator",
           "name": "Operator",
+          "render": [Function],
           "sortable": false,
           "truncateText": true,
           "width": "20%",
@@ -62,6 +64,7 @@ exports[`trusted_app_card TrustedAppCard should render correctly 1`] = `
   />
   <ItemDetailsAction
     color="danger"
+    data-test-subj="trustedAppDeleteButton"
     onClick={[Function]}
     size="s"
   >
@@ -106,6 +109,7 @@ exports[`trusted_app_card TrustedAppCard should trim long descriptions 1`] = `
         Object {
           "field": "field",
           "name": "Field",
+          "render": [Function],
           "sortable": false,
           "textOnly": true,
           "truncateText": true,
@@ -114,6 +118,7 @@ exports[`trusted_app_card TrustedAppCard should trim long descriptions 1`] = `
         Object {
           "field": "operator",
           "name": "Operator",
+          "render": [Function],
           "sortable": false,
           "truncateText": true,
           "width": "20%",
@@ -132,6 +137,7 @@ exports[`trusted_app_card TrustedAppCard should trim long descriptions 1`] = `
   />
   <ItemDetailsAction
     color="danger"
+    data-test-subj="trustedAppDeleteButton"
     onClick={[Function]}
     size="s"
   >
