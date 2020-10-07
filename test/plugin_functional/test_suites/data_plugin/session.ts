@@ -22,53 +22,50 @@ import { PluginFunctionalProviderContext } from '../../services';
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'discover', 'timePicker']);
   const filterBar = getService('filterBar');
-
   const testSubjects = getService('testSubjects');
   const toasts = getService('toasts');
 
-  describe('Session management', function describeIndexTests() {
-    const checkOpenSession = async () => {
-      const toastCount = await toasts.getToastCount();
-      const toast = await toasts.getToastElement(1);
-      const newSession = await toast.getVisibleText();
-      expect(newSession).not.to.contain('undefined');
-      expect(toastCount).to.be(1);
-    };
+  const getSessionIds = async () => {
+    const sessionsBtn = await testSubjects.find('showSessionsButton');
+    await sessionsBtn.click();
+    const toast = await toasts.getToastElement(1);
+    const sessionIds = await toast.getVisibleText();
+    return sessionIds.split(',');
+  };
 
+  describe('Session management', function describeIndexTests() {
     describe('Discover', () => {
       before(async () => {
         await PageObjects.common.navigateToApp('discover');
       });
 
       afterEach(async () => {
+        await testSubjects.click('clearSessionsButton');
         await toasts.dismissAllToasts();
       });
 
       it('Starts a new session', async () => {
-        const toastCount = await toasts.getToastCount();
-        const toast = await toasts.getToastElement(1);
-        const toast2 = await toasts.getToastElement(2);
-        const noSession = await toast.getVisibleText();
-        const newSession = await toast2.getVisibleText();
-        expect(noSession).to.contain('undefined');
-        expect(newSession).not.to.contain('undefined');
-        expect(toastCount).to.be(2);
+        const sessionIds = await getSessionIds();
+        expect(sessionIds.length).to.be(1);
       });
 
       it('Starts a new session on filter change', async () => {
         await filterBar.addFilter('line_number', 'IS', '4.1.155');
-        await checkOpenSession();
+        const sessionIds = await getSessionIds();
+        expect(sessionIds.length).to.be(1);
       });
 
       it('Starts a new session on sort', async () => {
         await PageObjects.discover.clickFieldListItemAdd('speaker');
         await PageObjects.discover.clickFieldSort('speaker');
-        await checkOpenSession();
+        const sessionIds = await getSessionIds();
+        expect(sessionIds.length).to.be(1);
       });
 
       it('Starts on a refresh', async () => {
         await testSubjects.click('querySubmitButton');
-        await checkOpenSession();
+        const sessionIds = await getSessionIds();
+        expect(sessionIds.length).to.be(1);
       });
     });
   });

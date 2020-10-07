@@ -17,16 +17,49 @@
  * under the License.
  */
 
-import { CoreStart, Plugin } from 'kibana/public';
-import { AppPluginDependencies } from './types';
+import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { AppPluginDependenciesStart, AppPluginDependenciesSetup } from './types';
 
 export class SessionNotificationsPlugin implements Plugin {
-  public setup() {}
-  public start(core: CoreStart, { data }: AppPluginDependencies) {
+  private sessionIds: Array<string | undefined> = [];
+  public setup(core: CoreSetup, { navigation }: AppPluginDependenciesSetup) {
+    const showSessions = {
+      id: 'showSessionsButton',
+      label: 'Show Sessions',
+      description: 'Sessions',
+      run: () => {
+        core.notifications.toasts.addInfo(this.sessionIds.join(','), {
+          toastLifeTimeMs: 50000,
+        });
+      },
+      tooltip: () => {
+        return this.sessionIds.join(',');
+      },
+      testId: 'showSessionsButton',
+    };
+
+    navigation.registerMenuItem(showSessions);
+
+    const clearSessions = {
+      id: 'clearSessionsButton',
+      label: 'Clear Sessions',
+      description: 'Sessions',
+      run: () => {
+        this.sessionIds.length = 0;
+      },
+      testId: 'clearSessionsButton',
+    };
+
+    navigation.registerMenuItem(clearSessions);
+  }
+
+  public start(core: CoreStart, { data }: AppPluginDependenciesStart) {
+    core.application.currentAppId$.subscribe(() => {
+      this.sessionIds.length = 0;
+    });
+
     data.search.session.getSession$().subscribe((sessionId?: string) => {
-      core.notifications.toasts.addInfo(`sessionId: ${sessionId}`, {
-        toastLifeTimeMs: 60000,
-      });
+      this.sessionIds.push(sessionId);
     });
   }
   public stop() {}

@@ -17,8 +17,12 @@
  * under the License.
  */
 
+import { NavigationPublicPluginSetup } from '../../../../../src/plugins/navigation/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 
-export interface AppPluginDependencies {
+export interface AppPluginDependenciesSetup {
+  navigation: NavigationPublicPluginSetup;
+}
+export interface AppPluginDependenciesStart {
   data: DataPublicPluginStart;
 }

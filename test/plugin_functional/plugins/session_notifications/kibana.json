@@ -5,5 +5,5 @@
   "configPath": ["session_notifications"],
   "server": false,
   "ui": true,
-  "requiredPlugins": ["data"]
+  "requiredPlugins": ["data", "navigation"]
 }
