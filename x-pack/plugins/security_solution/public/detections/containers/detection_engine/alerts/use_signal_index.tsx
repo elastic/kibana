@@ -43,7 +43,7 @@ export const useSignalIndex = (): ReturnSignalIndex => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const signal = await getSignalIndex({ signal: abortCtrl.signal });
+        const signal = await createSignalIndex({ signal: abortCtrl.signal });
 
         if (isSubscribed && signal != null) {
           setSignalIndex({

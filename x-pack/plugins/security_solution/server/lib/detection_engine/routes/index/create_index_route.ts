@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { get } from 'lodash';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
 import { transformError, buildSiemResponse } from '../utils';
@@ -39,24 +40,32 @@ export const createIndexRoute = (router: IRouter) => {
 
         const index = siemClient.getSignalsIndex();
         const indexExists = await getIndexExists(callCluster, index);
-        if (indexExists) {
-          return siemResponse.error({
-            statusCode: 409,
-            body: `index: "${index}" already exists`,
+        const templateExists = await getTemplateExists(callCluster, index);
+        let existingTemplateVersion: number | undefined;
+        if (templateExists) {
+          const existingTemplate: unknown = await callCluster('indices.getTemplate', {
+            name: index,
           });
-        } else {
+          existingTemplateVersion = get(existingTemplate, [index, 'version']);
+        }
+        const newTemplate = getSignalsTemplate(index);
+        if (
+          existingTemplateVersion === undefined ||
+          existingTemplateVersion < newTemplate.version
+        ) {
           const policyExists = await getPolicyExists(callCluster, index);
           if (!policyExists) {
             await setPolicy(callCluster, index, signalsPolicy);
           }
-          const templateExists = await getTemplateExists(callCluster, index);
-          if (!templateExists) {
-            const template = getSignalsTemplate(index);
-            await setTemplate(callCluster, index, template);
+          await setTemplate(callCluster, index, newTemplate);
+          if (indexExists) {
+            await callCluster('indices.rollover', { alias: index });
           }
-          await createBootstrapIndex(callCluster, index);
-          return response.ok({ body: { acknowledged: true } });
         }
+        if (!indexExists) {
+          await createBootstrapIndex(callCluster, index);
+        }
+        return response.ok({ body: { acknowledged: true } });
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({
