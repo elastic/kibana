@@ -30,16 +30,15 @@ export function createInfiniteScrollDirective() {
       more: '=',
     },
     link: ($scope: LazyScope, $element: JQuery) => {
-      const $window = $(window);
       let checkTimer: any;
+      const scrollDiv = $element.parents('.dscTable');
 
       function onScroll() {
         if (!$scope.more) return;
 
-        const winHeight = Number($window.height());
-        const winBottom = Number(winHeight) + Number($window.scrollTop());
-        const offset = $element.offset();
-        const elTop = offset ? offset.top : 0;
+        const winHeight = Number(scrollDiv.height());
+        const winBottom = Number(winHeight) + Number(scrollDiv.scrollTop());
+        const elTop = $element.get(0).offsetTop || 0;
         const remaining = elTop - winBottom;
 
         if (remaining <= winHeight * 0.5) {
@@ -57,10 +56,10 @@ export function createInfiniteScrollDirective() {
         }, 50);
       }
 
-      $window.on('scroll', scheduleCheck);
+      scrollDiv.on('scroll', scheduleCheck);
       $scope.$on('$destroy', function () {
         clearTimeout(checkTimer);
-        $window.off('scroll', scheduleCheck);
+        $(scrollDiv).off('scroll', scheduleCheck);
       });
       scheduleCheck();
     },
