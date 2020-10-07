@@ -76,6 +76,7 @@ import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
 import { IIndexPattern } from '../../index_patterns';
 import { IEsSearchRequest, IEsSearchResponse, ISearchOptions } from '../..';
+import { IKibanaSearchRequest, IKibanaSearchResponse } from '../types';
 import { ISearchSource, SearchSourceOptions, SearchSourceFields } from './types';
 import { FetchHandlers, RequestFailure, getSearchParamsFromRequest, SearchRequest } from './fetch';
 
@@ -101,7 +102,15 @@ export const searchSourceRequiredUiSettings = [
 ];
 
 export interface SearchSourceDependencies extends FetchHandlers {
-  search: (request: IEsSearchRequest, options: ISearchOptions) => Promise<IEsSearchResponse>;
+  // Types are nearly identical to ISearchGeneric, except we are making
+  // search options required here and returning a promise instead of observable.
+  search: <
+    SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
+    SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
+  >(
+    request: SearchStrategyRequest,
+    options: ISearchOptions
+  ) => Promise<SearchStrategyResponse>;
 }
 
 /** @public **/

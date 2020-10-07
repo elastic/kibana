@@ -21,6 +21,7 @@ import {
  */
 export const FieldNameContainer = styled.span`
   border-radius: 4px;
+  display: flex;
   padding: 0 4px 0 8px;
   position: relative;
 

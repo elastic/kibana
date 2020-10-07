@@ -43,7 +43,7 @@ export function EnvironmentField({
       })}
     >
       <EuiSelect
-        value={currentValue}
+        defaultValue={currentValue}
         options={options}
         onChange={onChange}
         compressed
@@ -75,7 +75,7 @@ export function TransactionTypeField({
     <PopoverExpression value={currentValue} title={label}>
       <EuiSelect
         data-test-subj="transactionTypeField"
-        value={currentValue}
+        defaultValue={currentValue}
         options={options}
         onChange={onChange}
         compressed

@@ -325,7 +325,7 @@ const FooterAction = styled(EuiFlexGroup).attrs(() => ({
 
 FooterAction.displayName = 'FooterAction';
 
-const PaginationEuiFlexItem = styled(EuiFlexItem)`
+export const PaginationEuiFlexItem = styled(EuiFlexItem)`
   @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.m}) {
     .euiButtonIcon:last-child {
       margin-left: 28px;

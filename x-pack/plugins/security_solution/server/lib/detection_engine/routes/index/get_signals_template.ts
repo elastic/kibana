@@ -8,6 +8,7 @@ import signalsMapping from './signals_mapping.json';
 import ecsMapping from './ecs_mapping.json';
 
 export const getSignalsTemplate = (index: string) => {
+  const version = 2;
   const template = {
     settings: {
       index: {
@@ -29,8 +30,11 @@ export const getSignalsTemplate = (index: string) => {
         ...ecsMapping.mappings.properties,
         signal: signalsMapping.mappings.properties.signal,
       },
+      _meta: {
+        version,
+      },
     },
-    version: 1,
+    version,
   };
   return template;
 };

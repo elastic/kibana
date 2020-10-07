@@ -199,5 +199,6 @@ export interface Fields {
   [key: string]: string | string[] | { name: string } | { key: string } | { id: string };
 }
 export interface ResponseError {
-  [k: string]: string;
+  errorMessages: string[] | null | undefined;
+  errors: { [k: string]: string } | null | undefined;
 }

@@ -10,13 +10,14 @@ import React, { memo, useMemo, HTMLAttributes } from 'react';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { htmlIdGenerator, EuiSpacer, EuiTitle, EuiText, EuiTextColor, EuiLink } from '@elastic/eui';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage } from '@kbn/i18n/react';
 import styled from 'styled-components';
 import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 import { StyledDescriptionList, StyledTitle } from './styles';
 import * as selectors from '../../store/selectors';
 import * as eventModel from '../../../../common/endpoint/models/event';
 import { GeneratedText } from './panel_content_utilities';
+import { CopyablePanelField } from './copyable_panel_field';
 import { Breadcrumbs } from './breadcrumbs';
 import { processPath, processPID } from '../../models/process_event';
 import { CubeForProcess } from './cube_for_process';
@@ -131,7 +132,12 @@ const NodeDetailView = memo(function ({
       .map((entry) => {
         return {
           ...entry,
-          description: <GeneratedText>{String(entry.description)}</GeneratedText>,
+          description: (
+            <CopyablePanelField
+              textToCopy={String(entry.description)}
+              content={<GeneratedText>{String(entry.description)}</GeneratedText>}
+            />
+          ),
         };
       });
 

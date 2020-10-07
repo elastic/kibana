@@ -50,7 +50,7 @@ export const ROLE_MAPPING_NEW_PATH = `${ROLE_MAPPINGS_PATH}/new`;
 export const USERS_PATH = `${ORG_PATH}/users`;
 export const SECURITY_PATH = `${ORG_PATH}/security`;
 
-export const GROUPS_PATH = `${ORG_PATH}/groups`;
+export const GROUPS_PATH = '/groups';
 export const GROUP_PATH = `${GROUPS_PATH}/:groupId`;
 export const GROUP_SOURCE_PRIORITIZATION_PATH = `${GROUPS_PATH}/:groupId/source-prioritization`;
 
@@ -114,3 +114,6 @@ export const getContentSourcePath = (
   sourceId: string,
   isOrganization: boolean
 ): string => generatePath(isOrganization ? ORG_PATH + path : path, { sourceId });
+export const getGroupPath = (groupId: string) => generatePath(GROUP_PATH, { groupId });
+export const getGroupSourcePrioritizationPath = (groupId: string) =>
+  `${GROUPS_PATH}/${groupId}/source_prioritization`;

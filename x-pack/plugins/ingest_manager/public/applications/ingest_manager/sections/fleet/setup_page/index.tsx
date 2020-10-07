@@ -222,7 +222,7 @@ xpack.security.authc.api_key.enabled: true`}
                     />
                   </EuiLink>
                 ),
-                tlsFlag: <EuiCode>xpack.ingestManager.fleet.tlsCheckDisabled</EuiCode>,
+                tlsFlag: <EuiCode>xpack.fleet.agents.tlsCheckDisabled</EuiCode>,
                 true: <EuiCode>true</EuiCode>,
               }}
             />
