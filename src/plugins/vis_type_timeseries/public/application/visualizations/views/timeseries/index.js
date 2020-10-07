@@ -140,7 +140,7 @@ export const TimeSeries = ({
           type: tooltipMode === 'show_focused' ? TooltipType.Follow : TooltipType.VerticalCursor,
           headerFormatter: tooltipFormatter,
         }}
-        externalPointerEvents={{ tooltip: { visible: true } }}
+        externalPointerEvents={{ tooltip: { visible: false } }}
       />
 
       {annotations.map(({ id, data, icon, color }) => {
