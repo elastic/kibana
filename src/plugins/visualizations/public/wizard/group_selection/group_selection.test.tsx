@@ -40,37 +40,40 @@ describe('GroupSelection', () => {
       title: 'Vis Type 1',
       description: 'Vis Type 1',
       stage: 'production',
-      group: 'other',
+      group: VisGroups.PROMOTED,
       ...defaultVisTypeParams,
     },
     {
       name: 'vis2',
       title: 'Vis Type 2',
       description: 'Vis Type 2',
-      group: 'other',
+      group: VisGroups.PROMOTED,
       stage: 'production',
       ...defaultVisTypeParams,
     },
     {
       name: 'visWithAliasUrl',
       title: 'Vis with alias Url',
+      aliasApp: 'aliasApp',
+      aliasPath: '#/aliasApp',
+      disabled: true,
       description: 'Vis with alias Url',
       stage: 'production',
-      group: 'other',
+      group: VisGroups.PROMOTED,
     },
     {
       name: 'visAliasWithPromotion',
       title: 'Vis alias with promotion',
       description: 'Vis alias with promotion',
       stage: 'production',
-      group: 'other',
+      group: VisGroups.PROMOTED,
       aliasApp: 'anotherApp',
       aliasPath: '#/anotherUrl',
       promotion: {
         description: 'promotion description',
         buttonText: 'another app',
       },
-    },
+    } as unknown,
   ] as VisType[];
 
   const visTypesRegistry = (visTypes: VisType[]): TypesStart => {
@@ -141,7 +144,7 @@ describe('GroupSelection', () => {
     const aggBasedVisType = {
       name: 'visWithSearch',
       title: 'Vis with search',
-      group: 'aggbased',
+      group: VisGroups.AGGBASED,
       stage: 'production',
       ...defaultVisTypeParams,
     };
@@ -173,7 +176,7 @@ describe('GroupSelection', () => {
       name: 'vis3',
       title: 'Vis3',
       stage: 'production',
-      group: 'tools',
+      group: VisGroups.TOOLS,
       ...defaultVisTypeParams,
     };
     const wrapper = mountWithIntl(
@@ -192,7 +195,7 @@ describe('GroupSelection', () => {
     const aggBasedVisType = {
       name: 'visWithSearch',
       title: 'Vis with search',
-      group: 'aggbased',
+      group: VisGroups.AGGBASED,
       stage: 'production',
       ...defaultVisTypeParams,
     };
@@ -210,12 +213,11 @@ describe('GroupSelection', () => {
   });
 
   it('should sort promoted visualizations first', () => {
-    const toggleGroups = jest.fn();
     const wrapper = mountWithIntl(
       <GroupSelection
         visTypesRegistry={visTypesRegistry(_visTypes as VisType[])}
         docLinks={docLinks as DocLinksStart}
-        toggleGroups={toggleGroups}
+        toggleGroups={jest.fn()}
         onVisTypeSelected={jest.fn()}
       />
     );
@@ -232,5 +234,23 @@ describe('GroupSelection', () => {
       'visType-vis2',
       'visType-visWithAliasUrl',
     ]);
+  });
+
+  it('should render disabled aliases with a disabled class', () => {
+    const wrapper = mountWithIntl(
+      <GroupSelection
+        visTypesRegistry={visTypesRegistry(_visTypes as VisType[])}
+        docLinks={docLinks as DocLinksStart}
+        toggleGroups={jest.fn()}
+        onVisTypeSelected={jest.fn()}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="visType-visWithAliasUrl"]').exists()).toBe(true);
+    expect(
+      wrapper
+        .find('[data-test-subj="visType-visWithAliasUrl"]')
+        .at(1)
+        .hasClass('euiCard-isDisabled')
+    ).toBe(true);
   });
 });

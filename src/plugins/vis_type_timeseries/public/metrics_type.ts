@@ -35,7 +35,7 @@ export const metricsVisDefinition = {
       'Advanced time series editor that allows user to use complex calculations and add annotations.',
   }),
   icon: 'visVisualBuilder',
-  group: VisGroups.OTHER,
+  group: VisGroups.PROMOTED,
   visConfig: {
     defaults: {
       id: '61ca57f0-469d-11e7-af02-69e470af7417',

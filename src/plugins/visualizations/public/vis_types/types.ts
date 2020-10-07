@@ -33,7 +33,7 @@ export interface VisTypeOptions {
 }
 
 export enum VisGroups {
-  OTHER = 'other',
+  PROMOTED = 'promoted',
   TOOLS = 'tools',
   AGGBASED = 'aggbased',
 }
@@ -53,7 +53,7 @@ export interface VisType<TVisParams = unknown> {
   readonly icon?: IconType;
   readonly image?: string;
   readonly stage: 'experimental' | 'beta' | 'production';
-  readonly group?: VisGroups.TOOLS | VisGroups.AGGBASED | VisGroups.OTHER;
+  readonly group?: VisGroups.TOOLS | VisGroups.AGGBASED | VisGroups.PROMOTED;
   readonly requiresSearch: boolean;
   readonly useCustomNoDataScreen: boolean;
   readonly hierarchicalData?: boolean | ((vis: { params: TVisParams }) => boolean);

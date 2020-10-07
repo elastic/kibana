@@ -56,7 +56,10 @@ function isVisTypeAlias(type: VisType | VisTypeAlias): type is VisTypeAlias {
 function GroupSelection(props: GroupSelectionProps) {
   const visualizeGuideLink = props.docLinks.links.dashboard.guide;
   const promotedVisGroups = orderBy(
-    [...props.visTypesRegistry.getAliases(), ...props.visTypesRegistry.getByGroup(VisGroups.OTHER)],
+    [
+      ...props.visTypesRegistry.getAliases(),
+      ...props.visTypesRegistry.getByGroup(VisGroups.PROMOTED),
+    ],
     ['promotion', 'title'],
     ['asc', 'asc']
   );
@@ -72,7 +75,13 @@ function GroupSelection(props: GroupSelectionProps) {
       </EuiModalHeader>
       <EuiModalBody>
         <EuiSpacer size="s" />
-        <EuiFlexGroup gutterSize="l" wrap responsive={false} data-test-subj="visNewDialogGroups">
+        <EuiFlexGroup
+          gutterSize="l"
+          wrap
+          justifyContent="center"
+          responsive={false}
+          data-test-subj="visNewDialogGroups"
+        >
           {promotedVisGroups.map((visType) => (
             <VisGroup
               visType={visType}
@@ -83,9 +92,9 @@ function GroupSelection(props: GroupSelectionProps) {
         </EuiFlexGroup>
         <EuiSpacer size="xl" />
         <EuiSpacer size="xl" />
-        <EuiFlexGroup gutterSize="l">
+        <EuiFlexGroup gutterSize="l" wrap justifyContent="center" responsive={false}>
           {props.visTypesRegistry.getByGroup(VisGroups.AGGBASED).length > 0 && (
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiCard
                 titleSize="xs"
                 layout="horizontal"
@@ -123,7 +132,7 @@ function GroupSelection(props: GroupSelectionProps) {
             </EuiFlexItem>
           )}
           {props.visTypesRegistry.getByGroup(VisGroups.TOOLS).length > 0 && (
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiCard
                 titleSize="xs"
                 title={
@@ -174,7 +183,7 @@ function GroupSelection(props: GroupSelectionProps) {
 const VisGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
   const onClick = () => onVisTypeSelected(visType);
   return (
-    <EuiFlexItem>
+    <EuiFlexItem grow={false}>
       <EuiCard
         titleSize="xs"
         title={<span data-test-subj="visTypeTitle">{visType.title}</span>}
@@ -203,7 +212,7 @@ const VisGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
 const ToolsGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
   const onClick = () => onVisTypeSelected(visType);
   return (
-    <EuiFlexGroup alignItems="center">
+    <EuiFlexGroup alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiIcon type={visType.icon || 'empty'} size="l" />
       </EuiFlexItem>

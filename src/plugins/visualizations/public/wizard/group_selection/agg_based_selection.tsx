@@ -37,20 +37,15 @@ import {
 } from '@elastic/eui';
 
 import { memoizeLast } from '../../legacy/memoize';
-import { VisTypeAlias } from '../../vis_types/vis_type_alias_registry';
 import { VisType, TypesStart, VisGroups } from '../../vis_types';
 
 interface VisTypeListEntry {
-  type: VisType | VisTypeAlias;
+  type: VisType;
   highlighted: boolean;
 }
 
-function isVisTypeAlias(type: VisType | VisTypeAlias): type is VisTypeAlias {
-  return 'aliasPath' in type;
-}
-
 interface AggBasedSelectionProps {
-  onVisTypeSelected: (visType: VisType | VisTypeAlias) => void;
+  onVisTypeSelected: (visType: VisType) => void;
   visTypesRegistry: TypesStart;
   showExperimental: boolean;
   toggleGroups: (flag: boolean) => void;
@@ -167,7 +162,7 @@ class AggBasedSelection extends React.Component<AggBasedSelectionProps, AggBased
 
   private renderVisType = (visType: VisTypeListEntry) => {
     let stage = {};
-    if (!isVisTypeAlias(visType.type) && visType.type.stage === 'experimental') {
+    if (visType.type.stage === 'experimental') {
       stage = {
         betaBadgeLabel: i18n.translate('visualizations.newVisWizard.experimentalTitle', {
           defaultMessage: 'Experimental',
@@ -176,17 +171,6 @@ class AggBasedSelection extends React.Component<AggBasedSelectionProps, AggBased
           defaultMessage:
             'This visualization might be changed or removed in a future release and is not subject to the support SLA.',
         }),
-      };
-    } else if (isVisTypeAlias(visType.type) && visType.type.stage === 'beta') {
-      const aliasDescription = i18n.translate('visualizations.newVisWizard.betaDescription', {
-        defaultMessage:
-          'This visualization is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features',
-      });
-      stage = {
-        betaBadgeLabel: i18n.translate('visualizations.newVisWizard.betaTitle', {
-          defaultMessage: 'Beta',
-        }),
-        betaBadgeTooltipContent: aliasDescription,
       };
     }
 
