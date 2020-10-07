@@ -33,6 +33,10 @@ export function analyzeWithAxe(context, options, callback) {
               id: 'aria-required-children',
               selector: '[data-skip-axe="aria-required-children"] > *',
             },
+            {
+              id: 'label',
+              selector: '[data-test-subj="comboBoxSearchInput"] *',
+            },
           ],
         });
         return window.axe.run(context, options);
