@@ -110,7 +110,7 @@ const isThreatMatchFields = <T>(
   fields: QueryRuleFields<T> | MlRuleFields<T> | ThresholdRuleFields<T> | ThreatMatchRuleFields<T>
 ): fields is ThreatMatchRuleFields<T> => has('threatIndex', fields);
 
-export const filterRuleFieldsForType = <T extends RuleFields>(
+export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
   fields: T,
   type: Type
 ): QueryRuleFields<T> | MlRuleFields<T> | ThresholdRuleFields<T> | ThreatMatchRuleFields<T> => {

@@ -64,9 +64,9 @@ export const eqlValidator = async (
   }
 
   try {
-    const { http } = KibanaServices.get();
+    const { data } = KibanaServices.get();
     const signal = new AbortController().signal;
-    const response = await validateEql({ query, http, signal, index });
+    const response = await validateEql({ data, query, signal, index });
 
     if (response?.valid === false) {
       return {

@@ -6,6 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 
+export * from '../../translations';
+
 export const INCIDENT_MANAGEMENT_SYSTEM_TITLE = i18n.translate(
   'xpack.securitySolution.case.configureCases.incidentManagementSystemTitle',
   {
@@ -25,13 +27,6 @@ export const INCIDENT_MANAGEMENT_SYSTEM_LABEL = i18n.translate(
   'xpack.securitySolution.case.configureCases.incidentManagementSystemLabel',
   {
     defaultMessage: 'Incident management system',
-  }
-);
-
-export const NO_CONNECTOR = i18n.translate(
-  'xpack.securitySolution.case.configureCases.noConnector',
-  {
-    defaultMessage: 'No connector selected',
   }
 );
 

@@ -29,7 +29,7 @@ import {
 } from './selectors';
 
 import {
-  createDefaultPaginationInfo,
+  createDefaultPagination,
   createListComplexLoadingResourceState,
   createListFailedResourceState,
   createListLoadedResourceState,
@@ -66,13 +66,13 @@ describe('selectors', () => {
     });
 
     it('returns true when current loaded page index is outdated', () => {
-      const listView = createLoadedListViewWithPagination(initialNow, { index: 1, size: 20 });
+      const listView = createLoadedListViewWithPagination(initialNow, { pageIndex: 1 });
 
       expect(needsRefreshOfListData({ ...initialState, listView, active: true })).toBe(true);
     });
 
     it('returns true when current loaded page size is outdated', () => {
-      const listView = createLoadedListViewWithPagination(initialNow, { index: 0, size: 50 });
+      const listView = createLoadedListViewWithPagination(initialNow, { pageSize: 50 });
 
       expect(needsRefreshOfListData({ ...initialState, listView, active: true })).toBe(true);
     });
@@ -112,8 +112,7 @@ describe('selectors', () => {
         ...initialState,
         listView: {
           listResourceState: createListComplexLoadingResourceState(
-            createDefaultPaginationInfo(),
-            200,
+            createDefaultPagination(),
             initialNow
           ),
           freshDataTimestamp: initialNow,
@@ -121,7 +120,7 @@ describe('selectors', () => {
       };
 
       expect(getLastLoadedListResourceState(state)).toStrictEqual(
-        createListLoadedResourceState(createDefaultPaginationInfo(), 200, initialNow)
+        createListLoadedResourceState(createDefaultPagination(), initialNow)
       );
     });
   });
@@ -136,17 +135,14 @@ describe('selectors', () => {
         ...initialState,
         listView: {
           listResourceState: createListComplexLoadingResourceState(
-            createDefaultPaginationInfo(),
-            200,
+            createDefaultPagination(),
             initialNow
           ),
           freshDataTimestamp: initialNow,
         },
       };
 
-      expect(getListItems(state)).toStrictEqual(
-        createSampleTrustedApps(createDefaultPaginationInfo())
-      );
+      expect(getListItems(state)).toStrictEqual(createSampleTrustedApps(createDefaultPagination()));
     });
   });
 
@@ -160,8 +156,7 @@ describe('selectors', () => {
         ...initialState,
         listView: {
           listResourceState: createListComplexLoadingResourceState(
-            createDefaultPaginationInfo(),
-            200,
+            createDefaultPagination(),
             initialNow
           ),
           freshDataTimestamp: initialNow,
@@ -202,8 +197,7 @@ describe('selectors', () => {
         ...initialState,
         listView: {
           listResourceState: createListComplexLoadingResourceState(
-            createDefaultPaginationInfo(),
-            200,
+            createDefaultPagination(),
             initialNow
           ),
           freshDataTimestamp: initialNow,
@@ -236,8 +230,7 @@ describe('selectors', () => {
         ...initialState,
         listView: {
           listResourceState: createListComplexLoadingResourceState(
-            createDefaultPaginationInfo(),
-            200,
+            createDefaultPagination(),
             initialNow
           ),
           freshDataTimestamp: initialNow,

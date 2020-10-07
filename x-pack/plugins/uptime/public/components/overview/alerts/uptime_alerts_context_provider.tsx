@@ -29,7 +29,7 @@ interface KibanaDeps {
 
   data: DataPublicPluginStart;
   charts: ChartsPluginStart;
-  triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
 export const UptimeAlertsContextProvider: React.FC = ({ children }) => {
@@ -39,7 +39,7 @@ export const UptimeAlertsContextProvider: React.FC = ({ children }) => {
       http,
       charts,
       notifications,
-      triggers_actions_ui: { actionTypeRegistry, alertTypeRegistry },
+      triggersActionsUi: { actionTypeRegistry, alertTypeRegistry },
       uiSettings,
       docLinks,
       application: { capabilities },
