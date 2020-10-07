@@ -27,6 +27,11 @@ import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
 
+export type Buckets = Array<{
+  key: string;
+  doc_count: number;
+}>;
+
 export interface UseMatrixHistogramArgs {
   data: MatrixHistogramData[];
   inspect: InspectResponse;
@@ -98,10 +103,12 @@ export const useMatrixHistogram = ({
             next: (response) => {
               if (isCompleteResponse(response)) {
                 if (!didCancel) {
-                  const histogramBuckets: Array<{
-                    key: string;
-                    doc_count: number;
-                  }> = getOr([], 'rawResponse.aggregations.eventActionGroup.buckets', response);
+                  const bucketEmpty: Buckets = [];
+                  const histogramBuckets: Buckets = getOr(
+                    bucketEmpty,
+                    'rawResponse.aggregations.eventActionGroup.buckets',
+                    response
+                  );
                   setLoading(false);
                   setMatrixHistogramResponse((prevResponse) => ({
                     ...prevResponse,

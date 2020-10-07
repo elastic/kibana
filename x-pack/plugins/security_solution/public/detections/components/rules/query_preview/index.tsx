@@ -20,15 +20,13 @@ import {
 } from '@elastic/eui';
 
 import * as i18n from './translations';
-import { useKibana } from '../../../../common/lib/kibana';
 import { ESQuery } from '../../../../../common/typed_json';
 import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
 import { FieldValueQueryBar } from '../query_bar';
 import { Filter } from '../../../../../../../../src/plugins/data/common/es_query';
 import { Language, Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { PreviewEqlQueryHistogram } from './eql_histogram';
-import { useEqlPreview } from '../../../../common/hooks/eql';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useEqlPreview } from '../../../../common/hooks/eql/';
 import { PreviewNonEqlQueryHistogram } from './non_eql_histogram';
 import { getTimeframeOptions } from './helpers';
 import { PreviewThresholdQueryHistogram } from './threshold_histogram';
@@ -61,9 +59,6 @@ export const PreviewQuery = ({
   threshold,
   isDisabled,
 }: PreviewQueryProps) => {
-  const { data } = useKibana().services;
-  const { addError } = useAppToasts();
-
   const [timeframeOptions, setTimeframeOptions] = useState<EuiSelectOption[]>([]);
   const [showHistogram, setShowHistogram] = useState(false);
   const [timeframe, setTimeframe] = useState<Unit>('h');
@@ -71,12 +66,7 @@ export const PreviewQuery = ({
   const [queryFilter, setQueryFilter] = useState<ESQuery | undefined>(undefined);
   const [toTime, setTo] = useState(formatDate('now-1h'));
   const [fromTime, setFrom] = useState(formatDate('now'));
-  const {
-    error: eqlError,
-    start: startEql,
-    result: eqlQueryResult,
-    loading: eqlQueryLoading,
-  } = useEqlPreview();
+  const [eqlQueryLoading, startEql, eqlQueryResult] = useEqlPreview();
 
   const queryString = useMemo((): string => getOr('', 'query.query', query), [query]);
   const language = useMemo((): Language => getOr('kuery', 'query.language', query), [query]);
@@ -96,14 +86,13 @@ export const PreviewQuery = ({
 
   const handlePreviewEqlQuery = useCallback((): void => {
     startEql({
-      data,
       index,
       query: queryString,
-      fromTime,
-      toTime,
+      from: fromTime,
+      to: toTime,
       interval: timeframe,
     });
-  }, [startEql, data, index, queryString, fromTime, toTime, timeframe]);
+  }, [startEql, index, queryString, fromTime, toTime, timeframe]);
 
   const handleSelectPreviewTimeframe = ({
     target: { value },
@@ -136,12 +125,6 @@ export const PreviewQuery = ({
     ruleType,
   ]);
 
-  useEffect((): void => {
-    if (eqlError != null) {
-      addError(eqlError, { title: i18n.PREVIEW_QUERY_ERROR });
-    }
-  }, [eqlError, addError]);
-
   // reset when rule type changes
   useEffect((): void => {
     const options = getTimeframeOptions(ruleType);
@@ -157,18 +140,6 @@ export const PreviewQuery = ({
     setShowHistogram(false);
     setWarnings([]);
   }, [timeframe, queryString]);
-
-  useEffect((): void => {
-    if (eqlQueryResult != null) {
-      setWarnings((prevWarnings) => {
-        if (eqlQueryResult.warnings.join() !== prevWarnings.join()) {
-          return eqlQueryResult.warnings;
-        }
-
-        return prevWarnings;
-      });
-    }
-  }, [eqlQueryResult]);
 
   const thresholdFieldExists = useMemo(
     (): boolean => threshold != null && threshold.field != null && threshold.field.trim() !== '',
