@@ -57,7 +57,6 @@ describe('AutocompleteFieldMatchComponent', () => {
           isClearable={false}
           isDisabled
           onChange={jest.fn()}
-          onError={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -71,7 +70,6 @@ describe('AutocompleteFieldMatchComponent', () => {
     wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <AutocompleteFieldMatchComponent
-          rowLabel={undefined}
           placeholder="Placeholder text"
           selectedField={getField('ip')}
           selectedValue="126.45.211.34"
@@ -98,7 +96,6 @@ describe('AutocompleteFieldMatchComponent', () => {
     wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <AutocompleteFieldMatchComponent
-          rowLabel={undefined}
           placeholder="Placeholder text"
           selectedField={getField('ip')}
           selectedValue="126.45.211.34"
@@ -127,7 +124,6 @@ describe('AutocompleteFieldMatchComponent', () => {
     wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <AutocompleteFieldMatchComponent
-          rowLabel={undefined}
           placeholder="Placeholder text"
           selectedField={getField('ip')}
           selectedValue="126.45.211.34"
@@ -156,7 +152,6 @@ describe('AutocompleteFieldMatchComponent', () => {
     wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <AutocompleteFieldMatchComponent
-          rowLabel={undefined}
           placeholder="Placeholder text"
           selectedField={getField('ip')}
           selectedValue="126.45.211.34"
@@ -184,7 +179,6 @@ describe('AutocompleteFieldMatchComponent', () => {
     wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <AutocompleteFieldMatchComponent
-          rowLabel={undefined}
           placeholder="Placeholder text"
           selectedField={getField('ip')}
           selectedValue=""
@@ -214,7 +208,6 @@ describe('AutocompleteFieldMatchComponent', () => {
     wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <AutocompleteFieldMatchComponent
-          rowLabel={undefined}
           placeholder="Placeholder text"
           selectedField={getField('machine.os.raw')}
           selectedValue=""
@@ -243,7 +236,6 @@ describe('AutocompleteFieldMatchComponent', () => {
     wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <AutocompleteFieldMatchComponent
-          rowLabel={undefined}
           placeholder="Placeholder text"
           selectedField={getField('machine.os.raw')}
           selectedValue=""
@@ -295,7 +287,6 @@ describe('AutocompleteFieldMatchComponent', () => {
       wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <AutocompleteFieldMatchComponent
-            rowLabel={undefined}
             placeholder="Placeholder text"
             selectedField={getField('ssl')}
             selectedValue=""
@@ -335,7 +326,6 @@ describe('AutocompleteFieldMatchComponent', () => {
       wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <AutocompleteFieldMatchComponent
-            rowLabel={undefined}
             placeholder="Placeholder text"
             selectedField={getField('ssl')}
             selectedValue=""
@@ -365,7 +355,6 @@ describe('AutocompleteFieldMatchComponent', () => {
       wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <AutocompleteFieldMatchComponent
-            rowLabel={undefined}
             placeholder="Placeholder text"
             selectedField={getField('ssl')}
             selectedValue=""
@@ -407,7 +396,6 @@ describe('AutocompleteFieldMatchComponent', () => {
       wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <AutocompleteFieldMatchComponent
-            rowLabel={undefined}
             placeholder="Placeholder text"
             selectedField={getField('bytes')}
             selectedValue=""
@@ -435,7 +423,6 @@ describe('AutocompleteFieldMatchComponent', () => {
       wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <AutocompleteFieldMatchComponent
-            rowLabel={undefined}
             placeholder="Placeholder text"
             selectedField={getField('bytes')}
             selectedValue=""

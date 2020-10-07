@@ -14,7 +14,7 @@ describe('AutocompleteFieldExistsComponent', () => {
   test('it renders field disabled', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <AutocompleteFieldExistsComponent rowLabel={undefined} placeholder="Placeholder text" />
+        <AutocompleteFieldExistsComponent rowLabel="Test" placeholder="Placeholder text" />
       </ThemeProvider>
     );
 

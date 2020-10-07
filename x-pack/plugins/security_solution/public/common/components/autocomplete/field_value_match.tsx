@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import {
   EuiSuperSelect,
   EuiFormRow,
@@ -22,7 +22,6 @@ import * as i18n from './translations';
 
 interface AutocompleteFieldMatchProps {
   placeholder: string;
-  rowLabel: string | undefined;
   selectedField: IFieldType | undefined;
   selectedValue: string | undefined;
   indexPattern: IIndexPattern | undefined;
@@ -31,8 +30,9 @@ interface AutocompleteFieldMatchProps {
   isClearable: boolean;
   isRequired?: boolean;
   fieldInputWidth?: number;
+  rowLabel?: string;
   onChange: (arg: string) => void;
-  onError: (arg: boolean) => void;
+  onError?: (arg: boolean) => void;
 }
 
 export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchProps> = ({
@@ -76,7 +76,7 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
       setError((existingErr): string | undefined => {
         const oldErr = existingErr != null;
         const newErr = err != null;
-        if (oldErr !== newErr) {
+        if (oldErr !== newErr && onError != null) {
           onError(newErr);
         }
 
@@ -162,6 +162,13 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
     isLoading,
     isLoadingSuggestions,
   ]);
+
+  useEffect((): void => {
+    setError(undefined);
+    if (onError != null) {
+      onError(false);
+    }
+  }, [selectedField, onError]);
 
   const defaultInput = useMemo((): JSX.Element => {
     return (

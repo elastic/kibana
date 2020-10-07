@@ -228,7 +228,6 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
           isClearable={false}
           isDisabled={false}
           onChange={jest.fn()}
-          onError={jest.fn()}
         />
       </ThemeProvider>
     );

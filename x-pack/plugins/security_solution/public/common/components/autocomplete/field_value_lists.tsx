@@ -14,13 +14,13 @@ import * as i18n from './translations';
 
 interface AutocompleteFieldListsProps {
   placeholder: string;
-  rowLabel: string | undefined;
   selectedField: IFieldType | undefined;
   selectedValue: string | undefined;
   isLoading: boolean;
   isDisabled: boolean;
   isClearable: boolean;
   isRequired?: boolean;
+  rowLabel?: string;
   onChange: (arg: ListSchema) => void;
 }
 

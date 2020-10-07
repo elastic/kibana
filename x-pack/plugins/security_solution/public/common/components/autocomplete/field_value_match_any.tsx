@@ -16,7 +16,6 @@ import * as i18n from './translations';
 
 interface AutocompleteFieldMatchAnyProps {
   placeholder: string;
-  rowLabel: string | undefined;
   selectedField: IFieldType | undefined;
   selectedValue: string[];
   indexPattern: IIndexPattern | undefined;
@@ -24,8 +23,9 @@ interface AutocompleteFieldMatchAnyProps {
   isDisabled: boolean;
   isClearable: boolean;
   isRequired?: boolean;
+  rowLabel?: string;
   onChange: (arg: string[]) => void;
-  onError: (arg: boolean) => void;
+  onError?: (arg: boolean) => void;
 }
 
 export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatchAnyProps> = ({
@@ -71,7 +71,7 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
       setError((existingErr): string | null | undefined => {
         const oldErr = existingErr != null;
         const newErr = err != null;
-        if (oldErr !== newErr) {
+        if (oldErr !== newErr && onError != null) {
           onError(newErr);
         }
 

@@ -8,7 +8,7 @@ import { EuiFormRow, EuiComboBox } from '@elastic/eui';
 
 interface AutocompleteFieldExistsProps {
   placeholder: string;
-  rowLabel: string | undefined;
+  rowLabel?: string;
 }
 
 export const AutocompleteFieldExistsComponent: React.FC<AutocompleteFieldExistsProps> = ({

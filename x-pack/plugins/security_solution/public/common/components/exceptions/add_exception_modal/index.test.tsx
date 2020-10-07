@@ -408,7 +408,7 @@ describe('When the add exception modal is opened', () => {
     });
   });
 
-  test('when there are exception builder errors submit button is disabled', () => {
+  test('when there are exception builder errors submit button is disabled', async () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <AddExceptionModal
