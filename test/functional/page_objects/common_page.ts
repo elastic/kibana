@@ -434,7 +434,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       }
     }
 
-    async getBodyText() {
+    async getJsonBodyText() {
       if (await find.existsByCssSelector('a[id=rawdata-tab]', defaultFindTimeout)) {
         // Firefox has 3 tabs and requires navigation to see Raw output
         await find.clickByCssSelector('a[id=rawdata-tab]');
@@ -447,6 +447,11 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         const jsonElement = await find.byCssSelector('body div#json');
         return await jsonElement.getVisibleText();
       }
+    }
+
+    async getBodyText() {
+      const body = await find.byCssSelector('body');
+      return await body.getVisibleText();
     }
 
     /**

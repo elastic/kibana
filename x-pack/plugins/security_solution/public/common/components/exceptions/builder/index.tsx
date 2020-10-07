@@ -52,11 +52,13 @@ const initialState: State = {
   addNested: false,
   exceptions: [],
   exceptionsToDelete: [],
+  errorExists: 0,
 };
 
 interface OnChangeProps {
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
   exceptionsToDelete: ExceptionListItemSchema[];
+  errorExists: boolean;
 }
 
 interface ExceptionBuilderProps {
@@ -93,6 +95,7 @@ export const ExceptionBuilderComponent = ({
       disableNested,
       disableOr,
       addNested,
+      errorExists,
     },
     dispatch,
   ] = useReducer(exceptionsBuilderReducer(), {
@@ -101,6 +104,16 @@ export const ExceptionBuilderComponent = ({
     disableOr: isOrDisabled,
     disableNested: isNestedDisabled,
   });
+
+  const setErrorsExist = useCallback(
+    (hasErrors: boolean): void => {
+      dispatch({
+        type: 'setErrorsExist',
+        errorExists: hasErrors,
+      });
+    },
+    [dispatch]
+  );
 
   const setUpdateExceptions = useCallback(
     (items: ExceptionsBuilderExceptionItem[]): void => {
@@ -306,8 +319,12 @@ export const ExceptionBuilderComponent = ({
 
   // Bubble up changes to parent
   useEffect(() => {
-    onChange({ exceptionItems: filterExceptionItems(exceptions), exceptionsToDelete });
-  }, [onChange, exceptionsToDelete, exceptions]);
+    onChange({
+      exceptionItems: filterExceptionItems(exceptions),
+      exceptionsToDelete,
+      errorExists: errorExists > 0,
+    });
+  }, [onChange, exceptionsToDelete, exceptions, errorExists]);
 
   // Defaults builder to never be sans entry, instead
   // always falls back to an empty entry if user deletes all
@@ -364,6 +381,7 @@ export const ExceptionBuilderComponent = ({
                 onDeleteExceptionItem={handleDeleteExceptionItem}
                 onChangeExceptionItem={handleExceptionItemChange}
                 onlyShowListOperators={containsValueListEntry(exceptions)}
+                setErrorsExist={setErrorsExist}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

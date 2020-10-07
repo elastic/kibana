@@ -50,7 +50,7 @@ export function VisitorBreakdownChart({ loading, options }: Props) {
     : EUI_CHARTS_THEME_LIGHT;
 
   return (
-    <ChartWrapper loading={loading} height="calc(100% - 72px)" maxWidth="430px">
+    <ChartWrapper loading={loading} height="245px" maxWidth="430px">
       <StyleChart>
         <Chart>
           <Settings

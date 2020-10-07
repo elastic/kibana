@@ -37,9 +37,9 @@ export function CopySavedObjectsToSpacePageProvider({
       if (!overwrite) {
         const radio = await testSubjects.find('cts-copyModeControl-overwriteRadioGroup');
         // a radio button consists of a div tag that contains an input, a div, and a label
-        // we can't click the input directly, need to go up one level and click the parent div
-        const div = await radio.findByXpath("//div[input[@id='overwriteDisabled']]");
-        await div.click();
+        // we can't click the input directly, need to click the label
+        const label = await radio.findByCssSelector('label[for="overwriteDisabled"]');
+        await label.click();
       }
       await testSubjects.click(`cts-space-selector-row-${destinationSpaceId}`);
     },
