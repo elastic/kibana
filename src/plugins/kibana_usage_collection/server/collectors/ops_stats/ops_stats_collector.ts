@@ -62,6 +62,68 @@ export function getOpsStatsCollector(
     type: KIBANA_STATS_TYPE,
     isReady: () => !!lastMetrics,
     fetch: () => lastMetrics,
+    schema: {
+      timestamp: { type: 'date' },
+      response_times: {
+        average: { type: 'float' },
+        max: { type: 'long' },
+      },
+      process: {
+        memory: {
+          heap: {
+            total_in_bytes: { type: 'long' },
+            used_in_bytes: { type: 'long' },
+            size_limit: { type: 'long' },
+          },
+          resident_set_size_in_bytes: { type: 'long' },
+        },
+        event_loop_delay: { type: 'long' },
+        pid: { type: 'long' },
+        uptime_in_millis: { type: 'long' },
+      },
+      os: {
+        platform: { type: 'keyword' },
+        platformRelease: { type: 'keyword' },
+        distro: { type: 'keyword' },
+        distroRelease: { type: 'keyword' },
+        load: {
+          '1m': { type: 'float' },
+          '5m': { type: 'float' },
+          '15m': { type: 'float' },
+        },
+        memory: {
+          total_in_bytes: { type: 'long' },
+          free_in_bytes: { type: 'long' },
+          used_in_bytes: { type: 'long' },
+        },
+        uptime_in_millis: { type: 'long' },
+        cpuacct: {
+          control_group: { type: 'keyword' },
+          usage_nanos: { type: 'long' },
+        },
+        cpu: {
+          control_group: { type: 'keyword' },
+          cfs_period_micros: { type: 'long' },
+          cfs_quota_micros: { type: 'long' },
+          stat: {
+            number_of_elapsed_periods: { type: 'long' },
+            number_of_times_throttled: { type: 'long' },
+            time_throttled_nanos: { type: 'long' },
+          },
+        },
+      },
+      requests: {
+        disconnects: { type: 'long' },
+        total: { type: 'long' },
+        statusCodes: {
+          200: { type: 'long' },
+          400: { type: 'long' },
+          500: { type: 'long' },
+          // TODO: List all codes (although StatsCollectors don't make it to the schema, because they are not sent to the Remote Telemetry Service
+        },
+      },
+      concurrent_connections: { type: 'long' },
+    },
   });
 }
 

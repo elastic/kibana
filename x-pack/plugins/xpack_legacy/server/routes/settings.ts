@@ -11,7 +11,7 @@ import { first } from 'rxjs/operators';
 import { IRouter, ServiceStatus, ServiceStatusLevels } from '../../../../../src/core/server';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server';
 import { KIBANA_SETTINGS_TYPE } from '../../../monitoring/common/constants';
-import { KibanaSettingsCollector } from '../../../monitoring/server';
+import { getEmailValueStructure, KibanaSettingsCollector } from '../../../monitoring/server';
 
 const SNAPSHOT_REGEX = /-snapshot/i;
 
@@ -51,8 +51,7 @@ export function registerSettingsRoute({
       }
 
       const settings =
-        (await settingsCollector.fetch(callAsCurrentUser)) ??
-        settingsCollector.getEmailValueStructure(null);
+        (await settingsCollector.fetch(callAsCurrentUser)) ?? getEmailValueStructure(null);
       const { cluster_uuid: uuid } = await callAsCurrentUser('info', {
         filterPath: 'cluster_uuid',
       });

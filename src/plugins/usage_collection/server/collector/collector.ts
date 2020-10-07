@@ -46,17 +46,33 @@ export type MakeSchemaFrom<Base> = {
 };
 
 export interface CollectorOptions<T = unknown, U = T> {
+  /**
+   * Unique string identifier for the collector
+   */
   type: string;
   init?: Function;
-  schema?: MakeSchemaFrom<T>;
+  /**
+   * Method to return `true`/`false` to confirm if the collector is ready for the `fetch` method to be called.
+   */
+  isReady: () => Promise<boolean> | boolean;
+  /**
+   * Schema definition of the output of the `fetch` method.
+   */
+  schema: MakeSchemaFrom<T>;
+  /**
+   * Called whenever usage collection is requested. It should return the payload to be reported as usage for the `type` collector.
+   *
+   * @param callCluster {@Link LegacyAPICaller}
+   * @param esClient {@Link ElasticsearchClient}
+   */
   fetch: (callCluster: LegacyAPICaller, esClient?: ElasticsearchClient) => Promise<T> | T;
-  /*
+  /**
    * A hook for allowing the fetched data payload to be organized into a typed
    * data model for internal bulk upload. See defaultFormatterForBulkUpload for
    * a generic example.
+   * @deprecated Used only by the Legacy Monitoring collection (to be removed in 8.0)
    */
   formatForBulkUpload?: CollectorFormatForBulkUpload<T, U>;
-  isReady: () => Promise<boolean> | boolean;
 }
 
 export class Collector<T = unknown, U = T> {

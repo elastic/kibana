@@ -18,8 +18,3 @@
  */
 
 export const I18N_RC = '.i18nrc.json';
-
-/**
- * The type name used within the Monitoring index to publish localization stats.
- */
-export const KIBANA_LOCALIZATION_STATS_TYPE = 'localization';

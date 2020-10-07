@@ -18,7 +18,7 @@
  */
 
 import { noop } from 'lodash';
-import { Collector } from './collector';
+import { Collector, CollectorOptions } from './collector';
 import { CollectorSet } from './collector_set';
 import { UsageCollector } from './usage_collector';
 import { elasticsearchServiceMock, loggingSystemMock } from '../../../../core/server/mocks';
@@ -62,15 +62,21 @@ describe('CollectorSet', () => {
     it('should throw when 2 collectors with the same type are registered', () => {
       const collectorSet = new CollectorSet({ logger });
       collectorSet.registerCollector(
-        new Collector(logger, { type: 'test_duplicated', fetch: () => 1, isReady: () => true })
+        new Collector(logger, {
+          type: 'test_duplicated',
+          fetch: () => ({ prop: 1 }),
+          isReady: () => true,
+          schema: { prop: { type: 'long' } },
+        })
       );
       expect(() =>
         collectorSet.registerCollector(
           // Even for Collector vs. UsageCollector
           new UsageCollector(logger, {
             type: 'test_duplicated',
-            fetch: () => 2,
+            fetch: () => ({ prop: 2 }),
             isReady: () => false,
+            schema: { prop: { type: 'long' } },
           })
         )
       ).toThrowError(`Usage collector's type "test_duplicated" is duplicated.`);
@@ -83,6 +89,7 @@ describe('CollectorSet', () => {
           type: 'MY_TEST_COLLECTOR',
           fetch: (caller: any) => caller(),
           isReady: () => true,
+          schema: {},
         })
       );
 
@@ -106,6 +113,7 @@ describe('CollectorSet', () => {
           type: 'MY_TEST_COLLECTOR',
           fetch: () => new Promise((_resolve, reject) => reject()),
           isReady: () => true,
+          schema: {},
         })
       );
 
@@ -126,6 +134,7 @@ describe('CollectorSet', () => {
           type: 'MY_TEST_COLLECTOR',
           fetch: () => ({ test: 1 }),
           isReady: true as any,
+          schema: { test: { type: 'long' } },
         })
       );
 
@@ -167,6 +176,7 @@ describe('CollectorSet', () => {
             payload: { test: result.test * 2 },
           }),
           isReady: () => true,
+          schema: { test: { type: 'long' } },
         })
       );
 
@@ -246,7 +256,12 @@ describe('CollectorSet', () => {
   });
 
   describe('isUsageCollector', () => {
-    const collectorOptions = { type: 'MY_TEST_COLLECTOR', fetch: () => {}, isReady: () => true };
+    const collectorOptions: CollectorOptions = {
+      type: 'MY_TEST_COLLECTOR',
+      fetch: () => ({ test: 1 }),
+      isReady: () => true,
+      schema: { test: { type: 'long' } },
+    };
 
     it('returns true only for UsageCollector instances', () => {
       const collectors = new CollectorSet({ logger });
