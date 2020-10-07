@@ -1,0 +1,30 @@
+[role="xpack"]
+[[import-geospatial-data]]
+== Import geospatial data
+
+In order to use your geospatial data in the Elastic Stack, it must be indexed as {ref}/geo-point.html[geo_point] or {ref}/geo-shape.html[geo_shape].
+Kibana makes it easy to import geospatial data into the Elastic Stack.
+
+=== Upload a CSV file with latitude and longitude columns
+
+To upload a CSV file with latitude and longitude columns
+
+. Open the Kibana sidebar menu, then click *{kib} > Machine Learning*.
+. Select the *Data Visualizer* tab, then click *Upload file*.
+. Use the file chooser to select a CSV file.
+. Click *Import*.
+. Select the *Advanced* tab.
+. Set *Index name*.
+. Click *Add combined field*, then click *Add geo point field*.
+. Fill out the *ADD GEO POINT FIELD* form and click *Add*.
+. Click *Import*.
+
+=== Upload a GeoJSON file
+
+To upload a GeoJSON file:
+
+. <<maps-create>>
+. Click *Add layer*.
+. Select *Upload GeoJSON*.
+. Use the file chooser to select a GeoJSON file.
+. Click *Import file*.
