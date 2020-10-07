@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ControlState, model, next, State } from '.';
+import { FatalState, model, next, State } from '.';
 import { ElasticsearchClient } from '../../elasticsearch';
 
 const initState: State = {
@@ -26,7 +26,6 @@ const initState: State = {
   aliases: {},
   source: '',
   target: '',
-  error: undefined,
   log: [],
   retryCount: 0,
   retryDelay: 0,
@@ -58,7 +57,7 @@ describe('migrations state machine', () => {
             '.kibana_7.11.0': '.kibana_7.11.0_001',
             '.kibana_7.12.0': '.kibana_7.12.0_001',
           },
-        });
+        }) as FatalState;
 
         expect(newState.controlState).toEqual('FATAL');
         expect(newState.error?.message).toMatchInlineSnapshot(
@@ -129,12 +128,12 @@ describe('migrations state machine', () => {
     it.todo('SET_SOURCE_WRITE_BLOCK returns setIndexWriteBlock thunk');
     it.todo('CLONE_SOURCE returns cloneIndex thunk');
     it('DONE returns null', () => {
-      const state = { ...initState, ...{ controlState: 'FATAL' as ControlState } };
+      const state: State = { ...initState, ...{ controlState: 'DONE' } };
       const action = next({} as ElasticsearchClient, state);
       expect(action).toEqual(null);
     });
     it('FATAL returns null', () => {
-      const state = { ...initState, ...{ controlState: 'FATAL' as ControlState } };
+      const state: State = { ...initState, ...{ controlState: 'FATAL' } };
       const action = next({} as ElasticsearchClient, state);
       expect(action).toEqual(null);
     });
