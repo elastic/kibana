@@ -19,4 +19,4 @@ export const LOADING_SPINNER = '[data-test-subj="loading-spinner"]';
 export const OPERATOR_INPUT = '[data-test-subj="operatorAutocompleteComboBox"]';
 
 export const VALUES_INPUT =
-  '[data-test-subj="valuesAutocompleteComboBox matchAnyComboxBox"] [data-test-subj="comboBoxInput"]';
+  '[data-test-subj="valuesAutocompleteMatchAny"] [data-test-subj="comboBoxInput"]';
