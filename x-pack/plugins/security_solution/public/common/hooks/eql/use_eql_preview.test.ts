@@ -6,6 +6,7 @@
 import { Unit } from '@elastic/datemath';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { of, throwError } from 'rxjs';
+import { delay } from 'rxjs/operators';
 
 import * as i18n from '../translations';
 import { EqlSearchStrategyResponse } from '../../../../../data_enhanced/common';
@@ -85,14 +86,33 @@ describe('useEqlPreview', () => {
 
       result.current[1](params);
 
-      // await waitForNextUpdate();
-
       expect(result.current[0]).toBeFalsy();
       expect(typeof result.current[1]).toEqual('function');
       expect(result.current[2].totalCount).toEqual(4);
       expect(result.current[2].data.length).toBeGreaterThan(0);
       expect(result.current[2].inspect.dsl.length).toBeGreaterThan(0);
       expect(result.current[2].inspect.response.length).toBeGreaterThan(0);
+    });
+  });
+
+  it('should not resolve values after search is invoked if component unmounted', async () => {
+    await act(async () => {
+      (useKibana().services.data.search.search as jest.Mock).mockReturnValue(
+        of(getMockResponse()).pipe(delay(5000))
+      );
+      const { result, waitForNextUpdate, unmount } = renderHook(() => useEqlPreview());
+
+      await waitForNextUpdate();
+
+      result.current[1](params);
+
+      unmount();
+
+      expect(result.current[0]).toBeTruthy();
+      expect(result.current[2].totalCount).toEqual(0);
+      expect(result.current[2].data.length).toEqual(0);
+      expect(result.current[2].inspect.dsl.length).toEqual(0);
+      expect(result.current[2].inspect.response.length).toEqual(0);
     });
   });
 

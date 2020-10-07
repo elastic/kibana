@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { noop } from 'lodash/fp';
 import { Subscription } from 'rxjs';
 
@@ -24,6 +24,7 @@ import { hasEqlSequenceQuery } from '../../../../common/detection_engine/utils';
 import { EqlSearchResponse } from '../../../../common/detection_engine/types';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { inputsModel } from '../../../common/store';
+import { EQL_SEARCH_STRATEGY } from '../../../../../data_enhanced/public';
 
 export const useEqlPreview = (): [
   boolean,
@@ -34,6 +35,7 @@ export const useEqlPreview = (): [
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
+  const didCancel = useRef(false);
 
   const [response, setResponse] = useState<EqlPreviewResponse>({
     data: [],
@@ -52,7 +54,6 @@ export const useEqlPreview = (): [
         return;
       }
 
-      let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
@@ -84,14 +85,14 @@ export const useEqlPreview = (): [
               },
             },
             {
-              strategy: 'eql',
+              strategy: EQL_SEARCH_STRATEGY,
               abortSignal: abortCtrl.current.signal,
             }
           )
           .subscribe({
             next: (res) => {
               if (isCompleteResponse(res)) {
-                if (!didCancel) {
+                if (!didCancel.current) {
                   if (hasEqlSequenceQuery(query)) {
                     setResponse(getSequenceAggs(res, interval, to, from, refetch.current));
                   } else {
@@ -102,7 +103,7 @@ export const useEqlPreview = (): [
                 notifications.toasts.addWarning(i18n.EQL_PREVIEW_FETCH_FAILURE);
               }
 
-              if (!didCancel) {
+              if (!didCancel.current) {
                 setLoading(false);
                 if (searchSubscription$ != null) {
                   searchSubscription$.unsubscribe();
@@ -132,13 +133,15 @@ export const useEqlPreview = (): [
       abortCtrl.current.abort();
       asyncSearch();
       refetch.current = asyncSearch;
-      return () => {
-        didCancel = true;
-        abortCtrl.current.abort();
-      };
     },
     [data.search, notifications.toasts]
   );
+
+  useEffect((): (() => void) => {
+    return (): void => {
+      didCancel.current = true;
+    };
+  }, []);
 
   return [loading, searchEql, response];
 };
