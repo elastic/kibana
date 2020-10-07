@@ -7,6 +7,8 @@
 import React from 'react';
 import { CoreStart } from 'kibana/public';
 import moment from 'moment';
+import { takeUntil } from 'rxjs/operators';
+import { from } from 'rxjs';
 import { VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
 import {
   KibanaContextProvider,
@@ -19,13 +21,19 @@ import { getInitialGroupsMap } from '../../application/components/job_selector/j
 import { getDefaultPanelTitle } from './anomaly_swimlane_embeddable';
 import { getMlGlobalServices } from '../../application/app';
 import { HttpService } from '../../application/services/http_service';
+import { DashboardConstants } from '../../../../../../src/plugins/dashboard/public';
 import { AnomalySwimlaneEmbeddableInput } from '..';
 
 export async function resolveAnomalySwimlaneUserInput(
   coreStart: CoreStart,
   input?: AnomalySwimlaneEmbeddableInput
 ): Promise<Partial<AnomalySwimlaneEmbeddableInput>> {
-  const { http, uiSettings, overlays } = coreStart;
+  const {
+    http,
+    uiSettings,
+    overlays,
+    application: { currentAppId$ },
+  } = coreStart;
 
   const anomalyDetectorService = new AnomalyDetectorService(new HttpService(http));
 
@@ -90,5 +98,12 @@ export async function resolveAnomalySwimlaneUserInput(
         ownFocus: true,
       }
     );
+
+    // Close the flyout when user navigates out of the dashboard plugin
+    currentAppId$.pipe(takeUntil(from(flyoutSession.onClose))).subscribe((appId) => {
+      if (appId !== DashboardConstants.DASHBOARDS_ID) {
+        flyoutSession.close();
+      }
+    });
   });
 }
