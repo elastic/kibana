@@ -25,7 +25,5 @@ image::fleet/images/fleet-start.png[{fleet} app in {kib}]
 [float]
 == Get started
 
-//TODO: Might need to rename this to Fleet User Guide (discussion pending)
-
 To get started with {fleet}, refer to the
 {ingest-guide}/index.html[Ingest Management Guide].
