@@ -32,6 +32,7 @@ export type FieldGroups = Record<
     isAffectedByGlobalFilter: boolean;
     isAffectedByTimeFilter: boolean;
     hideDetails?: boolean;
+    defaultNoFieldsMessage?: string;
   }
 >;
 
@@ -75,8 +76,6 @@ export function FieldList({
         .map(([key, { isInitiallyOpen }]) => [key, isInitiallyOpen])
     )
   );
-
-  const isAffectedByFieldFilter = !!(filter.typeFilter.length || filter.nameFilter.length);
 
   useEffect(() => {
     // Reset the scroll if we have made material changes to the field list
@@ -180,9 +179,10 @@ export function FieldList({
                 renderCallout={
                   <NoFieldsCallout
                     isAffectedByGlobalFilter={fieldGroup.isAffectedByGlobalFilter}
-                    isAffectedByFieldFilter={isAffectedByFieldFilter}
                     isAffectedByTimerange={fieldGroup.isAffectedByTimeFilter}
+                    isAffectedByFieldFilter={fieldGroup.fieldCount !== fieldGroup.fields.length}
                     existFieldsInIndex={!!existFieldsInIndex}
+                    defaultNoFieldsMessage={fieldGroup.defaultNoFieldsMessage}
                   />
                 }
               />

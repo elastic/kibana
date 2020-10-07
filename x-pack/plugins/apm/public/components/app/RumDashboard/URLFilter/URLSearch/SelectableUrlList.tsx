@@ -4,9 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FormEvent, SetStateAction, useRef, useState } from 'react';
+import React, {
+  FormEvent,
+  SetStateAction,
+  useRef,
+  useState,
+  KeyboardEvent,
+} from 'react';
 import {
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -14,13 +19,41 @@ import {
   EuiPopoverTitle,
   EuiSelectable,
   EuiSelectableMessage,
+  EuiPopoverFooter,
+  EuiButton,
+  EuiText,
+  EuiIcon,
+  EuiBadge,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import styled from 'styled-components';
+import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import { useEvent } from 'react-use';
 import {
   formatOptions,
   selectableRenderOptions,
   UrlOption,
 } from './RenderOption';
 import { I18LABELS } from '../../translations';
+import { useUiSetting$ } from '../../../../../../../../../src/plugins/kibana_react/public';
+
+const StyledRow = styled.div<{
+  darkMode: boolean;
+}>`
+  text-align: center;
+  padding: 8px 0px;
+  background-color: ${(props) =>
+    props.darkMode
+      ? euiDarkVars.euiPageBackgroundColor
+      : euiLightVars.euiPageBackgroundColor};
+  border-bottom: 1px solid
+    ${(props) =>
+      props.darkMode
+        ? euiDarkVars.euiColorLightestShade
+        : euiLightVars.euiColorLightestShade};
+`;
 
 interface Props {
   data: {
@@ -48,10 +81,22 @@ export function SelectableUrlList({
   popoverIsOpen,
   setPopoverIsOpen,
 }: Props) {
+  const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
+
   const [popoverRef, setPopoverRef] = useState<HTMLElement | null>(null);
   const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
 
   const titleRef = useRef<HTMLDivElement>(null);
+
+  const onEnterKey = (evt: KeyboardEvent<HTMLInputElement>) => {
+    if (evt.key.toLowerCase() === 'enter') {
+      onTermChange();
+      setPopoverIsOpen(false);
+    }
+  };
+
+  // @ts-ignore - not sure, why it's not working
+  useEvent('keydown', onEnterKey, searchRef);
 
   const searchOnFocus = (e: React.FocusEvent<HTMLInputElement>) => {
     setPopoverIsOpen(true);
@@ -102,21 +147,9 @@ export function SelectableUrlList({
   function PopOverTitle() {
     return (
       <EuiPopoverTitle>
-        <EuiFlexGroup ref={titleRef}>
+        <EuiFlexGroup ref={titleRef} gutterSize="xs">
           <EuiFlexItem style={{ justifyContent: 'center' }}>
             {loading ? <EuiLoadingSpinner /> : titleText}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              disabled={!searchValue}
-              onClick={() => {
-                onTermChange();
-                setPopoverIsOpen(false);
-              }}
-            >
-              {I18LABELS.matchThisQuery}
-            </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPopoverTitle>
@@ -142,6 +175,7 @@ export function SelectableUrlList({
       listProps={{
         rowHeight: 68,
         showIcons: true,
+        onFocusBadge: false,
       }}
       loadingMessage={loadingMessage}
       emptyMessage={emptyMessage}
@@ -158,7 +192,43 @@ export function SelectableUrlList({
         >
           <div style={{ width: 600, maxWidth: '100%' }}>
             <PopOverTitle />
+            {searchValue && (
+              <StyledRow darkMode={darkMode}>
+                <EuiText size="s">
+                  <FormattedMessage
+                    id="xpack.apm.ux.url.hitEnter.include"
+                    defaultMessage="Hit {icon} to include all urls matching {searchValue}"
+                    values={{
+                      searchValue: <strong>{searchValue}</strong>,
+                      icon: (
+                        <EuiBadge color="hollow">
+                          Enter <EuiIcon type="returnKey" />
+                        </EuiBadge>
+                      ),
+                    }}
+                  />
+                </EuiText>
+              </StyledRow>
+            )}
             {list}
+            <EuiPopoverFooter>
+              <EuiFlexGroup style={{ justifyContent: 'flex-end' }}>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    fill
+                    size="s"
+                    onClick={() => {
+                      onTermChange();
+                      closePopover();
+                    }}
+                  >
+                    {i18n.translate('xpack.apm.apply.label', {
+                      defaultMessage: 'Apply',
+                    })}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPopoverFooter>
           </div>
         </EuiPopover>
       )}

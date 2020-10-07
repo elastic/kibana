@@ -20,7 +20,7 @@ import { CoreSetup, PluginInitializerContext } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { AggGroupNames } from '../../data/public';
 import { Schemas } from '../../vis_default_editor/public';
-import { BaseVisTypeOptions, Vis } from '../../visualizations/public';
+import { BaseVisTypeOptions } from '../../visualizations/public';
 import { tableVisResponseHandler } from './table_vis_response_handler';
 // @ts-ignore
 import tableVisTemplate from './table_vis.html';
@@ -99,7 +99,7 @@ export function getTableVisTypeDefinition(
       ]),
     },
     responseHandler: tableVisResponseHandler,
-    hierarchicalData: (vis: Vis) => {
+    hierarchicalData: (vis) => {
       return Boolean(vis.params.showPartialRows || vis.params.showMetricsAtAllLevels);
     },
   };
