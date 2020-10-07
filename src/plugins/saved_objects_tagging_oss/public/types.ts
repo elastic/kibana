@@ -17,8 +17,10 @@
  * under the License.
  */
 
+import { SearchFilterConfig } from '@elastic/eui/src/components/search_bar/filters/filters';
 import type { FunctionComponent } from 'react';
 import { SavedObject } from '../../../core/types';
+import { SavedObjectsFindOptionsReference } from '../../../core/public';
 import { ITagsClient } from '../common';
 
 export interface SavedObjectTaggingOssPluginSetup {
@@ -49,7 +51,7 @@ export interface SavedObjectTaggingOssPluginStart {
 
 export interface TaggingApi {
   client: ITagsClient;
-  ui: TaggingApiComponents;
+  ui: TaggingApiUi;
 }
 
 export interface TagListComponentProps {
@@ -59,9 +61,36 @@ export interface TagListComponentProps {
   object: SavedObject;
 }
 
-export interface TaggingApiComponents {
+export interface GetSearchBarFilterOptions {
   /**
-   * Displays the tags for given saved object.
+   * The field that will be used as value when an option is selected. Can either
+   * be `id` or `name`.
+   * Default to `id`
    */
-  TagList: FunctionComponent<TagListComponentProps>;
+  valueField?: 'id' | 'name';
+}
+
+/**
+ * React components and utility methods to use the SO tagging feature
+ */
+export interface TaggingApiUi {
+  /**
+   * Returns a filter that can be used by filter by tag with `EuiSearchBar` or EUI tables using `EuiSearchBar`.
+   */
+  getSearchBarFilter(options?: GetSearchBarFilterOptions): SearchFilterConfig;
+
+  /**
+   * Converts given tag name to a reference to be used to search using the _find API.
+   */
+  convertNameToReference(tagName: string): SavedObjectsFindOptionsReference | undefined;
+
+  /**
+   * React component to support the tagging feature.
+   */
+  components: {
+    /**
+     * Displays the tags for given saved object.
+     */
+    TagList: FunctionComponent<TagListComponentProps>;
+  };
 }

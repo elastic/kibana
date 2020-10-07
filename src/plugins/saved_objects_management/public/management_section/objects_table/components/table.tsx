@@ -183,14 +183,7 @@ export class Table extends PureComponent<TableProps, TableState> {
         multiSelect: 'or',
         options: filterOptions,
       },
-      // Add this back in once we have tag support
-      // {
-      //   type: 'field_value_selection',
-      //   field: 'tag',
-      //   name: 'Tags',
-      //   multiSelect: 'or',
-      //   options: [],
-      // },
+      ...(taggingApi ? [taggingApi.ui.getSearchBarFilter({ valueField: 'name' })] : []),
     ];
 
     const columns = [
@@ -257,7 +250,7 @@ export class Table extends PureComponent<TableProps, TableState> {
               sortable: false,
               'data-test-subj': 'savedObjectsTableRowTags',
               render: (references: any[], object: SavedObjectWithMetadata) => {
-                return <taggingApi.ui.TagList object={object} />;
+                return <taggingApi.ui.components.TagList object={object} />;
               },
             },
           ]

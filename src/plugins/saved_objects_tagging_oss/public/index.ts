@@ -24,8 +24,9 @@ export {
   SavedObjectTaggingOssPluginSetup,
   SavedObjectTaggingOssPluginStart,
   TaggingApi,
-  TaggingApiComponents,
+  TaggingApiUi,
   TagListComponentProps,
+  GetSearchBarFilterOptions,
 } from './types';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>

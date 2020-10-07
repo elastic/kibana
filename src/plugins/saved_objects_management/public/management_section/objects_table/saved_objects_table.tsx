@@ -54,6 +54,7 @@ import {
   OverlayStart,
   NotificationsStart,
   ApplicationStart,
+  SavedObjectsFindOptionsReference,
 } from 'src/core/public';
 import { RedirectAppLinks } from '../../../../kibana_react/public';
 import { TaggingApi } from '../../../../saved_objects_tagging_oss/public';
@@ -216,8 +217,8 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   debouncedFetchObjects = debounce(async () => {
     const { activeQuery: query, page, perPage } = this.state;
-    const { notifications, http, allowedTypes } = this.props;
-    const { queryText, visibleTypes } = parseQuery(query);
+    const { notifications, http, allowedTypes, taggingApi } = this.props;
+    const { queryText, visibleTypes, selectedTags } = parseQuery(query);
     // "searchFields" is missing from the "findOptions" but gets injected via the API.
     // The API extracts the fields from each uiExports.savedObjectsManagement "defaultSearchField" attribute
     const findOptions: SavedObjectsFindOptions = {
@@ -229,6 +230,18 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     };
     if (findOptions.type.length > 1) {
       findOptions.sortField = 'type';
+    }
+
+    if (taggingApi && selectedTags) {
+      const references: SavedObjectsFindOptionsReference[] = [];
+      selectedTags.forEach((tagName) => {
+        const ref = taggingApi.ui.convertNameToReference(tagName);
+        if (ref) {
+          references.push(ref);
+        }
+      });
+      findOptions.hasReference = references;
+      findOptions.hasReferenceOperator = 'OR';
     }
 
     try {

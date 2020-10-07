@@ -11,4 +11,6 @@ export {
   TagListProps,
   TagBadge,
   TagBadgeProps,
+  TagSearchBarOption,
+  TagSearchBarOptionProps,
 } from './base';

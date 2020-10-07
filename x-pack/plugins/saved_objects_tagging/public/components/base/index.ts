@@ -7,3 +7,4 @@
 export { TagBadge, TagBadgeProps } from './tag_badge';
 export { TagList, TagListProps } from './tag_list';
 export { TagComboBox, TagComboBoxProps } from './tag_combo_box';
+export { TagSearchBarOption, TagSearchBarOptionProps } from './tag_searchbar_option';
