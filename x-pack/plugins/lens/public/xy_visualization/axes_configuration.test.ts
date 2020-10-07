@@ -117,6 +117,7 @@ describe('axes_configuration', () => {
                 extended_bounds: {},
               },
             },
+            params: { params: { id: 'date', params: { pattern: 'HH:mm' } } },
           },
         },
         {
@@ -141,6 +142,19 @@ describe('axes_configuration', () => {
                 missingBucketLabel: 'Missing',
               },
             },
+            params: {
+              id: 'terms',
+              params: {
+                id: 'string',
+                otherBucketLabel: 'Other',
+                missingBucketLabel: 'Missing',
+                parsedUrl: {
+                  origin: 'http://localhost:5601',
+                  pathname: '/jiy/app/kibana',
+                  basePath: '/jiy',
+                },
+              },
+            },
           },
         },
         {
@@ -154,6 +168,7 @@ describe('axes_configuration', () => {
               indexPatternId: 'indexPatternId',
               type: 'count',
             },
+            params: { id: 'number' },
           },
         },
         {
@@ -167,6 +182,7 @@ describe('axes_configuration', () => {
               indexPatternId: 'indexPatternId',
               type: 'average',
             },
+            params: { id: 'bytes' },
           },
         },
         {
@@ -180,6 +196,7 @@ describe('axes_configuration', () => {
               indexPatternId: 'indexPatternId',
               type: 'average',
             },
+            params: { id: 'currency' },
           },
         },
         {
@@ -193,6 +210,7 @@ describe('axes_configuration', () => {
               indexPatternId: 'indexPatternId',
               type: 'average',
             },
+            params: { id: 'currency' },
           },
         },
       ],

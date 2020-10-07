@@ -107,6 +107,7 @@ describe('desanitizeFilterContext', () => {
               },
             ],
             columns: table.columns,
+            type: 'datatable',
           },
         },
       ],

@@ -13,7 +13,6 @@ import { DatatableProps } from './expression';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import { IFieldFormat } from '../../../../../src/plugins/data/public';
 import { IAggType } from 'src/plugins/data/public';
-const onClickValue = jest.fn();
 import { EmptyPlaceholder } from '../shared_components';
 import { LensIconChartDatatable } from '../assets/chart_datatable';
 
@@ -31,7 +30,8 @@ function sampleArgs() {
             meta: {
               type: 'string',
               source: 'esaggs',
-              sourceParams: { indexPatternId, aggConfigs: { type: 'terms' } },
+              field: 'a',
+              sourceParams: { type: 'terms', indexPatternId },
             },
           },
           {
@@ -39,10 +39,11 @@ function sampleArgs() {
             name: 'b',
             meta: {
               type: 'date',
+              field: 'b',
               source: 'esaggs',
               sourceParams: {
+                type: 'date_histogram',
                 indexPatternId,
-                aggConfigs: { type: 'date_histogram', params: { field: 'b' } },
               },
             },
           },
@@ -52,7 +53,8 @@ function sampleArgs() {
             meta: {
               type: 'number',
               source: 'esaggs',
-              sourceParams: { indexPatternId, aggConfigs: { type: 'count' } },
+              field: 'c',
+              sourceParams: { indexPatternId, type: 'count' },
             },
           },
         ],
@@ -73,6 +75,11 @@ function sampleArgs() {
 }
 
 describe('datatable_expression', () => {
+  let onClickValue: jest.Mock;
+  beforeEach(() => {
+    onClickValue = jest.fn();
+  });
+
   describe('datatable renders', () => {
     test('it renders with the specified data and args', () => {
       const { data, args } = sampleArgs();
@@ -133,8 +140,7 @@ describe('datatable_expression', () => {
             value: 'shoes',
           },
         ],
-        negate: true,
-        timeFieldName: undefined,
+        timeFieldName: 'a',
       });
     });
 
@@ -168,7 +174,6 @@ describe('datatable_expression', () => {
             value: 1588024800000,
           },
         ],
-        negate: false,
         timeFieldName: 'b',
       });
     });
@@ -186,13 +191,18 @@ describe('datatable_expression', () => {
                 meta: {
                   type: 'date',
                   source: 'esaggs',
-                  sourceParams: { type: 'date_range', aggConfigParams: { field: 'a' } },
+                  field: 'a',
+                  sourceParams: { type: 'date_range', indexPatternId: 'a' },
                 },
               },
               {
                 id: 'b',
                 name: 'b',
-                meta: { type: 'number', source: 'esaggs', sourceParams: { type: 'count' } },
+                meta: {
+                  type: 'number',
+                  source: 'esaggs',
+                  sourceParams: { type: 'count', indexPatternId: 'a' },
+                },
               },
             ],
             rows: [{ a: 1588024800000, b: 3 }],
@@ -232,7 +242,7 @@ describe('datatable_expression', () => {
             value: 1588024800000,
           },
         ],
-        negate: false,
+        // negate: false,
         timeFieldName: 'a',
       });
     });

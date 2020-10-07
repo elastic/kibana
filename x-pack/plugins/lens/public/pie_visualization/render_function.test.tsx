@@ -138,14 +138,23 @@ describe('PieVisualization component', () => {
                 "columns": Array [
                   Object {
                     "id": "a",
+                    "meta": Object {
+                      "type": "number",
+                    },
                     "name": "a",
                   },
                   Object {
                     "id": "b",
+                    "meta": Object {
+                      "type": "number",
+                    },
                     "name": "b",
                   },
                   Object {
                     "id": "c",
+                    "meta": Object {
+                      "type": "string",
+                    },
                     "name": "c",
                   },
                 ],

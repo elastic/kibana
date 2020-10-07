@@ -122,6 +122,7 @@ const dateHistogramData: LensMultiTable = {
                 extended_bounds: {},
               },
             },
+            params: { id: 'date', params: { pattern: 'HH:mm' } },
           },
         },
         {
@@ -146,6 +147,19 @@ const dateHistogramData: LensMultiTable = {
                 missingBucketLabel: 'Missing',
               },
             },
+            params: {
+              id: 'terms',
+              params: {
+                id: 'string',
+                otherBucketLabel: 'Other',
+                missingBucketLabel: 'Missing',
+                parsedUrl: {
+                  origin: 'http://localhost:5601',
+                  pathname: '/jiy/app/kibana',
+                  basePath: '/jiy',
+                },
+              },
+            },
           },
         },
         {
@@ -159,6 +173,7 @@ const dateHistogramData: LensMultiTable = {
               indexPatternId: 'indexPatternId',
               params: {},
             },
+            params: { id: 'number' },
           },
         },
       ],
@@ -188,13 +203,22 @@ const createSampleDatatableWithRows = (rows: DatatableRow[]): Datatable => ({
     {
       id: 'a',
       name: 'a',
-      meta: { type: 'number' },
+      meta: { type: 'number', params: { id: 'number', params: { pattern: '0,0.000' } } },
     },
-    { id: 'b', name: 'b', meta: { type: 'number', params: { pattern: '000,0' } } },
+    {
+      id: 'b',
+      name: 'b',
+      meta: { type: 'number', params: { id: 'number', params: { pattern: '000,0' } } },
+    },
     {
       id: 'c',
       name: 'c',
-      meta: { type: 'date', params: { type: 'date-histogram', params: { interval: 'auto' } } },
+      meta: {
+        type: 'date',
+        field: 'order_date',
+        sourceParams: { type: 'date-histogram', params: { interval: 'auto' } },
+        params: { id: 'string' },
+      },
     },
     { id: 'd', name: 'ColD', meta: { type: 'string' } },
   ],
@@ -370,7 +394,7 @@ describe('xy_expression', () => {
             { id: 'a', name: 'a', meta: { type: 'number' } },
             { id: 'b', name: 'b', meta: { type: 'number' } },
             { id: 'c', name: 'c', meta: { type: 'string' } },
-            { id: 'd', name: 'd', meta: { type: 'string' } },
+            { id: 'd', name: 'd', meta: { type: 'string', params: { id: 'custom' } } },
           ],
           rows: [
             { a: 1, b: 2, c: 'I', d: 'Row 1' },
@@ -542,12 +566,12 @@ describe('xy_expression', () => {
         );
 
         expect(component.find(Settings).prop('xDomain')).toMatchInlineSnapshot(`
-        Object {
-          "max": 1546491600000,
-          "min": 1546405200000,
-          "minInterval": undefined,
-        }
-      `);
+                  Object {
+                    "max": 1546491600000,
+                    "min": 1546405200000,
+                    "minInterval": undefined,
+                  }
+              `);
       });
       test('it generates correct xDomain for a layer with single value and layer with multiple value data (1-n)', () => {
         const data: LensMultiTable = {
@@ -625,12 +649,12 @@ describe('xy_expression', () => {
         );
 
         expect(component.find(Settings).prop('xDomain')).toMatchInlineSnapshot(`
-        Object {
-          "max": 1546491600000,
-          "min": 1546405200000,
-          "minInterval": undefined,
-        }
-      `);
+                  Object {
+                    "max": 1546491600000,
+                    "min": 1546405200000,
+                    "minInterval": undefined,
+                  }
+              `);
       });
     });
 

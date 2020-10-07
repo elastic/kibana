@@ -173,9 +173,7 @@ export function DatatableComponent(props: DatatableRenderProps) {
   const handleFilterClick = useMemo(
     () => (field: string, value: unknown, colIndex: number, negate: boolean = false) => {
       const col = firstTable.columns[colIndex];
-      const isDate =
-        col.meta?.sourceParams?.type === 'date_histogram' ||
-        col.meta?.sourceParams?.type === 'date_range';
+      const isDate = col.meta?.type === 'date';
       const timeFieldName = negate && isDate ? undefined : col?.meta?.field;
       const rowIndex = firstTable.rows.findIndex((row) => row[field] === value);
 

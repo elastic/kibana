@@ -46,10 +46,16 @@ describe('rename_columns', () => {
         "columns": Array [
           Object {
             "id": "b",
+            "meta": Object {
+              "type": "number",
+            },
             "name": "Austrailia",
           },
           Object {
             "id": "c",
+            "meta": Object {
+              "type": "number",
+            },
             "name": "Boomerang",
           },
         ],
@@ -129,10 +135,16 @@ describe('rename_columns', () => {
         "columns": Array [
           Object {
             "id": "a",
+            "meta": Object {
+              "type": "number",
+            },
             "name": "A",
           },
           Object {
             "id": "c",
+            "meta": Object {
+              "type": "number",
+            },
             "name": "Catamaran",
           },
         ],
@@ -189,10 +201,16 @@ describe('rename_columns', () => {
         "columns": Array [
           Object {
             "id": "a",
+            "meta": Object {
+              "type": "number",
+            },
             "name": "A",
           },
           Object {
             "id": "c",
+            "meta": Object {
+              "type": "number",
+            },
             "name": "Apple per 30 seconds",
           },
         ],
