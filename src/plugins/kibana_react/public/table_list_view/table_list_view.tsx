@@ -36,7 +36,9 @@ import {
   EuiConfirmModal,
   EuiCallOut,
   EuiBasicTableColumn,
+  SearchFilterConfig,
 } from '@elastic/eui';
+
 import { HttpFetchError, ToastsStart } from 'kibana/public';
 import { toMountPoint } from '../util';
 
@@ -70,6 +72,7 @@ export interface TableListViewProps {
    * If the table is not empty, this component renders its own h1 element using the same id.
    */
   headingId?: string;
+  searchFilters?: SearchFilterConfig[];
 }
 
 export interface TableListViewState {
@@ -402,6 +405,8 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
   }
 
   renderTable() {
+    const { searchFilters } = this.props;
+
     const selection = this.props.deleteItems
       ? {
           onSelectionChange: (obj: Item[]) => {
@@ -438,6 +443,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
       box: {
         incremental: true,
       },
+      filters: searchFilters ?? [],
     };
 
     const columns = this.props.tableColumns.slice();

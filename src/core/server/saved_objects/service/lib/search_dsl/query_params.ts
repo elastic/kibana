@@ -145,13 +145,9 @@ interface QueryParams {
 }
 
 function getReferencesFilter(
-  references: HasReferenceQueryParams | HasReferenceQueryParams[],
+  references: HasReferenceQueryParams[],
   operator: SearchOperator = 'OR'
 ) {
-  if (!Array.isArray(references)) {
-    references = [references];
-  }
-
   if (operator === 'AND') {
     return {
       bool: {
@@ -214,6 +210,10 @@ export function getQueryParams({
     typeToNamespacesMap ? Array.from(typeToNamespacesMap.keys()) : type
   );
 
+  if (hasReference && !Array.isArray(hasReference)) {
+    hasReference = [hasReference];
+  }
+
   // A de-duplicated set of namespaces makes for a more effecient query.
   //
   // Additonally, we treat the `*` namespace as the `default` namespace.
@@ -233,7 +233,9 @@ export function getQueryParams({
   const bool: any = {
     filter: [
       ...(kueryNode != null ? [esKuery.toElasticsearchQuery(kueryNode)] : []),
-      ...(hasReference ? [getReferencesFilter(hasReference, hasReferenceOperator)] : []),
+      ...(hasReference && hasReference.length
+        ? [getReferencesFilter(hasReference, hasReferenceOperator)]
+        : []),
       {
         bool: {
           should: types.map((shouldType) => {

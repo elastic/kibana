@@ -27,6 +27,8 @@ export {
   TaggingApiUi,
   TagListComponentProps,
   GetSearchBarFilterOptions,
+  ParsedSearchQuery,
+  ParseSearchQueryOptions,
 } from './types';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>

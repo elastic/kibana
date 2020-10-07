@@ -236,25 +236,7 @@ export class Table extends PureComponent<TableProps, TableState> {
           );
         },
       } as EuiTableFieldDataColumnType<SavedObjectWithMetadata<any>>,
-      ...(taggingApi
-        ? [
-            {
-              field: 'references',
-              name: i18n.translate('savedObjectsManagement.objectsTable.table.columnTagsName', {
-                defaultMessage: 'Tags',
-              }),
-              description: i18n.translate(
-                'savedObjectsManagement.objectsTable.table.columnTagsDescription',
-                { defaultMessage: 'Tags associated with this saved object' }
-              ),
-              sortable: false,
-              'data-test-subj': 'savedObjectsTableRowTags',
-              render: (references: any[], object: SavedObjectWithMetadata) => {
-                return <taggingApi.ui.components.TagList object={object} />;
-              },
-            },
-          ]
-        : []),
+      ...(taggingApi ? [taggingApi.ui.getTableColumnDefinition()] : []),
       ...columnRegistry.getAll().map((column) => {
         return {
           ...column.euiColumn,
