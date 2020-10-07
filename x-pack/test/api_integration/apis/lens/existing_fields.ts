@@ -59,7 +59,6 @@ const fieldsWithData = [
   'utc_time',
   'xss',
   'xss.raw',
-  'runtime_number',
 
   'relatedContent.article:modified_time',
   'relatedContent.article:published_time',
@@ -209,7 +208,6 @@ export default ({ getService }: FtrProviderContext) => {
           'request.raw',
           'response',
           'response.raw',
-          'runtime_number',
           'spaces',
           'spaces.raw',
           'type',
