@@ -282,18 +282,6 @@ export class IndexPattern implements IIndexPattern {
    * Returns index pattern as saved object body for saving
    */
   getAsSavedObjectBody() {
-    /*
-    const serializeFieldFormatMap = (
-      flat: any,
-      format: FieldFormat | undefined,
-      field: string | undefined
-    ) => {
-      if (format && field) {
-        flat[field] = format;
-      }
-    };
-    */
-    // const serialized = _.transform(this.fieldFormatMap, serializeFieldFormatMap);
     const fieldFormatMap = _.isEmpty(this.fieldFormatMap)
       ? undefined
       : JSON.stringify(this.fieldFormatMap);
@@ -329,11 +317,11 @@ export class IndexPattern implements IIndexPattern {
   }
 
   /**
-   * Provide a field, get its formatter
+   * Get formatter for a given field name. Return undefined if none exists
    * @param field
    */
-  getFormatterForFieldNoDefault(field: IndexPatternField | IndexPatternField['spec'] | IFieldType) {
-    const formatSpec = this.fieldFormatMap[field.name];
+  getFormatterForFieldNoDefault(fieldname: string) {
+    const formatSpec = this.fieldFormatMap[fieldname];
     if (formatSpec) {
       return this.fieldFormats.getInstance(formatSpec.id, formatSpec.params);
     }

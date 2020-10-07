@@ -208,7 +208,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         DefaultFieldFormat as FieldFormatInstanceType,
         data.fieldFormats
       ),
-      fieldFormatId: indexPattern.getFormatterForFieldNoDefault(spec)?.type?.id,
+      fieldFormatId: indexPattern.getFormatterForFieldNoDefault(spec.name)?.type?.id,
       fieldFormatParams: format.params(),
     });
   }

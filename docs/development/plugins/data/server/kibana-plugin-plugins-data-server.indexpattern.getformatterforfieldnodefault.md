@@ -4,19 +4,19 @@
 
 ## IndexPattern.getFormatterForFieldNoDefault() method
 
-Provide a field, get its formatter
+Get formatter for a given field name. Return undefined if none exists
 
 <b>Signature:</b>
 
 ```typescript
-getFormatterForFieldNoDefault(field: IndexPatternField | IndexPatternField['spec'] | IFieldType): FieldFormat | undefined;
+getFormatterForFieldNoDefault(fieldname: string): FieldFormat | undefined;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  field | <code>IndexPatternField &#124; IndexPatternField['spec'] &#124; IFieldType</code> |  |
+|  fieldname | <code>string</code> |  |
 
 <b>Returns:</b>
 

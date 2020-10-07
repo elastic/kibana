@@ -72,7 +72,7 @@ export class IndexedFieldsTable extends Component<
           return {
             ...field.spec,
             displayName: field.displayName,
-            format: indexPattern.getFormatterForFieldNoDefault(field)?.type?.title || '',
+            format: indexPattern.getFormatterForFieldNoDefault(field.name)?.type?.title || '',
             excluded: fieldWildcardMatch ? fieldWildcardMatch(field.name) : false,
             info: helpers.getFieldInfo && helpers.getFieldInfo(indexPattern, field),
           };
