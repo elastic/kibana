@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import get from 'lodash/get';
-import has from 'lodash/has';
+import { get, has } from 'lodash';
 
 const PARSING_ERROR_TYPE = 'parsing_exception';
 const VERIFICATION_ERROR_TYPE = 'verification_exception';
