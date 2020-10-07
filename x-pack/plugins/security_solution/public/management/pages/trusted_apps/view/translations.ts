@@ -11,6 +11,11 @@ import {
   WindowsConditionEntry,
 } from '../../../../../common/endpoint/types';
 
+export const ABOUT_TRUSTED_APPS = i18n.translate('xpack.securitySolution.trustedapps.aboutInfo', {
+  defaultMessage:
+    'Add a trusted application to improve performance or alleviate conflicts with other applications running on your hosts. Trusted applications will be applied to hosts running Endpoint Security.',
+});
+
 export const OS_TITLES: Readonly<{ [K in TrustedApp['os']]: string }> = {
   windows: i18n.translate('xpack.securitySolution.trustedapps.os.windows', {
     defaultMessage: 'Windows',
@@ -24,7 +29,7 @@ export const OS_TITLES: Readonly<{ [K in TrustedApp['os']]: string }> = {
 };
 
 export const PROPERTY_TITLES: Readonly<
-  { [K in keyof Omit<TrustedApp, 'id' | 'description' | 'entries'>]: string }
+  { [K in keyof Omit<TrustedApp, 'id' | 'entries'>]: string }
 > = {
   name: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.name', {
     defaultMessage: 'Name',
@@ -37,6 +42,9 @@ export const PROPERTY_TITLES: Readonly<
   }),
   created_by: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.createdBy', {
     defaultMessage: 'Created By',
+  }),
+  description: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.description', {
+    defaultMessage: 'Description',
   }),
 };
 

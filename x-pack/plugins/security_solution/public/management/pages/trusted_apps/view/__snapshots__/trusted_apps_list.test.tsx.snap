@@ -494,11 +494,11 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
   padding: 16px;
 }
 
-.c1 {
+.c1.c1.c1 {
   width: 40%;
 }
 
-.c2 {
+.c2.c2.c2 {
   width: 60%;
 }
 
@@ -791,7 +791,11 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                             <dd
                               class="euiDescriptionList__description c2"
                             >
-                              trusted app 0
+                              <span
+                                title=""
+                              >
+                                trusted app 0
+                              </span>
                             </dd>
                             <dt
                               class="euiDescriptionList__title c1"
@@ -801,7 +805,11 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                             <dd
                               class="euiDescriptionList__description c2"
                             >
-                              Windows
+                              <span
+                                title=""
+                              >
+                                Windows
+                              </span>
                             </dd>
                             <dt
                               class="euiDescriptionList__title c1"
@@ -811,7 +819,11 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                             <dd
                               class="euiDescriptionList__description c2"
                             >
-                              1 minute ago
+                              <span
+                                title=""
+                              >
+                                1 minute ago
+                              </span>
                             </dd>
                             <dt
                               class="euiDescriptionList__title c1"
@@ -821,7 +833,25 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                             <dd
                               class="euiDescriptionList__description c2"
                             >
-                              someone
+                              <span
+                                title=""
+                              >
+                                someone
+                              </span>
+                            </dd>
+                            <dt
+                              class="euiDescriptionList__title c1"
+                            >
+                              Description
+                            </dt>
+                            <dd
+                              class="euiDescriptionList__description c2"
+                            >
+                              <span
+                                title="Trusted App 0"
+                              >
+                                Trusted App 0
+                              </span>
                             </dd>
                           </dl>
                         </div>

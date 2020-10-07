@@ -18,6 +18,7 @@ import { useTrustedAppsSelector } from './hooks';
 import { getCurrentLocation } from '../store/selectors';
 import { TrustedAppsListPageRouteState } from '../../../../../common/endpoint/types';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
+import { ABOUT_TRUSTED_APPS } from './translations';
 
 export const TrustedAppsPage = memo(() => {
   const history = useHistory();
@@ -71,12 +72,7 @@ export const TrustedAppsPage = memo(() => {
         />
       }
       headerBackComponent={backButton}
-      subtitle={
-        <FormattedMessage
-          id="xpack.securitySolution.trustedapps.list.pageSubTitle"
-          defaultMessage="View and configure trusted applications"
-        />
-      }
+      subtitle={ABOUT_TRUSTED_APPS}
       actions={addButton}
     >
       <TrustedAppsNotifications />

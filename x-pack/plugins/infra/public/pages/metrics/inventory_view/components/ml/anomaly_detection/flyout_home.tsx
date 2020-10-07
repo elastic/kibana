@@ -232,7 +232,7 @@ const CreateJobTab = (props: CreateJobTab) => {
             }
             description={
               <FormattedMessage
-                defaultMessage="Detect anomalies for memory usage and network traffic."
+                defaultMessage="Detect anomalies for memory usage and network traffic on hosts."
                 id="xpack.infra.ml.anomalyFlyout.create.hostDescription"
               />
             }
@@ -270,7 +270,7 @@ const CreateJobTab = (props: CreateJobTab) => {
             }
             description={
               <FormattedMessage
-                defaultMessage="Detect anomalies for memory usage and network traffic."
+                defaultMessage="Detect anomalies for memory usage and network traffic on Kubernetes Pods."
                 id="xpack.infra.ml.anomalyFlyout.create.k8sDescription"
               />
             }

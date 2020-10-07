@@ -164,7 +164,7 @@ export interface DashboardStart {
     R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
   >(
     type: string,
-    options?: AttributeServiceOptions<A>
+    options: AttributeServiceOptions<A>
   ) => AttributeService<A, V, R>;
 }
 
@@ -482,12 +482,10 @@ export class DashboardPlugin
         new AttributeService(
           type,
           showSaveModal,
-          core.savedObjects.client,
-          core.overlays,
           core.i18n.Context,
           core.notifications.toasts,
-          embeddable.getEmbeddableFactory,
-          options
+          options,
+          embeddable.getEmbeddableFactory
         ),
     };
   }

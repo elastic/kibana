@@ -6,6 +6,7 @@
 
 import { Service, IRouter, AlertingSetup } from '../types';
 import { register as registerIndexThreshold } from './index_threshold';
+import { register as registerGeoThreshold } from './geo_threshold';
 
 interface RegisterBuiltInAlertTypesParams {
   service: Service;
@@ -16,4 +17,5 @@ interface RegisterBuiltInAlertTypesParams {
 
 export function registerBuiltInAlertTypes(params: RegisterBuiltInAlertTypesParams) {
   registerIndexThreshold(params);
+  registerGeoThreshold(params);
 }

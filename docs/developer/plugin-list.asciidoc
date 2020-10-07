@@ -155,6 +155,11 @@ It also provides a stateful version of it on the start contract.
 |WARNING: Missing README.
 
 
+|{kib-repo}blob/{branch}/src/plugins/security_oss/README.md[securityOss]
+|securityOss is responsible for educating users about Elastic's free security features,
+so they can properly protect the data within their clusters.
+
+
 |{kib-repo}blob/{branch}/src/plugins/share/README.md[share]
 |Replaces the legacy ui/share module for registering share context menus.
 
@@ -497,7 +502,7 @@ using the CURL scripts in the scripts folder.
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/triggers_actions_ui/README.md[triggers_actions_ui]
+|{kib-repo}blob/{branch}/x-pack/plugins/triggers_actions_ui/README.md[triggersActionsUi]
 |The Kibana alerts and actions UI plugin provides a user interface for managing alerts and actions.
 As a developer you can reuse and extend built-in alerts and actions UI functionality:
 

@@ -6,6 +6,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
+import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
 import {
   AppMountParameters,
   AppUpdater,
@@ -25,6 +26,7 @@ export interface ObservabilityPluginSetup {
 
 export interface ObservabilityPluginSetupDeps {
   home?: HomePublicPluginSetup;
+  data: DataPublicPluginSetup;
 }
 
 export type ObservabilityPluginStart = void;
