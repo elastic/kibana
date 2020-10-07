@@ -41,6 +41,7 @@ import {
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
 import { deleteKibanaSavedObjectsAssets, removeInstallation } from './remove';
 import {
+  ingestErrorToResponseOptions,
   IngestManagerError,
   PackageOperationNotSupportedError,
   PackageOutdatedError,
@@ -49,7 +50,7 @@ import { getPackageSavedObjects } from './get';
 import { installTransform } from '../elasticsearch/transform/install';
 import { appContextService } from '../../app_context';
 import { loadArchivePackage } from '../archive';
-import { isCriticalInstallError } from './bulk_install_packages';
+import { isBulkInstallError, isCriticalInstallError } from './bulk_install_packages';
 
 export async function installLatestPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -73,6 +74,8 @@ export async function ensureInstalledDefaultPackages(
   savedObjectsClient: SavedObjectsClientContract,
   callCluster: CallESAsCurrentUser
 ): Promise<Installation[]> {
+  const logger = appContextService.getLogger();
+
   const installations = [];
   const bulkResponse = await bulkInstallPackages({
     savedObjectsClient,
@@ -83,6 +86,11 @@ export async function ensureInstalledDefaultPackages(
   for (const resp of bulkResponse) {
     if (isCriticalInstallError(resp)) {
       throw resp.error;
+    } else if (isBulkInstallError(resp)) {
+      const { body } = ingestErrorToResponseOptions(resp.error);
+      logger.warn(
+        `failure occurred while bulk installing the ${resp.name} package: ${body.message}`
+      );
     } else {
       installations.push(getInstallation({ savedObjectsClient, pkgName: resp.name }));
     }
