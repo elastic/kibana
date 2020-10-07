@@ -21,7 +21,7 @@ import {
 
 import * as i18n from './translations';
 import { useKibana } from '../../../../common/lib/kibana';
-import { ESQueryStringQuery } from '../../../../../common/typed_json';
+import { ESQuery } from '../../../../../common/typed_json';
 import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
 import { FieldValueQueryBar } from '../query_bar';
 import { Filter } from '../../../../../../../../src/plugins/data/common/es_query';
@@ -68,9 +68,9 @@ export const PreviewQuery = ({
   const [showHistogram, setShowHistogram] = useState(false);
   const [timeframe, setTimeframe] = useState<Unit>('h');
   const [warnings, setWarnings] = useState<string[]>([]);
-  const [queryFilter, setQueryFilter] = useState<ESQueryStringQuery | undefined>(undefined);
-  const [toTime, setTo] = useState('');
-  const [fromTime, setFrom] = useState('');
+  const [queryFilter, setQueryFilter] = useState<ESQuery | undefined>(undefined);
+  const [toTime, setTo] = useState(formatDate('now-1h'));
+  const [fromTime, setFrom] = useState(formatDate('now'));
   const {
     error: eqlError,
     start: startEql,
@@ -89,6 +89,10 @@ export const PreviewQuery = ({
     setTo(to);
     setFrom(from);
   }, [timeframe]);
+
+  const handleSetWarnings = useCallback((toAdd: string[]) => {
+    setWarnings((prev) => [...prev, ...toAdd]);
+  }, []);
 
   const handlePreviewEqlQuery = useCallback((): void => {
     startEql({
@@ -110,21 +114,13 @@ export const PreviewQuery = ({
 
   const handlePreviewClicked = useCallback((): void => {
     handleCalculateTimeRange();
+    setWarnings([]);
 
     if (ruleType === 'eql') {
       setShowHistogram(true);
       handlePreviewEqlQuery();
     } else {
-      const builtFilterQuery = {
-        ...((getQueryFilter(
-          queryString,
-          language,
-          filters,
-          index,
-          [],
-          true
-        ) as unknown) as ESQueryStringQuery),
-      };
+      const builtFilterQuery = getQueryFilter(queryString, language, filters, index, [], true);
       if (builtFilterQuery != null) {
         setShowHistogram(true);
       }
@@ -209,7 +205,11 @@ export const PreviewQuery = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <PreviewButton fill isDisabled={isDisabled} onClick={handlePreviewClicked}>
+            <PreviewButton
+              fill
+              isDisabled={eqlQueryLoading || isDisabled}
+              onClick={handlePreviewClicked}
+            >
               {i18n.PREVIEW_LABEL}
             </PreviewButton>
           </EuiFlexItem>
@@ -231,12 +231,15 @@ export const PreviewQuery = ({
           from={fromTime}
           to={toTime}
           threshold={threshold}
+          interval={timeframe}
+          onSetWarning={handleSetWarnings}
         />
       )}
       {ruleType === 'eql' && eqlQueryResult != null && showHistogram && !eqlQueryLoading && (
         <PreviewEqlQueryHistogram
           to={toTime}
           from={fromTime}
+          query={queryString}
           totalHits={eqlQueryResult.totalCount}
           data={eqlQueryResult.data}
           inspect={eqlQueryResult.inspect}
