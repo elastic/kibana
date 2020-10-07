@@ -30,6 +30,7 @@ export function RumHome() {
             wrap
             style={{ flexWrap: 'wrap-reverse' }}
             justifyContent="flexEnd"
+            gutterSize="s"
           >
             <MainFilters />
             <EuiFlexItem grow={false}>

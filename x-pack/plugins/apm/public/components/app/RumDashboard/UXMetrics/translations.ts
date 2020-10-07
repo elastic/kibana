@@ -34,3 +34,11 @@ export const SUM_LONG_TASKS = i18n.translate(
     defaultMessage: 'Total long tasks duration',
   }
 );
+
+export const getPercentileLabel = (value: number) =>
+  i18n.translate('xpack.apm.ux.percentiles.label', {
+    defaultMessage: '{value}th Perc.',
+    values: {
+      value,
+    },
+  });
