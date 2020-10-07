@@ -288,7 +288,7 @@ xpack.security.audit.ignore_filters:
 | List of values matched against the `event.outcome` field of an audit event. See https://www.elastic.co/guide/en/ecs/current/ecs-allowed-values-event-outcome.html[ECS outcome field] for allowed values.
 
 | `xpack.security.audit.appender` (beta)
-| Optional. Specifies where audit logs should be written to and how they should be formatted. *Default:* console
+| Optional. Specifies where audit logs should be written to and how they should be formatted.
 
 2+a|
 [NOTE]
@@ -311,11 +311,11 @@ xpack.security.audit.appender:
 [cols="2*<"]
 |===
 | `xpack.security.audit.appender.kind` (beta)
-| Mandatory. Specifies where audit logs should be written to. Allowed values are `console` or `file` appender.
+| Mandatory. Specifies where audit logs should be written to. Allowed values are `console` or `file`.
 |===
 
 [float]
-[[file-appender-settings]]
+[[audit-logging-file-appender-settings]]
 ===== File appender settings (beta)
 
 The file appender can be configured using the following settings:
@@ -330,7 +330,7 @@ The file appender can be configured using the following settings:
 |===
 
 [float]
-[[pattern-layout-settings]]
+[[audit-logging-pattern-layout-settings]]
 ===== Pattern layout settings (beta)
 
 The pattern layout can be configured using the following settings:

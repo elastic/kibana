@@ -35,7 +35,9 @@ multiple audit events. The following is a list of the events that can be generat
                                              objects when using a role with <<kibana-privileges>>
 |======
 
-==== ECS audit events (beta)
+==== ECS audit events
+
+beta[]
 
 [IMPORTANT]
 ============================================================================
@@ -69,7 +71,7 @@ To ensure that a record of every operation is persisted even in case of an unexp
 | 
 | `user_login`
 | `failure`
-| Failed login attemp (e.g. due to invalid credentials)
+| Failed login attempt (e.g. due to invalid credentials)
 
 | `database`
 | `creation`
