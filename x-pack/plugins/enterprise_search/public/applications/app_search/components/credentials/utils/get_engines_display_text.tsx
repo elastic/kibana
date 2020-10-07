@@ -11,11 +11,9 @@ import { IApiToken } from '../types';
 export const getEnginesDisplayText = (apiToken: IApiToken): JSX.Element | string => {
   const { type, access_all_engines: accessAll, engines = [] } = apiToken;
   const engineList = () => (
-    <ul className="credentials-engine-list">
+    <ul>
       {engines.map((engine) => (
-        <li key={engine} className="credentials-engine-list__engine">
-          {engine}
-        </li>
+        <li key={engine}>{engine}</li>
       ))}
     </ul>
   );
