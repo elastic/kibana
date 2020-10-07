@@ -86,7 +86,7 @@ export function KeyUXMetrics({ data, loading }: Props) {
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="s"
-          title={formatToSec(longTaskData?.longestLongTask)}
+          title={formatToSec(longTaskData?.longestLongTask, 'ms')}
           description={LONGEST_LONG_TASK}
           isLoading={status !== 'success'}
         />
@@ -94,7 +94,7 @@ export function KeyUXMetrics({ data, loading }: Props) {
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="s"
-          title={formatToSec(longTaskData?.sumOfLongTasks)}
+          title={formatToSec(longTaskData?.sumOfLongTasks, 'ms')}
           description={SUM_LONG_TASKS}
           isLoading={status !== 'success'}
         />
