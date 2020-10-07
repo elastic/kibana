@@ -2963,7 +2963,7 @@ exports[`Header renders 1`] = `
                     navigateToApp={[MockFunction]}
                   >
                     <a
-                      aria-label="Go to home page"
+                      aria-label="Elastic home"
                       className="euiHeaderLogo"
                       data-test-subj="logo"
                       href="/"
