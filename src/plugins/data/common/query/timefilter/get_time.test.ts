@@ -46,7 +46,7 @@ describe('get_time', () => {
       );
       expect(filter!.range.date).toEqual({
         gte: '1940-02-01T00:00:00.000Z',
-        lte: '2000-02-01T00:00:00.000Z',
+        lt: '2000-02-01T00:00:00.000Z',
         format: 'strict_date_optional_time',
       });
       clock.restore();
@@ -84,7 +84,7 @@ describe('get_time', () => {
       );
       expect(filter!.range.myCustomDate).toEqual({
         gte: '1940-02-01T00:00:00.000Z',
-        lte: '2000-02-01T00:00:00.000Z',
+        lt: '2000-02-01T00:00:00.000Z',
         format: 'strict_date_optional_time',
       });
       clock.restore();
