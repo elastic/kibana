@@ -5,12 +5,7 @@
  */
 
 import { SavedObjectsClientContract, SavedObjectsFindOptions } from 'src/core/server';
-import {
-  Installable,
-  isPackageLimited,
-  RegistryPackage,
-  RegistrySearchResult,
-} from '../../../../common';
+import { isPackageLimited } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import { Installation, InstallationStatus, PackageInfo, KibanaAssetType } from '../../../types';
 import * as Registry from '../registry';
