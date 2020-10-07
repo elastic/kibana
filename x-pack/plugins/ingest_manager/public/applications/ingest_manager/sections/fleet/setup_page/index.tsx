@@ -239,7 +239,7 @@ xpack.security.authc.api_key.enabled: true`}
               values={{
                 encryptionKeyLink: (
                   <EuiLink
-                    href="https://www.elastic.co/guide/en/kibana/current/ingest-manager-settings-kb.html"
+                    href="https://www.elastic.co/guide/en/kibana/current/fleet-settings-kb.html"
                     target="_blank"
                     external
                   >
