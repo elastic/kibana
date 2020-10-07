@@ -57,10 +57,10 @@ export const getApiComponents = ({ cache }: GetApiComponentsOptions): TaggingApi
     getTableColumnDefinition: () => {
       return {
         field: 'references',
-        name: i18n.translate('savedObjectsTagging.uiApi.table.columnTagsName', {
+        name: i18n.translate('xpack.savedObjectsTagging.uiApi.table.columnTagsName', {
           defaultMessage: 'Tags',
         }),
-        description: i18n.translate('savedObjectsTagging.uiApi.table.columnTagsDescription', {
+        description: i18n.translate('xpack.savedObjectsTagging.uiApi.table.columnTagsDescription', {
           defaultMessage: 'Tags associated with this saved object',
         }),
         sortable: false,
