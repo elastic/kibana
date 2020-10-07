@@ -30,13 +30,6 @@
             }
           },
           "type": "text"
-        },
-        "runtime_customer_ssn": {
-          "type": "runtime",
-          "runtime_type": "keyword",
-          "script": {
-            "source": "emit(doc['customer_ssn'].value + ' calculated at runtime')"
-          }
         }
       }
     },
