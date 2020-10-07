@@ -96,16 +96,17 @@ export async function installIndexPatterns(
 
   const packageVersionsToFetch = [...installedPackages];
   if (pkgName && pkgVersion) {
-    // add this package to the array if it doesn't already exist
-    const outDatedPkg = packageVersionsToFetch.findIndex(
-      (pkg) => pkg.pkgName === pkgName && pkg.pkgVersion !== pkgVersion
-    );
-    // this may be removed if we add the package to saved objects before installing index patterns
-    // otherwise this is a first time install
+    const packageToInstall = packageVersionsToFetch.findIndex((pkg) => pkg.pkgName === pkgName);
 
-    // If we found a package in the list that does not match the version we are trying to install, switch to our version
-    if (outDatedPkg !== -1) {
-      packageVersionsToFetch[outDatedPkg].pkgVersion = pkgVersion;
+    if (packageToInstall !== -1) {
+      // set the version to the one we want to install
+      // if we're installing for the first time the number will be the same
+      // if this is an upgrade then we'll be modifying the version number to the upgrade version
+      packageVersionsToFetch[packageToInstall].pkgVersion = pkgVersion;
+    } else {
+      // this will likely not happen because the saved objects should already have the package we're trying
+      // install which means that it should have been found in the case above
+      packageVersionsToFetch.push({ pkgName, pkgVersion });
     }
   }
   // get each package's registry info
