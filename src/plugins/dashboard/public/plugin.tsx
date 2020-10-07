@@ -452,10 +452,11 @@ export class DashboardPlugin
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, clonePanelAction.id);
 
     if (this.dashboardFeatureFlagConfig?.allowByValueEmbeddables) {
-      const addToLibraryAction = new AddToLibraryAction();
+      const addToLibraryAction = new AddToLibraryAction(notifications.toasts);
       uiActions.registerAction(addToLibraryAction);
       uiActions.attachAction(CONTEXT_MENU_TRIGGER, addToLibraryAction.id);
-      const unlinkFromLibraryAction = new UnlinkFromLibraryAction();
+
+      const unlinkFromLibraryAction = new UnlinkFromLibraryAction(notifications.toasts);
       uiActions.registerAction(unlinkFromLibraryAction);
       uiActions.attachAction(CONTEXT_MENU_TRIGGER, unlinkFromLibraryAction.id);
 

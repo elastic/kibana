@@ -17,7 +17,16 @@
  * under the License.
  */
 import React, { useState } from 'react';
-import { EuiBadge, EuiButton, EuiPopover, EuiPopoverFooter, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiPopoverFooter,
+  EuiPopoverTitle,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LibraryNotificationActionContext, UnlinkFromLibraryAction } from '.';
 
@@ -43,23 +52,19 @@ export function LibraryNotificationPopover({
     <EuiPopover
       ownFocus
       button={
-        <EuiBadge
+        <EuiButtonIcon
           data-test-subj={`embeddablePanelNotification-${id}`}
           iconType={icon}
-          style={{ marginTop: '2px', marginRight: '4px' }}
-          color="hollow"
+          style={{ marginTop: '-1px' }}
+          color="text"
           onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
-          onClickAriaLabel={i18n.translate('dashboard.panel.LibraryNotificationAriaLabel', {
-            defaultMessage: 'View library information and unlink this panel',
-          })}
-        >
-          {displayName}
-        </EuiBadge>
+        />
       }
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
       anchorPosition="upCenter"
     >
+      <EuiPopoverTitle>{displayName}</EuiPopoverTitle>
       <div style={{ width: '300px' }}>
         <EuiText>
           <p>
@@ -71,14 +76,24 @@ export function LibraryNotificationPopover({
         </EuiText>
       </div>
       <EuiPopoverFooter>
-        <EuiButton
-          data-test-subj={'libraryNotificationUnlinkButton'}
-          fullWidth
-          size="s"
-          onClick={() => unlinkAction.execute({ embeddable })}
+        <EuiFlexGroup
+          gutterSize="s"
+          alignItems="center"
+          justifyContent="flexEnd"
+          responsive={false}
+          wrap={true}
         >
-          {unlinkAction.getDisplayName({ embeddable })}
-        </EuiButton>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj={'libraryNotificationUnlinkButton'}
+              size="s"
+              fill
+              onClick={() => unlinkAction.execute({ embeddable })}
+            >
+              {unlinkAction.getDisplayName({ embeddable })}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPopoverFooter>
     </EuiPopover>
   );

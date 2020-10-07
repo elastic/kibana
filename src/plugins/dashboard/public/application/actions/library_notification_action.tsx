@@ -39,7 +39,7 @@ export class LibraryNotificationAction implements ActionByType<typeof ACTION_LIB
   constructor(private unlinkAction: UnlinkFromLibraryAction) {}
 
   private displayName = i18n.translate('dashboard.panel.LibraryNotification', {
-    defaultMessage: 'Library',
+    defaultMessage: 'Visualize Library',
   });
 
   private icon = 'folderCheck';
