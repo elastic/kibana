@@ -65,7 +65,7 @@ export const DiscoverGridFlyout = function DiscoverGridInner({
         <EuiFlyoutHeader hasBorder>
           <EuiFlexGroup alignItems="baseline" justifyContent="spaceBetween">
             <EuiFlexItem>
-              <EuiTitle className="dscTable__flyoutHeader">
+              <EuiTitle size="s" className="dscTable__flyoutHeader">
                 <h2>
                   <EuiIcon type="expand" size="m" />{' '}
                   {i18n.translate('discover.grid.tableRow.detailHeading', {
@@ -77,7 +77,12 @@ export const DiscoverGridFlyout = function DiscoverGridInner({
           </EuiFlexGroup>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexEnd">
+          <EuiFlexGroup
+            direction="column"
+            responsive={false}
+            gutterSize="none"
+            alignItems="flexEnd"
+          >
             {indexPattern.isTimeBased() && (
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty

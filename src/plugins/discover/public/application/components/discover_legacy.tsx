@@ -18,13 +18,19 @@
  */
 import React, { useState, useCallback, useEffect } from 'react';
 import classNames from 'classnames';
-import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiButtonToggle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHideFor,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { IUiSettingsClient, MountPoint } from 'kibana/public';
 import { HitsCounter } from './hits_counter';
 import { TimechartHeader } from './timechart_header';
-import { DiscoverSidebar } from './sidebar';
 import { getServices, IndexPattern } from '../../kibana_services';
 // @ts-ignore
 import { DiscoverNoResults } from '../angular/directives/no_results';
@@ -49,6 +55,7 @@ import { SavedSearch } from '../../saved_searches';
 import { SavedObject } from '../../../../../core/types';
 import { Vis } from '../../../../visualizations/public';
 import { TopNavMenuData } from '../../../../navigation/public';
+import { DiscoverSidebarResponsive } from './sidebar';
 
 export interface DiscoverLegacyProps {
   addColumn: (column: string) => void;
@@ -122,6 +129,7 @@ export function DiscoverLegacy({
   updateSavedQueryId,
   vis,
 }: DiscoverLegacyProps) {
+  const [toggleOn, toggleChart] = useState(true);
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
   const { TopNavMenu } = getServices().navigation.ui;
   const { savedSearch, indexPatternList } = opts;
@@ -148,11 +156,6 @@ export function DiscoverLegacy({
     closed: isSidebarClosed,
   });
 
-  const mainSectionClassName = classNames({
-    'col-md-10': !isSidebarClosed,
-    'col-md-12': isSidebarClosed,
-  });
-
   return (
     <I18nProvider>
       <div className="dscAppContainer" data-fetch-counter={fetchCounter}>
@@ -172,152 +175,165 @@ export function DiscoverLegacy({
           showSearchBar={true}
           useDefaultBehaviors={true}
         />
-        <main className="container-fluid">
-          <div className="row">
-            <div
-              className={`col-md-2 dscSidebar__container dscCollapsibleSidebar ${sidebarClassName}`}
-              id="discover-sidebar"
-              data-test-subj="discover-sidebar"
-            >
-              {!isSidebarClosed && (
-                <div className="dscFieldChooser">
-                  <DiscoverSidebar
-                    columns={state.columns || []}
-                    fieldCounts={fieldCounts}
-                    hits={rows}
-                    indexPatternList={indexPatternList}
-                    onAddField={addColumn}
-                    onAddFilter={onAddFilter}
-                    onRemoveField={onRemoveColumn}
-                    selectedIndexPattern={searchSource && searchSource.getField('index')}
-                    setIndexPattern={setIndexPattern}
-                  />
-                </div>
-              )}
-              <EuiButtonIcon
-                iconType={isSidebarClosed ? 'menuRight' : 'menuLeft'}
-                iconSize="m"
-                size="s"
-                onClick={() => setIsSidebarClosed(!isSidebarClosed)}
-                data-test-subj="collapseSideBarButton"
-                aria-controls="discover-sidebar"
-                aria-expanded={isSidebarClosed ? 'false' : 'true'}
-                aria-label="Toggle sidebar"
-                className="dscCollapsibleSidebar__collapseButton"
+        <div className="dscApp__frame">
+          <DiscoverSidebarResponsive
+            columns={state.columns || []}
+            fieldCounts={fieldCounts}
+            hits={rows}
+            indexPatternList={indexPatternList}
+            onAddField={addColumn}
+            onAddFilter={onAddFilter}
+            onRemoveField={onRemoveColumn}
+            selectedIndexPattern={searchSource && searchSource.getField('index')}
+            setIndexPattern={setIndexPattern}
+            legacy={true}
+            sidebarClassName={sidebarClassName}
+          />
+          <EuiHideFor sizes={['xs', 's']}>
+            <EuiButtonIcon
+              iconType={isSidebarClosed ? 'menuRight' : 'menuLeft'}
+              iconSize="m"
+              size="s"
+              onClick={() => setIsSidebarClosed(!isSidebarClosed)}
+              data-test-subj="collapseSideBarButton"
+              aria-controls="discover-sidebar"
+              aria-expanded={isSidebarClosed ? 'false' : 'true'}
+              aria-label="Toggle sidebar"
+              className={`dscCollapsibleSidebar__collapseButton ${sidebarClassName}`}
+            />
+          </EuiHideFor>
+          <div className="dscWrapper__content">
+            {resultState === 'none' && (
+              <DiscoverNoResults
+                timeFieldName={opts.timefield}
+                queryLanguage={state.query ? state.query.language : ''}
               />
-            </div>
-            <div className={`dscWrapper ${mainSectionClassName}`}>
-              {resultState === 'none' && (
-                <DiscoverNoResults
-                  timeFieldName={opts.timefield}
-                  queryLanguage={state.query ? state.query.language : ''}
-                />
-              )}
-              {resultState === 'uninitialized' && <DiscoverUninitialized onRefresh={fetch} />}
-              {/* @TODO: Solved in the Angular way to satisfy functional test - should be improved*/}
-              <span style={{ display: resultState !== 'loading' ? 'none' : '' }}>
-                {fetchError && <DiscoverFetchError fetchError={fetchError} />}
-                <div className="dscOverlay" style={{ display: fetchError ? 'none' : '' }}>
-                  <LoadingSpinner />
+            )}
+            {resultState === 'uninitialized' && <DiscoverUninitialized onRefresh={fetch} />}
+            {/* @TODO: Solved in the Angular way to satisfy functional test - should be improved*/}
+            <span style={{ display: resultState !== 'loading' ? 'none' : '' }}>
+              {fetchError && <DiscoverFetchError fetchError={fetchError} />}
+              <div className="dscLoading" style={{ display: fetchError ? 'none' : '' }}>
+                <LoadingSpinner />
+              </div>
+            </span>
+            {resultState === 'ready' && (
+              <>
+                <SkipBottomButton onClick={onSkipBottomButtonClick} />
+                <div className="dscResultCount">
+                  <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                    <EuiFlexItem
+                      grow={false}
+                      className="dscResuntCount__title eui-textTruncate eui-textNoWrap"
+                    >
+                      <HitsCounter
+                        hits={hits > 0 ? hits : 0}
+                        showResetButton={!!(savedSearch && savedSearch.id)}
+                        onResetQuery={resetQuery}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem className="dscResultCount__actions">
+                      <TimechartHeader
+                        dateFormat={opts.config.get('dateFormat')}
+                        timeRange={timeRange}
+                        options={search.aggs.intervalOptions}
+                        onChangeInterval={onChangeInterval}
+                        stateInterval={state.interval || ''}
+                        bucketInterval={bucketInterval}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem className="dscResultCount__toggle" grow={false}>
+                      <EuiButtonToggle
+                        label={toggleOn ? 'Hide chart' : 'Show chart'}
+                        iconType={toggleOn ? 'eyeClosed' : 'eye'}
+                        onChange={(e: any) => {
+                          toggleChart(e.target.checked);
+                        }}
+                        isSelected={toggleOn}
+                        isEmpty
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </div>
-              </span>
-              {resultState === 'ready' && (
-                <div className="dscWrapper__content">
-                  <SkipBottomButton onClick={onSkipBottomButtonClick} />
-                  <HitsCounter
-                    hits={hits > 0 ? hits : 0}
-                    showResetButton={!!(savedSearch && savedSearch.id)}
-                    onResetQuery={resetQuery}
-                  />
-                  {opts.timefield && (
-                    <TimechartHeader
-                      dateFormat={opts.config.get('dateFormat')}
-                      timeRange={timeRange}
-                      options={search.aggs.intervalOptions}
-                      onChangeInterval={onChangeInterval}
-                      stateInterval={state.interval || ''}
-                      bucketInterval={bucketInterval}
-                    />
-                  )}
 
-                  {opts.timefield && (
-                    <section
-                      aria-label={i18n.translate('discover.histogramOfFoundDocumentsAriaLabel', {
-                        defaultMessage: 'Histogram of found documents',
-                      })}
-                      className="dscTimechart"
-                    >
-                      {vis && rows.length !== 0 && (
-                        <div className="dscHistogram" data-test-subj="discoverChart">
-                          <DiscoverHistogram
-                            chartData={histogramData}
-                            timefilterUpdateHandler={timefilterUpdateHandler}
-                          />
-                        </div>
-                      )}
-                    </section>
-                  )}
-
-                  <div className="dscResults">
-                    <section
-                      className="dscTable dscTableFixedScroll"
-                      aria-labelledby="documentsAriaLabel"
-                      ref={fixedScrollRef}
-                    >
-                      <h2 className="euiScreenReaderOnly" id="documentsAriaLabel">
-                        <FormattedMessage
-                          id="discover.documentsAriaLabel"
-                          defaultMessage="Documents"
+                {toggleOn && opts.timefield && (
+                  <section
+                    aria-label={i18n.translate('discover.histogramOfFoundDocumentsAriaLabel', {
+                      defaultMessage: 'Histogram of found documents',
+                    })}
+                    className="dscTimechart"
+                  >
+                    {vis && rows.length !== 0 && (
+                      <div className="dscHistogram" data-test-subj="discoverChart">
+                        <DiscoverHistogram
+                          chartData={histogramData}
+                          timefilterUpdateHandler={timefilterUpdateHandler}
                         />
-                      </h2>
-                      {rows && rows.length && (
-                        <div className="dscDiscover">
-                          <DocTableLegacy
-                            columns={state.columns || []}
-                            indexPattern={indexPattern}
-                            minimumVisibleRows={minimumVisibleRows}
-                            rows={rows}
-                            sort={state.sort || []}
-                            searchDescription={opts.savedSearch.description}
-                            searchTitle={opts.savedSearch.lastSavedTitle}
-                            onAddColumn={addColumn}
-                            onFilter={onAddFilter}
-                            onMoveColumn={onMoveColumn}
-                            onRemoveColumn={onRemoveColumn}
-                            onSort={onSort}
-                          />
-                          <a tabIndex={0} id="discoverBottomMarker">
-                            &#8203;
-                          </a>
-                          {rows.length === opts.sampleSize && (
-                            <div
-                              className="dscTable__footer"
-                              data-test-subj="discoverDocTableFooter"
+                      </div>
+                    )}
+                  </section>
+                )}
+
+                <div className="dscResults">
+                  <section
+                    className="dscTable dscTableFixedScroll"
+                    aria-labelledby="documentsAriaLabel"
+                    ref={fixedScrollRef}
+                  >
+                    <h2 className="euiScreenReaderOnly" id="documentsAriaLabel">
+                      <FormattedMessage
+                        id="discover.documentsAriaLabel"
+                        defaultMessage="Documents"
+                      />
+                    </h2>
+                    {rows && rows.length && (
+                      <div className="dscDiscover">
+                        <DocTableLegacy
+                          columns={state.columns || []}
+                          indexPattern={indexPattern}
+                          minimumVisibleRows={minimumVisibleRows}
+                          rows={rows}
+                          sort={state.sort || []}
+                          searchDescription={opts.savedSearch.description}
+                          searchTitle={opts.savedSearch.lastSavedTitle}
+                          onAddColumn={addColumn}
+                          onFilter={onAddFilter}
+                          onMoveColumn={onMoveColumn}
+                          onRemoveColumn={onRemoveColumn}
+                          onSort={onSort}
+                        />
+                        <a tabIndex={0} id="discoverBottomMarker">
+                          &#8203;
+                        </a>
+                        {rows.length === opts.sampleSize && (
+                          <div className="dscTable__footer" data-test-subj="discoverDocTableFooter">
+                            <FormattedMessage
+                              id="discover.howToSeeOtherMatchingDocumentsDescription"
+                              defaultMessage="These are the first {sampleSize} documents matching
+                  your search, refine your search to see others."
+                              values={{ sampleSize: opts.sampleSize }}
+                            />
+
+                            <EuiButtonEmpty
+                              onClick={(ev) => {
+                                ev.currentTarget.parentNode.parentNode.parentNode.scrollTo(0, 0);
+                              }}
                             >
                               <FormattedMessage
-                                id="discover.howToSeeOtherMatchingDocumentsDescription"
-                                defaultMessage="These are the first {sampleSize} documents matching
-                  your search, refine your search to see others."
-                                values={{ sampleSize: opts.sampleSize }}
+                                id="discover.backToTopLinkText"
+                                defaultMessage="Back to top."
                               />
-
-                              <EuiButtonEmpty onClick={() => window.scrollTo(0, 0)}>
-                                <FormattedMessage
-                                  id="discover.backToTopLinkText"
-                                  defaultMessage="Back to top."
-                                />
-                              </EuiButtonEmpty>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </section>
-                  </div>
+                            </EuiButtonEmpty>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </section>
                 </div>
-              )}
-            </div>
+              </>
+            )}
           </div>
-        </main>
+        </div>
       </div>
     </I18nProvider>
   );

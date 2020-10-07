@@ -6,12 +6,25 @@
 }
 
 .dscAppContainer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
   > * {
     position: relative;
   }
 }
+
 discover-app {
   flex-grow: 1;
+}
+
+.dscHitsCounter,
+.dscTimeChartHeader {
+  flex-grow: 0;
 }
 
 .dscApp {
@@ -36,14 +49,13 @@ discover-app {
   flex-grow: 1;
   display: flex;
   overflow: hidden;
-}
-
-.dscApp__sidebar {
-  flex-grow: 0;
-  flex-basis: auto;
-  min-width: 250px;
-  display: flex;
-  flex-direction: column;
+  @include euiBreakpoint('xs', 's') {
+    flex-grow: 0;
+    flex-wrap: wrap;
+    margin-left: 0;
+    margin-right: 0;
+    overflow-y: auto;
+  }
 }
 
 .dscApp__content {
@@ -56,7 +68,7 @@ discover-app {
 
 .dscHistogram {
   display: flex;
-  height: 200px;
+  height: $euiSize * 12.5;
   padding: $euiSizeS;
 }
 // new slimmer layout for data grid
@@ -86,6 +98,15 @@ discover-app {
   display: flex;
   overflow: hidden;
 
+  @include euiBreakpoint('m', 'l', 'xl') {
+    margin-right: $euiSize;
+    margin-bottom: $euiSize;
+  }
+
+  @include euiBreakpoint('xs', 's') {
+    margin: $euiSizeS;
+  }
+
   .kbn-table {
     margin-bottom: 0;
   }
@@ -113,18 +134,9 @@ discover-app {
   padding: $euiSizeXS 0;
 }
 
-.dscOverlay {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 20;
-  padding-top: $euiSizeM;
-
-  opacity: 0.75;
+.dscLoading {
   text-align: center;
-  background-color: transparent;
+  padding: $euiSizeL 0;
 }
 
 .dscTable {
@@ -138,10 +150,9 @@ discover-app {
   }
 }
 
-// SASSTODO: replace the padding value with a variable
 .dscTable__footer {
   background-color: $euiColorLightShade;
-  padding: 5px 10px;
+  padding: $euiSizeXS $euiSizeS;
   text-align: center;
 }
 
@@ -150,10 +161,6 @@ discover-app {
   flex-direction: column;
   display: flex;
   overflow: hidden;
-  h3 {
-    margin: -20px 0 10px 0;
-    text-align: center;
-  }
 }
 
 .dscResults__interval {
@@ -196,28 +203,22 @@ discover-app {
   }
 }
 
+.dscCollapsibleSidebar__collapseButton {
+  align-self: flex-start;
+  &:not(.closed) {
+    position: relative;
+    left: -$euiSizeS;
+  }
+}
+
 .dscCollapsibleSidebar {
   position: relative;
   z-index: $euiZLevel1;
-
-  .dscCollapsibleSidebar__collapseButton {
-    position: absolute;
-    top: 0;
-    right: -$euiSizeXL + 4;
-    cursor: pointer;
-    z-index: -1;
-    min-height: $euiSizeM;
-    min-width: $euiSizeM;
-    padding: $euiSizeXS * .5;
-  }
 
   &.closed {
     width: 0 !important;
     border-right-width: 0;
     border-left-width: 0;
-    .dscCollapsibleSidebar__collapseButton {
-      right: -$euiSizeL + 4;
-    }
   }
 }
 
