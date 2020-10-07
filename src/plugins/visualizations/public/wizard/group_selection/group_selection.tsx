@@ -55,6 +55,11 @@ function isVisTypeAlias(type: VisType | VisTypeAlias): type is VisTypeAlias {
 
 function GroupSelection(props: GroupSelectionProps) {
   const visualizeGuideLink = props.docLinks.links.dashboard.guide;
+  const promotedVisGroups = orderBy(
+    [...props.visTypesRegistry.getAliases(), ...props.visTypesRegistry.getByGroup(VisGroups.OTHER)],
+    ['promotion', 'title'],
+    ['asc', 'asc']
+  );
   return (
     <>
       <EuiModalHeader>
@@ -65,28 +70,16 @@ function GroupSelection(props: GroupSelectionProps) {
           />
         </EuiModalHeaderTitle>
       </EuiModalHeader>
-      <EuiModalBody data-test-subj="visNewDialogGroups">
+      <EuiModalBody>
         <EuiSpacer size="s" />
-        <EuiFlexGroup gutterSize="l">
-          {orderBy(props.visTypesRegistry.getAliases(), ['title', ['asc']]).map((visType) => (
+        <EuiFlexGroup gutterSize="l" wrap responsive={false} data-test-subj="visNewDialogGroups">
+          {promotedVisGroups.map((visType) => (
             <VisGroup
               visType={visType}
               key={visType.name}
               onVisTypeSelected={props.onVisTypeSelected}
             />
           ))}
-        </EuiFlexGroup>
-        <EuiSpacer />
-        <EuiFlexGroup gutterSize="l">
-          {orderBy(props.visTypesRegistry.getByGroup(VisGroups.OTHER), ['title', ['asc']]).map(
-            (visType) => (
-              <VisGroup
-                visType={visType}
-                key={visType.name}
-                onVisTypeSelected={props.onVisTypeSelected}
-              />
-            )
-          )}
         </EuiFlexGroup>
         <EuiSpacer size="xl" />
         <EuiSpacer size="xl" />
@@ -113,15 +106,18 @@ function GroupSelection(props: GroupSelectionProps) {
                   }
                 )}
                 icon={<EuiIcon type="heatmap" size="xl" color="secondary" />}
+                className="visNewVisDialog__groupsCard"
               >
                 <EuiLink
                   data-test-subj="visGroupAggBasedExploreLink"
                   onClick={() => props.toggleGroups(false)}
                 >
-                  {i18n.translate('visualizations.newVisWizard.exploreOptionLinkText', {
-                    defaultMessage: 'Explore Options',
-                  })}{' '}
-                  <EuiIcon type="arrowRight" />
+                  <EuiText size="s">
+                    {i18n.translate('visualizations.newVisWizard.exploreOptionLinkText', {
+                      defaultMessage: 'Explore Options',
+                    })}{' '}
+                    <EuiIcon type="sortRight" />
+                  </EuiText>
                 </EuiLink>
               </EuiCard>
             </EuiFlexItem>
@@ -198,6 +194,7 @@ const VisGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
         description={visType.description || ''}
         layout="horizontal"
         icon={<EuiIcon type={visType.icon || 'empty'} size="xl" color="secondary" />}
+        className="visNewVisDialog__groupsCard"
       />
     </EuiFlexItem>
   );

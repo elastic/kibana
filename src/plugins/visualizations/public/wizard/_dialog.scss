@@ -22,6 +22,10 @@
   background-color: transparent;
 }
 
+.visNewVisDialog__groupsCard {
+  width: $euiSizeL * 15.8 !important;
+}
+
 .visNewVisDialog__card {
   width: $euiSizeL * 10 !important;
 }

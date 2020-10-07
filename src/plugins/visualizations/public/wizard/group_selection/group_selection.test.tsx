@@ -38,6 +38,7 @@ describe('GroupSelection', () => {
     {
       name: 'vis1',
       title: 'Vis Type 1',
+      description: 'Vis Type 1',
       stage: 'production',
       group: 'other',
       ...defaultVisTypeParams,
@@ -45,6 +46,7 @@ describe('GroupSelection', () => {
     {
       name: 'vis2',
       title: 'Vis Type 2',
+      description: 'Vis Type 2',
       group: 'other',
       stage: 'production',
       ...defaultVisTypeParams,
@@ -52,8 +54,22 @@ describe('GroupSelection', () => {
     {
       name: 'visWithAliasUrl',
       title: 'Vis with alias Url',
+      description: 'Vis with alias Url',
       stage: 'production',
       group: 'other',
+    },
+    {
+      name: 'visAliasWithPromotion',
+      title: 'Vis alias with promotion',
+      description: 'Vis alias with promotion',
+      stage: 'production',
+      group: 'other',
+      aliasApp: 'anotherApp',
+      aliasPath: '#/anotherUrl',
+      promotion: {
+        description: 'promotion description',
+        buttonText: 'another app',
+      },
     },
   ] as VisType[];
 
@@ -191,5 +207,30 @@ describe('GroupSelection', () => {
     const aggBasedGroupCard = wrapper.find('[data-test-subj="visGroupAggBasedExploreLink"]').at(0);
     aggBasedGroupCard.simulate('click');
     expect(toggleGroups).toHaveBeenCalled();
+  });
+
+  it('should sort promoted visualizations first', () => {
+    const toggleGroups = jest.fn();
+    const wrapper = mountWithIntl(
+      <GroupSelection
+        visTypesRegistry={visTypesRegistry(_visTypes as VisType[])}
+        docLinks={docLinks as DocLinksStart}
+        toggleGroups={toggleGroups}
+        onVisTypeSelected={jest.fn()}
+      />
+    );
+
+    const cards = [
+      ...new Set(
+        wrapper.find('[data-test-subj^="visType-"]').map((card) => card.prop('data-test-subj'))
+      ),
+    ];
+
+    expect(cards).toEqual([
+      'visType-visAliasWithPromotion',
+      'visType-vis1',
+      'visType-vis2',
+      'visType-visWithAliasUrl',
+    ]);
   });
 });
