@@ -15,6 +15,9 @@ import { getListArrayMock } from '../../../../common/detection_engine/schemas/ty
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 
+// @ts-expect-error
+moment.suppressDeprecationWarnings = true;
+
 import {
   generateId,
   parseInterval,
@@ -32,6 +35,7 @@ import {
   createSearchAfterReturnType,
   mergeReturns,
   createTotalHitsFromSearchResult,
+  lastValidDate,
 } from './utils';
 import { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
 import {
@@ -45,6 +49,7 @@ import {
   sampleEmptyDocSearchResults,
   sampleDocSearchResultsNoSortIdNoHits,
   repeatedSearchResultsWithSortId,
+  sampleDocSearchResultsNoSortId,
 } from './__mocks__/es_results';
 import { ShardError } from '../../types';
 
@@ -966,6 +971,57 @@ describe('utils', () => {
       searchResult._shards.failed = 0;
       const { success } = createSearchAfterReturnTypeFromResponse({ searchResult });
       expect(success).toEqual(true);
+    });
+
+    test('It will not set an invalid date time stamp from a non-existent @timestamp when the index is not 100% ECS compliant', () => {
+      const searchResult = sampleDocSearchResultsNoSortId();
+      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = undefined;
+      const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({ searchResult });
+      expect(lastLookBackDate).toEqual(null);
+    });
+
+    test('It will not set an invalid date time stamp from a null @timestamp when the index is not 100% ECS compliant', () => {
+      const searchResult = sampleDocSearchResultsNoSortId();
+      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = null;
+      const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({ searchResult });
+      expect(lastLookBackDate).toEqual(null);
+    });
+
+    test('It will not set an invalid date time stamp from an invalid @timestamp string', () => {
+      const searchResult = sampleDocSearchResultsNoSortId();
+      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = 'invalid';
+      const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({ searchResult });
+      expect(lastLookBackDate).toEqual(null);
+    });
+  });
+
+  describe('lastValidDate', () => {
+    test('It returns undefined if the search result contains a null timestamp', () => {
+      const searchResult = sampleDocSearchResultsNoSortId();
+      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = null;
+      const date = lastValidDate(searchResult);
+      expect(date).toEqual(undefined);
+    });
+
+    test('It returns undefined if the search result contains a undefined timestamp', () => {
+      const searchResult = sampleDocSearchResultsNoSortId();
+      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = undefined;
+      const date = lastValidDate(searchResult);
+      expect(date).toEqual(undefined);
+    });
+
+    test('It returns undefined if the search result contains an invalid string value', () => {
+      const searchResult = sampleDocSearchResultsNoSortId();
+      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = 'invalid value';
+      const date = lastValidDate(searchResult);
+      expect(date).toEqual(undefined);
+    });
+
+    test('It returns correct date time stamp if the search result contains an invalid string value', () => {
+      const searchResult = sampleDocSearchResultsNoSortId();
+      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = 'invalid value';
+      const date = lastValidDate(searchResult);
+      expect(date).toEqual(undefined);
     });
   });
 
