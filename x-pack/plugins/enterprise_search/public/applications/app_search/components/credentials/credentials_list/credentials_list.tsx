@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiBasicTable, EuiBasicTableColumn, EuiButtonIcon, EuiCopy } from '@elastic/eui';
 import { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { useActions, useValues } from 'kea';
@@ -22,7 +22,7 @@ export const CredentialsList: React.FC = () => {
 
   const { apiTokens, meta } = useValues(CredentialsLogic);
 
-  const items = apiTokens.slice().sort(apiTokenSort);
+  const items = useMemo(() => apiTokens.slice().sort(apiTokenSort), [apiTokens]);
 
   const columns: Array<EuiBasicTableColumn<IApiToken>> = [
     {
