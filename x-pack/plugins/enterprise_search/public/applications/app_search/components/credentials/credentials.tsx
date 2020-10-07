@@ -23,20 +23,16 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import {
-  CredentialsLogic,
-  ICredentialsLogicActions,
-  ICredentialsLogicValues,
-} from './credentials_logic';
+import { CredentialsLogic } from './credentials_logic';
 import { externalUrl } from '../../../shared/enterprise_search_url/external_url';
 import { CredentialsList } from './credentials_list';
 
 export const Credentials: React.FC = () => {
   const { initializeCredentialsData, resetCredentials, showCredentialsForm } = useActions(
     CredentialsLogic
-  ) as ICredentialsLogicActions;
+  );
 
-  const { dataLoading } = useValues(CredentialsLogic) as ICredentialsLogicValues;
+  const { dataLoading } = useValues(CredentialsLogic);
 
   useEffect(() => {
     initializeCredentialsData();
