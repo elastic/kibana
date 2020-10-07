@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { getBreakpoint } from '@elastic/eui';
 
 import { InventoryItemType } from '../../../../../common/inventory_models/types';
