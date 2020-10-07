@@ -59,7 +59,7 @@ export function ExpressionWrapper({
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiText size="s">
-                      {getOriginalRequestErrorMessage(error) ?? errorMessage}
+                      {getOriginalRequestErrorMessage(error) || errorMessage}
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>

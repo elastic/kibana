@@ -345,7 +345,7 @@ export const InnerVisualizationWrapper = ({
         reload$={autoRefreshFetch$}
         onEvent={onEvent}
         renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
-          const visibleErrorMessage = getOriginalRequestErrorMessage(error) ?? errorMessage;
+          const visibleErrorMessage = getOriginalRequestErrorMessage(error) || errorMessage;
           return (
             <EuiFlexGroup style={{ maxWidth: '100%' }} direction="column" alignItems="center">
               <EuiFlexItem>
