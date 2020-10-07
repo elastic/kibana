@@ -31,13 +31,13 @@ describe('getModeDisplayText', () => {
     expect(getModeDisplayText({ ...apiToken, read: false, write: true })).toEqual(WRITE_ONLY);
   });
 
-  it('will return "search" if they key is a search key, regardless of read/write state', () => {
+  it('will return "search" if the key is a search key, regardless of read/write state', () => {
     expect(
       getModeDisplayText({ ...apiToken, type: ApiTokenTypes.Search, read: false, write: true })
     ).toEqual(SEARCH_DISPLAY);
   });
 
-  it('will return "--" if they key is an admin key, regardless of read/write state', () => {
+  it('will return "--" if the key is an admin key, regardless of read/write state', () => {
     expect(
       getModeDisplayText({ ...apiToken, type: ApiTokenTypes.Admin, read: false, write: true })
     ).toEqual('--');

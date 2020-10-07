@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import React from 'react';
 import { shallow } from 'enzyme';
 
@@ -42,7 +43,7 @@ describe('getEnginesDisplayText', () => {
     expect(wrapper.find('li').map((e) => e.text())).toEqual(['engine1', 'engine2', 'engine3']);
   });
 
-  it('returns "--" when the token is an admin token, even if access_all_engines is true ', () => {
+  it('returns "--" when the token is an admin token, even if access_all_engines is true', () => {
     const wrapper = shallow(
       <div>
         {getEnginesDisplayText({
