@@ -45,7 +45,10 @@ export function SeriesConfigQueryBarWithIgnoreGlobalFilter({
         <EuiFormRow
           id={htmlId('filterInput')}
           label={
-            <FormattedMessage id="visTypeTimeseries.table.filterLabel" defaultMessage="Filter" />
+            <FormattedMessage
+              id="visTypeTimeseries.seriesConfig.filterLabel"
+              defaultMessage="Filter"
+            />
           }
           fullWidth
         >
@@ -67,7 +70,7 @@ export function SeriesConfigQueryBarWithIgnoreGlobalFilter({
           id={htmlId('seriesIgnoreGlobalFilter')}
           label={
             <FormattedMessage
-              id="visTypeTimeseries.table.optionsTab.ignoreGlobalFilterLabel"
+              id="visTypeTimeseries.seriesConfig.ignoreGlobalFilterLabel"
               defaultMessage="Ignore global filter?"
             />
           }
