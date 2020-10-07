@@ -15,7 +15,7 @@ export const initElasticsearchHelpers = (es) => {
   let templatesCreated = [];
 
   // Indices
-  const getIndex = (index) => es.indices.get({ index });
+  const getIndex = (index) => es.indices.get({ index }).then(({ body }) => body);
 
   const createIndex = (index = getRandomString()) => {
     indicesCreated.push(index);
