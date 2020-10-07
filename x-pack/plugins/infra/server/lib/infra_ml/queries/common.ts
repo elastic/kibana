@@ -40,6 +40,16 @@ export const createTimeRangeFilters = (startTime: number, endTime: number) => [
   },
 ];
 
+export const createAnomalyScoreFilter = (minScore: number) => [
+  {
+    range: {
+      record_score: {
+        gte: minScore,
+      },
+    },
+  },
+];
+
 export const createResultTypeFilters = (resultTypes: Array<'model_plot' | 'record'>) => [
   {
     terms: {

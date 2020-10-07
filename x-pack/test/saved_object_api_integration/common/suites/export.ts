@@ -75,14 +75,17 @@ export const getTestCases = (spaceId?: string): { [key: string]: ExportTestCase 
   multiNamespaceType: {
     title: 'multi-namespace type',
     type: 'sharedtype',
-    successResult: (spaceId === SPACE_1_ID
-      ? [CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, CASES.MULTI_NAMESPACE_ONLY_SPACE_1]
-      : spaceId === SPACE_2_ID
-      ? [CASES.MULTI_NAMESPACE_ONLY_SPACE_2]
-      : [CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1]
-    )
-      .concat([CONFLICT_1_OBJ, CONFLICT_2A_OBJ, CONFLICT_2B_OBJ, CONFLICT_3_OBJ, CONFLICT_4A_OBJ])
-      .flat(),
+    successResult: [
+      CASES.MULTI_NAMESPACE_ALL_SPACES,
+      ...(spaceId === SPACE_1_ID
+        ? [CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, CASES.MULTI_NAMESPACE_ONLY_SPACE_1]
+        : spaceId === SPACE_2_ID
+        ? [CASES.MULTI_NAMESPACE_ONLY_SPACE_2]
+        : [CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1]
+      )
+        .concat([CONFLICT_1_OBJ, CONFLICT_2A_OBJ, CONFLICT_2B_OBJ, CONFLICT_3_OBJ, CONFLICT_4A_OBJ])
+        .flat(),
+    ],
   },
   namespaceAgnosticObject: {
     title: 'namespace-agnostic object',
@@ -112,7 +115,7 @@ const getTestTitle = ({ failure, title }: ExportTestCase) =>
 const EMPTY_RESULT = { exportedCount: 0, missingRefCount: 0, missingReferences: [] };
 
 export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const expectForbiddenBulkGet = expectResponses.forbiddenTypes('bulk_get');
+  const expectSavedObjectForbiddenBulkGet = expectResponses.forbiddenTypes('bulk_get');
   const expectResponseBody = (testCase: ExportTestCase): ExpectResponseBody => async (
     response: Record<string, any>
   ) => {
@@ -121,7 +124,7 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       // In export only, the API uses "bulkGet" or "find" depending on the parameters it receives.
       if (failure.statusCode === 403) {
         // "bulkGet" was unauthorized, which returns a forbidden error
-        await expectForbiddenBulkGet(type)(response);
+        await expectSavedObjectForbiddenBulkGet(type)(response);
       } else if (failure.statusCode === 200) {
         // "find" was unauthorized, which returns an empty result
         expect(response.body).not.to.have.property('error');

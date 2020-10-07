@@ -7,6 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { isEmpty } from 'lodash';
+import { getSeverity } from '../../../common/anomaly_detection';
 import { ANOMALY_SEVERITY } from '../../../../ml/common';
 import { KibanaRequest } from '../../../../../../src/core/server';
 import {
@@ -61,6 +62,8 @@ export function registerTransactionDurationAnomalyAlertType({
         apmActionVariables.serviceName,
         apmActionVariables.transactionType,
         apmActionVariables.environment,
+        apmActionVariables.threshold,
+        apmActionVariables.triggerValue,
       ],
     },
     producer: 'apm',
@@ -148,6 +151,11 @@ export function registerTransactionDurationAnomalyAlertType({
                     field: 'by_field_value',
                   },
                 },
+                record_avg: {
+                  avg: {
+                    field: 'record_score',
+                  },
+                },
               },
             },
           },
@@ -162,6 +170,7 @@ export function registerTransactionDurationAnomalyAlertType({
           services: {
             buckets: Array<{
               key: string;
+              record_avg: { value: number };
               transaction_types: { buckets: Array<{ key: string }> };
             }>;
           };
@@ -173,10 +182,12 @@ export function registerTransactionDurationAnomalyAlertType({
       if (hitCount > 0) {
         function scheduleAction({
           serviceName,
+          severity,
           environment,
           transactionType,
         }: {
           serviceName: string;
+          severity: string;
           environment?: string;
           transactionType?: string;
         }) {
@@ -192,23 +203,31 @@ export function registerTransactionDurationAnomalyAlertType({
           const alertInstance = services.alertInstanceFactory(
             alertInstanceName
           );
+
           alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, {
             serviceName,
             environment,
             transactionType,
+            threshold: selectedOption?.label,
+            thresholdValue: severity,
           });
         }
-
         mlJobs.map((job) => {
           const environment = job.custom_settings?.job_tags?.environment;
           response.aggregations?.services.buckets.forEach((serviceBucket) => {
             const serviceName = serviceBucket.key as string;
+            const severity = getSeverity(serviceBucket.record_avg.value);
             if (isEmpty(serviceBucket.transaction_types?.buckets)) {
-              scheduleAction({ serviceName, environment });
+              scheduleAction({ serviceName, severity, environment });
             } else {
               serviceBucket.transaction_types?.buckets.forEach((typeBucket) => {
                 const transactionType = typeBucket.key as string;
-                scheduleAction({ serviceName, environment, transactionType });
+                scheduleAction({
+                  serviceName,
+                  severity,
+                  environment,
+                  transactionType,
+                });
               });
             }
           });

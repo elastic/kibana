@@ -102,7 +102,7 @@ export const EditProcessorForm: FunctionComponent<Props> = ({
   handleSubmit,
   resetProcessors,
 }) => {
-  const { testPipelineData, setCurrentTestPipelineData } = useTestPipelineContext();
+  const { testPipelineData, testPipelineDataDispatch } = useTestPipelineContext();
   const {
     testOutputPerProcessor,
     config: { selectedDocumentIndex, documents },
@@ -117,7 +117,7 @@ export const EditProcessorForm: FunctionComponent<Props> = ({
     testOutputPerProcessor[selectedDocumentIndex][processor.id];
 
   const updateSelectedDocument = (index: number) => {
-    setCurrentTestPipelineData({
+    testPipelineDataDispatch({
       type: 'updateActiveDocument',
       payload: {
         config: {

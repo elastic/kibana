@@ -35,6 +35,7 @@ export interface MatrixHistogramRequestOptions extends RequestBasicOptions {
   timerange: TimerangeInput;
   histogramType: MatrixHistogramType;
   stackByField: string;
+  threshold?: { field: string | undefined; value: number } | undefined;
   inspect?: Maybe<Inspect>;
 }
 

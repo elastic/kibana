@@ -5,13 +5,14 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { NotificationsStart } from 'src/core/public';
+import { NotificationsStart, StartServicesAccessor } from 'src/core/public';
 import {
   SavedObjectsManagementAction,
   SavedObjectsManagementRecord,
 } from '../../../../../src/plugins/saved_objects_management/public';
 import { ShareSavedObjectsToSpaceFlyout } from './components';
 import { SpacesManager } from '../spaces_manager';
+import { PluginsStart } from '../plugin';
 
 export class ShareToSpaceSavedObjectsManagementAction extends SavedObjectsManagementAction {
   public id: string = 'share_saved_objects_to_space';
@@ -39,7 +40,8 @@ export class ShareToSpaceSavedObjectsManagementAction extends SavedObjectsManage
 
   constructor(
     private readonly spacesManager: SpacesManager,
-    private readonly notifications: NotificationsStart
+    private readonly notifications: NotificationsStart,
+    private readonly getStartServices: StartServicesAccessor<PluginsStart>
   ) {
     super();
   }
@@ -56,6 +58,7 @@ export class ShareToSpaceSavedObjectsManagementAction extends SavedObjectsManage
         savedObject={this.record}
         spacesManager={this.spacesManager}
         toastNotifications={this.notifications.toasts}
+        getStartServices={this.getStartServices}
       />
     );
   };

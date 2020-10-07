@@ -12,9 +12,7 @@ import { EuiCodeBlock, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
 import { dictionaryToArray } from '../../../../../../common/types/common';
 
-import { DataGrid } from '../../../../../shared_imports';
-
-import { useToastNotifications } from '../../../../app_dependencies';
+import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import {
   getPivotQuery,
   getPivotPreviewDevConsoleStatement,
@@ -39,6 +37,9 @@ export const StepDefineSummary: FC<Props> = ({
   formState: { searchString, searchQuery, groupByList, aggList },
   searchItems,
 }) => {
+  const {
+    ml: { DataGrid },
+  } = useAppDependencies();
   const toastNotifications = useToastNotifications();
   const pivotAggsArr = dictionaryToArray(aggList);
   const pivotGroupByArr = dictionaryToArray(groupByList);

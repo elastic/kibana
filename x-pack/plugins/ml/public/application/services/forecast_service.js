@@ -6,15 +6,7 @@
 
 // Service for carrying out requests to run ML forecasts and to obtain
 // data on forecasts that have been performed.
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import get from 'lodash/get';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import find from 'lodash/find';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import each from 'lodash/each';
+import { get, find, each } from 'lodash';
 import { map } from 'rxjs/operators';
 
 import { ml } from './ml_api_service';
@@ -58,7 +50,6 @@ function getForecastsSummary(job, query, earliestMs, maxResults) {
     ml.results
       .anomalySearch({
         size: maxResults,
-        rest_total_hits_as_int: true,
         body: {
           query: {
             bool: {
@@ -69,7 +60,7 @@ function getForecastsSummary(job, query, earliestMs, maxResults) {
         },
       })
       .then((resp) => {
-        if (resp.hits.total !== 0) {
+        if (resp.hits.total.value > 0) {
           obj.forecasts = resp.hits.hits.map((hit) => hit._source);
         }
 
@@ -352,7 +343,6 @@ function getForecastRequestStats(job, forecastId) {
     ml.results
       .anomalySearch({
         size: 1,
-        rest_total_hits_as_int: true,
         body: {
           query: {
             bool: {
@@ -362,7 +352,7 @@ function getForecastRequestStats(job, forecastId) {
         },
       })
       .then((resp) => {
-        if (resp.hits.total !== 0) {
+        if (resp.hits.total.value > 0) {
           obj.stats = resp.hits.hits[0]._source;
         }
         resolve(obj);

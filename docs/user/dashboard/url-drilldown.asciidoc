@@ -15,6 +15,22 @@ image:images/url_drilldown_go_to_github.gif[Drilldown on pie chart that navigate
 NOTE: URL drilldown is available with the https://www.elastic.co/subscriptions[Gold subscription] and higher.
 
 [float]
+[[url-drilldown-supported-panels]]
+==== Supported panels
+
+The following panels support URL drilldowns:
+
+* Lens
+* Area
+* Data table
+* Heat map
+* Horizontal bar
+* Line
+* Pie
+* Tag cloud
+* Vertical bar
+
+[float]
 [[try-it]]
 ==== Try it: Create a URL drilldown
 

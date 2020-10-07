@@ -179,27 +179,29 @@ describe('AllRules', () => {
     expect(wrapper.find('[title="All rules"]')).toHaveLength(1);
   });
 
-  it('renders rules tab', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <AllRules
-          createPrePackagedRules={jest.fn()}
-          hasNoPermissions={false}
-          loading={false}
-          loadingCreatePrePackagedRules={false}
-          refetchPrePackagedRulesStatus={jest.fn()}
-          rulesCustomInstalled={1}
-          rulesInstalled={0}
-          rulesNotInstalled={0}
-          rulesNotUpdated={0}
-          setRefreshRulesData={jest.fn()}
-        />
-      </TestProviders>
-    );
+  describe('rules tab', () => {
+    it('renders correctly', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <AllRules
+            createPrePackagedRules={jest.fn()}
+            hasNoPermissions={false}
+            loading={false}
+            loadingCreatePrePackagedRules={false}
+            refetchPrePackagedRulesStatus={jest.fn()}
+            rulesCustomInstalled={1}
+            rulesInstalled={0}
+            rulesNotInstalled={0}
+            rulesNotUpdated={0}
+            setRefreshRulesData={jest.fn()}
+          />
+        </TestProviders>
+      );
 
-    await waitFor(() => {
-      expect(wrapper.exists('[data-test-subj="monitoring-table"]')).toBeFalsy();
-      expect(wrapper.exists('[data-test-subj="rules-table"]')).toBeTruthy();
+      await waitFor(() => {
+        expect(wrapper.exists('[data-test-subj="monitoring-table"]')).toBeFalsy();
+        expect(wrapper.exists('[data-test-subj="rules-table"]')).toBeTruthy();
+      });
     });
   });
 

@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { EuiText, EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage } from '@kbn/i18n/react';
 import styled from 'styled-components';
 
 import * as i18n from '../translations';

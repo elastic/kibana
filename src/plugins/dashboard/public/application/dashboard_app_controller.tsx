@@ -359,10 +359,6 @@ export class DashboardAppController {
         incomingEmbeddable = undefined;
       }
 
-      let expandedPanelId;
-      if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
-        expandedPanelId = dashboardContainer.getInput().expandedPanelId;
-      }
       const shouldShowEditHelp = getShouldShowEditHelp();
       const shouldShowViewHelp = getShouldShowViewHelp();
       const isEmptyInReadonlyMode = shouldShowUnauthorizedEmptyState();
@@ -384,7 +380,7 @@ export class DashboardAppController {
         lastReloadRequestTime,
         title: dashboardStateManager.getTitle(),
         description: dashboardStateManager.getDescription(),
-        expandedPanelId,
+        expandedPanelId: dashboardStateManager.getExpandedPanelId(),
       };
     };
 

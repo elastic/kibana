@@ -118,4 +118,7 @@ export {
   TypeToString,
   UnmappedTypeStrings,
   ExpressionValueRender as Render,
+  ExpressionsService,
+  ExpressionsServiceSetup,
+  ExpressionsServiceStart,
 } from '../common';

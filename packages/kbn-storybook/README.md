@@ -2,32 +2,40 @@
 
 This package provides ability to add [Storybook](https://storybook.js.org/) to any Kibana plugin.
 
-- [Setup Instructions](#setup-instructions)
-
+- [Kibana Storybook](#kibana-storybook)
+  - [Setup Instructions](#setup-instructions)
+  - [Customizing configuration](#customizing-configuration)
 
 ## Setup Instructions
 
-1. Add `storybook.js` launcher file to your plugin. For example, create a file at
-   `src/plugins/<plugin>/scripts/storybook.js`, with the following contents:
+- Add a `.storybook/main.js` configuration file to your plugin. For example, create a file at
+  `src/plugins/<plugin>/.storybook/main.js`, with the following contents:
 
-   ```js
-   import { join } from 'path';
+  ```js
+  module.exports = require('@kbn/storybook').defaultConfig;
+  ```
 
-   // eslint-disable-next-line
-   require('@kbn/storybook').runStorybookCli({
-     name: '<plugin>',
-     storyGlobs: [join(__dirname, '..', 'public', 'components', '**', '*.examples.tsx')],
-   });
-   ```
-2. Add your plugin alias to `src/dev/storybook/aliases.ts` config.
-3. Create sample Storybook stories. For example, in your plugin create create a file at
-   `src/plugins/<plugin>/public/components/hello_world/__examples__/hello_world.examples.tsx` with
-   the following contents:
+- Add your plugin alias to `src/dev/storybook/aliases.ts` config.
+- Create sample Storybook stories. For example, in your plugin create a file at
+  `src/plugins/<plugin>/public/components/hello_world/hello_world.stories.tsx` with
+  the following [Component Story Format](https://storybook.js.org/docs/react/api/csf) contents:
 
-   ```jsx
-   import * as React from 'react';
-   import { storiesOf } from '@storybook/react';
+  ```jsx
+  import { MyComponent } from './my_component';
 
-   storiesOf('Hello world', module).add('default', () => <div>Hello world!</div>);
-   ```
-4. Launch Storybook with `yarn storybook <plugin>`.
+  export default {
+    component: MyComponent,
+    title: 'Path/In/Side/Navigation/ToComponent',
+  };
+
+  export function Example() {
+    return <MyComponent />;
+  }
+  ```
+
+- Launch Storybook with `yarn storybook <plugin>`, or build a static site with `yarn storybook --site <plugin>`.
+
+## Customizing configuration
+
+The `defaultConfig` object provided by the @kbn/storybook package should be all you need to get running, but you can
+override this in your .storybook/main.js. Using [Storybook's configuration options](https://storybook.js.org/docs/react/configure/overview).

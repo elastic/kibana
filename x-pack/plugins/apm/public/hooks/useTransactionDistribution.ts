@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flatten, omit } from 'lodash';
+import { flatten, omit, isEmpty } from 'lodash';
 import { useHistory, useParams } from 'react-router-dom';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useFetcher } from './useFetcher';
@@ -69,13 +69,13 @@ export function useTransactionDistribution(urlParams: IUrlParams) {
           // selected sample was not found. select a new one:
           // sorted by total number of requests, but only pick
           // from buckets that have samples
-          const preferredSample = maybe(
-            response.buckets
-              .filter((bucket) => bucket.samples.length > 0)
-              .sort((bucket) => bucket.count)[0]?.samples[0]
-          );
+          const bucketsSortedByCount = response.buckets
+            .filter((bucket) => !isEmpty(bucket.samples))
+            .sort((bucket) => bucket.count);
 
-          history.push({
+          const preferredSample = maybe(bucketsSortedByCount[0]?.samples[0]);
+
+          history.replace({
             ...history.location,
             search: fromQuery({
               ...omit(toQuery(history.location.search), [

@@ -22,8 +22,10 @@ import {
   OPEN_SELECTED_ALERTS_BTN,
   MARK_ALERT_IN_PROGRESS_BTN,
   MARK_SELECTED_ALERTS_IN_PROGRESS_BTN,
+  ALERT_RISK_SCORE_HEADER,
 } from '../screens/alerts';
 import { REFRESH_BUTTON } from '../screens/security_header';
+import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
 
 export const closeFirstAlert = () => {
   cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
@@ -79,6 +81,12 @@ export const selectNumberOfAlerts = (numberOfAlerts: number) => {
   for (let i = 0; i < numberOfAlerts; i++) {
     cy.get(ALERT_CHECKBOX).eq(i).click({ force: true });
   }
+};
+
+export const sortRiskScore = () => {
+  cy.get(ALERT_RISK_SCORE_HEADER).click();
+  cy.get(TIMELINE_COLUMN_SPINNER).should('exist');
+  cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
 };
 
 export const investigateFirstAlertInTimeline = () => {

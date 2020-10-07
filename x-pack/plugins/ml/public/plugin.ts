@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   AppMountParameters,
   CoreSetup,
   CoreStart,
@@ -14,29 +14,36 @@ import {
 } from 'kibana/public';
 import { BehaviorSubject } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { ManagementSetup } from 'src/plugins/management/public';
-import { SharePluginSetup, SharePluginStart } from 'src/plugins/share/public';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
-import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { HomePublicPluginSetup } from 'src/plugins/home/public';
-import { IndexPatternManagementSetup } from 'src/plugins/index_pattern_management/public';
-import { EmbeddableSetup } from 'src/plugins/embeddable/public';
+import type { ManagementSetup } from 'src/plugins/management/public';
+import type {
+  SharePluginSetup,
+  SharePluginStart,
+  UrlGeneratorContract,
+} from 'src/plugins/share/public';
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import type { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { HomePublicPluginSetup } from 'src/plugins/home/public';
+import type { IndexPatternManagementSetup } from 'src/plugins/index_pattern_management/public';
+import type { EmbeddableSetup } from 'src/plugins/embeddable/public';
+
 import { AppStatus, AppUpdater, DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
+import type { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
+import type { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
 import { MlCardState } from '../../../../src/plugins/index_pattern_management/public';
-import { SecurityPluginSetup } from '../../security/public';
-import { LicensingPluginSetup } from '../../licensing/public';
-import { registerManagementSection } from './application/management';
-import { LicenseManagementUIPluginSetup } from '../../license_management/public';
-import { setDependencyCache } from './application/util/dependency_cache';
+
+import type { LicenseManagementUIPluginSetup } from '../../license_management/public';
+import type { LicensingPluginSetup } from '../../licensing/public';
+import type { SecurityPluginSetup } from '../../security/public';
+
 import { PLUGIN_ICON_SOLUTION, PLUGIN_ID } from '../common/constants/app';
-import { registerFeature } from './register_feature';
-import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
-import { registerMlUiActions } from './ui_actions';
-import { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
-import { registerUrlGenerator } from './ml_url_generator';
+import { ML_APP_URL_GENERATOR } from '../common/constants/ml_url_generator';
 import { isFullLicense, isMlEnabled } from '../common/license';
-import { registerEmbeddables } from './embeddables';
+
+import { setDependencyCache } from './application/util/dependency_cache';
+import { registerFeature } from './register_feature';
+// Not importing from `ml_url_generator/index` here to avoid importing unnecessary code
+import { registerUrlGenerator } from './ml_url_generator/ml_url_generator';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -62,6 +69,7 @@ export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
 
 export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   private appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  private urlGenerator: undefined | UrlGeneratorContract<typeof ML_APP_URL_GENERATOR>;
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
@@ -101,11 +109,14 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       },
     });
 
-    const managementApp = registerManagementSection(pluginsSetup.management, core);
+    if (pluginsSetup.share) {
+      this.urlGenerator = registerUrlGenerator(pluginsSetup.share, core);
+    }
 
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
     licensing.subscribe(async (license) => {
       const [coreStart] = await core.getStartServices();
+      const { capabilities } = coreStart.application;
 
       if (isMlEnabled(license)) {
         // add ML to home page
@@ -113,42 +124,36 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           registerFeature(pluginsSetup.home);
         }
 
-        // the mlUrlGenerator should be registered even without full license
-        // for other plugins to access ML links
-        registerUrlGenerator(pluginsSetup.share, core);
-
-        const { capabilities } = coreStart.application;
-
         // register ML for the index pattern management no data screen.
         pluginsSetup.indexPatternManagement.environment.update({
           ml: () =>
             capabilities.ml.canFindFileStructure ? MlCardState.ENABLED : MlCardState.HIDDEN,
         });
-
-        const canManageMLJobs = capabilities.management?.insightsAndAlerting?.jobsListLink ?? false;
-
-        // register various ML plugin features which require a full license
-        if (isFullLicense(license)) {
-          if (canManageMLJobs && managementApp) {
-            managementApp.enable();
-          }
-          registerEmbeddables(pluginsSetup.embeddable, core);
-          registerMlUiActions(pluginsSetup.uiActions, core);
-        } else if (managementApp) {
-          managementApp.disable();
-        }
       } else {
         // if ml is disabled in elasticsearch, disable ML in kibana
         this.appUpdater.next(() => ({
           status: AppStatus.inaccessible,
         }));
-        if (managementApp) {
-          managementApp.disable();
+      }
+
+      // register various ML plugin features which require a full license
+      const { registerEmbeddables, registerManagementSection, registerMlUiActions } = await import(
+        './register_helper'
+      );
+
+      if (isMlEnabled(license) && isFullLicense(license)) {
+        const canManageMLJobs = capabilities.management?.insightsAndAlerting?.jobsListLink ?? false;
+        if (canManageMLJobs && pluginsSetup.management !== undefined) {
+          registerManagementSection(pluginsSetup.management, core).enable();
         }
+        registerEmbeddables(pluginsSetup.embeddable, core);
+        registerMlUiActions(pluginsSetup.uiActions, core);
       }
     });
 
-    return {};
+    return {
+      urlGenerator: this.urlGenerator,
+    };
   }
 
   start(core: CoreStart, deps: any) {
@@ -158,7 +163,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       http: core.http,
       i18n: core.i18n,
     });
-    return {};
+    return {
+      urlGenerator: this.urlGenerator,
+    };
   }
 
   public stop() {}

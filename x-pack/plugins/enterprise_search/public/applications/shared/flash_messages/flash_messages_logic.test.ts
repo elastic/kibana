@@ -7,11 +7,14 @@
 import { resetContext } from 'kea';
 
 import { mockHistory } from '../../__mocks__';
+jest.mock('../kibana', () => ({
+  KibanaLogic: { values: { history: mockHistory } },
+}));
 
 import { FlashMessagesLogic, mountFlashMessagesLogic, IFlashMessage } from './';
 
 describe('FlashMessagesLogic', () => {
-  const mount = () => mountFlashMessagesLogic({ history: mockHistory as any });
+  const mount = () => mountFlashMessagesLogic();
 
   beforeEach(() => {
     jest.clearAllMocks();

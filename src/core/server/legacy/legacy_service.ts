@@ -217,6 +217,11 @@ export class LegacyService implements CoreService {
       },
       uiSettings: { asScopedToClient: startDeps.core.uiSettings.asScopedToClient },
       auditTrail: startDeps.core.auditTrail,
+      coreUsageData: {
+        getCoreUsageData: () => {
+          throw new Error('core.start.coreUsageData.getCoreUsageData is unsupported in legacy');
+        },
+      },
     };
 
     const router = setupDeps.core.http.createRouter('', this.legacyId);

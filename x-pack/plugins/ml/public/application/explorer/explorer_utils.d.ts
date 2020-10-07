@@ -190,3 +190,9 @@ export declare interface AppStateSelectedCells {
   showTopFieldValues?: boolean;
   viewByFieldName?: string;
 }
+
+export declare const removeFilterFromQueryString: (
+  currentQueryString: string,
+  fieldName: string,
+  fieldValue: string
+) => string;

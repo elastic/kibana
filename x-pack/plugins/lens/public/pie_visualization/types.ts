@@ -28,6 +28,8 @@ export interface PieVisualizationState {
 }
 
 export type PieExpressionArgs = SharedLayerState & {
+  title?: string;
+  description?: string;
   shape: 'pie' | 'donut' | 'treemap';
   hideLabels: boolean;
 };

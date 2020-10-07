@@ -5,3 +5,4 @@
  */
 
 export { encryptedSavedObjectsServiceMock } from './encrypted_saved_objects_service.mocks';
+export { encryptionKeyRotationServiceMock } from './encryption_key_rotation_service.mocks';

@@ -228,7 +228,12 @@ export function PieComponent(
     );
   }
   return (
-    <VisualizationContainer className="lnsPieExpression__container" isReady={state.isReady}>
+    <VisualizationContainer
+      reportTitle={props.args.title}
+      reportDescription={props.args.description}
+      className="lnsPieExpression__container"
+      isReady={state.isReady}
+    >
       <Chart>
         <Settings
           // Legend is hidden in many scenarios

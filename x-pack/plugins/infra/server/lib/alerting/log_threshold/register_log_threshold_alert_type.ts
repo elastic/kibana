@@ -4,14 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { schema } from '@kbn/config-schema';
 import { PluginSetupContract } from '../../../../../alerts/server';
 import { createLogThresholdExecutor, FIRED_ACTIONS } from './log_threshold_executor';
 import {
   LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
-  Comparator,
-} from '../../../../common/alerting/logs/types';
+  AlertParamsRT,
+} from '../../../../common/alerting/logs/log_threshold/types';
 import { InfraBackendLibs } from '../../infra_types';
+import { decodeOrThrow } from '../../../../common/runtime_types';
+
+const timestampActionVariableDescription = i18n.translate(
+  'xpack.infra.logs.alerting.threshold.timestampActionVariableDescription',
+  {
+    defaultMessage: 'UTC timestamp of when the alert was triggered',
+  }
+);
 
 const documentCountActionVariableDescription = i18n.translate(
   'xpack.infra.logs.alerting.threshold.documentCountActionVariableDescription',
@@ -34,33 +41,33 @@ const groupByActionVariableDescription = i18n.translate(
   }
 );
 
-const countSchema = schema.object({
-  value: schema.number(),
-  comparator: schema.oneOf([
-    schema.literal(Comparator.GT),
-    schema.literal(Comparator.LT),
-    schema.literal(Comparator.GT_OR_EQ),
-    schema.literal(Comparator.LT_OR_EQ),
-    schema.literal(Comparator.EQ),
-  ]),
-});
+const isRatioActionVariableDescription = i18n.translate(
+  'xpack.infra.logs.alerting.threshold.isRatioActionVariableDescription',
+  {
+    defaultMessage: 'Denotes whether this alert was configured with a ratio',
+  }
+);
 
-const criteriaSchema = schema.object({
-  field: schema.string(),
-  comparator: schema.oneOf([
-    schema.literal(Comparator.GT),
-    schema.literal(Comparator.LT),
-    schema.literal(Comparator.GT_OR_EQ),
-    schema.literal(Comparator.LT_OR_EQ),
-    schema.literal(Comparator.EQ),
-    schema.literal(Comparator.NOT_EQ),
-    schema.literal(Comparator.MATCH),
-    schema.literal(Comparator.NOT_MATCH),
-    schema.literal(Comparator.MATCH_PHRASE),
-    schema.literal(Comparator.NOT_MATCH_PHRASE),
-  ]),
-  value: schema.oneOf([schema.number(), schema.string()]),
-});
+const ratioActionVariableDescription = i18n.translate(
+  'xpack.infra.logs.alerting.threshold.ratioActionVariableDescription',
+  {
+    defaultMessage: 'The ratio value of the two sets of criteria',
+  }
+);
+
+const numeratorConditionsActionVariableDescription = i18n.translate(
+  'xpack.infra.logs.alerting.threshold.numeratorConditionsActionVariableDescription',
+  {
+    defaultMessage: 'The conditions that the numerator of the ratio needed to fulfill',
+  }
+);
+
+const denominatorConditionsActionVariableDescription = i18n.translate(
+  'xpack.infra.logs.alerting.threshold.denominatorConditionsActionVariableDescription',
+  {
+    defaultMessage: 'The conditions that the denominator of the ratio needed to fulfill',
+  }
+);
 
 export async function registerLogThresholdAlertType(
   alertingPlugin: PluginSetupContract,
@@ -76,22 +83,27 @@ export async function registerLogThresholdAlertType(
     id: LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
     name: 'Log threshold',
     validate: {
-      params: schema.object({
-        count: countSchema,
-        criteria: schema.arrayOf(criteriaSchema),
-        timeUnit: schema.string(),
-        timeSize: schema.number(),
-        groupBy: schema.maybe(schema.arrayOf(schema.string())),
-      }),
+      params: {
+        validate: (params) => decodeOrThrow(AlertParamsRT)(params),
+      },
     },
     defaultActionGroupId: FIRED_ACTIONS.id,
     actionGroups: [FIRED_ACTIONS],
     executor: createLogThresholdExecutor(libs),
     actionVariables: {
       context: [
+        { name: 'timestamp', description: timestampActionVariableDescription },
         { name: 'matchingDocuments', description: documentCountActionVariableDescription },
         { name: 'conditions', description: conditionsActionVariableDescription },
         { name: 'group', description: groupByActionVariableDescription },
+        // Ratio alerts
+        { name: 'isRatio', description: isRatioActionVariableDescription },
+        { name: 'ratio', description: ratioActionVariableDescription },
+        { name: 'numeratorConditions', description: numeratorConditionsActionVariableDescription },
+        {
+          name: 'denominatorConditions',
+          description: denominatorConditionsActionVariableDescription,
+        },
       ],
     },
     producer: 'logs',

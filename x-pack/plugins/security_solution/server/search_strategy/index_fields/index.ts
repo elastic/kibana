@@ -12,14 +12,18 @@ import {
   IndexFieldsStrategyResponse,
   IndexField,
   IndexFieldsStrategyRequest,
+  BeatFields,
 } from '../../../common/search_strategy/index_fields';
-
-import { fieldsBeat } from '../../utils/beat_schema/fields';
 
 export const securitySolutionIndexFieldsProvider = (): ISearchStrategy<
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse
 > => {
+  // require the fields once we actually need them, rather than ahead of time, and pass
+  // them to createFieldItem to reduce the amount of work done as much as possible
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const beatFields: BeatFields = require('../../utils/beat_schema/fields').fieldsBeat;
+
   return {
     search: async (context, request) => {
       const { elasticsearch } = context.core;
@@ -41,6 +45,7 @@ export const securitySolutionIndexFieldsProvider = (): ISearchStrategy<
 
       if (!request.onlyCheckIfIndicesExist) {
         indexFields = await formatIndexFields(
+          beatFields,
           responsesIndexFields.filter((rif) => rif !== false) as FieldDescriptor[][],
           dedupeIndices
         );
@@ -116,6 +121,7 @@ const missingFields: FieldDescriptor[] = [
  * @param indexesAliasIdx The index within the alias
  */
 export const createFieldItem = (
+  beatFields: BeatFields,
   indexesAlias: string[],
   index: FieldDescriptor,
   indexesAliasIdx: number
@@ -126,7 +132,7 @@ export const createFieldItem = (
     splitIndexName[splitIndexName.length - 1] === 'text'
       ? splitIndexName.slice(0, splitIndexName.length - 1).join('.')
       : index.name;
-  const beatIndex = fieldsBeat[indexName] ?? {};
+  const beatIndex = beatFields[indexName] ?? {};
   if (isEmpty(beatIndex.category)) {
     beatIndex.category = splitIndexName[0];
   }
@@ -151,6 +157,7 @@ export const createFieldItem = (
  * @param indexesAlias The index aliases such as filebeat-*
  */
 export const formatFirstFields = async (
+  beatFields: BeatFields,
   responsesIndexFields: FieldDescriptor[][],
   indexesAlias: string[]
 ): Promise<IndexField[]> => {
@@ -160,11 +167,11 @@ export const formatFirstFields = async (
         responsesIndexFields.reduce(
           (accumulator: IndexField[], indexFields: FieldDescriptor[], indexesAliasIdx: number) => {
             missingFields.forEach((index) => {
-              const item = createFieldItem(indexesAlias, index, indexesAliasIdx);
+              const item = createFieldItem(beatFields, indexesAlias, index, indexesAliasIdx);
               accumulator.push(item);
             });
             indexFields.forEach((index) => {
-              const item = createFieldItem(indexesAlias, index, indexesAliasIdx);
+              const item = createFieldItem(beatFields, indexesAlias, index, indexesAliasIdx);
               accumulator.push(item);
             });
             return accumulator;
@@ -224,10 +231,11 @@ export const formatSecondFields = async (fields: IndexField[]): Promise<IndexFie
  * @param indexesAlias The index alias
  */
 export const formatIndexFields = async (
+  beatFields: BeatFields,
   responsesIndexFields: FieldDescriptor[][],
   indexesAlias: string[]
 ): Promise<IndexField[]> => {
-  const fields = await formatFirstFields(responsesIndexFields, indexesAlias);
+  const fields = await formatFirstFields(beatFields, responsesIndexFields, indexesAlias);
   const secondFields = await formatSecondFields(fields);
   return secondFields;
 };

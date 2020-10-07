@@ -13,8 +13,10 @@ import {
   Incident,
   GetFieldsByIssueTypeHandlerArgs,
   GetIssueTypesHandlerArgs,
+  GetIssuesHandlerArgs,
   PushToServiceApiParams,
   PushToServiceResponse,
+  GetIssueHandlerArgs,
 } from './types';
 
 // TODO: to remove, need to support Case
@@ -43,6 +45,18 @@ const getFieldsByIssueTypeHandler = async ({
 }: GetFieldsByIssueTypeHandlerArgs) => {
   const { id } = params;
   const res = await externalService.getFieldsByIssueType(id);
+  return res;
+};
+
+const getIssuesHandler = async ({ externalService, params }: GetIssuesHandlerArgs) => {
+  const { title } = params;
+  const res = await externalService.getIssues(title);
+  return res;
+};
+
+const getIssueHandler = async ({ externalService, params }: GetIssueHandlerArgs) => {
+  const { id } = params;
+  const res = await externalService.getIssue(id);
   return res;
 };
 
@@ -77,14 +91,28 @@ const pushToServiceHandler = async ({
       defaultPipes,
     });
 
-    incident = transformFields<PushToServiceApiParams, ExternalServiceParams, Incident>({
+    const transformedFields = transformFields<
+      PushToServiceApiParams,
+      ExternalServiceParams,
+      Incident
+    >({
       params,
       fields,
       currentIncident,
     });
+
+    const { priority, labels, issueType, parent } = params;
+    incident = {
+      summary: transformedFields.summary,
+      description: transformedFields.description,
+      priority,
+      labels,
+      issueType,
+      parent,
+    };
   } else {
-    const { title, description, priority, labels, issueType } = params;
-    incident = { summary: title, description, priority, labels, issueType };
+    const { title, description, priority, labels, issueType, parent } = params;
+    incident = { summary: title, description, priority, labels, issueType, parent };
   }
 
   if (externalId != null) {
@@ -134,4 +162,6 @@ export const api: ExternalServiceApi = {
   getIncident: getIncidentHandler,
   issueTypes: getIssueTypesHandler,
   fieldsByIssueType: getFieldsByIssueTypeHandler,
+  issues: getIssuesHandler,
+  issue: getIssueHandler,
 };

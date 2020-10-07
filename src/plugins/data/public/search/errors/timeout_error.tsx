@@ -78,9 +78,7 @@ export class SearchTimeoutError extends KbnError {
   private onClick(application: ApplicationStart) {
     switch (this.mode) {
       case TimeoutErrorMode.UPGRADE:
-        application.navigateToApp('management', {
-          path: `/kibana/indexPatterns`,
-        });
+        application.navigateToUrl('https://www.elastic.co/subscriptions');
         break;
       case TimeoutErrorMode.CHANGE:
         application.navigateToApp('management', {
@@ -99,7 +97,12 @@ export class SearchTimeoutError extends KbnError {
           <>
             <EuiSpacer size="s" />
             <EuiText textAlign="right">
-              <EuiButton color="danger" onClick={() => this.onClick(application)} size="s">
+              <EuiButton
+                color="danger"
+                onClick={() => this.onClick(application)}
+                size="s"
+                data-test-subj="searchTimeoutError"
+              >
                 {actionText}
               </EuiButton>
             </EuiText>
