@@ -159,7 +159,6 @@
 |  [IndexPatternAggRestrictions](./kibana-plugin-plugins-data-public.indexpatternaggrestrictions.md) |  |
 |  [IndexPatternsContract](./kibana-plugin-plugins-data-public.indexpatternscontract.md) |  |
 |  [IndexPatternSelectProps](./kibana-plugin-plugins-data-public.indexpatternselectprops.md) |  |
-|  [IndexPatternSelectPublicProps](./kibana-plugin-plugins-data-public.indexpatternselectpublicprops.md) |  |
 |  [InputTimeRange](./kibana-plugin-plugins-data-public.inputtimerange.md) |  |
 |  [ISearch](./kibana-plugin-plugins-data-public.isearch.md) |  |
 |  [ISearchGeneric](./kibana-plugin-plugins-data-public.isearchgeneric.md) |  |

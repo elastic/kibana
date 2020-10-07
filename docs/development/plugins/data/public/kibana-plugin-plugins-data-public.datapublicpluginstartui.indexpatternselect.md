@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-IndexPatternSelect: React.ComponentType<IndexPatternSelectPublicProps>;
+IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
 ```

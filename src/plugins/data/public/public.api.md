@@ -446,7 +446,7 @@ export interface DataPublicPluginStartActions {
 // @public
 export interface DataPublicPluginStartUi {
     // (undocumented)
-    IndexPatternSelect: React.ComponentType<IndexPatternSelectPublicProps>;
+    IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
     // (undocumented)
     SearchBar: React.ComponentType<StatefulSearchBarProps>;
 }
@@ -1297,11 +1297,6 @@ export type IndexPatternSelectProps = Required<Omit<EuiComboBoxProps<any>, 'isLo
     onNoIndexPatterns?: () => void;
     savedObjectsClient: SavedObjectsClientContract;
 };
-
-// Warning: (ae-missing-release-tag) "IndexPatternSelectPublicProps" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export type IndexPatternSelectPublicProps = Omit<IndexPatternSelectProps, 'savedObjectsClient'>;
 
 // Warning: (ae-missing-release-tag) "IndexPatternSpec" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
