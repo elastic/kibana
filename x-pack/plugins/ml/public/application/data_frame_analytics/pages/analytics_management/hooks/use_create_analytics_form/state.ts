@@ -292,7 +292,6 @@ export function getFormStateFromJobConfig(
   isClone: boolean = true
 ): Partial<State['form']> {
   const jobType = getAnalysisType(analyticsJobConfig.analysis) as DataFrameAnalysisConfigType;
-
   const resultState: Partial<State['form']> = {
     jobType,
     description: analyticsJobConfig.description ?? '',
@@ -302,7 +301,8 @@ export function getFormStateFromJobConfig(
       : analyticsJobConfig.source.index,
     modelMemoryLimit: analyticsJobConfig.model_memory_limit,
     maxNumThreads: analyticsJobConfig.max_num_threads,
-    includes: analyticsJobConfig.analyzed_fields.includes,
+    includes: analyticsJobConfig.analyzed_fields?.includes ?? [],
+    jobConfigQuery: analyticsJobConfig.source.query || defaultSearchQuery,
   };
 
   if (isClone === false) {
