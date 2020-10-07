@@ -49,6 +49,7 @@ interface WorkerOptions {
   title?: string;
   watch?: boolean;
   baseArgv?: string[];
+  apmServiceName?: string;
 }
 
 export class Worker extends EventEmitter {
@@ -89,6 +90,7 @@ export class Worker extends EventEmitter {
       NODE_OPTIONS: process.env.NODE_OPTIONS || '',
       kbnWorkerType: this.type,
       kbnWorkerArgv: JSON.stringify([...(opts.baseArgv || baseArgv), ...(opts.argv || [])]),
+      ELASTIC_APM_SERVICE_NAME: opts.apmServiceName || '',
     };
   }
 

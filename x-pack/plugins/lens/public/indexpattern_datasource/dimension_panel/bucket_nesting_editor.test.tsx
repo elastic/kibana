@@ -53,11 +53,8 @@ describe('BucketNestingEditor', () => {
         setColumns={jest.fn()}
       />
     );
-    const control1 = component.find('[data-test-subj="indexPattern-nesting-topLevel"]').first();
-    const control2 = component.find('[data-test-subj="indexPattern-nesting-bottomLevel"]').first();
-
-    expect(control1.prop('checked')).toBeTruthy();
-    expect(control2.prop('checked')).toBeFalsy();
+    const nestingSwitch = component.find('[data-test-subj="indexPattern-nesting-switch"]').first();
+    expect(nestingSwitch.prop('checked')).toBeTruthy();
   });
 
   it('should display the bottom level grouping when appropriate', () => {
@@ -77,12 +74,8 @@ describe('BucketNestingEditor', () => {
         setColumns={jest.fn()}
       />
     );
-
-    const control1 = component.find('[data-test-subj="indexPattern-nesting-topLevel"]').first();
-    const control2 = component.find('[data-test-subj="indexPattern-nesting-bottomLevel"]').first();
-
-    expect(control1.prop('checked')).toBeFalsy();
-    expect(control2.prop('checked')).toBeTruthy();
+    const nestingSwitch = component.find('[data-test-subj="indexPattern-nesting-switch"]').first();
+    expect(nestingSwitch.prop('checked')).toBeFalsy();
   });
 
   it('should reorder the columns when toggled', () => {
@@ -103,9 +96,9 @@ describe('BucketNestingEditor', () => {
         setColumns={setColumns}
       />
     );
-    const control1 = component.find('[data-test-subj="indexPattern-nesting-topLevel"]').first();
 
-    (control1.prop('onChange') as () => {})();
+    const nestingSwitch = component.find('[data-test-subj="indexPattern-nesting-switch"]').first();
+    (nestingSwitch.prop('onChange') as () => {})();
 
     expect(setColumns).toHaveBeenCalledTimes(1);
     expect(setColumns).toHaveBeenCalledWith(['a', 'b', 'c']);
@@ -122,9 +115,10 @@ describe('BucketNestingEditor', () => {
       },
     });
 
-    const control2 = component.find('[data-test-subj="indexPattern-nesting-bottomLevel"]').first();
-
-    (control2.prop('onChange') as () => {})();
+    (component
+      .find('[data-test-subj="indexPattern-nesting-switch"]')
+      .first()
+      .prop('onChange') as () => {})();
 
     expect(setColumns).toHaveBeenCalledTimes(2);
     expect(setColumns).toHaveBeenLastCalledWith(['b', 'a', 'c']);
