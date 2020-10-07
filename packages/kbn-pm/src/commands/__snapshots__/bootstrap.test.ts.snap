@@ -121,15 +121,6 @@ Array [
 ]
 `;
 
-exports[`does not run installer if no deps in package: install in dir 1`] = `
-Array [
-  Array [
-    "<repoRoot>/packages/kbn-pm/src/commands",
-    Array [],
-  ],
-]
-`;
-
 exports[`handles "frozen-lockfile": install in dir 1`] = `
 Array [
   Array [
@@ -137,23 +128,6 @@ Array [
     Array [
       "--frozen-lockfile",
     ],
-  ],
-]
-`;
-
-exports[`handles dependencies of dependencies: install in dir 1`] = `
-Array [
-  Array [
-    "<repoRoot>/packages/kbn-pm/src/commands",
-    Array [],
-  ],
-  Array [
-    "<repoRoot>/packages/kbn-pm/src/commands/packages/bar",
-    Array [],
-  ],
-  Array [
-    "<repoRoot>/packages/kbn-pm/src/commands/packages/foo",
-    Array [],
   ],
 ]
 `;
