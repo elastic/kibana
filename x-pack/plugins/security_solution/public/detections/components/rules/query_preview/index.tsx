@@ -214,6 +214,7 @@ export const PreviewQuery = ({
           totalHits={eqlQueryResult.totalCount}
           data={eqlQueryResult.data}
           inspect={eqlQueryResult.inspect}
+          refetch={eqlQueryResult.refetch}
         />
       )}
       {warnings.length > 0 &&

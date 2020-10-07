@@ -16,6 +16,7 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { Panel } from '../../../../common/components/panel';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { hasEqlSequenceQuery } from '../../../../../common/detection_engine/utils';
+import { inputsModel } from '../../../../common/store';
 
 export const ID = 'queryEqlPreviewHistogramQuery';
 
@@ -26,6 +27,7 @@ interface PreviewEqlQueryHistogramProps {
   query: string;
   data: ChartData[];
   inspect: InspectQuery;
+  refetch: inputsModel.Refetch;
 }
 
 export const PreviewEqlQueryHistogram = ({
@@ -35,14 +37,15 @@ export const PreviewEqlQueryHistogram = ({
   query,
   data,
   inspect,
+  refetch,
 }: PreviewEqlQueryHistogramProps) => {
   const { setQuery, isInitializing } = useGlobalTime();
 
   useEffect((): void => {
     if (!isInitializing) {
-      setQuery({ id: ID, inspect, loading: false, refetch: () => {} });
+      setQuery({ id: ID, inspect, loading: false, refetch });
     }
-  }, [setQuery, inspect, isInitializing]);
+  }, [setQuery, inspect, isInitializing, refetch]);
 
   const barConfig = useMemo(
     (): ChartSeriesConfigs => getHistogramConfig(to, from, hasEqlSequenceQuery(query)),

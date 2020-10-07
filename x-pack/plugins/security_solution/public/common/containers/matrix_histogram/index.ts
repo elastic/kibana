@@ -131,9 +131,8 @@ export const useMatrixHistogram = ({
             },
             error: (msg) => {
               if (!(msg instanceof AbortError)) {
-                notifications.toasts.addDanger({
+                notifications.toasts.addError(msg, {
                   title: errorMessage ?? i18n.FAIL_MATRIX_HISTOGRAM,
-                  text: msg.message,
                 });
               }
             },
