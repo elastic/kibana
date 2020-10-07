@@ -124,6 +124,7 @@ describe('FieldEditor', () => {
     indexPattern = ({
       fields,
       getFormatterForField: () => ({ params: () => ({}) }),
+      getFormatterForFieldNoDefault: () => ({ params: () => ({}) }),
     } as unknown) as IndexPattern;
   });
 
