@@ -32,10 +32,10 @@ export class PhraseFilterManager extends FilterManager {
     controlId: string,
     fieldName: string,
     indexPatternId: string,
-    indexPatternService: IndexPatternsContract,
+    indexPatternsService: IndexPatternsContract,
     queryFilter: QueryFilterManager
   ) {
-    super(controlId, fieldName, indexPatternId, indexPatternService, queryFilter);
+    super(controlId, fieldName, indexPatternId, indexPatternsService, queryFilter);
   }
 
   createFilter(phrases: any): PhraseFilter {
