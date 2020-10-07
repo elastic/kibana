@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { createMemoryHistory, History as HistoryPackageHistoryInterface } from 'history';
-
+import copy from 'copy-to-clipboard';
 import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from '../data_access_layer/mocks/no_ancestors_two_children_with_related_events_on_origin';
 import { Simulator } from '../test_utilities/simulator';
 // Extend jest with a custom matcher
@@ -13,6 +13,10 @@ import { urlSearch } from '../test_utilities/url_search';
 
 // the resolver component instance ID, used by the react code to distinguish piece of global state from those used by other resolver instances
 const resolverComponentInstanceID = 'resolverComponentInstanceID';
+
+jest.mock('copy-to-clipboard', () => {
+  return jest.fn();
+});
 
 describe(`Resolver: when analyzing a tree with no ancestors and two children and two related registry event on the origin, and when the component instance ID is ${resolverComponentInstanceID}`, () => {
   /**
@@ -112,6 +116,16 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
         wordBreaks: 2,
       });
     });
+    it('should allow all node details to be copied', async () => {
+      const copyableFields = await simulator().resolve('resolver:panel:copyable-field');
+
+      copyableFields?.map((copyableField) => {
+        copyableField.simulate('mouseenter');
+        simulator().testSubject('clipboard').last().simulate('click');
+        expect(copy).toHaveBeenLastCalledWith(copyableField.text(), expect.any(Object));
+        copyableField.simulate('mouseleave');
+      });
+    });
   });
 
   const queryStringWithFirstChildSelected = urlSearch(resolverComponentInstanceID, {
@@ -156,6 +170,19 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
     await expect(
       simulator().map(() => simulator().testSubject('resolver:node-list:node-link:icon').length)
     ).toYieldEqualTo(3);
+  });
+
+  it('should be able to copy the timestamps for all 3 nodes', async () => {
+    const copyableFields = await simulator().resolve('resolver:panel:copyable-field');
+
+    expect(copyableFields?.length).toBe(3);
+
+    copyableFields?.map((copyableField) => {
+      copyableField.simulate('mouseenter');
+      simulator().testSubject('clipboard').last().simulate('click');
+      expect(copy).toHaveBeenLastCalledWith(copyableField.text(), expect.any(Object));
+      copyableField.simulate('mouseleave');
+    });
   });
 
   describe('when there is an item in the node list and its text has been clicked', () => {
@@ -238,6 +265,34 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
                 simulator().testSubject('resolver:panel:node-events-in-category:event-link').length
             )
           ).toYieldEqualTo(2);
+        });
+        describe('and when the first event link is clicked', () => {
+          beforeEach(async () => {
+            const link = await simulator().resolve(
+              'resolver:panel:node-events-in-category:event-link'
+            );
+            const first = link?.first();
+            expect(first).toBeTruthy();
+
+            if (first) {
+              first.simulate('click', { button: 0 });
+            }
+          });
+          it('should show the event detail view', async () => {
+            await expect(
+              simulator().map(() => simulator().testSubject('resolver:panel:event-detail').length)
+            ).toYieldEqualTo(1);
+          });
+          it('should allow all fields to be copied', async () => {
+            const copyableFields = await simulator().resolve('resolver:panel:copyable-field');
+
+            copyableFields?.map((copyableField) => {
+              copyableField.simulate('mouseenter');
+              simulator().testSubject('clipboard').last().simulate('click');
+              expect(copy).toHaveBeenLastCalledWith(copyableField.text(), expect.any(Object));
+              copyableField.simulate('mouseleave');
+            });
+          });
         });
       });
     });

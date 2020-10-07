@@ -19,7 +19,7 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 export default function executionStatusAlertTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/79249
+  // Failing: See https://github.com/elastic/kibana/issues/79248
   describe.skip('executionStatus', () => {
     const objectRemover = new ObjectRemover(supertest);
 
@@ -65,7 +65,6 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       expect(response.status).to.eql(200);
       const alertId = response.body.id;
       dates.push(response.body.executionStatus.lastExecutionDate);
-      dates.push(Date.now());
       objectRemover.add(Spaces.space1.id, alertId, 'alert', 'alerts');
 
       const executionStatus = await waitForStatus(alertId, new Set(['ok']));
@@ -100,7 +99,6 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       expect(response.status).to.eql(200);
       const alertId = response.body.id;
       dates.push(response.body.executionStatus.lastExecutionDate);
-      dates.push(Date.now());
       objectRemover.add(Spaces.space1.id, alertId, 'alert', 'alerts');
 
       const executionStatus = await waitForStatus(alertId, new Set(['active']));
@@ -132,7 +130,6 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       expect(response.status).to.eql(200);
       const alertId = response.body.id;
       dates.push(response.body.executionStatus.lastExecutionDate);
-      dates.push(Date.now());
       objectRemover.add(Spaces.space1.id, alertId, 'alert', 'alerts');
 
       const executionStatus = await waitForStatus(alertId, new Set(['error']));

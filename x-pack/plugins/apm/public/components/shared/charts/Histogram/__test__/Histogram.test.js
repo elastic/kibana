@@ -10,15 +10,15 @@ import d3 from 'd3';
 import { HistogramInner } from '../index';
 import response from './response.json';
 import {
-  getDurationFormatter,
-  asInteger,
-} from '../../../../../utils/formatters';
-import {
   disableConsoleWarning,
   toJson,
   mountWithTheme,
 } from '../../../../../utils/testHelpers';
 import { getFormattedBuckets } from '../../../../app/TransactionDetails/Distribution/index';
+import {
+  asInteger,
+  getDurationFormatter,
+} from '../../../../../../common/utils/formatters';
 
 describe('Histogram', () => {
   let mockConsole;

@@ -44,7 +44,4 @@ export {
 
 export { isJSON } from '../../../../src/plugins/es_ui_shared/static/validators/string';
 
-export {
-  createKibanaReactContext,
-  reactRouterNavigate,
-} from '../../../../src/plugins/kibana_react/public';
+export { reactRouterNavigate } from '../../../../src/plugins/kibana_react/public';

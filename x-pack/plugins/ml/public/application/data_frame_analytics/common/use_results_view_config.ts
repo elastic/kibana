@@ -19,7 +19,7 @@ import { DataFrameAnalyticsConfig } from '../common';
 
 import { isGetDataFrameAnalyticsStatsResponseOk } from '../pages/analytics_management/services/analytics_service/get_analytics';
 import { DATA_FRAME_TASK_STATE } from '../pages/analytics_management/components/analytics_list/common';
-import { useInferenceApiService } from '../../services/ml_api_service/inference';
+import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
 import { TotalFeatureImportance } from '../../../../common/types/feature_importance';
 import { getToastNotificationService } from '../../services/toast_notification_service';
 import {
@@ -29,7 +29,7 @@ import {
 
 export const useResultsViewConfig = (jobId: string) => {
   const mlContext = useMlContext();
-  const inferenceApiService = useInferenceApiService();
+  const trainedModelsApiService = useTrainedModelsApiService();
 
   const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
@@ -74,16 +74,13 @@ export const useResultsViewConfig = (jobId: string) => {
             isRegressionAnalysis(jobConfigUpdate.analysis)
           ) {
             try {
-              const inferenceModels = await inferenceApiService.getInferenceModel(`${jobId}*`, {
+              const inferenceModels = await trainedModelsApiService.getTrainedModels(`${jobId}*`, {
                 include: 'total_feature_importance',
               });
               const inferenceModel = inferenceModels.find(
                 (model) => model.metadata?.analytics_config?.id === jobId
               );
-              if (
-                Array.isArray(inferenceModel?.metadata?.total_feature_importance) === true &&
-                inferenceModel?.metadata?.total_feature_importance.length > 0
-              ) {
+              if (Array.isArray(inferenceModel?.metadata?.total_feature_importance) === true) {
                 setTotalFeatureImportance(inferenceModel?.metadata?.total_feature_importance);
               }
             } catch (e) {
