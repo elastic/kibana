@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
-import { isEmpty } from 'lodash';
 import React, { useContext, useState } from 'react';
 import { ThemeContext } from 'styled-components';
 import { useTrackPageview } from '../..';
@@ -34,9 +33,9 @@ export function OverviewPage({ routeParams }: Props) {
 
   const { rangeFrom, rangeTo, refreshInterval = 10000, refreshPaused = true } = routeParams.query;
 
-  const { hasData } = useHasDataContext();
+  const { hasData, hasAnyData } = useHasDataContext();
 
-  if (isEmpty(hasData)) {
+  if (!hasAnyData) {
     return <LoadingObservability />;
   }
 

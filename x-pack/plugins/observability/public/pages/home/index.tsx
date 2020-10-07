@@ -6,6 +6,7 @@
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useHasDataContext } from '../../hooks/use_has_data_context';
+import { LoadingObservability } from '../overview/loading_observability';
 
 export function HomePage() {
   const history = useHistory();
@@ -20,5 +21,5 @@ export function HomePage() {
     }
   }, [hasAnyData, history]);
 
-  return <></>;
+  return <LoadingObservability />;
 }
