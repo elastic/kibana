@@ -170,7 +170,7 @@ describe('initAppAuthorization', () => {
 
     await postAuthHandler(mockRequest, mockResponse, mockPostAuthToolkit);
 
-    expect(mockResponse.notFound).toHaveBeenCalledTimes(1);
+    expect(mockResponse.forbidden).toHaveBeenCalledTimes(1);
     expect(mockPostAuthToolkit.next).not.toHaveBeenCalled();
     expect(mockCheckPrivileges).toHaveBeenCalledWith({ kibana: mockAuthz.actions.app.get('foo') });
     expect(mockAuthz.mode.useRbacForRequest).toHaveBeenCalledWith(mockRequest);
