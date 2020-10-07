@@ -9,8 +9,9 @@ import { PropTypes } from 'prop-types';
 import { CustomSelectionTable } from '../../custom_selection_table';
 import { JobSelectorBadge } from '../job_selector_badge';
 import { TimeRangeBar } from '../timerange_bar';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiTabbedContent } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTabbedContent, EuiCallOut } from '@elastic/eui';
 
 import { LEFT_ALIGNMENT, CENTER_ALIGNMENT, SortableProperties } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
@@ -234,7 +235,17 @@ export function JobSelectorTable({
 
   return (
     <Fragment>
-      {jobs.length === 0 && <EuiLoadingSpinner size="l" />}
+      {jobs.length === 0 && (
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="xpack.ml.jobSelector.noJobsFoundTitle"
+              defaultMessage="No anomaly detection jobs found"
+            />
+          }
+          iconType="iInCircle"
+        />
+      )}
       {jobs.length !== 0 && singleSelection === true && renderJobsTable()}
       {jobs.length !== 0 && !singleSelection && renderTabs()}
     </Fragment>

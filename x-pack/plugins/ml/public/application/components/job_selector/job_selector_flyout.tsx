@@ -17,6 +17,7 @@ import {
   EuiSwitch,
   EuiTitle,
   EuiResizeObserver,
+  EuiProgress,
 } from '@elastic/eui';
 import { NewSelectionIdBadges } from './new_selection_id_badges';
 // @ts-ignore
@@ -71,6 +72,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
 
   const [newSelection, setNewSelection] = useState(selectedIds);
 
+  const [isLoading, setIsLoading] = useState(true);
   const [showAllBadges, setShowAllBadges] = useState(false);
   const [applyTimeRange, setApplyTimeRange] = useState(true);
   const [jobs, setJobs] = useState<MlJobWithTimeRange[]>([]);
@@ -170,12 +172,15 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
         }),
       });
     }
+    setIsLoading(false);
   }
 
   return (
     <EuiResizeObserver onResize={handleResize}>
       {(resizeRef) => (
-        <div
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="none"
           ref={(e) => {
             flyoutEl.current = e;
             resizeRef(e);
@@ -193,59 +198,68 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody className="mlJobSelectorFlyoutBody">
-            <EuiFlexGroup direction="column" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup wrap responsive={false} gutterSize="xs" alignItems="center">
-                  <NewSelectionIdBadges
-                    limit={BADGE_LIMIT}
-                    maps={jobGroupsMaps}
-                    newSelection={newSelection}
-                    onDeleteClick={removeId}
-                    onLinkClick={() => setShowAllBadges(!showAllBadges)}
-                    showAllBadges={showAllBadges}
-                  />
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup direction="row" justifyContent="spaceBetween" responsive={false}>
+            {isLoading ? (
+              <EuiProgress size="xs" color="accent" />
+            ) : (
+              <>
+                <EuiFlexGroup direction="column" responsive={false}>
                   <EuiFlexItem grow={false}>
-                    {!singleSelection && newSelection.length > 0 && (
-                      <EuiButtonEmpty
-                        onClick={clearSelection}
-                        size="xs"
-                        data-test-subj="mlFlyoutJobSelectorButtonClearSelection"
-                      >
-                        {i18n.translate('xpack.ml.jobSelector.clearAllFlyoutButton', {
-                          defaultMessage: 'Clear all',
-                        })}
-                      </EuiButtonEmpty>
-                    )}
-                  </EuiFlexItem>
-                  {withTimeRangeSelector && (
-                    <EuiFlexItem grow={false}>
-                      <EuiSwitch
-                        label={i18n.translate('xpack.ml.jobSelector.applyTimerangeSwitchLabel', {
-                          defaultMessage: 'Apply time range',
-                        })}
-                        checked={applyTimeRange}
-                        onChange={toggleTimerangeSwitch}
-                        data-test-subj="mlFlyoutJobSelectorSwitchApplyTimeRange"
+                    <EuiFlexGroup wrap responsive={false} gutterSize="xs" alignItems="center">
+                      <NewSelectionIdBadges
+                        limit={BADGE_LIMIT}
+                        maps={jobGroupsMaps}
+                        newSelection={newSelection}
+                        onDeleteClick={removeId}
+                        onLinkClick={() => setShowAllBadges(!showAllBadges)}
+                        showAllBadges={showAllBadges}
                       />
-                    </EuiFlexItem>
-                  )}
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup direction="row" justifyContent="spaceBetween" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        {!singleSelection && newSelection.length > 0 && (
+                          <EuiButtonEmpty
+                            onClick={clearSelection}
+                            size="xs"
+                            data-test-subj="mlFlyoutJobSelectorButtonClearSelection"
+                          >
+                            {i18n.translate('xpack.ml.jobSelector.clearAllFlyoutButton', {
+                              defaultMessage: 'Clear all',
+                            })}
+                          </EuiButtonEmpty>
+                        )}
+                      </EuiFlexItem>
+                      {withTimeRangeSelector && (
+                        <EuiFlexItem grow={false}>
+                          <EuiSwitch
+                            label={i18n.translate(
+                              'xpack.ml.jobSelector.applyTimerangeSwitchLabel',
+                              {
+                                defaultMessage: 'Apply time range',
+                              }
+                            )}
+                            checked={applyTimeRange}
+                            onChange={toggleTimerangeSwitch}
+                            data-test-subj="mlFlyoutJobSelectorSwitchApplyTimeRange"
+                          />
+                        </EuiFlexItem>
+                      )}
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
                 </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <JobSelectorTable
-              jobs={jobs}
-              ganttBarWidth={ganttBarWidth}
-              groupsList={groups}
-              onSelection={handleNewSelection}
-              selectedIds={newSelection}
-              singleSelection={singleSelection}
-              timeseriesOnly={timeseriesOnly}
-              withTimeRangeSelector={withTimeRangeSelector}
-            />
+                <JobSelectorTable
+                  jobs={jobs}
+                  ganttBarWidth={ganttBarWidth}
+                  groupsList={groups}
+                  onSelection={handleNewSelection}
+                  selectedIds={newSelection}
+                  singleSelection={singleSelection}
+                  timeseriesOnly={timeseriesOnly}
+                  withTimeRangeSelector={withTimeRangeSelector}
+                />
+              </>
+            )}
           </EuiFlyoutBody>
           <EuiFlyoutFooter>
             <EuiFlexGroup>
@@ -274,7 +288,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlyoutFooter>
-        </div>
+        </EuiFlexGroup>
       )}
     </EuiResizeObserver>
   );
