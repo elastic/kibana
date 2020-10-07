@@ -23,7 +23,7 @@ export const cli = async () => {
     default: {
       count: 10,
     },
-  });
+  }) as RunOptions;
   logger.write(`${separator}
 Loading ${options.count} Trusted App Entries`);
   await run(options);

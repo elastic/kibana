@@ -39,10 +39,10 @@ export async function sendTelemetryOptInStatus(
   statsGetterConfig: StatsGetterConfig
 ) {
   const { optInStatusUrl, newOptInStatus } = config;
-  const optInStatus = await telemetryCollectionManager.getOptInStats(
+  const optInStatus = (await telemetryCollectionManager.getOptInStats(
     newOptInStatus,
     statsGetterConfig
-  );
+  )) as any;
 
   await fetch(optInStatusUrl, {
     method: 'post',

@@ -129,7 +129,7 @@ async function copyToBuild(project: Project, kibanaRoot: string, buildRoot: stri
   await copy(['**/*', '!node_modules/**'], buildProjectPath, {
     cwd: project.getIntermediateBuildDirectory(),
     dot: true,
-    nodir: true,
+    onlyFiles: true,
     parents: true,
   });
 
