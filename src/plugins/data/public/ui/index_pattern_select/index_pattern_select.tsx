@@ -26,7 +26,21 @@ import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
 import { SavedObjectsClientContract, SimpleSavedObject } from 'src/core/public';
 import { getTitle } from '../../../common/index_patterns/lib';
 
-export type IndexPatternSelectInternalProps = IndexPatternSelectProps & {
+export type IndexPatternSelectProps = Required<
+  Omit<
+    EuiComboBoxProps<any>,
+    'isLoading' | 'onSearchChange' | 'options' | 'selectedOptions' | 'onChange'
+  >,
+  'placeholder'
+> & {
+  onChange: (indexPatternId?: string) => void;
+  indexPatternId: string;
+  fieldTypes?: string[];
+  onNoIndexPatterns?: () => void;
+  savedObjectsClient: SavedObjectsClientContract;
+};
+
+type IndexPatternSelectInternalProps = IndexPatternSelectProps & {
   savedObjectsClient: SavedObjectsClientContract;
 };
 
@@ -58,7 +72,7 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectInte
   private isMounted: boolean = false;
   state: IndexPatternSelectState;
 
-  constructor(props: IndexPatternSelectProps) {
+  constructor(props: IndexPatternSelectInternalProps) {
     super(props);
 
     this.state = {
@@ -80,7 +94,7 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectInte
     this.fetchSelectedIndexPattern(this.props.indexPatternId);
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps: IndexPatternSelectProps) {
+  UNSAFE_componentWillReceiveProps(nextProps: IndexPatternSelectInternalProps) {
     if (nextProps.indexPatternId !== this.props.indexPatternId) {
       this.fetchSelectedIndexPattern(nextProps.indexPatternId);
     }
