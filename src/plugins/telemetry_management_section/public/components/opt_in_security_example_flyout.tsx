@@ -20,95 +20,26 @@
 import * as React from 'react';
 
 import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutHeader,
   EuiFlyoutBody,
-  EuiLoadingSpinner,
   EuiPortal, // EuiPortal is a temporary requirement to use EuiFlyout with "ownFocus"
   EuiText,
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
-
-import { FormattedMessage } from '@kbn/i18n/react';
+import { loadingSpinner } from './loading_spinner';
 
 interface Props {
   onClose: () => void;
 }
-
-interface State {
-  isLoading: boolean;
-  hasPrivilegeToRead: boolean;
-}
-
-const loadingSpinner = (
-  <EuiFlexGroup justifyContent="spaceAround">
-    <EuiFlexItem grow={false}>
-      <EuiLoadingSpinner size="xl" />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
 
 const LazyExampleSecurityPayload = React.lazy(() => import('./example_security_payload'));
 
 /**
  * React component for displaying the example data associated with the Telemetry opt-in banner.
  */
-export class OptInSecurityExampleFlyout extends React.PureComponent<Props, State> {
-  public readonly state: State = {
-    isLoading: true,
-    hasPrivilegeToRead: false,
-  };
-
-  async componentDidMount() {
-    try {
-      this.setState({
-        isLoading: false,
-        hasPrivilegeToRead: true,
-      });
-    } catch (err) {
-      this.setState({
-        isLoading: false,
-        hasPrivilegeToRead: err.status !== 403,
-      });
-    }
-  }
-
-  renderBody({ isLoading, hasPrivilegeToRead }: State) {
-    if (isLoading) {
-      return loadingSpinner;
-    }
-
-    if (!hasPrivilegeToRead) {
-      return (
-        <EuiCallOut
-          title={
-            <FormattedMessage
-              id="telemetry.callout.errorUnprivilegedUserTitle"
-              defaultMessage="Error displaying cluster statistics"
-            />
-          }
-          color="danger"
-          iconType="cross"
-        >
-          <FormattedMessage
-            id="telemetry.callout.errorUnprivilegedUserDescription"
-            defaultMessage="You do not have access to see unencrypted cluster statistics."
-          />
-        </EuiCallOut>
-      );
-    }
-
-    return (
-      <React.Suspense fallback={loadingSpinner}>
-        <LazyExampleSecurityPayload />
-      </React.Suspense>
-    );
-  }
-
+export class OptInSecurityExampleFlyout extends React.PureComponent<Props> {
   render() {
     return (
       <EuiPortal>
@@ -126,7 +57,11 @@ export class OptInSecurityExampleFlyout extends React.PureComponent<Props, State
               </EuiText>
             </EuiTextColor>
           </EuiFlyoutHeader>
-          <EuiFlyoutBody>{this.renderBody(this.state)}</EuiFlyoutBody>
+          <EuiFlyoutBody>
+            <React.Suspense fallback={loadingSpinner}>
+              <LazyExampleSecurityPayload />
+            </React.Suspense>
+          </EuiFlyoutBody>
         </EuiFlyout>
       </EuiPortal>
     );
