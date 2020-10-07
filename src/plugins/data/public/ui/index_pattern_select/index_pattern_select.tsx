@@ -37,7 +37,6 @@ export type IndexPatternSelectProps = Required<
   indexPatternId: string;
   fieldTypes?: string[];
   onNoIndexPatterns?: () => void;
-  savedObjectsClient: SavedObjectsClientContract;
 };
 
 type IndexPatternSelectInternalProps = IndexPatternSelectProps & {
