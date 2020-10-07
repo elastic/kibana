@@ -33,7 +33,7 @@ describe('useGetCaseUserActions', () => {
   it('init', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetCaseUserActions>(() =>
-        useGetCaseUserActions(basicCase.id, basicCase.connectorId)
+        useGetCaseUserActions(basicCase.id, basicCase.connector.id)
       );
       await waitForNextUpdate();
       expect(result.current).toEqual({
@@ -48,7 +48,7 @@ describe('useGetCaseUserActions', () => {
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetCaseUserActions>(() =>
-        useGetCaseUserActions(basicCase.id, basicCase.connectorId)
+        useGetCaseUserActions(basicCase.id, basicCase.connector.id)
       );
       await waitForNextUpdate();
 
@@ -61,7 +61,7 @@ describe('useGetCaseUserActions', () => {
   it('returns proper state on getCaseUserActions', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetCaseUserActions>(() =>
-        useGetCaseUserActions(basicCase.id, basicCase.connectorId)
+        useGetCaseUserActions(basicCase.id, basicCase.connector.id)
       );
       await waitForNextUpdate();
       result.current.fetchCaseUserActions(basicCase.id);
@@ -81,7 +81,7 @@ describe('useGetCaseUserActions', () => {
   it('set isLoading to true when posting case', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetCaseUserActions>(() =>
-        useGetCaseUserActions(basicCase.id, basicCase.connectorId)
+        useGetCaseUserActions(basicCase.id, basicCase.connector.id)
       );
       await waitForNextUpdate();
       result.current.fetchCaseUserActions(basicCase.id);
@@ -98,7 +98,7 @@ describe('useGetCaseUserActions', () => {
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetCaseUserActions>(() =>
-        useGetCaseUserActions(basicCase.id, basicCase.connectorId)
+        useGetCaseUserActions(basicCase.id, basicCase.connector.id)
       );
       await waitForNextUpdate();
       result.current.fetchCaseUserActions(basicCase.id);
@@ -230,7 +230,7 @@ describe('useGetCaseUserActions', () => {
       const userActions = [
         ...caseUserActions,
         getUserAction(['pushed'], 'push-to-service'),
-        getUserAction(['connector_id'], 'update'),
+        getUserAction(['connector'], 'update'),
       ];
       const result = getPushedInfo(userActions, '123');
       expect(result).toEqual({
