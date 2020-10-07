@@ -43,7 +43,7 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
 }): JSX.Element => {
   const [searchQuery, setSearchQuery] = useState('');
   const [touched, setIsTouched] = useState(false);
-  const [error, setError] = useState<string | null | undefined>(undefined);
+  const [error, setError] = useState<string | undefined>(undefined);
   const [isLoadingSuggestions, isSuggestingValues, suggestions] = useFieldValueAutocomplete({
     selectedField,
     operatorType: OperatorTypeEnum.MATCH_ANY,
@@ -67,8 +67,8 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
   );
 
   const handleError = useCallback(
-    (err: string | null | undefined): void => {
-      setError((existingErr): string | null | undefined => {
+    (err: string | undefined): void => {
+      setError((existingErr): string | undefined => {
         const oldErr = existingErr != null;
         const newErr = err != null;
         if (oldErr !== newErr && onError != null) {
