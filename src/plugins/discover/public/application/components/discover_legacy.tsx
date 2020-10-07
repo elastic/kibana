@@ -221,7 +221,7 @@ export function DiscoverLegacy({
               <>
                 <SkipBottomButton onClick={onSkipBottomButtonClick} />
                 <div className="dscResultCount">
-                  <EuiFlexGroup justifyContent="spaceBetween">
+                  <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
                     <EuiFlexItem
                       grow={false}
                       className="dscResuntCount__title eui-textTruncate eui-textNoWrap"

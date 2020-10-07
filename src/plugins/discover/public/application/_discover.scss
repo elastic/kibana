@@ -148,6 +148,9 @@ discover-app {
     font-family: $euiCodeFontFamily;
     font-size: $euiFontSizeXS;
   }
+  tr:first-child {
+    border-bottom: 1px solid $euiColorLightShade;
+  }
 }
 
 .dscTable__footer {
