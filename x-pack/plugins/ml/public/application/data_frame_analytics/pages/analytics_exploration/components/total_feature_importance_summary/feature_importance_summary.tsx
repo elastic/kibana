@@ -5,7 +5,7 @@
  */
 
 import React, { FC, useCallback, useMemo } from 'react';
-import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
+import { EuiButtonEmpty, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   Chart,
@@ -188,9 +188,14 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
   const tickFormatter = useCallback((d) => Number(d.toPrecision(3)).toString(), []);
 
+  // do not expand by default if no feature importance data
+  const hasTotalFeatureImportance = useMemo(() => totalFeatureImportance.length > 1, [
+    totalFeatureImportance,
+  ]);
   return (
     <>
       <ExpandableSection
+        isExpanded={hasTotalFeatureImportance}
         dataTestId="FeatureImportanceSummary"
         title={
           <FormattedMessage
@@ -219,34 +224,46 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
           },
         ]}
         content={
-          <Chart
-            size={{
-              width: '100%',
-              height: chartHeight,
-            }}
-          >
-            <Settings rotation={90} theme={theme} showLegend={showLegend} />
+          !hasTotalFeatureImportance ? (
+            <EuiCallOut
+              size="s"
+              title={
+                <FormattedMessage
+                  id="xpack.ml.dataframe.analytics.exploration.noTotalFeatureImportanceCalloutMessage"
+                  defaultMessage="Total feature importance data is not available; the data set is uniform and the features have no significant impact on the prediction."
+                />
+              }
+            />
+          ) : (
+            <Chart
+              size={{
+                width: '100%',
+                height: chartHeight,
+              }}
+            >
+              <Settings rotation={90} theme={theme} showLegend={showLegend} />
 
-            <Axis
-              id="x-axis"
-              title={i18n.translate(
-                'xpack.ml.dataframe.analytics.exploration.featureImportanceXAxisTitle',
-                {
-                  defaultMessage: 'Feature importance average magnitude',
-                }
-              )}
-              position={Position.Bottom}
-              tickFormat={tickFormatter}
-            />
-            <Axis id="y-axis" title="" position={Position.Left} />
-            <BarSeries
-              id="magnitude"
-              xScaleType={ScaleType.Ordinal}
-              yScaleType={ScaleType.Linear}
-              data={plotData}
-              {...barSeriesSpec}
-            />
-          </Chart>
+              <Axis
+                id="x-axis"
+                title={i18n.translate(
+                  'xpack.ml.dataframe.analytics.exploration.featureImportanceXAxisTitle',
+                  {
+                    defaultMessage: 'Feature importance average magnitude',
+                  }
+                )}
+                position={Position.Bottom}
+                tickFormat={tickFormatter}
+              />
+              <Axis id="y-axis" title="" position={Position.Left} />
+              <BarSeries
+                id="magnitude"
+                xScaleType={ScaleType.Ordinal}
+                yScaleType={ScaleType.Linear}
+                data={plotData}
+                {...barSeriesSpec}
+              />
+            </Chart>
+          )
         }
       />
       <EuiSpacer size="m" />
