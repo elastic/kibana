@@ -18,7 +18,7 @@
  */
 import PropTypes from 'prop-types';
 import React from 'react';
-import { htmlIdGenerator, EuiFlexItem, EuiFormRow, EuiToolTip } from '@elastic/eui';
+import { htmlIdGenerator, EuiFlexItem, EuiFormRow, EuiToolTip, EuiFlexGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { YesNo } from './yes_no';
 import { getDefaultQueryLanguage } from './lib/get_default_query_language';
@@ -40,7 +40,7 @@ export function SeriesConfigQueryBarWithIgnoreGlobalFilter({
     />
   );
   return (
-    <>
+    <EuiFlexGroup margin="s">
       <EuiFlexItem grow={true}>
         <EuiFormRow
           id={htmlId('filterInput')}
@@ -89,7 +89,7 @@ export function SeriesConfigQueryBarWithIgnoreGlobalFilter({
           )}
         </EuiFormRow>
       </EuiFlexItem>
-    </>
+    </EuiFlexGroup>
   );
 }
 

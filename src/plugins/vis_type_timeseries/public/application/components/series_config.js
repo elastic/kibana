@@ -55,14 +55,12 @@ export const SeriesConfig = (props) => {
 
       <EuiHorizontalRule margin="s" />
 
-      <EuiFlexGroup margin="s">
-        <SeriesConfigQueryBarWithIgnoreGlobalFilter
-          model={model}
-          onChange={props.onChange}
-          panel={props.panel}
-          indexPatternForQuery={seriesIndexPattern}
-        />
-      </EuiFlexGroup>
+      <SeriesConfigQueryBarWithIgnoreGlobalFilter
+        model={model}
+        onChange={props.onChange}
+        panel={props.panel}
+        indexPatternForQuery={seriesIndexPattern}
+      />
 
       <EuiHorizontalRule margin="s" />
 
