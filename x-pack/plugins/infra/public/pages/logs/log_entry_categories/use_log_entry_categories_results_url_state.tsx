@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect } from 'react';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as rt from 'io-ts';
-
 import { useUrlState } from '../../../utils/use_url_state';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import {
+  useKibanaTimefilterTime,
+  useSyncKibanaTimeFilterTime,
+} from '../../../hooks/use_kibana_timefilter_time';
 
 const autoRefreshRT = rt.union([
   rt.type({
@@ -31,15 +32,16 @@ const urlTimeRangeRT = rt.union([stringTimeRangeRT, rt.undefined]);
 
 const TIME_RANGE_URL_STATE_KEY = 'timeRange';
 const AUTOREFRESH_URL_STATE_KEY = 'autoRefresh';
+const TIME_DEFAULTS = { from: 'now-2w', to: 'now' };
 
 export const useLogEntryCategoriesResultsUrlState = () => {
-  const { services } = useKibanaContextForPlugin();
-  const { from: sharedFrom, to: sharedTo } = services.data.query.timefilter.timefilter.getTime();
+  const [getTime, _] = useKibanaTimefilterTime(TIME_DEFAULTS);
+  const { from: start, to: end } = getTime();
 
   const [timeRange, setTimeRange] = useUrlState({
     defaultState: {
-      startTime: sharedFrom || 'now-2w',
-      endTime: sharedTo || 'now',
+      startTime: start,
+      endTime: end,
     },
     decodeUrlState: (value: unknown) =>
       pipe(urlTimeRangeRT.decode(value), fold(constant(undefined), identity)),
@@ -48,14 +50,7 @@ export const useLogEntryCategoriesResultsUrlState = () => {
     writeDefaultState: true,
   });
 
-  useEffect(() => {
-    // Share timestamp changes with the rest of Kibana
-    const { startTime, endTime } = timeRange;
-    services.data.query.timefilter.timefilter.setTime({
-      from: startTime,
-      to: endTime,
-    });
-  }, [timeRange, services.data.query.timefilter.timefilter]);
+  useSyncKibanaTimeFilterTime(TIME_DEFAULTS, { from: timeRange.startTime, to: timeRange.endTime });
 
   const [autoRefresh, setAutoRefresh] = useUrlState({
     defaultState: {

@@ -20,6 +20,7 @@
 import _ from 'lodash';
 import { Subject, BehaviorSubject } from 'rxjs';
 import moment from 'moment';
+import { timeEnd } from 'console';
 import { areRefreshIntervalsDifferent, areTimeRangesDifferent } from './lib/diff_time_picker_vals';
 import { getForceNow } from './lib/get_force_now';
 import { TimefilterConfig, InputTimeRange, TimeRangeBounds } from './types';
@@ -41,6 +42,8 @@ export class Timefilter {
   private fetch$ = new Subject();
 
   private _time: TimeRange;
+  // Denotes whether setTime has been called, can be used to determine if the constructor defaults are being used.
+  private _isTimeTouched: boolean = false;
   private _refreshInterval!: RefreshInterval;
   private _history: TimeHistoryContract;
 
@@ -88,8 +91,8 @@ export class Timefilter {
     return this.fetch$.asObservable();
   };
 
-  public getTime = (): TimeRange => {
-    const { from, to } = this._time;
+  public getTime = (defaults?: TimeRange): TimeRange => {
+    const { from, to } = this._isTimeTouched || !defaults ? this._time : defaults;
     return {
       ...this._time,
       from: moment.isMoment(from) ? from.toISOString() : from,
@@ -112,6 +115,7 @@ export class Timefilter {
         from: newTime.from,
         to: newTime.to,
       };
+      this._isTimeTouched = true;
       this._history.add(this._time);
       this.timeUpdate$.next();
       this.fetch$.next();

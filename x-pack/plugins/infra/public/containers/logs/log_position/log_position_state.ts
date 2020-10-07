@@ -9,7 +9,7 @@ import createContainer from 'constate';
 import { useSetState } from 'react-use';
 import { TimeKey } from '../../../../common/time';
 import { datemathToEpochMillis, isValidDatemath } from '../../../utils/datemath';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { useKibanaTimefilterTime } from '../../../hooks/use_kibana_timefilter_time';
 
 type TimeKeyOrNull = TimeKey | null;
 
@@ -80,12 +80,15 @@ const useVisibleMidpoint = (middleKey: TimeKeyOrNull, targetPosition: TimeKeyOrN
   return store.currentValue;
 };
 
+const TIME_DEFAULTS = { from: 'now-1d', to: 'now' };
+
 export const useLogPositionState: () => LogPositionStateParams & LogPositionCallbacks = () => {
-  const { services } = useKibanaContextForPlugin();
-  const { from: sharedFrom, to: sharedTo } = services.data.query.timefilter.timefilter.getTime();
+  const [getTime, setTime] = useKibanaTimefilterTime(TIME_DEFAULTS);
+  const { from: start, to: end } = getTime();
+
   const DEFAULT_DATE_RANGE = {
-    startDateExpression: sharedFrom || 'now-1d',
-    endDateExpression: sharedTo || 'now',
+    startDateExpression: start,
+    endDateExpression: end,
   };
 
   // Flag to determine if `LogPositionState` has been fully initialized.
@@ -118,13 +121,15 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
   });
 
   useEffect(() => {
-    // Share timestamp changes with the rest of Kibana
-    const { startDateExpression, endDateExpression } = dateRange;
-    services.data.query.timefilter.timefilter.setTime({
-      from: startDateExpression,
-      to: endDateExpression,
-    });
-  }, [dateRange, services.data.query.timefilter.timefilter]);
+    if (isInitialized) {
+      if (
+        TIME_DEFAULTS.from !== dateRange.startDateExpression ||
+        TIME_DEFAULTS.to !== dateRange.endDateExpression
+      ) {
+        setTime({ from: dateRange.startDateExpression, to: dateRange.endDateExpression });
+      }
+    }
+  }, [isInitialized, dateRange.startDateExpression, dateRange.endDateExpression, setTime]);
 
   const { startKey, middleKey, endKey, pagesBeforeStart, pagesAfterEnd } = visiblePositions;
 
