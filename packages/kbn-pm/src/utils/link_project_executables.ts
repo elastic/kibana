@@ -19,7 +19,7 @@
 
 import { dirname, relative, resolve, sep } from 'path';
 
-import { chmod, createSymlink, isFile, mkdirp } from './fs';
+import { chmod, createSymlink, isFile, isDirectory, mkdirp, rmdirp } from './fs';
 import { log } from './log';
 import { ProjectGraph, ProjectMap } from './projects';
 
@@ -27,41 +27,86 @@ import { ProjectGraph, ProjectMap } from './projects';
  * Yarn does not link the executables from dependencies that are installed
  * using `link:` https://github.com/yarnpkg/yarn/pull/5046
  *
- * We simulate this functionality by walking through each project's project
- * dependencies, and manually linking their executables if defined. The logic
- * for linking was mostly adapted from lerna: https://github.com/lerna/lerna/blob/1d7eb9eeff65d5a7de64dea73613b1bf6bfa8d57/src/PackageUtilities.js#L348
+ * Additionally while we have a single package.json being used to install dependencies
+ * in the root project, we also want to be able to run npm scripts in the underlying projects.
+ * We simulate this functionality by finding the root project and for the root project walking through each
+ * dependency and manually link its executables if any defined.
+ * Finally we walk through each other project (excluding the root) and we just symlink each project's
+ * node_modules/.bin into the root node_modules/.bin
+ *
  */
 export async function linkProjectExecutables(
   projectsByName: ProjectMap,
   projectGraph: ProjectGraph
 ) {
   log.debug(`Linking package executables`);
+
+  // Find root and generate executables from dependencies for it
+  let rootProject = null;
+  let rootProjectDeps = [] as any;
   for (const [projectName, projectDeps] of projectGraph) {
     const project = projectsByName.get(projectName)!;
-    const binsDir = resolve(project.nodeModulesLocation, '.bin');
-
-    for (const projectDep of projectDeps) {
-      const executables = projectDep.getExecutables();
-      for (const name of Object.keys(executables)) {
-        const srcPath = executables[name];
-
-        // existing logic from lerna -- ensure that the bin we are going to
-        // point to exists or ignore it
-        if (!(await isFile(srcPath))) {
-          continue;
-        }
-
-        const dest = resolve(binsDir, name);
-
-        // Get relative project path with normalized path separators.
-        const projectRelativePath = relative(project.path, srcPath).split(sep).join('/');
-
-        log.debug(`[${project.name}] ${name} -> ${projectRelativePath}`);
-
-        await mkdirp(dirname(dest));
-        await createSymlink(srcPath, dest, 'exec');
-        await chmod(dest, '755');
-      }
+    if (project.isSinglePackageJsonProject) {
+      rootProject = projectsByName.get(projectName);
+      rootProjectDeps = projectDeps;
+      break;
     }
+  }
+
+  if (!rootProject) {
+    throw new Error('Could not finding root project while linking package executables');
+  }
+
+  // Prepare root project node_modules/.bin
+  const rootBinsDir = resolve(rootProject.nodeModulesLocation, '.bin');
+  for (const rootProjectDep of rootProjectDeps) {
+    const executables = rootProjectDep.getExecutables();
+    for (const name of Object.keys(executables)) {
+      const srcPath = executables[name];
+
+      // existing logic from lerna -- ensure that the bin we are going to
+      // point to exists or ignore it
+      if (!(await isFile(srcPath))) {
+        continue;
+      }
+
+      const dest = resolve(rootBinsDir, name);
+
+      // Get relative project path with normalized path separators.
+      const rootProjectRelativePath = relative(rootProject.path, srcPath).split(sep).join('/');
+
+      log.debug(`[${rootProject.name}] ${name} -> ${rootProjectRelativePath}`);
+
+      await mkdirp(dirname(dest));
+      await createSymlink(srcPath, dest, 'exec');
+      await chmod(dest, '755');
+    }
+  }
+
+  // Assure roots bin dir exists
+  if (!(await isDirectory(rootBinsDir))) {
+    await mkdirp(rootBinsDir);
+  }
+
+  // Create symlinks to rootProject/node_modules/.bin for every other project
+  for (const [projectName] of projectGraph) {
+    const project = projectsByName.get(projectName)!;
+
+    if (project.isSinglePackageJsonProject) {
+      continue;
+    }
+
+    const srcPath = rootBinsDir;
+    const dest = resolve(project.nodeModulesLocation, '.bin');
+
+    // Get relative project path with normalized path separators.
+    const projectRelativePath = relative(project.path, srcPath).split(sep).join('/');
+
+    log.debug(`[${project.name}] 'node_modules/.bin' -> ${projectRelativePath}`);
+
+    await rmdirp(dirname(dest));
+    await mkdirp(dirname(dest));
+    await createSymlink(srcPath, dest, 'dir');
+    await chmod(dest, '755');
   }
 }

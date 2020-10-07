@@ -11,12 +11,5 @@
     "kbn:watch": "tsc --watch",
     "test": "tsd",
     "clean": "del target"
-  },
-  "dependencies": {
-    "utility-types": "^3.10.0"
-  },
-  "devDependencies": {
-    "del-cli": "^3.0.1",
-    "tsd": "^0.13.1"
   }
 }

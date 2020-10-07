@@ -33,9 +33,6 @@ export const BootstrapCommand: ICommand = {
   name: 'bootstrap',
 
   async run(projects, projectGraph, { options, kbn }) {
-    const batchedProjectsByWorkspace = topologicallyBatchProjects(projects, projectGraph, {
-      batchByWorkspace: true,
-    });
     const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
 
     const extraArgs = [
@@ -43,15 +40,21 @@ export const BootstrapCommand: ICommand = {
       ...(options['prefer-offline'] === true ? ['--prefer-offline'] : []),
     ];
 
-    for (const batch of batchedProjectsByWorkspace) {
+    for (const batch of batchedProjects) {
       for (const project of batch) {
-        if (project.isWorkspaceProject) {
-          log.verbose(`Skipping workspace project: ${project.name}`);
+        if (!project.hasDependencies()) {
           continue;
         }
 
-        if (project.hasDependencies()) {
+        if (project.isSinglePackageJsonProject) {
           await project.installDependencies({ extraArgs });
+          continue;
+        }
+
+        if (!project.isEveryDependencyLocal()) {
+          throw new Error(
+            `[${project.name}] is not an eligible to hold non local dependencies. Move the non local dependencies into the top level package.json.`
+          );
         }
       }
     }
@@ -60,6 +63,7 @@ export const BootstrapCommand: ICommand = {
 
     await validateYarnLock(kbn, yarnLock);
 
+    // Create node_modules/bin for every project
     await linkProjectExecutables(projects, projectGraph);
 
     /**

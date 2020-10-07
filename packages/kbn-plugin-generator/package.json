@@ -9,18 +9,6 @@
     "kbn:watch": "node scripts/build --watch"
   },
   "dependencies": {
-    "@kbn/dev-utils": "1.0.0",
-    "ejs": "^3.1.5",
-    "execa": "^4.0.2",
-    "inquirer": "^7.3.3",
-    "normalize-path": "^3.0.0",
-    "prettier": "^2.1.1",
-    "vinyl": "^2.2.0",
-    "vinyl-fs": "^3.0.3"
-  },
-  "devDependencies": {
-    "@types/ejs": "^3.0.4",
-    "@types/prettier": "^2.0.2",
-    "@types/inquirer": "^7.3.1"
+    "@kbn/dev-utils": "link:../kbn-dev-utils"
   }
 }

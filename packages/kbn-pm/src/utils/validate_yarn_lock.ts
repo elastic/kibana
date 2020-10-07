@@ -26,6 +26,7 @@ import { Kibana } from './kibana';
 import { YarnLock } from './yarn_lock';
 import { log } from './log';
 import { Project } from './project';
+import { isLinkDependency } from './package_json';
 
 export async function validateYarnLock(kbn: Kibana, yarnLock: YarnLock) {
   // look through all of the packages in the yarn.lock file to see if
@@ -126,7 +127,9 @@ export async function validateYarnLock(kbn: Kibana, yarnLock: YarnLock) {
   }
 
   const duplicateRanges = Array.from(depRanges.entries())
-    .filter(([, ranges]) => ranges.length > 1)
+    .filter(
+      ([, ranges]) => ranges.length > 1 && !ranges.every((rng) => isLinkDependency(rng.range))
+    )
     .reduce(
       (acc: string[], [dep, ranges]) => [
         ...acc,

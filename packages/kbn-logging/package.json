@@ -10,9 +10,6 @@
     "kbn:watch": "yarn build --watch"
   },
   "dependencies": {
-    "@kbn/std": "1.0.0"
-  },
-  "devDependencies": {
-    "typescript": "4.0.2"
+    "@kbn/std": "link:../kbn-std"
   }
 }

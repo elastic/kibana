@@ -10,10 +10,6 @@
     "kbn:watch": "yarn build --watch"
   },
   "dependencies": {
-    "@kbn/config-schema": "1.0.0",
-    "load-json-file": "^6.2.0"
-  },
-  "devDependencies": {
-    "typescript": "4.0.2"
+    "@kbn/config-schema": "link:../kbn-config-schema"
   }
 }
