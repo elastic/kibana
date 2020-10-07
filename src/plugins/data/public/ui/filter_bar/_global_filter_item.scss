@@ -39,7 +39,6 @@
 }
 
 .globalFilterItem-isError {
-  text-decoration: none;
   .globalFilterLabel__value {
     color: makeHighContrastColor($euiColorDangerText, $euiColorLightShade);
   }
