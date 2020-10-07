@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ADMIN, READ_ONLY, READ_WRITE, SEARCH, SEARCH_DISPLAY, WRITE_ONLY } from '../constants';
+import { ApiTokenTypes, READ_ONLY, READ_WRITE, SEARCH_DISPLAY, WRITE_ONLY } from '../constants';
 import { IApiToken } from '../types';
 
 export const getModeDisplayText = (apiToken: IApiToken): string => {
   const { read = false, write = false, type } = apiToken;
 
   switch (type) {
-    case ADMIN:
+    case ApiTokenTypes.Admin:
       return '--';
-    case SEARCH:
+    case ApiTokenTypes.Search:
       return SEARCH_DISPLAY;
     default:
       if (read && write) {

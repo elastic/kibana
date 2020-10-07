@@ -12,12 +12,12 @@ import { useValues, useActions } from 'kea';
 import { CredentialsList } from './credentials_list';
 import { EuiBasicTable, EuiCopy } from '@elastic/eui';
 import { IApiToken } from '../types';
-import { ADMIN, PRIVATE } from '../constants';
+import { ApiTokenTypes } from '../constants';
 
 describe('Credentials', () => {
   const apiToken: IApiToken = {
     name: '',
-    type: PRIVATE,
+    type: ApiTokenTypes.Private,
     read: true,
     write: true,
     access_all_engines: true,
@@ -162,7 +162,7 @@ describe('Credentials', () => {
     describe('column 2 (type)', () => {
       const token = {
         ...apiToken,
-        type: PRIVATE,
+        type: ApiTokenTypes.Private,
       };
 
       it('renders correctly', () => {
@@ -206,7 +206,7 @@ describe('Credentials', () => {
     describe('column 4 (modes)', () => {
       const token = {
         ...apiToken,
-        type: ADMIN,
+        type: ApiTokenTypes.Admin,
       };
 
       it('renders correctly', () => {
@@ -219,7 +219,7 @@ describe('Credentials', () => {
     describe('column 5 (engines)', () => {
       const token = {
         ...apiToken,
-        type: PRIVATE,
+        type: ApiTokenTypes.Private,
         access_all_engines: true,
       };
 

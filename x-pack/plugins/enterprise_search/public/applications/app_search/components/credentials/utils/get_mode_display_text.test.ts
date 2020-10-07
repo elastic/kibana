@@ -4,22 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  ADMIN,
-  PRIVATE,
-  READ_ONLY,
-  READ_WRITE,
-  SEARCH,
-  SEARCH_DISPLAY,
-  WRITE_ONLY,
-} from '../constants';
+import { ApiTokenTypes, READ_ONLY, READ_WRITE, SEARCH_DISPLAY, WRITE_ONLY } from '../constants';
 import { IApiToken } from '../types';
 
 import { getModeDisplayText } from './get_mode_display_text';
 
 const apiToken: IApiToken = {
   name: '',
-  type: PRIVATE,
+  type: ApiTokenTypes.Private,
   read: true,
   write: true,
   access_all_engines: true,
@@ -40,22 +32,22 @@ describe('getModeDisplayText', () => {
   });
 
   it('will return "search" if they key is a search key, regardless of read/write state', () => {
-    expect(getModeDisplayText({ ...apiToken, type: SEARCH, read: false, write: true })).toEqual(
-      SEARCH_DISPLAY
-    );
+    expect(
+      getModeDisplayText({ ...apiToken, type: ApiTokenTypes.Search, read: false, write: true })
+    ).toEqual(SEARCH_DISPLAY);
   });
 
   it('will return "--" if they key is an admin key, regardless of read/write state', () => {
-    expect(getModeDisplayText({ ...apiToken, type: ADMIN, read: false, write: true })).toEqual(
-      '--'
-    );
+    expect(
+      getModeDisplayText({ ...apiToken, type: ApiTokenTypes.Admin, read: false, write: true })
+    ).toEqual('--');
   });
 
   it('will default read and write to false', () => {
     expect(
       getModeDisplayText({
         name: 'test',
-        type: PRIVATE,
+        type: ApiTokenTypes.Private,
       })
     ).toEqual(READ_ONLY);
   });

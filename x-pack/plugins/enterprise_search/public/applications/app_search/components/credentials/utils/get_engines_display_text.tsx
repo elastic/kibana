@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { ADMIN, ALL } from '../constants';
+import { ApiTokenTypes, ALL } from '../constants';
 import { IApiToken } from '../types';
 
 export const getEnginesDisplayText = (apiToken: IApiToken): JSX.Element | string => {
@@ -19,7 +19,7 @@ export const getEnginesDisplayText = (apiToken: IApiToken): JSX.Element | string
     </ul>
   );
 
-  if (type === ADMIN) {
+  if (type === ApiTokenTypes.Admin) {
     return '--';
   }
   return accessAll ? ALL : engineList();

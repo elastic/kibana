@@ -8,11 +8,11 @@ import { shallow } from 'enzyme';
 
 import { getEnginesDisplayText } from './get_engines_display_text';
 import { IApiToken } from '../types';
-import { ADMIN, PRIVATE } from '../constants';
+import { ApiTokenTypes } from '../constants';
 
 const apiToken: IApiToken = {
   name: '',
-  type: PRIVATE,
+  type: ApiTokenTypes.Private,
   read: true,
   write: true,
   access_all_engines: true,
@@ -21,7 +21,9 @@ const apiToken: IApiToken = {
 
 describe('getEnginesDisplayText', () => {
   it('returns "--" when the token is an admin token', () => {
-    const wrapper = shallow(<div>{getEnginesDisplayText({ ...apiToken, type: ADMIN })}</div>);
+    const wrapper = shallow(
+      <div>{getEnginesDisplayText({ ...apiToken, type: ApiTokenTypes.Admin })}</div>
+    );
     expect(wrapper.text()).toEqual('--');
   });
 
@@ -42,7 +44,13 @@ describe('getEnginesDisplayText', () => {
 
   it('returns "--" when the token is an admin token, even if access_all_engines is true ', () => {
     const wrapper = shallow(
-      <div>{getEnginesDisplayText({ ...apiToken, access_all_engines: true, type: ADMIN })}</div>
+      <div>
+        {getEnginesDisplayText({
+          ...apiToken,
+          access_all_engines: true,
+          type: ApiTokenTypes.Admin,
+        })}
+      </div>
     );
     expect(wrapper.text()).toEqual('--');
   });
