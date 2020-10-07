@@ -34,6 +34,7 @@ import { AGGS_TERMS_SIZE_SETTING } from '../../common/constants';
 
 export const visualizeFieldAction = createAction<typeof ACTION_VISUALIZE_FIELD>({
   type: ACTION_VISUALIZE_FIELD,
+  id: ACTION_VISUALIZE_FIELD,
   getDisplayName: () =>
     i18n.translate('visualize.discover.visualizeFieldLabel', {
       defaultMessage: 'Visualize field',
