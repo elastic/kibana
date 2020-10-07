@@ -5,4 +5,4 @@
  */
 
 export { PingListComponent } from './ping_list';
-export { PingList } from './ping_list_container';
+export { PingList } from './ping_list';

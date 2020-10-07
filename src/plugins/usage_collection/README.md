@@ -325,3 +325,8 @@ By storing these metrics and their counts as key-value pairs, we can add more me
 to worry about exceeding the 1000-field soft limit in Elasticsearch.
 
 The only caveat is that it makes it harder to consume in Kibana when analysing each entry in the array separately. In the telemetry team we are working to find a solution to this.
+
+# Routes registered by this plugin
+
+- `/api/ui_metric/report`: Used by `ui_metrics` usage collector instances to report their usage data to the server
+- `/api/stats`: Get the metrics and usage ([details](./server/routes/stats/README.md))

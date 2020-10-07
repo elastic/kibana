@@ -118,6 +118,25 @@ export function getDatasourceSuggestionsForField(
   }
 }
 
+// Called when the user navigates from Discover to Lens (Visualize button)
+export function getDatasourceSuggestionsForVisualizeField(
+  state: IndexPatternPrivateState,
+  indexPatternId: string,
+  fieldName: string
+): IndexPatternSugestion[] {
+  const layers = Object.keys(state.layers);
+  const layerIds = layers.filter((id) => state.layers[id].indexPatternId === indexPatternId);
+  // Identify the field by the indexPatternId and the fieldName
+  const indexPattern = state.indexPatterns[indexPatternId];
+  const field = indexPattern.fields.find((fld) => fld.name === fieldName);
+
+  if (layerIds.length !== 0 || !field) return [];
+  const newId = generateId();
+  return getEmptyLayerSuggestionsForField(state, newId, indexPatternId, field).concat(
+    getEmptyLayerSuggestionsForField({ ...state, layers: {} }, newId, indexPatternId, field)
+  );
+}
+
 function getBucketOperation(field: IndexPatternField) {
   // We allow numeric bucket types in some cases, but it's generally not the right suggestion,
   // so we eliminate it here.
@@ -473,7 +492,6 @@ export function getDatasourceSuggestionsFromCurrentState(
             suggestions.push(createChangedNestingSuggestion(state, layerId));
           }
         }
-
         return suggestions;
       })
   );

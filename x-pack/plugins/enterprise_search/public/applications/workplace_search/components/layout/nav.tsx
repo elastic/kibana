@@ -12,6 +12,9 @@ import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
 import { SideNav, SideNavLink } from '../../../shared/layout';
 
+import { GroupSubNav } from '../../views/groups/components/group_sub_nav';
+import { NAV } from '../../views/groups/constants';
+
 import {
   ORG_SOURCES_PATH,
   SOURCES_PATH,
@@ -35,10 +38,8 @@ export const WorkplaceSearchNav: React.FC = () => {
           defaultMessage: 'Sources',
         })}
       </SideNavLink>
-      <SideNavLink isExternal to={getWorkplaceSearchUrl(`#${GROUPS_PATH}`)}>
-        {i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.groups', {
-          defaultMessage: 'Groups',
-        })}
+      <SideNavLink to={GROUPS_PATH} subNav={<GroupSubNav />}>
+        {NAV.GROUPS}
       </SideNavLink>
       <SideNavLink isExternal to={getWorkplaceSearchUrl(`#${ROLE_MAPPINGS_PATH}`)}>
         {i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.roleMappings', {
@@ -59,11 +60,6 @@ export const WorkplaceSearchNav: React.FC = () => {
       <SideNavLink isExternal to={getWorkplaceSearchUrl(`#${SOURCES_PATH}`)}>
         {i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.personalDashboard', {
           defaultMessage: 'View my personal dashboard',
-        })}
-      </SideNavLink>
-      <SideNavLink isExternal to={getWorkplaceSearchUrl('/search')}>
-        {i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.search', {
-          defaultMessage: 'Go to search application',
         })}
       </SideNavLink>
     </SideNav>
