@@ -226,10 +226,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon
-                    color={getTimelineChartTheme(isDarkMode).crosshair.band.fill}
-                    type={'dot'}
-                  />
+                  <EuiIcon color={chartMetric.color} type={'dot'} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size={'xs'}>

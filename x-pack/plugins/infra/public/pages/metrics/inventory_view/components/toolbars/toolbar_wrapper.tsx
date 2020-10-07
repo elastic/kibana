@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import { fieldToName } from '../../lib/field_to_display_name';
 import { useSourceContext } from '../../../../../containers/source';
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
