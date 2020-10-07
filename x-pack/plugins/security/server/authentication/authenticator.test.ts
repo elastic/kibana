@@ -17,10 +17,9 @@ import {
   httpServerMock,
   elasticsearchServiceMock,
 } from '../../../../../src/core/server/mocks';
-import { Auditor, AuditorFactory } from '../../../../../src/core/server';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
-import { securityAuditLoggerMock } from '../audit/index.mock';
+import { auditServiceMock, securityAuditLoggerMock } from '../audit/index.mock';
 import { sessionMock } from '../session_management/index.mock';
 import { SecurityLicenseFeatures } from '../../common/licensing';
 import { ConfigSchema, createConfig } from '../config';
@@ -30,26 +29,19 @@ import { Authenticator, AuthenticatorOptions } from './authenticator';
 import { DeauthenticationResult } from './deauthentication_result';
 import { BasicAuthenticationProvider, SAMLAuthenticationProvider } from './providers';
 import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
-import { userLoginEvent } from './audit_events';
 
 function getMockOptions({
   providers,
   http = {},
   selector,
-  auditor = {
-    add: jest.fn(),
-  },
 }: {
   providers?: Record<string, unknown> | string[];
   http?: Partial<AuthenticatorOptions['config']['authc']['http']>;
   selector?: AuthenticatorOptions['config']['authc']['selector'];
-  auditor?: Auditor;
 } = {}) {
-  const auditorFactory: AuditorFactory = {
-    asScoped: jest.fn(() => auditor),
-  };
   return {
-    auditLogger: securityAuditLoggerMock.create(),
+    legacyAuditLogger: securityAuditLoggerMock.create(),
+    audit: auditServiceMock.create(),
     getCurrentUser: jest.fn(),
     clusterClient: elasticsearchServiceMock.createLegacyClusterClient(),
     basePath: httpServiceMock.createSetupContract().basePath,
@@ -64,7 +56,6 @@ function getMockOptions({
     getFeatureUsageService: jest
       .fn()
       .mockReturnValue(securityFeatureUsageServiceMock.createStartContract()),
-    getAuditorFactory: jest.fn(() => Promise.resolve(auditorFactory)),
   };
 }
 
@@ -225,12 +216,15 @@ describe('Authenticator', () => {
     let authenticator: Authenticator;
     let mockOptions: ReturnType<typeof getMockOptions>;
     let mockSessVal: SessionValue;
-    const auditor = { add: jest.fn() };
+    const auditLogger = {
+      log: jest.fn(),
+    };
+
     beforeEach(() => {
-      mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } }, auditor });
+      mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } } });
       mockOptions.session.get.mockResolvedValue(null);
+      mockOptions.audit.withRequest.mockReturnValue(auditLogger);
       mockSessVal = sessionMock.createValue({ state: { authorization: 'Basic xxx' } });
-      auditor.add.mockClear();
 
       authenticator = new Authenticator(mockOptions);
     });
@@ -300,18 +294,9 @@ describe('Authenticator', () => {
       );
       await authenticator.login(request, { provider: { type: 'basic' }, value: {} });
 
-      expect(auditor.add).toHaveBeenCalledWith(
-        userLoginEvent,
+      expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
-          authenticationResult: expect.objectContaining({
-            status: 'succeeded',
-            user: expect.objectContaining({
-              username: 'user',
-              roles: ['user-role'],
-            }),
-          }),
-          authentication_provider: 'basic1',
-          authentication_type: 'basic',
+          event: { action: 'user_login', category: 'authentication', outcome: 'success' },
         })
       );
     });
@@ -324,15 +309,9 @@ describe('Authenticator', () => {
       );
       await authenticator.login(request, { provider: { type: 'basic' }, value: {} });
 
-      expect(auditor.add).toHaveBeenCalledWith(
-        userLoginEvent,
+      expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
-          authenticationResult: expect.objectContaining({
-            status: 'failed',
-            error: failureReason,
-          }),
-          authentication_provider: 'basic1',
-          authentication_type: 'basic',
+          event: { action: 'user_login', category: 'authentication', outcome: 'failure' },
         })
       );
     });
@@ -345,7 +324,7 @@ describe('Authenticator', () => {
 
       await authenticator.login(request, { provider: { name: 'basic2' }, value: {} });
 
-      expect(auditor.add).not.toHaveBeenCalled();
+      expect(auditLogger.log).not.toHaveBeenCalled();
     });
 
     it('creates session whenever authentication provider returns state', async () => {
@@ -1927,11 +1906,14 @@ describe('Authenticator', () => {
         accessAgreementAcknowledged: true,
       });
 
-      expect(mockOptions.auditLogger.accessAgreementAcknowledged).toHaveBeenCalledTimes(1);
-      expect(mockOptions.auditLogger.accessAgreementAcknowledged).toHaveBeenCalledWith('user', {
-        type: 'basic',
-        name: 'basic1',
-      });
+      expect(mockOptions.legacyAuditLogger.accessAgreementAcknowledged).toHaveBeenCalledTimes(1);
+      expect(mockOptions.legacyAuditLogger.accessAgreementAcknowledged).toHaveBeenCalledWith(
+        'user',
+        {
+          type: 'basic',
+          name: 'basic1',
+        }
+      );
 
       expect(
         mockOptions.getFeatureUsageService().recordPreAccessAgreementUsage

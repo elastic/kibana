@@ -5,53 +5,168 @@
  */
 
 import { Subscription } from 'rxjs';
-import { Logger } from '../../../../../src/core/server';
-import { SecurityLicense } from '../../common/licensing';
+import { map } from 'rxjs/operators';
+import {
+  Logger,
+  LoggingServiceSetup,
+  KibanaRequest,
+  HttpServiceSetup,
+  LoggerContextConfigInput,
+} from '../../../../../src/core/server';
+import { SecurityLicense, SecurityLicenseFeatures } from '../../common/licensing';
 import { ConfigType } from '../config';
+import { SpacesPluginSetup } from '../../../spaces/server';
+import { AuditEvent, httpRequestEvent } from './audit_events';
+import { SecurityPluginSetup } from '..';
 
-export interface AuditLogger {
+/**
+ * @deprecated
+ */
+export interface LegacyAuditLogger {
   log: (eventType: string, message: string, data?: Record<string, any>) => void;
 }
 
+export interface AuditLogger {
+  log: (event: AuditEvent) => void;
+}
+
+interface AuditLogMeta extends AuditEvent {
+  session?: {
+    id: string;
+  };
+  trace: {
+    id: string;
+  };
+}
+
 export interface AuditServiceSetup {
-  getLogger: (id?: string) => AuditLogger;
+  withRequest: (request: KibanaRequest) => AuditLogger;
+  getLogger: (id?: string) => LegacyAuditLogger;
 }
 
 interface AuditServiceSetupParams {
   license: SecurityLicense;
   config: ConfigType['audit'];
+  logging: Pick<LoggingServiceSetup, 'configure'>;
+  http: Pick<HttpServiceSetup, 'registerOnPostAuth'>;
+  getCurrentUser(
+    request: KibanaRequest
+  ): ReturnType<SecurityPluginSetup['authc']['getCurrentUser']> | undefined;
+  getSpaceId(
+    request: KibanaRequest
+  ): ReturnType<SpacesPluginSetup['spacesService']['getSpaceId']> | undefined;
 }
 
 export class AuditService {
+  /**
+   * @deprecated
+   */
   private licenseFeaturesSubscription?: Subscription;
-  private auditLoggingEnabled = false;
+  /**
+   * @deprecated
+   */
+  private allowAuditLogging = false;
+  private readonly betaLogger: Logger;
 
-  constructor(private readonly logger: Logger) {}
+  constructor(private readonly logger: Logger) {
+    this.betaLogger = this.logger.get('beta');
+  }
 
-  setup({ license, config }: AuditServiceSetupParams): AuditServiceSetup {
+  setup({
+    license,
+    config,
+    logging,
+    http,
+    getCurrentUser,
+    getSpaceId,
+  }: AuditServiceSetupParams): AuditServiceSetup {
     if (config.enabled && !config.appender) {
       this.licenseFeaturesSubscription = license.features$.subscribe(({ allowAuditLogging }) => {
-        this.auditLoggingEnabled = allowAuditLogging;
+        this.allowAuditLogging = allowAuditLogging;
       });
     }
 
-    return {
-      getLogger: (id?: string): AuditLogger => {
-        return {
-          log: (eventType: string, message: string, data?: Record<string, any>) => {
-            if (!this.auditLoggingEnabled) {
-              return;
-            }
+    // Configure logging
+    logging.configure(license.features$.pipe(createLoggingConfig(config)));
 
-            this.logger.info(message, {
-              tags: id ? [id, eventType] : [eventType],
-              eventType,
-              ...data,
-            });
+    /**
+     * Creates an {@link AuditLogger} scoped to the current request.
+     *
+     * @example
+     * ```typescript
+     * const auditLogger = audit.withRequest(request);
+     * auditLogger.log(event);
+     * ```
+     */
+    const withRequest = (request: KibanaRequest): AuditLogger => {
+      /**
+       * Logs an {@link AuditEvent} with meta data about the current user, space id and request id automatically added.
+       *
+       * @example
+       * ```typescript
+       * const auditLogger = audit.withRequest(request);
+       * auditLogger.log({
+       *   message: 'User is updating dashboard [id=123]',
+       *   kibana: {
+       *     saved_object: { type: 'dashboard', id: '123' }
+       *   },
+       * });
+       * ```
+       */
+      const log = (event: AuditEvent) => {
+        const user = getCurrentUser(request);
+        const spaceId = getSpaceId(request);
+        const meta: AuditLogMeta = {
+          ...event,
+          user:
+            (user && {
+              name: user.username,
+              roles: user.roles,
+            }) ||
+            event.user,
+          kibana: {
+            space_id: spaceId,
+            ...event.kibana,
+          },
+          trace: {
+            id: request.id,
           },
         };
-      },
+        if (filterEvent(meta, config.ignore_filters)) {
+          this.betaLogger.info(event.message!, meta);
+        }
+      };
+      return { log };
     };
+
+    /**
+     * @deprecated
+     * Use `audit.withRequest(request)` method instead to create an audit logger
+     */
+    const getLogger = (id?: string): LegacyAuditLogger => {
+      return {
+        log: (eventType: string, message: string, data?: Record<string, any>) => {
+          if (!this.allowAuditLogging) {
+            return;
+          }
+
+          this.logger.info(message, {
+            tags: id ? [id, eventType] : [eventType],
+            eventType,
+            ...data,
+          });
+        },
+      };
+    };
+
+    http.registerOnPostAuth((request, response, t) => {
+      if (request.auth.isAuthenticated) {
+        withRequest(request).log(httpRequestEvent({ request }));
+      }
+      return t.next();
+    });
+
+    return { withRequest, getLogger };
   }
 
   stop() {
@@ -60,4 +175,41 @@ export class AuditService {
       this.licenseFeaturesSubscription = undefined;
     }
   }
+}
+
+export const createLoggingConfig = (config: ConfigType['audit']) =>
+  map<Pick<SecurityLicenseFeatures, 'allowAuditLogging'>, LoggerContextConfigInput>((features) => ({
+    appenders: {
+      auditTrailAppender: config.appender ?? {
+        kind: 'console',
+        layout: {
+          kind: 'pattern',
+          highlight: true,
+        },
+      },
+    },
+    loggers: [
+      {
+        context: 'audit.beta',
+        level: config.enabled && config.appender && features.allowAuditLogging ? 'info' : 'off',
+        appenders: ['auditTrailAppender'],
+      },
+    ],
+  }));
+
+export function filterEvent(
+  event: AuditEvent,
+  ignoreFilters: ConfigType['audit']['ignore_filters']
+) {
+  if (ignoreFilters) {
+    return !ignoreFilters.some(
+      (rule) =>
+        (!rule.actions || rule.actions.includes(event.event.action)) &&
+        (!rule.categories || rule.categories.includes(event.event.category!)) &&
+        (!rule.types || rule.types.includes(event.event.type!)) &&
+        (!rule.outcomes || rule.outcomes.includes(event.event.outcome!)) &&
+        (!rule.spaces || rule.spaces.includes(event.kibana?.space_id!))
+    );
+  }
+  return true;
 }

@@ -6,11 +6,11 @@
 
 import { SecureSavedObjectsClientWrapper } from './secure_saved_objects_client_wrapper';
 import { Actions } from '../authorization';
-import { securityAuditLoggerMock } from '../audit/index.mock';
-import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
+import { securityAuditLoggerMock, auditServiceMock } from '../audit/index.mock';
+import { savedObjectsClientMock, httpServerMock } from '../../../../../src/core/server/mocks';
 import { SavedObjectsClientContract } from 'kibana/server';
 import { SavedObjectActions } from '../authorization/actions/saved_object';
-import { savedObjectEvent } from './audit_events';
+import { AuditEvent, EventOutcome } from '../audit';
 
 let clientOpts: ReturnType<typeof createSecureSavedObjectsClientWrapperOptions>;
 let client: SecureSavedObjectsClientWrapper;
@@ -32,10 +32,6 @@ const createSecureSavedObjectsClientWrapperOptions = () => {
     isNotFoundError: jest.fn().mockReturnValue(false),
   } as unknown) as jest.Mocked<SavedObjectsClientContract['errors']>;
   const getSpacesService = jest.fn().mockReturnValue(true);
-  const auditor = {
-    add: jest.fn(),
-  };
-  const getScopedAuditor = jest.fn().mockReturnValue(auditor);
 
   return {
     actions,
@@ -43,8 +39,8 @@ const createSecureSavedObjectsClientWrapperOptions = () => {
     checkSavedObjectsPrivilegesAsCurrentUser: jest.fn(),
     errors,
     getSpacesService,
-    getScopedAuditor,
-    auditLogger: securityAuditLoggerMock.create(),
+    legacyAuditLogger: securityAuditLoggerMock.create(),
+    auditLogger: auditServiceMock.create().withRequest(httpServerMock.createKibanaRequest()),
     forbiddenError,
     generalError,
   };
@@ -59,8 +55,8 @@ const expectGeneralError = async (fn: Function, args: Record<string, any>) => {
     clientOpts.generalError
   );
   expect(clientOpts.errors.decorateGeneralError).toHaveBeenCalledTimes(1);
-  expect(clientOpts.auditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-  expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+  expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+  expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
 };
 
 /**
@@ -90,8 +86,8 @@ const expectForbiddenError = async (fn: Function, args: Record<string, any>, act
   const spaceIds = [spaceId];
 
   expect(clientOpts.errors.decorateForbiddenError).toHaveBeenCalledTimes(1);
-  expect(clientOpts.auditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledTimes(1);
-  expect(clientOpts.auditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
+  expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledTimes(1);
+  expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
     USERNAME,
     action ?? ACTION,
     types,
@@ -99,7 +95,7 @@ const expectForbiddenError = async (fn: Function, args: Record<string, any>, act
     missing,
     args
   );
-  expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+  expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
 };
 
 const expectSuccess = async (fn: Function, args: Record<string, any>, action?: string) => {
@@ -111,9 +107,9 @@ const expectSuccess = async (fn: Function, args: Record<string, any>, action?: s
   const types = getCalls.map((x) => x[0]);
   const spaceIds = args.options?.namespaces || [args.options?.namespace || 'default'];
 
-  expect(clientOpts.auditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-  expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledTimes(1);
-  expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(
+  expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+  expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledTimes(1);
+  expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(
     USERNAME,
     action ?? ACTION,
     types,
@@ -182,9 +178,24 @@ const expectObjectNamespaceFiltering = async (
   );
 };
 
-const expectAuditEvent = (eventDecorator: Function, args: any) => {
-  const auditor = clientOpts.getScopedAuditor();
-  expect(auditor.add).toHaveBeenCalledWith(eventDecorator, expect.objectContaining(args));
+const expectAuditEvent = (
+  action: AuditEvent['event']['action'],
+  outcome: AuditEvent['event']['outcome'],
+  savedObject?: Required<AuditEvent>['kibana']['saved_object']
+) => {
+  expect(clientOpts.auditLogger.log).toHaveBeenCalledWith(
+    expect.objectContaining({
+      event: expect.objectContaining({
+        action,
+        outcome,
+      }),
+      kibana: savedObject
+        ? expect.objectContaining({
+            saved_object: savedObject,
+          })
+        : expect.anything(),
+    })
+  );
 };
 
 const expectObjectsNamespaceFiltering = async (fn: Function, args: Record<string, any>) => {
@@ -308,8 +319,10 @@ describe('#addToNamespaces', () => {
     );
 
     expect(clientOpts.errors.decorateForbiddenError).toHaveBeenCalledTimes(1);
-    expect(clientOpts.auditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledTimes(1);
-    expect(clientOpts.auditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
+    expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledTimes(1);
+    expect(
+      clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure
+    ).toHaveBeenCalledWith(
       USERNAME,
       'addToNamespacesCreate',
       [type],
@@ -317,7 +330,7 @@ describe('#addToNamespaces', () => {
       [{ privilege, spaceId: newNs1 }],
       { id, type, namespaces, options: {} }
     );
-    expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+    expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
 
   test(`throws decorated ForbiddenError when unauthorized to update in current space`, async () => {
@@ -333,9 +346,9 @@ describe('#addToNamespaces', () => {
     );
 
     expect(clientOpts.errors.decorateForbiddenError).toHaveBeenCalledTimes(1);
-    expect(clientOpts.auditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledTimes(1);
+    expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledTimes(1);
     expect(
-      clientOpts.auditLogger.savedObjectsAuthorizationFailure
+      clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure
     ).toHaveBeenLastCalledWith(
       USERNAME,
       'addToNamespacesUpdate',
@@ -344,7 +357,7 @@ describe('#addToNamespaces', () => {
       [{ privilege, spaceId: currentNs }],
       { id, type, namespaces, options: {} }
     );
-    expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledTimes(1);
+    expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledTimes(1);
   });
 
   test(`returns result of baseClient.addToNamespaces when authorized`, async () => {
@@ -354,9 +367,9 @@ describe('#addToNamespaces', () => {
     const result = await client.addToNamespaces(type, id, namespaces);
     expect(result).toBe(apiCallReturnValue);
 
-    expect(clientOpts.auditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-    expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledTimes(2);
-    expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).toHaveBeenNthCalledWith(
+    expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+    expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledTimes(2);
+    expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenNthCalledWith(
       1,
       USERNAME,
       'addToNamespacesCreate', // action for privilege check is 'share_to_space', but auditAction is 'addToNamespacesCreate'
@@ -364,7 +377,7 @@ describe('#addToNamespaces', () => {
       namespaces.sort(),
       { type, id, namespaces, options: {} }
     );
-    expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).toHaveBeenNthCalledWith(
+    expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenNthCalledWith(
       2,
       USERNAME,
       'addToNamespacesUpdate', // action for privilege check is 'share_to_space', but auditAction is 'addToNamespacesUpdate'
@@ -406,22 +419,13 @@ describe('#addToNamespaces', () => {
     const apiCallReturnValue = Symbol();
     clientOpts.baseClient.addToNamespaces.mockReturnValue(apiCallReturnValue as any);
     await client.addToNamespaces(type, id, namespaces);
-    expectAuditEvent(savedObjectEvent, {
-      action: 'saved_object_add_to_spaces',
-      saved_object: { type, id },
-      add_to_spaces: namespaces,
-    });
+    expectAuditEvent('saved_object_add_to_spaces', EventOutcome.UNKNOWN, { type, id });
   });
 
   test(`adds audit event when not successful`, async () => {
     clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockRejectedValue(new Error());
     await expect(() => client.addToNamespaces(type, id, namespaces)).rejects.toThrow();
-    expectAuditEvent(savedObjectEvent, {
-      action: 'saved_object_add_to_spaces',
-      saved_object: { type, id },
-      add_to_spaces: namespaces,
-      error: clientOpts.generalError,
-    });
+    expectAuditEvent('saved_object_add_to_spaces', EventOutcome.FAILURE, { type, id });
   });
 });
 
@@ -483,29 +487,15 @@ describe('#bulkCreate', () => {
     const objects = [obj1, obj2];
     const options = { namespace };
     await expectSuccess(client.bulkCreate, { objects, options });
-    expectAuditEvent(savedObjectEvent, {
-      action: 'saved_object_create',
-      saved_object: { type: obj1.type, id: obj1.id },
-    });
-    expectAuditEvent(savedObjectEvent, {
-      action: 'saved_object_create',
-      saved_object: { type: obj2.type, id: obj2.id },
-    });
+    expectAuditEvent('saved_object_create', EventOutcome.UNKNOWN, { type: obj1.type, id: obj1.id });
+    expectAuditEvent('saved_object_create', EventOutcome.UNKNOWN, { type: obj2.type, id: obj2.id });
   });
 
   test(`adds audit event when not successful`, async () => {
     clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockRejectedValue(new Error());
     await expect(() => client.bulkCreate([obj1, obj2], { namespace })).rejects.toThrow();
-    expectAuditEvent(savedObjectEvent, {
-      action: 'saved_object_create',
-      saved_object: { type: obj1.type, id: obj1.id },
-      error: clientOpts.generalError,
-    });
-    expectAuditEvent(savedObjectEvent, {
-      action: 'saved_object_create',
-      saved_object: { type: obj2.type, id: obj2.id },
-      error: clientOpts.generalError,
-    });
+    expectAuditEvent('saved_object_create', EventOutcome.FAILURE, { type: obj1.type, id: obj1.id });
+    expectAuditEvent('saved_object_create', EventOutcome.FAILURE, { type: obj2.type, id: obj2.id });
   });
 });
 
@@ -553,29 +543,15 @@ describe('#bulkGet', () => {
     const objects = [obj1, obj2];
     const options = { namespace };
     await expectSuccess(client.bulkGet, { objects, options });
-    expectAuditEvent(savedObjectEvent, {
-      action: 'saved_object_get',
-      saved_object: obj1,
-    });
-    expectAuditEvent(savedObjectEvent, {
-      action: 'saved_object_get',
-      saved_object: obj2,
-    });
+    expectAuditEvent('saved_object_get', EventOutcome.SUCCESS, obj1);
+    expectAuditEvent('saved_object_get', EventOutcome.SUCCESS, obj2);
   });
 
   test(`adds audit event when not successful`, async () => {
     clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockRejectedValue(new Error());
     await expect(() => client.bulkGet([obj1, obj2], { namespace })).rejects.toThrow();
-    expectAuditEvent(savedObjectEvent, {
-      action: 'saved_object_get',
-      saved_object: obj1,
-      error: clientOpts.generalError,
-    });
-    expectAuditEvent(savedObjectEvent, {
-      action: 'saved_object_get',
-      saved_object: obj2,
-      error: clientOpts.generalError,
-    });
+    expectAuditEvent('saved_object_get', EventOutcome.FAILURE, obj1);
+    expectAuditEvent('saved_object_get', EventOutcome.FAILURE, obj2);
   });
 });
 
@@ -634,29 +610,15 @@ describe('#bulkUpdate', () => {
     const objects = [obj1, obj2];
     const options = { namespace };
     await expectSuccess(client.bulkUpdate, { objects, options });
-    expectAuditEvent(savedObjectEvent, {
-      action: 'saved_object_update',
-      saved_object: { type: obj1.type, id: obj1.id },
-    });
-    expectAuditEvent(savedObjectEvent, {
-      action: 'saved_object_update',
-      saved_object: { type: obj2.type, id: obj2.id },
-    });
+    expectAuditEvent('saved_object_update', EventOutcome.UNKNOWN, { type: obj1.type, id: obj1.id });
+    expectAuditEvent('saved_object_update', EventOutcome.UNKNOWN, { type: obj2.type, id: obj2.id });
   });
 
   test(`adds audit event when not successful`, async () => {
     clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockRejectedValue(new Error());
     await expect(() => client.bulkUpdate<any>([obj1, obj2], { namespace })).rejects.toThrow();
-    expectAuditEvent(savedObjectEvent, {
-      action: 'saved_object_update',
-      saved_object: { type: obj1.type, id: obj1.id },
-      error: clientOpts.generalError,
-    });
-    expectAuditEvent(savedObjectEvent, {
-      action: 'saved_object_update',
-      saved_object: { type: obj2.type, id: obj2.id },
-      error: clientOpts.generalError,
-    });
+    expectAuditEvent('saved_object_update', EventOutcome.FAILURE, { type: obj1.type, id: obj1.id });
+    expectAuditEvent('saved_object_update', EventOutcome.FAILURE, { type: obj2.type, id: obj2.id });
   });
 });
 
@@ -744,21 +706,13 @@ describe('#create', () => {
     clientOpts.baseClient.create.mockResolvedValue(apiCallReturnValue as any);
     const options = { namespace };
     await expectSuccess(client.create, { type, attributes, options });
-
-    expectAuditEvent(savedObjectEvent, {
-      action: 'saved_object_create',
-      saved_object: { type },
-    });
+    expectAuditEvent('saved_object_create', EventOutcome.UNKNOWN, { type });
   });
 
   test(`adds audit event when not successful`, async () => {
     clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockRejectedValue(new Error());
     await expect(() => client.create(type, attributes, { namespace })).rejects.toThrow();
-    expectAuditEvent(savedObjectEvent, {
-      action: 'saved_object_create',
-      saved_object: { type },
-      error: clientOpts.generalError,
-    });
+    expectAuditEvent('saved_object_create', EventOutcome.FAILURE, { type });
   });
 });
 
@@ -795,20 +749,13 @@ describe('#delete', () => {
     clientOpts.baseClient.delete.mockReturnValue(apiCallReturnValue as any);
     const options = { namespace };
     await expectSuccess(client.delete, { type, id, options });
-    expectAuditEvent(savedObjectEvent, {
-      action: 'saved_object_delete',
-      saved_object: { type, id },
-    });
+    expectAuditEvent('saved_object_delete', EventOutcome.UNKNOWN, { type, id });
   });
 
   test(`adds audit event when not successful`, async () => {
     clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockRejectedValue(new Error());
     await expect(() => client.delete(type, id)).rejects.toThrow();
-    expectAuditEvent(savedObjectEvent, {
-      action: 'saved_object_delete',
-      error: clientOpts.generalError,
-      saved_object: { type, id },
-    });
+    expectAuditEvent('saved_object_delete', EventOutcome.FAILURE, { type, id });
   });
 });
 
@@ -830,8 +777,10 @@ describe('#find', () => {
     const result = await client.find(options);
 
     expect(clientOpts.baseClient.find).not.toHaveBeenCalled();
-    expect(clientOpts.auditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledTimes(1);
-    expect(clientOpts.auditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
+    expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledTimes(1);
+    expect(
+      clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure
+    ).toHaveBeenCalledWith(
       USERNAME,
       'find',
       [type1],
@@ -934,14 +883,8 @@ describe('#find', () => {
     clientOpts.baseClient.find.mockReturnValue(apiCallReturnValue as any);
     const options = Object.freeze({ type: type1, namespaces: ['some-ns'] });
     await expectSuccess(client.find, { options });
-    expectAuditEvent(savedObjectEvent, {
-      action: 'saved_object_find',
-      saved_object: obj1,
-    });
-    expectAuditEvent(savedObjectEvent, {
-      action: 'saved_object_find',
-      saved_object: obj2,
-    });
+    expectAuditEvent('saved_object_find', EventOutcome.SUCCESS, obj1);
+    expectAuditEvent('saved_object_find', EventOutcome.SUCCESS, obj2);
   });
 
   test(`adds audit event when not successful`, async () => {
@@ -949,10 +892,7 @@ describe('#find', () => {
       getMockCheckPrivilegesFailure
     );
     await client.find({ type: type1 });
-    expectAuditEvent(savedObjectEvent, {
-      action: 'saved_object_find',
-      error: expect.any(Error),
-    });
+    expectAuditEvent('saved_object_find', EventOutcome.FAILURE);
   });
 });
 
@@ -994,20 +934,13 @@ describe('#get', () => {
     clientOpts.baseClient.get.mockReturnValue(apiCallReturnValue as any);
     const options = { namespace };
     await expectSuccess(client.get, { type, id, options });
-    expectAuditEvent(savedObjectEvent, {
-      action: 'saved_object_get',
-      saved_object: { type, id },
-    });
+    expectAuditEvent('saved_object_get', EventOutcome.SUCCESS, { type, id });
   });
 
   test(`adds audit event when not successful`, async () => {
     clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockRejectedValue(new Error());
     await expect(() => client.get(type, id, { namespace })).rejects.toThrow();
-    expectAuditEvent(savedObjectEvent, {
-      action: 'saved_object_get',
-      saved_object: { type, id },
-      error: clientOpts.generalError,
-    });
+    expectAuditEvent('saved_object_get', EventOutcome.FAILURE, { type, id });
   });
 });
 
@@ -1033,8 +966,8 @@ describe('#deleteFromNamespaces', () => {
     );
 
     expect(clientOpts.errors.decorateForbiddenError).toHaveBeenCalledTimes(1);
-    expect(clientOpts.auditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledTimes(1);
-    expect(clientOpts.auditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
+    expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledTimes(1);
+    expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
       USERNAME,
       'deleteFromNamespaces', // action for privilege check is 'share_to_space', but auditAction is 'deleteFromNamespaces'
       [type],
@@ -1042,7 +975,7 @@ describe('#deleteFromNamespaces', () => {
       [{ privilege, spaceId: namespace1 }],
       { type, id, namespaces, options: {} }
     );
-    expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+    expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
 
   test(`returns result of baseClient.deleteFromNamespaces when authorized`, async () => {
@@ -1052,9 +985,9 @@ describe('#deleteFromNamespaces', () => {
     const result = await client.deleteFromNamespaces(type, id, namespaces);
     expect(result).toBe(apiCallReturnValue);
 
-    expect(clientOpts.auditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-    expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledTimes(1);
-    expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(
+    expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+    expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledTimes(1);
+    expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(
       USERNAME,
       'deleteFromNamespaces', // action for privilege check is 'share_to_space', but auditAction is 'deleteFromNamespaces'
       [type],
@@ -1085,22 +1018,13 @@ describe('#deleteFromNamespaces', () => {
     const apiCallReturnValue = Symbol();
     clientOpts.baseClient.deleteFromNamespaces.mockReturnValue(apiCallReturnValue as any);
     await client.deleteFromNamespaces(type, id, namespaces);
-    expectAuditEvent(savedObjectEvent, {
-      action: 'saved_object_delete_from_spaces',
-      saved_object: { type, id },
-      delete_from_spaces: namespaces,
-    });
+    expectAuditEvent('saved_object_delete_from_spaces', EventOutcome.UNKNOWN, { type, id });
   });
 
   test(`adds audit event when not successful`, async () => {
     clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockRejectedValue(new Error());
     await expect(() => client.deleteFromNamespaces(type, id, namespaces)).rejects.toThrow();
-    expectAuditEvent(savedObjectEvent, {
-      action: 'saved_object_delete_from_spaces',
-      saved_object: { type, id },
-      delete_from_spaces: namespaces,
-      error: clientOpts.generalError,
-    });
+    expectAuditEvent('saved_object_delete_from_spaces', EventOutcome.FAILURE, { type, id });
   });
 });
 
@@ -1143,20 +1067,13 @@ describe('#update', () => {
     clientOpts.baseClient.update.mockReturnValue(apiCallReturnValue as any);
     const options = { namespace };
     await expectSuccess(client.update, { type, id, attributes, options });
-    expectAuditEvent(savedObjectEvent, {
-      action: 'saved_object_update',
-      saved_object: { type, id },
-    });
+    expectAuditEvent('saved_object_update', EventOutcome.UNKNOWN, { type, id });
   });
 
   test(`adds audit event when not successful`, async () => {
     clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockRejectedValue(new Error());
     await expect(() => client.update(type, id, attributes, { namespace })).rejects.toThrow();
-    expectAuditEvent(savedObjectEvent, {
-      action: 'saved_object_update',
-      saved_object: { type, id },
-      error: clientOpts.generalError,
-    });
+    expectAuditEvent('saved_object_update', EventOutcome.FAILURE, { type, id });
   });
 });
 

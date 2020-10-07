@@ -32,7 +32,6 @@ import { defineRoutes } from './routes';
 import { SecurityLicenseService, SecurityLicense } from '../common/licensing';
 import { setupSavedObjects } from './saved_objects';
 import { AuditService, SecurityAuditLogger, AuditServiceSetup } from './audit';
-import { AuditTrailService } from './audit_trail';
 import { SecurityFeatureUsageService, SecurityFeatureUsageServiceStart } from './feature_usage';
 import { securityFeatures } from './features';
 import { ElasticsearchService } from './elasticsearch';
@@ -68,7 +67,7 @@ export interface SecurityPluginSetup {
     'actions' | 'checkPrivilegesDynamicallyWithRequest' | 'checkPrivilegesWithRequest' | 'mode'
   >;
   license: SecurityLicense;
-  audit: Pick<AuditServiceSetup, 'getLogger'>;
+  audit: Pick<AuditServiceSetup, 'getLogger' | 'withRequest'>;
 
   /**
    * If Spaces plugin is available it's supposed to register its SpacesService with Security plugin
@@ -102,6 +101,7 @@ export class Plugin {
   private readonly logger: Logger;
   private spacesService?: SpacesService | symbol = Symbol('not accessed');
   private securityLicenseService?: SecurityLicenseService;
+  private authc?: Authentication;
 
   private readonly featureUsageService = new SecurityFeatureUsageService();
   private featureUsageServiceStart?: SecurityFeatureUsageServiceStart;
@@ -113,9 +113,6 @@ export class Plugin {
   };
 
   private readonly auditService = new AuditService(this.initializerContext.logger.get('audit'));
-  private readonly auditTrailService = new AuditTrailService(
-    this.initializerContext.logger.get('audit_trail')
-  );
   private readonly authorizationService = new AuthorizationService();
   private readonly elasticsearchService = new ElasticsearchService(
     this.initializerContext.logger.get('elasticsearch')
@@ -180,8 +177,15 @@ export class Plugin {
 
     registerSecurityUsageCollector({ usageCollection, config, license });
 
-    const audit = this.auditService.setup({ license, config: config.audit });
-    const auditLogger = new SecurityAuditLogger(audit.getLogger());
+    const audit = this.auditService.setup({
+      license,
+      config: config.audit,
+      logging: core.logging,
+      http: core.http,
+      getSpaceId: (request) => this.getSpacesService()?.getSpaceId(request),
+      getCurrentUser: (request) => this.authc?.getCurrentUser(request),
+    });
+    const legacyAuditLogger = new SecurityAuditLogger(audit.getLogger());
 
     const { session } = this.sessionManagementService.setup({
       config,
@@ -191,13 +195,9 @@ export class Plugin {
       taskManager,
     });
 
-    const getAuditorFactory = async () => {
-      const [{ auditTrail }] = await core.getStartServices();
-      return auditTrail;
-    };
-
-    const authc = await setupAuthentication({
-      auditLogger,
+    this.authc = await setupAuthentication({
+      legacyAuditLogger,
+      audit,
       getFeatureUsageService: this.getFeatureUsageService,
       http: core.http,
       clusterClient,
@@ -205,7 +205,6 @@ export class Plugin {
       license,
       loggers: this.initializerContext.logger,
       session,
-      getAuditorFactory,
     });
 
     const authz = this.authorizationService.setup({
@@ -219,25 +218,15 @@ export class Plugin {
       buildNumber: this.initializerContext.env.packageInfo.buildNum,
       getSpacesService: this.getSpacesService,
       features,
-      getCurrentUser: authc.getCurrentUser,
-    });
-
-    this.auditTrailService.setup({
-      license,
-      config: config.audit,
-      logging: core.logging,
-      auditTrail: core.auditTrail,
-      http: core.http,
-      getCurrentUser: authc.getCurrentUser,
-      getSpacesService: this.getSpacesService,
+      getCurrentUser: this.authc.getCurrentUser,
     });
 
     setupSavedObjects({
-      auditLogger,
+      legacyAuditLogger,
+      audit,
       authz,
       savedObjects: core.savedObjects,
       getSpacesService: this.getSpacesService,
-      getAuditorFactory,
     });
 
     defineRoutes({
@@ -247,7 +236,7 @@ export class Plugin {
       logger: this.initializerContext.logger.get('routes'),
       clusterClient,
       config,
-      authc,
+      authc: this.authc,
       authz,
       license,
       session,
@@ -260,17 +249,18 @@ export class Plugin {
 
     return deepFreeze<SecurityPluginSetup>({
       audit: {
+        withRequest: audit.withRequest,
         getLogger: audit.getLogger,
       },
 
       authc: {
-        isAuthenticated: authc.isAuthenticated,
-        getCurrentUser: authc.getCurrentUser,
-        areAPIKeysEnabled: authc.areAPIKeysEnabled,
-        createAPIKey: authc.createAPIKey,
-        invalidateAPIKey: authc.invalidateAPIKey,
-        grantAPIKeyAsInternalUser: authc.grantAPIKeyAsInternalUser,
-        invalidateAPIKeyAsInternalUser: authc.invalidateAPIKeyAsInternalUser,
+        isAuthenticated: this.authc.isAuthenticated,
+        getCurrentUser: this.authc.getCurrentUser,
+        areAPIKeysEnabled: this.authc.areAPIKeysEnabled,
+        createAPIKey: this.authc.createAPIKey,
+        invalidateAPIKey: this.authc.invalidateAPIKey,
+        grantAPIKeyAsInternalUser: this.authc.grantAPIKeyAsInternalUser,
+        invalidateAPIKeyAsInternalUser: this.authc.invalidateAPIKeyAsInternalUser,
       },
 
       authz: {

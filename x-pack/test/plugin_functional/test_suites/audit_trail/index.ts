@@ -47,10 +47,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('logs audit events from saved objects client', async () => {
-      await supertest
-        .get('/audit_trail_test/saved_objects_client')
-        .set('kbn-xsrf', 'foo')
-        .expect(204);
+      await supertest.get('/audit_trail_test').set('kbn-xsrf', 'foo').expect(204);
 
       await retry.waitFor('logs event in the dest file', async () => {
         return await logFile.isNotEmpty();
@@ -58,17 +55,23 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       const content = await logFile.readJSON();
 
+      const httpEvent = content.find((c) => c.event.action === 'http_request');
+      expect(httpEvent).to.be.ok();
+      expect(httpEvent.trace.id).to.be.ok();
+      expect(httpEvent.user.name).to.be('elastic');
+      expect(httpEvent.kibana.space_id).to.be('default');
+
       const createEvent = content.find((c) => c.event.action === 'saved_object_create');
       expect(createEvent).to.be.ok();
       expect(createEvent.trace.id).to.be.ok();
       expect(createEvent.user.name).to.be('elastic');
-      expect(createEvent.kibana.namespace).to.be('default');
+      expect(createEvent.kibana.space_id).to.be('default');
 
       const findEvent = content.find((c) => c.event.action === 'saved_object_find');
       expect(findEvent).to.be.ok();
       expect(findEvent.trace.id).to.be.ok();
       expect(findEvent.user.name).to.be('elastic');
-      expect(findEvent.kibana.namespace).to.be('default');
+      expect(findEvent.kibana.space_id).to.be('default');
     });
   });
 }

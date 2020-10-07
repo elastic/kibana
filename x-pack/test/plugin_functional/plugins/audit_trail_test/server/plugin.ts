@@ -20,17 +20,7 @@ export class AuditTrailTestPlugin implements Plugin {
     const router = core.http.createRouter();
 
     router.get(
-      { path: '/audit_trail_test/audit_trail_service', validate: false },
-      async (context, request, response) => {
-        const [coreStart] = await core.getStartServices();
-        coreStart.auditTrail.asScoped(request);
-
-        return response.noContent();
-      }
-    );
-
-    router.get(
-      { path: '/audit_trail_test/saved_objects_client', validate: false },
+      { path: '/audit_trail_test', validate: false },
       async (context, request, response) => {
         await context.core.savedObjects.client.create('dashboard', {});
         await context.core.savedObjects.client.find({ type: 'dashboard' });

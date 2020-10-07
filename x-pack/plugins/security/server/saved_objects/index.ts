@@ -9,30 +9,29 @@ import {
   KibanaRequest,
   LegacyRequest,
   SavedObjectsClient,
-  AuditorFactory,
 } from '../../../../../src/core/server';
 import { SecureSavedObjectsClientWrapper } from './secure_saved_objects_client_wrapper';
 import { AuthorizationServiceSetup } from '../authorization';
-import { SecurityAuditLogger } from '../audit';
+import { SecurityAuditLogger, AuditServiceSetup } from '../audit';
 import { SpacesService } from '../plugin';
 
 interface SetupSavedObjectsParams {
-  auditLogger: SecurityAuditLogger;
+  legacyAuditLogger: SecurityAuditLogger;
+  audit: AuditServiceSetup;
   authz: Pick<
     AuthorizationServiceSetup,
     'mode' | 'actions' | 'checkSavedObjectsPrivilegesWithRequest'
   >;
   savedObjects: CoreSetup['savedObjects'];
   getSpacesService(): SpacesService | undefined;
-  getAuditorFactory(): Promise<AuditorFactory>;
 }
 
 export function setupSavedObjects({
-  auditLogger,
+  legacyAuditLogger,
+  audit,
   authz,
   savedObjects,
   getSpacesService,
-  getAuditorFactory,
 }: SetupSavedObjectsParams) {
   const getKibanaRequest = (request: KibanaRequest | LegacyRequest) =>
     request instanceof KibanaRequest ? request : KibanaRequest.from(request);
@@ -53,14 +52,14 @@ export function setupSavedObjects({
     return authz.mode.useRbacForRequest(kibanaRequest)
       ? new SecureSavedObjectsClientWrapper({
           actions: authz.actions,
-          auditLogger,
+          legacyAuditLogger,
+          auditLogger: audit.withRequest(kibanaRequest),
           baseClient: client,
           checkSavedObjectsPrivilegesAsCurrentUser: authz.checkSavedObjectsPrivilegesWithRequest(
             kibanaRequest
           ),
           errors: SavedObjectsClient.errors,
           getSpacesService,
-          getScopedAuditor: async () => (await getAuditorFactory()).asScoped(request),
         })
       : client;
   });

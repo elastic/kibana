@@ -198,104 +198,6 @@ export interface AssistantAPIClientParams extends GenericParams {
     path: '/_migration/assistance';
 }
 
-// @public
-export interface AuditEvent {
-    // (undocumented)
-    error?: {
-        code?: string;
-        message?: string;
-    };
-    // (undocumented)
-    event: {
-        action: string;
-        category?: EventCategory;
-        type?: EventType;
-        outcome?: EventOutcome;
-        module?: string;
-        dataset?: string;
-    };
-    // (undocumented)
-    http?: {
-        request?: {
-            method?: string;
-            body?: {
-                content: string;
-            };
-        };
-        response?: {
-            status_code?: number;
-        };
-    };
-    // (undocumented)
-    kibana: {
-        space_id?: string;
-        saved_object?: {
-            type: string;
-            id?: string;
-        };
-        add_to_spaces?: readonly string[];
-        delete_from_spaces?: readonly string[];
-        authentication_provider?: string;
-        authentication_type?: string;
-        authentication_realm?: string;
-        lookup_realm?: string;
-    };
-    message: string;
-    // (undocumented)
-    session?: {
-        id: string;
-    };
-    // (undocumented)
-    trace: {
-        id: string;
-    };
-    // (undocumented)
-    url?: {
-        domain?: string;
-        full?: string;
-        path?: string;
-        port?: number;
-        query?: string;
-        scheme?: string;
-    };
-    // (undocumented)
-    user?: {
-        name: string;
-        email?: string;
-        full_name?: string;
-        hash?: string;
-        roles?: readonly string[];
-    };
-}
-
-// Warning: (ae-missing-release-tag) "AuditEventDecorator" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export type AuditEventDecorator<Args = undefined> = (event: Pick<AuditEvent, 'user' | 'trace' | 'kibana'>, args: Args) => AuditEvent;
-
-// @public
-export interface Auditor {
-    add<Args>(decorateEvent: AuditEventDecorator<Args>, args: Args): void;
-}
-
-// @public
-export interface AuditorFactory {
-    // (undocumented)
-    asScoped(request: KibanaRequest): Auditor;
-}
-
-// Warning: (ae-missing-release-tag) "AuditTrailSetup" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export interface AuditTrailSetup {
-    register(auditor: AuditorFactory): void;
-}
-
-// Warning: (ae-missing-release-tag) "AuditTrailStart" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export type AuditTrailStart = AuditorFactory;
-
 // @public (undocumented)
 export interface Authenticated extends AuthResultParams {
     // (undocumented)
@@ -566,8 +468,6 @@ export interface CoreServicesUsageData {
 // @public
 export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
     // (undocumented)
-    auditTrail: AuditTrailSetup;
-    // (undocumented)
     capabilities: CapabilitiesSetup;
     // (undocumented)
     context: ContextSetup;
@@ -593,8 +493,6 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
 
 // @public
 export interface CoreStart {
-    // (undocumented)
-    auditTrail: AuditTrailStart;
     // (undocumented)
     capabilities: CapabilitiesStart;
     // @internal (undocumented)
@@ -1804,7 +1702,6 @@ export interface RequestHandlerContext {
         uiSettings: {
             client: IUiSettingsClient;
         };
-        auditor: Auditor;
     };
 }
 
@@ -2863,9 +2760,6 @@ export const validBodyOutput: readonly ["data", "stream"];
 
 // Warnings were encountered during analysis:
 //
-// src/core/server/audit_trail/types.ts:36:5 - (ae-forgotten-export) The symbol "EventCategory" needs to be exported by the entry point index.d.ts
-// src/core/server/audit_trail/types.ts:37:5 - (ae-forgotten-export) The symbol "EventType" needs to be exported by the entry point index.d.ts
-// src/core/server/audit_trail/types.ts:38:5 - (ae-forgotten-export) The symbol "EventOutcome" needs to be exported by the entry point index.d.ts
 // src/core/server/http/router/response.ts:316:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/types.ts:274:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/types.ts:274:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts

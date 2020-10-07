@@ -50,7 +50,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         )}`,
         // Required to load new platform plugins via `--plugin-path` flag.
         '--env.name=development',
-
         '--xpack.security.audit.enabled=true',
         '--xpack.security.audit.appender.kind=file',
         '--xpack.security.audit.appender.path=x-pack/test/plugin_functional/plugins/audit_trail_test/server/audit_trail.log',

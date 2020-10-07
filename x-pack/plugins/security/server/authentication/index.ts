@@ -9,11 +9,10 @@ import {
   KibanaRequest,
   LoggerFactory,
   HttpServiceSetup,
-  AuditorFactory,
 } from '../../../../../src/core/server';
 import { SecurityLicense } from '../../common/licensing';
 import { AuthenticatedUser } from '../../common/model';
-import { SecurityAuditLogger } from '../audit';
+import { SecurityAuditLogger, AuditServiceSetup } from '../audit';
 import { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
 import { SecurityFeatureUsageServiceStart } from '../feature_usage';
@@ -46,7 +45,8 @@ export {
 } from './http_authentication';
 
 interface SetupAuthenticationParams {
-  auditLogger: SecurityAuditLogger;
+  legacyAuditLogger: SecurityAuditLogger;
+  audit: AuditServiceSetup;
   getFeatureUsageService: () => SecurityFeatureUsageServiceStart;
   http: HttpServiceSetup;
   clusterClient: ILegacyClusterClient;
@@ -54,13 +54,13 @@ interface SetupAuthenticationParams {
   license: SecurityLicense;
   loggers: LoggerFactory;
   session: PublicMethodsOf<Session>;
-  getAuditorFactory(): Promise<AuditorFactory>;
 }
 
 export type Authentication = UnwrapPromise<ReturnType<typeof setupAuthentication>>;
 
 export async function setupAuthentication({
-  auditLogger,
+  legacyAuditLogger: auditLogger,
+  audit,
   getFeatureUsageService,
   http,
   clusterClient,
@@ -68,7 +68,6 @@ export async function setupAuthentication({
   license,
   loggers,
   session,
-  getAuditorFactory,
 }: SetupAuthenticationParams) {
   const authLogger = loggers.get('authentication');
 
@@ -85,7 +84,8 @@ export async function setupAuthentication({
   };
 
   const authenticator = new Authenticator({
-    auditLogger,
+    legacyAuditLogger: auditLogger,
+    audit,
     loggers,
     clusterClient,
     basePath: http.basePath,
@@ -94,7 +94,6 @@ export async function setupAuthentication({
     getFeatureUsageService,
     license,
     session,
-    getAuditorFactory,
   });
 
   authLogger.debug('Successfully initialized authenticator.');

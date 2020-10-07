@@ -17,23 +17,22 @@ import {
   SavedObjectsAddToNamespacesOptions,
   SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsUtils,
-  Auditor,
 } from '../../../../../src/core/server';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
 import { SecurityAuditLogger } from '../audit';
 import { Actions, CheckSavedObjectsPrivileges } from '../authorization';
 import { CheckPrivilegesResponse } from '../authorization/types';
 import { SpacesService } from '../plugin';
-import { SavedObjectAction, savedObjectEvent } from './audit_events';
+import { AuditLogger, EventOutcome, SavedObjectAction, savedObjectEvent } from '../audit';
 
 interface SecureSavedObjectsClientWrapperOptions {
   actions: Actions;
-  auditLogger: SecurityAuditLogger;
+  legacyAuditLogger: SecurityAuditLogger;
+  auditLogger: AuditLogger;
   baseClient: SavedObjectsClientContract;
   errors: SavedObjectsClientContract['errors'];
   checkSavedObjectsPrivilegesAsCurrentUser: CheckSavedObjectsPrivileges;
   getSpacesService(): SpacesService | undefined;
-  getScopedAuditor(): Promise<Auditor>;
 }
 
 interface SavedObjectNamespaces {
@@ -61,29 +60,29 @@ interface EnsureAuthorizedTypeResult {
 
 export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContract {
   private readonly actions: Actions;
-  private readonly auditLogger: PublicMethodsOf<SecurityAuditLogger>;
+  private readonly legacyAuditLogger: PublicMethodsOf<SecurityAuditLogger>;
+  private readonly auditLogger: AuditLogger;
   private readonly baseClient: SavedObjectsClientContract;
   private readonly checkSavedObjectsPrivilegesAsCurrentUser: CheckSavedObjectsPrivileges;
   private getSpacesService: () => SpacesService | undefined;
-  private getScopedAuditor: () => Promise<Auditor>;
   public readonly errors: SavedObjectsClientContract['errors'];
 
   constructor({
     actions,
+    legacyAuditLogger,
     auditLogger,
     baseClient,
     checkSavedObjectsPrivilegesAsCurrentUser,
     errors,
     getSpacesService,
-    getScopedAuditor,
   }: SecureSavedObjectsClientWrapperOptions) {
     this.errors = errors;
     this.actions = actions;
+    this.legacyAuditLogger = legacyAuditLogger;
     this.auditLogger = auditLogger;
     this.baseClient = baseClient;
     this.checkSavedObjectsPrivilegesAsCurrentUser = checkSavedObjectsPrivilegesAsCurrentUser;
     this.getSpacesService = getSpacesService;
-    this.getScopedAuditor = getScopedAuditor;
   }
 
   public async create<T = unknown>(
@@ -91,25 +90,27 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     attributes: T = {} as T,
     options: SavedObjectsCreateOptions = {}
   ) {
-    const auditor = await this.getScopedAuditor();
-
     try {
       const args = { type, attributes, options };
       const namespaces = [options.namespace, ...(options.initialNamespaces || [])];
       await this.ensureAuthorized(type, 'create', namespaces, { args });
     } catch (error) {
-      auditor.add(savedObjectEvent, {
-        action: SavedObjectAction.CREATE,
-        saved_object: { type, id: options.id },
-        error,
-      });
+      this.auditLogger.log(
+        savedObjectEvent({
+          action: SavedObjectAction.CREATE,
+          savedObject: { type, id: options.id },
+          error,
+        })
+      );
       throw error;
     }
-    auditor.add(savedObjectEvent, {
-      action: SavedObjectAction.CREATE,
-      saved_object: { type, id: options.id },
-      outcome: 'unknown',
-    });
+    this.auditLogger.log(
+      savedObjectEvent({
+        action: SavedObjectAction.CREATE,
+        outcome: EventOutcome.UNKNOWN,
+        savedObject: { type, id: options.id },
+      })
+    );
 
     const savedObject = await this.baseClient.create(type, attributes, options);
     return await this.redactSavedObjectNamespaces(savedObject);
@@ -134,8 +135,6 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     objects: Array<SavedObjectsBulkCreateObject<T>>,
     options: SavedObjectsBaseOptions = {}
   ) {
-    const auditor = await this.getScopedAuditor();
-
     try {
       const args = { objects, options };
       const namespaces = objects.reduce(
@@ -150,20 +149,24 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       });
     } catch (error) {
       objects.forEach(({ type, id }) =>
-        auditor.add(savedObjectEvent, {
-          action: SavedObjectAction.CREATE,
-          saved_object: { type, id },
-          error,
-        })
+        this.auditLogger.log(
+          savedObjectEvent({
+            action: SavedObjectAction.CREATE,
+            savedObject: { type, id },
+            error,
+          })
+        )
       );
       throw error;
     }
     objects.forEach(({ type, id }) =>
-      auditor.add(savedObjectEvent, {
-        action: SavedObjectAction.CREATE,
-        saved_object: { type, id },
-        outcome: 'unknown',
-      })
+      this.auditLogger.log(
+        savedObjectEvent({
+          action: SavedObjectAction.CREATE,
+          outcome: EventOutcome.UNKNOWN,
+          savedObject: { type, id },
+        })
+      )
     );
 
     const response = await this.baseClient.bulkCreate(objects, options);
@@ -171,31 +174,31 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   }
 
   public async delete(type: string, id: string, options: SavedObjectsBaseOptions = {}) {
-    const auditor = await this.getScopedAuditor();
-
     try {
       const args = { type, id, options };
       await this.ensureAuthorized(type, 'delete', options.namespace, { args });
     } catch (error) {
-      auditor.add(savedObjectEvent, {
-        action: SavedObjectAction.DELETE,
-        saved_object: { type, id },
-        error,
-      });
+      this.auditLogger.log(
+        savedObjectEvent({
+          action: SavedObjectAction.DELETE,
+          savedObject: { type, id },
+          error,
+        })
+      );
       throw error;
     }
-    auditor.add(savedObjectEvent, {
-      action: SavedObjectAction.DELETE,
-      saved_object: { type, id },
-      outcome: 'unknown',
-    });
+    this.auditLogger.log(
+      savedObjectEvent({
+        action: SavedObjectAction.DELETE,
+        outcome: EventOutcome.UNKNOWN,
+        savedObject: { type, id },
+      })
+    );
 
     return await this.baseClient.delete(type, id, options);
   }
 
   public async find<T = unknown>(options: SavedObjectsFindOptions) {
-    const auditor = await this.getScopedAuditor();
-
     if (
       this.getSpacesService() == null &&
       Array.isArray(options.namespaces) &&
@@ -216,7 +219,12 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
 
     if (status === 'unauthorized') {
       // return empty response
-      auditor.add(savedObjectEvent, { action: SavedObjectAction.FIND, error: new Error(status) });
+      this.auditLogger.log(
+        savedObjectEvent({
+          action: SavedObjectAction.FIND,
+          error: new Error(status),
+        })
+      );
       return SavedObjectsUtils.createEmptyFindResponse<T>(options);
     }
 
@@ -233,7 +241,12 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     });
 
     response.saved_objects.forEach(({ type, id }) =>
-      auditor.add(savedObjectEvent, { action: SavedObjectAction.FIND, saved_object: { type, id } })
+      this.auditLogger.log(
+        savedObjectEvent({
+          action: SavedObjectAction.FIND,
+          savedObject: { type, id },
+        })
+      )
     );
 
     return await this.redactSavedObjectsNamespaces(response);
@@ -243,8 +256,6 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     objects: SavedObjectsBulkGetObject[] = [],
     options: SavedObjectsBaseOptions = {}
   ) {
-    const auditor = await this.getScopedAuditor();
-
     try {
       const args = { objects, options };
       await this.ensureAuthorized(
@@ -257,11 +268,13 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       );
     } catch (error) {
       objects.forEach(({ type, id }) =>
-        auditor.add(savedObjectEvent, {
-          action: SavedObjectAction.GET,
-          saved_object: { type, id },
-          error,
-        })
+        this.auditLogger.log(
+          savedObjectEvent({
+            action: SavedObjectAction.GET,
+            savedObject: { type, id },
+            error,
+          })
+        )
       );
       throw error;
     }
@@ -269,36 +282,40 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     const response = await this.baseClient.bulkGet<T>(objects, options);
 
     objects.forEach(({ type, id }) =>
-      auditor.add(savedObjectEvent, {
-        action: SavedObjectAction.GET,
-        saved_object: { type, id },
-      })
+      this.auditLogger.log(
+        savedObjectEvent({
+          action: SavedObjectAction.GET,
+          savedObject: { type, id },
+        })
+      )
     );
 
     return await this.redactSavedObjectsNamespaces(response);
   }
 
   public async get<T = unknown>(type: string, id: string, options: SavedObjectsBaseOptions = {}) {
-    const auditor = await this.getScopedAuditor();
-
     try {
       const args = { type, id, options };
       await this.ensureAuthorized(type, 'get', options.namespace, { args });
     } catch (error) {
-      auditor.add(savedObjectEvent, {
-        action: SavedObjectAction.GET,
-        saved_object: { type, id },
-        error,
-      });
+      this.auditLogger.log(
+        savedObjectEvent({
+          action: SavedObjectAction.GET,
+          savedObject: { type, id },
+          error,
+        })
+      );
       throw error;
     }
 
     const savedObject = await this.baseClient.get<T>(type, id, options);
 
-    auditor.add(savedObjectEvent, {
-      action: SavedObjectAction.GET,
-      saved_object: { type, id },
-    });
+    this.auditLogger.log(
+      savedObjectEvent({
+        action: SavedObjectAction.GET,
+        savedObject: { type, id },
+      })
+    );
 
     return await this.redactSavedObjectNamespaces(savedObject);
   }
@@ -309,23 +326,26 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     attributes: Partial<T>,
     options: SavedObjectsUpdateOptions = {}
   ) {
-    const auditor = await this.getScopedAuditor();
     try {
       const args = { type, id, attributes, options };
       await this.ensureAuthorized(type, 'update', options.namespace, { args });
     } catch (error) {
-      auditor.add(savedObjectEvent, {
-        action: SavedObjectAction.UPDATE,
-        saved_object: { type, id },
-        error,
-      });
+      this.auditLogger.log(
+        savedObjectEvent({
+          action: SavedObjectAction.UPDATE,
+          savedObject: { type, id },
+          error,
+        })
+      );
       throw error;
     }
-    auditor.add(savedObjectEvent, {
-      action: SavedObjectAction.UPDATE,
-      saved_object: { type, id },
-      outcome: 'unknown',
-    });
+    this.auditLogger.log(
+      savedObjectEvent({
+        action: SavedObjectAction.UPDATE,
+        outcome: EventOutcome.UNKNOWN,
+        savedObject: { type, id },
+      })
+    );
 
     const savedObject = await this.baseClient.update(type, id, attributes, options);
     return await this.redactSavedObjectNamespaces(savedObject);
@@ -337,8 +357,6 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     namespaces: string[],
     options: SavedObjectsAddToNamespacesOptions = {}
   ) {
-    const auditor = await this.getScopedAuditor();
-
     try {
       const args = { type, id, namespaces, options };
       const { namespace } = options;
@@ -357,20 +375,24 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
         auditAction: 'addToNamespacesUpdate',
       });
     } catch (error) {
-      auditor.add(savedObjectEvent, {
-        action: SavedObjectAction.ADD_TO_SPACES,
-        saved_object: { type, id },
-        add_to_spaces: namespaces,
-        error,
-      });
+      this.auditLogger.log(
+        savedObjectEvent({
+          action: SavedObjectAction.ADD_TO_SPACES,
+          savedObject: { type, id },
+          addToSpaces: namespaces,
+          error,
+        })
+      );
       throw error;
     }
-    auditor.add(savedObjectEvent, {
-      action: SavedObjectAction.ADD_TO_SPACES,
-      saved_object: { type, id },
-      add_to_spaces: namespaces,
-      outcome: 'unknown',
-    });
+    this.auditLogger.log(
+      savedObjectEvent({
+        action: SavedObjectAction.ADD_TO_SPACES,
+        outcome: EventOutcome.UNKNOWN,
+        savedObject: { type, id },
+        addToSpaces: namespaces,
+      })
+    );
 
     const response = await this.baseClient.addToNamespaces(type, id, namespaces, options);
     return await this.redactSavedObjectNamespaces(response);
@@ -382,7 +404,6 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     namespaces: string[],
     options: SavedObjectsDeleteFromNamespacesOptions = {}
   ) {
-    const auditor = await this.getScopedAuditor();
     try {
       const args = { type, id, namespaces, options };
       // To un-share an object, the user must have the "share_to_space" permission in each of the target namespaces.
@@ -391,20 +412,24 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
         auditAction: 'deleteFromNamespaces',
       });
     } catch (error) {
-      auditor.add(savedObjectEvent, {
-        action: SavedObjectAction.DELETE_FROM_SPACES,
-        saved_object: { type, id },
-        delete_from_spaces: namespaces,
-        error,
-      });
+      this.auditLogger.log(
+        savedObjectEvent({
+          action: SavedObjectAction.DELETE_FROM_SPACES,
+          savedObject: { type, id },
+          deleteFromSpaces: namespaces,
+          error,
+        })
+      );
       throw error;
     }
-    auditor.add(savedObjectEvent, {
-      action: SavedObjectAction.DELETE_FROM_SPACES,
-      saved_object: { type, id },
-      delete_from_spaces: namespaces,
-      outcome: 'unknown',
-    });
+    this.auditLogger.log(
+      savedObjectEvent({
+        action: SavedObjectAction.DELETE_FROM_SPACES,
+        outcome: EventOutcome.UNKNOWN,
+        savedObject: { type, id },
+        deleteFromSpaces: namespaces,
+      })
+    );
 
     const response = await this.baseClient.deleteFromNamespaces(type, id, namespaces, options);
     return await this.redactSavedObjectNamespaces(response);
@@ -414,7 +439,6 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     objects: Array<SavedObjectsBulkUpdateObject<T>> = [],
     options: SavedObjectsBaseOptions = {}
   ) {
-    const auditor = await this.getScopedAuditor();
     try {
       const objectNamespaces = objects
         // The repository treats an `undefined` object namespace is treated as the absence of a namespace, falling back to options.namespace;
@@ -428,20 +452,24 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       });
     } catch (error) {
       objects.forEach(({ type, id }) =>
-        auditor.add(savedObjectEvent, {
-          action: SavedObjectAction.UPDATE,
-          saved_object: { type, id },
-          error,
-        })
+        this.auditLogger.log(
+          savedObjectEvent({
+            action: SavedObjectAction.UPDATE,
+            savedObject: { type, id },
+            error,
+          })
+        )
       );
       throw error;
     }
     objects.forEach(({ type, id }) =>
-      auditor.add(savedObjectEvent, {
-        action: SavedObjectAction.UPDATE,
-        saved_object: { type, id },
-        outcome: 'unknown',
-      })
+      this.auditLogger.log(
+        savedObjectEvent({
+          action: SavedObjectAction.UPDATE,
+          outcome: EventOutcome.UNKNOWN,
+          savedObject: { type, id },
+        })
+      )
     );
 
     const response = await this.baseClient.bulkUpdate<T>(objects, options);
@@ -496,7 +524,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     );
 
     const logAuthorizationFailure = () => {
-      this.auditLogger.savedObjectsAuthorizationFailure(
+      this.legacyAuditLogger.savedObjectsAuthorizationFailure(
         username,
         auditAction,
         types,
@@ -506,7 +534,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       );
     };
     const logAuthorizationSuccess = (typeArray: string[], spaceIdArray: string[]) => {
-      this.auditLogger.savedObjectsAuthorizationSuccess(
+      this.legacyAuditLogger.savedObjectsAuthorizationSuccess(
         username,
         auditAction,
         typeArray,
