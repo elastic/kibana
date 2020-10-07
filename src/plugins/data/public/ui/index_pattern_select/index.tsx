@@ -19,7 +19,10 @@
 
 import React from 'react';
 import { EuiLoadingContent, EuiDelayRender } from '@elastic/eui';
-import type { IndexPatternSelectProps } from './index_pattern_select';
+import type {
+  IndexPatternSelectProps,
+  IndexPatternSelectInternalProps,
+} from './index_pattern_select';
 
 const Fallback = () => (
   <EuiDelayRender>
@@ -28,7 +31,7 @@ const Fallback = () => (
 );
 
 const LazyIndexPatternSelect = React.lazy(() => import('./index_pattern_select'));
-export const IndexPatternSelect = (props: IndexPatternSelectProps) => (
+export const IndexPatternSelect = (props: IndexPatternSelectInternalProps) => (
   <React.Suspense fallback={<Fallback />}>
     <LazyIndexPatternSelect {...props} />
   </React.Suspense>
