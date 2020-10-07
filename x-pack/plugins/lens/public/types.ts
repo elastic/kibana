@@ -171,13 +171,21 @@ export interface Datasource<T = unknown, P = unknown> {
 
   toExpression: (state: T, layerId: string) => Ast | string | null;
 
-  getDatasourceSuggestionsForField: (state: T, field: unknown) => Array<DatasourceSuggestion<T>>;
+  getDatasourceSuggestionsForField: (
+    state: T,
+    field: unknown,
+    activeData?: Record<string, KibanaDatatable>
+  ) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsForVisualizeField: (
     state: T,
     indexPatternId: string,
-    fieldName: string
+    fieldName: string,
+    activeData?: Record<string, KibanaDatatable>
   ) => Array<DatasourceSuggestion<T>>;
-  getDatasourceSuggestionsFromCurrentState: (state: T) => Array<DatasourceSuggestion<T>>;
+  getDatasourceSuggestionsFromCurrentState: (
+    state: T,
+    activeData?: Record<string, KibanaDatatable>
+  ) => Array<DatasourceSuggestion<T>>;
 
   getPublicAPI: (props: PublicAPIProps<T>) => DatasourcePublicAPI;
 }
@@ -232,17 +240,20 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   setState: StateSetter<T>;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   dateRange: DateRange;
+  activeData?: Record<string, KibanaDatatable>;
 };
 
 export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T> & {
   dragDropContext: DragContextState;
   onClick: () => void;
+  activeData?: Record<string, KibanaDatatable>;
 };
 
 export interface DatasourceLayerPanelProps<T> {
   layerId: string;
   state: T;
   setState: StateSetter<T>;
+  activeData?: Record<string, KibanaDatatable>;
 }
 
 export interface DraggedOperation {
@@ -266,6 +277,7 @@ export type DatasourceDimensionDropProps<T> = SharedDimensionProps & {
   columnId: string;
   state: T;
   setState: StateSetter<T>;
+  activeData?: Record<string, KibanaDatatable>;
   dragDropContext: DragContextState;
 };
 
@@ -420,6 +432,12 @@ export interface VisualizationSuggestion<T = unknown> {
 
 export interface FramePublicAPI {
   datasourceLayers: Record<string, DatasourcePublicAPI>;
+  /**
+   * Data of the chart currently rendered in the preview.
+   * This data might be not available (e.g. if the chart can't be rendered) or outdated and belonging to another chart.
+   * If accessing, make sure to check whether expected columns actually exist.
+   */
+  activeData?: Record<string, KibanaDatatable>;
 
   dateRange: DateRange;
   query: Query;

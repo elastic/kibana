@@ -40,6 +40,7 @@ import {
 } from '../../../../../../../src/plugins/data/public';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { DropIllustration } from '../../../assets/drop_illustration';
+import { LensInspectorAdapters } from '../../types';
 
 export interface WorkspacePanelProps {
   activeVisualizationId: string | null;
@@ -245,6 +246,7 @@ export function WorkspacePanel({
         expression={expression}
         framePublicAPI={framePublicAPI}
         timefilter={plugins.data.query.timefilter.timefilter}
+        dispatch={dispatch}
         onEvent={onEvent}
         setLocalState={setLocalState}
         localState={localState}
@@ -289,11 +291,13 @@ export const InnerVisualizationWrapper = ({
   setLocalState,
   localState,
   ExpressionRendererComponent,
+  dispatch,
 }: {
   expression: Ast | null | undefined;
   framePublicAPI: FramePublicAPI;
   timefilter: TimefilterContract;
   onEvent: (event: ExpressionRendererEvent) => void;
+  dispatch: (action: Action) => void;
   setLocalState: (dispatch: (prevState: WorkspaceState) => WorkspaceState) => void;
   localState: WorkspaceState;
   ExpressionRendererComponent: ReactExpressionRendererType;
@@ -315,6 +319,18 @@ export const InnerVisualizationWrapper = ({
       framePublicAPI.dateRange.toDate,
       framePublicAPI.filters,
     ]
+  );
+
+  const onData$ = useCallback(
+    (data: unknown, inspectorAdapters?: LensInspectorAdapters) => {
+      if (inspectorAdapters && inspectorAdapters.tables) {
+        dispatch({
+          type: 'UPDATE_ACTIVE_DATA',
+          tables: inspectorAdapters.tables,
+        });
+      }
+    },
+    [dispatch]
   );
 
   if (localState.expressionBuildError) {
@@ -342,6 +358,7 @@ export const InnerVisualizationWrapper = ({
         searchContext={context}
         reload$={autoRefreshFetch$}
         onEvent={onEvent}
+        onData$={onData$}
         renderError={(errorMessage?: string | null) => {
           return (
             <EuiFlexGroup style={{ maxWidth: '100%' }} direction="column" alignItems="center">
