@@ -10,6 +10,7 @@ import { FC } from 'react';
 import { History } from 'history';
 import { ApplicationStart, ChromeBreadcrumb } from 'src/core/public';
 
+import { HttpLogic } from '../http';
 import { createHref, ICreateHrefOptions } from '../react_router_helpers';
 
 interface IKibanaLogicProps {
@@ -31,7 +32,8 @@ export const KibanaLogic = kea<MakeLogicType<IKibanaValues>>({
     history: [props.history, {}],
     navigateToUrl: [
       (url: string, options?: ICreateHrefOptions) => {
-        const href = createHref(url, props.history, options);
+        const deps = { history: props.history, http: HttpLogic.values.http };
+        const href = createHref(url, deps, options);
         return props.navigateToUrl(href);
       },
       {},

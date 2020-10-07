@@ -131,6 +131,10 @@ function isLoginAttemptWithProviderType(
   );
 }
 
+function isSessionAuthenticated(sessionValue?: Readonly<SessionValue> | null) {
+  return !!sessionValue?.username;
+}
+
 /**
  * Instantiates authentication provider based on the provider key from config.
  * @param providerType Provider type key.
@@ -558,7 +562,7 @@ export class Authenticator {
       return ownsSession ? { value: existingSessionValue, overwritten: false } : null;
     }
 
-    const isExistingSessionAuthenticated = !!existingSessionValue?.username;
+    const isExistingSessionAuthenticated = isSessionAuthenticated(existingSessionValue);
     const isNewSessionAuthenticated = !!authenticationResult.user;
 
     const providerHasChanged = !!existingSessionValue && !ownsSession;
@@ -637,7 +641,7 @@ export class Authenticator {
     //  4. Request isn't attributed with HTTP Authorization header
     return (
       canRedirectRequest(request) &&
-      !sessionValue &&
+      !isSessionAuthenticated(sessionValue) &&
       this.options.config.authc.selector.enabled &&
       HTTPAuthorizationHeader.parseFromRequest(request) == null
     );
@@ -688,14 +692,14 @@ export class Authenticator {
       return authenticationResult;
     }
 
-    const isSessionAuthenticated = !!sessionUpdateResult?.value?.username;
+    const isUpdatedSessionAuthenticated = isSessionAuthenticated(sessionUpdateResult?.value);
 
     let preAccessRedirectURL;
-    if (isSessionAuthenticated && sessionUpdateResult?.overwritten) {
+    if (isUpdatedSessionAuthenticated && sessionUpdateResult?.overwritten) {
       this.logger.debug('Redirecting user to the overwritten session UI.');
       preAccessRedirectURL = `${this.options.basePath.serverBasePath}${OVERWRITTEN_SESSION_ROUTE}`;
     } else if (
-      isSessionAuthenticated &&
+      isUpdatedSessionAuthenticated &&
       this.shouldRedirectToAccessAgreement(sessionUpdateResult?.value ?? null)
     ) {
       this.logger.debug('Redirecting user to the access agreement UI.');

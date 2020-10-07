@@ -5,10 +5,12 @@
  */
 import Boom from 'boom';
 import { SavedObjectsClientContract } from 'src/core/server';
+import { isAgentUpgradeable } from '../../../common';
 import { AGENT_SAVED_OBJECT_TYPE, AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { AgentSOAttributes, Agent, AgentEventSOAttributes, ListWithKuery } from '../../types';
 import { escapeSearchQueryPhrase, normalizeKuery, findAllSOs } from '../saved_object';
 import { savedObjectToAgent } from './saved_objects';
+import { appContextService } from '../../services';
 
 const ACTIVE_AGENT_CONDITION = `${AGENT_SAVED_OBJECT_TYPE}.attributes.active:true`;
 const INACTIVE_AGENT_CONDITION = `NOT (${ACTIVE_AGENT_CONDITION})`;
@@ -41,6 +43,7 @@ export async function listAgents(
     sortOrder = 'desc',
     kuery,
     showInactive = false,
+    showUpgradeable,
   } = options;
   const filters = [];
 
@@ -52,7 +55,7 @@ export async function listAgents(
     filters.push(ACTIVE_AGENT_CONDITION);
   }
 
-  const { saved_objects: agentSOs, total } = await soClient.find<AgentSOAttributes>({
+  let { saved_objects: agentSOs, total } = await soClient.find<AgentSOAttributes>({
     type: AGENT_SAVED_OBJECT_TYPE,
     filter: _joinFilters(filters),
     sortField,
@@ -60,6 +63,14 @@ export async function listAgents(
     page,
     perPage,
   });
+  // filtering for a range on the version string will not work,
+  // nor does filtering on a flattened field (local_metadata), so filter here
+  if (showUpgradeable) {
+    agentSOs = agentSOs.filter((agent) =>
+      isAgentUpgradeable(savedObjectToAgent(agent), appContextService.getKibanaVersion())
+    );
+    total = agentSOs.length;
+  }
 
   return {
     agents: agentSOs.map(savedObjectToAgent),
