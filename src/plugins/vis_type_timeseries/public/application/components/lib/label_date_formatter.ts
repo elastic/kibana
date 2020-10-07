@@ -19,12 +19,12 @@
 
 import moment from 'moment';
 
-export const labelDateFormatter = (label: string, dateformat?: string): string => {
+export const labelDateFormatter = (label: string, dateformat = 'lll') => {
   let formattedLabel = label;
   // Use moment isValid function on strict mode
   const isDate = moment(label, '', true).isValid();
   if (isDate) {
-    formattedLabel = moment(label).format(dateformat || 'lll');
+    formattedLabel = moment(label).format(dateformat);
   }
   return formattedLabel;
 };
