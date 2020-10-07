@@ -5,7 +5,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { noop } from 'lodash/fp';
+import { getOr, noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { MatrixHistogramQueryProps } from '../../components/matrix_histogram/types';
@@ -32,6 +32,10 @@ export interface UseMatrixHistogramArgs {
   inspect: InspectResponse;
   refetch: inputsModel.Refetch;
   totalCount: number;
+  buckets: Array<{
+    key: string;
+    doc_count: number;
+  }>;
 }
 
 const ID = 'matrixHistogramQuery';
@@ -44,6 +48,7 @@ export const useMatrixHistogram = ({
   indexNames,
   stackByField,
   startDate,
+  threshold,
 }: MatrixHistogramQueryProps): [boolean, UseMatrixHistogramArgs] => {
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
@@ -63,6 +68,7 @@ export const useMatrixHistogram = ({
       to: endDate,
     },
     stackByField,
+    threshold,
   });
 
   const [matrixHistogramResponse, setMatrixHistogramResponse] = useState<UseMatrixHistogramArgs>({
@@ -73,6 +79,7 @@ export const useMatrixHistogram = ({
     },
     refetch: refetch.current,
     totalCount: -1,
+    buckets: [],
   });
 
   const hostsSearch = useCallback(
@@ -91,6 +98,10 @@ export const useMatrixHistogram = ({
             next: (response) => {
               if (isCompleteResponse(response)) {
                 if (!didCancel) {
+                  const histogramBuckets: Array<{
+                    key: string;
+                    doc_count: number;
+                  }> = getOr([], 'rawResponse.aggregations.eventActionGroup.buckets', response);
                   setLoading(false);
                   setMatrixHistogramResponse((prevResponse) => ({
                     ...prevResponse,
@@ -98,6 +109,7 @@ export const useMatrixHistogram = ({
                     inspect: getInspectResponse(response, prevResponse.inspect),
                     refetch: refetch.current,
                     totalCount: response.totalCount,
+                    buckets: histogramBuckets,
                   }));
                 }
                 searchSubscription$.unsubscribe();
@@ -144,13 +156,14 @@ export const useMatrixHistogram = ({
           to: endDate,
         },
         stackByField,
+        threshold,
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [indexNames, endDate, filterQuery, startDate, stackByField, histogramType]);
+  }, [indexNames, endDate, filterQuery, startDate, stackByField, histogramType, threshold]);
 
   useEffect(() => {
     hostsSearch(matrixHistogramRequest);

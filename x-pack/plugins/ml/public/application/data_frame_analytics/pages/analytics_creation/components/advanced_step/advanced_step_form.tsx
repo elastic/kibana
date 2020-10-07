@@ -78,7 +78,10 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
   const isRegOrClassJob =
     jobType === ANALYSIS_CONFIG_TYPE.REGRESSION || jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION;
 
-  const mmlInvalid = modelMemoryLimitValidationResult !== null;
+  const mmlInvalid =
+    modelMemoryLimitValidationResult !== null &&
+    (modelMemoryLimitValidationResult.invalidUnits !== undefined ||
+      modelMemoryLimitValidationResult.required === true);
 
   const isStepInvalid =
     mmlInvalid ||
@@ -340,7 +343,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
             label={i18n.translate('xpack.ml.dataframe.analytics.create.modelMemoryLimitLabel', {
               defaultMessage: 'Model memory limit',
             })}
-            isInvalid={mmlInvalid}
+            isInvalid={modelMemoryLimitValidationResult !== null}
             error={mmlErrors}
             helpText={i18n.translate(
               'xpack.ml.dataframe.analytics.create.modelMemoryLimitHelpText',
@@ -359,7 +362,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
               disabled={isJobCreated}
               value={modelMemoryLimit || ''}
               onChange={(e) => setFormState({ modelMemoryLimit: e.target.value })}
-              isInvalid={mmlInvalid}
+              isInvalid={modelMemoryLimitValidationResult !== null}
               data-test-subj="mlAnalyticsCreateJobWizardModelMemoryInput"
             />
           </EuiFormRow>

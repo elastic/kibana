@@ -49,7 +49,7 @@ export default function (providerContext: FtrProviderContext) {
   const server = dockerServers.get('registry');
 
   const deletePackage = async (pkgkey: string) => {
-    await supertest.delete(`/api/ingest_manager/epm/packages/${pkgkey}`).set('kbn-xsrf', 'xxxx');
+    await supertest.delete(`/api/fleet/epm/packages/${pkgkey}`).set('kbn-xsrf', 'xxxx');
   };
 
   describe('installs packages from direct upload', async () => {
@@ -64,7 +64,7 @@ export default function (providerContext: FtrProviderContext) {
     it('should install a tar archive correctly', async function () {
       const buf = fs.readFileSync(testPkgArchiveTgz);
       const res = await supertest
-        .post(`/api/ingest_manager/epm/packages`)
+        .post(`/api/fleet/epm/packages`)
         .set('kbn-xsrf', 'xxxx')
         .type('application/gzip')
         .send(buf)
@@ -75,7 +75,7 @@ export default function (providerContext: FtrProviderContext) {
     it('should install a zip archive correctly', async function () {
       const buf = fs.readFileSync(testPkgArchiveZip);
       const res = await supertest
-        .post(`/api/ingest_manager/epm/packages`)
+        .post(`/api/fleet/epm/packages`)
         .set('kbn-xsrf', 'xxxx')
         .type('application/zip')
         .send(buf)
@@ -86,7 +86,7 @@ export default function (providerContext: FtrProviderContext) {
     it('should throw an error if the archive is zip but content type is gzip', async function () {
       const buf = fs.readFileSync(testPkgArchiveZip);
       const res = await supertest
-        .post(`/api/ingest_manager/epm/packages`)
+        .post(`/api/fleet/epm/packages`)
         .set('kbn-xsrf', 'xxxx')
         .type('application/gzip')
         .send(buf)
@@ -99,7 +99,7 @@ export default function (providerContext: FtrProviderContext) {
     it('should throw an error if the archive is tar.gz but content type is zip', async function () {
       const buf = fs.readFileSync(testPkgArchiveTgz);
       const res = await supertest
-        .post(`/api/ingest_manager/epm/packages`)
+        .post(`/api/fleet/epm/packages`)
         .set('kbn-xsrf', 'xxxx')
         .type('application/zip')
         .send(buf)
@@ -112,7 +112,7 @@ export default function (providerContext: FtrProviderContext) {
     it('should throw an error if the archive contains two top-level directories', async function () {
       const buf = fs.readFileSync(testPkgArchiveInvalidTwoToplevels);
       const res = await supertest
-        .post(`/api/ingest_manager/epm/packages`)
+        .post(`/api/fleet/epm/packages`)
         .set('kbn-xsrf', 'xxxx')
         .type('application/zip')
         .send(buf)
@@ -125,7 +125,7 @@ export default function (providerContext: FtrProviderContext) {
     it('should throw an error if the archive does not contain a manifest', async function () {
       const buf = fs.readFileSync(testPkgArchiveInvalidNoManifest);
       const res = await supertest
-        .post(`/api/ingest_manager/epm/packages`)
+        .post(`/api/fleet/epm/packages`)
         .set('kbn-xsrf', 'xxxx')
         .type('application/zip')
         .send(buf)
@@ -138,7 +138,7 @@ export default function (providerContext: FtrProviderContext) {
     it('should throw an error if the archive manifest contains invalid YAML', async function () {
       const buf = fs.readFileSync(testPkgArchiveInvalidManifestInvalidYaml);
       const res = await supertest
-        .post(`/api/ingest_manager/epm/packages`)
+        .post(`/api/fleet/epm/packages`)
         .set('kbn-xsrf', 'xxxx')
         .type('application/zip')
         .send(buf)
@@ -151,7 +151,7 @@ export default function (providerContext: FtrProviderContext) {
     it('should throw an error if the archive manifest misses a mandatory field', async function () {
       const buf = fs.readFileSync(testPkgArchiveInvalidManifestMissingField);
       const res = await supertest
-        .post(`/api/ingest_manager/epm/packages`)
+        .post(`/api/fleet/epm/packages`)
         .set('kbn-xsrf', 'xxxx')
         .type('application/zip')
         .send(buf)
@@ -164,7 +164,7 @@ export default function (providerContext: FtrProviderContext) {
     it('should throw an error if the toplevel directory name does not match the package key', async function () {
       const buf = fs.readFileSync(testPkgArchiveInvalidToplevelMismatch);
       const res = await supertest
-        .post(`/api/ingest_manager/epm/packages`)
+        .post(`/api/fleet/epm/packages`)
         .set('kbn-xsrf', 'xxxx')
         .type('application/zip')
         .send(buf)
