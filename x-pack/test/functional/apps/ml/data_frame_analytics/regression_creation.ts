@@ -205,7 +205,6 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertRegressionEvaluatePanelElementsExists();
           await ml.dataFrameAnalyticsResults.assertRegressionTablePanelExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
-          await ml.dataFrameAnalyticsResults.assertResultsTableTrainingFiltersExist();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
         });
       });

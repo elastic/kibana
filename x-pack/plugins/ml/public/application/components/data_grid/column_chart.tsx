@@ -51,7 +51,7 @@ export const ColumnChart: FC<Props> = ({ chartData, columnType, dataTestSubj }) 
               name="count"
               xScaleType={xScaleType}
               yScaleType="linear"
-              xAccessor={'key_as_string'}
+              xAccessor="key"
               yAccessors={['doc_count']}
               styleAccessor={(d) => d.datum.color}
               data={data}

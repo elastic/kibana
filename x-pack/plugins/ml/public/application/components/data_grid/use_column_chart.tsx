@@ -67,7 +67,7 @@ export const getFieldType = (schema: EuiDataGridColumn['schema']): KBN_FIELD_TYP
 
 interface NumericDataItem {
   key: number;
-  key_as_string?: string | number;
+  key_as_string?: string;
   doc_count: number;
 }
 
@@ -231,13 +231,11 @@ export const useColumnChart = (
   if (isOrdinalChartData(chartData)) {
     data = chartData.data.map((d: OrdinalDataItem) => ({
       ...d,
-      key_as_string: d.key_as_string ?? d.key,
       color: getColor(d),
     }));
   } else if (isNumericChartData(chartData)) {
     data = chartData.data.map((d: NumericDataItem) => ({
       ...d,
-      key_as_string: d.key_as_string || d.key,
       color: getColor(d),
     }));
   }
