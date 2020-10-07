@@ -26,6 +26,8 @@ import { createFailError, ToolingLog } from '@kbn/dev-utils';
 import { OptimizerConfig, getMetrics } from './optimizer';
 
 const LIMITS_PATH = require.resolve('../limits.yml');
+const DEFAULT_BUDGET = 15000;
+
 const diff = <T>(a: T[], b: T[]): T[] => a.filter((item) => !b.includes(item));
 
 export function readLimits() {
@@ -72,7 +74,7 @@ export function updateBundleLimits(log: ToolingLog, config: OptimizerConfig) {
   let yaml = `pageLoadAssetSize:\n`;
   for (const metric of metrics.sort((a, b) => a.id.localeCompare(b.id))) {
     if (metric.group === 'page load bundle size') {
-      yaml += `  ${metric.id}: ${number(metric.value + 5000)}\n`;
+      yaml += `  ${metric.id}: ${number(metric.value + DEFAULT_BUDGET)}\n`;
     }
   }
 
