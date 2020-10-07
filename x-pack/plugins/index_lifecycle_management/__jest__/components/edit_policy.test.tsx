@@ -21,8 +21,10 @@ import {
   fatalErrorsServiceMock,
 } from '../../../../../src/core/public/mocks';
 import { usageCollectionPluginMock } from '../../../../../src/plugins/usage_collection/public/mocks';
+import { CloudSetup } from '../../../cloud/public';
 
 import { EditPolicy } from '../../public/application/sections/edit_policy/edit_policy';
+import { KibanaContextProvider } from '../../public/shared_imports';
 import { init as initHttp } from '../../public/application/services/http';
 import { init as initUiMetric } from '../../public/application/services/ui_metric';
 import { init as initNotification } from '../../public/application/services/notification';
@@ -148,7 +150,14 @@ const save = (rendered: ReactWrapper) => {
 describe('edit policy', () => {
   beforeEach(() => {
     component = (
-      <EditPolicy history={history} getUrlForApp={jest.fn()} policies={policies} policyName={''} />
+      <KibanaContextProvider services={{ cloud: { isCloudEnabled: false } as CloudSetup }}>
+        <EditPolicy
+          history={history}
+          getUrlForApp={jest.fn()}
+          policies={policies}
+          policyName={''}
+        />
+      </KibanaContextProvider>
     );
 
     ({ http } = editPolicyHelpers.setup());
@@ -677,6 +686,40 @@ describe('edit policy', () => {
       setPhaseAfter(rendered, 'delete', '-1');
       save(rendered);
       expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
+    });
+  });
+  describe('on cloud', () => {
+    beforeEach(() => {
+      component = (
+        <KibanaContextProvider services={{ cloud: { isCloudEnabled: true } as CloudSetup }}>
+          <EditPolicy
+            history={history}
+            getUrlForApp={jest.fn()}
+            policies={policies}
+            policyName={''}
+          />
+        </KibanaContextProvider>
+      );
+      ({ http } = editPolicyHelpers.setup());
+      ({ server, httpRequestsMockHelpers } = http);
+      server.respondImmediately = true;
+
+      httpRequestsMockHelpers.setPoliciesResponse(policies);
+    });
+    test('should show cloud notice cold tier nodes do not exist', async () => {
+      http.setupNodeListResponse({
+        nodesByAttributes: {},
+        nodesByRoles: { data: ['test'], data_hot: ['test'], data_warm: ['test'] },
+      });
+      const rendered = mountWithIntl(component);
+      noRollover(rendered);
+      setPolicyName(rendered, 'mypolicy');
+      await activatePhase(rendered, 'cold');
+      expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
+      expect(findTestSubject(rendered, 'cloudDataTierCallout').exists()).toBeTruthy();
+      // Assert that other notices are not showing
+      expect(findTestSubject(rendered, 'defaultAllocationNotice').exists()).toBeFalsy();
+      expect(findTestSubject(rendered, 'noNodeAttributesWarning').exists()).toBeFalsy();
     });
   });
 });
