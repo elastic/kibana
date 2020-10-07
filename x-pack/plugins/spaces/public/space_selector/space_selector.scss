@@ -29,3 +29,11 @@
   width: $euiFormMaxWidth; // make sure it's as wide as our default form element width
   max-width: 100%;
 }
+
+.spcSpaceSelector__errorPanel {
+  position: relative;
+  margin: auto;
+  padding-left: $euiSizeXL;
+  padding-right: $euiSizeXL;
+  max-width: 700px;
+}
