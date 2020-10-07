@@ -26,7 +26,7 @@ export const unmountHandler = () => (useEffect as jest.Mock).mock.calls[0][0]()(
 /**
  * Example unmount() usage:
  *
- * import { onUnmount } from '../../../__mocks__/shallow_useeffect.mock';
+ * import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
  *
  * it('unmounts', () => {
  *   shallow(SomeComponent);
