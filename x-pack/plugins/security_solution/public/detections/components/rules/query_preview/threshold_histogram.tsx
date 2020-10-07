@@ -6,26 +6,29 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
+import { Unit } from '@elastic/datemath';
 
 import * as i18n from './translations';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { BarChart } from '../../../../common/components/charts/barchart';
-import { getThresholdHistogramConfig } from './helpers';
+import { getThresholdHistogramConfig, HITS_THRESHOLD } from './helpers';
 import { useMatrixHistogram } from '../../../../common/containers/matrix_histogram';
 import { MatrixHistogramType } from '../../../../../common/search_strategy/security_solution/matrix_histogram';
-import { ESQueryStringQuery } from '../../../../../common/typed_json';
 import { Panel } from '../../../../common/components/panel';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { ChartSeriesConfigs } from '../../../../common/components/charts/common';
+import { ESQuery } from '../../../../../common/typed_json';
 
 export const ID = 'queryPreviewThresholdHistogramQuery';
 
 interface PreviewThresholdQueryHistogramProps {
   to: string;
   from: string;
-  filterQuery: ESQueryStringQuery | undefined;
+  filterQuery: ESQuery | undefined;
   threshold: { field: string | undefined; value: number } | undefined;
   index: string[];
+  interval: Unit;
+  onSetWarning: (ar: string[]) => void;
 }
 
 export const PreviewThresholdQueryHistogram = ({
@@ -34,6 +37,8 @@ export const PreviewThresholdQueryHistogram = ({
   filterQuery,
   threshold,
   index,
+  interval,
+  onSetWarning,
 }: PreviewThresholdQueryHistogramProps) => {
   const { setQuery, isInitializing } = useGlobalTime();
 
@@ -55,15 +60,20 @@ export const PreviewThresholdQueryHistogram = ({
   }, [setQuery, inspect, isLoading, isInitializing, refetch]);
 
   const { data, totalCount } = useMemo(() => {
+    const total = buckets.length;
+
+    if (total > 0 && total > HITS_THRESHOLD[interval]) {
+      onSetWarning([i18n.QUERY_PREVIEW_NOISE_WARNING]);
+    }
     return {
       data: buckets.map<{ x: string; y: number; g: string }>(({ key, doc_count: docCount }) => ({
         x: key,
         y: docCount,
         g: key,
       })),
-      totalCount: buckets.length,
+      totalCount: total,
     };
-  }, [buckets]);
+  }, [buckets, onSetWarning, interval]);
 
   const barConfig = useMemo((): ChartSeriesConfigs => getThresholdHistogramConfig(200), []);
 

@@ -15,7 +15,7 @@ import {
   MatrixHistogramOption,
   MatrixHistogramConfigs,
 } from '../../../../common/components/matrix_histogram/types';
-import { ESQueryStringQuery } from '../../../../../common/typed_json';
+import { ESQuery } from '../../../../../common/typed_json';
 
 const ID = 'nonEqlRuleQueryPreviewHistogramQuery';
 
@@ -43,7 +43,7 @@ interface PreviewNonEqlQueryHistogramProps {
   to: string;
   from: string;
   index: string[];
-  filterQuery: ESQueryStringQuery | undefined;
+  filterQuery: ESQuery | undefined;
 }
 
 export const PreviewNonEqlQueryHistogram = ({
