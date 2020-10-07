@@ -5,6 +5,7 @@
  */
 
 import { SavedObjectsType } from 'src/core/server';
+import { userActionsMigrations } from './migrations';
 
 export const CASE_USER_ACTION_SAVED_OBJECT = 'cases-user-actions';
 
@@ -44,4 +45,5 @@ export const caseUserActionSavedObjectType: SavedObjectsType = {
       },
     },
   },
+  migrations: userActionsMigrations,
 };
