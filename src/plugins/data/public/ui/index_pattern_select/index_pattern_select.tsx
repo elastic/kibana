@@ -39,7 +39,7 @@ export type IndexPatternSelectProps = Required<
   onNoIndexPatterns?: () => void;
 };
 
-type IndexPatternSelectInternalProps = IndexPatternSelectProps & {
+export type IndexPatternSelectInternalProps = IndexPatternSelectProps & {
   savedObjectsClient: SavedObjectsClientContract;
 };
 
