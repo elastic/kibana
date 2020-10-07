@@ -17,21 +17,18 @@
  * under the License.
  */
 
+import { Either, isRight, left, right } from 'fp-ts/lib/Either';
 import { ElasticsearchClient } from '../../elasticsearch';
 
-/**
- * IDEAS:
- *  - Utility function to create thunks, returns {action: string, exec: fn}
- *  - Debug logging for action names
- */
+type AllResponses = CloneIndexResponse | FetchAliasesResponse | SetIndexWriteBlockResponse;
 
-export type FetchAliasesResponse =
-  | {
-      fetchAliases: Record<string, string>;
-    }
-  | {
-      error: Error;
-    };
+export type ActionResponse<T = AllResponses> = Either<Error, T>;
+
+export type ActionThunk<T = AllResponses> = () => Promise<ActionResponse<T>>;
+
+export interface FetchAliasesResponse {
+  fetchAliases: Record<string, string>;
+}
 
 /**
  * Queries Elasticsearch for the provided `aliasesToFetch` and returns a map
@@ -43,7 +40,7 @@ export type FetchAliasesResponse =
 export const fetchAliases = (
   client: ElasticsearchClient,
   aliasesToFetch: string[]
-) => async (): Promise<FetchAliasesResponse> => {
+): ActionThunk<FetchAliasesResponse> => async () => {
   return client.indices
     .getAlias(
       { name: aliasesToFetch },
@@ -65,22 +62,19 @@ export const fetchAliases = (
         });
         return acc;
       }, {} as Record<string, string>);
-      return { fetchAliases: aliases };
+      return right({ fetchAliases: aliases });
     })
-    .catch((error) => ({ error }));
+    .catch(left);
 };
 
-export type SetIndexWriteBlockResponse =
-  | {
-      setIndexWriteBlock: boolean;
-    }
-  | {
-      error: Error;
-    };
+export interface SetIndexWriteBlockResponse {
+  setIndexWriteBlock: boolean;
+}
 
-export const setIndexWriteBlock = (client: ElasticsearchClient, index: string) => async (): Promise<
-  SetIndexWriteBlockResponse
-> => {
+export const setIndexWriteBlock = (
+  client: ElasticsearchClient,
+  index: string
+): ActionThunk<SetIndexWriteBlockResponse> => async () => {
   return client.indices
     .addBlock(
       {
@@ -94,26 +88,22 @@ export const setIndexWriteBlock = (client: ElasticsearchClient, index: string) =
       // need to check for `shards_acknowledged=true` here too. But if the
       // lock is already in place `shards_acknowledged` is always false.
       // Follow-up with ES-team, do we need to check index status >= yellow?
-      return {
+      return right({
         setIndexWriteBlock: res.body.acknowledged,
-      };
+      });
     })
-    .catch((error) => ({ error }));
+    .catch(left);
 };
 
-export type CloneIndexResponse =
-  | {
-      cloneIndex: boolean;
-    }
-  | {
-      error: Error;
-    };
+export interface CloneIndexResponse {
+  cloneIndex: boolean;
+}
 
 export const cloneIndex = (
   client: ElasticsearchClient,
   source: string,
   target: string
-) => async (): Promise<CloneIndexResponse> => {
+): ActionThunk<CloneIndexResponse> => async () => {
   const cloneResult = await client.indices
     .clone(
       {
@@ -125,25 +115,26 @@ export const cloneIndex = (
       { maxRetries: 0 /** handle retry ourselves for now */ }
     )
     .then((res) => {
-      return {
+      return right({
         cloneIndex: res.body.acknowledged as boolean,
-      };
+      });
     })
     .catch((error) => {
       if (error.meta?.body?.error.type === 'resource_already_exists_exception') {
-        return { cloneIndex: true };
+        return right({ cloneIndex: true });
       } else {
-        return { error };
+        return left(error);
       }
     });
 
-  if (cloneResult.cloneIndex ?? false) {
+  // If the clone operation succeeded, wait for the index to become green
+  if (isRight(cloneResult) && cloneResult.right.cloneIndex) {
     return client.cluster
       .health({ index: target, wait_for_status: 'green', timeout: '60s' })
       .then((res) => {
-        return { cloneIndex: true };
+        return right({ cloneIndex: true });
       })
-      .catch((error) => ({ error }));
+      .catch(left);
   } else {
     return cloneResult;
   }

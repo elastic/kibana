@@ -22,12 +22,9 @@
 import { ElasticsearchClient } from 'src/core/server/elasticsearch';
 import { gt } from 'semver';
 import chalk from 'chalk';
+import { isLeft } from 'fp-ts/lib/Either';
 import * as Actions from './actions';
-
-type ActionResponse =
-  | Actions.CloneIndexResponse
-  | Actions.FetchAliasesResponse
-  | Actions.SetIndexWriteBlockResponse;
+import { ActionResponse, ActionThunk } from './actions';
 
 export interface BaseState {
   kibanaVersion: string;
@@ -79,7 +76,6 @@ export type State =
   | CloneSourceState;
 
 type Model = (currentState: State, result: ActionResponse) => State;
-type ActionThunk = () => Promise<ActionResponse>;
 type NextAction = (client: ElasticsearchClient, state: State) => ActionThunk | null;
 
 function throwBadControlState(p: never): never;
@@ -94,21 +90,22 @@ function indexVersion(indexName: string) {
 export const model: Model = (currentState: State, res: ActionResponse): State => {
   let stateP: State = { ...currentState, ...{ log: [] } };
 
-  if ('error' in res) {
+  if (isLeft(res)) {
     if (stateP.retryCount === 5) {
       stateP = {
         ...stateP,
         controlState: 'FATAL',
-        error: res.error,
+        error: res.left,
         log: [
           { level: 'error', message: 'Unable to complete action after 5 attempts, terminating.' },
         ],
       };
+      return stateP;
     } else {
       stateP = {
         ...stateP,
         controlState: 'FATAL',
-        error: res.error,
+        error: res.left,
         retryCount: stateP.retryCount + 1,
         retryDelay: 1000 * Math.pow(2, stateP.retryCount + 1), // 2s, 4s, 8s, 16s, 32s, 64s
         log: [
@@ -116,22 +113,21 @@ export const model: Model = (currentState: State, res: ActionResponse): State =>
             level: 'error',
             message:
               chalk.red('ERROR: ') +
-              `Action failed with '${res.error.message}'. Retrying attempt ${
+              `Action failed with '${res.left.message}'. Retrying attempt ${
                 stateP.retryCount
               } out of 5 in ${stateP.retryDelay / 1000} seconds.`,
           },
           ...stateP.log,
         ],
       };
+      return stateP;
     }
-  }
-
-  if (stateP.controlState === 'INIT') {
-    if ('fetchAliases' in res) {
+  } else if (stateP.controlState === 'INIT') {
+    if ('fetchAliases' in res.right) {
       if (
-        res.fetchAliases['.kibana_current'] != null &&
-        res.fetchAliases['.kibana_7.11.0'] != null &&
-        res.fetchAliases['.kibana_current'] === res.fetchAliases['.kibana_7.11.0']
+        res.right.fetchAliases['.kibana_current'] != null &&
+        res.right.fetchAliases['.kibana_7.11.0'] != null &&
+        res.right.fetchAliases['.kibana_current'] === res.right.fetchAliases['.kibana_7.11.0']
       ) {
         // `.kibana_current` and the version specific aliases both exists and
         // are pointing to the same index. This version's migration has already
@@ -139,8 +135,8 @@ export const model: Model = (currentState: State, res: ActionResponse): State =>
         stateP = { ...stateP, controlState: 'DONE' };
         // TODO, go to step (6)
       } else if (
-        res.fetchAliases['.kibana_current'] != null &&
-        gt(indexVersion(res.fetchAliases['.kibana_current']), '7.11.0')
+        res.right.fetchAliases['.kibana_current'] != null &&
+        gt(indexVersion(res.right.fetchAliases['.kibana_current']), '7.11.0')
       ) {
         // `.kibana_current` is pointing to an index that belongs to a later
         // version of Kibana .e.g. a 7.11.0 node found `.kibana_7.12.0_001`
@@ -149,17 +145,22 @@ export const model: Model = (currentState: State, res: ActionResponse): State =>
           controlState: 'FATAL',
           error: new Error(
             'The .kibana_current alias is pointing to a newer version of Kibana: v' +
-              indexVersion(res.fetchAliases['.kibana_current'])
+              indexVersion(res.right.fetchAliases['.kibana_current'])
           ),
         };
-      } else if (res.fetchAliases['.kibana_current'] ?? res.fetchAliases['.kibana'] ?? false) {
+      } else if (
+        res.right.fetchAliases['.kibana_current'] ??
+        res.right.fetchAliases['.kibana'] ??
+        false
+      ) {
         //  The source index is:
         //  1. the index the `.kibana_current` alias points to, or if it doesn’t exist,
         //  2. the index the `.kibana` alias points to, or if it doesn't exist,
-        const source = res.fetchAliases['.kibana_current'] || res.fetchAliases['.kibana'];
+        const source =
+          res.right.fetchAliases['.kibana_current'] || res.right.fetchAliases['.kibana'];
         stateP = {
           ...stateP,
-          controlState: 'DONE',
+          controlState: 'SET_SOURCE_WRITE_BLOCK',
           source,
           target: `.kibana_${stateP.kibanaVersion}_001`,
         };
@@ -211,12 +212,12 @@ export const next: NextAction = (client: ElasticsearchClient, state: State) => {
     return delay(Actions.fetchAliases(client, ['.kibana', '.kibana_current', '.kibana_7.11.0']));
   } else if (state.controlState === 'SET_SOURCE_WRITE_BLOCK') {
     return delay(Actions.setIndexWriteBlock(client, state.source));
-  } else if (state.controlState === 'FATAL') {
+  } else if (state.controlState === 'CLONE_SOURCE') {
     return delay(Actions.cloneIndex(client, state.source, state.target));
-  } else if (state.controlState === 'INIT_NEW_INDICES' || state.controlState === 'CLONE_SOURCE') {
+  } else if (state.controlState === 'INIT_NEW_INDICES') {
     return null;
-  } else if (state.controlState === 'DONE') {
-    return null; // DONE
+  } else if (state.controlState === 'DONE' || state.controlState === 'FATAL') {
+    return null; // Terminal state reached
   } else {
     return throwBadControlState(state);
   }
@@ -262,10 +263,8 @@ export async function migrationStateMachine(client: ElasticsearchClient, kibanaV
   let actionThunk: ActionThunk | null = next(client, state);
 
   while (actionThunk != null) {
-    const actionResult = await actionThunk!().catch((error) => ({ error }));
-    if (actionResult == null) {
-      throw new Error('Action must return a result.');
-    }
+    const actionResult = await actionThunk();
+
     console.log(chalk.cyanBright('ACTION RESPONSE\n'), actionResult);
 
     const newState = model(state, actionResult);
