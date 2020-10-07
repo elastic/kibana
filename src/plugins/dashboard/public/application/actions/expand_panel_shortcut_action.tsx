@@ -18,9 +18,8 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiBadge, EuiButtonIcon } from '@elastic/eui';
-import { IEmbeddable, ViewMode, isReferenceOrValueEmbeddable } from '../../embeddable_plugin';
+import { EuiButtonIcon } from '@elastic/eui';
+import { IEmbeddable } from '../../embeddable_plugin';
 import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
 import { reactToUiComponent } from '../../../../kibana_react/public';
 import { ExpandPanelAction, isDashboard, isExpanded } from './expand_panel_action';
@@ -35,20 +34,6 @@ export class ExpandPanelShortcutAction
   public readonly id = ACTION_EXPAND_PANEL_SHORTCUT;
   public readonly type = ACTION_EXPAND_PANEL_SHORTCUT;
   public readonly order = 1;
-
-  private minimizeMessage = i18n.translate(
-    'dashboard.actions.toggleExpandPanelBadge.minimizeAriaLabel',
-    {
-      defaultMessage: 'Minimize this panel',
-    }
-  );
-
-  private maximizeMessage = i18n.translate(
-    'dashboard.actions.toggleExpandPanelBadge.minimizeAriaLabel',
-    {
-      defaultMessage: 'Maximize this panel',
-    }
-  );
 
   constructor(private expandPanelAction: ExpandPanelAction) {}
 
@@ -77,13 +62,6 @@ export class ExpandPanelShortcutAction
     }
     return '';
   }
-
-  // public getDisplayNameTooltip = ({ embeddable }: ExpandPanelShortcutActionContext) => {
-  //   if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
-  //     throw new IncompatibleActionError();
-  //   }
-  //   return isExpanded(embeddable) ? this.minimizeMessage : this.maximizeMessage;
-  // };
 
   public isCompatible = async ({ embeddable }: ExpandPanelShortcutActionContext) => {
     return Boolean(embeddable.parent && isDashboard(embeddable.parent));

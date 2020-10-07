@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBadge, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon } from '@elastic/eui';
 import { IEmbeddable, ViewMode, isReferenceOrValueEmbeddable } from '../../embeddable_plugin';
 import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
 import { reactToUiComponent } from '../../../../kibana_react/public';
