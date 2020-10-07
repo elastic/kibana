@@ -13,7 +13,7 @@ import {
   toMountPoint,
 } from '../../../../../../src/plugins/kibana_react/public';
 import { AnomalySwimlaneInitializer } from './anomaly_swimlane_initializer';
-import { JobSelectorFlyout } from '../../application/components/job_selector/job_selector_flyout';
+import { JobSelectorFlyoutContent } from '../../application/components/job_selector/job_selector_flyout';
 import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 import { getInitialGroupsMap } from '../../application/components/job_selector/job_selector';
 import { getDefaultPanelTitle } from './anomaly_swimlane_embeddable';
@@ -43,7 +43,7 @@ export async function resolveAnomalySwimlaneUserInput(
     const flyoutSession = coreStart.overlays.openFlyout(
       toMountPoint(
         <KibanaContextProvider services={{ ...coreStart, mlServices: getMlGlobalServices(http) }}>
-          <JobSelectorFlyout
+          <JobSelectorFlyoutContent
             selectedIds={selectedIds}
             withTimeRangeSelector={false}
             dateFormatTz={dateFormatTz}
@@ -87,6 +87,7 @@ export async function resolveAnomalySwimlaneUserInput(
       ),
       {
         'data-test-subj': 'mlAnomalySwimlaneEmbeddable',
+        ownFocus: true,
       }
     );
   });
