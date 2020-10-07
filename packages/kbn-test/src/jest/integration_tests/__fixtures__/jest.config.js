@@ -17,6 +17,21 @@
  * under the License.
  */
 
-it('fails', () => {
-  throw new Error('failure');
-});
+const { resolve } = require('path');
+const { REPO_ROOT } = require('@kbn/utils');
+
+module.exports = {
+  reporters: [
+    'default',
+    [
+      `${REPO_ROOT}/packages/kbn-test/target/jest/junit_reporter`,
+      {
+        reportName: 'JUnit Reporter Integration Test',
+        rootDirectory: resolve(
+          REPO_ROOT,
+          'packages/kbn-test/src/jest/integration_tests/__fixtures__'
+        ),
+      },
+    ],
+  ],
+};
