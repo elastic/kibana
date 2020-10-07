@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import React, { FC, memo, useCallback, useState, useEffect } from 'react';
 import styled from 'styled-components';
 // Prefer importing entire lodash library, e.g. import { get } from "lodash"
@@ -53,6 +53,7 @@ import {
 import { EqlQueryBar } from '../eql_query_bar';
 import { ThreatMatchInput } from '../threatmatch_input';
 import { useFetchIndex } from '../../../../common/containers/source';
+import { PreviewQuery } from '../query_preview';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -130,16 +131,33 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     options: { stripEmptyFields: false },
     schema,
   });
-  const { getFields, getFormData, reset, submit } = form;
-  const [{ index: formIndex, ruleType: formRuleType, threatIndex: formThreatIndex }] = (useFormData(
+  const { getErrors, getFields, getFormData, reset, submit } = form;
+  const [
     {
-      form,
-      watch: ['index', 'ruleType', 'threatIndex'],
-    }
-  ) as unknown) as [Partial<DefineStepRule>];
+      index: formIndex,
+      ruleType: formRuleType,
+      queryBar: formQuery,
+      threatIndex: formThreatIndex,
+      'threshold.value': formThresholdValue,
+      'threshold.field': formThresholdField,
+    },
+  ] = (useFormData({
+    form,
+    watch: ['index', 'ruleType', 'queryBar', 'threshold.value', 'threshold.field', 'threatIndex'],
+  }) as unknown) as [
+    Partial<
+      DefineStepRule & {
+        'threshold.value': number | undefined;
+        'threshold.field': string[] | undefined;
+      }
+    >
+  ];
   const index = formIndex || initialState.index;
   const threatIndex = formThreatIndex || initialState.threatIndex;
   const ruleType = formRuleType || initialState.ruleType;
+  const queryBarQuery =
+    formQuery != null ? formQuery.query.query : '' || initialState.queryBar.query.query;
+  const errorExists = getErrors().length > 0;
   const [indexPatternsLoading, { browserFields, indexPatterns }] = useFetchIndex(index);
 
   const [
@@ -372,6 +390,24 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             }}
           />
         </Form>
+        {ruleType !== 'machine_learning' && ruleType !== 'threat_match' && (
+          <>
+            <EuiSpacer size="s" />
+            <PreviewQuery
+              dataTestSubj="something"
+              idAria="someAriaId"
+              ruleType={ruleType}
+              index={index}
+              query={formQuery}
+              isDisabled={queryBarQuery.trim() === '' || errorExists}
+              threshold={
+                formThresholdValue != null && formThresholdField != null
+                  ? { value: formThresholdValue, field: formThresholdField[0] }
+                  : undefined
+              }
+            />
+          </>
+        )}
       </StepContentWrapper>
 
       {!isUpdateView && (
