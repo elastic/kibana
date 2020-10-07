@@ -289,7 +289,7 @@ export abstract class Embeddable<TEmbeddableInput extends EmbeddableInput = Embe
 // Warning: (ae-missing-release-tag) "EmbeddableChildPanel" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelProps, State_2> {
+export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelProps, State_3> {
     constructor(props: EmbeddableChildPanelProps);
     // (undocumented)
     [panel: string]: any;
@@ -440,7 +440,7 @@ export interface EmbeddablePackageState {
 // Warning: (ae-missing-release-tag) "EmbeddablePanel" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export class EmbeddablePanel extends React.Component<Props, State_3> {
+export class EmbeddablePanel extends React.Component<Props, State_4> {
     constructor(props: Props);
     // (undocumented)
     closeMyContextMenuPanel: () => void;
@@ -765,7 +765,7 @@ export interface PropertySpec {
 export interface RangeSelectContext<T extends IEmbeddable = IEmbeddable> {
     // (undocumented)
     data: {
-        table: KibanaDatatable;
+        table: Datatable;
         column: number;
         range: number[];
         timeFieldName?: string;
@@ -796,7 +796,7 @@ export interface ValueClickContext<T extends IEmbeddable = IEmbeddable> {
     // (undocumented)
     data: {
         data: Array<{
-            table: Pick<KibanaDatatable, 'rows' | 'columns'>;
+            table: Pick<Datatable, 'rows' | 'columns'>;
             column: number;
             row: number;
             value: any;
@@ -836,7 +836,7 @@ export const withEmbeddableSubscription: <I extends EmbeddableInput, O extends E
 // src/plugins/embeddable/common/types.ts:59:3 - (ae-forgotten-export) The symbol "TimeRange" needs to be exported by the entry point index.d.ts
 // src/plugins/embeddable/common/types.ts:64:3 - (ae-forgotten-export) The symbol "Query" needs to be exported by the entry point index.d.ts
 // src/plugins/embeddable/common/types.ts:69:3 - (ae-forgotten-export) The symbol "Filter" needs to be exported by the entry point index.d.ts
-// src/plugins/embeddable/public/lib/triggers/triggers.ts:45:5 - (ae-forgotten-export) The symbol "KibanaDatatable" needs to be exported by the entry point index.d.ts
+// src/plugins/embeddable/public/lib/triggers/triggers.ts:45:5 - (ae-forgotten-export) The symbol "Datatable" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 
