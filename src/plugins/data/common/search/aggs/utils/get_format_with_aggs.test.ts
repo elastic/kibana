@@ -85,7 +85,8 @@ describe('getFormatWithAggs', () => {
     const format = getFieldFormat(mapping);
 
     expect(format.convert({ gte: 1, lt: 20, label: 'custom' })).toBe('custom');
-    expect(getFormat).toHaveBeenCalledTimes(1);
+    // underlying formatter is not called because custom label can be used directly
+    expect(getFormat).toHaveBeenCalledTimes(0);
   });
 
   test('creates custom format for terms', () => {
