@@ -20,13 +20,13 @@
 import React, { ComponentType } from 'react';
 import { injectI18n, InjectedIntlProps } from '@kbn/i18n/react';
 import { EuiFormRow } from '@elastic/eui';
-import { IndexPatternSelectPublicProps } from 'src/plugins/data/public';
+import { IndexPatternSelectProps } from 'src/plugins/data/public';
 
 export type IndexPatternSelectFormRowUiProps = InjectedIntlProps & {
   onChange: (opt: any) => void;
   indexPatternId: string;
   controlIndex: number;
-  IndexPatternSelect: ComponentType<IndexPatternSelectPublicProps>;
+  IndexPatternSelect: ComponentType<IndexPatternSelectProps>;
 };
 
 function IndexPatternSelectFormRowUi(props: IndexPatternSelectFormRowUiProps) {
