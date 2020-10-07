@@ -1059,8 +1059,6 @@ export interface SavedObjectsFindOptions {
     //
     // (undocumented)
     filter?: string | KueryNode;
-    // Warning: (ae-forgotten-export) The symbol "SavedObjectsFindOptionsReference" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     hasReference?: SavedObjectsFindOptionsReference | SavedObjectsFindOptionsReference[];
     // (undocumented)
@@ -1082,6 +1080,14 @@ export interface SavedObjectsFindOptions {
     // (undocumented)
     type: string | string[];
     typeToNamespacesMap?: Map<string, string[] | undefined>;
+}
+
+// @public (undocumented)
+export interface SavedObjectsFindOptionsReference {
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    type: string;
 }
 
 // @public
