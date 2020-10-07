@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { RequestHandlerContext, ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient, IScopedClusterClient } from 'kibana/server';
 
 import { JobsInSpaces, JobType } from '../../saved_objects/filter';
 
@@ -21,8 +21,8 @@ import { DataFrameAnalyticsConfig } from '../../../common/types/data_frame_analy
 
 export type MlClient = ElasticsearchClient['ml'];
 
-export function getMlClient(context: RequestHandlerContext, jobsInSpaces: JobsInSpaces): MlClient {
-  const mlClient = context.core.elasticsearch.client.asInternalUser.ml;
+export function getMlClient(client: IScopedClusterClient, jobsInSpaces: JobsInSpaces): MlClient {
+  const mlClient = client.asInternalUser.ml;
 
   async function jobIdsCheck(jobType: JobType, p: any) {
     const jobIds = getADJobIds(p);

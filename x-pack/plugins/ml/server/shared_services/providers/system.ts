@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest } from 'kibana/server';
+import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { RequestParams } from '@elastic/elasticsearch';
 import { MlServerLicense } from '../../lib/license';
@@ -19,7 +19,8 @@ import { GetGuards } from '../shared_services';
 
 export interface MlSystemProvider {
   mlSystemProvider(
-    request: KibanaRequest
+    request: KibanaRequest,
+    savedObjectsClient: SavedObjectsClientContract
   ): {
     mlCapabilities(): Promise<MlCapabilitiesResponse>;
     mlInfo(): Promise<MlInfoResponse>;
@@ -35,12 +36,12 @@ export function getMlSystemProvider(
   resolveMlCapabilities: ResolveMlCapabilities
 ): MlSystemProvider {
   return {
-    mlSystemProvider(request: KibanaRequest) {
+    mlSystemProvider(request: KibanaRequest, savedObjectsClient: SavedObjectsClientContract) {
       return {
         async mlCapabilities() {
-          return await getGuards(request)
+          return await getGuards(request, savedObjectsClient)
             .isMinimumLicense()
-            .ok(async ({ scopedClient }) => {
+            .ok(async ({ mlClient }) => {
               const { isMlEnabledInSpace } =
                 spaces !== undefined
                   ? spacesUtilsProvider(spaces, request)
@@ -52,7 +53,7 @@ export function getMlSystemProvider(
               }
 
               const { getCapabilities } = capabilitiesProvider(
-                scopedClient,
+                mlClient,
                 mlCapabilities,
                 mlLicense,
                 isMlEnabledInSpace
@@ -61,7 +62,7 @@ export function getMlSystemProvider(
             });
         },
         async mlInfo(): Promise<MlInfoResponse> {
-          return await getGuards(request)
+          return await getGuards(request, savedObjectsClient)
             .isMinimumLicense()
             .ok(async ({ scopedClient }) => {
               const { asInternalUser } = scopedClient;
@@ -77,7 +78,7 @@ export function getMlSystemProvider(
         async mlAnomalySearch<T>(
           searchParams: RequestParams.Search<any>
         ): Promise<SearchResponse<T>> {
-          return await getGuards(request)
+          return await getGuards(request, savedObjectsClient)
             .isFullLicense()
             .hasMlCapabilities(['canAccessML'])
             .ok(async ({ scopedClient }) => {

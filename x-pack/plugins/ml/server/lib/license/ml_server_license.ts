@@ -45,14 +45,15 @@ function guard(check: () => boolean, handler: Handler) {
     }
 
     const jobsInSpaces = filterJobIdsFactory(context.core.savedObjects.client);
+    const client = context.core.elasticsearch.client;
 
     return handler({
-      client: context.core.elasticsearch.client,
+      client,
       request,
       response,
       context,
       jobsInSpaces,
-      mlClient: getMlClient(context, jobsInSpaces),
+      mlClient: getMlClient(client, jobsInSpaces),
     });
   };
 }

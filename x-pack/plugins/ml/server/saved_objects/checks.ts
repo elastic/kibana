@@ -136,12 +136,12 @@ export function checksFactory(client: IScopedClusterClient, jobsInSpaces: JobsIn
       savedObjectsCreated: string[];
       savedObjectsDeleted: string[];
       datafeedsAdded: string[];
-      datafeedsDeleted: string[];
+      datafeedsRemoved: string[];
     } = {
       savedObjectsCreated: [],
       savedObjectsDeleted: [],
       datafeedsAdded: [],
-      datafeedsDeleted: [],
+      datafeedsRemoved: [],
     };
 
     const { body: datafeeds } = await client.asInternalUser.ml.getDatafeeds<{
@@ -207,7 +207,7 @@ export function checksFactory(client: IScopedClusterClient, jobsInSpaces: JobsIn
         job.datafeedId !== null &&
         job.datafeedId !== undefined
       ) {
-        results.datafeedsDeleted.push(job.jobId);
+        results.datafeedsRemoved.push(job.jobId);
         if (simulate === false) {
           //
           await jobsInSpaces.deleteDatafeed(job.datafeedId);
