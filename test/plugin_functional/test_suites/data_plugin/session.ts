@@ -20,11 +20,9 @@ import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
-  const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'dashboard', 'discover', 'timePicker']);
   const filterBar = getService('filterBar');
 
-  const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const toasts = getService('toasts');
 
