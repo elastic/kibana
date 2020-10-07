@@ -18,7 +18,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Kibana roles page a11y tests', () => {
     before(async () => {
+      await esArchiver.loadIfNeeded('logstash_functional');
+      await kibanaServer.uiSettings.update({
+        defaultIndex: 'logstash-*',
+      });
       await PageObjects.security.clickElasticsearchRoles();
+    });
+
+    after(async () => {
+      await esArchiver.unload('logstash_functional');
     });
 
     it('a11y test for Roles main page', async () => {
@@ -78,7 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('cancelSpacePrivilegeButton');
     });
 
-    it('a11y test for role page after inputs', async () => {
+    it('a11y test for view privilege summary panel', async () => {
       await PageObjects.security.clickElasticsearchRoles();
       await PageObjects.security.addRole('a11yRole', {
         elasticsearch: {
@@ -93,13 +101,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           global: ['all'],
         },
       });
+      await testSubjects.click('edit-role-action-a11yRole');
+      await testSubjects.click('viewPrivilegeSummaryButton');
+
       await a11y.testAppSnapshot();
+      await testSubjects.click('euiFlyoutCloseButton');
+      await testSubjects.click('roleFormCancelButton');
     });
 
-    it('a11y test for deleting a role', async () => {
-      await PageObjects.security.clickElasticsearchRoles();
-
+    it('a11y test for select and delete a role in roles listing table', async () => {
+      await testSubjects.click('checkboxSelectRow-a11yRole');
       await a11y.testAppSnapshot();
+      await testSubjects.click('deleteRoleButton');
+      await a11y.testAppSnapshot();
+      await testSubjects.click('confirmModalCancelButton');
     });
   });
 }

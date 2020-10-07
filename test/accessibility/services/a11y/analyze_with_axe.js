@@ -37,6 +37,10 @@ export function analyzeWithAxe(context, options, callback) {
               id: 'label',
               selector: '[data-test-subj="comboBoxSearchInput"] *',
             },
+            {
+              id: 'aria-roles',
+              selector: '[data-test-subj="comboBoxSearchInput"] *',
+            },
           ],
         });
         return window.axe.run(context, options);
