@@ -63,7 +63,7 @@ describe('News', () => {
     jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
       data: { items: newsFeedItems },
       status: fetcherHook.FETCH_STATUS.SUCCESS,
-      refetch: jest.fn(),
+      refetch: () => {},
     });
 
     const { getByText, getAllByText, queryAllByTestId } = render(<NewsFeed />);
