@@ -169,7 +169,7 @@ export const CredentialsLogic = kea<
           engines: tokenType === ApiTokenTypes.Admin ? [] : activeApiToken.engines,
           write: tokenType === ApiTokenTypes.Private,
           read: tokenType === ApiTokenTypes.Private,
-          type: tokenType,
+          type: tokenType as ApiTokenTypes,
         }),
         showCredentialsForm: (_, activeApiToken) => activeApiToken,
       },
