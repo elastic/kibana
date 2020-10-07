@@ -40,11 +40,11 @@ export const constructWarnings = (timestampIssue: boolean, hits: number, range: 
     warnings = [i18n.PREVIEW_WARNING_TIMESTAMP];
   }
 
-  if (hits === EQL_QUERY_EVENT_SIZE) {
+  if (hits > 0 && hits === EQL_QUERY_EVENT_SIZE) {
     warnings = [...warnings, i18n.PREVIEW_WARNING_CAP_HIT(EQL_QUERY_EVENT_SIZE)];
   }
 
-  if (hits > HITS_THRESHOLD[range]) {
+  if (hits > 0 && hits > HITS_THRESHOLD[range]) {
     warnings = [...warnings, i18n.QUERY_PREVIEW_NOISE_WARNING];
   }
 
@@ -78,8 +78,8 @@ export const getEqlAggsData = (
 ): EqlPreviewResponse => {
   const { dsl, response: inspectResponse } = formatInspect(response);
   // The upper bound of the timestamps
-  const relativeNow: number = Date.parse(from);
-  const accumulator: EqlAggBuckets = getInterval(range, relativeNow);
+  const relativeNow = Date.parse(from);
+  const accumulator = getInterval(range, relativeNow);
   const events = response.rawResponse.body.hits.events ?? [];
   const totalCount = response.rawResponse.body.hits.total.value;
   let timestampNotFound = false;
@@ -91,7 +91,7 @@ export const getEqlAggsData = (
       return acc;
     }
 
-    const eventTimestamp: number = Date.parse(timestamp);
+    const eventTimestamp = Date.parse(timestamp);
     const bucket =
       range === 'h'
         ? calculateBucketForHour(eventTimestamp, relativeNow)

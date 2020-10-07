@@ -15,6 +15,7 @@ import { InspectQuery } from '../../../../common/store/inputs/model';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { Panel } from '../../../../common/components/panel';
 import { HeaderSection } from '../../../../common/components/header_section';
+import { hasEqlSequenceQuery } from '../../../../../common/detection_engine/utils';
 
 export const ID = 'queryEqlPreviewHistogramQuery';
 
@@ -22,6 +23,7 @@ interface PreviewEqlQueryHistogramProps {
   to: string;
   from: string;
   totalHits: number;
+  query: string;
   data: ChartData[];
   inspect: InspectQuery;
 }
@@ -30,6 +32,7 @@ export const PreviewEqlQueryHistogram = ({
   from,
   to,
   totalHits,
+  query,
   data,
   inspect,
 }: PreviewEqlQueryHistogramProps) => {
@@ -41,7 +44,10 @@ export const PreviewEqlQueryHistogram = ({
     }
   }, [setQuery, inspect, isInitializing]);
 
-  const barConfig = useMemo((): ChartSeriesConfigs => getHistogramConfig(to, from), [from, to]);
+  const barConfig = useMemo(
+    (): ChartSeriesConfigs => getHistogramConfig(to, from, hasEqlSequenceQuery(query)),
+    [from, to, query]
+  );
 
   return (
     <>
