@@ -394,7 +394,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           <>
             <EuiSpacer size="s" />
             <PreviewQuery
-              dataTestSubj="something"
+              dataTestSubj="ruleCreationQueryPreview"
               idAria="ruleCreationQueryPreview"
               ruleType={ruleType}
               index={index}
