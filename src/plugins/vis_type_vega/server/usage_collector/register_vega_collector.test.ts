@@ -25,18 +25,19 @@ import { registerVegaUsageCollector } from './register_vega_collector';
 
 describe('registerVegaUsageCollector', () => {
   const mockIndex = 'mock_index';
+  const mockDeps = { home: {} };
   const mockConfig = of({ kibana: { index: mockIndex } });
 
   it('makes a usage collector and registers it`', () => {
     const mockCollectorSet = createUsageCollectionSetupMock();
-    registerVegaUsageCollector(mockCollectorSet, mockConfig);
+    registerVegaUsageCollector(mockCollectorSet, mockConfig, mockDeps);
     expect(mockCollectorSet.makeUsageCollector).toBeCalledTimes(1);
     expect(mockCollectorSet.registerCollector).toBeCalledTimes(1);
   });
 
   it('makeUsageCollector configs fit the shape', () => {
     const mockCollectorSet = createUsageCollectionSetupMock();
-    registerVegaUsageCollector(mockCollectorSet, mockConfig);
+    registerVegaUsageCollector(mockCollectorSet, mockConfig, mockDeps);
     expect(mockCollectorSet.makeUsageCollector).toHaveBeenCalledWith({
       type: 'vis_type_vega',
       isReady: expect.any(Function),
@@ -49,13 +50,12 @@ describe('registerVegaUsageCollector', () => {
 
   it('makeUsageCollector config.isReady returns true', () => {
     const mockCollectorSet = createUsageCollectionSetupMock();
-    registerVegaUsageCollector(mockCollectorSet, mockConfig);
+    registerVegaUsageCollector(mockCollectorSet, mockConfig, mockDeps);
     const usageCollectorConfig = mockCollectorSet.makeUsageCollector.mock.calls[0][0];
     expect(usageCollectorConfig.isReady()).toBe(true);
   });
 
   it('makeUsageCollector config.fetch calls getStats', async () => {
-    const mockDeps = {};
     const mockCollectorSet = createUsageCollectionSetupMock();
     registerVegaUsageCollector(mockCollectorSet, mockConfig, mockDeps);
     const usageCollectorConfig = mockCollectorSet.makeUsageCollector.mock.calls[0][0];
