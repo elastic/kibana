@@ -17,15 +17,11 @@
  * under the License.
  */
 
-import { Observable } from 'rxjs';
 import { countBy, get, groupBy, mapValues, max, min, values } from 'lodash';
-import { first } from 'rxjs/operators';
 import { SearchResponse } from 'elasticsearch';
 
 import { LegacyAPICaller } from 'src/core/server';
 import { getPastDays } from './get_past_days';
-
-const VIS_USAGE_TYPE = 'visualization_types';
 
 type ESResponse = SearchResponse<{ visualization: { visState: string } }>;
 
@@ -35,10 +31,25 @@ interface VisSummary {
   past_days: number;
 }
 
+export interface VisualizationUsage {
+  [x: string]: {
+    total: number;
+    spaces_min: number;
+    spaces_max: number;
+    spaces_avg: number;
+    saved_7_days_total: number;
+    saved_30_days_total: number;
+    saved_90_days_total: number;
+  };
+}
+
 /*
  * Parse the response data into telemetry payload
  */
-async function getStats(callCluster: LegacyAPICaller, index: string) {
+export async function getStats(
+  callCluster: LegacyAPICaller,
+  index: string
+): Promise<VisualizationUsage> {
   const searchParams = {
     size: 10000, // elasticsearch index.max_result_window default value
     index,
@@ -57,7 +68,7 @@ async function getStats(callCluster: LegacyAPICaller, index: string) {
   const esResponse: ESResponse = await callCluster('search', searchParams);
   const size = get(esResponse, 'hits.hits.length', 0);
   if (size < 1) {
-    return;
+    return {};
   }
 
   // `map` to get the raw types
@@ -85,23 +96,12 @@ async function getStats(callCluster: LegacyAPICaller, index: string) {
 
     return {
       total,
-      spaces_min: min(spaceCounts),
-      spaces_max: max(spaceCounts),
+      spaces_min: min(spaceCounts) || 0,
+      spaces_max: max(spaceCounts) || 0,
       spaces_avg: total / spaceCounts.length,
       saved_7_days_total: curr.filter((c) => c.past_days <= 7).length,
       saved_30_days_total: curr.filter((c) => c.past_days <= 30).length,
       saved_90_days_total: curr.filter((c) => c.past_days <= 90).length,
     };
   });
-}
-
-export function getUsageCollector(config: Observable<{ kibana: { index: string } }>) {
-  return {
-    type: VIS_USAGE_TYPE,
-    isReady: () => true,
-    fetch: async (callCluster: LegacyAPICaller) => {
-      const index = (await config.pipe(first()).toPromise()).kibana.index;
-      return await getStats(callCluster, index);
-    },
-  };
 }

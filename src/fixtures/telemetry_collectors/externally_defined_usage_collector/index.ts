@@ -17,4 +17,12 @@
  * under the License.
  */
 
-export { registerVegaUsageCollector } from './register_vega_collector';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { getUsageCollector } from './get_usage_collector';
+
+export function registerCollector(collectorSet: UsageCollectionSetup) {
+  const collectorName = 'some_configs';
+  const collector = collectorSet.makeUsageCollector(getUsageCollector(collectorName));
+
+  collectorSet.registerCollector(collector);
+}

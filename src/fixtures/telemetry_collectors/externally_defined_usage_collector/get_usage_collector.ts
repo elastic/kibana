@@ -17,4 +17,23 @@
  * under the License.
  */
 
-export { registerVegaUsageCollector } from './register_vega_collector';
+export interface Usage {
+  collectorName: string;
+}
+
+export function getUsageCollector(collectorName: string) {
+  return {
+    type: 'externally_defined_usage_collector',
+    isReady: () => true,
+    schema: {
+      collectorName: {
+        type: 'keyword' as 'keyword',
+      },
+    },
+    fetch(): Usage {
+      return {
+        collectorName,
+      };
+    },
+  };
+}

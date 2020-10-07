@@ -17,4 +17,8 @@
  * under the License.
  */
 
-export { registerVegaUsageCollector } from './register_vega_collector';
+export const mockStats = { somestat: 1 };
+export const mockGetStats = jest.fn().mockResolvedValue(mockStats);
+jest.doMock('./get_usage_collector', () => ({
+  getStats: mockGetStats,
+}));
