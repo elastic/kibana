@@ -29,8 +29,8 @@ import {
   IEmbeddable,
   Container,
   EmbeddableFactoryNotFoundError,
+  EmbeddableFactory,
 } from '../index';
-import { EmbeddableStart } from '../../plugin';
 
 /**
  * The attribute service is a shared, generic service that embeddables can use to provide the functionality
@@ -66,7 +66,7 @@ export class AttributeService<
     private i18nContext: I18nStart['Context'],
     private toasts: NotificationsStart['toasts'],
     private options: AttributeServiceOptions<SavedObjectAttributes>,
-    getEmbeddableFactory?: EmbeddableStart['getEmbeddableFactory']
+    getEmbeddableFactory?: (embeddableFactoryId: string) => EmbeddableFactory
   ) {
     if (getEmbeddableFactory) {
       const factory = getEmbeddableFactory(this.type);
