@@ -327,9 +327,29 @@ function getValidationAlertType() {
   return result;
 }
 
+// Obviously you shouldn't use statics like this in "real" code ...
+// This is used to maintain the current step in a pattern alert; we can't keep
+// it in the alert state as we can't update the state when the alert throws
+// an error.
+const PatternIndexMap = new Map<string, number>();
+
+function getNextPatternIndex(alertId: string): number {
+  const value = PatternIndexMap.get(alertId) || 0;
+  PatternIndexMap.set(alertId, value + 1);
+  return value;
+}
+
+// This alert will schedule actions, or not, or throw exceptions, based on
+// a pattern provided as the param.  The pattern should be typed as a
+// Record<string, any[]>. The keys of the pattern are instance ids, and
+// the values in the array are the actions which will be run on that turn,
+// in sequence.  If the value is a string, an error will be thrown with that
+// message.  If the value is truthy, the instance will schedule actions.  If
+// the value is falsy, the instance will not schedule actions.  Once "past" the
+// pattern, the instance will not schedule actions.
 function getPatternFiringAlertType() {
   const paramsSchema = schema.object({
-    pattern: schema.recordOf(schema.string(), schema.arrayOf(schema.boolean())),
+    pattern: schema.recordOf(schema.string(), schema.arrayOf(schema.any())),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
   interface State {
@@ -342,33 +362,23 @@ function getPatternFiringAlertType() {
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     async executor(alertExecutorOptions) {
-      const { services, state, params } = alertExecutorOptions;
-      const pattern = params.pattern;
-      if (typeof pattern !== 'object') throw new Error('pattern is not an object');
-      let maxPatternLength = 0;
+      // eslint-disable-next-line prettier/prettier
+      const { services, params: { pattern }, alertId } = alertExecutorOptions;
+
+      // get the pattern index
+      const patternIndex = getNextPatternIndex(alertId);
+
       for (const [instanceId, instancePattern] of Object.entries(pattern)) {
-        if (!Array.isArray(instancePattern)) {
-          throw new Error(`pattern for instance ${instanceId} is not an array`);
+        const action = instancePattern[patternIndex];
+        if (typeof action === 'string') {
+          throw new Error(action);
         }
-        maxPatternLength = Math.max(maxPatternLength, instancePattern.length);
-      }
-
-      // get the pattern index, return if past it
-      const patternIndex = state.patternIndex ?? 0;
-      if (patternIndex >= maxPatternLength) {
-        return { patternIndex };
-      }
-
-      // fire if pattern says to
-      for (const [instanceId, instancePattern] of Object.entries(pattern)) {
-        if (instancePattern[patternIndex]) {
+        if (action) {
           services.alertInstanceFactory(instanceId).scheduleActions('default');
         }
       }
 
-      return {
-        patternIndex: patternIndex + 1,
-      };
+      return;
     },
   };
   return result;
