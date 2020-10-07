@@ -31,6 +31,13 @@ export default function ({ getService }: FtrProviderContext) {
       agentPolicyId = agentPolicyResponse.item.id;
     });
 
+    after(async function () {
+      await supertest
+        .post(`/api/fleet/agent_policies/delete`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ agentPolicyId });
+    });
+
     it('should work with valid values', async function () {
       if (server.enabled) {
         await supertest
