@@ -152,8 +152,7 @@ function getBucketMappings(table: TableSuggestion, currentState?: State) {
 
   if (
     currentXScaleType &&
-    // make sure date histograms get mapped to x dimension even when changing current bucket/dimension mapping
-    // number histograms can be mapped also elsewhere
+    // make sure histograms get mapped to x dimension even when changing current bucket/dimension mapping
     (currentXScaleType === 'interval' || prioritizedBuckets[0].operation.scale !== 'interval')
   ) {
     const [x] = prioritizedBuckets.splice(currentXColumnIndex, 1);
