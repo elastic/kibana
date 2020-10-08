@@ -29,7 +29,7 @@ Results exceeding `index.max_result_window` are not displayed.
 
 * *Use vector tiles.* Vector tiles partition your map into 6 to 8 tiles.
 Each tile request is limited to the `index.max_result_window` index setting.
-Tiles exceeding `index.max_result_window` provide a visual indication that there are too many features to display.
+Tiles exceeding `index.max_result_window` have a visual indicator when there are too many features to display.
 
 *EMS Boundaries*:: Administrative boundaries from https://www.elastic.co/elastic-maps-service[Elastic Maps Service].
 
