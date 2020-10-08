@@ -251,14 +251,30 @@ export const ConnectorAddFlyout = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={closeFlyout}>
-              {i18n.translate(
-                'xpack.triggersActionsUI.sections.actionConnectorAdd.cancelButtonLabel',
-                {
-                  defaultMessage: 'Cancel',
-                }
-              )}
-            </EuiButtonEmpty>
+            {!actionType ? (
+              <EuiButtonEmpty onClick={closeFlyout}>
+                {i18n.translate(
+                  'xpack.triggersActionsUI.sections.actionConnectorAdd.cancelButtonLabel',
+                  {
+                    defaultMessage: 'Cancel',
+                  }
+                )}
+              </EuiButtonEmpty>
+            ) : (
+              <EuiButtonEmpty
+                onClick={() => {
+                  setActionType(undefined);
+                  setConnector(initialConnector);
+                }}
+              >
+                {i18n.translate(
+                  'xpack.triggersActionsUI.sections.actionConnectorAdd.backButtonLabel',
+                  {
+                    defaultMessage: 'Back',
+                  }
+                )}
+              </EuiButtonEmpty>
+            )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup justifyContent="spaceBetween">
