@@ -19,6 +19,7 @@
 
 import React from 'react';
 import { EuiButtonIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { IEmbeddable } from '../../embeddable_plugin';
 import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
 import { reactToUiComponent } from '../../../../kibana_react/public';
@@ -44,6 +45,9 @@ export class ExpandPanelShortcutAction
         color="text"
         style={{ marginTop: '-1px' }}
         iconType={this.getIconType({ embeddable: context.embeddable })}
+        aria-label={i18n.translate('dashboard.panel.expandPanelShortcut.ariaLabel', {
+          defaultMessage: 'Expand this panel',
+        })}
         onClick={() => this.expandPanelAction.execute({ embeddable: context.embeddable })}
       />
     )

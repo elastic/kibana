@@ -47,6 +47,9 @@ export class LibraryNotificationAction implements ActionByType<typeof ACTION_LIB
       iconType={this.icon}
       key={this.id}
       style={{ marginTop: '-1px' }}
+      aria-label={i18n.translate('dashboard.panel.libraryNotification.ariaLabel', {
+        defaultMessage: 'View library information and unlink this panel',
+      })}
       color="text"
     />
   ));
