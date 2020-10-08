@@ -13,6 +13,7 @@
 /x-pack/build
 node_modules
 target
+snapshots.js
 
 !/.eslintrc.js
 
@@ -25,7 +26,6 @@ target
 /src/plugins/vis_type_timelion/public/flot/jquery.flot.*
 /src/plugins/timelion/public/flot/jquery.flot.*
 /x-pack/legacy/plugins/**/__tests__/fixtures/**
-/x-pack/plugins/apm/e2e/**/snapshots.js
 /x-pack/plugins/apm/e2e/tmp/*
 /x-pack/plugins/canvas/canvas_plugin
 /x-pack/plugins/canvas/canvas_plugin_src/lib/flot-charts
