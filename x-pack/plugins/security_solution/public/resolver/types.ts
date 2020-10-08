@@ -227,6 +227,17 @@ export interface NodeEventsInCategoryState {
    * The cursor, if any, that can be used to retrieve more events.
    */
   cursor: null | string;
+
+  /**
+   * The cursor, if any, that was last used to fetch additional related events.
+   */
+
+  lastCursorRequested?: null | string;
+
+  /**
+   * Flag for showing an error message when fetching additional related events.
+   */
+  error?: boolean;
 }
 
 /**

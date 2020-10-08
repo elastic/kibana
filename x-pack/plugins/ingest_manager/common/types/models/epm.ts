@@ -20,6 +20,7 @@ export enum InstallStatus {
 }
 
 export type InstallType = 'reinstall' | 'reupdate' | 'rollback' | 'update' | 'install';
+export type InstallSource = 'registry' | 'upload';
 
 export type EpmPackageInstallStatus = 'installed' | 'installing';
 
@@ -49,10 +50,8 @@ export enum AgentAssetType {
 
 export type RegistryRelease = 'ga' | 'beta' | 'experimental';
 
-// from /package/{name}
-// type Package struct at https://github.com/elastic/package-registry/blob/master/util/package.go
-// https://github.com/elastic/package-registry/blob/master/docs/api/package.json
-export interface RegistryPackage {
+// Fields common to packages that come from direct upload and the registry
+export interface InstallablePackage {
   name: string;
   title?: string;
   version: string;
@@ -61,7 +60,6 @@ export interface RegistryPackage {
   description: string;
   type: string;
   categories: string[];
-  requirement: RequirementsByServiceName;
   screenshots?: RegistryImage[];
   icons?: RegistryImage[];
   assets?: string[];
@@ -69,6 +67,17 @@ export interface RegistryPackage {
   format_version: string;
   data_streams?: RegistryDataStream[];
   policy_templates?: RegistryPolicyTemplate[];
+}
+
+// Uploaded package archives don't have extra fields
+// Linter complaint disabled because this extra type is meant for better code readability
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ArchivePackage extends InstallablePackage {}
+
+// Registry packages do have extra fields.
+// cf. type Package struct at https://github.com/elastic/package-registry/blob/master/util/package.go
+export interface RegistryPackage extends InstallablePackage {
+  requirement: RequirementsByServiceName;
   download: string;
   path: string;
 }
@@ -240,6 +249,7 @@ export interface Installation extends SavedObjectAttributes {
   install_status: EpmPackageInstallStatus;
   install_version: string;
   install_started_at: string;
+  install_source: InstallSource;
 }
 
 export type Installable<T> = Installed<T> | NotInstalled<T>;

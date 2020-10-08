@@ -79,6 +79,7 @@ import {
   anomalyDetectionEnvironmentsRoute,
 } from './settings/anomaly_detection';
 import {
+  rumHasDataRoute,
   rumClientMetricsRoute,
   rumJSErrors,
   rumLongTaskMetrics,
@@ -186,7 +187,8 @@ const createApmApi = () => {
     .add(rumWebCoreVitals)
     .add(rumJSErrors)
     .add(rumUrlSearch)
-    .add(rumLongTaskMetrics);
+    .add(rumLongTaskMetrics)
+    .add(rumHasDataRoute);
 
   return api;
 };

@@ -125,9 +125,7 @@ export const StepRuleDescriptionComponent = <T,>({
   );
 };
 
-export const StepRuleDescription = memo(
-  StepRuleDescriptionComponent
-) as typeof StepRuleDescriptionComponent;
+export const StepRuleDescription = memo(StepRuleDescriptionComponent);
 
 export const buildListItems = <T,>(
   data: unknown,

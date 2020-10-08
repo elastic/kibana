@@ -31,7 +31,7 @@ import { createMemoryUsageAlertType } from './alerts/memory_usage_alert';
 interface MonitoringSetupPluginDependencies {
   home?: HomePublicPluginSetup;
   cloud?: { isCloudEnabled: boolean };
-  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   usageCollection: UsageCollectionSetup;
 }
 
@@ -73,7 +73,7 @@ export class MonitoringPlugin
       });
     }
 
-    const { alertTypeRegistry } = plugins.triggers_actions_ui;
+    const { alertTypeRegistry } = plugins.triggersActionsUi;
     alertTypeRegistry.register(createCpuUsageAlertType());
     alertTypeRegistry.register(createDiskUsageAlertType());
     alertTypeRegistry.register(createMemoryUsageAlertType());
@@ -102,7 +102,7 @@ export class MonitoringPlugin
           isCloud: Boolean(plugins.cloud?.isCloudEnabled),
           pluginInitializerContext: this.initializerContext,
           externalConfig: this.getExternalConfig(),
-          triggersActionsUi: plugins.triggers_actions_ui,
+          triggersActionsUi: plugins.triggersActionsUi,
           usageCollection: plugins.usageCollection,
         };
 

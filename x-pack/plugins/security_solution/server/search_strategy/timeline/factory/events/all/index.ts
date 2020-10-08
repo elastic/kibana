@@ -14,10 +14,9 @@ import {
   TimelineEventsAllRequestOptions,
   TimelineEdges,
 } from '../../../../../../common/search_strategy/timeline';
-import { inspectStringifyObject, reduceFields } from '../../../../../utils/build_query';
+import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { SecuritySolutionTimelineFactory } from '../../types';
 import { buildTimelineEventsAllQuery } from './query.events_all.dsl';
-import { eventFieldsMap } from '../../../../../lib/ecs_fields';
 import { TIMELINE_EVENTS_FIELDS } from './constants';
 import { formatTimelineData } from './helpers';
 
@@ -27,10 +26,7 @@ export const timelineEventsAll: SecuritySolutionTimelineFactory<TimelineEventsQu
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
     const { fieldRequested, ...queryOptions } = cloneDeep(options);
-    queryOptions.fields = uniq([
-      ...fieldRequested,
-      ...reduceFields(TIMELINE_EVENTS_FIELDS, eventFieldsMap),
-    ]);
+    queryOptions.fields = uniq([...fieldRequested, ...TIMELINE_EVENTS_FIELDS]);
     return buildTimelineEventsAllQuery(queryOptions);
   },
   parse: async (
@@ -38,23 +34,17 @@ export const timelineEventsAll: SecuritySolutionTimelineFactory<TimelineEventsQu
     response: IEsSearchResponse<unknown>
   ): Promise<TimelineEventsAllStrategyResponse> => {
     const { fieldRequested, ...queryOptions } = cloneDeep(options);
-    queryOptions.fields = uniq([
-      ...fieldRequested,
-      ...reduceFields(TIMELINE_EVENTS_FIELDS, eventFieldsMap),
-    ]);
-    const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
-
+    queryOptions.fields = uniq([...fieldRequested, ...TIMELINE_EVENTS_FIELDS]);
+    const { activePage, querySize } = options.pagination;
     const totalCount = getOr(0, 'hits.total.value', response.rawResponse);
     const hits = response.rawResponse.hits.hits;
-    const edges: TimelineEdges[] = hits.splice(cursorStart, querySize - cursorStart).map((hit) =>
+    const edges: TimelineEdges[] = hits.map((hit) =>
       // @ts-expect-error
-      formatTimelineData(options.fieldRequested, TIMELINE_EVENTS_FIELDS, hit, eventFieldsMap)
+      formatTimelineData(options.fieldRequested, TIMELINE_EVENTS_FIELDS, hit)
     );
     const inspect = {
       dsl: [inspectStringifyObject(buildTimelineEventsAllQuery(queryOptions))],
     };
-    const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
-    const showMorePagesIndicator = totalCount > fakeTotalCount;
 
     return {
       ...response,
@@ -63,8 +53,7 @@ export const timelineEventsAll: SecuritySolutionTimelineFactory<TimelineEventsQu
       totalCount,
       pageInfo: {
         activePage: activePage ?? 0,
-        fakeTotalCount,
-        showMorePagesIndicator,
+        querySize,
       },
     };
   },

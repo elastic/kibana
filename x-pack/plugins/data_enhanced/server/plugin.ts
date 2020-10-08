@@ -16,10 +16,10 @@ import {
   PluginStart as DataPluginStart,
   usageProvider,
 } from '../../../../src/plugins/data/server';
-import { enhancedEsSearchStrategyProvider } from './search';
+import { enhancedEsSearchStrategyProvider, eqlSearchStrategyProvider } from './search';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { getUiSettings } from './ui_settings';
-import { ENHANCED_ES_SEARCH_STRATEGY } from '../common';
+import { ENHANCED_ES_SEARCH_STRATEGY, EQL_SEARCH_STRATEGY } from '../common';
 
 interface SetupDependencies {
   data: DataPluginSetup;
@@ -45,6 +45,11 @@ export class EnhancedDataServerPlugin implements Plugin<void, void, SetupDepende
         this.logger,
         usage
       )
+    );
+
+    deps.data.search.registerSearchStrategy(
+      EQL_SEARCH_STRATEGY,
+      eqlSearchStrategyProvider(this.logger)
     );
 
     deps.data.__enhance({

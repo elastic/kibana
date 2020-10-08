@@ -14,7 +14,7 @@ import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemet
 export const ErrorConnecting: React.FC = () => {
   return (
     <>
-      <SetPageChrome isRoot />
+      <SetPageChrome />
       <SendTelemetry action="error" metric="cannot_connect" />
 
       <EuiPageContent>

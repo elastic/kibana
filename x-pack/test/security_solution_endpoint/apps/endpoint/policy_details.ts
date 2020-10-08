@@ -25,13 +25,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { protocol, hostname, port } = kbnTestServer;
 
   const kibanaUrl = Url.format({
-    protocol,
     hostname,
     port,
   });
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/72102
-  describe.skip('When on the Endpoint Policy Details Page', function () {
+  describe('When on the Endpoint Policy Details Page', function () {
     this.tags(['ciGroup7']);
 
     describe('with an invalid policy id', () => {
@@ -262,6 +260,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           fleet: {
             kibana: {
               hosts: [kibanaUrl],
+              protocol,
             },
           },
           revision: 3,

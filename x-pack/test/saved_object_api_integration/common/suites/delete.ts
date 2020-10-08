@@ -32,12 +32,12 @@ export const TEST_CASES: Record<string, DeleteTestCase> = Object.freeze({
 const createRequest = ({ type, id, force }: DeleteTestCase) => ({ type, id, force });
 
 export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const expectForbidden = expectResponses.forbiddenTypes('delete');
+  const expectSavedObjectForbidden = expectResponses.forbiddenTypes('delete');
   const expectResponseBody = (testCase: DeleteTestCase): ExpectResponseBody => async (
     response: Record<string, any>
   ) => {
     if (testCase.failure === 403) {
-      await expectForbidden(testCase.type)(response);
+      await expectSavedObjectForbidden(testCase.type)(response);
     } else {
       // permitted
       const object = response.body;

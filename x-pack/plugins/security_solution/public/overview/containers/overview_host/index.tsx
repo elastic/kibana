@@ -55,16 +55,21 @@ export const useHostOverview = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
-  const [overviewHostRequest, setHostRequest] = useState<HostOverviewRequestOptions>({
-    defaultIndex: indexNames,
-    factoryQueryType: HostsQueries.overview,
-    filterQuery: createFilter(filterQuery),
-    timerange: {
-      interval: '12h',
-      from: startDate,
-      to: endDate,
-    },
-  });
+  const [overviewHostRequest, setHostRequest] = useState<HostOverviewRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          factoryQueryType: HostsQueries.overview,
+          filterQuery: createFilter(filterQuery),
+          id: ID,
+          timerange: {
+            interval: '12h',
+            from: startDate,
+            to: endDate,
+          },
+        }
+      : null
+  );
 
   const [overviewHostResponse, setHostOverviewResponse] = useState<HostOverviewArgs>({
     overviewHost: {},
@@ -78,7 +83,11 @@ export const useHostOverview = ({
   });
 
   const overviewHostSearch = useCallback(
-    (request: HostOverviewRequestOptions) => {
+    (request: HostOverviewRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -135,9 +144,11 @@ export const useHostOverview = ({
   useEffect(() => {
     setHostRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
         defaultIndex: indexNames,
+        factoryQueryType: HostsQueries.overview,
         filterQuery: createFilter(filterQuery),
+        id: ID,
         timerange: {
           interval: '12h',
           from: startDate,
