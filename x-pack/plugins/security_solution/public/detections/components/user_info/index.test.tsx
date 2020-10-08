@@ -43,6 +43,7 @@ describe('useUserInfo', () => {
         isSignalIndexExists: null,
         loading: true,
         signalIndexName: null,
+        signalIndexTemplateOutdated: null,
       },
       error: undefined,
     });

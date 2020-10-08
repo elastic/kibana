@@ -20,6 +20,7 @@ export interface State {
   hasEncryptionKey: boolean | null;
   loading: boolean;
   signalIndexName: string | null;
+  signalIndexTemplateOutdated: boolean | null;
 }
 
 const initialState: State = {
@@ -31,6 +32,7 @@ const initialState: State = {
   hasEncryptionKey: null,
   loading: true,
   signalIndexName: null,
+  signalIndexTemplateOutdated: null,
 };
 
 export type Action =
@@ -62,6 +64,10 @@ export type Action =
   | {
       type: 'updateSignalIndexName';
       signalIndexName: string | null;
+    }
+  | {
+      type: 'updateSignalIndexTemplateOutdated';
+      signalIndexTemplateOutdated: boolean | null;
     };
 
 export const userInfoReducer = (state: State, action: Action): State => {
@@ -114,6 +120,12 @@ export const userInfoReducer = (state: State, action: Action): State => {
         signalIndexName: action.signalIndexName,
       };
     }
+    case 'updateSignalIndexTemplateOutdated': {
+      return {
+        ...state,
+        signalIndexTemplateOutdated: action.signalIndexTemplateOutdated,
+      };
+    }
     default:
       return state;
   }
@@ -144,6 +156,7 @@ export const useUserInfo = (): State => {
       hasEncryptionKey,
       loading,
       signalIndexName,
+      signalIndexTemplateOutdated,
     },
     dispatch,
   ] = useUserData();
@@ -158,6 +171,7 @@ export const useUserInfo = (): State => {
     loading: indexNameLoading,
     signalIndexExists: isApiSignalIndexExists,
     signalIndexName: apiSignalIndexName,
+    signalIndexTemplateOutdated: apiSignalIndexTemplateOutdated,
     createDeSignalIndex: createSignalIndex,
   } = useSignalIndex();
 
@@ -218,10 +232,37 @@ export const useUserInfo = (): State => {
   }, [dispatch, loading, signalIndexName, apiSignalIndexName]);
 
   useEffect(() => {
-    if (isAuthenticated && hasEncryptionKey && hasIndexManage && createSignalIndex != null) {
+    if (
+      !loading &&
+      signalIndexTemplateOutdated !== apiSignalIndexTemplateOutdated &&
+      apiSignalIndexTemplateOutdated != null
+    ) {
+      dispatch({
+        type: 'updateSignalIndexTemplateOutdated',
+        signalIndexTemplateOutdated: apiSignalIndexTemplateOutdated,
+      });
+    }
+  }, [dispatch, loading, signalIndexTemplateOutdated, apiSignalIndexTemplateOutdated]);
+
+  useEffect(() => {
+    if (
+      isAuthenticated &&
+      hasEncryptionKey &&
+      hasIndexManage &&
+      ((isSignalIndexExists != null && !isSignalIndexExists) ||
+        (signalIndexTemplateOutdated != null && signalIndexTemplateOutdated)) &&
+      createSignalIndex != null
+    ) {
       createSignalIndex();
     }
-  }, [createSignalIndex, isAuthenticated, hasEncryptionKey, isSignalIndexExists, hasIndexManage]);
+  }, [
+    createSignalIndex,
+    isAuthenticated,
+    hasEncryptionKey,
+    isSignalIndexExists,
+    hasIndexManage,
+    signalIndexTemplateOutdated,
+  ]);
 
   return {
     loading,
@@ -232,5 +273,6 @@ export const useUserInfo = (): State => {
     hasIndexManage,
     hasIndexWrite,
     signalIndexName,
+    signalIndexTemplateOutdated,
   };
 };
