@@ -69,9 +69,11 @@ export function monitoringClustersProvider($injector) {
       if (Legacy.shims.isCloud) {
         return Promise.resolve();
       }
-      const ccs = window.location.hash.split('?')[0] === '#/home' ? 'ccs' : 'single';
+      const globalState = $injector.get('globalState');
       return $http
-        .get(`../api/monitoring/v1/elasticsearch_settings/check/internal_monitoring/${ccs}`)
+        .post('../api/monitoring/v1/elasticsearch_settings/check/internal_monitoring', {
+          ccs: globalState.ccs,
+        })
         .then(({ data }) => {
           showInternalMonitoringToast({
             legacyIndices: data.legacy_indices,

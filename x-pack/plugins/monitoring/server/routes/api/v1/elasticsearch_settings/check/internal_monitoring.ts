@@ -72,11 +72,11 @@ export function internalMonitoringCheckRoute(
   server: { config: () => unknown },
   npRoute: RouteDependencies
 ) {
-  npRoute.router.get(
+  npRoute.router.post(
     {
-      path: '/api/monitoring/v1/elasticsearch_settings/check/internal_monitoring/{ccs}',
+      path: '/api/monitoring/v1/elasticsearch_settings/check/internal_monitoring',
       validate: {
-        params: schema.object({
+        body: schema.object({
           ccs: schema.maybe(schema.string()),
         }),
       },
@@ -89,17 +89,10 @@ export function internalMonitoringCheckRoute(
         };
 
         const config = server.config();
-        const { ccs } = request.params;
-        const ccsPrefix = ccs === 'ccs' ? '*' : null;
-        const esIndexPattern = prefixIndexPattern(
-          config,
-          INDEX_PATTERN_ELASTICSEARCH,
-          ccsPrefix,
-          true
-        );
-        const kbnIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_KIBANA, ccsPrefix, true);
-        const lsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_LOGSTASH, ccsPrefix, true);
-
+        const { ccs } = request.body;
+        const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs, true);
+        const kbnIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_KIBANA, ccs, true);
+        const lsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_LOGSTASH, ccs, true);
         const indexCounts = await Promise.all([
           checkLatestMonitoringIsLegacy(context, esIndexPattern),
           checkLatestMonitoringIsLegacy(context, kbnIndexPattern),
