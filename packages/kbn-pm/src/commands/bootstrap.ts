@@ -61,7 +61,9 @@ export const BootstrapCommand: ICommand = {
 
     const yarnLock = await readYarnLock(kbn);
 
-    await validateYarnLock(kbn, yarnLock);
+    if (options.validate) {
+      await validateYarnLock(kbn, yarnLock);
+    }
 
     // Create node_modules/bin for every project
     await linkProjectExecutables(projects, projectGraph);

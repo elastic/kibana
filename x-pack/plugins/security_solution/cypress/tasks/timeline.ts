@@ -43,6 +43,7 @@ import {
   TIMELINE_TITLE,
   TIMESTAMP_TOGGLE_FIELD,
   TOGGLE_TIMELINE_EXPAND_EVENT,
+  CREATE_NEW_TIMELINE_TEMPLATE,
 } from '../screens/timeline';
 import { TIMELINES_TABLE } from '../screens/timelines';
 
@@ -112,6 +113,11 @@ export const createNewTimeline = () => {
   cy.get(TIMELINE_SETTINGS_ICON).click({ force: true });
   cy.get(CREATE_NEW_TIMELINE).click();
   cy.get(CLOSE_TIMELINE_BTN).click({ force: true });
+};
+
+export const createNewTimelineTemplate = () => {
+  cy.get(TIMELINE_SETTINGS_ICON).click({ force: true });
+  cy.get(CREATE_NEW_TIMELINE_TEMPLATE).click();
 };
 
 export const executeTimelineKQL = (query: string) => {

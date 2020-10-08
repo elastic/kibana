@@ -59,8 +59,8 @@ export default ({ getService }: FtrProviderContext): void => {
           .send({ ids: [resBody.id] })
           .expect(200);
         return (
-          body[resBody.id].current_status?.status === 'succeeded' ||
-          body[resBody.id].current_status?.status === 'going to run'
+          body[resBody.id]?.current_status?.status === 'succeeded' ||
+          body[resBody.id]?.current_status?.status === 'going to run'
         );
       });
 

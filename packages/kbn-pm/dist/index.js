@@ -196,6 +196,7 @@ function help() {
         --oss                   Do not include the x-pack when running command.
         --skip-kibana-plugins   Filter all plugins in ./plugins and ../kibana-extra when running command.
         --no-cache              Disable the bootstrap cache
+        --no-validate           Disable the bootstrap yarn.lock validation
         --verbose               Set log level to verbose
         --debug                 Set log level to debug
         --quiet                 Set log level to error
@@ -222,9 +223,10 @@ async function run(argv) {
       i: 'include'
     },
     default: {
-      cache: true
+      cache: true,
+      validate: true
     },
-    boolean: ['prefer-offline', 'frozen-lockfile', 'cache']
+    boolean: ['prefer-offline', 'frozen-lockfile', 'cache', 'validate']
   });
   const args = options._;
 
@@ -8999,7 +9001,11 @@ const BootstrapCommand = {
     }
 
     const yarnLock = await Object(_utils_yarn_lock__WEBPACK_IMPORTED_MODULE_6__["readYarnLock"])(kbn);
-    await Object(_utils_validate_yarn_lock__WEBPACK_IMPORTED_MODULE_7__["validateYarnLock"])(kbn, yarnLock); // Create node_modules/bin for every project
+
+    if (options.validate) {
+      await Object(_utils_validate_yarn_lock__WEBPACK_IMPORTED_MODULE_7__["validateYarnLock"])(kbn, yarnLock);
+    } // Create node_modules/bin for every project
+
 
     await Object(_utils_link_project_executables__WEBPACK_IMPORTED_MODULE_0__["linkProjectExecutables"])(projects, projectGraph);
     /**
