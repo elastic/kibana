@@ -30,7 +30,7 @@ export const useKibanaTimefilterTime = ({
 };
 
 export const useSyncKibanaTimeFilterTime = (defaults: TimeRange, currentTimeRange: TimeRange) => {
-  const [_, setTime] = useKibanaTimefilterTime(defaults);
+  const [, setTime] = useKibanaTimefilterTime(defaults);
 
   // On first mount we only want to sync time with Kibana if the derived currentTimeRange (e.g. from URL params)
   // differs from our defaults.
