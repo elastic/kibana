@@ -70,6 +70,10 @@ export class Timefilter {
     return this._isAutoRefreshSelectorEnabled;
   }
 
+  public isTimeTouched() {
+    return this._isTimeTouched;
+  }
+
   public getEnabledUpdated$ = () => {
     return this.enabledUpdated$.asObservable();
   };
@@ -90,8 +94,8 @@ export class Timefilter {
     return this.fetch$.asObservable();
   };
 
-  public getTime = (defaults?: TimeRange): TimeRange => {
-    const { from, to } = this._isTimeTouched || !defaults ? this._time : defaults;
+  public getTime = (): TimeRange => {
+    const { from, to } = this._time;
     return {
       ...this._time,
       from: moment.isMoment(from) ? from.toISOString() : from,

@@ -16,7 +16,10 @@ export const useKibanaTimefilterTime = ({
   const { services } = useKibanaContextForPlugin();
 
   const getTime = useCallback(() => {
-    return services.data.query.timefilter.timefilter.getTime({ from: fromDefault, to: toDefault });
+    const timefilterService = services.data.query.timefilter.timefilter;
+    return timefilterService.isTimeTouched()
+      ? timefilterService.getTime()
+      : { from: fromDefault, to: toDefault };
   }, [services.data.query.timefilter.timefilter, fromDefault, toDefault]);
 
   return [getTime, services.data.query.timefilter.timefilter.setTime];
