@@ -44,6 +44,7 @@
     "@mapbox/mapbox-gl-draw": "^1.2.0",
     "@mapbox/mapbox-gl-rtl-text": "^0.2.3",
     "@scant/router": "^0.1.0",
+    "@storybook/addon-a11y": "^6.0.16",
     "@storybook/addon-actions": "^6.0.16",
     "@storybook/addon-essentials": "^6.0.16",
     "@storybook/addon-knobs": "^6.0.16",
