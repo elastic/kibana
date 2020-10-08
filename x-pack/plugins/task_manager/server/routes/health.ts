@@ -11,11 +11,11 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
-import { Logger, ServiceStatus, ServiceStatusLevels } from 'src/core/server';
 import { Observable, from } from 'rxjs';
 import { take, mergeMap, map } from 'rxjs/operators';
 import { throttleTime } from 'rxjs/operators';
 import { isString } from 'lodash';
+import { Logger, ServiceStatus, ServiceStatusLevels } from '../../../../../src/core/server';
 import {
   MonitoringStats,
   summarizeMonitoringStats,
