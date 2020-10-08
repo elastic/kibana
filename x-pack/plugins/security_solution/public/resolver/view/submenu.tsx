@@ -38,6 +38,28 @@ interface ResolverSubmenuOption {
   action: () => unknown;
   prefix?: number | JSX.Element;
 }
+  
+  /**
+    This can be achieved in an easier way by using `notation="compact"` on
+    FormattedNumber in the future, but it does not work at present (10/2020)
+*/
+function compactNotation(num) {
+    if(!Number.isFinite(num)){
+        return num;
+    }
+    let scale = 1;
+    while (scale < 1e12 && num / (scale * 1000) >= 1) {
+        scale *= 1000;
+    }
+    const prefixes = {
+        '1': '',
+        '1000': 'k',
+        '1000000': 'M',
+        '1000000000': 'B',
+        '1000000000000': 'T',
+    }
+    return [prefixes[`${scale}`], Math.floor(num / scale), ((num / scale) % 1) > Number.EPSILON]
+}
 
 export type ResolverSubmenuOptionList = ResolverSubmenuOption[] | string;
 
