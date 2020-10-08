@@ -53,7 +53,6 @@ import {
 
 import {
   DataPublicPluginStart,
-  IndexPatternSelect,
   IndexPattern,
   IndexPatternField,
   isCompleteResponse,
@@ -92,6 +91,7 @@ export const SearchExamplesApp = ({
   navigation,
   data,
 }: SearchExamplesAppDeps) => {
+  const { IndexPatternSelect } = data.ui;
   const [getCool, setGetCool] = useState<boolean>(false);
   const [timeTook, setTimeTook] = useState<number | undefined>();
   const [indexPattern, setIndexPattern] = useState<IndexPattern | null>();
@@ -232,7 +232,6 @@ export const SearchExamplesApp = ({
                       <EuiFlexItem>
                         <EuiFormLabel>Index Pattern</EuiFormLabel>
                         <IndexPatternSelect
-                          savedObjectsClient={savedObjectsClient}
                           placeholder={i18n.translate(
                             'backgroundSessionExample.selectIndexPatternPlaceholder',
                             {

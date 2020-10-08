@@ -23,7 +23,7 @@ jest.mock('../../../../common/lib/kibana', () => ({
           },
         },
       },
-      triggers_actions_ui: {
+      triggersActionsUi: {
         actionTypeRegistry: jest.fn(),
       },
     },

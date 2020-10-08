@@ -13,8 +13,11 @@ import {
   EuiTitle,
   EuiComboBoxOptionOption,
   EuiSelectOption,
+  EuiFormControlLayout,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isSome } from 'fp-ts/lib/Option';
 
 import { ActionParamsProps } from '../../../../types';
 import { ResilientActionParams } from './types';
@@ -23,6 +26,7 @@ import { TextFieldWithMessageVariables } from '../../text_field_with_message_var
 
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
+import { extractActionVariable } from '../extract_action_variable';
 
 const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<ResilientActionParams>> = ({
   actionParams,
@@ -37,6 +41,10 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
   const [firstLoad, setFirstLoad] = useState(false);
   const { title, description, comments, incidentTypes, severityCode, savedObjectId } =
     actionParams.subActionParams || {};
+
+  const isActionBeingConfiguredByAnAlert = messageVariables
+    ? isSome(extractActionVariable(messageVariables, 'alertId'))
+    : false;
 
   const [incidentTypesComboBoxOptions, setIncidentTypesComboBoxOptions] = useState<
     Array<EuiComboBoxOptionOption<string>>
@@ -98,7 +106,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
     if (!actionParams.subAction) {
       editAction('subAction', 'pushToService', index);
     }
-    if (!savedObjectId && messageVariables?.find((variable) => variable.name === 'alertId')) {
+    if (!savedObjectId && isActionBeingConfiguredByAnAlert) {
       editSubActionProperty('savedObjectId', '{{alertId}}');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -218,6 +226,43 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
           errors={errors.title as string[]}
         />
       </EuiFormRow>
+      {!isActionBeingConfiguredByAnAlert && (
+        <Fragment>
+          <EuiFormRow
+            fullWidth
+            label={i18n.translate(
+              'xpack.triggersActionsUI.components.builtinActionTypes.resilient.savedObjectIdFieldLabel',
+              {
+                defaultMessage: 'Object ID (optional)',
+              }
+            )}
+          >
+            <EuiFormControlLayout
+              fullWidth
+              append={
+                <EuiIconTip
+                  content={i18n.translate(
+                    'xpack.triggersActionsUI.components.builtinActionTypes.resilient.savedObjectIdFieldHelp',
+                    {
+                      defaultMessage:
+                        'IBM Resilient will associate this action with the ID of a Kibana saved object.',
+                    }
+                  )}
+                />
+              }
+            >
+              <TextFieldWithMessageVariables
+                index={index}
+                editAction={editSubActionProperty}
+                messageVariables={messageVariables}
+                paramsProperty={'savedObjectId'}
+                inputTargetValue={savedObjectId}
+              />
+            </EuiFormControlLayout>
+          </EuiFormRow>
+          <EuiSpacer size="m" />
+        </Fragment>
+      )}
       <TextAreaWithMessageVariables
         index={index}
         editAction={editSubActionProperty}

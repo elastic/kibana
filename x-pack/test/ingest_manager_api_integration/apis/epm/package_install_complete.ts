@@ -22,7 +22,7 @@ export default function (providerContext: FtrProviderContext) {
     describe('package install', async () => {
       before(async () => {
         await supertest
-          .post(`/api/ingest_manager/epm/packages/${pkgName}-0.1.0`)
+          .post(`/api/fleet/epm/packages/${pkgName}-0.1.0`)
           .set('kbn-xsrf', 'xxxx')
           .send({ force: true });
       });
@@ -32,7 +32,7 @@ export default function (providerContext: FtrProviderContext) {
           id: pkgName,
         });
         const installStartedAtBeforeSetup = packageBeforeSetup.attributes.install_started_at;
-        await supertest.post(`/api/ingest_manager/setup`).set('kbn-xsrf', 'xxx').send();
+        await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').send();
         const packageAfterSetup = await kibanaServer.savedObjects.get({
           type: PACKAGES_SAVED_OBJECT_TYPE,
           id: pkgName,
@@ -51,7 +51,7 @@ export default function (providerContext: FtrProviderContext) {
             install_started_at: previousInstallDate,
           },
         });
-        await supertest.post(`/api/ingest_manager/setup`).set('kbn-xsrf', 'xxx').send();
+        await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').send();
         const packageAfterSetup = await kibanaServer.savedObjects.get({
           type: PACKAGES_SAVED_OBJECT_TYPE,
           id: pkgName,
@@ -71,7 +71,7 @@ export default function (providerContext: FtrProviderContext) {
             install_started_at: previousInstallDate,
           },
         });
-        await supertest.post(`/api/ingest_manager/setup`).set('kbn-xsrf', 'xxx').send();
+        await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').send();
         const packageAfterSetup = await kibanaServer.savedObjects.get({
           type: PACKAGES_SAVED_OBJECT_TYPE,
           id: pkgName,
@@ -82,18 +82,18 @@ export default function (providerContext: FtrProviderContext) {
       });
       after(async () => {
         await supertest
-          .delete(`/api/ingest_manager/epm/packages/multiple_versions-0.1.0`)
+          .delete(`/api/fleet/epm/packages/multiple_versions-0.1.0`)
           .set('kbn-xsrf', 'xxxx');
       });
     });
     describe('package update', async () => {
       before(async () => {
         await supertest
-          .post(`/api/ingest_manager/epm/packages/${pkgName}-0.1.0`)
+          .post(`/api/fleet/epm/packages/${pkgName}-0.1.0`)
           .set('kbn-xsrf', 'xxxx')
           .send({ force: true });
         await supertest
-          .post(`/api/ingest_manager/epm/packages/${pkgName}-0.2.0`)
+          .post(`/api/fleet/epm/packages/${pkgName}-0.2.0`)
           .set('kbn-xsrf', 'xxxx')
           .send({ force: true });
       });
@@ -103,7 +103,7 @@ export default function (providerContext: FtrProviderContext) {
           id: pkgName,
         });
         const installStartedAtBeforeSetup = packageBeforeSetup.attributes.install_started_at;
-        await supertest.post(`/api/ingest_manager/setup`).set('kbn-xsrf', 'xxx').send();
+        await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').send();
         const packageAfterSetup = await kibanaServer.savedObjects.get({
           type: PACKAGES_SAVED_OBJECT_TYPE,
           id: pkgName,
@@ -124,7 +124,7 @@ export default function (providerContext: FtrProviderContext) {
             install_version: pkgUpdateVersion, // set version back
           },
         });
-        await supertest.post(`/api/ingest_manager/setup`).set('kbn-xsrf', 'xxx').send();
+        await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').send();
         const packageAfterSetup = await kibanaServer.savedObjects.get({
           type: PACKAGES_SAVED_OBJECT_TYPE,
           id: pkgName,
@@ -147,7 +147,7 @@ export default function (providerContext: FtrProviderContext) {
             version: pkgVersion, // set version back
           },
         });
-        await supertest.post(`/api/ingest_manager/setup`).set('kbn-xsrf', 'xxx').send();
+        await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').send();
         const packageAfterSetup = await kibanaServer.savedObjects.get({
           type: PACKAGES_SAVED_OBJECT_TYPE,
           id: pkgName,
@@ -159,7 +159,7 @@ export default function (providerContext: FtrProviderContext) {
       });
       after(async () => {
         await supertest
-          .delete(`/api/ingest_manager/epm/packages/multiple_versions-0.1.0`)
+          .delete(`/api/fleet/epm/packages/multiple_versions-0.1.0`)
           .set('kbn-xsrf', 'xxxx');
       });
     });

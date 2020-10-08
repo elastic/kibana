@@ -140,7 +140,7 @@ export interface DashboardStartDependencies {
   savedObjects: SavedObjectsStart;
 }
 
-export type Setup = void;
+export type DashboardSetup = void;
 
 export interface DashboardStart {
   getSavedDashboardLoader: () => SavedObjectLoader;
@@ -155,7 +155,7 @@ export interface DashboardStart {
     R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
   >(
     type: string,
-    options?: AttributeServiceOptions<A>
+    options: AttributeServiceOptions<A>
   ) => AttributeService<A, V, R>;
 }
 
@@ -171,7 +171,10 @@ declare module '../../../plugins/ui_actions/public' {
 }
 
 export class DashboardPlugin
-  implements Plugin<Setup, DashboardStart, DashboardSetupDependencies, DashboardStartDependencies> {
+  implements
+    Plugin<DashboardSetup, DashboardStart, DashboardSetupDependencies, DashboardStartDependencies> {
+  constructor(private initializerContext: PluginInitializerContext) {}
+
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
   private getActiveUrl: (() => string) | undefined = undefined;
@@ -180,8 +183,6 @@ export class DashboardPlugin
 
   private dashboardUrlGenerator?: DashboardUrlGenerator;
 
-  constructor(private initializerContext: PluginInitializerContext) {}
-
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
     {
@@ -189,12 +190,11 @@ export class DashboardPlugin
       uiActions,
       embeddable,
       home,
-      kibanaLegacy,
       urlForwarding,
       data,
       usageCollection,
     }: DashboardSetupDependencies
-  ): Setup {
+  ): DashboardSetup {
     this.dashboardFeatureFlagConfig = this.initializerContext.config.get<
       DashboardFeatureFlagConfig
     >();
@@ -369,6 +369,9 @@ export class DashboardPlugin
         title: i18n.translate('dashboard.featureCatalogue.dashboardTitle', {
           defaultMessage: 'Dashboard',
         }),
+        subtitle: i18n.translate('dashboard.featureCatalogue.dashboardSubtitle', {
+          defaultMessage: 'Analyze data in dashboards.',
+        }),
         description: i18n.translate('dashboard.featureCatalogue.dashboardDescription', {
           defaultMessage: 'Display and share a collection of visualizations and saved searches.',
         }),
@@ -376,6 +379,8 @@ export class DashboardPlugin
         path: `/app/dashboards#${DashboardConstants.LANDING_PAGE_PATH}`,
         showOnHomePage: false,
         category: FeatureCatalogueCategory.DATA,
+        solutionId: 'kibana',
+        order: 100,
       });
     }
   }
@@ -459,12 +464,10 @@ export class DashboardPlugin
         new AttributeService(
           type,
           showSaveModal,
-          core.savedObjects.client,
-          core.overlays,
           core.i18n.Context,
           core.notifications.toasts,
-          embeddable.getEmbeddableFactory,
-          options
+          options,
+          embeddable.getEmbeddableFactory
         ),
     };
   }
