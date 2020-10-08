@@ -7,11 +7,14 @@
 import React from 'react';
 import uuid from 'uuid/v4';
 
+import { i18n } from '@kbn/i18n';
+import rison from 'rison-node';
 import {
   convertCompositeRespToGeoJson,
   convertRegularRespToGeoJson,
   makeESBbox,
 } from '../../../../common/elasticsearch_util';
+// @ts-expect-error
 import { UpdateSourceEditor } from './update_source_editor';
 import {
   SOURCE_TYPES,
@@ -26,15 +29,14 @@ import {
   GEOCENTROID_AGG_NAME,
   ES_GEO_FIELD_TYPE,
 } from '../../../../common/constants';
-import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { AbstractESAggSource, DEFAULT_METRIC } from '../es_agg_source';
 import { DataRequestAbortError } from '../../util/data_request';
 import { registerSource } from '../source_registry';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 
-import rison from 'rison-node';
 import { getHttp } from '../../../kibana_services';
+import { ITiledSingleLayerVectorSource } from '../vector_source';
 
 export const MAX_GEOTILE_LEVEL = 29;
 
@@ -46,7 +48,7 @@ export const heatmapTitle = i18n.translate('xpack.maps.source.esGridHeatmapTitle
   defaultMessage: 'Heat map',
 });
 
-export class ESGeoGridSource extends AbstractESAggSource {
+export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingleLayerVectorSource {
   static type = SOURCE_TYPES.ES_GEO_GRID;
 
   static createDescriptor({ indexPatternId, geoField, metrics, requestType, resolution }) {
@@ -339,7 +341,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
     return {
       data: {
         type: 'FeatureCollection',
-        features: features,
+        features,
       },
       meta: {
         areResultsTrimmed: false,
@@ -376,16 +378,16 @@ export class ESGeoGridSource extends AbstractESAggSource {
       layerName: this.getLayerName(),
       minSourceZoom: this.getMinZoom(),
       maxSourceZoom: this.getMaxZoom(),
-      urlTemplate: urlTemplate,
+      urlTemplate,
     };
   }
 
   isFilterByMapBounds() {
     if (this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE) {
-      //MVT gridded data. Should exclude bounds-filter from ES-DSL
+      // MVT gridded data. Should exclude bounds-filter from ES-DSL
       return false;
     } else {
-      //Should include bounds-filter from ES-DSL
+      // Should include bounds-filter from ES-DSL
       return true;
     }
   }
