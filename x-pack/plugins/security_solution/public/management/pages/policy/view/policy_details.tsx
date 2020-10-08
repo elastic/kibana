@@ -48,6 +48,36 @@ import { PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
 import { WrapperPage } from '../../../../common/components/wrapper_page';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { PolicyAdvanced } from './policy_advanced';
+import * as AdvancedPolicySchema from '../../../../../schema.json';
+
+interface AdvancedPolicySchemaType {
+  key: string;
+  first_supported_version: string;
+  last_supported_version: string;
+}
+
+const AdvancedPolicyForms = React.memo(() => {
+  return (
+    <>
+      {((AdvancedPolicySchema as unknown) as AdvancedPolicySchemaType[]).map(
+        (advancedField, index) => {
+          const configPath = advancedField.key.split('.');
+          console.log(advancedField.key);
+          console.log(advancedField.first_supported_version);
+          console.log(advancedField.last_supported_version);
+          return (
+            <PolicyAdvanced
+              key={index}
+              configPath={configPath}
+              firstSupportedVersion={advancedField.first_supported_version}
+              lastSupportedVersion={advancedField.last_supported_version}
+            />
+          );
+        }
+      )}
+    </>
+  );
+});
 
 export const PolicyDetails = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
@@ -249,7 +279,7 @@ export const PolicyDetails = React.memo(() => {
 
         <EuiSpacer size="l" />
 
-        <PolicyAdvanced />
+        <AdvancedPolicyForms />
       </WrapperPage>
 
       <SpyRoute pageName={SecurityPageName.administration} />
