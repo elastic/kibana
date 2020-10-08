@@ -78,4 +78,15 @@ storiesOf('TrustedApps/TrustedAppsGrid', module)
     );
 
     return renderGrid(store);
+  })
+  .add('long texts', () => {
+    const store = createGlobalNoMiddlewareStore();
+
+    store.dispatch(
+      createTrustedAppsListResourceStateChangedAction(
+        createListLoadedResourceState({ pageSize: 10 }, now, true)
+      )
+    );
+
+    return renderGrid(store);
   });
