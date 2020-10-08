@@ -192,7 +192,7 @@ const VisGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
         betaBadgeLabel={
           isVisTypeAlias(visType) && visType.disabled
             ? i18n.translate('visualizations.newVisWizard.basicTitle', {
-                defaultMessage: 'Beta',
+                defaultMessage: 'Basic',
               })
             : undefined
         }
