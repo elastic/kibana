@@ -82,21 +82,22 @@ export function validateLimitsForAllBundles(log: ToolingLog, config: OptimizerCo
 export function updateBundleLimits(log: ToolingLog, config: OptimizerConfig) {
   const metrics = getMetrics(log, config);
 
-  const number = (input: number) => input.toLocaleString('en').split(',').join('_');
+  const pageLoadAssetSize: NonNullable<Limits['pageLoadAssetSize']> = {};
 
-  let yaml = `pageLoadAssetSize:\n`;
   for (const metric of metrics.sort((a, b) => a.id.localeCompare(b.id))) {
     if (metric.group === 'page load bundle size') {
       const existingLimit = config.limits.pageLoadAssetSize?.[metric.id];
-      const newLimit =
+      pageLoadAssetSize[metric.id] =
         existingLimit != null && existingLimit >= metric.value
           ? existingLimit
           : metric.value + DEFAULT_BUDGET;
-
-      yaml += `  ${metric.id}: ${number(newLimit)}\n`;
     }
   }
 
-  Fs.writeFileSync(LIMITS_PATH, yaml);
+  const newLimits: Limits = {
+    pageLoadAssetSize,
+  };
+
+  Fs.writeFileSync(LIMITS_PATH, Yaml.safeDump(newLimits));
   log.success(`wrote updated limits to ${LIMITS_PATH}`);
 }
