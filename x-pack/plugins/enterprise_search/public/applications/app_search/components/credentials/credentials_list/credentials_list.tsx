@@ -33,45 +33,48 @@ export const CredentialsList: React.FC = () => {
     {
       name: 'Type',
       width: '15%',
-      render: (item: IApiToken) => TOKEN_TYPE_DISPLAY_NAMES[item.type],
+      render: (token: IApiToken) => TOKEN_TYPE_DISPLAY_NAMES[token.type],
     },
     {
       name: 'Key',
       width: '36%',
-      render: (item: IApiToken) => (
-        <EuiCopy
-          textToCopy={item.key || ''}
-          afterMessage={i18n.translate('xpack.enterpriseSearch.appSearch.credentials.copied', {
-            defaultMessage: 'Copied',
-          })}
-        >
-          {(copy) => (
-            <>
-              <EuiButtonIcon
-                onClick={copy}
-                iconType="copyClipboard"
-                aria-label={i18n.translate(
-                  'xpack.enterpriseSearch.appSearch.credentials.copyApiKey',
-                  {
-                    defaultMessage: 'Copy API Key to clipboard',
-                  }
-                )}
-              />
-              {item.key}
-            </>
-          )}
-        </EuiCopy>
-      ),
+      render: (token: IApiToken) => {
+        if (!token.key) return null;
+        return (
+          <EuiCopy
+            textToCopy={token.key}
+            afterMessage={i18n.translate('xpack.enterpriseSearch.appSearch.credentials.copied', {
+              defaultMessage: 'Copied',
+            })}
+          >
+            {(copy) => (
+              <>
+                <EuiButtonIcon
+                  onClick={copy}
+                  iconType="copyClipboard"
+                  aria-label={i18n.translate(
+                    'xpack.enterpriseSearch.appSearch.credentials.copyApiKey',
+                    {
+                      defaultMessage: 'Copy API Key to clipboard',
+                    }
+                  )}
+                />
+                {token.key}
+              </>
+            )}
+          </EuiCopy>
+        );
+      },
     },
     {
       name: 'Modes',
       width: '10%',
-      render: (item: IApiToken) => getModeDisplayText(item),
+      render: (token: IApiToken) => getModeDisplayText(token),
     },
     {
       name: 'Engines',
       width: '18%',
-      render: (item: IApiToken) => getEnginesDisplayText(item),
+      render: (token: IApiToken) => getEnginesDisplayText(token),
     },
     {
       actions: [
@@ -85,7 +88,7 @@ export const CredentialsList: React.FC = () => {
           type: 'icon',
           icon: 'pencil',
           color: 'primary',
-          onClick: (item: IApiToken) => showCredentialsForm(item),
+          onClick: (token: IApiToken) => showCredentialsForm(token),
         },
         {
           name: i18n.translate('xpack.enterpriseSearch.actions.delete', {
@@ -97,7 +100,7 @@ export const CredentialsList: React.FC = () => {
           type: 'icon',
           icon: 'trash',
           color: 'danger',
-          onClick: (item: IApiToken) => deleteApiKey(item.name),
+          onClick: (token: IApiToken) => deleteApiKey(token.name),
         },
       ],
     },

@@ -130,10 +130,7 @@ describe('Credentials', () => {
   });
 
   describe('columns', () => {
-    let columns: Array<{
-      render: (token: object) => any;
-      actions: any;
-    }>;
+    let columns: any[];
     const showCredentialsForm = jest.fn();
     const deleteApiKey = jest.fn();
 
@@ -180,28 +177,23 @@ describe('Credentials', () => {
         key: 'abc-123',
       };
 
-      const subject = (token: object): [any, any] => {
+      it('renders the credential and a button to copy it', () => {
         const copyMock = jest.fn();
         const column = columns[2];
-        const wrapper = shallow(<div>{column.render(token)}</div>);
+        const wrapper = shallow(<div>{column.render(testToken)}</div>);
         const children = wrapper.find(EuiCopy).props().children;
-        const copyEl = shallow(children(copyMock));
-        return [copyMock, copyEl];
-      };
-
-      it('renders the credential and a button to copy it', () => {
-        const [copyMock, copyEl] = subject(testToken);
+        const copyEl = shallow(<div>{children(copyMock)}</div>);
         expect(copyEl.find('EuiButtonIcon').props().onClick).toEqual(copyMock);
         expect(copyEl.text()).toContain('abc-123');
       });
 
-      it('empty text if no key is present', () => {
-        const [copyMock, copyEl] = subject({
-          ...testToken,
+      it('renders nothing if no key is present', () => {
+        const tokenWithNoKey = {
           key: undefined,
-        });
-        expect(copyEl.find('EuiButtonIcon').props().onClick).toEqual(copyMock);
-        expect(copyEl.text().replace('<EuiButtonIcon />', '')).toBe('');
+        };
+        const column = columns[2];
+        const wrapper = shallow(<div>{column.render(tokenWithNoKey)}</div>);
+        expect(wrapper.text()).toBe('');
       });
     });
 
