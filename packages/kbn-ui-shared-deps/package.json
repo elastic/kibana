@@ -33,6 +33,7 @@
     "rxjs": "^6.5.5",
     "styled-components": "^5.1.0",
     "symbol-observable": "^1.2.0",
+    "tslib": "^2.0.0",
     "whatwg-fetch": "^3.0.0"
   },
   "devDependencies": {

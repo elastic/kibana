@@ -332,4 +332,26 @@ describe('When the edit exception modal is opened', () => {
       ).toBeDisabled();
     });
   });
+
+  test('when there are exception builder errors has the add exception button disabled', async () => {
+    const wrapper = mount(
+      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <EditExceptionModal
+          ruleId="123"
+          ruleIndices={['filebeat-*']}
+          ruleName={ruleName}
+          exceptionListType={'endpoint'}
+          exceptionItem={{ ...getExceptionListItemSchemaMock(), entries: [] }}
+          onCancel={jest.fn()}
+          onConfirm={jest.fn()}
+        />
+      </ThemeProvider>
+    );
+    const callProps = ExceptionBuilderComponent.mock.calls[0][0];
+    await waitFor(() => callProps.onChange({ exceptionItems: [], errorExists: true }));
+
+    expect(
+      wrapper.find('button[data-test-subj="edit-exception-confirm-button"]').getDOMNode()
+    ).toBeDisabled();
+  });
 });
