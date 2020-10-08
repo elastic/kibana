@@ -16,22 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { i18n } from '@kbn/i18n';
-import { VisTypeAlias } from 'src/plugins/visualizations/public';
-import { APP_NAME, PLUGIN_ID, APP_PATH, APP_ICON } from '../common';
-
-export const getLensAliasConfig = (): VisTypeAlias => ({
-  aliasPath: APP_PATH,
-  aliasApp: APP_NAME,
-  name: PLUGIN_ID,
-  title: i18n.translate('lensOss.visTypeAlias.title', {
-    defaultMessage: 'Lens',
-  }),
-  description: i18n.translate('lensOss.visTypeAlias.description', {
-    defaultMessage: `Drag and drop intuitive way to create multiple types of visualizations. Best option for most visualizations.`,
-  }),
-  icon: APP_ICON,
-  stage: 'production',
-  disabled: true,
-});
+export const APP_NAME = 'maps';
+export const PLUGIN_ID = 'mapsOss';
+export const APP_PATH = '/map';
+export const APP_ICON = 'gisApp';

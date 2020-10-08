@@ -131,7 +131,7 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 
 
 |{kib-repo}blob/{branch}/src/plugins/lens_oss/README.md[lensOSS]
-|The lens_oss plugins registers the lens visualization on OSS.
+|The lens_oss plugin registers the lens visualization on OSS.
 It is registered as disabled. The x-pack plugin should unregister this.
 
 
@@ -144,7 +144,7 @@ It is registered as disabled. The x-pack plugin should unregister this.
 
 
 |{kib-repo}blob/{branch}/src/plugins/maps_oss/README.md[mapsOSS]
-|The maps_oss plugins registers the maps visualization on OSS.
+|The maps_oss plugin registers the maps visualization on OSS.
 It is registered as disabled. The x-pack plugin should unregister this.
 
 
