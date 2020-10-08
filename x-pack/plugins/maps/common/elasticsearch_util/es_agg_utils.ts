@@ -8,7 +8,7 @@ import _ from 'lodash';
 import { IndexPattern, IFieldType } from '../../../../../src/plugins/data/common';
 import { TOP_TERM_PERCENTAGE_SUFFIX } from '../constants';
 
-export function getField(indexPattern: IndexPattern, fieldName: string) {
+export function getField(indexPattern: IndexPattern, fieldName: string): IFieldType {
   const field = indexPattern.fields.getByName(fieldName);
   if (!field) {
     throw new Error(
