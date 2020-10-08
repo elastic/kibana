@@ -52,19 +52,24 @@ export const useHostsKpiAuthentications = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
-  const [hostsKpiAuthenticationsRequest, setHostsKpiAuthenticationsRequest] = useState<
-    HostsKpiAuthenticationsRequestOptions
-  >({
-    defaultIndex: indexNames,
-    factoryQueryType: HostsKpiQueries.kpiAuthentications,
-    filterQuery: createFilter(filterQuery),
-    id: ID,
-    timerange: {
-      interval: '12h',
-      from: startDate,
-      to: endDate,
-    },
-  });
+  const [
+    hostsKpiAuthenticationsRequest,
+    setHostsKpiAuthenticationsRequest,
+  ] = useState<HostsKpiAuthenticationsRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          factoryQueryType: HostsKpiQueries.kpiAuthentications,
+          filterQuery: createFilter(filterQuery),
+          id: ID,
+          timerange: {
+            interval: '12h',
+            from: startDate,
+            to: endDate,
+          },
+        }
+      : null
+  );
 
   const [hostsKpiAuthenticationsResponse, setHostsKpiAuthenticationsResponse] = useState<
     HostsKpiAuthenticationsArgs
@@ -83,7 +88,11 @@ export const useHostsKpiAuthentications = ({
   });
 
   const hostsKpiAuthenticationsSearch = useCallback(
-    (request: HostsKpiAuthenticationsRequestOptions) => {
+    (request: HostsKpiAuthenticationsRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -146,9 +155,11 @@ export const useHostsKpiAuthentications = ({
   useEffect(() => {
     setHostsKpiAuthenticationsRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
         defaultIndex: indexNames,
+        factoryQueryType: HostsKpiQueries.kpiAuthentications,
         filterQuery: createFilter(filterQuery),
+        id: ID,
         timerange: {
           interval: '12h',
           from: startDate,
