@@ -163,7 +163,10 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
             />
           </EuiFlexItem>
           {filters && filters.options && (
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem
+              grow={false}
+              data-test-subj="mlDFAnalyticsExplorationQueryBarFilterButtons"
+            >
               <EuiButtonGroup
                 legend={i18n.translate(
                   'xpack.ml.dataframe.analytics.explorationQueryBar.buttonGroupLegend',
@@ -172,7 +175,6 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
                   }
                 )}
                 name="analyticsQueryBarFilterButtons"
-                data-test-subj="mlDFAnalyticsExplorationQueryBarFilterButtons"
                 options={filters.options}
                 type="multi"
                 idToSelectedMap={idToSelectedMap}

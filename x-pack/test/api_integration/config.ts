@@ -27,8 +27,8 @@ export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProvi
         ...xPackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
         '--xpack.security.session.idleTimeout=3600000', // 1 hour
         '--telemetry.optIn=true',
-        '--xpack.ingestManager.enabled=true',
-        '--xpack.ingestManager.fleet.pollingRequestTimeout=5000', // 5 seconds
+        '--xpack.fleet.enabled=true',
+        '--xpack.fleet.agents.pollingRequestTimeout=5000', // 5 seconds
       ],
     },
     esTestCluster: {

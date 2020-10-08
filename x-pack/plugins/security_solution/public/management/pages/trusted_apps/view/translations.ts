@@ -28,6 +28,17 @@ export const OS_TITLES: Readonly<{ [K in TrustedApp['os']]: string }> = {
   }),
 };
 
+export const CONDITION_FIELD_TITLE: { [K in MacosLinuxConditionEntry['field']]: string } = {
+  'process.hash.*': i18n.translate(
+    'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.hash',
+    { defaultMessage: 'Hash' }
+  ),
+  'process.executable.caseless': i18n.translate(
+    'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.path',
+    { defaultMessage: 'Path' }
+  ),
+};
+
 export const PROPERTY_TITLES: Readonly<
   { [K in keyof Omit<TrustedApp, 'id' | 'entries'>]: string }
 > = {
@@ -82,3 +93,28 @@ export const LIST_ACTIONS = {
     ),
   },
 };
+
+export const CARD_DELETE_BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.trustedapps.card.removeButtonLabel',
+  {
+    defaultMessage: 'Remove',
+  }
+);
+
+export const GRID_VIEW_TOGGLE_LABEL = i18n.translate(
+  'xpack.securitySolution.trustedapps.view.toggle.grid',
+  {
+    defaultMessage: 'Grid view',
+  }
+);
+
+export const LIST_VIEW_TOGGLE_LABEL = i18n.translate(
+  'xpack.securitySolution.trustedapps.view.toggle.list',
+  {
+    defaultMessage: 'List view',
+  }
+);
+
+export const NO_RESULTS_MESSAGE = i18n.translate('xpack.securitySolution.trustedapps.noResults', {
+  defaultMessage: 'No items found',
+});
