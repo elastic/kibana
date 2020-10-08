@@ -26,6 +26,7 @@ import { KibanaRequest } from 'src/core/server';
 import { KibanaRequest as KibanaRequest_2 } from 'kibana/server';
 import { LegacyAPICaller } from 'kibana/server';
 import { Logger } from 'kibana/server';
+import { Logger as Logger_2 } from 'src/core/server';
 import { LoggerFactory } from '@kbn/logging';
 import { Moment } from 'moment';
 import moment from 'moment';
