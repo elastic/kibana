@@ -182,7 +182,7 @@ const observeCompiler = (
       );
 
       bundle.cache.set({
-        bundleRefExportIds: bundleRefExportIds.sort((a, b) => a.localeCompare(b)),
+        bundleRefExportIds: bundleRefExportIds.sort(ascending((p) => p)),
         optimizerCacheKey: workerConfig.optimizerCacheKey,
         cacheKey: bundle.createCacheKey(files, mtimes),
         moduleCount,
