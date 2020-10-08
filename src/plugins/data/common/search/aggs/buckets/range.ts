@@ -68,7 +68,7 @@ export const getRangeBucketAgg = ({ getFieldFormatsStart }: RangeBucketAggDepend
         keyCaches.set(agg, keys);
       }
 
-      const id = RangeKey.idBucket(bucket);
+      const id = RangeKey.idBucket(bucket, agg.params.ranges);
 
       key = keys.get(id);
       if (!key) {

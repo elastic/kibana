@@ -19,27 +19,41 @@
 
 const id = Symbol('id');
 
+type Ranges = Array<{
+  from: string | number | undefined;
+  to: string | number | undefined;
+  label?: string;
+}>;
+
 export class RangeKey {
   [id]: string;
   gte: string | number;
   lt: string | number;
   label?: string;
 
-  constructor(
-    bucket: any,
-    allRanges?: Array<{ from: string | number; to: string | number; label?: string }>
-  ) {
+  private static findCustomLabel(from: string | number, to: string | number, ranges: Ranges) {
+    return ranges
+      ? ranges.find(
+          (range) =>
+            ((from === -Infinity && range.from === undefined) || range.from === from) &&
+            ((to === Infinity && range.to === undefined) || range.to === to)
+        )?.label
+      : undefined;
+  }
+
+  constructor(bucket: any, allRanges?: Ranges) {
     this.gte = bucket.from == null ? -Infinity : bucket.from;
     this.lt = bucket.to == null ? +Infinity : bucket.to;
-    this.label = allRanges
-      ? allRanges.find((range) => range.from === bucket.from && range.to === bucket.to)?.label
-      : undefined;
+    this.label = allRanges ? RangeKey.findCustomLabel(this.gte, this.lt, allRanges) : undefined;
 
     this[id] = RangeKey.idBucket(bucket);
   }
 
-  static idBucket(bucket: any) {
-    return `from:${bucket.from},to:${bucket.to}`;
+  static idBucket(bucket: any, allRanges?: Ranges) {
+    const customLabel = allRanges
+      ? RangeKey.findCustomLabel(bucket.from, bucket.to, allRanges)
+      : undefined;
+    return `from:${bucket.from},to:${bucket.to},label:${customLabel}`;
   }
 
   toString() {
