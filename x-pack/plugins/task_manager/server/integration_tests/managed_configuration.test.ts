@@ -52,7 +52,7 @@ describe('managed configuration', () => {
       },
     });
     taskManager.start();
-    // force rxjs timers t ofire when they are scheduled for setTimeout(0) as the
+    // force rxjs timers to fire when they are scheduled for setTimeout(0) as the
     // sinon fake timers cause them to stall
     clock.tick(0);
   });
