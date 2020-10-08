@@ -20,13 +20,12 @@ export interface IntervalSchedule extends SavedObjectAttributes {
 export const AlertExecutionStatusValues = ['ok', 'active', 'error', 'pending', 'unknown'] as const;
 export type AlertExecutionStatuses = typeof AlertExecutionStatusValues[number];
 
-export const AlertExecutionStatusErrorReasonValues = [
-  'read',
-  'decrypt',
-  'execute',
-  'unknown',
-] as const;
-export type AlertExecutionStatusErrorReasons = typeof AlertExecutionStatusErrorReasonValues[number];
+export enum AlertExecutionStatusErrorReasons {
+  read = 'read',
+  decrypt = 'decrypt',
+  execute = 'execute',
+  unknown = 'unknown',
+}
 
 export interface AlertExecutionStatus {
   status: AlertExecutionStatuses;
