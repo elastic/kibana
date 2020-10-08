@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { PluginInitializerContext, Plugin, CoreSetup, CoreStart, Logger } from 'src/core/server';
-import { Subject } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { Subject, combineLatest } from 'rxjs';
+import { first, map } from 'rxjs/operators';
 import { TaskDictionary, TaskDefinition } from './task';
 import { TaskManager } from './task_manager';
 import { TaskManagerConfig } from './config';
@@ -51,7 +51,7 @@ export class TaskManagerPlugin
 
     // Routes
     const router = core.http.createRouter();
-    healthRoute(
+    const serviceStatus$ = healthRoute(
       router,
       this.taskManager.then((tm) => createMonitoringStats(tm, config, logger)),
       logger,
@@ -60,6 +60,16 @@ export class TaskManagerPlugin
       // if "cold" health stats are any more stale than the configured refresh, consider the system unhealthy
       config.monitored_aggregated_stats_refresh_rate + 1000
     );
+
+    core.getStartServices().then(async () => {
+      core.status.set(
+        combineLatest([core.status.derivedStatus$, serviceStatus$]).pipe(
+          map(([derivedStatus, serviceStatus]) =>
+            serviceStatus.level > derivedStatus.level ? serviceStatus : derivedStatus
+          )
+        )
+      );
+    });
 
     return {
       addMiddleware: (middleware: Middleware) => {

@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { of, Subject } from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { merge } from 'lodash';
 import { httpServiceMock } from 'src/core/server/mocks';
 import { healthRoute } from './health';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { sleep, mockLogger } from '../test_utils';
 import { MonitoringStats, summarizeMonitoringStats } from '../monitoring';
+import { ServiceStatusLevels } from 'src/core/server';
 
 describe('healthRoute', () => {
   beforeEach(() => {
@@ -77,7 +79,14 @@ describe('healthRoute', () => {
     const mockStat = mockHealthStats({
       lastUpdate: new Date(Date.now() - 1500).toISOString(),
     });
-    healthRoute(router, Promise.resolve(of(mockStat)), mockLogger(), 1000, 60000);
+
+    const serviceStatus$ = healthRoute(
+      router,
+      Promise.resolve(of(mockStat)),
+      mockLogger(),
+      1000,
+      60000
+    );
 
     const [, handler] = router.get.mock.calls[0];
 
@@ -87,6 +96,35 @@ describe('healthRoute', () => {
 
     expect(await handler(context, req, res)).toMatchObject({
       body: {
+        status: 'error',
+        ...summarizeMonitoringStats(
+          mockHealthStats({
+            lastUpdate: expect.any(String),
+            stats: {
+              configuration: {
+                timestamp: expect.any(String),
+              },
+              workload: {
+                timestamp: expect.any(String),
+              },
+              runtime: {
+                timestamp: expect.any(String),
+                value: {
+                  polling: {
+                    lastSuccessfulPoll: expect.any(String),
+                  },
+                },
+              },
+            },
+          })
+        ),
+      },
+    });
+
+    expect(await getLatest(serviceStatus$)).toMatchObject({
+      level: ServiceStatusLevels.unavailable,
+      summary: 'Task Manager is unavailable',
+      meta: {
         status: 'error',
         ...summarizeMonitoringStats(
           mockHealthStats({
@@ -260,4 +298,8 @@ function mockHealthStats(overrides = {}) {
     },
     overrides
   ) as unknown) as MonitoringStats;
+}
+
+async function getLatest<T>(stream$: Observable<T>) {
+  return new Promise<T>((resolve) => stream$.pipe(take(1)).subscribe((stats) => resolve(stats)));
 }

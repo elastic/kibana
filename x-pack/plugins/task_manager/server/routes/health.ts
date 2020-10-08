@@ -11,9 +11,9 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
-import { Logger } from 'src/core/server';
-import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { Logger, ServiceStatus, ServiceStatusLevels } from 'src/core/server';
+import { Observable, from } from 'rxjs';
+import { take, mergeMap, map } from 'rxjs/operators';
 import { throttleTime } from 'rxjs/operators';
 import { isString } from 'lodash';
 import {
@@ -23,14 +23,22 @@ import {
   RawMonitoringStats,
 } from '../monitoring';
 
+type MonitoredHealth = RawMonitoringStats & { status: HealthStatus; timestamp: string };
+
+const LEVEL_SUMMARY = {
+  [ServiceStatusLevels.available.toString()]: 'Task Manager is healthy',
+  [ServiceStatusLevels.degraded.toString()]: 'Task Manager is unhealthy',
+  [ServiceStatusLevels.unavailable.toString()]: 'Task Manager is unavailable',
+};
+
 export function healthRoute(
   router: IRouter,
   monitoringStats: Promise<Observable<MonitoringStats>>,
   logger: Logger,
   requiredHotStatsFreshness: number,
   requiredColdStatsFreshness: number
-) {
-  function calculateStatus(monitoredStats: MonitoringStats) {
+): Observable<ServiceStatus> {
+  function calculateStatus(monitoredStats: MonitoringStats): MonitoredHealth {
     const now = Date.now();
     const timestamp = new Date(now).toISOString();
 
@@ -47,15 +55,23 @@ export function healthRoute(
         : hasStatus(summarizedStats.stats, HealthStatus.Warning)
         ? HealthStatus.Warning
         : HealthStatus.OK;
-
     return { timestamp, status: healthStatus, ...summarizedStats };
   }
 
+  // Only calculate the summerized stats (calculates all runnign averages and evaluates state)
+  // when needed by throttling down to the requiredHotStatsFreshness
+  const throttledMonitoredStats$ = from(monitoringStats).pipe(
+    mergeMap((monitoringStats$) =>
+      monitoringStats$.pipe(
+        throttleTime(requiredHotStatsFreshness),
+        map((stats) => calculateStatus(stats))
+      )
+    )
+  );
+
   /* Log Task Manager stats as a Debug log line at a fixed interval */
-  monitoringStats.then((monitoringStats$) => {
-    monitoringStats$.pipe(throttleTime(requiredHotStatsFreshness)).subscribe((stats) => {
-      logger.debug(JSON.stringify(calculateStatus(stats)));
-    });
+  throttledMonitoredStats$.subscribe((stats) => {
+    logger.debug(JSON.stringify(stats));
   });
 
   router.get(
@@ -72,6 +88,28 @@ export function healthRoute(
         body: calculateStatus(await getLatestStats(await monitoringStats)),
       });
     }
+  );
+
+  return asServiceStatus(throttledMonitoredStats$);
+}
+
+export function asServiceStatus(
+  monitoredHealth$: Observable<MonitoredHealth>
+): Observable<ServiceStatus> {
+  return monitoredHealth$.pipe(
+    map((monitoredHealth) => {
+      const level =
+        monitoredHealth.status === HealthStatus.OK
+          ? ServiceStatusLevels.available
+          : monitoredHealth.status === HealthStatus.Warning
+          ? ServiceStatusLevels.degraded
+          : ServiceStatusLevels.unavailable;
+      return {
+        level,
+        summary: LEVEL_SUMMARY[level.toString()],
+        meta: monitoredHealth,
+      };
+    })
   );
 }
 
