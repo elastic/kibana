@@ -27,13 +27,11 @@ export async function getPackages(
   } & Registry.SearchParams
 ) {
   const { savedObjectsClient, experimental, category } = options;
-  // todo remove the .then and see if that fixes the unhandled promise rejection
   const registryItems = await Registry.fetchList({ category, experimental }).then((items) => {
     return items.map((item) =>
       Object.assign({}, item, { title: item.title || nameAsTitle(item.name) })
     );
   });
-
   // get the installed packages
   const packageSavedObjects = await getPackageSavedObjects(savedObjectsClient);
 
@@ -41,7 +39,6 @@ export async function getPackages(
   const savedObjectsVisible = packageSavedObjects.saved_objects.filter(
     (o) => !o.attributes.internal
   );
-
   const packageList = registryItems
     .map((item) =>
       createInstallableFrom(
