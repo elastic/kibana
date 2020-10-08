@@ -15,7 +15,7 @@ import {
 } from '../typings/fetch_overview_data';
 
 export interface HasDataContextValue {
-  hasData: Partial<ObservabilityHasDataResponse> | undefined;
+  hasData: Partial<ObservabilityHasDataResponse>;
   hasAnyData: boolean | undefined;
 }
 
@@ -25,7 +25,7 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
   const { rangeFrom, rangeTo } = useRouteParams('/overview').query;
   const { absStart, absEnd } = useTimeRange({ rangeFrom, rangeTo });
 
-  const [hasData, setHasData] = useState<HasDataContextValue['hasData']>();
+  const [hasData, setHasData] = useState<HasDataContextValue['hasData']>({});
 
   const { data: hasApmData, status: apmStatus } = useFetcher(
     () => getDataHandler('apm')?.hasData(),
@@ -75,23 +75,17 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
     uptimeStatus !== 'loading' &&
     uxStatus !== 'loading';
 
-  const hasSomeData =
-    hasData &&
-    (Object.keys(hasData) as ObservabilityFetchDataPlugins[]).some((app) => {
-      const _hasData = app === 'ux' ? hasData[app]?.hasData : hasData[app];
-      return _hasData === true;
-    });
+  const hasSomeData = (Object.keys(hasData) as ObservabilityFetchDataPlugins[]).some((app) => {
+    const _hasData = app === 'ux' ? hasData[app]?.hasData : hasData[app];
+    return _hasData === true;
+  });
 
-  // When hasSomeData is false, checks if all request have complete, if they do, hasAnyData is set to false;
   let hasAnyData;
-  if (hasSomeData !== undefined) {
-    if (hasSomeData === false) {
-      if (allRequestCompleted === true) {
-        hasAnyData = false;
-      }
-    } else {
-      hasAnyData = true;
-    }
+  if (hasSomeData === true) {
+    hasAnyData = true;
+    // Waits until all requests are complete to set hasAnyData to false
+  } else if (hasSomeData === false && allRequestCompleted === true) {
+    hasAnyData = false;
   }
 
   return <HasDataContext.Provider value={{ hasData, hasAnyData }} children={children} />;

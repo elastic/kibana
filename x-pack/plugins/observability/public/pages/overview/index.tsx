@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import { isEmpty } from 'lodash';
 import React, { useContext, useState } from 'react';
 import { ThemeContext } from 'styled-components';
 import { useTrackPageview } from '../..';
@@ -33,9 +34,10 @@ export function OverviewPage({ routeParams }: Props) {
 
   const { rangeFrom, rangeTo, refreshInterval = 10000, refreshPaused = true } = routeParams.query;
 
-  const { hasData, hasAnyData } = useHasDataContext();
+  const { hasData } = useHasDataContext();
 
-  if (!hasAnyData) {
+  // Shows the Loading component while fetching hasData returns any information
+  if (isEmpty(hasData)) {
     return <LoadingObservability />;
   }
 
