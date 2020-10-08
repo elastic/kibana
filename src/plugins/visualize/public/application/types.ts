@@ -132,6 +132,6 @@ export interface ByValueVisInstance {
 export type VisualizeEditorVisInstance = SavedVisInstance | ByValueVisInstance;
 
 export interface IEditorController {
-  render(props: EditorRenderProps): void;
+  render(props: EditorRenderProps): Promise<void> | void;
   destroy(): void;
 }

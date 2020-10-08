@@ -20,7 +20,7 @@
 import { PluginInitializerContext } from 'kibana/public';
 import { VisualizePlugin } from './plugin';
 
-export { EditorRenderProps } from './application/types';
+export { EditorRenderProps, IEditorController } from './application/types';
 export { VisualizeConstants } from './application/visualize_constants';
 
 export const plugin = (context: PluginInitializerContext) => {

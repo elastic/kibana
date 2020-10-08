@@ -102,16 +102,18 @@ export const useSavedVisInstance = (
 
         let visEditorController;
         // do not create editor in embeded mode
-        if (isChromeVisible) {
-          const Editor = vis.type.editor || DefaultEditorController;
-          visEditorController = new Editor(
-            visEditorRef.current,
-            vis,
-            eventEmitter,
-            embeddableHandler
-          );
-        } else if (visEditorRef.current) {
-          embeddableHandler.render(visEditorRef.current);
+        if (visEditorRef.current) {
+          if (isChromeVisible) {
+            const Editor = vis.type.editor || DefaultEditorController;
+            visEditorController = new Editor(
+              visEditorRef.current,
+              vis,
+              eventEmitter,
+              embeddableHandler
+            );
+          } else {
+            embeddableHandler.render(visEditorRef.current);
+          }
         }
 
         setState({
