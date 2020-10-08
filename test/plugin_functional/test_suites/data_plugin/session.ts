@@ -20,7 +20,7 @@ import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
-  const PageObjects = getPageObjects(['common', 'dashboard', 'discover', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'header', 'dashboard', 'discover', 'timePicker']);
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const toasts = getService('toasts');
@@ -45,12 +45,14 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       });
 
       it('Starts a new session', async () => {
+        await PageObjects.header.waitUntilLoadingHasFinished();
         const sessionIds = await getSessionIds();
         expect(sessionIds.length).to.be(1);
       });
 
       it('Starts on a refresh', async () => {
         await testSubjects.click('querySubmitButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
         const sessionIds = await getSessionIds();
         expect(sessionIds.length).to.be(1);
       });
@@ -58,12 +60,14 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       it('Starts a new session on sort', async () => {
         await PageObjects.discover.clickFieldListItemAdd('speaker');
         await PageObjects.discover.clickFieldSort('speaker');
+        await PageObjects.header.waitUntilLoadingHasFinished();
         const sessionIds = await getSessionIds();
         expect(sessionIds.length).to.be(1);
       });
 
       it('Starts a new session on filter change', async () => {
         await filterBar.addFilter('line_number', 'exists');
+        await PageObjects.header.waitUntilLoadingHasFinished();
         const sessionIds = await getSessionIds();
         expect(sessionIds.length).to.be(1);
       });
