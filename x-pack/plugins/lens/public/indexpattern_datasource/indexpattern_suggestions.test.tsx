@@ -1381,6 +1381,81 @@ describe('IndexPattern Data Source suggestions', () => {
       );
     });
 
+    it('adds date histogram over default time field for tables with numeric buckets without time dimension', async () => {
+      const initialState = testInitialState();
+      const state: IndexPatternPrivateState = {
+        ...initialState,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['colb', 'cola'],
+            columns: {
+              cola: {
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'dest',
+                label: 'Unique count of dest',
+                operationType: 'cardinality',
+              },
+              colb: {
+                label: 'My Op',
+                dataType: 'number',
+                isBucketed: true,
+                operationType: 'range',
+                sourceField: 'bytes',
+                scale: 'interval',
+                params: {
+                  type: 'histogram',
+                  maxBars: 100,
+                  ranges: [],
+                },
+              },
+            },
+          },
+        },
+      };
+
+      expect(getDatasourceSuggestionsFromCurrentState(state)).toContainEqual(
+        expect.objectContaining({
+          table: {
+            isMultiRow: true,
+            changeType: 'reorder',
+            label: 'Over time',
+            layerId: 'first',
+            columns: [
+              {
+                columnId: 'id1',
+                operation: {
+                  label: 'timestampLabel',
+                  dataType: 'date',
+                  isBucketed: true,
+                  scale: 'interval',
+                },
+              },
+              {
+                columnId: 'colb',
+                operation: {
+                  label: 'My Op',
+                  dataType: 'number',
+                  isBucketed: true,
+                  scale: 'interval',
+                },
+              },
+              {
+                columnId: 'cola',
+                operation: {
+                  dataType: 'number',
+                  isBucketed: false,
+                  label: 'Unique count of dest',
+                  scale: undefined,
+                },
+              },
+            ],
+          },
+        })
+      );
+    });
+
     it('does not create an over time suggestion if there is no default time field', async () => {
       const initialState = testInitialState();
       const state: IndexPatternPrivateState = {
