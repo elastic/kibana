@@ -282,9 +282,12 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
     },
     mlLicense.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const { body } = await mlClient.explainDataFrameAnalytics({
-          body: request.body,
-        });
+        const { body } = await mlClient.explainDataFrameAnalytics(
+          {
+            body: request.body,
+          },
+          getAuthorizationHeader(request)
+        );
         return response.ok({
           body,
         });

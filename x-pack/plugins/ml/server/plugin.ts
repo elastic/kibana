@@ -48,7 +48,7 @@ import { createSharedServices, SharedServices } from './shared_services';
 import { getPluginPrivileges } from '../common/types/capabilities';
 import { setupCapabilitiesSwitcher } from './lib/capabilities';
 import { registerKibanaSettings } from './lib/register_settings';
-import { inferenceRoutes } from './routes/inference';
+import { trainedModelsRoutes } from './routes/trained_models';
 import { setupSavedObjects } from './saved_objects';
 
 export type MlPluginSetup = SharedServices;
@@ -117,7 +117,6 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
 
     // initialize capabilities switcher to add license filter to ml capabilities
     setupCapabilitiesSwitcher(coreSetup, plugins.licensing.license$, this.log);
-
     setupSavedObjects(coreSetup.savedObjects);
 
     const routeInit: RouteInitialization = {
@@ -155,10 +154,10 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
       cloud: plugins.cloud,
       resolveMlCapabilities,
     });
+    trainedModelsRoutes(routeInit);
+
     initMlServerLog({ log: this.log });
     initMlTelemetry(coreSetup, plugins.usageCollection);
-
-    inferenceRoutes(routeInit);
 
     return {
       ...createSharedServices(
