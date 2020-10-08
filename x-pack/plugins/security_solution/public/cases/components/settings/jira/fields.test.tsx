@@ -95,12 +95,20 @@ describe('JiraParamsFields renders', () => {
 
   test('all params fields are rendered - isEdit: false', () => {
     const wrapper = mount(
-      <Fields isEdit={false} fields={fields} onChange={onChange} connector={connector} />
+      <Fields
+        isEdit={false}
+        fields={{ ...fields, parent: 'Parent Task' }}
+        onChange={onChange}
+        connector={connector}
+      />
     );
-    expect(wrapper.find('[data-test-subj="card-list-item"]').first().text()).toEqual(
+    expect(wrapper.find('[data-test-subj="card-list-item"]').at(0).text()).toEqual(
       'Issue type: Task'
     );
-    expect(wrapper.find('[data-test-subj="card-list-item"]').last().text()).toEqual(
+    expect(wrapper.find('[data-test-subj="card-list-item"]').at(1).text()).toEqual(
+      'Parent issue: Parent Task'
+    );
+    expect(wrapper.find('[data-test-subj="card-list-item"]').at(2).text()).toEqual(
       'Priority: High'
     );
   });
@@ -174,6 +182,28 @@ describe('JiraParamsFields renders', () => {
       });
 
     expect(onChange).toHaveBeenCalledWith({ issueType: '10007', parent: null, priority: null });
+  });
+
+  test('it sets issue type when it comes as null', () => {
+    const wrapper = mount(
+      <Fields fields={{ ...fields, issueType: null }} onChange={onChange} connector={connector} />
+    );
+    expect(wrapper.find('select[data-test-subj="issueTypeSelect"]').first().props().value).toEqual(
+      '10006'
+    );
+  });
+
+  test('it sets issue type when it comes as unknown value', () => {
+    const wrapper = mount(
+      <Fields
+        fields={{ ...fields, issueType: '99999' }}
+        onChange={onChange}
+        connector={connector}
+      />
+    );
+    expect(wrapper.find('select[data-test-subj="issueTypeSelect"]').first().props().value).toEqual(
+      '10006'
+    );
   });
 
   test('it sets priority correctly', () => {
