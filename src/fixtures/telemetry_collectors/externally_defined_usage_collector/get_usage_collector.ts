@@ -17,27 +17,23 @@
  * under the License.
  */
 
-import * as path from 'path';
-import { parseTelemetryRC } from './config';
+export interface Usage {
+  collectorName: string;
+}
 
-describe('parseTelemetryRC', () => {
-  it('throw if config path is not absolute', async () => {
-    const fixtureDir = './__fixture__/';
-    await expect(parseTelemetryRC(fixtureDir)).rejects.toThrowError();
-  });
-
-  it('returns parsed rc file', async () => {
-    const configRoot = path.join(process.cwd(), 'src', 'fixtures', 'telemetry_collectors');
-    const config = await parseTelemetryRC(configRoot);
-    expect(config).toStrictEqual([
-      {
-        root: configRoot,
-        output: configRoot,
-        exclude: [
-          path.resolve(configRoot, './unmapped_collector.ts'),
-          path.resolve(configRoot, './externally_defined_usage_collector/index.ts'),
-        ],
+export function getUsageCollector(collectorName: string) {
+  return {
+    type: 'externally_defined_usage_collector',
+    isReady: () => true,
+    schema: {
+      collectorName: {
+        type: 'keyword' as 'keyword',
       },
-    ]);
-  });
-});
+    },
+    fetch(): Usage {
+      return {
+        collectorName,
+      };
+    },
+  };
+}
