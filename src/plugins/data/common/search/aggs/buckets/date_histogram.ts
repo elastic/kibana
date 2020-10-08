@@ -69,7 +69,6 @@ export function isDateHistogramBucketAggConfig(agg: any): agg is IBucketDateHist
 export interface AggParamsDateHistogram extends BaseAggParams {
   field?: string;
   timeRange?: TimeRange;
-  useNormalizedEsInterval?: boolean;
   scaleMetricValues?: boolean;
   interval?: string;
   time_zone?: string;
@@ -160,11 +159,6 @@ export const getDateHistogramBucketAgg = ({
         write: noop,
       },
       {
-        name: 'useNormalizedEsInterval',
-        default: true,
-        write: noop,
-      },
-      {
         name: 'scaleMetricValues',
         default: false,
         write: noop,
@@ -191,9 +185,14 @@ export const getDateHistogramBucketAgg = ({
         options: intervalOptions,
         write(agg, output, aggs) {
           updateTimeBuckets(agg, calculateBounds);
+          const { scaleMetricValues } = agg.params;
 
-          const { useNormalizedEsInterval, scaleMetricValues } = agg.params;
+          const useNormalizedEsInterval = intervalOptions
+            .map((option) => option.val)
+            .includes(agg.params.interval);
+
           const interval = agg.buckets.getInterval(useNormalizedEsInterval);
+
           output.bucketInterval = interval;
           if (interval.expression === '0ms') {
             // We are hitting this code a couple of times while configuring in editor

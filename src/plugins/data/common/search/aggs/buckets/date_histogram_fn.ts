@@ -65,12 +65,6 @@ export const aggDateHistogram = (): FunctionDefinition => ({
         defaultMessage: 'Field to use for this aggregation',
       }),
     },
-    useNormalizedEsInterval: {
-      types: ['boolean'],
-      help: i18n.translate('data.search.aggs.buckets.dateHistogram.useNormalizedEsInterval.help', {
-        defaultMessage: 'Specifies whether to use useNormalizedEsInterval for this aggregation',
-      }),
-    },
     time_zone: {
       types: ['string'],
       help: i18n.translate('data.search.aggs.buckets.dateHistogram.timeZone.help', {
