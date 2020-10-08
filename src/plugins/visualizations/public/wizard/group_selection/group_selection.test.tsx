@@ -118,6 +118,7 @@ describe('GroupSelection', () => {
         docLinks={docLinks as DocLinksStart}
         toggleGroups={jest.fn()}
         onVisTypeSelected={jest.fn()}
+        showExperimental={true}
       />
     );
     expect(wrapper.find('[data-test-subj="groupModalHeader"]').at(0).text()).toBe(
@@ -132,6 +133,7 @@ describe('GroupSelection', () => {
         docLinks={docLinks as DocLinksStart}
         toggleGroups={jest.fn()}
         onVisTypeSelected={jest.fn()}
+        showExperimental={true}
       />
     );
     expect(wrapper.find('[data-test-subj="visGroup-aggbased"]').exists()).toBe(false);
@@ -151,6 +153,7 @@ describe('GroupSelection', () => {
         docLinks={docLinks as DocLinksStart}
         toggleGroups={jest.fn()}
         onVisTypeSelected={jest.fn()}
+        showExperimental={true}
       />
     );
     expect(wrapper.find('[data-test-subj="visGroup-aggbased"]').exists()).toBe(true);
@@ -163,6 +166,7 @@ describe('GroupSelection', () => {
         docLinks={docLinks as DocLinksStart}
         toggleGroups={jest.fn()}
         onVisTypeSelected={jest.fn()}
+        showExperimental={true}
       />
     );
     expect(wrapper.find('[data-test-subj="visGroup-tools"]').exists()).toBe(false);
@@ -182,6 +186,7 @@ describe('GroupSelection', () => {
         docLinks={docLinks as DocLinksStart}
         toggleGroups={jest.fn()}
         onVisTypeSelected={jest.fn()}
+        showExperimental={true}
       />
     );
     expect(wrapper.find('[data-test-subj="visGroup-tools"]').exists()).toBe(true);
@@ -202,6 +207,7 @@ describe('GroupSelection', () => {
         docLinks={docLinks as DocLinksStart}
         toggleGroups={toggleGroups}
         onVisTypeSelected={jest.fn()}
+        showExperimental={true}
       />
     );
     const aggBasedGroupCard = wrapper.find('[data-test-subj="visGroupAggBasedExploreLink"]').at(0);
@@ -216,6 +222,7 @@ describe('GroupSelection', () => {
         docLinks={docLinks as DocLinksStart}
         toggleGroups={jest.fn()}
         onVisTypeSelected={jest.fn()}
+        showExperimental={true}
       />
     );
 
@@ -240,6 +247,7 @@ describe('GroupSelection', () => {
         docLinks={docLinks as DocLinksStart}
         toggleGroups={jest.fn()}
         onVisTypeSelected={jest.fn()}
+        showExperimental={true}
       />
     );
     expect(wrapper.find('[data-test-subj="visType-visWithAliasUrl"]').exists()).toBe(true);
@@ -249,5 +257,45 @@ describe('GroupSelection', () => {
         .at(1)
         .hasClass('euiCard-isDisabled')
     ).toBe(true);
+  });
+
+  it('should not show tools experimental visualizations if showExperimentalis false', () => {
+    const expVis = {
+      name: 'visExp',
+      title: 'Experimental Vis',
+      group: VisGroups.TOOLS,
+      stage: 'experimental',
+      ...defaultVisTypeParams,
+    };
+    const wrapper = mountWithIntl(
+      <GroupSelection
+        visTypesRegistry={visTypesRegistry([..._visTypes, expVis] as VisType[])}
+        docLinks={docLinks as DocLinksStart}
+        toggleGroups={jest.fn()}
+        onVisTypeSelected={jest.fn()}
+        showExperimental={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="visType-visExp"]').exists()).toBe(false);
+  });
+
+  it('should show tools experimental visualizations if showExperimental is true', () => {
+    const expVis = {
+      name: 'visExp',
+      title: 'Experimental Vis',
+      group: VisGroups.TOOLS,
+      stage: 'experimental',
+      ...defaultVisTypeParams,
+    };
+    const wrapper = mountWithIntl(
+      <GroupSelection
+        visTypesRegistry={visTypesRegistry([..._visTypes, expVis] as VisType[])}
+        docLinks={docLinks as DocLinksStart}
+        toggleGroups={jest.fn()}
+        onVisTypeSelected={jest.fn()}
+        showExperimental={true}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="visType-visExp"]').exists()).toBe(true);
   });
 });

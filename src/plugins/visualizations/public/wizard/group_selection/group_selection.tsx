@@ -31,6 +31,8 @@ import {
   EuiLink,
   EuiText,
   EuiSpacer,
+  EuiBetaBadge,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DocLinksStart } from '../../../../../core/public';
@@ -42,11 +44,13 @@ interface GroupSelectionProps {
   visTypesRegistry: TypesStart;
   docLinks: DocLinksStart;
   toggleGroups: (flag: boolean) => void;
+  showExperimental: boolean;
 }
 
 interface VisCardProps {
   onVisTypeSelected: (visType: VisType | VisTypeAlias) => void;
   visType: VisType | VisTypeAlias;
+  showExperimental?: boolean | undefined;
 }
 
 function isVisTypeAlias(type: VisType | VisTypeAlias): type is VisTypeAlias {
@@ -132,29 +136,23 @@ function GroupSelection(props: GroupSelectionProps) {
             </EuiFlexItem>
           )}
           {props.visTypesRegistry.getByGroup(VisGroups.TOOLS).length > 0 && (
-            <EuiFlexItem grow={false}>
-              <EuiCard
-                titleSize="xs"
-                title={
-                  <span data-test-subj="visGroup-tools">
-                    {i18n.translate('visualizations.newVisWizard.toolsGroupTitle', {
-                      defaultMessage: 'Tools',
-                    })}
-                  </span>
-                }
-                display="plain"
-                layout="horizontal"
-                description=""
-                className="visNewVisDialog__toolsCard"
-              >
-                {props.visTypesRegistry.getByGroup(VisGroups.TOOLS).map((visType) => (
-                  <ToolsGroup
-                    visType={visType}
-                    key={visType.name}
-                    onVisTypeSelected={props.onVisTypeSelected}
-                  />
-                ))}
-              </EuiCard>
+            <EuiFlexItem grow={false} className="visNewVisDialog__toolsCard">
+              <EuiSpacer size="m" />
+              <EuiTitle size="xs">
+                <span data-test-subj="visGroup-tools">
+                  {i18n.translate('visualizations.newVisWizard.toolsGroupTitle', {
+                    defaultMessage: 'Tools',
+                  })}
+                </span>
+              </EuiTitle>
+              {props.visTypesRegistry.getByGroup(VisGroups.TOOLS).map((visType) => (
+                <ToolsGroup
+                  visType={visType}
+                  key={visType.name}
+                  onVisTypeSelected={props.onVisTypeSelected}
+                  showExperimental={props.showExperimental}
+                />
+              ))}
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
@@ -215,17 +213,39 @@ const VisGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
   );
 };
 
-const ToolsGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
+const ToolsGroup = ({ visType, onVisTypeSelected, showExperimental }: VisCardProps) => {
+  // hide the experimental visualization if lab mode is not enabled
+  if (!showExperimental && visType.stage === 'experimental') {
+    return null;
+  }
   const onClick = () => onVisTypeSelected(visType);
   return (
-    <EuiFlexGroup alignItems="center" responsive={false}>
+    <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiIcon type={visType.icon || 'empty'} size="l" />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiLink data-test-subj={`visType-${visType.name}`} onClick={onClick}>
-          {visType.title}
-        </EuiLink>
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiLink data-test-subj={`visType-${visType.name}`} onClick={onClick}>
+              {visType.title}
+            </EuiLink>
+          </EuiFlexItem>
+          {visType.stage === 'experimental' && (
+            <EuiFlexItem grow={false}>
+              <EuiBetaBadge
+                iconType="beaker"
+                tooltipContent={i18n.translate('visualizations.newVisWizard.experimentalTooltip', {
+                  defaultMessage:
+                    'This visualization might be changed or removed in a future release and is not subject to the support SLA.',
+                })}
+                label={i18n.translate('visualizations.newVisWizard.experimentalTitle', {
+                  defaultMessage: 'Experimental',
+                })}
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
         <EuiText color="subdued" size="s">
           {visType.description}
         </EuiText>

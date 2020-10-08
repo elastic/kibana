@@ -47,7 +47,6 @@ interface VisTypeListEntry {
 interface AggBasedSelectionProps {
   onVisTypeSelected: (visType: VisType) => void;
   visTypesRegistry: TypesStart;
-  showExperimental: boolean;
   toggleGroups: (flag: boolean) => void;
 }
 interface AggBasedSelectionState {
@@ -130,17 +129,8 @@ class AggBasedSelection extends React.Component<AggBasedSelectionProps, AggBased
 
   private filteredVisTypes(visTypes: TypesStart, query: string): VisTypeListEntry[] {
     const types = visTypes.getByGroup(VisGroups.AGGBASED).filter((type) => {
-      // Filter out all lab visualizations if lab mode is not enabled
-      if (!this.props.showExperimental && type.stage === 'experimental') {
-        return false;
-      }
-
       // Filter out hidden visualizations and visualizations that are only aggregations based
-      if (type.hidden) {
-        return false;
-      }
-
-      return true;
+      return !type.hidden;
     });
 
     let entries: VisTypeListEntry[];
@@ -161,19 +151,6 @@ class AggBasedSelection extends React.Component<AggBasedSelectionProps, AggBased
   }
 
   private renderVisType = (visType: VisTypeListEntry) => {
-    let stage = {};
-    if (visType.type.stage === 'experimental') {
-      stage = {
-        betaBadgeLabel: i18n.translate('visualizations.newVisWizard.experimentalTitle', {
-          defaultMessage: 'Experimental',
-        }),
-        betaBadgeTooltipContent: i18n.translate('visualizations.newVisWizard.experimentalTooltip', {
-          defaultMessage:
-            'This visualization might be changed or removed in a future release and is not subject to the support SLA.',
-        }),
-      };
-    }
-
     const isDisabled = this.state.query !== '' && !visType.highlighted;
     const onClick = () => this.props.onVisTypeSelected(visType.type);
 
@@ -191,7 +168,6 @@ class AggBasedSelection extends React.Component<AggBasedSelectionProps, AggBased
           layout="horizontal"
           isDisabled={isDisabled}
           icon={<EuiIcon type={visType.type.icon || 'empty'} size="l" color="secondary" />}
-          {...stage}
         />
       </EuiFlexItem>
     );

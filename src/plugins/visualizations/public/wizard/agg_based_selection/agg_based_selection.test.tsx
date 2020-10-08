@@ -42,13 +42,6 @@ describe('AggBasedSelection', () => {
       ...defaultVisTypeParams,
     },
     {
-      name: 'visExp',
-      title: 'Experimental Vis',
-      group: VisGroups.AGGBASED,
-      stage: 'experimental',
-      ...defaultVisTypeParams,
-    },
-    {
       name: 'vis2',
       title: 'Vis Type 2',
       group: VisGroups.AGGBASED,
@@ -102,7 +95,6 @@ describe('AggBasedSelection', () => {
     const toggleGroups = jest.fn();
     const wrapper = mountWithIntl(
       <AggBasedSelection
-        showExperimental={true}
         visTypesRegistry={visTypes}
         toggleGroups={toggleGroups}
         onVisTypeSelected={jest.fn()}
@@ -117,7 +109,6 @@ describe('AggBasedSelection', () => {
     it('should render as expected', () => {
       const wrapper = mountWithIntl(
         <AggBasedSelection
-          showExperimental={true}
           visTypesRegistry={visTypes}
           toggleGroups={jest.fn()}
           onVisTypeSelected={jest.fn()}
@@ -126,32 +117,6 @@ describe('AggBasedSelection', () => {
       const searchBox = wrapper.find('input[data-test-subj="filterVisType"]');
       searchBox.simulate('change', { target: { value: 'with' } });
       expect(wrapper.find('[data-test-subj="visType-visWithSearch"]').exists()).toBe(true);
-    });
-  });
-
-  describe('experimental visualizations', () => {
-    it('should not show experimental visualizations if showExperimentalis false', () => {
-      const wrapper = mountWithIntl(
-        <AggBasedSelection
-          showExperimental={false}
-          visTypesRegistry={visTypes}
-          toggleGroups={jest.fn()}
-          onVisTypeSelected={jest.fn()}
-        />
-      );
-      expect(wrapper.find('[data-test-subj="visType-visExp"]').exists()).toBe(false);
-    });
-
-    it('should show experimental visualizations if showExperimental is true', () => {
-      const wrapper = mountWithIntl(
-        <AggBasedSelection
-          showExperimental={true}
-          visTypesRegistry={visTypes}
-          toggleGroups={jest.fn()}
-          onVisTypeSelected={jest.fn()}
-        />
-      );
-      expect(wrapper.find('[data-test-subj="visType-visExp"]').exists()).toBe(true);
     });
   });
 });
