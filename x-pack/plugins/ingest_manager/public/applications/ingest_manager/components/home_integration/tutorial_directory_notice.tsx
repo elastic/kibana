@@ -61,7 +61,7 @@ const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = memo(() => {
         title={
           <FormattedMessage
             id="xpack.ingestManager.homeIntegration.tutorialDirectory.noticeTitle"
-            defaultMessage="{newPrefix} Elastic Agent and Ingest Manager Beta"
+            defaultMessage="{newPrefix} Elastic Agent and Fleet Beta"
             values={{
               newPrefix: (
                 <strong>
@@ -98,8 +98,8 @@ const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = memo(() => {
             <div>
               <EuiButton size="s" href={getHref('overview')}>
                 <FormattedMessage
-                  id="xpack.ingestManager.homeIntegration.tutorialDirectory.ingestManagerAppButtonText"
-                  defaultMessage="Try Ingest Manager Beta"
+                  id="xpack.ingestManager.homeIntegration.tutorialDirectory.fleetAppButtonText"
+                  defaultMessage="Try Fleet Beta"
                 />
               </EuiButton>
             </div>
