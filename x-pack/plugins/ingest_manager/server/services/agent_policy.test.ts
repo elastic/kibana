@@ -6,6 +6,7 @@
 
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { agentPolicyService } from './agent_policy';
+import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 import { Output } from '../types';
 
 function getSavedObjectMock(agentPolicyAttributes: any) {
@@ -59,7 +60,20 @@ jest.mock('./output', () => {
   };
 });
 
+jest.mock('./agent_policy_update');
+
 describe('agent policy', () => {
+  describe('bumpRevision', () => {
+    it('should call agentPolicyUpdateEventHandler with updated event once', async () => {
+      const soClient = getSavedObjectMock({
+        revision: 1,
+        monitoring_enabled: ['metrics'],
+      });
+      await agentPolicyService.bumpRevision(soClient, 'agent-policy');
+
+      expect(agentPolicyUpdateEventHandler).toHaveBeenCalledTimes(1);
+    });
+  });
   describe('getFullAgentPolicy', () => {
     it('should return a policy without monitoring if monitoring is not enabled', async () => {
       const soClient = getSavedObjectMock({
