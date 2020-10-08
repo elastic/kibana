@@ -5,8 +5,7 @@
  */
 
 import React from 'react';
-import { shallow, mount, ReactWrapper } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { shallow, mount } from 'enzyme';
 
 import '../../../../../common/mock/match_media';
 import '../../../../../common/mock/formatted_relative';
@@ -181,9 +180,8 @@ describe('AllRules', () => {
   });
 
   describe('rules tab', () => {
-    let wrapper: ReactWrapper;
-    beforeEach(() => {
-      wrapper = mount(
+    it('renders correctly', async () => {
+      const wrapper = mount(
         <TestProviders>
           <AllRules
             createPrePackagedRules={jest.fn()}
@@ -199,14 +197,10 @@ describe('AllRules', () => {
           />
         </TestProviders>
       );
-    });
 
-    it('renders correctly', async () => {
-      await act(async () => {
-        await waitFor(() => {
-          expect(wrapper.exists('[data-test-subj="monitoring-table"]')).toBeFalsy();
-          expect(wrapper.exists('[data-test-subj="rules-table"]')).toBeTruthy();
-        });
+      await waitFor(() => {
+        expect(wrapper.exists('[data-test-subj="monitoring-table"]')).toBeFalsy();
+        expect(wrapper.exists('[data-test-subj="rules-table"]')).toBeTruthy();
       });
     });
   });

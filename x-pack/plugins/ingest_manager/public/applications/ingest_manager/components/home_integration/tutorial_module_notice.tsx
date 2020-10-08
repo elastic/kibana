@@ -9,7 +9,7 @@ import { EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
 import { TutorialModuleNoticeComponent } from 'src/plugins/home/public';
 import { useGetPackages, useLink, useCapabilities } from '../../hooks';
 
-export const TutorialModuleNotice: TutorialModuleNoticeComponent = memo(({ moduleName }) => {
+const TutorialModuleNotice: TutorialModuleNoticeComponent = memo(({ moduleName }) => {
   const { getHref } = useLink();
   const { show: hasIngestManager } = useCapabilities();
   const { data: packagesData, isLoading } = useGetPackages();
@@ -72,3 +72,7 @@ export const TutorialModuleNotice: TutorialModuleNoticeComponent = memo(({ modul
 
   return null;
 });
+
+// Needed for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default TutorialModuleNotice;
