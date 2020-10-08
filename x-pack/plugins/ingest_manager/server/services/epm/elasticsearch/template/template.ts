@@ -11,6 +11,7 @@ import {
   TemplateRef,
   IndexTemplate,
   IndexTemplateMappings,
+  DataType,
 } from '../../../../types';
 import { getRegistryDataStreamAssetBaseName } from '../index';
 
@@ -400,8 +401,6 @@ const updateExistingIndex = async ({
   delete mappings.properties.stream;
   delete mappings.properties.data_stream;
 
-  const [, dsType, dsTemplateName, dsNamespace] = indexName.split('-');
-  const dataStreamName = `${dsType}-${dsTemplateName}-${dsNamespace}`;
   // try to update the mappings first
   try {
     await callCluster('indices.putMapping', {
@@ -411,13 +410,53 @@ const updateExistingIndex = async ({
     // if update fails, rollover data stream
   } catch (err) {
     try {
+      // get the data_stream values to compose datastream name
+      const searchDataStreamFieldsResponse = await callCluster('search', {
+        index: indexTemplate.index_patterns[0],
+        body: {
+          size: 1,
+          query: {
+            bool: {
+              must: [
+                {
+                  exists: {
+                    field: 'data_stream.type',
+                  },
+                },
+                {
+                  exists: {
+                    field: 'data_stream.dataset',
+                  },
+                },
+                {
+                  exists: {
+                    field: 'data_stream.namespace',
+                  },
+                },
+              ],
+            },
+          },
+        },
+      });
+      if (searchDataStreamFieldsResponse.hits.total.value === 0)
+        throw new Error('data_stream fields are missing from datastream indices');
+      const {
+        dataset,
+        namespace,
+        type,
+      }: {
+        dataset: string;
+        namespace: string;
+        type: DataType;
+      } = searchDataStreamFieldsResponse.hits.hits[0]._source.data_stream;
+      const dataStreamName = `${type}-${dataset}-${namespace}`;
       const path = `/${dataStreamName}/_rollover`;
       await callCluster('transport.request', {
         method: 'POST',
         path,
       });
     } catch (error) {
-      throw new Error(`cannot rollover data stream ${dataStreamName}`);
+      throw new Error(`cannot rollover data stream ${error}`);
     }
   }
   // update settings after mappings was successful to ensure
