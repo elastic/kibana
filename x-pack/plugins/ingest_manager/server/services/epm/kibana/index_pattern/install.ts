@@ -96,13 +96,13 @@ export async function installIndexPatterns(
 
   const packageVersionsToFetch = [...installedPackages];
   if (pkgName && pkgVersion) {
-    const packageToInstall = packageVersionsToFetch.findIndex((pkg) => pkg.pkgName === pkgName);
+    const packageToInstall = packageVersionsToFetch.find((pkg) => pkg.pkgName === pkgName);
 
-    if (packageToInstall !== -1) {
+    if (packageToInstall) {
       // set the version to the one we want to install
       // if we're installing for the first time the number will be the same
       // if this is an upgrade then we'll be modifying the version number to the upgrade version
-      packageVersionsToFetch[packageToInstall].pkgVersion = pkgVersion;
+      packageToInstall.pkgVersion = pkgVersion;
     } else {
       // this will likely not happen because the saved objects should already have the package we're trying
       // install which means that it should have been found in the case above
