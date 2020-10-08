@@ -26,31 +26,31 @@ import { useKibana } from '../../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../../types';
 import { CreateEditField } from './create_edit_field';
 
-export type CreateEditFieldContainerProps = RouteComponentProps<{ id: string; fieldName: string }>;
+export type CreateEditFieldContainerProps = RouteComponentProps<{ id: string; fieldName?: string }>;
 
 const CreateEditFieldCont: React.FC<CreateEditFieldContainerProps> = ({ ...props }) => {
   const { setBreadcrumbs, data } = useKibana<IndexPatternManagmentContext>().services;
   const [indexPattern, setIndexPattern] = useState<IndexPattern>();
+  const fieldName =
+    props.match.params.fieldName && decodeURIComponent(props.match.params.fieldName);
 
   useEffect(() => {
     data.indexPatterns.get(props.match.params.id).then((ip: IndexPattern) => {
       setIndexPattern(ip);
       if (ip) {
         setBreadcrumbs(
-          props.match.params.fieldName
-            ? getEditFieldBreadcrumbs(ip, props.match.params.fieldName)
-            : getCreateFieldBreadcrumbs(ip)
+          fieldName ? getEditFieldBreadcrumbs(ip, fieldName) : getCreateFieldBreadcrumbs(ip)
         );
       }
     });
-  }, [props.match.params.id, props.match.params.fieldName, setBreadcrumbs, data.indexPatterns]);
+  }, [props.match.params.id, fieldName, setBreadcrumbs, data.indexPatterns]);
 
   if (indexPattern) {
     return (
       <CreateEditField
         indexPattern={indexPattern}
-        mode={props.match.params.fieldName ? 'edit' : 'create'}
-        fieldName={props.match.params.fieldName}
+        mode={fieldName ? 'edit' : 'create'}
+        fieldName={fieldName}
       />
     );
   } else {
