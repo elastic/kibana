@@ -66,7 +66,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       });
 
       it('Starts a new session on filter change', async () => {
-        await filterBar.addFilter('line_number', 'exists');
+        await filterBar.addFilter('line_number', 'is', '4.3.108');
         await PageObjects.header.waitUntilLoadingHasFinished();
         const sessionIds = await getSessionIds();
         expect(sessionIds.length).to.be(1);
