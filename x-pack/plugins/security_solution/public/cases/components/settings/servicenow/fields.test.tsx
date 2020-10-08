@@ -37,54 +37,28 @@ describe('ServiceNow Fields', () => {
     expect(wrapper.find('[data-test-subj="card-list-item"]').at(2).text()).toEqual('Impact: Low');
   });
 
-  test('onChange calls', async () => {
+  describe('onChange calls', () => {
     const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
 
     expect(onChange).toHaveBeenCalledWith(fields);
 
-    // SEVERITY
-    await waitFor(() => {
-      const select = wrapper.find(EuiSelect).filter('[data-test-subj="severitySelect"]')!;
-      select.prop('onChange')!({
-        target: {
-          value: '9',
-        },
-      } as React.ChangeEvent<HTMLSelectElement>);
-    });
-    wrapper.update();
-    expect(onChange.mock.calls[1][0]).toEqual({
-      ...fields,
-      severity: '9',
-    });
-
-    // URGENCY
-    await waitFor(() => {
-      const select = wrapper.find(EuiSelect).filter('[data-test-subj="urgencySelect"]')!;
-      select.prop('onChange')!({
-        target: {
-          value: '9',
-        },
-      } as React.ChangeEvent<HTMLSelectElement>);
-    });
-    wrapper.update();
-    expect(onChange.mock.calls[2][0]).toEqual({
-      ...fields,
-      urgency: '9',
-    });
-
-    // IMPACT
-    await waitFor(() => {
-      const select = wrapper.find(EuiSelect).filter('[data-test-subj="impactSelect"]')!;
-      select.prop('onChange')!({
-        target: {
-          value: '9',
-        },
-      } as React.ChangeEvent<HTMLSelectElement>);
-    });
-    wrapper.update();
-    expect(onChange.mock.calls[3][0]).toEqual({
-      ...fields,
-      impact: '9',
-    });
+    const testers = ['severity', 'urgency', 'impact'];
+    testers.forEach((subj) =>
+      test(`${subj.toUpperCase()}`, async () => {
+        await waitFor(() => {
+          const select = wrapper.find(EuiSelect).filter(`[data-test-subj="${subj}Select"]`)!;
+          select.prop('onChange')!({
+            target: {
+              value: '9',
+            },
+          } as React.ChangeEvent<HTMLSelectElement>);
+        });
+        wrapper.update();
+        expect(onChange).toHaveBeenCalledWith({
+          ...fields,
+          [subj]: '9',
+        });
+      })
+    );
   });
 });
