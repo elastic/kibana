@@ -189,7 +189,13 @@ const VisGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
         title={<span data-test-subj="visTypeTitle">{visType.title}</span>}
         onClick={onClick}
         isDisabled={isVisTypeAlias(visType) && visType.disabled}
-        betaBadgeLabel={isVisTypeAlias(visType) && visType.disabled ? 'Basic' : undefined}
+        betaBadgeLabel={
+          isVisTypeAlias(visType) && visType.disabled
+            ? i18n.translate('visualizations.newVisWizard.basicTitle', {
+                defaultMessage: 'Beta',
+              })
+            : undefined
+        }
         betaBadgeTooltipContent={
           isVisTypeAlias(visType) && visType.disabled
             ? i18n.translate('visualizations.newVisWizard.basicLicenseRequired', {

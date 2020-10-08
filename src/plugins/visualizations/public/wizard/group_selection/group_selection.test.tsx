@@ -69,10 +69,7 @@ describe('GroupSelection', () => {
       group: VisGroups.PROMOTED,
       aliasApp: 'anotherApp',
       aliasPath: '#/anotherUrl',
-      promotion: {
-        description: 'promotion description',
-        buttonText: 'another app',
-      },
+      promotion: true,
     } as unknown,
   ] as VisType[];
 

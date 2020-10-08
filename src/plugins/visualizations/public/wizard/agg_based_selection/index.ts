@@ -17,34 +17,4 @@
  * under the License.
  */
 
-import React from 'react';
-
-import { EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-
-interface VisHelpTextProps {
-  name: string;
-  title: string;
-  description?: string;
-  highlightMsg?: string;
-}
-
-export const VisHelpText = ({ name, title, description, highlightMsg }: VisHelpTextProps) => {
-  return (
-    <React.Fragment>
-      <EuiTitle size="s">
-        <h2>{title}</h2>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <div id={`visTypeDescription-${name}`}>
-        <EuiText>
-          {highlightMsg && (
-            <p>
-              <em>{highlightMsg}</em>
-            </p>
-          )}
-          <p>{description}</p>
-        </EuiText>
-      </div>
-    </React.Fragment>
-  );
-};
+export { AggBasedSelection } from './agg_based_selection';

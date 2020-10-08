@@ -42,18 +42,13 @@ export interface VisualizationsAppExtension {
   }) => VisualizationListItem;
 }
 
-export interface VisTypeAliasPromotion {
-  description: string;
-  buttonText: string;
-}
-
 export interface VisTypeAlias {
   aliasPath: string;
   aliasApp: string;
   name: string;
   title: string;
   icon: string;
-  promotion?: VisTypeAliasPromotion;
+  promotion?: boolean;
   description: string;
   disabled?: boolean;
   getSupportedTriggers?: () => Array<keyof TriggerContextMapping>;

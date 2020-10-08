@@ -185,7 +185,7 @@ class AggBasedSelection extends React.Component<AggBasedSelectionProps, AggBased
           title={<span data-test-subj="visTypeTitle">{visType.type.title}</span>}
           onClick={onClick}
           data-test-subj={`visType-${visType.type.name}`}
-          data-vis-stage={!('aliasPath' in visType) ? visType.type.stage : 'alias'}
+          data-vis-stage={visType.type.stage}
           aria-describedby={`visTypeDescription-${visType.type.name}`}
           description={visType.type.description || ''}
           layout="horizontal"
