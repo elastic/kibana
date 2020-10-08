@@ -19,11 +19,13 @@
 
 const id = Symbol('id');
 
-type Ranges = Array<{
-  from: string | number | undefined;
-  to: string | number | undefined;
-  label?: string;
-}>;
+type Ranges = Array<
+  Partial<{
+    from: string | number;
+    to: string | number;
+    label: string;
+  }>
+>;
 
 export class RangeKey {
   [id]: string;
@@ -31,28 +33,28 @@ export class RangeKey {
   lt: string | number;
   label?: string;
 
-  private static findCustomLabel(from: string | number, to: string | number, ranges: Ranges) {
-    return ranges
-      ? ranges.find(
-          (range) =>
-            ((from === -Infinity && range.from === undefined) || range.from === from) &&
-            ((to === Infinity && range.to === undefined) || range.to === to)
-        )?.label
-      : undefined;
+  private static findCustomLabel(
+    from: string | number | undefined | null,
+    to: string | number | undefined | null,
+    ranges?: Ranges
+  ) {
+    return (ranges || []).find(
+      (range) =>
+        ((from == null && range.from == null) || range.from === from) &&
+        ((to == null && range.to == null) || range.to === to)
+    )?.label;
   }
 
   constructor(bucket: any, allRanges?: Ranges) {
     this.gte = bucket.from == null ? -Infinity : bucket.from;
     this.lt = bucket.to == null ? +Infinity : bucket.to;
-    this.label = allRanges ? RangeKey.findCustomLabel(this.gte, this.lt, allRanges) : undefined;
+    this.label = RangeKey.findCustomLabel(bucket.from, bucket.to, allRanges);
 
     this[id] = RangeKey.idBucket(bucket);
   }
 
   static idBucket(bucket: any, allRanges?: Ranges) {
-    const customLabel = allRanges
-      ? RangeKey.findCustomLabel(bucket.from, bucket.to, allRanges)
-      : undefined;
+    const customLabel = RangeKey.findCustomLabel(bucket.from, bucket.to, allRanges);
     return `from:${bucket.from},to:${bucket.to},label:${customLabel}`;
   }
 

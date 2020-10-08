@@ -42,7 +42,7 @@ export const range: ExpressionTypeDefinition<typeof name, Range> = {
   },
   to: {
     render: (value: Range): ExpressionValueRender<{ text: string }> => {
-      const text = value?.label ? value.label : `from ${value.from} to ${value.to}`;
+      const text = value?.label || `from ${value.from} to ${value.to}`;
       return {
         type: 'render',
         as: 'text',
