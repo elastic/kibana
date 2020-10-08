@@ -20,6 +20,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
   SavedObjectsFindOptionsReference,
+  SavedObjectReference,
 } from 'kibana/public';
 import { SavedObject } from '../types';
 import { StringUtils } from './helpers/string_utils';
@@ -100,7 +101,7 @@ export class SavedObjectLoader {
   mapHitSource(
     source: Record<string, unknown>,
     id: string,
-    references: SavedObjectsFindOptionsReference[] = []
+    references: SavedObjectReference[] = []
   ) {
     source.id = id;
     source.url = this.urlFor(id);
@@ -117,7 +118,7 @@ export class SavedObjectLoader {
   mapSavedObjectApiHits(hit: {
     attributes: Record<string, unknown>;
     id: string;
-    references?: SavedObjectsFindOptionsReference[];
+    references?: SavedObjectReference[];
   }) {
     return this.mapHitSource(hit.attributes, hit.id, hit.references || []);
   }

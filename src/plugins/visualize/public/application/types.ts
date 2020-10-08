@@ -46,6 +46,7 @@ import { SavedObjectsStart, SavedObject } from 'src/plugins/saved_objects/public
 import { EmbeddableStart } from 'src/plugins/embeddable/public';
 import { UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import { DashboardStart } from '../../../dashboard/public';
+import { TaggingApi } from '../../../saved_objects_tagging_oss/public';
 
 export type PureVisState = SavedVisState;
 
@@ -114,6 +115,7 @@ export interface VisualizeServices extends CoreStart {
   scopedHistory: ScopedHistory;
   dashboard: DashboardStart;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  savedObjectsTagging?: TaggingApi;
 }
 
 export interface SavedVisInstance {

@@ -130,6 +130,28 @@ describe('saved_visualizations', () => {
     ]);
   });
 
+  it('searches with references', async () => {
+    const props = {
+      ...testProps(),
+      references: [
+        { type: 'foo', id: 'hello' },
+        { type: 'bar', id: 'dolly' },
+      ],
+    };
+    const { find } = props.savedObjectsClient;
+    await findListItems(props);
+    expect(find.mock.calls).toMatchObject([
+      [
+        {
+          hasReference: [
+            { type: 'foo', id: 'hello' },
+            { type: 'bar', id: 'dolly' },
+          ],
+        },
+      ],
+    ]);
+  });
+
   it('uses type-specific toListItem function, if available', async () => {
     const props = {
       ...testProps(),

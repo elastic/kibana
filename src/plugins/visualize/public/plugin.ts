@@ -49,6 +49,7 @@ import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { SavedObjectsStart } from '../../saved_objects/public';
 import { EmbeddableStart } from '../../embeddable/public';
 import { DashboardStart } from '../../dashboard/public';
+import { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public';
 import { UiActionsStart, VISUALIZE_FIELD_TRIGGER } from '../../ui_actions/public';
 import {
   setUISettings,
@@ -70,6 +71,7 @@ export interface VisualizePluginStartDependencies {
   savedObjects: SavedObjectsStart;
   dashboard: DashboardStart;
   uiActions: UiActionsStart;
+  savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
 }
 
 export interface VisualizePluginSetupDependencies {
@@ -197,6 +199,7 @@ export class VisualizePlugin
           restorePreviousUrl,
           dashboard: pluginsStart.dashboard,
           setHeaderActionMenu: params.setHeaderActionMenu,
+          savedObjectsTagging: pluginsStart.savedObjectsTaggingOss?.getTaggingApi(),
         };
 
         params.element.classList.add('visAppWrapper');
