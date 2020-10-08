@@ -145,7 +145,7 @@ function getEventScopeFromValueClickTriggerContext(
     const column = table.columns[columnIndex];
     return {
       value: toPrimitiveOrUndefined(value) as Primitive,
-      key: column?.meta?.sourceParams?.field,
+      key: column?.meta?.field,
     };
   });
 

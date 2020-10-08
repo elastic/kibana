@@ -25,9 +25,9 @@ const createPoint = ({
         id: '1-1',
         meta: {
           type: 'date' as DatatableColumnType,
+          field,
           source: 'esaggs',
           sourceParams: {
-            field,
             type: 'histogram',
             indexPatternId: 'logstash-*',
             interval: 30,
