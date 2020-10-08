@@ -17,27 +17,8 @@
  * under the License.
  */
 
-import * as path from 'path';
-import { parseTelemetryRC } from './config';
-
-describe('parseTelemetryRC', () => {
-  it('throw if config path is not absolute', async () => {
-    const fixtureDir = './__fixture__/';
-    await expect(parseTelemetryRC(fixtureDir)).rejects.toThrowError();
-  });
-
-  it('returns parsed rc file', async () => {
-    const configRoot = path.join(process.cwd(), 'src', 'fixtures', 'telemetry_collectors');
-    const config = await parseTelemetryRC(configRoot);
-    expect(config).toStrictEqual([
-      {
-        root: configRoot,
-        output: configRoot,
-        exclude: [
-          path.resolve(configRoot, './unmapped_collector.ts'),
-          path.resolve(configRoot, './externally_defined_usage_collector/index.ts'),
-        ],
-      },
-    ]);
-  });
-});
+export const mockStats = { somestat: 1 };
+export const mockGetStats = jest.fn().mockResolvedValue(mockStats);
+jest.doMock('./get_usage_collector', () => ({
+  getStats: mockGetStats,
+}));
