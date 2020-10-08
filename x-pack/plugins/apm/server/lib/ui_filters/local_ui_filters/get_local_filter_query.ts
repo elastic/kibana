@@ -8,7 +8,7 @@ import { omit } from 'lodash';
 import { mergeProjection } from '../../../projections/util/merge_projection';
 import { Projection } from '../../../projections/typings';
 import { UIFilters } from '../../../../typings/ui_filters';
-import { getUiFiltersES } from '../../helpers/convert_ui_filters/get_ui_filters_es';
+import { getEsFilter } from '../../helpers/convert_ui_filters/get_es_filter';
 import { localUIFilters } from './config';
 import { LocalUIFilterName } from '../../../../common/ui_filter';
 
@@ -22,7 +22,7 @@ export const getLocalFilterQuery = ({
   localUIFilterName: LocalUIFilterName;
 }) => {
   const field = localUIFilters[localUIFilterName];
-  const filter = getUiFiltersES(omit(uiFilters, field.name));
+  const filter = getEsFilter(omit(uiFilters, field.name));
 
   const bucketCountAggregation = projection.body.aggs
     ? {

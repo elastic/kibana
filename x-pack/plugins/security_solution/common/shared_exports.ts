@@ -5,6 +5,7 @@
  */
 
 export { NonEmptyString } from './detection_engine/schemas/types/non_empty_string';
+export { DefaultArray } from './detection_engine/schemas/types/default_array';
 export { DefaultUuid } from './detection_engine/schemas/types/default_uuid';
 export { DefaultStringArray } from './detection_engine/schemas/types/default_string_array';
 export {

@@ -32,7 +32,7 @@
     "lodash": "^4.17.20",
     "parse-link-header": "^1.0.1",
     "rxjs": "^6.5.5",
-    "strip-ansi": "^5.2.0",
+    "strip-ansi": "^6.0.0",
     "tar-fs": "^2.1.0",
     "xml2js": "^0.4.22",
     "zlib": "^1.0.5"

@@ -58,6 +58,19 @@ describe('DELETE /api/saved_objects/{type}/{id}', () => {
       .delete('/api/saved_objects/index-pattern/logstash-*')
       .expect(200);
 
-    expect(savedObjectsClient.delete).toHaveBeenCalledWith('index-pattern', 'logstash-*');
+    expect(savedObjectsClient.delete).toHaveBeenCalledWith('index-pattern', 'logstash-*', {
+      force: undefined,
+    });
+  });
+
+  it('can specify `force` option', async () => {
+    await supertest(httpSetup.server.listener)
+      .delete('/api/saved_objects/index-pattern/logstash-*')
+      .query({ force: true })
+      .expect(200);
+
+    expect(savedObjectsClient.delete).toHaveBeenCalledWith('index-pattern', 'logstash-*', {
+      force: true,
+    });
   });
 });

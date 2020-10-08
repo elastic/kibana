@@ -30,7 +30,11 @@ export function getMigrations(
       // migrate all documents in 7.10 in order to add the "meta" RBAC field
       return true;
     },
-    pipeMigrations(markAsLegacyAndChangeConsumer, setAlertIdAsDefaultDedupkeyOnPagerDutyActions)
+    pipeMigrations(
+      markAsLegacyAndChangeConsumer,
+      setAlertIdAsDefaultDedupkeyOnPagerDutyActions,
+      initializeExecutionStatus
+    )
   );
 
   return {
@@ -106,6 +110,23 @@ function setAlertIdAsDefaultDedupkeyOnPagerDutyActions(
             }),
           }
         : {}),
+    },
+  };
+}
+
+function initializeExecutionStatus(
+  doc: SavedObjectUnsanitizedDoc<RawAlert>
+): SavedObjectUnsanitizedDoc<RawAlert> {
+  const { attributes } = doc;
+  return {
+    ...doc,
+    attributes: {
+      ...attributes,
+      executionStatus: {
+        status: 'pending',
+        lastExecutionDate: new Date().toISOString(),
+        error: null,
+      },
     },
   };
 }

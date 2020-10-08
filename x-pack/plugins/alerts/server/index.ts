@@ -11,6 +11,7 @@ import { AlertingPlugin } from './plugin';
 export type AlertsClient = PublicMethodsOf<AlertsClientClass>;
 
 export {
+  ActionVariable,
   AlertType,
   ActionGroup,
   AlertingPlugin,

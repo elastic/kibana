@@ -178,7 +178,7 @@ export class IngestManagerPlugin
     this.encryptedSavedObjectsSetup = deps.encryptedSavedObjects;
     this.cloud = deps.cloud;
 
-    registerSavedObjects(core.savedObjects);
+    registerSavedObjects(core.savedObjects, deps.encryptedSavedObjects);
     registerEncryptedSavedObjects(deps.encryptedSavedObjects);
 
     // Register feature
@@ -237,7 +237,7 @@ export class IngestManagerPlugin
       registerEPMRoutes(router);
 
       // Conditional config routes
-      if (config.fleet.enabled) {
+      if (config.agents.enabled) {
         const isESOUsingEphemeralEncryptionKey =
           deps.encryptedSavedObjects.usingEphemeralEncryptionKey;
         if (isESOUsingEphemeralEncryptionKey) {
