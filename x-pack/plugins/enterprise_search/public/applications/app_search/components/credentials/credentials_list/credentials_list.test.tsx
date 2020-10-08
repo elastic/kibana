@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import '../../../../__mocks__/kea.mock';
 
 import React from 'react';
@@ -136,7 +137,7 @@ describe('Credentials', () => {
     const showCredentialsForm = jest.fn();
     const deleteApiKey = jest.fn();
 
-    beforeEach(() => {
+    beforeAll(() => {
       mockKea({
         actions: {
           showCredentialsForm,
@@ -191,7 +192,7 @@ describe('Credentials', () => {
       it('renders the credential and a button to copy it', () => {
         const [copyMock, copyEl] = subject(testToken);
         expect(copyEl.find('EuiButtonIcon').props().onClick).toEqual(copyMock);
-        expect(copyEl.text().replace('<EuiButtonIcon />', '')).toBe('abc-123');
+        expect(copyEl.text()).toContain('abc-123');
       });
 
       it('empty text if no key is present', () => {
@@ -261,7 +262,7 @@ describe('Credentials', () => {
 
       mockKea({ actions: { fetchCredentials } });
       const wrapper = shallow(<CredentialsList />);
-      const onChange = wrapper.find(EuiBasicTable).props().onChange;
+      const { onChange } = wrapper.find(EuiBasicTable).props();
 
       onChange({
         page: {

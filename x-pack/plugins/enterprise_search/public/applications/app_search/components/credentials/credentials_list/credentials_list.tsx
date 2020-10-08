@@ -28,7 +28,7 @@ export const CredentialsList: React.FC = () => {
     {
       name: 'Name',
       width: '12%',
-      render: (item: IApiToken) => item.name,
+      render: (token: IApiToken) => token.name,
     },
     {
       name: 'Type',
@@ -46,7 +46,7 @@ export const CredentialsList: React.FC = () => {
           })}
         >
           {(copy) => (
-            <div>
+            <>
               <EuiButtonIcon
                 onClick={copy}
                 iconType="copyClipboard"
@@ -58,7 +58,7 @@ export const CredentialsList: React.FC = () => {
                 )}
               />
               {item.key}
-            </div>
+            </>
           )}
         </EuiCopy>
       ),
