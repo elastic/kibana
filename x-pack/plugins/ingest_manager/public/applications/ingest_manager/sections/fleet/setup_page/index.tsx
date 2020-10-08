@@ -73,7 +73,7 @@ export const SetupPage: React.FunctionComponent<{
   ) {
     return (
       <WithoutHeaderLayout>
-        <EuiPageBody restrictWidth={548}>
+        <EuiPageBody restrictWidth={648}>
           <EuiPageContent
             verticalPosition="center"
             horizontalPosition="center"
@@ -87,7 +87,7 @@ export const SetupPage: React.FunctionComponent<{
               <h2>
                 <FormattedMessage
                   id="xpack.ingestManager.setupPage.enableTitle"
-                  defaultMessage="Enable Fleet"
+                  defaultMessage="Enable central management for Elastic Agents"
                 />
               </h2>
             </EuiTitle>
@@ -95,15 +95,15 @@ export const SetupPage: React.FunctionComponent<{
             <EuiText color="subdued">
               <FormattedMessage
                 id="xpack.ingestManager.setupPage.enableText"
-                defaultMessage="Fleet requires an Elastic user who can create API keys and write to logs-* and metrics-*."
+                defaultMessage="Central management requires an Elastic user who can create API keys and write to logs-* and metrics-*."
               />
             </EuiText>
             <EuiSpacer size="l" />
             <EuiForm>
               <EuiButton onClick={onSubmit} fill isLoading={isFormLoading} type="submit">
                 <FormattedMessage
-                  id="xpack.ingestManager.setupPage.enableFleet"
-                  defaultMessage="Create user and enable Fleet"
+                  id="xpack.ingestManager.setupPage.enableCentralManagement"
+                  defaultMessage="Create user and enable central management"
                 />
               </EuiButton>
             </EuiForm>
@@ -127,7 +127,7 @@ export const SetupPage: React.FunctionComponent<{
           >
             <FormattedMessage
               id="xpack.ingestManager.setupPage.missingRequirementsCalloutDescription"
-              defaultMessage="In order to use Fleet, you must enable the following Elasticsearch and Kibana security features."
+              defaultMessage="To use central management for Elastic Agents, enable the following Elasticsearch and Kibana security features."
             />
           </EuiCallOut>
           <EuiSpacer size="m" />

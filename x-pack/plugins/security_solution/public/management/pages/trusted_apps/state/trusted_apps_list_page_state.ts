@@ -7,7 +7,6 @@
 import { ServerApiError } from '../../../../common/types';
 import { NewTrustedApp, TrustedApp } from '../../../../../common/endpoint/types/trusted_apps';
 import { AsyncResourceState } from '.';
-import { TrustedAppsUrlParams } from '../types';
 
 export interface PaginationInfo {
   index: number;
@@ -39,12 +38,19 @@ export interface TrustedAppCreateFailure {
   data: ServerApiError;
 }
 
+export type ViewType = 'list' | 'grid';
+
+export interface TrustedAppsListPageLocation {
+  page_index: number;
+  page_size: number;
+  view_type: ViewType;
+  show?: 'create';
+}
+
 export interface TrustedAppsListPageState {
   listView: {
-    currentListResourceState: AsyncResourceState<TrustedAppsListData>;
-    currentPaginationInfo: PaginationInfo;
+    listResourceState: AsyncResourceState<TrustedAppsListData>;
     freshDataTimestamp: number;
-    show: TrustedAppsUrlParams['show'] | undefined;
   };
   deletionDialog: {
     entry?: TrustedApp;
@@ -56,5 +62,6 @@ export interface TrustedAppsListPageState {
     | TrustedAppCreatePending
     | TrustedAppCreateSuccess
     | TrustedAppCreateFailure;
+  location: TrustedAppsListPageLocation;
   active: boolean;
 }

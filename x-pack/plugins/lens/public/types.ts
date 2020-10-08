@@ -22,6 +22,7 @@ import {
   SELECT_RANGE_TRIGGER,
   TriggerContext,
   VALUE_CLICK_TRIGGER,
+  VisualizeFieldContext,
 } from '../../../../src/plugins/ui_actions/public';
 
 export type ErrorCallback = (e: { message: string }) => void;
@@ -40,6 +41,7 @@ export interface EditorFrameProps {
   query: Query;
   filters: Filter[];
   savedQuery?: SavedQuery;
+  initialContext?: VisualizeFieldContext;
 
   // Frame loader (app or embeddable) is expected to call this when it loads and updates
   // This should be replaced with a top-down state
@@ -145,7 +147,11 @@ export interface Datasource<T = unknown, P = unknown> {
   // For initializing, either from an empty state or from persisted state
   // Because this will be called at runtime, state might have a type of `any` and
   // datasources should validate their arguments
-  initialize: (state?: P, savedObjectReferences?: SavedObjectReference[]) => Promise<T>;
+  initialize: (
+    state?: P,
+    savedObjectReferences?: SavedObjectReference[],
+    initialContext?: VisualizeFieldContext
+  ) => Promise<T>;
 
   // Given the current state, which parts should be saved?
   getPersistableState: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };
@@ -166,6 +172,11 @@ export interface Datasource<T = unknown, P = unknown> {
   toExpression: (state: T, layerId: string) => Ast | string | null;
 
   getDatasourceSuggestionsForField: (state: T, field: unknown) => Array<DatasourceSuggestion<T>>;
+  getDatasourceSuggestionsForVisualizeField: (
+    state: T,
+    indexPatternId: string,
+    fieldName: string
+  ) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsFromCurrentState: (state: T) => Array<DatasourceSuggestion<T>>;
 
   getPublicAPI: (props: PublicAPIProps<T>) => DatasourcePublicAPI;

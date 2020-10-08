@@ -27,6 +27,14 @@ import { OS_TITLES, PROPERTY_TITLES, ENTRY_PROPERTY_TITLES } from '../../transla
 
 type Entry = MacosLinuxConditionEntry | WindowsConditionEntry;
 
+const trimTextOverflow = (text: string, maxSize: number) => {
+  if (text.length > maxSize) {
+    return `${text.substr(0, maxSize)}...`;
+  } else {
+    return text;
+  }
+};
+
 const getEntriesColumnDefinitions = (): Array<EuiTableFieldDataColumnType<Entry>> => [
   {
     field: 'field',
@@ -75,6 +83,13 @@ export const TrustedAppCard = memo(({ trustedApp, onDelete }: TrustedAppCardProp
         }
       />
       <ItemDetailsPropertySummary name={PROPERTY_TITLES.created_by} value={trustedApp.created_by} />
+      <ItemDetailsPropertySummary
+        name={PROPERTY_TITLES.description}
+        value={useMemo(() => trimTextOverflow(trustedApp.description || '', 100), [
+          trustedApp.description,
+        ])}
+        title={trustedApp.description}
+      />
 
       <ConditionsTable
         columns={useMemo(() => getEntriesColumnDefinitions(), [])}

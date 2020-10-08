@@ -88,7 +88,7 @@ export const I18LABELS = {
   pageLoadDurationByRegion: i18n.translate(
     'xpack.apm.rum.visitorBreakdownMap.pageLoadDurationByRegion',
     {
-      defaultMessage: 'Page load duration by region',
+      defaultMessage: 'Page load duration by region (avg.)',
     }
   ),
   searchByUrl: i18n.translate('xpack.apm.rum.filters.searchByUrl', {

@@ -9,6 +9,7 @@ import { first, map } from 'rxjs/operators';
 import { TypeOf } from '@kbn/config-schema';
 import { deepFreeze } from '@kbn/std';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { SecurityOssPluginSetup } from 'src/plugins/security_oss/server';
 import {
   CoreSetup,
   CoreStart,
@@ -84,6 +85,7 @@ export interface PluginSetupDependencies {
   licensing: LicensingPluginSetup;
   taskManager: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
+  securityOss?: SecurityOssPluginSetup;
 }
 
 export interface PluginStartDependencies {
@@ -133,7 +135,7 @@ export class Plugin {
 
   public async setup(
     core: CoreSetup<PluginStartDependencies>,
-    { features, licensing, taskManager, usageCollection }: PluginSetupDependencies
+    { features, licensing, taskManager, usageCollection, securityOss }: PluginSetupDependencies
   ) {
     const [config, legacyConfig] = await combineLatest([
       this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
@@ -152,6 +154,13 @@ export class Plugin {
     const { license } = this.securityLicenseService.setup({
       license$: licensing.license$,
     });
+
+    if (securityOss) {
+      license.features$.subscribe(({ allowRbac }) => {
+        const showInsecureClusterWarning = !allowRbac;
+        securityOss.showInsecureClusterWarning$.next(showInsecureClusterWarning);
+      });
+    }
 
     securityFeatures.forEach((securityFeature) =>
       features.registerElasticsearchFeature(securityFeature)

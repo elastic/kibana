@@ -55,6 +55,7 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
   const group1NonImportable = [{ ...CASES.HIDDEN, ...fail400() }];
   const group1All = [...group1Importable, ...group1NonImportable];
   const group2 = [
+    { ...CASES.MULTI_NAMESPACE_ALL_SPACES, ...fail409(!overwrite) },
     {
       ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
       ...fail409(!overwrite && (spaceId === DEFAULT_SPACE_ID || spaceId === SPACE_1_ID)),

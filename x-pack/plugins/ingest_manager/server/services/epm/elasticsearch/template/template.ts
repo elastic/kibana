@@ -189,6 +189,9 @@ function generateKeywordMapping(field: Field): IndexTemplateMapping {
   if (field.ignore_above) {
     mapping.ignore_above = field.ignore_above;
   }
+  if (field.normalizer) {
+    mapping.normalizer = field.normalizer;
+  }
   return mapping;
 }
 

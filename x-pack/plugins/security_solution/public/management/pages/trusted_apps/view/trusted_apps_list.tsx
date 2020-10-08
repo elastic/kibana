@@ -23,8 +23,8 @@ import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
 import { getTrustedAppsListPath } from '../../../common/routing';
 
 import {
-  getListCurrentPageIndex,
-  getListCurrentPageSize,
+  getCurrentLocationPageIndex,
+  getCurrentLocationPageSize,
   getListErrorMessage,
   getListItems,
   getListTotalItemsCount,
@@ -149,8 +149,8 @@ const getColumnDefinitions = (context: TrustedAppsListContext): ColumnsList => {
 
 export const TrustedAppsList = memo(() => {
   const [detailsMap, setDetailsMap] = useState<DetailsMap>({});
-  const pageIndex = useTrustedAppsSelector(getListCurrentPageIndex);
-  const pageSize = useTrustedAppsSelector(getListCurrentPageSize);
+  const pageIndex = useTrustedAppsSelector(getCurrentLocationPageIndex);
+  const pageSize = useTrustedAppsSelector(getCurrentLocationPageSize);
   const totalItemCount = useTrustedAppsSelector(getListTotalItemsCount);
   const listItems = useTrustedAppsSelector(getListItems);
   const dispatch = useDispatch();

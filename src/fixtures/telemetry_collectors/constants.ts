@@ -66,3 +66,7 @@ export interface MappedTypes {
     [key in 'prop3']: number;
   };
 }
+
+export type RecordWithKnownProps = Record<MappedTypeProps, number>;
+
+export type IndexedAccessType = Pick<WithUnion, 'prop1' | 'prop2'>;

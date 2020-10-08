@@ -310,7 +310,7 @@ export function resolveCopyToSpaceConflictsSuite(
     // a 403 error actually comes back as an HTTP 200 response
     const statusCode = outcome === 'noAccess' ? 404 : 200;
     const type = 'sharedtype';
-    const exactMatchId = 'all_spaces';
+    const exactMatchId = 'each_space';
     const inexactMatchId = `conflict_1_${spaceId}`;
     const ambiguousConflictId = `conflict_2_${spaceId}`;
 

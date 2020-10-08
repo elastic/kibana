@@ -48,6 +48,7 @@ export default function () {
         `--elasticsearch.username=${kibanaServerTestUser.username}`,
         `--elasticsearch.password=${kibanaServerTestUser.password}`,
         `--home.disableWelcomeScreen=true`,
+        `--security.showInsecureClusterWarning=false`,
         '--telemetry.banner=false',
         '--telemetry.optIn=false',
         // These are *very* important to have them pointing to staging

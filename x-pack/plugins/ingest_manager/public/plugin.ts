@@ -60,13 +60,16 @@ export class IngestManagerPlugin
   implements
     Plugin<IngestManagerSetup, IngestManagerStart, IngestManagerSetupDeps, IngestManagerStartDeps> {
   private config: IngestManagerConfigType;
+  private kibanaVersion: string;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<IngestManagerConfigType>();
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
   public setup(core: CoreSetup, deps: IngestManagerSetupDeps) {
     const config = this.config;
+    const kibanaVersion = this.kibanaVersion;
 
     // Set up http client
     setHttpClient(core.http);
@@ -88,7 +91,7 @@ export class IngestManagerPlugin
           IngestManagerStart
         ];
         const { renderApp, teardownIngestManager } = await import('./applications/ingest_manager');
-        const unmount = renderApp(coreStart, params, deps, startDeps, config);
+        const unmount = renderApp(coreStart, params, deps, startDeps, config, kibanaVersion);
 
         return () => {
           unmount();

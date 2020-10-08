@@ -43,6 +43,7 @@ const createTestCases = (overwrite: boolean) => {
   const group1NonImportable = [{ ...CASES.HIDDEN, ...fail400() }];
   const group1All = [...group1Importable, ...group1NonImportable];
   const group2 = [
+    { ...CASES.MULTI_NAMESPACE_ALL_SPACES, ...fail409(!overwrite) },
     { ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, ...fail409(!overwrite) },
     { ...CASES.CONFLICT_1A_OBJ, ...newCopy() }, // "ambiguous source" conflict which results in a new destination ID and empty origin ID
     { ...CASES.CONFLICT_1B_OBJ, ...newCopy() }, // "ambiguous source" conflict which results in a new destination ID and empty origin ID

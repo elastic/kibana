@@ -751,7 +751,7 @@ describe('xy_expression', () => {
     });
 
     test('onElementClick returns correct context data', () => {
-      const geometry: GeometryValue = { x: 5, y: 1, accessor: 'y1', mark: null };
+      const geometry: GeometryValue = { x: 5, y: 1, accessor: 'y1', mark: null, datum: {} };
       const series = {
         key: 'spec{d}yAccessor{d}splitAccessors{b-2}',
         specId: 'd',

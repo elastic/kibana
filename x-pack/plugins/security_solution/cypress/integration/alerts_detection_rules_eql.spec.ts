@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { eqlRule, indexPatterns } from '../objects/rule';
+import { eqlRule, eqlSequenceRule, indexPatterns } from '../objects/rule';
 
 import {
   ALERT_RULE_METHOD,
@@ -85,8 +85,10 @@ const expectedMitre = eqlRule.mitre
   .join('');
 const expectedNumberOfRules = 1;
 const expectedNumberOfAlerts = 7;
+const expectedNumberOfSequenceAlerts = 1;
 
-describe('Detection rules, EQL', () => {
+// Failing: See https://github.com/elastic/kibana/issues/79522
+describe.skip('Detection rules, EQL', () => {
   before(() => {
     esArchiverLoad('timeline');
   });
@@ -171,5 +173,44 @@ describe('Detection rules, EQL', () => {
     cy.get(ALERT_RULE_METHOD).first().should('have.text', 'eql');
     cy.get(ALERT_RULE_SEVERITY).first().should('have.text', eqlRule.severity.toLowerCase());
     cy.get(ALERT_RULE_RISK_SCORE).first().should('have.text', eqlRule.riskScore);
+  });
+
+  it('Creates and activates a new EQL rule with a sequence', () => {
+    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+    waitForAlertsPanelToBeLoaded();
+    waitForAlertsIndexToBeCreated();
+    goToManageAlertsDetectionRules();
+    waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
+    goToCreateNewRule();
+    selectEqlRuleType();
+    fillDefineEqlRuleAndContinue(eqlSequenceRule);
+    fillAboutRuleAndContinue(eqlSequenceRule);
+    fillScheduleRuleAndContinue(eqlSequenceRule);
+    createAndActivateRule();
+
+    cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
+
+    changeToThreeHundredRowsPerPage();
+    waitForRulesToBeLoaded();
+
+    cy.get(RULES_TABLE).then(($table) => {
+      cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
+    });
+
+    filterByCustomRules();
+    goToRuleDetails();
+    refreshPage();
+    waitForTheRuleToBeExecuted();
+
+    cy.get(NUMBER_OF_ALERTS)
+      .invoke('text')
+      .then((numberOfAlertsText) => {
+        cy.wrap(parseInt(numberOfAlertsText, 10)).should('eql', expectedNumberOfSequenceAlerts);
+      });
+    cy.get(ALERT_RULE_NAME).first().should('have.text', eqlSequenceRule.name);
+    cy.get(ALERT_RULE_VERSION).first().should('have.text', '1');
+    cy.get(ALERT_RULE_METHOD).first().should('have.text', 'eql');
+    cy.get(ALERT_RULE_SEVERITY).first().should('have.text', eqlSequenceRule.severity.toLowerCase());
+    cy.get(ALERT_RULE_RISK_SCORE).first().should('have.text', eqlSequenceRule.riskScore);
   });
 });

@@ -88,6 +88,7 @@ export const TestPipelineActions: FunctionComponent = () => {
       {openTestPipelineFlyout && (
         <TestPipelineFlyout
           activeTab={activeFlyoutTab}
+          setActiveTab={setActiveFlyoutTab}
           processors={{
             processors: processors.state.processors,
             onFailure: processors.state.onFailure,

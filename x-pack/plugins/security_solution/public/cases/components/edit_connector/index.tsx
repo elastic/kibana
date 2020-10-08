@@ -27,7 +27,7 @@ interface EditConnectorProps {
   connectors: Connector[];
   disabled?: boolean;
   isLoading: boolean;
-  onSubmit: (a: string[], onSuccess: () => void, onError: () => void) => void;
+  onSubmit: (a: string, onSuccess: () => void, onError: () => void) => void;
   selectedConnector: string;
 }
 
@@ -48,7 +48,13 @@ export const EditConnector = React.memo(
     onSubmit,
     selectedConnector,
   }: EditConnectorProps) => {
-    const initialState = { connectors };
+    const initialState: {
+      connectors: Connector[];
+      connector: string | undefined;
+    } = {
+      connectors,
+      connector: undefined,
+    };
     const { form } = useForm({
       defaultValue: initialState,
       options: { stripEmptyFields: false },

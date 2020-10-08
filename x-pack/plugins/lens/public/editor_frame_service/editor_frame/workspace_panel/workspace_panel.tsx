@@ -28,7 +28,10 @@ import { getSuggestions, switchToSuggestion } from '../suggestion_helpers';
 import { buildExpression } from '../expression_helpers';
 import { debouncedComponent } from '../../../debounced_component';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
-import { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
+import {
+  UiActionsStart,
+  VisualizeFieldContext,
+} from '../../../../../../../src/plugins/ui_actions/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public';
 import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
@@ -53,6 +56,7 @@ export interface WorkspacePanelProps {
   core: CoreStart | CoreSetup;
   plugins: { uiActions?: UiActionsStart; data: DataPublicPluginStart };
   title?: string;
+  visualizeTriggerFieldContext?: VisualizeFieldContext;
 }
 
 export const WorkspacePanel = debouncedComponent(InnerWorkspacePanel);
@@ -71,6 +75,7 @@ export function InnerWorkspacePanel({
   plugins,
   ExpressionRenderer: ExpressionRendererComponent,
   title,
+  visualizeTriggerFieldContext,
 }: WorkspacePanelProps) {
   const dragDropContext = useContext(DragContext);
 
@@ -208,27 +213,22 @@ export function InnerWorkspacePanel({
       >
         <h2>
           <strong>
-            {expression === null ? (
-              <FormattedMessage
-                id="xpack.lens.editorFrame.emptyWorkspace"
-                defaultMessage="Drop some fields here to start"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.lens.editorFrame.emptyWorkspaceSimple"
-                defaultMessage="Drop field here"
-              />
-            )}
+            {expression === null
+              ? i18n.translate('xpack.lens.editorFrame.emptyWorkspace', {
+                  defaultMessage: 'Drop some fields here to start',
+                })
+              : i18n.translate('xpack.lens.editorFrame.emptyWorkspaceSimple', {
+                  defaultMessage: 'Drop field here',
+                })}
           </strong>
         </h2>
         <DropIllustration aria-hidden={true} className="lnsWorkspacePanel__dropIllustration" />
         {expression === null && (
           <>
             <p>
-              <FormattedMessage
-                id="xpack.lens.editorFrame.emptyWorkspaceHeading"
-                defaultMessage="Lens is a new tool for creating visualizations"
-              />
+              {i18n.translate('xpack.lens.editorFrame.emptyWorkspaceHeading', {
+                defaultMessage: 'Lens is a new tool for creating visualization',
+              })}
             </p>
             <p>
               <small>
@@ -237,10 +237,9 @@ export function InnerWorkspacePanel({
                   target="_blank"
                   external
                 >
-                  <FormattedMessage
-                    id="xpack.lens.editorFrame.goToForums"
-                    defaultMessage="Make requests and give feedback"
-                  />
+                  {i18n.translate('xpack.lens.editorFrame.goToForums', {
+                    defaultMessage: 'Make requests and give feedback',
+                  })}
                 </EuiLink>
               </small>
             </p>
@@ -251,7 +250,9 @@ export function InnerWorkspacePanel({
   }
 
   function renderVisualization() {
-    if (expression === null) {
+    // we don't want to render the emptyWorkspace on visualizing field from Discover
+    // as it is specific for the drag and drop functionality and can confuse the users
+    if (expression === null && !visualizeTriggerFieldContext) {
       return renderEmptyWorkspace();
     }
 

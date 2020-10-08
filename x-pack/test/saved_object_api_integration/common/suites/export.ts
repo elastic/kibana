@@ -75,14 +75,17 @@ export const getTestCases = (spaceId?: string): { [key: string]: ExportTestCase 
   multiNamespaceType: {
     title: 'multi-namespace type',
     type: 'sharedtype',
-    successResult: (spaceId === SPACE_1_ID
-      ? [CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, CASES.MULTI_NAMESPACE_ONLY_SPACE_1]
-      : spaceId === SPACE_2_ID
-      ? [CASES.MULTI_NAMESPACE_ONLY_SPACE_2]
-      : [CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1]
-    )
-      .concat([CONFLICT_1_OBJ, CONFLICT_2A_OBJ, CONFLICT_2B_OBJ, CONFLICT_3_OBJ, CONFLICT_4A_OBJ])
-      .flat(),
+    successResult: [
+      CASES.MULTI_NAMESPACE_ALL_SPACES,
+      ...(spaceId === SPACE_1_ID
+        ? [CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, CASES.MULTI_NAMESPACE_ONLY_SPACE_1]
+        : spaceId === SPACE_2_ID
+        ? [CASES.MULTI_NAMESPACE_ONLY_SPACE_2]
+        : [CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1]
+      )
+        .concat([CONFLICT_1_OBJ, CONFLICT_2A_OBJ, CONFLICT_2B_OBJ, CONFLICT_3_OBJ, CONFLICT_4A_OBJ])
+        .flat(),
+    ],
   },
   namespaceAgnosticObject: {
     title: 'namespace-agnostic object',
