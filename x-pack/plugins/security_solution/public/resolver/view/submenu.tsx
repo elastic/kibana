@@ -51,6 +51,8 @@ export function compactNotationParts(num: number): [number, string, string] {
     return [num, '', ''];
   }
 
+  // "scale" here will be a term indicating how many thousands there are in the number
+  // e.g. 1000 will be 1, 1000000 will be 2, etc.
   const scale = Math.pow(10, 3 * Math.min(Math.floor(Math.floor(Math.log10(num)) / 3), 4));
 
   const compactPrefixTranslations = {
