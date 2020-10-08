@@ -8,10 +8,15 @@ import _ from 'lodash';
 import React from 'react';
 import rison from 'rison-node';
 
+import { i18n } from '@kbn/i18n';
+import uuid from 'uuid/v4';
 import { AbstractESSource } from '../es_source';
 import { getSearchService, getHttp } from '../../../kibana_services';
 import { hitsToGeoJson, getField, addFieldToDSL } from '../../../../common/elasticsearch_util';
+
+// @ts-expect-error
 import { UpdateSourceEditor } from './update_source_editor';
+
 import {
   SOURCE_TYPES,
   ES_GEO_FIELD_TYPE,
@@ -23,11 +28,9 @@ import {
   GIS_API_PATH,
   MVT_GETTILE_API_PATH,
 } from '../../../../common/constants';
-import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { getSourceFields } from '../../../index_pattern_util';
 import { loadIndexSettings } from './load_index_settings';
-import uuid from 'uuid/v4';
 
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { ESDocField } from '../../fields/es_doc_field';
@@ -621,7 +624,7 @@ export class ESSearchSource extends AbstractESSource {
       layerName: this.getLayerName(),
       minSourceZoom: this.getMinZoom(),
       maxSourceZoom: this.getMaxZoom(),
-      urlTemplate: urlTemplate,
+      urlTemplate,
     };
   }
 }
