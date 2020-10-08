@@ -7,11 +7,7 @@
 import { TRANSACTION_DURATION } from '../../../common/elasticsearch_fieldnames';
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   TRANSACTION_DOM_INTERACTIVE,
   TRANSACTION_TIME_TO_FIRST_BYTE,
@@ -22,7 +18,7 @@ export async function getClientMetrics({
   urlQuery,
   percentile = 50,
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   urlQuery?: string;
   percentile?: number;
 }) {

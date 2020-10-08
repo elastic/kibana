@@ -4,19 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
+import axios from 'axios';
+import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import { LocationDescriptorObject } from 'history';
+import { HttpSetup } from 'kibana/public';
+
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import {
   notificationServiceMock,
-  fatalErrorsServiceMock,
   docLinksServiceMock,
-  injectedMetadataServiceMock,
   scopedHistoryMock,
 } from '../../../../../../src/core/public/mocks';
 
 import { usageCollectionPluginMock } from '../../../../../../src/plugins/usage_collection/public/mocks';
-
-import { HttpService } from '../../../../../../src/core/public/http';
 
 import {
   breadcrumbService,
@@ -27,10 +27,7 @@ import {
 
 import { init as initHttpRequests } from './http_requests';
 
-const httpServiceSetupMock = new HttpService().setup({
-  injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
-  fatalErrors: fatalErrorsServiceMock.createSetupContract(),
-});
+const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 
 const history = scopedHistoryMock.create();
 history.createHref.mockImplementation((location: LocationDescriptorObject) => {
@@ -53,7 +50,7 @@ const appServices = {
 
 export const setupEnvironment = () => {
   uiMetricService.setup(usageCollectionPluginMock.createSetupContract());
-  apiService.setup(httpServiceSetupMock, uiMetricService);
+  apiService.setup((mockHttpClient as unknown) as HttpSetup, uiMetricService);
   documentationService.setup(docLinksServiceMock.createStartContract());
   breadcrumbService.setup(() => {});
 

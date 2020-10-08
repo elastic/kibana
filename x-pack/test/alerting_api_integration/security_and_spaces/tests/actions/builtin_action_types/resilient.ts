@@ -352,25 +352,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.savedObjectId]: expected value of type [string] but got [undefined]\n- [3.subAction]: expected value to equal [incidentTypes]\n- [4.subAction]: expected value to equal [severity]',
-              });
-            });
-        });
-
-        it('should handle failing with a simulated success without savedObjectId', async () => {
-          await supertest
-            .post(`/api/actions/action/${simulatedActionId}/_execute`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              params: { subAction: 'pushToService', subActionParams: {} },
-            })
-            .then((resp: any) => {
-              expect(resp.body).to.eql({
-                actionId: simulatedActionId,
-                status: 'error',
-                retry: false,
-                message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.savedObjectId]: expected value of type [string] but got [undefined]\n- [3.subAction]: expected value to equal [incidentTypes]\n- [4.subAction]: expected value to equal [severity]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.title]: expected value of type [string] but got [undefined]\n- [3.subAction]: expected value to equal [incidentTypes]\n- [4.subAction]: expected value to equal [severity]',
               });
             });
         });

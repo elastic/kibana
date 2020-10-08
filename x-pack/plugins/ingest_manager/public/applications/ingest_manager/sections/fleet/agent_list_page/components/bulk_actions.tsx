@@ -18,7 +18,12 @@ import {
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n/react';
 import { SO_SEARCH_LIMIT } from '../../../../constants';
 import { Agent } from '../../../../types';
-import { AgentReassignAgentPolicyFlyout, AgentUnenrollAgentModal } from '../../components';
+import {
+  AgentReassignAgentPolicyFlyout,
+  AgentUnenrollAgentModal,
+  AgentUpgradeAgentModal,
+} from '../../components';
+import { useKibanaVersion } from '../../../../hooks';
 
 const Divider = styled.div`
   width: 0;
@@ -59,6 +64,7 @@ export const AgentBulkActions: React.FunctionComponent<{
   setSelectedAgents,
   refreshAgents,
 }) => {
+  const kibanaVersion = useKibanaVersion();
   // Bulk actions menu states
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const closeMenu = () => setIsMenuOpen(false);
@@ -67,6 +73,7 @@ export const AgentBulkActions: React.FunctionComponent<{
   // Actions states
   const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState<boolean>(false);
   const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState<boolean>(false);
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState<boolean>(false);
 
   // Check if user is working with only inactive agents
   const atLeastOneActiveAgentSelected =
@@ -109,6 +116,20 @@ export const AgentBulkActions: React.FunctionComponent<{
         {
           name: (
             <FormattedMessage
+              id="xpack.ingestManager.agentBulkActions.upgradeAgents"
+              defaultMessage="Upgrade agents"
+            />
+          ),
+          icon: <EuiIcon type="refresh" size="m" />,
+          disabled: !atLeastOneActiveAgentSelected,
+          onClick: () => {
+            closeMenu();
+            setIsUpgradeModalOpen(true);
+          },
+        },
+        {
+          name: (
+            <FormattedMessage
               id="xpack.ingestManager.agentBulkActions.clearSelection"
               defaultMessage="Clear selection"
             />
@@ -146,6 +167,21 @@ export const AgentBulkActions: React.FunctionComponent<{
             }
             onClose={() => {
               setIsUnenrollModalOpen(false);
+              refreshAgents();
+            }}
+          />
+        </EuiPortal>
+      )}
+      {isUpgradeModalOpen && (
+        <EuiPortal>
+          <AgentUpgradeAgentModal
+            version={kibanaVersion}
+            agents={selectionMode === 'manual' ? selectedAgents : currentQuery}
+            agentCount={
+              selectionMode === 'manual' ? selectedAgents.length : totalAgents - totalInactiveAgents
+            }
+            onClose={() => {
+              setIsUpgradeModalOpen(false);
               refreshAgents();
             }}
           />

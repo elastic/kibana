@@ -88,7 +88,7 @@ export async function getFullEndpointExceptionList(
     const response = await eClient.findExceptionListItem({
       listId,
       namespaceType: 'agnostic',
-      filter: `exception-list-agnostic.attributes._tags:\"os:${os}\"`,
+      filter: `exception-list-agnostic.attributes.os_types:\"${os}\"`,
       perPage: 100,
       page,
       sortField: 'created_at',
@@ -141,16 +141,16 @@ export function translateToEndpointExceptions(
 
 function getMatcherFunction(field: string, matchAny?: boolean): TranslatedEntryMatcher {
   return matchAny
-    ? field.endsWith('.text')
+    ? field.endsWith('.caseless')
       ? 'exact_caseless_any'
       : 'exact_cased_any'
-    : field.endsWith('.text')
+    : field.endsWith('.caseless')
     ? 'exact_caseless'
     : 'exact_cased';
 }
 
 function normalizeFieldName(field: string): string {
-  return field.endsWith('.text') ? field.substring(0, field.length - 5) : field;
+  return field.endsWith('.caseless') ? field.substring(0, field.lastIndexOf('.')) : field;
 }
 
 function translateItem(
