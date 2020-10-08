@@ -18,6 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { BaseVisTypeOptions } from 'src/plugins/visualizations/public';
 import { DefaultEditorSize } from '../../vis_default_editor/public';
 import { VegaVisualizationDependencies } from './plugin';
 import { VegaVisEditor } from './components';
@@ -31,7 +32,9 @@ import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
 
 import { getInfoMessage } from './components/experimental_map_vis_info';
 
-export const createVegaTypeDefinition = (dependencies: VegaVisualizationDependencies) => {
+export const createVegaTypeDefinition = (
+  dependencies: VegaVisualizationDependencies
+): BaseVisTypeOptions => {
   const requestHandler = createVegaRequestHandler(dependencies);
   const visualization = createVegaVisualization(dependencies);
 
