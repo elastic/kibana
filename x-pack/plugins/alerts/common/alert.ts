@@ -21,10 +21,10 @@ export const AlertExecutionStatusValues = ['ok', 'active', 'error', 'pending', '
 export type AlertExecutionStatuses = typeof AlertExecutionStatusValues[number];
 
 export enum AlertExecutionStatusErrorReasons {
-  read = 'read',
-  decrypt = 'decrypt',
-  execute = 'execute',
-  unknown = 'unknown',
+  Read = 'read',
+  Decrypt = 'decrypt',
+  Execute = 'execute',
+  Unknown = 'unknown',
 }
 
 export interface AlertExecutionStatus {

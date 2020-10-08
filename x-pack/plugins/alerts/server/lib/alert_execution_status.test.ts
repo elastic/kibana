@@ -58,7 +58,7 @@ describe('AlertExecutionStatus', () => {
 
     test('error with a reason', () => {
       const status = executionStatusFromError(
-        new ErrorWithReason(AlertExecutionStatusErrorReasons.execute, new Error('hoo!'))
+        new ErrorWithReason(AlertExecutionStatusErrorReasons.Execute, new Error('hoo!'))
       );
       expect(status.status).toBe('error');
       expect(status.error).toMatchInlineSnapshot(`
@@ -73,7 +73,7 @@ describe('AlertExecutionStatus', () => {
   describe('alertExecutionStatusToRaw()', () => {
     const date = new Date('2020-09-03T16:26:58Z');
     const status = 'ok';
-    const reason = AlertExecutionStatusErrorReasons.decrypt;
+    const reason = AlertExecutionStatusErrorReasons.Decrypt;
     const error = { reason, message: 'wops' };
 
     test('status without an error', () => {
@@ -104,7 +104,7 @@ describe('AlertExecutionStatus', () => {
   describe('alertExecutionStatusFromRaw()', () => {
     const date = new Date('2020-09-03T16:26:58Z').toISOString();
     const status = 'active';
-    const reason = AlertExecutionStatusErrorReasons.execute;
+    const reason = AlertExecutionStatusErrorReasons.Execute;
     const error = { reason, message: 'wops' };
 
     test('no input', () => {
