@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { right } from 'fp-ts/lib/Either';
+import { left, right } from 'fp-ts/lib/Either';
 
 import { FatalState, model, next, State } from '.';
 import { ElasticsearchClient } from '../../elasticsearch';
@@ -40,8 +40,64 @@ describe('migrations state machine', () => {
 
   test.todo('returns the final state once all steps are completed');
 
-  describe('model transitions from', () => {
-    describe('INIT', () => {
+  describe('model', () => {
+    describe('exponential retry delay', () => {
+      test('sets retryCount, exponential retryDelay when an action fails', () => {
+        let state: State = initState;
+        state = model(state, left(new Error()));
+
+        expect(state.retryCount).toEqual(1);
+        expect(state.retryDelay).toEqual(2000);
+
+        state = model(state, left(new Error()));
+
+        expect(state.retryCount).toEqual(2);
+        expect(state.retryDelay).toEqual(4000);
+
+        state = model(state, left(new Error()));
+
+        expect(state.retryCount).toEqual(3);
+        expect(state.retryDelay).toEqual(8000);
+
+        state = model(state, left(new Error()));
+
+        expect(state.retryCount).toEqual(4);
+        expect(state.retryDelay).toEqual(16000);
+
+        state = model(state, left(new Error()));
+
+        expect(state.retryCount).toEqual(5);
+        expect(state.retryDelay).toEqual(32000);
+
+        state = model(state, left(new Error()));
+      });
+
+      test('resets retryCount, retryDelay when an action succeeds', () => {
+        const newState = model(
+          { ...initState, ...{ retryCount: 5, retryDelay: 32000 } },
+          right({
+            fetchAliases: {
+              '.kibana_current': '.kibana_7.11.0_001',
+              '.kibana_7.11.0': '.kibana_7.11.0_001',
+            },
+          })
+        );
+
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+      });
+
+      test('terminates to FATAL after 5 retries', () => {
+        const newState = model(
+          { ...initState, ...{ retryCount: 5, retryDelay: 32000 } },
+          left(new Error())
+        );
+
+        expect(newState.controlState).toEqual('FATAL');
+      });
+    });
+
+    describe('transitions from INIT', () => {
       test('-> DONE if .kibana_current is already pointing to the target index', () => {
         const newState = model(
           initState,

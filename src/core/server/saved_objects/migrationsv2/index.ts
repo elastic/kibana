@@ -78,6 +78,9 @@ export type State =
 type Model = (currentState: State, result: ActionResponse) => State;
 type NextAction = (client: ElasticsearchClient, state: State) => ActionThunk | null;
 
+/**
+ * A helper function/type for ensuring that all control state's are handled.
+ */
 function throwBadControlState(p: never): never;
 function throwBadControlState(controlState: any) {
   throw new Error('Unknown control state: ' + controlState);
@@ -122,7 +125,12 @@ export const model: Model = (currentState: State, res: ActionResponse): State =>
       };
       return stateP;
     }
-  } else if (stateP.controlState === 'INIT') {
+  } else {
+    // Reset retry count when an action succeeds
+    stateP = { ...stateP, ...{ retryCount: 0, retryDelay: 0 } };
+  }
+
+  if (stateP.controlState === 'INIT') {
     if ('fetchAliases' in res.right) {
       if (
         res.right.fetchAliases['.kibana_current'] != null &&
