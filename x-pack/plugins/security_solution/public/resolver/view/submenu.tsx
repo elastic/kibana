@@ -50,10 +50,9 @@ export function compactNotationParts(num: number): [number, string, string] {
   if (!Number.isFinite(num)) {
     return [num, '', ''];
   }
-  let scale = 1;
-  while (scale < 1e12 && num / (scale * 1000) >= 1) {
-    scale *= 1000;
-  }
+
+  const scale = Math.pow(10, 3 * Math.min(Math.floor(Math.floor(Math.log10(num)) / 3), 4));
+
   const compactPrefixTranslations = {
     compactThousands: i18n.translate('xpack.securitySolution.endpoint.resolver.compactThousands', {
       defaultMessage: 'k',
