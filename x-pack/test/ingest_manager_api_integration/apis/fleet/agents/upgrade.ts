@@ -112,7 +112,7 @@ export default function (providerContext: FtrProviderContext) {
     it('should respond 400 if trying to upgrade an agent that is not upgradeable', async () => {
       const kibanaVersion = await kibanaServer.version.get();
       const res = await supertest
-        .post(`/api/ingest_manager/fleet/agents/agent1/upgrade`)
+        .post(`/api/fleet/agents/agent1/upgrade`)
         .set('kbn-xsrf', 'xxx')
         .send({
           version: kibanaVersion,

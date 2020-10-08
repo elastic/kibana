@@ -99,6 +99,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
 }: EditExceptionModalProps) {
   const { http } = useKibana().services;
   const [comment, setComment] = useState('');
+  const [errorsExist, setErrorExists] = useState(false);
   const { rule: maybeRule } = useRuleAsync(ruleId);
   const [updateError, setUpdateError] = useState<ErrorInfo | null>(null);
   const [hasVersionConflict, setHasVersionConflict] = useState(false);
@@ -109,8 +110,11 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   >([]);
   const { addError, addSuccess } = useAppToasts();
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
+  const memoSignalIndexName = useMemo(() => (signalIndexName !== null ? [signalIndexName] : []), [
+    signalIndexName,
+  ]);
   const [isSignalIndexPatternLoading, { indexPatterns: signalIndexPatterns }] = useFetchIndex(
-    signalIndexName !== null ? [signalIndexName] : []
+    memoSignalIndexName
   );
 
   const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(ruleIndices);
@@ -188,17 +192,23 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   }, [shouldDisableBulkClose]);
 
   const isSubmitButtonDisabled = useMemo(
-    () => exceptionItemsToAdd.every((item) => item.entries.length === 0) || hasVersionConflict,
-    [exceptionItemsToAdd, hasVersionConflict]
+    () =>
+      exceptionItemsToAdd.every((item) => item.entries.length === 0) ||
+      hasVersionConflict ||
+      errorsExist,
+    [exceptionItemsToAdd, hasVersionConflict, errorsExist]
   );
 
   const handleBuilderOnChange = useCallback(
     ({
       exceptionItems,
+      errorExists,
     }: {
       exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
+      errorExists: boolean;
     }) => {
       setExceptionItemsToAdd(exceptionItems);
+      setErrorExists(errorExists);
     },
     [setExceptionItemsToAdd]
   );
@@ -297,6 +307,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
                 id-aria="edit-exception-modal-builder"
                 onChange={handleBuilderOnChange}
                 indexPatterns={indexPatterns}
+                ruleType={maybeRule?.type}
               />
 
               <EuiSpacer />
