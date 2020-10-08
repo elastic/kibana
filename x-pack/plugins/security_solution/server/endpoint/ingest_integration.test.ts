@@ -13,27 +13,20 @@ import {
 } from './services/artifacts/manifest_manager/manifest_manager.mock';
 import { getPackagePolicyCreateCallback } from './ingest_integration';
 import { KibanaRequest, RequestHandlerContext } from 'kibana/server';
-import { AppClientFactory } from '../client';
 import { createMockConfig, requestContextMock } from '../lib/detection_engine/routes/__mocks__';
-import { PluginStartContract as AlertsStartContract } from '../../../alerts/server';
-import { SecurityPluginSetup } from '../../../security/server';
-import { securityMock } from '../../../security/server/mocks';
-import { alertsMock } from '../../../alerts/server/mocks';
+import { EndpointAppContextServiceStartContract } from './endpoint_app_context_services';
+import { createMockEndpointAppContextServiceStartContract } from './mocks';
 
 describe('ingest_integration tests ', () => {
+  let endpointAppContextMock: EndpointAppContextServiceStartContract;
   let req: KibanaRequest;
   let ctx: RequestHandlerContext;
-  let appFactory: AppClientFactory;
-  let alerts: AlertsStartContract;
-  let securitySetup: SecurityPluginSetup;
   const maxTimelineImportExportSize = createMockConfig().maxTimelineImportExportSize;
 
   beforeEach(() => {
+    endpointAppContextMock = createMockEndpointAppContextServiceStartContract();
     ctx = requestContextMock.createTools().context;
     req = httpServerMock.createKibanaRequest();
-    appFactory = new AppClientFactory();
-    alerts = alertsMock.createStart();
-    securitySetup = securityMock.createSetup();
   });
 
   describe('ingest_integration sanity checks', () => {
@@ -46,10 +39,10 @@ describe('ingest_integration tests ', () => {
       const callback = getPackagePolicyCreateCallback(
         logger,
         manifestManager,
-        appFactory,
+        endpointAppContextMock.appClientFactory,
         maxTimelineImportExportSize,
-        securitySetup,
-        alerts
+        endpointAppContextMock.security,
+        endpointAppContextMock.alerts
       );
       const policyConfig = createNewPackagePolicyMock(); // policy config without manifest
       const newPolicyConfig = await callback(policyConfig, ctx, req); // policy config WITH manifest
@@ -123,10 +116,10 @@ describe('ingest_integration tests ', () => {
       const callback = getPackagePolicyCreateCallback(
         logger,
         manifestManager,
-        appFactory,
+        endpointAppContextMock.appClientFactory,
         maxTimelineImportExportSize,
-        securitySetup,
-        alerts
+        endpointAppContextMock.security,
+        endpointAppContextMock.alerts
       );
       const policyConfig = createNewPackagePolicyMock();
       const newPolicyConfig = await callback(policyConfig, ctx, req);
@@ -150,10 +143,10 @@ describe('ingest_integration tests ', () => {
       const callback = getPackagePolicyCreateCallback(
         logger,
         manifestManager,
-        appFactory,
+        endpointAppContextMock.appClientFactory,
         maxTimelineImportExportSize,
-        securitySetup,
-        alerts
+        endpointAppContextMock.security,
+        endpointAppContextMock.alerts
       );
       const policyConfig = createNewPackagePolicyMock();
       const newPolicyConfig = await callback(policyConfig, ctx, req);
@@ -171,10 +164,10 @@ describe('ingest_integration tests ', () => {
       const callback = getPackagePolicyCreateCallback(
         logger,
         manifestManager,
-        appFactory,
+        endpointAppContextMock.appClientFactory,
         maxTimelineImportExportSize,
-        securitySetup,
-        alerts
+        endpointAppContextMock.security,
+        endpointAppContextMock.alerts
       );
       const policyConfig = createNewPackagePolicyMock();
       const newPolicyConfig = await callback(policyConfig, ctx, req);
