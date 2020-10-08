@@ -49,6 +49,9 @@ export const expandFirstAlert = () => {
 
 export const goToClosedAlerts = () => {
   cy.get(CLOSED_ALERTS_FILTER_BTN).click();
+  cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
+  cy.get(REFRESH_BUTTON).should('have.text', 'Refresh');
+  cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
 };
 
 export const goToManageAlertsDetectionRules = () => {
@@ -57,6 +60,9 @@ export const goToManageAlertsDetectionRules = () => {
 
 export const goToOpenedAlerts = () => {
   cy.get(OPENED_ALERTS_FILTER_BTN).click({ force: true });
+  cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
+  cy.get(REFRESH_BUTTON).should('have.text', 'Refresh');
+  cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
 };
 
 export const openFirstAlert = () => {

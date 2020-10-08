@@ -32,11 +32,11 @@ import { refreshPage } from '../tasks/security_header';
 import { DETECTIONS_URL } from '../urls/navigation';
 
 describe('Exceptions', () => {
-  before(() => {
+  beforeEach(() => {
     esArchiverLoad('exceptions');
   });
 
-  after(() => {
+  afterEach(() => {
     esArchiverUnload('exceptions');
   });
 
@@ -61,6 +61,8 @@ describe('Exceptions', () => {
     goToExceptionsTab();
     addsExceptionFromRuleSettings(exception);
     esArchiverLoad('auditbeat');
+    waitForTheRuleToBeExecuted();
+    refreshPage();
     goToAlertsTab();
 
     cy.get(SERVER_SIDE_EVENT_COUNT).should('have.attr', 'title', '0');
@@ -74,7 +76,6 @@ describe('Exceptions', () => {
       });
 
     goToOpenedAlerts();
-    refreshPage();
 
     cy.get(SERVER_SIDE_EVENT_COUNT)
       .invoke('text')
@@ -88,6 +89,7 @@ describe('Exceptions', () => {
     goToAlertsTab();
     waitForTheRuleToBeExecuted();
     refreshPage();
+    goToOpenedAlerts();
 
     cy.get(SERVER_SIDE_EVENT_COUNT)
       .invoke('text')
