@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Redirect, useRouteMatch, Switch, Route, useHistory, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
@@ -22,7 +22,13 @@ import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import styled from 'styled-components';
 import { AgentPolicy, AgentPolicyDetailsDeployAgentAction } from '../../../types';
 import { PAGE_ROUTING_PATHS } from '../../../constants';
-import { useGetOneAgentPolicy, useLink, useBreadcrumbs, useCore } from '../../../hooks';
+import {
+  useGetOneAgentPolicy,
+  useLink,
+  useBreadcrumbs,
+  useCore,
+  useFleetStatus,
+} from '../../../hooks';
 import { Loading, Error } from '../../../components';
 import { WithHeaderLayout } from '../../../layouts';
 import { AgentPolicyRefreshContext, useGetAgentStatus, AgentStatusRefreshContext } from './hooks';
@@ -55,6 +61,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
   const agentStatus = agentStatusRequest.data?.results;
   const queryParams = new URLSearchParams(useLocation().search);
   const openEnrollmentFlyoutOpenByDefault = queryParams.get('openEnrollmentFlyout') === 'true';
+  const { isReady: isFleetReady } = useFleetStatus();
 
   const headerLeftContent = useMemo(
     () => (
@@ -104,12 +111,6 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
     ),
     [getHref, isLoading, agentPolicy, policyId]
   );
-
-  const enrollmentCancelClickHandler = useCallback(() => {
-    if (routeState && routeState.onDoneNavigateTo) {
-      navigateToApp(routeState.onDoneNavigateTo[0], routeState.onDoneNavigateTo[1]);
-    }
-  }, [routeState, navigateToApp]);
 
   const headerRightContent = useMemo(
     () =>
@@ -177,8 +178,12 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
                   }}
                   enrollmentFlyoutOpenByDefault={openEnrollmentFlyoutOpenByDefault}
                   onCancelEnrollment={
-                    routeState && routeState.onDoneNavigateTo
-                      ? enrollmentCancelClickHandler
+                    routeState && routeState.onDoneNavigateTo && isFleetReady
+                      ? () =>
+                          navigateToApp(
+                            routeState.onDoneNavigateTo![0],
+                            routeState.onDoneNavigateTo![1]
+                          )
                       : undefined
                   }
                 />

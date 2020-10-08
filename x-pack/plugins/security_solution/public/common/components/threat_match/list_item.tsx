@@ -72,9 +72,9 @@ export const ListItemComponent = React.memo<ListItemProps>(
     const entries = useMemo(
       (): FormattedEntry[] =>
         indexPattern != null && listItem.entries.length > 0
-          ? getFormattedEntries(indexPattern, listItem.entries)
+          ? getFormattedEntries(indexPattern, threatIndexPatterns, listItem.entries)
           : [],
-      [listItem.entries, indexPattern]
+      [listItem.entries, indexPattern, threatIndexPatterns]
     );
     return (
       <EuiFlexItem>
