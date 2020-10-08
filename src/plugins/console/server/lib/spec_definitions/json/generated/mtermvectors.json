@@ -25,8 +25,7 @@
     ],
     "patterns": [
       "_mtermvectors",
-      "{indices}/_mtermvectors",
-      "{indices}/{type}/_mtermvectors"
+      "{indices}/_mtermvectors"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-multi-termvectors.html"
   }

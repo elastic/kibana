@@ -1,11 +1,13 @@
 {
-  "cluster.delete_component_template": {
+  "cluster.put_component_template": {
     "url_params": {
+      "create": "__flag__",
       "timeout": "",
       "master_timeout": ""
     },
     "methods": [
-      "DELETE"
+      "PUT",
+      "POST"
     ],
     "patterns": [
       "_component_template/{name}"
