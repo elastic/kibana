@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
-import { IFieldType, IndexPattern } from 'src/plugins/data/public';
+import { IFieldType, IndexPattern, ISearchSource } from 'src/plugins/data/public';
 import { AbstractVectorSource, BoundsFilters } from '../vector_source';
 import {
   getAutocompleteService,
@@ -22,7 +22,6 @@ import { expandToTileBoundaries } from '../../../../common/geo_tile_utils';
 import { search } from '../../../../../../../src/plugins/data/public';
 import { IVectorSource } from '../vector_source';
 import { SearchSource, TimeRange } from '../../../../../../../src/plugins/data/common';
-import { IndexPattern, ISearchSource } from '../../../../../../../src/plugins/data/public';
 import {
   AbstractSourceDescriptor,
   DynamicStylePropertyOptions,

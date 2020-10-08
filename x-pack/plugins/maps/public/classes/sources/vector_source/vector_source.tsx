@@ -30,9 +30,7 @@ import {
   VectorSourceRequestMeta,
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
-import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { DataRequest } from '../../util/data_request';
-import { MVTField } from '../../fields/mvt_field';
 
 export interface SourceTooltipConfig {
   tooltipContent: string | null;
@@ -95,7 +93,7 @@ export interface ITiledSingleLayerVectorSource extends IVectorSource {
 }
 
 export class AbstractVectorSource extends AbstractSource {
-  protected readonly _tooltipFields: MVTField[];
+  protected readonly _tooltipFields: IField[];
 
   static async getGeoJson({
     format,
