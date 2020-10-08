@@ -104,12 +104,14 @@ describe('ensureInstalledDefaultPackages', () => {
         {
           name: 'failure two',
           error: new Error('zzz'),
-          criticalFailure: false,
+          isUpgrade: true,
+          rollbackError: undefined,
         },
         {
           name: 'failure one',
           error: new SomeCustomError('abc 123'),
-          criticalFailure: true,
+          isUpgrade: true,
+          rollbackError: new Error('rollback'),
         },
         {
           name: 'success three',
