@@ -5,7 +5,7 @@
  */
 
 import { Feature, FeatureCollection } from 'geojson';
-import { AbstractVectorSource } from '../vector_source';
+import { AbstractVectorSource, GeoJsonWithMeta } from '../vector_source';
 import { EMPTY_FEATURE_COLLECTION, SOURCE_TYPES } from '../../../../common/constants';
 import { GeojsonFileSourceDescriptor } from '../../../../common/descriptor_types';
 import { registerSource } from '../source_registry';
@@ -43,7 +43,7 @@ export class GeojsonFileSource extends AbstractVectorSource {
     };
   }
 
-  async getGeoJsonWithMeta() {
+  async getGeoJsonWithMeta(): Promise<GeoJsonWithMeta> {
     return {
       data: (this._descriptor as GeojsonFileSourceDescriptor).__featureCollection,
       meta: {},

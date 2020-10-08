@@ -177,10 +177,10 @@ export class MVTSingleLayerVectorSource
     return this._descriptor.maxSourceZoom;
   }
 
-  getBoundsForFilters(
+  async getBoundsForFilters(
     boundsFilters: BoundsFilters,
     registerCancelCallback: (callback: () => void) => void
-  ): MapExtent | null {
+  ): Promise<MapExtent | null> {
     return null;
   }
 
