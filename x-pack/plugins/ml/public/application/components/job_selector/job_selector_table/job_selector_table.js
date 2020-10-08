@@ -11,10 +11,20 @@ import { JobSelectorBadge } from '../job_selector_badge';
 import { TimeRangeBar } from '../timerange_bar';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiTabbedContent, EuiCallOut } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTabbedContent,
+  EuiCallOut,
+  EuiButton,
+  EuiText,
+} from '@elastic/eui';
 
 import { LEFT_ALIGNMENT, CENTER_ALIGNMENT, SortableProperties } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
+import { useMlKibana } from '../../../contexts/kibana';
+import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { PLUGIN_ID } from '../../../../../common/constants/app';
 
 const JOB_FILTER_FIELDS = ['job_id', 'groups'];
 const GROUP_FILTER_FIELDS = ['id'];
@@ -31,6 +41,12 @@ export function JobSelectorTable({
 }) {
   const [sortableProperties, setSortableProperties] = useState();
   const [currentTab, setCurrentTab] = useState('Jobs');
+
+  const {
+    services: {
+      application: { navigateToApp },
+    },
+  } = useMlKibana();
 
   useEffect(() => {
     let sortablePropertyItems = [];
@@ -233,6 +249,10 @@ export function JobSelectorTable({
     );
   }
 
+  const navigateToWizard = async () => {
+    await navigateToApp(PLUGIN_ID, { path: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB });
+  };
+
   return (
     <Fragment>
       {jobs.length === 0 && (
@@ -244,7 +264,16 @@ export function JobSelectorTable({
             />
           }
           iconType="iInCircle"
-        />
+        >
+          <EuiText textAlign="center">
+            <EuiButton color="primary" onClick={navigateToWizard}>
+              <FormattedMessage
+                id="xpack.ml.jobSelector.createJobButtonLabel"
+                defaultMessage="Create job"
+              />
+            </EuiButton>
+          </EuiText>
+        </EuiCallOut>
       )}
       {jobs.length !== 0 && singleSelection === true && renderJobsTable()}
       {jobs.length !== 0 && !singleSelection && renderTabs()}
