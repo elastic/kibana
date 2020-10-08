@@ -49,47 +49,47 @@ import { i18n } from '@kbn/i18n';
 
 		if (monthNames == null) {
 			monthNames = [
-        i18n.translate('xpack.monitoring.janLabel', {
+        i18n.translate('flot.time.janLabel', {
 					defaultMessage: 'Jan',
-				}), i18n.translate('xpack.monitoring.febLabel', {
+				}), i18n.translate('flot.time.febLabel', {
 					defaultMessage: 'Feb',
-				}), i18n.translate('xpack.monitoring.marLabel', {
+				}), i18n.translate('flot.time.marLabel', {
 					defaultMessage: 'Mar',
-				}), i18n.translate('xpack.monitoring.aprLabel', {
+				}), i18n.translate('flot.time.aprLabel', {
 					defaultMessage: 'Apr',
-				}), i18n.translate('xpack.monitoring.mayLabel', {
+				}), i18n.translate('flot.time.mayLabel', {
 					defaultMessage: 'May',
-				}), i18n.translate('xpack.monitoring.junLabel', {
+				}), i18n.translate('flot.time.junLabel', {
 					defaultMessage: 'Jun',
-				}), i18n.translate('xpack.monitoring.julLabel', {
+				}), i18n.translate('flot.time.julLabel', {
 					defaultMessage: 'Jul',
-				}), i18n.translate('xpack.monitoring.augLabel', {
+				}), i18n.translate('flot.time.augLabel', {
 					defaultMessage: 'Aug',
-				}), i18n.translate('xpack.monitoring.sepLabel', {
+				}), i18n.translate('flot.time.sepLabel', {
 					defaultMessage: 'Sep',
-				}), i18n.translate('xpack.monitoring.octLabel', {
+				}), i18n.translate('flot.time.octLabel', {
 					defaultMessage: 'Oct',
-				}), i18n.translate('xpack.monitoring.novLabel', {
+				}), i18n.translate('flot.time.novLabel', {
 					defaultMessage: 'Nov',
-				}), i18n.translate('xpack.monitoring.decLabel', {
+				}), i18n.translate('flot.time.decLabel', {
 					defaultMessage: 'Dec',
 				})];
 		}
 
 		if (dayNames == null) {
-			dayNames = [i18n.translate('xpack.monitoring.sunLabel', {
+			dayNames = [i18n.translate('flot.time.sunLabel', {
         defaultMessage: 'Sun',
-      }), i18n.translate('xpack.monitoring.monLabel', {
+      }), i18n.translate('flot.time.monLabel', {
         defaultMessage: 'Mon',
-      }), i18n.translate('xpack.monitoring.tueLabel', {
+      }), i18n.translate('flot.time.tueLabel', {
         defaultMessage: 'Tue',
-      }), i18n.translate('xpack.monitoring.wedLabel', {
+      }), i18n.translate('flot.time.wedLabel', {
         defaultMessage: 'Wed',
-      }), i18n.translate('xpack.monitoring.thuLabel', {
+      }), i18n.translate('flot.time.thuLabel', {
         defaultMessage: 'Thu',
-      }), i18n.translate('xpack.monitoring.friLabel', {
+      }), i18n.translate('flot.time.friLabel', {
         defaultMessage: 'Fri',
-      }), i18n.translate('xpack.monitoring.satLabel', {
+      }), i18n.translate('flot.time.satLabel', {
         defaultMessage: 'Sat',
       })];
 		}
