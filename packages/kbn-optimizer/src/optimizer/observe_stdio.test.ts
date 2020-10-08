@@ -19,7 +19,7 @@
 
 import { Readable } from 'stream';
 
-import { allValuesFrom } from '@kbn/std';
+import { allValuesFrom } from '../common';
 
 import { observeStdio$ } from './observe_stdio';
 

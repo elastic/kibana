@@ -19,13 +19,7 @@
 
 import * as Rx from 'rxjs';
 
-import {
-  firstValueFrom,
-  optionalFirstValueFrom,
-  lastValueFrom,
-  optionalLastValueFrom,
-  allValuesFrom,
-} from './observables';
+import { firstValueFrom, lastValueFrom } from './rxjs_7';
 
 // create an empty observable that completes with no notifications
 // after a delay to ensure helpers aren't checking for the EMPTY constant
@@ -66,33 +60,6 @@ describe('firstValueFrom()', () => {
   });
 });
 
-describe('optionalFirstValue()', () => {
-  it('resolves to the first value from the observable', async () => {
-    await expect(optionalFirstValueFrom(Rx.of(1, 2, 3))).resolves.toBe(1);
-  });
-
-  it('resolves to undefined if the observable is empty', async () => {
-    await expect(optionalFirstValueFrom(empty())).resolves.toBe(undefined);
-  });
-
-  it('unsubscribes from the source observable after first notification', async () => {
-    const values = [1, 2, 3, 4];
-    let unsubscribed = false;
-    const source = new Rx.Observable<number>((subscriber) => {
-      while (!subscriber.closed) {
-        subscriber.next(values.shift()!);
-      }
-      unsubscribed = subscriber.closed;
-    });
-
-    await expect(optionalFirstValueFrom(source)).resolves.toMatchInlineSnapshot(`1`);
-    if (!unsubscribed) {
-      throw new Error('expected source to be unsubscribed');
-    }
-    expect(values).toEqual([2, 3, 4]);
-  });
-});
-
 describe('lastValueFrom()', () => {
   it('resolves to the last value from the observable', async () => {
     await expect(lastValueFrom(Rx.of(1, 2, 3))).resolves.toBe(3);
@@ -102,25 +69,5 @@ describe('lastValueFrom()', () => {
     await expect(lastValueFrom(empty())).rejects.toThrowErrorMatchingInlineSnapshot(
       `"no elements in sequence"`
     );
-  });
-});
-
-describe('optionalLastValue()', () => {
-  it('resolves to the last value from the observable', async () => {
-    await expect(optionalLastValueFrom(Rx.of(1, 2, 3))).resolves.toBe(3);
-  });
-
-  it('resolves to undefined if the observable is empty', async () => {
-    await expect(optionalLastValueFrom(empty())).resolves.toBe(undefined);
-  });
-});
-
-describe('allValuesFrom()', () => {
-  it('resolves to the list of values emitted from the observable', async () => {
-    await expect(allValuesFrom(Rx.of(1, 2, 3))).resolves.toEqual([1, 2, 3]);
-  });
-
-  it('resolves to an empty array if the observable is empty', async () => {
-    await expect(allValuesFrom(empty())).resolves.toEqual([]);
   });
 });

@@ -19,9 +19,8 @@
 
 import * as Rx from 'rxjs';
 import { REPO_ROOT } from '@kbn/utils';
-import { allValuesFrom } from '@kbn/std';
 
-import { Update } from '../common';
+import { Update, allValuesFrom } from '../common';
 
 import { OptimizerState } from './optimizer_state';
 import { OptimizerConfig } from './optimizer_config';

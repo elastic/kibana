@@ -22,11 +22,10 @@ import Path from 'path';
 import cpy from 'cpy';
 import del from 'del';
 import { createAbsolutePathSerializer } from '@kbn/dev-utils';
-import { allValuesFrom } from '@kbn/std';
 
 import { getMtimes } from '../optimizer/get_mtimes';
 import { OptimizerConfig } from '../optimizer/optimizer_config';
-import { Bundle } from '../common/bundle';
+import { allValuesFrom, Bundle } from '../common';
 import { getBundleCacheEvent$ } from '../optimizer/bundle_cache';
 
 const TMP_DIR = Path.resolve(__dirname, '../__fixtures__/__tmp__');

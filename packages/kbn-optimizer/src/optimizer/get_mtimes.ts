@@ -21,7 +21,7 @@ import Fs from 'fs';
 
 import * as Rx from 'rxjs';
 import { mergeMap, map, catchError } from 'rxjs/operators';
-import { allValuesFrom } from '@kbn/std';
+import { allValuesFrom } from '../common';
 
 const stat$ = Rx.bindNodeCallback(Fs.stat);
 

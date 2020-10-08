@@ -34,7 +34,8 @@ import {
   logOptimizerState,
   readLimits,
 } from '@kbn/optimizer';
-import { allValuesFrom } from '@kbn/std';
+
+import { allValuesFrom } from '../common';
 
 const TMP_DIR = Path.resolve(__dirname, '../__fixtures__/__tmp__');
 const MOCK_REPO_SRC = Path.resolve(__dirname, '../__fixtures__/mock_repo');
