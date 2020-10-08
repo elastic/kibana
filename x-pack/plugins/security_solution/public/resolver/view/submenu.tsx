@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from 'react-intl';
+import { EuiI18nNumber } from '@elastic/eui';
 import { ResolverNodeStats } from '../../../common/endpoint/types';
 import { useRelatedEventByCategoryNavigation } from './use_related_event_by_category_navigation';
 import { useColors } from './use_colors';
@@ -120,7 +121,7 @@ export const NodeSubMenuComponents = React.memo(
               id="xpack.securitySolution.endpoint.resolver.node.pillNumber"
               description=""
               defaultMessage="{mantissa}{scale}{hasRemainder}"
-              values={{ mantissa, scale, hasRemainder }}
+              values={{ mantissa: <EuiI18nNumber value={mantissa} />, scale, hasRemainder }}
             />
           );
           return {
