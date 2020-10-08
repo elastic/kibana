@@ -1,7 +1,9 @@
 {
   "upstream": "elastic/kibana",
   "targetBranchChoices": [
+    { "name": "master", "checked": true },
     { "name": "7.x", "checked": true },
+    "7.10",
     "7.9",
     "7.8",
     "7.7",
@@ -25,7 +27,8 @@
   ],
   "targetPRLabels": ["backport"],
   "branchLabelMapping": {
-    "^v7.10.0$": "7.x",
+    "^v8.0.0$": "master",
+    "^v7.11.0$": "7.x",
     "^v(\\d+).(\\d+).\\d+$": "$1.$2"
   }
 }
