@@ -276,7 +276,7 @@ export const EndpointList = () => {
           );
           const toRouteUrl = formatUrl(toRoutePath);
           return (
-            <EuiToolTip content={hostname} anchorClassName="eui-fullWidth">
+            <EuiToolTip content={hostname} anchorClassName="eui-textTruncate">
               <EndpointListNavLink
                 name={hostname}
                 href={toRouteUrl}
@@ -320,7 +320,7 @@ export const EndpointList = () => {
         // eslint-disable-next-line react/display-name
         render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied']) => {
           return (
-            <EuiToolTip content={policy.name} anchorClassName="eui-fullWidth">
+            <EuiToolTip content={policy.name} anchorClassName="eui-textTruncate">
               <EndpointPolicyLink
                 policyId={policy.id}
                 className="eui-textTruncate"

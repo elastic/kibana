@@ -78,7 +78,6 @@ export interface SearchResponse<T> {
         _score: number;
         _version?: number;
         _explanation?: Explanation;
-        fields?: string[];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         highlight?: any;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
