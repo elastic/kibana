@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
@@ -34,16 +34,13 @@ export const EMPTY_FILTER = '';
 // and not supporting server-side paging.
 // This component does not try to tackle these problems (yet) and is just feature matching the legacy component
 // TODO support server side sorting/paging once title and description are sortable on the server.
-export const DashboardListing = ({ initialFilter, title, redirectTo }: DashboardListingProps) => {
+export const DashboardListing = ({
+  initialFilter,
+  title,
+  redirectToDashboard,
+}: DashboardListingProps) => {
   const {
-    services: {
-      core,
-      savedDashboards,
-      savedObjectsClient,
-      scopedHistory,
-      savedObjects,
-      dashboardConfig,
-    },
+    services: { core, savedObjects, savedDashboards, dashboardConfig, savedObjectsClient },
   } = useKibana<DashboardAppServices>();
 
   if (title) {
@@ -59,7 +56,7 @@ export const DashboardListing = ({ initialFilter, title, redirectTo }: Dashboard
           (dashboard) => dashboard.attributes.title.toLowerCase() === title.toLowerCase()
         );
         if (matchingDashboards.length === 1) {
-          redirectTo(matchingDashboards[0].id);
+          redirectToDashboard({ id: matchingDashboards[0].id, useReplace: true });
         } else {
           initialFilter = title;
         }
@@ -67,17 +64,17 @@ export const DashboardListing = ({ initialFilter, title, redirectTo }: Dashboard
   }
 
   const hideWriteControls = dashboardConfig.getHideWriteControls();
-  const history = scopedHistory();
   const listingLimit = savedObjects.settings.getListingLimit();
-  const createItem = () => history.push(DashboardConstants.CREATE_NEW_DASHBOARD_URL);
 
-  const tableColumns = getTableColumns();
-  const noItemsFragment = getNoItemsMessage(hideWriteControls, core.application, createItem);
+  const tableColumns = getTableColumns((id) => redirectToDashboard({ id }));
+  const noItemsFragment = getNoItemsMessage(hideWriteControls, core.application, () =>
+    redirectToDashboard({})
+  );
 
   return (
     <TableListView
-      headingId="visualizeListingHeading"
-      createItem={createItem}
+      headingId="dashboardListingHeading"
+      createItem={() => redirectToDashboard({})}
       findItems={(search) => savedDashboards.find(search, listingLimit)}
       deleteItems={
         hideWriteControls
@@ -88,8 +85,7 @@ export const DashboardListing = ({ initialFilter, title, redirectTo }: Dashboard
       editItem={
         hideWriteControls
           ? undefined
-          : ({ id }: { id: string }) =>
-              history.push(`${createDashboardEditUrl(id)}?_a=(viewMode:edit)`)
+          : ({ id }: { id: string | undefined }) => redirectToDashboard({ id })
       }
       tableColumns={tableColumns}
       listingLimit={listingLimit}
@@ -110,7 +106,7 @@ export const DashboardListing = ({ initialFilter, title, redirectTo }: Dashboard
   );
 };
 
-const getTableColumns = () => {
+const getTableColumns = (redirectTo: (id?: string) => void) => {
   return [
     {
       field: 'title',
@@ -120,7 +116,7 @@ const getTableColumns = () => {
       sortable: true,
       render: (field: string, record: { id: string; title: string }) => (
         <EuiLink
-          href={createDashboardEditUrl(record.id)}
+          onClick={() => redirectTo(record.id)}
           data-test-subj={`dashboardListingTitleLink-${record.title.split(' ').join('-')}`}
         >
           {field}
@@ -147,7 +143,7 @@ const getNoItemsMessage = (
     return (
       <div>
         <EuiEmptyPrompt
-          iconType="visualizeApp"
+          iconType="dashboardApp"
           title={
             <h1 id="dashboardListingHeading">
               <FormattedMessage

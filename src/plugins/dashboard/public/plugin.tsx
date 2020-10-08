@@ -198,9 +198,6 @@ export class DashboardPlugin
     this.dashboardFeatureFlagConfig = this.initializerContext.config.get<
       DashboardFeatureFlagConfig
     >();
-    const expandPanelAction = new ExpandPanelAction();
-    uiActions.registerAction(expandPanelAction);
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction.id);
     const startServices = core.getStartServices();
 
     if (share) {

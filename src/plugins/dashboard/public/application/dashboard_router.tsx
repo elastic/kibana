@@ -21,12 +21,12 @@ import React from 'react';
 
 import { I18nProvider } from '@kbn/i18n/react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Router, Switch, Route, RouteComponentProps } from 'react-router-dom';
+import { Switch, Route, RouteComponentProps, HashRouter } from 'react-router-dom';
 import { parse } from 'query-string';
 import { Storage } from '../../../kibana_utils/public';
 import { KibanaContextProvider } from '../../../kibana_react/public';
 import { DashboardListing, Dashboard404 } from './listing';
-import { DashboardAppServices, DashboardMountProps } from './types';
+import { DashboardAppServices, DashboardMountProps, RedirectToDashboardProps } from './types';
 import { DashboardApp } from './dashboard_app';
 import { createDashboardEditUrl, DashboardConstants } from '..';
 
@@ -88,6 +88,21 @@ export async function mountApp({
     );
   };
 
+  const redirect = (
+    routeProps: RouteComponentProps,
+    { id, useReplace }: RedirectToDashboardProps
+  ) => {
+    if (useReplace) {
+      routeProps.history.replace(
+        id ? createDashboardEditUrl(id) : DashboardConstants.CREATE_NEW_DASHBOARD_URL
+      );
+      return;
+    }
+    routeProps.history.push(
+      id ? createDashboardEditUrl(id) : DashboardConstants.CREATE_NEW_DASHBOARD_URL
+    );
+  };
+
   const renderListingPage = (routeProps: RouteComponentProps) => {
     const searchParams = parse(routeProps.history.location.search);
     const title = (searchParams.title as string) || undefined;
@@ -96,7 +111,7 @@ export async function mountApp({
       <DashboardListing
         initialFilter={filter}
         title={title}
-        redirectTo={(id) => routeProps.history.replace(createDashboardEditUrl(id))}
+        redirectToDashboard={(props: RedirectToDashboardProps) => redirect(routeProps, props)}
       />
     );
   };
@@ -106,7 +121,7 @@ export async function mountApp({
 
   const app = (
     <I18nProvider>
-      <Router history={scopedHistory}>
+      <HashRouter>
         <KibanaContextProvider services={dashboardServices}>
           <Switch>
             <Route
@@ -120,7 +135,7 @@ export async function mountApp({
             <Dashboard404 />
           </Switch>
         </KibanaContextProvider>
-      </Router>
+      </HashRouter>
     </I18nProvider>
   );
 

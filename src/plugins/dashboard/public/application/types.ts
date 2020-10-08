@@ -39,6 +39,12 @@ import { DashboardSetupDependencies, DashboardStart, DashboardStartDependencies 
 import { Storage } from '../../../kibana_utils/public';
 import { DashboardCapabilities } from '../types';
 
+export type RedirectToDashboard = (props: RedirectToDashboardProps) => void;
+
+export interface RedirectToDashboardProps {
+  id?: string;
+  useReplace?: boolean;
+}
 export interface DashboardAppProps {
   savedDashboardId?: string;
   history: History; // TODO: Remove history after state deangularize?
@@ -47,7 +53,7 @@ export interface DashboardAppProps {
 export interface DashboardListingProps {
   initialFilter?: string;
   title?: string;
-  redirectTo: (id: string) => void;
+  redirectToDashboard: RedirectToDashboard;
 }
 
 export interface DashboardMountProps {

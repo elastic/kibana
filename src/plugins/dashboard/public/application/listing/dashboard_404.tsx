@@ -48,7 +48,7 @@ export const Dashboard404 = () => {
           <p>
             <FormattedMessage
               id="dashboard.404Route.bannerText"
-              defaultMessage="Visualize application doesn't recognize this route: {route}."
+              defaultMessage="Dashboard application doesn't recognize this route: {route}."
               values={{
                 route: <EuiLink href={window.location.href}>{history.location.pathname}</EuiLink>,
               }}

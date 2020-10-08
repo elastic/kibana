@@ -28,7 +28,7 @@ import {
   Container,
   EmbeddableStart,
   EmbeddableFactoryNotFoundError,
-} from '../embeddable_plugin';
+} from '../../../embeddable/public';
 import { I18nStart, NotificationsStart } from '../../../../core/public';
 import { SavedObjectSaveModal, OnSaveProps, SaveResult } from '../../../saved_objects/public';
 

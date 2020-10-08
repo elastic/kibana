@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useCallback } from 'react';
 
 import _ from 'lodash';
+import { map } from 'rxjs/operators';
 import { DashboardStateManager } from './dashboard_state_manager';
 import {
   createKbnUrlStateStorage,
@@ -31,6 +32,12 @@ import { DashboardAppProps, DashboardAppServices } from './types';
 import { useKibana } from '../../../kibana_react/public';
 import { DashboardSavedObject } from '../saved_dashboards';
 import { migrateLegacyQuery } from './lib/migrate_legacy_query';
+import {
+  connectToQueryState,
+  esFilters,
+  QueryState,
+  syncQueryStateWithUrl,
+} from '../../../data/public';
 import { DashboardConstants } from '..';
 
 enum UrlParams {
@@ -83,6 +90,7 @@ export function DashboardApp({ savedDashboardId, history }: DashboardAppProps) {
   const initializeStateSyncing = useCallback(
     (savedDashboard: DashboardSavedObject) => {
       const filterManager = data.query.filterManager;
+      const timefilter = data.query.timefilter.timefilter;
       const queryStringManager = data.query.queryString;
 
       const kbnUrlStateStorage = createKbnUrlStateStorage({
@@ -104,6 +112,59 @@ export function DashboardApp({ savedDashboardId, history }: DashboardAppProps) {
       // if there is an existing similar global filter, then leave it as global
       filterManager.setAppFilters(_.cloneDeep(dashboardStateManager.appState.filters));
       queryStringManager.setQuery(migrateLegacyQuery(dashboardStateManager.appState.query));
+
+      // setup syncing of app filters between appState and filterManager
+      const stopSyncingAppFilters = connectToQueryState(
+        data.query,
+        {
+          set: ({ filters, query }) => {
+            dashboardStateManager.setFilters(filters || []);
+            dashboardStateManager.setQuery(query || queryStringManager.getDefaultQuery());
+          },
+          get: () => ({
+            filters: dashboardStateManager.appState.filters,
+            query: dashboardStateManager.getQuery(),
+          }),
+          state$: dashboardStateManager.appState$.pipe(
+            map((state) => ({
+              filters: state.filters,
+              query: queryStringManager.formatQuery(state.query),
+            }))
+          ),
+        },
+        {
+          filters: esFilters.FilterStateStore.APP_STATE,
+          query: true,
+        }
+      );
+
+      // The hash check is so we only update the time filter on dashboard open, not during
+      // normal cross app navigation.
+      if (dashboardStateManager.getIsTimeSavedWithDashboard()) {
+        const initialGlobalStateInUrl = kbnUrlStateStorage.get<QueryState>('_g');
+        if (!initialGlobalStateInUrl?.time) {
+          dashboardStateManager.syncTimefilterWithDashboardTime(timefilter);
+        }
+        if (!initialGlobalStateInUrl?.refreshInterval) {
+          dashboardStateManager.syncTimefilterWithDashboardRefreshInterval(timefilter);
+        }
+      }
+
+      // starts syncing `_g` portion of url with query services
+      // it is important to start this syncing after `dashboardStateManager.syncTimefilterWithDashboard(timefilter);` above is run,
+      // otherwise it will case redundant browser history records
+      const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
+        data.query,
+        kbnUrlStateStorage
+      );
+
+      // starts syncing `_a` portion of url
+      dashboardStateManager.startStateSyncing();
+
+      return {
+        stopSyncingQueryServiceStateWithUrl,
+        stopSyncingAppFilters,
+      };
     },
     [
       core.notifications.toasts,
@@ -130,7 +191,6 @@ export function DashboardApp({ savedDashboardId, history }: DashboardAppProps) {
             savedDashboardId
           );
         }
-        // console.log(savedDashboard);
       })
       .catch((error) => {
         // Preserve BWC of v5.3.0 links for new, unsaved dashboards.
