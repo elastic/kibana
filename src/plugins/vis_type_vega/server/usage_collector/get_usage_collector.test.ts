@@ -99,22 +99,17 @@ describe('Vega visualization usage collector', () => {
       },
     } as unknown) as HomeServerPluginSetup,
   };
-  const baseVegaUsage = {
-    vega_lib_specs_total: 0,
-    vega_lite_lib_specs_total: 0,
-    vega_use_map_total: 0,
-  };
 
-  test('Returns 0 totals when no results found (undefined)', async () => {
+  test('Returns undefined when no results found (undefined)', async () => {
     const result = await getStats(getMockCallCluster(), mockIndex, mockDeps);
 
-    expect(result).toEqual(baseVegaUsage);
+    expect(result).toBeUndefined();
   });
 
-  test('Returns 0 totals when no results found (0 results)', async () => {
+  test('Returns undefined when no results found (0 results)', async () => {
     const result = await getStats(getMockCallCluster([]), mockIndex, mockDeps);
 
-    expect(result).toEqual(baseVegaUsage);
+    expect(result).toBeUndefined();
   });
 
   test('Returns undefined when no vega saved objects found', async () => {
@@ -129,7 +124,7 @@ describe('Vega visualization usage collector', () => {
     ]);
     const result = await getStats(mockCallCluster, mockIndex, mockDeps);
 
-    expect(result).toEqual(baseVegaUsage);
+    expect(result).toBeUndefined();
   });
 
   test('Should ingnore sample data visualizations', async () => {
@@ -153,7 +148,7 @@ describe('Vega visualization usage collector', () => {
 
     const result = await getStats(mockCallCluster, mockIndex, mockDeps);
 
-    expect(result).toEqual(baseVegaUsage);
+    expect(result).toBeUndefined();
   });
 
   test('Summarizes visualizations response data', async () => {

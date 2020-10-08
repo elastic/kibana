@@ -123,14 +123,14 @@ describe('Visualizations usage collector', () => {
   const getMockCallCluster = (hits: unknown[]) =>
     (() => Promise.resolve({ hits: { hits } }) as unknown) as LegacyAPICaller;
 
-  test('Returns {} when no results found (undefined)', async () => {
+  test('Returns undefined when no results found (undefined)', async () => {
     const result = await getStats(getMockCallCluster(undefined as any), mockIndex);
-    expect(result).toEqual({});
+    expect(result).toBeUndefined();
   });
 
-  test('Returns {} when no results found (0 results)', async () => {
+  test('Returns undefined when no results found (0 results)', async () => {
     const result = await getStats(getMockCallCluster([]), mockIndex);
-    expect(result).toEqual({});
+    expect(result).toBeUndefined();
   });
 
   test('Summarizes visualizations response data', async () => {

@@ -19,7 +19,6 @@
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { first } from 'rxjs/operators';
-import { LegacyAPICaller } from 'src/core/server';
 import { getStats, VegaUsage } from './get_usage_collector';
 import { ConfigObservable, VisTypeVegaPluginSetupDependencies } from '../types';
 
@@ -28,7 +27,7 @@ export function registerVegaUsageCollector(
   config: ConfigObservable,
   dependencies: Pick<VisTypeVegaPluginSetupDependencies, 'home'>
 ) {
-  const collector = collectorSet.makeUsageCollector<VegaUsage>({
+  const collector = collectorSet.makeUsageCollector<VegaUsage | undefined>({
     type: 'vis_type_vega',
     isReady: () => true,
     schema: {
@@ -36,7 +35,7 @@ export function registerVegaUsageCollector(
       vega_lite_lib_specs_total: { type: 'long' },
       vega_use_map_total: { type: 'long' },
     },
-    fetch: async (callCluster: LegacyAPICaller) => {
+    fetch: async (callCluster) => {
       const { index } = (await config.pipe(first()).toPromise()).kibana;
 
       return await getStats(callCluster, index, dependencies);

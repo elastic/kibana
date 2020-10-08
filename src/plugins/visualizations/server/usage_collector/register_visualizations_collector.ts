@@ -20,7 +20,6 @@
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { LegacyAPICaller } from 'src/core/server';
 
 import { getStats, VisualizationUsage } from './get_usage_collector';
 
@@ -28,7 +27,7 @@ export function registerVisualizationsCollector(
   collectorSet: UsageCollectionSetup,
   config: Observable<{ kibana: { index: string } }>
 ) {
-  const collector = collectorSet.makeUsageCollector<VisualizationUsage>({
+  const collector = collectorSet.makeUsageCollector<VisualizationUsage | undefined>({
     type: 'visualization_types',
     isReady: () => true,
     schema: {
@@ -42,7 +41,7 @@ export function registerVisualizationsCollector(
         saved_90_days_total: { type: 'long' },
       },
     },
-    fetch: async (callCluster: LegacyAPICaller) => {
+    fetch: async (callCluster) => {
       const index = (await config.pipe(first()).toPromise()).kibana.index;
       return await getStats(callCluster, index);
     },

@@ -67,7 +67,9 @@ export const getStats = async (
   callCluster: LegacyAPICaller,
   index: string,
   { home }: UsageCollectorDependencies
-): Promise<VegaUsage> => {
+): Promise<VegaUsage | undefined> => {
+  let shouldPublishTelemetry = false;
+
   const vegaUsage = {
     vega_lib_specs_total: 0,
     vega_lite_lib_specs_total: 0,
@@ -92,7 +94,7 @@ export const getStats = async (
   const size = esResponse?.hits?.hits?.length ?? 0;
 
   if (!size) {
-    return vegaUsage;
+    return;
   }
 
   // we want to exclude the Vega Sample Data visualizations from the stats
@@ -107,6 +109,8 @@ export const getStats = async (
         const spec = parse(visState.params.spec, { legacyRoot: false });
 
         if (spec) {
+          shouldPublishTelemetry = true;
+
           if (checkVegaSchemaType(spec.$schema, 'vega')) {
             vegaUsage.vega_lib_specs_total++;
           }
@@ -123,5 +127,5 @@ export const getStats = async (
     }
   }
 
-  return vegaUsage;
+  return shouldPublishTelemetry ? vegaUsage : undefined;
 };

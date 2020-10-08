@@ -34,8 +34,8 @@ interface VisSummary {
 export interface VisualizationUsage {
   [x: string]: {
     total: number;
-    spaces_min: number;
-    spaces_max: number;
+    spaces_min?: number;
+    spaces_max?: number;
     spaces_avg: number;
     saved_7_days_total: number;
     saved_30_days_total: number;
@@ -49,7 +49,7 @@ export interface VisualizationUsage {
 export async function getStats(
   callCluster: LegacyAPICaller,
   index: string
-): Promise<VisualizationUsage> {
+): Promise<VisualizationUsage | undefined> {
   const searchParams = {
     size: 10000, // elasticsearch index.max_result_window default value
     index,
@@ -68,7 +68,7 @@ export async function getStats(
   const esResponse: ESResponse = await callCluster('search', searchParams);
   const size = get(esResponse, 'hits.hits.length', 0);
   if (size < 1) {
-    return {};
+    return;
   }
 
   // `map` to get the raw types
@@ -96,8 +96,8 @@ export async function getStats(
 
     return {
       total,
-      spaces_min: min(spaceCounts) || 0,
-      spaces_max: max(spaceCounts) || 0,
+      spaces_min: min(spaceCounts),
+      spaces_max: max(spaceCounts),
       spaces_avg: total / spaceCounts.length,
       saved_7_days_total: curr.filter((c) => c.past_days <= 7).length,
       saved_30_days_total: curr.filter((c) => c.past_days <= 30).length,
