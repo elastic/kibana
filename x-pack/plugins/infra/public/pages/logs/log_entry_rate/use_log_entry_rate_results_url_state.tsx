@@ -36,7 +36,7 @@ const AUTOREFRESH_URL_STATE_KEY = 'autoRefresh';
 const TIME_DEFAULTS = { from: 'now-2w', to: 'now' };
 
 export const useLogAnalysisResultsUrlState = () => {
-  const [getTime, _] = useKibanaTimefilterTime(TIME_DEFAULTS);
+  const [getTime] = useKibanaTimefilterTime(TIME_DEFAULTS);
   const { from: start, to: end } = getTime();
 
   const [timeRange, setTimeRange] = useUrlState({
