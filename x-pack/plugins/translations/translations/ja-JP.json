@@ -3966,7 +3966,6 @@
     "visTypeTimeseries.timeseries.dataTab.dataButtonLabel": "データ",
     "visTypeTimeseries.timeSeries.defaultPaletteLabel": "既定のパレット",
     "visTypeTimeseries.timeSeries.deleteSeriesTooltip": "数列を削除",
-    "visTypeTimeseries.timeSeries.filterLabel": "フィルター",
     "visTypeTimeseries.timeSeries.gradientLabel": "グラデーション",
     "visTypeTimeseries.timeSeries.hideInLegendLabel": "凡例で非表示",
     "visTypeTimeseries.timeSeries.labelPlaceholder": "ラベル",
