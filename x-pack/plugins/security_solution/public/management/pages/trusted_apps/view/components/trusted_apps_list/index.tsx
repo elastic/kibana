@@ -96,6 +96,7 @@ const getColumnDefinitions = (context: TrustedAppsListContext): ColumnsList => {
     {
       field: 'name',
       name: PROPERTY_TITLES.name,
+      truncateText: true,
     },
     {
       field: 'os',
