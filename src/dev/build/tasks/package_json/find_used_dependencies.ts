@@ -47,14 +47,14 @@ export async function findUsedDependencies(listedPkgDependencies: any, baseDir: 
   ]);
 
   // Compose all the needed entries
-  const codeEntries = [...mainCodeEntries, ...discoveredPluginEntries];
+  const serverEntries = [...mainCodeEntries, ...discoveredPluginEntries];
 
-  // Get the dependencies found searching through the
-  // code entries that were provided
-  const codeDependencies = await getDependencies(baseDir, codeEntries);
+  // Get the dependencies found searching through the server
+  // side code entries that were provided
+  const serverDependencies = await getDependencies(baseDir, serverEntries);
 
   // Consider this as our whiteList for the modules we can't delete
-  const whiteListedModules = [...codeDependencies];
+  const whiteListedModules = [...serverDependencies];
 
   const listedDependencies = Object.keys(listedPkgDependencies);
   const filteredListedDependencies = listedDependencies.filter((entry) => {

@@ -168,16 +168,6 @@ export const CleanExtraFilesFromModules: Task = {
         regularExpressions,
       })
     );
-
-    if (!build.isOss()) {
-      log.info(
-        'Deleted %d files',
-        await scanDelete({
-          directory: build.resolvePath('x-pack/node_modules'),
-          regularExpressions,
-        })
-      );
-    }
   },
 };
 
