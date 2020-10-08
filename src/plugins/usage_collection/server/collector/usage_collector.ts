@@ -17,13 +17,22 @@
  * under the License.
  */
 
+import { Logger } from 'src/core/server';
 import { KIBANA_STATS_TYPE } from '../../common/constants';
-import { Collector } from './collector';
+import { Collector, CollectorOptions } from './collector';
+
+// Enforce the `schema` property for UsageCollectors
+export type UsageCollectorOptions<T = unknown, U = T> = CollectorOptions<T, U> &
+  Required<Pick<CollectorOptions<T, U>, 'schema'>>;
 
 export class UsageCollector<T = unknown, U = { usage: { [key: string]: T } }> extends Collector<
   T,
   U
 > {
+  constructor(protected readonly log: Logger, collectorOptions: UsageCollectorOptions<T, U>) {
+    super(log, collectorOptions);
+  }
+
   protected defaultFormatterForBulkUpload(result: T) {
     return {
       type: KIBANA_STATS_TYPE,

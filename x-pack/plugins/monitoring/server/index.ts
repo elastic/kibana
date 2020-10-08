@@ -10,7 +10,7 @@ import { Plugin } from './plugin';
 import { configSchema } from './config';
 import { deprecations } from './deprecations';
 
-export { KibanaSettingsCollector, getEmailValueStructure } from './kibana_monitoring/collectors';
+export { KibanaSettingsCollector } from './kibana_monitoring/collectors';
 export { MonitoringConfig } from './config';
 export const plugin = (initContext: PluginInitializerContext) => new Plugin(initContext);
 export const config: PluginConfigDescriptor<TypeOf<typeof configSchema>> = {

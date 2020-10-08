@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  Collector,
-  UsageCollectionSetup,
-} from '../../../../../../src/plugins/usage_collection/server';
+import { Collector, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import { KIBANA_SETTINGS_TYPE } from '../../../common/constants';
 import { MonitoringConfig } from '../../config';
@@ -47,14 +44,8 @@ interface EmailSettingData {
   xpack: { default_admin_email: string | null };
 }
 
-export type KibanaSettingsCollector = Collector<EmailSettingData | undefined>;
-
-export function getEmailValueStructure(email: string | null) {
-  return {
-    xpack: {
-      default_admin_email: email,
-    },
-  };
+export interface KibanaSettingsCollector extends Collector<EmailSettingData | undefined> {
+  getEmailValueStructure(email: string | null): EmailSettingData;
 }
 
 export function getSettingsCollector(
@@ -69,13 +60,13 @@ export function getSettingsCollector(
         default_admin_email: { type: 'text' },
       },
     },
-    async fetch(this: Collector<EmailSettingData | undefined>) {
+    async fetch(this: KibanaSettingsCollector) {
       let kibanaSettingsData;
       const defaultAdminEmail = await checkForEmailValue(config);
 
       // skip everything if defaultAdminEmail === undefined
       if (defaultAdminEmail || (defaultAdminEmail === null && shouldUseNull)) {
-        kibanaSettingsData = getEmailValueStructure(defaultAdminEmail);
+        kibanaSettingsData = this.getEmailValueStructure(defaultAdminEmail);
         this.log.debug(
           `[${defaultAdminEmail}] default admin email setting found, sending [${KIBANA_SETTINGS_TYPE}] monitoring document.`
         );
@@ -90,6 +81,13 @@ export function getSettingsCollector(
 
       // returns undefined if there was no result
       return kibanaSettingsData;
+    },
+    getEmailValueStructure(email: string | null) {
+      return {
+        xpack: {
+          default_admin_email: email,
+        },
+      };
     },
   });
 }

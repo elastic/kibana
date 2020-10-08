@@ -58,7 +58,7 @@ export interface CollectorOptions<T = unknown, U = T> {
   /**
    * Schema definition of the output of the `fetch` method.
    */
-  schema: MakeSchemaFrom<T>;
+  schema?: MakeSchemaFrom<T>;
   /**
    * Called whenever usage collection is requested. It should return the payload to be reported as usage for the `type` collector.
    *

@@ -73,7 +73,6 @@ describe('collector', () => {
         type: 'my_test_collector',
         isReady: () => false,
         fetch: () => ({ testPass: 100 }),
-        schema: { testPass: { type: 'long' } },
       });
       expect(collector).toBeDefined();
     });
@@ -84,7 +83,6 @@ describe('collector', () => {
       const collector = new Collector(logger, {
         type: 'my_test_collector',
         fetch: () => fetchOutput,
-        schema: { testPass: { type: 'long' } },
       });
       expect(collector.isReady()).toBe(true);
     });
@@ -97,7 +95,6 @@ describe('collector', () => {
         type: 'my_test_collector',
         isReady: () => false,
         fetch: () => fetchOutput,
-        schema: { testPass: { type: 'long' } },
       });
       expect(collector.formatForBulkUpload(fetchOutput)).toStrictEqual({
         type: 'my_test_collector',
@@ -112,7 +109,6 @@ describe('collector', () => {
         isReady: () => false,
         fetch: () => fetchOutput,
         formatForBulkUpload: (a) => ({ type: 'other_value', payload: { nested: a } }),
-        schema: { testPass: { type: 'long' } },
       });
       expect(collector.formatForBulkUpload(fetchOutput)).toStrictEqual({
         type: 'other_value',
