@@ -7,7 +7,6 @@
 import { EuiButtonGroup, EuiButtonGroupProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { euiStyled } from '../../../../../../../observability/public';
 
 interface Props {
   view: string;
@@ -32,7 +31,7 @@ export const ViewSwitcher = ({ view, onChange }: Props) => {
     },
   ];
   return (
-    <StyledButtonGroup
+    <EuiButtonGroup
       legend={i18n.translate('xpack.infra.viewSwitcher.lenged', {
         defaultMessage: 'Switch between table and map view',
       })}
@@ -45,10 +44,3 @@ export const ViewSwitcher = ({ view, onChange }: Props) => {
     />
   );
 };
-
-// FIXME https://github.com/elastic/eui/issues/4122
-const StyledButtonGroup = euiStyled(EuiButtonGroup)`
- & .euiButtonGroup__toggle[class*="checked"] {
-   z-index: 1;
- }
-`;
