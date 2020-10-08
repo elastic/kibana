@@ -69,13 +69,13 @@ const createRequest = ({ type, id, initialNamespaces }: CreateTestCase) => ({
 });
 
 export function createTestSuiteFactory(es: any, esArchiver: any, supertest: SuperTest<any>) {
-  const expectForbidden = expectResponses.forbiddenTypes('create');
+  const expectSavedObjectForbidden = expectResponses.forbiddenTypes('create');
   const expectResponseBody = (
     testCase: CreateTestCase,
     user?: TestUser
   ): ExpectResponseBody => async (response: Record<string, any>) => {
     if (testCase.failure === 403) {
-      await expectForbidden(testCase.type)(response);
+      await expectSavedObjectForbidden(testCase.type)(response);
     } else {
       // permitted
       const object = response.body;
@@ -127,7 +127,7 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
           const path = `${type}${id ? `/${id}` : ''}`;
           const requestBody = {
             attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-            ...(initialNamespaces && { namespaces: initialNamespaces }),
+            ...(initialNamespaces && { initialNamespaces }),
           };
           const query = test.overwrite ? '?overwrite=true' : '';
           await supertest

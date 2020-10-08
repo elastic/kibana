@@ -28,6 +28,17 @@ export const OS_TITLES: Readonly<{ [K in TrustedApp['os']]: string }> = {
   }),
 };
 
+export const CONDITION_FIELD_TITLE: { [K in MacosLinuxConditionEntry['field']]: string } = {
+  'process.hash.*': i18n.translate(
+    'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.hash',
+    { defaultMessage: 'Hash' }
+  ),
+  'process.executable.caseless': i18n.translate(
+    'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.path',
+    { defaultMessage: 'Path' }
+  ),
+};
+
 export const PROPERTY_TITLES: Readonly<
   { [K in keyof Omit<TrustedApp, 'id' | 'entries'>]: string }
 > = {

@@ -206,6 +206,7 @@ export class Plugin {
       loggers: this.initializerContext.logger,
       kibanaIndexName: legacyConfig.kibana.index,
       packageVersion: this.initializerContext.env.packageInfo.version,
+      buildNumber: this.initializerContext.env.packageInfo.buildNum,
       getSpacesService: this.getSpacesService,
       features,
       getCurrentUser: authc.getCurrentUser,
