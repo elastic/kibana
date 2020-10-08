@@ -1,4 +1,6 @@
-div.mlDataGrid .euiDataGridRowCell--boolean {
-  text-transform: none;
+.mlDataGrid {
+  .euiDataGridRowCell--boolean {
+    text-transform: none;
+  }
 }
 
