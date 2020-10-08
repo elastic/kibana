@@ -42,14 +42,34 @@ describe('firstValueFrom()', () => {
     );
   });
 
-  it('unsubscribes from the source observable after first notification', async () => {
+  it('does not unsubscribe from the source observable that emits synchronously', async () => {
     const values = [1, 2, 3, 4];
     let unsubscribed = false;
     const source = new Rx.Observable<number>((subscriber) => {
-      while (!subscriber.closed) {
+      while (!subscriber.closed && values.length) {
         subscriber.next(values.shift()!);
       }
       unsubscribed = subscriber.closed;
+      subscriber.complete();
+    });
+
+    await expect(firstValueFrom(source)).resolves.toMatchInlineSnapshot(`1`);
+    if (unsubscribed) {
+      throw new Error('expected source to not be unsubscribed');
+    }
+    expect(values).toEqual([]);
+  });
+
+  it('unsubscribes from the source observable after first async notification', async () => {
+    const values = [1, 2, 3, 4];
+    let unsubscribed = false;
+    const source = new Rx.Observable<number>((subscriber) => {
+      setTimeout(() => {
+        while (!subscriber.closed) {
+          subscriber.next(values.shift()!);
+        }
+        unsubscribed = subscriber.closed;
+      });
     });
 
     await expect(firstValueFrom(source)).resolves.toMatchInlineSnapshot(`1`);
