@@ -117,7 +117,8 @@ function wrapSearchBarInContext(testProps: any) {
   );
 }
 
-describe('SearchBar', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/79910
+describe.skip('SearchBar', () => {
   const SEARCH_BAR_TEST_ID = 'globalQueryBar';
   const SEARCH_BAR_ROOT = '.globalQueryBar';
   const FILTER_BAR = '.globalFilterBar';

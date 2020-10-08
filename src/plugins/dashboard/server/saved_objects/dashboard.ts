@@ -46,10 +46,10 @@ export const dashboardSavedObjectType: SavedObjectsType = {
       description: { type: 'text' },
       hits: { type: 'integer', index: false, doc_values: false },
       kibanaSavedObjectMeta: {
-        properties: { searchSourceJSON: { type: 'text', index: false, doc_values: false } },
+        properties: { searchSourceJSON: { type: 'text', index: false } },
       },
-      optionsJSON: { type: 'text', index: false, doc_values: false },
-      panelsJSON: { type: 'text', index: false, doc_values: false },
+      optionsJSON: { type: 'text', index: false },
+      panelsJSON: { type: 'text', index: false },
       refreshInterval: {
         properties: {
           display: { type: 'keyword', index: false, doc_values: false },

@@ -1,11 +1,11 @@
 [chapter]
 [role="xpack"]
-[[ingest-manager]]
-= {ingest-manager}
+[[fleet]]
+= {fleet}
 
 experimental[]
 
-{ingest-manager} in {kib} enables you to add and manage integrations for popular
+{fleet} in {kib} enables you to add and manage integrations for popular
 services and platforms, as well as manage {elastic-agent} installations in
 standalone or {fleet} mode.
 
@@ -17,11 +17,13 @@ Standalone mode requires you to manually configure and manage the agent locally.
 * An overview of the data ingest in your {es} cluster.
 * Multiple integrations to collect and transform data.
 
+//TODO: Redo screen capture.
+
 [role="screenshot"]
-image::ingest_manager/images/ingest-manager-start.png[{ingest-manager} app in {kib}]
+image::fleet/images/fleet-start.png[{fleet} app in {kib}]
 
 [float]
 == Get started
 
-To get started with {ingest-management}, refer to the
+To get started with {fleet}, refer to the
 {ingest-guide}/index.html[Ingest Management Guide].

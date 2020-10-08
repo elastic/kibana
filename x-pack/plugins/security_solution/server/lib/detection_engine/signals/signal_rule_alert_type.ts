@@ -99,6 +99,7 @@ export const signalRulesAlertType = ({
         from,
         ruleId,
         index,
+        eventCategoryOverride,
         filters,
         language,
         maxSignals,
@@ -114,6 +115,7 @@ export const signalRulesAlertType = ({
         threatIndex,
         threatMapping,
         threatLanguage,
+        timestampOverride,
         type,
         exceptionsList,
       } = params;
@@ -313,6 +315,7 @@ export const signalRulesAlertType = ({
             logger,
             filter: esFilter,
             threshold,
+            timestampOverride,
             buildRuleMessage,
           });
 
@@ -346,7 +349,10 @@ export const signalRulesAlertType = ({
           });
           result = mergeReturns([
             result,
-            createSearchAfterReturnTypeFromResponse({ searchResult: thresholdResults }),
+            createSearchAfterReturnTypeFromResponse({
+              searchResult: thresholdResults,
+              timestampOverride,
+            }),
             createSearchAfterReturnType({
               success,
               errors: [...errors, ...searchErrors],
@@ -464,12 +470,12 @@ export const signalRulesAlertType = ({
           const request = buildEqlSearchRequest(
             query,
             inputIndex,
-            params.from,
-            params.to,
+            from,
+            to,
             searchAfterSize,
-            params.timestampOverride,
+            timestampOverride,
             exceptionItems ?? [],
-            params.eventCategoryOverride
+            eventCategoryOverride
           );
           const response: EqlSignalSearchResponse = await services.callCluster(
             'transport.request',
