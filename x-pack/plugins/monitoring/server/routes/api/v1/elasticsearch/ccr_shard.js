@@ -59,7 +59,7 @@ async function getCcrStat(req, esIndexPattern, filters) {
         inner_hits: {
           name: 'oldest',
           size: 1,
-          sort: [{ timestamp: 'asc' }],
+          sort: [{ timestamp: { order: 'asc', unmapped_type: 'long' } }],
         },
       },
     },
