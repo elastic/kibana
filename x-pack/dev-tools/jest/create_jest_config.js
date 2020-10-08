@@ -28,7 +28,7 @@ export function createJestConfig({ kibanaDirectory, rootDir, xPackKibanaDirector
       '^(!!)?file-loader!': fileMockPath,
     },
     collectCoverageFrom: [
-      'plugins/security_solution/public/cases/**/*.{js,mjs,jsx,ts,tsx}',
+      'plugins/**/*.{js,mjs,jsx,ts,tsx}',
       '!**/{__test__,__snapshots__,__examples__,integration_tests,tests}/**',
       '!**/*.test.{js,mjs,ts,tsx}',
       '!**/flot-charts/**',
