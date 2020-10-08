@@ -56,6 +56,9 @@ export function LibraryNotificationPopover({
           data-test-subj={`embeddablePanelNotification-${id}`}
           iconType={icon}
           style={{ marginTop: '-1px' }}
+          aria-label={i18n.translate('dashboard.panel.libraryNotification.ariaLabel', {
+            defaultMessage: 'View library information and unlink this panel',
+          })}
           color="text"
           onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
         />
