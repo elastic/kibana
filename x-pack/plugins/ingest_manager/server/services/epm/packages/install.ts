@@ -372,7 +372,28 @@ async function installPackage({
       install_source: installSource,
     });
   }
-  const installIndexPatternPromise = installIndexPatterns(savedObjectsClient, pkgName, pkgVersion);
+
+  // kick off `installIndexPatterns` & `installKibanaAssets` as early as possible because they're the longest running operations
+  // we don't `await` here because we don't want to delay starting the many other `install*` functions
+  // however, without an `await` or a `.catch` we haven't defined any error handling behavior
+  // we define it many lines and potentially a few seconds of wall clock time later in
+  // `await Promise.all([installKibanaAssetsPromise, installIndexPatternPromise]);`
+  // if we encounter an error before we there, we'll have an "unhandled rejection" which causes it's own problems
+  // the program will log something like this _and exit/crash_
+  //   Unhandled Promise rejection detected:
+  //   RegistryResponseError or some other error
+  //   Terminating process...
+  //    server crashed  with status code 1
+  //
+  // add a `.catch` to prevent the "unhandled rejection" case
+  // in that `.catch`, set something that indicates a failure
+  // look for that failure later and act accordingly (throw, ignore, return)
+  let installIndexPatternError;
+  const installIndexPatternPromise = installIndexPatterns(
+    savedObjectsClient,
+    pkgName,
+    pkgVersion
+  ).catch((reason) => (installIndexPatternError = reason));
   const kibanaAssets = await getKibanaAssets(paths);
   if (installedPkg)
     await deleteKibanaSavedObjectsAssets(
@@ -385,11 +406,12 @@ async function installPackage({
     pkgName,
     kibanaAssets
   );
+  let installKibanaAssetsError;
   const installKibanaAssetsPromise = installKibanaAssets({
     savedObjectsClient,
     pkgName,
     kibanaAssets,
-  });
+  }).catch((reason) => (installKibanaAssetsError = reason));
 
   // the rest of the installation must happen in sequential order
 
@@ -445,6 +467,10 @@ async function installPackage({
     id: template.templateName,
     type: ElasticsearchAssetType.indexTemplate,
   }));
+
+  // make sure the assets are installed (or didn't error)
+  if (installIndexPatternError) throw installIndexPatternError;
+  if (installKibanaAssetsError) throw installKibanaAssetsError;
   await Promise.all([installKibanaAssetsPromise, installIndexPatternPromise]);
 
   // update to newly installed version when all assets are successfully installed
