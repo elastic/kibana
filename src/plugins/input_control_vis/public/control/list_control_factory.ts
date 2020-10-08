@@ -142,6 +142,17 @@ export class ListControl extends Control<PhraseFilterManager> {
       timeout: `${settings.autocompleteTimeout}ms`,
       terminate_after: Number(settings.autocompleteTerminateAfter),
     };
+
+    // dynamic options are only allowed on String fields but the setting defaults to true so it could
+    // be enabled for non-string fields (since UI input is hidden for non-string fields).
+    // If field is not string, then disable dynamic options.
+    const field = indexPattern?.fields
+      .getAll()
+      .find(({ name }) => name === this.controlParams.fieldName);
+    if (field && field.type !== 'string') {
+      this.options.dynamicOptions = false;
+    }
+
     const aggs = termsAgg({
       field: indexPattern.fields.getByName(fieldName),
       size: this.options.dynamicOptions ? null : _.get(this.options, 'size', 5),
@@ -213,27 +224,20 @@ export async function listControlFactory(
   deps: InputControlVisDependencies
 ) {
   const [, { data: dataPluginStart }] = await deps.core.getStartServices();
-  const indexPattern = await dataPluginStart.indexPatterns.get(controlParams.indexPattern);
-
-  // dynamic options are only allowed on String fields but the setting defaults to true so it could
-  // be enabled for non-string fields (since UI input is hidden for non-string fields).
-  // If field is not string, then disable dynamic options.
-  const field = indexPattern.fields.getAll().find(({ name }) => name === controlParams.fieldName);
-  if (field && field.type !== 'string') {
-    controlParams.options.dynamicOptions = false;
-  }
 
   const listControl = new ListControl(
     controlParams,
     new PhraseFilterManager(
       controlParams.id,
       controlParams.fieldName,
-      indexPattern,
+      controlParams.indexPattern,
+      dataPluginStart.indexPatterns,
       deps.data.query.filterManager
     ),
     useTimeFilter,
     dataPluginStart.search.searchSource,
     deps
   );
+  await listControl.filterManager.init();
   return listControl;
 }
