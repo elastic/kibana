@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FunctionComponent, useEffect } from 'react';
-import { produce } from 'immer';
+import React, { Fragment, FunctionComponent } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -19,189 +18,46 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import {
-  HotPhase as HotPhaseInterface,
-  Phases,
-  SerializedHotPhase,
-} from '../../../../../common/types';
+import { HotPhase as HotPhaseInterface, Phases } from '../../../../../../../common/types';
 
 import {
-  useForm,
-  Form,
+  useFormContext,
   useFormData,
   UseField,
   SelectField,
   UseMultiFields,
   FieldConfig,
-  ValidationFunc,
   getFieldValidityAndErrorMessage,
-} from '../../../../shared_imports';
+} from '../../../../../../shared_imports';
 
-import { splitSizeAndUnits } from '../../../services/policies/policy_serialization';
+import { LearnMoreLink, ActiveBadge, PhaseErrorMessage, ErrableFormRow } from '../../';
 
-import { LearnMoreLink, ActiveBadge, PhaseErrorMessage, ErrableFormRow } from '../components';
+import { Forcemerge, SetPriorityInput, ifExistsNumberGreatThanZero } from '../shared';
 
-import { Forcemerge, SetPriorityInput, ifExistsNumberGreatThanZero } from './shared';
+import { maxSizeStoredUnits, maxAgeUnits, ROLLOVER_FORM_PATHS } from './constants';
 
-const maxSizeStoredUnits = [
-  {
-    value: 'gb',
-    text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.gigabytesLabel', {
-      defaultMessage: 'gigabytes',
-    }),
-  },
-  {
-    value: 'mb',
-    text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.megabytesLabel', {
-      defaultMessage: 'megabytes',
-    }),
-  },
-  {
-    value: 'b',
-    text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.bytesLabel', {
-      defaultMessage: 'bytes',
-    }),
-  },
-  {
-    value: 'kb',
-    text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.kilobytesLabel', {
-      defaultMessage: 'kilobytes',
-    }),
-  },
-  {
-    value: 'tb',
-    text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.terabytesLabel', {
-      defaultMessage: 'terabytes',
-    }),
-  },
-  {
-    value: 'pb',
-    text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.petabytesLabel', {
-      defaultMessage: 'petabytes',
-    }),
-  },
-];
+import { ROLLOVER_EMPTY_VALIDATION, rolloverThresholdsValidator } from './validations';
 
-const maxAgeUnits = [
-  {
-    value: 'd',
-    text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.daysLabel', {
-      defaultMessage: 'days',
-    }),
-  },
-  {
-    value: 'h',
-    text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.hoursLabel', {
-      defaultMessage: 'hours',
-    }),
-  },
-  {
-    value: 'm',
-    text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.minutesLabel', {
-      defaultMessage: 'minutes',
-    }),
-  },
-  {
-    value: 's',
-    text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.secondsLabel', {
-      defaultMessage: 'seconds',
-    }),
-  },
-  {
-    value: 'ms',
-    text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.millisecondsLabel', {
-      defaultMessage: 'milliseconds',
-    }),
-  },
-  {
-    value: 'micros',
-    text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.microsecondsLabel', {
-      defaultMessage: 'microseconds',
-    }),
-  },
-  {
-    value: 'nanos',
-    text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.nanosecondsLabel', {
-      defaultMessage: 'nanoseconds',
-    }),
-  },
-];
+import { i18nTexts } from './i18n_texts';
+
+import { useRolloverPath } from '../shared';
 
 const hotProperty: keyof Phases = 'hot';
 const phaseProperty = (propertyName: keyof HotPhaseInterface) => propertyName;
 
-const ROLLOVER_PATHS = {
-  maxDocs: 'actions.rollover.max_docs',
-  maxAge: 'actions.rollover.max_age',
-  maxSize: 'actions.rollover.max_size',
-};
-
-const i18nTexts = {
-  maximumAgeRequiredMessage: i18n.translate(
-    'xpack.indexLifecycleMgmt.editPolicy.maximumAgeMissingError',
-    {
-      defaultMessage: 'A maximum age is required.',
-    }
-  ),
-  maximumSizeRequiredMessage: i18n.translate(
-    'xpack.indexLifecycleMgmt.editPolicy.maximumIndexSizeMissingError',
-    {
-      defaultMessage: 'A maximum index size is required.',
-    }
-  ),
-  maximumDocumentsRequiredMessage: i18n.translate(
-    'xpack.indexLifecycleMgmt.editPolicy.maximumDocumentsMissingError',
-    {
-      defaultMessage: 'Maximum documents is required.',
-    }
-  ),
-  rollOverConfigurationCallout: {
-    title: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.rolloverConfigurationError.title', {
-      defaultMessage: 'Invalid rollover configuration',
-    }),
-    body: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.rolloverConfigurationError.body', {
-      defaultMessage:
-        'A value for one of maximum size, maximum documents, or maximum age is required.',
-    }),
-  },
-};
-
-const EMPTY = 'EMPTY';
-const rolloverThresholdsValidator: ValidationFunc = ({ form }) => {
-  const fields = form.getFields();
-  if (
-    !(
-      fields[ROLLOVER_PATHS.maxAge].value ||
-      fields[ROLLOVER_PATHS.maxDocs].value ||
-      fields[ROLLOVER_PATHS.maxSize].value
-    )
-  ) {
-    fields[ROLLOVER_PATHS.maxAge].setErrors([
-      { validationType: EMPTY, message: i18nTexts.maximumAgeRequiredMessage },
-    ]);
-    fields[ROLLOVER_PATHS.maxDocs].setErrors([
-      { validationType: EMPTY, message: i18nTexts.maximumDocumentsRequiredMessage },
-    ]);
-    fields[ROLLOVER_PATHS.maxSize].setErrors([
-      { validationType: EMPTY, message: i18nTexts.maximumSizeRequiredMessage },
-    ]);
-  } else {
-    fields[ROLLOVER_PATHS.maxAge].clearErrors(EMPTY);
-    fields[ROLLOVER_PATHS.maxDocs].clearErrors(EMPTY);
-    fields[ROLLOVER_PATHS.maxSize].clearErrors(EMPTY);
-  }
-};
 const fieldsConfig = {
   _meta: {
-    useRollover: {
-      defaultValue: true,
-    } as FieldConfig<boolean>,
-    maxStorageSizeUnit: {
-      defaultValue: 'gb',
-    } as FieldConfig<string>,
-    maxAgeUnit: {
-      defaultValue: 'd',
-    } as FieldConfig<string>,
+    hot: {
+      useRollover: {
+        defaultValue: true,
+      } as FieldConfig<boolean>,
+      maxStorageSizeUnit: {
+        defaultValue: 'gb',
+      } as FieldConfig<string>,
+      maxAgeUnit: {
+        defaultValue: 'd',
+      } as FieldConfig<string>,
+    },
   },
   rollover: {
     maxStorageSize: {
@@ -248,101 +104,13 @@ const fieldsConfig = {
   },
 };
 
-interface Props {
-  defaultValue?: SerializedHotPhase;
-  onChange: (formData: any) => void;
-  setWarmPhaseOnRollover: (value: boolean) => void;
-}
-
-/**
- * Describes the shape of data after deserialization.
- */
-export interface FormInternal extends SerializedHotPhase {
-  /**
-   * This is a special internal-only field that is used to display or hide
-   * certain form fields which affects what is ultimately serialized.
-   */
-  _meta: {
-    useRollover: boolean;
-    forceMergeEnabled: boolean;
-    bestCompression: boolean;
-    maxStorageSizeUnit?: string;
-    maxAgeUnit?: string;
-  };
-}
-
-const deserializer = (phase: SerializedHotPhase): FormInternal =>
-  produce(phase, (draft: SerializedHotPhase) => {
-    const _meta: FormInternal['_meta'] = {
-      useRollover: Boolean(draft.actions?.rollover),
-      forceMergeEnabled: Boolean(draft.actions?.forcemerge),
-      bestCompression: draft.actions?.forcemerge?.index_codec === 'best_compression',
-    };
-
-    if (draft.actions?.rollover) {
-      if (draft.actions.rollover.max_size) {
-        const maxSize = splitSizeAndUnits(draft.actions.rollover.max_size);
-        draft.actions.rollover.max_size = maxSize.size;
-        _meta.maxStorageSizeUnit = maxSize.units;
-      }
-
-      if (draft.actions.rollover.max_age) {
-        const maxAge = splitSizeAndUnits(draft.actions.rollover.max_age);
-        draft.actions.rollover.max_age = maxAge.size;
-        _meta.maxAgeUnit = maxAge.units;
-      }
-    }
-
-    return {
-      _meta,
-      ...draft,
-    };
-  });
-
-const serializer = (data: FormInternal) => {
-  const { _meta, ...rest } = data;
-  if (rest.actions?.rollover) {
-    if (rest.actions.rollover.max_size) {
-      rest.actions.rollover.max_size = `${rest.actions.rollover.max_size}${_meta.maxStorageSizeUnit}`;
-    }
-    if (rest.actions.rollover.max_age) {
-      rest.actions.rollover.max_age = `${rest.actions.rollover.max_age}${_meta.maxAgeUnit}`;
-    }
-
-    if (_meta.bestCompression && rest.actions.forcemerge) {
-      rest.actions.forcemerge.index_codec = 'best_compression';
-    }
-  }
-  return rest;
-};
-
-export const defaultHotPhase: SerializedHotPhase = {
-  actions: {
-    rollover: {},
-  },
-};
-
-export const HotPhase: FunctionComponent<Props> = ({
-  defaultValue,
-  setWarmPhaseOnRollover,
-  onChange,
-}) => {
-  const { form } = useForm({
-    defaultValue: defaultValue ?? defaultHotPhase,
-    deserializer,
-    serializer,
-  });
-  const [formData] = useFormData({ form });
+export const HotPhase: FunctionComponent = () => {
+  const [{ [useRolloverPath]: isRolloverEnabled }] = useFormData({ watch: [useRolloverPath] });
+  const form = useFormContext();
   const isShowingErrors = form.isValid === false;
-  const isRolloverEnabled = !!formData['_meta.useRollover'];
-
-  useEffect(() => {
-    const subscription = form.subscribe(onChange);
-    return subscription.unsubscribe;
-  }, [onChange, form]);
 
   return (
-    <Form form={form}>
+    <>
       <EuiDescribedFormGroup
         title={
           <div>
@@ -370,7 +138,7 @@ export const HotPhase: FunctionComponent<Props> = ({
         }
         fullWidth
       >
-        <UseField<boolean> path="_meta.useRollover" config={fieldsConfig._meta.useRollover}>
+        <UseField<boolean> path="_meta.hot.useRollover" config={fieldsConfig._meta.hot.useRollover}>
           {(field) => {
             return (
               <EuiFormRow
@@ -402,7 +170,6 @@ export const HotPhase: FunctionComponent<Props> = ({
                   data-test-subj="rolloverSwitch"
                   checked={field.value}
                   onChange={(e) => {
-                    setWarmPhaseOnRollover(e.target.checked);
                     field.setValue(e.target.checked);
                   }}
                   label={i18n.translate('xpack.indexLifecycleMgmt.hotPhase.enableRolloverLabel', {
@@ -419,15 +186,15 @@ export const HotPhase: FunctionComponent<Props> = ({
             <UseMultiFields
               fields={{
                 maxAge: {
-                  path: ROLLOVER_PATHS.maxAge,
+                  path: ROLLOVER_FORM_PATHS.maxAge,
                   config: fieldsConfig.rollover.maxAge,
                 },
                 maxSize: {
-                  path: ROLLOVER_PATHS.maxSize,
+                  path: ROLLOVER_FORM_PATHS.maxSize,
                   config: fieldsConfig.rollover.maxStorageSize,
                 },
                 maxDocs: {
-                  path: ROLLOVER_PATHS.maxDocs,
+                  path: ROLLOVER_FORM_PATHS.maxDocs,
                   config: fieldsConfig.rollover.maxDocs,
                 },
               }}
@@ -438,7 +205,7 @@ export const HotPhase: FunctionComponent<Props> = ({
                 const maxDocsValidity = getFieldValidityAndErrorMessage(maxDocs);
                 return (
                   <>
-                    {maxAge.errors.some((e) => e.validationType === EMPTY) && (
+                    {maxAge.errors.some((e) => e.validationType === ROLLOVER_EMPTY_VALIDATION) && (
                       <>
                         <EuiCallOut
                           title={i18nTexts.rollOverConfigurationCallout.title}
@@ -471,9 +238,9 @@ export const HotPhase: FunctionComponent<Props> = ({
                       </EuiFlexItem>
                       <EuiFlexItem style={{ maxWidth: 188 }}>
                         <UseField
-                          path="_meta.maxStorageSizeUnit"
+                          path="_meta.hot.maxStorageSizeUnit"
                           component={SelectField}
-                          config={fieldsConfig._meta.maxStorageSizeUnit}
+                          config={fieldsConfig._meta.hot.maxStorageSizeUnit}
                           componentProps={{
                             'data-test-subj': `${hotProperty}-${phaseProperty(
                               'selectedMaxSizeStoredUnits'
@@ -533,8 +300,8 @@ export const HotPhase: FunctionComponent<Props> = ({
                       </EuiFlexItem>
                       <EuiFlexItem style={{ maxWidth: 188 }}>
                         <UseField
-                          path="_meta.maxAgeUnit"
-                          config={fieldsConfig._meta.maxAgeUnit}
+                          path="_meta.hot.maxAgeUnit"
+                          config={fieldsConfig._meta.hot.maxAgeUnit}
                           component={SelectField}
                           componentProps={{
                             'data-test-subj': `${hotProperty}-${phaseProperty(
@@ -563,6 +330,6 @@ export const HotPhase: FunctionComponent<Props> = ({
       </EuiDescribedFormGroup>
       {isRolloverEnabled && <Forcemerge phase="hot" />}
       <SetPriorityInput phase={hotProperty} />
-    </Form>
+    </>
   );
 };

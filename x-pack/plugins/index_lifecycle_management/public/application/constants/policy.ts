@@ -10,7 +10,19 @@ import {
   DeletePhase,
   HotPhase,
   WarmPhase,
+  SerializedPolicy,
 } from '../../../common/types';
+
+export const defaultPolicy: SerializedPolicy = {
+  name: '',
+  phases: {
+    hot: {
+      actions: {
+        rollover: {},
+      },
+    },
+  },
+};
 
 export const defaultNewHotPhase: HotPhase = {
   phaseEnabled: true,

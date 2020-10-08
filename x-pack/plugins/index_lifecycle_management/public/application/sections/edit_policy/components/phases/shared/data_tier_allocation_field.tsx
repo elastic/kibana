@@ -8,17 +8,17 @@ import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 
-import { PhaseWithAllocationAction, PhaseWithAllocation } from '../../../../../../common/types';
-import { PhaseValidationErrors } from '../../../../services/policies/policy_validation';
-import { getAvailableNodeRoleForPhase } from '../../../../lib/data_tiers';
-import { isNodeRoleFirstPreference } from '../../../../lib/data_tiers/is_node_role_first_preference';
+import { PhaseWithAllocationAction, PhaseWithAllocation } from '../../../../../../../common/types';
+import { PhaseValidationErrors } from '../../../../../services/policies/policy_validation';
+import { getAvailableNodeRoleForPhase } from '../../../../../lib/data_tiers';
+import { isNodeRoleFirstPreference } from '../../../../../lib/data_tiers/is_node_role_first_preference';
 
 import {
   DataTierAllocation,
   DefaultAllocationNotice,
   NoNodeAttributesWarning,
   NodesDataProvider,
-} from '../../components/data_tier_allocation';
+} from '../../data_tier_allocation';
 
 const i18nTexts = {
   title: i18n.translate('xpack.indexLifecycleMgmt.common.dataTier.title', {

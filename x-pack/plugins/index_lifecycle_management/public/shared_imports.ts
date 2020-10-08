@@ -14,6 +14,7 @@ export {
   ValidationFunc,
   UseMultiFields,
   getFieldValidityAndErrorMessage,
+  useFormContext,
 } from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 
 export { fieldValidators } from '../../../../src/plugins/es_ui_shared/static/forms/helpers';

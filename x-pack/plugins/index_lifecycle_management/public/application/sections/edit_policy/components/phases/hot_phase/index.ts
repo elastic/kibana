@@ -4,7 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { HotPhase, defaultHotPhase } from './hot_phase';
-export { WarmPhase } from './warm_phase';
-export { ColdPhase } from './cold_phase';
-export { DeletePhase } from './delete_phase';
+export { defaultHotPhase, HotPhase, FormInternal } from './hot_phase';
