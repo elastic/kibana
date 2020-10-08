@@ -8,11 +8,7 @@ import React from 'react';
 import { fireEvent, render } from '@testing-library/react'; // eslint-disable-line import/no-extraneous-dependencies
 import { JobSelectorTable } from './job_selector_table';
 
-jest.mock('../../../services/job_service', () => ({
-  mlJobService: {
-    getJob: jest.fn(),
-  },
-}));
+jest.mock('../../../contexts/kibana');
 
 const props = {
   ganttBarWidth: 299,
