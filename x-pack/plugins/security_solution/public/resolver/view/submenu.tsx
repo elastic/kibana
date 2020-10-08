@@ -43,7 +43,7 @@ interface ResolverSubmenuOption {
  * Until browser support accomodates the `notation="compact"` feature of Intl.NumberFormat...
  * exported for testing
  * @param num The number to format
- * @returns [Scalar of compact notation (k,M,B,T), mantissa, overflow indicator (+)]
+ * @returns [mantissa ("12" in "12k+"), Scalar of compact notation (k,M,B,T), remainder indicator ("+" in "12k+")]
  */
 export function compactNotationParts(num: number): [number, string, string] {
   if (!Number.isFinite(num)) {
@@ -76,18 +76,11 @@ export function compactNotationParts(num: number): [number, string, string] {
     [1000000000, compactPrefixTranslations.compactBillions],
     [1000000000000, compactPrefixTranslations.compactTrillions],
   ]);
-  const overflowIndicator = i18n.translate(
-    'xpack.securitySolution.endpoint.resolver.compactOverflow',
-    {
-      defaultMessage: '+',
-    }
-  );
+  const hasRemainder = i18n.translate('xpack.securitySolution.endpoint.resolver.compactOverflow', {
+    defaultMessage: '+',
+  });
   const prefix = prefixMap.get(scale) ?? '';
-  return [
-    Math.floor(num / scale),
-    prefix,
-    (num / scale) % 1 > Number.EPSILON ? overflowIndicator : '',
-  ];
+  return [Math.floor(num / scale), prefix, (num / scale) % 1 > Number.EPSILON ? hasRemainder : ''];
 }
 
 export type ResolverSubmenuOptionList = ResolverSubmenuOption[] | string;
