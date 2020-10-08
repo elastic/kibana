@@ -62,9 +62,6 @@ const AdvancedPolicyForms = React.memo(() => {
       {((AdvancedPolicySchema as unknown) as AdvancedPolicySchemaType[]).map(
         (advancedField, index) => {
           const configPath = advancedField.key.split('.');
-          console.log(advancedField.key);
-          console.log(advancedField.first_supported_version);
-          console.log(advancedField.last_supported_version);
           return (
             <PolicyAdvanced
               key={index}
@@ -78,6 +75,8 @@ const AdvancedPolicyForms = React.memo(() => {
     </>
   );
 });
+
+AdvancedPolicyForms.displayName = 'AdvancedPolicyForms';
 
 export const PolicyDetails = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();

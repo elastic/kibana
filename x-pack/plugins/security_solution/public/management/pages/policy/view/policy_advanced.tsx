@@ -6,11 +6,16 @@
 
 import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { EuiFieldText, EuiText, FormattedMessage, EuiIconTip/*, EuiDataGrid, EuiPopover, EuiButtonIcon*/ } from '@elastic/eui';
+import {
+  EuiFieldText,
+  EuiText,
+  FormattedMessage,
+  EuiIconTip /* , EuiDataGrid, EuiPopover, EuiButtonIcon*/,
+} from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { policyConfig } from '../store/policy_details/selectors';
 import { usePolicyDetailsSelector } from './policy_hooks';
-//import * as AdvancedPolicySchema from '../../../../../schema.json';
+// import * as AdvancedPolicySchema from '../../../../../schema.json';
 
 function setValue(obj: Record<string, unknown>, value: string, path: string[]) {
   let newPolicyConfig = obj;
@@ -116,81 +121,81 @@ export const PolicyAdvanced = React.memo(
 //     [dispatch, policyDetailsConfig]
 //   );
 
-  // const rawData = [];
-  // const columns = [
-  //   {
-  //     id: 'Field name',
-  //   },
-  //   {
-  //     id: 'Supported endpoint version',
-  //   },
-  //   {
-  //     id: 'Value',
-  //     // rowCellRender: function RowCellRender() {
-  //     //   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  //     //   return (
+// const rawData = [];
+// const columns = [
+//   {
+//     id: 'Field name',
+//   },
+//   {
+//     id: 'Supported endpoint version',
+//   },
+//   {
+//     id: 'Value',
+//     // rowCellRender: function RowCellRender() {
+//     //   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+//     //   return (
 
-  //     //   );
-  //     // },
-  //   },
-  // ];
+//     //   );
+//     // },
+//   },
+// ];
 
-  // ((AdvancedPolicySchema as unknown) as AdvancedPolicySchemaType[]).map((advancedField, index) => {
-  //   const configPath = advancedField.key.split('.');
+// ((AdvancedPolicySchema as unknown) as AdvancedPolicySchemaType[]).map((advancedField, index) => {
+//   const configPath = advancedField.key.split('.');
 
-  //   const value =
-  //     policyDetailsConfig &&
-  //     getValue((policyDetailsConfig as unknown) as Record<string, unknown>, configPath);
+//   const value =
+//     policyDetailsConfig &&
+//     getValue((policyDetailsConfig as unknown) as Record<string, unknown>, configPath);
 
-    // const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-    // // console.log(configPath, value);
-    // return rawData.push({
-    //   'Field name': advancedField.key,
-    //   'Supported endpoint version': advancedField.last_supported_version
-    //     ? `${advancedField.first_supported_version}-${advancedField.last_supported_version}`
-    //     : `${advancedField.first_supported_version}+`,
-    //   Value: /*<EuiFieldText value={value as string} onChange={onChange(configPath)}/>,*/
-    //   <EuiPopover
-    //   isOpen={isPopoverOpen}
-    //   anchorPosition="upCenter"
-    //   button={
-    //     <EuiButtonIcon
-    //       aria-label="show actions"
-    //       iconType="boxesHorizontal"
-    //       color="text"
-    //       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-    //     />
-    //   }
-    //   closePopover={() => setIsPopoverOpen(false)}
-    //   ownFocus={true}> 
-    // <EuiFieldText value={value as string} onChange={onChange(configPath)}/>
-    // </EuiPopover>
-    // });
-  // });
+// const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+// // console.log(configPath, value);
+// return rawData.push({
+//   'Field name': advancedField.key,
+//   'Supported endpoint version': advancedField.last_supported_version
+//     ? `${advancedField.first_supported_version}-${advancedField.last_supported_version}`
+//     : `${advancedField.first_supported_version}+`,
+//   Value: /*<EuiFieldText value={value as string} onChange={onChange(configPath)}/>,*/
+//   <EuiPopover
+//   isOpen={isPopoverOpen}
+//   anchorPosition="upCenter"
+//   button={
+//     <EuiButtonIcon
+//       aria-label="show actions"
+//       iconType="boxesHorizontal"
+//       color="text"
+//       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+//     />
+//   }
+//   closePopover={() => setIsPopoverOpen(false)}
+//   ownFocus={true}>
+// <EuiFieldText value={value as string} onChange={onChange(configPath)}/>
+// </EuiPopover>
+// });
+// });
 
-  // Column visibility
-  // const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ id }) => id)); // initialize to the full set of columns
+// Column visibility
+// const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ id }) => id)); // initialize to the full set of columns
 
-  // const renderCellValue = useMemo(() => {
-  //   return ({ rowIndex, columnId, setCellProps }) => {
-  //     // eslint-disable-next-line react-hooks/rules-of-hooks
-  //     useEffect(() => {
-  //       if (columnId === 'Value') {
-  //         // if (rawData.hasOwnProperty(rowIndex)) {
-  //         setCellProps({
-  //           style: {
-  //             backgroundColor: '#fffcdd',
-  //           },
-  //         });
-  //         // }
-  //       }
-  //     }, [rowIndex, columnId, setCellProps]);
+// const renderCellValue = useMemo(() => {
+//   return ({ rowIndex, columnId, setCellProps }) => {
+//     // eslint-disable-next-line react-hooks/rules-of-hooks
+//     useEffect(() => {
+//       if (columnId === 'Value') {
+//         // if (rawData.hasOwnProperty(rowIndex)) {
+//         setCellProps({
+//           style: {
+//             backgroundColor: '#fffcdd',
+//           },
+//         });
+//         // }
+//       }
+//     }, [rowIndex, columnId, setCellProps]);
 
-  //     return Object.prototype.hasOwnProperty.call(rawData, rowIndex)
-  //       ? rawData[rowIndex][columnId]
-  //       : null;
-  //   };
-  // }, [rawData]);
+//     return Object.prototype.hasOwnProperty.call(rawData, rowIndex)
+//       ? rawData[rowIndex][columnId]
+//       : null;
+//   };
+// }, [rawData]);
 
 //   return (
 //     <EuiDataGrid
