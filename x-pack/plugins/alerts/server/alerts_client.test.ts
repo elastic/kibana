@@ -13,7 +13,7 @@ import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
 import { alertsAuthorizationMock } from './authorization/alerts_authorization.mock';
 import { TaskStatus } from '../../task_manager/server';
-import { IntervalSchedule, RawAlert } from './types';
+import { AlertExecutionStatusErrorReasons, IntervalSchedule, RawAlert } from './types';
 import { resolvable } from './test_utils';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { actionsClientMock, actionsAuthorizationMock } from '../../actions/server/mocks';
@@ -2975,7 +2975,7 @@ describe('hasDecryptionFailures()', () => {
               status: 'error',
               lastExecutionDate: new Date().toISOString(),
               error: {
-                reason: 'decrypt',
+                reason: AlertExecutionStatusErrorReasons.Decrypt,
                 message: 'Failed decrypt',
               },
             },
@@ -3045,7 +3045,7 @@ describe('hasDecryptionFailures()', () => {
               status: 'error',
               lastExecutionDate: new Date().toISOString(),
               error: {
-                reason: 'unknown',
+                reason: AlertExecutionStatusErrorReasons.Unknown,
                 message: 'Failed',
               },
             },

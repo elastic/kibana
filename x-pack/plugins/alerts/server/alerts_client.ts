@@ -27,6 +27,7 @@ import {
   SanitizedAlert,
   AlertTaskState,
   AlertInstanceSummary,
+  AlertExecutionStatusErrorReasons,
 } from './types';
 import { validateAlertTypeParams, alertExecutionStatusFromRaw } from './lib';
 import {
@@ -403,7 +404,10 @@ export class AlertsClient {
       type: 'alert',
     });
     return (
-      data.filter((item) => item.attributes.executionStatus.error?.reason === 'decrypt').length > 0
+      data.filter(
+        (item) =>
+          item.attributes.executionStatus.error?.reason === AlertExecutionStatusErrorReasons.Decrypt
+      ).length > 0
     );
   }
 
