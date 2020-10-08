@@ -65,9 +65,3 @@ report.asciidoc
 
 # TS incremental build cache
 *.tsbuildinfo
-
-# TEMPORARY-FOR-DEVELOPMENT
-# TODO: REMOVE THIS
-compose_single_root_pkg_json.js
-bazel-*
-.bazelrc.user
