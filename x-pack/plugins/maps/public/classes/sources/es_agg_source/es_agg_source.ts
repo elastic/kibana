@@ -55,7 +55,7 @@ export abstract class AbstractESAggSource extends AbstractESSource {
     }
   }
 
-  getFieldByName(fieldName: string) {
+  getFieldByName(fieldName: string): IField | null {
     return this.getMetricFieldForName(fieldName);
   }
 

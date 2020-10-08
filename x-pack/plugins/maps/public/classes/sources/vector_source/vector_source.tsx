@@ -159,7 +159,7 @@ export class AbstractVectorSource extends AbstractSource {
    * @param label
    * @returns {IField}
    */
-  getFieldByName(name: string) {
+  getFieldByName(fieldName: string): IField | null {
     return this.createField({ fieldName: name });
   }
 
@@ -175,9 +175,10 @@ export class AbstractVectorSource extends AbstractSource {
     return false;
   }
 
-  async getBoundsForFilters(): Promise<MapExtent | null> {
-    return null;
-  }
+  getBoundsForFilters(
+    boundsFilters: BoundsFilters,
+    registerCancelCallback: (callback: () => void) => void
+  ): Promise<MapExtent | null>;
 
   async getFields() {
     return [];

@@ -126,7 +126,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     requestDescription: string;
     searchSource: SearchSource;
     registerCancelCallback: (callback: () => void) => void;
-  }): any {
+  }): Promise<any> {
     const abortController = new AbortController();
     registerCancelCallback(() => abortController.abort());
 
