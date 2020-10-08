@@ -21,7 +21,7 @@ import { of } from 'rxjs';
 
 import { getUsageCollector } from './get_usage_collector';
 import { HomeServerPluginSetup } from '../../../home/server';
-import { createCollectorFetchClientsMock } from 'src/plugins/usage_collection/server/usage_collection.mock';
+import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/usage_collection.mock';
 
 const mockedSavedObjects = [
   // vega-lite lib spec
@@ -73,7 +73,7 @@ const mockedSavedObjects = [
 ];
 
 const getMockFetchClients = (hits?: unknown[]) => {
-  const fetchParamsMock = createCollectorFetchClientsMock();
+  const fetchParamsMock = createCollectorFetchContextMock();
   fetchParamsMock.callCluster.mockResolvedValue({ hits: { hits } });
   return fetchParamsMock;
 };

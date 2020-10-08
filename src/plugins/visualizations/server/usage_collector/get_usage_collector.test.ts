@@ -20,7 +20,7 @@
 import moment from 'moment';
 import { of } from 'rxjs';
 
-import { createCollectorFetchClientsMock } from 'src/plugins/usage_collection/server/usage_collection.mock';
+import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/usage_collection.mock';
 import { getUsageCollector } from './get_usage_collector';
 
 const defaultMockSavedObjects = [
@@ -124,7 +124,7 @@ describe('Visualizations usage collector', () => {
   const configMock = of({ kibana: { index: '' } });
   const usageCollector = getUsageCollector(configMock);
   const getMockFetchClients = (hits?: unknown[]) => {
-    const fetchParamsMock = createCollectorFetchClientsMock();
+    const fetchParamsMock = createCollectorFetchContextMock();
     fetchParamsMock.callCluster.mockResolvedValue({ hits: { hits } });
     return fetchParamsMock;
   };

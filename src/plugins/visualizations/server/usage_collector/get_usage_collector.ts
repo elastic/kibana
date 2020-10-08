@@ -23,7 +23,7 @@ import { first } from 'rxjs/operators';
 import { SearchResponse } from 'elasticsearch';
 
 import { LegacyAPICaller } from 'src/core/server';
-import { CollectorFetchClients } from 'src/plugins/usage_collection/server';
+import { CollectorFetchContext } from 'src/plugins/usage_collection/server';
 import { getPastDays } from './get_past_days';
 
 const VIS_USAGE_TYPE = 'visualization_types';
@@ -100,7 +100,7 @@ export function getUsageCollector(config: Observable<{ kibana: { index: string }
   return {
     type: VIS_USAGE_TYPE,
     isReady: () => true,
-    fetch: async ({ callCluster }: CollectorFetchClients) => {
+    fetch: async ({ callCluster }: CollectorFetchContext) => {
       const index = (await config.pipe(first()).toPromise()).kibana.index;
       return await getStats(callCluster, index);
     },

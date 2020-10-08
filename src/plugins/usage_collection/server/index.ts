@@ -26,7 +26,7 @@ export {
   SchemaField,
   CollectorOptions,
   Collector,
-  CollectorFetchClients,
+  CollectorFetchContext,
 } from './collector';
 export { UsageCollectionSetup } from './plugin';
 export { config } from './config';

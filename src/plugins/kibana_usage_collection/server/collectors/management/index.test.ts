@@ -21,15 +21,11 @@ import { uiSettingsServiceMock } from '../../../../../core/server/mocks';
 import {
   CollectorOptions,
   createUsageCollectionSetupMock,
-  createCollectorFetchClientsMock,
+  createCollectorFetchContextMock,
 } from '../../../../usage_collection/server/usage_collection.mock';
 
 import { registerManagementUsageCollector } from './';
-const getMockFetchClients = (resp?: any) => {
-  const fetchParamsMock = createCollectorFetchClientsMock();
-  fetchParamsMock.callCluster.mockResolvedValue(resp);
-  return fetchParamsMock;
-};
+
 describe('telemetry_application_usage_collector', () => {
   let collector: CollectorOptions;
 
@@ -41,6 +37,7 @@ describe('telemetry_application_usage_collector', () => {
 
   const uiSettingsClient = uiSettingsServiceMock.createClient();
   const getUiSettingsClient = jest.fn(() => uiSettingsClient);
+  const mockedFetchContext = createCollectorFetchContextMock();
 
   beforeAll(() => {
     registerManagementUsageCollector(usageCollectionMock, getUiSettingsClient);
@@ -63,11 +60,11 @@ describe('telemetry_application_usage_collector', () => {
     uiSettingsClient.getUserProvided.mockImplementationOnce(async () => ({
       'my-key': { userValue: 'my-value' },
     }));
-    await expect(collector.fetch(getMockFetchClients())).resolves.toMatchSnapshot();
+    await expect(collector.fetch(mockedFetchContext)).resolves.toMatchSnapshot();
   });
 
   test('fetch() should not fail if invoked when not ready', async () => {
     getUiSettingsClient.mockImplementationOnce(() => undefined as any);
-    await expect(collector.fetch(getMockFetchClients())).resolves.toBe(undefined);
+    await expect(collector.fetch(mockedFetchContext)).resolves.toBe(undefined);
   });
 });

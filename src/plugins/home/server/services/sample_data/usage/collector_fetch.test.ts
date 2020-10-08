@@ -17,30 +17,30 @@
  * under the License.
  */
 
-import { CollectorFetchClients } from 'src/plugins/usage_collection/server';
-import { createCollectorFetchClientsMock } from 'src/plugins/usage_collection/server/usage_collection.mock';
+import { CollectorFetchContext } from 'src/plugins/usage_collection/server';
+import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/usage_collection.mock';
 import { fetchProvider } from './collector_fetch';
 
 const getMockFetchClients = (hits?: unknown[]) => {
-  const fetchParamsMock = createCollectorFetchClientsMock();
+  const fetchParamsMock = createCollectorFetchContextMock();
   fetchParamsMock.callCluster.mockResolvedValue({ hits: { hits } });
   return fetchParamsMock;
 };
 
 describe('Sample Data Fetch', () => {
-  let collectorFetchClients: CollectorFetchClients;
+  let collectorFetchContext: CollectorFetchContext;
 
   test('uninitialized .kibana', async () => {
     const fetch = fetchProvider('index');
-    collectorFetchClients = getMockFetchClients();
-    const telemetry = await fetch(collectorFetchClients);
+    collectorFetchContext = getMockFetchClients();
+    const telemetry = await fetch(collectorFetchContext);
 
     expect(telemetry).toMatchInlineSnapshot(`undefined`);
   });
 
   test('installed data set', async () => {
     const fetch = fetchProvider('index');
-    collectorFetchClients = getMockFetchClients([
+    collectorFetchContext = getMockFetchClients([
       {
         _id: 'sample-data-telemetry:test1',
         _source: {
@@ -49,7 +49,7 @@ describe('Sample Data Fetch', () => {
         },
       },
     ]);
-    const telemetry = await fetch(collectorFetchClients);
+    const telemetry = await fetch(collectorFetchContext);
 
     expect(telemetry).toMatchInlineSnapshot(`
 Object {
@@ -67,7 +67,7 @@ Object {
 
   test('multiple installed data sets', async () => {
     const fetch = fetchProvider('index');
-    collectorFetchClients = getMockFetchClients([
+    collectorFetchContext = getMockFetchClients([
       {
         _id: 'sample-data-telemetry:test1',
         _source: {
@@ -83,7 +83,7 @@ Object {
         },
       },
     ]);
-    const telemetry = await fetch(collectorFetchClients);
+    const telemetry = await fetch(collectorFetchContext);
 
     expect(telemetry).toMatchInlineSnapshot(`
 Object {
@@ -102,13 +102,13 @@ Object {
 
   test('installed data set, missing counts', async () => {
     const fetch = fetchProvider('index');
-    collectorFetchClients = getMockFetchClients([
+    collectorFetchContext = getMockFetchClients([
       {
         _id: 'sample-data-telemetry:test1',
         _source: { updated_at: '2019-03-13T22:02:09Z', 'sample-data-telemetry': {} },
       },
     ]);
-    const telemetry = await fetch(collectorFetchClients);
+    const telemetry = await fetch(collectorFetchContext);
 
     expect(telemetry).toMatchInlineSnapshot(`
 Object {
@@ -124,7 +124,7 @@ Object {
 
   test('installed and uninstalled data sets', async () => {
     const fetch = fetchProvider('index');
-    collectorFetchClients = getMockFetchClients([
+    collectorFetchContext = getMockFetchClients([
       {
         _id: 'sample-data-telemetry:test0',
         _source: {
@@ -147,7 +147,7 @@ Object {
         },
       },
     ]);
-    const telemetry = await fetch(collectorFetchClients);
+    const telemetry = await fetch(collectorFetchContext);
 
     expect(telemetry).toMatchInlineSnapshot(`
 Object {

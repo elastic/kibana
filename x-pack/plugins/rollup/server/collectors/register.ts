@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import { UsageCollectionSetup, CollectorFetchClients } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup, CollectorFetchContext } from 'src/plugins/usage_collection/server';
 import { LegacyAPICaller } from 'kibana/server';
 
 interface IdToFlagMap {
@@ -211,7 +211,7 @@ export function registerRollupUsageCollector(
         total: { type: 'long' },
       },
     },
-    fetch: async ({ callCluster }: CollectorFetchClients) => {
+    fetch: async ({ callCluster }: CollectorFetchContext) => {
       const rollupIndexPatterns = await fetchRollupIndexPatterns(kibanaIndex, callCluster);
       const rollupIndexPatternToFlagMap = createIdToFlagMap(rollupIndexPatterns);
 

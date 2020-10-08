@@ -5,7 +5,7 @@
  */
 
 import { CoreSetup } from '../../../../../src/core/server';
-import { CollectorFetchClients } from '../../../../../src/plugins/usage_collection/server';
+import { CollectorFetchContext } from '../../../../../src/plugins/usage_collection/server';
 import { CollectorDependencies } from './types';
 import { DetectionsUsage, fetchDetectionsUsage, defaultDetectionsUsage } from './detections';
 import { EndpointUsage, getEndpointTelemetryFromFleet } from './endpoints';
@@ -78,7 +78,7 @@ export const registerCollector: RegisterCollector = ({
       },
     },
     isReady: () => kibanaIndex.length > 0,
-    fetch: async ({ callCluster }: CollectorFetchClients): Promise<UsageData> => {
+    fetch: async ({ callCluster }: CollectorFetchContext): Promise<UsageData> => {
       const savedObjectsClient = await getInternalSavedObjectsClient(core);
       const [detections, endpoints] = await Promise.allSettled([
         fetchDetectionsUsage(kibanaIndex, callCluster, ml),

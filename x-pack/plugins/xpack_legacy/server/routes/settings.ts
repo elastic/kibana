@@ -42,7 +42,7 @@ export function registerSettingsRoute({
     },
     async (context, req, res) => {
       const { callAsCurrentUser } = context.core.elasticsearch.legacy.client;
-      const collectorFetchClients = {
+      const collectorFetchContext = {
         callCluster: callAsCurrentUser,
       };
 
@@ -54,7 +54,7 @@ export function registerSettingsRoute({
       }
 
       const settings =
-        (await settingsCollector.fetch(collectorFetchClients)) ??
+        (await settingsCollector.fetch(collectorFetchContext)) ??
         settingsCollector.getEmailValueStructure(null);
       const { cluster_uuid: uuid } = await callAsCurrentUser('info', {
         filterPath: 'cluster_uuid',

@@ -5,7 +5,7 @@
  */
 
 import { KibanaTelemetryAdapter } from '../kibana_telemetry_adapter';
-import { createCollectorFetchClientsMock } from 'src/plugins/usage_collection/server/usage_collection.mock';
+import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/usage_collection.mock';
 jest
   .spyOn(KibanaTelemetryAdapter, 'countNoOfUniqueMonitorAndLocations')
   .mockResolvedValue(undefined as any);
@@ -28,7 +28,7 @@ describe('KibanaTelemetryAdapter', () => {
     getSavedObjectsClient = () => {
       return {};
     };
-    collectorFetchParams = createCollectorFetchClientsMock();
+    collectorFetchParams = createCollectorFetchContextMock();
   });
 
   it('collects monitor and overview data', async () => {

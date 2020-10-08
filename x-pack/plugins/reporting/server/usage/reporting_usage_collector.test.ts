@@ -6,8 +6,8 @@
 
 import * as Rx from 'rxjs';
 import sinon from 'sinon';
-import { CollectorFetchClients, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { createCollectorFetchClientsMock } from 'src/plugins/usage_collection/server/usage_collection.mock';
+import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/usage_collection.mock';
 import { ReportingConfig, ReportingCore } from '../';
 import { getExportTypesRegistry } from '../lib/export_types_registry';
 import { createMockConfig, createMockConfigSchema, createMockReportingCore } from '../test_helpers';
@@ -58,7 +58,7 @@ function getPluginsMock(
 const getResponseMock = (base = {}) => base;
 
 const getMockFetchClients = (resp: any) => {
-  const fetchParamsMock = createCollectorFetchClientsMock();
+  const fetchParamsMock = createCollectorFetchContextMock();
   fetchParamsMock.callCluster.mockResolvedValue(resp);
   return fetchParamsMock;
 };
@@ -186,7 +186,7 @@ describe('license checks', () => {
 describe('data modeling', () => {
   let mockConfig: ReportingConfig;
   let mockCore: ReportingCore;
-  let collectorFetchClients: CollectorFetchClients;
+  let collectorFetchContext: CollectorFetchContext;
   beforeAll(async () => {
     mockConfig = createMockConfig(createMockConfigSchema());
     mockCore = await createMockReportingCore(mockConfig);
@@ -202,7 +202,7 @@ describe('data modeling', () => {
         return Promise.resolve(true);
       }
     );
-    collectorFetchClients = getMockFetchClients(
+    collectorFetchContext = getMockFetchClients(
       getResponseMock(
       {
         aggregations: {
@@ -237,7 +237,7 @@ describe('data modeling', () => {
         },
       } as SearchResponse) // prettier-ignore
     );
-    const usageStats = await fetch(collectorFetchClients);
+    const usageStats = await fetch(collectorFetchContext);
     expect(usageStats).toMatchSnapshot();
   });
 
@@ -252,7 +252,7 @@ describe('data modeling', () => {
         return Promise.resolve(true);
       }
     );
-    collectorFetchClients = getMockFetchClients(
+    collectorFetchContext = getMockFetchClients(
       getResponseMock(
       {
         aggregations: {
@@ -287,7 +287,7 @@ describe('data modeling', () => {
         },
       } as SearchResponse) // prettier-ignore
     );
-    const usageStats = await fetch(collectorFetchClients);
+    const usageStats = await fetch(collectorFetchContext);
     expect(usageStats).toMatchSnapshot();
   });
 
@@ -303,7 +303,7 @@ describe('data modeling', () => {
       }
     );
 
-    collectorFetchClients = getMockFetchClients(
+    collectorFetchContext = getMockFetchClients(
       getResponseMock({
       aggregations: {
         ranges: {
@@ -337,7 +337,7 @@ describe('data modeling', () => {
       },
     } as SearchResponse) // prettier-ignore
     );
-    const usageStats = await fetch(collectorFetchClients);
+    const usageStats = await fetch(collectorFetchContext);
     expect(usageStats).toMatchSnapshot();
   });
 

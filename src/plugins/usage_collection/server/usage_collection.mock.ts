@@ -20,7 +20,7 @@
 import { elasticsearchServiceMock } from '../../../../src/core/server/mocks';
 
 import { CollectorOptions } from './collector/collector';
-import { UsageCollectionSetup, CollectorFetchClients } from './index';
+import { UsageCollectionSetup, CollectorFetchContext } from './index';
 
 export { CollectorOptions };
 
@@ -48,8 +48,8 @@ export const createUsageCollectionSetupMock = () => {
   return usageCollectionSetupMock;
 };
 
-export function createCollectorFetchClientsMock(): jest.Mocked<CollectorFetchClients> {
-  const collectorFetchClientsMock: jest.Mocked<CollectorFetchClients> = {
+export function createCollectorFetchContextMock(): jest.Mocked<CollectorFetchContext> {
+  const collectorFetchClientsMock: jest.Mocked<CollectorFetchContext> = {
     callCluster: elasticsearchServiceMock.createLegacyClusterClient().callAsInternalUser,
     esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
   };

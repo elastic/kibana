@@ -20,7 +20,7 @@
 import { pluginInitializerContextConfigMock } from '../../../../../core/server/mocks';
 import {
   CollectorOptions,
-  createCollectorFetchClientsMock,
+  createCollectorFetchContextMock,
   createUsageCollectionSetupMock,
 } from '../../../../usage_collection/server/usage_collection.mock';
 
@@ -38,7 +38,7 @@ describe('telemetry_kibana', () => {
   const legacyConfig$ = pluginInitializerContextConfigMock({}).legacy.globalConfig$;
 
   const getMockFetchClients = (hits?: unknown[]) => {
-    const fetchParamsMock = createCollectorFetchClientsMock();
+    const fetchParamsMock = createCollectorFetchContextMock();
     fetchParamsMock.callCluster.mockResolvedValue({ hits: { hits } });
     return fetchParamsMock;
   };

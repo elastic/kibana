@@ -39,7 +39,7 @@ All you need to provide is a `type` for organizing your fields, `schema` field t
 3. Creating and registering a Usage Collector. Ideally collectors would be defined in a separate directory `server/collectors/register.ts`.
     ```ts
     // server/collectors/register.ts
-    import { UsageCollectionSetup, CollectorFetchClients } from 'src/plugins/usage_collection/server';
+    import { UsageCollectionSetup, CollectorFetchContext } from 'src/plugins/usage_collection/server';
     import { APICluster } from 'kibana/server';
 
     interface Usage {
@@ -62,7 +62,7 @@ All you need to provide is a `type` for organizing your fields, `schema` field t
             total: 'long',
           },
         },
-        fetch: async (collectorFetchClients: CollectorFetchClients) => {
+        fetch: async (collectorFetchContext: CollectorFetchContext) => {
 
         // query ES and get some data
         // summarize the data into a model
