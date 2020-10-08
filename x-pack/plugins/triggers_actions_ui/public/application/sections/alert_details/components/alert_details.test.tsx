@@ -21,7 +21,10 @@ import { i18n } from '@kbn/i18n';
 import { ViewInApp } from './view_in_app';
 import { PLUGIN } from '../../../constants/plugin';
 import { coreMock } from 'src/core/public/mocks';
-import { ALERTS_FEATURE_ID } from '../../../../../../alerts/common';
+import {
+  AlertExecutionStatusErrorReasons,
+  ALERTS_FEATURE_ID,
+} from '../../../../../../alerts/common';
 
 const mockes = coreMock.createSetup();
 
@@ -149,7 +152,7 @@ describe('alert_details', () => {
         status: 'error',
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
         error: {
-          reason: 'unknown',
+          reason: AlertExecutionStatusErrorReasons.Unknown,
           message: 'test',
         },
       },

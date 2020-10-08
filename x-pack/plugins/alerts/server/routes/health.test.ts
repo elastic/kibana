@@ -20,7 +20,7 @@ jest.mock('../lib/license_api_access.ts', () => ({
 
 beforeEach(() => {
   jest.resetAllMocks();
-  alertsClient.hasDecryptionFailures.mockResolvedValue(true);
+  alertsClient.getHealth.mockResolvedValue(true);
 });
 
 describe('healthRoute', () => {

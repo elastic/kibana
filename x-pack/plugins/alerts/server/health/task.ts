@@ -100,9 +100,7 @@ export function healthCheckTaskRunner(
     return {
       async run() {
         try {
-          const alertingHealthStatus = await (await alertsClient)
-            .getAlertsClient()
-            .hasDecryptionFailures();
+          const alertingHealthStatus = await (await alertsClient).getAlertsClient().getHealth();
           return {
             state: {
               runs: (state.runs || 0) + 1,

@@ -61,7 +61,7 @@ export function healthRoute(
           });
 
         const alertsClient = context.alerting.getAlertsClient();
-        const hasDecryptionFailures = await alertsClient.hasDecryptionFailures();
+        const hasDecryptionFailures = await alertsClient.getHealth();
 
         const frameworkHealth: AlertingFrameworkHealth = {
           isSufficientlySecure: !isSecurityEnabled || (isSecurityEnabled && isTLSEnabled),

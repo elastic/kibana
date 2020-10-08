@@ -9,6 +9,7 @@ import { getFindResultStatus, ruleStatusRequest, getResult } from '../__mocks__/
 import { serverMock, requestContextMock, requestMock } from '../__mocks__';
 import { findRulesStatusesRoute } from './find_rules_status_route';
 import { RuleStatusResponse } from '../../rules/types';
+import { AlertExecutionStatusErrorReasons } from '../../../../../../alerts/common';
 
 jest.mock('../../signals/rule_status_service');
 
@@ -57,7 +58,7 @@ describe('find_statuses', () => {
         status: 'error',
         lastExecutionDate: failingExecutionRule.executionStatus.lastExecutionDate,
         error: {
-          reason: 'read',
+          reason: AlertExecutionStatusErrorReasons.Read,
           message: 'oops',
         },
       };
