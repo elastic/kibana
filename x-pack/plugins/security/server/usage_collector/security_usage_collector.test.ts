@@ -5,9 +5,10 @@
  */
 
 import { createConfig, ConfigSchema } from '../config';
-import { loggingSystemMock, elasticsearchServiceMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from 'src/core/server/mocks';
 import { TypeOf } from '@kbn/config-schema';
 import { usageCollectionPluginMock } from 'src/plugins/usage_collection/server/mocks';
+import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/usage_collection.mock';
 import { registerSecurityUsageCollector } from './security_usage_collector';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { SecurityLicenseFeatures } from '../../common/licensing';
@@ -33,11 +34,7 @@ describe('Security UsageCollector', () => {
     return license;
   };
 
-  const clusterClient = elasticsearchServiceMock.createLegacyClusterClient();
-  const collectorFetchContext = {
-    callCluster: clusterClient.asScoped().callAsCurrentUser,
-    esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
-  };
+  const collectorFetchContext = createCollectorFetchContextMock();
 
   describe('initialization', () => {
     it('handles an undefined usage collector', () => {
