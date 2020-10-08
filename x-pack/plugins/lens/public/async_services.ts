@@ -21,4 +21,5 @@ export * from './xy_visualization/xy_visualization';
 export * from './indexpattern_datasource/indexpattern';
 
 export * from './editor_frame_service/editor_frame';
+export * from './editor_frame_service/embeddable';
 export * from './app_plugin/mounter';

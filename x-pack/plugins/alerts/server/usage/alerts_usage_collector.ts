@@ -4,10 +4,43 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { MakeSchemaFrom, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { get } from 'lodash';
 import { TaskManagerStartContract } from '../../../task_manager/server';
 import { AlertsUsage } from './types';
+
+const byTypeSchema: MakeSchemaFrom<AlertsUsage>['count_by_type'] = {
+  // TODO: Find out an automated way to populate the keys or reformat these into an array (and change the Remote Telemetry indexer accordingly)
+  DYNAMIC_KEY: { type: 'long' },
+  // Known alerts (searching the use of the alerts API `registerType`:
+  // Built-in
+  '__index-threshold': { type: 'long' },
+  // APM
+  apm__error_rate: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
+  apm__transaction_error_rate: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
+  apm__transaction_duration: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
+  apm__transaction_duration_anomaly: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
+  // Infra
+  metrics__alert__threshold: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
+  metrics__alert__inventory__threshold: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
+  logs__alert__document__count: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
+  // Monitoring
+  monitoring_alert_cluster_health: { type: 'long' },
+  monitoring_alert_cpu_usage: { type: 'long' },
+  monitoring_alert_disk_usage: { type: 'long' },
+  monitoring_alert_elasticsearch_version_mismatch: { type: 'long' },
+  monitoring_alert_kibana_version_mismatch: { type: 'long' },
+  monitoring_alert_license_expiration: { type: 'long' },
+  monitoring_alert_logstash_version_mismatch: { type: 'long' },
+  monitoring_alert_nodes_changed: { type: 'long' },
+  // Security Solution
+  siem__signals: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
+  siem__notifications: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
+  // Uptime
+  xpack__uptime__alerts__monitorStatus: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
+  xpack__uptime__alerts__tls: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
+  xpack__uptime__alerts__durationAnomaly: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
+};
 
 export function createAlertsUsageCollector(
   usageCollection: UsageCollectionSetup,
@@ -49,6 +82,28 @@ export function createAlertsUsageCollector(
           count_by_type: {},
         };
       }
+    },
+    schema: {
+      count_total: { type: 'long' },
+      count_active_total: { type: 'long' },
+      count_disabled_total: { type: 'long' },
+      throttle_time: {
+        min: { type: 'long' },
+        avg: { type: 'float' },
+        max: { type: 'long' },
+      },
+      schedule_time: {
+        min: { type: 'long' },
+        avg: { type: 'float' },
+        max: { type: 'long' },
+      },
+      connectors_per_alert: {
+        min: { type: 'long' },
+        avg: { type: 'float' },
+        max: { type: 'long' },
+      },
+      count_active_by_type: byTypeSchema,
+      count_by_type: byTypeSchema,
     },
   });
 }

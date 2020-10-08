@@ -212,6 +212,12 @@
                   "ofType": { "kind": "SCALAR", "name": "ID", "ofType": null }
                 },
                 "defaultValue": null
+              },
+              {
+                "name": "timelineType",
+                "description": "",
+                "type": { "kind": "ENUM", "name": "TimelineType", "ofType": null },
+                "defaultValue": null
               }
             ],
             "type": {
@@ -1915,6 +1921,29 @@
         "possibleTypes": null
       },
       {
+        "kind": "ENUM",
+        "name": "TimelineType",
+        "description": "",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "default",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "template",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "TimelineResult",
         "description": "",
@@ -2951,29 +2980,6 @@
         "inputFields": null,
         "interfaces": null,
         "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "ENUM",
-        "name": "TimelineType",
-        "description": "",
-        "fields": null,
-        "inputFields": null,
-        "interfaces": null,
-        "enumValues": [
-          {
-            "name": "default",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "template",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
         "possibleTypes": null
       },
       {

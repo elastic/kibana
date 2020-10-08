@@ -33,7 +33,7 @@ export interface PostTrustedAppCreateResponse {
 }
 
 export interface MacosLinuxConditionEntry {
-  field: 'process.hash.*' | 'process.executable.text';
+  field: 'process.hash.*' | 'process.executable.caseless';
   type: 'match';
   operator: 'included';
   value: string;

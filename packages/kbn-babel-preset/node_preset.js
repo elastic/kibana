@@ -49,13 +49,5 @@ module.exports = (_, options = {}) => {
       ],
       require('./common_preset'),
     ],
-    plugins: [
-      [
-        require.resolve('babel-plugin-transform-define'),
-        {
-          'global.__BUILT_WITH_BABEL__': 'true',
-        },
-      ],
-    ],
   };
 };

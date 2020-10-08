@@ -45,7 +45,7 @@ export const DataGridTitle: FC<{ title: string }> = ({ title }) => (
 
 interface PropsWithoutHeader extends UseIndexDataReturnType {
   baseline?: number;
-  analysisType?: DataFrameAnalysisConfigType;
+  analysisType?: DataFrameAnalysisConfigType | 'unknown';
   resultsField?: string;
   dataTestSubj: string;
   toastNotifications: CoreSetup['notifications']['toasts'];
@@ -98,6 +98,14 @@ export const DataGrid: FC<Props> = memo(
     //     onMouseLeave: () => hoveredRow$.next(null),
     //   };
     // };
+
+    // If the charts are visible, hide the column actions icon.
+    const columnsWithChartsActionized = columnsWithCharts.map((d) => {
+      if (chartsVisible === true) {
+        d.actions = false;
+      }
+      return d;
+    });
 
     const popOverContent = useMemo(() => {
       return analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
@@ -254,7 +262,7 @@ export const DataGrid: FC<Props> = memo(
         <div className="mlDataGrid">
           <EuiDataGrid
             aria-label={isWithHeader(props) ? props.title : ''}
-            columns={columnsWithCharts.map((c) => {
+            columns={columnsWithChartsActionized.map((c) => {
               c.initialWidth = 165;
               return c;
             })}

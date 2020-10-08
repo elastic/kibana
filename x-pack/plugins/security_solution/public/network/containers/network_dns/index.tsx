@@ -61,7 +61,6 @@ interface UseNetworkDns {
 export const useNetworkDns = ({
   endDate,
   filterQuery,
-  id = ID,
   indexNames,
   skip,
   startDate,
@@ -74,26 +73,37 @@ export const useNetworkDns = ({
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
 
-  const [networkDnsRequest, setNetworkDnsRequest] = useState<NetworkDnsRequestOptions>({
-    defaultIndex: indexNames,
-    factoryQueryType: NetworkQueries.dns,
-    filterQuery: createFilter(filterQuery),
-    isPtrIncluded,
-    pagination: generateTablePaginationOptions(activePage, limit),
-    sort,
-    timerange: {
-      interval: '12h',
-      from: startDate ? startDate : '',
-      to: endDate ? endDate : new Date(Date.now()).toISOString(),
-    },
-  });
+  const [networkDnsRequest, setNetworkDnsRequest] = useState<NetworkDnsRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          factoryQueryType: NetworkQueries.dns,
+          filterQuery: createFilter(filterQuery),
+          id: ID,
+          isPtrIncluded,
+          pagination: generateTablePaginationOptions(activePage, limit),
+          sort,
+          timerange: {
+            interval: '12h',
+            from: startDate ? startDate : '',
+            to: endDate ? endDate : new Date(Date.now()).toISOString(),
+          },
+        }
+      : null
+  );
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
-      setNetworkDnsRequest((prevRequest) => ({
-        ...prevRequest,
-        pagination: generateTablePaginationOptions(newActivePage, limit),
-      }));
+      setNetworkDnsRequest((prevRequest) => {
+        if (!prevRequest) {
+          return prevRequest;
+        }
+
+        return {
+          ...prevRequest,
+          pagination: generateTablePaginationOptions(newActivePage, limit),
+        };
+      });
     },
     [limit]
   );
@@ -118,7 +128,11 @@ export const useNetworkDns = ({
   });
 
   const networkDnsSearch = useCallback(
-    (request: NetworkDnsRequestOptions) => {
+    (request: NetworkDnsRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -178,10 +192,12 @@ export const useNetworkDns = ({
   useEffect(() => {
     setNetworkDnsRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         isPtrIncluded,
+        factoryQueryType: NetworkQueries.dns,
         filterQuery: createFilter(filterQuery),
+        id: ID,
         pagination: generateTablePaginationOptions(activePage, limit),
         sort,
         timerange: {

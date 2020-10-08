@@ -28,6 +28,7 @@ import { QuerySignalsSchemaDecoded } from '../../../../../common/detection_engin
 import { SetSignalsStatusSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/create_rules_schema.mock';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
+import { EqlSearchResponse } from '../../../../../common/detection_engine/types';
 
 export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],
@@ -196,7 +197,7 @@ export const ruleStatusRequest = () =>
   requestMock.create({
     method: 'post',
     path: `${DETECTION_ENGINE_RULES_URL}/_find_statuses`,
-    body: { ids: ['someId'] },
+    body: { ids: ['04128c15-0d1b-4716-a4c5-46997ac7f3bd'] },
   });
 
 export const getImportRulesRequest = (hapiStream?: HapiReadableStream) =>
@@ -525,7 +526,7 @@ export const getFindResultStatus = (): SavedObjectsFindResponse<
       type: 'my-type',
       id: 'e0b86950-4e9f-11ea-bdbd-07b56aa159b3',
       attributes: {
-        alertId: '1ea5a820-4da1-4e82-92a1-2b43a7bece08',
+        alertId: '04128c15-0d1b-4716-a4c5-46997ac7f3bc',
         statusDate: '2020-02-18T15:26:49.783Z',
         status: 'succeeded',
         lastFailureAt: undefined,
@@ -575,6 +576,22 @@ export const getEmptySignalsResponse = (): SignalSearchResponse => ({
   aggregations: {
     alertsByGrouping: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
   },
+});
+
+export const getEmptyEqlSearchResponse = (): EqlSearchResponse<unknown> => ({
+  hits: { total: { value: 0, relation: 'eq' }, events: [] },
+  is_partial: false,
+  is_running: false,
+  took: 1,
+  timed_out: false,
+});
+
+export const getEmptyEqlSequencesResponse = (): EqlSearchResponse<unknown> => ({
+  hits: { total: { value: 0, relation: 'eq' }, sequences: [] },
+  is_partial: false,
+  is_running: false,
+  took: 1,
+  timed_out: false,
 });
 
 export const getSuccessfulSignalUpdateResponse = () => ({

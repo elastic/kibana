@@ -28,7 +28,7 @@ export default function (providerContext: FtrProviderContext) {
         return;
       }
       const { body: agentPolicyResponse } = await supertest
-        .post(`/api/ingest_manager/agent_policies`)
+        .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
           name: 'Test policy',
@@ -37,7 +37,7 @@ export default function (providerContext: FtrProviderContext) {
       agentPolicyId = agentPolicyResponse.item.id;
 
       const { body: packagePolicyResponse } = await supertest
-        .post(`/api/ingest_manager/package_policies`)
+        .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
           name: 'filetest-1',
@@ -56,7 +56,7 @@ export default function (providerContext: FtrProviderContext) {
       packagePolicyId = packagePolicyResponse.item.id;
 
       const { body: packagePolicyResponse2 } = await supertest
-        .post(`/api/ingest_manager/package_policies`)
+        .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
           name: 'filetest-2',
@@ -75,9 +75,16 @@ export default function (providerContext: FtrProviderContext) {
       packagePolicyId2 = packagePolicyResponse2.item.id;
     });
 
+    after(async function () {
+      await supertest
+        .post(`/api/fleet/agent_policies/delete`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ agentPolicyId });
+    });
+
     it('should work with valid values', async function () {
       await supertest
-        .put(`/api/ingest_manager/package_policies/${packagePolicyId}`)
+        .put(`/api/fleet/package_policies/${packagePolicyId}`)
         .set('kbn-xsrf', 'xxxx')
         .send({
           name: 'filetest-1',
@@ -92,13 +99,12 @@ export default function (providerContext: FtrProviderContext) {
             title: 'For File Tests',
             version: '0.1.0',
           },
-        })
-        .expect(200);
+        });
     });
 
     it('should return a 500 if there is another package policy with the same name', async function () {
       await supertest
-        .put(`/api/ingest_manager/package_policies/${packagePolicyId2}`)
+        .put(`/api/fleet/package_policies/${packagePolicyId2}`)
         .set('kbn-xsrf', 'xxxx')
         .send({
           name: 'filetest-1',

@@ -93,10 +93,7 @@ export function PageLoadDistChart({
     : EUI_CHARTS_THEME_LIGHT;
 
   return (
-    <ChartWrapper
-      loading={loading || breakdownLoading}
-      height="calc(100% - 72px)"
-    >
+    <ChartWrapper loading={loading || breakdownLoading} height="250px">
       {(!loading || data) && (
         <PageLoadChart>
           <Settings

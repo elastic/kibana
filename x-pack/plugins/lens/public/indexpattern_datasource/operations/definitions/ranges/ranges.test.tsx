@@ -485,7 +485,7 @@ describe('ranges', () => {
           />
         );
 
-        // This series of act clojures are made to make it work properly the update flush
+        // This series of act closures are made to make it work properly the update flush
         act(() => {
           instance.find(RangePopover).find(EuiLink).prop('onClick')!({} as ReactMouseEvent);
         });
@@ -548,6 +548,46 @@ describe('ranges', () => {
           instance.update();
 
           expect(instance.find(RangePopover)).toHaveLength(1);
+        });
+      });
+
+      it('should handle correctly open ranges when saved', () => {
+        const setStateSpy = jest.fn();
+
+        // Add an extra open range:
+        (state.layers.first.columns.col1 as RangeIndexPatternColumn).params.ranges.push({
+          from: null,
+          to: null,
+          label: '',
+        });
+
+        const instance = mount(
+          <InlineOptions
+            {...defaultOptions}
+            state={state}
+            setState={setStateSpy}
+            columnId="col1"
+            currentColumn={state.layers.first.columns.col1 as RangeIndexPatternColumn}
+            layerId="first"
+          />
+        );
+
+        act(() => {
+          instance.find(RangePopover).last().find(EuiLink).prop('onClick')!({} as ReactMouseEvent);
+        });
+
+        act(() => {
+          // need another wrapping for this in order to work
+          instance.update();
+
+          // Check UI values for open ranges
+          expect(
+            instance.find(RangePopover).last().find(EuiFieldNumber).first().prop('value')
+          ).toBe('');
+
+          expect(instance.find(RangePopover).last().find(EuiFieldNumber).last().prop('value')).toBe(
+            ''
+          );
         });
       });
     });

@@ -74,6 +74,10 @@ describe('api', () => {
 
         expect(externalService.createIncident).toHaveBeenCalledWith({
           incident: {
+            labels: ['kibana', 'elastic'],
+            priority: 'High',
+            issueType: '10006',
+            parent: null,
             description:
               'Incident description (created at 2020-04-27T10:59:46.202Z by Elastic User)',
             summary: 'Incident title (created at 2020-04-27T10:59:46.202Z by Elastic User)',
@@ -233,6 +237,10 @@ describe('api', () => {
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
+            labels: ['kibana', 'elastic'],
+            priority: 'High',
+            issueType: '10006',
+            parent: null,
             description:
               'Incident description (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
             summary: 'Incident title (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
@@ -443,6 +451,10 @@ describe('api', () => {
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
+            labels: ['kibana', 'elastic'],
+            priority: 'High',
+            issueType: '10006',
+            parent: null,
             summary: 'Incident title (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
             description:
               'description from jira \r\nIncident description (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
@@ -480,6 +492,10 @@ describe('api', () => {
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
+            labels: ['kibana', 'elastic'],
+            priority: 'High',
+            issueType: '10006',
+            parent: null,
             description:
               'description from jira \r\nIncident description (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
           },
@@ -516,6 +532,10 @@ describe('api', () => {
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
+            labels: ['kibana', 'elastic'],
+            priority: 'High',
+            issueType: '10006',
+            parent: null,
             summary:
               'title from jira \r\nIncident title (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
             description:
@@ -553,7 +573,12 @@ describe('api', () => {
         });
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
-          incident: {},
+          incident: {
+            labels: ['kibana', 'elastic'],
+            priority: 'High',
+            issueType: '10006',
+            parent: null,
+          },
         });
       });
 
@@ -587,6 +612,10 @@ describe('api', () => {
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
+            labels: ['kibana', 'elastic'],
+            priority: 'High',
+            issueType: '10006',
+            parent: null,
             summary: 'Incident title (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
           },
         });
@@ -622,6 +651,10 @@ describe('api', () => {
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
+            labels: ['kibana', 'elastic'],
+            priority: 'High',
+            issueType: '10006',
+            parent: null,
             summary: 'Incident title (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
             description:
               'Incident description (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
@@ -659,6 +692,10 @@ describe('api', () => {
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
+            labels: ['kibana', 'elastic'],
+            priority: 'High',
+            issueType: '10006',
+            parent: null,
             description:
               'Incident description (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
           },
@@ -695,6 +732,10 @@ describe('api', () => {
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
+            labels: ['kibana', 'elastic'],
+            priority: 'High',
+            issueType: '10006',
+            parent: null,
             summary:
               'title from jira \r\nIncident title (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
             description:
@@ -733,6 +774,10 @@ describe('api', () => {
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
+            labels: ['kibana', 'elastic'],
+            priority: 'High',
+            issueType: '10006',
+            parent: null,
             summary:
               'title from jira \r\nIncident title (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
           },

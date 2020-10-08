@@ -28,6 +28,7 @@ import type { InternalApplicationStart } from './application';
 
 interface ApmConfig {
   // AgentConfigOptions is not exported from @elastic/apm-rum
+  active?: boolean;
   globalLabels?: Record<string, string>;
 }
 
@@ -39,10 +40,10 @@ export class ApmSystem {
   private readonly enabled: boolean;
   /**
    * `apmConfig` would be populated with relevant APM RUM agent
-   * configuration if server is started with `ELASTIC_APM_ACTIVE=true`
+   * configuration if server is started with elastic.apm.* config.
    */
   constructor(private readonly apmConfig?: ApmConfig) {
-    this.enabled = process.env.IS_KIBANA_DISTRIBUTABLE !== 'true' && apmConfig != null;
+    this.enabled = apmConfig != null && !!apmConfig.active;
   }
 
   async setup() {
