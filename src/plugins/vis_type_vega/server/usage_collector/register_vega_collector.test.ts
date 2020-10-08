@@ -19,7 +19,10 @@
 
 import { of } from 'rxjs';
 import { mockStats, mockGetStats } from './get_usage_collector.mock';
-import { createUsageCollectionSetupMock } from 'src/plugins/usage_collection/server/usage_collection.mock';
+import {
+  createCollectorFetchContextMock,
+  createUsageCollectionSetupMock,
+} from 'src/plugins/usage_collection/server/usage_collection.mock';
 import { HomeServerPluginSetup } from '../../../home/server';
 import { registerVegaUsageCollector } from './register_vega_collector';
 
@@ -59,10 +62,14 @@ describe('registerVegaUsageCollector', () => {
     const mockCollectorSet = createUsageCollectionSetupMock();
     registerVegaUsageCollector(mockCollectorSet, mockConfig, mockDeps);
     const usageCollectorConfig = mockCollectorSet.makeUsageCollector.mock.calls[0][0];
-    const mockCallCluster = jest.fn();
-    const fetchResult = await usageCollectorConfig.fetch(mockCallCluster);
+    const mockedCollectorFetchContext = createCollectorFetchContextMock();
+    const fetchResult = await usageCollectorConfig.fetch(mockedCollectorFetchContext);
     expect(mockGetStats).toBeCalledTimes(1);
-    expect(mockGetStats).toBeCalledWith(mockCallCluster, mockIndex, mockDeps);
+    expect(mockGetStats).toBeCalledWith(
+      mockedCollectorFetchContext.callCluster,
+      mockIndex,
+      mockDeps
+    );
     expect(fetchResult).toBe(mockStats);
   });
 });

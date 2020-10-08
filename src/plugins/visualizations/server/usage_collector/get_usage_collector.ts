@@ -21,7 +21,6 @@ import { countBy, get, groupBy, mapValues, max, min, values } from 'lodash';
 import { SearchResponse } from 'elasticsearch';
 
 import { LegacyAPICaller } from 'src/core/server';
-import { CollectorFetchContext } from 'src/plugins/usage_collection/server';
 import { getPastDays } from './get_past_days';
 
 type ESResponse = SearchResponse<{ visualization: { visState: string } }>;

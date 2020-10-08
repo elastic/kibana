@@ -19,7 +19,10 @@
 
 import { of } from 'rxjs';
 import { mockStats, mockGetStats } from './get_usage_collector.mock';
-import { createUsageCollectionSetupMock } from 'src/plugins/usage_collection/server/usage_collection.mock';
+import {
+  createCollectorFetchContextMock,
+  createUsageCollectionSetupMock,
+} from 'src/plugins/usage_collection/server/usage_collection.mock';
 
 import { registerVisualizationsCollector } from './register_visualizations_collector';
 
@@ -58,10 +61,10 @@ describe('registerVisualizationsCollector', () => {
     const mockCollectorSet = createUsageCollectionSetupMock();
     registerVisualizationsCollector(mockCollectorSet, mockConfig);
     const usageCollectorConfig = mockCollectorSet.makeUsageCollector.mock.calls[0][0];
-    const mockCallCluster = jest.fn();
-    const fetchResult = await usageCollectorConfig.fetch(mockCallCluster);
+    const mockCollectorFetchContext = createCollectorFetchContextMock();
+    const fetchResult = await usageCollectorConfig.fetch(mockCollectorFetchContext);
     expect(mockGetStats).toBeCalledTimes(1);
-    expect(mockGetStats).toBeCalledWith(mockCallCluster, mockIndex);
+    expect(mockGetStats).toBeCalledWith(mockCollectorFetchContext.callCluster, mockIndex);
     expect(fetchResult).toBe(mockStats);
   });
 });

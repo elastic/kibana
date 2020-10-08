@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { LegacyAPICaller } from 'src/core/server';
 import { getStats } from './get_usage_collector';
 import { HomeServerPluginSetup } from '../../../home/server';
 import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/usage_collection.mock';
@@ -71,7 +70,7 @@ const mockedSavedObjects = [
   },
 ];
 
-const getMockFetchClients = (hits?: unknown[]) => {
+const getMockCollectorFetchContext = (hits?: unknown[]) => {
   const fetchParamsMock = createCollectorFetchContextMock();
   fetchParamsMock.callCluster.mockResolvedValue({ hits: { hits } });
   return fetchParamsMock;
@@ -105,19 +104,23 @@ describe('Vega visualization usage collector', () => {
   };
 
   test('Returns undefined when no results found (undefined)', async () => {
-    const result = await getStats(getMockFetchClients(), mockIndex, mockDeps);
+    const result = await getStats(getMockCollectorFetchContext().callCluster, mockIndex, mockDeps);
 
     expect(result).toBeUndefined();
   });
 
   test('Returns undefined when no results found (0 results)', async () => {
-    const result = await getStats(getMockFetchClients([]), mockIndex, mockDeps);
+    const result = await getStats(
+      getMockCollectorFetchContext([]).callCluster,
+      mockIndex,
+      mockDeps
+    );
 
     expect(result).toBeUndefined();
   });
 
   test('Returns undefined when no vega saved objects found', async () => {
-    const mockCallCluster = getMockFetchClients([
+    const mockCollectorFetchContext = getMockCollectorFetchContext([
       {
         _id: 'visualization:myvis-123',
         _source: {
@@ -126,13 +129,13 @@ describe('Vega visualization usage collector', () => {
         },
       },
     ]);
-    const result = await getStats(mockCallCluster, mockIndex, mockDeps);
+    const result = await getStats(mockCollectorFetchContext.callCluster, mockIndex, mockDeps);
 
     expect(result).toBeUndefined();
   });
 
   test('Should ingnore sample data visualizations', async () => {
-    const mockCallCluster = getMockFetchClients([
+    const mockCollectorFetchContext = getMockCollectorFetchContext([
       {
         _id: 'visualization:sampledata-123',
         _source: {
@@ -150,14 +153,14 @@ describe('Vega visualization usage collector', () => {
       },
     ]);
 
-    const result = await getStats(mockCallCluster, mockIndex, mockDeps);
+    const result = await getStats(mockCollectorFetchContext.callCluster, mockIndex, mockDeps);
 
     expect(result).toBeUndefined();
   });
 
   test('Summarizes visualizations response data', async () => {
-    const mockCallCluster = getMockFetchClients(mockedSavedObjects);
-    const result = await getStats(mockCallCluster, mockIndex, mockDeps);
+    const mockCollectorFetchContext = getMockCollectorFetchContext(mockedSavedObjects);
+    const result = await getStats(mockCollectorFetchContext.callCluster, mockIndex, mockDeps);
 
     expect(result).toMatchObject({
       vega_lib_specs_total: 2,
