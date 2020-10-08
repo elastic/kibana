@@ -8,24 +8,27 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { omit } from 'lodash/fp';
 
-import { connector } from '../mock';
+import { connector, issues } from '../mock';
 import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import Fields from './fields';
 import { waitFor } from '@testing-library/dom';
 import { useGetSingleIssue } from './use_get_single_issue';
+import { useGetIssues } from './use_get_issues';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('./use_get_issue_types');
 jest.mock('./use_get_fields_by_issue_type');
 jest.mock('./use_get_single_issue');
+jest.mock('./use_get_issues');
 
 const useGetIssueTypesMock = useGetIssueTypes as jest.Mock;
 const useGetFieldsByIssueTypeMock = useGetFieldsByIssueType as jest.Mock;
 const useGetSingleIssueMock = useGetSingleIssue as jest.Mock;
+const useGetIssuesMock = useGetIssues as jest.Mock;
 
-describe('JiraParamsFields renders', () => {
+describe('Jira Fields', () => {
   const useGetIssueTypesResponse = {
     isLoading: false,
     issueTypes: [
@@ -71,6 +74,11 @@ describe('JiraParamsFields renders', () => {
     issueType: '10006',
     priority: 'High',
     parent: null,
+  };
+
+  const useGetIssuesResponse = {
+    isLoading: false,
+    issues,
   };
 
   const onChange = jest.fn();
@@ -121,6 +129,7 @@ describe('JiraParamsFields renders', () => {
         parent: {},
       },
     });
+    useGetIssuesMock.mockReturnValue(useGetIssuesResponse);
     const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
 
     await waitFor(() =>
@@ -134,6 +143,26 @@ describe('JiraParamsFields renders', () => {
       parent: 'parentId',
       priority: 'High',
     });
+  });
+  test('it searches parent correctly', async () => {
+    useGetFieldsByIssueTypeMock.mockReturnValue({
+      ...useGetFieldsByIssueTypeResponse,
+      fields: {
+        ...useGetFieldsByIssueTypeResponse.fields,
+        parent: {},
+      },
+    });
+    useGetSingleIssueMock.mockReturnValue({ useGetSingleIssueResponse, issue: null });
+    useGetIssuesMock.mockReturnValue(useGetIssuesResponse);
+    const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
+
+    await waitFor(() =>
+      ((wrapper.find(EuiComboBox).props() as unknown) as {
+        onSearchChange: (a: string) => void;
+      }).onSearchChange('womanId')
+    );
+    wrapper.update();
+    expect(useGetIssuesMock.mock.calls[2][0].query).toEqual('womanId');
   });
 
   test('it disabled the fields when loading issue types', () => {
