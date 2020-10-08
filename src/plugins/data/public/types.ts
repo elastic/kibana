@@ -28,8 +28,7 @@ import { createFiltersFromRangeSelectAction, createFiltersFromValueClickAction }
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
 import { QuerySetup, QueryStart } from './query';
 import { IndexPatternsContract } from './index_patterns';
-import { StatefulSearchBarProps } from './ui';
-import { IndexPatternSelectProps } from './ui/index_pattern_select';
+import { IndexPatternSelectProps, StatefulSearchBarProps } from './ui';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 
 export interface DataPublicPluginEnhancements {
