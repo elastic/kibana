@@ -22,9 +22,6 @@ export const pie: RendererFactory<Pie> = () => ({
   help: strings.getHelpDescription(),
   reuseDomNode: false,
   render: async (domNode, config, handlers) => {
-    // @ts-expect-error
-    await import('../../lib/flot-charts');
-
     if (!includes($.plot.plugins, piePlugin)) {
       $.plot.plugins.push(piePlugin);
     }

@@ -58,3 +58,5 @@ export const TsLib = require('tslib');
 
 import * as Theme from './theme.ts';
 export { Theme };
+
+import './flot_charts';
