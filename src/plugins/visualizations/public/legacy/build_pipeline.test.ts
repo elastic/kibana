@@ -117,12 +117,6 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
       expect(actual).toMatchSnapshot();
     });
 
-    it('handles timelion function', () => {
-      const params = { expression: 'foo', interval: 'bar' };
-      const actual = buildPipelineVisFunction.timelion(params, schemasDef, uiState);
-      expect(actual).toMatchSnapshot();
-    });
-
     describe('handles table function', () => {
       it('without splits or buckets', () => {
         const params = { foo: 'bar' };

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SPACES } from './spaces';
+import { SPACES, ALL_SPACES_ID } from './spaces';
 import { TestCase } from './types';
 
 const {
@@ -31,6 +31,11 @@ export const SAVED_OBJECT_TEST_CASES: Record<string, CommonTestCase> = Object.fr
     type: 'isolatedtype',
     id: 'space2-isolatedtype-id',
     expectedNamespaces: [SPACE_2_ID],
+  }),
+  MULTI_NAMESPACE_ALL_SPACES: Object.freeze({
+    type: 'sharedtype',
+    id: 'all_spaces',
+    expectedNamespaces: [ALL_SPACES_ID],
   }),
   MULTI_NAMESPACE_DEFAULT_AND_SPACE_1: Object.freeze({
     type: 'sharedtype',

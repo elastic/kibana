@@ -110,6 +110,25 @@ export const buildEqlSearchRequest = (
     exceptionFilter = buildExceptionFilter(exceptionQueries, indexPattern, config, true, 1024);
   }
   const indexString = index.join();
+  const requestFilter: unknown[] = [
+    {
+      range: {
+        [timestamp]: {
+          gte: from,
+          lte: to,
+        },
+      },
+    },
+  ];
+  if (exceptionFilter !== undefined) {
+    requestFilter.push({
+      bool: {
+        must_not: {
+          bool: exceptionFilter?.query.bool,
+        },
+      },
+    });
+  }
   const baseRequest = {
     method: 'POST',
     path: `/${indexString}/_eql/search?allow_no_indices=true`,
@@ -117,20 +136,9 @@ export const buildEqlSearchRequest = (
       size,
       query,
       filter: {
-        range: {
-          [timestamp]: {
-            gte: from,
-            lte: to,
-          },
+        bool: {
+          filter: requestFilter,
         },
-        bool:
-          exceptionFilter !== undefined
-            ? {
-                must_not: {
-                  bool: exceptionFilter?.query.bool,
-                },
-              }
-            : undefined,
       },
     },
   };

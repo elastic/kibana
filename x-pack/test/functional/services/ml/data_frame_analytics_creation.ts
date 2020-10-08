@@ -29,23 +29,16 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       await testSubjects.existOrFail('mlAnalyticsCreateJobWizardJobTypeSelect');
     },
 
-    async assertJobTypeSelection(expectedSelection: string) {
+    async assertJobTypeSelection(jobTypeAttribute: string) {
       await retry.tryForTime(5000, async () => {
-        const actualSelection = await testSubjects.getAttribute(
-          'mlAnalyticsCreateJobWizardJobTypeSelect',
-          'value'
-        );
-        expect(actualSelection).to.eql(
-          expectedSelection,
-          `Job type selection should be '${expectedSelection}' (got '${actualSelection}')`
-        );
+        await testSubjects.existOrFail(`${jobTypeAttribute} selectedJobType`);
       });
     },
 
     async selectJobType(jobType: string) {
-      await testSubjects.click('mlAnalyticsCreateJobWizardJobTypeSelect');
-      await testSubjects.click(`mlAnalyticsCreation-${jobType}-option`);
-      await this.assertJobTypeSelection(jobType);
+      const jobTypeAttribute = `mlAnalyticsCreation-${jobType}-option`;
+      await testSubjects.click(jobTypeAttribute);
+      await this.assertJobTypeSelection(jobTypeAttribute);
     },
 
     async assertAdvancedEditorSwitchExists() {
@@ -505,7 +498,8 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
 
     async assertInitialCloneJobConfigStep(job: DataFrameAnalyticsConfig) {
       const jobType = Object.keys(job.analysis)[0];
-      await this.assertJobTypeSelection(jobType);
+      const jobTypeAttribute = `mlAnalyticsCreation-${jobType}-option`;
+      await this.assertJobTypeSelection(jobTypeAttribute);
       if (isClassificationAnalysis(job.analysis) || isRegressionAnalysis(job.analysis)) {
         await this.assertDependentVariableSelection([job.analysis[jobType].dependent_variable]);
         await this.assertTrainingPercentValue(String(job.analysis[jobType].training_percent));

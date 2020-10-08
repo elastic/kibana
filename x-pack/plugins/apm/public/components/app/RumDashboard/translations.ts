@@ -88,11 +88,11 @@ export const I18LABELS = {
   pageLoadDurationByRegion: i18n.translate(
     'xpack.apm.rum.visitorBreakdownMap.pageLoadDurationByRegion',
     {
-      defaultMessage: 'Page load duration by region',
+      defaultMessage: 'Page load duration by region (avg.)',
     }
   ),
   searchByUrl: i18n.translate('xpack.apm.rum.filters.searchByUrl', {
-    defaultMessage: 'Search by url',
+    defaultMessage: 'Search by URL',
   }),
   getSearchResultsLabel: (total: number) =>
     i18n.translate('xpack.apm.rum.filters.searchResults', {
@@ -107,9 +107,6 @@ export const I18LABELS = {
   }),
   url: i18n.translate('xpack.apm.rum.filters.url', {
     defaultMessage: 'Url',
-  }),
-  matchThisQuery: i18n.translate('xpack.apm.rum.filters.url.matchThisQuery', {
-    defaultMessage: 'Match this query',
   }),
   loadingResults: i18n.translate('xpack.apm.rum.filters.url.loadingResults', {
     defaultMessage: 'Loading results',
@@ -149,6 +146,9 @@ export const I18LABELS = {
   }),
   percentile99th: i18n.translate('xpack.apm.ux.percentile.99th', {
     defaultMessage: '99th',
+  }),
+  noData: i18n.translate('xpack.apm.ux.visitorBreakdown.noData', {
+    defaultMessage: 'No data.',
   }),
 };
 

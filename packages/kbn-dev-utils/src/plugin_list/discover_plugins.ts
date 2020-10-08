@@ -29,7 +29,7 @@ import { extractAsciidocInfo } from './extract_asciidoc_info';
 
 export interface Plugin {
   id: string;
-  relativeDir?: string;
+  relativeDir: string;
   relativeReadmePath?: string;
   readmeSnippet?: string;
   readmeAsciidocAnchor?: string;

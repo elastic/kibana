@@ -14,7 +14,7 @@ import { coreMock } from '../../../../../../../src/core/public/mocks';
 const startMock = coreMock.createStart();
 
 jest.mock('../../services', () => {
-  const services = require.requireActual('../../services');
+  const services = jest.requireActual('../../services');
   return {
     ...services,
     getRouterLinkProps: (link) => ({ href: link }),

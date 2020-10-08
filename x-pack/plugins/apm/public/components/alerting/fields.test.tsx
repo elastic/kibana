@@ -9,7 +9,7 @@ import { act, fireEvent, render } from '@testing-library/react';
 import { expectTextsInDocument } from '../../utils/testHelpers';
 
 describe('alerting fields', () => {
-  describe('Service Fiels', () => {
+  describe('Service Field', () => {
     it('renders with value', () => {
       const component = render(<ServiceField value="foo" />);
       expectTextsInDocument(component, ['foo']);

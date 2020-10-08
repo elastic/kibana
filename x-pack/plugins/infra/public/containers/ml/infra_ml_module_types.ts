@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { HttpHandler } from 'src/core/public';
 import {
   ValidateLogEntryDatasetsResponsePayload,
   ValidationIndicesResponsePayload,
@@ -16,6 +16,14 @@ import { SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
 
 export { JobModelSizeStats, JobSummary } from './api/ml_get_jobs_summary_api';
 
+export interface SetUpModuleArgs {
+  start?: number | undefined;
+  end?: number | undefined;
+  datasetFilter?: DatasetFilter;
+  moduleSourceConfiguration: ModuleSourceConfiguration;
+  partitionField?: string;
+}
+
 export interface ModuleDescriptor<JobType extends string> {
   moduleId: string;
   moduleName: string;
@@ -23,25 +31,32 @@ export interface ModuleDescriptor<JobType extends string> {
   jobTypes: JobType[];
   bucketSpan: number;
   getJobIds: (spaceId: string, sourceId: string) => Record<JobType, string>;
-  getJobSummary: (spaceId: string, sourceId: string) => Promise<FetchJobStatusResponsePayload>;
-  getModuleDefinition: () => Promise<GetMlModuleResponsePayload>;
+  getJobSummary: (
+    spaceId: string,
+    sourceId: string,
+    fetch: HttpHandler
+  ) => Promise<FetchJobStatusResponsePayload>;
+  getModuleDefinition: (fetch: HttpHandler) => Promise<GetMlModuleResponsePayload>;
   setUpModule: (
-    start: number | undefined,
-    end: number | undefined,
-    datasetFilter: DatasetFilter,
-    sourceConfiguration: ModuleSourceConfiguration,
-    partitionField?: string
+    setUpModuleArgs: SetUpModuleArgs,
+    fetch: HttpHandler
   ) => Promise<SetupMlModuleResponsePayload>;
-  cleanUpModule: (spaceId: string, sourceId: string) => Promise<DeleteJobsResponsePayload>;
-  validateSetupIndices: (
+  cleanUpModule: (
+    spaceId: string,
+    sourceId: string,
+    fetch: HttpHandler
+  ) => Promise<DeleteJobsResponsePayload>;
+  validateSetupIndices?: (
     indices: string[],
-    timestampField: string
+    timestampField: string,
+    fetch: HttpHandler
   ) => Promise<ValidationIndicesResponsePayload>;
-  validateSetupDatasets: (
+  validateSetupDatasets?: (
     indices: string[],
     timestampField: string,
     startTime: number,
-    endTime: number
+    endTime: number,
+    fetch: HttpHandler
   ) => Promise<ValidateLogEntryDatasetsResponsePayload>;
 }
 

@@ -43,7 +43,7 @@ export function CurrentRelatedEventFetcher(
         type: 'appRequestedCurrentRelatedEventData',
       });
 
-      let result: SafeResolverEvent | undefined | null;
+      let result: SafeResolverEvent | null = null;
       try {
         result = await dataAccessLayer.event(currentEventID);
       } catch (error) {

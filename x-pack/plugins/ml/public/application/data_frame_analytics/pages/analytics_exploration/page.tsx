@@ -6,17 +6,12 @@
 
 import React, { Fragment, FC } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
-
 import {
-  EuiBetaBadge,
   EuiPage,
   EuiPageBody,
   EuiPageContentBody,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
-  EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -41,32 +36,11 @@ export const Page: FC<{
         <EuiPageContentHeader>
           <EuiPageContentHeaderSection>
             <EuiTitle>
-              <h1>
-                <FormattedMessage
-                  id="xpack.ml.dataframe.analytics.exploration.title"
-                  defaultMessage="Analytics exploration"
-                />
-                <span>&nbsp;</span>
-                <EuiBetaBadge
-                  label={i18n.translate(
-                    'xpack.ml.dataframe.analytics.exploration.experimentalBadgeLabel',
-                    {
-                      defaultMessage: 'Experimental',
-                    }
-                  )}
-                  tooltipContent={i18n.translate(
-                    'xpack.ml.dataframe.analytics.exploration.experimentalBadgeTooltipContent',
-                    {
-                      defaultMessage: `Data frame analytics are an experimental feature. We'd love to hear your feedback.`,
-                    }
-                  )}
-                />
-              </h1>
+              <h1>{jobId}</h1>
             </EuiTitle>
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
         <EuiPageContentBody style={{ maxWidth: 'calc(100% - 0px)' }}>
-          <EuiSpacer size="l" />
           {analysisType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION && (
             <OutlierExploration jobId={jobId} />
           )}

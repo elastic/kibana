@@ -52,23 +52,30 @@ const DetailsSection = styled(EuiFlexItem)`
 `;
 
 const DescriptionListTitle = styled(EuiDescriptionListTitle)`
-  width: 40%;
+  &&& {
+    width: 40%;
+  }
 `;
 
 const DescriptionListDescription = styled(EuiDescriptionListDescription)`
-  width: 60%;
+  &&& {
+    width: 60%;
+  }
 `;
 
 interface ItemDetailsPropertySummaryProps {
   name: ReactNode | ReactNode[];
   value: ReactNode | ReactNode[];
+  title?: string;
 }
 
 export const ItemDetailsPropertySummary: FC<ItemDetailsPropertySummaryProps> = memo(
-  ({ name, value }) => (
+  ({ name, value, title = '' }) => (
     <>
       <DescriptionListTitle>{name}</DescriptionListTitle>
-      <DescriptionListDescription>{value}</DescriptionListDescription>
+      <DescriptionListDescription>
+        <span title={title}>{value}</span>
+      </DescriptionListDescription>
     </>
   )
 );

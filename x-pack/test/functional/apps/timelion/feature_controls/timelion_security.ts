@@ -9,7 +9,14 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'timelion', 'header', 'security', 'spaceSelector']);
+  const PageObjects = getPageObjects([
+    'common',
+    'error',
+    'header',
+    'security',
+    'spaceSelector',
+    'timelion',
+  ]);
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
 
@@ -60,7 +67,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows timelion navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Timelion']);
+        expect(navLinks).to.eql(['Overview', 'Timelion']);
       });
 
       it(`allows a timelion sheet to be created`, async () => {
@@ -112,7 +119,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows timelion navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Timelion']);
+        expect(navLinks).to.eql(['Overview', 'Timelion']);
       });
 
       it(`does not allow a timelion sheet to be created`, async () => {
@@ -164,19 +171,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await security.user.delete('no_timelion_privileges_user');
       });
 
-      it(`returns a 404`, async () => {
+      it(`returns a 403`, async () => {
         await PageObjects.common.navigateToActualUrl('timelion', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        const messageText = await PageObjects.common.getBodyText();
-        expect(messageText).to.eql(
-          JSON.stringify({
-            statusCode: 404,
-            error: 'Not Found',
-            message: 'Not Found',
-          })
-        );
+        PageObjects.error.expectForbidden();
       });
     });
   });

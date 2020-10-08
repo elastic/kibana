@@ -8,7 +8,12 @@ import { lazy } from 'react';
 import { ValidationResult, ActionTypeModel } from '../../../../types';
 import { connectorConfiguration } from './config';
 import logo from './logo.svg';
-import { ResilientActionConnector, ResilientActionParams } from './types';
+import {
+  ResilientActionConnector,
+  ResilientConfig,
+  ResilientSecrets,
+  ResilientActionParams,
+} from './types';
 import * as i18n from './translations';
 import { isValidUrl } from '../../../lib/value_validators';
 
@@ -45,7 +50,11 @@ const validateConnector = (action: ResilientActionConnector): ValidationResult =
   return validationResult;
 };
 
-export function getActionType(): ActionTypeModel<ResilientActionConnector, ResilientActionParams> {
+export function getActionType(): ActionTypeModel<
+  ResilientConfig,
+  ResilientSecrets,
+  ResilientActionParams
+> {
   return {
     id: connectorConfiguration.id,
     iconClass: logo,

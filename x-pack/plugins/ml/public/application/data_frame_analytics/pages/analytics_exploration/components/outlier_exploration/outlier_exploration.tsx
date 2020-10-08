@@ -6,27 +6,19 @@
 
 import React, { useState, FC } from 'react';
 
-import { i18n } from '@kbn/i18n';
-
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiText } from '@elastic/eui';
 
 import {
   useColorRange,
   COLOR_RANGE,
   COLOR_RANGE_SCALE,
 } from '../../../../../components/color_range_legend';
-import { ColorRangeLegend } from '../../../../../components/color_range_legend';
-import { DataGrid } from '../../../../../components/data_grid';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
-import { getToastNotifications } from '../../../../../util/dependency_cache';
 
 import { defaultSearchQuery, useResultsViewConfig } from '../../../../common';
 
-import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/use_columns';
-
+import { ExpandableSectionAnalytics, ExpandableSectionResults } from '../expandable_section';
 import { ExplorationQueryBar } from '../exploration_query_bar';
-import { ExplorationTitle } from '../exploration_title';
-import { IndexPatternPrompt } from '../index_pattern_prompt';
 
 import { getFeatureCount } from './common';
 import { useOutlierData } from './use_outlier_data';
@@ -38,12 +30,7 @@ interface ExplorationProps {
 }
 
 export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) => {
-  const explorationTitle = i18n.translate('xpack.ml.dataframe.analytics.exploration.jobIdTitle', {
-    defaultMessage: 'Outlier detection job ID {jobId}',
-    values: { jobId },
-  });
-
-  const { indexPattern, jobConfig, jobStatus, needsDestIndexPattern } = useResultsViewConfig(jobId);
+  const { indexPattern, jobConfig, needsDestIndexPattern } = useResultsViewConfig(jobId);
   const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
   const outlierData = useOutlierData(indexPattern, jobConfig, searchQuery);
 
@@ -56,56 +43,29 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
   );
 
   return (
-    <EuiPanel data-test-subj="mlDFAnalyticsOutlierExplorationTablePanel">
-      {jobConfig !== undefined && needsDestIndexPattern && (
-        <IndexPatternPrompt destIndex={jobConfig.dest.index} />
+    <>
+      {typeof jobConfig?.description !== 'undefined' && (
+        <>
+          <EuiText>{jobConfig?.description}</EuiText>
+          <EuiSpacer size="m" />
+        </>
       )}
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="spaceBetween"
-        responsive={false}
-        gutterSize="s"
-      >
-        <EuiFlexItem grow={false}>
-          <ExplorationTitle title={explorationTitle} />
-        </EuiFlexItem>
-        {jobStatus !== undefined && (
-          <EuiFlexItem grow={false}>
-            <span>{getTaskStateBadge(jobStatus)}</span>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-      <EuiHorizontalRule margin="xs" />
       {(columnsWithCharts.length > 0 || searchQuery !== defaultSearchQuery) &&
         indexPattern !== undefined && (
           <>
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem>
-                <ExplorationQueryBar indexPattern={indexPattern} setSearchQuery={setSearchQuery} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiSpacer size="s" />
-                <ColorRangeLegend
-                  colorRange={colorRange}
-                  title={i18n.translate(
-                    'xpack.ml.dataframe.analytics.exploration.colorRangeLegendTitle',
-                    {
-                      defaultMessage: 'Feature influence score',
-                    }
-                  )}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="s" />
-            {columnsWithCharts.length > 0 && tableItems.length > 0 && (
-              <DataGrid
-                {...outlierData}
-                dataTestSubj="mlExplorationDataGrid"
-                toastNotifications={getToastNotifications()}
-              />
-            )}
+            <ExplorationQueryBar indexPattern={indexPattern} setSearchQuery={setSearchQuery} />
+            <EuiSpacer size="m" />
           </>
         )}
-    </EuiPanel>
+      {typeof jobConfig?.id === 'string' && <ExpandableSectionAnalytics jobId={jobConfig?.id} />}
+      <ExpandableSectionResults
+        colorRange={colorRange}
+        indexData={outlierData}
+        indexPattern={indexPattern}
+        jobConfig={jobConfig}
+        needsDestIndexPattern={needsDestIndexPattern}
+        searchQuery={searchQuery}
+      />
+    </>
   );
 });

@@ -41,6 +41,7 @@ export type {
 // Static exports
 export { getSeverityColor, getSeverityType } from '../common/util/anomaly_utils';
 export { ANOMALY_SEVERITY } from '../common';
+export { useMlHref, ML_PAGES, MlUrlGenerator } from './ml_url_generator';
 
 // Bundled shared exports
 // Exported this way so the code doesn't end up in ML's page load bundle

@@ -7,6 +7,7 @@
 import { useMemo, useState } from 'react';
 
 import { LogEntryCategoryExample } from '../../../../common/http_api';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { callGetLogEntryCategoryExamplesAPI } from './service_calls/get_log_entry_category_examples';
 
@@ -23,6 +24,8 @@ export const useLogEntryCategoryExamples = ({
   sourceId: string;
   startTime: number;
 }) => {
+  const { services } = useKibanaContextForPlugin();
+
   const [logEntryCategoryExamples, setLogEntryCategoryExamples] = useState<
     LogEntryCategoryExample[]
   >([]);
@@ -32,11 +35,14 @@ export const useLogEntryCategoryExamples = ({
       cancelPreviousOn: 'creation',
       createPromise: async () => {
         return await callGetLogEntryCategoryExamplesAPI(
-          sourceId,
-          startTime,
-          endTime,
-          categoryId,
-          exampleCount
+          {
+            sourceId,
+            startTime,
+            endTime,
+            categoryId,
+            exampleCount,
+          },
+          services.http.fetch
         );
       },
       onResolve: ({ data: { examples } }) => {

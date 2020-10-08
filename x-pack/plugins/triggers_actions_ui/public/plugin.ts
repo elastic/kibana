@@ -25,6 +25,10 @@ import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import { PluginStartContract as AlertingStart } from '../../alerts/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 
+export interface TriggersActionsUiConfigType {
+  enableGeoTrackingThresholdAlert: boolean;
+}
+
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   alertTypeRegistry: TypeRegistry<AlertTypeModel>;
@@ -56,6 +60,7 @@ export class Plugin
     > {
   private actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   private alertTypeRegistry: TypeRegistry<AlertTypeModel>;
+  private initializerContext: PluginInitializerContext;
 
   constructor(initializerContext: PluginInitializerContext) {
     const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
@@ -63,6 +68,8 @@ export class Plugin
 
     const alertTypeRegistry = new TypeRegistry<AlertTypeModel>();
     this.alertTypeRegistry = alertTypeRegistry;
+
+    this.initializerContext = initializerContext;
   }
 
   public setup(core: CoreSetup, plugins: PluginsSetup): TriggersAndActionsUIPublicPluginSetup {
@@ -110,6 +117,7 @@ export class Plugin
 
     registerBuiltInAlertTypes({
       alertTypeRegistry: this.alertTypeRegistry,
+      triggerActionsUiConfig: this.initializerContext.config.get<TriggersActionsUiConfigType>(),
     });
 
     return {

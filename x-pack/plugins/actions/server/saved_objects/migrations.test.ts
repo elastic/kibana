@@ -21,6 +21,20 @@ describe('7.10.0', () => {
     );
   });
 
+  test('add hasAuth config property for .email actions', () => {
+    const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
+    const action = getMockDataForEmail({});
+    expect(migration710(action, context)).toMatchObject({
+      ...action,
+      attributes: {
+        ...action.attributes,
+        config: {
+          hasAuth: true,
+        },
+      },
+    });
+  });
+
   test('rename cases configuration object', () => {
     const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
     const action = getMockData({});
@@ -35,6 +49,22 @@ describe('7.10.0', () => {
     });
   });
 });
+
+function getMockDataForEmail(
+  overwrites: Record<string, unknown> = {}
+): SavedObjectUnsanitizedDoc<RawAction> {
+  return {
+    attributes: {
+      name: 'abc',
+      actionTypeId: '.email',
+      config: {},
+      secrets: { user: 'test', password: '123' },
+      ...overwrites,
+    },
+    id: uuid.v4(),
+    type: 'action',
+  };
+}
 
 function getMockData(
   overwrites: Record<string, unknown> = {}

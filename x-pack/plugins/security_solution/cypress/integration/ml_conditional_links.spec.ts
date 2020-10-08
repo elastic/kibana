@@ -24,20 +24,7 @@ import {
   mlNetworkSingleIpNullKqlQuery,
 } from '../urls/ml_conditional_links';
 
-// FLAKY: https://github.com/elastic/kibana/issues/78512
-// FLAKY: https://github.com/elastic/kibana/issues/78511
-// FLAKY: https://github.com/elastic/kibana/issues/78510
-// FLAKY: https://github.com/elastic/kibana/issues/78509
-// FLAKY: https://github.com/elastic/kibana/issues/78508
-// FLAKY: https://github.com/elastic/kibana/issues/78507
-// FLAKY: https://github.com/elastic/kibana/issues/78506
-// FLAKY: https://github.com/elastic/kibana/issues/78505
-// FLAKY: https://github.com/elastic/kibana/issues/78504
-// FLAKY: https://github.com/elastic/kibana/issues/78503
-// FLAKY: https://github.com/elastic/kibana/issues/78502
-// FLAKY: https://github.com/elastic/kibana/issues/78501
-// FLAKY: https://github.com/elastic/kibana/issues/78500
-describe.skip('ml conditional links', () => {
+describe('ml conditional links', () => {
   it('sets the KQL from a single IP with a value for the query', () => {
     loginAndWaitForPageWithoutDateRange(mlNetworkSingleIpKqlQuery);
     cy.get(KQL_INPUT)

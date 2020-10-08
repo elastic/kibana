@@ -74,7 +74,7 @@ export function createContextSearchSourceStub(hits, timeField = '@timestamp') {
   searchSourceStub.fetch = sinon.spy(() => {
     const timeField = searchSourceStub._stubTimeField;
     const lastQuery = searchSourceStub.setField.withArgs('query').lastCall.args[1];
-    const timeRange = lastQuery.query.constant_score.filter.range[timeField];
+    const timeRange = lastQuery.query.bool.must.constant_score.filter.range[timeField];
     const lastSort = searchSourceStub.setField.withArgs('sort').lastCall.args[1];
     const sortDirection = lastSort[0][timeField];
     const sortFunction =

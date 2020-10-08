@@ -119,6 +119,7 @@ export class DocLinksService {
           gettingStarted: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/index.html`,
         },
         query: {
+          eql: `${ELASTICSEARCH_DOCS}eql.html`,
           luceneQuerySyntax: `${ELASTICSEARCH_DOCS}query-dsl-query-string-query.html#query-string-syntax`,
           queryDsl: `${ELASTICSEARCH_DOCS}query-dsl.html`,
           kueryQuerySyntax: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/kuery-query.html`,
@@ -227,6 +228,7 @@ export interface DocLinksStart {
       readonly gettingStarted: string;
     };
     readonly query: {
+      readonly eql: string;
       readonly luceneQuerySyntax: string;
       readonly queryDsl: string;
       readonly kueryQuerySyntax: string;

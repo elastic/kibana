@@ -401,7 +401,7 @@ export interface ExpressionImage {
 //
 // @public (undocumented)
 export interface ExpressionRenderDefinition<Config = unknown> {
-    displayName: string;
+    displayName?: string;
     help?: string;
     name: string;
     render: (domNode: HTMLElement, config: Config, handlers: IInterpreterRenderHandlers) => void | Promise<void>;
