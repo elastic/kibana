@@ -7,26 +7,19 @@
 import { useCallback } from 'react';
 import { useUpdateEffect, useMount } from 'react-use';
 import { useKibanaContextForPlugin } from './use_kibana';
-import { TimeRange } from '../../../../../src/plugins/data/public';
+import { TimeRange, TimefilterContract } from '../../../../../src/plugins/data/public';
 
 export const useKibanaTimefilterTime = ({
   from: fromDefault,
   to: toDefault,
-}: TimeRange): [typeof getTime, typeof setTime] => {
+}: TimeRange): [typeof getTime, TimefilterContract['setTime']] => {
   const { services } = useKibanaContextForPlugin();
 
   const getTime = useCallback(() => {
     return services.data.query.timefilter.timefilter.getTime({ from: fromDefault, to: toDefault });
   }, [services.data.query.timefilter.timefilter, fromDefault, toDefault]);
 
-  const setTime = useCallback(
-    (timeRange: TimeRange) => {
-      services.data.query.timefilter.timefilter.setTime(timeRange);
-    },
-    [services.data.query.timefilter.timefilter]
-  );
-
-  return [getTime, setTime];
+  return [getTime, services.data.query.timefilter.timefilter.setTime];
 };
 
 export const useSyncKibanaTimeFilterTime = (defaults: TimeRange, currentTimeRange: TimeRange) => {
