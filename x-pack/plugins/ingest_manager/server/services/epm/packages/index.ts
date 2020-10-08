@@ -18,12 +18,7 @@ export {
   isBulkInstallError,
   isCriticalInstallError,
 } from './bulk_install_packages';
-export {
-  isUpgrade,
-  upgradePackage,
-  BulkInstallResponse,
-  IBulkInstallPackageError,
-} from './upgrade';
+export { upgradePackage, BulkInstallResponse, IBulkInstallPackageError } from './upgrade';
 export {
   getCategories,
   getFile,

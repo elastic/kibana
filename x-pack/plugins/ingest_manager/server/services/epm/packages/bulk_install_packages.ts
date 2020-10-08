@@ -77,5 +77,11 @@ export function isBulkInstallError(test: any): test is IBulkInstallPackageError 
 export function isCriticalInstallError(
   resp: BulkInstallResponse
 ): resp is IBulkInstallPackageError {
-  return isBulkInstallError(resp) && resp.criticalFailure;
+  return (
+    isBulkInstallError(resp) &&
+    // if isUpgrade was undefined then we didn't have enough information to determine if it was an upgrade
+    // if isUpgrade is false then we knew it was a regular install
+    // if a rollback error occurred then the upgrade is in a bad state
+    (resp.isUpgrade === undefined || !resp.isUpgrade || resp.rollbackError !== undefined)
+  );
 }

@@ -19,7 +19,8 @@ import {
 export interface IBulkInstallPackageError {
   name: string;
   error: Error;
-  criticalFailure: boolean;
+  isUpgrade?: boolean;
+  rollbackError?: Error;
 }
 export type BulkInstallResponse = BulkInstallPackageInfo | IBulkInstallPackageError;
 
@@ -60,14 +61,14 @@ export async function upgradePackage({
         installedPkg,
         callCluster,
       });
-      // a critical failure occurs if the failure came from a normal install (not upgrading a package) or if the upgrade
-      // had a rollback error because that means the package could not be restored to its original state
-      const criticalFailure =
-        !isUpgrade({ installedPkg, latestPkg }) || rollbackError !== undefined;
+
+      const isUpgrade =
+        installedPkg !== undefined && semver.gt(latestPkg.version, installedPkg.attributes.version);
       return {
         name: pkgToUpgrade,
         error: installFailed,
-        criticalFailure,
+        isUpgrade,
+        rollbackError,
       };
     }
   } else {
@@ -82,16 +83,4 @@ export async function upgradePackage({
       ],
     };
   }
-}
-
-export function isUpgrade({
-  installedPkg,
-  latestPkg,
-}: {
-  installedPkg: UnwrapPromise<ReturnType<typeof getInstallationObject>>;
-  latestPkg: UnwrapPromise<ReturnType<typeof Registry.fetchFindLatestPackage>>;
-}): boolean {
-  return (
-    installedPkg !== undefined && semver.gt(latestPkg.version, installedPkg.attributes.version)
-  );
 }

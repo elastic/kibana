@@ -15,6 +15,7 @@ import { createAppContextStartContractMock } from '../../../mocks';
 import { handleInstallPackageFailure, installPackageFromRegistry } from './install';
 import { upgradePackage } from './upgrade';
 import { RegistryResponseError } from '../../../errors';
+import { isCriticalInstallError } from './bulk_install_packages';
 
 // if we add this assertion, TS will type check the return value
 // and the editor will also know about .mockImplementation, .mock.calls, etc
@@ -77,6 +78,7 @@ describe('upgradePackage', () => {
       oldVersion: mockInstallation.attributes.version,
       assets: [],
     });
+    expect(isCriticalInstallError(resp)).toBeFalsy();
   });
   it('should not do an upgrade if a newer package version does not exist', async () => {
     const latestPkg = {
@@ -103,6 +105,7 @@ describe('upgradePackage', () => {
         ...mockInstallation.attributes.installed_kibana,
       ],
     });
+    expect(isCriticalInstallError(resp)).toBeFalsy();
   });
   it('should return a non critical error if rollback succeeds', async () => {
     const installError = new Error('install');
@@ -130,8 +133,10 @@ describe('upgradePackage', () => {
     expect(resp).toEqual({
       name: mockInstallation.attributes.name,
       error: installError,
-      criticalFailure: false,
+      isUpgrade: true,
+      rollbackError: undefined,
     });
+    expect(isCriticalInstallError(resp)).toBeFalsy();
   });
   it('should return a non critical error if an upgrade encountered a registry error', async () => {
     const installError = new RegistryResponseError('install');
@@ -161,16 +166,19 @@ describe('upgradePackage', () => {
     expect(resp).toEqual({
       name: mockInstallation.attributes.name,
       error: installError,
-      criticalFailure: false,
+      isUpgrade: true,
+      rollbackError: undefined,
     });
+    expect(isCriticalInstallError(resp)).toBeFalsy();
   });
   it('should return a critical error if rollback fails', async () => {
     const installError = new Error('install');
     mockedInstallPackageFromRegistry.mockImplementation(async () => {
       throw installError;
     });
+    const rollbackError = new Error('rollback');
     mockedHandleInstallPackageFailure.mockImplementation(async () => {
-      return new Error('rollback');
+      return rollbackError;
     });
     const latestPkg = {
       name: mockInstallation.attributes.name,
@@ -190,8 +198,10 @@ describe('upgradePackage', () => {
     expect(resp).toEqual({
       name: mockInstallation.attributes.name,
       error: installError,
-      criticalFailure: true,
+      isUpgrade: true,
+      rollbackError,
     });
+    expect(isCriticalInstallError(resp)).toBeTruthy();
   });
   it('should return a critical error if an install failed', async () => {
     const installError = new Error('install');
@@ -221,16 +231,19 @@ describe('upgradePackage', () => {
     expect(resp).toEqual({
       name: mockInstallation.attributes.name,
       error: installError,
-      criticalFailure: true,
+      isUpgrade: false,
+      rollbackError: undefined,
     });
+    expect(isCriticalInstallError(resp)).toBeTruthy();
   });
   it('should return a critical error if an install failed and if rollback fails', async () => {
     const installError = new Error('install');
     mockedInstallPackageFromRegistry.mockImplementation(async () => {
       throw installError;
     });
+    const rollbackError = new Error('rollback');
     mockedHandleInstallPackageFailure.mockImplementation(async () => {
-      return undefined;
+      return rollbackError;
     });
     const latestPkg = {
       name: mockInstallation.attributes.name,
@@ -252,7 +265,9 @@ describe('upgradePackage', () => {
     expect(resp).toEqual({
       name: mockInstallation.attributes.name,
       error: installError,
-      criticalFailure: true,
+      isUpgrade: false,
+      rollbackError,
     });
+    expect(isCriticalInstallError(resp)).toBeTruthy();
   });
 });

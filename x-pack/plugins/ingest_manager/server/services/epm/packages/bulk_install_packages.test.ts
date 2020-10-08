@@ -18,7 +18,7 @@ import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { appContextService } from '../../app_context';
 import { createAppContextStartContractMock } from '../../../mocks';
 import { fetchFindLatestPackage } from '../registry';
-import { bulkInstallPackages } from './bulk_install_packages';
+import { bulkInstallPackages, isCriticalInstallError } from './bulk_install_packages';
 import { RegistryConnectionError } from '../../../errors';
 
 // if we add this assertion, TS will type check the return value
@@ -100,7 +100,7 @@ describe('bulkInstallPackages', () => {
       packagesToUpgrade: ['test-pkg'],
       callCluster: jest.fn(),
     });
-    expect((resp[0] as IBulkInstallPackageError).criticalFailure).toEqual(true);
+    expect(isCriticalInstallError(resp[0])).toBeTruthy();
     expect((resp[0] as IBulkInstallPackageError).error.message).toEqual('registry');
   });
   it('should return an error when it fails to get the installed object', async () => {
@@ -122,7 +122,7 @@ describe('bulkInstallPackages', () => {
       packagesToUpgrade: ['test-pkg'],
       callCluster: jest.fn(),
     });
-    expect((resp[0] as IBulkInstallPackageError).criticalFailure).toEqual(true);
+    expect(isCriticalInstallError(resp[0])).toBeTruthy();
     expect((resp[0] as IBulkInstallPackageError).error.message).toEqual('installation');
   });
   it('should return an error when upgradePackage throws an error', async () => {
@@ -147,7 +147,7 @@ describe('bulkInstallPackages', () => {
       packagesToUpgrade: ['test-pkg'],
       callCluster: jest.fn(),
     });
-    expect((resp[0] as IBulkInstallPackageError).criticalFailure).toEqual(true);
+    expect(isCriticalInstallError(resp[0])).toBeTruthy();
     expect((resp[0] as IBulkInstallPackageError).error.message).toEqual('upgrade');
   });
 });
