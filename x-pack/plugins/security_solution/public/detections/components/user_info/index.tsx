@@ -218,14 +218,7 @@ export const useUserInfo = (): State => {
   }, [dispatch, loading, signalIndexName, apiSignalIndexName]);
 
   useEffect(() => {
-    if (
-      isAuthenticated &&
-      hasEncryptionKey &&
-      hasIndexManage &&
-      isSignalIndexExists != null &&
-      !isSignalIndexExists &&
-      createSignalIndex != null
-    ) {
+    if (isAuthenticated && hasEncryptionKey && hasIndexManage && createSignalIndex != null) {
       createSignalIndex();
     }
   }, [createSignalIndex, isAuthenticated, hasEncryptionKey, isSignalIndexExists, hasIndexManage]);
