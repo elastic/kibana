@@ -3967,7 +3967,6 @@
     "visTypeTimeseries.timeseries.dataTab.dataButtonLabel": "数据",
     "visTypeTimeseries.timeSeries.defaultPaletteLabel": "默认调色板",
     "visTypeTimeseries.timeSeries.deleteSeriesTooltip": "删除序列",
-    "visTypeTimeseries.timeSeries.filterLabel": "筛选",
     "visTypeTimeseries.timeSeries.gradientLabel": "渐变",
     "visTypeTimeseries.timeSeries.hideInLegendLabel": "在图例中隐藏",
     "visTypeTimeseries.timeSeries.labelPlaceholder": "标签",
