@@ -25,8 +25,8 @@ import { SolutionPanel } from './solution_panel';
 import { FeatureCatalogueEntry, FeatureCatalogueSolution } from '../../../';
 
 const sortByOrder = (
-  { order: orderA = 0 }: FeatureCatalogueSolution,
-  { order: orderB = 0 }: FeatureCatalogueSolution
+  { order: orderA = 0 }: FeatureCatalogueSolution | FeatureCatalogueEntry,
+  { order: orderB = 0 }: FeatureCatalogueSolution | FeatureCatalogueEntry
 ) => orderA - orderB;
 
 interface Props {
