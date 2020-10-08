@@ -72,10 +72,10 @@ export function getMlClient(client: IScopedClusterClient, jobsInSpaces: JobsInSp
     async deleteDataFrameAnalytics(...p: Parameters<MlClient['deleteDataFrameAnalytics']>) {
       await jobIdsCheck('data-frame-analytics', p);
       const resp = await mlClient.deleteDataFrameAnalytics(...p);
-      const [analyticsId] = getDFAJobIds(p);
-      if (analyticsId !== undefined) {
-        await jobsInSpaces.deleteDataFrameAnalyticsJob(analyticsId);
-      }
+      // const [analyticsId] = getDFAJobIds(p);
+      // if (analyticsId !== undefined) {
+      //   await jobsInSpaces.deleteDataFrameAnalyticsJob(analyticsId);
+      // }
       return resp;
     },
     async deleteDatafeed(...p: any) {
@@ -101,10 +101,10 @@ export function getMlClient(client: IScopedClusterClient, jobsInSpaces: JobsInSp
     async deleteJob(...p: Parameters<MlClient['deleteJob']>) {
       await jobIdsCheck('anomaly-detector', p);
       const resp = await mlClient.deleteJob(...p);
-      const [jobId] = getADJobIds(p);
-      if (jobId !== undefined) {
-        await jobsInSpaces.deleteAnomalyDetectionJob(jobId);
-      }
+      // const [jobId] = getADJobIds(p);
+      // if (jobId !== undefined) {
+      //   await jobsInSpaces.deleteAnomalyDetectionJob(jobId);
+      // }
       return resp;
     },
     async deleteModelSnapshot(...p: Parameters<MlClient['deleteModelSnapshot']>) {

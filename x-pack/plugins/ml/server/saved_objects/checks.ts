@@ -33,7 +33,7 @@ interface SavedObjectJob {
 
 export function checksFactory(client: IScopedClusterClient, jobsInSpaces: JobsInSpaces) {
   async function checkStatus() {
-    const { saved_objects: jobObjects } = await jobsInSpaces.getAllJobObjects();
+    const jobObjects = await jobsInSpaces.getAllJobObjects();
     // load all non-space jobs and datafeeds
     const { body: adJobs } = await client.asInternalUser.ml.getJobs<{ jobs: Job[] }>();
     const { body: datafeeds } = await client.asInternalUser.ml.getDatafeeds<{

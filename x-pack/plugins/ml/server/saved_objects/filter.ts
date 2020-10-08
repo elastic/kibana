@@ -27,27 +27,37 @@ export function filterJobIdsFactory(savedObjectsClient: SavedObjectsClientContra
       perPage: 10000,
     };
 
-    if (jobType !== undefined) {
-      options.searchFields!.push('type');
-      options.search = `type: ${jobType}`;
+    const allJobs = jobId === undefined && datafeedId === undefined;
 
-      if (jobId !== undefined || datafeedId !== undefined) {
-        options.search += ' AND ';
+    if (allJobs) {
+      if (jobType !== undefined) {
+        options.searchFields!.push('type');
+        options.search = jobType;
+      }
+    } else {
+      if (jobId !== undefined) {
+        options.searchFields!.push('job_id');
+        options.search += jobId;
+      } else if (datafeedId !== undefined) {
+        options.searchFields!.push('datafeed_id');
+        options.search += datafeedId;
       }
     }
 
-    if (jobId !== undefined) {
-      options.searchFields!.push('job_id');
-      options.search += `job_id: ${jobId} `;
-    } else if (datafeedId !== undefined) {
-      options.searchFields!.push('datafeed_id');
-      options.search += `datafeed_id: ${datafeedId} `;
-    }
+    const jobs = await savedObjectsClient.find<JobObject>(options);
 
-    return await savedObjectsClient.find<JobObject>(options);
+    return allJobs === true
+      ? jobs.saved_objects
+      : jobs.saved_objects.filter((j) => j.attributes.type === jobType);
   }
 
   async function _createJob(jobType: JobType, jobId: string) {
+    try {
+      await _deleteJob(jobType, jobId);
+    } catch (error) {
+      // fail silently
+      // the job object may or may not already exist, we'll overwrite it anyway.
+    }
     await savedObjectsClient.create<JobObject>(ML_SAVED_OBJECT_TYPE, {
       job_id: jobId,
       datafeed_id: null,
@@ -57,7 +67,7 @@ export function filterJobIdsFactory(savedObjectsClient: SavedObjectsClientContra
 
   async function _deleteJob(jobType: JobType, jobId: string) {
     const jobs = await _getJobObjects(jobType, jobId);
-    const job = jobs.saved_objects[0];
+    const job = jobs[0];
     if (job === undefined) {
       throw new Error('job not found');
     }
@@ -87,7 +97,7 @@ export function filterJobIdsFactory(savedObjectsClient: SavedObjectsClientContra
 
   async function addDatafeed(datafeedId: string, jobId: string) {
     const jobs = await _getJobObjects('anomaly-detector', jobId);
-    const job = jobs.saved_objects[0];
+    const job = jobs[0];
     if (job === undefined) {
       throw new Error('job not found');
     }
@@ -99,7 +109,7 @@ export function filterJobIdsFactory(savedObjectsClient: SavedObjectsClientContra
 
   async function deleteDatafeed(datafeedId: string) {
     const jobs = await _getJobObjects('anomaly-detector', undefined, datafeedId);
-    const job = jobs.saved_objects[0];
+    const job = jobs[0];
     if (job === undefined) {
       throw new Error('job not found');
     }
@@ -111,7 +121,7 @@ export function filterJobIdsFactory(savedObjectsClient: SavedObjectsClientContra
 
   async function getIds(jobType: JobType, idType: keyof JobObject) {
     const jobs = await _getJobObjects(jobType);
-    return jobs.saved_objects.map((o) => o.attributes[idType]);
+    return jobs.map((o) => o.attributes[idType]);
   }
 
   async function filterJobObjectsForSpace<T>(
