@@ -30,6 +30,8 @@ $aggbasedCardWidth: $euiSizeL * 10;
 
 .visNewVisDialog__groupsCard {
   width: $groupCardWidth !important;
+  background-color: transparent;
+  box-shadow: none;
 }
 
 .visNewVisDialog__card {
