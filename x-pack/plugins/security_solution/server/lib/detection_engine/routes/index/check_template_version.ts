@@ -5,20 +5,11 @@
  */
 
 import { get } from 'lodash';
-import { LegacyCallAPIOptions } from '../../../../../../../../src/core/server';
+import { LegacyAPICaller } from '../../../../../../../../src/core/server';
 import { getSignalsTemplate } from './get_signals_template';
 import { getTemplateExists } from '../../index/get_template_exists';
 
-export const templateNeedsUpdate = async (
-  callCluster: (
-    endpoint: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    clientParams: Record<string, any>,
-    options?: LegacyCallAPIOptions
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ) => Promise<any>,
-  index: string
-) => {
+export const templateNeedsUpdate = async (callCluster: LegacyAPICaller, index: string) => {
   const templateExists = await getTemplateExists(callCluster, index);
   let existingTemplateVersion: number | undefined;
   if (templateExists) {
