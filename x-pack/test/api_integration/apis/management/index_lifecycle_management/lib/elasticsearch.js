@@ -54,7 +54,7 @@ export const initElasticsearchHelpers = (es) => {
 
   const cleanUp = () => Promise.all([deleteAllIndices(), deleteAllTemplates()]);
 
-  const getNodesStats = () => es.nodes.stats();
+  const getNodesStats = () => es.nodes.stats().then(({ body }) => body);
 
   return {
     getIndex,
