@@ -27,6 +27,7 @@ import { coreMock, httpServiceMock } from '../../../../../../src/core/public/moc
 import { IBasePath } from '../../../../../../src/core/public';
 import { AttributeService } from '../../../../../../src/plugins/dashboard/public';
 import { LensAttributeService } from '../../lens_attribute_service';
+import { OnSaveProps } from '../../../../../../src/plugins/saved_objects/public/save_modal';
 
 jest.mock('../../../../../../src/plugins/inspector/public/', () => ({
   isAvailable: false,
@@ -44,6 +45,30 @@ const savedVis: Document = {
   title: 'My title',
   visualizationType: '',
 };
+const defaultSaveMethod = (
+  type: string,
+  testAttributes: LensSavedObjectAttributes,
+  savedObjectId?: string
+): Promise<{ id: string }> => {
+  return new Promise(() => {
+    return { id: '123' };
+  });
+};
+const defaultUnwrapMethod = (savedObjectId: string): Promise<LensSavedObjectAttributes> => {
+  return new Promise(() => {
+    return { ...savedVis };
+  });
+};
+const defaultCheckForDuplicateTitle = (props: OnSaveProps): Promise<true> => {
+  return new Promise(() => {
+    return true;
+  });
+};
+const options = {
+  saveMethod: defaultSaveMethod,
+  unwrapMethod: defaultUnwrapMethod,
+  checkForDuplicateTitle: defaultCheckForDuplicateTitle,
+};
 
 const attributeServiceMockFromSavedVis = (document: Document): LensAttributeService => {
   const core = coreMock.createStart();
@@ -51,14 +76,7 @@ const attributeServiceMockFromSavedVis = (document: Document): LensAttributeServ
     LensSavedObjectAttributes,
     LensByValueInput,
     LensByReferenceInput
-  >(
-    'lens',
-    jest.fn(),
-    core.savedObjects.client,
-    core.overlays,
-    core.i18n.Context,
-    core.notifications.toasts
-  );
+  >('lens', jest.fn(), core.i18n.Context, core.notifications.toasts, options);
   service.unwrapAttributes = jest.fn((input: LensByValueInput | LensByReferenceInput) => {
     return Promise.resolve({ ...document } as LensSavedObjectAttributes);
   });

@@ -27,7 +27,7 @@ export default function (providerContext: FtrProviderContext) {
         return;
       }
       const { body: agentPolicyResponse } = await supertest
-        .post(`/api/ingest_manager/agent_policies`)
+        .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
           name: 'Test policy',
@@ -36,7 +36,7 @@ export default function (providerContext: FtrProviderContext) {
       agentPolicyId = agentPolicyResponse.item.id;
 
       const { body: packagePolicyResponse } = await supertest
-        .post(`/api/ingest_manager/package_policies`)
+        .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
           name: 'filetest-1',
@@ -61,24 +61,24 @@ export default function (providerContext: FtrProviderContext) {
       }
 
       await supertest
-        .post(`/api/ingest_manager/agent_policies/delete`)
+        .post(`/api/fleet/agent_policies/delete`)
         .set('kbn-xsrf', 'xxxx')
         .send({ agentPolicyId })
         .expect(200);
 
       await supertest
-        .post(`/api/ingest_manager/package_policies/delete`)
+        .post(`/api/fleet/package_policies/delete`)
         .set('kbn-xsrf', 'xxxx')
         .send({ packagePolicyIds: [packagePolicyId] })
         .expect(200);
     });
 
     it('should succeed with a valid id', async function () {
-      await supertest.get(`/api/ingest_manager/package_policies/${packagePolicyId}`).expect(200);
+      await supertest.get(`/api/fleet/package_policies/${packagePolicyId}`).expect(200);
     });
 
     it('should return a 404 with an invalid id', async function () {
-      await supertest.get(`/api/ingest_manager/package_policies/IS_NOT_PRESENT`).expect(404);
+      await supertest.get(`/api/fleet/package_policies/IS_NOT_PRESENT`).expect(404);
     });
   });
 }

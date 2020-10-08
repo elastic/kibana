@@ -19,10 +19,16 @@ export type AgentStatus =
   | 'warning'
   | 'enrolling'
   | 'unenrolling'
-  | 'upgrading'
+  | 'updating'
   | 'degraded';
 
-export type AgentActionType = 'POLICY_CHANGE' | 'UNENROLL' | 'UPGRADE';
+export type AgentActionType =
+  | 'POLICY_CHANGE'
+  | 'UNENROLL'
+  | 'UPGRADE'
+  // INTERNAL* actions are mean to interupt long polling calls these actions will not be distributed to the agent
+  | 'INTERNAL_POLICY_REASSIGN';
+
 export interface NewAgentAction {
   type: AgentActionType;
   data?: any;
@@ -89,6 +95,7 @@ export interface NewAgentEvent {
     | 'STOPPING'
     | 'STOPPED'
     | 'DEGRADED'
+    | 'UPDATING'
     // Action results
     | 'DATA_DUMP'
     // Actions
@@ -109,10 +116,8 @@ export interface AgentEvent extends NewAgentEvent {
 
 export type AgentEventSOAttributes = NewAgentEvent;
 
-type MetadataValue = string | AgentMetadata;
-
 export interface AgentMetadata {
-  [x: string]: MetadataValue;
+  [x: string]: any;
 }
 interface AgentBase {
   type: AgentType;
@@ -129,7 +134,7 @@ interface AgentBase {
   policy_id?: string;
   policy_revision?: number | null;
   last_checkin?: string;
-  last_checkin_status?: 'error' | 'online' | 'degraded';
+  last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating';
   user_provided_metadata: AgentMetadata;
   local_metadata: AgentMetadata;
 }
