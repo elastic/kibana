@@ -79,10 +79,10 @@ export default ({ getService }: FtrProviderContext) => {
         .delete(`/api/ml/annotations/delete/${annotationIdToDelete}`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .set(COMMON_REQUEST_HEADERS)
-        .expect(404);
+        .expect(403);
 
-      expect(body.error).to.eql('Not Found');
-      expect(body.message).to.eql('Not Found');
+      expect(body.error).to.eql('Forbidden');
+      expect(body.message).to.eql('Forbidden');
 
       await ml.api.waitForAnnotationToExist(annotationIdToDelete);
     });

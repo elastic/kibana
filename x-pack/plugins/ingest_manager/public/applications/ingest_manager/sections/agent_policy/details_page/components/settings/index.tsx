@@ -35,7 +35,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
   ({ agentPolicy: originalAgentPolicy }) => {
     const { notifications } = useCore();
     const {
-      fleet: { enabled: isFleetEnabled },
+      agents: { enabled: isFleetEnabled },
     } = useConfig();
     const history = useHistory();
     const { getPath } = useLink();

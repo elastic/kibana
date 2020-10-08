@@ -17,6 +17,7 @@ export const SectionWrapper = styled.div`
   box-sizing: content-box;
   margin: 0 auto;
   max-width: 1175px;
+  width: 100%;
 `;
 
 export const HeaderWrapper = styled.div`
