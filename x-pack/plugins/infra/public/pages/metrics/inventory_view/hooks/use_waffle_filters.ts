@@ -10,6 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import createContainter from 'constate';
+import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 import { useUrlState } from '../../../../utils/use_url_state';
 import { useSourceContext } from '../../../../containers/source';
 import { convertKueryToElasticSearchQuery } from '../../../../utils/kuery';
@@ -50,7 +51,7 @@ export const useWaffleFilters = () => {
 
   const applyFilterQueryFromKueryExpression = useCallback(
     (expression: string) => {
-      setState(previous => ({
+      setState((previous) => ({
         ...previous,
         kind: 'kuery',
         expression,
@@ -67,6 +68,10 @@ export const useWaffleFilters = () => {
   const isFilterQueryDraftValid = useMemo(() => validateKuery(filterQueryDraft), [
     filterQueryDraft,
   ]);
+
+  const { inventoryPrefill } = useAlertPrefillContext();
+  const prefillContext = useMemo(() => inventoryPrefill, [inventoryPrefill]); // For Jest compatibility
+  useEffect(() => prefillContext.setFilterQuery(state.expression), [prefillContext, state]);
 
   return {
     filterQuery: urlState,

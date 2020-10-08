@@ -6,9 +6,12 @@
 
 import { CoreSetup, CoreStart } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { ScopedHistory } from 'kibana/public';
 
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+
+import type { GetMlSharedImportsReturnType } from '../shared_imports';
 
 export interface AppDependencies {
   chrome: CoreStart['chrome'];
@@ -21,6 +24,8 @@ export interface AppDependencies {
   savedObjects: CoreStart['savedObjects'];
   storage: Storage;
   overlays: CoreStart['overlays'];
+  history: ScopedHistory;
+  ml: GetMlSharedImportsReturnType;
 }
 
 export const useAppDependencies = () => {

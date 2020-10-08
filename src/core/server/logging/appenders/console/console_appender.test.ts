@@ -29,8 +29,7 @@ jest.mock('../../layouts/layouts', () => {
   };
 });
 
-import { LogLevel } from '../../log_level';
-import { LogRecord } from '../../log_record';
+import { LogRecord, LogLevel } from '@kbn/logging';
 import { ConsoleAppender } from './console_appender';
 
 test('`configSchema` creates correct schema.', () => {

@@ -179,4 +179,372 @@ describe('processFields', () => {
       JSON.stringify(mixedFieldsExpanded)
     );
   });
+
+  const objectFieldWithProperty = [
+    {
+      name: 'a',
+      type: 'object',
+      dynamic: true,
+    },
+    {
+      name: 'a.b',
+      type: 'keyword',
+    },
+  ];
+
+  const objectFieldWithPropertyExpanded = [
+    {
+      name: 'a',
+      type: 'group',
+      dynamic: true,
+      fields: [
+        {
+          name: 'b',
+          type: 'keyword',
+        },
+      ],
+    },
+  ];
+  test('correctly handles properties of object type fields', () => {
+    expect(JSON.stringify(processFields(objectFieldWithProperty))).toEqual(
+      JSON.stringify(objectFieldWithPropertyExpanded)
+    );
+  });
+
+  test('correctly handles properties of object type fields where object comes second', () => {
+    const nested = [
+      {
+        name: 'a.b',
+        type: 'keyword',
+      },
+      {
+        name: 'a',
+        type: 'object',
+        dynamic: true,
+      },
+    ];
+
+    const nestedExpanded = [
+      {
+        name: 'a',
+        type: 'group',
+        dynamic: true,
+        fields: [
+          {
+            name: 'b',
+            type: 'keyword',
+          },
+        ],
+      },
+    ];
+    expect(processFields(nested)).toEqual(nestedExpanded);
+  });
+
+  test('correctly handles properties of nested type fields', () => {
+    const nested = [
+      {
+        name: 'a',
+        type: 'nested',
+        dynamic: true,
+      },
+      {
+        name: 'a.b',
+        type: 'keyword',
+      },
+    ];
+
+    const nestedExpanded = [
+      {
+        name: 'a',
+        type: 'group-nested',
+        dynamic: true,
+        fields: [
+          {
+            name: 'b',
+            type: 'keyword',
+          },
+        ],
+      },
+    ];
+    expect(processFields(nested)).toEqual(nestedExpanded);
+  });
+
+  test('correctly handles properties of nested and object type fields together', () => {
+    const fields = [
+      {
+        name: 'a',
+        type: 'object',
+      },
+      {
+        name: 'a.b',
+        type: 'nested',
+      },
+      {
+        name: 'a.b.c',
+        type: 'boolean',
+      },
+      {
+        name: 'a.b.d',
+        type: 'keyword',
+      },
+    ];
+
+    const fieldsExpanded = [
+      {
+        name: 'a',
+        type: 'group',
+        fields: [
+          {
+            name: 'b',
+            type: 'group-nested',
+            fields: [
+              {
+                name: 'c',
+                type: 'boolean',
+              },
+              {
+                name: 'd',
+                type: 'keyword',
+              },
+            ],
+          },
+        ],
+      },
+    ];
+    expect(processFields(fields)).toEqual(fieldsExpanded);
+  });
+
+  test('correctly handles properties of nested and object type fields in large depth', () => {
+    const fields = [
+      {
+        name: 'a.h-object',
+        type: 'object',
+        dynamic: false,
+      },
+      {
+        name: 'a.b-nested.c-nested',
+        type: 'nested',
+      },
+      {
+        name: 'a.b-nested',
+        type: 'nested',
+      },
+      {
+        name: 'a',
+        type: 'object',
+      },
+      {
+        name: 'a.b-nested.d',
+        type: 'keyword',
+      },
+      {
+        name: 'a.b-nested.c-nested.e',
+        type: 'boolean',
+        dynamic: true,
+      },
+      {
+        name: 'a.b-nested.c-nested.f-object',
+        type: 'object',
+      },
+      {
+        name: 'a.b-nested.c-nested.f-object.g',
+        type: 'keyword',
+      },
+    ];
+
+    const fieldsExpanded = [
+      {
+        name: 'a',
+        type: 'group',
+        fields: [
+          {
+            name: 'h-object',
+            type: 'object',
+            dynamic: false,
+          },
+          {
+            name: 'b-nested',
+            type: 'group-nested',
+            fields: [
+              {
+                name: 'c-nested',
+                type: 'group-nested',
+                fields: [
+                  {
+                    name: 'e',
+                    type: 'boolean',
+                    dynamic: true,
+                  },
+                  {
+                    name: 'f-object',
+                    type: 'group',
+                    fields: [
+                      {
+                        name: 'g',
+                        type: 'keyword',
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                name: 'd',
+                type: 'keyword',
+              },
+            ],
+          },
+        ],
+      },
+    ];
+    expect(processFields(fields)).toEqual(fieldsExpanded);
+  });
+
+  test('correctly handles properties of nested and object type fields together in different order', () => {
+    const fields = [
+      {
+        name: 'a.b.c',
+        type: 'boolean',
+      },
+      {
+        name: 'a.b',
+        type: 'nested',
+      },
+      {
+        name: 'a',
+        type: 'object',
+      },
+      {
+        name: 'a.b.d',
+        type: 'keyword',
+      },
+    ];
+
+    const fieldsExpanded = [
+      {
+        name: 'a',
+        type: 'group',
+        fields: [
+          {
+            name: 'b',
+            type: 'group-nested',
+            fields: [
+              {
+                name: 'c',
+                type: 'boolean',
+              },
+              {
+                name: 'd',
+                type: 'keyword',
+              },
+            ],
+          },
+        ],
+      },
+    ];
+    expect(processFields(fields)).toEqual(fieldsExpanded);
+  });
+
+  test('correctly handles properties of nested type where nested top level comes second', () => {
+    const nested = [
+      {
+        name: 'a.b',
+        type: 'keyword',
+      },
+      {
+        name: 'a',
+        type: 'nested',
+        dynamic: true,
+      },
+    ];
+
+    const nestedExpanded = [
+      {
+        name: 'a',
+        type: 'group-nested',
+        dynamic: true,
+        fields: [
+          {
+            name: 'b',
+            type: 'keyword',
+          },
+        ],
+      },
+    ];
+    expect(processFields(nested)).toEqual(nestedExpanded);
+  });
+
+  test('ignores redefinitions of an object field', () => {
+    const object = [
+      {
+        name: 'a',
+        type: 'object',
+        dynamic: true,
+      },
+      {
+        name: 'a',
+        type: 'object',
+        dynamic: false,
+      },
+    ];
+
+    const objectExpected = [
+      {
+        name: 'a',
+        type: 'object',
+        // should preserve the field that was parsed first which had dynamic: true
+        dynamic: true,
+      },
+    ];
+    expect(processFields(object)).toEqual(objectExpected);
+  });
+
+  test('ignores redefinitions of a nested field', () => {
+    const nested = [
+      {
+        name: 'a',
+        type: 'nested',
+        dynamic: true,
+      },
+      {
+        name: 'a',
+        type: 'nested',
+        dynamic: false,
+      },
+    ];
+
+    const nestedExpected = [
+      {
+        name: 'a',
+        type: 'nested',
+        // should preserve the field that was parsed first which had dynamic: true
+        dynamic: true,
+      },
+    ];
+    expect(processFields(nested)).toEqual(nestedExpected);
+  });
+
+  test('ignores redefinitions of a nested and object field', () => {
+    const nested = [
+      {
+        name: 'a',
+        type: 'nested',
+        dynamic: true,
+      },
+      {
+        name: 'a',
+        type: 'object',
+        dynamic: false,
+      },
+    ];
+
+    const nestedExpected = [
+      {
+        name: 'a',
+        type: 'nested',
+        // should preserve the field that was parsed first which had dynamic: true
+        dynamic: true,
+      },
+    ];
+    expect(processFields(nested)).toEqual(nestedExpected);
+  });
 });

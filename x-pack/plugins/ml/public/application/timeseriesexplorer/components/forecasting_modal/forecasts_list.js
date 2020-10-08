@@ -13,7 +13,7 @@ import React from 'react';
 
 import { EuiButtonIcon, EuiIcon, EuiInMemoryTable, EuiText, EuiToolTip } from '@elastic/eui';
 
-import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
+import { formatHumanReadableDateTimeSeconds } from '../../../../../common/util/date_utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -25,7 +25,7 @@ function getColumns(viewForecast) {
         defaultMessage: 'Created',
       }),
       dataType: 'date',
-      render: date => formatHumanReadableDateTimeSeconds(date),
+      render: (date) => formatHumanReadableDateTimeSeconds(date),
       sortable: true,
     },
     {
@@ -34,7 +34,7 @@ function getColumns(viewForecast) {
         defaultMessage: 'From',
       }),
       dataType: 'date',
-      render: date => formatHumanReadableDateTimeSeconds(date),
+      render: (date) => formatHumanReadableDateTimeSeconds(date),
       sortable: true,
     },
     {
@@ -43,7 +43,7 @@ function getColumns(viewForecast) {
         defaultMessage: 'To',
       }),
       dataType: 'date',
-      render: date => formatHumanReadableDateTimeSeconds(date),
+      render: (date) => formatHumanReadableDateTimeSeconds(date),
       sortable: true,
     },
     {
@@ -51,7 +51,7 @@ function getColumns(viewForecast) {
         defaultMessage: 'View',
       }),
       width: '60px',
-      render: forecast => {
+      render: (forecast) => {
         const viewForecastAriaLabel = i18n.translate(
           'xpack.ml.timeSeriesExplorer.forecastsList.viewForecastAriaLabel',
           {
@@ -65,7 +65,7 @@ function getColumns(viewForecast) {
         return (
           <EuiButtonIcon
             onClick={() => viewForecast(forecast.forecast_id)}
-            iconType="stats"
+            iconType="visLine"
             aria-label={viewForecastAriaLabel}
           />
         );

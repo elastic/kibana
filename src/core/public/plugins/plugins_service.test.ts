@@ -21,7 +21,6 @@ import { omit, pick } from 'lodash';
 
 import {
   MockedPluginInitializer,
-  mockLoadPluginBundle,
   mockPluginInitializerProvider,
 } from './plugins_service.test.mocks';
 
@@ -32,6 +31,7 @@ import {
   PluginsServiceStartDeps,
   PluginsServiceSetupDeps,
 } from './plugins_service';
+
 import { InjectedPluginMetadata } from '../injected_metadata';
 import { notificationServiceMock } from '../notifications/notifications_service.mock';
 import { applicationServiceMock } from '../application/application_service.mock';
@@ -50,7 +50,7 @@ import { contextServiceMock } from '../context/context_service.mock';
 export let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;
 
 mockPluginInitializerProvider.mockImplementation(
-  pluginName => mockPluginInitializers.get(pluginName)!
+  (pluginName) => mockPluginInitializers.get(pluginName)!
 );
 
 let plugins: InjectedPluginMetadata[];
@@ -73,6 +73,7 @@ function createManifest(
     configPath: ['path'],
     requiredPlugins: required,
     optionalPlugins: optional,
+    requiredBundles: [],
   };
 }
 
@@ -91,7 +92,7 @@ describe('PluginsService', () => {
       context: contextServiceMock.createSetupContract(),
       fatalErrors: fatalErrorsServiceMock.createSetupContract(),
       http: httpServiceMock.createSetupContract(),
-      injectedMetadata: pick(injectedMetadataServiceMock.createStartContract(), 'getInjectedVar'),
+      injectedMetadata: injectedMetadataServiceMock.createStartContract(),
       notifications: notificationServiceMock.createSetupContract(),
       uiSettings: uiSettingsServiceMock.createSetupContract(),
     };
@@ -99,6 +100,7 @@ describe('PluginsService', () => {
       ...mockSetupDeps,
       application: expect.any(Object),
       getStartServices: expect.any(Function),
+      injectedMetadata: pick(mockSetupDeps.injectedMetadata, 'getInjectedVar'),
     };
     mockStartDeps = {
       application: applicationServiceMock.createInternalStartContract(),
@@ -106,7 +108,7 @@ describe('PluginsService', () => {
       http: httpServiceMock.createStartContract(),
       chrome: chromeServiceMock.createStartContract(),
       i18n: i18nServiceMock.createStartContract(),
-      injectedMetadata: pick(injectedMetadataServiceMock.createStartContract(), 'getInjectedVar'),
+      injectedMetadata: injectedMetadataServiceMock.createStartContract(),
       notifications: notificationServiceMock.createStartContract(),
       overlays: overlayServiceMock.createStartContract(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
@@ -117,6 +119,7 @@ describe('PluginsService', () => {
       ...mockStartDeps,
       application: expect.any(Object),
       chrome: omit(mockStartDeps.chrome, 'getComponent'),
+      injectedMetadata: pick(mockStartDeps.injectedMetadata, 'getInjectedVar'),
     };
 
     // Reset these for each test.
@@ -152,10 +155,6 @@ describe('PluginsService', () => {
     ] as unknown) as [[PluginName, any]]);
   });
 
-  afterEach(() => {
-    mockLoadPluginBundle.mockClear();
-  });
-
   describe('#getOpaqueIds()', () => {
     it('returns dependency tree of symbols', () => {
       const pluginsService = new PluginsService(mockCoreContext, plugins);
@@ -174,39 +173,11 @@ describe('PluginsService', () => {
   });
 
   describe('#setup()', () => {
-    it('fails if any bundle cannot be loaded', async () => {
-      mockLoadPluginBundle.mockRejectedValueOnce(new Error('Could not load bundle'));
-
-      const pluginsService = new PluginsService(mockCoreContext, plugins);
-      await expect(pluginsService.setup(mockSetupDeps)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Could not load bundle"`
-      );
-    });
-
     it('fails if any plugin instance does not have a setup function', async () => {
       mockPluginInitializers.set('pluginA', (() => ({})) as any);
       const pluginsService = new PluginsService(mockCoreContext, plugins);
       await expect(pluginsService.setup(mockSetupDeps)).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Instance of plugin \\"pluginA\\" does not define \\"setup\\" function."`
-      );
-    });
-
-    it('calls loadPluginBundles with http and plugins', async () => {
-      const pluginsService = new PluginsService(mockCoreContext, plugins);
-      await pluginsService.setup(mockSetupDeps);
-
-      expect(mockLoadPluginBundle).toHaveBeenCalledTimes(3);
-      expect(mockLoadPluginBundle).toHaveBeenCalledWith(
-        mockSetupDeps.http.basePath.prepend,
-        'pluginA'
-      );
-      expect(mockLoadPluginBundle).toHaveBeenCalledWith(
-        mockSetupDeps.http.basePath.prepend,
-        'pluginB'
-      );
-      expect(mockLoadPluginBundle).toHaveBeenCalledWith(
-        mockSetupDeps.http.basePath.prepend,
-        'pluginC'
       );
     });
 
@@ -282,7 +253,7 @@ describe('PluginsService', () => {
     });
 
     describe('timeout', () => {
-      const flushPromises = () => new Promise(resolve => setImmediate(resolve));
+      const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
       beforeAll(() => {
         jest.useFakeTimers();
       });
@@ -294,7 +265,7 @@ describe('PluginsService', () => {
         mockPluginInitializers.set(
           'pluginA',
           jest.fn(() => ({
-            setup: jest.fn(() => new Promise(i => i)),
+            setup: jest.fn(() => new Promise((i) => i)),
             start: jest.fn(() => ({ value: 1 })),
             stop: jest.fn(),
           }))
@@ -302,7 +273,6 @@ describe('PluginsService', () => {
         const pluginsService = new PluginsService(mockCoreContext, plugins);
         const promise = pluginsService.setup(mockSetupDeps);
 
-        jest.runAllTimers(); // load plugin bundles
         await flushPromises();
         jest.runAllTimers(); // setup plugins
 
@@ -376,7 +346,7 @@ describe('PluginsService', () => {
           'pluginA',
           jest.fn(() => ({
             setup: jest.fn(() => ({ value: 1 })),
-            start: jest.fn(() => new Promise(i => i)),
+            start: jest.fn(() => new Promise((i) => i)),
             stop: jest.fn(),
           }))
         );

@@ -10,7 +10,7 @@ import { EuiPageContent } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { MissingPrivileges } from '../../../../../common';
+import { MissingPrivileges } from '../../../../../common/types/privileges';
 
 import { SectionLoading } from '../../../components';
 
@@ -35,7 +35,7 @@ interface Props {
 export const WithPrivileges = ({ privileges: requiredPrivileges, children }: Props) => {
   const { isLoading, privileges } = useContext(AuthorizationContext);
 
-  const privilegesToArray: Privilege[] = toArray(requiredPrivileges).map(p => {
+  const privilegesToArray: Privilege[] = toArray(requiredPrivileges).map((p) => {
     const [section, privilege] = p.split('.');
     if (!privilege) {
       // Oh! we forgot to use the dot "." notation.

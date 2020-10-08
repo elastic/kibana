@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-const { set, get, isEmpty, forEach } = require('lodash');
-
-const isEmptyFilter = (filter = {}) => Boolean(filter.match_all) && isEmpty(filter.match_all);
+import _ from 'lodash';
+import { overwrite } from '../../helpers';
+const isEmptyFilter = (filter = {}) => Boolean(filter.match_all) && _.isEmpty(filter.match_all);
 const hasSiblingPipelineAggregation = (aggs = {}) => Object.keys(aggs).length > 1;
 
 /* Last query handler in the chain. You can use this handler
@@ -28,27 +28,27 @@ const hasSiblingPipelineAggregation = (aggs = {}) => Object.keys(aggs).length > 
  *
  */
 export function normalizeQuery() {
-  return () => doc => {
-    const series = get(doc, 'aggs.pivot.aggs');
+  return () => (doc) => {
+    const series = _.get(doc, 'aggs.pivot.aggs');
     const normalizedSeries = {};
 
-    forEach(series, (value, seriesId) => {
-      const filter = get(value, `filter`);
+    _.forEach(series, (value, seriesId) => {
+      const filter = _.get(value, `filter`);
 
       if (isEmptyFilter(filter) && !hasSiblingPipelineAggregation(value.aggs)) {
-        const agg = get(value, 'aggs.timeseries');
+        const agg = _.get(value, 'aggs.timeseries');
         const meta = {
-          ...get(value, 'meta'),
+          ..._.get(value, 'meta'),
           seriesId,
         };
-        set(normalizedSeries, `${seriesId}`, agg);
-        set(normalizedSeries, `${seriesId}.meta`, meta);
+        overwrite(normalizedSeries, `${seriesId}`, agg);
+        overwrite(normalizedSeries, `${seriesId}.meta`, meta);
       } else {
-        set(normalizedSeries, `${seriesId}`, value);
+        overwrite(normalizedSeries, `${seriesId}`, value);
       }
     });
 
-    set(doc, 'aggs.pivot.aggs', normalizedSeries);
+    overwrite(doc, 'aggs.pivot.aggs', normalizedSeries);
 
     return doc;
   };

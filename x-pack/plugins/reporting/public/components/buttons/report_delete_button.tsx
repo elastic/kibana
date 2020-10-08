@@ -83,7 +83,12 @@ export class ReportDeleteButton extends PureComponent<Props, State> {
 
     return (
       <Fragment>
-        <EuiButton onClick={() => this.showConfirm()} iconType="trash" color={'danger'}>
+        <EuiButton
+          onClick={() => this.showConfirm()}
+          iconType="trash"
+          color={'danger'}
+          data-test-subj="deleteReportButton"
+        >
           {intl.formatMessage(
             {
               id: 'xpack.reporting.listing.table.deleteReportButton',

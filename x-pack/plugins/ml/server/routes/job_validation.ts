@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { RequestHandlerContext } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
 import { AnalysisConfig } from '../../common/types/anomaly_detection_jobs';
 import { wrapError } from '../client/error_wrapper';
@@ -27,12 +27,12 @@ type CalculateModelMemoryLimitPayload = TypeOf<typeof modelMemoryLimitSchema>;
  */
 export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, version: string) {
   function calculateModelMemoryLimit(
-    context: RequestHandlerContext,
+    client: IScopedClusterClient,
     payload: CalculateModelMemoryLimitPayload
   ) {
     const { analysisConfig, indexPattern, query, timeFieldName, earliestMs, latestMs } = payload;
 
-    return calculateModelMemoryLimitProvider(context.ml!.mlClient.callAsCurrentUser)(
+    return calculateModelMemoryLimitProvider(client)(
       analysisConfig as AnalysisConfig,
       indexPattern,
       query,
@@ -57,15 +57,14 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
       validate: {
         body: estimateBucketSpanSchema,
       },
+      options: {
+        tags: ['access:ml:canCreateJob'],
+      },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         let errorResp;
-        const resp = await estimateBucketSpanFactory(
-          context.ml!.mlClient.callAsCurrentUser,
-          context.core.elasticsearch.adminClient.callAsInternalUser,
-          mlLicense.isSecurityEnabled() === false
-        )(request.body)
+        const resp = await estimateBucketSpanFactory(client)(request.body)
           // this catch gets triggered when the estimation code runs without error
           // but isn't able to come up with a bucket span estimation.
           // this doesn't return a HTTP error but an object with an error message
@@ -106,10 +105,13 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
       validate: {
         body: modelMemoryLimitSchema,
       },
+      options: {
+        tags: ['access:ml:canCreateJob'],
+      },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const resp = await calculateModelMemoryLimit(context, request.body);
+        const resp = await calculateModelMemoryLimit(client, request.body);
 
         return response.ok({
           body: resp,
@@ -135,13 +137,13 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
       validate: {
         body: validateCardinalitySchema,
       },
+      options: {
+        tags: ['access:ml:canCreateJob'],
+      },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const resp = await validateCardinality(
-          context.ml!.mlClient.callAsCurrentUser,
-          request.body
-        );
+        const resp = await validateCardinality(client, request.body);
 
         return response.ok({
           body: resp,
@@ -167,15 +169,17 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
       validate: {
         body: validateJobSchema,
       },
+      options: {
+        tags: ['access:ml:canCreateJob'],
+      },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         // version corresponds to the version used in documentation links.
         const resp = await validateJob(
-          context.ml!.mlClient.callAsCurrentUser,
+          client,
           request.body,
           version,
-          context.core.elasticsearch.adminClient.callAsInternalUser,
           mlLicense.isSecurityEnabled() === false
         );
 

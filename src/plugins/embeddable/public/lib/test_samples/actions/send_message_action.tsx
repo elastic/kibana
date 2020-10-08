@@ -57,7 +57,7 @@ export function createSendMessageAction(overlays: CoreStart['overlays']) {
         toMountPoint(
           <GetMessageModal
             onCancel={() => modal.close()}
-            onDone={message => {
+            onDone={(message) => {
               modal.close();
               sendMessage(context, message);
             }}

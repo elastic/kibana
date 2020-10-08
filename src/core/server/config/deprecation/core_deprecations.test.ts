@@ -17,9 +17,8 @@
  * under the License.
  */
 
+import { configDeprecationFactory, applyDeprecations } from '@kbn/config';
 import { coreDeprecationProvider } from './core_deprecations';
-import { configDeprecationFactory } from './deprecation_factory';
-import { applyDeprecations } from './apply_deprecations';
 
 const initialEnv = { ...process.env };
 
@@ -28,11 +27,11 @@ const applyCoreDeprecations = (settings: Record<string, any> = {}) => {
   const deprecationMessages: string[] = [];
   const migrated = applyDeprecations(
     settings,
-    deprecations.map(deprecation => ({
+    deprecations.map((deprecation) => ({
       deprecation,
       path: '',
     })),
-    msg => deprecationMessages.push(msg)
+    (msg) => deprecationMessages.push(msg)
   );
   return {
     messages: deprecationMessages,
@@ -51,7 +50,7 @@ describe('core deprecations', () => {
       const { messages } = applyCoreDeprecations();
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "Environment variable CONFIG_PATH is deprecated. It has been replaced with KIBANA_PATH_CONF pointing to a config folder",
+          "Environment variable CONFIG_PATH is deprecated. It has been replaced with KBN_PATH_CONF pointing to a config folder",
         ]
       `);
     });

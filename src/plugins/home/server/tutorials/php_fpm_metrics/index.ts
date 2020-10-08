@@ -36,6 +36,7 @@ export function phpfpmMetricsSpecProvider(context: TutorialContext): TutorialSch
     name: i18n.translate('home.tutorials.phpFpmMetrics.nameTitle', {
       defaultMessage: 'PHP-FPM metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     isBeta: false,
     shortDescription: i18n.translate('home.tutorials.phpFpmMetrics.shortDescription', {
@@ -63,7 +64,6 @@ export function phpfpmMetricsSpecProvider(context: TutorialContext): TutorialSch
       },
     },
     completionTimeMinutes: 10,
-    // previewImagePath: '/plugins/kibana/home/tutorial_resources/php_fpm_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),

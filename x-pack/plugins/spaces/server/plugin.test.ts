@@ -8,14 +8,14 @@ import { CoreSetup } from 'src/core/server';
 import { coreMock } from 'src/core/server/mocks';
 import { featuresPluginMock } from '../../features/server/mocks';
 import { licensingMock } from '../../licensing/server/mocks';
-import { Plugin, PluginsSetup } from './plugin';
+import { Plugin, PluginsStart } from './plugin';
 import { usageCollectionPluginMock } from '../../../../src/plugins/usage_collection/server/mocks';
 
 describe('Spaces Plugin', () => {
   describe('#setup', () => {
     it('can setup with all optional plugins disabled, exposing the expected contract', async () => {
       const initializerContext = coreMock.createPluginInitializerContext({});
-      const core = coreMock.createSetup() as CoreSetup<PluginsSetup>;
+      const core = coreMock.createSetup() as CoreSetup<PluginsStart>;
       const features = featuresPluginMock.createSetup();
       const licensing = licensingMock.createSetup();
 
@@ -23,10 +23,6 @@ describe('Spaces Plugin', () => {
       const spacesSetup = await plugin.setup(core, { features, licensing });
       expect(spacesSetup).toMatchInlineSnapshot(`
         Object {
-          "__legacyCompat": Object {
-            "createDefaultSpace": [Function],
-            "registerLegacyAPI": [Function],
-          },
           "spacesService": Object {
             "getActiveSpace": [Function],
             "getBasePath": [Function],
@@ -42,7 +38,7 @@ describe('Spaces Plugin', () => {
 
     it('registers the capabilities provider and switcher', async () => {
       const initializerContext = coreMock.createPluginInitializerContext({});
-      const core = coreMock.createSetup() as CoreSetup<PluginsSetup>;
+      const core = coreMock.createSetup() as CoreSetup<PluginsStart>;
       const features = featuresPluginMock.createSetup();
       const licensing = licensingMock.createSetup();
 
@@ -56,7 +52,7 @@ describe('Spaces Plugin', () => {
 
     it('registers the usage collector', async () => {
       const initializerContext = coreMock.createPluginInitializerContext({});
-      const core = coreMock.createSetup() as CoreSetup<PluginsSetup>;
+      const core = coreMock.createSetup() as CoreSetup<PluginsStart>;
       const features = featuresPluginMock.createSetup();
       const licensing = licensingMock.createSetup();
 
@@ -71,7 +67,7 @@ describe('Spaces Plugin', () => {
 
     it('registers the "space" saved object type and client wrapper', async () => {
       const initializerContext = coreMock.createPluginInitializerContext({});
-      const core = coreMock.createSetup() as CoreSetup<PluginsSetup>;
+      const core = coreMock.createSetup() as CoreSetup<PluginsStart>;
       const features = featuresPluginMock.createSetup();
       const licensing = licensingMock.createSetup();
 

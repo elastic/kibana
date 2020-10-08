@@ -39,7 +39,7 @@ export const GradientLegend: React.FC<Props> = ({ legend, bounds, formatter }) =
   const maxValue = legend.rules.reduce((acc, rule) => {
     return acc < rule.value ? rule.value : acc;
   }, 0);
-  const colorStops = legend.rules.map(rule => {
+  const colorStops = legend.rules.map((rule) => {
     const percent = (rule.value / maxValue) * 100;
     return `${rule.color} ${percent}%`;
   });
@@ -69,7 +69,7 @@ const GradientLegendTick = euiStyled.div`
 
 const GradientLegendTickLine = euiStyled.div`
   position: absolute;
-  background-color: ${props => props.theme.eui.euiBorderColor};
+  background-color: ${(props) => props.theme.eui.euiBorderColor};
   width: 1px;
   left: 0;
   top: 15px;

@@ -29,7 +29,7 @@ import { toPercentileNumber } from '../../../../../../plugins/vis_type_timeserie
 import { METRIC_TYPES } from '../../../../../../plugins/vis_type_timeseries/common/metric_types';
 
 function createTypeFilter(restrict, exclude) {
-  return metric => {
+  return (metric) => {
     if (includes(exclude, metric.type)) return false;
     switch (restrict) {
       case 'basic':
@@ -42,7 +42,7 @@ function createTypeFilter(restrict, exclude) {
 
 // This filters out sibling aggs, percentiles, and special aggs (like Series Agg)
 export function filterRows(includeSiblings) {
-  return row => {
+  return (row) => {
     if (includeSiblings) {
       return !/^series/.test(row.type) && !/^percentile/.test(row.type) && row.type !== 'math';
     }
@@ -78,13 +78,13 @@ function MetricSelectUi(props) {
   // could have multiple percentiles associated with it. So the user needs a way
   // to specify which percentile the want to use.
   const percentileOptions = siblings
-    .filter(row => /^percentile/.test(row.type))
+    .filter((row) => /^percentile/.test(row.type))
     .reduce((acc, row) => {
       const label = calculateLabel(row, calculatedMetrics);
 
       switch (row.type) {
         case METRIC_TYPES.PERCENTILE_RANK:
-          (row.values || []).forEach(p => {
+          (row.values || []).forEach((p) => {
             const value = toPercentileNumber(p);
 
             acc.push({
@@ -94,7 +94,7 @@ function MetricSelectUi(props) {
           });
 
         case METRIC_TYPES.PERCENTILE:
-          (row.percentiles || []).forEach(p => {
+          (row.percentiles || []).forEach((p) => {
             if (p.value) {
               const value = toPercentileNumber(p.value);
 
@@ -109,13 +109,13 @@ function MetricSelectUi(props) {
       return acc;
     }, []);
 
-  const options = siblings.filter(filterRows(includeSiblings)).map(row => {
+  const options = siblings.filter(filterRows(includeSiblings)).map((row) => {
     const label = calculateLabel(row, calculatedMetrics);
     return { value: row.id, label };
   });
   const allOptions = [...options, ...additionalOptions, ...percentileOptions];
 
-  const selectedOption = allOptions.find(option => {
+  const selectedOption = allOptions.find((option) => {
     return value === option.value;
   });
   const selectedOptions = selectedOption ? [selectedOption] : [];

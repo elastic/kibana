@@ -5,7 +5,7 @@
  */
 
 import { kibanaResponseFactory } from 'src/core/server';
-import { savedObjectsServiceMock } from 'src/core/server/saved_objects/saved_objects_service.mock';
+import { savedObjectsServiceMock } from 'src/core/server/mocks';
 import { createMockRouter, MockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
 import { createRequestMock } from './__mocks__/request.mock';
 
@@ -39,7 +39,7 @@ describe('Upgrade Assistant Telemetry API', () => {
   });
   afterEach(() => jest.clearAllMocks());
 
-  describe('PUT /api/upgrade_assistant/telemetry/ui_open', () => {
+  describe('PUT /api/upgrade_assistant/stats/ui_open', () => {
     it('returns correct payload with single option', async () => {
       const returnPayload = {
         overview: true,
@@ -51,7 +51,7 @@ describe('Upgrade Assistant Telemetry API', () => {
 
       const resp = await routeDependencies.router.getHandler({
         method: 'put',
-        pathPattern: '/api/upgrade_assistant/telemetry/ui_open',
+        pathPattern: '/api/upgrade_assistant/stats/ui_open',
       })(
         routeHandlerContextMock,
         createRequestMock({ body: returnPayload }),
@@ -72,7 +72,7 @@ describe('Upgrade Assistant Telemetry API', () => {
 
       const resp = await routeDependencies.router.getHandler({
         method: 'put',
-        pathPattern: '/api/upgrade_assistant/telemetry/ui_open',
+        pathPattern: '/api/upgrade_assistant/stats/ui_open',
       })(
         routeHandlerContextMock,
         createRequestMock({
@@ -93,7 +93,7 @@ describe('Upgrade Assistant Telemetry API', () => {
 
       const resp = await routeDependencies.router.getHandler({
         method: 'put',
-        pathPattern: '/api/upgrade_assistant/telemetry/ui_open',
+        pathPattern: '/api/upgrade_assistant/stats/ui_open',
       })(
         routeHandlerContextMock,
         createRequestMock({
@@ -108,7 +108,7 @@ describe('Upgrade Assistant Telemetry API', () => {
     });
   });
 
-  describe('PUT /api/upgrade_assistant/telemetry/ui_reindex', () => {
+  describe('PUT /api/upgrade_assistant/stats/ui_reindex', () => {
     it('returns correct payload with single option', async () => {
       const returnPayload = {
         close: false,
@@ -121,7 +121,7 @@ describe('Upgrade Assistant Telemetry API', () => {
 
       const resp = await routeDependencies.router.getHandler({
         method: 'put',
-        pathPattern: '/api/upgrade_assistant/telemetry/ui_reindex',
+        pathPattern: '/api/upgrade_assistant/stats/ui_reindex',
       })(
         routeHandlerContextMock,
         createRequestMock({
@@ -147,7 +147,7 @@ describe('Upgrade Assistant Telemetry API', () => {
 
       const resp = await routeDependencies.router.getHandler({
         method: 'put',
-        pathPattern: '/api/upgrade_assistant/telemetry/ui_reindex',
+        pathPattern: '/api/upgrade_assistant/stats/ui_reindex',
       })(
         routeHandlerContextMock,
         createRequestMock({
@@ -169,7 +169,7 @@ describe('Upgrade Assistant Telemetry API', () => {
 
       const resp = await routeDependencies.router.getHandler({
         method: 'put',
-        pathPattern: '/api/upgrade_assistant/telemetry/ui_reindex',
+        pathPattern: '/api/upgrade_assistant/stats/ui_reindex',
       })(
         routeHandlerContextMock,
         createRequestMock({

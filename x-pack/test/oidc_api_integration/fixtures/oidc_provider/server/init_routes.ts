@@ -4,16 +4,53 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../../../../../src/core/server';
 import { createTokens } from '../../oidc_tools';
 
 export function initRoutes(router: IRouter) {
   let nonce = '';
+  router.get(
+    {
+      path: '/oidc_provider/authorize',
+      validate: {
+        query: schema.object(
+          { redirect_uri: schema.string(), state: schema.string(), nonce: schema.string() },
+          { unknowns: 'ignore' }
+        ),
+      },
+      options: { authRequired: false },
+    },
+    async (context, request, response) => {
+      nonce = request.query.nonce;
+
+      return response.redirected({
+        headers: {
+          location: `${request.query.redirect_uri}?code=code1&state=${request.query.state}`,
+        },
+      });
+    }
+  );
+
+  router.get(
+    {
+      path: '/oidc_provider/endsession',
+      validate: {
+        query: schema.object({ post_logout_redirect_uri: schema.string() }, { unknowns: 'ignore' }),
+      },
+      options: { authRequired: false },
+    },
+    async (context, request, response) => {
+      return response.redirected({
+        headers: { location: request.query.post_logout_redirect_uri || '/' },
+      });
+    }
+  );
 
   router.post(
     {
       path: '/api/oidc_provider/setup',
-      validate: { body: value => ({ value }) },
+      validate: { body: (value) => ({ value }) },
       options: { authRequired: false },
     },
     (context, request, response) => {
@@ -25,7 +62,7 @@ export function initRoutes(router: IRouter) {
   router.post(
     {
       path: '/api/oidc_provider/token_endpoint',
-      validate: { body: value => ({ value }) },
+      validate: { body: (value) => ({ value }) },
       // Token endpoint needs authentication (with the client credentials) but we don't attempt to
       // validate this OIDC behavior here
       options: { authRequired: false, xsrfRequired: false },

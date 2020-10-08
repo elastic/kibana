@@ -5,7 +5,8 @@
  */
 
 import { useCallback, useMemo } from 'react';
-
+import { DatasetFilter } from '../../../../common/log_analysis';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { useModuleStatus } from './log_analysis_module_status';
 import { ModuleDescriptor, ModuleSourceConfiguration } from './log_analysis_module_types';
@@ -17,6 +18,7 @@ export const useLogAnalysisModule = <JobType extends string>({
   sourceConfiguration: ModuleSourceConfiguration;
   moduleDescriptor: ModuleDescriptor<JobType>;
 }) => {
+  const { services } = useKibanaContextForPlugin();
   const { spaceId, sourceId, timestampField } = sourceConfiguration;
   const [moduleStatus, dispatchModuleStatus] = useModuleStatus(moduleDescriptor.jobTypes);
 
@@ -25,9 +27,9 @@ export const useLogAnalysisModule = <JobType extends string>({
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
         dispatchModuleStatus({ type: 'fetchingJobStatuses' });
-        return await moduleDescriptor.getJobSummary(spaceId, sourceId);
+        return await moduleDescriptor.getJobSummary(spaceId, sourceId, services.http.fetch);
       },
-      onResolve: jobResponse => {
+      onResolve: (jobResponse) => {
         dispatchModuleStatus({
           type: 'fetchedJobStatuses',
           payload: jobResponse,
@@ -48,16 +50,27 @@ export const useLogAnalysisModule = <JobType extends string>({
       createPromise: async (
         selectedIndices: string[],
         start: number | undefined,
-        end: number | undefined
+        end: number | undefined,
+        datasetFilter: DatasetFilter
       ) => {
         dispatchModuleStatus({ type: 'startedSetup' });
-        const setupResult = await moduleDescriptor.setUpModule(start, end, {
-          indices: selectedIndices,
-          sourceId,
+        const setupResult = await moduleDescriptor.setUpModule(
+          start,
+          end,
+          datasetFilter,
+          {
+            indices: selectedIndices,
+            sourceId,
+            spaceId,
+            timestampField,
+          },
+          services.http.fetch
+        );
+        const jobSummaries = await moduleDescriptor.getJobSummary(
           spaceId,
-          timestampField,
-        });
-        const jobSummaries = await moduleDescriptor.getJobSummary(spaceId, sourceId);
+          sourceId,
+          services.http.fetch
+        );
         return { setupResult, jobSummaries };
       },
       onResolve: ({ setupResult: { datafeeds, jobs }, jobSummaries }) => {
@@ -81,7 +94,7 @@ export const useLogAnalysisModule = <JobType extends string>({
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
-        return await moduleDescriptor.cleanUpModule(spaceId, sourceId);
+        return await moduleDescriptor.cleanUpModule(spaceId, sourceId, services.http.fetch);
       },
     },
     [spaceId, sourceId]
@@ -92,11 +105,16 @@ export const useLogAnalysisModule = <JobType extends string>({
   ]);
 
   const cleanUpAndSetUpModule = useCallback(
-    (selectedIndices: string[], start: number | undefined, end: number | undefined) => {
+    (
+      selectedIndices: string[],
+      start: number | undefined,
+      end: number | undefined,
+      datasetFilter: DatasetFilter
+    ) => {
       dispatchModuleStatus({ type: 'startedSetup' });
       cleanUpModule()
         .then(() => {
-          setUpModule(selectedIndices, start, end);
+          setUpModule(selectedIndices, start, end, datasetFilter);
         })
         .catch(() => {
           dispatchModuleStatus({ type: 'failedSetup' });
@@ -104,14 +122,6 @@ export const useLogAnalysisModule = <JobType extends string>({
     },
     [cleanUpModule, dispatchModuleStatus, setUpModule]
   );
-
-  const viewSetupForReconfiguration = useCallback(() => {
-    dispatchModuleStatus({ type: 'requestedJobConfigurationUpdate' });
-  }, [dispatchModuleStatus]);
-
-  const viewSetupForUpdate = useCallback(() => {
-    dispatchModuleStatus({ type: 'requestedJobDefinitionUpdate' });
-  }, [dispatchModuleStatus]);
 
   const viewResults = useCallback(() => {
     dispatchModuleStatus({ type: 'viewedResults' });
@@ -137,7 +147,5 @@ export const useLogAnalysisModule = <JobType extends string>({
     setupStatus: moduleStatus.setupStatus,
     sourceConfiguration,
     viewResults,
-    viewSetupForReconfiguration,
-    viewSetupForUpdate,
   };
 };

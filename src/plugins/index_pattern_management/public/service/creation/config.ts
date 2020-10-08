@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { MatchedIndex } from '../../../../../legacy/core_plugins/kibana/public/management/sections/index_patterns/create_index_pattern_wizard/types';
+import { MatchedItem } from '../../components/create_index_pattern_wizard/types';
 
 const indexPatternTypeName = i18n.translate(
   'indexPatternManagement.editIndexPattern.createIndex.defaultTypeName',
@@ -74,15 +74,13 @@ export class IndexPatternCreationConfig {
     this.isBeta = isBeta;
   }
 
-  public async getIndexPatternCreationOption(
-    urlHandler: UrlHandler
-  ): Promise<IndexPatternCreationOption> {
+  public getIndexPatternCreationOption(urlHandler: UrlHandler): IndexPatternCreationOption {
     return {
       text: indexPatternButtonText,
       description: indexPatternButtonDescription,
       testSubj: `createStandardIndexPatternButton`,
       onClick: () => {
-        urlHandler('/management/kibana/index_pattern');
+        urlHandler('/create');
       },
     };
   }
@@ -107,7 +105,7 @@ export class IndexPatternCreationConfig {
     return [];
   }
 
-  public checkIndicesForErrors(indices: MatchedIndex[]) {
+  public checkIndicesForErrors(indices: MatchedItem[]) {
     return undefined;
   }
 

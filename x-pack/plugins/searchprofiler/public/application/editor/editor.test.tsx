@@ -14,7 +14,7 @@ describe('Editor Component', () => {
     const props: Props = {
       initialValue: '',
       licenseEnabled: true,
-      onEditorReady: e => {},
+      onEditorReady: (e) => {},
     };
     // Ignore the warning about Worker not existing for now...
     const init = registerTestBed(Editor);

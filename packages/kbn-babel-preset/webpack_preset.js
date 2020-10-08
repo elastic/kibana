@@ -33,8 +33,6 @@ module.exports = () => {
       require('./common_preset'),
     ],
     plugins: [
-      require.resolve('@babel/plugin-transform-modules-commonjs'),
-      require.resolve('@babel/plugin-syntax-dynamic-import'),
       [
         require.resolve('babel-plugin-styled-components'),
         {
@@ -42,5 +40,18 @@ module.exports = () => {
         },
       ],
     ],
+    env: {
+      production: {
+        plugins: [
+          [
+            require.resolve('babel-plugin-transform-react-remove-prop-types'),
+            {
+              mode: 'remove',
+              removeImport: true,
+            },
+          ],
+        ],
+      },
+    },
   };
 };

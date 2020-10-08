@@ -17,10 +17,10 @@ export class GrokdebuggerService {
       .post(`${ROUTES.API_ROOT}/simulate`, {
         body: JSON.stringify(grokdebuggerRequest.upstreamJSON),
       })
-      .then(response => {
+      .then((response) => {
         return GrokdebuggerResponse.fromUpstreamJSON(response);
       })
-      .catch(e => {
+      .catch((e) => {
         throw e.body.message;
       });
   }

@@ -3,39 +3,56 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ScopedClusterClient } from 'src/core/server';
+import { LegacyScopedClusterClient } from 'src/core/server';
 
 export {
   // Object types
   Agent,
+  AgentMetadata,
   AgentSOAttributes,
   AgentStatus,
   AgentType,
+  NewAgentEvent,
   AgentEvent,
   AgentEventSOAttributes,
   AgentAction,
+  AgentPolicyAction,
+  AgentPolicyActionV7_9,
+  BaseAgentActionSOAttributes,
   AgentActionSOAttributes,
-  Datasource,
-  NewDatasource,
-  FullAgentConfigDatasource,
-  FullAgentConfig,
-  AgentConfig,
-  NewAgentConfig,
-  AgentConfigStatus,
+  AgentPolicyActionSOAttributes,
+  PackagePolicy,
+  PackagePolicyInput,
+  PackagePolicyInputStream,
+  NewPackagePolicy,
+  UpdatePackagePolicy,
+  PackagePolicySOAttributes,
+  FullAgentPolicyInput,
+  FullAgentPolicy,
+  AgentPolicy,
+  AgentPolicySOAttributes,
+  NewAgentPolicy,
+  AgentPolicyStatus,
+  DataStream,
   Output,
   NewOutput,
+  OutputSOAttributes,
   OutputType,
   EnrollmentAPIKey,
   EnrollmentAPIKeySOAttributes,
   Installation,
+  EpmPackageInstallStatus,
   InstallationStatus,
   PackageInfo,
   RegistryVarsEntry,
-  Dataset,
+  RegistryDataStream,
+  RegistryElasticsearch,
   AssetReference,
+  EsAssetReference,
+  KibanaAssetReference,
   ElasticsearchAssetType,
-  IngestAssetType,
   RegistryPackage,
+  InstallablePackage,
   AssetType,
   Installable,
   KibanaAssetType,
@@ -47,13 +64,22 @@ export {
   RegistrySearchResults,
   RegistrySearchResult,
   DefaultPackages,
+  TemplateRef,
+  IndexTemplateMappings,
+  Settings,
+  SettingsSOAttributes,
+  InstallType,
+  InstallSource,
+  // Agent Request types
+  PostAgentEnrollRequest,
+  PostAgentCheckinRequest,
 } from '../../common';
 
-export type CallESAsCurrentUser = ScopedClusterClient['callAsCurrentUser'];
+export type CallESAsCurrentUser = LegacyScopedClusterClient['callAsCurrentUser'];
 
-export type AgentConfigUpdateHandler = (
+export type AgentPolicyUpdateHandler = (
   action: 'created' | 'updated' | 'deleted',
-  agentConfigId: string
+  agentPolicyId: string
 ) => Promise<void>;
 
 export * from './models';

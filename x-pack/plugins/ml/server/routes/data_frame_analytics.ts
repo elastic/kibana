@@ -4,21 +4,60 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { RequestHandlerContext, IScopedClusterClient } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
 import { RouteInitialization } from '../types';
 import {
   dataAnalyticsJobConfigSchema,
+  dataAnalyticsJobUpdateSchema,
   dataAnalyticsEvaluateSchema,
   dataAnalyticsExplainSchema,
   analyticsIdSchema,
   stopsDataFrameAnalyticsJobQuerySchema,
+  deleteDataFrameAnalyticsJobSchema,
 } from './schemas/data_analytics_schema';
+import { IndexPatternHandler } from '../models/data_frame_analytics/index_patterns';
+import { DeleteDataFrameAnalyticsWithIndexStatus } from '../../common/types/data_frame_analytics';
+import { getAuthorizationHeader } from '../lib/request_authorization';
+import { analyticsFeatureImportanceProvider } from '../models/data_frame_analytics/feature_importance';
+
+function getIndexPatternId(context: RequestHandlerContext, patternName: string) {
+  const iph = new IndexPatternHandler(context.core.savedObjects.client);
+  return iph.getIndexPatternId(patternName);
+}
+
+function deleteDestIndexPatternById(context: RequestHandlerContext, indexPatternId: string) {
+  const iph = new IndexPatternHandler(context.core.savedObjects.client);
+  return iph.deleteIndexPatternById(indexPatternId);
+}
 
 /**
  * Routes for the data frame analytics
  */
 export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitialization) {
+  async function userCanDeleteIndex(
+    client: IScopedClusterClient,
+    destinationIndex: string
+  ): Promise<boolean> {
+    if (!mlLicense.isSecurityEnabled()) {
+      return true;
+    }
+
+    const { body } = await client.asCurrentUser.security.hasPrivileges({
+      body: {
+        index: [
+          {
+            names: [destinationIndex], // uses wildcard
+            privileges: ['delete_index'],
+          },
+        ],
+      },
+    });
+
+    return body?.has_all_requested === true;
+  }
+
   /**
    * @apiGroup DataFrameAnalytics
    *
@@ -33,12 +72,15 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
     {
       path: '/api/ml/data_frame/analytics',
       validate: false,
+      options: {
+        tags: ['access:ml:canGetDataFrameAnalytics'],
+      },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, response }) => {
       try {
-        const results = await context.ml!.mlClient.callAsCurrentUser('ml.getDataFrameAnalytics');
+        const { body } = await client.asInternalUser.ml.getDataFrameAnalytics({ size: 1000 });
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -61,15 +103,18 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
       validate: {
         params: analyticsIdSchema,
       },
+      options: {
+        tags: ['access:ml:canGetDataFrameAnalytics'],
+      },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const { analyticsId } = request.params;
-        const results = await context.ml!.mlClient.callAsCurrentUser('ml.getDataFrameAnalytics', {
-          analyticsId,
+        const { body } = await client.asInternalUser.ml.getDataFrameAnalytics({
+          id: analyticsId,
         });
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -88,14 +133,15 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
     {
       path: '/api/ml/data_frame/analytics/_stats',
       validate: false,
+      options: {
+        tags: ['access:ml:canGetDataFrameAnalytics'],
+      },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, response }) => {
       try {
-        const results = await context.ml!.mlClient.callAsCurrentUser(
-          'ml.getDataFrameAnalyticsStats'
-        );
+        const { body } = await client.asInternalUser.ml.getDataFrameAnalyticsStats({ size: 1000 });
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -118,18 +164,18 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
       validate: {
         params: analyticsIdSchema,
       },
+      options: {
+        tags: ['access:ml:canGetDataFrameAnalytics'],
+      },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const { analyticsId } = request.params;
-        const results = await context.ml!.mlClient.callAsCurrentUser(
-          'ml.getDataFrameAnalyticsStats',
-          {
-            analyticsId,
-          }
-        );
+        const { body } = await client.asInternalUser.ml.getDataFrameAnalyticsStats({
+          id: analyticsId,
+        });
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -155,19 +201,22 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         params: analyticsIdSchema,
         body: dataAnalyticsJobConfigSchema,
       },
+      options: {
+        tags: ['access:ml:canCreateDataFrameAnalytics'],
+      },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const { analyticsId } = request.params;
-        const results = await context.ml!.mlClient.callAsCurrentUser(
-          'ml.createDataFrameAnalytics',
+        const { body } = await client.asInternalUser.ml.putDataFrameAnalytics(
           {
+            id: analyticsId,
             body: request.body,
-            analyticsId,
-          }
+          },
+          getAuthorizationHeader(request)
         );
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -190,17 +239,20 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
       validate: {
         body: dataAnalyticsEvaluateSchema,
       },
+      options: {
+        tags: ['access:ml:canGetDataFrameAnalytics'],
+      },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const results = await context.ml!.mlClient.callAsCurrentUser(
-          'ml.evaluateDataFrameAnalytics',
+        const { body } = await client.asInternalUser.ml.evaluateDataFrame(
           {
             body: request.body,
-          }
+          },
+          getAuthorizationHeader(request)
         );
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -224,17 +276,20 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
       validate: {
         body: dataAnalyticsExplainSchema,
       },
+      options: {
+        tags: ['access:ml:canCreateDataFrameAnalytics'],
+      },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const results = await context.ml!.mlClient.callAsCurrentUser(
-          'ml.explainDataFrameAnalytics',
+        const { body } = await client.asInternalUser.ml.explainDataFrameAnalytics(
           {
             body: request.body,
-          }
+          },
+          getAuthorizationHeader(request)
         );
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -256,17 +311,85 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
       path: '/api/ml/data_frame/analytics/{analyticsId}',
       validate: {
         params: analyticsIdSchema,
+        query: deleteDataFrameAnalyticsJobSchema,
+      },
+      options: {
+        tags: ['access:ml:canDeleteDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response, context }) => {
       try {
         const { analyticsId } = request.params;
-        const results = await context.ml!.mlClient.callAsCurrentUser(
-          'ml.deleteDataFrameAnalytics',
-          {
-            analyticsId,
+        const { deleteDestIndex, deleteDestIndexPattern } = request.query;
+        let destinationIndex: string | undefined;
+        const analyticsJobDeleted: DeleteDataFrameAnalyticsWithIndexStatus = { success: false };
+        const destIndexDeleted: DeleteDataFrameAnalyticsWithIndexStatus = { success: false };
+        const destIndexPatternDeleted: DeleteDataFrameAnalyticsWithIndexStatus = {
+          success: false,
+        };
+
+        try {
+          // Check if analyticsId is valid and get destination index
+          const { body } = await client.asInternalUser.ml.getDataFrameAnalytics({
+            id: analyticsId,
+          });
+          if (Array.isArray(body.data_frame_analytics) && body.data_frame_analytics.length > 0) {
+            destinationIndex = body.data_frame_analytics[0].dest.index;
           }
-        );
+        } catch (e) {
+          // exist early if the job doesn't exist
+          return response.customError(wrapError(e));
+        }
+
+        if (deleteDestIndex || deleteDestIndexPattern) {
+          // If user checks box to delete the destinationIndex associated with the job
+          if (destinationIndex && deleteDestIndex) {
+            // Verify if user has privilege to delete the destination index
+            const userCanDeleteDestIndex = await userCanDeleteIndex(client, destinationIndex);
+            // If user does have privilege to delete the index, then delete the index
+            if (userCanDeleteDestIndex) {
+              try {
+                await client.asCurrentUser.indices.delete({
+                  index: destinationIndex,
+                });
+                destIndexDeleted.success = true;
+              } catch ({ body }) {
+                destIndexDeleted.error = body;
+              }
+            } else {
+              return response.forbidden();
+            }
+          }
+
+          // Delete the index pattern if there's an index pattern that matches the name of dest index
+          if (destinationIndex && deleteDestIndexPattern) {
+            try {
+              const indexPatternId = await getIndexPatternId(context, destinationIndex);
+              if (indexPatternId) {
+                await deleteDestIndexPatternById(context, indexPatternId);
+              }
+              destIndexPatternDeleted.success = true;
+            } catch (deleteDestIndexPatternError) {
+              destIndexPatternDeleted.error = deleteDestIndexPatternError;
+            }
+          }
+        }
+        // Grab the target index from the data frame analytics job id
+        // Delete the data frame analytics
+
+        try {
+          await client.asInternalUser.ml.deleteDataFrameAnalytics({
+            id: analyticsId,
+          });
+          analyticsJobDeleted.success = true;
+        } catch ({ body }) {
+          analyticsJobDeleted.error = body;
+        }
+        const results = {
+          analyticsJobDeleted,
+          destIndexDeleted,
+          destIndexPatternDeleted,
+        };
         return response.ok({
           body: results,
         });
@@ -291,15 +414,18 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
       validate: {
         params: analyticsIdSchema,
       },
+      options: {
+        tags: ['access:ml:canStartStopDataFrameAnalytics'],
+      },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const { analyticsId } = request.params;
-        const results = await context.ml!.mlClient.callAsCurrentUser('ml.startDataFrameAnalytics', {
-          analyticsId,
+        const { body } = await client.asInternalUser.ml.startDataFrameAnalytics({
+          id: analyticsId,
         });
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -324,24 +450,63 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         params: analyticsIdSchema,
         query: stopsDataFrameAnalyticsJobQuerySchema,
       },
+      options: {
+        tags: ['access:ml:canStartStopDataFrameAnalytics'],
+      },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const options: { analyticsId: string; force?: boolean | undefined } = {
-          analyticsId: request.params.analyticsId,
+        const options: { id: string; force?: boolean | undefined } = {
+          id: request.params.analyticsId,
         };
-        // @ts-ignore TODO: update types
+        // @ts-expect-error TODO: update types
         if (request.url?.query?.force !== undefined) {
-          // @ts-ignore TODO: update types
+          // @ts-expect-error TODO: update types
           options.force = request.url.query.force;
         }
 
-        const results = await context.ml!.mlClient.callAsCurrentUser(
-          'ml.stopDataFrameAnalytics',
-          options
+        const { body } = await client.asInternalUser.ml.stopDataFrameAnalytics(options);
+        return response.ok({
+          body,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup DataFrameAnalytics
+   *
+   * @api {post} /api/ml/data_frame/analytics/:analyticsId/_update Update specified analytics job
+   * @apiName UpdateDataFrameAnalyticsJob
+   * @apiDescription Updates a data frame analytics job.
+   *
+   * @apiSchema (params) analyticsIdSchema
+   */
+  router.post(
+    {
+      path: '/api/ml/data_frame/analytics/{analyticsId}/_update',
+      validate: {
+        params: analyticsIdSchema,
+        body: dataAnalyticsJobUpdateSchema,
+      },
+      options: {
+        tags: ['access:ml:canCreateDataFrameAnalytics'],
+      },
+    },
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+      try {
+        const { analyticsId } = request.params;
+        const { body } = await client.asInternalUser.ml.updateDataFrameAnalytics(
+          {
+            id: analyticsId,
+            body: request.body,
+          },
+          getAuthorizationHeader(request)
         );
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -364,17 +529,52 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
       validate: {
         params: analyticsIdSchema,
       },
+      options: {
+        tags: ['access:ml:canGetDataFrameAnalytics'],
+      },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const { analyticsId } = request.params;
-        const { getAnalyticsAuditMessages } = analyticsAuditMessagesProvider(
-          context.ml!.mlClient.callAsCurrentUser
-        );
+        const { getAnalyticsAuditMessages } = analyticsAuditMessagesProvider(client);
 
         const results = await getAnalyticsAuditMessages(analyticsId);
         return response.ok({
           body: results,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup DataFrameAnalytics
+   *
+   * @api {get} /api/ml/data_frame/analytics/baseline Get analytics's feature importance baseline
+   * @apiName GetDataFrameAnalyticsBaseline
+   * @apiDescription Returns the baseline for data frame analytics job.
+   *
+   * @apiSchema (params) analyticsIdSchema
+   */
+  router.post(
+    {
+      path: '/api/ml/data_frame/analytics/{analyticsId}/baseline',
+      validate: {
+        params: analyticsIdSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetDataFrameAnalytics'],
+      },
+    },
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+      try {
+        const { analyticsId } = request.params;
+        const { getRegressionAnalyticsBaseline } = analyticsFeatureImportanceProvider(client);
+        const baseline = await getRegressionAnalyticsBaseline(analyticsId);
+
+        return response.ok({
+          body: { baseline },
         });
       } catch (e) {
         return response.customError(wrapError(e));

@@ -37,24 +37,24 @@ class KuiCheckBoxExample extends Component {
       <div>
         <KuiCheckBox
           isChecked={this.state.value1}
-          onChange={event => this.handleChange(event, 'value1')}
+          onChange={(event) => this.handleChange(event, 'value1')}
         />
         <hr className="guideBreak" />
         <KuiCheckBox
           isChecked={this.state.value2}
-          onChange={event => this.handleChange(event, 'value2')}
+          onChange={(event) => this.handleChange(event, 'value2')}
         />
         <hr className="guideBreak" />
         <KuiCheckBox
           isChecked={this.state.value3}
-          onChange={event => this.handleChange(event, 'value3')}
+          onChange={(event) => this.handleChange(event, 'value3')}
           isDisabled
         />
         <hr className="guideBreak" />
         <KuiCheckBoxLabel
           text="With clickable label"
           isChecked={this.state.value4}
-          onChange={event => this.handleChange(event, 'value4')}
+          onChange={(event) => this.handleChange(event, 'value4')}
         />
       </div>
     );

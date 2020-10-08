@@ -31,7 +31,7 @@ test.onFinish(() => {
   delete Object.prototype.POLLUTED;
 });
 
-test('test setup ok', t => {
+test('test setup ok', (t) => {
   t.equal({}.POLLUTED, 'polluted!');
   t.end();
 });
@@ -41,7 +41,7 @@ test('test setup ok', t => {
 // newer versions. See https://github.com/elastic/kibana/issues/59628
 const functions = ['exec', 'execFile', 'spawn', 'execFileSync', 'execSync', 'spawnSync'];
 for (const name of functions) {
-  test(`${name}()`, t => {
+  test(`${name}()`, (t) => {
     t.throws(() => cp[name](), /argument must be of type string/);
     t.end();
   });
@@ -50,11 +50,11 @@ for (const name of functions) {
 {
   const command = 'echo $POLLUTED$custom';
 
-  test('exec(command)', t => {
+  test('exec(command)', (t) => {
     assertProcess(t, cp.exec(command));
   });
 
-  test('exec(command, callback)', t => {
+  test('exec(command, callback)', (t) => {
     cp.exec(command, (err, stdout, stderr) => {
       t.error(err);
       t.equal(stdout.trim(), '');
@@ -63,15 +63,15 @@ for (const name of functions) {
     });
   });
 
-  test('exec(command, options)', t => {
+  test('exec(command, options)', (t) => {
     assertProcess(t, cp.exec(command, {}));
   });
 
-  test('exec(command, options) - with custom env', t => {
+  test('exec(command, options) - with custom env', (t) => {
     assertProcess(t, cp.exec(command, { env: { custom: 'custom' } }), { stdout: 'custom' });
   });
 
-  test('exec(command, options, callback)', t => {
+  test('exec(command, options, callback)', (t) => {
     cp.exec(command, {}, (err, stdout, stderr) => {
       t.error(err);
       t.equal(stdout.trim(), '');
@@ -80,7 +80,7 @@ for (const name of functions) {
     });
   });
 
-  test('exec(command, options, callback) - with custom env', t => {
+  test('exec(command, options, callback) - with custom env', (t) => {
     cp.exec(command, { env: { custom: 'custom' } }, (err, stdout, stderr) => {
       t.error(err);
       t.equal(stdout.trim(), 'custom');
@@ -90,11 +90,11 @@ for (const name of functions) {
   });
 
   for (const unset of notSet) {
-    test(`exec(command, ${unset})`, t => {
+    test(`exec(command, ${unset})`, (t) => {
       assertProcess(t, cp.exec(command, unset));
     });
 
-    test(`exec(command, ${unset}, callback)`, t => {
+    test(`exec(command, ${unset}, callback)`, (t) => {
       cp.exec(command, unset, (err, stdout, stderr) => {
         t.error(err);
         t.equal(stdout.trim(), '');
@@ -108,15 +108,15 @@ for (const name of functions) {
 {
   const file = path.join('test', 'harden', '_echo.sh');
 
-  test('execFile(file)', t => {
+  test('execFile(file)', (t) => {
     assertProcess(t, cp.execFile(file));
   });
 
-  test('execFile(file, args)', t => {
+  test('execFile(file, args)', (t) => {
     assertProcess(t, cp.execFile(file, []));
   });
 
-  test('execFile(file, callback)', t => {
+  test('execFile(file, callback)', (t) => {
     cp.execFile(file, (err, stdout, stderr) => {
       t.error(err);
       t.equal(stdout.trim(), '');
@@ -125,15 +125,15 @@ for (const name of functions) {
     });
   });
 
-  test('execFile(file, options)', t => {
+  test('execFile(file, options)', (t) => {
     assertProcess(t, cp.execFile(file, {}));
   });
 
-  test('execFile(file, options) - with custom env', t => {
+  test('execFile(file, options) - with custom env', (t) => {
     assertProcess(t, cp.execFile(file, { env: { custom: 'custom' } }), { stdout: 'custom' });
   });
 
-  test('execFile(file, options, callback)', t => {
+  test('execFile(file, options, callback)', (t) => {
     cp.execFile(file, {}, (err, stdout, stderr) => {
       t.error(err);
       t.equal(stdout.trim(), '');
@@ -142,7 +142,7 @@ for (const name of functions) {
     });
   });
 
-  test('execFile(file, options, callback) - with custom env', t => {
+  test('execFile(file, options, callback) - with custom env', (t) => {
     cp.execFile(file, { env: { custom: 'custom' } }, (err, stdout, stderr) => {
       t.error(err);
       t.equal(stdout.trim(), 'custom');
@@ -151,7 +151,7 @@ for (const name of functions) {
     });
   });
 
-  test('execFile(file, args, callback)', t => {
+  test('execFile(file, args, callback)', (t) => {
     cp.execFile(file, [], (err, stdout, stderr) => {
       t.error(err);
       t.equal(stdout.trim(), '');
@@ -160,15 +160,15 @@ for (const name of functions) {
     });
   });
 
-  test('execFile(file, args, options)', t => {
+  test('execFile(file, args, options)', (t) => {
     assertProcess(t, cp.execFile(file, [], {}));
   });
 
-  test('execFile(file, args, options) - with custom env', t => {
+  test('execFile(file, args, options) - with custom env', (t) => {
     assertProcess(t, cp.execFile(file, [], { env: { custom: 'custom' } }), { stdout: 'custom' });
   });
 
-  test('execFile(file, args, options, callback)', t => {
+  test('execFile(file, args, options, callback)', (t) => {
     cp.execFile(file, [], {}, (err, stdout, stderr) => {
       t.error(err);
       t.equal(stdout.trim(), '');
@@ -177,7 +177,7 @@ for (const name of functions) {
     });
   });
 
-  test('execFile(file, args, options, callback) - with custom env', t => {
+  test('execFile(file, args, options, callback) - with custom env', (t) => {
     cp.execFile(file, [], { env: { custom: 'custom' } }, (err, stdout, stderr) => {
       t.error(err);
       t.equal(stdout.trim(), 'custom');
@@ -187,15 +187,15 @@ for (const name of functions) {
   });
 
   for (const unset of notSet) {
-    test(`execFile(file, ${unset})`, t => {
+    test(`execFile(file, ${unset})`, (t) => {
       assertProcess(t, cp.execFile(file, unset));
     });
 
-    test(`execFile(file, ${unset}, ${unset})`, t => {
+    test(`execFile(file, ${unset}, ${unset})`, (t) => {
       assertProcess(t, cp.execFile(file, unset, unset));
     });
 
-    test(`execFile(file, ${unset}, callback)`, t => {
+    test(`execFile(file, ${unset}, callback)`, (t) => {
       cp.execFile(file, unset, (err, stdout, stderr) => {
         t.error(err);
         t.equal(stdout.trim(), '');
@@ -204,7 +204,7 @@ for (const name of functions) {
       });
     });
 
-    test(`execFile(file, ${unset}, ${unset}, callback)`, t => {
+    test(`execFile(file, ${unset}, ${unset}, callback)`, (t) => {
       cp.execFile(file, unset, unset, (err, stdout, stderr) => {
         t.error(err);
         t.equal(stdout.trim(), '');
@@ -213,7 +213,7 @@ for (const name of functions) {
       });
     });
 
-    test(`execFile(file, ${unset}, options)`, t => {
+    test(`execFile(file, ${unset}, options)`, (t) => {
       assertProcess(t, cp.execFile(file, unset, {}));
     });
   }
@@ -223,16 +223,16 @@ for (const name of functions) {
   const modulePath = path.join('test', 'harden', '_fork.js');
 
   // NOTE: Forked processes don't have any stdout we can monitor without providing options
-  test.skip('fork(modulePath)', t => {
+  test.skip('fork(modulePath)', (t) => {
     assertProcess(t, cp.fork(modulePath));
   });
 
   // NOTE: Forked processes don't have any stdout we can monitor without providing options
-  test.skip('execFile(file, args)', t => {
+  test.skip('execFile(file, args)', (t) => {
     assertProcess(t, cp.fork(modulePath, []));
   });
 
-  test('fork(modulePath, options)', t => {
+  test('fork(modulePath, options)', (t) => {
     assertProcess(
       t,
       cp.fork(modulePath, {
@@ -241,7 +241,7 @@ for (const name of functions) {
     );
   });
 
-  test('fork(modulePath, options) - with custom env', t => {
+  test('fork(modulePath, options) - with custom env', (t) => {
     assertProcess(
       t,
       cp.fork(modulePath, {
@@ -252,7 +252,7 @@ for (const name of functions) {
     );
   });
 
-  test('fork(modulePath, args, options)', t => {
+  test('fork(modulePath, args, options)', (t) => {
     assertProcess(
       t,
       cp.fork(modulePath, [], {
@@ -261,7 +261,7 @@ for (const name of functions) {
     );
   });
 
-  test('fork(modulePath, args, options) - with custom env', t => {
+  test('fork(modulePath, args, options) - with custom env', (t) => {
     assertProcess(
       t,
       cp.fork(modulePath, [], {
@@ -274,16 +274,16 @@ for (const name of functions) {
 
   for (const unset of notSet) {
     // NOTE: Forked processes don't have any stdout we can monitor without providing options
-    test.skip(`fork(modulePath, ${unset})`, t => {
+    test.skip(`fork(modulePath, ${unset})`, (t) => {
       assertProcess(t, cp.fork(modulePath, unset));
     });
 
     // NOTE: Forked processes don't have any stdout we can monitor without providing options
-    test.skip(`fork(modulePath, ${unset}, ${unset})`, t => {
+    test.skip(`fork(modulePath, ${unset}, ${unset})`, (t) => {
       assertProcess(t, cp.fork(modulePath, unset, unset));
     });
 
-    test(`fork(modulePath, ${unset}, options)`, t => {
+    test(`fork(modulePath, ${unset}, options)`, (t) => {
       assertProcess(
         t,
         cp.fork(modulePath, unset, {
@@ -297,40 +297,40 @@ for (const name of functions) {
 {
   const command = path.join('test', 'harden', '_echo.sh');
 
-  test('spawn(command)', t => {
+  test('spawn(command)', (t) => {
     assertProcess(t, cp.spawn(command));
   });
 
-  test('spawn(command, args)', t => {
+  test('spawn(command, args)', (t) => {
     assertProcess(t, cp.spawn(command, []));
   });
 
-  test('spawn(command, options)', t => {
+  test('spawn(command, options)', (t) => {
     assertProcess(t, cp.spawn(command, {}));
   });
 
-  test('spawn(command, options) - with custom env', t => {
+  test('spawn(command, options) - with custom env', (t) => {
     assertProcess(t, cp.spawn(command, { env: { custom: 'custom' } }), { stdout: 'custom' });
   });
 
-  test('spawn(command, args, options)', t => {
+  test('spawn(command, args, options)', (t) => {
     assertProcess(t, cp.spawn(command, [], {}));
   });
 
-  test('spawn(command, args, options) - with custom env', t => {
+  test('spawn(command, args, options) - with custom env', (t) => {
     assertProcess(t, cp.spawn(command, [], { env: { custom: 'custom' } }), { stdout: 'custom' });
   });
 
   for (const unset of notSet) {
-    test(`spawn(command, ${unset})`, t => {
+    test(`spawn(command, ${unset})`, (t) => {
       assertProcess(t, cp.spawn(command, unset));
     });
 
-    test(`spawn(command, ${unset}, ${unset})`, t => {
+    test(`spawn(command, ${unset}, ${unset})`, (t) => {
       assertProcess(t, cp.spawn(command, unset, unset));
     });
 
-    test(`spawn(command, ${unset}, options)`, t => {
+    test(`spawn(command, ${unset}, options)`, (t) => {
       assertProcess(t, cp.spawn(command, unset, {}));
     });
   }
@@ -339,40 +339,22 @@ for (const name of functions) {
 {
   const file = path.join('test', 'harden', '_echo.sh');
 
-  test('execFileSync(file)', t => {
-    t.equal(
-      cp
-        .execFileSync(file)
-        .toString()
-        .trim(),
-      ''
-    );
+  test('execFileSync(file)', (t) => {
+    t.equal(cp.execFileSync(file).toString().trim(), '');
     t.end();
   });
 
-  test('execFileSync(file, args)', t => {
-    t.equal(
-      cp
-        .execFileSync(file, [])
-        .toString()
-        .trim(),
-      ''
-    );
+  test('execFileSync(file, args)', (t) => {
+    t.equal(cp.execFileSync(file, []).toString().trim(), '');
     t.end();
   });
 
-  test('execFileSync(file, options)', t => {
-    t.equal(
-      cp
-        .execFileSync(file, {})
-        .toString()
-        .trim(),
-      ''
-    );
+  test('execFileSync(file, options)', (t) => {
+    t.equal(cp.execFileSync(file, {}).toString().trim(), '');
     t.end();
   });
 
-  test('execFileSync(file, options) - with custom env', t => {
+  test('execFileSync(file, options) - with custom env', (t) => {
     t.equal(
       cp
         .execFileSync(file, { env: { custom: 'custom' } })
@@ -383,18 +365,12 @@ for (const name of functions) {
     t.end();
   });
 
-  test('execFileSync(file, args, options)', t => {
-    t.equal(
-      cp
-        .execFileSync(file, [], {})
-        .toString()
-        .trim(),
-      ''
-    );
+  test('execFileSync(file, args, options)', (t) => {
+    t.equal(cp.execFileSync(file, [], {}).toString().trim(), '');
     t.end();
   });
 
-  test('execFileSync(file, args, options) - with custom env', t => {
+  test('execFileSync(file, args, options) - with custom env', (t) => {
     t.equal(
       cp
         .execFileSync(file, [], { env: { custom: 'custom' } })
@@ -406,36 +382,18 @@ for (const name of functions) {
   });
 
   for (const unset of notSet) {
-    test(`execFileSync(file, ${unset})`, t => {
-      t.equal(
-        cp
-          .execFileSync(file, unset)
-          .toString()
-          .trim(),
-        ''
-      );
+    test(`execFileSync(file, ${unset})`, (t) => {
+      t.equal(cp.execFileSync(file, unset).toString().trim(), '');
       t.end();
     });
 
-    test(`execFileSync(file, ${unset}, ${unset})`, t => {
-      t.equal(
-        cp
-          .execFileSync(file, unset, unset)
-          .toString()
-          .trim(),
-        ''
-      );
+    test(`execFileSync(file, ${unset}, ${unset})`, (t) => {
+      t.equal(cp.execFileSync(file, unset, unset).toString().trim(), '');
       t.end();
     });
 
-    test(`execFileSync(file, ${unset}, options)`, t => {
-      t.equal(
-        cp
-          .execFileSync(file, unset, {})
-          .toString()
-          .trim(),
-        ''
-      );
+    test(`execFileSync(file, ${unset}, options)`, (t) => {
+      t.equal(cp.execFileSync(file, unset, {}).toString().trim(), '');
       t.end();
     });
   }
@@ -444,29 +402,17 @@ for (const name of functions) {
 {
   const command = 'echo $POLLUTED$custom';
 
-  test('execSync(command)', t => {
-    t.equal(
-      cp
-        .execSync(command)
-        .toString()
-        .trim(),
-      ''
-    );
+  test('execSync(command)', (t) => {
+    t.equal(cp.execSync(command).toString().trim(), '');
     t.end();
   });
 
-  test('execSync(command, options)', t => {
-    t.equal(
-      cp
-        .execSync(command, {})
-        .toString()
-        .trim(),
-      ''
-    );
+  test('execSync(command, options)', (t) => {
+    t.equal(cp.execSync(command, {}).toString().trim(), '');
     t.end();
   });
 
-  test('execSync(command, options) - with custom env', t => {
+  test('execSync(command, options) - with custom env', (t) => {
     t.equal(
       cp
         .execSync(command, { env: { custom: 'custom' } })
@@ -478,14 +424,8 @@ for (const name of functions) {
   });
 
   for (const unset of notSet) {
-    test(`execSync(command, ${unset})`, t => {
-      t.equal(
-        cp
-          .execSync(command, unset)
-          .toString()
-          .trim(),
-        ''
-      );
+    test(`execSync(command, ${unset})`, (t) => {
+      t.equal(cp.execSync(command, unset).toString().trim(), '');
       t.end();
     });
   }
@@ -494,7 +434,7 @@ for (const name of functions) {
 {
   const command = path.join('test', 'harden', '_echo.sh');
 
-  test('spawnSync(command)', t => {
+  test('spawnSync(command)', (t) => {
     const result = cp.spawnSync(command);
     t.error(result.error);
     t.equal(result.stdout.toString().trim(), '');
@@ -502,7 +442,7 @@ for (const name of functions) {
     t.end();
   });
 
-  test('spawnSync(command, args)', t => {
+  test('spawnSync(command, args)', (t) => {
     const result = cp.spawnSync(command, []);
     t.error(result.error);
     t.equal(result.stdout.toString().trim(), '');
@@ -510,7 +450,7 @@ for (const name of functions) {
     t.end();
   });
 
-  test('spawnSync(command, options)', t => {
+  test('spawnSync(command, options)', (t) => {
     const result = cp.spawnSync(command, {});
     t.error(result.error);
     t.equal(result.stdout.toString().trim(), '');
@@ -518,7 +458,7 @@ for (const name of functions) {
     t.end();
   });
 
-  test('spawnSync(command, options) - with custom env', t => {
+  test('spawnSync(command, options) - with custom env', (t) => {
     const result = cp.spawnSync(command, { env: { custom: 'custom' } });
     t.error(result.error);
     t.equal(result.stdout.toString().trim(), 'custom');
@@ -526,7 +466,7 @@ for (const name of functions) {
     t.end();
   });
 
-  test('spawnSync(command, args, options)', t => {
+  test('spawnSync(command, args, options)', (t) => {
     const result = cp.spawnSync(command, [], {});
     t.error(result.error);
     t.equal(result.stdout.toString().trim(), '');
@@ -534,7 +474,7 @@ for (const name of functions) {
     t.end();
   });
 
-  test('spawnSync(command, args, options) - with custom env', t => {
+  test('spawnSync(command, args, options) - with custom env', (t) => {
     const result = cp.spawnSync(command, [], { env: { custom: 'custom' } });
     t.error(result.error);
     t.equal(result.stdout.toString().trim(), 'custom');
@@ -543,7 +483,7 @@ for (const name of functions) {
   });
 
   for (const unset of notSet) {
-    test(`spawnSync(command, ${unset})`, t => {
+    test(`spawnSync(command, ${unset})`, (t) => {
       const result = cp.spawnSync(command, unset);
       t.error(result.error);
       t.equal(result.stdout.toString().trim(), '');
@@ -551,7 +491,7 @@ for (const name of functions) {
       t.end();
     });
 
-    test(`spawnSync(command, ${unset}, ${unset})`, t => {
+    test(`spawnSync(command, ${unset}, ${unset})`, (t) => {
       const result = cp.spawnSync(command, unset, unset);
       t.error(result.error);
       t.equal(result.stdout.toString().trim(), '');
@@ -559,7 +499,7 @@ for (const name of functions) {
       t.end();
     });
 
-    test(`spawnSync(command, ${unset}, options)`, t => {
+    test(`spawnSync(command, ${unset}, options)`, (t) => {
       const result = cp.spawnSync(command, unset, {});
       t.error(result.error);
       t.equal(result.stdout.toString().trim(), '');
@@ -572,15 +512,15 @@ for (const name of functions) {
 function assertProcess(t, cmd, { stdout = '' } = {}) {
   t.plan(2);
 
-  cmd.stdout.on('data', data => {
+  cmd.stdout.on('data', (data) => {
     t.equal(data.toString().trim(), stdout);
   });
 
-  cmd.stderr.on('data', data => {
+  cmd.stderr.on('data', (data) => {
     t.fail(`Unexpected data on STDERR: "${data}"`);
   });
 
-  cmd.on('close', code => {
+  cmd.on('close', (code) => {
     t.equal(code, 0);
     t.end();
   });

@@ -17,16 +17,11 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import { coordinateMigration } from './migration_coordinator';
+import { createSavedObjectsMigrationLoggerMock } from '../mocks';
 
 describe('coordinateMigration', () => {
-  const log = {
-    debug: jest.fn(),
-    warning: jest.fn(),
-    warn: jest.fn(),
-    info: jest.fn(),
-  };
+  const log = createSavedObjectsMigrationLoggerMock();
 
   test('waits for isMigrated, if there is an index conflict', async () => {
     const pollInterval = 1;

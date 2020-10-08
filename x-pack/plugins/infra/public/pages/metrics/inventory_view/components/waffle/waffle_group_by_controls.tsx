@@ -9,8 +9,6 @@ import {
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
-  EuiFilterButton,
-  EuiFilterGroup,
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -22,6 +20,7 @@ import { CustomFieldPanel } from './custom_field_panel';
 import { euiStyled } from '../../../../../../../observability/public';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { SnapshotGroupBy } from '../../../../../../common/http_api/snapshot_api';
+import { DropdownButton } from '../dropdown_button';
 
 interface Props {
   options: Array<{ text: string; field: string; toolTipContent?: string }>;
@@ -45,7 +44,7 @@ export const WaffleGroupByControls = class extends React.PureComponent<Props, St
 
   public render() {
     const { nodeType, groupBy } = this.props;
-    const customOptions = this.props.customOptions.map(option => ({
+    const customOptions = this.props.customOptions.map((option) => ({
       ...option,
       toolTipContent: option.text,
     }));
@@ -81,8 +80,8 @@ export const WaffleGroupByControls = class extends React.PureComponent<Props, St
             icon: 'empty',
             panel: 'customPanel',
           },
-          ...options.map(o => {
-            const icon = groupBy.some(g => g.field === o.field) ? 'check' : 'empty';
+          ...options.map((o) => {
+            const icon = groupBy.some((g) => g.field === o.field) ? 'check' : 'empty';
             const panel = {
               name: o.text,
               onClick: this.handleClick(o.field),
@@ -117,40 +116,45 @@ export const WaffleGroupByControls = class extends React.PureComponent<Props, St
     const buttonBody =
       groupBy.length > 0 ? (
         groupBy
-          .map(g => options.find(o => o.field === g.field))
-          .filter(o => o != null)
+          .map((g) => options.find((o) => o.field === g.field))
+          .filter((o) => o != null)
           // In this map the `o && o.field` is totally unnecessary but Typescript is
           // too stupid to realize that the filter above prevents the next map from being null
-          .map(o => <EuiBadge key={o && o.field}>{o && o.text}</EuiBadge>)
+          .map((o) => (
+            <EuiBadge color="hollow" key={o && o.field}>
+              {o && o.text}
+            </EuiBadge>
+          ))
       ) : (
         <FormattedMessage id="xpack.infra.waffle.groupByAllTitle" defaultMessage="All" />
       );
+
     const button = (
-      <EuiFilterButton iconType="arrowDown" onClick={this.handleToggle}>
-        <FormattedMessage id="xpack.infra.waffle.groupByButtonLabel" defaultMessage="Group By: " />
+      <DropdownButton
+        label={i18n.translate('xpack.infra.waffle.groupByLabel', { defaultMessage: 'Group by' })}
+        onClick={this.handleToggle}
+      >
         {buttonBody}
-      </EuiFilterButton>
+      </DropdownButton>
     );
 
     return (
-      <EuiFilterGroup>
-        <EuiPopover
-          isOpen={this.state.isPopoverOpen}
-          id="groupByPanel"
-          button={button}
-          panelPaddingSize="none"
-          closePopover={this.handleClose}
-        >
-          <StyledContextMenu initialPanelId="firstPanel" panels={panels} />
-        </EuiPopover>
-      </EuiFilterGroup>
+      <EuiPopover
+        isOpen={this.state.isPopoverOpen}
+        id="groupByPanel"
+        button={button}
+        panelPaddingSize="none"
+        closePopover={this.handleClose}
+      >
+        <StyledContextMenu initialPanelId="firstPanel" panels={panels} />
+      </EuiPopover>
     );
   }
 
   private handleRemove = (field: string) => () => {
     const { groupBy } = this.props;
-    this.props.onChange(groupBy.filter(g => g.field !== field));
-    const options = this.props.customOptions.filter(g => g.field !== field);
+    this.props.onChange(groupBy.filter((g) => g.field !== field));
+    const options = this.props.customOptions.filter((g) => g.field !== field);
     this.props.onChangeCustomOptions(options);
     // We need to close the panel after we rmeove the pill icon otherwise
     // it will remain open because the click is still captured by the EuiFilterButton
@@ -162,7 +166,7 @@ export const WaffleGroupByControls = class extends React.PureComponent<Props, St
   };
 
   private handleToggle = () => {
-    this.setState(state => ({ isPopoverOpen: !state.isPopoverOpen }));
+    this.setState((state) => ({ isPopoverOpen: !state.isPopoverOpen }));
   };
 
   private handleCustomField = (field: string) => {
@@ -180,7 +184,7 @@ export const WaffleGroupByControls = class extends React.PureComponent<Props, St
 
   private handleClick = (field: string) => () => {
     const { groupBy } = this.props;
-    if (groupBy.some(g => g.field === field)) {
+    if (groupBy.some((g) => g.field === field)) {
       this.handleRemove(field)();
     } else if (this.props.groupBy.length < 2) {
       this.props.onChange([...groupBy, { field }]);

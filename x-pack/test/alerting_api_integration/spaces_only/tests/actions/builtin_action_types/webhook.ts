@@ -4,25 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import http from 'http';
+import getPort from 'get-port';
 import expect from '@kbn/expect';
 import { URL, format as formatUrl } from 'url';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import {
-  getExternalServiceSimulatorPath,
-  ExternalServiceSimulator,
-} from '../../../../common/fixtures/plugins/actions';
+import { getWebhookServer } from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
 
 // eslint-disable-next-line import/no-default-export
 export default function webhookTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
 
   async function createWebhookAction(
-    urlWithCreds: string,
+    webhookSimulatorURL: string,
     config: Record<string, string | Record<string, string>> = {}
   ): Promise<string> {
-    const url = formatUrl(new URL(urlWithCreds), { auth: false });
+    const url = formatUrl(new URL(webhookSimulatorURL), { auth: false });
     const composedConfig = {
       headers: {
         'Content-Type': 'text/plain',
@@ -32,7 +29,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
     };
 
     const { body: createdAction } = await supertest
-      .post('/api/action')
+      .post('/api/actions/action')
       .set('kbn-xsrf', 'test')
       .send({
         name: 'A generic Webhook action',
@@ -46,21 +43,19 @@ export default function webhookTest({ getService }: FtrProviderContext) {
   }
 
   describe('webhook action', () => {
-    let webhookSimulatorURL: string = '<could not determine kibana url>';
-
-    // need to wait for kibanaServer to settle ...
-    before(() => {
-      webhookSimulatorURL = kibanaServer.resolveUrl(
-        getExternalServiceSimulatorPath(ExternalServiceSimulator.WEBHOOK)
-      );
+    let webhookSimulatorURL: string = '';
+    let webhookServer: http.Server;
+    before(async () => {
+      webhookServer = await getWebhookServer();
+      const availablePort = await getPort({ port: 9000 });
+      webhookServer.listen(availablePort);
+      webhookSimulatorURL = `http://localhost:${availablePort}`;
     });
-
-    after(() => esArchiver.unload('empty_kibana'));
 
     it('webhook can be executed without username and password', async () => {
       const webhookActionId = await createWebhookAction(webhookSimulatorURL);
       const { body: result } = await supertest
-        .post(`/api/action/${webhookActionId}/_execute`)
+        .post(`/api/actions/action/${webhookActionId}/_execute`)
         .set('kbn-xsrf', 'test')
         .send({
           params: {
@@ -70,6 +65,10 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(result.status).to.eql('ok');
+    });
+
+    after(() => {
+      webhookServer.close();
     });
   });
 }

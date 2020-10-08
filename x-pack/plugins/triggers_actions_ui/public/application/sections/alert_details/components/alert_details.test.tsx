@@ -7,26 +7,66 @@ import * as React from 'react';
 import uuid from 'uuid';
 import { shallow } from 'enzyme';
 import { AlertDetails } from './alert_details';
-import { Alert, ActionType } from '../../../../types';
-import { EuiTitle, EuiBadge, EuiFlexItem, EuiSwitch, EuiBetaBadge } from '@elastic/eui';
-import { times, random } from 'lodash';
+import { Alert, ActionType, ValidationResult } from '../../../../types';
+import {
+  EuiTitle,
+  EuiBadge,
+  EuiFlexItem,
+  EuiSwitch,
+  EuiBetaBadge,
+  EuiButtonEmpty,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ViewInApp } from './view_in_app';
 import { PLUGIN } from '../../../constants/plugin';
+import { coreMock } from 'src/core/public/mocks';
+import { ALERTS_FEATURE_ID } from '../../../../../../alerts/common';
+
+const mockes = coreMock.createSetup();
 
 jest.mock('../../../app_context', () => ({
   useAppDependencies: jest.fn(() => ({
     http: jest.fn(),
-    legacy: {
-      capabilities: {
-        get: jest.fn(() => ({})),
-      },
+    capabilities: {
+      get: jest.fn(() => ({})),
     },
+    actionTypeRegistry: jest.fn(),
+    alertTypeRegistry: {
+      has: jest.fn().mockReturnValue(true),
+      register: jest.fn(),
+      get: jest.fn().mockReturnValue({
+        id: 'my-alert-type',
+        iconClass: 'test',
+        name: 'test-alert',
+        validate: (): ValidationResult => {
+          return { errors: {} };
+        },
+        requiresAppContext: false,
+      }),
+      list: jest.fn(),
+    },
+    toastNotifications: mockes.notifications.toasts,
+    docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
+    uiSettings: mockes.uiSettings,
+    dataPlugin: jest.fn(),
+    charts: jest.fn(),
   })),
 }));
 
+jest.mock('react-router-dom', () => ({
+  useHistory: () => ({
+    push: jest.fn(),
+  }),
+  useLocation: () => ({
+    pathname: '/triggersActions/alerts/',
+  }),
+}));
+
 jest.mock('../../../lib/capabilities', () => ({
+  hasAllPrivilege: jest.fn(() => true),
   hasSaveAlertsCapability: jest.fn(() => true),
+  hasExecuteActionsCapability: jest.fn(() => true),
 }));
 
 const mockAlertApis = {
@@ -35,6 +75,10 @@ const mockAlertApis = {
   enableAlert: jest.fn(),
   disableAlert: jest.fn(),
   requestRefresh: jest.fn(),
+};
+
+const authorizedConsumers = {
+  [ALERTS_FEATURE_ID]: { read: true, all: true },
 };
 
 // const AlertDetails = withBulkAlertOperations(RawAlertDetails);
@@ -47,8 +91,10 @@ describe('alert_details', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: { context: [], state: [] },
+      actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
+      producer: ALERTS_FEATURE_ID,
+      authorizedConsumers,
     };
 
     expect(
@@ -84,14 +130,48 @@ describe('alert_details', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: { context: [], state: [] },
+      actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
+      producer: ALERTS_FEATURE_ID,
+      authorizedConsumers,
     };
 
     expect(
       shallow(
         <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
       ).containsMatchingElement(<EuiBadge>{alertType.name}</EuiBadge>)
+    ).toBeTruthy();
+  });
+
+  it('renders the alert error banner with error message, when alert status is an error', () => {
+    const alert = mockAlert({
+      executionStatus: {
+        status: 'error',
+        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+        error: {
+          reason: 'unknown',
+          message: 'test',
+        },
+      },
+    });
+    const alertType = {
+      id: '.noop',
+      name: 'No Op',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      actionVariables: { context: [], state: [], params: [] },
+      defaultActionGroupId: 'default',
+      producer: ALERTS_FEATURE_ID,
+      authorizedConsumers,
+    };
+
+    expect(
+      shallow(
+        <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
+      ).containsMatchingElement(
+        <EuiText size="s" color="danger" data-test-subj="alertErrorMessageText">
+          {'test'}
+        </EuiText>
+      )
     ).toBeTruthy();
   });
 
@@ -112,8 +192,10 @@ describe('alert_details', () => {
         id: '.noop',
         name: 'No Op',
         actionGroups: [{ id: 'default', name: 'Default' }],
-        actionVariables: { context: [], state: [] },
+        actionVariables: { context: [], state: [], params: [] },
         defaultActionGroupId: 'default',
+        producer: ALERTS_FEATURE_ID,
+        authorizedConsumers,
       };
 
       const actionTypes: ActionType[] = [
@@ -144,7 +226,6 @@ describe('alert_details', () => {
     });
 
     it('renders a counter for multiple alert action', () => {
-      const actionCount = random(1, 10);
       const alert = mockAlert({
         actions: [
           {
@@ -153,20 +234,22 @@ describe('alert_details', () => {
             params: {},
             actionTypeId: '.server-log',
           },
-          ...times(actionCount, () => ({
+          {
             group: 'default',
             id: uuid.v4(),
             params: {},
             actionTypeId: '.email',
-          })),
+          },
         ],
       });
       const alertType = {
         id: '.noop',
         name: 'No Op',
         actionGroups: [{ id: 'default', name: 'Default' }],
-        actionVariables: { context: [], state: [] },
+        actionVariables: { context: [], state: [], params: [] },
         defaultActionGroupId: 'default',
+        producer: ALERTS_FEATURE_ID,
+        authorizedConsumers,
       };
       const actionTypes: ActionType[] = [
         {
@@ -207,7 +290,7 @@ describe('alert_details', () => {
       expect(
         details.containsMatchingElement(
           <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">{`+${actionCount}`}</EuiBadge>
+            <EuiBadge color="hollow">{actionTypes[1].name}</EuiBadge>
           </EuiFlexItem>
         )
       ).toBeTruthy();
@@ -222,8 +305,10 @@ describe('alert_details', () => {
         id: '.noop',
         name: 'No Op',
         actionGroups: [{ id: 'default', name: 'Default' }],
-        actionVariables: { context: [], state: [] },
+        actionVariables: { context: [], state: [], params: [] },
         defaultActionGroupId: 'default',
+        producer: ALERTS_FEATURE_ID,
+        authorizedConsumers,
       };
 
       expect(
@@ -232,11 +317,35 @@ describe('alert_details', () => {
         ).containsMatchingElement(<ViewInApp alert={alert} />)
       ).toBeTruthy();
     });
+
+    it('links to the Edit flyout', () => {
+      const alert = mockAlert();
+
+      const alertType = {
+        id: '.noop',
+        name: 'No Op',
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        actionVariables: { context: [], state: [], params: [] },
+        defaultActionGroupId: 'default',
+        producer: ALERTS_FEATURE_ID,
+        authorizedConsumers,
+      };
+
+      expect(
+        shallow(
+          <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
+        )
+          .find(EuiButtonEmpty)
+          .find('[data-test-subj="openEditAlertFlyoutButton"]')
+          .first()
+          .exists()
+      ).toBeTruthy();
+    });
   });
 });
 
-describe('enable button', () => {
-  it('should render an enable button when alert is enabled', () => {
+describe('disable button', () => {
+  it('should render a disable button when alert is enabled', () => {
     const alert = mockAlert({
       enabled: true,
     });
@@ -245,24 +354,26 @@ describe('enable button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: { context: [], state: [] },
+      actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
+      producer: ALERTS_FEATURE_ID,
+      authorizedConsumers,
     };
 
     const enableButton = shallow(
       <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
     )
       .find(EuiSwitch)
-      .find('[name="enable"]')
+      .find('[name="disable"]')
       .first();
 
     expect(enableButton.props()).toMatchObject({
-      checked: true,
+      checked: false,
       disabled: false,
     });
   });
 
-  it('should render an enable button when alert is disabled', () => {
+  it('should render a disable button when alert is disabled', () => {
     const alert = mockAlert({
       enabled: false,
     });
@@ -271,19 +382,21 @@ describe('enable button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: { context: [], state: [] },
+      actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
+      producer: ALERTS_FEATURE_ID,
+      authorizedConsumers,
     };
 
     const enableButton = shallow(
       <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
     )
       .find(EuiSwitch)
-      .find('[name="enable"]')
+      .find('[name="disable"]')
       .first();
 
     expect(enableButton.props()).toMatchObject({
-      checked: false,
+      checked: true,
       disabled: false,
     });
   });
@@ -297,8 +410,10 @@ describe('enable button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: { context: [], state: [] },
+      actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
+      producer: ALERTS_FEATURE_ID,
+      authorizedConsumers,
     };
 
     const disableAlert = jest.fn();
@@ -312,7 +427,7 @@ describe('enable button', () => {
       />
     )
       .find(EuiSwitch)
-      .find('[name="enable"]')
+      .find('[name="disable"]')
       .first();
 
     enableButton.simulate('click');
@@ -332,8 +447,10 @@ describe('enable button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: { context: [], state: [] },
+      actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
+      producer: ALERTS_FEATURE_ID,
+      authorizedConsumers,
     };
 
     const enableAlert = jest.fn();
@@ -347,7 +464,7 @@ describe('enable button', () => {
       />
     )
       .find(EuiSwitch)
-      .find('[name="enable"]')
+      .find('[name="disable"]')
       .first();
 
     enableButton.simulate('click');
@@ -370,8 +487,10 @@ describe('mute button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: { context: [], state: [] },
+      actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
+      producer: ALERTS_FEATURE_ID,
+      authorizedConsumers,
     };
 
     const enableButton = shallow(
@@ -397,8 +516,10 @@ describe('mute button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: { context: [], state: [] },
+      actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
+      producer: ALERTS_FEATURE_ID,
+      authorizedConsumers,
     };
 
     const enableButton = shallow(
@@ -424,8 +545,10 @@ describe('mute button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: { context: [], state: [] },
+      actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
+      producer: ALERTS_FEATURE_ID,
+      authorizedConsumers,
     };
 
     const muteAlert = jest.fn();
@@ -460,8 +583,10 @@ describe('mute button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: { context: [], state: [] },
+      actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
+      producer: ALERTS_FEATURE_ID,
+      authorizedConsumers,
     };
 
     const unmuteAlert = jest.fn();
@@ -496,8 +621,10 @@ describe('mute button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: { context: [], state: [] },
+      actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
+      producer: ALERTS_FEATURE_ID,
+      authorizedConsumers,
     };
 
     const enableButton = shallow(
@@ -514,6 +641,136 @@ describe('mute button', () => {
   });
 });
 
+describe('edit button', () => {
+  const actionTypes: ActionType[] = [
+    {
+      id: '.server-log',
+      name: 'Server log',
+      enabled: true,
+      enabledInConfig: true,
+      enabledInLicense: true,
+      minimumLicenseRequired: 'basic',
+    },
+  ];
+
+  it('should render an edit button when alert and actions are editable', () => {
+    const alert = mockAlert({
+      enabled: true,
+      muteAll: false,
+      actions: [
+        {
+          group: 'default',
+          id: uuid.v4(),
+          params: {},
+          actionTypeId: '.server-log',
+        },
+      ],
+    });
+
+    const alertType = {
+      id: '.noop',
+      name: 'No Op',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      actionVariables: { context: [], state: [], params: [] },
+      defaultActionGroupId: 'default',
+      producer: 'alerting',
+      authorizedConsumers,
+    };
+
+    expect(
+      shallow(
+        <AlertDetails
+          alert={alert}
+          alertType={alertType}
+          actionTypes={actionTypes}
+          {...mockAlertApis}
+        />
+      )
+        .find(EuiButtonEmpty)
+        .find('[name="edit"]')
+        .first()
+        .exists()
+    ).toBeTruthy();
+  });
+
+  it('should not render an edit button when alert editable but actions arent', () => {
+    const { hasExecuteActionsCapability } = jest.requireMock('../../../lib/capabilities');
+    hasExecuteActionsCapability.mockReturnValue(false);
+    const alert = mockAlert({
+      enabled: true,
+      muteAll: false,
+      actions: [
+        {
+          group: 'default',
+          id: uuid.v4(),
+          params: {},
+          actionTypeId: '.server-log',
+        },
+      ],
+    });
+
+    const alertType = {
+      id: '.noop',
+      name: 'No Op',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      actionVariables: { context: [], state: [], params: [] },
+      defaultActionGroupId: 'default',
+      producer: 'alerting',
+      authorizedConsumers,
+    };
+
+    expect(
+      shallow(
+        <AlertDetails
+          alert={alert}
+          alertType={alertType}
+          actionTypes={actionTypes}
+          {...mockAlertApis}
+        />
+      )
+        .find(EuiButtonEmpty)
+        .find('[name="edit"]')
+        .first()
+        .exists()
+    ).toBeFalsy();
+  });
+
+  it('should render an edit button when alert editable but actions arent when there are no actions on the alert', () => {
+    const { hasExecuteActionsCapability } = jest.requireMock('../../../lib/capabilities');
+    hasExecuteActionsCapability.mockReturnValue(false);
+    const alert = mockAlert({
+      enabled: true,
+      muteAll: false,
+      actions: [],
+    });
+
+    const alertType = {
+      id: '.noop',
+      name: 'No Op',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      actionVariables: { context: [], state: [], params: [] },
+      defaultActionGroupId: 'default',
+      producer: 'alerting',
+      authorizedConsumers,
+    };
+
+    expect(
+      shallow(
+        <AlertDetails
+          alert={alert}
+          alertType={alertType}
+          actionTypes={actionTypes}
+          {...mockAlertApis}
+        />
+      )
+        .find(EuiButtonEmpty)
+        .find('[name="edit"]')
+        .first()
+        .exists()
+    ).toBeTruthy();
+  });
+});
+
 function mockAlert(overloads: Partial<Alert> = {}): Alert {
   return {
     id: uuid.v4(),
@@ -521,7 +778,7 @@ function mockAlert(overloads: Partial<Alert> = {}): Alert {
     name: `alert-${uuid.v4()}`,
     tags: [],
     alertTypeId: '.noop',
-    consumer: 'consumer',
+    consumer: ALERTS_FEATURE_ID,
     schedule: { interval: '1m' },
     actions: [],
     params: {},
@@ -533,6 +790,10 @@ function mockAlert(overloads: Partial<Alert> = {}): Alert {
     throttle: null,
     muteAll: false,
     mutedInstanceIds: [],
+    executionStatus: {
+      status: 'unknown',
+      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+    },
     ...overloads,
   };
 }

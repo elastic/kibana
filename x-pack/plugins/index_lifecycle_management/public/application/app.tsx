@@ -5,25 +5,40 @@
  */
 
 import React, { useEffect } from 'react';
-import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
+import { Router, Switch, Route, Redirect } from 'react-router-dom';
+import { ScopedHistory, ApplicationStart } from 'kibana/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 
-import { BASE_PATH } from '../../common/constants';
-import { UIM_APP_LOAD } from './constants';
+import { UIM_APP_LOAD } from './constants/ui_metric';
 import { EditPolicy } from './sections/edit_policy';
 import { PolicyTable } from './sections/policy_table';
 import { trackUiMetric } from './services/ui_metric';
 
-export const App = () => {
+export const App = ({
+  history,
+  navigateToApp,
+  getUrlForApp,
+}: {
+  history: ScopedHistory;
+  navigateToApp: ApplicationStart['navigateToApp'];
+  getUrlForApp: ApplicationStart['getUrlForApp'];
+}) => {
   useEffect(() => trackUiMetric(METRIC_TYPE.LOADED, UIM_APP_LOAD), []);
 
   return (
-    <HashRouter>
+    <Router history={history}>
       <Switch>
-        <Redirect exact from={`${BASE_PATH}`} to={`${BASE_PATH}policies`} />
-        <Route exact path={`${BASE_PATH}policies`} component={PolicyTable} />
-        <Route path={`${BASE_PATH}policies/edit/:policyName?`} component={EditPolicy} />
+        <Redirect exact from="/" to="/policies" />
+        <Route
+          exact
+          path={`/policies`}
+          render={(props) => <PolicyTable {...props} navigateToApp={navigateToApp} />}
+        />
+        <Route
+          path={`/policies/edit/:policyName?`}
+          render={(props) => <EditPolicy {...props} getUrlForApp={getUrlForApp} />}
+        />
       </Switch>
-    </HashRouter>
+    </Router>
   );
 };

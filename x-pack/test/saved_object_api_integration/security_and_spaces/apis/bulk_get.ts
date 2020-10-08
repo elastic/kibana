@@ -28,6 +28,7 @@ const createTestCases = (spaceId: string) => {
     { ...CASES.SINGLE_NAMESPACE_DEFAULT_SPACE, ...fail404(spaceId !== DEFAULT_SPACE_ID) },
     { ...CASES.SINGLE_NAMESPACE_SPACE_1, ...fail404(spaceId !== SPACE_1_ID) },
     { ...CASES.SINGLE_NAMESPACE_SPACE_2, ...fail404(spaceId !== SPACE_2_ID) },
+    CASES.MULTI_NAMESPACE_ALL_SPACES,
     {
       ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
       ...fail404(spaceId !== DEFAULT_SPACE_ID && spaceId !== SPACE_1_ID),
@@ -42,11 +43,11 @@ const createTestCases = (spaceId: string) => {
   return { normalTypes, hiddenType, allTypes };
 };
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
-  const { addTests, createTestDefinitions, expectForbidden } = bulkGetTestSuiteFactory(
+  const { addTests, createTestDefinitions, expectSavedObjectForbidden } = bulkGetTestSuiteFactory(
     esArchiver,
     supertest
   );
@@ -60,7 +61,7 @@ export default function({ getService }: FtrProviderContext) {
         createTestDefinitions(hiddenType, true),
         createTestDefinitions(allTypes, true, {
           singleRequest: true,
-          responseBodyOverride: expectForbidden(['hiddentype']),
+          responseBodyOverride: expectSavedObjectForbidden(['hiddentype']),
         }),
       ].flat(),
       superuser: createTestDefinitions(allTypes, false, { singleRequest: true }),
@@ -75,7 +76,7 @@ export default function({ getService }: FtrProviderContext) {
         addTests(`${user.description}${suffix}`, { user, spaceId, tests });
       };
 
-      [users.noAccess, users.legacyAll, users.allAtOtherSpace].forEach(user => {
+      [users.noAccess, users.legacyAll, users.allAtOtherSpace].forEach((user) => {
         _addTests(user, unauthorized);
       });
       [
@@ -85,7 +86,7 @@ export default function({ getService }: FtrProviderContext) {
         users.readGlobally,
         users.allAtSpace,
         users.readAtSpace,
-      ].forEach(user => {
+      ].forEach((user) => {
         _addTests(user, authorized);
       });
       _addTests(users.superuser, superuser);

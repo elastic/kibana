@@ -18,3 +18,4 @@
  */
 
 export { TodoSavedObjectAttributes } from './todo_saved_object_attributes';
+export { BookSavedObjectAttributes, BOOK_SAVED_OBJECT } from './book_saved_object_attributes';

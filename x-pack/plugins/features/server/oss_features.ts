@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { FeatureConfig } from '../common/feature';
+import { KibanaFeatureConfig } from '../common';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 
 export interface BuildOSSFeaturesParams {
   savedObjectTypes: string[];
@@ -19,22 +20,23 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
         defaultMessage: 'Discover',
       }),
       order: 100,
+      category: DEFAULT_APP_CATEGORIES.kibana,
       icon: 'discoverApp',
-      navLinkId: 'kibana:discover',
-      app: ['kibana'],
+      navLinkId: 'discover',
+      app: ['discover', 'kibana'],
       catalogue: ['discover'],
       privileges: {
         all: {
-          app: ['kibana'],
+          app: ['discover', 'kibana'],
           catalogue: ['discover'],
           savedObject: {
-            all: ['search', 'query'],
-            read: ['index-pattern'],
+            all: ['search', 'query', 'index-pattern'],
+            read: [],
           },
           ui: ['show', 'save', 'saveQuery'],
         },
         read: {
-          app: ['kibana'],
+          app: ['discover', 'kibana'],
           catalogue: ['discover'],
           savedObject: {
             all: [],
@@ -78,14 +80,15 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       name: i18n.translate('xpack.features.visualizeFeatureName', {
         defaultMessage: 'Visualize',
       }),
-      order: 200,
+      order: 700,
+      category: DEFAULT_APP_CATEGORIES.kibana,
       icon: 'visualizeApp',
-      navLinkId: 'kibana:visualize',
-      app: ['kibana', 'lens'],
+      navLinkId: 'visualize',
+      app: ['visualize', 'lens', 'kibana'],
       catalogue: ['visualize'],
       privileges: {
         all: {
-          app: ['kibana', 'lens'],
+          app: ['visualize', 'lens', 'kibana'],
           catalogue: ['visualize'],
           savedObject: {
             all: ['visualization', 'query', 'lens'],
@@ -94,7 +97,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
           ui: ['show', 'delete', 'save', 'saveQuery'],
         },
         read: {
-          app: ['kibana', 'lens'],
+          app: ['visualize', 'lens', 'kibana'],
           catalogue: ['visualize'],
           savedObject: {
             all: [],
@@ -138,17 +141,18 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       name: i18n.translate('xpack.features.dashboardFeatureName', {
         defaultMessage: 'Dashboard',
       }),
-      order: 300,
+      order: 200,
+      category: DEFAULT_APP_CATEGORIES.kibana,
       icon: 'dashboardApp',
-      navLinkId: 'kibana:dashboard',
-      app: ['kibana'],
+      navLinkId: 'dashboards',
+      app: ['dashboards', 'kibana'],
       catalogue: ['dashboard'],
       privileges: {
         all: {
-          app: ['kibana'],
+          app: ['dashboards', 'kibana'],
           catalogue: ['dashboard'],
           savedObject: {
-            all: ['dashboard', 'url', 'query'],
+            all: ['dashboard', 'query'],
             read: [
               'index-pattern',
               'search',
@@ -162,7 +166,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
           ui: ['createNew', 'show', 'showWriteControls', 'saveQuery'],
         },
         read: {
-          app: ['kibana'],
+          app: ['dashboards', 'kibana'],
           catalogue: ['dashboard'],
           savedObject: {
             all: [],
@@ -172,6 +176,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
               'visualization',
               'timelion-sheet',
               'canvas-workpad',
+              'lens',
               'map',
               'dashboard',
               'query',
@@ -216,13 +221,14 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
         defaultMessage: 'Dev Tools',
       }),
       order: 1300,
+      category: DEFAULT_APP_CATEGORIES.management,
       icon: 'devToolsApp',
-      navLinkId: 'kibana:dev_tools',
-      app: ['kibana'],
+      navLinkId: 'dev_tools',
+      app: ['dev_tools', 'kibana'],
       catalogue: ['console', 'searchprofiler', 'grokdebugger'],
       privileges: {
         all: {
-          app: ['kibana'],
+          app: ['dev_tools', 'kibana'],
           catalogue: ['console', 'searchprofiler', 'grokdebugger'],
           api: ['console'],
           savedObject: {
@@ -232,7 +238,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
           ui: ['show', 'save'],
         },
         read: {
-          app: ['kibana'],
+          app: ['dev_tools', 'kibana'],
           catalogue: ['console', 'searchprofiler', 'grokdebugger'],
           api: ['console'],
           savedObject: {
@@ -253,6 +259,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
         defaultMessage: 'Advanced Settings',
       }),
       order: 1500,
+      category: DEFAULT_APP_CATEGORIES.management,
       icon: 'advancedSettingsApp',
       app: ['kibana'],
       catalogue: ['advanced_settings'],
@@ -292,18 +299,19 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
         defaultMessage: 'Index Pattern Management',
       }),
       order: 1600,
+      category: DEFAULT_APP_CATEGORIES.management,
       icon: 'indexPatternApp',
       app: ['kibana'],
-      catalogue: ['index_patterns'],
+      catalogue: ['indexPatterns'],
       management: {
-        kibana: ['index_patterns'],
+        kibana: ['indexPatterns'],
       },
       privileges: {
         all: {
           app: ['kibana'],
-          catalogue: ['index_patterns'],
+          catalogue: ['indexPatterns'],
           management: {
-            kibana: ['index_patterns'],
+            kibana: ['indexPatterns'],
           },
           savedObject: {
             all: ['index-pattern'],
@@ -313,9 +321,9 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
         },
         read: {
           app: ['kibana'],
-          catalogue: ['index_patterns'],
+          catalogue: ['indexPatterns'],
           management: {
-            kibana: ['index_patterns'],
+            kibana: ['indexPatterns'],
           },
           savedObject: {
             all: [],
@@ -331,6 +339,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
         defaultMessage: 'Saved Objects Management',
       }),
       order: 1700,
+      category: DEFAULT_APP_CATEGORIES.management,
       icon: 'savedObjectsApp',
       app: ['kibana'],
       catalogue: ['saved_objects'],
@@ -349,7 +358,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
             all: [...savedObjectTypes],
             read: [],
           },
-          ui: ['read', 'edit', 'delete', 'copyIntoSpace'],
+          ui: ['read', 'edit', 'delete', 'copyIntoSpace', 'shareIntoSpace'],
         },
         read: {
           app: ['kibana'],
@@ -367,13 +376,14 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       },
     },
     ...(includeTimelion ? [timelionFeature] : []),
-  ] as FeatureConfig[];
+  ] as KibanaFeatureConfig[];
 };
 
-const timelionFeature: FeatureConfig = {
+const timelionFeature: KibanaFeatureConfig = {
   id: 'timelion',
   name: 'Timelion',
   order: 350,
+  category: DEFAULT_APP_CATEGORIES.kibana,
   icon: 'timelionApp',
   navLinkId: 'timelion',
   app: ['timelion', 'kibana'],

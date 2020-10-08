@@ -1,0 +1,48 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { CombinedState } from 'redux';
+import { SecurityPageName } from '../app/types';
+import { PolicyListState, PolicyDetailsState } from './pages/policy/types';
+import { EndpointState } from './pages/endpoint_hosts/types';
+import { TrustedAppsListPageState } from './pages/trusted_apps/state/trusted_apps_list_page_state';
+
+/**
+ * The type for the management store global namespace. Used mostly internally to reference
+ * the type while defining more complex interfaces/types
+ */
+export type ManagementStoreGlobalNamespace = 'management';
+
+export type ManagementState = CombinedState<{
+  policyList: PolicyListState;
+  policyDetails: PolicyDetailsState;
+  endpoints: EndpointState;
+  trustedApps: TrustedAppsListPageState;
+}>;
+
+/**
+ * The management list of sub-tabs. Changes to these will impact the Router routes.
+ */
+export enum AdministrationSubTab {
+  endpoints = 'endpoints',
+  policies = 'policy',
+  trustedApps = 'trusted_apps',
+}
+
+/**
+ * The URL route params for the Management Policy List section
+ */
+export interface ManagementRoutePolicyListParams {
+  pageName: SecurityPageName.administration;
+  tabName: AdministrationSubTab.policies;
+}
+
+/**
+ * The URL route params for the Management Policy Details section
+ */
+export interface ManagementRoutePolicyDetailsParams extends ManagementRoutePolicyListParams {
+  policyId: string;
+}

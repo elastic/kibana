@@ -4,23 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFilterButton, EuiFilterGroup, EuiPopover } from '@elastic/eui';
+import { EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState, useCallback } from 'react';
 import { IFieldType } from 'src/plugins/data/public';
+import { getCustomMetricLabel } from '../../../../../../../common/formatters/get_custom_metric_label';
 import {
   SnapshotMetricInput,
   SnapshotCustomMetricInput,
   SnapshotCustomMetricInputRT,
 } from '../../../../../../../common/http_api/snapshot_api';
 import { CustomMetricForm } from './custom_metric_form';
-import { getCustomMetricLabel } from './get_custom_metric_label';
 import { MetricsContextMenu } from './metrics_context_menu';
 import { ModeSwitcher } from './mode_switcher';
 import { MetricsEditMode } from './metrics_edit_mode';
 import { CustomMetricMode } from './types';
 import { SnapshotMetricType } from '../../../../../../../common/inventory_models/types';
+import { DropdownButton } from '../../dropdown_button';
 
 interface Props {
   options: Array<{ text: string; value: string }>;
@@ -84,7 +84,7 @@ export const WaffleMetricControls = ({
         onChange({ type: options[0].value as SnapshotMetricType });
       }
       // Filter out the deleted metric from the editbale.
-      const newMetrics = editModeCustomMetrics.filter(v => v.id !== m.id);
+      const newMetrics = editModeCustomMetrics.filter((v) => v.id !== m.id);
       setEditModeCustomMetrics(newMetrics);
     },
     [editModeCustomMetrics, metric, onChange, options]
@@ -92,7 +92,9 @@ export const WaffleMetricControls = ({
 
   const handleEditCustomMetric = useCallback(
     (currentMetric: SnapshotCustomMetricInput) => {
-      const newMetrics = customMetrics.map(m => (m.id === currentMetric.id && currentMetric) || m);
+      const newMetrics = customMetrics.map(
+        (m) => (m.id === currentMetric.id && currentMetric) || m
+      );
       onChangeCustomMetrics(newMetrics);
       setModeToPick();
       setEditCustomMetric(void 0);
@@ -125,24 +127,23 @@ export const WaffleMetricControls = ({
   const id = SnapshotCustomMetricInputRT.is(metric) && metric.id ? metric.id : metric.type;
   const currentLabel = SnapshotCustomMetricInputRT.is(metric)
     ? getCustomMetricLabel(metric)
-    : options.find(o => o.value === id)?.text;
+    : options.find((o) => o.value === id)?.text;
 
   if (!currentLabel) {
     return null;
   }
 
   const button = (
-    <EuiFilterButton iconType="arrowDown" onClick={handleToggle}>
-      <FormattedMessage
-        id="xpack.infra.waffle.metricButtonLabel"
-        defaultMessage="Metric: {selectedMetric}"
-        values={{ selectedMetric: currentLabel }}
-      />
-    </EuiFilterButton>
+    <DropdownButton
+      onClick={handleToggle}
+      label={i18n.translate('xpack.infra.waffle.metriclabel', { defaultMessage: 'Metric' })}
+    >
+      {currentLabel}
+    </DropdownButton>
   );
 
   return (
-    <EuiFilterGroup>
+    <>
       <EuiPopover
         isOpen={isPopoverOpen}
         id="metricsPanel"
@@ -194,6 +195,6 @@ export const WaffleMetricControls = ({
           customMetrics={customMetrics}
         />
       </EuiPopover>
-    </EuiFilterGroup>
+    </>
   );
 };

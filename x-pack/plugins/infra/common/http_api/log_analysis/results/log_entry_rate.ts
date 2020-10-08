@@ -16,11 +16,16 @@ export const LOG_ANALYSIS_GET_LOG_ENTRY_RATE_PATH =
  */
 
 export const getLogEntryRateRequestPayloadRT = rt.type({
-  data: rt.type({
-    bucketDuration: rt.number,
-    sourceId: rt.string,
-    timeRange: timeRangeRT,
-  }),
+  data: rt.intersection([
+    rt.type({
+      bucketDuration: rt.number,
+      sourceId: rt.string,
+      timeRange: timeRangeRT,
+    }),
+    rt.partial({
+      datasets: rt.array(rt.string),
+    }),
+  ]),
 });
 
 export type GetLogEntryRateRequestPayload = rt.TypeOf<typeof getLogEntryRateRequestPayloadRT>;
@@ -30,12 +35,15 @@ export type GetLogEntryRateRequestPayload = rt.TypeOf<typeof getLogEntryRateRequ
  */
 
 export const logEntryRateAnomalyRT = rt.type({
+  id: rt.string,
   actualLogEntryRate: rt.number,
   anomalyScore: rt.number,
   duration: rt.number,
   startTime: rt.number,
   typicalLogEntryRate: rt.number,
 });
+
+export type LogEntryRateAnomaly = rt.TypeOf<typeof logEntryRateAnomalyRT>;
 
 export const logEntryRatePartitionRT = rt.type({
   analysisBucketCount: rt.number,

@@ -10,7 +10,7 @@ export const validateRegExpString = (s: string) =>
   pipe(
     tryCatch(
       () => new RegExp(s),
-      e => (e as Error).message
+      (e) => (e as Error).message
     ),
     fold(
       (errorMessage: string) => errorMessage,

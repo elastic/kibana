@@ -52,7 +52,7 @@ describe('bulkCreate', () => {
     findTestSubject(component, 'loadSavedObjects').simulate('click');
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -73,10 +73,31 @@ describe('bulkCreate', () => {
     findTestSubject(component, 'loadSavedObjects').simulate('click');
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
     expect(component).toMatchSnapshot();
+  });
+
+  test('should filter out saved object version before calling bulkCreate', async () => {
+    const bulkCreateMock = jest.fn().mockResolvedValue({
+      savedObjects: [savedObject],
+    });
+    const component = mountWithIntl(
+      <SavedObjectsInstaller.WrappedComponent
+        bulkCreate={bulkCreateMock}
+        savedObjects={[{ ...savedObject, version: 'foo' }]}
+      />
+    );
+
+    findTestSubject(component, 'loadSavedObjects').simulate('click');
+
+    // Ensure all promises resolve
+    await new Promise((resolve) => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+
+    expect(bulkCreateMock).toHaveBeenCalledWith([savedObject], expect.any(Object));
   });
 });

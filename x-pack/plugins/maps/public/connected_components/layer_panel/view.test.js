@@ -40,6 +40,17 @@ jest.mock('./layer_settings', () => ({
   },
 }));
 
+jest.mock('../../kibana_services', () => {
+  return {
+    getData() {
+      return {};
+    },
+    getCore() {
+      return {};
+    },
+  };
+});
+
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
@@ -55,7 +66,7 @@ const mockLayer = {
   getImmutableSourceProperties: () => {
     return [{ label: 'source prop1', value: 'you get one chance to set me' }];
   },
-  isJoinable: () => {
+  showJoinEditor: () => {
     return true;
   },
   supportsElasticsearchFilters: () => {
@@ -80,7 +91,7 @@ describe('LayerPanel', () => {
     const component = shallowWithIntl(<LayerPanel {...defaultProps} />);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -91,7 +102,7 @@ describe('LayerPanel', () => {
     const component = shallowWithIntl(<LayerPanel {...defaultProps} selectedLayer={undefined} />);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 

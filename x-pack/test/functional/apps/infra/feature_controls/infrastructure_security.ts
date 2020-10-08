@@ -8,10 +8,10 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { DATES } from '../constants';
 
 const DATE_WITH_DATA = DATES.metricsAndLogs.hosts.withData;
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'infraHome', 'security']);
+  const PageObjects = getPageObjects(['common', 'error', 'infraHome', 'security']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
@@ -52,16 +52,16 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_infrastructure_all_role'),
           security.user.delete('global_infrastructure_all_user'),
-          PageObjects.security.forceLogout(),
         ]);
       });
 
       it('shows metrics navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.eql(['Metrics', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.eql(['Overview', 'Metrics', 'Stack Management']);
       });
 
       describe('infrastructure landing page without data', () => {
@@ -168,16 +168,16 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_infrastructure_read_role'),
           security.user.delete('global_infrastructure_read_user'),
-          PageObjects.security.forceLogout(),
         ]);
       });
 
       it('shows metrics navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.eql(['Metrics', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.eql(['Overview', 'Metrics', 'Stack Management']);
       });
 
       describe('infrastructure landing page without data', () => {
@@ -419,23 +419,16 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`doesn't show metrics navlink`, async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.not.contain(['Metrics']);
       });
 
-      it(`metrics app is inaccessible and Application Not Found message is rendered`, async () => {
-        await PageObjects.common.navigateToApp('infraOps');
-        await testSubjects.existOrFail('~appNotFoundPageContent');
-        await PageObjects.common.navigateToUrlWithBrowserHistory(
-          'infraOps',
-          '/inventory',
-          undefined,
-          {
-            ensureCurrentUrl: false,
-            shouldLoginIfPrompted: false,
-          }
-        );
-        await testSubjects.existOrFail('~appNotFoundPageContent');
+      it(`metrics app is inaccessible and returns a 403`, async () => {
+        await PageObjects.common.navigateToActualUrl('infraOps', '', {
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+        });
+        PageObjects.error.expectForbidden();
       });
     });
   });

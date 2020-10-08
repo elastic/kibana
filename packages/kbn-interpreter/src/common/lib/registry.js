@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import clone from 'lodash.clone';
+import { clone } from 'lodash';
 
 export class Registry {
   constructor(prop = 'name') {
@@ -48,7 +48,7 @@ export class Registry {
   }
 
   toArray() {
-    return Object.keys(this._indexed).map(key => this.get(key));
+    return Object.keys(this._indexed).map((key) => this.get(key));
   }
 
   get(name) {

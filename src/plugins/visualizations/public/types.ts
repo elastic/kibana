@@ -17,9 +17,15 @@
  * under the License.
  */
 
+import { ExpressionAstExpression } from 'src/plugins/expressions';
 import { SavedObject } from '../../../plugins/saved_objects/public';
-import { ISearchSource, AggConfigOptions } from '../../../plugins/data/public';
+import {
+  AggConfigOptions,
+  SearchSourceFields,
+  TimefilterContract,
+} from '../../../plugins/data/public';
 import { SerializedVis, Vis, VisParams } from './vis';
+import { ExprVis } from './expressions/vis';
 
 export { Vis, SerializedVis, VisParams };
 
@@ -31,10 +37,11 @@ export interface VisualizationController {
 
 export type VisualizationControllerConstructor = new (
   el: HTMLElement,
-  vis: Vis
+  vis: ExprVis
 ) => VisualizationController;
 
 export interface SavedVisState {
+  title: string;
   type: string;
   params: VisParams;
   aggs: AggConfigOptions[];
@@ -45,7 +52,7 @@ export interface ISavedVis {
   title: string;
   description?: string;
   visState: SavedVisState;
-  searchSource?: ISearchSource;
+  searchSourceFields?: SearchSourceFields;
   uiStateJSON?: string;
   savedSearchRefName?: string;
   savedSearchId?: string;
@@ -59,3 +66,14 @@ export interface VisResponseValue {
   visConfig: object;
   params?: object;
 }
+
+export interface VisToExpressionAstParams {
+  timefilter: TimefilterContract;
+  timeRange?: any;
+  abortSignal?: AbortSignal;
+}
+
+export type VisToExpressionAst<TVisParams = VisParams> = (
+  vis: Vis<TVisParams>,
+  params: VisToExpressionAstParams
+) => ExpressionAstExpression;

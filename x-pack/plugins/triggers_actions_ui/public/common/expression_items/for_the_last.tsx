@@ -20,11 +20,12 @@ import { getTimeUnitLabel } from '../lib/get_time_unit_label';
 import { TIME_UNITS } from '../../application/constants';
 import { getTimeOptions } from '../lib/get_time_options';
 import { ClosablePopoverTitle } from './components';
+import { IErrorObject } from '../../types';
 
 interface ForLastExpressionProps {
   timeWindowSize?: number;
   timeWindowUnit?: string;
-  errors: { [key: string]: string[] };
+  errors: IErrorObject;
   onChangeWindowSize: (selectedWindowSize: number | undefined) => void;
   onChangeWindowUnit: (selectedWindowUnit: string) => void;
   popupPosition?:
@@ -40,11 +41,13 @@ interface ForLastExpressionProps {
     | 'rightCenter'
     | 'rightUp'
     | 'rightDown';
+  display?: 'fullWidth' | 'inline';
 }
 
 export const ForLastExpression = ({
   timeWindowSize,
   timeWindowUnit = 's',
+  display = 'inline',
   errors,
   onChangeWindowSize,
   onChangeWindowUnit,
@@ -70,7 +73,8 @@ export const ForLastExpression = ({
           onClick={() => {
             setAlertDurationPopoverOpen(true);
           }}
-          color={timeWindowSize ? 'secondary' : 'danger'}
+          display={display === 'inline' ? 'inline' : 'columns'}
+          isInvalid={!timeWindowSize}
         />
       }
       isOpen={alertDurationPopoverOpen}
@@ -78,6 +82,7 @@ export const ForLastExpression = ({
         setAlertDurationPopoverOpen(false);
       }}
       ownFocus
+      display={display === 'fullWidth' ? 'block' : 'inlineBlock'}
       withTitle
       anchorPosition={popupPosition ?? 'downLeft'}
     >
@@ -99,7 +104,7 @@ export const ForLastExpression = ({
                 isInvalid={errors.timeWindowSize.length > 0 && timeWindowSize !== undefined}
                 min={0}
                 value={timeWindowSize || ''}
-                onChange={e => {
+                onChange={(e) => {
                   const { value } = e.target;
                   const timeWindowSizeVal = value !== '' ? parseInt(value, 10) : undefined;
                   onChangeWindowSize(timeWindowSizeVal);
@@ -111,7 +116,7 @@ export const ForLastExpression = ({
             <EuiSelect
               data-test-subj="timeWindowUnitSelect"
               value={timeWindowUnit}
-              onChange={e => {
+              onChange={(e) => {
                 onChangeWindowUnit(e.target.value);
               }}
               options={getTimeOptions(timeWindowSize ?? 1)}

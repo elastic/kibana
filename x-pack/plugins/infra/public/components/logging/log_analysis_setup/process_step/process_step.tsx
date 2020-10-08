@@ -101,11 +101,10 @@ export const ProcessStep: React.FunctionComponent<ProcessStepProps> = ({
             />
           </EuiButton>
         </>
-      ) : setupStatus.type === 'required' &&
-        (setupStatus.reason === 'update' || setupStatus.reason === 'reconfiguration') ? (
-        <RecreateMLJobsButton isDisabled={!isConfigurationValid} onClick={cleanUpAndSetUp} />
-      ) : (
+      ) : setupStatus.type === 'required' ? (
         <CreateMLJobsButton isDisabled={!isConfigurationValid} onClick={setUp} />
+      ) : (
+        <RecreateMLJobsButton isDisabled={!isConfigurationValid} onClick={cleanUpAndSetUp} />
       )}
     </EuiText>
   );

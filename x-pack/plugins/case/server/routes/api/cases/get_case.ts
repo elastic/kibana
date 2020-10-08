@@ -9,11 +9,12 @@ import { schema } from '@kbn/config-schema';
 import { CaseResponseRt } from '../../../../common/api';
 import { RouteDeps } from '../types';
 import { flattenCaseSavedObject, wrapError } from '../utils';
+import { CASE_DETAILS_URL } from '../../../../common/constants';
 
-export function initGetCaseApi({ caseService, router }: RouteDeps) {
+export function initGetCaseApi({ caseConfigureService, caseService, router }: RouteDeps) {
   router.get(
     {
-      path: '/api/cases/{case_id}',
+      path: CASE_DETAILS_URL,
       validate: {
         params: schema.object({
           case_id: schema.string(),
@@ -28,13 +29,21 @@ export function initGetCaseApi({ caseService, router }: RouteDeps) {
         const client = context.core.savedObjects.client;
         const includeComments = JSON.parse(request.query.includeComments);
 
-        const theCase = await caseService.getCase({
-          client,
-          caseId: request.params.case_id,
-        });
+        const [theCase] = await Promise.all([
+          caseService.getCase({
+            client,
+            caseId: request.params.case_id,
+          }),
+        ]);
 
         if (!includeComments) {
-          return response.ok({ body: CaseResponseRt.encode(flattenCaseSavedObject(theCase, [])) });
+          return response.ok({
+            body: CaseResponseRt.encode(
+              flattenCaseSavedObject({
+                savedObject: theCase,
+              })
+            ),
+          });
         }
 
         const theComments = await caseService.getAllCaseComments({
@@ -47,7 +56,13 @@ export function initGetCaseApi({ caseService, router }: RouteDeps) {
         });
 
         return response.ok({
-          body: CaseResponseRt.encode(flattenCaseSavedObject(theCase, theComments.saved_objects)),
+          body: CaseResponseRt.encode(
+            flattenCaseSavedObject({
+              savedObject: theCase,
+              comments: theComments.saved_objects,
+              totalComment: theComments.total,
+            })
+          ),
         });
       } catch (error) {
         return response.customError(wrapError(error));

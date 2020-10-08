@@ -17,82 +17,67 @@
  * under the License.
  */
 
-import { IconType } from '@elastic/eui';
-import { ManagementApp } from './management_app';
-import { ManagementSection } from './management_section';
-import { ChromeBreadcrumb, ApplicationStart } from '../../../core/public/';
+import { ScopedHistory, Capabilities } from 'kibana/public';
+import { ManagementSection, RegisterManagementSectionArgs } from './utils';
+import { ChromeBreadcrumb } from '../../../core/public/';
 
 export interface ManagementSetup {
   sections: SectionsServiceSetup;
 }
 
-export interface ManagementStart {
-  sections: SectionsServiceStart;
-  legacy: any;
+export interface DefinedSections {
+  ingest: ManagementSection;
+  data: ManagementSection;
+  insightsAndAlerting: ManagementSection;
+  security: ManagementSection;
+  kibana: ManagementSection;
+  stack: ManagementSection;
 }
 
-interface SectionsServiceSetup {
-  getSection: (sectionId: ManagementSection['id']) => ManagementSection | undefined;
-  getAllSections: () => ManagementSection[];
-  register: RegisterSection;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ManagementStart {}
+
+export interface ManagementSectionsStartPrivate {
+  getSectionsEnabled: () => ManagementSection[];
 }
 
-interface SectionsServiceStart {
-  getSection: (sectionId: ManagementSection['id']) => ManagementSection | undefined;
-  getAllSections: () => ManagementSection[];
-  navigateToApp: ApplicationStart['navigateToApp'];
+export interface SectionsServiceStartDeps {
+  capabilities: Capabilities;
 }
 
-export interface CreateSection {
-  id: string;
-  title: string;
-  order?: number;
-  euiIconType?: string; // takes precedence over `icon` property.
-  icon?: string; // URL to image file; fallback if no `euiIconType`
+export interface SectionsServiceSetup {
+  register: (args: Omit<RegisterManagementSectionArgs, 'capabilities'>) => ManagementSection;
+  section: DefinedSections;
 }
 
-export type RegisterSection = (section: CreateSection) => ManagementSection;
-
-export interface RegisterManagementAppArgs {
-  id: string;
-  title: string;
-  mount: ManagementSectionMount;
-  order?: number;
+export interface SectionsServiceStart {
+  getSectionsEnabled: () => ManagementSection[];
 }
 
-export type RegisterManagementApp = (managementApp: RegisterManagementAppArgs) => ManagementApp;
+export enum ManagementSectionId {
+  Ingest = 'ingest',
+  Data = 'data',
+  InsightsAndAlerting = 'insightsAndAlerting',
+  Security = 'security',
+  Kibana = 'kibana',
+  Stack = 'stack',
+}
 
 export type Unmount = () => Promise<void> | void;
+export type Mount = (params: ManagementAppMountParams) => Unmount | Promise<Unmount>;
 
 export interface ManagementAppMountParams {
   basePath: string; // base path for setting up your router
   element: HTMLElement; // element the section should render into
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
+  history: ScopedHistory;
 }
 
-export type ManagementSectionMount = (
-  params: ManagementAppMountParams
-) => Unmount | Promise<Unmount>;
-
-export interface CreateManagementApp {
+export interface CreateManagementItemArgs {
   id: string;
   title: string;
-  basePath: string;
+  tip?: string;
   order?: number;
-  mount: ManagementSectionMount;
-}
-
-export interface LegacySection extends LegacyApp {
-  visibleItems: LegacyApp[];
-}
-
-export interface LegacyApp {
-  disabled: boolean;
-  visible: boolean;
-  id: string;
-  display: string;
-  url?: string;
-  euiIconType?: IconType;
-  icon?: string;
-  order: number;
+  euiIconType?: string; // takes precedence over `icon` property.
+  icon?: string; // URL to image file; fallback if no `euiIconType`
 }

@@ -7,7 +7,7 @@
 import { ReactText } from 'react';
 import Color from 'color';
 import { get, first, last, min, max } from 'lodash';
-import { createFormatter } from '../../../../utils/formatters';
+import { createFormatter } from '../../../../../common/formatters';
 import { InfraDataSeries } from '../../../../graphql/types';
 import {
   InventoryVisTypeRT,
@@ -44,7 +44,7 @@ export const getMaxMinTimestamp = (metric: NodeDetailsMetricData): [number, numb
     const lastRow = last(item.data);
     return acc.concat([(firstRow && firstRow.timestamp) || 0, (lastRow && lastRow.timestamp) || 0]);
   }, [] as number[]);
-  return [min(values), max(values)];
+  return [min(values) as number, max(values) as number];
 };
 
 /**

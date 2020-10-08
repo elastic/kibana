@@ -10,10 +10,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { RouteComponentProps } from 'react-router-dom';
 import { EuiButton, EuiCallOut, EuiLink, EuiEmptyPrompt, EuiSpacer, EuiIcon } from '@elastic/eui';
 
-import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common/constants';
-import { SectionError, SectionLoading, Error } from '../../../components';
+import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common';
+import { WithPrivileges, SectionError, Error } from '../../../../shared_imports';
+import { SectionLoading } from '../../../components';
 import { BASE_PATH, UIM_SNAPSHOT_LIST_LOAD } from '../../../constants';
-import { WithPrivileges } from '../../../lib/authorization';
 import { documentationLinksService } from '../../../services/documentation';
 import { useLoadSnapshots } from '../../../services/http';
 import {
@@ -24,8 +24,11 @@ import {
   linkToSnapshot,
 } from '../../../services/navigation';
 import { useServices } from '../../../app_context';
+import { useDecodedParams } from '../../../lib';
 import { SnapshotDetails } from './snapshot_details';
 import { SnapshotTable } from './snapshot_table';
+
+import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
 
 interface MatchParams {
   repositoryName?: string;
@@ -33,17 +36,15 @@ interface MatchParams {
 }
 
 export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  match: {
-    params: { repositoryName, snapshotId },
-  },
   location: { search },
   history,
 }) => {
+  const { repositoryName, snapshotId } = useDecodedParams<MatchParams>();
   const {
     error,
     isLoading,
     data: { snapshots = [], repositories = [], policies = [], errors = {} },
-    sendRequest: reload,
+    resendRequest: reload,
   } = useLoadSnapshots();
 
   const { uiMetricService } = useServices();
@@ -141,7 +142,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
               defaultMessage="Go to {repositoryLink} to fix the errors."
               values={{
                 repositoryLink: (
-                  <EuiLink href={linkToRepositories()}>
+                  <EuiLink {...reactRouterNavigate(history, linkToRepositories())}>
                     <FormattedMessage
                       id="xpack.snapshotRestore.repositoryWarningLinkText"
                       defaultMessage="Repositories"
@@ -176,7 +177,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
             </p>
             <p>
               <EuiButton
-                href={linkToAddRepository()}
+                {...reactRouterNavigate(history, linkToAddRepository())}
                 fill
                 iconType="plusInCircle"
                 data-test-subj="registerRepositoryButton"
@@ -205,7 +206,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
           </h1>
         }
         body={
-          <WithPrivileges privileges={APP_SLM_CLUSTER_PRIVILEGES.map(name => `cluster.${name}`)}>
+          <WithPrivileges privileges={APP_SLM_CLUSTER_PRIVILEGES.map((name) => `cluster.${name}`)}>
             {({ hasPrivileges }) =>
               hasPrivileges ? (
                 <Fragment>
@@ -233,7 +234,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
                   <p>
                     {policies.length === 0 ? (
                       <EuiButton
-                        href={linkToAddPolicy()}
+                        {...reactRouterNavigate(history, linkToAddPolicy())}
                         fill
                         iconType="plusInCircle"
                         data-test-subj="addPolicyButton"
@@ -245,7 +246,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
                       </EuiButton>
                     ) : (
                       <EuiButton
-                        href={linkToPolicies()}
+                        {...reactRouterNavigate(history, linkToPolicies())}
                         fill
                         iconType="list"
                         data-test-subj="goToPoliciesButton"
@@ -305,7 +306,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
             defaultMessage="Snapshots might load slowly. Go to {repositoryLink} to fix the errors."
             values={{
               repositoryLink: (
-                <EuiLink href={linkToRepositories()}>
+                <EuiLink {...reactRouterNavigate(history, linkToRepositories())}>
                   <FormattedMessage
                     id="xpack.snapshotRestore.repositoryWarningLinkText"
                     defaultMessage="Repositories"

@@ -8,15 +8,21 @@ import expect from '@kbn/expect';
 
 const VECTOR_SOURCE_ID = 'z52lq';
 
-export default function({ getPageObjects, getService }) {
+export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps', 'common']);
   const inspector = getService('inspector');
   const find = getService('find');
+  const security = getService('security');
 
   describe('geo top hits', () => {
     describe('split on string field', () => {
       before(async () => {
+        await security.testUser.setRoles(['global_maps_all', 'test_logstash_reader'], false);
         await PageObjects.maps.loadSavedMap('document example top hits');
+      });
+
+      after(async () => {
+        await security.testUser.restoreDefaults();
       });
 
       it('should not fetch any search hits', async () => {

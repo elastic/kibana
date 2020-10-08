@@ -28,7 +28,7 @@ export function loadIndexPatterns(indexPatterns: IndexPatternsContract) {
       fields: ['id', 'title', 'type', 'fields'],
       perPage: 10000,
     })
-    .then(response => {
+    .then((response) => {
       indexPatternCache = response.savedObjects;
       return indexPatternCache;
     });
@@ -41,7 +41,7 @@ export function loadSavedSearches() {
       type: 'search',
       perPage: 10000,
     })
-    .then(response => {
+    .then((response) => {
       savedSearchesCache = response.savedObjects;
       return savedSearchesCache;
     });
@@ -62,7 +62,7 @@ export function getIndexPatternsContract() {
 }
 
 export function getIndexPatternNames() {
-  return indexPatternCache.map(i => i.attributes && i.attributes.title);
+  return indexPatternCache.map((i) => i.attributes && i.attributes.title);
 }
 
 export function getIndexPatternIdFromName(name: string) {
@@ -88,7 +88,7 @@ export async function getIndexPatternAndSavedSearch(savedSearchId: string) {
   if (ss === null) {
     return resp;
   }
-  const indexPatternId = ss.references.find(r => r.type === 'index-pattern')?.id;
+  const indexPatternId = ss.references.find((r) => r.type === 'index-pattern')?.id;
   resp.indexPattern = await getIndexPatternById(indexPatternId!);
   resp.savedSearch = ss;
   return resp;
@@ -104,14 +104,18 @@ export function getQueryFromSavedSearch(savedSearch: SavedSearchSavedObject) {
 
 export function getIndexPatternById(id: string): Promise<IndexPattern> {
   if (indexPatternsContract !== null) {
-    return indexPatternsContract.get(id);
+    if (id) {
+      return indexPatternsContract.get(id);
+    } else {
+      return indexPatternsContract.create({});
+    }
   } else {
     throw new Error('Index patterns are not initialized!');
   }
 }
 
 export function getSavedSearchById(id: string): SavedSearchSavedObject | undefined {
-  return savedSearchesCache.find(s => s.id === id);
+  return savedSearchesCache.find((s) => s.id === id);
 }
 
 /**

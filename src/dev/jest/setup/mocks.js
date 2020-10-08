@@ -34,10 +34,6 @@
  * The mocks that are enabled that way live inside the `__mocks__` folders beside their implementation files.
  */
 
-jest.mock('ui/metadata');
-jest.mock('ui/documentation_links/documentation_links');
-jest.mock('ui/chrome');
-
 jest.mock('moment-timezone', () => {
   // We always want to mock the timezone moment-timezone guesses, since otherwise
   // test results might be depending on which time zone you are running them.
@@ -54,6 +50,6 @@ jest.mock('@elastic/eui/lib/services/react', () => {
   // This is for performance, but when used in certain Jest scernarios it can be nondeterministic.
   // Jest tests are never concerned about the state prior to batch completion, so we bypass batching entirely.
   return {
-    enqueueStateChange: fn => fn(),
+    enqueueStateChange: (fn) => fn(),
   };
 });

@@ -35,6 +35,8 @@
  * @packageDocumentation
  */
 
+import './index.scss';
+
 import {
   ChromeBadge,
   ChromeBrand,
@@ -54,11 +56,11 @@ import {
   ChromeStart,
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
+  NavType,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
 import { I18nStart } from './i18n';
-import { InjectedMetadataSetup, InjectedMetadataStart, LegacyNavLink } from './injected_metadata';
 import { NotificationsSetup, NotificationsStart } from './notifications';
 import { OverlayStart } from './overlays';
 import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
@@ -66,7 +68,6 @@ import { UiSettingsState, IUiSettingsClient } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
-export { PackageInfo, EnvironmentMode } from '../server/types';
 import {
   IContextContainer,
   IContextProvider,
@@ -76,8 +77,9 @@ import {
   HandlerParameters,
 } from './context';
 
+export { PackageInfo, EnvironmentMode } from '../server/types';
 export { CoreContext, CoreSystem } from './core_system';
-export { RecursiveReadonly, DEFAULT_APP_CATEGORIES } from '../utils';
+export { DEFAULT_APP_CATEGORIES } from '../utils';
 export {
   AppCategory,
   UiSettingsParams,
@@ -93,7 +95,7 @@ export {
   ApplicationSetup,
   ApplicationStart,
   App,
-  AppBase,
+  PublicAppInfo,
   AppMount,
   AppMountDeprecated,
   AppUnmount,
@@ -109,6 +111,7 @@ export {
   AppUpdatableFields,
   AppUpdater,
   ScopedHistory,
+  NavigateToAppOptions,
 } from './application';
 
 export {
@@ -124,6 +127,7 @@ export {
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectAttributeSingle,
+  SavedObjectError,
   SavedObjectReference,
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
@@ -132,17 +136,21 @@ export {
   SavedObjectsClient,
   SimpleSavedObject,
   SavedObjectsImportResponse,
+  SavedObjectsImportSuccess,
   SavedObjectsImportConflictError,
+  SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportUnknownError,
   SavedObjectsImportError,
   SavedObjectsImportRetry,
+  SavedObjectsNamespaceType,
 } from './saved_objects';
 
 export {
   HttpHeadersInit,
   HttpRequestInit,
+  HttpFetchError,
   HttpFetchOptions,
   HttpFetchOptionsWithPath,
   HttpFetchQuery,
@@ -173,6 +181,8 @@ export {
 } from './notifications';
 
 export { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
+
+export { URL_MAX_LENGTH } from './core_app';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle
@@ -207,7 +217,7 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   /**
    * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
    * use *only* to retrieve config values. There is no way to set injected values
-   * in the new platform. Use the legacy platform API instead.
+   * in the new platform.
    * @deprecated
    * */
   injectedMetadata: {
@@ -262,42 +272,12 @@ export interface CoreStart {
   /**
    * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
    * use *only* to retrieve config values. There is no way to set injected values
-   * in the new platform. Use the legacy platform API instead.
+   * in the new platform.
    * @deprecated
    * */
   injectedMetadata: {
     getInjectedVar: (name: string, defaultValue?: any) => unknown;
   };
-}
-
-/**
- * Setup interface exposed to the legacy platform via the `ui/new_platform` module.
- *
- * @remarks
- * Some methods are not supported in the legacy platform and while present to make this type compatibile with
- * {@link CoreSetup}, unsupported methods will throw exceptions when called.
- *
- * @public
- * @deprecated
- */
-export interface LegacyCoreSetup extends CoreSetup<any, any> {
-  /** @deprecated */
-  injectedMetadata: InjectedMetadataSetup;
-}
-
-/**
- * Start interface exposed to the legacy platform via the `ui/new_platform` module.
- *
- * @remarks
- * Some methods are not supported in the legacy platform and while present to make this type compatibile with
- * {@link CoreStart}, unsupported methods will throw exceptions when called.
- *
- * @public
- * @deprecated
- */
-export interface LegacyCoreStart extends CoreStart {
-  /** @deprecated */
-  injectedMetadata: InjectedMetadataStart;
 }
 
 export {
@@ -333,7 +313,6 @@ export {
   HttpSetup,
   HttpStart,
   I18nStart,
-  LegacyNavLink,
   NotificationsSetup,
   NotificationsStart,
   Plugin,
@@ -343,4 +322,7 @@ export {
   PluginOpaqueId,
   IUiSettingsClient,
   UiSettingsState,
+  NavType,
 };
+
+export { __kbnBootstrap__ } from './kbn_bootstrap';

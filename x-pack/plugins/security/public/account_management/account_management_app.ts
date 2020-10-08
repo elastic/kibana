@@ -5,9 +5,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { StartServicesAccessor, ApplicationSetup, AppMountParameters } from 'src/core/public';
+import {
+  ApplicationSetup,
+  AppMountParameters,
+  AppNavLinkStatus,
+  StartServicesAccessor,
+} from '../../../../../src/core/public';
 import { AuthenticationServiceSetup } from '../authentication';
-import { UserAPIClient } from '../management';
 
 interface CreateDeps {
   application: ApplicationSetup;
@@ -24,13 +28,17 @@ export const accountManagementApp = Object.freeze({
     application.register({
       id: this.id,
       title,
-      // TODO: switch to proper enum once https://github.com/elastic/kibana/issues/58327 is resolved.
-      navLinkStatus: 3,
+      navLinkStatus: AppNavLinkStatus.hidden,
       appRoute: '/security/account',
       async mount({ element }: AppMountParameters) {
-        const [[coreStart], { renderAccountManagementPage }] = await Promise.all([
+        const [
+          [coreStart],
+          { renderAccountManagementPage },
+          { UserAPIClient },
+        ] = await Promise.all([
           getStartServices(),
           import('./account_management_page'),
+          import('../management'),
         ]);
 
         coreStart.chrome.setBreadcrumbs([{ text: title }]);

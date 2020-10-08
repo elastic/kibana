@@ -22,8 +22,8 @@ export const registerFeature = (home: HomePublicPluginSetup) => {
         'Use transforms to pivot existing Elasticsearch indices into summarized or entity-centric indices.',
     }),
     icon: 'managementApp', // there is currently no Transforms icon, so using the general management app icon
-    path: '/app/kibana#/management/elasticsearch/transform',
-    showOnHomePage: true,
+    path: '/app/management/data/transform',
+    showOnHomePage: false,
     category: FeatureCatalogueCategory.ADMIN,
   });
 };

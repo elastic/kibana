@@ -60,6 +60,7 @@ exports[`CalendarListsHeader renders header 1`] = `
           grow={false}
         >
           <EuiButtonEmpty
+            data-test-subj="mlCalendarListRefreshButton"
             iconType="refresh"
             onClick={[MockFunction]}
             size="s"
@@ -88,7 +89,7 @@ exports[`CalendarListsHeader renders header 1`] = `
           values={
             Object {
               "br": <br />,
-              "learnMoreLink": <ForwardRef
+              "learnMoreLink": <EuiLink
                 href="https://www.elastic.co/guide/en/machine-learning/jest-metadata-mock-branch/ml-calendars.html"
                 target="_blank"
               >
@@ -97,7 +98,7 @@ exports[`CalendarListsHeader renders header 1`] = `
                   id="xpack.ml.settings.calendars.listHeader.calendarsDescription.learnMoreLinkText"
                   values={Object {}}
                 />
-              </ForwardRef>,
+              </EuiLink>,
             }
           }
         />

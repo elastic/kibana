@@ -20,8 +20,7 @@ import url from 'url';
 import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getService, getPageObjects }: PluginFunctionalProviderContext) {
+export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);
 
   const browser = getService('browser');
@@ -33,11 +32,9 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
   const loadingScreenNotShown = async () =>
     expect(await testSubjects.exists('kbnLoadingMessage')).to.be(false);
 
-  const loadingScreenShown = () => testSubjects.existOrFail('kbnLoadingMessage');
-
-  const getAppWrapperWidth = async () => {
+  const getAppWrapperHeight = async () => {
     const wrapper = await find.byClassName('app-wrapper');
-    return (await wrapper.getSize()).width;
+    return (await wrapper.getSize()).height;
   };
 
   const getKibanaUrl = (pathname?: string, search?: string) =>
@@ -57,12 +54,24 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
     });
   };
 
+  const navigateTo = async (path: string) =>
+    await browser.navigateTo(`${PageObjects.common.getHostPort()}${path}`);
+
   describe('ui applications', function describeIndexTests() {
     before(async () => {
       await PageObjects.common.navigateToApp('foo');
     });
 
     it('starts on home page', async () => {
+      await testSubjects.existOrFail('fooAppHome');
+    });
+
+    it('redirects and renders correctly regardless of trailing slash', async () => {
+      await navigateTo(`/app/foo`);
+      await waitForUrlToBe('/app/foo/home');
+      await testSubjects.existOrFail('fooAppHome');
+      await navigateTo(`/app/foo/`);
+      await waitForUrlToBe('/app/foo/home');
       await testSubjects.existOrFail('fooAppHome');
     });
 
@@ -75,7 +84,7 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
 
       // Go to home page
       await testSubjects.click('fooNavHome');
-      await waitForUrlToBe('/app/foo');
+      await waitForUrlToBe('/app/foo/home');
       await loadingScreenNotShown();
       await testSubjects.existOrFail('fooAppHome');
     });
@@ -89,8 +98,8 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
 
     it('navigates to app root when navlink is clicked', async () => {
       await appsMenu.clickLink('Foo');
-      await waitForUrlToBe('/app/foo');
-      await loadingScreenNotShown();
+      await waitForUrlToBe('/app/foo/home');
+      // await loadingScreenNotShown();
       await testSubjects.existOrFail('fooAppHome');
     });
 
@@ -108,7 +117,7 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
 
     it('can use the back button to navigate back to previous app', async () => {
       await browser.goBack();
-      await waitForUrlToBe('/app/foo');
+      await waitForUrlToBe('/app/foo/home');
       await loadingScreenNotShown();
       await testSubjects.existOrFail('fooAppHome');
     });
@@ -122,9 +131,9 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       await loadingScreenNotShown();
       expect(await testSubjects.exists('headerGlobalNav')).to.be(false);
 
-      const wrapperWidth = await getAppWrapperWidth();
-      const windowWidth = (await browser.getWindowSize()).width;
-      expect(wrapperWidth).to.eql(windowWidth);
+      const wrapperHeight = await getAppWrapperHeight();
+      const windowHeight = (await browser.getWindowSize()).height;
+      expect(wrapperHeight).to.eql(windowHeight);
     });
 
     it('navigating away from chromeless application shows chrome', async () => {
@@ -132,21 +141,9 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       await loadingScreenNotShown();
       expect(await testSubjects.exists('headerGlobalNav')).to.be(true);
 
-      const wrapperWidth = await getAppWrapperWidth();
-      const windowWidth = (await browser.getWindowSize()).width;
-      expect(wrapperWidth).to.be.below(windowWidth);
-    });
-
-    it('can navigate from NP apps to legacy apps', async () => {
-      await appsMenu.clickLink('Management');
-      await loadingScreenShown();
-      await testSubjects.existOrFail('managementNav');
-    });
-
-    it('can navigate from legacy apps to NP apps', async () => {
-      await appsMenu.clickLink('Foo');
-      await loadingScreenShown();
-      await testSubjects.existOrFail('fooAppHome');
+      const wrapperHeight = await getAppWrapperHeight();
+      const windowHeight = (await browser.getWindowSize()).height;
+      expect(wrapperHeight).to.be.below(windowHeight);
     });
   });
 }

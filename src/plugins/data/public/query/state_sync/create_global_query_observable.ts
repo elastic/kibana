@@ -24,23 +24,31 @@ import { FilterManager } from '../filter_manager';
 import { QueryState, QueryStateChange } from './index';
 import { createStateContainer } from '../../../../kibana_utils/public';
 import { isFilterPinned, compareFilters, COMPARE_ALL_OPTIONS } from '../../../common';
+import { QueryStringContract } from '../query_string';
 
 export function createQueryStateObservable({
   timefilter: { timefilter },
   filterManager,
+  queryString,
 }: {
   timefilter: TimefilterSetup;
   filterManager: FilterManager;
+  queryString: QueryStringContract;
 }): Observable<{ changes: QueryStateChange; state: QueryState }> {
-  return new Observable(subscriber => {
+  return new Observable((subscriber) => {
     const state = createStateContainer<QueryState>({
       time: timefilter.getTime(),
       refreshInterval: timefilter.getRefreshInterval(),
       filters: filterManager.getFilters(),
+      query: queryString.getQuery(),
     });
 
     let currentChange: QueryStateChange = {};
     const subs: Subscription[] = [
+      queryString.getUpdates$().subscribe(() => {
+        currentChange.query = true;
+        state.set({ ...state.get(), query: queryString.getQuery() });
+      }),
       timefilter.getTimeUpdate$().subscribe(() => {
         currentChange.time = true;
         state.set({ ...state.get(), time: timefilter.getTime() });
@@ -53,8 +61,8 @@ export function createQueryStateObservable({
         currentChange.filters = true;
 
         const { filters } = state.get();
-        const globalOld = filters?.filter(f => isFilterPinned(f));
-        const appOld = filters?.filter(f => !isFilterPinned(f));
+        const globalOld = filters?.filter((f) => isFilterPinned(f));
+        const appOld = filters?.filter((f) => !isFilterPinned(f));
         const globalNew = filterManager.getGlobalFilters();
         const appNew = filterManager.getAppFilters();
 
@@ -73,7 +81,7 @@ export function createQueryStateObservable({
       }),
       state.state$
         .pipe(
-          map(newState => ({ state: newState, changes: currentChange })),
+          map((newState) => ({ state: newState, changes: currentChange })),
           tap(() => {
             currentChange = {};
           })
@@ -81,7 +89,7 @@ export function createQueryStateObservable({
         .subscribe(subscriber),
     ];
     return () => {
-      subs.forEach(s => s.unsubscribe());
+      subs.forEach((s) => s.unsubscribe());
     };
   });
 }

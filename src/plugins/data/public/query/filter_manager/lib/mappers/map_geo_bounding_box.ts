@@ -41,7 +41,7 @@ const getFormattedValueFn = (params: any) => {
 };
 
 const getParams = (filter: GeoBoundingBoxFilter) => {
-  const key = Object.keys(filter.geo_bounding_box).filter(k => k !== 'ignore_unmapped')[0];
+  const key = Object.keys(filter.geo_bounding_box).filter((k) => k !== 'ignore_unmapped')[0];
   const params = filter.geo_bounding_box[key];
 
   return {

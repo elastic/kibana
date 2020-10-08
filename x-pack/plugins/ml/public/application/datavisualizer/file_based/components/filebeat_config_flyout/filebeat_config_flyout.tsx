@@ -55,9 +55,11 @@ export const FilebeatConfigFlyout: FC<Props> = ({
   } = useMlKibana();
 
   useEffect(() => {
-    security.authc.getCurrentUser().then(user => {
-      setUsername(user.username === undefined ? null : user.username);
-    });
+    if (security !== undefined) {
+      security.authc.getCurrentUser().then((user) => {
+        setUsername(user.username === undefined ? null : user.username);
+      });
+    }
   }, []);
 
   useEffect(() => {
@@ -84,7 +86,7 @@ export const FilebeatConfigFlyout: FC<Props> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiCopy textToCopy={fileBeatConfig}>
-              {copy => (
+              {(copy) => (
                 <EuiButton onClick={copy}>
                   <FormattedMessage
                     id="xpack.ml.fileDatavisualizer.fileBeatConfigFlyout.copyButton"

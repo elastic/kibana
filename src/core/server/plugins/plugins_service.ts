@@ -18,11 +18,12 @@
  */
 
 import Path from 'path';
-import { Observable } from 'rxjs';
+import { Observable, EMPTY } from 'rxjs';
 import { filter, first, map, mergeMap, tap, toArray } from 'rxjs/operators';
+import { pick } from '@kbn/std';
+
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
-
 import { Logger } from '../logging';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
 import { PluginWrapper } from './plugin';
@@ -31,7 +32,7 @@ import { PluginsConfig, PluginsConfigType } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 import { InternalCoreSetup, InternalCoreStart } from '../internal_types';
 import { IConfigService } from '../config';
-import { pick } from '../../utils';
+import { InternalEnvironmentServiceSetup } from '../environment';
 
 /** @internal */
 export interface PluginsServiceSetup {
@@ -73,6 +74,11 @@ export type PluginsServiceSetupDeps = InternalCoreSetup;
 export type PluginsServiceStartDeps = InternalCoreStart;
 
 /** @internal */
+export interface PluginsServiceDiscoverDeps {
+  environment: InternalEnvironmentServiceSetup;
+}
+
+/** @internal */
 export class PluginsService implements CoreService<PluginsServiceSetup, PluginsServiceStart> {
   private readonly log: Logger;
   private readonly pluginsSystem: PluginsSystem;
@@ -80,22 +86,30 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
   private readonly config$: Observable<PluginsConfig>;
   private readonly pluginConfigDescriptors = new Map<PluginName, PluginConfigDescriptor>();
   private readonly uiPluginInternalInfo = new Map<PluginName, InternalPluginInfo>();
+  private readonly discoveryDisabled: boolean;
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('plugins-service');
+    this.discoveryDisabled = coreContext.env.isDevClusterMaster;
     this.pluginsSystem = new PluginsSystem(coreContext);
     this.configService = coreContext.configService;
     this.config$ = coreContext.configService
       .atPath<PluginsConfigType>('plugins')
-      .pipe(map(rawConfig => new PluginsConfig(rawConfig, coreContext.env)));
+      .pipe(map((rawConfig) => new PluginsConfig(rawConfig, coreContext.env)));
   }
 
-  public async discover() {
-    this.log.debug('Discovering plugins');
-
+  public async discover({ environment }: PluginsServiceDiscoverDeps) {
     const config = await this.config$.pipe(first()).toPromise();
 
-    const { error$, plugin$ } = discover(config, this.coreContext);
+    const { error$, plugin$ } = this.discoveryDisabled
+      ? {
+          error$: EMPTY,
+          plugin$: EMPTY,
+        }
+      : discover(config, this.coreContext, {
+          uuid: environment.instanceUuid,
+        });
+
     await this.handleDiscoveryErrors(error$);
     await this.handleDiscoveredPlugins(plugin$);
 
@@ -153,7 +167,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
           return (
             configDescriptor &&
             configDescriptor.exposeToBrowser &&
-            Object.values(configDescriptor?.exposeToBrowser).some(exposed => exposed)
+            Object.values(configDescriptor?.exposeToBrowser).some((exposed) => exposed)
           );
         })
         .map(([pluginId, plugin]) => {
@@ -186,14 +200,14 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
 
     const errors = await error$
       .pipe(
-        filter(error => errorTypesToReport.includes(error.type)),
-        tap(pluginError => this.log.error(pluginError)),
+        filter((error) => errorTypesToReport.includes(error.type)),
+        tap((pluginError) => this.log.error(pluginError)),
         toArray()
       )
       .toPromise();
     if (errors.length > 0) {
       throw new Error(
-        `Failed to initialize plugins:${errors.map(err => `\n\t${err.message}`).join('')}`
+        `Failed to initialize plugins:${errors.map((err) => `\n\t${err.message}`).join('')}`
       );
     }
   }
@@ -205,7 +219,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     >();
     await plugin$
       .pipe(
-        mergeMap(async plugin => {
+        mergeMap(async (plugin) => {
           const configDescriptor = plugin.getConfigDescriptor();
           if (configDescriptor) {
             this.pluginConfigDescriptors.set(plugin.name, configDescriptor);
@@ -228,6 +242,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
 
           if (plugin.includesUiPlugin) {
             this.uiPluginInternalInfo.set(plugin.name, {
+              requiredBundles: plugin.requiredBundles,
               publicTargetDir: Path.resolve(plugin.path, 'target/public'),
               publicAssetsDir: Path.resolve(plugin.path, 'public/assets'),
             });
@@ -239,11 +254,30 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       .toPromise();
 
     for (const [pluginName, { plugin, isEnabled }] of pluginEnableStatuses) {
-      if (this.shouldEnablePlugin(pluginName, pluginEnableStatuses)) {
+      // validate that `requiredBundles` ids point to a discovered plugin which `includesUiPlugin`
+      for (const requiredBundleId of plugin.requiredBundles) {
+        if (!pluginEnableStatuses.has(requiredBundleId)) {
+          throw new Error(
+            `Plugin bundle with id "${requiredBundleId}" is required by plugin "${pluginName}" but it is missing.`
+          );
+        }
+
+        if (!pluginEnableStatuses.get(requiredBundleId)!.plugin.includesUiPlugin) {
+          throw new Error(
+            `Plugin bundle with id "${requiredBundleId}" is required by plugin "${pluginName}" but it doesn't have a UI bundle.`
+          );
+        }
+      }
+
+      const pluginEnablement = this.shouldEnablePlugin(pluginName, pluginEnableStatuses);
+
+      if (pluginEnablement.enabled) {
         this.pluginsSystem.addPlugin(plugin);
       } else if (isEnabled) {
         this.log.info(
-          `Plugin "${pluginName}" has been disabled since some of its direct or transitive dependencies are missing or disabled.`
+          `Plugin "${pluginName}" has been disabled since the following direct or transitive dependencies are missing or disabled: [${pluginEnablement.missingDependencies.join(
+            ', '
+          )}]`
         );
       } else {
         this.log.info(`Plugin "${pluginName}" is disabled.`);
@@ -257,17 +291,34 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     pluginName: PluginName,
     pluginEnableStatuses: Map<PluginName, { plugin: PluginWrapper; isEnabled: boolean }>,
     parents: PluginName[] = []
-  ): boolean {
+  ): { enabled: true } | { enabled: false; missingDependencies: string[] } {
     const pluginInfo = pluginEnableStatuses.get(pluginName);
-    return (
-      pluginInfo !== undefined &&
-      pluginInfo.isEnabled &&
-      pluginInfo.plugin.requiredPlugins
-        .filter(dep => !parents.includes(dep))
-        .every(dependencyName =>
-          this.shouldEnablePlugin(dependencyName, pluginEnableStatuses, [...parents, pluginName])
-        )
-    );
+
+    if (pluginInfo === undefined || !pluginInfo.isEnabled) {
+      return {
+        enabled: false,
+        missingDependencies: [],
+      };
+    }
+
+    const missingDependencies = pluginInfo.plugin.requiredPlugins
+      .filter((dep) => !parents.includes(dep))
+      .filter(
+        (dependencyName) =>
+          !this.shouldEnablePlugin(dependencyName, pluginEnableStatuses, [...parents, pluginName])
+            .enabled
+      );
+
+    if (missingDependencies.length === 0) {
+      return {
+        enabled: true,
+      };
+    }
+
+    return {
+      enabled: false,
+      missingDependencies,
+    };
   }
 
   private registerPluginStaticDirs(deps: PluginsServiceSetupDeps) {

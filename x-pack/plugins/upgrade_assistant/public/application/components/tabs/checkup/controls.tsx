@@ -8,8 +8,8 @@ import React, { FunctionComponent, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-
-import { DeprecationInfo } from 'src/legacy/core_plugins/elasticsearch';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { DeprecationInfo } from '../../../../../../../../src/core/server/elasticsearch/legacy/api_types';
 import { GroupByOption, LevelFilterOption, LoadingState } from '../../types';
 import { FilterBar } from './filter_bar';
 import { GroupByBar } from './group_by_bar';
@@ -58,7 +58,7 @@ export const CheckupControls: FunctionComponent<CheckupControlsProps> = ({
                   defaultMessage: 'Filter',
                 }
               )}
-              onChange={e => {
+              onChange={(e) => {
                 const string = e.target.value;
                 const errorMessage = validateRegExpString(string);
                 if (errorMessage) {

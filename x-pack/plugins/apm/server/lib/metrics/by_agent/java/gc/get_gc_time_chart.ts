@@ -7,35 +7,31 @@
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { METRIC_JAVA_GC_TIME } from '../../../../../../common/elasticsearch_fieldnames';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters
-} from '../../../../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
 import { fetchAndTransformGcMetrics } from './fetch_and_transform_gc_metrics';
 import { ChartBase } from '../../../types';
 
 const series = {
   [METRIC_JAVA_GC_TIME]: {
     title: i18n.translate('xpack.apm.agentMetrics.java.gcTime', {
-      defaultMessage: 'GC time'
+      defaultMessage: 'GC time',
     }),
-    color: theme.euiColorVis0
-  }
+    color: theme.euiColorVis0,
+  },
 };
 
 const chartBase: ChartBase = {
   title: i18n.translate('xpack.apm.agentMetrics.java.gcTimeChartTitle', {
-    defaultMessage: 'Garbage collection time spent per minute'
+    defaultMessage: 'Garbage collection time spent per minute',
   }),
   key: 'gc_time_line_chart',
   type: 'linemark',
   yUnit: 'time',
-  series
+  series,
 };
 
 const getGcTimeChart = (
-  setup: Setup & SetupTimeRange & SetupUIFilters,
+  setup: Setup & SetupTimeRange,
   serviceName: string,
   serviceNodeName?: string
 ) => {
@@ -44,7 +40,7 @@ const getGcTimeChart = (
     serviceName,
     serviceNodeName,
     chartBase,
-    fieldName: METRIC_JAVA_GC_TIME
+    fieldName: METRIC_JAVA_GC_TIME,
   });
 };
 

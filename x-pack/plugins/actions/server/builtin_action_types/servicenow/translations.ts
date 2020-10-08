@@ -6,77 +6,22 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const API_URL_REQUIRED = i18n.translate(
-  'xpack.actions.builtin.servicenow.servicenowApiNullError',
-  {
-    defaultMessage: 'ServiceNow [apiUrl] is required',
-  }
-);
+export const NAME = i18n.translate('xpack.actions.builtin.servicenowTitle', {
+  defaultMessage: 'ServiceNow',
+});
 
-export const WHITE_LISTED_ERROR = (message: string) =>
-  i18n.translate('xpack.actions.builtin.servicenow.servicenowApiWhitelistError', {
-    defaultMessage: 'error configuring servicenow action: {message}',
+export const ALLOWED_HOSTS_ERROR = (message: string) =>
+  i18n.translate('xpack.actions.builtin.configuration.apiAllowedHostsError', {
+    defaultMessage: 'error configuring connector action: {message}',
     values: {
       message,
     },
   });
 
-export const NAME = i18n.translate('xpack.actions.builtin.servicenowTitle', {
-  defaultMessage: 'ServiceNow',
-});
-
-export const MAPPING_EMPTY = i18n.translate('xpack.actions.builtin.servicenow.emptyMapping', {
-  defaultMessage: '[casesConfiguration.mapping]: expected non-empty but got empty',
-});
-
-export const ERROR_POSTING = i18n.translate(
-  'xpack.actions.builtin.servicenow.postingErrorMessage',
+// TODO: remove when Case mappings will be removed
+export const MAPPING_EMPTY = i18n.translate(
+  'xpack.actions.builtin.servicenow.configuration.emptyMapping',
   {
-    defaultMessage: 'error posting servicenow event',
+    defaultMessage: '[incidentConfiguration.mapping]: expected non-empty but got empty',
   }
 );
-
-export const RETRY_POSTING = (status: number) =>
-  i18n.translate('xpack.actions.builtin.servicenow.postingRetryErrorMessage', {
-    defaultMessage: 'error posting servicenow event: http status {status}, retry later',
-    values: {
-      status,
-    },
-  });
-
-export const UNEXPECTED_STATUS = (status: number) =>
-  i18n.translate('xpack.actions.builtin.servicenow.postingUnexpectedErrorMessage', {
-    defaultMessage: 'error posting servicenow event: unexpected status {status}',
-    values: {
-      status,
-    },
-  });
-
-export const FIELD_INFORMATION = (
-  mode: string,
-  date: string | undefined,
-  user: string | undefined
-) => {
-  switch (mode) {
-    case 'create':
-      return i18n.translate('xpack.actions.builtin.servicenow.informationCreated', {
-        values: { date, user },
-        defaultMessage: '(created at {date} by {user})',
-      });
-    case 'update':
-      return i18n.translate('xpack.actions.builtin.servicenow.informationUpdated', {
-        values: { date, user },
-        defaultMessage: '(updated at {date} by {user})',
-      });
-    case 'add':
-      return i18n.translate('xpack.actions.builtin.servicenow.informationAdded', {
-        values: { date, user },
-        defaultMessage: '(added at {date} by {user})',
-      });
-    default:
-      return i18n.translate('xpack.actions.builtin.servicenow.informationDefault', {
-        values: { date, user },
-        defaultMessage: '(created at {date} by {user})',
-      });
-  }
-};

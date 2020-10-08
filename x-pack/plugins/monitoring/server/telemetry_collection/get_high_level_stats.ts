@@ -153,7 +153,7 @@ function groupInstancesByCluster<T extends { cluster_uuid?: string }>(
   const clusterMap = new Map<string, InternalClusterMap>();
 
   // hits are sorted arbitrarily by product UUID
-  instances.map(instance => {
+  instances.map((instance) => {
     const clusterUuid = instance._source.cluster_uuid;
     const version: string | undefined = get(
       instance,
@@ -329,7 +329,7 @@ export async function fetchHighLevelStats<
         // a more ideal field would be the concatenation of the uuid + transport address for duped UUIDs (copied installations)
         field: `${product}_stats.${product}.uuid`,
       },
-      sort: [{ timestamp: 'desc' }],
+      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
     },
   };
 

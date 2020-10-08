@@ -114,6 +114,32 @@ export class AdvancedSettingsComponent extends Component<
         filteredSettings: this.mapSettings(Query.execute(query, this.settings)),
       });
     });
+
+    // scrolls to setting provided in the URL hash
+    const { hash } = window.location;
+    if (hash !== '') {
+      setTimeout(() => {
+        const id = hash.replace('#', '');
+        const element = document.getElementById(id);
+
+        let globalNavOffset = 0;
+
+        const globalNavBars = document
+          .getElementById('globalHeaderBars')
+          ?.getElementsByClassName('euiHeader');
+
+        if (globalNavBars) {
+          Array.from(globalNavBars).forEach((navBar) => {
+            globalNavOffset += (navBar as HTMLDivElement).offsetHeight;
+          });
+        }
+
+        if (element) {
+          element.scrollIntoView();
+          window.scrollBy(0, -globalNavOffset); // offsets scroll by height of the global nav
+        }
+      }, 0);
+    }
   }
 
   componentWillUnmount() {
@@ -125,7 +151,7 @@ export class AdvancedSettingsComponent extends Component<
   mapConfig(config: IUiSettingsClient) {
     const all = config.getAll();
     return Object.entries(all)
-      .map(setting => {
+      .map((setting) => {
         return toEditableConfig({
           def: setting[1],
           name: setting[0],
@@ -134,7 +160,7 @@ export class AdvancedSettingsComponent extends Component<
           isOverridden: config.isOverridden(setting[0]),
         });
       })
-      .filter(c => !c.readonly)
+      .filter((c) => !c.readonly)
       .sort(Comparators.property('name', Comparators.default('asc')));
   }
 
@@ -228,7 +254,7 @@ export class AdvancedSettingsComponent extends Component<
 }
 
 export const AdvancedSettings = (props: AdvancedSettingsProps) => {
-  const { query } = useParams();
+  const { query } = useParams<{ query: string }>();
   return (
     <AdvancedSettingsComponent
       queryText={query || ''}

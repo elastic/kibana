@@ -13,6 +13,7 @@ interface Props {
   placeholder?: string;
   changeHandler(d: EuiComboBoxOptionOption[]): void;
   testSubj?: string;
+  isDisabled?: boolean;
 }
 
 export const DropDown: React.FC<Props> = ({
@@ -20,9 +21,11 @@ export const DropDown: React.FC<Props> = ({
   options,
   placeholder = 'Search ...',
   testSubj,
+  isDisabled,
 }) => {
   return (
     <EuiComboBox
+      fullWidth
       placeholder={placeholder}
       singleSelection={{ asPlainText: true }}
       options={options}
@@ -30,6 +33,7 @@ export const DropDown: React.FC<Props> = ({
       onChange={changeHandler}
       isClearable={false}
       data-test-subj={testSubj}
+      isDisabled={isDisabled}
     />
   );
 };

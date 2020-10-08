@@ -18,13 +18,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import * as kbnTestServer from '../../../../test_utils/kbn_server';
+import * as kbnTestServer from '../../../test_helpers/kbn_server';
 
 describe('ui settings service', () => {
   describe('routes', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
     beforeAll(async () => {
-      root = kbnTestServer.createRoot();
+      root = kbnTestServer.createRoot({ plugins: { initialize: false } });
 
       const { uiSettings } = await root.setup();
       uiSettings.register({

@@ -55,7 +55,7 @@ export class KQLSyntaxError extends Error {
   constructor(error: KQLSyntaxErrorData, expression: any) {
     let message = error.message;
     if (error.expected) {
-      const translatedExpectations = error.expected.map(expected => {
+      const translatedExpectations = error.expected.map((expected) => {
         return grammarRuleTranslations[expected.description] || expected.description;
       });
 

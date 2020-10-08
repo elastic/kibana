@@ -93,11 +93,11 @@ function title(statuses: Statuses) {
   }
 }
 
-function ImportError(error: any, key: number) {
+const ImportError: FC<{ error: any }> = ({ error }) => {
   const errorObj = toString(error);
   return (
-    <React.Fragment>
-      <p key={key}>{errorObj.msg}</p>
+    <>
+      <p>{errorObj.msg}</p>
 
       {errorObj.more !== undefined && (
         <EuiAccordion
@@ -113,9 +113,9 @@ function ImportError(error: any, key: number) {
           {errorObj.more}
         </EuiAccordion>
       )}
-    </React.Fragment>
+    </>
   );
-}
+};
 
 function toString(error: any): ImportError {
   if (typeof error === 'string') {
@@ -127,11 +127,11 @@ function toString(error: any): ImportError {
       return { msg: error.msg };
     } else if (error.error !== undefined) {
       if (typeof error.error === 'object') {
-        if (error.error.msg !== undefined) {
+        if (error.error.reason !== undefined) {
           // this will catch a bulk ingest failure
-          const errorObj: ImportError = { msg: error.error.msg };
-          if (error.error.body !== undefined) {
-            errorObj.more = error.error.response;
+          const errorObj: ImportError = { msg: error.error.reason };
+          if (error.error.root_cause !== undefined) {
+            errorObj.more = JSON.stringify(error.error.root_cause);
           }
           return errorObj;
         }

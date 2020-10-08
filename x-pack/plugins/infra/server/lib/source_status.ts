@@ -18,7 +18,7 @@ export class InfraSourceStatus {
     sourceId: string
   ): Promise<string[]> {
     const sourceConfiguration = await this.libs.sources.getSourceConfiguration(
-      requestContext,
+      requestContext.core.savedObjects.client,
       sourceId
     );
     const indexNames = await this.adapter.getIndexNames(
@@ -32,7 +32,7 @@ export class InfraSourceStatus {
     sourceId: string
   ): Promise<string[]> {
     const sourceConfiguration = await this.libs.sources.getSourceConfiguration(
-      requestContext,
+      requestContext.core.savedObjects.client,
       sourceId
     );
     const indexNames = await this.adapter.getIndexNames(
@@ -46,7 +46,7 @@ export class InfraSourceStatus {
     sourceId: string
   ): Promise<boolean> {
     const sourceConfiguration = await this.libs.sources.getSourceConfiguration(
-      requestContext,
+      requestContext.core.savedObjects.client,
       sourceId
     );
     const hasAlias = await this.adapter.hasAlias(
@@ -60,7 +60,7 @@ export class InfraSourceStatus {
     sourceId: string
   ): Promise<boolean> {
     const sourceConfiguration = await this.libs.sources.getSourceConfiguration(
-      requestContext,
+      requestContext.core.savedObjects.client,
       sourceId
     );
     const hasAlias = await this.adapter.hasAlias(
@@ -69,38 +69,43 @@ export class InfraSourceStatus {
     );
     return hasAlias;
   }
-  public async hasLogIndices(
+  public async getLogIndexStatus(
     requestContext: RequestHandlerContext,
     sourceId: string
-  ): Promise<boolean> {
+  ): Promise<SourceIndexStatus> {
     const sourceConfiguration = await this.libs.sources.getSourceConfiguration(
-      requestContext,
+      requestContext.core.savedObjects.client,
       sourceId
     );
-    const hasIndices = await this.adapter.hasIndices(
+    const indexStatus = await this.adapter.getIndexStatus(
       requestContext,
       sourceConfiguration.configuration.logAlias
     );
-    return hasIndices;
+    return indexStatus;
   }
   public async hasMetricIndices(
     requestContext: RequestHandlerContext,
     sourceId: string
   ): Promise<boolean> {
     const sourceConfiguration = await this.libs.sources.getSourceConfiguration(
-      requestContext,
+      requestContext.core.savedObjects.client,
       sourceId
     );
-    const hasIndices = await this.adapter.hasIndices(
+    const indexStatus = await this.adapter.getIndexStatus(
       requestContext,
       sourceConfiguration.configuration.metricAlias
     );
-    return hasIndices;
+    return indexStatus !== 'missing';
   }
 }
+
+export type SourceIndexStatus = 'missing' | 'empty' | 'available';
 
 export interface InfraSourceStatusAdapter {
   getIndexNames(requestContext: RequestHandlerContext, aliasName: string): Promise<string[]>;
   hasAlias(requestContext: RequestHandlerContext, aliasName: string): Promise<boolean>;
-  hasIndices(requestContext: RequestHandlerContext, indexNames: string): Promise<boolean>;
+  getIndexStatus(
+    requestContext: RequestHandlerContext,
+    indexNames: string
+  ): Promise<SourceIndexStatus>;
 }

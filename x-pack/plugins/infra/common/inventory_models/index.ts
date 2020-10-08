@@ -18,7 +18,7 @@ export { metrics } from './metrics';
 export const inventoryModels = [host, pod, container, awsEC2, awsS3, awsRDS, awsSQS];
 
 export const findInventoryModel = (type: InventoryItemType) => {
-  const model = inventoryModels.find(m => m.id === type);
+  const model = inventoryModels.find((m) => m.id === type);
   if (!model) {
     throw new Error(
       i18n.translate('xpack.infra.inventoryModels.findInventoryModel.error', {
@@ -30,7 +30,6 @@ export const findInventoryModel = (type: InventoryItemType) => {
 };
 
 interface InventoryFields {
-  message: string[];
   host: string;
   pod: string;
   container: string;
@@ -51,9 +50,9 @@ const getFieldByType = (type: InventoryItemType, fields: InventoryFields) => {
   }
 };
 
-export const findInventoryFields = (type: InventoryItemType, fields: InventoryFields) => {
+export const findInventoryFields = (type: InventoryItemType, fields?: InventoryFields) => {
   const inventoryModel = findInventoryModel(type);
-  if (LEGACY_TYPES.includes(type)) {
+  if (fields && LEGACY_TYPES.includes(type)) {
     const id = getFieldByType(type, fields) || inventoryModel.fields.id;
     return {
       ...inventoryModel.fields,

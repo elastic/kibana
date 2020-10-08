@@ -37,17 +37,17 @@ export function loadIndexPatterns(
       fields: ['id', 'title', 'type', 'fields'],
       perPage: 10000,
     })
-    .then(response => {
+    .then((response) => {
       indexPatternCache = response.savedObjects;
 
       if (refreshIndexPatterns === null) {
         refreshIndexPatterns = () => {
           return new Promise((resolve, reject) => {
             loadIndexPatterns(savedObjectsClient, indexPatterns)
-              .then(resp => {
+              .then((resp) => {
                 resolve(resp);
               })
-              .catch(error => {
+              .catch((error) => {
                 reject(error);
               });
           });
@@ -59,7 +59,7 @@ export function loadIndexPatterns(
 }
 
 export function getIndexPatternIdByTitle(indexPatternTitle: string): string | undefined {
-  return indexPatternCache.find(d => d?.attributes?.title === indexPatternTitle)?.id;
+  return indexPatternCache.find((d) => d?.attributes?.title === indexPatternTitle)?.id;
 }
 
 type CombinedQuery = Record<'bool', any> | object;

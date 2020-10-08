@@ -19,11 +19,7 @@
 
 import { schema } from '@kbn/config-schema';
 import stringify from 'json-stable-stringify';
-import {
-  createPromiseFromStreams,
-  createMapStream,
-  createConcatStream,
-} from '../../../../legacy/utils/streams';
+import { createPromiseFromStreams, createMapStream, createConcatStream } from '../../utils/streams';
 import { IRouter } from '../../http';
 import { SavedObjectConfig } from '../saved_objects_config';
 import { exportSavedObjectsToStream } from '../export';
@@ -61,7 +57,7 @@ export const registerExportRoute = (router: IRouter, config: SavedObjectConfig) 
       // need to access the registry for type validation, can't use the schema for this
       const supportedTypes = context.core.savedObjects.typeRegistry
         .getImportableAndExportableTypes()
-        .map(t => t.name);
+        .map((t) => t.name);
       if (types) {
         const validationError = validateTypes(types, supportedTypes);
         if (validationError) {

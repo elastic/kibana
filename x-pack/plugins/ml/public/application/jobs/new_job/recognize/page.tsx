@@ -21,7 +21,8 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import { merge } from 'lodash';
-import { useMlKibana } from '../../../contexts/kibana';
+import moment from 'moment';
+import { useMlKibana, useMlUrlGenerator } from '../../../contexts/kibana';
 import { ml } from '../../../services/ml_api_service';
 import { useMlContext } from '../../../contexts/ml';
 import {
@@ -32,7 +33,6 @@ import {
   KibanaObjectResponse,
   ModuleJob,
 } from '../../../../../common/types/modules';
-import { mlJobService } from '../../../services/job_service';
 import { CreateResultCallout } from './components/create_result_callout';
 import { KibanaObjects } from './components/kibana_objects';
 import { ModuleJobs } from './components/module_jobs';
@@ -40,6 +40,8 @@ import { checkForSavedObjects } from './resolvers';
 import { JobSettingsForm, JobSettingsFormValues } from './components/job_settings_form';
 import { TimeRange } from '../common/components';
 import { JobId } from '../../../../../common/types/anomaly_detection_jobs';
+import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { TIME_FORMAT } from '../../../../../common/constants/time_format';
 
 export interface ModuleJobUI extends ModuleJob {
   datafeedResult?: DatafeedResponse;
@@ -71,6 +73,8 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
   const {
     services: { notifications },
   } = useMlKibana();
+  const urlGenerator = useMlUrlGenerator();
+
   // #region State
   const [jobPrefix, setJobPrefix] = useState<string>('');
   const [jobs, setJobs] = useState<ModuleJobUI[]>([]);
@@ -113,7 +117,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
       setSaveState(SAVE_STATE.NOT_SAVED);
 
       // mix existing groups from the server with the groups used across all jobs in the module.
-      const moduleGroups = [...response.jobs.map(j => j.config.groups || [])].flat();
+      const moduleGroups = [...response.jobs.map((j) => j.config.groups || [])].flat();
       setExistingGroups([...new Set([...existingGroups, ...moduleGroups])]);
     } catch (e) {
       // eslint-disable-next-line no-console
@@ -172,12 +176,11 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
         startDatafeed: startDatafeedAfterSave,
         ...(jobOverridesPayload !== null ? { jobOverrides: jobOverridesPayload } : {}),
         ...resultTimeRange,
-        estimateModelMemory: false,
       });
       const { datafeeds: datafeedsResponse, jobs: jobsResponse, kibana: kibanaResponse } = response;
 
       setJobs(
-        jobs.map(job => {
+        jobs.map((job) => {
           return {
             ...job,
             datafeedResult: datafeedsResponse.find(({ id }) => id.endsWith(job.id)),
@@ -186,14 +189,20 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
         })
       );
       setKibanaObjects(merge(kibanaObjects, kibanaResponse));
-      setResultsUrl(
-        mlJobService.createResultsUrl(
-          jobsResponse.filter(({ success }) => success).map(({ id }) => id),
-          resultTimeRange.start,
-          resultTimeRange.end,
-          'explorer'
-        )
-      );
+
+      const url = await urlGenerator.createUrl({
+        page: ML_PAGES.ANOMALY_EXPLORER,
+        pageState: {
+          jobIds: jobsResponse.filter(({ success }) => success).map(({ id }) => id),
+          timeRange: {
+            from: moment(resultTimeRange.start).format(TIME_FORMAT),
+            to: moment(resultTimeRange.end).format(TIME_FORMAT),
+            mode: 'absolute',
+          },
+        },
+      });
+
+      setResultsUrl(url);
       const failedJobsCount = jobsResponse.reduce((count, { success }) => {
         return success ? count : count + 1;
       }, 0);
@@ -298,7 +307,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
               {isFormVisible && (
                 <JobSettingsForm
                   onSubmit={save}
-                  onChange={formValues => {
+                  onChange={(formValues) => {
                     setJobPrefix(formValues.jobPrefix);
                   }}
                   saveState={saveState}

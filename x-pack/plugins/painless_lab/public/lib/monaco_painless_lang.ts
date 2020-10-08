@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as monaco from 'monaco-editor';
+import { monaco } from '@kbn/monaco';
 
 /**
  * Extends the default type for a Monarch language so we can use

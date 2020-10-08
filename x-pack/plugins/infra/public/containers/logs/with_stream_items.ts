@@ -29,7 +29,7 @@ export const WithStreamItems: React.FunctionComponent<{
     () =>
       logEntries.isReloading
         ? []
-        : logEntries.entries.map(logEntry =>
+        : logEntries.entries.map((logEntry) =>
             createLogEntryStreamItem(logEntry, logEntryHighlightsById[logEntry.id] || [])
           ),
 

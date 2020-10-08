@@ -10,8 +10,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiPageContent } from '@elastic/eui';
 
-import { CRUD_APP_BASE_PATH } from '../../constants';
-import { getRouter, redirect, extractQueryParams } from '../../services';
+import { extractQueryParams } from '../../../shared_imports';
+import { getRouter, redirect } from '../../services';
 import { setBreadcrumbs } from '../../services/breadcrumb';
 import { RemoteClusterPageTitle, RemoteClusterForm } from '../components';
 
@@ -32,7 +32,7 @@ export class RemoteClusterAdd extends PureComponent {
     this.props.clearAddClusterErrors();
   }
 
-  save = clusterConfig => {
+  save = (clusterConfig) => {
     this.props.addCluster(clusterConfig);
   };
 
@@ -49,7 +49,7 @@ export class RemoteClusterAdd extends PureComponent {
       const decodedRedirect = decodeURIComponent(redirectUrl);
       redirect(decodedRedirect);
     } else {
-      history.push(CRUD_APP_BASE_PATH);
+      history.push('/list');
     }
   };
 

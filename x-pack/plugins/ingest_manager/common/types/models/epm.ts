@@ -19,7 +19,12 @@ export enum InstallStatus {
   uninstalling = 'uninstalling',
 }
 
-export type DetailViewPanelName = 'overview' | 'data-sources' | 'settings';
+export type InstallType = 'reinstall' | 'reupdate' | 'rollback' | 'update' | 'install';
+export type InstallSource = 'registry' | 'upload';
+
+export type EpmPackageInstallStatus = 'installed' | 'installing';
+
+export type DetailViewPanelName = 'overview' | 'usages' | 'settings';
 export type ServiceName = 'kibana' | 'elasticsearch';
 export type AssetType = KibanaAssetType | ElasticsearchAssetType | AgentAssetType;
 
@@ -32,52 +37,64 @@ export enum KibanaAssetType {
 }
 
 export enum ElasticsearchAssetType {
-  ingestPipeline = 'ingest-pipeline',
-  indexTemplate = 'index-template',
-  ilmPolicy = 'ilm-policy',
+  componentTemplate = 'component_template',
+  ingestPipeline = 'ingest_pipeline',
+  indexTemplate = 'index_template',
+  ilmPolicy = 'ilm_policy',
+  transform = 'transform',
 }
 
 export enum AgentAssetType {
   input = 'input',
 }
 
-// from /package/{name}
-// type Package struct at https://github.com/elastic/package-registry/blob/master/util/package.go
-// https://github.com/elastic/package-registry/blob/master/docs/api/package.json
-export interface RegistryPackage {
+export type RegistryRelease = 'ga' | 'beta' | 'experimental';
+
+// Fields common to packages that come from direct upload and the registry
+export interface InstallablePackage {
   name: string;
   title?: string;
   version: string;
+  release?: RegistryRelease;
   readme?: string;
   description: string;
   type: string;
   categories: string[];
-  requirement: RequirementsByServiceName;
   screenshots?: RegistryImage[];
   icons?: RegistryImage[];
   assets?: string[];
   internal?: boolean;
   format_version: string;
-  datasets?: Dataset[];
-  datasources?: RegistryDatasource[];
+  data_streams?: RegistryDataStream[];
+  policy_templates?: RegistryPolicyTemplate[];
+}
+
+// Uploaded package archives don't have extra fields
+// Linter complaint disabled because this extra type is meant for better code readability
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ArchivePackage extends InstallablePackage {}
+
+// Registry packages do have extra fields.
+// cf. type Package struct at https://github.com/elastic/package-registry/blob/master/util/package.go
+export interface RegistryPackage extends InstallablePackage {
+  requirement: RequirementsByServiceName;
   download: string;
   path: string;
 }
 
 interface RegistryImage {
-  // https://github.com/elastic/package-registry/blob/master/util/package.go#L74
-  // says src is potentially missing but I couldn't find any examples
-  // it seems like src should be required. How can you have an image with no reference to the content?
   src: string;
+  path: string;
   title?: string;
   size?: string;
   type?: string;
 }
-export interface RegistryDatasource {
+export interface RegistryPolicyTemplate {
   name: string;
   title: string;
   description: string;
   inputs: RegistryInput[];
+  multiple?: boolean;
 }
 
 export interface RegistryInput {
@@ -85,16 +102,15 @@ export interface RegistryInput {
   title: string;
   description?: string;
   vars?: RegistryVarsEntry[];
-  streams: RegistryStream[];
 }
 
 export interface RegistryStream {
   input: string;
-  dataset: string;
   title: string;
   description?: string;
   enabled?: boolean;
   vars?: RegistryVarsEntry[];
+  template_path: string;
 }
 
 export type RequirementVersion = string;
@@ -113,14 +129,15 @@ export type RegistrySearchResult = Pick<
   | 'name'
   | 'title'
   | 'version'
+  | 'release'
   | 'description'
   | 'type'
   | 'icons'
   | 'internal'
   | 'download'
   | 'path'
-  | 'datasets'
-  | 'datasources'
+  | 'data_streams'
+  | 'policy_templates'
 >;
 
 export type ScreenshotItem = RegistryImage;
@@ -166,16 +183,21 @@ export type ElasticsearchAssetTypeToParts = Record<
   ElasticsearchAssetParts[]
 >;
 
-export interface Dataset {
-  title: string;
-  path: string;
-  id: string;
-  release: string;
-  ingest_pipeline: string;
-  vars?: RegistryVarsEntry[];
+export interface RegistryDataStream {
   type: string;
+  dataset: string;
+  title: string;
+  release: string;
   streams?: RegistryStream[];
   package: string;
+  path: string;
+  ingest_pipeline: string;
+  elasticsearch?: RegistryElasticsearch;
+}
+
+export interface RegistryElasticsearch {
+  'index_template.settings'?: object;
+  'index_template.mappings'?: object;
 }
 
 // EPR types this as `[]map[string]interface{}`
@@ -201,7 +223,9 @@ export interface RegistryVarsEntry {
 // internal until we need them
 interface PackageAdditions {
   title: string;
+  latestVersion: string;
   assets: AssetsGroupedByServiceByType;
+  removable?: boolean;
 }
 
 // Managers public HTTP response types
@@ -217,10 +241,15 @@ export type PackageInfo = Installable<
 >;
 
 export interface Installation extends SavedObjectAttributes {
-  installed: AssetReference[];
+  installed_kibana: KibanaAssetReference[];
+  installed_es: EsAssetReference[];
   es_index_patterns: Record<string, string>;
   name: string;
   version: string;
+  install_status: EpmPackageInstallStatus;
+  install_version: string;
+  install_started_at: string;
+  install_source: InstallSource;
 }
 
 export type Installable<T> = Installed<T> | NotInstalled<T>;
@@ -234,32 +263,41 @@ export type NotInstalled<T = {}> = T & {
   status: InstallationStatus.notInstalled;
 };
 
-export type AssetReference = Pick<SavedObjectReference, 'id'> & {
-  type: AssetType | IngestAssetType;
+export type AssetReference = KibanaAssetReference | EsAssetReference;
+
+export type KibanaAssetReference = Pick<SavedObjectReference, 'id'> & {
+  type: KibanaAssetType;
+};
+export type EsAssetReference = Pick<SavedObjectReference, 'id'> & {
+  type: ElasticsearchAssetType;
 };
 
-/**
- * Types of assets which can be installed/removed
- */
-export enum IngestAssetType {
-  DataFrameTransform = 'data-frame-transform',
-  IlmPolicy = 'ilm-policy',
-  IndexTemplate = 'index-template',
-  IngestPipeline = 'ingest-pipeline',
-  MlJob = 'ml-job',
-  RollupJob = 'rollup-job',
-}
-
 export enum DefaultPackages {
-  base = 'base',
   system = 'system',
   endpoint = 'endpoint',
 }
 
+export interface IndexTemplateMappings {
+  properties: any;
+}
+
+// This is an index template v2, see https://github.com/elastic/elasticsearch/issues/53101
+// until "proper" documentation of the new format is available.
+// Ingest Manager does not use nor support the legacy index template v1 format at all
 export interface IndexTemplate {
-  order: number;
+  priority: number;
   index_patterns: string[];
-  settings: any;
-  mappings: object;
-  aliases: object;
+  template: {
+    settings: any;
+    mappings: any;
+    aliases: object;
+  };
+  data_stream: object;
+  composed_of: string[];
+  _meta: object;
+}
+
+export interface TemplateRef {
+  templateName: string;
+  indexTemplate: IndexTemplate;
 }

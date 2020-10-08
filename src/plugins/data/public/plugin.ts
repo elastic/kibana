@@ -17,39 +17,37 @@
  * under the License.
  */
 
-import {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  PackageInfo,
-} from 'src/core/public';
-import { Storage, IStorageWrapper } from '../../kibana_utils/public';
+import './index.scss';
+
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { ConfigSchema } from '../config';
+import { Storage, IStorageWrapper, createStartServicesGetter } from '../../kibana_utils/public';
 import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
   DataSetupDependencies,
   DataStartDependencies,
-  GetInternalStartServicesFn,
+  DataPublicPluginEnhancements,
 } from './types';
 import { AutocompleteService } from './autocomplete';
 import { SearchService } from './search/search_service';
 import { FieldFormatsService } from './field_formats';
 import { QueryService } from './query';
 import { createIndexPatternSelect } from './ui/index_pattern_select';
-import { IndexPatternsService } from './index_patterns';
+import {
+  IndexPatternsService,
+  onRedirectNoIndexPattern,
+  IndexPatternsApiClient,
+  UiSettingsPublicToCommon,
+} from './index_patterns';
 import {
   setFieldFormats,
-  setHttp,
   setIndexPatterns,
-  setInjectedMetadata,
   setNotifications,
   setOverlays,
   setQueryService,
   setSearchService,
   setUiSettings,
-  getFieldFormats,
-  getNotifications,
 } from './services';
 import { createSearchBar } from './ui/search_bar/create_search_bar';
 import { esaggs } from './search/expressions';
@@ -58,18 +56,22 @@ import {
   VALUE_CLICK_TRIGGER,
   APPLY_FILTER_TRIGGER,
 } from '../../ui_actions/public';
-import { ACTION_GLOBAL_APPLY_FILTER, createFilterAction, createFiltersFromEvent } from './actions';
-import { ApplyGlobalFilterActionContext } from './actions/apply_filter_action';
 import {
-  selectRangeAction,
-  SelectRangeActionContext,
+  ACTION_GLOBAL_APPLY_FILTER,
+  createFilterAction,
+  createFiltersFromValueClickAction,
+  createFiltersFromRangeSelectAction,
+  ApplyGlobalFilterActionContext,
   ACTION_SELECT_RANGE,
-} from './actions/select_range_action';
-import {
-  valueClickAction,
   ACTION_VALUE_CLICK,
+  SelectRangeActionContext,
   ValueClickActionContext,
-} from './actions/value_click_action';
+  createValueClickAction,
+  createSelectRangeAction,
+} from './actions';
+
+import { SavedObjectsClientPublicToCommon } from './index_patterns';
+import { indexPatternLoad } from './index_patterns/expressions/load_index_pattern';
 
 declare module '../../ui_actions/public' {
   export interface ActionContextMapping {
@@ -79,34 +81,36 @@ declare module '../../ui_actions/public' {
   }
 }
 
-export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPublicPluginStart> {
-  private readonly autocomplete = new AutocompleteService();
+export class DataPublicPlugin
+  implements
+    Plugin<
+      DataPublicPluginSetup,
+      DataPublicPluginStart,
+      DataSetupDependencies,
+      DataStartDependencies
+    > {
+  private readonly autocomplete: AutocompleteService;
   private readonly searchService: SearchService;
   private readonly fieldFormatsService: FieldFormatsService;
   private readonly queryService: QueryService;
   private readonly storage: IStorageWrapper;
-  private readonly packageInfo: PackageInfo;
 
-  constructor(initializerContext: PluginInitializerContext) {
-    this.searchService = new SearchService();
+  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
+    this.searchService = new SearchService(initializerContext);
     this.queryService = new QueryService();
     this.fieldFormatsService = new FieldFormatsService();
+    this.autocomplete = new AutocompleteService(initializerContext);
     this.storage = new Storage(window.localStorage);
-    this.packageInfo = initializerContext.env.packageInfo;
   }
 
   public setup(
-    core: CoreSetup,
-    { expressions, uiActions }: DataSetupDependencies
+    core: CoreSetup<DataStartDependencies, DataPublicPluginStart>,
+    { expressions, uiActions, usageCollection }: DataSetupDependencies
   ): DataPublicPluginSetup {
-    setInjectedMetadata(core.injectedMetadata);
+    const startServices = createStartServicesGetter(core.getStartServices);
 
     expressions.registerFunction(esaggs);
-
-    const getInternalStartServices: GetInternalStartServicesFn = () => ({
-      fieldFormats: getFieldFormats(),
-      notifications: getNotifications(),
-    });
+    expressions.registerFunction(indexPatternLoad);
 
     const queryService = this.queryService.setup({
       uiSettings: core.uiSettings,
@@ -117,31 +121,38 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
       createFilterAction(queryService.filterManager, queryService.timefilter.timefilter)
     );
 
-    uiActions.attachAction(
+    uiActions.addTriggerAction(
       SELECT_RANGE_TRIGGER,
-      selectRangeAction(queryService.filterManager, queryService.timefilter.timefilter)
+      createSelectRangeAction(() => ({
+        uiActions: startServices().plugins.uiActions,
+      }))
     );
 
-    uiActions.attachAction(
+    uiActions.addTriggerAction(
       VALUE_CLICK_TRIGGER,
-      valueClickAction(queryService.filterManager, queryService.timefilter.timefilter)
+      createValueClickAction(() => ({
+        uiActions: startServices().plugins.uiActions,
+      }))
     );
+
+    const searchService = this.searchService.setup(core, {
+      usageCollection,
+      expressions,
+    });
 
     return {
       autocomplete: this.autocomplete.setup(core),
-      search: this.searchService.setup(core, {
-        getInternalStartServices,
-        packageInfo: this.packageInfo,
-        query: queryService,
-      }),
+      search: searchService,
       fieldFormats: this.fieldFormatsService.setup(core),
       query: queryService,
+      __enhance: (enhancements: DataPublicPluginEnhancements) => {
+        searchService.__enhance(enhancements.search);
+      },
     };
   }
 
   public start(core: CoreStart, { uiActions }: DataStartDependencies): DataPublicPluginStart {
-    const { uiSettings, http, notifications, savedObjects, overlays } = core;
-    setHttp(http);
+    const { uiSettings, http, notifications, savedObjects, overlays, application } = core;
     setNotifications(notifications);
     setOverlays(overlays);
     setUiSettings(uiSettings);
@@ -149,20 +160,42 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     const fieldFormats = this.fieldFormatsService.start();
     setFieldFormats(fieldFormats);
 
-    const indexPatterns = new IndexPatternsService(uiSettings, savedObjects.client, http);
+    const indexPatterns = new IndexPatternsService({
+      uiSettings: new UiSettingsPublicToCommon(uiSettings),
+      savedObjectsClient: new SavedObjectsClientPublicToCommon(savedObjects.client),
+      apiClient: new IndexPatternsApiClient(http),
+      fieldFormats,
+      onNotification: (toastInputFields) => {
+        notifications.toasts.add(toastInputFields);
+      },
+      onError: notifications.toasts.addError.bind(notifications.toasts),
+      onRedirectNoIndexPattern: onRedirectNoIndexPattern(
+        application.capabilities,
+        application.navigateToApp,
+        overlays
+      ),
+    });
     setIndexPatterns(indexPatterns);
 
-    const query = this.queryService.start(savedObjects);
+    const query = this.queryService.start({
+      storage: this.storage,
+      savedObjectsClient: savedObjects.client,
+      uiSettings,
+    });
     setQueryService(query);
 
     const search = this.searchService.start(core, { fieldFormats, indexPatterns });
     setSearchService(search);
 
-    uiActions.attachAction(APPLY_FILTER_TRIGGER, uiActions.getAction(ACTION_GLOBAL_APPLY_FILTER));
+    uiActions.addTriggerAction(
+      APPLY_FILTER_TRIGGER,
+      uiActions.getAction(ACTION_GLOBAL_APPLY_FILTER)
+    );
 
     const dataServices = {
       actions: {
-        createFiltersFromEvent,
+        createFiltersFromValueClickAction,
+        createFiltersFromRangeSelectAction,
       },
       autocomplete: this.autocomplete.start(),
       fieldFormats,
@@ -188,5 +221,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
 
   public stop() {
     this.autocomplete.clearProviders();
+    this.queryService.stop();
+    this.searchService.stop();
   }
 }

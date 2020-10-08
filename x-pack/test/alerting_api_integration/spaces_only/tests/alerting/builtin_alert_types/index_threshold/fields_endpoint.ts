@@ -10,7 +10,7 @@ import { Spaces } from '../../../../scenarios';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME, getUrlPrefix } from '../../../../../common/lib';
 
-const API_URI = 'api/alerting_builtins/index_threshold/_fields';
+const API_URI = 'api/stack_alerts/index_threshold/_fields';
 
 // eslint-disable-next-line import/no-default-export
 export default function fieldsEndpointTests({ getService }: FtrProviderContext) {
@@ -148,7 +148,7 @@ export default function fieldsEndpointTests({ getService }: FtrProviderContext) 
   });
 
   function getFieldNamed(fields: any[], fieldName: string): any | undefined {
-    const matching = fields.filter(field => field.name === fieldName);
+    const matching = fields.filter((field) => field.name === fieldName);
     if (matching.length === 0) return;
     if (matching.length === 1) return matching[0];
     throw new Error(`multiple fields named ${fieldName}`);
@@ -156,10 +156,7 @@ export default function fieldsEndpointTests({ getService }: FtrProviderContext) 
 
   async function runQueryExpect(requestBody: any, status: number): Promise<any> {
     const url = `${getUrlPrefix(Spaces.space1.id)}/${API_URI}`;
-    const res = await supertest
-      .post(url)
-      .set('kbn-xsrf', 'foo')
-      .send(requestBody);
+    const res = await supertest.post(url).set('kbn-xsrf', 'foo').send(requestBody);
 
     if (res.status !== status) {
       // good place to put a console log for debugging unexpected results

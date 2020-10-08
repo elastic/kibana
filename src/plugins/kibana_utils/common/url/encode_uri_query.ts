@@ -45,7 +45,7 @@ export const encodeQuery = (
   query: ParsedQuery,
   encodeFunction: (val: string, pctEncodeSpaces?: boolean) => string = encodeUriQuery
 ) =>
-  transform(query, (result, value, key) => {
+  transform(query, (result: any, value, key) => {
     if (key) {
       const singleValue = Array.isArray(value) ? value.join(',') : value;
 

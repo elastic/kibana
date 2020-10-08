@@ -3,7 +3,7 @@
 exports[`Transform: <AggListForm /> Minimal initialization 1`] = `
 <Fragment>
   <EuiPanel
-    data-test-subj="transformAggregationEntry 0"
+    data-test-subj="transformAggregationEntry_0"
     paddingSize="s"
   >
     <AggLabelForm

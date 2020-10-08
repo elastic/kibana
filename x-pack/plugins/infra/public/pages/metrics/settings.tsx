@@ -4,16 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
-import { SourceConfigurationSettings } from '../../components/source_configuration/source_configuration_settings';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { SourceConfigurationSettings } from '../../components/source_configuration/source_configuration_settings';
 
 export const MetricsSettingsPage = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
   return (
-    <SourceConfigurationSettings
-      shouldAllowEdit={uiCapabilities?.infrastructure?.configureSource as boolean}
-      displaySettings="metrics"
-    />
+    <EuiErrorBoundary>
+      <SourceConfigurationSettings
+        shouldAllowEdit={uiCapabilities?.infrastructure?.configureSource as boolean}
+      />
+    </EuiErrorBoundary>
   );
 };

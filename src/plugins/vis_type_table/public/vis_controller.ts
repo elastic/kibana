@@ -22,6 +22,7 @@ import $ from 'jquery';
 
 import { VisParams, ExprVis } from '../../visualizations/public';
 import { getAngularModule } from './get_inner_angular';
+import { getKibanaLegacy } from './services';
 import { initTableVisLegacyModule } from './table_vis_legacy_module';
 
 const innerAngularName = 'kibana/table_vis';
@@ -63,7 +64,8 @@ export function getTableVisualizationControllerClass(
       }
     }
 
-    async render(esResponse: object, visParams: VisParams) {
+    async render(esResponse: object, visParams: VisParams): Promise<void> {
+      getKibanaLegacy().loadFontAwesome();
       await this.initLocalAngular();
 
       return new Promise(async (resolve, reject) => {
@@ -76,8 +78,18 @@ export function getTableVisualizationControllerClass(
           if (!this.$scope) {
             return;
           }
+
+          // How things get into this $scope?
+          // To inject variables into this $scope there's the following pipeline of stuff to check:
+          // - visualize_embeddable => that's what the editor creates to wrap this Angular component
+          // - build_pipeline => it serialize all the params into an Angular template compiled on the fly
+          // - table_vis_fn => unserialize the params and prepare them for the final React/Angular bridge
+          // - visualization_renderer => creates the wrapper component for this controller and passes the params
+          //
+          // In case some prop is missing check into the top of the chain if they are available and check
+          // the list above that it is passing through
           this.$scope.vis = this.vis;
-          this.$scope.visState = { params: visParams };
+          this.$scope.visState = { params: visParams, title: visParams.title };
           this.$scope.esResponse = esResponse;
 
           this.$scope.visParams = visParams;
@@ -91,7 +103,9 @@ export function getTableVisualizationControllerClass(
           this.$scope = this.$rootScope.$new();
           this.$scope.uiState = this.vis.getUiState();
           updateScope();
-          this.el.find('div').append(this.$compile(this.vis.type!.visConfig.template)(this.$scope));
+          this.el
+            .find('div')
+            .append(this.$compile(this.vis.type.visConfig?.template ?? '')(this.$scope));
           this.$scope.$apply();
         } else {
           updateScope();

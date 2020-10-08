@@ -53,13 +53,13 @@ export class PromiseWithCancel {
     return new Promise((resolve, reject) => {
       this._status = Status.Awaiting;
       return this._promise
-        .then(response => {
+        .then((response) => {
           if (this._status !== Status.Canceled) {
             this._status = Status.Resolved;
             return resolve(response);
           }
         })
-        .catch(error => {
+        .catch((error) => {
           if (this._status !== Status.Canceled) {
             this._status = Status.Failed;
             return reject(error);

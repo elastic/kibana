@@ -43,7 +43,7 @@ var IGNORE_WARNINGS = [
 ];
 
 if (process.noProcessWarnings !== true) {
-  process.on('warning', function(warn) {
+  process.on('warning', function (warn) {
     if (shouldIgnore(warn)) return;
 
     if (process.traceProcessWarnings === true) {
@@ -62,7 +62,7 @@ if (process.noProcessWarnings !== true) {
   // While the above warning listener would also be called on
   // unhandledRejection warnings, we can give a better error message if we
   // handle them separately:
-  process.on('unhandledRejection', function(reason) {
+  process.on('unhandledRejection', function (reason) {
     console.error('Unhandled Promise rejection detected:');
     console.error();
     console.error(reason);
@@ -74,7 +74,7 @@ if (process.noProcessWarnings !== true) {
 
 function shouldIgnore(warn) {
   warn = parseWarn(warn);
-  return IGNORE_WARNINGS.some(function({ name, code, message, file, line, col }) {
+  return IGNORE_WARNINGS.some(function ({ name, code, message, file, line, col }) {
     if (name && name !== warn.name) return false;
     if (code && code !== warn.code) return false;
     if (message && message !== warn.message) return false;

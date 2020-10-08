@@ -170,7 +170,7 @@ Array [
 ]
 `;
 
-exports[`index table show mapping button works from context menu 1`] = `"Mapping"`;
+exports[`index table show mappings button works from context menu 1`] = `"Mappings"`;
 
 exports[`index table show settings button works from context menu 1`] = `"Settings"`;
 

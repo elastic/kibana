@@ -27,7 +27,7 @@ export class PrivilegeFormCalculator {
     const entry = this.role.kibana[privilegeIndex];
 
     const basePrivileges = this.kibanaPrivileges.getBasePrivileges(entry);
-    return basePrivileges.find(bp => entry.base.includes(bp.id));
+    return basePrivileges.find((bp) => entry.base.includes(bp.id));
   }
 
   /**
@@ -67,7 +67,7 @@ export class PrivilegeFormCalculator {
       this.role.kibana[privilegeIndex],
     ]);
 
-    return feature.getSubFeaturePrivileges().some(sfp => {
+    return feature.getSubFeaturePrivileges().some((sfp) => {
       const isGranted = formPrivileges.grantsPrivilege(sfp);
       const isGrantedByDisplayedPrimary = displayedPrimary?.grantsPrivilege(sfp) ?? isGranted;
 
@@ -90,7 +90,7 @@ export class PrivilegeFormCalculator {
 
     return feature
       .getPrimaryFeaturePrivileges({ includeMinimalFeaturePrivileges: true })
-      .find(fp => {
+      .find((fp) => {
         return selectedFeaturePrivileges.includes(fp.id) || basePrivilege?.grantsPrivilege(fp);
       });
   }
@@ -112,7 +112,7 @@ export class PrivilegeFormCalculator {
     const feature = this.kibanaPrivileges.getSecuredFeature(featureId);
     const subFeaturePrivilege = feature
       .getSubFeaturePrivileges()
-      .find(ap => ap.id === privilegeId)!;
+      .find((ap) => ap.id === privilegeId)!;
 
     const assignedPrivileges = this.kibanaPrivileges.createCollectionFromRoleKibanaPrivileges([
       kibanaPrivilege,
@@ -138,7 +138,7 @@ export class PrivilegeFormCalculator {
       kibanaPrivilege,
     ]);
 
-    return subFeatureGroup.privileges.find(p => {
+    return subFeatureGroup.privileges.find((p) => {
       return assignedPrivileges.grantsPrivilege(p);
     });
   }
@@ -155,7 +155,7 @@ export class PrivilegeFormCalculator {
 
     return feature
       .getPrimaryFeaturePrivileges({ includeMinimalFeaturePrivileges: true })
-      .some(apfp => selectedFeaturePrivileges.includes(apfp.id));
+      .some((apfp) => selectedFeaturePrivileges.includes(apfp.id));
   }
 
   /**
@@ -184,8 +184,8 @@ export class PrivilegeFormCalculator {
 
       const startingPrivileges = feature
         .getSubFeaturePrivileges()
-        .filter(ap => primary.grantsPrivilege(ap))
-        .map(p => p.id);
+        .filter((ap) => primary.grantsPrivilege(ap))
+        .map((p) => p.id);
 
       nextPrivileges.push(primary.getMinimalPrivilegeId(), ...startingPrivileges);
     } else {
@@ -216,14 +216,14 @@ export class PrivilegeFormCalculator {
 
     const hasAssignedBasePrivileges = this.kibanaPrivileges
       .getBasePrivileges(entry)
-      .some(base => entry.base.includes(base.id));
+      .some((base) => entry.base.includes(base.id));
 
     const featuresWithDirectlyAssignedPrivileges = this.kibanaPrivileges
       .getSecuredFeatures()
-      .filter(feature =>
+      .filter((feature) =>
         feature
           .getAllPrivileges()
-          .some(privilege => entry.feature[feature.id]?.includes(privilege.id))
+          .some((privilege) => entry.feature[feature.id]?.includes(privilege.id))
       );
 
     const hasSupersededBasePrivileges =
@@ -231,15 +231,15 @@ export class PrivilegeFormCalculator {
       this.kibanaPrivileges
         .getBasePrivileges(entry)
         .some(
-          privilege =>
+          (privilege) =>
             globalPrivileges.grantsPrivilege(privilege) &&
             !formPrivileges.grantsPrivilege(privilege)
         );
 
-    const hasSupersededFeaturePrivileges = featuresWithDirectlyAssignedPrivileges.some(feature =>
+    const hasSupersededFeaturePrivileges = featuresWithDirectlyAssignedPrivileges.some((feature) =>
       feature
         .getAllPrivileges()
-        .some(fp => globalPrivileges.grantsPrivilege(fp) && !formPrivileges.grantsPrivilege(fp))
+        .some((fp) => globalPrivileges.grantsPrivilege(fp) && !formPrivileges.grantsPrivilege(fp))
     );
 
     return hasSupersededBasePrivileges || hasSupersededFeaturePrivileges;
@@ -270,12 +270,12 @@ export class PrivilegeFormCalculator {
 
     const selectedFeaturePrivileges = this.getSelectedFeaturePrivileges(featureId, privilegeIndex);
 
-    return feature.getPrimaryFeaturePrivileges().find(fp => {
+    return feature.getPrimaryFeaturePrivileges().find((fp) => {
       const correspondingMinimalPrivilegeId = fp.getMinimalPrivilegeId();
 
       const correspendingMinimalPrivilege = feature
         .getMinimalFeaturePrivileges()
-        .find(mp => mp.id === correspondingMinimalPrivilegeId)!;
+        .find((mp) => mp.id === correspondingMinimalPrivilegeId)!;
 
       // There are two cases where the minimal privileges aren't available:
       // 1. The feature has no registered sub-features
@@ -298,6 +298,6 @@ export class PrivilegeFormCalculator {
   }
 
   private locateGlobalPrivilege(role: Role) {
-    return role.kibana.find(entry => isGlobalPrivilegeDefinition(entry));
+    return role.kibana.find((entry) => isGlobalPrivilegeDefinition(entry));
   }
 }

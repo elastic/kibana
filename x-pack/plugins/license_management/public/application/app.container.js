@@ -15,7 +15,7 @@ import {
 } from './store/reducers/license_management';
 import { loadPermissions } from './store/actions/permissions';
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     hasPermission: getPermission(state),
     permissionsLoading: isPermissionsLoading(state),

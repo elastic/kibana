@@ -5,9 +5,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { routeToHome, routeToConnectors, routeToAlerts } from '../constants';
+import { routeToHome, routeToConnectors, routeToAlerts, routeToAlertDetails } from '../constants';
 
-export const getCurrentBreadcrumb = (type: string): { text: string; href: string } => {
+export const getAlertingSectionBreadcrumb = (type: string): { text: string; href: string } => {
   // Home and sections
   switch (type) {
     case 'connectors':
@@ -15,21 +15,31 @@ export const getCurrentBreadcrumb = (type: string): { text: string; href: string
         text: i18n.translate('xpack.triggersActionsUI.connectors.breadcrumbTitle', {
           defaultMessage: 'Connectors',
         }),
-        href: `#${routeToConnectors}`,
+        href: `${routeToConnectors}`,
       };
     case 'alerts':
       return {
         text: i18n.translate('xpack.triggersActionsUI.alerts.breadcrumbTitle', {
           defaultMessage: 'Alerts',
         }),
-        href: `#${routeToAlerts}`,
+        href: `${routeToAlerts}`,
       };
     default:
       return {
         text: i18n.translate('xpack.triggersActionsUI.home.breadcrumbTitle', {
           defaultMessage: 'Alerts and Actions',
         }),
-        href: `#${routeToHome}`,
+        href: `${routeToHome}`,
       };
   }
+};
+
+export const getAlertDetailsBreadcrumb = (
+  id: string,
+  name: string
+): { text: string; href: string } => {
+  return {
+    text: name,
+    href: `${routeToAlertDetails.replace(':alertId', id)}`,
+  };
 };

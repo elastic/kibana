@@ -1,8 +1,8 @@
 [role="xpack"]
 [[maps-search]]
-== Searching your data
+== Search geographic data
 
-**Elastic Maps** embeds the search bar for real-time search.
+Maps embeds the search bar for real-time search.
 Only layers requesting data from {es} are filtered when you submit a search request.
 Layers narrowed by the search context contain the filter icon image:maps/images/filter_icon.png[] next to the layer name in the legend.
 
@@ -10,20 +10,20 @@ You can create a layer that requests data from {es} from the following:
 
 * <<vector-layer>> with:
 
-** Documents source
+** Documents
 
-** Grid aggregation source
+** Clusters and grid
 
 ** <<terms-join>>
 
-* <<heatmap-layer>> with Grid aggregation source
+* <<heatmap-layer>>
 
 [role="screenshot"]
 image::maps/images/global_search_bar.png[]
 
 [role="xpack"]
 [[maps-create-filter-from-map]]
-=== Creating filters from your map
+=== Create filters from a map
 
 You can create two types of filters by interacting with your map:
 
@@ -62,7 +62,7 @@ image::maps/images/create_phrase_filter.png[]
 
 [role="xpack"]
 [[maps-layer-based-filtering]]
-=== Filtering a single layer
+=== Filter a single layer
 
 You can apply a search request to individual layers by setting `Filters` in the layer details panel.
 Click the *Add filter* button to add a filter to a layer.
@@ -74,7 +74,7 @@ image::maps/images/layer_search.png[]
 
 [role="xpack"]
 [[maps-search-across-multiple-indices]]
-=== Searching across multiple indices
+=== Search across multiple indices
 
 Your map might contain multiple {es} indices.
 This can occur when your map contains two or more layers with {es} sources from different indices.
@@ -85,7 +85,7 @@ The most common cause for empty layers are searches for a field that exists in o
 
 [float]
 [[maps-disable-search-for-layer]]
-==== Disable search for layer
+==== Disable search for a layer
 
 You can prevent the search bar from applying search context to a layer by configuring the following:
 
@@ -95,7 +95,7 @@ You can prevent the search bar from applying search context to a layer by config
 
 [float]
 [[maps-add-index-search]]
-==== Use _index in your search
+==== Use _index in a search
 
 Add {ref}/mapping-index-field.html[_index] to your search to include documents from indices that do not contain a search field.
 

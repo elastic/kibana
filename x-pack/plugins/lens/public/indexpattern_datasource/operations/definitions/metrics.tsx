@@ -6,11 +6,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { OperationDefinition } from './index';
-import { FormattedIndexPatternColumn } from './column_types';
+import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
 
-type MetricColumn<T> = FormattedIndexPatternColumn & {
-  operationType: T;
-};
+type MetricColumn<T> = FormattedIndexPatternColumn &
+  FieldBasedIndexPatternColumn & {
+    operationType: T;
+  };
 
 function buildMetricOperation<T extends MetricColumn<string>>({
   type,
@@ -27,6 +28,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     type,
     priority,
     displayName,
+    input: 'field',
     getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
       if (
         fieldType === 'number' &&
@@ -41,7 +43,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       }
     },
     isTransferable: (column, newIndexPattern) => {
-      const newField = newIndexPattern.fields.find(field => field.name === column.sourceField);
+      const newField = newIndexPattern.fields.find((field) => field.name === column.sourceField);
 
       return Boolean(
         newField &&
@@ -51,7 +53,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       );
     },
     buildColumn: ({ suggestedPriority, field, previousColumn }) => ({
-      label: ofName(field.name),
+      label: ofName(field.displayName),
       dataType: 'number',
       operationType: type,
       suggestedPriority,
@@ -64,11 +66,11 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     onFieldChange: (oldColumn, indexPattern, field) => {
       return {
         ...oldColumn,
-        label: ofName(field.name),
+        label: ofName(field.displayName),
         sourceField: field.name,
       };
     },
-    toEsAggsConfig: (column, columnId) => ({
+    toEsAggsConfig: (column, columnId, _indexPattern) => ({
       id: columnId,
       enabled: true,
       type: column.operationType,
@@ -78,7 +80,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         missing: 0,
       },
     }),
-  } as OperationDefinition<T>;
+  } as OperationDefinition<T, 'field'>;
 }
 
 export type SumIndexPatternColumn = MetricColumn<'sum'>;
@@ -91,7 +93,7 @@ export const minOperation = buildMetricOperation<MinIndexPatternColumn>({
   displayName: i18n.translate('xpack.lens.indexPattern.min', {
     defaultMessage: 'Minimum',
   }),
-  ofName: name =>
+  ofName: (name) =>
     i18n.translate('xpack.lens.indexPattern.minOf', {
       defaultMessage: 'Minimum of {name}',
       values: { name },
@@ -103,7 +105,7 @@ export const maxOperation = buildMetricOperation<MaxIndexPatternColumn>({
   displayName: i18n.translate('xpack.lens.indexPattern.max', {
     defaultMessage: 'Maximum',
   }),
-  ofName: name =>
+  ofName: (name) =>
     i18n.translate('xpack.lens.indexPattern.maxOf', {
       defaultMessage: 'Maximum of {name}',
       values: { name },
@@ -116,7 +118,7 @@ export const averageOperation = buildMetricOperation<AvgIndexPatternColumn>({
   displayName: i18n.translate('xpack.lens.indexPattern.avg', {
     defaultMessage: 'Average',
   }),
-  ofName: name =>
+  ofName: (name) =>
     i18n.translate('xpack.lens.indexPattern.avgOf', {
       defaultMessage: 'Average of {name}',
       values: { name },
@@ -129,7 +131,7 @@ export const sumOperation = buildMetricOperation<SumIndexPatternColumn>({
   displayName: i18n.translate('xpack.lens.indexPattern.sum', {
     defaultMessage: 'Sum',
   }),
-  ofName: name =>
+  ofName: (name) =>
     i18n.translate('xpack.lens.indexPattern.sumOf', {
       defaultMessage: 'Sum of {name}',
       values: { name },

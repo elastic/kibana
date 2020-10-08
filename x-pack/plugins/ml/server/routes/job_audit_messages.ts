@@ -7,7 +7,10 @@
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import { jobAuditMessagesProvider } from '../models/job_audit_messages';
-import { jobAuditMessagesQuerySchema, jobIdSchema } from './schemas/job_audit_messages_schema';
+import {
+  jobAuditMessagesQuerySchema,
+  jobAuditMessagesJobIdSchema,
+} from './schemas/job_audit_messages_schema';
 
 /**
  * Routes for job audit message routes
@@ -20,22 +23,23 @@ export function jobAuditMessagesRoutes({ router, mlLicense }: RouteInitializatio
    * @apiName GetJobAuditMessages
    * @apiDescription Returns audit messages for specified job ID
    *
-   * @apiSchema (params) jobIdSchema
+   * @apiSchema (params) jobAuditMessagesJobIdSchema
    * @apiSchema (query) jobAuditMessagesQuerySchema
    */
   router.get(
     {
       path: '/api/ml/job_audit_messages/messages/{jobId}',
       validate: {
-        params: jobIdSchema,
+        params: jobAuditMessagesJobIdSchema,
         query: jobAuditMessagesQuerySchema,
       },
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const { getJobAuditMessages } = jobAuditMessagesProvider(
-          context.ml!.mlClient.callAsCurrentUser
-        );
+        const { getJobAuditMessages } = jobAuditMessagesProvider(client);
         const { jobId } = request.params;
         const { from } = request.query;
         const resp = await getJobAuditMessages(jobId, from);
@@ -64,12 +68,13 @@ export function jobAuditMessagesRoutes({ router, mlLicense }: RouteInitializatio
       validate: {
         query: jobAuditMessagesQuerySchema,
       },
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const { getJobAuditMessages } = jobAuditMessagesProvider(
-          context.ml!.mlClient.callAsCurrentUser
-        );
+        const { getJobAuditMessages } = jobAuditMessagesProvider(client);
         const { from } = request.query;
         const resp = await getJobAuditMessages(undefined, from);
 

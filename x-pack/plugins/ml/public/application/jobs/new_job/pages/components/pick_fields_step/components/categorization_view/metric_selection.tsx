@@ -6,12 +6,14 @@
 
 import React, { FC, useContext, useEffect, useState } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
-import { mlMessageBarService } from '../../../../../../../components/messagebar';
+import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import { CategorizationJobCreator } from '../../../../../common/job_creator';
 import { CategorizationField } from '../categorization_field';
 import { CategorizationDetector } from '../categorization_detector';
+import { CategorizationPerPartitionField } from '../categorization_partition_field';
+
 import { FieldExamples } from './field_examples';
 import { ExamplesValidCallout } from './examples_valid_callout';
 import {
@@ -92,7 +94,7 @@ export const CategorizationDetectors: FC<Props> = ({ setIsValid }) => {
         setFieldExamples(null);
         setValidationChecks([]);
         setOverallValidStatus(CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID);
-        mlMessageBarService.notify.error(error);
+        getToastNotificationService().displayErrorToast(error);
       }
     } else {
       setFieldExamples(null);
@@ -126,6 +128,8 @@ export const CategorizationDetectors: FC<Props> = ({ setIsValid }) => {
           <FieldExamples fieldExamples={fieldExamples} />
         </>
       )}
+      <EuiHorizontalRule />
+      <CategorizationPerPartitionField />
     </>
   );
 };

@@ -137,7 +137,9 @@ export function topologicallyBatchProjects(
   const batches = [];
 
   if (batchByWorkspace) {
-    const workspaceRootProject = Array.from(projectsToBatch.values()).find(p => p.isWorkspaceRoot);
+    const workspaceRootProject = Array.from(projectsToBatch.values()).find(
+      (p) => p.isWorkspaceRoot
+    );
 
     if (!workspaceRootProject) {
       throw new CliError(`There was no yarn workspace root found.`);
@@ -167,7 +169,7 @@ export function topologicallyBatchProjects(
     const batch = [];
     for (const projectName of projectsLeftToBatch) {
       const projectDeps = projectGraph.get(projectName)!;
-      const needsDependenciesBatched = projectDeps.some(dep => projectsLeftToBatch.has(dep.name));
+      const needsDependenciesBatched = projectDeps.some((dep) => projectsLeftToBatch.has(dep.name));
 
       if (!needsDependenciesBatched) {
         batch.push(projectsToBatch.get(projectName)!);
@@ -188,7 +190,7 @@ export function topologicallyBatchProjects(
 
     batches.push(batch);
 
-    batch.forEach(project => projectsLeftToBatch.delete(project.name));
+    batch.forEach((project) => projectsLeftToBatch.delete(project.name));
   }
 
   return batches;
@@ -211,7 +213,7 @@ export function includeTransitiveProjects(
       ? project.productionDependencies
       : project.allDependencies;
 
-    Object.keys(dependencies).forEach(dep => {
+    Object.keys(dependencies).forEach((dep) => {
       if (allProjects.has(dep)) {
         toProcess.push(allProjects.get(dep)!);
       }

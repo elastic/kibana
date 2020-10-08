@@ -13,10 +13,17 @@ import { InfraBackendLibs } from './lib/infra_types';
 import {
   initGetLogEntryCategoriesRoute,
   initGetLogEntryCategoryDatasetsRoute,
+  initGetLogEntryCategoryDatasetsStatsRoute,
   initGetLogEntryCategoryExamplesRoute,
   initGetLogEntryRateRoute,
+  initGetLogEntryExamplesRoute,
+  initValidateLogAnalysisDatasetsRoute,
   initValidateLogAnalysisIndicesRoute,
+  initGetLogEntryAnomaliesRoute,
+  initGetLogEntryAnomaliesDatasetsRoute,
 } from './routes/log_analysis';
+import { initGetK8sAnomaliesRoute } from './routes/infra_ml';
+import { initGetHostsAnomaliesRoute } from './routes/infra_ml';
 import { initMetricExplorerRoute } from './routes/metrics_explorer';
 import { initMetadataRoute } from './routes/metadata';
 import { initSnapshotRoute } from './routes/snapshot';
@@ -29,7 +36,10 @@ import {
   initLogEntriesItemRoute,
 } from './routes/log_entries';
 import { initInventoryMetaRoute } from './routes/inventory_metadata';
+import { initLogSourceConfigurationRoutes, initLogSourceStatusRoutes } from './routes/log_sources';
 import { initSourceRoute } from './routes/source';
+import { initAlertPreviewRoute } from './routes/alerting';
+import { initGetLogAlertsChartPreviewDataRoute } from './routes/log_alerts';
 
 export const initInfraServer = (libs: InfraBackendLibs) => {
   const schema = makeExecutableSchema({
@@ -45,13 +55,20 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initIpToHostName(libs);
   initGetLogEntryCategoriesRoute(libs);
   initGetLogEntryCategoryDatasetsRoute(libs);
+  initGetLogEntryCategoryDatasetsStatsRoute(libs);
   initGetLogEntryCategoryExamplesRoute(libs);
   initGetLogEntryRateRoute(libs);
+  initGetLogEntryAnomaliesRoute(libs);
+  initGetLogEntryAnomaliesDatasetsRoute(libs);
+  initGetK8sAnomaliesRoute(libs);
+  initGetHostsAnomaliesRoute(libs);
   initSnapshotRoute(libs);
   initNodeDetailsRoute(libs);
   initSourceRoute(libs);
+  initValidateLogAnalysisDatasetsRoute(libs);
   initValidateLogAnalysisIndicesRoute(libs);
   initLogEntriesRoute(libs);
+  initGetLogEntryExamplesRoute(libs);
   initLogEntriesHighlightsRoute(libs);
   initLogEntriesSummaryRoute(libs);
   initLogEntriesSummaryHighlightsRoute(libs);
@@ -59,4 +76,8 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initMetricExplorerRoute(libs);
   initMetadataRoute(libs);
   initInventoryMetaRoute(libs);
+  initLogSourceConfigurationRoutes(libs);
+  initLogSourceStatusRoutes(libs);
+  initAlertPreviewRoute(libs);
+  initGetLogAlertsChartPreviewDataRoute(libs);
 };

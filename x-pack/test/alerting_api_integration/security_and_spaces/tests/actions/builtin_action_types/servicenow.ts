@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import httpProxy from 'http-proxy';
 import expect from '@kbn/expect';
 
+import { getHttpProxyServer } from '../../../../common/lib/get_proxy_server';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
   getExternalServiceSimulatorPath,
   ExternalServiceSimulator,
-} from '../../../../common/fixtures/plugins/actions';
-
-// node ../scripts/functional_test_runner.js --grep "servicenow" --config=test/alerting_api_integration/security_and_spaces/config.ts
+} from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
 
 const mapping = [
   {
@@ -24,7 +24,7 @@ const mapping = [
   {
     source: 'description',
     target: 'description',
-    actionType: 'append',
+    actionType: 'overwrite',
   },
   {
     source: 'comments',
@@ -36,399 +36,436 @@ const mapping = [
 // eslint-disable-next-line import/no-default-export
 export default function servicenowTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const configService = getService('config');
 
   const mockServiceNow = {
     config: {
       apiUrl: 'www.servicenowisinkibanaactions.com',
-      casesConfiguration: { mapping: [...mapping] },
+      incidentConfiguration: { mapping },
+      isCaseOwned: true,
     },
     secrets: {
       password: 'elastic',
       username: 'changeme',
     },
     params: {
-      caseId: '123',
-      title: 'a title',
-      description: 'a description',
-      createdAt: '2020-03-13T08:34:53.450Z',
-      createdBy: { fullName: 'Elastic User', username: 'elastic' },
-      updatedAt: null,
-      updatedBy: null,
-      incidentId: null,
-      comments: [
-        {
-          commentId: '456',
-          version: 'WzU3LDFd',
-          comment: 'first comment',
-          createdAt: '2020-03-13T08:34:53.450Z',
-          createdBy: { fullName: 'Elastic User', username: 'elastic' },
-          updatedAt: null,
-          updatedBy: null,
-        },
-      ],
+      subAction: 'pushToService',
+      subActionParams: {
+        savedObjectId: '123',
+        createdAt: '2020-03-13T08:34:53.450Z',
+        createdBy: { fullName: 'Elastic User', username: 'elastic' },
+        comments: [
+          {
+            commentId: '456',
+            comment: 'first comment',
+            createdAt: '2020-03-13T08:34:53.450Z',
+            createdBy: { fullName: 'Elastic User', username: 'elastic' },
+            updatedAt: null,
+            updatedBy: null,
+          },
+        ],
+        description: 'a description',
+        externalId: null,
+        title: 'a title',
+        severity: '1',
+        urgency: '1',
+        impact: '1',
+        updatedAt: '2020-06-17T04:37:45.147Z',
+        updatedBy: { fullName: null, username: 'elastic' },
+      },
     },
   };
 
-  describe('servicenow', () => {
-    let simulatedActionId = '';
-    let servicenowSimulatorURL: string = '<could not determine kibana url>';
+  let servicenowSimulatorURL: string = '<could not determine kibana url>';
 
-    // need to wait for kibanaServer to settle ...
+  describe('ServiceNow', () => {
     before(() => {
       servicenowSimulatorURL = kibanaServer.resolveUrl(
         getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW)
       );
     });
 
-    after(() => esArchiver.unload('empty_kibana'));
-
-    it('should return 200 when creating a servicenow action successfully', async () => {
-      const { body: createdAction } = await supertest
-        .post('/api/action')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'A servicenow action',
-          actionTypeId: '.servicenow',
-          config: {
-            apiUrl: servicenowSimulatorURL,
-            casesConfiguration: { ...mockServiceNow.config.casesConfiguration },
-          },
-          secrets: { ...mockServiceNow.secrets },
-        })
-        .expect(200);
-
-      expect(createdAction).to.eql({
-        id: createdAction.id,
-        isPreconfigured: false,
-        name: 'A servicenow action',
-        actionTypeId: '.servicenow',
-        config: {
-          apiUrl: servicenowSimulatorURL,
-          casesConfiguration: { ...mockServiceNow.config.casesConfiguration },
-        },
-      });
-
-      expect(typeof createdAction.id).to.be('string');
-
-      const { body: fetchedAction } = await supertest
-        .get(`/api/action/${createdAction.id}`)
-        .expect(200);
-
-      expect(fetchedAction).to.eql({
-        id: fetchedAction.id,
-        isPreconfigured: false,
-        name: 'A servicenow action',
-        actionTypeId: '.servicenow',
-        config: {
-          apiUrl: servicenowSimulatorURL,
-          casesConfiguration: { ...mockServiceNow.config.casesConfiguration },
-        },
-      });
-    });
-
-    it('should respond with a 400 Bad Request when creating a servicenow action with no apiUrl', async () => {
-      await supertest
-        .post('/api/action')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'A servicenow action',
-          actionTypeId: '.servicenow',
-          config: {},
-        })
-        .expect(400)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            statusCode: 400,
-            error: 'Bad Request',
-            message:
-              'error validating action type config: [apiUrl]: expected value of type [string] but got [undefined]',
-          });
-        });
-    });
-
-    it('should respond with a 400 Bad Request when creating a servicenow action with a non whitelisted apiUrl', async () => {
-      await supertest
-        .post('/api/action')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'A servicenow action',
-          actionTypeId: '.servicenow',
-          config: {
-            apiUrl: 'http://servicenow.mynonexistent.com',
-            casesConfiguration: { ...mockServiceNow.config.casesConfiguration },
-          },
-          secrets: { ...mockServiceNow.secrets },
-        })
-        .expect(400)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            statusCode: 400,
-            error: 'Bad Request',
-            message:
-              'error validating action type config: error configuring servicenow action: target url "http://servicenow.mynonexistent.com" is not whitelisted in the Kibana config xpack.actions.whitelistedHosts',
-          });
-        });
-    });
-
-    it('should respond with a 400 Bad Request when creating a servicenow action without secrets', async () => {
-      await supertest
-        .post('/api/action')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'A servicenow action',
-          actionTypeId: '.servicenow',
-          config: {
-            apiUrl: servicenowSimulatorURL,
-            casesConfiguration: { ...mockServiceNow.config.casesConfiguration },
-          },
-        })
-        .expect(400)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            statusCode: 400,
-            error: 'Bad Request',
-            message:
-              'error validating action type secrets: [password]: expected value of type [string] but got [undefined]',
-          });
-        });
-    });
-
-    it('should respond with a 400 Bad Request when creating a servicenow action without casesConfiguration', async () => {
-      await supertest
-        .post('/api/action')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'A servicenow action',
-          actionTypeId: '.servicenow',
-          config: {
-            apiUrl: servicenowSimulatorURL,
-          },
-          secrets: { ...mockServiceNow.secrets },
-        })
-        .expect(400)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            statusCode: 400,
-            error: 'Bad Request',
-            message:
-              'error validating action type config: [casesConfiguration.mapping]: expected value of type [array] but got [undefined]',
-          });
-        });
-    });
-
-    it('should respond with a 400 Bad Request when creating a servicenow action with empty mapping', async () => {
-      await supertest
-        .post('/api/action')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'A servicenow action',
-          actionTypeId: '.servicenow',
-          config: {
-            apiUrl: servicenowSimulatorURL,
-            casesConfiguration: { mapping: [] },
-          },
-          secrets: { ...mockServiceNow.secrets },
-        })
-        .expect(400)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            statusCode: 400,
-            error: 'Bad Request',
-            message:
-              'error validating action type config: [casesConfiguration.mapping]: expected non-empty but got empty',
-          });
-        });
-    });
-
-    it('should respond with a 400 Bad Request when creating a servicenow action with wrong actionType', async () => {
-      await supertest
-        .post('/api/action')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'A servicenow action',
-          actionTypeId: '.servicenow',
-          config: {
-            apiUrl: servicenowSimulatorURL,
-            casesConfiguration: {
-              mapping: [
-                {
-                  source: 'title',
-                  target: 'description',
-                  actionType: 'non-supported',
-                },
-              ],
+    describe('ServiceNow - Action Creation', () => {
+      it('should return 200 when creating a servicenow action successfully', async () => {
+        const { body: createdAction } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A servicenow action',
+            actionTypeId: '.servicenow',
+            config: {
+              apiUrl: servicenowSimulatorURL,
+              incidentConfiguration: mockServiceNow.config.incidentConfiguration,
+              isCaseOwned: true,
             },
-          },
-          secrets: { ...mockServiceNow.secrets },
-        })
-        .expect(400);
-    });
+            secrets: mockServiceNow.secrets,
+          })
+          .expect(200);
 
-    it('should create our servicenow simulator action successfully', async () => {
-      const { body: createdSimulatedAction } = await supertest
-        .post('/api/action')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'A servicenow simulator',
+        expect(createdAction).to.eql({
+          id: createdAction.id,
+          isPreconfigured: false,
+          name: 'A servicenow action',
           actionTypeId: '.servicenow',
           config: {
             apiUrl: servicenowSimulatorURL,
-            casesConfiguration: { ...mockServiceNow.config.casesConfiguration },
+            incidentConfiguration: mockServiceNow.config.incidentConfiguration,
+            isCaseOwned: true,
           },
-          secrets: { ...mockServiceNow.secrets },
-        })
-        .expect(200);
+        });
 
-      simulatedActionId = createdSimulatedAction.id;
-    });
+        const { body: fetchedAction } = await supertest
+          .get(`/api/actions/action/${createdAction.id}`)
+          .expect(200);
 
-    it('should handle executing with a simulated success', async () => {
-      const { body: result } = await supertest
-        .post(`/api/action/${simulatedActionId}/_execute`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          params: { ...mockServiceNow.params, title: 'success', comments: [] },
-        })
-        .expect(200);
+        expect(fetchedAction).to.eql({
+          id: fetchedAction.id,
+          isPreconfigured: false,
+          name: 'A servicenow action',
+          actionTypeId: '.servicenow',
+          config: {
+            apiUrl: servicenowSimulatorURL,
+            incidentConfiguration: mockServiceNow.config.incidentConfiguration,
+            isCaseOwned: true,
+          },
+        });
+      });
 
-      expect(result).to.eql({
-        status: 'ok',
-        actionId: simulatedActionId,
-        data: {
-          incidentId: '123',
-          number: 'INC01',
-          pushedDate: '2020-03-10T12:24:20.000Z',
-          url: `${servicenowSimulatorURL}/nav_to.do?uri=incident.do?sys_id=123`,
-        },
+      it('should respond with a 400 Bad Request when creating a servicenow action with no apiUrl', async () => {
+        await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A servicenow action',
+            actionTypeId: '.servicenow',
+            config: {},
+          })
+          .expect(400)
+          .then((resp: any) => {
+            expect(resp.body).to.eql({
+              statusCode: 400,
+              error: 'Bad Request',
+              message:
+                'error validating action type config: [apiUrl]: expected value of type [string] but got [undefined]',
+            });
+          });
+      });
+
+      it('should respond with a 400 Bad Request when creating a servicenow action with a not present in allowedHosts apiUrl', async () => {
+        await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A servicenow action',
+            actionTypeId: '.servicenow',
+            config: {
+              apiUrl: 'http://servicenow.mynonexistent.com',
+              incidentConfiguration: mockServiceNow.config.incidentConfiguration,
+              isCaseOwned: true,
+            },
+            secrets: mockServiceNow.secrets,
+          })
+          .expect(400)
+          .then((resp: any) => {
+            expect(resp.body).to.eql({
+              statusCode: 400,
+              error: 'Bad Request',
+              message:
+                'error validating action type config: error configuring connector action: target url "http://servicenow.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
+            });
+          });
+      });
+
+      it('should respond with a 400 Bad Request when creating a servicenow action without secrets', async () => {
+        await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A servicenow action',
+            actionTypeId: '.servicenow',
+            config: {
+              apiUrl: servicenowSimulatorURL,
+              incidentConfiguration: mockServiceNow.config.incidentConfiguration,
+              isCaseOwned: true,
+            },
+          })
+          .expect(400)
+          .then((resp: any) => {
+            expect(resp.body).to.eql({
+              statusCode: 400,
+              error: 'Bad Request',
+              message:
+                'error validating action type secrets: [password]: expected value of type [string] but got [undefined]',
+            });
+          });
+      });
+
+      it('should create a servicenow action without incidentConfiguration', async () => {
+        await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A servicenow action',
+            actionTypeId: '.servicenow',
+            config: {
+              apiUrl: servicenowSimulatorURL,
+              isCaseOwned: true,
+            },
+            secrets: mockServiceNow.secrets,
+          })
+          .expect(200);
+      });
+
+      it('should respond with a 400 Bad Request when creating a servicenow action with empty mapping', async () => {
+        await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A servicenow action',
+            actionTypeId: '.servicenow',
+            config: {
+              apiUrl: servicenowSimulatorURL,
+              incidentConfiguration: { mapping: [] },
+              isCaseOwned: true,
+            },
+            secrets: mockServiceNow.secrets,
+          })
+          .expect(400)
+          .then((resp: any) => {
+            expect(resp.body).to.eql({
+              statusCode: 400,
+              error: 'Bad Request',
+              message:
+                'error validating action type config: [incidentConfiguration.mapping]: expected non-empty but got empty',
+            });
+          });
+      });
+
+      it('should respond with a 400 Bad Request when creating a servicenow action with wrong actionType', async () => {
+        await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A servicenow action',
+            actionTypeId: '.servicenow',
+            config: {
+              apiUrl: servicenowSimulatorURL,
+              incidentConfiguration: {
+                mapping: [
+                  {
+                    source: 'title',
+                    target: 'description',
+                    actionType: 'non-supported',
+                  },
+                ],
+              },
+              isCaseOwned: true,
+            },
+            secrets: mockServiceNow.secrets,
+          })
+          .expect(400);
       });
     });
 
-    it('should handle failing with a simulated success without caseId', async () => {
-      await supertest
-        .post(`/api/action/${simulatedActionId}/_execute`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          params: {},
-        })
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            actionId: simulatedActionId,
-            status: 'error',
-            retry: false,
-            message:
-              'error validating action params: [caseId]: expected value of type [string] but got [undefined]',
+    describe('ServiceNow - Executor', () => {
+      let simulatedActionId: string;
+      let proxyServer: httpProxy | undefined;
+      let proxyHaveBeenCalled = false;
+      before(async () => {
+        const { body } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A servicenow simulator',
+            actionTypeId: '.servicenow',
+            config: {
+              apiUrl: servicenowSimulatorURL,
+              incidentConfiguration: mockServiceNow.config.incidentConfiguration,
+              isCaseOwned: true,
+            },
+            secrets: mockServiceNow.secrets,
           });
-        });
-    });
+        simulatedActionId = body.id;
 
-    it('should handle failing with a simulated success without title', async () => {
-      await supertest
-        .post(`/api/action/${simulatedActionId}/_execute`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          params: { caseId: 'success' },
-        })
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            actionId: simulatedActionId,
-            status: 'error',
-            retry: false,
-            message:
-              'error validating action params: [title]: expected value of type [string] but got [undefined]',
-          });
-        });
-    });
+        proxyServer = await getHttpProxyServer(
+          kibanaServer.resolveUrl('/'),
+          configService.get('kbnTestServer.serverArgs'),
+          () => {
+            proxyHaveBeenCalled = true;
+          }
+        );
+      });
 
-    it('should handle failing with a simulated success without createdAt', async () => {
-      await supertest
-        .post(`/api/action/${simulatedActionId}/_execute`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          params: { caseId: 'success', title: 'success' },
-        })
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            actionId: simulatedActionId,
-            status: 'error',
-            retry: false,
-            message:
-              'error validating action params: [createdAt]: expected value of type [string] but got [undefined]',
-          });
+      describe('Validation', () => {
+        it('should handle failing with a simulated success without action', async () => {
+          await supertest
+            .post(`/api/actions/action/${simulatedActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {},
+            })
+            .then((resp: any) => {
+              expect(resp.body).to.eql({
+                actionId: simulatedActionId,
+                status: 'error',
+                retry: false,
+                message: `error validating action params: Cannot read property 'Symbol(Symbol.iterator)' of undefined`,
+              });
+            });
         });
-    });
 
-    it('should handle failing with a simulated success without commentId', async () => {
-      await supertest
-        .post(`/api/action/${simulatedActionId}/_execute`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          params: {
-            caseId: 'success',
-            title: 'success',
-            createdAt: 'success',
-            createdBy: { username: 'elastic' },
-            comments: [{}],
-          },
-        })
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            actionId: simulatedActionId,
-            status: 'error',
-            retry: false,
-            message:
-              'error validating action params: [comments.0.commentId]: expected value of type [string] but got [undefined]',
-          });
+        it('should handle failing with a simulated success without unsupported action', async () => {
+          await supertest
+            .post(`/api/actions/action/${simulatedActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: { subAction: 'non-supported' },
+            })
+            .then((resp: any) => {
+              expect(resp.body).to.eql({
+                actionId: simulatedActionId,
+                status: 'error',
+                retry: false,
+                message:
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subAction]: expected value to equal [pushToService]',
+              });
+            });
         });
-    });
 
-    it('should handle failing with a simulated success without comment message', async () => {
-      await supertest
-        .post(`/api/action/${simulatedActionId}/_execute`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          params: {
-            caseId: 'success',
-            title: 'success',
-            createdAt: 'success',
-            createdBy: { username: 'elastic' },
-            comments: [{ commentId: 'success' }],
-          },
-        })
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            actionId: simulatedActionId,
-            status: 'error',
-            retry: false,
-            message:
-              'error validating action params: [comments.0.comment]: expected value of type [string] but got [undefined]',
-          });
+        it('should handle failing with a simulated success without subActionParams', async () => {
+          await supertest
+            .post(`/api/actions/action/${simulatedActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: { subAction: 'pushToService' },
+            })
+            .then((resp: any) => {
+              expect(resp.body).to.eql({
+                actionId: simulatedActionId,
+                status: 'error',
+                retry: false,
+                message:
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.title]: expected value of type [string] but got [undefined]',
+              });
+            });
         });
-    });
 
-    it('should handle failing with a simulated success without comment.createdAt', async () => {
-      await supertest
-        .post(`/api/action/${simulatedActionId}/_execute`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          params: {
-            caseId: 'success',
-            title: 'success',
-            createdAt: 'success',
-            createdBy: { username: 'elastic' },
-            comments: [{ commentId: 'success', comment: 'success' }],
-          },
-        })
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
+        it('should handle failing with a simulated success without title', async () => {
+          await supertest
+            .post(`/api/actions/action/${simulatedActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {
+                ...mockServiceNow.params,
+                subActionParams: {
+                  savedObjectId: 'success',
+                },
+              },
+            })
+            .then((resp: any) => {
+              expect(resp.body).to.eql({
+                actionId: simulatedActionId,
+                status: 'error',
+                retry: false,
+                message:
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.title]: expected value of type [string] but got [undefined]',
+              });
+            });
+        });
+
+        it('should handle failing with a simulated success without commentId', async () => {
+          await supertest
+            .post(`/api/actions/action/${simulatedActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {
+                ...mockServiceNow.params,
+                subActionParams: {
+                  ...mockServiceNow.params.subActionParams,
+                  savedObjectId: 'success',
+                  title: 'success',
+                  createdAt: 'success',
+                  createdBy: { username: 'elastic' },
+                  comments: [{}],
+                },
+              },
+            })
+            .then((resp: any) => {
+              expect(resp.body).to.eql({
+                actionId: simulatedActionId,
+                status: 'error',
+                retry: false,
+                message:
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.comments.0.commentId]: expected value of type [string] but got [undefined]',
+              });
+            });
+        });
+
+        it('should handle failing with a simulated success without comment message', async () => {
+          await supertest
+            .post(`/api/actions/action/${simulatedActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {
+                ...mockServiceNow.params,
+                subActionParams: {
+                  ...mockServiceNow.params.subActionParams,
+                  savedObjectId: 'success',
+                  title: 'success',
+                  createdAt: 'success',
+                  createdBy: { username: 'elastic' },
+                  comments: [{ commentId: 'success' }],
+                },
+              },
+            })
+            .then((resp: any) => {
+              expect(resp.body).to.eql({
+                actionId: simulatedActionId,
+                status: 'error',
+                retry: false,
+                message:
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.comments.0.comment]: expected value of type [string] but got [undefined]',
+              });
+            });
+        });
+      });
+
+      describe('Execution', () => {
+        it('should handle creating an incident without comments', async () => {
+          const { body: result } = await supertest
+            .post(`/api/actions/action/${simulatedActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {
+                ...mockServiceNow.params,
+                subActionParams: {
+                  ...mockServiceNow.params.subActionParams,
+                  comments: [],
+                },
+              },
+            })
+            .expect(200);
+
+          expect(proxyHaveBeenCalled).to.equal(true);
+          expect(result).to.eql({
+            status: 'ok',
             actionId: simulatedActionId,
-            status: 'error',
-            retry: false,
-            message:
-              'error validating action params: [comments.0.createdAt]: expected value of type [string] but got [undefined]',
+            data: {
+              id: '123',
+              title: 'INC01',
+              pushedDate: '2020-03-10T12:24:20.000Z',
+              url: `${servicenowSimulatorURL}/nav_to.do?uri=incident.do?sys_id=123`,
+            },
           });
         });
+      });
+
+      after(() => {
+        if (proxyServer) {
+          proxyServer.close();
+        }
+      });
     });
   });
 }

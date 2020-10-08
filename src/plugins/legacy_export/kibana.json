@@ -1,0 +1,6 @@
+{
+  "id": "legacyExport",
+  "version": "kibana",
+  "server": true,
+  "ui": false
+}

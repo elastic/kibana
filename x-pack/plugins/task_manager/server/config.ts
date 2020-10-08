@@ -8,6 +8,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 
 export const DEFAULT_MAX_WORKERS = 10;
 export const DEFAULT_POLL_INTERVAL = 3000;
+export const DEFAULT_MAX_POLL_INACTIVITY_CYCLES = 10;
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
@@ -21,6 +22,11 @@ export const configSchema = schema.object({
     defaultValue: DEFAULT_POLL_INTERVAL,
     min: 100,
   }),
+  /* How many poll interval cycles can work take before it's timed out. */
+  max_poll_inactivity_cycles: schema.number({
+    defaultValue: DEFAULT_MAX_POLL_INACTIVITY_CYCLES,
+    min: 1,
+  }),
   /* How many requests can Task Manager buffer before it rejects new requests. */
   request_capacity: schema.number({
     // a nice round contrived number, feel free to change as we learn how it behaves
@@ -30,7 +36,7 @@ export const configSchema = schema.object({
   /* The name of the index used to store task information. */
   index: schema.string({
     defaultValue: '.kibana_task_manager',
-    validate: val => {
+    validate: (val) => {
       if (val.toLowerCase() === '.tasks') {
         return `"${val}" is an invalid Kibana Task Manager index, as it is already in use by the ElasticSearch Tasks Manager`;
       }

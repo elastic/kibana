@@ -19,35 +19,38 @@
 
 import React from 'react';
 import {
-  EuiPanel,
   EuiPageBody,
   EuiPageContent,
   EuiPageContentBody,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiTitle,
+  EuiPanel,
+  EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
-import { EuiSpacer } from '@elastic/eui';
-import {
-  EmbeddableFactoryRenderer,
-  EmbeddableStart,
-  ViewMode,
-} from '../../../src/plugins/embeddable/public';
+import { EmbeddableRenderer, ViewMode } from '../../../src/plugins/embeddable/public';
 import {
   HELLO_WORLD_EMBEDDABLE,
-  TODO_EMBEDDABLE,
   MULTI_TASK_TODO_EMBEDDABLE,
-  SEARCHABLE_LIST_CONTAINER,
-  LIST_CONTAINER,
+  TODO_EMBEDDABLE,
+  ListContainerFactory,
+  SearchableListContainerFactory,
 } from '../../embeddable_examples/public';
+import { SearchableContainerInput } from '../../embeddable_examples/public/searchable_list_container/searchable_list_container';
+import { TodoInput } from '../../embeddable_examples/public/todo';
+import { MultiTaskTodoInput } from '../../embeddable_examples/public/multi_task_todo';
 
 interface Props {
-  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
+  listContainerEmbeddableFactory: ListContainerFactory;
+  searchableListContainerEmbeddableFactory: SearchableListContainerFactory;
 }
 
-export function ListContainerExample({ getEmbeddableFactory }: Props) {
-  const listInput = {
+export function ListContainerExample({
+  listContainerEmbeddableFactory,
+  searchableListContainerEmbeddableFactory,
+}: Props) {
+  const listInput: SearchableContainerInput = {
     id: 'hello',
     title: 'My todo list',
     viewMode: ViewMode.VIEW,
@@ -65,7 +68,7 @@ export function ListContainerExample({ getEmbeddableFactory }: Props) {
           task: 'Goes out on Wednesdays!',
           icon: 'broom',
           title: 'Take out the trash',
-        },
+        } as TodoInput,
       },
       '3': {
         type: TODO_EMBEDDABLE,
@@ -73,12 +76,12 @@ export function ListContainerExample({ getEmbeddableFactory }: Props) {
           id: '3',
           icon: 'broom',
           title: 'Vaccum the floor',
-        },
+        } as TodoInput,
       },
     },
   };
 
-  const searchableInput = {
+  const searchableInput: SearchableContainerInput = {
     id: '1',
     title: 'My searchable todo list',
     viewMode: ViewMode.VIEW,
@@ -97,7 +100,7 @@ export function ListContainerExample({ getEmbeddableFactory }: Props) {
           task: 'Goes out on Wednesdays!',
           icon: 'broom',
           title: 'Take out the trash',
-        },
+        } as TodoInput,
       },
       '3': {
         type: MULTI_TASK_TODO_EMBEDDABLE,
@@ -106,7 +109,7 @@ export function ListContainerExample({ getEmbeddableFactory }: Props) {
           icon: 'searchProfilerApp',
           title: 'Learn more',
           tasks: ['Go to school', 'Watch planet earth', 'Read the encyclopedia'],
-        },
+        } as MultiTaskTodoInput,
       },
     },
   };
@@ -127,11 +130,7 @@ export function ListContainerExample({ getEmbeddableFactory }: Props) {
             list.
           </EuiText>
           <EuiPanel data-test-subj="listContainerEmbeddablePanel" paddingSize="none" role="figure">
-            <EmbeddableFactoryRenderer
-              getEmbeddableFactory={getEmbeddableFactory}
-              type={LIST_CONTAINER}
-              input={listInput}
-            />
+            <EmbeddableRenderer input={listInput} factory={listContainerEmbeddableFactory} />
           </EuiPanel>
 
           <EuiSpacer />
@@ -167,10 +166,9 @@ export function ListContainerExample({ getEmbeddableFactory }: Props) {
             paddingSize="none"
             role="figure"
           >
-            <EmbeddableFactoryRenderer
-              getEmbeddableFactory={getEmbeddableFactory}
-              type={SEARCHABLE_LIST_CONTAINER}
+            <EmbeddableRenderer
               input={searchableInput}
+              factory={searchableListContainerEmbeddableFactory}
             />{' '}
           </EuiPanel>
           <EuiSpacer />
@@ -178,7 +176,7 @@ export function ListContainerExample({ getEmbeddableFactory }: Props) {
             <p>
               There currently is no formal way to limit what children can be added to a container.
               If the use case arose, it wouldn&#39;t be difficult. In the mean time, it&#39;s good
-              to understand that chilren may ignore input they don&#39;t care about. Likewise the
+              to understand that children may ignore input they don&#39;t care about. Likewise the
               container will have to choose what to do when it encounters children that are missing
               certain output variables.
             </p>

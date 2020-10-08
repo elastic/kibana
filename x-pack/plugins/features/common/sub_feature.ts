@@ -15,7 +15,7 @@ export interface SubFeatureConfig {
   name: string;
 
   /** Collection of privilege groups */
-  privilegeGroups: SubFeaturePrivilegeGroupConfig[];
+  privilegeGroups: readonly SubFeaturePrivilegeGroupConfig[];
 }
 
 /**
@@ -45,7 +45,7 @@ export interface SubFeaturePrivilegeGroupConfig {
   /**
    * The privileges which belong to this group.
    */
-  privileges: SubFeaturePrivilegeConfig[];
+  privileges: readonly SubFeaturePrivilegeConfig[];
 }
 
 /**

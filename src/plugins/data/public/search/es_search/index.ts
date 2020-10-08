@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export { esSearchStrategyProvider } from './es_search_strategy';
 export { getEsPreference } from './get_es_preference';

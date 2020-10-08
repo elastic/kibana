@@ -5,11 +5,15 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/server';
-import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../../../constants';
+import {
+  INDEX_PATTERN_SAVED_OBJECT_TYPE,
+  INDEX_PATTERN_PLACEHOLDER_SUFFIX,
+} from '../../../../constants';
 import * as Registry from '../../registry';
 import { loadFieldsFromYaml, Fields, Field } from '../../fields/field';
 import { getPackageKeysByStatus } from '../../packages/get';
-import { InstallationStatus, RegistryPackage } from '../../../../types';
+import { InstallationStatus, RegistryPackage, CallESAsCurrentUser } from '../../../../types';
+import { appContextService } from '../../../../services';
 
 interface FieldFormatMap {
   [key: string]: FieldFormatMapItem;
@@ -47,6 +51,7 @@ const typeMap: TypeMap = {
   date: 'date',
   ip: 'ip',
   boolean: 'boolean',
+  constant_keyword: 'string',
 };
 
 export interface IndexPatternField {
@@ -62,11 +67,11 @@ export interface IndexPatternField {
   enabled?: boolean;
   script?: string;
   lang?: string;
+  readFromDocValues: boolean;
 }
 export enum IndexPatternType {
   logs = 'logs',
   metrics = 'metrics',
-  events = 'events',
 }
 // TODO: use a function overload and make pkgName and pkgVersion required for install/update
 // and not for an update removal.  or separate out the functions
@@ -80,9 +85,19 @@ export async function installIndexPatterns(
     savedObjectsClient,
     InstallationStatus.installed
   );
+
+  // TODO: move to install package
+  // cache all installed packages if they don't exist
+  const packagePromises = installedPackages.map((pkg) =>
+    // TODO: this hard-codes 'registry' as installSource, so uploaded packages are ignored
+    // and their fields will be removed from the generated index patterns after this runs.
+    Registry.ensureCachedArchiveInfo(pkg.pkgName, pkg.pkgVersion, 'registry')
+  );
+  await Promise.all(packagePromises);
+
   if (pkgName && pkgVersion) {
     // add this package to the array if it doesn't already exist
-    const foundPkg = installedPackages.find(pkg => pkg.pkgName === pkgName);
+    const foundPkg = installedPackages.find((pkg) => pkg.pkgName === pkgName);
     // this may be removed if we add the packged to saved objects before installing index patterns
     // otherwise this is a first time install
     // TODO: handle update case when versions are different
@@ -91,18 +106,14 @@ export async function installIndexPatterns(
     }
   }
   // get each package's registry info
-  const installedPackagesFetchInfoPromise = installedPackages.map(pkg =>
+  const installedPackagesFetchInfoPromise = installedPackages.map((pkg) =>
     Registry.fetchInfo(pkg.pkgName, pkg.pkgVersion)
   );
   const installedPackagesInfo = await Promise.all(installedPackagesFetchInfoPromise);
 
   // for each index pattern type, create an index pattern
-  const indexPatternTypes = [
-    IndexPatternType.logs,
-    IndexPatternType.metrics,
-    IndexPatternType.events,
-  ];
-  indexPatternTypes.forEach(async indexPatternType => {
+  const indexPatternTypes = [IndexPatternType.logs, IndexPatternType.metrics];
+  indexPatternTypes.forEach(async (indexPatternType) => {
     // if this is an update because a package is being unisntalled (no pkgkey argument passed) and no other packages are installed, remove the index pattern
     if (!pkgName && installedPackages.length === 0) {
       try {
@@ -113,8 +124,8 @@ export async function installIndexPatterns(
       return;
     }
 
-    // get all dataset fields from all installed packages
-    const fields = await getAllDatasetFieldsByType(installedPackagesInfo, indexPatternType);
+    // get all data stream fields from all installed packages
+    const fields = await getAllDataStreamFieldsByType(installedPackagesInfo, indexPatternType);
 
     const kibanaIndexPattern = createIndexPattern(indexPatternType, fields);
     // create or overwrite the index pattern
@@ -126,23 +137,27 @@ export async function installIndexPatterns(
 }
 
 // loops through all given packages and returns an array
-// of all fields from all datasets matching datasetType
-export const getAllDatasetFieldsByType = async (
+// of all fields from all data streams matching data stream type
+export const getAllDataStreamFieldsByType = async (
   packages: RegistryPackage[],
-  datasetType: IndexPatternType
+  dataStreamType: IndexPatternType
 ): Promise<Fields> => {
-  const datasetsPromises = packages.reduce<Array<Promise<Field[]>>>((acc, pkg) => {
-    if (pkg.datasets) {
-      // filter out datasets by datasetType
-      const matchingDatasets = pkg.datasets.filter(dataset => dataset.type === datasetType);
-      matchingDatasets.forEach(dataset => acc.push(loadFieldsFromYaml(pkg, dataset.path)));
+  const dataStreamsPromises = packages.reduce<Array<Promise<Field[]>>>((acc, pkg) => {
+    if (pkg.data_streams) {
+      // filter out data streams by data stream type
+      const matchingDataStreams = pkg.data_streams.filter(
+        (dataStream) => dataStream.type === dataStreamType
+      );
+      matchingDataStreams.forEach((dataStream) =>
+        acc.push(loadFieldsFromYaml(pkg, dataStream.path))
+      );
     }
     return acc;
   }, []);
 
-  // get all the datasets for each installed package into one array
-  const allDatasetFields: Fields[] = await Promise.all(datasetsPromises);
-  return allDatasetFields.flat();
+  // get all the data stream fields for each installed package into one array
+  const allDataStreamFields: Fields[] = await Promise.all(dataStreamsPromises);
+  return allDataStreamFields.flat();
 };
 
 // creates or updates index pattern
@@ -233,6 +248,7 @@ export const transformField = (field: Field, i: number, fields: Fields): IndexPa
     searchable: field.searchable ?? true,
     aggregatable: field.aggregatable ?? true,
     doc_values: field.doc_values ?? true,
+    readFromDocValues: field.doc_values ?? true,
   };
 
   // if type exists, check if it exists in the map
@@ -250,6 +266,7 @@ export const transformField = (field: Field, i: number, fields: Fields): IndexPa
     newField.aggregatable = false;
     newField.analyzed = false;
     newField.doc_values = field.doc_values ?? false;
+    newField.readFromDocValues = field.doc_values ?? false;
     newField.indexed = false;
     newField.searchable = false;
   }
@@ -261,6 +278,7 @@ export const transformField = (field: Field, i: number, fields: Fields): IndexPa
       newField.aggregatable = false;
       newField.analyzed = false;
       newField.doc_values = false;
+      newField.readFromDocValues = false;
       newField.indexed = false;
       newField.searchable = false;
     }
@@ -275,6 +293,7 @@ export const transformField = (field: Field, i: number, fields: Fields): IndexPa
     newField.script = field.script;
     newField.lang = 'painless';
     newField.doc_values = false;
+    newField.readFromDocValues = false;
   }
 
   return newField;
@@ -289,6 +308,10 @@ export const transformField = (field: Field, i: number, fields: Fields): IndexPa
 export const flattenFields = (allFields: Fields): Fields => {
   const flatten = (fields: Fields): Fields =>
     fields.reduce<Field[]>((acc, field) => {
+      // if this is a group fields with no fields, skip the field
+      if (field.type === 'group' && !field.fields?.length) {
+        return acc;
+      }
       // recurse through nested fields
       if (field.type === 'group' && field.fields?.length) {
         // skip if field.enabled is not explicitly set to false
@@ -319,7 +342,7 @@ export const flattenFields = (allFields: Fields): Fields => {
   // helper function to call flatten() and rename the fields
   const renameAndFlatten = (field: Field, fields: Fields, acc: Fields): Fields => {
     const flattenedFields = flatten(fields);
-    flattenedFields.forEach(nestedField => {
+    flattenedFields.forEach((nestedField) => {
       acc.push({
         ...nestedField,
         name: `${field.name}.${nestedField.name}`,
@@ -355,4 +378,32 @@ const getFieldFormatParams = (field: Field): FieldFormatParams => {
   if (field.url_template) params.urlTemplate = field.url_template;
   if (field.open_link_in_current_tab) params.openLinkInCurrentTab = field.open_link_in_current_tab;
   return params;
+};
+
+export const ensureDefaultIndices = async (callCluster: CallESAsCurrentUser) => {
+  // create placeholder indices to supress errors in the kibana Dashboards app
+  // that no matching indices exist https://github.com/elastic/kibana/issues/62343
+  const logger = appContextService.getLogger();
+  return Promise.all(
+    Object.keys(IndexPatternType).map(async (indexPattern) => {
+      const defaultIndexPatternName = indexPattern + INDEX_PATTERN_PLACEHOLDER_SUFFIX;
+      const indexExists = await callCluster('indices.exists', { index: defaultIndexPatternName });
+      if (!indexExists) {
+        try {
+          await callCluster('indices.create', {
+            index: defaultIndexPatternName,
+            body: {
+              mappings: {
+                properties: {
+                  '@timestamp': { type: 'date' },
+                },
+              },
+            },
+          });
+        } catch (putErr) {
+          logger.error(`${defaultIndexPatternName} could not be created`);
+        }
+      }
+    })
+  );
 };

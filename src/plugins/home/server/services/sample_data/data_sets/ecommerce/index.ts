@@ -31,13 +31,13 @@ const ecommerceDescription = i18n.translate('home.sampleData.ecommerceSpecDescri
 });
 const initialAppLinks = [] as AppLinkSchema[];
 
-export const ecommerceSpecProvider = function(): SampleDatasetSchema {
+export const ecommerceSpecProvider = function (): SampleDatasetSchema {
   return {
     id: 'ecommerce',
     name: ecommerceName,
     description: ecommerceDescription,
-    previewImagePath: '/plugins/kibana/home/sample_data_resources/ecommerce/dashboard.png',
-    darkPreviewImagePath: '/plugins/kibana/home/sample_data_resources/ecommerce/dashboard_dark.png',
+    previewImagePath: '/plugins/home/assets/sample_data_resources/ecommerce/dashboard.png',
+    darkPreviewImagePath: '/plugins/home/assets/sample_data_resources/ecommerce/dashboard_dark.png',
     overviewDashboard: '722b74f0-b882-11e8-a6d9-e546fe2bba5f',
     appLinks: initialAppLinks,
     defaultIndex: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',

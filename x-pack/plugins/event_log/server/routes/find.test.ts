@@ -5,11 +5,13 @@
  */
 
 import { findRoute } from './find';
-import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
+import { httpServiceMock } from 'src/core/server/mocks';
 import { mockHandlerArguments, fakeEvent } from './_mock_handler_arguments';
 import { eventLogClientMock } from '../event_log_client.mock';
+import { loggingSystemMock } from 'src/core/server/mocks';
 
 const eventLogClient = eventLogClientMock.create();
+const systemLogger = loggingSystemMock.createLogger();
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -17,9 +19,9 @@ beforeEach(() => {
 
 describe('find', () => {
   it('finds events with proper parameters', async () => {
-    const router: RouterMock = mockRouter.create();
+    const router = httpServiceMock.createRouter();
 
-    findRoute(router);
+    findRoute(router, systemLogger);
 
     const [config, handler] = router.get.mock.calls[0];
 
@@ -56,9 +58,9 @@ describe('find', () => {
   });
 
   it('supports optional pagination parameters', async () => {
-    const router: RouterMock = mockRouter.create();
+    const router = httpServiceMock.createRouter();
 
-    findRoute(router);
+    findRoute(router, systemLogger);
 
     const [, handler] = router.get.mock.calls[0];
     eventLogClient.findEventsBySavedObject.mockResolvedValueOnce({
@@ -94,5 +96,30 @@ describe('find', () => {
         data: [],
       },
     });
+  });
+
+  it('logs a warning when the query throws an error', async () => {
+    const router = httpServiceMock.createRouter();
+
+    findRoute(router, systemLogger);
+
+    const [, handler] = router.get.mock.calls[0];
+    eventLogClient.findEventsBySavedObject.mockRejectedValueOnce(new Error('oof!'));
+
+    const [context, req, res] = mockHandlerArguments(
+      eventLogClient,
+      {
+        params: { id: '1', type: 'action' },
+        query: { page: 3, per_page: 10 },
+      },
+      ['ok']
+    );
+
+    await handler(context, req, res);
+
+    expect(systemLogger.debug).toHaveBeenCalledTimes(1);
+    expect(systemLogger.debug).toHaveBeenCalledWith(
+      'error calling eventLog findEventsBySavedObject(action, 1, {"page":3,"per_page":10}): oof!'
+    );
   });
 });

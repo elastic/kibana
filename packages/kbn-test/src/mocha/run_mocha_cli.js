@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import getopts from 'getopts';
 import globby from 'globby';
 
@@ -85,7 +85,7 @@ export function runMochaCli() {
           ],
         }
       )
-      .forEach(file => {
+      .forEach((file) => {
         process.argv.push(file);
       });
   }

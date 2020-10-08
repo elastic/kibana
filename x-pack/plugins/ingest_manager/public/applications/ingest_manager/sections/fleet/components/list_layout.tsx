@@ -19,23 +19,24 @@ import {
 } from '@elastic/eui';
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { useRouteMatch } from 'react-router-dom';
-import { DonutChart } from '../agent_list_page/components/donut_chart';
-import { useGetAgentStatus } from '../../agent_config/details_page/hooks';
-import { useCapabilities, useLink, useGetAgentConfigs } from '../../../hooks';
+import { PAGE_ROUTING_PATHS } from '../../../constants';
 import { WithHeaderLayout } from '../../../layouts';
-import { FLEET_ENROLLMENT_TOKENS_PATH, FLEET_AGENTS_PATH } from '../../../constants';
-import { AgentEnrollmentFlyout } from '../agent_list_page/components';
+import { useCapabilities, useLink, useGetAgentPolicies } from '../../../hooks';
+import { useGetAgentStatus } from '../../agent_policy/details_page/hooks';
+import { AgentEnrollmentFlyout } from '../components';
+import { DonutChart } from './donut_chart';
 
 const REFRESH_INTERVAL_MS = 5000;
 
 const Divider = styled.div`
   width: 0;
   height: 100%;
-  border-left: ${props => props.theme.eui.euiBorderThin};
+  border-left: ${(props) => props.theme.eui.euiBorderThin};
   height: 45px;
 `;
 
 export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
+  const { getHref } = useLink();
   const hasWriteCapabilites = useCapabilities().write;
   const agentStatusRequest = useGetAgentStatus(undefined, {
     pollIntervalMs: REFRESH_INTERVAL_MS,
@@ -65,6 +66,7 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
             online: agentStatus?.online || 0,
             offline: agentStatus?.offline || 0,
             error: agentStatus?.error || 0,
+            other: agentStatus?.other || 0,
           }}
         />
       </EuiFlexItem>
@@ -111,7 +113,7 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
             <EuiButton fill iconType="plusInCircle" onClick={() => setIsEnrollmentFlyoutOpen(true)}>
               <FormattedMessage
                 id="xpack.ingestManager.agentList.enrollButton"
-                defaultMessage="Enroll new agents"
+                defaultMessage="Add agent"
               />
             </EuiButton>
           </EuiFlexItem>
@@ -124,7 +126,7 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
       <EuiFlexItem>
         <EuiText>
           <h1>
-            <FormattedMessage id="xpack.ingestManager.fleet.pageTitle" defaultMessage="Fleet" />
+            <FormattedMessage id="xpack.ingestManager.agents.pageTitle" defaultMessage="Agents" />
           </h1>
         </EuiText>
       </EuiFlexItem>
@@ -132,8 +134,8 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
         <EuiText color="subdued">
           <p>
             <FormattedMessage
-              id="xpack.ingestManager.fleet.pageSubtitle"
-              defaultMessage="Manage and deploy configuration updates to a group of agents of any size."
+              id="xpack.ingestManager.agents.pageSubtitle"
+              defaultMessage="Manage and deploy policy updates to a group of agents of any size."
             />
           </p>
         </EuiText>
@@ -141,12 +143,12 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
     </EuiFlexGroup>
   );
 
-  const agentConfigsRequest = useGetAgentConfigs({
+  const agentPoliciesRequest = useGetAgentPolicies({
     page: 1,
     perPage: 1000,
   });
 
-  const agentConfigs = agentConfigsRequest.data ? agentConfigsRequest.data.items : [];
+  const agentPolicies = agentPoliciesRequest.data ? agentPoliciesRequest.data.items : [];
 
   const routeMatch = useRouteMatch();
 
@@ -163,8 +165,8 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
                 defaultMessage="Agents"
               />
             ),
-            isSelected: routeMatch.path === FLEET_AGENTS_PATH,
-            href: useLink(FLEET_AGENTS_PATH),
+            isSelected: routeMatch.path === PAGE_ROUTING_PATHS.fleet_agent_list,
+            href: getHref('fleet_agent_list'),
           },
           {
             name: (
@@ -173,15 +175,15 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
                 defaultMessage="Enrollment tokens"
               />
             ),
-            isSelected: routeMatch.path === FLEET_ENROLLMENT_TOKENS_PATH,
-            href: useLink(FLEET_ENROLLMENT_TOKENS_PATH),
+            isSelected: routeMatch.path === PAGE_ROUTING_PATHS.fleet_enrollment_tokens,
+            href: getHref('fleet_enrollment_tokens'),
           },
         ] as unknown) as EuiTabProps[]
       }
     >
       {isEnrollmentFlyoutOpen ? (
         <AgentEnrollmentFlyout
-          agentConfigs={agentConfigs}
+          agentPolicies={agentPolicies}
           onClose={() => setIsEnrollmentFlyoutOpen(false)}
         />
       ) : null}

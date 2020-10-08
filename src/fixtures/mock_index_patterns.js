@@ -20,7 +20,7 @@
 import sinon from 'sinon';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
-export default function(Private) {
+export default function (Private) {
   const indexPatterns = Private(FixturesStubbedLogstashIndexPatternProvider);
   const getIndexPatternStub = sinon.stub().resolves(indexPatterns);
 

@@ -21,7 +21,7 @@ import { ColumnarPage, PageContent } from '../components/page';
 
 const DetailPageContent = euiStyled(PageContent)`
   overflow: auto;
-  background-color: ${props => props.theme.eui.euiColorLightestShade};
+  background-color: ${(props) => props.theme.eui.euiColorLightestShade};
 `;
 
 interface Props {

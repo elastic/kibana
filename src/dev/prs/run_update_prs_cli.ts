@@ -48,7 +48,7 @@ run(
       throw createFlagError('invalid --repo-dir, expected a single string');
     }
 
-    const prNumbers = flags._.map(arg => Pr.parseInput(arg));
+    const prNumbers = flags._.map((arg) => Pr.parseInput(arg));
 
     /**
      * Call the Gitub API once for each PR to get the targetRef so we know which branch to pull
@@ -56,7 +56,7 @@ run(
      */
     const api = new GithubApi(accessToken);
     const prs = await Promise.all(
-      prNumbers.map(async prNumber => {
+      prNumbers.map(async (prNumber) => {
         const { targetRef, owner, sourceBranch } = await api.getPrInfo(prNumber);
         return new Pr(prNumber, targetRef, owner, sourceBranch);
       })
@@ -76,7 +76,7 @@ run(
           getLine$(proc.stdout!), // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdout will not be null
           getLine$(proc.stderr!) // TypeScript note: As long as the proc stdio[2] is 'pipe', then stderr will not be null
         )
-          .pipe(tap(line => log.debug(line)))
+          .pipe(tap((line) => log.debug(line)))
           .toPromise(),
       ]);
     };
@@ -133,9 +133,7 @@ run(
             `) + '\n'
           );
 
-          await getLine$(process.stdin)
-            .pipe(first())
-            .toPromise();
+          await getLine$(process.stdin).pipe(first()).toPromise();
 
           try {
             await execInDir('git', ['diff-index', '--quiet', 'HEAD', '--']);

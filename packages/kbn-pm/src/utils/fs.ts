@@ -25,6 +25,7 @@ import { promisify } from 'util';
 
 const lstat = promisify(fs.lstat);
 export const readFile = promisify(fs.readFile);
+export const writeFile = promisify(fs.writeFile);
 const symlink = promisify(fs.symlink);
 export const chmod = promisify(fs.chmod);
 const cmdShim = promisify<string, string>(cmdShimCb);
@@ -49,7 +50,7 @@ async function statTest(path: string, block: (stats: fs.Stats) => boolean) {
  * @param path
  */
 export async function isSymlink(path: string) {
-  return await statTest(path, stats => stats.isSymbolicLink());
+  return await statTest(path, (stats) => stats.isSymbolicLink());
 }
 
 /**
@@ -57,7 +58,7 @@ export async function isSymlink(path: string) {
  * @param path
  */
 export async function isDirectory(path: string) {
-  return await statTest(path, stats => stats.isDirectory());
+  return await statTest(path, (stats) => stats.isDirectory());
 }
 
 /**
@@ -65,7 +66,7 @@ export async function isDirectory(path: string) {
  * @param path
  */
 export async function isFile(path: string) {
-  return await statTest(path, stats => stats.isFile());
+  return await statTest(path, (stats) => stats.isFile());
 }
 
 /**

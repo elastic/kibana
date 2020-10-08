@@ -7,12 +7,14 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import { EuiButton, EuiLink, EuiInMemoryTable } from '@elastic/eui';
-
+import { EuiButton, EuiInMemoryTable } from '@elastic/eui';
+import { Link } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { GLOBAL_CALENDAR } from '../../../../../../common/constants/calendars';
+import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';
+import { ML_PAGES } from '../../../../../../common/constants/ml_url_generator';
 
 export const CalendarsListTable = ({
   calendarsList,
@@ -24,6 +26,8 @@ export const CalendarsListTable = ({
   mlNodesAvailable,
   itemsSelected,
 }) => {
+  const redirectToNewCalendarPage = useCreateAndNavigateToMlLink(ML_PAGES.CALENDARS_NEW);
+
   const sorting = {
     sort: {
       field: 'calendar_id',
@@ -45,7 +49,12 @@ export const CalendarsListTable = ({
       sortable: true,
       truncateText: true,
       scope: 'row',
-      render: id => <EuiLink href={`#/settings/calendars_list/edit_calendar/${id}`}>{id}</EuiLink>,
+      render: (id) => (
+        <Link to={`/${ML_PAGES.CALENDARS_EDIT}/${id}`} data-test-subj="mlEditCalendarLink">
+          {id}
+        </Link>
+      ),
+      'data-test-subj': 'mlCalendarListColumnId',
     },
     {
       field: 'job_ids_string',
@@ -54,7 +63,7 @@ export const CalendarsListTable = ({
       }),
       sortable: true,
       truncateText: true,
-      render: jobList => {
+      render: (jobList) => {
         return jobList === GLOBAL_CALENDAR ? (
           <span style={{ fontStyle: 'italic' }}>
             <FormattedMessage
@@ -66,6 +75,7 @@ export const CalendarsListTable = ({
           jobList
         );
       },
+      'data-test-subj': 'mlCalendarListColumnJobs',
     },
     {
       field: 'events_length',
@@ -73,16 +83,17 @@ export const CalendarsListTable = ({
         defaultMessage: 'Events',
       }),
       sortable: true,
-      render: eventsLength =>
+      render: (eventsLength) =>
         i18n.translate('xpack.ml.calendarsList.table.eventsCountLabel', {
           defaultMessage: '{eventsLength, plural, one {# event} other {# events}}',
           values: { eventsLength },
         }),
+      'data-test-subj': 'mlCalendarListColumnEvents',
     },
   ];
 
   const tableSelection = {
-    onSelectionChange: selection => setSelectedCalendarList(selection),
+    onSelectionChange: (selection) => setSelectedCalendarList(selection),
   };
 
   const search = {
@@ -91,7 +102,7 @@ export const CalendarsListTable = ({
         size="s"
         data-test-subj="mlCalendarButtonCreate"
         key="new_calendar_button"
-        href="#/settings/calendars_list/new_calendar"
+        onClick={redirectToNewCalendarPage}
         isDisabled={canCreateCalendar === false || mlNodesAvailable === false}
       >
         <FormattedMessage id="xpack.ml.calendarsList.table.newButtonLabel" defaultMessage="New" />
@@ -104,6 +115,8 @@ export const CalendarsListTable = ({
         isDisabled={
           canDeleteCalendar === false || mlNodesAvailable === false || itemsSelected === false
         }
+        data-test-subj="mlCalendarButtonDelete"
+        key="delete_calendar_button"
       >
         <FormattedMessage
           id="xpack.ml.calendarsList.table.deleteButtonLabel"
@@ -118,7 +131,7 @@ export const CalendarsListTable = ({
   };
 
   return (
-    <React.Fragment>
+    <div data-test-subj="mlCalendarTableContainer">
       <EuiInMemoryTable
         items={calendarsList}
         itemId="calendar_id"
@@ -130,8 +143,11 @@ export const CalendarsListTable = ({
         selection={tableSelection}
         isSelectable={true}
         data-test-subj="mlCalendarTable"
+        rowProps={(item) => ({
+          'data-test-subj': `mlCalendarListRow row-${item.calendar_id}`,
+        })}
       />
-    </React.Fragment>
+    </div>
   );
 };
 

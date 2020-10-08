@@ -5,7 +5,7 @@
  */
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   describe('delete', () => {
@@ -18,9 +18,7 @@ export default function({ getService }: FtrProviderContext) {
         .put('/api/logstash/pipeline/fast_generator')
         .set('kbn-xsrf', 'xxx')
         .send({
-          id: 'fast_generator',
           description: 'foobar baz',
-          username: 'seger',
           pipeline: 'input { generator {} }\n\n output { stdout {} }',
         })
         .expect(204);

@@ -18,17 +18,21 @@ import {
   EuiLink,
   EuiSpacer,
   EuiText,
+  EuiCallOut,
+  EuiCode,
 } from '@elastic/eui';
 
 import { Repository } from '../../../../../common/types';
-import { CronEditor } from '../../../../shared_imports';
+import { CronEditor, SectionError } from '../../../../shared_imports';
 import { useServices } from '../../../app_context';
 import { DEFAULT_POLICY_SCHEDULE, DEFAULT_POLICY_FREQUENCY } from '../../../constants';
 import { useLoadRepositories } from '../../../services/http';
 import { linkToAddRepository } from '../../../services/navigation';
 import { documentationLinksService } from '../../../services/documentation';
-import { SectionLoading, SectionError } from '../../';
+import { SectionLoading } from '../../';
 import { StepProps } from './';
+
+import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
 
 export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
   policy,
@@ -47,10 +51,14 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
         name: undefined,
       },
     },
-    sendRequest: reloadRepositories,
+    resendRequest: reloadRepositories,
   } = useLoadRepositories();
 
-  const { i18n } = useServices();
+  const { i18n, history } = useServices();
+
+  const [showRepositoryNotFoundWarning, setShowRepositoryNotFoundWarning] = useState<boolean>(
+    false
+  );
 
   // State for touched inputs
   const [touched, setTouched] = useState({
@@ -108,7 +116,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
           defaultValue={policy.name}
           fullWidth
           onBlur={() => setTouched({ ...touched, name: true })}
-          onChange={e => {
+          onChange={(e) => {
             updatePolicy(
               {
                 name: e.target.value,
@@ -226,7 +234,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
           }}
           actions={
             <EuiButton
-              href={linkToAddRepository(currentUrl)}
+              {...reactRouterNavigate(history, linkToAddRepository(currentUrl))}
               color="danger"
               iconType="plusInCircle"
               data-test-subj="addRepositoryButton"
@@ -254,15 +262,28 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
       }
     }
 
+    const doesRepositoryExist =
+      !!policy.repository &&
+      repositories.some((r: { name: string }) => r.name === policy.repository);
+
+    if (!doesRepositoryExist && !errors.repository) {
+      updatePolicy(policy, { repositoryDoesNotExist: true });
+    }
+
+    if (showRepositoryNotFoundWarning !== !doesRepositoryExist) {
+      setShowRepositoryNotFoundWarning(!doesRepositoryExist);
+    }
+
     return (
       <EuiSelect
         options={repositories.map(({ name }: Repository) => ({
           value: name,
           text: name,
         }))}
-        value={policy.repository || repositories[0].name}
+        hasNoInitialSelection={!doesRepositoryExist}
+        value={!doesRepositoryExist ? '' : policy.repository}
         onBlur={() => setTouched({ ...touched, repository: true })}
-        onChange={e => {
+        onChange={(e) => {
           updatePolicy(
             {
               repository: e.target.value,
@@ -333,7 +354,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
         <EuiFieldText
           defaultValue={policy.snapshotName}
           fullWidth
-          onChange={e => {
+          onChange={(e) => {
             updatePolicy(
               {
                 snapshotName: e.target.value,
@@ -412,7 +433,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
             <EuiFieldText
               defaultValue={policy.schedule}
               fullWidth
-              onChange={e => {
+              onChange={(e) => {
                 updatePolicy(
                   {
                     schedule: e.target.value,
@@ -539,8 +560,31 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="l" />
 
+      {showRepositoryNotFoundWarning && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            data-test-subj="repositoryNotFoundWarning"
+            title={
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyForm.stepLogistics.selectRepository.policyRepositoryNotFoundTitle"
+                defaultMessage="Repository not found"
+              />
+            }
+            color="danger"
+            iconType="alert"
+          >
+            <FormattedMessage
+              id="xpack.snapshotRestore.policyForm.stepLogistics.selectRepository.policyRepositoryNotFoundDescription"
+              defaultMessage="Repository {repo} does not exist. Please select an existing repository."
+              values={{ repo: <EuiCode>{policy.repository}</EuiCode> }}
+            />
+          </EuiCallOut>
+        </>
+      )}
+
+      <EuiSpacer size="l" />
       {renderNameField()}
       {renderSnapshotNameField()}
       {renderRepositoryField()}

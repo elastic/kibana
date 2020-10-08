@@ -27,9 +27,9 @@ export default function average(dataTuples, targetTuples) {
   // Phase 1: Downsample
   // We necessarily won't well match the dataSource here as we don't know how much data
   // they had when creating their own average
-  const resultTimes = _.pluck(targetTuples, 0);
+  const resultTimes = _.map(targetTuples, 0);
   const dataTuplesQueue = _.clone(dataTuples);
-  const resultValues = _.map(targetTuples, function(bucket) {
+  const resultValues = _.map(targetTuples, function (bucket) {
     const time = bucket[0];
     let i = 0;
     const avgSet = [];
@@ -53,7 +53,7 @@ export default function average(dataTuples, targetTuples) {
   // Phase 2: Upsample if needed
   // If we have any NaNs we are probably resampling from a big interval to a small one (eg, 1M as 1d)
   // So look for the missing stuff in the array, and smooth it out
-  const naNIndex = _.findIndex(resultValues, function(val) {
+  const naNIndex = _.findIndex(resultValues, function (val) {
     return isNaN(val);
   });
 

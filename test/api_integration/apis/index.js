@@ -17,10 +17,9 @@
  * under the License.
  */
 
-export default function({ loadTestFile }) {
+export default function ({ loadTestFile }) {
   describe('apis', () => {
     loadTestFile(require.resolve('./core'));
-    loadTestFile(require.resolve('./elasticsearch'));
     loadTestFile(require.resolve('./general'));
     loadTestFile(require.resolve('./home'));
     loadTestFile(require.resolve('./index_patterns'));
@@ -28,10 +27,12 @@ export default function({ loadTestFile }) {
     loadTestFile(require.resolve('./saved_objects_management'));
     loadTestFile(require.resolve('./saved_objects'));
     loadTestFile(require.resolve('./scripts'));
+    loadTestFile(require.resolve('./search'));
     loadTestFile(require.resolve('./shorten'));
     loadTestFile(require.resolve('./suggestions'));
     loadTestFile(require.resolve('./status'));
     loadTestFile(require.resolve('./stats'));
     loadTestFile(require.resolve('./ui_metric'));
+    loadTestFile(require.resolve('./telemetry'));
   });
 }

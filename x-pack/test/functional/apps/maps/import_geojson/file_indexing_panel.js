@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import path from 'path';
 import uuid from 'uuid/v4';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['maps', 'common']);
   const testSubjects = getService('testSubjects');
   const log = getService('log');
@@ -105,7 +105,7 @@ export default function({ getService, getPageObjects }) {
 
     const GEO_POINT = 'geo_point';
     const pointGeojsonFiles = ['point.json', 'multi_point.json'];
-    pointGeojsonFiles.forEach(async pointFile => {
+    pointGeojsonFiles.forEach(async (pointFile) => {
       it(`should index with type geo_point for file: ${pointFile}`, async () => {
         await loadFileAndIndex(pointFile);
         const indexPatternResults = await PageObjects.maps.getIndexPatternResults();
@@ -123,7 +123,7 @@ export default function({ getService, getPageObjects }) {
       'multi_polygon.json',
       'polygon.json',
     ];
-    nonPointGeojsonFiles.forEach(async shapeFile => {
+    nonPointGeojsonFiles.forEach(async (shapeFile) => {
       it(`should index with type geo_shape for file: ${shapeFile}`, async () => {
         await loadFileAndIndex(shapeFile);
         const indexPatternResults = await PageObjects.maps.getIndexPatternResults();

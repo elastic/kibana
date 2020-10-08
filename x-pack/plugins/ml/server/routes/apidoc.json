@@ -1,7 +1,7 @@
 {
   "name": "ml_kibana_api",
   "version": "7.8.0",
-  "description": "ML Kibana API",
+  "description": "This is the documentation of the REST API provided by the Machine Learning Kibana plugin. Each API is experimental and can include breaking changes in any version.",
   "title": "ML Kibana API",
   "order": [
     "DataFrameAnalytics",
@@ -20,6 +20,7 @@
     "DataVisualizer",
     "GetOverallStats",
     "GetStatsForFields",
+    "GetHistogramsForFields",
 
     "AnomalyDetectors",
     "CreateAnomalyDetectors",
@@ -48,7 +49,11 @@
     "GetMaxAnomalyScore",
     "GetCategoryExamples",
     "GetPartitionFieldsValues",
+    "AnomalySearch",
+    "GetCategorizerStats",
+    "GetCategoryStoppedPartitions",
 
+    "Modules",
     "DataRecognizer",
     "RecognizeIndex",
     "GetModule",
@@ -100,10 +105,11 @@
 
     "SystemRoutes",
     "HasPrivileges",
-    "MlCapabilities",
+    "MlCapabilitiesResponse",
     "MlNodeCount",
     "MlInfo",
     "MlEsSearch",
+    "MlIndexExists",
 
     "JobAuditMessages",
     "GetJobAuditMessages",

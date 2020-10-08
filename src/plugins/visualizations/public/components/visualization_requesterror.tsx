@@ -36,7 +36,7 @@ export class VisualizationRequestError extends React.Component<VisualizationRequ
     return (
       <div className="visError" ref={this.containerDiv}>
         <EuiText size="xs" color="subdued">
-          <EuiIcon type="alert" size="m" color="danger" aria-hidden="true" />
+          <EuiIcon type="alert" size="m" color="danger" />
 
           <EuiSpacer size="s" />
 

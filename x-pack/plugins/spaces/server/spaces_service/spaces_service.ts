@@ -15,6 +15,7 @@ import { getSpaceIdFromPath, addSpaceIdToPath } from '../../common/lib/spaces_ur
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { spaceIdToNamespace, namespaceToSpaceId } from '../lib/utils/namespace';
 import { Space } from '../../common/model/space';
+import { SpacesAuditLogger } from '../lib/audit_logger';
 
 type RequestFacade = KibanaRequest | Legacy.Request;
 
@@ -39,7 +40,7 @@ interface SpacesServiceDeps {
   getStartServices: CoreSetup['getStartServices'];
   authorization: SecurityPluginSetup['authz'] | null;
   config$: Observable<ConfigType>;
-  getSpacesAuditLogger(): any;
+  auditLogger: SpacesAuditLogger;
 }
 
 export class SpacesService {
@@ -52,7 +53,7 @@ export class SpacesService {
     getStartServices,
     authorization,
     config$,
-    getSpacesAuditLogger,
+    auditLogger,
   }: SpacesServiceDeps): Promise<SpacesServiceSetup> {
     const getSpaceId = (request: RequestFacade) => {
       // Currently utilized by reporting
@@ -67,21 +68,25 @@ export class SpacesService {
       return spaceId;
     };
 
+    const internalRepositoryPromise = getStartServices().then(([coreStart]) =>
+      coreStart.savedObjects.createInternalRepository(['space'])
+    );
+
     const getScopedClient = async (request: KibanaRequest) => {
       const [coreStart] = await getStartServices();
+      const internalRepository = await internalRepositoryPromise;
 
       return config$
         .pipe(
-          map(config => {
-            const internalRepository = coreStart.savedObjects.createInternalRepository(['space']);
-
+          take(1),
+          map((config) => {
             const callWithRequestRepository = coreStart.savedObjects.createScopedRepository(
               request,
               ['space']
             );
 
             return new SpacesClient(
-              getSpacesAuditLogger(),
+              auditLogger,
               (message: string) => {
                 this.log.debug(message);
               },
@@ -91,8 +96,7 @@ export class SpacesService {
               internalRepository,
               request
             );
-          }),
-          take(1)
+          })
         )
         .toPromise();
     };

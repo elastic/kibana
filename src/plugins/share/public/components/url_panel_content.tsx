@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, ReactElement } from 'react';
 
 import {
   EuiButton,
@@ -41,6 +41,7 @@ import { HttpStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 
 import { shortenUrl } from '../lib/url_shortener';
+import { UrlParamExtension } from '../types';
 
 interface Props {
   allowShortUrl: boolean;
@@ -50,11 +51,18 @@ interface Props {
   shareableUrl?: string;
   basePath: string;
   post: HttpStart['post'];
+  urlParamExtensions?: UrlParamExtension[];
 }
 
-enum ExportUrlAsType {
+export enum ExportUrlAsType {
   EXPORT_URL_AS_SAVED_OBJECT = 'savedObject',
   EXPORT_URL_AS_SNAPSHOT = 'snapshot',
+}
+
+interface UrlParams {
+  [extensionName: string]: {
+    [queryParam: string]: boolean;
+  };
 }
 
 interface State {
@@ -63,6 +71,7 @@ interface State {
   isCreatingShortUrl: boolean;
   url?: string;
   shortUrlErrorMsg?: string;
+  urlParams?: UrlParams;
 }
 
 export class UrlPanelContent extends Component<Props, State> {
@@ -100,7 +109,7 @@ export class UrlPanelContent extends Component<Props, State> {
       <I18nProvider>
         <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareUrlForm">
           {this.renderExportAsRadioGroup()}
-
+          {this.renderUrlParamExtensions()}
           {this.renderShortUrlSwitch()}
 
           <EuiSpacer size="m" />
@@ -151,6 +160,13 @@ export class UrlPanelContent extends Component<Props, State> {
     }
   };
 
+  private updateUrlParams = (url: string) => {
+    const embedUrl = this.props.isEmbedded ? this.makeUrlEmbeddable(url) : url;
+    const extendUrl = this.state.urlParams ? this.getUrlParamExtensions(embedUrl) : embedUrl;
+
+    return extendUrl;
+  };
+
   private getSavedObjectUrl = () => {
     if (this.isNotSaved()) {
       return;
@@ -166,7 +182,7 @@ export class UrlPanelContent extends Component<Props, State> {
     // Get the application route, after the hash, and remove the #.
     const parsedAppUrl = parseUrl(parsedUrl.hash.slice(1), true);
 
-    let formattedUrl = formatUrl({
+    const formattedUrl = formatUrl({
       protocol: parsedUrl.protocol,
       auth: parsedUrl.auth,
       host: parsedUrl.host,
@@ -180,28 +196,42 @@ export class UrlPanelContent extends Component<Props, State> {
         },
       }),
     });
-    if (this.props.isEmbedded) {
-      formattedUrl = this.makeUrlEmbeddable(url);
-    }
 
-    return formattedUrl;
+    return this.updateUrlParams(formattedUrl);
   };
 
   private getSnapshotUrl = () => {
-    let url = this.props.shareableUrl || window.location.href;
-    if (this.props.isEmbedded) {
-      url = this.makeUrlEmbeddable(url);
-    }
-    return url;
+    const url = this.props.shareableUrl || window.location.href;
+
+    return this.updateUrlParams(url);
   };
 
-  private makeUrlEmbeddable = (url: string) => {
-    const embedQueryParam = '?embed=true';
+  private makeUrlEmbeddable = (url: string): string => {
+    const embedParam = '?embed=true';
     const urlHasQueryString = url.indexOf('?') !== -1;
+
     if (urlHasQueryString) {
-      return url.replace('?', `${embedQueryParam}&`);
+      return url.replace('?', `${embedParam}&`);
     }
-    return `${url}${embedQueryParam}`;
+
+    return `${url}${embedParam}`;
+  };
+
+  private getUrlParamExtensions = (url: string): string => {
+    const { urlParams } = this.state;
+    return urlParams
+      ? Object.keys(urlParams).reduce((urlAccumulator, key) => {
+          const urlParam = urlParams[key];
+          return urlParam
+            ? Object.keys(urlParam).reduce((queryAccumulator, queryParam) => {
+                const isQueryParamEnabled = urlParam[queryParam];
+                return isQueryParamEnabled
+                  ? queryAccumulator + `&${queryParam}=true`
+                  : queryAccumulator;
+              }, urlAccumulator)
+            : urlAccumulator;
+        }, url)
+      : url;
   };
 
   private makeIframeTag = (url?: string) => {
@@ -247,6 +277,10 @@ export class UrlPanelContent extends Component<Props, State> {
     }
 
     // "Use short URL" is checked but shortUrl has not been generated yet so one needs to be created.
+    this.createShortUrl();
+  };
+
+  private createShortUrl = async () => {
     this.setState({
       isCreatingShortUrl: true,
       shortUrlErrorMsg: undefined,
@@ -262,7 +296,7 @@ export class UrlPanelContent extends Component<Props, State> {
         this.setState(
           {
             isCreatingShortUrl: false,
-            useShortUrl: isChecked,
+            useShortUrl: true,
           },
           this.setUrl
         );
@@ -321,7 +355,7 @@ export class UrlPanelContent extends Component<Props, State> {
   private renderWithIconTip = (child: React.ReactNode, tipContent: React.ReactNode) => {
     return (
       <EuiFlexGroup gutterSize="none" responsive={false}>
-        <EuiFlexItem>{child}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{child}</EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiIconTip content={tipContent} position="bottom" />
         </EuiFlexItem>
@@ -336,9 +370,7 @@ export class UrlPanelContent extends Component<Props, State> {
         defaultMessage="Can't share as saved object until the {objectType} has been saved."
         values={{ objectType: this.props.objectType }}
       />
-    ) : (
-      undefined
-    );
+    ) : undefined;
     return (
       <EuiFormRow
         label={
@@ -397,6 +429,36 @@ export class UrlPanelContent extends Component<Props, State> {
       <EuiFormRow helpText={this.state.shortUrlErrorMsg} data-test-subj="createShortUrl">
         {this.renderWithIconTip(switchComponent, tipContent)}
       </EuiFormRow>
+    );
+  };
+
+  private renderUrlParamExtensions = (): ReactElement | void => {
+    if (!this.props.urlParamExtensions) {
+      return;
+    }
+
+    const setParamValue = (paramName: string) => (
+      values: { [queryParam: string]: boolean } = {}
+    ): void => {
+      const stateUpdate = {
+        urlParams: {
+          ...this.state.urlParams,
+          [paramName]: {
+            ...values,
+          },
+        },
+      };
+      this.setState(stateUpdate, this.state.useShortUrl ? this.createShortUrl : this.setUrl);
+    };
+
+    return (
+      <React.Fragment>
+        {this.props.urlParamExtensions.map(({ paramName, component: UrlParamComponent }) => (
+          <EuiFormRow key={paramName}>
+            <UrlParamComponent setParamValue={setParamValue(paramName)} />
+          </EuiFormRow>
+        ))}
+      </React.Fragment>
     );
   };
 }

@@ -17,9 +17,9 @@
  * under the License.
  */
 
-const ace = require('brace');
+import ace from 'brace';
 import 'brace/mode/json';
-import { addXJsonToRules } from '../../../../../../es_ui_shared/public';
+import { addXJsonToRules } from '@kbn/ace';
 
 const oop = ace.acequire('ace/lib/oop');
 const JsonHighlightRules = ace.acequire('ace/mode/json_highlight_rules').JsonHighlightRules;

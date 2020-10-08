@@ -19,7 +19,7 @@
 
 import Mocha from 'mocha';
 import { relative } from 'path';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 
 import { loadTestFiles } from './load_test_files';
 import { filterSuitesByTags } from './filter_suites_by_tags';
@@ -42,7 +42,7 @@ export async function setupMocha(lifecycle, log, config, providers) {
   });
 
   // global beforeEach hook in root suite triggers before all others
-  mocha.suite.beforeEach('global before each', async function() {
+  mocha.suite.beforeEach('global before each', async function () {
     await lifecycle.beforeEachTest.trigger(this.currentTest);
   });
 
@@ -62,15 +62,15 @@ export async function setupMocha(lifecycle, log, config, providers) {
   filterSuitesByTags({
     log,
     mocha,
-    include: config.get('suiteFiles.include').map(file => relative(REPO_ROOT, file)),
-    exclude: config.get('suiteFiles.exclude').map(file => relative(REPO_ROOT, file)),
+    include: config.get('suiteFiles.include').map((file) => relative(REPO_ROOT, file)),
+    exclude: config.get('suiteFiles.exclude').map((file) => relative(REPO_ROOT, file)),
   });
 
   filterSuitesByTags({
     log,
     mocha,
-    include: config.get('suiteTags.include').map(tag => tag.replace(/-\d+$/, '')),
-    exclude: config.get('suiteTags.exclude').map(tag => tag.replace(/-\d+$/, '')),
+    include: config.get('suiteTags.include').map((tag) => tag.replace(/-\d+$/, '')),
+    exclude: config.get('suiteTags.exclude').map((tag) => tag.replace(/-\d+$/, '')),
   });
 
   return mocha;

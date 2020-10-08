@@ -8,25 +8,49 @@ import React, { Fragment, FC, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiLink, EuiSwitch, EuiFieldText, EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiLink,
+  EuiSwitch,
+  EuiFieldText,
+  EuiForm,
+  EuiFormRow,
+  EuiSelect,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { KBN_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/common';
-
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
-import { TransformId } from '../../../../../../common';
+
+import {
+  isEsIndices,
+  isPostTransformsPreviewResponseSchema,
+} from '../../../../../../common/api_schemas/type_guards';
+import { TransformId, TransformPivotConfig } from '../../../../../../common/types/transform';
 import { isValidIndexName } from '../../../../../../common/utils/es_utils';
 
-import { getErrorMessage } from '../../../../../shared_imports';
+import { getErrorMessage } from '../../../../../../common/utils/errors';
 
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { ToastNotificationText } from '../../../../components';
+import { isHttpFetchError } from '../../../../common/request';
 import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
 import { SearchItems } from '../../../../hooks/use_search_items';
 import { useApi } from '../../../../hooks/use_api';
-
-import { isTransformIdValid, TransformPivotConfig } from '../../../../common';
+import { StepDetailsTimeField } from './step_details_time_field';
+import {
+  getPivotQuery,
+  getPreviewTransformRequestBody,
+  isTransformIdValid,
+} from '../../../../common';
 import { EsIndexName, IndexPatternTitle } from './common';
-import { delayValidator } from '../../../../common/validators';
+import {
+  continuousModeDelayValidator,
+  transformFrequencyValidator,
+  transformSettingsMaxPageSearchSizeValidator,
+} from '../../../../common/validators';
+import { StepDefineExposedState } from '../step_define/common';
+import { dictionaryToArray } from '../../../../../../common/types/common';
 
 export interface StepDetailsExposedState {
   continuousModeDateField: string;
@@ -37,20 +61,31 @@ export interface StepDetailsExposedState {
   touched: boolean;
   transformId: TransformId;
   transformDescription: string;
+  transformFrequency: string;
+  transformSettingsMaxPageSearchSize: number;
+  transformSettingsDocsPerSecond?: number;
   valid: boolean;
+  indexPatternTimeField?: string | undefined;
 }
+
+const defaultContinuousModeDelay = '60s';
+const defaultTransformFrequency = '1m';
+const defaultTransformSettingsMaxPageSearchSize = 500;
 
 export function getDefaultStepDetailsState(): StepDetailsExposedState {
   return {
     continuousModeDateField: '',
-    continuousModeDelay: '60s',
+    continuousModeDelay: defaultContinuousModeDelay,
     createIndexPattern: true,
     isContinuousModeEnabled: false,
     transformId: '',
     transformDescription: '',
+    transformFrequency: defaultTransformFrequency,
+    transformSettingsMaxPageSearchSize: defaultTransformSettingsMaxPageSearchSize,
     destinationIndex: '',
     touched: false,
     valid: false,
+    indexPatternTimeField: undefined,
   };
 }
 
@@ -63,8 +98,22 @@ export function applyTransformConfigToDetailsState(
     const time = transformConfig.sync?.time;
     if (time !== undefined) {
       state.continuousModeDateField = time.field;
-      state.continuousModeDelay = time.delay;
+      state.continuousModeDelay = time?.delay ?? defaultContinuousModeDelay;
       state.isContinuousModeEnabled = true;
+    }
+    if (transformConfig.description !== undefined) {
+      state.transformDescription = transformConfig.description;
+    }
+    if (transformConfig.frequency !== undefined) {
+      state.transformFrequency = transformConfig.frequency;
+    }
+    if (transformConfig.settings) {
+      if (typeof transformConfig.settings?.max_page_search_size === 'number') {
+        state.transformSettingsMaxPageSearchSize = transformConfig.settings.max_page_search_size;
+      }
+      if (typeof transformConfig.settings?.docs_per_second === 'number') {
+        state.transformSettingsDocsPerSecond = transformConfig.settings.docs_per_second;
+      }
     }
   }
   return state;
@@ -74,10 +123,11 @@ interface Props {
   overrides?: StepDetailsExposedState;
   onChange(s: StepDetailsExposedState): void;
   searchItems: SearchItems;
+  stepDefineState: StepDefineExposedState;
 }
 
 export const StepDetailsForm: FC<Props> = React.memo(
-  ({ overrides = {}, onChange, searchItems }) => {
+  ({ overrides = {}, onChange, searchItems, stepDefineState }) => {
     const deps = useAppDependencies();
     const toastNotifications = useToastNotifications();
     const { esIndicesCreateIndex } = useDocumentationLinks();
@@ -93,8 +143,30 @@ export const StepDetailsForm: FC<Props> = React.memo(
     );
     const [transformIds, setTransformIds] = useState<TransformId[]>([]);
     const [indexNames, setIndexNames] = useState<EsIndexName[]>([]);
+
+    // Index pattern state
     const [indexPatternTitles, setIndexPatternTitles] = useState<IndexPatternTitle[]>([]);
     const [createIndexPattern, setCreateIndexPattern] = useState(defaults.createIndexPattern);
+    const [indexPatternAvailableTimeFields, setIndexPatternAvailableTimeFields] = useState<
+      string[]
+    >([]);
+    const [indexPatternTimeField, setIndexPatternTimeField] = useState<string | undefined>();
+
+    const onTimeFieldChanged = React.useCallback(
+      (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const value = e.target.value;
+        // If the value is an empty string, it's not a valid selection
+        if (value === '') {
+          return;
+        }
+        // Find the time field based on the selected value
+        // this is to account for undefined when user chooses not to use a date field
+        const timeField = indexPatternAvailableTimeFields.find((col) => col === value);
+
+        setIndexPatternTimeField(timeField);
+      },
+      [setIndexPatternTimeField, indexPatternAvailableTimeFields]
+    );
 
     // Continuous mode state
     const [isContinuousModeEnabled, setContinuousModeEnabled] = useState(
@@ -106,33 +178,68 @@ export const StepDetailsForm: FC<Props> = React.memo(
     // fetch existing transform IDs and indices once for form validation
     useEffect(() => {
       // use an IIFE to avoid returning a Promise to useEffect.
-      (async function() {
-        try {
-          setTransformIds(
-            (await api.getTransforms()).transforms.map(
-              (transform: TransformPivotConfig) => transform.id
-            )
+      (async function () {
+        const { searchQuery, groupByList, aggList } = stepDefineState;
+        const pivotAggsArr = dictionaryToArray(aggList);
+        const pivotGroupByArr = dictionaryToArray(groupByList);
+        const pivotQuery = getPivotQuery(searchQuery);
+        const previewRequest = getPreviewTransformRequestBody(
+          searchItems.indexPattern.title,
+          pivotQuery,
+          pivotGroupByArr,
+          pivotAggsArr
+        );
+
+        const transformPreview = await api.getTransformsPreview(previewRequest);
+
+        if (isPostTransformsPreviewResponseSchema(transformPreview)) {
+          const properties = transformPreview.generated_dest_index.mappings.properties;
+          const timeFields: string[] = Object.keys(properties).filter(
+            (col) => properties[col].type === 'date'
           );
-        } catch (e) {
+
+          setIndexPatternAvailableTimeFields(timeFields);
+          setIndexPatternTimeField(timeFields[0]);
+        } else {
+          toastNotifications.addDanger({
+            title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingTransformPreview', {
+              defaultMessage: 'An error occurred fetching the transform preview',
+            }),
+            text: toMountPoint(
+              <ToastNotificationText
+                overlays={deps.overlays}
+                text={getErrorMessage(transformPreview)}
+              />
+            ),
+          });
+        }
+
+        const resp = await api.getTransforms();
+
+        if (isHttpFetchError(resp)) {
           toastNotifications.addDanger({
             title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingTransformList', {
               defaultMessage: 'An error occurred getting the existing transform IDs:',
             }),
             text: toMountPoint(
-              <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
+              <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(resp)} />
             ),
           });
+        } else {
+          setTransformIds(resp.transforms.map((transform: TransformPivotConfig) => transform.id));
         }
 
-        try {
-          setIndexNames((await api.getIndices()).map(index => index.name));
-        } catch (e) {
+        const indices = await api.getEsIndices();
+
+        if (isEsIndices(indices)) {
+          setIndexNames(indices.map((index) => index.name));
+        } else {
           toastNotifications.addDanger({
             title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingIndexNames', {
               defaultMessage: 'An error occurred getting the existing index names:',
             }),
             text: toMountPoint(
-              <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
+              <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(indices)} />
             ),
           });
         }
@@ -158,29 +265,43 @@ export const StepDetailsForm: FC<Props> = React.memo(
     }, []);
 
     const dateFieldNames = searchItems.indexPattern.fields
-      .filter(f => f.type === KBN_FIELD_TYPES.DATE)
-      .map(f => f.name)
+      .filter((f) => f.type === KBN_FIELD_TYPES.DATE)
+      .map((f) => f.name)
       .sort();
     const isContinuousModeAvailable = dateFieldNames.length > 0;
     const [continuousModeDateField, setContinuousModeDateField] = useState(
       isContinuousModeAvailable ? dateFieldNames[0] : ''
     );
     const [continuousModeDelay, setContinuousModeDelay] = useState(defaults.continuousModeDelay);
-    const isContinuousModeDelayValid = delayValidator(continuousModeDelay);
+    const isContinuousModeDelayValid = continuousModeDelayValidator(continuousModeDelay);
 
-    const transformIdExists = transformIds.some(id => transformId === id);
+    const transformIdExists = transformIds.some((id) => transformId === id);
     const transformIdEmpty = transformId === '';
     const transformIdValid = isTransformIdValid(transformId);
 
-    const indexNameExists = indexNames.some(name => destinationIndex === name);
+    const indexNameExists = indexNames.some((name) => destinationIndex === name);
     const indexNameEmpty = destinationIndex === '';
     const indexNameValid = isValidIndexName(destinationIndex);
-    const indexPatternTitleExists = indexPatternTitles.some(name => destinationIndex === name);
+    const indexPatternTitleExists = indexPatternTitles.some((name) => destinationIndex === name);
+
+    const [transformFrequency, setTransformFrequency] = useState(defaults.transformFrequency);
+    const isTransformFrequencyValid = transformFrequencyValidator(transformFrequency);
+
+    const [transformSettingsMaxPageSearchSize, setTransformSettingsMaxPageSearchSize] = useState(
+      defaults.transformSettingsMaxPageSearchSize
+    );
+    const [transformSettingsDocsPerSecond] = useState(defaults.transformSettingsDocsPerSecond);
+
+    const isTransformSettingsMaxPageSearchSizeValid = transformSettingsMaxPageSearchSizeValidator(
+      transformSettingsMaxPageSearchSize
+    );
 
     const valid =
       !transformIdEmpty &&
       transformIdValid &&
       !transformIdExists &&
+      isTransformFrequencyValid &&
+      isTransformSettingsMaxPageSearchSizeValid &&
       !indexNameEmpty &&
       indexNameValid &&
       (!indexPatternTitleExists || !createIndexPattern) &&
@@ -195,9 +316,13 @@ export const StepDetailsForm: FC<Props> = React.memo(
         isContinuousModeEnabled,
         transformId,
         transformDescription,
+        transformFrequency,
+        transformSettingsMaxPageSearchSize,
+        transformSettingsDocsPerSecond,
         destinationIndex,
         touched: true,
         valid,
+        indexPatternTimeField,
       });
       // custom comparison
       /* eslint-disable react-hooks/exhaustive-deps */
@@ -208,8 +333,11 @@ export const StepDetailsForm: FC<Props> = React.memo(
       isContinuousModeEnabled,
       transformId,
       transformDescription,
+      transformFrequency,
+      transformSettingsMaxPageSearchSize,
       destinationIndex,
       valid,
+      indexPatternTimeField,
       /* eslint-enable react-hooks/exhaustive-deps */
     ]);
 
@@ -240,9 +368,8 @@ export const StepDetailsForm: FC<Props> = React.memo(
             ]}
           >
             <EuiFieldText
-              placeholder="transform ID"
               value={transformId}
-              onChange={e => setTransformId(e.target.value)}
+              onChange={(e) => setTransformId(e.target.value)}
               aria-label={i18n.translate(
                 'xpack.transform.stepDetailsForm.transformIdInputAriaLabel',
                 {
@@ -257,17 +384,14 @@ export const StepDetailsForm: FC<Props> = React.memo(
             label={i18n.translate('xpack.transform.stepDetailsForm.transformDescriptionLabel', {
               defaultMessage: 'Transform description',
             })}
-            helpText={i18n.translate(
-              'xpack.transform.stepDetailsForm.transformDescriptionHelpText',
-              {
-                defaultMessage: 'Optional descriptive text.',
-              }
-            )}
           >
             <EuiFieldText
-              placeholder="transform description"
+              placeholder={i18n.translate(
+                'xpack.transform.stepDetailsForm.transformDescriptionPlaceholderText',
+                { defaultMessage: 'Description (optional)' }
+              )}
               value={transformDescription}
-              onChange={e => setTransformDescription(e.target.value)}
+              onChange={(e) => setTransformDescription(e.target.value)}
               aria-label={i18n.translate(
                 'xpack.transform.stepDetailsForm.transformDescriptionInputAriaLabel',
                 {
@@ -310,9 +434,8 @@ export const StepDetailsForm: FC<Props> = React.memo(
             }
           >
             <EuiFieldText
-              placeholder="destination index"
               value={destinationIndex}
-              onChange={e => setDestinationIndex(e.target.value)}
+              onChange={(e) => setDestinationIndex(e.target.value)}
               aria-label={i18n.translate(
                 'xpack.transform.stepDetailsForm.destinationIndexInputAriaLabel',
                 {
@@ -323,6 +446,7 @@ export const StepDetailsForm: FC<Props> = React.memo(
               data-test-subj="transformDestinationIndexInput"
             />
           </EuiFormRow>
+
           <EuiFormRow
             isInvalid={createIndexPattern && indexPatternTitleExists}
             error={
@@ -344,6 +468,15 @@ export const StepDetailsForm: FC<Props> = React.memo(
               data-test-subj="transformCreateIndexPatternSwitch"
             />
           </EuiFormRow>
+          {createIndexPattern &&
+            !indexPatternTitleExists &&
+            indexPatternAvailableTimeFields.length > 0 && (
+              <StepDetailsTimeField
+                indexPatternAvailableTimeFields={indexPatternAvailableTimeFields}
+                indexPatternTimeField={indexPatternTimeField}
+                onTimeFieldChanged={onTimeFieldChanged}
+              />
+            )}
           <EuiFormRow
             helpText={
               isContinuousModeAvailable === false
@@ -383,9 +516,9 @@ export const StepDetailsForm: FC<Props> = React.memo(
                 )}
               >
                 <EuiSelect
-                  options={dateFieldNames.map(text => ({ text }))}
+                  options={dateFieldNames.map((text: string) => ({ text }))}
                   value={continuousModeDateField}
-                  onChange={e => setContinuousModeDateField(e.target.value)}
+                  onChange={(e) => setContinuousModeDateField(e.target.value)}
                   data-test-subj="transformContinuousDateFieldSelect"
                 />
               </EuiFormRow>
@@ -411,7 +544,7 @@ export const StepDetailsForm: FC<Props> = React.memo(
                 <EuiFieldText
                   placeholder="delay"
                   value={continuousModeDelay}
-                  onChange={e => setContinuousModeDelay(e.target.value)}
+                  onChange={(e) => setContinuousModeDelay(e.target.value)}
                   aria-label={i18n.translate(
                     'xpack.transform.stepDetailsForm.continuousModeAriaLabel',
                     {
@@ -424,6 +557,99 @@ export const StepDetailsForm: FC<Props> = React.memo(
               </EuiFormRow>
             </Fragment>
           )}
+
+          <EuiSpacer size="l" />
+
+          <EuiAccordion
+            data-test-subj="transformWizardAccordionAdvancedSettings"
+            id="transformWizardAccordionAdvancedSettings"
+            buttonContent={i18n.translate(
+              'xpack.transform.stepDetailsForm.advancedSettingsAccordionButtonContent',
+              {
+                defaultMessage: 'Advanced settings',
+              }
+            )}
+            paddingSize="s"
+          >
+            <EuiFormRow
+              label={i18n.translate('xpack.transform.stepDetailsForm.frequencyLabel', {
+                defaultMessage: 'Frequency',
+              })}
+              isInvalid={!isTransformFrequencyValid}
+              error={
+                !isTransformFrequencyValid && [
+                  i18n.translate('xpack.transform.stepDetailsForm.frequencyError', {
+                    defaultMessage: 'Invalid frequency format',
+                  }),
+                ]
+              }
+              helpText={i18n.translate('xpack.transform.stepDetailsForm.frequencyHelpText', {
+                defaultMessage:
+                  'The interval between checks for changes in the source indices when the transform is running continuously. Also determines the retry interval in the event of transient failures while the transform is searching or indexing. The minimum value is 1s and the maximum is 1h.',
+              })}
+            >
+              <EuiFieldText
+                placeholder={i18n.translate(
+                  'xpack.transform.stepDetailsForm.editFlyoutFormFrequencyPlaceholderText',
+                  {
+                    defaultMessage: 'Default: {defaultValue}',
+                    values: { defaultValue: '1m' },
+                  }
+                )}
+                value={transformFrequency}
+                onChange={(e) => setTransformFrequency(e.target.value)}
+                aria-label={i18n.translate('xpack.transform.stepDetailsForm.frequencyAriaLabel', {
+                  defaultMessage: 'Choose a frequency.',
+                })}
+                isInvalid={!isTransformFrequencyValid}
+                data-test-subj="transformFrequencyInput"
+              />
+            </EuiFormRow>
+
+            <EuiFormRow
+              label={i18n.translate('xpack.transform.stepDetailsForm.maxPageSearchSizeLabel', {
+                defaultMessage: 'Maximum page search size',
+              })}
+              isInvalid={!isTransformSettingsMaxPageSearchSizeValid}
+              error={
+                !isTransformSettingsMaxPageSearchSizeValid && [
+                  i18n.translate('xpack.transform.stepDetailsForm.maxPageSearchSizeError', {
+                    defaultMessage:
+                      'max_page_search_size needs to be a number between 10 and 10000.',
+                  }),
+                ]
+              }
+              helpText={i18n.translate(
+                'xpack.transform.stepDetailsForm.maxPageSearchSizeHelpText',
+                {
+                  defaultMessage:
+                    'Defines the initial page size to use for the composite aggregation for each checkpoint.',
+                }
+              )}
+            >
+              <EuiFieldText
+                placeholder={i18n.translate(
+                  'xpack.transform.stepDetailsForm.editFlyoutFormMaxPageSearchSizePlaceholderText',
+                  {
+                    defaultMessage: 'Default: {defaultValue}',
+                    values: { defaultValue: 500 },
+                  }
+                )}
+                value={transformSettingsMaxPageSearchSize.toString()}
+                onChange={(e) =>
+                  setTransformSettingsMaxPageSearchSize(parseInt(e.target.value, 10))
+                }
+                aria-label={i18n.translate(
+                  'xpack.transform.stepDetailsForm.maxPageSearchSizeAriaLabel',
+                  {
+                    defaultMessage: 'Choose a maximum page search size.',
+                  }
+                )}
+                isInvalid={!isTransformFrequencyValid}
+                data-test-subj="transformMaxPageSearchSizeInput"
+              />
+            </EuiFormRow>
+          </EuiAccordion>
         </EuiForm>
       </div>
     );

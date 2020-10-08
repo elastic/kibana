@@ -34,7 +34,7 @@ import {
 
 import { readConfigFile } from '../functional_test_runner/lib';
 
-const makeSuccessMessage = options => {
+const makeSuccessMessage = (options) => {
   const installDirFlag = options.installDir ? ` --kibana-install-dir=${options.installDir}` : '';
 
   return (
@@ -92,7 +92,7 @@ export async function runTests(options) {
       continue;
     }
 
-    await withProcRunner(log, async procs => {
+    await withProcRunner(log, async (procs) => {
       const config = await readConfigFile(log, configPath);
 
       let es;
@@ -128,7 +128,7 @@ export async function startServers(options) {
     log,
   };
 
-  await withProcRunner(log, async procs => {
+  await withProcRunner(log, async (procs) => {
     const config = await readConfigFile(log, options.config);
 
     const es = await runElasticsearch({ config, options: opts });

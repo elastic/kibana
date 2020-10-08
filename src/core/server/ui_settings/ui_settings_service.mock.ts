@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   IUiSettingsClient,
   InternalUiSettingsServiceSetup,
@@ -46,10 +46,7 @@ const createClientMock = () => {
 const createSetupMock = () => {
   const mocked: jest.Mocked<InternalUiSettingsServiceSetup> = {
     register: jest.fn(),
-    asScopedToClient: jest.fn(),
   };
-
-  mocked.asScopedToClient.mockReturnValue(createClientMock());
 
   return mocked;
 };

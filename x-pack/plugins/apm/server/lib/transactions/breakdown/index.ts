@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flatten, sortByOrder, last } from 'lodash';
+import { flatten, orderBy, last } from 'lodash';
+import { asPercent } from '../../../../common/utils/formatters';
+import { ProcessorEvent } from '../../../../common/processor_event';
 import {
   SERVICE_NAME,
   SPAN_SUBTYPE,
@@ -13,14 +15,9 @@ import {
   TRANSACTION_TYPE,
   TRANSACTION_NAME,
   TRANSACTION_BREAKDOWN_COUNT,
-  PROCESSOR_EVENT
 } from '../../../../common/elasticsearch_fieldnames';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters
-} from '../../helpers/setup_request';
-import { rangeFilter } from '../../helpers/range_filter';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { rangeFilter } from '../../../../common/utils/range_filter';
 import { getMetricsDateHistogramParams } from '../../helpers/metrics';
 import { MAX_KPIS } from './constants';
 import { getVizColorForIndex } from '../../../../common/viz_colors';
@@ -29,33 +26,33 @@ export async function getTransactionBreakdown({
   setup,
   serviceName,
   transactionName,
-  transactionType
+  transactionType,
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   serviceName: string;
   transactionName?: string;
   transactionType: string;
 }) {
-  const { uiFiltersES, client, start, end, indices } = setup;
+  const { esFilter, apmEventClient, start, end, config } = setup;
 
   const subAggs = {
     sum_all_self_times: {
       sum: {
-        field: SPAN_SELF_TIME_SUM
-      }
+        field: SPAN_SELF_TIME_SUM,
+      },
     },
     total_transaction_breakdown_count: {
       sum: {
-        field: TRANSACTION_BREAKDOWN_COUNT
-      }
+        field: TRANSACTION_BREAKDOWN_COUNT,
+      },
     },
     types: {
       terms: {
         field: SPAN_TYPE,
         size: 20,
         order: {
-          _count: 'desc' as const
-        }
+          _count: 'desc' as const,
+        },
       },
       aggs: {
         subtypes: {
@@ -64,27 +61,26 @@ export async function getTransactionBreakdown({
             missing: '',
             size: 20,
             order: {
-              _count: 'desc' as const
-            }
+              _count: 'desc' as const,
+            },
           },
           aggs: {
             total_self_time_per_subtype: {
               sum: {
-                field: SPAN_SELF_TIME_SUM
-              }
-            }
-          }
-        }
-      }
-    }
+                field: SPAN_SELF_TIME_SUM,
+              },
+            },
+          },
+        },
+      },
+    },
   };
 
   const filters = [
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [TRANSACTION_TYPE]: transactionType } },
-    { term: { [PROCESSOR_EVENT]: 'metric' } },
     { range: rangeFilter(start, end) },
-    ...uiFiltersES
+    ...esFilter,
   ];
 
   if (transactionName) {
@@ -92,25 +88,31 @@ export async function getTransactionBreakdown({
   }
 
   const params = {
-    index: indices['apm_oss.metricsIndices'],
+    apm: {
+      events: [ProcessorEvent.metric],
+    },
     body: {
       size: 0,
       query: {
         bool: {
-          filter: filters
-        }
+          filter: filters,
+        },
       },
       aggs: {
         ...subAggs,
         by_date: {
-          date_histogram: getMetricsDateHistogramParams(start, end),
-          aggs: subAggs
-        }
-      }
-    }
+          date_histogram: getMetricsDateHistogramParams(
+            start,
+            end,
+            config['xpack.apm.metricsInterval']
+          ),
+          aggs: subAggs,
+        },
+      },
+    },
   };
 
-  const resp = await client.search(params);
+  const resp = await apmEventClient.search(params);
 
   const formatBucket = (
     aggs:
@@ -120,15 +122,15 @@ export async function getTransactionBreakdown({
     const sumAllSelfTimes = aggs.sum_all_self_times.value || 0;
 
     const breakdowns = flatten(
-      aggs.types.buckets.map(bucket => {
+      aggs.types.buckets.map((bucket) => {
         const type = bucket.key as string;
 
-        return bucket.subtypes.buckets.map(subBucket => {
+        return bucket.subtypes.buckets.map((subBucket) => {
           return {
             name: (subBucket.key as string) || type,
             percentage:
               (subBucket.total_self_time_per_subtype.value || 0) /
-              sumAllSelfTimes
+              sumAllSelfTimes,
           };
         });
       })
@@ -138,20 +140,27 @@ export async function getTransactionBreakdown({
   };
 
   const visibleKpis = resp.aggregations
-    ? sortByOrder(formatBucket(resp.aggregations), 'percentage', 'desc').slice(
+    ? orderBy(formatBucket(resp.aggregations), 'percentage', 'desc').slice(
         0,
         MAX_KPIS
       )
     : [];
 
-  const kpis = sortByOrder(visibleKpis, 'name').map((kpi, index) => {
-    return {
+  const kpis = orderBy(
+    visibleKpis.map((kpi) => ({
       ...kpi,
-      color: getVizColorForIndex(index)
+      lowerCaseName: kpi.name.toLowerCase(),
+    })),
+    'lowerCaseName'
+  ).map((kpi, index) => {
+    const { lowerCaseName, ...rest } = kpi;
+    return {
+      ...rest,
+      color: getVizColorForIndex(index),
     };
   });
 
-  const kpiNames = kpis.map(kpi => kpi.name);
+  const kpiNames = kpis.map((kpi) => kpi.name);
 
   const bucketsByDate = resp.aggregations?.by_date.buckets || [];
 
@@ -161,10 +170,10 @@ export async function getTransactionBreakdown({
 
     const updatedSeries = kpiNames.reduce((p, kpiName) => {
       const { name, percentage } = formattedValues.find(
-        val => val.name === kpiName
+        (val) => val.name === kpiName
       ) || {
         name: kpiName,
-        percentage: null
+        percentage: null,
       };
 
       if (!p[name]) {
@@ -174,8 +183,8 @@ export async function getTransactionBreakdown({
         ...p,
         [name]: p[name].concat({
           x: time,
-          y: percentage
-        })
+          y: percentage,
+        }),
       };
     }, prev);
 
@@ -186,11 +195,11 @@ export async function getTransactionBreakdown({
     // is drawn correctly.
     // If we set all values to 0, the chart always displays null values as 0,
     // and the chart looks weird.
-    const hasAnyValues = lastValues.some(value => value.y !== null);
-    const hasNullValues = lastValues.some(value => value.y === null);
+    const hasAnyValues = lastValues.some((value) => value?.y !== null);
+    const hasNullValues = lastValues.some((value) => value?.y === null);
 
     if (hasAnyValues && hasNullValues) {
-      Object.values(updatedSeries).forEach(series => {
+      Object.values(updatedSeries).forEach((series) => {
         const value = series[series.length - 1];
         const isEmpty = value.y === null;
         if (isEmpty) {
@@ -203,16 +212,14 @@ export async function getTransactionBreakdown({
     return updatedSeries;
   }, {} as Record<string, Array<{ x: number; y: number | null }>>);
 
-  const timeseries = kpis.map(kpi => ({
+  const timeseries = kpis.map((kpi) => ({
     title: kpi.name,
     color: kpi.color,
     type: 'areaStacked',
     data: timeseriesPerSubtype[kpi.name],
-    hideLegend: true
+    hideLegend: false,
+    legendValue: asPercent(kpi.percentage, 1),
   }));
 
-  return {
-    kpis,
-    timeseries
-  };
+  return { timeseries };
 }

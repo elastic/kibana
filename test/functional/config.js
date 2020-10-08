@@ -20,16 +20,17 @@
 import { pageObjects } from './page_objects';
 import { services } from './services';
 
-export default async function({ readConfigFile }) {
+export default async function ({ readConfigFile }) {
   const commonConfig = await readConfigFile(require.resolve('../common/config'));
 
   return {
     testFiles: [
+      require.resolve('./apps/bundles'),
       require.resolve('./apps/console'),
-      require.resolve('./apps/getting_started'),
       require.resolve('./apps/context'),
       require.resolve('./apps/dashboard'),
       require.resolve('./apps/discover'),
+      require.resolve('./apps/getting_started'),
       require.resolve('./apps/home'),
       require.resolve('./apps/management'),
       require.resolve('./apps/saved_objects_management'),
@@ -39,6 +40,7 @@ export default async function({ readConfigFile }) {
     ],
     pageObjects,
     services,
+
     servers: commonConfig.get('servers'),
 
     esTestCluster: commonConfig.get('esTestCluster'),
@@ -67,35 +69,38 @@ export default async function({ readConfigFile }) {
         pathname: '/status',
       },
       discover: {
-        pathname: '/app/kibana',
-        hash: '/discover',
+        pathname: '/app/discover',
+        hash: '/',
       },
       context: {
-        pathname: '/app/kibana',
+        pathname: '/app/discover',
         hash: '/context',
       },
       visualize: {
-        pathname: '/app/kibana',
-        hash: '/visualize',
+        pathname: '/app/visualize',
+        hash: '/',
       },
       dashboard: {
-        pathname: '/app/kibana',
-        hash: '/dashboards',
+        pathname: '/app/dashboards',
+        hash: '/list',
       },
+      management: {
+        pathname: '/app/management',
+      },
+      /** @obsolete "management" should be instead of "settings" **/
       settings: {
-        pathname: '/app/kibana',
-        hash: '/management',
+        pathname: '/app/management',
       },
       timelion: {
         pathname: '/app/timelion',
       },
       console: {
-        pathname: '/app/kibana',
-        hash: '/dev_tools/console',
+        pathname: '/app/dev_tools',
+        hash: '/console',
       },
       home: {
-        pathname: '/app/kibana',
-        hash: '/home',
+        pathname: '/app/home',
+        hash: '/',
       },
     },
     junit: {
@@ -224,6 +229,21 @@ export default async function({ readConfigFile }) {
           kibana: [],
         },
 
+        kibana_timefield: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['without-timefield', 'with-timefield'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+
         kibana_large_strings: {
           elasticsearch: {
             cluster: [],
@@ -259,7 +279,7 @@ export default async function({ readConfigFile }) {
             cluster: [],
             indices: [
               {
-                names: ['animals-*'],
+                names: ['animals-*', 'dogbreeds'],
                 privileges: ['read', 'view_index_metadata'],
                 field_security: { grant: ['*'], except: [] },
               },

@@ -37,7 +37,7 @@ describe('HttpResources service', () => {
   describe('#createRegistrar', () => {
     beforeEach(() => {
       setupDeps = {
-        http: httpServiceMock.createSetupContract(),
+        http: httpServiceMock.createInternalSetupContract(),
         rendering: renderingMock.createSetupContract(),
       };
       service = new HttpResourcesService(coreContext);

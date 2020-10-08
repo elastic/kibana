@@ -7,11 +7,11 @@
 import expect from '@kbn/expect';
 import clustersFixture from './fixtures/clusters';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('clusters', function() {
+  describe('clusters', function () {
     // TODO: https://github.com/elastic/stack-monitoring/issues/31
     this.tags(['skipCloud']);
 

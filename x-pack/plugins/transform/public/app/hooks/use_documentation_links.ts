@@ -19,6 +19,7 @@ export const useDocumentationLinks = () => {
     esStackOverviewDocBasePath: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack-overview/${DOC_LINK_VERSION}/`,
     esTransform: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/${TRANSFORM_DOC_PATHS.transforms}`,
     esTransformPivot: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/put-transform.html#put-transform-request-body`,
+    esTransformUpdate: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/update-transform.html`,
     mlDocBasePath: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/`,
   };
 };

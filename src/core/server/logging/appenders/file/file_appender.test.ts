@@ -19,11 +19,10 @@
 
 import { mockCreateWriteStream } from './file_appender.test.mocks';
 
-import { LogLevel } from '../../log_level';
-import { LogRecord } from '../../log_record';
+import { LogRecord, LogLevel } from '@kbn/logging';
 import { FileAppender } from './file_appender';
 
-const tickMs = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const tickMs = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 beforeEach(() => {
   mockCreateWriteStream.mockReset();
@@ -145,7 +144,7 @@ test('`dispose()` succeeds even if stream is not created.', async () => {
 
 test('`dispose()` closes stream.', async () => {
   const mockStreamEndFinished = jest.fn();
-  const mockStreamEnd = jest.fn(async callback => {
+  const mockStreamEnd = jest.fn(async (callback) => {
     // It's required to make sure `dispose` waits for `end` to complete.
     await tickMs(100);
     mockStreamEndFinished();

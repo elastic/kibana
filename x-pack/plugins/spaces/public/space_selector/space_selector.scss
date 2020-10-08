@@ -1,0 +1,39 @@
+.spcSpaceSelector {
+  @include kibanaFullScreenGraphics;
+}
+
+.spcSpaceSelector__pageContent {
+  background-color: transparent;
+  box-shadow: none;
+  border: none;
+  text-align: center;
+  position: relative;
+  z-index: 10;
+}
+
+.spcSpaceSelector__heading {
+  flex-direction: column;
+  flex-shrink: 0;
+  position: relative;
+  padding: $euiSizeXL;
+  z-index: 10;
+}
+
+.spcSpaceSelector__logo {
+  @include kibanaCircleLogo;
+  @include euiBottomShadowMedium;
+  margin-bottom: $euiSizeXL;
+}
+
+.spcSpaceSelector__searchHolder {
+  width: $euiFormMaxWidth; // make sure it's as wide as our default form element width
+  max-width: 100%;
+}
+
+.spcSpaceSelector__errorPanel {
+  position: relative;
+  margin: auto;
+  padding-left: $euiSizeXL;
+  padding-right: $euiSizeXL;
+  max-width: 700px;
+}

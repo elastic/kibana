@@ -85,12 +85,12 @@ export class Table extends Component {
       [
         {
           name: 'title',
-          getValue: item => item.title.toLowerCase(),
+          getValue: (item) => item.title.toLowerCase(),
           isAscending: true,
         },
         {
           name: 'status',
-          getValue: item => item.status.toLowerCase(),
+          getValue: (item) => item.status.toLowerCase(),
           isAscending: true,
         },
       ],
@@ -98,7 +98,7 @@ export class Table extends Component {
     );
   }
 
-  onSort = prop => {
+  onSort = (prop) => {
     this.sortableProperties.sortOn(prop);
 
     this.setState({
@@ -106,35 +106,35 @@ export class Table extends Component {
     });
   };
 
-  toggleItem = item => {
-    this.setState(previousState => {
+  toggleItem = (item) => {
+    this.setState((previousState) => {
       const rowToSelectedStateMap = new Map(previousState.rowToSelectedStateMap);
       rowToSelectedStateMap.set(item, !rowToSelectedStateMap.get(item));
       return { rowToSelectedStateMap };
     });
   };
 
-  isItemChecked = item => {
+  isItemChecked = (item) => {
     return this.state.rowToSelectedStateMap.get(item);
   };
 
-  togglePopover = item => {
-    this.setState(previousState => {
+  togglePopover = (item) => {
+    this.setState((previousState) => {
       const rowToOpenActionsPopoverMap = new Map(previousState.rowToOpenActionsPopoverMap);
       rowToOpenActionsPopoverMap.set(item, !rowToOpenActionsPopoverMap.get(item));
       return { rowToOpenActionsPopoverMap };
     });
   };
 
-  closePopover = item => {
-    this.setState(previousState => {
+  closePopover = (item) => {
+    this.setState((previousState) => {
       const rowToOpenActionsPopoverMap = new Map(previousState.rowToOpenActionsPopoverMap);
       rowToOpenActionsPopoverMap.set(item, false);
       return { rowToOpenActionsPopoverMap };
     });
   };
 
-  isPopoverOpen = item => {
+  isPopoverOpen = (item) => {
     return this.state.rowToOpenActionsPopoverMap.get(item);
   };
 
@@ -146,7 +146,7 @@ export class Table extends Component {
   renderRows() {
     const rows = [];
 
-    this.items.forEach(item => {
+    this.items.forEach((item) => {
       const classes = classNames({
         'kuiTableRowCell--wrap': item.isWrapped,
       });

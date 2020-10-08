@@ -37,25 +37,26 @@ export function traefikLogsSpecProvider(context: TutorialContext): TutorialSchem
     name: i18n.translate('home.tutorials.traefikLogs.nameTitle', {
       defaultMessage: 'Traefik logs',
     }),
-    category: TutorialsCategory.LOGGING,
+    moduleName,
+    category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.traefikLogs.shortDescription', {
-      defaultMessage: 'Collect and parse access logs created by the Traefik Proxy.',
+      defaultMessage: 'Collect Traefik access logs.',
     }),
     longDescription: i18n.translate('home.tutorials.traefikLogs.longDescription', {
       defaultMessage:
-        'The `traefik` Filebeat module parses access logs created by Traefik. \
+        'The  module parses access logs created by [Træfik](https://traefik.io/). \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-traefik.html',
       },
     }),
-    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/traefik.svg',
+    euiIconType: '/plugins/home/assets/logos/traefik.svg',
     artifacts: {
       dashboards: [
         {
           id: 'Filebeat-Traefik-Dashboard-ecs',
           linkLabel: i18n.translate('home.tutorials.traefikLogs.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'Traefik logs dashboard',
+            defaultMessage: 'Traefik Access Logs',
           }),
           isOverview: true,
         },
@@ -65,7 +66,6 @@ export function traefikLogsSpecProvider(context: TutorialContext): TutorialSchem
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/traefik_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),

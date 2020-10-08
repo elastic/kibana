@@ -37,16 +37,16 @@ export function execInProjects(
   getArgs: (project: Project) => string[]
 ) {
   const list = new Listr(
-    projects.map(project => ({
+    projects.map((project) => ({
       task: () =>
         execa(cmd, getArgs(project), {
           // execute in the current working directory so that relative paths in errors
           // are relative from the right location
           cwd: process.cwd(),
-          env: chalk.enabled ? { FORCE_COLOR: 'true' } : {},
+          env: chalk.level > 0 ? { FORCE_COLOR: 'true' } : {},
           stdio: ['ignore', 'pipe', 'pipe'],
           preferLocal: true,
-        }).catch(error => {
+        }).catch((error) => {
           throw new ProjectFailure(project, error);
         }),
       title: project.name,

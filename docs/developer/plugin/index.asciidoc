@@ -1,0 +1,42 @@
+[[external-plugin-development]]
+== External plugin development
+
+[IMPORTANT]
+==============================================
+The {kib} plugin interfaces are in a state of constant development.  We cannot provide backwards compatibility for plugins due to the high rate of change.  {kib} enforces that the installed plugins match the version of {kib} itself.  Plugin developers will have to release a new version of their plugin for each new {kib} release as a result.
+==============================================
+
+Most developers who contribute code directly to the {kib} repo are writing code inside plugins, so our <<contributing>> docs are the best place to
+start. However, there are a few differences when developing plugins outside the {kib} repo. These differences are covered here.
+
+[discrete]
+[[automatic-plugin-generator]]
+=== Automatic plugin generator
+
+We recommend that you kick-start your plugin by generating it with the {kib-repo}tree/{branch}/packages/kbn-plugin-generator[Kibana Plugin Generator]. Run the following in the {kib} repo, and you will be asked a couple questions, see some progress bars, and have a freshly generated plugin ready for you to play with in {kib}'s `plugins` folder.
+
+["source","shell"]
+-----------
+node scripts/generate_plugin my_plugin_name # replace "my_plugin_name" with your desired plugin name
+-----------
+
+[discrete]
+=== Plugin location
+
+The {kib} directory must be named `kibana`, and your plugin directory should be located in the root of `kibana` in a `plugins` directory, for example:
+
+["source","shell"]
+----
+.
+└── kibana
+    └── plugins
+        ├── foo-plugin
+        └── bar-plugin
+----
+
+* <<external-plugin-functional-tests>>
+* <<external-plugin-localization>>
+
+include::external-plugin-functional-tests.asciidoc[leveloffset=+1]
+
+include::external-plugin-localization.asciidoc[leveloffset=+1]

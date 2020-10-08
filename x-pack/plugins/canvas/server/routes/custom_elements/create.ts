@@ -5,11 +5,8 @@
  */
 
 import { RouteInitializerDeps } from '../';
-import {
-  CUSTOM_ELEMENT_TYPE,
-  API_ROUTE_CUSTOM_ELEMENT,
-} from '../../../../../legacy/plugins/canvas/common/lib/constants';
-import { getId } from '../../../../../legacy/plugins/canvas/public/lib/get_id';
+import { CUSTOM_ELEMENT_TYPE, API_ROUTE_CUSTOM_ELEMENT } from '../../../common/lib/constants';
+import { getId } from '../../../common/lib/get_id';
 import { CustomElementSchema } from './custom_element_schema';
 import { CustomElementAttributes } from './custom_element_attributes';
 import { okResponse } from '../ok_response';

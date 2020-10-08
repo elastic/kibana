@@ -4,28 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IClusterClient, Logger } from 'src/core/server';
-import { APMConfig } from '../../..';
+import { ILegacyClusterClient, Logger } from 'src/core/server';
 import {
   createOrUpdateIndex,
-  Mappings
-} from '../../helpers/create_or_update_index';
+  MappingsDefinition,
+} from '../../../../../observability/server';
+import { APMConfig } from '../../..';
 import { getApmIndicesConfig } from '../apm_indices/get_apm_indices';
 
 export async function createApmAgentConfigurationIndex({
   esClient,
   config,
-  logger
+  logger,
 }: {
-  esClient: IClusterClient;
+  esClient: ILegacyClusterClient;
   config: APMConfig;
   logger: Logger;
 }) {
   const index = getApmIndicesConfig(config).apmAgentConfigurationIndex;
-  return createOrUpdateIndex({ index, esClient, logger, mappings });
+  return createOrUpdateIndex({
+    index,
+    apiCaller: esClient.callAsInternalUser,
+    logger,
+    mappings,
+  });
 }
 
-const mappings: Mappings = {
+const mappings: MappingsDefinition = {
   dynamic: 'strict',
   dynamic_templates: [
     {
@@ -34,42 +39,42 @@ const mappings: Mappings = {
         match_mapping_type: 'string',
         mapping: {
           type: 'keyword',
-          ignore_above: 1024
-        }
-      }
-    }
+          ignore_above: 1024,
+        },
+      },
+    },
   ],
   properties: {
     '@timestamp': {
-      type: 'date'
+      type: 'date',
     },
     service: {
       properties: {
         name: {
           type: 'keyword',
-          ignore_above: 1024
+          ignore_above: 1024,
         },
         environment: {
           type: 'keyword',
-          ignore_above: 1024
-        }
-      }
+          ignore_above: 1024,
+        },
+      },
     },
     settings: {
       // allowing dynamic fields without specifying anything specific
       dynamic: true,
-      properties: {}
+      properties: {},
     },
     applied_by_agent: {
-      type: 'boolean'
+      type: 'boolean',
     },
     agent_name: {
       type: 'keyword',
-      ignore_above: 1024
+      ignore_above: 1024,
     },
     etag: {
       type: 'keyword',
-      ignore_above: 1024
-    }
-  }
+      ignore_above: 1024,
+    },
+  },
 };

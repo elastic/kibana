@@ -23,11 +23,13 @@ import moment from 'moment-timezone';
 import {
   FieldFormat,
   KBN_FIELD_TYPES,
-  TextContextTypeConvert,
   FIELD_FORMAT_IDS,
   FieldFormatsGetConfigFn,
-  IFieldFormatMetaParams,
 } from '../../../common';
+import {
+  IFieldFormatMetaParams,
+  TextContextTypeConvert,
+} from '../../../common/field_formats/types';
 
 export class DateFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.DATE;
@@ -77,7 +79,7 @@ export class DateFormat extends FieldFormat {
     };
   }
 
-  textConvert: TextContextTypeConvert = val => {
+  textConvert: TextContextTypeConvert = (val) => {
     // don't give away our ref to converter so we can hot-swap when config changes
     const pattern = this.param('pattern');
     const timezone = this.param('timezone');

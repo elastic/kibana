@@ -52,7 +52,7 @@ export default new Chainable('movingaverage', {
           validPositions: validPositions.join(', '),
         },
       }),
-      suggestions: validPositions.map(position => {
+      suggestions: validPositions.map((position) => {
         const suggestion = { name: position };
         if (position === defaultPosition) {
           suggestion.help = 'default';
@@ -67,7 +67,7 @@ export default new Chainable('movingaverage', {
       'Calculate the moving average over a given window. Nice for smoothing noisy series',
   }),
   fn: function movingaverageFn(args, tlConfig) {
-    return alter(args, function(eachSeries, _window, _position) {
+    return alter(args, function (eachSeries, _window, _position) {
       // _window always needs to be a number, if isn't we have to make it into one.
       if (typeof _window !== 'number') {
         // Ok, I guess its a datemath expression
@@ -81,7 +81,7 @@ export default new Chainable('movingaverage', {
       }
 
       _position = _position || defaultPosition;
-      if (!_.contains(validPositions, _position)) {
+      if (!_.includes(validPositions, _position)) {
         throw new Error(
           i18n.translate(
             'timelion.serverSideErrors.movingaverageFunction.notValidPositionErrorMessage',
@@ -103,7 +103,7 @@ export default new Chainable('movingaverage', {
         const average =
           _.chain(pairSlice)
             .map(1)
-            .reduce(function(memo, num) {
+            .reduce(function (memo, num) {
               return memo + num;
             })
             .value() / _window;
@@ -114,18 +114,18 @@ export default new Chainable('movingaverage', {
       if (_position === 'center') {
         const windowLeft = Math.floor(_window / 2);
         const windowRight = _window - windowLeft;
-        eachSeries.data = _.map(pairs, function(point, i) {
+        eachSeries.data = _.map(pairs, function (point, i) {
           if (i < windowLeft || i > pairsLen - windowRight) return [point[0], null];
           return toPoint(point, pairs.slice(i - windowLeft, i + windowRight));
         });
       } else if (_position === 'left') {
-        eachSeries.data = _.map(pairs, function(point, i) {
+        eachSeries.data = _.map(pairs, function (point, i) {
           const cursor = i + 1;
           if (cursor < _window) return [point[0], null];
           return toPoint(point, pairs.slice(cursor - _window, cursor));
         });
       } else if (_position === 'right') {
-        eachSeries.data = _.map(pairs, function(point, i) {
+        eachSeries.data = _.map(pairs, function (point, i) {
           if (i > pairsLen - _window) return [point[0], null];
           return toPoint(point, pairs.slice(i, i + _window));
         });

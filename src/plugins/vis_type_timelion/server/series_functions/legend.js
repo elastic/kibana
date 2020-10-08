@@ -113,7 +113,7 @@ export default new Chainable('legend', {
     defaultMessage: 'Set the position and style of the legend on the plot',
   }),
   fn: function legendFn(args) {
-    return alter(args, function(
+    return alter(args, function (
       eachSeries,
       position,
       columns,

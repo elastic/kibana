@@ -5,29 +5,37 @@
  */
 
 import LRU from 'lru-cache';
-import { APICaller } from '../../../../../../src/core/server';
+import { LegacyAPICaller } from '../../../../../../src/core/server';
 import {
   IndexPatternsFetcher,
-  IIndexPattern
+  FieldDescriptor,
 } from '../../../../../../src/plugins/data/server';
 import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
-import { ProcessorEvent } from '../../../common/processor_event';
+import {
+  ProcessorEvent,
+  UIProcessorEvent,
+} from '../../../common/processor_event';
 import { APMRequestHandlerContext } from '../../routes/typings';
 
-const cache = new LRU<string, IIndexPattern | undefined>({
+interface IndexPatternTitleAndFields {
+  title: string;
+  fields: FieldDescriptor[];
+}
+
+const cache = new LRU<string, IndexPatternTitleAndFields | undefined>({
   max: 100,
-  maxAge: 1000 * 60
+  maxAge: 1000 * 60,
 });
 
 // TODO: this is currently cached globally. In the future we might want to cache this per user
 export const getDynamicIndexPattern = async ({
   context,
   indices,
-  processorEvent
+  processorEvent,
 }: {
   context: APMRequestHandlerContext;
   indices: ApmIndicesConfig;
-  processorEvent?: ProcessorEvent;
+  processorEvent?: UIProcessorEvent;
 }) => {
   const patternIndices = getPatternIndices(indices, processorEvent);
   const indexPatternTitle = patternIndices.join(',');
@@ -37,8 +45,8 @@ export const getDynamicIndexPattern = async ({
   }
 
   const indexPatternsFetcher = new IndexPatternsFetcher(
-    (...rest: Parameters<APICaller>) =>
-      context.core.elasticsearch.adminClient.callAsCurrentUser(...rest)
+    (...rest: Parameters<LegacyAPICaller>) =>
+      context.core.elasticsearch.legacy.client.callAsCurrentUser(...rest)
   );
 
   // Since `getDynamicIndexPattern` is called in setup_request (and thus by every endpoint)
@@ -47,12 +55,12 @@ export const getDynamicIndexPattern = async ({
   // (would be a bad first time experience)
   try {
     const fields = await indexPatternsFetcher.getFieldsForWildcard({
-      pattern: patternIndices
+      pattern: patternIndices,
     });
 
-    const indexPattern: IIndexPattern = {
+    const indexPattern: IndexPatternTitleAndFields = {
       fields,
-      title: indexPatternTitle
+      title: indexPatternTitle,
     };
 
     cache.set(CACHE_KEY, indexPattern);
@@ -75,17 +83,17 @@ export const getDynamicIndexPattern = async ({
 
 function getPatternIndices(
   indices: ApmIndicesConfig,
-  processorEvent?: ProcessorEvent
+  processorEvent?: UIProcessorEvent
 ) {
   const indexNames = processorEvent
     ? [processorEvent]
-    : ['transaction' as const, 'metric' as const, 'error' as const];
+    : [ProcessorEvent.transaction, ProcessorEvent.metric, ProcessorEvent.error];
 
   const indicesMap = {
-    transaction: indices['apm_oss.transactionIndices'],
-    metric: indices['apm_oss.metricsIndices'],
-    error: indices['apm_oss.errorIndices']
+    [ProcessorEvent.transaction]: indices['apm_oss.transactionIndices'],
+    [ProcessorEvent.metric]: indices['apm_oss.metricsIndices'],
+    [ProcessorEvent.error]: indices['apm_oss.errorIndices'],
   };
 
-  return indexNames.map(name => indicesMap[name]);
+  return indexNames.map((name) => indicesMap[name as UIProcessorEvent]);
 }

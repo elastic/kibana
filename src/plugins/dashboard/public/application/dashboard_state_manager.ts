@@ -25,7 +25,7 @@ import { History } from 'history';
 
 import { Filter, Query, TimefilterContract as Timefilter } from 'src/plugins/data/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { migrateLegacyQuery } from '../../../kibana_legacy/public';
+import { migrateLegacyQuery } from './lib/migrate_legacy_query';
 
 import { ViewMode } from '../embeddable_plugin';
 import { getAppStateDefaults, migrateAppState, getDashboardIdFromUrl } from './lib';
@@ -139,8 +139,8 @@ export class DashboardStateManager {
     this.stateContainer = createStateContainer<DashboardAppState, DashboardAppStateTransitions>(
       initialState,
       {
-        set: state => (prop, value) => ({ ...state, [prop]: value }),
-        setOption: state => (option, value) => ({
+        set: (state) => (prop, value) => ({ ...state, [prop]: value }),
+        setOption: (state) => (option, value) => ({
           ...state,
           options: {
             ...state.options,
@@ -162,7 +162,7 @@ export class DashboardStateManager {
 
     this.stateContainerChangeSub = this.stateContainer.state$.subscribe(() => {
       this.isDirty = this.checkIsDirty();
-      this.changeListeners.forEach(listener => listener({ dirty: this.isDirty }));
+      this.changeListeners.forEach((listener) => listener({ dirty: this.isDirty }));
     });
 
     // setup state syncing utils. state container will be synced with url into `this.STATE_STORAGE_KEY` query param
@@ -218,7 +218,7 @@ export class DashboardStateManager {
     const savedDashboardPanelMap: { [key: string]: SavedDashboardPanel } = {};
 
     const input = dashboardContainer.getInput();
-    this.getPanels().forEach(savedDashboardPanel => {
+    this.getPanels().forEach((savedDashboardPanel) => {
       if (input.panels[savedDashboardPanel.panelIndex] !== undefined) {
         savedDashboardPanelMap[savedDashboardPanel.panelIndex] = savedDashboardPanel;
       } else {
@@ -229,7 +229,7 @@ export class DashboardStateManager {
 
     const convertedPanelStateMap: { [key: string]: SavedDashboardPanel } = {};
 
-    Object.values(input.panels).forEach(panelState => {
+    Object.values(input.panels).forEach((panelState) => {
       if (savedDashboardPanelMap[panelState.explicitInput.id] === undefined) {
         dirty = true;
       }
@@ -267,11 +267,15 @@ export class DashboardStateManager {
       this.setFullScreenMode(input.isFullScreenMode);
     }
 
+    if (input.expandedPanelId !== this.getExpandedPanelId()) {
+      this.setExpandedPanelId(input.expandedPanelId);
+    }
+
     if (!_.isEqual(input.query, this.getQuery())) {
       this.setQuery(input.query);
     }
 
-    this.changeListeners.forEach(listener => listener({ dirty }));
+    this.changeListeners.forEach((listener) => listener({ dirty }));
   }
 
   public getFullScreenMode() {
@@ -280,6 +284,14 @@ export class DashboardStateManager {
 
   public setFullScreenMode(fullScreenMode: boolean) {
     this.stateContainer.transitions.set('fullScreenMode', fullScreenMode);
+  }
+
+  public getExpandedPanelId() {
+    return this.appState.expandedPanelId;
+  }
+
+  public setExpandedPanelId(expandedPanelId?: string) {
+    this.stateContainer.transitions.set('expandedPanelId', expandedPanelId);
   }
 
   public setFilters(filters: Filter[]) {

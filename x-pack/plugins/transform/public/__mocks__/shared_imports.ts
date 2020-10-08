@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// actual mocks
 export const expandLiteralStrings = jest.fn();
 export const XJsonMode = jest.fn();
 export const useRequest = jest.fn(() => ({
@@ -11,5 +12,7 @@ export const useRequest = jest.fn(() => ({
   error: null,
   data: undefined,
 }));
-export { mlInMemoryTableBasicFactory } from '../../../ml/public/application/components/ml_in_memory_table';
-export const SORT_DIRECTION = { ASC: 'asc' };
+export const createSavedSearchesLoader = jest.fn();
+
+// just passing through the reimports
+export { getMlSharedImports } from '../../../ml/public';

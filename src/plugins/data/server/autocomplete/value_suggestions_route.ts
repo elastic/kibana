@@ -55,7 +55,7 @@ export function registerValueSuggestionsRoute(
       const config = await config$.pipe(first()).toPromise();
       const { field: fieldName, query, boolFilter } = request.body;
       const { index } = request.params;
-      const { dataClient } = context.core.elasticsearch;
+      const { client } = context.core.elasticsearch.legacy;
       const signal = getRequestAbortedSignal(request.events.aborted$);
 
       const autocompleteSearchOptions = {
@@ -69,7 +69,7 @@ export function registerValueSuggestionsRoute(
       const body = await getBody(autocompleteSearchOptions, field || fieldName, query, boolFilter);
 
       try {
-        const result = await dataClient.callAsCurrentUser('search', { index, body }, { signal });
+        const result = await client.callAsCurrentUser('search', { index, body }, { signal });
 
         const buckets: any[] =
           get(result, 'aggregations.suggestions.buckets') ||
@@ -84,6 +84,7 @@ export function registerValueSuggestionsRoute(
 }
 
 async function getBody(
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   { timeout, terminate_after }: Record<string, any>,
   field: IFieldType | string,
   query: string,
@@ -93,7 +94,7 @@ async function getBody(
 
   // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html#_standard_operators
   const getEscapedQuery = (q: string = '') =>
-    q.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, match => `\\${match}`);
+    q.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, (match) => `\\${match}`);
 
   // Helps ensure that the regex is not evaluated eagerly against the terms dictionary
   const executionHint = 'map';

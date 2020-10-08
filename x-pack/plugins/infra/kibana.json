@@ -4,17 +4,25 @@
   "kibanaVersion": "kibana",
   "requiredPlugins": [
     "features",
-    "apm",
     "usageCollection",
     "spaces",
-    "home",
+    
     "data",
     "dataEnhanced",
     "visTypeTimeseries",
-    "alerting",
-    "triggers_actions_ui"
+    "alerts",
+    "triggersActionsUi"
   ],
+  "optionalPlugins": ["ml", "observability", "home"],
   "server": true,
   "ui": true,
-  "configPath": ["xpack", "infra"]
+  "configPath": ["xpack", "infra"],
+  "requiredBundles": [
+    "observability",
+    "licenseManagement",
+    "kibanaUtils",
+    "kibanaReact",
+    "apm",
+    "home"
+  ]
 }

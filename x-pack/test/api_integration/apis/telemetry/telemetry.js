@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import multiClusterFixture from './fixtures/multicluster';
 import basicClusterFixture from './fixtures/basiccluster';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 

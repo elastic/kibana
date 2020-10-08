@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { Fragment, Suspense, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -27,9 +27,10 @@ import {
   EuiCallOut,
   EuiHorizontalRule,
   EuiText,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
-import { HttpSetup, ToastsApi } from 'kibana/public';
-import { loadActionTypes, loadAllActions } from '../../lib/action_connector_api';
+import { HttpSetup, ToastsSetup, ApplicationStart, DocLinksStart } from 'kibana/public';
+import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
 import {
   IErrorObject,
   ActionTypeModel,
@@ -37,13 +38,15 @@ import {
   ActionTypeIndex,
   ActionConnector,
   ActionType,
+  ActionVariable,
 } from '../../../types';
 import { SectionLoading } from '../../components/section_loading';
 import { ConnectorAddModal } from './connector_add_modal';
 import { TypeRegistry } from '../../type_registry';
 import { actionTypeCompare } from '../../lib/action_type_compare';
-import { checkActionTypeEnabled } from '../../lib/check_action_type_enabled';
+import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
+import { hasSaveActionsCapability } from '../../lib/capabilities';
 
 interface ActionAccordionFormProps {
   actions: AlertAction[];
@@ -53,14 +56,13 @@ interface ActionAccordionFormProps {
   setActionParamsProperty: (key: string, value: any, index: number) => void;
   http: HttpSetup;
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  toastNotifications: Pick<
-    ToastsApi,
-    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
-  >;
+  toastNotifications: ToastsSetup;
+  docLinks: DocLinksStart;
   actionTypes?: ActionType[];
-  messageVariables?: string[];
+  messageVariables?: ActionVariable[];
   defaultActionMessage?: string;
   setHasActionsDisabled?: (value: boolean) => void;
+  capabilities: ApplicationStart['capabilities'];
 }
 
 interface ActiveActionConnectorState {
@@ -81,7 +83,11 @@ export const ActionForm = ({
   defaultActionMessage,
   toastNotifications,
   setHasActionsDisabled,
+  capabilities,
+  docLinks,
 }: ActionAccordionFormProps) => {
+  const canSave = hasSaveActionsCapability(capabilities);
+
   const [addModalVisible, setAddModalVisibility] = useState<boolean>(false);
   const [activeActionItem, setActiveActionItem] = useState<ActiveActionConnectorState | undefined>(
     undefined
@@ -106,19 +112,13 @@ export const ActionForm = ({
           index[actionTypeItem.id] = actionTypeItem;
         }
         setActionTypesIndex(index);
-        const hasActionsDisabled = actions.some(action => !index[action.actionTypeId].enabled);
-        if (setHasActionsDisabled) {
-          setHasActionsDisabled(hasActionsDisabled);
-        }
       } catch (e) {
-        if (toastNotifications) {
-          toastNotifications.addDanger({
-            title: i18n.translate(
-              'xpack.triggersActionsUI.sections.alertForm.unableToLoadActionTypesMessage',
-              { defaultMessage: 'Unable to load action types' }
-            ),
-          });
-        }
+        toastNotifications.addDanger({
+          title: i18n.translate(
+            'xpack.triggersActionsUI.sections.alertForm.unableToLoadActionTypesMessage',
+            { defaultMessage: 'Unable to load action types' }
+          ),
+        });
       } finally {
         setIsLoadingActionTypes(false);
       }
@@ -126,41 +126,73 @@ export const ActionForm = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // load connectors
   useEffect(() => {
-    loadConnectors();
+    (async () => {
+      try {
+        setIsLoadingConnectors(true);
+        const loadedConnectors = await loadConnectors({ http });
+        setConnectors(loadedConnectors);
+      } catch (e) {
+        toastNotifications.addDanger({
+          title: i18n.translate(
+            'xpack.triggersActionsUI.sections.alertForm.unableToLoadActionsMessage',
+            {
+              defaultMessage: 'Unable to load connectors',
+            }
+          ),
+        });
+      } finally {
+        setIsLoadingConnectors(false);
+      }
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function loadConnectors() {
-    try {
-      setIsLoadingConnectors(true);
-      const actionsResponse = await loadAllActions({ http });
-      setConnectors(actionsResponse);
-    } catch (e) {
-      toastNotifications.addDanger({
-        title: i18n.translate(
-          'xpack.triggersActionsUI.sections.alertForm.unableToLoadActionsMessage',
-          {
-            defaultMessage: 'Unable to load connectors',
-          }
-        ),
-      });
-    } finally {
-      setIsLoadingConnectors(false);
+  useEffect(() => {
+    const setActionTypesAvalilability = () => {
+      const preconfiguredConnectors = connectors.filter((connector) => connector.isPreconfigured);
+      const hasActionsDisabled = actions.some(
+        (action) =>
+          actionTypesIndex &&
+          !actionTypesIndex[action.actionTypeId].enabled &&
+          !checkActionFormActionTypeEnabled(
+            actionTypesIndex[action.actionTypeId],
+            preconfiguredConnectors
+          ).isEnabled
+      );
+      if (setHasActionsDisabled) {
+        setHasActionsDisabled(hasActionsDisabled);
+      }
+    };
+    if (connectors.length > 0 && actionTypesIndex) {
+      setActionTypesAvalilability();
     }
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connectors, actionTypesIndex]);
+
   const preconfiguredMessage = i18n.translate(
     'xpack.triggersActionsUI.sections.actionForm.preconfiguredTitleMessage',
     {
       defaultMessage: '(preconfigured)',
     }
   );
+
   const getSelectedOptions = (actionItemId: string) => {
-    const val = connectors.find(connector => connector.id === actionItemId);
-    if (!val) {
+    const selectedConnector = connectors.find((connector) => connector.id === actionItemId);
+    if (
+      !selectedConnector ||
+      // if selected connector is not preconfigured and action type is for preconfiguration only,
+      // do not show regular connectors of this type
+      (actionTypesIndex &&
+        !actionTypesIndex[selectedConnector.actionTypeId].enabledInConfig &&
+        !selectedConnector.isPreconfigured)
+    ) {
       return [];
     }
-    const optionTitle = `${val.name} ${val.isPreconfigured ? preconfiguredMessage : ''}`;
+    const optionTitle = `${selectedConnector.name} ${
+      selectedConnector.isPreconfigured ? preconfiguredMessage : ''
+    }`;
     return [
       {
         label: optionTitle,
@@ -179,8 +211,19 @@ export const ActionForm = ({
     },
     index: number
   ) => {
+    if (!actionTypesIndex) {
+      return null;
+    }
+
+    const actionType = actionTypesIndex[actionItem.actionTypeId];
+
     const optionsList = connectors
-      .filter(connectorItem => connectorItem.actionTypeId === actionItem.actionTypeId)
+      .filter(
+        (connectorItem) =>
+          connectorItem.actionTypeId === actionItem.actionTypeId &&
+          // include only enabled by config connectors or preconfigured
+          (actionType.enabledInConfig || connectorItem.isPreconfigured)
+      )
       .map(({ name, id, isPreconfigured }) => ({
         label: `${name} ${isPreconfigured ? preconfiguredMessage : ''}`,
         key: id,
@@ -189,8 +232,9 @@ export const ActionForm = ({
     const actionTypeRegistered = actionTypeRegistry.get(actionConnector.actionTypeId);
     if (!actionTypeRegistered || actionItem.group !== defaultActionGroupId) return null;
     const ParamsFieldsComponent = actionTypeRegistered.actionParamsFields;
-    const checkEnabledResult = checkActionTypeEnabled(
-      actionTypesIndex && actionTypesIndex[actionConnector.actionTypeId]
+    const checkEnabledResult = checkActionFormActionTypeEnabled(
+      actionTypesIndex[actionConnector.actionTypeId],
+      connectors.filter((connector) => connector.isPreconfigured)
     );
 
     const accordionContent = checkEnabledResult.isEnabled ? (
@@ -211,19 +255,23 @@ export const ActionForm = ({
                 />
               }
               labelAppend={
-                <EuiButtonEmpty
-                  size="xs"
-                  data-test-subj="createActionConnectorButton"
-                  onClick={() => {
-                    setActiveActionItem({ actionTypeId: actionItem.actionTypeId, index });
-                    setAddModalVisibility(true);
-                  }}
-                >
-                  <FormattedMessage
-                    defaultMessage="Add new"
-                    id="xpack.triggersActionsUI.sections.alertForm.addNewConnectorEmptyButton"
-                  />
-                </EuiButtonEmpty>
+                canSave &&
+                actionTypesIndex &&
+                actionTypesIndex[actionConnector.actionTypeId].enabledInConfig ? (
+                  <EuiButtonEmpty
+                    size="xs"
+                    data-test-subj={`addNewActionConnectorButton-${actionItem.actionTypeId}`}
+                    onClick={() => {
+                      setActiveActionItem({ actionTypeId: actionItem.actionTypeId, index });
+                      setAddModalVisibility(true);
+                    }}
+                  >
+                    <FormattedMessage
+                      defaultMessage="Add new"
+                      id="xpack.triggersActionsUI.sections.alertForm.addNewConnectorEmptyButton"
+                    />
+                  </EuiButtonEmpty>
+                ) : null
               }
             >
               <EuiComboBox
@@ -231,9 +279,9 @@ export const ActionForm = ({
                 singleSelection={{ asPlainText: true }}
                 options={optionsList}
                 id={`selectActionConnector-${actionItem.id}`}
-                data-test-subj="selectActionConnector"
+                data-test-subj={`selectActionConnector-${actionItem.actionTypeId}`}
                 selectedOptions={getSelectedOptions(actionItem.id)}
-                onChange={selectedOptions => {
+                onChange={(selectedOptions) => {
                   setActionIdByIndex(selectedOptions[0].id ?? '', index);
                 }}
                 isClearable={false}
@@ -243,14 +291,28 @@ export const ActionForm = ({
         </EuiFlexGroup>
         <EuiSpacer size="xl" />
         {ParamsFieldsComponent ? (
-          <ParamsFieldsComponent
-            actionParams={actionItem.params as any}
-            index={index}
-            errors={actionParamsErrors.errors}
-            editAction={setActionParamsProperty}
-            messageVariables={messageVariables}
-            defaultMessage={defaultActionMessage ?? undefined}
-          />
+          <Suspense
+            fallback={
+              <EuiFlexGroup justifyContent="center">
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner size="m" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+          >
+            <ParamsFieldsComponent
+              actionParams={actionItem.params as any}
+              index={index}
+              errors={actionParamsErrors.errors}
+              editAction={setActionParamsProperty}
+              messageVariables={messageVariables}
+              defaultMessage={defaultActionMessage ?? undefined}
+              docLinks={docLinks}
+              http={http}
+              toastNotifications={toastNotifications}
+              actionConnector={actionConnector}
+            />
+          </Suspense>
         ) : null}
       </Fragment>
     ) : (
@@ -258,10 +320,9 @@ export const ActionForm = ({
     );
 
     return (
-      <Fragment>
+      <Fragment key={index}>
         <EuiAccordion
           initialIsOpen={true}
-          key={index}
           id={index.toString()}
           className="actAccordionActionForm"
           buttonContentClassName="actAccordionActionForm__button"
@@ -273,12 +334,12 @@ export const ActionForm = ({
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText>
-                  <p>
+                  <div>
                     <EuiFlexGroup gutterSize="s">
                       <EuiFlexItem grow={false}>
                         <FormattedMessage
                           defaultMessage="{actionConnectorName}"
-                          id="xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeEditTitle"
+                          id="xpack.triggersActionsUI.sections.alertForm.existingAlertActionTypeEditTitle"
                           values={{
                             actionConnectorName: `${actionConnector.name} ${
                               actionConnector.isPreconfigured ? preconfiguredMessage : ''
@@ -304,7 +365,7 @@ export const ActionForm = ({
                         )}
                       </EuiFlexItem>
                     </EuiFlexGroup>
-                  </p>
+                  </div>
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -348,11 +409,20 @@ export const ActionForm = ({
       : actionItem.actionTypeId;
     const actionTypeRegistered = actionTypeRegistry.get(actionItem.actionTypeId);
     if (!actionTypeRegistered || actionItem.group !== defaultActionGroupId) return null;
+
+    const noConnectorsLabel = (
+      <FormattedMessage
+        id="xpack.triggersActionsUI.sections.alertForm.emptyConnectorsLabel"
+        defaultMessage="No {actionTypeName} connectors"
+        values={{
+          actionTypeName,
+        }}
+      />
+    );
     return (
-      <Fragment>
+      <Fragment key={index}>
         <EuiAccordion
           initialIsOpen={true}
-          key={index}
           id={index.toString()}
           className="actAccordionActionForm"
           buttonContentClassName="actAccordionActionForm__button"
@@ -364,15 +434,15 @@ export const ActionForm = ({
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText>
-                  <p>
+                  <div>
                     <FormattedMessage
                       defaultMessage="{actionConnectorName}"
-                      id="xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeEditTitle"
+                      id="xpack.triggersActionsUI.sections.alertForm.newAlertActionTypeEditTitle"
                       values={{
                         actionConnectorName: actionTypeRegistered.actionTypeTitle,
                       }}
                     />
-                  </p>
+                  </div>
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -403,46 +473,51 @@ export const ActionForm = ({
           }
           paddingSize="l"
         >
-          <EuiEmptyPrompt
-            title={
-              emptyActionsIds.find((emptyId: string) => actionItem.id === emptyId) ? (
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.alertForm.emptyConnectorsLabel"
-                  defaultMessage="No {actionTypeName} connectors."
-                  values={{
-                    actionTypeName,
+          {canSave ? (
+            <EuiEmptyPrompt
+              title={
+                emptyActionsIds.find((emptyId: string) => actionItem.id === emptyId) ? (
+                  noConnectorsLabel
+                ) : (
+                  <EuiCallOut
+                    title={i18n.translate(
+                      'xpack.triggersActionsUI.sections.alertForm.unableToLoadConnectorTitle',
+                      {
+                        defaultMessage: 'Unable to load connector.',
+                      }
+                    )}
+                    color="warning"
+                  />
+                )
+              }
+              actions={[
+                <EuiButton
+                  color="primary"
+                  fill
+                  size="s"
+                  data-test-subj="createActionConnectorButton"
+                  onClick={() => {
+                    setActiveActionItem({ actionTypeId: actionItem.actionTypeId, index });
+                    setAddModalVisibility(true);
                   }}
-                />
-              ) : (
-                <EuiCallOut
-                  title={i18n.translate(
-                    'xpack.triggersActionsUI.sections.alertForm.unableToLoadConnectorTitle',
-                    {
-                      defaultMessage: 'Unable to load connector.',
-                    }
-                  )}
-                  color="warning"
-                />
-              )
-            }
-            actions={[
-              <EuiButton
-                color="primary"
-                fill
-                size="s"
-                data-test-subj="createActionConnectorButton"
-                onClick={() => {
-                  setActiveActionItem({ actionTypeId: actionItem.actionTypeId, index });
-                  setAddModalVisibility(true);
-                }}
-              >
+                >
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.alertForm.addConnectorButtonLabel"
+                    defaultMessage="Create a connector"
+                  />
+                </EuiButton>,
+              ]}
+            />
+          ) : (
+            <EuiCallOut title={noConnectorsLabel}>
+              <p>
                 <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.alertForm.addConnectorButtonLabel"
-                  defaultMessage="Create a connector"
+                  id="xpack.triggersActionsUI.sections.alertForm.unauthorizedToCreateForEmptyConnectors"
+                  defaultMessage="Only authorized users can configure a connector. Contact your administrator."
                 />
-              </EuiButton>,
-            ]}
-          />
+              </p>
+            </EuiCallOut>
+          )}
         </EuiAccordion>
         <EuiSpacer size="xs" />
       </Fragment>
@@ -460,7 +535,7 @@ export const ActionForm = ({
     }
     setIsAddActionPanelOpen(false);
     const actionTypeConnectors = connectors.filter(
-      field => field.actionTypeId === actionTypeModel.id
+      (field) => field.actionTypeId === actionTypeModel.id
     );
 
     if (actionTypeConnectors.length > 0) {
@@ -486,18 +561,27 @@ export const ActionForm = ({
     }
   }
 
-  let actionTypeNodes: JSX.Element[] | null = null;
+  let actionTypeNodes: Array<JSX.Element | null> | null = null;
   let hasDisabledByLicenseActionTypes = false;
   if (actionTypesIndex) {
+    const preconfiguredConnectors = connectors.filter((connector) => connector.isPreconfigured);
     actionTypeNodes = actionTypeRegistry
       .list()
-      .filter(
-        item => actionTypesIndex[item.id] && actionTypesIndex[item.id].enabledInConfig === true
+      .filter((item) => actionTypesIndex[item.id])
+      .filter((item) => !!item.actionParamsFields)
+      .sort((a, b) =>
+        actionTypeCompare(actionTypesIndex[a.id], actionTypesIndex[b.id], preconfiguredConnectors)
       )
-      .sort((a, b) => actionTypeCompare(actionTypesIndex[a.id], actionTypesIndex[b.id]))
-      .map(function(item, index) {
+      .map(function (item, index) {
         const actionType = actionTypesIndex[item.id];
-        const checkEnabledResult = checkActionTypeEnabled(actionTypesIndex[item.id]);
+        const checkEnabledResult = checkActionFormActionTypeEnabled(
+          actionTypesIndex[item.id],
+          preconfiguredConnectors
+        );
+        // if action type is not enabled in config and not preconfigured, it shouldn't be displayed
+        if (!actionType.enabledInConfig && !checkEnabledResult.isEnabled) {
+          return null;
+        }
         if (!actionType.enabledInLicense) {
           hasDisabledByLicenseActionTypes = true;
         }
@@ -515,20 +599,20 @@ export const ActionForm = ({
         );
 
         return (
-          <Fragment key={`keypad-${item.id}`}>
+          <EuiFlexItem grow={false} key={`keypad-${item.id}`}>
             {checkEnabledResult.isEnabled && keyPadItem}
             {checkEnabledResult.isEnabled === false && (
               <EuiToolTip position="top" content={checkEnabledResult.message}>
                 {keyPadItem}
               </EuiToolTip>
             )}
-          </Fragment>
+          </EuiFlexItem>
         );
       });
   }
 
   const alertActionsList = actions.map((actionItem: AlertAction, index: number) => {
-    const actionConnector = connectors.find(field => field.id === actionItem.id);
+    const actionConnector = connectors.find((field) => field.id === actionItem.id);
     // connectors doesn't exists
     if (!actionConnector) {
       return getAddConnectorsForm(actionItem, index);
@@ -615,7 +699,7 @@ export const ActionForm = ({
                 )}
               </EuiFlexGroup>
               <EuiSpacer />
-              <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" wrap>
+              <EuiFlexGroup gutterSize="m" wrap>
                 {isLoadingActionTypes ? (
                   <SectionLoading>
                     <FormattedMessage
@@ -644,8 +728,13 @@ export const ActionForm = ({
           actionTypeRegistry={actionTypeRegistry}
           http={http}
           toastNotifications={toastNotifications}
+          docLinks={docLinks}
+          capabilities={capabilities}
         />
       ) : null}
     </Fragment>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { ActionForm as default };

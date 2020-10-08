@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFormRow, EuiComboBox, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -62,15 +62,17 @@ interface Props {
 export const PathParameter = ({ field, allFields }: Props) => {
   const suggestedFields = getSuggestedFields(allFields, field);
 
+  const fieldConfig = useMemo(
+    () => ({
+      ...getFieldConfig('path'),
+      deserializer: getDeserializer(allFields),
+    }),
+    [allFields]
+  );
+
   return (
-    <UseField
-      path="path"
-      config={{
-        ...getFieldConfig('path'),
-        deserializer: getDeserializer(allFields),
-      }}
-    >
-      {pathField => {
+    <UseField path="path" config={fieldConfig}>
+      {(pathField) => {
         const error = pathField.getErrorsMessages();
         const isInvalid = error ? Boolean(error.length) : false;
 
@@ -123,7 +125,7 @@ export const PathParameter = ({ field, allFields }: Props) => {
                   singleSelection={{ asPlainText: true }}
                   options={suggestedFields}
                   selectedOptions={pathField.value as AliasOption[]}
-                  onChange={value => pathField.setValue(value)}
+                  onChange={(value) => pathField.setValue(value)}
                   isClearable={false}
                   fullWidth
                 />

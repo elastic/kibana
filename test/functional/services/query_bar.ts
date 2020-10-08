@@ -54,6 +54,11 @@ export function QueryBarProvider({ getService, getPageObjects }: FtrProviderCont
       });
     }
 
+    public async clearQuery(): Promise<void> {
+      await this.setQuery('');
+      await PageObjects.common.pressTabKey();
+    }
+
     public async submitQuery(): Promise<void> {
       log.debug('QueryBar.submitQuery');
       await testSubjects.click('queryInput');
@@ -81,6 +86,11 @@ export function QueryBarProvider({ getService, getPageObjects }: FtrProviderCont
     public async expectQueryLanguageOrFail(lang: 'kql' | 'lucene'): Promise<void> {
       const queryLanguageButton = await testSubjects.find('switchQueryLanguageButton');
       expect((await queryLanguageButton.getVisibleText()).toLowerCase()).to.eql(lang);
+    }
+
+    public async getSuggestions() {
+      const suggestions = await testSubjects.findAll('autoCompleteSuggestionText');
+      return Promise.all(suggestions.map((suggestion) => suggestion.getVisibleText()));
     }
   }
 

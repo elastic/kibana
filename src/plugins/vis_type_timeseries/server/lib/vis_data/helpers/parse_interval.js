@@ -25,9 +25,7 @@ import dateMath from '@elastic/datemath';
 const INTERVAL_STRING_RE = new RegExp('^([0-9\\.]*)\\s*(' + dateMath.units.join('|') + ')$');
 
 export function parseInterval(interval) {
-  const matches = String(interval)
-    .trim()
-    .match(INTERVAL_STRING_RE);
+  const matches = String(interval).trim().match(INTERVAL_STRING_RE);
 
   if (!matches) return null;
 
@@ -44,7 +42,7 @@ export function parseInterval(interval) {
     // adding 0.5 days until we hit the end date. However, since there is a bug in moment, when you add 0.5 days to
     // the start date, you get the same exact date (instead of being ahead by 12 hours). So instead of returning
     // a duration corresponding to 0.5 hours, we return a duration corresponding to 12 hours.
-    const selectedUnit = _.find(dateMath.units, unit => {
+    const selectedUnit = _.find(dateMath.units, (unit) => {
       return Math.abs(duration.as(unit)) >= 1;
     });
 

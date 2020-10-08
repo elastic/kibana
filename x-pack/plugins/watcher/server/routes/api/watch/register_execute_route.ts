@@ -5,9 +5,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { get } from 'lodash';
-import { isEsError } from '../../../lib/is_es_error';
+import { isEsError } from '../../../shared_imports';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 import { RouteDependencies } from '../../../types';
@@ -23,7 +23,7 @@ const bodySchema = schema.object({
   watch: schema.object({}, { unknowns: 'allow' }),
 });
 
-function executeWatch(dataClient: IScopedClusterClient, executeDetails: any, watchJson: any) {
+function executeWatch(dataClient: ILegacyScopedClusterClient, executeDetails: any, watchJson: any) {
   const body = executeDetails;
   body.watch = watchJson;
 

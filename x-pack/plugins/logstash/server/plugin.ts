@@ -6,12 +6,13 @@
 import {
   CoreSetup,
   CoreStart,
-  ICustomClusterClient,
+  ILegacyCustomClusterClient,
   Logger,
   Plugin,
   PluginInitializerContext,
 } from 'src/core/server';
 import { LicensingPluginSetup } from '../../licensing/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { SecurityPluginSetup } from '../../security/server';
 
 import { registerRoutes } from './routes';
@@ -19,11 +20,12 @@ import { registerRoutes } from './routes';
 interface SetupDeps {
   licensing: LicensingPluginSetup;
   security?: SecurityPluginSetup;
+  features: FeaturesPluginSetup;
 }
 
 export class LogstashPlugin implements Plugin {
   private readonly logger: Logger;
-  private esClient?: ICustomClusterClient;
+  private esClient?: ILegacyCustomClusterClient;
   private coreSetup?: CoreSetup;
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
@@ -34,6 +36,22 @@ export class LogstashPlugin implements Plugin {
 
     this.coreSetup = core;
     registerRoutes(core.http.createRouter(), deps.security);
+
+    deps.features.registerElasticsearchFeature({
+      id: 'pipelines',
+      management: {
+        ingest: ['pipelines'],
+      },
+      privileges: [
+        {
+          requiredClusterPrivileges: [],
+          requiredIndexPrivileges: {
+            ['.logstash']: ['read'],
+          },
+          ui: [],
+        },
+      ],
+    });
   }
 
   start(core: CoreStart) {

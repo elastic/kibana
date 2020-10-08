@@ -11,16 +11,13 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function emailTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
 
   describe('create email action', () => {
-    after(() => esArchiver.unload('empty_kibana'));
-
     let createdActionId = '';
 
     it('should return 200 when creating an email action successfully', async () => {
       const { body: createdAction } = await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'An email action',
@@ -28,6 +25,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
           config: {
             service: '__json',
             from: 'bob@example.com',
+            hasAuth: true,
           },
           secrets: {
             user: 'bob',
@@ -44,6 +42,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
         actionTypeId: '.email',
         config: {
           service: '__json',
+          hasAuth: true,
           host: null,
           port: null,
           secure: null,
@@ -54,7 +53,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
       expect(typeof createdActionId).to.be('string');
 
       const { body: fetchedAction } = await supertest
-        .get(`/api/action/${createdActionId}`)
+        .get(`/api/actions/action/${createdActionId}`)
         .expect(200);
 
       expect(fetchedAction).to.eql({
@@ -65,6 +64,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
         config: {
           from: 'bob@example.com',
           service: '__json',
+          hasAuth: true,
           host: null,
           port: null,
           secure: null,
@@ -74,7 +74,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
 
     it('should return the message data when firing the __json service', async () => {
       await supertest
-        .post(`/api/action/${createdActionId}/_execute`)
+        .post(`/api/actions/action/${createdActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -117,7 +117,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
 
     it('should render html from markdown', async () => {
       await supertest
-        .post(`/api/action/${createdActionId}/_execute`)
+        .post(`/api/actions/action/${createdActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -138,7 +138,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
 
     it('should respond with a 400 Bad Request when creating an email action with an invalid config', async () => {
       await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'An email action',
@@ -156,15 +156,15 @@ export default function emailTest({ getService }: FtrProviderContext) {
         });
     });
 
-    it('should respond with a 400 Bad Request when creating an email action with non-whitelisted server', async () => {
+    it('should respond with a 400 Bad Request when creating an email action with a server not added to allowedHosts', async () => {
       await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'An email action',
           actionTypeId: '.email',
           config: {
-            service: 'gmail', // not whitelisted in the config for this test
+            service: 'gmail', // not added to allowedHosts in the config for this test
             from: 'bob@example.com',
           },
           secrets: {
@@ -178,18 +178,18 @@ export default function emailTest({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message:
-              "error validating action type config: [service] value 'gmail' resolves to host 'smtp.gmail.com' which is not in the whitelistedHosts configuration",
+              "error validating action type config: [service] value 'gmail' resolves to host 'smtp.gmail.com' which is not in the allowedHosts configuration",
           });
         });
 
       await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'An email action',
           actionTypeId: '.email',
           config: {
-            host: 'stmp.gmail.com', // not whitelisted in the config for this test
+            host: 'stmp.gmail.com', // not added to allowedHosts in the config for this test
             port: 666,
             from: 'bob@example.com',
           },
@@ -204,20 +204,20 @@ export default function emailTest({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message:
-              "error validating action type config: [host] value 'stmp.gmail.com' is not in the whitelistedHosts configuration",
+              "error validating action type config: [host] value 'stmp.gmail.com' is not in the allowedHosts configuration",
           });
         });
     });
 
-    it('should handle creating an email action with a whitelisted server', async () => {
+    it('should handle creating an email action with a server added to allowedHosts', async () => {
       const { body: createdAction } = await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'An email action',
           actionTypeId: '.email',
           config: {
-            host: 'some.non.existent.com', // whitelisted in the config for this test
+            host: 'some.non.existent.com', // added to allowedHosts in the config for this test
             port: 666,
             from: 'bob@example.com',
           },
@@ -232,7 +232,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
 
     it('should handle an email action with no auth', async () => {
       const { body: createdAction } = await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'An email action with no auth',
@@ -245,7 +245,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
         .expect(200);
 
       await supertest
-        .post(`/api/action/${createdAction.id}/_execute`)
+        .post(`/api/actions/action/${createdAction.id}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {

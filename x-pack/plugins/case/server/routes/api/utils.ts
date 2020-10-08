@@ -17,30 +17,36 @@ import {
   CasePostRequest,
   CaseResponse,
   CasesFindResponse,
-  CaseAttributes,
   CommentResponse,
   CommentsResponse,
   CommentAttributes,
+  ESCaseConnector,
+  ESCaseAttributes,
 } from '../../../common/api';
+import { transformESConnectorToCaseConnector } from './cases/helpers';
 
 import { SortFieldCase, TotalCommentByCase } from './types';
 
 export const transformNewCase = ({
+  connector,
   createdDate,
   email,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   full_name,
   newCase,
   username,
 }: {
+  connector: ESCaseConnector;
   createdDate: string;
   email?: string | null;
   full_name?: string | null;
   newCase: CasePostRequest;
   username?: string | null;
-}): CaseAttributes => ({
+}): ESCaseAttributes => ({
   ...newCase,
   closed_at: null,
   closed_by: null,
+  connector,
   created_at: createdDate,
   created_by: { email, full_name, username },
   external_service: null,
@@ -60,6 +66,7 @@ export const transformNewComment = ({
   comment,
   createdDate,
   email,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   full_name,
   username,
 }: NewCommentArgs): CommentAttributes => ({
@@ -83,7 +90,7 @@ export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> 
 }
 
 export const transformCases = (
-  cases: SavedObjectsFindResponse<CaseAttributes>,
+  cases: SavedObjectsFindResponse<ESCaseAttributes>,
   countOpenCases: number,
   countClosedCases: number,
   totalCommentByCase: TotalCommentByCase[]
@@ -97,30 +104,35 @@ export const transformCases = (
 });
 
 export const flattenCaseSavedObjects = (
-  savedObjects: SavedObjectsFindResponse<CaseAttributes>['saved_objects'],
+  savedObjects: Array<SavedObject<ESCaseAttributes>>,
   totalCommentByCase: TotalCommentByCase[]
 ): CaseResponse[] =>
-  savedObjects.reduce((acc: CaseResponse[], savedObject: SavedObject<CaseAttributes>) => {
+  savedObjects.reduce((acc: CaseResponse[], savedObject: SavedObject<ESCaseAttributes>) => {
     return [
       ...acc,
-      flattenCaseSavedObject(
+      flattenCaseSavedObject({
         savedObject,
-        [],
-        totalCommentByCase.find(tc => tc.caseId === savedObject.id)?.totalComments ?? 0
-      ),
+        totalComment:
+          totalCommentByCase.find((tc) => tc.caseId === savedObject.id)?.totalComments ?? 0,
+      }),
     ];
   }, []);
 
-export const flattenCaseSavedObject = (
-  savedObject: SavedObject<CaseAttributes>,
-  comments: Array<SavedObject<CommentAttributes>> = [],
-  totalComment: number = 0
-): CaseResponse => ({
+export const flattenCaseSavedObject = ({
+  savedObject,
+  comments = [],
+  totalComment = 0,
+}: {
+  savedObject: SavedObject<ESCaseAttributes>;
+  comments?: Array<SavedObject<CommentAttributes>>;
+  totalComment?: number;
+}): CaseResponse => ({
   id: savedObject.id,
   version: savedObject.version ?? '0',
   comments: flattenCommentSavedObjects(comments),
   totalComment,
   ...savedObject.attributes,
+  connector: transformESConnectorToCaseConnector(savedObject.attributes.connector),
 });
 
 export const transformComments = (
@@ -133,7 +145,7 @@ export const transformComments = (
 });
 
 export const flattenCommentSavedObjects = (
-  savedObjects: SavedObjectsFindResponse<CommentAttributes>['saved_objects']
+  savedObjects: Array<SavedObject<CommentAttributes>>
 ): CommentResponse[] =>
   savedObjects.reduce((acc: CommentResponse[], savedObject: SavedObject<CommentAttributes>) => {
     return [...acc, flattenCommentSavedObject(savedObject)];

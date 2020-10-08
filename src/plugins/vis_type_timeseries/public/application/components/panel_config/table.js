@@ -64,10 +64,10 @@ export class TablePanelConfig extends Component {
     this.setState({ selectedTab });
   }
 
-  handlePivotChange = selectedOption => {
+  handlePivotChange = (selectedOption) => {
     const { fields, model } = this.props;
     const pivotId = get(selectedOption, '[0].value', null);
-    const field = fields[model.index_pattern].find(field => field.name === pivotId);
+    const field = fields[model.index_pattern].find((field) => field.name === pivotId);
     const pivotType = get(field, 'type', model.pivot_type);
 
     this.props.onChange({
@@ -243,7 +243,7 @@ export class TablePanelConfig extends Component {
                         : getDefaultQueryLanguage(),
                       query: model.filter.query || '',
                     }}
-                    onChange={filter => this.props.onChange({ filter })}
+                    onChange={(filter) => this.props.onChange({ filter })}
                     indexPatterns={[model.index_pattern || model.default_index_pattern]}
                   />
                 </EuiFormRow>
@@ -269,7 +269,7 @@ export class TablePanelConfig extends Component {
       );
     }
     return (
-      <div>
+      <>
         <EuiTabs size="s">
           <EuiTab isSelected={selectedTab === 'data'} onClick={() => this.switchTab('data')}>
             <FormattedMessage
@@ -285,7 +285,7 @@ export class TablePanelConfig extends Component {
           </EuiTab>
         </EuiTabs>
         {view}
-      </div>
+      </>
     );
   }
 }

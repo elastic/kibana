@@ -4,29 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { uniq, take, sortBy } from 'lodash';
+import { ProcessorEvent } from '../../../common/processor_event';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { rangeFilter } from '../helpers/range_filter';
+import { rangeFilter } from '../../../common/utils/range_filter';
 import { ESFilter } from '../../../typings/elasticsearch';
 import {
-  PROCESSOR_EVENT,
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
   TRACE_ID,
-  SPAN_DESTINATION_SERVICE_RESOURCE
+  SPAN_DESTINATION_SERVICE_RESOURCE,
 } from '../../../common/elasticsearch_fieldnames';
+import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
 
 const MAX_TRACES_TO_INSPECT = 1000;
 
 export async function getTraceSampleIds({
   serviceName,
   environment,
-  setup
+  setup,
 }: {
   serviceName?: string;
   environment?: string;
   setup: Setup & SetupTimeRange;
 }) {
-  const { start, end, client, indices, config } = setup;
+  const { start, end, apmEventClient, config } = setup;
 
   const rangeQuery = { range: rangeFilter(start, end) };
 
@@ -34,27 +35,20 @@ export async function getTraceSampleIds({
     bool: {
       filter: [
         {
-          term: {
-            [PROCESSOR_EVENT]: 'span'
-          }
-        },
-        {
           exists: {
-            field: SPAN_DESTINATION_SERVICE_RESOURCE
-          }
+            field: SPAN_DESTINATION_SERVICE_RESOURCE,
+          },
         },
-        rangeQuery
-      ] as ESFilter[]
-    }
+        rangeQuery,
+      ] as ESFilter[],
+    },
   } as { bool: { filter: ESFilter[]; must_not?: ESFilter[] | ESFilter } };
 
   if (serviceName) {
     query.bool.filter.push({ term: { [SERVICE_NAME]: serviceName } });
   }
 
-  if (environment) {
-    query.bool.filter.push({ term: { [SERVICE_ENVIRONMENT]: environment } });
-  }
+  query.bool.filter.push(...getEnvironmentUiFilterES(environment));
 
   const fingerprintBucketSize = serviceName
     ? config['xpack.apm.serviceMapFingerprintBucketSize']
@@ -67,7 +61,9 @@ export async function getTraceSampleIds({
   const samplerShardSize = traceIdBucketSize * 10;
 
   const params = {
-    index: [indices['apm_oss.spanIndices']],
+    apm: {
+      events: [ProcessorEvent.span],
+    },
     body: {
       size: 0,
       query,
@@ -78,32 +74,32 @@ export async function getTraceSampleIds({
               {
                 [SPAN_DESTINATION_SERVICE_RESOURCE]: {
                   terms: {
-                    field: SPAN_DESTINATION_SERVICE_RESOURCE
-                  }
-                }
+                    field: SPAN_DESTINATION_SERVICE_RESOURCE,
+                  },
+                },
               },
               {
                 [SERVICE_NAME]: {
                   terms: {
-                    field: SERVICE_NAME
-                  }
-                }
+                    field: SERVICE_NAME,
+                  },
+                },
               },
               {
                 [SERVICE_ENVIRONMENT]: {
                   terms: {
                     field: SERVICE_ENVIRONMENT,
-                    missing_bucket: true
-                  }
-                }
-              }
+                    missing_bucket: true,
+                  },
+                },
+              },
             ],
-            size: fingerprintBucketSize
+            size: fingerprintBucketSize,
           },
           aggs: {
             sample: {
               sampler: {
-                shard_size: samplerShardSize
+                shard_size: samplerShardSize,
               },
               aggs: {
                 trace_ids: {
@@ -114,29 +110,27 @@ export async function getTraceSampleIds({
                     // remove bias towards large traces by sorting on trace.id
                     // which will be random-esque
                     order: {
-                      _key: 'desc' as const
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+                      _key: 'desc' as const,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   };
 
-  const tracesSampleResponse = await client.search<unknown, typeof params>(
-    params
-  );
+  const tracesSampleResponse = await apmEventClient.search(params);
 
   // make sure at least one trace per composite/connection bucket
   // is queried
   const traceIdsWithPriority =
-    tracesSampleResponse.aggregations?.connections.buckets.flatMap(bucket =>
+    tracesSampleResponse.aggregations?.connections.buckets.flatMap((bucket) =>
       bucket.sample.trace_ids.buckets.map((sampleDocBucket, index) => ({
         traceId: sampleDocBucket.key as string,
-        priority: index
+        priority: index,
       }))
     ) || [];
 
@@ -148,6 +142,6 @@ export async function getTraceSampleIds({
   );
 
   return {
-    traceIds
+    traceIds,
   };
 }

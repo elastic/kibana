@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 import _ from 'lodash';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
@@ -65,6 +65,7 @@ export default function({ getService }) {
           attributes: {
             title: 'An existing visualization',
           },
+          namespaces: ['default'],
         });
 
         expect(secondObject)
@@ -77,6 +78,7 @@ export default function({ getService }) {
           attributes: {
             title: 'An existing dashboard',
           },
+          namespaces: ['default'],
         });
       });
 
@@ -233,6 +235,7 @@ export default function({ getService }) {
             attributes: {
               title: 'An existing dashboard',
             },
+            namespaces: ['default'],
           });
         });
       });

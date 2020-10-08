@@ -53,12 +53,12 @@ export interface IExpressionLoaderParams {
   onRenderError?: RenderErrorHandlerFnType;
 }
 
-export interface RenderError extends Error {
+export interface ExpressionRenderError extends Error {
   type?: string;
 }
 
 export type RenderErrorHandlerFnType = (
   domNode: HTMLElement,
-  error: RenderError,
+  error: ExpressionRenderError,
   handlers: IInterpreterRenderHandlers
 ) => void;

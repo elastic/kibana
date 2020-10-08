@@ -22,18 +22,24 @@ import { Type } from '@kbn/config-schema';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { ConfigDeprecationProvider } from './config';
 import { ContextSetup } from './context';
-import { InternalElasticsearchServiceSetup, ElasticsearchServiceStart } from './elasticsearch';
-import { InternalHttpServiceSetup } from './http';
+import {
+  InternalElasticsearchServiceSetup,
+  InternalElasticsearchServiceStart,
+} from './elasticsearch';
+import { InternalHttpServiceSetup, InternalHttpServiceStart } from './http';
 import {
   InternalSavedObjectsServiceSetup,
   InternalSavedObjectsServiceStart,
 } from './saved_objects';
 import { InternalUiSettingsServiceSetup, InternalUiSettingsServiceStart } from './ui_settings';
-import { UuidServiceSetup } from './uuid';
-import { InternalMetricsServiceSetup } from './metrics';
+import { InternalEnvironmentServiceSetup } from './environment';
+import { InternalMetricsServiceSetup, InternalMetricsServiceStart } from './metrics';
 import { InternalRenderingServiceSetup } from './rendering';
 import { InternalHttpResourcesSetup } from './http_resources';
 import { InternalStatusServiceSetup } from './status';
+import { AuditTrailSetup, AuditTrailStart } from './audit_trail';
+import { InternalLoggingServiceSetup } from './logging';
+import { CoreUsageDataStart } from './core_usage_data';
 
 /** @internal */
 export interface InternalCoreSetup {
@@ -41,13 +47,15 @@ export interface InternalCoreSetup {
   context: ContextSetup;
   http: InternalHttpServiceSetup;
   elasticsearch: InternalElasticsearchServiceSetup;
-  metrics: InternalMetricsServiceSetup;
   savedObjects: InternalSavedObjectsServiceSetup;
   status: InternalStatusServiceSetup;
   uiSettings: InternalUiSettingsServiceSetup;
-  uuid: UuidServiceSetup;
+  environment: InternalEnvironmentServiceSetup;
   rendering: InternalRenderingServiceSetup;
   httpResources: InternalHttpResourcesSetup;
+  auditTrail: AuditTrailSetup;
+  logging: InternalLoggingServiceSetup;
+  metrics: InternalMetricsServiceSetup;
 }
 
 /**
@@ -55,9 +63,13 @@ export interface InternalCoreSetup {
  */
 export interface InternalCoreStart {
   capabilities: CapabilitiesStart;
-  elasticsearch: ElasticsearchServiceStart;
+  elasticsearch: InternalElasticsearchServiceStart;
+  http: InternalHttpServiceStart;
+  metrics: InternalMetricsServiceStart;
   savedObjects: InternalSavedObjectsServiceStart;
   uiSettings: InternalUiSettingsServiceStart;
+  auditTrail: AuditTrailStart;
+  coreUsageData: CoreUsageDataStart;
 }
 
 /**

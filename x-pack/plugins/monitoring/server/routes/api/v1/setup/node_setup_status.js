@@ -46,7 +46,7 @@ export function nodeSetupStatusRoute(server) {
         ),
       },
     },
-    handler: async req => {
+    handler: async (req) => {
       let status = null;
 
       // NOTE using try/catch because checkMonitoringAuth is expected to throw

@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiButton, EuiText } from '@elastic/eui';
 
-import { useDispatch, useMappingsState } from '../../mappings_state';
+import { useDispatch, useMappingsState } from '../../mappings_state_context';
 import { FieldsEditor } from '../../types';
 import { canUseMappingsEditor, normalize } from '../../lib';
 

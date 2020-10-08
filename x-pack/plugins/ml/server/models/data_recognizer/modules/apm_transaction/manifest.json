@@ -1,29 +1,29 @@
 {
   "id": "apm_transaction",
   "title": "APM",
-  "description": "Detect anomalies in high mean of transaction duration (ECS)",
+  "description": "Detect anomalies in transactions from your APM services.",
   "type": "Transaction data",
   "logoFile": "logo.json",
-  "defaultIndexPattern": "apm-*",
+  "defaultIndexPattern": "apm-*-transaction",
   "query": {
     "bool": {
       "filter": [
         { "term": { "processor.event": "transaction" } },
-        { "term": { "transaction.type": "request" } }
+        { "exists": { "field": "transaction.duration" } }
       ]
     }
   },
   "jobs": [
     {
-      "id": "high_mean_response_time",
-      "file": "high_mean_response_time.json"
+      "id": "high_mean_transaction_duration",
+      "file": "high_mean_transaction_duration.json"
     }
   ],
   "datafeeds": [
     {
-      "id": "datafeed-high_mean_response_time",
-      "file": "datafeed_high_mean_response_time.json",
-      "job_id": "high_mean_response_time"
+      "id": "datafeed-high_mean_transaction_duration",
+      "file": "datafeed_high_mean_transaction_duration.json",
+      "job_id": "high_mean_transaction_duration"
     }
   ]
 }

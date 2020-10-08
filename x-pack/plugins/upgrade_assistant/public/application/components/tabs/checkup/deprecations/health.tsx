@@ -10,7 +10,8 @@ import React, { FunctionComponent } from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { DeprecationInfo } from 'src/legacy/core_plugins/elasticsearch';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { DeprecationInfo } from '../../../../../../../../../src/core/server/elasticsearch/legacy/api_types';
 import { COLOR_MAP, LEVEL_MAP, REVERSE_LEVEL_MAP } from '../constants';
 
 const LocalizedLevels: { [level: string]: string } = {
@@ -60,7 +61,7 @@ export const DeprecationHealth: FunctionComponent<DeprecationHealthProps> = ({
     return <span />;
   }
 
-  const levels = deprecations.map(d => LEVEL_MAP[d.level]);
+  const levels = deprecations.map((d) => LEVEL_MAP[d.level]);
 
   if (single) {
     const highest = Math.max(...levels);
@@ -74,9 +75,9 @@ export const DeprecationHealth: FunctionComponent<DeprecationHealthProps> = ({
   return (
     <React.Fragment>
       {Object.keys(countByLevel)
-        .map(k => parseInt(k, 10))
+        .map((k) => parseInt(k, 10))
         .sort()
-        .map(level => [level, REVERSE_LEVEL_MAP[level]])
+        .map((level) => [level, REVERSE_LEVEL_MAP[level]])
         .map(([numLevel, stringLevel]) => (
           <SingleHealth
             key={stringLevel}

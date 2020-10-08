@@ -6,19 +6,21 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Provider } from 'react-redux';
-import { I18nStart } from 'kibana/public';
+import { I18nStart, ScopedHistory, ApplicationStart } from 'kibana/public';
 import { UnmountCallback } from 'src/core/public';
 
 import { App } from './app';
-import { indexLifecycleManagementStore } from './store';
 
-export const renderApp = (element: Element, I18nContext: I18nStart['Context']): UnmountCallback => {
+export const renderApp = (
+  element: Element,
+  I18nContext: I18nStart['Context'],
+  history: ScopedHistory,
+  navigateToApp: ApplicationStart['navigateToApp'],
+  getUrlForApp: ApplicationStart['getUrlForApp']
+): UnmountCallback => {
   render(
     <I18nContext>
-      <Provider store={indexLifecycleManagementStore()}>
-        <App />
-      </Provider>
+      <App history={history} navigateToApp={navigateToApp} getUrlForApp={getUrlForApp} />
     </I18nContext>,
     element
   );

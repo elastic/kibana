@@ -13,7 +13,7 @@ import {
   EuiFlexItem,
   EuiFieldText,
   EuiFormRow,
-  keyCodes,
+  keys,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -35,7 +35,7 @@ export class NewGroupInput extends Component {
     };
   }
 
-  changeTempNewGroup = e => {
+  changeTempNewGroup = (e) => {
     const tempNewGroupName = e.target.value;
     let groupsValidationError = '';
 
@@ -59,9 +59,9 @@ export class NewGroupInput extends Component {
     });
   };
 
-  newGroupKeyPress = e => {
+  newGroupKeyPress = (e) => {
     if (
-      e.keyCode === keyCodes.ENTER &&
+      e.key === keys.ENTER &&
       this.state.groupsValidationError === '' &&
       this.state.tempNewGroupName !== ''
     ) {

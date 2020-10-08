@@ -36,7 +36,7 @@ export function pollForLogEntry$(
 
   const FINAL_MSG = '@@final@@';
 
-  return new Rx.Observable<logging.Entry>(subscriber => {
+  return new Rx.Observable<logging.Entry>((subscriber) => {
     subscriber.add(
       stop$.pipe(first()).subscribe(() => {
         driver
@@ -49,7 +49,7 @@ export function pollForLogEntry$(
               console.log(${JSON.stringify(FINAL_MSG)})
             `
           )
-          .catch(error => subscriber.error(error));
+          .catch((error) => subscriber.error(error));
       })
     );
 
@@ -61,8 +61,8 @@ export function pollForLogEntry$(
           mergeMap(async () => await logCtrl.get(type)),
 
           // filter and flatten list of entries
-          mergeMap(entries => {
-            const filtered = entries.filter(entry => {
+          mergeMap((entries) => {
+            const filtered = entries.filter((entry) => {
               if (entry.message.includes(FINAL_MSG)) {
                 poll$.complete();
                 return false;

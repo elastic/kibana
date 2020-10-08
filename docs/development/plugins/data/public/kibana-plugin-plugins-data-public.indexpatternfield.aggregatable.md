@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-aggregatable?: boolean;
+get aggregatable(): boolean;
 ```

@@ -27,7 +27,6 @@ export interface ShareRemoveTestCase {
   id: string;
   namespaces: string[];
   failure?: 400 | 403 | 404;
-  fail400Param?: string;
 }
 
 const TYPE = 'sharedtype';
@@ -37,23 +36,16 @@ const createRequest = ({ id, namespaces }: ShareRemoveTestCase) => ({
 });
 
 export function shareRemoveTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const expectForbidden = expectResponses.forbidden('delete');
+  const expectForbidden = expectResponses.forbiddenTypes('share_to_space');
   const expectResponseBody = (testCase: ShareRemoveTestCase): ExpectResponseBody => async (
     response: Record<string, any>
   ) => {
-    const { id, failure, fail400Param } = testCase;
+    const { id, failure } = testCase;
     const object = response.body;
     if (failure === 403) {
       await expectForbidden(TYPE)(response);
-    } else if (failure) {
-      let error: any;
-      if (failure === 400) {
-        error = SavedObjectsErrorHelpers.createBadRequestError(
-          `${id} doesn't exist in the following namespace(s): ${fail400Param}`
-        );
-      } else if (failure === 404) {
-        error = SavedObjectsErrorHelpers.createGenericNotFoundError(TYPE, id);
-      }
+    } else if (failure === 404) {
+      const error = SavedObjectsErrorHelpers.createGenericNotFoundError(TYPE, id);
       expect(object.error).to.eql(error.output.payload.error);
       expect(object.statusCode).to.eql(error.output.payload.statusCode);
     } else {
@@ -71,9 +63,9 @@ export function shareRemoveTestSuiteFactory(esArchiver: any, supertest: SuperTes
     let cases = Array.isArray(testCases) ? testCases : [testCases];
     if (forbidden) {
       // override the expected result in each test case
-      cases = cases.map(x => ({ ...x, failure: 403 }));
+      cases = cases.map((x) => ({ ...x, failure: 403 }));
     }
-    return cases.map(x => ({
+    return cases.map((x) => ({
       title: getTestTitle({ ...x, type: TYPE }),
       responseStatusCode: x.failure ?? 204,
       request: createRequest(x),

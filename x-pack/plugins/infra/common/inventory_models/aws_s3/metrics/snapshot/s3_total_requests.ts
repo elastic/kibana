@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SnapshotModel } from '../../../types';
+import { MetricsUIAggregation } from '../../../types';
 
-export const s3TotalRequests: SnapshotModel = {
+export const s3TotalRequests: MetricsUIAggregation = {
   s3TotalRequests: {
     max: {
       field: 'aws.s3_request.requests.total',

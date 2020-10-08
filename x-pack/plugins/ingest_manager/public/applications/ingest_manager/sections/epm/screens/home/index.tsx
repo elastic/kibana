@@ -5,14 +5,11 @@
  */
 
 import React, { useState } from 'react';
-import { useRouteMatch, Switch, Route } from 'react-router-dom';
+import { useRouteMatch, Switch, Route, useLocation, useHistory } from 'react-router-dom';
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { i18n } from '@kbn/i18n';
-import {
-  EPM_LIST_ALL_PACKAGES_PATH,
-  EPM_LIST_INSTALLED_PACKAGES_PATH,
-} from '../../../../constants';
-import { useLink, useGetCategories, useGetPackages } from '../../../../hooks';
+import { PAGE_ROUTING_PATHS } from '../../../../constants';
+import { useLink, useGetCategories, useGetPackages, useBreadcrumbs } from '../../../../hooks';
 import { WithHeaderLayout } from '../../../../layouts';
 import { CategorySummaryItem } from '../../../../types';
 import { PackageListGrid } from '../../components/package_list_grid';
@@ -23,9 +20,7 @@ export function EPMHomePage() {
   const {
     params: { tabId },
   } = useRouteMatch<{ tabId?: string }>();
-
-  const ALL_PACKAGES_URI = useLink(EPM_LIST_ALL_PACKAGES_PATH);
-  const INSTALLED_PACKAGES_URI = useLink(EPM_LIST_INSTALLED_PACKAGES_PATH);
+  const { getHref } = useLink();
 
   return (
     <WithHeaderLayout
@@ -38,7 +33,7 @@ export function EPMHomePage() {
             name: i18n.translate('xpack.ingestManager.epmList.allTabText', {
               defaultMessage: 'All integrations',
             }),
-            href: ALL_PACKAGES_URI,
+            href: getHref('integrations_all'),
             isSelected: tabId !== 'installed',
           },
           {
@@ -46,17 +41,17 @@ export function EPMHomePage() {
             name: i18n.translate('xpack.ingestManager.epmList.installedTabText', {
               defaultMessage: 'Installed integrations',
             }),
-            href: INSTALLED_PACKAGES_URI,
+            href: getHref('integrations_installed'),
             isSelected: tabId === 'installed',
           },
         ] as unknown) as EuiTabProps[]
       }
     >
       <Switch>
-        <Route path={EPM_LIST_INSTALLED_PACKAGES_PATH}>
+        <Route path={PAGE_ROUTING_PATHS.integrations_installed}>
           <InstalledPackages />
         </Route>
-        <Route path={EPM_LIST_ALL_PACKAGES_PATH}>
+        <Route path={PAGE_ROUTING_PATHS.integrations_all}>
           <AvailablePackages />
         </Route>
       </Switch>
@@ -65,16 +60,24 @@ export function EPMHomePage() {
 }
 
 function InstalledPackages() {
-  const { data: allPackages, isLoading: isLoadingPackages } = useGetPackages();
+  useBreadcrumbs('integrations_installed');
+  const { data: allPackages, isLoading: isLoadingPackages } = useGetPackages({
+    experimental: true,
+  });
   const [selectedCategory, setSelectedCategory] = useState('');
-  const packages =
-    allPackages && allPackages.response && selectedCategory === ''
-      ? allPackages.response.filter(pkg => pkg.status === 'installed')
-      : [];
 
   const title = i18n.translate('xpack.ingestManager.epmList.installedTitle', {
     defaultMessage: 'Installed integrations',
   });
+
+  const allInstalledPackages =
+    allPackages && allPackages.response
+      ? allPackages.response.filter((pkg) => pkg.status === 'installed')
+      : [];
+
+  const updatablePackages = allInstalledPackages.filter(
+    (item) => 'savedObject' in item && item.version > item.savedObject.attributes.version
+  );
 
   const categories = [
     {
@@ -82,14 +85,14 @@ function InstalledPackages() {
       title: i18n.translate('xpack.ingestManager.epmList.allFilterLinkText', {
         defaultMessage: 'All',
       }),
-      count: packages.length,
+      count: allInstalledPackages.length,
     },
     {
       id: 'updates_available',
       title: i18n.translate('xpack.ingestManager.epmList.updatesAvailableFilterLinkText', {
         defaultMessage: 'Updates available',
       }),
-      count: 0, // TODO: Update with real count when available
+      count: updatablePackages.length,
     },
   ];
 
@@ -106,14 +109,19 @@ function InstalledPackages() {
       isLoading={isLoadingPackages}
       controls={controls}
       title={title}
-      list={packages}
+      list={selectedCategory === 'updates_available' ? updatablePackages : allInstalledPackages}
     />
   );
 }
 
 function AvailablePackages() {
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const { data: categoryPackagesRes, isLoading: isLoadingPackages } = useGetPackages({
+  useBreadcrumbs('integrations_all');
+  const history = useHistory();
+  const queryParams = new URLSearchParams(useLocation().search);
+  const initialCategory = queryParams.get('category') || '';
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+  const { data: allPackagesRes, isLoading: isLoadingAllPackages } = useGetPackages();
+  const { data: categoryPackagesRes, isLoading: isLoadingCategoryPackages } = useGetPackages({
     category: selectedCategory,
   });
   const { data: categoriesRes, isLoading: isLoadingCategories } = useGetCategories();
@@ -121,7 +129,7 @@ function AvailablePackages() {
     categoryPackagesRes && categoryPackagesRes.response ? categoryPackagesRes.response : [];
 
   const title = i18n.translate('xpack.ingestManager.epmList.allTitle', {
-    defaultMessage: 'All integrations',
+    defaultMessage: 'Browse by category',
   });
 
   const categories = [
@@ -130,23 +138,28 @@ function AvailablePackages() {
       title: i18n.translate('xpack.ingestManager.epmList.allPackagesFilterLinkText', {
         defaultMessage: 'All',
       }),
-      count: packages.length,
+      count: allPackagesRes?.response?.length || 0,
     },
     ...(categoriesRes ? categoriesRes.response : []),
   ];
-
   const controls = categories ? (
     <CategoryFacets
-      isLoading={isLoadingCategories}
+      isLoading={isLoadingCategories || isLoadingAllPackages}
       categories={categories}
       selectedCategory={selectedCategory}
-      onCategoryChange={({ id }: CategorySummaryItem) => setSelectedCategory(id)}
+      onCategoryChange={({ id }: CategorySummaryItem) => {
+        // clear category query param in the url
+        if (queryParams.get('category')) {
+          history.push({});
+        }
+        setSelectedCategory(id);
+      }}
     />
   ) : null;
 
   return (
     <PackageListGrid
-      isLoading={isLoadingPackages}
+      isLoading={isLoadingCategoryPackages}
       title={title}
       controls={controls}
       list={packages}

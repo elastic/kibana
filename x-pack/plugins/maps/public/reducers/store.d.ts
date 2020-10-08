@@ -7,12 +7,16 @@
 import { Store } from 'redux';
 import { MapState } from './map';
 import { MapUiState } from './ui';
+import { NonSerializableState } from './non_serializable_instances';
 
 export interface MapStoreState {
   ui: MapUiState;
   map: MapState;
+  nonSerializableInstances: NonSerializableState;
 }
 
 export type MapStore = Store<MapStoreState>;
 
 export function createMapStore(): MapStore;
+
+export const DEFAULT_MAP_STORE_STATE: MapStoreState;

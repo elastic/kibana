@@ -28,6 +28,7 @@ const createTestCases = (spaceId: string) => {
     { ...CASES.SINGLE_NAMESPACE_DEFAULT_SPACE, ...fail404(spaceId !== DEFAULT_SPACE_ID) },
     { ...CASES.SINGLE_NAMESPACE_SPACE_1, ...fail404(spaceId !== SPACE_1_ID) },
     { ...CASES.SINGLE_NAMESPACE_SPACE_2, ...fail404(spaceId !== SPACE_2_ID) },
+    CASES.MULTI_NAMESPACE_ALL_SPACES,
     {
       ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
       ...fail404(spaceId !== DEFAULT_SPACE_ID && spaceId !== SPACE_1_ID),
@@ -42,7 +43,7 @@ const createTestCases = (spaceId: string) => {
   return { normalTypes, hiddenType, allTypes };
 };
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
@@ -74,10 +75,10 @@ export default function({ getService }: FtrProviderContext) {
         users.readGlobally,
         users.readAtSpace,
         users.allAtOtherSpace,
-      ].forEach(user => {
+      ].forEach((user) => {
         _addTests(user, unauthorized);
       });
-      [users.dualAll, users.allGlobally, users.allAtSpace].forEach(user => {
+      [users.dualAll, users.allGlobally, users.allAtSpace].forEach((user) => {
         _addTests(user, authorized);
       });
       _addTests(users.superuser, superuser);

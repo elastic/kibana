@@ -55,8 +55,13 @@ exports[`buildOSSFeatures returns the dashboard feature augmented with appropria
 Array [
   Object {
     "privilege": Object {
+      "alerting": Object {
+        "all": Array [],
+        "read": Array [],
+      },
       "api": Array [],
       "app": Array [
+        "dashboards",
         "kibana",
       ],
       "catalogue": Array [
@@ -66,8 +71,8 @@ Array [
       "savedObject": Object {
         "all": Array [
           "dashboard",
-          "url",
           "query",
+          "url",
         ],
         "read": Array [
           "index-pattern",
@@ -92,6 +97,7 @@ Array [
   Object {
     "privilege": Object {
       "app": Array [
+        "dashboards",
         "kibana",
       ],
       "catalogue": Array [
@@ -105,6 +111,7 @@ Array [
           "visualization",
           "timelion-sheet",
           "canvas-workpad",
+          "lens",
           "map",
           "dashboard",
           "query",
@@ -127,6 +134,7 @@ Array [
         "console",
       ],
       "app": Array [
+        "dev_tools",
         "kibana",
       ],
       "catalogue": Array [
@@ -151,6 +159,7 @@ Array [
         "console",
       ],
       "app": Array [
+        "dev_tools",
         "kibana",
       ],
       "catalogue": Array [
@@ -175,8 +184,13 @@ exports[`buildOSSFeatures returns the discover feature augmented with appropriat
 Array [
   Object {
     "privilege": Object {
+      "alerting": Object {
+        "all": Array [],
+        "read": Array [],
+      },
       "api": Array [],
       "app": Array [
+        "discover",
         "kibana",
       ],
       "catalogue": Array [
@@ -187,11 +201,10 @@ Array [
         "all": Array [
           "search",
           "query",
+          "index-pattern",
           "url",
         ],
-        "read": Array [
-          "index-pattern",
-        ],
+        "read": Array [],
       },
       "ui": Array [
         "show",
@@ -205,6 +218,7 @@ Array [
   Object {
     "privilege": Object {
       "app": Array [
+        "discover",
         "kibana",
       ],
       "catalogue": Array [
@@ -235,11 +249,11 @@ Array [
         "kibana",
       ],
       "catalogue": Array [
-        "index_patterns",
+        "indexPatterns",
       ],
       "management": Object {
         "kibana": Array [
-          "index_patterns",
+          "indexPatterns",
         ],
       },
       "savedObject": Object {
@@ -260,11 +274,11 @@ Array [
         "kibana",
       ],
       "catalogue": Array [
-        "index_patterns",
+        "indexPatterns",
       ],
       "management": Object {
         "kibana": Array [
-          "index_patterns",
+          "indexPatterns",
         ],
       },
       "savedObject": Object {
@@ -310,6 +324,7 @@ Array [
         "edit",
         "delete",
         "copyIntoSpace",
+        "shareIntoSpace",
       ],
     },
     "privilegeId": "all",
@@ -398,10 +413,15 @@ exports[`buildOSSFeatures returns the visualize feature augmented with appropria
 Array [
   Object {
     "privilege": Object {
+      "alerting": Object {
+        "all": Array [],
+        "read": Array [],
+      },
       "api": Array [],
       "app": Array [
-        "kibana",
+        "visualize",
         "lens",
+        "kibana",
       ],
       "catalogue": Array [
         "visualize",
@@ -432,8 +452,9 @@ Array [
   Object {
     "privilege": Object {
       "app": Array [
-        "kibana",
+        "visualize",
         "lens",
+        "kibana",
       ],
       "catalogue": Array [
         "visualize",

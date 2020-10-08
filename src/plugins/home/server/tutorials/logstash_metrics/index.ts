@@ -36,6 +36,7 @@ export function logstashMetricsSpecProvider(context: TutorialContext): TutorialS
     name: i18n.translate('home.tutorials.logstashMetrics.nameTitle', {
       defaultMessage: 'Logstash metrics',
     }),
+    moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.logstashMetrics.shortDescription', {
@@ -56,7 +57,7 @@ export function logstashMetricsSpecProvider(context: TutorialContext): TutorialS
         label: i18n.translate('home.tutorials.logstashMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
-        path: '/app/kibana#/discover',
+        path: '/app/discover#/',
       },
       dashboards: [],
       exportedFields: {

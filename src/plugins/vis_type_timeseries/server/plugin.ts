@@ -33,10 +33,12 @@ import { VisTypeTimeseriesConfig } from './config';
 import { getVisData, GetVisData, GetVisDataOptions } from './lib/get_vis_data';
 import { ValidationTelemetryService } from './validation_telemetry';
 import { UsageCollectionSetup } from '../../usage_collection/server';
+import { PluginStart } from '../../data/server';
 import { visDataRoutes } from './routes/vis';
 // @ts-ignore
 import { fieldsRoutes } from './routes/fields';
 import { SearchStrategyRegistry } from './lib/search_strategies';
+import { uiSettings } from './ui_settings';
 
 export interface LegacySetup {
   server: Server;
@@ -44,6 +46,10 @@ export interface LegacySetup {
 
 interface VisTypeTimeseriesPluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;
+}
+
+interface VisTypeTimeseriesPluginStartDependencies {
+  data: PluginStart;
 }
 
 export interface VisTypeTimeseriesSetup {
@@ -56,7 +62,7 @@ export interface VisTypeTimeseriesSetup {
 }
 
 export interface Framework {
-  core: CoreSetup;
+  core: CoreSetup<VisTypeTimeseriesPluginStartDependencies>;
   plugins: any;
   config$: Observable<VisTypeTimeseriesConfig>;
   globalConfig$: PluginInitializerContext['config']['legacy']['globalConfig$'];
@@ -73,8 +79,12 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
     this.validationTelementryService = new ValidationTelemetryService();
   }
 
-  public setup(core: CoreSetup, plugins: VisTypeTimeseriesPluginSetupDependencies) {
+  public setup(
+    core: CoreSetup<VisTypeTimeseriesPluginStartDependencies>,
+    plugins: VisTypeTimeseriesPluginSetupDependencies
+  ) {
     const logger = this.initializerContext.logger.get('visTypeTimeseries');
+    core.uiSettings.register(uiSettings);
     const config$ = this.initializerContext.config.create<VisTypeTimeseriesConfig>();
     // Global config contains things like the ES shard timeout
     const globalConfig$ = this.initializerContext.config.legacy.globalConfig$;

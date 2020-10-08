@@ -12,7 +12,7 @@ import { RoleComboBoxOption } from './role_combo_box_option';
 
 interface Props {
   availableRoles: Role[];
-  selectedRoleNames: string[];
+  selectedRoleNames: readonly string[];
   onChange: (selectedRoleNames: string[]) => void;
   placeholder?: string;
   isLoading?: boolean;
@@ -21,11 +21,11 @@ interface Props {
 
 export const RoleComboBox = (props: Props) => {
   const onRolesChange = (selectedItems: Array<{ label: string }>) => {
-    props.onChange(selectedItems.map(item => item.label));
+    props.onChange(selectedItems.map((item) => item.label));
   };
 
   const roleNameToOption = (roleName: string) => {
-    const roleDefinition = props.availableRoles.find(role => role.name === roleName);
+    const roleDefinition = props.availableRoles.find((role) => role.name === roleName);
     const isDeprecated: boolean = (roleDefinition && isRoleDeprecated(roleDefinition)) ?? false;
     return {
       color: isDeprecated ? 'warning' : 'default',
@@ -37,7 +37,7 @@ export const RoleComboBox = (props: Props) => {
     };
   };
 
-  const options = props.availableRoles.map(role => roleNameToOption(role.name));
+  const options = props.availableRoles.map((role) => roleNameToOption(role.name));
 
   const selectedOptions = props.selectedRoleNames.map(roleNameToOption);
 
@@ -55,7 +55,7 @@ export const RoleComboBox = (props: Props) => {
       isDisabled={props.isDisabled}
       options={options}
       selectedOptions={selectedOptions}
-      renderOption={option => <RoleComboBoxOption option={option} />}
+      renderOption={(option) => <RoleComboBoxOption option={option} />}
     />
   );
 };

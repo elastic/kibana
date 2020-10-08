@@ -17,56 +17,7 @@
  * under the License.
  */
 
-import { IndexPattern } from '../../index_patterns';
-import {
-  AggType,
-  AggTypesRegistrySetup,
-  AggTypesRegistryStart,
-  AggConfig,
-  AggConfigs,
-  CreateAggConfigParams,
-  FieldParamType,
-  getCalculateAutoTimeExpression,
-  MetricAggType,
-  aggTypeFieldFilters,
-  parentPipelineAggHelper,
-  siblingPipelineAggHelper,
-} from './';
+import { AggsCommonSetup } from '../../../common';
 
-export { IAggConfig } from './agg_config';
-export { CreateAggConfigParams, IAggConfigs } from './agg_configs';
-export { IAggType } from './agg_type';
-export { AggParam, AggParamOption } from './agg_params';
-export { IFieldParamType } from './param_types';
-export { IMetricAggType } from './metrics/metric_agg_type';
-export { DateRangeKey } from './buckets/lib/date_range';
-export { IpRangeKey } from './buckets/lib/ip_range';
-export { OptionedValueProp, OptionedParamEditorProps } from './param_types/optioned';
-
-/** @internal */
-export interface SearchAggsSetup {
-  calculateAutoTimeExpression: ReturnType<typeof getCalculateAutoTimeExpression>;
-  types: AggTypesRegistrySetup;
-}
-
-/** @internal */
-export interface SearchAggsStartLegacy {
-  AggConfig: typeof AggConfig;
-  AggType: typeof AggType;
-  aggTypeFieldFilters: typeof aggTypeFieldFilters;
-  FieldParamType: typeof FieldParamType;
-  MetricAggType: typeof MetricAggType;
-  parentPipelineAggHelper: typeof parentPipelineAggHelper;
-  siblingPipelineAggHelper: typeof siblingPipelineAggHelper;
-}
-
-/** @internal */
-export interface SearchAggsStart {
-  calculateAutoTimeExpression: ReturnType<typeof getCalculateAutoTimeExpression>;
-  createAggConfigs: (
-    indexPattern: IndexPattern,
-    configStates?: CreateAggConfigParams[],
-    schemas?: Record<string, any>
-  ) => InstanceType<typeof AggConfigs>;
-  types: AggTypesRegistryStart;
-}
+export type AggsSetup = AggsCommonSetup;
+export { AggsStart } from '../../../common';

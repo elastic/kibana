@@ -21,14 +21,14 @@ import supertest from 'supertest';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { registerUpdateRoute } from '../update';
 import { savedObjectsClientMock } from '../../../../../core/server/mocks';
-import { setupServer } from './test_utils';
+import { setupServer } from '../test_utils';
 
-type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
+type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
 describe('PUT /api/saved_objects/{type}/{id?}', () => {
-  let server: setupServerReturn['server'];
-  let httpSetup: setupServerReturn['httpSetup'];
-  let handlerContext: setupServerReturn['handlerContext'];
+  let server: SetupServerReturn['server'];
+  let httpSetup: SetupServerReturn['httpSetup'];
+  let handlerContext: SetupServerReturn['handlerContext'];
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   beforeEach(async () => {

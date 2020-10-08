@@ -20,6 +20,7 @@
 import _, { isArray, last, get } from 'lodash';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { RedirectAppLinks } from '../../../../../../kibana_react/public';
 import { createTickFormatter } from '../../lib/tick_formatter';
 import { calculateLabel } from '../../../../../../../plugins/vis_type_timeseries/common/calculate_label';
 import { isSortable } from './is_sortable';
@@ -27,14 +28,14 @@ import { EuiToolTip, EuiIcon } from '@elastic/eui';
 import { replaceVars } from '../../lib/replace_vars';
 import { fieldFormats } from '../../../../../../../plugins/data/public';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { getFieldFormats } from '../../../../services';
+import { getFieldFormats, getCoreStart } from '../../../../services';
 
 import { METRIC_TYPES } from '../../../../../../../plugins/vis_type_timeseries/common/metric_types';
 
 function getColor(rules, colorKey, value) {
   let color;
   if (rules) {
-    rules.forEach(rule => {
+    rules.forEach((rule) => {
       if (rule.operator && rule.value != null) {
         if (_[rule.operator](value, rule.value)) {
           color = rule[colorKey];
@@ -56,10 +57,10 @@ export class TableVis extends Component {
   }
 
   get visibleSeries() {
-    return get(this.props, 'model.series', []).filter(series => !series.hidden);
+    return get(this.props, 'model.series', []).filter((series) => !series.hidden);
   }
 
-  renderRow = row => {
+  renderRow = (row) => {
     const { model } = this.props;
     let rowDisplay = model.pivot_type === 'date' ? this.dateFormatter.convert(row.key) : row.key;
     if (model.drilldown_url) {
@@ -67,9 +68,9 @@ export class TableVis extends Component {
       rowDisplay = <a href={url}>{rowDisplay}</a>;
     }
     const columns = row.series
-      .filter(item => item)
-      .map(item => {
-        const column = this.visibleSeries.find(c => c.id === item.id);
+      .filter((item) => item)
+      .map((item) => {
+        const column = this.visibleSeries.find((c) => c.id === item.id);
         if (!column) return null;
         const formatter = createTickFormatter(
           column.formatter,
@@ -128,7 +129,7 @@ export class TableVis extends Component {
       }
     };
 
-    const columns = this.visibleSeries.map(item => {
+    const columns = this.visibleSeries.map((item) => {
       const metric = last(item.metrics);
       const label = calculateHeaderLabel(metric, item);
 
@@ -231,12 +232,16 @@ export class TableVis extends Component {
       );
     }
     return (
-      <div className="tvbVis" data-test-subj="tableView">
+      <RedirectAppLinks
+        application={getCoreStart().application}
+        className="tvbVis"
+        data-test-subj="tableView"
+      >
         <table className="table">
           <thead>{header}</thead>
           <tbody>{rows}</tbody>
         </table>
-      </div>
+      </RedirectAppLinks>
     );
   }
 }

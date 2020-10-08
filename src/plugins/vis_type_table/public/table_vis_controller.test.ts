@@ -22,23 +22,19 @@ import 'angular-mocks';
 import 'angular-sanitize';
 import $ from 'jquery';
 
-// @ts-ignore
-import StubIndexPattern from 'test_utils/stub_index_pattern';
 import { getAngularModule } from './get_inner_angular';
 import { initTableVisLegacyModule } from './table_vis_legacy_module';
 import { getTableVisTypeDefinition } from './table_vis_type';
 import { Vis } from '../../visualizations/public';
-// eslint-disable-next-line
 import { stubFields } from '../../data/public/stubs';
-// eslint-disable-next-line
 import { tableVisResponseHandler } from './table_vis_response_handler';
 import { coreMock } from '../../../core/public/mocks';
 import { IAggConfig, search } from '../../data/public';
+import { getStubIndexPattern } from '../../data/public/test_utils';
 // TODO: remove linting disable
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { searchStartMock } from '../../data/public/search/mocks';
+import { searchServiceMock } from '../../data/public/search/mocks';
 
-const { createAggConfigs } = searchStartMock.aggs;
+const { createAggConfigs } = searchServiceMock.createStartContract().aggs;
 
 const { tabifyAggResponse } = search;
 
@@ -108,7 +104,7 @@ describe('Table Vis - Controller', () => {
   );
 
   beforeEach(() => {
-    stubIndexPattern = new StubIndexPattern(
+    stubIndexPattern = getStubIndexPattern(
       'logstash-*',
       (cfg: any) => cfg,
       'time',
@@ -124,7 +120,7 @@ describe('Table Vis - Controller', () => {
   function getRangeVis(params?: object) {
     return ({
       type: tableVisTypeDefinition,
-      params: Object.assign({}, tableVisTypeDefinition.visConfig.defaults, params),
+      params: Object.assign({}, tableVisTypeDefinition.visConfig?.defaults, params),
       data: {
         aggs: createAggConfigs(stubIndexPattern, [
           { type: 'count', schema: 'metric' },
@@ -253,13 +249,13 @@ describe('Table Vis - Controller', () => {
     const vis = getRangeVis({ showPartialRows: true });
     initController(vis);
 
-    expect(vis.type.hierarchicalData(vis)).toEqual(true);
+    expect((vis.type.hierarchicalData as Function)(vis)).toEqual(true);
   });
 
   test('passes partialRows:false to tabify based on the vis params', () => {
     const vis = getRangeVis({ showPartialRows: false });
     initController(vis);
 
-    expect(vis.type.hierarchicalData(vis)).toEqual(false);
+    expect((vis.type.hierarchicalData as Function)(vis)).toEqual(false);
   });
 });

@@ -9,16 +9,15 @@ import {
   UseRequestConfig,
   sendRequest as _sendRequest,
   useRequest as _useRequest,
+  Error as CustomError,
 } from '../../../shared_imports';
 
-import { Error as CustomError } from '../../components/section_error';
-
-import { httpService } from './index';
+import { httpService } from '.';
 
 export const sendRequest = (config: SendRequestConfig) => {
   return _sendRequest<any, CustomError>(httpService.httpClient, config);
 };
 
-export const useRequest = (config: UseRequestConfig) => {
-  return _useRequest<any, CustomError>(httpService.httpClient, config);
+export const useRequest = <D = any>(config: UseRequestConfig) => {
+  return _useRequest<D, CustomError>(httpService.httpClient, config);
 };

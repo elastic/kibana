@@ -9,9 +9,11 @@ import { RouteComponentProps } from 'react-router-dom';
 
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { SlmPolicyPayload } from '../../../../common/types';
-import { TIME_UNITS } from '../../../../common/constants';
+import { TIME_UNITS } from '../../../../common';
 
-import { PolicyForm, SectionError, SectionLoading, Error } from '../../components';
+import { SectionError, Error } from '../../../shared_imports';
+
+import { PolicyForm, SectionLoading } from '../../components';
 import { BASE_PATH, DEFAULT_POLICY_SCHEDULE } from '../../constants';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 import { addPolicy, useLoadIndices } from '../../services/http';
@@ -23,13 +25,8 @@ export const PolicyAdd: React.FunctionComponent<RouteComponentProps> = ({
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
 
-  const {
-    error: errorLoadingIndices,
-    isLoading: isLoadingIndices,
-    data: { indices } = {
-      indices: [],
-    },
-  } = useLoadIndices();
+  const { error: errorLoadingIndices, isLoading: isLoadingIndices, data } = useLoadIndices();
+  const { indices, dataStreams } = data ?? { indices: [], dataStreams: [] };
 
   // Set breadcrumb and page title
   useEffect(() => {
@@ -46,7 +43,7 @@ export const PolicyAdd: React.FunctionComponent<RouteComponentProps> = ({
     if (error) {
       setSaveError(error);
     } else {
-      history.push(`${BASE_PATH}/policies/${name}`);
+      history.push(encodeURI(`${BASE_PATH}/policies/${encodeURIComponent(name)}`));
     }
   };
 
@@ -121,6 +118,7 @@ export const PolicyAdd: React.FunctionComponent<RouteComponentProps> = ({
           <PolicyForm
             policy={emptyPolicy}
             indices={indices}
+            dataStreams={dataStreams}
             currentUrl={pathname}
             isSaving={isSaving}
             saveError={renderSaveError()}

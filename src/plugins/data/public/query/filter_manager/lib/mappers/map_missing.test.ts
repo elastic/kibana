@@ -33,7 +33,7 @@ describe('filter manager utilities', () => {
       expect(result).toHaveProperty('value', 'missing');
     });
 
-    test('should return undefined for none matching', async done => {
+    test('should return undefined for none matching', async (done) => {
       const filter = buildEmptyFilter(true);
 
       try {

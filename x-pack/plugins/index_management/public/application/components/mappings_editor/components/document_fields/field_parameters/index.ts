@@ -45,6 +45,8 @@ export * from './term_vector_parameter';
 
 export * from './type_parameter';
 
+export * from './subtype_parameter';
+
 export * from './ignore_z_value_parameter';
 
 export * from './orientation_parameter';
@@ -66,6 +68,10 @@ export * from './relations_parameter';
 export * from './other_type_name_parameter';
 
 export * from './other_type_json_parameter';
+
+export * from './meta_parameter';
+
+export * from './ignore_above_parameter';
 
 export const PARAMETER_SERIALIZERS = [relationsSerializer, dynamicSerializer];
 

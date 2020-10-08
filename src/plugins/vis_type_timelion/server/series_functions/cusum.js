@@ -41,10 +41,10 @@ export default new Chainable('cusum', {
     defaultMessage: 'Return the cumulative sum of a series, starting at a base.',
   }),
   fn: function cusumFn(args) {
-    return alter(args, function(eachSeries, base) {
+    return alter(args, function (eachSeries, base) {
       const pairs = eachSeries.data;
       let total = base || 0;
-      eachSeries.data = _.map(pairs, function(point) {
+      eachSeries.data = _.map(pairs, function (point) {
         total += point[1];
         return [point[0], total];
       });

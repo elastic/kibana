@@ -5,8 +5,11 @@
  */
 
 import React, { useEffect, FC } from 'react';
-import { useObservable } from 'react-use';
+import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
+
+import { NavigateToPath } from '../../contexts/kibana';
+
 import { DEFAULT_REFRESH_INTERVAL_MS } from '../../../../common/constants/jobs_list';
 import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
 import { useUrlState } from '../../util/url_state';
@@ -15,24 +18,22 @@ import { useResolver } from '../use_resolver';
 import { basicResolvers } from '../resolvers';
 import { JobsPage } from '../../jobs/jobs_list';
 import { useTimefilter } from '../../contexts/kibana';
-import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../breadcrumbs';
+import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 
-const breadcrumbs = [
-  ML_BREADCRUMB,
-  ANOMALY_DETECTION_BREADCRUMB,
-  {
-    text: i18n.translate('xpack.ml.anomalyDetection.jobManagementLabel', {
-      defaultMessage: 'Job Management',
-    }),
-    href: '',
-  },
-];
-
-export const jobListRoute: MlRoute = {
+export const jobListRouteFactory = (navigateToPath: NavigateToPath, basePath: string): MlRoute => ({
   path: '/jobs',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
-  breadcrumbs,
-};
+  breadcrumbs: [
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
+    {
+      text: i18n.translate('xpack.ml.anomalyDetection.jobManagementLabel', {
+        defaultMessage: 'Job Management',
+      }),
+      href: '',
+    },
+  ],
+});
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
   const { context } = useResolver(undefined, undefined, deps.config, basicResolvers(deps));

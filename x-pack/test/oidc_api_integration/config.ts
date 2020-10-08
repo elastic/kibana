@@ -8,8 +8,8 @@ import { resolve } from 'path';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { services } from './services';
 
-export default async function({ readConfigFile }: FtrConfigProviderContext) {
-  const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.js'));
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+  const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
   const plugin = resolve(__dirname, './fixtures/oidc_provider');
   const kibanaPort = xPackAPITestsConfig.get('servers.kibana.port');
   const jwksPath = resolve(__dirname, './fixtures/jwks.json');
@@ -49,7 +49,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         `--plugin-path=${plugin}`,
-        '--xpack.security.authc.providers=["oidc"]',
+        `--xpack.security.authc.providers=${JSON.stringify(['oidc', 'basic'])}`,
         '--xpack.security.authc.oidc.realm="oidc1"',
       ],
     },

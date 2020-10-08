@@ -32,7 +32,7 @@ export class PrivilegeSummaryCalculator {
 
       const effectiveSubPrivileges = feature
         .getSubFeaturePrivileges()
-        .filter(ap => assignedPrivileges.grantsPrivilege(ap));
+        .filter((ap) => assignedPrivileges.grantsPrivilege(ap));
 
       const hasCustomizedSubFeaturePrivileges = this.hasCustomizedSubFeaturePrivileges(
         feature,
@@ -45,7 +45,7 @@ export class PrivilegeSummaryCalculator {
         [feature.id]: {
           primary: displayedPrimaryFeaturePrivilege,
           hasCustomizedSubFeaturePrivileges,
-          subFeature: effectiveSubPrivileges.map(p => p.id),
+          subFeature: effectiveSubPrivileges.map((p) => p.id),
         },
       };
     }, {} as EffectiveFeaturePrivileges);
@@ -58,7 +58,7 @@ export class PrivilegeSummaryCalculator {
   ) {
     const formPrivileges = this.collectAssignedPrivileges(entry);
 
-    return feature.getSubFeaturePrivileges().some(sfp => {
+    return feature.getSubFeaturePrivileges().some((sfp) => {
       const isGranted = formPrivileges.grantsPrivilege(sfp);
       const isGrantedByDisplayedPrimary =
         displayedPrimaryFeaturePrivilege?.grantsPrivilege(sfp) ?? isGranted;
@@ -77,11 +77,11 @@ export class PrivilegeSummaryCalculator {
 
     const hasMinimalPrivileges = feature.subFeatures.length > 0;
 
-    const effectivePrivilege = primaryFeaturePrivileges.find(pfp => {
+    const effectivePrivilege = primaryFeaturePrivileges.find((pfp) => {
       const isPrimaryGranted = assignedPrivileges.grantsPrivilege(pfp);
       if (!isPrimaryGranted && hasMinimalPrivileges) {
         const correspondingMinimal = minimalPrimaryFeaturePrivileges.find(
-          mpfp => mpfp.id === pfp.getMinimalPrivilegeId()
+          (mpfp) => mpfp.id === pfp.getMinimalPrivilegeId()
         )!;
 
         return assignedPrivileges.grantsPrivilege(correspondingMinimal);
@@ -104,6 +104,6 @@ export class PrivilegeSummaryCalculator {
   }
 
   private locateGlobalPrivilege(role: Role) {
-    return role.kibana.find(entry => isGlobalPrivilegeDefinition(entry));
+    return role.kibana.find((entry) => isGlobalPrivilegeDefinition(entry));
   }
 }

@@ -18,7 +18,10 @@ export interface NewOutput {
   fleet_enroll_username?: string;
   fleet_enroll_password?: string;
   config?: Record<string, any>;
+  config_yaml?: string;
 }
+
+export type OutputSOAttributes = NewOutput;
 
 export type Output = NewOutput & {
   id: string;

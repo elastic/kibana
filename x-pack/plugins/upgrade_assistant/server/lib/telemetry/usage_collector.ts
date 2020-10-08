@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set } from 'lodash';
+import { get } from 'lodash';
 import {
-  APICaller,
+  LegacyAPICaller,
   ElasticsearchServiceStart,
   ISavedObjectsRepository,
   SavedObjectsServiceStart,
@@ -38,7 +38,9 @@ async function getSavedObjectAttributesFromRepo(
   }
 }
 
-async function getDeprecationLoggingStatusValue(callAsCurrentUser: APICaller): Promise<boolean> {
+async function getDeprecationLoggingStatusValue(
+  callAsCurrentUser: LegacyAPICaller
+): Promise<boolean> {
   try {
     const loggerDeprecationCallResult = await callAsCurrentUser('cluster.getSettings', {
       includeDefaults: true,
@@ -84,16 +86,19 @@ export async function fetchUpgradeAssistantMetrics(
       return defaultTelemetrySavedObject;
     }
 
-    const upgradeAssistantTelemetrySOAttrsKeys = Object.keys(
-      upgradeAssistantTelemetrySavedObjectAttrs
-    );
-    const telemetryObj = defaultTelemetrySavedObject;
-
-    upgradeAssistantTelemetrySOAttrsKeys.forEach((key: string) => {
-      set(telemetryObj, key, upgradeAssistantTelemetrySavedObjectAttrs[key]);
-    });
-
-    return telemetryObj as UpgradeAssistantTelemetrySavedObject;
+    return {
+      ui_open: {
+        overview: get(upgradeAssistantTelemetrySavedObjectAttrs, 'ui_open.overview', 0),
+        cluster: get(upgradeAssistantTelemetrySavedObjectAttrs, 'ui_open.cluster', 0),
+        indices: get(upgradeAssistantTelemetrySavedObjectAttrs, 'ui_open.indices', 0),
+      },
+      ui_reindex: {
+        close: get(upgradeAssistantTelemetrySavedObjectAttrs, 'ui_reindex.close', 0),
+        open: get(upgradeAssistantTelemetrySavedObjectAttrs, 'ui_reindex.open', 0),
+        start: get(upgradeAssistantTelemetrySavedObjectAttrs, 'ui_reindex.start', 0),
+        stop: get(upgradeAssistantTelemetrySavedObjectAttrs, 'ui_reindex.stop', 0),
+      },
+    } as UpgradeAssistantTelemetrySavedObject;
   };
 
   return {
@@ -117,9 +122,29 @@ export function registerUpgradeAssistantUsageCollector({
   usageCollection,
   savedObjects,
 }: Dependencies) {
-  const upgradeAssistantUsageCollector = usageCollection.makeUsageCollector({
-    type: UPGRADE_ASSISTANT_TYPE,
+  const upgradeAssistantUsageCollector = usageCollection.makeUsageCollector<
+    UpgradeAssistantTelemetry
+  >({
+    type: 'upgrade-assistant-telemetry',
     isReady: () => true,
+    schema: {
+      features: {
+        deprecation_logging: {
+          enabled: { type: 'boolean' },
+        },
+      },
+      ui_open: {
+        cluster: { type: 'long' },
+        indices: { type: 'long' },
+        overview: { type: 'long' },
+      },
+      ui_reindex: {
+        close: { type: 'long' },
+        open: { type: 'long' },
+        start: { type: 'long' },
+        stop: { type: 'long' },
+      },
+    },
     fetch: async () => fetchUpgradeAssistantMetrics(elasticsearch, savedObjects),
   });
 

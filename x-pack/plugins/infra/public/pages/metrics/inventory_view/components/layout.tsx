@@ -4,28 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useInterval } from 'react-use';
 
-import { euiPaletteColorBlind } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { AutoSizer } from '../../../../components/auto_sizer';
+import { convertIntervalToString } from '../../../../utils/convert_interval_to_string';
 import { NodesOverview } from './nodes_overview';
-import { Toolbar } from './toolbars/toolbar';
+import { calculateBoundsFromNodes } from '../lib/calculate_bounds_from_nodes';
 import { PageContent } from '../../../../components/page';
 import { useSnapshot } from '../hooks/use_snaphot';
-import { useInventoryMeta } from '../hooks/use_inventory_meta';
 import { useWaffleTimeContext } from '../hooks/use_waffle_time';
 import { useWaffleFiltersContext } from '../hooks/use_waffle_filters';
 import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
 import { useSourceContext } from '../../../../containers/source';
-import { InfraFormatterType, InfraWaffleMapGradientLegend } from '../../../../lib/lib';
-
-const euiVisColorPalette = euiPaletteColorBlind();
+import { InfraFormatterType } from '../../../../lib/lib';
+import { euiStyled } from '../../../../../../observability/public';
+import { Toolbar } from './toolbars/toolbar';
+import { ViewSwitcher } from './waffle/view_switcher';
+import { IntervalLabel } from './waffle/interval_label';
+import { createInventoryMetricFormatter } from '../lib/create_inventory_metric_formatter';
+import { createLegend } from '../lib/create_legend';
+import { useSavedViewContext } from '../../../../containers/saved_view/saved_view';
+import { useWaffleViewState } from '../hooks/use_waffle_view_state';
+import { SavedViewsToolbarControls } from '../../../../components/saved_views/toolbar_control';
+import { BottomDrawer } from './bottom_drawer';
+import { Legend } from './waffle/legend';
 
 export const Layout = () => {
   const { sourceId, source } = useSourceContext();
+  const { currentView, shouldLoadDefault } = useSavedViewContext();
   const {
     metric,
     groupBy,
+    sort,
     nodeType,
     accountId,
     region,
@@ -33,32 +45,28 @@ export const Layout = () => {
     view,
     autoBounds,
     boundsOverride,
+    legend,
   } = useWaffleOptionsContext();
-  const { accounts, regions } = useInventoryMeta(sourceId, nodeType);
   const { currentTime, jumpToTime, isAutoReloading } = useWaffleTimeContext();
   const { filterQueryAsJson, applyFilterQuery } = useWaffleFiltersContext();
   const { loading, nodes, reload, interval } = useSnapshot(
     filterQueryAsJson,
-    metric,
+    [metric],
     groupBy,
     nodeType,
     sourceId,
     currentTime,
     accountId,
-    region
+    region,
+    false
   );
 
   const options = {
     formatter: InfraFormatterType.percent,
     formatTemplate: '{{value}}',
-    legend: {
-      type: 'gradient',
-      rules: [
-        { value: 0, color: '#D3DAE6' },
-        { value: 1, color: euiVisColorPalette[1] },
-      ],
-    } as InfraWaffleMapGradientLegend,
+    legend: createLegend(legend.palette, legend.steps, legend.reverseColors),
     metric,
+    sort,
     fields: source?.configuration?.fields,
     groupBy,
   };
@@ -72,25 +80,90 @@ export const Layout = () => {
     isAutoReloading ? 5000 : null
   );
 
+  const intervalAsString = convertIntervalToString(interval);
+  const dataBounds = calculateBoundsFromNodes(nodes);
+  const bounds = autoBounds ? dataBounds : boundsOverride;
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  const formatter = useCallback(createInventoryMetricFormatter(options.metric), [options.metric]);
+  const { viewState, onViewChange } = useWaffleViewState();
+
+  useEffect(() => {
+    if (currentView) {
+      onViewChange(currentView);
+    }
+  }, [currentView, onViewChange]);
+
+  useEffect(() => {
+    // load snapshot data after default view loaded, unless we're not loading a view
+    if (currentView != null || !shouldLoadDefault) {
+      reload();
+    }
+  }, [reload, currentView, shouldLoadDefault]);
+
   return (
     <>
-      <Toolbar accounts={accounts} regions={regions} nodeType={nodeType} />
       <PageContent>
-        <NodesOverview
-          nodes={nodes}
-          options={options}
-          nodeType={nodeType}
-          loading={loading}
-          reload={reload}
-          onDrilldown={applyFilterQuery}
-          currentTime={currentTime}
-          onViewChange={changeView}
-          view={view}
-          autoBounds={autoBounds}
-          boundsOverride={boundsOverride}
-          interval={interval}
-        />
+        <MainContainer>
+          <TopActionContainer>
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">
+              <Toolbar nodeType={nodeType} />
+              <EuiFlexItem grow={false}>
+                <IntervalLabel intervalAsString={intervalAsString} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <ViewSwitcher view={view} onChange={changeView} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer />
+            <SavedViewContainer>
+              <SavedViewsToolbarControls viewState={viewState} />
+            </SavedViewContainer>
+          </TopActionContainer>
+          <AutoSizer bounds>
+            {({ measureRef, bounds: { height = 0 } }) => (
+              <>
+                <NodesOverview
+                  nodes={nodes}
+                  options={options}
+                  nodeType={nodeType}
+                  loading={loading}
+                  reload={reload}
+                  onDrilldown={applyFilterQuery}
+                  currentTime={currentTime}
+                  view={view}
+                  autoBounds={autoBounds}
+                  boundsOverride={boundsOverride}
+                  formatter={formatter}
+                  bottomMargin={height}
+                />
+                <BottomDrawer measureRef={measureRef} interval={interval} formatter={formatter}>
+                  <Legend
+                    formatter={formatter}
+                    bounds={bounds}
+                    dataBounds={dataBounds}
+                    legend={options.legend}
+                  />
+                </BottomDrawer>
+              </>
+            )}
+          </AutoSizer>
+        </MainContainer>
       </PageContent>
     </>
   );
 };
+
+const MainContainer = euiStyled.div`
+  position: relative;
+  flex: 1 1 auto;
+`;
+
+const TopActionContainer = euiStyled.div`
+  padding: ${(props) => `12px ${props.theme.eui.paddingSizes.m}`};
+`;
+
+const SavedViewContainer = euiStyled.div`
+  position: relative;
+  z-index: 1;
+  padding-left: ${(props) => props.theme.eui.paddingSizes.m};
+`;

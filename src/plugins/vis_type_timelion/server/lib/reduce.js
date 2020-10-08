@@ -42,13 +42,13 @@ async function pairwiseReduce(left, right, fn) {
   if (allSeriesContainKey(left, 'split') && allSeriesContainKey(right, 'split')) {
     pairwiseField = 'split';
   }
-  const indexedList = _.indexBy(right.list, pairwiseField);
+  const indexedList = _.keyBy(right.list, pairwiseField);
 
   // ensure seriesLists contain same pairwise labels
-  left.list.forEach(leftSeries => {
+  left.list.forEach((leftSeries) => {
     if (!indexedList[leftSeries[pairwiseField]]) {
       const rightSeriesLabels = right.list
-        .map(rightSeries => {
+        .map((rightSeries) => {
           return `"${rightSeries[pairwiseField]}"`;
         })
         .join(',');
@@ -60,7 +60,7 @@ async function pairwiseReduce(left, right, fn) {
 
   // pairwise reduce seriesLists
   const pairwiseSeriesList = { type: 'seriesList', list: [] };
-  left.list.forEach(async leftSeries => {
+  left.list.forEach(async (leftSeries) => {
     const first = { type: 'seriesList', list: [leftSeries] };
     const second = { type: 'seriesList', list: [indexedList[leftSeries[pairwiseField]]] };
     const reducedSeriesList = await reduce([first, second], fn);
@@ -100,8 +100,8 @@ async function reduce(argsPromises, fn) {
   }
 
   function reduceSeries(series) {
-    return _.reduce(series, function(destinationObject, argument, i, p) {
-      let output = _.map(destinationObject.data, function(point, index) {
+    return _.reduce(series, function (destinationObject, argument, i, p) {
+      let output = _.map(destinationObject.data, function (point, index) {
         const value = point[1];
 
         if (value == null) {
@@ -131,7 +131,7 @@ async function reduce(argsPromises, fn) {
   let reduced;
 
   if (argument != null) {
-    reduced = _.map(seriesList.list, function(series) {
+    reduced = _.map(seriesList.list, function (series) {
       return reduceSeries([series].concat(argument));
     });
   } else {

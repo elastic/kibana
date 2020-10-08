@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  DynamicSettings,
-  defaultDynamicSettings,
-} from '../../../../legacy/plugins/uptime/common/runtime_types';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../common/constants';
+import { DynamicSettings } from '../../common/runtime_types';
 import { SavedObjectsType, SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { UMSavedObjectsQueryFn } from './adapters';
 
@@ -24,20 +22,24 @@ export const umDynamicSettings: SavedObjectsType = {
   hidden: false,
   namespaceType: 'single',
   mappings: {
+    dynamic: false,
     properties: {
+      /* Leaving these commented to make it clear that these fields exist, even though we don't want them indexed.
+         When adding new fields please add them here. If they need to be searchable put them in the uncommented
+         part of properties.
       heartbeatIndices: {
         type: 'keyword',
       },
-      certificatesThresholds: {
-        properties: {
-          errorState: {
-            type: 'long',
-          },
-          warningState: {
-            type: 'long',
-          },
-        },
+      certAgeThreshold: {
+        type: 'long',
       },
+      certExpirationThreshold: {
+        type: 'long',
+      },
+      defaultConnectors: {
+        type: 'keyword',
+      },
+      */
     },
   },
 };
@@ -49,7 +51,7 @@ export const savedObjectsAdapter: UMSavedObjectsAdapter = {
       return obj.attributes;
     } catch (getErr) {
       if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
-        return defaultDynamicSettings;
+        return DYNAMIC_SETTINGS_DEFAULTS;
       }
       throw getErr;
     }

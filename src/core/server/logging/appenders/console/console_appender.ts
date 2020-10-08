@@ -18,14 +18,18 @@
  */
 
 import { schema } from '@kbn/config-schema';
-
-import { Layout, Layouts } from '../../layouts/layouts';
-import { LogRecord } from '../../log_record';
-import { DisposableAppender } from '../appenders';
+import { Layout, LogRecord, DisposableAppender } from '@kbn/logging';
+import { Layouts, LayoutConfigType } from '../../layouts/layouts';
 
 const { literal, object } = schema;
 
+export interface ConsoleAppenderConfig {
+  kind: 'console';
+  layout: LayoutConfigType;
+}
+
 /**
+ *
  * Appender that formats all the `LogRecord` instances it receives and logs them via built-in `console`.
  * @internal
  */

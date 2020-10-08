@@ -35,7 +35,7 @@ export const hashUrl = createQueryReplacer(hashQuery);
 
 // naive hack, but this allows to decouple these utils from AppState, GlobalState for now
 // when removing AppState, GlobalState and migrating to IState containers,
-// need to make sure that apps explicitly passing this whitelist to hash
+// need to make sure that apps explicitly passing this allow-list to hash
 const __HACK_HARDCODED_LEGACY_HASHABLE_PARAMS = ['_g', '_a', '_s'];
 function createQueryMapper(queryParamMapper: (q: string) => string | null) {
   return (
@@ -56,5 +56,5 @@ function createQueryReplacer(
   queryMapper: (q: IParsedUrlQuery, options?: IUrlQueryMapperOptions) => IParsedUrlQuery,
   options?: IUrlQueryReplacerOptions
 ) {
-  return (url: string) => replaceUrlHashQuery(url, query => queryMapper(query, options));
+  return (url: string) => replaceUrlHashQuery(url, (query) => queryMapper(query, options));
 }

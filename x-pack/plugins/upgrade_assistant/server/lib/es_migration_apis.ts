@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient } from 'src/core/server';
-import { DeprecationAPIResponse } from 'src/legacy/core_plugins/elasticsearch';
+import { ILegacyScopedClusterClient } from 'src/core/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { DeprecationAPIResponse } from '../../../../../src/core/server/elasticsearch/legacy/api_types';
 import { EnrichedDeprecationInfo, UpgradeAssistantStatus } from '../../common/types';
 
 import { esIndicesStateCheck } from './es_indices_state_check';
 
 export async function getUpgradeAssistantStatus(
-  dataClient: IScopedClusterClient,
+  dataClient: ILegacyScopedClusterClient,
   isCloudEnabled: boolean
 ): Promise<UpgradeAssistantStatus> {
   const deprecations = await dataClient.callAsCurrentUser('transport.request', {
@@ -32,13 +33,13 @@ export async function getUpgradeAssistantStatus(
       indexNames
     );
 
-    indices.forEach(indexData => {
+    indices.forEach((indexData) => {
       indexData.blockerForReindexing =
-        indexStates[indexData.index!] === 'close' ? 'index-closed' : undefined;
+        indexStates[indexData.index!] === 'closed' ? 'index-closed' : undefined;
     });
   }
 
-  const criticalWarnings = cluster.concat(indices).filter(d => d.level === 'critical');
+  const criticalWarnings = cluster.concat(indices).filter((d) => d.level === 'critical');
 
   return {
     readyForUpgrade: criticalWarnings.length === 0,
@@ -52,7 +53,7 @@ const getCombinedIndexInfos = (deprecations: DeprecationAPIResponse) =>
   Object.keys(deprecations.index_settings).reduce((indexDeprecations, indexName) => {
     return indexDeprecations.concat(
       deprecations.index_settings[indexName].map(
-        d =>
+        (d) =>
           ({
             ...d,
             index: indexName,
@@ -69,7 +70,7 @@ const getClusterDeprecations = (deprecations: DeprecationAPIResponse, isCloudEna
 
   if (isCloudEnabled) {
     // In Cloud, this is changed at upgrade time. Filter it out to improve upgrade UX.
-    return combined.filter(d => d.message !== 'Security realm settings structure changed');
+    return combined.filter((d) => d.message !== 'Security realm settings structure changed');
   } else {
     return combined;
   }

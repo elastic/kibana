@@ -9,22 +9,18 @@ import { schema } from '@kbn/config-schema';
 import { ActionExecutor } from './action_executor';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
-import { savedObjectsClientMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
+import { loggingSystemMock } from '../../../../../src/core/server/mocks';
 import { eventLoggerMock } from '../../../event_log/server/mocks';
 import { spacesServiceMock } from '../../../spaces/server/spaces_service/spaces_service.mock';
 import { ActionType } from '../types';
+import { actionsMock, actionsClientMock } from '../mocks';
+import { pick } from 'lodash';
 
 const actionExecutor = new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false });
-const savedObjectsClient = savedObjectsClientMock.create();
+const services = actionsMock.createServices();
 
-function getServices() {
-  return {
-    savedObjectsClient,
-    log: jest.fn(),
-    callCluster: jest.fn(),
-  };
-}
-const encryptedSavedObjectsPlugin = encryptedSavedObjectsMock.createStart();
+const actionsClient = actionsClientMock.create();
+const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
 const actionTypeRegistry = actionTypeRegistryMock.create();
 
 const executeParams = {
@@ -36,12 +32,15 @@ const executeParams = {
 };
 
 const spacesMock = spacesServiceMock.createSetupContract();
+const loggerMock = loggingSystemMock.create().get();
+const getActionsClientWithRequest = jest.fn();
 actionExecutor.initialize({
-  logger: loggingServiceMock.create().get(),
+  logger: loggerMock,
   spaces: spacesMock,
-  getServices,
+  getServices: () => services,
+  getActionsClientWithRequest,
   actionTypeRegistry,
-  encryptedSavedObjectsPlugin,
+  encryptedSavedObjectsClient,
   eventLogger: eventLoggerMock.create(),
   preconfiguredActions: [],
 });
@@ -49,6 +48,7 @@ actionExecutor.initialize({
 beforeEach(() => {
   jest.resetAllMocks();
   spacesMock.getSpaceId.mockReturnValue('some-namespace');
+  getActionsClientWithRequest.mockResolvedValue(actionsClient);
 });
 
 test('successfully executes', async () => {
@@ -72,12 +72,18 @@ test('successfully executes', async () => {
     },
     references: [],
   };
-  savedObjectsClient.get.mockResolvedValueOnce(actionSavedObject);
-  encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
+  const actionResult = {
+    id: actionSavedObject.id,
+    name: actionSavedObject.id,
+    ...pick(actionSavedObject.attributes, 'actionTypeId', 'config'),
+    isPreconfigured: false,
+  };
+  actionsClient.get.mockResolvedValueOnce(actionResult);
+  encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
   await actionExecutor.execute(executeParams);
 
-  expect(encryptedSavedObjectsPlugin.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+  expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
     'action',
     '1',
     { namespace: 'some-namespace' }
@@ -113,8 +119,14 @@ test('provides empty config when config and / or secrets is empty', async () => 
     },
     references: [],
   };
-  savedObjectsClient.get.mockResolvedValueOnce(actionSavedObject);
-  encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
+  const actionResult = {
+    id: actionSavedObject.id,
+    name: actionSavedObject.id,
+    actionTypeId: actionSavedObject.attributes.actionTypeId,
+    isPreconfigured: false,
+  };
+  actionsClient.get.mockResolvedValueOnce(actionResult);
+  encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
   await actionExecutor.execute(executeParams);
 
@@ -143,8 +155,14 @@ test('throws an error when config is invalid', async () => {
     },
     references: [],
   };
-  savedObjectsClient.get.mockResolvedValueOnce(actionSavedObject);
-  encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
+  const actionResult = {
+    id: actionSavedObject.id,
+    name: actionSavedObject.id,
+    actionTypeId: actionSavedObject.attributes.actionTypeId,
+    isPreconfigured: false,
+  };
+  actionsClient.get.mockResolvedValueOnce(actionResult);
+  encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
 
   const result = await actionExecutor.execute(executeParams);
@@ -176,8 +194,14 @@ test('throws an error when params is invalid', async () => {
     },
     references: [],
   };
-  savedObjectsClient.get.mockResolvedValueOnce(actionSavedObject);
-  encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
+  const actionResult = {
+    id: actionSavedObject.id,
+    name: actionSavedObject.id,
+    actionTypeId: actionSavedObject.attributes.actionTypeId,
+    isPreconfigured: false,
+  };
+  actionsClient.get.mockResolvedValueOnce(actionResult);
+  encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
 
   const result = await actionExecutor.execute(executeParams);
@@ -190,7 +214,7 @@ test('throws an error when params is invalid', async () => {
 });
 
 test('throws an error when failing to load action through savedObjectsClient', async () => {
-  savedObjectsClient.get.mockRejectedValueOnce(new Error('No access'));
+  actionsClient.get.mockRejectedValueOnce(new Error('No access'));
   await expect(actionExecutor.execute(executeParams)).rejects.toThrowErrorMatchingInlineSnapshot(
     `"No access"`
   );
@@ -211,8 +235,14 @@ test('throws an error if actionType is not enabled', async () => {
     },
     references: [],
   };
-  savedObjectsClient.get.mockResolvedValueOnce(actionSavedObject);
-  encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
+  const actionResult = {
+    id: actionSavedObject.id,
+    name: actionSavedObject.id,
+    actionTypeId: actionSavedObject.attributes.actionTypeId,
+    isPreconfigured: false,
+  };
+  actionsClient.get.mockResolvedValueOnce(actionResult);
+  encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
   actionTypeRegistry.ensureActionTypeEnabled.mockImplementationOnce(() => {
     throw new Error('not enabled for test');
@@ -224,14 +254,65 @@ test('throws an error if actionType is not enabled', async () => {
   expect(actionTypeRegistry.ensureActionTypeEnabled).toHaveBeenCalledWith('test');
 });
 
+test('should not throws an error if actionType is preconfigured', async () => {
+  const actionType: jest.Mocked<ActionType> = {
+    id: 'test',
+    name: 'Test',
+    minimumLicenseRequired: 'basic',
+    executor: jest.fn(),
+  };
+  const actionSavedObject = {
+    id: '1',
+    type: 'action',
+    attributes: {
+      actionTypeId: 'test',
+      config: {
+        bar: true,
+      },
+      secrets: {
+        baz: true,
+      },
+    },
+    references: [],
+  };
+  const actionResult = {
+    id: actionSavedObject.id,
+    name: actionSavedObject.id,
+    ...pick(actionSavedObject.attributes, 'actionTypeId', 'config', 'secrets'),
+    isPreconfigured: false,
+  };
+  actionsClient.get.mockResolvedValueOnce(actionResult);
+  encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+  actionTypeRegistry.ensureActionTypeEnabled.mockImplementationOnce(() => {
+    throw new Error('not enabled for test');
+  });
+  actionTypeRegistry.isActionExecutable.mockImplementationOnce(() => true);
+  await actionExecutor.execute(executeParams);
+
+  expect(actionTypeRegistry.ensureActionTypeEnabled).toHaveBeenCalledTimes(0);
+  expect(actionType.executor).toHaveBeenCalledWith({
+    actionId: '1',
+    services: expect.anything(),
+    config: {
+      bar: true,
+    },
+    secrets: {
+      baz: true,
+    },
+    params: { foo: true },
+  });
+});
+
 test('throws an error when passing isESOUsingEphemeralEncryptionKey with value of true', async () => {
   const customActionExecutor = new ActionExecutor({ isESOUsingEphemeralEncryptionKey: true });
   customActionExecutor.initialize({
-    logger: loggingServiceMock.create().get(),
+    logger: loggingSystemMock.create().get(),
     spaces: spacesMock,
-    getServices,
+    getActionsClientWithRequest,
+    getServices: () => services,
     actionTypeRegistry,
-    encryptedSavedObjectsPlugin,
+    encryptedSavedObjectsClient,
     eventLogger: eventLoggerMock.create(),
     preconfiguredActions: [],
   });
@@ -241,3 +322,87 @@ test('throws an error when passing isESOUsingEphemeralEncryptionKey with value o
     `"Unable to execute action due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml"`
   );
 });
+
+test('does not log warning when alert executor succeeds', async () => {
+  const executorMock = setupActionExecutorMock();
+  executorMock.mockResolvedValue({
+    actionId: '1',
+    status: 'ok',
+  });
+  await actionExecutor.execute(executeParams);
+  expect(loggerMock.warn).not.toBeCalled();
+});
+
+test('logs a warning when alert executor has an error', async () => {
+  const executorMock = setupActionExecutorMock();
+  executorMock.mockResolvedValue({
+    actionId: '1',
+    status: 'error',
+    message: 'message for action execution error',
+    serviceMessage: 'serviceMessage for action execution error',
+  });
+  await actionExecutor.execute(executeParams);
+  expect(loggerMock.warn).toBeCalledWith(
+    'action execution failure: test:1: action-1: message for action execution error: serviceMessage for action execution error'
+  );
+});
+
+test('logs a warning when alert executor throws an error', async () => {
+  const executorMock = setupActionExecutorMock();
+  executorMock.mockRejectedValue(new Error('this action execution is intended to fail'));
+  await actionExecutor.execute(executeParams);
+  expect(loggerMock.warn).toBeCalledWith(
+    'action execution failure: test:1: action-1: an error occurred while running the action executor: this action execution is intended to fail'
+  );
+});
+
+test('logs a warning when alert executor returns invalid status', async () => {
+  const executorMock = setupActionExecutorMock();
+  // object typed as any as it has an invalid status value, but we want to test that
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const alertExecutionStatus: any = {
+    actionId: '1',
+    status: 'invalid-status',
+    message: 'message for action execution error',
+    serviceMessage: 'serviceMessage for action execution error',
+  };
+  executorMock.mockResolvedValue(alertExecutionStatus);
+  await actionExecutor.execute(executeParams);
+  expect(loggerMock.warn).toBeCalledWith(
+    'action execution failure: test:1: action-1: returned unexpected result "invalid-status"'
+  );
+});
+
+function setupActionExecutorMock() {
+  const actionType: jest.Mocked<ActionType> = {
+    id: 'test',
+    name: 'Test',
+    minimumLicenseRequired: 'basic',
+    executor: jest.fn(),
+  };
+  const actionSavedObject = {
+    id: '1',
+    type: 'action',
+    name: 'action-1',
+    attributes: {
+      actionTypeId: 'test',
+      config: {
+        bar: true,
+      },
+      secrets: {
+        baz: true,
+      },
+    },
+    references: [],
+  };
+  const actionResult = {
+    id: actionSavedObject.id,
+    name: actionSavedObject.name,
+    ...pick(actionSavedObject.attributes, 'actionTypeId', 'config'),
+    isPreconfigured: false,
+  };
+  actionsClient.get.mockResolvedValueOnce(actionResult);
+  encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+  return actionType.executor;
+}

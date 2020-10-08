@@ -18,9 +18,7 @@
  */
 
 import { coreMock } from '../../../core/public/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { homePluginMock } from '../../home/public/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { managementPluginMock } from '../../management/public/mocks';
 import { dataPluginMock } from '../../data/public/mocks';
 import { SavedObjectsManagementPlugin } from './plugin';

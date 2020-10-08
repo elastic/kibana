@@ -23,7 +23,7 @@ import { GuideDemo, GuidePage, GuideSection, GuideSectionTypes } from '../../com
 
 import linkHtml from './link.html';
 
-export default props => (
+export default (props) => (
   <GuidePage title={props.route.name}>
     <GuideSection
       title="Link"

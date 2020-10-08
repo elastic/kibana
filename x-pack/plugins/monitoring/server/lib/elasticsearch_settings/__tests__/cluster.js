@@ -18,7 +18,7 @@ describe('Elasticsearch Cluster Settings', () => {
     return result;
   };
 
-  const getReq = response => {
+  const getReq = (response) => {
     return {
       server: {
         newPlatform: {
@@ -53,7 +53,7 @@ describe('Elasticsearch Cluster Settings', () => {
     const setting = {
       xpack: { monitoring: { collection: { interval: -1 } } },
     };
-    const makeExpected = source => ({
+    const makeExpected = (source) => ({
       found: true,
       reason: {
         context: `cluster ${source}`,
@@ -83,7 +83,7 @@ describe('Elasticsearch Cluster Settings', () => {
     const setting = {
       xpack: { monitoring: { exporters: { myCoolExporter: {} } } },
     };
-    const makeExpected = source => ({
+    const makeExpected = (source) => ({
       found: true,
       reason: {
         context: `cluster ${source}`,
@@ -113,7 +113,7 @@ describe('Elasticsearch Cluster Settings', () => {
     const setting = {
       xpack: { monitoring: { enabled: 'false' } },
     };
-    const makeExpected = source => ({
+    const makeExpected = (source) => ({
       found: true,
       reason: {
         context: `cluster ${source}`,

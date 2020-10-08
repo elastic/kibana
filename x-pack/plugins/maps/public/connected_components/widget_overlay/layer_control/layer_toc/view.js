@@ -28,7 +28,7 @@ export class LayerTOC extends React.Component {
     }
 
     // Layer list is displayed in reverse order so index needs to reversed to get back to original reference.
-    const reverseIndex = index => {
+    const reverseIndex = (index) => {
       return this.props.layerList.length - index - 1;
     };
 
@@ -49,7 +49,7 @@ export class LayerTOC extends React.Component {
     const reverseLayerList = [...this.props.layerList].reverse();
 
     if (this.props.isReadOnly) {
-      return reverseLayerList.map(layer => {
+      return reverseLayerList.map((layer) => {
         return <TOCEntry key={layer.getId()} layer={layer} />;
       });
     }

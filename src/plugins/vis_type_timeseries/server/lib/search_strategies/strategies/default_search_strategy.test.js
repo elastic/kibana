@@ -20,40 +20,18 @@ import { DefaultSearchStrategy } from './default_search_strategy';
 
 describe('DefaultSearchStrategy', () => {
   let defaultSearchStrategy;
-  let server;
-  let callWithRequest;
   let req;
 
   beforeEach(() => {
-    server = {};
-    callWithRequest = jest.fn();
-    req = {
-      server: {
-        plugins: {
-          elasticsearch: {
-            getCluster: jest.fn().mockReturnValue({
-              callWithRequest,
-            }),
-          },
-        },
-      },
-    };
-    defaultSearchStrategy = new DefaultSearchStrategy(server);
+    req = {};
+    defaultSearchStrategy = new DefaultSearchStrategy();
   });
 
   test('should init an DefaultSearchStrategy instance', () => {
     expect(defaultSearchStrategy.name).toBe('default');
     expect(defaultSearchStrategy.checkForViability).toBeDefined();
-    expect(defaultSearchStrategy.getCallWithRequestInstance).toBeDefined();
-    expect(defaultSearchStrategy.getSearchRequest).toBeDefined();
+    expect(defaultSearchStrategy.search).toBeDefined();
     expect(defaultSearchStrategy.getFieldsForWildcard).toBeDefined();
-  });
-
-  test('should invoke callWithRequestFactory with passed params', () => {
-    const value = defaultSearchStrategy.getCallWithRequestInstance(req);
-
-    expect(value).toBe(callWithRequest);
-    expect(req.server.plugins.elasticsearch.getCluster).toHaveBeenCalledWith('data');
   });
 
   test('should check a strategy for viability', () => {

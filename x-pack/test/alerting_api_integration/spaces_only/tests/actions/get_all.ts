@@ -19,7 +19,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
 
     it('should handle get all action request appropriately', async () => {
       const { body: createdAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My action',
@@ -32,9 +32,9 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           },
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAction.id, 'action');
+      objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
 
-      await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/action/_getAll`).expect(200, [
+      await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/actions`).expect(200, [
         {
           id: createdAction.id,
           isPreconfigured: false,
@@ -50,11 +50,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           isPreconfigured: true,
           actionTypeId: '.index',
           name: 'preconfigured_es_index_action',
-          config: {
-            index: 'functional-test-actions-index-preconfigured',
-            refresh: true,
-            executionTimeField: 'timestamp',
-          },
           referencedByCount: 0,
         },
         {
@@ -62,9 +57,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           isPreconfigured: true,
           actionTypeId: '.slack',
           name: 'Slack#xyz',
-          config: {
-            webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
-          },
           referencedByCount: 0,
         },
         {
@@ -72,11 +64,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           isPreconfigured: true,
           actionTypeId: 'system-abc-action-type',
           name: 'SystemABC',
-          config: {
-            xyzConfig1: 'value1',
-            xyzConfig2: 'value2',
-            listOfThings: ['a', 'b', 'c', 'd'],
-          },
           referencedByCount: 0,
         },
         {
@@ -84,9 +71,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           isPreconfigured: true,
           actionTypeId: 'test.index-record',
           name: 'Test:_Preconfigured_Index_Record',
-          config: {
-            unencrypted: 'ignored-but-required',
-          },
           referencedByCount: 0,
         },
       ]);
@@ -94,7 +78,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
 
     it(`shouldn't get all action from another space`, async () => {
       const { body: createdAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My action',
@@ -107,19 +91,14 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           },
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAction.id, 'action');
+      objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
 
-      await supertest.get(`${getUrlPrefix(Spaces.other.id)}/api/action/_getAll`).expect(200, [
+      await supertest.get(`${getUrlPrefix(Spaces.other.id)}/api/actions`).expect(200, [
         {
           id: 'preconfigured-es-index-action',
           isPreconfigured: true,
           actionTypeId: '.index',
           name: 'preconfigured_es_index_action',
-          config: {
-            index: 'functional-test-actions-index-preconfigured',
-            refresh: true,
-            executionTimeField: 'timestamp',
-          },
           referencedByCount: 0,
         },
         {
@@ -127,9 +106,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           isPreconfigured: true,
           actionTypeId: '.slack',
           name: 'Slack#xyz',
-          config: {
-            webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
-          },
           referencedByCount: 0,
         },
         {
@@ -137,11 +113,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           isPreconfigured: true,
           actionTypeId: 'system-abc-action-type',
           name: 'SystemABC',
-          config: {
-            xyzConfig1: 'value1',
-            xyzConfig2: 'value2',
-            listOfThings: ['a', 'b', 'c', 'd'],
-          },
           referencedByCount: 0,
         },
         {
@@ -149,9 +120,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           isPreconfigured: true,
           actionTypeId: 'test.index-record',
           name: 'Test:_Preconfigured_Index_Record',
-          config: {
-            unencrypted: 'ignored-but-required',
-          },
           referencedByCount: 0,
         },
       ]);

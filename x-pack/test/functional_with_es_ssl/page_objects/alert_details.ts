@@ -23,7 +23,6 @@ export function AlertDetailsPageProvider({ getService }: FtrProviderContext) {
     async getActionsLabels() {
       return {
         actionType: await testSubjects.getVisibleText('actionTypeLabel'),
-        actionCount: await testSubjects.getVisibleText('actionCountLabel'),
       };
     },
     async getAlertInstancesList() {
@@ -33,7 +32,7 @@ export function AlertDetailsPageProvider({ getService }: FtrProviderContext) {
       const $ = await table.parseDomContent();
       return $.findTestSubjects('alert-instance-row')
         .toArray()
-        .map(row => {
+        .map((row) => {
           return {
             instance: $(row)
               .findTestSubject('alertInstancesTableCell-instance')
@@ -71,12 +70,10 @@ export function AlertDetailsPageProvider({ getService }: FtrProviderContext) {
         const muteAlertInstanceButton = await testSubjects.find(
           `muteAlertInstanceButton_${instance}`
         );
-        log.debug(`checked:${await muteAlertInstanceButton.getAttribute('checked')}`);
-        expect(await muteAlertInstanceButton.getAttribute('checked')).to.eql(
-          isMuted ? 'true' : null
+        log.debug(`checked:${await muteAlertInstanceButton.getAttribute('aria-checked')}`);
+        expect(await muteAlertInstanceButton.getAttribute('aria-checked')).to.eql(
+          isMuted ? 'true' : 'false'
         );
-
-        expect(await testSubjects.exists(`mutedAlertInstanceLabel_${instance}`)).to.eql(isMuted);
       });
     },
     async ensureAlertInstanceExistance(instance: string, shouldExist: boolean) {
@@ -89,7 +86,7 @@ export function AlertDetailsPageProvider({ getService }: FtrProviderContext) {
           $.findTestSubjects('alert-instance-row')
             .toArray()
             .filter(
-              row =>
+              (row) =>
                 $(row)
                   .findTestSubject('alertInstancesTableCell-instance')
                   .find('.euiTableCellContent')

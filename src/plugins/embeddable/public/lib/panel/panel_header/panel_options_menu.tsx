@@ -28,14 +28,14 @@ import {
 } from '@elastic/eui';
 
 export interface PanelOptionsMenuProps {
-  getActionContextMenuPanel: () => Promise<EuiContextMenuPanelDescriptor>;
+  getActionContextMenuPanel: () => Promise<EuiContextMenuPanelDescriptor[]>;
   isViewMode: boolean;
   closeContextMenu: boolean;
   title?: string;
 }
 
 interface State {
-  actionContextMenuPanel?: EuiContextMenuPanelDescriptor;
+  actionContextMenuPanel?: EuiContextMenuPanelDescriptor[];
   isPopoverOpen: boolean;
 }
 
@@ -117,7 +117,7 @@ export class PanelOptionsMenu extends React.Component<PanelOptionsMenuProps, Sta
       >
         <EuiContextMenu
           initialPanelId="mainMenu"
-          panels={this.state.actionContextMenuPanel ? [this.state.actionContextMenuPanel] : []}
+          panels={this.state.actionContextMenuPanel || []}
         />
       </EuiPopover>
     );
@@ -137,11 +137,11 @@ export class PanelOptionsMenu extends React.Component<PanelOptionsMenuProps, Sta
       this.setState({ actionContextMenuPanel: undefined });
       this.props
         .getActionContextMenuPanel()
-        .then(actionContextMenuPanel => {
+        .then((actionContextMenuPanel) => {
           if (!this.mounted) return;
           this.setState({ actionContextMenuPanel });
         })
-        .catch(error => console.error(error)); // eslint-disable-line no-console
+        .catch((error) => console.error(error)); // eslint-disable-line no-console
     };
     this.setState(({ isPopoverOpen }) => ({ isPopoverOpen: !isPopoverOpen }), after);
   };

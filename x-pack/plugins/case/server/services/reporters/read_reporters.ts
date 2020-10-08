@@ -16,7 +16,7 @@ export const convertToReporters = (caseObjects: Array<SavedObject<CaseAttributes
       caseObj.attributes &&
       caseObj.attributes.created_by &&
       caseObj.attributes.created_by.username &&
-      !accum.some(item => item.username === caseObj.attributes.created_by.username)
+      !accum.some((item) => item.username === caseObj.attributes.created_by.username)
     ) {
       return [...accum, caseObj.attributes.created_by];
     } else {

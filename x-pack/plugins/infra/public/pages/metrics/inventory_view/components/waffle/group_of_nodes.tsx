@@ -42,9 +42,9 @@ export const GroupOfNodes: React.FC<Props> = ({
     <GroupOfNodesContainer style={{ width }}>
       <GroupName group={group} onDrilldown={onDrilldown} isChild={isChild} options={options} />
       <Nodes>
-        {group.nodes.map(node => (
+        {group.nodes.map((node) => (
           <Node
-            key={node.pathId}
+            key={`${node.pathId}:${node.name}`}
             options={options}
             squareSize={group.squareSize}
             node={node}
@@ -70,6 +70,6 @@ const Nodes = euiStyled.div`
   justify-content: center;
   padding: 20px 10px 10px;
   border-radius: 4px;
-  border: 1px solid ${props => props.theme.eui.euiBorderColor};
+  border: 1px solid ${(props) => props.theme.eui.euiBorderColor};
   box-shadow: 0 1px 7px rgba(0, 0, 0, 0.1);
 `;

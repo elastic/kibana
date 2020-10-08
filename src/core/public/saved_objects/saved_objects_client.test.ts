@@ -132,7 +132,9 @@ describe('SavedObjectsClient', () => {
           Object {
             "body": undefined,
             "method": "DELETE",
-            "query": undefined,
+            "query": Object {
+              "force": false,
+            },
           },
         ]
       `);
@@ -432,7 +434,7 @@ describe('SavedObjectsClient', () => {
         sortOrder: 'sort', // Not currently supported by API
       };
 
-      // @ts-ignore
+      // @ts-expect-error
       savedObjectsClient.find(options);
       expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
         Array [

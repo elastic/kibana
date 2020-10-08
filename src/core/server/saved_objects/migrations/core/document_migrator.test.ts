@@ -17,19 +17,20 @@
  * under the License.
  */
 
+import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import { SavedObjectUnsanitizedDoc } from '../../serialization';
 import { DocumentMigrator } from './document_migrator';
-import { loggingServiceMock } from '../../../logging/logging_service.mock';
+import { loggingSystemMock } from '../../../logging/logging_system.mock';
 import { SavedObjectsType } from '../../types';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 
-const mockLoggerFactory = loggingServiceMock.create();
+const mockLoggerFactory = loggingSystemMock.create();
 const mockLogger = mockLoggerFactory.get('mock logger');
 
 const createRegistry = (...types: Array<Partial<SavedObjectsType>>) => {
   const registry = new SavedObjectTypeRegistry();
-  types.forEach(type =>
+  types.forEach((type) =>
     registry.registerType({
       name: 'unknown',
       namespaceType: 'single',
@@ -47,7 +48,6 @@ describe('DocumentMigrator', () => {
     return {
       kibanaVersion: '25.2.3',
       typeRegistry: createRegistry(),
-      validateDoc: _.noop,
       log: mockLogger,
     };
   }
@@ -59,7 +59,6 @@ describe('DocumentMigrator', () => {
         name: 'foo',
         migrations: _.noop as any,
       }),
-      validateDoc: _.noop,
       log: mockLogger,
     };
     expect(() => new DocumentMigrator(invalidDefinition)).toThrow(
@@ -73,10 +72,9 @@ describe('DocumentMigrator', () => {
       typeRegistry: createRegistry({
         name: 'foo',
         migrations: {
-          bar: doc => doc,
+          bar: (doc) => doc,
         },
       }),
-      validateDoc: _.noop,
       log: mockLogger,
     };
     expect(() => new DocumentMigrator(invalidDefinition)).toThrow(
@@ -93,7 +91,6 @@ describe('DocumentMigrator', () => {
           '1.2.3': 23 as any,
         },
       }),
-      validateDoc: _.noop,
       log: mockLogger,
     };
     expect(() => new DocumentMigrator(invalidDefinition)).toThrow(
@@ -131,8 +128,8 @@ describe('DocumentMigrator', () => {
       typeRegistry: createRegistry({
         name: 'user',
         migrations: {
-          '1.2.3': doc => {
-            _.set(doc, 'attributes.name', 'Mike');
+          '1.2.3': (doc) => {
+            set(doc, 'attributes.name', 'Mike');
             return doc;
           },
         },
@@ -149,13 +146,13 @@ describe('DocumentMigrator', () => {
     expect(_.get(migratedDoc, 'attributes.name')).toBe('Mike');
   });
 
-  it('migrates meta properties', () => {
+  it('migrates root properties', () => {
     const migrator = new DocumentMigrator({
       ...testOpts(),
       typeRegistry: createRegistry({
         name: 'acl',
         migrations: {
-          '2.3.5': setAttr('acl', 'admins-only,sucka!'),
+          '2.3.5': setAttr('acl', 'admins-only, sucka!'),
         },
       }),
     });
@@ -165,13 +162,13 @@ describe('DocumentMigrator', () => {
       attributes: { name: 'Tyler' },
       acl: 'anyone',
       migrationVersion: {},
-    });
+    } as SavedObjectUnsanitizedDoc);
     expect(actual).toEqual({
       id: 'me',
       type: 'user',
       attributes: { name: 'Tyler' },
       migrationVersion: { acl: '2.3.5' },
-      acl: 'admins-only,sucka!',
+      acl: 'admins-only, sucka!',
     });
   });
 
@@ -241,7 +238,7 @@ describe('DocumentMigrator', () => {
       type: 'user',
       attributes: { name: 'Tyler' },
       bbb: 'Shazm',
-    });
+    } as SavedObjectUnsanitizedDoc);
     expect(actual).toEqual({
       id: 'me',
       type: 'user',
@@ -293,7 +290,7 @@ describe('DocumentMigrator', () => {
         migrationVersion: { dog: '10.2.0' },
       })
     ).toThrow(
-      /Document "smelly" has property "dog" which belongs to a more recent version of Kibana \(10\.2\.0\)/i
+      /Document "smelly" has property "dog" which belongs to a more recent version of Kibana \[10\.2\.0\]\. The last known version is \[undefined\]/i
     );
   });
 
@@ -315,7 +312,7 @@ describe('DocumentMigrator', () => {
         migrationVersion: { dawg: '1.2.4' },
       })
     ).toThrow(
-      /Document "fleabag" has property "dawg" which belongs to a more recent version of Kibana \(1\.2\.4\)/i
+      /Document "fleabag" has property "dawg" which belongs to a more recent version of Kibana \[1\.2\.4\]\. The last known version is \[1\.2\.3\]/i
     );
   });
 
@@ -405,7 +402,7 @@ describe('DocumentMigrator', () => {
       attributes: { name: 'Callie' },
       dawg: 'Yo',
       migrationVersion: {},
-    });
+    } as SavedObjectUnsanitizedDoc);
     expect(actual).toEqual({
       id: 'smelly',
       type: 'foo',
@@ -572,7 +569,7 @@ describe('DocumentMigrator', () => {
       expect('Did not throw').toEqual('But it should have!');
     } catch (error) {
       expect(error.message).toMatch(/Dang diggity!/);
-      const warning = loggingServiceMock.collect(mockLoggerFactory).warn[0][0];
+      const warning = loggingSystemMock.collect(mockLoggerFactory).warn[0][0];
       expect(warning).toContain(JSON.stringify(failedDoc));
       expect(warning).toContain('dog:1.2.3');
     }
@@ -601,8 +598,8 @@ describe('DocumentMigrator', () => {
       migrationVersion: {},
     };
     migrator.migrate(doc);
-    expect(loggingServiceMock.collect(mockLoggerFactory).info[0][0]).toEqual(logTestMsg);
-    expect(loggingServiceMock.collect(mockLoggerFactory).warn[1][0]).toEqual(logTestMsg);
+    expect(loggingSystemMock.collect(mockLoggerFactory).info[0][0]).toEqual(logTestMsg);
+    expect(loggingSystemMock.collect(mockLoggerFactory).warn[1][0]).toEqual(logTestMsg);
   });
 
   test('extracts the latest migration version info', () => {
@@ -632,37 +629,16 @@ describe('DocumentMigrator', () => {
       bbb: '3.2.3',
     });
   });
-
-  test('fails if the validate doc throws', () => {
-    const migrator = new DocumentMigrator({
-      ...testOpts(),
-      typeRegistry: createRegistry({
-        name: 'aaa',
-        migrations: {
-          '2.3.4': d => _.set(d, 'attributes.counter', 42),
-        },
-      }),
-      validateDoc: d => {
-        if ((d.attributes as any).counter === 42) {
-          throw new Error('Meaningful!');
-        }
-      },
-    });
-
-    const doc = { id: '1', type: 'foo', attributes: {}, migrationVersion: {}, aaa: {} };
-
-    expect(() => migrator.migrate(doc)).toThrow(/Meaningful/);
-  });
 });
 
 function renameAttr(path: string, newPath: string) {
   return (doc: SavedObjectUnsanitizedDoc) =>
-    _.omit(_.set(doc, newPath, _.get(doc, path)) as {}, path) as SavedObjectUnsanitizedDoc;
+    _.omit(set(doc, newPath, _.get(doc, path)) as {}, path) as SavedObjectUnsanitizedDoc;
 }
 
 function setAttr(path: string, value: any) {
   return (doc: SavedObjectUnsanitizedDoc) =>
-    _.set(
+    set(
       doc,
       path,
       _.isFunction(value) ? value(_.get(doc, path)) : value

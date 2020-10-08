@@ -18,10 +18,10 @@
  */
 import { PluginFunctionalProviderContext } from '../../services';
 
-export default function({ getService, loadTestFile }: PluginFunctionalProviderContext) {
+export default function ({ getService, loadTestFile }: PluginFunctionalProviderContext) {
   const esArchiver = getService('esArchiver');
 
-  describe('doc views', function() {
+  describe('doc views', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/discover');
     });

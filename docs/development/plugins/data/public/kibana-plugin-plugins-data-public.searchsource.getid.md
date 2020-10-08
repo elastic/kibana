@@ -4,6 +4,8 @@
 
 ## SearchSource.getId() method
 
+returns search source id
+
 <b>Signature:</b>
 
 ```typescript

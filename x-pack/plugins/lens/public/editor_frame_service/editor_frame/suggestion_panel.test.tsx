@@ -20,7 +20,8 @@ import { esFilters, IFieldType, IIndexPattern } from '../../../../../../src/plug
 import { SuggestionPanel, SuggestionPanelProps } from './suggestion_panel';
 import { getSuggestions, Suggestion } from './suggestion_helpers';
 import { EuiIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
-import chartTableSVG from '../../..assets/chart_datatable.svg';
+import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
+import { LensIconChartDatatable } from '../../assets/chart_datatable';
 
 jest.mock('./suggestion_helpers');
 
@@ -85,6 +86,7 @@ describe('suggestion_panel', () => {
       dispatch: dispatchMock,
       ExpressionRenderer: expressionRendererMock,
       frame: createMockFramePublicAPI(),
+      plugins: { data: dataPluginMock.createStartContract() },
     };
   });
 
@@ -95,7 +97,7 @@ describe('suggestion_panel', () => {
       wrapper
         .find('[data-test-subj="lnsSuggestion"]')
         .find(EuiPanel)
-        .map(el => el.parents(EuiToolTip).prop('content'))
+        .map((el) => el.parents(EuiToolTip).prop('content'))
     ).toEqual(['Current', 'Suggestion1', 'Suggestion2']);
   });
 
@@ -157,39 +159,27 @@ describe('suggestion_panel', () => {
       const wrapper = mount(<SuggestionPanel {...defaultProps} />);
 
       act(() => {
-        wrapper
-          .find('[data-test-subj="lnsSuggestion"]')
-          .at(2)
-          .simulate('click');
+        wrapper.find('[data-test-subj="lnsSuggestion"]').at(2).simulate('click');
       });
 
       wrapper.update();
 
-      expect(
-        wrapper
-          .find('[data-test-subj="lnsSuggestion"]')
-          .at(2)
-          .prop('className')
-      ).toContain('lnsSuggestionPanel__button-isSelected');
+      expect(wrapper.find('[data-test-subj="lnsSuggestion"]').at(2).prop('className')).toContain(
+        'lnsSuggestionPanel__button-isSelected'
+      );
     });
 
     it('should rollback suggestion if current panel is clicked', () => {
       const wrapper = mount(<SuggestionPanel {...defaultProps} />);
 
       act(() => {
-        wrapper
-          .find('[data-test-subj="lnsSuggestion"]')
-          .at(2)
-          .simulate('click');
+        wrapper.find('[data-test-subj="lnsSuggestion"]').at(2).simulate('click');
       });
 
       wrapper.update();
 
       act(() => {
-        wrapper
-          .find('[data-test-subj="lnsSuggestion"]')
-          .at(0)
-          .simulate('click');
+        wrapper.find('[data-test-subj="lnsSuggestion"]').at(0).simulate('click');
       });
 
       wrapper.update();
@@ -204,10 +194,7 @@ describe('suggestion_panel', () => {
     const wrapper = mount(<SuggestionPanel {...defaultProps} />);
 
     act(() => {
-      wrapper
-        .find('button[data-test-subj="lnsSuggestion"]')
-        .at(1)
-        .simulate('click');
+      wrapper.find('button[data-test-subj="lnsSuggestion"]').at(1).simulate('click');
     });
     wrapper.update();
 
@@ -262,7 +249,6 @@ describe('suggestion_panel', () => {
 
     expect(passedExpression).toMatchInlineSnapshot(`
       "kibana
-      | kibana_context timeRange=\\"{\\\\\\"from\\\\\\":\\\\\\"now-7d\\\\\\",\\\\\\"to\\\\\\":\\\\\\"now\\\\\\"}\\" query=\\"{\\\\\\"query\\\\\\":\\\\\\"\\\\\\",\\\\\\"language\\\\\\":\\\\\\"lucene\\\\\\"}\\" filters=\\"[{\\\\\\"meta\\\\\\":{\\\\\\"index\\\\\\":\\\\\\"index1\\\\\\"},\\\\\\"exists\\\\\\":{\\\\\\"field\\\\\\":\\\\\\"myfield\\\\\\"}}]\\"
       | lens_merge_tables layerIds=\\"first\\" tables={datasource_expression}
       | test
       | expression"
@@ -274,7 +260,7 @@ describe('suggestion_panel', () => {
     getSuggestionsMock.mockReturnValue([
       {
         datasourceState: {},
-        previewIcon: chartTableSVG,
+        previewIcon: LensIconChartDatatable,
         score: 0.5,
         visualizationState: suggestion1State,
         visualizationId: 'vis',
@@ -302,6 +288,6 @@ describe('suggestion_panel', () => {
     const wrapper = mount(<SuggestionPanel {...defaultProps} />);
 
     expect(wrapper.find(EuiIcon)).toHaveLength(1);
-    expect(wrapper.find(EuiIcon).prop('type')).toEqual(chartTableSVG);
+    expect(wrapper.find(EuiIcon).prop('type')).toEqual(LensIconChartDatatable);
   });
 });

@@ -19,8 +19,8 @@
 
 import { seedColors } from './seed_colors';
 
-describe('Seed Colors', function() {
-  it('should return an array', function() {
+describe('Seed Colors', function () {
+  it('should return an array', function () {
     expect(seedColors).toBeInstanceOf(Array);
   });
 });

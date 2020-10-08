@@ -18,6 +18,7 @@ import {
   EuiSwitch,
   EuiTitle,
   EuiLink,
+  EuiCallOut,
 } from '@elastic/eui';
 import { RestoreSettings } from '../../../../../common/types';
 import { REMOVE_INDEX_SETTINGS_SUGGESTIONS } from '../../../constants';
@@ -28,10 +29,12 @@ import { StepProps } from './';
 export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = ({
   restoreSettings,
   updateRestoreSettings,
+  snapshotDetails,
   errors,
 }) => {
   const { i18n } = useServices();
   const { indexSettings, ignoreIndexSettings } = restoreSettings;
+  const { dataStreams } = snapshotDetails;
 
   // State for index setting toggles
   const [isUsingIndexSettings, setIsUsingIndexSettings] = useState<boolean>(Boolean(indexSettings));
@@ -51,7 +54,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
   >(
     [
       ...new Set((ignoreIndexSettings || []).concat([...REMOVE_INDEX_SETTINGS_SUGGESTIONS].sort())),
-    ].map(setting => ({
+    ].map((setting) => ({
       label: setting,
     }))
   );
@@ -96,6 +99,23 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {dataStreams?.length ? (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            iconType="help"
+            title={i18n.translate(
+              'xpack.snapshotRestore.restoreForm.stepSettings.dataStreamsCallout.title',
+              { defaultMessage: 'Backing indices' }
+            )}
+          >
+            <FormattedMessage
+              id="xpack.snapshotRestore.restoreForm.stepSettings.dataStreamsCallout.description"
+              defaultMessage="These settings also apply to the backing indices of data streams."
+            />
+          </EuiCallOut>
+        </>
+      ) : undefined}
       <EuiSpacer size="l" />
 
       {/* Modify index settings */}
@@ -131,7 +151,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
                 />
               }
               checked={isUsingIndexSettings}
-              onChange={e => {
+              onChange={(e) => {
                 const isChecked = e.target.checked;
                 if (isChecked) {
                   setIsUsingIndexSettings(true);
@@ -237,7 +257,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
                 />
               }
               checked={isUsingIgnoreIndexSettings}
-              onChange={e => {
+              onChange={(e) => {
                 const isChecked = e.target.checked;
                 if (isChecked) {
                   setIsUsingIgnoreIndexSettings(true);
@@ -278,7 +298,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
                           )
                         : []
                     }
-                    onChange={selectedOptions => {
+                    onChange={(selectedOptions) => {
                       const newIgnoreIndexSettings = selectedOptions.map(({ label }) => label);
                       updateRestoreSettings({ ignoreIndexSettings: newIgnoreIndexSettings });
                       setCachedRestoreSettings({

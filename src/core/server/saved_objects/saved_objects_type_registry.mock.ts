@@ -19,11 +19,13 @@
 
 import { ISavedObjectTypeRegistry, SavedObjectTypeRegistry } from './saved_objects_type_registry';
 
-const createRegistryMock = (): jest.Mocked<ISavedObjectTypeRegistry &
-  Pick<SavedObjectTypeRegistry, 'registerType'>> => {
+const createRegistryMock = (): jest.Mocked<
+  ISavedObjectTypeRegistry & Pick<SavedObjectTypeRegistry, 'registerType'>
+> => {
   const mock = {
     registerType: jest.fn(),
     getType: jest.fn(),
+    getVisibleTypes: jest.fn(),
     getAllTypes: jest.fn(),
     getImportableAndExportableTypes: jest.fn(),
     isNamespaceAgnostic: jest.fn(),
@@ -34,6 +36,7 @@ const createRegistryMock = (): jest.Mocked<ISavedObjectTypeRegistry &
     isImportableAndExportable: jest.fn(),
   };
 
+  mock.getVisibleTypes.mockReturnValue([]);
   mock.getAllTypes.mockReturnValue([]);
   mock.getImportableAndExportableTypes.mockReturnValue([]);
   mock.getIndex.mockReturnValue('.kibana-test');

@@ -6,13 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { CRUD_APP_BASE_PATH } from '../../constants';
-import {
-  addCluster as sendAddClusterRequest,
-  getRouter,
-  extractQueryParams,
-  redirect,
-} from '../../services';
+import { extractQueryParams } from '../../../shared_imports';
+import { addCluster as sendAddClusterRequest, getRouter, redirect } from '../../services';
 import { fatalError, toasts } from '../../services/notification';
 
 import {
@@ -22,7 +17,7 @@ import {
   CLEAR_ADD_CLUSTER_ERRORS,
 } from '../action_types';
 
-export const addCluster = cluster => async dispatch => {
+export const addCluster = (cluster) => async (dispatch) => {
   dispatch({
     type: ADD_CLUSTER_START,
   });
@@ -31,7 +26,7 @@ export const addCluster = cluster => async dispatch => {
     await Promise.all([
       sendAddClusterRequest(cluster),
       // Wait at least half a second to avoid a weird flicker of the saving feedback.
-      new Promise(resolve => setTimeout(resolve, 500)),
+      new Promise((resolve) => setTimeout(resolve, 500)),
     ]);
   } catch (error) {
     if (error) {
@@ -108,13 +103,13 @@ export const addCluster = cluster => async dispatch => {
     // This will open the new job in the detail panel. Note that we're *not* showing a success toast
     // here, because it would partially obscure the detail panel.
     history.push({
-      pathname: `${CRUD_APP_BASE_PATH}/list`,
+      pathname: `/list`,
       search: `?cluster=${cluster.name}`,
     });
   }
 };
 
-export const clearAddClusterErrors = () => dispatch => {
+export const clearAddClusterErrors = () => (dispatch) => {
   dispatch({
     type: CLEAR_ADD_CLUSTER_ERRORS,
   });

@@ -38,8 +38,8 @@ const types = {
   markdown,
 };
 
-const checkModelValidity = validationResults =>
-  Boolean(Object.values(validationResults).every(isValid => isValid));
+const checkModelValidity = (validationResults) =>
+  Boolean(Object.values(validationResults).every((isValid) => isValid));
 
 export function PanelConfig(props) {
   const { model } = props;
@@ -67,7 +67,9 @@ export function PanelConfig(props) {
     return (
       <FormValidationContext.Provider value={updateControlValidity}>
         <VisDataContext.Provider value={visData}>
-          <Component {...props} />
+          <div data-test-subj={`tvbPanelConfig__${model.type}`}>
+            <Component {...props} />
+          </div>
         </VisDataContext.Provider>
       </FormValidationContext.Provider>
     );

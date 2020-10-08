@@ -9,14 +9,7 @@ Increases a counter field by one. Creates the document if one doesn't exist for 
 <b>Signature:</b>
 
 ```typescript
-incrementCounter(type: string, id: string, counterFieldName: string, options?: SavedObjectsIncrementCounterOptions): Promise<{
-        id: string;
-        type: string;
-        updated_at: string;
-        references: any;
-        version: string;
-        attributes: any;
-    }>;
+incrementCounter(type: string, id: string, counterFieldName: string, options?: SavedObjectsIncrementCounterOptions): Promise<SavedObject>;
 ```
 
 ## Parameters
@@ -30,14 +23,7 @@ incrementCounter(type: string, id: string, counterFieldName: string, options?: S
 
 <b>Returns:</b>
 
-`Promise<{
-        id: string;
-        type: string;
-        updated_at: string;
-        references: any;
-        version: string;
-        attributes: any;
-    }>`
+`Promise<SavedObject>`
 
 {<!-- -->promise<!-- -->}
 

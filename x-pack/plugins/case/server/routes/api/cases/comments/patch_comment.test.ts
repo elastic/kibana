@@ -14,6 +14,7 @@ import {
   mockCases,
 } from '../../__fixtures__';
 import { initPatchCommentApi } from './patch_comment';
+import { CASE_COMMENTS_URL } from '../../../../../common/constants';
 
 describe('PATCH comment', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -22,7 +23,7 @@ describe('PATCH comment', () => {
   });
   it(`Patch a comment`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{case_id}/comments',
+      path: CASE_COMMENTS_URL,
       method: 'patch',
       params: {
         case_id: 'mock-id-1',
@@ -50,7 +51,7 @@ describe('PATCH comment', () => {
 
   it(`Fails with 409 if version does not match`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{case_id}/comments',
+      path: CASE_COMMENTS_URL,
       method: 'patch',
       params: {
         case_id: 'mock-id-1',
@@ -74,7 +75,7 @@ describe('PATCH comment', () => {
   });
   it(`Returns an error if updateComment throws`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{case_id}/comments',
+      path: CASE_COMMENTS_URL,
       method: 'patch',
       params: {
         case_id: 'mock-id-1',

@@ -74,12 +74,13 @@ function DefaultEditorDataTab({
       ),
     [metricAggs]
   );
-  const lastParentPipelineAggTitle = lastParentPipelineAgg && lastParentPipelineAgg.type.title;
+  const lastParentPipelineAggTitle =
+    lastParentPipelineAgg && (lastParentPipelineAgg as IAggConfig).type.title;
 
-  const addSchema: AddSchema = useCallback(schema => dispatch(addNewAgg(schema)), [dispatch]);
+  const addSchema: AddSchema = useCallback((schema) => dispatch(addNewAgg(schema)), [dispatch]);
 
   const onAggRemove: DefaultEditorAggCommonProps['removeAgg'] = useCallback(
-    aggId => dispatch(removeAgg(aggId, schemas.all || [])),
+    (aggId) => dispatch(removeAgg(aggId, schemas.all || [])),
     [dispatch, schemas]
   );
 
@@ -116,7 +117,7 @@ function DefaultEditorDataTab({
     setValidity,
     setTouched,
     removeAgg: onAggRemove,
-  };
+  } as any;
 
   return (
     <>

@@ -52,7 +52,7 @@ import { VisDataContext } from '../contexts/vis_data_context';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
 
-const validateIntervalValue = intervalValue => {
+const validateIntervalValue = (intervalValue) => {
   const isAutoOrGteInterval = isGteInterval(intervalValue) || isAutoInterval(intervalValue);
 
   if (isAutoOrGteInterval) {

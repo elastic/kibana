@@ -1,0 +1,19 @@
+@import '@elastic/eui/src/components/flyout/variables';
+@import '@elastic/eui/src/components/flyout/mixins';
+
+.lnsDimensionContainer {
+  // Use the EuiFlyout style
+  @include euiFlyout;
+  // But with custom positioning to keep it within the sidebar contents
+  position: absolute;
+  right: 0;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  animation: euiFlyout $euiAnimSpeedNormal $euiAnimSlightResistance;
+}
+
+.lnsDimensionContainer__footer,
+.lnsDimensionContainer__header {
+  padding: $euiSizeS;
+}

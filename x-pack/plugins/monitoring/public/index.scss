@@ -1,0 +1,14 @@
+// Monitoring plugin styles
+
+// Prefix all styles with "mon" to avoid conflicts.
+// Examples
+//   monChart
+//   monChart__legend
+//   monChart__legend--small
+//   monChart__legend-isLoading
+
+.monApplicationWrapper {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}

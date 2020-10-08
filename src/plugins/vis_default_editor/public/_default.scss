@@ -70,8 +70,7 @@
 
 .visEditor__visualization {
   display: flex;
-  flex-basis: 100%;
-  flex: 1;
+  flex: 1 1 auto; // Fixes IE bug: the editor overflows a visualization on small screens
   overflow: hidden;
 
   @include euiBreakpoint('xs', 's', 'm') {

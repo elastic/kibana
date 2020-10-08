@@ -6,7 +6,13 @@
 
 import React from 'react';
 
-import { Alert, AlertType, AlertTaskState, AlertingFrameworkHealth } from '../../../../types';
+import {
+  Alert,
+  AlertType,
+  AlertTaskState,
+  AlertInstanceSummary,
+  AlertingFrameworkHealth,
+} from '../../../../types';
 import { useAppDependencies } from '../../../app_context';
 import {
   deleteAlerts,
@@ -22,6 +28,7 @@ import {
   unmuteAlertInstance,
   loadAlert,
   loadAlertState,
+  loadAlertInstanceSummary,
   loadAlertTypes,
   health,
 } from '../../../lib/alert_api';
@@ -51,6 +58,7 @@ export interface ComponentOpts {
   }>;
   loadAlert: (id: Alert['id']) => Promise<Alert>;
   loadAlertState: (id: Alert['id']) => Promise<AlertTaskState>;
+  loadAlertInstanceSummary: (id: Alert['id']) => Promise<AlertInstanceSummary>;
   loadAlertTypes: () => Promise<AlertType[]>;
   getHealth: () => Promise<AlertingFrameworkHealth>;
 }
@@ -66,22 +74,25 @@ export function withBulkAlertOperations<T>(
       <WrappedComponent
         {...(props as T)}
         muteAlerts={async (items: Alert[]) =>
-          muteAlerts({ http, ids: items.filter(item => !isAlertMuted(item)).map(item => item.id) })
+          muteAlerts({
+            http,
+            ids: items.filter((item) => !isAlertMuted(item)).map((item) => item.id),
+          })
         }
         unmuteAlerts={async (items: Alert[]) =>
-          unmuteAlerts({ http, ids: items.filter(isAlertMuted).map(item => item.id) })
+          unmuteAlerts({ http, ids: items.filter(isAlertMuted).map((item) => item.id) })
         }
         enableAlerts={async (items: Alert[]) =>
-          enableAlerts({ http, ids: items.filter(isAlertDisabled).map(item => item.id) })
+          enableAlerts({ http, ids: items.filter(isAlertDisabled).map((item) => item.id) })
         }
         disableAlerts={async (items: Alert[]) =>
           disableAlerts({
             http,
-            ids: items.filter(item => !isAlertDisabled(item)).map(item => item.id),
+            ids: items.filter((item) => !isAlertDisabled(item)).map((item) => item.id),
           })
         }
         deleteAlerts={async (items: Alert[]) =>
-          deleteAlerts({ http, ids: items.map(item => item.id) })
+          deleteAlerts({ http, ids: items.map((item) => item.id) })
         }
         muteAlert={async (alert: Alert) => {
           if (!isAlertMuted(alert)) {
@@ -116,6 +127,9 @@ export function withBulkAlertOperations<T>(
         deleteAlert={async (alert: Alert) => deleteAlerts({ http, ids: [alert.id] })}
         loadAlert={async (alertId: Alert['id']) => loadAlert({ http, alertId })}
         loadAlertState={async (alertId: Alert['id']) => loadAlertState({ http, alertId })}
+        loadAlertInstanceSummary={async (alertId: Alert['id']) =>
+          loadAlertInstanceSummary({ http, alertId })
+        }
         loadAlertTypes={async () => loadAlertTypes({ http })}
         getHealth={async () => health({ http })}
       />
@@ -132,5 +146,5 @@ function isAlertMuted(alert: Alert) {
 }
 
 function isAlertInstanceMuted(alert: Alert, instanceId: string) {
-  return alert.mutedInstanceIds.findIndex(muted => muted === instanceId) >= 0;
+  return alert.mutedInstanceIds.findIndex((muted) => muted === instanceId) >= 0;
 }

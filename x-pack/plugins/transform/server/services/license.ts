@@ -37,7 +37,7 @@ export class License {
     { pluginId, minimumLicenseType, defaultErrorMessage }: SetupSettings,
     { licensing, logger }: { licensing: LicensingPluginSetup; logger: Logger }
   ) {
-    licensing.license$.subscribe(license => {
+    licensing.license$.subscribe((license) => {
       const { state, message } = license.check(pluginId, minimumLicenseType);
       const hasRequiredLicense = state === 'valid';
 
@@ -62,12 +62,12 @@ export class License {
     });
   }
 
-  guardApiRoute(handler: RequestHandler<unknown, unknown, any, any>) {
+  guardApiRoute<Params, Query, Body>(handler: RequestHandler<Params, Query, Body>) {
     const license = this;
 
     return function licenseCheck(
       ctx: RequestHandlerContext,
-      request: KibanaRequest,
+      request: KibanaRequest<Params, Query, Body>,
       response: KibanaResponseFactory
     ): IKibanaResponse<any> | Promise<IKibanaResponse<any>> {
       const licenseStatus = license.getStatus();

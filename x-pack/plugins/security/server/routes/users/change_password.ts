@@ -16,6 +16,7 @@ import { RouteDefinitionParams } from '..';
 
 export function defineChangeUserPasswordRoutes({
   authc,
+  session,
   router,
   clusterClient,
 }: RouteDefinitionParams) {
@@ -37,7 +38,7 @@ export function defineChangeUserPasswordRoutes({
       const currentUser = authc.getCurrentUser(request);
       const isUserChangingOwnPassword =
         currentUser && currentUser.username === username && canUserChangePassword(currentUser);
-      const currentSession = isUserChangingOwnPassword ? await authc.getSessionInfo(request) : null;
+      const currentSession = isUserChangingOwnPassword ? await session.get(request) : null;
 
       // If user is changing their own password they should provide a proof of knowledge their
       // current password via sending it in `Authorization: Basic base64(username:current password)`
@@ -81,7 +82,7 @@ export function defineChangeUserPasswordRoutes({
       if (isUserChangingOwnPassword && currentSession) {
         try {
           const authenticationResult = await authc.login(request, {
-            provider: { name: currentUser!.authentication_provider },
+            provider: { name: currentSession.provider.name },
             value: { username, password: newPassword },
           });
 

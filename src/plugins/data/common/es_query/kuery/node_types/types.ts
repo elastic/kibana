@@ -22,7 +22,7 @@
  */
 
 import { IIndexPattern } from '../../../index_patterns';
-import { JsonValue } from '../../../../../kibana_utils/public';
+import { JsonValue } from '../../../../../kibana_utils/common';
 import { KueryNode } from '..';
 
 export type FunctionName =
@@ -76,6 +76,7 @@ export interface NamedArgTypeBuildNode {
 }
 
 interface WildcardType {
+  wildcardSymbol: string;
   buildNode: (value: string) => WildcardTypeBuildNode | KueryNode;
   test: (node: any, string: string) => boolean;
   toElasticsearchQuery: (node: any) => string;

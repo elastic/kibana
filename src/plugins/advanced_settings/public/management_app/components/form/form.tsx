@@ -18,7 +18,7 @@
  */
 
 import React, { PureComponent, Fragment } from 'react';
-import classNames from 'classnames';
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -44,7 +44,6 @@ import { Field, getEditableValue } from '../field';
 import { FieldSetting, SettingsChanges, FieldState } from '../../types';
 
 type Category = string;
-const NAV_IS_LOCKED_KEY = 'core.chrome.isLocked';
 
 interface FormProps {
   settings: Record<string, FieldSetting[]>;
@@ -81,7 +80,7 @@ export class Form extends PureComponent<FormProps> {
   getSettingByKey = (key: string): FieldSetting | undefined => {
     return Object.values(this.props.settings)
       .flat()
-      .find(el => el.name === key);
+      .find((el) => el.name === key);
   };
 
   getCountOfUnsavedChanges = (): number => {
@@ -91,8 +90,8 @@ export class Form extends PureComponent<FormProps> {
   getCountOfHiddenUnsavedChanges = (): number => {
     const shownSettings = Object.values(this.props.visibleSettings)
       .flat()
-      .map(setting => setting.name);
-    return Object.keys(this.state.unsavedChanges).filter(key => !shownSettings.includes(key))
+      .map((setting) => setting.name);
+    return Object.keys(this.state.unsavedChanges).filter((key) => !shownSettings.includes(key))
       .length;
   };
 
@@ -155,7 +154,9 @@ export class Form extends PureComponent<FormProps> {
       let equalsToDefault = false;
       switch (type) {
         case 'array':
-          valueToSave = valueToSave.split(',').map((val: string) => val.trim());
+          valueToSave = valueToSave.trim();
+          valueToSave =
+            valueToSave === '' ? [] : valueToSave.split(',').map((val: string) => val.trim());
           equalsToDefault = valueToSave.join(',') === (defVal as string[]).join(',');
           break;
         case 'json':
@@ -255,7 +256,7 @@ export class Form extends PureComponent<FormProps> {
               </EuiFlexGroup>
             </EuiText>
             <EuiSpacer size="m" />
-            {settings.map(setting => {
+            {settings.map((setting) => {
               return (
                 <Field
                   key={setting.name}
@@ -325,12 +326,8 @@ export class Form extends PureComponent<FormProps> {
 
   renderBottomBar = () => {
     const areChangesInvalid = this.areChangesInvalid();
-    const bottomBarClasses = classNames('mgtAdvancedSettingsForm__bottomBar', {
-      'mgtAdvancedSettingsForm__bottomBar--pushForNav':
-        localStorage.getItem(NAV_IS_LOCKED_KEY) === 'true',
-    });
     return (
-      <EuiBottomBar className={bottomBarClasses} data-test-subj="advancedSetting-bottomBar">
+      <EuiBottomBar data-test-subj="advancedSetting-bottomBar">
         <EuiFlexGroup
           justifyContent="spaceBetween"
           alignItems="center"
@@ -391,8 +388,15 @@ export class Form extends PureComponent<FormProps> {
     const { unsavedChanges } = this.state;
     const { visibleSettings, categories, categoryCounts, clearQuery } = this.props;
     const currentCategories: Category[] = [];
+    const hasUnsavedChanges = !isEmpty(unsavedChanges);
 
-    categories.forEach(category => {
+    if (hasUnsavedChanges) {
+      document.body.classList.add('kbnBody--mgtAdvancedSettingsHasBottomBar');
+    } else {
+      document.body.classList.remove('kbnBody--mgtAdvancedSettingsHasBottomBar');
+    }
+
+    categories.forEach((category) => {
       if (visibleSettings[category] && visibleSettings[category].length) {
         currentCategories.push(category);
       }
@@ -402,7 +406,7 @@ export class Form extends PureComponent<FormProps> {
       <Fragment>
         <div>
           {currentCategories.length
-            ? currentCategories.map(category => {
+            ? currentCategories.map((category) => {
                 return this.renderCategory(
                   category,
                   visibleSettings[category],
@@ -411,7 +415,7 @@ export class Form extends PureComponent<FormProps> {
               })
             : this.maybeRenderNoSettings(clearQuery)}
         </div>
-        {!isEmpty(unsavedChanges) && this.renderBottomBar()}
+        {hasUnsavedChanges && this.renderBottomBar()}
       </Fragment>
     );
   }

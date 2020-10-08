@@ -2,7 +2,7 @@
 
 exports[`AuthenticationStatePage renders 1`] = `
 <div
-  className="secAuthenticationStatePage"
+  className="secAuthenticationStatePage "
 >
   <header
     className="secAuthenticationStatePage__header"
@@ -18,7 +18,7 @@ exports[`AuthenticationStatePage renders 1`] = `
       >
         <EuiIcon
           size="xxl"
-          type="logoKibana"
+          type="logoElastic"
         />
       </span>
       <EuiTitle

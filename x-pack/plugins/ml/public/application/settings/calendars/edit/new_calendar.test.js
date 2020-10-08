@@ -4,18 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+jest.mock('../../../contexts/kibana/use_create_url', () => ({
+  useCreateAndNavigateToMlLink: jest.fn(),
+}));
+
 jest.mock('../../../components/navigation_menu', () => ({
   NavigationMenu: () => <div id="mockNavigationMenu" />,
 }));
-jest.mock('../../../privilege/check_privilege', () => ({
+jest.mock('../../../capabilities/check_capabilities', () => ({
   checkPermission: () => true,
 }));
 jest.mock('../../../license', () => ({
   hasLicenseExpired: () => false,
   isFullLicense: () => false,
 }));
-jest.mock('../../../privilege/get_privileges', () => ({
-  getPrivileges: () => {},
+jest.mock('../../../capabilities/get_capabilities', () => ({
+  getCapabilities: () => {},
 }));
 jest.mock('../../../ml_nodes_check/check_ml_nodes', () => ({
   mlNodesAvailable: () => true,
@@ -38,7 +42,7 @@ jest.mock('../../../services/ml_api_service', () => ({
 jest.mock('./utils', () => ({
   getCalendarSettingsData: jest.fn().mockImplementation(
     () =>
-      new Promise(resolve => {
+      new Promise((resolve) => {
         resolve({
           jobIds: ['test-job-one', 'test-job-2'],
           groupIds: ['test-group-one', 'test-group-two'],
@@ -48,7 +52,7 @@ jest.mock('./utils', () => ({
   ),
 }));
 jest.mock('../../../../../../../../src/plugins/kibana_react/public', () => ({
-  withKibana: comp => {
+  withKibana: (comp) => {
     return comp;
   },
 }));
@@ -117,7 +121,7 @@ describe('NewCalendar', () => {
   test('Import modal shown on Import Events button click', () => {
     const wrapper = mountWithIntl(<NewCalendar {...props} />);
 
-    const importButton = wrapper.find('[data-test-subj="ml_import_events"]');
+    const importButton = wrapper.find('[data-test-subj="mlCalendarImportEventsButton"]');
     const button = importButton.find('EuiButton');
     button.simulate('click');
 
@@ -127,7 +131,7 @@ describe('NewCalendar', () => {
   test('New event modal shown on New event button click', () => {
     const wrapper = mountWithIntl(<NewCalendar {...props} />);
 
-    const importButton = wrapper.find('[data-test-subj="ml_new_event"]');
+    const importButton = wrapper.find('[data-test-subj="mlCalendarNewEventButton"]');
     const button = importButton.find('EuiButton');
     button.simulate('click');
 
@@ -154,7 +158,7 @@ describe('NewCalendar', () => {
 
     const wrapper = mountWithIntl(<NewCalendar {...noCreateProps} />);
 
-    const buttons = wrapper.find('[data-test-subj="ml_save_calendar_button"]');
+    const buttons = wrapper.find('[data-test-subj="mlSaveCalendarButton"]');
     const saveButton = buttons.find('EuiButton');
 
     expect(saveButton.prop('isDisabled')).toBe(true);

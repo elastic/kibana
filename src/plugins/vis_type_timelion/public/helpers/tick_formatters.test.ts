@@ -19,24 +19,24 @@
 
 import { tickFormatters } from './tick_formatters';
 
-describe('Tick Formatters', function() {
+describe('Tick Formatters', function () {
   let formatters: any;
 
-  beforeEach(function() {
+  beforeEach(function () {
     formatters = tickFormatters();
   });
 
-  describe('Bits mode', function() {
+  describe('Bits mode', function () {
     let bitFormatter: any;
-    beforeEach(function() {
+    beforeEach(function () {
       bitFormatter = formatters.bits;
     });
 
-    it('is a function', function() {
+    it('is a function', function () {
       expect(bitFormatter).toEqual(expect.any(Function));
     });
 
-    it('formats with b/kb/mb/gb', function() {
+    it('formats with b/kb/mb/gb', function () {
       expect(bitFormatter(7)).toEqual('7b');
       expect(bitFormatter(4 * 1000)).toEqual('4kb');
       expect(bitFormatter(4.1 * 1000 * 1000)).toEqual('4.1mb');
@@ -51,24 +51,24 @@ describe('Tick Formatters', function() {
     });
   });
 
-  describe('Bits/s mode', function() {
+  describe('Bits/s mode', function () {
     let bitsFormatter: any;
-    beforeEach(function() {
+    beforeEach(function () {
       bitsFormatter = formatters['bits/s'];
     });
 
-    it('is a function', function() {
+    it('is a function', function () {
       expect(bitsFormatter).toEqual(expect.any(Function));
     });
 
-    it('formats with b/kb/mb/gb', function() {
+    it('formats with b/kb/mb/gb', function () {
       expect(bitsFormatter(7)).toEqual('7b/s');
       expect(bitsFormatter(4 * 1000)).toEqual('4kb/s');
       expect(bitsFormatter(4.1 * 1000 * 1000)).toEqual('4.1mb/s');
       expect(bitsFormatter(3 * 1000 * 1000 * 1000)).toEqual('3gb/s');
     });
 
-    it('formats negative values with b/kb/mb/gb', function() {
+    it('formats negative values with b/kb/mb/gb', function () {
       expect(bitsFormatter(-7)).toEqual('-7b/s');
       expect(bitsFormatter(-4 * 1000)).toEqual('-4kb/s');
       expect(bitsFormatter(-4.1 * 1000 * 1000)).toEqual('-4.1mb/s');
@@ -76,24 +76,24 @@ describe('Tick Formatters', function() {
     });
   });
 
-  describe('Bytes mode', function() {
+  describe('Bytes mode', function () {
     let byteFormatter: any;
-    beforeEach(function() {
+    beforeEach(function () {
       byteFormatter = formatters.bytes;
     });
 
-    it('is a function', function() {
+    it('is a function', function () {
       expect(byteFormatter).toEqual(expect.any(Function));
     });
 
-    it('formats with B/KB/MB/GB', function() {
+    it('formats with B/KB/MB/GB', function () {
       expect(byteFormatter(10)).toEqual('10B');
       expect(byteFormatter(10 * 1024)).toEqual('10KB');
       expect(byteFormatter(10.2 * 1024 * 1024)).toEqual('10.2MB');
       expect(byteFormatter(3 * 1024 * 1024 * 1024)).toEqual('3GB');
     });
 
-    it('formats negative values with B/KB/MB/GB', function() {
+    it('formats negative values with B/KB/MB/GB', function () {
       expect(byteFormatter(-10)).toEqual('-10B');
       expect(byteFormatter(-10 * 1024)).toEqual('-10KB');
       expect(byteFormatter(-10.2 * 1024 * 1024)).toEqual('-10.2MB');
@@ -101,24 +101,24 @@ describe('Tick Formatters', function() {
     });
   });
 
-  describe('Bytes/s mode', function() {
+  describe('Bytes/s mode', function () {
     let bytesFormatter: any;
-    beforeEach(function() {
+    beforeEach(function () {
       bytesFormatter = formatters['bytes/s'];
     });
 
-    it('is a function', function() {
+    it('is a function', function () {
       expect(bytesFormatter).toEqual(expect.any(Function));
     });
 
-    it('formats with B/KB/MB/GB', function() {
+    it('formats with B/KB/MB/GB', function () {
       expect(bytesFormatter(10)).toEqual('10B/s');
       expect(bytesFormatter(10 * 1024)).toEqual('10KB/s');
       expect(bytesFormatter(10.2 * 1024 * 1024)).toEqual('10.2MB/s');
       expect(bytesFormatter(3 * 1024 * 1024 * 1024)).toEqual('3GB/s');
     });
 
-    it('formats negative values with B/KB/MB/GB', function() {
+    it('formats negative values with B/KB/MB/GB', function () {
       expect(bytesFormatter(-10)).toEqual('-10B/s');
       expect(bytesFormatter(-10 * 1024)).toEqual('-10KB/s');
       expect(bytesFormatter(-10.2 * 1024 * 1024)).toEqual('-10.2MB/s');
@@ -126,17 +126,17 @@ describe('Tick Formatters', function() {
     });
   });
 
-  describe('Currency mode', function() {
+  describe('Currency mode', function () {
     let currencyFormatter: any;
-    beforeEach(function() {
+    beforeEach(function () {
       currencyFormatter = formatters.currency;
     });
 
-    it('is a function', function() {
+    it('is a function', function () {
       expect(currencyFormatter).toEqual(expect.any(Function));
     });
 
-    it('formats with $ by default', function() {
+    it('formats with $ by default', function () {
       const axis = {
         options: {
           units: {},
@@ -145,7 +145,7 @@ describe('Tick Formatters', function() {
       expect(currencyFormatter(10.2, axis)).toEqual('$10.20');
     });
 
-    it('accepts currency in ISO 4217', function() {
+    it('accepts currency in ISO 4217', function () {
       const axis = {
         options: {
           units: {
@@ -158,17 +158,17 @@ describe('Tick Formatters', function() {
     });
   });
 
-  describe('Percent mode', function() {
+  describe('Percent mode', function () {
     let percentFormatter: any;
-    beforeEach(function() {
+    beforeEach(function () {
       percentFormatter = formatters.percent;
     });
 
-    it('is a function', function() {
+    it('is a function', function () {
       expect(percentFormatter).toEqual(expect.any(Function));
     });
 
-    it('formats with %', function() {
+    it('formats with %', function () {
       const axis = {
         options: {
           units: {},
@@ -177,7 +177,7 @@ describe('Tick Formatters', function() {
       expect(percentFormatter(0.1234, axis)).toEqual('12%');
     });
 
-    it('formats with % with decimal precision', function() {
+    it('formats with % with decimal precision', function () {
       const tickDecimals = 3;
       const tickDecimalShift = 2;
       const axis = {
@@ -192,17 +192,17 @@ describe('Tick Formatters', function() {
     });
   });
 
-  describe('Custom mode', function() {
+  describe('Custom mode', function () {
     let customFormatter: any;
-    beforeEach(function() {
+    beforeEach(function () {
       customFormatter = formatters.custom;
     });
 
-    it('is a function', function() {
+    it('is a function', function () {
       expect(customFormatter).toEqual(expect.any(Function));
     });
 
-    it('accepts prefix and suffix', function() {
+    it('accepts prefix and suffix', function () {
       const axis = {
         options: {
           units: {
@@ -216,7 +216,7 @@ describe('Tick Formatters', function() {
       expect(customFormatter(10.2, axis)).toEqual('prefix10.2suffix');
     });
 
-    it('correctly renders small values', function() {
+    it('correctly renders small values', function () {
       const axis = {
         options: {
           units: {

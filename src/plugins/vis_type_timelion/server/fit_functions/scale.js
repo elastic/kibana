@@ -30,7 +30,7 @@ import _ from 'lodash';
 function sum(set) {
   return _.reduce(
     set,
-    function(sum, num) {
+    function (sum, num) {
       return sum + num;
     },
     0

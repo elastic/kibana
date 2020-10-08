@@ -152,10 +152,10 @@ export const PolicyRetentionSchedule: React.FunctionComponent<Props> = ({
           />
         </p>
         <RetentionExecuteModalProvider>
-          {executeRetentionPrompt => {
+          {(executeRetentionPrompt) => {
             return (
               <RetentionSettingsUpdateModalProvider>
-                {updateRetentionSettingsPrompt => {
+                {(updateRetentionSettingsPrompt) => {
                   return (
                     <EuiPopover
                       id="retentionActionMenu"

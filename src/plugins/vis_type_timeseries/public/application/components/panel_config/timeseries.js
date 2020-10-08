@@ -44,6 +44,7 @@ import {
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { QueryBarWrapper } from '../query_bar_wrapper';
+
 class TimeseriesPanelConfigUi extends Component {
   constructor(props) {
     super(props);
@@ -61,6 +62,7 @@ class TimeseriesPanelConfigUi extends Component {
       axis_min: '',
       legend_position: 'right',
       show_grid: 1,
+      tooltip_mode: 'show_all',
     };
     const model = { ...defaults, ...this.props.model };
     const { selectedTab } = this.state;
@@ -85,7 +87,23 @@ class TimeseriesPanelConfigUi extends Component {
         value: 'left',
       },
     ];
-    const selectedPositionOption = positionOptions.find(option => {
+    const tooltipModeOptions = [
+      {
+        label: intl.formatMessage({
+          id: 'visTypeTimeseries.timeseries.tooltipOptions.showAll',
+          defaultMessage: 'Show all values',
+        }),
+        value: 'show_all',
+      },
+      {
+        label: intl.formatMessage({
+          id: 'visTypeTimeseries.timeseries.tooltipOptions.showFocused',
+          defaultMessage: 'Show focused values',
+        }),
+        value: 'show_focused',
+      },
+    ];
+    const selectedPositionOption = positionOptions.find((option) => {
       return model.axis_position === option.value;
     });
     const scaleOptions = [
@@ -104,7 +122,7 @@ class TimeseriesPanelConfigUi extends Component {
         value: 'log',
       },
     ];
-    const selectedAxisScaleOption = scaleOptions.find(option => {
+    const selectedAxisScaleOption = scaleOptions.find((option) => {
       return model.axis_scale === option.value;
     });
     const legendPositionOptions = [
@@ -130,8 +148,12 @@ class TimeseriesPanelConfigUi extends Component {
         value: 'bottom',
       },
     ];
-    const selectedLegendPosOption = legendPositionOptions.find(option => {
+    const selectedLegendPosOption = legendPositionOptions.find((option) => {
       return model.legend_position === option.value;
+    });
+
+    const selectedTooltipMode = tooltipModeOptions.find((option) => {
+      return model.tooltip_mode === option.value;
     });
 
     let view;
@@ -192,7 +214,7 @@ class TimeseriesPanelConfigUi extends Component {
                       language: model.filter.language || getDefaultQueryLanguage(),
                       query: model.filter.query || '',
                     }}
-                    onChange={filter => this.props.onChange({ filter })}
+                    onChange={(filter) => this.props.onChange({ filter })}
                     indexPatterns={[model.index_pattern || model.default_index_pattern]}
                   />
                 </EuiFormRow>
@@ -356,13 +378,31 @@ class TimeseriesPanelConfigUi extends Component {
               <EuiFlexItem>
                 <YesNo value={model.show_grid} name="show_grid" onChange={this.props.onChange} />
               </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormLabel>
+                  <FormattedMessage
+                    id="visTypeTimeseries.timeseries.optionsTab.tooltipMode"
+                    defaultMessage="Tooltip"
+                  />
+                </EuiFormLabel>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiComboBox
+                  isClearable={false}
+                  id={htmlId('tooltipMode')}
+                  options={tooltipModeOptions}
+                  selectedOptions={selectedTooltipMode ? [selectedTooltipMode] : []}
+                  onChange={handleSelectChange('tooltip_mode')}
+                  singleSelection={{ asPlainText: true }}
+                />
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
         </div>
       );
     }
     return (
-      <div>
+      <>
         <EuiTabs size="s">
           <EuiTab isSelected={selectedTab === 'data'} onClick={() => this.switchTab('data')}>
             <FormattedMessage
@@ -391,7 +431,7 @@ class TimeseriesPanelConfigUi extends Component {
           </EuiTab>
         </EuiTabs>
         {view}
-      </div>
+      </>
     );
   }
 }

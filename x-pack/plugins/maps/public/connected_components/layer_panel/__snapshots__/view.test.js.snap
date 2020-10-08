@@ -5,13 +5,13 @@ exports[`LayerPanel is rendered 1`] = `
   services={
     Object {
       "appName": "maps",
-      "data": undefined,
+      "data": Object {},
       "storage": Storage {
         "clear": [Function],
         "get": [Function],
         "remove": [Function],
         "set": [Function],
-        "store": undefined,
+        "store": Storage {},
       },
     }
   }
@@ -32,17 +32,9 @@ exports[`LayerPanel is rendered 1`] = `
         <EuiFlexItem
           grow={false}
         >
-          <EuiButtonIcon
-            aria-label="Fit to bounds"
-            iconType="vector"
-            onClick={[Function]}
-          >
-            <FormattedMessage
-              defaultMessage="Fit"
-              id="xpack.maps.layerPanel.fitToBoundsButtonLabel"
-              values={Object {}}
-            />
-          </EuiButtonIcon>
+          <EuiIcon
+            type="vector"
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle
@@ -65,6 +57,8 @@ exports[`LayerPanel is rendered 1`] = `
           buttonContent="Source details"
           id="accordion1"
           initialIsOpen={false}
+          isLoading={false}
+          isLoadingMessage={false}
           paddingSize="none"
         >
           <EuiText
@@ -97,12 +91,35 @@ exports[`LayerPanel is rendered 1`] = `
         className="mapLayerPanel__bodyOverflow"
       >
         <LayerErrors />
-        <LayerSettings />
+        <LayerSettings
+          layer={
+            Object {
+              "getDisplayName": [Function],
+              "getId": [Function],
+              "getImmutableSourceProperties": [Function],
+              "getLayerTypeIconName": [Function],
+              "renderSourceSettingsEditor": [Function],
+              "showJoinEditor": [Function],
+              "supportsElasticsearchFilters": [Function],
+            }
+          }
+        />
         <div>
           mockSourceSettings
         </div>
         <EuiPanel>
           <JoinEditor
+            layer={
+              Object {
+                "getDisplayName": [Function],
+                "getId": [Function],
+                "getImmutableSourceProperties": [Function],
+                "getLayerTypeIconName": [Function],
+                "renderSourceSettingsEditor": [Function],
+                "showJoinEditor": [Function],
+                "supportsElasticsearchFilters": [Function],
+              }
+            }
             layerDisplayName="layer 1"
             leftJoinFields={Array []}
           />

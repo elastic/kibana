@@ -17,68 +17,30 @@
  * under the License.
  */
 
-import { CoreStart, PluginInitializerContext, CoreSetup, Plugin } from 'src/core/server';
-import { BfetchServerSetup, BfetchServerStart } from '../../bfetch/server';
-import {
-  LegacyInterpreterServerApi,
-  createLegacyServerInterpreterApi,
-  createLegacyServerEndpoints,
-} from './legacy';
+import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from 'src/core/server';
 import { ExpressionsService, ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
 
-export interface ExpressionsServerSetupDependencies {
-  bfetch: BfetchServerSetup;
-}
-
-export interface ExpressionsServerStartDependencies {
-  bfetch: BfetchServerStart;
-}
-
-export interface ExpressionsServerSetup extends ExpressionsServiceSetup {
-  __LEGACY: LegacyInterpreterServerApi;
-}
+export type ExpressionsServerSetup = ExpressionsServiceSetup;
 
 export type ExpressionsServerStart = ExpressionsServiceStart;
 
 export class ExpressionsServerPlugin
-  implements
-    Plugin<
-      ExpressionsServerSetup,
-      ExpressionsServerStart,
-      ExpressionsServerSetupDependencies,
-      ExpressionsServerStartDependencies
-    > {
+  implements Plugin<ExpressionsServerSetup, ExpressionsServerStart> {
   readonly expressions: ExpressionsService = new ExpressionsService();
 
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
+  constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(
-    core: CoreSetup,
-    plugins: ExpressionsServerSetupDependencies
-  ): ExpressionsServerSetup {
-    const logger = this.initializerContext.logger.get();
-    const { expressions } = this;
-    const { executor } = expressions;
-
-    executor.extendContext({
+  public setup(core: CoreSetup): ExpressionsServerSetup {
+    this.expressions.executor.extendContext({
       environment: 'server',
     });
 
-    const legacyApi = createLegacyServerInterpreterApi();
-    createLegacyServerEndpoints(legacyApi, logger, core, plugins);
-
-    const setup = {
-      ...this.expressions.setup(),
-      __LEGACY: legacyApi,
-    };
+    const setup = this.expressions.setup();
 
     return Object.freeze(setup);
   }
 
-  public start(
-    core: CoreStart,
-    plugins: ExpressionsServerStartDependencies
-  ): ExpressionsServerStart {
+  public start(core: CoreStart): ExpressionsServerStart {
     const start = this.expressions.start();
 
     return Object.freeze(start);

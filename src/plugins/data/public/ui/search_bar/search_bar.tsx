@@ -26,11 +26,13 @@ import { get, isEqual } from 'lodash';
 
 import { withKibana, KibanaReactContextValue } from '../../../../kibana_react/public';
 
-import { QueryBarTopRow } from '../query_string_input/query_bar_top_row';
+import { QueryBarTopRow } from '../query_string_input';
 import { SavedQueryAttributes, TimeHistoryContract, SavedQuery } from '../../query';
 import { IDataPluginServices } from '../../types';
 import { TimeRange, Query, Filter, IIndexPattern } from '../../../common';
-import { SavedQueryMeta, SavedQueryManagementComponent, SaveQueryForm, FilterBar } from '..';
+import { FilterBar } from '../filter_bar/filter_bar';
+import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
+import { SavedQueryManagementComponent } from '../saved_query_management';
 
 interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
@@ -75,6 +77,7 @@ export interface SearchBarOwnProps {
   onClearSavedQuery?: () => void;
 
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
+  indicateNoData?: boolean;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
@@ -223,9 +226,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   };
 
   // member-ordering rules conflict with use-before-declaration rules
-  /* eslint-disable */
   public ro = new ResizeObserver(this.setFilterBarHeight);
-  /* eslint-enable */
 
   public onSave = async (savedQueryMeta: SavedQueryMeta, saveAsNew = false) => {
     if (!this.state.query) return;
@@ -402,6 +403,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             this.props.customSubmitButton ? this.props.customSubmitButton : undefined
           }
           dataTestSubj={this.props.dataTestSubj}
+          indicateNoData={this.props.indicateNoData}
         />
       );
     }
@@ -409,18 +411,19 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     let filterBar;
     if (this.shouldRenderFilterBar()) {
       const filterGroupClasses = classNames('globalFilterGroup__wrapper', {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'globalFilterGroup__wrapper-isVisible': this.state.isFiltersVisible,
       });
       filterBar = (
         <div
           id="GlobalFilterGroup"
-          ref={node => {
+          ref={(node) => {
             this.filterBarWrapperRef = node;
           }}
           className={filterGroupClasses}
         >
           <div
-            ref={node => {
+            ref={(node) => {
               this.filterBarRef = node;
             }}
           >
@@ -436,7 +439,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     }
 
     return (
-      <div className="globalQueryBar">
+      <div className="globalQueryBar" data-test-subj="globalQueryBar">
         {queryBar}
         {filterBar}
 
@@ -453,7 +456,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         {this.state.showSaveNewQueryModal ? (
           <SaveQueryForm
             savedQueryService={this.savedQueryService}
-            onSave={savedQueryMeta => this.onSave(savedQueryMeta, true)}
+            onSave={(savedQueryMeta) => this.onSave(savedQueryMeta, true)}
             onClose={() => this.setState({ showSaveNewQueryModal: false })}
             showFilterOption={this.props.showFilterBar}
             showTimeFilterOption={this.shouldRenderTimeFilterInSavedQueryForm()}
@@ -464,4 +467,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   }
 }
 
-export const SearchBar = injectI18n(withKibana(SearchBarUI));
+// Needed for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default injectI18n(withKibana(SearchBarUI));

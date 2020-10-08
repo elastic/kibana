@@ -7,15 +7,14 @@
 import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import { init as initHttpRequests } from './http_requests';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { setHttpClient, setSavedObjectsClient } from '../../../public/application/lib/api';
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 mockHttpClient.interceptors.response.use(
-  res => {
+  (res) => {
     return res.data;
   },
-  rej => {
+  (rej) => {
     return Promise.reject(rej);
   }
 );

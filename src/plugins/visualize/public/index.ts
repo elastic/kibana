@@ -21,7 +21,7 @@ import { PluginInitializerContext } from 'kibana/public';
 import { VisualizePlugin } from './plugin';
 
 export { EditorRenderProps } from './application/types';
-export { VisualizeConstants, createVisualizeEditUrl } from './application/visualize_constants';
+export { VisualizeConstants } from './application/visualize_constants';
 
 export const plugin = (context: PluginInitializerContext) => {
   return new VisualizePlugin(context);

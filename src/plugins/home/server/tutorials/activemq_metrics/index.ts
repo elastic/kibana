@@ -36,6 +36,7 @@ export function activemqMetricsSpecProvider(context: TutorialContext): TutorialS
     name: i18n.translate('home.tutorials.activemqMetrics.nameTitle', {
       defaultMessage: 'ActiveMQ metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.activemqMetrics.shortDescription', {
       defaultMessage: 'Fetch monitoring metrics from ActiveMQ instances.',
@@ -48,14 +49,14 @@ export function activemqMetricsSpecProvider(context: TutorialContext): TutorialS
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-activemq.html',
       },
     }),
-    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/activemq.svg',
+    euiIconType: '/plugins/home/assets/logos/activemq.svg',
     isBeta: true,
     artifacts: {
       application: {
         label: i18n.translate('home.tutorials.activemqMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
-        path: '/app/kibana#/discover',
+        path: '/app/discover#/',
       },
       dashboards: [],
       exportedFields: {

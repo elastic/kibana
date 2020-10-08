@@ -30,11 +30,13 @@ import {
 } from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function uptimeMonitorsSpecProvider(context: TutorialContext): TutorialSchema {
+  const moduleName = 'uptime';
   return {
     id: 'uptimeMonitors',
     name: i18n.translate('home.tutorials.uptimeMonitors.nameTitle', {
       defaultMessage: 'Uptime Monitors',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.uptimeMonitors.shortDescription', {
       defaultMessage: 'Monitor services for their availability',
@@ -45,7 +47,7 @@ export function uptimeMonitorsSpecProvider(context: TutorialContext): TutorialSc
         Given a list of URLs, Heartbeat asks the simple question: Are you alive? \
         [Learn more]({learnMoreLink}).',
       values: {
-        learnMoreLink: '{config.docs.beats.heartbeat}/heartbeat-getting-started.html',
+        learnMoreLink: '{config.docs.beats.heartbeat}/heartbeat-installation-configuration.html',
       },
     }),
     euiIconType: 'uptimeApp',
@@ -62,7 +64,7 @@ export function uptimeMonitorsSpecProvider(context: TutorialContext): TutorialSc
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/uptime_monitors/screenshot.png',
+    previewImagePath: '/plugins/home/assets/uptime_monitors/screenshot.png',
     onPrem: onPremInstructions([], context),
     elasticCloud: cloudInstructions(),
     onPremElasticCloud: onPremCloudInstructions(),

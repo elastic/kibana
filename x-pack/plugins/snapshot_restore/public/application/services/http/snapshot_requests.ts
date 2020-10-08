@@ -35,10 +35,9 @@ export const deleteSnapshots = async (
   snapshotIds: Array<{ snapshot: string; repository: string }>
 ) => {
   const result = await sendRequest({
-    path: `${API_BASE_PATH}snapshots/${snapshotIds
-      .map(({ snapshot, repository }) => encodeURIComponent(`${repository}/${snapshot}`))
-      .join(',')}`,
-    method: 'delete',
+    path: `${API_BASE_PATH}snapshots/bulk_delete`,
+    method: 'post',
+    body: snapshotIds,
   });
 
   uiMetricService.trackUiMetric(

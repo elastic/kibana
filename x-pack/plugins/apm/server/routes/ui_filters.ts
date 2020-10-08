@@ -9,42 +9,50 @@ import { omit } from 'lodash';
 import {
   setupRequest,
   Setup,
-  SetupUIFilters,
-  SetupTimeRange
+  SetupTimeRange,
 } from '../lib/helpers/setup_request';
 import { getEnvironments } from '../lib/ui_filters/get_environments';
-import { Projection } from '../../common/projections/typings';
-import {
-  localUIFilterNames,
-  LocalUIFilterName
-} from '../lib/ui_filters/local_ui_filters/config';
-import { getUiFiltersES } from '../lib/helpers/convert_ui_filters/get_ui_filters_es';
+import { Projection } from '../projections/typings';
+import { localUIFilterNames } from '../lib/ui_filters/local_ui_filters/config';
+import { getEsFilter } from '../lib/helpers/convert_ui_filters/get_es_filter';
 import { getLocalUIFilters } from '../lib/ui_filters/local_ui_filters';
-import { getServicesProjection } from '../../common/projections/services';
-import { getTransactionGroupsProjection } from '../../common/projections/transaction_groups';
-import { getMetricsProjection } from '../../common/projections/metrics';
-import { getErrorGroupsProjection } from '../../common/projections/errors';
-import { getTransactionsProjection } from '../../common/projections/transactions';
+import { getServicesProjection } from '../projections/services';
+import { getTransactionGroupsProjection } from '../projections/transaction_groups';
+import { getMetricsProjection } from '../projections/metrics';
+import { getErrorGroupsProjection } from '../projections/errors';
+import { getTransactionsProjection } from '../projections/transactions';
 import { createRoute } from './create_route';
 import { uiFiltersRt, rangeRt } from './default_api_types';
 import { jsonRt } from '../../common/runtime_types/json_rt';
-import { getServiceNodesProjection } from '../../common/projections/service_nodes';
+import { getServiceNodesProjection } from '../projections/service_nodes';
+import { getRumPageLoadTransactionsProjection } from '../projections/rum_page_load_transactions';
+import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
+import { APMRequestHandlerContext } from './typings';
+import { LocalUIFilterName } from '../../common/ui_filter';
 
 export const uiFiltersEnvironmentsRoute = createRoute(() => ({
   path: '/api/apm/ui_filters/environments',
   params: {
     query: t.intersection([
       t.partial({
-        serviceName: t.string
+        serviceName: t.string,
       }),
-      rangeRt
-    ])
+      rangeRt,
+    ]),
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.query;
-    return getEnvironments(setup, serviceName);
-  }
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
+
+    return getEnvironments({
+      setup,
+      serviceName,
+      searchAggregatedTransactions,
+    });
+  },
 }));
 
 const filterNamesRt = t.type({
@@ -52,17 +60,17 @@ const filterNamesRt = t.type({
     t.array(
       t.keyof(
         Object.fromEntries(
-          localUIFilterNames.map(filterName => [filterName, null])
+          localUIFilterNames.map((filterName) => [filterName, null])
         ) as Record<LocalUIFilterName, null>
       )
     )
-  )
+  ),
 });
 
 const localUiBaseQueryRt = t.intersection([
   filterNamesRt,
   uiFiltersRt,
-  rangeRt
+  rangeRt,
 ]);
 
 function createLocalFiltersRoute<
@@ -72,102 +80,125 @@ function createLocalFiltersRoute<
 >({
   path,
   getProjection,
-  queryRt
+  queryRt,
 }: {
   path: TPath;
-  getProjection: GetProjection<TProjection, TQueryRT & BaseQueryType>;
+  getProjection: GetProjection<
+    TProjection,
+    t.IntersectionC<[TQueryRT, BaseQueryType]>
+  >;
   queryRt: TQueryRT;
 }) {
   return createRoute(() => ({
     path,
     params: {
-      query: t.intersection([localUiBaseQueryRt, queryRt])
+      query: t.intersection([localUiBaseQueryRt, queryRt]),
     },
     handler: async ({ context, request }) => {
       const setup = await setupRequest(context, request);
+      const { uiFilters } = setup;
       const { query } = context.params;
 
-      const { uiFilters, filterNames } = query;
-      const parsedUiFilters = JSON.parse(uiFilters);
-      const projection = getProjection({
+      const { filterNames } = query;
+      const projection = await getProjection({
         query,
+        context,
         setup: {
           ...setup,
-          uiFiltersES: getUiFiltersES(
-            setup.dynamicIndexPattern,
-            omit(parsedUiFilters, filterNames)
-          )
-        }
+          esFilter: getEsFilter(omit(uiFilters, filterNames)),
+        },
       });
 
       return getLocalUIFilters({
         projection,
         setup,
-        uiFilters: parsedUiFilters,
-        localFilterNames: filterNames
+        uiFilters,
+        localFilterNames: filterNames,
       });
-    }
+    },
   }));
 }
 
 export const servicesLocalFiltersRoute = createLocalFiltersRoute({
   path: `/api/apm/ui_filters/local_filters/services`,
-  getProjection: ({ setup }) => getServicesProjection({ setup }),
-  queryRt: t.type({})
+  getProjection: async ({ context, setup }) => {
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
+
+    return getServicesProjection({ setup, searchAggregatedTransactions });
+  },
+  queryRt: t.type({}),
 });
 
 export const transactionGroupsLocalFiltersRoute = createLocalFiltersRoute({
   path: '/api/apm/ui_filters/local_filters/transactionGroups',
-  getProjection: ({ setup, query }) => {
+  getProjection: async ({ context, setup, query }) => {
     const { transactionType, serviceName, transactionName } = query;
+
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
+
     return getTransactionGroupsProjection({
       setup,
       options: {
         type: 'top_transactions',
         transactionType,
         serviceName,
-        transactionName
-      }
+        transactionName,
+        searchAggregatedTransactions,
+      },
     });
   },
   queryRt: t.intersection([
     t.type({
       serviceName: t.string,
-      transactionType: t.string
+      transactionType: t.string,
     }),
     t.partial({
-      transactionName: t.string
-    })
-  ])
+      transactionName: t.string,
+    }),
+  ]),
 });
 
 export const tracesLocalFiltersRoute = createLocalFiltersRoute({
   path: '/api/apm/ui_filters/local_filters/traces',
-  getProjection: ({ setup }) => {
+  getProjection: async ({ setup, context }) => {
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
+
     return getTransactionGroupsProjection({
       setup,
-      options: { type: 'top_traces' }
+      options: { type: 'top_traces', searchAggregatedTransactions },
     });
   },
-  queryRt: t.type({})
+  queryRt: t.type({}),
 });
 
 export const transactionsLocalFiltersRoute = createLocalFiltersRoute({
   path: '/api/apm/ui_filters/local_filters/transactions',
-  getProjection: ({ setup, query }) => {
+  getProjection: async ({ context, setup, query }) => {
     const { transactionType, serviceName, transactionName } = query;
+
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
+
     return getTransactionsProjection({
       setup,
       transactionType,
       serviceName,
-      transactionName
+      transactionName,
+      searchAggregatedTransactions,
     });
   },
   queryRt: t.type({
     transactionType: t.string,
     transactionName: t.string,
-    serviceName: t.string
-  })
+    serviceName: t.string,
+  }),
 });
 
 export const metricsLocalFiltersRoute = createLocalFiltersRoute({
@@ -177,17 +208,17 @@ export const metricsLocalFiltersRoute = createLocalFiltersRoute({
     return getMetricsProjection({
       setup,
       serviceName,
-      serviceNodeName
+      serviceNodeName,
     });
   },
   queryRt: t.intersection([
     t.type({
-      serviceName: t.string
+      serviceName: t.string,
     }),
     t.partial({
-      serviceNodeName: t.string
-    })
-  ])
+      serviceNodeName: t.string,
+    }),
+  ]),
 });
 
 export const errorGroupsLocalFiltersRoute = createLocalFiltersRoute({
@@ -196,25 +227,36 @@ export const errorGroupsLocalFiltersRoute = createLocalFiltersRoute({
     const { serviceName } = query;
     return getErrorGroupsProjection({
       setup,
-      serviceName
+      serviceName,
     });
   },
   queryRt: t.type({
-    serviceName: t.string
-  })
+    serviceName: t.string,
+  }),
 });
 
 export const serviceNodesLocalFiltersRoute = createLocalFiltersRoute({
   path: '/api/apm/ui_filters/local_filters/serviceNodes',
   getProjection: ({ setup, query }) => {
+    const { serviceName } = query;
     return getServiceNodesProjection({
       setup,
-      serviceName: query.serviceName
+      serviceName,
     });
   },
   queryRt: t.type({
-    serviceName: t.string
-  })
+    serviceName: t.string,
+  }),
+});
+
+export const rumOverviewLocalFiltersRoute = createLocalFiltersRoute({
+  path: '/api/apm/ui_filters/local_filters/rumOverview',
+  getProjection: async ({ setup }) => {
+    return getRumPageLoadTransactionsProjection({
+      setup,
+    });
+  },
+  queryRt: t.type({}),
 });
 
 type BaseQueryType = typeof localUiBaseQueryRt;
@@ -224,8 +266,10 @@ type GetProjection<
   TQueryRT extends t.HasProps
 > = ({
   query,
-  setup
+  setup,
+  context,
 }: {
   query: t.TypeOf<TQueryRT>;
-  setup: Setup & SetupUIFilters & SetupTimeRange;
-}) => TProjection;
+  setup: Setup & SetupTimeRange;
+  context: APMRequestHandlerContext;
+}) => Promise<TProjection> | TProjection;

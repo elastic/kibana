@@ -26,5 +26,5 @@ import { parse } from './parse';
  * @param expression Expression pipeline string.
  */
 export function parseExpression(expression: string): ExpressionAstExpression {
-  return parse(expression, 'expression') as ExpressionAstExpression;
+  return parse(expression, 'expression');
 }

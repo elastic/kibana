@@ -5,15 +5,17 @@
  */
 
 export { createSavedSearchesLoader } from '../../../../src/plugins/discover/public';
-export {
-  XJsonMode,
-  collapseLiteralStrings,
-  expandLiteralStrings,
-} from '../../../../src/plugins/es_ui_shared/public';
+export { XJsonMode } from '@kbn/ace';
+export { UseRequestConfig, useRequest } from '../../../../src/plugins/es_ui_shared/public';
 
 export {
-  UseRequestConfig,
-  useRequest,
-} from '../../../../src/plugins/es_ui_shared/public/request/np_ready_request';
+  getMlSharedImports,
+  GetMlSharedImportsReturnType,
+  UseIndexDataReturnType,
+  EsSorting,
+  RenderCellValue,
+} from '../../ml/public';
 
-export { getErrorMessage } from '../../ml/common/util/errors';
+import { XJson } from '../../../../src/plugins/es_ui_shared/public';
+const { expandLiteralStrings, collapseLiteralStrings } = XJson;
+export { expandLiteralStrings, collapseLiteralStrings };

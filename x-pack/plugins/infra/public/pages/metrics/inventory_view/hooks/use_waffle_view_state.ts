@@ -16,6 +16,13 @@ import {
   WaffleFiltersState,
 } from './use_waffle_filters';
 
+export const DEFAULT_WAFFLE_VIEW_STATE: WaffleViewState = {
+  ...DEFAULT_WAFFLE_OPTIONS_STATE,
+  filterQuery: DEFAULT_WAFFLE_FILTERS_STATE,
+  time: DEFAULT_WAFFLE_TIME_STATE.currentTime,
+  autoReload: DEFAULT_WAFFLE_TIME_STATE.isAutoReloading,
+};
+
 export const useWaffleViewState = () => {
   const {
     metric,
@@ -28,6 +35,8 @@ export const useWaffleViewState = () => {
     autoBounds,
     accountId,
     region,
+    legend,
+    sort,
     setWaffleOptionsState,
   } = useWaffleOptionsContext();
   const { currentTime, isAutoReloading, setWaffleTimeState } = useWaffleTimeContext();
@@ -35,6 +44,7 @@ export const useWaffleViewState = () => {
 
   const viewState: WaffleViewState = {
     metric,
+    sort,
     groupBy,
     nodeType,
     view,
@@ -47,18 +57,13 @@ export const useWaffleViewState = () => {
     time: currentTime,
     autoReload: isAutoReloading,
     filterQuery,
-  };
-
-  const defaultViewState: WaffleViewState = {
-    ...DEFAULT_WAFFLE_OPTIONS_STATE,
-    filterQuery: DEFAULT_WAFFLE_FILTERS_STATE,
-    time: DEFAULT_WAFFLE_TIME_STATE.currentTime,
-    autoReload: DEFAULT_WAFFLE_TIME_STATE.isAutoReloading,
+    legend,
   };
 
   const onViewChange = useCallback(
     (newState: WaffleViewState) => {
       setWaffleOptionsState({
+        sort: newState.sort,
         metric: newState.metric,
         groupBy: newState.groupBy,
         nodeType: newState.nodeType,
@@ -69,6 +74,7 @@ export const useWaffleViewState = () => {
         autoBounds: newState.autoBounds,
         accountId: newState.accountId,
         region: newState.region,
+        legend: newState.legend,
       });
       if (newState.time) {
         setWaffleTimeState({
@@ -83,7 +89,7 @@ export const useWaffleViewState = () => {
 
   return {
     viewState,
-    defaultViewState,
+    defaultViewState: DEFAULT_WAFFLE_VIEW_STATE,
     onViewChange,
   };
 };

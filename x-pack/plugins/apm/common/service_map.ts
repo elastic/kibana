@@ -5,46 +5,63 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ILicense } from '../../licensing/public';
+import cytoscape from 'cytoscape';
+import { ILicense } from '../../licensing/common/types';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
-  SERVICE_FRAMEWORK_NAME,
   SERVICE_NAME,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_SUBTYPE,
   SPAN_TYPE,
-  SPAN_DESTINATION_SERVICE_RESOURCE
 } from './elasticsearch_fieldnames';
+import { ServiceAnomalyStats } from './anomaly_detection';
 
-export interface ServiceConnectionNode {
+export interface ServiceConnectionNode extends cytoscape.NodeDataDefinition {
   [SERVICE_NAME]: string;
   [SERVICE_ENVIRONMENT]: string | null;
-  [SERVICE_FRAMEWORK_NAME]: string | null;
   [AGENT_NAME]: string;
+  serviceAnomalyStats?: ServiceAnomalyStats;
+  label?: string;
 }
-export interface ExternalConnectionNode {
+export interface ExternalConnectionNode extends cytoscape.NodeDataDefinition {
   [SPAN_DESTINATION_SERVICE_RESOURCE]: string;
   [SPAN_TYPE]: string;
   [SPAN_SUBTYPE]: string;
+  label?: string;
 }
 
 export type ConnectionNode = ServiceConnectionNode | ExternalConnectionNode;
+
+export interface ConnectionEdge {
+  id: string;
+  source: ConnectionNode['id'];
+  target: ConnectionNode['id'];
+  label?: string;
+  bidirectional?: boolean;
+  isInverseEdge?: boolean;
+}
+
+export interface ConnectionElement {
+  data: ConnectionNode | ConnectionEdge;
+}
 
 export interface Connection {
   source: ConnectionNode;
   destination: ConnectionNode;
 }
 
-export interface ServiceNodeMetrics {
-  numInstances: number;
+export interface ServiceNodeStats {
   avgMemoryUsage: number | null;
   avgCpuUsage: number | null;
-  avgTransactionDuration: number | null;
-  avgRequestsPerMinute: number | null;
-  avgErrorsPerMinute: number | null;
+  transactionStats: {
+    avgTransactionDuration: number | null;
+    avgRequestsPerMinute: number | null;
+  };
+  avgErrorRate: number | null;
 }
 
-export function isValidPlatinumLicense(license: ILicense) {
+export function isActivePlatinumLicense(license: ILicense) {
   return license.isActive && license.hasAtLeast('platinum');
 }
 
@@ -52,6 +69,25 @@ export const invalidLicenseMessage = i18n.translate(
   'xpack.apm.serviceMap.invalidLicenseMessage',
   {
     defaultMessage:
-      "In order to access Service Maps, you must be subscribed to an Elastic Platinum license. With it, you'll have the ability to visualize your entire application stack along with your APM data."
+      "In order to access Service Maps, you must be subscribed to an Elastic Platinum license. With it, you'll have the ability to visualize your entire application stack along with your APM data.",
   }
 );
+
+const NONGROUPED_SPANS: Record<string, string[]> = {
+  aws: ['servicename'],
+  cache: ['all'],
+  db: ['all'],
+  external: ['graphql', 'grpc', 'websocket'],
+  messaging: ['all'],
+  template: ['handlebars'],
+};
+
+export function isSpanGroupingSupported(type?: string, subtype?: string) {
+  if (!type || !(type in NONGROUPED_SPANS)) {
+    return true;
+  }
+  return !NONGROUPED_SPANS[type].some(
+    (nongroupedSubType) =>
+      nongroupedSubType === 'all' || nongroupedSubType === subtype
+  );
+}

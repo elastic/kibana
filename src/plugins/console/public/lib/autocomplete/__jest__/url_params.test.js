@@ -16,16 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-const _ = require('lodash');
+import _ from 'lodash';
 import { UrlParams } from '../../autocomplete/url_params';
 import { populateContext } from '../../autocomplete/engine';
 
 describe('Url params', () => {
   function paramTest(name, description, tokenPath, expectedContext, globalParams) {
-    test(name, function() {
+    test(name, function () {
       const urlParams = new UrlParams(description, globalParams || {});
       if (typeof tokenPath === 'string') {
-        tokenPath = _.map(tokenPath.split('/'), function(p) {
+        tokenPath = _.map(tokenPath.split('/'), function (p) {
           p = p.split(',');
           if (p.length === 1) {
             return p[0];
@@ -35,7 +35,7 @@ describe('Url params', () => {
       }
 
       if (expectedContext.autoCompleteSet) {
-        expectedContext.autoCompleteSet = _.map(expectedContext.autoCompleteSet, function(t) {
+        expectedContext.autoCompleteSet = _.map(expectedContext.autoCompleteSet, function (t) {
           if (_.isString(t)) {
             t = { name: t };
           }
@@ -79,7 +79,7 @@ describe('Url params', () => {
     return r;
   }
 
-  (function() {
+  (function () {
     const params = {
       a: ['1', '2'],
       b: '__flag__',

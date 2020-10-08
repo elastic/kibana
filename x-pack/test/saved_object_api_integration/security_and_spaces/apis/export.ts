@@ -15,35 +15,44 @@ import {
 
 const createTestCases = (spaceId: string) => {
   const cases = getTestCases(spaceId);
-  const exportableTypes = [
+  const exportableObjects = [
     cases.singleNamespaceObject,
-    cases.singleNamespaceType,
+    cases.multiNamespaceObject,
     cases.namespaceAgnosticObject,
+  ];
+  const exportableTypes = [
+    cases.singleNamespaceType,
+    cases.multiNamespaceType,
     cases.namespaceAgnosticType,
   ];
-  const nonExportableTypes = [
-    cases.multiNamespaceObject,
-    cases.multiNamespaceType,
-    cases.hiddenObject,
-    cases.hiddenType,
-  ];
-  const allTypes = exportableTypes.concat(nonExportableTypes);
-  return { exportableTypes, nonExportableTypes, allTypes };
+  const nonExportableObjectsAndTypes = [cases.hiddenObject, cases.hiddenType];
+  const allObjectsAndTypes = [
+    exportableObjects,
+    exportableTypes,
+    nonExportableObjectsAndTypes,
+  ].flat();
+  return { exportableObjects, exportableTypes, nonExportableObjectsAndTypes, allObjectsAndTypes };
 };
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
   const { addTests, createTestDefinitions } = exportTestSuiteFactory(esArchiver, supertest);
   const createTests = (spaceId: string) => {
-    const { exportableTypes, nonExportableTypes, allTypes } = createTestCases(spaceId);
+    const {
+      exportableObjects,
+      exportableTypes,
+      nonExportableObjectsAndTypes,
+      allObjectsAndTypes,
+    } = createTestCases(spaceId);
     return {
       unauthorized: [
-        createTestDefinitions(exportableTypes, true),
-        createTestDefinitions(nonExportableTypes, false),
+        createTestDefinitions(exportableObjects, { statusCode: 403, reason: 'unauthorized' }),
+        createTestDefinitions(exportableTypes, { statusCode: 200, reason: 'unauthorized' }), // failure with empty result
+        createTestDefinitions(nonExportableObjectsAndTypes, false),
       ].flat(),
-      authorized: createTestDefinitions(allTypes, false),
+      authorized: createTestDefinitions(allObjectsAndTypes, false),
     };
   };
 
@@ -55,7 +64,7 @@ export default function({ getService }: FtrProviderContext) {
         addTests(`${user.description}${suffix}`, { user, spaceId, tests });
       };
 
-      [users.noAccess, users.legacyAll, users.allAtOtherSpace].forEach(user => {
+      [users.noAccess, users.legacyAll, users.allAtOtherSpace].forEach((user) => {
         _addTests(user, unauthorized);
       });
       [
@@ -66,7 +75,7 @@ export default function({ getService }: FtrProviderContext) {
         users.allAtSpace,
         users.readAtSpace,
         users.superuser,
-      ].forEach(user => {
+      ].forEach((user) => {
         _addTests(user, authorized);
       });
     });

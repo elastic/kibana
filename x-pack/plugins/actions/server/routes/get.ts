@@ -22,19 +22,16 @@ const paramSchema = schema.object({
 export const getActionRoute = (router: IRouter, licenseState: ILicenseState) => {
   router.get(
     {
-      path: `${BASE_ACTION_API_PATH}/{id}`,
+      path: `${BASE_ACTION_API_PATH}/action/{id}`,
       validate: {
         params: paramSchema,
       },
-      options: {
-        tags: ['access:actions-read'],
-      },
     },
-    router.handleLegacyErrors(async function(
+    router.handleLegacyErrors(async function (
       context: RequestHandlerContext,
-      req: KibanaRequest<TypeOf<typeof paramSchema>, any, any, any>,
+      req: KibanaRequest<TypeOf<typeof paramSchema>, unknown>,
       res: KibanaResponseFactory
-    ): Promise<IKibanaResponse<any>> {
+    ): Promise<IKibanaResponse> {
       verifyApiAccess(licenseState);
       if (!context.actions) {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for actions' });

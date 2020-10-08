@@ -69,13 +69,14 @@ export function getAlertType(): AlertTypeModel {
     id: '.index-threshold',
     name: 'Index threshold',
     iconClass: 'alert',
-    alertParamsExpression: IndexThresholdAlertTypeExpression,
+    alertParamsExpression: lazy(() => import('./index_threshold_expression')),
     validate: validateAlertType,
+    requiresAppContext: false,
   };
 }
 ```
 
-alertParamsExpression form represented as an expression using `EuiExpression` components:
+alertParamsExpression should be a lazy loaded React component extending an expression using `EuiExpression` components:
 ![Index Threshold Alert expression form](https://i.imgur.com/Ysk1ljY.png)
 
 ```
@@ -171,6 +172,7 @@ export const alertReducer = (state: any, action: AlertReducerAction) => {
 
 ```
 
+The Expression component should be lazy loaded which means it'll have to be the default export in `index_threshold_expression.ts`:
 
 ```
 export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThresholdProps> = ({
@@ -224,6 +226,9 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
       </Fragment>
   );
 };
+
+// Export as default in order to support lazy loading
+export {IndexThresholdAlertTypeExpression as default};
 ```
 
 Index Threshold Alert form with validation:
@@ -237,7 +242,9 @@ Each alert type should be defined as `AlertTypeModel` object with the these prop
   name: string;
   iconClass: string;
   validate: (alertParams: any) => ValidationResult;
-  alertParamsExpression: React.FunctionComponent<any>;
+  alertParamsExpression: React.LazyExoticComponent<
+        ComponentType<AlertTypeParamsExpressionProps<AlertParamsType, AlertsContextValue>>
+      >;
   defaultActionMessage?: string;
 ```
 |Property|Description|
@@ -246,11 +253,12 @@ Each alert type should be defined as `AlertTypeModel` object with the these prop
 |name|Name of the alert type that will be displayed on the select card in the UI.|
 |iconClass|Icon of the alert type that will be displayed on the select card in the UI.|
 |validate|Validation function for the alert params.|
-|alertParamsExpression|React functional component for building UI of the current alert type params.|
+|alertParamsExpression| A lazy loaded React component for building UI of the current alert type params.|
 |defaultActionMessage|Optional property for providing default message for all added actions with `message` property.|
+|requiresAppContext|Define if alert type is enabled for create and edit in the alerting management UI.|
 
 IMPORTANT: The current UI supports a single action group only. 
-Action groups are mapped from the server API result for [GET /api/alert/types: List alert types](https://github.com/elastic/kibana/tree/master/x-pack/legacy/plugins/alerting#get-apialerttypes-list-alert-types).
+Action groups are mapped from the server API result for [GET /api/alerts/list_alert_types: List alert types](https://github.com/elastic/kibana/tree/master/x-pack/plugins/alerts#get-apialerttypes-list-alert-types).
 Server side alert type model:
 ```
 export interface AlertType {
@@ -261,6 +269,7 @@ export interface AlertType {
   };
   actionGroups: string[];
   executor: ({ services, params, state }: AlertExecutorOptions) => Promise<State | void>;
+  requiresAppContext: boolean;
 }
 ```
 Only the default (which means first item of the array) action group is displayed in the current UI.
@@ -282,12 +291,12 @@ function getSomeNewAlertType() {
   return { ... } as AlertTypeModel;
 }
 
-triggers_actions_ui.alertTypeRegistry.register(getSomeNewAlertType());
+triggersActionsUi.alertTypeRegistry.register(getSomeNewAlertType());
 ```
 
 ## Create and register new alert type UI example
 
-Before registering a UI for a new Alert Type, you should first register the type on the server-side by following the Alerting guide: https://github.com/elastic/kibana/tree/master/x-pack/legacy/plugins/alerting#example 
+Before registering a UI for a new Alert Type, you should first register the type on the server-side by following the Alerting guide: https://github.com/elastic/kibana/tree/master/x-pack/plugins/alerts#example 
 
 Alert type UI is expected to be defined as `AlertTypeModel` object.
 
@@ -295,8 +304,8 @@ Below is a list of steps that should be done to build and register a new alert t
 
 1. At any suitable place in Kibana, create a file, which will expose an object implementing interface [AlertTypeModel](https://github.com/elastic/kibana/blob/55b7905fb5265b73806006e7265739545d7521d0/x-pack/legacy/plugins/triggers_actions_ui/np_ready/public/types.ts#L83). Example:
 ```
+import { lazy } from 'react';
 import { AlertTypeModel } from '../../../../types';
-import { ExampleExpression } from './expression';
 import { validateExampleAlertType } from './validation';
 
 export function getAlertType(): AlertTypeModel {
@@ -304,9 +313,10 @@ export function getAlertType(): AlertTypeModel {
     id: 'example',
     name: 'Example Alert Type',
     iconClass: 'bell',
-    alertParamsExpression: ExampleExpression,
+    alertParamsExpression: lazy(() => import('./expression')),
     validate: validateExampleAlertType,
     defaultActionMessage: 'Alert [{{ctx.metadata.name}}] has exceeded the threshold',
+    requiresAppContext: false,
   };
 }
 ```
@@ -360,6 +370,9 @@ export const ExampleExpression: React.FunctionComponent<ExampleProps> = ({
     </Fragment>
   );
 };
+
+// Export as default in order to support lazy loading
+export {ExampleExpression as default};
 
 ```
 This alert type form becomes available, when the card of `Example Alert Type` is selected.
@@ -627,7 +640,7 @@ Follow the instructions bellow to embed the Create Alert flyout within any Kiban
 1. Add TriggersAndActionsUIPublicPluginSetup to Kibana plugin setup dependencies:
 
 ```
-triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 ```
 Then this dependency will be used to embed Create Alert flyout or register new alert/action type.
 
@@ -656,8 +669,8 @@ const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
 <AlertsContextProvider
   value={{
     http,
-    actionTypeRegistry: triggers_actions_ui.actionTypeRegistry,
-    alertTypeRegistry: triggers_actions_ui.alertTypeRegistry,
+    actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
+    alertTypeRegistry: triggersActionsUi.alertTypeRegistry,
     toastNotifications: toasts,
     uiSettings,
     docLinks,
@@ -887,10 +900,23 @@ export function getActionType(): ActionTypeModel {
 
 ![Index connector card](https://i.imgur.com/fflsmu5.png)
 
-![Index connector form](https://i.imgur.com/tbgyvAL.png)
+![Index connector form](https://i.imgur.com/IkixGMV.png)
 
 and action params form available in Create Alert form:
-![Index action form](https://i.imgur.com/VsWMLeU.png)
+![Index action form](https://i.imgur.com/mpxnPOF.png)
+
+Example of the index document for Index Threshold alert:
+
+```
+{
+    "alert_id": "{{alertId}}",
+    "alert_name": "{{alertName}}",
+    "alert_instance_id": "{{alertInstanceId}}",
+    "context_title": "{{context.title}}",
+    "context_value": "{{context.value}}",
+    "context_message": "{{context.message}}"
+} 
+```
 
 ### Webhook
 
@@ -985,8 +1011,8 @@ Each action type should be defined as an `ActionTypeModel` object with the follo
 |selectMessage|Short description of action type responsibility, that will be displayed on the select card in UI.|
 |validateConnector|Validation function for action connector.|
 |validateParams|Validation function for action params.|
-|actionConnectorFields|React functional component for building UI of current action type connector.|
-|actionParamsFields|React functional component for building UI of current action type params. Displayed as a part of Create Alert flyout.|
+|actionConnectorFields|A lazy loaded React component for building UI of current action type connector.|
+|actionParamsFields|A lazy loaded React component for building UI of current action type params. Displayed as a part of Create Alert flyout.|
 
 ## Register action type model
 
@@ -1004,7 +1030,7 @@ function getSomeNewActionType() {
   return { ... } as ActionTypeModel;
 }
 
-triggers_actions_ui.actionTypeRegistry.register(getSomeNewActionType());
+triggersActionsUi.actionTypeRegistry.register(getSomeNewActionType());
 ```
 
 ## Create and register new action type UI
@@ -1017,7 +1043,7 @@ Below is a list of steps that should be done to build and register a new action 
 
 1. At any suitable place in Kibana, create a file, which will expose an object implementing interface [ActionTypeModel]:
 ```
-import React, { Fragment } from 'react';
+import React, { Fragment, lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   ActionTypeModel,
@@ -1082,8 +1108,8 @@ export function getActionType(): ActionTypeModel {
       }
       return validationResult;
     },
-    actionConnectorFields: ExampleConnectorFields,
-    actionParamsFields: ExampleParamsFields,
+    actionConnectorFields: lazy(() => import('./example_connector_fields')),
+    actionParamsFields: lazy(() => import('./example_params_fields')),
   };
 }
 ```
@@ -1130,6 +1156,9 @@ const ExampleConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps
     </Fragment>
   );
 };
+
+// Export as default in order to support lazy loading
+export {ExampleConnectorFields as default};
 ```
 
 3. Define action type params fields using the property of `ActionTypeModel` `actionParamsFields`: 
@@ -1175,6 +1204,9 @@ const ExampleParamsFields: React.FunctionComponent<ActionParamsProps<ExampleActi
     </Fragment>
   );
 };
+
+// Export as default in order to support lazy loading
+export {ExampleParamsFields as default};
 ```
 
 4. Extend registration code with the new action type register in the file `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/index.ts`
@@ -1212,10 +1244,10 @@ import {
    TriggersAndActionsUIPublicPluginStart,
  } from '../../../../../x-pack/plugins/triggers_actions_ui/public';
 
-triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 ...
 
-triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
+triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 ```
 Then this dependencies will be used to embed Actions form or register your own action type.
 
@@ -1233,12 +1265,12 @@ Then this dependencies will be used to embed Actions form or register your own a
  ];
 
  export const ComponentWithActionsForm: () => {
-   const { http, triggers_actions_ui, toastNotifications } = useKibana().services;
-   const actionTypeRegistry = triggers_actions_ui.actionTypeRegistry;
+   const { http, triggersActionsUi, notifications } = useKibana().services;
+   const actionTypeRegistry = triggersActionsUi.actionTypeRegistry;
    const initialAlert = ({
         name: 'test',
         params: {},
-        consumer: 'alerting',
+        consumer: 'alerts',
         alertTypeId: '.index-threshold',
         schedule: {
           interval: '1m',
@@ -1262,7 +1294,7 @@ Then this dependencies will be used to embed Actions form or register your own a
    return (
      <ActionForm
           actions={initialAlert.actions}
-          messageVariables={['test var1', 'test var2']}
+          messageVariables={[ { name: 'testVar1', description: 'test var1' } ]}
           defaultActionGroupId={'default'}
           setActionIdByIndex={(id: string, index: number) => {
             initialAlert.actions[index].id = id;
@@ -1275,7 +1307,8 @@ Then this dependencies will be used to embed Actions form or register your own a
           actionTypeRegistry={actionTypeRegistry}
           defaultActionMessage={'Alert [{{ctx.metadata.name}}] has exceeded the threshold'}
           actionTypes={ALOWED_BY_PLUGIN_ACTION_TYPES}
-          toastNotifications={toastNotifications}
+          toastNotifications={notifications.toasts}
+          consumer={initialAlert.consumer}
         />
    );
  };
@@ -1296,8 +1329,9 @@ interface ActionAccordionFormProps {
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
   >;
   actionTypes?: ActionType[];
-  messageVariables?: string[];
+  messageVariables?: ActionVariable[];
   defaultActionMessage?: string;
+  consumer: string;
 }
 
 ```
@@ -1315,6 +1349,7 @@ interface ActionAccordionFormProps {
 |actionTypes|Optional property, which allowes to define a list of available actions specific for a current plugin.|
 |actionTypes|Optional property, which allowes to define a list of variables for action 'message' property.|
 |defaultActionMessage|Optional property, which allowes to define a message value for action with 'message' property.|
+|consumer|Name of the plugin that creates an action.|
 
 
 AlertsContextProvider value options:
@@ -1358,10 +1393,10 @@ import {
    TriggersAndActionsUIPublicPluginStart,
  } from '../../../../../x-pack/plugins/triggers_actions_ui/public';
 
-triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 ...
 
-triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
+triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 ```
 Then this dependency will be used to embed Create Connector flyout or register new action type.
 
@@ -1374,7 +1409,7 @@ import { ActionsConnectorsContextProvider, ConnectorAddFlyout } from '../../../.
 const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
 
 // load required dependancied
-const { http, triggers_actions_ui, toastNotifications, capabilities } = useKibana().services;
+const { http, triggersActionsUi, notifications, application, docLinks } = useKibana().services;
 
 const connector = {
       secrets: {},
@@ -1403,9 +1438,10 @@ const connector = {
 <ActionsConnectorsContextProvider
         value={{
           http: http,
-          toastNotifications: toastNotifications,
-          actionTypeRegistry: triggers_actions_ui.actionTypeRegistry,
-          capabilities: capabilities,
+          toastNotifications: notifications.toasts,
+          actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
+          capabilities: application.capabilities,
+          docLinks,
         }}
       >
         <ConnectorAddFlyout
@@ -1447,7 +1483,9 @@ export interface ActionsConnectorsContextValue {
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
   >;
   capabilities: ApplicationStart['capabilities'];
+  docLinks: DocLinksStart;
   reloadConnectors?: () => Promise<void>;
+  consumer: string;
 }
 ```
 
@@ -1458,6 +1496,7 @@ export interface ActionsConnectorsContextValue {
 |capabilities|Property, which is defining action current user usage capabilities like canSave or canDelete.|
 |toastNotifications|Toast messages.|
 |reloadConnectors|Optional function, which will be executed if connector was saved sucsessfuly, like reload list of connecotrs.|
+|consumer|Optional name of the plugin that creates an action.|
 
 
 ## Embed the Edit Connector flyout within any Kibana plugin
@@ -1471,10 +1510,10 @@ import {
    TriggersAndActionsUIPublicPluginStart,
  } from '../../../../../x-pack/plugins/triggers_actions_ui/public';
 
-triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 ...
 
-triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
+triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 ```
 Then this dependency will be used to embed Edit Connector flyout.
 
@@ -1487,7 +1526,7 @@ import { ActionsConnectorsContextProvider, ConnectorEditFlyout } from '../../../
 const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
 
 // load required dependancied
-const { http, triggers_actions_ui, toastNotifications, capabilities } = useKibana().services;
+const { http, triggersActionsUi, notifications, application } = useKibana().services;
 
 // UI control item for open flyout
 <EuiButton
@@ -1506,9 +1545,9 @@ const { http, triggers_actions_ui, toastNotifications, capabilities } = useKiban
 <ActionsConnectorsContextProvider
         value={{
           http: http,
-          toastNotifications: toastNotifications,
-          actionTypeRegistry: triggers_actions_ui.actionTypeRegistry,
-          capabilities: capabilities,
+          toastNotifications: notifications.toasts,
+          actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
+          capabilities: application.capabilities,
         }}
       >
         <ConnectorEditFlyout
@@ -1556,4 +1595,3 @@ export interface ActionsConnectorsContextValue {
 |capabilities|Property, which is defining action current user usage capabilities like canSave or canDelete.|
 |toastNotifications|Toast messages.|
 |reloadConnectors|Optional function, which will be executed if connector was saved sucsessfuly, like reload list of connecotrs.|
-

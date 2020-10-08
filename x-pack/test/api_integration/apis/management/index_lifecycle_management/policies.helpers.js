@@ -5,7 +5,6 @@
  */
 
 import { API_BASE_PATH, DEFAULT_POLICY_NAME } from './constants';
-import { getPolicyPayload } from './fixtures';
 import { getPolicyNames } from './lib';
 
 export const registerHelpers = ({ supertest }) => {
@@ -14,22 +13,19 @@ export const registerHelpers = ({ supertest }) => {
       ? supertest.get(`${API_BASE_PATH}/policies?withIndices=true`)
       : supertest.get(`${API_BASE_PATH}/policies`);
 
-  const createPolicy = (policy = getPolicyPayload()) => {
-    return supertest
-      .post(`${API_BASE_PATH}/policies`)
-      .set('kbn-xsrf', 'xxx')
-      .send(policy);
+  const createPolicy = (policy) => {
+    return supertest.post(`${API_BASE_PATH}/policies`).set('kbn-xsrf', 'xxx').send(policy);
   };
 
-  const deletePolicy = name => {
+  const deletePolicy = (name) => {
     return supertest.delete(`${API_BASE_PATH}/policies/${name}`).set('kbn-xsrf', 'xxx');
   };
 
-  const deleteAllPolicies = policies => Promise.all(policies.map(deletePolicy));
+  const deleteAllPolicies = (policies) => Promise.all(policies.map(deletePolicy));
 
   const cleanUp = () => {
     return loadPolicies()
-      .then(({ body }) => getPolicyNames(body).filter(name => name !== DEFAULT_POLICY_NAME))
+      .then(({ body }) => getPolicyNames(body).filter((name) => name !== DEFAULT_POLICY_NAME))
       .then(deleteAllPolicies);
   };
 

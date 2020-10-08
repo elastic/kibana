@@ -19,14 +19,14 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
 
   describe('source filters', function describeIndexTests() {
-    before(async function() {
+    before(async function () {
       // delete .kibana index and update configDoc
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
@@ -48,11 +48,11 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.common.sleep(1000);
     });
 
-    it('should not get the field referer', async function() {
+    it('should not get the field referer', async function () {
       const fieldNames = await PageObjects.discover.getAllFieldNames();
       expect(fieldNames).to.not.contain('referer');
       const relatedContentFields = fieldNames.filter(
-        fieldName => fieldName.indexOf('relatedContent') === 0
+        (fieldName) => fieldName.indexOf('relatedContent') === 0
       );
       expect(relatedContentFields).to.have.length(0);
     });

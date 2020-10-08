@@ -47,4 +47,5 @@ export const host: InventoryModel = {
     ...awsRequiredMetrics,
     ...nginxRequireMetrics,
   ],
+  tooltipMetrics: ['cpu', 'memory', 'tx', 'rx'],
 };

@@ -22,17 +22,19 @@ export function notificationRoutes({ router, mlLicense }: RouteInitialization) {
     {
       path: '/api/ml/notification_settings',
       validate: false,
+      options: {
+        tags: ['access:ml:canAccessML'],
+      },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, response }) => {
       try {
-        const params = {
-          includeDefaults: true,
-          filterPath: '**.xpack.notification',
-        };
-        const resp = await context.ml!.mlClient.callAsCurrentUser('cluster.getSettings', params);
+        const { body } = await client.asCurrentUser.cluster.getSettings({
+          include_defaults: true,
+          filter_path: '**.xpack.notification',
+        });
 
         return response.ok({
-          body: resp,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));

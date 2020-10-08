@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Agent, AgentAction, AgentEvent, AgentStatus, AgentType, NewAgentAction } from '../models';
+import {
+  Agent,
+  AgentAction,
+  NewAgentAction,
+  NewAgentEvent,
+  AgentEvent,
+  AgentStatus,
+  AgentType,
+} from '../models';
 
 export interface GetAgentsRequest {
   query: {
@@ -12,15 +20,16 @@ export interface GetAgentsRequest {
     perPage: number;
     kuery?: string;
     showInactive: boolean;
+    showUpgradeable?: boolean;
   };
 }
 
 export interface GetAgentsResponse {
   list: Agent[];
   total: number;
+  totalInactive: number;
   page: number;
   perPage: number;
-  success: boolean;
 }
 
 export interface GetOneAgentRequest {
@@ -31,7 +40,6 @@ export interface GetOneAgentRequest {
 
 export interface GetOneAgentResponse {
   item: Agent;
-  success: boolean;
 }
 
 export interface PostAgentCheckinRequest {
@@ -39,14 +47,15 @@ export interface PostAgentCheckinRequest {
     agentId: string;
   };
   body: {
+    status?: 'online' | 'error' | 'degraded';
     local_metadata?: Record<string, any>;
-    events?: AgentEvent[];
+    events?: NewAgentEvent[];
   };
 }
 
 export interface PostAgentCheckinResponse {
   action: string;
-  success: boolean;
+
   actions: AgentAction[];
 }
 
@@ -63,7 +72,7 @@ export interface PostAgentEnrollRequest {
 
 export interface PostAgentEnrollResponse {
   action: string;
-  success: boolean;
+
   item: Agent & { status: AgentStatus };
 }
 
@@ -78,7 +87,6 @@ export interface PostAgentAcksRequest {
 
 export interface PostAgentAcksResponse {
   action: string;
-  success: boolean;
 }
 
 export interface PostNewAgentActionRequest {
@@ -91,22 +99,76 @@ export interface PostNewAgentActionRequest {
 }
 
 export interface PostNewAgentActionResponse {
-  success: boolean;
   item: AgentAction;
 }
 
 export interface PostAgentUnenrollRequest {
-  body: { kuery: string } | { ids: string[] };
+  params: {
+    agentId: string;
+  };
+  body: {
+    force?: boolean;
+  };
 }
 
-export interface PostAgentUnenrollResponse {
-  results: Array<{
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PostAgentUnenrollResponse {}
+
+export interface PostBulkAgentUnenrollRequest {
+  body: {
+    agents: string[] | string;
+    force?: boolean;
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PostBulkAgentUnenrollResponse {}
+
+export interface PostAgentUpgradeRequest {
+  params: {
+    agentId: string;
+  };
+  body: {
+    source_uri?: string;
+    version: string;
+  };
+}
+
+export interface PostBulkAgentUpgradeRequest {
+  body: {
+    agents: string[] | string;
+    source_uri?: string;
+    version: string;
+  };
+}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PostBulkAgentUpgradeResponse {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PostAgentUpgradeResponse {}
+
+export interface PutAgentReassignRequest {
+  params: {
+    agentId: string;
+  };
+  body: { policy_id: string };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PutAgentReassignResponse {}
+
+export interface PostBulkAgentReassignRequest {
+  body: {
+    policy_id: string;
+    agents: string[] | string;
+  };
+}
+
+export interface PostBulkAgentReassignResponse {
+  [key: string]: {
     success: boolean;
-    error?: any;
-    id: string;
-    action: string;
-  }>;
-  success: boolean;
+    error?: Error;
+  };
 }
 
 export interface GetOneAgentEventsRequest {
@@ -125,7 +187,6 @@ export interface GetOneAgentEventsResponse {
   total: number;
   page: number;
   perPage: number;
-  success: boolean;
 }
 
 export interface DeleteAgentRequest {
@@ -145,17 +206,17 @@ export interface UpdateAgentRequest {
 
 export interface GetAgentStatusRequest {
   query: {
-    configId: string;
+    policyId?: string;
   };
 }
 
 export interface GetAgentStatusResponse {
-  success: boolean;
   results: {
     events: number;
     total: number;
     online: number;
     error: number;
     offline: number;
+    other: number;
   };
 }

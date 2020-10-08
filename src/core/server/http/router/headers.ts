@@ -17,8 +17,7 @@
  * under the License.
  */
 import { IncomingHttpHeaders } from 'http';
-
-import { pick } from '../../../utils';
+import { pick } from '@kbn/std';
 
 /**
  * Creates a Union type of all known keys of a given interface.
@@ -71,7 +70,7 @@ export function filterHeaders(
   // Normalize list of headers we want to allow in upstream request
   const fieldsToKeepNormalized = fieldsToKeep
     .map(normalizeHeaderField)
-    .filter(name => !fieldsToExcludeNormalized.includes(name));
+    .filter((name) => !fieldsToExcludeNormalized.includes(name));
 
   return pick(headers, fieldsToKeepNormalized);
 }

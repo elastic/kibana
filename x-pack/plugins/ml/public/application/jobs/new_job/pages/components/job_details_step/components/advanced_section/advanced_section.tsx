@@ -14,6 +14,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { ModelPlotSwitch } from './components/model_plot';
+import { AnnotationsSwitch } from './components/annotations';
 import { DedicatedIndexSwitch } from './components/dedicated_index';
 import { ModelMemoryLimitInput } from '../../../common/model_memory_limit';
 import { JobCreatorContext } from '../../../job_creator_context';
@@ -41,6 +42,7 @@ export const AdvancedSection: FC<Props> = ({ advancedExpanded, setAdvancedExpand
         <EuiFlexGroup gutterSize="xl">
           <EuiFlexItem>
             <ModelPlotSwitch />
+            <AnnotationsSwitch />
           </EuiFlexItem>
           <EuiFlexItem>
             <DedicatedIndexSwitch />
@@ -68,6 +70,7 @@ export const AdvancedSection: FC<Props> = ({ advancedExpanded, setAdvancedExpand
         >
           <EuiFlexItem>
             <ModelPlotSwitch />
+            <AnnotationsSwitch />
             <ModelMemoryLimitInput />
           </EuiFlexItem>
           <EuiFlexItem>

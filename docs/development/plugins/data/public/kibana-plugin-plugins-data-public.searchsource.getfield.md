@@ -4,7 +4,7 @@
 
 ## SearchSource.getField() method
 
-Get fields from the fields
+Gets a single field from the fields
 
 <b>Signature:</b>
 

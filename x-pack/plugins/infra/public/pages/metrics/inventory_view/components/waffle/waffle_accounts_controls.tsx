@@ -4,17 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiContextMenuPanelDescriptor,
-  EuiFilterButton,
-  EuiFilterGroup,
-  EuiPopover,
-  EuiContextMenu,
-} from '@elastic/eui';
+import { EuiContextMenuPanelDescriptor, EuiPopover, EuiContextMenu } from '@elastic/eui';
 import React, { useCallback, useState, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { InventoryCloudAccount } from '../../../../../../common/http_api/inventory_meta_api';
+import { DropdownButton } from '../dropdown_button';
 
 interface Props {
   accountId: string;
@@ -34,7 +28,7 @@ export const WaffleAccountsControls = (props: Props) => {
     setIsOpen(false);
   }, [setIsOpen]);
 
-  const currentLabel = options.find(o => o.value === accountId);
+  const currentLabel = options.find((o) => o.value === accountId);
 
   const changeAccount = useCallback(
     (val: string) => {
@@ -53,7 +47,7 @@ export const WaffleAccountsControls = (props: Props) => {
       {
         id: 0,
         title: '',
-        items: options.map(o => {
+        items: options.map((o) => {
           const icon = o.value === accountId ? 'check' : 'empty';
           const panel = { name: o.name, onClick: () => changeAccount(o.value), icon };
           return panel;
@@ -63,32 +57,29 @@ export const WaffleAccountsControls = (props: Props) => {
     [options, accountId, changeAccount]
   );
 
+  const button = (
+    <DropdownButton
+      label={i18n.translate('xpack.infra.waffle.accountLabel', { defaultMessage: 'Account' })}
+      onClick={showPopover}
+    >
+      {currentLabel
+        ? currentLabel.name
+        : i18n.translate('xpack.infra.waffle.accountAllTitle', {
+            defaultMessage: 'All',
+          })}
+    </DropdownButton>
+  );
+
   return (
-    <EuiFilterGroup>
-      <EuiPopover
-        isOpen={isOpen}
-        id="accontPopOver"
-        button={
-          <EuiFilterButton iconType="arrowDown" onClick={showPopover}>
-            <FormattedMessage
-              id="xpack.infra.waffle.accountLabel"
-              defaultMessage="Account: {selectedAccount}"
-              values={{
-                selectedAccount: currentLabel
-                  ? currentLabel.name
-                  : i18n.translate('xpack.infra.waffle.accountAllTitle', {
-                      defaultMessage: 'All',
-                    }),
-              }}
-            />
-          </EuiFilterButton>
-        }
-        anchorPosition="downLeft"
-        panelPaddingSize="none"
-        closePopover={closePopover}
-      >
-        <EuiContextMenu initialPanelId={0} panels={panels} />
-      </EuiPopover>
-    </EuiFilterGroup>
+    <EuiPopover
+      isOpen={isOpen}
+      id="accontPopOver"
+      button={button}
+      anchorPosition="downLeft"
+      panelPaddingSize="none"
+      closePopover={closePopover}
+    >
+      <EuiContextMenu initialPanelId={0} panels={panels} />
+    </EuiPopover>
   );
 };

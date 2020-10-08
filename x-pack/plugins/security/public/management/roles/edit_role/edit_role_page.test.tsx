@@ -9,14 +9,14 @@ import React from 'react';
 import { act } from '@testing-library/react';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { Capabilities } from 'src/core/public';
-import { Feature } from '../../../../../features/public';
+import { KibanaFeature } from '../../../../../features/public';
 import { Role } from '../../../../common/model';
 import { DocumentationLinksService } from '../documentation_links';
 import { EditRolePage } from './edit_role_page';
 import { SimplePrivilegeSection } from './privileges/kibana/simple_privilege_section';
 
 import { TransformErrorSection } from './privileges/kibana/transform_error_section';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from '../../../../../../../src/core/public/mocks';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { licenseMock } from '../../../../common/licensing/index.mock';
 import { userAPIClientMock } from '../../users/index.mock';
@@ -27,11 +27,12 @@ import { createRawKibanaPrivileges } from '../__fixtures__/kibana_privileges';
 
 const buildFeatures = () => {
   return [
-    new Feature({
+    new KibanaFeature({
       id: 'feature1',
       name: 'Feature 1',
       icon: 'addDataApp',
       app: ['feature1App'],
+      category: { id: 'foo', label: 'foo' },
       privileges: {
         all: {
           app: ['feature1App'],
@@ -51,11 +52,12 @@ const buildFeatures = () => {
         },
       },
     }),
-    new Feature({
+    new KibanaFeature({
       id: 'feature2',
       name: 'Feature 2',
       icon: 'addDataApp',
       app: ['feature2App'],
+      category: { id: 'foo', label: 'foo' },
       privileges: {
         all: {
           app: ['feature2App'],
@@ -75,7 +77,7 @@ const buildFeatures = () => {
         },
       },
     }),
-  ] as Feature[];
+  ] as KibanaFeature[];
 };
 
 const buildBuiltinESPrivileges = () => {
@@ -163,7 +165,12 @@ function getProps({
   const { http, docLinks, notifications } = coreMock.createStart();
   http.get.mockImplementation(async (path: any) => {
     if (path === '/api/spaces/space') {
-      return buildSpaces();
+      if (spacesEnabled) {
+        return buildSpaces();
+      }
+
+      const notFoundError = { response: { status: 404 } };
+      throw notFoundError;
     }
   });
 
@@ -181,8 +188,8 @@ function getProps({
     notifications,
     docLinks: new DocumentationLinksService(docLinks),
     fatalErrors,
-    spacesEnabled,
     uiCapabilities: buildUICapabilities(canManageSpaces),
+    history: scopedHistoryMock.create(),
   };
 }
 

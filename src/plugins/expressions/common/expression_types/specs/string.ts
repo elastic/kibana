@@ -27,8 +27,8 @@ export const string: ExpressionTypeDefinition<typeof name, string> = {
   name,
   from: {
     null: () => '',
-    boolean: b => String(b),
-    number: n => String(n),
+    boolean: (b) => String(b),
+    number: (n) => String(n),
   },
   to: {
     render: <T>(text: T): ExpressionValueRender<{ text: T }> => {
@@ -40,7 +40,7 @@ export const string: ExpressionTypeDefinition<typeof name, string> = {
     },
     datatable: (value): Datatable => ({
       type: 'datatable',
-      columns: [{ name: 'value', type: 'string' }],
+      columns: [{ id: 'value', name: 'value', meta: { type: 'string' } }],
       rows: [{ value }],
     }),
   },

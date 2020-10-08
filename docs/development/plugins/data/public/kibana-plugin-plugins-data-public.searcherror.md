@@ -2,28 +2,22 @@
 
 [Home](./index.md) &gt; [kibana-plugin-plugins-data-public](./kibana-plugin-plugins-data-public.md) &gt; [SearchError](./kibana-plugin-plugins-data-public.searcherror.md)
 
-## SearchError class
+## SearchError interface
 
 <b>Signature:</b>
 
 ```typescript
-export declare class SearchError extends Error 
+export interface SearchError 
 ```
-
-## Constructors
-
-|  Constructor | Modifiers | Description |
-|  --- | --- | --- |
-|  [(constructor)({ status, title, message, path, type })](./kibana-plugin-plugins-data-public.searcherror._constructor_.md) |  | Constructs a new instance of the <code>SearchError</code> class |
 
 ## Properties
 
-|  Property | Modifiers | Type | Description |
-|  --- | --- | --- | --- |
-|  [message](./kibana-plugin-plugins-data-public.searcherror.message.md) |  | <code>string</code> |  |
-|  [name](./kibana-plugin-plugins-data-public.searcherror.name.md) |  | <code>string</code> |  |
-|  [path](./kibana-plugin-plugins-data-public.searcherror.path.md) |  | <code>string</code> |  |
-|  [status](./kibana-plugin-plugins-data-public.searcherror.status.md) |  | <code>string</code> |  |
-|  [title](./kibana-plugin-plugins-data-public.searcherror.title.md) |  | <code>string</code> |  |
-|  [type](./kibana-plugin-plugins-data-public.searcherror.type.md) |  | <code>string</code> |  |
+|  Property | Type | Description |
+|  --- | --- | --- |
+|  [message](./kibana-plugin-plugins-data-public.searcherror.message.md) | <code>string</code> |  |
+|  [name](./kibana-plugin-plugins-data-public.searcherror.name.md) | <code>string</code> |  |
+|  [path](./kibana-plugin-plugins-data-public.searcherror.path.md) | <code>string</code> |  |
+|  [status](./kibana-plugin-plugins-data-public.searcherror.status.md) | <code>string</code> |  |
+|  [title](./kibana-plugin-plugins-data-public.searcherror.title.md) | <code>string</code> |  |
+|  [type](./kibana-plugin-plugins-data-public.searcherror.type.md) | <code>string</code> |  |
 

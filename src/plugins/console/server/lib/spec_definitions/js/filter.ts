@@ -18,7 +18,6 @@
  */
 import { SpecDefinitionsService } from '../../../services';
 
-/* eslint-disable @typescript-eslint/camelcase */
 const filters: Record<string, any> = {};
 
 filters.and = {
@@ -56,13 +55,6 @@ filters.limit = {
     value: 100,
   },
   value: 100,
-};
-
-filters.type = {
-  __template: {
-    value: 'TYPE',
-  },
-  value: '{type}',
 };
 
 filters.geo_bounding_box = {

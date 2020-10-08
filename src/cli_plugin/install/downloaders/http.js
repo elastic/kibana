@@ -17,12 +17,14 @@
  * under the License.
  */
 
-import Wreck from '@hapi/wreck';
-import Progress from '../progress';
 import { createWriteStream } from 'fs';
+
+import Wreck from '@hapi/wreck';
 import HttpProxyAgent from 'http-proxy-agent';
 import HttpsProxyAgent from 'https-proxy-agent';
 import { getProxyForUrl } from 'proxy-from-env';
+
+import { Progress } from '../progress';
 
 function getProxyAgent(sourceUrl, logger) {
   const proxy = getProxyForUrl(sourceUrl);
@@ -76,7 +78,7 @@ function downloadResponse({ resp, targetPath, progress }) {
     writeStream.on('error', reject);
 
     // report progress as we download
-    resp.on('data', chunk => {
+    resp.on('data', (chunk) => {
       progress.progress(chunk.length);
     });
 
@@ -91,7 +93,7 @@ function downloadResponse({ resp, targetPath, progress }) {
 /*
 Responsible for managing http transfers
 */
-export default async function downloadUrl(logger, sourceUrl, targetPath, timeout) {
+export async function downloadHttpFile(logger, sourceUrl, targetPath, timeout) {
   try {
     const { req, resp } = await sendRequest({ sourceUrl, timeout }, logger);
 

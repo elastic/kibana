@@ -18,8 +18,6 @@
  */
 
 import { Container, isErrorEmbeddable } from '../../../..';
-// @ts-ignore
-import { findTestSubject } from '@elastic/eui/lib/test';
 import { nextTick } from 'test_utils/enzyme_helpers';
 import { CustomizePanelTitleAction } from './customize_panel_action';
 import {
@@ -66,7 +64,7 @@ beforeEach(async () => {
   }
 });
 
-test('Updates the embeddable title when given', async done => {
+test('Updates the embeddable title when given', async (done) => {
   const getUserData = () => Promise.resolve({ title: 'What is up?' });
   const customizePanelAction = new CustomizePanelTitleAction(getUserData);
   expect(embeddable.getInput().title).toBeUndefined();

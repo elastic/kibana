@@ -33,15 +33,13 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
-import { METRIC_TYPES } from '../../../../../../plugins/vis_type_timeseries/common/metric_types';
+import { getSupportedFieldsByMetricType } from '../lib/get_supported_fields_by_metric_type';
 
 export function StandardAgg(props) {
   const { model, panel, series, fields, uiRestrictions } = props;
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
-  const restrictFields = model.type === METRIC_TYPES.CARDINALITY ? [] : [KBN_FIELD_TYPES.NUMBER];
-
+  const restrictFields = getSupportedFieldsByMetricType(model.type);
   const indexPattern =
     (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
   const htmlId = htmlIdGenerator();

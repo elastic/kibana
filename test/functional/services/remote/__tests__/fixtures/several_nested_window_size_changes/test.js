@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export default function({ getService, loadTestFile }) {
+export default function ({ getService, loadTestFile }) {
   const remote = getService('remote');
 
   describe('suite1', () => {

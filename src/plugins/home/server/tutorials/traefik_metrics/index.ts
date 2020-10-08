@@ -33,6 +33,7 @@ export function traefikMetricsSpecProvider(context: TutorialContext): TutorialSc
     name: i18n.translate('home.tutorials.traefikMetrics.nameTitle', {
       defaultMessage: 'Traefik metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.traefikMetrics.shortDescription', {
       defaultMessage: 'Fetch monitoring metrics from Traefik.',
@@ -45,7 +46,7 @@ export function traefikMetricsSpecProvider(context: TutorialContext): TutorialSc
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-traefik.html',
       },
     }),
-    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/traefik.svg',
+    euiIconType: '/plugins/home/assets/logos/traefik.svg',
     artifacts: {
       dashboards: [],
       exportedFields: {
@@ -53,7 +54,6 @@ export function traefikMetricsSpecProvider(context: TutorialContext): TutorialSc
       },
     },
     completionTimeMinutes: 10,
-    // previewImagePath: '/plugins/kibana/home/tutorial_resources/traefik_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),

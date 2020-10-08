@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { checkPermission } from '../../../../privilege/check_privilege';
+import { checkPermission } from '../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
@@ -29,7 +29,7 @@ class MultiJobActionsMenuUI extends Component {
   }
 
   onButtonClick = () => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       isOpen: !prevState.isOpen,
     }));
   };
@@ -41,7 +41,7 @@ class MultiJobActionsMenuUI extends Component {
   };
 
   render() {
-    const anyJobsDeleting = this.props.jobs.some(j => j.deleting);
+    const anyJobsDeleting = this.props.jobs.some((j) => j.deleting);
     const button = (
       <EuiButtonIcon
         size="s"
@@ -57,6 +57,7 @@ class MultiJobActionsMenuUI extends Component {
         disabled={
           anyJobsDeleting || (this.canDeleteJob === false && this.canStartStopDatafeed === false)
         }
+        data-test-subj="mlADJobListMultiSelectManagementActionsButton"
       />
     );
 
@@ -69,6 +70,7 @@ class MultiJobActionsMenuUI extends Component {
           this.props.showDeleteJobModal(this.props.jobs);
           this.closePopover();
         }}
+        data-test-subj="mlADJobListMultiSelectDeleteJobActionButton"
       >
         <FormattedMessage
           id="xpack.ml.jobsList.multiJobsActions.deleteJobsLabel"
@@ -88,6 +90,7 @@ class MultiJobActionsMenuUI extends Component {
             closeJobs(this.props.jobs);
             this.closePopover();
           }}
+          data-test-subj="mlADJobListMultiSelectCloseJobActionButton"
         >
           <FormattedMessage
             id="xpack.ml.jobsList.multiJobsActions.closeJobsLabel"
@@ -108,6 +111,7 @@ class MultiJobActionsMenuUI extends Component {
             stopDatafeeds(this.props.jobs, this.props.refreshJobs);
             this.closePopover();
           }}
+          data-test-subj="mlADJobListMultiSelectStopDatafeedActionButton"
         >
           <FormattedMessage
             id="xpack.ml.jobsList.multiJobsActions.stopDatafeedsLabel"
@@ -128,6 +132,7 @@ class MultiJobActionsMenuUI extends Component {
             this.props.showStartDatafeedModal(this.props.jobs);
             this.closePopover();
           }}
+          data-test-subj="mlADJobListMultiSelectStartDatafeedActionButton"
         >
           <FormattedMessage
             id="xpack.ml.jobsList.multiJobsActions.startDatafeedsLabel"

@@ -13,15 +13,15 @@ import { CalendarsList } from './calendars_list';
 jest.mock('../../../components/navigation_menu', () => ({
   NavigationMenu: () => <div id="mockNavigationMenu" />,
 }));
-jest.mock('../../../privilege/check_privilege', () => ({
+jest.mock('../../../capabilities/check_capabilities', () => ({
   checkPermission: () => true,
 }));
 jest.mock('../../../license', () => ({
   hasLicenseExpired: () => false,
   isFullLicense: () => false,
 }));
-jest.mock('../../../privilege/get_privileges', () => ({
-  getPrivileges: () => {},
+jest.mock('../../../capabilities/get_capabilities', () => ({
+  getCapabilities: () => {},
 }));
 jest.mock('../../../ml_nodes_check/check_ml_nodes', () => ({
   mlNodesAvailable: () => true,
@@ -37,11 +37,11 @@ jest.mock('../../../services/ml_api_service', () => ({
 
 jest.mock('react', () => {
   const r = jest.requireActual('react');
-  return { ...r, memo: x => x };
+  return { ...r, memo: (x) => x };
 });
 
 jest.mock('../../../../../../../../src/plugins/kibana_react/public', () => ({
-  withKibana: node => {
+  withKibana: (node) => {
     return node;
   },
 }));

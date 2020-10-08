@@ -21,7 +21,7 @@ import React from 'react';
 import ReactResizeDetector from 'react-resize-detector';
 import MonacoEditor from 'react-monaco-editor';
 
-import { monaco } from '@kbn/ui-shared-deps/monaco';
+import { monaco } from '@kbn/monaco';
 
 import { LIGHT_THEME, DARK_THEME } from './editor_theme';
 
@@ -186,3 +186,7 @@ export class CodeEditor extends React.Component<Props, {}> {
     }
   };
 }
+
+// React.lazy requires default export
+// eslint-disable-next-line import/no-default-export
+export default CodeEditor;

@@ -5,7 +5,7 @@
  */
 import React from 'react';
 
-import { NormalizedField, Field as FieldType } from '../../../../types';
+import { NormalizedField, Field as FieldType, ParameterName } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
 import {
   StoreParameter,
@@ -14,11 +14,12 @@ import {
   CoerceNumberParameter,
   FormatParameter,
   LocaleParameter,
+  MetaParameter,
 } from '../../field_parameters';
 import { BasicParametersSection, AdvancedParametersSection } from '../edit_field';
 import { FormDataProvider } from '../../../../shared_imports';
 
-const getDefaultToggleValue = (param: 'locale' | 'format' | 'boost', field: FieldType) => {
+const getDefaultToggleValue = (param: ParameterName, field: FieldType) => {
   return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
 };
 
@@ -33,7 +34,7 @@ export const RangeType = ({ field }: Props) => {
         <IndexParameter hasIndexOptions={false} />
 
         <FormDataProvider pathsToWatch="subType">
-          {formData =>
+          {(formData) =>
             formData.subType === 'date_range' ? (
               <FormatParameter
                 defaultValue={field.source.format as string}
@@ -46,7 +47,7 @@ export const RangeType = ({ field }: Props) => {
 
       <AdvancedParametersSection>
         <FormDataProvider pathsToWatch="subType">
-          {formData =>
+          {(formData) =>
             formData.subType === 'date_range' ? (
               <LocaleParameter defaultToggleValue={getDefaultToggleValue('locale', field.source)} />
             ) : null
@@ -56,6 +57,8 @@ export const RangeType = ({ field }: Props) => {
         <CoerceNumberParameter />
 
         <StoreParameter />
+
+        <MetaParameter defaultToggleValue={getDefaultToggleValue('meta', field.source)} />
 
         <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
       </AdvancedParametersSection>

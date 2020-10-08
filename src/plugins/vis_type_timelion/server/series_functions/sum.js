@@ -42,7 +42,7 @@ export default new Chainable('sum', {
   }),
   aliases: ['add', 'plus'],
   fn: function sumFn(args) {
-    return reduce(args, function(a, b) {
+    return reduce(args, function (a, b) {
       return a + b;
     });
   },

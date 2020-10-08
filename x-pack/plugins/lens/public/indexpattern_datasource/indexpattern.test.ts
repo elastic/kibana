@@ -10,6 +10,8 @@ import { DatasourcePublicAPI, Operation, Datasource } from '../types';
 import { coreMock } from 'src/core/public/mocks';
 import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
+import { Ast } from '@kbn/interpreter/common';
+import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
@@ -19,39 +21,46 @@ const expectedIndexPatterns = {
     id: '1',
     title: 'my-fake-index-pattern',
     timeFieldName: 'timestamp',
+    hasRestrictions: false,
     fields: [
       {
         name: 'timestamp',
+        displayName: 'timestampLabel',
         type: 'date',
         aggregatable: true,
         searchable: true,
       },
       {
         name: 'start_date',
+        displayName: 'start_date',
         type: 'date',
         aggregatable: true,
         searchable: true,
       },
       {
         name: 'bytes',
+        displayName: 'bytes',
         type: 'number',
         aggregatable: true,
         searchable: true,
       },
       {
         name: 'memory',
+        displayName: 'memory',
         type: 'number',
         aggregatable: true,
         searchable: true,
       },
       {
         name: 'source',
+        displayName: 'source',
         type: 'string',
         aggregatable: true,
         searchable: true,
       },
       {
         name: 'dest',
+        displayName: 'dest',
         type: 'string',
         aggregatable: true,
         searchable: true,
@@ -62,9 +71,11 @@ const expectedIndexPatterns = {
     id: '2',
     title: 'my-fake-restricted-pattern',
     timeFieldName: 'timestamp',
+    hasRestrictions: true,
     fields: [
       {
         name: 'timestamp',
+        displayName: 'timestampLabel',
         type: 'date',
         aggregatable: true,
         searchable: true,
@@ -79,6 +90,7 @@ const expectedIndexPatterns = {
       },
       {
         name: 'bytes',
+        displayName: 'bytes',
         type: 'number',
         aggregatable: true,
         searchable: true,
@@ -104,6 +116,7 @@ const expectedIndexPatterns = {
       },
       {
         name: 'source',
+        displayName: 'source',
         type: 'string',
         aggregatable: true,
         searchable: true,
@@ -117,21 +130,27 @@ const expectedIndexPatterns = {
   },
 };
 
-function stateFromPersistedState(
-  persistedState: IndexPatternPersistedState
-): IndexPatternPrivateState {
+type IndexPatternBaseState = Omit<
+  IndexPatternPrivateState,
+  'indexPatternRefs' | 'indexPatterns' | 'existingFields' | 'isFirstExistenceFetch'
+>;
+
+function enrichBaseState(baseState: IndexPatternBaseState): IndexPatternPrivateState {
   return {
-    currentIndexPatternId: persistedState.currentIndexPatternId,
-    layers: persistedState.layers,
+    currentIndexPatternId: baseState.currentIndexPatternId,
+    layers: baseState.layers,
     indexPatterns: expectedIndexPatterns,
     indexPatternRefs: [],
     existingFields: {},
-    showEmptyFields: true,
+    isFirstExistenceFetch: false,
   };
 }
 
 describe('IndexPattern Data Source', () => {
-  let persistedState: IndexPatternPersistedState;
+  let baseState: Omit<
+    IndexPatternPrivateState,
+    'indexPatternRefs' | 'indexPatterns' | 'existingFields' | 'isFirstExistenceFetch'
+  >;
   let indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState>;
 
   beforeEach(() => {
@@ -139,9 +158,10 @@ describe('IndexPattern Data Source', () => {
       storage: {} as IStorageWrapper,
       core: coreMock.createStart(),
       data: dataPluginMock.createStartContract(),
+      charts: chartPluginMock.createSetupContract(),
     });
 
-    persistedState = {
+    baseState = {
       currentIndexPatternId: '1',
       layers: {
         first: {
@@ -212,9 +232,37 @@ describe('IndexPattern Data Source', () => {
 
   describe('#getPersistedState', () => {
     it('should persist from saved state', async () => {
-      const state = stateFromPersistedState(persistedState);
+      const state = enrichBaseState(baseState);
 
-      expect(indexPatternDatasource.getPersistableState(state)).toEqual(persistedState);
+      expect(indexPatternDatasource.getPersistableState(state)).toEqual({
+        state: {
+          layers: {
+            first: {
+              columnOrder: ['col1'],
+              columns: {
+                col1: {
+                  label: 'My Op',
+                  dataType: 'string',
+                  isBucketed: true,
+
+                  // Private
+                  operationType: 'terms',
+                  sourceField: 'op',
+                  params: {
+                    size: 5,
+                    orderBy: { type: 'alphabetical' },
+                    orderDirection: 'asc',
+                  },
+                },
+              },
+            },
+          },
+        },
+        savedObjectReferences: [
+          { name: 'indexpattern-datasource-current-indexpattern', type: 'index-pattern', id: '1' },
+          { name: 'indexpattern-datasource-layer-first', type: 'index-pattern', id: '1' },
+        ],
+      });
     });
   });
 
@@ -225,7 +273,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should generate an expression for an aggregated query', async () => {
-      const queryPersistedState: IndexPatternPersistedState = {
+      const queryBaseState: IndexPatternBaseState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -254,7 +302,7 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const state = stateFromPersistedState(queryPersistedState);
+      const state = enrichBaseState(queryBaseState);
 
       expect(indexPatternDatasource.toExpression(state, 'first')).toMatchInlineSnapshot(`
         Object {
@@ -262,20 +310,7 @@ describe('IndexPattern Data Source', () => {
             Object {
               "arguments": Object {
                 "aggConfigs": Array [
-                  Object {
-                    "chain": Array [
-                      Object {
-                        "arguments": Object {
-                          "aggConfigs": Array [
-                            "[{\\"id\\":\\"col1\\",\\"enabled\\":true,\\"type\\":\\"count\\",\\"schema\\":\\"metric\\",\\"params\\":{}},{\\"id\\":\\"col2\\",\\"enabled\\":true,\\"type\\":\\"date_histogram\\",\\"schema\\":\\"segment\\",\\"params\\":{\\"field\\":\\"timestamp\\",\\"useNormalizedEsInterval\\":true,\\"interval\\":\\"1d\\",\\"drop_partials\\":false,\\"min_doc_count\\":0,\\"extended_bounds\\":{}}}]",
-                          ],
-                        },
-                        "function": "lens_auto_date",
-                        "type": "function",
-                      },
-                    ],
-                    "type": "expression",
-                  },
+                  "[{\\"id\\":\\"col1\\",\\"enabled\\":true,\\"type\\":\\"count\\",\\"schema\\":\\"metric\\",\\"params\\":{}},{\\"id\\":\\"col2\\",\\"enabled\\":true,\\"type\\":\\"date_histogram\\",\\"schema\\":\\"segment\\",\\"params\\":{\\"field\\":\\"timestamp\\",\\"useNormalizedEsInterval\\":true,\\"interval\\":\\"1d\\",\\"drop_partials\\":false,\\"min_doc_count\\":0,\\"extended_bounds\\":{}}}]",
                 ],
                 "includeFormatHints": Array [
                   true,
@@ -284,10 +319,13 @@ describe('IndexPattern Data Source', () => {
                   "1",
                 ],
                 "metricsAtAllLevels": Array [
-                  false,
+                  true,
                 ],
                 "partialRows": Array [
-                  false,
+                  true,
+                ],
+                "timeFields": Array [
+                  "timestamp",
                 ],
               },
               "function": "esaggs",
@@ -296,7 +334,7 @@ describe('IndexPattern Data Source', () => {
             Object {
               "arguments": Object {
                 "idMap": Array [
-                  "{\\"col-0-col1\\":{\\"label\\":\\"Count of records\\",\\"dataType\\":\\"number\\",\\"isBucketed\\":false,\\"sourceField\\":\\"Records\\",\\"operationType\\":\\"count\\",\\"id\\":\\"col1\\"},\\"col-1-col2\\":{\\"label\\":\\"Date\\",\\"dataType\\":\\"date\\",\\"isBucketed\\":true,\\"operationType\\":\\"date_histogram\\",\\"sourceField\\":\\"timestamp\\",\\"params\\":{\\"interval\\":\\"1d\\"},\\"id\\":\\"col2\\"}}",
+                  "{\\"col--1-col1\\":{\\"label\\":\\"Count of records\\",\\"dataType\\":\\"number\\",\\"isBucketed\\":false,\\"sourceField\\":\\"Records\\",\\"operationType\\":\\"count\\",\\"id\\":\\"col1\\"},\\"col-2-col2\\":{\\"label\\":\\"Date\\",\\"dataType\\":\\"date\\",\\"isBucketed\\":true,\\"operationType\\":\\"date_histogram\\",\\"sourceField\\":\\"timestamp\\",\\"params\\":{\\"interval\\":\\"1d\\"},\\"id\\":\\"col2\\"}}",
                 ],
               },
               "function": "lens_rename_columns",
@@ -306,6 +344,89 @@ describe('IndexPattern Data Source', () => {
           "type": "expression",
         }
       `);
+    });
+
+    it('should put all time fields used in date_histograms to the esaggs timeFields parameter', async () => {
+      const queryBaseState: IndexPatternBaseState = {
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1', 'col2', 'col3'],
+            columns: {
+              col1: {
+                label: 'Count of records',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'Records',
+                operationType: 'count',
+              },
+              col2: {
+                label: 'Date',
+                dataType: 'date',
+                isBucketed: true,
+                operationType: 'date_histogram',
+                sourceField: 'timestamp',
+                params: {
+                  interval: 'auto',
+                },
+              },
+              col3: {
+                label: 'Date 2',
+                dataType: 'date',
+                isBucketed: true,
+                operationType: 'date_histogram',
+                sourceField: 'another_datefield',
+                params: {
+                  interval: 'auto',
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const state = enrichBaseState(queryBaseState);
+
+      const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+      expect(ast.chain[0].arguments.timeFields).toEqual(['timestamp', 'another_datefield']);
+    });
+
+    it('should not put date fields used outside date_histograms to the esaggs timeFields parameter', async () => {
+      const queryBaseState: IndexPatternBaseState = {
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1', 'col2'],
+            columns: {
+              col1: {
+                label: 'Count of records',
+                dataType: 'date',
+                isBucketed: false,
+                sourceField: 'timefield',
+                operationType: 'cardinality',
+              },
+              col2: {
+                label: 'Date',
+                dataType: 'date',
+                isBucketed: true,
+                operationType: 'date_histogram',
+                sourceField: 'timestamp',
+                params: {
+                  interval: 'auto',
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const state = enrichBaseState(queryBaseState);
+
+      const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+      expect(ast.chain[0].arguments.timeFields).toEqual(['timestamp']);
+      expect(ast.chain[0].arguments.timeFields).not.toContain('timefield');
     });
   });
 
@@ -328,7 +449,7 @@ describe('IndexPattern Data Source', () => {
           },
         },
         currentIndexPatternId: '1',
-        showEmptyFields: false,
+        isFirstExistenceFetch: false,
       };
       expect(indexPatternDatasource.insertLayer(state, 'newLayer')).toEqual({
         ...state,
@@ -349,7 +470,7 @@ describe('IndexPattern Data Source', () => {
       const state = {
         indexPatternRefs: [],
         existingFields: {},
-        showEmptyFields: false,
+        isFirstExistenceFetch: false,
         indexPatterns: expectedIndexPatterns,
         layers: {
           first: {
@@ -384,7 +505,7 @@ describe('IndexPattern Data Source', () => {
         indexPatternDatasource.getLayers({
           indexPatternRefs: [],
           existingFields: {},
-          showEmptyFields: false,
+          isFirstExistenceFetch: false,
           indexPatterns: expectedIndexPatterns,
           layers: {
             first: {
@@ -404,55 +525,14 @@ describe('IndexPattern Data Source', () => {
     });
   });
 
-  describe('#getMetadata', () => {
-    it('should return the title of the index patterns', () => {
-      expect(
-        indexPatternDatasource.getMetaData({
-          indexPatternRefs: [],
-          existingFields: {},
-          showEmptyFields: false,
-          indexPatterns: expectedIndexPatterns,
-          layers: {
-            first: {
-              indexPatternId: '1',
-              columnOrder: [],
-              columns: {},
-            },
-            second: {
-              indexPatternId: '2',
-              columnOrder: [],
-              columns: {},
-            },
-          },
-          currentIndexPatternId: '1',
-        })
-      ).toEqual({
-        filterableIndexPatterns: [
-          {
-            id: '1',
-            title: 'my-fake-index-pattern',
-          },
-          {
-            id: '2',
-            title: 'my-fake-restricted-pattern',
-          },
-        ],
-      });
-    });
-  });
-
   describe('#getPublicAPI', () => {
     let publicAPI: DatasourcePublicAPI;
 
     beforeEach(async () => {
-      const initialState = stateFromPersistedState(persistedState);
+      const initialState = enrichBaseState(baseState);
       publicAPI = indexPatternDatasource.getPublicAPI({
         state: initialState,
         layerId: 'first',
-        dateRange: {
-          fromDate: 'now-30d',
-          toDate: 'now',
-        },
       });
     });
 

@@ -50,7 +50,7 @@ export const datasourceSaga = ({
     }
   }
 
-  return function*() {
+  return function* () {
     yield takeLatest(requestDatasource.match, fetchFields);
   };
 };

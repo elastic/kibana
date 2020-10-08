@@ -16,6 +16,7 @@ import {
 } from '../../../../src/core/server';
 
 import { CloudSetup } from '../../cloud/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 
 import { CredentialStore, credentialStoreFactory } from './lib/reindexing/credential_store';
@@ -25,11 +26,14 @@ import { registerClusterCheckupRoutes } from './routes/cluster_checkup';
 import { registerDeprecationLoggingRoutes } from './routes/deprecation_logging';
 import { registerReindexIndicesRoutes, createReindexWorker } from './routes/reindex_indices';
 import { registerTelemetryRoutes } from './routes/telemetry';
+import { telemetrySavedObjectType, reindexOperationSavedObjectType } from './saved_object_types';
+
 import { RouteDependencies } from './types';
 
 interface PluginsSetup {
   usageCollection: UsageCollectionSetup;
   licensing: LicensingPluginSetup;
+  features: FeaturesPluginSetup;
   cloud?: CloudSetup;
 }
 
@@ -57,10 +61,26 @@ export class UpgradeAssistantServerPlugin implements Plugin {
   }
 
   setup(
-    { http, getStartServices, capabilities }: CoreSetup,
-    { usageCollection, cloud, licensing }: PluginsSetup
+    { http, getStartServices, capabilities, savedObjects }: CoreSetup,
+    { usageCollection, cloud, features, licensing }: PluginsSetup
   ) {
     this.licensing = licensing;
+
+    savedObjects.registerType(reindexOperationSavedObjectType);
+    savedObjects.registerType(telemetrySavedObjectType);
+
+    features.registerElasticsearchFeature({
+      id: 'upgrade_assistant',
+      management: {
+        stack: ['upgrade_assistant'],
+      },
+      privileges: [
+        {
+          requiredClusterPrivileges: ['manage'],
+          ui: [],
+        },
+      ],
+    });
 
     const router = http.createRouter();
 
@@ -85,8 +105,12 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     registerTelemetryRoutes(dependencies);
 
     if (usageCollection) {
-      getStartServices().then(([{ savedObjects, elasticsearch }]) => {
-        registerUpgradeAssistantUsageCollector({ elasticsearch, usageCollection, savedObjects });
+      getStartServices().then(([{ savedObjects: savedObjectsService, elasticsearch }]) => {
+        registerUpgradeAssistantUsageCollector({
+          elasticsearch,
+          usageCollection,
+          savedObjects: savedObjectsService,
+        });
       });
     }
   }

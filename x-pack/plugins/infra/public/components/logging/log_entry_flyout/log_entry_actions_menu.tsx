@@ -9,7 +9,7 @@ import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } f
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
 import { useVisibilityState } from '../../../utils/use_visibility_state';
-import { getTraceUrl } from '../../../../../../legacy/plugins/apm/public/components/shared/Links/apm/ExternalLinks';
+import { getTraceUrl } from '../../../../../apm/public';
 import { LogEntriesItem } from '../../../../common/http_api';
 import { useLinkProps, LinkDescriptor } from '../../../hooks/use_link_props';
 import { decodeOrThrow } from '../../../../common/runtime_types';
@@ -99,7 +99,7 @@ const getUptimeLink = (logItem: LogEntriesItem): LinkDescriptor | undefined => {
       const { field, value } = fieldItem;
       try {
         const parsedValue = decodeOrThrow(rt.array(rt.string))(JSON.parse(value));
-        return acc.concat(parsedValue.map(val => `${field}:${val}`));
+        return acc.concat(parsedValue.map((val) => `${field}:${val}`));
       } catch (e) {
         return acc.concat([`${field}:${value}`]);
       }

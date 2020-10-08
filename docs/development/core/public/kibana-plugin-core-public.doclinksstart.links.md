@@ -8,6 +8,12 @@
 
 ```typescript
 readonly links: {
+        readonly dashboard: {
+            readonly drilldowns: string;
+            readonly drilldownsTriggerPicker: string;
+            readonly urlDrilldownTemplateSyntax: string;
+            readonly urlDrilldownVariables: string;
+        };
         readonly filebeat: {
             readonly base: string;
             readonly installation: string;
@@ -78,12 +84,14 @@ readonly links: {
             readonly loadingData: string;
             readonly introduction: string;
         };
+        readonly addData: string;
         readonly kibana: string;
         readonly siem: {
             readonly guide: string;
             readonly gettingStarted: string;
         };
         readonly query: {
+            readonly eql: string;
             readonly luceneQuerySyntax: string;
             readonly queryDsl: string;
             readonly kueryQuerySyntax: string;
@@ -92,5 +100,6 @@ readonly links: {
             readonly dateMath: string;
         };
         readonly management: Record<string, string>;
+        readonly visualize: Record<string, string>;
     };
 ```

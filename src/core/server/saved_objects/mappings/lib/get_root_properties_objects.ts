@@ -39,14 +39,14 @@ import { getRootProperties } from './get_root_properties';
  *  @return {EsPropertyMappings}
  */
 
-const blacklist = ['migrationVersion', 'references'];
+const omittedRootProps = ['migrationVersion', 'references'];
 
 export function getRootPropertiesObjects(mappings: IndexMapping) {
   const rootProperties = getRootProperties(mappings);
   return Object.entries(rootProperties).reduce((acc, [key, value]) => {
     // we consider the existence of the properties or type of object to designate that this is an object datatype
     if (
-      !blacklist.includes(key) &&
+      !omittedRootProps.includes(key) &&
       ((value as SavedObjectsComplexFieldMapping).properties || value.type === 'object')
     ) {
       acc[key] = value;

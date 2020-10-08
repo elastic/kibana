@@ -8,7 +8,12 @@ export { ObjectRemover } from './object_remover';
 export { getUrlPrefix } from './space_test_utils';
 export { ES_TEST_INDEX_NAME, ESTestIndexTool } from './es_test_index_tool';
 export { getTestAlertData } from './get_test_alert_data';
-export { AlertUtils } from './alert_utils';
+export {
+  AlertUtils,
+  getConsumerUnauthorizedErrorMessage,
+  getProducerUnauthorizedErrorMessage,
+} from './alert_utils';
 export { TaskManagerUtils } from './task_manager_utils';
 export * from './test_assertions';
 export { checkAAD } from './check_aad';
+export { getEventLog } from './get_event_log';

@@ -26,19 +26,19 @@ describe('Range parsing utility', () => {
       parseRange('');
     }).toThrowError(TypeError);
 
-    expect(function() {
+    expect(function () {
       parseRange('p10202');
     }).toThrowError(TypeError);
 
-    expect(function() {
+    expect(function () {
       parseRange('{0,100}');
     }).toThrowError(TypeError);
 
-    expect(function() {
+    expect(function () {
       parseRange('[0,100');
     }).toThrowError(TypeError);
 
-    expect(function() {
+    expect(function () {
       parseRange(')0,100(');
     }).toThrowError(TypeError);
   });

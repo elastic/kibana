@@ -9,7 +9,6 @@ import { EuiConfirmModal, EuiOverlayMask, EuiCallOut, EuiCheckbox, EuiBadge } fr
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { IndexTemplateFormatVersion } from '../../../common';
 import { deleteTemplates } from '../services/api';
 import { notificationService } from '../services/notification';
 
@@ -17,7 +16,7 @@ export const TemplateDeleteModal = ({
   templatesToDelete,
   callback,
 }: {
-  templatesToDelete: Array<{ name: string; formatVersion: IndexTemplateFormatVersion }>;
+  templatesToDelete: Array<{ name: string; isLegacy?: boolean }>;
   callback: (data?: { hasDeletedTemplates: boolean }) => void;
 }) => {
   const [isDeleteConfirmed, setIsDeleteConfirmed] = useState<boolean>(false);
@@ -164,7 +163,7 @@ export const TemplateDeleteModal = ({
                   />
                 }
                 checked={isDeleteConfirmed}
-                onChange={e => setIsDeleteConfirmed(e.target.checked)}
+                onChange={(e) => setIsDeleteConfirmed(e.target.checked)}
               />
             </EuiCallOut>
           )}

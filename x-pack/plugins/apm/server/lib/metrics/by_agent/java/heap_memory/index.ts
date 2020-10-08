@@ -10,52 +10,48 @@ import {
   METRIC_JAVA_HEAP_MEMORY_MAX,
   METRIC_JAVA_HEAP_MEMORY_COMMITTED,
   METRIC_JAVA_HEAP_MEMORY_USED,
-  AGENT_NAME
+  AGENT_NAME,
 } from '../../../../../../common/elasticsearch_fieldnames';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters
-} from '../../../../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
 import { ChartBase } from '../../../types';
 
 const series = {
   heapMemoryUsed: {
     title: i18n.translate('xpack.apm.agentMetrics.java.heapMemorySeriesUsed', {
-      defaultMessage: 'Avg. used'
+      defaultMessage: 'Avg. used',
     }),
-    color: theme.euiColorVis0
+    color: theme.euiColorVis0,
   },
   heapMemoryCommitted: {
     title: i18n.translate(
       'xpack.apm.agentMetrics.java.heapMemorySeriesCommitted',
       {
-        defaultMessage: 'Avg. committed'
+        defaultMessage: 'Avg. committed',
       }
     ),
-    color: theme.euiColorVis1
+    color: theme.euiColorVis1,
   },
   heapMemoryMax: {
     title: i18n.translate('xpack.apm.agentMetrics.java.heapMemorySeriesMax', {
-      defaultMessage: 'Avg. limit'
+      defaultMessage: 'Avg. limit',
     }),
-    color: theme.euiColorVis2
-  }
+    color: theme.euiColorVis2,
+  },
 };
 
 const chartBase: ChartBase = {
   title: i18n.translate('xpack.apm.agentMetrics.java.heapMemoryChartTitle', {
-    defaultMessage: 'Heap Memory'
+    defaultMessage: 'Heap Memory',
   }),
   key: 'heap_memory_area_chart',
   type: 'area',
   yUnit: 'bytes',
-  series
+  series,
 };
 
 export async function getHeapMemoryChart(
-  setup: Setup & SetupTimeRange & SetupUIFilters,
+  setup: Setup & SetupTimeRange,
   serviceName: string,
   serviceNodeName?: string
 ) {
@@ -67,10 +63,10 @@ export async function getHeapMemoryChart(
     aggs: {
       heapMemoryMax: { avg: { field: METRIC_JAVA_HEAP_MEMORY_MAX } },
       heapMemoryCommitted: {
-        avg: { field: METRIC_JAVA_HEAP_MEMORY_COMMITTED }
+        avg: { field: METRIC_JAVA_HEAP_MEMORY_COMMITTED },
       },
-      heapMemoryUsed: { avg: { field: METRIC_JAVA_HEAP_MEMORY_USED } }
+      heapMemoryUsed: { avg: { field: METRIC_JAVA_HEAP_MEMORY_USED } },
     },
-    additionalFilters: [{ term: { [AGENT_NAME]: 'java' } }]
+    additionalFilters: [{ term: { [AGENT_NAME]: 'java' } }],
   });
 }

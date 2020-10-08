@@ -12,23 +12,3 @@ type DeeplyMockedKeys<T> = {
     : DeeplyMockedKeys<T[P]>;
 } &
   T;
-
-// https://github.com/styled-components/jest-styled-components/issues/264
-declare namespace jest {
-  interface AsymmetricMatcher {
-    $$typeof: Symbol; //eslint-disable-line
-    sample?: string | RegExp | object | Array<any> | Function; // eslint-disable-line
-  }
-
-  type Value = string | number | RegExp | AsymmetricMatcher | undefined;
-
-  interface Options {
-    media?: string;
-    modifier?: string;
-    supports?: string;
-  }
-
-  interface Matchers<R> {
-    toHaveStyleRule(property: string, value?: Value, options?: Options): R;
-  }
-}

@@ -68,7 +68,7 @@ export default new Chainable('points', {
         },
       }),
       types: ['string', 'null'],
-      suggestions: validSymbols.map(symbol => {
+      suggestions: validSymbols.map((symbol) => {
         const suggestion = { name: symbol };
         if (symbol === defaultSymbol) {
           suggestion.help = 'default';
@@ -88,7 +88,7 @@ export default new Chainable('points', {
     defaultMessage: 'Show the series as points',
   }),
   fn: function pointsFn(args) {
-    return alter(args, function(eachSeries, radius, weight, fill, fillColor, symbol, show) {
+    return alter(args, function (eachSeries, radius, weight, fill, fillColor, symbol, show) {
       eachSeries.points = eachSeries.points || {};
       eachSeries.points.radius = radius == null ? undefined : radius;
 
@@ -105,7 +105,7 @@ export default new Chainable('points', {
       }
 
       symbol = symbol || defaultSymbol;
-      if (!_.contains(validSymbols, symbol)) {
+      if (!_.includes(validSymbols, symbol)) {
         throw new Error(
           i18n.translate('timelion.serverSideErrors.pointsFunction.notValidSymbolErrorMessage', {
             defaultMessage: 'Valid symbols are: {validSymbols}',

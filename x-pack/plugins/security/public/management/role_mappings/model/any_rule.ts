@@ -49,19 +49,19 @@ export class AnyRule extends RuleGroup {
   public canContainRules(rules: Rule[]) {
     const forbiddenRules = [ExceptAllRule, ExceptAnyRule];
     return rules.every(
-      candidate => !forbiddenRules.some(forbidden => candidate instanceof forbidden)
+      (candidate) => !forbiddenRules.some((forbidden) => candidate instanceof forbidden)
     );
   }
 
   /** {@see RuleGroup.clone} */
   public clone() {
-    return new AnyRule(this.rules.map(r => r.clone()));
+    return new AnyRule(this.rules.map((r) => r.clone()));
   }
 
   /** {@see RuleGroup.toRaw} */
   public toRaw() {
     return {
-      any: [...this.rules.map(rule => rule.toRaw())],
+      any: [...this.rules.map((rule) => rule.toRaw())],
     };
   }
 }

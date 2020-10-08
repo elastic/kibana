@@ -39,7 +39,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { getDefaultQueryLanguage } from './lib/get_default_query_language';
 import { QueryBarWrapper } from './query_bar_wrapper';
 
-export const SeriesConfig = props => {
+export const SeriesConfig = (props) => {
   const defaults = { offset_time: '', value_template: '' };
   const model = { ...defaults, ...props.model };
   const handleSelectChange = createSelectHandler(props.onChange);
@@ -74,7 +74,7 @@ export const SeriesConfig = props => {
                 : getDefaultQueryLanguage(),
             query: model.filter && model.filter.query ? model.filter.query : '',
           }}
-          onChange={filter => props.onChange({ filter })}
+          onChange={(filter) => props.onChange({ filter })}
           indexPatterns={[seriesIndexPattern]}
         />
       </EuiFormRow>

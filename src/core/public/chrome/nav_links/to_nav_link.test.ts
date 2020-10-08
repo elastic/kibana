@@ -17,31 +17,17 @@
  * under the License.
  */
 
-import { App, AppMount, AppNavLinkStatus, AppStatus, LegacyApp } from '../../application';
+import { PublicAppInfo, AppNavLinkStatus, AppStatus } from '../../application';
 import { toNavLink } from './to_nav_link';
 
 import { httpServiceMock } from '../../mocks';
 
-function mount() {}
-
-const app = (props: Partial<App> = {}): App => ({
-  mount: (mount as unknown) as AppMount,
+const app = (props: Partial<PublicAppInfo> = {}): PublicAppInfo => ({
   id: 'some-id',
   title: 'some-title',
   status: AppStatus.accessible,
   navLinkStatus: AppNavLinkStatus.default,
   appRoute: `/app/some-id`,
-  legacy: false,
-  ...props,
-});
-
-const legacyApp = (props: Partial<LegacyApp> = {}): LegacyApp => ({
-  appUrl: '/my-app-url',
-  id: 'some-id',
-  title: 'some-title',
-  status: AppStatus.accessible,
-  navLinkStatus: AppNavLinkStatus.default,
-  legacy: true,
   ...props,
 });
 
@@ -70,11 +56,6 @@ describe('toNavLink', () => {
     );
   });
 
-  it('flags legacy apps when converting to navLink', () => {
-    expect(toNavLink(app({}), basePath).properties.legacy).toEqual(false);
-    expect(toNavLink(legacyApp({}), basePath).properties.legacy).toEqual(true);
-  });
-
   it('handles applications with custom app route', () => {
     const link = toNavLink(
       app({
@@ -85,18 +66,24 @@ describe('toNavLink', () => {
     expect(link.properties.baseUrl).toEqual('http://localhost/base-path/my-route/my-path');
   });
 
-  it('uses appUrl when converting legacy applications', () => {
-    expect(
-      toNavLink(
-        legacyApp({
-          appUrl: '/my-legacy-app/#foo',
-        }),
-        basePath
-      ).properties
-    ).toEqual(
-      expect.objectContaining({
-        baseUrl: 'http://localhost/base-path/my-legacy-app/#foo',
-      })
+  it('generates the `url` property', () => {
+    let link = toNavLink(
+      app({
+        appRoute: '/my-route/my-path',
+      }),
+      basePath
+    );
+    expect(link.properties.url).toEqual('http://localhost/base-path/my-route/my-path');
+
+    link = toNavLink(
+      app({
+        appRoute: '/my-route/my-path',
+        defaultPath: 'some/default/path',
+      }),
+      basePath
+    );
+    expect(link.properties.url).toEqual(
+      'http://localhost/base-path/my-route/my-path/some/default/path'
     );
   });
 

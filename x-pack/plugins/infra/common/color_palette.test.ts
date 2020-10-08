@@ -4,35 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { sampleColor, MetricsExplorerColor, colorTransformer } from './color_palette';
+import { sampleColor, Color, colorTransformer } from './color_palette';
 describe('Color Palette', () => {
   describe('sampleColor()', () => {
     it('should just work', () => {
-      const usedColors = [MetricsExplorerColor.color0];
+      const usedColors = [Color.color0];
       const color = sampleColor(usedColors);
-      expect(color).toBe(MetricsExplorerColor.color1);
+      expect(color).toBe(Color.color1);
     });
 
     it('should return color0 when nothing is available', () => {
       const usedColors = [
-        MetricsExplorerColor.color0,
-        MetricsExplorerColor.color1,
-        MetricsExplorerColor.color2,
-        MetricsExplorerColor.color3,
-        MetricsExplorerColor.color4,
-        MetricsExplorerColor.color5,
-        MetricsExplorerColor.color6,
-        MetricsExplorerColor.color7,
-        MetricsExplorerColor.color8,
-        MetricsExplorerColor.color9,
+        Color.color0,
+        Color.color1,
+        Color.color2,
+        Color.color3,
+        Color.color4,
+        Color.color5,
+        Color.color6,
+        Color.color7,
+        Color.color8,
+        Color.color9,
       ];
       const color = sampleColor(usedColors);
-      expect(color).toBe(MetricsExplorerColor.color0);
+      expect(color).toBe(Color.color0);
     });
   });
   describe('colorTransformer()', () => {
     it('should just work', () => {
-      expect(colorTransformer(MetricsExplorerColor.color0)).toBe('#6092C0');
+      expect(colorTransformer(Color.color0)).toBe('#6092C0');
     });
   });
 });

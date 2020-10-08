@@ -36,6 +36,8 @@ interface TestOptions {
 
 export const normalizeResult = (report: any) => {
   if (report.error) {
+    const error = new Error(report.error.message);
+    error.stack = report.error.stack;
     throw report.error;
   }
 
@@ -69,8 +71,12 @@ export function A11yProvider({ getService }: FtrProviderContext) {
         include: global ? undefined : [testSubjectToCss('appA11yRoot')],
         exclude: ([] as string[])
           .concat(excludeTestSubj || [])
-          .map(ts => [testSubjectToCss(ts)])
-          .concat([['.ace_scrollbar']]),
+          .map((ts) => [testSubjectToCss(ts)])
+          .concat([
+            [
+              '.leaflet-vega-container[role="graphics-document"][aria-roledescription="visualization"]',
+            ],
+          ]),
       };
     }
 
@@ -92,7 +98,10 @@ export function A11yProvider({ getService }: FtrProviderContext) {
         runOnly: ['wcag2a', 'wcag2aa'],
         rules: {
           'color-contrast': {
-            enabled: false,
+            enabled: false, // disabled because we have too many failures
+          },
+          bypass: {
+            enabled: false, // disabled because it's too flaky
           },
         },
       };

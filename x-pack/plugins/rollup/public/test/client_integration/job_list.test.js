@@ -10,15 +10,15 @@ import { JOBS } from './helpers/constants';
 import { coreMock } from '../../../../../../src/core/public/mocks';
 
 jest.mock('../../crud_app/services', () => {
-  const services = require.requireActual('../../crud_app/services');
+  const services = jest.requireActual('../../crud_app/services');
   return {
     ...services,
-    getRouterLinkProps: link => ({ href: link }),
+    getRouterLinkProps: (link) => ({ href: link }),
   };
 });
 
 jest.mock('../../kibana_services', () => {
-  const services = require.requireActual('../../kibana_services');
+  const services = jest.requireActual('../../kibana_services');
   return {
     ...services,
     getUiStatsReporter: jest.fn(() => () => {}),

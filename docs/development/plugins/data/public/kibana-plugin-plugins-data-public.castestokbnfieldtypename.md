@@ -9,5 +9,5 @@ Get the KbnFieldType name for an esType string
 <b>Signature:</b>
 
 ```typescript
-castEsToKbnFieldTypeName: (esType: string) => KBN_FIELD_TYPES
+castEsToKbnFieldTypeName: (esType: ES_FIELD_TYPES | string) => KBN_FIELD_TYPES
 ```

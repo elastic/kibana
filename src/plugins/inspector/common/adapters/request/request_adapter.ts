@@ -18,7 +18,6 @@
  */
 
 import { EventEmitter } from 'events';
-import _ from 'lodash';
 import uuid from 'uuid/v4';
 import { RequestResponder } from './request_responder';
 import { Request, RequestParams, RequestStatus } from './types';

@@ -8,26 +8,24 @@ import _ from 'lodash';
 import React from 'react';
 import { Provider } from 'react-redux';
 import { render, unmountComponentAtNode } from 'react-dom';
-import 'mapbox-gl/dist/mapbox-gl.css';
 import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
+import { Embeddable, IContainer } from '../../../../../src/plugins/embeddable/public';
+import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../src/plugins/data/public';
 import {
-  Embeddable,
-  IContainer,
-  EmbeddableInput,
-  EmbeddableOutput,
-} from '../../../../../src/plugins/embeddable/public';
-import { APPLY_FILTER_TRIGGER } from '../../../../../src/plugins/ui_actions/public';
+  APPLY_FILTER_TRIGGER,
+  ActionExecutionContext,
+  TriggerContextMapping,
+} from '../../../../../src/plugins/ui_actions/public';
 import {
   esFilters,
-  IIndexPattern,
   TimeRange,
   Filter,
   Query,
   RefreshInterval,
 } from '../../../../../src/plugins/data/public';
-import { GisMap } from '../connected_components/gis_map';
 import { createMapStore, MapStore } from '../reducers/store';
+import { MapSettings } from '../reducers/map';
 import {
   setGotoWithCenter,
   replaceLayerList,
@@ -40,9 +38,11 @@ import {
   hideLayerControl,
   hideViewControl,
   setHiddenLayers,
-} from '../actions/map_actions';
-import { MapCenterAndZoom } from '../../common/descriptor_types';
-import { setReadOnly, setIsLayerTOCOpen, setOpenTOCDetails } from '../actions/ui_actions';
+  setMapSettings,
+  setReadOnly,
+  setIsLayerTOCOpen,
+  setOpenTOCDetails,
+} from '../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
   getInspectorAdapters,
@@ -51,44 +51,21 @@ import {
 } from '../reducers/non_serializable_instances';
 import { getMapCenter, getMapZoom, getHiddenLayerIds } from '../selectors/map_selectors';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
-import { RenderToolTipContent } from '../layers/tooltips/tooltip_property';
+import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 import { getUiActions, getCoreI18n } from '../kibana_services';
+import { LayerDescriptor } from '../../common/descriptor_types';
+import { MapContainer } from '../connected_components/map_container';
 
-interface MapEmbeddableConfig {
-  editUrl?: string;
-  indexPatterns: IIndexPattern[];
-  editable: boolean;
-  title?: string;
-  layerList: unknown[];
-}
-
-export interface MapEmbeddableInput extends EmbeddableInput {
-  timeRange?: TimeRange;
-  filters: Filter[];
-  query?: Query;
-  refreshConfig: RefreshInterval;
-  isLayerTOCOpen: boolean;
-  openTOCDetails?: string[];
-  disableTooltipControl?: boolean;
-  disableInteractive?: boolean;
-  hideToolbarOverlay?: boolean;
-  hideLayerControl?: boolean;
-  hideViewControl?: boolean;
-  mapCenter?: MapCenterAndZoom;
-  hiddenLayers?: string[];
-  hideFilterActions?: boolean;
-}
-
-export interface MapEmbeddableOutput extends EmbeddableOutput {
-  indexPatterns: IIndexPattern[];
-}
+import { MapEmbeddableConfig, MapEmbeddableInput, MapEmbeddableOutput } from './types';
+export { MapEmbeddableInput, MapEmbeddableConfig };
 
 export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput> {
   type = MAP_SAVED_OBJECT_TYPE;
 
+  private _description: string;
   private _renderTooltipContent?: RenderToolTipContent;
   private _eventHandlers?: EventHandlers;
-  private _layerList: unknown[];
+  private _layerList: LayerDescriptor[];
   private _store: MapStore;
   private _subscription: Subscription;
   private _prevTimeRange?: TimeRange;
@@ -97,6 +74,7 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
   private _prevFilters?: Filter[];
   private _domNode?: HTMLElement;
   private _unsubscribeFromStore?: Unsubscribe;
+  private _settings?: MapSettings;
 
   constructor(
     config: MapEmbeddableConfig,
@@ -109,6 +87,8 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
       initialInput,
       {
         editUrl: config.editUrl,
+        editApp: config.editApp,
+        editPath: config.editPath,
         indexPatterns: config.indexPatterns,
         editable: config.editable,
         defaultTitle: config.title,
@@ -116,12 +96,22 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
       parent
     );
 
+    this._description = config.description ? config.description : '';
     this._renderTooltipContent = renderTooltipContent;
     this._eventHandlers = eventHandlers;
     this._layerList = config.layerList;
+    this._settings = config.settings;
     this._store = createMapStore();
 
-    this._subscription = this.getInput$().subscribe(input => this.onContainerStateChanged(input));
+    this._subscription = this.getInput$().subscribe((input) => this.onContainerStateChanged(input));
+  }
+
+  public getDescription() {
+    return this._description;
+  }
+
+  supportedTriggers(): Array<keyof TriggerContextMapping> {
+    return [APPLY_FILTER_TRIGGER];
   }
 
   setRenderTooltipContent = (renderTooltipContent: RenderToolTipContent) => {
@@ -154,22 +144,22 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
     query,
     timeRange,
     filters,
-    refresh,
+    forceRefresh,
   }: {
     query?: Query;
     timeRange?: TimeRange;
     filters: Filter[];
-    refresh?: boolean;
+    forceRefresh?: boolean;
   }) {
     this._prevTimeRange = timeRange;
     this._prevQuery = query;
     this._prevFilters = filters;
-    this._store.dispatch(
+    this._store.dispatch<any>(
       setQuery({
-        filters: filters.filter(filter => !filter.meta.disabled),
+        filters: filters.filter((filter) => !filter.meta.disabled),
         query,
         timeFilters: timeRange,
-        refresh,
+        forceRefresh,
       })
     );
   }
@@ -193,6 +183,10 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
     this._store.dispatch(setEventHandlers(this._eventHandlers));
     this._store.dispatch(setReadOnly(true));
     this._store.dispatch(disableScrollZoom());
+
+    if (this._settings) {
+      this._store.dispatch(setMapSettings(this._settings));
+    }
 
     if (_.has(this.input, 'isLayerTOCOpen')) {
       this._store.dispatch(setIsLayerTOCOpen(this.input.isLayerTOCOpen));
@@ -231,9 +225,9 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
       );
     }
 
-    this._store.dispatch(replaceLayerList(this._layerList));
+    this._store.dispatch<any>(replaceLayerList(this._layerList));
     if (this.input.hiddenLayers) {
-      this._store.dispatch(setHiddenLayers(this.input.hiddenLayers));
+      this._store.dispatch<any>(setHiddenLayers(this.input.hiddenLayers));
     }
     this._dispatchSetQuery(this.input);
     this._dispatchSetRefreshConfig(this.input);
@@ -245,9 +239,13 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
     render(
       <Provider store={this._store}>
         <I18nContext>
-          <GisMap
+          <MapContainer
             addFilters={this.input.hideFilterActions ? null : this.addFilters}
+            getFilterActions={this.getFilterActions}
+            getActionContext={this.getActionContext}
             renderTooltipContent={this._renderTooltipContent}
+            title={this.getTitle()}
+            description={this._description}
           />
         </I18nContext>
       </Provider>,
@@ -259,16 +257,39 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
     });
   }
 
-  async setLayerList(layerList: unknown[]) {
+  async setLayerList(layerList: LayerDescriptor[]) {
     this._layerList = layerList;
-    return await this._store.dispatch(replaceLayerList(this._layerList));
+    return await this._store.dispatch<any>(replaceLayerList(this._layerList));
   }
 
-  addFilters = (filters: Filter[]) => {
-    getUiActions().executeTriggerActions(APPLY_FILTER_TRIGGER, {
-      embeddable: this,
+  addFilters = async (filters: Filter[], actionId: string = ACTION_GLOBAL_APPLY_FILTER) => {
+    const executeContext = {
+      ...this.getActionContext(),
       filters,
+    };
+    const action = getUiActions().getAction(actionId);
+    if (!action) {
+      throw new Error('Unable to apply filter, could not locate action');
+    }
+    action.execute(executeContext);
+  };
+
+  getFilterActions = async () => {
+    return await getUiActions().getTriggerCompatibleActions(APPLY_FILTER_TRIGGER, {
+      embeddable: this,
+      filters: [],
     });
+  };
+
+  getActionContext = () => {
+    const trigger = getUiActions().getTrigger(APPLY_FILTER_TRIGGER);
+    if (!trigger) {
+      throw new Error('Unable to get context, could not locate trigger');
+    }
+    return {
+      embeddable: this,
+      trigger,
+    } as ActionExecutionContext;
   };
 
   destroy() {
@@ -291,7 +312,7 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
       query: this._prevQuery,
       timeRange: this._prevTimeRange,
       filters: this._prevFilters ?? [],
-      refresh: true,
+      forceRefresh: true,
     });
   }
 

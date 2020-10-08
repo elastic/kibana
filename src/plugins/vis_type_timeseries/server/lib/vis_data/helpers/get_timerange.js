@@ -19,7 +19,7 @@
 
 import moment from 'moment';
 
-export const getTimerange = req => {
+export const getTimerange = (req) => {
   const { min, max } = req.payload.timerange;
 
   return {
@@ -28,7 +28,7 @@ export const getTimerange = req => {
   };
 };
 
-export const getTimerangeDuration = req => {
+export const getTimerangeDuration = (req) => {
   const { from, to } = getTimerange(req);
 
   return moment.duration(to.valueOf() - from.valueOf(), 'ms');

@@ -57,13 +57,13 @@ export function LayerControl({
   closeLayerTOC,
   openLayerTOC,
   layerList,
-  isAddButtonActive,
+  isFlyoutOpen,
 }) {
   if (!isLayerTOCOpen) {
-    const hasErrors = layerList.some(layer => {
+    const hasErrors = layerList.some((layer) => {
       return layer.hasErrors();
     });
-    const isLoading = layerList.some(layer => {
+    const isLoading = layerList.some((layer) => {
       return layer.isLayerLoading();
     });
 
@@ -86,7 +86,7 @@ export function LayerControl({
       <Fragment>
         <EuiSpacer size="s" />
         <EuiButton
-          isDisabled={!isAddButtonActive}
+          isDisabled={isFlyoutOpen}
           className="mapLayerControl__addLayerButton"
           fill
           fullWidth

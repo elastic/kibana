@@ -9,7 +9,7 @@ import { getDiscoverUrl } from './navigation';
 describe('navigation', () => {
   test('getDiscoverUrl should provide encoded url to Discover page', () => {
     expect(getDiscoverUrl('farequote-airline', 'http://example.com')).toBe(
-      'http://example.com#/discover?_g=()&_a=(index:farequote-airline)'
+      'http://example.com/app/discover#?_g=()&_a=(index:farequote-airline)'
     );
   });
 });

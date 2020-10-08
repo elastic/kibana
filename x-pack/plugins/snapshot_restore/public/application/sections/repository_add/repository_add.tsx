@@ -12,7 +12,9 @@ import { RouteComponentProps } from 'react-router-dom';
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { Repository, EmptyRepository } from '../../../../common/types';
 
-import { RepositoryForm, SectionError } from '../../components';
+import { SectionError } from '../../../shared_imports';
+
+import { RepositoryForm } from '../../components';
 import { BASE_PATH, Section } from '../../constants';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 import { addRepository } from '../../services/http';
@@ -42,7 +44,11 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
     } else {
       const { redirect } = parse(search.replace(/^\?/, ''), { sort: false });
 
-      history.push(redirect ? (redirect as string) : `${BASE_PATH}/${section}/${name}`);
+      history.push(
+        redirect
+          ? (redirect as string)
+          : encodeURI(`${BASE_PATH}/${encodeURIComponent(section)}/${encodeURIComponent(name)}`)
+      );
     }
   };
 

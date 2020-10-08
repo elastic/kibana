@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Option } from 'fp-ts/lib/Option';
+
 import { ConcreteTaskInstance } from './task';
 
 import { Result, Err } from './lib/result_type';
@@ -22,7 +24,7 @@ export interface TaskEvent<T, E> {
 }
 export type TaskMarkRunning = TaskEvent<ConcreteTaskInstance, Error>;
 export type TaskRun = TaskEvent<ConcreteTaskInstance, Error>;
-export type TaskClaim = TaskEvent<ConcreteTaskInstance, Error>;
+export type TaskClaim = TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>;
 export type TaskRunRequest = TaskEvent<ConcreteTaskInstance, Error>;
 
 export function asTaskMarkRunningEvent(
@@ -46,7 +48,7 @@ export function asTaskRunEvent(id: string, event: Result<ConcreteTaskInstance, E
 
 export function asTaskClaimEvent(
   id: string,
-  event: Result<ConcreteTaskInstance, Error>
+  event: Result<ConcreteTaskInstance, Option<ConcreteTaskInstance>>
 ): TaskClaim {
   return {
     id,
@@ -68,16 +70,18 @@ export function asTaskRunRequestEvent(
 }
 
 export function isTaskMarkRunningEvent(
-  taskEvent: TaskEvent<any, any>
+  taskEvent: TaskEvent<unknown, unknown>
 ): taskEvent is TaskMarkRunning {
   return taskEvent.type === TaskEventType.TASK_MARK_RUNNING;
 }
-export function isTaskRunEvent(taskEvent: TaskEvent<any, any>): taskEvent is TaskRun {
+export function isTaskRunEvent(taskEvent: TaskEvent<unknown, unknown>): taskEvent is TaskRun {
   return taskEvent.type === TaskEventType.TASK_RUN;
 }
-export function isTaskClaimEvent(taskEvent: TaskEvent<any, any>): taskEvent is TaskClaim {
+export function isTaskClaimEvent(taskEvent: TaskEvent<unknown, unknown>): taskEvent is TaskClaim {
   return taskEvent.type === TaskEventType.TASK_CLAIM;
 }
-export function isTaskRunRequestEvent(taskEvent: TaskEvent<any, any>): taskEvent is TaskRunRequest {
+export function isTaskRunRequestEvent(
+  taskEvent: TaskEvent<unknown, unknown>
+): taskEvent is TaskRunRequest {
   return taskEvent.type === TaskEventType.TASK_RUN_REQUEST;
 }

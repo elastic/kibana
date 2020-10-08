@@ -87,9 +87,25 @@ export class TelemetryService {
     return telemetryUrl;
   };
 
-  public getUserHasSeenOptedInNotice = () => {
-    return this.config.telemetryNotifyUserAboutOptInDefault || false;
-  };
+  /**
+   * Returns if an user should be shown the notice about Opt-In/Out telemetry.
+   * The decision is made based on whether any user has already dismissed the message or
+   * the user can't actually change the settings (in which case, there's no point on bothering them)
+   */
+  public getUserShouldSeeOptInNotice(): boolean {
+    return (
+      (this.config.telemetryNotifyUserAboutOptInDefault && this.config.userCanChangeSettings) ??
+      false
+    );
+  }
+
+  public get userCanChangeSettings() {
+    return this.config.userCanChangeSettings ?? false;
+  }
+
+  public set userCanChangeSettings(userCanChangeSettings: boolean) {
+    this.config = { ...this.config, userCanChangeSettings };
+  }
 
   public getIsOptedIn = () => {
     return this.isOptedIn;
@@ -122,11 +138,15 @@ export class TelemetryService {
     }
 
     try {
-      await this.http.post('/api/telemetry/v2/optIn', {
+      // Report the option to the Kibana server to store the settings.
+      // It returns the encrypted update to send to the telemetry cluster [{cluster_uuid, opt_in_status}]
+      const optInPayload = await this.http.post<string[]>('/api/telemetry/v2/optIn', {
         body: JSON.stringify({ enabled: optedIn }),
       });
       if (this.reportOptInStatusChange) {
-        await this.reportOptInStatus(optedIn);
+        // Use the response to report about the change to the remote telemetry cluster.
+        // If it's opt-out, this will be the last communication to the remote service.
+        await this.reportOptInStatus(optInPayload);
       }
       this.isOptedIn = optedIn;
     } catch (err) {
@@ -162,7 +182,11 @@ export class TelemetryService {
     }
   };
 
-  private reportOptInStatus = async (OptInStatus: boolean): Promise<void> => {
+  /**
+   * Pushes the encrypted payload [{cluster_uuid, opt_in_status}] to the remote telemetry service
+   * @param optInPayload [{cluster_uuid, opt_in_status}] encrypted by the server into an array of strings
+   */
+  private reportOptInStatus = async (optInPayload: string[]): Promise<void> => {
     const telemetryOptInStatusUrl = this.getOptInStatusUrl();
 
     try {
@@ -171,7 +195,7 @@ export class TelemetryService {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ enabled: OptInStatus }),
+        body: JSON.stringify(optInPayload),
       });
     } catch (err) {
       // Sending the ping is best-effort. Telemetry tries to send the ping once and discards it immediately if sending fails.

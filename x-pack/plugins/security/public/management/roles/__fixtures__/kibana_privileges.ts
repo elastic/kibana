@@ -7,17 +7,19 @@
 import { Actions } from '../../../../server/authorization';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { privilegesFactory } from '../../../../server/authorization/privileges';
-import { Feature } from '../../../../../features/public';
+import { KibanaFeature } from '../../../../../features/public';
 import { KibanaPrivileges } from '../model';
 import { SecurityLicenseFeatures } from '../../..';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { featuresPluginMock } from '../../../../../features/server/mocks';
+
 export const createRawKibanaPrivileges = (
-  features: Feature[],
+  features: KibanaFeature[],
   { allowSubFeaturePrivileges = true } = {}
 ) => {
-  const featuresService = {
-    getFeatures: () => features,
-  };
+  const featuresService = featuresPluginMock.createSetup();
+  featuresService.getKibanaFeatures.mockReturnValue(features);
 
   const licensingService = {
     getFeatures: () => ({ allowSubFeaturePrivileges } as SecurityLicenseFeatures),
@@ -31,7 +33,7 @@ export const createRawKibanaPrivileges = (
 };
 
 export const createKibanaPrivileges = (
-  features: Feature[],
+  features: KibanaFeature[],
   { allowSubFeaturePrivileges = true } = {}
 ) => {
   return new KibanaPrivileges(

@@ -22,19 +22,23 @@ import sinon from 'sinon';
 import timelionDefaults from '../../lib/get_namespaced_settings';
 import esResponse from './es_response';
 
-export default function() {
+export default function () {
   const functions = require('../../lib/load_functions')('series_functions');
 
   const tlConfig = require('../../handlers/lib/tl_config.js')({
-    getFunction: name => {
+    getFunction: (name) => {
       if (!functions[name]) throw new Error('No such function: ' + name);
       return functions[name];
     },
-    esDataClient: sinon.stub().returns({
-      callAsCurrentUser: function() {
-        return Promise.resolve(esResponse);
-      },
-    }),
+    getStartServices: sinon
+      .stub()
+      .returns(
+        Promise.resolve([
+          {},
+          { data: { search: { search: () => Promise.resolve({ rawResponse: esResponse }) } } },
+        ])
+      ),
+
     esShardTimeout: moment.duration(30000),
     allowedGraphiteUrls: ['https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite'],
   });

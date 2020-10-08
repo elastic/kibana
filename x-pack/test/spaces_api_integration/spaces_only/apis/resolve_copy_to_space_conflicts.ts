@@ -19,12 +19,13 @@ export default function resolveCopyToSpaceConflictsTestSuite({ getService }: Ftr
     createExpectNonOverriddenResponseWithoutReferences,
     createExpectOverriddenResponseWithReferences,
     createExpectOverriddenResponseWithoutReferences,
+    createMultiNamespaceTestCases,
     NON_EXISTENT_SPACE_ID,
     originSpaces,
   } = resolveCopyToSpaceConflictsSuite(esArchiver, supertestWithAuth, supertestWithoutAuth);
 
   describe('resolve copy to spaces conflicts', () => {
-    originSpaces.forEach(spaceId => {
+    originSpaces.forEach((spaceId) => {
       resolveCopyToSpaceConflictsTest(`from the ${spaceId} space`, {
         spaceId,
         tests: {
@@ -51,6 +52,7 @@ export default function resolveCopyToSpaceConflictsTestSuite({ getService }: Ftr
               NON_EXISTENT_SPACE_ID
             ),
           },
+          multiNamespaceTestCases: createMultiNamespaceTestCases(spaceId),
         },
       });
     });

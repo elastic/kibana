@@ -9,19 +9,21 @@ import fs from 'fs';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { services } from './services';
 
-export default async function({ readConfigFile }: FtrConfigProviderContext) {
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const integrationConfig = await readConfigFile(require.resolve('../api_integration/config'));
 
   // Find all folders in ./plugins since we treat all them as plugin folder
   const allFiles = fs.readdirSync(path.resolve(__dirname, 'plugins'));
-  const plugins = allFiles.filter(file =>
+  const plugins = allFiles.filter((file) =>
     fs.statSync(path.resolve(__dirname, 'plugins', file)).isDirectory()
   );
 
   return {
     testFiles: [
+      require.resolve('./test_suites/platform'),
       require.resolve('./test_suites/task_manager'),
       require.resolve('./test_suites/event_log'),
+      require.resolve('./test_suites/licensed_feature_usage'),
     ],
     services,
     servers: integrationConfig.get('servers'),
@@ -42,7 +44,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.eventLog.logEntries=true',
         '--xpack.eventLog.indexEntries=true',
         ...plugins.map(
-          pluginDir => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`
+          (pluginDir) => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`
         ),
       ],
     },

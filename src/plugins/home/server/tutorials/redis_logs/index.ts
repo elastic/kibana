@@ -37,6 +37,7 @@ export function redisLogsSpecProvider(context: TutorialContext): TutorialSchema 
     name: i18n.translate('home.tutorials.redisLogs.nameTitle', {
       defaultMessage: 'Redis logs',
     }),
+    moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.redisLogs.shortDescription', {
       defaultMessage: 'Collect and parse error and slow logs created by Redis.',
@@ -71,7 +72,7 @@ Note that the `slowlog` fileset is experimental. \
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/redis_logs/screenshot.png',
+    previewImagePath: '/plugins/home/assets/redis_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),

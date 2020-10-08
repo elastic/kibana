@@ -134,7 +134,7 @@ https://www.elastic.co/blog/using-painless-kibana-scripted-fields[Using Painless
 [[create-scripted-field]]
 === Create a scripted field
 
-. Go to *Management > {kib} > Index Patterns*
+. Open the menu, then go to *Stack Management > {kib} > Index Patterns*
 . Select the index pattern you want to add a scripted field to.
 . Go to the *Scripted fields* tab for the index pattern, then click *Add scripted field*.
 . Enter a name for the scripted field.
@@ -148,7 +148,6 @@ For more information about scripted fields in {es}, see
 [[update-scripted-field]]
 === Update a scripted field
 
-. Go to *Management > {kib} > Index Patterns*
 . Click the *Scripted fields* tab for the index pattern.
 . Click the *Edit* button for the scripted field you want to change.
 . Make your changes, then click *Save field*.
@@ -160,7 +159,6 @@ exceptions whenever you try to view the dynamically generated data.
 [[delete-scripted-field]]
 === Delete a scripted field
 
-. Go to *Management > {kib} > Index Patterns*
 . Click the *Scripted fields* tab for the index pattern.
 . Click *Delete* for the scripted field you want to remove.
 . Click *Delete* on the confirmation window.

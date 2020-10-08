@@ -301,16 +301,16 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
                     >
                       <EuiImage
                         alt=""
-                        url="/plugins/kibana/home/assets/welcome_graphic_light_2x.png"
+                        url="/plugins/home/assets/welcome_graphic_light_2x.png"
                       >
                         <figure
-                          className="euiImage"
-                          role="figure"
+                          className="euiImage "
                         >
                           <img
                             alt=""
                             className="euiImage__img"
-                            src="/plugins/kibana/home/assets/welcome_graphic_light_2x.png"
+                            src="/plugins/home/assets/welcome_graphic_light_2x.png"
+                            style={Object {}}
                           />
                         </figure>
                       </EuiImage>
@@ -671,35 +671,54 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
               iconType="plusInCircle"
               size="s"
             >
-              <button
+              <EuiButtonDisplay
                 aria-label="Create new visualization button"
-                className="euiButton euiButton--primary euiButton--small"
                 data-test-subj="addVisualizationButton"
+                element="button"
+                iconSide="left"
+                iconType="plusInCircle"
+                size="s"
                 type="button"
               >
-                <span
-                  className="euiButton__content"
+                <button
+                  aria-label="Create new visualization button"
+                  className="euiButton euiButton--primary euiButton--small"
+                  data-test-subj="addVisualizationButton"
+                  type="button"
                 >
-                  <EuiIcon
-                    aria-hidden="true"
-                    className="euiButton__icon"
-                    size="m"
-                    type="plusInCircle"
+                  <EuiButtonContent
+                    className="euiButton__content"
+                    iconSide="left"
+                    iconType="plusInCircle"
+                    textProps={
+                      Object {
+                        "className": "euiButton__text",
+                      }
+                    }
                   >
-                    <div
-                      aria-hidden="true"
-                      className="euiButton__icon"
-                      data-euiicon-type="plusInCircle"
-                      size="m"
-                    />
-                  </EuiIcon>
-                  <span
-                    className="euiButton__text"
-                  >
-                    Create new
-                  </span>
-                </span>
-              </button>
+                    <span
+                      className="euiButtonContent euiButton__content"
+                    >
+                      <EuiIcon
+                        className="euiButtonContent__icon"
+                        size="m"
+                        type="plusInCircle"
+                      >
+                        <div
+                          className="euiButtonContent__icon"
+                          data-euiicon-type="plusInCircle"
+                          size="m"
+                        />
+                      </EuiIcon>
+                      <span
+                        className="euiButton__text"
+                      >
+                        Create new
+                      </span>
+                    </span>
+                  </EuiButtonContent>
+                </button>
+              </EuiButtonDisplay>
             </EuiButton>
           </p>
         </div>
@@ -995,16 +1014,16 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
                     >
                       <EuiImage
                         alt=""
-                        url="/plugins/kibana/home/assets/welcome_graphic_light_2x.png"
+                        url="/plugins/home/assets/welcome_graphic_light_2x.png"
                       >
                         <figure
-                          className="euiImage"
-                          role="figure"
+                          className="euiImage "
                         >
                           <img
                             alt=""
                             className="euiImage__img"
-                            src="/plugins/kibana/home/assets/welcome_graphic_light_2x.png"
+                            src="/plugins/home/assets/welcome_graphic_light_2x.png"
+                            style={Object {}}
                           />
                         </figure>
                       </EuiImage>

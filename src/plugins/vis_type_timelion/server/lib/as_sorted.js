@@ -22,5 +22,5 @@ import unzipPairs from './unzip_pairs.js';
 
 export default function asSorted(timeValObject, fn) {
   const data = unzipPairs(timeValObject);
-  return _.zipObject(fn(data));
+  return _.fromPairs(fn(data));
 }

@@ -64,7 +64,7 @@ export function fetchElasticsearchStats(
         },
       },
       collapse: { field: 'cluster_uuid' },
-      sort: { timestamp: { order: 'desc' } },
+      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
     },
   };
 
@@ -86,5 +86,5 @@ export interface ESClusterStats {
 export function handleElasticsearchStats(response: SearchResponse<ESClusterStats>) {
   const clusters = response.hits?.hits || [];
 
-  return clusters.map(cluster => cluster._source);
+  return clusters.map((cluster) => cluster._source);
 }

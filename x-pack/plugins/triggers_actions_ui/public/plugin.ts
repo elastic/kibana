@@ -4,19 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreStart, PluginInitializerContext, Plugin as CorePlugin } from 'src/core/public';
+import {
+  CoreStart,
+  CoreSetup,
+  PluginInitializerContext,
+  Plugin as CorePlugin,
+} from 'src/core/public';
 
 import { i18n } from '@kbn/i18n';
 import { registerBuiltInActionTypes } from './application/components/builtin_action_types';
 import { registerBuiltInAlertTypes } from './application/components/builtin_alert_types';
-import { hasShowActionsCapability, hasShowAlertsCapability } from './application/lib/capabilities';
 import { ActionTypeModel, AlertTypeModel } from './types';
 import { TypeRegistry } from './application/type_registry';
-import { ManagementStart } from '../../../../src/plugins/management/public';
+import {
+  ManagementSetup,
+  ManagementAppMountParams,
+} from '../../../../src/plugins/management/public';
 import { boot } from './application/boot';
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
-import { PluginStartContract as AlertingStart } from '../../alerting/public';
+import { PluginStartContract as AlertingStart } from '../../alerts/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+
+export interface TriggersActionsUiConfigType {
+  enableGeoTrackingThresholdAlert: boolean;
+}
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -28,19 +39,28 @@ export interface TriggersAndActionsUIPublicPluginStart {
   alertTypeRegistry: TypeRegistry<AlertTypeModel>;
 }
 
+interface PluginsSetup {
+  management: ManagementSetup;
+}
+
 interface PluginsStart {
   data: DataPublicPluginStart;
   charts: ChartsPluginStart;
-  management: ManagementStart;
-  alerting?: AlertingStart;
+  alerts?: AlertingStart;
   navigateToApp: CoreStart['application']['navigateToApp'];
 }
 
 export class Plugin
   implements
-    CorePlugin<TriggersAndActionsUIPublicPluginSetup, TriggersAndActionsUIPublicPluginStart> {
+    CorePlugin<
+      TriggersAndActionsUIPublicPluginSetup,
+      TriggersAndActionsUIPublicPluginStart,
+      PluginsSetup,
+      PluginsStart
+    > {
   private actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   private alertTypeRegistry: TypeRegistry<AlertTypeModel>;
+  private initializerContext: PluginInitializerContext;
 
   constructor(initializerContext: PluginInitializerContext) {
     const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
@@ -48,15 +68,56 @@ export class Plugin
 
     const alertTypeRegistry = new TypeRegistry<AlertTypeModel>();
     this.alertTypeRegistry = alertTypeRegistry;
+
+    this.initializerContext = initializerContext;
   }
 
-  public setup(): TriggersAndActionsUIPublicPluginSetup {
+  public setup(core: CoreSetup, plugins: PluginsSetup): TriggersAndActionsUIPublicPluginSetup {
+    const actionTypeRegistry = this.actionTypeRegistry;
+    const alertTypeRegistry = this.alertTypeRegistry;
+
+    plugins.management.sections.section.insightsAndAlerting.registerApp({
+      id: 'triggersActions',
+      title: i18n.translate('xpack.triggersActionsUI.managementSection.displayName', {
+        defaultMessage: 'Alerts and Actions',
+      }),
+      order: 0,
+      async mount(params: ManagementAppMountParams) {
+        const [coreStart, pluginsStart] = (await core.getStartServices()) as [
+          CoreStart,
+          PluginsStart,
+          unknown
+        ];
+        boot({
+          dataPlugin: pluginsStart.data,
+          charts: pluginsStart.charts,
+          alerts: pluginsStart.alerts,
+          element: params.element,
+          toastNotifications: coreStart.notifications.toasts,
+          http: coreStart.http,
+          uiSettings: coreStart.uiSettings,
+          docLinks: coreStart.docLinks,
+          chrome: coreStart.chrome,
+          savedObjects: coreStart.savedObjects.client,
+          I18nContext: coreStart.i18n.Context,
+          capabilities: coreStart.application.capabilities,
+          navigateToApp: coreStart.application.navigateToApp,
+          setBreadcrumbs: params.setBreadcrumbs,
+          history: params.history,
+          actionTypeRegistry,
+          alertTypeRegistry,
+        });
+        return () => {};
+      },
+    });
+
     registerBuiltInActionTypes({
       actionTypeRegistry: this.actionTypeRegistry,
     });
 
     registerBuiltInAlertTypes({
       alertTypeRegistry: this.alertTypeRegistry,
+      triggerActionsUiConfig: this.initializerContext.config.get<TriggersActionsUiConfigType>(),
     });
 
     return {
@@ -65,43 +126,7 @@ export class Plugin
     };
   }
 
-  public start(core: CoreStart, plugins: PluginsStart): TriggersAndActionsUIPublicPluginStart {
-    const { capabilities } = core.application;
-
-    const canShowActions = hasShowActionsCapability(capabilities);
-    const canShowAlerts = hasShowAlertsCapability(capabilities);
-
-    // Don't register routes when user doesn't have access to the application
-    if (canShowActions || canShowAlerts) {
-      plugins.management.sections.getSection('kibana')!.registerApp({
-        id: 'triggersActions',
-        title: i18n.translate('xpack.triggersActionsUI.managementSection.displayName', {
-          defaultMessage: 'Alerts and Actions',
-        }),
-        order: 7,
-        mount: params => {
-          boot({
-            dataPlugin: plugins.data,
-            charts: plugins.charts,
-            alerting: plugins.alerting,
-            element: params.element,
-            toastNotifications: core.notifications.toasts,
-            http: core.http,
-            uiSettings: core.uiSettings,
-            docLinks: core.docLinks,
-            chrome: core.chrome,
-            savedObjects: core.savedObjects.client,
-            I18nContext: core.i18n.Context,
-            capabilities: core.application.capabilities,
-            navigateToApp: core.application.navigateToApp,
-            setBreadcrumbs: params.setBreadcrumbs,
-            actionTypeRegistry: this.actionTypeRegistry,
-            alertTypeRegistry: this.alertTypeRegistry,
-          });
-          return () => {};
-        },
-      });
-    }
+  public start(): TriggersAndActionsUIPublicPluginStart {
     return {
       actionTypeRegistry: this.actionTypeRegistry,
       alertTypeRegistry: this.alertTypeRegistry,

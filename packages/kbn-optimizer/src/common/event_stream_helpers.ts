@@ -40,7 +40,7 @@ export const summarizeEventStream = <Event, State>(
   initialState: State,
   summarize: Summarizer<Event, State>
 ) => {
-  return new Rx.Observable<Update<Event, State>>(subscriber => {
+  return new Rx.Observable<Update<Event, State>>((subscriber) => {
     const eventBuffer: Event[] = [];
 
     let processingEventBuffer = false;
@@ -93,7 +93,7 @@ export const summarizeEventStream = <Event, State>(
     subscriber.add(
       event$.subscribe(
         injectEvent,
-        error => {
+        (error) => {
           subscriber.error(error);
         },
         () => {

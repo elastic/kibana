@@ -2,19 +2,14 @@
 
 [Home](./index.md) &gt; [kibana-plugin-plugins-data-server](./kibana-plugin-plugins-data-server.md) &gt; [TimeRange](./kibana-plugin-plugins-data-server.timerange.md)
 
-## TimeRange interface
+## TimeRange type
 
 <b>Signature:</b>
 
 ```typescript
-export interface TimeRange 
+export declare type TimeRange = {
+    from: string;
+    to: string;
+    mode?: 'absolute' | 'relative';
+};
 ```
-
-## Properties
-
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [from](./kibana-plugin-plugins-data-server.timerange.from.md) | <code>string</code> |  |
-|  [mode](./kibana-plugin-plugins-data-server.timerange.mode.md) | <code>'absolute' &#124; 'relative'</code> |  |
-|  [to](./kibana-plugin-plugins-data-server.timerange.to.md) | <code>string</code> |  |
-

@@ -17,14 +17,14 @@
  * under the License.
  */
 import _ from 'lodash';
-import mappings from '../../mappings/mappings';
+import { getIndices } from '../../mappings/mappings';
 import { ListComponent } from './list_component';
 function nonValidUsernameType(token) {
   return token[0] === '_';
 }
 export class UsernameAutocompleteComponent extends ListComponent {
   constructor(name, parent, multiValued) {
-    super(name, mappings.getIndices, parent, multiValued);
+    super(name, getIndices, parent, multiValued);
   }
   validateTokens(tokens) {
     if (!this.multiValued && tokens.length > 1) {

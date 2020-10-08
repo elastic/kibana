@@ -217,7 +217,7 @@ describe('ScopedHistory', () => {
       gh.push('/app/wow');
       const h = new ScopedHistory(gh, '/app/wow');
       const listenPaths: string[] = [];
-      h.listen(l => listenPaths.push(l.pathname));
+      h.listen((l) => listenPaths.push(l.pathname));
       h.push('/first-page');
       h.push('/second-page');
       h.push('/third-page');
@@ -237,7 +237,7 @@ describe('ScopedHistory', () => {
       gh.push('/app/wow');
       const h = new ScopedHistory(gh, '/app/wow');
       const listenPaths: string[] = [];
-      const unlisten = h.listen(l => listenPaths.push(l.pathname));
+      const unlisten = h.listen((l) => listenPaths.push(l.pathname));
       h.push('/first-page');
       unlisten();
       h.push('/second-page');
@@ -252,7 +252,7 @@ describe('ScopedHistory', () => {
       gh.push('/app/wow');
       const h = new ScopedHistory(gh, '/app/wow');
       const listenPaths: string[] = [];
-      h.listen(l => listenPaths.push(l.pathname));
+      h.listen((l) => listenPaths.push(l.pathname));
       h.push('/first-page');
       gh.push('/app/other');
       gh.push('/second-page');

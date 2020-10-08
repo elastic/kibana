@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import RowParser from '../../../lib/row_parser';
-import { collapseLiteralStrings } from '../../../../../es_ui_shared/public';
+import { XJson } from '../../../../../es_ui_shared/public';
 import * as utils from '../../../lib/utils';
 
 // @ts-ignore
@@ -29,6 +29,8 @@ import { CoreEditor, Position, Range } from '../../../types';
 import { createTokenIterator } from '../../factories';
 
 import Autocomplete from '../../../lib/autocomplete/autocomplete';
+
+const { collapseLiteralStrings } = XJson;
 
 export class SenseEditor {
   currentReqRange: (Range & { markerRef: any }) | null;
@@ -425,8 +427,8 @@ export class SenseEditor {
     }
 
     const column =
-        (this.coreEditor.getLineValue(curLineNumber) || '').length +
-        1 /* Range goes to 1 after last char */;
+      (this.coreEditor.getLineValue(curLineNumber) || '').length +
+      1; /* Range goes to 1 after last char */
 
     return {
       lineNumber: curLineNumber,
@@ -467,7 +469,7 @@ export class SenseEditor {
 
   getRequestsAsCURL = async (elasticsearchBaseUrl: string, range?: Range): Promise<string> => {
     const requests = await this.getRequestsInRange(range, true);
-    const result = _.map(requests, req => {
+    const result = _.map(requests, (req) => {
       if (typeof req === 'string') {
         // no request block
         return req;

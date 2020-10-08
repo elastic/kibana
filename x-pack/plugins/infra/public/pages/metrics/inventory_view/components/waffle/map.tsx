@@ -12,10 +12,10 @@ import { InfraWaffleMapBounds, InfraWaffleMapOptions } from '../../../../../lib/
 import { AutoSizer } from '../../../../../components/auto_sizer';
 import { GroupOfGroups } from './group_of_groups';
 import { GroupOfNodes } from './group_of_nodes';
-import { Legend } from './legend';
 import { applyWaffleMapLayout } from '../../lib/apply_wafflemap_layout';
 import { SnapshotNode } from '../../../../../../common/http_api/snapshot_api';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
+import { sortNodes } from '../../lib/sort_nodes';
 
 interface Props {
   nodes: SnapshotNode[];
@@ -26,6 +26,7 @@ interface Props {
   onFilter: (filter: string) => void;
   bounds: InfraWaffleMapBounds;
   dataBounds: InfraWaffleMapBounds;
+  bottomMargin: number;
 }
 
 export const Map: React.FC<Props> = ({
@@ -37,16 +38,22 @@ export const Map: React.FC<Props> = ({
   bounds,
   nodeType,
   dataBounds,
+  bottomMargin,
 }) => {
-  const map = nodesToWaffleMap(nodes);
+  const sortedNodes = sortNodes(options.sort, nodes);
+  const map = nodesToWaffleMap(sortedNodes);
   return (
     <AutoSizer content>
       {({ measureRef, content: { width = 0, height = 0 } }) => {
         const groupsWithLayout = applyWaffleMapLayout(map, width, height);
         return (
-          <WaffleMapOuterContainer ref={(el: any) => measureRef(el)} data-test-subj="waffleMap">
+          <WaffleMapOuterContainer
+            ref={(el: any) => measureRef(el)}
+            bottomMargin={bottomMargin}
+            data-test-subj="waffleMap"
+          >
             <WaffleMapInnerContainer>
-              {groupsWithLayout.map(group => {
+              {groupsWithLayout.map((group) => {
                 if (isWaffleMapGroupWithGroups(group)) {
                   return (
                     <GroupOfGroups
@@ -78,12 +85,6 @@ export const Map: React.FC<Props> = ({
                 }
               })}
             </WaffleMapInnerContainer>
-            <Legend
-              formatter={formatter}
-              bounds={bounds}
-              dataBounds={dataBounds}
-              legend={options.legend}
-            />
           </WaffleMapOuterContainer>
         );
       }}
@@ -91,13 +92,14 @@ export const Map: React.FC<Props> = ({
   );
 };
 
-const WaffleMapOuterContainer = euiStyled.div`
+const WaffleMapOuterContainer = euiStyled.div<{ bottomMargin: number }>`
   flex: 1 0 0%;
   display: flex;
   justify-content: flex-start;
   flex-direction: column;
   overflow-x: hidden;
   overflow-y: auto;
+  margin-bottom: ${(props) => props.bottomMargin}px;
 `;
 
 const WaffleMapInnerContainer = euiStyled.div`

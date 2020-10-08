@@ -4,21 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ClusterClient, Logger } from '../../../../../src/core/server';
-import { elasticsearchServiceMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
+import { LegacyClusterClient, Logger } from 'src/core/server';
+import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 import { ClusterClientAdapter, IClusterClientAdapter } from './cluster_client_adapter';
-import moment from 'moment';
 import { findOptionsSchema } from '../event_log_client';
 
-type EsClusterClient = Pick<jest.Mocked<ClusterClient>, 'callAsInternalUser' | 'asScoped'>;
+type EsClusterClient = Pick<jest.Mocked<LegacyClusterClient>, 'callAsInternalUser' | 'asScoped'>;
 
 let logger: Logger;
 let clusterClient: EsClusterClient;
 let clusterClientAdapter: IClusterClientAdapter;
 
 beforeEach(() => {
-  logger = loggingServiceMock.createLogger();
-  clusterClient = elasticsearchServiceMock.createClusterClient();
+  logger = loggingSystemMock.createLogger();
+  clusterClient = elasticsearchServiceMock.createLegacyClusterClient();
   clusterClientAdapter = new ClusterClientAdapter({
     logger,
     clusterClientPromise: Promise.resolve(clusterClient),
@@ -42,6 +41,8 @@ describe('indexDocument', () => {
 });
 
 describe('doesIlmPolicyExist', () => {
+  // ElasticsearchError can be a bit random in shape, we need an any here
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const notFoundError = new Error('Not found') as any;
   notFoundError.statusCode = 404;
 
@@ -49,7 +50,7 @@ describe('doesIlmPolicyExist', () => {
     await clusterClientAdapter.doesIlmPolicyExist('foo');
     expect(clusterClient.callAsInternalUser).toHaveBeenCalledWith('transport.request', {
       method: 'GET',
-      path: '_ilm/policy/foo',
+      path: '/_ilm/policy/foo',
     });
   });
 
@@ -76,7 +77,7 @@ describe('createIlmPolicy', () => {
     await clusterClientAdapter.createIlmPolicy('foo', { args: true });
     expect(clusterClient.callAsInternalUser).toHaveBeenCalledWith('transport.request', {
       method: 'PUT',
-      path: '_ilm/policy/foo',
+      path: '/_ilm/policy/foo',
       body: { args: true },
     });
   });
@@ -187,6 +188,8 @@ describe('createIndex', () => {
   });
 
   test(`shouldn't throw when an error of type resource_already_exists_exception is thrown`, async () => {
+    // ElasticsearchError can be a bit random in shape, we need an any here
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const err = new Error('Already exists') as any;
     err.body = {
       error: {
@@ -201,7 +204,7 @@ describe('createIndex', () => {
 describe('queryEventsBySavedObject', () => {
   const DEFAULT_OPTIONS = findOptionsSchema.validate({});
 
-  test('should call cluster with proper arguments', async () => {
+  test('should call cluster with proper arguments with non-default namespace', async () => {
     clusterClient.callAsInternalUser.mockResolvedValue({
       hits: {
         hits: [],
@@ -210,6 +213,7 @@ describe('queryEventsBySavedObject', () => {
     });
     await clusterClientAdapter.queryEventsBySavedObject(
       'index-name',
+      'namespace',
       'saved-object-type',
       'saved-object-id',
       DEFAULT_OPTIONS
@@ -217,45 +221,147 @@ describe('queryEventsBySavedObject', () => {
 
     const [method, query] = clusterClient.callAsInternalUser.mock.calls[0];
     expect(method).toEqual('search');
-    expect(query).toMatchObject({
-      index: 'index-name',
-      body: {
-        from: 0,
-        size: 10,
-        sort: { 'event.start': { order: 'asc' } },
-        query: {
-          bool: {
-            must: [
-              {
-                nested: {
-                  path: 'kibana.saved_objects',
-                  query: {
-                    bool: {
-                      must: [
-                        {
-                          term: {
-                            'kibana.saved_objects.type': {
-                              value: 'saved-object-type',
+    expect(query).toMatchInlineSnapshot(`
+      Object {
+        "body": Object {
+          "from": 0,
+          "query": Object {
+            "bool": Object {
+              "must": Array [
+                Object {
+                  "nested": Object {
+                    "path": "kibana.saved_objects",
+                    "query": Object {
+                      "bool": Object {
+                        "must": Array [
+                          Object {
+                            "term": Object {
+                              "kibana.saved_objects.rel": Object {
+                                "value": "primary",
+                              },
                             },
                           },
-                        },
-                        {
-                          term: {
-                            'kibana.saved_objects.id': {
-                              value: 'saved-object-id',
+                          Object {
+                            "term": Object {
+                              "kibana.saved_objects.type": Object {
+                                "value": "saved-object-type",
+                              },
                             },
                           },
-                        },
-                      ],
+                          Object {
+                            "term": Object {
+                              "kibana.saved_objects.id": Object {
+                                "value": "saved-object-id",
+                              },
+                            },
+                          },
+                          Object {
+                            "term": Object {
+                              "kibana.saved_objects.namespace": Object {
+                                "value": "namespace",
+                              },
+                            },
+                          },
+                        ],
+                      },
                     },
                   },
                 },
-              },
-            ],
+              ],
+            },
+          },
+          "size": 10,
+          "sort": Object {
+            "@timestamp": Object {
+              "order": "asc",
+            },
           },
         },
+        "index": "index-name",
+        "rest_total_hits_as_int": true,
+      }
+    `);
+  });
+
+  test('should call cluster with proper arguments with default namespace', async () => {
+    clusterClient.callAsInternalUser.mockResolvedValue({
+      hits: {
+        hits: [],
+        total: { value: 0 },
       },
     });
+    await clusterClientAdapter.queryEventsBySavedObject(
+      'index-name',
+      undefined,
+      'saved-object-type',
+      'saved-object-id',
+      DEFAULT_OPTIONS
+    );
+
+    const [method, query] = clusterClient.callAsInternalUser.mock.calls[0];
+    expect(method).toEqual('search');
+    expect(query).toMatchInlineSnapshot(`
+      Object {
+        "body": Object {
+          "from": 0,
+          "query": Object {
+            "bool": Object {
+              "must": Array [
+                Object {
+                  "nested": Object {
+                    "path": "kibana.saved_objects",
+                    "query": Object {
+                      "bool": Object {
+                        "must": Array [
+                          Object {
+                            "term": Object {
+                              "kibana.saved_objects.rel": Object {
+                                "value": "primary",
+                              },
+                            },
+                          },
+                          Object {
+                            "term": Object {
+                              "kibana.saved_objects.type": Object {
+                                "value": "saved-object-type",
+                              },
+                            },
+                          },
+                          Object {
+                            "term": Object {
+                              "kibana.saved_objects.id": Object {
+                                "value": "saved-object-id",
+                              },
+                            },
+                          },
+                          Object {
+                            "bool": Object {
+                              "must_not": Object {
+                                "exists": Object {
+                                  "field": "kibana.saved_objects.namespace",
+                                },
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          "size": 10,
+          "sort": Object {
+            "@timestamp": Object {
+              "order": "asc",
+            },
+          },
+        },
+        "index": "index-name",
+        "rest_total_hits_as_int": true,
+      }
+    `);
   });
 
   test('should call cluster with sort', async () => {
@@ -267,6 +373,7 @@ describe('queryEventsBySavedObject', () => {
     });
     await clusterClientAdapter.queryEventsBySavedObject(
       'index-name',
+      'namespace',
       'saved-object-type',
       'saved-object-id',
       { ...DEFAULT_OPTIONS, sort_field: 'event.end', sort_order: 'desc' }
@@ -290,12 +397,11 @@ describe('queryEventsBySavedObject', () => {
       },
     });
 
-    const start = moment()
-      .subtract(1, 'days')
-      .toISOString();
+    const start = '2020-07-08T00:52:28.350Z';
 
     await clusterClientAdapter.queryEventsBySavedObject(
       'index-name',
+      'namespace',
       'saved-object-type',
       'saved-object-id',
       { ...DEFAULT_OPTIONS, start }
@@ -303,49 +409,73 @@ describe('queryEventsBySavedObject', () => {
 
     const [method, query] = clusterClient.callAsInternalUser.mock.calls[0];
     expect(method).toEqual('search');
-    expect(query).toMatchObject({
-      index: 'index-name',
-      body: {
-        query: {
-          bool: {
-            must: [
-              {
-                nested: {
-                  path: 'kibana.saved_objects',
-                  query: {
-                    bool: {
-                      must: [
-                        {
-                          term: {
-                            'kibana.saved_objects.type': {
-                              value: 'saved-object-type',
+    expect(query).toMatchInlineSnapshot(`
+      Object {
+        "body": Object {
+          "from": 0,
+          "query": Object {
+            "bool": Object {
+              "must": Array [
+                Object {
+                  "nested": Object {
+                    "path": "kibana.saved_objects",
+                    "query": Object {
+                      "bool": Object {
+                        "must": Array [
+                          Object {
+                            "term": Object {
+                              "kibana.saved_objects.rel": Object {
+                                "value": "primary",
+                              },
                             },
                           },
-                        },
-                        {
-                          term: {
-                            'kibana.saved_objects.id': {
-                              value: 'saved-object-id',
+                          Object {
+                            "term": Object {
+                              "kibana.saved_objects.type": Object {
+                                "value": "saved-object-type",
+                              },
                             },
                           },
-                        },
-                      ],
+                          Object {
+                            "term": Object {
+                              "kibana.saved_objects.id": Object {
+                                "value": "saved-object-id",
+                              },
+                            },
+                          },
+                          Object {
+                            "term": Object {
+                              "kibana.saved_objects.namespace": Object {
+                                "value": "namespace",
+                              },
+                            },
+                          },
+                        ],
+                      },
                     },
                   },
                 },
-              },
-              {
-                range: {
-                  'event.start': {
-                    gte: start,
+                Object {
+                  "range": Object {
+                    "@timestamp": Object {
+                      "gte": "2020-07-08T00:52:28.350Z",
+                    },
                   },
                 },
-              },
-            ],
+              ],
+            },
+          },
+          "size": 10,
+          "sort": Object {
+            "@timestamp": Object {
+              "order": "asc",
+            },
           },
         },
-      },
-    });
+        "index": "index-name",
+        "rest_total_hits_as_int": true,
+      }
+    `);
   });
 
   test('supports optional date range', async () => {
@@ -356,15 +486,12 @@ describe('queryEventsBySavedObject', () => {
       },
     });
 
-    const start = moment()
-      .subtract(1, 'days')
-      .toISOString();
-    const end = moment()
-      .add(1, 'days')
-      .toISOString();
+    const start = '2020-07-08T00:52:28.350Z';
+    const end = '2020-07-08T00:00:00.000Z';
 
     await clusterClientAdapter.queryEventsBySavedObject(
       'index-name',
+      'namespace',
       'saved-object-type',
       'saved-object-id',
       { ...DEFAULT_OPTIONS, start, end }
@@ -372,55 +499,79 @@ describe('queryEventsBySavedObject', () => {
 
     const [method, query] = clusterClient.callAsInternalUser.mock.calls[0];
     expect(method).toEqual('search');
-    expect(query).toMatchObject({
-      index: 'index-name',
-      body: {
-        query: {
-          bool: {
-            must: [
-              {
-                nested: {
-                  path: 'kibana.saved_objects',
-                  query: {
-                    bool: {
-                      must: [
-                        {
-                          term: {
-                            'kibana.saved_objects.type': {
-                              value: 'saved-object-type',
+    expect(query).toMatchInlineSnapshot(`
+      Object {
+        "body": Object {
+          "from": 0,
+          "query": Object {
+            "bool": Object {
+              "must": Array [
+                Object {
+                  "nested": Object {
+                    "path": "kibana.saved_objects",
+                    "query": Object {
+                      "bool": Object {
+                        "must": Array [
+                          Object {
+                            "term": Object {
+                              "kibana.saved_objects.rel": Object {
+                                "value": "primary",
+                              },
                             },
                           },
-                        },
-                        {
-                          term: {
-                            'kibana.saved_objects.id': {
-                              value: 'saved-object-id',
+                          Object {
+                            "term": Object {
+                              "kibana.saved_objects.type": Object {
+                                "value": "saved-object-type",
+                              },
                             },
                           },
-                        },
-                      ],
+                          Object {
+                            "term": Object {
+                              "kibana.saved_objects.id": Object {
+                                "value": "saved-object-id",
+                              },
+                            },
+                          },
+                          Object {
+                            "term": Object {
+                              "kibana.saved_objects.namespace": Object {
+                                "value": "namespace",
+                              },
+                            },
+                          },
+                        ],
+                      },
                     },
                   },
                 },
-              },
-              {
-                range: {
-                  'event.start': {
-                    gte: start,
+                Object {
+                  "range": Object {
+                    "@timestamp": Object {
+                      "gte": "2020-07-08T00:52:28.350Z",
+                    },
                   },
                 },
-              },
-              {
-                range: {
-                  'event.end': {
-                    lte: end,
+                Object {
+                  "range": Object {
+                    "@timestamp": Object {
+                      "lte": "2020-07-08T00:00:00.000Z",
+                    },
                   },
                 },
-              },
-            ],
+              ],
+            },
+          },
+          "size": 10,
+          "sort": Object {
+            "@timestamp": Object {
+              "order": "asc",
+            },
           },
         },
-      },
-    });
+        "index": "index-name",
+        "rest_total_hits_as_int": true,
+      }
+    `);
   });
 });

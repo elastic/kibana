@@ -39,6 +39,9 @@ const EMPTY_RUN_RESULT: SuccessfulRunResult = {};
 
 export interface TaskRunner {
   isExpired: boolean;
+  expiration: Date;
+  startedAt: Date | null;
+  definition: TaskDefinition;
   cancel: CancelFunction;
   markTaskAsRunning: () => Promise<boolean>;
   run: () => Promise<Result<SuccessfulRunResult, FailedRunResult>>;
@@ -46,7 +49,7 @@ export interface TaskRunner {
   toString: () => string;
 }
 
-interface Updatable {
+export interface Updatable {
   readonly maxAttempts: number;
   update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance>;
   remove(id: string): Promise<void>;
@@ -130,10 +133,24 @@ export class TaskManagerRunner implements TaskRunner {
   }
 
   /**
+   * Gets the time at which this task will expire.
+   */
+  public get expiration() {
+    return intervalFromDate(this.instance.startedAt!, this.definition.timeout)!;
+  }
+
+  /**
+   * Gets the duration of the current task run
+   */
+  public get startedAt() {
+    return this.instance.startedAt;
+  }
+
+  /**
    * Gets whether or not this task has run longer than its expiration setting allows.
    */
   public get isExpired() {
-    return intervalFromDate(this.instance.startedAt!, this.definition.timeout)! < new Date();
+    return this.expiration < new Date();
   }
 
   /**
@@ -261,12 +278,12 @@ export class TaskManagerRunner implements TaskRunner {
    */
   public async cancel() {
     const { task } = this;
-    if (task && task.cancel) {
+    if (task?.cancel) {
       this.task = undefined;
       return task.cancel();
     }
 
-    this.logger.warn(`The task ${this} is not cancellable.`);
+    this.logger.debug(`The task ${this} is not cancellable.`);
   }
 
   private validateResult(result?: RunResult | void): Result<SuccessfulRunResult, FailedRunResult> {
@@ -342,7 +359,7 @@ export class TaskManagerRunner implements TaskRunner {
     await this.bufferedTaskStore.update(
       defaults(
         {
-          ...fieldUpdates,
+          ...(fieldUpdates as Partial<ConcreteTaskInstance>),
           // reset fields that track the lifecycle of the concluded `task run`
           startedAt: null,
           retryAt: null,
@@ -392,7 +409,7 @@ export class TaskManagerRunner implements TaskRunner {
     attempts,
     addDuration,
   }: {
-    error: any;
+    error: Error;
     attempts: number;
     addDuration?: string;
   }): Date | null {

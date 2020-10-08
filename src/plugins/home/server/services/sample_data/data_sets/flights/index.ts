@@ -31,13 +31,13 @@ const flightsDescription = i18n.translate('home.sampleData.flightsSpecDescriptio
 });
 const initialAppLinks = [] as AppLinkSchema[];
 
-export const flightsSpecProvider = function(): SampleDatasetSchema {
+export const flightsSpecProvider = function (): SampleDatasetSchema {
   return {
     id: 'flights',
     name: flightsName,
     description: flightsDescription,
-    previewImagePath: '/plugins/kibana/home/sample_data_resources/flights/dashboard.png',
-    darkPreviewImagePath: '/plugins/kibana/home/sample_data_resources/flights/dashboard_dark.png',
+    previewImagePath: '/plugins/home/assets/sample_data_resources/flights/dashboard.png',
+    darkPreviewImagePath: '/plugins/home/assets/sample_data_resources/flights/dashboard_dark.png',
     overviewDashboard: '7adfa750-4c81-11e8-b3d7-01146121b73d',
     appLinks: initialAppLinks,
     defaultIndex: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',

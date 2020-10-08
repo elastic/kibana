@@ -14,7 +14,7 @@ import {
   TableSuggestion,
   TableChangeType,
 } from '../types';
-import { State, SeriesType, XYState } from './types';
+import { State, SeriesType, XYState, visualizationTypes, LayerConfig } from './types';
 import { getIconForSeries } from './state_helpers';
 
 const columnSortOrder = {
@@ -42,9 +42,27 @@ export function getSuggestions({
     // We reject any datasource suggestions which have a column of an unknown type.
     !table.isMultiRow ||
     table.columns.length <= 1 ||
-    table.columns.every(col => col.operation.dataType !== 'number') ||
-    table.columns.some(col => !columnSortOrder.hasOwnProperty(col.operation.dataType))
+    table.columns.every((col) => col.operation.dataType !== 'number') ||
+    table.columns.some((col) => !columnSortOrder.hasOwnProperty(col.operation.dataType))
   ) {
+    if (table.changeType === 'unchanged' && state) {
+      // this isn't a table we would switch to, but we have a state already. In this case, just use the current state for all series types
+      return visualizationTypes.map((visType) => {
+        const seriesType = visType.id as SeriesType;
+        return {
+          seriesType,
+          score: 0,
+          state: {
+            ...state,
+            preferredSeriesType: seriesType,
+            layers: state.layers.map((layer) => ({ ...layer, seriesType })),
+          },
+          previewIcon: getIconForSeries(seriesType),
+          title: visType.label,
+          hide: true,
+        };
+      });
+    }
     return [];
   }
 
@@ -62,7 +80,7 @@ function getSuggestionForColumns(
   keptLayerIds: string[],
   currentState?: State
 ): VisualizationSuggestion<State> | Array<VisualizationSuggestion<State>> | undefined {
-  const [buckets, values] = partition(table.columns, col => col.operation.isBucketed);
+  const [buckets, values] = partition(table.columns, (col) => col.operation.isBucketed);
 
   if (buckets.length === 1 || buckets.length === 2) {
     const [x, splitBy] = getBucketMappings(table, currentState);
@@ -91,31 +109,53 @@ function getSuggestionForColumns(
   }
 }
 
+function flipSeriesType(seriesType: SeriesType) {
+  switch (seriesType) {
+    case 'bar_horizontal':
+      return 'bar';
+    case 'bar_horizontal_stacked':
+      return 'bar_stacked';
+    case 'bar':
+      return 'bar_horizontal';
+    case 'bar_horizontal_stacked':
+      return 'bar_stacked';
+    case 'bar_horizontal_percentage_stacked':
+      return 'bar_percentage_stacked';
+    case 'bar_percentage_stacked':
+      return 'bar_horizontal_percentage_stacked';
+    default:
+      return 'bar_horizontal';
+  }
+}
+
 function getBucketMappings(table: TableSuggestion, currentState?: State) {
   const currentLayer =
     currentState && currentState.layers.find(({ layerId }) => layerId === table.layerId);
 
-  const buckets = table.columns.filter(col => col.operation.isBucketed);
+  const buckets = table.columns.filter((col) => col.operation.isBucketed);
   // reverse the buckets before prioritization to always use the most inner
   // bucket of the highest-prioritized group as x value (don't use nested
   // buckets as split series)
-  const prioritizedBuckets = prioritizeColumns(buckets.reverse());
+  const prioritizedBuckets = prioritizeColumns([...buckets].reverse());
 
   if (!currentLayer || table.changeType === 'initial') {
     return prioritizedBuckets;
+  }
+  if (table.changeType === 'reorder') {
+    return buckets;
   }
 
   // if existing table is just modified, try to map buckets to the current dimensions
   const currentXColumnIndex = prioritizedBuckets.findIndex(
     ({ columnId }) => columnId === currentLayer.xAccessor
   );
-  const currentXDataType =
-    currentXColumnIndex > -1 && prioritizedBuckets[currentXColumnIndex].operation.dataType;
+  const currentXScaleType =
+    currentXColumnIndex > -1 && prioritizedBuckets[currentXColumnIndex].operation.scale;
 
   if (
-    currentXDataType &&
-    // make sure time gets mapped to x dimension even when changing current bucket/dimension mapping
-    (currentXDataType === 'date' || prioritizedBuckets[0].operation.dataType !== 'date')
+    currentXScaleType &&
+    // make sure histograms get mapped to x dimension even when changing current bucket/dimension mapping
+    (currentXScaleType === 'interval' || prioritizedBuckets[0].operation.scale !== 'interval')
   ) {
     const [x] = prioritizedBuckets.splice(currentXColumnIndex, 1);
     prioritizedBuckets.unshift(x);
@@ -153,7 +193,7 @@ function getSuggestionsForLayer({
 }: {
   layerId: string;
   changeType: TableChangeType;
-  xValue: TableSuggestionColumn;
+  xValue?: TableSuggestionColumn;
   yValues: TableSuggestionColumn[];
   splitBy?: TableSuggestionColumn;
   currentState?: State;
@@ -161,7 +201,7 @@ function getSuggestionsForLayer({
   keptLayerIds: string[];
 }): VisualizationSuggestion<State> | Array<VisualizationSuggestion<State>> {
   const title = getSuggestionTitle(yValues, xValue, tableLabel);
-  const seriesType: SeriesType = getSeriesType(currentState, layerId, xValue, changeType);
+  const seriesType: SeriesType = getSeriesType(currentState, layerId, xValue);
 
   const options = {
     currentState,
@@ -175,27 +215,36 @@ function getSuggestionsForLayer({
     keptLayerIds,
   };
 
-  const isSameState = currentState && changeType === 'unchanged';
+  // handles the simplest cases, acting as a chart switcher
+  if (!currentState && changeType === 'unchanged') {
+    // Chart switcher needs to include every chart type
+    return visualizationTypes
+      .map((visType) => {
+        return {
+          ...buildSuggestion({ ...options, seriesType: visType.id as SeriesType }),
+          title: visType.label,
+          hide: visType.id !== 'bar_stacked',
+        };
+      })
+      .sort((a, b) => (a.state.preferredSeriesType === 'bar_stacked' ? -1 : 1));
+  }
 
+  const isSameState = currentState && changeType === 'unchanged';
   if (!isSameState) {
     return buildSuggestion(options);
   }
 
+  // Suggestions are either changing the data, or changing the way the data is used
   const sameStateSuggestions: Array<VisualizationSuggestion<State>> = [];
 
   // if current state is using the same data, suggest same chart with different presentational configuration
-  if (seriesType !== 'line' && xValue.operation.scale === 'ordinal') {
+  if (seriesType.includes('bar') && (!xValue || xValue.operation.scale === 'ordinal')) {
     // flip between horizontal/vertical for ordinal scales
     sameStateSuggestions.push(
       buildSuggestion({
         ...options,
         title: i18n.translate('xpack.lens.xySuggestions.flipTitle', { defaultMessage: 'Flip' }),
-        seriesType:
-          seriesType === 'bar_horizontal'
-            ? 'bar'
-            : seriesType === 'bar_horizontal_stacked'
-            ? 'bar_stacked'
-            : 'bar_horizontal',
+        seriesType: flipSeriesType(seriesType),
       })
     );
   } else {
@@ -216,7 +265,7 @@ function getSuggestionsForLayer({
     );
   }
 
-  if (seriesType !== 'line' && splitBy) {
+  if (seriesType !== 'line' && splitBy && !seriesType.includes('percentage')) {
     // flip between stacked/unstacked
     sameStateSuggestions.push(
       buildSuggestion({
@@ -233,7 +282,45 @@ function getSuggestionsForLayer({
     );
   }
 
-  return sameStateSuggestions;
+  if (
+    seriesType !== 'line' &&
+    seriesType.includes('stacked') &&
+    !seriesType.includes('percentage')
+  ) {
+    const percentageOptions = { ...options };
+    if (percentageOptions.xValue?.operation.scale === 'ordinal' && !percentageOptions.splitBy) {
+      percentageOptions.splitBy = percentageOptions.xValue;
+      delete percentageOptions.xValue;
+    }
+    // percentage suggestion
+    sameStateSuggestions.push(
+      buildSuggestion({
+        ...options,
+        // hide the suggestion if split by is missing
+        hide: !percentageOptions.splitBy,
+        seriesType: asPercentageSeriesType(seriesType),
+        title: i18n.translate('xpack.lens.xySuggestions.asPercentageTitle', {
+          defaultMessage: 'Percentage',
+        }),
+      })
+    );
+  }
+
+  // Combine all pre-built suggestions with hidden suggestions for remaining chart types
+  return sameStateSuggestions.concat(
+    visualizationTypes
+      .filter((visType) => {
+        return !sameStateSuggestions.find(
+          (suggestion) => suggestion.state.preferredSeriesType === visType.id
+        );
+      })
+      .map((visType) => {
+        return {
+          ...buildSuggestion({ ...options, seriesType: visType.id as SeriesType }),
+          hide: true,
+        };
+      })
+  );
 }
 
 function toggleStackSeriesType(oldSeriesType: SeriesType) {
@@ -246,6 +333,19 @@ function toggleStackSeriesType(oldSeriesType: SeriesType) {
       return 'bar_stacked';
     case 'bar_stacked':
       return 'bar';
+    default:
+      return oldSeriesType;
+  }
+}
+
+function asPercentageSeriesType(oldSeriesType: SeriesType) {
+  switch (oldSeriesType) {
+    case 'area_stacked':
+      return 'area_percentage_stacked';
+    case 'bar_stacked':
+      return 'bar_percentage_stacked';
+    case 'bar_horizontal_stacked':
+      return 'bar_horizontal_percentage_stacked';
     default:
       return oldSeriesType;
   }
@@ -272,8 +372,7 @@ function altSeriesType(oldSeriesType: SeriesType) {
 function getSeriesType(
   currentState: XYState | undefined,
   layerId: string,
-  xValue: TableSuggestionColumn,
-  changeType: TableChangeType
+  xValue?: TableSuggestionColumn
 ): SeriesType {
   const defaultType = 'bar_stacked';
 
@@ -285,24 +384,20 @@ function getSeriesType(
 
   // Attempt to keep the seriesType consistent on initial add of a layer
   // Ordinal scales should always use a bar because there is no interpolation between buckets
-  if (xValue.operation.scale && xValue.operation.scale === 'ordinal') {
+  if (xValue && xValue.operation.scale && xValue.operation.scale === 'ordinal') {
     return closestSeriesType.startsWith('bar') ? closestSeriesType : defaultType;
   }
 
-  if (changeType === 'initial') {
-    return defaultType;
-  }
-
-  return closestSeriesType !== defaultType ? closestSeriesType : defaultType;
+  return closestSeriesType;
 }
 
 function getSuggestionTitle(
   yValues: TableSuggestionColumn[],
-  xValue: TableSuggestionColumn,
+  xValue: TableSuggestionColumn | undefined,
   tableLabel: string | undefined
 ) {
   const yTitle = yValues
-    .map(col => col.operation.label)
+    .map((col) => col.operation.label)
     .join(
       i18n.translate('xpack.lens.xySuggestions.yAxixConjunctionSign', {
         defaultMessage: ' & ',
@@ -310,10 +405,14 @@ function getSuggestionTitle(
           'A character that can be used for conjunction of multiple enumarated items. Make sure to include spaces around it if needed.',
       })
     );
-  const xTitle = xValue.operation.label;
+  const xTitle =
+    xValue?.operation.label ||
+    i18n.translate('xpack.lens.xySuggestions.emptyAxisTitle', {
+      defaultMessage: '(empty)',
+    });
   const title =
     tableLabel ||
-    (xValue.operation.dataType === 'date'
+    (xValue?.operation.dataType === 'date'
       ? i18n.translate('xpack.lens.xySuggestions.dateSuggestion', {
           defaultMessage: '{yTitle} over {xTitle}',
           description:
@@ -339,43 +438,86 @@ function buildSuggestion({
   changeType,
   xValue,
   keptLayerIds,
+  hide,
 }: {
   currentState: XYState | undefined;
   seriesType: SeriesType;
   title: string;
   yValues: TableSuggestionColumn[];
-  xValue: TableSuggestionColumn;
+  xValue?: TableSuggestionColumn;
   splitBy: TableSuggestionColumn | undefined;
   layerId: string;
   changeType: TableChangeType;
   keptLayerIds: string[];
+  hide?: boolean;
 }) {
+  if (seriesType.includes('percentage') && xValue?.operation.scale === 'ordinal' && !splitBy) {
+    splitBy = xValue;
+    xValue = undefined;
+  }
+  const existingLayer: LayerConfig | {} = getExistingLayer(currentState, layerId) || {};
+  const accessors = yValues.map((col) => col.columnId);
   const newLayer = {
-    ...(getExistingLayer(currentState, layerId) || {}),
+    ...existingLayer,
     layerId,
     seriesType,
-    xAccessor: xValue.columnId,
+    xAccessor: xValue?.columnId,
     splitAccessor: splitBy?.columnId,
-    accessors: yValues.map(col => col.columnId),
+    accessors,
+    yConfig:
+      'yConfig' in existingLayer && existingLayer.yConfig
+        ? existingLayer.yConfig.filter(({ forAccessor }) => accessors.indexOf(forAccessor) !== -1)
+        : undefined,
   };
 
+  // Maintain consistent order for any layers that were saved
   const keptLayers = currentState
-    ? currentState.layers.filter(
-        layer => layer.layerId !== layerId && keptLayerIds.includes(layer.layerId)
-      )
+    ? currentState.layers
+        // Remove layers that aren't being suggested
+        .filter((layer) => keptLayerIds.includes(layer.layerId))
+        // Update in place
+        .map((layer) => (layer.layerId === layerId ? newLayer : layer))
+        // Replace the seriesType on all previous layers
+        .map((layer) => ({
+          ...layer,
+          seriesType,
+        }))
     : [];
 
   const state: State = {
     legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
+    fittingFunction: currentState?.fittingFunction || 'None',
+    xTitle: currentState?.xTitle,
+    yTitle: currentState?.yTitle,
+    yRightTitle: currentState?.yRightTitle,
+    axisTitlesVisibilitySettings: currentState?.axisTitlesVisibilitySettings || {
+      x: true,
+      yLeft: true,
+      yRight: true,
+    },
+    tickLabelsVisibilitySettings: currentState?.tickLabelsVisibilitySettings || {
+      x: true,
+      yLeft: true,
+      yRight: true,
+    },
+    gridlinesVisibilitySettings: currentState?.gridlinesVisibilitySettings || {
+      x: true,
+      yLeft: true,
+      yRight: true,
+    },
     preferredSeriesType: seriesType,
-    layers: [...keptLayers, newLayer],
+    layers: Object.keys(existingLayer).length ? keptLayers : [...keptLayers, newLayer],
   };
 
   return {
     title,
     score: getScore(yValues, splitBy, changeType),
-    // don't advertise chart of same type but with less data
-    hide: currentState && changeType === 'reduced',
+    hide:
+      hide ??
+      // Only advertise very clear changes when XY chart is not active
+      ((!currentState && changeType !== 'unchanged' && changeType !== 'extended') ||
+        // Don't advertise removing dimensions
+        (currentState && changeType === 'reduced')),
     state,
     previewIcon: getIconForSeries(seriesType),
   };
@@ -393,5 +535,5 @@ function getScore(
 }
 
 function getExistingLayer(currentState: XYState | undefined, layerId: string) {
-  return currentState && currentState.layers.find(layer => layer.layerId === layerId);
+  return currentState && currentState.layers.find((layer) => layer.layerId === layerId);
 }

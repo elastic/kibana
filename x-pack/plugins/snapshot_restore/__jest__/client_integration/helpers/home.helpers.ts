@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-/* eslint-disable @kbn/eslint/no-restricted-paths */
 import { act } from 'react-dom/test-utils';
 
 import {
@@ -66,7 +65,7 @@ export const setup = async (): Promise<HomeTestBed> => {
     await act(async () => {
       const { href } = repositoryLink.props();
       router.navigateTo(href!);
-      await nextTick();
+      await nextTick(10);
       component.update();
     });
   };
@@ -98,19 +97,13 @@ export const setup = async (): Promise<HomeTestBed> => {
   const selectTab = (tab: 'repositories' | 'snapshots') => {
     const tabs = ['snapshots', 'repositories'];
 
-    testBed
-      .find(`${tab}_tab`)
-      .at(tabs.indexOf(tab))
-      .simulate('click');
+    testBed.find(`${tab}_tab`).at(tabs.indexOf(tab)).simulate('click');
   };
 
   const selectSnapshotDetailTab = (tab: 'summary' | 'failedIndices') => {
     const tabs = ['summary', 'failedIndices'];
 
-    testBed
-      .find('snapshotDetail.tab')
-      .at(tabs.indexOf(tab))
-      .simulate('click');
+    testBed.find('snapshotDetail.tab').at(tabs.indexOf(tab)).simulate('click');
   };
 
   return {

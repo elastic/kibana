@@ -35,4 +35,11 @@ export const awsRDS: InventoryModel = {
     'awsRDSActiveTransactions',
     'awsRDSLatency',
   ],
+  tooltipMetrics: [
+    'cpu',
+    'rdsLatency',
+    'rdsConnections',
+    'rdsQueriesExecuted',
+    'rdsActiveTransactions',
+  ],
 };

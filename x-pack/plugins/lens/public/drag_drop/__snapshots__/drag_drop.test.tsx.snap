@@ -1,20 +1,34 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`DragDrop droppable is reflected in the className 1`] = `
-<div
-  class="lnsDragDrop lnsDragDrop-isDropTarget"
+<button
+  class="lnsDragDrop lnsDragDrop-isDroppable lnsDragDrop-isDropTarget"
   data-test-subj="lnsDragDrop"
 >
   Hello!
-</div>
+</button>
+`;
+
+exports[`DragDrop items that have droppable=false get special styling when another item is dragged 1`] = `
+<button
+  className="lnsDragDrop lnsDragDrop-isDroppable lnsDragDrop-isNotDroppable"
+  data-test-subj="lnsDragDrop"
+  onDragEnd={[Function]}
+  onDragLeave={[Function]}
+  onDragOver={[Function]}
+  onDragStart={[Function]}
+  onDrop={[Function]}
+>
+  Hello!
+</button>
 `;
 
 exports[`DragDrop renders if nothing is being dragged 1`] = `
-<div
-  class="lnsDragDrop"
+<button
+  class="lnsDragDrop lnsDragDrop-isDraggable"
   data-test-subj="lnsDragDrop"
   draggable="true"
 >
   Hello!
-</div>
+</button>
 `;

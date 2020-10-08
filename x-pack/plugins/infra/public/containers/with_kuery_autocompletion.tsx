@@ -59,7 +59,7 @@ class WithKueryAutocompletionComponent extends React.Component<
   ) => {
     const { indexPattern } = this.props;
     const language = 'kuery';
-    const hasQuerySuggestions = this.props.kibana.services.data.autocomplete.hasQuerySuggestions(
+    const hasQuerySuggestions = this.props.kibana.services.data?.autocomplete.hasQuerySuggestions(
       language
     );
 
@@ -85,7 +85,7 @@ class WithKueryAutocompletionComponent extends React.Component<
         boolFilter: [],
       })) || [];
 
-    this.setState(state =>
+    this.setState((state) =>
       state.currentRequest &&
       state.currentRequest.expression !== expression &&
       state.currentRequest.cursorPosition !== cursorPosition

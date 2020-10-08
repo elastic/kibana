@@ -72,10 +72,13 @@ export function* extractCodeMessages(buffer, reporter) {
         'typescript',
         'objectRestSpread',
         'classProperties',
+        'classPrivateProperties',
+        'classPrivateMethods',
         'asyncGenerators',
         'dynamicImport',
         'nullishCoalescingOperator',
         'optionalChaining',
+        'exportNamespaceFrom',
       ],
     });
   } catch (error) {

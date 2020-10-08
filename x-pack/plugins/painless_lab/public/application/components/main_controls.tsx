@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useState } from 'react';
-import classNames from 'classnames';
 import {
   EuiPopover,
   EuiBottomBar,
@@ -15,7 +14,6 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
 import { Links } from '../../links';
 
 interface Props {
@@ -24,16 +22,9 @@ interface Props {
   isLoading: boolean;
   reset: () => void;
   links: Links;
-  isNavDrawerLocked: boolean;
 }
 
-export function MainControls({
-  toggleRequestFlyout,
-  isRequestFlyoutOpen,
-  reset,
-  links,
-  isNavDrawerLocked,
-}: Props) {
+export function MainControls({ toggleRequestFlyout, isRequestFlyoutOpen, reset, links }: Props) {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   const items = [
@@ -87,12 +78,8 @@ export function MainControls({
     </EuiContextMenuItem>,
   ];
 
-  const classes = classNames('painlessLab__bottomBar', {
-    'painlessLab__bottomBar-isNavDrawerLocked': isNavDrawerLocked,
-  });
-
   return (
-    <EuiBottomBar paddingSize="s" className={classes}>
+    <EuiBottomBar paddingSize="s">
       <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" justifyContent="flexStart">
@@ -116,7 +103,7 @@ export function MainControls({
                 closePopover={() => setIsHelpOpen(false)}
                 panelPaddingSize="none"
                 withTitle
-                anchorPosition="upRight"
+                anchorPosition="upLeft"
               >
                 <EuiContextMenuPanel items={items} />
               </EuiPopover>

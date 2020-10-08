@@ -5,16 +5,20 @@
  */
 
 import { SavedObject, SavedObjectsUpdateResponse } from 'kibana/server';
-import { get } from 'lodash';
+import { get, isPlainObject, isString } from 'lodash';
+import deepEqual from 'fast-deep-equal';
 
 import {
   CaseUserActionAttributes,
   UserAction,
   UserActionField,
-  CaseAttributes,
+  ESCaseAttributes,
   User,
 } from '../../../common/api';
-import { isTwoArraysDifference } from '../../routes/api/cases/helpers';
+import {
+  isTwoArraysDifference,
+  transformESConnectorToCaseConnector,
+} from '../../routes/api/cases/helpers';
 import { UserActionItem } from '.';
 import { CASE_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT } from '../../saved_object_types';
 
@@ -23,6 +27,7 @@ export const transformNewUserAction = ({
   action,
   actionAt,
   email,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   full_name,
   newValue = null,
   oldValue = null,
@@ -119,6 +124,7 @@ export const buildCaseUserActionItem = ({
 
 const userActionFieldsAllowed: UserActionField = [
   'comment',
+  'connector',
   'description',
   'tags',
   'title',
@@ -133,21 +139,42 @@ export const buildCaseUserActions = ({
 }: {
   actionDate: string;
   actionBy: User;
-  originalCases: Array<SavedObject<CaseAttributes>>;
-  updatedCases: Array<SavedObjectsUpdateResponse<CaseAttributes>>;
+  originalCases: Array<SavedObject<ESCaseAttributes>>;
+  updatedCases: Array<SavedObjectsUpdateResponse<ESCaseAttributes>>;
 }): UserActionItem[] =>
   updatedCases.reduce<UserActionItem[]>((acc, updatedItem) => {
-    const originalItem = originalCases.find(oItem => oItem.id === updatedItem.id);
+    const originalItem = originalCases.find((oItem) => oItem.id === updatedItem.id);
     if (originalItem != null) {
       let userActions: UserActionItem[] = [];
       const updatedFields = Object.keys(updatedItem.attributes) as UserActionField;
-      updatedFields.forEach(field => {
+      updatedFields.forEach((field) => {
         if (userActionFieldsAllowed.includes(field)) {
-          const origValue = get(originalItem, ['attributes', field]);
-          const updatedValue = get(updatedItem, ['attributes', field]);
-          const compareValues = isTwoArraysDifference(origValue, updatedValue);
-          if (compareValues != null) {
-            if (compareValues.addedItems.length > 0) {
+          const origValue =
+            field === 'connector' && originalItem.attributes.connector
+              ? transformESConnectorToCaseConnector(originalItem.attributes.connector)
+              : get(originalItem, ['attributes', field]);
+
+          const updatedValue =
+            field === 'connector' && updatedItem.attributes.connector
+              ? transformESConnectorToCaseConnector(updatedItem.attributes.connector)
+              : get(updatedItem, ['attributes', field]);
+
+          if (isString(origValue) && isString(updatedValue) && origValue !== updatedValue) {
+            userActions = [
+              ...userActions,
+              buildCaseUserActionItem({
+                action: 'update',
+                actionAt: actionDate,
+                actionBy,
+                caseId: updatedItem.id,
+                fields: [field],
+                newValue: updatedValue,
+                oldValue: origValue,
+              }),
+            ];
+          } else if (Array.isArray(origValue) && Array.isArray(updatedValue)) {
+            const compareValues = isTwoArraysDifference(origValue, updatedValue);
+            if (compareValues && compareValues.addedItems.length > 0) {
               userActions = [
                 ...userActions,
                 buildCaseUserActionItem({
@@ -160,7 +187,8 @@ export const buildCaseUserActions = ({
                 }),
               ];
             }
-            if (compareValues.deletedItems.length > 0) {
+
+            if (compareValues && compareValues.deletedItems.length > 0) {
               userActions = [
                 ...userActions,
                 buildCaseUserActionItem({
@@ -173,7 +201,11 @@ export const buildCaseUserActions = ({
                 }),
               ];
             }
-          } else if (origValue !== updatedValue) {
+          } else if (
+            isPlainObject(origValue) &&
+            isPlainObject(updatedValue) &&
+            !deepEqual(origValue, updatedValue)
+          ) {
             userActions = [
               ...userActions,
               buildCaseUserActionItem({
@@ -182,8 +214,8 @@ export const buildCaseUserActions = ({
                 actionBy,
                 caseId: updatedItem.id,
                 fields: [field],
-                newValue: updatedValue,
-                oldValue: origValue,
+                newValue: JSON.stringify(updatedValue),
+                oldValue: JSON.stringify(origValue),
               }),
             ];
           }

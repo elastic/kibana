@@ -16,8 +16,33 @@ import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY } from '../common/constants';
  * major version!
  * @return {Array} array of rename operations and callback function for rename logging
  */
-export const deprecations = ({ rename }: ConfigDeprecationFactory): ConfigDeprecation[] => {
+export const deprecations = ({
+  rename,
+  renameFromRoot,
+}: ConfigDeprecationFactory): ConfigDeprecation[] => {
   return [
+    // This order matters. The "blanket rename" needs to happen at the end
+    renameFromRoot('xpack.monitoring.max_bucket_size', 'monitoring.ui.max_bucket_size'),
+    renameFromRoot('xpack.monitoring.min_interval_seconds', 'monitoring.ui.min_interval_seconds'),
+    renameFromRoot(
+      'xpack.monitoring.show_license_expiration',
+      'monitoring.ui.show_license_expiration'
+    ),
+    renameFromRoot(
+      'xpack.monitoring.ui.container.elasticsearch.enabled',
+      'monitoring.ui.container.elasticsearch.enabled'
+    ),
+    renameFromRoot(
+      'xpack.monitoring.ui.container.logstash.enabled',
+      'monitoring.ui.container.logstash.enabled'
+    ),
+    renameFromRoot('xpack.monitoring.elasticsearch', 'monitoring.ui.elasticsearch'),
+    renameFromRoot('xpack.monitoring.ccs.enabled', 'monitoring.ui.ccs.enabled'),
+    renameFromRoot(
+      'xpack.monitoring.elasticsearch.logFetchCount',
+      'monitoring.ui.elasticsearch.logFetchCount'
+    ),
+    renameFromRoot('xpack.monitoring', 'monitoring'),
     (config, fromPath, logger) => {
       const clusterAlertsEnabled = get(config, 'cluster_alerts.enabled');
       const emailNotificationsEnabled =
@@ -34,7 +59,11 @@ export const deprecations = ({ rename }: ConfigDeprecationFactory): ConfigDeprec
       if (es) {
         if (es.username === 'elastic') {
           logger(
-            `Setting [${fromPath}.username] to "elastic" is deprecated. You should use the "kibana" user instead.`
+            `Setting [${fromPath}.username] to "elastic" is deprecated. You should use the "kibana_system" user instead.`
+          );
+        } else if (es.username === 'kibana') {
+          logger(
+            `Setting [${fromPath}.username] to "kibana" is deprecated. You should use the "kibana_system" user instead.`
           );
         }
       }

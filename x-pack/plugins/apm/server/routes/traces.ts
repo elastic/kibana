@@ -10,28 +10,35 @@ import { getTrace } from '../lib/traces/get_trace';
 import { getTransactionGroupList } from '../lib/transaction_groups';
 import { createRoute } from './create_route';
 import { rangeRt, uiFiltersRt } from './default_api_types';
+import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 
 export const tracesRoute = createRoute(() => ({
   path: '/api/apm/traces',
   params: {
-    query: t.intersection([rangeRt, uiFiltersRt])
+    query: t.intersection([rangeRt, uiFiltersRt]),
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
-    return getTransactionGroupList({ type: 'top_traces' }, setup);
-  }
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
+    return getTransactionGroupList(
+      { type: 'top_traces', searchAggregatedTransactions },
+      setup
+    );
+  },
 }));
 
 export const tracesByIdRoute = createRoute(() => ({
   path: '/api/apm/traces/{traceId}',
   params: {
     path: t.type({
-      traceId: t.string
+      traceId: t.string,
     }),
-    query: rangeRt
+    query: rangeRt,
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     return getTrace(context.params.path.traceId, setup);
-  }
+  },
 }));

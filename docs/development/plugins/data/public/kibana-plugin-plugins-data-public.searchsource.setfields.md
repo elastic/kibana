@@ -4,6 +4,9 @@
 
 ## SearchSource.setFields() method
 
+Internal, do not use. Overrides all search source fields with the new field array.
+
+
 <b>Signature:</b>
 
 ```typescript

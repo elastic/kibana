@@ -55,7 +55,7 @@ function wrapSearchTerms(task: string, search?: string) {
 }
 
 function renderTasks(tasks: MultiTaskTodoInput['tasks'], search?: string) {
-  return tasks.map(task => (
+  return tasks.map((task) => (
     <EuiListGroupItem
       key={task}
       data-test-subj="multiTaskTodoTask"

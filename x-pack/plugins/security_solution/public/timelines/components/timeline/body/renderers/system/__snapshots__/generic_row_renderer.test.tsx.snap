@@ -1,0 +1,127 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly against snapshot 1`] = `
+<span>
+  <RowRendererContainer>
+    <SystemGenericFileDetails
+      browserFields={Object {}}
+      contextId="user_login-test"
+      data={
+        Object {
+          "_id": "29",
+          "event": Object {
+            "action": Array [
+              "user_login",
+            ],
+            "dataset": Array [
+              "login",
+            ],
+            "kind": Array [
+              "event",
+            ],
+            "module": Array [
+              "system",
+            ],
+            "outcome": Array [
+              "failure",
+            ],
+          },
+          "host": Object {
+            "id": Array [
+              "7c21f5ed03b04d0299569d221fe18bbc",
+            ],
+            "ip": Array [
+              "46.101.3.136",
+              "10.16.0.5",
+              "fe80::4066:42ff:fe19:b3b9",
+            ],
+            "name": Array [
+              "zeek-london",
+            ],
+          },
+          "process": Object {
+            "pid": Array [
+              6278,
+            ],
+          },
+          "source": Object {
+            "ip": Array [
+              "128.199.212.120",
+            ],
+          },
+          "user": Object {
+            "name": Array [
+              "Braden",
+            ],
+          },
+        }
+      }
+      text="some text"
+      timelineId="test"
+    />
+  </RowRendererContainer>
+</span>
+`;
+
+exports[`GenericRowRenderer #createGenericSystemRowRenderer renders correctly against snapshot 1`] = `
+<span>
+  <RowRendererContainer>
+    <SystemGenericDetails
+      browserFields={Object {}}
+      contextId="process_started-test"
+      data={
+        Object {
+          "_id": "30",
+          "event": Object {
+            "action": Array [
+              "process_started",
+            ],
+            "dataset": Array [
+              "login",
+            ],
+            "kind": Array [
+              "event",
+            ],
+            "module": Array [
+              "system",
+            ],
+            "outcome": Array [
+              "failure",
+            ],
+          },
+          "host": Object {
+            "id": Array [
+              "7c21f5ed03b04d0299569d221fe18bbc",
+            ],
+            "ip": Array [
+              "46.101.3.136",
+              "10.16.0.5",
+              "fe80::4066:42ff:fe19:b3b9",
+            ],
+            "name": Array [
+              "zeek-london",
+            ],
+          },
+          "process": Object {
+            "pid": Array [
+              6278,
+            ],
+          },
+          "source": Object {
+            "ip": Array [
+              "128.199.212.120",
+            ],
+          },
+          "user": Object {
+            "name": Array [
+              "Evan",
+            ],
+          },
+        }
+      }
+      text="some text"
+      timelineId="test"
+    />
+  </RowRendererContainer>
+</span>
+`;

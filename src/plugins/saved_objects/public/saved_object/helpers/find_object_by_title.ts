@@ -49,5 +49,7 @@ export async function findObjectByTitle<T extends SavedObjectAttributes>(
     searchFields: ['title'],
     fields: ['title'],
   });
-  return response.savedObjects.find(obj => obj.get('title').toLowerCase() === title.toLowerCase());
+  return response.savedObjects.find(
+    (obj) => obj.get('title').toLowerCase() === title.toLowerCase()
+  );
 }

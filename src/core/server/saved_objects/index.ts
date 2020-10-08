@@ -19,8 +19,6 @@
 
 export * from './service';
 
-export { SavedObjectsSchema } from './schema';
-
 export * from './import';
 
 export {

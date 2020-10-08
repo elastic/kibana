@@ -4,7 +4,9 @@
 
 ## SavedObjectTypeRegistry.getAllTypes() method
 
-Return all [types](./kibana-plugin-core-server.savedobjectstype.md) currently registered.
+Return all [types](./kibana-plugin-core-server.savedobjectstype.md) currently registered, including the hidden ones.
+
+To only get the visible types (which is the most common use case), use `getVisibleTypes` instead.
 
 <b>Signature:</b>
 

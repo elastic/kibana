@@ -96,14 +96,14 @@ export function appStateToSavedWorkspace(
   },
   canSaveData: boolean
 ) {
-  const blacklist: SerializedNode[] = canSaveData
-    ? workspace.blacklistedNodes.map(node => serializeNode(node))
+  const blocklist: SerializedNode[] = canSaveData
+    ? workspace.blocklistedNodes.map((node) => serializeNode(node))
     : [];
   const vertices: SerializedNode[] = canSaveData
-    ? workspace.nodes.map(node => serializeNode(node, workspace.nodes))
+    ? workspace.nodes.map((node) => serializeNode(node, workspace.nodes))
     : [];
   const links: SerializedEdge[] = canSaveData
-    ? workspace.edges.map(edge => serializeEdge(edge, workspace.nodes))
+    ? workspace.edges.map((edge) => serializeEdge(edge, workspace.nodes))
     : [];
 
   const mappedUrlTemplates = urlTemplates.map(serializeUrlTemplate);
@@ -111,7 +111,7 @@ export function appStateToSavedWorkspace(
   const persistedWorkspaceState: SerializedWorkspaceState = {
     indexPattern: selectedIndex.title,
     selectedFields: selectedFields.map(serializeField),
-    blacklist,
+    blocklist,
     vertices,
     links,
     urlTemplates: mappedUrlTemplates,

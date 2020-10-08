@@ -33,11 +33,11 @@ export function IncludeExcludeParamEditor(props: AggParamEditorProps<string | Ar
     if (isAggOfNumberType && !Array.isArray(value) && value !== undefined) {
       const numberArray = value
         .split('|')
-        .map(item => parseFloat(item))
-        .filter(number => Number.isFinite(number));
+        .map((item) => parseFloat(item))
+        .filter((number) => Number.isFinite(number));
       setValue(numberArray.length ? numberArray : ['']);
     } else if (!isAggOfNumberType && Array.isArray(value) && value !== undefined) {
-      setValue(value.filter(item => item !== '').join('|'));
+      setValue(value.filter((item) => item !== '').join('|'));
     }
   }, [isAggOfNumberType, setValue, value]);
 

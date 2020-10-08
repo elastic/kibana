@@ -4,16 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiContextMenuPanelDescriptor,
-  EuiFilterButton,
-  EuiFilterGroup,
-  EuiPopover,
-  EuiContextMenu,
-} from '@elastic/eui';
+import { EuiContextMenuPanelDescriptor, EuiPopover, EuiContextMenu } from '@elastic/eui';
 import React, { useCallback, useState, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { DropdownButton } from '../dropdown_button';
 
 interface Props {
   region?: string;
@@ -33,7 +27,7 @@ export const WaffleRegionControls = (props: Props) => {
     setIsOpen(false);
   }, [setIsOpen]);
 
-  const currentLabel = options.find(o => region === o);
+  const currentLabel = options.find((o) => region === o);
 
   const changeRegion = useCallback(
     (val: string) => {
@@ -52,7 +46,7 @@ export const WaffleRegionControls = (props: Props) => {
       {
         id: 0,
         title: '',
-        items: options.map(o => {
+        items: options.map((o) => {
           const icon = o === region ? 'check' : 'empty';
           const panel = { name: o, onClick: () => changeRegion(o), icon };
           return panel;
@@ -62,32 +56,28 @@ export const WaffleRegionControls = (props: Props) => {
     [changeRegion, options, region]
   );
 
+  const button = (
+    <DropdownButton
+      onClick={showPopover}
+      label={i18n.translate('xpack.infra.waffle.regionLabel', { defaultMessage: 'Region' })}
+    >
+      {currentLabel ||
+        i18n.translate('xpack.infra.waffle.region', {
+          defaultMessage: 'All',
+        })}
+    </DropdownButton>
+  );
+
   return (
-    <EuiFilterGroup>
-      <EuiPopover
-        isOpen={isOpen}
-        id="regionPanel"
-        button={
-          <EuiFilterButton iconType="arrowDown" onClick={showPopover}>
-            <FormattedMessage
-              id="xpack.infra.waffle.regionLabel"
-              defaultMessage="Region: {selectedRegion}"
-              values={{
-                selectedRegion:
-                  currentLabel ||
-                  i18n.translate('xpack.infra.waffle.region', {
-                    defaultMessage: 'All',
-                  }),
-              }}
-            />
-          </EuiFilterButton>
-        }
-        anchorPosition="downLeft"
-        panelPaddingSize="none"
-        closePopover={closePopover}
-      >
-        <EuiContextMenu initialPanelId={0} panels={panels} />
-      </EuiPopover>
-    </EuiFilterGroup>
+    <EuiPopover
+      isOpen={isOpen}
+      id="regionPanel"
+      button={button}
+      anchorPosition="downLeft"
+      panelPaddingSize="none"
+      closePopover={closePopover}
+    >
+      <EuiContextMenu initialPanelId={0} panels={panels} />
+    </EuiPopover>
   );
 };

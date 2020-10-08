@@ -6,12 +6,16 @@
 import {
   EPM_API_ROOT,
   EPM_API_ROUTES,
-  DATASOURCE_API_ROUTES,
-  AGENT_CONFIG_API_ROUTES,
-  FLEET_SETUP_API_ROUTES,
+  PACKAGE_POLICY_API_ROUTES,
+  AGENT_POLICY_API_ROUTES,
+  DATA_STREAM_API_ROUTES,
+  AGENTS_SETUP_API_ROUTES,
   AGENT_API_ROUTES,
   ENROLLMENT_API_KEY_ROUTES,
   SETUP_API_ROUTE,
+  OUTPUT_API_ROUTES,
+  SETTINGS_API_ROUTES,
+  APP_API_ROUTES,
 } from '../constants';
 
 export const epmRouteService = {
@@ -23,6 +27,10 @@ export const epmRouteService = {
     return EPM_API_ROUTES.LIST_PATTERN;
   },
 
+  getListLimitedPath: () => {
+    return EPM_API_ROUTES.LIMITED_LIST_PATTERN;
+  },
+
   getInfoPath: (pkgkey: string) => {
     return EPM_API_ROUTES.INFO_PATTERN.replace('{pkgkey}', pkgkey);
   },
@@ -32,7 +40,14 @@ export const epmRouteService = {
   },
 
   getInstallPath: (pkgkey: string) => {
-    return EPM_API_ROUTES.INSTALL_PATTERN.replace('{pkgkey}', pkgkey).replace(/\/$/, ''); // trim trailing slash
+    return EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN.replace('{pkgkey}', pkgkey).replace(
+      /\/$/,
+      ''
+    ); // trim trailing slash
+  },
+
+  getBulkInstallPath: () => {
+    return EPM_API_ROUTES.BULK_INSTALL_PATTERN;
   },
 
   getRemovePath: (pkgkey: string) => {
@@ -40,66 +55,107 @@ export const epmRouteService = {
   },
 };
 
-export const datasourceRouteService = {
+export const packagePolicyRouteService = {
   getListPath: () => {
-    return DATASOURCE_API_ROUTES.LIST_PATTERN;
+    return PACKAGE_POLICY_API_ROUTES.LIST_PATTERN;
   },
 
-  getInfoPath: (datasourceId: string) => {
-    return DATASOURCE_API_ROUTES.INFO_PATTERN.replace('{datasourceId}', datasourceId);
+  getInfoPath: (packagePolicyId: string) => {
+    return PACKAGE_POLICY_API_ROUTES.INFO_PATTERN.replace('{packagePolicyId}', packagePolicyId);
   },
 
   getCreatePath: () => {
-    return DATASOURCE_API_ROUTES.CREATE_PATTERN;
+    return PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN;
   },
 
-  getUpdatePath: (datasourceId: string) => {
-    return DATASOURCE_API_ROUTES.UPDATE_PATTERN.replace('{datasourceId}', datasourceId);
+  getUpdatePath: (packagePolicyId: string) => {
+    return PACKAGE_POLICY_API_ROUTES.UPDATE_PATTERN.replace('{packagePolicyId}', packagePolicyId);
   },
 
   getDeletePath: () => {
-    return DATASOURCE_API_ROUTES.DELETE_PATTERN;
+    return PACKAGE_POLICY_API_ROUTES.DELETE_PATTERN;
   },
 };
 
-export const agentConfigRouteService = {
+export const agentPolicyRouteService = {
   getListPath: () => {
-    return AGENT_CONFIG_API_ROUTES.LIST_PATTERN;
+    return AGENT_POLICY_API_ROUTES.LIST_PATTERN;
   },
 
-  getInfoPath: (agentConfigId: string) => {
-    return AGENT_CONFIG_API_ROUTES.INFO_PATTERN.replace('{agentConfigId}', agentConfigId);
+  getInfoPath: (agentPolicyId: string) => {
+    return AGENT_POLICY_API_ROUTES.INFO_PATTERN.replace('{agentPolicyId}', agentPolicyId);
   },
 
   getCreatePath: () => {
-    return AGENT_CONFIG_API_ROUTES.CREATE_PATTERN;
+    return AGENT_POLICY_API_ROUTES.CREATE_PATTERN;
   },
 
-  getUpdatePath: (agentConfigId: string) => {
-    return AGENT_CONFIG_API_ROUTES.UPDATE_PATTERN.replace('{agentConfigId}', agentConfigId);
+  getUpdatePath: (agentPolicyId: string) => {
+    return AGENT_POLICY_API_ROUTES.UPDATE_PATTERN.replace('{agentPolicyId}', agentPolicyId);
+  },
+
+  getCopyPath: (agentPolicyId: string) => {
+    return AGENT_POLICY_API_ROUTES.COPY_PATTERN.replace('{agentPolicyId}', agentPolicyId);
   },
 
   getDeletePath: () => {
-    return AGENT_CONFIG_API_ROUTES.DELETE_PATTERN;
+    return AGENT_POLICY_API_ROUTES.DELETE_PATTERN;
   },
 
-  getInfoFullPath: (agentConfigId: string) => {
-    return AGENT_CONFIG_API_ROUTES.FULL_INFO_PATTERN.replace('{agentConfigId}', agentConfigId);
+  getInfoFullPath: (agentPolicyId: string) => {
+    return AGENT_POLICY_API_ROUTES.FULL_INFO_PATTERN.replace('{agentPolicyId}', agentPolicyId);
+  },
+
+  getInfoFullDownloadPath: (agentPolicyId: string) => {
+    return AGENT_POLICY_API_ROUTES.FULL_INFO_DOWNLOAD_PATTERN.replace(
+      '{agentPolicyId}',
+      agentPolicyId
+    );
+  },
+};
+
+export const dataStreamRouteService = {
+  getListPath: () => {
+    return DATA_STREAM_API_ROUTES.LIST_PATTERN;
   },
 };
 
 export const fleetSetupRouteService = {
-  getFleetSetupPath: () => FLEET_SETUP_API_ROUTES.INFO_PATTERN,
-  postFleetSetupPath: () => FLEET_SETUP_API_ROUTES.CREATE_PATTERN,
+  getFleetSetupPath: () => AGENTS_SETUP_API_ROUTES.INFO_PATTERN,
+  postFleetSetupPath: () => AGENTS_SETUP_API_ROUTES.CREATE_PATTERN,
 };
 
 export const agentRouteService = {
   getInfoPath: (agentId: string) => AGENT_API_ROUTES.INFO_PATTERN.replace('{agentId}', agentId),
   getUpdatePath: (agentId: string) => AGENT_API_ROUTES.UPDATE_PATTERN.replace('{agentId}', agentId),
   getEventsPath: (agentId: string) => AGENT_API_ROUTES.EVENTS_PATTERN.replace('{agentId}', agentId),
-  getUnenrollPath: () => AGENT_API_ROUTES.UNENROLL_PATTERN,
+  getUnenrollPath: (agentId: string) =>
+    AGENT_API_ROUTES.UNENROLL_PATTERN.replace('{agentId}', agentId),
+  getBulkUnenrollPath: () => AGENT_API_ROUTES.BULK_UNENROLL_PATTERN,
+  getReassignPath: (agentId: string) =>
+    AGENT_API_ROUTES.REASSIGN_PATTERN.replace('{agentId}', agentId),
+  getBulkReassignPath: () => AGENT_API_ROUTES.BULK_REASSIGN_PATTERN,
+  getUpgradePath: (agentId: string) =>
+    AGENT_API_ROUTES.UPGRADE_PATTERN.replace('{agentId}', agentId),
+  getBulkUpgradePath: () => AGENT_API_ROUTES.BULK_UPGRADE_PATTERN,
   getListPath: () => AGENT_API_ROUTES.LIST_PATTERN,
   getStatusPath: () => AGENT_API_ROUTES.STATUS_PATTERN,
+};
+
+export const outputRoutesService = {
+  getInfoPath: (outputId: string) => OUTPUT_API_ROUTES.INFO_PATTERN.replace('{outputId}', outputId),
+  getUpdatePath: (outputId: string) =>
+    OUTPUT_API_ROUTES.UPDATE_PATTERN.replace('{outputId}', outputId),
+  getListPath: () => OUTPUT_API_ROUTES.LIST_PATTERN,
+};
+
+export const settingsRoutesService = {
+  getInfoPath: () => SETTINGS_API_ROUTES.INFO_PATTERN,
+  getUpdatePath: () => SETTINGS_API_ROUTES.UPDATE_PATTERN,
+};
+
+export const appRoutesService = {
+  getCheckPermissionsPath: () => APP_API_ROUTES.CHECK_PERMISSIONS_PATTERN,
 };
 
 export const enrollmentAPIKeyRouteService = {

@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { defineAccessAgreementRoutes } from './access_agreement';
 import { defineAccountManagementRoutes } from './account_management';
 import { defineLoggedOutRoutes } from './logged_out';
 import { defineLoginRoutes } from './login';
 import { defineLogoutRoutes } from './logout';
 import { defineOverwrittenSessionRoutes } from './overwritten_session';
+import { defineCaptureURLRoutes } from './capture_url';
 import { RouteDefinitionParams } from '..';
 
 export function defineViewRoutes(params: RouteDefinitionParams) {
@@ -20,8 +22,10 @@ export function defineViewRoutes(params: RouteDefinitionParams) {
     defineLoginRoutes(params);
   }
 
+  defineAccessAgreementRoutes(params);
   defineAccountManagementRoutes(params);
   defineLoggedOutRoutes(params);
   defineLogoutRoutes(params);
   defineOverwrittenSessionRoutes(params);
+  defineCaptureURLRoutes(params);
 }

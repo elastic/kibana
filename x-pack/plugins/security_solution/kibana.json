@@ -1,0 +1,36 @@
+{
+  "id": "securitySolution",
+  "version": "8.0.0",
+  "extraPublicDirs": ["common"],
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "securitySolution"],
+  "requiredPlugins": [
+    "actions",
+    "alerts",
+    "data",
+    "dataEnhanced",
+    "embeddable",
+    "features",
+    "taskManager",
+    "inspector",
+    "licensing",
+    "maps",
+    "triggersActionsUi",
+    "uiActions"
+  ],
+  "optionalPlugins": [
+    "encryptedSavedObjects",
+    "ingestManager",
+    "ml",
+    "newsfeed",
+    "security",
+    "spaces",
+    "usageCollection",
+    "lists",
+    "home",
+    "telemetry"
+  ],
+  "server": true,
+  "ui": true,
+  "requiredBundles": ["esUiShared", "ingestManager", "kibanaUtils", "kibanaReact", "lists", "ml"]
+}

@@ -17,7 +17,16 @@
  * under the License.
  */
 
-export { JsonEditor, OnJsonEditorUpdateHandler } from './components/json_editor';
+/**
+ * Create a namespace for Forms
+ * In the future, each top level folder should be exported like that to avoid naming collision
+ */
+import * as Forms from './forms';
+import * as ace from './ace';
+import * as GlobalFlyout from './global_flyout';
+import * as XJson from './xjson';
+
+export { JsonEditor, OnJsonEditorUpdateHandler, JsonEditorState } from './components/json_editor';
 
 export { SectionLoading } from './components/section_loading';
 
@@ -30,22 +39,25 @@ export {
   UseRequestResponse,
   sendRequest,
   useRequest,
-} from './request/np_ready_request';
+} from './request';
 
 export { indices } from './indices';
 
-export { useUIAceKeyboardMode } from './use_ui_ace_keyboard_mode';
-
 export {
-  installXJsonMode,
-  XJsonMode,
-  ElasticsearchSqlHighlightRules,
-  addXJsonToRules,
-  ScriptHighlightRules,
-  XJsonHighlightRules,
-  collapseLiteralStrings,
-  expandLiteralStrings,
-} from './console_lang';
+  AuthorizationContext,
+  AuthorizationProvider,
+  NotAuthorizedSection,
+  WithPrivileges,
+  Privileges,
+  MissingPrivileges,
+  SectionError,
+  Error,
+  useAuthorizationContext,
+} from './authorization';
+
+export { Forms, ace, GlobalFlyout, XJson };
+
+export { extractQueryParams } from './url';
 
 /** dummy plugin, we just want esUiShared to have its own bundle */
 export function plugin() {

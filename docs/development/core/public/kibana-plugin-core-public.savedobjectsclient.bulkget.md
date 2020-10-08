@@ -9,10 +9,10 @@ Returns an array of objects by id
 <b>Signature:</b>
 
 ```typescript
-bulkGet: (objects?: {
+bulkGet: (objects?: Array<{
         id: string;
         type: string;
-    }[]) => Promise<SavedObjectsBatchResponse<unknown>>;
+    }>) => Promise<SavedObjectsBatchResponse<unknown>>;
 ```
 
 ## Example

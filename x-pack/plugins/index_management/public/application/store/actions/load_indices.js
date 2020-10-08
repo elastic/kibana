@@ -11,7 +11,7 @@ export const loadIndicesStart = createAction('INDEX_MANAGEMENT_LOAD_INDICES_STAR
 export const loadIndicesSuccess = createAction('INDEX_MANAGEMENT_LOAD_INDICES_SUCCESS');
 export const loadIndicesError = createAction('INDEX_MANAGEMENT_LOAD_INDICES_ERROR');
 
-export const loadIndices = () => async dispatch => {
+export const loadIndices = () => async (dispatch) => {
   dispatch(loadIndicesStart());
   let indices;
   try {

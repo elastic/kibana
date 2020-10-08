@@ -33,10 +33,10 @@ jest.mock('@elastic/eui', () => ({
     let counter = 1;
     return () => `12${counter++}`;
   }),
-  EuiSpacer: require.requireActual('@elastic/eui').EuiSpacer,
-  EuiFlexItem: require.requireActual('@elastic/eui').EuiFlexItem,
-  EuiButtonEmpty: require.requireActual('@elastic/eui').EuiButtonEmpty,
-  EuiFormErrorText: require.requireActual('@elastic/eui').EuiFormErrorText,
+  EuiSpacer: jest.requireActual('@elastic/eui').EuiSpacer,
+  EuiFlexItem: jest.requireActual('@elastic/eui').EuiFlexItem,
+  EuiButtonEmpty: jest.requireActual('@elastic/eui').EuiButtonEmpty,
+  EuiFormErrorText: jest.requireActual('@elastic/eui').EuiFormErrorText,
 }));
 
 describe('NumberList', () => {
@@ -139,12 +139,7 @@ describe('NumberList', () => {
     defaultProps.numberArray = [1];
     const comp = shallow(<NumberList {...defaultProps} />);
 
-    expect(
-      comp
-        .find(NumberRow)
-        .first()
-        .prop('disableDelete')
-    ).toEqual(true);
+    expect(comp.find(NumberRow).first().prop('disableDelete')).toEqual(true);
   });
 
   test('should change value', () => {
@@ -157,10 +152,7 @@ describe('NumberList', () => {
 
   test('should call setTouched', () => {
     const comp = shallow(<NumberList {...defaultProps} />);
-    comp
-      .find(NumberRow)
-      .first()
-      .prop('onBlur')();
+    comp.find(NumberRow).first().prop('onBlur')();
 
     expect(defaultProps.setTouched).toBeCalled();
   });

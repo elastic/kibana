@@ -20,20 +20,20 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const filterBar = getService('filterBar');
   const inspector = getService('inspector');
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
   const queryBar = getService('queryBar');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker', 'visualize']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
   };
 
   describe('discover field visualize button', () => {
-    before(async function() {
+    before(async function () {
       log.debug('load kibana index with default index pattern');
       await esArchiver.load('discover');
 
@@ -46,6 +46,13 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('go to discover');
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
+    });
+
+    it('should be able to visualize a field and save the visualization', async () => {
+      await PageObjects.discover.findFieldByName('type');
+      log.debug('visualize a type field');
+      await PageObjects.discover.clickFieldListItemVisualize('type');
+      await PageObjects.visualize.saveVisualizationExpectSuccess('Top 5 server types');
     });
 
     it('should visualize a field in area chart', async () => {
@@ -78,6 +85,12 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await inspector.open();
       await inspector.expectTableData(expectedTableData);
       await inspector.close();
+    });
+
+    it('should not show the "Visualize" button for geo field', async () => {
+      await PageObjects.discover.findFieldByName('geo.coordinates');
+      log.debug('visualize a geo field');
+      await PageObjects.discover.expectMissingFieldListItemVisualize('geo.coordinates');
     });
 
     it('should preserve app filters in visualize', async () => {

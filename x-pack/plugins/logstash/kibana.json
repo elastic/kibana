@@ -4,9 +4,16 @@
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "logstash"],
   "requiredPlugins": [
-    "licensing"
+    "licensing",
+    "management",
+    "features"
   ],
-  "optionalPlugins": ["security"],
+  "optionalPlugins": [
+    "home",
+    "monitoring",
+    "security"
+  ],
   "server": true,
-  "ui": false
+  "ui": true,
+  "requiredBundles": ["home"]
 }

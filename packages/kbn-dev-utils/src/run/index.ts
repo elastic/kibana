@@ -17,6 +17,7 @@
  * under the License.
  */
 
-export { run } from './run';
-export { Flags } from './flags';
-export { createFailError, createFlagError, combineErrors, isFailError } from './fail';
+export * from './run';
+export * from './run_with_commands';
+export * from './flags';
+export * from './fail';

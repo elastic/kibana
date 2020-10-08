@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function({ loadTestFile }) {
-  describe('logstash', function() {
-    this.tags(['ciGroup2', 'smoke']);
+export default function ({ loadTestFile }) {
+  describe('logstash', function () {
+    this.tags(['ciGroup2']);
 
+    loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./pipeline_list'));
     loadTestFile(require.resolve('./pipeline_create'));
   });

@@ -83,7 +83,7 @@ function fetchPipelineVersions(...args) {
     size: 0,
     ignoreUnavailable: true,
     body: {
-      sort: { timestamp: { order: 'desc' } },
+      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query,
       aggs,
     },
@@ -98,7 +98,7 @@ export function _handleResponse(response) {
     'aggregations.pipelines.scoped.by_pipeline_hash.buckets',
     []
   );
-  return pipelineHashes.map(pipelineHash => ({
+  return pipelineHashes.map((pipelineHash) => ({
     hash: pipelineHash.key,
     firstSeen: get(pipelineHash, 'path_to_root.first_seen.value'),
     lastSeen: get(pipelineHash, 'path_to_root.last_seen.value'),

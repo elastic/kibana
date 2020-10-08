@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Feature, FeatureConfig } from '../../../../../features/common';
+import { KibanaFeature, KibanaFeatureConfig } from '../../../../../features/common';
 import { PrimaryFeaturePrivilege } from './primary_feature_privilege';
 import { SecuredSubFeature } from './secured_sub_feature';
 import { SubFeaturePrivilege } from './sub_feature_privilege';
 
-export class SecuredFeature extends Feature {
+export class SecuredFeature extends KibanaFeature {
   private readonly primaryFeaturePrivileges: PrimaryFeaturePrivilege[];
 
   private readonly minimalPrimaryFeaturePrivileges: PrimaryFeaturePrivilege[];
@@ -18,7 +18,10 @@ export class SecuredFeature extends Feature {
 
   private readonly securedSubFeatures: SecuredSubFeature[];
 
-  constructor(config: FeatureConfig, actionMapping: { [privilegeId: string]: string[] } = {}) {
+  constructor(
+    config: KibanaFeatureConfig,
+    actionMapping: { [privilegeId: string]: string[] } = {}
+  ) {
     super(config);
     this.primaryFeaturePrivileges = Object.entries(this.config.privileges || {}).map(
       ([id, privilege]) => new PrimaryFeaturePrivilege(id, privilege, actionMapping[id])
@@ -34,7 +37,7 @@ export class SecuredFeature extends Feature {
     }
 
     this.securedSubFeatures =
-      this.config.subFeatures?.map(sf => new SecuredSubFeature(sf, actionMapping)) ?? [];
+      this.config.subFeatures?.map((sf) => new SecuredSubFeature(sf, actionMapping)) ?? [];
 
     this.subFeaturePrivileges = this.securedSubFeatures.reduce((acc, subFeature) => {
       return [...acc, ...subFeature.privilegeIterator()];

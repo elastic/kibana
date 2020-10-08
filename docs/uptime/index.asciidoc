@@ -1,21 +1,19 @@
+[chapter]
 [role="xpack"]
 [[xpack-uptime]]
 = Uptime
 
-[partintro]
---
-Uptime allows you to monitor the status of network endpoints via HTTP/S, TCP, and ICMP.
+The Uptime app in {kib} enables you to monitor the status of network endpoints via HTTP/S, TCP, and ICMP.
 You can explore endpoint status over time, drill down into specific monitors,
-and easily view a high-level snapshot of your environment at any point in time.
+and view a high-level snapshot of your environment at any point in time.
+
+[role="screenshot"]
+image::images/uptime-overview.png[Uptime app overview]
+
+[float]
+=== Get started
 
 To get started with Elastic Uptime, refer to {uptime-guide}/install-uptime.html[Install Uptime].
 
-* <<uptime-overview>>
-* <<uptime-monitor>>
-* <<uptime-settings>>
 
---
 
-include::overview.asciidoc[]
-include::monitor.asciidoc[]
-include::settings.asciidoc[]

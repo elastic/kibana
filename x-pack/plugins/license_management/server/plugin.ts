@@ -7,14 +7,27 @@
 import { Plugin, CoreSetup } from 'kibana/server';
 
 import { ApiRoutes } from './routes';
-import { isEsError } from './lib/is_es_error';
+import { isEsError } from './shared_imports';
 import { Dependencies } from './types';
 
 export class LicenseManagementServerPlugin implements Plugin<void, void, any, any> {
   private readonly apiRoutes = new ApiRoutes();
 
-  setup({ http }: CoreSetup, { licensing, security }: Dependencies) {
+  setup({ http }: CoreSetup, { licensing, features, security }: Dependencies) {
     const router = http.createRouter();
+
+    features.registerElasticsearchFeature({
+      id: 'license_management',
+      management: {
+        stack: ['license_management'],
+      },
+      privileges: [
+        {
+          requiredClusterPrivileges: ['manage'],
+          ui: [],
+        },
+      ],
+    });
 
     this.apiRoutes.setup({
       router,

@@ -46,7 +46,7 @@ describe('ModalService', () => {
   describe('openModal()', () => {
     it('renders a modal to the DOM', () => {
       expect(mockReactDomRender).not.toHaveBeenCalled();
-      modals.open(container => {
+      modals.open((container) => {
         const content = document.createElement('span');
         content.textContent = 'Modal content';
         container.append(content);
@@ -104,7 +104,7 @@ describe('ModalService', () => {
   describe('openConfirm()', () => {
     it('renders a mountpoint confirm message', () => {
       expect(mockReactDomRender).not.toHaveBeenCalled();
-      modals.openConfirm(container => {
+      modals.openConfirm((container) => {
         const content = document.createElement('span');
         content.textContent = 'Modal content';
         container.append(content);

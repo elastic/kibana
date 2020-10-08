@@ -9,11 +9,12 @@ import { schema } from '@kbn/config-schema';
 import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
+import { CASE_COMMENTS_URL } from '../../../../../common/constants';
 
 export function initDeleteAllCommentsApi({ caseService, router, userActionService }: RouteDeps) {
   router.delete(
     {
-      path: '/api/cases/{case_id}/comments',
+      path: CASE_COMMENTS_URL,
       validate: {
         params: schema.object({
           case_id: schema.string(),
@@ -23,6 +24,7 @@ export function initDeleteAllCommentsApi({ caseService, router, userActionServic
     async (context, request, response) => {
       try {
         const client = context.core.savedObjects.client;
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { username, full_name, email } = await caseService.getUser({ request, response });
         const deleteDate = new Date().toISOString();
 
@@ -31,7 +33,7 @@ export function initDeleteAllCommentsApi({ caseService, router, userActionServic
           caseId: request.params.case_id,
         });
         await Promise.all(
-          comments.saved_objects.map(comment =>
+          comments.saved_objects.map((comment) =>
             caseService.deleteComment({
               client,
               commentId: comment.id,
@@ -41,7 +43,7 @@ export function initDeleteAllCommentsApi({ caseService, router, userActionServic
 
         await userActionService.postUserActions({
           client,
-          actions: comments.saved_objects.map(comment =>
+          actions: comments.saved_objects.map((comment) =>
             buildCommentUserActionItem({
               action: 'delete',
               actionAt: deleteDate,

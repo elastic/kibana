@@ -5,7 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { RouteDependencies } from '../../../types';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
@@ -13,8 +13,8 @@ const bodySchema = schema.object({
   watchIds: schema.arrayOf(schema.string()),
 });
 
-function deleteWatches(dataClient: IScopedClusterClient, watchIds: string[]) {
-  const deletePromises = watchIds.map(watchId => {
+function deleteWatches(dataClient: ILegacyScopedClusterClient, watchIds: string[]) {
+  const deletePromises = watchIds.map((watchId) => {
     return dataClient
       .callAsCurrentUser('watcher.deleteWatch', {
         id: watchId,
@@ -23,7 +23,7 @@ function deleteWatches(dataClient: IScopedClusterClient, watchIds: string[]) {
       .catch((error: Array<{ _id: string }>) => ({ error }));
   });
 
-  return Promise.all(deletePromises).then(results => {
+  return Promise.all(deletePromises).then((results) => {
     const errors: Error[] = [];
     const successes: boolean[] = [];
     results.forEach(({ success, error }: { success?: any; error?: any }) => {

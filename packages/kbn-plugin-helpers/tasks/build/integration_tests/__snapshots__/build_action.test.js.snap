@@ -1,3 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`calling create_build rejects returned promise when build fails 1`] = `"foo bar"`;

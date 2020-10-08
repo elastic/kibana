@@ -21,7 +21,7 @@ import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { services } from './services';
 import { pageObjects } from './page_objects';
 
-export default async function({ readConfigFile }: FtrConfigProviderContext) {
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
   return {
@@ -35,6 +35,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/management'),
       require.resolve('./apps/console'),
       require.resolve('./apps/home'),
+      require.resolve('./apps/filter_panel'),
     ],
     pageObjects,
     services,

@@ -4,108 +4,118 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { curry, isEmpty } from 'lodash';
+import { curry } from 'lodash';
 import { schema } from '@kbn/config-schema';
+
+import { validate } from './validators';
 import {
-  ActionType,
-  ActionTypeExecutorOptions,
-  ActionTypeExecutorResult,
-  ExecutorType,
-} from '../../types';
+  ExternalIncidentServiceConfiguration,
+  ExternalIncidentServiceSecretConfiguration,
+  ExecutorParamsSchema,
+} from './schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
-import { ServiceNow } from './lib';
-
+import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../../types';
+import { createExternalService } from './service';
+import { api } from './api';
 import * as i18n from './translations';
+import { Logger } from '../../../../../../src/core/server';
+import {
+  ExecutorParams,
+  ExecutorSubActionPushParams,
+  ServiceNowPublicConfigurationType,
+  ServiceNowSecretConfigurationType,
+  PushToServiceResponse,
+} from './types';
 
-import { ACTION_TYPE_ID } from './constants';
-import { ConfigType, SecretsType, Comment, ExecutorParams } from './types';
+// TODO: to remove, need to support Case
+import { buildMap, mapParams } from '../case/utils';
 
-import { ConfigSchemaProps, SecretsSchemaProps, ParamsSchema } from './schema';
-
-import { buildMap, mapParams } from './helpers';
-import { handleIncident } from './action_handlers';
-
-function validateConfig(
-  configurationUtilities: ActionsConfigurationUtilities,
-  configObject: ConfigType
-) {
-  try {
-    if (isEmpty(configObject.casesConfiguration.mapping)) {
-      return i18n.MAPPING_EMPTY;
-    }
-
-    configurationUtilities.ensureWhitelistedUri(configObject.apiUrl);
-  } catch (whitelistError) {
-    return i18n.WHITE_LISTED_ERROR(whitelistError.message);
-  }
+interface GetActionTypeParams {
+  logger: Logger;
+  configurationUtilities: ActionsConfigurationUtilities;
 }
 
-function validateSecrets(
-  configurationUtilities: ActionsConfigurationUtilities,
-  secrets: SecretsType
-) {}
-
 // action type definition
-export function getActionType({
-  configurationUtilities,
-  executor = serviceNowExecutor,
-}: {
-  configurationUtilities: ActionsConfigurationUtilities;
-  executor?: ExecutorType;
-}): ActionType {
+export function getActionType(
+  params: GetActionTypeParams
+): ActionType<
+  ServiceNowPublicConfigurationType,
+  ServiceNowSecretConfigurationType,
+  ExecutorParams,
+  PushToServiceResponse | {}
+> {
+  const { logger, configurationUtilities } = params;
   return {
-    id: ACTION_TYPE_ID,
-    name: i18n.NAME,
+    id: '.servicenow',
     minimumLicenseRequired: 'platinum',
+    name: i18n.NAME,
     validate: {
-      config: schema.object(ConfigSchemaProps, {
-        validate: curry(validateConfig)(configurationUtilities),
+      config: schema.object(ExternalIncidentServiceConfiguration, {
+        validate: curry(validate.config)(configurationUtilities),
       }),
-      secrets: schema.object(SecretsSchemaProps, {
-        validate: curry(validateSecrets)(configurationUtilities),
+      secrets: schema.object(ExternalIncidentServiceSecretConfiguration, {
+        validate: curry(validate.secrets)(configurationUtilities),
       }),
-      params: ParamsSchema,
+      params: ExecutorParamsSchema,
     },
-    executor,
+    executor: curry(executor)({ logger }),
   };
 }
 
 // action executor
 
-async function serviceNowExecutor(
-  execOptions: ActionTypeExecutorOptions
-): Promise<ActionTypeExecutorResult> {
-  const actionId = execOptions.actionId;
-  const {
-    apiUrl,
-    casesConfiguration: { mapping: configurationMapping },
-  } = execOptions.config as ConfigType;
-  const { username, password } = execOptions.secrets as SecretsType;
-  const params = execOptions.params as ExecutorParams;
-  const { comments, incidentId, ...restParams } = params;
+async function executor(
+  { logger }: { logger: Logger },
+  execOptions: ActionTypeExecutorOptions<
+    ServiceNowPublicConfigurationType,
+    ServiceNowSecretConfigurationType,
+    ExecutorParams
+  >
+): Promise<ActionTypeExecutorResult<PushToServiceResponse | {}>> {
+  const { actionId, config, params, secrets } = execOptions;
+  const { subAction, subActionParams } = params;
+  let data: PushToServiceResponse | null = null;
 
-  const mapping = buildMap(configurationMapping);
-  const incident = mapParams(restParams, mapping);
-  const serviceNow = new ServiceNow({ url: apiUrl, username, password });
+  const externalService = createExternalService(
+    {
+      config,
+      secrets,
+    },
+    logger,
+    execOptions.proxySettings
+  );
 
-  const handlerInput = {
-    incidentId,
-    serviceNow,
-    params: { ...params, incident },
-    comments: comments as Comment[],
-    mapping,
-  };
+  if (!api[subAction]) {
+    const errorMessage = `[Action][ExternalService] Unsupported subAction type ${subAction}.`;
+    logger.error(errorMessage);
+    throw new Error(errorMessage);
+  }
 
-  const res: Pick<ActionTypeExecutorResult, 'status'> &
-    Pick<ActionTypeExecutorResult, 'actionId'> = {
-    status: 'ok',
-    actionId,
-  };
+  if (subAction !== 'pushToService') {
+    const errorMessage = `[Action][ExternalService] subAction ${subAction} not implemented.`;
+    logger.error(errorMessage);
+    throw new Error(errorMessage);
+  }
 
-  const data = await handleIncident(handlerInput);
+  if (subAction === 'pushToService') {
+    const pushToServiceParams = subActionParams as ExecutorSubActionPushParams;
 
-  return {
-    ...res,
-    data,
-  };
+    const { comments, externalId, ...restParams } = pushToServiceParams;
+    const incidentConfiguration = config.incidentConfiguration;
+    const mapping = incidentConfiguration ? buildMap(incidentConfiguration.mapping) : null;
+    const externalObject =
+      config.incidentConfiguration && mapping ? mapParams(restParams, mapping) : {};
+
+    data = await api.pushToService({
+      externalService,
+      mapping,
+      params: { ...pushToServiceParams, externalObject },
+      secrets,
+      logger,
+    });
+
+    logger.debug(`response push to service for incident id: ${data.id}`);
+  }
+
+  return { status: 'ok', data: data ?? {}, actionId };
 }

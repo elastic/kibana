@@ -70,9 +70,7 @@ export function registerTelemetryOptInStatsRoutes(
         const unencrypted = req.body.unencrypted;
 
         const statsGetterConfig: StatsGetterConfig = {
-          start: moment()
-            .subtract(20, 'minutes')
-            .toISOString(),
+          start: moment().subtract(20, 'minutes').toISOString(),
           end: moment().toISOString(),
           unencrypted,
           request: req,

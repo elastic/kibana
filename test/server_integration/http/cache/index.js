@@ -18,7 +18,7 @@
  */
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
 
   describe('kibana server cache-control', () => {
@@ -37,10 +37,7 @@ export default function({ getService }) {
     });
 
     it('allows the bootstrap bundles to be cached', async () => {
-      await supertest
-        .get('/bundles/app/any-old-id-works/bootstrap.js')
-        .expect('Cache-Control', 'must-revalidate')
-        .expect(200);
+      await supertest.get('/bootstrap.js').expect('Cache-Control', 'must-revalidate').expect(200);
     });
   });
 }

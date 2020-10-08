@@ -8,13 +8,13 @@ import React from 'react';
 
 import { LogEntryCategoryDataset } from '../../../../../../common/http_api/log_analysis';
 import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
-import { AnomalySeverityIndicator } from './anomaly_severity_indicator';
+import { AnomalySeverityIndicator } from '../../../../../components/logging/log_analysis_results/anomaly_severity_indicator';
 
 export const AnomalySeverityIndicatorList: React.FunctionComponent<{
   datasets: LogEntryCategoryDataset[];
 }> = ({ datasets }) => (
   <ul>
-    {datasets.map(dataset => {
+    {datasets.map((dataset) => {
       const datasetLabel = getFriendlyNameForPartitionId(dataset.name);
       return (
         <li key={datasetLabel}>

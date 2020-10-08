@@ -60,7 +60,7 @@ export function QueryLanguageSwitcher(props: Props) {
     <EuiButtonEmpty
       size="xs"
       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-      className="euiFormControlLayout__append"
+      className="euiFormControlLayout__append kqlQueryBar__languageSwitcherButton"
       data-test-subj={'switchQueryLanguageButton'}
     >
       {props.language === 'lucene' ? luceneLabel : kqlLabel}
@@ -77,6 +77,7 @@ export function QueryLanguageSwitcher(props: Props) {
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
       withTitle
+      repositionOnScroll
     >
       <EuiPopoverTitle>
         <FormattedMessage

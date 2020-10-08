@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { KibanaMigrator, KibanaMigratorStatus } from './kibana_migrator';
 import { buildActiveMappings } from '../core';
@@ -65,7 +66,7 @@ const createMigrator = (
   };
 
   mockMigrator.getActiveMappings.mockReturnValue(buildActiveMappings(mergeTypes(types)));
-  mockMigrator.migrateDocument.mockImplementation(doc => doc);
+  mockMigrator.migrateDocument.mockImplementation((doc) => doc);
   return mockMigrator;
 };
 

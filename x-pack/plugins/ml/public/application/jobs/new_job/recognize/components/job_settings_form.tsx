@@ -109,7 +109,7 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
           description={
             <FormattedMessage
               id="xpack.ml.tooltips.newJobRecognizerJobPrefixTooltip"
-              defaultMessage="A prefix which will be added to the beginning of each job ID."
+              defaultMessage="The prefix is added to the beginning of each job ID."
             />
           }
         >
@@ -195,7 +195,7 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
           <>
             <EuiSpacer size="m" />
             <TimeRangePicker
-              setTimeRange={value => {
+              setTimeRange={(value) => {
                 setFormState({
                   timeRange: value,
                 });
@@ -230,7 +230,7 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
             description={
               <FormattedMessage
                 id="xpack.ml.tooltips.newJobDedicatedIndexTooltip"
-                defaultMessage="Select to store results in a separate index for this job."
+                defaultMessage="Store results in a separate index for this job."
               />
             }
           >
@@ -258,27 +258,19 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
           fill
           type="submit"
           isLoading={saveState === SAVE_STATE.SAVING}
-          disabled={!validationResult.formValid}
+          disabled={!validationResult.formValid || saveState === SAVE_STATE.SAVING}
           onClick={() => {
             onSubmit(formState);
           }}
           aria-label={i18n.translate('xpack.ml.newJob.recognize.createJobButtonAriaLabel', {
-            defaultMessage: 'Create Job',
+            defaultMessage: 'Create job',
           })}
         >
-          {saveState === SAVE_STATE.NOT_SAVED && (
-            <FormattedMessage
-              id="xpack.ml.newJob.recognize.createJobButtonLabel"
-              defaultMessage="Create {numberOfJobs, plural, zero {Job} one {Job} other {Jobs}}"
-              values={{ numberOfJobs: jobs.length }}
-            />
-          )}
-          {saveState === SAVE_STATE.SAVING && (
-            <FormattedMessage
-              id="xpack.ml.newJob.recognize.analysisRunningLabel"
-              defaultMessage="Analysis running"
-            />
-          )}
+          <FormattedMessage
+            id="xpack.ml.newJob.recognize.createJobButtonLabel"
+            defaultMessage="Create {numberOfJobs, plural, zero {Job} one {Job} other {Jobs}}"
+            values={{ numberOfJobs: jobs.length }}
+          />
         </EuiButton>
       </EuiTextAlign>
     </>

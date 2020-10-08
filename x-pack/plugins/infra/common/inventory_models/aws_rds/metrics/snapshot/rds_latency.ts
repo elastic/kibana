@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SnapshotModel } from '../../../types';
+import { MetricsUIAggregation } from '../../../types';
 
-export const rdsLatency: SnapshotModel = {
+export const rdsLatency: MetricsUIAggregation = {
   rdsLatency: {
     avg: {
       field: 'aws.rds.latency.dml',

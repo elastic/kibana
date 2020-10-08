@@ -15,11 +15,17 @@ import { CASE_SAVED_OBJECT } from '../../../../saved_object_types';
 import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import { RouteDeps } from '../../types';
 import { escapeHatch, wrapError, flattenCaseSavedObject } from '../../utils';
+import { CASE_COMMENTS_URL } from '../../../../../common/constants';
 
-export function initPatchCommentApi({ caseService, router, userActionService }: RouteDeps) {
+export function initPatchCommentApi({
+  caseConfigureService,
+  caseService,
+  router,
+  userActionService,
+}: RouteDeps) {
   router.patch(
     {
-      path: '/api/cases/{case_id}/comments',
+      path: CASE_COMMENTS_URL,
       validate: {
         params: schema.object({
           case_id: schema.string(),
@@ -50,7 +56,7 @@ export function initPatchCommentApi({ caseService, router, userActionService }: 
           throw Boom.notFound(`This comment ${query.id} does not exist anymore.`);
         }
 
-        const caseRef = myComment.references.find(c => c.type === CASE_SAVED_OBJECT);
+        const caseRef = myComment.references.find((c) => c.type === CASE_SAVED_OBJECT);
         if (caseRef == null || (caseRef != null && caseRef.id !== caseId)) {
           throw Boom.notFound(`This comment ${query.id} does not exist in ${caseId}).`);
         }
@@ -61,6 +67,7 @@ export function initPatchCommentApi({ caseService, router, userActionService }: 
           );
         }
 
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { username, full_name, email } = await caseService.getUser({ request, response });
         const updatedDate = new Date().toISOString();
         const [updatedComment, updatedCase] = await Promise.all([
@@ -124,16 +131,16 @@ export function initPatchCommentApi({ caseService, router, userActionService }: 
 
         return response.ok({
           body: CaseResponseRt.encode(
-            flattenCaseSavedObject(
-              {
+            flattenCaseSavedObject({
+              savedObject: {
                 ...myCase,
                 ...updatedCase,
                 attributes: { ...myCase.attributes, ...updatedCase.attributes },
                 version: updatedCase.version ?? myCase.version,
                 references: myCase.references,
               },
-              comments.saved_objects
-            )
+              comments: comments.saved_objects,
+            })
           ),
         });
       } catch (error) {

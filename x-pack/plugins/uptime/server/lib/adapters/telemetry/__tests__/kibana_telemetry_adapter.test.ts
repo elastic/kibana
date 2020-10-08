@@ -6,6 +6,10 @@
 
 import { KibanaTelemetryAdapter } from '../kibana_telemetry_adapter';
 
+jest
+  .spyOn(KibanaTelemetryAdapter, 'countNoOfUniqueMonitorAndLocations')
+  .mockResolvedValue(undefined as any);
+
 describe('KibanaTelemetryAdapter', () => {
   let usageCollection: any;
   let getSavedObjectsClient: any;

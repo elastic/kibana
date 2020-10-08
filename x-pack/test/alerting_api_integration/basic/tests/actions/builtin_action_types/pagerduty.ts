@@ -13,7 +13,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
   describe('pagerduty action', () => {
     it('should return 403 when creating a pagerduty action', async () => {
       await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'A pagerduty action',

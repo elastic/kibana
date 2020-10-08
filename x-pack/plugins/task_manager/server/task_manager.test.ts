@@ -7,6 +7,7 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import { Subject } from 'rxjs';
+import { none } from 'fp-ts/lib/Option';
 
 import {
   asTaskMarkRunningEvent,
@@ -25,6 +26,7 @@ import { SavedObjectsSerializer, SavedObjectTypeRegistry } from '../../../../src
 import { mockLogger } from './test_utils';
 import { asErr, asOk } from './lib/result_type';
 import { ConcreteTaskInstance, TaskLifecycleResult, TaskStatus } from './task';
+import { Middleware } from './lib/middleware';
 
 const savedObjectsClient = savedObjectsRepositoryMock.create();
 const serializer = new SavedObjectsSerializer(new SavedObjectTypeRegistry());
@@ -38,6 +40,7 @@ describe('TaskManager', () => {
     index: 'foo',
     max_attempts: 9,
     poll_interval: 6000000,
+    max_poll_inactivity_cycles: 10,
     request_capacity: 1000,
   };
   const taskManagerOpts = {
@@ -247,20 +250,20 @@ describe('TaskManager', () => {
 
   test('allows middleware registration before starting', () => {
     const client = new TaskManager(taskManagerOpts);
-    const middleware = {
-      beforeSave: async (saveOpts: any) => saveOpts,
-      beforeRun: async (runOpts: any) => runOpts,
-      beforeMarkRunning: async (runOpts: any) => runOpts,
+    const middleware: Middleware = {
+      beforeSave: jest.fn(async (saveOpts) => saveOpts),
+      beforeRun: jest.fn(async (runOpts) => runOpts),
+      beforeMarkRunning: jest.fn(async (runOpts) => runOpts),
     };
     expect(() => client.addMiddleware(middleware)).not.toThrow();
   });
 
   test('disallows middleware registration after starting', async () => {
     const client = new TaskManager(taskManagerOpts);
-    const middleware = {
-      beforeSave: async (saveOpts: any) => saveOpts,
-      beforeRun: async (runOpts: any) => runOpts,
-      beforeMarkRunning: async (runOpts: any) => runOpts,
+    const middleware: Middleware = {
+      beforeSave: jest.fn(async (saveOpts) => saveOpts),
+      beforeRun: jest.fn(async (runOpts) => runOpts),
+      beforeMarkRunning: jest.fn(async (runOpts) => runOpts),
     };
 
     client.start();
@@ -296,7 +299,9 @@ describe('TaskManager', () => {
         events$.next(asTaskMarkRunningEvent(id, asOk(task)));
         events$.next(asTaskRunEvent(id, asErr(new Error('some thing gone wrong'))));
 
-        return expect(result).rejects.toEqual(new Error('some thing gone wrong'));
+        return expect(result).rejects.toMatchInlineSnapshot(
+          `[Error: Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2": Error: some thing gone wrong]`
+        );
       });
 
       test('rejects when the task mark as running fails', () => {
@@ -310,7 +315,9 @@ describe('TaskManager', () => {
         events$.next(asTaskClaimEvent(id, asOk(task)));
         events$.next(asTaskMarkRunningEvent(id, asErr(new Error('some thing gone wrong'))));
 
-        return expect(result).rejects.toEqual(new Error('some thing gone wrong'));
+        return expect(result).rejects.toMatchInlineSnapshot(
+          `[Error: Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2": Error: some thing gone wrong]`
+        );
       });
 
       test('when a task claim fails we ensure the task exists', async () => {
@@ -320,7 +327,7 @@ describe('TaskManager', () => {
 
         const result = awaitTaskRunResult(id, events$, getLifecycle);
 
-        events$.next(asTaskClaimEvent(id, asErr(new Error('failed to claim'))));
+        events$.next(asTaskClaimEvent(id, asErr(none)));
 
         await expect(result).rejects.toEqual(
           new Error(`Failed to run task "${id}" as it does not exist`)
@@ -336,7 +343,7 @@ describe('TaskManager', () => {
 
         const result = awaitTaskRunResult(id, events$, getLifecycle);
 
-        events$.next(asTaskClaimEvent(id, asErr(new Error('failed to claim'))));
+        events$.next(asTaskClaimEvent(id, asErr(none)));
 
         await expect(result).rejects.toEqual(
           new Error(`Failed to run task "${id}" as it is currently running`)
@@ -352,7 +359,7 @@ describe('TaskManager', () => {
 
         const result = awaitTaskRunResult(id, events$, getLifecycle);
 
-        events$.next(asTaskClaimEvent(id, asErr(new Error('failed to claim'))));
+        events$.next(asTaskClaimEvent(id, asErr(none)));
 
         await expect(result).rejects.toEqual(
           new Error(`Failed to run task "${id}" as it is currently running`)
@@ -385,9 +392,11 @@ describe('TaskManager', () => {
 
         const result = awaitTaskRunResult(id, events$, getLifecycle);
 
-        events$.next(asTaskClaimEvent(id, asErr(new Error('failed to claim'))));
+        events$.next(asTaskClaimEvent(id, asErr(none)));
 
-        await expect(result).rejects.toEqual(new Error('failed to claim'));
+        await expect(result).rejects.toMatchInlineSnapshot(
+          `[Error: Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2" for unknown reason (Current Task Lifecycle is "idle")]`
+        );
 
         expect(getLifecycle).toHaveBeenCalledWith(id);
       });
@@ -399,9 +408,11 @@ describe('TaskManager', () => {
 
         const result = awaitTaskRunResult(id, events$, getLifecycle);
 
-        events$.next(asTaskClaimEvent(id, asErr(new Error('failed to claim'))));
+        events$.next(asTaskClaimEvent(id, asErr(none)));
 
-        await expect(result).rejects.toEqual(new Error('failed to claim'));
+        await expect(result).rejects.toMatchInlineSnapshot(
+          `[Error: Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2" for unknown reason (Current Task Lifecycle is "failed")]`
+        );
 
         expect(getLifecycle).toHaveBeenCalledWith(id);
       });
@@ -423,7 +434,9 @@ describe('TaskManager', () => {
 
         events$.next(asTaskRunEvent(id, asErr(new Error('some thing gone wrong'))));
 
-        return expect(result).rejects.toEqual(new Error('some thing gone wrong'));
+        return expect(result).rejects.toMatchInlineSnapshot(
+          `[Error: Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2": Error: some thing gone wrong]`
+        );
       });
     });
   });

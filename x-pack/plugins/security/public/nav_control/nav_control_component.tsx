@@ -41,7 +41,7 @@ export class SecurityNavControl extends Component<Props, State> {
       authenticatedUser: null,
     };
 
-    props.user.then(authenticatedUser => {
+    props.user.then((authenticatedUser) => {
       this.setState({
         authenticatedUser,
       });

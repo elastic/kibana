@@ -5,31 +5,35 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
-import { isSetupStatusWithResults } from '../../../../common/log_analysis';
+import React, { useCallback, useEffect } from 'react';
+import { isJobStatusWithResults } from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
 import {
   LogAnalysisSetupStatusUnknownPrompt,
   MissingResultsPrivilegesPrompt,
   MissingSetupPrivilegesPrompt,
-  MlUnavailablePrompt,
+  SubscriptionSplashContent,
 } from '../../../components/logging/log_analysis_setup';
+import {
+  LogAnalysisSetupFlyout,
+  useLogAnalysisSetupFlyoutStateContext,
+} from '../../../components/logging/log_analysis_setup/setup_flyout';
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis';
-import { useSourceContext } from '../../../containers/source';
+import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
+import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { LogEntryCategoriesResultsContent } from './page_results_content';
 import { LogEntryCategoriesSetupContent } from './page_setup_content';
-import { useLogEntryCategoriesModuleContext } from './use_log_entry_categories_module';
 
 export const LogEntryCategoriesPageContent = () => {
   const {
     hasFailedLoadingSource,
-    isLoadingSource,
+    isLoading,
     isUninitialized,
     loadSource,
     loadSourceFailureMessage,
-  } = useSourceContext();
+  } = useLogSourceContext();
 
   const {
     hasLogAnalysisCapabilites,
@@ -37,7 +41,12 @@ export const LogEntryCategoriesPageContent = () => {
     hasLogAnalysisSetupCapabilities,
   } = useLogAnalysisCapabilitiesContext();
 
-  const { fetchJobStatus, setupStatus } = useLogEntryCategoriesModuleContext();
+  const { fetchJobStatus, setupStatus, jobStatus } = useLogEntryCategoriesModuleContext();
+
+  const { showModuleSetup } = useLogAnalysisSetupFlyoutStateContext();
+  const showCategoriesModuleSetup = useCallback(() => showModuleSetup('logs_ui_categories'), [
+    showModuleSetup,
+  ]);
 
   useEffect(() => {
     if (hasLogAnalysisReadCapabilities) {
@@ -45,12 +54,12 @@ export const LogEntryCategoriesPageContent = () => {
     }
   }, [fetchJobStatus, hasLogAnalysisReadCapabilities]);
 
-  if (isLoadingSource || isUninitialized) {
+  if (isLoading || isUninitialized) {
     return <SourceLoadingPage />;
   } else if (hasFailedLoadingSource) {
     return <SourceErrorPage errorMessage={loadSourceFailureMessage ?? ''} retry={loadSource} />;
   } else if (!hasLogAnalysisCapabilites) {
-    return <MlUnavailablePrompt />;
+    return <SubscriptionSplashContent />;
   } else if (!hasLogAnalysisReadCapabilities) {
     return <MissingResultsPrivilegesPrompt />;
   } else if (setupStatus.type === 'initializing') {
@@ -63,11 +72,23 @@ export const LogEntryCategoriesPageContent = () => {
     );
   } else if (setupStatus.type === 'unknown') {
     return <LogAnalysisSetupStatusUnknownPrompt retry={fetchJobStatus} />;
-  } else if (isSetupStatusWithResults(setupStatus)) {
-    return <LogEntryCategoriesResultsContent />;
+  } else if (isJobStatusWithResults(jobStatus['log-entry-categories-count'])) {
+    return (
+      <>
+        <LogEntryCategoriesResultsContent onOpenSetup={showCategoriesModuleSetup} />
+        <LogAnalysisSetupFlyout allowedModules={allowedSetupModules} />
+      </>
+    );
   } else if (!hasLogAnalysisSetupCapabilities) {
     return <MissingSetupPrivilegesPrompt />;
   } else {
-    return <LogEntryCategoriesSetupContent />;
+    return (
+      <>
+        <LogEntryCategoriesSetupContent onOpenSetup={showCategoriesModuleSetup} />
+        <LogAnalysisSetupFlyout allowedModules={allowedSetupModules} />
+      </>
+    );
   }
 };
+
+const allowedSetupModules = ['logs_ui_categories' as const];

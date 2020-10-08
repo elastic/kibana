@@ -18,8 +18,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getConfigPath } from '../../../core/server/path';
+import { getConfigPath } from '@kbn/utils';
 import { ENDPOINT_VERSION } from '../common/constants';
 
 export const configSchema = schema.object({
@@ -56,7 +55,7 @@ export const configSchema = schema.object({
     })
   ),
   sendUsageFrom: schema.oneOf([schema.literal('server'), schema.literal('browser')], {
-    defaultValue: 'browser',
+    defaultValue: 'server',
   }),
 });
 

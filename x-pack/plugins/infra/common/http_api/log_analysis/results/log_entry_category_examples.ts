@@ -12,6 +12,7 @@ import {
   timeRangeRT,
   routeTimingMetadataRT,
 } from '../../shared';
+import { logEntryContextRT } from '../../log_entries';
 
 export const LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORY_EXAMPLES_PATH =
   '/api/infra/log_analysis/results/log_entry_category_examples';
@@ -42,9 +43,12 @@ export type GetLogEntryCategoryExamplesRequestPayload = rt.TypeOf<
  */
 
 const logEntryCategoryExampleRT = rt.type({
+  id: rt.string,
   dataset: rt.string,
   message: rt.string,
   timestamp: rt.number,
+  tiebreaker: rt.number,
+  context: logEntryContextRT,
 });
 
 export type LogEntryCategoryExample = rt.TypeOf<typeof logEntryCategoryExampleRT>;

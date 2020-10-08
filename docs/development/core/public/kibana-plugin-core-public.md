@@ -31,8 +31,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Interface | Description |
 |  --- | --- |
-|  [App](./kibana-plugin-core-public.app.md) | Extension of [common app properties](./kibana-plugin-core-public.appbase.md) with the mount function. |
-|  [AppBase](./kibana-plugin-core-public.appbase.md) |  |
+|  [App](./kibana-plugin-core-public.app.md) |  |
 |  [AppCategory](./kibana-plugin-core-public.appcategory.md) | A category definition for nav links to know where to sort them in the left hand nav |
 |  [AppLeaveConfirmAction](./kibana-plugin-core-public.appleaveconfirmaction.md) | Action to return from a [AppLeaveHandler](./kibana-plugin-core-public.appleavehandler.md) to show a confirmation message when trying to leave an application.<!-- -->See  |
 |  [AppLeaveDefaultAction](./kibana-plugin-core-public.appleavedefaultaction.md) | Action to return from a [AppLeaveHandler](./kibana-plugin-core-public.appleavehandler.md) to execute the default behaviour when leaving the application.<!-- -->See  |
@@ -56,7 +55,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [CoreSetup](./kibana-plugin-core-public.coresetup.md) | Core services exposed to the <code>Plugin</code> setup lifecycle |
 |  [CoreStart](./kibana-plugin-core-public.corestart.md) | Core services exposed to the <code>Plugin</code> start lifecycle |
 |  [DocLinksStart](./kibana-plugin-core-public.doclinksstart.md) |  |
-|  [EnvironmentMode](./kibana-plugin-core-public.environmentmode.md) |  |
 |  [ErrorToastOptions](./kibana-plugin-core-public.errortoastoptions.md) | Options available for [IToasts](./kibana-plugin-core-public.itoasts.md) error APIs. |
 |  [FatalErrorInfo](./kibana-plugin-core-public.fatalerrorinfo.md) | Represents the <code>message</code> and <code>stack</code> of a fatal Error |
 |  [FatalErrorsSetup](./kibana-plugin-core-public.fatalerrorssetup.md) | FatalErrors stop the Kibana Public Core and displays a fatal error screen with details about the Kibana build and the error. |
@@ -80,19 +78,17 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [IHttpResponseInterceptorOverrides](./kibana-plugin-core-public.ihttpresponseinterceptoroverrides.md) | Properties that can be returned by HttpInterceptor.request to override the response. |
 |  [ImageValidation](./kibana-plugin-core-public.imagevalidation.md) |  |
 |  [IUiSettingsClient](./kibana-plugin-core-public.iuisettingsclient.md) | Client-side client that provides access to the advanced settings stored in elasticsearch. The settings provide control over the behavior of the Kibana application. For example, a user can specify how to display numeric or date fields. Users can adjust the settings via Management UI. [IUiSettingsClient](./kibana-plugin-core-public.iuisettingsclient.md) |
-|  [LegacyCoreSetup](./kibana-plugin-core-public.legacycoresetup.md) | Setup interface exposed to the legacy platform via the <code>ui/new_platform</code> module. |
-|  [LegacyCoreStart](./kibana-plugin-core-public.legacycorestart.md) | Start interface exposed to the legacy platform via the <code>ui/new_platform</code> module. |
-|  [LegacyNavLink](./kibana-plugin-core-public.legacynavlink.md) |  |
+|  [NavigateToAppOptions](./kibana-plugin-core-public.navigatetoappoptions.md) | Options for the [navigateToApp API](./kibana-plugin-core-public.applicationstart.navigatetoapp.md) |
 |  [NotificationsSetup](./kibana-plugin-core-public.notificationssetup.md) |  |
 |  [NotificationsStart](./kibana-plugin-core-public.notificationsstart.md) |  |
 |  [OverlayBannersStart](./kibana-plugin-core-public.overlaybannersstart.md) |  |
 |  [OverlayRef](./kibana-plugin-core-public.overlayref.md) | Returned by [OverlayStart](./kibana-plugin-core-public.overlaystart.md) methods for closing a mounted overlay. |
 |  [OverlayStart](./kibana-plugin-core-public.overlaystart.md) |  |
-|  [PackageInfo](./kibana-plugin-core-public.packageinfo.md) |  |
 |  [Plugin](./kibana-plugin-core-public.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
 |  [PluginInitializerContext](./kibana-plugin-core-public.plugininitializercontext.md) | The available core services passed to a <code>PluginInitializer</code> |
 |  [SavedObject](./kibana-plugin-core-public.savedobject.md) |  |
 |  [SavedObjectAttributes](./kibana-plugin-core-public.savedobjectattributes.md) | The data for a Saved Object is stored as an object in the <code>attributes</code> property. |
+|  [SavedObjectError](./kibana-plugin-core-public.savedobjecterror.md) |  |
 |  [SavedObjectReference](./kibana-plugin-core-public.savedobjectreference.md) | A reference to another saved object. |
 |  [SavedObjectsBaseOptions](./kibana-plugin-core-public.savedobjectsbaseoptions.md) |  |
 |  [SavedObjectsBatchResponse](./kibana-plugin-core-public.savedobjectsbatchresponse.md) |  |
@@ -103,11 +99,13 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsCreateOptions](./kibana-plugin-core-public.savedobjectscreateoptions.md) |  |
 |  [SavedObjectsFindOptions](./kibana-plugin-core-public.savedobjectsfindoptions.md) |  |
 |  [SavedObjectsFindResponsePublic](./kibana-plugin-core-public.savedobjectsfindresponsepublic.md) | Return type of the Saved Objects <code>find()</code> method.<!-- -->\*Note\*: this type is different between the Public and Server Saved Objects clients. |
+|  [SavedObjectsImportAmbiguousConflictError](./kibana-plugin-core-public.savedobjectsimportambiguousconflicterror.md) | Represents a failure to import due to a conflict, which can be resolved in different ways with an overwrite. |
 |  [SavedObjectsImportConflictError](./kibana-plugin-core-public.savedobjectsimportconflicterror.md) | Represents a failure to import due to a conflict. |
 |  [SavedObjectsImportError](./kibana-plugin-core-public.savedobjectsimporterror.md) | Represents a failure to import. |
 |  [SavedObjectsImportMissingReferencesError](./kibana-plugin-core-public.savedobjectsimportmissingreferenceserror.md) | Represents a failure to import due to missing references. |
 |  [SavedObjectsImportResponse](./kibana-plugin-core-public.savedobjectsimportresponse.md) | The response describing the result of an import. |
 |  [SavedObjectsImportRetry](./kibana-plugin-core-public.savedobjectsimportretry.md) | Describes a retry operation for importing a saved object. |
+|  [SavedObjectsImportSuccess](./kibana-plugin-core-public.savedobjectsimportsuccess.md) | Represents a successful import. |
 |  [SavedObjectsImportUnknownError](./kibana-plugin-core-public.savedobjectsimportunknownerror.md) | Represents a failure to import due to an unknown reason. |
 |  [SavedObjectsImportUnsupportedTypeError](./kibana-plugin-core-public.savedobjectsimportunsupportedtypeerror.md) | Represents a failure to import due to having an unsupported saved object type. |
 |  [SavedObjectsMigrationVersion](./kibana-plugin-core-public.savedobjectsmigrationversion.md) | Information about the migrations that have been applied to this SavedObject. When Kibana starts up, KibanaMigrator detects outdated documents and migrates them based on this value. For each migration that has been applied, the plugin's name is used as a key and the latest migration version as the value. |
@@ -119,6 +117,12 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [UiSettingsParams](./kibana-plugin-core-public.uisettingsparams.md) | UiSettings parameters defined by the plugins. |
 |  [UiSettingsState](./kibana-plugin-core-public.uisettingsstate.md) |  |
 |  [UserProvidedValues](./kibana-plugin-core-public.userprovidedvalues.md) | Describes the values explicitly set by user. |
+
+## Variables
+
+|  Variable | Description |
+|  --- | --- |
+|  [URL\_MAX\_LENGTH](./kibana-plugin-core-public.url_max_length.md) | The max URL length allowed by the current browser. Should be used to display warnings to users when query parameters cause URL to exceed this limit. |
 
 ## Type Aliases
 
@@ -146,13 +150,15 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [IContextProvider](./kibana-plugin-core-public.icontextprovider.md) | A function that returns a context value for a specific key of given context type. |
 |  [IToasts](./kibana-plugin-core-public.itoasts.md) | Methods for adding and removing global toast messages. See [ToastsApi](./kibana-plugin-core-public.toastsapi.md)<!-- -->. |
 |  [MountPoint](./kibana-plugin-core-public.mountpoint.md) | A function that should mount DOM content inside the provided container element and return a handler to unmount it. |
+|  [NavType](./kibana-plugin-core-public.navtype.md) |  |
 |  [PluginInitializer](./kibana-plugin-core-public.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>public</code> directory should conform to this interface. |
 |  [PluginOpaqueId](./kibana-plugin-core-public.pluginopaqueid.md) |  |
+|  [PublicAppInfo](./kibana-plugin-core-public.publicappinfo.md) | Public information about a registered [application](./kibana-plugin-core-public.app.md) |
 |  [PublicUiSettingsParams](./kibana-plugin-core-public.publicuisettingsparams.md) | A sub-set of [UiSettingsParams](./kibana-plugin-core-public.uisettingsparams.md) exposed to the client-side. |
-|  [RecursiveReadonly](./kibana-plugin-core-public.recursivereadonly.md) |  |
 |  [SavedObjectAttribute](./kibana-plugin-core-public.savedobjectattribute.md) | Type definition for a Saved Object attribute value |
 |  [SavedObjectAttributeSingle](./kibana-plugin-core-public.savedobjectattributesingle.md) | Don't use this type, it's simply a helper type for [SavedObjectAttribute](./kibana-plugin-core-public.savedobjectattribute.md) |
 |  [SavedObjectsClientContract](./kibana-plugin-core-public.savedobjectsclientcontract.md) | SavedObjectsClientContract as implemented by the [SavedObjectsClient](./kibana-plugin-core-public.savedobjectsclient.md) |
+|  [SavedObjectsNamespaceType](./kibana-plugin-core-public.savedobjectsnamespacetype.md) | The namespace type dictates how a saved object can be interacted in relation to namespaces. Each type is mutually exclusive: \* single (default): this type of saved object is namespace-isolated, e.g., it exists in only one namespace. \* multiple: this type of saved object is shareable, e.g., it can exist in one or more namespaces. \* agnostic: this type of saved object is global. |
 |  [StartServicesAccessor](./kibana-plugin-core-public.startservicesaccessor.md) | Allows plugins to get access to APIs available in start inside async handlers, such as [App.mount](./kibana-plugin-core-public.app.mount.md)<!-- -->. Promise will not resolve until Core and plugin dependencies have completed <code>start</code>. |
 |  [StringValidation](./kibana-plugin-core-public.stringvalidation.md) | Allows regex objects or a regex string |
 |  [Toast](./kibana-plugin-core-public.toast.md) |  |

@@ -19,8 +19,9 @@
 
 import { omit } from 'lodash';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { StatsCollectionContext } from 'src/plugins/telemetry_collection_manager/server';
+import { ElasticsearchClient } from 'src/core/server';
 
 export interface KibanaUsageStats {
   kibana: {
@@ -28,8 +29,10 @@ export interface KibanaUsageStats {
   };
   kibana_stats: {
     os: {
-      platform: string;
-      platformRelease: string;
+      // These should be provided
+      platform: string | undefined;
+      platformRelease: string | undefined;
+      // The ones below are really optional
       distro?: string;
       distroRelease?: string;
     };
@@ -46,7 +49,6 @@ export function handleKibanaStats(
     logger.warn('No Kibana stats returned from usage collectors');
     return;
   }
-
   const { kibana, kibana_stats: kibanaStats, ...plugins } = response;
 
   const os = {
@@ -81,8 +83,9 @@ export function handleKibanaStats(
 
 export async function getKibana(
   usageCollection: UsageCollectionSetup,
-  callWithInternalUser: APICaller
+  callWithInternalUser: LegacyAPICaller,
+  asInternalUser: ElasticsearchClient
 ): Promise<KibanaUsageStats> {
-  const usage = await usageCollection.bulkFetch(callWithInternalUser);
+  const usage = await usageCollection.bulkFetch(callWithInternalUser, asInternalUser);
   return usageCollection.toObject(usage);
 }

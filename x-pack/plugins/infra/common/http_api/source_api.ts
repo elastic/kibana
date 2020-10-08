@@ -17,14 +17,14 @@ export const TimestampFromString = new rt.Type<number, string>(
   (input, context) =>
     pipe(
       rt.string.validate(input, context),
-      chain(stringInput => {
+      chain((stringInput) => {
         const momentValue = moment(stringInput);
         return momentValue.isValid()
           ? rt.success(momentValue.valueOf())
           : rt.failure(stringInput, context);
       })
     ),
-  output => new Date(output).toISOString()
+  (output) => new Date(output).toISOString()
 );
 
 /**
@@ -69,6 +69,8 @@ export const SavedSourceConfigurationRuntimeType = rt.partial({
   description: rt.string,
   metricAlias: rt.string,
   logAlias: rt.string,
+  inventoryDefaultView: rt.string,
+  metricsExplorerDefaultView: rt.string,
   fields: SavedSourceConfigurationFieldsRuntimeType,
   logColumns: rt.array(SavedSourceConfigurationColumnRuntimeType),
 });
@@ -79,7 +81,16 @@ export interface InfraSavedSourceConfiguration
 export const pickSavedSourceConfiguration = (
   value: InfraSourceConfiguration
 ): InfraSavedSourceConfiguration => {
-  const { name, description, metricAlias, logAlias, fields, logColumns } = value;
+  const {
+    name,
+    description,
+    metricAlias,
+    logAlias,
+    fields,
+    inventoryDefaultView,
+    metricsExplorerDefaultView,
+    logColumns,
+  } = value;
   const { container, host, pod, tiebreaker, timestamp } = fields;
 
   return {
@@ -87,6 +98,8 @@ export const pickSavedSourceConfiguration = (
     description,
     metricAlias,
     logAlias,
+    inventoryDefaultView,
+    metricsExplorerDefaultView,
     fields: { container, host, pod, tiebreaker, timestamp },
     logColumns,
   };
@@ -106,6 +119,8 @@ export const StaticSourceConfigurationRuntimeType = rt.partial({
   description: rt.string,
   metricAlias: rt.string,
   logAlias: rt.string,
+  inventoryDefaultView: rt.string,
+  metricsExplorerDefaultView: rt.string,
   fields: StaticSourceConfigurationFieldsRuntimeType,
   logColumns: rt.array(SavedSourceConfigurationColumnRuntimeType),
 });

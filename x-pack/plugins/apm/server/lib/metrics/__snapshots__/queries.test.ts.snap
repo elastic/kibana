@@ -2,6 +2,11 @@
 
 exports[`metrics queries with a service node name fetches cpu chart data 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "processCPUAverage": Object {
@@ -67,11 +72,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "processor.event": "metric",
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -87,7 +87,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
         ],
@@ -95,12 +95,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`metrics queries with a service node name fetches heap memory chart data 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "heapMemoryCommitted": Object {
@@ -156,11 +160,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "processor.event": "metric",
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -176,7 +175,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
           Object {
@@ -189,27 +188,65 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`metrics queries with a service node name fetches memory chart data 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "memoryUsedAvg": Object {
         "avg": Object {
           "script": Object {
-            "lang": "expression",
-            "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+            "lang": "painless",
+            "source": "
+    /*
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants.
+      This number represents the max possible value for the limit field.
+    */
+    double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
+
+    String limitKey = 'system.process.cgroup.memory.mem.limit.bytes';
+
+    //Should use cgropLimit when value is not empty and not equals to the max limit value.
+    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
+
+    double total = useCgroupLimit ? doc[limitKey].value : doc['system.memory.total'].value;
+
+    double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
+
+    return used / total;
+    ",
           },
         },
       },
       "memoryUsedMax": Object {
         "max": Object {
           "script": Object {
-            "lang": "expression",
-            "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+            "lang": "painless",
+            "source": "
+    /*
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants.
+      This number represents the max possible value for the limit field.
+    */
+    double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
+
+    String limitKey = 'system.process.cgroup.memory.mem.limit.bytes';
+
+    //Should use cgropLimit when value is not empty and not equals to the max limit value.
+    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
+
+    double total = useCgroupLimit ? doc[limitKey].value : doc['system.memory.total'].value;
+
+    double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
+
+    return used / total;
+    ",
           },
         },
       },
@@ -218,16 +255,50 @@ Object {
           "memoryUsedAvg": Object {
             "avg": Object {
               "script": Object {
-                "lang": "expression",
-                "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+                "lang": "painless",
+                "source": "
+    /*
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants.
+      This number represents the max possible value for the limit field.
+    */
+    double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
+
+    String limitKey = 'system.process.cgroup.memory.mem.limit.bytes';
+
+    //Should use cgropLimit when value is not empty and not equals to the max limit value.
+    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
+
+    double total = useCgroupLimit ? doc[limitKey].value : doc['system.memory.total'].value;
+
+    double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
+
+    return used / total;
+    ",
               },
             },
           },
           "memoryUsedMax": Object {
             "max": Object {
               "script": Object {
-                "lang": "expression",
-                "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+                "lang": "painless",
+                "source": "
+    /*
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants.
+      This number represents the max possible value for the limit field.
+    */
+    double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
+
+    String limitKey = 'system.process.cgroup.memory.mem.limit.bytes';
+
+    //Should use cgropLimit when value is not empty and not equals to the max limit value.
+    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
+
+    double total = useCgroupLimit ? doc[limitKey].value : doc['system.memory.total'].value;
+
+    double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
+
+    return used / total;
+    ",
               },
             },
           },
@@ -252,11 +323,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "processor.event": "metric",
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -272,17 +338,12 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
           Object {
             "exists": Object {
-              "field": "system.memory.actual.free",
-            },
-          },
-          Object {
-            "exists": Object {
-              "field": "system.memory.total",
+              "field": "system.process.cgroup.memory.mem.usage.bytes",
             },
           },
         ],
@@ -290,12 +351,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`metrics queries with a service node name fetches non heap memory chart data 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "nonHeapMemoryCommitted": Object {
@@ -351,11 +416,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "processor.event": "metric",
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -371,7 +431,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
           Object {
@@ -384,12 +444,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`metrics queries with a service node name fetches thread count chart data 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "threadCount": Object {
@@ -432,11 +496,6 @@ Object {
           Object {
             "term": Object {
               "service.name": "foo",
-            },
-          },
-          Object {
-            "term": Object {
-              "processor.event": "metric",
             },
           },
           Object {
@@ -455,7 +514,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
           Object {
@@ -468,12 +527,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`metrics queries with service_node_name_missing fetches cpu chart data 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "processCPUAverage": Object {
@@ -539,11 +602,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "processor.event": "metric",
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -565,7 +623,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
         ],
@@ -573,12 +631,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`metrics queries with service_node_name_missing fetches heap memory chart data 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "heapMemoryCommitted": Object {
@@ -634,11 +696,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "processor.event": "metric",
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -660,7 +717,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
           Object {
@@ -673,27 +730,65 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`metrics queries with service_node_name_missing fetches memory chart data 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "memoryUsedAvg": Object {
         "avg": Object {
           "script": Object {
-            "lang": "expression",
-            "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+            "lang": "painless",
+            "source": "
+    /*
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants.
+      This number represents the max possible value for the limit field.
+    */
+    double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
+
+    String limitKey = 'system.process.cgroup.memory.mem.limit.bytes';
+
+    //Should use cgropLimit when value is not empty and not equals to the max limit value.
+    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
+
+    double total = useCgroupLimit ? doc[limitKey].value : doc['system.memory.total'].value;
+
+    double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
+
+    return used / total;
+    ",
           },
         },
       },
       "memoryUsedMax": Object {
         "max": Object {
           "script": Object {
-            "lang": "expression",
-            "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+            "lang": "painless",
+            "source": "
+    /*
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants.
+      This number represents the max possible value for the limit field.
+    */
+    double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
+
+    String limitKey = 'system.process.cgroup.memory.mem.limit.bytes';
+
+    //Should use cgropLimit when value is not empty and not equals to the max limit value.
+    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
+
+    double total = useCgroupLimit ? doc[limitKey].value : doc['system.memory.total'].value;
+
+    double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
+
+    return used / total;
+    ",
           },
         },
       },
@@ -702,16 +797,50 @@ Object {
           "memoryUsedAvg": Object {
             "avg": Object {
               "script": Object {
-                "lang": "expression",
-                "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+                "lang": "painless",
+                "source": "
+    /*
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants.
+      This number represents the max possible value for the limit field.
+    */
+    double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
+
+    String limitKey = 'system.process.cgroup.memory.mem.limit.bytes';
+
+    //Should use cgropLimit when value is not empty and not equals to the max limit value.
+    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
+
+    double total = useCgroupLimit ? doc[limitKey].value : doc['system.memory.total'].value;
+
+    double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
+
+    return used / total;
+    ",
               },
             },
           },
           "memoryUsedMax": Object {
             "max": Object {
               "script": Object {
-                "lang": "expression",
-                "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+                "lang": "painless",
+                "source": "
+    /*
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants.
+      This number represents the max possible value for the limit field.
+    */
+    double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
+
+    String limitKey = 'system.process.cgroup.memory.mem.limit.bytes';
+
+    //Should use cgropLimit when value is not empty and not equals to the max limit value.
+    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
+
+    double total = useCgroupLimit ? doc[limitKey].value : doc['system.memory.total'].value;
+
+    double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
+
+    return used / total;
+    ",
               },
             },
           },
@@ -736,11 +865,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "processor.event": "metric",
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -762,17 +886,12 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
           Object {
             "exists": Object {
-              "field": "system.memory.actual.free",
-            },
-          },
-          Object {
-            "exists": Object {
-              "field": "system.memory.total",
+              "field": "system.process.cgroup.memory.mem.usage.bytes",
             },
           },
         ],
@@ -780,12 +899,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`metrics queries with service_node_name_missing fetches non heap memory chart data 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "nonHeapMemoryCommitted": Object {
@@ -841,11 +964,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "processor.event": "metric",
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -867,7 +985,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
           Object {
@@ -880,12 +998,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`metrics queries with service_node_name_missing fetches thread count chart data 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "threadCount": Object {
@@ -931,11 +1053,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "processor.event": "metric",
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -957,7 +1074,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
           Object {
@@ -970,12 +1087,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`metrics queries without a service node name fetches cpu chart data 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "processCPUAverage": Object {
@@ -1041,11 +1162,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "processor.event": "metric",
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -1056,7 +1172,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
         ],
@@ -1064,12 +1180,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`metrics queries without a service node name fetches heap memory chart data 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "heapMemoryCommitted": Object {
@@ -1125,11 +1245,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "processor.event": "metric",
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -1140,7 +1255,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
           Object {
@@ -1153,27 +1268,65 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`metrics queries without a service node name fetches memory chart data 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "memoryUsedAvg": Object {
         "avg": Object {
           "script": Object {
-            "lang": "expression",
-            "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+            "lang": "painless",
+            "source": "
+    /*
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants.
+      This number represents the max possible value for the limit field.
+    */
+    double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
+
+    String limitKey = 'system.process.cgroup.memory.mem.limit.bytes';
+
+    //Should use cgropLimit when value is not empty and not equals to the max limit value.
+    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
+
+    double total = useCgroupLimit ? doc[limitKey].value : doc['system.memory.total'].value;
+
+    double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
+
+    return used / total;
+    ",
           },
         },
       },
       "memoryUsedMax": Object {
         "max": Object {
           "script": Object {
-            "lang": "expression",
-            "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+            "lang": "painless",
+            "source": "
+    /*
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants.
+      This number represents the max possible value for the limit field.
+    */
+    double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
+
+    String limitKey = 'system.process.cgroup.memory.mem.limit.bytes';
+
+    //Should use cgropLimit when value is not empty and not equals to the max limit value.
+    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
+
+    double total = useCgroupLimit ? doc[limitKey].value : doc['system.memory.total'].value;
+
+    double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
+
+    return used / total;
+    ",
           },
         },
       },
@@ -1182,16 +1335,50 @@ Object {
           "memoryUsedAvg": Object {
             "avg": Object {
               "script": Object {
-                "lang": "expression",
-                "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+                "lang": "painless",
+                "source": "
+    /*
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants.
+      This number represents the max possible value for the limit field.
+    */
+    double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
+
+    String limitKey = 'system.process.cgroup.memory.mem.limit.bytes';
+
+    //Should use cgropLimit when value is not empty and not equals to the max limit value.
+    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
+
+    double total = useCgroupLimit ? doc[limitKey].value : doc['system.memory.total'].value;
+
+    double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
+
+    return used / total;
+    ",
               },
             },
           },
           "memoryUsedMax": Object {
             "max": Object {
               "script": Object {
-                "lang": "expression",
-                "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+                "lang": "painless",
+                "source": "
+    /*
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants.
+      This number represents the max possible value for the limit field.
+    */
+    double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
+
+    String limitKey = 'system.process.cgroup.memory.mem.limit.bytes';
+
+    //Should use cgropLimit when value is not empty and not equals to the max limit value.
+    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
+
+    double total = useCgroupLimit ? doc[limitKey].value : doc['system.memory.total'].value;
+
+    double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
+
+    return used / total;
+    ",
               },
             },
           },
@@ -1216,11 +1403,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "processor.event": "metric",
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -1231,17 +1413,12 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
           Object {
             "exists": Object {
-              "field": "system.memory.actual.free",
-            },
-          },
-          Object {
-            "exists": Object {
-              "field": "system.memory.total",
+              "field": "system.process.cgroup.memory.mem.usage.bytes",
             },
           },
         ],
@@ -1249,12 +1426,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`metrics queries without a service node name fetches non heap memory chart data 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "nonHeapMemoryCommitted": Object {
@@ -1310,11 +1491,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "processor.event": "metric",
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -1325,7 +1501,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
           Object {
@@ -1338,12 +1514,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`metrics queries without a service node name fetches thread count chart data 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "threadCount": Object {
@@ -1389,11 +1569,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "processor.event": "metric",
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -1404,7 +1579,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
           Object {
@@ -1417,6 +1592,5 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;

@@ -5,12 +5,12 @@
  */
 
 import { merge } from 'lodash';
-import { Server } from 'hapi';
+
 import { SavedObjectsClient } from 'src/core/server';
-import { PromiseReturnType } from '../../../../typings/common';
+import { PromiseReturnType } from '../../../../../observability/typings/common';
 import {
   APM_INDICES_SAVED_OBJECT_TYPE,
-  APM_INDICES_SAVED_OBJECT_ID
+  APM_INDICES_SAVED_OBJECT_ID,
 } from '../../../../common/apm_saved_object_constants';
 import { APMConfig } from '../../..';
 import { APMRequestHandlerContext } from '../../../routes/typings';
@@ -18,21 +18,19 @@ import { APMRequestHandlerContext } from '../../../routes/typings';
 type ISavedObjectsClient = Pick<SavedObjectsClient, 'get'>;
 
 export interface ApmIndicesConfig {
+  /* eslint-disable @typescript-eslint/naming-convention */
   'apm_oss.sourcemapIndices': string;
   'apm_oss.errorIndices': string;
   'apm_oss.onboardingIndices': string;
   'apm_oss.spanIndices': string;
   'apm_oss.transactionIndices': string;
   'apm_oss.metricsIndices': string;
+  /* eslint-enable @typescript-eslint/naming-convention */
   apmAgentConfigurationIndex: string;
   apmCustomLinkIndex: string;
 }
 
 export type ApmIndicesName = keyof ApmIndicesConfig;
-
-export type ScopedSavedObjectsClient = ReturnType<
-  Server['savedObjects']['getScopedSavedObjectsClient']
->;
 
 async function getApmIndicesSavedObject(
   savedObjectsClient: ISavedObjectsClient
@@ -46,21 +44,23 @@ async function getApmIndicesSavedObject(
 
 export function getApmIndicesConfig(config: APMConfig): ApmIndicesConfig {
   return {
+    /* eslint-disable @typescript-eslint/naming-convention */
     'apm_oss.sourcemapIndices': config['apm_oss.sourcemapIndices'],
     'apm_oss.errorIndices': config['apm_oss.errorIndices'],
     'apm_oss.onboardingIndices': config['apm_oss.onboardingIndices'],
     'apm_oss.spanIndices': config['apm_oss.spanIndices'],
     'apm_oss.transactionIndices': config['apm_oss.transactionIndices'],
     'apm_oss.metricsIndices': config['apm_oss.metricsIndices'],
+    /* eslint-enable @typescript-eslint/naming-convention */
     // system indices, not configurable
     apmAgentConfigurationIndex: '.apm-agent-configuration',
-    apmCustomLinkIndex: '.apm-custom-link'
+    apmCustomLinkIndex: '.apm-custom-link',
   };
 }
 
 export async function getApmIndices({
   config,
-  savedObjectsClient
+  savedObjectsClient,
 }: {
   config: APMConfig;
   savedObjectsClient: ISavedObjectsClient;
@@ -82,11 +82,11 @@ const APM_UI_INDICES: ApmIndicesName[] = [
   'apm_oss.onboardingIndices',
   'apm_oss.spanIndices',
   'apm_oss.transactionIndices',
-  'apm_oss.metricsIndices'
+  'apm_oss.metricsIndices',
 ];
 
 export async function getApmIndexSettings({
-  context
+  context,
 }: {
   context: APMRequestHandlerContext;
 }) {
@@ -104,9 +104,9 @@ export async function getApmIndexSettings({
   }
   const apmIndicesConfig = getApmIndicesConfig(context.config);
 
-  return APM_UI_INDICES.map(configurationName => ({
+  return APM_UI_INDICES.map((configurationName) => ({
     configurationName,
     defaultValue: apmIndicesConfig[configurationName], // value defined in kibana[.dev].yml
-    savedValue: apmIndicesSavedObject[configurationName] // value saved via Saved Objects service
+    savedValue: apmIndicesSavedObject[configurationName], // value saved via Saved Objects service
   }));
 }

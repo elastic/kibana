@@ -45,17 +45,16 @@ export const configSchema = schema.object({
   hosts: schema.oneOf([hostURISchema, schema.arrayOf(hostURISchema, { minSize: 1 })], {
     defaultValue: 'http://localhost:9200',
   }),
-  preserveHost: schema.boolean({ defaultValue: true }),
   username: schema.maybe(
     schema.conditional(
       schema.contextRef('dist'),
       false,
       schema.string({
-        validate: rawConfig => {
+        validate: (rawConfig) => {
           if (rawConfig === 'elastic') {
             return (
               'value of "elastic" is forbidden. This is a superuser account that can obfuscate ' +
-              'privilege-related issues. You should use the "kibana" user instead.'
+              'privilege-related issues. You should use the "kibana_system" user instead.'
             );
           }
         },
@@ -71,7 +70,6 @@ export const configSchema = schema.object({
   shardTimeout: schema.duration({ defaultValue: '30s' }),
   requestTimeout: schema.duration({ defaultValue: '30s' }),
   pingTimeout: schema.duration({ defaultValue: schema.siblingRef('requestTimeout') }),
-  startupTimeout: schema.duration({ defaultValue: '5s' }),
   logQueries: schema.boolean({ defaultValue: false }),
   ssl: schema.object(
     {
@@ -96,7 +94,7 @@ export const configSchema = schema.object({
       alwaysPresentCertificate: schema.boolean({ defaultValue: false }),
     },
     {
-      validate: rawConfig => {
+      validate: (rawConfig) => {
         if (rawConfig.key && rawConfig.keystore.path) {
           return 'cannot use [key] when [keystore.path] is specified';
         }
@@ -112,7 +110,7 @@ export const configSchema = schema.object({
     schema.contextRef('dev'),
     false,
     schema.boolean({
-      validate: rawValue => {
+      validate: (rawValue) => {
         if (rawValue === true) {
           return '"ignoreVersionMismatch" can only be set to true in development mode';
         }
@@ -131,7 +129,11 @@ const deprecations: ConfigDeprecationProvider = () => [
     }
     if (es.username === 'elastic') {
       log(
-        `Setting [${fromPath}.username] to "elastic" is deprecated. You should use the "kibana" user instead.`
+        `Setting [${fromPath}.username] to "elastic" is deprecated. You should use the "kibana_system" user instead.`
+      );
+    } else if (es.username === 'kibana') {
+      log(
+        `Setting [${fromPath}.username] to "kibana" is deprecated. You should use the "kibana_system" user instead.`
       );
     }
     if (es.ssl?.key !== undefined && es.ssl?.certificate === undefined) {

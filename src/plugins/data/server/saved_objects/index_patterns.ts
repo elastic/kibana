@@ -32,27 +32,21 @@ export const indexPatternSavedObjectType: SavedObjectsType = {
       return obj.attributes.title;
     },
     getEditUrl(obj) {
-      return `/management/kibana/index_patterns/${encodeURIComponent(obj.id)}`;
+      return `/management/kibana/indexPatterns/patterns/${encodeURIComponent(obj.id)}`;
     },
     getInAppUrl(obj) {
       return {
-        path: `/app/kibana#/management/kibana/index_patterns/${encodeURIComponent(obj.id)}`,
-        uiCapabilitiesPath: 'management.kibana.index_patterns',
+        path: `/app/management/kibana/indexPatterns/patterns/${encodeURIComponent(obj.id)}`,
+        uiCapabilitiesPath: 'management.kibana.indexPatterns',
       };
     },
   },
   mappings: {
+    dynamic: false,
     properties: {
-      fieldFormatMap: { type: 'text' },
-      fields: { type: 'text' },
-      intervalName: { type: 'keyword' },
-      notExpandable: { type: 'boolean' },
-      sourceFilters: { type: 'text' },
-      timeFieldName: { type: 'keyword' },
       title: { type: 'text' },
       type: { type: 'keyword' },
-      typeMeta: { type: 'keyword' },
     },
   },
-  migrations: indexPatternSavedObjectTypeMigrations,
+  migrations: indexPatternSavedObjectTypeMigrations as any,
 };

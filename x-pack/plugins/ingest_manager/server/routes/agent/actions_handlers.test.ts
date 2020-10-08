@@ -10,8 +10,7 @@ import {
   RequestHandlerContext,
   SavedObjectsClientContract,
 } from 'kibana/server';
-import { savedObjectsClientMock } from '../../../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
-import { httpServerMock } from '../../../../../../src/core/server/http/http_server.mocks';
+import { savedObjectsClientMock, httpServerMock } from 'src/core/server/mocks';
 import { ActionsService } from '../../services/agents';
 import { AgentAction } from '../../../common/types/models';
 import { postNewAgentActionHandlerBuilder } from './actions_handlers';
@@ -24,7 +23,7 @@ describe('test actions handlers schema', () => {
   it('validate that new agent actions schema is valid', async () => {
     expect(
       NewAgentActionSchema.validate({
-        type: 'CONFIG_CHANGE',
+        type: 'POLICY_CHANGE',
         data: 'data',
         sent_at: '2020-03-14T19:45:02.620Z',
       })
@@ -54,7 +53,7 @@ describe('test actions handlers', () => {
     const postNewAgentActionRequest: PostNewAgentActionRequest = {
       body: {
         action: {
-          type: 'CONFIG_CHANGE',
+          type: 'POLICY_CHANGE',
           data: 'data',
           sent_at: '2020-03-14T19:45:02.620Z',
         },
@@ -67,7 +66,7 @@ describe('test actions handlers', () => {
     const mockRequest = httpServerMock.createKibanaRequest(postNewAgentActionRequest);
 
     const agentAction = ({
-      type: 'CONFIG_CHANGE',
+      type: 'POLICY_CHANGE',
       id: 'action1',
       sent_at: '2020-03-14T19:45:02.620Z',
       timestamp: '2019-01-04T14:32:03.36764-05:00',
@@ -98,6 +97,5 @@ describe('test actions handlers', () => {
       ?.body as unknown) as PostNewAgentActionResponse;
 
     expect(expectedAgentActionResponse.item).toEqual(agentAction);
-    expect(expectedAgentActionResponse.success).toEqual(true);
   });
 });

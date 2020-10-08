@@ -9,20 +9,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from 'src/core/server';
-import { PLUGIN_ID, AGENT_API_ROUTES } from '../../constants';
+import { IRouter, RouteValidationResultFactory } from 'src/core/server';
+import Ajv from 'ajv';
+import {
+  PLUGIN_ID,
+  AGENT_API_ROUTES,
+  AGENT_API_ROUTES_7_9,
+  LIMITED_CONCURRENCY_ROUTE_TAG,
+  AGENT_POLLING_REQUEST_TIMEOUT_MARGIN_MS,
+} from '../../constants';
 import {
   GetAgentsRequestSchema,
   GetOneAgentRequestSchema,
   GetOneAgentEventsRequestSchema,
   UpdateAgentRequestSchema,
   DeleteAgentRequestSchema,
-  PostAgentCheckinRequestSchema,
-  PostAgentEnrollRequestSchema,
-  PostAgentAcksRequestSchema,
+  PostAgentCheckinRequestBodyJSONSchema,
+  PostAgentCheckinRequestParamsJSONSchema,
+  PostAgentAcksRequestParamsJSONSchema,
+  PostAgentAcksRequestBodyJSONSchema,
   PostAgentUnenrollRequestSchema,
+  PostBulkAgentUnenrollRequestSchema,
   GetAgentStatusRequestSchema,
   PostNewAgentActionRequestSchema,
+  PutAgentReassignRequestSchema,
+  PostBulkAgentReassignRequestSchema,
+  PostAgentEnrollRequestBodyJSONSchema,
+  PostAgentUpgradeRequestSchema,
+  PostBulkAgentUpgradeRequestSchema,
 } from '../../types';
 import {
   getAgentsHandler,
@@ -32,15 +46,42 @@ import {
   getAgentEventsHandler,
   postAgentCheckinHandler,
   postAgentEnrollHandler,
-  postAgentsUnenrollHandler,
-  getAgentStatusForConfigHandler,
-  getInternalUserSOClient,
+  getAgentStatusForAgentPolicyHandler,
+  putAgentsReassignHandler,
+  postBulkAgentsReassignHandler,
 } from './handlers';
 import { postAgentAcksHandlerBuilder } from './acks_handlers';
 import * as AgentService from '../../services/agents';
 import { postNewAgentActionHandlerBuilder } from './actions_handlers';
+import { appContextService } from '../../services';
+import { postAgentUnenrollHandler, postBulkAgentsUnenrollHandler } from './unenroll_handler';
+import { IngestManagerConfigType } from '../..';
+import { postAgentUpgradeHandler, postBulkAgentsUpgradeHandler } from './upgrade_handler';
 
-export const registerRoutes = (router: IRouter) => {
+const ajv = new Ajv({
+  coerceTypes: true,
+  useDefaults: true,
+  removeAdditional: true,
+  allErrors: false,
+  nullable: true,
+});
+
+function schemaErrorsText(errors: Ajv.ErrorObject[], dataVar: any) {
+  return errors.map((e) => `${dataVar + (e.dataPath || '')} ${e.message}`).join(', ');
+}
+
+function makeValidator(jsonSchema: any) {
+  const validator = ajv.compile(jsonSchema);
+  return function validateWithAJV(data: any, r: RouteValidationResultFactory) {
+    if (validator(data)) {
+      return r.ok(data);
+    }
+
+    return r.badRequest(schemaErrorsText(validator.errors || [], data));
+  };
+}
+
+export const registerRoutes = (router: IRouter, config: IngestManagerConfigType) => {
   // Get one
   router.get(
     {
@@ -78,12 +119,48 @@ export const registerRoutes = (router: IRouter) => {
     getAgentsHandler
   );
 
+  const pollingRequestTimeout = config.agents.pollingRequestTimeout;
   // Agent checkin
   router.post(
     {
       path: AGENT_API_ROUTES.CHECKIN_PATTERN,
-      validate: PostAgentCheckinRequestSchema,
-      options: { tags: [] },
+      validate: {
+        params: makeValidator(PostAgentCheckinRequestParamsJSONSchema),
+        body: makeValidator(PostAgentCheckinRequestBodyJSONSchema),
+      },
+      options: {
+        tags: [],
+        // If the timeout is too short, do not set socket idle timeout and rely on Kibana global socket timeout
+        ...(pollingRequestTimeout && pollingRequestTimeout > AGENT_POLLING_REQUEST_TIMEOUT_MARGIN_MS
+          ? {
+              timeout: {
+                idleSocket: pollingRequestTimeout,
+              },
+            }
+          : {}),
+      },
+    },
+    postAgentCheckinHandler
+  );
+  // BWC for agent <= 7.9
+  router.post(
+    {
+      path: AGENT_API_ROUTES_7_9.CHECKIN_PATTERN,
+      validate: {
+        params: makeValidator(PostAgentCheckinRequestParamsJSONSchema),
+        body: makeValidator(PostAgentCheckinRequestBodyJSONSchema),
+      },
+      options: {
+        tags: [],
+        // If the timeout is too short, do not set socket idle timeout and rely on Kibana global socket timeout
+        ...(pollingRequestTimeout && pollingRequestTimeout > AGENT_POLLING_REQUEST_TIMEOUT_MARGIN_MS
+          ? {
+              timeout: {
+                idleSocket: pollingRequestTimeout,
+              },
+            }
+          : {}),
+      },
     },
     postAgentCheckinHandler
   );
@@ -92,8 +169,21 @@ export const registerRoutes = (router: IRouter) => {
   router.post(
     {
       path: AGENT_API_ROUTES.ENROLL_PATTERN,
-      validate: PostAgentEnrollRequestSchema,
-      options: { tags: [] },
+      validate: {
+        body: makeValidator(PostAgentEnrollRequestBodyJSONSchema),
+      },
+      options: { tags: [LIMITED_CONCURRENCY_ROUTE_TAG] },
+    },
+    postAgentEnrollHandler
+  );
+  // BWC for agent <= 7.9
+  router.post(
+    {
+      path: AGENT_API_ROUTES_7_9.ENROLL_PATTERN,
+      validate: {
+        body: makeValidator(PostAgentEnrollRequestBodyJSONSchema),
+      },
+      options: { tags: [LIMITED_CONCURRENCY_ROUTE_TAG] },
     },
     postAgentEnrollHandler
   );
@@ -102,13 +192,37 @@ export const registerRoutes = (router: IRouter) => {
   router.post(
     {
       path: AGENT_API_ROUTES.ACKS_PATTERN,
-      validate: PostAgentAcksRequestSchema,
-      options: { tags: [] },
+      validate: {
+        params: makeValidator(PostAgentAcksRequestParamsJSONSchema),
+        body: makeValidator(PostAgentAcksRequestBodyJSONSchema),
+      },
+      options: { tags: [LIMITED_CONCURRENCY_ROUTE_TAG] },
     },
     postAgentAcksHandlerBuilder({
       acknowledgeAgentActions: AgentService.acknowledgeAgentActions,
-      getAgentByAccessAPIKeyId: AgentService.getAgentByAccessAPIKeyId,
-      getSavedObjectsClientContract: getInternalUserSOClient,
+      authenticateAgentWithAccessToken: AgentService.authenticateAgentWithAccessToken,
+      getSavedObjectsClientContract: appContextService.getInternalUserSOClient.bind(
+        appContextService
+      ),
+      saveAgentEvents: AgentService.saveAgentEvents,
+    })
+  );
+  // BWC for agent <= 7.9
+  router.post(
+    {
+      path: AGENT_API_ROUTES_7_9.ACKS_PATTERN,
+      validate: {
+        params: makeValidator(PostAgentAcksRequestParamsJSONSchema),
+        body: makeValidator(PostAgentAcksRequestBodyJSONSchema),
+      },
+      options: { tags: [LIMITED_CONCURRENCY_ROUTE_TAG] },
+    },
+    postAgentAcksHandlerBuilder({
+      acknowledgeAgentActions: AgentService.acknowledgeAgentActions,
+      authenticateAgentWithAccessToken: AgentService.authenticateAgentWithAccessToken,
+      getSavedObjectsClientContract: appContextService.getInternalUserSOClient.bind(
+        appContextService
+      ),
       saveAgentEvents: AgentService.saveAgentEvents,
     })
   );
@@ -132,7 +246,16 @@ export const registerRoutes = (router: IRouter) => {
       validate: PostAgentUnenrollRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
-    postAgentsUnenrollHandler
+    postAgentUnenrollHandler
+  );
+
+  router.put(
+    {
+      path: AGENT_API_ROUTES.REASSIGN_PATTERN,
+      validate: PutAgentReassignRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    putAgentsReassignHandler
   );
 
   // Get agent events
@@ -145,13 +268,50 @@ export const registerRoutes = (router: IRouter) => {
     getAgentEventsHandler
   );
 
-  // Get agent status for config
+  // Get agent status for policy
   router.get(
     {
       path: AGENT_API_ROUTES.STATUS_PATTERN,
       validate: GetAgentStatusRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
-    getAgentStatusForConfigHandler
+    getAgentStatusForAgentPolicyHandler
+  );
+  // upgrade agent
+  router.post(
+    {
+      path: AGENT_API_ROUTES.UPGRADE_PATTERN,
+      validate: PostAgentUpgradeRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    postAgentUpgradeHandler
+  );
+  // bulk upgrade
+  router.post(
+    {
+      path: AGENT_API_ROUTES.BULK_UPGRADE_PATTERN,
+      validate: PostBulkAgentUpgradeRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    postBulkAgentsUpgradeHandler
+  );
+  // Bulk reassign
+  router.post(
+    {
+      path: AGENT_API_ROUTES.BULK_REASSIGN_PATTERN,
+      validate: PostBulkAgentReassignRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    postBulkAgentsReassignHandler
+  );
+
+  // Bulk unenroll
+  router.post(
+    {
+      path: AGENT_API_ROUTES.BULK_UNENROLL_PATTERN,
+      validate: PostBulkAgentUnenrollRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    postBulkAgentsUnenrollHandler
   );
 };

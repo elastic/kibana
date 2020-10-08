@@ -33,6 +33,10 @@ export class PlaceholderEmbeddableFactory implements EmbeddableFactoryDefinition
     return false;
   }
 
+  public canCreateNew() {
+    return false;
+  }
+
   public async create(initialInput: EmbeddableInput, parent?: IContainer) {
     return new PlaceholderEmbeddable(initialInput, parent);
   }

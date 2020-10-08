@@ -66,7 +66,7 @@ describe('stdMetric(resp, panel, series)', () => {
 
   test('calls next when finished (percentile)', () => {
     series.metrics[0].type = 'percentile';
-    const next = jest.fn(d => d);
+    const next = jest.fn((d) => d);
     const results = stdMetric(resp, panel, series)(next)([]);
     expect(next.mock.calls.length).toEqual(1);
     expect(results).toHaveLength(0);
@@ -75,14 +75,14 @@ describe('stdMetric(resp, panel, series)', () => {
   test('calls next when finished (std_deviation band)', () => {
     series.metrics[0].type = 'std_deviation';
     series.metrics[0].mode = 'band';
-    const next = jest.fn(d => d);
+    const next = jest.fn((d) => d);
     const results = stdMetric(resp, panel, series)(next)([]);
     expect(next.mock.calls.length).toEqual(1);
     expect(results).toHaveLength(0);
   });
 
   test('creates a series', () => {
-    const next = results => results;
+    const next = (results) => results;
     const results = stdMetric(resp, panel, series)(next)([]);
     expect(results).toHaveLength(1);
     expect(results[0]).toHaveProperty('color', 'rgb(255, 0, 0)');

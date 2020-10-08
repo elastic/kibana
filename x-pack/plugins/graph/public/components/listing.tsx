@@ -24,6 +24,7 @@ export interface ListingProps {
   hideWriteControls: boolean;
   capabilities: { save: boolean; delete: boolean };
   initialFilter: string;
+  initialPageSize: number;
 }
 
 export function Listing(props: ListingProps) {
@@ -38,6 +39,7 @@ export function Listing(props: ListingProps) {
         tableColumns={getTableColumns(props.getViewUrl)}
         listingLimit={props.listingLimit}
         initialFilter={props.initialFilter}
+        initialPageSize={props.initialPageSize}
         noItemsFragment={getNoItemsMessage(
           props.capabilities.save === false,
           props.createItem,
@@ -53,7 +55,6 @@ export function Listing(props: ListingProps) {
         tableListTitle={i18n.translate('xpack.graph.listing.graphsTitle', {
           defaultMessage: 'Graphs',
         })}
-        uiSettings={props.coreStart.uiSettings}
       />
     </I18nProvider>
   );
@@ -82,7 +83,7 @@ function getNoItemsMessage(
     );
   }
 
-  const sampleDataUrl = `${application.getUrlForApp('kibana')}#/home/tutorial_directory/sampleData`;
+  const sampleDataUrl = `${application.getUrlForApp('home')}#/tutorial_directory/sampleData`;
 
   return (
     <div>

@@ -68,7 +68,7 @@ const UNIT_OPTIONS = [
   },
 ];
 
-export const PositiveRateAgg = props => {
+export const PositiveRateAgg = (props) => {
   const defaults = { unit: '' };
   const model = { ...defaults, ...props.model };
 
@@ -80,7 +80,7 @@ export const PositiveRateAgg = props => {
     (props.series.override_index_pattern && props.series.series_index_pattern) ||
     props.panel.index_pattern;
 
-  const selectedUnitOptions = UNIT_OPTIONS.filter(o => o.value === model.unit);
+  const selectedUnitOptions = UNIT_OPTIONS.filter((o) => o.value === model.unit);
 
   return (
     <AggRow
@@ -123,7 +123,7 @@ export const PositiveRateAgg = props => {
             <FieldSelect
               fields={props.fields}
               type={model.type}
-              restrict={KBN_FIELD_TYPES.NUMBER}
+              restrict={[KBN_FIELD_TYPES.NUMBER]}
               indexPattern={indexPattern}
               value={model.field}
               onChange={handleSelectChange('field')}

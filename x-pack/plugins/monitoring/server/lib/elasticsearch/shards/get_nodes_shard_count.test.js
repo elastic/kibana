@@ -25,7 +25,7 @@ describe('getNodeShardCount', () => {
               callWithRequest: () => ({
                 aggregations: {
                   nodes: {
-                    buckets: Object.keys(nodes).map(id => ({
+                    buckets: Object.keys(nodes).map((id) => ({
                       key: id,
                       doc_count: nodes[id].shardCount,
                     })),

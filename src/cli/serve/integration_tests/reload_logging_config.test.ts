@@ -26,8 +26,7 @@ import Del from 'del';
 import * as Rx from 'rxjs';
 import { map, filter, take } from 'rxjs/operators';
 import { safeDump } from 'js-yaml';
-
-import { getConfigFromFiles } from '../../../core/server/config/read_config';
+import { getConfigFromFiles } from '@kbn/config';
 
 const legacyConfig = follow('__fixtures__/reload_logging_config/kibana.test.yml');
 const configFileLogConsole = follow(
@@ -70,7 +69,7 @@ function watchFileUntil(path: string, matcher: RegExp, timeout: number) {
 }
 
 function containsJsonOnly(content: string[]) {
-  return content.every(line => line.startsWith('{'));
+  return content.every((line) => line.startsWith('{'));
 }
 
 function createConfigManager(configPath: string) {
@@ -83,7 +82,7 @@ function createConfigManager(configPath: string) {
   };
 }
 
-describe('Server logging configuration', function() {
+describe('Server logging configuration', function () {
   let child: undefined | Child.ChildProcess;
 
   beforeEach(() => {
@@ -92,7 +91,7 @@ describe('Server logging configuration', function() {
 
   afterEach(async () => {
     if (child !== undefined) {
-      const exitPromise = new Promise(resolve => child?.once('exit', resolve));
+      const exitPromise = new Promise((resolve) => child?.once('exit', resolve));
       child.kill('SIGKILL');
       await exitPromise;
     }
@@ -110,7 +109,7 @@ describe('Server logging configuration', function() {
   describe('legacy logging', () => {
     it(
       'should be reloadable via SIGHUP process signaling',
-      async function() {
+      async function () {
         const configFilePath = Path.resolve(tempDir, 'kibana.yml');
         Fs.copyFileSync(legacyConfig, configFilePath);
 
@@ -124,17 +123,13 @@ describe('Server logging configuration', function() {
 
         // TypeScript note: As long as the child stdio[1] is 'pipe', then stdout will not be null
         const message$ = Rx.fromEvent(child.stdout!, 'data').pipe(
-          map(messages =>
-            String(messages)
-              .split('\n')
-              .filter(Boolean)
-          )
+          map((messages) => String(messages).split('\n').filter(Boolean))
         );
 
         await message$
           .pipe(
             // We know the sighup handler will be registered before this message logged
-            filter((messages: string[]) => messages.some(m => m.includes('setting up root'))),
+            filter((messages: string[]) => messages.some((m) => m.includes('setting up root'))),
             take(1)
           )
           .toPromise();
@@ -142,7 +137,7 @@ describe('Server logging configuration', function() {
         const lastMessage = await message$.pipe(take(1)).toPromise();
         expect(containsJsonOnly(lastMessage)).toBe(true);
 
-        createConfigManager(configFilePath).modify(oldConfig => {
+        createConfigManager(configFilePath).modify((oldConfig) => {
           oldConfig.logging.json = false;
           return oldConfig;
         });
@@ -151,7 +146,7 @@ describe('Server logging configuration', function() {
 
         await message$
           .pipe(
-            filter(messages => !containsJsonOnly(messages)),
+            filter((messages) => !containsJsonOnly(messages)),
             take(1)
           )
           .toPromise();
@@ -161,7 +156,7 @@ describe('Server logging configuration', function() {
 
     it(
       'should recreate file handle on SIGHUP',
-      async function() {
+      async function () {
         const logPath = Path.resolve(tempDir, 'kibana.log');
         const logPathArchived = Path.resolve(tempDir, 'kibana_archive.log');
 
@@ -189,7 +184,7 @@ describe('Server logging configuration', function() {
   describe('platform logging', () => {
     it(
       'should be reloadable via SIGHUP process signaling',
-      async function() {
+      async function () {
         const configFilePath = Path.resolve(tempDir, 'kibana.yml');
         Fs.copyFileSync(configFileLogConsole, configFilePath);
 
@@ -197,17 +192,13 @@ describe('Server logging configuration', function() {
 
         // TypeScript note: As long as the child stdio[1] is 'pipe', then stdout will not be null
         const message$ = Rx.fromEvent(child.stdout!, 'data').pipe(
-          map(messages =>
-            String(messages)
-              .split('\n')
-              .filter(Boolean)
-          )
+          map((messages) => String(messages).split('\n').filter(Boolean))
         );
 
         await message$
           .pipe(
             // We know the sighup handler will be registered before this message logged
-            filter((messages: string[]) => messages.some(m => m.includes('setting up root'))),
+            filter((messages: string[]) => messages.some((m) => m.includes('setting up root'))),
             take(1)
           )
           .toPromise();
@@ -215,7 +206,7 @@ describe('Server logging configuration', function() {
         const lastMessage = await message$.pipe(take(1)).toPromise();
         expect(containsJsonOnly(lastMessage)).toBe(true);
 
-        createConfigManager(configFilePath).modify(oldConfig => {
+        createConfigManager(configFilePath).modify((oldConfig) => {
           oldConfig.logging.appenders.console.layout.kind = 'pattern';
           return oldConfig;
         });
@@ -223,7 +214,7 @@ describe('Server logging configuration', function() {
 
         await message$
           .pipe(
-            filter(messages => !containsJsonOnly(messages)),
+            filter((messages) => !containsJsonOnly(messages)),
             take(1)
           )
           .toPromise();
@@ -232,14 +223,14 @@ describe('Server logging configuration', function() {
     );
     it(
       'should recreate file handle on SIGHUP',
-      async function() {
+      async function () {
         const configFilePath = Path.resolve(tempDir, 'kibana.yml');
         Fs.copyFileSync(configFileLogFile, configFilePath);
 
         const logPath = Path.resolve(tempDir, 'kibana.log');
         const logPathArchived = Path.resolve(tempDir, 'kibana_archive.log');
 
-        createConfigManager(configFilePath).modify(oldConfig => {
+        createConfigManager(configFilePath).modify((oldConfig) => {
           oldConfig.logging.appenders.file.path = logPath;
           return oldConfig;
         });

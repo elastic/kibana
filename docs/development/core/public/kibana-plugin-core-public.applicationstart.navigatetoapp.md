@@ -9,10 +9,7 @@ Navigate to a given app
 <b>Signature:</b>
 
 ```typescript
-navigateToApp(appId: string, options?: {
-        path?: string;
-        state?: any;
-    }): Promise<void>;
+navigateToApp(appId: string, options?: NavigateToAppOptions): Promise<void>;
 ```
 
 ## Parameters
@@ -20,7 +17,7 @@ navigateToApp(appId: string, options?: {
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  appId | <code>string</code> |  |
-|  options | <code>{</code><br/><code>        path?: string;</code><br/><code>        state?: any;</code><br/><code>    }</code> |  |
+|  options | <code>NavigateToAppOptions</code> | navigation options |
 
 <b>Returns:</b>
 

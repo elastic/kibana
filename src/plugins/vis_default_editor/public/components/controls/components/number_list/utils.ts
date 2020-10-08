@@ -105,7 +105,7 @@ function validateValueUnique(
 }
 
 function getNextModel(list: NumberRowModel[], range: NumberListRange): NumberRowModel {
-  const lastValue = last(list).value;
+  const lastValue = (last(list) as NumberRowModel).value;
   let next = Number(lastValue) ? Number(lastValue) + 1 : 1;
 
   if (next >= range.max) {
@@ -121,7 +121,7 @@ function getNextModel(list: NumberRowModel[], range: NumberListRange): NumberRow
 
 function getInitModelList(list: Array<number | undefined | ''>): NumberRowModel[] {
   return list.length
-    ? list.map(num => ({
+    ? list.map((num) => ({
         value: (num === undefined ? EMPTY_STRING : num) as NumberRowModel['value'],
         id: generateId(),
         isInvalid: false,

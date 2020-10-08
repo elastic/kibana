@@ -17,12 +17,39 @@
  * under the License.
  */
 
-import { IRouter, ISavedObjectsRepository } from 'kibana/server';
+import {
+  IRouter,
+  ISavedObjectsRepository,
+  MetricsServiceSetup,
+  ServiceStatus,
+} from 'kibana/server';
+import { Observable } from 'rxjs';
+import { CollectorSet } from '../collector';
 import { registerUiMetricRoute } from './report_metrics';
+import { registerStatsRoute } from './stats';
 
-export function setupRoutes(
-  router: IRouter,
-  getSavedObjects: () => ISavedObjectsRepository | undefined
-) {
+export function setupRoutes({
+  router,
+  getSavedObjects,
+  ...rest
+}: {
+  router: IRouter;
+  getSavedObjects: () => ISavedObjectsRepository | undefined;
+  config: {
+    allowAnonymous: boolean;
+    kibanaIndex: string;
+    kibanaVersion: string;
+    uuid: string;
+    server: {
+      name: string;
+      hostname: string;
+      port: number;
+    };
+  };
+  collectorSet: CollectorSet;
+  metrics: MetricsServiceSetup;
+  overallStatus$: Observable<ServiceStatus>;
+}) {
   registerUiMetricRoute(router, getSavedObjects);
+  registerStatsRoute({ router, ...rest });
 }

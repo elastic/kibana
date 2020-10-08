@@ -26,13 +26,13 @@ import {
   EuiLink,
   EuiIcon,
   EuiCallOut,
-  EuiLoadingKibana,
+  EuiLoadingElastic,
   EuiInMemoryTable,
   EuiToolTip,
   EuiText,
   EuiSpacer,
 } from '@elastic/eui';
-import { FilterConfig } from '@elastic/eui/src/components/search_bar/filters/filters';
+import { SearchFilterConfig } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { IBasePath } from 'src/core/public';
@@ -119,7 +119,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
     }
 
     if (isLoading) {
-      return <EuiLoadingKibana size="xl" />;
+      return <EuiLoadingElastic size="xl" />;
     }
 
     const columns = [
@@ -235,7 +235,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
     ];
 
     const filterTypesMap = new Map(
-      relationships.map(relationship => [
+      relationships.map((relationship) => [
         relationship.type,
         {
           value: relationship.type,
@@ -284,7 +284,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
           multiSelect: 'or',
           options: [...filterTypesMap.values()],
         },
-      ] as FilterConfig[],
+      ] as SearchFilterConfig[],
     };
 
     return (

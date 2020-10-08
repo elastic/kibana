@@ -6,77 +6,64 @@
 
 import { SavedObjectsClientContract } from '../../../../src/core/server';
 import { TaskManagerStartContract } from '../../task_manager/server';
-import {
-  GetBasePathFunction,
-  RawAction,
-  ActionTypeRegistryContract,
-  PreConfiguredAction,
-} from './types';
+import { RawAction, ActionTypeRegistryContract, PreConfiguredAction } from './types';
+import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './saved_objects';
+import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
+import { isSavedObjectExecutionSource } from './lib';
 
 interface CreateExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;
-  getScopedSavedObjectsClient: (request: any) => SavedObjectsClientContract;
-  getBasePath: GetBasePathFunction;
   isESOUsingEphemeralEncryptionKey: boolean;
   actionTypeRegistry: ActionTypeRegistryContract;
   preconfiguredActions: PreConfiguredAction[];
 }
 
-export interface ExecuteOptions {
+export interface ExecuteOptions extends Pick<ActionExecutorOptions, 'params' | 'source'> {
   id: string;
-  params: Record<string, any>;
   spaceId: string;
   apiKey: string | null;
 }
 
-export function createExecuteFunction({
-  getBasePath,
+export type ExecutionEnqueuer = (
+  unsecuredSavedObjectsClient: SavedObjectsClientContract,
+  options: ExecuteOptions
+) => Promise<void>;
+
+export function createExecutionEnqueuerFunction({
   taskManager,
   actionTypeRegistry,
-  getScopedSavedObjectsClient,
   isESOUsingEphemeralEncryptionKey,
   preconfiguredActions,
 }: CreateExecuteFunctionOptions) {
-  return async function execute({ id, params, spaceId, apiKey }: ExecuteOptions) {
+  return async function execute(
+    unsecuredSavedObjectsClient: SavedObjectsClientContract,
+    { id, params, spaceId, source, apiKey }: ExecuteOptions
+  ) {
     if (isESOUsingEphemeralEncryptionKey === true) {
       throw new Error(
         `Unable to execute action due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml`
       );
     }
 
-    const requestHeaders: Record<string, string> = {};
+    const actionTypeId = await getActionTypeId(
+      unsecuredSavedObjectsClient,
+      preconfiguredActions,
+      id
+    );
 
-    if (apiKey) {
-      requestHeaders.authorization = `ApiKey ${apiKey}`;
+    if (!actionTypeRegistry.isActionExecutable(id, actionTypeId)) {
+      actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
     }
 
-    // Since we're using API keys and accessing elasticsearch can only be done
-    // via a request, we're faking one with the proper authorization headers.
-    const fakeRequest: any = {
-      headers: requestHeaders,
-      getBasePath: () => getBasePath(spaceId),
-      path: '/',
-      route: { settings: {} },
-      url: {
-        href: '/',
+    const actionTaskParamsRecord = await unsecuredSavedObjectsClient.create(
+      ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+      {
+        actionId: id,
+        params,
+        apiKey,
       },
-      raw: {
-        req: {
-          url: '/',
-        },
-      },
-    };
-
-    const savedObjectsClient = getScopedSavedObjectsClient(fakeRequest);
-    const actionTypeId = await getActionTypeId(id);
-
-    actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
-
-    const actionTaskParamsRecord = await savedObjectsClient.create('action_task_params', {
-      actionId: id,
-      params,
-      apiKey,
-    });
+      executionSourceAsSavedObjectReferences(source)
+    );
 
     await taskManager.schedule({
       taskType: `actions:${actionTypeId}`,
@@ -87,15 +74,34 @@ export function createExecuteFunction({
       state: {},
       scope: ['actions'],
     });
-
-    async function getActionTypeId(actionId: string): Promise<string> {
-      const pcAction = preconfiguredActions.find(action => action.id === actionId);
-      if (pcAction) {
-        return pcAction.actionTypeId;
-      }
-
-      const actionSO = await savedObjectsClient.get<RawAction>('action', actionId);
-      return actionSO.attributes.actionTypeId;
-    }
   };
+}
+
+function executionSourceAsSavedObjectReferences(executionSource: ActionExecutorOptions['source']) {
+  return isSavedObjectExecutionSource(executionSource)
+    ? {
+        references: [
+          {
+            name: 'source',
+            ...executionSource.source,
+          },
+        ],
+      }
+    : {};
+}
+
+async function getActionTypeId(
+  unsecuredSavedObjectsClient: SavedObjectsClientContract,
+  preconfiguredActions: PreConfiguredAction[],
+  actionId: string
+): Promise<string> {
+  const pcAction = preconfiguredActions.find((action) => action.id === actionId);
+  if (pcAction) {
+    return pcAction.actionTypeId;
+  }
+
+  const {
+    attributes: { actionTypeId },
+  } = await unsecuredSavedObjectsClient.get<RawAction>('action', actionId);
+  return actionTypeId;
 }

@@ -5,66 +5,66 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { CommentSchema, EntityInformation, IncidentConfigurationSchema } from '../case/schema';
 
-export const MapEntrySchema = schema.object({
-  source: schema.string(),
-  target: schema.string(),
-  actionType: schema.oneOf([
-    schema.literal('nothing'),
-    schema.literal('overwrite'),
-    schema.literal('append'),
-  ]),
-});
-
-export const CasesConfigurationSchema = schema.object({
-  mapping: schema.arrayOf(MapEntrySchema),
-});
-
-export const ConfigSchemaProps = {
+export const ExternalIncidentServiceConfiguration = {
   apiUrl: schema.string(),
-  casesConfiguration: CasesConfigurationSchema,
+  // TODO: to remove - set it optional for the current stage to support Case ServiceNow implementation
+  incidentConfiguration: schema.nullable(IncidentConfigurationSchema),
+  isCaseOwned: schema.maybe(schema.boolean()),
 };
 
-export const ConfigSchema = schema.object(ConfigSchemaProps);
+export const ExternalIncidentServiceConfigurationSchema = schema.object(
+  ExternalIncidentServiceConfiguration
+);
 
-export const SecretsSchemaProps = {
+export const ExternalIncidentServiceSecretConfiguration = {
   password: schema.string(),
   username: schema.string(),
 };
 
-export const SecretsSchema = schema.object(SecretsSchemaProps);
+export const ExternalIncidentServiceSecretConfigurationSchema = schema.object(
+  ExternalIncidentServiceSecretConfiguration
+);
 
-export const UserSchema = schema.object({
-  fullName: schema.nullable(schema.string()),
-  username: schema.string(),
-});
-
-const EntityInformationSchemaProps = {
-  createdAt: schema.string(),
-  createdBy: UserSchema,
-  updatedAt: schema.nullable(schema.string()),
-  updatedBy: schema.nullable(UserSchema),
-};
-
-export const EntityInformationSchema = schema.object(EntityInformationSchemaProps);
-
-export const CommentSchema = schema.object({
-  commentId: schema.string(),
-  comment: schema.string(),
-  version: schema.maybe(schema.string()),
-  ...EntityInformationSchemaProps,
-});
-
-export const ExecutorAction = schema.oneOf([
-  schema.literal('newIncident'),
-  schema.literal('updateIncident'),
+export const ExecutorSubActionSchema = schema.oneOf([
+  schema.literal('getIncident'),
+  schema.literal('pushToService'),
+  schema.literal('handshake'),
 ]);
 
-export const ParamsSchema = schema.object({
-  caseId: schema.string(),
+export const ExecutorSubActionPushParamsSchema = schema.object({
+  savedObjectId: schema.nullable(schema.string()),
   title: schema.string(),
+  description: schema.nullable(schema.string()),
+  comment: schema.nullable(schema.string()),
+  externalId: schema.nullable(schema.string()),
+  severity: schema.nullable(schema.string()),
+  urgency: schema.nullable(schema.string()),
+  impact: schema.nullable(schema.string()),
+  // TODO: remove later  - need for support Case push multiple comments
   comments: schema.maybe(schema.arrayOf(CommentSchema)),
-  description: schema.maybe(schema.string()),
-  incidentId: schema.nullable(schema.string()),
-  ...EntityInformationSchemaProps,
+  ...EntityInformation,
 });
+
+export const ExecutorSubActionGetIncidentParamsSchema = schema.object({
+  externalId: schema.string(),
+});
+
+// Reserved for future implementation
+export const ExecutorSubActionHandshakeParamsSchema = schema.object({});
+
+export const ExecutorParamsSchema = schema.oneOf([
+  schema.object({
+    subAction: schema.literal('getIncident'),
+    subActionParams: ExecutorSubActionGetIncidentParamsSchema,
+  }),
+  schema.object({
+    subAction: schema.literal('handshake'),
+    subActionParams: ExecutorSubActionHandshakeParamsSchema,
+  }),
+  schema.object({
+    subAction: schema.literal('pushToService'),
+    subActionParams: ExecutorSubActionPushParamsSchema,
+  }),
+]);

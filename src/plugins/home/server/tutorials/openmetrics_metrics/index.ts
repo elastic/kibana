@@ -36,6 +36,7 @@ export function openmetricsMetricsSpecProvider(context: TutorialContext): Tutori
     name: i18n.translate('home.tutorials.openmetricsMetrics.nameTitle', {
       defaultMessage: 'OpenMetrics metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.openmetricsMetrics.shortDescription', {
       defaultMessage: 'Fetch metrics from an endpoint that serves metrics in OpenMetrics format.',
@@ -48,7 +49,7 @@ export function openmetricsMetricsSpecProvider(context: TutorialContext): Tutori
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-openmetrics.html',
       },
     }),
-    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/openmetrics.svg',
+    euiIconType: '/plugins/home/assets/logos/openmetrics.svg',
     artifacts: {
       dashboards: [],
       exportedFields: {

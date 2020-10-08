@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const icalendar = require('icalendar');
+import icalendar from 'icalendar';
 import moment from 'moment';
 import { generateTempId } from '../utils';
 
@@ -12,7 +12,7 @@ function createEvents(ical) {
   const events = ical.events();
   const mlEvents = [];
 
-  events.forEach(e => {
+  events.forEach((e) => {
     if (e.element === 'VEVENT') {
       const description = e.properties.SUMMARY;
       const start = e.properties.DTSTART;
@@ -38,11 +38,14 @@ function createEvents(ical) {
 
 export function filterEvents(events) {
   const now = moment().valueOf();
-  return events.filter(e => e.start_time > now);
+  return events.filter((e) => e.start_time > now);
 }
 
 export function parseICSFile(data) {
-  const cal = icalendar.parse_calendar(data);
+  // force a new line char on the end of the data
+  // icalendar must split on new lines and so parsing fails
+  // if there isn't at least one new line at the end.
+  const cal = icalendar.parse_calendar(data + '\n');
   return createEvents(cal);
 }
 

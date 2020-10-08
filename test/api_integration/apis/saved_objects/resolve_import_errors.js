@@ -20,11 +20,28 @@
 import expect from '@kbn/expect';
 import { join } from 'path';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
   describe('resolve_import_errors', () => {
+    // mock success results including metadata
+    const indexPattern = {
+      type: 'index-pattern',
+      id: '91200a00-9efd-11e7-acb3-3dab96693fab',
+      meta: { title: 'logstash-*', icon: 'indexPatternApp' },
+    };
+    const visualization = {
+      type: 'visualization',
+      id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+      meta: { title: 'Count of requests', icon: 'visualizeApp' },
+    };
+    const dashboard = {
+      type: 'dashboard',
+      id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
+      meta: { title: 'Requests', icon: 'dashboardApp' },
+    };
+
     describe('without kibana index', () => {
       // Cleanup data that got created in import
       after(() => esArchiver.unload('saved_objects/basic'));
@@ -35,7 +52,7 @@ export default function({ getService }) {
           .field('retries', '[]')
           .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
           .expect(200)
-          .then(resp => {
+          .then((resp) => {
             expect(resp.body).to.eql({
               success: true,
               successCount: 0,
@@ -68,10 +85,15 @@ export default function({ getService }) {
           )
           .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
           .expect(200)
-          .then(resp => {
+          .then((resp) => {
             expect(resp.body).to.eql({
               success: true,
               successCount: 3,
+              successResults: [
+                { ...indexPattern, overwrite: true },
+                { ...visualization, overwrite: true },
+                { ...dashboard, overwrite: true },
+              ],
             });
           });
       });
@@ -81,7 +103,7 @@ export default function({ getService }) {
           .post('/api/saved_objects/_resolve_import_errors')
           .field('retries', '[]')
           .expect(400)
-          .then(resp => {
+          .then((resp) => {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
@@ -100,7 +122,7 @@ export default function({ getService }) {
           .field('retries', JSON.stringify([{ type: 'wigwags', id: '1' }]))
           .attach('file', fileBuffer, 'export.ndjson')
           .expect(200)
-          .then(resp => {
+          .then((resp) => {
             expect(resp.body).to.eql({
               success: false,
               successCount: 0,
@@ -109,9 +131,8 @@ export default function({ getService }) {
                   id: '1',
                   type: 'wigwags',
                   title: 'my title',
-                  error: {
-                    type: 'unsupported_type',
-                  },
+                  meta: { title: 'my title' },
+                  error: { type: 'unsupported_type' },
                 },
               ],
             });
@@ -128,7 +149,7 @@ export default function({ getService }) {
           .field('retries', '[]')
           .attach('file', Buffer.from(fileChunks.join('\n'), 'utf8'), 'export.ndjson')
           .expect(400)
-          .then(resp => {
+          .then((resp) => {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
@@ -166,7 +187,7 @@ export default function({ getService }) {
           )
           .attach('file', Buffer.from(JSON.stringify(objToInsert), 'utf8'), 'export.ndjson')
           .expect(200)
-          .then(resp => {
+          .then((resp) => {
             expect(resp.body).to.eql({
               success: false,
               successCount: 0,
@@ -175,9 +196,9 @@ export default function({ getService }) {
                   id: '1',
                   type: 'visualization',
                   title: 'My favorite vis',
+                  meta: { title: 'My favorite vis', icon: 'visualizeApp' },
                   error: {
                     type: 'missing_references',
-                    blocking: [],
                     references: [
                       {
                         type: 'index-pattern',
@@ -203,7 +224,7 @@ export default function({ getService }) {
             .field('retries', '[]')
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({ success: true, successCount: 0 });
             });
         });
@@ -233,8 +254,16 @@ export default function({ getService }) {
             )
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
             .expect(200)
-            .then(resp => {
-              expect(resp.body).to.eql({ success: true, successCount: 3 });
+            .then((resp) => {
+              expect(resp.body).to.eql({
+                success: true,
+                successCount: 3,
+                successResults: [
+                  { ...indexPattern, overwrite: true },
+                  { ...visualization, overwrite: true },
+                  { ...dashboard, overwrite: true },
+                ],
+              });
             });
         });
 
@@ -253,8 +282,12 @@ export default function({ getService }) {
             )
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
             .expect(200)
-            .then(resp => {
-              expect(resp.body).to.eql({ success: true, successCount: 1 });
+            .then((resp) => {
+              expect(resp.body).to.eql({
+                success: true,
+                successCount: 1,
+                successResults: [{ ...visualization, overwrite: true }],
+              });
             });
         });
 
@@ -294,16 +327,23 @@ export default function({ getService }) {
             )
             .attach('file', Buffer.from(JSON.stringify(objToInsert), 'utf8'), 'export.ndjson')
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 success: true,
                 successCount: 1,
+                successResults: [
+                  {
+                    type: 'visualization',
+                    id: '1',
+                    meta: { title: 'My favorite vis', icon: 'visualizeApp' },
+                  },
+                ],
               });
             });
           await supertest
             .get('/api/saved_objects/visualization/1')
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body.references).to.eql([
                 {
                   name: 'ref_0',

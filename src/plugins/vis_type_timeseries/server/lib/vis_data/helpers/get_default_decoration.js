@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export const getDefaultDecoration = series => {
+export const getDefaultDecoration = (series) => {
   const pointSize =
     series.point_size != null ? Number(series.point_size) : Number(series.line_width);
   const showPoints = series.chart_type === 'line' && pointSize !== 0;

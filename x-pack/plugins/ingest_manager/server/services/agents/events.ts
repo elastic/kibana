@@ -7,6 +7,7 @@
 import { SavedObjectsClientContract } from 'src/core/server';
 import { AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { AgentEventSOAttributes, AgentEvent } from '../../types';
+import { normalizeKuery } from '../saved_object';
 
 export async function getAgentEvents(
   soClient: SavedObjectsClientContract,
@@ -19,23 +20,23 @@ export async function getAgentEvents(
 ) {
   const { page, perPage, kuery } = options;
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { total, saved_objects } = await soClient.find<AgentEventSOAttributes>({
     type: AGENT_EVENT_SAVED_OBJECT_TYPE,
     filter:
-      kuery && kuery !== ''
-        ? kuery.replace(/agent_events\./g, 'agent_events.attributes.')
-        : undefined,
+      kuery && kuery !== '' ? normalizeKuery(AGENT_EVENT_SAVED_OBJECT_TYPE, kuery) : undefined,
     perPage,
     page,
     sortField: 'timestamp',
-    sortOrder: 'DESC',
+    sortOrder: 'desc',
     defaultSearchOperator: 'AND',
     search: agentId,
     searchFields: ['agent_id'],
   });
 
-  const items: AgentEvent[] = saved_objects.map(so => {
+  const items: AgentEvent[] = saved_objects.map((so) => {
     return {
+      id: so.id,
       ...so.attributes,
       payload: so.attributes.payload ? JSON.parse(so.attributes.payload) : undefined,
     };

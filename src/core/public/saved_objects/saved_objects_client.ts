@@ -19,6 +19,7 @@
 
 import { cloneDeep, pick, throttle } from 'lodash';
 import { resolve as resolveUrl } from 'url';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import {
   SavedObject,
@@ -28,16 +29,13 @@ import {
   SavedObjectsMigrationVersion,
 } from '../../server';
 
-// TODO: Migrate to an error modal powered by the NP?
-import {
-  isAutoCreateIndexError,
-  showAutoCreateIndexErrorPage,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../legacy/ui/public/error_auto_create_index/error_auto_create_index';
 import { SimpleSavedObject } from './simple_saved_object';
 import { HttpFetchOptions, HttpSetup } from '../http';
 
-type SavedObjectsFindOptions = Omit<SavedObjectFindOptionsServer, 'namespace' | 'sortOrder'>;
+type SavedObjectsFindOptions = Omit<
+  SavedObjectFindOptionsServer,
+  'sortOrder' | 'rootSearchFields' | 'typeToNamespacesMap'
+>;
 
 type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
 
@@ -96,6 +94,12 @@ export interface SavedObjectsUpdateOptions {
 /** @public */
 export interface SavedObjectsBatchResponse<T = unknown> {
   savedObjects: Array<SimpleSavedObject<T>>;
+}
+
+/** @public */
+export interface SavedObjectsDeleteOptions {
+  /** Force deletion of an object that exists in multiple namespaces */
+  force?: boolean;
 }
 
 /**
@@ -162,20 +166,22 @@ export class SavedObjectsClient {
 
       this.bulkGet(queue)
         .then(({ savedObjects }) => {
-          queue.forEach(queueItem => {
-            const foundObject = savedObjects.find(savedObject => {
+          queue.forEach((queueItem) => {
+            const foundObject = savedObjects.find((savedObject) => {
               return savedObject.id === queueItem.id && savedObject.type === queueItem.type;
             });
 
             if (!foundObject) {
-              return queueItem.resolve(this.createSavedObject(pick(queueItem, ['id', 'type'])));
+              return queueItem.resolve(
+                this.createSavedObject(pick(queueItem, ['id', 'type']) as SavedObject)
+              );
             }
 
             queueItem.resolve(foundObject);
           });
         })
-        .catch(err => {
-          queue.forEach(queueItem => {
+        .catch((err) => {
+          queue.forEach((queueItem) => {
             queueItem.reject(err);
           });
         });
@@ -222,15 +228,7 @@ export class SavedObjectsClient {
       }),
     });
 
-    return createRequest
-      .then(resp => this.createSavedObject(resp))
-      .catch((error: object) => {
-        if (isAutoCreateIndexError(error)) {
-          showAutoCreateIndexErrorPage();
-        }
-
-        throw error;
-      });
+    return createRequest.then((resp) => this.createSavedObject(resp));
   };
 
   /**
@@ -253,8 +251,8 @@ export class SavedObjectsClient {
       query,
       body: JSON.stringify(objects),
     });
-    return request.then(resp => {
-      resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
+    return request.then((resp) => {
+      resp.saved_objects = resp.saved_objects.map((d) => this.createSavedObject(d));
       return renameKeys<
         PromiseType<ReturnType<SavedObjectsApi['bulkCreate']>>,
         SavedObjectsBatchResponse
@@ -269,12 +267,20 @@ export class SavedObjectsClient {
    * @param id
    * @returns
    */
-  public delete = (type: string, id: string): ReturnType<SavedObjectsApi['delete']> => {
+  public delete = (
+    type: string,
+    id: string,
+    options?: SavedObjectsDeleteOptions
+  ): ReturnType<SavedObjectsApi['delete']> => {
     if (!type || !id) {
       return Promise.reject(new Error('requires type and id'));
     }
 
-    return this.savedObjectsFetch(this.getPath([type, id]), { method: 'DELETE' });
+    const query = {
+      force: !!options?.force,
+    };
+
+    return this.savedObjectsFetch(this.getPath([type, id]), { method: 'DELETE', query });
   };
 
   /**
@@ -306,6 +312,8 @@ export class SavedObjectsClient {
       sortField: 'sort_field',
       type: 'type',
       filter: 'filter',
+      namespaces: 'namespaces',
+      preference: 'preference',
     };
 
     const renamedQuery = renameKeys<SavedObjectsFindOptions, any>(renameMap, options);
@@ -315,8 +323,7 @@ export class SavedObjectsClient {
       method: 'GET',
       query,
     });
-    return request.then(resp => {
-      resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
+    return request.then((resp) => {
       return renameKeys<
         PromiseType<ReturnType<SavedObjectsApi['find']>>,
         SavedObjectsFindResponsePublic
@@ -327,7 +334,10 @@ export class SavedObjectsClient {
           per_page: 'perPage',
           page: 'page',
         },
-        resp
+        {
+          ...resp,
+          saved_objects: resp.saved_objects.map((d) => this.createSavedObject(d)),
+        }
       ) as SavedObjectsFindResponsePublic<T>;
     });
   };
@@ -364,14 +374,14 @@ export class SavedObjectsClient {
    */
   public bulkGet = (objects: Array<{ id: string; type: string }> = []) => {
     const path = this.getPath(['_bulk_get']);
-    const filteredObjects = objects.map(obj => pick(obj, ['id', 'type']));
+    const filteredObjects = objects.map((obj) => pick(obj, ['id', 'type']));
 
     const request: ReturnType<SavedObjectsApi['bulkGet']> = this.savedObjectsFetch(path, {
       method: 'POST',
       body: JSON.stringify(filteredObjects),
     });
-    return request.then(resp => {
-      resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
+    return request.then((resp) => {
+      resp.saved_objects = resp.saved_objects.map((d) => this.createSavedObject(d));
       return renameKeys<
         PromiseType<ReturnType<SavedObjectsApi['bulkGet']>>,
         SavedObjectsBatchResponse
@@ -428,7 +438,7 @@ export class SavedObjectsClient {
     return this.savedObjectsFetch(path, {
       method: 'PUT',
       body: JSON.stringify(objects),
-    }).then(resp => {
+    }).then((resp) => {
       resp.saved_objects = resp.saved_objects.map((d: SavedObject<T>) => this.createSavedObject(d));
       return renameKeys<
         PromiseType<ReturnType<SavedObjectsApi['bulkUpdate']>>,

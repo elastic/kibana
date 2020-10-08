@@ -21,5 +21,5 @@ export declare class AggParamType<TAggConfig extends IAggConfig = IAggConfig> ex
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
 |  [allowedAggs](./kibana-plugin-plugins-data-public.aggparamtype.allowedaggs.md) |  | <code>string[]</code> |  |
-|  [makeAgg](./kibana-plugin-plugins-data-public.aggparamtype.makeagg.md) |  | <code>(agg: TAggConfig, state?: any) =&gt; TAggConfig</code> |  |
+|  [makeAgg](./kibana-plugin-plugins-data-public.aggparamtype.makeagg.md) |  | <code>(agg: TAggConfig, state?: AggConfigSerialized) =&gt; TAggConfig</code> |  |
 

@@ -16,18 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import * as kbnTestServer from '../../../../test_utils/kbn_server';
+
+import { LegacyLoggingConfig } from '@kbn/config';
+import * as kbnTestServer from '../../../test_helpers/kbn_server';
 
 import {
   getPlatformLogsFromMock,
   getLegacyPlatformLogsFromMock,
 } from '../../logging/integration_tests/utils';
 
-import { LegacyLoggingConfig } from '../config/legacy_object_to_config_adapter';
-
 function createRoot(legacyLoggingConfig: LegacyLoggingConfig = {}) {
   return kbnTestServer.createRoot({
     migrations: { skip: true }, // otherwise stuck in polling ES
+    plugins: { initialize: false },
     logging: {
       // legacy platform config
       silent: false,

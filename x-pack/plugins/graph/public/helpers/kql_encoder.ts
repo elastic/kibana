@@ -15,7 +15,7 @@ function escapeQuotes(str: string) {
 export function asKQL(workspace: Workspace, joinBy: 'and' | 'or') {
   const nodes = workspace.returnUnpackedGroupeds(workspace.getSelectedOrAllNodes());
   const clauses = nodes.map(
-    node => `"${escapeQuotes(node.data.field)}" : "${escapeQuotes(node.data.term)}"`
+    (node) => `"${escapeQuotes(node.data.field)}" : "${escapeQuotes(node.data.term)}"`
   );
 
   const expression = clauses.join(` ${joinBy} `);

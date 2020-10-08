@@ -37,7 +37,7 @@ jest.mock('../utils/extract_config_files', () => ({
 const log = new ToolingLog();
 
 function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function ensureNoResolve(promise) {
@@ -60,7 +60,7 @@ async function ensureResolve(promise) {
 
 function mockEsBin({ exitCode, start }) {
   execa.mockImplementationOnce((cmd, args, options) =>
-    require.requireActual('execa')(
+    jest.requireActual('execa')(
       process.execPath,
       [
         require.resolve('./__fixtures__/es_bin.js'),
@@ -77,7 +77,7 @@ function mockEsBin({ exitCode, start }) {
 
 beforeEach(() => {
   jest.resetAllMocks();
-  extractConfigFiles.mockImplementation(config => config);
+  extractConfigFiles.mockImplementation((config) => config);
 });
 
 describe('#installSource()', () => {
@@ -85,7 +85,7 @@ describe('#installSource()', () => {
     let resolveInstallSource;
     installSource.mockImplementationOnce(
       () =>
-        new Promise(resolve => {
+        new Promise((resolve) => {
           resolveInstallSource = () => {
             resolve({ installPath: 'foo' });
           };
@@ -124,7 +124,7 @@ describe('#installSnapshot()', () => {
     let resolveInstallSnapshot;
     installSnapshot.mockImplementationOnce(
       () =>
-        new Promise(resolve => {
+        new Promise((resolve) => {
           resolveInstallSnapshot = () => {
             resolve({ installPath: 'foo' });
           };
@@ -163,7 +163,7 @@ describe('#installArchive(path)', () => {
     let resolveInstallArchive;
     installArchive.mockImplementationOnce(
       () =>
-        new Promise(resolve => {
+        new Promise((resolve) => {
           resolveInstallArchive = () => {
             resolve({ installPath: 'foo' });
           };

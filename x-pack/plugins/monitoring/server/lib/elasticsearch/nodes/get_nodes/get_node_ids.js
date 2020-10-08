@@ -19,6 +19,7 @@ export async function getNodeIds(req, indexPattern, { clusterUuid }, size) {
     filterPath: ['aggregations.composite_data.buckets'],
     body: {
       query: createQuery({
+        type: 'node_stats',
         start,
         end,
         metric: ElasticsearchMetric.getMetricFields(),
@@ -52,5 +53,5 @@ export async function getNodeIds(req, indexPattern, { clusterUuid }, size) {
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const response = await callWithRequest(req, 'search', params);
-  return get(response, 'aggregations.composite_data.buckets', []).map(bucket => bucket.key);
+  return get(response, 'aggregations.composite_data.buckets', []).map((bucket) => bucket.key);
 }

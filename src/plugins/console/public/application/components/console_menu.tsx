@@ -48,7 +48,7 @@ export class ConsoleMenu extends Component<Props, State> {
 
   mouseEnter = () => {
     if (this.state.isPopoverOpen) return;
-    this.props.getCurl().then(text => {
+    this.props.getCurl().then((text) => {
       this.setState({ curlCode: text });
     });
   };
@@ -75,7 +75,7 @@ export class ConsoleMenu extends Component<Props, State> {
   }
 
   onButtonClick = () => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       isPopoverOpen: !prevState.isPopoverOpen,
     }));
   };

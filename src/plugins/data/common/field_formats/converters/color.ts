@@ -60,7 +60,7 @@ export class ColorFormat extends FieldFormat {
     }
   }
 
-  htmlConvert: HtmlContextTypeConvert = val => {
+  htmlConvert: HtmlContextTypeConvert = (val) => {
     const color = this.findColorRuleForVal(val) as typeof DEFAULT_CONVERTER_COLOR;
     if (!color) return escape(asPrettyString(val));
 

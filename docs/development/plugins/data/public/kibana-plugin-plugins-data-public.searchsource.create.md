@@ -4,6 +4,11 @@
 
 ## SearchSource.create() method
 
+> Warning: This API is now obsolete.
+> 
+> Don't use.
+> 
+
 <b>Signature:</b>
 
 ```typescript

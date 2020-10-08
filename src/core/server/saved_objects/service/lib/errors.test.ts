@@ -274,6 +274,53 @@ describe('savedObjectsClient/errorTypes', () => {
     });
   });
 
+  describe('TooManyRequests error', () => {
+    describe('decorateTooManyRequestsError', () => {
+      it('returns original object', () => {
+        const error = new Error();
+        expect(SavedObjectsErrorHelpers.decorateTooManyRequestsError(error)).toBe(error);
+      });
+
+      it('makes the error identifiable as a TooManyRequests error', () => {
+        const error = new Error();
+        expect(SavedObjectsErrorHelpers.isTooManyRequestsError(error)).toBe(false);
+        SavedObjectsErrorHelpers.decorateTooManyRequestsError(error);
+        expect(SavedObjectsErrorHelpers.isTooManyRequestsError(error)).toBe(true);
+      });
+
+      it('adds boom properties', () => {
+        const error = SavedObjectsErrorHelpers.decorateTooManyRequestsError(new Error());
+        expect(error).toHaveProperty('isBoom', true);
+      });
+
+      describe('error.output', () => {
+        it('defaults to message of error', () => {
+          const error = SavedObjectsErrorHelpers.decorateTooManyRequestsError(new Error('foobar'));
+          expect(error.output.payload).toHaveProperty('message', 'foobar');
+        });
+
+        it('prefixes message with passed reason', () => {
+          const error = SavedObjectsErrorHelpers.decorateTooManyRequestsError(
+            new Error('foobar'),
+            'biz'
+          );
+          expect(error.output.payload).toHaveProperty('message', 'biz: foobar');
+        });
+
+        it('sets statusCode to 429', () => {
+          const error = SavedObjectsErrorHelpers.decorateTooManyRequestsError(new Error('foo'));
+          expect(error.output).toHaveProperty('statusCode', 429);
+        });
+
+        it('preserves boom properties of input', () => {
+          const error = Boom.tooManyRequests();
+          SavedObjectsErrorHelpers.decorateTooManyRequestsError(error);
+          expect(error.output).toHaveProperty('statusCode', 429);
+        });
+      });
+    });
+  });
+
   describe('EsCannotExecuteScript error', () => {
     describe('decorateEsCannotExecuteScriptError', () => {
       it('returns original object', () => {
@@ -399,45 +446,6 @@ describe('savedObjectsClient/errorTypes', () => {
           const error = Boom.notFound();
           SavedObjectsErrorHelpers.decorateGeneralError(error);
           expect(error.output).toHaveProperty('statusCode', 404);
-        });
-      });
-    });
-  });
-
-  describe('EsAutoCreateIndex error', () => {
-    describe('createEsAutoCreateIndexError', () => {
-      it('does not take an error argument', () => {
-        const error = new Error();
-        // @ts-ignore
-        expect(SavedObjectsErrorHelpers.createEsAutoCreateIndexError(error)).not.toBe(error);
-      });
-
-      it('returns a new Error', () => {
-        expect(SavedObjectsErrorHelpers.createEsAutoCreateIndexError()).toBeInstanceOf(Error);
-      });
-
-      it('makes errors identifiable as EsAutoCreateIndex errors', () => {
-        expect(
-          SavedObjectsErrorHelpers.isEsAutoCreateIndexError(
-            SavedObjectsErrorHelpers.createEsAutoCreateIndexError()
-          )
-        ).toBe(true);
-      });
-
-      it('returns a boom error', () => {
-        const error = SavedObjectsErrorHelpers.createEsAutoCreateIndexError();
-        expect(error).toHaveProperty('isBoom', true);
-      });
-
-      describe('error.output', () => {
-        it('uses "Automatic index creation failed" message', () => {
-          const error = SavedObjectsErrorHelpers.createEsAutoCreateIndexError();
-          expect(error.output.payload).toHaveProperty('message', 'Automatic index creation failed');
-        });
-
-        it('sets statusCode to 503', () => {
-          const error = SavedObjectsErrorHelpers.createEsAutoCreateIndexError();
-          expect(error.output).toHaveProperty('statusCode', 503);
         });
       });
     });

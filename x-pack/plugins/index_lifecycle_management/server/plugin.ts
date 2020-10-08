@@ -7,18 +7,29 @@
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Plugin, Logger, PluginInitializerContext, APICaller } from 'src/core/server';
+import {
+  CoreSetup,
+  Plugin,
+  Logger,
+  PluginInitializerContext,
+  LegacyAPICaller,
+} from 'src/core/server';
 
+import { Index as IndexWithoutIlm } from '../../index_management/common/types';
 import { PLUGIN } from '../common/constants';
+import { Index, IndexLifecyclePolicy } from '../common/types';
 import { Dependencies } from './types';
 import { registerApiRoutes } from './routes';
 import { License } from './services';
 import { IndexLifecycleManagementConfig } from './config';
-import { isEsError } from './lib/is_es_error';
+import { isEsError } from './shared_imports';
 
-const indexLifecycleDataEnricher = async (indicesList: any, callAsCurrentUser: APICaller) => {
+const indexLifecycleDataEnricher = async (
+  indicesList: IndexWithoutIlm[],
+  callAsCurrentUser: LegacyAPICaller
+): Promise<Index[]> => {
   if (!indicesList || !indicesList.length) {
-    return;
+    return [];
   }
 
   const params = {
@@ -26,9 +37,11 @@ const indexLifecycleDataEnricher = async (indicesList: any, callAsCurrentUser: A
     method: 'GET',
   };
 
-  const { indices: ilmIndicesData } = await callAsCurrentUser('transport.request', params);
+  const { indices: ilmIndicesData } = await callAsCurrentUser<{
+    indices: { [indexName: string]: IndexLifecyclePolicy };
+  }>('transport.request', params);
 
-  return indicesList.map((index: any): any => {
+  return indicesList.map((index: IndexWithoutIlm) => {
     return {
       ...index,
       ilm: { ...(ilmIndicesData[index.name] || {}) },
@@ -47,7 +60,10 @@ export class IndexLifecycleManagementServerPlugin implements Plugin<void, void, 
     this.license = new License();
   }
 
-  async setup({ http }: CoreSetup, { licensing, indexManagement }: Dependencies): Promise<void> {
+  async setup(
+    { http }: CoreSetup,
+    { licensing, indexManagement, features }: Dependencies
+  ): Promise<void> {
     const router = http.createRouter();
     const config = await this.config$.pipe(first()).toPromise();
 
@@ -64,6 +80,20 @@ export class IndexLifecycleManagementServerPlugin implements Plugin<void, void, 
         logger: this.logger,
       }
     );
+
+    features.registerElasticsearchFeature({
+      id: PLUGIN.ID,
+      management: {
+        data: [PLUGIN.ID],
+      },
+      catalogue: [PLUGIN.ID],
+      privileges: [
+        {
+          requiredClusterPrivileges: ['manage_ilm'],
+          ui: [],
+        },
+      ],
+    });
 
     registerApiRoutes({
       router,

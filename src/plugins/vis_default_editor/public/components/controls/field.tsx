@@ -100,7 +100,7 @@ function FieldParamEditor({
     }
   });
 
-  const onSearchChange = useCallback(searchValue => setIsDirty(Boolean(searchValue)), []);
+  const onSearchChange = useCallback((searchValue) => setIsDirty(Boolean(searchValue)), []);
 
   return (
     <EuiFormRow
@@ -124,6 +124,7 @@ function FieldParamEditor({
         onChange={onChange}
         onBlur={setTouched}
         onSearchChange={onSearchChange}
+        sortMatchesBy="startsWith"
         data-test-subj="visDefaultEditorField"
         fullWidth={true}
       />

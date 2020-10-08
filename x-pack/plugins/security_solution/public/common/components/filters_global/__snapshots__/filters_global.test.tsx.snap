@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`rendering renders correctly 1`] = `
+<InPortal
+  node={<div />}
+>
+  <FiltersGlobalContainer
+    data-test-subj="filters-global-container"
+    show={true}
+  >
+    <Wrapper
+      className="siemFiltersGlobal"
+    >
+      <p>
+        Additional filters here.
+      </p>
+    </Wrapper>
+  </FiltersGlobalContainer>
+</InPortal>
+`;

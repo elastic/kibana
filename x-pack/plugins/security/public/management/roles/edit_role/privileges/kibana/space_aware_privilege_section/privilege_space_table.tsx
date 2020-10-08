@@ -3,6 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import './privilege_space_table.scss';
+
 import {
   EuiBadge,
   EuiBadgeProps,
@@ -17,11 +20,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import _ from 'lodash';
 import React, { Component } from 'react';
 import { Space, getSpaceColor } from '../../../../../../../../spaces/public';
 import { FeaturesPrivileges, Role, copyRole } from '../../../../../../../common/model';
-import { SpacesPopoverList } from '../../../spaces_popover_list';
 import { PrivilegeDisplay } from './privilege_display';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';
@@ -75,8 +76,8 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
 
     const rows: TableRow[] = spacePrivileges.map((spacePrivs, privilegeIndex) => {
       const spaces = spacePrivs.spaces.map(
-        spaceId =>
-          displaySpaces.find(space => space.id === spaceId) || {
+        (spaceId) =>
+          displaySpaces.find((space) => space.id === spaceId) || {
             id: spaceId,
             name: spaceId,
             disabledFeatures: [],
@@ -116,19 +117,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
           const displayedSpaces = isExpanded ? spaces : spaces.slice(0, SPACES_DISPLAY_COUNT);
 
           let button = null;
-          if (record.isGlobal) {
-            button = (
-              <SpacesPopoverList
-                spaces={this.props.displaySpaces.filter(s => s.id !== '*')}
-                buttonText={i18n.translate(
-                  'xpack.security.management.editRole.spacePrivilegeTable.showAllSpacesLink',
-                  {
-                    defaultMessage: 'show spaces',
-                  }
-                )}
-              />
-            );
-          } else if (spaces.length > displayedSpaces.length) {
+          if (spaces.length > displayedSpaces.length) {
             button = (
               <EuiButtonEmpty
                 size="xs"
@@ -235,7 +224,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
                     'xpack.security.management.editRole.spacePrivilegeTable.editPrivilegesLabel',
                     {
                       defaultMessage: `Edit privileges for the following spaces: {spaceNames}.`,
-                      values: { spaceNames: record.spaces.map(s => s.name).join(', ') },
+                      values: { spaceNames: record.spaces.map((s) => s.name).join(', ') },
                     }
                   )}
                   color={'primary'}
@@ -253,7 +242,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
                     'xpack.security.management.editRole.spacePrivilegeTable.deletePrivilegesLabel',
                     {
                       defaultMessage: `Delete privileges for the following spaces: {spaceNames}.`,
-                      values: { spaceNames: record.spaces.map(s => s.name).join(', ') },
+                      values: { spaceNames: record.spaces.map((s) => s.name).join(', ') },
                     }
                   )}
                   color={'danger'}
@@ -293,7 +282,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
   private toggleExpandSpacesGroup = (privilegeIndex: number) => {
     if (this.state.expandedSpacesGroups.includes(privilegeIndex)) {
       this.setState({
-        expandedSpacesGroups: this.state.expandedSpacesGroups.filter(i => i !== privilegeIndex),
+        expandedSpacesGroups: this.state.expandedSpacesGroups.filter((i) => i !== privilegeIndex),
       });
     } else {
       this.setState({
@@ -309,7 +298,9 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
     this.props.onChange(roleCopy);
 
     this.setState({
-      expandedSpacesGroups: this.state.expandedSpacesGroups.filter(i => i !== item.privilegeIndex),
+      expandedSpacesGroups: this.state.expandedSpacesGroups.filter(
+        (i) => i !== item.privilegeIndex
+      ),
     });
   };
 }

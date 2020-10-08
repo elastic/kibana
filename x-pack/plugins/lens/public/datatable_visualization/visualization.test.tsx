@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Ast } from '@kbn/interpreter/common';
+import { buildExpression } from '../../../../../src/plugins/expressions/public';
 import { createMockDatasource } from '../editor_frame_service/mocks';
 import { DatatableVisualizationState, datatableVisualization } from './visualization';
 import { Operation, DataType, FramePublicAPI, TableSuggestionColumn } from '../types';
@@ -45,20 +47,6 @@ describe('Datatable Visualization', () => {
         ],
       };
       expect(datatableVisualization.initialize(mockFrame(), expectedState)).toEqual(expectedState);
-    });
-  });
-
-  describe('#getPersistableState', () => {
-    it('should persist the internal state', () => {
-      const expectedState: DatatableVisualizationState = {
-        layers: [
-          {
-            layerId: 'baz',
-            columns: ['a', 'b', 'c'],
-          },
-        ],
-      };
-      expect(datatableVisualization.getPersistableState(expectedState)).toEqual(expectedState);
     });
   });
 
@@ -217,10 +205,10 @@ describe('Datatable Visualization', () => {
           },
           frame,
         }).groups
-      ).toHaveLength(1);
+      ).toHaveLength(2);
     });
 
-    it('allows all kinds of operations', () => {
+    it('allows only bucket operations one category', () => {
       const datasource = createMockDatasource('test');
       const frame = mockFrame();
       frame.datasourceLayers = { first: datasource.publicAPIMock };
@@ -244,6 +232,40 @@ describe('Datatable Visualization', () => {
       expect(filterOperations({ ...baseOperation, dataType: 'boolean' })).toEqual(true);
       expect(filterOperations({ ...baseOperation, dataType: 'other' as DataType })).toEqual(true);
       expect(filterOperations({ ...baseOperation, dataType: 'date', isBucketed: false })).toEqual(
+        false
+      );
+      expect(filterOperations({ ...baseOperation, dataType: 'number', isBucketed: false })).toEqual(
+        false
+      );
+    });
+
+    it('allows only metric operations in one category', () => {
+      const datasource = createMockDatasource('test');
+      const frame = mockFrame();
+      frame.datasourceLayers = { first: datasource.publicAPIMock };
+
+      const filterOperations = datatableVisualization.getConfiguration({
+        layerId: 'first',
+        state: {
+          layers: [{ layerId: 'first', columns: [] }],
+        },
+        frame,
+      }).groups[1].filterOperations;
+
+      const baseOperation: Operation = {
+        dataType: 'string',
+        isBucketed: true,
+        label: '',
+      };
+      expect(filterOperations({ ...baseOperation })).toEqual(false);
+      expect(filterOperations({ ...baseOperation, dataType: 'number' })).toEqual(false);
+      expect(filterOperations({ ...baseOperation, dataType: 'date' })).toEqual(false);
+      expect(filterOperations({ ...baseOperation, dataType: 'boolean' })).toEqual(false);
+      expect(filterOperations({ ...baseOperation, dataType: 'other' as DataType })).toEqual(false);
+      expect(filterOperations({ ...baseOperation, dataType: 'date', isBucketed: false })).toEqual(
+        true
+      );
+      expect(filterOperations({ ...baseOperation, dataType: 'number', isBucketed: false })).toEqual(
         true
       );
     });
@@ -260,7 +282,7 @@ describe('Datatable Visualization', () => {
           layerId: 'a',
           state: { layers: [layer] },
           frame,
-        }).groups[0].accessors
+        }).groups[1].accessors
       ).toEqual(['c', 'b']);
     });
   });
@@ -321,6 +343,32 @@ describe('Datatable Visualization', () => {
             columns: ['b', 'c'],
           },
         ],
+      });
+    });
+  });
+
+  describe('#toExpression', () => {
+    it('reorders the rendered colums based on the order from the datasource', () => {
+      const datasource = createMockDatasource('test');
+      const layer = { layerId: 'a', columns: ['b', 'c'] };
+      const frame = mockFrame();
+      frame.datasourceLayers = { a: datasource.publicAPIMock };
+      datasource.publicAPIMock.getTableSpec.mockReturnValue([{ columnId: 'c' }, { columnId: 'b' }]);
+      datasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+        dataType: 'string',
+        isBucketed: true,
+        label: 'label',
+      });
+
+      const expression = datatableVisualization.toExpression(
+        { layers: [layer] },
+        frame.datasourceLayers
+      ) as Ast;
+      const tableArgs = buildExpression(expression).findFunction('lens_datatable_columns');
+
+      expect(tableArgs).toHaveLength(1);
+      expect(tableArgs[0].arguments).toEqual({
+        columnIds: ['c', 'b'],
       });
     });
   });

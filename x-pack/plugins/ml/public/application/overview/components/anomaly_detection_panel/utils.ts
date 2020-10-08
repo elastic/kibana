@@ -156,7 +156,7 @@ export function getStatsBarData(jobsList: any) {
 }
 
 export function getJobsFromGroup(group: Group, jobs: any) {
-  return group.jobIds.map(jobId => jobs[jobId]).filter(id => id !== undefined);
+  return group.jobIds.map((jobId) => jobs[jobId]).filter((id) => id !== undefined);
 }
 
 export function getJobsWithTimerange(jobsList: any) {

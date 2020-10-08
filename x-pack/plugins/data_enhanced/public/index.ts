@@ -10,4 +10,4 @@ export const plugin = () => new DataEnhancedPlugin();
 
 export { DataEnhancedSetup, DataEnhancedStart };
 
-export { ASYNC_SEARCH_STRATEGY, IAsyncSearchRequest, IAsyncSearchOptions } from './search';
+export { ENHANCED_ES_SEARCH_STRATEGY, EQL_SEARCH_STRATEGY } from '../common';

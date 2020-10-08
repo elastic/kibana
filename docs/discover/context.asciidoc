@@ -1,5 +1,5 @@
 [[document-context]]
-== Viewing a document in context
+== View a document in context
 
 Once you've narrowed your search to a specific event,
 you might want to inspect the documents that occurred
@@ -16,7 +16,7 @@ The anchor document is highlighted in blue.
 
 
 [role="screenshot"]
-image::images/Discover-ContextView.png[Context View]
+image::images/Discover-ContextView.png[Image showing context view feature, with anchor documents highlighted in blue]
 
 [float]
 [[filter-context]]

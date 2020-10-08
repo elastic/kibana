@@ -16,15 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { uniq } from 'lodash';
+import { uniqBy, get } from 'lodash';
 import { first, map } from 'rxjs/operators';
 import { KibanaRequest, RequestHandlerContext } from 'kibana/server';
 
-// @ts-ignore
-import { getIndexPatternObject } from './vis_data/helpers/get_index_pattern';
-import { indexPatterns } from '../../../data/server';
 import { Framework } from '../plugin';
-import { IndexPatternFieldDescriptor, IndexPatternsFetcher } from '../../../data/server';
+import {
+  indexPatterns,
+  IndexPatternFieldDescriptor,
+  IndexPatternsFetcher,
+} from '../../../data/server';
 import { ReqFacade } from './search_strategies/strategies/abstract_search_strategy';
 
 export async function getFields(
@@ -38,42 +39,35 @@ export async function getFields(
   // level object passed from here. The layers should be refactored fully at some point, but for now
   // this works and we are still using the New Platform services for these vis data portions.
   const reqFacade: ReqFacade = {
+    requestContext,
     ...request,
     framework,
     payload: {},
     pre: {
       indexPatternsService: new IndexPatternsFetcher(
-        requestContext.core.elasticsearch.dataClient.callAsCurrentUser
+        requestContext.core.elasticsearch.legacy.client.callAsCurrentUser
       ),
     },
     getUiSettingsService: () => requestContext.core.uiSettings.client,
     getSavedObjectsClient: () => requestContext.core.savedObjects.client,
-    server: {
-      plugins: {
-        elasticsearch: {
-          getCluster: () => {
-            return {
-              callWithRequest: async (req: any, endpoint: string, params: any) => {
-                return await requestContext.core.elasticsearch.dataClient.callAsCurrentUser(
-                  endpoint,
-                  params
-                );
-              },
-            };
-          },
-        },
-      },
-    },
     getEsShardTimeout: async () => {
       return await framework.globalConfig$
         .pipe(
           first(),
-          map(config => config.elasticsearch.shardTimeout.asMilliseconds())
+          map((config) => config.elasticsearch.shardTimeout.asMilliseconds())
         )
         .toPromise();
     },
   };
-  const { indexPatternString } = await getIndexPatternObject(reqFacade, indexPattern);
+  let indexPatternString = indexPattern;
+
+  if (!indexPatternString) {
+    const [, { data }] = await framework.core.getStartServices();
+    const indexPatternsService = await data.indexPatterns.indexPatternsServiceFactory(request);
+    const defaultIndexPattern = await indexPatternsService.getDefault();
+    indexPatternString = get(defaultIndexPattern, 'title', '');
+  }
+
   const {
     searchStrategy,
     capabilities,
@@ -84,8 +78,8 @@ export async function getFields(
     indexPatternString,
     capabilities
   )) as IndexPatternFieldDescriptor[]).filter(
-    field => field.aggregatable && !indexPatterns.isNestedField(field)
+    (field) => field.aggregatable && !indexPatterns.isNestedField(field)
   );
 
-  return uniq(fields, field => field.name);
+  return uniqBy(fields, (field) => field.name);
 }

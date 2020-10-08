@@ -6,26 +6,29 @@
 
 import { errors } from 'elasticsearch';
 
-import { elasticsearchServiceMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
 
-import { IClusterClient, ElasticsearchErrorHelpers } from '../../../../../src/core/server';
+import {
+  ILegacyClusterClient,
+  LegacyElasticsearchErrorHelpers,
+} from '../../../../../src/core/server';
 import { Tokens } from './tokens';
 
 describe('Tokens', () => {
   let tokens: Tokens;
-  let mockClusterClient: jest.Mocked<IClusterClient>;
+  let mockClusterClient: jest.Mocked<ILegacyClusterClient>;
   beforeEach(() => {
-    mockClusterClient = elasticsearchServiceMock.createClusterClient();
+    mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient();
 
     const tokensOptions = {
       client: mockClusterClient,
-      logger: loggingServiceMock.create().get(),
+      logger: loggingSystemMock.create().get(),
     };
 
     tokens = new Tokens(tokensOptions);
   });
 
-  it('isAccessTokenExpiredError() returns `true` only if token expired or its document is missing', () => {
+  it('isAccessTokenExpiredError() returns `true` only if token expired', () => {
     const nonExpirationErrors = [
       {},
       new Error(),
@@ -39,7 +42,7 @@ describe('Tokens', () => {
 
     const expirationErrors = [
       { statusCode: 401 },
-      ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error()),
+      LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error()),
       new errors.AuthenticationException(),
     ];
     for (const error of expirationErrors) {
@@ -91,55 +94,66 @@ describe('Tokens', () => {
   });
 
   describe('invalidate()', () => {
-    it('throws if call to delete access token responds with an error', async () => {
-      const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
+    for (const [description, failureReason] of [
+      ['an unknown error', new Error('failed to delete token')],
+      ['a 404 error without body', { statusCode: 404 }],
+    ] as Array<[string, object]>) {
+      it(`throws if call to delete access token responds with ${description}`, async () => {
+        const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
-      const failureReason = new Error('failed to delete token');
-      mockClusterClient.callAsInternalUser.mockImplementation((methodName, args: any) => {
-        if (args && args.body && args.body.token) {
-          return Promise.reject(failureReason);
-        }
+        mockClusterClient.callAsInternalUser.mockImplementation((methodName, args: any) => {
+          if (args && args.body && args.body.token) {
+            return Promise.reject(failureReason);
+          }
 
-        return Promise.resolve({ invalidated_tokens: 1 });
+          return Promise.resolve({ invalidated_tokens: 1 });
+        });
+
+        await expect(tokens.invalidate(tokenPair)).rejects.toBe(failureReason);
+
+        expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(2);
+        expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith(
+          'shield.deleteAccessToken',
+          {
+            body: { token: tokenPair.accessToken },
+          }
+        );
+        expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith(
+          'shield.deleteAccessToken',
+          {
+            body: { refresh_token: tokenPair.refreshToken },
+          }
+        );
       });
 
-      await expect(tokens.invalidate(tokenPair)).rejects.toBe(failureReason);
+      it(`throws if call to delete refresh token responds with ${description}`, async () => {
+        const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(2);
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith(
-        'shield.deleteAccessToken',
-        { body: { token: tokenPair.accessToken } }
-      );
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith(
-        'shield.deleteAccessToken',
-        { body: { refresh_token: tokenPair.refreshToken } }
-      );
-    });
+        mockClusterClient.callAsInternalUser.mockImplementation((methodName, args: any) => {
+          if (args && args.body && args.body.refresh_token) {
+            return Promise.reject(failureReason);
+          }
 
-    it('throws if call to delete refresh token responds with an error', async () => {
-      const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
+          return Promise.resolve({ invalidated_tokens: 1 });
+        });
 
-      const failureReason = new Error('failed to delete token');
-      mockClusterClient.callAsInternalUser.mockImplementation((methodName, args: any) => {
-        if (args && args.body && args.body.refresh_token) {
-          return Promise.reject(failureReason);
-        }
+        await expect(tokens.invalidate(tokenPair)).rejects.toBe(failureReason);
 
-        return Promise.resolve({ invalidated_tokens: 1 });
+        expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(2);
+        expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith(
+          'shield.deleteAccessToken',
+          {
+            body: { token: tokenPair.accessToken },
+          }
+        );
+        expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith(
+          'shield.deleteAccessToken',
+          {
+            body: { refresh_token: tokenPair.refreshToken },
+          }
+        );
       });
-
-      await expect(tokens.invalidate(tokenPair)).rejects.toBe(failureReason);
-
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(2);
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith(
-        'shield.deleteAccessToken',
-        { body: { token: tokenPair.accessToken } }
-      );
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith(
-        'shield.deleteAccessToken',
-        { body: { refresh_token: tokenPair.refreshToken } }
-      );
-    });
+    }
 
     it('invalidates all provided tokens', async () => {
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
@@ -187,23 +201,35 @@ describe('Tokens', () => {
       );
     });
 
-    it('does not fail if none of the tokens were invalidated', async () => {
-      const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
+    for (const [description, response] of [
+      ['none of the tokens were invalidated', Promise.resolve({ invalidated_tokens: 0 })],
+      [
+        '404 error is returned',
+        Promise.reject({ statusCode: 404, body: { invalidated_tokens: 0 } }),
+      ],
+    ] as Array<[string, Promise<any>]>) {
+      it(`does not fail if ${description}`, async () => {
+        const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
-      mockClusterClient.callAsInternalUser.mockResolvedValue({ invalidated_tokens: 0 });
+        mockClusterClient.callAsInternalUser.mockImplementation(() => response);
 
-      await expect(tokens.invalidate(tokenPair)).resolves.toBe(undefined);
+        await expect(tokens.invalidate(tokenPair)).resolves.toBe(undefined);
 
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(2);
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith(
-        'shield.deleteAccessToken',
-        { body: { token: tokenPair.accessToken } }
-      );
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith(
-        'shield.deleteAccessToken',
-        { body: { refresh_token: tokenPair.refreshToken } }
-      );
-    });
+        expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(2);
+        expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith(
+          'shield.deleteAccessToken',
+          {
+            body: { token: tokenPair.accessToken },
+          }
+        );
+        expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith(
+          'shield.deleteAccessToken',
+          {
+            body: { refresh_token: tokenPair.refreshToken },
+          }
+        );
+      });
+    }
 
     it('does not fail if more than one token per access or refresh token were invalidated', async () => {
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };

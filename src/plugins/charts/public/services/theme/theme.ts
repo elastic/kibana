@@ -18,32 +18,56 @@
  */
 
 import { useEffect, useState } from 'react';
-import { map } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
 
 import { CoreSetup } from 'kibana/public';
-import { RecursivePartial, Theme } from '@elastic/charts';
+import { DARK_THEME, LIGHT_THEME, PartialTheme, Theme } from '@elastic/charts';
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 
 export class ThemeService {
-  private _chartsTheme$?: Observable<RecursivePartial<Theme>>;
-
   /** Returns default charts theme */
   public readonly chartsDefaultTheme = EUI_CHARTS_THEME_LIGHT.theme;
+  public readonly chartsDefaultBaseTheme = LIGHT_THEME;
+
+  private _uiSettingsDarkMode$?: Observable<boolean>;
+  private _chartsTheme$ = new BehaviorSubject(this.chartsDefaultTheme);
+  private _chartsBaseTheme$ = new BehaviorSubject(this.chartsDefaultBaseTheme);
 
   /** An observable of the current charts theme */
-  public get chartsTheme$(): Observable<RecursivePartial<Theme>> {
-    if (!this._chartsTheme$) {
+  public chartsTheme$ = this._chartsTheme$.asObservable();
+
+  /** An observable of the current charts base theme */
+  public chartsBaseTheme$ = this._chartsBaseTheme$.asObservable();
+
+  /** An observable boolean for dark mode of kibana */
+  public get darkModeEnabled$(): Observable<boolean> {
+    if (!this._uiSettingsDarkMode$) {
       throw new Error('ThemeService not initialized');
     }
 
-    return this._chartsTheme$;
+    return this._uiSettingsDarkMode$;
   }
 
+  /** A React hook for consuming the dark mode value */
+  public useDarkMode = (): boolean => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [value, update] = useState(false);
+
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useEffect(() => {
+      const s = this.darkModeEnabled$.subscribe(update);
+      return () => s.unsubscribe();
+    }, []);
+
+    return value;
+  };
+
   /** A React hook for consuming the charts theme */
-  public useChartsTheme = () => {
+  public useChartsTheme = (): PartialTheme => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const [value, update] = useState(this.chartsDefaultTheme);
 
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
       const s = this.chartsTheme$.subscribe(update);
       return () => s.unsubscribe();
@@ -52,12 +76,28 @@ export class ThemeService {
     return value;
   };
 
+  /** A React hook for consuming the charts theme */
+  public useChartsBaseTheme = (): Theme => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [value, update] = useState(this.chartsDefaultBaseTheme);
+
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useEffect(() => {
+      const s = this.chartsBaseTheme$.subscribe(update);
+      return () => s.unsubscribe();
+    }, []);
+
+    return value;
+  };
+
   /** initialize service with uiSettings */
   public init(uiSettings: CoreSetup['uiSettings']) {
-    this._chartsTheme$ = uiSettings
-      .get$('theme:darkMode')
-      .pipe(
-        map(darkMode => (darkMode ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme))
+    this._uiSettingsDarkMode$ = uiSettings.get$<boolean>('theme:darkMode');
+    this._uiSettingsDarkMode$.subscribe((darkMode) => {
+      this._chartsTheme$.next(
+        darkMode ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme
       );
+      this._chartsBaseTheme$.next(darkMode ? DARK_THEME : LIGHT_THEME);
+    });
   }
 }

@@ -9,18 +9,19 @@ import ReactDOM from 'react-dom';
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CoreStart, IBasePath } from 'src/core/public';
+import { parseNext } from '../../../common/parse_next';
 import { AuthenticationServiceSetup } from '../authentication_service';
 import { AuthenticationStatePage } from '../components';
 
 interface Props {
   basePath: IBasePath;
-  authc: AuthenticationServiceSetup;
+  authc: Pick<AuthenticationServiceSetup, 'getCurrentUser'>;
 }
 
 export function OverwrittenSessionPage({ authc, basePath }: Props) {
   const [username, setUsername] = useState<string | null>(null);
   useEffect(() => {
-    authc.getCurrentUser().then(user => setUsername(user.username));
+    authc.getCurrentUser().then((user) => setUsername(user.username));
   }, [authc]);
 
   if (username == null) {
@@ -36,7 +37,7 @@ export function OverwrittenSessionPage({ authc, basePath }: Props) {
         />
       }
     >
-      <EuiButton href={basePath.prepend('/')}>
+      <EuiButton href={parseNext(window.location.href, basePath.serverBasePath)}>
         <FormattedMessage
           id="xpack.security.overwrittenSession.continueAsUserText"
           defaultMessage="Continue as {username}"

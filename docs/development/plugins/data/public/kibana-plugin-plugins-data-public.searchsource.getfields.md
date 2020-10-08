@@ -4,6 +4,8 @@
 
 ## SearchSource.getFields() method
 
+returns all search source fields
+
 <b>Signature:</b>
 
 ```typescript

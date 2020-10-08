@@ -1,4 +1,4 @@
-==== Running Kibana with SysV `init`
+==== Run {kib} with SysV `init`
 
 Use the `chkconfig` command to configure Kibana to start automatically
 when the system boots up:

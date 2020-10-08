@@ -17,34 +17,48 @@
  * under the License.
  */
 
-import { get, has } from 'lodash';
+import { get, hasIn } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import {
-  KibanaContext,
-  KibanaDatatable,
-  ExpressionFunctionDefinition,
-  KibanaDatatableColumn,
-} from '../../../../../plugins/expressions/public';
-import { calculateObjectHash } from '../../../../../plugins/kibana_utils/public';
+import { KibanaDatatable, KibanaDatatableColumn } from 'src/plugins/expressions/public';
 import { PersistedState } from '../../../../../plugins/visualizations/public';
 import { Adapters } from '../../../../../plugins/inspector/public';
 
-import { IAggConfigs } from '../aggs';
-import { ISearchSource, SearchSource } from '../search_source';
-import { tabifyAggResponse } from '../tabify';
-import { Filter, Query, serializeFieldFormat, TimeRange } from '../../../common';
-import { FilterManager, getTime } from '../../query';
-import { getSearchService, getQueryService, getIndexPatterns } from '../../services';
+import {
+  calculateBounds,
+  EsaggsExpressionFunctionDefinition,
+  Filter,
+  getTime,
+  IIndexPattern,
+  isRangeFilter,
+  Query,
+  TimeRange,
+} from '../../../common';
+import {
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+  IAggConfigs,
+  ISearchSource,
+  tabifyAggResponse,
+} from '../../../common/search';
+
+import { FilterManager } from '../../query';
+import {
+  getFieldFormats,
+  getIndexPatterns,
+  getQueryService,
+  getSearchService,
+} from '../../services';
 import { buildTabularInspectorData } from './build_tabular_inspector_data';
-import { getRequestInspectorStats, getResponseInspectorStats, serializeAggConfig } from './utils';
+import { serializeAggConfig } from './utils';
 
 export interface RequestHandlerParams {
   searchSource: ISearchSource;
   aggs: IAggConfigs;
   timeRange?: TimeRange;
+  timeFields?: string[];
+  indexPattern?: IIndexPattern;
   query?: Query;
   filters?: Filter[];
-  forceFetch: boolean;
   filterManager: FilterManager;
   uiState?: PersistedState;
   partialRows?: boolean;
@@ -56,24 +70,14 @@ export interface RequestHandlerParams {
 
 const name = 'esaggs';
 
-type Input = KibanaContext | null;
-type Output = Promise<KibanaDatatable>;
-
-interface Arguments {
-  index: string;
-  metricsAtAllLevels: boolean;
-  partialRows: boolean;
-  includeFormatHints: boolean;
-  aggConfigs: string;
-}
-
 const handleCourierRequest = async ({
   searchSource,
   aggs,
   timeRange,
+  timeFields,
+  indexPattern,
   query,
   filters,
-  forceFetch,
   partialRows,
   metricsAtAllLevels,
   inspectorAdapters,
@@ -103,7 +107,7 @@ const handleCourierRequest = async ({
     },
   });
 
-  requestSearchSource.setField('aggs', function() {
+  requestSearchSource.setField('aggs', function () {
     return aggs.toDsl(metricsAtAllLevels);
   });
 
@@ -111,55 +115,54 @@ const handleCourierRequest = async ({
     return aggs.onSearchRequestStart(paramSearchSource, options);
   });
 
-  if (timeRange) {
+  // If timeFields have been specified, use the specified ones, otherwise use primary time field of index
+  // pattern if it's available.
+  const defaultTimeField = indexPattern?.getTimeField?.();
+  const defaultTimeFields = defaultTimeField ? [defaultTimeField.name] : [];
+  const allTimeFields = timeFields && timeFields.length > 0 ? timeFields : defaultTimeFields;
+
+  // If a timeRange has been specified and we had at least one timeField available, create range
+  // filters for that those time fields
+  if (timeRange && allTimeFields.length > 0) {
     timeFilterSearchSource.setField('filter', () => {
-      return getTime(searchSource.getField('index'), timeRange);
+      return allTimeFields
+        .map((fieldName) => getTime(indexPattern, timeRange, { fieldName }))
+        .filter(isRangeFilter);
     });
   }
 
   requestSearchSource.setField('filter', filters);
   requestSearchSource.setField('query', query);
 
-  const reqBody = await requestSearchSource.getSearchRequestBody();
-
-  const queryHash = calculateObjectHash(reqBody);
-  // We only need to reexecute the query, if forceFetch was true or the hash of the request body has changed
-  // since the last request
-  const shouldQuery = forceFetch || (searchSource as any).lastQuery !== queryHash;
-
-  if (shouldQuery) {
-    inspectorAdapters.requests.reset();
-    const request = inspectorAdapters.requests.start(
-      i18n.translate('data.functions.esaggs.inspector.dataRequest.title', {
-        defaultMessage: 'Data',
+  inspectorAdapters.requests.reset();
+  const request = inspectorAdapters.requests.start(
+    i18n.translate('data.functions.esaggs.inspector.dataRequest.title', {
+      defaultMessage: 'Data',
+    }),
+    {
+      description: i18n.translate('data.functions.esaggs.inspector.dataRequest.description', {
+        defaultMessage:
+          'This request queries Elasticsearch to fetch the data for the visualization.',
       }),
-      {
-        description: i18n.translate('data.functions.esaggs.inspector.dataRequest.description', {
-          defaultMessage:
-            'This request queries Elasticsearch to fetch the data for the visualization.',
-        }),
-      }
-    );
-    request.stats(getRequestInspectorStats(requestSearchSource));
-
-    try {
-      const response = await requestSearchSource.fetch({ abortSignal });
-
-      (searchSource as any).lastQuery = queryHash;
-
-      request.stats(getResponseInspectorStats(searchSource, response)).ok({ json: response });
-
-      (searchSource as any).rawResponse = response;
-    } catch (e) {
-      // Log any error during request to the inspector
-      request.error({ json: e });
-      throw e;
-    } finally {
-      // Add the request body no matter if things went fine or not
-      requestSearchSource.getSearchRequestBody().then((req: unknown) => {
-        request.json(req);
-      });
     }
+  );
+  request.stats(getRequestInspectorStats(requestSearchSource));
+
+  try {
+    const response = await requestSearchSource.fetch({ abortSignal });
+
+    request.stats(getResponseInspectorStats(response, searchSource)).ok({ json: response });
+
+    (searchSource as any).rawResponse = response;
+  } catch (e) {
+    // Log any error during request to the inspector
+    request.error({ json: e });
+    throw e;
+  } finally {
+    // Add the request body no matter if things went fine or not
+    requestSearchSource.getSearchRequestBody().then((req: unknown) => {
+      request.json(req);
+    });
   }
 
   // Note that rawResponse is not deeply cloned here, so downstream applications using courier
@@ -167,13 +170,13 @@ const handleCourierRequest = async ({
   // response data incorrectly in the inspector.
   let resp = (searchSource as any).rawResponse;
   for (const agg of aggs.aggs) {
-    if (has(agg, 'type.postFlightRequest')) {
+    if (hasIn(agg, 'type.postFlightRequest')) {
       resp = await agg.type.postFlightRequest(
         resp,
         aggs,
         agg,
         requestSearchSource,
-        inspectorAdapters,
+        inspectorAdapters.requests,
         abortSignal
       );
     }
@@ -181,36 +184,34 @@ const handleCourierRequest = async ({
 
   (searchSource as any).finalResponse = resp;
 
-  const parsedTimeRange = timeRange ? getTime(aggs.indexPattern, timeRange) : null;
+  const parsedTimeRange = timeRange ? calculateBounds(timeRange) : null;
   const tabifyParams = {
     metricsAtAllLevels,
     partialRows,
-    timeRange: parsedTimeRange ? parsedTimeRange.range : undefined,
+    timeRange: parsedTimeRange
+      ? { from: parsedTimeRange.min, to: parsedTimeRange.max, timeFields: allTimeFields }
+      : undefined,
   };
 
-  const tabifyCacheHash = calculateObjectHash({ tabifyAggs: aggs, ...tabifyParams });
-  // We only need to reexecute tabify, if either we did a new request or some input params to tabify changed
-  const shouldCalculateNewTabify =
-    shouldQuery || (searchSource as any).lastTabifyHash !== tabifyCacheHash;
-
-  if (shouldCalculateNewTabify) {
-    (searchSource as any).lastTabifyHash = tabifyCacheHash;
-    (searchSource as any).tabifiedResponse = tabifyAggResponse(
-      aggs,
-      (searchSource as any).finalResponse,
-      tabifyParams
-    );
-  }
+  (searchSource as any).tabifiedResponse = tabifyAggResponse(
+    aggs,
+    (searchSource as any).finalResponse,
+    tabifyParams
+  );
 
   inspectorAdapters.data.setTabularLoader(
-    () => buildTabularInspectorData((searchSource as any).tabifiedResponse, filterManager),
+    () =>
+      buildTabularInspectorData((searchSource as any).tabifiedResponse, {
+        queryFilter: filterManager,
+        deserializeFieldFormat: getFieldFormats().deserialize,
+      }),
     { returnsFormattedValues: true }
   );
 
   return (searchSource as any).tabifiedResponse;
 };
 
-export const esaggs = (): ExpressionFunctionDefinition<typeof name, Input, Arguments, Output> => ({
+export const esaggs = (): EsaggsExpressionFunctionDefinition => ({
   name,
   type: 'kibana_datatable',
   inputTypes: ['kibana_context', 'null'],
@@ -242,6 +243,11 @@ export const esaggs = (): ExpressionFunctionDefinition<typeof name, Input, Argum
       default: '""',
       help: '',
     },
+    timeFields: {
+      types: ['string'],
+      help: '',
+      multi: true,
+    },
   },
   async fn(input, args, { inspectorAdapters, abortSignal }) {
     const indexPatterns = getIndexPatterns();
@@ -253,17 +259,19 @@ export const esaggs = (): ExpressionFunctionDefinition<typeof name, Input, Argum
     const aggs = searchService.aggs.createAggConfigs(indexPattern, aggConfigsState);
 
     // we should move searchSource creation inside courier request handler
-    const searchSource = new SearchSource();
+    const searchSource = await searchService.searchSource.create();
+
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', 0);
 
     const response = await handleCourierRequest({
       searchSource,
       aggs,
+      indexPattern,
       timeRange: get(input, 'timeRange', undefined),
-      query: get(input, 'query', undefined),
+      query: get(input, 'query', undefined) as any,
       filters: get(input, 'filters', undefined),
-      forceFetch: true,
+      timeFields: args.timeFields,
       metricsAtAllLevels: args.metricsAtAllLevels,
       partialRows: args.partialRows,
       inspectorAdapters: inspectorAdapters as Adapters,
@@ -281,7 +289,7 @@ export const esaggs = (): ExpressionFunctionDefinition<typeof name, Input, Argum
           meta: serializeAggConfig(column.aggConfig),
         };
         if (args.includeFormatHints) {
-          cleanedColumn.formatHint = serializeFieldFormat(column.aggConfig);
+          cleanedColumn.formatHint = column.aggConfig.toSerializedFieldFormat();
         }
         return cleanedColumn;
       }),

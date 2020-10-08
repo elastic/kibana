@@ -31,10 +31,9 @@ import { MarkdownSimple } from '../../../../../../../plugins/kibana_react/public
 import { replaceVars } from '../../lib/replace_vars';
 import { getAxisLabelString } from '../../lib/get_axis_label_string';
 import { getInterval } from '../../lib/get_interval';
-import { areFieldsDifferent } from '../../lib/charts';
 import { createXaxisFormatter } from '../../lib/create_xaxis_formatter';
 import { STACKED_OPTIONS } from '../../../visualizations/constants';
-import { getCoreStart, getUISettings } from '../../../../services';
+import { getCoreStart } from '../../../../services';
 
 export class TimeseriesVisualization extends Component {
   static propTypes = {
@@ -45,7 +44,7 @@ export class TimeseriesVisualization extends Component {
     getConfig: PropTypes.func,
   };
 
-  xAxisFormatter = interval => val => {
+  xAxisFormatter = (interval) => (val) => {
     const { scaledDataFormat, dateFormat } = this.props.visData;
 
     if (!scaledDataFormat || !dateFormat) {
@@ -57,13 +56,13 @@ export class TimeseriesVisualization extends Component {
     return formatter(val);
   };
 
-  yAxisStackedByPercentFormatter = val => {
+  yAxisStackedByPercentFormatter = (val) => {
     const n = Number(val) * 100;
 
     return `${(Number.isNaN(n) ? 0 : n).toFixed(0)}%`;
   };
 
-  applyDocTo = template => doc => {
+  applyDocTo = (template) => (doc) => {
     const vars = replaceVars(template, null, doc);
 
     if (vars instanceof Error) {
@@ -75,7 +74,7 @@ export class TimeseriesVisualization extends Component {
     return vars;
   };
 
-  static getYAxisDomain = model => {
+  static getYAxisDomain = (model) => {
     const axisMin = get(model, 'axis_min', '').toString();
     const axisMax = get(model, 'axis_max', '').toString();
     const fit = model.series
@@ -100,7 +99,7 @@ export class TimeseriesVisualization extends Component {
     });
   };
 
-  static getAxisScaleType = model =>
+  static getAxisScaleType = (model) =>
     get(model, 'axis_scale') === 'log' ? ScaleType.Log : ScaleType.Linear;
 
   static getTickFormatter = (model, getConfig) =>
@@ -154,7 +153,7 @@ export class TimeseriesVisualization extends Component {
     const styles = reactCSS({
       default: {
         tvbVis: {
-          backgroundColor: get(model, 'background_color'),
+          borderColor: get(model, 'background_color'),
         },
       },
     });
@@ -163,22 +162,16 @@ export class TimeseriesVisualization extends Component {
     const yAxisIdGenerator = htmlIdGenerator('yaxis');
     const mainAxisGroupId = yAxisIdGenerator('main_group');
 
-    const seriesModel = model.series.filter(s => !s.hidden).map(s => cloneDeep(s));
-    const enableHistogramMode = areFieldsDifferent('chart_type')(seriesModel);
-    const firstSeries = seriesModel.find(s => s.formatter && !s.separate_axis);
+    const seriesModel = model.series.filter((s) => !s.hidden).map((s) => cloneDeep(s));
 
     const mainAxisScaleType = TimeseriesVisualization.getAxisScaleType(model);
     const mainAxisDomain = TimeseriesVisualization.getYAxisDomain(model);
-    const tickFormatter = TimeseriesVisualization.getTickFormatter(
-      firstSeries,
-      this.props.getConfig
-    );
     const yAxis = [];
     let mainDomainAdded = false;
 
     this.showToastNotification = null;
 
-    seriesModel.forEach(seriesGroup => {
+    seriesModel.forEach((seriesGroup) => {
       const isStackedWithinSeries = seriesGroup.stacked === STACKED_OPTIONS.STACKED_WITHIN_SERIES;
       const hasSeparateAxis = Boolean(seriesGroup.separate_axis);
       const groupId = hasSeparateAxis || isStackedWithinSeries ? seriesGroup.id : mainAxisGroupId;
@@ -203,9 +196,9 @@ export class TimeseriesVisualization extends Component {
       }
 
       series
-        .filter(r => startsWith(r.id, seriesGroup.id))
-        .forEach(seriesDataRow => {
-          seriesDataRow.tickFormatter = seriesGroupTickFormatter;
+        .filter((r) => startsWith(r.id, seriesGroup.id))
+        .forEach((seriesDataRow) => {
+          seriesDataRow.tickFormat = seriesGroupTickFormatter;
           seriesDataRow.groupId = groupId;
           seriesDataRow.yScaleType = yScaleType;
           seriesDataRow.hideInLegend = Boolean(seriesGroup.hide_in_legend);
@@ -226,7 +219,7 @@ export class TimeseriesVisualization extends Component {
         });
       } else if (!mainDomainAdded) {
         TimeseriesVisualization.addYAxis(yAxis, {
-          tickFormatter,
+          tickFormatter: series.length === 1 ? undefined : (val) => val,
           id: yAxisIdGenerator('main'),
           groupId: mainAxisGroupId,
           position: model.axis_position,
@@ -237,19 +230,17 @@ export class TimeseriesVisualization extends Component {
       }
     });
 
-    const darkMode = getUISettings().get('theme:darkMode');
     return (
       <div className="tvbVis" style={styles.tvbVis}>
         <TimeSeries
           series={series}
           yAxis={yAxis}
           onBrush={onBrush}
-          enableHistogramMode={enableHistogramMode}
           backgroundColor={model.background_color}
-          darkMode={darkMode}
           showGrid={Boolean(model.show_grid)}
           legend={Boolean(model.show_legend)}
           legendPosition={model.legend_position}
+          tooltipMode={model.tooltip_mode}
           xAxisLabel={getAxisLabelString(interval)}
           xAxisFormatter={this.xAxisFormatter(interval)}
           annotations={this.prepareAnnotations()}

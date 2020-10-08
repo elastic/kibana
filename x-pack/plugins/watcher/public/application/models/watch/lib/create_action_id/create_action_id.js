@@ -5,7 +5,7 @@
  */
 
 export function createActionId(actions, type) {
-  const existingIds = actions.map(action => action.id);
+  const existingIds = actions.map((action) => action.id);
 
   let nextValidIncrement = 1;
   let nextValidId = undefined;

@@ -24,6 +24,8 @@ import {
   HttpStart,
   PluginInitializerContext,
   SavedObjectsClientContract,
+  SavedObjectsBatchResponse,
+  ApplicationStart,
 } from '../../../core/public';
 
 import { TelemetrySender, TelemetryService, TelemetryNotifications } from './services';
@@ -37,6 +39,7 @@ import {
   getTelemetrySendUsageFrom,
 } from '../common/telemetry_config';
 import { getNotifyUserAboutOptInDefault } from '../common/telemetry_config/get_telemetry_notify_user_about_optin_default';
+import { PRIVACY_STATEMENT_URL } from '../common/constants';
 
 export interface TelemetryPluginSetup {
   telemetryService: TelemetryService;
@@ -45,6 +48,9 @@ export interface TelemetryPluginSetup {
 export interface TelemetryPluginStart {
   telemetryService: TelemetryService;
   telemetryNotifications: TelemetryNotifications;
+  telemetryConstants: {
+    getPrivacyStatementUrl: () => string;
+  };
 }
 
 export interface TelemetryPluginConfig {
@@ -56,6 +62,7 @@ export interface TelemetryPluginConfig {
   optInStatusUrl: string;
   sendUsageFrom: 'browser' | 'server';
   telemetryNotifyUserAboutOptInDefault?: boolean;
+  userCanChangeSettings?: boolean;
 }
 
 export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPluginStart> {
@@ -64,6 +71,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   private telemetrySender?: TelemetrySender;
   private telemetryNotifications?: TelemetryNotifications;
   private telemetryService?: TelemetryService;
+  private canUserChangeSettings: boolean = true;
 
   constructor(initializerContext: PluginInitializerContext<TelemetryPluginConfig>) {
     this.currentKibanaVersion = initializerContext.env.packageInfo.version;
@@ -85,6 +93,9 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     if (!this.telemetryService) {
       throw Error('Telemetry plugin failed to initialize properly.');
     }
+
+    this.canUserChangeSettings = this.getCanUserChangeSettings(application);
+    this.telemetryService.userCanChangeSettings = this.canUserChangeSettings;
 
     this.telemetryNotifications = new TelemetryNotifications({
       overlays,
@@ -114,7 +125,21 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     return {
       telemetryService: this.telemetryService,
       telemetryNotifications: this.telemetryNotifications,
+      telemetryConstants: {
+        getPrivacyStatementUrl: () => PRIVACY_STATEMENT_URL,
+      },
     };
+  }
+
+  /**
+   * Can the user edit the saved objects?
+   * This is a security feature, not included in the OSS build, so we need to fallback to `true`
+   * in case it is `undefined`.
+   * @param application CoreStart.application
+   * @private
+   */
+  private getCanUserChangeSettings(application: ApplicationStart): boolean {
+    return (application.capabilities?.savedObjectsManagement?.edit as boolean | undefined) ?? true;
   }
 
   private getIsUnauthenticated(http: HttpStart) {
@@ -188,15 +213,21 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       optIn,
       sendUsageFrom,
       telemetryNotifyUserAboutOptInDefault,
+      userCanChangeSettings: this.canUserChangeSettings,
     };
   }
 
   private async getTelemetrySavedObject(savedObjectsClient: SavedObjectsClientContract) {
     try {
-      const { attributes } = await savedObjectsClient.get<TelemetrySavedObjectAttributes>(
-        'telemetry',
-        'telemetry'
-      );
+      // Use bulk get API here to avoid the queue. This could fail independent requests if we don't have rights to access the telemetry object otherwise
+      const {
+        savedObjects: [{ attributes }],
+      } = (await savedObjectsClient.bulkGet([
+        {
+          id: 'telemetry',
+          type: 'telemetry',
+        },
+      ])) as SavedObjectsBatchResponse<TelemetrySavedObjectAttributes>;
       return attributes;
     } catch (error) {
       const errorCode = error[Symbol('SavedObjectsClientErrorCode')];

@@ -1,0 +1,52 @@
+[role="xpack"]
+[[drilldowns]]
+== Use drilldowns for dashboard actions
+
+Drilldowns, also known as custom actions, allow you to configure a
+workflow for analyzing and troubleshooting your data.
+For example, using a drilldown, you can navigate from one dashboard to another,
+taking the current time range, filters, and other parameters with you,
+so the context remains the same. You can continue your analysis from a new perspective.
+
+[role="screenshot"]
+image::images/drilldown_on_piechart.gif[Drilldown on pie chart that navigates to another dashboard]
+
+Drilldowns are specific to the dashboard panel for which you create them—they are not shared across panels. A panel can have multiple drilldowns.
+
+[float]
+[[actions]]
+=== Drilldown actions
+
+Drilldowns are user-configurable {kib} actions that are stored with the dashboard metadata.
+Kibana provides the following types of actions:
+
+[cols="2"]
+|===
+
+a| <<dashboard-drilldown, Dashboard drilldown>>
+
+| Navigate to a dashboard.
+
+a| <<url-drilldown, URL drilldown>>
+
+| Navigate to external or internal URL.
+
+|===
+
+[NOTE]
+==============================================
+Some action types are paid commercial features, while others are free.
+For a comparison of the Elastic subscription levels,
+see https://www.elastic.co/subscriptions[the subscription page].
+==============================================
+
+[float]
+[[code-drilldowns]]
+=== Code drilldowns
+Third-party developers can create drilldowns.
+Refer to {kib-repo}blob/{branch}/x-pack/examples/ui_actions_enhanced_examples[this example plugin]
+to learn how to code drilldowns.
+
+include::dashboard-drilldown.asciidoc[]
+include::url-drilldown.asciidoc[]
+

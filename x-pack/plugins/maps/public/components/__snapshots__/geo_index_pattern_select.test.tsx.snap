@@ -1,0 +1,104 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should render 1`] = `
+<Fragment>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Index pattern"
+    labelType="label"
+  >
+    <MockIndexPatternSelect
+      fieldTypes={
+        Array [
+          "geo_point",
+          "geo_shape",
+        ]
+      }
+      indexPatternId="indexPatternId"
+      isClearable={false}
+      isDisabled={false}
+      onChange={[Function]}
+      onNoIndexPatterns={[Function]}
+      placeholder="Select index pattern"
+    />
+  </EuiFormRow>
+</Fragment>
+`;
+
+exports[`should render no index pattern warning when there are no matching index patterns 1`] = `
+<Fragment>
+  <EuiCallOut
+    color="warning"
+    title="Couldn't find any index patterns with geospatial fields"
+  >
+    <p>
+      <FormattedMessage
+        defaultMessage="You'll need to "
+        id="xpack.maps.noIndexPattern.doThisPrefixDescription"
+        values={Object {}}
+      />
+      <EuiLink
+        href="abc//app/management/kibana/indexPatterns"
+      >
+        <FormattedMessage
+          defaultMessage="create an index pattern"
+          id="xpack.maps.noIndexPattern.doThisLinkTextDescription"
+          values={Object {}}
+        />
+      </EuiLink>
+      <FormattedMessage
+        defaultMessage=" with geospatial fields."
+        id="xpack.maps.noIndexPattern.doThisSuffixDescription"
+        values={Object {}}
+      />
+    </p>
+    <p>
+      <FormattedMessage
+        defaultMessage="Don't have any geospatial data sets? "
+        id="xpack.maps.noIndexPattern.hintDescription"
+        values={Object {}}
+      />
+      <EuiLink
+        href="abc//app/home#/tutorial_directory/sampleData"
+      >
+        <FormattedMessage
+          defaultMessage="Get started with some sample data sets."
+          id="xpack.maps.noIndexPattern.getStartedLinkText"
+          values={Object {}}
+        />
+      </EuiLink>
+    </p>
+  </EuiCallOut>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Index pattern"
+    labelType="label"
+  >
+    <MockIndexPatternSelect
+      fieldTypes={
+        Array [
+          "geo_point",
+          "geo_shape",
+        ]
+      }
+      indexPatternId="indexPatternId"
+      isClearable={false}
+      isDisabled={true}
+      onChange={[Function]}
+      onNoIndexPatterns={[Function]}
+      placeholder="Select index pattern"
+    />
+  </EuiFormRow>
+</Fragment>
+`;

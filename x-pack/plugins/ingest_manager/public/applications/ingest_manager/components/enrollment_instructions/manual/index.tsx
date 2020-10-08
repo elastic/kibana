@@ -4,32 +4,90 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiText, EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import styled from 'styled-components';
+import { EuiText, EuiSpacer, EuiLink, EuiTitle, EuiCodeBlock } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EnrollmentAPIKey } from '../../../types';
 
-export const ManualInstructions: React.FunctionComponent = () => {
+interface Props {
+  kibanaUrl: string;
+  apiKey: EnrollmentAPIKey;
+  kibanaCASha256?: string;
+}
+
+// Otherwise the copy button is over the text
+const CommandCode = styled.pre({
+  overflow: 'scroll',
+});
+
+export const ManualInstructions: React.FunctionComponent<Props> = ({
+  kibanaUrl,
+  apiKey,
+  kibanaCASha256,
+}) => {
+  const enrollArgs = `--kibana-url=${kibanaUrl} --enrollment-token=${apiKey.api_key}${
+    kibanaCASha256 ? ` --ca_sha256=${kibanaCASha256}` : ''
+  }`;
+
+  const linuxMacCommand = `./elastic-agent install -f ${enrollArgs}`;
+
+  const windowsCommand = `.\\elastic-agent.exe install -f ${enrollArgs}`;
+
   return (
     <>
       <EuiText>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam vestibulum ullamcorper
-        turpis vitae interdum. Maecenas orci magna, auctor volutpat pellentesque eu, consectetur id
-        est. Nunc orci lacus, condimentum vel congue ac, fringilla eget tortor. Aliquam blandit,
-        nisi et congue euismod, leo lectus blandit risus, eu blandit erat metus sit amet leo. Nam
-        dictum lobortis condimentum.
+        <FormattedMessage
+          id="xpack.ingestManager.enrollmentInstructions.descriptionText"
+          defaultMessage="From the agent directory, run the appropriate command to install, enroll, and start an Elastic Agent. You can reuse these commands to set up agents on more than one host. Requires administrator privileges."
+        />
       </EuiText>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
+      <EuiTitle size="xs">
+        <h4>
+          <FormattedMessage
+            id="xpack.ingestManager.enrollmentInstructions.linuxMacOSTitle"
+            defaultMessage="Linux, macOS"
+          />
+        </h4>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
+        <CommandCode>{linuxMacCommand}</CommandCode>
+      </EuiCodeBlock>
+      <EuiSpacer size="l" />
+      <EuiTitle size="xs">
+        <h4>
+          <FormattedMessage
+            id="xpack.ingestManager.enrollmentInstructions.windowsTitle"
+            defaultMessage="Windows"
+          />
+        </h4>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
+        <CommandCode>{windowsCommand}</CommandCode>
+      </EuiCodeBlock>
+      <EuiSpacer size="l" />
       <EuiText>
-        Vivamus sem sapien, dictum eu tellus vel, rutrum aliquam purus. Cras quis cursus nibh.
-        Aliquam fermentum ipsum nec turpis luctus lobortis. Nulla facilisi. Etiam nec fringilla
-        urna, sed vehicula ipsum. Quisque vel pellentesque lorem, at egestas enim. Nunc semper elit
-        lectus, in sollicitudin erat fermentum in. Pellentesque tempus massa eget purus pharetra
-        blandit.
-      </EuiText>
-      <EuiSpacer size="m" />
-      <EuiText>
-        Mauris congue enim nulla, nec semper est posuere non. Donec et eros eu nisi gravida
-        malesuada eget in velit. Morbi placerat semper euismod. Suspendisse potenti. Morbi quis
-        porta erat, quis cursus nulla. Aenean mauris lorem, mollis in mattis et, lobortis a lectus.
+        <FormattedMessage
+          id="xpack.ingestManager.enrollmentInstructions.moreInstructionsText"
+          defaultMessage="See the {link} for more instructions and options."
+          values={{
+            link: (
+              <EuiLink
+                target="_blank"
+                external
+                href="https://www.elastic.co/guide/en/ingest-management/current/elastic-agent-installation-configuration.html"
+              >
+                <FormattedMessage
+                  id="xpack.ingestManager.enrollmentInstructions.moreInstructionsLink"
+                  defaultMessage="Elastic Agent docs"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
       </EuiText>
     </>
   );

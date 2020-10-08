@@ -21,7 +21,7 @@ import { FakeRequest, RequestHandlerContext } from 'kibana/server';
 import _ from 'lodash';
 import { first, map } from 'rxjs/operators';
 import { getPanelData } from './vis_data/get_panel_data';
-import { Framework } from '../index';
+import { Framework } from '../plugin';
 import { ReqFacade } from './search_strategies/strategies/abstract_search_strategy';
 
 interface GetVisDataResponse {
@@ -65,39 +65,24 @@ export function getVisData(
   // level object passed from here. The layers should be refactored fully at some point, but for now
   // this works and we are still using the New Platform services for these vis data portions.
   const reqFacade: ReqFacade = {
+    requestContext,
     ...request,
     framework,
     pre: {},
     payload: request.body,
     getUiSettingsService: () => requestContext.core.uiSettings.client,
     getSavedObjectsClient: () => requestContext.core.savedObjects.client,
-    server: {
-      plugins: {
-        elasticsearch: {
-          getCluster: () => {
-            return {
-              callWithRequest: async (req: any, endpoint: string, params: any) => {
-                return await requestContext.core.elasticsearch.dataClient.callAsCurrentUser(
-                  endpoint,
-                  params
-                );
-              },
-            };
-          },
-        },
-      },
-    },
     getEsShardTimeout: async () => {
       return await framework.globalConfig$
         .pipe(
           first(),
-          map(config => config.elasticsearch.shardTimeout.asMilliseconds())
+          map((config) => config.elasticsearch.shardTimeout.asMilliseconds())
         )
         .toPromise();
     },
   };
   const promises = (reqFacade.payload as GetVisDataOptions).panels.map(getPanelData(reqFacade));
-  return Promise.all(promises).then(res => {
+  return Promise.all(promises).then((res) => {
     return res.reduce((acc, data) => {
       return _.assign(acc as any, data);
     }, {});

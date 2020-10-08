@@ -127,7 +127,7 @@ export class VisualRuleEditor extends Component<Props, {}> {
           rule={rule as RuleGroup}
           ruleDepth={0}
           allowAdd={this.canUseVisualEditor()}
-          onChange={value => onChange(value)}
+          onChange={(value) => onChange(value)}
           onDelete={this.onRuleDelete}
         />
       );
@@ -135,7 +135,7 @@ export class VisualRuleEditor extends Component<Props, {}> {
     return (
       <FieldRuleEditor
         rule={rule as FieldRule}
-        onChange={value => onChange(value)}
+        onChange={(value) => onChange(value)}
         onDelete={this.onRuleDelete}
       />
     );

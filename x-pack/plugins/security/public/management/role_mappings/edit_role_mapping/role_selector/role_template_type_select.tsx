@@ -53,7 +53,7 @@ export const RoleTemplateTypeSelect = (props: Props) => {
       singleSelection={{ asPlainText: true }}
       selectedOptions={selectedOptions}
       data-test-subj="roleMappingsFormTemplateType"
-      onChange={selected => {
+      onChange={(selected) => {
         const [{ id }] = selected;
         if (id === 'inline') {
           props.onChange({

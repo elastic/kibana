@@ -7,13 +7,13 @@
 // @ts-ignore
 import fetchMock from 'fetch-mock/es5/client';
 import { SessionTimeoutHttpInterceptor } from './session_timeout_http_interceptor';
-import { setup } from '../../../../../src/test_utils/public/http_test_setup';
+import { setup } from '../../../../../src/core/test_helpers/http_test_setup';
 import { createSessionTimeoutMock } from './session_timeout.mock';
 
 const mockCurrentUrl = (url: string) => window.history.pushState({}, '', url);
 
 const setupHttp = (basePath: string) => {
-  const { http } = setup(injectedMetadata => {
+  const { http } = setup((injectedMetadata) => {
     injectedMetadata.getBasePath.mockReturnValue(basePath);
   });
   return http;

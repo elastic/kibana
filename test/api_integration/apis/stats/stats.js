@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-const assertStatsAndMetrics = body => {
+const assertStatsAndMetrics = (body) => {
   expect(body.kibana.name).to.be.a('string');
   expect(body.kibana.uuid).to.be.a('string');
   expect(body.kibana.host).to.be.a('string');
@@ -53,9 +53,14 @@ const assertStatsAndMetrics = body => {
   expect(body.concurrent_connections).to.be.a('number');
 };
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
+  const esArchiver = getService('esArchiver');
+
   describe('kibana stats api', () => {
+    before('make sure there are some saved objects', () => esArchiver.load('saved_objects/basic'));
+    after('cleanup saved objects changes', () => esArchiver.unload('saved_objects/basic'));
+
     describe('basic', () => {
       it('should return the stats without cluster_uuid with no query string params', () => {
         return supertest

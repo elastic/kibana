@@ -17,7 +17,7 @@
  * under the License.
  */
 
-require('../src/setup_node_env');
+require('../src/setup_node_env/no_transpilation');
 
 var resolve = require('path').resolve;
 var pkg = require('../package.json');
@@ -32,7 +32,7 @@ kbnEs
     'base-path': resolve(__dirname, '../.es'),
     ssl: false,
   })
-  .catch(function(e) {
+  .catch(function (e) {
     console.error(e);
     process.exitCode = 1;
   });

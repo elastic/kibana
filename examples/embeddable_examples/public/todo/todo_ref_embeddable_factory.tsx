@@ -24,6 +24,7 @@ import {
   EmbeddableStart,
   ErrorEmbeddable,
   EmbeddableFactoryDefinition,
+  EmbeddableFactory,
 } from '../../../../src/plugins/embeddable/public';
 import {
   TodoRefEmbeddable,
@@ -37,7 +38,14 @@ interface StartServices {
   savedObjectsClient: SavedObjectsClientContract;
 }
 
-export class TodoRefEmbeddableFactory
+export type TodoRefEmbeddableFactory = EmbeddableFactory<
+  TodoRefInput,
+  TodoRefOutput,
+  TodoRefEmbeddable,
+  TodoSavedObjectAttributes
+>;
+
+export class TodoRefEmbeddableFactoryDefinition
   implements
     EmbeddableFactoryDefinition<
       TodoRefInput,

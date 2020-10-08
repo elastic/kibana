@@ -7,8 +7,8 @@
 import { transactionGroupsFetcher } from './fetcher';
 import {
   SearchParamsMock,
-  inspectSearchParams
-} from '../../../../../legacy/plugins/apm/public/utils/testHelpers';
+  inspectSearchParams,
+} from '../../utils/test_helpers';
 
 describe('transaction group queries', () => {
   let mock: SearchParamsMock;
@@ -18,30 +18,40 @@ describe('transaction group queries', () => {
   });
 
   it('fetches top transactions', async () => {
-    mock = await inspectSearchParams(setup =>
+    const bucketSize = 100;
+    mock = await inspectSearchParams((setup) =>
       transactionGroupsFetcher(
         {
           type: 'top_transactions',
           serviceName: 'foo',
-          transactionType: 'bar'
+          transactionType: 'bar',
+          searchAggregatedTransactions: false,
         },
-        setup
+        setup,
+        bucketSize
       )
     );
 
-    expect(mock.params).toMatchSnapshot();
+    const allParams = mock.spy.mock.calls.map((call) => call[0]);
+
+    expect(allParams).toMatchSnapshot();
   });
 
   it('fetches top traces', async () => {
-    mock = await inspectSearchParams(setup =>
+    const bucketSize = 100;
+    mock = await inspectSearchParams((setup) =>
       transactionGroupsFetcher(
         {
-          type: 'top_traces'
+          type: 'top_traces',
+          searchAggregatedTransactions: false,
         },
-        setup
+        setup,
+        bucketSize
       )
     );
 
-    expect(mock.params).toMatchSnapshot();
+    const allParams = mock.spy.mock.calls.map((call) => call[0]);
+
+    expect(allParams).toMatchSnapshot();
   });
 });

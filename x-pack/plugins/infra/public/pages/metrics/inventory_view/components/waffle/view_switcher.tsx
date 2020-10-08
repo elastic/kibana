@@ -28,7 +28,7 @@ export const ViewSwitcher = ({ view, onChange }: Props) => {
       label: i18n.translate('xpack.infra.viewSwitcher.tableViewLabel', {
         defaultMessage: 'Table view',
       }),
-      iconType: 'editorUnorderedList',
+      iconType: 'visTable',
     },
   ];
   return (
@@ -37,9 +37,11 @@ export const ViewSwitcher = ({ view, onChange }: Props) => {
         defaultMessage: 'Switch between table and map view',
       })}
       options={buttons}
-      color="primary"
+      color="text"
+      buttonSize="m"
       idSelected={view}
       onChange={onChange}
+      isIconOnly
     />
   );
 };

@@ -28,15 +28,18 @@ const NEW_ATTRIBUTE_KEY = 'title'; // all type mappings include this attribute, 
 const NEW_ATTRIBUTE_VAL = `Updated attribute value ${Date.now()}`;
 
 const DOES_NOT_EXIST = Object.freeze({ type: 'dashboard', id: 'does-not-exist' });
-export const TEST_CASES = Object.freeze({ ...CASES, DOES_NOT_EXIST });
+export const TEST_CASES: Record<string, UpdateTestCase> = Object.freeze({
+  ...CASES,
+  DOES_NOT_EXIST,
+});
 
 export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const expectForbidden = expectResponses.forbidden('update');
+  const expectSavedObjectForbidden = expectResponses.forbiddenTypes('update');
   const expectResponseBody = (testCase: UpdateTestCase): ExpectResponseBody => async (
     response: Record<string, any>
   ) => {
     if (testCase.failure === 403) {
-      await expectForbidden(testCase.type)(response);
+      await expectSavedObjectForbidden(testCase.type)(response);
     } else {
       // permitted
       const object = response.body;
@@ -56,9 +59,9 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     let cases = Array.isArray(testCases) ? testCases : [testCases];
     if (forbidden) {
       // override the expected result in each test case
-      cases = cases.map(x => ({ ...x, failure: 403 }));
+      cases = cases.map((x) => ({ ...x, failure: 403 }));
     }
-    return cases.map(x => ({
+    return cases.map((x) => ({
       title: getTestTitle(x),
       responseStatusCode: x.failure ?? 200,
       request: createRequest(x),

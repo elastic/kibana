@@ -18,15 +18,16 @@ interface LinkToPageProps {
   };
 }
 
-const ITEM_TYPES = inventoryModels.map(m => m.id).join('|');
+const ITEM_TYPES = inventoryModels.map((m) => m.id).join('|');
 
-export const LinkToLogsPage: React.FC<LinkToPageProps> = props => {
+export const LinkToLogsPage: React.FC<LinkToPageProps> = (props) => {
   return (
     <Switch>
       <Route
         path={`${props.match.url}/:sourceId?/:nodeType(${ITEM_TYPES})-logs/:nodeId`}
         component={RedirectToNodeLogs}
       />
+      <Route path={`${props.match.url}/:sourceId?/logs`} component={RedirectToLogs} />
       <Route path={`${props.match.url}/:sourceId?`} component={RedirectToLogs} />
       <Redirect to="/" />
     </Switch>

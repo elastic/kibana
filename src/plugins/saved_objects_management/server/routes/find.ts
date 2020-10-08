@@ -58,12 +58,12 @@ export const registerFindRoute = (
       const includedFields = Array.isArray(req.query.fields)
         ? req.query.fields
         : [req.query.fields];
-      const importAndExportableTypes = searchTypes.filter(type =>
+      const importAndExportableTypes = searchTypes.filter((type) =>
         managementService.isImportAndExportable(type)
       );
 
       const searchFields = new Set<string>();
-      importAndExportableTypes.forEach(type => {
+      importAndExportableTypes.forEach((type) => {
         const searchField = managementService.getDefaultSearchField(type);
         if (searchField) {
           searchFields.add(searchField);
@@ -77,8 +77,8 @@ export const registerFindRoute = (
       });
 
       const enhancedSavedObjects = findResponse.saved_objects
-        .map(so => injectMetaAttributes(so, managementService))
-        .map(obj => {
+        .map((so) => injectMetaAttributes(so, managementService))
+        .map((obj) => {
           const result = { ...obj, attributes: {} as Record<string, any> };
           for (const field of includedFields) {
             result.attributes[field] = obj.attributes[field];

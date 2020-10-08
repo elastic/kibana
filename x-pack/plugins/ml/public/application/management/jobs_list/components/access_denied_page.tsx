@@ -23,7 +23,7 @@ import {
 
 export const AccessDeniedPage = () => (
   <Fragment>
-    <EuiPage>
+    <EuiPage data-test-subj="mlPageAccessDenied">
       <EuiPageBody>
         <EuiPageContentHeader>
           <EuiPageContentHeaderSection>

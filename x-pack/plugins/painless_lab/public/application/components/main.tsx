@@ -21,10 +21,7 @@ export const Main: React.FunctionComponent = () => {
   const {
     store: { payload, validation },
     updatePayload,
-    services: {
-      http,
-      chrome: { getIsNavDrawerLocked$ },
-    },
+    services: { http },
     links,
   } = useAppContext();
 
@@ -42,16 +39,6 @@ export const Main: React.FunctionComponent = () => {
     setRequestFlyoutOpen(!isRequestFlyoutOpen);
   };
 
-  const [isNavDrawerLocked, setIsNavDrawerLocked] = useState(false);
-
-  useEffect(() => {
-    const subscription = getIsNavDrawerLocked$().subscribe((newIsNavDrawerLocked: boolean) => {
-      setIsNavDrawerLocked(newIsNavDrawerLocked);
-    });
-
-    return () => subscription.unsubscribe();
-  });
-
   return (
     <div className="painlessLabMainContainer">
       <EuiFlexGroup className="painlessLabPanelsContainer" responsive={false} gutterSize="none">
@@ -64,7 +51,7 @@ export const Main: React.FunctionComponent = () => {
             </h1>
           </EuiTitle>
 
-          <Editor code={payload.code} onChange={nextCode => updatePayload({ code: nextCode })} />
+          <Editor code={payload.code} onChange={(nextCode) => updatePayload({ code: nextCode })} />
         </EuiFlexItem>
 
         <EuiFlexItem>
@@ -77,7 +64,6 @@ export const Main: React.FunctionComponent = () => {
         isLoading={inProgress}
         toggleRequestFlyout={toggleRequestFlyout}
         isRequestFlyoutOpen={isRequestFlyoutOpen}
-        isNavDrawerLocked={isNavDrawerLocked}
         reset={() => updatePayload({ code: exampleScript })}
       />
 

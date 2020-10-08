@@ -1,0 +1,103 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Node Listing Metric Cell should format N/A as the metric for an offline node 1`] = `
+<div
+  class="monTableCell__number monTableCell__offline"
+>
+  N/A
+</div>
+`;
+
+exports[`Node Listing Metric Cell should format a non-percentage metric 1`] = `
+<div
+  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+>
+  <div
+    class="euiFlexItem euiFlexItem--flexGrowZero"
+  />
+  <div
+    class="euiFlexItem euiFlexItem--flexGrowZero"
+  >
+    <div
+      class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+      data-test-subj="testCell2"
+    >
+      <div
+        class="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <div
+          class="euiPopover euiPopover--anchorDownCenter"
+        >
+          <div
+            class="euiPopover__anchor"
+          >
+            <div
+              data-euiicon-type="arrowDown"
+              data-test-subj="monitoringCellIcon-testCell2"
+              role="button"
+              tabindex="0"
+              title="More information about this metric"
+            />
+          </div>
+        </div>
+      </div>
+      <div
+        class="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <div
+          class="euiText euiText--medium"
+        >
+          206.3 GB
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Node Listing Metric Cell should format a percentage metric 1`] = `
+<div
+  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+>
+  <div
+    class="euiFlexItem euiFlexItem--flexGrowZero"
+  />
+  <div
+    class="euiFlexItem euiFlexItem--flexGrowZero"
+  >
+    <div
+      class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+      data-test-subj="testCell"
+    >
+      <div
+        class="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <div
+          class="euiPopover euiPopover--anchorDownCenter"
+        >
+          <div
+            class="euiPopover__anchor"
+          >
+            <div
+              data-euiicon-type="arrowDown"
+              data-test-subj="monitoringCellIcon-testCell"
+              role="button"
+              tabindex="0"
+              title="More information about this metric"
+            />
+          </div>
+        </div>
+      </div>
+      <div
+        class="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <div
+          class="euiText euiText--medium"
+        >
+          0%
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

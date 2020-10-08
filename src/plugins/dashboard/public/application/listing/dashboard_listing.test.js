@@ -20,9 +20,9 @@
 jest.mock(
   'lodash',
   () => ({
-    ...require.requireActual('lodash'),
+    ...jest.requireActual('lodash'),
     // mock debounce to fire immediately with no internal timer
-    debounce: func => {
+    debounce: (func) => {
       function debounced(...args) {
         return func.apply(this, args);
       }
@@ -37,7 +37,7 @@ import { shallow } from 'enzyme';
 
 import { DashboardListing } from './dashboard_listing';
 
-const find = num => {
+const find = (num) => {
   const hits = [];
   for (let i = 0; i < num; i++) {
     hits.push({
@@ -79,13 +79,14 @@ describe('after fetch', () => {
         getViewUrl={() => {}}
         listingLimit={1000}
         hideWriteControls={false}
+        initialPageSize={10}
         initialFilter="my dashboard"
         core={{ notifications: { toasts: {} }, uiSettings: { get: jest.fn(() => 10) } }}
       />
     );
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -101,13 +102,14 @@ describe('after fetch', () => {
         editItem={() => {}}
         getViewUrl={() => {}}
         listingLimit={1000}
+        initialPageSize={10}
         hideWriteControls={false}
         core={{ notifications: { toasts: {} }, uiSettings: { get: jest.fn(() => 10) } }}
       />
     );
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -123,13 +125,14 @@ describe('after fetch', () => {
         editItem={() => {}}
         getViewUrl={() => {}}
         listingLimit={1}
+        initialPageSize={10}
         hideWriteControls={false}
         core={{ notifications: { toasts: {} }, uiSettings: { get: jest.fn(() => 10) } }}
       />
     );
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -145,13 +148,14 @@ describe('after fetch', () => {
         editItem={() => {}}
         getViewUrl={() => {}}
         listingLimit={1}
+        initialPageSize={10}
         hideWriteControls={true}
         core={{ notifications: { toasts: {} }, uiSettings: { get: jest.fn(() => 10) } }}
       />
     );
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -167,13 +171,14 @@ describe('after fetch', () => {
         editItem={() => {}}
         getViewUrl={() => {}}
         listingLimit={1}
+        initialPageSize={10}
         hideWriteControls={false}
         core={{ notifications: { toasts: {} }, uiSettings: { get: jest.fn(() => 10) } }}
       />
     );
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 

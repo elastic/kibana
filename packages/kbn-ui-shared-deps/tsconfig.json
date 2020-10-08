@@ -1,7 +1,10 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "../../build/tsbuildinfo/packages/kbn-ui-shared-deps"
+  },
   "include": [
     "index.d.ts",
-    "monaco.ts"
+    "theme.ts"
   ]
 }

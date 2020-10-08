@@ -1,0 +1,234 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LocationAvailability component doesnt shows warning if geo is provided 1`] = `
+<EuiErrorBoundary>
+  <EuiFlexGroup
+    gutterSize="none"
+    responsive={false}
+    style={
+      Object {
+        "flexGrow": 0,
+      }
+    }
+  >
+    <EuiFlexItem />
+    <EuiFlexItem
+      grow={false}
+    >
+      <ToggleViewBtn
+        onChange={[Function]}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    gutterSize="none"
+    justifyContent="flexEnd"
+    wrap={true}
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <LocationMap
+        downPoints={Array []}
+        upPoints={
+          Array [
+            Object {
+              "location": Object {
+                "lat": "40.730610",
+                "lon": " -73.935242",
+              },
+              "name": "New York",
+            },
+            Object {
+              "location": Object {
+                "lat": "52.487448",
+                "lon": " 13.394798",
+              },
+              "name": "Tokyo",
+            },
+          ]
+        }
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</EuiErrorBoundary>
+`;
+
+exports[`LocationAvailability component renders correctly against snapshot 1`] = `
+<EuiErrorBoundary>
+  <EuiFlexGroup
+    gutterSize="none"
+    responsive={false}
+    style={
+      Object {
+        "flexGrow": 0,
+      }
+    }
+  >
+    <EuiFlexItem>
+      <EuiTitle
+        size="s"
+      >
+        <h3>
+          Monitoring from
+        </h3>
+      </EuiTitle>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <ToggleViewBtn
+        onChange={[Function]}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    gutterSize="none"
+    justifyContent="flexEnd"
+    wrap={true}
+  >
+    <Styled(EuiFlexItem)
+      grow={true}
+    >
+      <LocationStatusTags
+        locations={
+          Array [
+            Object {
+              "down_history": 0,
+              "geo": Object {
+                "location": Object {
+                  "lat": "40.730610",
+                  "lon": " -73.935242",
+                },
+                "name": "New York",
+              },
+              "summary": Object {
+                "down": 0,
+                "up": 4,
+              },
+              "timestamp": "2020-01-13T22:50:06.536Z",
+              "up_history": 4,
+            },
+            Object {
+              "down_history": 0,
+              "geo": Object {
+                "location": Object {
+                  "lat": "52.487448",
+                  "lon": " 13.394798",
+                },
+                "name": "Tokyo",
+              },
+              "summary": Object {
+                "down": 0,
+                "up": 4,
+              },
+              "timestamp": "2020-01-13T22:50:04.354Z",
+              "up_history": 4,
+            },
+            Object {
+              "down_history": 0,
+              "geo": Object {
+                "name": "Unnamed-location",
+              },
+              "summary": Object {
+                "down": 0,
+                "up": 4,
+              },
+              "timestamp": "2020-01-13T22:50:02.753Z",
+              "up_history": 4,
+            },
+          ]
+        }
+      />
+    </Styled(EuiFlexItem)>
+  </EuiFlexGroup>
+</EuiErrorBoundary>
+`;
+
+exports[`LocationAvailability component renders named locations that have missing geo data 1`] = `
+<EuiErrorBoundary>
+  <EuiFlexGroup
+    gutterSize="none"
+    responsive={false}
+    style={
+      Object {
+        "flexGrow": 0,
+      }
+    }
+  >
+    <EuiFlexItem>
+      <LocationMissingWarning />
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <ToggleViewBtn
+        onChange={[Function]}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    gutterSize="none"
+    justifyContent="flexEnd"
+    wrap={true}
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <LocationMap
+        downPoints={Array []}
+        upPoints={Array []}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</EuiErrorBoundary>
+`;
+
+exports[`LocationAvailability component shows warning if geo information is missing 1`] = `
+<EuiErrorBoundary>
+  <EuiFlexGroup
+    gutterSize="none"
+    responsive={false}
+    style={
+      Object {
+        "flexGrow": 0,
+      }
+    }
+  >
+    <EuiFlexItem>
+      <LocationMissingWarning />
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <ToggleViewBtn
+        onChange={[Function]}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    gutterSize="none"
+    justifyContent="flexEnd"
+    wrap={true}
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <LocationMap
+        downPoints={Array []}
+        upPoints={
+          Array [
+            Object {
+              "location": Object {
+                "lat": "52.487448",
+                "lon": " 13.394798",
+              },
+              "name": "Tokyo",
+            },
+          ]
+        }
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</EuiErrorBoundary>
+`;

@@ -6,43 +6,23 @@
 
 import Boom from 'boom';
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient, SavedObject, RequestHandlerContext } from 'src/core/server';
+import { ILegacyScopedClusterClient, SavedObject, RequestHandlerContext } from 'src/core/server';
 import { CoreSetup } from 'src/core/server';
 import { BASE_API_URL } from '../../common';
-import {
-  IndexPatternsFetcher,
-  IndexPatternAttributes,
-} from '../../../../../src/plugins/data/server';
+import { IndexPatternAttributes, UI_SETTINGS } from '../../../../../src/plugins/data/server';
 
 /**
  * The number of docs to sample to determine field empty status.
  */
 const SAMPLE_SIZE = 500;
 
-interface MappingResult {
-  [indexPatternTitle: string]: {
-    mappings: {
-      properties: Record<string, { type: string; path: string }>;
-    };
-  };
-}
-
-interface FieldDescriptor {
-  name: string;
-  subType?: { multi?: { parent?: string } };
-}
-
 export interface Field {
   name: string;
   isScript: boolean;
-  isAlias: boolean;
-  path: string[];
+  isMeta: boolean;
   lang?: string;
   script?: string;
 }
-
-// TODO: Pull this from kibana advanced settings
-const metaFields = ['_source', '_id', '_type', '_index', '_score'];
 
 export async function existingFieldsRoute(setup: CoreSetup) {
   const router = setup.http.createRouter();
@@ -105,19 +85,18 @@ async function fetchFieldExistence({
   toDate?: string;
   timeFieldName?: string;
 }) {
-  const {
-    indexPattern,
-    indexPatternTitle,
-    mappings,
-    fieldDescriptors,
-  } = await fetchIndexPatternDefinition(indexPatternId, context);
+  const metaFields: string[] = await context.core.uiSettings.client.get(UI_SETTINGS.META_FIELDS);
+  const { indexPattern, indexPatternTitle } = await fetchIndexPatternDefinition(
+    indexPatternId,
+    context
+  );
 
-  const fields = buildFieldList(indexPattern, mappings, fieldDescriptors);
+  const fields = buildFieldList(indexPattern, metaFields);
   const docs = await fetchIndexPatternStats({
     fromDate,
     toDate,
     dslQuery,
-    client: context.core.elasticsearch.dataClient,
+    client: context.core.elasticsearch.legacy.client,
     index: indexPatternTitle,
     timeFieldName: timeFieldName || indexPattern.attributes.timeFieldName,
     fields,
@@ -131,33 +110,15 @@ async function fetchFieldExistence({
 
 async function fetchIndexPatternDefinition(indexPatternId: string, context: RequestHandlerContext) {
   const savedObjectsClient = context.core.savedObjects.client;
-  const requestClient = context.core.elasticsearch.dataClient;
   const indexPattern = await savedObjectsClient.get<IndexPatternAttributes>(
     'index-pattern',
     indexPatternId
   );
   const indexPatternTitle = indexPattern.attributes.title;
-  // TODO: maybe don't use IndexPatternsFetcher at all, since we're only using it
-  // to look up field values in the resulting documents. We can accomplish the same
-  // using the mappings which we're also fetching here.
-  const indexPatternsFetcher = new IndexPatternsFetcher(requestClient.callAsCurrentUser);
-  const [mappings, fieldDescriptors] = await Promise.all([
-    requestClient.callAsCurrentUser('indices.getMapping', {
-      index: indexPatternTitle,
-    }),
-
-    indexPatternsFetcher.getFieldsForWildcard({
-      pattern: indexPatternTitle,
-      // TODO: Pull this from kibana advanced settings
-      metaFields,
-    }),
-  ]);
 
   return {
     indexPattern,
     indexPatternTitle,
-    mappings,
-    fieldDescriptors,
   };
 }
 
@@ -166,33 +127,18 @@ async function fetchIndexPatternDefinition(indexPatternId: string, context: Requ
  */
 export function buildFieldList(
   indexPattern: SavedObject<IndexPatternAttributes>,
-  mappings: MappingResult,
-  fieldDescriptors: FieldDescriptor[]
+  metaFields: string[]
 ): Field[] {
-  const aliasMap = Object.entries(Object.values(mappings)[0].mappings.properties)
-    .map(([name, v]) => ({ ...v, name }))
-    .filter(f => f.type === 'alias')
-    .reduce((acc, f) => {
-      acc[f.name] = f.path;
-      return acc;
-    }, {} as Record<string, string>);
-
-  const descriptorMap = fieldDescriptors.reduce((acc, f) => {
-    acc[f.name] = f;
-    return acc;
-  }, {} as Record<string, FieldDescriptor>);
-
   return JSON.parse(indexPattern.attributes.fields).map(
     (field: { name: string; lang: string; scripted?: boolean; script?: string }) => {
-      const path =
-        aliasMap[field.name] || descriptorMap[field.name]?.subType?.multi?.parent || field.name;
       return {
         name: field.name,
         isScript: !!field.scripted,
-        isAlias: !!aliasMap[field.name],
-        path: path.split('.'),
         lang: field.lang,
         script: field.script,
+        // id is a special case - it doesn't show up in the meta field list,
+        // but as it's not part of source, it has to be handled separately.
+        isMeta: metaFields.includes(field.name) || field.name === '_id',
       };
     }
   );
@@ -207,7 +153,7 @@ async function fetchIndexPatternStats({
   toDate,
   fields,
 }: {
-  client: IScopedClusterClient;
+  client: ILegacyScopedClusterClient;
   index: string;
   dslQuery: object;
   timeFieldName?: string;
@@ -236,14 +182,15 @@ async function fetchIndexPatternStats({
     },
   };
 
-  const scriptedFields = fields.filter(f => f.isScript);
+  const scriptedFields = fields.filter((f) => f.isScript);
   const result = await client.callAsCurrentUser('search', {
     index,
     body: {
       size: SAMPLE_SIZE,
       query,
-      // _source is required because we are also providing script fields.
-      _source: '*',
+      sort: timeFieldName && fromDate && toDate ? [{ [timeFieldName]: 'desc' }] : [],
+      fields: ['*'],
+      _source: false,
       script_fields: scriptedFields.reduce((acc, field) => {
         acc[field.name] = {
           script: {
@@ -258,49 +205,11 @@ async function fetchIndexPatternStats({
   return result.hits.hits;
 }
 
-// Recursive function to determine if the _source of a document
-// contains a known path.
-function exists(obj: unknown, path: string[], i = 0): boolean {
-  if (obj == null) {
-    return false;
-  }
-
-  if (path.length === i) {
-    return true;
-  }
-
-  if (Array.isArray(obj)) {
-    return obj.some(child => exists(child, path, i));
-  }
-
-  if (typeof obj === 'object') {
-    // Because Elasticsearch flattens paths, dots in the field name are allowed
-    // as JSON keys. For example, { 'a.b': 10 }
-    const partialKeyMatches = Object.getOwnPropertyNames(obj)
-      .map(key => key.split('.'))
-      .filter(keyPaths => keyPaths.every((key, keyIndex) => key === path[keyIndex + i]));
-
-    if (partialKeyMatches.length) {
-      return partialKeyMatches.every(keyPaths => {
-        return exists(
-          (obj as Record<string, unknown>)[keyPaths.join('.')],
-          path,
-          i + keyPaths.length
-        );
-      });
-    }
-
-    return exists((obj as Record<string, unknown>)[path[i]], path, i + 1);
-  }
-
-  return path.length === i;
-}
-
 /**
  * Exported only for unit tests.
  */
 export function existingFields(
-  docs: Array<{ _source: unknown; fields: unknown }>,
+  docs: Array<{ fields: Record<string, unknown[]>; [key: string]: unknown }>,
   fields: Field[]
 ): string[] {
   const missingFields = new Set(fields);
@@ -310,12 +219,19 @@ export function existingFields(
       break;
     }
 
-    missingFields.forEach(field => {
-      if (exists(field.isScript ? doc.fields : doc._source, field.path)) {
+    missingFields.forEach((field) => {
+      let fieldStore: Record<string, unknown> = doc.fields;
+      if (field.isMeta) {
+        fieldStore = doc;
+      }
+      const value = fieldStore[field.name];
+      if (Array.isArray(value) && value.length) {
+        missingFields.delete(field);
+      } else if (!Array.isArray(value) && value) {
         missingFields.delete(field);
       }
     });
   }
 
-  return fields.filter(field => !missingFields.has(field)).map(f => f.name);
+  return fields.filter((field) => !missingFields.has(field)).map((f) => f.name);
 }

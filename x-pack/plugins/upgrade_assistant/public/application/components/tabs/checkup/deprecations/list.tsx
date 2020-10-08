@@ -6,7 +6,8 @@
 
 import React, { FunctionComponent } from 'react';
 
-import { DeprecationInfo } from 'src/legacy/core_plugins/elasticsearch';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { DeprecationInfo } from '../../../../../../../../../src/core/server/elasticsearch/legacy/api_types';
 import { EnrichedDeprecationInfo } from '../../../../../../common/types';
 import { GroupByOption } from '../../../types';
 
@@ -92,7 +93,7 @@ export const DeprecationList: FunctionComponent<{
   if (currentGroupBy === GroupByOption.message && deprecations[0].index !== undefined) {
     // We assume that every deprecation message is the same issue (since they have the same
     // message) and that each deprecation will have an index associated with it.
-    const indices = deprecations.map(dep => ({
+    const indices = deprecations.map((dep) => ({
       index: dep.index!,
       details: dep.details,
       reindex: dep.reindex === true,
@@ -102,7 +103,7 @@ export const DeprecationList: FunctionComponent<{
   } else if (currentGroupBy === GroupByOption.index) {
     return (
       <div>
-        {deprecations.sort(sortByLevelDesc).map(dep => (
+        {deprecations.sort(sortByLevelDesc).map((dep) => (
           <MessageDeprecation deprecation={dep} key={dep.message} />
         ))}
       </div>
@@ -110,7 +111,7 @@ export const DeprecationList: FunctionComponent<{
   } else {
     return (
       <div>
-        {deprecations.sort(sortByLevelDesc).map(dep => (
+        {deprecations.sort(sortByLevelDesc).map((dep) => (
           <SimpleMessageDeprecation deprecation={dep} key={dep.message} />
         ))}
       </div>

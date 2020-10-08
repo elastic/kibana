@@ -52,9 +52,10 @@ export const DynamicMappingSection = () => (
     }
   >
     <FormDataProvider pathsToWatch={['dynamicMapping.enabled', 'dynamicMapping.date_detection']}>
-      {formData => {
+      {(formData) => {
         const {
           'dynamicMapping.enabled': enabled,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'dynamicMapping.date_detection': dateDetection,
         } = formData;
 
@@ -67,6 +68,7 @@ export const DynamicMappingSection = () => (
           return (
             <>
               <UseField
+                key="numericDetectionToggle"
                 path="dynamicMapping.numeric_detection"
                 componentProps={{ 'data-test-subj': 'numericDetection' }}
               />
@@ -87,6 +89,7 @@ export const DynamicMappingSection = () => (
         } else {
           return (
             <UseField
+              key="throwErrorsCheckBox"
               path="dynamicMapping.throwErrorsForUnmappedFields"
               component={CheckBoxField}
             />

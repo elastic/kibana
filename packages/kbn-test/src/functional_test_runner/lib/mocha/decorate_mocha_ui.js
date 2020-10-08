@@ -17,7 +17,7 @@
  * under the License.
  */
 import { relative } from 'path';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { createAssignmentProxy } from './assignment_proxy';
 import { wrapFunction } from './wrap_function';
 import { wrapRunnableArgs } from './wrap_runnable_args';
@@ -57,12 +57,12 @@ export function decorateMochaUi(lifecycle, context) {
           throw new Error(`Unexpected arguments to ${name}(${argumentsList.join(', ')})`);
         }
 
-        argumentsList[1] = function() {
+        argumentsList[1] = function () {
           before(async () => {
             await lifecycle.beforeTestSuite.trigger(this);
           });
 
-          this.tags = tags => {
+          this.tags = (tags) => {
             this._tags = [].concat(this._tags || [], tags);
           };
 

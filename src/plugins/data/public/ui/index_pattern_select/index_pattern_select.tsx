@@ -23,8 +23,8 @@ import React, { Component } from 'react';
 import { Required } from '@kbn/utility-types';
 import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
 
-import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../core/public';
-import { getTitle } from '../../index_patterns/lib';
+import { SavedObjectsClientContract, SimpleSavedObject } from 'src/core/public';
+import { getTitle } from '../../../common/index_patterns/lib';
 
 export type IndexPatternSelectProps = Required<
   Omit<EuiComboBoxProps<any>, 'isLoading' | 'onSearchChange' | 'options' | 'selectedOptions'>,
@@ -58,14 +58,9 @@ const getIndexPatterns = async (
   return resp.savedObjects;
 };
 
-// Takes in stateful runtime dependencies and pre-wires them to the component
-export function createIndexPatternSelect(savedObjectsClient: SavedObjectsClientContract) {
-  return (props: Omit<IndexPatternSelectProps, 'savedObjectsClient'>) => (
-    <IndexPatternSelect {...props} savedObjectsClient={savedObjectsClient} />
-  );
-}
-
-export class IndexPatternSelect extends Component<IndexPatternSelectProps> {
+// Needed for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default class IndexPatternSelect extends Component<IndexPatternSelectProps> {
   private isMounted: boolean = false;
   state: IndexPatternSelectState;
 
@@ -188,12 +183,12 @@ export class IndexPatternSelect extends Component<IndexPatternSelectProps> {
 
   render() {
     const {
-      fieldTypes, // eslint-disable-line no-unused-vars
-      onChange, // eslint-disable-line no-unused-vars
-      indexPatternId, // eslint-disable-line no-unused-vars
+      fieldTypes,
+      onChange,
+      indexPatternId,
       placeholder,
-      onNoIndexPatterns, // eslint-disable-line no-unused-vars
-      savedObjectsClient, // eslint-disable-line no-unused-vars
+      onNoIndexPatterns,
+      savedObjectsClient,
       ...rest
     } = this.props;
 

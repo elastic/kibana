@@ -31,7 +31,7 @@ export const rowStatus = handleActions(
     [clearRowStatus](state, action) {
       const { indexNames } = action.payload;
       const newState = { ...state };
-      indexNames.forEach(indexName => {
+      indexNames.forEach((indexName) => {
         delete newState[indexName];
       });
       return newState;
@@ -40,7 +40,7 @@ export const rowStatus = handleActions(
       const { indexNames } = action.payload;
 
       const statuses = {};
-      indexNames.forEach(indexName => {
+      indexNames.forEach((indexName) => {
         statuses[indexName] = INDEX_CLOSING;
       });
 
@@ -53,7 +53,7 @@ export const rowStatus = handleActions(
       const { indexNames } = action.payload;
 
       const statuses = {};
-      indexNames.forEach(indexName => {
+      indexNames.forEach((indexName) => {
         statuses[indexName] = INDEX_OPENING;
       });
 
@@ -66,7 +66,7 @@ export const rowStatus = handleActions(
       const { indexNames } = action.payload;
 
       const statuses = {};
-      indexNames.forEach(indexName => {
+      indexNames.forEach((indexName) => {
         statuses[indexName] = INDEX_REFRESHING;
       });
 
@@ -79,7 +79,7 @@ export const rowStatus = handleActions(
       const { indexNames } = action.payload;
 
       const statuses = {};
-      indexNames.forEach(indexName => {
+      indexNames.forEach((indexName) => {
         statuses[indexName] = INDEX_FLUSHING;
       });
 
@@ -92,7 +92,7 @@ export const rowStatus = handleActions(
       const { indexNames } = action.payload;
 
       const statuses = {};
-      indexNames.forEach(indexName => {
+      indexNames.forEach((indexName) => {
         statuses[indexName] = INDEX_FORCEMERGING;
       });
 
@@ -105,7 +105,7 @@ export const rowStatus = handleActions(
       const { indexNames } = action.payload;
 
       const statuses = {};
-      indexNames.forEach(indexName => {
+      indexNames.forEach((indexName) => {
         statuses[indexName] = INDEX_CLEARING_CACHE;
       });
 

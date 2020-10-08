@@ -8,7 +8,7 @@ import { validateName } from './validate_name';
 
 describe('validateName', () => {
   describe('rejects empty input', () => {
-    ['   ', undefined, null].forEach(input => {
+    ['   ', undefined, null].forEach((input) => {
       test(`'${input}'`, () => {
         expect(validateName(input)).toMatchSnapshot();
       });
@@ -16,7 +16,7 @@ describe('validateName', () => {
   });
 
   describe('rejects invalid characters', () => {
-    '!@#$%^&*()+?<> ,.'.split('').forEach(input => {
+    '!@#$%^&*()+?<> ,.'.split('').forEach((input) => {
       test(`'${input}'`, () => {
         expect(validateName(input)).toMatchSnapshot();
       });

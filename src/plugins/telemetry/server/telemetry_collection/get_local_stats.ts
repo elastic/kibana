@@ -24,6 +24,8 @@ import {
 import { getClusterInfo, ESClusterInfo } from './get_cluster_info';
 import { getClusterStats } from './get_cluster_stats';
 import { getKibana, handleKibanaStats, KibanaUsageStats } from './get_kibana';
+import { getNodesUsage } from './get_nodes_usage';
+import { getDataTelemetry, DATA_TELEMETRY_ID, DataTelemetryPayload } from './get_data_telemetry';
 
 /**
  * Handle the separate local calls by combining them into a single object response that looks like the
@@ -35,9 +37,11 @@ import { getKibana, handleKibanaStats, KibanaUsageStats } from './get_kibana';
  * @param {Object} kibana The Kibana Usage stats
  */
 export function handleLocalStats(
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   { cluster_name, cluster_uuid, version }: ESClusterInfo,
   { _nodes, cluster_name: clusterName, ...clusterStats }: any,
-  kibana: KibanaUsageStats,
+  kibana: KibanaUsageStats | undefined,
+  dataTelemetry: DataTelemetryPayload | undefined,
   context: StatsCollectionContext
 ) {
   return {
@@ -48,6 +52,7 @@ export function handleLocalStats(
     cluster_stats: clusterStats,
     collection: 'local',
     stack_stats: {
+      [DATA_TELEMETRY_ID]: dataTelemetry,
       kibana: handleKibanaStats(context, kibana),
     },
   };
@@ -57,22 +62,36 @@ export type TelemetryLocalStats = ReturnType<typeof handleLocalStats>;
 
 /**
  * Get statistics for all products joined by Elasticsearch cluster.
+ * @param {Array} cluster uuids
+ * @param {Object} config contains the new esClient already scoped contains usageCollection, callCluster, esClient, start, end
+ * @param {Object} StatsCollectionContext contains logger and version (string)
  */
 export const getLocalStats: StatsGetter<{}, TelemetryLocalStats> = async (
-  clustersDetails,
-  config,
-  context
+  clustersDetails, // array of cluster uuid's
+  config, // contains the new esClient already scoped contains usageCollection, callCluster, esClient, start, end
+  context // StatsCollectionContext contains logger and version (string)
 ) => {
-  const { callCluster, usageCollection } = config;
+  const { callCluster, usageCollection, esClient } = config;
 
   return await Promise.all(
-    clustersDetails.map(async clustersDetail => {
-      const [clusterInfo, clusterStats, kibana] = await Promise.all([
-        getClusterInfo(callCluster), // cluster info
-        getClusterStats(callCluster), // cluster stats (not to be confused with cluster _state_)
-        getKibana(usageCollection, callCluster),
+    clustersDetails.map(async (clustersDetail) => {
+      const [clusterInfo, clusterStats, nodesUsage, kibana, dataTelemetry] = await Promise.all([
+        getClusterInfo(esClient), // cluster info
+        getClusterStats(esClient), // cluster stats (not to be confused with cluster _state_)
+        getNodesUsage(esClient), // nodes_usage info
+        getKibana(usageCollection, callCluster, esClient),
+        getDataTelemetry(esClient),
       ]);
-      return handleLocalStats(clusterInfo, clusterStats, kibana, context);
+      return handleLocalStats(
+        clusterInfo,
+        {
+          ...clusterStats,
+          nodes: { ...clusterStats.nodes, usage: nodesUsage },
+        },
+        kibana,
+        dataTelemetry,
+        context
+      );
     })
   );
 };

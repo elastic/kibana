@@ -19,7 +19,6 @@
 
 import { SpecDefinitionsService } from '../../../services';
 
-/* eslint-disable @typescript-eslint/camelcase */
 export const reindex = (specService: SpecDefinitionsService) => {
   specService.addEndpointDescription('reindex', {
     methods: ['POST'],

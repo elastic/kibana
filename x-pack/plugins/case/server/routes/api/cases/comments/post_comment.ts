@@ -15,11 +15,17 @@ import { CASE_SAVED_OBJECT } from '../../../../saved_object_types';
 import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import { escapeHatch, transformNewComment, wrapError, flattenCaseSavedObject } from '../../utils';
 import { RouteDeps } from '../../types';
+import { CASE_COMMENTS_URL } from '../../../../../common/constants';
 
-export function initPostCommentApi({ caseService, router, userActionService }: RouteDeps) {
+export function initPostCommentApi({
+  caseConfigureService,
+  caseService,
+  router,
+  userActionService,
+}: RouteDeps) {
   router.post(
     {
-      path: '/api/cases/{case_id}/comments',
+      path: CASE_COMMENTS_URL,
       validate: {
         params: schema.object({
           case_id: schema.string(),
@@ -41,6 +47,7 @@ export function initPostCommentApi({ caseService, router, userActionService }: R
           caseId,
         });
 
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { username, full_name, email } = await caseService.getUser({ request, response });
         const createdDate = new Date().toISOString();
 
@@ -111,16 +118,16 @@ export function initPostCommentApi({ caseService, router, userActionService }: R
 
         return response.ok({
           body: CaseResponseRt.encode(
-            flattenCaseSavedObject(
-              {
+            flattenCaseSavedObject({
+              savedObject: {
                 ...myCase,
                 ...updatedCase,
                 attributes: { ...myCase.attributes, ...updatedCase.attributes },
                 version: updatedCase.version ?? myCase.version,
                 references: myCase.references,
               },
-              comments.saved_objects
-            )
+              comments: comments.saved_objects,
+            })
           ),
         });
       } catch (error) {

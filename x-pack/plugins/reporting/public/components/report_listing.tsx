@@ -6,6 +6,8 @@
 
 import {
   EuiBasicTable,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiPageContent,
   EuiSpacer,
   EuiText,
@@ -16,43 +18,47 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import moment from 'moment';
-import { Component, Fragment, default as React } from 'react';
+import { Component, default as React, Fragment } from 'react';
 import { Subscription } from 'rxjs';
 import { ApplicationStart, ToastsSetup } from 'src/core/public';
 import { ILicense, LicensingPluginSetup } from '../../../licensing/public';
 import { Poller } from '../../common/poller';
-import { JobStatuses, JOB_COMPLETION_NOTIFICATIONS_POLLER_CONFIG } from '../../constants';
+import { durationToNumber } from '../../common/schema_utils';
+import { JobStatuses } from '../../constants';
 import { checkLicense } from '../lib/license_check';
 import { JobQueueEntry, ReportingAPIClient } from '../lib/reporting_api_client';
+import { ClientConfigType } from '../plugin';
 import {
   ReportDeleteButton,
   ReportDownloadButton,
   ReportErrorButton,
   ReportInfoButton,
 } from './buttons';
+import { ReportDiagnostic } from './report_diagnostic';
 
 export interface Job {
   id: string;
   type: string;
   object_type: string;
   object_title: string;
-  created_by?: string;
+  created_by?: string | false;
   created_at: string;
   started_at?: string;
   completed_at?: string;
   status: string;
   statusLabel: string;
-  max_size_reached: boolean;
+  max_size_reached?: boolean;
   attempts: number;
   max_attempts: number;
   csv_contains_formulas: boolean;
-  warnings: string[];
+  warnings?: string[];
 }
 
 export interface Props {
   intl: InjectedIntl;
   apiClient: ReportingAPIClient;
   license$: LicensingPluginSetup['license$'];
+  pollConfig: ClientConfigType['poll'];
   redirect: ApplicationStart['navigateToApp'];
   toasts: ToastsSetup;
 }
@@ -132,23 +138,38 @@ class ReportListingUi extends Component<Props, State> {
 
   public render() {
     return (
-      <EuiPageContent horizontalPosition="center" className="euiPageBody--restrictWidth-default">
-        <EuiTitle>
-          <h1>
-            <FormattedMessage id="xpack.reporting.listing.reportstitle" defaultMessage="Reports" />
-          </h1>
-        </EuiTitle>
-        <EuiText color="subdued" size="s">
-          <p>
-            <FormattedMessage
-              id="xpack.reporting.listing.reports.subtitle"
-              defaultMessage="Find reports generated in Kibana applications here"
-            />
-          </p>
-        </EuiText>
-        <EuiSpacer />
-        {this.renderTable()}
-      </EuiPageContent>
+      <div>
+        <EuiPageContent horizontalPosition="center" className="euiPageBody--restrictWidth-default">
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiTitle>
+                <h1>
+                  <FormattedMessage
+                    id="xpack.reporting.listing.reportstitle"
+                    defaultMessage="Reports"
+                  />
+                </h1>
+              </EuiTitle>
+              <EuiText color="subdued" size="s">
+                <p>
+                  <FormattedMessage
+                    id="xpack.reporting.listing.reports.subtitle"
+                    defaultMessage="Get reports generated in Kibana applications."
+                  />
+                </p>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer />
+          {this.renderTable()}
+        </EuiPageContent>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup justifyContent="spaceBetween" direction="rowReverse">
+          <EuiFlexItem grow={false}>
+            <ReportDiagnostic apiClient={this.props.apiClient} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
     );
   }
 
@@ -163,19 +184,19 @@ class ReportListingUi extends Component<Props, State> {
 
   public componentDidMount() {
     this.mounted = true;
+    const { pollConfig, license$ } = this.props;
+    const pollFrequencyInMillis = durationToNumber(pollConfig.jobsRefresh.interval);
     this.poller = new Poller({
       functionToPoll: () => {
         return this.fetchJobs();
       },
-      pollFrequencyInMillis:
-        JOB_COMPLETION_NOTIFICATIONS_POLLER_CONFIG.jobCompletionNotifier.interval,
+      pollFrequencyInMillis,
       trailing: false,
       continuePollingOnError: true,
-      pollFrequencyErrorMultiplier:
-        JOB_COMPLETION_NOTIFICATIONS_POLLER_CONFIG.jobCompletionNotifier.intervalErrorMultiplier,
+      pollFrequencyErrorMultiplier: pollConfig.jobsRefresh.intervalErrorMultiplier,
     });
     this.poller.start();
-    this.licenseSubscription = this.props.license$.subscribe(this.licenseHandler);
+    this.licenseSubscription = license$.subscribe(this.licenseHandler);
   }
 
   private licenseHandler = (license: ILicense) => {
@@ -191,13 +212,13 @@ class ReportListingUi extends Component<Props, State> {
   };
 
   private onSelectionChange = (jobs: Job[]) => {
-    this.setState(current => ({ ...current, selectedJobs: jobs }));
+    this.setState((current) => ({ ...current, selectedJobs: jobs }));
   };
 
   private removeRecord = (record: Job) => {
     const { jobs } = this.state;
-    const filtered = jobs.filter(j => j.id !== record.id);
-    this.setState(current => ({ ...current, jobs: filtered }));
+    const filtered = jobs.filter((j) => j.id !== record.id);
+    this.setState((current) => ({ ...current, jobs: filtered }));
   };
 
   private renderDeleteButton = () => {
@@ -266,7 +287,7 @@ class ReportListingUi extends Component<Props, State> {
     } catch (fetchError) {
       if (!this.licenseAllowsToShowThisPage()) {
         this.props.toasts.addDanger(this.state.badLicenseMessage);
-        this.props.redirect('kibana#/management');
+        this.props.redirect('management');
         return;
       }
 

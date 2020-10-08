@@ -2,7 +2,7 @@
 
 exports[`interpreter/functions#metric returns an object with the correct structure 1`] = `
 Object {
-  "as": "visualization",
+  "as": "metric_vis",
   "type": "render",
   "value": Object {
     "params": Object {

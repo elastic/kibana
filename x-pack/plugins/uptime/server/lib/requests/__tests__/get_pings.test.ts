@@ -5,8 +5,8 @@
  */
 
 import { getPings } from '../get_pings';
-import { set } from 'lodash';
-import { defaultDynamicSettings } from '../../../../../../legacy/plugins/uptime/common/runtime_types';
+import { set } from '@elastic/safer-lodash-set';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 
 describe('getAll', () => {
   let mockEsSearchResult: any;
@@ -62,7 +62,7 @@ describe('getAll', () => {
       },
     };
     expectedGetAllParams = {
-      index: defaultDynamicSettings.heartbeatIndices,
+      index: DYNAMIC_SETTINGS_DEFAULTS.heartbeatIndices,
       body: {
         query: {
           bool: {
@@ -88,7 +88,7 @@ describe('getAll', () => {
     mockEsClient.mockReturnValue(mockEsSearchResult);
     const result = await getPings({
       callES: mockEsClient,
-      dynamicSettings: defaultDynamicSettings,
+      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       dateRange: { from: 'now-1h', to: 'now' },
       sort: 'asc',
       size: 12,
@@ -110,7 +110,7 @@ describe('getAll', () => {
     mockEsClient.mockReturnValue(mockEsSearchResult);
     await getPings({
       callES: mockEsClient,
-      dynamicSettings: defaultDynamicSettings,
+      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       dateRange: { from: 'now-1h', to: 'now' },
       sort: 'asc',
       size: 12,
@@ -144,6 +144,30 @@ describe('getAll', () => {
                     },
                   },
                 ],
+                "must_not": Array [
+                  Object {
+                    "bool": Object {
+                      "filter": Array [
+                        Object {
+                          "term": Object {
+                            "monitor.type": "browser",
+                          },
+                        },
+                        Object {
+                          "bool": Object {
+                            "must_not": Array [
+                              Object {
+                                "exists": Object {
+                                  "field": "summary",
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
               },
             },
             "size": 12,
@@ -166,7 +190,7 @@ describe('getAll', () => {
     mockEsClient.mockReturnValue(mockEsSearchResult);
     await getPings({
       callES: mockEsClient,
-      dynamicSettings: defaultDynamicSettings,
+      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       dateRange: { from: 'now-1h', to: 'now' },
       size: 12,
     });
@@ -198,6 +222,30 @@ describe('getAll', () => {
                     },
                   },
                 ],
+                "must_not": Array [
+                  Object {
+                    "bool": Object {
+                      "filter": Array [
+                        Object {
+                          "term": Object {
+                            "monitor.type": "browser",
+                          },
+                        },
+                        Object {
+                          "bool": Object {
+                            "must_not": Array [
+                              Object {
+                                "exists": Object {
+                                  "field": "summary",
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
               },
             },
             "size": 12,
@@ -220,7 +268,7 @@ describe('getAll', () => {
     mockEsClient.mockReturnValue(mockEsSearchResult);
     await getPings({
       callES: mockEsClient,
-      dynamicSettings: defaultDynamicSettings,
+      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       dateRange: { from: 'now-1h', to: 'now' },
       sort: 'desc',
     });
@@ -252,6 +300,30 @@ describe('getAll', () => {
                     },
                   },
                 ],
+                "must_not": Array [
+                  Object {
+                    "bool": Object {
+                      "filter": Array [
+                        Object {
+                          "term": Object {
+                            "monitor.type": "browser",
+                          },
+                        },
+                        Object {
+                          "bool": Object {
+                            "must_not": Array [
+                              Object {
+                                "exists": Object {
+                                  "field": "summary",
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
               },
             },
             "size": 25,
@@ -274,7 +346,7 @@ describe('getAll', () => {
     mockEsClient.mockReturnValue(mockEsSearchResult);
     await getPings({
       callES: mockEsClient,
-      dynamicSettings: defaultDynamicSettings,
+      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       dateRange: { from: 'now-1h', to: 'now' },
       monitorId: 'testmonitorid',
     });
@@ -311,6 +383,30 @@ describe('getAll', () => {
                     },
                   },
                 ],
+                "must_not": Array [
+                  Object {
+                    "bool": Object {
+                      "filter": Array [
+                        Object {
+                          "term": Object {
+                            "monitor.type": "browser",
+                          },
+                        },
+                        Object {
+                          "bool": Object {
+                            "must_not": Array [
+                              Object {
+                                "exists": Object {
+                                  "field": "summary",
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
               },
             },
             "size": 25,
@@ -333,7 +429,7 @@ describe('getAll', () => {
     mockEsClient.mockReturnValue(mockEsSearchResult);
     await getPings({
       callES: mockEsClient,
-      dynamicSettings: defaultDynamicSettings,
+      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       dateRange: { from: 'now-1h', to: 'now' },
       status: 'down',
     });
@@ -367,6 +463,30 @@ describe('getAll', () => {
                   Object {
                     "term": Object {
                       "monitor.status": "down",
+                    },
+                  },
+                ],
+                "must_not": Array [
+                  Object {
+                    "bool": Object {
+                      "filter": Array [
+                        Object {
+                          "term": Object {
+                            "monitor.type": "browser",
+                          },
+                        },
+                        Object {
+                          "bool": Object {
+                            "must_not": Array [
+                              Object {
+                                "exists": Object {
+                                  "field": "summary",
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
                     },
                   },
                 ],

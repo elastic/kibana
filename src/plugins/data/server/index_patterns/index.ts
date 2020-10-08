@@ -18,4 +18,4 @@
  */
 export * from './utils';
 export { IndexPatternsFetcher, FieldDescriptor, shouldReadFieldFromDocValues } from './fetcher';
-export { IndexPatternsService } from './index_patterns_service';
+export { IndexPatternsService, IndexPatternsServiceStart } from './index_patterns_service';

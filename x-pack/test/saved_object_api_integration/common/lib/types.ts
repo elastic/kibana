@@ -21,6 +21,7 @@ export interface TestSuite<T> {
 export interface TestCase {
   type: string;
   id: string;
+  expectedNamespaces?: string[];
   failure?: 400 | 403 | 404 | 409;
 }
 
@@ -28,4 +29,5 @@ export interface TestUser {
   username: string;
   password: string;
   description: string;
+  authorizedAtSpaces: string[];
 }

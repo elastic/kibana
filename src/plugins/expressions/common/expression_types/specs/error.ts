@@ -28,10 +28,12 @@ export type ExpressionValueError = ExpressionValueBoxed<
   {
     error: {
       message: string;
+      type?: string;
       name?: string;
       stack?: string;
+      original?: Error;
     };
-    info: unknown;
+    info?: unknown;
   }
 >;
 

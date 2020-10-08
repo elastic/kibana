@@ -87,7 +87,7 @@ export const loadingSaga = ({
     getWorkspace()!.runLayout();
   }
 
-  return function*() {
+  return function* () {
     yield takeLatest(loadSavedWorkspace.match, deserializeWorkspace);
   };
 };
@@ -119,7 +119,7 @@ export const savingSaga = (deps: GraphStoreDependencies) => {
     }
   }
 
-  return function*() {
+  return function* () {
     yield takeLatest(saveWorkspace.match, persistWorkspace);
   };
 };
@@ -198,7 +198,7 @@ function showModal(
 
   openSaveModal({
     savePolicy: deps.savePolicy,
-    hasData: workspace.nodes.length > 0 || workspace.blacklistedNodes.length > 0,
+    hasData: workspace.nodes.length > 0 || workspace.blocklistedNodes.length > 0,
     workspace: savedWorkspace,
     showSaveModal: deps.showSaveModal,
     saveWorkspace: saveWorkspaceHandler,

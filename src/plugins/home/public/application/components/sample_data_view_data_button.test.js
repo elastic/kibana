@@ -24,7 +24,7 @@ import { SampleDataViewDataButton } from './sample_data_view_data_button';
 
 jest.mock('../kibana_services', () => ({
   getServices: () => ({
-    addBasePath: path => `root${path}`,
+    addBasePath: (path) => `root${path}`,
   }),
 }));
 

@@ -6,10 +6,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import mapValues from 'lodash/object/mapValues';
-import cloneDeep from 'lodash/lang/cloneDeep';
-import debounce from 'lodash/function/debounce';
-import first from 'lodash/array/first';
+import { cloneDeep, debounce, first, mapValues } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -94,7 +91,7 @@ export class JobCreateUi extends Component {
 
     props.kibana.services.setBreadcrumbs([listBreadcrumb, createBreadcrumb]);
     const { jobToClone: stepDefaultOverrides } = props;
-    const stepsFields = mapValues(stepIdToStepConfigMap, step =>
+    const stepsFields = mapValues(stepIdToStepConfigMap, (step) =>
       cloneDeep(step.getDefaultFields(stepDefaultOverrides))
     );
 
@@ -164,7 +161,7 @@ export class JobCreateUi extends Component {
 
     const lastIndexPatternValidationTime = (this.lastIndexPatternValidationTime = Date.now());
     validateIndexPattern(indexPattern)
-      .then(response => {
+      .then((response) => {
         // We don't need to do anything if this component has been unmounted.
         if (!this._isMounted) {
           return;
@@ -287,7 +284,7 @@ export class JobCreateUi extends Component {
           isValidatingIndexPattern: false,
         });
       })
-      .catch(error => {
+      .catch((error) => {
         // We don't need to do anything if this component has been unmounted.
         if (!this._isMounted) {
           return;
@@ -392,7 +389,7 @@ export class JobCreateUi extends Component {
     // Check every step before this one and see if it's been completed.
     const prerequisiteSteps = stepIds.slice(0, indexOfStep);
 
-    return prerequisiteSteps.every(prerequisiteStepId => !this.hasStepErrors(prerequisiteStepId));
+    return prerequisiteSteps.every((prerequisiteStepId) => !this.hasStepErrors(prerequisiteStepId));
   }
 
   hasStepErrors(stepId) {
@@ -405,7 +402,7 @@ export class JobCreateUi extends Component {
     }
 
     const stepFieldErrors = stepsFieldErrors[stepId];
-    return Object.values(stepFieldErrors).some(error => error != null);
+    return Object.values(stepFieldErrors).some((error) => error != null);
   }
 
   getStepsFieldsErrors(newStepsFields) {
@@ -515,7 +512,7 @@ export class JobCreateUi extends Component {
         } else {
           errorBody = (
             <ul>
-              {cause.map(causeValue => (
+              {cause.map((causeValue) => (
                 <li key={causeValue}>{causeValue}</li>
               ))}
             </ul>
@@ -650,7 +647,7 @@ export class JobCreateUi extends Component {
     }
   }
 
-  onToggleStartAfterCreate = eve => {
+  onToggleStartAfterCreate = (eve) => {
     this.setState({ startJobAfterCreation: eve.target.checked });
   };
 

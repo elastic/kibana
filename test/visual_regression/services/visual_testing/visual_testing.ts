@@ -19,7 +19,6 @@
 
 import { postSnapshot } from '@percy/agent/dist/utils/sdk-utils';
 import { Test } from 'mocha';
-import _ from 'lodash';
 
 import testSubjSelector from '@kbn/test-subj-selector';
 
@@ -54,7 +53,7 @@ export async function VisualTestingProvider({ getService }: FtrProviderContext) 
   const lifecycle = getService('lifecycle');
 
   let currentTest: Test | undefined;
-  lifecycle.beforeEachTest.add(test => {
+  lifecycle.beforeEachTest.add((test) => {
     currentTest = test;
   });
 

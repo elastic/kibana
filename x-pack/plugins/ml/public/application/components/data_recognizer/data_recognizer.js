@@ -28,8 +28,8 @@ export class DataRecognizer extends Component {
   componentDidMount() {
     // once the mount is complete, call the recognize endpoint to see if the index format is known to us,
     ml.recognizeIndex({ indexPatternTitle: this.indexPattern.title })
-      .then(resp => {
-        const results = resp.map(r => (
+      .then((resp) => {
+        const results = resp.map((r) => (
           <RecognizedResult
             key={r.id}
             config={r}
@@ -48,7 +48,7 @@ export class DataRecognizer extends Component {
           results,
         });
       })
-      .catch(e => {
+      .catch((e) => {
         console.error('Error attempting to recognize index', e);
       });
   }

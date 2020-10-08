@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { StatusService } from './status_service';
 import {
   InternalStatusServiceSetup,
@@ -39,6 +39,11 @@ const availableCoreStatus: CoreStatus = {
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<StatusServiceSetup> = {
     core$: new BehaviorSubject(availableCoreStatus),
+    overall$: new BehaviorSubject(available),
+    set: jest.fn(),
+    dependencies$: new BehaviorSubject({}),
+    derivedStatus$: new BehaviorSubject(available),
+    isStatusPageAnonymous: jest.fn().mockReturnValue(false),
   };
 
   return setupContract;
@@ -48,6 +53,12 @@ const createInternalSetupContractMock = () => {
   const setupContract: jest.Mocked<InternalStatusServiceSetup> = {
     core$: new BehaviorSubject(availableCoreStatus),
     overall$: new BehaviorSubject(available),
+    isStatusPageAnonymous: jest.fn().mockReturnValue(false),
+    plugins: {
+      set: jest.fn(),
+      getDependenciesStatus$: jest.fn(),
+      getDerivedStatus$: jest.fn(),
+    },
   };
 
   return setupContract;

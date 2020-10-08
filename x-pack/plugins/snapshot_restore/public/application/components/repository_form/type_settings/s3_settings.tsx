@@ -58,13 +58,13 @@ export const S3Settings: React.FunctionComponent<Props> = ({
     'log-delivery-write',
     'bucket-owner-read',
     'bucket-owner-full-control',
-  ].map(option => ({
+  ].map((option) => ({
     value: option,
     text: option,
   }));
   const hasErrors: boolean = Boolean(Object.keys(settingErrors).length);
 
-  const storageClassOptions = ['standard', 'reduced_redundancy', 'standard_ia'].map(option => ({
+  const storageClassOptions = ['standard', 'reduced_redundancy', 'standard_ia'].map((option) => ({
     value: option,
     text: option,
   }));
@@ -105,7 +105,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           <EuiFieldText
             defaultValue={client || ''}
             fullWidth
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 client: e.target.value,
               });
@@ -149,7 +149,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           <EuiFieldText
             defaultValue={bucket || ''}
             fullWidth
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 bucket: e.target.value,
               });
@@ -193,7 +193,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           <EuiFieldText
             defaultValue={basePath || ''}
             fullWidth
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 basePath: e.target.value,
               });
@@ -237,7 +237,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
               />
             }
             checked={!(compress === false)}
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 compress: e.target.checked,
               });
@@ -282,7 +282,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           <EuiFieldText
             defaultValue={chunkSize || ''}
             fullWidth
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 chunkSize: e.target.value,
               });
@@ -326,7 +326,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
               />
             }
             checked={!!serverSideEncryption}
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 serverSideEncryption: e.target.checked,
               });
@@ -372,7 +372,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           <EuiFieldText
             defaultValue={bufferSize || ''}
             fullWidth
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 bufferSize: e.target.value,
               });
@@ -416,7 +416,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           <EuiSelect
             options={cannedAclOptions}
             value={cannedAcl || cannedAclOptions[0].value}
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 cannedAcl: e.target.value,
               });
@@ -461,7 +461,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           <EuiSelect
             options={storageClassOptions}
             value={storageClass || storageClassOptions[0].value}
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 storageClass: e.target.value,
               });
@@ -507,7 +507,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           <EuiFieldText
             defaultValue={maxSnapshotBytesPerSec || ''}
             fullWidth
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 maxSnapshotBytesPerSec: e.target.value,
               });
@@ -552,7 +552,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           <EuiFieldText
             defaultValue={maxRestoreBytesPerSec || ''}
             fullWidth
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 maxRestoreBytesPerSec: e.target.value,
               });
@@ -596,7 +596,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
               />
             }
             checked={!!readonly}
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 readonly: e.target.checked,
               });

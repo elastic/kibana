@@ -8,10 +8,14 @@
     "data",
     "expressions",
     "navigation",
-    "kibanaLegacy",
-    "uiActions",
-    "visualizations"
+    "urlForwarding",
+    "visualizations",
+    "dashboard",
+    "charts",
+    "uiActions"
   ],
-  "optionalPlugins": ["embeddable", "usageCollection", "taskManager"],
-  "configPath": ["xpack", "lens"]
+  "optionalPlugins": ["embeddable", "usageCollection", "taskManager", "globalSearch"],
+  "configPath": ["xpack", "lens"],
+  "extraPublicDirs": ["common/constants"],
+  "requiredBundles": ["savedObjects", "kibanaUtils", "kibanaReact", "embeddable"]
 }

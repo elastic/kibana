@@ -17,30 +17,19 @@
  * under the License.
  */
 
-import axios, { AxiosInstance } from 'axios';
 import util from 'util';
-import { ToolingLog } from '@kbn/dev-utils';
+import { KbnClient, ToolingLog } from '@kbn/dev-utils';
 
 export class RoleMappings {
-  private log: ToolingLog;
-  private axios: AxiosInstance;
-
-  constructor(url: string, log: ToolingLog) {
-    this.log = log;
-    this.axios = axios.create({
-      headers: { 'kbn-xsrf': 'x-pack/ftr/services/security/role_mappings' },
-      baseURL: url,
-      maxRedirects: 0,
-      validateStatus: () => true, // we do our own validation below and throw better error messages
-    });
-  }
+  constructor(private log: ToolingLog, private kbnClient: KbnClient) {}
 
   public async create(name: string, roleMapping: Record<string, any>) {
     this.log.debug(`creating role mapping ${name}`);
-    const { data, status, statusText } = await this.axios.post(
-      `/internal/security/role_mapping/${name}`,
-      roleMapping
-    );
+    const { data, status, statusText } = await this.kbnClient.request({
+      path: `/internal/security/role_mapping/${name}`,
+      method: 'POST',
+      body: roleMapping,
+    });
     if (status !== 200) {
       throw new Error(
         `Expected status code of 200, received ${status} ${statusText}: ${util.inspect(data)}`
@@ -51,9 +40,10 @@ export class RoleMappings {
 
   public async delete(name: string) {
     this.log.debug(`deleting role mapping ${name}`);
-    const { data, status, statusText } = await this.axios.delete(
-      `/internal/security/role_mapping/${name}`
-    );
+    const { data, status, statusText } = await this.kbnClient.request({
+      path: `/internal/security/role_mapping/${name}`,
+      method: 'DELETE',
+    });
     if (status !== 200 && status !== 404) {
       throw new Error(
         `Expected status code of 200 or 404, received ${status} ${statusText}: ${util.inspect(

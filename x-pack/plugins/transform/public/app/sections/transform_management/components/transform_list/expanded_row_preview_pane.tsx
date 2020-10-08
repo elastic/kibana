@@ -4,39 +4,52 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
+import React, { useMemo, FC } from 'react';
 
+import { TransformPivotConfig } from '../../../../../../common/types/transform';
+
+import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
+import { getPivotQuery } from '../../../../common';
+import { usePivotData } from '../../../../hooks/use_pivot_data';
 import { SearchItems } from '../../../../hooks/use_search_items';
-
-import { getPivotQuery, TransformPivotConfig } from '../../../../common';
 
 import {
   applyTransformConfigToDefineState,
   getDefaultStepDefineState,
 } from '../../../create_transform/components/step_define/';
-import { PivotPreview } from '../../../../components/pivot_preview';
 
-interface Props {
+interface ExpandedRowPreviewPaneProps {
   transformConfig: TransformPivotConfig;
 }
 
-export const ExpandedRowPreviewPane: FC<Props> = ({ transformConfig }) => {
-  const previewConfig = applyTransformConfigToDefineState(
-    getDefaultStepDefineState({} as SearchItems),
-    transformConfig
+export const ExpandedRowPreviewPane: FC<ExpandedRowPreviewPaneProps> = ({ transformConfig }) => {
+  const {
+    ml: { DataGrid },
+  } = useAppDependencies();
+  const toastNotifications = useToastNotifications();
+
+  const { aggList, groupByList, searchQuery } = useMemo(
+    () =>
+      applyTransformConfigToDefineState(
+        getDefaultStepDefineState({} as SearchItems),
+        transformConfig
+      ),
+    [transformConfig]
   );
+
+  const pivotQuery = useMemo(() => getPivotQuery(searchQuery), [searchQuery]);
 
   const indexPatternTitle = Array.isArray(transformConfig.source.index)
     ? transformConfig.source.index.join(',')
     : transformConfig.source.index;
 
+  const pivotPreviewProps = usePivotData(indexPatternTitle, pivotQuery, aggList, groupByList);
+
   return (
-    <PivotPreview
-      aggs={previewConfig.aggList}
-      groupBy={previewConfig.groupByList}
-      indexPatternTitle={indexPatternTitle}
-      query={getPivotQuery(previewConfig.searchQuery)}
-      showHeader={false}
+    <DataGrid
+      {...pivotPreviewProps}
+      dataTestSubj="transformPivotPreview"
+      toastNotifications={toastNotifications}
     />
   );
 };

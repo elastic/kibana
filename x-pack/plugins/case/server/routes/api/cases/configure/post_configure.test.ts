@@ -16,6 +16,8 @@ import {
 import { mockCaseConfigure } from '../../__fixtures__/mock_saved_objects';
 import { initPostCaseConfigure } from './post_configure';
 import { newConfiguration } from '../../__mocks__/request_responses';
+import { CASE_CONFIGURE_URL } from '../../../../../common/constants';
+import { ConnectorTypes } from '../../../../../common/api/connectors';
 
 describe('POST configuration', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -30,7 +32,7 @@ describe('POST configuration', () => {
 
   it('create configuration', async () => {
     const req = httpServerMock.createKibanaRequest({
-      path: '/api/cases/configure',
+      path: CASE_CONFIGURE_URL,
       method: 'post',
       body: newConfiguration,
     });
@@ -46,8 +48,12 @@ describe('POST configuration', () => {
     expect(res.status).toEqual(200);
     expect(res.payload).toEqual(
       expect.objectContaining({
-        connector_id: '456',
-        connector_name: 'My connector 2',
+        connector: {
+          id: '456',
+          name: 'My connector 2',
+          type: '.jira',
+          fields: null,
+        },
         closure_type: 'close-by-pushing',
         created_at: '2020-04-09T09:43:51.778Z',
         created_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
@@ -61,7 +67,7 @@ describe('POST configuration', () => {
     routeHandler = await createRoute(initPostCaseConfigure, 'post', true);
 
     const req = httpServerMock.createKibanaRequest({
-      path: '/api/cases/configure',
+      path: CASE_CONFIGURE_URL,
       method: 'post',
       body: newConfiguration,
     });
@@ -77,8 +83,12 @@ describe('POST configuration', () => {
     expect(res.status).toEqual(200);
     expect(res.payload).toEqual(
       expect.objectContaining({
-        connector_id: '456',
-        connector_name: 'My connector 2',
+        connector: {
+          id: '456',
+          name: 'My connector 2',
+          type: '.jira',
+          fields: null,
+        },
         closure_type: 'close-by-pushing',
         created_at: '2020-04-09T09:43:51.778Z',
         created_by: { email: null, full_name: null, username: null },
@@ -88,12 +98,16 @@ describe('POST configuration', () => {
     );
   });
 
-  it('throws when missing connector_id', async () => {
+  it('throws when missing connector.id', async () => {
     const req = httpServerMock.createKibanaRequest({
-      path: '/api/cases/configure',
+      path: CASE_CONFIGURE_URL,
       method: 'post',
       body: {
-        connector_name: 'My connector 2',
+        connector: {
+          name: 'My connector 2',
+          type: '.jira',
+          fields: null,
+        },
         closure_type: 'close-by-pushing',
       },
     });
@@ -109,12 +123,66 @@ describe('POST configuration', () => {
     expect(res.payload.isBoom).toEqual(true);
   });
 
-  it('throws when missing connector_name', async () => {
+  it('throws when missing connector.name', async () => {
     const req = httpServerMock.createKibanaRequest({
-      path: '/api/cases/configure',
+      path: CASE_CONFIGURE_URL,
       method: 'post',
       body: {
-        connector_id: '456',
+        connector: {
+          id: '456',
+          type: '.jira',
+          fields: null,
+        },
+        closure_type: 'close-by-pushing',
+      },
+    });
+
+    const context = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseConfigureSavedObject: mockCaseConfigure,
+      })
+    );
+
+    const res = await routeHandler(context, req, kibanaResponseFactory);
+    expect(res.status).toEqual(400);
+    expect(res.payload.isBoom).toEqual(true);
+  });
+
+  it('throws when missing connector.type', async () => {
+    const req = httpServerMock.createKibanaRequest({
+      path: CASE_CONFIGURE_URL,
+      method: 'post',
+      body: {
+        connector: {
+          id: '456',
+          name: 'My connector 2',
+          fields: null,
+        },
+        closure_type: 'close-by-pushing',
+      },
+    });
+
+    const context = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseConfigureSavedObject: mockCaseConfigure,
+      })
+    );
+
+    const res = await routeHandler(context, req, kibanaResponseFactory);
+    expect(res.status).toEqual(400);
+    expect(res.payload.isBoom).toEqual(true);
+  });
+
+  it('throws when missing connector.fields', async () => {
+    const req = httpServerMock.createKibanaRequest({
+      path: CASE_CONFIGURE_URL,
+      method: 'post',
+      body: {
+        connector: {
+          id: '456',
+          name: 'My connector 2',
+          type: ConnectorTypes.none,
+        },
         closure_type: 'close-by-pushing',
       },
     });
@@ -132,11 +200,15 @@ describe('POST configuration', () => {
 
   it('throws when missing closure_type', async () => {
     const req = httpServerMock.createKibanaRequest({
-      path: '/api/cases/configure',
+      path: CASE_CONFIGURE_URL,
       method: 'post',
       body: {
-        connector_id: '456',
-        connector_name: 'My connector 2',
+        connector: {
+          id: '456',
+          name: 'My connector 2',
+          type: '.jira',
+          fields: null,
+        },
       },
     });
 
@@ -153,7 +225,7 @@ describe('POST configuration', () => {
 
   it('it deletes the previous configuration', async () => {
     const req = httpServerMock.createKibanaRequest({
-      path: '/api/cases/configure',
+      path: CASE_CONFIGURE_URL,
       method: 'post',
       body: newConfiguration,
     });
@@ -172,7 +244,7 @@ describe('POST configuration', () => {
 
   it('it does NOT delete when not found', async () => {
     const req = httpServerMock.createKibanaRequest({
-      path: '/api/cases/configure',
+      path: CASE_CONFIGURE_URL,
       method: 'post',
       body: newConfiguration,
     });
@@ -191,7 +263,7 @@ describe('POST configuration', () => {
 
   it('it deletes all configuration', async () => {
     const req = httpServerMock.createKibanaRequest({
-      path: '/api/cases/configure',
+      path: CASE_CONFIGURE_URL,
       method: 'post',
       body: newConfiguration,
     });
@@ -214,7 +286,7 @@ describe('POST configuration', () => {
 
   it('returns an error if find throws an error', async () => {
     const req = httpServerMock.createKibanaRequest({
-      path: '/api/cases/configure',
+      path: CASE_CONFIGURE_URL,
       method: 'post',
       body: newConfiguration,
     });
@@ -232,7 +304,7 @@ describe('POST configuration', () => {
 
   it('returns an error if delete throws an error', async () => {
     const req = httpServerMock.createKibanaRequest({
-      path: '/api/cases/configure',
+      path: CASE_CONFIGURE_URL,
       method: 'post',
       body: newConfiguration,
     });
@@ -250,11 +322,14 @@ describe('POST configuration', () => {
 
   it('returns an error if post throws an error', async () => {
     const req = httpServerMock.createKibanaRequest({
-      path: '/api/cases/configure',
+      path: CASE_CONFIGURE_URL,
       method: 'post',
       body: {
-        connector_id: 'throw-error-create',
-        connector_name: 'My connector 2',
+        connector: {
+          id: 'throw-error-create',
+          name: 'My connector 2',
+          fields: null,
+        },
         closure_type: 'close-by-pushing',
       },
     });
@@ -272,9 +347,17 @@ describe('POST configuration', () => {
 
   it('handles undefined version correctly', async () => {
     const req = httpServerMock.createKibanaRequest({
-      path: '/api/cases/configure',
+      path: CASE_CONFIGURE_URL,
       method: 'post',
-      body: { ...newConfiguration, connector_id: 'no-version' },
+      body: {
+        ...newConfiguration,
+        connector: {
+          id: 'no-version',
+          name: 'no version',
+          type: ConnectorTypes.none,
+          fields: null,
+        },
+      },
     });
 
     const context = createRouteContext(
@@ -290,5 +373,47 @@ describe('POST configuration', () => {
         version: '',
       })
     );
+  });
+
+  it('returns an error if fields are not null', async () => {
+    const req = httpServerMock.createKibanaRequest({
+      path: CASE_CONFIGURE_URL,
+      method: 'post',
+      body: {
+        ...newConfiguration,
+        connector: { id: 'not-null', name: 'not-null', type: ConnectorTypes.none, fields: {} },
+      },
+    });
+
+    const context = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseConfigureSavedObject: mockCaseConfigure,
+      })
+    );
+
+    const res = await routeHandler(context, req, kibanaResponseFactory);
+    expect(res.status).toEqual(400);
+    expect(res.payload.isBoom).toEqual(true);
+  });
+
+  it('returns an error if the type of the connector does not exists', async () => {
+    const req = httpServerMock.createKibanaRequest({
+      path: CASE_CONFIGURE_URL,
+      method: 'post',
+      body: {
+        ...newConfiguration,
+        connector: { id: 'not-exists', name: 'not-exist', type: '.not-exists', fields: null },
+      },
+    });
+
+    const context = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseConfigureSavedObject: mockCaseConfigure,
+      })
+    );
+
+    const res = await routeHandler(context, req, kibanaResponseFactory);
+    expect(res.status).toEqual(400);
+    expect(res.payload.isBoom).toEqual(true);
   });
 });

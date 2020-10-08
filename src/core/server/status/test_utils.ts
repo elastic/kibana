@@ -21,5 +21,5 @@ import { ServiceStatusLevels, ServiceStatusLevel } from './types';
 
 export const ServiceStatusLevelSnapshotSerializer: jest.SnapshotSerializerPlugin = {
   test: (val: any) => Object.values(ServiceStatusLevels).includes(val),
-  print: (val: ServiceStatusLevel) => val.toString(),
+  serialize: (val: ServiceStatusLevel) => val.toString(),
 };

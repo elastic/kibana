@@ -37,26 +37,27 @@ export function suricataLogsSpecProvider(context: TutorialContext): TutorialSche
     name: i18n.translate('home.tutorials.suricataLogs.nameTitle', {
       defaultMessage: 'Suricata logs',
     }),
-    category: TutorialsCategory.SIEM,
+    moduleName,
+    category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.suricataLogs.shortDescription', {
-      defaultMessage: 'Collect the result logs created by Suricata IDS/IPS/NSM.',
+      defaultMessage: 'Collect Suricata IDS/IPS/NSM logs.',
     }),
     longDescription: i18n.translate('home.tutorials.suricataLogs.longDescription', {
       defaultMessage:
-        'The `suricata` Filebeat module collects the logs from the \
-[Suricata Eve JSON output](https://suricata.readthedocs.io/en/latest/output/eve/eve-json-format.html). \
-[Learn more]({learnMoreLink}).',
+        'This is a module to the Suricata IDS/IPS/NSM log. It parses logs that are \
+        in the [Suricata Eve JSON format](https://suricata.readthedocs.io/en/latest/output/eve/eve-json-format.html). \
+        [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-suricata.html',
       },
     }),
-    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/suricata.svg',
+    euiIconType: '/plugins/home/assets/logos/suricata.svg',
     artifacts: {
       dashboards: [
         {
-          id: '69f5ae20-eb02-11e7-8f04-51231daa5b05',
+          id: '78289c40-86da-11e8-b59d-21efb914e65c-ecs',
           linkLabel: i18n.translate('home.tutorials.suricataLogs.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'Suricata logs dashboard',
+            defaultMessage: 'Suricata Events Overview',
           }),
           isOverview: true,
         },
@@ -66,7 +67,7 @@ export function suricataLogsSpecProvider(context: TutorialContext): TutorialSche
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/suricata_logs/screenshot.png',
+    previewImagePath: '/plugins/home/assets/suricata_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),

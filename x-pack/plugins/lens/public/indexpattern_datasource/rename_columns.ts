@@ -44,7 +44,7 @@ export const renameColumns: ExpressionFunctionDefinition<
 
     return {
       type: 'kibana_datatable',
-      rows: data.rows.map(row => {
+      rows: data.rows.map((row) => {
         const mappedRow: Record<string, unknown> = {};
         Object.entries(idMap).forEach(([fromId, toId]) => {
           mappedRow[toId.id] = row[fromId];
@@ -60,7 +60,7 @@ export const renameColumns: ExpressionFunctionDefinition<
 
         return mappedRow;
       }),
-      columns: data.columns.map(column => {
+      columns: data.columns.map((column) => {
         const mappedItem = idMap[column.id];
 
         if (!mappedItem) {

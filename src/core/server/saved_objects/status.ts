@@ -28,7 +28,7 @@ export const calculateStatus$ = (
   elasticsearchStatus$: Observable<ServiceStatus>
 ): Observable<ServiceStatus<SavedObjectStatusMeta>> => {
   const migratorStatus$: Observable<ServiceStatus<SavedObjectStatusMeta>> = rawMigratorStatus$.pipe(
-    map(migrationStatus => {
+    map((migrationStatus) => {
       if (migrationStatus.status === 'waiting') {
         return {
           level: ServiceStatusLevels.unavailable,

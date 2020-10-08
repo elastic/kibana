@@ -21,11 +21,14 @@ import 'source-map-support/register';
 
 import Path from 'path';
 
-import { run, REPO_ROOT, createFlagError } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
+import { run, createFlagError, CiStatsReporter } from '@kbn/dev-utils';
 
 import { logOptimizerState } from './log_optimizer_state';
 import { OptimizerConfig } from './optimizer';
+import { reportOptimizerStats } from './report_optimizer_stats';
 import { runOptimizer } from './run_optimizer';
+import { validateLimitsForAllBundles, updateBundleLimits } from './limits';
 
 run(
   async ({ log, flags }) => {
@@ -42,6 +45,11 @@ run(
     const cache = flags.cache ?? true;
     if (typeof cache !== 'boolean') {
       throw createFlagError('expected --cache to have no value');
+    }
+
+    const includeCoreBundle = flags.core ?? true;
+    if (typeof includeCoreBundle !== 'boolean') {
+      throw createFlagError('expected --core to have no value');
     }
 
     const dist = flags.dist ?? false;
@@ -71,47 +79,107 @@ run(
 
     const extraPluginScanDirs = ([] as string[])
       .concat((flags['scan-dir'] as string | string[]) || [])
-      .map(p => Path.resolve(p));
-    if (!extraPluginScanDirs.every(s => typeof s === 'string')) {
+      .map((p) => Path.resolve(p));
+    if (!extraPluginScanDirs.every((s) => typeof s === 'string')) {
       throw createFlagError('expected --scan-dir to be a string');
+    }
+
+    const reportStats = flags['report-stats'] ?? false;
+    if (typeof reportStats !== 'boolean') {
+      throw createFlagError('expected --report-stats to have no value');
+    }
+
+    const filter = typeof flags.filter === 'string' ? [flags.filter] : flags.filter;
+    if (!Array.isArray(filter) || !filter.every((f) => typeof f === 'string')) {
+      throw createFlagError('expected --filter to be one or more strings');
+    }
+
+    const validateLimits = flags['validate-limits'] ?? false;
+    if (typeof validateLimits !== 'boolean') {
+      throw createFlagError('expected --validate-limits to have no value');
+    }
+
+    const updateLimits = flags['update-limits'] ?? false;
+    if (typeof updateLimits !== 'boolean') {
+      throw createFlagError('expected --update-limits to have no value');
     }
 
     const config = OptimizerConfig.create({
       repoRoot: REPO_ROOT,
       watch,
       maxWorkerCount,
-      oss,
-      dist,
+      oss: oss && !(validateLimits || updateLimits),
+      dist: dist || updateLimits,
       cache,
-      examples,
+      examples: examples && !(validateLimits || updateLimits),
       profileWebpack,
       extraPluginScanDirs,
       inspectWorkers,
+      includeCoreBundle,
+      filter,
     });
 
-    await runOptimizer(config)
-      .pipe(logOptimizerState(log, config))
-      .toPromise();
+    if (validateLimits) {
+      validateLimitsForAllBundles(log, config);
+      return;
+    }
+
+    let update$ = runOptimizer(config);
+
+    if (reportStats) {
+      const reporter = CiStatsReporter.fromEnv(log);
+
+      if (!reporter.isEnabled()) {
+        log.warning('Unable to initialize CiStatsReporter from env');
+      }
+
+      update$ = update$.pipe(reportOptimizerStats(reporter, config, log));
+    }
+
+    await update$.pipe(logOptimizerState(log, config)).toPromise();
+
+    if (updateLimits) {
+      updateBundleLimits(log, config);
+    }
   },
   {
     flags: {
-      boolean: ['watch', 'oss', 'examples', 'dist', 'cache', 'profile', 'inspect-workers'],
-      string: ['workers', 'scan-dir'],
+      boolean: [
+        'core',
+        'watch',
+        'oss',
+        'examples',
+        'dist',
+        'cache',
+        'profile',
+        'inspect-workers',
+        'report-stats',
+        'validate-limits',
+        'update-limits',
+      ],
+      string: ['workers', 'scan-dir', 'filter'],
       default: {
+        core: true,
         examples: true,
         cache: true,
         'inspect-workers': true,
+        filter: [],
       },
       help: `
         --watch            run the optimizer in watch mode
         --workers          max number of workers to use
         --oss              only build oss plugins
         --profile          profile the webpack builds and write stats.json files to build outputs
+        --no-core          disable generating the core bundle
         --no-cache         disable the cache
+        --filter           comma-separated list of bundle id filters, results from multiple flags are merged, * and ! are supported
         --no-examples      don't build the example plugins
-        --dist             create bundles that are suitable for inclusion in the Kibana distributable
+        --dist             create bundles that are suitable for inclusion in the Kibana distributable, enabled when running with --update-limits
         --scan-dir         add a directory to the list of directories scanned for plugins (specify as many times as necessary)
         --no-inspect-workers  when inspecting the parent process, don't inspect the workers
+        --report-stats     attempt to report stats about this execution of the build to the kibana-ci-stats service using this name
+        --validate-limits  validate the limits.yml config to ensure that there are limits defined for every bundle
+        --update-limits    run a build and rewrite the limits file to include the current bundle sizes +5kb
       `,
     },
   }

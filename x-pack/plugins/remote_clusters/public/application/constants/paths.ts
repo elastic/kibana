@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const CRUD_APP_BASE_PATH: string = '/management/elasticsearch/remote_clusters';
+export const CRUD_APP_BASE_PATH: string = '/management/data/remote_clusters';

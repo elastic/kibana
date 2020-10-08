@@ -4,11 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchParams } from 'elasticsearch';
-import { IEsSearchRequest } from '../../../../../src/plugins/data/common';
+import { EqlSearch } from '@elastic/elasticsearch/api/requestParams';
+import { ApiResponse, TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
 
-export interface EnhancedSearchParams extends SearchParams {
-  ignoreThrottled: boolean;
+import {
+  IEsSearchRequest,
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+} from '../../../../../src/plugins/data/common';
+
+export const ENHANCED_ES_SEARCH_STRATEGY = 'ese';
+
+export interface IAsyncSearchRequest extends IEsSearchRequest {
+  /**
+   * The ID received from the response from the initial request
+   */
+  id?: string;
 }
 
 export interface IEnhancedEsSearchRequest extends IEsSearchRequest {
@@ -17,3 +28,13 @@ export interface IEnhancedEsSearchRequest extends IEsSearchRequest {
    */
   isRollup?: boolean;
 }
+
+export const EQL_SEARCH_STRATEGY = 'eql';
+
+export type EqlRequestParams = EqlSearch<Record<string, unknown>>;
+
+export interface EqlSearchStrategyRequest extends IKibanaSearchRequest<EqlRequestParams> {
+  options?: TransportRequestOptions;
+}
+
+export type EqlSearchStrategyResponse<T = unknown> = IKibanaSearchResponse<ApiResponse<T>>;

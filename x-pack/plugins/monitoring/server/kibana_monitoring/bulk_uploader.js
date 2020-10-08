@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaultsDeep, uniq, compact, get } from 'lodash';
-
+import { defaultsDeep, uniq, compact } from 'lodash';
+import { ServiceStatusLevels } from '../../../../../src/core/server';
 import {
   TELEMETRY_COLLECTION_INTERVAL,
   KIBANA_STATS_TYPE_MONITORING,
 } from '../../common/constants';
 
 import { sendBulkPayload, monitoringBulk } from './lib';
-import { hasMonitoringCluster } from '../es_client/instantiate_client';
 
 /*
  * Handles internal Kibana stats collection and uploading data to Monitoring
@@ -31,13 +30,11 @@ import { hasMonitoringCluster } from '../es_client/instantiate_client';
  * @param {Object} xpackInfo server.plugins.xpack_main.info object
  */
 export class BulkUploader {
-  constructor({ config, log, interval, elasticsearch, kibanaStats }) {
+  constructor({ log, interval, elasticsearch, statusGetter$, kibanaStats }) {
     if (typeof interval !== 'number') {
       throw new Error('interval number of milliseconds is required');
     }
 
-    this._hasDirectConnectionToMonitoringCluster = false;
-    this._productionClusterUuid = null;
     this._timer = null;
     // Hold sending and fetching usage until monitoring.bulk is successful. This means that we
     // send usage data on the second tick. But would save a lot of bandwidth fetching usage on
@@ -50,32 +47,23 @@ export class BulkUploader {
     this._usageInterval = TELEMETRY_COLLECTION_INTERVAL;
     this._log = log;
 
-    this._cluster = elasticsearch.createClient('admin', {
+    this._cluster = elasticsearch.legacy.createClient('admin', {
       plugins: [monitoringBulk],
     });
 
-    if (hasMonitoringCluster(config.elasticsearch)) {
-      this._log.info(`Detected direct connection to monitoring cluster`);
-      this._hasDirectConnectionToMonitoringCluster = true;
-      this._cluster = elasticsearch.createClient('monitoring-direct', config.elasticsearch);
-      elasticsearch.adminClient.callAsInternalUser('info').then(data => {
-        this._productionClusterUuid = get(data, 'cluster_uuid');
-      });
-    }
-
     this.kibanaStats = kibanaStats;
-    this.kibanaStatusGetter = null;
-  }
 
-  setKibanaStatusGetter(getter) {
-    this.kibanaStatusGetter = getter;
+    this.kibanaStatus = null;
+    this.kibanaStatusGetter$ = statusGetter$.subscribe((nextStatus) => {
+      this.kibanaStatus = nextStatus.level;
+    });
   }
 
   filterCollectorSet(usageCollection) {
     const successfulUploadInLastDay =
       this._lastFetchUsageTime && this._lastFetchUsageTime + this._usageInterval > Date.now();
 
-    return usageCollection.getFilteredCollectorSet(c => {
+    return usageCollection.getFilteredCollectorSet((c) => {
       // this is internal bulk upload, so filter out API-only collectors
       if (c.ignoreForInternalUploader) {
         return false;
@@ -151,7 +139,7 @@ export class BulkUploader {
 
     const data = await usageCollection.bulkFetch(this._cluster.callAsInternalUser);
     const payload = this.toBulkUploadFormat(compact(data), usageCollection);
-    if (payload) {
+    if (payload && payload.length > 0) {
       try {
         this._log.debug(`Uploading bulk stats payload to the local cluster`);
         const result = await this._onPayload(payload);
@@ -181,20 +169,26 @@ export class BulkUploader {
   }
 
   async _onPayload(payload) {
-    return await sendBulkPayload(
-      this._cluster,
-      this._interval,
-      payload,
-      this._log,
-      this._hasDirectConnectionToMonitoringCluster,
-      this._productionClusterUuid
-    );
+    return await sendBulkPayload(this._cluster, this._interval, payload, this._log);
+  }
+
+  getConvertedKibanaStatuss() {
+    if (this.kibanaStatus === ServiceStatusLevels.available) {
+      return 'green';
+    }
+    if (this.kibanaStatus === ServiceStatusLevels.critical) {
+      return 'red';
+    }
+    if (this.kibanaStatus === ServiceStatusLevels.degraded) {
+      return 'yellow';
+    }
+    return 'unknown';
   }
 
   getKibanaStats(type) {
     const stats = {
       ...this.kibanaStats,
-      status: this.kibanaStatusGetter(),
+      status: this.getConvertedKibanaStatuss(),
     };
 
     if (type === KIBANA_STATS_TYPE_MONITORING) {
@@ -244,7 +238,7 @@ export class BulkUploader {
    */
   toBulkUploadFormat(rawData, usageCollection) {
     if (rawData.length === 0) {
-      return;
+      return [];
     }
 
     // convert the raw data to a nested object by taking each payload through
@@ -272,7 +266,7 @@ export class BulkUploader {
   }
 
   static checkPayloadTypesUnique(payload) {
-    const ids = payload.map(item => item[0].index._type);
+    const ids = payload.map((item) => item[0].index._type);
     const uniques = uniq(ids);
     if (ids.length !== uniques.length) {
       throw new Error('Duplicate collector type identifiers found in payload! ' + ids.join(','));

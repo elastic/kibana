@@ -11,16 +11,16 @@ import supertestAsPromised from 'supertest-as-promised';
 
 const {
   task: { properties: taskManagerIndexMapping },
-} = require('../../../../legacy/plugins/task_manager/server/mappings.json');
+} = require('../../../../plugins/task_manager/server/saved_objects/mappings.json');
 
 const {
   DEFAULT_MAX_WORKERS,
   DEFAULT_POLL_INTERVAL,
 } = require('../../../../plugins/task_manager/server/config.ts');
 
-const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const es = getService('legacyEs');
   const log = getService('log');
   const retry = getService('retry');
@@ -30,11 +30,7 @@ export default function({ getService }) {
 
   describe('scheduling and running tasks', () => {
     beforeEach(
-      async () =>
-        await supertest
-          .delete('/api/sample_tasks')
-          .set('kbn-xsrf', 'xxx')
-          .expect(200)
+      async () => await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200)
     );
 
     beforeEach(async () => {
@@ -61,7 +57,7 @@ export default function({ getService }) {
       return supertest
         .get('/api/sample_tasks')
         .expect(200)
-        .then(response => response.body);
+        .then((response) => response.body);
     }
 
     function currentTask(task) {
@@ -69,7 +65,15 @@ export default function({ getService }) {
         .get(`/api/sample_tasks/task/${task}`)
         .send({ task })
         .expect(200)
-        .then(response => response.body);
+        .then((response) => response.body);
+    }
+
+    function ensureTasksIndexRefreshed() {
+      return supertest
+        .get(`/api/ensure_tasks_index_refreshed`)
+        .send({})
+        .expect(200)
+        .then((response) => response.body);
     }
 
     function historyDocs(taskId) {
@@ -78,7 +82,7 @@ export default function({ getService }) {
           index: testHistoryIndex,
           q: taskId ? `taskId:${taskId}` : 'type:task',
         })
-        .then(result => result.hits.hits);
+        .then((result) => result.hits.hits);
     }
 
     function scheduleTask(task) {
@@ -87,16 +91,7 @@ export default function({ getService }) {
         .set('kbn-xsrf', 'xxx')
         .send({ task })
         .expect(200)
-        .then(response => response.body);
-    }
-
-    function scheduleTaskUsingLegacyApi(task) {
-      return supertest
-        .post('/api/sample_tasks/schedule_legacy')
-        .set('kbn-xsrf', 'xxx')
-        .send({ task })
-        .expect(200)
-        .then(response => response.body);
+        .then((response) => response.body);
     }
 
     function runTaskNow(task) {
@@ -105,7 +100,7 @@ export default function({ getService }) {
         .set('kbn-xsrf', 'xxx')
         .send({ task })
         .expect(200)
-        .then(response => response.body);
+        .then((response) => response.body);
     }
 
     function scheduleTaskIfNotExists(task) {
@@ -114,7 +109,7 @@ export default function({ getService }) {
         .set('kbn-xsrf', 'xxx')
         .send({ task })
         .expect(200)
-        .then(response => response.body);
+        .then((response) => response.body);
     }
 
     function releaseTasksWaitingForEventToComplete(event) {
@@ -126,7 +121,7 @@ export default function({ getService }) {
     }
 
     function getTaskById(tasks, id) {
-      return tasks.filter(task => task.id === id)[0];
+      return tasks.filter((task) => task.id === id)[0];
     }
 
     async function provideParamsToTasksWaitingForParams(taskId, data = {}) {
@@ -300,10 +295,12 @@ export default function({ getService }) {
 
       await retry.try(async () => {
         const docs = await historyDocs();
-        expect(docs.filter(taskDoc => taskDoc._source.taskId === originalTask.id).length).to.eql(1);
+        expect(docs.filter((taskDoc) => taskDoc._source.taskId === originalTask.id).length).to.eql(
+          1
+        );
 
         const [task] = (await currentTasks()).docs.filter(
-          taskDoc => taskDoc.id === originalTask.id
+          (taskDoc) => taskDoc.id === originalTask.id
         );
 
         expect(task.state.count).to.eql(1);
@@ -321,11 +318,12 @@ export default function({ getService }) {
 
       await retry.try(async () => {
         expect(
-          (await historyDocs()).filter(taskDoc => taskDoc._source.taskId === originalTask.id).length
+          (await historyDocs()).filter((taskDoc) => taskDoc._source.taskId === originalTask.id)
+            .length
         ).to.eql(2);
 
         const [task] = (await currentTasks()).docs.filter(
-          taskDoc => taskDoc.id === originalTask.id
+          (taskDoc) => taskDoc.id === originalTask.id
         );
         expect(task.state.count).to.eql(2);
 
@@ -403,7 +401,7 @@ export default function({ getService }) {
       await retry.try(async () => {
         await releaseTasksWaitingForEventToComplete('releaseTheOthers');
         const tasks = (await currentTasks()).docs.filter(
-          task => task.params.originalParams.waitForEvent === 'releaseTheOthers'
+          (task) => task.params.originalParams.waitForEvent === 'releaseTheOthers'
         );
         expect(tasks.length).to.eql(0);
       });
@@ -413,19 +411,24 @@ export default function({ getService }) {
       const originalTask = await scheduleTask({
         taskType: 'sampleTask',
         schedule: { interval: `30m` },
-        params: { failWith: 'error on run now', failOn: 3 },
+        params: { failWith: 'this task was meant to fail!', failOn: 3 },
       });
 
       await retry.try(async () => {
         const docs = await historyDocs();
-        expect(docs.filter(taskDoc => taskDoc._source.taskId === originalTask.id).length).to.eql(1);
+        expect(docs.filter((taskDoc) => taskDoc._source.taskId === originalTask.id).length).to.eql(
+          1
+        );
 
         const task = await currentTask(originalTask.id);
         expect(task.state.count).to.eql(1);
+        expect(task.status).to.eql('idle');
 
         // ensure this task shouldnt run for another half hour
         expectReschedule(Date.parse(originalTask.runAt), task, 30 * 60000);
       });
+
+      await ensureTasksIndexRefreshed();
 
       // second run should still be successful
       const successfulRunNowResult = await runTaskNow({
@@ -436,18 +439,25 @@ export default function({ getService }) {
       await retry.try(async () => {
         const task = await currentTask(originalTask.id);
         expect(task.state.count).to.eql(2);
+        expect(task.status).to.eql('idle');
       });
+
+      await ensureTasksIndexRefreshed();
 
       // third run should fail
       const failedRunNowResult = await runTaskNow({
         id: originalTask.id,
       });
 
-      expect(failedRunNowResult).to.eql({ id: originalTask.id, error: `Error: error on run now` });
+      expect(failedRunNowResult).to.eql({
+        id: originalTask.id,
+        error: `Error: Failed to run task \"${originalTask.id}\": Error: this task was meant to fail!`,
+      });
 
       await retry.try(async () => {
         expect(
-          (await historyDocs()).filter(taskDoc => taskDoc._source.taskId === originalTask.id).length
+          (await historyDocs()).filter((taskDoc) => taskDoc._source.taskId === originalTask.id)
+            .length
         ).to.eql(2);
 
         const task = await currentTask(originalTask.id);
@@ -482,10 +492,15 @@ export default function({ getService }) {
 
       await retry.try(async () => {
         const docs = await historyDocs();
-        expect(docs.filter(taskDoc => taskDoc._source.taskId === longRunningTask.id).length).to.eql(
-          1
-        );
+        expect(
+          docs.filter((taskDoc) => taskDoc._source.taskId === longRunningTask.id).length
+        ).to.eql(1);
+
+        const task = await currentTask(longRunningTask.id);
+        expect(task.status).to.eql('running');
       });
+
+      await ensureTasksIndexRefreshed();
 
       // first runNow should fail
       const failedRunNowResult = await runTaskNow({
@@ -502,7 +517,12 @@ export default function({ getService }) {
       await retry.try(async () => {
         const tasks = (await currentTasks()).docs;
         expect(getTaskById(tasks, longRunningTask.id).state.count).to.eql(1);
+
+        const task = await currentTask(longRunningTask.id);
+        expect(task.status).to.eql('idle');
       });
+
+      await ensureTasksIndexRefreshed();
 
       // second runNow should be successful
       const successfulRunNowResult = runTaskNow({
@@ -586,16 +606,6 @@ export default function({ getService }) {
         expect(getTaskById(tasks, fastTask.id).state.count).to.greaterThan(2);
         expect(getTaskById(tasks, longRunningTask.id).state.count).to.eql(1);
       });
-    });
-
-    it('should retain the legacy api until v8.0.0', async () => {
-      const result = await scheduleTaskUsingLegacyApi({
-        id: 'task-with-legacy-api',
-        taskType: 'sampleTask',
-        params: {},
-      });
-
-      expect(result.id).to.be('task-with-legacy-api');
     });
   });
 }

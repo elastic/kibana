@@ -66,7 +66,7 @@ export class CaseUserActionService {
       try {
         this.log.debug(`Attempting to POST a new case user action`);
         return await client.bulkCreate(
-          actions.map(action => ({ type: CASE_USER_ACTION_SAVED_OBJECT, ...action }))
+          actions.map((action) => ({ type: CASE_USER_ACTION_SAVED_OBJECT, ...action }))
         );
       } catch (error) {
         this.log.debug(`Error on POST a new case user action: ${error}`);

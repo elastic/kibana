@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
 
 import { FormData } from '../types';
-import { useFormContext } from '../form_context';
+import { useFormData } from '../hooks';
 
 interface Props {
   children: (formData: FormData) => JSX.Element | null;
@@ -28,31 +28,12 @@ interface Props {
 }
 
 export const FormDataProvider = React.memo(({ children, pathsToWatch }: Props) => {
-  const form = useFormContext();
-  const previousRawData = useRef<FormData>(form.__formData$.current.value);
-  const [formData, setFormData] = useState<FormData>(previousRawData.current);
+  const { 0: formData, 2: isReady } = useFormData({ watch: pathsToWatch });
 
-  useEffect(() => {
-    const subscription = form.subscribe(({ data: { raw } }) => {
-      // To avoid re-rendering the children for updates on the form data
-      // that we are **not** interested in, we can specify one or multiple path(s)
-      // to watch.
-      if (pathsToWatch) {
-        const valuesToWatchArray = Array.isArray(pathsToWatch)
-          ? (pathsToWatch as string[])
-          : ([pathsToWatch] as string[]);
-
-        if (valuesToWatchArray.some(value => previousRawData.current[value] !== raw[value])) {
-          previousRawData.current = raw;
-          setFormData(raw);
-        }
-      } else {
-        setFormData(raw);
-      }
-    });
-
-    return subscription.unsubscribe;
-  }, [form, pathsToWatch]);
+  if (!isReady) {
+    // No field has mounted yet, don't render anything
+    return null;
+  }
 
   return children(formData);
 });

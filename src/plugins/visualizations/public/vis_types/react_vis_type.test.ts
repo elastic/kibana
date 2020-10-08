@@ -33,6 +33,7 @@ describe('React Vis Type', () => {
     it('should throw if component is not set', () => {
       expect(() => {
         const missingConfig = cloneDeep(visConfig);
+        // @ts-expect-error TS knows it's a required property
         delete missingConfig.visConfig.component;
         new ReactVisType(missingConfig);
       }).toThrow();

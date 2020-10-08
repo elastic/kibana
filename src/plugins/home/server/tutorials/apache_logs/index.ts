@@ -37,6 +37,7 @@ export function apacheLogsSpecProvider(context: TutorialContext): TutorialSchema
     name: i18n.translate('home.tutorials.apacheLogs.nameTitle', {
       defaultMessage: 'Apache logs',
     }),
+    moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.apacheLogs.shortDescription', {
       defaultMessage: 'Collect and parse access and error logs created by the Apache HTTP server.',
@@ -65,7 +66,7 @@ export function apacheLogsSpecProvider(context: TutorialContext): TutorialSchema
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/apache_logs/screenshot.png',
+    previewImagePath: '/plugins/home/assets/apache_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),

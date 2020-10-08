@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`datatable_expression DatatableComponent it renders the title and value 1`] = `
+<VisualizationContainer
+  reportTitle="My fanci metric chart"
+>
+  <EuiBasicTable
+    className="lnsDataTable"
+    columns={
+      Array [
+        Object {
+          "field": "a",
+          "name": "a",
+          "render": [Function],
+        },
+        Object {
+          "field": "b",
+          "name": "b",
+          "render": [Function],
+        },
+        Object {
+          "field": "c",
+          "name": "c",
+          "render": [Function],
+        },
+      ]
+    }
+    data-test-subj="lnsDataTable"
+    items={
+      Array [
+        Object {
+          "a": "shoes",
+          "b": 1588024800000,
+          "c": 3,
+        },
+      ]
+    }
+    noItemsMessage="No items found"
+    responsive={true}
+    tableLayout="auto"
+  />
+</VisualizationContainer>
+`;

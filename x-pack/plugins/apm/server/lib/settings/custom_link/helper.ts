@@ -8,7 +8,7 @@ import {
   CustomLinkES,
   CustomLink,
   Filter,
-  FilterKey
+  FilterKey,
 } from '../../../../common/custom_link/custom_link_types';
 
 export function fromESFormat(customLinkES: CustomLinkES): CustomLink {
@@ -21,9 +21,9 @@ export function fromESFormat(customLinkES: CustomLinkES): CustomLink {
     filters: Object.entries(filters).map(
       ([key, value]: [string, string[]]) => ({
         key: key as FilterKey,
-        value: isEmpty(value) ? '' : value.join()
+        value: isEmpty(value) ? '' : value.join(),
       })
-    )
+    ),
   };
 }
 
@@ -41,6 +41,6 @@ export function toESFormat(customLink: CustomLink): CustomLinkES {
 export function splitFilterValueByComma(filterValue: Filter['value']) {
   return filterValue
     .split(',')
-    .map(v => v.trim())
-    .filter(v => v);
+    .map((v) => v.trim())
+    .filter((v) => v);
 }

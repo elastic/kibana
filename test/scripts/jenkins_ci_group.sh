@@ -5,7 +5,7 @@ source test/scripts/jenkins_test_setup_oss.sh
 if [[ -z "$CODE_COVERAGE" ]]; then
   checks-reporter-with-killswitch "Functional tests / Group ${CI_GROUP}" yarn run grunt "run:functionalTests_ciGroup${CI_GROUP}";
 
-  if [ "$CI_GROUP" == "1" ]; then
+  if [[ ! "$TASK_QUEUE_PROCESS_ID" && "$CI_GROUP" == "1" ]]; then
     source test/scripts/jenkins_build_kbn_sample_panel_action.sh
     yarn run grunt run:pluginFunctionalTestsRelease --from=source;
     yarn run grunt run:exampleFunctionalTestsRelease --from=source;
@@ -31,4 +31,12 @@ else
     mkdir -p ../kibana/target/kibana-coverage/functional
     mv target/kibana-coverage/functional/* ../kibana/target/kibana-coverage/functional/
   fi
+
+  echo " -> moving junit output, silently fail in case of no report"
+  mkdir -p ../kibana/target/junit
+  mv target/junit/* ../kibana/target/junit/ || echo "copying junit failed"
+
+  echo " -> copying screenshots and html for failures"
+  cp -r test/functional/screenshots/* ../kibana/test/functional/screenshots/ || echo "copying screenshots failed"
+  cp -r test/functional/failure_debug ../kibana/test/functional/ || echo "copying html failed"
 fi

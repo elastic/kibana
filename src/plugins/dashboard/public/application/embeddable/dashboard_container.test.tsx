@@ -17,8 +17,6 @@
  * under the License.
  */
 
-// @ts-ignore
-import { findTestSubject } from '@elastic/eui/lib/test';
 import { nextTick } from 'test_utils/enzyme_helpers';
 import { isErrorEmbeddable, ViewMode } from '../../embeddable_plugin';
 import { DashboardContainer, DashboardContainerOptions } from './dashboard_container';
@@ -30,7 +28,6 @@ import {
   ContactCardEmbeddable,
   ContactCardEmbeddableOutput,
 } from '../../embeddable_plugin_test_samples';
-// eslint-disable-next-line
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 
 const options: DashboardContainerOptions = {
@@ -53,7 +50,7 @@ beforeEach(() => {
   options.embeddable = doStart();
 });
 
-test('DashboardContainer initializes embeddables', async done => {
+test('DashboardContainer initializes embeddables', async (done) => {
   const initialInput = getSampleDashboardInput({
     panels: {
       '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
@@ -64,7 +61,7 @@ test('DashboardContainer initializes embeddables', async done => {
   });
   const container = new DashboardContainer(initialInput, options);
 
-  const subscription = container.getOutput$().subscribe(output => {
+  const subscription = container.getOutput$().subscribe((output) => {
     if (container.getOutput().embeddableLoaded['123']) {
       const embeddable = container.getChild<ContactCardEmbeddable>('123');
       expect(embeddable).toBeDefined();

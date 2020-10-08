@@ -14,6 +14,7 @@ export declare interface ExplorerChartsData {
 export declare const getDefaultChartsData: () => ExplorerChartsData;
 
 export declare const anomalyDataChange: (
+  chartsContainerWidth: number,
   anomalyRecords: any[],
   earliestMs: number,
   latestMs: number,

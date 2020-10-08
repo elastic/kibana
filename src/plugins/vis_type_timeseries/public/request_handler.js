@@ -19,6 +19,7 @@
 
 import { getTimezone, validateInterval } from './application';
 import { getUISettings, getDataStart, getCoreStart } from './services';
+import { MAX_BUCKETS_SETTING } from '../common/constants';
 
 export const metricsRequestHandler = async ({
   uiState,
@@ -37,7 +38,7 @@ export const metricsRequestHandler = async ({
 
   if (visParams && visParams.id && !visParams.isModelInvalid) {
     try {
-      const maxBuckets = config.get('metrics:max_buckets');
+      const maxBuckets = config.get(MAX_BUCKETS_SETTING);
 
       validateInterval(parsedTimeRange, visParams, maxBuckets);
 

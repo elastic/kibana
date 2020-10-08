@@ -4,9 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createGetCertsRoute } from './certs';
+import { createGetCertsRoute } from './certs/certs';
 import { createGetOverviewFilters } from './overview_filters';
-import { createGetPingHistogramRoute, createGetPingsRoute } from './pings';
+import {
+  createGetPingHistogramRoute,
+  createGetPingsRoute,
+  createJourneyRoute,
+  createJourneyScreenshotRoute,
+} from './pings';
 import { createGetDynamicSettingsRoute, createPostDynamicSettingsRoute } from './dynamic_settings';
 import { createLogPageViewRoute } from './telemetry';
 import { createGetSnapshotCount } from './snapshot';
@@ -19,6 +24,7 @@ import {
 } from './monitors';
 import { createGetMonitorDurationRoute } from './monitors/monitors_durations';
 import { createGetIndexPatternRoute, createGetIndexStatusRoute } from './index_state';
+
 export * from './types';
 export { createRouteWithAuth } from './create_route_with_auth';
 export { uptimeRouteWrapper } from './uptime_route_wrapper';
@@ -39,4 +45,6 @@ export const restApiRoutes: UMRestApiRouteFactory[] = [
   createLogPageViewRoute,
   createGetPingHistogramRoute,
   createGetMonitorDurationRoute,
+  createJourneyRoute,
+  createJourneyScreenshotRoute,
 ];

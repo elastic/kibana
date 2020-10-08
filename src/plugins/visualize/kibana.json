@@ -1,17 +1,24 @@
 {
   "id": "visualize",
   "version": "kibana",
-  "server": false,
+  "server": true,
   "ui": true,
   "requiredPlugins": [
     "data",
-    "kibanaLegacy",
+    "urlForwarding",
     "navigation",
     "savedObjects",
-    "visualizations"
+    "visualizations",
+    "embeddable",
+    "dashboard",
+    "uiActions"
   ],
-  "optionalPlugins": [
+  "optionalPlugins": ["home", "share"],
+  "requiredBundles": [
+    "kibanaUtils",
+    "kibanaReact",
     "home",
-    "share"
+    "discover",
+    "visDefaultEditor"
   ]
 }

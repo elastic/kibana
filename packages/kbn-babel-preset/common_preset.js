@@ -34,6 +34,14 @@ const plugins = [
   // Nullish coalescing proposal is stage 3 (https://github.com/tc39/proposal-nullish-coalescing)
   // Need this since we are using TypeScript 3.7+
   require.resolve('@babel/plugin-proposal-nullish-coalescing-operator'),
+
+  // Proposal is on stage 4 (https://github.com/tc39/proposal-export-ns-from)
+  // Need this since we are using TypeScript 3.8+
+  require.resolve('@babel/plugin-proposal-export-namespace-from'),
+
+  // Proposal is on stage 4 (https://github.com/tc39/proposal-export-ns-from)
+  // Need this since we are using TypeScript 3.9+
+  require.resolve('@babel/plugin-proposal-private-methods'),
 ];
 
 module.exports = {

@@ -2,12 +2,7 @@
 
 exports[`Relationships should render dashboards normally 1`] = `
 <EuiFlyout
-  closeButtonAriaLabel="Closes this dialog"
-  hideCloseButton={false}
-  maxWidth={false}
   onClose={[MockFunction]}
-  ownFocus={false}
-  size="m"
 >
   <EuiFlyoutHeader
     hasBorder={true}
@@ -93,7 +88,7 @@ exports[`Relationships should render dashboards normally 1`] = `
                 "editUrl": "/management/kibana/objects/savedVisualizations/1",
                 "icon": "visualizeApp",
                 "inAppUrl": Object {
-                  "path": "/app/kibana#/visualize/edit/1",
+                  "path": "/app/visualize#/edit/1",
                   "uiCapabilitiesPath": "visualize.show",
                 },
                 "title": "My Visualization Title 1",
@@ -107,7 +102,7 @@ exports[`Relationships should render dashboards normally 1`] = `
                 "editUrl": "/management/kibana/objects/savedVisualizations/2",
                 "icon": "visualizeApp",
                 "inAppUrl": Object {
-                  "path": "/app/kibana#/visualize/edit/2",
+                  "path": "/app/visualize#/edit/2",
                   "uiCapabilitiesPath": "visualize.show",
                 },
                 "title": "My Visualization Title 2",
@@ -166,12 +161,7 @@ exports[`Relationships should render dashboards normally 1`] = `
 
 exports[`Relationships should render errors 1`] = `
 <EuiFlyout
-  closeButtonAriaLabel="Closes this dialog"
-  hideCloseButton={false}
-  maxWidth={false}
   onClose={[MockFunction]}
-  ownFocus={false}
-  size="m"
 >
   <EuiFlyoutHeader
     hasBorder={true}
@@ -215,12 +205,7 @@ exports[`Relationships should render errors 1`] = `
 
 exports[`Relationships should render index patterns normally 1`] = `
 <EuiFlyout
-  closeButtonAriaLabel="Closes this dialog"
-  hideCloseButton={false}
-  maxWidth={false}
   onClose={[MockFunction]}
-  ownFocus={false}
-  size="m"
 >
   <EuiFlyoutHeader
     hasBorder={true}
@@ -306,7 +291,7 @@ exports[`Relationships should render index patterns normally 1`] = `
                 "editUrl": "/management/kibana/objects/savedSearches/1",
                 "icon": "search",
                 "inAppUrl": Object {
-                  "path": "/app/kibana#/discover/1",
+                  "path": "/app/discover#//1",
                   "uiCapabilitiesPath": "discover.show",
                 },
                 "title": "My Search Title",
@@ -320,7 +305,7 @@ exports[`Relationships should render index patterns normally 1`] = `
                 "editUrl": "/management/kibana/objects/savedVisualizations/2",
                 "icon": "visualizeApp",
                 "inAppUrl": Object {
-                  "path": "/app/kibana#/visualize/edit/2",
+                  "path": "/app/visualize#/edit/2",
                   "uiCapabilitiesPath": "visualize.show",
                 },
                 "title": "My Visualization Title",
@@ -384,12 +369,7 @@ exports[`Relationships should render index patterns normally 1`] = `
 
 exports[`Relationships should render searches normally 1`] = `
 <EuiFlyout
-  closeButtonAriaLabel="Closes this dialog"
-  hideCloseButton={false}
-  maxWidth={false}
   onClose={[MockFunction]}
-  ownFocus={false}
-  size="m"
 >
   <EuiFlyoutHeader
     hasBorder={true}
@@ -472,11 +452,11 @@ exports[`Relationships should render searches normally 1`] = `
             Object {
               "id": "1",
               "meta": Object {
-                "editUrl": "/management/kibana/index_patterns/1",
+                "editUrl": "/management/kibana/indexPatterns/patterns/1",
                 "icon": "indexPatternApp",
                 "inAppUrl": Object {
-                  "path": "/app/kibana#/management/kibana/index_patterns/1",
-                  "uiCapabilitiesPath": "management.kibana.index_patterns",
+                  "path": "/app/management/kibana/indexPatterns/patterns/1",
+                  "uiCapabilitiesPath": "management.kibana.indexPatterns",
                 },
                 "title": "My Index Pattern",
               },
@@ -489,7 +469,7 @@ exports[`Relationships should render searches normally 1`] = `
                 "editUrl": "/management/kibana/objects/savedVisualizations/2",
                 "icon": "visualizeApp",
                 "inAppUrl": Object {
-                  "path": "/app/kibana#/visualize/edit/2",
+                  "path": "/app/visualize#/edit/2",
                   "uiCapabilitiesPath": "visualize.show",
                 },
                 "title": "My Visualization Title",
@@ -553,12 +533,7 @@ exports[`Relationships should render searches normally 1`] = `
 
 exports[`Relationships should render visualizations normally 1`] = `
 <EuiFlyout
-  closeButtonAriaLabel="Closes this dialog"
-  hideCloseButton={false}
-  maxWidth={false}
   onClose={[MockFunction]}
-  ownFocus={false}
-  size="m"
 >
   <EuiFlyoutHeader
     hasBorder={true}

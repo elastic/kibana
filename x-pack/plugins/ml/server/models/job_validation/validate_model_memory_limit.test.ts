@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { CombinedJob, Detector } from '../../../common/types/anomaly_detection_jobs';
-import { ModelMemoryEstimate } from '../calculate_model_memory_limit/calculate_model_memory_limit';
+import { ModelMemoryEstimateResponse } from '../calculate_model_memory_limit/calculate_model_memory_limit';
 import { validateModelMemoryLimit } from './validate_model_memory_limit';
 
 describe('ML - validateModelMemoryLimit', () => {
@@ -24,6 +24,7 @@ describe('ML - validateModelMemoryLimit', () => {
     },
     limits: {
       max_model_memory_limit: '30mb',
+      effective_max_model_memory_limit: '40mb',
     },
   };
 
@@ -64,39 +65,37 @@ describe('ML - validateModelMemoryLimit', () => {
   };
 
   // mock estimate model memory
-  const modelMemoryEstimateResponse: ModelMemoryEstimate = {
+  const modelMemoryEstimateResponse: ModelMemoryEstimateResponse = {
     model_memory_estimate: '40mb',
   };
 
   interface MockAPICallResponse {
-    'ml.estimateModelMemory'?: ModelMemoryEstimate;
+    'ml.estimateModelMemory'?: ModelMemoryEstimateResponse;
   }
 
-  // mock callWithRequest
+  // mock asCurrentUser
   // used in three places:
   // - to retrieve the info endpoint
   // - to search for cardinality of split field
   // - to retrieve field capabilities used in search for split field cardinality
-  const getMockCallWithRequest = ({
+  const getMockMlClusterClient = ({
     'ml.estimateModelMemory': estimateModelMemory,
-  }: MockAPICallResponse = {}) =>
-    ((call: string) => {
-      if (typeof call === undefined) {
-        return Promise.reject();
-      }
+  }: MockAPICallResponse = {}): IScopedClusterClient => {
+    const callAs = {
+      ml: {
+        info: () => Promise.resolve({ body: mlInfoResponse }),
+        estimateModelMemory: () =>
+          Promise.resolve({ body: estimateModelMemory || modelMemoryEstimateResponse }),
+      },
+      search: () => Promise.resolve({ body: cardinalitySearchResponse }),
+      fieldCaps: () => Promise.resolve({ body: fieldCapsResponse }),
+    };
 
-      let response = {};
-      if (call === 'ml.info') {
-        response = mlInfoResponse;
-      } else if (call === 'search') {
-        response = cardinalitySearchResponse;
-      } else if (call === 'fieldCaps') {
-        response = fieldCapsResponse;
-      } else if (call === 'ml.estimateModelMemory') {
-        response = estimateModelMemory || modelMemoryEstimateResponse;
-      }
-      return Promise.resolve(response);
-    }) as APICaller;
+    return ({
+      asCurrentUser: callAs,
+      asInternalUser: callAs,
+    } as unknown) as IScopedClusterClient;
+  };
 
   function getJobConfig(influencers: string[] = [], detectors: Detector[] = []) {
     return ({
@@ -128,8 +127,8 @@ describe('ML - validateModelMemoryLimit', () => {
     const job = getJobConfig();
     const duration = undefined;
 
-    return validateModelMemoryLimit(getMockCallWithRequest(), job, duration).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateModelMemoryLimit(getMockMlClusterClient(), job, duration).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toEqual([]);
     });
   });
@@ -137,11 +136,11 @@ describe('ML - validateModelMemoryLimit', () => {
   it('Called with no duration or split and mml above limit', () => {
     const job = getJobConfig();
     const duration = undefined;
-    // @ts-ignore
+    // @ts-expect-error
     job.analysis_limits.model_memory_limit = '31mb';
 
-    return validateModelMemoryLimit(getMockCallWithRequest(), job, duration).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateModelMemoryLimit(getMockMlClusterClient(), job, duration).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toEqual(['mml_greater_than_max_mml']);
     });
   });
@@ -150,15 +149,15 @@ describe('ML - validateModelMemoryLimit', () => {
     const dtrs = createDetectors(10);
     const job = getJobConfig(['instance'], dtrs);
     const duration = { start: 0, end: 1 };
-    // @ts-ignore
+    // @ts-expect-error
     job.analysis_limits.model_memory_limit = '20mb';
 
     return validateModelMemoryLimit(
-      getMockCallWithRequest({ 'ml.estimateModelMemory': { model_memory_estimate: '66mb' } }),
+      getMockMlClusterClient({ 'ml.estimateModelMemory': { model_memory_estimate: '66mb' } }),
       job,
       duration
-    ).then(messages => {
-      const ids = messages.map(m => m.id);
+    ).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toEqual(['estimated_mml_greater_than_max_mml']);
     });
   });
@@ -167,15 +166,15 @@ describe('ML - validateModelMemoryLimit', () => {
     const dtrs = createDetectors(2);
     const job = getJobConfig(['instance'], dtrs);
     const duration = { start: 0, end: 1 };
-    // @ts-ignore
+    // @ts-expect-error
     job.analysis_limits.model_memory_limit = '30mb';
 
     return validateModelMemoryLimit(
-      getMockCallWithRequest({ 'ml.estimateModelMemory': { model_memory_estimate: '24mb' } }),
+      getMockMlClusterClient({ 'ml.estimateModelMemory': { model_memory_estimate: '24mb' } }),
       job,
       duration
-    ).then(messages => {
-      const ids = messages.map(m => m.id);
+    ).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toEqual(['success_mml']);
     });
   });
@@ -184,15 +183,15 @@ describe('ML - validateModelMemoryLimit', () => {
     const dtrs = createDetectors(2);
     const job = getJobConfig(['instance'], dtrs);
     const duration = { start: 0, end: 1 };
-    // @ts-ignore
+    // @ts-expect-error
     job.analysis_limits.model_memory_limit = '10mb';
 
     return validateModelMemoryLimit(
-      getMockCallWithRequest({ 'ml.estimateModelMemory': { model_memory_estimate: '22mb' } }),
+      getMockMlClusterClient({ 'ml.estimateModelMemory': { model_memory_estimate: '22mb' } }),
       job,
       duration
-    ).then(messages => {
-      const ids = messages.map(m => m.id);
+    ).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toEqual(['half_estimated_mml_greater_than_mml']);
     });
   });
@@ -201,13 +200,38 @@ describe('ML - validateModelMemoryLimit', () => {
     const dtrs = createDetectors(2);
     const job = getJobConfig(['instance'], dtrs);
     const duration = { start: 0, end: 1 };
+    // @ts-expect-error
     delete mlInfoResponse.limits.max_model_memory_limit;
-    // @ts-ignore
+    // @ts-expect-error
     job.analysis_limits.model_memory_limit = '10mb';
 
-    return validateModelMemoryLimit(getMockCallWithRequest(), job, duration).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateModelMemoryLimit(getMockMlClusterClient(), job, duration).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toEqual(['half_estimated_mml_greater_than_mml']);
+    });
+  });
+
+  it('Called with no duration or split and mml above limit, no max setting', () => {
+    const job = getJobConfig();
+    const duration = undefined;
+    // @ts-expect-error
+    job.analysis_limits.model_memory_limit = '31mb';
+
+    return validateModelMemoryLimit(getMockMlClusterClient(), job, duration).then((messages) => {
+      const ids = messages.map((m) => m.id);
+      expect(ids).toEqual([]);
+    });
+  });
+
+  it('Called with no duration or split and mml above limit, no max setting, above effective max mml', () => {
+    const job = getJobConfig();
+    const duration = undefined;
+    // @ts-expect-error
+    job.analysis_limits.model_memory_limit = '41mb';
+
+    return validateModelMemoryLimit(getMockMlClusterClient(), job, duration).then((messages) => {
+      const ids = messages.map((m) => m.id);
+      expect(ids).toEqual(['mml_greater_than_effective_max_mml']);
     });
   });
 
@@ -215,15 +239,15 @@ describe('ML - validateModelMemoryLimit', () => {
     const dtrs = createDetectors(1);
     const job = getJobConfig(['instance'], dtrs);
     const duration = { start: 0, end: 1 };
-    // @ts-ignore
+    // @ts-expect-error
     job.analysis_limits.model_memory_limit = '20mb';
 
     return validateModelMemoryLimit(
-      getMockCallWithRequest({ 'ml.estimateModelMemory': { model_memory_estimate: '19mb' } }),
+      getMockMlClusterClient({ 'ml.estimateModelMemory': { model_memory_estimate: '19mb' } }),
       job,
       duration
-    ).then(messages => {
-      const ids = messages.map(m => m.id);
+    ).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toEqual(['success_mml']);
     });
   });
@@ -232,11 +256,11 @@ describe('ML - validateModelMemoryLimit', () => {
     const dtrs = createDetectors(1);
     const job = getJobConfig(['instance'], dtrs);
     const duration = { start: 0, end: 1 };
-    // @ts-ignore
+    // @ts-expect-error
     job.analysis_limits.model_memory_limit = '0mb';
 
-    return validateModelMemoryLimit(getMockCallWithRequest(), job, duration).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateModelMemoryLimit(getMockMlClusterClient(), job, duration).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toEqual(['mml_value_invalid']);
     });
   });
@@ -245,11 +269,11 @@ describe('ML - validateModelMemoryLimit', () => {
     const dtrs = createDetectors(1);
     const job = getJobConfig(['instance'], dtrs);
     const duration = { start: 0, end: 1 };
-    // @ts-ignore
+    // @ts-expect-error
     job.analysis_limits.model_memory_limit = '10mbananas';
 
-    return validateModelMemoryLimit(getMockCallWithRequest(), job, duration).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateModelMemoryLimit(getMockMlClusterClient(), job, duration).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toEqual(['mml_value_invalid']);
     });
   });
@@ -258,11 +282,11 @@ describe('ML - validateModelMemoryLimit', () => {
     const dtrs = createDetectors(1);
     const job = getJobConfig(['instance'], dtrs);
     const duration = { start: 0, end: 1 };
-    // @ts-ignore
+    // @ts-expect-error
     job.analysis_limits.model_memory_limit = '10';
 
-    return validateModelMemoryLimit(getMockCallWithRequest(), job, duration).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateModelMemoryLimit(getMockMlClusterClient(), job, duration).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toEqual(['mml_value_invalid']);
     });
   });
@@ -271,11 +295,11 @@ describe('ML - validateModelMemoryLimit', () => {
     const dtrs = createDetectors(1);
     const job = getJobConfig(['instance'], dtrs);
     const duration = { start: 0, end: 1 };
-    // @ts-ignore
+    // @ts-expect-error
     job.analysis_limits.model_memory_limit = 'mb';
 
-    return validateModelMemoryLimit(getMockCallWithRequest(), job, duration).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateModelMemoryLimit(getMockMlClusterClient(), job, duration).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toEqual(['mml_value_invalid']);
     });
   });
@@ -284,11 +308,11 @@ describe('ML - validateModelMemoryLimit', () => {
     const dtrs = createDetectors(1);
     const job = getJobConfig(['instance'], dtrs);
     const duration = { start: 0, end: 1 };
-    // @ts-ignore
+    // @ts-expect-error
     job.analysis_limits.model_memory_limit = 'asdf';
 
-    return validateModelMemoryLimit(getMockCallWithRequest(), job, duration).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateModelMemoryLimit(getMockMlClusterClient(), job, duration).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toEqual(['mml_value_invalid']);
     });
   });
@@ -297,11 +321,11 @@ describe('ML - validateModelMemoryLimit', () => {
     const dtrs = createDetectors(1);
     const job = getJobConfig(['instance'], dtrs);
     const duration = { start: 0, end: 1 };
-    // @ts-ignore
+    // @ts-expect-error
     job.analysis_limits.model_memory_limit = '1023KB';
 
-    return validateModelMemoryLimit(getMockCallWithRequest(), job, duration).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateModelMemoryLimit(getMockMlClusterClient(), job, duration).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toEqual(['mml_value_invalid']);
     });
   });
@@ -310,11 +334,11 @@ describe('ML - validateModelMemoryLimit', () => {
     const dtrs = createDetectors(1);
     const job = getJobConfig(['instance'], dtrs);
     const duration = { start: 0, end: 1 };
-    // @ts-ignore
+    // @ts-expect-error
     job.analysis_limits.model_memory_limit = '1024KB';
 
-    return validateModelMemoryLimit(getMockCallWithRequest(), job, duration).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateModelMemoryLimit(getMockMlClusterClient(), job, duration).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toEqual(['half_estimated_mml_greater_than_mml']);
     });
   });
@@ -323,11 +347,11 @@ describe('ML - validateModelMemoryLimit', () => {
     const dtrs = createDetectors(1);
     const job = getJobConfig(['instance'], dtrs);
     const duration = { start: 0, end: 1 };
-    // @ts-ignore
+    // @ts-expect-error
     job.analysis_limits.model_memory_limit = '6MB';
 
-    return validateModelMemoryLimit(getMockCallWithRequest(), job, duration).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateModelMemoryLimit(getMockMlClusterClient(), job, duration).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toEqual(['half_estimated_mml_greater_than_mml']);
     });
   });
@@ -336,15 +360,15 @@ describe('ML - validateModelMemoryLimit', () => {
     const dtrs = createDetectors(1);
     const job = getJobConfig(['instance'], dtrs);
     const duration = { start: 0, end: 1 };
-    // @ts-ignore
+    // @ts-expect-error
     job.analysis_limits.model_memory_limit = '20MB';
 
     return validateModelMemoryLimit(
-      getMockCallWithRequest({ 'ml.estimateModelMemory': { model_memory_estimate: '20mb' } }),
+      getMockMlClusterClient({ 'ml.estimateModelMemory': { model_memory_estimate: '20mb' } }),
       job,
       duration
-    ).then(messages => {
-      const ids = messages.map(m => m.id);
+    ).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toEqual(['success_mml']);
     });
   });

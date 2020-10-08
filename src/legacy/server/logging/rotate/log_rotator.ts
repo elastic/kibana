@@ -115,7 +115,7 @@ export class LogRotator {
 
       // await writeFileAsync(tempFile, 'test');
 
-      const usePollingTest$ = new Observable<boolean>(observer => {
+      const usePollingTest$ = new Observable<boolean>((observer) => {
         // observable complete function
         const completeFn = (completeStatus: boolean) => {
           if (this.stalkerUsePollingPolicyTestTimeout) {
@@ -297,10 +297,10 @@ export class LogRotator {
 
     return (
       foundLogFiles
-        .filter(file => new RegExp(`${logFileBaseName}\\.\\d`).test(file))
+        .filter((file) => new RegExp(`${logFileBaseName}\\.\\d`).test(file))
         // we use .slice(-1) here in order to retrieve the last number match in the read filenames
         .sort((a, b) => Number(a.match(/(\d+)/g)!.slice(-1)) - Number(b.match(/(\d+)/g)!.slice(-1)))
-        .map(filename => `${logFilesFolder}${sep}${filename}`)
+        .map((filename) => `${logFilesFolder}${sep}${filename}`)
     );
   }
 

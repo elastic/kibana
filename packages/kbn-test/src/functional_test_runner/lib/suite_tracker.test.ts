@@ -21,7 +21,7 @@ import fs from 'fs';
 import { join, resolve } from 'path';
 
 jest.mock('fs');
-jest.mock('@kbn/dev-utils', () => {
+jest.mock('@kbn/utils', () => {
   return { REPO_ROOT: '/dev/null/root' };
 });
 
@@ -145,8 +145,8 @@ describe('SuiteTracker', () => {
     const { suiteTracker } = await runLifecycleWithMocks([root, parent, withTests]);
     const suites = suiteTracker.getAllFinishedSuites();
 
-    const finishedRoot = suites.find(s => s.title === 'root');
-    const finishedWithTests = suites.find(s => s.title !== 'root');
+    const finishedRoot = suites.find((s) => s.title === 'root');
+    const finishedWithTests = suites.find((s) => s.title !== 'root');
 
     expect(finishedRoot).toBeTruthy();
     expect(finishedRoot?.hasTests).toBeFalsy();

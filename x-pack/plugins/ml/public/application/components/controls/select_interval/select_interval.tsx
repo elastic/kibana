@@ -47,7 +47,7 @@ const OPTIONS = [
 function optionValueToInterval(value: string) {
   // Builds the corresponding interval object with the required display and val properties
   // from the specified value.
-  const option = OPTIONS.find(opt => opt.value === value);
+  const option = OPTIONS.find((opt) => opt.value === value);
 
   // Default to auto if supplied value doesn't map to one of the options.
   let interval: TableInterval = { display: OPTIONS[0].text, val: OPTIONS[0].value };

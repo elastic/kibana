@@ -5,8 +5,7 @@
  */
 
 import _ from 'lodash';
-import { isColumnTransferable } from './operations';
-import { operationDefinitionMap, IndexPatternColumn } from './operations';
+import { isColumnTransferable, operationDefinitionMap, IndexPatternColumn } from './operations';
 import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from './types';
 
 export function updateColumnParam<C extends IndexPatternColumn, K extends keyof C['params']>({
@@ -52,7 +51,7 @@ function adjustColumnReferencesForChangedColumn(
   columnId: string
 ) {
   const newColumns = { ...columns };
-  Object.keys(newColumns).forEach(currentColumnId => {
+  Object.keys(newColumns).forEach((currentColumnId) => {
     if (currentColumnId !== columnId) {
       const currentColumn = newColumns[currentColumnId];
       const operationDefinition = operationDefinitionMap[currentColumn.operationType];
@@ -86,6 +85,11 @@ export function changeColumn<C extends IndexPatternColumn>({
     'params' in oldColumn
       ? { ...newColumn, params: oldColumn.params }
       : newColumn;
+
+  if (oldColumn && oldColumn.customLabel) {
+    updatedColumn.customLabel = true;
+    updatedColumn.label = oldColumn.label;
+  }
 
   const newColumns = adjustColumnReferencesForChangedColumn(
     {
@@ -156,16 +160,16 @@ export function updateLayerIndexPattern(
   layer: IndexPatternLayer,
   newIndexPattern: IndexPattern
 ): IndexPatternLayer {
-  const keptColumns: IndexPatternLayer['columns'] = _.pick(layer.columns, column =>
+  const keptColumns: IndexPatternLayer['columns'] = _.pickBy(layer.columns, (column) =>
     isColumnTransferable(column, newIndexPattern)
   );
-  const newColumns: IndexPatternLayer['columns'] = _.mapValues(keptColumns, column => {
+  const newColumns: IndexPatternLayer['columns'] = _.mapValues(keptColumns, (column) => {
     const operationDefinition = operationDefinitionMap[column.operationType];
     return operationDefinition.transfer
       ? operationDefinition.transfer(column, newIndexPattern)
       : column;
   });
-  const newColumnOrder = layer.columnOrder.filter(columnId => newColumns[columnId]);
+  const newColumnOrder = layer.columnOrder.filter((columnId) => newColumns[columnId]);
 
   return {
     ...layer,

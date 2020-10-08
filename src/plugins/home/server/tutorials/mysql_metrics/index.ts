@@ -36,6 +36,7 @@ export function mysqlMetricsSpecProvider(context: TutorialContext): TutorialSche
     name: i18n.translate('home.tutorials.mysqlMetrics.nameTitle', {
       defaultMessage: 'MySQL metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.mysqlMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from MySQL.',
@@ -64,7 +65,7 @@ export function mysqlMetricsSpecProvider(context: TutorialContext): TutorialSche
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/mysql_metrics/screenshot.png',
+    previewImagePath: '/plugins/home/assets/mysql_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),

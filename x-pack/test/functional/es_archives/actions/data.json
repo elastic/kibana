@@ -1,0 +1,58 @@
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "action:uuid-actionId",
+    "source": {
+      "type": "action",
+      "action": {
+        "actionTypeId": "test.not-enabled",
+        "name": "an action created before test.not-enabled was disabled",
+        "config": {}
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "action:791a2ab1-784a-46ea-aa68-04c837e5da2d",
+    "index": ".kibana_1",
+    "source": {
+      "action": {
+        "actionTypeId": ".jira",
+        "config": {
+          "apiUrl": "http://elastic:changeme@localhost:5620/api/_actions-FTS-external-service-simulators/jira",
+          "casesConfiguration": {
+            "mapping": [
+              {
+                "actionType": "overwrite",
+                "source": "title",
+                "target": "summary"
+              },
+              {
+                "actionType": "overwrite",
+                "source": "description",
+                "target": "description"
+              },
+              {
+                "actionType": "append",
+                "source": "comments",
+                "target": "comments"
+              }
+            ]
+          },
+          "projectKey": "CK"
+        },
+        "name": "A jira action",
+        "secrets": "gUYVHxyvkY6I6rZrST16PzSBjwuPLzWYIm9Ow6qjJXiCimA1wHGgH1BR5nO/xZJjv9QqIGO3eKDSYsn7K9m39UJv83+oi5P4ZgtFktsFq0Jv6XEFQPFkuVY5sWno7w89CxgxlsTQFpYAJb0Hl0qf/6p6bKKaje48YRqNS5roebNAAribh9AWu80uxIJFWNo="
+      },
+      "references": [
+      ],
+      "type": "action",
+      "updated_at": "2020-09-24T08:08:23.715Z"
+    },
+    "type": "_doc"
+  }
+}

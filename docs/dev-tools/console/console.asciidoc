@@ -7,7 +7,7 @@ Console enables you to interact with the REST API of {es}. You can:
 * View API documentation
 * Get your request history
 
-To get started, go to *Dev Tools > Console*.
+To get started, open the menu, go to *Dev Tools*, then click *Console*.
 
 [role="screenshot"]
 image::dev-tools/console/images/console.png["Console"]
@@ -44,7 +44,7 @@ curl -XGET "http://localhost:9200/_search" -d'
 ----------------------------------
 
 When you paste the command into Console, {kib} automatically converts it
-to Console syntax.  Alternatively, if you want to want to see Console syntax in cURL, 
+to Console syntax.  Alternatively, if you want to see Console syntax in cURL, 
 click the action icon (image:dev-tools/console/images/wrench.png[]) and select *Copy as cURL*.
 
 [float]

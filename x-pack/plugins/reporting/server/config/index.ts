@@ -5,19 +5,20 @@
  */
 
 import { PluginConfigDescriptor } from 'kibana/server';
-import { ConfigSchema, ConfigType } from './schema';
+import { ConfigSchema, ReportingConfigType } from './schema';
+export { buildConfig } from './config';
+export { ConfigSchema, ReportingConfigType };
 
-export { createConfig$ } from './create_config';
-
-export const config: PluginConfigDescriptor<ConfigType> = {
+export const config: PluginConfigDescriptor<ReportingConfigType> = {
+  exposeToBrowser: { poll: true },
   schema: ConfigSchema,
   deprecations: ({ unused }) => [
     unused('capture.browser.chromium.maxScreenshotDimension'),
     unused('capture.concurrency'),
     unused('capture.settleTime'),
     unused('capture.timeout'),
+    unused('poll.jobCompletionNotifier.intervalErrorMultiplier'),
+    unused('poll.jobsRefresh.intervalErrorMultiplier'),
     unused('kibanaApp'),
   ],
 };
-
-export { ConfigSchema, ConfigType };

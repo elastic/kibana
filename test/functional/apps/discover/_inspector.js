@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -28,13 +28,14 @@ export default function({ getService, getPageObjects }) {
   const STATS_ROW_NAME_INDEX = 0;
   const STATS_ROW_VALUE_INDEX = 1;
   function getHitCount(requestStats) {
-    const hitsCountStatsRow = requestStats.find(statsRow => {
+    const hitsCountStatsRow = requestStats.find((statsRow) => {
       return statsRow[STATS_ROW_NAME_INDEX] === 'Hits (total)';
     });
     return hitsCountStatsRow[STATS_ROW_VALUE_INDEX];
   }
 
-  describe('inspect', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/39842
+  describe.skip('inspect', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('discover');

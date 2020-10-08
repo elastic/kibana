@@ -36,6 +36,7 @@ export function couchbaseMetricsSpecProvider(context: TutorialContext): Tutorial
     name: i18n.translate('home.tutorials.couchbaseMetrics.nameTitle', {
       defaultMessage: 'Couchbase metrics',
     }),
+    moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.couchbaseMetrics.shortDescription', {
@@ -55,7 +56,7 @@ export function couchbaseMetricsSpecProvider(context: TutorialContext): Tutorial
         label: i18n.translate('home.tutorials.couchbaseMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
-        path: '/app/kibana#/discover',
+        path: '/app/discover#/',
       },
       dashboards: [],
       exportedFields: {

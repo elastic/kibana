@@ -6,41 +6,57 @@
 import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler, CustomHttpResponseOptions } from 'src/core/server';
 import {
-  GetPackagesRequestSchema,
-  GetFileRequestSchema,
-  GetInfoRequestSchema,
-  InstallPackageRequestSchema,
-  DeletePackageRequestSchema,
-} from '../../types';
-import {
   GetInfoResponse,
   InstallPackageResponse,
   DeletePackageResponse,
   GetCategoriesResponse,
   GetPackagesResponse,
+  GetLimitedPackagesResponse,
+  BulkInstallPackageInfo,
+  BulkInstallPackagesResponse,
+  IBulkInstallPackageHTTPError,
 } from '../../../common';
 import {
+  GetCategoriesRequestSchema,
+  GetPackagesRequestSchema,
+  GetFileRequestSchema,
+  GetInfoRequestSchema,
+  InstallPackageFromRegistryRequestSchema,
+  InstallPackageByUploadRequestSchema,
+  DeletePackageRequestSchema,
+  BulkUpgradePackagesFromRegistryRequestSchema,
+} from '../../types';
+import {
+  BulkInstallResponse,
+  bulkInstallPackages,
   getCategories,
   getPackages,
   getFile,
   getPackageInfo,
-  installPackage,
+  handleInstallPackageFailure,
+  isBulkInstallError,
+  installPackageFromRegistry,
+  installPackageByUpload,
   removeInstallation,
+  getLimitedPackages,
+  getInstallationObject,
 } from '../../services/epm/packages';
+import { defaultIngestErrorHandler, ingestErrorToResponseOptions } from '../../errors';
+import { splitPkgKey } from '../../services/epm/registry';
+import { licenseService } from '../../services';
 
-export const getCategoriesHandler: RequestHandler = async (context, request, response) => {
+export const getCategoriesHandler: RequestHandler<
+  undefined,
+  TypeOf<typeof GetCategoriesRequestSchema.query>
+> = async (context, request, response) => {
   try {
-    const res = await getCategories();
+    const res = await getCategories(request.query);
     const body: GetCategoriesResponse = {
       response: res,
-      success: true,
     };
     return response.ok({ body });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -52,20 +68,31 @@ export const getListHandler: RequestHandler<
     const savedObjectsClient = context.core.savedObjects.client;
     const res = await getPackages({
       savedObjectsClient,
-      category: request.query.category,
+      ...request.query,
     });
     const body: GetPackagesResponse = {
       response: res,
-      success: true,
     };
     return response.ok({
       body,
     });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+export const getLimitedListHandler: RequestHandler = async (context, request, response) => {
+  try {
+    const savedObjectsClient = context.core.savedObjects.client;
+    const res = await getLimitedPackages({ savedObjectsClient });
+    const body: GetLimitedPackagesResponse = {
+      response: res,
+    };
+    return response.ok({
+      body,
     });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -86,11 +113,8 @@ export const getFileHandler: RequestHandler<TypeOf<typeof GetFileRequestSchema.p
       customResponseObj.headers = { 'Content-Type': contentType };
     }
     return response.custom(customResponseObj);
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -103,43 +127,115 @@ export const getInfoHandler: RequestHandler<TypeOf<typeof GetInfoRequestSchema.p
     const { pkgkey } = request.params;
     const savedObjectsClient = context.core.savedObjects.client;
     // TODO: change epm API to /packageName/version so we don't need to do this
-    const [pkgName, pkgVersion] = pkgkey.split('-');
+    const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
     const res = await getPackageInfo({ savedObjectsClient, pkgName, pkgVersion });
     const body: GetInfoResponse = {
       response: res,
-      success: true,
     };
     return response.ok({ body });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
-export const installPackageHandler: RequestHandler<TypeOf<
-  typeof InstallPackageRequestSchema.params
->> = async (context, request, response) => {
+export const installPackageFromRegistryHandler: RequestHandler<
+  TypeOf<typeof InstallPackageFromRegistryRequestSchema.params>,
+  undefined,
+  TypeOf<typeof InstallPackageFromRegistryRequestSchema.body>
+> = async (context, request, response) => {
+  const savedObjectsClient = context.core.savedObjects.client;
+  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
+  const { pkgkey } = request.params;
+  const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
+  const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
   try {
-    const { pkgkey } = request.params;
-    const savedObjectsClient = context.core.savedObjects.client;
-    const callCluster = context.core.elasticsearch.adminClient.callAsCurrentUser;
-    const res = await installPackage({
+    const res = await installPackageFromRegistry({
       savedObjectsClient,
       pkgkey,
       callCluster,
+      force: request.body?.force,
     });
     const body: InstallPackageResponse = {
       response: res,
-      success: true,
     };
     return response.ok({ body });
   } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
+    const defaultResult = await defaultIngestErrorHandler({ error: e, response });
+    await handleInstallPackageFailure({
+      savedObjectsClient,
+      error: e,
+      pkgName,
+      pkgVersion,
+      installedPkg,
+      callCluster,
     });
+
+    return defaultResult;
+  }
+};
+
+const bulkInstallServiceResponseToHttpEntry = (
+  result: BulkInstallResponse
+): BulkInstallPackageInfo | IBulkInstallPackageHTTPError => {
+  if (isBulkInstallError(result)) {
+    const { statusCode, body } = ingestErrorToResponseOptions(result.error);
+    return {
+      name: result.name,
+      statusCode,
+      error: body.message,
+    };
+  } else {
+    return result;
+  }
+};
+
+export const bulkInstallPackagesFromRegistryHandler: RequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof BulkUpgradePackagesFromRegistryRequestSchema.body>
+> = async (context, request, response) => {
+  const savedObjectsClient = context.core.savedObjects.client;
+  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
+  const bulkInstalledResponses = await bulkInstallPackages({
+    savedObjectsClient,
+    callCluster,
+    packagesToUpgrade: request.body.packages,
+  });
+  const payload = bulkInstalledResponses.map(bulkInstallServiceResponseToHttpEntry);
+  const body: BulkInstallPackagesResponse = {
+    response: payload,
+  };
+  return response.ok({ body });
+};
+
+export const installPackageByUploadHandler: RequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof InstallPackageByUploadRequestSchema.body>
+> = async (context, request, response) => {
+  if (!licenseService.isEnterprise()) {
+    return response.customError({
+      statusCode: 403,
+      body: { message: 'Requires Enterprise license' },
+    });
+  }
+  const savedObjectsClient = context.core.savedObjects.client;
+  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
+  const contentType = request.headers['content-type'] as string; // from types it could also be string[] or undefined but this is checked later
+  const archiveBuffer = Buffer.from(request.body);
+  try {
+    const res = await installPackageByUpload({
+      savedObjectsClient,
+      callCluster,
+      archiveBuffer,
+      contentType,
+    });
+    const body: InstallPackageResponse = {
+      response: res,
+    };
+    return response.ok({ body });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -149,17 +245,13 @@ export const deletePackageHandler: RequestHandler<TypeOf<
   try {
     const { pkgkey } = request.params;
     const savedObjectsClient = context.core.savedObjects.client;
-    const callCluster = context.core.elasticsearch.adminClient.callAsCurrentUser;
+    const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
     const res = await removeInstallation({ savedObjectsClient, pkgkey, callCluster });
     const body: DeletePackageResponse = {
       response: res,
-      success: true,
     };
     return response.ok({ body });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };

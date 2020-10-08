@@ -96,7 +96,7 @@ export const ModalConfirmationDeleteFields = ({
                 )}
               </p>
               <ul>
-                {aliases.map(aliasPath => (
+                {aliases.map((aliasPath) => (
                   <li key={aliasPath}>
                     <EuiCode>{aliasPath}</EuiCode>
                   </li>

@@ -7,66 +7,49 @@
 import { Ast } from '@kbn/interpreter/common';
 import { ScaleType } from '@elastic/charts';
 import { State, LayerConfig } from './types';
-import { FramePublicAPI, OperationMetadata } from '../types';
+import { OperationMetadata, DatasourcePublicAPI } from '../types';
 
 interface ValidLayer extends LayerConfig {
   xAccessor: NonNullable<LayerConfig['xAccessor']>;
 }
 
-function xyTitles(layer: LayerConfig, frame: FramePublicAPI) {
-  const defaults = {
-    xTitle: 'x',
-    yTitle: 'y',
-  };
-
-  if (!layer || !layer.accessors.length) {
-    return defaults;
-  }
-  const datasource = frame.datasourceLayers[layer.layerId];
-  if (!datasource) {
-    return defaults;
-  }
-  const x = layer.xAccessor ? datasource.getOperationForColumnId(layer.xAccessor) : null;
-  const y = layer.accessors[0] ? datasource.getOperationForColumnId(layer.accessors[0]) : null;
-
-  return {
-    xTitle: x ? x.label : defaults.xTitle,
-    yTitle: y ? y.label : defaults.yTitle,
-  };
-}
-
-export const toExpression = (state: State, frame: FramePublicAPI): Ast | null => {
+export const toExpression = (
+  state: State,
+  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  attributes: Partial<{ title: string; description: string }> = {}
+): Ast | null => {
   if (!state || !state.layers.length) {
     return null;
   }
 
   const metadata: Record<string, Record<string, OperationMetadata | null>> = {};
-  state.layers.forEach(layer => {
+  state.layers.forEach((layer) => {
     metadata[layer.layerId] = {};
-    const datasource = frame.datasourceLayers[layer.layerId];
-    datasource.getTableSpec().forEach(column => {
-      const operation = frame.datasourceLayers[layer.layerId].getOperationForColumnId(
-        column.columnId
-      );
+    const datasource = datasourceLayers[layer.layerId];
+    datasource.getTableSpec().forEach((column) => {
+      const operation = datasourceLayers[layer.layerId].getOperationForColumnId(column.columnId);
       metadata[layer.layerId][column.columnId] = operation;
     });
   });
 
-  return buildExpression(state, metadata, frame, xyTitles(state.layers[0], frame));
+  return buildExpression(state, metadata, datasourceLayers, attributes);
 };
 
-export function toPreviewExpression(state: State, frame: FramePublicAPI) {
+export function toPreviewExpression(
+  state: State,
+  datasourceLayers: Record<string, DatasourcePublicAPI>
+) {
   return toExpression(
     {
       ...state,
-      layers: state.layers.map(layer => ({ ...layer, hide: true })),
+      layers: state.layers.map((layer) => ({ ...layer, hide: true })),
       // hide legend for preview
       legend: {
         ...state.legend,
         isVisible: false,
       },
     },
-    frame
+    datasourceLayers
   );
 }
 
@@ -99,11 +82,11 @@ export function getScaleType(metadata: OperationMetadata | null, defaultScale: S
 export const buildExpression = (
   state: State,
   metadata: Record<string, Record<string, OperationMetadata | null>>,
-  frame?: FramePublicAPI,
-  { xTitle, yTitle }: { xTitle: string; yTitle: string } = { xTitle: '', yTitle: '' }
+  datasourceLayers?: Record<string, DatasourcePublicAPI>,
+  attributes: Partial<{ title: string; description: string }> = {}
 ): Ast | null => {
   const validLayers = state.layers.filter((layer): layer is ValidLayer =>
-    Boolean(layer.xAccessor && layer.accessors.length)
+    Boolean(layer.accessors.length)
   );
   if (!validLayers.length) {
     return null;
@@ -116,8 +99,11 @@ export const buildExpression = (
         type: 'function',
         function: 'lens_xy_chart',
         arguments: {
-          xTitle: [xTitle],
-          yTitle: [yTitle],
+          title: [attributes?.title || ''],
+          description: [attributes?.description || ''],
+          xTitle: [state.xTitle || ''],
+          yTitle: [state.yTitle || ''],
+          yRightTitle: [state.yRightTitle || ''],
           legend: [
             {
               type: 'expression',
@@ -127,30 +113,82 @@ export const buildExpression = (
                   function: 'lens_xy_legendConfig',
                   arguments: {
                     isVisible: [state.legend.isVisible],
+                    showSingleSeries: state.legend.showSingleSeries
+                      ? [state.legend.showSingleSeries]
+                      : [],
                     position: [state.legend.position],
                   },
                 },
               ],
             },
           ],
-          layers: validLayers.map(layer => {
+          fittingFunction: [state.fittingFunction || 'None'],
+          axisTitlesVisibilitySettings: [
+            {
+              type: 'expression',
+              chain: [
+                {
+                  type: 'function',
+                  function: 'lens_xy_axisTitlesVisibilityConfig',
+                  arguments: {
+                    x: [state?.axisTitlesVisibilitySettings?.x ?? true],
+                    yLeft: [state?.axisTitlesVisibilitySettings?.yLeft ?? true],
+                    yRight: [state?.axisTitlesVisibilitySettings?.yRight ?? true],
+                  },
+                },
+              ],
+            },
+          ],
+          tickLabelsVisibilitySettings: [
+            {
+              type: 'expression',
+              chain: [
+                {
+                  type: 'function',
+                  function: 'lens_xy_tickLabelsConfig',
+                  arguments: {
+                    x: [state?.tickLabelsVisibilitySettings?.x ?? true],
+                    yLeft: [state?.tickLabelsVisibilitySettings?.yLeft ?? true],
+                    yRight: [state?.tickLabelsVisibilitySettings?.yRight ?? true],
+                  },
+                },
+              ],
+            },
+          ],
+          gridlinesVisibilitySettings: [
+            {
+              type: 'expression',
+              chain: [
+                {
+                  type: 'function',
+                  function: 'lens_xy_gridlinesConfig',
+                  arguments: {
+                    x: [state?.gridlinesVisibilitySettings?.x ?? true],
+                    yLeft: [state?.gridlinesVisibilitySettings?.yLeft ?? true],
+                    yRight: [state?.gridlinesVisibilitySettings?.yRight ?? true],
+                  },
+                },
+              ],
+            },
+          ],
+          layers: validLayers.map((layer) => {
             const columnToLabel: Record<string, string> = {};
 
-            if (frame) {
-              const datasource = frame.datasourceLayers[layer.layerId];
+            if (datasourceLayers) {
+              const datasource = datasourceLayers[layer.layerId];
               layer.accessors
                 .concat(layer.splitAccessor ? [layer.splitAccessor] : [])
-                .forEach(accessor => {
+                .forEach((accessor) => {
                   const operation = datasource.getOperationForColumnId(accessor);
-                  if (operation && operation.label) {
+                  if (operation?.label) {
                     columnToLabel[accessor] = operation.label;
                   }
                 });
             }
 
             const xAxisOperation =
-              frame &&
-              frame.datasourceLayers[layer.layerId].getOperationForColumnId(layer.xAccessor);
+              datasourceLayers &&
+              datasourceLayers[layer.layerId].getOperationForColumnId(layer.xAccessor);
 
             const isHistogramDimension = Boolean(
               xAxisOperation &&
@@ -170,7 +208,7 @@ export const buildExpression = (
 
                     hide: [Boolean(layer.hide)],
 
-                    xAccessor: [layer.xAccessor],
+                    xAccessor: layer.xAccessor ? [layer.xAccessor] : [],
                     yScaleType: [
                       getScaleType(metadata[layer.layerId][layer.accessors[0]], ScaleType.Ordinal),
                     ],
@@ -179,6 +217,22 @@ export const buildExpression = (
                     ],
                     isHistogram: [isHistogramDimension],
                     splitAccessor: layer.splitAccessor ? [layer.splitAccessor] : [],
+                    yConfig: layer.yConfig
+                      ? layer.yConfig.map((yConfig) => ({
+                          type: 'expression',
+                          chain: [
+                            {
+                              type: 'function',
+                              function: 'lens_xy_yConfig',
+                              arguments: {
+                                forAccessor: [yConfig.forAccessor],
+                                axisMode: yConfig.axisMode ? [yConfig.axisMode] : [],
+                                color: yConfig.color ? [yConfig.color] : [],
+                              },
+                            },
+                          ],
+                        }))
+                      : [],
                     seriesType: [layer.seriesType],
                     accessors: layer.accessors,
                     columnToLabel: [JSON.stringify(columnToLabel)],

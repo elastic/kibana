@@ -11,7 +11,9 @@ import {
   KibanaRequest,
   IKibanaResponse,
   KibanaResponseFactory,
-} from 'kibana/server';
+  Logger,
+} from 'src/core/server';
+
 import { BASE_EVENT_LOG_API_PATH } from '../../common';
 import { findOptionsSchema, FindOptionsType } from '../event_log_client';
 
@@ -20,7 +22,7 @@ const paramSchema = schema.object({
   id: schema.string(),
 });
 
-export const findRoute = (router: IRouter) => {
+export const findRoute = (router: IRouter, systemLogger: Logger) => {
   router.get(
     {
       path: `${BASE_EVENT_LOG_API_PATH}/{type}/{id}/_find`,
@@ -29,11 +31,11 @@ export const findRoute = (router: IRouter) => {
         query: findOptionsSchema,
       },
     },
-    router.handleLegacyErrors(async function(
+    router.handleLegacyErrors(async function (
       context: RequestHandlerContext,
-      req: KibanaRequest<TypeOf<typeof paramSchema>, FindOptionsType, any, any>,
+      req: KibanaRequest<TypeOf<typeof paramSchema>, FindOptionsType, unknown>,
       res: KibanaResponseFactory
-    ): Promise<IKibanaResponse<any>> {
+    ): Promise<IKibanaResponse> {
       if (!context.eventLog) {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for eventLog' });
       }
@@ -42,9 +44,16 @@ export const findRoute = (router: IRouter) => {
         params: { id, type },
         query,
       } = req;
-      return res.ok({
-        body: await eventLogClient.findEventsBySavedObject(type, id, query),
-      });
+
+      try {
+        return res.ok({
+          body: await eventLogClient.findEventsBySavedObject(type, id, query),
+        });
+      } catch (err) {
+        const call = `findEventsBySavedObject(${type}, ${id}, ${JSON.stringify(query)})`;
+        systemLogger.debug(`error calling eventLog ${call}: ${err.message}`);
+        return res.notFound();
+      }
     })
   );
 };

@@ -46,7 +46,7 @@ export function handleResponse(
   const nodesMetrics = mapNodesMetrics(metricsForNodes, nodesInfo, timeOptions); // summarize the metrics of online nodes
 
   // nodesInfo is the source of truth for the nodeIds, where nodesMetrics will lack metrics for offline nodes
-  const nodes = pageOfNodes.map(node => ({
+  const nodes = pageOfNodes.map((node) => ({
     ...nodesInfo[node.uuid],
     ...nodesMetrics[node.uuid],
     resolver: node.uuid,

@@ -34,6 +34,8 @@ import {
   ConditionalTypeValue,
   DurationOptions,
   DurationType,
+  IpOptions,
+  IpType,
   LiteralType,
   MapOfOptions,
   MapOfType,
@@ -44,6 +46,7 @@ import {
   ObjectType,
   ObjectTypeOptions,
   Props,
+  NullableProps,
   RecordOfOptions,
   RecordOfType,
   StringOptions,
@@ -57,7 +60,7 @@ import {
   StreamType,
 } from './types';
 
-export { ObjectType, TypeOf, Type };
+export { ObjectType, TypeOf, Type, Props, NullableProps };
 export { ByteSizeValue } from './byte_size_value';
 export { SchemaTypeError, ValidationError } from './errors';
 export { isConfigSchema } from './typeguards';
@@ -104,6 +107,10 @@ function duration(options?: DurationOptions): Type<Duration> {
 
 function never(): Type<never> {
   return new NeverType();
+}
+
+function ip(options?: IpOptions): Type<string> {
+  return new IpType(options);
 }
 
 /**
@@ -206,6 +213,7 @@ export const schema = {
   conditional,
   contextRef,
   duration,
+  ip,
   literal,
   mapOf,
   maybe,

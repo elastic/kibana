@@ -115,7 +115,7 @@ describe('Filter editor utils', () => {
 
     it('limits the fields to the filterable fields', () => {
       const fieldOptions = getFilterableFields(stubIndexPattern);
-      const nonFilterableFields = fieldOptions.filter(field => !field.filterable);
+      const nonFilterableFields = fieldOptions.filter((field) => !field.filterable);
       expect(nonFilterableFields.length).toBe(0);
     });
   });
@@ -124,14 +124,14 @@ describe('Filter editor utils', () => {
     it('returns range for number fields', () => {
       const [field] = stubFields.filter(({ type }) => type === 'number');
       const operatorOptions = getOperatorOptions(field);
-      const rangeOperator = operatorOptions.find(operator => operator.type === 'range');
+      const rangeOperator = operatorOptions.find((operator) => operator.type === 'range');
       expect(rangeOperator).not.toBeUndefined();
     });
 
     it('does not return range for string fields', () => {
       const [field] = stubFields.filter(({ type }) => type === 'string');
       const operatorOptions = getOperatorOptions(field);
-      const rangeOperator = operatorOptions.find(operator => operator.type === 'range');
+      const rangeOperator = operatorOptions.find((operator) => operator.type === 'range');
       expect(rangeOperator).toBeUndefined();
     });
   });
@@ -177,9 +177,25 @@ describe('Filter editor utils', () => {
     it('should return true for range filter with from/to', () => {
       const isValid = isFilterValid(stubIndexPattern, stubFields[0], isBetweenOperator, {
         from: 'foo',
-        too: 'goo',
+        to: 'goo',
       });
       expect(isValid).toBe(true);
+    });
+
+    it('should return false for date range filter with bad from', () => {
+      const isValid = isFilterValid(stubIndexPattern, stubFields[4], isBetweenOperator, {
+        from: 'foo',
+        to: 'now',
+      });
+      expect(isValid).toBe(false);
+    });
+
+    it('should return false for date range filter with bad to', () => {
+      const isValid = isFilterValid(stubIndexPattern, stubFields[4], isBetweenOperator, {
+        from: '2020-01-01',
+        to: 'mau',
+      });
+      expect(isValid).toBe(false);
     });
 
     it('should return true for exists filter without params', () => {

@@ -5,6 +5,6 @@
  */
 
 export { PLUGIN } from './plugin';
-export { BASE_PATH, API_BASE_PATH } from './base_path';
+export { API_BASE_PATH } from './base_path';
 export { EXTERNAL_LINKS } from './external_links';
 export { APP_PERMISSION } from './permissions';

@@ -34,7 +34,7 @@ export function includedFields(type: string | string[] = '*', fields?: string[] 
 
   return sourceType
     .reduce((acc: string[], t) => {
-      return [...acc, ...sourceFields.map(f => `${t}.${f}`)];
+      return [...acc, ...sourceFields.map((f) => `${t}.${f}`)];
     }, [])
     .concat('namespace')
     .concat('namespaces')
@@ -42,5 +42,6 @@ export function includedFields(type: string | string[] = '*', fields?: string[] 
     .concat('references')
     .concat('migrationVersion')
     .concat('updated_at')
+    .concat('originId')
     .concat(fields); // v5 compatibility
 }

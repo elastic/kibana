@@ -15,16 +15,23 @@ import {
   CasePatchRequest,
   excess,
   throwErrors,
+  ESCasePatchRequest,
 } from '../../../../common/api';
 import { escapeHatch, wrapError, flattenCaseSavedObject } from '../utils';
 import { RouteDeps } from '../types';
-import { getCaseToUpdate } from './helpers';
+import { getCaseToUpdate, transformCaseConnectorToEsConnector } from './helpers';
 import { buildCaseUserActions } from '../../../services/user_actions/helpers';
+import { CASES_URL } from '../../../../common/constants';
 
-export function initPatchCasesApi({ caseService, router, userActionService }: RouteDeps) {
+export function initPatchCasesApi({
+  caseConfigureService,
+  caseService,
+  router,
+  userActionService,
+}: RouteDeps) {
   router.patch(
     {
-      path: '/api/cases',
+      path: CASES_URL,
       validate: {
         body: escapeHatch,
       },
@@ -36,13 +43,15 @@ export function initPatchCasesApi({ caseService, router, userActionService }: Ro
           excess(CasesPatchRequestRt).decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
+
         const myCases = await caseService.getCases({
           client,
-          caseIds: query.cases.map(q => q.id),
+          caseIds: query.cases.map((q) => q.id),
         });
+
         let nonExistingCases: CasePatchRequest[] = [];
-        const conflictedCases = query.cases.filter(q => {
-          const myCase = myCases.saved_objects.find(c => c.id === q.id);
+        const conflictedCases = query.cases.filter((q) => {
+          const myCase = myCases.saved_objects.find((c) => c.id === q.id);
 
           if (myCase && myCase.error) {
             nonExistingCases = [...nonExistingCases, q];
@@ -53,33 +62,43 @@ export function initPatchCasesApi({ caseService, router, userActionService }: Ro
         if (nonExistingCases.length > 0) {
           throw Boom.notFound(
             `These cases ${nonExistingCases
-              .map(c => c.id)
+              .map((c) => c.id)
               .join(', ')} do not exist. Please check you have the correct ids.`
           );
         }
         if (conflictedCases.length > 0) {
           throw Boom.conflict(
             `These cases ${conflictedCases
-              .map(c => c.id)
+              .map((c) => c.id)
               .join(', ')} has been updated. Please refresh before saving additional updates.`
           );
         }
-        const updateCases: CasePatchRequest[] = query.cases.map(thisCase => {
-          const currentCase = myCases.saved_objects.find(c => c.id === thisCase.id);
+
+        const updateCases: ESCasePatchRequest[] = query.cases.map((updateCase) => {
+          const currentCase = myCases.saved_objects.find((c) => c.id === updateCase.id);
+          const { connector, ...thisCase } = updateCase;
           return currentCase != null
-            ? getCaseToUpdate(currentCase.attributes, thisCase)
+            ? getCaseToUpdate(currentCase.attributes, {
+                ...thisCase,
+                ...(connector != null
+                  ? { connector: transformCaseConnectorToEsConnector(connector) }
+                  : {}),
+              })
             : { id: thisCase.id, version: thisCase.version };
         });
-        const updateFilterCases = updateCases.filter(updateCase => {
+
+        const updateFilterCases = updateCases.filter((updateCase) => {
           const { id, version, ...updateCaseAttributes } = updateCase;
           return Object.keys(updateCaseAttributes).length > 0;
         });
+
         if (updateFilterCases.length > 0) {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           const { username, full_name, email } = await caseService.getUser({ request, response });
           const updatedDt = new Date().toISOString();
           const updatedCases = await caseService.patchCases({
             client,
-            cases: updateFilterCases.map(thisCase => {
+            cases: updateFilterCases.map((thisCase) => {
               const { id: caseId, version, ...updateCaseAttributes } = thisCase;
               let closedInfo = {};
               if (updateCaseAttributes.status && updateCaseAttributes.status === 'closed') {
@@ -107,17 +126,19 @@ export function initPatchCasesApi({ caseService, router, userActionService }: Ro
           });
 
           const returnUpdatedCase = myCases.saved_objects
-            .filter(myCase =>
-              updatedCases.saved_objects.some(updatedCase => updatedCase.id === myCase.id)
+            .filter((myCase) =>
+              updatedCases.saved_objects.some((updatedCase) => updatedCase.id === myCase.id)
             )
-            .map(myCase => {
-              const updatedCase = updatedCases.saved_objects.find(c => c.id === myCase.id);
+            .map((myCase) => {
+              const updatedCase = updatedCases.saved_objects.find((c) => c.id === myCase.id);
               return flattenCaseSavedObject({
-                ...myCase,
-                ...updatedCase,
-                attributes: { ...myCase.attributes, ...updatedCase?.attributes },
-                references: myCase.references,
-                version: updatedCase?.version ?? myCase.version,
+                savedObject: {
+                  ...myCase,
+                  ...updatedCase,
+                  attributes: { ...myCase.attributes, ...updatedCase?.attributes },
+                  references: myCase.references,
+                  version: updatedCase?.version ?? myCase.version,
+                },
               });
             });
 

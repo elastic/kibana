@@ -16,7 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { Moment } from 'moment';
+
 import { TimeRange, RefreshInterval } from '../../../common';
 
 export interface TimefilterConfig {
@@ -32,7 +34,4 @@ export type InputTimeRange =
       to: Moment;
     };
 
-export interface TimeRangeBounds {
-  min: Moment | undefined;
-  max: Moment | undefined;
-}
+export { TimeRangeBounds } from '../../../common';

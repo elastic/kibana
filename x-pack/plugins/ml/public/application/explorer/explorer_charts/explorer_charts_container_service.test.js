@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import { cloneDeep } from 'lodash';
 
 import mockAnomalyChartRecords from './__mocks__/mock_anomaly_chart_records.json';
 import mockDetectorsByJob from './__mocks__/mock_detectors_by_job.json';
@@ -24,10 +24,10 @@ import mockSeriesPromisesResponse from './__mocks__/mock_series_promises_respons
 // suitable responses from the mocked services. The mocked services check against the
 // provided alternative values and return specific modified mock responses for the test case.
 
-const mockJobConfigClone = _.cloneDeep(mockJobConfig);
+const mockJobConfigClone = cloneDeep(mockJobConfig);
 
 // adjust mock data to tests against null/0 values
-const mockMetricClone = _.cloneDeep(mockSeriesPromisesResponse[0][0]);
+const mockMetricClone = cloneDeep(mockSeriesPromisesResponse[0][0]);
 mockMetricClone.results['1486712700000'] = null;
 mockMetricClone.results['1486713600000'] = 0;
 
@@ -88,12 +88,6 @@ jest.mock('../../util/string_utils', () => ({
   },
 }));
 
-jest.mock('../legacy_utils', () => ({
-  getChartContainerWidth() {
-    return 1140;
-  },
-}));
-
 jest.mock('../explorer_dashboard_service', () => ({
   explorerService: {
     setCharts: jest.fn(),
@@ -108,8 +102,8 @@ describe('explorerChartsContainerService', () => {
     explorerService.setCharts.mockClear();
   });
 
-  test('call anomalyChangeListener with empty series config', done => {
-    anomalyDataChange([], 1486656000000, 1486670399999);
+  test('call anomalyChangeListener with empty series config', (done) => {
+    anomalyDataChange(1140, [], 1486656000000, 1486670399999);
 
     setImmediate(() => {
       expect(explorerService.setCharts.mock.calls.length).toBe(1);
@@ -121,8 +115,8 @@ describe('explorerChartsContainerService', () => {
     });
   });
 
-  test('call anomalyChangeListener with actual series config', done => {
-    anomalyDataChange(mockAnomalyChartRecords, 1486656000000, 1486670399999);
+  test('call anomalyChangeListener with actual series config', (done) => {
+    anomalyDataChange(1140, mockAnomalyChartRecords, 1486656000000, 1486670399999);
 
     setImmediate(() => {
       expect(explorerService.setCharts.mock.calls.length).toBe(2);
@@ -132,13 +126,13 @@ describe('explorerChartsContainerService', () => {
     });
   });
 
-  test('filtering should skip values of null', done => {
-    const mockAnomalyChartRecordsClone = _.cloneDeep(mockAnomalyChartRecords).map(d => {
+  test('filtering should skip values of null', (done) => {
+    const mockAnomalyChartRecordsClone = cloneDeep(mockAnomalyChartRecords).map((d) => {
       d.job_id = 'mock-job-id-distribution';
       return d;
     });
 
-    anomalyDataChange(mockAnomalyChartRecordsClone, 1486656000000, 1486670399999);
+    anomalyDataChange(1140, mockAnomalyChartRecordsClone, 1486656000000, 1486670399999);
 
     setImmediate(() => {
       expect(explorerService.setCharts.mock.calls.length).toBe(2);
@@ -150,18 +144,18 @@ describe('explorerChartsContainerService', () => {
       // it should remove the datapoint with `null` and keep the one with `0`.
       const chartData = explorerService.setCharts.mock.calls[1][0].seriesToPlot[0].chartData;
       expect(chartData).toHaveLength(114);
-      expect(chartData.filter(d => d.value === 0)).toHaveLength(1);
-      expect(chartData.filter(d => d.value === null)).toHaveLength(0);
+      expect(chartData.filter((d) => d.value === 0)).toHaveLength(1);
+      expect(chartData.filter((d) => d.value === null)).toHaveLength(0);
       done();
     });
   });
 
-  test('field value with trailing dot should not throw an error', done => {
-    const mockAnomalyChartRecordsClone = _.cloneDeep(mockAnomalyChartRecords);
+  test('field value with trailing dot should not throw an error', (done) => {
+    const mockAnomalyChartRecordsClone = cloneDeep(mockAnomalyChartRecords);
     mockAnomalyChartRecordsClone[1].partition_field_value = 'AAL.';
 
     expect(() => {
-      anomalyDataChange(mockAnomalyChartRecordsClone, 1486656000000, 1486670399999);
+      anomalyDataChange(1140, mockAnomalyChartRecordsClone, 1486656000000, 1486670399999);
     }).not.toThrow();
 
     setImmediate(() => {

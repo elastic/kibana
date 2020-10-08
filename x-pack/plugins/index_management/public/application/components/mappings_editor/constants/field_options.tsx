@@ -244,7 +244,7 @@ const DATE_FORMATS = [
   { label: 'year_month_day', strict: true },
 ];
 
-const STRICT_DATE_FORMAT_OPTIONS = DATE_FORMATS.filter(format => format.strict).map(
+const STRICT_DATE_FORMAT_OPTIONS = DATE_FORMATS.filter((format) => format.strict).map(
   ({ label }) => ({
     label: `strict_${label}`,
   })

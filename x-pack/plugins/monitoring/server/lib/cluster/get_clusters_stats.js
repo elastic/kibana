@@ -22,9 +22,9 @@ import { getClustersState } from './get_clusters_state';
 export function getClustersStats(req, esIndexPattern, clusterUuid) {
   return (
     fetchClusterStats(req, esIndexPattern, clusterUuid)
-      .then(response => handleClusterStats(response, req.server))
+      .then((response) => handleClusterStats(response, req.server))
       // augment older documents (e.g., from 2.x - 5.4) with their cluster_state
-      .then(clusters => getClustersState(req, esIndexPattern, clusters))
+      .then((clusters) => getClustersState(req, esIndexPattern, clusters))
   );
 }
 
@@ -67,7 +67,7 @@ function fetchClusterStats(req, esIndexPattern, clusterUuid) {
       collapse: {
         field: 'cluster_uuid',
       },
-      sort: { timestamp: { order: 'desc' } },
+      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
     },
   };
 
@@ -85,7 +85,7 @@ export function handleClusterStats(response) {
   const hits = get(response, 'hits.hits', []);
 
   return hits
-    .map(hit => {
+    .map((hit) => {
       const cluster = get(hit, '_source');
 
       if (cluster) {

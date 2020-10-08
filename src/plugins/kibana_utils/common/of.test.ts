@@ -21,7 +21,7 @@ import { of } from './of';
 
 describe('of()', () => {
   describe('when promise resolves', () => {
-    const promise = new Promise(resolve => resolve()).then(() => 123);
+    const promise = new Promise((resolve) => resolve()).then(() => 123);
 
     test('first member of 3-tuple is the promise value', async () => {
       const [result] = await of(promise);
@@ -40,7 +40,7 @@ describe('of()', () => {
   });
 
   describe('when promise rejects', () => {
-    const promise = new Promise(resolve => resolve()).then(() => {
+    const promise = new Promise((resolve) => resolve()).then(() => {
       // eslint-disable-next-line no-throw-literal
       throw 123;
     });

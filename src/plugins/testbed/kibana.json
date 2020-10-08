@@ -1,8 +1,0 @@
-{
-  "id": "testbed",
-  "version": "0.0.1",
-  "kibanaVersion": "kibana",
-  "configPath": ["core", "testbed"],
-  "server": true,
-  "ui": true
-}

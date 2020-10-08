@@ -20,11 +20,10 @@
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
 import { EuiText, EuiButton } from '@elastic/eui';
-import { VisTypeAliasListEntry } from './type_selection';
 import { VisTypeAlias } from '../../vis_types';
 
 interface Props {
-  promotedTypes: VisTypeAliasListEntry[];
+  promotedTypes: VisTypeAlias[];
   onPromotionClicked: (visType: VisTypeAlias) => void;
 }
 
@@ -37,7 +36,7 @@ export function NewVisHelp(props: Props) {
           defaultMessage="Start creating your visualization by selecting a type for that visualization."
         />
       </p>
-      {props.promotedTypes.map(t => (
+      {props.promotedTypes.map((t) => (
         <Fragment key={t.name}>
           <p>
             <strong>{t.promotion!.description}</strong>

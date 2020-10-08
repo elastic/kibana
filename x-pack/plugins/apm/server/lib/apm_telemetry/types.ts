@@ -15,7 +15,12 @@ export interface TimeframeMap {
 export type TimeframeMap1d = Pick<TimeframeMap, '1d'>;
 export type TimeframeMapAll = Pick<TimeframeMap, 'all'>;
 
-export type APMDataTelemetry = DeepPartial<{
+export interface AggregatedTransactionsCounts {
+  expected_metric_document_count: number;
+  transaction_count: number;
+}
+
+export interface APMUsage {
   has_any_services: boolean;
   services_per_agent: Record<AgentName, number>;
   version: {
@@ -24,6 +29,24 @@ export type APMDataTelemetry = DeepPartial<{
       major: number;
       patch: number;
     };
+  };
+  environments: {
+    services_without_environments: number;
+    services_with_multiple_environments: number;
+    top_environments: string[];
+  };
+  aggregated_transactions: {
+    current_implementation: AggregatedTransactionsCounts;
+    no_observer_name: AggregatedTransactionsCounts;
+    no_rum: AggregatedTransactionsCounts;
+    no_rum_no_observer_name: AggregatedTransactionsCounts;
+    only_rum: AggregatedTransactionsCounts;
+    only_rum_no_observer_name: AggregatedTransactionsCounts;
+  };
+  cloud: {
+    availability_zone: string[];
+    provider: string[];
+    region: string[];
   };
   counts: {
     transaction: TimeframeMap;
@@ -39,6 +62,7 @@ export type APMDataTelemetry = DeepPartial<{
     services: TimeframeMap;
   };
   cardinality: {
+    client: { geo: { country_iso_code: { rum: TimeframeMap1d } } };
     user_agent: {
       original: {
         all_agents: TimeframeMap1d;
@@ -102,6 +126,8 @@ export type APMDataTelemetry = DeepPartial<{
     };
   };
   tasks: Record<
+    | 'aggregated_transactions'
+    | 'cloud'
     | 'processor_events'
     | 'agent_configuration'
     | 'services'
@@ -113,6 +139,8 @@ export type APMDataTelemetry = DeepPartial<{
     | 'cardinality',
     { took: { ms: number } }
   >;
-}>;
+}
+
+export type APMDataTelemetry = DeepPartial<APMUsage>;
 
 export type APMTelemetry = APMDataTelemetry;

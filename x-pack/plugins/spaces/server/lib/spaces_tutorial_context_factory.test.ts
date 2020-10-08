@@ -9,12 +9,12 @@ import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { createSpacesTutorialContextFactory } from './spaces_tutorial_context_factory';
 import { SpacesService } from '../spaces_service';
 import { SpacesAuditLogger } from './audit_logger';
-import { coreMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
+import { coreMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
 import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
 import { spacesConfig } from './__fixtures__';
 import { securityMock } from '../../../security/server/mocks';
 
-const log = loggingServiceMock.createLogger();
+const log = loggingSystemMock.createLogger();
 
 const service = new SpacesService(log);
 
@@ -41,7 +41,7 @@ describe('createSpacesTutorialContextFactory', () => {
       http: coreMock.createSetup().http,
       getStartServices: async () => [coreMock.createStart(), {}, {}],
       authorization: securityMock.createSetup().authz,
-      getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
+      auditLogger: {} as SpacesAuditLogger,
       config$: Rx.of(spacesConfig),
     });
     const contextFactory = createSpacesTutorialContextFactory(spacesService);

@@ -8,11 +8,11 @@ import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ValidationResult } from '../../../types';
+import { ValidationResult, Alert } from '../../../types';
 import { AlertsContextProvider } from '../../context/alerts_context';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { ReactWrapper } from 'enzyme';
-import { AlertEdit } from './alert_edit';
+import AlertEdit from './alert_edit';
 import { AppContextProvider } from '../../app_context';
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -27,6 +27,11 @@ describe('alert_edit', () => {
   });
 
   async function setup() {
+    const [
+      {
+        application: { capabilities },
+      },
+    ] = await mockedCoreSetup.getStartServices();
     deps = {
       toastNotifications: mockedCoreSetup.notifications.toasts,
       http: mockedCoreSetup.http,
@@ -34,6 +39,7 @@ describe('alert_edit', () => {
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: alertTypeRegistry as any,
       docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
+      capabilities,
     };
 
     mockedCoreSetup.http.get.mockResolvedValue({
@@ -49,6 +55,7 @@ describe('alert_edit', () => {
         return { errors: {} };
       },
       alertParamsExpression: () => <React.Fragment />,
+      requiresAppContext: false,
     };
 
     const actionTypeModel = {
@@ -66,7 +73,7 @@ describe('alert_edit', () => {
       actionParamsFields: null,
     };
 
-    const alert = {
+    const alert: Alert = {
       id: 'ab5661e0-197e-45ee-b477-302d89193b5e',
       params: {
         aggType: 'average',
@@ -77,7 +84,7 @@ describe('alert_edit', () => {
         window: '1s',
         comparator: 'between',
       },
-      consumer: 'alerting',
+      consumer: 'alerts',
       alertTypeId: 'my-alert-type',
       enabled: false,
       schedule: { interval: '1m' },
@@ -86,7 +93,6 @@ describe('alert_edit', () => {
           actionTypeId: 'my-action-type',
           group: 'threshold met',
           params: { message: 'Alert [{{ctx.metadata.name}}] has exceeded the threshold' },
-          message: 'Alert [{{ctx.metadata.name}}] has exceeded the threshold',
           id: '917f5d41-fbc4-4056-a8ad-ac592f7dcee2',
         },
       ],
@@ -100,6 +106,10 @@ describe('alert_edit', () => {
       muteAll: false,
       mutedInstanceIds: [],
       updatedAt: new Date(),
+      executionStatus: {
+        status: 'unknown',
+        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+      },
     };
     actionTypeRegistry.get.mockReturnValueOnce(actionTypeModel);
     actionTypeRegistry.has.mockReturnValue(true);
@@ -122,13 +132,10 @@ describe('alert_edit', () => {
             toastNotifications: deps!.toastNotifications,
             uiSettings: deps!.uiSettings,
             docLinks: deps.docLinks,
+            capabilities: deps!.capabilities,
           }}
         >
-          <AlertEdit
-            editFlyoutVisible={true}
-            setEditFlyoutVisibility={() => {}}
-            initialAlert={alert}
-          />
+          <AlertEdit onClose={() => {}} initialAlert={alert} />
         </AlertsContextProvider>
       </AppContextProvider>
     );
@@ -153,10 +160,7 @@ describe('alert_edit', () => {
     err.body.message = 'Fail message';
     mockedCoreSetup.http.put.mockRejectedValue(err);
     await act(async () => {
-      wrapper
-        .find('[data-test-subj="saveEditedAlertButton"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="saveEditedAlertButton"]').first().simulate('click');
     });
     expect(mockedCoreSetup.notifications.toasts.addDanger).toHaveBeenCalledWith('Fail message');
   });

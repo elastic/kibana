@@ -25,7 +25,7 @@ import {
   IEmbeddable,
 } from '../embeddables';
 
-export interface PanelState<E extends { id: string; [key: string]: unknown } = { id: string }> {
+export interface PanelState<E extends EmbeddableInput & { id: string } = { id: string }> {
   // The type of embeddable in this panel. Will be used to find the factory in which to
   // load the embeddable.
   type: string;
@@ -43,7 +43,7 @@ export interface ContainerOutput extends EmbeddableOutput {
 export interface ContainerInput<PanelExplicitInput = {}> extends EmbeddableInput {
   hidePanelTitles?: boolean;
   panels: {
-    [key: string]: PanelState<PanelExplicitInput & { [id: string]: unknown } & { id: string }>;
+    [key: string]: PanelState<PanelExplicitInput & EmbeddableInput & { id: string }>;
   };
 }
 

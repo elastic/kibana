@@ -18,7 +18,13 @@
  */
 
 import { Vis } from '../types';
-import { VisualizeInput, VisualizeEmbeddable } from './visualize_embeddable';
+import {
+  VisualizeInput,
+  VisualizeEmbeddable,
+  VisualizeByValueInput,
+  VisualizeByReferenceInput,
+  VisualizeSavedObjectAttributes,
+} from './visualize_embeddable';
 import { IContainer, ErrorEmbeddable } from '../../../../plugins/embeddable/public';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import {
@@ -29,10 +35,19 @@ import {
   getCapabilities,
 } from '../services';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
+import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
+import { SavedVisualizationsLoader } from '../saved_visualizations';
+import { AttributeService } from '../../../dashboard/public';
 
 export const createVisEmbeddableFromObject = (deps: VisualizeEmbeddableFactoryDeps) => async (
   vis: Vis,
   input: Partial<VisualizeInput> & { id: string },
+  savedVisualizationsLoader?: SavedVisualizationsLoader,
+  attributeService?: AttributeService<
+    VisualizeSavedObjectAttributes,
+    VisualizeByValueInput,
+    VisualizeByReferenceInput
+  >,
   parent?: IContainer
 ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> => {
   const savedVisualizations = getSavedVisualizationsLoader();
@@ -40,10 +55,12 @@ export const createVisEmbeddableFromObject = (deps: VisualizeEmbeddableFactoryDe
   try {
     const visId = vis.id as string;
 
+    const editPath = visId ? savedVisualizations.urlFor(visId) : '#/edit_by_value';
+
     const editUrl = visId
-      ? getHttp().basePath.prepend(`/app/kibana${savedVisualizations.urlFor(visId)}`)
+      ? getHttp().basePath.prepend(`/app/visualize${savedVisualizations.urlFor(visId)}`)
       : '';
-    const isLabsEnabled = getUISettings().get<boolean>('visualize:enableLabs');
+    const isLabsEnabled = getUISettings().get<boolean>(VISUALIZE_ENABLE_LABS_SETTING);
 
     if (!isLabsEnabled && vis.type.stage === 'experimental') {
       return new DisabledLabEmbeddable(vis.title, input);
@@ -52,16 +69,20 @@ export const createVisEmbeddableFromObject = (deps: VisualizeEmbeddableFactoryDe
     const indexPattern = vis.data.indexPattern;
     const indexPatterns = indexPattern ? [indexPattern] : [];
     const editable = getCapabilities().visualize.save as boolean;
+
     return new VisualizeEmbeddable(
       getTimeFilter(),
       {
         vis,
         indexPatterns,
+        editPath,
         editUrl,
         editable,
         deps,
       },
       input,
+      attributeService,
+      savedVisualizationsLoader,
       parent
     );
   } catch (e) {

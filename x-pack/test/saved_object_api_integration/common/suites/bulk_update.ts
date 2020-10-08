@@ -8,12 +8,7 @@ import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
-import {
-  createRequest,
-  expectResponses,
-  getUrlPrefix,
-  getTestTitle,
-} from '../lib/saved_object_test_utils';
+import { expectResponses, getUrlPrefix, getTestTitle } from '../lib/saved_object_test_utils';
 import { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
 
 export interface BulkUpdateTestDefinition extends TestDefinition {
@@ -21,6 +16,7 @@ export interface BulkUpdateTestDefinition extends TestDefinition {
 }
 export type BulkUpdateTestSuite = TestSuite<BulkUpdateTestDefinition>;
 export interface BulkUpdateTestCase extends TestCase {
+  namespace?: string; // used to define individual "object namespace" strings, e.g., bulkUpdate across multiple namespaces
   failure?: 404; // only used for permitted response case
 }
 
@@ -28,18 +24,27 @@ const NEW_ATTRIBUTE_KEY = 'title'; // all type mappings include this attribute, 
 const NEW_ATTRIBUTE_VAL = `Updated attribute value ${Date.now()}`;
 
 const DOES_NOT_EXIST = Object.freeze({ type: 'dashboard', id: 'does-not-exist' });
-export const TEST_CASES = Object.freeze({ ...CASES, DOES_NOT_EXIST });
+export const TEST_CASES: Record<string, BulkUpdateTestCase> = Object.freeze({
+  ...CASES,
+  DOES_NOT_EXIST,
+});
+
+const createRequest = ({ type, id, namespace }: BulkUpdateTestCase) => ({
+  type,
+  id,
+  ...(namespace && { namespace }), // individual "object namespace" string
+});
 
 export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const expectForbidden = expectResponses.forbidden('bulk_update');
+  const expectSavedObjectForbidden = expectResponses.forbiddenTypes('bulk_update');
   const expectResponseBody = (
     testCases: BulkUpdateTestCase | BulkUpdateTestCase[],
     statusCode: 200 | 403
   ): ExpectResponseBody => async (response: Record<string, any>) => {
     const testCaseArray = Array.isArray(testCases) ? testCases : [testCases];
     if (statusCode === 403) {
-      const types = testCaseArray.map(x => x.type);
-      await expectForbidden(types)(response);
+      const types = testCaseArray.map((x) => x.type);
+      await expectSavedObjectForbidden(types)(response);
     } else {
       // permitted
       const savedObjects = response.body.saved_objects;
@@ -67,7 +72,7 @@ export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest
     if (!options?.singleRequest) {
       // if we are testing cases that should result in a forbidden response, we can do each case individually
       // this ensures that multiple test cases of a single type will each result in a forbidden error
-      return cases.map(x => ({
+      return cases.map((x) => ({
         title: getTestTitle(x, responseStatusCode),
         request: [createRequest(x)],
         responseStatusCode,
@@ -78,7 +83,7 @@ export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest
     return [
       {
         title: getTestTitle(cases, responseStatusCode),
-        request: cases.map(x => createRequest(x)),
+        request: cases.map((x) => createRequest(x)),
         responseStatusCode,
         responseBody:
           options?.responseBodyOverride || expectResponseBody(cases, responseStatusCode),
@@ -100,7 +105,7 @@ export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest
 
       for (const test of tests) {
         it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
-          const requestBody = test.request.map(x => ({ ...x, ...attrs }));
+          const requestBody = test.request.map((x) => ({ ...x, ...attrs }));
           await supertest
             .put(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_update`)
             .auth(user?.username, user?.password)
@@ -119,6 +124,6 @@ export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest
   return {
     addTests,
     createTestDefinitions,
-    expectForbidden,
+    expectSavedObjectForbidden,
   };
 }

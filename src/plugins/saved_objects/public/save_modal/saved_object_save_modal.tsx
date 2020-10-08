@@ -53,14 +53,15 @@ interface Props {
   onClose: () => void;
   title: string;
   showCopyOnSave: boolean;
+  initialCopyOnSave?: boolean;
   objectType: string;
   confirmButtonLabel?: React.ReactNode;
-  options?: React.ReactNode;
+  options?: React.ReactNode | ((state: SaveModalState) => React.ReactNode);
   description?: string;
   showDescription: boolean;
 }
 
-interface State {
+export interface SaveModalState {
   title: string;
   copyOnSave: boolean;
   isTitleDuplicateConfirmed: boolean;
@@ -71,11 +72,11 @@ interface State {
 
 const generateId = htmlIdGenerator();
 
-export class SavedObjectSaveModal extends React.Component<Props, State> {
+export class SavedObjectSaveModal extends React.Component<Props, SaveModalState> {
   private warning = React.createRef<HTMLDivElement>();
   public readonly state = {
     title: this.props.title,
-    copyOnSave: false,
+    copyOnSave: Boolean(this.props.initialCopyOnSave),
     isTitleDuplicateConfirmed: false,
     hasTitleDuplicate: false,
     isLoading: false,
@@ -109,10 +110,13 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
 
               <EuiForm>
                 {!this.props.showDescription && this.props.description && (
-                  <EuiFormRow>
-                    <EuiText color="subdued">{this.props.description}</EuiText>
-                  </EuiFormRow>
+                  <EuiText size="s" color="subdued">
+                    {this.props.description}
+                  </EuiText>
                 )}
+
+                <EuiSpacer />
+
                 {this.renderCopyOnSave()}
 
                 <EuiFormRow
@@ -139,7 +143,9 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
 
                 {this.renderViewDescription()}
 
-                {this.props.options}
+                {typeof this.props.options === 'function'
+                  ? this.props.options(this.state)
+                  : this.props.options}
               </EuiForm>
             </EuiModalBody>
 
@@ -278,8 +284,8 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
             title={
               <FormattedMessage
                 id="savedObjects.saveModal.duplicateTitleLabel"
-                defaultMessage="A {objectType} with the title '{title}' already exists"
-                values={{ objectType: this.props.objectType, title: this.state.title }}
+                defaultMessage="This {objectType} already exists"
+                values={{ objectType: this.props.objectType }}
               />
             }
             color="warning"
@@ -289,18 +295,9 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
             <p>
               <FormattedMessage
                 id="savedObjects.saveModal.duplicateTitleDescription"
-                defaultMessage="Clicking {confirmSaveLabel} will save the {objectType} with this duplicate title."
+                defaultMessage="Saving '{title}' creates a duplicate title."
                 values={{
-                  objectType: this.props.objectType,
-                  confirmSaveLabel: (
-                    <strong>
-                      {this.props.confirmButtonLabel
-                        ? this.props.confirmButtonLabel
-                        : i18n.translate('savedObjects.saveModal.saveButtonLabel', {
-                            defaultMessage: 'Save',
-                          })}
-                    </strong>
-                  ),
+                  title: this.state.title,
                 }}
               />
             </p>

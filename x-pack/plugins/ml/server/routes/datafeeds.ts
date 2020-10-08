@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { RequestParams } from '@elastic/elasticsearch';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import {
@@ -12,6 +13,7 @@ import {
   datafeedIdSchema,
   deleteDatafeedQuerySchema,
 } from './schemas/datafeeds_schema';
+import { getAuthorizationHeader } from '../lib/request_authorization';
 
 /**
  * Routes for datafeed service
@@ -28,13 +30,16 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
     {
       path: '/api/ml/datafeeds',
       validate: false,
+      options: {
+        tags: ['access:ml:canGetDatafeeds'],
+      },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, response }) => {
       try {
-        const resp = await context.ml!.mlClient.callAsCurrentUser('ml.datafeeds');
+        const { body } = await client.asInternalUser.ml.getDatafeeds();
 
         return response.ok({
-          body: resp,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -57,14 +62,17 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
       validate: {
         params: datafeedIdSchema,
       },
+      options: {
+        tags: ['access:ml:canGetDatafeeds'],
+      },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const datafeedId = request.params.datafeedId;
-        const resp = await context.ml!.mlClient.callAsCurrentUser('ml.datafeeds', { datafeedId });
+        const { body } = await client.asInternalUser.ml.getDatafeeds({ datafeed_id: datafeedId });
 
         return response.ok({
-          body: resp,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -83,13 +91,16 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
     {
       path: '/api/ml/datafeeds/_stats',
       validate: false,
+      options: {
+        tags: ['access:ml:canGetDatafeeds'],
+      },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const resp = await context.ml!.mlClient.callAsCurrentUser('ml.datafeedStats');
+        const { body } = await client.asInternalUser.ml.getDatafeedStats();
 
         return response.ok({
-          body: resp,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -112,16 +123,19 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
       validate: {
         params: datafeedIdSchema,
       },
+      options: {
+        tags: ['access:ml:canGetDatafeeds'],
+      },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const datafeedId = request.params.datafeedId;
-        const resp = await context.ml!.mlClient.callAsCurrentUser('ml.datafeedStats', {
-          datafeedId,
+        const { body } = await client.asInternalUser.ml.getDatafeedStats({
+          datafeed_id: datafeedId,
         });
 
         return response.ok({
-          body: resp,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -146,17 +160,23 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
         params: datafeedIdSchema,
         body: datafeedConfigSchema,
       },
+      options: {
+        tags: ['access:ml:canCreateDatafeed'],
+      },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const datafeedId = request.params.datafeedId;
-        const resp = await context.ml!.mlClient.callAsCurrentUser('ml.addDatafeed', {
-          datafeedId,
-          body: request.body,
-        });
+        const { body } = await client.asInternalUser.ml.putDatafeed(
+          {
+            datafeed_id: datafeedId,
+            body: request.body,
+          },
+          getAuthorizationHeader(request)
+        );
 
         return response.ok({
-          body: resp,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -181,17 +201,23 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
         params: datafeedIdSchema,
         body: datafeedConfigSchema,
       },
+      options: {
+        tags: ['access:ml:canUpdateDatafeed'],
+      },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const datafeedId = request.params.datafeedId;
-        const resp = await context.ml!.mlClient.callAsCurrentUser('ml.updateDatafeed', {
-          datafeedId,
-          body: request.body,
-        });
+        const { body } = await client.asInternalUser.ml.updateDatafeed(
+          {
+            datafeed_id: datafeedId,
+            body: request.body,
+          },
+          getAuthorizationHeader(request)
+        );
 
         return response.ok({
-          body: resp,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -216,21 +242,24 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
         params: datafeedIdSchema,
         query: deleteDatafeedQuerySchema,
       },
+      options: {
+        tags: ['access:ml:canDeleteDatafeed'],
+      },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const options: { datafeedId: string; force?: boolean } = {
-          datafeedId: request.params.jobId,
+        const options: RequestParams.MlDeleteDatafeed = {
+          datafeed_id: request.params.jobId,
         };
         const force = request.query.force;
         if (force !== undefined) {
           options.force = force;
         }
 
-        const resp = await context.ml!.mlClient.callAsCurrentUser('ml.deleteDatafeed', options);
+        const { body } = await client.asInternalUser.ml.deleteDatafeed(options);
 
         return response.ok({
-          body: resp,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -255,20 +284,23 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
         params: datafeedIdSchema,
         body: startDatafeedSchema,
       },
+      options: {
+        tags: ['access:ml:canStartStopDatafeed'],
+      },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const datafeedId = request.params.datafeedId;
         const { start, end } = request.body;
 
-        const resp = await context.ml!.mlClient.callAsCurrentUser('ml.startDatafeed', {
-          datafeedId,
+        const { body } = await client.asInternalUser.ml.startDatafeed({
+          datafeed_id: datafeedId,
           start,
           end,
         });
 
         return response.ok({
-          body: resp,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -291,17 +323,20 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
       validate: {
         params: datafeedIdSchema,
       },
+      options: {
+        tags: ['access:ml:canStartStopDatafeed'],
+      },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const datafeedId = request.params.datafeedId;
 
-        const resp = await context.ml!.mlClient.callAsCurrentUser('ml.stopDatafeed', {
-          datafeedId,
+        const { body } = await client.asInternalUser.ml.stopDatafeed({
+          datafeed_id: datafeedId,
         });
 
         return response.ok({
-          body: resp,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -324,16 +359,22 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
       validate: {
         params: datafeedIdSchema,
       },
+      options: {
+        tags: ['access:ml:canPreviewDatafeed'],
+      },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const datafeedId = request.params.datafeedId;
-        const resp = await context.ml!.mlClient.callAsCurrentUser('ml.datafeedPreview', {
-          datafeedId,
-        });
+        const { body } = await client.asInternalUser.ml.previewDatafeed(
+          {
+            datafeed_id: datafeedId,
+          },
+          getAuthorizationHeader(request)
+        );
 
         return response.ok({
-          body: resp,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));

@@ -8,16 +8,18 @@
 #
 # eg. Setting the environment variable:
 #
-#       ELASTICSEARCH_STARTUPTIMEOUT=60
+#       ELASTICSEARCH_LOGQUERIES=true
 #
 # will cause Kibana to be invoked with:
 #
-#       --elasticsearch.startupTimeout=60
+#       --elasticsearch.logQueries=true
 
 kibana_vars=(
     console.enabled
     console.proxyConfig
     console.proxyFilter
+    ops.cGroupOverrides.cpuPath
+    ops.cGroupOverrides.cpuAcctPath
     cpu.cgroup.path.override
     cpuacct.cgroup.path.override
     csp.rules
@@ -28,7 +30,6 @@ kibana_vars=(
     elasticsearch.logQueries
     elasticsearch.password
     elasticsearch.pingTimeout
-    elasticsearch.preserveHost
     elasticsearch.requestHeadersWhitelist
     elasticsearch.requestTimeout
     elasticsearch.shardTimeout
@@ -45,7 +46,6 @@ kibana_vars=(
     elasticsearch.ssl.truststore.path
     elasticsearch.ssl.truststore.password
     elasticsearch.ssl.verificationMode
-    elasticsearch.startupTimeout
     elasticsearch.username
     i18n.locale
     interpreter.enableInVisualize
@@ -72,11 +72,28 @@ kibana_vars=(
     map.tilemap.options.minZoom
     map.tilemap.options.subdomains
     map.tilemap.url
+    monitoring.cluster_alerts.email_notifications.email_address
+    monitoring.enabled
+    monitoring.kibana.collection.enabled
+    monitoring.kibana.collection.interval
+    monitoring.ui.container.elasticsearch.enabled
+    monitoring.ui.container.logstash.enabled
+    monitoring.ui.elasticsearch.password
+    monitoring.ui.elasticsearch.pingTimeout
+    monitoring.ui.elasticsearch.hosts
+    monitoring.ui.elasticsearch.username
+    monitoring.ui.elasticsearch.logFetchCount
+    monitoring.ui.elasticsearch.ssl.certificateAuthorities
+    monitoring.ui.elasticsearch.ssl.verificationMode
+    monitoring.ui.enabled
+    monitoring.ui.max_bucket_size
+    monitoring.ui.min_interval_seconds
     newsfeed.enabled
     ops.interval
     path.data
     pid.file
     regionmap
+    security.showInsecureClusterWarning
     server.basePath
     server.customResponseHeaders
     server.compression.enabled
@@ -143,6 +160,7 @@ kibana_vars=(
     xpack.code.security.gitHostWhitelist
     xpack.code.security.gitProtocolWhitelist
     xpack.encryptedSavedObjects.encryptionKey
+    xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys
     xpack.graph.enabled
     xpack.graph.canEditDrillDownUrls
     xpack.graph.savePolicy
@@ -158,27 +176,12 @@ kibana_vars=(
     xpack.infra.sources.default.fields.timestamp
     xpack.infra.sources.default.logAlias
     xpack.infra.sources.default.metricAlias
+    xpack.ingestManager.fleet.tlsCheckDisabled
+    xpack.ingestManager.registryUrl
     xpack.license_management.enabled
+    xpack.maps.enabled
+    xpack.maps.showMapVisualizationTypes
     xpack.ml.enabled
-    xpack.monitoring.cluster_alerts.email_notifications.email_address
-    xpack.monitoring.elasticsearch.password
-    xpack.monitoring.elasticsearch.pingTimeout
-    xpack.monitoring.elasticsearch.hosts
-    xpack.monitoring.elasticsearch.username
-    xpack.monitoring.elasticsearch.logFetchCount
-    xpack.monitoring.elasticsearch.ssl.certificateAuthorities
-    xpack.monitoring.elasticsearch.ssl.verificationMode
-    xpack.monitoring.enabled
-    xpack.monitoring.kibana.collection.enabled
-    xpack.monitoring.kibana.collection.interval
-    xpack.monitoring.max_bucket_size
-    xpack.monitoring.min_interval_seconds
-    xpack.monitoring.node_resolver
-    xpack.monitoring.report_stats
-    xpack.monitoring.elasticsearch.pingTimeout
-    xpack.monitoring.ui.container.elasticsearch.enabled
-    xpack.monitoring.ui.container.logstash.enabled
-    xpack.monitoring.ui.enabled
     xpack.reporting.capture.browser.autoDownload
     xpack.reporting.capture.browser.chromium.disableSandbox
     xpack.reporting.capture.browser.chromium.inspect
@@ -197,10 +200,14 @@ kibana_vars=(
     xpack.reporting.csv.checkForFormulas
     xpack.reporting.csv.escapeFormulaValues
     xpack.reporting.csv.enablePanelActionDownload
+    xpack.reporting.csv.useByteOrderMarkEncoding
     xpack.reporting.csv.maxSizeBytes
     xpack.reporting.csv.scroll.duration
     xpack.reporting.csv.scroll.size
     xpack.reporting.capture.maxAttempts
+    xpack.reporting.capture.timeouts.openUrl
+    xpack.reporting.capture.timeouts.waitForElements
+    xpack.reporting.capture.timeouts.renderComplete
     xpack.reporting.enabled
     xpack.reporting.encryptionKey
     xpack.reporting.index
@@ -228,11 +235,16 @@ kibana_vars=(
     xpack.security.cookieName
     xpack.security.enabled
     xpack.security.encryptionKey
+    xpack.security.sameSiteCookies
     xpack.security.secureCookies
     xpack.security.sessionTimeout
     xpack.security.session.idleTimeout
     xpack.security.session.lifespan
+    xpack.security.session.cleanupInterval
     xpack.security.loginAssistanceMessage
+    xpack.security.loginHelp
+    xpack.spaces.enabled
+    xpack.spaces.maxSpaces
     telemetry.allowChangingOptInStatus
     telemetry.enabled
     telemetry.optIn
@@ -270,4 +282,4 @@ umask 0002
 # Therefore, we set this value here so that cgroup statistics are
 # available for the container this process will run in.
 
-exec /usr/share/kibana/bin/kibana --cpu.cgroup.path.override=/ --cpuacct.cgroup.path.override=/ ${longopts} "$@"
+exec /usr/share/kibana/bin/kibana --ops.cGroupOverrides.cpuPath=/ --ops.cGroupOverrides.cpuAcctPath=/ ${longopts} "$@"

@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export let toasts: any;
-export let fatalErrors: any;
+import { IToasts, FatalErrorsSetup } from 'src/core/public';
 
-export function init(_toasts: any, _fatalErrors: any): void {
+export let toasts: IToasts;
+export let fatalErrors: FatalErrorsSetup;
+
+export function init(_toasts: IToasts, _fatalErrors: FatalErrorsSetup): void {
   toasts = _toasts;
   fatalErrors = _fatalErrors;
 }

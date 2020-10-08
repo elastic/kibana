@@ -23,6 +23,18 @@ export function analyzeWithAxe(context, options, callback) {
   Promise.resolve()
     .then(() => {
       if (window.axe) {
+        window.axe.configure({
+          rules: [
+            {
+              id: 'scrollable-region-focusable',
+              selector: '[data-skip-axe="scrollable-region-focusable"]',
+            },
+            {
+              id: 'aria-required-children',
+              selector: '[data-skip-axe="aria-required-children"] > *',
+            },
+          ],
+        });
         return window.axe.run(context, options);
       }
 
@@ -30,8 +42,15 @@ export function analyzeWithAxe(context, options, callback) {
       return false;
     })
     .then(
-      result => callback({ result }),
-      error => callback({ error })
+      (result) => callback({ result }),
+      (error) => {
+        callback({
+          error: {
+            message: error.message,
+            stack: error.stack,
+          },
+        });
+      }
     );
 }
 

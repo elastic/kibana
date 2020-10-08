@@ -23,11 +23,11 @@ import { basename, dirname, relative, resolve } from 'path';
 import { IMinimatch, Minimatch } from 'minimatch';
 import { parseConfigFileTextToJson } from 'typescript';
 
-import { REPO_ROOT } from '../constants';
+import { REPO_ROOT } from '@kbn/utils';
 
 function makeMatchers(directory: string, patterns: string[]) {
   return patterns.map(
-    pattern =>
+    (pattern) =>
       new Minimatch(resolve(directory, pattern), {
         dot: true,
       })
@@ -45,7 +45,7 @@ function parseTsConfig(path: string) {
 }
 
 function testMatchers(matchers: IMinimatch[], path: string) {
-  return matchers.some(matcher => matcher.match(path));
+  return matchers.some((matcher) => matcher.match(path));
 }
 
 export class Project {

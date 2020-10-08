@@ -150,7 +150,7 @@ export class TopNPanelConfig extends Component {
                         : getDefaultQueryLanguage(),
                       query: model.filter.query || '',
                     }}
-                    onChange={filter => this.props.onChange({ filter })}
+                    onChange={(filter) => this.props.onChange({ filter })}
                     indexPatterns={[model.index_pattern || model.default_index_pattern]}
                   />
                 </EuiFormRow>
@@ -227,7 +227,7 @@ export class TopNPanelConfig extends Component {
       );
     }
     return (
-      <div>
+      <>
         <EuiTabs size="s">
           <EuiTab isSelected={selectedTab === 'data'} onClick={() => this.switchTab('data')}>
             <FormattedMessage
@@ -243,7 +243,7 @@ export class TopNPanelConfig extends Component {
           </EuiTab>
         </EuiTabs>
         {view}
-      </div>
+      </>
     );
   }
 }

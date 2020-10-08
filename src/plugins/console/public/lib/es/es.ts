@@ -32,10 +32,13 @@ export function getContentType(body: any) {
 }
 
 export function send(method: string, path: string, data: any) {
-  const wrappedDfd = $.Deferred(); // eslint-disable-line new-cap
+  const wrappedDfd = $.Deferred();
 
   const options: JQuery.AjaxSettings = {
     url: '../api/console/proxy?' + stringify({ path, method }, { sort: false }),
+    headers: {
+      'kbn-xsrf': 'kibana',
+    },
     data,
     contentType: getContentType(data),
     cache: false,

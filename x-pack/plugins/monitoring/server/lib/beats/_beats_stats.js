@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { capitalize, get } from 'lodash';
+import { upperFirst, get } from 'lodash';
 
 export const getDiffCalculation = (max, min) => {
   // no need to test max >= 0, but min <= 0 which is normal for a derivative after restart
@@ -26,7 +26,7 @@ export const beatsAggFilterPath = [
   'aggregations.max_bytes_sent_total.value',
 ];
 
-export const beatsUuidsAgg = maxBucketSize => ({
+export const beatsUuidsAgg = (maxBucketSize) => ({
   types: {
     terms: {
       field: 'beats_stats.beat.type',
@@ -97,7 +97,7 @@ export const beatsUuidsAgg = maxBucketSize => ({
   },
 });
 
-export const beatsAggResponseHandler = response => {
+export const beatsAggResponseHandler = (response) => {
   // beat types stat
   const buckets = get(response, 'aggregations.types.buckets', []);
   const beatTotal = get(response, 'aggregations.total.value', null);
@@ -105,7 +105,7 @@ export const beatsAggResponseHandler = response => {
     return [
       ...types,
       {
-        type: capitalize(typeBucket.key),
+        type: upperFirst(typeBucket.key),
         count: get(typeBucket, 'uuids.buckets.length'),
       },
     ];

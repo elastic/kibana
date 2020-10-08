@@ -26,14 +26,14 @@ const dashify = (str: string) => {
   return str
     .trim()
     .replace(/([a-z])([A-Z])/g, '$1-$2')
-    .replace(/\W/g, m => (/[À-ž]/.test(m) ? m : '-'))
+    .replace(/\W/g, (m) => (/[À-ž]/.test(m) ? m : '-'))
     .replace(/^-+|-+$/g, '')
     .toLowerCase();
 };
 
 const inlineStyle = (obj: Record<string, string | number>) => {
   if (!obj) return '';
-  const styles = Object.keys(obj).map(key => {
+  const styles = Object.keys(obj).map((key) => {
     const prop = dashify(key);
     const line = prop.concat(':').concat(String(obj[key]));
     return line;
@@ -52,7 +52,9 @@ interface Arguments {
   weight?: FontWeight;
 }
 
-export const font: ExpressionFunctionDefinition<'font', null, Arguments, Style> = {
+export type ExpressionFunctionFont = ExpressionFunctionDefinition<'font', null, Arguments, Style>;
+
+export const font: ExpressionFunctionFont = {
   name: 'font',
   aliases: [],
   type: 'style',
@@ -62,7 +64,7 @@ export const font: ExpressionFunctionDefinition<'font', null, Arguments, Style> 
   inputTypes: ['null'],
   args: {
     align: {
-      default: 'left',
+      default: '{ theme "font.align" default="left" }',
       help: i18n.translate('expressions.functions.font.args.alignHelpText', {
         defaultMessage: 'The horizontal text alignment.',
       }),
@@ -70,13 +72,14 @@ export const font: ExpressionFunctionDefinition<'font', null, Arguments, Style> 
       types: ['string'],
     },
     color: {
+      default: `{ theme "font.color" }`,
       help: i18n.translate('expressions.functions.font.args.colorHelpText', {
         defaultMessage: 'The text color.',
       }),
       types: ['string'],
     },
     family: {
-      default: `"${openSans.value}"`,
+      default: `{ theme "font.family" default="${openSans.value}" }`,
       help: i18n.translate('expressions.functions.font.args.familyHelpText', {
         defaultMessage: 'An acceptable {css} web font string',
         values: {
@@ -86,7 +89,7 @@ export const font: ExpressionFunctionDefinition<'font', null, Arguments, Style> 
       types: ['string'],
     },
     italic: {
-      default: false,
+      default: `{ theme "font.italic" default=false }`,
       help: i18n.translate('expressions.functions.font.args.italicHelpText', {
         defaultMessage: 'Italicize the text?',
       }),
@@ -94,7 +97,7 @@ export const font: ExpressionFunctionDefinition<'font', null, Arguments, Style> 
       types: ['boolean'],
     },
     lHeight: {
-      default: null,
+      default: `{ theme "font.lHeight" }`,
       aliases: ['lineHeight'],
       help: i18n.translate('expressions.functions.font.args.lHeightHelpText', {
         defaultMessage: 'The line height in pixels',
@@ -102,14 +105,14 @@ export const font: ExpressionFunctionDefinition<'font', null, Arguments, Style> 
       types: ['number', 'null'],
     },
     size: {
-      default: 14,
+      default: `{ theme "font.size" default=14 }`,
       help: i18n.translate('expressions.functions.font.args.sizeHelpText', {
         defaultMessage: 'The font size in pixels',
       }),
       types: ['number'],
     },
     underline: {
-      default: false,
+      default: `{ theme "font.underline" default=false }`,
       help: i18n.translate('expressions.functions.font.args.underlineHelpText', {
         defaultMessage: 'Underline the text?',
       }),
@@ -117,13 +120,13 @@ export const font: ExpressionFunctionDefinition<'font', null, Arguments, Style> 
       types: ['boolean'],
     },
     weight: {
-      default: 'normal',
+      default: `{ theme "font.weight" default="normal" }`,
       help: i18n.translate('expressions.functions.font.args.weightHelpText', {
         defaultMessage: 'The font weight. For example, {list}, or {end}.',
         values: {
           list: Object.values(FontWeight)
             .slice(0, -1)
-            .map(weight => `\`"${weight}"\``)
+            .map((weight) => `\`"${weight}"\``)
             .join(', '),
           end: `\`"${Object.values(FontWeight).slice(-1)[0]}"\``,
         },

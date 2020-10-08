@@ -18,9 +18,9 @@
  */
 
 import chalk from 'chalk';
+import { LogRecord } from '@kbn/logging';
 
 import { Conversion } from './type';
-import { LogRecord } from '../../log_record';
 
 export const LoggerConversion: Conversion = {
   pattern: /%logger/g,

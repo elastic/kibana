@@ -8,37 +8,46 @@ import { useReducer } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { SimpleSavedObject } from 'kibana/public';
-import { getErrorMessage } from '../../../../../../../common/util/errors';
+import { extractErrorMessage } from '../../../../../../../common/util/errors';
 import { DeepReadonly } from '../../../../../../../common/types/common';
 import { ml } from '../../../../../services/ml_api_service';
 import { useMlContext } from '../../../../../contexts/ml';
+import { DuplicateIndexPatternError } from '../../../../../../../../../../src/plugins/data/public';
 
 import {
   useRefreshAnalyticsList,
   DataFrameAnalyticsId,
   DataFrameAnalyticsConfig,
 } from '../../../../common';
-import {
-  extractCloningConfig,
-  isAdvancedConfig,
-} from '../../components/analytics_list/action_clone';
+import { extractCloningConfig, isAdvancedConfig } from '../../components/action_clone';
 
 import { ActionDispatchers, ACTION } from './actions';
 import { reducer } from './reducer';
 import {
   getInitialState,
   getJobConfigFromFormState,
-  EsIndexName,
   FormMessage,
   State,
   SourceIndexMap,
-  getCloneFormStateFromJobConfig,
+  getFormStateFromJobConfig,
 } from './state';
+
+import { ANALYTICS_STEPS } from '../../../analytics_creation/page';
+
+export interface AnalyticsCreationStep {
+  number: ANALYTICS_STEPS;
+  completed: boolean;
+}
 
 export interface CreateAnalyticsFormProps {
   actions: ActionDispatchers;
   state: State;
+}
+
+export interface CreateAnalyticsStepProps extends CreateAnalyticsFormProps {
+  setCurrentStep: React.Dispatch<React.SetStateAction<any>>;
+  step?: ANALYTICS_STEPS;
+  stepActivated?: boolean;
 }
 
 export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
@@ -58,9 +67,6 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
   const resetAdvancedEditorMessages = () =>
     dispatch({ type: ACTION.RESET_ADVANCED_EDITOR_MESSAGES });
 
-  const setIndexNames = (indexNames: EsIndexName[]) =>
-    dispatch({ type: ACTION.SET_INDEX_NAMES, indexNames });
-
   const setAdvancedEditorRawString = (advancedEditorRawString: string) =>
     dispatch({ type: ACTION.SET_ADVANCED_EDITOR_RAW_STRING, advancedEditorRawString });
 
@@ -74,12 +80,6 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     dispatch({ type: ACTION.SET_IS_JOB_STARTED, isJobStarted });
   };
 
-  const setIsModalButtonDisabled = (isModalButtonDisabled: boolean) =>
-    dispatch({ type: ACTION.SET_IS_MODAL_BUTTON_DISABLED, isModalButtonDisabled });
-
-  const setIsModalVisible = (isModalVisible: boolean) =>
-    dispatch({ type: ACTION.SET_IS_MODAL_VISIBLE, isModalVisible });
-
   const setJobIds = (jobIds: DataFrameAnalyticsId[]) =>
     dispatch({ type: ACTION.SET_JOB_IDS, jobIds });
 
@@ -89,7 +89,6 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
 
   const createAnalyticsJob = async () => {
     resetRequestMessages();
-    setIsModalButtonDisabled(true);
 
     const analyticsJobConfig = (isAdvancedEditorEnabled
       ? jobConfig
@@ -110,7 +109,6 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
           }
         ),
       });
-      setIsModalButtonDisabled(false);
       setIsJobCreated(true);
       if (createIndexPattern) {
         createKibanaIndexPattern();
@@ -118,7 +116,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
       refresh();
     } catch (e) {
       addRequestMessage({
-        error: getErrorMessage(e),
+        error: extractErrorMessage(e),
         message: i18n.translate(
           'xpack.ml.dataframe.analytics.create.errorCreatingDataFrameAnalyticsJob',
           {
@@ -126,7 +124,6 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
           }
         ),
       });
-      setIsModalButtonDisabled(false);
     }
   };
 
@@ -134,19 +131,25 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     const indexPatternName = destinationIndex;
 
     try {
-      const newIndexPattern = await mlContext.indexPatterns.make();
+      await mlContext.indexPatterns.createAndSave(
+        {
+          title: indexPatternName,
+        },
+        false,
+        true
+      );
 
-      Object.assign(newIndexPattern, {
-        id: '',
-        title: indexPatternName,
+      addRequestMessage({
+        message: i18n.translate(
+          'xpack.ml.dataframe.analytics.create.createIndexPatternSuccessMessage',
+          {
+            defaultMessage: 'Kibana index pattern {indexPatternName} created.',
+            values: { indexPatternName },
+          }
+        ),
       });
-
-      const id = await newIndexPattern.create();
-
-      await mlContext.indexPatterns.clearCache();
-
-      // id returns false if there's a duplicate index pattern.
-      if (id === false) {
+    } catch (e) {
+      if (e instanceof DuplicateIndexPatternError) {
         addRequestMessage({
           error: i18n.translate(
             'xpack.ml.dataframe.analytics.create.duplicateIndexPatternErrorMessageError',
@@ -162,34 +165,17 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
             }
           ),
         });
-        return;
+      } else {
+        addRequestMessage({
+          error: extractErrorMessage(e),
+          message: i18n.translate(
+            'xpack.ml.dataframe.analytics.create.createIndexPatternErrorMessage',
+            {
+              defaultMessage: 'An error occurred creating the Kibana index pattern:',
+            }
+          ),
+        });
       }
-
-      // check if there's a default index pattern, if not,
-      // set the newly created one as the default index pattern.
-      if (!mlContext.kibanaConfig.get('defaultIndex')) {
-        await mlContext.kibanaConfig.set('defaultIndex', id);
-      }
-
-      addRequestMessage({
-        message: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.createIndexPatternSuccessMessage',
-          {
-            defaultMessage: 'Kibana index pattern {indexPatternName} created.',
-            values: { indexPatternName },
-          }
-        ),
-      });
-    } catch (e) {
-      addRequestMessage({
-        error: getErrorMessage(e),
-        message: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.createIndexPatternErrorMessage',
-          {
-            defaultMessage: 'An error occurred creating the Kibana index pattern:',
-          }
-        ),
-      });
     }
   };
 
@@ -203,7 +189,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
       );
     } catch (e) {
       addRequestMessage({
-        error: getErrorMessage(e),
+        error: extractErrorMessage(e),
         message: i18n.translate(
           'xpack.ml.dataframe.analytics.create.errorGettingDataFrameAnalyticsList',
           {
@@ -214,24 +200,10 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     }
 
     try {
-      setIndexNames((await ml.getIndices()).map(index => index.name));
-    } catch (e) {
-      addRequestMessage({
-        error: getErrorMessage(e),
-        message: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.errorGettingDataFrameIndexNames',
-          {
-            defaultMessage: 'An error occurred getting the existing index names:',
-          }
-        ),
-      });
-    }
-
-    try {
-      // Set the index pattern titles which the user can choose as the source.
+      // Set the existing index pattern titles.
       const indexPatternsMap: SourceIndexMap = {};
       const savedObjects = (await mlContext.indexPatterns.getCache()) || [];
-      savedObjects.forEach((obj: SimpleSavedObject<Record<string, any>>) => {
+      savedObjects.forEach((obj) => {
         const title = obj?.attributes?.title;
         if (title !== undefined) {
           const id = obj?.id || '';
@@ -243,7 +215,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
       });
     } catch (e) {
       addRequestMessage({
-        error: getErrorMessage(e),
+        error: extractErrorMessage(e),
         message: i18n.translate(
           'xpack.ml.dataframe.analytics.create.errorGettingIndexPatternTitles',
           {
@@ -254,15 +226,12 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     }
   };
 
-  const openModal = async () => {
+  const initiateWizard = async () => {
     await mlContext.indexPatterns.clearCache();
-    resetForm();
     await prepareFormValidation();
-    dispatch({ type: ACTION.OPEN_MODAL });
   };
 
   const startAnalyticsJob = async () => {
-    setIsModalButtonDisabled(true);
     try {
       const response = await ml.dataFrameAnalytics.startDataFrameAnalytics(jobId);
       if (response.acknowledged !== true) {
@@ -278,11 +247,10 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
         ),
       });
       setIsJobStarted(true);
-      setIsModalButtonDisabled(false);
       refresh();
     } catch (e) {
       addRequestMessage({
-        error: getErrorMessage(e),
+        error: extractErrorMessage(e),
         message: i18n.translate(
           'xpack.ml.dataframe.analytics.create.errorStartingDataFrameAnalyticsJob',
           {
@@ -290,7 +258,6 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
           }
         ),
       });
-      setIsModalButtonDisabled(false);
     }
   };
 
@@ -306,38 +273,39 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     dispatch({ type: ACTION.SWITCH_TO_ADVANCED_EDITOR });
   };
 
+  const switchToForm = () => {
+    dispatch({ type: ACTION.SWITCH_TO_FORM });
+  };
+
   const setEstimatedModelMemoryLimit = (value: State['estimatedModelMemoryLimit']) => {
     dispatch({ type: ACTION.SET_ESTIMATED_MODEL_MEMORY_LIMIT, value });
   };
 
   const setJobClone = async (cloneJob: DeepReadonly<DataFrameAnalyticsConfig>) => {
     resetForm();
-    await prepareFormValidation();
-
     const config = extractCloningConfig(cloneJob);
     if (isAdvancedConfig(config)) {
-      setJobConfig(config);
+      setFormState(getFormStateFromJobConfig(config));
       switchToAdvancedEditor();
     } else {
-      setFormState(getCloneFormStateFromJobConfig(config));
+      setFormState(getFormStateFromJobConfig(config));
       setEstimatedModelMemoryLimit(config.model_memory_limit);
     }
 
     dispatch({ type: ACTION.SET_JOB_CLONE, cloneJob });
-    dispatch({ type: ACTION.OPEN_MODAL });
   };
 
   const actions: ActionDispatchers = {
     closeModal,
     createAnalyticsJob,
-    openModal,
+    initiateWizard,
     resetAdvancedEditorMessages,
     setAdvancedEditorRawString,
     setFormState,
-    setIsModalVisible,
     setJobConfig,
     startAnalyticsJob,
     switchToAdvancedEditor,
+    switchToForm,
     setEstimatedModelMemoryLimit,
     setJobClone,
   };

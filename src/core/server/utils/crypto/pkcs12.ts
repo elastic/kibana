@@ -115,9 +115,9 @@ const getCerts = (p12: pkcs12.Pkcs12Pfx, pubKey?: PublicKeyData) => {
   let ca;
   let cert;
   if (bags && bags.length) {
-    const certs = bags.map(convertCert).filter(x => x !== undefined);
-    cert = certs.find(x => doesPubKeyMatch(x!.publicKeyData, pubKey))?.cert;
-    ca = certs.filter(x => !doesPubKeyMatch(x!.publicKeyData, pubKey)).map(x => x!.cert);
+    const certs = bags.map(convertCert).filter((x) => x !== undefined);
+    cert = certs.find((x) => doesPubKeyMatch(x!.publicKeyData, pubKey))?.cert;
+    ca = certs.filter((x) => !doesPubKeyMatch(x!.publicKeyData, pubKey)).map((x) => x!.cert);
     if (ca.length === 0) {
       ca = undefined;
     }

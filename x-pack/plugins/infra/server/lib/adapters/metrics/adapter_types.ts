@@ -40,12 +40,12 @@ export enum InfraMetricModelMetricType {
   min = 'min',
   calculation = 'calculation',
   cardinality = 'cardinality',
-  series_agg = 'series_agg', // eslint-disable-line @typescript-eslint/camelcase
-  positive_only = 'positive_only', // eslint-disable-line @typescript-eslint/camelcase
+  series_agg = 'series_agg',
+  positive_only = 'positive_only',
   derivative = 'derivative',
   count = 'count',
   sum = 'sum',
-  cumulative_sum = 'cumulative_sum', // eslint-disable-line @typescript-eslint/camelcase
+  cumulative_sum = 'cumulative_sum',
 }
 
 export interface InfraMetricModel {
@@ -80,7 +80,7 @@ export interface InfraMetricModelBasicMetric {
 export interface InfraMetricModelSeriesAgg {
   id: string;
   function: string;
-  type: InfraMetricModelMetricType.series_agg; // eslint-disable-line @typescript-eslint/camelcase
+  type: InfraMetricModelMetricType.series_agg;
 }
 
 export interface InfraMetricModelDerivative {

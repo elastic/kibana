@@ -6,13 +6,25 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const queryBar = getService('queryBar');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'maps', 'timePicker']);
+  const security = getService('security');
 
   describe('discover visualize button', () => {
     beforeEach(async () => {
+      await security.testUser.setRoles([
+        'test_logstash_reader',
+        'global_maps_all',
+        'geoshape_data_reader',
+        'global_discover_read',
+        'global_visualize_read',
+      ]);
       await PageObjects.common.navigateToApp('discover');
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
     });
 
     it('should link geo_shape fields to Maps application', async () => {

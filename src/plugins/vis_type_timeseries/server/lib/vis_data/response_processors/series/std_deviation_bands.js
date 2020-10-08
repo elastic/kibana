@@ -17,37 +17,37 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { getSplits } from '../../helpers/get_splits';
-import { getLastMetric } from '../../helpers/get_last_metric';
-import { mapBucket } from '../../helpers/map_bucket';
+import { getAggValue, getLastMetric, getSplits } from '../../helpers';
+import { METRIC_TYPES } from '../../../../../common/metric_types';
 
 export function stdDeviationBands(resp, panel, series, meta) {
-  return next => results => {
+  return (next) => (results) => {
     const metric = getLastMetric(series);
-    if (metric.type === 'std_deviation' && metric.mode === 'band') {
-      getSplits(resp, panel, series, meta).forEach(split => {
-        const upper = split.timeseries.buckets.map(
-          mapBucket(_.assign({}, metric, { mode: 'upper' }))
-        );
-        const lower = split.timeseries.buckets.map(
-          mapBucket(_.assign({}, metric, { mode: 'lower' }))
-        );
+    if (metric.type === METRIC_TYPES.STD_DEVIATION && metric.mode === 'band') {
+      getSplits(resp, panel, series, meta).forEach(({ id, color, label, timeseries }) => {
+        const data = timeseries.buckets.map((bucket) => [
+          bucket.key,
+          getAggValue(bucket, { ...metric, mode: 'upper' }),
+          getAggValue(bucket, { ...metric, mode: 'lower' }),
+        ]);
+
         results.push({
-          id: `${split.id}:upper`,
-          label: split.label,
-          color: split.color,
-          lines: { show: true, fill: 0.5, lineWidth: 0 },
+          id,
+          label,
+          color,
+          data,
+          lines: {
+            show: series.chart_type === 'line',
+            fill: 0.5,
+            lineWidth: 0,
+            mode: 'band',
+          },
+          bars: {
+            show: series.chart_type === 'bar',
+            fill: 0.5,
+            mode: 'band',
+          },
           points: { show: false },
-          fillBetween: `${split.id}:lower`,
-          data: upper,
-        });
-        results.push({
-          id: `${split.id}:lower`,
-          color: split.color,
-          lines: { show: true, fill: false, lineWidth: 0 },
-          points: { show: false },
-          data: lower,
         });
       });
     }

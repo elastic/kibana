@@ -3,11 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters
-} from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getJavaMetricsCharts } from './by_agent/java';
 import { getDefaultMetricsCharts } from './by_agent/default';
 import { GenericMetricsChart } from './transform_metrics_chart';
@@ -20,9 +16,9 @@ export async function getMetricsChartDataByAgent({
   setup,
   serviceName,
   serviceNodeName,
-  agentName
+  agentName,
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;
   agentName: string;

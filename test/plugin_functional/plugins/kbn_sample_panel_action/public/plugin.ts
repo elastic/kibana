@@ -27,14 +27,10 @@ export class SampelPanelActionTestPlugin
   implements Plugin<SampelPanelActionTestPluginSetup, SampelPanelActionTestPluginStart> {
   public setup(core: CoreSetup, { uiActions }: { uiActions: UiActionsSetup }) {
     const samplePanelAction = createSamplePanelAction(core.getStartServices);
-
-    uiActions.registerAction(samplePanelAction);
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, samplePanelAction);
-
     const samplePanelLink = createSamplePanelLink();
 
-    uiActions.registerAction(samplePanelLink);
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, samplePanelLink);
+    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, samplePanelAction);
+    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, samplePanelLink);
 
     return {};
   }

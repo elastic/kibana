@@ -10,16 +10,16 @@ Fetch this source and reject the returned Promise on error
 <b>Signature:</b>
 
 ```typescript
-fetch(options?: FetchOptions): Promise<any>;
+fetch(options?: ISearchOptions): Promise<import("elasticsearch").SearchResponse<any>>;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  options | <code>FetchOptions</code> |  |
+|  options | <code>ISearchOptions</code> |  |
 
 <b>Returns:</b>
 
-`Promise<any>`
+`Promise<import("elasticsearch").SearchResponse<any>>`
 

@@ -107,7 +107,7 @@ function TimeIntervalParamEditor({
   setTouched,
   setValidity,
 }: AggParamEditorProps<string>) {
-  const timeBase: string = get(editorConfig, 'interval.timeBase');
+  const timeBase: string = get(editorConfig, 'interval.timeBase') as string;
   const options = timeBase
     ? []
     : ((aggParam as any).options || []).reduce(

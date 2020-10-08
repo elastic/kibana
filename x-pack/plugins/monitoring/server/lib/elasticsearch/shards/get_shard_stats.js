@@ -57,7 +57,7 @@ export function getShardStats(
     size: 0,
     ignoreUnavailable: true,
     body: {
-      sort: { timestamp: { order: 'desc' } },
+      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({
         type: 'shards',
         clusterUuid: cluster.cluster_uuid,
@@ -71,7 +71,7 @@ export function getShardStats(
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  return callWithRequest(req, 'search', params).then(resp => {
+  return callWithRequest(req, 'search', params).then((resp) => {
     return handleResponse(resp, includeNodes, includeIndices, cluster);
   });
 }

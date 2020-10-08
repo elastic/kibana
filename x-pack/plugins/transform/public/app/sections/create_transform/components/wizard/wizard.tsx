@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useEffect, useRef, useState } from 'react';
+import React, { Fragment, FC, useEffect, useRef, useState, createContext } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
 import { EuiSteps, EuiStepStatus } from '@elastic/eui';
 
-import { getCreateRequestBody, TransformPivotConfig } from '../../../../common';
+import { TransformPivotConfig } from '../../../../../../common/types/transform';
+
+import { getCreateTransformRequestBody } from '../../../../common';
 import { SearchItems } from '../../../../hooks/use_search_items';
 
 import {
@@ -28,6 +30,7 @@ import {
   StepDetailsSummary,
 } from '../step_details';
 import { WizardNav } from '../wizard_nav';
+import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
 
 enum KBN_MANAGEMENT_PAGE_CLASSNAME {
   DEFAULT_BODY = 'mgtPage__body',
@@ -85,7 +88,13 @@ interface WizardProps {
   searchItems: SearchItems;
 }
 
+export const CreateTransformWizardContext = createContext<{ indexPattern: IndexPattern | null }>({
+  indexPattern: null,
+});
+
 export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems }) => {
+  const { indexPattern } = searchItems;
+
   // The current WIZARD_STEP
   const [currentStep, setCurrentStep] = useState(WIZARD_STEPS.DEFINE);
 
@@ -105,6 +114,7 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
         onChange={setStepDetailsState}
         overrides={stepDetailsState}
         searchItems={searchItems}
+        stepDefineState={stepDefineState}
       />
     ) : (
       <StepDetailsSummary {...stepDetailsState} />
@@ -120,21 +130,28 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
     // as it was when transforms were part of the ML plugin. This will be revisited
     // to come up with an approach that's more in line with the overall layout
     // of the Kibana management section.
-    const managementBody = document.getElementsByClassName(
+    let managementBody = document.getElementsByClassName(
       KBN_MANAGEMENT_PAGE_CLASSNAME.DEFAULT_BODY
     );
 
     if (managementBody.length > 0) {
-      managementBody[0].classList.add(KBN_MANAGEMENT_PAGE_CLASSNAME.TRANSFORM_BODY_MODIFIER);
+      managementBody[0].classList.replace(
+        KBN_MANAGEMENT_PAGE_CLASSNAME.DEFAULT_BODY,
+        KBN_MANAGEMENT_PAGE_CLASSNAME.TRANSFORM_BODY_MODIFIER
+      );
       return () => {
-        managementBody[0].classList.remove(KBN_MANAGEMENT_PAGE_CLASSNAME.TRANSFORM_BODY_MODIFIER);
+        managementBody = document.getElementsByClassName(
+          KBN_MANAGEMENT_PAGE_CLASSNAME.TRANSFORM_BODY_MODIFIER
+        );
+        managementBody[0].classList.replace(
+          KBN_MANAGEMENT_PAGE_CLASSNAME.TRANSFORM_BODY_MODIFIER,
+          KBN_MANAGEMENT_PAGE_CLASSNAME.DEFAULT_BODY
+        );
       };
     }
   }, []);
 
-  const { indexPattern } = searchItems;
-
-  const transformConfig = getCreateRequestBody(
+  const transformConfig = getCreateTransformRequestBody(
     indexPattern.title,
     stepDefineState,
     stepDetailsState
@@ -148,6 +165,7 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
         transformConfig={transformConfig}
         onChange={setStepCreateState}
         overrides={stepCreateState}
+        timeFieldName={stepDetailsState.indexPatternTimeField}
       />
     ) : (
       <StepCreateSummary />
@@ -155,8 +173,8 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
 
   const stepsConfig = [
     {
-      title: i18n.translate('xpack.transform.transformsWizard.stepDefineTitle', {
-        defaultMessage: 'Define pivot',
+      title: i18n.translate('xpack.transform.transformsWizard.stepConfigurationTitle', {
+        defaultMessage: 'Configuration',
       }),
       children: (
         <StepDefine
@@ -204,5 +222,9 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
     },
   ];
 
-  return <EuiSteps className="transform__steps" steps={stepsConfig} />;
+  return (
+    <CreateTransformWizardContext.Provider value={{ indexPattern }}>
+      <EuiSteps className="transform__steps" steps={stepsConfig} />
+    </CreateTransformWizardContext.Provider>
+  );
 });

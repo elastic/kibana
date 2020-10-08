@@ -105,12 +105,12 @@ export class StringFormat extends FieldFormat {
   }
 
   private toTitleCase(val: string) {
-    return val.replace(/\w\S*/g, txt => {
+    return val.replace(/\w\S*/g, (txt) => {
       return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
     });
   }
 
-  textConvert: TextContextTypeConvert = val => {
+  textConvert: TextContextTypeConvert = (val) => {
     switch (this.param('transform')) {
       case 'lower':
         return String(val).toLowerCase();

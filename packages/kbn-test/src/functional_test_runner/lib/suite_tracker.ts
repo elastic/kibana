@@ -19,7 +19,7 @@
 import fs from 'fs';
 import { dirname, relative, resolve } from 'path';
 
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 
 import { Lifecycle } from './lifecycle';
 
@@ -70,7 +70,7 @@ export class SuiteTracker {
 
     const config = relative(REPO_ROOT, configPathAbsolute);
 
-    lifecycle.beforeTestSuite.add(suite => {
+    lifecycle.beforeTestSuite.add((suite) => {
       const tracked = this.getTracked(suite);
       tracked.startTime = new Date();
     });
@@ -92,7 +92,7 @@ export class SuiteTracker {
     lifecycle.testFailure.add(handleFailure);
     lifecycle.testHookFailure.add(handleFailure);
 
-    lifecycle.afterTestSuite.add(suite => {
+    lifecycle.afterTestSuite.add((suite) => {
       const tracked = this.getTracked(suite);
       tracked.endTime = new Date();
 

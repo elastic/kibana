@@ -50,7 +50,7 @@ export const initialValue: Store = produce<Store>(
 );
 
 export const reducer: Reducer<Store, Actions> = (state, action) =>
-  produce<Store>(state, draft => {
+  produce<Store>(state, (draft) => {
     if (action.type === 'sendRequest') {
       draft.requestInFlight = true;
       draft.lastResult = initialResultValue;

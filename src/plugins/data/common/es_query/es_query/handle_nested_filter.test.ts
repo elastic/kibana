@@ -22,7 +22,7 @@ import { fields } from '../../index_patterns/mocks';
 import { buildPhraseFilter, buildQueryFilter } from '../filters';
 import { IFieldType, IIndexPattern } from '../../index_patterns';
 
-describe('handleNestedFilter', function() {
+describe('handleNestedFilter', function () {
   const indexPattern: IIndexPattern = ({
     id: 'logstash-*',
     fields,
@@ -86,6 +86,6 @@ describe('handleNestedFilter', function() {
   });
 
   function getField(name: string) {
-    return indexPattern.fields.find(field => field.name === name);
+    return indexPattern.fields.find((field) => field.name === name);
   }
 });

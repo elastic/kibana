@@ -36,6 +36,7 @@ export function postgresqlMetricsSpecProvider(context: TutorialContext): Tutoria
     name: i18n.translate('home.tutorials.postgresqlMetrics.nameTitle', {
       defaultMessage: 'PostgreSQL metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     isBeta: false,
     shortDescription: i18n.translate('home.tutorials.postgresqlMetrics.shortDescription', {
@@ -65,7 +66,6 @@ export function postgresqlMetricsSpecProvider(context: TutorialContext): Tutoria
       },
     },
     completionTimeMinutes: 10,
-    // previewImagePath: '/plugins/kibana/home/tutorial_resources/postgresql_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),

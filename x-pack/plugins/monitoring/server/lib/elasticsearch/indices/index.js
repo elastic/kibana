@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getIndices } from './get_indices';
+export { getIndices, buildGetIndicesQuery } from './get_indices';
 export { getIndexSummary } from './get_index_summary';

@@ -27,7 +27,7 @@ const noop = () => {};
 export const RoutedTabs = ({ tabs }: RoutedTabsProps) => {
   return (
     <EuiTabs display="condensed">
-      {tabs.map(tab => {
+      {tabs.map((tab) => {
         return <Tab key={`${tab.pathname}-${tab.title}`} {...tab} />;
       })}
     </EuiTabs>
@@ -42,7 +42,6 @@ const Tab = ({ title, pathname, app }: TabConfiguration) => {
       children={({ match, history }) => {
         return (
           <TabContainer className="euiTab">
-            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
             <EuiLink {...linkProps} data-test-subj={`infrastructureNavLink_${pathname}`}>
               <EuiTab onClick={noop} isSelected={match !== null}>
                 {title}

@@ -25,22 +25,22 @@ import buildRequest from './lib/build_request';
 import createDateAgg from './lib/create_date_agg';
 import esResponse from '../fixtures/es_response';
 
-import Bluebird from 'bluebird';
 import _ from 'lodash';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import invoke from '../helpers/invoke_series_fn.js';
+import { UI_SETTINGS } from '../../../../data/server';
 
 function stubRequestAndServer(response, indexPatternSavedObjects = []) {
   return {
-    esDataClient: sinon.stub().returns({
-      callAsCurrentUser: function() {
-        return Bluebird.resolve(response);
-      },
-    }),
+    getStartServices: sinon
+      .stub()
+      .returns(
+        Promise.resolve([{}, { data: { search: { search: () => Promise.resolve(response) } } }])
+      ),
     savedObjectsClient: {
-      find: function() {
-        return Bluebird.resolve({
+      find: function () {
+        return Promise.resolve({
           saved_objects: indexPatternSavedObjects,
         });
       },
@@ -54,18 +54,20 @@ describe('es', () => {
   describe('seriesList processor', () => {
     it('throws an error then the index is missing', () => {
       tlConfig = stubRequestAndServer({
-        _shards: { total: 0 },
+        rawResponse: {
+          _shards: { total: 0 },
+        },
       });
       return invoke(es, [5], tlConfig)
         .then(expect.fail)
-        .catch(e => {
+        .catch((e) => {
           expect(e).to.be.an('error');
         });
     });
 
     it('returns a seriesList', () => {
-      tlConfig = stubRequestAndServer(esResponse);
-      return invoke(es, [5], tlConfig).then(r => {
+      tlConfig = stubRequestAndServer({ rawResponse: esResponse });
+      return invoke(es, [5], tlConfig).then((r) => {
         expect(r.output.type).to.eql('seriesList');
       });
     });
@@ -98,9 +100,17 @@ describe('es', () => {
       expect(agg.time_buckets.date_histogram.time_zone).to.equal('Etc/UTC');
     });
 
-    it('sets the field and interval', () => {
+    it('sets the field', () => {
       expect(agg.time_buckets.date_histogram.field).to.equal('@timestamp');
-      expect(agg.time_buckets.date_histogram.interval).to.equal('1y');
+    });
+
+    it('sets the interval for calendar_interval correctly', () => {
+      expect(agg.time_buckets.date_histogram).to.have.property('calendar_interval', '1y');
+    });
+
+    it('sets the interval for fixed_interval correctly', () => {
+      const a = createDateAgg({ timefield: '@timestamp', interval: '24h' }, tlConfig);
+      expect(a.time_buckets.date_histogram).to.have.property('fixed_interval', '24h');
     });
 
     it('sets min_doc_count to 0', () => {
@@ -167,22 +177,22 @@ describe('es', () => {
       config.index = 'beer';
       const request = fn(config, tlConfig, emptyScriptedFields);
 
-      expect(request.index).to.equal('beer');
+      expect(request.params.index).to.equal('beer');
     });
 
     it('always sets body.size to 0', () => {
       const request = fn(config, tlConfig, emptyScriptedFields);
 
-      expect(request.body.size).to.equal(0);
+      expect(request.params.body.size).to.equal(0);
     });
 
     it('creates a filters agg that contains each of the queries passed', () => {
       config.q = ['foo', 'bar'];
       const request = fn(config, tlConfig, emptyScriptedFields);
 
-      expect(request.body.aggs.q.meta.type).to.equal('split');
+      expect(request.params.body.aggs.q.meta.type).to.equal('split');
 
-      const filters = request.body.aggs.q.filters.filters;
+      const filters = request.params.body.aggs.q.filters.filters;
       expect(filters.foo.query_string.query).to.eql('foo');
       expect(filters.bar.query_string.query).to.eql('bar');
     });
@@ -192,14 +202,14 @@ describe('es', () => {
         config.index = 'beer';
         const request = fn(config, tlConfig, emptyScriptedFields, 30000);
 
-        expect(request.timeout).to.equal('30000ms');
+        expect(request.params.timeout).to.equal('30000ms');
       });
 
       it('sets no timeout if elasticsearch.shardTimeout is set to 0', () => {
         config.index = 'beer';
         const request = fn(config, tlConfig, emptyScriptedFields, 0);
 
-        expect(request).to.not.have.property('timeout');
+        expect(request.params).to.not.have.property('timeout');
       });
     });
 
@@ -216,18 +226,18 @@ describe('es', () => {
 
       it('sets ignore_throttled=true on the request', () => {
         config.index = 'beer';
-        tlConfig.settings['search:includeFrozen'] = false;
+        tlConfig.settings[UI_SETTINGS.SEARCH_INCLUDE_FROZEN] = false;
         const request = fn(config, tlConfig, emptyScriptedFields);
 
-        expect(request.ignore_throttled).to.equal(true);
+        expect(request.params.ignore_throttled).to.equal(true);
       });
 
       it('sets no timeout if elasticsearch.shardTimeout is set to 0', () => {
-        tlConfig.settings['search:includeFrozen'] = true;
+        tlConfig.settings[UI_SETTINGS.SEARCH_INCLUDE_FROZEN] = true;
         config.index = 'beer';
         const request = fn(config, tlConfig, emptyScriptedFields);
 
-        expect(request.ignore_throttled).to.equal(false);
+        expect(request.params.ignore_throttled).to.equal(false);
       });
     });
 
@@ -239,7 +249,7 @@ describe('es', () => {
             to: 5,
           },
           request: {
-            payload: {
+            body: {
               extended: {
                 es: {
                   filter: {
@@ -258,10 +268,10 @@ describe('es', () => {
         });
       });
 
-      it('adds the contents of payload.extended.es.filter to a filter clause of the bool', () => {
+      it('adds the contents of body.extended.es.filter to a filter clause of the bool', () => {
         config.kibana = true;
         const request = fn(config, tlConfig, emptyScriptedFields);
-        const filter = request.body.query.bool.filter.bool;
+        const filter = request.params.body.query.bool.filter.bool;
         expect(filter.must.length).to.eql(1);
         expect(filter.must_not.length).to.eql(2);
       });
@@ -269,13 +279,13 @@ describe('es', () => {
       it('does not include filters if config.kibana = false', () => {
         config.kibana = false;
         const request = fn(config, tlConfig, emptyScriptedFields);
-        expect(request.body.query.bool.filter).to.eql(undefined);
+        expect(request.params.body.query.bool.filter).to.eql(undefined);
       });
 
       it('adds a time filter to the bool querys must clause', () => {
         let request = fn(config, tlConfig, emptyScriptedFields);
-        expect(request.body.query.bool.must.length).to.eql(1);
-        expect(request.body.query.bool.must[0]).to.eql({
+        expect(request.params.body.query.bool.must.length).to.eql(1);
+        expect(request.params.body.query.bool.must[0]).to.eql({
           range: {
             '@timestamp': {
               format: 'strict_date_optional_time',
@@ -287,7 +297,7 @@ describe('es', () => {
 
         config.kibana = true;
         request = fn(config, tlConfig, emptyScriptedFields);
-        expect(request.body.query.bool.must.length).to.eql(1);
+        expect(request.params.body.query.bool.must.length).to.eql(1);
       });
     });
 
@@ -296,7 +306,7 @@ describe('es', () => {
         config.split = ['beer:5', 'wine:10'];
         const request = fn(config, tlConfig, emptyScriptedFields);
 
-        const aggs = request.body.aggs.q.aggs;
+        const aggs = request.params.body.aggs.q.aggs;
 
         expect(aggs.beer.meta.type).to.eql('split');
         expect(aggs.beer.terms.field).to.eql('beer');
@@ -323,7 +333,7 @@ describe('es', () => {
         ];
         const request = fn(config, tlConfig, scriptedFields);
 
-        const aggs = request.body.aggs.q.aggs;
+        const aggs = request.params.body.aggs.q.aggs;
 
         expect(aggs.scriptedBeer.meta.type).to.eql('split');
         expect(aggs.scriptedBeer.terms.script).to.eql({

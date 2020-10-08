@@ -19,7 +19,7 @@
 
 import React, { Component } from 'react';
 import { debounce } from 'lodash';
-// @ts-ignore
+// @ts-expect-error
 import { saveAs } from '@elastic/filesaver';
 import {
   EuiSpacer,
@@ -27,7 +27,7 @@ import {
   EuiInMemoryTable,
   EuiIcon,
   EuiConfirmModal,
-  EuiLoadingKibana,
+  EuiLoadingElastic,
   EuiOverlayMask,
   EUI_MODAL_CONFIRM_BUTTON,
   EuiCheckboxGroup,
@@ -55,6 +55,7 @@ import {
   NotificationsStart,
   ApplicationStart,
 } from 'src/core/public';
+import { RedirectAppLinks } from '../../../../kibana_react/public';
 import { IndexPatternsContract } from '../../../../data/public';
 import {
   parseQuery,
@@ -64,6 +65,7 @@ import {
   fetchExportObjects,
   fetchExportByTypeAndSearch,
   findObjects,
+  findObject,
   extractExportDetails,
   SavedObjectsExportResultDetails,
 } from '../../lib';
@@ -71,8 +73,10 @@ import { SavedObjectWithMetadata } from '../../types';
 import {
   ISavedObjectsManagementServiceRegistry,
   SavedObjectsManagementActionServiceStart,
+  SavedObjectsManagementColumnServiceStart,
 } from '../../services';
 import { Header, Table, Flyout, Relationships } from './components';
+import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 
 interface ExportAllOption {
   id: string;
@@ -83,9 +87,11 @@ export interface SavedObjectsTableProps {
   allowedTypes: string[];
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
   actionRegistry: SavedObjectsManagementActionServiceStart;
+  columnRegistry: SavedObjectsManagementColumnServiceStart;
   savedObjectsClient: SavedObjectsClientContract;
   indexPatterns: IndexPatternsContract;
   http: HttpStart;
+  search: DataPublicPluginStart['search'];
   overlays: OverlayStart;
   notifications: NotificationsStart;
   applications: ApplicationStart;
@@ -154,14 +160,16 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   componentWillUnmount() {
     this._isMounted = false;
-    this.debouncedFetch.cancel();
+    this.debouncedFetchObjects.cancel();
   }
 
   fetchCounts = async () => {
     const { allowedTypes } = this.props;
     const { queryText, visibleTypes } = parseQuery(this.state.activeQuery);
 
-    const filteredTypes = allowedTypes.filter(type => !visibleTypes || visibleTypes.includes(type));
+    const filteredTypes = allowedTypes.filter(
+      (type) => !visibleTypes || visibleTypes.includes(type)
+    );
 
     // These are the saved objects visible in the table.
     const filteredSavedObjectCounts = await getSavedObjectCounts(
@@ -173,7 +181,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     const exportAllOptions: ExportAllOption[] = [];
     const exportAllSelectedOptions: Record<string, boolean> = {};
 
-    Object.keys(filteredSavedObjectCounts).forEach(id => {
+    Object.keys(filteredSavedObjectCounts).forEach((id) => {
       // Add this type as a bulk-export option.
       exportAllOptions.push({
         id,
@@ -188,7 +196,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     // the table filter dropdown.
     const savedObjectCounts = await getSavedObjectCounts(this.props.http, allowedTypes, queryText);
 
-    this.setState(state => ({
+    this.setState((state) => ({
       ...state,
       savedObjectCounts,
       exportAllOptions,
@@ -197,15 +205,14 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   };
 
   fetchSavedObjects = () => {
-    this.setState(
-      {
-        isSearching: true,
-      },
-      this.debouncedFetch
-    );
+    this.setState({ isSearching: true }, this.debouncedFetchObjects);
   };
 
-  debouncedFetch = debounce(async () => {
+  fetchSavedObject = (type: string, id: string) => {
+    this.setState({ isSearching: true }, () => this.debouncedFetchObject(type, id));
+  };
+
+  debouncedFetchObjects = debounce(async () => {
     const { activeQuery: query, page, perPage } = this.state;
     const { notifications, http, allowedTypes } = this.props;
     const { queryText, visibleTypes } = parseQuery(query);
@@ -216,7 +223,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       perPage,
       page: page + 1,
       fields: ['id'],
-      type: allowedTypes.filter(type => !visibleTypes || visibleTypes.includes(type)),
+      type: allowedTypes.filter((type) => !visibleTypes || visibleTypes.includes(type)),
     };
     if (findOptions.type.length > 1) {
       findOptions.sortField = 'type';
@@ -256,8 +263,46 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     }
   }, 300);
 
-  refreshData = async () => {
+  debouncedFetchObject = debounce(async (type: string, id: string) => {
+    const { notifications, http } = this.props;
+    try {
+      const resp = await findObject(http, type, id);
+      if (!this._isMounted) {
+        return;
+      }
+
+      this.setState(({ savedObjects, filteredItemCount }) => {
+        const refreshedSavedObjects = savedObjects.map((object) =>
+          object.type === type && object.id === id ? resp : object
+        );
+        return {
+          savedObjects: refreshedSavedObjects,
+          filteredItemCount,
+          isSearching: false,
+        };
+      });
+    } catch (error) {
+      if (this._isMounted) {
+        this.setState({
+          isSearching: false,
+        });
+      }
+      notifications.toasts.addDanger({
+        title: i18n.translate(
+          'savedObjectsManagement.objectsTable.unableFindSavedObjectNotificationMessage',
+          { defaultMessage: 'Unable to find saved object' }
+        ),
+        text: `${error}`,
+      });
+    }
+  }, 300);
+
+  refreshObjects = async () => {
     await Promise.all([this.fetchSavedObjects(), this.fetchCounts()]);
+  };
+
+  refreshObject = async ({ type, id }: SavedObjectWithMetadata) => {
+    await this.fetchSavedObject(type, id);
   };
 
   onSelectionChanged = (selection: SavedObjectWithMetadata[]) => {
@@ -310,7 +355,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   onExport = async (includeReferencesDeep: boolean) => {
     const { selectedSavedObjects } = this.state;
     const { notifications, http } = this.props;
-    const objectsToExport = selectedSavedObjects.map(obj => ({ id: obj.id, type: obj.type }));
+    const objectsToExport = selectedSavedObjects.map((obj) => ({ id: obj.id, type: obj.type }));
 
     let blob;
     try {
@@ -416,14 +461,14 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     this.setState({ isDeleting: true });
 
-    const indexPatterns = selectedSavedObjects.filter(object => object.type === 'index-pattern');
+    const indexPatterns = selectedSavedObjects.filter((object) => object.type === 'index-pattern');
     if (indexPatterns.length) {
       await this.props.indexPatterns.clearCache();
     }
 
     const objects = await savedObjectsClient.bulkGet(selectedSavedObjects);
-    const deletes = objects.savedObjects.map(object =>
-      savedObjectsClient.delete(object.type, object.id)
+    const deletes = objects.savedObjects.map((object) =>
+      savedObjectsClient.delete(object.type, object.id, { force: true })
     );
     await Promise.all(deletes);
 
@@ -453,8 +498,8 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       return null;
     }
     const { applications } = this.props;
-    const newIndexPatternUrl = applications.getUrlForApp('kibana', {
-      path: '#/management/kibana/index_pattern',
+    const newIndexPatternUrl = applications.getUrlForApp('management', {
+      path: 'kibana/indexPatterns',
     });
 
     return (
@@ -467,6 +512,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         newIndexPatternUrl={newIndexPatternUrl}
         allowedTypes={this.props.allowedTypes}
         overlays={this.props.overlays}
+        search={this.props.search}
       />
     );
   }
@@ -499,7 +545,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     if (isDeleting) {
       // Block the user from interacting with the table while its contents are being deleted.
-      modal = <EuiLoadingKibana size="xl" />;
+      modal = <EuiLoadingElastic size="xl" />;
     } else {
       const onCancel = () => {
         this.setState({ isShowingDeleteConfirmModal: false });
@@ -589,7 +635,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   }
 
   changeIncludeReferencesDeep = () => {
-    this.setState(state => ({
+    this.setState((state) => ({
       isIncludeReferencesDeepChecked: !state.isIncludeReferencesDeepChecked,
     }));
   };
@@ -638,7 +684,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
               <EuiCheckboxGroup
                 options={exportAllOptions}
                 idToSelectedMap={exportAllSelectedOptions}
-                onChange={optionId => {
+                onChange={(optionId) => {
                   const newExportAllSelectedOptions = {
                     ...exportAllSelectedOptions,
                     ...{
@@ -710,7 +756,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       onSelectionChange: this.onSelectionChanged,
     };
 
-    const filterOptions = allowedTypes.map(type => ({
+    const filterOptions = allowedTypes.map((type) => ({
       value: type,
       name: type,
       view: `${type} (${savedObjectCounts[type] || 0})`,
@@ -725,31 +771,35 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         <Header
           onExportAll={() => this.setState({ isShowingExportAllOptionsModal: true })}
           onImport={this.showImportFlyout}
-          onRefresh={this.refreshData}
+          onRefresh={this.refreshObjects}
           filteredCount={filteredItemCount}
         />
         <EuiSpacer size="xs" />
-        <Table
-          basePath={http.basePath}
-          itemId={'id'}
-          actionRegistry={this.props.actionRegistry}
-          selectionConfig={selectionConfig}
-          selectedSavedObjects={selectedSavedObjects}
-          onQueryChange={this.onQueryChange}
-          onTableChange={this.onTableChange}
-          filterOptions={filterOptions}
-          onExport={this.onExport}
-          canDelete={applications.capabilities.savedObjectsManagement.delete as boolean}
-          onDelete={this.onDelete}
-          goInspectObject={this.props.goInspectObject}
-          pageIndex={page}
-          pageSize={perPage}
-          items={savedObjects}
-          totalItemCount={filteredItemCount}
-          isSearching={isSearching}
-          onShowRelationships={this.onShowRelationships}
-          canGoInApp={this.props.canGoInApp}
-        />
+        <RedirectAppLinks application={applications}>
+          <Table
+            basePath={http.basePath}
+            itemId={'id'}
+            actionRegistry={this.props.actionRegistry}
+            columnRegistry={this.props.columnRegistry}
+            selectionConfig={selectionConfig}
+            selectedSavedObjects={selectedSavedObjects}
+            onQueryChange={this.onQueryChange}
+            onTableChange={this.onTableChange}
+            filterOptions={filterOptions}
+            onExport={this.onExport}
+            canDelete={applications.capabilities.savedObjectsManagement.delete as boolean}
+            onDelete={this.onDelete}
+            onActionRefresh={this.refreshObject}
+            goInspectObject={this.props.goInspectObject}
+            pageIndex={page}
+            pageSize={perPage}
+            items={savedObjects}
+            totalItemCount={filteredItemCount}
+            isSearching={isSearching}
+            onShowRelationships={this.onShowRelationships}
+            canGoInApp={this.props.canGoInApp}
+          />
+        </RedirectAppLinks>
       </EuiPageContent>
     );
   }

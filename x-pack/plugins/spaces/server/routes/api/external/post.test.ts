@@ -10,9 +10,9 @@ import {
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
 } from '../__fixtures__';
-import { CoreSetup, kibanaResponseFactory, IRouter, RouteValidatorConfig } from 'src/core/server';
+import { CoreSetup, kibanaResponseFactory, RouteValidatorConfig } from 'src/core/server';
 import {
-  loggingServiceMock,
+  loggingSystemMock,
   httpServerMock,
   httpServiceMock,
   coreMock,
@@ -30,20 +30,20 @@ describe('Spaces Public API', () => {
 
   const setup = async () => {
     const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
+    const router = httpService.createRouter();
 
     const coreStart = coreMock.createStart();
 
     const savedObjectsRepositoryMock = createMockSavedObjectsRepository(spacesSavedObjects);
 
-    const log = loggingServiceMock.create().get('spaces');
+    const log = loggingSystemMock.create().get('spaces');
 
     const service = new SpacesService(log);
     const spacesService = await service.setup({
       http: (httpService as unknown) as CoreSetup['http'],
       getStartServices: async () => [coreStart, {}, {}],
       authorization: securityMock.createSetup().authz,
-      getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
+      auditLogger: {} as SpacesAuditLogger,
       config$: Rx.of(spacesConfig),
     });
 
@@ -67,6 +67,7 @@ describe('Spaces Public API', () => {
       getImportExportObjectLimit: () => 1000,
       log,
       spacesService,
+      authorization: null, // not needed for this route
     });
 
     const [routeDefinition, routeHandler] = router.post.mock.calls[0];

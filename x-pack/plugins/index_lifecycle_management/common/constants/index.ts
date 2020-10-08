@@ -7,6 +7,8 @@
 import { i18n } from '@kbn/i18n';
 import { LicenseType } from '../../../licensing/common/types';
 
+export { phaseToNodePreferenceMap } from './data_tiers';
+
 const basicLicense: LicenseType = 'basic';
 
 export const PLUGIN = {
@@ -16,7 +18,5 @@ export const PLUGIN = {
     defaultMessage: 'Index Lifecycle Policies',
   }),
 };
-
-export const BASE_PATH = '/management/elasticsearch/index_lifecycle_management/';
 
 export const API_BASE_PATH = '/api/index_lifecycle_management';

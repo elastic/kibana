@@ -5,29 +5,54 @@
  */
 
 import React from 'react';
+import { Observable } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { App } from './app';
+import { LensAppProps, LensAppServices } from './types';
 import { EditorFrameInstance } from '../types';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
-import { Document, SavedObjectStore } from '../persistence';
+import { Document, DOC_TYPE } from '../persistence';
 import { mount } from 'enzyme';
-import { SavedObjectSaveModal } from '../../../../../src/plugins/saved_objects/public';
+import { I18nProvider } from '@kbn/i18n/react';
 import {
+  SavedObjectSaveModal,
+  checkForDuplicateTitle,
+} from '../../../../../src/plugins/saved_objects/public';
+import { createMemoryHistory } from 'history';
+import {
+  DataPublicPluginStart,
   esFilters,
   FilterManager,
   IFieldType,
   IIndexPattern,
+  UI_SETTINGS,
 } from '../../../../../src/plugins/data/public';
-import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
-const dataStartMock = dataPluginMock.createStartContract();
-
 import { navigationPluginMock } from '../../../../../src/plugins/navigation/public/mocks';
 import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
 import { coreMock } from 'src/core/public/mocks';
+import {
+  LensByValueInput,
+  LensSavedObjectAttributes,
+  LensByReferenceInput,
+} from '../editor_frame_service/embeddable/embeddable';
+import { SavedObjectReference } from '../../../../../src/core/types';
+import { mockAttributeService } from '../../../../../src/plugins/dashboard/public/mocks';
+import { LensAttributeService } from '../lens_attribute_service';
+import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 
-jest.mock('../persistence');
+jest.mock('../editor_frame_service/editor_frame/expression_helpers');
 jest.mock('src/core/public');
+jest.mock('../../../../../src/plugins/saved_objects/public', () => {
+  // eslint-disable-next-line no-shadow
+  const { SavedObjectSaveModal, SavedObjectSaveModalOrigin } = jest.requireActual(
+    '../../../../../src/plugins/saved_objects/public'
+  );
+  return {
+    SavedObjectSaveModal,
+    SavedObjectSaveModalOrigin,
+    checkForDuplicateTitle: jest.fn(),
+  };
+});
 
 const navigationStartMock = navigationPluginMock.createStartContract();
 
@@ -77,6 +102,14 @@ function createMockFilterManager() {
   };
 }
 
+function createMockQueryString() {
+  return {
+    getQuery: jest.fn(() => ({ query: '', language: 'kuery' })),
+    setQuery: jest.fn(),
+    getDefaultQuery: jest.fn(() => ({ query: '', language: 'kuery' })),
+  };
+}
+
 function createMockTimefilter() {
   const unsubscribe = jest.fn();
 
@@ -88,82 +121,143 @@ function createMockTimefilter() {
         return unsubscribe;
       },
     }),
+    getRefreshInterval: () => {},
+    getRefreshIntervalDefaults: () => {},
   };
 }
 
 describe('Lens App', () => {
-  let frame: jest.Mocked<EditorFrameInstance>;
   let core: ReturnType<typeof coreMock['createStart']>;
-  let instance: ReactWrapper;
+  let defaultDoc: Document;
+  let defaultSavedObjectId: string;
 
-  function makeDefaultArgs(): jest.Mocked<{
-    editorFrame: EditorFrameInstance;
-    data: typeof dataStartMock;
-    navigation: typeof navigationStartMock;
-    core: typeof core;
-    storage: Storage;
-    docId?: string;
-    docStorage: SavedObjectStore;
-    redirectTo: (id?: string) => void;
-    addToDashboardMode?: boolean;
-  }> {
-    return ({
-      navigation: navigationStartMock,
-      editorFrame: createMockFrame(),
-      core: {
-        ...core,
-        application: {
-          ...core.application,
-          capabilities: {
-            ...core.application.capabilities,
-            visualize: { save: true, saveQuery: true, show: true },
-          },
-        },
+  const navMenuItems = {
+    expectedSaveButton: { emphasize: true, testId: 'lnsApp_saveButton' },
+    expectedSaveAsButton: { emphasize: false, testId: 'lnsApp_saveButton' },
+    expectedSaveAndReturnButton: { emphasize: true, testId: 'lnsApp_saveAndReturnButton' },
+  };
+
+  function makeAttributeService(): LensAttributeService {
+    const attributeServiceMock = mockAttributeService<
+      LensSavedObjectAttributes,
+      LensByValueInput,
+      LensByReferenceInput
+    >(
+      DOC_TYPE,
+      {
+        saveMethod: jest.fn(),
+        unwrapMethod: jest.fn(),
+        checkForDuplicateTitle: jest.fn(),
       },
-      data: {
+      core
+    );
+    attributeServiceMock.unwrapAttributes = jest.fn().mockResolvedValue(defaultDoc);
+    attributeServiceMock.wrapAttributes = jest
+      .fn()
+      .mockResolvedValue({ savedObjectId: defaultSavedObjectId });
+    return attributeServiceMock;
+  }
+
+  function makeDefaultProps(): jest.Mocked<LensAppProps> {
+    return {
+      editorFrame: createMockFrame(),
+      history: createMemoryHistory(),
+      redirectTo: jest.fn(),
+      redirectToOrigin: jest.fn(),
+      onAppLeave: jest.fn(),
+      setHeaderActionMenu: jest.fn(),
+    };
+  }
+
+  function makeDefaultServices(): jest.Mocked<LensAppServices> {
+    return {
+      http: core.http,
+      chrome: core.chrome,
+      overlays: core.overlays,
+      uiSettings: core.uiSettings,
+      navigation: navigationStartMock,
+      notifications: core.notifications,
+      attributeService: makeAttributeService(),
+      savedObjectsClient: core.savedObjects.client,
+      dashboardFeatureFlag: { allowByValueEmbeddables: false },
+      getOriginatingAppName: jest.fn(() => 'defaultOriginatingApp'),
+      application: {
+        ...core.application,
+        capabilities: {
+          ...core.application.capabilities,
+          visualize: { save: true, saveQuery: true, show: true },
+        },
+        getUrlForApp: jest.fn((appId: string) => `/testbasepath/app/${appId}#/`),
+      },
+      data: ({
         query: {
           filterManager: createMockFilterManager(),
           timefilter: {
             timefilter: createMockTimefilter(),
           },
+          queryString: createMockQueryString(),
+          state$: new Observable(),
         },
         indexPatterns: {
-          get: jest.fn(id => {
-            return new Promise(resolve => resolve({ id }));
+          get: jest.fn((id) => {
+            return new Promise((resolve) => resolve({ id }));
           }),
         },
-      },
+      } as unknown) as DataPublicPluginStart,
       storage: {
         get: jest.fn(),
+        set: jest.fn(),
+        remove: jest.fn(),
+        clear: jest.fn(),
       },
-      docStorage: {
-        load: jest.fn(),
-        save: jest.fn(),
-      },
-      redirectTo: jest.fn(id => {}),
-    } as unknown) as jest.Mocked<{
-      navigation: typeof navigationStartMock;
-      editorFrame: EditorFrameInstance;
-      data: typeof dataStartMock;
-      core: typeof core;
-      storage: Storage;
-      docId?: string;
-      docStorage: SavedObjectStore;
-      redirectTo: (id?: string) => void;
-      addToDashboardMode?: boolean;
-    }>;
+    };
+  }
+
+  function mountWith({
+    props: incomingProps,
+    services: incomingServices,
+  }: {
+    props?: jest.Mocked<LensAppProps>;
+    services?: jest.Mocked<LensAppServices>;
+  }) {
+    const props = incomingProps ?? makeDefaultProps();
+    const services = incomingServices ?? makeDefaultServices();
+    const wrappingComponent: React.FC<{
+      children: React.ReactNode;
+    }> = ({ children }) => {
+      return (
+        <I18nProvider>
+          <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
+        </I18nProvider>
+      );
+    };
+    const frame = props.editorFrame as ReturnType<typeof createMockFrame>;
+    const component = mount(<App {...props} />, { wrappingComponent });
+    return { component, frame, props, services };
   }
 
   beforeEach(() => {
-    frame = createMockFrame();
     core = coreMock.createStart({ basePath: '/testbasepath' });
+    defaultSavedObjectId = '1234';
+    defaultDoc = ({
+      savedObjectId: defaultSavedObjectId,
+      title: 'An extremely cool default document!',
+      expression: 'definitely a valid expression',
+      state: {
+        query: 'kuery',
+        filters: [{ query: { match_phrase: { src: 'test' } } }],
+      },
+      references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
+    } as unknown) as Document;
 
     core.uiSettings.get.mockImplementation(
-      jest.fn(type => {
-        if (type === 'timepicker:timeDefaults') {
+      jest.fn((type) => {
+        if (type === UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS) {
           return { from: 'now-7d', to: 'now' };
-        } else if (type === 'search:queryLanguage') {
+        } else if (type === UI_SETTINGS.SEARCH_QUERY_LANGUAGE) {
           return 'kuery';
+        } else if (type === 'state:storeInSessionStorage') {
+          return false;
         } else {
           return [];
         }
@@ -172,10 +266,7 @@ describe('Lens App', () => {
   });
 
   it('renders the editor frame', () => {
-    const args = makeDefaultArgs();
-    args.editorFrame = frame;
-
-    mount(<App {...args} />);
+    const { frame } = mountWith({});
 
     expect(frame.mount.mock.calls).toMatchInlineSnapshot(`
       Array [
@@ -190,6 +281,7 @@ describe('Lens App', () => {
             },
             "doc": undefined,
             "filters": Array [],
+            "initialContext": undefined,
             "onChange": [Function],
             "onError": [Function],
             "query": Object {
@@ -197,6 +289,7 @@ describe('Lens App', () => {
               "query": "",
             },
             "savedQuery": undefined,
+            "showNoDataPopover": [Function],
           },
         ],
       ]
@@ -204,71 +297,123 @@ describe('Lens App', () => {
   });
 
   it('clears app filters on load', () => {
-    const defaultArgs = makeDefaultArgs();
-    mount(<App {...defaultArgs} />);
-
-    expect(defaultArgs.data.query.filterManager.setAppFilters).toHaveBeenCalledWith([]);
+    const { services } = mountWith({});
+    expect(services.data.query.filterManager.setAppFilters).toHaveBeenCalledWith([]);
   });
 
-  it('sets breadcrumbs when the document title changes', async () => {
-    const defaultArgs = makeDefaultArgs();
-    instance = mount(<App {...defaultArgs} />);
+  it('passes global filters to frame', async () => {
+    const services = makeDefaultServices();
+    const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
+    const pinnedField = ({ name: 'pinnedField' } as unknown) as IFieldType;
+    const pinnedFilter = esFilters.buildExistsFilter(pinnedField, indexPattern);
+    services.data.query.filterManager.getFilters = jest.fn().mockImplementation(() => {
+      return [pinnedFilter];
+    });
+    const { component, frame } = mountWith({ services });
 
-    expect(core.chrome.setBreadcrumbs).toHaveBeenCalledWith([
-      { text: 'Visualize', href: '/testbasepath/app/kibana#/visualize' },
-      { text: 'Create' },
-    ]);
+    component.update();
 
-    (defaultArgs.docStorage.load as jest.Mock).mockResolvedValue({
-      id: '1234',
+    expect(frame.mount).toHaveBeenCalledWith(
+      expect.any(Element),
+      expect.objectContaining({
+        dateRange: { fromDate: 'now-7d', toDate: 'now' },
+        query: { query: '', language: 'kuery' },
+        filters: [pinnedFilter],
+      })
+    );
+  });
+
+  it('displays errors from the frame in a toast', () => {
+    const { component, frame, services } = mountWith({});
+    const onError = frame.mount.mock.calls[0][1].onError;
+    onError({ message: 'error' });
+    component.update();
+    expect(services.notifications.toasts.addDanger).toHaveBeenCalled();
+  });
+
+  describe('breadcrumbs', () => {
+    const breadcrumbDocSavedObjectId = defaultSavedObjectId;
+    const breadcrumbDoc = ({
+      savedObjectId: breadcrumbDocSavedObjectId,
       title: 'Daaaaaaadaumching!',
-      expression: 'valid expression',
       state: {
         query: 'fake query',
-        datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
+        filters: [],
       },
-    });
-    await act(async () => {
-      instance.setProps({ docId: '1234' });
+      references: [],
+    } as unknown) as Document;
+
+    it('sets breadcrumbs when the document title changes', async () => {
+      const { component, services } = mountWith({});
+
+      expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
+        { text: 'Visualize', href: '/testbasepath/app/visualize#/', onClick: expect.anything() },
+        { text: 'Create' },
+      ]);
+
+      services.attributeService.unwrapAttributes = jest.fn().mockResolvedValue(breadcrumbDoc);
+      await act(async () => {
+        component.setProps({ initialInput: { savedObjectId: breadcrumbDocSavedObjectId } });
+      });
+
+      expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
+        { text: 'Visualize', href: '/testbasepath/app/visualize#/', onClick: expect.anything() },
+        { text: 'Daaaaaaadaumching!' },
+      ]);
     });
 
-    expect(defaultArgs.core.chrome.setBreadcrumbs).toHaveBeenCalledWith([
-      { text: 'Visualize', href: '/testbasepath/app/kibana#/visualize' },
-      { text: 'Daaaaaaadaumching!' },
-    ]);
+    it('sets originatingApp breadcrumb when the document title changes', async () => {
+      const props = makeDefaultProps();
+      const services = makeDefaultServices();
+      props.incomingState = { originatingApp: 'coolContainer' };
+      services.getOriginatingAppName = jest.fn(() => 'The Coolest Container Ever Made');
+      const { component } = mountWith({ props, services });
+
+      expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
+        { text: 'The Coolest Container Ever Made', onClick: expect.anything() },
+        { text: 'Visualize', href: '/testbasepath/app/visualize#/', onClick: expect.anything() },
+        { text: 'Create' },
+      ]);
+
+      services.attributeService.unwrapAttributes = jest.fn().mockResolvedValue(breadcrumbDoc);
+      await act(async () => {
+        component.setProps({ initialInput: { savedObjectId: breadcrumbDocSavedObjectId } });
+      });
+
+      expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
+        { text: 'The Coolest Container Ever Made', onClick: expect.anything() },
+        { text: 'Visualize', href: '/testbasepath/app/visualize#/', onClick: expect.anything() },
+        { text: 'Daaaaaaadaumching!' },
+      ]);
+    });
   });
 
   describe('persistence', () => {
-    it('does not load a document if there is no document id', () => {
-      const args = makeDefaultArgs();
-
-      mount(<App {...args} />);
-
-      expect(args.docStorage.load).not.toHaveBeenCalled();
+    it('does not load a document if there is no initial input', () => {
+      const { services } = mountWith({});
+      expect(services.attributeService.unwrapAttributes).not.toHaveBeenCalled();
     });
 
-    it('loads a document and uses query and filters if there is a document id', async () => {
-      const args = makeDefaultArgs();
-      args.editorFrame = frame;
-      (args.docStorage.load as jest.Mock).mockResolvedValue({
-        id: '1234',
-        expression: 'valid expression',
+    it('loads a document and uses query and filters if initial input is provided', async () => {
+      const { component, frame, services } = mountWith({});
+      services.attributeService.unwrapAttributes = jest.fn().mockResolvedValue({
+        savedObjectId: defaultSavedObjectId,
         state: {
           query: 'fake query',
           filters: [{ query: { match_phrase: { src: 'test' } } }],
-          datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
         },
+        references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
       });
-
-      instance = mount(<App {...args} />);
 
       await act(async () => {
-        instance.setProps({ docId: '1234' });
+        component.setProps({ initialInput: { savedObjectId: defaultSavedObjectId } });
       });
 
-      expect(args.docStorage.load).toHaveBeenCalledWith('1234');
-      expect(args.data.indexPatterns.get).toHaveBeenCalledWith('1');
-      expect(args.data.query.filterManager.setAppFilters).toHaveBeenCalledWith([
+      expect(services.attributeService.unwrapAttributes).toHaveBeenCalledWith({
+        savedObjectId: defaultSavedObjectId,
+      });
+      expect(services.data.indexPatterns.get).toHaveBeenCalledWith('1');
+      expect(services.data.query.filterManager.setAppFilters).toHaveBeenCalledWith([
         { query: { match_phrase: { src: 'test' } } },
       ]);
       expect(TopNavMenu).toHaveBeenCalledWith(
@@ -281,357 +426,388 @@ describe('Lens App', () => {
       expect(frame.mount).toHaveBeenCalledWith(
         expect.any(Element),
         expect.objectContaining({
-          doc: {
-            id: '1234',
-            expression: 'valid expression',
-            state: {
+          doc: expect.objectContaining({
+            savedObjectId: defaultSavedObjectId,
+            state: expect.objectContaining({
               query: 'fake query',
               filters: [{ query: { match_phrase: { src: 'test' } } }],
-              datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
-            },
-          },
+            }),
+          }),
         })
       );
     });
 
     it('does not load documents on sequential renders unless the id changes', async () => {
-      const args = makeDefaultArgs();
-      args.editorFrame = frame;
-      (args.docStorage.load as jest.Mock).mockResolvedValue({ id: '1234' });
-
-      instance = mount(<App {...args} />);
-      await act(async () => {
-        instance.setProps({ docId: '1234' });
-      });
+      const { services, component } = mountWith({});
 
       await act(async () => {
-        instance.setProps({ docId: '1234' });
+        component.setProps({ initialInput: { savedObjectId: defaultSavedObjectId } });
       });
-
-      expect(args.docStorage.load).toHaveBeenCalledTimes(1);
+      await act(async () => {
+        component.setProps({ initialInput: { savedObjectId: defaultSavedObjectId } });
+      });
+      expect(services.attributeService.unwrapAttributes).toHaveBeenCalledTimes(1);
 
       await act(async () => {
-        instance.setProps({ docId: '9876' });
+        component.setProps({ initialInput: { savedObjectId: '5678' } });
       });
 
-      expect(args.docStorage.load).toHaveBeenCalledTimes(2);
+      expect(services.attributeService.unwrapAttributes).toHaveBeenCalledTimes(2);
     });
 
     it('handles document load errors', async () => {
-      const args = makeDefaultArgs();
-      args.editorFrame = frame;
-      (args.docStorage.load as jest.Mock).mockRejectedValue('failed to load');
-
-      instance = mount(<App {...args} />);
+      const services = makeDefaultServices();
+      services.attributeService.unwrapAttributes = jest.fn().mockRejectedValue('failed to load');
+      const { component, props } = mountWith({ services });
 
       await act(async () => {
-        instance.setProps({ docId: '1234' });
+        component.setProps({ initialInput: { savedObjectId: defaultSavedObjectId } });
       });
 
-      expect(args.docStorage.load).toHaveBeenCalledWith('1234');
-      expect(args.core.notifications.toasts.addDanger).toHaveBeenCalled();
-      expect(args.redirectTo).toHaveBeenCalled();
+      expect(services.attributeService.unwrapAttributes).toHaveBeenCalledWith({
+        savedObjectId: defaultSavedObjectId,
+      });
+      expect(services.notifications.toasts.addDanger).toHaveBeenCalled();
+      expect(props.redirectTo).toHaveBeenCalled();
     });
 
-    describe('save button', () => {
+    it('adds to the recently accessed list on load', async () => {
+      const { component, services } = mountWith({});
+
+      await act(async () => {
+        component.setProps({ initialInput: { savedObjectId: defaultSavedObjectId } });
+      });
+      expect(services.chrome.recentlyAccessed.add).toHaveBeenCalledWith(
+        '/app/lens#/edit/1234',
+        'An extremely cool default document!',
+        '1234'
+      );
+    });
+
+    describe('save buttons', () => {
       interface SaveProps {
         newCopyOnSave: boolean;
+        returnToOrigin?: boolean;
         newTitle: string;
       }
-
-      let defaultArgs: jest.Mocked<{
-        editorFrame: EditorFrameInstance;
-        navigation: typeof navigationStartMock;
-        data: typeof dataStartMock;
-        core: typeof core;
-        storage: Storage;
-        docId?: string;
-        docStorage: SavedObjectStore;
-        redirectTo: (id?: string) => void;
-        addToDashboardMode?: boolean;
-      }>;
-
-      beforeEach(() => {
-        defaultArgs = makeDefaultArgs();
-        (defaultArgs.docStorage.load as jest.Mock).mockResolvedValue({
-          id: '1234',
-          title: 'My cool doc',
-          expression: 'valid expression',
-          state: {
-            query: 'kuery',
-            datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
-          },
-        } as jest.ResolvedValue<Document>);
-      });
 
       function getButton(inst: ReactWrapper): TopNavMenuData {
         return (inst
           .find('[data-test-subj="lnsApp_topNav"]')
           .prop('config') as TopNavMenuData[]).find(
-          button => button.testId === 'lnsApp_saveButton'
+          (button) => button.testId === 'lnsApp_saveButton'
         )!;
       }
 
       async function testSave(inst: ReactWrapper, saveProps: SaveProps) {
         await getButton(inst).run(inst.getDOMNode());
-
         inst.update();
-
-        const handler = inst.findWhere(el => el.prop('onSave')).prop('onSave') as (
+        const handler = inst.find('[data-test-subj="lnsApp_saveModalOrigin"]').prop('onSave') as (
           p: unknown
         ) => void;
         handler(saveProps);
       }
 
       async function save({
-        initialDocId,
-        addToDashboardMode,
-        lastKnownDoc = { expression: 'kibana 3' },
+        lastKnownDoc = {
+          references: [],
+          state: {
+            filters: [],
+          },
+        },
+        initialSavedObjectId,
         ...saveProps
       }: SaveProps & {
         lastKnownDoc?: object;
-        initialDocId?: string;
-        addToDashboardMode?: boolean;
+        initialSavedObjectId?: string;
       }) {
-        const args = {
-          ...defaultArgs,
-          docId: initialDocId,
+        const props = {
+          ...makeDefaultProps(),
+          initialInput: initialSavedObjectId
+            ? { savedObjectId: initialSavedObjectId, id: '5678' }
+            : undefined,
         };
-        if (addToDashboardMode) {
-          args.addToDashboardMode = addToDashboardMode;
-        }
-        args.editorFrame = frame;
-        (args.docStorage.load as jest.Mock).mockResolvedValue({
-          id: '1234',
-          expression: 'kibana',
+
+        const services = makeDefaultServices();
+        services.attributeService.wrapAttributes = jest
+          .fn()
+          .mockImplementation(async ({ savedObjectId }) => ({
+            savedObjectId: savedObjectId || 'aaa',
+          }));
+        services.attributeService.unwrapAttributes = jest.fn().mockResolvedValue({
+          savedObjectId: initialSavedObjectId ?? 'aaa',
+          references: [],
           state: {
             query: 'fake query',
-            datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
             filters: [],
           },
-        });
-        (args.docStorage.save as jest.Mock).mockImplementation(async ({ id }) => ({
-          id: id || 'aaa',
-          expression: 'kibana 2',
-        }));
+        } as jest.ResolvedValue<Document>);
 
+        let frame: jest.Mocked<EditorFrameInstance> = {} as jest.Mocked<EditorFrameInstance>;
+        let component: ReactWrapper = {} as ReactWrapper;
         await act(async () => {
-          instance = mount(<App {...args} />);
+          const { frame: newFrame, component: newComponent } = mountWith({ services, props });
+          frame = newFrame;
+          component = newComponent;
         });
 
-        if (initialDocId) {
-          expect(args.docStorage.load).toHaveBeenCalledTimes(1);
+        if (initialSavedObjectId) {
+          expect(services.attributeService.unwrapAttributes).toHaveBeenCalledTimes(1);
         } else {
-          expect(args.docStorage.load).not.toHaveBeenCalled();
+          expect(services.attributeService.unwrapAttributes).not.toHaveBeenCalled();
         }
 
         const onChange = frame.mount.mock.calls[0][1].onChange;
+
         act(() =>
           onChange({
             filterableIndexPatterns: [],
-            doc: { id: initialDocId, ...lastKnownDoc } as Document,
+            doc: { savedObjectId: initialSavedObjectId, ...lastKnownDoc } as Document,
+            isSaveable: true,
           })
         );
-
-        instance.update();
-
-        expect(getButton(instance).disableButton).toEqual(false);
-
+        component.update();
+        expect(getButton(component).disableButton).toEqual(false);
         await act(async () => {
-          testSave(instance, saveProps);
+          testSave(component, { ...saveProps });
         });
-
-        return { args, instance };
+        return { props, services, component, frame };
       }
 
       it('shows a disabled save button when the user does not have permissions', async () => {
-        const args = defaultArgs;
-        args.core.application = {
-          ...args.core.application,
+        const services = makeDefaultServices();
+        services.application = {
+          ...services.application,
           capabilities: {
-            ...args.core.application.capabilities,
+            ...services.application.capabilities,
             visualize: { save: false, saveQuery: false, show: true },
           },
         };
-        args.editorFrame = frame;
-
-        instance = mount(<App {...args} />);
-
-        expect(getButton(instance).disableButton).toEqual(true);
-
+        const { component, frame } = mountWith({ services });
+        expect(getButton(component).disableButton).toEqual(true);
         const onChange = frame.mount.mock.calls[0][1].onChange;
         act(() =>
           onChange({
             filterableIndexPatterns: [],
-            doc: ({ id: 'will save this', expression: 'valid expression' } as unknown) as Document,
+            doc: ({ savedObjectId: 'will save this' } as unknown) as Document,
+            isSaveable: true,
           })
         );
-        instance.update();
-        expect(getButton(instance).disableButton).toEqual(true);
+        component.update();
+        expect(getButton(component).disableButton).toEqual(true);
       });
 
-      it('shows a disabled save button when there are no changes to the document', async () => {
-        const args = defaultArgs;
-        (args.docStorage.load as jest.Mock).mockResolvedValue({
-          id: '1234',
-          title: 'My cool doc',
-          expression: '',
-        } as jest.ResolvedValue<Document>);
-        args.editorFrame = frame;
-
-        instance = mount(<App {...args} />);
-        expect(getButton(instance).disableButton).toEqual(true);
-
+      it('shows a save button that is enabled when the frame has provided its state and does not show save and return or save as', async () => {
+        const { component, frame } = mountWith({});
+        expect(getButton(component).disableButton).toEqual(true);
         const onChange = frame.mount.mock.calls[0][1].onChange;
-
-        act(() => {
+        act(() =>
           onChange({
             filterableIndexPatterns: [],
-            doc: ({ id: '1234', expression: 'valid expression' } as unknown) as Document,
-          });
+            doc: ({ savedObjectId: 'will save this' } as unknown) as Document,
+            isSaveable: true,
+          })
+        );
+        component.update();
+        expect(getButton(component).disableButton).toEqual(false);
+
+        await act(async () => {
+          const topNavMenuConfig = component.find(TopNavMenu).prop('config');
+          expect(topNavMenuConfig).not.toContainEqual(
+            expect.objectContaining(navMenuItems.expectedSaveAndReturnButton)
+          );
+          expect(topNavMenuConfig).not.toContainEqual(
+            expect.objectContaining(navMenuItems.expectedSaveAsButton)
+          );
+          expect(topNavMenuConfig).toContainEqual(
+            expect.objectContaining(navMenuItems.expectedSaveButton)
+          );
         });
-        instance.update();
-        expect(getButton(instance).disableButton).toEqual(false);
       });
 
-      it('shows a save button that is enabled when the frame has provided its state', async () => {
-        const args = defaultArgs;
-        args.editorFrame = frame;
+      it('Shows Save and Return and Save As buttons in create by value mode', async () => {
+        const props = makeDefaultProps();
+        const services = makeDefaultServices();
+        services.dashboardFeatureFlag = { allowByValueEmbeddables: true };
+        props.incomingState = {
+          originatingApp: 'ultraDashboard',
+          valueInput: {
+            id: 'whatchaGonnaDoWith',
+            attributes: {
+              title:
+                'whatcha gonna do with all these references? All these references in your value Input',
+              references: [] as SavedObjectReference[],
+            },
+          } as LensByValueInput,
+        };
 
-        instance = mount(<App {...args} />);
+        const { component } = mountWith({ props, services });
 
-        expect(getButton(instance).disableButton).toEqual(true);
+        await act(async () => {
+          const topNavMenuConfig = component.find(TopNavMenu).prop('config');
+          expect(topNavMenuConfig).toContainEqual(
+            expect.objectContaining(navMenuItems.expectedSaveAndReturnButton)
+          );
+          expect(topNavMenuConfig).toContainEqual(
+            expect.objectContaining(navMenuItems.expectedSaveAsButton)
+          );
+          expect(topNavMenuConfig).not.toContainEqual(
+            expect.objectContaining(navMenuItems.expectedSaveButton)
+          );
+        });
+      });
 
-        const onChange = frame.mount.mock.calls[0][1].onChange;
-        act(() =>
-          onChange({
-            filterableIndexPatterns: [],
-            doc: ({ id: 'will save this', expression: 'valid expression' } as unknown) as Document,
-          })
-        );
-        instance.update();
+      it('Shows Save and Return and Save As buttons in edit by reference mode', async () => {
+        const props = makeDefaultProps();
+        props.initialInput = { savedObjectId: defaultSavedObjectId, id: '5678' };
+        props.incomingState = {
+          originatingApp: 'ultraDashboard',
+        };
 
-        expect(getButton(instance).disableButton).toEqual(false);
+        const { component } = mountWith({ props });
+
+        await act(async () => {
+          const topNavMenuConfig = component.find(TopNavMenu).prop('config');
+          expect(topNavMenuConfig).toContainEqual(
+            expect.objectContaining(navMenuItems.expectedSaveAndReturnButton)
+          );
+          expect(topNavMenuConfig).toContainEqual(
+            expect.objectContaining(navMenuItems.expectedSaveAsButton)
+          );
+          expect(topNavMenuConfig).not.toContainEqual(
+            expect.objectContaining(navMenuItems.expectedSaveButton)
+          );
+        });
       });
 
       it('saves new docs', async () => {
-        const { args, instance: inst } = await save({
-          initialDocId: undefined,
+        const { props, services } = await save({
+          initialSavedObjectId: undefined,
           newCopyOnSave: false,
           newTitle: 'hello there',
         });
+        expect(services.attributeService.wrapAttributes).toHaveBeenCalledWith(
+          expect.objectContaining({
+            savedObjectId: undefined,
+            title: 'hello there',
+          }),
+          true,
+          undefined
+        );
+        expect(props.redirectTo).toHaveBeenCalledWith('aaa');
+      });
 
-        expect(args.docStorage.save).toHaveBeenCalledWith({
-          id: undefined,
-          title: 'hello there',
-          expression: 'kibana 3',
+      it('adds to the recently accessed list on save', async () => {
+        const { services } = await save({
+          initialSavedObjectId: undefined,
+          newCopyOnSave: false,
+          newTitle: 'hello there',
         });
-
-        expect(args.redirectTo).toHaveBeenCalledWith('aaa');
-
-        inst.setProps({ docId: 'aaa' });
-
-        expect(args.docStorage.load).not.toHaveBeenCalled();
+        expect(services.chrome.recentlyAccessed.add).toHaveBeenCalledWith(
+          '/app/lens#/edit/aaa',
+          'hello there',
+          'aaa'
+        );
       });
 
       it('saves the latest doc as a copy', async () => {
-        const { args, instance: inst } = await save({
-          initialDocId: '1234',
+        const { props, services, component } = await save({
+          initialSavedObjectId: defaultSavedObjectId,
           newCopyOnSave: true,
           newTitle: 'hello there',
         });
-
-        expect(args.docStorage.save).toHaveBeenCalledWith({
-          id: undefined,
-          title: 'hello there',
-          expression: 'kibana 3',
+        expect(services.attributeService.wrapAttributes).toHaveBeenCalledWith(
+          expect.objectContaining({
+            savedObjectId: undefined,
+            title: 'hello there',
+          }),
+          true,
+          undefined
+        );
+        expect(props.redirectTo).toHaveBeenCalledWith('aaa');
+        await act(async () => {
+          component.setProps({ initialInput: { savedObjectId: 'aaa' } });
         });
-
-        expect(args.redirectTo).toHaveBeenCalledWith('aaa');
-
-        inst.setProps({ docId: 'aaa' });
-
-        expect(args.docStorage.load).toHaveBeenCalledTimes(1);
+        expect(services.attributeService.wrapAttributes).toHaveBeenCalledTimes(1);
       });
 
       it('saves existing docs', async () => {
-        const { args, instance: inst } = await save({
-          initialDocId: '1234',
+        const { props, services, component } = await save({
+          initialSavedObjectId: defaultSavedObjectId,
           newCopyOnSave: false,
           newTitle: 'hello there',
         });
-
-        expect(args.docStorage.save).toHaveBeenCalledWith({
-          id: '1234',
-          title: 'hello there',
-          expression: 'kibana 3',
+        expect(services.attributeService.wrapAttributes).toHaveBeenCalledWith(
+          expect.objectContaining({
+            savedObjectId: defaultSavedObjectId,
+            title: 'hello there',
+          }),
+          true,
+          { id: '5678', savedObjectId: defaultSavedObjectId }
+        );
+        expect(props.redirectTo).not.toHaveBeenCalled();
+        await act(async () => {
+          component.setProps({ initialInput: { savedObjectId: defaultSavedObjectId } });
         });
-
-        expect(args.redirectTo).not.toHaveBeenCalled();
-
-        inst.setProps({ docId: '1234' });
-
-        expect(args.docStorage.load).toHaveBeenCalledTimes(1);
+        expect(services.attributeService.unwrapAttributes).toHaveBeenCalledTimes(1);
       });
 
       it('handles save failure by showing a warning, but still allows another save', async () => {
-        const args = defaultArgs;
-        args.editorFrame = frame;
-        (args.docStorage.save as jest.Mock).mockRejectedValue({ message: 'failed' });
-
-        instance = mount(<App {...args} />);
-
+        const services = makeDefaultServices();
+        services.attributeService.wrapAttributes = jest
+          .fn()
+          .mockRejectedValue({ message: 'failed' });
+        const { component, props, frame } = mountWith({ services });
         const onChange = frame.mount.mock.calls[0][1].onChange;
         act(() =>
           onChange({
             filterableIndexPatterns: [],
-            doc: ({ id: undefined, expression: 'new expression' } as unknown) as Document,
+            doc: ({ id: undefined } as unknown) as Document,
+            isSaveable: true,
           })
         );
-
-        instance.update();
+        component.update();
 
         await act(async () => {
-          testSave(instance, { newCopyOnSave: false, newTitle: 'hello there' });
+          testSave(component, { newCopyOnSave: false, newTitle: 'hello there' });
         });
-
-        expect(args.core.notifications.toasts.addDanger).toHaveBeenCalled();
-        expect(args.redirectTo).not.toHaveBeenCalled();
-
-        expect(getButton(instance).disableButton).toEqual(false);
+        expect(services.notifications.toasts.addDanger).toHaveBeenCalled();
+        expect(props.redirectTo).not.toHaveBeenCalled();
+        expect(getButton(component).disableButton).toEqual(false);
       });
 
-      it('saves new doc and redirects to dashboard', async () => {
-        const { args } = await save({
-          initialDocId: undefined,
-          addToDashboardMode: true,
+      it('saves new doc and redirects to originating app', async () => {
+        const { props, services } = await save({
+          initialSavedObjectId: undefined,
+          returnToOrigin: true,
           newCopyOnSave: false,
           newTitle: 'hello there',
         });
-
-        expect(args.docStorage.save).toHaveBeenCalledWith({
-          expression: 'kibana 3',
-          id: undefined,
-          title: 'hello there',
+        expect(services.attributeService.wrapAttributes).toHaveBeenCalledWith(
+          expect.objectContaining({
+            savedObjectId: undefined,
+            title: 'hello there',
+          }),
+          true,
+          undefined
+        );
+        expect(props.redirectToOrigin).toHaveBeenCalledWith({
+          input: { savedObjectId: 'aaa' },
+          isCopied: false,
         });
-
-        expect(args.redirectTo).toHaveBeenCalledWith('aaa');
       });
 
       it('saves app filters and does not save pinned filters', async () => {
         const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
         const field = ({ name: 'myfield' } as unknown) as IFieldType;
         const pinnedField = ({ name: 'pinnedField' } as unknown) as IFieldType;
-
         const unpinned = esFilters.buildExistsFilter(field, indexPattern);
         const pinned = esFilters.buildExistsFilter(pinnedField, indexPattern);
-
         await act(async () => {
           FilterManager.setFiltersStore([pinned], esFilters.FilterStateStore.GLOBAL_STATE);
         });
-
-        const { args } = await save({
-          initialDocId: '1234',
+        const { services } = await save({
+          initialSavedObjectId: defaultSavedObjectId,
           newCopyOnSave: false,
           newTitle: 'hello there2',
           lastKnownDoc: {
@@ -641,71 +817,78 @@ describe('Lens App', () => {
             },
           },
         });
-
-        expect(args.docStorage.save).toHaveBeenCalledWith({
-          id: '1234',
-          title: 'hello there2',
-          expression: 'kibana 3',
-          state: {
-            filters: [unpinned],
+        expect(services.attributeService.wrapAttributes).toHaveBeenCalledWith(
+          {
+            savedObjectId: defaultSavedObjectId,
+            title: 'hello there2',
+            expression: 'kibana 3',
+            state: {
+              filters: [unpinned],
+            },
           },
-        });
+          true,
+          { id: '5678', savedObjectId: defaultSavedObjectId }
+        );
       });
 
-      it('does not show the copy button on first save', async () => {
-        const args = defaultArgs;
-        args.editorFrame = frame;
-
-        instance = mount(<App {...args} />);
-
+      it('checks for duplicate title before saving', async () => {
+        const services = makeDefaultServices();
+        services.attributeService.wrapAttributes = jest
+          .fn()
+          .mockReturnValue(Promise.resolve({ savedObjectId: '123' }));
+        const { component, frame } = mountWith({ services });
         const onChange = frame.mount.mock.calls[0][1].onChange;
         await act(async () =>
           onChange({
             filterableIndexPatterns: [],
-            doc: ({ expression: 'valid expression' } as unknown) as Document,
+            doc: ({ savedObjectId: '123' } as unknown) as Document,
+            isSaveable: true,
           })
         );
-        instance.update();
+        component.update();
+        await act(async () => {
+          getButton(component).run(component.getDOMNode());
+        });
+        component.update();
+        const onTitleDuplicate = jest.fn();
+        await act(async () => {
+          component.find(SavedObjectSaveModal).prop('onSave')({
+            onTitleDuplicate,
+            isTitleDuplicateConfirmed: false,
+            newCopyOnSave: false,
+            newDescription: '',
+            newTitle: 'test',
+          });
+        });
+        expect(checkForDuplicateTitle).toHaveBeenCalledWith(
+          expect.objectContaining({ savedObjectId: '123' }),
+          false,
+          onTitleDuplicate,
+          expect.anything()
+        );
+      });
 
-        await act(async () => getButton(instance).run(instance.getDOMNode()));
-        instance.update();
-
-        expect(instance.find(SavedObjectSaveModal).prop('showCopyOnSave')).toEqual(false);
+      it('does not show the copy button on first save', async () => {
+        const { component, frame } = mountWith({});
+        const onChange = frame.mount.mock.calls[0][1].onChange;
+        await act(async () =>
+          onChange({
+            filterableIndexPatterns: [],
+            doc: ({} as unknown) as Document,
+            isSaveable: true,
+          })
+        );
+        component.update();
+        await act(async () => getButton(component).run(component.getDOMNode()));
+        component.update();
+        expect(component.find(SavedObjectSaveModal).prop('showCopyOnSave')).toEqual(false);
       });
     });
   });
 
   describe('query bar state management', () => {
-    let defaultArgs: jest.Mocked<{
-      editorFrame: EditorFrameInstance;
-      data: typeof dataStartMock;
-      navigation: typeof navigationStartMock;
-      core: typeof core;
-      storage: Storage;
-      docId?: string;
-      docStorage: SavedObjectStore;
-      redirectTo: (id?: string) => void;
-    }>;
-
-    beforeEach(() => {
-      defaultArgs = makeDefaultArgs();
-      (defaultArgs.docStorage.load as jest.Mock).mockResolvedValue({
-        id: '1234',
-        title: 'My cool doc',
-        expression: 'valid expression',
-        state: {
-          query: 'kuery',
-          datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
-        },
-      } as jest.ResolvedValue<Document>);
-    });
-
     it('uses the default time and query language settings', () => {
-      const args = defaultArgs;
-      args.editorFrame = frame;
-
-      mount(<App {...args} />);
-
+      const { frame } = mountWith({});
       expect(TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
           query: { query: '', language: 'kuery' },
@@ -724,47 +907,37 @@ describe('Lens App', () => {
     });
 
     it('updates the index patterns when the editor frame is changed', async () => {
-      const args = defaultArgs;
-      args.editorFrame = frame;
-
-      instance = mount(<App {...args} />);
-
+      const { component, frame } = mountWith({});
       expect(TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
           indexPatterns: [],
         }),
         {}
       );
-
       const onChange = frame.mount.mock.calls[0][1].onChange;
-
       await act(async () => {
         onChange({
-          filterableIndexPatterns: [{ id: '1', title: 'newIndex' }],
-          doc: ({ id: undefined, expression: 'valid expression' } as unknown) as Document,
+          filterableIndexPatterns: ['1'],
+          doc: ({ id: undefined } as unknown) as Document,
+          isSaveable: true,
         });
       });
-
-      instance.update();
-
+      component.update();
       expect(TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
           indexPatterns: [{ id: '1' }],
         }),
         {}
       );
-
       // Do it again to verify that the dirty checking is done right
-
       await act(async () => {
         onChange({
-          filterableIndexPatterns: [{ id: '2', title: 'second index' }],
-          doc: ({ id: undefined, expression: 'valid expression' } as unknown) as Document,
+          filterableIndexPatterns: ['2'],
+          doc: ({ id: undefined } as unknown) as Document,
+          isSaveable: true,
         });
       });
-
-      instance.update();
-
+      component.update();
       expect(TopNavMenu).toHaveBeenLastCalledWith(
         expect.objectContaining({
           indexPatterns: [{ id: '2' }],
@@ -772,21 +945,16 @@ describe('Lens App', () => {
         {}
       );
     });
+
     it('updates the editor frame when the user changes query or time in the search bar', () => {
-      const args = defaultArgs;
-      args.editorFrame = frame;
-
-      instance = mount(<App {...args} />);
-
+      const { component, frame } = mountWith({});
       act(() =>
-        instance.find(TopNavMenu).prop('onQuerySubmit')!({
+        component.find(TopNavMenu).prop('onQuerySubmit')!({
           dateRange: { from: 'now-14d', to: 'now-7d' },
           query: { query: 'new', language: 'lucene' },
         })
       );
-
-      instance.update();
-
+      component.update();
       expect(TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
           query: { query: 'new', language: 'lucene' },
@@ -805,19 +973,15 @@ describe('Lens App', () => {
     });
 
     it('updates the filters when the user changes them', () => {
-      const args = defaultArgs;
-      args.editorFrame = frame;
-
-      instance = mount(<App {...args} />);
+      const { component, frame, services } = mountWith({});
       const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
       const field = ({ name: 'myfield' } as unknown) as IFieldType;
-
       act(() =>
-        args.data.query.filterManager.setFilters([esFilters.buildExistsFilter(field, indexPattern)])
+        services.data.query.filterManager.setFilters([
+          esFilters.buildExistsFilter(field, indexPattern),
+        ])
       );
-
-      instance.update();
-
+      component.update();
       expect(frame.mount).toHaveBeenCalledWith(
         expect.any(Element),
         expect.objectContaining({
@@ -829,17 +993,15 @@ describe('Lens App', () => {
 
   describe('saved query handling', () => {
     it('does not allow saving when the user is missing the saveQuery permission', () => {
-      const args = makeDefaultArgs();
-      args.core.application = {
-        ...args.core.application,
+      const services = makeDefaultServices();
+      services.application = {
+        ...services.application,
         capabilities: {
-          ...args.core.application.capabilities,
+          ...services.application.capabilities,
           visualize: { save: false, saveQuery: false, show: true },
         },
       };
-
-      mount(<App {...args} />);
-
+      mountWith({ services });
       expect(TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({ showSaveQuery: false }),
         {}
@@ -847,11 +1009,7 @@ describe('Lens App', () => {
     });
 
     it('persists the saved query ID when the query is saved', () => {
-      const args = makeDefaultArgs();
-      args.editorFrame = frame;
-
-      instance = mount(<App {...args} />);
-
+      const { component } = mountWith({});
       expect(TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
           showSaveQuery: true,
@@ -862,9 +1020,8 @@ describe('Lens App', () => {
         }),
         {}
       );
-
       act(() => {
-        instance.find(TopNavMenu).prop('onSaved')!({
+        component.find(TopNavMenu).prop('onSaved')!({
           id: '1',
           attributes: {
             title: '',
@@ -873,7 +1030,6 @@ describe('Lens App', () => {
           },
         });
       });
-
       expect(TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
           savedQuery: {
@@ -890,13 +1046,9 @@ describe('Lens App', () => {
     });
 
     it('changes the saved query ID when the query is updated', () => {
-      const args = makeDefaultArgs();
-      args.editorFrame = frame;
-
-      instance = mount(<App {...args} />);
-
+      const { component } = mountWith({});
       act(() => {
-        instance.find(TopNavMenu).prop('onSaved')!({
+        component.find(TopNavMenu).prop('onSaved')!({
           id: '1',
           attributes: {
             title: '',
@@ -905,9 +1057,8 @@ describe('Lens App', () => {
           },
         });
       });
-
       act(() => {
-        instance.find(TopNavMenu).prop('onSavedQueryUpdated')!({
+        component.find(TopNavMenu).prop('onSavedQueryUpdated')!({
           id: '2',
           attributes: {
             title: 'new title',
@@ -916,7 +1067,6 @@ describe('Lens App', () => {
           },
         });
       });
-
       expect(TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
           savedQuery: {
@@ -933,32 +1083,23 @@ describe('Lens App', () => {
     });
 
     it('clears all existing unpinned filters when the active saved query is cleared', () => {
-      const args = makeDefaultArgs();
-      args.editorFrame = frame;
-
-      instance = mount(<App {...args} />);
-
+      const { component, frame, services } = mountWith({});
       act(() =>
-        instance.find(TopNavMenu).prop('onQuerySubmit')!({
+        component.find(TopNavMenu).prop('onQuerySubmit')!({
           dateRange: { from: 'now-14d', to: 'now-7d' },
           query: { query: 'new', language: 'lucene' },
         })
       );
-
       const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
       const field = ({ name: 'myfield' } as unknown) as IFieldType;
       const pinnedField = ({ name: 'pinnedField' } as unknown) as IFieldType;
-
       const unpinned = esFilters.buildExistsFilter(field, indexPattern);
       const pinned = esFilters.buildExistsFilter(pinnedField, indexPattern);
       FilterManager.setFiltersStore([pinned], esFilters.FilterStateStore.GLOBAL_STATE);
-
-      act(() => args.data.query.filterManager.setFilters([pinned, unpinned]));
-      instance.update();
-
-      act(() => instance.find(TopNavMenu).prop('onClearSavedQuery')!());
-      instance.update();
-
+      act(() => services.data.query.filterManager.setFilters([pinned, unpinned]));
+      component.update();
+      act(() => component.find(TopNavMenu).prop('onClearSavedQuery')!());
+      component.update();
       expect(frame.mount).toHaveBeenLastCalledWith(
         expect.any(Element),
         expect.objectContaining({
@@ -968,17 +1109,129 @@ describe('Lens App', () => {
     });
   });
 
-  it('displays errors from the frame in a toast', () => {
-    const args = makeDefaultArgs();
-    args.editorFrame = frame;
+  describe('showing a confirm message when leaving', () => {
+    let defaultLeave: jest.Mock;
+    let confirmLeave: jest.Mock;
 
-    instance = mount(<App {...args} />);
+    beforeEach(() => {
+      defaultLeave = jest.fn();
+      confirmLeave = jest.fn();
+    });
 
-    const onError = frame.mount.mock.calls[0][1].onError;
-    onError({ message: 'error' });
+    it('should not show a confirm message if there is no expression to save', () => {
+      const { props } = mountWith({});
+      const lastCall = props.onAppLeave.mock.calls[props.onAppLeave.mock.calls.length - 1][0];
+      lastCall({ default: defaultLeave, confirm: confirmLeave });
+      expect(defaultLeave).toHaveBeenCalled();
+      expect(confirmLeave).not.toHaveBeenCalled();
+    });
 
-    instance.update();
+    it('does not confirm if the user is missing save permissions', () => {
+      const services = makeDefaultServices();
+      services.application = {
+        ...services.application,
+        capabilities: {
+          ...services.application.capabilities,
+          visualize: { save: false, saveQuery: false, show: true },
+        },
+      };
+      const { component, frame, props } = mountWith({ services });
+      const onChange = frame.mount.mock.calls[0][1].onChange;
+      act(() =>
+        onChange({
+          filterableIndexPatterns: [],
+          doc: ({
+            savedObjectId: undefined,
+            references: [],
+          } as unknown) as Document,
+          isSaveable: true,
+        })
+      );
+      component.update();
+      const lastCall = props.onAppLeave.mock.calls[props.onAppLeave.mock.calls.length - 1][0];
+      lastCall({ default: defaultLeave, confirm: confirmLeave });
+      expect(defaultLeave).toHaveBeenCalled();
+      expect(confirmLeave).not.toHaveBeenCalled();
+    });
 
-    expect(args.core.notifications.toasts.addDanger).toHaveBeenCalled();
+    it('should confirm when leaving with an unsaved doc', () => {
+      const { component, frame, props } = mountWith({});
+      const onChange = frame.mount.mock.calls[0][1].onChange;
+      act(() =>
+        onChange({
+          filterableIndexPatterns: [],
+          doc: ({ savedObjectId: undefined, state: {} } as unknown) as Document,
+          isSaveable: true,
+        })
+      );
+      component.update();
+      const lastCall = props.onAppLeave.mock.calls[props.onAppLeave.mock.calls.length - 1][0];
+      lastCall({ default: defaultLeave, confirm: confirmLeave });
+      expect(confirmLeave).toHaveBeenCalled();
+      expect(defaultLeave).not.toHaveBeenCalled();
+    });
+
+    it('should confirm when leaving with unsaved changes to an existing doc', async () => {
+      const { component, frame, props } = mountWith({});
+      await act(async () => {
+        component.setProps({ initialInput: { savedObjectId: defaultSavedObjectId } });
+      });
+      const onChange = frame.mount.mock.calls[0][1].onChange;
+      act(() =>
+        onChange({
+          filterableIndexPatterns: [],
+          doc: ({
+            savedObjectId: defaultSavedObjectId,
+            references: [],
+          } as unknown) as Document,
+          isSaveable: true,
+        })
+      );
+      component.update();
+      const lastCall = props.onAppLeave.mock.calls[props.onAppLeave.mock.calls.length - 1][0];
+      lastCall({ default: defaultLeave, confirm: confirmLeave });
+      expect(confirmLeave).toHaveBeenCalled();
+      expect(defaultLeave).not.toHaveBeenCalled();
+    });
+
+    it('should not confirm when changes are saved', async () => {
+      const { component, frame, props } = mountWith({});
+      await act(async () => {
+        component.setProps({ initialInput: { savedObjectId: defaultSavedObjectId } });
+      });
+      const onChange = frame.mount.mock.calls[0][1].onChange;
+      act(() =>
+        onChange({
+          filterableIndexPatterns: [],
+          doc: defaultDoc,
+          isSaveable: true,
+        })
+      );
+      component.update();
+      const lastCall = props.onAppLeave.mock.calls[props.onAppLeave.mock.calls.length - 1][0];
+      lastCall({ default: defaultLeave, confirm: confirmLeave });
+      expect(defaultLeave).toHaveBeenCalled();
+      expect(confirmLeave).not.toHaveBeenCalled();
+    });
+
+    it('should confirm when the latest doc is invalid', async () => {
+      const { component, frame, props } = mountWith({});
+      await act(async () => {
+        component.setProps({ initialInput: { savedObjectId: defaultSavedObjectId } });
+      });
+      const onChange = frame.mount.mock.calls[0][1].onChange;
+      act(() =>
+        onChange({
+          filterableIndexPatterns: [],
+          doc: ({ savedObjectId: defaultSavedObjectId, references: [] } as unknown) as Document,
+          isSaveable: true,
+        })
+      );
+      component.update();
+      const lastCall = props.onAppLeave.mock.calls[props.onAppLeave.mock.calls.length - 1][0];
+      lastCall({ default: defaultLeave, confirm: confirmLeave });
+      expect(confirmLeave).toHaveBeenCalled();
+      expect(defaultLeave).not.toHaveBeenCalled();
+    });
   });
 });

@@ -77,14 +77,7 @@ class VisualizationChart extends React.Component<VisualizationChartProps> {
   public render() {
     return (
       <div className="visChart__container kbn-resetFocusState" tabIndex={0} ref={this.containerDiv}>
-        <p className="euiScreenReaderOnly">
-          {this.props.vis.type.title} visualization, not yet accessible
-        </p>
-        <div
-          aria-hidden={!this.props.vis.type.isAccessible}
-          className="visChart"
-          ref={this.chartDiv}
-        />
+        <div className="visChart" ref={this.chartDiv} />
       </div>
     );
   }
@@ -96,6 +89,12 @@ class VisualizationChart extends React.Component<VisualizationChartProps> {
 
     const { vis } = this.props;
     const Visualization = vis.type.visualization;
+
+    if (!Visualization) {
+      throw new Error(
+        'Tried to use VisualizationChart component with a vis without visualization property.'
+      );
+    }
 
     this.visualization = new Visualization(this.chartDiv.current, vis);
 

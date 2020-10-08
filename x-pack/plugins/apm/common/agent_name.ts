@@ -14,26 +14,42 @@ import { AgentName } from '../typings/es_schemas/ui/fields/agent';
  * AGENT_NAMES array.
  */
 
+export const OPEN_TELEMETRY_AGENT_NAMES: AgentName[] = [
+  'otlp',
+  'opentelemetry/cpp',
+  'opentelemetry/dotnet',
+  'opentelemetry/erlang',
+  'opentelemetry/go',
+  'opentelemetry/java',
+  'opentelemetry/nodejs',
+  'opentelemetry/php',
+  'opentelemetry/python',
+  'opentelemetry/ruby',
+  'opentelemetry/webjs',
+];
+
 export const AGENT_NAMES: AgentName[] = [
-  'java',
-  'js-base',
-  'rum-js',
   'dotnet',
   'go',
   'java',
+  'js-base',
   'nodejs',
   'python',
-  'ruby'
+  'ruby',
+  'rum-js',
+  ...OPEN_TELEMETRY_AGENT_NAMES,
 ];
 
-export function isAgentName(agentName: string): agentName is AgentName {
-  return AGENT_NAMES.includes(agentName as AgentName);
-}
+export const RUM_AGENT_NAMES: AgentName[] = [
+  'js-base',
+  'rum-js',
+  'opentelemetry/webjs',
+];
 
 export function isRumAgentName(
-  agentName: string | undefined
-): agentName is 'js-base' | 'rum-js' {
-  return agentName === 'js-base' || agentName === 'rum-js';
+  agentName?: string
+): agentName is 'js-base' | 'rum-js' | 'opentelemetry/webjs' {
+  return RUM_AGENT_NAMES.includes(agentName! as AgentName);
 }
 
 export function isJavaAgentName(

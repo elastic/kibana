@@ -17,12 +17,5 @@
  * under the License.
  */
 
-// The following require statements MUST be executed before any others - BEGIN
-require('./exit_on_warning');
-require('./harden');
-// The following require statements MUST be executed before any others - END
-
-require('symbol-observable');
-require('./root');
-require('./node_version_validator');
-require('./babel_register');
+require('./no_transpilation');
+require('@kbn/optimizer').registerNodeAutoTranspilation();

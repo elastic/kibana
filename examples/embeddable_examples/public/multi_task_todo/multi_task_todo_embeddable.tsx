@@ -48,7 +48,7 @@ function getHasMatch(tasks: string[], title?: string, search?: string) {
 
   if (title && title.match(search)) return true;
 
-  const match = tasks.find(task => task.match(search));
+  const match = tasks.find((task) => task.match(search));
   if (match) return true;
 
   return false;

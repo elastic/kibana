@@ -5,7 +5,7 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { Ping } from '../../../../../legacy/plugins/uptime/common/runtime_types';
+import { Ping } from '../../../common/runtime_types';
 
 export interface GetLatestMonitorParams {
   /** @member dateRangeStart timestamp bounds */
@@ -16,6 +16,10 @@ export interface GetLatestMonitorParams {
 
   /** @member monitorId optional limit to monitorId */
   monitorId?: string | null;
+
+  observerLocation?: string;
+
+  status?: string;
 }
 
 // Get The monitor latest state sorted by timestamp with date range
@@ -25,6 +29,8 @@ export const getLatestMonitor: UMElasticsearchQueryFn<GetLatestMonitorParams, Pi
   dateStart,
   dateEnd,
   monitorId,
+  observerLocation,
+  status,
 }) => {
   const params = {
     index: dynamicSettings.heartbeatIndices,
@@ -40,12 +46,14 @@ export const getLatestMonitor: UMElasticsearchQueryFn<GetLatestMonitorParams, Pi
                 },
               },
             },
+            ...(status ? [{ term: { 'monitor.status': status } }] : []),
             ...(monitorId ? [{ term: { 'monitor.id': monitorId } }] : []),
+            ...(observerLocation ? [{ term: { 'observer.geo.name': observerLocation } }] : []),
           ],
         },
       },
       size: 1,
-      _source: ['url', 'monitor', 'observer', 'tls', '@timestamp'],
+      _source: ['url', 'monitor', 'observer', '@timestamp', 'tls.*', 'http', 'error'],
       sort: {
         '@timestamp': { order: 'desc' },
       },
@@ -54,8 +62,13 @@ export const getLatestMonitor: UMElasticsearchQueryFn<GetLatestMonitorParams, Pi
 
   const result = await callES('search', params);
   const doc = result.hits?.hits?.[0];
-  const source = doc?._source ?? {};
   const docId = doc?._id ?? '';
+  const { tls, ...ping } = doc?._source ?? {};
 
-  return { ...source, docId, timestamp: source['@timestamp'] };
+  return {
+    ...ping,
+    docId,
+    timestamp: ping['@timestamp'],
+    tls,
+  };
 };

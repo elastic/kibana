@@ -17,21 +17,24 @@
  * under the License.
  */
 
-import { get, set } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
+import { get } from 'lodash';
 import { SavedObjectsErrorHelpers } from './errors';
 import { IndexMapping } from '../../mappings';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { esKuery, KueryNode } from '../../../../../plugins/data/server';
+// @ts-expect-error no ts
+import { esKuery } from '../../es_query';
+type KueryNode = any;
 
 const astFunctionType = ['is', 'range', 'nested'];
 
 export const validateConvertFilterToKueryNode = (
   allowedTypes: string[],
-  filter: string,
+  filter: string | KueryNode,
   indexMapping: IndexMapping
 ): KueryNode | undefined => {
-  if (filter && filter.length > 0 && indexMapping) {
-    const filterKueryNode = esKuery.fromKueryExpression(filter);
+  if (filter && indexMapping) {
+    const filterKueryNode =
+      typeof filter === 'string' ? esKuery.fromKueryExpression(filter) : filter;
 
     const validationFilterKuery = validateFilterKueryNode({
       astFilter: filterKueryNode,
@@ -48,22 +51,22 @@ export const validateConvertFilterToKueryNode = (
       );
     }
 
-    if (validationFilterKuery.some(obj => obj.error != null)) {
+    if (validationFilterKuery.some((obj) => obj.error != null)) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         validationFilterKuery
-          .filter(obj => obj.error != null)
-          .map(obj => obj.error)
+          .filter((obj) => obj.error != null)
+          .map((obj) => obj.error)
           .join('\n')
       );
     }
 
-    validationFilterKuery.forEach(item => {
+    validationFilterKuery.forEach((item) => {
       const path: string[] = item.astPath.length === 0 ? [] : item.astPath.split('.');
       const existingKueryNode: KueryNode =
         path.length === 0 ? filterKueryNode : get(filterKueryNode, path);
       if (item.isSavedObjectAttr) {
         existingKueryNode.arguments[0].value = existingKueryNode.arguments[0].value.split('.')[1];
-        const itemType = allowedTypes.filter(t => t === item.type);
+        const itemType = allowedTypes.filter((t) => t === item.type);
         if (itemType.length === 1) {
           set(
             filterKueryNode,

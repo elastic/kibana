@@ -44,7 +44,7 @@ export function getKibanas(req, kbnIndexPattern, { clusterUuid }) {
       collapse: {
         field: 'kibana_stats.kibana.uuid',
       },
-      sort: [{ timestamp: { order: 'desc' } }],
+      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
       _source: [
         'timestamp',
         'kibana_stats.process.memory.resident_set_size_in_bytes',
@@ -63,10 +63,10 @@ export function getKibanas(req, kbnIndexPattern, { clusterUuid }) {
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  return callWithRequest(req, 'search', params).then(resp => {
+  return callWithRequest(req, 'search', params).then((resp) => {
     const instances = get(resp, 'hits.hits', []);
 
-    return instances.map(hit => {
+    return instances.map((hit) => {
       return {
         ...get(hit, '_source.kibana_stats'),
         availability: calculateAvailability(get(hit, '_source.timestamp')),

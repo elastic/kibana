@@ -1,9 +1,0 @@
-{
-  "id": "ossTelemetry",
-  "server": true,
-  "version": "8.0.0",
-  "kibanaVersion": "kibana",
-  "requiredPlugins": ["usageCollection", "taskManager"],
-  "configPath": ["xpack", "oss_telemetry"],
-  "ui": false
-}

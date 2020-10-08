@@ -9,7 +9,7 @@ import { API_BASE_PATH, ROLLUP_INDEX_NAME } from './constants';
 
 import { registerHelpers } from './rollup.test_helpers';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
 
@@ -113,7 +113,7 @@ export default function({ getService }) {
           const {
             body: { jobs },
           } = await loadJobs();
-          const job = jobs.find(job => job.config.id === payload.job.id);
+          const job = jobs.find((job) => job.config.id === payload.job.id);
 
           expect(job).not.be(undefined);
           expect(job.config.index_pattern).to.eql(payload.job.index_pattern);
@@ -218,7 +218,7 @@ export default function({ getService }) {
           const {
             body: { jobs },
           } = await loadJobs();
-          job = jobs.find(job => job.config.id === payload.job.id);
+          job = jobs.find((job) => job.config.id === payload.job.id);
         });
 
         it('should start the job', async () => {
@@ -233,7 +233,7 @@ export default function({ getService }) {
           const {
             body: { jobs },
           } = await loadJobs();
-          job = jobs.find(job => job.config.id === jobId);
+          job = jobs.find((job) => job.config.id === jobId);
           expect(job.status.job_state).to.eql('started');
         });
 
@@ -254,7 +254,7 @@ export default function({ getService }) {
           const {
             body: { jobs },
           } = await loadJobs();
-          job = jobs.find(job => job.config.id === payload.job.id);
+          job = jobs.find((job) => job.config.id === payload.job.id);
         });
 
         it('should stop the job', async () => {
@@ -268,7 +268,7 @@ export default function({ getService }) {
           const {
             body: { jobs },
           } = await loadJobs();
-          job = jobs.find(job => job.config.id === jobId);
+          job = jobs.find((job) => job.config.id === jobId);
           expect(job.status.job_state).to.eql('stopped');
         });
 

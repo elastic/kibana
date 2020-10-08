@@ -68,7 +68,7 @@ describe('ML - field type utils', () => {
       const mlKeys = Object.keys(ML_JOB_FIELD_TYPES);
       const receivedMlLabels: Record<string, string | null> = {};
       const testStorage = mlJobTypeAriaLabels;
-      mlKeys.forEach(constant => {
+      mlKeys.forEach((constant) => {
         receivedMlLabels[constant] = getMLJobTypeAriaLabel(
           ML_JOB_FIELD_TYPES[constant as keyof typeof ML_JOB_FIELD_TYPES]
         );

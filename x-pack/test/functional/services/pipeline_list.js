@@ -13,10 +13,10 @@ export function PipelineListProvider({ getService }) {
   const SUBJ_CONTAINER = `pipelineList`;
   const SUBJ_BTN_ADD = `pipelineList > btnAdd`;
   const SUBJ_BTN_DELETE = `pipelineList > btnDeletePipeline`;
-  const getCloneLinkSubjForId = id => `pipelineList > lnkPipelineClone-${id}`;
+  const getCloneLinkSubjForId = (id) => `pipelineList > lnkPipelineClone-${id}`;
   const SUBJ_FILTER = `pipelineList > filter`;
   const SUBJ_SELECT_ALL = `pipelineList > pipelineTable > checkboxSelectAll`;
-  const getSelectCheckbox = id => `pipelineList > pipelineTable > checkboxSelectRow-${id}`;
+  const getSelectCheckbox = (id) => `pipelineList > pipelineTable > checkboxSelectRow-${id}`;
   const SUBJ_BTN_NEXT_PAGE = `pipelineList > pagination-button-next`;
 
   const INNER_SUBJ_ROW = `row`;
@@ -96,7 +96,7 @@ export function PipelineListProvider({ getService }) {
 
       // pick an unselected selectbox and select it
       const rows = await this.readRows();
-      const rowToClick = await random.pickOne(rows.filter(r => !r.selected));
+      const rowToClick = await random.pickOne(rows.filter((r) => !r.selected));
       await testSubjects.click(getSelectCheckbox(rowToClick.id));
 
       await retry.waitFor(
@@ -115,21 +115,13 @@ export function PipelineListProvider({ getService }) {
       const $ = await pipelineTable.parseDomContent();
       return $.findTestSubjects(INNER_SUBJ_ROW)
         .toArray()
-        .map(row => {
+        .map((row) => {
           return {
             selected: $(row).hasClass('euiTableRow-isSelected'),
-            id: $(row)
-              .findTestSubjects(INNER_SUBJ_CELL_ID)
-              .text(),
-            description: $(row)
-              .findTestSubjects(INNER_SUBJ_CELL_DESCRIPTION)
-              .text(),
-            lastModified: $(row)
-              .findTestSubjects(INNER_SUBJ_CELL_LAST_MODIFIED)
-              .text(),
-            username: $(row)
-              .findTestSubjects(INNER_SUBJ_CELL_USERNAME)
-              .text(),
+            id: $(row).findTestSubjects(INNER_SUBJ_CELL_ID).text(),
+            description: $(row).findTestSubjects(INNER_SUBJ_CELL_DESCRIPTION).text(),
+            lastModified: $(row).findTestSubjects(INNER_SUBJ_CELL_LAST_MODIFIED).text(),
+            username: $(row).findTestSubjects(INNER_SUBJ_CELL_USERNAME).text(),
           };
         });
     }

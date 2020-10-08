@@ -57,14 +57,15 @@ export function ItemsGrid({
   const pageItems = items.slice(startIndex, startIndex + itemsPerPage);
   const gridItems = pageItems.map((item, index) => {
     return (
-      <EuiFlexItem key={`ml_grid_item_${index}`}>
+      <EuiFlexItem key={`ml_grid_item_${index}`} data-test-subj={`mlGridItem ${item}`}>
         <EuiCheckbox
           id={`ml_grid_item_${index}`}
           label={item}
           checked={selectedItems.indexOf(item) >= 0}
-          onChange={e => {
+          onChange={(e) => {
             setItemSelected(item, e.target.checked);
           }}
+          data-test-subj={`mlGridItemCheckbox`}
         />
       </EuiFlexItem>
     );

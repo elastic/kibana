@@ -312,7 +312,6 @@ class HeaderHelpMenuUI extends Component<Props, State> {
     );
 
     return (
-      // @ts-ignore repositionOnScroll doesn't exist in EuiPopover
       <EuiPopover
         anchorPosition="downRight"
         button={button}

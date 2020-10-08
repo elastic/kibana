@@ -9,6 +9,7 @@ import { AppActions } from './app';
 import { SavedObjectActions } from './saved_object';
 import { SpaceActions } from './space';
 import { UIActions } from './ui';
+import { AlertingActions } from './alerting';
 
 /** Actions are used to create the "actions" that are associated with Elasticsearch's
  * application privileges, and are used to perform the authorization checks implemented
@@ -22,6 +23,8 @@ export class Actions {
   public readonly login = 'login:';
 
   public readonly savedObject = new SavedObjectActions(this.versionNumber);
+
+  public readonly alerting = new AlertingActions(this.versionNumber);
 
   public readonly space = new SpaceActions(this.versionNumber);
 

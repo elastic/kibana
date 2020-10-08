@@ -5,6 +5,7 @@
  */
 import React, { useCallback } from 'react';
 import { EuiContextMenuPanelDescriptor, EuiContextMenu } from '@elastic/eui';
+import { getCustomMetricLabel } from '../../../../../../../common/formatters/get_custom_metric_label';
 import {
   SnapshotMetricInput,
   SnapshotCustomMetricInput,
@@ -14,7 +15,6 @@ import {
   SnapshotMetricTypeRT,
   SnapshotMetricType,
 } from '../../../../../../../common/inventory_models/types';
-import { getCustomMetricLabel } from './get_custom_metric_label';
 
 interface Props {
   options: Array<{ text: string; value: string }>;
@@ -36,7 +36,7 @@ export const MetricsContextMenu = ({
   const handleClick = useCallback(
     (val: string) => {
       if (!SnapshotMetricTypeRT.is(val)) {
-        const selectedMetric = customMetrics.find(m => m.id === val);
+        const selectedMetric = customMetrics.find((m) => m.id === val);
         if (selectedMetric) {
           onChange(selectedMetric);
         }
@@ -53,12 +53,12 @@ export const MetricsContextMenu = ({
       id: 0,
       title: '',
       items: [
-        ...options.map(o => {
+        ...options.map((o) => {
           const icon = o.value === id ? 'check' : 'empty';
           const panel = { name: o.text, onClick: () => handleClick(o.value), icon };
           return panel;
         }),
-        ...customMetrics.map(m => {
+        ...customMetrics.map((m) => {
           const icon = m.id === id ? 'check' : 'empty';
           const panel = {
             name: getCustomMetricLabel(m),

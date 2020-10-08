@@ -61,8 +61,8 @@
  */
 
 import Boom from 'boom';
+import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
-import cloneDeep from 'lodash.clonedeep';
 import Semver from 'semver';
 import { Logger } from '../../../logging';
 import { SavedObjectUnsanitizedDoc } from '../../serialization';
@@ -73,12 +73,9 @@ import { SavedObjectMigrationFn } from '../types';
 
 export type TransformFn = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc;
 
-type ValidateDoc = (doc: SavedObjectUnsanitizedDoc) => void;
-
 interface DocumentMigratorOptions {
   kibanaVersion: string;
   typeRegistry: ISavedObjectTypeRegistry;
-  validateDoc: ValidateDoc;
   log: Logger;
 }
 
@@ -113,19 +110,16 @@ export class DocumentMigrator implements VersionedTransformer {
    * @param {DocumentMigratorOptions} opts
    * @prop {string} kibanaVersion - The current version of Kibana
    * @prop {SavedObjectTypeRegistry} typeRegistry - The type registry to get type migrations from
-   * @prop {ValidateDoc} validateDoc - A function which, given a document throws an error if it is
-   *   not up to date. This is used to ensure we don't let unmigrated documents slip through.
    * @prop {Logger} log - The migration logger
    * @memberof DocumentMigrator
    */
-  constructor({ typeRegistry, kibanaVersion, log, validateDoc }: DocumentMigratorOptions) {
+  constructor({ typeRegistry, kibanaVersion, log }: DocumentMigratorOptions) {
     validateMigrationDefinition(typeRegistry);
 
     this.migrations = buildActiveMigrations(typeRegistry, log);
     this.transformDoc = buildDocumentTransform({
       kibanaVersion,
       migrations: this.migrations,
-      validateDoc,
     });
   }
 
@@ -151,7 +145,7 @@ export class DocumentMigrator implements VersionedTransformer {
     // Clone the document to prevent accidental mutations on the original data
     // Ex: Importing sample data that is cached at import level, migrations would
     // execute on mutated data the second time.
-    const clonedDoc = cloneDeep(doc);
+    const clonedDoc = _.cloneDeep(doc);
     return this.transformDoc(clonedDoc);
   };
 }
@@ -183,7 +177,7 @@ function validateMigrationDefinition(registry: ISavedObjectTypeRegistry) {
     }
   }
 
-  registry.getAllTypes().forEach(type => {
+  registry.getAllTypes().forEach((type) => {
     if (type.migrations) {
       assertObject(
         type.migrations,
@@ -209,7 +203,7 @@ function buildActiveMigrations(
 ): ActiveMigrations {
   return typeRegistry
     .getAllTypes()
-    .filter(type => type.migrations && Object.keys(type.migrations).length > 0)
+    .filter((type) => type.migrations && Object.keys(type.migrations).length > 0)
     .reduce((migrations, type) => {
       const transforms = Object.entries(type.migrations!)
         .map(([version, transform]) => ({
@@ -220,7 +214,7 @@ function buildActiveMigrations(
       return {
         ...migrations,
         [type.name]: {
-          latestVersion: _.last(transforms).version,
+          latestVersion: _.last(transforms)!.version,
           transforms,
         },
       };
@@ -231,20 +225,15 @@ function buildActiveMigrations(
  * Creates a function which migrates and validates any document that is passed to it.
  */
 function buildDocumentTransform({
-  kibanaVersion,
   migrations,
-  validateDoc,
 }: {
   kibanaVersion: string;
   migrations: ActiveMigrations;
-  validateDoc: ValidateDoc;
 }): TransformFn {
   return function transformAndValidate(doc: SavedObjectUnsanitizedDoc) {
     const result = doc.migrationVersion
       ? applyMigrations(doc, migrations)
       : markAsUpToDate(doc, migrations);
-
-    validateDoc(result);
 
     // In order to keep tests a bit more stable, we won't
     // tack on an empy migrationVersion to docs that have
@@ -279,7 +268,7 @@ function props(doc: SavedObjectUnsanitizedDoc) {
  */
 function propVersion(doc: SavedObjectUnsanitizedDoc | ActiveMigrations, prop: string) {
   return (
-    (doc[prop] && doc[prop].latestVersion) ||
+    ((doc as any)[prop] && (doc as any)[prop].latestVersion) ||
     (doc.migrationVersion && (doc as any).migrationVersion[prop])
   );
 }
@@ -292,7 +281,7 @@ function markAsUpToDate(doc: SavedObjectUnsanitizedDoc, migrations: ActiveMigrat
     ...doc,
     migrationVersion: props(doc).reduce((acc, prop) => {
       const version = propVersion(migrations, prop);
-      return version ? _.set(acc, prop, version) : acc;
+      return version ? set(acc, prop, version) : acc;
     }, {}),
   };
 }
@@ -334,7 +323,7 @@ function wrapWithTry(
  * Finds the first unmigrated property in the specified document.
  */
 function nextUnmigratedProp(doc: SavedObjectUnsanitizedDoc, migrations: ActiveMigrations) {
-  return props(doc).find(p => {
+  return props(doc).find((p) => {
     const latestVersion = propVersion(migrations, p);
     const docVersion = propVersion(doc, p);
 
@@ -350,7 +339,7 @@ function nextUnmigratedProp(doc: SavedObjectUnsanitizedDoc, migrations: ActiveMi
     if (docVersion && (!latestVersion || Semver.gt(docVersion, latestVersion))) {
       throw Boom.badData(
         `Document "${doc.id}" has property "${p}" which belongs to a more recent` +
-          ` version of Kibana (${docVersion}).`,
+          ` version of Kibana [${docVersion}]. The last known version is [${latestVersion}]`,
         doc
       );
     }
@@ -431,7 +420,7 @@ function assertNoDowngrades(
   }
 
   const downgrade = Object.keys(migrationVersion).find(
-    k => !docVersion.hasOwnProperty(k) || Semver.lt(docVersion[k], migrationVersion[k])
+    (k) => !docVersion.hasOwnProperty(k) || Semver.lt(docVersion[k], migrationVersion[k])
   );
 
   if (downgrade) {

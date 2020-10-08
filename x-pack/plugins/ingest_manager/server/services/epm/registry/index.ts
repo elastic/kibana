@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import semver from 'semver';
 import { Response } from 'node-fetch';
 import { URL } from 'url';
 import {
@@ -11,73 +12,135 @@ import {
   AssetsGroupedByServiceByType,
   CategoryId,
   CategorySummaryList,
+  InstallSource,
   KibanaAssetType,
   RegistryPackage,
   RegistrySearchResults,
   RegistrySearchResult,
 } from '../../../types';
-import { appContextService } from '../../';
-import { cacheGet, cacheSet } from './cache';
-import { ArchiveEntry, untarBuffer } from './extract';
+import {
+  cacheGet,
+  cacheSet,
+  cacheDelete,
+  getArchiveFilelist,
+  setArchiveFilelist,
+  deleteArchiveFilelist,
+} from './cache';
+import { ArchiveEntry, untarBuffer, unzipBuffer } from './extract';
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { streamToBuffer } from './streams';
+import { getRegistryUrl } from './registry_url';
+import { appContextService } from '../..';
+import { PackageNotFoundError, PackageCacheError } from '../../../errors';
 
 export { ArchiveEntry } from './extract';
 
 export interface SearchParams {
   category?: CategoryId;
+  experimental?: boolean;
+}
+
+export interface CategoriesParams {
+  experimental?: boolean;
+}
+
+/**
+ * Extract the package name and package version from a string.
+ *
+ * @param pkgkey a string containing the package name delimited by the package version
+ */
+export function splitPkgKey(pkgkey: string): { pkgName: string; pkgVersion: string } {
+  // this will return an empty string if `indexOf` returns -1
+  const pkgName = pkgkey.substr(0, pkgkey.indexOf('-'));
+  if (pkgName === '') {
+    throw new Error('Package key parsing failed: package name was empty');
+  }
+
+  // this will return the entire string if `indexOf` return -1
+  const pkgVersion = pkgkey.substr(pkgkey.indexOf('-') + 1);
+  if (!semver.valid(pkgVersion)) {
+    throw new Error('Package key parsing failed: package version was not a valid semver');
+  }
+  return { pkgName, pkgVersion };
 }
 
 export const pkgToPkgKey = ({ name, version }: { name: string; version: string }) =>
   `${name}-${version}`;
 
 export async function fetchList(params?: SearchParams): Promise<RegistrySearchResults> {
-  const registryUrl = appContextService.getConfig()?.epm.registryUrl;
+  const registryUrl = getRegistryUrl();
   const url = new URL(`${registryUrl}/search`);
-  if (params && params.category) {
-    url.searchParams.set('category', params.category);
+  const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be x.y.z-SNAPSHOT
+  const kibanaBranch = appContextService.getKibanaBranch();
+  if (params) {
+    if (params.category) {
+      url.searchParams.set('category', params.category);
+    }
+    if (params.experimental) {
+      url.searchParams.set('experimental', params.experimental.toString());
+    }
+  }
+
+  // on master, request all packages regardless of version
+  if (kibanaVersion && kibanaBranch !== 'master') {
+    url.searchParams.set('kibana.version', kibanaVersion);
   }
 
   return fetchUrl(url.toString()).then(JSON.parse);
 }
 
-export async function fetchFindLatestPackage(
-  packageName: string,
-  internal: boolean = true
-): Promise<RegistrySearchResult> {
-  const registryUrl = appContextService.getConfig()?.epm.registryUrl;
-  const url = new URL(`${registryUrl}/search?package=${packageName}&internal=${internal}`);
+export async function fetchFindLatestPackage(packageName: string): Promise<RegistrySearchResult> {
+  const registryUrl = getRegistryUrl();
+  const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be x.y.z-SNAPSHOT
+  const kibanaBranch = appContextService.getKibanaBranch();
+  const url = new URL(
+    `${registryUrl}/search?package=${packageName}&internal=true&experimental=true`
+  );
+
+  // on master, request all packages regardless of version
+  if (kibanaVersion && kibanaBranch !== 'master') {
+    url.searchParams.set('kibana.version', kibanaVersion);
+  }
   const res = await fetchUrl(url.toString());
   const searchResults = JSON.parse(res);
   if (searchResults.length) {
     return searchResults[0];
   } else {
-    throw new Error('package not found');
+    throw new PackageNotFoundError(`${packageName} not found`);
   }
 }
 
 export async function fetchInfo(pkgName: string, pkgVersion: string): Promise<RegistryPackage> {
-  const registryUrl = appContextService.getConfig()?.epm.registryUrl;
+  const registryUrl = getRegistryUrl();
   return fetchUrl(`${registryUrl}/package/${pkgName}/${pkgVersion}`).then(JSON.parse);
 }
 
 export async function fetchFile(filePath: string): Promise<Response> {
-  const registryUrl = appContextService.getConfig()?.epm.registryUrl;
+  const registryUrl = getRegistryUrl();
   return getResponse(`${registryUrl}${filePath}`);
 }
 
-export async function fetchCategories(): Promise<CategorySummaryList> {
-  const registryUrl = appContextService.getConfig()?.epm.registryUrl;
-  return fetchUrl(`${registryUrl}/categories`).then(JSON.parse);
+export async function fetchCategories(params?: CategoriesParams): Promise<CategorySummaryList> {
+  const registryUrl = getRegistryUrl();
+  const url = new URL(`${registryUrl}/categories`);
+  if (params) {
+    if (params.experimental) {
+      url.searchParams.set('experimental', params.experimental.toString());
+    }
+  }
+
+  return fetchUrl(url.toString()).then(JSON.parse);
 }
 
-export async function getArchiveInfo(
+export async function unpackRegistryPackageToCache(
   pkgName: string,
   pkgVersion: string,
   filter = (entry: ArchiveEntry): boolean => true
 ): Promise<string[]> {
   const paths: string[] = [];
-  const onEntry = (entry: ArchiveEntry) => {
+  const { archiveBuffer, archivePath } = await fetchArchiveBuffer(pkgName, pkgVersion);
+  const bufferExtractor = getBufferExtractor(archivePath);
+  await bufferExtractor(archiveBuffer, filter, (entry: ArchiveEntry) => {
     const { path, buffer } = entry;
     const { file } = pathParts(path);
     if (!file) return;
@@ -85,11 +148,25 @@ export async function getArchiveInfo(
       cacheSet(path, buffer);
       paths.push(path);
     }
-  };
-
-  await extract(pkgName, pkgVersion, filter, onEntry);
+  });
 
   return paths;
+}
+
+export async function loadRegistryPackage(
+  pkgName: string,
+  pkgVersion: string
+): Promise<{ paths: string[]; registryPackageInfo: RegistryPackage }> {
+  let paths = getArchiveFilelist(pkgName, pkgVersion);
+  if (!paths || paths.length === 0) {
+    paths = await unpackRegistryPackageToCache(pkgName, pkgVersion);
+    setArchiveFilelist(pkgName, pkgVersion, paths);
+  }
+
+  // TODO: cache this as well?
+  const registryPackageInfo = await fetchInfo(pkgName, pkgVersion);
+
+  return { paths, registryPackageInfo };
 }
 
 export function pathParts(path: string): AssetParts {
@@ -97,12 +174,12 @@ export function pathParts(path: string): AssetParts {
 
   let [pkgkey, service, type, file] = path.split('/');
 
-  // if it's a dataset
-  if (service === 'dataset') {
+  // if it's a data stream
+  if (service === 'data_stream') {
     // save the dataset name
     dataset = type;
-    // drop the `dataset/dataset-name` portion & re-parse
-    [pkgkey, service, type, file] = path.replace(`dataset/${dataset}/`, '').split('/');
+    // drop the `data_stream/dataset-name` portion & re-parse
+    [pkgkey, service, type, file] = path.replace(`data_stream/${dataset}/`, '').split('/');
   }
 
   // This is to cover for the fields.yml files inside the "fields" directory
@@ -122,37 +199,39 @@ export function pathParts(path: string): AssetParts {
   } as AssetParts;
 }
 
-async function extract(
-  pkgName: string,
-  pkgVersion: string,
-  filter = (entry: ArchiveEntry): boolean => true,
-  onEntry: (entry: ArchiveEntry) => void
+export function getBufferExtractor(archivePath: string) {
+  const isZip = archivePath.endsWith('.zip');
+  const bufferExtractor = isZip ? unzipBuffer : untarBuffer;
+
+  return bufferExtractor;
+}
+
+export async function ensureCachedArchiveInfo(
+  name: string,
+  version: string,
+  installSource: InstallSource = 'registry'
 ) {
-  const archiveBuffer = await getOrFetchArchiveBuffer(pkgName, pkgVersion);
-
-  return untarBuffer(archiveBuffer, filter, onEntry);
-}
-
-async function getOrFetchArchiveBuffer(pkgName: string, pkgVersion: string): Promise<Buffer> {
-  // assume .tar.gz for now. add support for .zip if/when we need it
-  const key = `${pkgName}-${pkgVersion}.tar.gz`;
-  let buffer = cacheGet(key);
-  if (!buffer) {
-    buffer = await fetchArchiveBuffer(pkgName, pkgVersion);
-    cacheSet(key, buffer);
-  }
-
-  if (buffer) {
-    return buffer;
-  } else {
-    throw new Error(`no archive buffer for ${key}`);
+  const paths = getArchiveFilelist(name, version);
+  if (!paths || paths.length === 0) {
+    if (installSource === 'registry') {
+      await loadRegistryPackage(name, version);
+    } else {
+      throw new PackageCacheError(
+        `Package ${name}-${version} not cached. If it was uploaded, try uninstalling and reinstalling manually.`
+      );
+    }
   }
 }
 
-async function fetchArchiveBuffer(pkgName: string, pkgVersion: string): Promise<Buffer> {
+async function fetchArchiveBuffer(
+  pkgName: string,
+  pkgVersion: string
+): Promise<{ archiveBuffer: Buffer; archivePath: string }> {
   const { download: archivePath } = await fetchInfo(pkgName, pkgVersion);
-  const registryUrl = appContextService.getConfig()?.epm.registryUrl;
-  return getResponseStream(`${registryUrl}${archivePath}`).then(streamToBuffer);
+  const archiveUrl = `${getRegistryUrl()}${archivePath}`;
+  const archiveBuffer = await getResponseStream(archiveUrl).then(streamToBuffer);
+
+  return { archiveBuffer, archivePath };
 }
 
 export function getAsset(key: string) {
@@ -180,3 +259,15 @@ export function groupPathsByService(paths: string[]): AssetsGroupedByServiceByTy
     // elasticsearch: assets.elasticsearch,
   };
 }
+
+export const deletePackageCache = (name: string, version: string) => {
+  // get cached archive filelist
+  const paths = getArchiveFilelist(name, version);
+
+  // delete cached archive filelist
+  deleteArchiveFilelist(name, version);
+
+  // delete cached archive files
+  // this has been populated in unpackRegistryPackageToCache()
+  paths?.forEach((path) => cacheDelete(path));
+};

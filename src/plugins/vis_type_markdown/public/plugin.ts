@@ -24,8 +24,7 @@ import { VisualizationsSetup } from '../../visualizations/public';
 import { markdownVisDefinition } from './markdown_vis';
 import { createMarkdownVisFn } from './markdown_fn';
 import { ConfigSchema } from '../config';
-
-import './index.scss';
+import { markdownVisRenderer } from './markdown_renderer';
 
 /** @internal */
 export interface MarkdownPluginSetupDependencies {
@@ -42,7 +41,8 @@ export class MarkdownPlugin implements Plugin<void, void> {
   }
 
   public setup(core: CoreSetup, { expressions, visualizations }: MarkdownPluginSetupDependencies) {
-    visualizations.createReactVisualization(markdownVisDefinition);
+    visualizations.createBaseVisualization(markdownVisDefinition);
+    expressions.registerRenderer(markdownVisRenderer);
     expressions.registerFunction(createMarkdownVisFn);
   }
 

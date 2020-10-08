@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './data_panel_wrapper.scss';
+
 import React, { useMemo, memo, useContext, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
@@ -19,6 +21,7 @@ interface DataPanelWrapperProps {
   activeDatasource: string | null;
   datasourceIsLoading: boolean;
   dispatch: (action: Action) => void;
+  showNoDataPopover: () => void;
   core: DatasourceDataPanelProps['core'];
   query: Query;
   dateRange: FramePublicAPI['dateRange'];
@@ -26,16 +29,17 @@ interface DataPanelWrapperProps {
 }
 
 export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
+  const { dispatch, activeDatasource } = props;
   const setDatasourceState: StateSetter<unknown> = useMemo(
-    () => updater => {
-      props.dispatch({
+    () => (updater) => {
+      dispatch({
         type: 'UPDATE_DATASOURCE_STATE',
         updater,
-        datasourceId: props.activeDatasource!,
+        datasourceId: activeDatasource!,
         clearStagedPreview: true,
       });
     },
-    [props.dispatch, props.activeDatasource]
+    [dispatch, activeDatasource]
   );
 
   const datasourceProps: DatasourceDataPanelProps = {
@@ -46,6 +50,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
     query: props.query,
     dateRange: props.dateRange,
     filters: props.filters,
+    showNoDataPopover: props.showNoDataPopover,
   };
 
   const [showDatasourceSwitcher, setDatasourceSwitcher] = useState(false);
@@ -78,7 +83,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
             title={i18n.translate('xpack.lens.dataPanelWrapper.switchDatasource', {
               defaultMessage: 'Switch to datasource',
             })}
-            items={Object.keys(props.datasourceMap).map(datasourceId => (
+            items={Object.keys(props.datasourceMap).map((datasourceId) => (
               <EuiContextMenuItem
                 key={datasourceId}
                 data-test-subj={`datasource-switch-${datasourceId}`}

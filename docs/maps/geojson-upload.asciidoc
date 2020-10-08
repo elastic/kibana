@@ -1,11 +1,13 @@
 [role="xpack"]
 [[geojson-upload]]
 == Upload GeoJSON data
-*Elastic Maps* makes it easy to import geospatial data into the Elastic Stack.
-Using the *GeoJSON Upload* feature, you can drag and drop your point and shape
+
+Maps makes it easy to import geospatial data into the Elastic Stack.
+Using the GeoJSON Upload feature, you can drag and drop your point and shape
 data files directly into {es}, and then use them as layers
 in the map.  You can also use the GeoJSON data in the broader Kibana ecosystem,
 for example, in visualizations and Canvas workpads.
+
 [float]
 === Why GeoJSON?
 GeoJSON is an open-standard file format for storing geospatial vector data.
@@ -17,7 +19,7 @@ GeoJSON is the most commonly used and flexible option.
 Follow these instructions to upload a GeoJSON data file, or try the
 <<indexing-geojson-data-tutorial, end-to-end integrated example>>.
 
-. Open *Elastic Maps*, and then click *Add layer*.
+. Open the menu, go to *Maps*, and then click *Add layer*.
 . Click *Uploaded GeoJSON*.
 +
 [role="screenshot"]

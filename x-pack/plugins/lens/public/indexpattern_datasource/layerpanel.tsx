@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { DatasourceLayerPanelProps } from '../types';
@@ -28,7 +27,8 @@ export function LayerPanel({ state, layerId, onChangeIndexPattern }: IndexPatter
           label: state.indexPatterns[layer.indexPatternId].title,
           title: state.indexPatterns[layer.indexPatternId].title,
           'data-test-subj': 'lns_layerIndexPatternLabel',
-          size: 'xs',
+          size: 's',
+          fontWeight: 'normal',
         }}
         indexPatternId={layer.indexPatternId}
         indexPatternRefs={state.indexPatternRefs}

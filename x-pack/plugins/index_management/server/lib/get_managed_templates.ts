@@ -6,7 +6,7 @@
 
 // Cloud has its own system for managing templates and we want to make
 // this clear in the UI when a template is used in a Cloud deployment.
-export const getManagedTemplatePrefix = async (
+export const getCloudManagedTemplatePrefix = async (
   callAsCurrentUser: any
 ): Promise<string | undefined> => {
   try {

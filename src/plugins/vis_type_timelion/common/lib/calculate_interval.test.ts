@@ -22,9 +22,7 @@ import { calculateInterval as fn } from './calculate_interval';
 import moment, { unitOfTime } from 'moment';
 
 const from = (count: number, unit: unitOfTime.DurationConstructor) =>
-  moment()
-    .subtract(count, unit)
-    .valueOf();
+  moment().subtract(count, unit).valueOf();
 const to = moment().valueOf();
 const size = 200;
 const min = '1ms';

@@ -4,7 +4,7 @@
 
 ## SearchSource.setPreferredSearchStrategyId() method
 
-\*\*\* PUBLIC API \*\*\*
+internal, dont use
 
 <b>Signature:</b>
 

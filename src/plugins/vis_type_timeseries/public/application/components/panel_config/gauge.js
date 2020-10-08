@@ -46,6 +46,9 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { QueryBarWrapper } from '../query_bar_wrapper';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 
+import { limitOfSeries } from '../../../../common/ui_restrictions';
+import { PANEL_TYPES } from '../../../../common/panel_types';
+
 class GaugePanelConfigUi extends Component {
   constructor(props) {
     super(props);
@@ -101,7 +104,7 @@ class GaugePanelConfigUi extends Component {
       },
     ];
     const htmlId = htmlIdGenerator();
-    const selectedGaugeStyleOption = styleOptions.find(option => {
+    const selectedGaugeStyleOption = styleOptions.find((option) => {
       return model.gauge_style === option.value;
     });
     let view;
@@ -110,7 +113,7 @@ class GaugePanelConfigUi extends Component {
         <SeriesEditor
           colorPicker={true}
           fields={this.props.fields}
-          limit={1}
+          limit={limitOfSeries[PANEL_TYPES.GAUGE]}
           model={this.props.model}
           name={this.props.name}
           onChange={this.props.onChange}
@@ -155,7 +158,7 @@ class GaugePanelConfigUi extends Component {
                       language: model.filter.language || getDefaultQueryLanguage(),
                       query: model.filter.query || '',
                     }}
-                    onChange={filter => this.props.onChange({ filter })}
+                    onChange={(filter) => this.props.onChange({ filter })}
                     indexPatterns={[model.index_pattern || model.default_index_pattern]}
                   />
                 </EuiFormRow>
@@ -327,7 +330,7 @@ class GaugePanelConfigUi extends Component {
       );
     }
     return (
-      <div>
+      <>
         <EuiTabs size="s">
           <EuiTab isSelected={selectedTab === 'data'} onClick={() => this.switchTab('data')}>
             <FormattedMessage
@@ -343,7 +346,7 @@ class GaugePanelConfigUi extends Component {
           </EuiTab>
         </EuiTabs>
         {view}
-      </div>
+      </>
     );
   }
 }

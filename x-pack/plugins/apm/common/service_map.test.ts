@@ -8,7 +8,7 @@ import { License } from '../../licensing/common/license';
 import * as serviceMap from './service_map';
 
 describe('service map helpers', () => {
-  describe('isValidPlatinumLicense', () => {
+  describe('isActivePlatinumLicense', () => {
     describe('with an expired license', () => {
       it('returns false', () => {
         const license = new License({
@@ -17,12 +17,12 @@ describe('service map helpers', () => {
             expiryDateInMillis: 0,
             mode: 'platinum',
             type: 'platinum',
-            status: 'expired'
+            status: 'expired',
           },
-          signature: 'test signature'
+          signature: 'test signature',
         });
 
-        expect(serviceMap.isValidPlatinumLicense(license)).toEqual(false);
+        expect(serviceMap.isActivePlatinumLicense(license)).toEqual(false);
       });
     });
 
@@ -34,12 +34,12 @@ describe('service map helpers', () => {
             expiryDateInMillis: 0,
             mode: 'basic',
             type: 'basic',
-            status: 'active'
+            status: 'active',
           },
-          signature: 'test signature'
+          signature: 'test signature',
         });
 
-        expect(serviceMap.isValidPlatinumLicense(license)).toEqual(false);
+        expect(serviceMap.isActivePlatinumLicense(license)).toEqual(false);
       });
     });
 
@@ -51,12 +51,12 @@ describe('service map helpers', () => {
             expiryDateInMillis: 0,
             mode: 'platinum',
             type: 'platinum',
-            status: 'active'
+            status: 'active',
           },
-          signature: 'test signature'
+          signature: 'test signature',
         });
 
-        expect(serviceMap.isValidPlatinumLicense(license)).toEqual(true);
+        expect(serviceMap.isActivePlatinumLicense(license)).toEqual(true);
       });
     });
 
@@ -68,12 +68,12 @@ describe('service map helpers', () => {
             expiryDateInMillis: 0,
             mode: 'enterprise',
             type: 'enterprise',
-            status: 'active'
+            status: 'active',
           },
-          signature: 'test signature'
+          signature: 'test signature',
         });
 
-        expect(serviceMap.isValidPlatinumLicense(license)).toEqual(true);
+        expect(serviceMap.isActivePlatinumLicense(license)).toEqual(true);
       });
     });
 
@@ -85,12 +85,12 @@ describe('service map helpers', () => {
             expiryDateInMillis: 0,
             mode: 'trial',
             type: 'trial',
-            status: 'active'
+            status: 'active',
           },
-          signature: 'test signature'
+          signature: 'test signature',
         });
 
-        expect(serviceMap.isValidPlatinumLicense(license)).toEqual(true);
+        expect(serviceMap.isActivePlatinumLicense(license)).toEqual(true);
       });
     });
   });

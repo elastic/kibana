@@ -4,8 +4,12 @@
 
 ## SavedObjectsComplexFieldMapping.dynamic property
 
+The dynamic property of the mapping, either `false` or `'strict'`<!-- -->. If unspecified `dynamic: 'strict'` will be inherited from the top-level index mappings.
+
+Note: To limit the number of mapping fields Saved Object types should \*never\* use `dynamic: true`<!-- -->.
+
 <b>Signature:</b>
 
 ```typescript
-dynamic?: string;
+dynamic?: false | 'strict';
 ```

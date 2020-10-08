@@ -8,6 +8,7 @@ import { useEffect, useMemo } from 'react';
 import { METRIC_TYPE, UiStatsMetricType } from '@kbn/analytics';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { ObservabilityApp } from '../../typings/common';
 
 /**
  * Note: The usage_collection plugin will take care of sending this data to the telemetry server.
@@ -16,8 +17,6 @@ import { useKibana } from '../../../../../src/plugins/kibana_react/public';
  * which will be an array of objects each containing a key, representing the metric, and
  * a value, which will be a counter
  */
-
-type ObservabilityApp = 'infra_metrics' | 'infra_logs' | 'apm' | 'uptime';
 
 interface TrackOptions {
   app?: ObservabilityApp;

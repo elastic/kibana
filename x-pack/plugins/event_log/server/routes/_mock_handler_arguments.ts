@@ -4,16 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext, KibanaRequest, KibanaResponseFactory } from 'kibana/server';
 import { identity, merge } from 'lodash';
-import { httpServerMock } from '../../../../../src/core/server/mocks';
+import { RequestHandlerContext, KibanaRequest, KibanaResponseFactory } from 'src/core/server';
+
+import { httpServerMock } from 'src/core/server/mocks';
 import { IEventLogClient } from '../types';
 
 export function mockHandlerArguments(
   eventLogClient: IEventLogClient,
-  req: any,
+  req: unknown,
   res?: Array<MethodKeysOf<KibanaResponseFactory>>
-): [RequestHandlerContext, KibanaRequest<any, any, any, any>, KibanaResponseFactory] {
+): [RequestHandlerContext, KibanaRequest<unknown, unknown, unknown>, KibanaResponseFactory] {
   return [
     ({
       eventLog: {
@@ -22,7 +23,7 @@ export function mockHandlerArguments(
         },
       },
     } as unknown) as RequestHandlerContext,
-    req as KibanaRequest<any, any, any, any>,
+    req as KibanaRequest<unknown, unknown, unknown>,
     mockResponseFactory(res),
   ];
 }

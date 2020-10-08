@@ -40,13 +40,13 @@ export default new Chainable('precision', {
     defaultMessage: 'The number of digits to truncate the decimal portion of the value to',
   }),
   fn: async function precisionFn(args) {
-    await alter(args, function(eachSeries, precision) {
+    await alter(args, function (eachSeries, precision) {
       eachSeries._meta = eachSeries._meta || {};
       eachSeries._meta.precision = precision;
       return eachSeries;
     });
 
-    return reduce(args, function(a, b) {
+    return reduce(args, function (a, b) {
       return parseInt(a * Math.pow(10, b), 10) / Math.pow(10, b);
     });
   },

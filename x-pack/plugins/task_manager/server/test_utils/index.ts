@@ -23,7 +23,7 @@ export function mockLogger() {
   };
 }
 
-interface Resolvable {
+export interface Resolvable {
   resolve: () => void;
 }
 
@@ -33,11 +33,11 @@ interface Resolvable {
  */
 export function resolvable(): PromiseLike<void> & Resolvable {
   let resolve: () => void;
-  const result = new Promise<void>(r => (resolve = r)) as any;
-
-  result.resolve = () => nativeTimeout(resolve, 0);
-
-  return result;
+  return Object.assign(new Promise<void>((r) => (resolve = r)), {
+    resolve() {
+      return nativeTimeout(resolve, 0);
+    },
+  });
 }
 
 /**
@@ -46,5 +46,5 @@ export function resolvable(): PromiseLike<void> & Resolvable {
  * @param {number} ms
  */
 export async function sleep(ms: number) {
-  return new Promise(r => nativeTimeout(r, ms));
+  return new Promise((r) => nativeTimeout(r, ms));
 }

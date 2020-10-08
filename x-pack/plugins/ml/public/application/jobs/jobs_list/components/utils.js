@@ -5,60 +5,68 @@
  */
 
 import { each } from 'lodash';
-import { mlMessageBarService } from '../../../components/messagebar';
+import { i18n } from '@kbn/i18n';
 import rison from 'rison-node';
 
 import { mlJobService } from '../../../services/job_service';
+import {
+  getToastNotificationService,
+  toastNotificationServiceProvider,
+} from '../../../services/toast_notification_service';
+import { getToastNotifications } from '../../../util/dependency_cache';
 import { ml } from '../../../services/ml_api_service';
-import { getToastNotifications, getBasePath } from '../../../util/dependency_cache';
+import { stringMatch } from '../../../util/string_utils';
 import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/states';
 import { parseInterval } from '../../../../../common/util/parse_interval';
-import { i18n } from '@kbn/i18n';
 import { mlCalendarService } from '../../../services/calendar_service';
 
 export function loadFullJob(jobId) {
   return new Promise((resolve, reject) => {
     ml.jobs
-      .jobs(jobId)
-      .then(jobs => {
+      .jobs([jobId])
+      .then((jobs) => {
         if (jobs.length) {
           resolve(jobs[0]);
         } else {
           throw new Error(`Could not find job ${jobId}`);
         }
       })
-      .catch(error => {
+      .catch((error) => {
         reject(error);
       });
   });
 }
 
 export function isStartable(jobs) {
-  return jobs.some(j => j.datafeedState === DATAFEED_STATE.STOPPED);
+  return jobs.some(
+    (j) => j.datafeedState === DATAFEED_STATE.STOPPED && j.jobState !== JOB_STATE.CLOSING
+  );
 }
 
 export function isStoppable(jobs) {
   return jobs.some(
-    j => j.datafeedState === DATAFEED_STATE.STARTED || j.datafeedState === DATAFEED_STATE.STARTING
+    (j) => j.datafeedState === DATAFEED_STATE.STARTED || j.datafeedState === DATAFEED_STATE.STARTING
   );
 }
 
 export function isClosable(jobs) {
   return jobs.some(
-    j => j.datafeedState === DATAFEED_STATE.STOPPED && j.jobState !== JOB_STATE.CLOSED
+    (j) =>
+      j.datafeedState === DATAFEED_STATE.STOPPED &&
+      j.jobState !== JOB_STATE.CLOSED &&
+      j.jobState !== JOB_STATE.CLOSING
   );
 }
 
 export function forceStartDatafeeds(jobs, start, end, finish = () => {}) {
-  const datafeedIds = jobs.filter(j => j.hasDatafeed).map(j => j.datafeedId);
+  const datafeedIds = jobs.filter((j) => j.hasDatafeed).map((j) => j.datafeedId);
   mlJobService
     .forceStartDatafeeds(datafeedIds, start, end)
-    .then(resp => {
+    .then((resp) => {
       showResults(resp, DATAFEED_STATE.STARTED);
       finish();
     })
-    .catch(error => {
-      mlMessageBarService.notify.error(error);
+    .catch((error) => {
       const toastNotifications = getToastNotifications();
       toastNotifications.addDanger(
         i18n.translate('xpack.ml.jobsList.startJobErrorMessage', {
@@ -71,15 +79,14 @@ export function forceStartDatafeeds(jobs, start, end, finish = () => {}) {
 }
 
 export function stopDatafeeds(jobs, finish = () => {}) {
-  const datafeedIds = jobs.filter(j => j.hasDatafeed).map(j => j.datafeedId);
+  const datafeedIds = jobs.filter((j) => j.hasDatafeed).map((j) => j.datafeedId);
   mlJobService
     .stopDatafeeds(datafeedIds)
-    .then(resp => {
+    .then((resp) => {
       showResults(resp, DATAFEED_STATE.STOPPED);
       finish();
     })
-    .catch(error => {
-      mlMessageBarService.notify.error(error);
+    .catch((error) => {
       const toastNotifications = getToastNotifications();
       toastNotifications.addDanger(
         i18n.translate('xpack.ml.jobsList.stopJobErrorMessage', {
@@ -156,9 +163,10 @@ function showResults(resp, action) {
   );
 
   if (failures.length > 0) {
-    failures.forEach(f => {
-      mlMessageBarService.notify.error(f.result.error);
-      toastNotifications.addDanger(
+    failures.forEach((f) => {
+      const toastNotificationService = toastNotificationServiceProvider(toastNotifications);
+      toastNotificationService.displayErrorToast(
+        f.result.error,
         i18n.translate('xpack.ml.jobsList.actionFailedNotificationMessage', {
           defaultMessage: '{failureId} failed to {actionText}',
           values: {
@@ -216,9 +224,8 @@ export async function cloneJob(jobId) {
 
     window.location.href = '#/jobs/new_job';
   } catch (error) {
-    mlMessageBarService.notify.error(error);
-    const toastNotifications = getToastNotifications();
-    toastNotifications.addDanger(
+    getToastNotificationService().displayErrorToast(
+      error,
       i18n.translate('xpack.ml.jobsList.cloneJobErrorMessage', {
         defaultMessage: 'Could not clone {jobId}. Job could not be found',
         values: { jobId },
@@ -228,42 +235,38 @@ export async function cloneJob(jobId) {
 }
 
 export function closeJobs(jobs, finish = () => {}) {
-  const jobIds = jobs.map(j => j.id);
+  const jobIds = jobs.map((j) => j.id);
   mlJobService
     .closeJobs(jobIds)
-    .then(resp => {
+    .then((resp) => {
       showResults(resp, JOB_STATE.CLOSED);
       finish();
     })
-    .catch(error => {
-      mlMessageBarService.notify.error(error);
-      const toastNotifications = getToastNotifications();
-      toastNotifications.addDanger(
+    .catch((error) => {
+      getToastNotificationService().displayErrorToast(
+        error,
         i18n.translate('xpack.ml.jobsList.closeJobErrorMessage', {
           defaultMessage: 'Jobs failed to close',
-        }),
-        error
+        })
       );
       finish();
     });
 }
 
 export function deleteJobs(jobs, finish = () => {}) {
-  const jobIds = jobs.map(j => j.id);
+  const jobIds = jobs.map((j) => j.id);
   mlJobService
     .deleteJobs(jobIds)
-    .then(resp => {
+    .then((resp) => {
       showResults(resp, JOB_STATE.DELETED);
       finish();
     })
-    .catch(error => {
-      mlMessageBarService.notify.error(error);
-      const toastNotifications = getToastNotifications();
-      toastNotifications.addDanger(
+    .catch((error) => {
+      getToastNotificationService().displayErrorToast(
+        error,
         i18n.translate('xpack.ml.jobsList.deleteJobErrorMessage', {
           defaultMessage: 'Jobs failed to delete',
-        }),
-        error
+        })
       );
       finish();
     });
@@ -284,7 +287,7 @@ export function filterJobs(jobs, clauses) {
     return p;
   }, {});
 
-  clauses.forEach(c => {
+  clauses.forEach((c) => {
     // the search term could be negated with a minus, e.g. -bananas
     const bool = c.match === 'must';
     let js = [];
@@ -295,14 +298,14 @@ export function filterJobs(jobs, clauses) {
       // if the term has been negated, AND the matches
       if (bool === true) {
         js = jobs.filter(
-          job =>
+          (job) =>
             stringMatch(job.id, c.value) === bool ||
             stringMatch(job.description, c.value) === bool ||
             stringMatch(job.memory_status, c.value) === bool
         );
       } else {
         js = jobs.filter(
-          job =>
+          (job) =>
             stringMatch(job.id, c.value) === bool &&
             stringMatch(job.description, c.value) === bool &&
             stringMatch(job.memory_status, c.value) === bool
@@ -311,19 +314,24 @@ export function filterJobs(jobs, clauses) {
     } else {
       // filter other clauses, i.e. the toggle group buttons
       if (Array.isArray(c.value)) {
-        // the groups value is an array of group ids
-        js = jobs.filter(job => jobProperty(job, c.field).some(g => c.value.indexOf(g) >= 0));
+        // if it's an array of job ids
+        if (c.field === 'id') {
+          js = jobs.filter((job) => c.value.indexOf(jobProperty(job, c.field)) >= 0);
+        } else {
+          // the groups value is an array of group ids
+          js = jobs.filter((job) => jobProperty(job, c.field).some((g) => c.value.indexOf(g) >= 0));
+        }
       } else {
-        js = jobs.filter(job => jobProperty(job, c.field) === c.value);
+        js = jobs.filter((job) => jobProperty(job, c.field) === c.value);
       }
     }
 
-    js.forEach(j => matches[j.id].count++);
+    js.forEach((j) => matches[j.id].count++);
   });
 
   // loop through the matches and return only those jobs which have match all the clauses
   const filteredJobs = [];
-  each(matches, m => {
+  each(matches, (m) => {
     if (m.count >= clauses.length) {
       filteredJobs.push(m.job);
     }
@@ -350,60 +358,58 @@ export function checkForAutoStartDatafeed() {
   }
 }
 
-function stringMatch(str, substr) {
-  return (
-    typeof str === 'string' &&
-    typeof substr === 'string' &&
-    (str.toLowerCase().match(substr.toLowerCase()) === null) === false
-  );
-}
-
 function jobProperty(job, prop) {
   const propMap = {
     job_state: 'jobState',
     datafeed_state: 'datafeedState',
     groups: 'groups',
+    id: 'id',
   };
   return job[propMap[prop]];
 }
 
-export function getJobIdUrl(jobId) {
-  // Create url for filtering by job id for kibana management table
-  const settings = {
-    jobId,
-  };
-  const encoded = rison.encode(settings);
-  const url = `?mlManagement=${encoded}`;
-  const basePath = getBasePath();
-
-  return `${basePath.get()}/app/ml#/jobs${url}`;
-}
-
 function getUrlVars(url) {
   const vars = {};
-  url.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(_, key, value) {
+  url.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (_, key, value) {
     vars[key] = value;
   });
   return vars;
 }
 
-export function getSelectedJobIdFromUrl(url) {
+export function getSelectedIdFromUrl(url) {
+  const result = {};
   if (typeof url === 'string') {
+    const isGroup = url.includes('groupIds');
     url = decodeURIComponent(url);
-    if (url.includes('mlManagement') && url.includes('jobId')) {
+
+    if (url.includes('mlManagement')) {
       const urlParams = getUrlVars(url);
       const decodedJson = rison.decode(urlParams.mlManagement);
-      return decodedJson.jobId;
+
+      if (isGroup) {
+        result.groupIds = decodedJson.groupIds;
+      } else {
+        result.jobId = decodedJson.jobId;
+      }
     }
   }
+  return result;
+}
+
+export function getGroupQueryText(groupIds) {
+  return `groups:(${groupIds.join(' or ')})`;
+}
+
+export function getJobQueryText(jobIds) {
+  return Array.isArray(jobIds) ? `id:(${jobIds.join(' OR ')})` : jobIds;
 }
 
 export function clearSelectedJobIdFromUrl(url) {
   if (typeof url === 'string') {
     url = decodeURIComponent(url);
-    if (url.includes('mlManagement') && url.includes('jobId')) {
+    if (url.includes('mlManagement') && (url.includes('jobId') || url.includes('groupIds'))) {
       const urlParams = getUrlVars(url);
-      const clearedParams = `ml#/jobs?_g=${urlParams._g}`;
+      const clearedParams = `jobs?_g=${urlParams._g}`;
       window.history.replaceState({}, document.title, clearedParams);
     }
   }

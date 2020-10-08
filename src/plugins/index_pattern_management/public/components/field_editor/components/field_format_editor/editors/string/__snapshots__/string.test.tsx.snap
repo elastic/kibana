@@ -1,0 +1,68 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`StringFormatEditor should render normally 1`] = `
+<Fragment>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    isInvalid={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Transform"
+        id="indexPatternManagement.string.transformLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiSelect
+      data-test-subj="stringEditorTransform"
+      defaultValue=""
+      isInvalid={false}
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "text": "Upper Case",
+            "value": "upper",
+          },
+        ]
+      }
+    />
+  </EuiFormRow>
+  <FormatEditorSamples
+    sampleType="text"
+    samples={
+      Array [
+        Object {
+          "input": "A Quick Brown Fox.",
+          "output": "A QUICK BROWN FOX.",
+        },
+        Object {
+          "input": "STAY CALM!",
+          "output": "STAY CALM!",
+        },
+        Object {
+          "input": "com.organizations.project.ClassName",
+          "output": "COM.ORGANIZATIONS.PROJECT.CLASSNAME",
+        },
+        Object {
+          "input": "hostname.net",
+          "output": "HOSTNAME.NET",
+        },
+        Object {
+          "input": "SGVsbG8gd29ybGQ=",
+          "output": "SGVSBG8GD29YBGQ=",
+        },
+        Object {
+          "input": "%EC%95%88%EB%85%95%20%ED%82%A4%EB%B0%94%EB%82%98",
+          "output": "%EC%95%88%EB%85%95%20%ED%82%A4%EB%B0%94%EB%82%98",
+        },
+      ]
+    }
+  />
+</Fragment>
+`;

@@ -37,7 +37,7 @@ export function SaveModal({
   const [dataConsent, setDataConsent] = useState(false);
   return (
     <SavedObjectSaveModal
-      onSave={props => {
+      onSave={(props) => {
         onSave({ ...props, newDescription, dataConsent });
       }}
       onClose={onClose}
@@ -58,7 +58,7 @@ export function SaveModal({
             <EuiTextArea
               data-test-subj="dashboardDescription"
               value={newDescription}
-              onChange={e => {
+              onChange={(e) => {
                 setDescription(e.target.value);
               }}
               fullWidth
@@ -80,7 +80,7 @@ export function SaveModal({
                   defaultMessage: 'Save graph content',
                 })}
                 checked={dataConsent}
-                onChange={e => {
+                onChange={(e) => {
                   setDataConsent(e.target.checked);
                 }}
               />

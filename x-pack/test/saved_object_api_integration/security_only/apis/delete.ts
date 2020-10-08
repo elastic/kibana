@@ -13,7 +13,7 @@ import {
   DeleteTestDefinition,
 } from '../../common/suites/delete';
 
-const { fail404 } = testCaseFailures;
+const { fail400, fail404 } = testCaseFailures;
 
 const createTestCases = () => {
   // for each permitted (non-403) outcome, if failure !== undefined then we expect
@@ -22,7 +22,12 @@ const createTestCases = () => {
     CASES.SINGLE_NAMESPACE_DEFAULT_SPACE,
     { ...CASES.SINGLE_NAMESPACE_SPACE_1, ...fail404() },
     { ...CASES.SINGLE_NAMESPACE_SPACE_2, ...fail404() },
-    CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
+    { ...CASES.MULTI_NAMESPACE_ALL_SPACES, ...fail400() },
+    // try to delete this object again, this time using the `force` option
+    { ...CASES.MULTI_NAMESPACE_ALL_SPACES, force: true },
+    { ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, ...fail400() },
+    // try to delete this object again, this time using the `force` option
+    { ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, force: true },
     { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1, ...fail404() },
     { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_2, ...fail404() },
     CASES.NAMESPACE_AGNOSTIC,
@@ -33,7 +38,7 @@ const createTestCases = () => {
   return { normalTypes, hiddenType, allTypes };
 };
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
@@ -66,10 +71,10 @@ export default function({ getService }: FtrProviderContext) {
         users.readAtDefaultSpace,
         users.allAtSpace1,
         users.readAtSpace1,
-      ].forEach(user => {
+      ].forEach((user) => {
         _addTests(user, unauthorized);
       });
-      [users.dualAll, users.allGlobally].forEach(user => {
+      [users.dualAll, users.allGlobally].forEach((user) => {
         _addTests(user, authorized);
       });
       _addTests(users.superuser, superuser);

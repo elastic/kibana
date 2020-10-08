@@ -77,6 +77,7 @@ describe('findRelationships', () => {
           type: 'parent-type',
           id: 'parent-id',
           attributes: {},
+          score: 1,
           references: [],
         },
       ],
@@ -99,7 +100,7 @@ describe('findRelationships', () => {
 
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith(
-      references.map(ref => ({
+      references.map((ref) => ({
         id: ref.id,
         type: ref.type,
       }))

@@ -20,6 +20,7 @@ export {
   ccrShardRoute,
 } from './elasticsearch';
 export {
+  internalMonitoringCheckRoute,
   clusterSettingsCheckRoute,
   nodesSettingsCheckRoute,
   setCollectionEnabledRoute,

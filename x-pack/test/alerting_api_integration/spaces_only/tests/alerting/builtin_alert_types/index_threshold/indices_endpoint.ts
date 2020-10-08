@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME, getUrlPrefix } from '../../../../../common/lib';
 import { createEsDocuments } from './create_test_data';
 
-const API_URI = 'api/alerting_builtins/index_threshold/_indices';
+const API_URI = 'api/stack_alerts/index_threshold/_indices';
 
 // eslint-disable-next-line import/no-default-export
 export default function indicesEndpointTests({ getService }: FtrProviderContext) {
@@ -115,10 +115,7 @@ export default function indicesEndpointTests({ getService }: FtrProviderContext)
 
   async function runQueryExpect(requestBody: any, status: number): Promise<any> {
     const url = `${getUrlPrefix(Spaces.space1.id)}/${API_URI}`;
-    const res = await supertest
-      .post(url)
-      .set('kbn-xsrf', 'foo')
-      .send(requestBody);
+    const res = await supertest.post(url).set('kbn-xsrf', 'foo').send(requestBody);
 
     if (res.status !== status) {
       // good place to put a console log for debugging unexpected results

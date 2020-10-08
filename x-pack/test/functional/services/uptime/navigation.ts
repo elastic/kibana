@@ -16,8 +16,9 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
     await retry.tryForTime(60 * 1000, async () => {
       if (await testSubjects.exists('uptimeSettingsToOverviewLink', { timeout: 0 })) {
         await testSubjects.click('uptimeSettingsToOverviewLink');
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await testSubjects.existOrFail('uptimeOverviewPage', { timeout: 2000 });
-      } else if (!(await testSubjects.exists('uptimeOverviewPage', { timeout: 0 }))) {
+      } else {
         await PageObjects.common.navigateToApp('uptime');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await testSubjects.existOrFail('uptimeOverviewPage', { timeout: 2000 });
@@ -25,9 +26,13 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
     });
   };
 
+  const refreshApp = async () => {
+    await testSubjects.click('superDatePickerApplyTimeButton', 10000);
+  };
+
   return {
     async refreshApp() {
-      await testSubjects.click('superDatePickerApplyTimeButton');
+      await refreshApp();
     },
 
     async goToUptime() {
@@ -37,7 +42,7 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
     goToSettings: async () => {
       await goToUptimeRoot();
       await testSubjects.click('settings-page-link', 5000);
-      await testSubjects.existOrFail('uptimeSettingsPage', { timeout: 2000 });
+      await testSubjects.existOrFail('uptimeSettingsPage', { timeout: 10000 });
     },
 
     checkIfOnMonitorPage: async (monitorId: string) => {
@@ -52,6 +57,7 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
     },
 
     goToMonitor: async (monitorId: string) => {
+      // only go to monitor page if not already there
       if (!(await testSubjects.exists('uptimeMonitorPage', { timeout: 0 }))) {
         await testSubjects.click(`monitor-page-link-${monitorId}`);
         await testSubjects.existOrFail('uptimeMonitorPage', {
@@ -60,9 +66,29 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
       }
     },
 
+    goToCertificates: async () => {
+      if (!(await testSubjects.exists('uptimeCertificatesPage', { timeout: 0 }))) {
+        return retry.try(async () => {
+          if (await testSubjects.exists('uptimeCertificatesLink', { timeout: 0 })) {
+            await testSubjects.click('uptimeCertificatesLink', 10000);
+          }
+          await testSubjects.existOrFail('uptimeCertificatesPage');
+        });
+      }
+      return true;
+    },
+
     async loadDataAndGoToMonitorPage(dateStart: string, dateEnd: string, monitorId: string) {
       await PageObjects.timePicker.setAbsoluteRange(dateStart, dateEnd);
       await this.goToMonitor(monitorId);
+    },
+
+    async isOnDetailsPage() {
+      return await testSubjects.exists('uptimeMonitorPage', { timeout: 0 });
+    },
+
+    async goToHomeViaBreadCrumb() {
+      await testSubjects.click('breadcrumb first');
     },
   };
 }

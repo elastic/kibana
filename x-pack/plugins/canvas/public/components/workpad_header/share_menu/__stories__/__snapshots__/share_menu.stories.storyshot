@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/WorkpadHeader/ShareMenu default 1`] = `
+<div>
+  <div
+    className="euiPopover euiPopover--anchorDownLeft"
+    onKeyDown={[Function]}
+    onMouseDown={[Function]}
+    onMouseUp={[Function]}
+    onTouchEnd={[Function]}
+    onTouchStart={[Function]}
+  >
+    <div
+      className="euiPopover__anchor"
+    >
+      <button
+        aria-label="Share this workpad"
+        className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+        onClick={[Function]}
+        type="button"
+      >
+        <span
+          className="euiButtonContent euiButtonEmpty__content"
+        >
+          <span
+            className="euiButtonEmpty__text"
+          >
+            Share
+          </span>
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
+`;

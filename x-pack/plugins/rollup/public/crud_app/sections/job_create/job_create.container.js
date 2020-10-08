@@ -11,7 +11,7 @@ import { isSaving, getCreateJobError, getCloneJobConfig } from '../../store/sele
 
 import { createJob, clearCreateJobErrors, clearCloneJob } from '../../store/actions';
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     isSaving: isSaving(state),
     saveError: getCreateJobError(state),
@@ -19,9 +19,9 @@ const mapStateToProps = state => {
   };
 };
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
-    createJob: jobConfig => {
+    createJob: (jobConfig) => {
       dispatch(createJob(jobConfig));
     },
     clearCreateJobErrors: () => {

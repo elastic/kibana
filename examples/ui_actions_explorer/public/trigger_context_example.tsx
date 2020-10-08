@@ -105,7 +105,7 @@ export function TriggerContextExample({ uiActionsApi }: Props) {
   ];
 
   const updateUser = (newUser: User, oldName: string) => {
-    const index = rows.findIndex(u => u.name === oldName);
+    const index = rows.findIndex((u) => u.name === oldName);
     const newRows = [...rows];
     newRows.splice(index, 1, createRowData(newUser, uiActionsApi, updateUser));
     setRows(newRows);

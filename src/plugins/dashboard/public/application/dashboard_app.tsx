@@ -33,7 +33,6 @@ import { SavedObjectDashboard } from '../saved_dashboards';
 export interface DashboardAppScope extends ng.IScope {
   dash: SavedObjectDashboard;
   appState: DashboardAppState;
-  screenTitle: string;
   model: {
     query: Query;
     filters: Filter[];
@@ -53,22 +52,11 @@ export interface DashboardAppScope extends ng.IScope {
   expandedPanel?: string;
   getShouldShowEditHelp: () => boolean;
   getShouldShowViewHelp: () => boolean;
-  updateQueryAndFetch: ({ query, dateRange }: { query: Query; dateRange?: TimeRange }) => void;
-  onRefreshChange: ({
-    isPaused,
-    refreshInterval,
-  }: {
-    isPaused: boolean;
-    refreshInterval: any;
-  }) => void;
-  onFiltersUpdated: (filters: Filter[]) => void;
-  onCancelApplyFilters: () => void;
-  onApplyFilters: (filters: Filter[]) => void;
-  onQuerySaved: (savedQuery: SavedQuery) => void;
-  onSavedQueryUpdated: (savedQuery: SavedQuery) => void;
-  onClearSavedQuery: () => void;
+  handleRefresh: (
+    { query, dateRange }: { query?: Query; dateRange: TimeRange },
+    isUpdate?: boolean
+  ) => void;
   topNavMenu: any;
-  showFilterBar: () => boolean;
   showAddPanel: any;
   showSaveQuery: boolean;
   kbnTopNav: any;

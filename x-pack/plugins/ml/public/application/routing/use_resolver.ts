@@ -16,6 +16,8 @@ import { createSearchItems } from '../jobs/new_job/utils/new_job_utils';
 import { ResolverResults, Resolvers } from './resolvers';
 import { MlContextValue } from '../contexts/ml';
 import { useNotifications } from '../contexts/kibana';
+import { useCreateAndNavigateToMlLink } from '../contexts/kibana/use_create_url';
+import { ML_PAGES } from '../../../common/constants/ml_url_generator';
 
 export const useResolver = (
   indexPatternId: string | undefined,
@@ -34,11 +36,14 @@ export const useResolver = (
 
   const [context, setContext] = useState<any | null>(null);
   const [results, setResults] = useState(tempResults);
+  const redirectToJobsManagementPage = useCreateAndNavigateToMlLink(
+    ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE
+  );
 
   useEffect(() => {
     (async () => {
       try {
-        const res = await Promise.all(funcs.map(r => r()));
+        const res = await Promise.all(funcs.map((r) => r()));
         res.forEach((r, i) => (tempResults[funcNames[i]] = r));
         setResults(tempResults);
       } catch (error) {
@@ -73,7 +78,7 @@ export const useResolver = (
               defaultMessage: 'An error has occurred',
             }),
           });
-          window.location.href = '#/';
+          await redirectToJobsManagementPage();
         }
       } else {
         setContext({});

@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { merge } from 'lodash';
-import { Logger, CallAPIOptions } from 'kibana/server';
+import { Logger, LegacyCallAPIOptions } from 'kibana/server';
 import { IndicesStatsParams, Client } from 'elasticsearch';
 import {
   ESSearchRequest,
-  ESSearchResponse
+  ESSearchResponse,
 } from '../../../../typings/elasticsearch';
 import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
 import { tasks } from './tasks';
@@ -21,7 +21,7 @@ type TelemetryTaskExecutor = (params: {
   ): Promise<ESSearchResponse<unknown, TSearchRequest>>;
   indicesStats(
     params: IndicesStatsParams,
-    options?: CallAPIOptions
+    options?: LegacyCallAPIOptions
   ): ReturnType<Client['indices']['stats']>;
   transportRequest: (params: {
     path: string;
@@ -43,10 +43,10 @@ export function collectDataTelemetry({
   indices,
   logger,
   indicesStats,
-  transportRequest
+  transportRequest,
 }: CollectTelemetryParams) {
   return tasks.reduce((prev, task) => {
-    return prev.then(async data => {
+    return prev.then(async (data) => {
       logger.debug(`Executing APM telemetry task ${task.name}`);
       try {
         const time = process.hrtime();
@@ -54,7 +54,7 @@ export function collectDataTelemetry({
           search,
           indices,
           indicesStats,
-          transportRequest
+          transportRequest,
         });
         const took = process.hrtime(time);
 
@@ -62,10 +62,10 @@ export function collectDataTelemetry({
           tasks: {
             [task.name]: {
               took: {
-                ms: Math.round(took[0] * 1000 + took[1] / 1e6)
-              }
-            }
-          }
+                ms: Math.round(took[0] * 1000 + took[1] / 1e6),
+              },
+            },
+          },
         });
       } catch (err) {
         logger.warn(`Failed executing APM telemetry task ${task.name}`);

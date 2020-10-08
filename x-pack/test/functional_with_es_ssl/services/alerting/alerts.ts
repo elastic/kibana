@@ -8,6 +8,21 @@ import axios, { AxiosInstance } from 'axios';
 import util from 'util';
 import { ToolingLog } from '@kbn/dev-utils';
 
+export interface AlertInstanceSummary {
+  status: string;
+  muted: boolean;
+  enabled: boolean;
+  lastRun?: string;
+  errorMessage?: string;
+  instances: Record<string, AlertInstanceStatus>;
+}
+
+export interface AlertInstanceStatus {
+  status: string;
+  muted: boolean;
+  activeStartDate?: string;
+}
+
 export class Alerts {
   private log: ToolingLog;
   private axios: AxiosInstance;
@@ -22,15 +37,53 @@ export class Alerts {
     });
   }
 
+  public async createAlertWithActions(
+    name: string,
+    alertTypeId: string,
+    params?: Record<string, any>,
+    actions?: Array<{
+      id: string;
+      group: string;
+      params: Record<string, any>;
+    }>,
+    tags?: string[],
+    consumer?: string,
+    schedule?: Record<string, any>,
+    throttle?: string
+  ) {
+    this.log.debug(`creating alert ${name}`);
+
+    const { data: alert, status, statusText } = await this.axios.post(`/api/alerts/alert`, {
+      enabled: true,
+      name,
+      tags,
+      alertTypeId,
+      consumer: consumer ?? 'alerts',
+      schedule: schedule ?? { interval: '1m' },
+      throttle: throttle ?? '1m',
+      actions: actions ?? [],
+      params: params ?? {},
+    });
+    if (status !== 200) {
+      throw new Error(
+        `Expected status code of 200, received ${status} ${statusText}: ${util.inspect(alert)}`
+      );
+    }
+
+    this.log.debug(`created alert ${alert.id}`);
+
+    return alert;
+  }
+
   public async createNoOp(name: string) {
     this.log.debug(`creating alert ${name}`);
 
-    const { data: alert, status, statusText } = await this.axios.post(`/api/alert`, {
+    const { data: alert, status, statusText } = await this.axios.post(`/api/alerts/alert`, {
       enabled: true,
       name,
       tags: ['foo'],
       alertTypeId: 'test.noop',
-      consumer: 'consumer-noop',
+      consumer: 'alerting_fixture',
       schedule: { interval: '1m' },
       throttle: '1m',
       actions: [],
@@ -58,12 +111,12 @@ export class Alerts {
   ) {
     this.log.debug(`creating alert ${name}`);
 
-    const { data: alert, status, statusText } = await this.axios.post(`/api/alert`, {
+    const { data: alert, status, statusText } = await this.axios.post(`/api/alerts/alert`, {
       enabled: true,
       name,
       tags: ['foo'],
       alertTypeId: 'test.always-firing',
-      consumer: 'bar',
+      consumer: 'alerts',
       schedule: { interval: '1m' },
       throttle: '1m',
       actions,
@@ -94,7 +147,7 @@ export class Alerts {
   public async deleteAlert(id: string) {
     this.log.debug(`deleting alert ${id}`);
 
-    const { data: alert, status, statusText } = await this.axios.delete(`/api/alert/${id}`);
+    const { data: alert, status, statusText } = await this.axios.delete(`/api/alerts/alert/${id}`);
     if (status !== 204) {
       throw new Error(
         `Expected status code of 204, received ${status} ${statusText}: ${util.inspect(alert)}`
@@ -103,10 +156,10 @@ export class Alerts {
     this.log.debug(`deleted alert ${alert.id}`);
   }
 
-  public async getAlertState(id: string) {
+  public async getAlertInstanceSummary(id: string): Promise<AlertInstanceSummary> {
     this.log.debug(`getting alert ${id} state`);
 
-    const { data } = await this.axios.get(`/api/alert/${id}/state`);
+    const { data } = await this.axios.get(`/api/alerts/alert/${id}/_instance_summary`);
     return data;
   }
 
@@ -114,7 +167,7 @@ export class Alerts {
     this.log.debug(`muting instance ${instanceId} under alert ${id}`);
 
     const { data: alert, status, statusText } = await this.axios.post(
-      `/api/alert/${id}/alert_instance/${instanceId}/_mute`
+      `/api/alerts/alert/${id}/alert_instance/${instanceId}/_mute`
     );
     if (status !== 204) {
       throw new Error(

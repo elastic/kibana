@@ -27,7 +27,7 @@ export function getClusterStats(req, esIndexPattern, clusterUuid) {
   }
 
   // passing clusterUuid so `get_clusters` will filter for single cluster
-  return getClustersStats(req, esIndexPattern, clusterUuid).then(clusters => {
+  return getClustersStats(req, esIndexPattern, clusterUuid).then((clusters) => {
     if (!clusters || clusters.length === 0) {
       throw notFound(
         i18n.translate('xpack.monitoring.clusterStats.uuidNotFoundErrorMessage', {

@@ -32,18 +32,19 @@ import { createActionConnector } from '../../lib/action_connector_api';
 import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { PLUGIN } from '../../constants/plugin';
-import { BASE_PATH as LICENSE_MANAGEMENT_BASE_PATH } from '../../../../../license_management/common/constants';
 
 export interface ConnectorAddFlyoutProps {
   addFlyoutVisible: boolean;
   setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
   actionTypes?: ActionType[];
+  onTestConnector?: (connector: ActionConnector) => void;
 }
 
 export const ConnectorAddFlyout = ({
   addFlyoutVisible,
   setAddFlyoutVisibility,
   actionTypes,
+  onTestConnector,
 }: ConnectorAddFlyoutProps) => {
   let hasErrors = false;
   const {
@@ -52,9 +53,11 @@ export const ConnectorAddFlyout = ({
     capabilities,
     actionTypeRegistry,
     reloadConnectors,
+    docLinks,
+    consumer,
   } = useActionsConnectorsContext();
   const [actionType, setActionType] = useState<ActionType | undefined>(undefined);
-  const [hasActionsDisabledByLicense, setHasActionsDisabledByLicense] = useState<boolean>(false);
+  const [hasActionsUpgradeableByTrial, setHasActionsUpgradeableByTrial] = useState<boolean>(false);
 
   // hooks
   const initialConnector = {
@@ -96,7 +99,7 @@ export const ConnectorAddFlyout = ({
       <ActionTypeMenu
         onActionTypeChange={onActionTypeChange}
         actionTypes={actionTypes}
-        setHasActionsDisabledByLicense={setHasActionsDisabledByLicense}
+        setHasActionsUpgradeableByTrial={setHasActionsUpgradeableByTrial}
       />
     );
   } else {
@@ -106,7 +109,7 @@ export const ConnectorAddFlyout = ({
       ...actionTypeModel?.validateConnector(connector).errors,
       ...validateBaseProperties(connector).errors,
     } as IErrorObject;
-    hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
+    hasErrors = !!Object.keys(errors).find((errorKey) => errors[errorKey].length >= 1);
 
     currentForm = (
       <ActionConnectorForm
@@ -116,13 +119,16 @@ export const ConnectorAddFlyout = ({
         errors={errors}
         actionTypeRegistry={actionTypeRegistry}
         http={http}
+        docLinks={docLinks}
+        capabilities={capabilities}
+        consumer={consumer}
       />
     );
   }
 
   const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
     await createActionConnector({ http, connector })
-      .then(savedConnector => {
+      .then((savedConnector) => {
         if (toastNotifications) {
           toastNotifications.addSuccess(
             i18n.translate(
@@ -138,7 +144,7 @@ export const ConnectorAddFlyout = ({
         }
         return savedConnector;
       })
-      .catch(errorRes => {
+      .catch((errorRes) => {
         toastNotifications.addDanger(
           errorRes.body?.message ??
             i18n.translate(
@@ -148,6 +154,19 @@ export const ConnectorAddFlyout = ({
         );
         return undefined;
       });
+
+  const onSaveClicked = async () => {
+    setIsSaving(true);
+    const savedAction = await onActionConnectorSave();
+    setIsSaving(false);
+    if (savedAction) {
+      closeFlyout();
+      if (reloadConnectors) {
+        await reloadConnectors();
+      }
+    }
+    return savedAction;
+  };
 
   return (
     <EuiFlyout onClose={closeFlyout} aria-labelledby="flyoutActionAddTitle" size="m">
@@ -219,7 +238,7 @@ export const ConnectorAddFlyout = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody
         banner={
-          !actionType && hasActionsDisabledByLicense ? (
+          !actionType && hasActionsUpgradeableByTrial ? (
             <UpgradeYourLicenseCallOut http={http} />
           ) : (
             <Fragment />
@@ -241,35 +260,52 @@ export const ConnectorAddFlyout = ({
               )}
             </EuiButtonEmpty>
           </EuiFlexItem>
-          {canSave && actionTypeModel && actionType ? (
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                color="secondary"
-                data-test-subj="saveNewActionButton"
-                type="submit"
-                iconType="check"
-                isDisabled={hasErrors}
-                isLoading={isSaving}
-                onClick={async () => {
-                  setIsSaving(true);
-                  const savedAction = await onActionConnectorSave();
-                  setIsSaving(false);
-                  if (savedAction) {
-                    closeFlyout();
-                    if (reloadConnectors) {
-                      reloadConnectors();
-                    }
-                  }
-                }}
-              >
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.actionConnectorAdd.saveButtonLabel"
-                  defaultMessage="Save"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          ) : null}
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              {canSave && actionTypeModel && actionType ? (
+                <Fragment>
+                  {onTestConnector && (
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        color="secondary"
+                        data-test-subj="saveAndTestNewActionButton"
+                        type="submit"
+                        isDisabled={hasErrors}
+                        isLoading={isSaving}
+                        onClick={async () => {
+                          const savedConnector = await onSaveClicked();
+                          if (savedConnector) {
+                            onTestConnector(savedConnector);
+                          }
+                        }}
+                      >
+                        <FormattedMessage
+                          id="xpack.triggersActionsUI.sections.actionConnectorAdd.saveAndTestButtonLabel"
+                          defaultMessage="Save & Test"
+                        />
+                      </EuiButton>
+                    </EuiFlexItem>
+                  )}
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      fill
+                      color="secondary"
+                      data-test-subj="saveNewActionButton"
+                      type="submit"
+                      isDisabled={hasErrors}
+                      isLoading={isSaving}
+                      onClick={onSaveClicked}
+                    >
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.actionConnectorAdd.saveButtonLabel"
+                        defaultMessage="Save"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                </Fragment>
+              ) : null}
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>
@@ -291,7 +327,7 @@ const UpgradeYourLicenseCallOut = ({ http }: { http: HttpSetup }) => (
     <EuiFlexGroup gutterSize="s" wrap={true}>
       <EuiFlexItem grow={false}>
         <EuiButton
-          href={`${http.basePath.get()}/app/kibana#${LICENSE_MANAGEMENT_BASE_PATH}`}
+          href={`${http.basePath.get()}/app/management/stack/license_management`}
           iconType="gear"
           target="_blank"
         >
@@ -317,3 +353,6 @@ const UpgradeYourLicenseCallOut = ({ http }: { http: HttpSetup }) => (
     </EuiFlexGroup>
   </EuiCallOut>
 );
+
+// eslint-disable-next-line import/no-default-export
+export { ConnectorAddFlyout as default };

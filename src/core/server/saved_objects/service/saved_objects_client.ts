@@ -20,6 +20,7 @@
 import { ISavedObjectsRepository } from './lib';
 import {
   SavedObject,
+  SavedObjectError,
   SavedObjectReference,
   SavedObjectsMigrationVersion,
   SavedObjectsBaseOptions,
@@ -37,11 +38,25 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
   id?: string;
   /** Overwrite existing documents (defaults to false) */
   overwrite?: boolean;
+  /**
+   * An opaque version number which changes on each successful write operation.
+   * Can be used in conjunction with `overwrite` for implementing optimistic concurrency control.
+   **/
+  version?: string;
   /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
   references?: SavedObjectReference[];
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
+  /** Optional ID of the original saved object, if this object's `id` was regenerated */
+  originId?: string;
+  /**
+   * Optional initial namespaces for the object to be created in. If this is defined, it will supersede the namespace ID that is in
+   * {@link SavedObjectsCreateOptions}.
+   *
+   * Note: this can only be used for multi-namespace object types.
+   */
+  initialNamespaces?: string[];
 }
 
 /**
@@ -52,9 +67,19 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
   id?: string;
   type: string;
   attributes: T;
+  version?: string;
   references?: SavedObjectReference[];
   /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
+  /** Optional ID of the original saved object, if this object's `id` was regenerated */
+  originId?: string;
+  /**
+   * Optional initial namespaces for the object to be created in. If this is defined, it will supersede the namespace ID that is in
+   * {@link SavedObjectsCreateOptions}.
+   *
+   * Note: this can only be used for multi-namespace object types.
+   */
+  initialNamespaces?: string[];
 }
 
 /**
@@ -69,6 +94,13 @@ export interface SavedObjectsBulkUpdateObject<T = unknown>
   type: string;
   /** {@inheritdoc SavedObjectAttributes} */
   attributes: Partial<T>;
+  /**
+   * Optional namespace string to use when searching for this object. If this is defined, it will supersede the namespace ID that is in
+   * {@link SavedObjectsBulkUpdateOptions}.
+   *
+   * Note: the default namespace's string representation is `'default'`, and its ID representation is `undefined`.
+   **/
+  namespace?: string;
 }
 
 /**
@@ -80,6 +112,17 @@ export interface SavedObjectsBulkResponse<T = unknown> {
 }
 
 /**
+ *
+ * @public
+ */
+export interface SavedObjectsFindResult<T = unknown> extends SavedObject<T> {
+  /**
+   * The Elasticsearch `_score` of this result.
+   */
+  score: number;
+}
+
+/**
  * Return type of the Saved Objects `find()` method.
  *
  * *Note*: this type is different between the Public and Server Saved Objects
@@ -88,10 +131,31 @@ export interface SavedObjectsBulkResponse<T = unknown> {
  * @public
  */
 export interface SavedObjectsFindResponse<T = unknown> {
-  saved_objects: Array<SavedObject<T>>;
+  saved_objects: Array<SavedObjectsFindResult<T>>;
   total: number;
   per_page: number;
   page: number;
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsCheckConflictsObject {
+  id: string;
+  type: string;
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsCheckConflictsResponse {
+  errors: Array<{
+    id: string;
+    type: string;
+    error: SavedObjectError;
+  }>;
 }
 
 /**
@@ -122,9 +186,27 @@ export interface SavedObjectsAddToNamespacesOptions extends SavedObjectsBaseOpti
  *
  * @public
  */
+export interface SavedObjectsAddToNamespacesResponse {
+  /** The namespaces the object exists in after this operation is complete. */
+  namespaces: string[];
+}
+
+/**
+ *
+ * @public
+ */
 export interface SavedObjectsDeleteFromNamespacesOptions extends SavedObjectsBaseOptions {
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsDeleteFromNamespacesResponse {
+  /** The namespaces the object exists in after this operation is complete. An empty array indicates the object was deleted. */
+  namespaces: string[];
 }
 
 /**
@@ -143,6 +225,8 @@ export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions {
 export interface SavedObjectsDeleteOptions extends SavedObjectsBaseOptions {
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
+  /** Force deletion of an object that exists in multiple namespaces */
+  force?: boolean;
 }
 
 /**
@@ -219,6 +303,20 @@ export class SavedObjectsClient {
     options?: SavedObjectsCreateOptions
   ) {
     return await this._repository.bulkCreate(objects, options);
+  }
+
+  /**
+   * Check what conflicts will result when creating a given array of saved objects. This includes "unresolvable conflicts", which are
+   * multi-namespace objects that exist in a different namespace; such conflicts cannot be resolved/overwritten.
+   *
+   * @param objects
+   * @param options
+   */
+  async checkConflicts(
+    objects: SavedObjectsCheckConflictsObject[] = [],
+    options: SavedObjectsBaseOptions = {}
+  ): Promise<SavedObjectsCheckConflictsResponse> {
+    return await this._repository.checkConflicts(objects, options);
   }
 
   /**
@@ -303,7 +401,7 @@ export class SavedObjectsClient {
     id: string,
     namespaces: string[],
     options: SavedObjectsAddToNamespacesOptions = {}
-  ): Promise<{}> {
+  ): Promise<SavedObjectsAddToNamespacesResponse> {
     return await this._repository.addToNamespaces(type, id, namespaces, options);
   }
 
@@ -320,7 +418,7 @@ export class SavedObjectsClient {
     id: string,
     namespaces: string[],
     options: SavedObjectsDeleteFromNamespacesOptions = {}
-  ): Promise<{}> {
+  ): Promise<SavedObjectsDeleteFromNamespacesResponse> {
     return await this._repository.deleteFromNamespaces(type, id, namespaces, options);
   }
 

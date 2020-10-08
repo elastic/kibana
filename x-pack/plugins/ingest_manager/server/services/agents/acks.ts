@@ -11,9 +11,12 @@ import {
   SavedObjectsClientContract,
 } from 'src/core/server';
 import Boom from 'boom';
+import LRU from 'lru-cache';
 import {
   Agent,
   AgentAction,
+  AgentPolicyAction,
+  AgentPolicyActionV7_9,
   AgentEvent,
   AgentEventSOAttributes,
   AgentSOAttributes,
@@ -25,14 +28,25 @@ import {
   AGENT_ACTION_SAVED_OBJECT_TYPE,
 } from '../../constants';
 import { getAgentActionByIds } from './actions';
+import { forceUnenrollAgent } from './unenroll';
+import { ackAgentUpgraded } from './upgrade';
 
 const ALLOWED_ACKNOWLEDGEMENT_TYPE: string[] = ['ACTION_RESULT'];
+
+const actionCache = new LRU<string, AgentAction>({
+  max: 20,
+  maxAge: 10 * 60 * 1000, // 10 minutes
+});
 
 export async function acknowledgeAgentActions(
   soClient: SavedObjectsClientContract,
   agent: Agent,
   agentEvents: AgentEvent[]
 ): Promise<AgentAction[]> {
+  if (agentEvents.length === 0) {
+    return [];
+  }
+
   for (const agentEvent of agentEvents) {
     if (!isAllowedType(agentEvent.type)) {
       throw Boom.badRequest(`${agentEvent.type} not allowed for acknowledgment only ACTION_RESULT`);
@@ -40,12 +54,12 @@ export async function acknowledgeAgentActions(
   }
 
   const actionIds = agentEvents
-    .map(event => event.action_id)
-    .filter(actionId => actionId !== undefined) as string[];
+    .map((event) => event.action_id)
+    .filter((actionId) => actionId !== undefined) as string[];
 
-  let actions;
+  let actions: AgentAction[];
   try {
-    actions = await getAgentActionByIds(soClient, actionIds);
+    actions = await fetchActionsUsingCache(soClient, actionIds);
   } catch (error) {
     if (Boom.isBoom(error) && error.output.statusCode === 404) {
       throw Boom.badRequest(`One or more actions cannot be found`);
@@ -53,55 +67,101 @@ export async function acknowledgeAgentActions(
     throw error;
   }
 
+  const agentActionsIds: string[] = [];
   for (const action of actions) {
-    if (action.agent_id !== agent.id) {
+    if (action.agent_id) {
+      agentActionsIds.push(action.id);
+    }
+    if (action.agent_id && action.agent_id !== agent.id) {
       throw Boom.badRequest(`${action.id} not found`);
     }
   }
 
-  if (actions.length === 0) {
-    return [];
+  const isAgentUnenrolled = actions.some((action) => action.type === 'UNENROLL');
+  if (isAgentUnenrolled) {
+    await forceUnenrollAgent(soClient, agent.id);
   }
-  const configRevision = getLatestConfigRevison(agent, actions);
+
+  const upgradeAction = actions.find((action) => action.type === 'UPGRADE');
+  if (upgradeAction) {
+    await ackAgentUpgraded(soClient, upgradeAction);
+  }
+
+  const configChangeAction = getLatestConfigChangePolicyActionIfUpdated(agent, actions);
 
   await soClient.bulkUpdate<AgentSOAttributes | AgentActionSOAttributes>([
-    buildUpdateAgentConfigRevision(agent.id, configRevision),
-    ...buildUpdateAgentActionSentAt(actionIds),
+    ...(configChangeAction
+      ? [
+          {
+            type: AGENT_SAVED_OBJECT_TYPE,
+            id: agent.id,
+            attributes: {
+              policy_revision: configChangeAction.policy_revision,
+              packages: configChangeAction?.ack_data?.packages,
+            },
+          },
+        ]
+      : []),
+    ...buildUpdateAgentActionSentAt(agentActionsIds),
   ]);
 
   return actions;
 }
 
-function getLatestConfigRevison(agent: Agent, actions: AgentAction[]) {
-  return actions.reduce((acc, action) => {
-    if (action.type !== 'CONFIG_CHANGE') {
-      return acc;
-    }
-    const data = action.data || {};
+async function fetchActionsUsingCache(
+  soClient: SavedObjectsClientContract,
+  actionIds: string[]
+): Promise<AgentAction[]> {
+  const missingActionIds: string[] = [];
+  const actions = actionIds
+    .map((actionId) => {
+      const action = actionCache.get(actionId);
+      if (!action) {
+        missingActionIds.push(actionId);
+      }
+      return action;
+    })
+    .filter((action): action is AgentAction => action !== undefined);
 
-    if (data?.config?.id !== agent.config_id) {
-      return acc;
-    }
+  if (missingActionIds.length === 0) {
+    return actions;
+  }
 
-    return data?.config?.revision > acc ? data?.config?.revision : acc;
-  }, agent.config_revision || 0);
+  const freshActions = await getAgentActionByIds(soClient, actionIds, false);
+  freshActions.forEach((action) => actionCache.set(action.id, action));
+
+  return [...freshActions, ...actions];
 }
 
-function buildUpdateAgentConfigRevision(agentId: string, configRevision: number) {
-  return {
-    type: AGENT_SAVED_OBJECT_TYPE,
-    id: agentId,
-    attributes: {
-      config_revision: configRevision,
-    },
-  };
+function isAgentPolicyAction(
+  action: AgentAction | AgentPolicyAction | AgentPolicyActionV7_9
+): action is AgentPolicyAction | AgentPolicyActionV7_9 {
+  return (action as AgentPolicyAction).policy_id !== undefined;
+}
+
+function getLatestConfigChangePolicyActionIfUpdated(
+  agent: Agent,
+  actions: Array<AgentAction | AgentPolicyAction | AgentPolicyActionV7_9>
+): AgentPolicyAction | AgentPolicyActionV7_9 | null {
+  return actions.reduce<null | AgentPolicyAction | AgentPolicyActionV7_9>((acc, action) => {
+    if (
+      !isAgentPolicyAction(action) ||
+      (action.type !== 'POLICY_CHANGE' && action.type !== 'CONFIG_CHANGE') ||
+      action.policy_id !== agent.policy_id ||
+      (action?.policy_revision ?? 0) < (agent.policy_revision || 0)
+    ) {
+      return acc;
+    }
+
+    return action;
+  }, null);
 }
 
 function buildUpdateAgentActionSentAt(
   actionsIds: string[],
   sentAt: string = new Date().toISOString()
 ) {
-  return actionsIds.map(actionId => ({
+  return actionsIds.map((actionId) => ({
     type: AGENT_ACTION_SAVED_OBJECT_TYPE,
     id: actionId,
     attributes: {
@@ -119,7 +179,7 @@ export async function saveAgentEvents(
   events: AgentEvent[]
 ): Promise<SavedObjectsBulkResponse<AgentEventSOAttributes>> {
   const objects: Array<SavedObjectsBulkCreateObject<AgentEventSOAttributes>> = events.map(
-    eventData => {
+    (eventData) => {
       return {
         attributes: {
           ...eventData,
@@ -140,9 +200,9 @@ export interface AcksService {
     actionIds: AgentEvent[]
   ) => Promise<AgentAction[]>;
 
-  getAgentByAccessAPIKeyId: (
+  authenticateAgentWithAccessToken: (
     soClient: SavedObjectsClientContract,
-    accessAPIKeyId: string
+    request: KibanaRequest
   ) => Promise<Agent>;
 
   getSavedObjectsClientContract: (kibanaRequest: KibanaRequest) => SavedObjectsClientContract;

@@ -8,7 +8,7 @@ import { PluginInitializer } from '../../../../../../src/core/server';
 import { initRoutes } from './init_routes';
 
 export const plugin: PluginInitializer<void, void> = () => ({
-  setup: core => initRoutes(core.http.createRouter()),
+  setup: (core) => initRoutes(core.http.createRouter()),
   start: () => {},
   stop: () => {},
 });

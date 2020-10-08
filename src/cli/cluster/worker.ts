@@ -21,10 +21,10 @@ import _ from 'lodash';
 import cluster from 'cluster';
 import { EventEmitter } from 'events';
 
-import { BinderFor } from '../../legacy/utils/binder_for';
+import { BinderFor } from './binder_for';
 import { fromRoot } from '../../core/server/utils';
 
-const cliPath = fromRoot('src/cli');
+const cliPath = fromRoot('src/cli/dev');
 const baseArgs = _.difference(process.argv.slice(2), ['--no-watch']);
 const baseArgv = [process.execPath, cliPath].concat(baseArgs);
 
@@ -49,6 +49,7 @@ interface WorkerOptions {
   title?: string;
   watch?: boolean;
   baseArgv?: string[];
+  apmServiceName?: string;
 }
 
 export class Worker extends EventEmitter {
@@ -89,6 +90,7 @@ export class Worker extends EventEmitter {
       NODE_OPTIONS: process.env.NODE_OPTIONS || '',
       kbnWorkerType: this.type,
       kbnWorkerArgv: JSON.stringify([...(opts.baseArgv || baseArgv), ...(opts.argv || [])]),
+      ELASTIC_APM_SERVICE_NAME: opts.apmServiceName || '',
     };
   }
 
@@ -136,7 +138,7 @@ export class Worker extends EventEmitter {
       this.processBinder.destroy();
 
       // wait until the cluster reports this fork has exited, then resolve
-      await new Promise(resolve => this.once('fork:exit', resolve));
+      await new Promise((resolve) => this.once('fork:exit', resolve));
     }
   }
 
@@ -177,9 +179,9 @@ export class Worker extends EventEmitter {
   }
 
   flushChangeBuffer() {
-    const files = _.unique(this.changes.splice(0));
+    const files = _.uniq(this.changes.splice(0));
     const prefix = files.length > 1 ? '\n - ' : '';
-    return files.reduce(function(list, file) {
+    return files.reduce(function (list, file) {
       return `${list || ''}${prefix}"${file}"`;
     }, '');
   }
@@ -188,7 +190,7 @@ export class Worker extends EventEmitter {
     if (this.fork) {
       // once "exit" event is received with 0 status, start() is called again
       this.shutdown();
-      await new Promise(cb => this.once('online', cb));
+      await new Promise((cb) => this.once('online', cb));
       return;
     }
 
@@ -214,6 +216,6 @@ export class Worker extends EventEmitter {
     this.processBinder.on('exit', () => this.shutdown());
 
     // wait for the fork to report it is online before resolving
-    await new Promise(cb => this.once('fork:online', cb));
+    await new Promise((cb) => this.once('fork:online', cb));
   }
 }

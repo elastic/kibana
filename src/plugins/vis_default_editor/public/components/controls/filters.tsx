@@ -23,7 +23,8 @@ import { htmlIdGenerator, EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useMount } from 'react-use';
 
-import { Query } from 'src/plugins/data/public';
+import { Query, DataPublicPluginStart } from '../../../../data/public';
+import { IUiSettingsClient } from '../../../../../core/public';
 import { useKibana } from '../../../../kibana_react/public';
 import { FilterRow } from './filter';
 import { AggParamEditorProps } from '../agg_param_props';
@@ -38,12 +39,14 @@ interface FilterValue {
 
 function FiltersParamEditor({ agg, value = [], setValue }: AggParamEditorProps<FilterValue[]>) {
   const [filters, setFilters] = useState(() =>
-    value.map(filter => ({ ...filter, id: generateId() }))
+    value.map((filter) => ({ ...filter, id: generateId() }))
   );
 
   useMount(() => {
     // set parsed values into model after initialization
-    setValue(filters.map(filter => omit({ ...filter, input: filter.input }, 'id')));
+    setValue(
+      filters.map((filter) => omit({ ...filter, input: filter.input }, 'id') as FilterValue)
+    );
   });
 
   useEffect(() => {
@@ -52,31 +55,32 @@ function FiltersParamEditor({ agg, value = [], setValue }: AggParamEditorProps<F
       value.length !== filters.length ||
       value.some((filter, index) => !isEqual(filter, omit(filters[index], 'id')))
     ) {
-      setFilters(value.map(filter => ({ ...filter, id: generateId() })));
+      setFilters(value.map((filter) => ({ ...filter, id: generateId() })));
     }
   }, [filters, value]);
 
   const updateFilters = (updatedFilters: FilterValue[]) => {
     // do not set internal id parameter into saved object
-    setValue(updatedFilters.map(filter => omit(filter, 'id')));
+    setValue(updatedFilters.map((filter) => omit(filter, 'id') as FilterValue));
     setFilters(updatedFilters);
   };
 
-  const { services } = useKibana();
+  const { services } = useKibana<{ uiSettings: IUiSettingsClient; data: DataPublicPluginStart }>();
 
   const onAddFilter = () =>
     updateFilters([
       ...filters,
       {
-        input: { query: '', language: services.uiSettings.get('search:queryLanguage') },
+        input: services.data.query.queryString.getDefaultQuery(),
         label: '',
         id: generateId(),
       },
     ]);
-  const onRemoveFilter = (id: string) => updateFilters(filters.filter(filter => filter.id !== id));
+  const onRemoveFilter = (id: string) =>
+    updateFilters(filters.filter((filter) => filter.id !== id));
   const onChangeValue = (id: string, query: Query, label: string) =>
     updateFilters(
-      filters.map(filter =>
+      filters.map((filter) =>
         filter.id === id
           ? {
               ...filter,

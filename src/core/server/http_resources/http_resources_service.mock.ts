@@ -25,7 +25,7 @@ const createHttpResourcesMock = (): jest.Mocked<HttpResources> => ({
 
 function createInternalHttpResourcesSetup() {
   return {
-    createRegistrar: createHttpResourcesMock,
+    createRegistrar: jest.fn(() => createHttpResourcesMock()),
   };
 }
 

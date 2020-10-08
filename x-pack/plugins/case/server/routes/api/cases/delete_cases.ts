@@ -9,11 +9,12 @@ import { schema } from '@kbn/config-schema';
 import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
 import { RouteDeps } from '../types';
 import { wrapError } from '../utils';
+import { CASES_URL } from '../../../../common/constants';
 
 export function initDeleteCasesApi({ caseService, router, userActionService }: RouteDeps) {
   router.delete(
     {
-      path: '/api/cases',
+      path: CASES_URL,
       validate: {
         query: schema.object({
           ids: schema.arrayOf(schema.string()),
@@ -24,7 +25,7 @@ export function initDeleteCasesApi({ caseService, router, userActionService }: R
       try {
         const client = context.core.savedObjects.client;
         await Promise.all(
-          request.query.ids.map(id =>
+          request.query.ids.map((id) =>
             caseService.deleteCase({
               client,
               caseId: id,
@@ -32,7 +33,7 @@ export function initDeleteCasesApi({ caseService, router, userActionService }: R
           )
         );
         const comments = await Promise.all(
-          request.query.ids.map(id =>
+          request.query.ids.map((id) =>
             caseService.getAllCaseComments({
               client,
               caseId: id,
@@ -40,9 +41,9 @@ export function initDeleteCasesApi({ caseService, router, userActionService }: R
           )
         );
 
-        if (comments.some(c => c.saved_objects.length > 0)) {
+        if (comments.some((c) => c.saved_objects.length > 0)) {
           await Promise.all(
-            comments.map(c =>
+            comments.map((c) =>
               Promise.all(
                 c.saved_objects.map(({ id }) =>
                   caseService.deleteComment({
@@ -54,12 +55,13 @@ export function initDeleteCasesApi({ caseService, router, userActionService }: R
             )
           );
         }
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { username, full_name, email } = await caseService.getUser({ request, response });
         const deleteDate = new Date().toISOString();
 
         await userActionService.postUserActions({
           client,
-          actions: request.query.ids.map(id =>
+          actions: request.query.ids.map((id) =>
             buildCaseUserActionItem({
               action: 'create',
               actionAt: deleteDate,

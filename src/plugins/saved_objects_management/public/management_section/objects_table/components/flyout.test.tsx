@@ -33,6 +33,7 @@ import { coreMock } from '../../../../../../core/public/mocks';
 import { serviceRegistryMock } from '../../../services/service_registry.mock';
 import { Flyout, FlyoutProps, FlyoutState } from './flyout';
 import { ShallowWrapper } from 'enzyme';
+import { dataPluginMock } from '../../../../../data/public/mocks';
 
 const mockFile = ({
   name: 'foo.ndjson',
@@ -56,18 +57,23 @@ describe('Flyout', () => {
 
   beforeEach(() => {
     const { http, overlays } = coreMock.createStart();
+    const search = dataPluginMock.createStartContract().search;
 
     defaultProps = {
       close: jest.fn(),
       done: jest.fn(),
       newIndexPatternUrl: '',
       indexPatterns: {
-        getFields: jest.fn().mockImplementation(() => [{ id: '1' }, { id: '2' }]),
+        getCache: jest.fn().mockImplementation(() => [
+          { id: '1', attributes: {} },
+          { id: '2', attributes: {} },
+        ]),
       } as any,
       overlays,
       http,
       allowedTypes: ['search', 'index-pattern', 'visualization'],
       serviceRegistry: serviceRegistryMock.create(),
+      search,
     };
   });
 
@@ -75,31 +81,18 @@ describe('Flyout', () => {
     const component = shallowRender(defaultProps);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
     expect(component).toMatchSnapshot();
   });
 
-  it('should toggle the overwrite all control', async () => {
-    const component = shallowRender(defaultProps);
-
-    // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
-    // Ensure the state changes are reflected
-    component.update();
-
-    expect(component.state('isOverwriteAllChecked')).toBe(true);
-    component.find('EuiSwitch').simulate('change');
-    expect(component.state('isOverwriteAllChecked')).toBe(false);
-  });
-
   it('should allow picking a file', async () => {
     const component = shallowRender(defaultProps);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -127,7 +120,7 @@ describe('Flyout', () => {
     const component = shallowRender(defaultProps);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -181,14 +174,17 @@ describe('Flyout', () => {
       const component = shallowRender(defaultProps);
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
       component.setState({ file: mockFile, isLegacyFile: false });
       await component.instance().import();
 
-      expect(importFileMock).toHaveBeenCalledWith(defaultProps.http, mockFile, true);
+      expect(importFileMock).toHaveBeenCalledWith(defaultProps.http, mockFile, {
+        createNewCopies: false,
+        overwrite: true,
+      });
       expect(component.state()).toMatchObject({
         conflictedIndexPatterns: undefined,
         conflictedSavedObjectsLinkedToSavedSearches: undefined,
@@ -216,7 +212,7 @@ describe('Flyout', () => {
       const component = shallowRender(defaultProps);
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -236,64 +232,13 @@ describe('Flyout', () => {
         .find('EuiButton[data-test-subj="importSavedObjectsConfirmBtn"]')
         .simulate('click');
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       expect(resolveImportErrorsMock).toMatchSnapshot();
-    });
-
-    it('should handle errors', async () => {
-      const component = shallowRender(defaultProps);
-
-      // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
-      // Ensure the state changes are reflected
-      component.update();
-
-      resolveImportErrorsMock.mockImplementation(() => ({
-        status: 'success',
-        importCount: 0,
-        failedImports: [
-          {
-            obj: {
-              type: 'visualization',
-              id: '1',
-            },
-            error: {
-              type: 'unknown',
-            },
-          },
-        ],
-      }));
-
-      component.setState({ file: mockFile, isLegacyFile: false });
-
-      // Go through the import flow
-      await component.instance().import();
-      component.update();
-      // Set a resolution
-      component.instance().onIndexChanged('MyIndexPattern*', { target: { value: '2' } });
-      await component
-        .find('EuiButton[data-test-subj="importSavedObjectsConfirmBtn"]')
-        .simulate('click');
-      // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
-
-      expect(component.state('failedImports')).toEqual([
-        {
-          error: {
-            type: 'unknown',
-          },
-          obj: {
-            id: '1',
-            type: 'visualization',
-          },
-        },
-      ]);
-      expect(component.find('EuiFlyoutBody EuiCallOut')).toMatchSnapshot();
     });
   });
 
-  describe('errors', () => {
-    it('should display unsupported type errors properly', async () => {
+  describe('summary', () => {
+    it('should display summary when import is complete', async () => {
       const component = shallowRender(defaultProps);
 
       // Ensure all promises resolve
@@ -304,32 +249,14 @@ describe('Flyout', () => {
       importFileMock.mockImplementation(() => ({
         success: false,
         successCount: 0,
-        errors: [
-          {
-            id: '1',
-            type: 'wigwags',
-            title: 'My Title',
-            error: {
-              type: 'unsupported_type',
-            },
-          },
-        ],
       }));
+      const failedImports = Symbol();
+      const successfulImports = Symbol();
       resolveImportErrorsMock.mockImplementation(() => ({
         status: 'success',
         importCount: 0,
-        failedImports: [
-          {
-            error: {
-              type: 'unsupported_type',
-            },
-            obj: {
-              id: '1',
-              type: 'wigwags',
-              title: 'My Title',
-            },
-          },
-        ],
+        failedImports,
+        successfulImports,
       }));
 
       component.setState({ file: mockFile, isLegacyFile: false });
@@ -342,19 +269,11 @@ describe('Flyout', () => {
       await Promise.resolve();
 
       expect(component.state('status')).toBe('success');
-      expect(component.state('failedImports')).toEqual([
-        {
-          error: {
-            type: 'unsupported_type',
-          },
-          obj: {
-            id: '1',
-            type: 'wigwags',
-            title: 'My Title',
-          },
-        },
-      ]);
-      expect(component.find('EuiFlyout EuiCallOut')).toMatchSnapshot();
+      expect(component.find('EuiFlyout ImportSummary')).toMatchSnapshot();
+      const cancelButton = await component.find(
+        'EuiButtonEmpty[data-test-subj="importSavedObjectsCancelBtn"]'
+      );
+      expect(cancelButton.prop('disabled')).toBe(true);
     });
   });
 
@@ -419,7 +338,7 @@ describe('Flyout', () => {
       const component = shallowRender(defaultProps);
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -429,9 +348,9 @@ describe('Flyout', () => {
       expect(importLegacyFileMock).toHaveBeenCalledWith(legacyMockFile);
       // Remove the last element from data since it should be filtered out
       expect(resolveSavedObjectsMock).toHaveBeenCalledWith(
-        mockData.slice(0, 2).map(doc => ({ ...doc, _migrationVersion: {} })),
+        mockData.slice(0, 2).map((doc) => ({ ...doc, _migrationVersion: {} })),
         true,
-        defaultProps.serviceRegistry.all().map(s => s.service),
+        defaultProps.serviceRegistry.all().map((s) => s.service),
         defaultProps.indexPatterns,
         defaultProps.overlays.openConfirm
       );
@@ -474,7 +393,7 @@ describe('Flyout', () => {
       const component = shallowRender(defaultProps);
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -494,12 +413,15 @@ describe('Flyout', () => {
         .find('EuiButton[data-test-subj="importSavedObjectsConfirmBtn"]')
         .simulate('click');
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       expect(resolveIndexPatternConflictsMock).toHaveBeenCalledWith(
         component.instance().resolutions,
         mockConflictedIndexPatterns,
         true,
-        defaultProps.indexPatterns
+        {
+          search: defaultProps.search,
+          indexPatterns: defaultProps.indexPatterns,
+        }
       );
       expect(saveObjectsMock).toHaveBeenCalledWith(
         mockConflictedSavedObjectsLinkedToSavedSearches,
@@ -507,7 +429,7 @@ describe('Flyout', () => {
       );
       expect(resolveSavedSearchesMock).toHaveBeenCalledWith(
         mockConflictedSearchDocs,
-        defaultProps.serviceRegistry.all().map(s => s.service),
+        defaultProps.serviceRegistry.all().map((s) => s.service),
         defaultProps.indexPatterns,
         true
       );
@@ -517,7 +439,7 @@ describe('Flyout', () => {
       const component = shallowRender(defaultProps);
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -536,7 +458,7 @@ describe('Flyout', () => {
         .find('EuiButton[data-test-subj="importSavedObjectsConfirmBtn"]')
         .simulate('click');
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
 
       expect(component.state('error')).toEqual('foobar');
       expect(component.find('EuiFlyoutBody EuiCallOut')).toMatchSnapshot();

@@ -23,7 +23,8 @@ import { VisualizationsSetup } from '../../visualizations/public';
 import { createTableVisFn } from './table_vis_fn';
 import { getTableVisTypeDefinition } from './table_vis_type';
 import { DataPublicPluginStart } from '../../data/public';
-import { setFormatService } from './services';
+import { setFormatService, setKibanaLegacy } from './services';
+import { KibanaLegacyStart } from '../../kibana_legacy/public';
 
 /** @internal */
 export interface TablePluginSetupDependencies {
@@ -34,6 +35,7 @@ export interface TablePluginSetupDependencies {
 /** @internal */
 export interface TablePluginStartDependencies {
   data: DataPublicPluginStart;
+  kibanaLegacy: KibanaLegacyStart;
 }
 
 /** @internal */
@@ -55,7 +57,8 @@ export class TableVisPlugin implements Plugin<Promise<void>, void> {
     );
   }
 
-  public start(core: CoreStart, { data }: TablePluginStartDependencies) {
+  public start(core: CoreStart, { data, kibanaLegacy }: TablePluginStartDependencies) {
     setFormatService(data.fieldFormats);
+    setKibanaLegacy(kibanaLegacy);
   }
 }

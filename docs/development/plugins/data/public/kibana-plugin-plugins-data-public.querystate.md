@@ -17,6 +17,7 @@ export interface QueryState
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [filters](./kibana-plugin-plugins-data-public.querystate.filters.md) | <code>Filter[]</code> |  |
+|  [query](./kibana-plugin-plugins-data-public.querystate.query.md) | <code>Query</code> |  |
 |  [refreshInterval](./kibana-plugin-plugins-data-public.querystate.refreshinterval.md) | <code>RefreshInterval</code> |  |
 |  [time](./kibana-plugin-plugins-data-public.querystate.time.md) | <code>TimeRange</code> |  |
 

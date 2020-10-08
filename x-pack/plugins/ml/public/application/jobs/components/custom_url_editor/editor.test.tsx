@@ -23,14 +23,14 @@ function prepareTest(customUrl: CustomUrlSettings, setEditCustomUrlFn: (url: Url
       url_name: 'Show data',
       time_range: 'auto',
       url_value:
-        "kibana#/discover?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=" +
+        "discover#/?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=" +
         '(index:e532ba80-b76f-11e8-a9dc-37914a458883,query:(language:lucene,query:\'airline:"$airline$"\'))',
     },
     {
       url_name: 'Show dashboard',
       time_range: '1h',
       url_value:
-        'kibana#/dashboard/52ea8840-bbef-11e8-a04d-b1701b2b977e?_g=' +
+        'dashboards#/view/52ea8840-bbef-11e8-a04d-b1701b2b977e?_g=' +
         "(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&" +
         '_a=(filters:!(),query:(language:lucene,query:\'airline:"$airline$"\'))',
     },

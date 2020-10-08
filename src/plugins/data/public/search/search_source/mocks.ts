@@ -17,25 +17,13 @@
  * under the License.
  */
 
-import { ISearchSource } from './search_source';
+import { searchSourceCommonMock } from '../../../common/search/search_source/mocks';
+import { ISearchStart } from '../types';
 
-export const searchSourceMock: MockedKeys<ISearchSource> = {
-  setPreferredSearchStrategyId: jest.fn(),
-  setFields: jest.fn().mockReturnThis(),
-  setField: jest.fn().mockReturnThis(),
-  getId: jest.fn(),
-  getFields: jest.fn(),
-  getField: jest.fn(),
-  getOwnField: jest.fn(),
-  create: jest.fn().mockReturnThis(),
-  createCopy: jest.fn().mockReturnThis(),
-  createChild: jest.fn().mockReturnThis(),
-  setParent: jest.fn(),
-  getParent: jest.fn().mockReturnThis(),
-  fetch: jest.fn().mockResolvedValue({}),
-  onRequestStart: jest.fn(),
-  getSearchRequestBody: jest.fn(),
-  destroy: jest.fn(),
-  history: [],
-  serialize: jest.fn(),
+function createStartContract(): jest.Mocked<ISearchStart['searchSource']> {
+  return searchSourceCommonMock;
+}
+
+export const searchSourceMock = {
+  createStartContract,
 };

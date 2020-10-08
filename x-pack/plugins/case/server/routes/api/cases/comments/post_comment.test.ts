@@ -15,6 +15,7 @@ import {
   mockCaseComments,
 } from '../../__fixtures__';
 import { initPostCommentApi } from './post_comment';
+import { CASE_COMMENTS_URL } from '../../../../../common/constants';
 
 describe('POST comment', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -27,7 +28,7 @@ describe('POST comment', () => {
   });
   it(`Posts a new comment`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{case_id}/comments',
+      path: CASE_COMMENTS_URL,
       method: 'post',
       params: {
         case_id: 'mock-id-1',
@@ -52,7 +53,7 @@ describe('POST comment', () => {
   });
   it(`Returns an error if the case does not exist`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{case_id}/comments',
+      path: CASE_COMMENTS_URL,
       method: 'post',
       params: {
         case_id: 'this-is-not-real',
@@ -75,7 +76,7 @@ describe('POST comment', () => {
   });
   it(`Returns an error if postNewCase throws`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{case_id}/comments',
+      path: CASE_COMMENTS_URL,
       method: 'post',
       params: {
         case_id: 'mock-id-1',
@@ -100,7 +101,7 @@ describe('POST comment', () => {
     routeHandler = await createRoute(initPostCommentApi, 'post', true);
 
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{case_id}/comments',
+      path: CASE_COMMENTS_URL,
       method: 'post',
       params: {
         case_id: 'mock-id-1',

@@ -11,8 +11,9 @@ import {
   Installation,
   InstallationStatus,
   KibanaAssetType,
-} from '../../../../common/types/models/epm';
+} from '../../../types';
 
+export { bulkInstallPackages, isBulkInstallError } from './bulk_install_packages';
 export {
   getCategories,
   getFile,
@@ -20,11 +21,29 @@ export {
   getInstallation,
   getPackageInfo,
   getPackages,
+  getLimitedPackages,
   SearchParams,
 } from './get';
 
-export { installKibanaAssets, installPackage, ensureInstalledPackage } from './install';
+export {
+  BulkInstallResponse,
+  IBulkInstallPackageError,
+  handleInstallPackageFailure,
+  installPackageFromRegistry,
+  installPackageByUpload,
+  ensureInstalledPackage,
+} from './install';
 export { removeInstallation } from './remove';
+
+type RequiredPackage = 'system' | 'endpoint';
+const requiredPackages: Record<RequiredPackage, boolean> = {
+  system: true,
+  endpoint: true,
+};
+
+export function isRequiredPackage(value: string): value is RequiredPackage {
+  return value in requiredPackages;
+}
 
 export class PackageNotInstalledError extends Error {
   constructor(pkgkey: string) {

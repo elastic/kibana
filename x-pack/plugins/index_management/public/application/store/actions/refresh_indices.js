@@ -12,7 +12,7 @@ import { clearRowStatus, reloadIndices } from '../actions';
 import { notificationService } from '../../services/notification';
 
 export const refreshIndicesStart = createAction('INDEX_MANAGEMENT_REFRESH_INDICES_START');
-export const refreshIndices = ({ indexNames }) => async dispatch => {
+export const refreshIndices = ({ indexNames }) => async (dispatch) => {
   dispatch(refreshIndicesStart({ indexNames }));
   try {
     await request(indexNames);

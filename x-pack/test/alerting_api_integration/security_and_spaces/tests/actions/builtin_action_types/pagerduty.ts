@@ -4,37 +4,47 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import httpProxy from 'http-proxy';
 import expect from '@kbn/expect';
 
+import { getHttpProxyServer } from '../../../../common/lib/get_proxy_server';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
   getExternalServiceSimulatorPath,
   ExternalServiceSimulator,
-} from '../../../../common/fixtures/plugins/actions';
+} from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
 
 // eslint-disable-next-line import/no-default-export
 export default function pagerdutyTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const configService = getService('config');
 
   describe('pagerduty action', () => {
     let simulatedActionId = '';
     let pagerdutySimulatorURL: string = '<could not determine kibana url>';
+    let proxyServer: httpProxy | undefined;
+    let proxyHaveBeenCalled = false;
 
     // need to wait for kibanaServer to settle ...
-    before(() => {
+    before(async () => {
       pagerdutySimulatorURL = kibanaServer.resolveUrl(
         getExternalServiceSimulatorPath(ExternalServiceSimulator.PAGERDUTY)
       );
-    });
 
-    after(() => esArchiver.unload('empty_kibana'));
+      proxyServer = await getHttpProxyServer(
+        kibanaServer.resolveUrl('/'),
+        configService.get('kbnTestServer.serverArgs'),
+        () => {
+          proxyHaveBeenCalled = true;
+        }
+      );
+    });
 
     it('should return successfully when passed valid create parameters', async () => {
       const { body: createdAction } = await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'A pagerduty action',
@@ -61,7 +71,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
       expect(typeof createdAction.id).to.be('string');
 
       const { body: fetchedAction } = await supertest
-        .get(`/api/action/${createdAction.id}`)
+        .get(`/api/actions/action/${createdAction.id}`)
         .expect(200);
 
       expect(fetchedAction).to.eql({
@@ -77,7 +87,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
 
     it('should return unsuccessfully when passed invalid create parameters', async () => {
       await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'A pagerduty action',
@@ -98,9 +108,9 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
         });
     });
 
-    it('should return unsuccessfully when default pagerduty url is not whitelisted', async () => {
+    it('should return unsuccessfully when default pagerduty url is not present in allowedHosts', async () => {
       await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'A pagerduty action',
@@ -113,14 +123,14 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'error validating action type config: error configuring pagerduty action: target url "https://events.pagerduty.com/v2/enqueue" is not whitelisted in the Kibana config xpack.actions.whitelistedHosts',
+              'error validating action type config: error configuring pagerduty action: target url "https://events.pagerduty.com/v2/enqueue" is not added to the Kibana config xpack.actions.allowedHosts',
           });
         });
     });
 
     it('should create pagerduty simulator action successfully', async () => {
       const { body: createdSimulatedAction } = await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'A pagerduty simulator',
@@ -139,7 +149,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
 
     it('should handle executing with a simulated success', async () => {
       const { body: result } = await supertest
-        .post(`/api/action/${simulatedActionId}/_execute`)
+        .post(`/api/actions/action/${simulatedActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -147,11 +157,12 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
           },
         })
         .expect(200);
+
+      expect(proxyHaveBeenCalled).to.equal(true);
       expect(result).to.eql({
         status: 'ok',
         actionId: simulatedActionId,
         data: {
-          dedup_key: `action:${simulatedActionId}`,
           message: 'Event processed',
           status: 'success',
         },
@@ -160,7 +171,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
 
     it('should handle a 40x pagerduty error', async () => {
       const { body: result } = await supertest
-        .post(`/api/action/${simulatedActionId}/_execute`)
+        .post(`/api/actions/action/${simulatedActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -174,7 +185,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
 
     it('should handle a 429 pagerduty error', async () => {
       const { body: result } = await supertest
-        .post(`/api/action/${simulatedActionId}/_execute`)
+        .post(`/api/actions/action/${simulatedActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -192,7 +203,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
 
     it('should handle a 500 pagerduty error', async () => {
       const { body: result } = await supertest
-        .post(`/api/action/${simulatedActionId}/_execute`)
+        .post(`/api/actions/action/${simulatedActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -204,6 +215,12 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
       expect(result.status).to.equal('error');
       expect(result.message).to.match(/error posting pagerduty event: http status 502/);
       expect(result.retry).to.equal(true);
+    });
+
+    after(() => {
+      if (proxyServer) {
+        proxyServer.close();
+      }
     });
   });
 }

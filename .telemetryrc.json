@@ -1,0 +1,11 @@
+[
+  {
+    "output": "src/plugins/telemetry/schema/oss_plugins.json",
+    "root": "src/plugins/",
+    "exclude": [
+      "src/plugins/kibana_react/",
+      "src/plugins/testbed/",
+      "src/plugins/kibana_utils/"
+    ]
+  }
+]

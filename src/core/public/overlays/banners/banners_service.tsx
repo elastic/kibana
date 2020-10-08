@@ -112,7 +112,7 @@ export class OverlayBannersService {
       },
 
       get$() {
-        return banners$.pipe(map(bannerMap => [...bannerMap.values()]));
+        return banners$.pipe(map((bannerMap) => [...bannerMap.values()]));
       },
 
       getComponent() {

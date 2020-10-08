@@ -4,100 +4,107 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { TypeOf } from '@kbn/config-schema';
-
 import {
-  ConfigSchema,
-  SecretsSchema,
-  ParamsSchema,
-  CasesConfigurationSchema,
-  MapEntrySchema,
-  CommentSchema,
+  ExternalIncidentServiceConfigurationSchema,
+  ExternalIncidentServiceSecretConfigurationSchema,
+  ExecutorParamsSchema,
+  ExecutorSubActionPushParamsSchema,
+  ExecutorSubActionGetIncidentParamsSchema,
+  ExecutorSubActionHandshakeParamsSchema,
 } from './schema';
+import { ActionsConfigurationUtilities } from '../../actions_config';
+import { ExternalServiceCommentResponse } from '../case/types';
+import { IncidentConfigurationSchema } from '../case/schema';
+import { Logger } from '../../../../../../src/core/server';
 
-import { ServiceNow } from './lib';
-import { Incident, IncidentResponse } from './lib/types';
+export type ServiceNowPublicConfigurationType = TypeOf<
+  typeof ExternalIncidentServiceConfigurationSchema
+>;
+export type ServiceNowSecretConfigurationType = TypeOf<
+  typeof ExternalIncidentServiceSecretConfigurationSchema
+>;
 
-// config definition
-export type ConfigType = TypeOf<typeof ConfigSchema>;
-
-// secrets definition
-export type SecretsType = TypeOf<typeof SecretsSchema>;
-
-export type ExecutorParams = TypeOf<typeof ParamsSchema>;
-
-export type CasesConfigurationType = TypeOf<typeof CasesConfigurationSchema>;
-export type MapEntry = TypeOf<typeof MapEntrySchema>;
-export type Comment = TypeOf<typeof CommentSchema>;
-
-export type Mapping = Map<string, any>;
-
-export interface Params extends ExecutorParams {
-  incident: Record<string, any>;
-}
-export interface CreateHandlerArguments {
-  serviceNow: ServiceNow;
-  params: Params;
-  comments: Comment[];
-  mapping: Mapping;
+export interface CreateCommentRequest {
+  [key: string]: string;
 }
 
-export type UpdateHandlerArguments = CreateHandlerArguments & {
-  incidentId: string;
-};
+export type ExecutorParams = TypeOf<typeof ExecutorParamsSchema>;
+export type ExecutorSubActionPushParams = TypeOf<typeof ExecutorSubActionPushParamsSchema>;
 
-export type IncidentHandlerArguments = CreateHandlerArguments & {
-  incidentId: string | null;
-};
+export type IncidentConfiguration = TypeOf<typeof IncidentConfigurationSchema>;
 
-export interface HandlerResponse extends IncidentResponse {
-  comments?: SimpleComment[];
+export interface ExternalServiceCredentials {
+  config: Record<string, unknown>;
+  secrets: Record<string, unknown>;
 }
 
-export interface SimpleComment {
-  commentId: string;
+export interface ExternalServiceValidation {
+  config: (configurationUtilities: ActionsConfigurationUtilities, configObject: any) => void;
+  secrets: (configurationUtilities: ActionsConfigurationUtilities, secrets: any) => void;
+}
+
+export interface ExternalServiceIncidentResponse {
+  id: string;
+  title: string;
+  url: string;
   pushedDate: string;
 }
-
-export interface AppendFieldArgs {
-  value: string;
-  prefix?: string;
-  suffix?: string;
+export interface PushToServiceResponse extends ExternalServiceIncidentResponse {
+  comments?: ExternalServiceCommentResponse[];
 }
 
-export interface KeyAny {
-  [index: string]: string;
+export type ExternalServiceParams = Record<string, unknown>;
+
+export interface ExternalService {
+  getIncident: (id: string) => Promise<ExternalServiceParams | undefined>;
+  createIncident: (params: ExternalServiceParams) => Promise<ExternalServiceIncidentResponse>;
+  updateIncident: (params: ExternalServiceParams) => Promise<ExternalServiceIncidentResponse>;
+  findIncidents: (params?: Record<string, string>) => Promise<ExternalServiceParams[] | undefined>;
 }
 
-export interface AppendInformationFieldArgs {
-  value: string;
-  user: string;
-  date: string;
-  mode: string;
+export interface PushToServiceApiParams extends ExecutorSubActionPushParams {
+  externalObject: Record<string, any>;
 }
 
-export interface TransformerArgs {
-  value: string;
-  date?: string;
-  user?: string;
-  previousValue?: string;
+export interface ExternalServiceApiHandlerArgs {
+  externalService: ExternalService;
+  mapping: Map<string, any> | null;
 }
 
-export interface PrepareFieldsForTransformArgs {
-  params: Params;
-  mapping: Mapping;
-  defaultPipes?: string[];
+export type ExecutorSubActionGetIncidentParams = TypeOf<
+  typeof ExecutorSubActionGetIncidentParamsSchema
+>;
+
+export type ExecutorSubActionHandshakeParams = TypeOf<
+  typeof ExecutorSubActionHandshakeParamsSchema
+>;
+
+export type Incident = Pick<
+  ExecutorSubActionPushParams,
+  'description' | 'severity' | 'urgency' | 'impact'
+> & {
+  short_description: string;
+};
+
+export interface PushToServiceApiHandlerArgs extends ExternalServiceApiHandlerArgs {
+  params: PushToServiceApiParams;
+  secrets: Record<string, unknown>;
+  logger: Logger;
 }
 
-export interface PipedField {
-  key: string;
-  value: string;
-  actionType: string;
-  pipes: string[];
+export interface GetIncidentApiHandlerArgs extends ExternalServiceApiHandlerArgs {
+  params: ExecutorSubActionGetIncidentParams;
 }
 
-export interface TransformFieldsArgs {
-  params: Params;
-  fields: PipedField[];
-  currentIncident?: Incident;
+export interface HandshakeApiHandlerArgs extends ExternalServiceApiHandlerArgs {
+  params: ExecutorSubActionHandshakeParams;
+}
+
+export interface ExternalServiceApi {
+  handshake: (args: HandshakeApiHandlerArgs) => Promise<void>;
+  pushToService: (args: PushToServiceApiHandlerArgs) => Promise<PushToServiceResponse>;
+  getIncident: (args: GetIncidentApiHandlerArgs) => Promise<void>;
 }

@@ -1,0 +1,20 @@
+{
+  "name": "alerts-restricted-fixtures",
+  "version": "1.0.0",
+  "kibana": {
+    "version": "kibana",
+    "templateVersion": "1.0.0"
+  },
+  "main": "target/test/plugin_api_integration/plugins/alerts_restricted",
+  "scripts": {
+    "kbn": "node ../../../../../scripts/kbn.js",
+    "build": "rm -rf './target' && tsc"
+  },
+  "devDependencies": {
+    "typescript": "4.0.2"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "joi": "^13.5.2"
+  }
+}

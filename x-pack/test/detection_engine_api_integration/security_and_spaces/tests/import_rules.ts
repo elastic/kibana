@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/siem/common/constants';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -17,15 +17,69 @@ import {
   getSimpleRuleOutput,
   removeServerGeneratedProperties,
   ruleToNdjson,
-} from './utils';
+  waitFor,
+} from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   describe('import_rules', () => {
-    describe('importing rules', () => {
+    describe('importing rules without an index', () => {
+      it('should not create a rule if the index does not exist', async () => {
+        await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .set('kbn-xsrf', 'true')
+          .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
+          .expect(400);
+
+        await waitFor(async () => {
+          const { body } = await supertest
+            .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`)
+            .send();
+          return body.status_code === 404;
+        });
+
+        // Try to fetch the rule which should still be a 404 (not found)
+        const { body } = await supertest.get(`${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`).send();
+
+        expect(body).to.eql({
+          status_code: 404,
+          message: 'rule_id: "rule-1" not found',
+        });
+      });
+
+      it('should return an error that the index needs to be created before you are able to import a single rule', async () => {
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .set('kbn-xsrf', 'true')
+          .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
+          .expect(400);
+
+        expect(body).to.eql({
+          message:
+            'To create a rule, the index must exist first. Index .siem-signals-default does not exist',
+          status_code: 400,
+        });
+      });
+
+      it('should return an error that the index needs to be created before you are able to import two rules', async () => {
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .set('kbn-xsrf', 'true')
+          .attach('file', getSimpleRuleAsNdjson(['rule-1', 'rule-2']), 'rules.ndjson')
+          .expect(400);
+
+        expect(body).to.eql({
+          message:
+            'To create a rule, the index must exist first. Index .siem-signals-default does not exist',
+          status_code: 400,
+        });
+      });
+    });
+
+    describe('importing rules with an index', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest);
       });
@@ -71,21 +125,11 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('should report that it failed to import a thousand and one (10001) simple rules', async () => {
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
-          .set('kbn-xsrf', 'true')
-          .attach('file', getSimpleRuleAsNdjson(new Array(10001).fill('rule-1')), 'rules.ndjson')
-          .expect(500);
-
-        expect(body).to.eql({ message: "Can't import more than 10000 rules", status_code: 500 });
-      });
-
       it('should be able to read an imported rule back out correctly', async () => {
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
-          .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
+          .attach('file', getSimpleRuleAsNdjson(['rule-1'], true), 'rules.ndjson')
           .expect(200);
 
         const { body } = await supertest
@@ -199,7 +243,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
-          .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
+          .attach('file', getSimpleRuleAsNdjson(['rule-1'], true), 'rules.ndjson')
           .expect(200);
 
         const simpleRule = getSimpleRule('rule-1');
@@ -291,13 +335,17 @@ export default ({ getService }: FtrProviderContext): void => {
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
-          .attach('file', getSimpleRuleAsNdjson(['rule-1', 'rule-2']), 'rules.ndjson')
+          .attach('file', getSimpleRuleAsNdjson(['rule-1', 'rule-2'], true), 'rules.ndjson')
           .expect(200);
 
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
-          .attach('file', getSimpleRuleAsNdjson(['rule-1', 'rule-2', 'rule-3']), 'rules.ndjson')
+          .attach(
+            'file',
+            getSimpleRuleAsNdjson(['rule-1', 'rule-2', 'rule-3'], true),
+            'rules.ndjson'
+          )
           .expect(200);
 
         const { body: bodyOfRule1 } = await supertest

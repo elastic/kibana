@@ -7,12 +7,13 @@ import { configSchema } from './config';
 
 describe('config validation', () => {
   test('task manager defaults', () => {
-    const config: Record<string, any> = {};
+    const config: Record<string, unknown> = {};
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "enabled": true,
         "index": ".kibana_task_manager",
         "max_attempts": 3,
+        "max_poll_inactivity_cycles": 10,
         "max_workers": 10,
         "poll_interval": 3000,
         "request_capacity": 1000,
@@ -21,7 +22,7 @@ describe('config validation', () => {
   });
 
   test('the ElastiSearch Tasks index cannot be used for task manager', () => {
-    const config: Record<string, any> = {
+    const config: Record<string, unknown> = {
       index: '.tasks',
     };
     expect(() => {

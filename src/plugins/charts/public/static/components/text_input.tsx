@@ -47,7 +47,7 @@ function TextInputOption<ParamName extends string>({
         data-test-subj={dataTestSubj}
         disabled={disabled}
         value={value}
-        onChange={ev => setValue(paramName, ev.target.value)}
+        onChange={(ev) => setValue(paramName, ev.target.value)}
       />
     </EuiFormRow>
   );

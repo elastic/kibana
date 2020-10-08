@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { ButtonIconSide } from '@elastic/eui';
+import { EuiButtonProps } from '@elastic/eui';
 
-export type TopNavMenuAction = (anchorElement: EventTarget) => void;
+export type TopNavMenuAction = (anchorElement: HTMLElement) => void;
 
 export interface TopNavMenuData {
   id?: string;
@@ -29,10 +29,10 @@ export interface TopNavMenuData {
   testId?: string;
   className?: string;
   disableButton?: boolean | (() => boolean);
-  tooltip?: string | (() => string);
+  tooltip?: string | (() => string | undefined);
   emphasize?: boolean;
   iconType?: string;
-  iconSide?: ButtonIconSide;
+  iconSide?: EuiButtonProps['iconSide'];
 }
 
 export interface RegisteredTopNavMenuData extends TopNavMenuData {

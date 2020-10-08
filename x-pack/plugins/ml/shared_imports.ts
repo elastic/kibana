@@ -3,9 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { XJson } from '../../../src/plugins/es_ui_shared/public';
+const { collapseLiteralStrings, expandLiteralStrings } = XJson;
 
-export {
-  XJsonMode,
-  collapseLiteralStrings,
-  expandLiteralStrings,
-} from '../../../src/plugins/es_ui_shared/public';
+export { XJsonMode } from '@kbn/ace';
+export { collapseLiteralStrings, expandLiteralStrings };

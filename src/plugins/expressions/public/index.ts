@@ -30,18 +30,20 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 // Static exports.
-export { ExpressionExecutor, IExpressionLoaderParams } from './types';
+export { ExpressionExecutor, IExpressionLoaderParams, ExpressionRenderError } from './types';
 export {
   ExpressionRendererComponent,
   ReactExpressionRenderer,
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
 } from './react_expression_renderer';
-export { ExpressionRenderHandler } from './render';
+export { ExpressionRenderHandler, ExpressionRendererEvent } from './render';
 export {
   AnyExpressionFunctionDefinition,
   AnyExpressionTypeDefinition,
   ArgumentType,
+  buildExpression,
+  buildExpressionFunction,
   Datatable,
   DatatableColumn,
   DatatableColumnType,
@@ -57,10 +59,13 @@ export {
   ExecutorState,
   ExpressionAstArgument,
   ExpressionAstExpression,
+  ExpressionAstExpressionBuilder,
   ExpressionAstFunction,
+  ExpressionAstFunctionBuilder,
   ExpressionAstNode,
   ExpressionFunction,
   ExpressionFunctionDefinition,
+  ExpressionFunctionDefinitions,
   ExpressionFunctionKibana,
   ExpressionFunctionParameter,
   ExpressionImage,
@@ -78,7 +83,7 @@ export {
   ExpressionValueRender,
   ExpressionValueSearchContext,
   ExpressionValueUnboxed,
-  Filter,
+  ExpressionValueFilter,
   Font,
   FontLabel,
   FontStyle,
@@ -90,6 +95,7 @@ export {
   IInterpreterRenderHandlers,
   InterpreterErrorType,
   IRegistry,
+  isExpressionAstBuilder,
   KIBANA_CONTEXT_NAME,
   KibanaContext,
   KibanaDatatable,
@@ -116,4 +122,7 @@ export {
   TypeToString,
   UnmappedTypeStrings,
   ExpressionValueRender as Render,
+  ExpressionsService,
+  ExpressionsServiceSetup,
+  ExpressionsServiceStart,
 } from '../common';

@@ -6,6 +6,7 @@
 
 import { SearchParams } from 'elasticsearch';
 import { get } from 'lodash';
+import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
 import { collectFns } from './collector_helpers';
 import {
   TelemetryCollector,
@@ -19,7 +20,7 @@ interface CustomElementSearch {
   [CUSTOM_ELEMENT_TYPE]: TelemetryCustomElementDocument;
 }
 
-interface CustomElementTelemetry {
+export interface CustomElementTelemetry {
   custom_elements?: {
     count: number;
     elements: {
@@ -30,6 +31,18 @@ interface CustomElementTelemetry {
     functions_in_use: string[];
   };
 }
+
+export const customElementSchema: MakeSchemaFrom<CustomElementTelemetry> = {
+  custom_elements: {
+    count: { type: 'long' },
+    elements: {
+      min: { type: 'long' },
+      max: { type: 'long' },
+      avg: { type: 'float' },
+    },
+    functions_in_use: { type: 'array', items: { type: 'keyword' } },
+  },
+};
 
 function isCustomElement(maybeCustomElement: any): maybeCustomElement is TelemetryCustomElement {
   return (
@@ -60,7 +73,7 @@ export function summarizeCustomElements(
   const functionSet = new Set<string>();
 
   const parsedContents: TelemetryCustomElement[] = customElements
-    .map(element => element.content)
+    .map((element) => element.content)
     .map(parseJsonOrNull)
     .filter(isCustomElement);
 
@@ -76,8 +89,8 @@ export function summarizeCustomElements(
 
   let totalElements = 0;
 
-  parsedContents.map(contents => {
-    contents.selectedNodes.map(node => {
+  parsedContents.map((contents) => {
+    contents.selectedNodes.map((node) => {
       const ast = parseExpression(node.expression);
       collectFns(ast, (cFunction: string) => {
         functionSet.add(cFunction);
@@ -113,8 +126,8 @@ const customElementCollector: TelemetryCollector = async function customElementC
 
   const esResponse = await callCluster<CustomElementSearch>('search', customElementParams);
 
-  if (get<number>(esResponse, 'hits.hits.length') > 0) {
-    const customElements = esResponse.hits.hits.map(hit => hit._source[CUSTOM_ELEMENT_TYPE]);
+  if (get(esResponse, 'hits.hits.length') > 0) {
+    const customElements = esResponse.hits.hits.map((hit) => hit._source[CUSTOM_ELEMENT_TYPE]);
     return summarizeCustomElements(customElements);
   }
 

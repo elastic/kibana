@@ -11,22 +11,23 @@ import { MetricsAndGroupByToolbarItems } from '../shared/components/metrics_and_
 import { CloudToolbarItems } from '../shared/components/cloud_toolbar_items';
 import { SnapshotMetricType } from '../types';
 
+export const sqsMetricTypes: SnapshotMetricType[] = [
+  'sqsMessagesVisible',
+  'sqsMessagesDelayed',
+  'sqsMessagesSent',
+  'sqsMessagesEmpty',
+  'sqsOldestMessage',
+];
+export const sqsGroupByFields = ['cloud.region'];
+
 export const AwsSQSToolbarItems = (props: ToolbarProps) => {
-  const metricTypes: SnapshotMetricType[] = [
-    'sqsMessagesVisible',
-    'sqsMessagesDelayed',
-    'sqsMessagesSent',
-    'sqsMessagesEmpty',
-    'sqsOldestMessage',
-  ];
-  const groupByFields = ['cloud.region'];
   return (
     <>
       <CloudToolbarItems {...props} />
       <MetricsAndGroupByToolbarItems
         {...props}
-        metricTypes={metricTypes}
-        groupByFields={groupByFields}
+        metricTypes={sqsMetricTypes}
+        groupByFields={sqsGroupByFields}
       />
     </>
   );

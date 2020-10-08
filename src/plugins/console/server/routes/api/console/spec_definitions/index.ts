@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IRouter, RequestHandler } from 'kibana/server';
-import { SpecDefinitionsService } from '../../../../services';
+import { RequestHandler } from 'kibana/server';
+import { RouteDependencies } from '../../../';
 
 interface SpecDefinitionsRouteResponse {
   es: {
@@ -27,16 +27,10 @@ interface SpecDefinitionsRouteResponse {
   };
 }
 
-export const registerSpecDefinitionsRoute = ({
-  router,
-  services,
-}: {
-  router: IRouter;
-  services: { specDefinitions: SpecDefinitionsService };
-}) => {
+export const registerSpecDefinitionsRoute = ({ router, services }: RouteDependencies) => {
   const handler: RequestHandler = async (ctx, request, response) => {
     const specResponse: SpecDefinitionsRouteResponse = {
-      es: services.specDefinitions.asJson(),
+      es: services.specDefinitionService.asJson(),
     };
 
     return response.ok({

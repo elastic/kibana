@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SavedObjectsClientContract } from 'src/core/server';
 import {
-  AssetReference,
-  Dataset,
+  EsAssetReference,
+  RegistryDataStream,
   ElasticsearchAssetType,
-  IngestAssetType,
-  RegistryPackage,
+  InstallablePackage,
 } from '../../../../types';
 import * as Registry from '../../registry';
 import { CallESAsCurrentUser } from '../../../../types';
+import { saveInstalledEsRefs } from '../../packages/install';
 
 interface RewriteSubstitution {
   source: string;
@@ -21,34 +22,56 @@ interface RewriteSubstitution {
 }
 
 export const installPipelines = async (
-  registryPackage: RegistryPackage,
-  callCluster: CallESAsCurrentUser
+  installablePackage: InstallablePackage,
+  paths: string[],
+  callCluster: CallESAsCurrentUser,
+  savedObjectsClient: SavedObjectsClientContract
 ) => {
-  const datasets = registryPackage.datasets;
-  if (datasets) {
-    const pipelines = datasets.reduce<Array<Promise<AssetReference[]>>>((acc, dataset) => {
-      if (dataset.ingest_pipeline) {
-        acc.push(
-          installPipelinesForDataset({
-            dataset,
-            callCluster,
-            pkgName: registryPackage.name,
-            pkgVersion: registryPackage.version,
-          })
-        );
-      }
-      return acc;
-    }, []);
-    return Promise.all(pipelines).then(results => results.flat());
-  }
-  return [];
+  // unlike other ES assets, pipeline names are versioned so after a template is updated
+  // it can be created pointing to the new template, without removing the old one and effecting data
+  // so do not remove the currently installed pipelines here
+  const dataStreams = installablePackage.data_streams;
+  if (!dataStreams?.length) return [];
+  const pipelinePaths = paths.filter((path) => isPipeline(path));
+  // get and save pipeline refs before installing pipelines
+  const pipelineRefs = dataStreams.reduce<EsAssetReference[]>((acc, dataStream) => {
+    const filteredPaths = pipelinePaths.filter((path) =>
+      isDataStreamPipeline(path, dataStream.path)
+    );
+    const pipelineObjectRefs = filteredPaths.map((path) => {
+      const { name } = getNameAndExtension(path);
+      const nameForInstallation = getPipelineNameForInstallation({
+        pipelineName: name,
+        dataStream,
+        packageVersion: installablePackage.version,
+      });
+      return { id: nameForInstallation, type: ElasticsearchAssetType.ingestPipeline };
+    });
+    acc.push(...pipelineObjectRefs);
+    return acc;
+  }, []);
+  await saveInstalledEsRefs(savedObjectsClient, installablePackage.name, pipelineRefs);
+  const pipelines = dataStreams.reduce<Array<Promise<EsAssetReference[]>>>((acc, dataStream) => {
+    if (dataStream.ingest_pipeline) {
+      acc.push(
+        installPipelinesForDataStream({
+          dataStream,
+          callCluster,
+          paths: pipelinePaths,
+          pkgVersion: installablePackage.version,
+        })
+      );
+    }
+    return acc;
+  }, []);
+  return await Promise.all(pipelines).then((results) => results.flat());
 };
 
 export function rewriteIngestPipeline(
   pipeline: string,
   substitutions: RewriteSubstitution[]
 ): string {
-  substitutions.forEach(sub => {
+  substitutions.forEach((sub) => {
     const { source, target, templateFunction } = sub;
     // This fakes the use of the golang text/template expression {{SomeTemplateFunction 'some-param'}}
     // cf. https://github.com/elastic/beats/blob/master/filebeat/fileset/fileset.go#L294
@@ -65,30 +88,26 @@ export function rewriteIngestPipeline(
   return pipeline;
 }
 
-export async function installPipelinesForDataset({
+export async function installPipelinesForDataStream({
   callCluster,
-  pkgName,
   pkgVersion,
-  dataset,
+  paths,
+  dataStream,
 }: {
   callCluster: CallESAsCurrentUser;
-  pkgName: string;
   pkgVersion: string;
-  dataset: Dataset;
-}): Promise<AssetReference[]> {
-  const pipelinePaths = await Registry.getArchiveInfo(
-    pkgName,
-    pkgVersion,
-    (entry: Registry.ArchiveEntry) => isDatasetPipeline(entry, dataset.path)
-  );
+  paths: string[];
+  dataStream: RegistryDataStream;
+}): Promise<EsAssetReference[]> {
+  const pipelinePaths = paths.filter((path) => isDataStreamPipeline(path, dataStream.path));
   let pipelines: any[] = [];
   const substitutions: RewriteSubstitution[] = [];
 
-  pipelinePaths.forEach(path => {
+  pipelinePaths.forEach((path) => {
     const { name, extension } = getNameAndExtension(path);
     const nameForInstallation = getPipelineNameForInstallation({
       pipelineName: name,
-      dataset,
+      dataStream,
       packageVersion: pkgVersion,
     });
     const content = Registry.getAsset(path).toString('utf-8');
@@ -105,14 +124,14 @@ export async function installPipelinesForDataset({
     });
   });
 
-  pipelines = pipelines.map(pipeline => {
+  pipelines = pipelines.map((pipeline) => {
     return {
       ...pipeline,
       contentForInstallation: rewriteIngestPipeline(pipeline.content, substitutions),
     };
   });
 
-  const installationPromises = pipelines.map(async pipeline => {
+  const installationPromises = pipelines.map(async (pipeline) => {
     return installPipeline({ callCluster, pipeline });
   });
 
@@ -125,7 +144,7 @@ async function installPipeline({
 }: {
   callCluster: CallESAsCurrentUser;
   pipeline: any;
-}): Promise<AssetReference> {
+}): Promise<EsAssetReference> {
   const callClusterParams: {
     method: string;
     path: string;
@@ -139,7 +158,12 @@ async function installPipeline({
     body: pipeline.contentForInstallation,
   };
   if (pipeline.extension === 'yml') {
-    callClusterParams.headers = { ['Content-Type']: 'application/yaml' };
+    callClusterParams.headers = {
+      // pipeline is YAML
+      'Content-Type': 'application/yaml',
+      // but we want JSON responses (to extract error messages, status code, or other metadata)
+      Accept: 'application/json',
+    };
   }
 
   // This uses the catch-all endpoint 'transport.request' because we have to explicitly
@@ -148,19 +172,23 @@ async function installPipeline({
   // which we could otherwise use.
   // See src/core/server/elasticsearch/api_types.ts for available endpoints.
   await callCluster('transport.request', callClusterParams);
-  return { id: pipeline.nameForInstallation, type: IngestAssetType.IngestPipeline };
+  return { id: pipeline.nameForInstallation, type: ElasticsearchAssetType.ingestPipeline };
 }
 
 const isDirectory = ({ path }: Registry.ArchiveEntry) => path.endsWith('/');
-const isDatasetPipeline = ({ path }: Registry.ArchiveEntry, datasetName: string) => {
-  // TODO: better way to get particular assets
+
+const isDataStreamPipeline = (path: string, dataStreamDataset: string) => {
   const pathParts = Registry.pathParts(path);
   return (
     !isDirectory({ path }) &&
     pathParts.type === ElasticsearchAssetType.ingestPipeline &&
     pathParts.dataset !== undefined &&
-    datasetName === pathParts.dataset
+    dataStreamDataset === pathParts.dataset
   );
+};
+const isPipeline = (path: string) => {
+  const pathParts = Registry.pathParts(path);
+  return pathParts.type === ElasticsearchAssetType.ingestPipeline;
 };
 
 // XXX: assumes path/to/file.ext -- 0..n '/' and exactly one '.'
@@ -180,15 +208,15 @@ const getNameAndExtension = (
 
 export const getPipelineNameForInstallation = ({
   pipelineName,
-  dataset,
+  dataStream,
   packageVersion,
 }: {
   pipelineName: string;
-  dataset: Dataset;
+  dataStream: RegistryDataStream;
   packageVersion: string;
 }): string => {
-  const isPipelineEntry = pipelineName === dataset.ingest_pipeline;
+  const isPipelineEntry = pipelineName === dataStream.ingest_pipeline;
   const suffix = isPipelineEntry ? '' : `-${pipelineName}`;
   // if this is the pipeline entry, don't add a suffix
-  return `${dataset.type}-${dataset.id}-${packageVersion}${suffix}`;
+  return `${dataStream.type}-${dataStream.dataset}-${packageVersion}${suffix}`;
 };

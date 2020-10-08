@@ -1,6 +1,24 @@
 {
   "id": "discover",
   "version": "kibana",
-  "server": false,
-  "ui": true
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [
+    "charts",
+    "data",
+    "embeddable",
+    "inspector",
+    "kibanaLegacy",
+    "urlForwarding",
+    "navigation",
+    "uiActions",
+    "visualizations"
+  ],
+  "optionalPlugins": ["home", "share"],
+  "requiredBundles": [
+    "kibanaUtils",
+    "home",
+    "savedObjects",
+    "kibanaReact"
+  ]
 }

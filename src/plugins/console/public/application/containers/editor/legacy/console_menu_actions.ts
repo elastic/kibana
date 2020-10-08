@@ -23,17 +23,14 @@ import { SenseEditor } from '../../../models/sense_editor';
 export async function autoIndent(editor: SenseEditor, event: Event) {
   event.preventDefault();
   await editor.autoIndent();
-  editor
-    .getCoreEditor()
-    .getContainer()
-    .focus();
+  editor.getCoreEditor().getContainer().focus();
 }
 
 export function getDocumentation(
   editor: SenseEditor,
   docLinkVersion: string
 ): Promise<string | null> {
-  return editor.getRequestsInRange().then(requests => {
+  return editor.getRequestsInRange().then((requests) => {
     if (!requests || requests.length === 0) {
       return null;
     }

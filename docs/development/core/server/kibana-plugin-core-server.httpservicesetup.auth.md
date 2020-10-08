@@ -4,11 +4,15 @@
 
 ## HttpServiceSetup.auth property
 
+> Warning: This API is now obsolete.
+> 
+> use [the start contract](./kibana-plugin-core-server.httpservicestart.auth.md) instead.
+> 
+
+Auth status. See [HttpAuth](./kibana-plugin-core-server.httpauth.md)
+
 <b>Signature:</b>
 
 ```typescript
-auth: {
-        get: GetAuthState;
-        isAuthenticated: IsAuthenticated;
-    };
+auth: HttpAuth;
 ```

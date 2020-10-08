@@ -19,7 +19,7 @@
 
 import { STACK_ACCESSORS, STACKED_OPTIONS } from '../../../constants';
 
-export const getStackAccessors = stack => {
+export const getStackAccessors = (stack) => {
   switch (stack) {
     case STACKED_OPTIONS.STACKED:
     case STACKED_OPTIONS.STACKED_WITHIN_SERIES:

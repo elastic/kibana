@@ -64,7 +64,7 @@ export class TooltipHeader extends Component {
     countByLayerId.forEach((count, layerId) => {
       layers.push(this.props.findLayerById(layerId));
     });
-    const layerNamePromises = layers.map(layer => {
+    const layerNamePromises = layers.map((layer) => {
       return layer.getDisplayName();
     });
     const layerNames = await Promise.all(layerNamePromises);
@@ -88,12 +88,12 @@ export class TooltipHeader extends Component {
     }
   };
 
-  _onPageChange = pageNumber => {
+  _onPageChange = (pageNumber) => {
     this.setState({ pageNumber });
     this.props.setCurrentFeature(this.state.filteredFeatures[pageNumber]);
   };
 
-  _onLayerChange = e => {
+  _onLayerChange = (e) => {
     const newLayerId = e.target.value;
     if (this.state.selectedLayerId === newLayerId) {
       return;
@@ -102,7 +102,7 @@ export class TooltipHeader extends Component {
     const filteredFeatures =
       newLayerId === ALL_LAYERS
         ? this.props.features
-        : this.props.features.filter(feature => {
+        : this.props.features.filter((feature) => {
             return feature.layerId === newLayerId;
           });
 

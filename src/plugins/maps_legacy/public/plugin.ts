@@ -18,14 +18,16 @@
  */
 
 // @ts-ignore
-import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
 // @ts-ignore
-import { setToasts, setUiSettings, setInjectedVarFunc } from './kibana_services';
-// @ts-ignore
-import { ServiceSettings } from './map/service_settings';
+import { setToasts, setUiSettings, setKibanaVersion, setMapsLegacyConfig } from './kibana_services';
 // @ts-ignore
 import { getPrecision, getZoomPrecision } from './map/precision';
 import { MapsLegacyPluginSetup, MapsLegacyPluginStart } from './index';
+import { MapsLegacyConfig } from '../config';
+// @ts-ignore
+import { BaseMapsVisualizationProvider } from './map/base_maps_visualization';
+import { getServiceSettings } from './get_service_settings';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -33,23 +35,43 @@ import { MapsLegacyPluginSetup, MapsLegacyPluginStart } from './index';
  * @public
  */
 
+export const bindSetupCoreAndPlugins = (
+  core: CoreSetup,
+  config: MapsLegacyConfig,
+  kibanaVersion: string
+) => {
+  setToasts(core.notifications.toasts);
+  setUiSettings(core.uiSettings);
+  setKibanaVersion(kibanaVersion);
+  setMapsLegacyConfig(config);
+};
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MapsLegacySetupDependencies {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MapsLegacyStartDependencies {}
 
 export class MapsLegacyPlugin implements Plugin<MapsLegacyPluginSetup, MapsLegacyPluginStart> {
-  constructor() {}
+  readonly _initializerContext: PluginInitializerContext<MapsLegacyConfig>;
+
+  constructor(initializerContext: PluginInitializerContext<MapsLegacyConfig>) {
+    this._initializerContext = initializerContext;
+  }
 
   public setup(core: CoreSetup, plugins: MapsLegacySetupDependencies) {
-    setToasts(core.notifications.toasts);
-    setUiSettings(core.uiSettings);
-    setInjectedVarFunc(core.injectedMetadata.getInjectedVar);
+    const config = this._initializerContext.config.get<MapsLegacyConfig>();
+    const kibanaVersion = this._initializerContext.env.packageInfo.version;
+
+    bindSetupCoreAndPlugins(core, config, kibanaVersion);
+
+    const getBaseMapsVis = () => new BaseMapsVisualizationProvider();
 
     return {
-      serviceSettings: new ServiceSettings(),
+      getServiceSettings,
       getZoomPrecision,
       getPrecision,
+      config,
+      getBaseMapsVis,
     };
   }
 

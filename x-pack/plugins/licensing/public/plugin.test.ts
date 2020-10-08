@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { take } from 'rxjs/operators';
+import { take, toArray } from 'rxjs/operators';
 import { mountExpiredBannerMock } from './plugin.test.mocks';
 
 import { LicenseType } from '../common/types';
@@ -15,6 +15,7 @@ import { licenseMock } from '../common/licensing.mock';
 import { coreMock } from '../../../../src/core/public/mocks';
 import { HttpInterceptor } from 'src/core/public';
 
+const coreStart = coreMock.createStart();
 describe('licensing plugin', () => {
   let plugin: LicensingPlugin;
 
@@ -23,7 +24,7 @@ describe('licensing plugin', () => {
     await plugin.stop();
   });
 
-  describe('#setup', () => {
+  describe('#start', () => {
     describe('#refresh', () => {
       it('forces data re-fetch', async () => {
         const sessionStorage = coreMock.createStorage();
@@ -38,10 +39,11 @@ describe('licensing plugin', () => {
         });
         coreSetup.http.get.mockResolvedValueOnce(firstLicense).mockResolvedValueOnce(secondLicense);
 
-        const { license$, refresh } = await plugin.setup(coreSetup);
+        await plugin.setup(coreSetup);
+        const { license$, refresh } = await plugin.start(coreStart);
 
         let fromObservable;
-        license$.subscribe(license => (fromObservable = license));
+        license$.subscribe((license) => (fromObservable = license));
 
         const licenseResult = await refresh();
         expect(licenseResult.uid).toBe('first');
@@ -60,7 +62,8 @@ describe('licensing plugin', () => {
         const fetchedLicense = licenseMock.createLicense();
         coreSetup.http.get.mockResolvedValue(fetchedLicense);
 
-        const { refresh } = await plugin.setup(coreSetup);
+        await plugin.setup(coreSetup);
+        const { refresh } = await plugin.start(coreStart);
 
         await refresh();
 
@@ -78,7 +81,8 @@ describe('licensing plugin', () => {
         plugin = new LicensingPlugin(coreMock.createPluginInitializerContext(), sessionStorage);
 
         const coreSetup = coreMock.createSetup();
-        const { license$ } = await plugin.setup(coreSetup);
+        await plugin.setup(coreSetup);
+        const { license$ } = await plugin.start(coreStart);
 
         const license = await license$.pipe(take(1)).toPromise();
         expect(license.isAvailable).toBe(true);
@@ -88,7 +92,7 @@ describe('licensing plugin', () => {
         expect(sessionStorage.getItem).toHaveBeenCalledWith(licensingSessionStorageKey);
       });
 
-      it('observable receives updated licenses', async done => {
+      it('observable receives updated licenses', async () => {
         const types: LicenseType[] = ['gold', 'platinum'];
 
         const sessionStorage = coreMock.createStorage();
@@ -99,24 +103,18 @@ describe('licensing plugin', () => {
         coreSetup.http.get.mockImplementation(() =>
           Promise.resolve(licenseMock.createLicense({ license: { type: types.shift() } }))
         );
-        const { license$, refresh } = await plugin.setup(coreSetup);
 
-        let i = 0;
-        license$.subscribe(value => {
-          i++;
-          if (i === 1) {
-            expect(value.type).toBe('basic');
-            refresh();
-          } else if (i === 2) {
-            expect(value.type).toBe('gold');
-            refresh();
-          } else if (i === 3) {
-            expect(value.type).toBe('platinum');
-            done();
-          } else {
-            throw new Error('unreachable');
-          }
-        });
+        plugin.setup(coreSetup);
+        const { refresh, license$ } = await plugin.start(coreStart);
+        const promise = license$.pipe(take(3), toArray()).toPromise();
+
+        await refresh();
+        await refresh();
+
+        const licenses = await promise;
+        expect(licenses[0].type).toBe('basic');
+        expect(licenses[1].type).toBe('gold');
+        expect(licenses[2].type).toBe('platinum');
       });
 
       it('saved fetched license & signature in session storage', async () => {
@@ -128,7 +126,8 @@ describe('licensing plugin', () => {
         const fetchedLicense = licenseMock.createLicense({ license: { uid: 'fresh' } });
         coreSetup.http.get.mockResolvedValue(fetchedLicense);
 
-        const { license$, refresh } = await plugin.setup(coreSetup);
+        await plugin.setup(coreSetup);
+        const { license$, refresh } = await plugin.start(coreStart);
 
         await refresh();
         const license = await license$.pipe(take(1)).toPromise();
@@ -153,7 +152,8 @@ describe('licensing plugin', () => {
         const coreSetup = coreMock.createSetup();
         coreSetup.http.get.mockRejectedValue(new Error('reason'));
 
-        const { license$, refresh } = await plugin.setup(coreSetup);
+        await plugin.setup(coreSetup);
+        const { license$, refresh } = await plugin.start(coreStart);
         await refresh();
 
         const license = await license$.pipe(take(1)).toPromise();
@@ -169,7 +169,8 @@ describe('licensing plugin', () => {
         const coreSetup = coreMock.createSetup();
         coreSetup.http.get.mockRejectedValue(new Error('sorry'));
 
-        const { license$, refresh } = await plugin.setup(coreSetup);
+        await plugin.setup(coreSetup);
+        const { license$, refresh } = await plugin.start(coreStart);
         expect(sessionStorage.removeItem).toHaveBeenCalledTimes(0);
 
         await refresh();
@@ -206,7 +207,8 @@ describe('licensing plugin', () => {
         return () => undefined;
       });
 
-      const { license$ } = await plugin.setup(coreSetup);
+      await plugin.setup(coreSetup);
+      const { license$ } = await plugin.start(coreStart);
       expect(registeredInterceptor!.response).toBeDefined();
 
       const httpResponse = {
@@ -284,7 +286,8 @@ describe('licensing plugin', () => {
         return () => undefined;
       });
 
-      const { license$ } = await plugin.setup(coreSetup);
+      await plugin.setup(coreSetup);
+      const { license$ } = await plugin.start(coreStart);
 
       let updated = false;
       license$.subscribe(() => (updated = true));
@@ -326,10 +329,8 @@ describe('licensing plugin', () => {
         licenseMock.createLicense({ license: { status: 'active', type: 'gold' } })
       );
 
-      const { refresh } = await plugin.setup(coreSetup);
-
-      const coreStart = coreMock.createStart();
-      await plugin.start(coreStart);
+      await plugin.setup(coreSetup);
+      const { refresh } = await plugin.start(coreStart);
 
       await refresh();
       expect(coreStart.overlays.banners.add).toHaveBeenCalledTimes(0);
@@ -352,10 +353,8 @@ describe('licensing plugin', () => {
         .mockResolvedValueOnce(activeLicense)
         .mockResolvedValueOnce(expiredLicense);
 
-      const { refresh } = await plugin.setup(coreSetup);
-
-      const coreStart = coreMock.createStart();
-      await plugin.start(coreStart);
+      await plugin.setup(coreSetup);
+      const { refresh } = await plugin.start(coreStart);
 
       await refresh();
       expect(coreStart.overlays.banners.add).toHaveBeenCalledTimes(0);
@@ -367,7 +366,7 @@ describe('licensing plugin', () => {
       expect(coreStart.overlays.banners.add).toHaveBeenCalledTimes(1);
       expect(mountExpiredBannerMock).toHaveBeenCalledWith({
         type: 'gold',
-        uploadUrl: '/app/kibana#/management/elasticsearch/license_management/upload_license',
+        uploadUrl: '/app/management/stack/license_management/upload_license',
       });
     });
   });
@@ -377,7 +376,8 @@ describe('licensing plugin', () => {
       const sessionStorage = coreMock.createStorage();
       plugin = new LicensingPlugin(coreMock.createPluginInitializerContext(), sessionStorage);
       const coreSetup = coreMock.createSetup();
-      const { license$ } = await plugin.setup(coreSetup);
+      await plugin.setup(coreSetup);
+      const { license$ } = await plugin.start(coreStart);
 
       let completed = false;
       license$.subscribe({ complete: () => (completed = true) });

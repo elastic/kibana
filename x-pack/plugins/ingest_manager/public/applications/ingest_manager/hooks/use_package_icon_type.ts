@@ -6,7 +6,7 @@
 
 import { useEffect, useState } from 'react';
 import { ICON_TYPES } from '@elastic/eui';
-import { PackageInfo, PackageListItem } from '../../../../common/types/models';
+import { PackageInfo, PackageListItem } from '../types';
 import { useLinks } from '../sections/epm/hooks';
 import { sendGetPackageInfoByKey } from './index';
 
@@ -39,15 +39,17 @@ export const usePackageIconType = ({
       setIconType(CACHED_ICONS.get(pkgKey) || '');
       return;
     }
-    const svgIcons = (paramIcons || iconList)?.filter(iconDef => iconDef.type === 'image/svg+xml');
-    const localIconSrc = Array.isArray(svgIcons) && svgIcons[0]?.src;
+    const svgIcons = (paramIcons || iconList)?.filter(
+      (iconDef) => iconDef.type === 'image/svg+xml'
+    );
+    const localIconSrc = Array.isArray(svgIcons) && (svgIcons[0].path || svgIcons[0].src);
     if (localIconSrc) {
       CACHED_ICONS.set(pkgKey, toImage(localIconSrc));
       setIconType(CACHED_ICONS.get(pkgKey) || '');
       return;
     }
 
-    const euiLogoIcon = ICON_TYPES.find(key => key.toLowerCase() === `logo${packageName}`);
+    const euiLogoIcon = ICON_TYPES.find((key) => key.toLowerCase() === `logo${packageName}`);
     if (euiLogoIcon) {
       CACHED_ICONS.set(pkgKey, euiLogoIcon);
       setIconType(euiLogoIcon);
@@ -56,8 +58,8 @@ export const usePackageIconType = ({
 
     if (tryApi && !paramIcons && !iconList) {
       sendGetPackageInfoByKey(pkgKey)
-        .catch(error => undefined) // Ignore API errors
-        .then(res => {
+        .catch((error) => undefined) // Ignore API errors
+        .then((res) => {
           CACHED_ICONS.delete(pkgKey);
           setIconList(res?.data?.response?.icons);
         });

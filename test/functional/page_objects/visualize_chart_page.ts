@@ -40,11 +40,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       const $ = await xAxis.parseDomContent();
       return $('.x > g > text')
         .toArray()
-        .map(tick =>
-          $(tick)
-            .text()
-            .trim()
-        );
+        .map((tick) => $(tick).text().trim());
     }
 
     public async getYAxisLabels() {
@@ -52,11 +48,11 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       const $ = await yAxis.parseDomContent();
       return $('.y > g > text')
         .toArray()
-        .map(tick =>
-          $(tick)
-            .text()
-            .trim()
-        );
+        .map((tick) => $(tick).text().trim());
+    }
+
+    public async getYAxisLabelsAsNumbers() {
+      return (await this.getYAxisLabels()).map((label) => Number(label.replace(',', '')));
     }
 
     /**
@@ -137,7 +133,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       );
       // 4). for each chart element, find the green circle, then the cy position
       const chartData = await Promise.all(
-        chartTypes.map(async chart => {
+        chartTypes.map(async (chart) => {
           const cy = Number(await chart.getAttribute('cy'));
           // the point_series_options test has data in the billions range and
           // getting 11 digits of precision with these calculations is very hard
@@ -159,7 +155,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       const $ = await svg.parseDomContent();
       const chartData = $(`g > g.series > rect[data-label="${dataLabel}"]`)
         .toArray()
-        .map(chart => {
+        .map((chart) => {
           const barHeight = Number($(chart).attr('height'));
           return Math.round(barHeight * yAxisRatio);
         });
@@ -248,7 +244,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
         const firstCount = await this.getVisualizationRenderingCount();
         log.debug(`-- firstCount=${firstCount}`);
 
-        await common.sleep(1000);
+        await common.sleep(2000);
 
         const secondCount = await this.getVisualizationRenderingCount();
         log.debug(`-- secondCount=${secondCount}`);
@@ -268,7 +264,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
         defaultFindTimeout * 2
       );
       return await Promise.all(
-        legendEntries.map(async chart => await chart.getAttribute('data-label'))
+        legendEntries.map(async (chart) => await chart.getAttribute('data-label'))
       );
     }
 
@@ -310,8 +306,23 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       return element.getVisibleText();
     }
 
+    public async getFieldLinkInVisTable(fieldName: string, rowIndex: number = 1) {
+      const tableVis = await testSubjects.find('tableVis');
+      const $ = await tableVis.parseDomContent();
+      const headers = $('span[ng-bind="::col.title"]')
+        .toArray()
+        .map((header: any) => $(header).text());
+      const fieldColumnIndex = headers.indexOf(fieldName);
+      return await find.byCssSelector(
+        `[data-test-subj="paginated-table-body"] tr:nth-of-type(${rowIndex}) td:nth-of-type(${
+          fieldColumnIndex + 1
+        }) a`
+      );
+    }
+
     /**
      * If you are writing new tests, you should rather look into getTableVisContent method instead.
+     * @deprecated Use getTableVisContent instead.
      */
     public async getTableVisData() {
       return await testSubjects.getVisibleText('paginated-table-body');
@@ -332,10 +343,12 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
         }
 
         const allData = await Promise.all(
-          allTables.map(async t => {
+          allTables.map(async (t) => {
             let data = await table.getDataFromElement(t);
             if (stripEmptyRows) {
-              data = data.filter(row => row.length > 0 && row.some(cell => cell.trim().length > 0));
+              data = data.filter(
+                (row) => row.length > 0 && row.some((cell) => cell.trim().length > 0)
+              );
             }
             return data;
           })
@@ -357,13 +370,13 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
         '[data-test-subj="visualizationLoader"] .mtrVis__container'
       );
       const values = await Promise.all(
-        elements.map(async element => {
+        elements.map(async (element) => {
           const text = await element.getVisibleText();
           return text;
         })
       );
       return values
-        .filter(item => item.length > 0)
+        .filter((item) => item.length > 0)
         .reduce((arr: string[], item) => arr.concat(item.split('\n')), []);
     }
 
@@ -372,12 +385,48 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
         '[data-test-subj="visualizationLoader"] .chart svg text'
       );
       const values = await Promise.all(
-        elements.map(async element => {
+        elements.map(async (element) => {
           const text = await element.getVisibleText();
           return text;
         })
       );
-      return values.filter(item => item.length > 0);
+      return values.filter((item) => item.length > 0);
+    }
+
+    public async getRightValueAxes() {
+      const axes = await find.allByCssSelector('.visAxis__column--right g.axis');
+      return axes.length;
+    }
+
+    public async getHistogramSeries() {
+      const series = await find.allByCssSelector('.series.histogram');
+      return series.length;
+    }
+
+    public async getGridLines(): Promise<Array<{ x: number; y: number }>> {
+      const grid = await find.byCssSelector('g.grid');
+      const $ = await grid.parseDomContent();
+      return $('path')
+        .toArray()
+        .map((line) => {
+          const dAttribute = $(line).attr('d');
+          const firstPoint = dAttribute.split('L')[0].replace('M', '').split(',');
+          return {
+            x: parseFloat(firstPoint[0]),
+            y: parseFloat(firstPoint[1]),
+          };
+        });
+    }
+
+    public async getChartValues() {
+      const elements = await find.allByCssSelector('.series.histogram text');
+      const values = await Promise.all(
+        elements.map(async (element) => {
+          const text = await element.getVisibleText();
+          return text;
+        })
+      );
+      return values;
     }
   }
 

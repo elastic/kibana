@@ -7,83 +7,131 @@
 import uuid from 'uuid';
 import { SavedObjectsClientContract } from 'src/core/server';
 import { CallESAsCurrentUser } from '../types';
-import { agentConfigService } from './agent_config';
+import { agentPolicyService } from './agent_policy';
 import { outputService } from './output';
-import { ensureInstalledDefaultPackages } from './epm/packages/install';
 import {
-  packageToConfigDatasource,
-  Datasource,
-  AgentConfig,
+  ensureInstalledDefaultPackages,
+  ensurePackagesCompletedInstall,
+} from './epm/packages/install';
+import { ensureDefaultIndices } from './epm/kibana/index_pattern/install';
+import {
+  packageToPackagePolicy,
+  PackagePolicy,
+  AgentPolicy,
   Installation,
   Output,
-  DEFAULT_AGENT_CONFIGS_PACKAGES,
+  DEFAULT_AGENT_POLICIES_PACKAGES,
 } from '../../common';
+import { SO_SEARCH_LIMIT } from '../constants';
 import { getPackageInfo } from './epm/packages';
-import { datasourceService } from './datasource';
+import { packagePolicyService } from './package_policy';
 import { generateEnrollmentAPIKey } from './api_keys';
+import { settingsService } from '.';
+import { awaitIfPending } from './setup_utils';
+import { createDefaultSettings } from './settings';
 
 const FLEET_ENROLL_USERNAME = 'fleet_enroll';
 const FLEET_ENROLL_ROLE = 'fleet_enroll';
 
+export interface SetupStatus {
+  isIntialized: true | undefined;
+}
+
 export async function setupIngestManager(
   soClient: SavedObjectsClientContract,
   callCluster: CallESAsCurrentUser
-) {
-  const [installedPackages, defaultOutput, config] = await Promise.all([
+): Promise<SetupStatus> {
+  return awaitIfPending(async () => createSetupSideEffects(soClient, callCluster));
+}
+
+async function createSetupSideEffects(
+  soClient: SavedObjectsClientContract,
+  callCluster: CallESAsCurrentUser
+): Promise<SetupStatus> {
+  const [installedPackages, defaultOutput, defaultAgentPolicy] = await Promise.all([
     // packages installed by default
     ensureInstalledDefaultPackages(soClient, callCluster),
     outputService.ensureDefaultOutput(soClient),
-    agentConfigService.ensureDefaultAgentConfig(soClient),
+    agentPolicyService.ensureDefaultAgentPolicy(soClient),
+    ensurePackagesCompletedInstall(soClient, callCluster),
+    ensureDefaultIndices(callCluster),
+    settingsService.getSettings(soClient).catch((e: any) => {
+      if (e.isBoom && e.output.statusCode === 404) {
+        const defaultSettings = createDefaultSettings();
+        return settingsService.saveSettings(soClient, defaultSettings);
+      }
+
+      return Promise.reject(e);
+    }),
   ]);
 
   // ensure default packages are added to the default conifg
-  const configWithDatasource = await agentConfigService.get(soClient, config.id, true);
-  if (!configWithDatasource) {
-    throw new Error('Config not found');
+  const agentPolicyWithPackagePolicies = await agentPolicyService.get(
+    soClient,
+    defaultAgentPolicy.id,
+    true
+  );
+  if (!agentPolicyWithPackagePolicies) {
+    throw new Error('Policy not found');
   }
   if (
-    configWithDatasource.datasources.length &&
-    typeof configWithDatasource.datasources[0] === 'string'
+    agentPolicyWithPackagePolicies.package_policies.length &&
+    typeof agentPolicyWithPackagePolicies.package_policies[0] === 'string'
   ) {
-    throw new Error('Config not found');
+    throw new Error('Policy not found');
   }
   for (const installedPackage of installedPackages) {
-    const packageShouldBeInstalled = DEFAULT_AGENT_CONFIGS_PACKAGES.some(
-      packageName => installedPackage.name === packageName
+    const packageShouldBeInstalled = DEFAULT_AGENT_POLICIES_PACKAGES.some(
+      (packageName) => installedPackage.name === packageName
     );
     if (!packageShouldBeInstalled) {
       continue;
     }
 
-    const isInstalled = configWithDatasource.datasources.some((d: Datasource | string) => {
-      return typeof d !== 'string' && d.package?.name === installedPackage.name;
-    });
+    const isInstalled = agentPolicyWithPackagePolicies.package_policies.some(
+      (d: PackagePolicy | string) => {
+        return typeof d !== 'string' && d.package?.name === installedPackage.name;
+      }
+    );
 
     if (!isInstalled) {
-      await addPackageToConfig(soClient, installedPackage, configWithDatasource, defaultOutput);
+      await addPackageToAgentPolicy(
+        soClient,
+        callCluster,
+        installedPackage,
+        agentPolicyWithPackagePolicies,
+        defaultOutput
+      );
     }
   }
+
+  return { isIntialized: true };
 }
 
 export async function setupFleet(
   soClient: SavedObjectsClientContract,
-  callCluster: CallESAsCurrentUser
+  callCluster: CallESAsCurrentUser,
+  options?: { forceRecreate?: boolean }
 ) {
   // Create fleet_enroll role
   // This should be done directly in ES at some point
-  await callCluster('transport.request', {
+  const res = await callCluster('transport.request', {
     method: 'PUT',
     path: `/_security/role/${FLEET_ENROLL_ROLE}`,
     body: {
       cluster: ['monitor', 'manage_api_key'],
       indices: [
         {
-          names: ['logs-*', 'metrics-*', 'events-*'],
-          privileges: ['write', 'create_index'],
+          names: ['logs-*', 'metrics-*', 'events-*', '.ds-logs-*', '.ds-metrics-*', '.ds-events-*'],
+          privileges: ['write', 'create_index', 'indices:admin/auto_create'],
         },
       ],
     },
   });
+  // If the role is already created skip the rest unless you have forceRecreate set to true
+  if (options?.forceRecreate !== true && res.role.created === false) {
+    return;
+  }
   const password = generateRandomPassword();
   // Create fleet enroll user
   await callCluster('transport.request', {
@@ -92,30 +140,54 @@ export async function setupFleet(
     body: {
       password,
       roles: [FLEET_ENROLL_ROLE],
+      metadata: {
+        updated_at: new Date().toISOString(),
+      },
     },
   });
 
+  outputService.invalidateCache();
+
   // save fleet admin user
-  await outputService.updateOutput(soClient, await outputService.getDefaultOutputId(soClient), {
+  const defaultOutputId = await outputService.getDefaultOutputId(soClient);
+  if (!defaultOutputId) {
+    throw new Error('Default output does not exist');
+  }
+
+  await outputService.updateOutput(soClient, defaultOutputId, {
     fleet_enroll_username: FLEET_ENROLL_USERNAME,
     fleet_enroll_password: password,
   });
 
-  // Generate default enrollment key
-  await generateEnrollmentAPIKey(soClient, {
-    name: 'Default',
-    configId: await agentConfigService.getDefaultAgentConfigId(soClient),
+  const { items: agentPolicies } = await agentPolicyService.list(soClient, {
+    perPage: SO_SEARCH_LIMIT,
   });
+
+  await Promise.all(
+    agentPolicies.map((agentPolicy) => {
+      return generateEnrollmentAPIKey(soClient, {
+        name: `Default`,
+        agentPolicyId: agentPolicy.id,
+      });
+    })
+  );
+
+  await Promise.all(
+    agentPolicies.map((agentPolicy) =>
+      agentPolicyService.createFleetPolicyChangeAction(soClient, agentPolicy.id)
+    )
+  );
 }
 
 function generateRandomPassword() {
   return Buffer.from(uuid.v4()).toString('base64');
 }
 
-async function addPackageToConfig(
+async function addPackageToAgentPolicy(
   soClient: SavedObjectsClientContract,
+  callCluster: CallESAsCurrentUser,
   packageToInstall: Installation,
-  config: AgentConfig,
+  agentPolicy: AgentPolicy,
   defaultOutput: Output
 ) {
   const packageInfo = await getPackageInfo({
@@ -124,17 +196,14 @@ async function addPackageToConfig(
     pkgVersion: packageToInstall.version,
   });
 
-  const newDatasource = packageToConfigDatasource(
+  const newPackagePolicy = packageToPackagePolicy(
     packageInfo,
-    config.id,
+    agentPolicy.id,
     defaultOutput.id,
-    undefined,
-    config.namespace
-  );
-  newDatasource.inputs = await datasourceService.assignPackageStream(
-    { pkgName: packageToInstall.name, pkgVersion: packageToInstall.version },
-    newDatasource.inputs
+    agentPolicy.namespace
   );
 
-  await datasourceService.create(soClient, newDatasource);
+  await packagePolicyService.create(soClient, callCluster, newPackagePolicy, {
+    bumpRevision: false,
+  });
 }

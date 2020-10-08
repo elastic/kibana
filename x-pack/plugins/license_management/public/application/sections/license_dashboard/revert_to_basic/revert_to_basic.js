@@ -62,7 +62,7 @@ export class RevertToBasic extends React.PureComponent {
             <EuiText>{firstLine}</EuiText>
             <EuiText>
               <ul>
-                {messages.map(message => (
+                {messages.map((message) => (
                   <li key={message}>{message}</li>
                 ))}
               </ul>
@@ -82,13 +82,13 @@ export class RevertToBasic extends React.PureComponent {
         <FormattedMessage
           id="xpack.licenseMgmt.licenseDashboard.revertToBasic.revertToFreeFeaturesDescription"
           defaultMessage="You’ll revert to our free features and lose access to
-          machine learning, advanced security, and other {platinumLicenseFeaturesLinkText}."
+          machine learning, advanced security, and other {subscriptionFeaturesLinkText}."
           values={{
-            platinumLicenseFeaturesLinkText: (
+            subscriptionFeaturesLinkText: (
               <EuiLink href={EXTERNAL_LINKS.SUBSCRIPTIONS} target="_blank">
                 <FormattedMessage
-                  id="xpack.licenseMgmt.licenseDashboard.revertToBasic.platinumLicenseFeaturesLinkText"
-                  defaultMessage="Platinum features"
+                  id="xpack.licenseMgmt.licenseDashboard.revertToBasic.subscriptionFeaturesLinkText"
+                  defaultMessage="subscription features"
                 />
               </EuiLink>
             ),

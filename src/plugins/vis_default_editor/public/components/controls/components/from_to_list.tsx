@@ -21,7 +21,7 @@ import React, { useCallback } from 'react';
 import { EuiFieldText, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { Ipv4Address } from '../../../../../kibana_utils/public';
+import { search } from '../../../../../data/public';
 import { InputList, InputListConfig, InputModel, InputObject, InputItem } from './input_list';
 
 const EMPTY_STRING = '';
@@ -49,7 +49,7 @@ const defaultConfig = {
     from: { value: '0.0.0.0', model: '0.0.0.0', isInvalid: false },
     to: { value: '255.255.255.255', model: '255.255.255.255', isInvalid: false },
   },
-  validateClass: Ipv4Address,
+  validateClass: search.aggs.Ipv4Address,
   getModelValue: (item: FromToObject = {}) => ({
     from: {
       value: item.from || EMPTY_STRING,
@@ -90,7 +90,7 @@ function FromToList({ showValidation, onBlur, ...rest }: FromToListProps) {
             compressed
             isInvalid={showValidation ? item.from.isInvalid : false}
             placeholder="*"
-            onChange={ev => {
+            onChange={(ev) => {
               onChangeValue(index, ev.target.value, 'from');
             }}
             value={item.from.value}
@@ -109,7 +109,7 @@ function FromToList({ showValidation, onBlur, ...rest }: FromToListProps) {
             compressed
             isInvalid={showValidation ? item.to.isInvalid : false}
             placeholder="*"
-            onChange={ev => {
+            onChange={(ev) => {
               onChangeValue(index, ev.target.value, 'to');
             }}
             value={item.to.value}

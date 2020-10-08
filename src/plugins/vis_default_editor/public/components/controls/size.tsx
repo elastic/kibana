@@ -59,7 +59,7 @@ function SizeParamEditor({
     >
       <EuiFieldNumber
         value={isUndefined(value) ? '' : value}
-        onChange={ev => setValue(ev.target.value === '' ? '' : parseFloat(ev.target.value))}
+        onChange={(ev) => setValue(ev.target.value === '' ? '' : parseFloat(ev.target.value))}
         fullWidth={true}
         compressed
         isInvalid={showValidation ? !isValid : false}

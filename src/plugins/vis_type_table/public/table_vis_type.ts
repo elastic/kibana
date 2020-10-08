@@ -20,16 +20,19 @@ import { CoreSetup, PluginInitializerContext } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { AggGroupNames } from '../../data/public';
 import { Schemas } from '../../vis_default_editor/public';
-import { Vis } from '../../visualizations/public';
+import { BaseVisTypeOptions } from '../../visualizations/public';
 import { tableVisResponseHandler } from './table_vis_response_handler';
 // @ts-ignore
 import tableVisTemplate from './table_vis.html';
-import { TableOptions } from './components/table_vis_options';
+import { TableOptions } from './components/table_vis_options_lazy';
 import { getTableVisualizationControllerClass } from './vis_controller';
+import { VIS_EVENT_TO_TRIGGER } from '../../../plugins/visualizations/public';
 
-export function getTableVisTypeDefinition(core: CoreSetup, context: PluginInitializerContext) {
+export function getTableVisTypeDefinition(
+  core: CoreSetup,
+  context: PluginInitializerContext
+): BaseVisTypeOptions {
   return {
-    type: 'table',
     name: 'table',
     title: i18n.translate('visTypeTable.tableVisTitle', {
       defaultMessage: 'Data Table',
@@ -39,6 +42,9 @@ export function getTableVisTypeDefinition(core: CoreSetup, context: PluginInitia
       defaultMessage: 'Display values in a table',
     }),
     visualization: getTableVisualizationControllerClass(core, context),
+    getSupportedTriggers: () => {
+      return [VIS_EVENT_TO_TRIGGER.filter];
+    },
     visConfig: {
       defaults: {
         perPage: 10,
@@ -93,7 +99,7 @@ export function getTableVisTypeDefinition(core: CoreSetup, context: PluginInitia
       ]),
     },
     responseHandler: tableVisResponseHandler,
-    hierarchicalData: (vis: Vis) => {
+    hierarchicalData: (vis) => {
       return Boolean(vis.params.showPartialRows || vis.params.showMetricsAtAllLevels);
     },
   };

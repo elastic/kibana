@@ -1,8 +1,0 @@
-{
-  "id": "<%= camelCase(name) %>",
-  "version": "<%= kbnVersion %>",
-  "server": <%= hasServer %>,
-  "ui": <%= hasUi %>,
-  "requiredPlugins": ["navigation"],
-  "optionalPlugins": []
-}

@@ -7,11 +7,13 @@
 import { CaseConfigureResponseRt } from '../../../../../common/api';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
+import { CASE_CONFIGURE_URL } from '../../../../../common/constants';
+import { transformESConnectorToCaseConnector } from '../helpers';
 
-export function initGetCaseConfigure({ caseConfigureService, caseService, router }: RouteDeps) {
+export function initGetCaseConfigure({ caseConfigureService, router }: RouteDeps) {
   router.get(
     {
-      path: '/api/cases/configure',
+      path: CASE_CONFIGURE_URL,
       validate: false,
     },
     async (context, request, response) => {
@@ -20,11 +22,15 @@ export function initGetCaseConfigure({ caseConfigureService, caseService, router
 
         const myCaseConfigure = await caseConfigureService.find({ client });
 
+        const { connector, ...caseConfigureWithoutConnector } = myCaseConfigure.saved_objects[0]
+          ?.attributes ?? { connector: null };
+
         return response.ok({
           body:
             myCaseConfigure.saved_objects.length > 0
               ? CaseConfigureResponseRt.encode({
-                  ...myCaseConfigure.saved_objects[0].attributes,
+                  ...caseConfigureWithoutConnector,
+                  connector: transformESConnectorToCaseConnector(connector),
                   version: myCaseConfigure.saved_objects[0].version ?? '',
                 })
               : {},

@@ -15,7 +15,7 @@ import { LineChartData } from '../../../../../common/chart_loader';
 import { Field, AggFieldPair } from '../../../../../../../../../common/types/fields';
 import { getChartSettings, defaultChartSettings } from '../../../charts/common/settings';
 import { ChartGrid } from './chart_grid';
-import { mlMessageBarService } from '../../../../../../../components/messagebar';
+import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
 
 type DetectorFieldValues = Record<number, string[]>;
 
@@ -81,7 +81,7 @@ export const PopulationDetectorsSummary: FC = () => {
 
         setLineChartsData(resp);
       } catch (error) {
-        mlMessageBarService.notify.error(error);
+        getToastNotificationService().displayErrorToast(error);
         setLineChartsData({});
       }
       setLoadingData(false);
@@ -125,7 +125,7 @@ export const PopulationDetectorsSummary: FC = () => {
 
   function allDataReady() {
     let ready = aggFieldPairList.length > 0;
-    aggFieldPairList.forEach(af => {
+    aggFieldPairList.forEach((af) => {
       if (af.by !== undefined && af.by.field !== null) {
         // if a by field is set, it's only ready when the value is loaded
         ready = ready && af.by.value !== null;

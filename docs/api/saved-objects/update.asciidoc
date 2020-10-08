@@ -49,7 +49,7 @@ Update an existing index pattern object,`my-pattern`, with a different title:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X PUT "localhost:5601/api/saved_objects/index-pattern/my-pattern"
+$ curl -X PUT api/saved_objects/index-pattern/my-pattern
 {
   "attributes": {
     "title": "some-other-pattern-*"

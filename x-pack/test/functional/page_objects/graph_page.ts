@@ -23,7 +23,7 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
   const find = getService('find');
   const log = getService('log');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'header', 'settings']);
+  const PageObjects = getPageObjects(['common', 'header']);
   const retry = getService('retry');
 
   class GraphPage {
@@ -36,6 +36,9 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
         'aria-disabled',
         'false'
       );
+      // Need document focus to not be on `graphDatasourceButton` so its tooltip does not
+      // obscure the next intended click area. Focus the adjaecnt input instead.
+      await testSubjects.click('queryInput');
     }
 
     async clickAddField() {
@@ -83,10 +86,7 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
       return [this.getPositionAsString(x1, y1), this.getPositionAsString(x2, y2)];
     }
 
-    async isolateEdge(edge: Edge) {
-      const from = edge.sourceNode.label;
-      const to = edge.targetNode.label;
-
+    async isolateEdge(from: string, to: string) {
       // select all nodes
       await testSubjects.click('graphSelectAll');
 
@@ -107,13 +107,6 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
 
       // remove all other nodes
       await testSubjects.click('graphRemoveSelection');
-    }
-
-    async clickEdge(edge: Edge) {
-      await this.stopLayout();
-      await PageObjects.common.sleep(1000);
-      await edge.element.click();
-      await this.startLayout();
     }
 
     async stopLayout() {
@@ -207,7 +200,7 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
     }
 
     async getSearchFilter() {
-      const searchFilter = await find.allByCssSelector('.euiFieldSearch');
+      const searchFilter = await find.allByCssSelector('main .euiFieldSearch');
       return searchFilter[0];
     }
 

@@ -5,12 +5,16 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { APICaller } from 'src/core/server';
+import { LegacyAPICaller } from 'src/core/server';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
-async function createPolicy(callAsCurrentUser: APICaller, name: string, phases: any): Promise<any> {
+async function createPolicy(
+  callAsCurrentUser: LegacyAPICaller,
+  name: string,
+  phases: any
+): Promise<any> {
   const body = {
     policy: {
       phases,
@@ -30,11 +34,13 @@ const minAgeSchema = schema.maybe(schema.string());
 
 const setPrioritySchema = schema.maybe(
   schema.object({
-    priority: schema.number(),
+    priority: schema.nullable(schema.number()),
   })
 );
 
 const unfollowSchema = schema.maybe(schema.object({})); // Unfollow has no options
+
+const migrateSchema = schema.maybe(schema.object({ enabled: schema.literal(false) }));
 
 const allocateNodeSchema = schema.maybe(schema.recordOf(schema.string(), schema.string()));
 const allocateSchema = schema.maybe(
@@ -43,6 +49,13 @@ const allocateSchema = schema.maybe(
     include: allocateNodeSchema,
     exclude: allocateNodeSchema,
     require: allocateNodeSchema,
+  })
+);
+
+const forcemergeSchema = schema.maybe(
+  schema.object({
+    max_num_segments: schema.number(),
+    index_codec: schema.maybe(schema.literal('best_compression')),
   })
 );
 
@@ -58,6 +71,7 @@ const hotPhaseSchema = schema.object({
         max_docs: schema.maybe(schema.number()),
       })
     ),
+    forcemerge: forcemergeSchema,
   }),
 });
 
@@ -65,20 +79,17 @@ const warmPhaseSchema = schema.maybe(
   schema.object({
     min_age: minAgeSchema,
     actions: schema.object({
+      migrate: migrateSchema,
       set_priority: setPrioritySchema,
       unfollow: unfollowSchema,
-      read_only: schema.maybe(schema.object({})), // Readonly has no options
+      readonly: schema.maybe(schema.object({})), // Readonly has no options
       allocate: allocateSchema,
       shrink: schema.maybe(
         schema.object({
           number_of_shards: schema.number(),
         })
       ),
-      forcemerge: schema.maybe(
-        schema.object({
-          max_num_segments: schema.number(),
-        })
-      ),
+      forcemerge: forcemergeSchema,
     }),
   })
 );
@@ -87,10 +98,16 @@ const coldPhaseSchema = schema.maybe(
   schema.object({
     min_age: minAgeSchema,
     actions: schema.object({
+      migrate: migrateSchema,
       set_priority: setPrioritySchema,
       unfollow: unfollowSchema,
       allocate: allocateSchema,
       freeze: schema.maybe(schema.object({})), // Freeze has no options
+      searchable_snapshot: schema.maybe(
+        schema.object({
+          snapshot_repository: schema.string(),
+        })
+      ),
     }),
   })
 );
@@ -104,7 +121,11 @@ const deletePhaseSchema = schema.maybe(
           policy: schema.string(),
         })
       ),
-      delete: schema.maybe(schema.object({})), // Delete has no options
+      delete: schema.maybe(
+        schema.object({
+          delete_searchable_snapshot: schema.maybe(schema.boolean()),
+        })
+      ),
     }),
   })
 );
@@ -128,7 +149,11 @@ export function registerCreateRoute({ router, license, lib }: RouteDependencies)
       const { name, phases } = body;
 
       try {
-        await createPolicy(context.core.elasticsearch.dataClient.callAsCurrentUser, name, phases);
+        await createPolicy(
+          context.core.elasticsearch.legacy.client.callAsCurrentUser,
+          name,
+          phases
+        );
         return response.ok();
       } catch (e) {
         if (lib.isEsError(e)) {

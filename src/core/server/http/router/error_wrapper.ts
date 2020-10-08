@@ -20,7 +20,7 @@
 import Boom from 'boom';
 import { RequestHandlerWrapper } from './router';
 
-export const wrapErrors: RequestHandlerWrapper = handler => {
+export const wrapErrors: RequestHandlerWrapper = (handler) => {
   return async (context, request, response) => {
     try {
       return await handler(context, request, response);

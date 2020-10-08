@@ -14,40 +14,58 @@ import {
   TemplatesForm,
   MultipleMappingsWarning,
 } from './components';
-import { IndexSettings } from './types';
+import {
+  OnUpdateHandler,
+  IndexSettings,
+  Field,
+  Mappings,
+  MappingsConfiguration,
+  MappingsTemplates,
+} from './types';
 import { extractMappingsDefinition } from './lib';
-import { State } from './reducer';
-import { MappingsState, Props as MappingsStateProps, Types } from './mappings_state';
-import { IndexSettingsProvider } from './index_settings_context';
-
-interface Props {
-  onUpdate: MappingsStateProps['onUpdate'];
-  defaultValue?: { [key: string]: any };
-  indexSettings?: IndexSettings;
-}
+import { useMappingsState } from './mappings_state_context';
+import { useMappingsStateListener } from './use_state_listener';
+import { useIndexSettings } from './index_settings_context';
 
 type TabName = 'fields' | 'advanced' | 'templates';
 
-export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSettings }: Props) => {
-  const [selectedTab, selectTab] = useState<TabName>('fields');
+interface MappingsEditorParsedMetadata {
+  parsedDefaultValue?: {
+    configuration: MappingsConfiguration;
+    fields: { [key: string]: Field };
+    templates: MappingsTemplates;
+  };
+  multipleMappingsDeclared: boolean;
+}
 
-  const { parsedDefaultValue, multipleMappingsDeclared } = useMemo(() => {
-    const mappingsDefinition = extractMappingsDefinition(defaultValue);
+interface Props {
+  onChange: OnUpdateHandler;
+  value?: { [key: string]: any };
+  indexSettings?: IndexSettings;
+}
+
+export const MappingsEditor = React.memo(({ onChange, value, indexSettings }: Props) => {
+  const { parsedDefaultValue, multipleMappingsDeclared } = useMemo<
+    MappingsEditorParsedMetadata
+  >(() => {
+    const mappingsDefinition = extractMappingsDefinition(value);
 
     if (mappingsDefinition === null) {
       return { multipleMappingsDeclared: true };
     }
 
     const {
-      _source = {},
-      _meta = {},
+      _source,
+      _meta,
       _routing,
       dynamic,
+      /* eslint-disable @typescript-eslint/naming-convention */
       numeric_detection,
       date_detection,
       dynamic_date_formats,
-      properties = {},
+      properties,
       dynamic_templates,
+      /* eslint-enable @typescript-eslint/naming-convention */
     } = mappingsDefinition;
 
     const parsed = {
@@ -67,20 +85,36 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
     };
 
     return { parsedDefaultValue: parsed, multipleMappingsDeclared: false };
-  }, [defaultValue]);
+  }, [value]);
+
+  /**
+   * Hook that will listen to:
+   * 1. "value" prop changes in order to reset the mappings editor
+   * 2. "state" changes in order to communicate any updates to the consumer
+   */
+  useMappingsStateListener({ onChange, value: parsedDefaultValue });
+
+  // Update the Index settings context so it is available in the Global flyout
+  const { update: updateIndexSettings } = useIndexSettings();
+  if (indexSettings !== undefined) {
+    updateIndexSettings(indexSettings);
+  }
+
+  const state = useMappingsState();
+  const [selectedTab, selectTab] = useState<TabName>('fields');
 
   useEffect(() => {
     if (multipleMappingsDeclared) {
       // We set the data getter here as the user won't be able to make any changes
-      onUpdate({
-        getData: () => defaultValue! as Types['Mappings'],
+      onChange({
+        getData: () => value! as Mappings,
         validate: () => Promise.resolve(true),
         isValid: true,
       });
     }
-  }, [multipleMappingsDeclared, onUpdate, defaultValue]);
+  }, [multipleMappingsDeclared, onChange, value]);
 
-  const changeTab = async (tab: TabName, state: State) => {
+  const changeTab = async (tab: TabName) => {
     if (selectedTab === 'advanced') {
       // When we navigate away we need to submit the form to validate if there are any errors.
       const { isValid: isConfigurationFormValid } = await state.configuration.submitForm!();
@@ -102,60 +136,52 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
     selectTab(tab);
   };
 
+  const tabToContentMap = {
+    fields: <DocumentFields />,
+    templates: <TemplatesForm value={state.templates.defaultValue} />,
+    advanced: <ConfigurationForm value={state.configuration.defaultValue} />,
+  };
+
   return (
     <div data-test-subj="mappingsEditor">
       {multipleMappingsDeclared ? (
         <MultipleMappingsWarning />
       ) : (
-        <IndexSettingsProvider indexSettings={indexSettings}>
-          <MappingsState onUpdate={onUpdate} defaultValue={parsedDefaultValue!}>
-            {({ state }) => {
-              const tabToContentMap = {
-                fields: <DocumentFields />,
-                templates: <TemplatesForm defaultValue={state.templates.defaultValue} />,
-                advanced: <ConfigurationForm defaultValue={state.configuration.defaultValue} />,
-              };
+        <div className="mappingsEditor">
+          <EuiTabs>
+            <EuiTab
+              onClick={() => changeTab('fields')}
+              isSelected={selectedTab === 'fields'}
+              data-test-subj="formTab"
+            >
+              {i18n.translate('xpack.idxMgmt.mappingsEditor.fieldsTabLabel', {
+                defaultMessage: 'Mapped fields',
+              })}
+            </EuiTab>
+            <EuiTab
+              onClick={() => changeTab('templates')}
+              isSelected={selectedTab === 'templates'}
+              data-test-subj="formTab"
+            >
+              {i18n.translate('xpack.idxMgmt.mappingsEditor.templatesTabLabel', {
+                defaultMessage: 'Dynamic templates',
+              })}
+            </EuiTab>
+            <EuiTab
+              onClick={() => changeTab('advanced')}
+              isSelected={selectedTab === 'advanced'}
+              data-test-subj="formTab"
+            >
+              {i18n.translate('xpack.idxMgmt.mappingsEditor.advancedTabLabel', {
+                defaultMessage: 'Advanced options',
+              })}
+            </EuiTab>
+          </EuiTabs>
 
-              return (
-                <div className="mappingsEditor">
-                  <EuiTabs>
-                    <EuiTab
-                      onClick={() => changeTab('fields', state)}
-                      isSelected={selectedTab === 'fields'}
-                      data-test-subj="formTab"
-                    >
-                      {i18n.translate('xpack.idxMgmt.mappingsEditor.fieldsTabLabel', {
-                        defaultMessage: 'Mapped fields',
-                      })}
-                    </EuiTab>
-                    <EuiTab
-                      onClick={() => changeTab('templates', state)}
-                      isSelected={selectedTab === 'templates'}
-                      data-test-subj="formTab"
-                    >
-                      {i18n.translate('xpack.idxMgmt.mappingsEditor.templatesTabLabel', {
-                        defaultMessage: 'Dynamic templates',
-                      })}
-                    </EuiTab>
-                    <EuiTab
-                      onClick={() => changeTab('advanced', state)}
-                      isSelected={selectedTab === 'advanced'}
-                      data-test-subj="formTab"
-                    >
-                      {i18n.translate('xpack.idxMgmt.mappingsEditor.advancedTabLabel', {
-                        defaultMessage: 'Advanced options',
-                      })}
-                    </EuiTab>
-                  </EuiTabs>
+          <EuiSpacer size="l" />
 
-                  <EuiSpacer size="l" />
-
-                  {tabToContentMap[selectedTab]}
-                </div>
-              );
-            }}
-          </MappingsState>
-        </IndexSettingsProvider>
+          {tabToContentMap[selectedTab]}
+        </div>
       )}
     </div>
   );

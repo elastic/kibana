@@ -19,8 +19,8 @@
 
 import { getMissingFilterField } from './missing_filter';
 
-describe('missing filter', function() {
-  describe('getMissingFilterField', function() {
+describe('missing filter', function () {
+  describe('getMissingFilterField', function () {
     it('should return the name of the field an missing query is targeting', () => {
       const filter = {
         missing: {

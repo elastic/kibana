@@ -23,7 +23,7 @@ class MockLayer {
 const defaultProps = {
   onClose: () => {},
   isLocked: false,
-  findLayerById: id => {
+  findLayerById: (id) => {
     return new MockLayer(id);
   },
   setCurrentFeature: () => {},
@@ -42,7 +42,7 @@ describe('TooltipHeader', () => {
         const component = shallow(<TooltipHeader {...defaultProps} features={SINGLE_FEATURE} />);
 
         // Ensure all promises resolve
-        await new Promise(resolve => process.nextTick(resolve));
+        await new Promise((resolve) => process.nextTick(resolve));
         // Ensure the state changes are reflected
         component.update();
 
@@ -56,7 +56,7 @@ describe('TooltipHeader', () => {
         );
 
         // Ensure all promises resolve
-        await new Promise(resolve => process.nextTick(resolve));
+        await new Promise((resolve) => process.nextTick(resolve));
         // Ensure the state changes are reflected
         component.update();
 
@@ -83,7 +83,7 @@ describe('TooltipHeader', () => {
         );
 
         // Ensure all promises resolve
-        await new Promise(resolve => process.nextTick(resolve));
+        await new Promise((resolve) => process.nextTick(resolve));
         // Ensure the state changes are reflected
         component.update();
 
@@ -97,7 +97,7 @@ describe('TooltipHeader', () => {
         );
 
         // Ensure all promises resolve
-        await new Promise(resolve => process.nextTick(resolve));
+        await new Promise((resolve) => process.nextTick(resolve));
         // Ensure the state changes are reflected
         component.update();
 
@@ -128,7 +128,7 @@ describe('TooltipHeader', () => {
         );
 
         // Ensure all promises resolve
-        await new Promise(resolve => process.nextTick(resolve));
+        await new Promise((resolve) => process.nextTick(resolve));
         // Ensure the state changes are reflected
         component.update();
 
@@ -142,7 +142,7 @@ describe('TooltipHeader', () => {
         );
 
         // Ensure all promises resolve
-        await new Promise(resolve => process.nextTick(resolve));
+        await new Promise((resolve) => process.nextTick(resolve));
         // Ensure the state changes are reflected
         component.update();
 

@@ -53,10 +53,10 @@ export const markdownFactory = memoize(
       // https://github.com/markdown-it/markdown-it/blob/master/docs/architecture.md#renderer
       const originalLinkRender =
         markdownIt.renderer.rules.link_open ||
-        function(tokens, idx, options, env, self) {
+        function (tokens, idx, options, env, self) {
           return self.renderToken(tokens, idx, options);
         };
-      markdownIt.renderer.rules.link_open = function(tokens, idx, options, env, self) {
+      markdownIt.renderer.rules.link_open = function (tokens, idx, options, env, self) {
         const href = tokens[idx].attrGet('href');
         const target = '_blank';
         const rel = getSecureRelForTarget({ href: href === null ? undefined : href, target });
@@ -84,7 +84,7 @@ export const markdownFactory = memoize(
   }
 );
 
-interface MarkdownProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface MarkdownProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string;
   markdown?: string;
   openLinksInNewTab?: boolean;
@@ -112,3 +112,7 @@ export class Markdown extends PureComponent<MarkdownProps> {
     );
   }
 }
+
+// Needed for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default Markdown;

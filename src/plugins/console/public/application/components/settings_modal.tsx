@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import _ from 'lodash';
 import React, { Fragment, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -87,7 +88,7 @@ export function DevToolsSettingsModal(props: Props) {
   };
 
   const onAutocompleteChange = (optionId: AutocompleteOptions) => {
-    const option = _.find(autoCompleteCheckboxes, item => item.id === optionId);
+    const option = _.find(autoCompleteCheckboxes, (item) => item.id === optionId);
     if (option) {
       option.stateSetter(!checkboxIdToSelectedMap[optionId]);
     }
@@ -136,7 +137,7 @@ export function DevToolsSettingsModal(props: Props) {
                 id="console.settingsPage.pollingLabelText"
               />
             }
-            onChange={e => setPolling(e.target.checked)}
+            onChange={(e) => setPolling(e.target.checked)}
           />
         </EuiFormRow>
 
@@ -158,9 +159,7 @@ export function DevToolsSettingsModal(props: Props) {
           />
         </EuiButton>
       </Fragment>
-    ) : (
-      undefined
-    );
+    ) : undefined;
 
   return (
     <EuiOverlayMask>
@@ -193,7 +192,7 @@ export function DevToolsSettingsModal(props: Props) {
               value={fontSize}
               min={6}
               max={50}
-              onChange={e => {
+              onChange={(e) => {
                 const val = parseInt(e.target.value, 10);
                 if (!val) return;
                 setFontSize(val);
@@ -212,7 +211,7 @@ export function DevToolsSettingsModal(props: Props) {
                   id="console.settingsPage.wrapLongLinesLabelText"
                 />
               }
-              onChange={e => setWrapMode(e.target.checked)}
+              onChange={(e) => setWrapMode(e.target.checked)}
             />
           </EuiFormRow>
 
@@ -234,7 +233,7 @@ export function DevToolsSettingsModal(props: Props) {
                   id="console.settingsPage.tripleQuotesMessage"
                 />
               }
-              onChange={e => setTripleQuotes(e.target.checked)}
+              onChange={(e) => setTripleQuotes(e.target.checked)}
             />
           </EuiFormRow>
 
@@ -248,7 +247,7 @@ export function DevToolsSettingsModal(props: Props) {
             }
           >
             <EuiCheckboxGroup
-              options={autoCompleteCheckboxes.map(opts => {
+              options={autoCompleteCheckboxes.map((opts) => {
                 const { stateSetter, ...rest } = opts;
                 return rest;
               })}

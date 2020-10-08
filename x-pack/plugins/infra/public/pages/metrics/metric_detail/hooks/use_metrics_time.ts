@@ -20,11 +20,7 @@ const parseRange = (range: MetricsTimeInput) => {
   const parsedTo = dateMath.parse(range.to.toString(), { roundUp: true });
   return {
     ...range,
-    from:
-      (parsedFrom && parsedFrom.valueOf()) ||
-      moment()
-        .subtract(1, 'hour')
-        .valueOf(),
+    from: (parsedFrom && parsedFrom.valueOf()) || moment().subtract(1, 'hour').valueOf(),
     to: (parsedTo && parsedTo.valueOf()) || moment().valueOf(),
   };
 };
