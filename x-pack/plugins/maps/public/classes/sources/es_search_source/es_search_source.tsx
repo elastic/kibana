@@ -10,9 +10,8 @@ import rison from 'rison-node';
 
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
-import { IFieldType, IndexPattern } from 'src/plugins/data/public';
+import { IndexPattern } from 'src/plugins/data/public';
 import { GeoJsonProperties } from 'geojson';
-import { async } from 'rxjs';
 import { AbstractESSource } from '../es_source';
 import { getSearchService, getHttp } from '../../../kibana_services';
 import { hitsToGeoJson, getField, addFieldToDSL } from '../../../../common/elasticsearch_util';

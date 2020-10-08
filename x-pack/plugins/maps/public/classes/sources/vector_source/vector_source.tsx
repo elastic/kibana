@@ -92,7 +92,7 @@ export interface ITiledSingleLayerVectorSource extends IVectorSource {
   getLayerName(): string;
 }
 
-export class AbstractVectorSource extends AbstractSource {
+export class AbstractVectorSource extends AbstractSource implements IVectorSource {
   protected readonly _tooltipFields: IField[];
 
   static async getGeoJson({
@@ -169,14 +169,16 @@ export class AbstractVectorSource extends AbstractSource {
     return false;
   }
 
-  isBoundsAware() {
+  isBoundsAware(): boolean {
     return false;
   }
 
-  getBoundsForFilters(
+  async getBoundsForFilters(
     boundsFilters: BoundsFilters,
     registerCancelCallback: (callback: () => void) => void
-  ): Promise<MapExtent | null>;
+  ): Promise<MapExtent | null> {
+    return null;
+  }
 
   async getFields() {
     return [];
