@@ -73,8 +73,14 @@ export function registerTransactionDurationAnomalyAlertType({
       }
       const alertParams = params;
       const request = {} as KibanaRequest;
-      const { mlAnomalySearch } = ml.mlSystemProvider(request);
-      const anomalyDetectors = ml.anomalyDetectorsProvider(request);
+      const { mlAnomalySearch } = ml.mlSystemProvider(
+        request,
+        services.savedObjectsClient
+      );
+      const anomalyDetectors = ml.anomalyDetectorsProvider(
+        request,
+        services.savedObjectsClient
+      );
 
       const mlJobs = await getMLJobs(anomalyDetectors, alertParams.environment);
 
@@ -94,6 +100,7 @@ export function registerTransactionDurationAnomalyAlertType({
         return {};
       }
 
+      const jobIds = mlJobs.map((job) => job.job_id);
       const anomalySearchParams = {
         terminateAfter: 1,
         body: {
@@ -102,7 +109,7 @@ export function registerTransactionDurationAnomalyAlertType({
             bool: {
               filter: [
                 { term: { result_type: 'record' } },
-                { terms: { job_id: mlJobs.map((job) => job.job_id) } },
+                { terms: { job_id: jobIds } },
                 {
                   range: {
                     timestamp: {
@@ -162,8 +169,24 @@ export function registerTransactionDurationAnomalyAlertType({
         },
       };
 
+      // const response = ((await mlAnomalySearch(
+      //   anomalySearchParams
+      // )) as unknown) as {
+      //   hits: { total: { value: number } };
+      //   aggregations?: {
+      //     services: {
+      //       buckets: Array<{
+      //         key: string;
+      //         record_avg: { value: number };
+      //         transaction_types: { buckets: Array<{ key: string }> };
+      //       }>;
+      //     };
+      //   };
+      // };
+
       const response = ((await mlAnomalySearch(
-        anomalySearchParams
+        anomalySearchParams,
+        jobIds
       )) as unknown) as {
         hits: { total: { value: number } };
         aggregations?: {

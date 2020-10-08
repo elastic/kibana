@@ -173,7 +173,8 @@ async function fetchMetricK8sAnomalies(
 
   const results = decodeOrThrow(metricsK8sAnomaliesResponseRT)(
     await mlSystem.mlAnomalySearch(
-      createMetricsK8sAnomaliesQuery(jobIds, startTime, endTime, sort, expandedPagination)
+      createMetricsK8sAnomaliesQuery(jobIds, startTime, endTime, sort, expandedPagination),
+      jobIds
     )
   );
 

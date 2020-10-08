@@ -115,8 +115,8 @@ function getMlSetup(
   request: KibanaRequest
 ) {
   return {
-    mlSystem: ml.mlSystemProvider(request),
-    anomalyDetectors: ml.anomalyDetectorsProvider(request),
+    mlSystem: ml.mlSystemProvider(request, savedObjectsClient),
+    anomalyDetectors: ml.anomalyDetectorsProvider(request, savedObjectsClient),
     modules: ml.modulesProvider(request, savedObjectsClient),
   };
 }

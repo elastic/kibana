@@ -81,7 +81,7 @@ export async function anomalySeriesFetcher({
     const response: ESSearchResponse<
       unknown,
       typeof params
-    > = (await ml.mlSystem.mlAnomalySearch(params)) as any;
+    > = (await ml.mlSystem.mlAnomalySearch(params, [jobId])) as any;
 
     return response;
   } catch (err) {

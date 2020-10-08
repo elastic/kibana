@@ -226,7 +226,8 @@ async function fetchTopLogEntryCategories(
         endTime,
         categoryCount,
         datasets
-      )
+      ),
+      [logEntryCategoriesCountJobId]
     )
   );
 
@@ -284,7 +285,8 @@ export async function fetchLogEntryCategories(
 
   const logEntryCategoriesResponse = decodeOrThrow(logEntryCategoriesResponseRT)(
     await context.infra.mlSystem.mlAnomalySearch(
-      createLogEntryCategoriesQuery(logEntryCategoriesCountJobId, categoryIds)
+      createLogEntryCategoriesQuery(logEntryCategoriesCountJobId, categoryIds),
+      [logEntryCategoriesCountJobId]
     )
   );
 
@@ -333,7 +335,8 @@ async function fetchTopLogEntryCategoryHistograms(
             startTime,
             endTime,
             bucketCount
-          )
+          ),
+          [logEntryCategoriesCountJobId]
         )
         .then(decodeOrThrow(logEntryCategoryHistogramsResponseRT))
         .then((response) => ({

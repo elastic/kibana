@@ -80,7 +80,12 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const mlAuthz = buildMlAuthz({ license: context.licensing.license, ml, request });
+        const mlAuthz = buildMlAuthz({
+          license: context.licensing.license,
+          ml,
+          request,
+          savedObjectsClient,
+        });
 
         const { filename } = (request.body.file as HapiReadableStream).hapi;
         const fileExtension = extname(filename).toLowerCase();

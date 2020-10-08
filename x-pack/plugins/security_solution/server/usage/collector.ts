@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller, CoreSetup } from '../../../../../src/core/server';
+import {
+  LegacyAPICaller,
+  CoreSetup,
+  SavedObjectsClientContract,
+} from '../../../../../src/core/server';
 import { CollectorDependencies } from './types';
 import { DetectionsUsage, fetchDetectionsUsage, defaultDetectionsUsage } from './detections';
 import { EndpointUsage, getEndpointTelemetryFromFleet } from './endpoints';
@@ -80,7 +84,12 @@ export const registerCollector: RegisterCollector = ({
     fetch: async (callCluster: LegacyAPICaller): Promise<UsageData> => {
       const savedObjectsClient = await getInternalSavedObjectsClient(core);
       const [detections, endpoints] = await Promise.allSettled([
-        fetchDetectionsUsage(kibanaIndex, callCluster, ml),
+        fetchDetectionsUsage(
+          kibanaIndex,
+          callCluster,
+          ml,
+          (savedObjectsClient as never) as SavedObjectsClientContract
+        ),
         getEndpointTelemetryFromFleet(savedObjectsClient),
       ]);
 

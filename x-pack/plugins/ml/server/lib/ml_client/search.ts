@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { IScopedClusterClient, ElasticsearchClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 // import { SearchResponse } from 'elasticsearch';
 import { RequestParams, ApiResponse } from '@elastic/elasticsearch';
 
