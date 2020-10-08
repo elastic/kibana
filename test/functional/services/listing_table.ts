@@ -106,8 +106,14 @@ export function ListingTableProvider({ getService, getPageObjects }: FtrProvider
         const searchFilter = await this.getSearchFilter();
         await searchFilter.clearValue();
         await searchFilter.click();
-        // Note: this replacement of - to space is to preserve original logic but I'm not sure why or if it's needed.
-        await searchFilter.type(name.replace('-', ' '));
+
+        await searchFilter.type(
+          name
+            // Note: this replacement of - to space is to preserve original logic but I'm not sure why or if it's needed.
+            .replace('-', ' ')
+            // Remove `[*]` from search as it is not supported by EUI Query's syntax.
+            .replace(/ *\[[^)]*\] */g, '')
+        );
         await common.pressEnterKey();
       });
 
