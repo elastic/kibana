@@ -7,7 +7,7 @@
 import { AnyAction } from 'redux';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { IndexPatternsContract } from 'src/plugins/data/public/index_patterns';
-import { AppMountContext, AppMountParameters } from 'kibana/public';
+import { AppMountParameters } from 'kibana/public';
 import { IndexPattern } from 'src/plugins/data/public';
 import { Embeddable, IContainer } from '../../../../../src/plugins/embeddable/public';
 import { LayerDescriptor } from '../../common/descriptor_types';
@@ -40,7 +40,7 @@ interface LazyLoadedMapModules {
     initialLayers?: LayerDescriptor[]
   ) => LayerDescriptor[];
   mergeInputWithSavedMap: any;
-  renderApp: (context: AppMountContext, params: AppMountParameters) => Promise<() => void>;
+  renderApp: (params: AppMountParameters) => Promise<() => void>;
   createSecurityLayerDescriptors: (
     indexPatternId: string,
     indexPatternTitle: string
