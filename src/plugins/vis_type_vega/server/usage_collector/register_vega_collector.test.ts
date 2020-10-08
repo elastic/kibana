@@ -20,12 +20,12 @@
 import { of } from 'rxjs';
 import { mockStats, mockGetStats } from './get_usage_collector.mock';
 import { createUsageCollectionSetupMock } from 'src/plugins/usage_collection/server/usage_collection.mock';
-
+import { HomeServerPluginSetup } from '../../../home/server';
 import { registerVegaUsageCollector } from './register_vega_collector';
 
 describe('registerVegaUsageCollector', () => {
   const mockIndex = 'mock_index';
-  const mockDeps = { home: {} };
+  const mockDeps = { home: ({} as unknown) as HomeServerPluginSetup };
   const mockConfig = of({ kibana: { index: mockIndex } });
 
   it('makes a usage collector and registers it`', () => {
