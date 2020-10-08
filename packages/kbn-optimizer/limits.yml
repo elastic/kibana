@@ -63,8 +63,10 @@ pageLoadAssetSize:
   remoteClusters: 51_327
   reporting: 183_418
   rollup: 97_204
-  savedObjects: 108_518
-  savedObjectsManagement: 100_503
+  savedObjects: 108_893
+  savedObjectsManagement: 101_836
+  savedObjectsTagging: 47_425
+  savedObjectsTaggingOss: 20_590
   searchprofiler: 67_080
   security: 189_428
   securityOss: 30_806
