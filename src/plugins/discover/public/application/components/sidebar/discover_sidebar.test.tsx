@@ -31,6 +31,7 @@ import { coreMock } from '../../../../../../core/public/mocks';
 import { IndexPatternAttributes } from '../../../../../data/common';
 import { getStubIndexPattern } from '../../../../../data/public/test_utils';
 import { SavedObject } from '../../../../../../core/types';
+import { FieldFilterState } from './lib/field_filter';
 
 jest.mock('../../../kibana_services', () => ({
   getServices: () => ({
@@ -101,6 +102,8 @@ function getCompProps() {
     selectedIndexPattern: indexPattern,
     setIndexPattern: jest.fn(),
     state: {},
+    fieldFilter: {} as FieldFilterState,
+    setFieldFilter: jest.fn(),
   };
 }
 

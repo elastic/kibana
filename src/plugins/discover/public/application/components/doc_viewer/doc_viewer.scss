@@ -1,5 +1,8 @@
 .kbnDocViewerTable {
   margin-top: $euiSizeS;
+  @include euiBreakpoint('xs', 's') {
+    table-layout: fixed;
+  }
 }
 
 .kbnDocViewer {
@@ -11,10 +14,10 @@
     white-space: pre-wrap;
     color: $euiColorFullShade;
     vertical-align: top;
-    padding-top: 2px;
+    padding-top: $euiSizeXS * 0.5;
   }
   .kbnDocViewer__field {
-    padding-top: 8px;
+    padding-top: $euiSizeS;
   }
 
   .dscFieldName {
@@ -54,11 +57,16 @@
 }
 
 .kbnDocViewer__field {
-  width: 160px;
+  width: $euiSize * 10;
+  @include euiBreakpoint('xs', 's') {
+    width: $euiSize * 6;
+  }
 }
 
 .kbnDocViewer__actionButton {
-  opacity: 0;
+  @include euiBreakpoint('m', 'l', 'xl') {
+    opacity: 0;
+  }
 
   &:focus {
     opacity: 1;
@@ -68,4 +76,3 @@
 .kbnDocViewer__warning {
   margin-right: $euiSizeS;
 }
-

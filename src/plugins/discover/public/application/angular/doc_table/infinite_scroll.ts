@@ -30,16 +30,23 @@ export function createInfiniteScrollDirective() {
       more: '=',
     },
     link: ($scope: LazyScope, $element: JQuery) => {
-      const $window = $(window);
       let checkTimer: any;
+      /**
+       * depending on which version of Discover is displayed, different elements are scrolling
+       * and have therefore to be considered for calculation of infinite scrolling
+       */
+      const scrollDiv = $element.parents('.dscTable');
+      const scrollDivMobile = $element.parents('.dscApp__frame');
 
       function onScroll() {
         if (!$scope.more) return;
+        const usedScrollDiv = document.getElementsByClassName('dscSidebar__mobile').length
+          ? scrollDivMobile
+          : scrollDiv;
 
-        const winHeight = Number($window.height());
-        const winBottom = Number(winHeight) + Number($window.scrollTop());
-        const offset = $element.offset();
-        const elTop = offset ? offset.top : 0;
+        const winHeight = Number(usedScrollDiv.height());
+        const winBottom = Number(winHeight) + Number(usedScrollDiv.scrollTop());
+        const elTop = $element.get(0).offsetTop || 0;
         const remaining = elTop - winBottom;
 
         if (remaining <= winHeight * 0.5) {
@@ -57,10 +64,12 @@ export function createInfiniteScrollDirective() {
         }, 50);
       }
 
-      $window.on('scroll', scheduleCheck);
+      scrollDiv.on('scroll', scheduleCheck);
+      scrollDivMobile.on('scroll', scheduleCheck);
       $scope.$on('$destroy', function () {
         clearTimeout(checkTimer);
-        $window.off('scroll', scheduleCheck);
+        scrollDiv.off('scroll', scheduleCheck);
+        scrollDivMobile.off('scroll', scheduleCheck);
       });
       scheduleCheck();
     },

@@ -192,7 +192,7 @@ app.directive('discoverApp', function () {
   };
 });
 
-function discoverController($element, $route, $scope, $timeout, $window, Promise, uiCapabilities) {
+function discoverController($element, $route, $scope, $timeout, Promise, uiCapabilities) {
   const { isDefault: isDefaultType } = indexPatternsUtils;
   const subscriptions = new Subscription();
   const $fetchObservable = new Subject();
@@ -1032,10 +1032,6 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     const colSize = $scope.state.columnsWidth ? { ...$scope.state.columnsWidth } : {};
     colSize[col.columnId] = Math.round(col.width);
     setAppState({ columnsWidth: colSize });
-  };
-
-  $scope.scrollToTop = function () {
-    $window.scrollTo(0, 0);
   };
 
   async function setupVisualization() {
