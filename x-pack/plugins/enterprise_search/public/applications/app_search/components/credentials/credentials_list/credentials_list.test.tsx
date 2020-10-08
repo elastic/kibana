@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../../../../__mocks__/kea.mock';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea.mock';
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { useValues, useActions } from 'kea';
 
 import { CredentialsList } from './credentials_list';
 import { EuiBasicTable, EuiCopy } from '@elastic/eui';
@@ -25,60 +24,53 @@ describe('Credentials', () => {
     key: 'abc-1234',
   };
 
-  const mockKea = ({ values = {}, actions = {} }) => {
-    const mergedValues = {
-      apiTokens: [],
-      meta: {
-        page: {
-          current: 1,
-          size: 10,
-          total_pages: 1,
-          total_results: 1,
-        },
+  // Kea mocks
+  const values = {
+    apiTokens: [],
+    meta: {
+      page: {
+        current: 1,
+        size: 10,
+        total_pages: 1,
+        total_results: 1,
       },
-      ...values,
-    };
-
-    const mergedActions = {
-      deleteApiKey: jest.fn(),
-      fetchCredentials: jest.fn(),
-      showCredentialsForm: jest.fn(),
-      ...actions,
-    };
-
-    (useValues as jest.Mock).mockImplementationOnce(() => mergedValues);
-    (useActions as jest.Mock).mockImplementationOnce(() => mergedActions);
+    },
+  };
+  const actions = {
+    deleteApiKey: jest.fn(),
+    fetchCredentials: jest.fn(),
+    showCredentialsForm: jest.fn(),
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
+    setMockValues(values);
+    setMockActions(actions);
   });
 
   it('renders', () => {
-    mockKea({});
     const wrapper = shallow(<CredentialsList />);
     expect(wrapper.find(EuiBasicTable)).toHaveLength(1);
   });
 
   describe('items', () => {
     it('sorts items by id', () => {
-      mockKea({
-        values: {
-          apiTokens: [
-            {
-              ...apiToken,
-              id: 2,
-            },
-            {
-              ...apiToken,
-              id: undefined,
-            },
-            {
-              ...apiToken,
-              id: 1,
-            },
-          ],
-        },
+      setMockValues({
+        ...values,
+        apiTokens: [
+          {
+            ...apiToken,
+            id: 2,
+          },
+          {
+            ...apiToken,
+            id: undefined,
+          },
+          {
+            ...apiToken,
+            id: 1,
+          },
+        ],
       });
       const wrapper = shallow(<CredentialsList />);
       const { items } = wrapper.find(EuiBasicTable).props();
@@ -88,19 +80,17 @@ describe('Credentials', () => {
 
   describe('pagination', () => {
     it('derives pagination from meta object', () => {
-      mockKea({
-        values: {
-          meta: {
-            page: {
-              current: 6,
-              size: 55,
-              total_pages: 1,
-              total_results: 1004,
-            },
+      setMockValues({
+        ...values,
+        meta: {
+          page: {
+            current: 6,
+            size: 55,
+            total_pages: 1,
+            total_results: 1004,
           },
         },
       });
-
       const wrapper = shallow(<CredentialsList />);
       const { pagination } = wrapper.find(EuiBasicTable).props();
       expect(pagination).toEqual({
@@ -112,12 +102,7 @@ describe('Credentials', () => {
     });
 
     it('will default pagination values if `page` is not available', () => {
-      mockKea({
-        values: {
-          meta: {},
-        },
-      });
-
+      setMockValues({ ...values, meta: {} });
       const wrapper = shallow(<CredentialsList />);
       const { pagination } = wrapper.find(EuiBasicTable).props();
       expect(pagination).toEqual({
@@ -131,16 +116,8 @@ describe('Credentials', () => {
 
   describe('columns', () => {
     let columns: any[];
-    const showCredentialsForm = jest.fn();
-    const deleteApiKey = jest.fn();
 
     beforeAll(() => {
-      mockKea({
-        actions: {
-          showCredentialsForm,
-          deleteApiKey,
-        },
-      });
       const wrapper = shallow(<CredentialsList />);
       columns = wrapper.find(EuiBasicTable).props().columns;
     });
@@ -230,7 +207,7 @@ describe('Credentials', () => {
       it('calls showCredentialsForm when clicked', () => {
         const action = columns[5].actions[0];
         action.onClick(token);
-        expect(showCredentialsForm).toHaveBeenCalledWith(token);
+        expect(actions.showCredentialsForm).toHaveBeenCalledWith(token);
       });
     });
 
@@ -243,16 +220,13 @@ describe('Credentials', () => {
       it('calls deleteApiKey when clicked', () => {
         const action = columns[5].actions[1];
         action.onClick(token);
-        expect(deleteApiKey).toHaveBeenCalledWith('some-name');
+        expect(actions.deleteApiKey).toHaveBeenCalledWith('some-name');
       });
     });
   });
 
   describe('onChange', () => {
     it('will handle pagination by calling `fetchCredentials`', () => {
-      const fetchCredentials = jest.fn();
-
-      mockKea({ actions: { fetchCredentials } });
       const wrapper = shallow(<CredentialsList />);
       const { onChange } = wrapper.find(EuiBasicTable).props();
 
@@ -263,7 +237,7 @@ describe('Credentials', () => {
         },
       });
 
-      expect(fetchCredentials).toHaveBeenCalledWith(3);
+      expect(actions.fetchCredentials).toHaveBeenCalledWith(3);
     });
   });
 });
