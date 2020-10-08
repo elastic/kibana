@@ -4,8 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import {
+  Axis,
+  Chart,
+  HistogramBarSeries,
+  niceTimeFormatter,
+  Position,
+  ScaleType,
+  Settings,
+  SettingsSpec,
+  TooltipValue,
+} from '@elastic/charts';
+
 import { EuiTitle } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
@@ -13,6 +24,7 @@ import { scaleUtc } from 'd3-scale';
 import { mean } from 'lodash';
 import React from 'react';
 import { asRelativeDateTimeRange } from '../../../../../common/utils/formatters';
+import { useTheme } from '../../../../hooks/useTheme';
 import { getTimezoneOffsetInMs } from '../../../shared/charts/CustomPlot/getTimezoneOffsetInMs';
 // @ts-expect-error
 import Histogram from '../../../shared/charts/Histogram';
@@ -62,6 +74,7 @@ const tooltipHeader = (bucket: FormattedBucket) =>
   asRelativeDateTimeRange(bucket.x0, bucket.x);
 
 export function ErrorDistribution({ distribution, title }: Props) {
+  const theme = useTheme();
   const buckets = getFormattedBuckets(
     distribution.buckets,
     distribution.bucketSize
@@ -82,48 +95,99 @@ export function ErrorDistribution({ distribution, title }: Props) {
   const xMax = d3.max(buckets, (d) => d.x);
   const tickFormat = scaleUtc().domain([xMin, xMax]).tickFormat();
 
+  const xFormatter = niceTimeFormatter([xMin, xMax]);
+
+  const tooltipProps: SettingsSpec['tooltip'] = {
+    headerFormatter: (tooltip: TooltipValue) => {
+      const serie = buckets.find((bucket) => bucket.x0 === tooltip.value);
+      if (serie) {
+        return asRelativeDateTimeRange(serie.x0, serie.x);
+      }
+      return `${tooltip.value}`;
+    },
+  };
+
   return (
     <div>
       <EuiTitle size="xs">
         <span>{title}</span>
       </EuiTitle>
-      <Histogram
-        height={180}
-        noHits={distribution.noHits}
-        tooltipHeader={tooltipHeader}
-        verticalLineHover={(bucket: FormattedBucket) => bucket.x}
-        xType="time-utc"
-        formatX={(value: Date) => {
-          const time = value.getTime();
-          return tickFormat(new Date(time - getTimezoneOffsetInMs(time)));
-        }}
-        buckets={buckets}
-        bucketSize={distribution.bucketSize}
-        formatYShort={(value: number) =>
-          i18n.translate('xpack.apm.errorGroupDetails.occurrencesShortLabel', {
-            defaultMessage: '{occCount} occ.',
-            values: { occCount: value },
-          })
-        }
-        formatYLong={(value: number) =>
-          i18n.translate('xpack.apm.errorGroupDetails.occurrencesLongLabel', {
-            defaultMessage:
-              '{occCount} {occCount, plural, one {occurrence} other {occurrences}}',
-            values: { occCount: value },
-          })
-        }
-        legends={[
-          {
-            color: theme.euiColorVis1,
-            // 0a abbreviates large whole numbers with metric prefixes like: 1000 = 1k, 32000 = 32k, 1000000 = 1m
-            legendValue: numeral(averageValue).format('0a'),
-            title: i18n.translate('xpack.apm.errorGroupDetails.avgLabel', {
-              defaultMessage: 'Avg.',
-            }),
-            legendClickDisabled: true,
-          },
-        ]}
-      />
+      <div>
+        <Histogram
+          height={180}
+          noHits={distribution.noHits}
+          tooltipHeader={tooltipHeader}
+          verticalLineHover={(bucket: FormattedBucket) => bucket.x}
+          xType="time-utc"
+          formatX={(value: Date) => {
+            const time = value.getTime();
+            return tickFormat(new Date(time - getTimezoneOffsetInMs(time)));
+          }}
+          buckets={buckets}
+          bucketSize={distribution.bucketSize}
+          formatYShort={(value: number) =>
+            i18n.translate(
+              'xpack.apm.errorGroupDetails.occurrencesShortLabel',
+              {
+                defaultMessage: '{occCount} occ.',
+                values: { occCount: value },
+              }
+            )
+          }
+          formatYLong={(value: number) =>
+            i18n.translate('xpack.apm.errorGroupDetails.occurrencesLongLabel', {
+              defaultMessage:
+                '{occCount} {occCount, plural, one {occurrence} other {occurrences}}',
+              values: { occCount: value },
+            })
+          }
+          legends={[
+            {
+              color: theme.eui.euiColorVis1,
+              // 0a abbreviates large whole numbers with metric prefixes like: 1000 = 1k, 32000 = 32k, 1000000 = 1m
+              legendValue: numeral(averageValue).format('0a'),
+              title: i18n.translate('xpack.apm.errorGroupDetails.avgLabel', {
+                defaultMessage: 'Avg.',
+              }),
+              legendClickDisabled: true,
+            },
+          ]}
+        />
+      </div>
+      <div style={{ height: 180 }}>
+        <Chart>
+          <Settings
+            xDomain={{ min: xMin, max: xMax }}
+            tooltip={tooltipProps}
+            showLegend
+            showLegendExtra
+            legendPosition={Position.Bottom}
+          />
+          <Axis
+            id="x-axis"
+            position={Position.Bottom}
+            showOverlappingTicks
+            tickFormat={xFormatter}
+          />
+          <Axis
+            id="y-axis"
+            position={Position.Left}
+            ticks={2}
+            showGridLines
+            tickFormat={(value) => `${value} occ.`}
+          />
+          <HistogramBarSeries
+            id="errorOccurrences"
+            name="Occurences"
+            xScaleType={ScaleType.Linear}
+            yScaleType={ScaleType.Linear}
+            xAccessor="x0"
+            yAccessors={['y']}
+            data={buckets}
+            color={theme.eui.euiColorVis1}
+          />
+        </Chart>
+      </div>
     </div>
   );
 }

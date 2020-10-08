@@ -6,6 +6,7 @@
 
 import React, { ReactNode, useMemo, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
+import { Annotation } from '../../common/annotations';
 import { fromQuery, toQuery } from '../components/shared/Links/url_helpers';
 import { useFetcher } from '../hooks/useFetcher';
 import { useUrlParams } from '../hooks/useUrlParams';
@@ -15,6 +16,7 @@ const ChartsSyncContext = React.createContext<{
   onHover: (hoverX: number) => void;
   onMouseLeave: () => void;
   onSelectionEnd: (range: { start: number; end: number }) => void;
+  annotations: Annotation[];
 } | null>(null);
 
 function ChartsSyncContextProvider({ children }: { children: ReactNode }) {

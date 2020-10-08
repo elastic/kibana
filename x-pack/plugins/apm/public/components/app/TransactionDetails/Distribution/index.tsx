@@ -10,7 +10,25 @@ import d3 from 'd3';
 import { isEmpty } from 'lodash';
 import React, { useCallback } from 'react';
 import { ValuesType } from 'utility-types';
+import {
+  Axis,
+  BarSeriesStyle,
+  Chart,
+  DataSeriesDatum,
+  ElementClickListener,
+  GeometryValue,
+  HistogramBarSeries,
+  PartialTheme,
+  Position,
+  RectAnnotation,
+  ScaleType,
+  Settings,
+  SettingsSpec,
+  TooltipValue,
+} from '@elastic/charts';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
+import { useTheme } from '../../../../../../observability/public';
+import { unit } from '../../../../style/variables';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TransactionDistributionAPIResponse } from '../../../../../server/lib/transactions/distribution';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -110,6 +128,7 @@ export function TransactionDistribution(props: Props) {
     bucketIndex,
     onBucketClick,
   } = props;
+  const theme = useTheme();
 
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const formatYShort = useCallback(getFormatYShort(transactionType), [
@@ -150,8 +169,33 @@ export function TransactionDistribution(props: Props) {
     distribution.bucketSize
   );
 
+  const xMin = d3.min(buckets, (d) => d.x0) || 0;
   const xMax = d3.max(buckets, (d) => d.x) || 0;
   const timeFormatter = getDurationFormatter(xMax);
+
+  const tooltipProps: SettingsSpec['tooltip'] = {
+    headerFormatter: (tooltip: TooltipValue) => {
+      const serie = buckets.find((bucket) => bucket.x0 === tooltip.value);
+      if (serie) {
+        const xFormatted = timeFormatter(serie.x);
+        const x0Formatted = timeFormatter(serie.x0);
+        return `${x0Formatted.value} - ${xFormatted.value} ${xFormatted.unit}`;
+      }
+      return `${timeFormatter(tooltip.value)}`;
+    },
+  };
+
+  const onBarClick: ElementClickListener = (elements) => {
+    const chartPoint = elements[0][0] as GeometryValue;
+    const clickedBucket = distribution?.buckets.find((bucket) => {
+      return bucket.key === chartPoint.x;
+    });
+    if (clickedBucket) {
+      onBucketClick(clickedBucket);
+    }
+  };
+
+  const selectedBucket = buckets[bucketIndex];
 
   return (
     <div>
@@ -181,42 +225,85 @@ export function TransactionDistribution(props: Props) {
           />
         </h5>
       </EuiTitle>
+      <div style={{ height: unit * 10 }}>
+        <Histogram
+          buckets={buckets}
+          bucketSize={distribution.bucketSize}
+          bucketIndex={bucketIndex}
+          onClick={(chartPoint: IChartPoint) => {
+            const clickedBucket = getBucketFromChartPoint(chartPoint);
 
-      <Histogram
-        buckets={buckets}
-        bucketSize={distribution.bucketSize}
-        bucketIndex={bucketIndex}
-        onClick={(chartPoint: IChartPoint) => {
-          const clickedBucket = getBucketFromChartPoint(chartPoint);
-
-          if (clickedBucket) {
-            onBucketClick(clickedBucket);
-          }
-        }}
-        formatX={(time: number) => timeFormatter(time).formatted}
-        formatYShort={formatYShort}
-        formatYLong={formatYLong}
-        verticalLineHover={(point: IChartPoint) =>
-          isEmpty(getBucketFromChartPoint(point)?.samples)
-        }
-        backgroundHover={(point: IChartPoint) =>
-          !isEmpty(getBucketFromChartPoint(point)?.samples)
-        }
-        tooltipHeader={(point: IChartPoint) => {
-          const xFormatted = timeFormatter(point.x);
-          const x0Formatted = timeFormatter(point.x0);
-          return `${x0Formatted.value} - ${xFormatted.value} ${xFormatted.unit}`;
-        }}
-        tooltipFooter={(point: IChartPoint) =>
-          isEmpty(getBucketFromChartPoint(point)?.samples) &&
-          i18n.translate(
-            'xpack.apm.transactionDetails.transactionsDurationDistributionChart.noSampleTooltip',
-            {
-              defaultMessage: 'No sample available for this bucket',
+            if (clickedBucket) {
+              onBucketClick(clickedBucket);
             }
-          )
-        }
-      />
+          }}
+          formatX={(time: number) => timeFormatter(time).formatted}
+          formatYShort={formatYShort}
+          formatYLong={formatYLong}
+          verticalLineHover={(point: IChartPoint) =>
+            isEmpty(getBucketFromChartPoint(point)?.samples)
+          }
+          backgroundHover={(point: IChartPoint) =>
+            !isEmpty(getBucketFromChartPoint(point)?.samples)
+          }
+          tooltipHeader={(point: IChartPoint) => {
+            const xFormatted = timeFormatter(point.x);
+            const x0Formatted = timeFormatter(point.x0);
+            return `${x0Formatted.value} - ${xFormatted.value} ${xFormatted.unit}`;
+          }}
+          tooltipFooter={(point: IChartPoint) =>
+            isEmpty(getBucketFromChartPoint(point)?.samples) &&
+            i18n.translate(
+              'xpack.apm.transactionDetails.transactionsDurationDistributionChart.noSampleTooltip',
+              {
+                defaultMessage: 'No sample available for this bucket',
+              }
+            )
+          }
+        />
+      </div>
+      <div style={{ height: unit * 10 }}>
+        <Chart>
+          <Settings
+            xDomain={{ min: xMin, max: xMax }}
+            tooltip={tooltipProps}
+            onElementClick={onBarClick}
+          />
+          {selectedBucket && (
+            <RectAnnotation
+              id="highlighted_bucket"
+              dataValues={[
+                {
+                  coordinates: { x0: selectedBucket.x0, x1: selectedBucket.x },
+                },
+              ]}
+              style={{
+                fill: 'transparent',
+                strokeWidth: 1,
+                stroke: theme.eui.euiColorVis1,
+                opacity: 1,
+              }}
+            />
+          )}
+          <Axis
+            id="bottom"
+            position={Position.Bottom}
+            showOverlappingTicks
+            tickFormat={(time: number) => timeFormatter(time).formatted}
+          />
+          <Axis id="left" position={Position.Left} ticks={3} showGridLines />
+          <HistogramBarSeries
+            id="transactionDurationDistribution"
+            name="requests"
+            xScaleType={ScaleType.Linear}
+            yScaleType={ScaleType.Linear}
+            xAccessor="x0"
+            yAccessors={['y']}
+            data={buckets}
+            color={theme.eui.euiColorVis1}
+          />
+        </Chart>
+      </div>
     </div>
   );
 }

@@ -3,12 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { max } from 'lodash';
 import React, { useCallback } from 'react';
 import { useParams } from 'react-router-dom';
+import { unit } from '../../../../style/variables';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { useChartsSync } from '../../../../hooks/useChartsSync';
 import { useFetcher } from '../../../../hooks/useFetcher';
@@ -16,6 +18,7 @@ import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { callApmApi } from '../../../../services/rest/createCallApmApi';
 // @ts-expect-error
 import CustomPlot from '../CustomPlot';
+import { ErroneousTransactionsRateChartElasticChart } from './elastic_chart';
 
 const tickFormatY = (y?: number | null) => {
   return asPercent(y || 0, 1);
@@ -69,38 +72,41 @@ export function ErroneousTransactionsRateChart() {
         </span>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <CustomPlot
-        {...syncedChartsProps}
-        noHits={data?.noHits}
-        yMax={maxRate === 0 ? 1 : undefined}
-        series={[
-          {
-            color: theme.euiColorVis7,
-            data: [],
-            legendValue: tickFormatY(data?.average),
-            legendClickDisabled: true,
-            title: i18n.translate('xpack.apm.errorRateChart.avgLabel', {
-              defaultMessage: 'Avg.',
-            }),
-            type: 'linemark',
-            hideTooltipValue: true,
-          },
-          {
-            data: errorRates,
-            type: 'linemark',
-            color: theme.euiColorVis7,
-            hideLegend: true,
-            title: i18n.translate('xpack.apm.errorRateChart.rateLabel', {
-              defaultMessage: 'Rate',
-            }),
-          },
-        ]}
-        onHover={combinedOnHover}
-        tickFormatY={tickFormatY}
-        formatTooltipValue={({ y }: { y?: number }) =>
-          Number.isFinite(y) ? tickFormatY(y) : 'N/A'
-        }
-      />
+      <div style={{ height: unit * 16 }}>
+        <CustomPlot
+          {...syncedChartsProps}
+          noHits={data?.noHits}
+          yMax={maxRate === 0 ? 1 : undefined}
+          series={[
+            {
+              color: theme.euiColorVis7,
+              data: [],
+              legendValue: tickFormatY(data?.average),
+              legendClickDisabled: true,
+              title: i18n.translate('xpack.apm.errorRateChart.avgLabel', {
+                defaultMessage: 'Avg.',
+              }),
+              type: 'linemark',
+              hideTooltipValue: true,
+            },
+            {
+              data: errorRates,
+              type: 'linemark',
+              color: theme.euiColorVis7,
+              hideLegend: true,
+              title: i18n.translate('xpack.apm.errorRateChart.rateLabel', {
+                defaultMessage: 'Rate',
+              }),
+            },
+          ]}
+          onHover={combinedOnHover}
+          tickFormatY={tickFormatY}
+          formatTooltipValue={({ y }: { y?: number }) =>
+            Number.isFinite(y) ? tickFormatY(y) : 'N/A'
+          }
+        />
+      </div>
+      <ErroneousTransactionsRateChartElasticChart errorRates={errorRates} />
     </EuiPanel>
   );
 }

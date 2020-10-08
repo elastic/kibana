@@ -10,6 +10,7 @@ import React from 'react';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
 import { useTransactionBreakdown } from '../../../hooks/useTransactionBreakdown';
 import { TransactionBreakdownGraph } from './TransactionBreakdownGraph';
+import { TransactionBreakdownGraphElasticChart } from './TransactionBreakdownGraph/elastic_charts';
 
 function TransactionBreakdown() {
   const { data, status } = useTransactionBreakdown();
@@ -30,6 +31,12 @@ function TransactionBreakdown() {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <TransactionBreakdownGraph timeseries={timeseries} noHits={noHits} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <TransactionBreakdownGraphElasticChart
+            timeseries={timeseries}
+            noHits={noHits}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
