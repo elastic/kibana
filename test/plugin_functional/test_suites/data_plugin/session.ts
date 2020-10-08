@@ -49,8 +49,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         expect(sessionIds.length).to.be(1);
       });
 
-      it('Starts a new session on filter change', async () => {
-        await filterBar.addFilter('line_number', 'IS', '4.1.155');
+      it('Starts on a refresh', async () => {
+        await testSubjects.click('querySubmitButton');
         const sessionIds = await getSessionIds();
         expect(sessionIds.length).to.be(1);
       });
@@ -62,8 +62,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         expect(sessionIds.length).to.be(1);
       });
 
-      it('Starts on a refresh', async () => {
-        await testSubjects.click('querySubmitButton');
+      it('Starts a new session on filter change', async () => {
+        await filterBar.addFilter('line_number', 'exists');
         const sessionIds = await getSessionIds();
         expect(sessionIds.length).to.be(1);
       });
