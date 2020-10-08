@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useEffect, useState, useCallback } from 'react';
+import React, { Fragment, useEffect, useState, useCallback, useRef } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -27,6 +27,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+
+import { OnFormUpdateArg } from '../../../shared_imports';
 import { toasts } from '../../services/notification';
 
 import { Phases, Policy, PolicyFromES } from '../../../../common/types';
@@ -43,7 +45,7 @@ import {
 } from '../../services/policies/policy_serialization';
 
 import { ErrableFormRow, LearnMoreLink, PolicyJsonFlyout } from './components';
-import { ColdPhase, DeletePhase, HotPhase, WarmPhase } from './phases';
+import { ColdPhase, DeletePhase, HotPhase, defaultHotPhase, WarmPhase } from './phases';
 
 export interface Props {
   policies: PolicyFromES[];
@@ -67,6 +69,14 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
     window.scrollTo(0, 0);
   }, []);
 
+  const hotPhaseForm = useRef<OnFormUpdateArg<any>>({
+    validate: async () => true,
+    data: {
+      format: () => defaultHotPhase,
+      raw: {},
+    },
+  });
+
   const [isShowingErrors, setIsShowingErrors] = useState(false);
   const [errors, setErrors] = useState<ValidationErrors>();
   const [isShowingPolicyJsonFlyout, setIsShowingPolicyJsonFlyout] = useState(false);
@@ -87,7 +97,8 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
 
   const submit = async () => {
     setIsShowingErrors(true);
-    const [isValid, validationErrors] = validatePolicy(
+    const isHotPhaseValid = await hotPhaseForm.current.validate();
+    const [legacyIsValid, validationErrors] = validatePolicy(
       saveAsNew,
       policy,
       policies,
@@ -95,17 +106,23 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
     );
     setErrors(validationErrors);
 
+    const isValid = legacyIsValid && isHotPhaseValid;
+
     if (!isValid) {
       toasts.addDanger(
         i18n.translate('xpack.indexLifecycleMgmt.editPolicy.formErrorsMessage', {
           defaultMessage: 'Please fix the errors on this page.',
         })
       );
-      const firstError = findFirstError(validationErrors);
-      const errorRowId = `${firstError ? firstError.replace('.', '-') : ''}-row`;
-      const element = document.getElementById(errorRowId);
-      if (element) {
-        element.scrollIntoView({ block: 'center', inline: 'nearest' });
+      // This functionality will not be required for once form lib is fully adopted for this form
+      // because errors are reported as fields are edited.
+      if (!legacyIsValid) {
+        const firstError = findFirstError(validationErrors);
+        const errorRowId = `${firstError ? firstError.replace('.', '-') : ''}-row`;
+        const element = document.getElementById(errorRowId);
+        if (element) {
+          element.scrollIntoView({ block: 'center', inline: 'nearest' });
+        }
       }
     } else {
       const success = await savePolicy(policy, isNewPolicy || saveAsNew, existingPolicy);
@@ -132,10 +149,10 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
     [setPolicy]
   );
 
-  const setHotPhaseData = useCallback(
-    (key: string, value: any) => setPhaseData('hot', key, value),
-    [setPhaseData]
-  );
+  const onHotPhaseChange = useCallback((value: any) => {
+    hotPhaseForm.current = value;
+  }, []);
+
   const setWarmPhaseData = useCallback(
     (key: string, value: any) => setPhaseData('warm', key, value),
     [setPhaseData]
@@ -295,11 +312,8 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
             <EuiSpacer />
 
             <HotPhase
-              errors={errors?.hot}
+              onChange={onHotPhaseChange}
               defaultValue={existingPolicy?.policy.phases.hot}
-              isShowingErrors={isShowingErrors && !!errors && Object.keys(errors.hot).length > 0}
-              setPhaseData={setHotPhaseData}
-              phaseData={policy.phases.hot}
               setWarmPhaseOnRollover={setWarmPhaseOnRollover}
             />
 

@@ -10,5 +10,16 @@ export {
   Form,
   UseField,
   FieldConfig,
+  OnFormUpdateArg,
+  ValidationFunc,
+  UseMultiFields,
+  getFieldValidityAndErrorMessage,
 } from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
-export { ToggleField } from '../../../../src/plugins/es_ui_shared/static/forms/components';
+
+export { fieldValidators } from '../../../../src/plugins/es_ui_shared/static/forms/helpers';
+
+export {
+  ToggleField,
+  NumericField,
+  SelectField,
+} from '../../../../src/plugins/es_ui_shared/static/forms/components';
