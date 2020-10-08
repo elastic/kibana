@@ -653,10 +653,18 @@ function createSuggestionWithDefaultDateHistogram(
     field: timeField,
     suggestedPriority: undefined,
   });
+  const shouldSwitchTimeWithBuckets = layer.columns[buckets[0]]?.dataType === 'number';
+
   const updatedLayer = {
     indexPatternId: layer.indexPatternId,
-    columns: { ...layer.columns, [newId]: timeColumn },
-    columnOrder: [...buckets, newId, ...metrics],
+    columns: {
+      ...layer.columns,
+      [newId]: timeColumn,
+    },
+    columnOrder: shouldSwitchTimeWithBuckets
+      ? // in this case the order is very important to assign the split accessor!
+        [newId, ...buckets, ...metrics]
+      : [...buckets, newId, ...metrics],
   };
   return buildSuggestion({
     state,
@@ -665,7 +673,7 @@ function createSuggestionWithDefaultDateHistogram(
     label: i18n.translate('xpack.lens.indexpattern.suggestions.overTimeLabel', {
       defaultMessage: 'Over time',
     }),
-    changeType: 'extended',
+    changeType: shouldSwitchTimeWithBuckets ? 'reorder' : 'extended',
   });
 }
 
