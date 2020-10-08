@@ -18,10 +18,8 @@
  */
 
 import moment from 'moment';
-import { of } from 'rxjs';
-
-import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/usage_collection.mock';
-import { getUsageCollector } from './get_usage_collector';
+import { LegacyAPICaller } from 'src/core/server';
+import { getStats } from './get_usage_collector';
 
 const defaultMockSavedObjects = [
   {
@@ -121,32 +119,22 @@ const enlargedMockSavedObjects = [
 ];
 
 describe('Visualizations usage collector', () => {
-  const configMock = of({ kibana: { index: '' } });
-  const usageCollector = getUsageCollector(configMock);
-  const getMockFetchClients = (hits?: unknown[]) => {
-    const fetchParamsMock = createCollectorFetchContextMock();
-    fetchParamsMock.callCluster.mockResolvedValue({ hits: { hits } });
-    return fetchParamsMock;
-  };
-
-  test('Should fit the shape', () => {
-    expect(usageCollector.type).toBe('visualization_types');
-    expect(usageCollector.isReady()).toBe(true);
-    expect(usageCollector.fetch).toEqual(expect.any(Function));
-  });
+  const mockIndex = '';
+  const getMockCallCluster = (hits: unknown[]) =>
+    (() => Promise.resolve({ hits: { hits } }) as unknown) as LegacyAPICaller;
 
   test('Returns undefined when no results found (undefined)', async () => {
-    const result = await usageCollector.fetch(getMockFetchClients(undefined as any));
-    expect(result).toBe(undefined);
+    const result = await getStats(getMockCallCluster(undefined as any), mockIndex);
+    expect(result).toBeUndefined();
   });
 
   test('Returns undefined when no results found (0 results)', async () => {
-    const result = await usageCollector.fetch(getMockFetchClients([]));
-    expect(result).toBe(undefined);
+    const result = await getStats(getMockCallCluster([]), mockIndex);
+    expect(result).toBeUndefined();
   });
 
   test('Summarizes visualizations response data', async () => {
-    const result = await usageCollector.fetch(getMockFetchClients(defaultMockSavedObjects));
+    const result = await getStats(getMockCallCluster(defaultMockSavedObjects), mockIndex);
 
     expect(result).toMatchObject({
       shell_beads: {
@@ -200,7 +188,8 @@ describe('Visualizations usage collector', () => {
         saved_90_days_total: 3,
       },
     };
-    const result = await usageCollector.fetch(getMockFetchClients(enlargedMockSavedObjects));
+
+    const result = await getStats(getMockCallCluster(enlargedMockSavedObjects), mockIndex);
 
     expect(result).toMatchObject(expectedStats);
   });
