@@ -85,6 +85,7 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
         uiActions.getTrigger(SWIM_LANE_SELECTION_TRIGGER).exec({
           embeddable: embeddableContext,
           data: update,
+          updateCallback: setSelectedCells.bind(null, undefined),
         });
       }
     },
