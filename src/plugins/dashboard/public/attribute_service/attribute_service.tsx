@@ -29,7 +29,7 @@ import {
   EmbeddableStart,
   EmbeddableFactory,
   EmbeddableFactoryNotFoundError,
-} from '../embeddable_plugin';
+} from '../../../embeddable/public';
 import {
   SavedObjectsClientContract,
   SimpleSavedObject,

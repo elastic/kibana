@@ -27,7 +27,7 @@ import { Filter, Query, TimefilterContract as Timefilter } from 'src/plugins/dat
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { migrateLegacyQuery } from './lib/migrate_legacy_query';
 
-import { ViewMode } from '../embeddable_plugin';
+import { ViewMode } from '../../../../plugins/embeddable/public';
 import { getAppStateDefaults, migrateAppState, getDashboardIdFromUrl } from './lib';
 import { convertPanelStateToSavedDashboardPanel } from './lib/embeddable_saved_object_converters';
 import { FilterUtils } from './lib/filter_utils';

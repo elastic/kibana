@@ -30,7 +30,7 @@ import React from 'react';
 import { Subscription } from 'rxjs';
 import ReactGridLayout, { Layout } from 'react-grid-layout';
 import { GridData } from '../../../../common';
-import { ViewMode, EmbeddableChildPanel, EmbeddableStart } from '../../../embeddable_plugin';
+import { ViewMode, EmbeddableChildPanel, EmbeddableStart } from '../../../../../embeddable/public';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
 import { DashboardPanelState } from '../types';
 import { withKibana } from '../../../../../kibana_react/public';

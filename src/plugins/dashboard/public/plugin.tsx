@@ -95,6 +95,7 @@ import {
 } from './url_generator';
 import { createSavedDashboardLoader } from './saved_dashboards';
 import { DashboardConstants } from './dashboard_constants';
+import { addEmbeddableToDashboardUrl } from './url_utils/url_helper';
 import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
 import { UrlGeneratorState } from '../../share/public';
 import { AttributeService } from '.';
@@ -323,7 +324,9 @@ export class DashboardPlugin
         appMounted();
         return mountApp({
           core,
+          appUnMounted,
           usageCollection,
+          initializerContext: this.initializerContext,
           restorePreviousUrl,
           element: params.element,
           scopedHistory: this.currentHistory!,
@@ -375,6 +378,23 @@ export class DashboardPlugin
         category: FeatureCatalogueCategory.DATA,
       });
     }
+  }
+
+  private addEmbeddableToDashboard(
+    core: CoreStart,
+    { embeddableId, embeddableType }: { embeddableId: string; embeddableType: string }
+  ) {
+    if (!this.getActiveUrl) {
+      throw new Error('dashboard is not ready yet.');
+    }
+
+    const lastDashboardUrl = this.getActiveUrl();
+    const dashboardUrl = addEmbeddableToDashboardUrl(
+      lastDashboardUrl,
+      embeddableId,
+      embeddableType
+    );
+    core.application.navigateToApp('dashboards', { path: dashboardUrl });
   }
 
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {

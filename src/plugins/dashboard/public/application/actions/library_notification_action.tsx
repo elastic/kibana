@@ -20,8 +20,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBadge } from '@elastic/eui';
-import { IEmbeddable, ViewMode, isReferenceOrValueEmbeddable } from '../../embeddable_plugin';
-import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
+import { IEmbeddable, ViewMode, isReferenceOrValueEmbeddable } from '../../../../embeddable/public';
+import { ActionByType, IncompatibleActionError } from '../../../../ui_actions/public';
 import { reactToUiComponent } from '../../../../kibana_react/public';
 
 export const ACTION_LIBRARY_NOTIFICATION = 'ACTION_LIBRARY_NOTIFICATION';

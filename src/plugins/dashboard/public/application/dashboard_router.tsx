@@ -27,7 +27,6 @@ import { Storage } from '../../../kibana_utils/public';
 import { KibanaContextProvider } from '../../../kibana_react/public';
 import { DashboardListing, Dashboard404 } from './listing';
 import { DashboardAppServices, DashboardMountProps } from './types';
-import { DashboardSavedObject } from '../saved_dashboards';
 import { DashboardApp } from './dashboard_app';
 import { createDashboardEditUrl, DashboardConstants } from '..';
 
@@ -36,8 +35,10 @@ export async function mountApp({
   element,
   scopedHistory,
   usageCollection,
+  initializerContext,
   restorePreviousUrl,
   setHeaderActionMenu,
+  appUnMounted,
 }: DashboardMountProps) {
   const [coreStart, pluginsStart, dashboardStart] = await core.getStartServices();
 
@@ -59,6 +60,7 @@ export async function mountApp({
     dashboardConfig,
     data: dataStart,
     share: shareStart,
+    initializerContext,
     restorePreviousUrl,
     setHeaderActionMenu,
     navigateToDefaultApp,
@@ -123,5 +125,8 @@ export async function mountApp({
   );
 
   render(app, element);
-  return () => unmountComponentAtNode(element);
+  return () => {
+    unmountComponentAtNode(element);
+    appUnMounted();
+  };
 }

@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { Subscription } from 'rxjs';
-import { PanelState, EmbeddableStart } from '../../../embeddable_plugin';
+import { PanelState, EmbeddableStart } from '../../../../../embeddable/public';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 import { DashboardGrid } from '../grid';
 import { context } from '../../../../../kibana_react/public';

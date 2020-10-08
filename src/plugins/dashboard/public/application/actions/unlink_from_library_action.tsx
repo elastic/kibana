@@ -20,8 +20,8 @@
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import uuid from 'uuid';
-import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
-import { ViewMode, PanelState, IEmbeddable } from '../../embeddable_plugin';
+import { ActionByType, IncompatibleActionError } from '../../../../ui_actions/public';
+import { ViewMode, PanelState, IEmbeddable } from '../../../../embeddable/public';
 import {
   PanelNotFoundError,
   EmbeddableInput,

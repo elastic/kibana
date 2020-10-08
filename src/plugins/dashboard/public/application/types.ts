@@ -24,6 +24,7 @@ import {
   ScopedHistory,
   ChromeStart,
   IUiSettingsClient,
+  PluginInitializerContext,
 } from 'kibana/public';
 import { History } from 'history';
 import { DataPublicPluginStart, IndexPatternsContract } from '../../../data/public';
@@ -51,8 +52,10 @@ export interface DashboardListingProps {
 
 export interface DashboardMountProps {
   restorePreviousUrl: () => void;
+  appUnMounted: () => void;
   scopedHistory: ScopedHistory<unknown>;
   element: AppMountParameters['element'];
+  initializerContext: PluginInitializerContext;
   core: CoreSetup<DashboardStartDependencies, DashboardStart>;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   usageCollection: DashboardSetupDependencies['usageCollection'];
@@ -70,6 +73,7 @@ export interface DashboardAppServices {
   indexPatterns: IndexPatternsContract;
   navigation: NavigationPublicPluginStart;
   dashboardCapabilities: any; // TODO: Switch this any out for DashboardCapabilities
+  initializerContext: PluginInitializerContext;
   savedObjectsClient: SavedObjectsClientContract;
   dashboardConfig: KibanaLegacyStart['dashboardConfig'];
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];

@@ -19,7 +19,7 @@
 import { omit } from 'lodash';
 import { SavedDashboardPanel } from '../../types';
 import { DashboardPanelState } from '../embeddable';
-import { SavedObjectEmbeddableInput } from '../../embeddable_plugin';
+import { SavedObjectEmbeddableInput } from '../../../../embeddable/public';
 
 export function convertSavedDashboardPanelToPanelState(
   savedDashboardPanel: SavedDashboardPanel

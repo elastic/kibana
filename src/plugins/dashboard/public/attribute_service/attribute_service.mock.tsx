@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { EmbeddableInput, SavedObjectEmbeddableInput } from '../embeddable_plugin';
+import { EmbeddableInput, SavedObjectEmbeddableInput } from '../../../embeddable/public';
 import { coreMock } from '../../../../core/public/mocks';
 import { AttributeServiceOptions } from './attribute_service';
 import { CoreStart } from '../../../../core/public';

@@ -24,14 +24,14 @@ import { EuiCallOut, EuiLink } from '@elastic/eui';
 
 import { useKibana, toMountPoint } from '../../../../kibana_react/public';
 import { DashboardConstants } from '../../dashboard_constants';
-import { DashboardServices } from '../dashboard_router';
+import { DashboardAppServices } from '../types';
 
 let bannerId: string;
 
 export const Dashboard404 = () => {
   const {
     services: { core, scopedHistory, restorePreviousUrl },
-  } = useKibana<DashboardServices>();
+  } = useKibana<DashboardAppServices>();
 
   useEffect(() => {
     const history = scopedHistory();
