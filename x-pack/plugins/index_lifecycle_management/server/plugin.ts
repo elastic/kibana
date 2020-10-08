@@ -25,6 +25,7 @@ import { IndexLifecycleManagementConfig } from './config';
 
 const indexLifecycleDataEnricher = async (
   indicesList: IndexWithoutIlm[],
+  // TODO replace deprecated ES client after Index Management is updated
   callAsCurrentUser: LegacyAPICaller
 ): Promise<Index[]> => {
   if (!indicesList || !indicesList.length) {
