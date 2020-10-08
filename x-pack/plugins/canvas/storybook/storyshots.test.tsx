@@ -114,4 +114,5 @@ initStoryshots({
   test: multiSnapshotWithOptions({}),
   // Don't snapshot tests that start with 'redux'
   storyNameRegex: /^((?!.*?redux).)*$/,
+  framework: 'react',
 });
