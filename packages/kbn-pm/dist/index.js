@@ -8992,8 +8992,8 @@ const BootstrapCommand = {
           continue;
         }
 
-        if (!project.isEveryDependencyKbnPackageLink()) {
-          throw new Error(`[${project.name}] is not an eligible to hold non kbn packages dependencies. Move the non kbn packages dependencies into the top level package.json.`);
+        if (!project.isEveryDependencyLocal()) {
+          throw new Error(`[${project.name}] is not an eligible to hold non local dependencies. Move the non local dependencies into the top level package.json.`);
         }
       }
     }
@@ -9136,6 +9136,11 @@ async function linkProjectExecutables(projectsByName, projectGraph) {
       await Object(_fs__WEBPACK_IMPORTED_MODULE_1__["createSymlink"])(srcPath, dest, 'exec');
       await Object(_fs__WEBPACK_IMPORTED_MODULE_1__["chmod"])(dest, '755');
     }
+  } // Assure roots bin dir exists
+
+
+  if (!(await Object(_fs__WEBPACK_IMPORTED_MODULE_1__["isDirectory"])(rootBinsDir))) {
+    await Object(_fs__WEBPACK_IMPORTED_MODULE_1__["mkdirp"])(rootBinsDir);
   } // Create symlinks to rootProject/node_modules/.bin for every other project
 
 
@@ -23105,7 +23110,7 @@ class Project {
       throw new _errors__WEBPACK_IMPORTED_MODULE_2__["CliError"](`[${this.name}] depends on [${project.name}] using 'link:', but the path is wrong. ${updateMsg}`, meta);
     }
 
-    throw new _errors__WEBPACK_IMPORTED_MODULE_2__["CliError"](`[${this.name}] depends on [${project.name}], but it's not using the local package. ${updateMsg}`, meta);
+    throw new _errors__WEBPACK_IMPORTED_MODULE_2__["CliError"](`[${this.name}] depends on [${project.name}] but it's not using the local package. ${updateMsg}`, meta);
   }
 
   getBuildConfig() {
@@ -23177,8 +23182,8 @@ class Project {
     return Object.keys(this.allDependencies).length > 0;
   }
 
-  isEveryDependencyKbnPackageLink() {
-    return Object.values(this.allDependencies).every(dep => Object(_package_json__WEBPACK_IMPORTED_MODULE_4__["isLinkDependency"])(dep)) && Object.keys(this.allDependencies).every(dep => dep.startsWith('@kbn') || dep.startsWith('@elastic'));
+  isEveryDependencyLocal() {
+    return Object.values(this.allDependencies).every(dep => Object(_package_json__WEBPACK_IMPORTED_MODULE_4__["isLinkDependency"])(dep));
   }
 
   async installDependencies({
@@ -58086,7 +58091,7 @@ async function copyToBuild(project, kibanaRoot, buildRoot) {
   await cpy__WEBPACK_IMPORTED_MODULE_0___default()(['**/*', '!node_modules/**'], buildProjectPath, {
     cwd: project.getIntermediateBuildDirectory(),
     dot: true,
-    nodir: true,
+    onlyFiles: true,
     parents: true
   }); // If a project is using an intermediate build directory, we special-case our
   // handling of `package.json`, as the project build process might have copied

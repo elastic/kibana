@@ -17,8 +17,10 @@
  * under the License.
  */
 
+import normalizePosixPath from 'normalize-path';
+// @ts-ignore
 import { transformDependencies } from '@kbn/pm';
-
+import { findUsedDependencies } from './find_used_dependencies';
 import { read, write, Task } from '../../lib';
 
 export const CreatePackageJson: Task = {
@@ -26,6 +28,12 @@ export const CreatePackageJson: Task = {
 
   async run(config, log, build) {
     const pkg = config.getKibanaPkg();
+    const transformedDeps = transformDependencies(pkg.dependencies as { [key: string]: string });
+    const foundPkgDeps = await findUsedDependencies(
+      transformedDeps,
+      normalizePosixPath(build.resolvePath('.')),
+      build.isOss()
+    );
 
     const newPkg = {
       name: pkg.name,
@@ -45,7 +53,7 @@ export const CreatePackageJson: Task = {
         node: pkg.engines.node,
       },
       resolutions: pkg.resolutions,
-      dependencies: transformDependencies(pkg.dependencies as { [key: string]: string }),
+      dependencies: foundPkgDeps,
     };
 
     await write(build.resolvePath('package.json'), JSON.stringify(newPkg, null, '  '));

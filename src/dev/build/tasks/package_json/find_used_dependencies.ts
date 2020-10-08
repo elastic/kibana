@@ -1,0 +1,72 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import globby from 'globby';
+// @ts-ignore
+import { parseEntries, dependenciesParseStrategy } from '@kbn/babel-code-parser';
+
+async function getDependencies(cwd: string, entries: string[]) {
+  // Return the dependencies retrieve from the
+  // provided code entries (sanitized) and
+  // parseStrategy (dependencies one)
+  return Object.keys(await parseEntries(cwd, entries, dependenciesParseStrategy, {}));
+}
+
+export async function findUsedDependencies(listedPkgDependencies: any, baseDir: any, isOss: any) {
+  // Define the entry points for the server code in order to
+  // start here later looking for the server side dependencies
+  const mainCodeEntries = [
+    `${baseDir}/src/cli`,
+    `${baseDir}/src/cli_keystore`,
+    `${baseDir}/src/cli_plugin`,
+  ];
+
+  if (!isOss) {
+    mainCodeEntries.push(`${baseDir}/x-pack`);
+  }
+
+  const discoveredPluginEntries = await globby([
+    `${baseDir}/src/plugins/*/server/index.js`,
+    `!${baseDir}/src/plugins/**/public`,
+  ]);
+
+  // Compose all the needed entries
+  const codeEntries = [...mainCodeEntries, ...discoveredPluginEntries];
+
+  // Get the dependencies found searching through the
+  // code entries that were provided
+  const codeDependencies = await getDependencies(baseDir, codeEntries);
+
+  // Consider this as our whiteList for the modules we can't delete
+  const whiteListedModules = [...codeDependencies];
+
+  const listedDependencies = Object.keys(listedPkgDependencies);
+  const filteredListedDependencies = listedDependencies.filter((entry) => {
+    const isWhiteListed = whiteListedModules.some((nonEntry) => entry.includes(nonEntry));
+    return !isWhiteListed;
+  });
+
+  return filteredListedDependencies.reduce((foundUsedDeps: any, usedDep) => {
+    if (listedPkgDependencies[usedDep]) {
+      foundUsedDeps[usedDep] = listedPkgDependencies[usedDep];
+    }
+
+    return foundUsedDeps;
+  }, {});
+}
