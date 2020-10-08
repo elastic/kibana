@@ -7,7 +7,7 @@
 import { SavedObjectsServiceSetup } from 'kibana/server';
 import mappings from './mappings.json';
 
-// import { getMigrations } from './migrations';
+import { migrations } from './migrations';
 // import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 
 export const ML_SAVED_OBJECT_TYPE = 'ml-job';
@@ -44,7 +44,7 @@ export function setupSavedObjects(
     name: ML_SAVED_OBJECT_TYPE,
     hidden: false,
     namespaceType: 'multiple',
-    // migrations: getMigrations(encryptedSavedObjects),
+    migrations,
     mappings: mappings.job,
   });
 

@@ -45,6 +45,11 @@ export const categoryExamplesSchema = schema.object({
   maxExamples: schema.number(),
 });
 
+export const anomalySearchSchema = schema.object({
+  jobIds: schema.arrayOf(schema.string()),
+  query: schema.any(),
+});
+
 export const partitionFieldValuesSchema = schema.object({
   jobId: schema.string(),
   searchTerm: schema.maybe(schema.any()),

@@ -27,8 +27,8 @@ export function getResultsServiceProvider(getGuards: GetGuards): ResultsServiceP
           return await getGuards(request, savedObjectsClient)
             .isFullLicense()
             .hasMlCapabilities(['canGetJobs'])
-            .ok(async ({ scopedClient, mlClient }) => {
-              const { getAnomaliesTableData } = resultsServiceProvider(scopedClient, mlClient);
+            .ok(async ({ mlClient }) => {
+              const { getAnomaliesTableData } = resultsServiceProvider(mlClient);
               return getAnomaliesTableData(...args);
             });
         },

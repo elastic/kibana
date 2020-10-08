@@ -5,10 +5,8 @@
  */
 
 import Boom from 'boom';
-import { IScopedClusterClient } from 'kibana/server';
 import { PARTITION_FIELDS } from '../../../common/constants/anomalies';
 import { PartitionFieldsType } from '../../../common/types/anomalies';
-import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { CriteriaField } from './results_service';
 import type { MlClient } from '../../lib/ml_client';
 
@@ -75,10 +73,7 @@ function getFieldObject(fieldType: PartitionFieldsType, aggs: any) {
     : {};
 }
 
-export const getPartitionFieldsValuesFactory = (
-  { asInternalUser }: IScopedClusterClient,
-  mlClient: MlClient
-) =>
+export const getPartitionFieldsValuesFactory = (mlClient: MlClient) =>
   /**
    * Gets the record of partition fields with possible values that fit the provided queries.
    * @param jobId - Job ID
@@ -103,52 +98,54 @@ export const getPartitionFieldsValuesFactory = (
 
     const isModelPlotEnabled = job?.model_plot_config?.enabled;
 
-    const { body } = await asInternalUser.search({
-      index: ML_RESULTS_INDEX_PATTERN,
-      size: 0,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              ...criteriaFields.map(({ fieldName, fieldValue }) => {
-                return {
+    const { body } = await mlClient.anomalySearch(
+      {
+        size: 0,
+        body: {
+          query: {
+            bool: {
+              filter: [
+                ...criteriaFields.map(({ fieldName, fieldValue }) => {
+                  return {
+                    term: {
+                      [fieldName]: fieldValue,
+                    },
+                  };
+                }),
+                {
                   term: {
-                    [fieldName]: fieldValue,
-                  },
-                };
-              }),
-              {
-                term: {
-                  job_id: jobId,
-                },
-              },
-              {
-                range: {
-                  timestamp: {
-                    gte: earliestMs,
-                    lte: latestMs,
-                    format: 'epoch_millis',
+                    job_id: jobId,
                   },
                 },
-              },
-              {
-                term: {
-                  result_type: isModelPlotEnabled ? 'model_plot' : 'record',
+                {
+                  range: {
+                    timestamp: {
+                      gte: earliestMs,
+                      lte: latestMs,
+                      format: 'epoch_millis',
+                    },
+                  },
                 },
-              },
-            ],
+                {
+                  term: {
+                    result_type: isModelPlotEnabled ? 'model_plot' : 'record',
+                  },
+                },
+              ],
+            },
+          },
+          aggs: {
+            ...PARTITION_FIELDS.reduce((acc, key) => {
+              return {
+                ...acc,
+                ...getFieldAgg(key, searchTerm[key]),
+              };
+            }, {}),
           },
         },
-        aggs: {
-          ...PARTITION_FIELDS.reduce((acc, key) => {
-            return {
-              ...acc,
-              ...getFieldAgg(key, searchTerm[key]),
-            };
-          }, {}),
-        },
       },
-    });
+      []
+    );
 
     return PARTITION_FIELDS.reduce((acc, key) => {
       return {

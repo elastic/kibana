@@ -20,7 +20,7 @@ export function jobServiceProvider(client: IScopedClusterClient, mlClient: MlCli
     ...groupsProvider(mlClient),
     ...newJobCapsProvider(client),
     ...newJobChartsProvider(client),
-    ...topCategoriesProvider(client),
+    ...topCategoriesProvider(mlClient),
     ...modelSnapshotProvider(mlClient),
   };
 }

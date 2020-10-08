@@ -16,10 +16,18 @@ import {
   DatafeedStats,
 } from '../../../common/types/anomaly_detection_jobs';
 import { Calendar } from '../../../common/types/calendars';
+import { searchProvider } from './search';
 
 import { DataFrameAnalyticsConfig } from '../../../common/types/data_frame_analytics';
 
-export type MlClient = ElasticsearchClient['ml'];
+type OrigMlClient = ElasticsearchClient['ml'];
+
+export interface MlClient extends OrigMlClient {
+  anomalySearch: ReturnType<typeof searchProvider>['anomalySearch'];
+  // anomalySearch: ReturnType<typeof searchProvider>['anomalySearch'];
+}
+
+// export type MlClient = ElasticsearchClient['ml'];
 
 export function getMlClient(client: IScopedClusterClient, jobsInSpaces: JobsInSpaces): MlClient {
   const mlClient = client.asInternalUser.ml;
@@ -347,6 +355,10 @@ export function getMlClient(client: IScopedClusterClient, jobsInSpaces: JobsInSp
     async validateDetector(...p: Parameters<MlClient['validateDetector']>) {
       return mlClient.validateDetector(...p);
     },
+    // async anomalySearch(...p: Parameters<MlClient['validate']>) {
+    //   return mlClient.validate(...p);
+    // },
+    ...searchProvider(client, jobsInSpaces),
   } as MlClient;
 }
 

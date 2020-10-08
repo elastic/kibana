@@ -54,7 +54,7 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
 
   const { forceDeleteDatafeed, getDatafeedIdsByJobId } = datafeedsProvider(mlClient);
   const { getAuditMessagesSummary } = jobAuditMessagesProvider(client, mlClient);
-  const { getLatestBucketTimestampByJob } = resultsServiceProvider(client, mlClient);
+  const { getLatestBucketTimestampByJob } = resultsServiceProvider(mlClient);
   const calMngr = new CalendarManager(mlClient);
 
   async function forceDeleteJob(jobId: string) {

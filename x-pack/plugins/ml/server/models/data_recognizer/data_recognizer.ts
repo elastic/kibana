@@ -134,7 +134,7 @@ export class DataRecognizer {
     this._savedObjectsClient = savedObjectsClient;
     this._authorizationHeader = getAuthorizationHeader(request);
     this._jobsService = jobServiceProvider(mlClusterClient, mlClient);
-    this._resultsService = resultsServiceProvider(mlClusterClient, mlClient);
+    this._resultsService = resultsServiceProvider(mlClient);
     this._calculateModelMemoryLimit = calculateModelMemoryLimitProvider(mlClusterClient, mlClient);
   }
 

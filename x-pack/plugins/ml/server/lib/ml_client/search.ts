@@ -1,0 +1,42 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import Boom from 'boom';
+import { IScopedClusterClient, ElasticsearchClient } from 'kibana/server';
+// import { SearchResponse } from 'elasticsearch';
+import { RequestParams, ApiResponse } from '@elastic/elasticsearch';
+
+import { JobsInSpaces, JobType } from '../../saved_objects/filter';
+import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
+import type { SearchResponse7 } from '../../../common/types/es_client';
+
+export function searchProvider(client: IScopedClusterClient, jobsInSpaces: JobsInSpaces) {
+  async function jobIdsCheck(jobType: JobType, jobIds: string[]) {
+    if (jobIds.length) {
+      const filteredJobIds = await jobsInSpaces.filterJobIdsForSpace(jobType, jobIds);
+      const missingIds = jobIds.filter((j) => filteredJobIds.indexOf(j) === -1);
+      if (missingIds.length) {
+        throw Boom.notFound(`${missingIds.join(',')} missing`);
+      }
+    }
+  }
+
+  async function anomalySearch<T>(
+    searchParams: RequestParams.Search<any>,
+    jobIds: string[]
+  ): Promise<ApiResponse<SearchResponse7<T>>> {
+    // ): Promise<ReturnType<ElasticsearchClient['search']>> {
+    // console.log(jobIds);
+    await jobIdsCheck('anomaly-detector', jobIds);
+    const { asInternalUser } = client;
+    const resp = await asInternalUser.search<SearchResponse7<T>>({
+      ...searchParams,
+      index: ML_RESULTS_INDEX_PATTERN,
+    });
+    return resp;
+  }
+  return { anomalySearch };
+}
