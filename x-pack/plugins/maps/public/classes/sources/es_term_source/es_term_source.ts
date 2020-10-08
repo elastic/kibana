@@ -37,15 +37,15 @@ import { IField } from '../../fields/field';
 import { PropertiesMap } from '../../joins/join';
 
 export interface IESTermSource extends IESAggSource {
-  getTermField: () => IField;
-  hasCompleteConfig: () => boolean;
-  getWhereQuery: () => MapQuery;
-  getPropertiesMap: (
+  getTermField(): IField;
+  hasCompleteConfig(): boolean;
+  getWhereQuery(): MapQuery;
+  getPropertiesMap(
     searchFilters: VectorJoinSourceRequestMeta,
     leftSourceName: string,
     leftFieldName: string,
     registerCancelCallback: (callback: () => void) => void
-  ) => PropertiesMap;
+  ): PropertiesMap;
 }
 
 export function extractPropertiesMap(rawEsData, countPropertyName) {
@@ -60,7 +60,7 @@ export function extractPropertiesMap(rawEsData, countPropertyName) {
   return propertiesMap;
 }
 
-export class ESTermSource extends AbstractESAggSource {
+export class ESTermSource extends AbstractESAggSource implements IESTermSource {
   static type = SOURCE_TYPES.ES_TERM_SOURCE;
 
   constructor(descriptor, inspectorAdapters) {
