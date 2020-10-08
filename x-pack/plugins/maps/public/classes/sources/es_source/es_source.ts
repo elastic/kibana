@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AbstractVectorSource } from '../vector_source';
+import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
+import uuid from 'uuid/v4';
+import { IFieldType, IndexPattern } from 'src/plugins/data/public';
+import { AbstractVectorSource, BoundsFilters } from '../vector_source';
 import {
   getAutocompleteService,
   getIndexPatternService,
@@ -12,16 +16,52 @@ import {
   getSearchService,
 } from '../../../kibana_services';
 import { createExtentFilter } from '../../../../common/elasticsearch_util';
-import _ from 'lodash';
-import { i18n } from '@kbn/i18n';
-import uuid from 'uuid/v4';
-
 import { copyPersistentState } from '../../../reducers/util';
 import { DataRequestAbortError } from '../../util/data_request';
 import { expandToTileBoundaries } from '../../../../common/geo_tile_utils';
 import { search } from '../../../../../../../src/plugins/data/public';
+import { IVectorSource } from '../vector_source';
+import { SearchSource, TimeRange } from '../../../../../../../src/plugins/data/common';
+import { IndexPattern, ISearchSource } from '../../../../../../../src/plugins/data/public';
+import {
+  AbstractSourceDescriptor,
+  DynamicStylePropertyOptions,
+  MapExtent,
+  MapQuery,
+  VectorSourceRequestMeta,
+} from '../../../../common/descriptor_types';
+import { IVectorStyle } from '../../styles/vector/vector_style';
+import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
+import { IField } from '../../fields/field';
+import { FieldFormatter } from '../../../../common/constants';
 
-export class AbstractESSource extends AbstractVectorSource {
+export interface IESSource extends IVectorSource {
+  isESSource(): true;
+  getId(): string;
+  getIndexPattern(): Promise<IndexPattern>;
+  getIndexPatternId(): string;
+  getGeoFieldName(): string;
+  getMaxResultWindow(): Promise<number>;
+  loadStylePropsMeta({
+    layerName,
+    style,
+    dynamicStyleProps,
+    registerCancelCallback,
+    sourceQuery,
+    timeFilters,
+  }: {
+    layerName: string;
+    style: IVectorStyle;
+    dynamicStyleProps: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>;
+    registerCancelCallback: (callback: () => void) => void;
+    sourceQuery?: MapQuery;
+    timeFilters: TimeRange;
+  }): Promise<object>;
+}
+
+export class AbstractESSource extends AbstractVectorSource implements IESSource {
+  indexPattern?: IndexPattern;
+
   constructor(descriptor, inspectorAdapters) {
     super(
       {
@@ -32,34 +72,34 @@ export class AbstractESSource extends AbstractVectorSource {
     );
   }
 
-  getId() {
+  getId(): string {
     return this._descriptor.id;
   }
 
-  isFieldAware() {
+  isFieldAware(): boolean {
     return true;
   }
 
-  isRefreshTimerAware() {
+  isRefreshTimerAware(): boolean {
     return true;
   }
 
-  isQueryAware() {
+  isQueryAware(): boolean {
     return true;
   }
 
-  getIndexPatternIds() {
+  getIndexPatternIds(): string[] {
     return [this.getIndexPatternId()];
   }
 
-  getQueryableIndexPatternIds() {
+  getQueryableIndexPatternIds(): string[] {
     if (this.getApplyGlobalQuery()) {
       return [this.getIndexPatternId()];
     }
     return [];
   }
 
-  isESSource() {
+  isESSource(): true {
     return true;
   }
 
@@ -67,7 +107,7 @@ export class AbstractESSource extends AbstractVectorSource {
     this._inspectorAdapters.requests.resetRequest(this.getId());
   }
 
-  cloneDescriptor() {
+  cloneDescriptor(): AbstractSourceDescriptor {
     const clonedDescriptor = copyPersistentState(this._descriptor);
     // id used as uuid to track requests in inspector
     clonedDescriptor.id = uuid();
@@ -80,7 +120,13 @@ export class AbstractESSource extends AbstractVectorSource {
     requestDescription,
     searchSource,
     registerCancelCallback,
-  }) {
+  }: {
+    requestId: string;
+    requestName: string;
+    requestDescription: string;
+    searchSource: SearchSource;
+    registerCancelCallback: (callback: () => void) => void;
+  }): any {
     const abortController = new AbortController();
     registerCancelCallback(() => abortController.abort());
 
@@ -115,14 +161,18 @@ export class AbstractESSource extends AbstractVectorSource {
     return resp;
   }
 
-  async makeSearchSource(searchFilters, limit, initialSearchContext) {
+  async makeSearchSource(
+    searchFilters: VectorSourceRequestMeta,
+    limit: number,
+    initialSearchContext?: object
+  ): Promise<ISearchSource> {
     const indexPattern = await this.getIndexPattern();
     const isTimeAware = await this.isTimeAware();
     const applyGlobalQuery = _.get(searchFilters, 'applyGlobalQuery', true);
     const globalFilters = applyGlobalQuery ? searchFilters.filters : [];
     const allFilters = [...globalFilters];
     if (this.isFilterByMapBounds() && searchFilters.buffer) {
-      //buffer can be empty
+      // buffer can be empty
       const geoField = await this._getGeoField();
       const buffer = this.isGeoGridPrecisionAware()
         ? expandToTileBoundaries(searchFilters.buffer, searchFilters.geogridPrecision)
@@ -153,7 +203,10 @@ export class AbstractESSource extends AbstractVectorSource {
     return searchSource;
   }
 
-  async getBoundsForFilters(boundsFilters, registerCancelCallback) {
+  async getBoundsForFilters(
+    boundsFilters: BoundsFilters,
+    registerCancelCallback: (callback: () => void) => void
+  ): Promise<MapExtent | null> {
     const searchSource = await this.makeSearchSource(boundsFilters, 0);
     searchSource.setField('aggs', {
       fitToBounds: {
@@ -184,14 +237,14 @@ export class AbstractESSource extends AbstractVectorSource {
     const minLon = esBounds.top_left.lon;
     const maxLon = esBounds.bottom_right.lon;
     return {
-      minLon: minLon > maxLon ? minLon - 360 : minLon, //fixes an ES bbox to straddle dateline
+      minLon: minLon > maxLon ? minLon - 360 : minLon, // fixes an ES bbox to straddle dateline
       maxLon,
       minLat: esBounds.bottom_right.lat,
       maxLat: esBounds.top_left.lat,
     };
   }
 
-  async isTimeAware() {
+  async isTimeAware(): Promise<boolean> {
     try {
       const indexPattern = await this.getIndexPattern();
       const timeField = indexPattern.timeFieldName;
@@ -201,15 +254,16 @@ export class AbstractESSource extends AbstractVectorSource {
     }
   }
 
-  getIndexPatternId() {
+  getIndexPatternId(): string {
     return this._descriptor.indexPatternId;
   }
 
-  getGeoFieldName() {
+  getGeoFieldName(): string {
     return this._descriptor.geoField;
   }
 
-  async getIndexPattern() {
+  async getIndexPattern(): IndexPattern {
+    // Do we need this cache? Doesn't the IndexPatternService take care of this?
     if (this.indexPattern) {
       return this.indexPattern;
     }
@@ -227,7 +281,7 @@ export class AbstractESSource extends AbstractVectorSource {
     }
   }
 
-  async supportsFitToBounds() {
+  async supportsFitToBounds(): Promise<boolean> {
     try {
       const geoField = await this._getGeoField();
       return geoField.aggregatable;
@@ -236,8 +290,8 @@ export class AbstractESSource extends AbstractVectorSource {
     }
   }
 
-  async _getGeoField() {
-    const indexPattern = await this.getIndexPattern();
+  async _getGeoField(): Promise<IFieldType> {
+    const indexPattern: IndexPattern = await this.getIndexPattern();
     const geoField = indexPattern.fields.getByName(this.getGeoFieldName());
     if (!geoField) {
       throw new Error(
@@ -250,7 +304,7 @@ export class AbstractESSource extends AbstractVectorSource {
     return geoField;
   }
 
-  async getDisplayName() {
+  async getDisplayName(): Promise<string> {
     try {
       const indexPattern = await this.getIndexPattern();
       return indexPattern.title;
@@ -260,15 +314,11 @@ export class AbstractESSource extends AbstractVectorSource {
     }
   }
 
-  isBoundsAware() {
+  isBoundsAware(): boolean {
     return true;
   }
 
-  getId() {
-    return this._descriptor.id;
-  }
-
-  async createFieldFormatter(field) {
+  async createFieldFormatter(field: IField): Promise<FieldFormatter | null> {
     let indexPattern;
     try {
       indexPattern = await this.getIndexPattern();
@@ -291,14 +341,21 @@ export class AbstractESSource extends AbstractVectorSource {
     registerCancelCallback,
     sourceQuery,
     timeFilters,
-  }) {
+  }: {
+    layerName: string;
+    style: IVectorStyle;
+    dynamicStyleProps: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>;
+    registerCancelCallback: (callback: () => void) => void;
+    sourceQuery?: MapQuery;
+    timeFilters: TimeRange;
+  }): Promise<object> {
     const promises = dynamicStyleProps.map((dynamicStyleProp) => {
       return dynamicStyleProp.getFieldMetaRequest();
     });
 
     const fieldAggRequests = await Promise.all(promises);
-    const aggs = fieldAggRequests.reduce((aggs, fieldAggRequest) => {
-      return fieldAggRequest ? { ...aggs, ...fieldAggRequest } : aggs;
+    const aggs = fieldAggRequests.reduce((aAggs, fieldAggRequest) => {
+      return fieldAggRequest ? { ...aAggs, ...fieldAggRequest } : aAggs;
     }, {});
 
     const indexPattern = await this.getIndexPattern();
@@ -334,8 +391,7 @@ export class AbstractESSource extends AbstractVectorSource {
 
     return resp.aggregations;
   }
-
-  getValueSuggestions = async (field, query) => {
+  getValueSuggestions = async (field: IField, query: string): Promise<string[]> => {
     try {
       const indexPattern = await this.getIndexPattern();
       return await getAutocompleteService().getValueSuggestions({
@@ -344,6 +400,7 @@ export class AbstractESSource extends AbstractVectorSource {
         query,
       });
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.warn(
         `Unable to fetch suggestions for field: ${field.getRootName()}, query: ${query}, error: ${
           error.message
