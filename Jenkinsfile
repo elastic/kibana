@@ -3,8 +3,8 @@
 library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
-def PARALLEL_COUNT = 25
-def ITERATIONS_PER = 10
+def PARALLEL_COUNT = 100
+def ITERATIONS_PER = 20
 
 def worker = {
   return {
