@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { MutableRefObject, useEffect, useRef, useState } from 'react';
 import { EventEmitter } from 'events';
 import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
@@ -44,7 +44,7 @@ export const useSavedVisInstance = (
     savedVisInstance?: SavedVisInstance;
     visEditorController?: IEditorController;
   }>({});
-  const visEditorRef = useRef<HTMLDivElement>(null);
+  const visEditorRef = useRef<HTMLDivElement>();
   const visId = useRef('');
 
   useEffect(() => {
