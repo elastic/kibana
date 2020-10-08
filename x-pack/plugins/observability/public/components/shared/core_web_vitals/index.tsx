@@ -5,7 +5,14 @@
  */
 import * as React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { CLS_LABEL, FID_LABEL, LCP_LABEL } from './translations';
+import {
+  CLS_HELP_LABEL,
+  CLS_LABEL,
+  FID_HELP_LABEL,
+  FID_LABEL,
+  LCP_HELP_LABEL,
+  LCP_LABEL,
+} from './translations';
 import { CoreVitalItem } from './core_vital_item';
 import { WebCoreVitalsTitle } from './web_core_vitals_title';
 import { ServiceName } from './service_name';
@@ -60,6 +67,7 @@ export function CoreVitals({ data, loading, displayServiceName, serviceName }: P
             ranks={lcpRanks}
             loading={loading}
             thresholds={CoreVitalsThresholds.LCP}
+            helpLabel={LCP_HELP_LABEL}
           />
         </EuiFlexItem>
         <EuiFlexItem style={{ flexBasis: 380 }}>
@@ -69,6 +77,7 @@ export function CoreVitals({ data, loading, displayServiceName, serviceName }: P
             ranks={fidRanks}
             loading={loading}
             thresholds={CoreVitalsThresholds.FID}
+            helpLabel={FID_HELP_LABEL}
           />
         </EuiFlexItem>
         <EuiFlexItem style={{ flexBasis: 380 }}>
@@ -78,6 +87,8 @@ export function CoreVitals({ data, loading, displayServiceName, serviceName }: P
             ranks={clsRanks}
             loading={loading}
             thresholds={CoreVitalsThresholds.CLS}
+            isCls={true}
+            helpLabel={CLS_HELP_LABEL}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

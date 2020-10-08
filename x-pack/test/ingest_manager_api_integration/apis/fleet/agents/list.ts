@@ -93,7 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
       await supertest
         .get(`/api/fleet/agents`)
         .auth(users.kibana_basic_user.username, users.kibana_basic_user.password)
-        .expect(404);
+        .expect(403);
     });
     it('should return a 400 when given an invalid "kuery" value', async () => {
       await supertest
