@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { EuiI18nNumber } from '@elastic/eui';
+import { FormattedMessage } from 'react-intl';
 import { ResolverNodeStats } from '../../../common/endpoint/types';
 import { useRelatedEventByCategoryNavigation } from './use_related_event_by_category_navigation';
 import { useColors } from './use_colors';
@@ -38,27 +38,56 @@ interface ResolverSubmenuOption {
   action: () => unknown;
   prefix?: number | JSX.Element;
 }
-  
-  /**
-    This can be achieved in an easier way by using `notation="compact"` on
-    FormattedNumber in the future, but it does not work at present (10/2020)
-*/
-function compactNotation(num) {
-    if(!Number.isFinite(num)){
-        return num;
+
+/**
+ * Until browser support accomodates the `notation="compact"` feature of Intl.NumberFormat...
+ * exported for testing
+ * @param num The number to format
+ * @returns [Scalar of compact notation (k,M,B,T), mantissa, overflow indicator (+)]
+ */
+export function compactNotationParts(num: number): [number, string, string] {
+  if (!Number.isFinite(num)) {
+    return [num, '', ''];
+  }
+  let scale = 1;
+  while (scale < 1e12 && num / (scale * 1000) >= 1) {
+    scale *= 1000;
+  }
+  const compactPrefixTranslations = {
+    compactThousands: i18n.translate('xpack.securitySolution.endpoint.resolver.compactThousands', {
+      defaultMessage: 'k',
+    }),
+    compactMillions: i18n.translate('xpack.securitySolution.endpoint.resolver.compactMillions', {
+      defaultMessage: 'M',
+    }),
+
+    compactBillions: i18n.translate('xpack.securitySolution.endpoint.resolver.compactBillions', {
+      defaultMessage: 'B',
+    }),
+
+    compactTrillions: i18n.translate('xpack.securitySolution.endpoint.resolver.compactTrillions', {
+      defaultMessage: 'T',
+    }),
+  };
+  const prefixMap: Map<number, string> = new Map([
+    [1, ''],
+    [1000, compactPrefixTranslations.compactThousands],
+    [1000000, compactPrefixTranslations.compactMillions],
+    [1000000000, compactPrefixTranslations.compactBillions],
+    [1000000000000, compactPrefixTranslations.compactTrillions],
+  ]);
+  const overflowIndicator = i18n.translate(
+    'xpack.securitySolution.endpoint.resolver.compactOverflow',
+    {
+      defaultMessage: '+',
     }
-    let scale = 1;
-    while (scale < 1e12 && num / (scale * 1000) >= 1) {
-        scale *= 1000;
-    }
-    const prefixes = {
-        '1': '',
-        '1000': 'k',
-        '1000000': 'M',
-        '1000000000': 'B',
-        '1000000000000': 'T',
-    }
-    return [prefixes[`${scale}`], Math.floor(num / scale), ((num / scale) % 1) > Number.EPSILON]
+  );
+  const prefix = prefixMap.get(scale) ?? '';
+  return [
+    Math.floor(num / scale),
+    prefix,
+    (num / scale) % 1 > Number.EPSILON ? overflowIndicator : '',
+  ];
 }
 
 export type ResolverSubmenuOptionList = ResolverSubmenuOption[] | string;
@@ -92,8 +121,17 @@ export const NodeSubMenuComponents = React.memo(
         return [];
       } else {
         return Object.entries(relatedEventStats.events.byCategory).map(([category, total]) => {
+          const [mantissa, scale, hasRemainder] = compactNotationParts(total || 0);
+          const prefix = (
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.resolver.node.pillNumber"
+              description=""
+              defaultMessage="{mantissa}{scale}{hasRemainder}"
+              values={{ mantissa, scale, hasRemainder }}
+            />
+          );
           return {
-            prefix: <EuiI18nNumber value={total || 0} />,
+            prefix,
             optionTitle: category,
             action: () => relatedEventCallbacks(category),
           };
