@@ -42,7 +42,7 @@ export const ConfirmAlertSave: React.FC<Props> = ({ onConfirm, onCancel }) => {
       >
         <p>
           <FormattedMessage
-            id="xpack.triggersActionsUI.sections.confirmAlertSave.confirmAlertSaveMessage"
+            id="xpack.triggersActionsUI.sections.confirmAlertSave.confirmAlertSaveWithoutActionsMessage"
             defaultMessage="Are you sure you want to save this alert without defining any actions?"
           />
         </p>

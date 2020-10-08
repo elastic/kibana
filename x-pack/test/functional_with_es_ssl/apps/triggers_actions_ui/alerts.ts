@@ -133,6 +133,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('saveAlertButton');
       await testSubjects.existOrFail('confirmAlertSaveModal');
+      await testSubjects.click('confirmAlertSaveModal > confirmModalCancelButton');
+      await testSubjects.missingOrFail('confirmAlertSaveModal');
+      await find.existsByCssSelector('[data-test-subj="saveAlertButton"]:not(disabled)');
+
+      await testSubjects.click('saveAlertButton');
+      await testSubjects.existOrFail('confirmAlertSaveModal');
       await testSubjects.click('confirmAlertSaveModal > confirmModalConfirmButton');
       await testSubjects.missingOrFail('confirmAlertSaveModal');
 
@@ -148,27 +154,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           interval: '1m',
         },
       ]);
-
-      // clean up created alert
-      const alertsToDelete = await getAlertsByName(alertName);
-      await deleteAlerts(alertsToDelete.map((alertItem: { id: string }) => alertItem.id));
-    });
-
-    it('should not save if save confirmation is cancelled', async () => {
-      const alertsListBefore = await pageObjects.triggersActionsUI.getAlertsList();
-
-      const alertName = generateUniqueKey();
-      await defineAlert(alertName);
-
-      await testSubjects.click('saveAlertButton');
-      await testSubjects.existOrFail('confirmAlertSaveModal');
-      await testSubjects.click('confirmAlertSaveModal > confirmModalCancelButton');
-      await testSubjects.missingOrFail('confirmAlertSaveModal');
-
-      await testSubjects.click('cancelSaveAlertButton');
-
-      const alertsListAfter = await pageObjects.triggersActionsUI.getAlertsList();
-      expect(alertsListBefore.length).to.eql(alertsListAfter.length);
 
       // clean up created alert
       const alertsToDelete = await getAlertsByName(alertName);
