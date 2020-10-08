@@ -21,18 +21,18 @@
           "canvas-element": "7390014e1091044523666d97247392fc",
           "canvas-workpad": "b0a1706d356228dbdcb4a17e6b9eb231",
           "canvas-workpad-template": "ae2673f678281e2c055d764b153e9715",
-          "cases": "32aa96a6d3855ddda53010ae2048ac22",
+          "cases": "477f214ff61acc3af26a7b7818e380c1",
           "cases-comments": "c2061fb929f585df57425102fa928b4b",
-          "cases-configure": "42711cbb311976c0687853f4c1354572",
+          "cases-configure": "387c5f3a3bda7e0ae0dd4e106f914a69",
           "cases-user-actions": "32277330ec6b721abe3b846cfd939a71",
           "config": "c63748b75f39d0c54de12d12c1ccbc20",
-          "dashboard": "74eb4b909f81222fa1ddeaba2881a37e",
+          "dashboard": "40554caf09725935e2c02e02563a2d07",
           "endpoint:user-artifact": "4a11183eee21e6fbad864f7a30b39ad0",
           "endpoint:user-artifact-manifest": "4b9c0e7cfaf86d82a7ee9ed68065e50d",
           "enterprise_search_telemetry": "3d1b76c39bfb2cc8296b024d73854724",
-          "epm-packages": "386dc9996a3b74607de64c2ab2171582",
-          "exception-list": "497afa2f881a675d72d58e20057f3d8b",
-          "exception-list-agnostic": "497afa2f881a675d72d58e20057f3d8b",
+          "epm-packages": "2b83397e3eaaaa8ef15e38813f3721c3",
+          "exception-list": "67f055ab8c10abd7b2ebfd969b836788",
+          "exception-list-agnostic": "67f055ab8c10abd7b2ebfd969b836788",
           "file-upload-telemetry": "0ed4d3e1983d1217a30982630897092e",
           "fleet-agent-actions": "9511b565b1cc6441a42033db3d5de8e9",
           "fleet-agent-events": "e20a508b6e805189356be381dbfac8db",
@@ -42,7 +42,7 @@
           "index-pattern": "45915a1ad866812242df474eb0479052",
           "infrastructure-ui-source": "3d1b76c39bfb2cc8296b024d73854724",
           "ingest-agent-policies": "8b0733cce189659593659dad8db426f0",
-          "ingest-outputs": "8aa988c376e65443fefc26f1075e93a3",
+          "ingest-outputs": "8854f34453a47e26f86a29f8f3b80b4e",
           "ingest-package-policies": "f74dfe498e1849267cda41580b2be110",
           "ingest_manager_settings": "02a03095f0e05b7a538fa801b88a217f",
           "inventory-view": "3d1b76c39bfb2cc8296b024d73854724",
@@ -61,7 +61,7 @@
           "query": "11aaeb7f5f7fa5bb43f25e18ce26e7d9",
           "references": "7997cf5a56cc02bdc9c93361bde732b0",
           "sample-data-telemetry": "7d3cfeb915303c9641c59681967ffeb4",
-          "search": "7f9e077078cab612f6a58e3bfdedb71a",
+          "search": "43012c7ebc4cb57054e0a490e4b43023",
           "search-telemetry": "3d1b76c39bfb2cc8296b024d73854724",
           "siem-detection-engine-rule-actions": "6569b288c169539db10cb262bf79de18",
           "siem-detection-engine-rule-status": "ae783f41c6937db6b7a2ef5c93a9e9b0",
@@ -79,7 +79,7 @@
           "upgrade-assistant-telemetry": "56702cec857e0a9dacfb696655b4ff7b",
           "uptime-dynamic-settings": "3d1b76c39bfb2cc8296b024d73854724",
           "url": "c7f66a0df8b1b52f17c28c4adb111105",
-          "visualization": "44d6bd48a1a653bcb60ea01614b9e3c9",
+          "visualization": "f819cf6636b75c9e76ba733a0c6ef355",
           "workplace_search_telemetry": "3d1b76c39bfb2cc8296b024d73854724"
         }
       },
@@ -375,8 +375,28 @@
                 }
               }
             },
-            "connector_id": {
-              "type": "keyword"
+            "connector": {
+              "properties": {
+                "fields": {
+                  "properties": {
+                    "key": {
+                      "type": "text"
+                    },
+                    "value": {
+                      "type": "text"
+                    }
+                  }
+                },
+                "id": {
+                  "type": "keyword"
+                },
+                "name": {
+                  "type": "text"
+                },
+                "type": {
+                  "type": "keyword"
+                }
+              }
             },
             "created_at": {
               "type": "date"
@@ -519,11 +539,28 @@
             "closure_type": {
               "type": "keyword"
             },
-            "connector_id": {
-              "type": "keyword"
-            },
-            "connector_name": {
-              "type": "keyword"
+            "connector": {
+              "properties": {
+                "fields": {
+                  "properties": {
+                    "key": {
+                      "type": "text"
+                    },
+                    "value": {
+                      "type": "text"
+                    }
+                  }
+                },
+                "id": {
+                  "type": "keyword"
+                },
+                "name": {
+                  "type": "text"
+                },
+                "type": {
+                  "type": "keyword"
+                }
+              }
             },
             "created_at": {
               "type": "date"
@@ -738,6 +775,9 @@
               "enabled": false,
               "type": "object"
             },
+            "install_source": {
+              "type": "keyword"
+            },
             "install_started_at": {
               "type": "date"
             },
@@ -889,6 +929,9 @@
             "name": {
               "type": "keyword"
             },
+            "os_types": {
+              "type": "keyword"
+            },
             "tags": {
               "type": "keyword"
             },
@@ -1010,6 +1053,9 @@
               "type": "keyword"
             },
             "name": {
+              "type": "keyword"
+            },
+            "os_types": {
               "type": "keyword"
             },
             "tags": {
@@ -1288,6 +1334,9 @@
             "config": {
               "type": "flattened"
             },
+            "config_yaml": {
+              "type": "text"
+            },
             "fleet_enroll_password": {
               "type": "binary"
             },
@@ -1520,6 +1569,15 @@
               "type": "text"
             },
             "config": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "exception-list-agnostic": {
               "fields": {
                 "keyword": {
                   "ignore_above": 256,
