@@ -51,14 +51,14 @@ export async function getPackages(
 }
 
 // Get package names for packages which cannot have more than one package policy on an agent policy
-// Assume packages only export one config template for now
+// Assume packages only export one policy template for now
 export async function getLimitedPackages(options: {
   savedObjectsClient: SavedObjectsClientContract;
 }): Promise<string[]> {
   const { savedObjectsClient } = options;
   const allPackages = await getPackages({ savedObjectsClient, experimental: true });
   const installedPackages = allPackages.filter(
-    (pkg) => (pkg.status = InstallationStatus.installed)
+    (pkg) => pkg.status === InstallationStatus.installed
   );
   const installedPackagesInfo = await Promise.all(
     installedPackages.map((pkgInstall) => {
@@ -101,11 +101,14 @@ export async function getPackageInfo(options: {
   pkgVersion: string;
 }): Promise<PackageInfo> {
   const { savedObjectsClient, pkgName, pkgVersion } = options;
-  const [item, savedObject, latestPackage, assets] = await Promise.all([
-    Registry.fetchInfo(pkgName, pkgVersion),
+  const [
+    savedObject,
+    latestPackage,
+    { paths: assets, registryPackageInfo: item },
+  ] = await Promise.all([
     getInstallationObject({ savedObjectsClient, pkgName }),
     Registry.fetchFindLatestPackage(pkgName),
-    Registry.getArchiveInfo(pkgName, pkgVersion),
+    Registry.loadRegistryPackage(pkgName, pkgVersion),
   ]);
 
   // add properties that aren't (or aren't yet) on Registry response

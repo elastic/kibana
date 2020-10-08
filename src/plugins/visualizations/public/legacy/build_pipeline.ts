@@ -86,7 +86,10 @@ const vislibCharts: string[] = [
   'line',
 ];
 
-export const getSchemas = (vis: Vis, { timeRange, timefilter }: BuildPipelineParams): Schemas => {
+export const getSchemas = <TVisParams>(
+  vis: Vis<TVisParams>,
+  { timeRange, timefilter }: BuildPipelineParams
+): Schemas => {
   const createSchemaConfig = (accessor: number, agg: IAggConfig): SchemaConfig => {
     if (isDateHistogramBucketAggConfig(agg)) {
       agg.params.timeRange = timeRange;
@@ -155,7 +158,8 @@ export const getSchemas = (vis: Vis, { timeRange, timefilter }: BuildPipelinePar
       }
     }
     if (schemaName === 'split') {
-      schemaName = `split_${vis.params.row ? 'row' : 'column'}`;
+      // TODO: We should check if there's a better way then casting to `any` here
+      schemaName = `split_${(vis.params as any).row ? 'row' : 'column'}`;
       skipMetrics = responseAggs.length - metrics.length > 1;
     }
     if (!schemas[schemaName]) {
@@ -410,7 +414,7 @@ export const buildPipeline = async (vis: Vis, params: BuildPipelineParams) => {
       pipeline += `esaggs
     ${prepareString('index', indexPattern!.id)}
     metricsAtAllLevels=${vis.isHierarchical()}
-    partialRows=${vis.type.requiresPartialRows || vis.params.showPartialRows || false}
+    partialRows=${vis.params.showPartialRows || false}
     ${prepareJson('aggConfigs', vis.data.aggs!.aggs)} | `;
     }
 
@@ -433,7 +437,7 @@ export const buildPipeline = async (vis: Vis, params: BuildPipelineParams) => {
       pipeline += `visualization type='${vis.type.name}'
     ${prepareJson('visConfig', visConfig)}
     metricsAtAllLevels=${vis.isHierarchical()}
-    partialRows=${vis.type.requiresPartialRows || vis.params.showPartialRows || false} `;
+    partialRows=${vis.params.showPartialRows || false} `;
       if (indexPattern) {
         pipeline += `${prepareString('index', indexPattern.id)} `;
         if (vis.data.aggs) {

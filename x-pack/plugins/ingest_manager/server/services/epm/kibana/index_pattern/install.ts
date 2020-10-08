@@ -89,7 +89,9 @@ export async function installIndexPatterns(
   // TODO: move to install package
   // cache all installed packages if they don't exist
   const packagePromises = installedPackages.map((pkg) =>
-    Registry.ensureCachedArchiveInfo(pkg.pkgName, pkg.pkgVersion)
+    // TODO: this hard-codes 'registry' as installSource, so uploaded packages are ignored
+    // and their fields will be removed from the generated index patterns after this runs.
+    Registry.ensureCachedArchiveInfo(pkg.pkgName, pkg.pkgVersion, 'registry')
   );
   await Promise.all(packagePromises);
 

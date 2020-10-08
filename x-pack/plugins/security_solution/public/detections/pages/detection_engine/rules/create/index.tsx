@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonEmpty, EuiAccordion, EuiHorizontalRule, EuiPanel, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiAccordion,
+  EuiHorizontalRule,
+  EuiPanel,
+  EuiSpacer,
+  EuiFlexGroup,
+} from '@elastic/eui';
 import React, { useCallback, useRef, useState, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled, { StyledComponent } from 'styled-components';
@@ -28,7 +35,12 @@ import { StepScheduleRule } from '../../../../components/rules/step_schedule_rul
 import { StepRuleActions } from '../../../../components/rules/step_rule_actions';
 import { DetectionEngineHeaderPage } from '../../../../components/detection_engine_header_page';
 import * as RuleI18n from '../translations';
-import { redirectToDetections, getActionMessageParams, userHasNoPermissions } from '../helpers';
+import {
+  redirectToDetections,
+  getActionMessageParams,
+  userHasNoPermissions,
+  MaxWidthEuiFlexItem,
+} from '../helpers';
 import { RuleStep, RuleStepsFormData, RuleStepsFormHooks } from '../types';
 import { formatRule, stepIsValid } from './helpers';
 import * as i18n from './translations';
@@ -183,10 +195,10 @@ const CreateRulePageComponent: React.FC = () => {
         if (nextStep != null) {
           goToStep(nextStep);
         } else {
-          const defineStep = await stepsData.current[RuleStep.defineRule];
-          const aboutStep = await stepsData.current[RuleStep.aboutRule];
-          const scheduleStep = await stepsData.current[RuleStep.scheduleRule];
-          const actionsStep = await stepsData.current[RuleStep.ruleActions];
+          const defineStep = stepsData.current[RuleStep.defineRule];
+          const aboutStep = stepsData.current[RuleStep.aboutRule];
+          const scheduleStep = stepsData.current[RuleStep.scheduleRule];
+          const actionsStep = stepsData.current[RuleStep.ruleActions];
 
           if (
             stepIsValid(defineStep) &&
@@ -273,151 +285,155 @@ const CreateRulePageComponent: React.FC = () => {
 
   return (
     <>
-      <WrapperPage restrictWidth>
-        <DetectionEngineHeaderPage
-          backOptions={{
-            href: getRulesUrl(),
-            text: i18n.BACK_TO_RULES,
-            pageId: SecurityPageName.detections,
-          }}
-          border
-          isLoading={isLoading || loading}
-          title={i18n.PAGE_TITLE}
-        />
-        <MyEuiPanel zindex={4}>
-          <StepDefineRuleAccordion
-            initialIsOpen={true}
-            id={RuleStep.defineRule}
-            buttonContent={defineRuleButton}
-            paddingSize="xs"
-            ref={defineRuleRef}
-            onToggle={handleAccordionToggle.bind(null, RuleStep.defineRule)}
-            extraAction={
-              stepsData.current[RuleStep.defineRule].isValid && (
-                <EuiButtonEmpty
-                  data-test-subj="edit-define-rule"
-                  iconType="pencil"
-                  size="xs"
-                  onClick={() => editStep(RuleStep.defineRule)}
-                >
-                  {i18n.EDIT_RULE}
-                </EuiButtonEmpty>
-              )
-            }
-          >
-            <EuiHorizontalRule margin="m" />
-            <StepDefineRule
-              addPadding={true}
-              defaultValues={stepsData.current[RuleStep.defineRule].data}
-              isReadOnlyView={activeStep !== RuleStep.defineRule}
+      <WrapperPage>
+        <EuiFlexGroup direction="row" justifyContent="spaceAround">
+          <MaxWidthEuiFlexItem>
+            <DetectionEngineHeaderPage
+              backOptions={{
+                href: getRulesUrl(),
+                text: i18n.BACK_TO_RULES,
+                pageId: SecurityPageName.detections,
+              }}
+              border
               isLoading={isLoading || loading}
-              setForm={setFormHook}
-              onSubmit={() => submitStep(RuleStep.defineRule)}
-              descriptionColumns="singleSplit"
+              title={i18n.PAGE_TITLE}
             />
-          </StepDefineRuleAccordion>
-        </MyEuiPanel>
-        <EuiSpacer size="l" />
-        <MyEuiPanel zindex={3}>
-          <EuiAccordion
-            initialIsOpen={false}
-            id={RuleStep.aboutRule}
-            buttonContent={aboutRuleButton}
-            paddingSize="xs"
-            ref={aboutRuleRef}
-            onToggle={handleAccordionToggle.bind(null, RuleStep.aboutRule)}
-            extraAction={
-              stepsData.current[RuleStep.aboutRule].isValid && (
-                <EuiButtonEmpty
-                  data-test-subj="edit-about-rule"
-                  iconType="pencil"
-                  size="xs"
-                  onClick={() => editStep(RuleStep.aboutRule)}
-                >
-                  {i18n.EDIT_RULE}
-                </EuiButtonEmpty>
-              )
-            }
-          >
-            <EuiHorizontalRule margin="m" />
-            <StepAboutRule
-              addPadding={true}
-              defaultValues={stepsData.current[RuleStep.aboutRule].data}
-              defineRuleData={stepsData.current[RuleStep.defineRule].data}
-              descriptionColumns="singleSplit"
-              isReadOnlyView={activeStep !== RuleStep.aboutRule}
-              isLoading={isLoading || loading}
-              setForm={setFormHook}
-              onSubmit={() => submitStep(RuleStep.aboutRule)}
-            />
-          </EuiAccordion>
-        </MyEuiPanel>
-        <EuiSpacer size="l" />
-        <MyEuiPanel zindex={2}>
-          <EuiAccordion
-            initialIsOpen={false}
-            id={RuleStep.scheduleRule}
-            buttonContent={scheduleRuleButton}
-            paddingSize="xs"
-            ref={scheduleRuleRef}
-            onToggle={handleAccordionToggle.bind(null, RuleStep.scheduleRule)}
-            extraAction={
-              stepsData.current[RuleStep.scheduleRule].isValid && (
-                <EuiButtonEmpty
-                  iconType="pencil"
-                  size="xs"
-                  onClick={() => editStep(RuleStep.scheduleRule)}
-                >
-                  {i18n.EDIT_RULE}
-                </EuiButtonEmpty>
-              )
-            }
-          >
-            <EuiHorizontalRule margin="m" />
-            <StepScheduleRule
-              addPadding={true}
-              defaultValues={stepsData.current[RuleStep.scheduleRule].data}
-              descriptionColumns="singleSplit"
-              isReadOnlyView={activeStep !== RuleStep.scheduleRule}
-              isLoading={isLoading || loading}
-              setForm={setFormHook}
-              onSubmit={() => submitStep(RuleStep.scheduleRule)}
-            />
-          </EuiAccordion>
-        </MyEuiPanel>
-        <EuiSpacer size="l" />
-        <MyEuiPanel zindex={1}>
-          <EuiAccordion
-            initialIsOpen={false}
-            id={RuleStep.ruleActions}
-            buttonContent={ruleActionsButton}
-            paddingSize="xs"
-            ref={ruleActionsRef}
-            onToggle={handleAccordionToggle.bind(null, RuleStep.ruleActions)}
-            extraAction={
-              stepsData.current[RuleStep.ruleActions].isValid && (
-                <EuiButtonEmpty
-                  iconType="pencil"
-                  size="xs"
-                  onClick={() => editStep(RuleStep.ruleActions)}
-                >
-                  {i18n.EDIT_RULE}
-                </EuiButtonEmpty>
-              )
-            }
-          >
-            <EuiHorizontalRule margin="m" />
-            <StepRuleActions
-              addPadding={true}
-              defaultValues={stepsData.current[RuleStep.ruleActions].data}
-              isReadOnlyView={activeStep !== RuleStep.ruleActions}
-              isLoading={isLoading || loading}
-              setForm={setFormHook}
-              onSubmit={() => submitStep(RuleStep.ruleActions)}
-              actionMessageParams={actionMessageParams}
-            />
-          </EuiAccordion>
-        </MyEuiPanel>
+            <MyEuiPanel zindex={4}>
+              <StepDefineRuleAccordion
+                initialIsOpen={true}
+                id={RuleStep.defineRule}
+                buttonContent={defineRuleButton}
+                paddingSize="xs"
+                ref={defineRuleRef}
+                onToggle={handleAccordionToggle.bind(null, RuleStep.defineRule)}
+                extraAction={
+                  stepsData.current[RuleStep.defineRule].isValid && (
+                    <EuiButtonEmpty
+                      data-test-subj="edit-define-rule"
+                      iconType="pencil"
+                      size="xs"
+                      onClick={() => editStep(RuleStep.defineRule)}
+                    >
+                      {i18n.EDIT_RULE}
+                    </EuiButtonEmpty>
+                  )
+                }
+              >
+                <EuiHorizontalRule margin="m" />
+                <StepDefineRule
+                  addPadding={true}
+                  defaultValues={stepsData.current[RuleStep.defineRule].data}
+                  isReadOnlyView={activeStep !== RuleStep.defineRule}
+                  isLoading={isLoading || loading}
+                  setForm={setFormHook}
+                  onSubmit={() => submitStep(RuleStep.defineRule)}
+                  descriptionColumns="singleSplit"
+                />
+              </StepDefineRuleAccordion>
+            </MyEuiPanel>
+            <EuiSpacer size="l" />
+            <MyEuiPanel zindex={3}>
+              <EuiAccordion
+                initialIsOpen={false}
+                id={RuleStep.aboutRule}
+                buttonContent={aboutRuleButton}
+                paddingSize="xs"
+                ref={aboutRuleRef}
+                onToggle={handleAccordionToggle.bind(null, RuleStep.aboutRule)}
+                extraAction={
+                  stepsData.current[RuleStep.aboutRule].isValid && (
+                    <EuiButtonEmpty
+                      data-test-subj="edit-about-rule"
+                      iconType="pencil"
+                      size="xs"
+                      onClick={() => editStep(RuleStep.aboutRule)}
+                    >
+                      {i18n.EDIT_RULE}
+                    </EuiButtonEmpty>
+                  )
+                }
+              >
+                <EuiHorizontalRule margin="m" />
+                <StepAboutRule
+                  addPadding={true}
+                  defaultValues={stepsData.current[RuleStep.aboutRule].data}
+                  defineRuleData={stepsData.current[RuleStep.defineRule].data}
+                  descriptionColumns="singleSplit"
+                  isReadOnlyView={activeStep !== RuleStep.aboutRule}
+                  isLoading={isLoading || loading}
+                  setForm={setFormHook}
+                  onSubmit={() => submitStep(RuleStep.aboutRule)}
+                />
+              </EuiAccordion>
+            </MyEuiPanel>
+            <EuiSpacer size="l" />
+            <MyEuiPanel zindex={2}>
+              <EuiAccordion
+                initialIsOpen={false}
+                id={RuleStep.scheduleRule}
+                buttonContent={scheduleRuleButton}
+                paddingSize="xs"
+                ref={scheduleRuleRef}
+                onToggle={handleAccordionToggle.bind(null, RuleStep.scheduleRule)}
+                extraAction={
+                  stepsData.current[RuleStep.scheduleRule].isValid && (
+                    <EuiButtonEmpty
+                      iconType="pencil"
+                      size="xs"
+                      onClick={() => editStep(RuleStep.scheduleRule)}
+                    >
+                      {i18n.EDIT_RULE}
+                    </EuiButtonEmpty>
+                  )
+                }
+              >
+                <EuiHorizontalRule margin="m" />
+                <StepScheduleRule
+                  addPadding={true}
+                  defaultValues={stepsData.current[RuleStep.scheduleRule].data}
+                  descriptionColumns="singleSplit"
+                  isReadOnlyView={activeStep !== RuleStep.scheduleRule}
+                  isLoading={isLoading || loading}
+                  setForm={setFormHook}
+                  onSubmit={() => submitStep(RuleStep.scheduleRule)}
+                />
+              </EuiAccordion>
+            </MyEuiPanel>
+            <EuiSpacer size="l" />
+            <MyEuiPanel zindex={1}>
+              <EuiAccordion
+                initialIsOpen={false}
+                id={RuleStep.ruleActions}
+                buttonContent={ruleActionsButton}
+                paddingSize="xs"
+                ref={ruleActionsRef}
+                onToggle={handleAccordionToggle.bind(null, RuleStep.ruleActions)}
+                extraAction={
+                  stepsData.current[RuleStep.ruleActions].isValid && (
+                    <EuiButtonEmpty
+                      iconType="pencil"
+                      size="xs"
+                      onClick={() => editStep(RuleStep.ruleActions)}
+                    >
+                      {i18n.EDIT_RULE}
+                    </EuiButtonEmpty>
+                  )
+                }
+              >
+                <EuiHorizontalRule margin="m" />
+                <StepRuleActions
+                  addPadding={true}
+                  defaultValues={stepsData.current[RuleStep.ruleActions].data}
+                  isReadOnlyView={activeStep !== RuleStep.ruleActions}
+                  isLoading={isLoading || loading}
+                  setForm={setFormHook}
+                  onSubmit={() => submitStep(RuleStep.ruleActions)}
+                  actionMessageParams={actionMessageParams}
+                />
+              </EuiAccordion>
+            </MyEuiPanel>
+          </MaxWidthEuiFlexItem>
+        </EuiFlexGroup>
       </WrapperPage>
 
       <SpyRoute pageName={SecurityPageName.detections} />

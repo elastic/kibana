@@ -24,6 +24,7 @@ import {
   EuiSpacer,
   EuiBetaBadge,
   EuiButtonEmpty,
+  EuiButton,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -42,6 +43,7 @@ import { PLUGIN } from '../../../constants/plugin';
 import { AlertEdit } from '../../alert_form';
 import { AlertsContextProvider } from '../../../context/alerts_context';
 import { routeToAlertDetails } from '../../../constants';
+import { alertsErrorReasonTranslationsMapping } from '../../alerts_list/translations';
 
 type AlertDetailsProps = {
   alert: Alert;
@@ -105,9 +107,18 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   const [isEnabled, setIsEnabled] = useState<boolean>(alert.enabled);
   const [isMuted, setIsMuted] = useState<boolean>(alert.muteAll);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
+  const [dissmissAlertErrors, setDissmissAlertErrors] = useState<boolean>(false);
 
   const setAlert = async () => {
     history.push(routeToAlertDetails.replace(`:alertId`, alert.id));
+  };
+
+  const getAlertStatusErrorReasonText = () => {
+    if (alert.executionStatus.error && alert.executionStatus.error.reason) {
+      return alertsErrorReasonTranslationsMapping[alert.executionStatus.error.reason];
+    } else {
+      return alertsErrorReasonTranslationsMapping.unknown;
+    }
   };
 
   return (
@@ -166,6 +177,8 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                             dataFieldsFormats: dataPlugin.fieldFormats,
                             reloadAlerts: setAlert,
                             capabilities,
+                            dataUi: dataPlugin.ui,
+                            dataIndexPatterns: dataPlugin.indexPatterns,
                           }}
                         >
                           <AlertEdit
@@ -275,6 +288,30 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
+            {!dissmissAlertErrors && alert.executionStatus.status === 'error' ? (
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiCallOut
+                    color="danger"
+                    data-test-subj="alertErrorBanner"
+                    size="s"
+                    title={getAlertStatusErrorReasonText()}
+                    iconType="alert"
+                  >
+                    <EuiText size="s" color="danger" data-test-subj="alertErrorMessageText">
+                      {alert.executionStatus.error?.message}
+                    </EuiText>
+                    <EuiSpacer size="s" />
+                    <EuiButton color="danger" onClick={() => setDissmissAlertErrors(true)}>
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.alertDetails.dismissButtonTitle"
+                        defaultMessage="Dismiss"
+                      />
+                    </EuiButton>
+                  </EuiCallOut>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ) : null}
             <EuiFlexGroup>
               <EuiFlexItem>
                 {alert.enabled ? (

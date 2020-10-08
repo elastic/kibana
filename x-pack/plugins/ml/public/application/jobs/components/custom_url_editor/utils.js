@@ -18,6 +18,7 @@ import { ml } from '../../../services/ml_api_service';
 import { mlJobService } from '../../../services/job_service';
 import { escapeForElasticsearchQuery } from '../../../util/string_utils';
 import { getSavedObjectsClient, getGetUrlGenerator } from '../../../util/dependency_cache';
+import { getProcessedFields } from '../../../components/data_grid';
 
 export function getNewCustomUrlDefaults(job, dashboards, indexPatterns) {
   // Returns the settings object in the format used by the custom URL editor
@@ -329,7 +330,7 @@ export function getTestUrl(job, customUrl) {
               });
             } else {
               if (response.hits.total.value > 0) {
-                testDoc = response.hits.hits[0]._source;
+                testDoc = getProcessedFields(response.hits.hits[0].fields);
               }
             }
 
