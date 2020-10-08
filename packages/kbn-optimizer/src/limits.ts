@@ -23,19 +23,28 @@ import dedent from 'dedent';
 import Yaml from 'js-yaml';
 import { createFailError, ToolingLog } from '@kbn/dev-utils';
 
-import { OptimizerConfig, getMetrics } from './optimizer';
+import { OptimizerConfig, getMetrics, Limits } from './optimizer';
 
 const LIMITS_PATH = require.resolve('../limits.yml');
 const DEFAULT_BUDGET = 15000;
 
 const diff = <T>(a: T[], b: T[]): T[] => a.filter((item) => !b.includes(item));
 
-export function readLimits() {
-  return Yaml.safeLoad(Fs.readFileSync(LIMITS_PATH, 'utf8'));
+export function readLimits(): Limits {
+  let yaml;
+  try {
+    yaml = Fs.readFileSync(LIMITS_PATH, 'utf8');
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      throw error;
+    }
+  }
+
+  return yaml ? Yaml.safeLoad(yaml) : {};
 }
 
 export function validateLimitsForAllBundles(log: ToolingLog, config: OptimizerConfig) {
-  const limitBundleIds = Object.keys(config.limits.pageLoadAssetSize);
+  const limitBundleIds = Object.keys(config.limits.pageLoadAssetSize || {});
   const configBundleIds = config.bundles.map((b) => b.id);
 
   const missingBundleIds = diff(configBundleIds, limitBundleIds);
@@ -56,7 +65,11 @@ export function validateLimitsForAllBundles(log: ToolingLog, config: OptimizerCo
 
           ${issues.join('\n          ')}
 
-        To validate your changes locally, run:
+        To automatically update the limits file locally run:
+
+          node scripts/build_kibana_platform_plugins.js --update-limits
+
+        To validate your changes locally run:
 
           node scripts/build_kibana_platform_plugins.js --validate-limits
       ` + '\n'
@@ -74,7 +87,13 @@ export function updateBundleLimits(log: ToolingLog, config: OptimizerConfig) {
   let yaml = `pageLoadAssetSize:\n`;
   for (const metric of metrics.sort((a, b) => a.id.localeCompare(b.id))) {
     if (metric.group === 'page load bundle size') {
-      yaml += `  ${metric.id}: ${number(metric.value + DEFAULT_BUDGET)}\n`;
+      const existingLimit = config.limits.pageLoadAssetSize?.[metric.id];
+      const newLimit =
+        existingLimit != null && existingLimit >= metric.value
+          ? existingLimit
+          : metric.value + DEFAULT_BUDGET;
+
+      yaml += `  ${metric.id}: ${number(newLimit)}\n`;
     }
   }
 
