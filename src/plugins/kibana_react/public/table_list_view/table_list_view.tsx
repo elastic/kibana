@@ -42,6 +42,7 @@ import { toMountPoint } from '../util';
 
 interface Column {
   name: string;
+  field: string;
   width?: string;
   actions?: object[];
 }
@@ -440,12 +441,18 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
       },
     };
 
+    const actionsColumnName = i18n.translate(
+      'kibana-react.tableListView.listing.table.actionTitle',
+      {
+        defaultMessage: 'Actions',
+      }
+    );
+
     const columns = this.props.tableColumns.slice();
     if (this.props.editItem) {
       columns.push({
-        name: i18n.translate('kibana-react.tableListView.listing.table.actionTitle', {
-          defaultMessage: 'Actions',
-        }),
+        name: actionsColumnName,
+        field: actionsColumnName,
         width: '100px',
         actions,
       });
