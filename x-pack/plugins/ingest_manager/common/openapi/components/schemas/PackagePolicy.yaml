@@ -13,5 +13,3 @@ allOf:
       - id
       - revision
   - $ref: ./NewPackagePolicy.yaml
-x-examples:
-  example-1: {}

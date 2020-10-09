@@ -13,13 +13,6 @@ get:
                 type: boolean
             required:
               - isInitialized
-          examples:
-            success:
-              value:
-                isInitialized: true
-            failure:
-              value:
-                isInitialized: false
   operationId: get-agents-setup
   security:
     - basicAuth: []
@@ -38,10 +31,6 @@ post:
                 type: boolean
             required:
               - isInitialized
-          examples:
-            success:
-              value:
-                isInitialized: true
   requestBody:
     content:
       application/json:

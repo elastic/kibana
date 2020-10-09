@@ -18,15 +18,6 @@ post:
               required:
                 - id
                 - success
-          examples:
-            success:
-              value:
-                - id: df7d2540-5a47-11ea-80da-89b5a66da347
-                  success: true
-            fail:
-              value:
-                - id: df7d2540-5a47-11ea-80da-89b5a66da347
-                  success: false
   requestBody:
     content:
       application/json:
@@ -37,11 +28,6 @@ post:
               type: array
               items:
                 type: string
-        examples:
-          example-1:
-            value:
-              agentPolicyIds:
-                - df7d2540-5a47-11ea-80da-89b5a66da347
   parameters:
     - $ref: ../components/parameters/xsrfHeader.yaml
 parameters: []

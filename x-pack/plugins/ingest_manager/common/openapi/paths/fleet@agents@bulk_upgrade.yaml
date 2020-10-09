@@ -8,23 +8,12 @@ post:
         application/json:
           schema:
             $ref: ../components/schemas/BulkUpgradeAgents.yaml
-          examples:
-            success:
-              value: {}
     '400':
       description: BAD REQUEST
       content:
         application/json:
           schema:
             $ref: ../components/schemas/UpgradeAgent.yaml
-          examples:
-            bad request kibana version:
-              value:
-                statusCode: 400
-                error: Bad Request
-                message: >-
-                  cannot upgrade agent to 8.0.0 because it is different than the
-                  installed kibana version 7.9.10
   operationId: post-fleet-agents-bulk-upgrade
   parameters:
     - $ref: ../components/parameters/xsrfHeader.yaml
@@ -34,11 +23,3 @@ post:
       application/json:
         schema:
           $ref: ../components/schemas/BulkUpgradeAgents.yaml
-        examples:
-          version:
-            value:
-              version: 8.0.0
-          version and source_uri:
-            value:
-              version: 8.0.0
-              source_uri: 'http://localhost:8000'

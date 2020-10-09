@@ -24,28 +24,6 @@ get:
               - total
               - page
               - perPage
-          examples:
-            success:
-              value:
-                items:
-                  - id: 82da1fc0-8fbf-11ea-b2ce-01c4a6127154
-                    name: Default policy
-                    namespace: default
-                    description: Default agent policy created by Kibana
-                    status: active
-                    packagePolicies:
-                      - 8a5679b0-8fbf-11ea-b2ce-01c4a6127154
-                    is_default: true
-                    monitoring_enabled:
-                      - logs
-                      - metrics
-                    revision: 2
-                    updated_on: '2020-05-06T17:32:21.905Z'
-                    updated_by: system
-                    agents: 0
-                total: 1
-                page: 1
-                perPage: 50
   operationId: agent-policy-list
   parameters:
     - $ref: ../components/parameters/pageSizeParam.yaml

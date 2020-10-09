@@ -11,10 +11,6 @@ post:
             properties:
               isInitialized:
                 type: boolean
-          examples:
-            success:
-              value:
-                isInitialized: true
     '500':
       description: Internal Server Error
       content:
@@ -24,7 +20,6 @@ post:
             properties:
               message:
                 type: string
-          examples: {}
   operationId: post-setup
   parameters:
     - $ref: ../components/parameters/xsrfHeader.yaml

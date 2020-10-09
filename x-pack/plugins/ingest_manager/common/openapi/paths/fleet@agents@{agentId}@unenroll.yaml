@@ -19,7 +19,3 @@ post:
           properties:
             force:
               type: boolean
-        examples:
-          example-1:
-            value:
-              force: true

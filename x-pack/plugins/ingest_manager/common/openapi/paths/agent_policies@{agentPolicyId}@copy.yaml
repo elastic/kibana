@@ -31,6 +31,5 @@ post:
               type: string
           required:
             - name
-        examples: {}
     description: ''
   description: Copies one agent policy
