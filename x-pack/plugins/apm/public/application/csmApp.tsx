@@ -22,7 +22,6 @@ import { renderAsRedirectTo } from '../components/app/Main/route_config';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
 import { RumHome, UX_LABEL } from '../components/app/RumDashboard/RumHome';
 import { ApmPluginContext } from '../context/ApmPluginContext';
-import { LoadingIndicatorProvider } from '../context/LoadingIndicatorContext';
 import { UrlParamsProvider } from '../context/UrlParamsContext';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { ConfigSchema } from '../index';
@@ -92,9 +91,7 @@ export function CsmAppRoot({
           <i18nCore.Context>
             <Router history={history}>
               <UrlParamsProvider>
-                <LoadingIndicatorProvider>
-                  <CsmApp />
-                </LoadingIndicatorProvider>
+                <CsmApp />
               </UrlParamsProvider>
             </Router>
           </i18nCore.Context>

@@ -16,9 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import $ from 'jquery';
-
 interface LazyScope extends ng.IScope {
   [key: string]: any;
 }

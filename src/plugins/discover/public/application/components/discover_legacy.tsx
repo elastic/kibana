@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState } from 'react';
 import classNames from 'classnames';
 import {
   EuiButtonEmpty,
@@ -78,7 +78,6 @@ export interface DiscoverLegacyProps {
     indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
     timefield: string;
     sampleSize: number;
-    fixedScroll: (el: HTMLElement) => void;
     setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
   };
   resetQuery: () => void;
@@ -135,20 +134,6 @@ export function DiscoverLegacy({
     bucketAggConfig && search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)
       ? bucketAggConfig.buckets?.getInterval()
       : undefined;
-  const [fixedScrollEl, setFixedScrollEl] = useState<HTMLElement | undefined>();
-
-  useEffect(() => (fixedScrollEl ? opts.fixedScroll(fixedScrollEl) : undefined), [
-    fixedScrollEl,
-    opts,
-  ]);
-  const fixedScrollRef = useCallback(
-    (node: HTMLElement) => {
-      if (node !== null) {
-        setFixedScrollEl(node);
-      }
-    },
-    [setFixedScrollEl]
-  );
   const sidebarClassName = classNames({
     closed: isSidebarClosed,
   });
@@ -274,7 +259,6 @@ export function DiscoverLegacy({
                   <section
                     className="dscTable dscTableFixedScroll"
                     aria-labelledby="documentsAriaLabel"
-                    ref={fixedScrollRef}
                   >
                     <h2 className="euiScreenReaderOnly" id="documentsAriaLabel">
                       <FormattedMessage
@@ -311,8 +295,13 @@ export function DiscoverLegacy({
                             />
 
                             <EuiButtonEmpty
-                              onClick={(ev) => {
-                                ev.currentTarget.parentNode.parentNode.parentNode.scrollTo(0, 0);
+                              onClick={(ev: React.MouseEvent) => {
+                                // TODO: make it right
+                                // @ts-ignore
+                                ev.currentTarget?.parentNode?.parentNode?.parentNode?.scrollTo(
+                                  0,
+                                  0
+                                );
                               }}
                             >
                               <FormattedMessage

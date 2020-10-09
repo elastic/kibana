@@ -27,7 +27,7 @@ import { getMlSharedImports } from '../../../../../shared_imports';
 
 describe('Transform: <DefinePivotSummary />', () => {
   // Using the async/await wait()/done() pattern to avoid act() errors.
-  test('Minimal initialization', async (done) => {
+  test('Minimal initialization', async () => {
     // Arrange
     const mlSharedImports = await getMlSharedImports();
 
@@ -72,6 +72,5 @@ describe('Transform: <DefinePivotSummary />', () => {
     expect(getByText('Group by')).toBeInTheDocument();
     expect(getByText('Aggregations')).toBeInTheDocument();
     await wait();
-    done();
   });
 });

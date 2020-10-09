@@ -26,12 +26,13 @@ import realHits from 'fixtures/real_hits.js';
 import stubbedLogstashFields from 'fixtures/logstash_fields';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
-import { DiscoverSidebar, DiscoverSidebarProps } from './discover_sidebar';
+import { DiscoverSidebarProps } from './discover_sidebar';
 import { coreMock } from '../../../../../../core/public/mocks';
 import { IndexPatternAttributes } from '../../../../../data/common';
 import { getStubIndexPattern } from '../../../../../data/public/test_utils';
 import { SavedObject } from '../../../../../../core/types';
 import { FieldFilterState } from './lib/field_filter';
+import { DiscoverSidebarResponsive } from './discover_sidebar_responsive';
 
 jest.mock('../../../kibana_services', () => ({
   getServices: () => ({
@@ -113,7 +114,7 @@ describe('discover sidebar', function () {
 
   beforeAll(() => {
     props = getCompProps();
-    comp = mountWithIntl(<DiscoverSidebar {...props} />);
+    comp = mountWithIntl(<DiscoverSidebarResponsive {...props} />);
   });
 
   it('should have Selected Fields and Available Fields with Popular Fields sections', function () {

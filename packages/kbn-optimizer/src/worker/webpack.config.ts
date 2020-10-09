@@ -200,6 +200,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
             loader: 'babel-loader',
             options: {
               babelrc: false,
+              envName: worker.dist ? 'production' : 'development',
               presets: IS_CODE_COVERAGE
                 ? [ISTANBUL_PRESET_PATH, BABEL_PRESET_PATH]
                 : [BABEL_PRESET_PATH],

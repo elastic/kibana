@@ -110,6 +110,10 @@ const rule: SanitizedAlert = {
   muteAll: false,
   mutedInstanceIds: [],
   scheduledTaskId: '2dabe330-0702-11ea-8b50-773b89126888',
+  executionStatus: {
+    status: 'unknown',
+    lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+  },
 };
 
 export const getPatchRulesOptionsMock = (): PatchRulesOptions => ({
@@ -145,6 +149,11 @@ export const getPatchRulesOptionsMock = (): PatchRulesOptions => ({
   tags: [],
   threat: [],
   threshold: undefined,
+  threatFilters: undefined,
+  threatIndex: undefined,
+  threatQuery: undefined,
+  threatMapping: undefined,
+  threatLanguage: undefined,
   timestampOverride: undefined,
   to: 'now',
   type: 'query',
@@ -189,6 +198,11 @@ export const getPatchMlRulesOptionsMock = (): PatchRulesOptions => ({
   tags: [],
   threat: [],
   threshold: undefined,
+  threatFilters: undefined,
+  threatIndex: undefined,
+  threatQuery: undefined,
+  threatMapping: undefined,
+  threatLanguage: undefined,
   timestampOverride: undefined,
   to: 'now',
   type: 'machine_learning',

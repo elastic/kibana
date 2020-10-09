@@ -159,11 +159,13 @@ interface LoadEvaluateResult {
   error: string | null;
 }
 
-export const getAnalysisType = (analysis: AnalysisConfig): string => {
+export const getAnalysisType = (
+  analysis: AnalysisConfig
+): DataFrameAnalysisConfigType | 'unknown' => {
   const keys = Object.keys(analysis);
 
   if (keys.length === 1) {
-    return keys[0];
+    return keys[0] as DataFrameAnalysisConfigType;
   }
 
   return 'unknown';

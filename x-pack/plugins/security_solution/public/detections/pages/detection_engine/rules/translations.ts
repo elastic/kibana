@@ -315,6 +315,13 @@ export const COLUMN_TAGS = i18n.translate(
   }
 );
 
+export const COLUMN_SEE_ALL_POPOVER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.tagsPopoverTitle',
+  {
+    defaultMessage: 'See all',
+  }
+);
+
 export const COLUMN_ACTIVATE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.activateTitle',
   {

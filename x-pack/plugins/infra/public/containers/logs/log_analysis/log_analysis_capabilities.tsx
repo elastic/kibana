@@ -6,18 +6,16 @@
 
 import createContainer from 'constate';
 import { useMemo, useState, useEffect } from 'react';
-import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { identity } from 'fp-ts/lib/function';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
-import { npStart } from '../../../legacy_singletons';
 import {
   getMlCapabilitiesResponsePayloadRT,
   GetMlCapabilitiesResponsePayload,
 } from './api/ml_api_types';
-import { throwErrors, createPlainError } from '../../../../common/runtime_types';
+import { decodeOrThrow } from '../../../../common/runtime_types';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 export const useLogAnalysisCapabilities = () => {
+  const { services } = useKibanaContextForPlugin();
   const [mlCapabilities, setMlCapabilities] = useState<GetMlCapabilitiesResponsePayload>(
     initialMlCapabilities
   );
@@ -26,12 +24,9 @@ export const useLogAnalysisCapabilities = () => {
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
-        const rawResponse = await npStart.http.fetch('/api/ml/ml_capabilities');
+        const rawResponse = await services.http.fetch('/api/ml/ml_capabilities');
 
-        return pipe(
-          getMlCapabilitiesResponsePayloadRT.decode(rawResponse),
-          fold(throwErrors(createPlainError), identity)
-        );
+        return decodeOrThrow(getMlCapabilitiesResponsePayloadRT)(rawResponse);
       },
       onResolve: (response) => {
         setMlCapabilities(response);

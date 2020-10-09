@@ -20,11 +20,11 @@ export default function (providerContext: FtrProviderContext) {
   const metricsTemplateName = `metrics-${pkgName}.test_metrics`;
 
   const uninstallPackage = async (pkg: string) => {
-    await supertest.delete(`/api/ingest_manager/epm/packages/${pkg}`).set('kbn-xsrf', 'xxxx');
+    await supertest.delete(`/api/fleet/epm/packages/${pkg}`).set('kbn-xsrf', 'xxxx');
   };
   const installPackage = async (pkg: string) => {
     await supertest
-      .post(`/api/ingest_manager/epm/packages/${pkg}`)
+      .post(`/api/fleet/epm/packages/${pkg}`)
       .set('kbn-xsrf', 'xxxx')
       .send({ force: true });
   };
@@ -88,6 +88,14 @@ export default function (providerContext: FtrProviderContext) {
         const res = await es.transport.request({
           method: 'GET',
           path: `/_transform/${pkgName}.test-default-${pkgVersion}`,
+        });
+        expect(res.statusCode).equal(200);
+      });
+      it('should have created the index for the transform', async function () {
+        // the  index is defined in the transform file
+        const res = await es.transport.request({
+          method: 'GET',
+          path: `/logs-all_assets.test_log_current_default`,
         });
         expect(res.statusCode).equal(200);
       });
@@ -184,6 +192,7 @@ export default function (providerContext: FtrProviderContext) {
           install_version: '0.1.0',
           install_status: 'installed',
           install_started_at: res.attributes.install_started_at,
+          install_source: 'registry',
         });
       });
     });
@@ -253,6 +262,19 @@ export default function (providerContext: FtrProviderContext) {
           {
             method: 'GET',
             path: `/_transform/${pkgName}-test-default-${pkgVersion}`,
+          },
+          {
+            ignore: [404],
+          }
+        );
+        expect(res.statusCode).equal(404);
+      });
+      it('should have deleted the index for the transform', async function () {
+        // the  index is defined in the transform file
+        const res = await es.transport.request(
+          {
+            method: 'GET',
+            path: `/logs-all_assets.test_log_current_default`,
           },
           {
             ignore: [404],

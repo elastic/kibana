@@ -19,7 +19,6 @@
 import React, { ReactNode } from 'react';
 import { EuiDataGridColumn } from '@elastic/eui';
 import { IndexPattern } from '../../../../../data/common/index_patterns/index_patterns';
-import { DiscoverGridHeader } from './discover_grid_header_col';
 import { moveColumn } from '../../angular/doc_table/actions/columns';
 
 const kibanaJSON = 'kibana-json';
@@ -93,6 +92,11 @@ export function buildEuiGridColumn(
     schema: indexPatternField?.type,
     isSortable: indexPatternField?.sortable,
     display: indexPatternField?.displayName,
+    actions: {
+      showHide: { label: 'Remove column' },
+      showSortAsc: { label: 'Sort ASC' },
+      showSortDesc: { label: 'Sort DESC' },
+    },
   };
 
   // Default DataGrid schemas: boolean, numeric, datetime, json, currency
@@ -123,49 +127,6 @@ export function buildEuiGridColumn(
   if (columnWidth > 0) {
     column.initialWidth = Number(columnWidth);
   }
-  const listItems = [
-    {
-      label: 'Sort ASC',
-      onClick: () => onSort([[column.id, 'asc']]),
-      iconType: 'sortUp',
-      size: 'xs',
-      color: 'text',
-      isDisabled: !indexPatternField?.sortable,
-    },
-    {
-      label: 'Sort DESC',
-      onClick: () => onSort([[column.id, 'desc']]),
-      iconType: 'sortDown',
-      size: 'xs',
-      color: 'text',
-      isDisabled: !indexPatternField?.sortable,
-    },
-    {
-      label: 'Move left',
-      onClick: () => onSetColumns(moveColumn(columns, column.id, columns.indexOf(column.id) - 1)),
-      iconType: 'sortLeft',
-      size: 'xs',
-      color: 'text',
-      isDisabled: columns.indexOf(column.id) === 0,
-    },
-    {
-      label: 'Move right',
-      onClick: () => onSetColumns(moveColumn(columns, column.id, columns.indexOf(column.id) + 1)),
-      iconType: 'sortRight',
-      size: 'xs',
-      color: 'text',
-      isDisabled: columns.indexOf(column.id) === columns.length - 1,
-    },
-    {
-      label: 'Remove column',
-      onClick: () => onSetColumns(columns.filter((col: string) => col !== column.id)),
-      iconType: 'cross',
-      size: 'xs',
-      color: 'text',
-      isDisabled: columns.length === 1,
-    },
-  ];
-  column.display = <DiscoverGridHeader title={column.display} listItems={listItems} />;
   return column;
 }
 

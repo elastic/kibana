@@ -7,6 +7,7 @@
 export const TIMELINE_EVENTS_FIELDS = [
   '@timestamp',
   'signal.status',
+  'signal.group.id',
   'signal.original_time',
   'signal.rule.filters',
   'signal.rule.from',
@@ -136,6 +137,7 @@ export const TIMELINE_EVENTS_FIELDS = [
   'signal.rule.note',
   'signal.rule.threshold',
   'signal.rule.exceptions_list',
+  'signal.rule.building_block_type',
   'suricata.eve.proto',
   'suricata.eve.flow_id',
   'suricata.eve.alert.signature',

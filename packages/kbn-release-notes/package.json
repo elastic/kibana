@@ -13,7 +13,7 @@
     "axios": "^0.19.2",
     "cheerio": "0.22.0",
     "dedent": "^0.7.0",
-    "graphql": "^14.0.0",
+    "graphql": "^0.13.2",
     "graphql-tag": "^2.10.3",
     "terminal-link": "^2.1.1"
   },

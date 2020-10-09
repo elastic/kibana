@@ -73,11 +73,23 @@ const pushToServiceHandler = async ({
       defaultPipes,
     });
 
-    incident = transformFields<PushToServiceApiParams, ExternalServiceParams, Incident>({
+    const transformedFields = transformFields<
+      PushToServiceApiParams,
+      ExternalServiceParams,
+      Incident
+    >({
       params,
       fields,
       currentIncident,
     });
+
+    const { incidentTypes, severityCode } = params;
+    incident = {
+      name: transformedFields.name,
+      description: transformedFields.description,
+      incidentTypes,
+      severityCode,
+    };
   } else {
     const { title, description, incidentTypes, severityCode } = params;
     incident = { name: title, description, incidentTypes, severityCode };

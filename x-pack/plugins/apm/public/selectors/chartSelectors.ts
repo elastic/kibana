@@ -17,10 +17,10 @@ import {
   RectCoordinate,
   TimeSeries,
 } from '../../typings/timeseries';
-import { asDecimal, asDuration, tpmUnit } from '../utils/formatters';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { getEmptySeries } from '../components/shared/charts/CustomPlot/getEmptySeries';
 import { httpStatusCodeToColor } from '../utils/httpStatusCodeToColor';
+import { asDecimal, asDuration, tpmUnit } from '../../common/utils/formatters';
 
 export interface ITpmBucket {
   title: string;

@@ -12,8 +12,8 @@
 
 
 <!-- Error feedback -->
-<context-error-message 
-  status="contextApp.state.loadingStatus.anchor.status" 
+<context-error-message
+  status="contextApp.state.loadingStatus.anchor.status"
   reason="contextApp.state.loadingStatus.anchor.reason">
 </context-error-message>
 
@@ -56,7 +56,7 @@
     ng-if="contextApp.state.loadingStatus.anchor.status === contextApp.constants.LOADING_STATUS.LOADED"
     class="kuiPanel kuiVerticalRhythm"
   >
-    <div class="discover-table" fixed-scroll>
+    <div class="discover-table">
       <doc-table
         filter="contextApp.actions.addFilter"
         hits="contextApp.state.rows.all"

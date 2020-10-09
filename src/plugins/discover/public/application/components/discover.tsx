@@ -80,8 +80,6 @@ export function Discover({
       ? bucketAggConfig.buckets?.getInterval()
       : undefined;
 
-  let flyout;
-
   const getContextAppHref = (anchorId: string) => {
     const path = `#/context/${encodeURIComponent(indexPattern.id)}/${encodeURIComponent(anchorId)}`;
     const urlSearchParams = new URLSearchParams();
@@ -122,7 +120,6 @@ export function Discover({
           showSearchBar={true}
           useDefaultBehaviors={true}
         />
-        {flyout}
         <main className="dscApp__frame">
           <>
             <DiscoverSidebarResponsive

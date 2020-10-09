@@ -27,9 +27,10 @@ export {
 
 export {
   BulkInstallResponse,
-  handleInstallPackageFailure,
-  installPackage,
   IBulkInstallPackageError,
+  handleInstallPackageFailure,
+  installPackageFromRegistry,
+  installPackageByUpload,
   ensureInstalledPackage,
 } from './install';
 export { removeInstallation } from './remove';

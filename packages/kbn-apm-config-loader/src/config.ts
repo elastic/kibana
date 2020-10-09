@@ -30,8 +30,15 @@ const getDefaultConfig = (isDistributable: boolean): ApmAgentConfig => {
     return {
       active: false,
       globalLabels: {},
+      // Do not use a centralized controlled config
+      centralConfig: false,
+      // Capture all exceptions that are not caught
+      logUncaughtExceptions: true,
+      // Can be performance intensive, disabling by default
+      breakdownMetrics: false,
     };
   }
+
   return {
     active: false,
     serverUrl: 'https://f1542b814f674090afd914960583265f.apm.us-central1.gcp.cloud.es.io:443',
@@ -60,14 +67,14 @@ export class ApmConfiguration {
   ) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { version, build } = require(join(this.rootDir, 'package.json'));
-    this.kibanaVersion = version.replace(/\./g, '_');
+    this.kibanaVersion = version;
     this.pkgBuild = build;
   }
 
   public getConfig(serviceName: string): ApmAgentConfig {
     return {
       ...this.getBaseConfig(),
-      serviceName: `${serviceName}-${this.kibanaVersion}`,
+      serviceName,
     };
   }
 
@@ -76,7 +83,8 @@ export class ApmConfiguration {
       const apmConfig = merge(
         getDefaultConfig(this.isDistributable),
         this.getConfigFromKibanaConfig(),
-        this.getDevConfig()
+        this.getDevConfig(),
+        this.getDistConfig()
       );
 
       const rev = this.getGitRev();
@@ -88,6 +96,8 @@ export class ApmConfiguration {
       if (uuid) {
         apmConfig.globalLabels.kibana_uuid = uuid;
       }
+
+      apmConfig.serviceVersion = this.kibanaVersion;
       this.baseConfig = apmConfig;
     }
 
@@ -121,6 +131,19 @@ export class ApmConfiguration {
     } catch (e) {
       return {};
     }
+  }
+
+  /** Config keys that cannot be overridden in production builds */
+  private getDistConfig(): ApmAgentConfig {
+    if (!this.isDistributable) {
+      return {};
+    }
+
+    return {
+      // Headers & body may contain sensitive info
+      captureHeaders: false,
+      captureBody: 'off',
+    };
   }
 
   private getGitRev() {

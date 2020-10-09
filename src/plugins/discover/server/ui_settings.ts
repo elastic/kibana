@@ -33,6 +33,7 @@ import {
   CONTEXT_STEP_SETTING,
   CONTEXT_TIE_BREAKER_FIELDS_SETTING,
   DOC_TABLE_LEGACY_TABLE,
+  MODIFY_COLUMNS_ON_SWITCH,
 } from '../common';
 
 export const uiSettings: Record<string, UiSettingsParams> = {
@@ -172,6 +173,17 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     description: i18n.translate('discover.advancedSettings.docTableVersionDescription', {
       defaultMessage:
         'Prefer the legacy version of the documents table in Discover while available',
+    }),
+    category: ['discover'],
+    schema: schema.boolean(),
+  },
+  [MODIFY_COLUMNS_ON_SWITCH]: {
+    name: i18n.translate('discover.advancedSettings.discover.modifyColumnsOnSwitchTitle', {
+      defaultMessage: 'Modify columns when changing index patterns',
+    }),
+    value: true,
+    description: i18n.translate('discover.advancedSettings.discover.modifyColumnsOnSwitchText', {
+      defaultMessage: 'Remove columns that not available in the new index pattern.',
     }),
     category: ['discover'],
     schema: schema.boolean(),
