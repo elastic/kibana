@@ -6,3 +6,4 @@
 
 export { TagsClient, ITagInternalClient } from './tags_client';
 export { TagsCache, ITagsChangeListener, ITagsCache } from './tags_cache';
+export { isServerValidationError, TagServerValidationError } from './errors';

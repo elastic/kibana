@@ -7,6 +7,8 @@
 import { SavedObjectsClientContract, SavedObject } from 'src/core/server';
 import { Tag, TagAttributes, ITagsClient } from '../../common/types';
 import { tagSavedObjectTypeName } from '../../common/constants';
+import { TagValidationError } from './errors';
+import { validateTag } from './validate_tag';
 
 type TagSavedObject = SavedObject<TagAttributes>;
 
@@ -30,13 +32,19 @@ export class TagsClient implements ITagsClient {
   }
 
   public async create(attributes: TagAttributes) {
-    // TODO: validation (title+color)
+    const validation = validateTag(attributes);
+    if (!validation.valid) {
+      throw new TagValidationError('Error validating tag attributes', validation);
+    }
     const raw = await this.client.create<TagAttributes>(this.type, attributes);
     return savedObjectToTag(raw);
   }
 
   public async update(id: string, attributes: TagAttributes) {
-    // TODO: validation (title+color)
+    const validation = validateTag(attributes);
+    if (!validation.valid) {
+      throw new TagValidationError('Error validating tag attributes', validation);
+    }
     const raw = await this.client.update<TagAttributes>(this.type, id, attributes);
     return savedObjectToTag(raw as TagSavedObject); // all attributes are updated, this is not a partial
   }

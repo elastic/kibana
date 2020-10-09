@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TagAttributes } from '../../../common';
-
-export interface TagValidation {
-  valid: boolean;
-  errors?: Record<string, string>;
-}
+import { TagAttributes, TagValidation, validateTagColor, validateTagName } from '../../../common';
 
 /**
  * Returns the hex representation of a random color (e.g `#F1B7E2`)
@@ -21,15 +16,18 @@ export const getRandomColor = (): string => {
 export const validateTag = (tag: TagAttributes): TagValidation => {
   const validation: TagValidation = {
     valid: true,
+    warnings: [],
     errors: {},
   };
 
-  if (!tag.title.trim()) {
-    validation.valid = false;
-  }
-  if (!tag.color) {
-    validation.valid = false;
-  }
+  validation.errors.title = validateTagName(tag.title);
+  validation.errors.color = validateTagColor(tag.color);
+
+  Object.values(validation.errors).forEach((error) => {
+    if (error) {
+      validation.valid = false;
+    }
+  });
 
   return validation;
 };

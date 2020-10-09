@@ -13,3 +13,10 @@ export {
   tagsApiPrefix,
 } from './constants';
 export { TagWithRelations, TagAttributes, Tag, ITagsClient, TagSavedObject } from './types';
+export {
+  validateTagColor,
+  validateTagName,
+  tagNameMinLength,
+  TagValidation,
+  tagNameMaxLength,
+} from './validation';

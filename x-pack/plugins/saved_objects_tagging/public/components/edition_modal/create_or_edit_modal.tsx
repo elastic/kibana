@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useState, useEffect, useCallback, useMemo } from 'react';
+import React, { FC, useState, useCallback, useMemo } from 'react';
 import {
   EuiButtonEmpty,
   EuiButton,
@@ -25,29 +25,28 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { TagAttributes } from '../../../common';
+import { TagAttributes, TagValidation, validateTagColor } from '../../../common';
 import { TagBadge } from '../../components';
-import { getRandomColor, TagValidation } from './utils';
+import { getRandomColor } from './utils';
 
 interface CreateOrEditModalProps {
   onClose: () => void;
-  onSubmit: () => Promise<TagValidation>;
+  onSubmit: () => Promise<void>;
   mode: 'create' | 'edit';
   tag: TagAttributes;
-  validate: (tag: TagAttributes) => TagValidation;
+  validation: TagValidation;
   setField: <T extends keyof TagAttributes>(field: T) => (value: TagAttributes[T]) => void;
 }
 
 export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
   onClose,
   onSubmit,
-  validate,
+  validation,
   setField,
   tag,
   mode,
 }) => {
   const [submitting, setSubmitting] = useState<boolean>(false);
-  const [validation, setValidation] = useState<TagValidation>({ valid: false });
 
   // we don't want this value to change when the user edit the name.
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -59,9 +58,13 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
 
   const isEdit = useMemo(() => mode === 'edit', [mode]);
 
-  useEffect(() => {
-    setValidation(validate(tag));
-  }, [tag, validate]);
+  const previewTag: TagAttributes = useMemo(() => {
+    return {
+      ...tag,
+      title: tag.title || 'tag',
+      color: validateTagColor(tag.color) ? '#000000' : tag.color,
+    };
+  }, [tag]);
 
   const onFormSubmit = useCallback(async () => {
     if (!validation.valid) {
@@ -69,8 +72,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
     }
 
     setSubmitting(true);
-    const asyncValid = await onSubmit();
-    setValidation(asyncValid);
+    await onSubmit();
     setSubmitting(false);
   }, [validation, onSubmit]);
 
@@ -103,6 +105,8 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
                 label={i18n.translate('xpack.savedObjectsTagging.tagAttributeLabels.name', {
                   defaultMessage: 'Name',
                 })}
+                isInvalid={!!validation.errors.title}
+                error={validation.errors.title}
               >
                 <EuiFieldText
                   value={tag.title}
@@ -117,6 +121,8 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
                 label={i18n.translate('xpack.savedObjectsTagging.tagAttributeLabels.color', {
                   defaultMessage: 'Color',
                 })}
+                isInvalid={!!validation.errors.color}
+                error={validation.errors.color}
                 labelAppend={
                   <EuiButtonEmpty
                     onClick={() => setColor(getRandomColor())}
@@ -132,7 +138,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
               >
                 <EuiColorPicker
                   color={tag.color}
-                  onChange={(text, output) => setColor(output.hex)}
+                  onChange={(text) => setColor(text)}
                   format="hex"
                   data-test-subj="createModalField-color"
                 />
@@ -153,6 +159,8 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
                 />
               </EuiText>
             }
+            isInvalid={!!validation.errors.description}
+            error={validation.errors.description}
           >
             <EuiTextArea
               value={tag.description}
@@ -178,7 +186,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <TagBadge tag={{ ...tag, title: tag.title || 'tag' }} />
+                <TagBadge tag={previewTag} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
