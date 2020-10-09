@@ -56,6 +56,7 @@ describe('Security Plugin', () => {
               Object {
                 "audit": Object {
                   "getLogger": [Function],
+                  "withRequest": [Function],
                 },
                 "authc": Object {
                   "areAPIKeysEnabled": [Function],
