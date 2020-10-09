@@ -8,6 +8,7 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import {
   parseIntervalAsSecond,
+  parseIntervalAsMillisecond,
   intervalFromNow,
   intervalFromDate,
   secondsFromNow,
@@ -49,6 +50,50 @@ describe('taskIntervals', () => {
       expect(() => parseIntervalAsSecond(`hello`)).toThrow(
         /Invalid interval "hello"\. Intervals must be of the form {number}m. Example: 5m/
       );
+    });
+
+    test('returns an interval as s', () => {
+      expect(parseIntervalAsSecond('5s')).toEqual(5);
+      expect(parseIntervalAsSecond('15s')).toEqual(15);
+      expect(parseIntervalAsSecond('20m')).toEqual(20 * 60);
+      expect(parseIntervalAsSecond('61m')).toEqual(61 * 60);
+      expect(parseIntervalAsSecond('90m')).toEqual(90 * 60);
+    });
+  });
+
+  describe('parseIntervalAsMillisecond', () => {
+    test('it accepts intervals in the form `Nm`', () => {
+      expect(() => parseIntervalAsMillisecond(`${_.random(1, 1000)}m`)).not.toThrow();
+    });
+
+    test('it accepts intervals in the form `Ns`', () => {
+      expect(() => parseIntervalAsMillisecond(`${_.random(1, 1000)}s`)).not.toThrow();
+    });
+
+    test('it rejects 0 based intervals', () => {
+      expect(() => parseIntervalAsMillisecond('0m')).toThrow(
+        /Invalid interval "0m"\. Intervals must be of the form {number}m. Example: 5m/
+      );
+      expect(() => parseIntervalAsMillisecond('0s')).toThrow(
+        /Invalid interval "0s"\. Intervals must be of the form {number}m. Example: 5m/
+      );
+    });
+
+    test('it rejects intervals are not of the form `Nm` or `Ns`', () => {
+      expect(() => parseIntervalAsMillisecond(`5m 2s`)).toThrow(
+        /Invalid interval "5m 2s"\. Intervals must be of the form {number}m. Example: 5m/
+      );
+      expect(() => parseIntervalAsMillisecond(`hello`)).toThrow(
+        /Invalid interval "hello"\. Intervals must be of the form {number}m. Example: 5m/
+      );
+    });
+
+    test('returns an interval as ms', () => {
+      expect(parseIntervalAsMillisecond('5s')).toEqual(5 * 1000);
+      expect(parseIntervalAsMillisecond('15s')).toEqual(15 * 1000);
+      expect(parseIntervalAsMillisecond('20m')).toEqual(20 * 60 * 1000);
+      expect(parseIntervalAsMillisecond('61m')).toEqual(61 * 60 * 1000);
+      expect(parseIntervalAsMillisecond('90m')).toEqual(90 * 60 * 1000);
     });
   });
 

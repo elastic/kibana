@@ -5,12 +5,18 @@
  */
 
 import { first, take, bufferCount } from 'rxjs/operators';
-import { WorkloadAggregation, createWorkloadAggregator, padBuckets } from './workload_statistics';
+import {
+  WorkloadAggregation,
+  createWorkloadAggregator,
+  padBuckets,
+  estimateRecurringTaskScheduling,
+} from './workload_statistics';
 import { taskManagerMock } from '../task_manager.mock';
 import { mockLogger } from '../test_utils';
 import { ConcreteTaskInstance } from '../task';
 import { ESSearchResponse } from '../../../apm/typings/elasticsearch';
 import { AggregationResultOf } from '../../../apm/typings/elasticsearch/aggregations';
+import { times } from 'lodash';
 
 type MockESResult = ESSearchResponse<
   ConcreteTaskInstance,
@@ -102,6 +108,13 @@ describe('Workload Statistics Aggregator', () => {
                         field: 'task.runAt',
                         fixed_interval: '3s',
                       },
+                      aggs: {
+                        interval: {
+                          terms: {
+                            field: 'task.schedule.interval',
+                          },
+                        },
+                      },
                     },
                   },
                 },
@@ -121,105 +134,93 @@ describe('Workload Statistics Aggregator', () => {
     });
   });
 
-  const mockAggregatedResult: MockESResult = {
-    hits: {
-      hits: [],
-      max_score: 0,
-      total: { value: 4, relation: 'eq' },
-    },
-    took: 1,
-    timed_out: false,
-    _shards: {
-      total: 1,
-      successful: 1,
-      skipped: 1,
-      failed: 0,
-    },
-    aggregations: {
-      schedule: {
-        buckets: [
-          {
-            key: '3600s',
-            doc_count: 1,
-          },
-          {
-            key: '60s',
-            doc_count: 1,
-          },
-          {
-            key: '720m',
-            doc_count: 1,
-          },
-        ],
+  const mockAggregatedResult: () => MockESResult = () =>
+    ({
+      hits: {
+        hits: [],
+        max_score: 0,
+        total: { value: 4, relation: 'eq' },
       },
-      taskType: {
-        buckets: [
-          {
-            key: 'actions_telemetry',
-            doc_count: 2,
-            status: {
-              buckets: [
-                {
-                  key: 'idle',
-                  doc_count: 2,
-                },
-              ],
-            },
-          },
-          {
-            key: 'alerting_telemetry',
-            doc_count: 1,
-            status: {
-              buckets: [
-                {
-                  key: 'idle',
-                  doc_count: 1,
-                },
-              ],
-            },
-          },
-          {
-            key: 'session_cleanup',
-            doc_count: 1,
-            status: {
-              buckets: [
-                {
-                  key: 'idle',
-                  doc_count: 1,
-                },
-              ],
-            },
-          },
-        ],
+      took: 1,
+      timed_out: false,
+      _shards: {
+        total: 1,
+        successful: 1,
+        skipped: 1,
+        failed: 0,
       },
-      idleTasks: {
-        doc_count: 13,
-        overdue: {
-          doc_count: 6,
-        },
-        scheduleDensity: {
+      aggregations: {
+        schedule: {
           buckets: [
-            mockHistogram(Date.now(), Date.now() + 7 * 3000, Date.now() + 60000, 3000, [
-              2,
-              2,
-              5,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              1,
-            ]),
+            {
+              key: '3600s',
+              doc_count: 1,
+            },
+            {
+              key: '60s',
+              doc_count: 1,
+            },
+            {
+              key: '720m',
+              doc_count: 1,
+            },
           ],
         },
+        taskType: {
+          buckets: [
+            {
+              key: 'actions_telemetry',
+              doc_count: 2,
+              status: {
+                buckets: [
+                  {
+                    key: 'idle',
+                    doc_count: 2,
+                  },
+                ],
+              },
+            },
+            {
+              key: 'alerting_telemetry',
+              doc_count: 1,
+              status: {
+                buckets: [
+                  {
+                    key: 'idle',
+                    doc_count: 1,
+                  },
+                ],
+              },
+            },
+            {
+              key: 'session_cleanup',
+              doc_count: 1,
+              status: {
+                buckets: [
+                  {
+                    key: 'idle',
+                    doc_count: 1,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        idleTasks: {
+          doc_count: 13,
+          overdue: {
+            doc_count: 6,
+          },
+          scheduleDensity: {
+            buckets: [mockHistogram(0, 7 * 3000, 60 * 1000, 3000, [2, 2, 5, 0, 0, 0, 0, 0, 0, 1])],
+          },
+        },
       },
-    },
-  };
+    } as MockESResult);
 
   test('returns a summary of the workload by task type', async () => {
     const taskManager = taskManagerMock.create();
-    taskManager.aggregate.mockResolvedValue(mockAggregatedResult as MockESResult);
+    taskManager.aggregate.mockResolvedValue(mockAggregatedResult());
 
     const workloadAggregator = createWorkloadAggregator(taskManager, 10, 3000, mockLogger());
 
@@ -241,7 +242,7 @@ describe('Workload Statistics Aggregator', () => {
 
   test('returns a count of the overdue workload', async () => {
     const taskManager = taskManagerMock.create();
-    taskManager.aggregate.mockResolvedValue(mockAggregatedResult as MockESResult);
+    taskManager.aggregate.mockResolvedValue(mockAggregatedResult());
 
     const workloadAggregator = createWorkloadAggregator(taskManager, 10, 3000, mockLogger());
 
@@ -258,7 +259,7 @@ describe('Workload Statistics Aggregator', () => {
 
   test('returns a histogram of the upcoming workload for the upcoming minute when refresh rate is high', async () => {
     const taskManager = taskManagerMock.create();
-    taskManager.aggregate.mockResolvedValue(mockAggregatedResult as MockESResult);
+    taskManager.aggregate.mockResolvedValue(mockAggregatedResult());
 
     const workloadAggregator = createWorkloadAggregator(taskManager, 10, 3000, mockLogger());
 
@@ -269,9 +270,9 @@ describe('Workload Statistics Aggregator', () => {
           // we have intervals every 3s, so we aggregate buckets 3s apart
           // in this mock, Elasticsearch found tasks scheduled in 21 (8th bucket), 24, 27 and 48s seconds from now
           //  0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45, 48, 51, 54, 57
-          // [0, 0, 0, 0,  0,  0,  0,  0, 2,  2,  5,  0,  0,  0,  0,  0,  0,  1,  0,  0 ]
+          // [0, 0, 0, 0,  0,  0,  0,  2,  2,  5,  0,  0,  0,  0,  0,  0,  1,  0,  0, 0 ]
           //  Above you see each bucket and the number of scheduled tasks we expect to have in them
-          scheduleDensity: [0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 5, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+          scheduleDensity: [0, 0, 0, 0, 0, 0, 0, 2, 2, 5, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
         });
         resolve();
       });
@@ -280,38 +281,30 @@ describe('Workload Statistics Aggregator', () => {
 
   test('returns a histogram of the upcoming workload for twice refresh rate when rate is low', async () => {
     const taskManager = taskManagerMock.create();
-    taskManager.aggregate.mockResolvedValue(mockAggregatedResult as MockESResult);
+    taskManager.aggregate.mockResolvedValue(mockAggregatedResult());
 
     const workloadAggregator = createWorkloadAggregator(taskManager, 60 * 1000, 3000, mockLogger());
 
     return new Promise((resolve) => {
-      workloadAggregator.pipe(first()).subscribe((result) => {
-        expect(result.key).toEqual('workload');
-        expect(result.value).toMatchObject({
-          // same schedule density as in previous test, but window of 40 buckets ((60s refresh * 2) / 3s = 40)
-          scheduleDensity: [
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            2,
-            2,
-            5,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            1,
-            0,
-            0,
-            ...new Array(20).fill(0),
-          ],
+      workloadAggregator.pipe(first()).subscribe(() => {
+        expect(taskManager.aggregate.mock.calls[0][0]).toMatchObject({
+          aggs: {
+            idleTasks: {
+              aggs: {
+                scheduleDensity: {
+                  range: {
+                    field: 'task.runAt',
+                    ranges: [
+                      {
+                        from: 'now',
+                        to: 'now+2m',
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          },
         });
         resolve();
       });
@@ -320,7 +313,7 @@ describe('Workload Statistics Aggregator', () => {
 
   test('returns a histogram of the upcoming workload maxed out at 50 buckets when rate is too low', async () => {
     const taskManager = taskManagerMock.create();
-    taskManager.aggregate.mockResolvedValue(mockAggregatedResult as MockESResult);
+    taskManager.aggregate.mockResolvedValue(mockAggregatedResult());
 
     const workloadAggregator = createWorkloadAggregator(
       taskManager,
@@ -331,32 +324,25 @@ describe('Workload Statistics Aggregator', () => {
 
     return new Promise((resolve) => {
       workloadAggregator.pipe(first()).subscribe((result) => {
-        expect(result.key).toEqual('workload');
-        expect(result.value).toMatchObject({
-          // same schedule density as in previous test, but window of 40 buckets ((60s refresh * 2) / 3s = 40)
-          scheduleDensity: [
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            2,
-            2,
-            5,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            1,
-            0,
-            0,
-            ...new Array(30).fill(0),
-          ],
+        expect(taskManager.aggregate.mock.calls[0][0]).toMatchObject({
+          aggs: {
+            idleTasks: {
+              aggs: {
+                scheduleDensity: {
+                  range: {
+                    field: 'task.runAt',
+                    ranges: [
+                      {
+                        from: 'now',
+                        // 50 buckets of 3s = 50 * 3 = 150s
+                        to: 'now+150s',
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          },
         });
         resolve();
       });
@@ -367,13 +353,13 @@ describe('Workload Statistics Aggregator', () => {
     const taskManager = taskManagerMock.create();
     taskManager.aggregate
       .mockResolvedValueOnce(
-        setTaskTypeCount(mockAggregatedResult, 'alerting_telemetry', {
+        setTaskTypeCount(mockAggregatedResult(), 'alerting_telemetry', {
           idle: 2,
         })
       )
       .mockRejectedValueOnce(new Error('Elasticsearch has gone poof'))
       .mockResolvedValueOnce(
-        setTaskTypeCount(mockAggregatedResult, 'alerting_telemetry', {
+        setTaskTypeCount(mockAggregatedResult(), 'alerting_telemetry', {
           idle: 1,
           failed: 1,
         })
@@ -407,6 +393,116 @@ describe('Workload Statistics Aggregator', () => {
   });
 });
 
+describe('estimateRecurringTaskScheduling', () => {
+  test('flattens out buckets with non recurring tasks', () => {
+    const now = Date.now();
+    const schedule = times(10, (index) => ({
+      key: index * 3000 + now,
+      nonRecurring: index,
+    }));
+    expect(estimateRecurringTaskScheduling(schedule, 3000)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+  });
+
+  test('estimates the buckets that recurring tasks might repeat in when recurring task interval equals the interval', () => {
+    const now = Date.now();
+    const schedule: Array<{
+      key: number;
+      nonRecurring: number;
+      recurring?: Array<[number, string]>;
+    }> = times(10, (index) => ({
+      key: index * 3000 + now,
+      nonRecurring: 0,
+    }));
+
+    schedule[0].nonRecurring = 1;
+    schedule[1].nonRecurring = 1;
+    schedule[4].recurring = [[1, '3s']];
+
+    expect(estimateRecurringTaskScheduling(schedule, 3000)).toEqual([1, 1, 0, 0, 1, 1, 1, 1, 1, 1]);
+  });
+
+  test('estimates the buckets that recurring tasks might repeat in when recurring task interval is larger than the interval', () => {
+    const now = Date.now();
+    const schedule: Array<{
+      key: number;
+      nonRecurring: number;
+      recurring?: Array<[number, string]>;
+    }> = times(10, (index) => ({
+      key: index * 3000 + now,
+      nonRecurring: 0,
+    }));
+
+    schedule[0].nonRecurring = 1;
+    schedule[1].nonRecurring = 1;
+    schedule[4].recurring = [[1, '6s']];
+
+    expect(estimateRecurringTaskScheduling(schedule, 3000)).toEqual([1, 1, 0, 0, 1, 0, 1, 0, 1, 0]);
+  });
+
+  test('estimates the buckets that recurring tasks might repeat in when recurring task interval doesnt divide by interval', () => {
+    const now = Date.now();
+    const schedule: Array<{
+      key: number;
+      nonRecurring: number;
+      recurring?: Array<[number, string]>;
+    }> = times(10, (index) => ({
+      key: index * 3000 + now,
+      nonRecurring: 0,
+    }));
+
+    schedule[0].nonRecurring = 1;
+    schedule[1].nonRecurring = 1;
+    schedule[4].recurring = [[1, '5s']];
+
+    expect(estimateRecurringTaskScheduling(schedule, 3000)).toEqual([1, 1, 0, 0, 1, 0, 1, 0, 1, 0]);
+  });
+
+  test('estimates the buckets that recurring tasks might repeat in when recurring tasks overlap', () => {
+    const now = Date.now();
+    const schedule: Array<{
+      key: number;
+      nonRecurring: number;
+      recurring?: Array<[number, string]>;
+    }> = times(20, (index) => ({
+      key: index * 3000 + now,
+      nonRecurring: 0,
+    }));
+
+    schedule[0].nonRecurring = 1;
+    schedule[1].nonRecurring = 1;
+    schedule[3].recurring = [[1, '3s']];
+    schedule[4].recurring = [
+      [2, '6s'],
+      [1, '8s'],
+    ];
+    schedule[5].recurring = [[1, '5s']];
+    schedule[6].nonRecurring = 3;
+
+    expect(estimateRecurringTaskScheduling(schedule, 3000)).toEqual([
+      1,
+      1,
+      0,
+      1,
+      4,
+      2,
+      6,
+      3,
+      3,
+      2,
+      4,
+      2,
+      3,
+      3,
+      3,
+      2,
+      4,
+      2,
+      3,
+      3,
+    ]);
+  });
+});
+
 describe('padBuckets', () => {
   test('returns zeroed out bucklets when there are no buckets in the histogram', async () => {
     expect(
@@ -430,8 +526,8 @@ describe('padBuckets', () => {
         key: '2020-10-02T19:47:28.128Z-2020-10-02T19:48:28.128Z',
         from: 1601668048128,
         from_as_string: '2020-10-02T19:47:28.128Z',
-        to: 1601668077128,
-        to_as_string: '2020-10-02T19:47:57.128Z',
+        to: 1601668075128,
+        to_as_string: '2020-10-02T19:47:55.128Z',
         doc_count: 3,
         histogram: {
           buckets: [
@@ -439,31 +535,55 @@ describe('padBuckets', () => {
               key_as_string: '2020-10-02T19:47:27.000Z',
               key: 1601668047000,
               doc_count: 1,
+              interval: {
+                sum_other_doc_count: 0,
+                buckets: [],
+              },
             },
             {
               key_as_string: '2020-10-02T19:47:30.000Z',
               key: 1601668050000,
               doc_count: 1,
+              interval: {
+                sum_other_doc_count: 0,
+                buckets: [],
+              },
             },
             {
               key_as_string: '2020-10-02T19:47:33.000Z',
               key: 1601668053000,
               doc_count: 0,
+              interval: {
+                sum_other_doc_count: 0,
+                buckets: [],
+              },
             },
             {
               key_as_string: '2020-10-02T19:47:36.000Z',
               key: 1601668056000,
               doc_count: 0,
+              interval: {
+                sum_other_doc_count: 0,
+                buckets: [],
+              },
             },
             {
               key_as_string: '2020-10-02T19:47:39.000Z',
               key: 1601668059000,
               doc_count: 0,
+              interval: {
+                sum_other_doc_count: 0,
+                buckets: [],
+              },
             },
             {
               key_as_string: '2020-10-02T19:47:42.000Z',
               key: 1601668062000,
               doc_count: 1,
+              interval: {
+                sum_other_doc_count: 0,
+                buckets: [],
+              },
             },
           ],
         },
@@ -486,11 +606,13 @@ describe('padBuckets', () => {
               key_as_string: '2020-10-02T20:40:09.000Z',
               key: 1601671209000,
               doc_count: 1,
+              interval: { buckets: [] },
             },
             {
               key_as_string: '2020-10-02T20:40:12.000Z',
               key: 1601671212000,
               doc_count: 1,
+              interval: { buckets: [] },
             },
           ],
         },
@@ -502,10 +624,10 @@ describe('padBuckets', () => {
     expect(
       padBuckets(20, 3000, {
         key: '2020-10-02T20:39:45.793Z-2020-10-02T20:40:14.793Z',
-        from: 1.601671185793e12,
+        from: 1601671185793,
         from_as_string: '2020-10-02T20:39:45.793Z',
-        to: 1.1601671244793,
-        to_as_string: '2020-10-02T20:40:44.793Z',
+        to: 1601671242793,
+        to_as_string: '2020-10-02T20:40:42.793Z',
         doc_count: 2,
         histogram: {
           buckets: [
@@ -513,11 +635,13 @@ describe('padBuckets', () => {
               key_as_string: '2020-10-02T20:40:09.000Z',
               key: 1601671209000,
               doc_count: 1,
+              interval: { buckets: [] },
             },
             {
               key_as_string: '2020-10-02T20:40:12.000Z',
               key: 1601671212000,
               doc_count: 1,
+              interval: { buckets: [] },
             },
           ],
         },
@@ -541,7 +665,6 @@ function setTaskTypeCount(
       key: taskType,
       doc_count: Object.values(status).reduce((sum, count) => sum + count, 0),
       status: {
-        doc_count_error_upper_bound: 0,
         sum_other_doc_count: 0,
         buckets: Object.entries(status).map(([key, count]) => ({
           key,
@@ -557,7 +680,6 @@ function setTaskTypeCount(
     aggregations: {
       ...aggregations,
       taskType: {
-        doc_count_error_upper_bound: 0,
         sum_other_doc_count: 0,
         buckets,
       },
@@ -583,24 +705,26 @@ function mockHistogram(
   interval: number,
   foundBuckets: Array<number | undefined>
 ) {
-  const fromDate = new Date(from);
-  const toDate = new Date(to);
+  const now = Date.now();
+  const fromDate = new Date(now + from);
+  const toDate = new Date(now + to);
   return {
     key: `${fromDate.toISOString()}-${toDate.toISOString()}`,
-    from,
+    from: now + from,
     from_as_string: fromDate.toISOString(),
-    to,
+    to: now + to,
     to_as_string: toDate.toISOString(),
     doc_count: foundBuckets.reduce((sum: number, count) => sum + (count ?? 0), 0),
     histogram: {
       buckets: foundBuckets.reduce(
         (histogramBuckets, count, index) => {
           if (typeof count === 'number') {
-            const key = new Date(findFrom + index * interval);
+            const key = new Date(now + findFrom + index * interval);
             histogramBuckets.push({
               key_as_string: key.toISOString(),
               key: key.getTime(),
               doc_count: count,
+              interval: { buckets: [] },
             });
           }
           return histogramBuckets;
@@ -609,6 +733,12 @@ function mockHistogram(
           key_as_string: string;
           key: number;
           doc_count: number;
+          interval: {
+            buckets: Array<{
+              key: string;
+              doc_count: number;
+            }>;
+          };
         }>
       ),
     },

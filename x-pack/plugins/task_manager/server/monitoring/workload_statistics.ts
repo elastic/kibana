@@ -13,7 +13,7 @@ import { ESSearchResponse } from '../../../apm/typings/elasticsearch';
 import { AggregatedStatProvider } from './runtime_statistics_aggregator';
 import { TaskManager } from '../task_manager';
 import { ConcreteTaskInstance } from '../task';
-import { parseIntervalAsSecond, asInterval } from '../lib/intervals';
+import { parseIntervalAsSecond, asInterval, parseIntervalAsMillisecond } from '../lib/intervals';
 import { AggregationResultOf } from '../../../apm/typings/elasticsearch/aggregations';
 import { HealthStatus } from './monitoring_stats_stream';
 
@@ -64,6 +64,11 @@ export interface WorkloadAggregation {
                 field: string;
                 fixed_interval: string;
               };
+              aggs: {
+                interval: {
+                  terms: { field: string };
+                };
+              };
             };
           };
         };
@@ -84,6 +89,7 @@ type ScheduleDensityResult = AggregationResultOf<
   WorkloadAggregation['aggs']['idleTasks']['aggs']['scheduleDensity'],
   {}
 >['buckets'][0];
+type ScheduledIntervals = ScheduleDensityResult['histogram']['buckets'][0];
 
 // Set an upper bound just in case a customer sets a really high refresh rate
 const MAX_SHCEDULE_DENSITY_BUCKETS = 50;
@@ -122,6 +128,7 @@ export function createWorkloadAggregator(
             },
             aggs: {
               scheduleDensity: {
+                // create a window of upcoming tasks
                 range: {
                   field: 'task.runAt',
                   ranges: [
@@ -129,10 +136,17 @@ export function createWorkloadAggregator(
                   ],
                 },
                 aggs: {
+                  // create histogram of scheduling in the window, with each bucket being a polling interval
                   histogram: {
                     date_histogram: {
                       field: 'task.runAt',
                       fixed_interval: asInterval(pollInterval),
+                    },
+                    // break down each bucket in the historgram by schedule
+                    aggs: {
+                      interval: {
+                        terms: { field: 'task.schedule.interval' },
+                      },
                     },
                   },
                 },
@@ -216,37 +230,121 @@ export function createWorkloadAggregator(
   );
 }
 
+interface IntervalTaskCountTouple {
+  nonRecurring?: number;
+  recurring?: Array<[number, string]>;
+  key: number;
+}
+
 export function padBuckets(
   scheduleDensityBuckets: number,
   pollInterval: number,
   scheduleDensity: ScheduleDensityResult
 ): number[] {
-  if (scheduleDensity.from && scheduleDensity.histogram?.buckets?.length) {
-    const { histogram, from } = scheduleDensity;
+  if (scheduleDensity.from && scheduleDensity.to && scheduleDensity.histogram?.buckets?.length) {
+    const { histogram, from, to } = scheduleDensity;
     const firstBucket = histogram.buckets[0].key;
-    const bucketsToPadBeforeFirstBucket = bucketsBetween(from, firstBucket, pollInterval);
-    const bucketsToPadAfterLast =
-      scheduleDensityBuckets - (bucketsToPadBeforeFirstBucket + histogram.buckets.length);
-    return [
-      ...(bucketsToPadBeforeFirstBucket > 0
-        ? new Array(bucketsToPadBeforeFirstBucket).fill(0)
-        : []),
-      ...histogram.buckets.map((bucket) => bucket.doc_count),
-      ...(bucketsToPadAfterLast > 0 ? new Array(bucketsToPadAfterLast).fill(0) : []),
-    ];
+    const lastBucket = histogram.buckets[histogram.buckets.length - 1].key;
+    const bucketsToPadBeforeFirstBucket = calculateBucketsBetween(from, firstBucket, pollInterval);
+
+    const bucketsToPadAfterLast = calculateBucketsBetween(
+      lastBucket + pollInterval,
+      to,
+      pollInterval
+    );
+
+    return estimateRecurringTaskScheduling(
+      [
+        ...bucketsToPadBeforeFirstBucket,
+        ...histogram.buckets.map(countByIntervalInBucket),
+        ...bucketsToPadAfterLast,
+      ],
+      pollInterval
+    );
   }
   return new Array(scheduleDensityBuckets).fill(0);
 }
 
-function bucketsBetween(from: number, to: number, interval: number) {
-  let fromBound = from;
-  let count = 0;
-  while (fromBound <= to) {
-    fromBound += interval;
-    count++;
+function countByIntervalInBucket(bucket: ScheduledIntervals): IntervalTaskCountTouple {
+  if (bucket.doc_count === 0) {
+    return { nonRecurring: 0, key: bucket.key };
   }
-  return count;
+  const recurring: Array<[number, string]> = [];
+  let nonRecurring = bucket.doc_count;
+  for (const intervalBucket of bucket.interval.buckets) {
+    recurring.push([intervalBucket.doc_count, intervalBucket.key as string]);
+    nonRecurring -= intervalBucket.doc_count;
+  }
+
+  return { nonRecurring, recurring, key: bucket.key };
 }
+
+function calculateBucketsBetween(
+  from: number,
+  to: number,
+  interval: number,
+  bucketInterval: number = interval
+): Array<{ key: number }> {
+  // as task interval might not divide by the pollInterval (aka the bucket interval)
+  // we have to adjust for the "drift" that occurs when estimating when the next
+  // bucket the task might actually get scheduled in
+  const actualInterval = Math.ceil(interval / bucketInterval) * bucketInterval;
+
+  const buckets: Array<{ key: number }> = [];
+  let fromBound = from;
+  while (fromBound < to) {
+    buckets.push({ key: fromBound });
+    fromBound += actualInterval;
+  }
+
+  return buckets;
+}
+
+export function estimateRecurringTaskScheduling(
+  scheduleDensity: IntervalTaskCountTouple[],
+  pollInterval: number
+) {
+  const lastKey = scheduleDensity[scheduleDensity.length - 1].key;
+
+  return scheduleDensity.map((bucket, currentBucketIndex) => {
+    for (const [count, interval] of bucket.recurring ?? []) {
+      for (const recurrance of calculateBucketsBetween(
+        bucket.key,
+        // `calculateBucketsBetween` uses the `to` as a non-inclusive upper bound
+        // but lastKey is a bucket we wish to include
+        lastKey + pollInterval,
+        parseIntervalAsMillisecond(interval),
+        pollInterval
+      )) {
+        const recurranceBucketIndex =
+          currentBucketIndex + Math.ceil((recurrance.key - bucket.key) / pollInterval);
+
+        if (recurranceBucketIndex < scheduleDensity.length) {
+          scheduleDensity[recurranceBucketIndex].nonRecurring =
+            count + (scheduleDensity[recurranceBucketIndex].nonRecurring ?? 0);
+        }
+      }
+    }
+    return bucket.nonRecurring ?? 0;
+  });
+}
+
+// function estimateDriftInExecutionDueToPollInterval(
+//   scheduledExecutions: number[],
+//   pollInterval: number
+// ) {
+//   const recuranceBeginsAt = scheduledExecutions[0];
+//   let drift = 0;
+//   return scheduledExecutions.map((scheduledExecution, cycle) => {
+//     const estimatedExectionCycleTime = cycle * pollInterval;
+//     const estimatedExecution = scheduledExecution + drift;
+
+//     drift = estimatedExectionCycleTime > estimatedExecution ? ()
+//     // drift = (scheduledExecution - estimatedExecution) % pollInterval;
+
+//     return estimatedExecution;
+//   });
+// }
 
 export function summarizeWorkloadStat(
   workloadStats: WorkloadStat

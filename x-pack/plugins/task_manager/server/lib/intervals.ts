@@ -11,9 +11,9 @@ export enum IntervalCadence {
   Second = 's',
 }
 const VALID_CADENCE = new Set(Object.values(IntervalCadence));
-const CADENCE_IN_SECONDS: Record<IntervalCadence, number> = {
-  [IntervalCadence.Second]: 1,
-  [IntervalCadence.Minute]: 60,
+const CADENCE_IN_MS: Record<IntervalCadence, number> = {
+  [IntervalCadence.Second]: 1000,
+  [IntervalCadence.Minute]: 60 * 1000,
 };
 
 function isCadence(cadence: IntervalCadence | string): cadence is IntervalCadence {
@@ -81,6 +81,10 @@ export function secondsFromDate(date: Date, secs: number): Date {
  * @returns {number} The interval as seconds
  */
 export const parseIntervalAsSecond = memoize((interval: string): number => {
+  return Math.round(parseIntervalAsMillisecond(interval) / 1000);
+});
+
+export const parseIntervalAsMillisecond = memoize((interval: string): number => {
   const numericAsStr: string = interval.slice(0, -1);
   const numeric: number = parseInt(numericAsStr, 10);
   const cadence: IntervalCadence | string = interval.slice(-1);
@@ -89,7 +93,7 @@ export const parseIntervalAsSecond = memoize((interval: string): number => {
       `Invalid interval "${interval}". Intervals must be of the form {number}m. Example: 5m.`
     );
   }
-  return numeric * CADENCE_IN_SECONDS[cadence];
+  return numeric * CADENCE_IN_MS[cadence];
 });
 
 const isNumeric = (numAsStr: string) => /^\d+$/.test(numAsStr);
