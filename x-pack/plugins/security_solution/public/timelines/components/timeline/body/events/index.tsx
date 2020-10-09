@@ -15,13 +15,7 @@ import {
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import { Note } from '../../../../../common/lib/note';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
-import {
-  OnColumnResized,
-  OnPinEvent,
-  OnRowSelected,
-  OnUnPinEvent,
-  OnUpdateColumns,
-} from '../../events';
+import { OnPinEvent, OnRowSelected, OnUnPinEvent, OnUpdateColumns } from '../../events';
 import { EventsTbody } from '../../styles';
 import { ColumnRenderer } from '../renderers/column_renderer';
 import { RowRenderer } from '../renderers/row_renderer';
@@ -42,7 +36,6 @@ interface Props {
   id: string;
   isEventViewer?: boolean;
   loadingEventIds: Readonly<string[]>;
-  onColumnResized: OnColumnResized;
   onPinEvent: OnPinEvent;
   onRowSelected: OnRowSelected;
   onUpdateColumns: OnUpdateColumns;
@@ -70,7 +63,6 @@ const EventsComponent: React.FC<Props> = ({
   id,
   isEventViewer = false,
   loadingEventIds,
-  onColumnResized,
   onPinEvent,
   onRowSelected,
   onUpdateColumns,
@@ -101,7 +93,6 @@ const EventsComponent: React.FC<Props> = ({
         isEventViewer={isEventViewer}
         key={`${event._id}_${event._index}`}
         loadingEventIds={loadingEventIds}
-        onColumnResized={onColumnResized}
         onPinEvent={onPinEvent}
         onRowSelected={onRowSelected}
         onUnPinEvent={onUnPinEvent}

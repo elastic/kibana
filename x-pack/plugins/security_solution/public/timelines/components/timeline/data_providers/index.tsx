@@ -41,6 +41,10 @@ const DropTargetDataProvidersContainer = styled.div`
       color: ${({ theme }) => theme.eui.euiColorSuccess};
     }
   }
+
+  .euiDroppable__placeholder {
+    display: none;
+  }
 `;
 
 const DropTargetDataProviders = styled.div`

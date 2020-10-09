@@ -48,7 +48,6 @@ interface Props {
   isEventViewer?: boolean;
   loading: boolean;
   loadingEventIds: Readonly<string[]>;
-  onColumnResized: OnColumnResized;
   onEventToggled: () => void;
   onPinEvent: OnPinEvent;
   onRowSelected: OnRowSelected;
@@ -82,7 +81,6 @@ export const EventColumnView = React.memo<Props>(
     isEventViewer = false,
     loading,
     loadingEventIds,
-    onColumnResized,
     onEventToggled,
     onPinEvent,
     onRowSelected,
@@ -202,7 +200,6 @@ export const EventColumnView = React.memo<Props>(
           columnRenderers={columnRenderers}
           data={data}
           ecsData={ecsData}
-          onColumnResized={onColumnResized}
           timelineId={timelineId}
         />
       </EventsTrData>

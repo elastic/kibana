@@ -7,6 +7,7 @@
 import { get, isString } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
+import memoizeOne from 'memoize-one';
 
 import * as i18n from './translations';
 
@@ -19,8 +20,11 @@ EmptyWrapper.displayName = 'EmptyWrapper';
 export const getEmptyValue = () => '—';
 export const getEmptyString = () => `(${i18n.EMPTY_STRING})`;
 
-export const getEmptyTagValue = () => <EmptyWrapper>{getEmptyValue()}</EmptyWrapper>;
-export const getEmptyStringTag = () => <EmptyWrapper>{getEmptyString()}</EmptyWrapper>;
+const EmptyTagValue = () => <EmptyWrapper>{getEmptyValue()}</EmptyWrapper>;
+const EmptyStringTag = () => <EmptyWrapper>{getEmptyString()}</EmptyWrapper>;
+
+export const getEmptyTagValue = memoizeOne(EmptyTagValue);
+export const getEmptyStringTag = memoizeOne(EmptyStringTag);
 
 export const defaultToEmptyTag = <T extends unknown>(item: T): JSX.Element => {
   if (item == null) {

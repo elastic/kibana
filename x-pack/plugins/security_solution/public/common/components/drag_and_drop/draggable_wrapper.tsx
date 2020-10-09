@@ -9,6 +9,7 @@ import { DraggableStateSnapshot, DraggingStyle, NotDraggingStyle } from 'react-b
 import { EuiDraggable, EuiDroppable } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
+import deepEqual from 'fast-deep-equal';
 
 import { dragAndDropActions } from '../../store/drag_and_drop';
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
@@ -265,7 +266,15 @@ const DraggableWrapperComponent: React.FC<Props> = ({
   );
 };
 
-export const DraggableWrapper = React.memo(DraggableWrapperComponent);
+export const DraggableWrapper = React.memo(
+  DraggableWrapperComponent,
+  (prevProps, nextProps) =>
+    prevProps.children === nextProps.children &&
+    deepEqual(prevProps.dataProvider, nextProps.dataProvider) &&
+    prevProps.onFilterAdded === nextProps.onFilterAdded &&
+    prevProps.timelineId === nextProps.timelineId &&
+    prevProps.truncate === nextProps.truncate
+);
 
 DraggableWrapper.displayName = 'DraggableWrapper';
 

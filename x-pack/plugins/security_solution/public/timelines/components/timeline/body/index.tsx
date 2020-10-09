@@ -177,7 +177,6 @@ export const Body = React.memo<BodyProps>(
               id={timelineId}
               isEventViewer={isEventViewer}
               loadingEventIds={loadingEventIds}
-              onColumnResized={onColumnResized}
               onPinEvent={onPinEvent}
               onRowSelected={onRowSelected}
               onUpdateColumns={onUpdateColumns}

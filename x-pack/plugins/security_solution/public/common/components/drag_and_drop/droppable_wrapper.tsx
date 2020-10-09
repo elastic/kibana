@@ -99,15 +99,9 @@ export const DroppableWrapper = React.memo<Props>(
     renderClone,
   }) => {
     const DroppableContent = useCallback(
-      (provided, snapshot) => (
-        <ReactDndDropTarget
-          height={height}
-          ref={provided.innerRef}
-          {...provided.droppableProps}
-          isDraggingOver={snapshot.isDraggingOver}
-        >
-          {render == null ? children : render({ isDraggingOver: snapshot.isDraggingOver })}
-          {provided.placeholder}
+      (_, state) => (
+        <ReactDndDropTarget height={height} isDraggingOver={state.isDraggingOver}>
+          {render == null ? children : render({ isDraggingOver: state.isDraggingOver })}
         </ReactDndDropTarget>
       ),
       [children, height, render]

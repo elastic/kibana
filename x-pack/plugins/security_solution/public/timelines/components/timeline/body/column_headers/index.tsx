@@ -198,17 +198,10 @@ export const ColumnHeadersComponent = ({
   );
 
   const DroppableContent = useCallback(
-    (dropProvided, snapshot) => (
-      <>
-        <EventsThGroupData
-          data-test-subj="headers-group"
-          ref={dropProvided.innerRef}
-          isDragging={snapshot.isDraggingOver}
-          {...dropProvided.droppableProps}
-        >
-          {ColumnHeaderList}
-        </EventsThGroupData>
-      </>
+    (_, state) => (
+      <EventsThGroupData data-test-subj="headers-group" isDragging={state.isDraggingOver}>
+        {ColumnHeaderList}
+      </EventsThGroupData>
     ),
     [ColumnHeaderList]
   );

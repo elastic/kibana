@@ -20,13 +20,7 @@ import { Note } from '../../../../../common/lib/note';
 import { ColumnHeaderOptions, TimelineModel } from '../../../../../timelines/store/timeline/model';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
 import { SkeletonRow } from '../../skeleton_row';
-import {
-  OnColumnResized,
-  OnPinEvent,
-  OnRowSelected,
-  OnUnPinEvent,
-  OnUpdateColumns,
-} from '../../events';
+import { OnPinEvent, OnRowSelected, OnUnPinEvent, OnUpdateColumns } from '../../events';
 import { ExpandableEvent } from '../../expandable_event';
 import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
 import { EventsTrGroup, EventsTrSupplement, EventsTrSupplementContainer } from '../../styles';
@@ -53,7 +47,6 @@ interface Props {
   getNotesByIds: (noteIds: string[]) => Note[];
   isEventViewer?: boolean;
   loadingEventIds: Readonly<string[]>;
-  onColumnResized: OnColumnResized;
   onPinEvent: OnPinEvent;
   onRowSelected: OnRowSelected;
   onUnPinEvent: OnUnPinEvent;
@@ -123,7 +116,6 @@ const StatefulEventComponent: React.FC<Props> = ({
   isEventViewer = false,
   isEventPinned = false,
   loadingEventIds,
-  onColumnResized,
   onPinEvent,
   onRowSelected,
   onUnPinEvent,
@@ -202,7 +194,6 @@ const StatefulEventComponent: React.FC<Props> = ({
               isEventViewer={isEventViewer}
               loading={loading}
               loadingEventIds={loadingEventIds}
-              onColumnResized={onColumnResized}
               onEventToggled={onToggleExpanded}
               onPinEvent={onPinEvent}
               onRowSelected={onRowSelected}
@@ -288,7 +279,6 @@ const StatefulEventComponent: React.FC<Props> = ({
       isEventViewer,
       loading,
       loadingEventIds,
-      onColumnResized,
       onPinEvent,
       onRowSelected,
       onToggleExpanded,

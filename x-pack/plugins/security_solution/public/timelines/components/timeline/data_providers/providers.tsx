@@ -230,14 +230,8 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
     );
 
     const DraggableContent = useCallback(
-      (provided, snapshot) => (
-        <div
-          ref={provided.innerRef}
-          {...provided.draggableProps}
-          {...provided.dragHandleProps}
-          style={getItemStyle(provided.draggableProps.style)}
-          data-test-subj="providerContainer"
-        >
+      (_, state) => (
+        <div style={getItemStyle({})} data-test-subj="providerContainer">
           <EuiFlexGroup alignItems="center" gutterSize="none">
             <EuiFlexItem grow={false}>
               <ProviderItemBadge
@@ -269,7 +263,7 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {!snapshot.isDragging &&
+              {!state.isDragging &&
                 (index < group.length - 1 ? (
                   <AndOrBadge type="and" />
                 ) : (

@@ -82,11 +82,15 @@ export const EventsThead = styled.div.attrs(({ className = '' }) => ({
   z-index: ${({ theme }) => theme.eui.euiZLevel1};
 `;
 
-export const EventsTrHeader = styled.div.attrs(({ className }) => ({
+export const EventsTrHeader = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__trHeader ${className}`,
   role: 'row',
 }))`
   display: flex;
+
+  .euiDroppable__placeholder {
+    display: none;
+  }
 `;
 
 export const EventsThGroupActions = styled.div.attrs(({ className = '' }) => ({

@@ -78,14 +78,9 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
     [timelineId, header.id]
   );
 
-  const DraggableContent = useCallback(
-    (dragProvided) => (
-      <EventsTh
-        data-test-subj="draggable-header"
-        {...dragProvided.draggableProps}
-        {...dragProvided.dragHandleProps}
-        ref={dragProvided.innerRef}
-      >
+  const DraggableContent = useMemo(
+    () => (
+      <EventsTh data-test-subj="draggable-header">
         <EventsThContent>
           <Header
             timelineId={timelineId}

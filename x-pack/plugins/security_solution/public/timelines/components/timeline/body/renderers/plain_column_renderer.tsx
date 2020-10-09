@@ -6,6 +6,7 @@
 
 import { head } from 'lodash/fp';
 import React from 'react';
+import memoizeOne from 'memoize-one';
 
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
@@ -17,40 +18,43 @@ import { parseValue } from './parse_value';
 export const dataExistsAtColumn = (columnName: string, data: TimelineNonEcsData[]): boolean =>
   data.findIndex((item) => item.field === columnName) !== -1;
 
+const PlainColumnRenderer = ({
+  columnName,
+  eventId,
+  field,
+  timelineId,
+  truncate,
+  values,
+  linkValues,
+}: {
+  columnName: string;
+  eventId: string;
+  field: ColumnHeaderOptions;
+  timelineId: string;
+  truncate?: boolean;
+  values: string[] | undefined | null;
+  linkValues?: string[] | null | undefined;
+}) =>
+  values != null
+    ? values.map((value) => (
+        <FormattedFieldValue
+          key={`plain-column-renderer-formatted-field-value-${timelineId}-${columnName}-${eventId}-${field.id}-${value}`}
+          contextId={`plain-column-renderer-formatted-field-value-${timelineId}`}
+          eventId={eventId}
+          fieldFormat={field.format || ''}
+          fieldName={columnName}
+          fieldType={field.type || ''}
+          value={parseValue(value)}
+          truncate={truncate}
+          linkValue={head(linkValues)}
+        />
+      ))
+    : getEmptyTagValue();
+
+const memoizedPlainColumnRenderer = memoizeOne(PlainColumnRenderer);
+
 export const plainColumnRenderer: ColumnRenderer = {
   isInstance: (columnName: string, data: TimelineNonEcsData[]) =>
     dataExistsAtColumn(columnName, data),
-
-  renderColumn: ({
-    columnName,
-    eventId,
-    field,
-    timelineId,
-    truncate,
-    values,
-    linkValues,
-  }: {
-    columnName: string;
-    eventId: string;
-    field: ColumnHeaderOptions;
-    timelineId: string;
-    truncate?: boolean;
-    values: string[] | undefined | null;
-    linkValues?: string[] | null | undefined;
-  }) =>
-    values != null
-      ? values.map((value) => (
-          <FormattedFieldValue
-            key={`plain-column-renderer-formatted-field-value-${timelineId}-${columnName}-${eventId}-${field.id}-${value}`}
-            contextId={`plain-column-renderer-formatted-field-value-${timelineId}`}
-            eventId={eventId}
-            fieldFormat={field.format || ''}
-            fieldName={columnName}
-            fieldType={field.type || ''}
-            value={parseValue(value)}
-            truncate={truncate}
-            linkValue={head(linkValues)}
-          />
-        ))
-      : getEmptyTagValue(),
+  renderColumn: memoizedPlainColumnRenderer,
 };
