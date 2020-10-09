@@ -13,6 +13,7 @@ import {
   SavedObjectReference,
   SavedObject,
   PluginInitializerContext,
+  SavedObjectsFindResult,
 } from 'src/core/server';
 import { esKuery } from '../../../../src/plugins/data/server';
 import { ActionsClient, ActionsAuthorization } from '../../actions/server';
@@ -28,6 +29,7 @@ import {
   AlertTaskState,
   AlertInstanceSummary,
   AlertExecutionStatusErrorReasons,
+  AlertingFrameworkHeath,
 } from './types';
 import { validateAlertTypeParams, alertExecutionStatusFromRaw } from './lib';
 import {
@@ -397,18 +399,29 @@ export class AlertsClient {
     };
   }
 
-  public async hasDecryptionFailures(): Promise<boolean> {
+  public async getHealth(): Promise<AlertingFrameworkHeath> {
     const { saved_objects: data } = await this.unsecuredSavedObjectsClient.find<RawAlert>({
       filter: 'alert.attributes.executionStatus.status:error',
       fields: ['executionStatus'],
       type: 'alert',
     });
-    return (
-      data.filter(
-        (item) =>
-          item.attributes.executionStatus.error?.reason === AlertExecutionStatusErrorReasons.Decrypt
-      ).length > 0
+    const res = data.reduce(
+      (prevItem: Record<string, number>, item: SavedObjectsFindResult<RawAlert>) => {
+        if (item.attributes.executionStatus.error) {
+          prevItem[item.attributes.executionStatus.error?.reason] =
+            (prevItem[item.attributes.executionStatus.error?.reason] || 0) + 1;
+        }
+        return prevItem;
+      },
+      {}
     );
+    return {
+      hasDecryptionErrors: res[AlertExecutionStatusErrorReasons.Decrypt] > 0,
+      hasUnknownErrors: res[AlertExecutionStatusErrorReasons.Unknown] > 0,
+      hasExecutionErrors: res[AlertExecutionStatusErrorReasons.Execute] > 0,
+      hasReadErrors: res[AlertExecutionStatusErrorReasons.Read] > 0,
+      hasActionExecutionErrors: false, // TODO:
+    };
   }
 
   public async delete({ id }: { id: string }) {

@@ -104,7 +104,7 @@ export function healthCheckTaskRunner(
           return {
             state: {
               runs: (state.runs || 0) + 1,
-              isHealthy: alertingHealthStatus,
+              isHealthy: alertingHealthStatus.hasDecryptionErrors,
             },
             runAt: getNextHour(),
           };

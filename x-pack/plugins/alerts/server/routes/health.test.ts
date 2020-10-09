@@ -20,7 +20,13 @@ jest.mock('../lib/license_api_access.ts', () => ({
 
 beforeEach(() => {
   jest.resetAllMocks();
-  alertsClient.getHealth.mockResolvedValue(true);
+  alertsClient.getHealth.mockResolvedValue({
+    hasDecryptionErrors: true,
+    hasUnknownErrors: true,
+    hasExecutionErrors: true,
+    hasReadErrors: true,
+    hasActionExecutionErrors: true,
+  });
 });
 
 describe('healthRoute', () => {
@@ -83,7 +89,13 @@ describe('healthRoute', () => {
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
-          "hasDecryptionFailures": true,
+          "alertingFrameworkHeath": Object {
+            "hasActionExecutionErrors": true,
+            "hasDecryptionErrors": true,
+            "hasExecutionErrors": true,
+            "hasReadErrors": true,
+            "hasUnknownErrors": true,
+          },
           "hasPermanentEncryptionKey": false,
           "isSufficientlySecure": true,
         },
@@ -108,7 +120,13 @@ describe('healthRoute', () => {
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
-          "hasDecryptionFailures": true,
+          "alertingFrameworkHeath": Object {
+            "hasActionExecutionErrors": true,
+            "hasDecryptionErrors": true,
+            "hasExecutionErrors": true,
+            "hasReadErrors": true,
+            "hasUnknownErrors": true,
+          },
           "hasPermanentEncryptionKey": true,
           "isSufficientlySecure": true,
         },
@@ -133,7 +151,13 @@ describe('healthRoute', () => {
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
-          "hasDecryptionFailures": true,
+          "alertingFrameworkHeath": Object {
+            "hasActionExecutionErrors": true,
+            "hasDecryptionErrors": true,
+            "hasExecutionErrors": true,
+            "hasReadErrors": true,
+            "hasUnknownErrors": true,
+          },
           "hasPermanentEncryptionKey": true,
           "isSufficientlySecure": true,
         },
@@ -158,7 +182,13 @@ describe('healthRoute', () => {
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
-          "hasDecryptionFailures": true,
+          "alertingFrameworkHeath": Object {
+            "hasActionExecutionErrors": true,
+            "hasDecryptionErrors": true,
+            "hasExecutionErrors": true,
+            "hasReadErrors": true,
+            "hasUnknownErrors": true,
+          },
           "hasPermanentEncryptionKey": true,
           "isSufficientlySecure": false,
         },
@@ -185,7 +215,13 @@ describe('healthRoute', () => {
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
-          "hasDecryptionFailures": true,
+          "alertingFrameworkHeath": Object {
+            "hasActionExecutionErrors": true,
+            "hasDecryptionErrors": true,
+            "hasExecutionErrors": true,
+            "hasReadErrors": true,
+            "hasUnknownErrors": true,
+          },
           "hasPermanentEncryptionKey": true,
           "isSufficientlySecure": false,
         },
@@ -212,7 +248,13 @@ describe('healthRoute', () => {
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
-          "hasDecryptionFailures": true,
+          "alertingFrameworkHeath": Object {
+            "hasActionExecutionErrors": true,
+            "hasDecryptionErrors": true,
+            "hasExecutionErrors": true,
+            "hasReadErrors": true,
+            "hasUnknownErrors": true,
+          },
           "hasPermanentEncryptionKey": true,
           "isSufficientlySecure": true,
         },

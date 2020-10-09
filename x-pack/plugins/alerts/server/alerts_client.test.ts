@@ -2931,7 +2931,7 @@ describe('find()', () => {
   });
 });
 
-describe('hasDecryptionFailures()', () => {
+describe('getHealth()', () => {
   const listedTypes = new Set([
     {
       actionGroups: [],
@@ -3011,8 +3011,14 @@ describe('hasDecryptionFailures()', () => {
       ],
     });
     const alertsClient = new AlertsClient(alertsClientParams);
-    const result = await alertsClient.hasDecryptionFailures();
-    expect(result).toBe(true);
+    const result = await alertsClient.getHealth();
+    expect(result).toStrictEqual({
+      hasActionExecutionErrors: false,
+      hasDecryptionErrors: true,
+      hasExecutionErrors: false,
+      hasReadErrors: false,
+      hasUnknownErrors: false,
+    });
     expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
   });
 
@@ -3081,8 +3087,14 @@ describe('hasDecryptionFailures()', () => {
       ],
     });
     const alertsClient = new AlertsClient(alertsClientParams);
-    const result = await alertsClient.hasDecryptionFailures();
-    expect(result).toBe(false);
+    const result = await alertsClient.getHealth();
+    expect(result).toStrictEqual({
+      hasActionExecutionErrors: false,
+      hasDecryptionErrors: false,
+      hasExecutionErrors: false,
+      hasReadErrors: false,
+      hasUnknownErrors: true,
+    });
   });
 });
 

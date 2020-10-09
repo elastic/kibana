@@ -69,3 +69,11 @@ export interface Alert {
 }
 
 export type SanitizedAlert = Omit<Alert, 'apiKey'>;
+
+export interface AlertingFrameworkHeath {
+  hasDecryptionErrors: boolean;
+  hasUnknownErrors: boolean;
+  hasExecutionErrors: boolean;
+  hasReadErrors: boolean;
+  hasActionExecutionErrors: boolean;
+}

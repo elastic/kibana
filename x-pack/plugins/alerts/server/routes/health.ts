@@ -61,12 +61,12 @@ export function healthRoute(
           });
 
         const alertsClient = context.alerting.getAlertsClient();
-        const hasDecryptionFailures = await alertsClient.getHealth();
+        const alertingFrameworkHeath = await alertsClient.getHealth();
 
         const frameworkHealth: AlertingFrameworkHealth = {
           isSufficientlySecure: !isSecurityEnabled || (isSecurityEnabled && isTLSEnabled),
           hasPermanentEncryptionKey: !encryptedSavedObjects.usingEphemeralEncryptionKey,
-          hasDecryptionFailures,
+          alertingFrameworkHeath,
         };
 
         return res.ok({
