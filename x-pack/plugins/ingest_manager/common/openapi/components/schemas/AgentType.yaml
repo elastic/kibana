@@ -1,6 +1,0 @@
-type: string
-title: AgentType
-enum:
-  - PERMANENT
-  - EPHEMERAL
-  - TEMPORARY

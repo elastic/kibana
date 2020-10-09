@@ -12,7 +12,7 @@ get:
               items:
                 type: array
                 items:
-                  $ref: ../components/schemas/PackagePolicy.yaml
+                  $ref: ../components/schemas/package_policy.yaml
               total:
                 type: number
               page:
@@ -35,6 +35,6 @@ post:
     content:
       application/json:
         schema:
-          $ref: ../components/schemas/NewPackagePolicy.yaml
+          $ref: ../components/schemas/new_package_policy.yaml
   parameters:
     - $ref: ../components/parameters/xsrfHeader.yaml

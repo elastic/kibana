@@ -25,7 +25,7 @@ paths:
                   items:
                     type: array
                     items:
-                      $ref: '#/components/schemas/AgentPolicy'
+                      $ref: '#/components/schemas/agent_policy'
                   total:
                     type: number
                   page:
@@ -55,13 +55,13 @@ paths:
                 type: object
                 properties:
                   item:
-                    $ref: '#/components/schemas/AgentPolicy'
+                    $ref: '#/components/schemas/agent_policy'
       operationId: post-agent-policy
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NewAgentPolicy'
+              $ref: '#/components/schemas/new_agent_policy'
       security: []
       parameters:
         - $ref: '#/components/parameters/xsrfHeader'
@@ -84,7 +84,7 @@ paths:
                 type: object
                 properties:
                   item:
-                    $ref: '#/components/schemas/AgentPolicy'
+                    $ref: '#/components/schemas/agent_policy'
                 required:
                   - item
       operationId: agent-policy-info
@@ -102,7 +102,7 @@ paths:
                 type: object
                 properties:
                   item:
-                    $ref: '#/components/schemas/AgentPolicy'
+                    $ref: '#/components/schemas/agent_policy'
                 required:
                   - item
       operationId: put-agent-policy-agentPolicyId
@@ -110,7 +110,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NewAgentPolicy'
+              $ref: '#/components/schemas/new_agent_policy'
       parameters:
         - $ref: '#/components/parameters/xsrfHeader'
   '/agent_policies/{agentPolicyId}/copy':
@@ -132,7 +132,7 @@ paths:
                 type: object
                 properties:
                   item:
-                    $ref: '#/components/schemas/AgentPolicy'
+                    $ref: '#/components/schemas/agent_policy'
                 required:
                   - item
       requestBody:
@@ -198,7 +198,7 @@ paths:
                   items:
                     type: array
                     items:
-                      $ref: '#/components/schemas/PackagePolicy'
+                      $ref: '#/components/schemas/package_policy'
                   total:
                     type: number
                   page:
@@ -221,7 +221,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NewPackagePolicy'
+              $ref: '#/components/schemas/new_package_policy'
       parameters:
         - $ref: '#/components/parameters/xsrfHeader'
   '/package_policies/{packagePolicyId}':
@@ -237,7 +237,7 @@ paths:
                 type: object
                 properties:
                   item:
-                    $ref: '#/components/schemas/PackagePolicy'
+                    $ref: '#/components/schemas/package_policy'
                 required:
                   - item
       operationId: get-packagePolicies-packagePolicyId
@@ -259,7 +259,7 @@ paths:
                 type: object
                 properties:
                   item:
-                    $ref: '#/components/schemas/PackagePolicy'
+                    $ref: '#/components/schemas/package_policy'
                   sucess:
                     type: boolean
                 required:
@@ -330,7 +330,7 @@ paths:
                 allOf:
                   - properties:
                       response:
-                        $ref: '#/components/schemas/PackageInfo'
+                        $ref: '#/components/schemas/package_info'
                   - properties:
                       status:
                         type: string
@@ -420,7 +420,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/SearchResult'
+                  $ref: '#/components/schemas/search_result'
       operationId: get-epm-list
     parameters: []
   /epm/categories:
@@ -583,11 +583,11 @@ paths:
               type: object
               properties:
                 local_metadata:
-                  $ref: '#/components/schemas/AgentMetadata'
+                  $ref: '#/components/schemas/agent_metadata'
                 events:
                   type: array
                   items:
-                    $ref: '#/components/schemas/NewAgentEvent'
+                    $ref: '#/components/schemas/new_agent_event'
   '/fleet/agents/{agentId}/acks':
     parameters:
       - schema:
@@ -636,7 +636,7 @@ paths:
                   action:
                     type: string
                   item:
-                    $ref: '#/components/schemas/Agent'
+                    $ref: '#/components/schemas/agent'
       operationId: post-fleet-agents-enroll
       parameters:
         - $ref: '#/components/parameters/xsrfHeader'
@@ -661,9 +661,9 @@ paths:
                     - user_provided
                   properties:
                     local:
-                      $ref: '#/components/schemas/AgentMetadata'
+                      $ref: '#/components/schemas/agent_metadata'
                     user_provided:
-                      $ref: '#/components/schemas/AgentMetadata'
+                      $ref: '#/components/schemas/agent_metadata'
               required:
                 - type
                 - metadata
@@ -707,13 +707,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UpgradeAgent'
+                $ref: '#/components/schemas/upgrade_agent'
         '400':
           description: BAD REQUEST
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UpgradeAgent'
+                $ref: '#/components/schemas/upgrade_agent'
       operationId: post-fleet-agents-upgrade
       parameters:
         - $ref: '#/components/parameters/xsrfHeader'
@@ -722,7 +722,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpgradeAgent'
+              $ref: '#/components/schemas/upgrade_agent'
   /fleet/agents/bulk_upgrade:
     post:
       summary: Fleet - Agent - Bulk Upgrade
@@ -733,13 +733,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BulkUpgradeAgents'
+                $ref: '#/components/schemas/bulk_upgrade_agents'
         '400':
           description: BAD REQUEST
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UpgradeAgent'
+                $ref: '#/components/schemas/upgrade_agent'
       operationId: post-fleet-agents-bulk-upgrade
       parameters:
         - $ref: '#/components/parameters/xsrfHeader'
@@ -748,7 +748,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/BulkUpgradeAgents'
+              $ref: '#/components/schemas/bulk_upgrade_agents'
   /fleet/agent-status:
     get:
       summary: Fleet - Agent - Status for policy
@@ -876,7 +876,7 @@ components:
       name: kbn-xsrf
       required: true
   schemas:
-    NewAgentPolicy:
+    new_agent_policy:
       title: NewAgentPolicy
       type: object
       properties:
@@ -886,7 +886,7 @@ components:
           type: string
         description:
           type: string
-    NewPackagePolicy:
+    new_package_policy:
       title: NewPackagePolicy
       type: object
       x-examples:
@@ -971,7 +971,7 @@ components:
         - inputs
         - policy_id
         - name
-    PackagePolicy:
+    package_policy:
       title: PackagePolicy
       allOf:
         - type: object
@@ -986,10 +986,10 @@ components:
           required:
             - id
             - revision
-        - $ref: '#/components/schemas/NewPackagePolicy'
-    AgentPolicy:
+        - $ref: '#/components/schemas/new_package_policy'
+    agent_policy:
       allOf:
-        - $ref: '#/components/schemas/NewAgentPolicy'
+        - $ref: '#/components/schemas/new_agent_policy'
         - type: object
           properties:
             id:
@@ -1004,7 +1004,7 @@ components:
                 - items:
                     type: string
                 - items:
-                    $ref: '#/components/schemas/PackagePolicy'
+                    $ref: '#/components/schemas/package_policy'
               type: array
             updated_on:
               type: string
@@ -1018,7 +1018,7 @@ components:
           required:
             - id
             - status
-    PackageInfo:
+    package_info:
       title: PackageInfo
       type: object
       properties:
@@ -1137,7 +1137,7 @@ components:
         - format_version
         - download
         - path
-    SearchResult:
+    search_result:
       title: SearchResult
       type: object
       properties:
@@ -1171,10 +1171,10 @@ components:
         - type
         - version
         - status
-    AgentMetadata:
+    agent_metadata:
       title: AgentMetadata
       type: object
-    NewAgentEvent:
+    new_agent_event:
       title: NewAgentEvent
       type: object
       properties:
@@ -1219,14 +1219,14 @@ components:
         - timestamp
         - message
         - agent_id
-    AgentType:
+    agent_type:
       type: string
       title: AgentType
       enum:
         - PERMANENT
         - EPHEMERAL
         - TEMPORARY
-    AgentEvent:
+    agent_event:
       title: AgentEvent
       allOf:
         - type: object
@@ -1235,8 +1235,8 @@ components:
               type: string
           required:
             - id
-        - $ref: '#/components/schemas/NewAgentEvent'
-    AgentStatus:
+        - $ref: '#/components/schemas/new_agent_event'
+    agent_status:
       type: string
       title: AgentStatus
       enum:
@@ -1245,12 +1245,12 @@ components:
         - online
         - inactive
         - warning
-    Agent:
+    agent:
       title: Agent
       type: object
       properties:
         type:
-          $ref: '#/components/schemas/AgentType'
+          $ref: '#/components/schemas/agent_type'
         active:
           type: boolean
         enrolled_at:
@@ -1272,19 +1272,19 @@ components:
         last_checkin:
           type: string
         user_provided_metadata:
-          $ref: '#/components/schemas/AgentMetadata'
+          $ref: '#/components/schemas/agent_metadata'
         local_metadata:
-          $ref: '#/components/schemas/AgentMetadata'
+          $ref: '#/components/schemas/agent_metadata'
         id:
           type: string
         current_error_events:
           type: array
           items:
-            $ref: '#/components/schemas/AgentEvent'
+            $ref: '#/components/schemas/agent_event'
         access_api_key:
           type: string
         status:
-          $ref: '#/components/schemas/AgentStatus'
+          $ref: '#/components/schemas/agent_status'
         default_api_key:
           type: string
       required:
@@ -1294,7 +1294,7 @@ components:
         - id
         - current_error_events
         - status
-    UpgradeAgent:
+    upgrade_agent:
       title: UpgradeAgent
       oneOf:
         - type: object
@@ -1311,7 +1311,7 @@ components:
               type: string
           required:
             - version
-    BulkUpgradeAgents:
+    bulk_upgrade_agents:
       title: BulkUpgradeAgents
       oneOf:
         - type: object

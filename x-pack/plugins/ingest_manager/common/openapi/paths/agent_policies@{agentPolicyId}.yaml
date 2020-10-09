@@ -16,7 +16,7 @@ get:
             type: object
             properties:
               item:
-                $ref: ../components/schemas/AgentPolicy.yaml
+                $ref: ../components/schemas/agent_policy.yaml
             required:
               - item
   operationId: agent-policy-info
@@ -34,7 +34,7 @@ put:
             type: object
             properties:
               item:
-                $ref: ../components/schemas/AgentPolicy.yaml
+                $ref: ../components/schemas/agent_policy.yaml
             required:
               - item
   operationId: put-agent-policy-agentPolicyId
@@ -42,6 +42,6 @@ put:
     content:
       application/json:
         schema:
-          $ref: ../components/schemas/NewAgentPolicy.yaml
+          $ref: ../components/schemas/new_agent_policy.yaml
   parameters:
     - $ref: ../components/parameters/xsrfHeader.yaml

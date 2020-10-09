@@ -11,7 +11,7 @@ get:
             allOf:
               - properties:
                   response:
-                    $ref: ../components/schemas/PackageInfo.yaml
+                    $ref: ../components/schemas/package_info.yaml
               - properties:
                   status:
                     type: string

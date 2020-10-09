@@ -2,7 +2,7 @@ title: Agent
 type: object
 properties:
   type:
-    $ref: ./AgentType.yaml
+    $ref: ./agent_type.yaml
   active:
     type: boolean
   enrolled_at:
@@ -24,19 +24,19 @@ properties:
   last_checkin:
     type: string
   user_provided_metadata:
-    $ref: ./AgentMetadata.yaml
+    $ref: ./agent_metadata.yaml
   local_metadata:
-    $ref: ./AgentMetadata.yaml
+    $ref: ./agent_metadata.yaml
   id:
     type: string
   current_error_events:
     type: array
     items:
-      $ref: ./AgentEvent.yaml
+      $ref: ./agent_event.yaml
   access_api_key:
     type: string
   status:
-    $ref: ./AgentStatus.yaml
+    $ref: ./agent_status.yaml
   default_api_key:
     type: string
 required:

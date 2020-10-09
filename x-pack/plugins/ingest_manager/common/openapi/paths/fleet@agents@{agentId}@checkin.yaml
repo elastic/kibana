@@ -53,8 +53,8 @@ post:
           type: object
           properties:
             local_metadata:
-              $ref: ../components/schemas/AgentMetadata.yaml
+              $ref: ../components/schemas/agent_metadata.yaml
             events:
               type: array
               items:
-                $ref: ../components/schemas/NewAgentEvent.yaml
+                $ref: ../components/schemas/new_agent_event.yaml

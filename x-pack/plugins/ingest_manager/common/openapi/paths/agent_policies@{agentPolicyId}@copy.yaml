@@ -16,7 +16,7 @@ post:
             type: object
             properties:
               item:
-                $ref: ../components/schemas/AgentPolicy.yaml
+                $ref: ../components/schemas/agent_policy.yaml
             required:
               - item
   requestBody:

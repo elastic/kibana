@@ -9,6 +9,6 @@ get:
           schema:
             type: array
             items:
-              $ref: ../components/schemas/SearchResult.yaml
+              $ref: ../components/schemas/search_result.yaml
   operationId: get-epm-list
 parameters: []

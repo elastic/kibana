@@ -10,7 +10,7 @@ get:
             type: object
             properties:
               item:
-                $ref: ../components/schemas/PackagePolicy.yaml
+                $ref: ../components/schemas/package_policy.yaml
             required:
               - item
   operationId: get-packagePolicies-packagePolicyId
@@ -32,7 +32,7 @@ put:
             type: object
             properties:
               item:
-                $ref: ../components/schemas/PackagePolicy.yaml
+                $ref: ../components/schemas/package_policy.yaml
               sucess:
                 type: boolean
             required:

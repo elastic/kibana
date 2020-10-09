@@ -12,7 +12,7 @@ post:
               action:
                 type: string
               item:
-                $ref: ../components/schemas/Agent.yaml
+                $ref: ../components/schemas/agent.yaml
   operationId: post-fleet-agents-enroll
   parameters:
     - $ref: ../components/parameters/xsrfHeader.yaml
@@ -37,9 +37,9 @@ post:
                 - user_provided
               properties:
                 local:
-                  $ref: ../components/schemas/AgentMetadata.yaml
+                  $ref: ../components/schemas/agent_metadata.yaml
                 user_provided:
-                  $ref: ../components/schemas/AgentMetadata.yaml
+                  $ref: ../components/schemas/agent_metadata.yaml
           required:
             - type
             - metadata

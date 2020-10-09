@@ -7,13 +7,13 @@ post:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/BulkUpgradeAgents.yaml
+            $ref: ../components/schemas/bulk_upgrade_agents.yaml
     '400':
       description: BAD REQUEST
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/UpgradeAgent.yaml
+            $ref: ../components/schemas/upgrade_agent.yaml
   operationId: post-fleet-agents-bulk-upgrade
   parameters:
     - $ref: ../components/parameters/xsrfHeader.yaml
@@ -22,4 +22,4 @@ post:
     content:
       application/json:
         schema:
-          $ref: ../components/schemas/BulkUpgradeAgents.yaml
+          $ref: ../components/schemas/bulk_upgrade_agents.yaml
