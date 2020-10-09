@@ -1,0 +1,194 @@
+get:
+  summary: PackagePolicies - List
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              items:
+                type: array
+                items:
+                  $ref: ../components/schemas/PackagePolicy.yaml
+              total:
+                type: number
+              page:
+                type: number
+              perPage:
+                type: number
+            required:
+              - items
+          examples:
+            example-1:
+              value:
+                items:
+                  - id: 5d273cf0-5a44-11ea-80da-89b5a66da347
+                    use_output: default
+                    inputs:
+                      - type: docker/metrics
+                        streams:
+                          - metricset: status
+                            dataset: docker.status
+                      - type: logs
+                        streams:
+                          - paths:
+                              - /var/log/hello1.log
+                              - /var/log/hello2.log
+                  - id: 66490980-5a44-11ea-80da-89b5a66da347
+                    namespace: testing
+                    use_output: default
+                    inputs:
+                      - type: apache/metrics
+                        streams:
+                          - enabled: true
+                            metricset: info
+                  - id: df1ccae0-5a49-11ea-94a6-81affd263f47
+                    enabled: true
+                    title: This is a nice title for human
+                    package:
+                      name: epm/nginx
+                      version: 1.7.0
+                    namespace: prod
+                    use_output: long_term_storage
+                    inputs:
+                      - type: logs
+                        streams:
+                          - enabled: true
+                            dataset: nginx.acccess
+                            paths:
+                              - /var/log/nginx/access.log
+                          - enabled: true
+                            dataset: nginx.error
+                            paths:
+                              - /var/log/nginx/error.log
+                      - type: nginx/metrics
+                        streams:
+                          - id: id string
+                            enabled: true
+                            dataset: nginx.stub_status
+                            metricset: stub_status
+                  - id: f96a09d0-5a49-11ea-94a6-81affd263f47
+                    enabled: true
+                    title: This is a nice title for human
+                    package:
+                      name: epm/nginx
+                      version: 1.7.0
+                    namespace: prod
+                    use_output: long_term_storage
+                    inputs:
+                      - type: logs
+                        streams:
+                          - enabled: true
+                            dataset: nginx.acccess
+                            paths:
+                              - /var/log/nginx/access.log
+                          - enabled: true
+                            dataset: nginx.error
+                            paths:
+                              - /var/log/nginx/error.log
+                      - type: nginx/metrics
+                        streams:
+                          - id: id string
+                            enabled: true
+                            dataset: nginx.stub_status
+                            metricset: stub_status
+                  - id: 9ca403a0-5a66-11ea-9468-c911a41ab4f5
+                    enabled: true
+                    title: This is a nice title for human
+                    package:
+                      name: epm/nginx
+                      version: 1.7.0
+                    namespace: prod
+                    use_output: long_term_storage
+                    inputs:
+                      - type: logs
+                        streams:
+                          - enabled: true
+                            dataset: nginx.acccess
+                            paths:
+                              - /var/log/nginx/access.log
+                          - enabled: true
+                            dataset: nginx.error
+                            paths:
+                              - /var/log/nginx/error.log
+                      - type: nginx/metrics
+                        streams:
+                          - id: id string
+                            enabled: true
+                            dataset: nginx.stub_status
+                            metricset: stub_status
+                  - id: 27925980-5a44-11ea-80da-89b5a66da347
+                    enabled: true
+                    title: UPDATED title for human
+                    package:
+                      name: epm/nginx
+                      version: 1.7.0
+                    namespace: prod
+                    use_output: long_term_storage
+                    inputs:
+                      - streams:
+                          - paths:
+                              - /var/log/nginx/access.log
+                            dataset: nginx.acccess
+                            enabled: true
+                          - paths:
+                              - /var/log/nginx/error.log
+                            dataset: nginx.error
+                            enabled: true
+                        type: logs
+                      - streams:
+                          - metricset: stub_status
+                            id: id string
+                            dataset: nginx.stub_status
+                            enabled: true
+                        type: nginx/metrics
+                total: 6
+                page: 1
+                perPage: 20
+  operationId: get-packagePolicies
+  security: []
+  parameters: []
+parameters: []
+post:
+  summary: PackagePolicies - Create
+  operationId: post-packagePolicies
+  responses:
+    '200':
+      description: OK
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/NewPackagePolicy.yaml
+        examples:
+          example-1:
+            value:
+              enabled: true
+              title: This is a nice title for human
+              package:
+                name: epm/nginx
+                version: 1.7.0
+              namespace: prod
+              use_output: long_term_storage
+              inputs:
+                - type: logs
+                  streams:
+                    - enabled: true
+                      dataset: nginx.acccess
+                      paths:
+                        - /var/log/nginx/access.log
+                    - enabled: true
+                      dataset: nginx.error
+                      paths:
+                        - /var/log/nginx/error.log
+                - type: nginx/metrics
+                  streams:
+                    - id: id string
+                      enabled: true
+                      dataset: nginx.stub_status
+                      metricset: stub_status
+  parameters:
+    - $ref: ../components/parameters/xsrfHeader.yaml

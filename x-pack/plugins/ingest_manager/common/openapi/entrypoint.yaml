@@ -1,0 +1,77 @@
+openapi: 3.0.0
+info:
+  title: Ingest Manager
+  version: '0.2'
+  contact:
+    name: Ingest Team
+  license:
+    name: Elastic
+servers:
+  - url: 'http://localhost:5601/api/fleet'
+    description: local
+paths:
+  /agent_policies:
+    $ref: paths/agent_policies.yaml
+  '/agent_policies/{agentPolicyId}':
+    $ref: 'paths/agent_policies@{agentPolicyId}.yaml'
+  '/agent_policies/{agentPolicyId}/copy':
+    $ref: 'paths/agent_policies@{agentPolicyId}@copy.yaml'
+  /agent_policies/delete:
+    $ref: paths/agent_policies@delete.yaml
+  /package_policies:
+    $ref: paths/package_policies.yaml
+  '/package_policies/{packagePolicyId}':
+    $ref: 'paths/package_policies@{packagePolicyId}.yaml'
+  /agents/setup:
+    $ref: paths/agents@setup.yaml
+  '/epm/packages/{pkgkey}':
+    $ref: 'paths/epm@packages@{pkgkey}.yaml'
+  /epm/packages:
+    $ref: paths/epm@packages.yaml
+  /epm/categories:
+    $ref: paths/epm@categories.yaml
+  /fleet/agents:
+    $ref: paths/fleet@agents.yaml
+  '/fleet/agents/{agentId}':
+    $ref: 'paths/fleet@agents@{agentId}.yaml'
+  '/fleet/agents/{agentId}/events':
+    $ref: 'paths/fleet@agents@{agentId}@events.yaml'
+  '/fleet/agents/{agentId}/checkin':
+    $ref: 'paths/fleet@agents@{agentId}@checkin.yaml'
+  '/fleet/agents/{agentId}/acks':
+    $ref: 'paths/fleet@agents@{agentId}@acks.yaml'
+  /fleet/agents/enroll:
+    $ref: paths/fleet@agents@enroll.yaml
+  '/fleet/agents/{agentId}/unenroll':
+    $ref: 'paths/fleet@agents@{agentId}@unenroll.yaml'
+  '/fleet/agents/{agentId}/upgrade':
+    $ref: 'paths/fleet@agents@{agentId}@upgrade.yaml'
+  /fleet/agents/bulk_upgrade:
+    $ref: paths/fleet@agents@bulk_upgrade.yaml
+  /fleet/agent-status:
+    $ref: paths/fleet@agent-status.yaml
+  /fleet/enrollment-api-keys:
+    $ref: paths/fleet@enrollment-api-keys.yaml
+  '/fleet/enrollment-api-keys/{keyId}':
+    $ref: 'paths/fleet@enrollment-api-keys@{keyId}.yaml'
+  /setup:
+    $ref: paths/setup.yaml
+  '/fleet/install/{osType}':
+    $ref: 'paths/fleet@install@{osType}.yaml'
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    Enrollment API Key:
+      name: Authorization
+      type: apiKey
+      in: header
+      description: 'e.g. Authorization: ApiKey base64EnrollmentApiKey'
+    Access API Key:
+      name: Authorization
+      type: apiKey
+      in: header
+      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
+security:
+  - basicAuth: []

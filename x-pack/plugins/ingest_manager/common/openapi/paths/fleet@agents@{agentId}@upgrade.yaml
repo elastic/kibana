@@ -1,0 +1,60 @@
+parameters:
+  - schema:
+      type: string
+    name: agentId
+    in: path
+    required: true
+post:
+  summary: Fleet - Agent - Upgrade
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/UpgradeAgent.yaml
+          examples:
+            success:
+              value: {}
+    '400':
+      description: BAD REQUEST
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/UpgradeAgent.yaml
+          examples:
+            bad request not upgradeable:
+              value:
+                statusCode: 400
+                error: Bad Request
+                message: agent d133b07d-5c2b-42f0-8e6b-bbae53bdce88 is not upgradeable
+            bad request kibana version:
+              value:
+                statusCode: 400
+                error: Bad Request
+                message: >-
+                  cannot upgrade agent to 8.0.0 because it is different than the
+                  installed kibana version 7.9.10
+            bad request agent unenrolling:
+              value:
+                statusCode: 400
+                error: Bad Request
+                message: cannot upgrade an unenrolling or unenrolled agent
+  operationId: post-fleet-agents-upgrade
+  parameters:
+    - $ref: ../components/parameters/xsrfHeader.yaml
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/UpgradeAgent.yaml
+        examples:
+          version:
+            value:
+              version: 8.0.0
+          version and source_uri:
+            value:
+              version: 8.0.0
+              source_uri: 'http://localhost:8000'

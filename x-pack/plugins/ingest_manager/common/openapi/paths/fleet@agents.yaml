@@ -1,0 +1,60 @@
+get:
+  summary: Fleet - Agent - List
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              list:
+                type: array
+                items:
+                  type: object
+              total:
+                type: number
+              page:
+                type: number
+              perPage:
+                type: number
+            required:
+              - list
+              - total
+              - page
+              - perPage
+          examples:
+            example-1:
+              value:
+                list:
+                  - id: 205661d0-5e53-11ea-ad31-4f31c06bd9a4
+                    active: true
+                    policy_id: ae556400-5e39-11ea-8b49-f9747e466f7b
+                    type: PERMANENT
+                    enrolled_at: '2020-03-04T20:02:50.605Z'
+                    user_provided_metadata:
+                      dev_agent_version: 0.0.1
+                      region: us-east
+                    local_metadata:
+                      host: localhost
+                      ip: 127.0.0.1
+                      system: Darwin 18.7.0
+                      memory: 34359738368
+                    actions:
+                      - data: >-
+                          {"config":{"id":"ae556400-5e39-11ea-8b49-f9747e466f7b","outputs":{"default":{"type":"elasticsearch","hosts":["http://localhost:9200"],"api_key":"","api_token":"6ckkp3ABz7e_XRqr3LM8:gQuDfUNSRgmY0iziYqP9Hw"}},"packagePolicies":[]}}
+                        created_at: '2020-03-04T20:02:56.149Z'
+                        id: 6a95c00a-d76d-4931-97c3-0bf935272d7d
+                        type: POLICY_CHANGE
+                    access_api_key_id: 6Mkkp3ABz7e_XRqrzLNJ
+                    default_api_key: '6ckkp3ABz7e_XRqr3LM8:gQuDfUNSRgmY0iziYqP9Hw'
+                    current_error_events: []
+                    last_checkin: '2020-03-04T20:03:05.700Z'
+                    status: online
+                total: 1
+                page: 1
+                perPage: 20
+  operationId: get-fleet-agents
+  security:
+    - basicAuth: []

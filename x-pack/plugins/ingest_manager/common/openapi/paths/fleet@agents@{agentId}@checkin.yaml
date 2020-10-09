@@ -1,0 +1,322 @@
+parameters:
+  - schema:
+      type: string
+    name: agentId
+    in: path
+    required: true
+post:
+  summary: Fleet - Agent - Check In
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              action:
+                type: string
+                enum:
+                  - checkin
+              actions:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    agent_id:
+                      type: string
+                    data:
+                      type: object
+                    id:
+                      type: string
+                    created_at:
+                      type: string
+                      format: date-time
+                    type:
+                      type: string
+                  required:
+                    - agent_id
+                    - data
+                    - id
+                    - created_at
+                    - type
+          examples:
+            success:
+              value:
+                action: checkin
+                actions:
+                  - agent_id: a6f14bd2-1a2a-481c-9212-9494d064ffdf
+                    type: POLICY_CHANGE
+                    data:
+                      config:
+                        id: 2fe89350-a5e0-11ea-a587-5f886c8a849f
+                        outputs:
+                          default:
+                            type: elasticsearch
+                            hosts:
+                              - 'http://localhost:9200'
+                            api_key: 'Z-XkgHIBvwtjzIKtSCTh:AejRqdKpQx6z-6dqSI1LHg'
+                        packagePolicies:
+                          - id: 33d6bd70-a5e0-11ea-a587-5f886c8a849f
+                            name: system-1
+                            namespace: default
+                            enabled: true
+                            use_output: default
+                            inputs:
+                              - type: logs
+                                enabled: true
+                                streams:
+                                  - id: logs-system.auth
+                                    enabled: true
+                                    dataset: system.auth
+                                    paths:
+                                      - /var/log/auth.log*
+                                      - /var/log/secure*
+                                    exclude_files:
+                                      - .gz$
+                                    multiline:
+                                      pattern: ^\s
+                                      match: after
+                                    processors:
+                                      - add_locale: null
+                                      - add_fields:
+                                          target: ''
+                                          fields:
+                                            ecs.version: 1.5.0
+                                  - id: logs-system.syslog
+                                    enabled: true
+                                    dataset: system.syslog
+                                    paths:
+                                      - /var/log/messages*
+                                      - /var/log/syslog*
+                                    exclude_files:
+                                      - .gz$
+                                    multiline:
+                                      pattern: ^\s
+                                      match: after
+                                    processors:
+                                      - add_locale: null
+                                      - add_fields:
+                                          target: ''
+                                          fields:
+                                            ecs.version: 1.5.0
+                              - type: system/metrics
+                                enabled: true
+                                streams:
+                                  - id: system/metrics-system.core
+                                    enabled: true
+                                    dataset: system.core
+                                    metricsets:
+                                      - core
+                                    core.metrics: percentages
+                                  - id: system/metrics-system.cpu
+                                    enabled: true
+                                    dataset: system.cpu
+                                    metricsets:
+                                      - cpu
+                                    core.metrics: percentages
+                                    cpu.metrics: 'percentages,normalized_percentages'
+                                    period: 10s
+                                    process.include_top_n.by_cpu: 5
+                                    process.include_top_n.by_memory: 5
+                                    processes: .*
+                                  - id: system/metrics-system.diskio
+                                    enabled: true
+                                    dataset: system.diskio
+                                    metricsets:
+                                      - diskio
+                                  - id: system/metrics-system.entropy
+                                    enabled: true
+                                    dataset: system.entropy
+                                    metricsets:
+                                      - entropy
+                                  - id: system/metrics-system.filesystem
+                                    enabled: true
+                                    dataset: system.filesystem
+                                    metricsets:
+                                      - filesystem
+                                    period: 1m
+                                    processors:
+                                      - drop_event.when.regexp:
+                                          system.filesystem.mount_point: >-
+                                            ^/(sys|cgroup|proc|dev|etc|host|lib|snap)($|/)
+                                  - id: system/metrics-system.fsstat
+                                    enabled: true
+                                    dataset: system.fsstat
+                                    metricsets:
+                                      - fsstat
+                                    period: 1m
+                                    processors:
+                                      - drop_event.when.regexp:
+                                          system.filesystem.mount_point: >-
+                                            ^/(sys|cgroup|proc|dev|etc|host|lib|snap)($|/)
+                                  - id: system/metrics-system.load
+                                    enabled: true
+                                    dataset: system.load
+                                    metricsets:
+                                      - load
+                                    core.metrics: percentages
+                                    cpu.metrics: 'percentages,normalized_percentages'
+                                    period: 10s
+                                    process.include_top_n.by_cpu: 5
+                                    process.include_top_n.by_memory: 5
+                                    processes: .*
+                                  - id: system/metrics-system.memory
+                                    enabled: true
+                                    dataset: system.memory
+                                    metricsets:
+                                      - memory
+                                    core.metrics: percentages
+                                    cpu.metrics: 'percentages,normalized_percentages'
+                                    period: 10s
+                                    process.include_top_n.by_cpu: 5
+                                    process.include_top_n.by_memory: 5
+                                    processes: .*
+                                  - id: system/metrics-system.network
+                                    enabled: true
+                                    dataset: system.network
+                                    metricsets:
+                                      - network
+                                    core.metrics: percentages
+                                    cpu.metrics: 'percentages,normalized_percentages'
+                                    period: 10s
+                                    process.include_top_n.by_cpu: 5
+                                    process.include_top_n.by_memory: 5
+                                    processes: .*
+                                  - id: system/metrics-system.network_summary
+                                    enabled: true
+                                    dataset: system.network_summary
+                                    metricsets:
+                                      - network_summary
+                                  - id: system/metrics-system.process
+                                    enabled: true
+                                    dataset: system.process
+                                    metricsets:
+                                      - process
+                                    core.metrics: percentages
+                                    cpu.metrics: 'percentages,normalized_percentages'
+                                    period: 10s
+                                    process.include_top_n.by_cpu: 5
+                                    process.include_top_n.by_memory: 5
+                                    processes: .*
+                                  - id: system/metrics-system.process_summary
+                                    enabled: true
+                                    dataset: system.process_summary
+                                    metricsets:
+                                      - process_summary
+                                    core.metrics: percentages
+                                    cpu.metrics: 'percentages,normalized_percentages'
+                                    period: 10s
+                                    process.include_top_n.by_cpu: 5
+                                    process.include_top_n.by_memory: 5
+                                    processes: .*
+                                  - id: system/metrics-system.raid
+                                    enabled: true
+                                    dataset: system.raid
+                                    metricsets:
+                                      - raid
+                                  - id: system/metrics-system.service
+                                    enabled: true
+                                    dataset: system.service
+                                    metricsets:
+                                      - service
+                                  - id: system/metrics-system.socket
+                                    enabled: true
+                                    dataset: system.socket
+                                    metricsets:
+                                      - socket
+                                  - id: system/metrics-system.socket_summary
+                                    enabled: true
+                                    dataset: system.socket_summary
+                                    metricsets:
+                                      - socket_summary
+                                    core.metrics: percentages
+                                    cpu.metrics: 'percentages,normalized_percentages'
+                                    period: 10s
+                                    process.include_top_n.by_cpu: 5
+                                    process.include_top_n.by_memory: 5
+                                    processes: .*
+                                  - id: system/metrics-system.uptime
+                                    enabled: true
+                                    dataset: system.uptime
+                                    metricsets:
+                                      - uptime
+                                    core.metrics: percentages
+                                    cpu.metrics: 'percentages,normalized_percentages'
+                                    period: 10s
+                                    processes: .*
+                                  - id: system/metrics-system.users
+                                    enabled: true
+                                    dataset: system.users
+                                    metricsets:
+                                      - users
+                            package:
+                              name: system
+                              version: 0.1.0
+                          - id: fdb1fea0-a5f6-11ea-ad52-534e35d3cd6f
+                            name: endpoint-1
+                            namespace: default
+                            enabled: true
+                            use_output: default
+                            inputs: []
+                            package:
+                              name: endpoint
+                              version: 0.2.0
+                          - id: 2d792280-a5f7-11ea-ad52-534e35d3cd6f
+                            name: endpoint-2
+                            namespace: default
+                            enabled: true
+                            use_output: default
+                            inputs: []
+                            package:
+                              name: endpoint
+                              version: 0.2.0
+                        revision: 4
+                        settings:
+                          monitoring:
+                            use_output: default
+                            enabled: true
+                            logs: true
+                            metrics: true
+                    id: 51c6ad1e-a9c0-4c70-80da-99a5c51eedaf
+                    created_at: '2020-06-04T19:52:24.667Z'
+  operationId: post-fleet-agents-agentId-checkin
+  parameters:
+    - $ref: ../components/parameters/xsrfHeader.yaml
+  security:
+    - Access API Key: []
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            local_metadata:
+              $ref: ../components/schemas/AgentMetadata.yaml
+            events:
+              type: array
+              items:
+                $ref: ../components/schemas/NewAgentEvent.yaml
+        examples:
+          stoped to starting:
+            value:
+              events:
+                - type: STATE
+                  subtype: STARTING
+                  message: state changed from STOPPED to STARTING
+                  timestamp: '2019-10-01T13:42:54.323Z'
+                  payload: {}
+                  agent_id: bee40627-8cbd-45df-add9-98c390f9db10
+          running:
+            value:
+              events:
+                - type: STATE
+                  subtype: RUNNING
+                  message: state changed from STOPPED to RUNNING
+                  timestamp: '2020-05-26T20:44:57.480Z'
+                  payload:
+                    random: data
+                    state: RUNNING
+                    previous_state: STOPPED
+                  agent_id: bee40627-8cbd-45df-add9-98c390f9db10

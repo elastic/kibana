@@ -1,0 +1,427 @@
+get:
+  summary: EPM - Packages - Info
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            allOf:
+              - properties:
+                  response:
+                    $ref: ../components/schemas/PackageInfo.yaml
+              - properties:
+                  status:
+                    type: string
+                    enum:
+                      - installed
+                      - not_installed
+                  savedObject:
+                    type: string
+                required:
+                  - status
+                  - savedObject
+          examples:
+            example-1:
+              value:
+                response:
+                  name: coredns
+                  title: CoreDNS
+                  version: 1.0.1
+                  readme: /package/coredns-1.0.1/docs/README.md
+                  description: >
+                    CoreDNS logs and metrics integration.
+
+                    The CoreDNS integrations allows to gather logs and metrics
+                    from the CoreDNS DNS server to get better insights.
+                  type: integration
+                  categories:
+                    - logs
+                    - metrics
+                  requirement:
+                    kibana:
+                      versions: '>6.7.0'
+                  icons:
+                    - path: /package/coredns-1.0.1/img/icon.png
+                      src: /img/icon.png
+                      size: 1800x1800
+                    - path: /package/coredns-1.0.1/img/icon.svg
+                      src: /img/icon.svg
+                      size: 255x144
+                      type: image/svg+xml
+                  assets:
+                    kibana:
+                      dashboard:
+                        - pkgkey: coredns-1.0.1
+                          service: kibana
+                          type: dashboard
+                          file: 53aa1f70-443e-11e9-8548-ab7fbe04f038.json
+                          path: >-
+                            coredns-1.0.1/kibana/dashboard/53aa1f70-443e-11e9-8548-ab7fbe04f038.json
+                        - pkgkey: coredns-1.0.1
+                          service: kibana
+                          type: dashboard
+                          file: Metricbeat-CoreDNS-Dashboard-ecs.json
+                          path: >-
+                            coredns-1.0.1/kibana/dashboard/Metricbeat-CoreDNS-Dashboard-ecs.json
+                      visualization:
+                        - pkgkey: coredns-1.0.1
+                          service: kibana
+                          type: visualization
+                          file: 277fc650-67a9-11e9-a534-715561d0bf42.json
+                          path: >-
+                            coredns-1.0.1/kibana/visualization/277fc650-67a9-11e9-a534-715561d0bf42.json
+                        - pkgkey: coredns-1.0.1
+                          service: kibana
+                          type: visualization
+                          file: 27da53f0-53d5-11e9-b466-9be470bbd327-ecs.json
+                          path: >-
+                            coredns-1.0.1/kibana/visualization/27da53f0-53d5-11e9-b466-9be470bbd327-ecs.json
+                        - pkgkey: coredns-1.0.1
+                          service: kibana
+                          type: visualization
+                          file: 36e08510-53c4-11e9-b466-9be470bbd327-ecs.json
+                          path: >-
+                            coredns-1.0.1/kibana/visualization/36e08510-53c4-11e9-b466-9be470bbd327-ecs.json
+                        - pkgkey: coredns-1.0.1
+                          service: kibana
+                          type: visualization
+                          file: 3ad75810-4429-11e9-8548-ab7fbe04f038.json
+                          path: >-
+                            coredns-1.0.1/kibana/visualization/3ad75810-4429-11e9-8548-ab7fbe04f038.json
+                        - pkgkey: coredns-1.0.1
+                          service: kibana
+                          type: visualization
+                          file: 4804eaa0-7315-11e9-b0d0-414c3011ddbb.json
+                          path: >-
+                            coredns-1.0.1/kibana/visualization/4804eaa0-7315-11e9-b0d0-414c3011ddbb.json
+                        - pkgkey: coredns-1.0.1
+                          service: kibana
+                          type: visualization
+                          file: 57c74300-7308-11e9-b0d0-414c3011ddbb.json
+                          path: >-
+                            coredns-1.0.1/kibana/visualization/57c74300-7308-11e9-b0d0-414c3011ddbb.json
+                        - pkgkey: coredns-1.0.1
+                          service: kibana
+                          type: visualization
+                          file: 75743f70-443c-11e9-8548-ab7fbe04f038.json
+                          path: >-
+                            coredns-1.0.1/kibana/visualization/75743f70-443c-11e9-8548-ab7fbe04f038.json
+                        - pkgkey: coredns-1.0.1
+                          service: kibana
+                          type: visualization
+                          file: 86177430-728d-11e9-b0d0-414c3011ddbb.json
+                          path: >-
+                            coredns-1.0.1/kibana/visualization/86177430-728d-11e9-b0d0-414c3011ddbb.json
+                        - pkgkey: coredns-1.0.1
+                          service: kibana
+                          type: visualization
+                          file: 9dc640e0-4432-11e9-8548-ab7fbe04f038.json
+                          path: >-
+                            coredns-1.0.1/kibana/visualization/9dc640e0-4432-11e9-8548-ab7fbe04f038.json
+                        - pkgkey: coredns-1.0.1
+                          service: kibana
+                          type: visualization
+                          file: a19df590-53c4-11e9-b466-9be470bbd327-ecs.json
+                          path: >-
+                            coredns-1.0.1/kibana/visualization/a19df590-53c4-11e9-b466-9be470bbd327-ecs.json
+                        - pkgkey: coredns-1.0.1
+                          service: kibana
+                          type: visualization
+                          file: a58345f0-7298-11e9-b0d0-414c3011ddbb.json
+                          path: >-
+                            coredns-1.0.1/kibana/visualization/a58345f0-7298-11e9-b0d0-414c3011ddbb.json
+                        - pkgkey: coredns-1.0.1
+                          service: kibana
+                          type: visualization
+                          file: cfde7fb0-443d-11e9-8548-ab7fbe04f038.json
+                          path: >-
+                            coredns-1.0.1/kibana/visualization/cfde7fb0-443d-11e9-8548-ab7fbe04f038.json
+                  format_version: 1.0.0
+                  data_streams:
+                    - title: CoreDNS logs
+                      name: log
+                      release: ga
+                      type: logs
+                      ingest_pipeline: pipeline-entry
+                      vars:
+                        - default:
+                            - /var/log/coredns.log
+                          name: paths
+                          type: textarea
+                        - default:
+                            - coredns
+                          name: tags
+                          type: text
+                      package: coredns
+                    - title: CoreDNS stats metrics
+                      name: stats
+                      release: ga
+                      type: metrics
+                      vars:
+                        - default:
+                            - 'http://localhost:9153'
+                          description: CoreDNS hosts
+                          name: hosts
+                          required: true
+                        - default: 10s
+                          description: 'Collection period. Valid values: 10s, 5m, 2h'
+                          name: period
+                        - name: username
+                          type: text
+                        - name: password
+                          type: password
+                      package: coredns
+                  download: /epr/coredns/coredns-1.0.1.tar.gz
+                  path: /package/coredns-1.0.1
+                  status: installed
+                  savedObject:
+                    id: coredns-1.0.1
+                    type: epm-package
+                    updated_at: '2020-02-27T16:25:43.652Z'
+                    version: WzU2LDFd
+                    attributes:
+                      installed:
+                        - id: 53aa1f70-443e-11e9-8548-ab7fbe04f038
+                          type: dashboard
+                        - id: Metricbeat-CoreDNS-Dashboard-ecs
+                          type: dashboard
+                        - id: 75743f70-443c-11e9-8548-ab7fbe04f038
+                          type: visualization
+                        - id: 36e08510-53c4-11e9-b466-9be470bbd327-ecs
+                          type: visualization
+                        - id: 277fc650-67a9-11e9-a534-715561d0bf42
+                          type: visualization
+                        - id: cfde7fb0-443d-11e9-8548-ab7fbe04f038
+                          type: visualization
+                        - id: a19df590-53c4-11e9-b466-9be470bbd327-ecs
+                          type: visualization
+                        - id: a58345f0-7298-11e9-b0d0-414c3011ddbb
+                          type: visualization
+                        - id: 9dc640e0-4432-11e9-8548-ab7fbe04f038
+                          type: visualization
+                        - id: 3ad75810-4429-11e9-8548-ab7fbe04f038
+                          type: visualization
+                        - id: 57c74300-7308-11e9-b0d0-414c3011ddbb
+                          type: visualization
+                        - id: 27da53f0-53d5-11e9-b466-9be470bbd327-ecs
+                          type: visualization
+                        - id: 86177430-728d-11e9-b0d0-414c3011ddbb
+                          type: visualization
+                        - id: 4804eaa0-7315-11e9-b0d0-414c3011ddbb
+                          type: visualization
+                        - id: logs-log-1.0.1-pipeline-plaintext
+                          type: ingest-pipeline
+                        - id: logs-log-1.0.1-pipeline-json
+                          type: ingest-pipeline
+                        - id: logs-log-1.0.1
+                          type: ingest-pipeline
+                        - id: logs-log
+                          type: index-template
+                        - id: metrics-stats
+                          type: index-template
+                    references: []
+            required-package:
+              value:
+                response:
+                  format_version: 1.0.0
+                  name: endpoint
+                  title: Elastic Endpoint
+                  version: 0.3.0
+                  readme: /package/endpoint/0.3.0/docs/README.md
+                  license: basic
+                  description: This is the Elastic Endpoint package.
+                  type: solution
+                  categories:
+                    - security
+                  release: beta
+                  requirement:
+                    kibana:
+                      versions: '>7.4.0'
+                  icons:
+                    - path: /package/endpoint/0.3.0/img/logo-endpoint-64-color.svg
+                      src: /img/logo-endpoint-64-color.svg
+                      size: 16x16
+                      type: image/svg+xml
+                  assets:
+                    kibana:
+                      dashboard:
+                        - pkgkey: endpoint-0.3.0
+                          service: kibana
+                          type: dashboard
+                          file: 826759f0-7074-11ea-9bc8-6b38f4d29a16.json
+                          path: >-
+                            endpoint-0.3.0/kibana/dashboard/826759f0-7074-11ea-9bc8-6b38f4d29a16.json
+                      map:
+                        - pkgkey: endpoint-0.3.0
+                          service: kibana
+                          type: map
+                          file: a3a3bd10-706b-11ea-9bc8-6b38f4d29a16.json
+                          path: >-
+                            endpoint-0.3.0/kibana/map/a3a3bd10-706b-11ea-9bc8-6b38f4d29a16.json
+                      visualization:
+                        - pkgkey: endpoint-0.3.0
+                          service: kibana
+                          type: visualization
+                          file: 1cfceda0-728b-11ea-9bc8-6b38f4d29a16.json
+                          path: >-
+                            endpoint-0.3.0/kibana/visualization/1cfceda0-728b-11ea-9bc8-6b38f4d29a16.json
+                        - pkgkey: endpoint-0.3.0
+                          service: kibana
+                          type: visualization
+                          file: 1e525190-7074-11ea-9bc8-6b38f4d29a16.json
+                          path: >-
+                            endpoint-0.3.0/kibana/visualization/1e525190-7074-11ea-9bc8-6b38f4d29a16.json
+                        - pkgkey: endpoint-0.3.0
+                          service: kibana
+                          type: visualization
+                          file: 55387750-729c-11ea-9bc8-6b38f4d29a16.json
+                          path: >-
+                            endpoint-0.3.0/kibana/visualization/55387750-729c-11ea-9bc8-6b38f4d29a16.json
+                        - pkgkey: endpoint-0.3.0
+                          service: kibana
+                          type: visualization
+                          file: 92b1edc0-706a-11ea-9bc8-6b38f4d29a16.json
+                          path: >-
+                            endpoint-0.3.0/kibana/visualization/92b1edc0-706a-11ea-9bc8-6b38f4d29a16.json
+                  data_streams:
+                    - id: endpoint
+                      title: Endpoint Events
+                      release: experimental
+                      type: events
+                      package: endpoint
+                      path: events
+                    - id: endpoint.metadata
+                      title: Endpoint Metadata
+                      release: experimental
+                      type: metrics
+                      package: endpoint
+                      path: metadata
+                    - id: endpoint.policy
+                      title: Endpoint Policy Response
+                      release: experimental
+                      type: metrics
+                      package: endpoint
+                      path: policy
+                    - id: endpoint.telemetry
+                      title: Endpoint Telemetry
+                      release: experimental
+                      type: metrics
+                      package: endpoint
+                      path: telemetry
+                  packagePolicies:
+                    - name: endpoint
+                      title: Endpoint package policy
+                      description: Interact with the endpoint.
+                      inputs: null
+                      multiple: false
+                  download: /epr/endpoint/endpoint-0.3.0.tar.gz
+                  path: /package/endpoint/0.3.0
+                  latestVersion: 0.3.0
+                  removable: false
+                  status: installed
+                  savedObject:
+                    id: endpoint
+                    type: epm-packages
+                    updated_at: '2020-06-23T21:44:59.319Z'
+                    version: Wzk4LDFd
+                    attributes:
+                      installed:
+                        - id: 826759f0-7074-11ea-9bc8-6b38f4d29a16
+                          type: dashboard
+                        - id: 1cfceda0-728b-11ea-9bc8-6b38f4d29a16
+                          type: visualization
+                        - id: 1e525190-7074-11ea-9bc8-6b38f4d29a16
+                          type: visualization
+                        - id: 55387750-729c-11ea-9bc8-6b38f4d29a16
+                          type: visualization
+                        - id: 92b1edc0-706a-11ea-9bc8-6b38f4d29a16
+                          type: visualization
+                        - id: a3a3bd10-706b-11ea-9bc8-6b38f4d29a16
+                          type: map
+                        - id: events-endpoint
+                          type: index-template
+                        - id: metrics-endpoint.metadata
+                          type: index-template
+                        - id: metrics-endpoint.policy
+                          type: index-template
+                        - id: metrics-endpoint.telemetry
+                          type: index-template
+                      es_index_patterns:
+                        events: events-endpoint-*
+                        metadata: metrics-endpoint.metadata-*
+                        policy: metrics-endpoint.policy-*
+                        telemetry: metrics-endpoint.telemetry-*
+                      name: endpoint
+                      version: 0.3.0
+                      internal: false
+                      removable: false
+                    references: []
+  operationId: get-epm-package-pkgkey
+  security:
+    - basicAuth: []
+parameters:
+  - schema:
+      type: string
+    name: pkgkey
+    in: path
+    required: true
+post:
+  summary: EPM - Packages - Install
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              response:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                    - id
+                    - type
+            required:
+              - response
+  operationId: post-epm-install-pkgkey
+  description: ''
+  parameters:
+    - $ref: ../components/parameters/xsrfHeader.yaml
+delete:
+  summary: EPM - Packages - Delete
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              response:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                    - id
+                    - type
+            required:
+              - response
+  operationId: post-epm-delete-pkgkey
+  parameters:
+    - $ref: ../components/parameters/xsrfHeader.yaml

@@ -1,0 +1,30 @@
+post:
+  summary: Ingest Manager - Setup
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              isInitialized:
+                type: boolean
+          examples:
+            success:
+              value:
+                isInitialized: true
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+          examples: {}
+  operationId: post-setup
+  parameters:
+    - $ref: ../components/parameters/xsrfHeader.yaml

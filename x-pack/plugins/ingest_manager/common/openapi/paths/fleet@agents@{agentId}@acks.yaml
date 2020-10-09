@@ -1,0 +1,46 @@
+parameters:
+  - schema:
+      type: string
+    name: agentId
+    in: path
+    required: true
+post:
+  summary: Fleet - Agent - Acks
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              action:
+                type: string
+                enum:
+                  - acks
+            required:
+              - action
+          examples:
+            success:
+              value:
+                action: checkin
+  operationId: post-fleet-agents-agentId-acks
+  parameters:
+    - $ref: ../components/parameters/xsrfHeader.yaml
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties: {}
+        examples:
+          example-1:
+            value:
+              events:
+                - type: ACTION_RESULT
+                  subtype: CONFIG
+                  timestamp: '2019-01-04T14:32:03.36764-05:00'
+                  action_id: 51c6ad1e-a9c0-4c70-80da-99a5c51eedaf
+                  agent_id: a6f14bd2-1a2a-481c-9212-9494d064ffdf
+                  message: acknowledge

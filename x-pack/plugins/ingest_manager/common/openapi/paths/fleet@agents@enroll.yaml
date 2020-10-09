@@ -1,0 +1,81 @@
+post:
+  summary: Fleet - Agent - Enroll
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              action:
+                type: string
+              item:
+                $ref: ../components/schemas/Agent.yaml
+          examples:
+            success:
+              value:
+                action: created
+                item:
+                  id: 8086fb1a-72ca-4a67-8533-09300c1639fa
+                  active: true
+                  policy_id: 2fe89350-a5e0-11ea-a587-5f886c8a849f
+                  type: PERMANENT
+                  enrolled_at: '2020-06-04T13:03:57.856Z'
+                  user_provided_metadata:
+                    dev_agent_version: 0.0.1
+                    region: us-east
+                  local_metadata:
+                    host: localhost
+                    ip: 127.0.0.1
+                    system: Darwin 18.7.0
+                    memory: 34359738368
+                  current_error_events: []
+                  access_api_key: cU9KdWYzSUJ2d3RqeklLdFdnNF86ZW05ZjFrMThUWW1GRW13OHMwRGZvdw==
+                  status: error
+  operationId: post-fleet-agents-enroll
+  parameters:
+    - $ref: ../components/parameters/xsrfHeader.yaml
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+                - PERMANENT
+                - EPHEMERAL
+                - TEMPORARY
+            shared_id:
+              type: string
+            metadata:
+              type: object
+              required:
+                - local
+                - user_provided
+              properties:
+                local:
+                  $ref: ../components/schemas/AgentMetadata.yaml
+                user_provided:
+                  $ref: ../components/schemas/AgentMetadata.yaml
+          required:
+            - type
+            - metadata
+        examples:
+          good:
+            value:
+              type: PERMANENT
+              metadata:
+                local:
+                  host: localhost
+                  ip: 127.0.0.1
+                  system: Darwin 18.7.0
+                  memory: 34359738368
+                user_provided:
+                  dev_agent_version: 0.0.1
+                  region: us-east
+  security:
+    - Enrollment API Key: []
