@@ -32,9 +32,9 @@ export async function findUsedDependencies(listedPkgDependencies: any, baseDir: 
   // Define the entry points for the server code in order to
   // start here later looking for the server side dependencies
   const mainCodeEntries = [
-    `${baseDir}/src/cli`,
-    `${baseDir}/src/cli_keystore`,
-    `${baseDir}/src/cli_plugin`,
+    `${baseDir}/src/cli/dist.js`,
+    `${baseDir}/src/cli_keystore/dist.js`,
+    `${baseDir}/src/cli_plugin/dist.js`,
   ];
 
   if (!isOss) {
@@ -58,8 +58,7 @@ export async function findUsedDependencies(listedPkgDependencies: any, baseDir: 
 
   const listedDependencies = Object.keys(listedPkgDependencies);
   const filteredListedDependencies = listedDependencies.filter((entry) => {
-    const isWhiteListed = whiteListedModules.some((nonEntry) => entry.includes(nonEntry));
-    return !isWhiteListed;
+    return whiteListedModules.some((nonEntry) => entry.includes(nonEntry));
   });
 
   return filteredListedDependencies.reduce((foundUsedDeps: any, usedDep) => {
