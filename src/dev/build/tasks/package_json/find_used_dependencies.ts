@@ -37,10 +37,6 @@ export async function findUsedDependencies(listedPkgDependencies: any, baseDir: 
     `${baseDir}/src/cli_plugin/dist.js`,
   ];
 
-  if (!isOss) {
-    mainCodeEntries.push(`${baseDir}/x-pack`);
-  }
-
   const discoveredPluginEntries = await globby([
     `${baseDir}/src/plugins/*/server/index.js`,
     `!${baseDir}/src/plugins/**/public`,
@@ -48,6 +44,15 @@ export async function findUsedDependencies(listedPkgDependencies: any, baseDir: 
 
   // Compose all the needed entries
   const serverEntries = [...mainCodeEntries, ...discoveredPluginEntries];
+
+  if (!isOss) {
+    serverEntries.push(
+      ...(await globby([
+        `${baseDir}/x-pack/plugins/*/server/index.js`,
+        `!${baseDir}/x-pack/plugins/**/public`,
+      ]))
+    );
+  }
 
   // Get the dependencies found searching through the server
   // side code entries that were provided
