@@ -27,3 +27,4 @@ export { withTimeout } from './promise';
 export { isRelativeUrl, modifyUrl, getUrlOrigin, URLMeaningfulParts } from './url';
 export { unset } from './unset';
 export { getFlattenedObject } from './get_flattened_object';
+export * from './rxjs_7';
