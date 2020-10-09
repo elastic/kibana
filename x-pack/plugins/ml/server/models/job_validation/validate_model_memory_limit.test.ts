@@ -71,7 +71,7 @@ describe('ML - validateModelMemoryLimit', () => {
   };
 
   interface MockAPICallResponse {
-    'ml.estimateModelMemory'?: ModelMemoryEstimateResponse;
+    estimateModelMemory?: ModelMemoryEstimateResponse;
   }
 
   // mock asCurrentUser
@@ -79,15 +79,8 @@ describe('ML - validateModelMemoryLimit', () => {
   // - to retrieve the info endpoint
   // - to search for cardinality of split field
   // - to retrieve field capabilities used in search for split field cardinality
-  const getMockMlClusterClient = ({
-    'ml.estimateModelMemory': estimateModelMemory,
-  }: MockAPICallResponse = {}): IScopedClusterClient => {
+  const getMockMlClusterClient = (): IScopedClusterClient => {
     const callAs = {
-      ml: {
-        info: () => Promise.resolve({ body: mlInfoResponse }),
-        estimateModelMemory: () =>
-          Promise.resolve({ body: estimateModelMemory || modelMemoryEstimateResponse }),
-      },
       search: () => Promise.resolve({ body: cardinalitySearchResponse }),
       fieldCaps: () => Promise.resolve({ body: fieldCapsResponse }),
     };
@@ -99,7 +92,7 @@ describe('ML - validateModelMemoryLimit', () => {
   };
 
   const getMockMlClient = ({
-    'ml.estimateModelMemory': estimateModelMemory,
+    estimateModelMemory: estimateModelMemory,
   }: MockAPICallResponse = {}): MlClient => {
     const callAs = {
       info: () => Promise.resolve({ body: mlInfoResponse }),
@@ -176,8 +169,8 @@ describe('ML - validateModelMemoryLimit', () => {
     job.analysis_limits.model_memory_limit = '20mb';
 
     return validateModelMemoryLimit(
-      getMockMlClusterClient({ 'ml.estimateModelMemory': { model_memory_estimate: '66mb' } }),
-      getMockMlClient(),
+      getMockMlClusterClient(),
+      getMockMlClient({ estimateModelMemory: { model_memory_estimate: '66mb' } }),
       job,
       duration
     ).then((messages) => {
@@ -185,7 +178,7 @@ describe('ML - validateModelMemoryLimit', () => {
       expect(ids).toEqual(['estimated_mml_greater_than_max_mml']);
     });
   });
-
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   it('Called with small number of detectors, so estimated mml is under max', () => {
     const dtrs = createDetectors(2);
     const job = getJobConfig(['instance'], dtrs);
@@ -194,8 +187,8 @@ describe('ML - validateModelMemoryLimit', () => {
     job.analysis_limits.model_memory_limit = '30mb';
 
     return validateModelMemoryLimit(
-      getMockMlClusterClient({ 'ml.estimateModelMemory': { model_memory_estimate: '24mb' } }),
-      getMockMlClient(),
+      getMockMlClusterClient(),
+      getMockMlClient({ estimateModelMemory: { model_memory_estimate: '24mb' } }),
       job,
       duration
     ).then((messages) => {
@@ -212,8 +205,8 @@ describe('ML - validateModelMemoryLimit', () => {
     job.analysis_limits.model_memory_limit = '10mb';
 
     return validateModelMemoryLimit(
-      getMockMlClusterClient({ 'ml.estimateModelMemory': { model_memory_estimate: '22mb' } }),
-      getMockMlClient(),
+      getMockMlClusterClient(),
+      getMockMlClient({ estimateModelMemory: { model_memory_estimate: '22mb' } }),
       job,
       duration
     ).then((messages) => {
@@ -284,8 +277,8 @@ describe('ML - validateModelMemoryLimit', () => {
     job.analysis_limits.model_memory_limit = '20mb';
 
     return validateModelMemoryLimit(
-      getMockMlClusterClient({ 'ml.estimateModelMemory': { model_memory_estimate: '19mb' } }),
-      getMockMlClient(),
+      getMockMlClusterClient(),
+      getMockMlClient({ estimateModelMemory: { model_memory_estimate: '19mb' } }),
       job,
       duration
     ).then((messages) => {
@@ -446,8 +439,8 @@ describe('ML - validateModelMemoryLimit', () => {
     job.analysis_limits.model_memory_limit = '20MB';
 
     return validateModelMemoryLimit(
-      getMockMlClusterClient({ 'ml.estimateModelMemory': { model_memory_estimate: '20mb' } }),
-      getMockMlClient(),
+      getMockMlClusterClient(),
+      getMockMlClient({ estimateModelMemory: { model_memory_estimate: '20mb' } }),
       job,
       duration
     ).then((messages) => {

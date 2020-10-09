@@ -12,17 +12,6 @@ import type { MlClient } from '../../lib/ml_client';
 
 const callAs = {
   fieldCaps: () => Promise.resolve({ body: { fields: [] } }),
-  ml: {
-    info: () =>
-      Promise.resolve({
-        body: {
-          limits: {
-            effective_max_model_memory_limit: '100MB',
-            max_model_memory_limit: '1GB',
-          },
-        },
-      }),
-  },
   search: () => Promise.resolve({ body: { hits: { total: { value: 0, relation: 'eq' } } } }),
 };
 
@@ -31,7 +20,17 @@ const mlClusterClient = ({
   asInternalUser: callAs,
 } as unknown) as IScopedClusterClient;
 
-const mlClient = (callAs as unknown) as MlClient;
+const mlClient = ({
+  info: () =>
+    Promise.resolve({
+      body: {
+        limits: {
+          effective_max_model_memory_limit: '100MB',
+          max_model_memory_limit: '1GB',
+        },
+      },
+    }),
+} as unknown) as MlClient;
 
 // Note: The tests cast `payload` as any
 // so we can simulate possible runtime payloads
