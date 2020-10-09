@@ -34,11 +34,11 @@ const anomalyDetectorTypeFilter = {
   },
 };
 
-export function jobAuditMessagesProvider({ asInternalUser }, mlClient, jobsInSpaces) {
+export function jobAuditMessagesProvider({ asInternalUser }, mlClient) {
   // search for audit messages,
   // jobId is optional. without it, all jobs will be listed.
   // from is optional and should be a string formatted in ES time units. e.g. 12h, 1d, 7d
-  async function getJobAuditMessages(jobId, from) {
+  async function getJobAuditMessages(jobsInSpaces, jobId, from) {
     let gte = null;
     if (jobId !== undefined && from === undefined) {
       const jobs = await mlClient.getJobs({ job_id: jobId });

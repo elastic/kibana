@@ -10,9 +10,8 @@ import type { JobsInSpaces } from '../../saved_objects';
 
 export function jobAuditMessagesProvider(
   client: IScopedClusterClient,
-  mlClient: MlClient,
-  jobsInSpaces: JobsInSpaces
+  mlClient: MlClient
 ): {
-  getJobAuditMessages: (jobId?: string, from?: string) => any;
+  getJobAuditMessages: (jobsInSpaces: JobsInSpaces, jobId?: string, from?: string) => any;
   getAuditMessagesSummary: (jobIds?: string[]) => any;
 };

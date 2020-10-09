@@ -39,10 +39,10 @@ export function jobAuditMessagesRoutes({ router, mlLicense }: RouteInitializatio
     },
     mlLicense.fullLicenseAPIGuard(async ({ client, mlClient, request, response, jobsInSpaces }) => {
       try {
-        const { getJobAuditMessages } = jobAuditMessagesProvider(client, mlClient, jobsInSpaces);
+        const { getJobAuditMessages } = jobAuditMessagesProvider(client, mlClient);
         const { jobId } = request.params;
         const { from } = request.query;
-        const resp = await getJobAuditMessages(jobId, from);
+        const resp = await getJobAuditMessages(jobsInSpaces, jobId, from);
 
         return response.ok({
           body: resp,
@@ -74,9 +74,9 @@ export function jobAuditMessagesRoutes({ router, mlLicense }: RouteInitializatio
     },
     mlLicense.fullLicenseAPIGuard(async ({ client, mlClient, request, response, jobsInSpaces }) => {
       try {
-        const { getJobAuditMessages } = jobAuditMessagesProvider(client, mlClient, jobsInSpaces);
+        const { getJobAuditMessages } = jobAuditMessagesProvider(client, mlClient);
         const { from } = request.query;
-        const resp = await getJobAuditMessages(undefined, from);
+        const resp = await getJobAuditMessages(jobsInSpaces, undefined, from);
 
         return response.ok({
           body: resp,
