@@ -5,11 +5,12 @@
  */
 
 import React, { useState, ReactElement } from 'react';
+import { i18n } from '@kbn/i18n';
 
 interface ChildrenProps {
   toggle: () => void;
   isHidden: boolean;
-  hiddenText: string;
+  hiddenText: React.ReactNode;
 }
 
 interface Props {
@@ -19,7 +20,15 @@ interface Props {
 
 export const HiddenText: React.FC<Props> = ({ text, children }) => {
   const [isHidden, toggleIsHidden] = useState(true);
-  const hiddenText = isHidden ? text.replace(/./g, '•') : text;
+
+  const hiddenLabel = i18n.translate('xpack.enterpriseSearch.hiddenText', {
+    defaultMessage: 'Hidden text',
+  });
+  const hiddenText = isHidden ? (
+    <span aria-label={hiddenLabel}>{text.replace(/./g, '•')}</span>
+  ) : (
+    text
+  );
 
   return children({
     hiddenText,

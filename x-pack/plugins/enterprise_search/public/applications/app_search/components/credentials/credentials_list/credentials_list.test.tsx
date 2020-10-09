@@ -190,7 +190,7 @@ describe('Credentials', () => {
           copy: expect.any(Function),
           toggleIsHidden: expect.any(Function),
           isHidden: expect.any(Boolean),
-          text: '•••••••',
+          text: <span aria-label="Hidden text">•••••••</span>,
         });
       });
     });

@@ -12,7 +12,7 @@ interface Props {
   copy: () => void;
   toggleIsHidden: () => void;
   isHidden: boolean;
-  text: string;
+  text: React.ReactNode;
 }
 
 export const Key: React.FC<Props> = ({ copy, toggleIsHidden, isHidden, text }) => {
