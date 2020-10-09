@@ -16,7 +16,15 @@ interface Props {
 }
 
 export const Key: React.FC<Props> = ({ copy, toggleIsHidden, isHidden, text }) => {
-  const icon = isHidden ? 'eye' : 'eyeClosed';
+  const hideIcon = isHidden ? 'eye' : 'eyeClosed';
+  const hideIconLabel = isHidden
+    ? i18n.translate('xpack.enterpriseSearch.appSearch.credentials.showApiKey', {
+        defaultMessage: 'Show API Key',
+      })
+    : i18n.translate('xpack.enterpriseSearch.appSearch.credentials.hideApiKey', {
+        defaultMessage: 'Hide API Key',
+      });
+
   return (
     <>
       <EuiButtonIcon
@@ -28,13 +36,9 @@ export const Key: React.FC<Props> = ({ copy, toggleIsHidden, isHidden, text }) =
       />
       <EuiButtonIcon
         onClick={toggleIsHidden}
-        iconType={icon}
-        aria-label={i18n.translate(
-          'xpack.enterpriseSearch.appSearch.credentials.toggleApiEndpoint',
-          {
-            defaultMessage: 'Toggle API Key visibility',
-          }
-        )}
+        iconType={hideIcon}
+        aria-label={hideIconLabel}
+        aria-pressed={!isHidden}
       />
       {text}
     </>
