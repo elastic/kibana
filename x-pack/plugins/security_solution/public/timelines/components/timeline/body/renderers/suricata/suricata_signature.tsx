@@ -5,16 +5,12 @@
  */
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
-import {
-  DragEffects,
-  DraggableWrapper,
-} from '../../../../../../common/components/drag_and_drop/draggable_wrapper';
+import { DraggableWrapper } from '../../../../../../common/components/drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../../../../common/components/drag_and_drop/helpers';
 import { GoogleLink } from '../../../../../../common/components/links';
-import { Provider } from '../../../data_providers/provider';
 
 import { TokensFlexItem } from '../helpers';
 import { getBeginningTokens } from './suricata_links';
@@ -75,28 +71,23 @@ export const DraggableSignatureId = React.memo<{ id: string; signatureId: number
       [id, signatureId]
     );
 
-    const render = useCallback(
-      (dataProvider, _, snapshot) =>
-        snapshot.isDragging ? (
-          <DragEffects>
-            <Provider dataProvider={dataProvider} />
-          </DragEffects>
-        ) : (
-          <EuiToolTip
-            data-test-subj="signature-id-tooltip"
-            content={SURICATA_SIGNATURE_ID_FIELD_NAME}
-          >
-            <Badge iconType="number" color="hollow" title="">
-              {signatureId}
-            </Badge>
-          </EuiToolTip>
-        ),
+    const content = useMemo(
+      () => (
+        <EuiToolTip
+          data-test-subj="signature-id-tooltip"
+          content={SURICATA_SIGNATURE_ID_FIELD_NAME}
+        >
+          <Badge iconType="number" color="hollow" title="">
+            {signatureId}
+          </Badge>
+        </EuiToolTip>
+      ),
       [signatureId]
     );
 
     return (
       <SignatureFlexItem grow={false}>
-        <DraggableWrapper dataProvider={dataProviderProp} render={render} />
+        <DraggableWrapper dataProvider={dataProviderProp}>{content}</DraggableWrapper>
       </SignatureFlexItem>
     );
   }

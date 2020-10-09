@@ -9,12 +9,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 
-import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
+import { DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../empty_value';
 import { MoreRowItems, Spacer } from '../page';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
 
 const Subtext = styled.div`
   font-size: ${(props) => props.theme.eui.euiFontSizeXS};
@@ -54,16 +53,9 @@ export const getRowItemDraggable = ({
             operator: IS_OPERATOR,
           },
         }}
-        render={(dataProvider, _, snapshot) =>
-          snapshot.isDragging ? (
-            <DragEffects>
-              <Provider dataProvider={dataProvider} />
-            </DragEffects>
-          ) : (
-            <>{render ? render(rowItem) : defaultToEmptyTag(rowItem)}</>
-          )
-        }
-      />
+      >
+        <>{render ? render(rowItem) : defaultToEmptyTag(rowItem)}</>
+      </DraggableWrapper>
     );
   } else {
     return getEmptyTagValue();
@@ -114,16 +106,9 @@ export const getRowItemDraggables = ({
                 operator: IS_OPERATOR,
               },
             }}
-            render={(dataProvider, _, snapshot) =>
-              snapshot.isDragging ? (
-                <DragEffects>
-                  <Provider dataProvider={dataProvider} />
-                </DragEffects>
-              ) : (
-                <>{render ? render(rowItem) : defaultToEmptyTag(rowItem)}</>
-              )
-            }
-          />
+          >
+            <>{render ? render(rowItem) : defaultToEmptyTag(rowItem)}</>
+          </DraggableWrapper>
         </React.Fragment>
       );
     });

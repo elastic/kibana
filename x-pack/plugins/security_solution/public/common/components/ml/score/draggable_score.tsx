@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { DraggableWrapper, DragEffects } from '../../drag_and_drop/draggable_wrapper';
+import React, { useMemo } from 'react';
+import { DraggableWrapper } from '../../drag_and_drop/draggable_wrapper';
 import { Anomaly } from '../types';
 import {
   IS_OPERATOR,
   QueryOperator,
 } from '../../../../timelines/components/timeline/data_providers/data_provider';
-import { Provider } from '../../../../timelines/components/timeline/data_providers/provider';
 import { Spacer } from '../../page';
 import { getScoreString } from './score_health';
 
@@ -43,23 +42,18 @@ export const DraggableScoreComponent = ({
     [id, score.entityName, score.entityValue]
   );
 
-  const render = useCallback(
-    (dataProvider, _, snapshot) =>
-      snapshot.isDragging ? (
-        <DragEffects>
-          <Provider dataProvider={dataProvider} />
-        </DragEffects>
-      ) : (
-        <>
-          {index !== 0 && (
-            <>
-              {','}
-              <Spacer />
-            </>
-          )}
-          {scoreString}
-        </>
-      ),
+  const content = useMemo(
+    () => (
+      <>
+        {index !== 0 && (
+          <>
+            {','}
+            <Spacer />
+          </>
+        )}
+        {scoreString}
+      </>
+    ),
     [index, scoreString]
   );
 
@@ -67,12 +61,11 @@ export const DraggableScoreComponent = ({
     <DraggableWrapper
       key={`draggable-score-draggable-wrapper-${id}`}
       dataProvider={dataProviderProp}
-      render={render}
-    />
+    >
+      {content}
+    </DraggableWrapper>
   );
 };
-
-DraggableScoreComponent.displayName = 'DraggableScoreComponent';
 
 export const DraggableScore = React.memo(DraggableScoreComponent);
 

@@ -8,16 +8,12 @@ import numeral from '@elastic/numeral';
 import React from 'react';
 
 import { NetworkDnsFields, NetworkDnsItem } from '../../../../common/search_strategy';
-import {
-  DragEffects,
-  DraggableWrapper,
-} from '../../../common/components/drag_and_drop/draggable_wrapper';
+import { DraggableWrapper } from '../../../common/components/drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../../../common/components/empty_value';
 import { Columns } from '../../../common/components/paginated_table';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { PreferenceFormattedBytes } from '../../../common/components/formatted_bytes';
-import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
 
 import * as i18n from './translations';
 export type NetworkDnsColumns = [
@@ -54,16 +50,9 @@ export const getNetworkDnsColumns = (): NetworkDnsColumns => [
                 operator: IS_OPERATOR,
               },
             }}
-            render={(dataProvider, _, snapshot) =>
-              snapshot.isDragging ? (
-                <DragEffects>
-                  <Provider dataProvider={dataProvider} />
-                </DragEffects>
-              ) : (
-                defaultToEmptyTag(dnsName)
-              )
-            }
-          />
+          >
+            {defaultToEmptyTag(dnsName)}
+          </DraggableWrapper>
         );
       } else {
         return getEmptyTagValue();

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiDraggable } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { Draggable } from 'react-beautiful-dnd';
 import { Resizable, ResizeCallback } from 're-resizable';
 import deepEqual from 'fast-deep-equal';
 
@@ -109,7 +109,7 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
       handleComponent={resizableHandleComponent}
       onResizeStop={handleResizeStop}
     >
-      <Draggable
+      <EuiDraggable
         data-test-subj="draggable"
         // Required for drag events while hovering the sort button to work: https://github.com/atlassian/react-beautiful-dnd/blob/master/docs/api/draggable.md#interactive-child-elements-within-a-draggable-
         disableInteractiveElementBlocking
@@ -118,7 +118,7 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
         key={header.id}
       >
         {DraggableContent}
-      </Draggable>
+      </EuiDraggable>
     </Resizable>
   );
 };

@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiDroppable } from '@elastic/eui';
 import { rgba } from 'polished';
 import React, { useCallback } from 'react';
-import { Droppable, DraggableChildrenFn } from 'react-beautiful-dnd';
+import { DraggableChildrenFn } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 
 interface Props {
@@ -113,7 +114,7 @@ export const DroppableWrapper = React.memo<Props>(
     );
 
     return (
-      <Droppable
+      <EuiDroppable
         isDropDisabled={isDropDisabled}
         droppableId={droppableId}
         direction={'horizontal'}
@@ -121,7 +122,7 @@ export const DroppableWrapper = React.memo<Props>(
         renderClone={renderClone}
       >
         {DroppableContent}
-      </Droppable>
+      </EuiDroppable>
     );
   }
 );

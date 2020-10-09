@@ -6,17 +6,13 @@
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { get } from 'lodash/fp';
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import { Ecs } from '../../../../../../../common/ecs';
-import {
-  DragEffects,
-  DraggableWrapper,
-} from '../../../../../../common/components/drag_and_drop/draggable_wrapper';
+import { DraggableWrapper } from '../../../../../../common/components/drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../../../../common/components/drag_and_drop/helpers';
 import { GoogleLink, ReputationLink } from '../../../../../../common/components/links';
-import { Provider } from '../../../data_providers/provider';
 import { IS_OPERATOR, QueryOperator } from '../../../data_providers/data_provider';
 
 import * as i18n from './translations';
@@ -86,25 +82,20 @@ export const DraggableZeekElement = React.memo<{
     [field, id, value]
   );
 
-  const render = useCallback(
-    (dataProvider, _, snapshot) =>
-      snapshot.isDragging ? (
-        <DragEffects>
-          <Provider dataProvider={dataProvider} />
-        </DragEffects>
-      ) : (
-        <EuiToolTip data-test-subj="badge-tooltip" content={field}>
-          <Badge iconType="tag" color="hollow" title="">
-            {stringRenderer(value!)}
-          </Badge>
-        </EuiToolTip>
-      ),
+  const content = useMemo(
+    () => (
+      <EuiToolTip data-test-subj="badge-tooltip" content={field}>
+        <Badge iconType="tag" color="hollow" title="">
+          {stringRenderer(value!)}
+        </Badge>
+      </EuiToolTip>
+    ),
     [field, stringRenderer, value]
   );
 
   return value != null ? (
     <TokensFlexItem grow={false}>
-      <DraggableWrapper dataProvider={dataProviderProp} render={render} />
+      <DraggableWrapper dataProvider={dataProviderProp}>{content}</DraggableWrapper>
     </TokensFlexItem>
   ) : null;
 });

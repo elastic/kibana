@@ -16,15 +16,11 @@ import {
   TopNetworkTablesEcsField,
 } from '../../../../common/search_strategy/security_solution/network';
 import { networkModel } from '../../store';
-import {
-  DragEffects,
-  DraggableWrapper,
-} from '../../../common/components/drag_and_drop/draggable_wrapper';
+import { DraggableWrapper } from '../../../common/components/drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { Columns } from '../../../common/components/paginated_table';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
 import * as i18n from './translations';
 import { PreferenceFormattedBytes } from '../../../common/components/formatted_bytes';
 
@@ -70,18 +66,9 @@ export const getNetworkTopCountriesColumns = (
               kqlQuery: '',
               queryMatch: { field: geoAttr, value: geo, operator: IS_OPERATOR },
             }}
-            render={(dataProvider, _, snapshot) =>
-              snapshot.isDragging ? (
-                <DragEffects>
-                  <Provider dataProvider={dataProvider} />
-                </DragEffects>
-              ) : (
-                <>
-                  <CountryFlagAndName countryCode={geo} />
-                </>
-              )
-            }
-          />
+          >
+            <CountryFlagAndName countryCode={geo} />
+          </DraggableWrapper>
         );
       } else {
         return getEmptyTagValue();

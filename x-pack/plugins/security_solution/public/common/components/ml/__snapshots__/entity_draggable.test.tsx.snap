@@ -18,6 +18,7 @@ exports[`entity_draggable renders correctly against snapshot 1`] = `
     }
   }
   key="entity-draggable-id-prefix-entity-name-entity-value"
-  render={[Function]}
-/>
+>
+  entity-name: "entity-value"
+</DraggableWrapper>
 `;

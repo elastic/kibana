@@ -20,7 +20,10 @@ exports[`empty_column_renderer renders correctly against snapshot 1`] = `
       }
     }
     key="empty-column-renderer-draggable-wrapper-test-source.ip-1-source.ip"
-    render={[Function]}
-  />
+  >
+    <span>
+      —
+    </span>
+  </DraggableWrapper>
 </span>
 `;

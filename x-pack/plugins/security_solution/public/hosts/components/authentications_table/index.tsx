@@ -13,17 +13,13 @@ import { connect, ConnectedProps } from 'react-redux';
 import { AuthenticationsEdges } from '../../../../common/search_strategy/security_solution/hosts/authentications';
 
 import { State } from '../../../common/store';
-import {
-  DragEffects,
-  DraggableWrapper,
-} from '../../../common/components/drag_and_drop/draggable_wrapper';
+import { DraggableWrapper } from '../../../common/components/drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { HostDetailsLink, NetworkDetailsLink } from '../../../common/components/links';
 import { Columns, ItemsPerRow, PaginatedTable } from '../../../common/components/paginated_table';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
 import { getRowItemDraggables } from '../../../common/components/tables/helpers';
 
 import { hostsActions, hostsModel, hostsSelectors } from '../../store';
@@ -187,16 +183,9 @@ const getAuthenticationColumns = (): AuthTableColumns => [
               operator: IS_OPERATOR,
             },
           }}
-          render={(dataProvider, _, snapshot) =>
-            snapshot.isDragging ? (
-              <DragEffects>
-                <Provider dataProvider={dataProvider} />
-              </DragEffects>
-            ) : (
-              node.successes
-            )
-          }
-        />
+        >
+          {node.successes}
+        </DraggableWrapper>
       );
     },
     width: '8%',
@@ -225,16 +214,9 @@ const getAuthenticationColumns = (): AuthTableColumns => [
               operator: IS_OPERATOR,
             },
           }}
-          render={(dataProvider, _, snapshot) =>
-            snapshot.isDragging ? (
-              <DragEffects>
-                <Provider dataProvider={dataProvider} />
-              </DragEffects>
-            ) : (
-              node.failures
-            )
-          }
-        />
+        >
+          {node.failures}
+        </DraggableWrapper>
       );
     },
     width: '8%',

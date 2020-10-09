@@ -5,12 +5,9 @@
  */
 
 import { isArray, isEmpty, isString, uniq } from 'lodash/fp';
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 
-import {
-  DragEffects,
-  DraggableWrapper,
-} from '../../../common/components/drag_and_drop/draggable_wrapper';
+import { DraggableWrapper } from '../../../common/components/drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
 import { Content } from '../../../common/components/draggables';
 import { getOrEmptyTagFromValue } from '../../../common/components/empty_value';
@@ -20,7 +17,6 @@ import {
   DataProvider,
   IS_OPERATOR,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
 
 const getUniqueId = ({
   contextId,
@@ -89,27 +85,18 @@ const NonDecoratedIpComponent: React.FC<{
     [contextId, eventId, fieldName, value]
   );
 
-  const render = useCallback(
-    (dataProvider, _, snapshot) =>
-      snapshot.isDragging ? (
-        <DragEffects>
-          <Provider dataProvider={dataProvider} />
-        </DragEffects>
-      ) : typeof value !== 'object' ? (
-        getOrEmptyTagFromValue(value)
-      ) : (
-        getOrEmptyTagFromValue(tryStringify(value))
-      ),
+  const content = useMemo(
+    () =>
+      typeof value !== 'object'
+        ? getOrEmptyTagFromValue(value)
+        : getOrEmptyTagFromValue(tryStringify(value)),
     [value]
   );
 
   return (
-    <DraggableWrapper
-      dataProvider={dataProviderProp}
-      key={key}
-      render={render}
-      truncate={truncate}
-    />
+    <DraggableWrapper dataProvider={dataProviderProp} key={key} truncate={truncate}>
+      {content}
+    </DraggableWrapper>
   );
 };
 
@@ -142,27 +129,19 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
     [address, contextId, eventId, fieldName]
   );
 
-  const render = useCallback(
-    (_props, _provided, snapshot) =>
-      snapshot.isDragging ? (
-        <DragEffects>
-          <Provider dataProvider={dataProviderProp} />
-        </DragEffects>
-      ) : (
-        <Content field={fieldName} tooltipContent={address}>
-          <NetworkDetailsLink data-test-subj="network-details" ip={address} />
-        </Content>
-      ),
-    [address, dataProviderProp, fieldName]
+  const content = useMemo(
+    () => (
+      <Content field={fieldName} tooltipContent={address}>
+        <NetworkDetailsLink data-test-subj="network-details" ip={address} />
+      </Content>
+    ),
+    [address, fieldName]
   );
 
   return (
-    <DraggableWrapper
-      dataProvider={dataProviderProp}
-      key={key}
-      render={render}
-      truncate={truncate}
-    />
+    <DraggableWrapper dataProvider={dataProviderProp} key={key} truncate={truncate}>
+      {content}
+    </DraggableWrapper>
   );
 };
 

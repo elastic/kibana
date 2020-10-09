@@ -29,9 +29,12 @@ exports[`Columns it renders the expected columns 1`] = `
           }
         }
         key="empty-column-renderer-draggable-wrapper-test-message-1-message"
-        render={[Function]}
         truncate={true}
-      />
+      >
+        <span>
+          —
+        </span>
+      </DraggableWrapper>
     </styled.div>
   </styled.div>
   <styled.div

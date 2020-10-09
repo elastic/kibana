@@ -58,8 +58,18 @@ exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1
       },
     }
   }
-  render={[Function]}
-/>
+>
+  <Content
+    field="host.name"
+    value="raspberrypi"
+  >
+    <Memo(HostDetailsLinkComponent)
+      hostName="raspberrypi"
+    >
+      raspberrypi
+    </Memo(HostDetailsLinkComponent)>
+  </Content>
+</DraggableWrapper>
 `;
 
 exports[`Field Renderers #hostNameRenderer it renders correctly against snapshot 1`] = `
@@ -79,8 +89,18 @@ exports[`Field Renderers #hostNameRenderer it renders correctly against snapshot
       },
     }
   }
-  render={[Function]}
-/>
+>
+  <Content
+    field="host.name"
+    value="raspberrypi"
+  >
+    <Memo(HostDetailsLinkComponent)
+      hostName="raspberrypi"
+    >
+      raspberrypi
+    </Memo(HostDetailsLinkComponent)>
+  </Content>
+</DraggableWrapper>
 `;
 
 exports[`Field Renderers #locationRenderer it renders correctly against snapshot 1`] = `

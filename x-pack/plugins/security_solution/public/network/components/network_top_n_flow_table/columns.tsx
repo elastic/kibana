@@ -16,16 +16,12 @@ import {
   TopNetworkTablesEcsField,
 } from '../../../../common/search_strategy';
 import { networkModel } from '../../store';
-import {
-  DragEffects,
-  DraggableWrapper,
-} from '../../../common/components/drag_and_drop/draggable_wrapper';
+import { DraggableWrapper } from '../../../common/components/drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { NetworkDetailsLink } from '../../../common/components/links';
 import { Columns } from '../../../common/components/paginated_table';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
 import * as i18n from './translations';
 import {
   getRowItemDraggable,
@@ -80,16 +76,9 @@ export const getNetworkTopNFlowColumns = (
                 kqlQuery: '',
                 queryMatch: { field: ipAttr, value: ip, operator: IS_OPERATOR },
               }}
-              render={(dataProvider, _, snapshot) =>
-                snapshot.isDragging ? (
-                  <DragEffects>
-                    <Provider dataProvider={dataProvider} />
-                  </DragEffects>
-                ) : (
-                  <NetworkDetailsLink ip={ip} flowTarget={flowTarget} />
-                )
-              }
-            />
+            >
+              <NetworkDetailsLink ip={ip} flowTarget={flowTarget} />
+            </DraggableWrapper>
 
             {geo && (
               <DraggableWrapper
@@ -103,19 +92,12 @@ export const getNetworkTopNFlowColumns = (
                   kqlQuery: '',
                   queryMatch: { field: geoAttrName, value: geo, operator: IS_OPERATOR },
                 }}
-                render={(dataProvider, _, snapshot) =>
-                  snapshot.isDragging ? (
-                    <DragEffects>
-                      <Provider dataProvider={dataProvider} />
-                    </DragEffects>
-                  ) : (
-                    <>
-                      {' '}
-                      <CountryFlag countryCode={geo} /> {geo}
-                    </>
-                  )
-                }
-              />
+              >
+                <>
+                  {' '}
+                  <CountryFlag countryCode={geo} /> {geo}
+                </>
+              </DraggableWrapper>
             )}
           </>
         );

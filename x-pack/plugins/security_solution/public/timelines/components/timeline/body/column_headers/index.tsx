@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonIcon, EuiCheckbox, EuiToolTip } from '@elastic/eui';
+import { EuiDroppable, EuiButtonIcon, EuiCheckbox, EuiToolTip } from '@elastic/eui';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Droppable, DraggableChildrenFn } from 'react-beautiful-dnd';
+import { DraggableChildrenFn } from 'react-beautiful-dnd';
 import deepEqual from 'fast-deep-equal';
 
-import { DragEffects } from '../../../../../common/components/drag_and_drop/draggable_wrapper';
 import { DraggableFieldBadge } from '../../../../../common/components/draggables/field_badge';
 import { BrowserFields } from '../../../../../common/containers/source';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
@@ -159,9 +158,7 @@ export const ColumnHeadersComponent = ({
           ref={dragProvided.innerRef}
         >
           <DraggableContainer onMount={onMount} onUnmount={onUnmount}>
-            <DragEffects>
-              <DraggableFieldBadge fieldId={header.id} fieldWidth={header.width} />
-            </DragEffects>
+            <DraggableFieldBadge fieldId={header.id} fieldWidth={header.width} />
           </DraggableContainer>
         </EventsTh>
       );
@@ -284,7 +281,7 @@ export const ColumnHeadersComponent = ({
           )}
         </EventsThGroupActions>
 
-        <Droppable
+        <EuiDroppable
           direction={'horizontal'}
           droppableId={`${droppableTimelineColumnsPrefix}${timelineId}`}
           isDropDisabled={false}
@@ -292,7 +289,7 @@ export const ColumnHeadersComponent = ({
           renderClone={renderClone}
         >
           {DroppableContent}
-        </Droppable>
+        </EuiDroppable>
       </EventsTrHeader>
     </EventsThead>
   );

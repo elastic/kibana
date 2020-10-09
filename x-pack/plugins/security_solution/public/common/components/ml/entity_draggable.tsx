@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { DraggableWrapper, DragEffects } from '../drag_and_drop/draggable_wrapper';
+import React, { useMemo } from 'react';
+import { DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
 import {
   IS_OPERATOR,
   QueryOperator,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 
 interface Props {
@@ -43,19 +42,16 @@ export const EntityDraggableComponent: React.FC<Props> = ({
     [entityName, entityValue, id]
   );
 
-  const render = useCallback(
-    (dataProvider, _, snapshot) =>
-      snapshot.isDragging ? (
-        <DragEffects>
-          <Provider dataProvider={dataProvider} />
-        </DragEffects>
-      ) : (
-        <>{`${entityName}: "${entityValue}"`}</>
-      ),
-    [entityName, entityValue]
-  );
+  const content = useMemo(() => <>{`${entityName}: "${entityValue}"`}</>, [
+    entityName,
+    entityValue,
+  ]);
 
-  return <DraggableWrapper key={id} dataProvider={dataProviderProp} render={render} />;
+  return (
+    <DraggableWrapper key={id} dataProvider={dataProviderProp}>
+      {content}
+    </DraggableWrapper>
+  );
 };
 
 EntityDraggableComponent.displayName = 'EntityDraggableComponent';

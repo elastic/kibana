@@ -5,18 +5,13 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import {
-  Draggable,
-  DraggableProvided,
-  DraggableStateSnapshot,
-  DraggingStyle,
-  Droppable,
-  NotDraggingStyle,
-} from 'react-beautiful-dnd';
+import { DraggableStateSnapshot, DraggingStyle, NotDraggingStyle } from 'react-beautiful-dnd';
+import { EuiDraggable, EuiDroppable } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { dragAndDropActions } from '../../store/drag_and_drop';
+import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
 import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../../../timelines/components/row_renderers_browser/constants';
 
@@ -25,11 +20,6 @@ import { WithHoverActions } from '../with_hover_actions';
 import { DraggableWrapperHoverContent, useGetTimelineId } from './draggable_wrapper_hover_content';
 import { getDraggableId, getDroppableId } from './helpers';
 import { ProviderContainer } from './provider_container';
-
-// As right now, we do not know what we want there, we will keep it as a placeholder
-export const DragEffects = styled.div``;
-
-DragEffects.displayName = 'DragEffects';
 
 /**
  * Wraps the `react-beautiful-dnd` error boundary. See also:
@@ -80,17 +70,11 @@ const ProviderContentWrapper = styled.span`
   }
 `;
 
-type RenderFunctionProp = (
-  props: DataProvider,
-  provided: DraggableProvided,
-  state: DraggableStateSnapshot
-) => React.ReactNode;
-
 interface Props {
+  children: React.ReactNode;
   dataProvider: DataProvider;
   disabled?: boolean;
   inline?: boolean;
-  render: RenderFunctionProp;
   timelineId?: string;
   truncate?: boolean;
   onFilterAdded?: () => void;
@@ -116,9 +100,9 @@ export const getStyle = (
 };
 
 const DraggableWrapperComponent: React.FC<Props> = ({
+  children,
   dataProvider,
   onFilterAdded,
-  render,
   timelineId,
   truncate,
 }) => {
@@ -209,75 +193,62 @@ const DraggableWrapperComponent: React.FC<Props> = ({
           <ProviderContentWrapper
             data-test-subj={`draggable-content-${dataProvider.queryMatch.field}`}
           >
-            {render(dataProvider, provided, snapshot)}
+            <Provider dataProvider={dataProvider} />
           </ProviderContentWrapper>
         </div>
       </ConditionalPortal>
     ),
-    [dataProvider, registerProvider, render]
+    [dataProvider, registerProvider]
   );
 
-  const DraggableContent = useCallback(
-    (provided, snapshot) => (
+  const DraggableContent = useMemo(
+    () => (
       <ProviderContainer
-        {...provided.draggableProps}
-        {...provided.dragHandleProps}
         ref={(e: HTMLDivElement) => {
-          provided.innerRef(e);
           draggableRef.current = e;
         }}
         data-test-subj="providerContainer"
-        isDragging={snapshot.isDragging}
         registerProvider={registerProvider}
       >
-        {truncate && !snapshot.isDragging ? (
+        {truncate ? (
           <TruncatableText data-test-subj="draggable-truncatable-content">
-            {render(dataProvider, provided, snapshot)}
+            {children}
           </TruncatableText>
         ) : (
           <ProviderContentWrapper
             data-test-subj={`draggable-content-${dataProvider.queryMatch.field}`}
           >
-            {render(dataProvider, provided, snapshot)}
+            {children}
           </ProviderContentWrapper>
         )}
       </ProviderContainer>
     ),
-    [dataProvider, registerProvider, render, truncate]
-  );
-
-  const DroppableContent = useCallback(
-    (droppableProvided) => (
-      <div ref={droppableProvided.innerRef} {...droppableProvided.droppableProps}>
-        <Draggable
-          draggableId={getDraggableId(dataProvider.id)}
-          index={0}
-          key={getDraggableId(dataProvider.id)}
-          isDragDisabled={isDisabled}
-        >
-          {DraggableContent}
-        </Draggable>
-        {droppableProvided.placeholder}
-      </div>
-    ),
-    [DraggableContent, dataProvider.id, isDisabled]
+    [children, dataProvider, registerProvider, truncate]
   );
 
   const content = useMemo(
     () => (
       <Wrapper data-test-subj="draggableWrapperDiv" disabled={isDisabled}>
         <DragDropErrorBoundary>
-          <Droppable
+          <EuiDroppable
             isDropDisabled={true}
             droppableId={getDroppableId(dataProvider.id)}
             renderClone={RenderClone}
+            cloneDraggables={true}
           >
-            {DroppableContent}
-          </Droppable>
+            <EuiDraggable
+              draggableId={getDraggableId(dataProvider.id)}
+              index={0}
+              key={getDraggableId(dataProvider.id)}
+              isDragDisabled={isDisabled}
+            >
+              {DraggableContent}
+            </EuiDraggable>
+          </EuiDroppable>
         </DragDropErrorBoundary>
       </Wrapper>
     ),
-    [DroppableContent, RenderClone, dataProvider.id, isDisabled]
+    [DraggableContent, RenderClone, dataProvider.id, isDisabled]
   );
 
   const renderContent = useCallback(() => content, [content]);

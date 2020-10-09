@@ -8,6 +8,7 @@
 
 import {
   EuiCheckbox,
+  EuiDraggable,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -16,13 +17,11 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import React from 'react';
-import { Draggable } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
 import { ToStringArray } from '../../../graphql/types';
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
-import { DragEffects } from '../drag_and_drop/draggable_wrapper';
 import { DroppableWrapper } from '../drag_and_drop/droppable_wrapper';
 import { getDroppableId, getDraggableFieldId, DRAG_TYPE_FIELD } from '../drag_and_drop/helpers';
 import { DraggableFieldBadge } from '../draggables/field_badge';
@@ -119,13 +118,11 @@ export const getColumns = ({
                 {...provided.dragHandleProps}
                 ref={provided.innerRef}
               >
-                <DragEffects>
-                  <DraggableFieldBadge fieldId={field} />
-                </DragEffects>
+                <DraggableFieldBadge fieldId={field} />
               </div>
             )}
           >
-            <Draggable
+            <EuiDraggable
               draggableId={getDraggableFieldId({
                 contextId: `event-details-field-draggable-${contextId}-${eventId}-${data.category}-${field}`,
                 fieldId: field,
@@ -150,7 +147,7 @@ export const getColumns = ({
                   />
                 </div>
               )}
-            </Draggable>
+            </EuiDraggable>
           </DroppableWrapper>
         </EuiFlexItem>
       </EuiFlexGroup>

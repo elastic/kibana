@@ -4,10 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormHelpText, EuiSpacer } from '@elastic/eui';
+import {
+  EuiDraggable,
+  EuiDroppable,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormHelpText,
+  EuiSpacer,
+} from '@elastic/eui';
 import { rgba } from 'polished';
 import React, { useCallback, useMemo } from 'react';
-import { Draggable, DraggingStyle, Droppable, NotDraggingStyle } from 'react-beautiful-dnd';
+import { DraggingStyle, NotDraggingStyle } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
@@ -289,14 +296,14 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
     );
 
     return (
-      <Draggable
+      <EuiDraggable
         disableInteractiveElementBlocking={true}
         draggableId={draggableId}
         index={index}
         key={dataProvider.id}
       >
         {DraggableContent}
-      </Draggable>
+      </EuiDraggable>
     );
   }
 );
@@ -332,16 +339,13 @@ const DataProvidersGroup = React.memo<DataProvidersGroup>(
       [browserFields, group, groupIndex, timelineId]
     );
 
-    const DroppableContent = useCallback(
-      (droppableProvided) => (
+    const DroppableContent = useMemo(
+      () => (
         <DroppableContainer
           className={isLastGroup ? EMPTY_PROVIDERS_GROUP_CLASS_NAME : ''}
-          ref={droppableProvided.innerRef}
           style={listStyle}
-          {...droppableProvided.droppableProps}
         >
           {GroupDataProviders}
-          {droppableProvided.placeholder}
         </DroppableContainer>
       ),
       [GroupDataProviders, isLastGroup]
@@ -361,9 +365,9 @@ const DataProvidersGroup = React.memo<DataProvidersGroup>(
             <Parens>{'('}</Parens>
           </ParensContainer>
           <EuiFlexItem grow={false}>
-            <Droppable droppableId={droppableId} direction="horizontal">
+            <EuiDroppable droppableId={droppableId} direction="horizontal">
               {DroppableContent}
-            </Droppable>
+            </EuiDroppable>
           </EuiFlexItem>
           <ParensContainer grow={false}>
             <Parens>{')'}</Parens>

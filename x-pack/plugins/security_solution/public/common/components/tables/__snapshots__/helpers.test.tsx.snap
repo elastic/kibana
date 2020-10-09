@@ -19,8 +19,9 @@ exports[`Table Helpers #getRowItemDraggable it returns correctly against snapsho
     }
   }
   key="idPrefix-attrName-item1"
-  render={[Function]}
-/>
+>
+  item1
+</DraggableWrapper>
 `;
 
 exports[`Table Helpers #getRowItemDraggables it returns correctly against snapshot 1`] = `
@@ -45,8 +46,9 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
       }
     }
     key="idPrefix-attrName-item1-0"
-    render={[Function]}
-  />
+  >
+    item1
+  </DraggableWrapper>
   ,
   <Spacer />
   <DraggableWrapper
@@ -67,8 +69,9 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
       }
     }
     key="idPrefix-attrName-item2-1"
-    render={[Function]}
-  />
+  >
+    item2
+  </DraggableWrapper>
   ,
   <Spacer />
   <DraggableWrapper
@@ -89,8 +92,9 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
       }
     }
     key="idPrefix-attrName-item3-2"
-    render={[Function]}
-  />
+  >
+    item3
+  </DraggableWrapper>
    
 </DragDropContext>
 `;

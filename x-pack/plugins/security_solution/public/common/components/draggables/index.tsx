@@ -5,17 +5,16 @@
  */
 
 import { EuiBadge, EuiToolTip, IconType } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
-import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
+import { DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { getEmptyStringTag } from '../empty_value';
 import {
   DataProvider,
   IS_OPERATOR,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
 
 export interface DefaultDraggableType {
   id: string;
@@ -105,28 +104,14 @@ export const DefaultDraggable = React.memo<DefaultDraggableType>(
       [field, id, name, queryValue, value]
     );
 
-    const renderCallback = useCallback(
-      (dataProvider, _, snapshot) =>
-        snapshot.isDragging ? (
-          <DragEffects>
-            <Provider dataProvider={dataProvider} />
-          </DragEffects>
-        ) : (
-          <Content field={field} tooltipContent={tooltipContent} value={value}>
-            {children}
-          </Content>
-        ),
-      [children, field, tooltipContent, value]
-    );
-
     if (value == null) return null;
 
     return (
-      <DraggableWrapper
-        dataProvider={dataProviderProp}
-        render={renderCallback}
-        timelineId={timelineId}
-      />
+      <DraggableWrapper dataProvider={dataProviderProp} timelineId={timelineId}>
+        <Content field={field} tooltipContent={tooltipContent} value={value}>
+          {children}
+        </Content>
+      </DraggableWrapper>
     );
   }
 );

@@ -18,8 +18,9 @@ exports[`draggable_score renders correctly against snapshot 1`] = `
     }
   }
   key="draggable-score-draggable-wrapper-some-id"
-  render={[Function]}
-/>
+>
+  17
+</DraggableWrapper>
 `;
 
 exports[`draggable_score renders correctly against snapshot when the index is not included 1`] = `
@@ -40,6 +41,7 @@ exports[`draggable_score renders correctly against snapshot when the index is no
     }
   }
   key="draggable-score-draggable-wrapper-some-id"
-  render={[Function]}
-/>
+>
+  17
+</DraggableWrapper>
 `;

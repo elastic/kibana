@@ -6,16 +6,12 @@
 
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import {
-  DragEffects,
-  DraggableWrapper,
-} from '../../../common/components/drag_and_drop/draggable_wrapper';
+import { DraggableWrapper } from '../../../common/components/drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { HostDetailsLink } from '../../../common/components/links';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
 import {
   AddFilterToGlobalSearchBar,
   createFilter,
@@ -46,16 +42,9 @@ export const getHostsColumns = (): HostsTableColumns => [
               kqlQuery: '',
               queryMatch: { field: 'host.name', value: hostName[0], operator: IS_OPERATOR },
             }}
-            render={(dataProvider, _, snapshot) =>
-              snapshot.isDragging ? (
-                <DragEffects>
-                  <Provider dataProvider={dataProvider} />
-                </DragEffects>
-              ) : (
-                <HostDetailsLink hostName={hostName[0]} />
-              )
-            }
-          />
+          >
+            <HostDetailsLink hostName={hostName[0]} />
+          </DraggableWrapper>
         );
       }
       return getEmptyTagValue();
