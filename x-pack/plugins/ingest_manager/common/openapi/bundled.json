@@ -1425,50 +1425,6 @@
       "new_package_policy": {
         "title": "NewPackagePolicy",
         "type": "object",
-        "x-examples": {
-          "example-1": {
-            "enabled": true,
-            "title": "This is a nice title for human",
-            "package": {
-              "name": "epm/nginx",
-              "version": "1.7.0"
-            },
-            "namespace": "prod",
-            "use_output": "long_term_storage",
-            "inputs": [
-              {
-                "type": "logs",
-                "streams": [
-                  {
-                    "enabled": true,
-                    "dataset": "nginx.acccess",
-                    "paths": [
-                      "/var/log/nginx/access.log"
-                    ]
-                  },
-                  {
-                    "enabled": true,
-                    "dataset": "nginx.error",
-                    "paths": [
-                      "/var/log/nginx/error.log"
-                    ]
-                  }
-                ]
-              },
-              {
-                "type": "nginx/metrics",
-                "streams": [
-                  {
-                    "id": "id string",
-                    "enabled": true,
-                    "dataset": "nginx.stub_status",
-                    "metricset": "stub_status"
-                  }
-                ]
-              }
-            ]
-          }
-        },
         "description": "",
         "properties": {
           "enabled": {
