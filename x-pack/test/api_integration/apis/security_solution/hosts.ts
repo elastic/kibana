@@ -21,7 +21,6 @@ const HOST_NAME = 'Ubuntu';
 const TOTAL_COUNT = 7;
 const EDGE_LENGTH = 1;
 const CURSOR_ID = '2ab45fc1c41e4c84bbd02202a7e5761f';
-const AGENT_ID = '4348052a-b8d2-4577-bca6-aeb71de81993';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -96,11 +95,6 @@ export default function ({ getService }: FtrProviderContext) {
     it('Make sure that we get Host details data', async () => {
       const expectedHostDetails = {
         _id: 'zeek-sensor-san-francisco',
-        endpoint: null,
-        agent: {
-          id: AGENT_ID,
-          __typename: 'AgentFields',
-        },
         host: {
           architecture: ['x86_64'],
           id: [CURSOR_ID],
