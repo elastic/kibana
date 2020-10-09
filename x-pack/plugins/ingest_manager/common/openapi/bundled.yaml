@@ -1268,9 +1268,7 @@ components:
         policy_id:
           type: string
         policy_revision:
-          type:
-            - number
-            - 'null'
+          type: number
         last_checkin:
           type: string
         user_provided_metadata:
