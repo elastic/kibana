@@ -36,8 +36,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { getDefaultQueryLanguage } from './lib/get_default_query_language';
-import { QueryBarWrapper } from './query_bar_wrapper';
+import { SeriesConfigQueryBarWithIgnoreGlobalFilter } from './series_config_query_bar_with_ignore_global_filter';
 
 export const SeriesConfig = (props) => {
   const defaults = { offset_time: '', value_template: '' };
@@ -56,28 +55,12 @@ export const SeriesConfig = (props) => {
 
       <EuiHorizontalRule margin="s" />
 
-      <EuiFormRow
-        id={htmlId('series_filter')}
-        label={
-          <FormattedMessage
-            id="visTypeTimeseries.seriesConfig.filterLabel"
-            defaultMessage="Filter"
-          />
-        }
-        fullWidth
-      >
-        <QueryBarWrapper
-          query={{
-            language:
-              model.filter && model.filter.language
-                ? model.filter.language
-                : getDefaultQueryLanguage(),
-            query: model.filter && model.filter.query ? model.filter.query : '',
-          }}
-          onChange={(filter) => props.onChange({ filter })}
-          indexPatterns={[seriesIndexPattern]}
-        />
-      </EuiFormRow>
+      <SeriesConfigQueryBarWithIgnoreGlobalFilter
+        model={model}
+        onChange={props.onChange}
+        panel={props.panel}
+        indexPatternForQuery={seriesIndexPattern}
+      />
 
       <EuiHorizontalRule margin="s" />
 
@@ -162,6 +145,7 @@ export const SeriesConfig = (props) => {
 
 SeriesConfig.propTypes = {
   fields: PropTypes.object,
+  panel: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
   indexPatternForQuery: PropTypes.string,
