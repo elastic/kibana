@@ -19,13 +19,13 @@
 import { IUiSettingsClient } from 'kibana/public';
 import { getSortForSearchSource } from '../angular/doc_table';
 import { SAMPLE_SIZE_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../common';
-import { IndexPattern, SearchSource } from '../../../../data/common/';
+import { IndexPattern, ISearchSource } from '../../../../data/common/';
 import { AppState } from '../angular/discover_state';
 import { SortOrder } from '../../saved_searches/types';
 import { DataPublicPluginStart } from '../../../../data/public';
 
 export function updateSearchSource(
-  searchSource: SearchSource,
+  searchSource: ISearchSource,
   {
     state,
     indexPattern,

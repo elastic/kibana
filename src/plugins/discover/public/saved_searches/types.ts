@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { ISearchSource } from '../../../data/public';
+import { SearchSource } from '../../../data/public';
 import { SavedObjectSaveOpts } from '../../../saved_objects/public';
 
 export type SortOrder = [string, string];
 export interface SavedSearch {
   readonly id: string;
   title: string;
-  searchSource: ISearchSource;
+  searchSource: SearchSource;
   description?: string;
   columns: string[];
   sort: SortOrder[];
