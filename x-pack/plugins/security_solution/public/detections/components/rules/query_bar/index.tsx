@@ -46,7 +46,7 @@ interface QueryBarDefineRuleProps {
   onCloseTimelineSearch: () => void;
   openTimelineSearch: boolean;
   resizeParentContainer?: (height: number) => void;
-  onError: (arg: boolean) => void;
+  onError?: (arg: boolean) => void;
 }
 
 const StyledEuiFormRow = styled(EuiFormRow)`
