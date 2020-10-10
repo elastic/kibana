@@ -54,13 +54,14 @@ import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/pub
 import { deleteColumn } from './state_helpers';
 import { Datasource, StateSetter } from '../index';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
+import { Dragging } from '../drag_drop/providers';
 
 export { OperationType, IndexPatternColumn } from './operations';
 
-export interface DraggedField {
+export type DraggedField = Dragging & {
   field: IndexPatternField;
   indexPatternId: string;
-}
+};
 
 export function columnToOperation(column: IndexPatternColumn, uniqueLabel?: string): Operation {
   const { dataType, label, isBucketed, scale } = column;

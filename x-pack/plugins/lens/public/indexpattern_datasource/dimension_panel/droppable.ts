@@ -45,9 +45,40 @@ export function canHandleDrop(props: DatasourceDimensionDropProps<IndexPatternPr
   return false;
 }
 
+function reorderElements(items: string[], dest: string, src: string) {
+  const result = items.filter((c) => c !== src);
+  const destIndex = items.findIndex((c) => c === src);
+  const destPosition = result.indexOf(dest);
+
+  const srcIndex = items.findIndex((c) => c === dest);
+
+  result.splice(destIndex < srcIndex ? destPosition + 1 : destPosition, 0, src);
+  return result;
+}
+
 export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPrivateState>) {
   const operationSupportMatrix = getOperationSupportMatrix(props);
   const droppedItem = props.droppedItem;
+
+  if (isDraggedOperation(droppedItem) && props.isReorder) {
+    const { setState, state, layerId, columnId } = props;
+
+    const dragged = droppedItem.columnId;
+    const dropped = columnId;
+    const layer = state.layers[layerId];
+
+    setState(
+      mergeLayer({
+        state,
+        layerId,
+        newLayer: {
+          columnOrder: reorderElements(layer.columnOrder, dropped, dragged),
+        },
+      })
+    );
+
+    return true;
+  }
 
   function hasOperationForField(field: IndexPatternField) {
     return Boolean(operationSupportMatrix.operationByField[field.name]);

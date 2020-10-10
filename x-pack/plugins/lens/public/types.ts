@@ -267,6 +267,7 @@ export type DatasourceDimensionDropProps<T> = SharedDimensionProps & {
   state: T;
   setState: StateSetter<T>;
   dragDropContext: DragContextState;
+  isReorder?: boolean;
 };
 
 export type DatasourceDimensionDropHandlerProps<T> = DatasourceDimensionDropProps<T> & {

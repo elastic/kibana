@@ -39,7 +39,8 @@ export function isDraggedField(fieldCandidate: unknown): fieldCandidate is Dragg
     typeof fieldCandidate === 'object' &&
     fieldCandidate !== null &&
     'field' in fieldCandidate &&
-    'indexPatternId' in fieldCandidate
+    'indexPatternId' in fieldCandidate &&
+    'id' in fieldCandidate
   );
 }
 

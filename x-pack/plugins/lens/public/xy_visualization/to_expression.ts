@@ -85,9 +85,25 @@ export const buildExpression = (
   datasourceLayers?: Record<string, DatasourcePublicAPI>,
   attributes: Partial<{ title: string; description: string }> = {}
 ): Ast | null => {
-  const validLayers = state.layers.filter((layer): layer is ValidLayer =>
-    Boolean(layer.accessors.length)
-  );
+  const validLayers = state.layers
+    .filter((layer): layer is ValidLayer => Boolean(layer.accessors.length))
+    .map((layer) => {
+      if (!datasourceLayers) {
+        return layer;
+      }
+      const datasource = datasourceLayers[layer.layerId];
+      const originalOrder = datasource
+        .getTableSpec()
+        .map(({ columnId }) => columnId)
+        .filter((columnId) => layer.accessors.includes(columnId));
+      const sortedAccessors = Array.from(new Set(originalOrder.concat(layer.accessors)));
+
+      return {
+        ...layer,
+        accessors: sortedAccessors,
+      };
+    });
+
   if (!validLayers.length) {
     return null;
   }

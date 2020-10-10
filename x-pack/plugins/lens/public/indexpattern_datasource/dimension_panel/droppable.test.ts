@@ -219,7 +219,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         ...defaultProps,
         dragDropContext: {
           ...dragDropContext,
-          dragging: { name: 'bar' },
+          dragging: { name: 'bar', id: 'bar' },
         },
       })
     ).toBe(false);
@@ -234,6 +234,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           dragging: {
             indexPatternId: 'foo',
             field: { type: 'string', name: 'mystring', aggregatable: true },
+            id: 'mystring',
           },
         },
         state: dragDropState(),
@@ -252,6 +253,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           dragging: {
             field: { type: 'number', name: 'bar', aggregatable: true },
             indexPatternId: 'foo',
+            id: 'bar',
           },
         },
         state: dragDropState(),
@@ -270,6 +272,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           dragging: {
             field: { type: 'number', name: 'bar', aggregatable: true },
             indexPatternId: 'foo2',
+            id: 'bar',
           },
         },
         state: dragDropState(),
@@ -289,6 +292,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             columnId: 'col1',
             groupId: 'a',
             layerId: 'myLayer',
+            id: 'col1',
           },
         },
         state: dragDropState(),
@@ -309,6 +313,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             columnId: 'col1',
             groupId: 'a',
             layerId: 'myLayer',
+            id: 'bar',
           },
         },
         state: dragDropState(),
@@ -329,6 +334,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             columnId: 'col1',
             groupId: 'a',
             layerId: 'myLayer',
+            id: 'bar',
           },
         },
         state: dragDropState(),
@@ -343,6 +349,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
     const dragging = {
       field: { type: 'number', name: 'bar', aggregatable: true },
       indexPatternId: 'foo',
+      id: 'bar',
     };
     const testState = dragDropState();
 
@@ -382,6 +389,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
     const dragging = {
       field: { type: 'string', name: 'mystring', aggregatable: true },
       indexPatternId: 'foo',
+      id: 'bar',
     };
     const testState = dragDropState();
     onDrop({
@@ -420,6 +428,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
     const dragging = {
       field: { type: 'number', name: 'bar', aggregatable: true },
       indexPatternId: 'foo',
+      id: 'bar',
     };
     const testState = dragDropState();
     onDrop({
@@ -454,6 +463,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
     const dragging = {
       field: { type: 'string', name: 'mystring', aggregatable: true },
       indexPatternId: 'foo',
+      id: 'bar',
     };
     const testState = dragDropState();
     onDrop({
@@ -493,6 +503,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       columnId: 'col1',
       groupId: 'a',
       layerId: 'myLayer',
+      id: 'bar',
     };
     const testState = dragDropState();
 
@@ -529,6 +540,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       columnId: 'col2',
       groupId: 'a',
       layerId: 'myLayer',
+      id: 'col2',
     };
     const testState = dragDropState();
     testState.layers.myLayer = {

@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { NativeRenderer } from '../../../native_renderer';
 import { StateSetter, isDraggedOperation } from '../../../types';
-import { DragContext, DragDrop, ChildDragDropProvider } from '../../../drag_drop';
+import { DragContext, DragDrop, ChildDragDropProvider, ReorderProvider } from '../../../drag_drop';
 import { LayerSettings } from './layer_settings';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { generateId } from '../../../id_generator';
@@ -193,112 +193,139 @@ export function LayerPanel(
               }
             >
               <>
-                {group.accessors.map((accessor) => {
-                  return (
-                    <DragDrop
-                      key={accessor}
-                      dragType={
-                        isDraggedOperation(dragDropContext.dragging) &&
-                        accessor === dragDropContext.dragging.columnId
-                          ? 'move'
-                          : 'copy'
-                      }
-                      dropType={
-                        isDraggedOperation(dragDropContext.dragging) &&
-                        group.groupId !== dragDropContext.dragging.groupId
-                          ? 'replace'
-                          : 'add'
-                      }
-                      data-test-subj={group.dataTestSubj}
-                      draggable={!activeId}
-                      value={{ columnId: accessor, groupId: group.groupId, layerId }}
-                      isValueEqual={isSameConfiguration}
-                      label={group.groupLabel}
-                      droppable={
-                        Boolean(dragDropContext.dragging) &&
-                        // Verify that the dragged item is not coming from the same group
-                        // since this would be a reorder
-                        (!isDraggedOperation(dragDropContext.dragging) ||
-                          dragDropContext.dragging.groupId !== group.groupId) &&
-                        layerDatasource.canHandleDrop({
-                          ...layerDatasourceDropProps,
+                <ReorderProvider>
+                  {group.accessors.map((accessor) => {
+                    const { dragging } = dragDropContext;
+                    const dragType =
+                      isDraggedOperation(dragging) && accessor === dragging.columnId
+                        ? 'move'
+                        : isDraggedOperation(dragging) && group.groupId === dragging.groupId
+                        ? 'reorder'
+                        : 'copy';
+
+                    const dropType = isDraggedOperation(dragging)
+                      ? group.groupId !== dragging.groupId
+                        ? 'replace'
+                        : 'reorder'
+                      : 'add';
+
+                    const isFromCompatibleGroup =
+                      dragging?.groupId !== group.groupId &&
+                      layerDatasource.canHandleDrop({
+                        ...layerDatasourceDropProps,
+                        columnId: accessor,
+                        filterOperations: group.filterOperations,
+                      });
+
+                    const isFromTheSameGroup =
+                      isDraggedOperation(dragging) &&
+                      dragging.groupId === group.groupId &&
+                      dragging.columnId !== accessor &&
+                      dragging.groupId !== 'y'; // TODO: remove this line when https://github.com/elastic/elastic-charts/issues/868 is fixed
+                    return (
+                      <DragDrop
+                        key={accessor}
+                        draggable={!activeId}
+                        dragType={dragType}
+                        dropType={dropType}
+                        data-test-subj={group.dataTestSubj}
+                        itemsInGroup={group.accessors}
+                        value={{
                           columnId: accessor,
-                          filterOperations: group.filterOperations,
-                        })
-                      }
-                      onDrop={(droppedItem) => {
-                        const dropResult = layerDatasource.onDrop({
-                          ...layerDatasourceDropProps,
-                          droppedItem,
-                          columnId: accessor,
-                          filterOperations: group.filterOperations,
-                        });
-                        if (typeof dropResult === 'object') {
-                          // When a column is moved, we delete the reference to the old
-                          props.updateVisualization(
-                            activeVisualization.removeDimension({
-                              layerId,
-                              columnId: dropResult.deleted,
-                              prevState: props.visualizationState,
-                            })
-                          );
+                          groupId: group.groupId,
+                          layerId,
+                          id: accessor,
+                        }}
+                        isValueEqual={isSameConfiguration}
+                        label={group.groupLabel}
+                        droppable={
+                          (dragging && !isDraggedOperation(dragging)) ||
+                          isFromCompatibleGroup ||
+                          isFromTheSameGroup
                         }
-                      }}
-                    >
-                      <div className="lnsLayerPanel__dimension">
-                        <NativeRenderer
-                          render={props.datasourceMap[datasourceId].renderDimensionTrigger}
-                          nativeProps={{
-                            ...layerDatasourceConfigProps,
+                        onDrop={(droppedItem) => {
+                          const isReorder =
+                            isDraggedOperation(droppedItem) &&
+                            droppedItem.groupId === group.groupId &&
+                            droppedItem.columnId !== accessor;
+
+                          const dropResult = layerDatasource.onDrop({
+                            isReorder,
+                            ...layerDatasourceDropProps,
+                            droppedItem,
                             columnId: accessor,
                             filterOperations: group.filterOperations,
-                            suggestedPriority: group.suggestedPriority,
-                            onClick: () => {
-                              if (activeId) {
-                                setActiveDimension(initialActiveDimensionState);
-                              } else {
-                                setActiveDimension({
-                                  isNew: false,
-                                  activeGroup: group,
-                                  activeId: accessor,
-                                });
-                              }
-                            },
-                          }}
-                        />
-                        <EuiButtonIcon
-                          data-test-subj="indexPattern-dimension-remove"
-                          iconType="cross"
-                          iconSize="s"
-                          size="s"
-                          color="danger"
-                          aria-label={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
-                            defaultMessage: 'Remove configuration',
-                          })}
-                          title={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
-                            defaultMessage: 'Remove configuration',
-                          })}
-                          onClick={() => {
-                            trackUiEvent('indexpattern_dimension_removed');
-                            props.updateAll(
-                              datasourceId,
-                              layerDatasource.removeColumn({
-                                layerId,
-                                columnId: accessor,
-                                prevState: layerDatasourceState,
-                              }),
+                          });
+                          if (typeof dropResult === 'object') {
+                            // When a column is moved, we delete the reference to the old
+                            props.updateVisualization(
                               activeVisualization.removeDimension({
                                 layerId,
-                                columnId: accessor,
+                                columnId: dropResult.deleted,
                                 prevState: props.visualizationState,
                               })
                             );
-                          }}
-                        />
-                      </div>
-                    </DragDrop>
-                  );
-                })}
+                          }
+                        }}
+                      >
+                        <div className="lnsLayerPanel__dimension">
+                          <NativeRenderer
+                            render={props.datasourceMap[datasourceId].renderDimensionTrigger}
+                            nativeProps={{
+                              ...layerDatasourceConfigProps,
+                              columnId: accessor,
+                              filterOperations: group.filterOperations,
+                              suggestedPriority: group.suggestedPriority,
+                              onClick: () => {
+                                if (activeId) {
+                                  setActiveDimension(initialActiveDimensionState);
+                                } else {
+                                  setActiveDimension({
+                                    isNew: false,
+                                    activeGroup: group,
+                                    activeId: accessor,
+                                  });
+                                }
+                              },
+                            }}
+                          />
+                          <EuiButtonIcon
+                            data-test-subj="indexPattern-dimension-remove"
+                            iconType="cross"
+                            iconSize="s"
+                            size="s"
+                            color="danger"
+                            aria-label={i18n.translate(
+                              'xpack.lens.indexPattern.removeColumnLabel',
+                              {
+                                defaultMessage: 'Remove configuration',
+                              }
+                            )}
+                            title={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
+                              defaultMessage: 'Remove configuration',
+                            })}
+                            onClick={() => {
+                              trackUiEvent('indexpattern_dimension_removed');
+                              props.updateAll(
+                                datasourceId,
+                                layerDatasource.removeColumn({
+                                  layerId,
+                                  columnId: accessor,
+                                  prevState: layerDatasourceState,
+                                }),
+                                activeVisualization.removeDimension({
+                                  layerId,
+                                  columnId: accessor,
+                                  prevState: props.visualizationState,
+                                })
+                              );
+                            }}
+                          />
+                        </div>
+                      </DragDrop>
+                    );
+                  })}
+                </ReorderProvider>
                 {group.supportsMoreColumns ? (
                   <DragDrop
                     data-test-subj={group.dataTestSubj}

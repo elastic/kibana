@@ -343,7 +343,7 @@ describe('LayerPanel', () => {
 
       mockDatasource.canHandleDrop.mockReturnValue(true);
 
-      const draggingField = { field: { name: 'dragged' }, indexPatternId: 'a' };
+      const draggingField = { field: { name: 'dragged' }, indexPatternId: 'a', id: 'dragged' };
 
       const component = mountWithIntl(
         <ChildDragDropProvider dragging={draggingField} setDragging={jest.fn()}>
@@ -396,7 +396,7 @@ describe('LayerPanel', () => {
 
       mockDatasource.canHandleDrop.mockReturnValue(true);
 
-      const draggingOperation = { layerId: 'first', columnId: 'a', groupId: 'a' };
+      const draggingOperation = { layerId: 'first', columnId: 'a', groupId: 'a', id: 'a' };
 
       const component = mountWithIntl(
         <ChildDragDropProvider dragging={draggingOperation} setDragging={jest.fn()}>
@@ -436,7 +436,7 @@ describe('LayerPanel', () => {
       );
     });
 
-    it('should prevent dropping in the same group', () => {
+    it('should reorder when dropping in the same group', () => {
       mockVisualization.getConfiguration.mockReturnValue({
         groups: [
           {
@@ -450,7 +450,7 @@ describe('LayerPanel', () => {
         ],
       });
 
-      const draggingOperation = { layerId: 'first', columnId: 'a', groupId: 'a' };
+      const draggingOperation = { layerId: 'first', columnId: 'a', groupId: 'a', id: 'a' };
 
       const component = mountWithIntl(
         <ChildDragDropProvider dragging={draggingOperation} setDragging={jest.fn()}>

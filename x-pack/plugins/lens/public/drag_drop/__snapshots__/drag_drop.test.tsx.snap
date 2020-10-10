@@ -11,7 +11,7 @@ exports[`DragDrop droppable is reflected in the className 1`] = `
 
 exports[`DragDrop items that have droppable=false get special styling when another item is dragged 1`] = `
 <button
-  className="lnsDragDrop lnsDragDrop-isDroppable lnsDragDrop-isNotDroppable"
+  className="lnsDragDrop lnsDragDrop-isDroppable"
   data-test-subj="lnsDragDrop"
   onDragEnd={[Function]}
   onDragLeave={[Function]}

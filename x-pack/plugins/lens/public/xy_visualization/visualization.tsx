@@ -154,8 +154,19 @@ export const xyVisualization: Visualization<State> = {
     );
   },
 
-  getConfiguration(props) {
-    const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
+  getConfiguration({ state, frame, layerId }) {
+    const layer = state.layers.find((l) => l.layerId === layerId);
+    if (!layer) {
+      return { groups: [] };
+    }
+
+    const datasource = frame.datasourceLayers[layer.layerId];
+    const originalOrder = datasource
+      .getTableSpec()
+      .map(({ columnId }) => columnId)
+      .filter((columnId) => layer.accessors.includes(columnId));
+    // When we add a column it could be empty, and therefore have no order
+    const sortedAccessors = Array.from(new Set(originalOrder.concat(layer.accessors)));
     return {
       groups: [
         {
@@ -175,7 +186,7 @@ export const xyVisualization: Visualization<State> = {
           groupLabel: i18n.translate('xpack.lens.xyChart.yAxisLabel', {
             defaultMessage: 'Y-axis',
           }),
-          accessors: layer.accessors,
+          accessors: sortedAccessors,
           filterOperations: isNumericMetric,
           supportsMoreColumns: true,
           required: true,

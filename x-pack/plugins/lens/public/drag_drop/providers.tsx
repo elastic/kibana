@@ -6,6 +6,12 @@
 
 import React, { useState, useMemo } from 'react';
 
+export type Dragging =
+  | (Record<string, unknown> & {
+      id: string;
+    })
+  | undefined;
+
 /**
  * The shape of the drag / drop context.
  */
@@ -13,12 +19,12 @@ export interface DragContextState {
   /**
    * The item being dragged or undefined.
    */
-  dragging: unknown;
+  dragging: Dragging;
 
   /**
    * Set the item being dragged.
    */
-  setDragging: (dragging: unknown) => void;
+  setDragging: (dragging: Dragging) => void;
 }
 
 /**
@@ -39,13 +45,13 @@ export interface ProviderProps {
    * The item being dragged. If unspecified, the provider will
    * behave as if it is the root provider.
    */
-  dragging: unknown;
+  dragging: Dragging;
 
   /**
    * Sets the item being dragged. If unspecified, the provider
    * will behave as if it is the root provider.
    */
-  setDragging: (dragging: unknown) => void;
+  setDragging: (dragging: Dragging) => void;
 
   /**
    * The React children.
@@ -61,10 +67,10 @@ export interface ProviderProps {
  * @param props
  */
 export function RootDragDropProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<{ dragging: unknown }>({
+  const [state, setState] = useState<{ dragging: Dragging }>({
     dragging: undefined,
   });
-  const setDragging = useMemo(() => (dragging: unknown) => setState({ dragging }), [setState]);
+  const setDragging = useMemo(() => (dragging: Dragging) => setState({ dragging }), [setState]);
 
   return (
     <ChildDragDropProvider dragging={state.dragging} setDragging={setDragging}>
@@ -83,4 +89,45 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
 export function ChildDragDropProvider({ dragging, setDragging, children }: ProviderProps) {
   const value = useMemo(() => ({ dragging, setDragging }), [setDragging, dragging]);
   return <DragContext.Provider value={value}>{children}</DragContext.Provider>;
+}
+
+interface ReorderState {
+  /**
+   * Ids of the elements that are translated up or down
+   */
+  reorderedItems: string[];
+
+  /**
+   * Class responsible for transform (translation)
+   */
+  className: 'lnsDragDrop-isReorderable--down' | 'lnsDragDrop-isReorderable--up';
+}
+
+export interface ReorderContextState {
+  reorderState: ReorderState;
+  setReorderState: (reorderState: ReorderState) => void;
+}
+
+export const ReorderContext = React.createContext<ReorderContextState>({
+  reorderState: {
+    reorderedItems: [],
+    className: 'lnsDragDrop-isReorderable--down',
+  },
+  setReorderState: () => {},
+});
+
+export function ReorderProvider({ children }: { children: React.ReactNode }) {
+  const [state, setState] = useState<ReorderContextState['reorderState']>({
+    reorderedItems: [],
+    className: 'lnsDragDrop-isReorderable--down',
+  });
+  const setReorderState = useMemo(() => (reorderState: ReorderState) => setState(reorderState), [
+    setState,
+  ]);
+
+  return (
+    <ReorderContext.Provider value={{ reorderState: state, setReorderState }}>
+      {children}
+    </ReorderContext.Provider>
+  );
 }
