@@ -12,15 +12,15 @@ servers:
 paths:
   /agent_policies:
     $ref: paths/agent_policies.yaml
-  '/agent_policies/{agent_policy_id}':
+  '/agent_policies/{agentPolicyId}':
     $ref: 'paths/agent_policies@{agent_policy_id}.yaml'
-  '/agent_policies/{agent_policy_id}/copy':
+  '/agent_policies/{agentPolicyId}/copy':
     $ref: 'paths/agent_policies@{agent_policy_id}@copy.yaml'
   /agent_policies/delete:
     $ref: paths/agent_policies@delete.yaml
   /package_policies:
     $ref: paths/package_policies.yaml
-  '/package_policies/{package_policy_id}':
+  '/package_policies/{packagePolicyId}':
     $ref: 'paths/package_policies@{package_policy_id}.yaml'
   /agents/setup:
     $ref: paths/agents@setup.yaml
@@ -32,19 +32,19 @@ paths:
     $ref: paths/epm@categories.yaml
   /fleet/agents:
     $ref: paths/fleet@agents.yaml
-  '/fleet/agents/{agent_id}':
+  '/fleet/agents/{agentId}':
     $ref: 'paths/fleet@agents@{agent_id}.yaml'
-  '/fleet/agents/{agent_id}/events':
+  '/fleet/agents/{agentId}/events':
     $ref: 'paths/fleet@agents@{agent_id}@events.yaml'
-  '/fleet/agents/{agent_id}/checkin':
+  '/fleet/agents/{agentId}/checkin':
     $ref: 'paths/fleet@agents@{agent_id}@checkin.yaml'
-  '/fleet/agents/{agent_id}/acks':
+  '/fleet/agents/{agentId}/acks':
     $ref: 'paths/fleet@agents@{agent_id}@acks.yaml'
   /fleet/agents/enroll:
     $ref: paths/fleet@agents@enroll.yaml
-  '/fleet/agents/{agent_id}/unenroll':
+  '/fleet/agents/{agentId}/unenroll':
     $ref: 'paths/fleet@agents@{agent_id}@unenroll.yaml'
-  '/fleet/agents/{agent_id}/upgrade':
+  '/fleet/agents/{agentId}/upgrade':
     $ref: 'paths/fleet@agents@{agent_id}@upgrade.yaml'
   /fleet/agents/bulk_upgrade:
     $ref: paths/fleet@agents@bulk_upgrade.yaml
@@ -52,11 +52,11 @@ paths:
     $ref: paths/fleet@agent_status.yaml
   /fleet/enrollment-api-keys:
     $ref: paths/fleet@enrollment_api_keys.yaml
-  '/fleet/enrollment-api-keys/{key_id}':
+  '/fleet/enrollment-api-keys/{keyId}':
     $ref: 'paths/fleet@enrollment_api_keys@{key_id}.yaml'
   /setup:
     $ref: paths/setup.yaml
-  '/fleet/install/{os_type}':
+  '/fleet/install/{osType}':
     $ref: 'paths/fleet@install@{os_type}.yaml'
 components:
   securitySchemes:

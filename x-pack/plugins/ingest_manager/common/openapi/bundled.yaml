@@ -65,7 +65,7 @@ paths:
       security: []
       parameters:
         - $ref: '#/components/parameters/xsrfHeader'
-  '/agent_policies/{agent_policy_id}':
+  '/agent_policies/{agentPolicyId}':
     parameters:
       - schema:
           type: string
@@ -113,7 +113,7 @@ paths:
               $ref: '#/components/schemas/new_agent_policy'
       parameters:
         - $ref: '#/components/parameters/xsrfHeader'
-  '/agent_policies/{agent_policy_id}/copy':
+  '/agent_policies/{agentPolicyId}/copy':
     parameters:
       - schema:
           type: string
@@ -224,7 +224,7 @@ paths:
               $ref: '#/components/schemas/new_package_policy'
       parameters:
         - $ref: '#/components/parameters/xsrfHeader'
-  '/package_policies/{package_policy_id}':
+  '/package_policies/{packagePolicyId}':
     get:
       summary: PackagePolicies - Info
       tags: []
@@ -478,7 +478,7 @@ paths:
       operationId: get-fleet-agents
       security:
         - basicAuth: []
-  '/fleet/agents/{agent_id}':
+  '/fleet/agents/{agentId}':
     parameters:
       - schema:
           type: string
@@ -515,7 +515,7 @@ paths:
       operationId: delete-fleet-agents-agentId
       parameters:
         - $ref: '#/components/parameters/xsrfHeader'
-  '/fleet/agents/{agent_id}/events':
+  '/fleet/agents/{agentId}/events':
     parameters:
       - schema:
           type: string
@@ -527,7 +527,7 @@ paths:
       tags: []
       responses: {}
       operationId: get-fleet-agents-agentId-events
-  '/fleet/agents/{agent_id}/checkin':
+  '/fleet/agents/{agentId}/checkin':
     parameters:
       - schema:
           type: string
@@ -588,7 +588,7 @@ paths:
                   type: array
                   items:
                     $ref: '#/components/schemas/new_agent_event'
-  '/fleet/agents/{agent_id}/acks':
+  '/fleet/agents/{agentId}/acks':
     parameters:
       - schema:
           type: string
@@ -669,7 +669,7 @@ paths:
                 - metadata
       security:
         - Enrollment API Key: []
-  '/fleet/agents/{agent_id}/unenroll':
+  '/fleet/agents/{agentId}/unenroll':
     parameters:
       - schema:
           type: string
@@ -691,7 +691,7 @@ paths:
               properties:
                 force:
                   type: boolean
-  '/fleet/agents/{agent_id}/upgrade':
+  '/fleet/agents/{agentId}/upgrade':
     parameters:
       - schema:
           type: string
@@ -775,7 +775,7 @@ paths:
       operationId: post-fleet-enrollment-api-keys
       parameters:
         - $ref: '#/components/parameters/xsrfHeader'
-  '/fleet/enrollment-api-keys/{key_id}':
+  '/fleet/enrollment-api-keys/{keyId}':
     parameters:
       - schema:
           type: string
@@ -820,7 +820,7 @@ paths:
       operationId: post-setup
       parameters:
         - $ref: '#/components/parameters/xsrfHeader'
-  '/fleet/install/{os_type}':
+  '/fleet/install/{osType}':
     parameters:
       - schema:
           type: string

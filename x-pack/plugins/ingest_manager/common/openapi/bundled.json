@@ -108,7 +108,7 @@
         ]
       }
     },
-    "/agent_policies/{agent_policy_id}": {
+    "/agent_policies/{agentPolicyId}": {
       "parameters": [
         {
           "schema": {
@@ -186,7 +186,7 @@
         ]
       }
     },
-    "/agent_policies/{agent_policy_id}/copy": {
+    "/agent_policies/{agentPolicyId}/copy": {
       "parameters": [
         {
           "schema": {
@@ -365,7 +365,7 @@
         ]
       }
     },
-    "/package_policies/{package_policy_id}": {
+    "/package_policies/{packagePolicyId}": {
       "get": {
         "summary": "PackagePolicies - Info",
         "tags": [],
@@ -777,7 +777,7 @@
         ]
       }
     },
-    "/fleet/agents/{agent_id}": {
+    "/fleet/agents/{agentId}": {
       "parameters": [
         {
           "schema": {
@@ -836,7 +836,7 @@
         ]
       }
     },
-    "/fleet/agents/{agent_id}/events": {
+    "/fleet/agents/{agentId}/events": {
       "parameters": [
         {
           "schema": {
@@ -854,7 +854,7 @@
         "operationId": "get-fleet-agents-agentId-events"
       }
     },
-    "/fleet/agents/{agent_id}/checkin": {
+    "/fleet/agents/{agentId}/checkin": {
       "parameters": [
         {
           "schema": {
@@ -952,7 +952,7 @@
         }
       }
     },
-    "/fleet/agents/{agent_id}/acks": {
+    "/fleet/agents/{agentId}/acks": {
       "parameters": [
         {
           "schema": {
@@ -1085,7 +1085,7 @@
         ]
       }
     },
-    "/fleet/agents/{agent_id}/unenroll": {
+    "/fleet/agents/{agentId}/unenroll": {
       "parameters": [
         {
           "schema": {
@@ -1122,7 +1122,7 @@
         }
       }
     },
-    "/fleet/agents/{agent_id}/upgrade": {
+    "/fleet/agents/{agentId}/upgrade": {
       "parameters": [
         {
           "schema": {
@@ -1258,7 +1258,7 @@
         ]
       }
     },
-    "/fleet/enrollment-api-keys/{key_id}": {
+    "/fleet/enrollment-api-keys/{keyId}": {
       "parameters": [
         {
           "schema": {
@@ -1331,7 +1331,7 @@
         ]
       }
     },
-    "/fleet/install/{os_type}": {
+    "/fleet/install/{osType}": {
       "parameters": [
         {
           "schema": {
