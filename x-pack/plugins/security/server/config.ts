@@ -225,6 +225,12 @@ export function createConfig(
   logger: Logger,
   { isTLSEnabled }: { isTLSEnabled: boolean }
 ) {
+  if (config.audit.appender) {
+    logger.warn(
+      'The new audit logger has been enabled using the xpack.security.audit.appender setting. This is a beta feature and the format of the events recorded might change in future versions.'
+    );
+  }
+
   let encryptionKey = config.encryptionKey;
   if (encryptionKey === undefined) {
     logger.warn(
