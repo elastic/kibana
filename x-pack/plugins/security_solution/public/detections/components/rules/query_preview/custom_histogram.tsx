@@ -7,53 +7,50 @@
 import React, { useEffect, useMemo } from 'react';
 
 import * as i18n from './translations';
+import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { getHistogramConfig } from './helpers';
 import {
-  ChartSeriesData,
   ChartSeriesConfigs,
+  ChartSeriesData,
   ChartData,
 } from '../../../../common/components/charts/common';
-import { InspectQuery } from '../../../../common/store/inputs/model';
-import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { hasEqlSequenceQuery } from '../../../../../common/detection_engine/utils';
+import { InspectResponse } from '../../../../../public/types';
 import { inputsModel } from '../../../../common/store';
 import { PreviewHistogram } from './histogram';
 
-export const ID = 'queryEqlPreviewHistogramQuery';
+export const ID = 'queryPreviewCustomHistogramQuery';
 
-interface PreviewEqlQueryHistogramProps {
+interface PreviewCustomQueryHistogramProps {
   to: string;
   from: string;
-  totalCount: number;
   isLoading: boolean;
-  query: string;
   data: ChartData[];
-  inspect: InspectQuery;
+  totalCount: number;
+  inspect: InspectResponse;
   refetch: inputsModel.Refetch;
 }
 
-export const PreviewEqlQueryHistogram = ({
-  from,
+export const PreviewCustomQueryHistogram = ({
   to,
-  totalCount,
-  query,
+  from,
   data,
+  totalCount,
   inspect,
   refetch,
   isLoading,
-}: PreviewEqlQueryHistogramProps) => {
+}: PreviewCustomQueryHistogramProps) => {
   const { setQuery, isInitializing } = useGlobalTime();
 
   useEffect((): void => {
-    if (!isInitializing) {
-      setQuery({ id: ID, inspect, loading: false, refetch });
+    if (!isLoading && !isInitializing) {
+      setQuery({ id: ID, inspect, loading: isLoading, refetch });
     }
-  }, [setQuery, inspect, isInitializing, refetch]);
+  }, [setQuery, inspect, isLoading, isInitializing, refetch]);
 
-  const barConfig = useMemo(
-    (): ChartSeriesConfigs => getHistogramConfig(to, from, hasEqlSequenceQuery(query)),
-    [from, to, query]
-  );
+  const barConfig = useMemo((): ChartSeriesConfigs => getHistogramConfig(to, from, true), [
+    from,
+    to,
+  ]);
 
   const subtitle = useMemo(
     (): string =>
@@ -70,9 +67,9 @@ export const PreviewEqlQueryHistogram = ({
       barConfig={barConfig}
       title={i18n.QUERY_GRAPH_HITS_TITLE}
       subtitle={subtitle}
-      disclaimer={i18n.PREVIEW_QUERY_DISCLAIMER_EQL}
+      disclaimer={i18n.PREVIEW_QUERY_DISCLAIMER}
       isLoading={isLoading}
-      data-test-subj="queryPreviewEqlHistogram"
+      data-test-subj="queryPreviewCustomHistogram"
     />
   );
 };

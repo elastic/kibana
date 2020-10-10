@@ -46,6 +46,7 @@ interface QueryBarDefineRuleProps {
   onCloseTimelineSearch: () => void;
   openTimelineSearch: boolean;
   resizeParentContainer?: (height: number) => void;
+  onError: (arg: boolean) => void;
 }
 
 const StyledEuiFormRow = styled(EuiFormRow)`
@@ -74,6 +75,7 @@ export const QueryBarDefineRule = ({
   onCloseTimelineSearch,
   openTimelineSearch = false,
   resizeParentContainer,
+  onError,
 }: QueryBarDefineRuleProps) => {
   const [originalHeight, setOriginalHeight] = useState(-1);
   const [loadingTimeline, setLoadingTimeline] = useState(false);
@@ -85,6 +87,13 @@ export const QueryBarDefineRule = ({
   const [filterManager] = useState<FilterManager>(new FilterManager(kibana.services.uiSettings));
 
   const savedQueryServices = useSavedQueryServices();
+
+  useEffect((): void => {
+    if (onError != null) {
+      const errorExists = isInvalid || (errorMessage != null && errorMessage.trim() === '');
+      onError(errorExists);
+    }
+  }, [isInvalid, errorMessage, onError]);
 
   useEffect(() => {
     let isSubscribed = true;

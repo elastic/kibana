@@ -131,7 +131,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     options: { stripEmptyFields: false },
     schema,
   });
-  const { getErrors, getFields, getFormData, reset, submit } = form;
+  const { getFields, getFormData, reset, submit } = form;
   const [
     {
       index: formIndex,
@@ -152,14 +152,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       }
     >
   ];
+  const [errorExists, setErrorExists] = useState(false);
   const index = formIndex || initialState.index;
   const threatIndex = formThreatIndex || initialState.threatIndex;
   const ruleType = formRuleType || initialState.ruleType;
   const queryBarQuery =
     formQuery != null ? formQuery.query.query : '' || initialState.queryBar.query.query;
-  const errorExists = getErrors().length > 0;
   const [indexPatternsLoading, { browserFields, indexPatterns }] = useFetchIndex(index);
-
   const [
     threatIndexPatternsLoading,
     { browserFields: threatBrowserFields, indexPatterns: threatIndexPatterns },
@@ -284,6 +283,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   path="queryBar"
                   component={EqlQueryBar}
                   componentProps={{
+                    onError: setErrorExists,
                     idAria: 'detectionEngineStepDefineRuleEqlQueryBar',
                     isDisabled: isLoading,
                     isLoading: indexPatternsLoading,
@@ -319,6 +319,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     isLoading: indexPatternsLoading,
                     dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
                     openTimelineSearch,
+                    onError: setErrorExists,
                     onCloseTimelineSearch: handleCloseTimelineSearch,
                   }}
                 />
@@ -399,7 +400,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               ruleType={ruleType}
               index={index}
               query={formQuery}
-              isDisabled={queryBarQuery.trim() === '' || errorExists}
+              queryErrorExists={errorExists || index.length === 0}
+              isDisabled={queryBarQuery.trim() === '' || errorExists || index.length === 0}
               threshold={
                 formThresholdValue != null && formThresholdField != null
                   ? { value: formThresholdValue, field: formThresholdField[0] }

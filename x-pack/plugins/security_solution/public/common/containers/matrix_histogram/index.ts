@@ -32,6 +32,8 @@ export type Buckets = Array<{
   doc_count: number;
 }>;
 
+const bucketEmpty: Buckets = [];
+
 export interface UseMatrixHistogramArgs {
   data: MatrixHistogramData[];
   inspect: InspectResponse;
@@ -54,7 +56,8 @@ export const useMatrixHistogram = ({
   stackByField,
   startDate,
   threshold,
-}: MatrixHistogramQueryProps): [boolean, UseMatrixHistogramArgs] => {
+  skip = false,
+}: MatrixHistogramQueryProps): [boolean, UseMatrixHistogramArgs, () => void] => {
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
@@ -103,7 +106,6 @@ export const useMatrixHistogram = ({
             next: (response) => {
               if (isCompleteResponse(response)) {
                 if (!didCancel) {
-                  const bucketEmpty: Buckets = [];
                   const histogramBuckets: Buckets = getOr(
                     bucketEmpty,
                     'rawResponse.aggregations.eventActionGroup.buckets',
@@ -172,8 +174,14 @@ export const useMatrixHistogram = ({
   }, [indexNames, endDate, filterQuery, startDate, stackByField, histogramType, threshold]);
 
   useEffect(() => {
+    if (!skip) {
+      hostsSearch(matrixHistogramRequest);
+    }
+  }, [matrixHistogramRequest, hostsSearch, skip]);
+
+  const runMatrixHistogramSearch = useCallback(() => {
     hostsSearch(matrixHistogramRequest);
   }, [matrixHistogramRequest, hostsSearch]);
 
-  return [loading, matrixHistogramResponse];
+  return [loading, matrixHistogramResponse, runMatrixHistogramSearch];
 };

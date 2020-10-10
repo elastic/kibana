@@ -27,18 +27,24 @@ export interface EqlQueryBarProps {
   dataTestSubj: string;
   field: FieldHook<DefineStepRule['queryBar']>;
   idAria?: string;
+  onError?: (arg: boolean) => void;
 }
 
-export const EqlQueryBar: FC<EqlQueryBarProps> = ({ dataTestSubj, field, idAria }) => {
+export const EqlQueryBar: FC<EqlQueryBarProps> = ({ dataTestSubj, field, idAria, onError }) => {
   const { addError } = useAppToasts();
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
   const { setValue } = field;
   const { isValid, message, messages, error } = getValidationResults(field);
   const fieldValue = field.value.query.query as string;
 
-  useEffect(() => {
+  useEffect((): void => {
+    if (onError != null) {
+      const errorExists = messages != null && messages.length > 0;
+      onError(errorExists);
+    }
+
     setErrorMessages(messages ?? []);
-  }, [messages]);
+  }, [messages, onError]);
 
   useEffect(() => {
     if (error) {
