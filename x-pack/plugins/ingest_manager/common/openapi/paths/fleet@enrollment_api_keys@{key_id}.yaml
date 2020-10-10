@@ -15,4 +15,4 @@ delete:
   responses: {}
   operationId: delete-fleet-enrollment-api-keys-keyId
   parameters:
-    - $ref: ../components/parameters/xsrfHeader.yaml
+    - $ref: ../components/parameters/xsrf_header.yaml

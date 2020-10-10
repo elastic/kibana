@@ -10,7 +10,7 @@ post:
   responses: {}
   operationId: post-fleet-agents-unenroll
   parameters:
-    - $ref: ../components/parameters/xsrfHeader.yaml
+    - $ref: ../components/parameters/xsrf_header.yaml
   requestBody:
     content:
       application/json:

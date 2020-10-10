@@ -26,9 +26,9 @@ get:
               - perPage
   operationId: agent-policy-list
   parameters:
-    - $ref: ../components/parameters/pageSizeParam.yaml
-    - $ref: ../components/parameters/pageIndexParam.yaml
-    - $ref: ../components/parameters/kueryParam.yaml
+    - $ref: ../components/parameters/page_size.yaml
+    - $ref: ../components/parameters/page_index.yaml
+    - $ref: ../components/parameters/kuery.yaml
   description: ''
 post:
   summary: Agent policy - Create
@@ -51,4 +51,4 @@ post:
           $ref: ../components/schemas/new_agent_policy.yaml
   security: []
   parameters:
-    - $ref: ../components/parameters/xsrfHeader.yaml
+    - $ref: ../components/parameters/xsrf_header.yaml

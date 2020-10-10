@@ -45,4 +45,4 @@ post:
             - admin_username
             - admin_password
   parameters:
-    - $ref: ../components/parameters/xsrfHeader.yaml
+    - $ref: ../components/parameters/xsrf_header.yaml

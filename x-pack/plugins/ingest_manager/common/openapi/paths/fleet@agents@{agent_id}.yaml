@@ -26,11 +26,11 @@ put:
   responses: {}
   operationId: put-fleet-agents-agentId
   parameters:
-    - $ref: ../components/parameters/xsrfHeader.yaml
+    - $ref: ../components/parameters/xsrf_header.yaml
 delete:
   summary: Fleet - Agent - Delete
   tags: []
   responses: {}
   operationId: delete-fleet-agents-agentId
   parameters:
-    - $ref: ../components/parameters/xsrfHeader.yaml
+    - $ref: ../components/parameters/xsrf_header.yaml

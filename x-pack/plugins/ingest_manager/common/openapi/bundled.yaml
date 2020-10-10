@@ -39,9 +39,9 @@ paths:
                   - perPage
       operationId: agent-policy-list
       parameters:
-        - $ref: '#/components/parameters/pageSizeParam'
-        - $ref: '#/components/parameters/pageIndexParam'
-        - $ref: '#/components/parameters/kueryParam'
+        - $ref: '#/components/parameters/page_size'
+        - $ref: '#/components/parameters/page_index'
+        - $ref: '#/components/parameters/kuery'
       description: ''
     post:
       summary: Agent policy - Create
@@ -64,7 +64,7 @@ paths:
               $ref: '#/components/schemas/new_agent_policy'
       security: []
       parameters:
-        - $ref: '#/components/parameters/xsrfHeader'
+        - $ref: '#/components/parameters/xsrf_header'
   '/agent_policies/{agentPolicyId}':
     parameters:
       - schema:
@@ -112,7 +112,7 @@ paths:
             schema:
               $ref: '#/components/schemas/new_agent_policy'
       parameters:
-        - $ref: '#/components/parameters/xsrfHeader'
+        - $ref: '#/components/parameters/xsrf_header'
   '/agent_policies/{agentPolicyId}/copy':
     parameters:
       - schema:
@@ -181,7 +181,7 @@ paths:
                   items:
                     type: string
       parameters:
-        - $ref: '#/components/parameters/xsrfHeader'
+        - $ref: '#/components/parameters/xsrf_header'
     parameters: []
   /package_policies:
     get:
@@ -223,7 +223,7 @@ paths:
             schema:
               $ref: '#/components/schemas/new_package_policy'
       parameters:
-        - $ref: '#/components/parameters/xsrfHeader'
+        - $ref: '#/components/parameters/xsrf_header'
   '/package_policies/{packagePolicyId}':
     get:
       summary: PackagePolicies - Info
@@ -266,7 +266,7 @@ paths:
                   - item
                   - sucess
       parameters:
-        - $ref: '#/components/parameters/xsrfHeader'
+        - $ref: '#/components/parameters/xsrf_header'
   /agents/setup:
     get:
       summary: Agents setup - Info
@@ -315,7 +315,7 @@ paths:
                 - admin_username
                 - admin_password
       parameters:
-        - $ref: '#/components/parameters/xsrfHeader'
+        - $ref: '#/components/parameters/xsrf_header'
   '/epm/packages/{pkgkey}':
     get:
       summary: EPM - Packages - Info
@@ -379,7 +379,7 @@ paths:
       operationId: post-epm-install-pkgkey
       description: ''
       parameters:
-        - $ref: '#/components/parameters/xsrfHeader'
+        - $ref: '#/components/parameters/xsrf_header'
     delete:
       summary: EPM - Packages - Delete
       tags: []
@@ -407,7 +407,7 @@ paths:
                   - response
       operationId: post-epm-delete-pkgkey
       parameters:
-        - $ref: '#/components/parameters/xsrfHeader'
+        - $ref: '#/components/parameters/xsrf_header'
   /epm/packages:
     get:
       summary: EPM - Packages - List
@@ -507,14 +507,14 @@ paths:
       responses: {}
       operationId: put-fleet-agents-agentId
       parameters:
-        - $ref: '#/components/parameters/xsrfHeader'
+        - $ref: '#/components/parameters/xsrf_header'
     delete:
       summary: Fleet - Agent - Delete
       tags: []
       responses: {}
       operationId: delete-fleet-agents-agentId
       parameters:
-        - $ref: '#/components/parameters/xsrfHeader'
+        - $ref: '#/components/parameters/xsrf_header'
   '/fleet/agents/{agentId}/events':
     parameters:
       - schema:
@@ -573,7 +573,7 @@ paths:
                         - type
       operationId: post-fleet-agents-agentId-checkin
       parameters:
-        - $ref: '#/components/parameters/xsrfHeader'
+        - $ref: '#/components/parameters/xsrf_header'
       security:
         - Access API Key: []
       requestBody:
@@ -614,7 +614,7 @@ paths:
                   - action
       operationId: post-fleet-agents-agentId-acks
       parameters:
-        - $ref: '#/components/parameters/xsrfHeader'
+        - $ref: '#/components/parameters/xsrf_header'
       requestBody:
         content:
           application/json:
@@ -639,7 +639,7 @@ paths:
                     $ref: '#/components/schemas/agent'
       operationId: post-fleet-agents-enroll
       parameters:
-        - $ref: '#/components/parameters/xsrfHeader'
+        - $ref: '#/components/parameters/xsrf_header'
       requestBody:
         content:
           application/json:
@@ -682,7 +682,7 @@ paths:
       responses: {}
       operationId: post-fleet-agents-unenroll
       parameters:
-        - $ref: '#/components/parameters/xsrfHeader'
+        - $ref: '#/components/parameters/xsrf_header'
       requestBody:
         content:
           application/json:
@@ -716,7 +716,7 @@ paths:
                 $ref: '#/components/schemas/upgrade_agent'
       operationId: post-fleet-agents-upgrade
       parameters:
-        - $ref: '#/components/parameters/xsrfHeader'
+        - $ref: '#/components/parameters/xsrf_header'
       requestBody:
         required: true
         content:
@@ -742,7 +742,7 @@ paths:
                 $ref: '#/components/schemas/upgrade_agent'
       operationId: post-fleet-agents-bulk-upgrade
       parameters:
-        - $ref: '#/components/parameters/xsrfHeader'
+        - $ref: '#/components/parameters/xsrf_header'
       requestBody:
         required: true
         content:
@@ -774,7 +774,7 @@ paths:
       responses: {}
       operationId: post-fleet-enrollment-api-keys
       parameters:
-        - $ref: '#/components/parameters/xsrfHeader'
+        - $ref: '#/components/parameters/xsrf_header'
   '/fleet/enrollment-api-keys/{keyId}':
     parameters:
       - schema:
@@ -793,7 +793,7 @@ paths:
       responses: {}
       operationId: delete-fleet-enrollment-api-keys-keyId
       parameters:
-        - $ref: '#/components/parameters/xsrfHeader'
+        - $ref: '#/components/parameters/xsrf_header'
   /setup:
     post:
       summary: Ingest Manager - Setup
@@ -819,7 +819,7 @@ paths:
                     type: string
       operationId: post-setup
       parameters:
-        - $ref: '#/components/parameters/xsrfHeader'
+        - $ref: '#/components/parameters/xsrf_header'
   '/fleet/install/{osType}':
     parameters:
       - schema:
@@ -848,7 +848,7 @@ components:
       in: header
       description: 'e.g. Authorization: ApiKey base64AccessApiKey'
   parameters:
-    pageSizeParam:
+    page_size:
       name: perPage
       in: query
       description: The number of items to return
@@ -856,20 +856,20 @@ components:
       schema:
         type: integer
         default: 50
-    pageIndexParam:
+    page_index:
       name: page
       in: query
       required: false
       schema:
         type: integer
         default: 1
-    kueryParam:
+    kuery:
       name: kuery
       in: query
       required: false
       schema:
         type: string
-    xsrfHeader:
+    xsrf_header:
       schema:
         type: string
       in: header

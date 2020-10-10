@@ -37,4 +37,4 @@ post:
         schema:
           $ref: ../components/schemas/new_package_policy.yaml
   parameters:
-    - $ref: ../components/parameters/xsrfHeader.yaml
+    - $ref: ../components/parameters/xsrf_header.yaml

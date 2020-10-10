@@ -16,7 +16,7 @@ post:
             $ref: ../components/schemas/upgrade_agent.yaml
   operationId: post-fleet-agents-bulk-upgrade
   parameters:
-    - $ref: ../components/parameters/xsrfHeader.yaml
+    - $ref: ../components/parameters/xsrf_header.yaml
   requestBody:
     required: true
     content:
