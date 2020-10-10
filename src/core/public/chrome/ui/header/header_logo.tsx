@@ -99,14 +99,14 @@ export function HeaderLogo({ href, navigateToApp, ...observables }: Props) {
   return (
     <EuiHeaderLogo
       data-test-subj="logo"
-      iconType="logoElastic"
+      iconType="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg"
       onClick={(e) => onClick(e, forceNavigation, navLinks, navigateToApp)}
       href={href}
       aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel', {
         defaultMessage: 'Go to home page',
       })}
     >
-      Elastic
+      Test project name
     </EuiHeaderLogo>
   );
 }

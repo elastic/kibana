@@ -264,7 +264,11 @@ export function CollapsibleNav({
           return (
             <EuiCollapsibleNavGroup
               key={category.id}
-              iconType={category.euiIconType}
+              iconType={
+                category.euiIconType === 'logoKibana'
+                  ? 'https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg'
+                  : category.euiIconType
+              }
               title={category.label}
               isCollapsible={true}
               initialIsOpen={getIsCategoryOpen(category.id, storage)}
