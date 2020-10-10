@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState } from 'react';
 import classNames from 'classnames';
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -71,7 +71,6 @@ export interface DiscoverLegacyProps {
     indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
     timefield: string;
     sampleSize: number;
-    fixedScroll: (el: HTMLElement) => void;
     setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
   };
   resetQuery: () => void;
@@ -127,20 +126,7 @@ export function DiscoverLegacy({
     bucketAggConfig && search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)
       ? bucketAggConfig.buckets?.getInterval()
       : undefined;
-  const [fixedScrollEl, setFixedScrollEl] = useState<HTMLElement | undefined>();
 
-  useEffect(() => (fixedScrollEl ? opts.fixedScroll(fixedScrollEl) : undefined), [
-    fixedScrollEl,
-    opts,
-  ]);
-  const fixedScrollRef = useCallback(
-    (node: HTMLElement) => {
-      if (node !== null) {
-        setFixedScrollEl(node);
-      }
-    },
-    [setFixedScrollEl]
-  );
   const sidebarClassName = classNames({
     closed: isSidebarClosed,
   });
@@ -258,7 +244,6 @@ export function DiscoverLegacy({
                     <section
                       className="dscTable dscTableFixedScroll"
                       aria-labelledby="documentsAriaLabel"
-                      ref={fixedScrollRef}
                     >
                       <h2 className="euiScreenReaderOnly" id="documentsAriaLabel">
                         <FormattedMessage

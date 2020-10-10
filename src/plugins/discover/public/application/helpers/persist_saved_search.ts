@@ -18,7 +18,6 @@
  */
 import { IUiSettingsClient } from 'kibana/public';
 import { updateSearchSource } from './update_search_source';
-import { SearchSource } from '../../../../data/common/search/search_source';
 import { DataPublicPluginStart, IndexPattern } from '../../../../data/public';
 import { SavedSearch } from '../../saved_searches';
 import { AppState } from '../angular/discover_state';
@@ -33,7 +32,6 @@ export async function persistSavedSearch({
   onSuccess,
   savedSearch,
   saveOptions,
-  searchSource,
   state,
 }: {
   config: IUiSettingsClient;
@@ -43,10 +41,9 @@ export async function persistSavedSearch({
   onSuccess: (id: string) => void;
   savedSearch: SavedSearch;
   saveOptions: SavedObjectSaveOpts;
-  searchSource: SearchSource;
   state: AppState;
 }) {
-  updateSearchSource(searchSource, {
+  updateSearchSource(savedSearch.searchSource, {
     indexPattern,
     config,
     state,

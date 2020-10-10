@@ -65,7 +65,7 @@ interface GetStateParams {
   /**
    * Default state used for merging with with URL state to get the initial state
    */
-  defaultAppState?: AppState;
+  getStateDefaults?: () => AppState;
   /**
    * Determins the use of long vs. short/hashed urls
    */
@@ -123,7 +123,11 @@ export interface GetStateReturn {
   /**
    * Returns whether the current app state is different to the initial state
    */
-  isAppStateDirty: () => void;
+  isAppStateDirty: () => boolean;
+  /**
+   * Reset AppState to default, discarding all changes
+   */
+  resetAppState: () => void;
 }
 const APP_STATE_URL_KEY = '_a';
 
@@ -132,11 +136,12 @@ const APP_STATE_URL_KEY = '_a';
  * Used to sync URL with UI state
  */
 export function getState({
-  defaultAppState = {},
+  getStateDefaults,
   storeInSessionStorage = false,
   history,
   toasts,
 }: GetStateParams): GetStateReturn {
+  const defaultAppState = getStateDefaults ? getStateDefaults() : {};
   const stateStorage = createKbnUrlStateStorage({
     useHash: storeInSessionStorage,
     history,
@@ -184,6 +189,10 @@ export function getState({
     },
     resetInitialAppState: () => {
       initialAppState = appStateContainer.getState();
+    },
+    resetAppState: () => {
+      const defaultState = getStateDefaults ? getStateDefaults() : {};
+      setState(appStateContainerModified, defaultState);
     },
     getPreviousAppState: () => previousAppState,
     flushToUrl: () => stateStorage.flush(),

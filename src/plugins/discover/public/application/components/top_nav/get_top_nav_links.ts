@@ -17,19 +17,36 @@
  * under the License.
  */
 import { i18n } from '@kbn/i18n';
-import { Capabilities } from '../../../../../../core/types';
+import { showOpenSearchPanel } from './show_open_search_panel';
+import { getSharingData } from '../../helpers/get_sharing_data';
+import { unhashUrl } from '../../../../../kibana_utils/public';
+import { DiscoverServices } from '../../../build_services';
+import { Adapters } from '../../../../../inspector/common/adapters';
+import { SavedSearch } from '../../../saved_searches';
+import { onSaveSearch } from './on_save_search';
+import { GetStateReturn } from '../../angular/discover_state';
+import { IndexPattern } from '../../../kibana_services';
 
 /**
  * Helper function to build the top nav links
  */
-export const getTopNavLinks = (
-  onNewSearch: () => void,
-  onSaveSearch: () => void,
-  onOpenSearch: () => void,
-  onShareSearch: () => void,
-  onInspectSearch: () => void,
-  uiCapabilities: Capabilities
-) => {
+export const getTopNavLinks = ({
+  getFieldCounts,
+  indexPattern,
+  inspectorAdapters,
+  navigateTo,
+  savedSearch,
+  services,
+  state,
+}: {
+  getFieldCounts: () => Promise<Record<string, number>>;
+  indexPattern: IndexPattern;
+  inspectorAdapters: Adapters;
+  navigateTo: (url: string) => void;
+  savedSearch: SavedSearch;
+  services: DiscoverServices;
+  state: GetStateReturn;
+}) => {
   const newSearch = {
     id: 'new',
     label: i18n.translate('discover.localMenu.localMenu.newSearchTitle', {
@@ -38,7 +55,7 @@ export const getTopNavLinks = (
     description: i18n.translate('discover.localMenu.newSearchDescription', {
       defaultMessage: 'New Search',
     }),
-    run: onNewSearch,
+    run: () => navigateTo('/'),
     testId: 'discoverNewButton',
   };
 
@@ -51,7 +68,7 @@ export const getTopNavLinks = (
       defaultMessage: 'Save Search',
     }),
     testId: 'discoverSaveButton',
-    run: onSaveSearch,
+    run: () => onSaveSearch({ savedSearch, services, indexPattern, navigateTo, state }),
   };
 
   const openSearch = {
@@ -63,7 +80,11 @@ export const getTopNavLinks = (
       defaultMessage: 'Open Saved Search',
     }),
     testId: 'discoverOpenButton',
-    run: onOpenSearch,
+    run: () =>
+      showOpenSearchPanel({
+        makeUrl: (searchId) => `#/view/${encodeURIComponent(searchId)}`,
+        I18nContext: services.core.i18n.Context,
+      }),
   };
 
   const shareSearch = {
@@ -75,7 +96,31 @@ export const getTopNavLinks = (
       defaultMessage: 'Share Search',
     }),
     testId: 'shareTopNavButton',
-    run: onShareSearch,
+    run: async (anchorElement: HTMLElement) => {
+      if (!services.share) {
+        return;
+      }
+      const sharingData = await getSharingData(
+        savedSearch.searchSource,
+        state.appStateContainer.getState(),
+        indexPattern,
+        services.uiSettings,
+        getFieldCounts
+      );
+      services.share.toggleShareContextMenu({
+        anchorElement,
+        allowEmbed: false,
+        allowShortUrl: !!services.capabilities.discover.createShortUrl,
+        shareableUrl: unhashUrl(window.location.href),
+        objectId: savedSearch.id,
+        objectType: 'search',
+        sharingData: {
+          ...sharingData,
+          title: savedSearch.title,
+        },
+        isDirty: !savedSearch.id || state.isAppStateDirty(),
+      });
+    },
   };
 
   const inspectSearch = {
@@ -87,12 +132,16 @@ export const getTopNavLinks = (
       defaultMessage: 'Open Inspector for search',
     }),
     testId: 'openInspectorButton',
-    run: onInspectSearch,
+    run: () => {
+      services.inspector.open(inspectorAdapters, {
+        title: savedSearch.title,
+      });
+    },
   };
 
   return [
     newSearch,
-    ...(uiCapabilities.discover.save ? [saveSearch] : []),
+    ...(services.capabilities.discover.save ? [saveSearch] : []),
     openSearch,
     shareSearch,
     inspectSearch,

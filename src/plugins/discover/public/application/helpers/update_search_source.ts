@@ -27,10 +27,10 @@ import { DataPublicPluginStart } from '../../../../data/public';
 export function updateSearchSource(
   searchSource: ISearchSource,
   {
-    state,
-    indexPattern,
-    data,
     config,
+    data,
+    indexPattern,
+    state,
   }: {
     config: IUiSettingsClient;
     data: DataPublicPluginStart;
