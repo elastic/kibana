@@ -126,7 +126,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          title="trusted app 0"
                         >
                           trusted app 0
                         </span>
@@ -386,7 +386,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          title="trusted app 1"
                         >
                           trusted app 1
                         </span>
@@ -646,7 +646,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          title="trusted app 2"
                         >
                           trusted app 2
                         </span>
@@ -906,7 +906,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          title="trusted app 3"
                         >
                           trusted app 3
                         </span>
@@ -1166,7 +1166,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          title="trusted app 4"
                         >
                           trusted app 4
                         </span>
@@ -1426,7 +1426,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          title="trusted app 5"
                         >
                           trusted app 5
                         </span>
@@ -1686,7 +1686,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          title="trusted app 6"
                         >
                           trusted app 6
                         </span>
@@ -1946,7 +1946,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          title="trusted app 7"
                         >
                           trusted app 7
                         </span>
@@ -2206,7 +2206,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          title="trusted app 8"
                         >
                           trusted app 8
                         </span>
@@ -2466,7 +2466,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          title="trusted app 9"
                         >
                           trusted app 9
                         </span>
@@ -3004,7 +3004,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          title="trusted app 0"
                         >
                           trusted app 0
                         </span>
@@ -3264,7 +3264,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          title="trusted app 1"
                         >
                           trusted app 1
                         </span>
@@ -3524,7 +3524,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          title="trusted app 2"
                         >
                           trusted app 2
                         </span>
@@ -3784,7 +3784,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          title="trusted app 3"
                         >
                           trusted app 3
                         </span>
@@ -4044,7 +4044,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          title="trusted app 4"
                         >
                           trusted app 4
                         </span>
@@ -4304,7 +4304,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          title="trusted app 5"
                         >
                           trusted app 5
                         </span>
@@ -4564,7 +4564,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          title="trusted app 6"
                         >
                           trusted app 6
                         </span>
@@ -4824,7 +4824,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          title="trusted app 7"
                         >
                           trusted app 7
                         </span>
@@ -5084,7 +5084,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          title="trusted app 8"
                         >
                           trusted app 8
                         </span>
@@ -5344,7 +5344,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          title="trusted app 9"
                         >
                           trusted app 9
                         </span>
@@ -5846,7 +5846,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          title="trusted app 0"
                         >
                           trusted app 0
                         </span>
@@ -6106,7 +6106,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          title="trusted app 1"
                         >
                           trusted app 1
                         </span>
@@ -6366,7 +6366,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          title="trusted app 2"
                         >
                           trusted app 2
                         </span>
@@ -6626,7 +6626,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          title="trusted app 3"
                         >
                           trusted app 3
                         </span>
@@ -6886,7 +6886,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          title="trusted app 4"
                         >
                           trusted app 4
                         </span>
@@ -7146,7 +7146,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          title="trusted app 5"
                         >
                           trusted app 5
                         </span>
@@ -7406,7 +7406,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          title="trusted app 6"
                         >
                           trusted app 6
                         </span>
@@ -7666,7 +7666,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          title="trusted app 7"
                         >
                           trusted app 7
                         </span>
@@ -7926,7 +7926,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          title="trusted app 8"
                         >
                           trusted app 8
                         </span>
@@ -8186,7 +8186,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          title="trusted app 9"
                         >
                           trusted app 9
                         </span>
