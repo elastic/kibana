@@ -15,9 +15,15 @@ import {
   EuiIcon,
   EuiPortal,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, FormattedNumber } from '@kbn/i18n/react';
+import { SO_SEARCH_LIMIT } from '../../../../constants';
 import { Agent } from '../../../../types';
-import { AgentReassignAgentPolicyFlyout, AgentUnenrollAgentModal } from '../../components';
+import {
+  AgentReassignAgentPolicyFlyout,
+  AgentUnenrollAgentModal,
+  AgentUpgradeAgentModal,
+} from '../../components';
+import { useKibanaVersion } from '../../../../hooks';
 
 const Divider = styled.div`
   width: 0;
@@ -58,6 +64,7 @@ export const AgentBulkActions: React.FunctionComponent<{
   setSelectedAgents,
   refreshAgents,
 }) => {
+  const kibanaVersion = useKibanaVersion();
   // Bulk actions menu states
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const closeMenu = () => setIsMenuOpen(false);
@@ -66,6 +73,7 @@ export const AgentBulkActions: React.FunctionComponent<{
   // Actions states
   const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState<boolean>(false);
   const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState<boolean>(false);
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState<boolean>(false);
 
   // Check if user is working with only inactive agents
   const atLeastOneActiveAgentSelected =
@@ -103,6 +111,20 @@ export const AgentBulkActions: React.FunctionComponent<{
           onClick: () => {
             closeMenu();
             setIsUnenrollModalOpen(true);
+          },
+        },
+        {
+          name: (
+            <FormattedMessage
+              id="xpack.ingestManager.agentBulkActions.upgradeAgents"
+              defaultMessage="Upgrade agents"
+            />
+          ),
+          icon: <EuiIcon type="refresh" size="m" />,
+          disabled: !atLeastOneActiveAgentSelected,
+          onClick: () => {
+            closeMenu();
+            setIsUpgradeModalOpen(true);
           },
         },
         {
@@ -150,14 +172,40 @@ export const AgentBulkActions: React.FunctionComponent<{
           />
         </EuiPortal>
       )}
+      {isUpgradeModalOpen && (
+        <EuiPortal>
+          <AgentUpgradeAgentModal
+            version={kibanaVersion}
+            agents={selectionMode === 'manual' ? selectedAgents : currentQuery}
+            agentCount={
+              selectionMode === 'manual' ? selectedAgents.length : totalAgents - totalInactiveAgents
+            }
+            onClose={() => {
+              setIsUpgradeModalOpen(false);
+              refreshAgents();
+            }}
+          />
+        </EuiPortal>
+      )}
       <EuiFlexGroup gutterSize="m" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.ingestManager.agentBulkActions.totalAgents"
-              defaultMessage="Showing {count, plural, one {# agent} other {# agents}}"
-              values={{ count: totalAgents }}
-            />
+            {totalAgents > SO_SEARCH_LIMIT ? (
+              <FormattedMessage
+                id="xpack.ingestManager.agentBulkActions.totalAgentsWithLimit"
+                defaultMessage="Showing {count} of {total} agents"
+                values={{
+                  count: <FormattedNumber value={SO_SEARCH_LIMIT} />,
+                  total: <FormattedNumber value={totalAgents} />,
+                }}
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.ingestManager.agentBulkActions.totalAgents"
+                defaultMessage="Showing {count, plural, one {# agent} other {# agents}}"
+                values={{ count: totalAgents }}
+              />
+            )}
           </EuiText>
         </EuiFlexItem>
         {(selectionMode === 'manual' && selectedAgents.length) ||
@@ -184,7 +232,7 @@ export const AgentBulkActions: React.FunctionComponent<{
                         count:
                           selectionMode === 'manual'
                             ? selectedAgents.length
-                            : totalAgents - totalInactiveAgents,
+                            : Math.min(totalAgents - totalInactiveAgents, SO_SEARCH_LIMIT),
                       }}
                     />
                   </Button>

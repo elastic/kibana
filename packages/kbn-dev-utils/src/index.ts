@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export { REPO_ROOT } from '@kbn/utils';
+export * from '@kbn/utils';
 export { withProcRunner, ProcRunner } from './proc_runner';
 export * from './tooling_log';
 export * from './serializers';

@@ -15,6 +15,9 @@ import { getListArrayMock } from '../../../../common/detection_engine/schemas/ty
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 
+// @ts-expect-error
+moment.suppressDeprecationWarnings = true;
+
 import {
   generateId,
   parseInterval,
@@ -25,11 +28,14 @@ import {
   getListsClient,
   getSignalTimeTuples,
   getExceptions,
+  wrapBuildingBlocks,
+  generateSignalId,
   createErrorsFromShard,
   createSearchAfterReturnTypeFromResponse,
   createSearchAfterReturnType,
   mergeReturns,
   createTotalHitsFromSearchResult,
+  lastValidDate,
 } from './utils';
 import { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
 import {
@@ -38,10 +44,12 @@ import {
   sampleBulkError,
   sampleBulkErrorItem,
   mockLogger,
+  sampleSignalHit,
   sampleDocSearchResultsWithSortId,
   sampleEmptyDocSearchResults,
   sampleDocSearchResultsNoSortIdNoHits,
   repeatedSearchResultsWithSortId,
+  sampleDocSearchResultsNoSortId,
 } from './__mocks__/es_results';
 import { ShardError } from '../../types';
 
@@ -794,6 +802,56 @@ describe('utils', () => {
     });
   });
 
+  describe('wrapBuildingBlocks', () => {
+    it('should generate a unique id for each building block', () => {
+      const wrappedBlocks = wrapBuildingBlocks(
+        [sampleSignalHit(), sampleSignalHit()],
+        'test-index'
+      );
+      const blockIds: string[] = [];
+      wrappedBlocks.forEach((block) => {
+        expect(blockIds.includes(block._id)).toEqual(false);
+        blockIds.push(block._id);
+      });
+    });
+
+    it('should generate different ids for identical documents in different sequences', () => {
+      const wrappedBlockSequence1 = wrapBuildingBlocks([sampleSignalHit()], 'test-index');
+      const wrappedBlockSequence2 = wrapBuildingBlocks(
+        [sampleSignalHit(), sampleSignalHit()],
+        'test-index'
+      );
+      const blockId = wrappedBlockSequence1[0]._id;
+      wrappedBlockSequence2.forEach((block) => {
+        expect(block._id).not.toEqual(blockId);
+      });
+    });
+
+    it('should generate the same ids when given the same sequence twice', () => {
+      const wrappedBlockSequence1 = wrapBuildingBlocks(
+        [sampleSignalHit(), sampleSignalHit()],
+        'test-index'
+      );
+      const wrappedBlockSequence2 = wrapBuildingBlocks(
+        [sampleSignalHit(), sampleSignalHit()],
+        'test-index'
+      );
+      wrappedBlockSequence1.forEach((block, idx) => {
+        expect(block._id).toEqual(wrappedBlockSequence2[idx]._id);
+      });
+    });
+  });
+
+  describe('generateSignalId', () => {
+    it('generates a unique signal id for same signal with different rule id', () => {
+      const signalId1 = generateSignalId(sampleSignalHit().signal);
+      const modifiedSignal = sampleSignalHit();
+      modifiedSignal.signal.rule.id = 'some other rule id';
+      const signalIdModified = generateSignalId(modifiedSignal.signal);
+      expect(signalId1).not.toEqual(signalIdModified);
+    });
+  });
+
   describe('createErrorsFromShard', () => {
     test('empty errors will return an empty array', () => {
       const createdErrors = createErrorsFromShard({ errors: [] });
@@ -868,7 +926,10 @@ describe('utils', () => {
   describe('createSearchAfterReturnTypeFromResponse', () => {
     test('empty results will return successful type', () => {
       const searchResult = sampleEmptyDocSearchResults();
-      const newSearchResult = createSearchAfterReturnTypeFromResponse({ searchResult });
+      const newSearchResult = createSearchAfterReturnTypeFromResponse({
+        searchResult,
+        timestampOverride: undefined,
+      });
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
         createdSignalsCount: 0,
@@ -882,7 +943,10 @@ describe('utils', () => {
 
     test('multiple results will return successful type with expected success', () => {
       const searchResult = sampleDocSearchResultsWithSortId();
-      const newSearchResult = createSearchAfterReturnTypeFromResponse({ searchResult });
+      const newSearchResult = createSearchAfterReturnTypeFromResponse({
+        searchResult,
+        timestampOverride: undefined,
+      });
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
         createdSignalsCount: 0,
@@ -897,22 +961,137 @@ describe('utils', () => {
     test('result with error will create success: false within the result set', () => {
       const searchResult = sampleDocSearchResultsNoSortIdNoHits();
       searchResult._shards.failed = 1;
-      const { success } = createSearchAfterReturnTypeFromResponse({ searchResult });
+      const { success } = createSearchAfterReturnTypeFromResponse({
+        searchResult,
+        timestampOverride: undefined,
+      });
       expect(success).toEqual(false);
     });
 
     test('result with error will create success: false within the result set if failed is 2 or more', () => {
       const searchResult = sampleDocSearchResultsNoSortIdNoHits();
       searchResult._shards.failed = 2;
-      const { success } = createSearchAfterReturnTypeFromResponse({ searchResult });
+      const { success } = createSearchAfterReturnTypeFromResponse({
+        searchResult,
+        timestampOverride: undefined,
+      });
       expect(success).toEqual(false);
     });
 
     test('result with error will create success: true within the result set if failed is 0', () => {
       const searchResult = sampleDocSearchResultsNoSortIdNoHits();
       searchResult._shards.failed = 0;
-      const { success } = createSearchAfterReturnTypeFromResponse({ searchResult });
+      const { success } = createSearchAfterReturnTypeFromResponse({
+        searchResult,
+        timestampOverride: undefined,
+      });
       expect(success).toEqual(true);
+    });
+
+    test('It will not set an invalid date time stamp from a non-existent @timestamp when the index is not 100% ECS compliant', () => {
+      const searchResult = sampleDocSearchResultsNoSortId();
+      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = undefined;
+      const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({
+        searchResult,
+        timestampOverride: undefined,
+      });
+      expect(lastLookBackDate).toEqual(null);
+    });
+
+    test('It will not set an invalid date time stamp from a null @timestamp when the index is not 100% ECS compliant', () => {
+      const searchResult = sampleDocSearchResultsNoSortId();
+      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = null;
+      const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({
+        searchResult,
+        timestampOverride: undefined,
+      });
+      expect(lastLookBackDate).toEqual(null);
+    });
+
+    test('It will not set an invalid date time stamp from an invalid @timestamp string', () => {
+      const searchResult = sampleDocSearchResultsNoSortId();
+      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = 'invalid';
+      const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({
+        searchResult,
+        timestampOverride: undefined,
+      });
+      expect(lastLookBackDate).toEqual(null);
+    });
+  });
+
+  describe('lastValidDate', () => {
+    test('It returns undefined if the search result contains a null timestamp', () => {
+      const searchResult = sampleDocSearchResultsNoSortId();
+      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = null;
+      const date = lastValidDate({ searchResult, timestampOverride: undefined });
+      expect(date).toEqual(undefined);
+    });
+
+    test('It returns undefined if the search result contains a undefined timestamp', () => {
+      const searchResult = sampleDocSearchResultsNoSortId();
+      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = undefined;
+      const date = lastValidDate({ searchResult, timestampOverride: undefined });
+      expect(date).toEqual(undefined);
+    });
+
+    test('It returns undefined if the search result contains an invalid string value', () => {
+      const searchResult = sampleDocSearchResultsNoSortId();
+      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = 'invalid value';
+      const date = lastValidDate({ searchResult, timestampOverride: undefined });
+      expect(date).toEqual(undefined);
+    });
+
+    test('It returns correct date time stamp if the search result contains an invalid string value', () => {
+      const searchResult = sampleDocSearchResultsNoSortId();
+      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = 'invalid value';
+      const date = lastValidDate({ searchResult, timestampOverride: undefined });
+      expect(date).toEqual(undefined);
+    });
+
+    test('It returns normal date time if set', () => {
+      const searchResult = sampleDocSearchResultsNoSortId();
+      const date = lastValidDate({ searchResult, timestampOverride: undefined });
+      expect(date?.toISOString()).toEqual('2020-04-20T21:27:45.000Z');
+    });
+
+    test('It returns date time from field if set there', () => {
+      const timestamp = '2020-10-07T19:27:19.136Z';
+      const searchResult = sampleDocSearchResultsNoSortId();
+      if (searchResult.hits.hits[0] == null) {
+        throw new TypeError('Test requires one element');
+      }
+      searchResult.hits.hits[0] = {
+        ...searchResult.hits.hits[0],
+        fields: {
+          '@timestamp': [timestamp],
+        },
+      };
+      const date = lastValidDate({ searchResult, timestampOverride: undefined });
+      expect(date?.toISOString()).toEqual(timestamp);
+    });
+
+    test('It returns timestampOverride date time if set', () => {
+      const override = '2020-10-07T19:20:28.049Z';
+      const searchResult = sampleDocSearchResultsNoSortId();
+      searchResult.hits.hits[0]._source.different_timestamp = new Date(override).toISOString();
+      const date = lastValidDate({ searchResult, timestampOverride: 'different_timestamp' });
+      expect(date?.toISOString()).toEqual(override);
+    });
+
+    test('It returns timestampOverride date time from fields if set on it', () => {
+      const override = '2020-10-07T19:36:31.110Z';
+      const searchResult = sampleDocSearchResultsNoSortId();
+      if (searchResult.hits.hits[0] == null) {
+        throw new TypeError('Test requires one element');
+      }
+      searchResult.hits.hits[0] = {
+        ...searchResult.hits.hits[0],
+        fields: {
+          different_timestamp: [override],
+        },
+      };
+      const date = lastValidDate({ searchResult, timestampOverride: 'different_timestamp' });
+      expect(date?.toISOString()).toEqual(override);
     });
   });
 

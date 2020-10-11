@@ -38,6 +38,10 @@ describe('NewTemplateTimeline', () => {
   const mockTitle = 'NEW_TIMELINE';
   let wrapper: ReactWrapper;
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('render if CRUD', () => {
     beforeAll(() => {
       (useKibana as jest.Mock).mockReturnValue({
@@ -50,10 +54,6 @@ describe('NewTemplateTimeline', () => {
             },
           },
         },
-      });
-
-      afterAll(() => {
-        (useKibana as jest.Mock).mockReset();
       });
 
       wrapper = mount(
@@ -98,10 +98,6 @@ describe('NewTemplateTimeline', () => {
           <NewTemplateTimeline outline={true} closeGearMenu={mockClosePopover} title={mockTitle} />
         </ReduxStoreProvider>
       );
-    });
-
-    afterAll(() => {
-      (useKibana as jest.Mock).mockReset();
     });
 
     test('no render', () => {

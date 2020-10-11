@@ -80,33 +80,36 @@ describe('getMonitoringUsageCollector', () => {
     expect(args[0].schema).toStrictEqual({
       hasMonitoringData: { type: 'boolean' },
       clusters: {
-        license: { type: 'keyword' },
-        clusterUuid: { type: 'keyword' },
-        metricbeatUsed: { type: 'boolean' },
-        elasticsearch: {
-          enabled: { type: 'boolean' },
-          count: { type: 'long' },
+        type: 'array',
+        items: {
+          license: { type: 'keyword' },
+          clusterUuid: { type: 'keyword' },
           metricbeatUsed: { type: 'boolean' },
-        },
-        kibana: {
-          enabled: { type: 'boolean' },
-          count: { type: 'long' },
-          metricbeatUsed: { type: 'boolean' },
-        },
-        logstash: {
-          enabled: { type: 'boolean' },
-          count: { type: 'long' },
-          metricbeatUsed: { type: 'boolean' },
-        },
-        beats: {
-          enabled: { type: 'boolean' },
-          count: { type: 'long' },
-          metricbeatUsed: { type: 'boolean' },
-        },
-        apm: {
-          enabled: { type: 'boolean' },
-          count: { type: 'long' },
-          metricbeatUsed: { type: 'boolean' },
+          elasticsearch: {
+            enabled: { type: 'boolean' },
+            count: { type: 'long' },
+            metricbeatUsed: { type: 'boolean' },
+          },
+          kibana: {
+            enabled: { type: 'boolean' },
+            count: { type: 'long' },
+            metricbeatUsed: { type: 'boolean' },
+          },
+          logstash: {
+            enabled: { type: 'boolean' },
+            count: { type: 'long' },
+            metricbeatUsed: { type: 'boolean' },
+          },
+          beats: {
+            enabled: { type: 'boolean' },
+            count: { type: 'long' },
+            metricbeatUsed: { type: 'boolean' },
+          },
+          apm: {
+            enabled: { type: 'boolean' },
+            count: { type: 'long' },
+            metricbeatUsed: { type: 'boolean' },
+          },
         },
       },
     });

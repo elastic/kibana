@@ -25,6 +25,7 @@ import { writeFile } from './fs';
 import { Kibana } from './kibana';
 import { YarnLock } from './yarn_lock';
 import { log } from './log';
+import { Project } from './project';
 
 export async function validateYarnLock(kbn: Kibana, yarnLock: YarnLock) {
   // look through all of the packages in the yarn.lock file to see if
@@ -90,6 +91,67 @@ export async function validateYarnLock(kbn: Kibana, yarnLock: YarnLock) {
 
       If you have questions about this please reack out to the operations team.
 
+    `);
+
+    process.exit(1);
+  }
+
+  // TODO: remove this once we move into a single package.json
+  // look through all the package.json files to find packages which have mismatched version ranges
+  const depRanges = new Map<string, Array<{ range: string; projects: Project[] }>>();
+  for (const project of kbn.getAllProjects().values()) {
+    for (const [dep, range] of Object.entries(project.allDependencies)) {
+      const existingDep = depRanges.get(dep);
+      if (!existingDep) {
+        depRanges.set(dep, [
+          {
+            range,
+            projects: [project],
+          },
+        ]);
+        continue;
+      }
+
+      const existingRange = existingDep.find((existing) => existing.range === range);
+      if (!existingRange) {
+        existingDep.push({
+          range,
+          projects: [project],
+        });
+        continue;
+      }
+
+      existingRange.projects.push(project);
+    }
+  }
+
+  const duplicateRanges = Array.from(depRanges.entries())
+    .filter(([, ranges]) => ranges.length > 1)
+    .reduce(
+      (acc: string[], [dep, ranges]) => [
+        ...acc,
+        dep,
+        ...ranges.map(
+          ({ range, projects }) => `  ${range} => ${projects.map((p) => p.name).join(', ')}`
+        ),
+      ],
+      []
+    )
+    .join('\n        ');
+
+  if (duplicateRanges) {
+    log.error(dedent`
+
+      [single_version_dependencies] Multiple version ranges for the same dependency
+      were found declared across different package.json files. Please consolidate
+      those to match across all package.json files. Different versions for the
+      same dependency is not supported.
+
+      If you have questions about this please reach out to the operations team.
+
+      The conflicting dependencies are:
+
+        ${duplicateRanges}
     `);
 
     process.exit(1);

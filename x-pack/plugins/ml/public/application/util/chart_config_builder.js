@@ -9,9 +9,7 @@
  * in the source metric data.
  */
 
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import get from 'lodash/get';
+import { get } from 'lodash';
 
 import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
 

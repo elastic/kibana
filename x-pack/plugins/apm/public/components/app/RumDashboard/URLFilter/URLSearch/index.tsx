@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiTitle } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
 import React, { useEffect, useState, FormEvent, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
+import { EuiTitle } from '@elastic/eui';
 import { useUrlParams } from '../../../../../hooks/useUrlParams';
 import { useFetcher } from '../../../../../hooks/useFetcher';
 import { I18LABELS } from '../../translations';
@@ -15,6 +15,7 @@ import { fromQuery, toQuery } from '../../../../shared/Links/url_helpers';
 import { formatToSec } from '../../UXMetrics/KeyUXMetrics';
 import { SelectableUrlList } from './SelectableUrlList';
 import { UrlOption } from './RenderOption';
+import { useUxQuery } from '../../hooks/useUxQuery';
 
 interface Props {
   onChange: (value: string[]) => void;
@@ -23,9 +24,12 @@ interface Props {
 export function URLSearch({ onChange: onFilterChange }: Props) {
   const history = useHistory();
 
-  const { urlParams, uiFilters } = useUrlParams();
+  const { uiFilters, urlParams } = useUrlParams();
 
-  const { start, end, serviceName } = urlParams;
+  const { searchTerm } = urlParams;
+
+  const [popoverIsOpen, setPopoverIsOpen] = useState(false);
+
   const [searchValue, setSearchValue] = useState('');
 
   const [debouncedValue, setDebouncedValue] = useState('');
@@ -54,17 +58,18 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
 
   const [checkedUrls, setCheckedUrls] = useState<string[]>([]);
 
+  const uxQuery = useUxQuery();
+
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (start && end && serviceName) {
+      if (uxQuery && popoverIsOpen) {
         const { transactionUrl, ...restFilters } = uiFilters;
 
         return callApmApi({
           pathname: '/api/apm/rum-client/url-search',
           params: {
             query: {
-              start,
-              end,
+              ...uxQuery,
               uiFilters: JSON.stringify(restFilters),
               urlQuery: searchValue,
             },
@@ -73,12 +78,19 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
       }
       return Promise.resolve(null);
     },
-    [start, end, serviceName, uiFilters, searchValue]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [uxQuery, searchValue, popoverIsOpen]
   );
 
   useEffect(() => {
     setCheckedUrls(uiFilters.transactionUrl || []);
   }, [uiFilters]);
+
+  useEffect(() => {
+    if (searchTerm && searchValue === '') {
+      updateSearchTerm('');
+    }
+  }, [searchValue, updateSearchTerm, searchTerm]);
 
   const onChange = (updatedOptions: UrlOption[]) => {
     const clickedItems = updatedOptions.filter(
@@ -110,12 +122,14 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
   };
 
   const onClose = () => {
-    onFilterChange(checkedUrls);
+    if (uiFilters.transactionUrl || checkedUrls.length > 0) {
+      onFilterChange(checkedUrls);
+    }
   };
 
   return (
     <>
-      <EuiTitle size="xxs" textTransform="uppercase">
+      <EuiTitle size="xxxs" textTransform="uppercase">
         <h4>{I18LABELS.url}</h4>
       </EuiTitle>
       <SelectableUrlList
@@ -126,6 +140,8 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
         onChange={onChange}
         onClose={onClose}
         searchValue={searchValue}
+        popoverIsOpen={popoverIsOpen}
+        setPopoverIsOpen={setPopoverIsOpen}
       />
     </>
   );

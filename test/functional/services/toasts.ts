@@ -63,7 +63,7 @@ export function ToastsProvider({ getService }: FtrProviderContext) {
       }
     }
 
-    private async getToastElement(index: number) {
+    public async getToastElement(index: number) {
       const list = await this.getGlobalToastList();
       return await list.findByCssSelector(`.euiToast:nth-child(${index})`);
     }

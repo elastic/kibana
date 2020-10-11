@@ -18,7 +18,6 @@
  */
 
 import { ExpressionValue, ExpressionValueError } from '../expression_types';
-import { ExpressionFunction } from '../../common';
 
 export type ExpressionAstNode =
   | ExpressionAstExpression
@@ -48,9 +47,9 @@ export interface ExpressionAstFunctionDebug {
   success: boolean;
 
   /**
-   * Reference to the expression function this AST node represents.
+   * Id of expression function.
    */
-  fn: ExpressionFunction;
+  fn: string;
 
   /**
    * Input that expression function received as its first argument.

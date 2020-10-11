@@ -17,29 +17,21 @@
  * under the License.
  */
 
-import { trimEnd, debounce } from 'lodash';
-import {
-  BehaviorSubject,
-  throwError,
-  timer,
-  Subscription,
-  defer,
-  from,
-  Observable,
-  NEVER,
-} from 'rxjs';
+import { get, trimEnd, debounce } from 'lodash';
+import { BehaviorSubject, throwError, timer, defer, from, Observable, NEVER } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import { CoreStart, CoreSetup, ToastsSetup } from 'kibana/public';
-import { i18n } from '@kbn/i18n';
 import {
   getCombinedSignal,
   AbortError,
-  IEsSearchRequest,
+  IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchOptions,
   ES_SEARCH_STRATEGY,
 } from '../../common';
 import { SearchUsageCollector } from './collectors';
+import { SearchTimeoutError, PainlessError, isPainlessError, TimeoutErrorMode } from './errors';
+import { toMountPoint } from '../../../kibana_react/public';
 
 export interface SearchInterceptorDeps {
   http: CoreSetup['http'];
@@ -63,12 +55,6 @@ export class SearchInterceptor {
   protected pendingCount$ = new BehaviorSubject(0);
 
   /**
-   * The subscriptions from scheduling the automatic timeout for each request.
-   * @internal
-   */
-  protected timeoutSubscriptions: Subscription = new Subscription();
-
-  /**
    * @internal
    */
   protected application!: CoreStart['application'];
@@ -84,11 +70,46 @@ export class SearchInterceptor {
     });
   }
 
+  /*
+   * @returns `TimeoutErrorMode` indicating what action should be taken in case of a request timeout based on license and permissions.
+   * @internal
+   */
+  protected getTimeoutMode() {
+    return TimeoutErrorMode.UPGRADE;
+  }
+
+  /*
+   * @returns `Error` a search service specific error or the original error, if a specific error can't be recognized.
+   * @internal
+   */
+  protected handleSearchError(
+    e: any,
+    request: IKibanaSearchRequest,
+    timeoutSignal: AbortSignal,
+    appAbortSignal?: AbortSignal
+  ): Error {
+    if (timeoutSignal.aborted || get(e, 'body.message') === 'Request timed out') {
+      // Handle a client or a server side timeout
+      const err = new SearchTimeoutError(e, this.getTimeoutMode());
+
+      // Show the timeout error here, so that it's shown regardless of how an application chooses to handle errors.
+      this.showTimeoutError(err);
+      return err;
+    } else if (appAbortSignal?.aborted) {
+      // In the case an application initiated abort, throw the existing AbortError.
+      return e;
+    } else if (isPainlessError(e)) {
+      return new PainlessError(e, request);
+    } else {
+      return e;
+    }
+  }
+
   /**
    * @internal
    */
   protected runSearch(
-    request: IEsSearchRequest,
+    request: IKibanaSearchRequest,
     signal: AbortSignal,
     strategy?: string
   ): Observable<IKibanaSearchResponse> {
@@ -103,41 +124,6 @@ export class SearchInterceptor {
         signal,
       })
     );
-  }
-
-  /**
-   * Searches using the given `search` method. Overrides the `AbortSignal` with one that will abort
-   * either when `cancelPending` is called, when the request times out, or when the original
-   * `AbortSignal` is aborted. Updates `pendingCount$` when the request is started/finalized.
-   */
-  public search(
-    request: IEsSearchRequest,
-    options?: ISearchOptions
-  ): Observable<IKibanaSearchResponse> {
-    // Defer the following logic until `subscribe` is actually called
-    return defer(() => {
-      if (options?.abortSignal?.aborted) {
-        return throwError(new AbortError());
-      }
-
-      const { combinedSignal, cleanup } = this.setupAbortSignal({
-        abortSignal: options?.abortSignal,
-      });
-      this.pendingCount$.next(this.pendingCount$.getValue() + 1);
-
-      return this.runSearch(request, combinedSignal, options?.strategy).pipe(
-        catchError((e: any) => {
-          if (e.body?.attributes?.error === 'Request timed out') {
-            this.showTimeoutError(e);
-          }
-          return throwError(e);
-        }),
-        finalize(() => {
-          this.pendingCount$.next(this.pendingCount$.getValue() - 1);
-          cleanup();
-        })
-      );
-    });
   }
 
   /**
@@ -156,9 +142,7 @@ export class SearchInterceptor {
     const timeout$ = timeout ? timer(timeout) : NEVER;
     const subscription = timeout$.subscribe(() => {
       timeoutController.abort();
-      this.showTimeoutError(new AbortError());
     });
-    this.timeoutSubscriptions.add(subscription);
 
     // Get a combined `AbortSignal` that will be aborted whenever the first of the following occurs:
     // 1. The user manually aborts (via `cancelPending`)
@@ -172,34 +156,95 @@ export class SearchInterceptor {
 
     const combinedSignal = getCombinedSignal(signals);
     const cleanup = () => {
-      this.timeoutSubscriptions.remove(subscription);
+      subscription.unsubscribe();
     };
 
     combinedSignal.addEventListener('abort', cleanup);
 
     return {
       combinedSignal,
+      timeoutSignal,
       cleanup,
     };
   }
 
-  // Right now we are debouncing but we will hook this up with background sessions to show only one
-  // error notification per session.
-  protected showTimeoutError = debounce(
-    (e: Error) => {
-      this.deps.toasts.addError(e, {
+  /**
+   * Right now we are throttling but we will hook this up with background sessions to show only one
+   * error notification per session.
+   * @internal
+   */
+  private showTimeoutError = debounce(
+    (e: SearchTimeoutError) => {
+      this.deps.toasts.addDanger({
         title: 'Timed out',
-        toastMessage: i18n.translate('data.search.upgradeLicense', {
-          defaultMessage:
-            'One or more queries timed out. With our free Basic tier, your queries never time out.',
-        }),
+        text: toMountPoint(e.getErrorMessage(this.application)),
       });
     },
-    60000,
-    {
-      leading: true,
-    }
+    30000,
+    { leading: true, trailing: false }
   );
+
+  /**
+   * Searches using the given `search` method. Overrides the `AbortSignal` with one that will abort
+   * either when `cancelPending` is called, when the request times out, or when the original
+   * `AbortSignal` is aborted. Updates `pendingCount$` when the request is started/finalized.
+   *
+   * @param request
+   * @options
+   * @returns `Observalbe` emitting the search response or an error.
+   */
+  public search(
+    request: IKibanaSearchRequest,
+    options?: ISearchOptions
+  ): Observable<IKibanaSearchResponse> {
+    // Defer the following logic until `subscribe` is actually called
+    return defer(() => {
+      if (options?.abortSignal?.aborted) {
+        return throwError(new AbortError());
+      }
+
+      const { timeoutSignal, combinedSignal, cleanup } = this.setupAbortSignal({
+        abortSignal: options?.abortSignal,
+      });
+      this.pendingCount$.next(this.pendingCount$.getValue() + 1);
+
+      return this.runSearch(request, combinedSignal, options?.strategy).pipe(
+        catchError((e: any) => {
+          return throwError(
+            this.handleSearchError(e, request, timeoutSignal, options?.abortSignal)
+          );
+        }),
+        finalize(() => {
+          this.pendingCount$.next(this.pendingCount$.getValue() - 1);
+          cleanup();
+        })
+      );
+    });
+  }
+
+  /*
+   *
+   */
+  public showError(e: Error) {
+    if (e instanceof AbortError) return;
+
+    if (e instanceof SearchTimeoutError) {
+      // The SearchTimeoutError is shown by the interceptor in getSearchError (regardless of how the app chooses to handle errors)
+      return;
+    }
+
+    if (e instanceof PainlessError) {
+      this.deps.toasts.addDanger({
+        title: 'Search Error',
+        text: toMountPoint(e.getErrorMessage(this.application)),
+      });
+      return;
+    }
+
+    this.deps.toasts.addError(e, {
+      title: 'Search Error',
+    });
+  }
 }
 
 export type ISearchInterceptor = PublicMethodsOf<SearchInterceptor>;

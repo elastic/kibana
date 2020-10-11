@@ -162,7 +162,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore) {
 
     async delete(deleteIndex: string, id: string) {
       try {
-        const query = { id, index: deleteIndex };
+        const query = { id, index: deleteIndex, refresh: true };
         return callAsInternalUser('delete', query);
       } catch (error) {
         throw new Error(

@@ -16,6 +16,7 @@ import { Sources } from './sources';
 import { Note } from './note/saved_object';
 import { PinnedEvent } from './pinned_event/saved_object';
 import { Timeline } from './timeline/saved_object';
+import { TotalValue, BaseHit, Explanation } from '../../common/detection_engine/types';
 
 export * from './hosts';
 
@@ -37,40 +38,6 @@ export interface SiemContext {
   req: FrameworkRequest;
   context: RequestHandlerContext;
   user: AuthenticatedUser | null;
-}
-
-export interface TotalValue {
-  value: number;
-  relation: string;
-}
-
-export interface SearchResponse<T> {
-  took: number;
-  timed_out: boolean;
-  _scroll_id?: string;
-  _shards: ShardsResponse;
-  hits: {
-    total: TotalValue | number;
-    max_score: number;
-    hits: Array<{
-      _index: string;
-      _type: string;
-      _id: string;
-      _score: number;
-      _source: T;
-      _version?: number;
-      _explanation?: Explanation;
-      fields?: string[];
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      highlight?: any;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      inner_hits?: any;
-      matched_queries?: string[];
-      sort?: string[];
-    }>;
-  };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  aggregations?: any;
 }
 
 export interface ShardsResponse {
@@ -97,10 +64,31 @@ export interface ShardError {
   };
 }
 
-export interface Explanation {
-  value: number;
-  description: string;
-  details: Explanation[];
+export interface SearchResponse<T> {
+  took: number;
+  timed_out: boolean;
+  _scroll_id?: string;
+  _shards: ShardsResponse;
+  hits: {
+    total: TotalValue | number;
+    max_score: number;
+    hits: Array<
+      BaseHit<T> & {
+        _type: string;
+        _score: number;
+        _version?: number;
+        _explanation?: Explanation;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        highlight?: any;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        inner_hits?: any;
+        matched_queries?: string[];
+        sort?: string[];
+      }
+    >;
+  };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  aggregations?: any;
 }
 
 export type SearchHit = SearchResponse<object>['hits']['hits'][0];

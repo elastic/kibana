@@ -245,7 +245,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should not be able to edit a preconfigured connector', async () => {
-      const preconfiguredConnectorName = 'xyztest';
+      const preconfiguredConnectorName = 'test-preconfigured-email';
 
       await pageObjects.triggersActionsUI.searchConnectors(preconfiguredConnectorName);
 

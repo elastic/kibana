@@ -15,7 +15,7 @@ describe('DragDrop', () => {
   test('renders if nothing is being dragged', () => {
     const component = render(
       <DragDrop value="hello" draggable label="dragging">
-        Hello!
+        <button>Hello!</button>
       </DragDrop>
     );
 
@@ -24,7 +24,11 @@ describe('DragDrop', () => {
 
   test('dragover calls preventDefault if droppable is true', () => {
     const preventDefault = jest.fn();
-    const component = mount(<DragDrop droppable>Hello!</DragDrop>);
+    const component = mount(
+      <DragDrop droppable>
+        <button>Hello!</button>
+      </DragDrop>
+    );
 
     component.find('[data-test-subj="lnsDragDrop"]').simulate('dragover', { preventDefault });
 
@@ -33,7 +37,11 @@ describe('DragDrop', () => {
 
   test('dragover does not call preventDefault if droppable is false', () => {
     const preventDefault = jest.fn();
-    const component = mount(<DragDrop>Hello!</DragDrop>);
+    const component = mount(
+      <DragDrop>
+        <button>Hello!</button>
+      </DragDrop>
+    );
 
     component.find('[data-test-subj="lnsDragDrop"]').simulate('dragover', { preventDefault });
 
@@ -51,7 +59,7 @@ describe('DragDrop', () => {
     const component = mount(
       <ChildDragDropProvider dragging={value} setDragging={setDragging}>
         <DragDrop value={value} draggable={true} label="drag label">
-          Hello!
+          <button>Hello!</button>
         </DragDrop>
       </ChildDragDropProvider>
     );
@@ -74,7 +82,7 @@ describe('DragDrop', () => {
     const component = mount(
       <ChildDragDropProvider dragging="hola" setDragging={setDragging}>
         <DragDrop onDrop={onDrop} droppable={true} value={value}>
-          Hello!
+          <button>Hello!</button>
         </DragDrop>
       </ChildDragDropProvider>
     );
@@ -98,7 +106,7 @@ describe('DragDrop', () => {
     const component = mount(
       <ChildDragDropProvider dragging="hola" setDragging={setDragging}>
         <DragDrop onDrop={onDrop} droppable={false} value={{}}>
-          Hello!
+          <button>Hello!</button>
         </DragDrop>
       </ChildDragDropProvider>
     );
@@ -121,7 +129,7 @@ describe('DragDrop', () => {
         }}
         droppable
       >
-        Hello!
+        <button>Hello!</button>
       </DragDrop>
     );
 
@@ -132,10 +140,10 @@ describe('DragDrop', () => {
     const component = mount(
       <ChildDragDropProvider dragging={'ignored'} setDragging={() => {}}>
         <DragDrop value="ignored" draggable={true} label="a">
-          Ignored
+          <button>Hello!</button>
         </DragDrop>
         <DragDrop onDrop={(x: unknown) => {}} droppable={false}>
-          Hello!
+          <button>Hello!</button>
         </DragDrop>
       </ChildDragDropProvider>
     );
@@ -154,14 +162,14 @@ describe('DragDrop', () => {
         }}
       >
         <DragDrop value="ignored" draggable={true} label="a">
-          Ignored
+          <button>Hello!</button>
         </DragDrop>
         <DragDrop
           onDrop={(x: unknown) => {}}
           droppable
           getAdditionalClassesOnEnter={getAdditionalClasses}
         >
-          Hello!
+          <button>Hello!</button>
         </DragDrop>
       </ChildDragDropProvider>
     );

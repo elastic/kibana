@@ -20,7 +20,7 @@ import {
 import React, { useCallback, useMemo } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import { APP_ID } from '../../../../../common/constants';
 import {
@@ -33,9 +33,9 @@ import {
 import { SecurityPageName } from '../../../../app/types';
 import { timelineSelectors } from '../../../../timelines/store/timeline';
 import { getCreateCaseUrl } from '../../../../common/components/link_to';
-import { State } from '../../../../common/store';
 import { useKibana } from '../../../../common/lib/kibana';
 import { Note } from '../../../../common/lib/note';
+import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 
 import { Notes } from '../../notes';
 import { AssociateNote, UpdateNote } from '../../notes/helpers';
@@ -73,23 +73,31 @@ export const StarIcon = React.memo<{
   isFavorite: boolean;
   timelineId: string;
   updateIsFavorite: UpdateIsFavorite;
-}>(({ isFavorite, timelineId: id, updateIsFavorite }) => (
-  // TODO: 1 error is: Visible, non-interactive elements with click handlers must have at least one keyboard listener
-  // TODO: 2 error is: Elements with the 'button' interactive role must be focusable
-  // TODO: Investigate this error
-  // eslint-disable-next-line
-  <div role="button" onClick={() => updateIsFavorite({ id, isFavorite: !isFavorite })}>
-    {isFavorite ? (
-      <EuiToolTip data-test-subj="timeline-favorite-filled-star-tool-tip" content={i18n.FAVORITE}>
-        <StyledStar data-test-subj="timeline-favorite-filled-star" type="starFilled" size="l" />
-      </EuiToolTip>
-    ) : (
-      <EuiToolTip content={i18n.NOT_A_FAVORITE}>
-        <StyledStar data-test-subj="timeline-favorite-empty-star" type="starEmpty" size="l" />
-      </EuiToolTip>
-    )}
-  </div>
-));
+}>(({ isFavorite, timelineId: id, updateIsFavorite }) => {
+  const handleClick = useCallback(() => updateIsFavorite({ id, isFavorite: !isFavorite }), [
+    id,
+    isFavorite,
+    updateIsFavorite,
+  ]);
+
+  return (
+    // TODO: 1 error is: Visible, non-interactive elements with click handlers must have at least one keyboard listener
+    // TODO: 2 error is: Elements with the 'button' interactive role must be focusable
+    // TODO: Investigate this error
+    // eslint-disable-next-line
+  <div role="button" onClick={handleClick}>
+      {isFavorite ? (
+        <EuiToolTip data-test-subj="timeline-favorite-filled-star-tool-tip" content={i18n.FAVORITE}>
+          <StyledStar data-test-subj="timeline-favorite-filled-star" type="starFilled" size="l" />
+        </EuiToolTip>
+      ) : (
+        <EuiToolTip content={i18n.NOT_A_FAVORITE}>
+          <StyledStar data-test-subj="timeline-favorite-empty-star" type="starEmpty" size="l" />
+        </EuiToolTip>
+      )}
+    </div>
+  );
+});
 StarIcon.displayName = 'StarIcon';
 
 interface DescriptionProps {
@@ -159,7 +167,7 @@ interface NewCaseProps {
 export const NewCase = React.memo<NewCaseProps>(
   ({ compact, graphEventId, onClosePopover, timelineId, timelineStatus, timelineTitle }) => {
     const dispatch = useDispatch();
-    const { savedObjectId } = useSelector((state: State) =>
+    const { savedObjectId } = useShallowEqualSelector((state) =>
       timelineSelectors.selectTimeline(state, timelineId)
     );
     const { navigateToApp } = useKibana().services.application;

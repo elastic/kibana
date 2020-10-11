@@ -8,8 +8,7 @@ import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import '../../mock/match_media';
-// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
-import { wait as waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import { TestProviders } from '../../mock';
 import { useMountAppended } from '../../utils/use_mount_appended';
 

@@ -180,7 +180,7 @@ function transformResponseToServiceAnomalies(
   return serviceAnomaliesMap;
 }
 
-export async function getMLJobIds(
+export async function getMLJobs(
   anomalyDetectors: ReturnType<MlPluginSetup['anomalyDetectorsProvider']>,
   environment?: string
 ) {
@@ -198,7 +198,15 @@ export async function getMLJobIds(
     if (!matchingMLJob) {
       return [];
     }
-    return [matchingMLJob.job_id];
+    return [matchingMLJob];
   }
+  return mlJobs;
+}
+
+export async function getMLJobIds(
+  anomalyDetectors: ReturnType<MlPluginSetup['anomalyDetectorsProvider']>,
+  environment?: string
+) {
+  const mlJobs = await getMLJobs(anomalyDetectors, environment);
   return mlJobs.map((job) => job.job_id);
 }

@@ -8,7 +8,12 @@ import { lazy } from 'react';
 import { ValidationResult, ActionTypeModel } from '../../../../types';
 import { connectorConfiguration } from './config';
 import logo from './logo.svg';
-import { ServiceNowActionConnector, ServiceNowActionParams } from './types';
+import {
+  ServiceNowActionConnector,
+  ServiceNowConfig,
+  ServiceNowSecrets,
+  ServiceNowActionParams,
+} from './types';
 import * as i18n from './translations';
 import { isValidUrl } from '../../../lib/value_validators';
 
@@ -41,7 +46,8 @@ const validateConnector = (action: ServiceNowActionConnector): ValidationResult 
 };
 
 export function getActionType(): ActionTypeModel<
-  ServiceNowActionConnector,
+  ServiceNowConfig,
+  ServiceNowSecrets,
   ServiceNowActionParams
 > {
   return {

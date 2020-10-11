@@ -10,7 +10,7 @@ import { ViewMode, IEmbeddable } from '../../../../../../src/plugins/embeddable/
 import { StartServicesGetter } from '../../../../../../src/plugins/kibana_utils/public';
 import { KibanaLegacyStart } from '../../../../../../src/plugins/kibana_legacy/public';
 import { CoreStart } from '../../../../../../src/core/public';
-import { KibanaURL } from './kibana_url';
+import { KibanaURL } from '../../../../../../src/plugins/share/public';
 import * as shared from './shared';
 
 export const ACTION_EXPLORE_DATA = 'ACTION_EXPLORE_DATA';

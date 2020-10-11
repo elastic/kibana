@@ -5,9 +5,7 @@
  */
 
 import cytoscape from 'cytoscape';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import debounce from 'lodash/debounce';
+import { debounce } from 'lodash';
 import { useEffect } from 'react';
 import { EuiTheme, useUiTracker } from '../../../../../observability/public';
 import { getAnimationOptions, getNodeHeight } from './cytoscapeOptions';

@@ -5,7 +5,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { useDispatch, useSelector, shallowEqual } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import { networkActions, networkModel, networkSelectors } from '../../store';
@@ -16,6 +16,7 @@ import {
   NetworkDnsFields,
 } from '../../../../common/search_strategy';
 import { Criteria, ItemsPerRow, PaginatedTable } from '../../../common/components/paginated_table';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 
 import { getNetworkDnsColumns } from './columns';
 import { IsPtrIncluded } from './is_ptr_included';
@@ -59,10 +60,7 @@ const NetworkDnsTableComponent: React.FC<NetworkDnsTableProps> = ({
 }) => {
   const dispatch = useDispatch();
   const getNetworkDnsSelector = networkSelectors.dnsSelector();
-  const { activePage, isPtrIncluded, limit, sort } = useSelector(
-    getNetworkDnsSelector,
-    shallowEqual
-  );
+  const { activePage, isPtrIncluded, limit, sort } = useShallowEqualSelector(getNetworkDnsSelector);
   const updateLimitPagination = useCallback(
     (newLimit) =>
       dispatch(

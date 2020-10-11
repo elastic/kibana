@@ -32,6 +32,13 @@ import {
 import { findKibanaPlatformPlugins, KibanaPlatformPlugin } from './kibana_platform_plugins';
 import { getPluginBundles } from './get_plugin_bundles';
 import { filterById } from './filter_by_id';
+import { readLimits } from '../limits';
+
+export interface Limits {
+  pageLoadAssetSize?: {
+    [id: string]: number | undefined;
+  };
+}
 
 function pickMaxWorkerCount(dist: boolean) {
   // don't break if cpus() returns nothing, or an empty array
@@ -161,7 +168,8 @@ export class OptimizerConfig {
       Path.resolve(repoRoot, 'src/plugins'),
       ...(oss ? [] : [Path.resolve(repoRoot, 'x-pack/plugins')]),
       Path.resolve(repoRoot, 'plugins'),
-      ...(examples ? [Path.resolve('examples'), Path.resolve('x-pack/examples')] : []),
+      ...(examples ? [Path.resolve('examples')] : []),
+      ...(examples && !oss ? [Path.resolve('x-pack/examples')] : []),
       Path.resolve(repoRoot, '../kibana-extra'),
     ];
     if (!pluginScanDirs.every((p) => Path.isAbsolute(p))) {
@@ -237,7 +245,8 @@ export class OptimizerConfig {
       options.maxWorkerCount,
       options.dist,
       options.profileWebpack,
-      options.themeTags
+      options.themeTags,
+      readLimits()
     );
   }
 
@@ -251,7 +260,8 @@ export class OptimizerConfig {
     public readonly maxWorkerCount: number,
     public readonly dist: boolean,
     public readonly profileWebpack: boolean,
-    public readonly themeTags: ThemeTags
+    public readonly themeTags: ThemeTags,
+    public readonly limits: Limits
   ) {}
 
   getWorkerConfig(optimizerCacheKey: unknown): WorkerConfig {

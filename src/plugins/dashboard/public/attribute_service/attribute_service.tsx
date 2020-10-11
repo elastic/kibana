@@ -27,22 +27,10 @@ import {
   IEmbeddable,
   Container,
   EmbeddableStart,
-  EmbeddableFactory,
   EmbeddableFactoryNotFoundError,
 } from '../embeddable_plugin';
-import {
-  SavedObjectsClientContract,
-  SimpleSavedObject,
-  I18nStart,
-  NotificationsStart,
-  OverlayStart,
-} from '../../../../core/public';
-import {
-  SavedObjectSaveModal,
-  OnSaveProps,
-  SaveResult,
-  checkForDuplicateTitle,
-} from '../../../saved_objects/public';
+import { I18nStart, NotificationsStart } from '../../../../core/public';
+import { SavedObjectSaveModal, OnSaveProps, SaveResult } from '../../../saved_objects/public';
 
 /**
  * The attribute service is a shared, generic service that embeddables can use to provide the functionality
@@ -53,12 +41,13 @@ import {
 export const ATTRIBUTE_SERVICE_KEY = 'attributes';
 
 export interface AttributeServiceOptions<A extends { title: string }> {
-  customSaveMethod?: (
+  saveMethod: (
     type: string,
     attributes: A,
     savedObjectId?: string
   ) => Promise<{ id?: string } | { error: Error }>;
-  customUnwrapMethod?: (savedObject: SimpleSavedObject<A>) => A;
+  checkForDuplicateTitle: (props: OnSaveProps) => Promise<true>;
+  unwrapMethod?: (savedObjectId: string) => Promise<A>;
 }
 
 export class AttributeService<
@@ -68,38 +57,37 @@ export class AttributeService<
   } = EmbeddableInput & { [ATTRIBUTE_SERVICE_KEY]: SavedObjectAttributes },
   RefType extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
 > {
-  private embeddableFactory?: EmbeddableFactory;
-
   constructor(
     private type: string,
     private showSaveModal: (
       saveModal: React.ReactElement,
       I18nContext: I18nStart['Context']
     ) => void,
-    private savedObjectsClient: SavedObjectsClientContract,
-    private overlays: OverlayStart,
     private i18nContext: I18nStart['Context'],
     private toasts: NotificationsStart['toasts'],
-    getEmbeddableFactory?: EmbeddableStart['getEmbeddableFactory'],
-    private options?: AttributeServiceOptions<SavedObjectAttributes>
+    private options: AttributeServiceOptions<SavedObjectAttributes>,
+    getEmbeddableFactory?: EmbeddableStart['getEmbeddableFactory']
   ) {
     if (getEmbeddableFactory) {
       const factory = getEmbeddableFactory(this.type);
       if (!factory) {
         throw new EmbeddableFactoryNotFoundError(this.type);
       }
-      this.embeddableFactory = factory;
     }
+  }
+
+  private async defaultUnwrapMethod(input: RefType): Promise<SavedObjectAttributes> {
+    return new Promise<SavedObjectAttributes>((resolve) => {
+      // @ts-ignore
+      return resolve({ ...input });
+    });
   }
 
   public async unwrapAttributes(input: RefType | ValType): Promise<SavedObjectAttributes> {
     if (this.inputIsRefType(input)) {
-      const savedObject: SimpleSavedObject<SavedObjectAttributes> = await this.savedObjectsClient.get<
-        SavedObjectAttributes
-      >(this.type, input.savedObjectId);
-      return this.options?.customUnwrapMethod
-        ? this.options?.customUnwrapMethod(savedObject)
-        : { ...savedObject.attributes };
+      return this.options.unwrapMethod
+        ? await this.options.unwrapMethod(input.savedObjectId)
+        : await this.defaultUnwrapMethod(input);
     }
     return input[ATTRIBUTE_SERVICE_KEY];
   }
@@ -118,25 +106,11 @@ export class AttributeService<
       return { [ATTRIBUTE_SERVICE_KEY]: newAttributes } as ValType;
     }
     try {
-      if (this.options?.customSaveMethod) {
-        const savedItem = await this.options.customSaveMethod(
-          this.type,
-          newAttributes,
-          savedObjectId
-        );
-        if ('id' in savedItem) {
-          return { ...originalInput, savedObjectId: savedItem.id } as RefType;
-        }
-        return { ...originalInput } as RefType;
+      const savedItem = await this.options.saveMethod(this.type, newAttributes, savedObjectId);
+      if ('id' in savedItem) {
+        return { ...originalInput, savedObjectId: savedItem.id } as RefType;
       }
-
-      if (savedObjectId) {
-        await this.savedObjectsClient.update(this.type, savedObjectId, newAttributes);
-        return { ...originalInput, savedObjectId } as RefType;
-      }
-
-      const savedItem = await this.savedObjectsClient.create(this.type, newAttributes);
-      return { ...originalInput, savedObjectId: savedItem.id } as RefType;
+      return { ...originalInput } as RefType;
     } catch (error) {
       this.toasts.addDanger({
         title: i18n.translate('dashboard.attributeService.saveToLibraryError', {
@@ -181,21 +155,7 @@ export class AttributeService<
     }
     return new Promise<RefType>((resolve, reject) => {
       const onSave = async (props: OnSaveProps): Promise<SaveResult> => {
-        await checkForDuplicateTitle(
-          {
-            title: props.newTitle,
-            copyOnSave: false,
-            lastSavedTitle: '',
-            getEsType: () => this.type,
-            getDisplayName: this.embeddableFactory?.getDisplayName || (() => this.type),
-          },
-          props.isTitleDuplicateConfirmed,
-          props.onTitleDuplicate,
-          {
-            savedObjectsClient: this.savedObjectsClient,
-            overlays: this.overlays,
-          }
-        );
+        await this.options.checkForDuplicateTitle(props);
         try {
           const newAttributes = { ...input[ATTRIBUTE_SERVICE_KEY] };
           newAttributes.title = props.newTitle;

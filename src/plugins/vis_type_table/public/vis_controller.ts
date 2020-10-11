@@ -64,7 +64,7 @@ export function getTableVisualizationControllerClass(
       }
     }
 
-    async render(esResponse: object, visParams: VisParams) {
+    async render(esResponse: object, visParams: VisParams): Promise<void> {
       getKibanaLegacy().loadFontAwesome();
       await this.initLocalAngular();
 
@@ -103,7 +103,9 @@ export function getTableVisualizationControllerClass(
           this.$scope = this.$rootScope.$new();
           this.$scope.uiState = this.vis.getUiState();
           updateScope();
-          this.el.find('div').append(this.$compile(this.vis.type!.visConfig.template)(this.$scope));
+          this.el
+            .find('div')
+            .append(this.$compile(this.vis.type.visConfig?.template ?? '')(this.$scope));
           this.$scope.$apply();
         } else {
           updateScope();

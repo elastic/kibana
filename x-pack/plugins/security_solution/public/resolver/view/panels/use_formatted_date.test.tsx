@@ -45,7 +45,7 @@ describe('useFormattedDate', () => {
       const { findByTestId } = reactRenderResult(undefined);
       element = await findByTestId(testID);
 
-      expect(element).toBeEmpty();
+      expect(element).toBeEmptyDOMElement();
     });
   });
 
@@ -54,7 +54,7 @@ describe('useFormattedDate', () => {
       const { findByTestId } = reactRenderResult('');
       element = await findByTestId(testID);
 
-      expect(element).toBeEmpty();
+      expect(element).toBeEmptyDOMElement();
     });
   });
 

@@ -16,6 +16,7 @@ import {
   CODE_PATH_LOGSTASH,
   LOGSTASH_SYSTEM_ID,
   ALERT_LOGSTASH_VERSION_MISMATCH,
+  ALERT_MISSING_MONITORING_DATA,
 } from '../../../../common/constants';
 
 uiRoutes.when('/logstash/nodes', {
@@ -45,7 +46,12 @@ uiRoutes.when('/logstash/nodes', {
         alerts: {
           shouldFetch: true,
           options: {
-            alertTypeIds: [ALERT_LOGSTASH_VERSION_MISMATCH],
+            alertTypeIds: [ALERT_LOGSTASH_VERSION_MISMATCH, ALERT_MISSING_MONITORING_DATA],
+            filters: [
+              {
+                stackProduct: LOGSTASH_SYSTEM_ID,
+              },
+            ],
           },
         },
       });

@@ -6,11 +6,11 @@
 
 import { noop } from 'lodash/fp';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { shallowEqual, useSelector } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import { ESTermQuery } from '../../../../common/typed_json';
-import { inputsModel, State } from '../../../common/store';
+import { inputsModel } from '../../../common/store';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
 import { PageInfoPaginated, FlowTargetSourceDest } from '../../../graphql/types';
@@ -67,37 +67,46 @@ export const useNetworkTls = ({
   type,
 }: UseNetworkTls): [boolean, NetworkTlsArgs] => {
   const getTlsSelector = networkSelectors.tlsSelector();
-  const { activePage, limit, sort } = useSelector(
-    (state: State) => getTlsSelector(state, type, flowTarget),
-    shallowEqual
+  const { activePage, limit, sort } = useShallowEqualSelector((state) =>
+    getTlsSelector(state, type, flowTarget)
   );
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
 
-  const [networkTlsRequest, setHostRequest] = useState<NetworkTlsRequestOptions>({
-    defaultIndex: indexNames,
-    factoryQueryType: NetworkQueries.tls,
-    filterQuery: createFilter(filterQuery),
-    flowTarget,
-    id,
-    ip,
-    pagination: generateTablePaginationOptions(activePage, limit),
-    sort,
-    timerange: {
-      interval: '12h',
-      from: startDate ? startDate : '',
-      to: endDate ? endDate : new Date(Date.now()).toISOString(),
-    },
-  });
+  const [networkTlsRequest, setHostRequest] = useState<NetworkTlsRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          factoryQueryType: NetworkQueries.tls,
+          filterQuery: createFilter(filterQuery),
+          flowTarget,
+          id,
+          ip,
+          pagination: generateTablePaginationOptions(activePage, limit),
+          sort,
+          timerange: {
+            interval: '12h',
+            from: startDate ? startDate : '',
+            to: endDate ? endDate : new Date(Date.now()).toISOString(),
+          },
+        }
+      : null
+  );
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
-      setHostRequest((prevRequest) => ({
-        ...prevRequest,
-        pagination: generateTablePaginationOptions(newActivePage, limit),
-      }));
+      setHostRequest((prevRequest) => {
+        if (!prevRequest) {
+          return prevRequest;
+        }
+
+        return {
+          ...prevRequest,
+          pagination: generateTablePaginationOptions(newActivePage, limit),
+        };
+      });
     },
     [limit]
   );
@@ -121,7 +130,11 @@ export const useNetworkTls = ({
   });
 
   const networkTlsSearch = useCallback(
-    (request: NetworkTlsRequestOptions) => {
+    (request: NetworkTlsRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -177,9 +190,13 @@ export const useNetworkTls = ({
   useEffect(() => {
     setHostRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
         defaultIndex: indexNames,
+        factoryQueryType: NetworkQueries.tls,
         filterQuery: createFilter(filterQuery),
+        flowTarget,
+        id,
+        ip,
         pagination: generateTablePaginationOptions(activePage, limit),
         timerange: {
           interval: '12h',
@@ -193,7 +210,19 @@ export const useNetworkTls = ({
       }
       return prevRequest;
     });
-  }, [activePage, indexNames, endDate, filterQuery, limit, startDate, sort, skip]);
+  }, [
+    activePage,
+    indexNames,
+    endDate,
+    filterQuery,
+    limit,
+    startDate,
+    sort,
+    skip,
+    flowTarget,
+    ip,
+    id,
+  ]);
 
   useEffect(() => {
     networkTlsSearch(networkTlsRequest);

@@ -28,68 +28,71 @@ export function getMonitoringUsageCollector(
         type: 'boolean',
       },
       clusters: {
-        license: {
-          type: 'keyword',
-        },
-        clusterUuid: {
-          type: 'keyword',
-        },
-        metricbeatUsed: {
-          type: 'boolean',
-        },
-        elasticsearch: {
-          enabled: {
-            type: 'boolean',
+        type: 'array',
+        items: {
+          license: {
+            type: 'keyword',
           },
-          count: {
-            type: 'long',
+          clusterUuid: {
+            type: 'keyword',
           },
           metricbeatUsed: {
             type: 'boolean',
           },
-        },
-        kibana: {
-          enabled: {
-            type: 'boolean',
+          elasticsearch: {
+            enabled: {
+              type: 'boolean',
+            },
+            count: {
+              type: 'long',
+            },
+            metricbeatUsed: {
+              type: 'boolean',
+            },
           },
-          count: {
-            type: 'long',
+          kibana: {
+            enabled: {
+              type: 'boolean',
+            },
+            count: {
+              type: 'long',
+            },
+            metricbeatUsed: {
+              type: 'boolean',
+            },
           },
-          metricbeatUsed: {
-            type: 'boolean',
+          logstash: {
+            enabled: {
+              type: 'boolean',
+            },
+            count: {
+              type: 'long',
+            },
+            metricbeatUsed: {
+              type: 'boolean',
+            },
           },
-        },
-        logstash: {
-          enabled: {
-            type: 'boolean',
+          beats: {
+            enabled: {
+              type: 'boolean',
+            },
+            count: {
+              type: 'long',
+            },
+            metricbeatUsed: {
+              type: 'boolean',
+            },
           },
-          count: {
-            type: 'long',
-          },
-          metricbeatUsed: {
-            type: 'boolean',
-          },
-        },
-        beats: {
-          enabled: {
-            type: 'boolean',
-          },
-          count: {
-            type: 'long',
-          },
-          metricbeatUsed: {
-            type: 'boolean',
-          },
-        },
-        apm: {
-          enabled: {
-            type: 'boolean',
-          },
-          count: {
-            type: 'long',
-          },
-          metricbeatUsed: {
-            type: 'boolean',
+          apm: {
+            enabled: {
+              type: 'boolean',
+            },
+            count: {
+              type: 'long',
+            },
+            metricbeatUsed: {
+              type: 'boolean',
+            },
           },
         },
       },

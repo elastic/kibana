@@ -25,7 +25,7 @@ import { createMetricVisFn } from './metric_vis_fn';
 import { createMetricVisTypeDefinition } from './metric_vis_type';
 import { ChartsPluginSetup } from '../../charts/public';
 import { DataPublicPluginStart } from '../../data/public';
-import { setFormatService, setI18n } from './services';
+import { setFormatService } from './services';
 import { ConfigSchema } from '../config';
 import { metricVisRenderer } from './metric_vis_renderer';
 
@@ -59,7 +59,6 @@ export class MetricVisPlugin implements Plugin<void, void> {
   }
 
   public start(core: CoreStart, { data }: MetricVisPluginStartDependencies) {
-    setI18n(core.i18n);
     setFormatService(data.fieldFormats);
   }
 }

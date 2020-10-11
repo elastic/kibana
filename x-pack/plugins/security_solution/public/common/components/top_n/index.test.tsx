@@ -6,7 +6,7 @@
 
 import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
-
+import { waitFor } from '@testing-library/react';
 import '../../mock/match_media';
 import { mockBrowserFields } from '../../containers/source/mock';
 import {
@@ -180,19 +180,6 @@ let testProps = {
 };
 
 describe('StatefulTopN', () => {
-  // Suppress warnings about "react-beautiful-dnd"
-  /* eslint-disable no-console */
-  const originalError = console.error;
-  const originalWarn = console.warn;
-  beforeAll(() => {
-    console.warn = jest.fn();
-    console.error = jest.fn();
-  });
-  afterAll(() => {
-    console.error = originalError;
-    console.warn = originalWarn;
-  });
-
   describe('rendering in a global NON-timeline context', () => {
     let wrapper: ReactWrapper;
 
@@ -343,7 +330,7 @@ describe('StatefulTopN', () => {
     });
   });
   describe('rendering in a NON-active timeline context', () => {
-    test(`defaults to the 'Alert events' option when rendering in a NON-active timeline context (e.g. the Alerts table on the Detections page) when 'documentType' from 'useTimelineTypeContext()' is 'alerts'`, () => {
+    test(`defaults to the 'Alert events' option when rendering in a NON-active timeline context (e.g. the Alerts table on the Detections page) when 'documentType' from 'useTimelineTypeContext()' is 'alerts'`, async () => {
       const filterManager = new FilterManager(mockUiSettingsForFilterManager);
 
       const manageTimelineForTesting = {
@@ -365,10 +352,11 @@ describe('StatefulTopN', () => {
           </ManageGlobalTimeline>
         </TestProviders>
       );
+      await waitFor(() => {
+        const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
 
-      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
-
-      expect(props.defaultView).toEqual('alert');
+        expect(props.defaultView).toEqual('alert');
+      });
     });
   });
 });

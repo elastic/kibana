@@ -16,7 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('EPM - get', () => {
     it('returns a 500 for a package key without a proper name', async function () {
       if (server.enabled) {
-        await supertest.get('/api/ingest_manager/epm/packages/-0.1.0').expect(500);
+        await supertest.get('/api/fleet/epm/packages/-0.1.0').expect(500);
       } else {
         warnAndSkipTest(this, log);
       }
@@ -24,7 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('returns a 500 for a package key without a proper semver version', async function () {
       if (server.enabled) {
-        await supertest.get('/api/ingest_manager/epm/packages/endpoint-0.1.0.1.2.3').expect(500);
+        await supertest.get('/api/fleet/epm/packages/endpoint-0.1.0.1.2.3').expect(500);
       } else {
         warnAndSkipTest(this, log);
       }

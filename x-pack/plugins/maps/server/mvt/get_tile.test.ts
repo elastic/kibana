@@ -50,6 +50,7 @@ describe('getTile', () => {
         info: () => {},
       } as unknown) as Logger,
       callElasticsearch: mockCallElasticsearch,
+      geoFieldType: ES_GEO_FIELD_TYPE.GEO_SHAPE,
     });
 
     compareTiles('./__tests__/pbf/0_0_0_docs.pbf', tile);

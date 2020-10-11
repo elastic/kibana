@@ -6,7 +6,8 @@
 
 import { kea, MakeLogicType } from 'kea';
 import { ReactNode } from 'react';
-import { History } from 'history';
+
+import { KibanaLogic } from '../kibana';
 
 export interface IFlashMessage {
   type: 'success' | 'info' | 'warning' | 'error';
@@ -61,10 +62,10 @@ export const FlashMessagesLogic = kea<MakeLogicType<IFlashMessagesValues, IFlash
       },
     ],
   },
-  events: ({ props, values, actions }) => ({
+  events: ({ values, actions }) => ({
     afterMount: () => {
       // On React Router navigation, clear previous flash messages and load any queued messages
-      const unlisten = props.history.listen(() => {
+      const unlisten = KibanaLogic.values.history.listen(() => {
         actions.clearFlashMessages();
         actions.setFlashMessages(values.queuedMessages);
         actions.clearQueuedMessages();
@@ -81,11 +82,7 @@ export const FlashMessagesLogic = kea<MakeLogicType<IFlashMessagesValues, IFlash
 /**
  * Mount/props helper
  */
-interface IFlashMessagesLogicProps {
-  history: History;
-}
-export const mountFlashMessagesLogic = (props: IFlashMessagesLogicProps) => {
-  FlashMessagesLogic(props);
+export const mountFlashMessagesLogic = () => {
   const unmount = FlashMessagesLogic.mount();
   return unmount;
 };

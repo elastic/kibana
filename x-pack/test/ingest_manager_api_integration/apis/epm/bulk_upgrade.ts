@@ -10,7 +10,7 @@ import { skipIfNoDockerRegistry } from '../../helpers';
 import {
   BulkInstallPackageInfo,
   BulkInstallPackagesResponse,
-  IBulkInstallPackageError,
+  IBulkInstallPackageHTTPError,
 } from '../../../../plugins/ingest_manager/common';
 
 export default function (providerContext: FtrProviderContext) {
@@ -18,7 +18,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
 
   const deletePackage = async (pkgkey: string) => {
-    await supertest.delete(`/api/ingest_manager/epm/packages/${pkgkey}`).set('kbn-xsrf', 'xxxx');
+    await supertest.delete(`/api/fleet/epm/packages/${pkgkey}`).set('kbn-xsrf', 'xxxx');
   };
 
   describe('bulk package upgrade api', async () => {
@@ -27,7 +27,7 @@ export default function (providerContext: FtrProviderContext) {
     describe('bulk package upgrade with a package already installed', async () => {
       beforeEach(async () => {
         await supertest
-          .post(`/api/ingest_manager/epm/packages/multiple_versions-0.1.0`)
+          .post(`/api/fleet/epm/packages/multiple_versions-0.1.0`)
           .set('kbn-xsrf', 'xxxx')
           .send({ force: true })
           .expect(200);
@@ -39,14 +39,11 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should return 400 if no packages are requested for upgrade', async function () {
-        await supertest
-          .post(`/api/ingest_manager/epm/packages/_bulk`)
-          .set('kbn-xsrf', 'xxxx')
-          .expect(400);
+        await supertest.post(`/api/fleet/epm/packages/_bulk`).set('kbn-xsrf', 'xxxx').expect(400);
       });
       it('should return 200 and an array for upgrading a package', async function () {
         const { body }: { body: BulkInstallPackagesResponse } = await supertest
-          .post(`/api/ingest_manager/epm/packages/_bulk`)
+          .post(`/api/fleet/epm/packages/_bulk`)
           .set('kbn-xsrf', 'xxxx')
           .send({ packages: ['multiple_versions'] })
           .expect(200);
@@ -58,7 +55,7 @@ export default function (providerContext: FtrProviderContext) {
       });
       it('should return an error for packages that do not exist', async function () {
         const { body }: { body: BulkInstallPackagesResponse } = await supertest
-          .post(`/api/ingest_manager/epm/packages/_bulk`)
+          .post(`/api/fleet/epm/packages/_bulk`)
           .set('kbn-xsrf', 'xxxx')
           .send({ packages: ['multiple_versions', 'blahblah'] })
           .expect(200);
@@ -68,13 +65,13 @@ export default function (providerContext: FtrProviderContext) {
         expect(entry.oldVersion).equal('0.1.0');
         expect(entry.newVersion).equal('0.3.0');
 
-        const err = body.response[1] as IBulkInstallPackageError;
+        const err = body.response[1] as IBulkInstallPackageHTTPError;
         expect(err.statusCode).equal(404);
         expect(body.response[1].name).equal('blahblah');
       });
       it('should upgrade multiple packages', async function () {
         const { body }: { body: BulkInstallPackagesResponse } = await supertest
-          .post(`/api/ingest_manager/epm/packages/_bulk`)
+          .post(`/api/fleet/epm/packages/_bulk`)
           .set('kbn-xsrf', 'xxxx')
           .send({ packages: ['multiple_versions', 'overrides'] })
           .expect(200);
@@ -98,7 +95,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it('should return 200 and an array for upgrading a package', async function () {
         const { body }: { body: BulkInstallPackagesResponse } = await supertest
-          .post(`/api/ingest_manager/epm/packages/_bulk`)
+          .post(`/api/fleet/epm/packages/_bulk`)
           .set('kbn-xsrf', 'xxxx')
           .send({ packages: ['multiple_versions'] })
           .expect(200);

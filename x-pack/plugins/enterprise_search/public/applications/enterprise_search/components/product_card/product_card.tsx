@@ -4,17 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
 import { useValues } from 'kea';
 import { snakeCase } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiCard, EuiTextColor } from '@elastic/eui';
 
-import { KibanaContext, IKibanaContext } from '../../../index';
-
 import { EuiButton } from '../../../shared/react_router_helpers';
 import { sendTelemetry } from '../../../shared/telemetry';
 import { HttpLogic } from '../../../shared/http';
+import { KibanaLogic } from '../../../shared/kibana';
 
 import './product_card.scss';
 
@@ -31,9 +30,7 @@ interface IProductCard {
 
 export const ProductCard: React.FC<IProductCard> = ({ product, image }) => {
   const { http } = useValues(HttpLogic);
-  const {
-    config: { host },
-  } = useContext(KibanaContext) as IKibanaContext;
+  const { config } = useValues(KibanaLogic);
 
   const LAUNCH_BUTTON_TEXT = i18n.translate(
     'xpack.enterpriseSearch.overview.productCard.launchButton',
@@ -80,7 +77,7 @@ export const ProductCard: React.FC<IProductCard> = ({ product, image }) => {
             })
           }
         >
-          {host ? LAUNCH_BUTTON_TEXT : SETUP_BUTTON_TEXT}
+          {config.host ? LAUNCH_BUTTON_TEXT : SETUP_BUTTON_TEXT}
         </EuiButton>
       }
     />

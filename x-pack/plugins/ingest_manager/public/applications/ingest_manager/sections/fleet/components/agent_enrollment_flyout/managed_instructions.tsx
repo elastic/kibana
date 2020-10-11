@@ -74,14 +74,14 @@ export const ManagedInstructions = React.memo<Props>(({ agentPolicies }) => {
       ) : (
         <>
           <FormattedMessage
-            id="xpack.ingestManager.agentEnrollment.fleetNotInitializedText"
+            id="xpack.ingestManager.agentEnrollment.agentsNotInitializedText"
             defaultMessage="Before enrolling agents, {link}."
             values={{
               link: (
                 <EuiLink href={getHref('fleet')}>
                   <FormattedMessage
-                    id="xpack.ingestManager.agentEnrollment.setUpFleetLink"
-                    defaultMessage="set up Fleet"
+                    id="xpack.ingestManager.agentEnrollment.setUpAgentsLink"
+                    defaultMessage="set up central management for Elastic Agents"
                   />
                 </EuiLink>
               ),
