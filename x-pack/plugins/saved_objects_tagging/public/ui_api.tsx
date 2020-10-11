@@ -46,7 +46,7 @@ export const getApiComponents = ({ cache }: GetApiComponentsOptions): TaggingApi
             cache.getState().map((tag) => {
               return {
                 value: valueField === 'name' ? tag.name : tag.id,
-                name: tag.title,
+                name: tag.name,
                 view: <TagSearchBarOption tag={tag} />,
               };
             })
