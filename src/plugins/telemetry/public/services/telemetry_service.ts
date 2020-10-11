@@ -87,9 +87,25 @@ export class TelemetryService {
     return telemetryUrl;
   };
 
-  public getUserHasSeenOptedInNotice = () => {
-    return this.config.telemetryNotifyUserAboutOptInDefault || false;
-  };
+  /**
+   * Returns if an user should be shown the notice about Opt-In/Out telemetry.
+   * The decision is made based on whether any user has already dismissed the message or
+   * the user can't actually change the settings (in which case, there's no point on bothering them)
+   */
+  public getUserShouldSeeOptInNotice(): boolean {
+    return (
+      (this.config.telemetryNotifyUserAboutOptInDefault && this.config.userCanChangeSettings) ??
+      false
+    );
+  }
+
+  public get userCanChangeSettings() {
+    return this.config.userCanChangeSettings ?? false;
+  }
+
+  public set userCanChangeSettings(userCanChangeSettings: boolean) {
+    this.config = { ...this.config, userCanChangeSettings };
+  }
 
   public getIsOptedIn = () => {
     return this.isOptedIn;

@@ -21,10 +21,10 @@ import { i18n } from '@kbn/i18n';
 import { first } from 'rxjs/operators';
 import { TypeOf, schema } from '@kbn/config-schema';
 import { RecursiveReadonly } from '@kbn/utility-types';
+import { deepFreeze } from '@kbn/std';
 
 import { PluginStart } from '../../../../src/plugins/data/server';
 import { CoreSetup, PluginInitializerContext } from '../../../../src/core/server';
-import { deepFreeze } from '../../../../src/core/server';
 import { configSchema } from '../config';
 import loadFunctions from './lib/load_functions';
 import { functionsRoute } from './routes/functions';

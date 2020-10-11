@@ -37,7 +37,6 @@ import { ChromeNavControls, NavControlsService } from './nav_controls';
 import { ChromeNavLinks, NavLinksService, ChromeNavLink } from './nav_links';
 import { ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_accessed';
 import { Header } from './ui';
-import { NavType } from './ui/header';
 import { ChromeHelpExtensionMenuLink } from './ui/header/header_help_menu';
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
@@ -172,10 +171,6 @@ export class ChromeService {
 
     const getIsNavDrawerLocked$ = isNavDrawerLocked$.pipe(takeUntil(this.stop$));
 
-    // TODO #64541
-    // Can delete
-    const getNavType$ = uiSettings.get$('pageNavigation').pipe(takeUntil(this.stop$));
-
     const isIE = () => {
       const ua = window.navigator.userAgent;
       const msie = ua.indexOf('MSIE '); // IE 10 or older
@@ -241,10 +236,10 @@ export class ChromeService {
           navLinks$={navLinks.getNavLinks$()}
           recentlyAccessed$={recentlyAccessed.get$()}
           navControlsLeft$={navControls.getLeft$()}
+          navControlsCenter$={navControls.getCenter$()}
           navControlsRight$={navControls.getRight$()}
           onIsLockedUpdate={setIsNavDrawerLocked}
           isLocked$={getIsNavDrawerLocked$}
-          navType$={getNavType$}
         />
       ),
 
@@ -304,8 +299,6 @@ export class ChromeService {
       setHelpSupportUrl: (url: string) => helpSupportUrl$.next(url),
 
       getIsNavDrawerLocked$: () => getIsNavDrawerLocked$,
-
-      getNavType$: () => getNavType$,
 
       getCustomNavLink$: () => customNavLink$.pipe(takeUntil(this.stop$)),
 
@@ -468,13 +461,6 @@ export interface ChromeStart {
    * Get an observable of the current locked state of the nav drawer.
    */
   getIsNavDrawerLocked$(): Observable<boolean>;
-
-  /**
-   * Get the navigation type
-   * TODO #64541
-   * Can delete
-   */
-  getNavType$(): Observable<NavType>;
 }
 
 /** @internal */

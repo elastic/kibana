@@ -6,7 +6,7 @@
 
 import React, { Fragment, Component } from 'react';
 
-import { RENDER_AS } from '../../../../common/constants';
+import { GRID_RESOLUTION, LAYER_TYPE } from '../../../../common/constants';
 import { MetricsEditor } from '../../../components/metrics_editor';
 import { getIndexPatternService } from '../../../kibana_services';
 import { ResolutionEditor } from './resolution_editor';
@@ -62,8 +62,25 @@ export class UpdateSourceEditor extends Component {
     this.props.onChange({ propName: 'metrics', value: metrics });
   };
 
-  _onResolutionChange = (e) => {
-    this.props.onChange({ propName: 'resolution', value: e });
+  _onResolutionChange = (resolution) => {
+    let newLayerType;
+    if (
+      this.props.currentLayerType === LAYER_TYPE.VECTOR ||
+      this.props.currentLayerType === LAYER_TYPE.TILED_VECTOR
+    ) {
+      newLayerType =
+        resolution === GRID_RESOLUTION.SUPER_FINE ? LAYER_TYPE.TILED_VECTOR : LAYER_TYPE.VECTOR;
+    } else if (this.props.currentLayerType === LAYER_TYPE.HEATMAP) {
+      if (resolution === GRID_RESOLUTION.SUPER_FINE) {
+        throw new Error('Heatmap does not support SUPER_FINE resolution');
+      } else {
+        newLayerType = LAYER_TYPE.HEATMAP;
+      }
+    } else {
+      throw new Error('Unexpected layer-type');
+    }
+
+    this.props.onChange({ propName: 'resolution', value: resolution, newLayerType });
   };
 
   _onRequestTypeSelect = (requestType) => {
@@ -72,13 +89,13 @@ export class UpdateSourceEditor extends Component {
 
   _renderMetricsPanel() {
     const metricsFilter =
-      this.props.renderAs === RENDER_AS.HEATMAP
+      this.props.currentLayerType === LAYER_TYPE.HEATMAP
         ? (metric) => {
             //these are countable metrics, where blending heatmap color blobs make sense
             return isMetricCountable(metric.value);
           }
         : null;
-    const allowMultipleMetrics = this.props.renderAs !== RENDER_AS.HEATMAP;
+    const allowMultipleMetrics = this.props.currentLayerType !== LAYER_TYPE.HEATMAP;
     return (
       <EuiPanel>
         <EuiTitle size="xs">
@@ -115,6 +132,7 @@ export class UpdateSourceEditor extends Component {
           </EuiTitle>
           <EuiSpacer size="m" />
           <ResolutionEditor
+            includeSuperFine={this.props.currentLayerType !== LAYER_TYPE.HEATMAP}
             resolution={this.props.resolution}
             onChange={this._onResolutionChange}
           />

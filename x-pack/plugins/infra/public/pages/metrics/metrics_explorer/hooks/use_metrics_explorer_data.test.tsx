@@ -18,6 +18,10 @@ import {
   resp,
   createSeries,
 } from '../../../../utils/fixtures/metrics_explorer';
+import { MetricsExplorerOptions, MetricsExplorerTimeOptions } from './use_metrics_explorer_options';
+import { SourceQuery } from '../../../../../common/graphql/types';
+import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
+import { HttpHandler } from 'kibana/public';
 
 const mockedFetch = jest.fn();
 
@@ -31,7 +35,16 @@ const renderUseMetricsExplorerDataHook = () => {
     return <KibanaContextProvider services={services}>{children}</KibanaContextProvider>;
   };
   return renderHook(
-    (props) =>
+    (props: {
+      options: MetricsExplorerOptions;
+      source: SourceQuery.Query['source']['configuration'] | undefined;
+      derivedIndexPattern: IIndexPattern;
+      timeRange: MetricsExplorerTimeOptions;
+      afterKey: string | null | Record<string, string | null>;
+      signal: any;
+      fetch?: HttpHandler;
+      shouldLoadImmediately?: boolean;
+    }) =>
       useMetricsExplorerData(
         props.options,
         props.source,

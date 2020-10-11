@@ -9,6 +9,7 @@
     "embeddable",
     "inspector",
     "kibanaLegacy",
+    "urlForwarding",
     "navigation",
     "uiActions",
     "visualizations"

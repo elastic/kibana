@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESSearchClient } from '../../../lib/snapshot';
+import { ESSearchClient } from '../../../lib/metrics/types';
 
 interface EventDatasetHit {
   _source: {

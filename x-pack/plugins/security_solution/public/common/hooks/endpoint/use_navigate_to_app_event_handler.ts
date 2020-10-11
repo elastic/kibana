@@ -12,7 +12,7 @@ type NavigateToAppHandlerOptions<S = unknown> = NavigateToAppOptions & {
   state?: S;
   onClick?: EventHandlerCallback;
 };
-type EventHandlerCallback = MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
+type EventHandlerCallback = MouseEventHandler<HTMLButtonElement | HTMLAnchorElement | Element>;
 
 /**
  * Provides an event handlers that can be used with (for example) `onClick` to prevent the

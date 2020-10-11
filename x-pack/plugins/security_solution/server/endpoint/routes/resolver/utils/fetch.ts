@@ -6,11 +6,11 @@
 
 import { ILegacyScopedClusterClient } from 'kibana/server';
 import {
-  ResolverChildren,
-  ResolverRelatedEvents,
-  ResolverAncestry,
+  SafeResolverChildren,
+  SafeResolverRelatedEvents,
+  SafeResolverAncestry,
   ResolverRelatedAlerts,
-  ResolverLifecycleNode,
+  SafeResolverLifecycleNode,
 } from '../../../../../common/endpoint/types';
 import { Tree } from './tree';
 import { LifecycleQuery } from '../queries/lifecycle';
@@ -190,7 +190,7 @@ export class Fetcher {
    *
    * @param limit upper limit of ancestors to retrieve
    */
-  public async ancestors(limit: number): Promise<ResolverAncestry> {
+  public async ancestors(limit: number): Promise<SafeResolverAncestry> {
     const originNode = await this.getNode(this.id);
     const ancestryHandler = new AncestryQueryHandler(
       limit,
@@ -207,7 +207,7 @@ export class Fetcher {
    * @param limit the number of children to retrieve for a single level
    * @param after a cursor to use as the starting point for retrieving children
    */
-  public async children(limit: number, after?: string): Promise<ResolverChildren> {
+  public async children(limit: number, after?: string): Promise<SafeResolverChildren> {
     const childrenHandler = new ChildrenStartQueryHandler(
       limit,
       this.id,
@@ -237,7 +237,7 @@ export class Fetcher {
     limit: number,
     after?: string,
     filter?: string
-  ): Promise<ResolverRelatedEvents> {
+  ): Promise<SafeResolverRelatedEvents> {
     const eventsHandler = new RelatedEventsQueryHandler({
       limit,
       entityID: this.id,
@@ -285,7 +285,7 @@ export class Fetcher {
     return tree;
   }
 
-  private async getNode(entityID: string): Promise<ResolverLifecycleNode | undefined> {
+  private async getNode(entityID: string): Promise<SafeResolverLifecycleNode | undefined> {
     const query = new LifecycleQuery(this.eventsIndexPattern, this.endpointID);
     const results = await query.searchAndFormat(this.client, entityID);
     if (results.length === 0) {

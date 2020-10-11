@@ -71,6 +71,34 @@ export interface InstallPackageResponse {
   response: AssetReference[];
 }
 
+export interface IBulkInstallPackageHTTPError {
+  name: string;
+  statusCode: number;
+  error: string | Error;
+}
+
+export interface BulkInstallPackageInfo {
+  name: string;
+  newVersion: string;
+  // this will be null if no package was present before the upgrade (aka it was an install)
+  oldVersion: string | null;
+  assets: AssetReference[];
+}
+
+export interface BulkInstallPackagesResponse {
+  response: Array<BulkInstallPackageInfo | IBulkInstallPackageHTTPError>;
+}
+
+export interface BulkInstallPackagesRequest {
+  body: {
+    packages: string[];
+  };
+}
+
+export interface MessageResponse {
+  response: string;
+}
+
 export interface DeletePackageRequest {
   params: {
     pkgkey: string;

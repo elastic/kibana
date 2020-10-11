@@ -9,7 +9,7 @@
   "language": "kuery",
   "license": "Elastic License",
   "name": "Potential Application Shimming via Sdbinst",
-  "query": "event.code:1 and process.name:sdbinst.exe",
+  "query": "event.category:process and event.type:(start or process_started) and process.name:sdbinst.exe",
   "risk_score": 21,
   "rule_id": "fd4a992d-6130-4802-9ff8-829b89ae801f",
   "severity": "low",
@@ -50,5 +50,5 @@
     }
   ],
   "type": "query",
-  "version": 3
+  "version": 4
 }

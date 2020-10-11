@@ -4,81 +4,83 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
+import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
-import { KpiHostsData, KpiHostDetailsData } from '../../../graphql/types';
-import {
-  StatItemsComponent,
-  StatItemsProps,
-  useKpiMatrixStatus,
-} from '../../../common/components/stat_items';
-import { kpiHostsMapping } from './kpi_hosts_mapping';
-import { kpiHostDetailsMapping } from './kpi_host_details_mapping';
-import { UpdateDateRange } from '../../../common/components/charts/common';
+import { HostsKpiAuthentications } from './authentications';
+import { HostsKpiHosts } from './hosts';
+import { HostsKpiUniqueIps } from './unique_ips';
+import { HostsKpiProps } from './types';
 
-const kpiWidgetHeight = 247;
-
-interface GenericKpiHostProps {
-  from: string;
-  id: string;
-  loading: boolean;
-  to: string;
-  narrowDateRange: UpdateDateRange;
-}
-
-interface KpiHostsProps extends GenericKpiHostProps {
-  data: KpiHostsData;
-}
-
-interface KpiHostDetailsProps extends GenericKpiHostProps {
-  data: KpiHostDetailsData;
-}
-
-const FlexGroupSpinner = styled(EuiFlexGroup)`
-   {
-    min-height: ${kpiWidgetHeight}px;
-  }
-`;
-
-FlexGroupSpinner.displayName = 'FlexGroupSpinner';
-
-export const KpiHostsComponentBase = ({
-  data,
-  from,
-  loading,
-  id,
-  to,
-  narrowDateRange,
-}: KpiHostsProps | KpiHostDetailsProps) => {
-  const mappings =
-    (data as KpiHostsData).hosts !== undefined ? kpiHostsMapping : kpiHostDetailsMapping;
-  const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(
-    mappings,
-    data,
-    id,
-    from,
-    to,
-    narrowDateRange
-  );
-  return loading ? (
-    <FlexGroupSpinner justifyContent="center" alignItems="center">
-      <EuiFlexItem grow={false}>
-        <EuiLoadingSpinner size="xl" />
+export const HostsKpiComponent = React.memo<HostsKpiProps>(
+  ({ filterQuery, from, indexNames, to, setQuery, skip, narrowDateRange }) => (
+    <EuiFlexGroup wrap>
+      <EuiFlexItem grow={1}>
+        <HostsKpiHosts
+          filterQuery={filterQuery}
+          from={from}
+          indexNames={indexNames}
+          to={to}
+          narrowDateRange={narrowDateRange}
+          setQuery={setQuery}
+          skip={skip}
+        />
       </EuiFlexItem>
-    </FlexGroupSpinner>
-  ) : (
-    <EuiFlexGroup>
-      {statItemsProps.map((mappedStatItemProps, idx) => {
-        return <StatItemsComponent {...mappedStatItemProps} />;
-      })}
+      <EuiFlexItem grow={2}>
+        <HostsKpiAuthentications
+          filterQuery={filterQuery}
+          from={from}
+          indexNames={indexNames}
+          to={to}
+          narrowDateRange={narrowDateRange}
+          setQuery={setQuery}
+          skip={skip}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={2}>
+        <HostsKpiUniqueIps
+          filterQuery={filterQuery}
+          from={from}
+          indexNames={indexNames}
+          to={to}
+          narrowDateRange={narrowDateRange}
+          setQuery={setQuery}
+          skip={skip}
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
-  );
-};
+  )
+);
 
-KpiHostsComponentBase.displayName = 'KpiHostsComponentBase';
+HostsKpiComponent.displayName = 'HostsKpiComponent';
 
-export const KpiHostsComponent = React.memo(KpiHostsComponentBase);
+export const HostsDetailsKpiComponent = React.memo<HostsKpiProps>(
+  ({ filterQuery, from, indexNames, to, setQuery, skip, narrowDateRange }) => (
+    <EuiFlexGroup wrap>
+      <EuiFlexItem grow={1}>
+        <HostsKpiAuthentications
+          filterQuery={filterQuery}
+          from={from}
+          indexNames={indexNames}
+          to={to}
+          narrowDateRange={narrowDateRange}
+          setQuery={setQuery}
+          skip={skip}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={1}>
+        <HostsKpiUniqueIps
+          filterQuery={filterQuery}
+          from={from}
+          indexNames={indexNames}
+          to={to}
+          narrowDateRange={narrowDateRange}
+          setQuery={setQuery}
+          skip={skip}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  )
+);
 
-KpiHostsComponent.displayName = 'KpiHostsComponent';
+HostsDetailsKpiComponent.displayName = 'HostsDetailsKpiComponent';

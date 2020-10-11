@@ -52,7 +52,10 @@ export type DatatableRow = Record<string, any>;
 export interface DatatableColumnMeta {
   type: DatatableColumnType;
   field?: string;
+  index?: string;
   params?: SerializableState;
+  source?: string;
+  sourceParams?: SerializableState;
 }
 /**
  * This type represents the shape of a column in a `Datatable`.
@@ -63,17 +66,11 @@ export interface DatatableColumn {
   meta: DatatableColumnMeta;
 }
 
-export interface DatatableMeta {
-  type?: string;
-  source?: string;
-}
-
 /**
  * A `Datatable` in Canvas is a unique structure that represents tabulated data.
  */
 export interface Datatable {
   type: typeof name;
-  meta?: DatatableMeta;
   columns: DatatableColumn[];
   rows: DatatableRow[];
 }

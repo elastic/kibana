@@ -134,7 +134,6 @@ const mockOptions = () => {
   const options: MockedOptions = {
     logger: loggingSystemMock.create().get(),
     kibanaVersion: '8.2.3',
-    savedObjectValidations: {},
     typeRegistry: createRegistry([
       {
         name: 'testtype',

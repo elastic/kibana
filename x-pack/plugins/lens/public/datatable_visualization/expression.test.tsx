@@ -15,6 +15,7 @@ import { IFieldFormat } from '../../../../../src/plugins/data/public';
 import { IAggType } from 'src/plugins/data/public';
 const onClickValue = jest.fn();
 import { EmptyPlaceholder } from '../shared_components';
+import { LensIconChartDatatable } from '../assets/chart_datatable';
 
 function sampleArgs() {
   const data: LensMultiTable = {
@@ -219,7 +220,7 @@ describe('datatable_expression', () => {
           )}
         />
       );
-      expect(component.find(EmptyPlaceholder).prop('icon')).toEqual('visTable');
+      expect(component.find(EmptyPlaceholder).prop('icon')).toEqual(LensIconChartDatatable);
     });
   });
 });

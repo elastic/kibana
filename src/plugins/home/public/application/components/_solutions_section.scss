@@ -30,10 +30,12 @@
 }
 
 .homSolutions__group {
-  max-width: 50%;
+  @include euiBreakpoint('l') {
+    max-width: calc(75% - #{$euiSizeM * 2});
+  }
 
-  @include euiBreakpoint('xs', 's') {
-    max-width: none;
+  @include euiBreakpoint('xl') {
+    max-width: calc(50% - #{$euiSizeM * 2});
   }
 }
 
@@ -48,20 +50,20 @@
     @include euiSlightShadowHover;
     transform: translateY(-2px);
 
-    .euiTitle {
+    .homSolutionPanel__title {
       text-decoration: underline;
     }
   }
+}
 
-  &,
-  .euiPanel {
-    display: flex;
-    flex-direction: column;
-  }
+.homSolutionPanel,
+.homSolutionPanel__inner {
+  display: flex;
+  flex-direction: column;
+}
 
-  .euiPanel {
-    overflow: hidden;
-  }
+.homSolutionPanel__inner {
+  overflow: hidden;
 }
 
 .homSolutionPanel__header {

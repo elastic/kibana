@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { Key } from 'selenium-webdriver';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -94,9 +93,9 @@ export function VegaChartPageProvider({
       const aceGutter = await this.getAceGutterContainer();
 
       await aceGutter.doubleClick();
-      await browser.pressKeys(Key.RIGHT);
-      await browser.pressKeys(Key.LEFT);
-      await browser.pressKeys(Key.LEFT);
+      await browser.pressKeys(browser.keys.RIGHT);
+      await browser.pressKeys(browser.keys.LEFT);
+      await browser.pressKeys(browser.keys.LEFT);
       await browser.pressKeys(text);
     }
 
@@ -105,7 +104,7 @@ export function VegaChartPageProvider({
 
       await retry.try(async () => {
         await aceGutter.doubleClick();
-        await browser.pressKeys(Key.BACK_SPACE);
+        await browser.pressKeys(browser.keys.BACK_SPACE);
 
         expect(await this.getSpec()).to.be('');
       });

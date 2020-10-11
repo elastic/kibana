@@ -68,8 +68,7 @@ export function getServices() {
 
   const callCluster = esServer.es.getCallCluster();
 
-  const savedObjects = kbnServer.server.savedObjects;
-  const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(
+  const savedObjectsClient = kbn.coreStart.savedObjects.getScopedClient(
     httpServerMock.createKibanaRequest()
   );
 

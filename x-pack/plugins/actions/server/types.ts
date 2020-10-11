@@ -15,6 +15,8 @@ import {
   SavedObjectsClientContract,
   SavedObjectAttributes,
 } from '../../../../src/core/server';
+import { ActionTypeExecutorResult } from '../common';
+export { ActionTypeExecutorResult } from '../common';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;
@@ -78,16 +80,6 @@ export interface PreConfiguredAction<
 
 export interface FindActionResult extends ActionResult {
   referencedByCount: number;
-}
-
-// the result returned from an action type executor function
-export interface ActionTypeExecutorResult<Data> {
-  actionId: string;
-  status: 'ok' | 'error';
-  message?: string;
-  serviceMessage?: string;
-  data?: Data;
-  retry?: null | boolean | Date;
 }
 
 // signature of the action type executor function

@@ -1,15 +1,3 @@
-.kbnTopNavMenu__wrapper {
-  z-index: 5;
-
-  .kbnTopNavMenu {
-    padding: $euiSizeS 0;
-
-    .kbnTopNavItemEmphasized {
-      padding: 0 $euiSizeS;
-    }
-  }
-
-  .kbnTopNavMenu-isFullScreen {
-    padding: 0;
-  }
+.kbnTopNavMenu {
+  margin-right: $euiSizeXS;
 }

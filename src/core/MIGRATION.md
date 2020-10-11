@@ -1231,7 +1231,7 @@ import { npStart: { plugins } } from 'ui/new_platform';
 | `import 'ui/filter_bar'`                          | `import { FilterBar } from '../data/public'`                 | Directive is deprecated.                                                                                                             |
 | `import 'ui/query_bar'`                           | `import { QueryStringInput } from '../data/public'`          | Directives are deprecated.                                                                                                           |
 | `import 'ui/search_bar'`                          | `import { SearchBar } from '../data/public'`                 | Directive is deprecated.                                                                                                             |
-| `import 'ui/kbn_top_nav'`                         | `import { TopNavMenu } from '../navigation/public'`          | Directive was moved to `src/plugins/kibana_legacy`.                                                                                    |
+| `import 'ui/kbn_top_nav'`                         | `import { TopNavMenu } from '../navigation/public'`          | Directive was removed.                                                                                    |
 | `ui/saved_objects/components/saved_object_finder` | `import { SavedObjectFinder } from '../saved_objects/public'` |                                                                                                                                      |
 | `core_plugins/interpreter`                        | `plugins.data.expressions`                                           |
 | `ui/courier`                                      | `plugins.data.search`                                                |
@@ -1284,7 +1284,7 @@ _See also: [Server's CoreSetup API Docs](/docs/development/core/server/kibana-pl
 
 | Legacy Platform                                                                    | New Platform                                                                   | Notes |
 | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ----- |
-| `server.plugins.xpack_main.registerFeature`                                        | [`plugins.features.registerFeature`](x-pack/plugins/features/server/plugin.ts) |       |
+| `server.plugins.xpack_main.registerFeature`                                        | [`plugins.features.registerKibanaFeature`](x-pack/plugins/features/server/plugin.ts) |       |
 | `server.plugins.xpack_main.feature(pluginID).registerLicenseCheckResultsGenerator` | [`x-pack licensing plugin`](/x-pack/plugins/licensing/README.md)               |       |
 
 #### UI Exports

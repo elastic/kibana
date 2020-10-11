@@ -20,7 +20,11 @@
 import Stream from 'stream';
 import { get, isEqual } from 'lodash';
 
-const GET_CLIENT_HELLO = /GET_CLIENT_HELLO:http/;
+/**
+ * Matches error messages when clients connect via HTTP instead of HTTPS; see unit test for full message. Warning: this can change when Node
+ * and its bundled OpenSSL binary are upgraded.
+ */
+const OPENSSL_GET_RECORD_REGEX = /ssl3_get_record:http/;
 
 function doTagsMatch(event, tags) {
   return isEqual(get(event, 'tags'), tags);
@@ -124,7 +128,7 @@ export class LogInterceptor extends Stream.Transform {
   }
 
   downgradeIfHTTPWhenHTTPS(event) {
-    return downgradeIfErrorMessage(GET_CLIENT_HELLO, event);
+    return downgradeIfErrorMessage(OPENSSL_GET_RECORD_REGEX, event);
   }
 
   _transform(event, enc, next) {

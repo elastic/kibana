@@ -1,0 +1,171 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`tagcloud vis toExpressionAst function should match snapshot params fulfilled 1`] = `
+Object {
+  "chain": Array [
+    Object {
+      "arguments": Object {
+        "aggConfigs": Array [
+          "[]",
+        ],
+        "includeFormatHints": Array [
+          false,
+        ],
+        "index": Array [
+          "123",
+        ],
+        "metricsAtAllLevels": Array [
+          false,
+        ],
+        "partialRows": Array [
+          false,
+        ],
+      },
+      "function": "esaggs",
+      "type": "function",
+    },
+    Object {
+      "arguments": Object {
+        "bucket": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "accessor": Array [
+                    0,
+                  ],
+                  "format": Array [
+                    "terms",
+                  ],
+                  "formatParams": Array [
+                    "{\\"id\\":\\"string\\",\\"otherBucketLabel\\":\\"Other\\",\\"missingBucketLabel\\":\\"Missing\\"}",
+                  ],
+                },
+                "function": "visdimension",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+        "maxFontSize": Array [
+          15,
+        ],
+        "metric": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "accessor": Array [
+                    1,
+                  ],
+                  "format": Array [
+                    "number",
+                  ],
+                },
+                "function": "visdimension",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+        "minFontSize": Array [
+          5,
+        ],
+        "orientation": Array [
+          "single",
+        ],
+        "scale": Array [
+          "linear",
+        ],
+        "showLabel": Array [
+          true,
+        ],
+      },
+      "function": "tagcloud",
+      "type": "function",
+    },
+  ],
+  "type": "expression",
+}
+`;
+
+exports[`tagcloud vis toExpressionAst function should match snapshot without params 1`] = `
+Object {
+  "chain": Array [
+    Object {
+      "arguments": Object {
+        "aggConfigs": Array [
+          "[]",
+        ],
+        "includeFormatHints": Array [
+          false,
+        ],
+        "index": Array [
+          "123",
+        ],
+        "metricsAtAllLevels": Array [
+          false,
+        ],
+        "partialRows": Array [
+          false,
+        ],
+      },
+      "function": "esaggs",
+      "type": "function",
+    },
+    Object {
+      "arguments": Object {
+        "bucket": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "accessor": Array [
+                    0,
+                  ],
+                  "format": Array [
+                    "terms",
+                  ],
+                  "formatParams": Array [
+                    "{\\"id\\":\\"string\\",\\"otherBucketLabel\\":\\"Other\\",\\"missingBucketLabel\\":\\"Missing\\"}",
+                  ],
+                },
+                "function": "visdimension",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+        "metric": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "accessor": Array [
+                    1,
+                  ],
+                  "format": Array [
+                    "number",
+                  ],
+                },
+                "function": "visdimension",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+        "showLabel": Array [
+          false,
+        ],
+      },
+      "function": "tagcloud",
+      "type": "function",
+    },
+  ],
+  "type": "expression",
+}
+`;

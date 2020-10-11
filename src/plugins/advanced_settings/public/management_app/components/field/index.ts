@@ -18,3 +18,6 @@
  */
 
 export { Field, getEditableValue } from './field';
+
+// eslint-disable-next-line import/no-default-export
+export { Field as default } from './field';

@@ -70,19 +70,20 @@ export const TimeSeries = ({
   annotations,
 }) => {
   const chartRef = useRef();
-  const updateCursor = (_, cursor) => {
-    if (chartRef.current) {
-      chartRef.current.dispatchExternalPointerEvent(cursor);
-    }
-  };
 
   useEffect(() => {
+    const updateCursor = (_, cursor) => {
+      if (chartRef.current) {
+        chartRef.current.dispatchExternalPointerEvent(cursor);
+      }
+    };
+
     eventBus.on(ACTIVE_CURSOR, updateCursor);
 
     return () => {
       eventBus.off(ACTIVE_CURSOR, undefined, updateCursor);
     };
-  }, []); // eslint-disable-line
+  }, []);
 
   const tooltipFormatter = decorateFormatter(xAxisFormatter);
   const uiSettings = getUISettings();
@@ -139,6 +140,7 @@ export const TimeSeries = ({
           type: tooltipMode === 'show_focused' ? TooltipType.Follow : TooltipType.VerticalCursor,
           headerFormatter: tooltipFormatter,
         }}
+        externalPointerEvents={{ tooltip: { visible: false } }}
       />
 
       {annotations.map(({ id, data, icon, color }) => {
@@ -176,6 +178,7 @@ export const TimeSeries = ({
             useDefaultGroupDomain,
             y1AccessorFormat,
             y0AccessorFormat,
+            tickFormat,
           },
           sortIndex
         ) => {
@@ -207,6 +210,7 @@ export const TimeSeries = ({
                 sortIndex={sortIndex}
                 y1AccessorFormat={y1AccessorFormat}
                 y0AccessorFormat={y0AccessorFormat}
+                tickFormat={tickFormat}
               />
             );
           }
@@ -233,6 +237,7 @@ export const TimeSeries = ({
                 sortIndex={sortIndex}
                 y1AccessorFormat={y1AccessorFormat}
                 y0AccessorFormat={y0AccessorFormat}
+                tickFormat={tickFormat}
               />
             );
           }

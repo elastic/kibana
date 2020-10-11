@@ -15,6 +15,7 @@ import {
   CapabilitiesStart,
   IClusterClient,
 } from 'kibana/server';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { PluginsSetup, RouteInitialization } from './types';
 import { PLUGIN_ID, PLUGIN_ICON } from '../common/constants/app';
 import { MlCapabilities } from '../common/types/capabilities';
@@ -46,7 +47,7 @@ import { createSharedServices, SharedServices } from './shared_services';
 import { getPluginPrivileges } from '../common/types/capabilities';
 import { setupCapabilitiesSwitcher } from './lib/capabilities';
 import { registerKibanaSettings } from './lib/register_settings';
-import { inferenceRoutes } from './routes/inference';
+import { trainedModelsRoutes } from './routes/trained_models';
 
 export type MlPluginSetup = SharedServices;
 export type MlPluginStart = void;
@@ -67,13 +68,14 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
   public setup(coreSetup: CoreSetup, plugins: PluginsSetup): MlPluginSetup {
     const { admin, user, apmUser } = getPluginPrivileges();
 
-    plugins.features.registerFeature({
+    plugins.features.registerKibanaFeature({
       id: PLUGIN_ID,
       name: i18n.translate('xpack.ml.featureRegistry.mlFeatureName', {
         defaultMessage: 'Machine Learning',
       }),
       icon: PLUGIN_ICON,
       order: 500,
+      category: DEFAULT_APP_CATEGORIES.kibana,
       navLinkId: PLUGIN_ID,
       app: [PLUGIN_ID, 'kibana'],
       catalogue: [PLUGIN_ID, `${PLUGIN_ID}_file_data_visualizer`],
@@ -151,7 +153,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
     initMlServerLog({ log: this.log });
     initMlTelemetry(coreSetup, plugins.usageCollection);
 
-    inferenceRoutes(routeInit);
+    trainedModelsRoutes(routeInit);
 
     return {
       ...createSharedServices(

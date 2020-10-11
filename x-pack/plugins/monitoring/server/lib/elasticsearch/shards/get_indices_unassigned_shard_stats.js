@@ -20,7 +20,7 @@ async function getUnassignedShardData(req, esIndexPattern, cluster) {
     size: 0,
     ignoreUnavailable: true,
     body: {
-      sort: { timestamp: { order: 'desc' } },
+      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({
         type: 'shards',
         clusterUuid: cluster.cluster_uuid,

@@ -66,8 +66,6 @@ const ProviderContainerComponent = styled.div<ProviderContainerProps>`
 
       .${STATEFUL_EVENT_CSS_CLASS_NAME}:hover &,
       tr:hover & {
-        background-color: ${({ theme }) => theme.eui.euiColorLightShade};
-
         &::before {
           background-image: linear-gradient(
               135deg,

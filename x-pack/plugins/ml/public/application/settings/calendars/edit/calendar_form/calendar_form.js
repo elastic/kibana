@@ -25,11 +25,13 @@ import { EventsTable } from '../events_table';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { ML_PAGES } from '../../../../../../common/constants/ml_url_generator';
+import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';
 
 function EditHeader({ calendarId, description }) {
   return (
     <Fragment>
-      <EuiTitle>
+      <EuiTitle data-test-subj="mlCalendarTitle">
         <h1>
           <FormattedMessage
             id="xpack.ml.calendarsEdit.calendarForm.calendarTitle"
@@ -38,7 +40,7 @@ function EditHeader({ calendarId, description }) {
           />
         </h1>
       </EuiTitle>
-      <EuiText>
+      <EuiText data-test-subj={'mlCalendarDescriptionText'}>
         <p>{description}</p>
       </EuiText>
       <EuiSpacer size="l" />
@@ -81,9 +83,10 @@ export const CalendarForm = ({
   const error = isNewCalendarIdValid === false && !isEdit ? [msg] : undefined;
   const saveButtonDisabled =
     canCreateCalendar === false || saving || !isNewCalendarIdValid || calendarId === '';
+  const redirectToCalendarsManagementPage = useCreateAndNavigateToMlLink(ML_PAGES.CALENDARS_MANAGE);
 
   return (
-    <EuiForm>
+    <EuiForm data-test-subj={`mlCalendarForm${isEdit === true ? 'Edit' : 'New'}`}>
       {isEdit === true ? (
         <EditHeader calendarId={calendarId} description={description} />
       ) : (
@@ -113,6 +116,7 @@ export const CalendarForm = ({
               value={calendarId}
               onChange={onCalendarIdChange}
               disabled={isEdit === true || saving === true}
+              data-test-subj="mlCalendarIdInput"
             />
           </EuiFormRow>
 
@@ -129,6 +133,7 @@ export const CalendarForm = ({
               value={description}
               onChange={onDescriptionChange}
               disabled={isEdit === true || saving === true}
+              data-test-subj="mlCalendarDescriptionInput"
             />
           </EuiFormRow>
         </Fragment>
@@ -215,7 +220,7 @@ export const CalendarForm = ({
       <EuiSpacer size="l" />
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButton isDisabled={saving} href={'#/settings/calendars_list'}>
+          <EuiButton isDisabled={saving} onClick={redirectToCalendarsManagementPage}>
             <FormattedMessage
               id="xpack.ml.calendarsEdit.calendarForm.cancelButtonLabel"
               defaultMessage="Cancel"

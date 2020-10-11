@@ -239,6 +239,7 @@ export const SavedTimelineRuntimeType = runtimeTypes.partial({
   excludedRowRendererIds: unionWithNullType(runtimeTypes.array(RowRendererIdRuntimeType)),
   favorite: unionWithNullType(runtimeTypes.array(SavedFavoriteRuntimeType)),
   filters: unionWithNullType(runtimeTypes.array(SavedFilterRuntimeType)),
+  indexNames: unionWithNullType(runtimeTypes.array(runtimeTypes.string)),
   kqlMode: unionWithNullType(runtimeTypes.string),
   kqlQuery: unionWithNullType(SavedFilterQueryQueryRuntimeType),
   title: unionWithNullType(runtimeTypes.string),
@@ -398,3 +399,5 @@ export const importTimelineResultSchema = runtimeTypes.exact(
 );
 
 export type ImportTimelineResultSchema = runtimeTypes.TypeOf<typeof importTimelineResultSchema>;
+
+export type TimelineEventsType = 'all' | 'raw' | 'alert' | 'signal' | 'custom';

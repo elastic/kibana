@@ -12,6 +12,7 @@ import {
   loadActionTypes,
   loadAllActions,
   updateActionConnector,
+  executeAction,
 } from './action_connector_api';
 
 const http = httpServiceMock.createStartContract();
@@ -58,7 +59,7 @@ describe('loadAllActions', () => {
 
 describe('createActionConnector', () => {
   test('should call create action API', async () => {
-    const connector: ActionConnectorWithoutId = {
+    const connector: ActionConnectorWithoutId<{}, {}> = {
       actionTypeId: 'test',
       isPreconfigured: false,
       name: 'My test',
@@ -84,7 +85,7 @@ describe('createActionConnector', () => {
 describe('updateActionConnector', () => {
   test('should call the update API', async () => {
     const id = '123';
-    const connector: ActionConnectorWithoutId = {
+    const connector: ActionConnectorWithoutId<{}, {}> = {
       actionTypeId: 'test',
       isPreconfigured: false,
       name: 'My test',
@@ -124,6 +125,35 @@ describe('deleteActions', () => {
         Array [
           "/api/actions/action/3",
         ],
+      ]
+    `);
+  });
+});
+
+describe('executeAction', () => {
+  test('should call execute API', async () => {
+    const id = '123';
+    const params = {
+      stringParams: 'someString',
+      numericParams: 123,
+    };
+
+    http.post.mockResolvedValueOnce({
+      actionId: id,
+      status: 'ok',
+    });
+
+    const result = await executeAction({ id, http, params });
+    expect(result).toEqual({
+      actionId: id,
+      status: 'ok',
+    });
+    expect(http.post.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "/api/actions/action/123/_execute",
+        Object {
+          "body": "{\\"params\\":{\\"stringParams\\":\\"someString\\",\\"numericParams\\":123}}",
+        },
       ]
     `);
   });

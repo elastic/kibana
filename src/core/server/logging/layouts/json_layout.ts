@@ -19,10 +19,8 @@
 
 import moment from 'moment-timezone';
 import { merge } from 'lodash';
-import { schema, TypeOf } from '@kbn/config-schema';
-
-import { LogRecord } from '../log_record';
-import { Layout } from './layouts';
+import { schema } from '@kbn/config-schema';
+import { LogRecord, Layout } from '@kbn/logging';
 
 const { literal, object } = schema;
 
@@ -31,7 +29,9 @@ const jsonLayoutSchema = object({
 });
 
 /** @internal */
-export type JsonLayoutConfigType = TypeOf<typeof jsonLayoutSchema>;
+export interface JsonLayoutConfigType {
+  kind: 'json';
+}
 
 /**
  * Layout that just converts `LogRecord` into JSON string.

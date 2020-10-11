@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+import { expectSnapshot } from '../../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 export default function apiTest({ getService }: FtrProviderContext) {
@@ -25,24 +26,25 @@ export default function apiTest({ getService }: FtrProviderContext) {
     describe('when calling the endpoint for listing jobs', () => {
       it('returns an error because the user is on basic license', async () => {
         const { body } = await getAnomalyDetectionJobs();
-        expect(body).to.eql({
-          statusCode: 403,
-          error: 'Forbidden',
-          message:
-            "To use anomaly detection, you must be subscribed to an Elastic Platinum license. With it, you'll be able to monitor your services with the aid of machine learning.",
-        });
+
+        expect(body.statusCode).to.be(403);
+        expect(body.error).to.be('Forbidden');
+        expectSnapshot(body.message).toMatchInline(
+          `"To use anomaly detection, you must be subscribed to an Elastic Platinum license. With it, you'll be able to monitor your services with the aid of machine learning."`
+        );
       });
     });
 
     describe('when calling create endpoint', () => {
       it('returns an error because the user is on basic license', async () => {
         const { body } = await createAnomalyDetectionJobs(['production', 'staging']);
-        expect(body).to.eql({
-          statusCode: 403,
-          error: 'Forbidden',
-          message:
-            "To use anomaly detection, you must be subscribed to an Elastic Platinum license. With it, you'll be able to monitor your services with the aid of machine learning.",
-        });
+
+        expect(body.statusCode).to.be(403);
+        expect(body.error).to.be('Forbidden');
+
+        expectSnapshot(body.message).toMatchInline(
+          `"To use anomaly detection, you must be subscribed to an Elastic Platinum license. With it, you'll be able to monitor your services with the aid of machine learning."`
+        );
       });
     });
   });

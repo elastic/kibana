@@ -12,7 +12,7 @@ import { ConfigType } from '../';
 import { IAccess } from './check_access';
 
 import { IInitialAppData } from '../../common/types';
-import { stripTrailingSlash } from '../../common/strip_trailing_slash';
+import { stripTrailingSlash } from '../../common/strip_slashes';
 
 interface IParams {
   request: KibanaRequest;
@@ -29,7 +29,7 @@ interface IReturn extends IInitialAppData {
  * useful various settings (e.g. product access, external URL)
  * needed by the Kibana plugin at the setup stage
  */
-const ENDPOINT = '/api/ent/v1/internal/client_config';
+const ENDPOINT = '/api/ent/v2/internal/client_config';
 
 export const callEnterpriseSearchConfigAPI = async ({
   config,
@@ -67,44 +67,59 @@ export const callEnterpriseSearchConfigAPI = async ({
       publicUrl: stripTrailingSlash(data?.settings?.external_url),
       readOnlyMode: !!data?.settings?.read_only_mode,
       ilmEnabled: !!data?.settings?.ilm_enabled,
+      isFederatedAuth: !!data?.settings?.is_federated_auth, // i.e., not standard auth
       configuredLimits: {
-        maxDocumentByteSize: data?.settings?.configured_limits?.max_document_byte_size,
-        maxEnginesPerMetaEngine: data?.settings?.configured_limits?.max_engines_per_meta_engine,
+        appSearch: {
+          engine: {
+            maxDocumentByteSize:
+              data?.settings?.configured_limits?.app_search?.engine?.document_size_in_bytes,
+            maxEnginesPerMetaEngine:
+              data?.settings?.configured_limits?.app_search?.engine?.source_engines_per_meta_engine,
+          },
+        },
+        workplaceSearch: {
+          customApiSource: {
+            maxDocumentByteSize:
+              data?.settings?.configured_limits?.workplace_search?.custom_api_source
+                ?.document_size_in_bytes,
+            totalFields:
+              data?.settings?.configured_limits?.workplace_search?.custom_api_source?.total_fields,
+          },
+        },
       },
       appSearch: {
-        accountId: data?.settings?.app_search?.account_id,
-        onBoardingComplete: !!data?.settings?.app_search?.onboarding_complete,
+        accountId: data?.current_user?.app_search?.account?.id,
+        onboardingComplete: !!data?.current_user?.app_search?.account?.onboarding_complete,
         role: {
-          id: data?.current_user?.app_search_role?.id,
-          roleType: data?.current_user?.app_search_role?.role_type,
+          id: data?.current_user?.app_search?.role?.id,
+          roleType: data?.current_user?.app_search?.role?.role_type,
           ability: {
-            accessAllEngines: !!data?.current_user?.app_search_role?.ability?.access_all_engines,
-            destroy: data?.current_user?.app_search_role?.ability?.destroy || [],
-            manage: data?.current_user?.app_search_role?.ability?.manage || [],
-            edit: data?.current_user?.app_search_role?.ability?.edit || [],
-            view: data?.current_user?.app_search_role?.ability?.view || [],
-            credentialTypes: data?.current_user?.app_search_role?.ability?.credential_types || [],
+            accessAllEngines: !!data?.current_user?.app_search?.role?.ability?.access_all_engines,
+            manage: data?.current_user?.app_search?.role?.ability?.manage || [],
+            edit: data?.current_user?.app_search?.role?.ability?.edit || [],
+            view: data?.current_user?.app_search?.role?.ability?.view || [],
+            credentialTypes: data?.current_user?.app_search?.role?.ability?.credential_types || [],
             availableRoleTypes:
-              data?.current_user?.app_search_role?.ability?.available_role_types || [],
+              data?.current_user?.app_search?.role?.ability?.available_role_types || [],
           },
         },
       },
       workplaceSearch: {
-        canCreateInvitations: !!data?.settings?.workplace_search?.can_create_invitations,
-        isFederatedAuth: !!data?.settings?.workplace_search?.is_federated_auth,
         organization: {
-          name: data?.settings?.workplace_search?.organization?.name,
-          defaultOrgName: data?.settings?.workplace_search?.organization?.default_org_name,
+          name: data?.current_user?.workplace_search?.organization?.name,
+          defaultOrgName: data?.current_user?.workplace_search?.organization?.default_org_name,
         },
-        fpAccount: {
-          id: data?.settings?.workplace_search?.fp_account.id,
-          groups: data?.settings?.workplace_search?.fp_account.groups || [],
-          isAdmin: !!data?.settings?.workplace_search?.fp_account?.is_admin,
-          canCreatePersonalSources: !!data?.settings?.workplace_search?.fp_account
+        account: {
+          id: data?.current_user?.workplace_search?.account?.id,
+          groups: data?.current_user?.workplace_search?.account?.groups || [],
+          isAdmin: !!data?.current_user?.workplace_search?.account?.is_admin,
+          canCreatePersonalSources: !!data?.current_user?.workplace_search?.account
             ?.can_create_personal_sources,
-          isCurated: !!data?.settings?.workplace_search?.fp_account.is_curated,
-          viewedOnboardingPage: !!data?.settings?.workplace_search?.fp_account
-            .viewed_onboarding_page,
+          canCreateInvitations: !!data?.current_user?.workplace_search?.account
+            ?.can_create_invitations,
+          isCurated: !!data?.current_user?.workplace_search?.account?.is_curated,
+          viewedOnboardingPage: !!data?.current_user?.workplace_search?.account
+            ?.viewed_onboarding_page,
         },
       },
     };

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { noop } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
@@ -12,7 +11,7 @@ import deepEqual from 'fast-deep-equal';
 
 import { RowRendererId, TimelineId } from '../../../../../common/types/timeline';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
-import { TimelineItem } from '../../../../graphql/types';
+import { TimelineItem } from '../../../../../common/search_strategy/timeline';
 import { Note } from '../../../../common/lib/note';
 import { appSelectors, inputsModel, State } from '../../../../common/store';
 import { appActions } from '../../../../common/store/actions';
@@ -209,7 +208,6 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
         onColumnSorted={onColumnSorted}
         onRowSelected={onRowSelected}
         onSelectAll={onSelectAll}
-        onFilterChange={noop} // TODO: this is the callback for column filters, which is out scope for this phase of delivery
         onPinEvent={onPinEvent}
         onUnPinEvent={onUnPinEvent}
         onUpdateColumns={onUpdateColumns}

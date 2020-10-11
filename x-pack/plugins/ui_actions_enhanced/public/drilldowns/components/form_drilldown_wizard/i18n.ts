@@ -26,3 +26,10 @@ export const txtDrilldownAction = i18n.translate(
     defaultMessage: 'Action',
   }
 );
+
+export const txtGetMoreActions = i18n.translate(
+  'xpack.uiActionsEnhanced.drilldowns.components.FormDrilldownWizard.getMoreActionsLinkLabel',
+  {
+    defaultMessage: 'Get more actions',
+  }
+);

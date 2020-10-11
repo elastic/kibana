@@ -146,22 +146,17 @@ export function updateJobRules(job, detectorIndex, rules) {
   }
 
   return new Promise((resolve, reject) => {
-    mlJobService
-      .updateJob(jobId, jobData)
-      .then((resp) => {
-        if (resp.success) {
-          // Refresh the job data in the job service before resolving.
-          mlJobService
-            .refreshJob(jobId)
-            .then(() => {
-              resolve({ success: true });
-            })
-            .catch((refreshResp) => {
-              reject(refreshResp);
-            });
-        } else {
-          reject(resp);
-        }
+    ml.updateJob({ jobId: jobId, job: jobData })
+      .then(() => {
+        // Refresh the job data in the job service before resolving.
+        mlJobService
+          .refreshJob(jobId)
+          .then(() => {
+            resolve({ success: true });
+          })
+          .catch((refreshResp) => {
+            reject(refreshResp);
+          });
       })
       .catch((resp) => {
         reject(resp);

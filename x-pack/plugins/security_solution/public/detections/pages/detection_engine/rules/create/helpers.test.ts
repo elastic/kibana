@@ -241,6 +241,32 @@ describe('helpers', () => {
 
       expect(result).toEqual(expected);
     });
+
+    test('returns query fields if type is eql', () => {
+      const mockStepData: DefineStepRule = {
+        ...mockData,
+        ruleType: 'eql',
+        queryBar: {
+          ...mockData.queryBar,
+          query: {
+            ...mockData.queryBar.query,
+            language: 'eql',
+            query: 'process where process_name == "explorer.exe"',
+          },
+        },
+      };
+      const result: DefineStepRuleJson = formatDefineStepData(mockStepData);
+
+      const expected = {
+        filters: mockStepData.queryBar.filters,
+        index: mockStepData.index,
+        language: 'eql',
+        query: 'process where process_name == "explorer.exe"',
+        type: 'eql',
+      };
+
+      expect(result).toEqual(expect.objectContaining(expected));
+    });
   });
 
   describe('formatScheduleStepData', () => {

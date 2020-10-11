@@ -4,23 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface Options {
-  /**
-   * The entity_id of the selected node.
-   */
-  selectedEntityID?: string;
-}
+import { encode } from 'rison-node';
+import { PanelViewAndParameters } from '../types';
 
 /**
  * Calculate the expected URL search based on options.
  */
-export function urlSearch(resolverComponentInstanceID: string, options?: Options): string {
+export function urlSearch(
+  resolverComponentInstanceID: string,
+  options?: PanelViewAndParameters
+): string {
   if (!options) {
     return '';
   }
   const params = new URLSearchParams();
-  if (options.selectedEntityID !== undefined) {
-    params.set(`resolver-${resolverComponentInstanceID}-id`, options.selectedEntityID);
-  }
+  params.set(`resolver-${resolverComponentInstanceID}`, encode(options));
   return params.toString();
 }

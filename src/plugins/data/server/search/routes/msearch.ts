@@ -17,45 +17,12 @@
  * under the License.
  */
 
-import { first } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
 
 import { IRouter } from 'src/core/server';
-import { UI_SETTINGS } from '../../../common';
 import { SearchRouteDependencies } from '../search_service';
-import { getDefaultSearchParams } from '..';
 
-interface MsearchHeaders {
-  index: string;
-  preference?: number | string;
-}
-
-interface MsearchRequest {
-  header: MsearchHeaders;
-  body: any;
-}
-
-interface RequestBody {
-  searches: MsearchRequest[];
-}
-
-/** @internal */
-export function convertRequestBody(
-  requestBody: RequestBody,
-  { timeout }: { timeout?: string }
-): string {
-  return requestBody.searches.reduce((req, curr) => {
-    const header = JSON.stringify({
-      ignore_unavailable: true,
-      ...curr.header,
-    });
-    const body = JSON.stringify({
-      timeout,
-      ...curr.body,
-    });
-    return `${req}${header}\n${body}\n`;
-  }, '');
-}
+import { getCallMsearch } from './call_msearch';
 
 /**
  * The msearch route takes in an array of searches, each consisting of header
@@ -92,34 +59,15 @@ export function registerMsearchRoute(router: IRouter, deps: SearchRouteDependenc
       },
     },
     async (context, request, res) => {
-      const client = context.core.elasticsearch.client.asCurrentUser;
-
-      // get shardTimeout
-      const config = await deps.globalConfig$.pipe(first()).toPromise();
-      const { timeout } = getDefaultSearchParams(config);
-
-      const body = convertRequestBody(request.body, { timeout });
+      const callMsearch = getCallMsearch({
+        esClient: context.core.elasticsearch.client,
+        globalConfig$: deps.globalConfig$,
+        uiSettings: context.core.uiSettings.client,
+      });
 
       try {
-        const ignoreThrottled = !(await context.core.uiSettings.client.get(
-          UI_SETTINGS.SEARCH_INCLUDE_FROZEN
-        ));
-        const maxConcurrentShardRequests = await context.core.uiSettings.client.get(
-          UI_SETTINGS.COURIER_MAX_CONCURRENT_SHARD_REQUESTS
-        );
-        const response = await client.transport.request({
-          method: 'GET',
-          path: '/_msearch',
-          body,
-          querystring: {
-            rest_total_hits_as_int: true,
-            ignore_throttled: ignoreThrottled,
-            max_concurrent_shard_requests:
-              maxConcurrentShardRequests > 0 ? maxConcurrentShardRequests : undefined,
-          },
-        });
-
-        return res.ok({ body: response });
+        const response = await callMsearch({ body: request.body });
+        return res.ok(response);
       } catch (err) {
         return res.customError({
           statusCode: err.statusCode || 500,

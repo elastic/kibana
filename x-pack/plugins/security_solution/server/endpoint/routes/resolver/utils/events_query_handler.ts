@@ -3,12 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+/**
+ * @deprecated msearch functionality for querying events will be removed shortly
+ */
 import { SearchResponse } from 'elasticsearch';
 import { ILegacyScopedClusterClient } from 'kibana/server';
-import { ResolverRelatedEvents, ResolverEvent } from '../../../../../common/endpoint/types';
+import { SafeResolverRelatedEvents, SafeResolverEvent } from '../../../../../common/endpoint/types';
 import { createRelatedEvents } from './node';
-import { EventsQuery } from '../queries/events';
+import { EventsQuery } from '../queries/related_events';
 import { PaginationBuilder } from './pagination';
 import { QueryInfo } from '../queries/multi_searcher';
 import { SingleQueryHandler } from './fetch';
@@ -28,8 +30,8 @@ export interface RelatedEventsParams {
 /**
  * This retrieves the related events for the origin node of a resolver tree.
  */
-export class RelatedEventsQueryHandler implements SingleQueryHandler<ResolverRelatedEvents> {
-  private relatedEvents: ResolverRelatedEvents | undefined;
+export class RelatedEventsQueryHandler implements SingleQueryHandler<SafeResolverRelatedEvents> {
+  private relatedEvents: SafeResolverRelatedEvents | undefined;
   private readonly query: EventsQuery;
   private readonly limit: number;
   private readonly entityID: string;
@@ -46,7 +48,7 @@ export class RelatedEventsQueryHandler implements SingleQueryHandler<ResolverRel
     );
   }
 
-  private handleResponse = (response: SearchResponse<ResolverEvent>) => {
+  private handleResponse = (response: SearchResponse<SafeResolverEvent>) => {
     const results = this.query.formatResponse(response);
     this.relatedEvents = createRelatedEvents(
       this.entityID,

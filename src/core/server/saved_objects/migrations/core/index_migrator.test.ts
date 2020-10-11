@@ -369,6 +369,30 @@ describe('IndexMigrator', () => {
       ],
     });
   });
+
+  test('rejects when the migration function throws an error', async () => {
+    const { client } = testOpts;
+    const migrateDoc = jest.fn((doc: SavedObjectUnsanitizedDoc) => {
+      throw new Error('error migrating document');
+    });
+
+    testOpts.documentMigrator = {
+      migrationVersion: { foo: '1.2.3' },
+      migrate: migrateDoc,
+    };
+
+    withIndex(client, {
+      numOutOfDate: 1,
+      docs: [
+        [{ _id: 'foo:1', _source: { type: 'foo', foo: { name: 'Bar' } } }],
+        [{ _id: 'foo:2', _source: { type: 'foo', foo: { name: 'Baz' } } }],
+      ],
+    });
+
+    await expect(new IndexMigrator(testOpts).migrate()).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"error migrating document"`
+    );
+  });
 });
 
 function withIndex(

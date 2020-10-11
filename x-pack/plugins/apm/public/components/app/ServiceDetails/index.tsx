@@ -5,39 +5,34 @@
  */
 
 import {
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
-  EuiButtonEmpty,
 } from '@elastic/eui';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ApmHeader } from '../../shared/ApmHeader';
-import { ServiceDetailTabs } from './ServiceDetailTabs';
-import { useUrlParams } from '../../../hooks/useUrlParams';
-import { AlertIntegrations } from './AlertIntegrations';
+import React from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
+import { getAlertingCapabilities } from '../../alerting/get_alert_capabilities';
+import { ApmHeader } from '../../shared/ApmHeader';
+import { AlertingPopoverAndFlyout } from './alerting_popover_flyout';
+import { ServiceDetailTabs } from './ServiceDetailTabs';
 
-interface Props {
+interface Props extends RouteComponentProps<{ serviceName: string }> {
   tab: React.ComponentProps<typeof ServiceDetailTabs>['tab'];
 }
 
-export function ServiceDetails({ tab }: Props) {
-  const plugin = useApmPluginContext();
-  const { urlParams } = useUrlParams();
-  const { serviceName } = urlParams;
-  const capabilities = plugin.core.application.capabilities;
-  const canReadAlerts = !!capabilities.apm['alerting:show'];
-  const canSaveAlerts = !!capabilities.apm['alerting:save'];
-  const isAlertingPluginEnabled = 'alerts' in plugin.plugins;
-  const isAlertingAvailable =
-    isAlertingPluginEnabled && (canReadAlerts || canSaveAlerts);
-  const isMlPluginEnabled = 'ml' in plugin.plugins;
-  const canReadAnomalies = !!(
-    isMlPluginEnabled &&
-    capabilities.ml.canAccessML &&
-    capabilities.ml.canGetJobs
-  );
+export function ServiceDetails({ match, tab }: Props) {
+  const { core, plugins } = useApmPluginContext();
+  const { serviceName } = match.params;
+
+  const {
+    isAlertingAvailable,
+    canReadAlerts,
+    canSaveAlerts,
+    canReadAnomalies,
+  } = getAlertingCapabilities(plugins, core.application.capabilities);
 
   const ADD_DATA_LABEL = i18n.translate('xpack.apm.addDataButtonLabel', {
     defaultMessage: 'Add data',
@@ -54,7 +49,7 @@ export function ServiceDetails({ tab }: Props) {
           </EuiFlexItem>
           {isAlertingAvailable && (
             <EuiFlexItem grow={false}>
-              <AlertIntegrations
+              <AlertingPopoverAndFlyout
                 canReadAlerts={canReadAlerts}
                 canSaveAlerts={canSaveAlerts}
                 canReadAnomalies={canReadAnomalies}
@@ -63,9 +58,7 @@ export function ServiceDetails({ tab }: Props) {
           )}
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              href={plugin.core.http.basePath.prepend(
-                '/app/home#/tutorial/apm'
-              )}
+              href={core.http.basePath.prepend('/app/home#/tutorial/apm')}
               size="s"
               color="primary"
               iconType="plusInCircle"
@@ -76,7 +69,7 @@ export function ServiceDetails({ tab }: Props) {
         </EuiFlexGroup>
       </ApmHeader>
 
-      <ServiceDetailTabs tab={tab} />
+      <ServiceDetailTabs serviceName={serviceName} tab={tab} />
     </div>
   );
 }

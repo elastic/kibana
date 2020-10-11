@@ -19,26 +19,39 @@
 
 import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 
-import { FormHook, FieldHook, FieldConfig, FieldValidateResponse, ValidationError } from '../types';
+import {
+  FormHook,
+  FieldHook,
+  FieldConfig,
+  FieldValidateResponse,
+  ValidationError,
+  FormData,
+} from '../types';
 import { FIELD_TYPES, VALIDATION_TYPES } from '../constants';
 
-export const useField = <T>(
-  form: FormHook,
+export interface InternalFieldConfig<T> {
+  initialValue?: T;
+  isIncludedInOutput?: boolean;
+}
+
+export const useField = <T, FormType = FormData, I = T>(
+  form: FormHook<FormType>,
   path: string,
-  config: FieldConfig<any, T> & { initialValue?: T } = {},
-  valueChangeListener?: (value: T) => void
+  config: FieldConfig<T, FormType, I> & InternalFieldConfig<T> = {},
+  valueChangeListener?: (value: I) => void
 ) => {
   const {
     type = FIELD_TYPES.TEXT,
     defaultValue = '', // The value to use a fallback mecanism when no initial value is passed
     initialValue = config.defaultValue ?? '', // The value explicitly passed
+    isIncludedInOutput = true,
     label = '',
     labelAppend = '',
     helpText = '',
     validations,
     formatters,
     fieldsToValidateOnChange,
-    errorDisplayDelay = form.__options.errorDisplayDelay,
+    valueChangeDebounceTime = form.__options.valueChangeDebounceTime,
     serializer,
     deserializer,
   } = config;
@@ -62,7 +75,7 @@ export const useField = <T>(
     [initialValue, deserializer]
   );
 
-  const [value, setStateValue] = useState<T>(deserializeValue);
+  const [value, setStateValue] = useState<I>(deserializeValue);
   const [errors, setErrors] = useState<ValidationError[]>([]);
   const [isPristine, setPristine] = useState(true);
   const [isValidating, setValidating] = useState(false);
@@ -78,9 +91,9 @@ export const useField = <T>(
 
   // -- HELPERS
   // ----------------------------------
-  const serializeValue: FieldHook<T>['__serializeValue'] = useCallback(
-    (rawValue = value) => {
-      return serializer ? serializer(rawValue) : rawValue;
+  const serializeValue: FieldHook<T, I>['__serializeValue'] = useCallback(
+    (internalValue: I = value) => {
+      return serializer ? serializer(internalValue) : ((internalValue as unknown) as T);
     },
     [serializer, value]
   );
@@ -123,16 +136,8 @@ export const useField = <T>(
     const changeIteration = ++changeCounter.current;
     const startTime = Date.now();
 
-    if (debounceTimeout.current) {
-      clearTimeout(debounceTimeout.current);
-      debounceTimeout.current = null;
-    }
-
     setPristine(false);
-
-    if (errorDisplayDelay > 0) {
-      setIsChangingValue(true);
-    }
+    setIsChangingValue(true);
 
     // Notify listener
     if (valueChangeListener) {
@@ -155,22 +160,24 @@ export const useField = <T>(
      * and then, we verify how long we've already waited for as form.__validateFields() is asynchronous
      * and might already have taken more than the specified delay)
      */
-    if (errorDisplayDelay > 0 && changeIteration === changeCounter.current) {
-      const delta = Date.now() - startTime;
-      if (delta < errorDisplayDelay) {
-        debounceTimeout.current = setTimeout(() => {
-          debounceTimeout.current = null;
-          setIsChangingValue(false);
-        }, errorDisplayDelay - delta);
-      } else {
-        setIsChangingValue(false);
+    if (changeIteration === changeCounter.current) {
+      if (valueChangeDebounceTime > 0) {
+        const delta = Date.now() - startTime;
+        if (delta < valueChangeDebounceTime) {
+          debounceTimeout.current = setTimeout(() => {
+            debounceTimeout.current = null;
+            setIsChangingValue(false);
+          }, valueChangeDebounceTime - delta);
+          return;
+        }
       }
+      setIsChangingValue(false);
     }
   }, [
     path,
     value,
     valueChangeListener,
-    errorDisplayDelay,
+    valueChangeDebounceTime,
     fieldsToValidateOnChange,
     __updateFormDataAt,
     __validateFields,
@@ -201,7 +208,7 @@ export const useField = <T>(
       validationTypeToValidate,
     }: {
       formData: any;
-      value: unknown;
+      value: I;
       validationTypeToValidate?: string;
     }): ValidationError[] | Promise<ValidationError[]> => {
       if (!validations) {
@@ -234,7 +241,7 @@ export const useField = <T>(
           }
 
           inflightValidation.current = validator({
-            value: (valueToValidate as unknown) as string,
+            value: valueToValidate,
             errors: validationErrors,
             form: { getFormData, getFields },
             formData,
@@ -280,7 +287,7 @@ export const useField = <T>(
           }
 
           const validationResult = validator({
-            value: (valueToValidate as unknown) as string,
+            value: valueToValidate,
             errors: validationErrors,
             form: { getFormData, getFields },
             formData,
@@ -333,7 +340,7 @@ export const useField = <T>(
    * If a validationType is provided then only that validation will be executed,
    * skipping the other type of validation that might exist.
    */
-  const validate: FieldHook<T>['validate'] = useCallback(
+  const validate: FieldHook<T, I>['validate'] = useCallback(
     (validationData = {}) => {
       const {
         formData = getFormData({ unflatten: false }),
@@ -386,16 +393,22 @@ export const useField = <T>(
    *
    * @param newValue The new value to assign to the field
    */
-  const setValue: FieldHook<T>['setValue'] = useCallback(
+  const setValue: FieldHook<T, I>['setValue'] = useCallback(
     (newValue) => {
-      const formattedValue = formatInputValue<T>(newValue);
-      setStateValue(formattedValue);
-      return formattedValue;
+      setStateValue((prev) => {
+        let formattedValue: I;
+        if (typeof newValue === 'function') {
+          formattedValue = formatInputValue<I>((newValue as Function)(prev));
+        } else {
+          formattedValue = formatInputValue<I>(newValue);
+        }
+        return formattedValue;
+      });
     },
     [formatInputValue]
   );
 
-  const _setErrors: FieldHook<T>['setErrors'] = useCallback((_errors) => {
+  const _setErrors: FieldHook<T, I>['setErrors'] = useCallback((_errors) => {
     setErrors(
       _errors.map((error) => ({
         validationType: VALIDATION_TYPES.FIELD,
@@ -410,13 +423,13 @@ export const useField = <T>(
    *
    * @param event Form input change event
    */
-  const onChange: FieldHook<T>['onChange'] = useCallback(
+  const onChange: FieldHook<T, I>['onChange'] = useCallback(
     (event) => {
       const newValue = {}.hasOwnProperty.call(event!.target, 'checked')
         ? event.target.checked
         : event.target.value;
 
-      setValue((newValue as unknown) as T);
+      setValue((newValue as unknown) as I);
     },
     [setValue]
   );
@@ -431,7 +444,7 @@ export const useField = <T>(
    *
    * @param validationType The validation type to return error messages from
    */
-  const getErrorsMessages: FieldHook<T>['getErrorsMessages'] = useCallback(
+  const getErrorsMessages: FieldHook<T, I>['getErrorsMessages'] = useCallback(
     (args = {}) => {
       const { errorCode, validationType = VALIDATION_TYPES.FIELD } = args;
       const errorMessages = errors.reduce((messages, error) => {
@@ -452,30 +465,64 @@ export const useField = <T>(
     [errors]
   );
 
-  const reset: FieldHook<T>['reset'] = useCallback(
+  /**
+   * Handler to update the state and make sure the component is still mounted.
+   * When resetting the form, some field might get unmounted (e.g. a toggle on "true" becomes "false" and now certain fields should not be in the DOM).
+   * In that scenario there is a race condition in the "reset" method below, because the useState() hook is not synchronous.
+   *
+   * A better approach would be to have the state in a reducer and being able to update all values in a single dispatch action.
+   */
+  const updateStateIfMounted = useCallback(
+    (
+      state: 'isPristine' | 'isValidating' | 'isChangingValue' | 'isValidated' | 'errors' | 'value',
+      nextValue: any
+    ) => {
+      if (isMounted.current === false) {
+        return;
+      }
+
+      switch (state) {
+        case 'value':
+          return setValue(nextValue);
+        case 'errors':
+          return setErrors(nextValue);
+        case 'isChangingValue':
+          return setIsChangingValue(nextValue);
+        case 'isPristine':
+          return setPristine(nextValue);
+        case 'isValidated':
+          return setIsValidated(nextValue);
+        case 'isValidating':
+          return setValidating(nextValue);
+      }
+    },
+    [setValue]
+  );
+
+  const reset: FieldHook<T, I>['reset'] = useCallback(
     (resetOptions = { resetValue: true }) => {
       const { resetValue = true, defaultValue: updatedDefaultValue } = resetOptions;
 
-      setPristine(true);
-      setValidating(false);
-      setIsChangingValue(false);
-      setIsValidated(false);
-      setErrors([]);
+      updateStateIfMounted('isPristine', true);
+      updateStateIfMounted('isValidating', false);
+      updateStateIfMounted('isChangingValue', false);
+      updateStateIfMounted('isValidated', false);
+      updateStateIfMounted('errors', []);
 
       if (resetValue) {
         hasBeenReset.current = true;
         const newValue = deserializeValue(updatedDefaultValue ?? defaultValue);
-        setValue(newValue);
+        updateStateIfMounted('value', newValue);
         return newValue;
       }
     },
-    [setValue, deserializeValue, defaultValue]
+    [updateStateIfMounted, deserializeValue, defaultValue]
   );
 
   // Don't take into account non blocker validation. Some are just warning (like trying to add a wrong ComboBox item)
   const isValid = errors.filter((e) => e.__isBlocking__ !== false).length === 0;
 
-  const field = useMemo<FieldHook<T>>(() => {
+  const field = useMemo<FieldHook<T, I>>(() => {
     return {
       path,
       type,
@@ -496,6 +543,7 @@ export const useField = <T>(
       clearErrors,
       validate,
       reset,
+      __isIncludedInOutput: isIncludedInOutput,
       __serializeValue: serializeValue,
     };
   }, [
@@ -511,6 +559,7 @@ export const useField = <T>(
     isValidating,
     isValidated,
     isChangingValue,
+    isIncludedInOutput,
     onChange,
     getErrorsMessages,
     setValue,
@@ -551,6 +600,7 @@ export const useField = <T>(
     return () => {
       if (debounceTimeout.current) {
         clearTimeout(debounceTimeout.current);
+        debounceTimeout.current = null;
       }
     };
   }, [onValueChange]);

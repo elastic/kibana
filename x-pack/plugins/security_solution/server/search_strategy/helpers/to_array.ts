@@ -5,4 +5,4 @@
  */
 
 export const toArray = <T = string>(value: T | T[] | null) =>
-  Array.isArray(value) ? value : value == null ? [] : [value];
+  Array.isArray(value) ? value : value == null ? [] : [`${value}`];

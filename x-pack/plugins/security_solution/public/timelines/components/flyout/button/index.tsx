@@ -4,18 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { noop } from 'lodash/fp';
 import { EuiButton, EuiNotificationBadge, EuiPanel } from '@elastic/eui';
 import { rgba } from 'polished';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import deepEqual from 'fast-deep-equal';
 
-import { useWithSource } from '../../../../common/containers/source';
 import { IS_DRAGGING_CLASS_NAME } from '../../../../common/components/drag_and_drop/helpers';
 import { DataProvider } from '../../timeline/data_providers/data_provider';
 import { flattenIntoAndGroups } from '../../timeline/data_providers/helpers';
 import { DataProviders } from '../../timeline/data_providers';
 import * as i18n from './translations';
+import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
 export const FLYOUT_BUTTON_CLASS_NAME = 'timeline-flyout-button';
 
@@ -85,7 +86,19 @@ interface FlyoutButtonProps {
 export const FlyoutButton = React.memo<FlyoutButtonProps>(
   ({ onOpen, show, dataProviders, timelineId }) => {
     const badgeCount = useMemo(() => getBadgeCount(dataProviders), [dataProviders]);
-    const { browserFields } = useWithSource();
+    const { browserFields } = useSourcererScope(SourcererScopeName.timeline);
+
+    const badgeStyles: React.CSSProperties = useMemo(
+      () => ({
+        left: '-9px',
+        position: 'relative',
+        top: '-6px',
+        transform: 'rotate(90deg)',
+        visibility: dataProviders.length !== 0 ? 'inherit' : 'hidden',
+        zIndex: 10,
+      }),
+      [dataProviders.length]
+    );
 
     if (!show) {
       return null;
@@ -107,18 +120,7 @@ export const FlyoutButton = React.memo<FlyoutButtonProps>(
           >
             {i18n.FLYOUT_BUTTON}
           </EuiButton>
-          <EuiNotificationBadge
-            color="accent"
-            data-test-subj="badge"
-            style={{
-              left: '-9px',
-              position: 'relative',
-              top: '-6px',
-              transform: 'rotate(90deg)',
-              visibility: dataProviders.length !== 0 ? 'inherit' : 'hidden',
-              zIndex: 10,
-            }}
-          >
+          <EuiNotificationBadge color="accent" data-test-subj="badge" style={badgeStyles}>
             {badgeCount}
           </EuiNotificationBadge>
         </BadgeButtonContainer>
@@ -127,11 +129,6 @@ export const FlyoutButton = React.memo<FlyoutButtonProps>(
             browserFields={browserFields}
             timelineId={timelineId}
             dataProviders={dataProviders}
-            onDataProviderEdited={noop}
-            onDataProviderRemoved={noop}
-            onToggleDataProviderEnabled={noop}
-            onToggleDataProviderExcluded={noop}
-            onToggleDataProviderType={noop}
           />
         </DataProvidersPanel>
       </Container>
@@ -139,7 +136,7 @@ export const FlyoutButton = React.memo<FlyoutButtonProps>(
   },
   (prevProps, nextProps) =>
     prevProps.show === nextProps.show &&
-    prevProps.dataProviders === nextProps.dataProviders &&
+    deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
     prevProps.timelineId === nextProps.timelineId
 );
 

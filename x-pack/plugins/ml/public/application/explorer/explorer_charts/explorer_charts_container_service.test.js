@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import cloneDeep from 'lodash/cloneDeep';
+import { cloneDeep } from 'lodash';
 
 import mockAnomalyChartRecords from './__mocks__/mock_anomaly_chart_records.json';
 import mockDetectorsByJob from './__mocks__/mock_detectors_by_job.json';

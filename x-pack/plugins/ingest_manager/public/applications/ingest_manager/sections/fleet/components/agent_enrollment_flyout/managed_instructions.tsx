@@ -24,7 +24,7 @@ interface Props {
   agentPolicies?: AgentPolicy[];
 }
 
-export const ManagedInstructions: React.FunctionComponent<Props> = ({ agentPolicies }) => {
+export const ManagedInstructions = React.memo<Props>(({ agentPolicies }) => {
   const { getHref } = useLink();
   const core = useCore();
   const fleetStatus = useFleetStatus();
@@ -74,14 +74,14 @@ export const ManagedInstructions: React.FunctionComponent<Props> = ({ agentPolic
       ) : (
         <>
           <FormattedMessage
-            id="xpack.ingestManager.agentEnrollment.fleetNotInitializedText"
+            id="xpack.ingestManager.agentEnrollment.agentsNotInitializedText"
             defaultMessage="Before enrolling agents, {link}."
             values={{
               link: (
                 <EuiLink href={getHref('fleet')}>
                   <FormattedMessage
-                    id="xpack.ingestManager.agentEnrollment.setUpFleetLink"
-                    defaultMessage="set up Fleet"
+                    id="xpack.ingestManager.agentEnrollment.setUpAgentsLink"
+                    defaultMessage="set up central management for Elastic Agents"
                   />
                 </EuiLink>
               ),
@@ -91,4 +91,4 @@ export const ManagedInstructions: React.FunctionComponent<Props> = ({ agentPolic
       )}
     </>
   );
-};
+});

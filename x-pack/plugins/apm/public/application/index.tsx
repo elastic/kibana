@@ -22,13 +22,10 @@ import {
 import { AlertsContextProvider } from '../../../triggers_actions_ui/public';
 import { routes } from '../components/app/Main/route_config';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
-import { UpdateBreadcrumbs } from '../components/app/Main/UpdateBreadcrumbs';
 import { ApmPluginContext } from '../context/ApmPluginContext';
 import { LicenseProvider } from '../context/LicenseContext';
-import { LoadingIndicatorProvider } from '../context/LoadingIndicatorContext';
-import { LocationProvider } from '../context/LocationContext';
-import { MatchedRouteProvider } from '../context/MatchedRouteContext';
 import { UrlParamsProvider } from '../context/UrlParamsContext';
+import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { ApmPluginSetupDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { createStaticIndexPattern } from '../services/rest/index_pattern';
@@ -44,6 +41,8 @@ const MainContainer = styled.div`
 function App() {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
+  useBreadcrumbs(routes);
+
   return (
     <ThemeProvider
       theme={(outerTheme?: DefaultTheme) => ({
@@ -53,7 +52,6 @@ function App() {
       })}
     >
       <MainContainer data-test-subj="apmMainContainer" role="main">
-        <UpdateBreadcrumbs routes={routes} />
         <Route component={ScrollToTopOnPathChange} />
         <Switch>
           {routes.map((route, i) => (
@@ -92,24 +90,18 @@ export function ApmAppRoot({
             docLinks: core.docLinks,
             capabilities: core.application.capabilities,
             toastNotifications: core.notifications.toasts,
-            actionTypeRegistry: plugins.triggers_actions_ui.actionTypeRegistry,
-            alertTypeRegistry: plugins.triggers_actions_ui.alertTypeRegistry,
+            actionTypeRegistry: plugins.triggersActionsUi.actionTypeRegistry,
+            alertTypeRegistry: plugins.triggersActionsUi.alertTypeRegistry,
           }}
         >
           <KibanaContextProvider services={{ ...core, ...plugins }}>
             <i18nCore.Context>
               <Router history={history}>
-                <LocationProvider>
-                  <MatchedRouteProvider routes={routes}>
-                    <UrlParamsProvider>
-                      <LoadingIndicatorProvider>
-                        <LicenseProvider>
-                          <App />
-                        </LicenseProvider>
-                      </LoadingIndicatorProvider>
-                    </UrlParamsProvider>
-                  </MatchedRouteProvider>
-                </LocationProvider>
+                <UrlParamsProvider>
+                  <LicenseProvider>
+                    <App />
+                  </LicenseProvider>
+                </UrlParamsProvider>
               </Router>
             </i18nCore.Context>
           </KibanaContextProvider>

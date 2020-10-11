@@ -5,7 +5,7 @@
  */
 
 import { LevelLogger, startTrace } from '../';
-import { LayoutInstance } from '../../../common/types';
+import { LayoutInstance } from '../layouts';
 import { HeadlessChromiumDriver } from '../../browsers';
 import { CONTEXT_GETTIMERANGE } from './constants';
 

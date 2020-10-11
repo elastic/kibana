@@ -8,15 +8,14 @@ import React, { useMemo, useRef } from 'react';
 
 import { inputsModel } from '../../../../common/store';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
-import { TimelineItem, TimelineNonEcsData } from '../../../../graphql/types';
+import { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { Note } from '../../../../common/lib/note';
-import { ColumnHeaderOptions, EventType } from '../../../../timelines/store/timeline/model';
+import { ColumnHeaderOptions } from '../../../../timelines/store/timeline/model';
 import { AddNoteToEvent, UpdateNote } from '../../notes/helpers';
 import {
   OnColumnRemoved,
   OnColumnResized,
   OnColumnSorted,
-  OnFilterChange,
   OnPinEvent,
   OnRowSelected,
   OnSelectAll,
@@ -32,7 +31,7 @@ import { RowRenderer } from './renderers/row_renderer';
 import { Sort } from './sort';
 import { GraphOverlay } from '../../graph_overlay';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
-import { TimelineId, TimelineType } from '../../../../../common/types/timeline';
+import { TimelineEventsType, TimelineId, TimelineType } from '../../../../../common/types/timeline';
 
 export interface BodyProps {
   addNoteToEvent: AddNoteToEvent;
@@ -46,14 +45,13 @@ export interface BodyProps {
   isEventViewer?: boolean;
   isSelectAllChecked: boolean;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
-  eventType?: EventType;
+  eventType?: TimelineEventsType;
   loadingEventIds: Readonly<string[]>;
   onColumnRemoved: OnColumnRemoved;
   onColumnResized: OnColumnResized;
   onColumnSorted: OnColumnSorted;
   onRowSelected: OnRowSelected;
   onSelectAll: OnSelectAll;
-  onFilterChange: OnFilterChange;
   onPinEvent: OnPinEvent;
   onUpdateColumns: OnUpdateColumns;
   onUnPinEvent: OnUnPinEvent;
@@ -70,7 +68,7 @@ export interface BodyProps {
   updateNote: UpdateNote;
 }
 
-export const hasAdditionalActions = (id: string, eventType?: EventType): boolean =>
+export const hasAdditionalActions = (id: string, eventType?: TimelineEventsType): boolean =>
   id === TimelineId.detectionsPage ||
   id === TimelineId.detectionsRulesDetailsPage ||
   ((id === TimelineId.active && eventType && ['all', 'signal', 'alert'].includes(eventType)) ??
@@ -99,7 +97,6 @@ export const Body = React.memo<BodyProps>(
     onColumnSorted,
     onRowSelected,
     onSelectAll,
-    onFilterChange,
     onPinEvent,
     onUpdateColumns,
     onUnPinEvent,
@@ -157,7 +154,6 @@ export const Body = React.memo<BodyProps>(
               onColumnRemoved={onColumnRemoved}
               onColumnResized={onColumnResized}
               onColumnSorted={onColumnSorted}
-              onFilterChange={onFilterChange}
               onSelectAll={onSelectAll}
               onUpdateColumns={onUpdateColumns}
               showEventsSelect={false}

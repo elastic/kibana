@@ -16,13 +16,12 @@ import {
 } from '../../common/constants';
 import { UptimeApp, UptimeAppProps } from './uptime_app';
 import { ClientPluginsSetup, ClientPluginsStart } from './plugin';
-import { PLUGIN } from '../../common/constants/plugin';
 
 export function renderApp(
   core: CoreStart,
   plugins: ClientPluginsSetup,
   startPlugins: ClientPluginsStart,
-  { element }: AppMountParameters
+  { element, history }: AppMountParameters
 ) {
   const {
     application: { capabilities },
@@ -48,6 +47,7 @@ export function renderApp(
     basePath: basePath.get(),
     darkMode: core.uiSettings.get(DEFAULT_DARK_MODE),
     commonlyUsedRanges: core.uiSettings.get(DEFAULT_TIMEPICKER_QUICK_RANGES),
+    history,
     isApmAvailable: apm,
     isInfraAvailable: infrastructure,
     isLogsAvailable: logs,
@@ -67,7 +67,6 @@ export function renderApp(
           },
         ],
       }),
-    routerBasename: basePath.prepend(PLUGIN.ROUTER_BASE_NAME),
     setBadge,
     setBreadcrumbs: core.chrome.setBreadcrumbs,
   };

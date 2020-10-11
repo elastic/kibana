@@ -629,7 +629,7 @@ export class TimeSeriesExplorer extends React.Component {
             nonBlankEntities,
             searchBounds.min.valueOf(),
             searchBounds.max.valueOf(),
-            stateUpdate.contextAggregationInterval.expression
+            stateUpdate.contextAggregationInterval.asMilliseconds()
           )
           .toPromise()
           .then((resp) => {
@@ -652,7 +652,7 @@ export class TimeSeriesExplorer extends React.Component {
             this.getCriteriaFields(detectorIndex, entityControls),
             searchBounds.min.valueOf(),
             searchBounds.max.valueOf(),
-            stateUpdate.contextAggregationInterval.expression
+            stateUpdate.contextAggregationInterval.asMilliseconds()
           )
           .then((resp) => {
             const fullRangeRecordScoreData = processRecordScoreResults(resp.results);
@@ -703,7 +703,7 @@ export class TimeSeriesExplorer extends React.Component {
               nonBlankEntities,
               searchBounds.min.valueOf(),
               searchBounds.max.valueOf(),
-              stateUpdate.contextAggregationInterval.expression,
+              stateUpdate.contextAggregationInterval.asMilliseconds(),
               aggType
             )
             .toPromise()

@@ -17,14 +17,8 @@
  * under the License.
  */
 import { BehaviorSubject } from 'rxjs';
-import {
-  ChromeBadge,
-  ChromeBrand,
-  ChromeBreadcrumb,
-  ChromeService,
-  InternalChromeStart,
-  NavType,
-} from './';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { ChromeBadge, ChromeBrand, ChromeBreadcrumb, ChromeService, InternalChromeStart } from './';
 
 const createStartContractMock = () => {
   const startContract: DeeplyMockedKeys<InternalChromeStart> = {
@@ -50,8 +44,10 @@ const createStartContractMock = () => {
     },
     navControls: {
       registerLeft: jest.fn(),
+      registerCenter: jest.fn(),
       registerRight: jest.fn(),
       getLeft$: jest.fn(),
+      getCenter$: jest.fn(),
       getRight$: jest.fn(),
     },
     setAppTitle: jest.fn(),
@@ -70,7 +66,6 @@ const createStartContractMock = () => {
     setHelpExtension: jest.fn(),
     setHelpSupportUrl: jest.fn(),
     getIsNavDrawerLocked$: jest.fn(),
-    getNavType$: jest.fn(),
     getCustomNavLink$: jest.fn(),
     setCustomNavLink: jest.fn(),
   };
@@ -83,7 +78,6 @@ const createStartContractMock = () => {
   startContract.getCustomNavLink$.mockReturnValue(new BehaviorSubject(undefined));
   startContract.getHelpExtension$.mockReturnValue(new BehaviorSubject(undefined));
   startContract.getIsNavDrawerLocked$.mockReturnValue(new BehaviorSubject(false));
-  startContract.getNavType$.mockReturnValue(new BehaviorSubject('modern' as NavType));
   return startContract;
 };
 

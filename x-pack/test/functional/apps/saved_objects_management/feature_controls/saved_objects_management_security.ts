@@ -10,14 +10,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects([
-    'common',
-    'settings',
-    'security',
-    'error',
-    'header',
-    'savedObjects',
-  ]);
+  const PageObjects = getPageObjects(['common', 'settings', 'security', 'error', 'savedObjects']);
   let version: string = '';
 
   describe('feature controls saved objects management', () => {
@@ -310,12 +303,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       describe('listing', () => {
-        it(`doesn't display  management section`, async () => {
-          await PageObjects.settings.navigateTo();
-          await testSubjects.existOrFail('managementHome'); // this ensures we've gotten to the management page
-          await testSubjects.missingOrFail('objects');
-        });
-
         it(`can't navigate to listing page`, async () => {
           await PageObjects.common.navigateToUrl('management', 'kibana/objects', {
             ensureCurrentUrl: false,
@@ -323,7 +310,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             shouldUseHashForSubUrl: false,
           });
 
-          await testSubjects.existOrFail('managementHome');
+          await testSubjects.existOrFail('appNotFoundPageContent');
         });
       });
 
@@ -338,8 +325,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               shouldUseHashForSubUrl: false,
             }
           );
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await testSubjects.existOrFail('managementHome');
+          await testSubjects.existOrFail('appNotFoundPageContent');
         });
       });
     });

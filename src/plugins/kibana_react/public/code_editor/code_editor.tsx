@@ -186,3 +186,7 @@ export class CodeEditor extends React.Component<Props, {}> {
     }
   };
 }
+
+// React.lazy requires default export
+// eslint-disable-next-line import/no-default-export
+export default CodeEditor;

@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
+import { entityIDSafeVersion } from '../../../../plugins/security_solution/common/endpoint/models/event';
 import { eventsIndexPattern } from '../../../../plugins/security_solution/common/endpoint/constants';
 import {
-  ResolverTree,
+  SafeResolverTree,
   ResolverEntityIndex,
 } from '../../../../plugins/security_solution/common/endpoint/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -15,11 +16,18 @@ import {
   Event,
 } from '../../../../plugins/security_solution/common/endpoint/generate_data';
 import { InsertedEvents } from '../../services/resolver';
+import { createAncestryArray } from './common';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const resolver = getService('resolverGenerator');
   const generator = new EndpointDocGenerator('resolver');
+
+  const setEntityIDEmptyString = (event: Event) => {
+    if (event.process?.entity_id) {
+      event.process.entity_id = '';
+    }
+  };
 
   describe('Resolver handling of entity ids', () => {
     describe('entity api', () => {
@@ -27,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
       let genData: InsertedEvents;
       before(async () => {
         origin = generator.generateEvent({ parentEntityID: 'a' });
-        origin.process.entity_id = '';
+        setEntityIDEmptyString(origin);
         genData = await resolver.insertEvents([origin]);
       });
 
@@ -57,16 +65,16 @@ export default function ({ getService }: FtrProviderContext) {
         // should not be returned by the backend.
         origin = generator.generateEvent({ entityID: 'a' });
         childNoEntityID = generator.generateEvent({
-          parentEntityID: origin.process.entity_id,
-          ancestry: [origin.process.entity_id],
+          parentEntityID: entityIDSafeVersion(origin),
+          ancestry: createAncestryArray([origin]),
         });
         // force it to be empty
-        childNoEntityID.process.entity_id = '';
+        setEntityIDEmptyString(childNoEntityID);
 
         childWithEntityID = generator.generateEvent({
           entityID: 'b',
-          parentEntityID: origin.process.entity_id,
-          ancestry: [origin.process.entity_id],
+          parentEntityID: entityIDSafeVersion(origin),
+          ancestry: createAncestryArray([origin]),
         });
         events = [origin, childNoEntityID, childWithEntityID];
         genData = await resolver.insertEvents(events);
@@ -77,11 +85,11 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('does not find children without a process entity_id', async () => {
-        const { body }: { body: ResolverTree } = await supertest
-          .get(`/api/endpoint/resolver/${origin.process.entity_id}`)
+        const { body }: { body: SafeResolverTree } = await supertest
+          .get(`/api/endpoint/resolver/${origin.process?.entity_id}`)
           .expect(200);
         expect(body.children.childNodes.length).to.be(1);
-        expect(body.children.childNodes[0].entityID).to.be(childWithEntityID.process.entity_id);
+        expect(body.children.childNodes[0].entityID).to.be(childWithEntityID.process?.entity_id);
       });
     });
 
@@ -101,21 +109,21 @@ export default function ({ getService }: FtrProviderContext) {
         });
         ancestor1 = generator.generateEvent({
           entityID: '1',
-          parentEntityID: ancestor2.process.entity_id,
-          ancestry: [ancestor2.process.entity_id],
+          parentEntityID: entityIDSafeVersion(ancestor2),
+          ancestry: createAncestryArray([ancestor2]),
         });
 
         // we'll insert an event that doesn't have an entity id so if the backend does search for it, it should be
         // returned and our test should fail
         ancestorNoEntityID = generator.generateEvent({
-          ancestry: [ancestor2.process.entity_id],
+          ancestry: createAncestryArray([ancestor2]),
         });
-        ancestorNoEntityID.process.entity_id = '';
+        setEntityIDEmptyString(ancestorNoEntityID);
 
         origin = generator.generateEvent({
           entityID: 'a',
-          parentEntityID: ancestor1.process.entity_id,
-          ancestry: ['', ancestor2.process.entity_id],
+          parentEntityID: entityIDSafeVersion(ancestor1),
+          ancestry: ['', ...createAncestryArray([ancestor2])],
         });
 
         events = [origin, ancestor1, ancestor2, ancestorNoEntityID];
@@ -127,11 +135,11 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('does not query for ancestors that have an empty string for the entity_id', async () => {
-        const { body }: { body: ResolverTree } = await supertest
-          .get(`/api/endpoint/resolver/${origin.process.entity_id}`)
+        const { body }: { body: SafeResolverTree } = await supertest
+          .get(`/api/endpoint/resolver/${origin.process?.entity_id}`)
           .expect(200);
         expect(body.ancestry.ancestors.length).to.be(1);
-        expect(body.ancestry.ancestors[0].entityID).to.be(ancestor2.process.entity_id);
+        expect(body.ancestry.ancestors[0].entityID).to.be(ancestor2.process?.entity_id);
       });
     });
   });

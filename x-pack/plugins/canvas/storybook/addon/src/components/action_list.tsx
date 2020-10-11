@@ -51,7 +51,6 @@ export const ActionList: FC<{
   }, [recordedActions]);
 
   const options: EuiSelectableOption[] = Object.values(recordedActions).map((recordedAction) => ({
-    id: recordedAction.id,
     key: recordedAction.id,
     label: recordedAction.action.type,
     checked: recordedAction.id === selectedAction?.id ? 'on' : undefined,
@@ -59,8 +58,8 @@ export const ActionList: FC<{
 
   const onChange: (selectedOptions: EuiSelectableOption[]) => void = (selectedOptions) => {
     selectedOptions.forEach((option) => {
-      if (option && option.checked && option.id) {
-        const selected = recordedActions[option.id];
+      if (option && option.checked && option.key) {
+        const selected = recordedActions[option.key];
 
         if (selected) {
           setSelectedAction(selected);

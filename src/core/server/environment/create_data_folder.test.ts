@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PathConfigType } from '../path';
+import { PathConfigType } from '@kbn/utils';
 import { createDataFolder } from './create_data_folder';
 import { mkdir } from './fs';
 import { loggingSystemMock } from '../logging/logging_system.mock';

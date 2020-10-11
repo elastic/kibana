@@ -32,9 +32,9 @@ export function unpackProcessorEvents(
 ) {
   const { apm, ...params } = request;
 
-  const index = uniq(
-    apm.events.map((event) => indices[processorEventIndexMap[event]])
-  );
+  const events = uniq(apm.events);
+
+  const index = events.map((event) => indices[processorEventIndexMap[event]]);
 
   const withFilterForProcessorEvent: ESSearchRequest & {
     body: { query: { bool: { filter: ESFilter[] } } };
@@ -50,7 +50,7 @@ export function unpackProcessorEvents(
 
   withFilterForProcessorEvent.body.query.bool.filter.push({
     terms: {
-      [PROCESSOR_EVENT]: apm.events,
+      [PROCESSOR_EVENT]: events,
     },
   });
 

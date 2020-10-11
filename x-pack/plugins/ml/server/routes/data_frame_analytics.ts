@@ -20,6 +20,7 @@ import {
 import { IndexPatternHandler } from '../models/data_frame_analytics/index_patterns';
 import { DeleteDataFrameAnalyticsWithIndexStatus } from '../../common/types/data_frame_analytics';
 import { getAuthorizationHeader } from '../lib/request_authorization';
+import { analyticsFeatureImportanceProvider } from '../models/data_frame_analytics/feature_importance';
 
 function getIndexPatternId(context: RequestHandlerContext, patternName: string) {
   const iph = new IndexPatternHandler(context.core.savedObjects.client);
@@ -281,9 +282,12 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
     },
     mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const { body } = await client.asInternalUser.ml.explainDataFrameAnalytics({
-          body: request.body,
-        });
+        const { body } = await client.asInternalUser.ml.explainDataFrameAnalytics(
+          {
+            body: request.body,
+          },
+          getAuthorizationHeader(request)
+        );
         return response.ok({
           body,
         });
@@ -324,19 +328,20 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
           success: false,
         };
 
-        // Check if analyticsId is valid and get destination index
-        if (deleteDestIndex || deleteDestIndexPattern) {
-          try {
-            const { body } = await client.asInternalUser.ml.getDataFrameAnalytics({
-              id: analyticsId,
-            });
-            if (Array.isArray(body.data_frame_analytics) && body.data_frame_analytics.length > 0) {
-              destinationIndex = body.data_frame_analytics[0].dest.index;
-            }
-          } catch (e) {
-            return response.customError(wrapError(e));
+        try {
+          // Check if analyticsId is valid and get destination index
+          const { body } = await client.asInternalUser.ml.getDataFrameAnalytics({
+            id: analyticsId,
+          });
+          if (Array.isArray(body.data_frame_analytics) && body.data_frame_analytics.length > 0) {
+            destinationIndex = body.data_frame_analytics[0].dest.index;
           }
+        } catch (e) {
+          // exist early if the job doesn't exist
+          return response.customError(wrapError(e));
+        }
 
+        if (deleteDestIndex || deleteDestIndexPattern) {
           // If user checks box to delete the destinationIndex associated with the job
           if (destinationIndex && deleteDestIndex) {
             // Verify if user has privilege to delete the destination index
@@ -348,8 +353,8 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
                   index: destinationIndex,
                 });
                 destIndexDeleted.success = true;
-              } catch (deleteIndexError) {
-                destIndexDeleted.error = wrapError(deleteIndexError);
+              } catch ({ body }) {
+                destIndexDeleted.error = body;
               }
             } else {
               return response.forbidden();
@@ -365,7 +370,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
               }
               destIndexPatternDeleted.success = true;
             } catch (deleteDestIndexPatternError) {
-              destIndexPatternDeleted.error = wrapError(deleteDestIndexPatternError);
+              destIndexPatternDeleted.error = deleteDestIndexPatternError;
             }
           }
         }
@@ -377,11 +382,8 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
             id: analyticsId,
           });
           analyticsJobDeleted.success = true;
-        } catch (deleteDFAError) {
-          analyticsJobDeleted.error = wrapError(deleteDFAError);
-          if (analyticsJobDeleted.error.statusCode === 404) {
-            return response.notFound();
-          }
+        } catch ({ body }) {
+          analyticsJobDeleted.error = body;
         }
         const results = {
           analyticsJobDeleted,
@@ -539,6 +541,40 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         const results = await getAnalyticsAuditMessages(analyticsId);
         return response.ok({
           body: results,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup DataFrameAnalytics
+   *
+   * @api {get} /api/ml/data_frame/analytics/baseline Get analytics's feature importance baseline
+   * @apiName GetDataFrameAnalyticsBaseline
+   * @apiDescription Returns the baseline for data frame analytics job.
+   *
+   * @apiSchema (params) analyticsIdSchema
+   */
+  router.post(
+    {
+      path: '/api/ml/data_frame/analytics/{analyticsId}/baseline',
+      validate: {
+        params: analyticsIdSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetDataFrameAnalytics'],
+      },
+    },
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+      try {
+        const { analyticsId } = request.params;
+        const { getRegressionAnalyticsBaseline } = analyticsFeatureImportanceProvider(client);
+        const baseline = await getRegressionAnalyticsBaseline(analyticsId);
+
+        return response.ok({
+          body: { baseline },
         });
       } catch (e) {
         return response.customError(wrapError(e));

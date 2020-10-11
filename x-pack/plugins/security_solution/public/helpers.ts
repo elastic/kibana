@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash/fp';
+
 import { CoreStart } from '../../../../src/core/public';
 import { APP_ID } from '../common/constants';
 import {
@@ -13,13 +15,37 @@ import {
 import { SecurityPageName } from './app/types';
 import { InspectResponse } from './types';
 
+export const parseRoute = (location: Pick<Location, 'hash' | 'pathname' | 'search'>) => {
+  if (!isEmpty(location.hash)) {
+    const hashPath = location.hash.split('?');
+    const search = hashPath.length >= 1 ? `?${hashPath[1]}` : '';
+    const pageRoute = hashPath.length > 0 ? hashPath[0].split('/') : [];
+    const pageName = pageRoute.length >= 1 ? pageRoute[1] : '';
+    const path = `/${pageRoute.slice(2).join('/') ?? ''}${search}`;
+
+    return {
+      pageName,
+      path,
+      search,
+    };
+  }
+
+  const search = location.search;
+  const pageRoute = location.pathname.split('/');
+  const pageName = pageRoute[3];
+  const subpluginPath = pageRoute.length > 4 ? `/${pageRoute.slice(4).join('/')}` : '';
+  const path = `${subpluginPath}${search}`;
+
+  return {
+    pageName,
+    path,
+    search,
+  };
+};
+
 export const manageOldSiemRoutes = async (coreStart: CoreStart) => {
   const { application } = coreStart;
-  const hashPath = window.location.hash.split('?');
-  const search = hashPath.length >= 1 ? hashPath[1] : '';
-  const pageRoute = hashPath.length > 0 ? hashPath[0].split('/') : [];
-  const pageName = pageRoute.length >= 1 ? pageRoute[1] : '';
-  const path = `/${pageRoute.slice(2).join('/') ?? ''}?${search}`;
+  const { pageName, path, search } = parseRoute(window.location);
 
   switch (pageName) {
     case SecurityPageName.overview:
@@ -73,7 +99,7 @@ export const manageOldSiemRoutes = async (coreStart: CoreStart) => {
     default:
       application.navigateToApp(`${APP_ID}:${SecurityPageName.overview}`, {
         replace: true,
-        path: `?${search}`,
+        path: `${search}`,
       });
       break;
   }
@@ -84,5 +110,6 @@ export const getInspectResponse = <T extends FactoryQueryTypes>(
   prevResponse: InspectResponse
 ): InspectResponse => ({
   dsl: response?.inspect?.dsl ?? prevResponse?.dsl ?? [],
-  response: response != null ? [JSON.stringify(response, null, 2)] : prevResponse?.response,
+  response:
+    response != null ? [JSON.stringify(response.rawResponse, null, 2)] : prevResponse?.response,
 });

@@ -9,3 +9,31 @@ export interface Timeline {
   description: string;
   query: string;
 }
+
+export interface CompleteTimeline extends Timeline {
+  notes: string;
+  filter: TimelineFilter;
+}
+
+export interface TimelineFilter {
+  field: string;
+  operator: string;
+  value?: string;
+}
+
+export interface TimelineWithId extends Timeline {
+  id: string;
+}
+
+export const filter: TimelineFilter = {
+  field: 'host.name',
+  operator: 'exists',
+};
+
+export const timeline: CompleteTimeline = {
+  title: 'Security Timeline',
+  description: 'This is the best timeline',
+  query: 'host.name: * ',
+  notes: 'Yes, the best timeline',
+  filter,
+};

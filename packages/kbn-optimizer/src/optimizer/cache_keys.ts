@@ -23,7 +23,7 @@ import { promisify } from 'util';
 
 import Chalk from 'chalk';
 import execa from 'execa';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import stripAnsi from 'strip-ansi';
 
 import jestDiff from 'jest-diff';

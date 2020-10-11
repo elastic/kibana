@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export const ALL_CASES_CASE = (id: string) => {
+  return `[data-test-subj="cases-table-row-${id}"]`;
+};
+
 export const ALL_CASES_CLOSE_ACTION = '[data-test-subj="action-close"]';
 
 export const ALL_CASES_CLOSED_CASES_COUNT = '[data-test-subj="closed-case-count"]';
@@ -13,6 +17,8 @@ export const ALL_CASES_CLOSED_CASES_STATS = '[data-test-subj="closedStatsHeader"
 export const ALL_CASES_COMMENTS_COUNT = '[data-test-subj="case-table-column-commentCount"]';
 
 export const ALL_CASES_CREATE_NEW_CASE_BTN = '[data-test-subj="createNewCaseBtn"]';
+
+export const ALL_CASES_CREATE_NEW_CASE_TABLE_BTN = '[data-test-subj="cases-table-add-case"]';
 
 export const ALL_CASES_DELETE_ACTION = '[data-test-subj="action-delete"]';
 

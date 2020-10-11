@@ -28,24 +28,24 @@ export const HostsTabs = memo<HostsTabsProps>(
     deleteQuery,
     docValueFields,
     filterQuery,
-    setAbsoluteRangeDatePicker,
-    to,
     from,
-    setQuery,
+    indexNames,
     isInitializing,
-    type,
-    indexPattern,
     hostsPagePath,
+    setAbsoluteRangeDatePicker,
+    setQuery,
+    to,
+    type,
   }) => {
     const tabProps = {
       deleteQuery,
       endDate: to,
       filterQuery,
+      indexNames,
       skip: isInitializing,
       setQuery,
       startDate: from,
       type,
-      indexPattern,
       narrowDateRange: useCallback(
         (score: Anomaly, interval: string) => {
           const fromTo = scoreIntervalToDateTime(score, interval);

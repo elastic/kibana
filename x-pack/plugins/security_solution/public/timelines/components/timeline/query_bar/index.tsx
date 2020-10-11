@@ -6,7 +6,7 @@
 
 import { isEmpty } from 'lodash/fp';
 import React, { memo, useMemo, useCallback, useState, useEffect } from 'react';
-import { useDispatch, useSelector, shallowEqual } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 
@@ -20,6 +20,7 @@ import {
   SavedQueryTimeFilter,
 } from '../../../../../../../../src/plugins/data/public';
 
+import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { dispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
@@ -40,29 +41,26 @@ export interface QueryBarTimelineComponentProps {
 }
 
 const timelineFilterDropArea = 'timeline-filter-drop-area';
+const getTimeline = timelineSelectors.getTimelineByIdSelector();
+const getInputsTimeline = inputsSelectors.getTimelineSelector();
+const getInputsPolicy = inputsSelectors.getTimelinePolicySelector();
+const getKqlFilterQuery = timelineSelectors.getKqlFilterKuerySelector();
 
 export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
   ({ browserFields, filterManager, kqlMode, indexPattern, timelineId }) => {
     const dispatch = useDispatch();
-    const getTimeline = timelineSelectors.getTimelineByIdSelector();
-    const getInputsTimeline = inputsSelectors.getTimelineSelector();
-    const getInputsPolicy = inputsSelectors.getTimelinePolicySelector();
-    const getKqlFilterQuery = timelineSelectors.getKqlFilterKuerySelector();
-    const { dataProviders, filters, savedQueryId } = useSelector(
-      (state: State) => getTimeline(state, timelineId) ?? { ...timelineDefaults },
-      shallowEqual
+    const { dataProviders, filters, savedQueryId } = useShallowEqualSelector(
+      (state: State) => getTimeline(state, timelineId) ?? { ...timelineDefaults }
     );
     const {
       timerange: { to, toStr, from, fromStr },
-    } = useSelector(getInputsTimeline, shallowEqual);
-    const { kind: policyKind, duration: refreshInterval } = useSelector(
-      getInputsPolicy,
-      shallowEqual
+    } = useShallowEqualSelector(getInputsTimeline);
+    const { kind: policyKind, duration: refreshInterval } = useShallowEqualSelector(
+      getInputsPolicy
     );
     const isRefreshPaused = useMemo(() => policyKind === 'manual', [policyKind]);
-    const filterQuery = useSelector(
-      (state: State) => getKqlFilterQuery(state, timelineId)!,
-      shallowEqual
+    const filterQuery = useShallowEqualSelector(
+      (state: State) => getKqlFilterQuery(state, timelineId)!
     );
 
     const [dateRangeFrom, setDateRangeFrom] = useState<string>(

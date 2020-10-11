@@ -40,16 +40,10 @@ import { createTableRowDirective } from './application/angular/doc_table/compone
 import { createPagerFactory } from './application/angular/doc_table/lib/pager/pager_factory';
 import { createInfiniteScrollDirective } from './application/angular/doc_table/infinite_scroll';
 import { createDocViewerDirective } from './application/angular/doc_viewer';
-import { CollapsibleSidebarProvider } from './application/angular/directives/collapsible_sidebar/collapsible_sidebar';
-// @ts-ignore
-import { FixedScrollProvider } from './application/angular/directives/fixed_scroll';
-// @ts-ignore
-import { DebounceProviderTimeout } from './application/angular/directives/debounce/debounce';
 import { createRenderCompleteDirective } from './application/angular/directives/render_complete';
 import {
   initAngularBootstrap,
   configureAppAngularModule,
-  KbnAccessibleClickProvider,
   PrivateProvider,
   PromiseServiceCreator,
   registerListenEventListener,
@@ -57,14 +51,10 @@ import {
   createTopNavDirective,
   createTopNavHelper,
 } from '../../kibana_legacy/public';
-import { createDiscoverSidebarDirective } from './application/components/sidebar';
-import { createHitsCounterDirective } from '././application/components/hits_counter';
-import { createLoadingSpinnerDirective } from '././application/components/loading_spinner/loading_spinner';
-import { createTimechartHeaderDirective } from './application/components/timechart_header';
 import { createContextErrorMessageDirective } from './application/components/context_error_message';
 import { DiscoverStartPlugins } from './plugin';
 import { getScopedHistory } from './kibana_services';
-import { createSkipBottomButtonDirective } from './application/components/skip_bottom_button';
+import { createDiscoverLegacyDirective } from './application/components/create_discover_legacy_directive';
 
 /**
  * returns the main inner angular module, it contains all the parts of Angular Discover
@@ -88,11 +78,9 @@ export function getInnerAngularModule(
 export function getInnerAngularModuleEmbeddable(
   name: string,
   core: CoreStart,
-  deps: DiscoverStartPlugins,
-  context: PluginInitializerContext
+  deps: DiscoverStartPlugins
 ) {
-  const module = initializeInnerAngularModule(name, core, deps.navigation, deps.data, true);
-  return module;
+  return initializeInnerAngularModule(name, core, deps.navigation, deps.data, true);
 }
 
 let initialized = false;
@@ -129,8 +117,7 @@ export function initializeInnerAngularModule(
       ])
       .config(watchMultiDecorator)
       .directive('icon', (reactDirective) => reactDirective(EuiIcon))
-      .directive('renderComplete', createRenderCompleteDirective)
-      .service('debounce', ['$timeout', DebounceProviderTimeout]);
+      .directive('renderComplete', createRenderCompleteDirective);
   }
 
   return angular
@@ -149,18 +136,9 @@ export function initializeInnerAngularModule(
     ])
     .config(watchMultiDecorator)
     .run(registerListenEventListener)
-    .directive('icon', (reactDirective) => reactDirective(EuiIcon))
-    .directive('kbnAccessibleClick', KbnAccessibleClickProvider)
-    .directive('collapsibleSidebar', CollapsibleSidebarProvider)
-    .directive('fixedScroll', FixedScrollProvider)
     .directive('renderComplete', createRenderCompleteDirective)
-    .directive('discoverSidebar', createDiscoverSidebarDirective)
-    .directive('skipBottomButton', createSkipBottomButtonDirective)
-    .directive('hitsCounter', createHitsCounterDirective)
-    .directive('loadingSpinner', createLoadingSpinnerDirective)
-    .directive('timechartHeader', createTimechartHeaderDirective)
-    .directive('contextErrorMessage', createContextErrorMessageDirective)
-    .service('debounce', ['$timeout', DebounceProviderTimeout]);
+    .directive('discoverLegacy', createDiscoverLegacyDirective)
+    .directive('contextErrorMessage', createContextErrorMessageDirective);
 }
 
 function createLocalPromiseModule() {

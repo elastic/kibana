@@ -5,17 +5,18 @@
  */
 
 import React, { useCallback } from 'react';
-import { useDispatch, useSelector, shallowEqual } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect, EuiToolTip } from '@elastic/eui';
 import styled, { createGlobalStyle } from 'styled-components';
 
+import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import { FilterManager, IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 import { BrowserFields } from '../../../../common/containers/source';
-import { State } from '../../../../common/store';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { KqlMode } from '../../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
 import { QueryBarTimeline } from '../query_bar';
+
 import { options } from './helpers';
 import * as i18n from './translations';
 import { PickEventType } from './pick_events';
@@ -39,13 +40,6 @@ const SearchOrFilterGlobalStyle = createGlobalStyle`
   }
 `;
 
-interface OwnProps {
-  browserFields: BrowserFields;
-  filterManager: FilterManager;
-  indexPattern: IIndexPattern;
-  timelineId: string;
-}
-
 const SearchOrFilterContainer = styled.div`
   margin: 5px 0 10px 0;
   user-select: none;
@@ -67,6 +61,13 @@ const ModeFlexItem = styled(EuiFlexItem)`
 
 ModeFlexItem.displayName = 'ModeFlexItem';
 
+interface OwnProps {
+  browserFields: BrowserFields;
+  filterManager: FilterManager;
+  indexPattern: IIndexPattern;
+  timelineId: string;
+}
+
 const SearchOrFilterComponent: React.FC<OwnProps> = ({
   browserFields,
   filterManager,
@@ -75,13 +76,11 @@ const SearchOrFilterComponent: React.FC<OwnProps> = ({
 }) => {
   const dispatch = useDispatch();
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
-  const kqlMode = useSelector(
-    (state: State) => (getTimeline(state, timelineId) ?? timelineDefaults).kqlMode ?? 'filter',
-    shallowEqual
+  const kqlMode = useShallowEqualSelector(
+    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).kqlMode ?? 'filter'
   );
-  const eventType = useSelector(
-    (state: State) => (getTimeline(state, timelineId) ?? timelineDefaults).eventType ?? 'raw',
-    shallowEqual
+  const eventType = useShallowEqualSelector(
+    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).eventType ?? 'raw'
   );
   const handleUpdateKqlMode = useCallback(
     (mode: KqlMode) => dispatch(timelineActions.updateKqlMode({ id: timelineId, kqlMode: mode })),
@@ -124,6 +123,7 @@ const SearchOrFilterComponent: React.FC<OwnProps> = ({
     </>
   );
 };
+
 SearchOrFilterComponent.displayName = 'SearchOrFilterComponent';
 
 export const SearchOrFilter = React.memo(SearchOrFilterComponent);

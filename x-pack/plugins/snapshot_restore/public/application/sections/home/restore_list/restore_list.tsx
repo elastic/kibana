@@ -52,9 +52,13 @@ export const RestoreList: React.FunctionComponent = () => {
   const [currentInterval, setCurrentInterval] = useState<number>(INTERVAL_OPTIONS[1]);
 
   // Load restores
-  const { error, isLoading, data: restores = [], isInitialRequest, sendRequest } = useLoadRestores(
-    currentInterval
-  );
+  const {
+    error,
+    isLoading,
+    data: restores = [],
+    isInitialRequest,
+    resendRequest,
+  } = useLoadRestores(currentInterval);
 
   const { uiMetricService, history } = useServices();
 
@@ -174,7 +178,7 @@ export const RestoreList: React.FunctionComponent = () => {
                       key={interval}
                       icon="empty"
                       onClick={() => {
-                        sendRequest();
+                        resendRequest();
                         setCurrentInterval(interval);
                         setIsIntervalMenuOpen(false);
                       }}

@@ -84,7 +84,7 @@ export const markdownFactory = memoize(
   }
 );
 
-interface MarkdownProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface MarkdownProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string;
   markdown?: string;
   openLinksInNewTab?: boolean;
@@ -112,3 +112,7 @@ export class Markdown extends PureComponent<MarkdownProps> {
     );
   }
 }
+
+// Needed for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default Markdown;

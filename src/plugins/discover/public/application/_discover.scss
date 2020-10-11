@@ -5,6 +5,11 @@
   overflow: hidden;
 }
 
+.dscAppContainer {
+  > * {
+    position: relative;
+  }
+}
 discover-app {
   flex-grow: 1;
 }
@@ -17,9 +22,12 @@ discover-app {
 
 // SASSTODO: replace the z-index value with a variable
 .dscWrapper {
+  padding-left: $euiSizeXL;
   padding-right: $euiSizeS;
-  padding-left: 21px;
   z-index: 1;
+  @include euiBreakpoint('xs', 's', 'm') {
+    padding-left: $euiSizeS;
+  }
 }
 
 @include euiPanel('.dscWrapper__content');
@@ -104,14 +112,51 @@ discover-app {
   top: $euiSizeXS;
 }
 
-[fixed-scroll] {
+.dscTableFixedScroll {
   overflow-x: auto;
   padding-bottom: 0;
 
-  + .fixed-scroll-scroller {
+  + .dscTableFixedScroll__scroller {
     position: fixed;
     bottom: 0;
     overflow-x: auto;
     overflow-y: hidden;
+  }
+}
+
+.dscCollapsibleSidebar {
+  position: relative;
+  z-index: $euiZLevel1;
+
+  .dscCollapsibleSidebar__collapseButton {
+    position: absolute;
+    top: 0;
+    right: -$euiSizeXL + 4;
+    cursor: pointer;
+    z-index: -1;
+    min-height: $euiSizeM;
+    min-width: $euiSizeM;
+    padding: $euiSizeXS * .5;
+  }
+
+  &.closed {
+    width: 0 !important;
+    border-right-width: 0;
+    border-left-width: 0;
+    .dscCollapsibleSidebar__collapseButton {
+      right: -$euiSizeL + 4;
+    }
+  }
+}
+
+@include euiBreakpoint('xs', 's', 'm') {
+  .dscCollapsibleSidebar {
+    &.closed {
+      display: none;
+    }
+
+    .dscCollapsibleSidebar__collapseButton {
+      display: none;
+    }
   }
 }

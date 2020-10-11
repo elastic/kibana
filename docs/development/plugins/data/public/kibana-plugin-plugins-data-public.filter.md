@@ -2,19 +2,14 @@
 
 [Home](./index.md) &gt; [kibana-plugin-plugins-data-public](./kibana-plugin-plugins-data-public.md) &gt; [Filter](./kibana-plugin-plugins-data-public.filter.md)
 
-## Filter interface
+## Filter type
 
 <b>Signature:</b>
 
 ```typescript
-export interface Filter 
+export declare type Filter = {
+    $state?: FilterState;
+    meta: FilterMeta;
+    query?: any;
+};
 ```
-
-## Properties
-
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [$state](./kibana-plugin-plugins-data-public.filter._state.md) | <code>FilterState</code> |  |
-|  [meta](./kibana-plugin-plugins-data-public.filter.meta.md) | <code>FilterMeta</code> |  |
-|  [query](./kibana-plugin-plugins-data-public.filter.query.md) | <code>any</code> |  |
-

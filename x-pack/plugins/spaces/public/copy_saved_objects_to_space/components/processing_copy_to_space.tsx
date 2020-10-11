@@ -45,36 +45,30 @@ const renderCopyOptions = ({ createNewCopies, overwrite, includeRelated }: CopyO
       defaultMessage="Check for existing objects"
     />
   );
-  const overwriteLabel = overwrite ? (
-    <FormattedMessage
-      id="xpack.spaces.management.copyToSpace.overwriteLabel"
-      defaultMessage="Automatically try to overwrite conflicts"
-    />
-  ) : (
-    <FormattedMessage
-      id="xpack.spaces.management.copyToSpace.dontOverwriteLabel"
-      defaultMessage="Do not automatically try to overwrite conflicts"
-    />
-  );
-  const includeRelatedLabel = includeRelated ? (
-    <FormattedMessage
-      id="xpack.spaces.management.copyToSpace.includeRelatedLabel"
-      defaultMessage="Include related saved objects"
-    />
-  ) : (
-    <FormattedMessage
-      id="xpack.spaces.management.copyToSpace.dontIncludeRelatedLabel"
-      defaultMessage="Do not include related saved objects"
-    />
-  );
 
   return (
     <EuiListGroup className="spcCopyToSpaceOptionsView" flush>
       <EuiListGroupItem iconType="copy" label={createNewCopiesLabel} />
       {!createNewCopies && (
-        <EuiListGroupItem iconType={overwrite ? 'check' : 'cross'} label={overwriteLabel} />
+        <EuiListGroupItem
+          iconType={overwrite ? 'check' : 'cross'}
+          label={
+            <FormattedMessage
+              id="xpack.spaces.management.copyToSpace.overwriteLabel"
+              defaultMessage="Automatically overwrite conflicts"
+            />
+          }
+        />
       )}
-      <EuiListGroupItem iconType={includeRelated ? 'check' : 'cross'} label={includeRelatedLabel} />
+      <EuiListGroupItem
+        iconType={includeRelated ? 'check' : 'cross'}
+        label={
+          <FormattedMessage
+            id="xpack.spaces.management.copyToSpace.includeRelatedLabel"
+            defaultMessage="Include related saved objects"
+          />
+        }
+      />
     </EuiListGroup>
   );
 };

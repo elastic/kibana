@@ -8,5 +8,5 @@
 <b>Signature:</b>
 
 ```typescript
-export declare type AppenderConfigType = TypeOf<typeof appendersSchema>;
+export declare type AppenderConfigType = ConsoleAppenderConfig | FileAppenderConfig | LegacyAppenderConfig;
 ```

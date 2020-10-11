@@ -34,7 +34,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             ensureCurrentUrl: false,
           });
 
-          await PageObjects.error.expectNotFound();
+          await PageObjects.error.expectForbidden();
         });
 
         it('should not display the ML file data vis link on the Kibana home page', async () => {
@@ -55,16 +55,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         it('should not allow to access the Stack Management ML page', async () => {
           await ml.testExecution.logTestStep(
-            'should load the stack management with the ML menu item being present'
+            'should load the stack management with the ML menu item being absent'
           );
-          await ml.navigation.navigateToStackManagement();
-
-          await ml.testExecution.logTestStep(
-            'should display the access denied page in stack management'
-          );
-          await ml.navigation.navigateToStackManagementJobsListPage({
-            expectAccessDenied: true,
-          });
+          await ml.navigation.navigateToStackManagement({ expectMlLink: false });
         });
       });
     }

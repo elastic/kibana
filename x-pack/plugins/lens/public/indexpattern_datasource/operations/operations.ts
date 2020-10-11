@@ -63,7 +63,7 @@ export function getOperationTypesForField(field: IndexPatternField): OperationTy
   return operationDefinitions
     .filter(
       (operationDefinition) =>
-        'getPossibleOperationForField' in operationDefinition &&
+        operationDefinition.input === 'field' &&
         operationDefinition.getPossibleOperationForField(field)
     )
     .sort(getSortScoreByPriority)
@@ -80,11 +80,16 @@ export function isDocumentOperation(type: string) {
   return documentOperations.has(type);
 }
 
-interface OperationFieldTuple {
-  type: 'field';
-  operationType: OperationType;
-  field: string;
-}
+type OperationFieldTuple =
+  | {
+      type: 'field';
+      operationType: OperationType;
+      field: string;
+    }
+  | {
+      type: 'none';
+      operationType: OperationType;
+    };
 
 /**
  * Returns all possible operations (matches between operations and fields of the index
@@ -100,11 +105,18 @@ interface OperationFieldTuple {
  * [
  *    {
  *      operationMetaData: { dataType: 'string', isBucketed: true },
- *      operations: ['terms']
+ *      operations: [{
+ *        type: 'field',
+ *        operationType: ['terms'],
+ *        field: 'keyword'
+ *      }]
  *    },
  *    {
- *      operationMetaData: { dataType: 'number', isBucketed: false },
- *      operations: ['avg', 'min', 'max']
+ *      operationMetaData: { dataType: 'string', isBucketed: true },
+ *      operations: [{
+ *        type: 'none',
+ *        operationType: ['filters'],
+ *      }]
  *    },
  * ]
  * ```
@@ -133,28 +145,29 @@ export function getAvailableOperationsByMetadata(indexPattern: IndexPattern) {
   };
 
   operationDefinitions.sort(getSortScoreByPriority).forEach((operationDefinition) => {
-    indexPattern.fields.forEach((field) => {
+    if (operationDefinition.input === 'field') {
+      indexPattern.fields.forEach((field) => {
+        addToMap(
+          {
+            type: 'field',
+            operationType: operationDefinition.type,
+            field: field.name,
+          },
+          operationDefinition.getPossibleOperationForField(field)
+        );
+      });
+    } else if (operationDefinition.input === 'none') {
       addToMap(
         {
-          type: 'field',
+          type: 'none',
           operationType: operationDefinition.type,
-          field: field.name,
         },
-        getPossibleOperationForField(operationDefinition, field)
+        operationDefinition.getPossibleOperation()
       );
-    });
+    }
   });
 
   return Object.values(operationByMetadata);
-}
-
-function getPossibleOperationForField(
-  operationDefinition: GenericOperationDefinition,
-  field: IndexPatternField
-): OperationMetadata | undefined {
-  return 'getPossibleOperationForField' in operationDefinition
-    ? operationDefinition.getPossibleOperationForField(field)
-    : undefined;
 }
 
 /**
@@ -171,13 +184,13 @@ export function changeField(
 ) {
   const operationDefinition = operationDefinitionMap[column.operationType];
 
-  if (!('onFieldChange' in operationDefinition)) {
+  if (operationDefinition.input === 'field' && 'sourceField' in column) {
+    return operationDefinition.onFieldChange(column, indexPattern, newField);
+  } else {
     throw new Error(
       "Invariant error: Cannot change field if operation isn't a field based operaiton"
     );
   }
-
-  return operationDefinition.onFieldChange(column, indexPattern, newField);
 }
 
 /**
@@ -203,7 +216,7 @@ export function buildColumn({
   suggestedPriority: DimensionPriority | undefined;
   layerId: string;
   indexPattern: IndexPattern;
-  field: IndexPatternField;
+  field?: IndexPatternField;
   previousColumn?: IndexPatternColumn;
 }): IndexPatternColumn {
   const operationDefinition = operationDefinitionMap[op];
@@ -220,16 +233,18 @@ export function buildColumn({
     previousColumn,
   };
 
+  if (operationDefinition.input === 'none') {
+    return operationDefinition.buildColumn(baseOptions);
+  }
+
   if (!field) {
     throw new Error(`Invariant error: ${operationDefinition.type} operation requires field`);
   }
 
-  const newColumn = operationDefinition.buildColumn({
+  return operationDefinition.buildColumn({
     ...baseOptions,
     field,
   });
-
-  return newColumn;
 }
 
 export { operationDefinitionMap } from './definitions';

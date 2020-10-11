@@ -12,7 +12,6 @@ import { RequestOptionsPaginated } from '../..';
 
 export interface HostsEdges {
   node: HostItem;
-
   cursor: CursorType;
 }
 

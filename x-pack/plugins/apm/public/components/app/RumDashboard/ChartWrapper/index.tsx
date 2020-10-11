@@ -26,11 +26,14 @@ interface Props {
    * aria-label for accessibility
    */
   'aria-label'?: string;
+
+  maxWidth?: string;
 }
 
 export function ChartWrapper({
   loading = false,
   height = '100%',
+  maxWidth,
   children,
   ...rest
 }: Props) {
@@ -43,6 +46,7 @@ export function ChartWrapper({
           height,
           opacity,
           transition: 'opacity 0.2s',
+          ...(maxWidth ? { maxWidth } : {}),
         }}
         {...(rest as HTMLAttributes<HTMLDivElement>)}
       >
@@ -52,7 +56,12 @@ export function ChartWrapper({
         <EuiFlexGroup
           justifyContent="spaceAround"
           alignItems="center"
-          style={{ height, marginTop: `-${height}`, marginBottom: 0 }}
+          style={{
+            height,
+            marginTop: `-${height}`,
+            marginBottom: 0,
+            ...(maxWidth ? { maxWidth } : {}),
+          }}
         >
           <EuiFlexItem grow={false}>
             <EuiLoadingChart size="xl" />
