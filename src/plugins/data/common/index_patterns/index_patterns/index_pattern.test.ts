@@ -34,34 +34,6 @@ class MockFieldFormatter {}
 
 fieldFormatsMock.getInstance = jest.fn().mockImplementation(() => new MockFieldFormatter()) as any;
 
-jest.mock('../../field_mapping', () => {
-  const originalModule = jest.requireActual('../../field_mapping');
-
-  return {
-    ...originalModule,
-    expandShorthand: jest.fn(() => ({
-      id: true,
-      title: true,
-      fieldFormatMap: {
-        _serialize: jest.fn().mockImplementation(() => {}),
-        _deserialize: jest.fn().mockImplementation(() => []),
-      },
-      fields: {
-        _serialize: jest.fn().mockImplementation(() => {}),
-        _deserialize: jest.fn().mockImplementation((fields) => fields),
-      },
-      sourceFilters: {
-        _serialize: jest.fn().mockImplementation(() => {}),
-        _deserialize: jest.fn().mockImplementation(() => undefined),
-      },
-      typeMeta: {
-        _serialize: jest.fn().mockImplementation(() => {}),
-        _deserialize: jest.fn().mockImplementation(() => undefined),
-      },
-    })),
-  };
-});
-
 // helper function to create index patterns
 function create(id: string) {
   const {
@@ -208,6 +180,20 @@ describe('IndexPattern', () => {
       } catch (e) {
         expect(e).toBeInstanceOf(DuplicateField);
       }
+    });
+  });
+
+  describe('setFieldFormat and deleteFieldFormaat', () => {
+    test('should persist changes', () => {
+      const formatter = {
+        toJSON: () => ({ id: 'bytes' }),
+      } as FieldFormat;
+      indexPattern.getFormatterForField = () => formatter;
+      indexPattern.setFieldFormat('bytes', { id: 'bytes' });
+      expect(indexPattern.toSpec().fieldFormats).toEqual({ bytes: { id: 'bytes' } });
+
+      indexPattern.deleteFieldFormat('bytes');
+      expect(indexPattern.toSpec().fieldFormats).toEqual({});
     });
   });
 

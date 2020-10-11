@@ -208,7 +208,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         DefaultFieldFormat as FieldFormatInstanceType,
         data.fieldFormats
       ),
-      fieldFormatId: indexPattern.getFormatterForFieldNoDefault(spec)?.type?.id,
+      fieldFormatId: indexPattern.getFormatterForFieldNoDefault(spec.name)?.type?.id,
       fieldFormatParams: format.params(),
     });
   }
@@ -220,13 +220,11 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
   };
 
   onTypeChange = (type: KBN_FIELD_TYPES) => {
-    const { uiSettings, data } = this.context.services;
+    const { data } = this.context.services;
     const { spec, format } = this.state;
     const DefaultFieldFormat = data.fieldFormats.getDefaultType(type) as FieldFormatInstanceType;
 
     spec.type = type;
-
-    spec.format = new DefaultFieldFormat(null, (key) => uiSettings.get(key));
 
     this.setState({
       fieldTypeFormats: getFieldTypeFormatsList(spec, DefaultFieldFormat, data.fieldFormats),

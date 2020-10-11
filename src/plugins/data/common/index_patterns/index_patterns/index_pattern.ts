@@ -96,7 +96,7 @@ export class IndexPattern implements IIndexPattern {
 
     // set values
     this.id = spec.id;
-    this.fieldFormatMap = this.fieldSpecsToFieldFormatMap(spec.fields);
+    this.fieldFormatMap = spec.fieldFormats || {};
 
     this.version = spec.version;
 
@@ -128,18 +128,6 @@ export class IndexPattern implements IIndexPattern {
   resetOriginalSavedObjectBody = () => {
     this.originalSavedObjectBody = this.getAsSavedObjectBody();
   };
-
-  /**
-   * Extracts FieldFormatMap from FieldSpec map
-   * @param fldList FieldSpec map
-   */
-  private fieldSpecsToFieldFormatMap = (fldList: IndexPatternSpec['fields'] = {}) =>
-    Object.values(fldList).reduce<Record<string, SerializedFieldFormat>>((col, fieldSpec) => {
-      if (fieldSpec.format) {
-        col[fieldSpec.name] = { ...fieldSpec.format };
-      }
-      return col;
-    }, {});
 
   getComputedFields() {
     const scriptFields: any = {};
@@ -282,18 +270,6 @@ export class IndexPattern implements IIndexPattern {
    * Returns index pattern as saved object body for saving
    */
   getAsSavedObjectBody() {
-    /*
-    const serializeFieldFormatMap = (
-      flat: any,
-      format: FieldFormat | undefined,
-      field: string | undefined
-    ) => {
-      if (format && field) {
-        flat[field] = format;
-      }
-    };
-    */
-    // const serialized = _.transform(this.fieldFormatMap, serializeFieldFormatMap);
     const fieldFormatMap = _.isEmpty(this.fieldFormatMap)
       ? undefined
       : JSON.stringify(this.fieldFormatMap);
@@ -329,11 +305,11 @@ export class IndexPattern implements IIndexPattern {
   }
 
   /**
-   * Provide a field, get its formatter
+   * Get formatter for a given field name. Return undefined if none exists
    * @param field
    */
-  getFormatterForFieldNoDefault(field: IndexPatternField | IndexPatternField['spec'] | IFieldType) {
-    const formatSpec = this.fieldFormatMap[field.name];
+  getFormatterForFieldNoDefault(fieldname: string) {
+    const formatSpec = this.fieldFormatMap[fieldname];
     if (formatSpec) {
       return this.fieldFormats.getInstance(formatSpec.id, formatSpec.params);
     }
