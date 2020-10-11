@@ -45,7 +45,7 @@ export const getApiComponents = ({ cache }: GetApiComponentsOptions): TaggingApi
           return Promise.resolve(
             cache.getState().map((tag) => {
               return {
-                value: valueField === 'name' ? tag.title : tag.id,
+                value: valueField === 'name' ? tag.name : tag.id,
                 name: tag.title,
                 view: <TagSearchBarOption tag={tag} />,
               };
@@ -71,7 +71,7 @@ export const getApiComponents = ({ cache }: GetApiComponentsOptions): TaggingApi
       };
     },
     convertNameToReference: (tagName: string) => {
-      const found = cache.getState().find((tag) => tag.title === tagName);
+      const found = cache.getState().find((tag) => tag.name === tagName);
       return found ? { type: 'tag', id: found.id } : undefined;
     },
     parseSearchQuery: (
@@ -102,7 +102,7 @@ export const getApiComponents = ({ cache }: GetApiComponentsOptions): TaggingApi
         if (useName) {
           // TODO: use convertNameToReference directly instead
           selectedTags.forEach((tagName) => {
-            const found = cache.getState().find((tag) => tag.title === tagName);
+            const found = cache.getState().find((tag) => tag.name === tagName);
             if (found) {
               tagReferences.push({
                 type: 'tag',

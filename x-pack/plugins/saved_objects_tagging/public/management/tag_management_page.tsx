@@ -86,13 +86,13 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
     [editModalOpener, fetchTags]
   );
 
-  const deleteTag = useCallback(
+  const deleteTagWithConfirm = useCallback(
     async (tag: TagWithRelations) => {
       const confirmed = await overlays.openConfirm(
         i18n.translate('xpack.savedObjectsTagging.modals.confirmDelete.text', {
           defaultMessage: 'Are you sure you want to delete tag "{name}"?',
           values: {
-            name: tag.title,
+            name: tag.name,
           },
         }),
         {
@@ -114,7 +114,7 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
           title: i18n.translate('xpack.savedObjectsTagging.notifications.deleteTagSuccessTitle', {
             defaultMessage: 'Tag "{name}" was deleted.',
             values: {
-              name: tag.title,
+              name: tag.name,
             },
           }),
         });
@@ -139,7 +139,7 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
           openEditModal(tag);
         }}
         onDelete={(tag) => {
-          deleteTag(tag);
+          deleteTagWithConfirm(tag);
         }}
       />
     </EuiPageContent>
