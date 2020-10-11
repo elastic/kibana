@@ -5,6 +5,7 @@
  */
 
 import React, { memo, useMemo, useCallback } from 'react';
+import deepEqual from 'fast-deep-equal';
 
 import {
   Filter,
@@ -57,20 +58,20 @@ export const QueryBar = memo<QueryBarComponentProps>(
   }) => {
     const onQuerySubmit = useCallback(
       (payload: { dateRange: TimeRange; query?: Query }) => {
-        if (payload.query != null) {
+        if (payload.query != null && !deepEqual(payload.query, filterQuery)) {
           onSubmitQuery(payload.query);
         }
       },
-      [onSubmitQuery]
+      [filterQuery, onSubmitQuery]
     );
 
     const onQueryChange = useCallback(
       (payload: { dateRange: TimeRange; query?: Query }) => {
-        if (onChangedQuery && payload.query != null) {
+        if (onChangedQuery && payload.query != null && !deepEqual(payload.query, filterQuery)) {
           onChangedQuery(payload.query);
         }
       },
-      [onChangedQuery]
+      [filterQuery, onChangedQuery]
     );
 
     const onSavedQueryUpdated = useCallback(

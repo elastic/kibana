@@ -41,13 +41,13 @@ export interface QueryBarTimelineComponentProps {
 }
 
 const timelineFilterDropArea = 'timeline-filter-drop-area';
-const getTimeline = timelineSelectors.getTimelineByIdSelector();
-const getInputsTimeline = inputsSelectors.getTimelineSelector();
-const getInputsPolicy = inputsSelectors.getTimelinePolicySelector();
-const getKqlFilterQuery = timelineSelectors.getKqlFilterKuerySelector();
 
 export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
   ({ browserFields, filterManager, kqlMode, indexPattern, timelineId }) => {
+    const getTimeline = timelineSelectors.getTimelineByIdSelector();
+    const getInputsTimeline = inputsSelectors.getTimelineSelector();
+    const getInputsPolicy = inputsSelectors.getTimelinePolicySelector();
+    const getKqlFilterQuery = timelineSelectors.getKqlFilterKuerySelector();
     const dispatch = useDispatch();
     const { dataProviders, filters, savedQueryId } = useShallowEqualSelector(
       (state: State) => getTimeline(state, timelineId) ?? { ...timelineDefaults }
@@ -74,8 +74,8 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
 
     const [savedQuery, setSavedQuery] = useState<SavedQuery | undefined>(undefined);
     const [filterQueryConverted, setFilterQueryConverted] = useState<Query>({
-      query: filterQuery != null ? filterQuery.expression : '',
-      language: filterQuery != null ? filterQuery.kind : 'kuery',
+      query: filterQuery?.expression ?? '',
+      language: filterQuery?.kind ?? 'kuery',
     });
     const [dataProvidersDsl, setDataProvidersDsl] = useState<string>(
       convertKueryToElasticSearchQuery(buildGlobalQuery(dataProviders, browserFields), indexPattern)
@@ -157,8 +157,8 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
 
     useEffect(() => {
       setFilterQueryConverted({
-        query: filterQuery != null ? filterQuery.expression : '',
-        language: filterQuery != null ? filterQuery.kind : 'kuery',
+        query: filterQuery.expression ?? '',
+        language: filterQuery.kind ?? 'kuery',
       });
     }, [filterQuery]);
 

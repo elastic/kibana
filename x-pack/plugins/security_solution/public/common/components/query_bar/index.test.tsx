@@ -201,7 +201,7 @@ describe('QueryBar ', () => {
       );
       const searchBarProps = wrapper.find(SearchBar).props();
       const onChangedQueryRef = searchBarProps.onQueryChange;
-      const onSubmitQueryRef = searchBarProps.  ;
+      const onSubmitQueryRef = searchBarProps.onQuerySubmit;
       const onSavedQueryRef = searchBarProps.onSavedQueryUpdated;
 
       wrapper.setProps({ filterQuery: { expression: 'new: one', kind: 'kuery' } });
