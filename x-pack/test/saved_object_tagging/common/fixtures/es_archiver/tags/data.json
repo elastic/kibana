@@ -57,7 +57,7 @@
     "index": ".kibana",
     "source": {
       "tag": {
-        "title": "default-space-tag-1",
+        "name": "default-space-tag-1",
         "description": "desc",
         "color": "#FF00FF"
       },

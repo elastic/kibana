@@ -19,13 +19,13 @@
 
 export interface Tag {
   id: string;
-  title: string;
+  name: string;
   description: string;
   color: string;
 }
 
 export interface TagAttributes {
-  title: string;
+  name: string;
   description: string;
   color: string;
 }

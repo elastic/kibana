@@ -29,7 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(body).to.eql({
             tag: {
               id: 'default-space-tag-1',
-              title: 'default-space-tag-1',
+              name: 'default-space-tag-1',
               description: 'desc',
               color: '#FF00FF',
             },

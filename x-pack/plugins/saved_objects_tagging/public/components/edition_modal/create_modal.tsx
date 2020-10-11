@@ -18,7 +18,7 @@ interface CreateTagModalProps {
 }
 
 const createEmptyTag = (): TagAttributes => ({
-  title: '',
+  name: '',
   description: '',
   color: getRandomColor(),
 });

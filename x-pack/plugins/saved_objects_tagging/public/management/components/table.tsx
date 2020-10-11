@@ -92,7 +92,7 @@ export const TagTable: FC<TagTableProps> = ({
       name: i18n.translate('xpack.savedObjectsTagging.management.table.columns.name', {
         defaultMessage: 'Name',
       }),
-      sortable: (tag: TagWithRelations) => tag.title,
+      sortable: (tag: TagWithRelations) => tag.name,
       'data-test-subj': 'tagsTableRowName',
       render: (name: string, tag: TagWithRelations) => {
         return <TagBadge tag={tag} />;

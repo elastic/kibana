@@ -20,7 +20,7 @@ export const TagList: FC<TagListProps> = ({ tags }) => {
   return (
     <EuiBadgeGroup>
       {tags.map((tag) => (
-        <TagBadge key={tag.title} tag={tag} />
+        <TagBadge key={tag.name} tag={tag} />
       ))}
     </EuiBadgeGroup>
   );

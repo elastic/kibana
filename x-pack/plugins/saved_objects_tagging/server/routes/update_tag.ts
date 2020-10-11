@@ -18,7 +18,7 @@ export const registerUpdateTagRoute = (router: IRouter) => {
           id: schema.string(),
         }),
         body: schema.object({
-          title: schema.string(),
+          name: schema.string(),
           description: schema.string(),
           color: schema.string(),
         }),

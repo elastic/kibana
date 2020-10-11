@@ -15,7 +15,7 @@ export const registerCreateTagRoute = (router: IRouter) => {
       path: `${tagsApiPrefix}/create`,
       validate: {
         body: schema.object({
-          title: schema.string(),
+          name: schema.string(),
           description: schema.string(),
           color: schema.string(),
         }),

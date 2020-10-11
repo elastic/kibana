@@ -22,11 +22,11 @@ const renderTagOption = (
   searchValue: string,
   contentClassName: string
 ) => {
-  const { title, color } = option.value ?? { title: '' };
+  const { name, color } = option.value ?? { name: '' };
   return (
     <EuiHealth color={color}>
       <span className={contentClassName}>
-        <EuiHighlight search={searchValue}>{title}</EuiHighlight>
+        <EuiHighlight search={searchValue}>{name}</EuiHighlight>
       </span>
     </EuiHealth>
   );
@@ -35,7 +35,7 @@ const renderTagOption = (
 export const TagComboBox: FC<TagComboBoxProps> = ({ tags, selected, setSelected }) => {
   const options = useMemo(() => {
     return tags.map((tag) => ({
-      label: tag.title,
+      label: tag.name,
       color: tag.color,
       value: tag,
     }));

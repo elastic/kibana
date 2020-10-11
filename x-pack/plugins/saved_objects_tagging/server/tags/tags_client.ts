@@ -24,11 +24,11 @@ const savedObjectToTag = (savedObject: TagSavedObject): Tag => {
 };
 
 export class TagsClient implements ITagsClient {
-  private readonly client: SavedObjectsClientContract;
+  private readonly soClient: SavedObjectsClientContract;
   private readonly type = tagSavedObjectTypeName;
 
   constructor({ client }: TagsClientOptions) {
-    this.client = client;
+    this.soClient = client;
   }
 
   public async create(attributes: TagAttributes) {
@@ -36,7 +36,7 @@ export class TagsClient implements ITagsClient {
     if (!validation.valid) {
       throw new TagValidationError('Error validating tag attributes', validation);
     }
-    const raw = await this.client.create<TagAttributes>(this.type, attributes);
+    const raw = await this.soClient.create<TagAttributes>(this.type, attributes);
     return savedObjectToTag(raw);
   }
 
@@ -45,17 +45,17 @@ export class TagsClient implements ITagsClient {
     if (!validation.valid) {
       throw new TagValidationError('Error validating tag attributes', validation);
     }
-    const raw = await this.client.update<TagAttributes>(this.type, id, attributes);
+    const raw = await this.soClient.update<TagAttributes>(this.type, id, attributes);
     return savedObjectToTag(raw as TagSavedObject); // all attributes are updated, this is not a partial
   }
 
   public async get(id: string) {
-    const raw = await this.client.get<TagAttributes>(this.type, id);
+    const raw = await this.soClient.get<TagAttributes>(this.type, id);
     return savedObjectToTag(raw);
   }
 
   public async getAll() {
-    const result = await this.client.find<TagAttributes>({
+    const result = await this.soClient.find<TagAttributes>({
       type: this.type,
       perPage: 1000,
     });
@@ -66,6 +66,6 @@ export class TagsClient implements ITagsClient {
   public async delete(id: string) {
     // TODO: remove references from objects referencing the tag.
     //       We will need the internal client for that.
-    await this.client.delete(this.type, id);
+    await this.soClient.delete(this.type, id);
   }
 }

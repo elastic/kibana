@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsType } from 'src/core/server';
-import { tagSavedObjectTypeName } from '../../common/constants';
+import { SavedObject, SavedObjectsType } from 'src/core/server';
+import { tagSavedObjectTypeName, TagAttributes } from '../../common';
 
 export const tagType: SavedObjectsType = {
   name: tagSavedObjectTypeName,
@@ -13,7 +13,7 @@ export const tagType: SavedObjectsType = {
   namespaceType: 'single',
   mappings: {
     properties: {
-      title: {
+      name: {
         type: 'text',
       },
       description: {
@@ -26,8 +26,8 @@ export const tagType: SavedObjectsType = {
   },
   management: {
     importableAndExportable: true,
-    defaultSearchField: 'title',
+    defaultSearchField: 'name',
     icon: 'tag',
-    getTitle: (obj) => obj.attributes.title,
+    getTitle: (obj: SavedObject<TagAttributes>) => obj.attributes.name,
   },
 };

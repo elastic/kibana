@@ -50,9 +50,9 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
 
   // we don't want this value to change when the user edit the name.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const initialName = useMemo(() => tag.title, []);
+  const initialName = useMemo(() => tag.name, []);
 
-  const setTitle = useMemo(() => setField('title'), [setField]);
+  const setName = useMemo(() => setField('name'), [setField]);
   const setColor = useMemo(() => setField('color'), [setField]);
   const setDescription = useMemo(() => setField('description'), [setField]);
 
@@ -61,7 +61,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
   const previewTag: TagAttributes = useMemo(() => {
     return {
       ...tag,
-      title: tag.title || 'tag',
+      name: tag.name || 'tag',
       color: validateTagColor(tag.color) ? '#000000' : tag.color,
     };
   }, [tag]);
@@ -105,12 +105,12 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
                 label={i18n.translate('xpack.savedObjectsTagging.tagAttributeLabels.name', {
                   defaultMessage: 'Name',
                 })}
-                isInvalid={!!validation.errors.title}
-                error={validation.errors.title}
+                isInvalid={!!validation.errors.name}
+                error={validation.errors.name}
               >
                 <EuiFieldText
-                  value={tag.title}
-                  onChange={(e) => setTitle(e.target.value)}
+                  value={tag.name}
+                  onChange={(e) => setName(e.target.value)}
                   data-test-subj="createModalField-name"
                 />
               </EuiFormRow>

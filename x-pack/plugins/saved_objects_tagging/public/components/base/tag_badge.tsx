@@ -16,5 +16,5 @@ export interface TagBadgeProps {
  * The badge representation of a Tag, which is the default display to be used for them.
  */
 export const TagBadge: FC<TagBadgeProps> = ({ tag }) => {
-  return <EuiBadge color={tag.color}>{tag.title}</EuiBadge>;
+  return <EuiBadge color={tag.color}>{tag.name}</EuiBadge>;
 };

@@ -20,7 +20,7 @@ export const validateTag = (tag: TagAttributes): TagValidation => {
     errors: {},
   };
 
-  validation.errors.title = validateTagName(tag.title);
+  validation.errors.name = validateTagName(tag.name);
   validation.errors.color = validateTagColor(tag.color);
 
   Object.values(validation.errors).forEach((error) => {
