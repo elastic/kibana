@@ -10,11 +10,17 @@ import { Route, Switch } from 'react-router-dom';
 import { Case } from './pages';
 import { NotFoundPage } from '../app/404';
 
-export const CasesRoutes: React.FC = () => (
+const CasesRoutesComponent: React.FC = () => (
   <Switch>
     <Route path="/">
       <Case />
     </Route>
-    <Route render={() => <NotFoundPage />} />
+    <Route>
+      <NotFoundPage />
+    </Route>
   </Switch>
 );
+
+CasesRoutesComponent.displayName = 'CasesRoutesComponent';
+
+export const CasesRoutes = React.memo(CasesRoutesComponent);

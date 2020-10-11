@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo } from 'react';
-import { Route, Switch, RouteComponentProps, useHistory } from 'react-router-dom';
+import React, { useCallback, useMemo } from 'react';
+import { Route, Switch, useHistory } from 'react-router-dom';
 
 import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capabilities';
 import { hasMlUserPermissions } from '../../../common/machine_learning/has_ml_user_permissions';
@@ -17,12 +17,10 @@ import { getNetworkRoutePath } from './navigation';
 import { NetworkRouteType } from './navigation/types';
 import { MlNetworkConditionalContainer } from '../../common/components/ml/conditional_links/ml_network_conditional_container';
 
-type Props = Partial<RouteComponentProps<{}>> & { url: string };
-
 const networkPagePath = '';
-const ipDetailsPageBasePath = `/ip/:detailName`;
+const networkDetailsPageBasePath = `/ip/:detailName`;
 
-const NetworkContainerComponent: React.FC<Props> = () => {
+const NetworkContainerComponent: React.FC = () => {
   const history = useHistory();
   const capabilities = useMlCapabilities();
   const capabilitiesFetched = capabilities.capabilitiesFetched;
@@ -34,14 +32,35 @@ const NetworkContainerComponent: React.FC<Props> = () => {
     [capabilitiesFetched, userHasMlUserPermissions]
   );
 
+  const mlNetworkPathCallback = useCallback(
+    ({ match }) => <MlNetworkConditionalContainer url={match.url} />,
+    []
+  );
+
+  const networkDetailsPageBasePathCallback = useCallback(
+    ({
+      location: { search = '' },
+      match: {
+        params: { detailName },
+      },
+    }) => {
+      history.replace(`ip/${detailName}/${FlowTarget.source}${search}`);
+      return null;
+    },
+    [history]
+  );
+
+  const basePathCallback = useCallback(
+    ({ location: { search = '' } }) => {
+      history.replace(`${NetworkRouteType.flows}${search}`);
+      return null;
+    },
+    [history]
+  );
+
   return (
     <Switch>
-      <Route
-        path="/ml-network"
-        render={({ location, match }) => (
-          <MlNetworkConditionalContainer location={location} url={match.url} />
-        )}
-      />
+      <Route path="/ml-network" render={mlNetworkPathCallback} />
       <Route strict path={networkRoutePath}>
         <Network
           networkPagePath={networkPagePath}
@@ -49,28 +68,11 @@ const NetworkContainerComponent: React.FC<Props> = () => {
           hasMlUserPermissions={userHasMlUserPermissions}
         />
       </Route>
-      <Route path={`${ipDetailsPageBasePath}/:flowTarget`}>
+      <Route path={`${networkDetailsPageBasePath}/:flowTarget`}>
         <NetworkDetails />
       </Route>
-      <Route
-        path={ipDetailsPageBasePath}
-        render={({
-          location: { search = '' },
-          match: {
-            params: { detailName },
-          },
-        }) => {
-          history.replace(`ip/${detailName}/${FlowTarget.source}${search}`);
-          return null;
-        }}
-      />
-      <Route
-        path="/"
-        render={({ location: { search = '' } }) => {
-          history.replace(`${NetworkRouteType.flows}${search}`);
-          return null;
-        }}
-      />
+      <Route path={networkDetailsPageBasePath} render={networkDetailsPageBasePathCallback} />
+      <Route path="/" render={basePathCallback} />
     </Switch>
   );
 };

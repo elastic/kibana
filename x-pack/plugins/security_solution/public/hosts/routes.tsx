@@ -10,9 +10,19 @@ import { Route, Switch } from 'react-router-dom';
 import { HostsContainer } from './pages';
 import { NotFoundPage } from '../app/404';
 
-export const HostsRoutes = () => (
+export const HostsRoutesComponent = () => (
   <Switch>
-    <Route path="/" render={({ match }) => <HostsContainer url={match.url} />} />
-    <Route render={() => <NotFoundPage />} />
+    <Route path="/">
+      <HostsContainer />
+    </Route>
+    <Route>
+      <NotFoundPage />
+    </Route>
   </Switch>
 );
+
+HostsRoutesComponent.displayName = 'HostsRoutesComponent';
+
+export const HostsRoutes = React.memo(HostsRoutesComponent);
+
+HostsRoutes.displayName = 'HostsRoutes';

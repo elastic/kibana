@@ -12,10 +12,11 @@ import { NotFoundPage } from '../app/404';
 
 export const NetworkRoutes = () => (
   <Switch>
-    <Route
-      path="/"
-      render={({ location, match }) => <NetworkContainer location={location} url={match.url} />}
-    />
-    <Route render={() => <NotFoundPage />} />
+    <Route path="/">
+      <NetworkContainer />
+    </Route>
+    <Route>
+      <NotFoundPage />
+    </Route>
   </Switch>
 );

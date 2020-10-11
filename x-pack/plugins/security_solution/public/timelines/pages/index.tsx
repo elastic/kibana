@@ -5,7 +5,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Switch, Route, useHistory } from 'react-router-dom';
 
 import { ChromeBreadcrumb } from '../../../../../../src/core/public';
@@ -58,18 +58,21 @@ export const getBreadcrumbs = (
 
 export const Timelines = React.memo(() => {
   const history = useHistory();
+
+  const notFoundRouteCallback = useCallback(
+    ({ location: { search = '' } }) => {
+      history.replace(`${timelinesDefaultPath}${appendSearch(search)}`);
+      return null;
+    },
+    [history]
+  );
+
   return (
     <Switch>
       <Route exact path={timelinesPagePath}>
         <TimelinesPage />
       </Route>
-      <Route
-        path="/"
-        render={({ location: { search = '' } }) => {
-          history.replace(`${timelinesDefaultPath}${appendSearch(search)}`);
-          return null;
-        }}
-      />
+      <Route path="/" render={notFoundRouteCallback} />
     </Switch>
   );
 });

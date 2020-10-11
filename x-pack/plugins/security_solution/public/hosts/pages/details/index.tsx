@@ -8,6 +8,7 @@ import { EuiHorizontalRule, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useEffect, useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
+import { useParams } from 'react-router-dom';
 
 import { HostItem, LastEventIndexKey } from '../../../../common/search_strategy';
 import { SecurityPageName } from '../../../app/types';
@@ -39,7 +40,7 @@ import { esQuery, Filter } from '../../../../../../../src/plugins/data/public';
 import { OverviewEmpty } from '../../../overview/components/overview_empty';
 import { HostDetailsTabs } from './details_tabs';
 import { navTabsHostDetails } from './nav_tabs';
-import { HostDetailsProps } from './types';
+import { HostDetailsProps, HostDetailsParams } from './types';
 import { type } from './utils';
 import { getHostDetailsPageFilters } from './helpers';
 import { showGlobalFilters } from '../../../timelines/components/timeline/helpers';
@@ -60,9 +61,9 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
     query,
     setAbsoluteRangeDatePicker,
     setHostDetailsTablesActivePageToZero,
-    detailName,
     hostDetailsPagePath,
   }) => {
+    const { detailName } = useParams<HostDetailsParams>();
     const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
     const { globalFullScreen } = useFullScreen();
     useEffect(() => {

@@ -34,8 +34,11 @@ interface HostDetailsComponentDispatchProps extends HostBodyComponentDispatchPro
 }
 
 export interface HostDetailsProps {
-  detailName: string;
   hostDetailsPagePath: string;
+}
+
+export interface HostDetailsParams {
+  detailName: string;
 }
 
 export type HostDetailsComponentProps = HostDetailsComponentReduxProps &

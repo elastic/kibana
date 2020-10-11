@@ -10,9 +10,15 @@ import { Route, Switch } from 'react-router-dom';
 import { Overview } from './pages';
 import { NotFoundPage } from '../app/404';
 
-export const OverviewRoutes = () => (
+const OverviewRoutesComponent = () => (
   <Switch>
-    <Route path="/" render={() => <Overview />} />
-    <Route render={() => <NotFoundPage />} />
+    <Route path="/">
+      <Overview />
+    </Route>
+    <Route>
+      <NotFoundPage />
+    </Route>
   </Switch>
 );
+
+export const OverviewRoutes = React.memo(OverviewRoutesComponent);

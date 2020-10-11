@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { Route, Switch, RouteComponentProps, useHistory } from 'react-router-dom';
+import React, { useCallback } from 'react';
+import { Route, Switch, useHistory } from 'react-router-dom';
 
 import { HostDetails } from './details';
 import { HostsTableType } from '../store/model';
@@ -31,52 +31,46 @@ const getHostDetailsTabPath = (pagePath: string) =>
   `${HostsTableType.events}|` +
   `${HostsTableType.alerts})`;
 
-type Props = Partial<RouteComponentProps<{}>> & { url: string };
-
-export const HostsContainer = React.memo<Props>(({ url }) => {
+export const HostsContainer = React.memo(() => {
   const history = useHistory();
+
+  const hostDetailsPagePathCallback = useCallback(
+    ({
+      match: {
+        params: { detailName },
+      },
+      location: { search = '' },
+    }) => {
+      history.replace(`${detailName}/${HostsTableType.authentications}${search}`);
+      return null;
+    },
+    [history]
+  );
+
+  const basePathCallback = useCallback(
+    ({ location: { search = '' } }) => {
+      history.replace(`${HostsTableType.hosts}${search}`);
+      return null;
+    },
+    [history]
+  );
+
+  const mlHostsCallback = useCallback(
+    ({ match }) => <MlHostConditionalContainer url={match.url} />,
+    []
+  );
 
   return (
     <Switch>
-      <Route
-        path="/ml-hosts"
-        render={({ location, match }) => (
-          <MlHostConditionalContainer location={location} url={match.url} />
-        )}
-      />
+      <Route path="/ml-hosts" render={mlHostsCallback} />
       <Route path={getHostsTabPath()}>
         <Hosts hostsPagePath={hostsPagePath} />
       </Route>
-      <Route
-        path={getHostDetailsTabPath(hostsPagePath)}
-        render={({
-          match: {
-            params: { detailName },
-          },
-        }) => <HostDetails hostDetailsPagePath={hostDetailsPagePath} detailName={detailName} />}
-      />
-      <Route
-        path={hostDetailsPagePath}
-        render={({
-          match: {
-            params: { detailName },
-          },
-          location: { search = '' },
-        }) => {
-          history.replace(`${detailName}/${HostsTableType.authentications}${search}`);
-          return null;
-        }}
-      />
-
-      <Route
-        exact
-        strict
-        path=""
-        render={({ location: { search = '' } }) => {
-          history.replace(`${HostsTableType.hosts}${search}`);
-          return null;
-        }}
-      />
+      <Route path={getHostDetailsTabPath(hostsPagePath)}>
+        <HostDetails hostDetailsPagePath={hostDetailsPagePath} />
+      </Route>
+      <Route path={hostDetailsPagePath} render={hostDetailsPagePathCallback} />
+      <Route exact strict path="" render={basePathCallback} />
     </Switch>
   );
 });
