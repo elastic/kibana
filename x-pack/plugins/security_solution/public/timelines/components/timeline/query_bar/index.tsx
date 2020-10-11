@@ -157,8 +157,8 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
 
     useEffect(() => {
       setFilterQueryConverted({
-        query: filterQuery.expression ?? '',
-        language: filterQuery.kind ?? 'kuery',
+        query: filterQuery?.expression ?? '',
+        language: filterQuery?.kind ?? 'kuery',
       });
     }, [filterQuery]);
 
