@@ -18,7 +18,7 @@ import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 import { buildGlobalQuery } from '../helpers';
 import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 
-import { QueryBarTimeline, QueryBarTimelineComponentProps, getDataProviderFilter } from './index';
+import { QueryBarTimeline, getDataProviderFilter } from './index';
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
