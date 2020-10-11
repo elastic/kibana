@@ -128,7 +128,6 @@
     "@kbn/apm-config-loader": "1.0.0",
     "@kbn/config": "1.0.0",
     "@kbn/config-schema": "1.0.0",
-    "@kbn/dev-utils": "1.0.0",
     "@kbn/i18n": "1.0.0",
     "@kbn/interpreter": "1.0.0",
     "@kbn/logging": "1.0.0",
