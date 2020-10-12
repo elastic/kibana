@@ -75,8 +75,8 @@ describe('ExecutedJourney component', () => {
   });
 
   it('creates expected message for all succeeded', () => {
-    steps[0].synthetics.payload.status = 'succeeded';
-    steps[1].synthetics.payload.status = 'succeeded';
+    steps[0].synthetics!.payload!.status = 'succeeded';
+    steps[1].synthetics!.payload!.status = 'succeeded';
     const wrapper = shallowWithIntl(
       <ExecutedJourney
         journey={{
@@ -103,7 +103,7 @@ describe('ExecutedJourney component', () => {
   });
 
   it('creates appropriate message for mixed results', () => {
-    steps[0].synthetics.payload.status = 'succeeded';
+    steps[0].synthetics!.payload!.status = 'succeeded';
     const wrapper = shallowWithIntl(
       <ExecutedJourney
         journey={{
@@ -130,8 +130,8 @@ describe('ExecutedJourney component', () => {
   });
 
   it('tallies skipped steps', () => {
-    steps[0].synthetics.payload.status = 'succeeded';
-    steps[1].synthetics.payload.status = 'skipped';
+    steps[0].synthetics!.payload!.status = 'succeeded';
+    steps[1].synthetics!.payload!.status = 'skipped';
     const wrapper = shallowWithIntl(
       <ExecutedJourney
         journey={{
@@ -158,7 +158,7 @@ describe('ExecutedJourney component', () => {
   });
 
   it('uses appropriate count when non-step/end steps are included', () => {
-    steps[0].synthetics.payload.status = 'succeeded';
+    steps[0].synthetics!.payload!.status = 'succeeded';
     steps.push({
       docId: '3',
       timestamp: '125',
