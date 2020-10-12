@@ -85,7 +85,6 @@ export const Body = React.memo<BodyProps>(
     data,
     docValueFields,
     eventIdToNoteIds,
-    eventType,
     getNotesByIds,
     graphEventId,
     isEventViewer = false,
@@ -117,7 +116,9 @@ export const Body = React.memo<BodyProps>(
         getActionsColumnWidth(
           isEventViewer,
           showCheckboxes,
-          hasAdditionalActions(timelineId) ? DEFAULT_ICON_BUTTON_WIDTH + EXTRA_WIDTH : 0
+          hasAdditionalActions(timelineId as TimelineId)
+            ? DEFAULT_ICON_BUTTON_WIDTH + EXTRA_WIDTH
+            : 0
         ),
       [isEventViewer, showCheckboxes, timelineId]
     );
