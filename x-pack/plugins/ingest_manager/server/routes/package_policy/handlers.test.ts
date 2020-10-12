@@ -183,8 +183,8 @@ describe('When calling package policy', () => {
               version: '0.5.0',
             },
           },
-          expect.anything(), // request context
-          expect.anything() // kibanarequest
+          context,
+          request
         );
         expect(callbackTwo).toHaveBeenCalledWith(
           {
@@ -212,8 +212,8 @@ describe('When calling package policy', () => {
               version: '0.5.0',
             },
           },
-          expect.anything(), // request context
-          expect.anything() // kibanarequest
+          context,
+          request
         );
       });
 
