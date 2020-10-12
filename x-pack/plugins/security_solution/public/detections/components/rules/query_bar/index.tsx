@@ -93,7 +93,7 @@ export const QueryBarDefineRule = ({
   // not guarantee latest validity state
   useEffect((): void => {
     if (onValidityChange != null) {
-      onValidityChange(isInvalid);
+      onValidityChange(!isInvalid);
     }
   }, [isInvalid, onValidityChange]);
 
