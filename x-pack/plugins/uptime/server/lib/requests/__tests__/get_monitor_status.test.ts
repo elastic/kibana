@@ -182,6 +182,199 @@ describe('getMonitorStatus', () => {
     `);
   });
 
+  it('applies filters passed as objects', async () => {
+    const [callES, esMock] = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
+      [],
+      genBucketItem
+    );
+    await getMonitorStatus({
+      callES,
+      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+      locations: ['fairbanks', 'harrisburg'],
+      numTimes: 1,
+      timerange: {
+        from: 'now-2m',
+        to: 'now',
+      },
+      filters: `
+      {
+        "bool": {
+          "filter": [
+            {
+              "bool": {
+                "should": [
+                  {
+                    "match_phrase": {
+                      "tags": "org:google"
+                    }
+                  }
+                ],
+                "minimum_should_match": 1
+              }
+            },
+            {
+              "bool": {
+                "should": [
+                  {
+                    "bool": {
+                      "should": [
+                        {
+                          "match_phrase": {
+                            "monitor.type": "http"
+                          }
+                        }
+                      ],
+                      "minimum_should_match": 1
+                    }
+                  },
+                  {
+                    "bool": {
+                      "should": [
+                        {
+                          "match_phrase": {
+                            "monitor.type": "tcp"
+                          }
+                        }
+                      ],
+                      "minimum_should_match": 1
+                    }
+                  }
+                ],
+                "minimum_should_match": 1
+              }
+            }
+          ]
+        }
+      }`,
+    });
+    expect(esMock.callAsCurrentUser).toHaveBeenCalledTimes(1);
+    const [method, params] = esMock.callAsCurrentUser.mock.calls[0];
+    expect(method).toEqual('search');
+    expect(params).toMatchInlineSnapshot(`
+      Object {
+        "body": Object {
+          "aggs": Object {
+            "monitors": Object {
+              "composite": Object {
+                "size": 2000,
+                "sources": Array [
+                  Object {
+                    "monitor_id": Object {
+                      "terms": Object {
+                        "field": "monitor.id",
+                      },
+                    },
+                  },
+                  Object {
+                    "status": Object {
+                      "terms": Object {
+                        "field": "monitor.status",
+                      },
+                    },
+                  },
+                  Object {
+                    "location": Object {
+                      "terms": Object {
+                        "field": "observer.geo.name",
+                        "missing_bucket": true,
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+          "query": Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "term": Object {
+                    "monitor.status": "down",
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "@timestamp": Object {
+                      "gte": "now-2m",
+                      "lte": "now",
+                    },
+                  },
+                },
+                Object {
+                  "bool": Object {
+                    "filter": Array [
+                      Object {
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "match_phrase": Object {
+                                "tags": "org:google",
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      Object {
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "bool": Object {
+                                "minimum_should_match": 1,
+                                "should": Array [
+                                  Object {
+                                    "match_phrase": Object {
+                                      "monitor.type": "http",
+                                    },
+                                  },
+                                ],
+                              },
+                            },
+                            Object {
+                              "bool": Object {
+                                "minimum_should_match": 1,
+                                "should": Array [
+                                  Object {
+                                    "match_phrase": Object {
+                                      "monitor.type": "tcp",
+                                    },
+                                  },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                Object {
+                  "bool": Object {
+                    "should": Array [
+                      Object {
+                        "term": Object {
+                          "observer.geo.name": "fairbanks",
+                        },
+                      },
+                      Object {
+                        "term": Object {
+                          "observer.geo.name": "harrisburg",
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          "size": 0,
+        },
+        "index": "heartbeat-7*",
+      }
+    `);
+  });
+
   it('applies locations to params', async () => {
     const [callES, esMock] = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
       [],
