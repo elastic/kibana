@@ -13,13 +13,6 @@ import { urlSearch } from '../test_utilities/url_search';
 // the resolver component instance ID, used by the react code to distinguish piece of global state from those used by other resolver instances
 const resolverComponentInstanceID = 'resolverComponentInstanceID';
 
-Object.assign(navigator, {
-  clipboard: {
-    writeText: () => {},
-  },
-});
-jest.spyOn(navigator.clipboard, 'writeText');
-
 describe(`Resolver: when analyzing a tree with no ancestors and two children and two related registry event on the origin, and when the component instance ID is ${resolverComponentInstanceID}`, () => {
   /**
    * Get (or lazily create and get) the simulator.
@@ -38,6 +31,14 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
 
   beforeEach(() => {
     // create a mock data access layer
+    Object.assign(navigator, {
+      clipboard: {
+        writeText: () => {},
+      },
+    });
+
+    jest.spyOn(navigator.clipboard, 'writeText');
+
     const {
       metadata: dataAccessLayerMetadata,
       dataAccessLayer,
