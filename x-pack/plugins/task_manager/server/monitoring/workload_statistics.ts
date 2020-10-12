@@ -249,8 +249,8 @@ export function padBuckets(
     const { histogram, from, to } = scheduleDensity;
     const firstBucket = histogram.buckets[0].key;
     const lastBucket = histogram.buckets[histogram.buckets.length - 1].key;
-    const bucketsToPadBeforeFirstBucket = calculateBucketsBetween(from, firstBucket, pollInterval);
 
+    const bucketsToPadBeforeFirstBucket = calculateBucketsBetween(firstBucket, from, pollInterval);
     const bucketsToPadAfterLast = calculateBucketsBetween(
       lastBucket + pollInterval,
       to,
@@ -289,19 +289,28 @@ function calculateBucketsBetween(
   interval: number,
   bucketInterval: number = interval
 ): Array<{ key: number }> {
+  const calcForwardInTime = from < to;
+
   // as task interval might not divide by the pollInterval (aka the bucket interval)
   // we have to adjust for the "drift" that occurs when estimating when the next
   // bucket the task might actually get scheduled in
   const actualInterval = Math.ceil(interval / bucketInterval) * bucketInterval;
 
   const buckets: Array<{ key: number }> = [];
-  let fromBound = from;
-  while (fromBound < to) {
+  const toBound = calcForwardInTime ? to : -(to + actualInterval);
+  let fromBound = calcForwardInTime ? from : -from;
+
+  while (fromBound < toBound) {
     buckets.push({ key: fromBound });
     fromBound += actualInterval;
   }
 
-  return buckets;
+  return calcForwardInTime
+    ? buckets
+    : buckets.reverse().map((bucket) => {
+        bucket.key = Math.abs(bucket.key);
+        return bucket;
+      });
 }
 
 export function estimateRecurringTaskScheduling(
@@ -332,23 +341,6 @@ export function estimateRecurringTaskScheduling(
     return bucket.nonRecurring ?? 0;
   });
 }
-
-// function estimateDriftInExecutionDueToPollInterval(
-//   scheduledExecutions: number[],
-//   pollInterval: number
-// ) {
-//   const recuranceBeginsAt = scheduledExecutions[0];
-//   let drift = 0;
-//   return scheduledExecutions.map((scheduledExecution, cycle) => {
-//     const estimatedExectionCycleTime = cycle * pollInterval;
-//     const estimatedExecution = scheduledExecution + drift;
-
-//     drift = estimatedExectionCycleTime > estimatedExecution ? ()
-//     // drift = (scheduledExecution - estimatedExecution) % pollInterval;
-
-//     return estimatedExecution;
-//   });
-// }
 
 export function summarizeWorkloadStat(
   workloadStats: WorkloadStat

@@ -212,7 +212,9 @@ describe('Workload Statistics Aggregator', () => {
             doc_count: 6,
           },
           scheduleDensity: {
-            buckets: [mockHistogram(0, 7 * 3000, 60 * 1000, 3000, [2, 2, 5, 0, 0, 0, 0, 0, 0, 1])],
+            buckets: [
+              mockHistogram(0, 7 * 3000 + 500, 60 * 1000, 3000, [2, 2, 5, 0, 0, 0, 0, 0, 0, 1]),
+            ],
           },
         },
       },
@@ -524,10 +526,10 @@ describe('padBuckets', () => {
     expect(
       padBuckets(10, 3000, {
         key: '2020-10-02T19:47:28.128Z-2020-10-02T19:48:28.128Z',
-        from: 1601668048128,
-        from_as_string: '2020-10-02T19:47:28.128Z',
-        to: 1601668075128,
-        to_as_string: '2020-10-02T19:47:55.128Z',
+        from: 1601668046000,
+        from_as_string: '2020-10-02T19:47:26.000Z',
+        to: 1601668076000,
+        to_as_string: '2020-10-02T19:47:56.000Z',
         doc_count: 3,
         histogram: {
           buckets: [
@@ -595,10 +597,10 @@ describe('padBuckets', () => {
     expect(
       padBuckets(10, 3000, {
         key: '2020-10-02T20:39:45.793Z-2020-10-02T20:40:14.793Z',
-        from: 1.601671185793e12,
-        from_as_string: '2020-10-02T20:39:45.793Z',
-        to: 1.601671214793e12,
-        to_as_string: '2020-10-02T20:40:14.793Z',
+        from: 1601671183000,
+        from_as_string: '2020-10-02T20:39:43.000Z',
+        to: 1601671213000,
+        to_as_string: '2020-10-02T20:40:13.000Z',
         doc_count: 2,
         histogram: {
           buckets: [
@@ -626,8 +628,8 @@ describe('padBuckets', () => {
         key: '2020-10-02T20:39:45.793Z-2020-10-02T20:40:14.793Z',
         from: 1601671185793,
         from_as_string: '2020-10-02T20:39:45.793Z',
-        to: 1601671242793,
-        to_as_string: '2020-10-02T20:40:42.793Z',
+        to: 1601671245793,
+        to_as_string: '2020-10-02T20:40:45.793Z',
         doc_count: 2,
         histogram: {
           buckets: [
@@ -646,7 +648,7 @@ describe('padBuckets', () => {
           ],
         },
       })
-    ).toEqual([0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    ).toEqual([0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
   });
 });
 
