@@ -118,13 +118,13 @@ const SuggestionPreview = ({
   selected: boolean;
   showTitleAsLabel?: boolean;
 }) => {
-  const [renderedSuggestion, setRenderedSuggestion] = useState(
+  const [renderedExpression, setRenderedExpression] = useState(
     () => preview.expression && toExpression(preview.expression)
   );
   const currentExpression = preview.expression && toExpression(preview.expression);
   useDebounce(
     () => {
-      setRenderedSuggestion(preview.expression && toExpression(preview.expression));
+      setRenderedExpression(preview.expression && toExpression(preview.expression));
     },
     2000,
     [preview.expression]
@@ -141,13 +141,13 @@ const SuggestionPreview = ({
           data-test-subj="lnsSuggestion"
           onClick={onSelect}
         >
-          {preview.expression && currentExpression !== renderedSuggestion && (
+          {preview.expression && currentExpression !== renderedExpression && (
             <EuiProgress size="xs" color="accent" position="absolute" />
           )}
-          {renderedSuggestion ? (
+          {preview.expression ? (
             <PreviewRenderer
               ExpressionRendererComponent={ExpressionRendererComponent}
-              expression={renderedSuggestion}
+              expression={renderedExpression || toExpression(preview.expression)}
               withLabel={Boolean(showTitleAsLabel)}
             />
           ) : (
