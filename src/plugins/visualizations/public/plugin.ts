@@ -112,7 +112,7 @@ export interface VisualizationsStartDeps {
   uiActions: UiActionsStart;
   application: ApplicationStart;
   dashboard: DashboardStart;
-  getAttributeService: DashboardStart['getAttributeService'];
+  getAttributeService: EmbeddableStart['getAttributeService'];
   savedObjectsClient: SavedObjectsClientContract;
 }
 
