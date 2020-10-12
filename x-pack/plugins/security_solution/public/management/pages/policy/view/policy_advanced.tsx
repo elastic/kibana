@@ -6,16 +6,11 @@
 
 import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import {
-  EuiFieldText,
-  EuiText,
-  FormattedMessage,
-  EuiIconTip /* , EuiDataGrid, EuiPopover, EuiButtonIcon*/,
-} from '@elastic/eui';
+import { EuiFieldText, EuiText, EuiIconTip } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { cloneDeep } from 'lodash';
 import { policyConfig } from '../store/policy_details/selectors';
 import { usePolicyDetailsSelector } from './policy_hooks';
-// import * as AdvancedPolicySchema from '../../../../../schema.json';
 
 function setValue(obj: Record<string, unknown>, value: string, path: string[]) {
   let newPolicyConfig = obj;
@@ -69,10 +64,6 @@ export const PolicyAdvanced = React.memo(
       policyDetailsConfig &&
       getValue((policyDetailsConfig as unknown) as Record<string, unknown>, configPath);
 
-    // console.log(configPath.join('.'));
-    // console.log(firstSupportedVersion);
-    // console.log(lastSupportedVersion);
-    // console.log(value as string);
     return (
       <>
         <EuiText>

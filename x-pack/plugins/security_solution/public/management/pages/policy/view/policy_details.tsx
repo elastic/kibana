@@ -277,7 +277,6 @@ export const PolicyDetails = React.memo(() => {
         <LinuxEvents />
 
         <EuiSpacer size="l" />
-
         <AdvancedPolicyForms />
       </WrapperPage>
 
