@@ -41,6 +41,7 @@ describe('TaskManager', () => {
     index: 'foo',
     max_attempts: 9,
     poll_interval: 6000000,
+    monitored_stats_required_freshness: 6000000,
     max_poll_inactivity_cycles: 10,
     monitored_aggregated_stats_refresh_rate: 5000,
     monitored_stats_running_average_window: 50,
