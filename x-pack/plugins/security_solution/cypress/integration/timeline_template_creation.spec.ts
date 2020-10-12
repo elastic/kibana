@@ -12,8 +12,8 @@ import {
   NOTES_BUTTON,
   NOTES_COUNT,
   NOTES_TEXT_AREA,
+  PIN_EVENT,
   TIMELINE_DESCRIPTION,
-  // TIMELINE_FILTER,
   TIMELINE_QUERY,
   TIMELINE_TITLE,
 } from '../screens/timeline';
@@ -32,10 +32,8 @@ import {
   addNameToTimeline,
   addNotesToTimeline,
   closeNotes,
-  closeTimeline,
   createNewTimelineTemplate,
   markAsFavorite,
-  openTimelineFromSettings,
   populateTimeline,
   waitForTimelineChanges,
 } from '../tasks/timeline';
@@ -43,8 +41,7 @@ import { openTimeline } from '../tasks/timelines';
 
 import { OVERVIEW_URL } from '../urls/navigation';
 
-// FLAKY: https://github.com/elastic/kibana/issues/79967
-describe.skip('Timeline Templates', () => {
+describe('Timeline Templates', () => {
   before(() => {
     cy.server();
     cy.route('PATCH', '**/api/timeline').as('timeline');
@@ -56,12 +53,11 @@ describe.skip('Timeline Templates', () => {
     createNewTimelineTemplate();
     populateTimeline();
     addFilter(timeline.filter);
-    // To fix
-    // cy.get(PIN_EVENT).should(
-    //   'have.attr',
-    //   'aria-label',
-    //   'This event may not be pinned while editing a template timeline'
-    // );
+    cy.get(PIN_EVENT).should(
+      'have.attr',
+      'aria-label',
+      'This event may not be pinned while editing a template timeline'
+    );
     cy.get(LOCKED_ICON).should('be.visible');
 
     addNameToTimeline(timeline.title);
@@ -75,9 +71,6 @@ describe.skip('Timeline Templates', () => {
     closeNotes();
     markAsFavorite();
     waitForTimelineChanges();
-    createNewTimelineTemplate();
-    closeTimeline();
-    openTimelineFromSettings();
 
     cy.contains(timeline.title).should('exist');
     cy.get(TIMELINES_DESCRIPTION).first().should('have.text', timeline.description);
@@ -91,8 +84,6 @@ describe.skip('Timeline Templates', () => {
     cy.get(TIMELINE_TITLE).should('have.attr', 'value', timeline.title);
     cy.get(TIMELINE_DESCRIPTION).should('have.attr', 'value', timeline.description);
     cy.get(TIMELINE_QUERY).should('have.text', timeline.query);
-    // Comments this assertion until we agreed what to do with the filters.
-    // cy.get(TIMELINE_FILTER(timeline.filter)).should('exist');
     cy.get(NOTES_COUNT).should('have.text', '1');
     cy.get(NOTES_BUTTON).click();
     cy.get(NOTES_TEXT_AREA).should('have.attr', 'placeholder', 'Add a Note');
