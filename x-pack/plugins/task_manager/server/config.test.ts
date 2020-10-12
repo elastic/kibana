@@ -16,6 +16,7 @@ describe('config validation', () => {
         "max_poll_inactivity_cycles": 10,
         "max_workers": 10,
         "monitored_aggregated_stats_refresh_rate": 60000,
+        "monitored_stats_required_freshness": 4000,
         "monitored_stats_running_average_window": 50,
         "poll_interval": 3000,
         "request_capacity": 1000,
@@ -32,5 +33,33 @@ describe('config validation', () => {
     }).toThrowErrorMatchingInlineSnapshot(
       `"[index]: \\".tasks\\" is an invalid Kibana Task Manager index, as it is already in use by the ElasticSearch Tasks Manager"`
     );
+  });
+
+  test('the required freshness of the monitored stats config must always be less-than-equal to the poll interval', () => {
+    const config: Record<string, unknown> = {
+      monitored_stats_required_freshness: 100,
+    };
+    expect(() => {
+      configSchema.validate(config);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"The specified monitored_stats_required_freshness (100) is invalid, as it is below the poll_interval (3000)"`
+    );
+  });
+  test('the default required freshness of the monitored stats is poll interval with a slight buffer', () => {
+    const config: Record<string, unknown> = {};
+    expect(configSchema.validate(config)).toMatchInlineSnapshot(`
+      Object {
+        "enabled": true,
+        "index": ".kibana_task_manager",
+        "max_attempts": 3,
+        "max_poll_inactivity_cycles": 10,
+        "max_workers": 10,
+        "monitored_aggregated_stats_refresh_rate": 60000,
+        "monitored_stats_required_freshness": 4000,
+        "monitored_stats_running_average_window": 50,
+        "poll_interval": 3000,
+        "request_capacity": 1000,
+      }
+    `);
   });
 });
