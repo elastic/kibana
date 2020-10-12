@@ -647,7 +647,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -792,7 +792,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                               class="euiDescriptionList__description c2"
                             >
                               <span
-                                title=""
+                                title="trusted app 0"
                               >
                                 trusted app 0
                               </span>
@@ -1033,7 +1033,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -1152,7 +1152,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -1271,7 +1271,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -1390,7 +1390,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -1509,7 +1509,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -1628,7 +1628,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -1747,7 +1747,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -1866,7 +1866,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -1985,7 +1985,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -2104,7 +2104,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -2223,7 +2223,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -2342,7 +2342,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -2461,7 +2461,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -2580,7 +2580,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -2699,7 +2699,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -2818,7 +2818,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -2937,7 +2937,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -3056,7 +3056,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -3175,7 +3175,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -3654,7 +3654,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -3773,7 +3773,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -3892,7 +3892,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -4011,7 +4011,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -4130,7 +4130,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -4249,7 +4249,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -4368,7 +4368,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -4487,7 +4487,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -4606,7 +4606,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -4725,7 +4725,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -4844,7 +4844,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -4963,7 +4963,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -5082,7 +5082,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -5201,7 +5201,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -5320,7 +5320,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -5439,7 +5439,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -5558,7 +5558,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -5677,7 +5677,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -5796,7 +5796,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -5915,7 +5915,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -6552,7 +6552,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -6671,7 +6671,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -6790,7 +6790,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -6909,7 +6909,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -7028,7 +7028,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -7147,7 +7147,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -7266,7 +7266,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -7385,7 +7385,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -7504,7 +7504,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -7623,7 +7623,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -7742,7 +7742,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -7861,7 +7861,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -7980,7 +7980,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -8099,7 +8099,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -8218,7 +8218,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -8337,7 +8337,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -8456,7 +8456,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -8575,7 +8575,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -8694,7 +8694,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -8813,7 +8813,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -9292,7 +9292,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -9411,7 +9411,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -9530,7 +9530,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -9649,7 +9649,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -9768,7 +9768,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -9887,7 +9887,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -10006,7 +10006,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -10125,7 +10125,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -10244,7 +10244,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -10363,7 +10363,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -10482,7 +10482,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -10601,7 +10601,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -10720,7 +10720,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -10839,7 +10839,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -10958,7 +10958,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -11077,7 +11077,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -11196,7 +11196,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -11315,7 +11315,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -11434,7 +11434,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -11553,7 +11553,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 Name
               </div>
               <div
-                class="euiTableCellContent"
+                class="euiTableCellContent euiTableCellContent--truncateText"
               >
                 <span
                   class="euiTableCellContent__text"
