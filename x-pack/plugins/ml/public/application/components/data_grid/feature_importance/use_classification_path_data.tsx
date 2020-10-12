@@ -164,7 +164,7 @@ export const buildClassificationDecisionPathData = ({
   featureImportance: FeatureImportance[];
   currentClass: string | undefined;
 }): DecisionPathPlotData | undefined => {
-  if (currentClass === undefined) return [];
+  if (currentClass === undefined || !(Array.isArray(baselines) && baselines.length >= 2)) return [];
 
   const mappedFeatureImportance: Array<
     ExtendedFeatureImportance | undefined
@@ -183,7 +183,9 @@ export const buildClassificationDecisionPathData = ({
   });
 
   // get the baseline for the current class from the trained_models metadata
-  const baselineClass = baselines.find((bl) => bl.class_name === currentClass);
+  const baselineClass = baselines.find(
+    (bl) => getStringBasedClassName(bl.class_name) === currentClass
+  );
   const filteredFeatureImportance = mappedFeatureImportance.filter(
     (f) => f !== undefined
   ) as ExtendedFeatureImportance[];
