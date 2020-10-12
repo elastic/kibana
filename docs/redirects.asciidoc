@@ -59,7 +59,7 @@ This page has moved. Please see <<reporting-getting-started>>.
 [role="exclude",id="add-sample-data"]
 == Add sample data
 
-This page has moved. Please see <<gs-get-data-into-kibana>>.
+This page has moved. Please see <<get-started>>.
 
 [role="exclude",id="tilemap"]
 == Coordinate map
@@ -112,3 +112,9 @@ This content has moved. See
 
 This content has moved. See
 {ref}/ccr-getting-started.html#ccr-getting-started-remote-cluster[Connect to a remote cluster].
+
+[role="exclude",id="tutorial-define-index"]
+== Define your index patterns
+
+This content has moved. See
+<<get-started, Quick start>>.

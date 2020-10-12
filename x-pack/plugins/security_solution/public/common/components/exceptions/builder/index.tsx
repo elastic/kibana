@@ -7,6 +7,7 @@ import React, { useCallback, useEffect, useReducer } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
+import { Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { BuilderExceptionListItemComponent } from './exception_item';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 import {
@@ -72,6 +73,7 @@ interface ExceptionBuilderProps {
   isAndDisabled: boolean;
   isNestedDisabled: boolean;
   onChange: (arg: OnChangeProps) => void;
+  ruleType?: Type;
 }
 
 export const ExceptionBuilderComponent = ({
@@ -85,6 +87,7 @@ export const ExceptionBuilderComponent = ({
   isAndDisabled,
   isNestedDisabled,
   onChange,
+  ruleType,
 }: ExceptionBuilderProps) => {
   const [
     {
@@ -382,6 +385,7 @@ export const ExceptionBuilderComponent = ({
                 onChangeExceptionItem={handleExceptionItemChange}
                 onlyShowListOperators={containsValueListEntry(exceptions)}
                 setErrorsExist={setErrorsExist}
+                ruleType={ruleType}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
