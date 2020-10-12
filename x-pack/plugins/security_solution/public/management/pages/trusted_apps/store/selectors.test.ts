@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AsyncResourceState, TrustedAppsListPageState } from '../state';
+import {
+  AsyncResourceState,
+  TrustedAppsListPageLocation,
+  TrustedAppsListPageState,
+} from '../state';
 import { initialTrustedAppsPageState } from './reducer';
 import {
   getListResourceState,
@@ -25,7 +29,7 @@ import {
 } from './selectors';
 
 import {
-  createDefaultPaginationInfo,
+  createDefaultPagination,
   createListComplexLoadingResourceState,
   createListFailedResourceState,
   createListLoadedResourceState,
@@ -62,13 +66,13 @@ describe('selectors', () => {
     });
 
     it('returns true when current loaded page index is outdated', () => {
-      const listView = createLoadedListViewWithPagination(initialNow, { index: 1, size: 20 });
+      const listView = createLoadedListViewWithPagination(initialNow, { pageIndex: 1 });
 
       expect(needsRefreshOfListData({ ...initialState, listView, active: true })).toBe(true);
     });
 
     it('returns true when current loaded page size is outdated', () => {
-      const listView = createLoadedListViewWithPagination(initialNow, { index: 0, size: 50 });
+      const listView = createLoadedListViewWithPagination(initialNow, { pageSize: 50 });
 
       expect(needsRefreshOfListData({ ...initialState, listView, active: true })).toBe(true);
     });
@@ -84,7 +88,11 @@ describe('selectors', () => {
 
     it('returns false when current loaded data is up to date', () => {
       const listView = createLoadedListViewWithPagination(initialNow);
-      const location = { page_index: 0, page_size: 10 };
+      const location: TrustedAppsListPageLocation = {
+        page_index: 0,
+        page_size: 10,
+        view_type: 'grid',
+      };
 
       expect(needsRefreshOfListData({ ...initialState, listView, active: true, location })).toBe(
         false
@@ -104,8 +112,7 @@ describe('selectors', () => {
         ...initialState,
         listView: {
           listResourceState: createListComplexLoadingResourceState(
-            createDefaultPaginationInfo(),
-            200,
+            createDefaultPagination(),
             initialNow
           ),
           freshDataTimestamp: initialNow,
@@ -113,7 +120,7 @@ describe('selectors', () => {
       };
 
       expect(getLastLoadedListResourceState(state)).toStrictEqual(
-        createListLoadedResourceState(createDefaultPaginationInfo(), 200, initialNow)
+        createListLoadedResourceState(createDefaultPagination(), initialNow)
       );
     });
   });
@@ -128,17 +135,14 @@ describe('selectors', () => {
         ...initialState,
         listView: {
           listResourceState: createListComplexLoadingResourceState(
-            createDefaultPaginationInfo(),
-            200,
+            createDefaultPagination(),
             initialNow
           ),
           freshDataTimestamp: initialNow,
         },
       };
 
-      expect(getListItems(state)).toStrictEqual(
-        createSampleTrustedApps(createDefaultPaginationInfo())
-      );
+      expect(getListItems(state)).toStrictEqual(createSampleTrustedApps(createDefaultPagination()));
     });
   });
 
@@ -152,8 +156,7 @@ describe('selectors', () => {
         ...initialState,
         listView: {
           listResourceState: createListComplexLoadingResourceState(
-            createDefaultPaginationInfo(),
-            200,
+            createDefaultPagination(),
             initialNow
           ),
           freshDataTimestamp: initialNow,
@@ -166,17 +169,25 @@ describe('selectors', () => {
 
   describe('getListCurrentPageIndex()', () => {
     it('returns page index', () => {
-      const state = { ...initialState, location: { page_index: 3, page_size: 10 } };
+      const location: TrustedAppsListPageLocation = {
+        page_index: 3,
+        page_size: 10,
+        view_type: 'grid',
+      };
 
-      expect(getCurrentLocationPageIndex(state)).toBe(3);
+      expect(getCurrentLocationPageIndex({ ...initialState, location })).toBe(3);
     });
   });
 
   describe('getListCurrentPageSize()', () => {
     it('returns page size', () => {
-      const state = { ...initialState, location: { page_index: 0, page_size: 20 } };
+      const location: TrustedAppsListPageLocation = {
+        page_index: 0,
+        page_size: 20,
+        view_type: 'grid',
+      };
 
-      expect(getCurrentLocationPageSize(state)).toBe(20);
+      expect(getCurrentLocationPageSize({ ...initialState, location })).toBe(20);
     });
   });
 
@@ -186,8 +197,7 @@ describe('selectors', () => {
         ...initialState,
         listView: {
           listResourceState: createListComplexLoadingResourceState(
-            createDefaultPaginationInfo(),
-            200,
+            createDefaultPagination(),
             initialNow
           ),
           freshDataTimestamp: initialNow,
@@ -220,8 +230,7 @@ describe('selectors', () => {
         ...initialState,
         listView: {
           listResourceState: createListComplexLoadingResourceState(
-            createDefaultPaginationInfo(),
-            200,
+            createDefaultPagination(),
             initialNow
           ),
           freshDataTimestamp: initialNow,

@@ -207,6 +207,7 @@ const getSavedObjectTypes = (
         fleet_enroll_username: { type: 'binary' },
         fleet_enroll_password: { type: 'binary' },
         config: { type: 'flattened' },
+        config_yaml: { type: 'text' },
       },
     },
   },
@@ -303,6 +304,7 @@ const getSavedObjectTypes = (
         install_started_at: { type: 'date' },
         install_version: { type: 'keyword' },
         install_status: { type: 'keyword' },
+        install_source: { type: 'keyword' },
       },
     },
   },
@@ -346,6 +348,7 @@ export function registerEncryptedSavedObjects(
       'hosts',
       'ca_sha256',
       'config',
+      'config_yaml',
     ]),
   });
   encryptedSavedObjects.registerType({
@@ -370,6 +373,8 @@ export function registerEncryptedSavedObjects(
       'unenrolled_at',
       'unenrollment_started_at',
       'packages',
+      'upgraded_at',
+      'upgrade_started_at',
     ]),
   });
   encryptedSavedObjects.registerType({

@@ -15,7 +15,7 @@
     "inspector",
     "licensing",
     "maps",
-    "triggers_actions_ui",
+    "triggersActionsUi",
     "uiActions"
   ],
   "optionalPlugins": [
@@ -32,5 +32,5 @@
   ],
   "server": true,
   "ui": true,
-  "requiredBundles": ["esUiShared", "ingestManager", "kibanaUtils", "kibanaReact", "lists"]
+  "requiredBundles": ["esUiShared", "ingestManager", "kibanaUtils", "kibanaReact", "lists", "ml"]
 }

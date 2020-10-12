@@ -38,7 +38,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should create a fleet_enroll user and role', async () => {
       const { body: apiResponse } = await supertest
-        .post(`/api/ingest_manager/fleet/setup`)
+        .post(`/api/fleet/agents/setup`)
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
@@ -79,13 +79,13 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should not create or update the fleet_enroll user if called multiple times', async () => {
-      await supertest.post(`/api/ingest_manager/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);
+      await supertest.post(`/api/fleet/agents/setup`).set('kbn-xsrf', 'xxxx').expect(200);
 
       const { body: userResponseFirstTime } = await es.security.getUser({
         username: 'fleet_enroll',
       });
 
-      await supertest.post(`/api/ingest_manager/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);
+      await supertest.post(`/api/fleet/agents/setup`).set('kbn-xsrf', 'xxxx').expect(200);
 
       const { body: userResponseSecondTime } = await es.security.getUser({
         username: 'fleet_enroll',
@@ -97,14 +97,14 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should create or update the fleet_enroll user if called multiple times with forceRecreate flag', async () => {
-      await supertest.post(`/api/ingest_manager/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);
+      await supertest.post(`/api/fleet/agents/setup`).set('kbn-xsrf', 'xxxx').expect(200);
 
       const { body: userResponseFirstTime } = await es.security.getUser({
         username: 'fleet_enroll',
       });
 
       await supertest
-        .post(`/api/ingest_manager/fleet/setup`)
+        .post(`/api/fleet/agents/setup`)
         .set('kbn-xsrf', 'xxxx')
         .send({
           forceRecreate: true,

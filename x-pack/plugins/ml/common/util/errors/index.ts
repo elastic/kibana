@@ -8,6 +8,7 @@ export { MLRequestFailure } from './request_error';
 export { extractErrorMessage, extractErrorProperties } from './process_errors';
 export {
   ErrorType,
+  ErrorMessage,
   EsErrorBody,
   EsErrorRootCause,
   MLErrorObject,

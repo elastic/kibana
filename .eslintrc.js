@@ -392,6 +392,7 @@ module.exports = {
      */
     {
       files: [
+        '**/*.stories.tsx',
         'x-pack/test/apm_api_integration/**/*.ts',
         'x-pack/test/functional/apps/**/*.js',
         'x-pack/plugins/apm/**/*.js',
@@ -1049,9 +1050,7 @@ module.exports = {
      */
     {
       // typescript only for front and back end
-      files: [
-        'x-pack/plugins/{alerts,alerting_builtins,actions,task_manager,event_log}/**/*.{ts,tsx}',
-      ],
+      files: ['x-pack/plugins/{alerts,stack_alerts,actions,task_manager,event_log}/**/*.{ts,tsx}'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },

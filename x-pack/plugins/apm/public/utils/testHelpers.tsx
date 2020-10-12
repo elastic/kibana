@@ -12,7 +12,7 @@ import enzymeToJson from 'enzyme-to-json';
 import { Location } from 'history';
 import moment from 'moment';
 import { Moment } from 'moment-timezone';
-import { render, waitForElement } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { APMConfig } from '../../server';
@@ -25,6 +25,7 @@ import {
 } from '../../typings/elasticsearch';
 import { MockApmPluginContextWrapper } from '../context/ApmPluginContext/MockApmPluginContext';
 import { UIFilters } from '../../typings/ui_filters';
+import { UrlParamsProvider } from '../context/UrlParamsContext';
 
 const originalConsoleWarn = console.warn; // eslint-disable-line no-console
 /**
@@ -68,14 +69,16 @@ export async function getRenderedHref(Component: React.FC, location: Location) {
   const el = render(
     <MockApmPluginContextWrapper>
       <MemoryRouter initialEntries={[location]}>
-        <Component />
+        <UrlParamsProvider>
+          <Component />
+        </UrlParamsProvider>
       </MemoryRouter>
     </MockApmPluginContextWrapper>
   );
-
-  await waitForElement(() => el.container.querySelector('a'));
-
   const a = el.container.querySelector('a');
+
+  await waitFor(() => {}, { container: a! });
+
   return a ? a.getAttribute('href') : '';
 }
 

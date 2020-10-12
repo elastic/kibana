@@ -8,3 +8,4 @@ This plugin registers the basic usage collectors from Kibana:
 - Number of Saved Objects per type
 - Non-default UI Settings
 - CSP configuration
+- Core Metrics

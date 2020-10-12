@@ -21,7 +21,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
 import { SearchResponse } from 'elasticsearch';
-import { ShardFailureOpenModalButton } from '../../ui';
+import { ShardFailureOpenModalButton } from '../../ui/shard_failure_modal';
 import { toMountPoint } from '../../../../kibana_react/public';
 import { getNotifications } from '../../services';
 import { SearchRequest } from '..';

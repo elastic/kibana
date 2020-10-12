@@ -31,10 +31,13 @@ import {
 } from './book_embeddable';
 import { CreateEditBookComponent } from './create_edit_book_component';
 import { DashboardStart } from '../../../../src/plugins/dashboard/public';
+import { OnSaveProps } from '../../../../src/plugins/saved_objects/public';
+import { SavedObjectsClientContract } from '../../../../src/core/target/types/public/saved_objects';
 
 interface StartServices {
   openModal: OverlayStart['openModal'];
   getAttributeService: DashboardStart['getAttributeService'];
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 interface ActionContext {
@@ -56,8 +59,24 @@ export const createEditBookAction = (getStartServices: () => Promise<StartServic
       );
     },
     execute: async ({ embeddable }: ActionContext) => {
-      const { openModal, getAttributeService } = await getStartServices();
-      const attributeService = getAttributeService<BookSavedObjectAttributes>(BOOK_SAVED_OBJECT);
+      const { openModal, getAttributeService, savedObjectsClient } = await getStartServices();
+      const attributeService = getAttributeService<BookSavedObjectAttributes>(BOOK_SAVED_OBJECT, {
+        saveMethod: async (
+          type: string,
+          attributes: BookSavedObjectAttributes,
+          savedObjectId?: string
+        ) => {
+          if (savedObjectId) {
+            return savedObjectsClient.update(type, savedObjectId, attributes);
+          }
+          return savedObjectsClient.create(type, attributes);
+        },
+        checkForDuplicateTitle: (props: OnSaveProps) => {
+          return new Promise(() => {
+            return true;
+          });
+        },
+      });
       const onSave = async (attributes: BookSavedObjectAttributes, useRefType: boolean) => {
         const newInput = await attributeService.wrapAttributes(
           attributes,

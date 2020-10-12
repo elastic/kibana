@@ -8,7 +8,8 @@ import React from 'react';
 import { useValues } from 'kea';
 import { EuiLink, EuiButton, EuiButtonProps, EuiLinkAnchorProps } from '@elastic/eui';
 
-import { KibanaLogic } from '../../shared/kibana';
+import { KibanaLogic } from '../kibana';
+import { HttpLogic } from '../http';
 import { letBrowserHandleEvent, createHref } from './';
 
 /**
@@ -33,9 +34,10 @@ export const EuiReactRouterHelper: React.FC<IEuiReactRouterProps> = ({
   children,
 }) => {
   const { navigateToUrl, history } = useValues(KibanaLogic);
+  const { http } = useValues(HttpLogic);
 
   // Generate the correct link href (with basename etc. accounted for)
-  const href = createHref(to, history, { shouldNotCreateHref });
+  const href = createHref(to, { history, http }, { shouldNotCreateHref });
 
   const reactRouterLinkClick = (event: React.MouseEvent) => {
     if (onClick) onClick(); // Run any passed click events (e.g. telemetry)
