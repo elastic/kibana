@@ -359,11 +359,26 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   }
 
   /**
+   * The dependencies needed to mount the applications. These are dynamically loaded for the sake of webpack bundling efficiency.
+   * Webpack is smart enough to only request (and download) this even when it is imported multiple times concurrently.
+   */
+  private lazySubPlugins(): Promise<LazyApplicationDependencies> {
+    /**
+     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
+     * See https://webpack.js.org/api/module-methods/#magic-comments
+     */
+    return import(
+      /* webpackChunkName: "lazy_sub_plugins" */
+      './lazy_sub_plugins'
+    );
+  }
+
+  /**
    * Lazily instantiated subPlugins. This should be instantiated just once.
    */
   private async subPlugins(): Promise<SubPlugins> {
     if (!this._subPlugins) {
-      const { subPluginClasses } = await this.lazyApplicationDependencies();
+      const { subPluginClasses } = await this.lazySubPlugins();
       this._subPlugins = {
         detections: new subPluginClasses.Detections(),
         cases: new subPluginClasses.Cases(),
