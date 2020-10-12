@@ -42,8 +42,18 @@ export async function findUsedDependencies(listedPkgDependencies: any, baseDir: 
     `!${baseDir}/src/plugins/**/public`,
   ]);
 
+  // It will include entries that cannot be discovered
+  // statically as they are required with dynamic imports.
+  // In vis_type_timelion the problem is the loadFunctions()
+  // which dynamically requires all the files inside of function folders
+  // Another way would be to include an index file and import all the functions
+  // using named imports
+  const dynamicRequiredEntries = await globby([
+    `${baseDir}/src/plugins/vis_type_timelion/server/**/*.js`,
+  ]);
+
   // Compose all the needed entries
-  const serverEntries = [...mainCodeEntries, ...discoveredPluginEntries];
+  const serverEntries = [...mainCodeEntries, ...discoveredPluginEntries, ...dynamicRequiredEntries];
 
   if (!isOss) {
     serverEntries.push(
