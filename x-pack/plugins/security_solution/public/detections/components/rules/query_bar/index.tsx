@@ -46,7 +46,7 @@ interface QueryBarDefineRuleProps {
   onCloseTimelineSearch: () => void;
   openTimelineSearch: boolean;
   resizeParentContainer?: (height: number) => void;
-  onError?: (arg: boolean) => void;
+  onValidityChange?: (arg: boolean) => void;
 }
 
 const StyledEuiFormRow = styled(EuiFormRow)`
@@ -75,7 +75,7 @@ export const QueryBarDefineRule = ({
   onCloseTimelineSearch,
   openTimelineSearch = false,
   resizeParentContainer,
-  onError,
+  onValidityChange,
 }: QueryBarDefineRuleProps) => {
   const [originalHeight, setOriginalHeight] = useState(-1);
   const [loadingTimeline, setLoadingTimeline] = useState(false);
@@ -88,12 +88,14 @@ export const QueryBarDefineRule = ({
 
   const savedQueryServices = useSavedQueryServices();
 
+  // Bubbles up field validity to parent.
+  // Using something like form `getErrors` does
+  // not guarantee latest validity state
   useEffect((): void => {
-    if (onError != null) {
-      const errorExists = isInvalid || (errorMessage != null && errorMessage.trim() === '');
-      onError(errorExists);
+    if (onValidityChange != null) {
+      onValidityChange(isInvalid);
     }
-  }, [isInvalid, errorMessage, onError]);
+  }, [isInvalid, onValidityChange]);
 
   useEffect(() => {
     let isSubscribed = true;

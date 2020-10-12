@@ -283,7 +283,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   path="queryBar"
                   component={EqlQueryBar}
                   componentProps={{
-                    onError: setIsQueryBarValid,
+                    onValidityChange: setIsQueryBarValid,
                     idAria: 'detectionEngineStepDefineRuleEqlQueryBar',
                     isDisabled: isLoading,
                     isLoading: indexPatternsLoading,
@@ -319,7 +319,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     isLoading: indexPatternsLoading,
                     dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
                     openTimelineSearch,
-                    onError: setIsQueryBarValid,
+                    onValidityChange: setIsQueryBarValid,
                     onCloseTimelineSearch: handleCloseTimelineSearch,
                   }}
                 />
