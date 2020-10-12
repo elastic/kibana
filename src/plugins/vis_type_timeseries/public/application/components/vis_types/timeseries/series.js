@@ -97,6 +97,7 @@ const TimeseriesSeriesUI = injectI18n(function (props) {
       seriesBody = (
         <SeriesConfig
           fields={props.fields}
+          panel={panel}
           model={model}
           onChange={props.onChange}
           indexPatternForQuery={props.indexPatternForQuery}
