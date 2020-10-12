@@ -5,29 +5,22 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { LegacyAPICaller } from 'src/core/server';
+import { ElasticsearchClient } from 'kibana/server';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
-async function createPolicy(
-  callAsCurrentUser: LegacyAPICaller,
-  name: string,
-  phases: any
-): Promise<any> {
+async function createPolicy(client: ElasticsearchClient, name: string, phases: any): Promise<any> {
   const body = {
     policy: {
       phases,
     },
   };
-  const params = {
-    method: 'PUT',
-    path: `/_ilm/policy/${encodeURIComponent(name)}`,
+  const options = {
     ignore: [404],
-    body,
   };
 
-  return await callAsCurrentUser('transport.request', params);
+  return client.ilm.putLifecycle({ policy: name, body }, options);
 }
 
 const minAgeSchema = schema.maybe(schema.string());
@@ -141,7 +134,7 @@ const bodySchema = schema.object({
   }),
 });
 
-export function registerCreateRoute({ router, license, lib }: RouteDependencies) {
+export function registerCreateRoute({ router, license }: RouteDependencies) {
   router.post(
     { path: addBasePath('/policies'), validate: { body: bodySchema } },
     license.guardApiRoute(async (context, request, response) => {
@@ -149,17 +142,13 @@ export function registerCreateRoute({ router, license, lib }: RouteDependencies)
       const { name, phases } = body;
 
       try {
-        await createPolicy(
-          context.core.elasticsearch.legacy.client.callAsCurrentUser,
-          name,
-          phases
-        );
+        await createPolicy(context.core.elasticsearch.client.asCurrentUser, name, phases);
         return response.ok();
       } catch (e) {
-        if (lib.isEsError(e)) {
+        if (e.name === 'ResponseError') {
           return response.customError({
             statusCode: e.statusCode,
-            body: e,
+            body: { message: e.body.error?.reason },
           });
         }
         // Case: default
