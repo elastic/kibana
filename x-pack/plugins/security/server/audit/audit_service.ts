@@ -94,19 +94,27 @@ export class AuditService {
      *
      * @example
      * ```typescript
-     * const auditLogger = audit.withRequest(request);
+     * const auditLogger = securitySetup.audit.withRequest(request);
      * auditLogger.log(event);
      * ```
      */
     const withRequest = (request: KibanaRequest): AuditLogger => {
       /**
-       * Logs an {@link AuditEvent} with meta data about the current user, space id and request id automatically added.
+       * Logs an {@link AuditEvent} and automatically adds meta data about the
+       * current user, space and correlation id.
+       *
+       * Guidelines around what events should be logged and how they should be
+       * structured can be found in: `/x-pack/plugins/security/README.md`
        *
        * @example
        * ```typescript
-       * const auditLogger = audit.withRequest(request);
+       * const auditLogger = securitySetup.audit.withRequest(request);
        * auditLogger.log({
        *   message: 'User is updating dashboard [id=123]',
+       *   event: {
+       *     action: 'saved_object_update',
+       *     outcome: 'unknown'
+       *   },
        *   kibana: {
        *     saved_object: { type: 'dashboard', id: '123' }
        *   },
