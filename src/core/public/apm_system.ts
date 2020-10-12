@@ -80,50 +80,50 @@ export class ApmSystem {
   }
 
   /**
-   * Adds a filter to the APM configuration for normalizing transactions of the 'http-request' type to remove the
+   * Adds an observer to the APM configuration for normalizing transactions of the 'http-request' type to remove the
    * hostname, protocol, port, and base path. Allows for coorelating data cross different deployments.
    */
   private addHttpRequestNormalization(apm: ApmBase) {
-    apm.addFilter((payload) => {
-      payload.transactions
-        .filter((t: { type: string }) => t.type === 'http-request')
-        .forEach((t: { name: string }) => {
-          /** Split URLs of the from "GET protocol://hostname:port/pathname" into method & hostname */
-          const matches = t.name.match(HTTP_REQUEST_TRANSACTION_NAME_REGEX);
-          if (!matches) {
-            return;
-          }
+    apm.observe('transaction:end', (t) => {
+      if (t.type !== 'http-request') {
+        return;
+      }
 
-          const [, method, originalUrl] = matches;
-          // Normalize the URL
-          const normalizedUrl = modifyUrl(originalUrl, (parts) => {
-            // If the request was to a different host, port, or protocol then don't change anything
-            if (
-              parts.hostname !== window.location.hostname ||
-              parts.protocol !== window.location.protocol ||
-              parts.port !== window.location.port
-            ) {
-              return;
-            }
+      /** Split URLs of the from "GET protocol://hostname:port/pathname" into method & hostname */
+      const matches = t.name.match(HTTP_REQUEST_TRANSACTION_NAME_REGEX);
+      if (!matches) {
+        return;
+      }
 
-            // Strip the protocol, hostnname, port, and protocol slashes to normalize
-            parts.protocol = null;
-            parts.hostname = null;
-            parts.port = null;
-            parts.slashes = false;
+      const [, method, originalUrl] = matches;
+      // Normalize the URL
+      const normalizedUrl = modifyUrl(originalUrl, (parts) => {
+        const isAbsolute = parts.hostname && parts.protocol && parts.port;
+        // If the request was to a different host, port, or protocol then don't change anything
+        if (
+          isAbsolute &&
+          (parts.hostname !== window.location.hostname ||
+            parts.protocol !== window.location.protocol ||
+            parts.port !== window.location.port)
+        ) {
+          return;
+        }
 
-            // Replace the basePath if present in the pathname
-            if (parts.pathname === this.basePath) {
-              parts.pathname = '/';
-            } else if (parts.pathname?.startsWith(`${this.basePath}/`)) {
-              parts.pathname = parts.pathname?.slice(this.basePath.length);
-            }
-          });
+        // Strip the protocol, hostnname, port, and protocol slashes to normalize
+        parts.protocol = null;
+        parts.hostname = null;
+        parts.port = null;
+        parts.slashes = false;
 
-          t.name = `${method} ${normalizedUrl}`;
-        });
+        // Replace the basePath if present in the pathname
+        if (parts.pathname === this.basePath) {
+          parts.pathname = '/';
+        } else if (parts.pathname?.startsWith(`${this.basePath}/`)) {
+          parts.pathname = parts.pathname?.slice(this.basePath.length);
+        }
+      });
 
-      return payload;
+      t.name = `${method} ${normalizedUrl}`;
     });
   }
 }
