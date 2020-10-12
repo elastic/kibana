@@ -165,6 +165,7 @@ export const buildClassificationDecisionPathData = ({
   currentClass: string | undefined;
 }): DecisionPathPlotData | undefined => {
   if (currentClass === undefined) return [];
+
   const mappedFeatureImportance: Array<
     ExtendedFeatureImportance | undefined
   > = featureImportance.map((feature) => {
@@ -180,9 +181,29 @@ export const buildClassificationDecisionPathData = ({
     }
     return undefined;
   });
+
+  // get the baseline for the current class from the trained_models metadata
+  const baselineClass = baselines.find((bl) => bl.class_name === currentClass);
   const filteredFeatureImportance = mappedFeatureImportance.filter(
     (f) => f !== undefined
   ) as ExtendedFeatureImportance[];
 
-  return buildDecisionPathData(filteredFeatureImportance);
+  const finalResult: DecisionPathPlotData = filteredFeatureImportance
+    // sort so absolute importance so it goes from bottom (baseline) to top
+    .sort(
+      (a: ExtendedFeatureImportance, b: ExtendedFeatureImportance) =>
+        b.absImportance! - a.absImportance!
+    )
+    .map((d) => [d[FEATURE_NAME] as string, d[FEATURE_IMPORTANCE] as number, NaN]);
+
+  // transform the numbers into the probability space
+  // starting with the baseline retrieved from trained_models metadata
+  let logOddSoFar = baselineClass?.baseline ? baselineClass?.baseline : 0;
+  for (let i = featureImportance.length - 1; i >= 0; i--) {
+    logOddSoFar += finalResult[i][1];
+    const predictionProbabilitySoFar = Math.exp(logOddSoFar) / (Math.exp(logOddSoFar) + 1);
+    finalResult[i][2] = predictionProbabilitySoFar;
+  }
+
+  return finalResult;
 };

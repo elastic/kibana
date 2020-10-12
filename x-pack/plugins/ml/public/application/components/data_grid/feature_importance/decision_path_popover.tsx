@@ -123,6 +123,7 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
                 topClasses={topClasses as TopClasses}
                 predictedValue={predictedValue as string}
                 predictionFieldName={predictionFieldName}
+                baseline={baseline}
               />
             )}
           {analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION &&
