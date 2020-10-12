@@ -5,13 +5,13 @@
  */
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useHasDataContext } from '../../hooks/use_has_data_context';
+import { useHasData } from '../../hooks/use_has_data';
 import { LoadingObservability } from '../overview/loading_observability';
 
 export function HomePage() {
   const history = useHistory();
 
-  const { hasAnyData } = useHasDataContext();
+  const { hasAnyData } = useHasData();
 
   useEffect(() => {
     if (hasAnyData === true) {

@@ -7,7 +7,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 import { registerDataHandler, unregisterDataHandler } from '../data_handler';
-import { useHasDataContext } from '../hooks/use_has_data_context';
+import { useHasData } from '../hooks/use_has_data';
 import * as routeParams from '../hooks/use_route_params';
 import * as timeRange from '../hooks/use_time_range';
 import { HasData, ObservabilityFetchDataPlugins } from '../typings/fetch_overview_data';
@@ -59,7 +59,7 @@ describe('HasDataContextProvider', () => {
 
   describe('when no plugin has registered', () => {
     it('hasAnyData returns false and all apps return undefined', () => {
-      const { result } = renderHook(() => useHasDataContext(), { wrapper });
+      const { result } = renderHook(() => useHasData(), { wrapper });
       expect(result.current).toEqual({
         hasData: {
           apm: undefined,

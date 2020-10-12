@@ -7,6 +7,6 @@
 import { useContext } from 'react';
 import { HasDataContext } from '../context/has_data_context';
 
-export function useHasDataContext() {
+export function useHasData() {
   return useContext(HasDataContext);
 }

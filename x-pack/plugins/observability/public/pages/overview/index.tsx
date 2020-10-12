@@ -14,7 +14,7 @@ import { NewsFeed } from '../../components/app/news_feed';
 import { Resources } from '../../components/app/resources';
 import { AlertsSection } from '../../components/app/section/alerts';
 import { DatePicker } from '../../components/shared/data_picker';
-import { useHasDataContext } from '../../hooks/use_has_data_context';
+import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { RouteParams } from '../../routes';
 import { DataSections } from './data_sections';
@@ -34,7 +34,7 @@ export function OverviewPage({ routeParams }: Props) {
 
   const { rangeFrom, rangeTo, refreshInterval = 10000, refreshPaused = true } = routeParams.query;
 
-  const { hasData } = useHasDataContext();
+  const { hasData } = useHasData();
 
   // Shows the Loading component while fetching hasData returns any information
   if (isEmpty(hasData)) {
