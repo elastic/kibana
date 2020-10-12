@@ -231,6 +231,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
             dateFormatTZ: undefined,
           }
         );
+
         setAlertsQuery(
           getAlertsHistogramQuery(
             selectedStackByOption.value,
@@ -242,15 +243,8 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       } catch (e) {
         setAlertsQuery(getAlertsHistogramQuery(selectedStackByOption.value, from, to, []));
       }
-    }, [
-      selectedStackByOption.value,
-      from,
-      to,
-      query,
-      filters,
-      kibana.services.uiSettings,
-      setAlertsQuery,
-    ]);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedStackByOption.value, from, to, query, filters]);
 
     const linkButton = useMemo(() => {
       if (showLinkToAlerts) {
