@@ -9,15 +9,11 @@ There are three different sections to the stats returned by the `health` api.
 - `runtime`: Tracks Task Manager's performance.
 
 ### Configuring the Stats
-There are two new configurations:
+There are three new configurations:
 
-- `xpack.task_manager.monitored_aggregated_stats_refresh_rate` - Dictates how often we refresh the "Cold" metrics.  These metrics require an aggregation against Elasticsearch and adds load to the system, hence we want to limit how often we execute these. This covers the entire `workload` section of the stats. By default this is set to `60s`
+- `xpack.task_manager.monitored_stats_required_freshness` - The _required freshness_ of critical "Hot" stats, which means that if key stats (last polling cycle time, for example) haven't been refreshed within the specified duration, the `_health` endpoint and service will report an `Error` status. By default this is inferred from the configured `poll_interval` and is set to `poll_interval` plus a `1s` buffer.
+- `xpack.task_manager.monitored_aggregated_stats_refresh_rate` - Dictates how often we refresh the "Cold" metrics.  These metrics require an aggregation against Elasticsearch and add load to the system, hence we want to limit how often we execute these. We also inffer the _required freshness_ of these "Cold" metrics from this configuration, which means that if these stats have not been updated within the required duration then the `_health` endpoint and service will report an `Error` status. This covers the entire `workload` section of the stats. By default this is configured to `60s`, and as a result the _required freshness_ defaults to `61s` (refresh plus a `1s` buffer).
 - `xpack.task_manager.monitored_stats_running_average_window`- Dictates the size of the window used to calculate the running average of various "Hot" stats, such as the time it takes to run a task, the _drift_ that tasks experience etc. These stats are collected throughout the lifecycle of tasks and this window will dictate how large the queue we keep in memory would be, and how many values we need to calculate the average against. We do not calculate the average on *every* new value, but rather only when the time comes to summarize the stats before logging them or returning them to the API endpoint.
-
-Other configurations are inferred from existing config values.
-For example:
-- The _required freshness_ of critical "Hot" stats in always `pollingInterval + 1s`, which means that if key stats (last polling cycle time, for example) haven't been refreshed within the time scale of a single interval + 1s the stat will report an `Error` status.
-- The _required freshness_ of critical "Cold" stats is `monitored_aggregated_stats_refresh_rate + 1s` , which means that if these stats (workload, for example) has not been updated within the required refresh rate then the api will return an `Error` status.
 
 ## Consuming Health Stats
 Task Manager exposes a `/api/task_manager/_health` api which returns the _latest_ stats.
