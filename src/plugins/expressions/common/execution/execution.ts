@@ -219,6 +219,7 @@ export class Execution<
 
       if (!fn) {
         return createError({
+          name: 'fn not found',
           message: i18n.translate('expressions.execution.functionNotFound', {
             defaultMessage: `Function {fnName} could not be found.`,
             values: {
@@ -230,6 +231,7 @@ export class Execution<
 
       if (fn.disabled) {
         return createError({
+          name: 'fn is disabled',
           message: i18n.translate('expressions.execution.functionDisabled', {
             defaultMessage: `Function {fnName} is disabled.`,
             values: {
