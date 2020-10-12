@@ -43,7 +43,7 @@ export function getOriginalRequestErrorMessage(error?: ExpressionRenderError | n
       return i18n.translate('xpack.lens.editorFrame.expressionFailureMessage', {
         defaultMessage: 'Request error: {type}, {reason}',
         values: {
-          reasion: rootError.reason,
+          reason: rootError.reason,
           type: rootError.type,
         },
       });
