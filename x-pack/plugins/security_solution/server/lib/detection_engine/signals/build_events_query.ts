@@ -28,6 +28,25 @@ export const buildEventsSearchQuery = ({
   timestampOverride,
 }: BuildEventsSearchQuery) => {
   const timestamp = timestampOverride ?? '@timestamp';
+  const docFields =
+    timestampOverride != null
+      ? [
+          {
+            field: '@timestamp',
+            format: 'strict_date_optional_time',
+          },
+          {
+            field: timestampOverride,
+            format: 'strict_date_optional_time',
+          },
+        ]
+      : [
+          {
+            field: '@timestamp',
+            format: 'strict_date_optional_time',
+          },
+        ];
+
   const filterWithTime = [
     filter,
     {
@@ -40,6 +59,7 @@ export const buildEventsSearchQuery = ({
                   range: {
                     [timestamp]: {
                       gte: from,
+                      format: 'strict_date_optional_time',
                     },
                   },
                 },
@@ -54,6 +74,7 @@ export const buildEventsSearchQuery = ({
                   range: {
                     [timestamp]: {
                       lte: to,
+                      format: 'strict_date_optional_time',
                     },
                   },
                 },
@@ -65,12 +86,14 @@ export const buildEventsSearchQuery = ({
       },
     },
   ];
+
   const searchQuery = {
     allowNoIndices: true,
     index,
     size,
     ignoreUnavailable: true,
     body: {
+      docvalue_fields: docFields,
       query: {
         bool: {
           filter: [
