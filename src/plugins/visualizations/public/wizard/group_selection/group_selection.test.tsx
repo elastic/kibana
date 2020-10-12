@@ -126,7 +126,7 @@ describe('GroupSelection', () => {
     );
   });
 
-  it('should not render the aggBased group card if no aggBased group vis is not registered', () => {
+  it('should not render the aggBased group card if no aggBased visualization is registered', () => {
     const wrapper = mountWithIntl(
       <GroupSelection
         visTypesRegistry={visTypesRegistry(_visTypes)}
@@ -139,7 +139,7 @@ describe('GroupSelection', () => {
     expect(wrapper.find('[data-test-subj="visGroup-aggbased"]').exists()).toBe(false);
   });
 
-  it('should render the aggBased group card if a aggBased group vis is registered', () => {
+  it('should render the aggBased group card if an aggBased group vis is registered', () => {
     const aggBasedVisType = {
       name: 'visWithSearch',
       title: 'Vis with search',
@@ -159,7 +159,7 @@ describe('GroupSelection', () => {
     expect(wrapper.find('[data-test-subj="visGroup-aggbased"]').exists()).toBe(true);
   });
 
-  it('should not render the tools group card if no aggBased group vis is not registered', () => {
+  it('should not render the tools group card if no tools visualization is registered', () => {
     const wrapper = mountWithIntl(
       <GroupSelection
         visTypesRegistry={visTypesRegistry(_visTypes)}
@@ -172,7 +172,7 @@ describe('GroupSelection', () => {
     expect(wrapper.find('[data-test-subj="visGroup-tools"]').exists()).toBe(false);
   });
 
-  it('should render the aggBased group card if a tools group vis is registered', () => {
+  it('should render the tools group card if a tools group vis is registered', () => {
     const toolsVisType = {
       name: 'vis3',
       title: 'Vis3',
