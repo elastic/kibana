@@ -124,7 +124,7 @@ export const getPackagePolicyCreateCallback = (
       }
     }
 
-    // get most recent manifest
+    // Get most recent manifest
     const manifest = await getManifest(logger, manifestManager);
     const serializedManifest = manifest.toEndpointFormat();
     if (!manifestDispatchSchema.is(serializedManifest)) {
