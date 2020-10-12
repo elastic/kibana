@@ -10,4 +10,4 @@ post:
   responses: {}
   operationId: post-fleet-enrollment-api-keys
   parameters:
-    - $ref: ../components/parameters/xsrf_header.yaml
+    - $ref: ../components/headers/kbn_xsrf.yaml

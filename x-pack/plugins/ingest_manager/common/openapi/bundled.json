@@ -103,7 +103,7 @@
         "security": [],
         "parameters": [
           {
-            "$ref": "#/components/parameters/xsrf_header"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
       }
@@ -181,7 +181,7 @@
         },
         "parameters": [
           {
-            "$ref": "#/components/parameters/xsrf_header"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
       }
@@ -294,7 +294,7 @@
         },
         "parameters": [
           {
-            "$ref": "#/components/parameters/xsrf_header"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
       },
@@ -405,7 +405,7 @@
         "operationId": "post-fleet-agents-agentId-acks",
         "parameters": [
           {
-            "$ref": "#/components/parameters/xsrf_header"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ],
         "requestBody": {
@@ -488,7 +488,7 @@
         "operationId": "post-fleet-agents-agentId-checkin",
         "parameters": [
           {
-            "$ref": "#/components/parameters/xsrf_header"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ],
         "security": [
@@ -554,7 +554,7 @@
         "operationId": "post-fleet-agents-unenroll",
         "parameters": [
           {
-            "$ref": "#/components/parameters/xsrf_header"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ],
         "requestBody": {
@@ -612,7 +612,7 @@
         "operationId": "post-fleet-agents-upgrade",
         "parameters": [
           {
-            "$ref": "#/components/parameters/xsrf_header"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ],
         "requestBody": {
@@ -656,7 +656,7 @@
         "operationId": "post-fleet-agents-bulk-upgrade",
         "parameters": [
           {
-            "$ref": "#/components/parameters/xsrf_header"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ],
         "requestBody": {
@@ -698,7 +698,7 @@
         "operationId": "post-fleet-agents-enroll",
         "parameters": [
           {
-            "$ref": "#/components/parameters/xsrf_header"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ],
         "requestBody": {
@@ -826,7 +826,7 @@
         },
         "parameters": [
           {
-            "$ref": "#/components/parameters/xsrf_header"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
       }
@@ -846,7 +846,7 @@
         "operationId": "post-fleet-enrollment-api-keys",
         "parameters": [
           {
-            "$ref": "#/components/parameters/xsrf_header"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
       }
@@ -875,7 +875,7 @@
         "operationId": "delete-fleet-enrollment-api-keys-keyId",
         "parameters": [
           {
-            "$ref": "#/components/parameters/xsrf_header"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
       }
@@ -1043,7 +1043,7 @@
         "description": "",
         "parameters": [
           {
-            "$ref": "#/components/parameters/xsrf_header"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
       },
@@ -1088,7 +1088,7 @@
         "operationId": "post-epm-delete-pkgkey",
         "parameters": [
           {
-            "$ref": "#/components/parameters/xsrf_header"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
       }
@@ -1136,7 +1136,7 @@
         "operationId": "put-fleet-agents-agentId",
         "parameters": [
           {
-            "$ref": "#/components/parameters/xsrf_header"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
       },
@@ -1147,7 +1147,7 @@
         "operationId": "delete-fleet-agents-agentId",
         "parameters": [
           {
-            "$ref": "#/components/parameters/xsrf_header"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
       }
@@ -1230,7 +1230,7 @@
         },
         "parameters": [
           {
-            "$ref": "#/components/parameters/xsrf_header"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
       }
@@ -1300,7 +1300,7 @@
         },
         "parameters": [
           {
-            "$ref": "#/components/parameters/xsrf_header"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
       }
@@ -1344,7 +1344,7 @@
         "operationId": "post-setup",
         "parameters": [
           {
-            "$ref": "#/components/parameters/xsrf_header"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
       }
@@ -1397,7 +1397,7 @@
           "type": "string"
         }
       },
-      "xsrf_header": {
+      "kbn_xsrf": {
         "schema": {
           "type": "string"
         },

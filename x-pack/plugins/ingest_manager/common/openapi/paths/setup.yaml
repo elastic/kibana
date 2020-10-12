@@ -22,4 +22,4 @@ post:
                 type: string
   operationId: post-setup
   parameters:
-    - $ref: ../components/parameters/xsrf_header.yaml
+    - $ref: ../components/headers/kbn_xsrf.yaml

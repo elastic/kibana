@@ -51,4 +51,4 @@ post:
           $ref: ../components/schemas/new_agent_policy.yaml
   security: []
   parameters:
-    - $ref: ../components/parameters/xsrf_header.yaml
+    - $ref: ../components/headers/kbn_xsrf.yaml

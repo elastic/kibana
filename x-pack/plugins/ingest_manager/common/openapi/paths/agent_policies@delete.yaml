@@ -29,5 +29,5 @@ post:
               items:
                 type: string
   parameters:
-    - $ref: ../components/parameters/xsrf_header.yaml
+    - $ref: ../components/headers/kbn_xsrf.yaml
 parameters: []

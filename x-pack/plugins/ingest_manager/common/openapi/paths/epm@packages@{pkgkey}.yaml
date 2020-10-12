@@ -60,7 +60,7 @@ post:
   operationId: post-epm-install-pkgkey
   description: ''
   parameters:
-    - $ref: ../components/parameters/xsrf_header.yaml
+    - $ref: ../components/headers/kbn_xsrf.yaml
 delete:
   summary: EPM - Packages - Delete
   tags: []
@@ -88,4 +88,4 @@ delete:
               - response
   operationId: post-epm-delete-pkgkey
   parameters:
-    - $ref: ../components/parameters/xsrf_header.yaml
+    - $ref: ../components/headers/kbn_xsrf.yaml

@@ -43,7 +43,7 @@ post:
                     - type
   operationId: post-fleet-agents-agentId-checkin
   parameters:
-    - $ref: ../components/parameters/xsrf_header.yaml
+    - $ref: ../components/headers/kbn_xsrf.yaml
   security:
     - Access API Key: []
   requestBody:

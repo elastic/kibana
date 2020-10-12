@@ -44,4 +44,4 @@ put:
         schema:
           $ref: ../components/schemas/new_agent_policy.yaml
   parameters:
-    - $ref: ../components/parameters/xsrf_header.yaml
+    - $ref: ../components/headers/kbn_xsrf.yaml

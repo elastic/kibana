@@ -22,7 +22,7 @@ post:
             $ref: ../components/schemas/upgrade_agent.yaml
   operationId: post-fleet-agents-upgrade
   parameters:
-    - $ref: ../components/parameters/xsrf_header.yaml
+    - $ref: ../components/headers/kbn_xsrf.yaml
   requestBody:
     required: true
     content:

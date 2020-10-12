@@ -64,7 +64,7 @@ paths:
               $ref: '#/components/schemas/new_agent_policy'
       security: []
       parameters:
-        - $ref: '#/components/parameters/xsrf_header'
+        - $ref: '#/components/parameters/kbn_xsrf'
   '/agent_policies/{agentPolicyId}':
     parameters:
       - schema:
@@ -112,7 +112,7 @@ paths:
             schema:
               $ref: '#/components/schemas/new_agent_policy'
       parameters:
-        - $ref: '#/components/parameters/xsrf_header'
+        - $ref: '#/components/parameters/kbn_xsrf'
   '/agent_policies/{agentPolicyId}/copy':
     parameters:
       - schema:
@@ -181,7 +181,7 @@ paths:
                   items:
                     type: string
       parameters:
-        - $ref: '#/components/parameters/xsrf_header'
+        - $ref: '#/components/parameters/kbn_xsrf'
     parameters: []
   /agent-status:
     get:
@@ -251,7 +251,7 @@ paths:
                   - action
       operationId: post-fleet-agents-agentId-acks
       parameters:
-        - $ref: '#/components/parameters/xsrf_header'
+        - $ref: '#/components/parameters/kbn_xsrf'
       requestBody:
         content:
           application/json:
@@ -304,7 +304,7 @@ paths:
                         - type
       operationId: post-fleet-agents-agentId-checkin
       parameters:
-        - $ref: '#/components/parameters/xsrf_header'
+        - $ref: '#/components/parameters/kbn_xsrf'
       security:
         - Access API Key: []
       requestBody:
@@ -344,7 +344,7 @@ paths:
       responses: {}
       operationId: post-fleet-agents-unenroll
       parameters:
-        - $ref: '#/components/parameters/xsrf_header'
+        - $ref: '#/components/parameters/kbn_xsrf'
       requestBody:
         content:
           application/json:
@@ -378,7 +378,7 @@ paths:
                 $ref: '#/components/schemas/upgrade_agent'
       operationId: post-fleet-agents-upgrade
       parameters:
-        - $ref: '#/components/parameters/xsrf_header'
+        - $ref: '#/components/parameters/kbn_xsrf'
       requestBody:
         required: true
         content:
@@ -404,7 +404,7 @@ paths:
                 $ref: '#/components/schemas/upgrade_agent'
       operationId: post-fleet-agents-bulk-upgrade
       parameters:
-        - $ref: '#/components/parameters/xsrf_header'
+        - $ref: '#/components/parameters/kbn_xsrf'
       requestBody:
         required: true
         content:
@@ -429,7 +429,7 @@ paths:
                     $ref: '#/components/schemas/agent'
       operationId: post-fleet-agents-enroll
       parameters:
-        - $ref: '#/components/parameters/xsrf_header'
+        - $ref: '#/components/parameters/kbn_xsrf'
       requestBody:
         content:
           application/json:
@@ -507,7 +507,7 @@ paths:
                 - admin_username
                 - admin_password
       parameters:
-        - $ref: '#/components/parameters/xsrf_header'
+        - $ref: '#/components/parameters/kbn_xsrf'
   /enrollment-api-keys:
     get:
       summary: Enrollment - List
@@ -521,7 +521,7 @@ paths:
       responses: {}
       operationId: post-fleet-enrollment-api-keys
       parameters:
-        - $ref: '#/components/parameters/xsrf_header'
+        - $ref: '#/components/parameters/kbn_xsrf'
   '/enrollment-api-keys/{keyId}':
     parameters:
       - schema:
@@ -540,7 +540,7 @@ paths:
       responses: {}
       operationId: delete-fleet-enrollment-api-keys-keyId
       parameters:
-        - $ref: '#/components/parameters/xsrf_header'
+        - $ref: '#/components/parameters/kbn_xsrf'
   /epm/categories:
     get:
       summary: EPM - Categories
@@ -644,7 +644,7 @@ paths:
       operationId: post-epm-install-pkgkey
       description: ''
       parameters:
-        - $ref: '#/components/parameters/xsrf_header'
+        - $ref: '#/components/parameters/kbn_xsrf'
     delete:
       summary: EPM - Packages - Delete
       tags: []
@@ -672,7 +672,7 @@ paths:
                   - response
       operationId: post-epm-delete-pkgkey
       parameters:
-        - $ref: '#/components/parameters/xsrf_header'
+        - $ref: '#/components/parameters/kbn_xsrf'
   '/agents/{agentId}':
     parameters:
       - schema:
@@ -702,14 +702,14 @@ paths:
       responses: {}
       operationId: put-fleet-agents-agentId
       parameters:
-        - $ref: '#/components/parameters/xsrf_header'
+        - $ref: '#/components/parameters/kbn_xsrf'
     delete:
       summary: Fleet - Agent - Delete
       tags: []
       responses: {}
       operationId: delete-fleet-agents-agentId
       parameters:
-        - $ref: '#/components/parameters/xsrf_header'
+        - $ref: '#/components/parameters/kbn_xsrf'
   '/install/{osType}':
     parameters:
       - schema:
@@ -762,7 +762,7 @@ paths:
             schema:
               $ref: '#/components/schemas/new_package_policy'
       parameters:
-        - $ref: '#/components/parameters/xsrf_header'
+        - $ref: '#/components/parameters/kbn_xsrf'
   '/package_policies/{packagePolicyId}':
     get:
       summary: PackagePolicies - Info
@@ -805,7 +805,7 @@ paths:
                   - item
                   - sucess
       parameters:
-        - $ref: '#/components/parameters/xsrf_header'
+        - $ref: '#/components/parameters/kbn_xsrf'
   /setup:
     post:
       summary: Ingest Manager - Setup
@@ -831,7 +831,7 @@ paths:
                     type: string
       operationId: post-setup
       parameters:
-        - $ref: '#/components/parameters/xsrf_header'
+        - $ref: '#/components/parameters/kbn_xsrf'
 components:
   securitySchemes:
     basicAuth:
@@ -869,7 +869,7 @@ components:
       required: false
       schema:
         type: string
-    xsrf_header:
+    kbn_xsrf:
       schema:
         type: string
       in: header
