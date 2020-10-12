@@ -40,20 +40,10 @@ export const GetMetadataListRequestSchema = {
   body: schema.nullable(
     schema.object({
       paging_properties: schema.nullable(
-        schema.arrayOf(
-          schema.oneOf([
-            /**
-             * the number of results to return for this request per page
-             */
-            schema.object({
-              page_size: schema.number({ defaultValue: 10, min: 1, max: 10000 }),
-            }),
-            /**
-             * The search ID of the last returned object, as a Search-After artifact
-             */
-            schema.object({ after: schema.string() }),
-          ])
-        )
+        schema.object({
+          page_size: schema.number({ defaultValue: 10, min: 1, max: 10000 }), // the number of results to return for this request per page
+          after: schema.string(), // The search ID of the last returned object, as a Search-After artifact
+        })
       ),
       filters: endpointFilters,
     })

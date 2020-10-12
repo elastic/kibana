@@ -33,7 +33,7 @@ export async function kibanaRequestToMetadataListESQuery(
       ...metadataQueryStrategy.extraBodyProperties,
       sort: metadataQueryStrategy.sortProperty,
     },
-    from: pagingProperties.pageIndex * pagingProperties.pageSize,
+    search_after: pagingProperties.searchAfter,
     size: pagingProperties.pageSize,
     index: metadataQueryStrategy.index,
   };
@@ -45,7 +45,7 @@ async function getPagingProperties(
   endpointAppContext: EndpointAppContext
 ) {
   const config = await endpointAppContext.config();
-  const pagingProperties: { page_size?: number; page_index?: number } = {};
+  const pagingProperties: { page_size?: number; searchAfter?: [] } = {};
   if (request?.body?.paging_properties) {
     for (const property of request.body.paging_properties) {
       Object.assign(
@@ -56,7 +56,7 @@ async function getPagingProperties(
   }
   return {
     pageSize: pagingProperties.page_size || config.endpointResultListDefaultPageSize,
-    pageIndex: pagingProperties.page_index || config.endpointResultListDefaultFirstPageIndex,
+    searchAfter: [],
   };
 }
 

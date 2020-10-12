@@ -221,7 +221,6 @@ export async function mapToHostResultList(
   if (hostListQueryResult.resultList.length > 0) {
     return {
       request_page_size: queryParams.size,
-      request_page_index: queryParams.from,
       hosts: await Promise.all(
         hostListQueryResult.resultList.map(async (entry) =>
           enrichHostMetadata(
@@ -237,7 +236,6 @@ export async function mapToHostResultList(
   } else {
     return {
       request_page_size: queryParams.size,
-      request_page_index: queryParams.from,
       total: totalNumberOfHosts,
       hosts: [],
       query_strategy_version: hostListQueryResult.queryStrategyVersion,

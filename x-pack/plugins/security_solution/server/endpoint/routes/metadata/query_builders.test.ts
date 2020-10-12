@@ -38,7 +38,6 @@ describe('query builder', () => {
             },
           ],
         },
-        from: 0,
         size: 10,
         index: metadataCurrentIndexPattern,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -85,7 +84,6 @@ describe('query builder', () => {
               },
             ],
           },
-          from: 0,
           size: 10,
           index: metadataCurrentIndexPattern,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -143,7 +141,6 @@ describe('query builder', () => {
             },
           ],
         },
-        from: 0,
         size: 10,
         index: metadataCurrentIndexPattern,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -214,7 +211,6 @@ describe('query builder', () => {
               },
             ],
           },
-          from: 0,
           size: 10,
           index: metadataCurrentIndexPattern,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any

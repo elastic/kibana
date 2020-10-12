@@ -304,8 +304,6 @@ export interface HostResultList {
   total: number;
   /* the page size requested */
   request_page_size: number;
-  /* the page index requested */
-  request_page_index: number;
   /* the version of the query strategy */
   query_strategy_version: MetadataQueryStrategyVersions;
 }

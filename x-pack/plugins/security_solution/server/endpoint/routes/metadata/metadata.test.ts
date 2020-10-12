@@ -63,7 +63,6 @@ describe('test endpoint route', () => {
   const noUnenrolledAgent = {
     agents: [],
     total: 0,
-    page: 1,
     perPage: 1,
   };
 
@@ -122,7 +121,6 @@ describe('test endpoint route', () => {
       const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as HostResultList;
       expect(endpointResultList.hosts.length).toEqual(1);
       expect(endpointResultList.total).toEqual(1);
-      expect(endpointResultList.request_page_index).toEqual(0);
       expect(endpointResultList.request_page_size).toEqual(10);
       expect(endpointResultList.query_strategy_version).toEqual(
         MetadataQueryStrategyVersions.VERSION_1
@@ -217,7 +215,6 @@ describe('test endpoint route', () => {
       const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as HostResultList;
       expect(endpointResultList.hosts.length).toEqual(1);
       expect(endpointResultList.total).toEqual(1);
-      expect(endpointResultList.request_page_index).toEqual(0);
       expect(endpointResultList.request_page_size).toEqual(10);
       expect(endpointResultList.query_strategy_version).toEqual(
         MetadataQueryStrategyVersions.VERSION_2
@@ -227,14 +224,9 @@ describe('test endpoint route', () => {
     it('test find the latest of all endpoints with paging properties', async () => {
       const mockRequest = httpServerMock.createKibanaRequest({
         body: {
-          paging_properties: [
-            {
-              page_size: 10,
-            },
-            {
-              page_index: 1,
-            },
-          ],
+          paging_properties: {
+            page_size: 10,
+          },
         },
       });
 
@@ -274,7 +266,6 @@ describe('test endpoint route', () => {
       const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as HostResultList;
       expect(endpointResultList.hosts.length).toEqual(1);
       expect(endpointResultList.total).toEqual(1);
-      expect(endpointResultList.request_page_index).toEqual(10);
       expect(endpointResultList.request_page_size).toEqual(10);
       expect(endpointResultList.query_strategy_version).toEqual(
         MetadataQueryStrategyVersions.VERSION_2
@@ -284,15 +275,9 @@ describe('test endpoint route', () => {
     it('test find the latest of all endpoints with paging and filters properties', async () => {
       const mockRequest = httpServerMock.createKibanaRequest({
         body: {
-          paging_properties: [
-            {
-              page_size: 10,
-            },
-            {
-              page_index: 1,
-            },
-          ],
-
+          paging_properties: {
+            page_size: 10,
+          },
           filters: { kql: 'not host.ip:10.140.73.246' },
         },
       });
@@ -355,7 +340,6 @@ describe('test endpoint route', () => {
       const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as HostResultList;
       expect(endpointResultList.hosts.length).toEqual(1);
       expect(endpointResultList.total).toEqual(1);
-      expect(endpointResultList.request_page_index).toEqual(10);
       expect(endpointResultList.request_page_size).toEqual(10);
       expect(endpointResultList.query_strategy_version).toEqual(
         MetadataQueryStrategyVersions.VERSION_2
