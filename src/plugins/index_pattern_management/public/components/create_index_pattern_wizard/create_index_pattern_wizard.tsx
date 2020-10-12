@@ -108,6 +108,11 @@ export class CreateIndexPatternWizard extends Component<
   };
 
   fetchData = async () => {
+    const { http } = this.context.services;
+    const getIndexTags = (indexName: string) =>
+      this.state.indexPatternCreationType.getIndexTags(indexName);
+    const searchClient = this.context.services.data.search.search;
+
     const indicesFailMsg = (
       <FormattedMessage
         id="indexPatternManagement.createIndexPattern.loadIndicesFailMsg"
@@ -125,7 +130,7 @@ export class CreateIndexPatternWizard extends Component<
     // query local and remote indices, updating state independently
     ensureMinimumTime(
       this.catchAndWarn(
-        getIndices(this.context.services.http, this.state.indexPatternCreationType, `*`, false),
+        getIndices({ http, getIndexTags, pattern: '*', searchClient }),
         [],
         indicesFailMsg
       )
@@ -136,7 +141,7 @@ export class CreateIndexPatternWizard extends Component<
     this.catchAndWarn(
       // if we get an error from remote cluster query, supply fallback value that allows user entry.
       // ['a'] is fallback value
-      getIndices(this.context.services.http, this.state.indexPatternCreationType, `*:*`, false),
+      getIndices({ http, getIndexTags, pattern: '*:*', searchClient }),
       ['a'],
       clustersFailMsg
     ).then((remoteIndices: string[] | MatchedItem[]) =>
