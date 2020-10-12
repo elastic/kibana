@@ -20,20 +20,20 @@ export interface ITagsChangeListener {
   onGetAll: (tags: Tag[]) => void;
 }
 
-type CacheRefreshHandler = () => Tag[] | Promise<Tag[]>;
+export type CacheRefreshHandler = () => Tag[] | Promise<Tag[]>;
 
 /**
- * Reactive client-side cache of all the existing tags.
+ * Reactive client-side cache of the existing tags, connected to the TagsClient.
  *
- * Used mostly by the UI components to avoid performing http calls every time a component
- * needs to retrieve the list of all the existing tags.
+ * Used (mostly) by the UI components to avoid performing http calls every time a component
+ * needs to retrieve the list of all the existing tags or the tags associated with an object.
  */
 export class TagsCache implements ITagsCache, ITagsChangeListener {
   private readonly internal$: BehaviorSubject<Tag[]>;
   private readonly public$: Observable<Tag[]>;
   private readonly stop$: Subject<void>;
 
-  constructor(private readonly refresher: CacheRefreshHandler) {
+  constructor(private readonly refreshHandler: CacheRefreshHandler) {
     this.stop$ = new Subject();
     this.internal$ = new BehaviorSubject<Tag[]>([]);
     this.public$ = this.internal$.pipe(takeUntil(this.stop$));
@@ -41,7 +41,7 @@ export class TagsCache implements ITagsCache, ITagsChangeListener {
 
   public async populate() {
     try {
-      const tags = await this.refresher();
+      const tags = await this.refreshHandler();
       this.internal$.next(tags);
     } catch (e) {
       // what should we do here?
@@ -61,7 +61,7 @@ export class TagsCache implements ITagsCache, ITagsChangeListener {
   }
 
   public onCreate(tag: Tag) {
-    this.internal$.next([...this.internal$.value, tag]);
+    this.internal$.next([...this.internal$.value.filter((f) => f.id !== tag.id), tag]);
   }
 
   public onUpdate(id: string, attributes: TagAttributes) {
@@ -70,7 +70,7 @@ export class TagsCache implements ITagsCache, ITagsChangeListener {
         if (tag.id === id) {
           return {
             ...tag,
-            attributes,
+            ...attributes,
           };
         }
         return tag;
