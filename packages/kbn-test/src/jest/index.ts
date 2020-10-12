@@ -17,9 +17,6 @@
  * under the License.
  */
 
-import { createGetterSetter } from '../../kibana_utils/public';
-import { DataPublicPluginStart } from '../../data/public';
+export * from './junit_reporter';
 
-export const [getFormatService, setFormatService] = createGetterSetter<
-  DataPublicPluginStart['fieldFormats']
->('table data.fieldFormats');
+export * from './report_path';
