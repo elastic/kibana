@@ -53,5 +53,8 @@ export const ElasticEuiChartsTheme = require('@elastic/eui/dist/eui_charts_theme
 export const Lodash = require('lodash');
 export const LodashFp = require('lodash/fp');
 
+// runtime deps which don't need to be copied across all bundles
+export const TsLib = require('tslib');
+
 import * as Theme from './theme.ts';
 export { Theme };
