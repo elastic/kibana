@@ -17,24 +17,6 @@
  * under the License.
  */
 
-import config from './config';
+export * from './junit_reporter';
 
-export default {
-  ...config,
-  testMatch: [
-    '**/integration_tests/**/*.test.js',
-    '**/integration_tests/**/*.test.ts',
-    '**/integration_tests/**/*.test.tsx',
-  ],
-  testPathIgnorePatterns: config.testPathIgnorePatterns.filter(
-    (pattern) => !pattern.includes('integration_tests')
-  ),
-  reporters: [
-    'default',
-    [
-      '<rootDir>/packages/kbn-test/target/jest/junit_reporter',
-      { reportName: 'Jest Integration Tests' },
-    ],
-  ],
-  setupFilesAfterEnv: ['<rootDir>/src/dev/jest/setup/after_env.integration.js'],
-};
+export * from './report_path';
