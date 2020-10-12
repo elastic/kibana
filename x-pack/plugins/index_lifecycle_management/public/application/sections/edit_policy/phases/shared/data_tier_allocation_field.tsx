@@ -57,63 +57,47 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({
       {({ nodesByRoles, nodesByAttributes, isUsingLegacyDataRoleConfig }) => {
         const hasNodeAttrs = Boolean(Object.keys(nodesByAttributes ?? {}).length);
 
-        const renderDefaultAllocationNotice = () => {
-          if (phaseData.dataTierAllocationType !== 'default') {
-            return null;
-          }
+        const renderNotice = () => {
+          if (phaseData.dataTierAllocationType === 'default') {
+            const isCloudEnabled = cloud?.isCloudEnabled ?? false;
+            if (
+              isCloudEnabled &&
+              !isUsingLegacyDataRoleConfig &&
+              phase === 'cold' &&
+              !nodesByRoles.data_cold?.length
+            ) {
+              // Tell cloud users they can deploy cold tier nodes.
+              return (
+                <>
+                  <EuiSpacer size="s" />
+                  <CloudDataTierCallout />
+                </>
+              );
+            }
 
-          const allocationNodeRole = getAvailableNodeRoleForPhase(phase, nodesByRoles);
-          if (
-            allocationNodeRole !== 'none' &&
-            isNodeRoleFirstPreference(phase, allocationNodeRole)
-          ) {
-            return null;
+            const allocationNodeRole = getAvailableNodeRoleForPhase(phase, nodesByRoles);
+            if (
+              allocationNodeRole === 'none' ||
+              !isNodeRoleFirstPreference(phase, allocationNodeRole)
+            ) {
+              return (
+                <>
+                  <EuiSpacer size="s" />
+                  <DefaultAllocationNotice phase={phase} targetNodeRole={allocationNodeRole} />
+                </>
+              );
+            }
+          } else if (phaseData.dataTierAllocationType === 'custom') {
+            if (!hasNodeAttrs) {
+              return (
+                <>
+                  <EuiSpacer size="s" />
+                  <NoNodeAttributesWarning phase={phase} />
+                </>
+              );
+            }
           }
-
-          return (
-            <>
-              <EuiSpacer size="s" />
-              <DefaultAllocationNotice phase={phase} targetNodeRole={allocationNodeRole} />
-            </>
-          );
-        };
-
-        const renderNodeAttributesWarning = () => {
-          if (phaseData.dataTierAllocationType !== 'custom') {
-            return null;
-          }
-          if (hasNodeAttrs) {
-            return null;
-          }
-          return (
-            <>
-              <EuiSpacer size="s" />
-              <NoNodeAttributesWarning phase={phase} />
-            </>
-          );
-        };
-
-        const renderCloudCallout = () => {
-          const isCloudEnabled = cloud?.isCloudEnabled ?? false;
-          if (
-            !isCloudEnabled ||
-            isUsingLegacyDataRoleConfig ||
-            phaseData.dataTierAllocationType !== 'default' ||
-            phase !== 'cold'
-          ) {
-            return null;
-          }
-
-          if (nodesByRoles.data_cold?.length) {
-            return null;
-          }
-
-          return (
-            <>
-              <EuiSpacer size="s" />
-              <CloudDataTierCallout />
-            </>
-          );
+          return null;
         };
 
         return (
@@ -136,9 +120,7 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({
                 />
 
                 {/* Data tier related warnings and call-to-action notices */}
-                {renderDefaultAllocationNotice()}
-                {renderNodeAttributesWarning()}
-                {renderCloudCallout()}
+                {renderNotice()}
               </>
             </EuiFormRow>
           </EuiDescribedFormGroup>
