@@ -24,14 +24,14 @@ import 'angular-mocks';
 import sinon from 'sinon';
 import { round } from 'lodash';
 
-import { getFieldFormatsRegistry } from '../../../data/public/test_utils';
-import { coreMock } from '../../../../core/public/mocks';
-import { initAngularBootstrap } from '../../../kibana_legacy/public';
-import { setUiSettings } from '../../../data/public/services';
-import { UI_SETTINGS } from '../../../data/public/';
-import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../../../share/public';
+import { getFieldFormatsRegistry } from '../../../../data/public/test_utils';
+import { coreMock } from '../../../../../core/public/mocks';
+import { initAngularBootstrap } from '../../../../kibana_legacy/public';
+import { setUiSettings } from '../../../../data/public/services';
+import { UI_SETTINGS } from '../../../../data/public/';
+import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../../../../share/public';
 
-import { setFormatService } from '../services';
+import { setFormatService } from '../../services';
 import { getInnerAngular } from '../get_inner_angular';
 import { initTableVisLegacyModule } from '../table_vis_legacy_module';
 import { tabifiedData } from './tabified_data';

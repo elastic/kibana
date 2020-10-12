@@ -24,23 +24,18 @@ import $ from 'jquery';
 
 import { getAngularModule } from './get_inner_angular';
 import { initTableVisLegacyModule } from './table_vis_legacy_module';
-import { getTableVisTypeDefinition } from './table_vis_type';
-import { Vis } from '../../visualizations/public';
-import { stubFields } from '../../data/public/stubs';
-import { tableVisResponseHandler } from './table_vis_response_handler';
-import { coreMock } from '../../../core/public/mocks';
-import { IAggConfig, search } from '../../data/public';
-import { getStubIndexPattern } from '../../data/public/test_utils';
-// TODO: remove linting disable
-import { searchServiceMock } from '../../data/public/search/mocks';
+import { tableVisTypeDefinition } from '../table_vis_type';
+import { Vis } from '../../../visualizations/public';
+import { stubFields } from '../../../data/public/stubs';
+import { tableVisResponseHandler } from '../table_vis_response_handler';
+import { coreMock } from '../../../../core/public/mocks';
+import { IAggConfig, search } from '../../../data/public';
+import { getStubIndexPattern } from '../../../data/public/test_utils';
+import { searchServiceMock } from '../../../data/public/search/mocks';
 
 const { createAggConfigs } = searchServiceMock.createStartContract().aggs;
 
 const { tabifyAggResponse } = search;
-
-jest.mock('../../kibana_legacy/public/angular/angular_config', () => ({
-  configureAppAngularModule: () => {},
-}));
 
 interface TableVisScope extends IScope {
   [key: string]: any;
@@ -112,10 +107,6 @@ describe('Table Vis - Controller', () => {
       coreMock.createSetup()
     );
   });
-  const tableVisTypeDefinition = getTableVisTypeDefinition(
-    coreMock.createSetup(),
-    coreMock.createPluginInitializerContext()
-  );
 
   function getRangeVis(params?: object) {
     return ({
