@@ -69,13 +69,13 @@ export async function watchStdioForLine(
       }
     }),
     createPromiseFromStreams([
-      proc.stdout,
+      proc.stdout!,
       createSplitStream('\n'),
       skipLastEmptyLineStream(),
       createMapStream(onLogLine),
     ]),
     createPromiseFromStreams([
-      proc.stderr,
+      proc.stderr!,
       createSplitStream('\n'),
       skipLastEmptyLineStream(),
       createMapStream(onLogLine),
