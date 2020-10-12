@@ -25,7 +25,7 @@ import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks'
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/plugins/visualizations/public/embeddable';
 import { coreMock, httpServiceMock } from '../../../../../../src/core/public/mocks';
 import { IBasePath } from '../../../../../../src/core/public';
-import { AttributeService } from '../../../../../../src/plugins/dashboard/public';
+import { AttributeService } from '../../../../../../src/plugins/embeddable/public';
 import { LensAttributeService } from '../../lens_attribute_service';
 import { OnSaveProps } from '../../../../../../src/plugins/saved_objects/public/save_modal';
 
