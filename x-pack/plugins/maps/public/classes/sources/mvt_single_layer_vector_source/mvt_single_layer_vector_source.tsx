@@ -165,15 +165,15 @@ export class MVTSingleLayerVectorSource
     return [VECTOR_SHAPE_TYPE.POINT, VECTOR_SHAPE_TYPE.LINE, VECTOR_SHAPE_TYPE.POLYGON];
   }
 
-  canFormatFeatureProperties() {
+  canFormatFeatureProperties(): boolean {
     return !!this._tooltipFields.length;
   }
 
-  getMinZoom() {
+  getMinZoom(): number {
     return this._descriptor.minSourceZoom;
   }
 
-  getMaxZoom() {
+  getMaxZoom(): number {
     return this._descriptor.maxSourceZoom;
   }
 

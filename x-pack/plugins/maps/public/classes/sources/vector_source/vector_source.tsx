@@ -68,7 +68,7 @@ export interface IVectorSource extends ISource {
   getFields(): Promise<IField[]>;
   getFieldByName(fieldName: string): IField | null;
   getLeftJoinFields(): Promise<IField[]>;
-  getSyncMeta(): VectorSourceSyncMeta;
+  getSyncMeta(): VectorSourceSyncMeta | null;
   getFieldNames(): string[];
   getApplyGlobalQuery(): boolean;
   createField({ fieldName }: { fieldName: string }): IField;
@@ -142,7 +142,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
    * @returns {IField}
    */
   createField({ fieldName }: { fieldName: string }): IField {
-    throw new Error(`Should implemement AbstractVectorSource#createField`);
+    throw new Error(`Should implement AbstractVectorSource#createField`);
   }
 
   getFieldNames(): string[] {
@@ -220,7 +220,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     return [VECTOR_SHAPE_TYPE.POINT, VECTOR_SHAPE_TYPE.LINE, VECTOR_SHAPE_TYPE.POLYGON];
   }
 
-  getSourceTooltipContent(/* sourceDataRequest */) {
+  getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig {
     return { tooltipContent: null, areResultsTrimmed: false };
   }
 

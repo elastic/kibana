@@ -11,24 +11,23 @@ import rison from 'rison-node';
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import { IndexPattern } from 'src/plugins/data/public';
-import { GeoJsonProperties } from 'geojson';
+import { FeatureCollection, GeoJsonProperties } from 'geojson';
 import { AbstractESSource } from '../es_source';
-import { getSearchService, getHttp } from '../../../kibana_services';
-import { hitsToGeoJson, getField, addFieldToDSL } from '../../../../common/elasticsearch_util';
-
+import { getHttp, getSearchService } from '../../../kibana_services';
+import { addFieldToDSL, getField, hitsToGeoJson } from '../../../../common/elasticsearch_util';
 // @ts-expect-error
 import { UpdateSourceEditor } from './update_source_editor';
 
 import {
-  SOURCE_TYPES,
-  ES_GEO_FIELD_TYPE,
   DEFAULT_MAX_BUCKETS_LIMIT,
-  SORT_ORDER,
-  SCALING_TYPES,
-  VECTOR_SHAPE_TYPE,
-  MVT_SOURCE_LAYER_NAME,
+  ES_GEO_FIELD_TYPE,
   GIS_API_PATH,
   MVT_GETTILE_API_PATH,
+  MVT_SOURCE_LAYER_NAME,
+  SCALING_TYPES,
+  SORT_ORDER,
+  SOURCE_TYPES,
+  VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { getSourceFields } from '../../../index_pattern_util';
@@ -446,7 +445,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return this._tooltipFields.length > 0;
   }
 
-  async _loadTooltipProperties(docId, index, indexPattern) {
+  async _loadTooltipProperties(docId: string | number, index: string, indexPattern) {
     if (this._tooltipFields.length === 0) {
       return {};
     }
@@ -517,9 +516,9 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   async getLeftJoinFields(): Promise<IField[]> {
     const indexPattern = await this.getIndexPattern();
     // Left fields are retrieved from _source.
-    return getSourceFields(indexPattern.fields).map((field) =>
-      this.createField({ fieldName: field.name })
-    );
+    return getSourceFields(indexPattern.fields).map((field) => {
+      return this.createField({ fieldName: field.name });
+    });
   }
 
   async getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]> {
@@ -539,7 +538,9 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   }
 
   getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig {
-    const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
+    const featureCollection: FeatureCollection | null = sourceDataRequest
+      ? (sourceDataRequest.getData() as FeatureCollection)
+      : null;
     const meta = sourceDataRequest ? sourceDataRequest.getMeta() : null;
     if (!featureCollection || !meta) {
       // no tooltip content needed when there is no feature collection or meta
@@ -571,7 +572,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
         tooltipContent: `${entitiesFoundMsg} ${docsPerEntityMsg}`,
         // Used to show trimmed icon in legend
         // user only needs to be notified of trimmed results when entities are trimmed
-        areResultsTrimmed: meta.areEntitiesTrimmed,
+        areResultsTrimmed: !!meta.areEntitiesTrimmed,
       };
     }
 
@@ -596,11 +597,15 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
 
   getSyncMeta(): VectorSourceSyncMeta {
     return {
-      sortField: this._descriptor.sortField,
-      sortOrder: this._descriptor.sortOrder,
+      sortField: typeof this._descriptor.sortField === 'string' ? this._descriptor.sortField : '',
+      sortOrder: this._descriptor.sortOrder ? this._descriptor.sortOrder : SORT_ORDER.ASC,
       scalingType: this._descriptor.scalingType,
-      topHitsSplitField: this._descriptor.topHitsSplitField,
-      topHitsSize: this._descriptor.topHitsSize,
+      topHitsSplitField:
+        typeof this._descriptor.topHitsSplitField === 'string'
+          ? typeof this._descriptor.topHitsSplitField
+          : '',
+      topHitsSize:
+        typeof this._descriptor.topHitsSize === 'number' ? this._descriptor.topHitsSize : 1,
     };
   }
 

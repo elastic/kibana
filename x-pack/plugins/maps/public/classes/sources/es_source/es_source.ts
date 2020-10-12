@@ -21,8 +21,9 @@ import { DataRequestAbortError } from '../../util/data_request';
 import { expandToTileBoundaries } from '../../../../common/geo_tile_utils';
 import { search } from '../../../../../../../src/plugins/data/public';
 import { IVectorSource } from '../vector_source';
-import { SearchSource, TimeRange } from '../../../../../../../src/plugins/data/common';
+import { TimeRange } from '../../../../../../../src/plugins/data/common';
 import {
+  AbstractESSourceDescriptor,
   AbstractSourceDescriptor,
   DynamicStylePropertyOptions,
   MapExtent,
@@ -34,6 +35,7 @@ import { IVectorStyle } from '../../styles/vector/vector_style';
 import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 import { IField } from '../../fields/field';
 import { FieldFormatter } from '../../../../common/constants';
+import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 
 export interface IESSource extends IVectorSource {
   isESSource(): true;
@@ -61,7 +63,9 @@ export interface IESSource extends IVectorSource {
 export class AbstractESSource extends AbstractVectorSource implements IESSource {
   indexPattern?: IndexPattern;
 
-  constructor(descriptor, inspectorAdapters) {
+  readonly _descriptor: AbstractESSourceDescriptor;
+
+  constructor(descriptor: AbstractESSourceDescriptor, inspectorAdapters: Adapters) {
     super(
       {
         ...descriptor,
@@ -69,9 +73,13 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       },
       inspectorAdapters
     );
+    this._descriptor = descriptor;
   }
 
   getId(): string {
+    if (!this._descriptor.id) {
+      throw new Error('should not get id when undefined');
+    }
     return this._descriptor.id;
   }
 
@@ -161,7 +169,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   }
 
   async makeSearchSource(
-    searchFilters: VectorSourceRequestMeta | VectorJoinSourceRequestMeta,
+    searchFilters: VectorSourceRequestMeta | VectorJoinSourceRequestMeta | BoundsFilters,
     limit: number,
     initialSearchContext?: object
   ): Promise<ISearchSource> {
@@ -180,7 +188,10 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       allFilters.push(createExtentFilter(buffer, geoField.name, geoField.type));
     }
     if (isTimeAware) {
-      allFilters.push(getTimeFilter().createFilter(indexPattern, searchFilters.timeFilters));
+      const filter = getTimeFilter().createFilter(indexPattern, searchFilters.timeFilters);
+      if (filter) {
+        allFilters.push(filter);
+      }
     }
     const searchService = getSearchService();
     const searchSource = await searchService.searchSource.create(initialSearchContext);
@@ -259,10 +270,13 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   }
 
   getGeoFieldName(): string {
+    if (!this._descriptor.geoField) {
+      throw new Error('Should not call');
+    }
     return this._descriptor.geoField;
   }
 
-  async getIndexPattern(): IndexPattern {
+  async getIndexPattern(): Promise<IndexPattern> {
     // Do we need this cache? Doesn't the IndexPatternService take care of this?
     if (this.indexPattern) {
       return this.indexPattern;
@@ -284,7 +298,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   async supportsFitToBounds(): Promise<boolean> {
     try {
       const geoField = await this._getGeoField();
-      return geoField.aggregatable;
+      return !!geoField.aggregatable;
     } catch (error) {
       return false;
     }
@@ -369,7 +383,10 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       searchSource.setField('query', sourceQuery);
     }
     if (style.isTimeAware() && (await this.isTimeAware())) {
-      searchSource.setField('filter', [getTimeFilter().createFilter(indexPattern, timeFilters)]);
+      const timeFilter = getTimeFilter().createFilter(indexPattern, timeFilters);
+      if (timeFilter) {
+        searchSource.setField('filter', [timeFilter]);
+      }
     }
 
     const resp = await this._runEsQuery({
@@ -396,7 +413,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       const indexPattern = await this.getIndexPattern();
       return await getAutocompleteService().getValueSuggestions({
         indexPattern,
-        field: indexPattern.fields.getByName(field.getRootName()),
+        field: indexPattern.fields.getByName(field.getRootName()) as IFieldType,
         query,
       });
     } catch (error) {

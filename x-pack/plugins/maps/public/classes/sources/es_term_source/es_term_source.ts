@@ -16,11 +16,12 @@ import {
 } from '../../../../common/constants';
 import { getJoinAggKey } from '../../../../common/get_agg_key';
 import { ESDocField } from '../../fields/es_doc_field';
-import { AbstractESAggSource, IESAggSource } from '../es_agg_source';
+import { AbstractESAggSource } from '../es_agg_source';
 import {
   getField,
   addFieldToDSL,
   extractPropertiesFromBucket,
+  BucketProperties,
 } from '../../../../common/elasticsearch_util';
 
 const TERMS_AGG_NAME = 'join';
@@ -35,40 +36,25 @@ const TERMS_BUCKET_KEYS_TO_IGNORE = ['key', 'doc_count'];
 
 import {
   ESTermSourceDescriptor,
-  MapQuery,
   VectorJoinSourceRequestMeta,
 } from '../../../../common/descriptor_types';
-import { IField } from '../../fields/field';
-import { PropertiesMap } from '../../joins/join';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
-import { SearchSource } from '../../../../../../../src/plugins/data/common/search/search_source';
+import { PropertiesMap } from '../../../../common/elasticsearch_util';
 
-export interface IESTermSource extends IESAggSource {
-  getTermField(): IField;
-  hasCompleteConfig(): boolean;
-  getWhereQuery(): MapQuery;
-  getPropertiesMap(
-    searchFilters: VectorJoinSourceRequestMeta,
-    leftSourceName: string,
-    leftFieldName: string,
-    registerCancelCallback: (callback: () => void) => void
-  ): PropertiesMap;
-}
-
-export function extractPropertiesMap(rawEsData, countPropertyName) {
-  const propertiesMap = new Map();
-  const buckets = _.get(rawEsData, ['aggregations', TERMS_AGG_NAME, 'buckets'], []);
-  buckets.forEach((termBucket) => {
+export function extractPropertiesMap(rawEsData: any, countPropertyName: string): PropertiesMap {
+  const propertiesMap = new Map<string, BucketProperties>();
+  const buckets: any[] = _.get(rawEsData, ['aggregations', TERMS_AGG_NAME, 'buckets'], []);
+  buckets.forEach((termBucket: any) => {
     const properties = extractPropertiesFromBucket(termBucket, TERMS_BUCKET_KEYS_TO_IGNORE);
     if (countPropertyName) {
       properties[countPropertyName] = termBucket.doc_count;
     }
     propertiesMap.set(termBucket.key.toString(), properties);
   });
-  return propertiesMap;
+  return propertiesMap as PropertiesMap;
 }
 
-export class ESTermSource extends AbstractESAggSource implements IESTermSource {
+export class ESTermSource extends AbstractESAggSource {
   static type = SOURCE_TYPES.ES_TERM_SOURCE;
 
   private readonly _termField: ESDocField;
@@ -122,7 +108,7 @@ export class ESTermSource extends AbstractESAggSource implements IESTermSource {
     leftSourceName: string,
     leftFieldName: string,
     registerCancelCallback: (callback: () => void) => void
-  ) {
+  ): Promise<PropertiesMap> {
     if (!this.hasCompleteConfig()) {
       return [];
     }

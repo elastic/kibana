@@ -72,9 +72,9 @@ export interface ISource {
 
 export class AbstractSource implements ISource {
   readonly _descriptor: AbstractSourceDescriptor;
-  readonly _inspectorAdapters?: Adapters | undefined;
+  readonly _inspectorAdapters: Adapters;
 
-  constructor(descriptor: AbstractSourceDescriptor, inspectorAdapters?: Adapters) {
+  constructor(descriptor: AbstractSourceDescriptor, inspectorAdapters: Adapters) {
     this._descriptor = descriptor;
     this._inspectorAdapters = inspectorAdapters;
   }
@@ -153,7 +153,7 @@ export class AbstractSource implements ISource {
     return false;
   }
 
-  getJoinsDisabledReason() {
+  getJoinsDisabledReason(): string | null {
     return null;
   }
 

@@ -23,3 +23,9 @@ export function hitsToGeoJson(
   geoFieldType: ES_GEO_FIELD_TYPE,
   epochMillisFields: string[]
 ): FeatureCollection;
+
+export function createExtentFilter(
+  mapExtent: MapExtent,
+  geoFieldName: string,
+  geoFieldType: ES_GEO_FIELD_TYPE
+): unknown;
