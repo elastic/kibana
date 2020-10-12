@@ -11,7 +11,7 @@ import { services } from './services';
 // eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const apiIntegrationConfig = await readConfigFile(
-    require.resolve('../../api_integration/config.ts')
+    require.resolve('../../../api_integration/config.ts')
   );
 
   return {
@@ -22,7 +22,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       reportName: 'X-Pack Saved Object Tagging API Integration Tests',
     },
     esArchiver: {
-      directory: path.resolve(__dirname, '..', 'common', 'fixtures', 'es_archiver'),
+      directory: path.resolve(__dirname, '..', '..', 'common', 'fixtures', 'es_archiver'),
     },
     esTestCluster: {
       ...apiIntegrationConfig.get('esTestCluster'),

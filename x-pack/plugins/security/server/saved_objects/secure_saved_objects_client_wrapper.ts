@@ -16,6 +16,7 @@ import {
   SavedObjectsUpdateOptions,
   SavedObjectsAddToNamespacesOptions,
   SavedObjectsDeleteFromNamespacesOptions,
+  SavedObjectsRemoveReferencesToOptions,
   SavedObjectsUtils,
 } from '../../../../../src/core/server';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
@@ -266,6 +267,17 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
 
     const response = await this.baseClient.bulkUpdate<T>(objects, options);
     return await this.redactSavedObjectsNamespaces(response);
+  }
+
+  public async removeReferencesTo(
+    type: string,
+    id: string,
+    options: SavedObjectsRemoveReferencesToOptions = {}
+  ) {
+    const args = { type, id, options };
+    await this.ensureAuthorized(type, 'delete', options.namespace, { args });
+
+    return await this.baseClient.removeReferencesTo(type, id, options);
   }
 
   private async checkPrivileges(

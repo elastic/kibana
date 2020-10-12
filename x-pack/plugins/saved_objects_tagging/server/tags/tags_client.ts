@@ -64,8 +64,9 @@ export class TagsClient implements ITagsClient {
   }
 
   public async delete(id: string) {
-    // TODO: remove references from objects referencing the tag.
-    //       We will need the internal client for that.
     await this.soClient.delete(this.type, id);
+    // removeReferencesTo security check is the same as `delete`, so we can use the scoped client
+    // if that was going to change, we would need the internal client instead.
+    await this.soClient.removeReferencesTo(this.type, id);
   }
 }

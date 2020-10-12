@@ -12,7 +12,7 @@ import { TagValidationError } from '../tags';
 export const registerCreateTagRoute = (router: IRouter) => {
   router.post(
     {
-      path: `${tagsApiPrefix}/create`,
+      path: `${tagsApiPrefix}/tags/create`,
       validate: {
         body: schema.object({
           name: schema.string(),

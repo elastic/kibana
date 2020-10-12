@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { USERS, User, ExpectedResponse } from '../../common/lib';
+import { USERS, User, ExpectedResponse } from '../../../common/lib';
 import { FtrProviderContext } from '../services';
 
 // eslint-disable-next-line import/no-default-export
@@ -69,7 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
     ) => {
       it(`returns expected ${httpCode} response for ${description ?? username}`, async () => {
         await supertest
-          .get(`/api/tags/default-space-tag-1`)
+          .get(`/api/saved_objects_tagging/tags/default-space-tag-1`)
           .auth(username, password)
           .expect(httpCode)
           .then(expectResponse);

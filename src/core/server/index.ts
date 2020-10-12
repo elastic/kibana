@@ -286,6 +286,8 @@ export {
   SavedObjectsAddToNamespacesResponse,
   SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsDeleteFromNamespacesResponse,
+  SavedObjectsRemoveReferencesToOptions,
+  SavedObjectsRemoveReferencesToResponse,
   SavedObjectsServiceStart,
   SavedObjectsServiceSetup,
   SavedObjectStatusMeta,

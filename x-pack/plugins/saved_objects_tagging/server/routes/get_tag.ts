@@ -11,7 +11,7 @@ import { tagsApiPrefix } from '../../common/constants';
 export const registerGetTagRoute = (router: IRouter) => {
   router.get(
     {
-      path: `${tagsApiPrefix}/{id}`,
+      path: `${tagsApiPrefix}/tags/{id}`,
       validate: {
         params: schema.object({
           id: schema.string(),

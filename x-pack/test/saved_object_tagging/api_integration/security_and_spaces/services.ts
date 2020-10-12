@@ -5,7 +5,7 @@
  */
 
 import { GenericFtrProviderContext } from '@kbn/test/types/ftr';
-import { services as apiIntegrationServices } from '../../api_integration/services';
+import { services as apiIntegrationServices } from '../../../api_integration/services';
 
 export const services = {
   ...apiIntegrationServices,

@@ -10,7 +10,7 @@ import { tagsApiPrefix } from '../../common/constants';
 export const registerGetAllTagsRoute = (router: IRouter) => {
   router.get(
     {
-      path: `${tagsApiPrefix}/get_all`,
+      path: `${tagsApiPrefix}/tags/get_all`,
       validate: {},
     },
     router.handleLegacyErrors(async (ctx, req, res) => {

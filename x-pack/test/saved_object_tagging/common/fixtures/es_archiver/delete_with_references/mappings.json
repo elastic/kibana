@@ -163,11 +163,54 @@
             }
           }
         },
+        "references": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "type": {
+              "type": "keyword"
+            }
+          },
+          "type": "nested"
+        },
         "type": {
           "type": "keyword"
         },
         "updated_at": {
           "type": "date"
+        },
+        "visualization": {
+          "properties": {
+            "description": {
+              "type": "text"
+            },
+            "kibanaSavedObjectMeta": {
+              "properties": {
+                "searchSourceJSON": {
+                  "type": "text"
+                }
+              }
+            },
+            "savedSearchId": {
+              "type": "keyword"
+            },
+            "title": {
+              "type": "text"
+            },
+            "uiStateJSON": {
+              "type": "text"
+            },
+            "version": {
+              "type": "integer"
+            },
+            "visState": {
+              "type": "text"
+            }
+          }
         }
       }
     },

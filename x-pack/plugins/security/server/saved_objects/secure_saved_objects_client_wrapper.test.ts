@@ -901,6 +901,33 @@ describe('#update', () => {
   });
 });
 
+describe('#removeReferencesTo', () => {
+  const type = 'foo';
+  const id = `${type}-id`;
+  const namespace = 'some-ns';
+  const options = { namespace };
+
+  test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
+    await expectGeneralError(client.removeReferencesTo, { type, id, options });
+  });
+
+  test(`throws decorated ForbiddenError when unauthorized`, async () => {
+    await expectForbiddenError(client.removeReferencesTo, { type, id, options });
+  });
+
+  test(`returns result of baseClient.removeReferencesTo when authorized`, async () => {
+    const apiCallReturnValue = Symbol();
+    clientOpts.baseClient.removeReferencesTo.mockReturnValue(apiCallReturnValue as any);
+
+    const result = await expectSuccess(client.removeReferencesTo, { type, id, options });
+    expect(result).toBe(apiCallReturnValue);
+  });
+
+  test(`checks privileges for user, actions, and namespace`, async () => {
+    await expectPrivilegeCheck(client.removeReferencesTo, { type, id, options }, namespace);
+  });
+});
+
 describe('other', () => {
   test(`assigns errors from constructor to .errors`, () => {
     expect(client.errors).toBe(clientOpts.errors);

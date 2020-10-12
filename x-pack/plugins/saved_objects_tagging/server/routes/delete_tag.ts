@@ -11,7 +11,7 @@ import { tagsApiPrefix } from '../../common/constants';
 export const registerDeleteTagRoute = (router: IRouter) => {
   router.delete(
     {
-      path: `${tagsApiPrefix}/{id}`,
+      path: `${tagsApiPrefix}/tags/{id}`,
       validate: {
         params: schema.object({
           id: schema.string(),

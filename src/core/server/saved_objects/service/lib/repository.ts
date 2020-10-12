@@ -57,6 +57,8 @@ import {
   SavedObjectsAddToNamespacesResponse,
   SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsDeleteFromNamespacesResponse,
+  SavedObjectsRemoveReferencesToOptions,
+  SavedObjectsRemoveReferencesToResponse,
 } from '../saved_objects_client';
 import {
   SavedObject,
@@ -1444,6 +1446,56 @@ export class SavedObjectsRepository {
           references,
         };
       }),
+    };
+  }
+
+  async removeReferencesTo(
+    type: string,
+    id: string,
+    options: SavedObjectsRemoveReferencesToOptions = {}
+  ): Promise<SavedObjectsRemoveReferencesToResponse> {
+    const { namespace, refresh } = options;
+    const allTypes = this._registry.getAllTypes().map((t) => t.name);
+
+    // we need to target all SO indices as all types of objects may have references to the given SO.
+    const targetIndices = this.getIndicesForTypes(allTypes);
+
+    const { body } = await this.client.updateByQuery(
+      {
+        index: targetIndices,
+        refresh,
+        body: {
+          script: {
+            source: `
+              if (ctx._source.containsKey('references')) {
+                def items_to_remove = [];
+                for (item in ctx._source.references) {
+                  if ( (item['type'] == params['type']) && (item['id'] == params['id']) ) {
+                    items_to_remove.add(item);
+                  }
+                }
+                ctx._source.references.removeAll(items_to_remove);
+              }
+            `,
+            params: {
+              type,
+              id,
+            },
+            lang: 'painless',
+          },
+          conflicts: 'proceed',
+          ...getSearchDsl(this._mappings, this._registry, {
+            namespaces: namespace ? [namespace] : undefined,
+            type: allTypes,
+            hasReference: { type, id },
+          }),
+        },
+      },
+      { ignore: [404] }
+    );
+
+    return {
+      updated: body.updated,
     };
   }
 
