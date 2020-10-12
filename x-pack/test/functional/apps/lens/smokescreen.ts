@@ -160,6 +160,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.editMissingValues('Linear');
 
       await PageObjects.lens.assertMissingValues('Linear');
+
+      await PageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
       await PageObjects.lens.assertColor('#ff0000');
 
       await testSubjects.existOrFail('indexPattern-dimension-formatDecimals');
