@@ -239,3 +239,26 @@ The format is a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h',
 ============
 
 |===
+
+[float]
+[[security-encrypted-saved-objects-settings]]
+==== Encrypted Saved Objects settings
+
+You can configure the following settings in the `kibana.yml` file. For more details see <<xpack-security-secure-saved-objects>>.
+
+[IMPORTANT]
+============
+In high-availability deployments make sure you use the same encryption and decryption keys for all instances of {kib}. Although the keys can be specified in clear text in `kibana.yml`, it's recommended to store them securely in the <<secure-settings,{kib} Keystore>>.
+============
+
+[cols="2*<"]
+|===
+| [[xpack-encryptedSavedObjects-encryptionKey]] `xpack.encryptedSavedObjects.`
+`encryptionKey`
+| An arbitrary string of 32 characters or more that is used to encrypt sensitive properties of the Saved Objects before they're stored in {es}. If not set, {kib} will generate a random key on startup, but certain {kib} functionality won't be available until you set the encryption key explicitly.
+
+| `xpack.encryptedSavedObjects.`
+`keyRotation.decryptionOnlyKeys`
+| An optional list of arbitrary strings of 32 characters or more that were used as <<xpack-encryptedSavedObjects-encryptionKey, `xpack.encryptedSavedObjects.encryptionKey`>> previously. As the name implies {kib} doesn't use these keys for encryption, but may still require them to decrypt some existing Saved Objects.
+
+|===
