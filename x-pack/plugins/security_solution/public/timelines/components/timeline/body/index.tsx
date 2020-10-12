@@ -71,8 +71,7 @@ export interface BodyProps {
 export const hasAdditionalActions = (id: string, eventType?: TimelineEventsType): boolean =>
   id === TimelineId.detectionsPage ||
   id === TimelineId.detectionsRulesDetailsPage ||
-  ((id === TimelineId.active && eventType && ['all', 'signal', 'alert'].includes(eventType)) ??
-    false);
+  (id === TimelineId.active && eventType);
 
 const EXTRA_WIDTH = 4; // px
 
