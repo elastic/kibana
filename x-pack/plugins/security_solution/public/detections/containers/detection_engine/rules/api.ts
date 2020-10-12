@@ -119,7 +119,7 @@ export const fetchRules = async ({
 
   const tags = [
     ...(filterOptions.tags?.map((t) => `alert.attributes.tags: "${t.replace(/"/g, '\\"')}"`) ?? []),
-  ].join(' OR ');
+  ].join(' AND ');
 
   const filterString =
     filtersWithoutTags !== '' && tags !== ''

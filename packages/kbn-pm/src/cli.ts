@@ -47,6 +47,7 @@ function help() {
         --oss                   Do not include the x-pack when running command.
         --skip-kibana-plugins   Filter all plugins in ./plugins and ../kibana-extra when running command.
         --no-cache              Disable the bootstrap cache
+        --no-validate           Disable the bootstrap yarn.lock validation
         --verbose               Set log level to verbose
         --debug                 Set log level to debug
         --quiet                 Set log level to error
@@ -80,8 +81,9 @@ export async function run(argv: string[]) {
     },
     default: {
       cache: true,
+      validate: true,
     },
-    boolean: ['prefer-offline', 'frozen-lockfile', 'cache'],
+    boolean: ['prefer-offline', 'frozen-lockfile', 'cache', 'validate'],
   });
 
   const args = options._;
