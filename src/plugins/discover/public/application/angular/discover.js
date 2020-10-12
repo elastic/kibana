@@ -188,7 +188,6 @@ app.directive('discoverApp', function () {
 });
 
 function discoverController($element, $route, $scope, $timeout, $window, Promise, uiCapabilities) {
-  console.log(123);
   const { isDefault: isDefaultType } = indexPatternsUtils;
   const subscriptions = new Subscription();
   const $fetchObservable = new Subject();
