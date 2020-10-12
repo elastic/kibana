@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ParsedUrlQueryInput } from 'querystring'; // eslint-disable-line import/no-nodejs-modules
 import {
   HostInfo,
   Immutable,
@@ -90,7 +91,7 @@ export interface PolicyIds {
 /**
  * Query params on the host page parsed from the URL
  */
-export interface EndpointIndexUIQueryParams {
+export interface EndpointIndexUIQueryParams extends ParsedUrlQueryInput {
   /** Selected endpoint id shows host details flyout */
   selected_endpoint?: string;
   /** How many items to show in list */
