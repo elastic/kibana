@@ -22,6 +22,7 @@ import 'source-map-support/register';
 import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/utils';
+import { lastValueFrom } from '@kbn/std';
 import { run, createFlagError, CiStatsReporter } from '@kbn/dev-utils';
 
 import { logOptimizerState } from './log_optimizer_state';
@@ -136,7 +137,7 @@ run(
       update$ = update$.pipe(reportOptimizerStats(reporter, config, log));
     }
 
-    await update$.pipe(logOptimizerState(log, config)).toPromise();
+    await lastValueFrom(update$.pipe(logOptimizerState(log, config)));
 
     if (updateLimits) {
       updateBundleLimits(log, config);
