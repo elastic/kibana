@@ -51,9 +51,10 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({
   const {
     services: { cloud },
   } = useKibana();
+
   return (
     <NodesDataProvider>
-      {({ nodesByRoles, nodesByAttributes }) => {
+      {({ nodesByRoles, nodesByAttributes, isUsingLegacyDataRoleConfig }) => {
         const hasNodeAttrs = Boolean(Object.keys(nodesByAttributes ?? {}).length);
 
         const renderDefaultAllocationNotice = () => {
@@ -95,16 +96,14 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({
         const renderCloudCallout = () => {
           const isCloudEnabled = cloud?.isCloudEnabled ?? false;
           if (
-            phase !== 'cold' ||
             !isCloudEnabled ||
-            phaseData.dataTierAllocationType !== 'default'
+            isUsingLegacyDataRoleConfig ||
+            phaseData.dataTierAllocationType !== 'default' ||
+            phase !== 'cold'
           ) {
             return null;
           }
 
-          /**
-           * Check whether there are any data_cold tier roles
-           */
           if (nodesByRoles.data_cold?.length) {
             return null;
           }
@@ -133,6 +132,7 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({
                   phaseData={phaseData}
                   isShowingErrors={isShowingErrors}
                   nodes={nodesByAttributes}
+                  disableDataTierOption={!!(isUsingLegacyDataRoleConfig && cloud?.isCloudEnabled)}
                 />
 
                 {/* Data tier related warnings and call-to-action notices */}

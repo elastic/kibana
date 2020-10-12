@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiText, EuiFormRow, EuiSpacer, EuiSuperSelect, EuiSuperSelectOption } from '@elastic/eui';
 
@@ -90,7 +90,20 @@ const i18nTexts = {
 };
 
 export const DataTierAllocation: FunctionComponent<SharedProps> = (props) => {
-  const { phaseData, setPhaseData, phase, hasNodeAttributes } = props;
+  const { phaseData, setPhaseData, phase, hasNodeAttributes, disableDataTierOption } = props;
+
+  useEffect(() => {
+    if (disableDataTierOption && phaseData.dataTierAllocationType === 'default') {
+      /**
+       * This is a slight hack because we only know we should disable the "custom" option further
+       * down the component tree (i.e., before the policy has been deserialized).
+       *
+       * We reset the value to "custom" if we deserialized to "default.
+       */
+      setPhaseData('dataTierAllocationType', 'custom');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div data-test-subj={`${phase}-dataTierAllocationControls`}>
@@ -102,34 +115,23 @@ export const DataTierAllocation: FunctionComponent<SharedProps> = (props) => {
           onChange={(value) => setPhaseData('dataTierAllocationType', value)}
           options={
             [
-              {
-                value: 'default',
-                inputDisplay: i18nTexts.allocationOptions[phase].default.input,
-                dropdownDisplay: (
-                  <>
-                    <strong>{i18nTexts.allocationOptions[phase].default.input}</strong>
-                    <EuiText size="s" color="subdued">
-                      <p className="euiTextColor--subdued">
-                        {i18nTexts.allocationOptions[phase].default.helpText}
-                      </p>
-                    </EuiText>
-                  </>
-                ),
-              },
-              {
-                value: 'none',
-                inputDisplay: i18nTexts.allocationOptions[phase].none.inputDisplay,
-                dropdownDisplay: (
-                  <>
-                    <strong>{i18nTexts.allocationOptions[phase].none.inputDisplay}</strong>
-                    <EuiText size="s" color="subdued">
-                      <p className="euiTextColor--subdued">
-                        {i18nTexts.allocationOptions[phase].none.helpText}
-                      </p>
-                    </EuiText>
-                  </>
-                ),
-              },
+              disableDataTierOption
+                ? undefined
+                : {
+                    'data-test-subj': 'defaultDataAllocationOption',
+                    value: 'default',
+                    inputDisplay: i18nTexts.allocationOptions[phase].default.input,
+                    dropdownDisplay: (
+                      <>
+                        <strong>{i18nTexts.allocationOptions[phase].default.input}</strong>
+                        <EuiText size="s" color="subdued">
+                          <p className="euiTextColor--subdued">
+                            {i18nTexts.allocationOptions[phase].default.helpText}
+                          </p>
+                        </EuiText>
+                      </>
+                    ),
+                  },
               {
                 'data-test-subj': 'customDataAllocationOption',
                 value: 'custom',
@@ -145,7 +147,22 @@ export const DataTierAllocation: FunctionComponent<SharedProps> = (props) => {
                   </>
                 ),
               },
-            ] as SelectOptions[]
+              {
+                'data-test-subj': 'noneDataAllocationOption',
+                value: 'none',
+                inputDisplay: i18nTexts.allocationOptions[phase].none.inputDisplay,
+                dropdownDisplay: (
+                  <>
+                    <strong>{i18nTexts.allocationOptions[phase].none.inputDisplay}</strong>
+                    <EuiText size="s" color="subdued">
+                      <p className="euiTextColor--subdued">
+                        {i18nTexts.allocationOptions[phase].none.helpText}
+                      </p>
+                    </EuiText>
+                  </>
+                ),
+              },
+            ].filter(Boolean) as SelectOptions[]
           }
         />
       </EuiFormRow>
