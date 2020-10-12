@@ -696,6 +696,29 @@ describe('edit policy', () => {
       expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
     });
   });
+  describe('not on cloud', () => {
+    beforeEach(() => {
+      server.respondImmediately = true;
+    });
+    test('should show all allocation options, even if using legacy config', async () => {
+      http.setupNodeListResponse({
+        nodesByAttributes: { test: ['123'] },
+        nodesByRoles: { data: ['test'], data_hot: ['test'], data_warm: ['test'] },
+        isUsingLegacyDataRoleConfig: true,
+      });
+      const rendered = mountWithIntl(component);
+      noRollover(rendered);
+      setPolicyName(rendered, 'mypolicy');
+      await activatePhase(rendered, 'warm');
+      expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
+
+      // Assert that only the custom and off options exist
+      findTestSubject(rendered, 'dataTierSelect').simulate('click');
+      expect(findTestSubject(rendered, 'defaultDataAllocationOption').exists()).toBeTruthy();
+      expect(findTestSubject(rendered, 'customDataAllocationOption').exists()).toBeTruthy();
+      expect(findTestSubject(rendered, 'noneDataAllocationOption').exists()).toBeTruthy();
+    });
+  });
   describe('on cloud', () => {
     beforeEach(() => {
       component = (
