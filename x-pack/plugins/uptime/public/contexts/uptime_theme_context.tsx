@@ -31,6 +31,7 @@ const defaultContext: UptimeThemeContextValues = {
     success: euiLightVars.euiColorSuccess,
     warning: euiLightVars.euiColorWarning,
     gray: euiLightVars.euiColorLightShade,
+    lightestShade: euiLightVars.euiColorLightestShade,
   },
   chartTheme: {
     baseTheme: LIGHT_THEME,
@@ -54,6 +55,7 @@ export const UptimeThemeContextProvider: React.FC<ThemeContextProps> = ({ darkMo
       range: euiDarkVars.euiFocusBackgroundColor,
       success: euiDarkVars.euiColorSuccess,
       warning: euiDarkVars.euiColorWarning,
+      lightestShade: euiDarkVars.euiColorLightestShade,
     };
   } else {
     colors = {
@@ -63,6 +65,7 @@ export const UptimeThemeContextProvider: React.FC<ThemeContextProps> = ({ darkMo
       range: euiLightVars.euiFocusBackgroundColor,
       success: euiLightVars.euiColorSuccess,
       warning: euiLightVars.euiColorWarning,
+      lightestShade: euiLightVars.euiColorLightestShade,
     };
   }
   const value = useMemo(() => {

@@ -32,7 +32,6 @@ import {
   EuiHorizontalRule,
   EuiSuperSelect,
   EuiText,
-  formatDate,
 } from '@elastic/eui';
 
 import {
@@ -47,8 +46,8 @@ import { LineChartPoint } from '../../../jobs/new_job/common/chart_loader';
 import { EventRateChart } from '../../../jobs/new_job/pages/components/charts/event_rate_chart/event_rate_chart';
 import { Anomaly } from '../../../jobs/new_job/common/results_loader/results_loader';
 import { parseInterval } from '../../../../../common/util/parse_interval';
-import { TIME_FORMAT } from '../../../../../common/constants/time_format';
 import { CreateCalendar, CalendarEvent } from './create_calendar';
+import { timeFormatter } from '../../../../../common/util/date_utils';
 
 interface Props {
   snapshot: ModelSnapshot;
@@ -255,7 +254,7 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({ snapshot, snapshots, job,
             <FormattedMessage
               id="xpack.ml.newJob.wizard.revertModelSnapshotFlyout.warningCallout.contents"
               defaultMessage="All anomaly detection results after {date} will be deleted."
-              values={{ date: formatDate(currentSnapshot.latest_record_time_stamp, TIME_FORMAT) }}
+              values={{ date: timeFormatter(currentSnapshot.latest_record_time_stamp) }}
             />
           </EuiCallOut>
 

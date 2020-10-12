@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { storiesOf } from '@storybook/react';
 import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { ErrorCountAlertTrigger } from '.';
 import { ApmPluginContextValue } from '../../../context/ApmPluginContext';
 import {
@@ -13,32 +13,35 @@ import {
   MockApmPluginContextWrapper,
 } from '../../../context/ApmPluginContext/MockApmPluginContext';
 
-storiesOf('app/ErrorCountAlertTrigger', module).add(
-  'example',
-  () => {
-    const params = {
-      threshold: 2,
-      window: '5m',
-    };
-
-    return (
+export default {
+  title: 'app/ErrorCountAlertTrigger',
+  component: ErrorCountAlertTrigger,
+  decorators: [
+    (Story: React.ComponentClass) => (
       <MockApmPluginContextWrapper
         value={(mockApmPluginContextValue as unknown) as ApmPluginContextValue}
       >
-        <div style={{ width: 400 }}>
-          <ErrorCountAlertTrigger
-            alertParams={params as any}
-            setAlertParams={() => undefined}
-            setAlertProperty={() => undefined}
-          />
-        </div>
+        <MemoryRouter>
+          <div style={{ width: 400 }}>
+            <Story />
+          </div>
+        </MemoryRouter>
       </MockApmPluginContextWrapper>
-    );
-  },
-  {
-    info: {
-      propTablesExclude: [ErrorCountAlertTrigger, MockApmPluginContextWrapper],
-      source: false,
-    },
-  }
-);
+    ),
+  ],
+};
+
+export function Example() {
+  const params = {
+    threshold: 2,
+    window: '5m',
+  };
+
+  return (
+    <ErrorCountAlertTrigger
+      alertParams={params as any}
+      setAlertParams={() => undefined}
+      setAlertProperty={() => undefined}
+    />
+  );
+}

@@ -25,6 +25,7 @@ import {
   CoreStart,
   Plugin,
   ApplicationStart,
+  SavedObjectsClientContract,
 } from '../../../core/public';
 import { TypesService, TypesSetup, TypesStart } from './vis_types';
 import {
@@ -111,7 +112,8 @@ export interface VisualizationsStartDeps {
   uiActions: UiActionsStart;
   application: ApplicationStart;
   dashboard: DashboardStart;
-  getAttributeService: DashboardStart['getAttributeService'];
+  getAttributeService: EmbeddableStart['getAttributeService'];
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 /**

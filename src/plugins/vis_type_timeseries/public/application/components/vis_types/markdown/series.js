@@ -89,6 +89,7 @@ function MarkdownSeriesUi(props) {
       seriesBody = (
         <SeriesConfig
           fields={props.fields}
+          panel={panel}
           model={props.model}
           onChange={props.onChange}
           indexPatternForQuery={props.indexPatternForQuery}

@@ -7,13 +7,17 @@
 import Boom from 'boom';
 import Joi from 'joi';
 import { has, snakeCase } from 'lodash/fp';
+import { SanitizedAlert } from '../../../../../alerts/common';
 
 import {
   RouteValidationFunction,
   KibanaResponseFactory,
   CustomHttpResponseOptions,
+  SavedObjectsFindResult,
 } from '../../../../../../../src/core/server';
+import { AlertsClient } from '../../../../../alerts/server';
 import { BadRequestError } from '../errors/bad_request_error';
+import { RuleStatusResponse, IRuleStatusAttributes } from '../rules/types';
 
 export interface OutputError {
   message: string;
@@ -289,3 +293,47 @@ export const convertToSnakeCase = <T extends Record<string, unknown>>(
     return { ...acc, [newKey]: obj[item] };
   }, {});
 };
+
+export const mergeStatuses = (
+  id: string,
+  failures: Array<SavedObjectsFindResult<IRuleStatusAttributes>>,
+  acc: RuleStatusResponse
+) => {
+  if (failures.length === 0) {
+    return {
+      ...acc,
+    };
+  }
+  const convertedCurrentStatus = convertToSnakeCase<IRuleStatusAttributes>(failures[0].attributes);
+  return {
+    ...acc,
+    [id]: {
+      current_status: convertedCurrentStatus,
+      failures: failures.map((errorItem) =>
+        convertToSnakeCase<IRuleStatusAttributes>(errorItem.attributes)
+      ),
+    },
+  } as RuleStatusResponse;
+};
+
+export const getFailingRules = (ids: string[], alertsClient: AlertsClient) =>
+  Promise.all(
+    ids.map(async (id) =>
+      alertsClient.get({
+        id,
+      })
+    )
+  )
+    .then((rules) => rules.filter((rule) => rule.executionStatus.status === 'error'))
+    .then((rules) =>
+      rules.reduce((acc, failingRule) => {
+        const accum = acc;
+        const theRule = failingRule;
+        return {
+          [theRule.id]: {
+            ...theRule,
+          },
+          ...accum,
+        };
+      }, {} as Record<string, SanitizedAlert>)
+    );

@@ -132,7 +132,9 @@ describe('SavedObjectsClient', () => {
           Object {
             "body": undefined,
             "method": "DELETE",
-            "query": undefined,
+            "query": Object {
+              "force": false,
+            },
           },
         ]
       `);

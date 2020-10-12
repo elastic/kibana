@@ -398,6 +398,10 @@ describe('createAlert', () => {
       updatedBy: null,
       muteAll: false,
       mutedInstanceIds: [],
+      executionStatus: {
+        status: 'unknown',
+        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+      },
     };
     http.post.mockResolvedValueOnce(resolvedValue);
 
@@ -440,6 +444,10 @@ describe('updateAlert', () => {
       updatedBy: null,
       muteAll: false,
       mutedInstanceIds: [],
+      executionStatus: {
+        status: 'unknown',
+        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+      },
     };
     http.put.mockResolvedValueOnce(resolvedValue);
 
