@@ -264,8 +264,7 @@ For more details and a reference of audit events, refer to <<xpack-security-audi
 
 beta[]
 
-To enable the new audit logger (beta) you need to specify where the new audit
-events should be written to using the `xpack.security.audit.appender` option.
+To enable the audit logger, specify where you want to write the audit events using `xpack.security.audit.appender`.
 
 [cols="2*<"]
 |===
