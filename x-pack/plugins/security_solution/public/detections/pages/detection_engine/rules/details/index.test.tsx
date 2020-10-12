@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
+import { waitFor } from '@testing-library/react';
 
 import '../../../../../common/mock/match_media';
 import {
@@ -20,7 +21,7 @@ import { RuleDetailsPageComponent } from './index';
 import { createStore, State } from '../../../../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../../../../common/store/inputs/actions';
 import { useUserData } from '../../../../components/user_info';
-import { useWithSource } from '../../../../../common/containers/source';
+import { useSourcererScope } from '../../../../../common/containers/sourcerer';
 import { useParams } from 'react-router-dom';
 import { mockHistory, Router } from '../../../../../cases/components/__mock__/router';
 
@@ -35,7 +36,7 @@ jest.mock('../../../../../common/components/query_bar', () => ({
 jest.mock('../../../../containers/detection_engine/lists/use_lists_config');
 jest.mock('../../../../../common/components/link_to');
 jest.mock('../../../../components/user_info');
-jest.mock('../../../../../common/containers/source');
+jest.mock('../../../../../common/containers/sourcerer');
 jest.mock('../../../../../common/containers/use_global_time', () => ({
   useGlobalTime: jest.fn().mockReturnValue({
     from: '2020-07-07T08:20:18.966Z',
@@ -71,13 +72,13 @@ describe('RuleDetailsPageComponent', () => {
   beforeAll(() => {
     (useUserData as jest.Mock).mockReturnValue([{}]);
     (useParams as jest.Mock).mockReturnValue({});
-    (useWithSource as jest.Mock).mockReturnValue({
+    (useSourcererScope as jest.Mock).mockReturnValue({
       indicesExist: true,
       indexPattern: {},
     });
   });
 
-  it('renders correctly', () => {
+  it('renders correctly', async () => {
     const wrapper = mount(
       <TestProviders store={store}>
         <Router history={mockHistory}>
@@ -93,7 +94,8 @@ describe('RuleDetailsPageComponent', () => {
         wrappingComponent: TestProviders,
       }
     );
-
-    expect(wrapper.find('[data-test-subj="header-page-title"]').exists()).toBe(true);
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="header-page-title"]').exists()).toBe(true);
+    });
   });
 });

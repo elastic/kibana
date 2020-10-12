@@ -22,7 +22,6 @@ export interface TimelineEventsDetailsStrategyResponse extends IEsSearchResponse
 
 export interface TimelineEventsDetailsRequestOptions
   extends Partial<TimelineRequestOptionsPaginated> {
-  defaultIndex: string[];
   indexName: string;
   eventId: string;
 }

@@ -49,4 +49,9 @@ describe('savedLens', () => {
 
     expect(expression.input.filters).toEqual(embeddableFilters);
   });
+
+  it('accepts an empty title when title is disabled', () => {
+    const expression = fn(null, { ...args, title: '' }, {} as any);
+    expect(expression.input.title).toEqual('');
+  });
 });

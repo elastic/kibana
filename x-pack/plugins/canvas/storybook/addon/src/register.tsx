@@ -24,7 +24,7 @@ addons.register(ADDON_ID, (api) => {
     type: types.PANEL,
     render: ({ active, key }) => {
       return (
-        <AddonPanel active={active} key={key}>
+        <AddonPanel active={!!active} key={key}>
           <Panel />
         </AddonPanel>
       );

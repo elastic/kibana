@@ -12,7 +12,6 @@ import type {
   DeleteTransformsRequestSchema,
 } from '../../../common/api_schemas/delete_transforms';
 import { isDeleteTransformsResponseSchema } from '../../../common/api_schemas/type_guards';
-import { extractErrorMessage } from '../../shared_imports';
 import { getErrorMessage } from '../../../common/utils/errors';
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
 import { REFRESH_TRANSFORM_LIST_STATE, refreshTransformList$, TransformListRow } from '../common';
@@ -21,7 +20,11 @@ import { useApi } from './use_api';
 import { indexService } from '../services/es_index_service';
 
 export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
-  const { http, savedObjects } = useAppDependencies();
+  const {
+    http,
+    savedObjects,
+    ml: { extractErrorMessage },
+  } = useAppDependencies();
   const toastNotifications = useToastNotifications();
 
   const [deleteDestIndex, setDeleteDestIndex] = useState<boolean>(true);
@@ -56,7 +59,7 @@ export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
         );
       }
     },
-    [savedObjects.client, toastNotifications]
+    [savedObjects.client, toastNotifications, extractErrorMessage]
   );
 
   const checkUserIndexPermission = useCallback(async () => {
@@ -105,7 +108,10 @@ export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
 type SuccessCountField = keyof Omit<DeleteTransformStatus, 'destinationIndex'>;
 
 export const useDeleteTransforms = () => {
-  const { overlays } = useAppDependencies();
+  const {
+    overlays,
+    ml: { extractErrorMessage },
+  } = useAppDependencies();
   const toastNotifications = useToastNotifications();
   const api = useApi();
 

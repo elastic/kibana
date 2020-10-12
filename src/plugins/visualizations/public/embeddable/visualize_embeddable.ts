@@ -167,7 +167,7 @@ export class VisualizeEmbeddable
         typeof inspectorAdapters === 'function' ? inspectorAdapters() : inspectorAdapters;
     }
   }
-  public getVisualizationDescription() {
+  public getDescription() {
     return this.vis.description;
   }
 
@@ -241,12 +241,6 @@ export class VisualizeEmbeddable
     if (!_.isEqual(this.input.query, this.query)) {
       this.query = this.input.query;
       dirty = true;
-    }
-
-    // propagate the title to the output embeddable
-    // but only when the visualization is in edit/Visualize mode
-    if (!this.parent && this.vis.title !== this.output.title) {
-      this.updateOutput({ title: this.vis.title });
     }
 
     if (this.vis.description && this.domNode) {

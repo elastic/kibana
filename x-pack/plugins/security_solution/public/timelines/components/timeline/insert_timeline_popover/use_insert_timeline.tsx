@@ -5,7 +5,9 @@
  */
 
 import { useCallback, useState, useEffect } from 'react';
-import { useDispatch, useSelector, shallowEqual } from 'react-redux';
+import { useDispatch } from 'react-redux';
+
+import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import { SecurityPageName } from '../../../../../common/constants';
 import { getTimelineUrl, useFormatUrl } from '../../../../common/components/link_to';
 import { CursorPosition } from '../../../../common/components/markdown_editor';
@@ -20,7 +22,7 @@ export const useInsertTimeline = (value: string, onChange: (newValue: string) =>
     end: 0,
   });
 
-  const insertTimeline = useSelector(timelineSelectors.selectInsertTimeline, shallowEqual);
+  const insertTimeline = useShallowEqualSelector(timelineSelectors.selectInsertTimeline);
 
   const handleOnTimelineChange = useCallback(
     (title: string, id: string | null, graphEventId?: string) => {

@@ -8,6 +8,7 @@ export {
   getAnalysisType,
   getDependentVar,
   getPredictionFieldName,
+  getDefaultTrainingFilterQuery,
   isOutlierAnalysis,
   refreshAnalyticsList$,
   useRefreshAnalyticsList,

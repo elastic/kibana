@@ -20,7 +20,7 @@
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef } from 'react';
-import { expandLiteralStrings } from '../../../../../../../es_ui_shared/public';
+import { expandLiteralStrings } from '../../../../../shared_imports';
 import {
   useEditorReadContext,
   useRequestReadContext,

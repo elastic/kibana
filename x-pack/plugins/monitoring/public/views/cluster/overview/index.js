@@ -36,6 +36,9 @@ uiRoutes.when('/overview', {
         title: i18n.translate('xpack.monitoring.cluster.overviewTitle', {
           defaultMessage: 'Overview',
         }),
+        pageTitle: i18n.translate('xpack.monitoring.cluster.overview.pageTitle', {
+          defaultMessage: 'Cluster overview',
+        }),
         defaultData: {},
         getPageData: async () => {
           const clusters = await monitoringClusters(
@@ -51,6 +54,7 @@ uiRoutes.when('/overview', {
         alerts: {
           shouldFetch: true,
         },
+        telemetryPageViewTitle: 'cluster_overview',
       });
 
       this.init = () => this.renderReact(null);

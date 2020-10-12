@@ -9,8 +9,8 @@ import { ReportingCore } from '../..';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
 import { browserStartLogs } from '../../browsers/chromium/driver_factory/start_logs';
 import { LevelLogger as Logger } from '../../lib';
-import { DiagnosticResponse } from '../../types';
 import { authorizedUserPreRoutingFactory } from '../lib/authorized_user_pre_routing';
+import { DiagnosticResponse } from './';
 
 const logsToHelpMap = {
   'error while loading shared libraries': i18n.translate(

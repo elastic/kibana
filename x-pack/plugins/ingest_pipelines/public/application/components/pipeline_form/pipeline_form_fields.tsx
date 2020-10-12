@@ -6,7 +6,7 @@
 
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSpacer, EuiSwitch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiSpacer, EuiSwitch } from '@elastic/eui';
 
 import { Processor } from '../../../../common/types';
 
@@ -14,14 +14,10 @@ import { getUseField, getFormRow, Field } from '../../../shared_imports';
 
 import {
   ProcessorsEditorContextProvider,
-  GlobalOnFailureProcessorsEditor,
-  ProcessorsEditor,
   OnUpdateHandler,
   OnDoneLoadJsonHandler,
+  PipelineProcessorsEditor,
 } from '../pipeline_processors_editor';
-
-import { ProcessorsHeader } from './processors_header';
-import { OnFailureProcessorsTitle } from './on_failure_processors_title';
 
 interface Props {
   processors: Processor[];
@@ -118,28 +114,12 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
       </FormRow>
 
       {/* Pipeline Processors Editor */}
-
       <ProcessorsEditorContextProvider
         onFlyoutOpen={onEditorFlyoutOpen}
         onUpdate={onProcessorsUpdate}
         value={{ processors, onFailure }}
       >
-        <div className="pipelineProcessorsEditor">
-          <EuiFlexGroup gutterSize="m" responsive={false} direction="column">
-            <EuiFlexItem grow={false}>
-              <ProcessorsHeader onLoadJson={onLoadJson} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} className="pipelineProcessorsEditor__container">
-              <ProcessorsEditor />
-
-              <EuiSpacer size="s" />
-
-              <OnFailureProcessorsTitle />
-
-              <GlobalOnFailureProcessorsEditor />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
+        <PipelineProcessorsEditor onLoadJson={onLoadJson} />
       </ProcessorsEditorContextProvider>
     </>
   );

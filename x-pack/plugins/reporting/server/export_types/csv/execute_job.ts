@@ -22,7 +22,7 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<
     const generateCsv = createGenerateCsv(jobLogger);
 
     const encryptionKey = config.get('encryptionKey');
-    const headers = await decryptJobHeaders({ encryptionKey, job, logger });
+    const headers = await decryptJobHeaders(encryptionKey, job.headers, logger);
     const fakeRequest = reporting.getFakeRequest({ headers }, job.spaceId);
     const uiSettingsClient = await reporting.getUiSettingsClient(fakeRequest);
 

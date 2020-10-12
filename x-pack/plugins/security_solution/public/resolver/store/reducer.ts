@@ -9,7 +9,7 @@ import { cameraReducer } from './camera/reducer';
 import { dataReducer } from './data/reducer';
 import { ResolverAction } from './actions';
 import { ResolverState, ResolverUIState } from '../types';
-import { uniquePidForProcess } from '../models/process_event';
+import * as eventModel from '../../../common/endpoint/models/event';
 
 const uiReducer: Reducer<ResolverUIState, ResolverAction> = (
   state = {
@@ -37,17 +37,18 @@ const uiReducer: Reducer<ResolverUIState, ResolverAction> = (
       selectedNode: action.payload,
     };
     return next;
-  } else if (
-    action.type === 'userBroughtProcessIntoView' ||
-    action.type === 'appDetectedNewIdFromQueryParams'
-  ) {
-    const nodeID = uniquePidForProcess(action.payload.process);
-    const next: ResolverUIState = {
-      ...state,
-      ariaActiveDescendant: nodeID,
-      selectedNode: nodeID,
-    };
-    return next;
+  } else if (action.type === 'userBroughtProcessIntoView') {
+    const nodeID = eventModel.entityIDSafeVersion(action.payload.process);
+    if (nodeID !== undefined) {
+      const next: ResolverUIState = {
+        ...state,
+        ariaActiveDescendant: nodeID,
+        selectedNode: nodeID,
+      };
+      return next;
+    } else {
+      return state;
+    }
   } else if (action.type === 'appReceivedNewExternalProperties') {
     const next: ResolverUIState = {
       ...state,
@@ -68,10 +69,7 @@ const concernReducers = combineReducers({
 
 export const resolverReducer: Reducer<ResolverState, ResolverAction> = (state, action) => {
   const nextState = concernReducers(state, action);
-  if (
-    action.type === 'userBroughtProcessIntoView' ||
-    action.type === 'appDetectedNewIdFromQueryParams'
-  ) {
+  if (action.type === 'userBroughtProcessIntoView') {
     return animateProcessIntoView(nextState, action.payload.time, action.payload.process);
   } else {
     return nextState;

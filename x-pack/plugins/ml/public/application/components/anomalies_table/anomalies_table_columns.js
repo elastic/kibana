@@ -7,7 +7,7 @@
 import { EuiButtonIcon, EuiLink, EuiScreenReaderOnly } from '@elastic/eui';
 
 import React from 'react';
-import get from 'lodash/get';
+import { get } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -16,7 +16,7 @@ import {
   formatHumanReadableDate,
   formatHumanReadableDateTime,
   formatHumanReadableDateTimeSeconds,
-} from '../../util/date_utils';
+} from '../../../../common/util/date_utils';
 
 import { DescriptionCell } from './description_cell';
 import { DetectorCell } from './detector_cell';

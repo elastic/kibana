@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchAfterAndBulkCreateReturnType } from '../search_after_bulk_create';
+import { SearchAfterAndBulkCreateReturnType } from '../types';
 
 import { calculateAdditiveMax, combineResults } from './utils';
 

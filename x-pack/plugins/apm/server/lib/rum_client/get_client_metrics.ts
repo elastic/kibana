@@ -7,11 +7,7 @@
 import { TRANSACTION_DURATION } from '../../../common/elasticsearch_fieldnames';
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   TRANSACTION_DOM_INTERACTIVE,
   TRANSACTION_TIME_TO_FIRST_BYTE,
@@ -19,11 +15,16 @@ import {
 
 export async function getClientMetrics({
   setup,
+  urlQuery,
+  percentile = 50,
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
+  urlQuery?: string;
+  percentile?: number;
 }) {
   const projection = getRumPageLoadTransactionsProjection({
     setup,
+    urlQuery,
   });
 
   const params = mergeProjection(projection, {
@@ -38,7 +39,7 @@ export async function getClientMetrics({
         backEnd: {
           percentiles: {
             field: TRANSACTION_TIME_TO_FIRST_BYTE,
-            percents: [50],
+            percents: [percentile],
             hdr: {
               number_of_significant_value_digits: 3,
             },
@@ -47,7 +48,7 @@ export async function getClientMetrics({
         domInteractive: {
           percentiles: {
             field: TRANSACTION_DOM_INTERACTIVE,
-            percents: [50],
+            percents: [percentile],
             hdr: {
               number_of_significant_value_digits: 3,
             },
@@ -62,14 +63,14 @@ export async function getClientMetrics({
   const response = await apmEventClient.search(params);
   const { backEnd, domInteractive, pageViews } = response.aggregations!;
 
+  const pkey = percentile.toFixed(1);
+
   // Divide by 1000 to convert ms into seconds
   return {
     pageViews,
-    backEnd: { value: (backEnd.values['50.0'] || 0) / 1000 },
+    backEnd: { value: backEnd.values[pkey] || 0 },
     frontEnd: {
-      value:
-        ((domInteractive.values['50.0'] || 0) - (backEnd.values['50.0'] || 0)) /
-        1000,
+      value: (domInteractive.values[pkey] || 0) - (backEnd.values[pkey] || 0),
     },
   };
 }

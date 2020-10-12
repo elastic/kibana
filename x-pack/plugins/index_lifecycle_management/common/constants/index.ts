@@ -7,6 +7,8 @@
 import { i18n } from '@kbn/i18n';
 import { LicenseType } from '../../../licensing/common/types';
 
+export { phaseToNodePreferenceMap } from './data_tiers';
+
 const basicLicense: LicenseType = 'basic';
 
 export const PLUGIN = {

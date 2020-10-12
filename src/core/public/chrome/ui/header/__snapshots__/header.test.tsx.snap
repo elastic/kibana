@@ -477,17 +477,7 @@ exports[`Header renders 1`] = `
                 "index": 1,
                 "isStopped": false,
                 "outerIndex": 1,
-                "outerValue": BehaviorSubject {
-                  "_isScalar": false,
-                  "_value": "",
-                  "closed": false,
-                  "hasError": false,
-                  "isStopped": false,
-                  "observers": Array [
-                    [Circular],
-                  ],
-                  "thrownError": null,
-                },
+                "outerValue": undefined,
                 "parent": [Circular],
                 "syncErrorThrowable": false,
                 "syncErrorThrown": false,
@@ -558,7 +548,7 @@ exports[`Header renders 1`] = `
                     "index": 1,
                     "isStopped": false,
                     "outerIndex": 1,
-                    "outerValue": [Circular],
+                    "outerValue": undefined,
                     "parent": [Circular],
                     "syncErrorThrowable": false,
                     "syncErrorThrown": false,
@@ -568,7 +558,7 @@ exports[`Header renders 1`] = `
                 "thrownError": null,
               },
             ],
-            "resultSelector": null,
+            "resultSelector": undefined,
             "syncErrorThrowable": true,
             "syncErrorThrown": false,
             "syncErrorValue": null,
@@ -597,7 +587,7 @@ exports[`Header renders 1`] = `
           "index": 1,
           "isStopped": false,
           "outerIndex": 0,
-          "outerValue": [Circular],
+          "outerValue": undefined,
           "parent": CombineLatestSubscriber {
             "_parentOrParents": Subscriber {
               "_parentOrParents": null,
@@ -663,17 +653,7 @@ exports[`Header renders 1`] = `
                 "index": 1,
                 "isStopped": false,
                 "outerIndex": 1,
-                "outerValue": BehaviorSubject {
-                  "_isScalar": false,
-                  "_value": "",
-                  "closed": false,
-                  "hasError": false,
-                  "isStopped": false,
-                  "observers": Array [
-                    [Circular],
-                  ],
-                  "thrownError": null,
-                },
+                "outerValue": undefined,
                 "parent": [Circular],
                 "syncErrorThrowable": false,
                 "syncErrorThrown": false,
@@ -744,7 +724,7 @@ exports[`Header renders 1`] = `
                     "index": 1,
                     "isStopped": false,
                     "outerIndex": 1,
-                    "outerValue": [Circular],
+                    "outerValue": undefined,
                     "parent": [Circular],
                     "syncErrorThrowable": false,
                     "syncErrorThrown": false,
@@ -754,7 +734,7 @@ exports[`Header renders 1`] = `
                 "thrownError": null,
               },
             ],
-            "resultSelector": null,
+            "resultSelector": undefined,
             "syncErrorThrowable": true,
             "syncErrorThrown": false,
             "syncErrorValue": null,
@@ -845,17 +825,7 @@ exports[`Header renders 1`] = `
                 "index": 1,
                 "isStopped": false,
                 "outerIndex": 0,
-                "outerValue": BehaviorSubject {
-                  "_isScalar": false,
-                  "_value": undefined,
-                  "closed": false,
-                  "hasError": false,
-                  "isStopped": false,
-                  "observers": Array [
-                    [Circular],
-                  ],
-                  "thrownError": null,
-                },
+                "outerValue": undefined,
                 "parent": [Circular],
                 "syncErrorThrowable": false,
                 "syncErrorThrown": false,
@@ -926,7 +896,7 @@ exports[`Header renders 1`] = `
                     "index": 1,
                     "isStopped": false,
                     "outerIndex": 0,
-                    "outerValue": [Circular],
+                    "outerValue": undefined,
                     "parent": [Circular],
                     "syncErrorThrowable": false,
                     "syncErrorThrown": false,
@@ -937,7 +907,7 @@ exports[`Header renders 1`] = `
               },
               [Circular],
             ],
-            "resultSelector": null,
+            "resultSelector": undefined,
             "syncErrorThrowable": true,
             "syncErrorThrown": false,
             "syncErrorValue": null,
@@ -966,7 +936,7 @@ exports[`Header renders 1`] = `
           "index": 1,
           "isStopped": false,
           "outerIndex": 1,
-          "outerValue": [Circular],
+          "outerValue": undefined,
           "parent": CombineLatestSubscriber {
             "_parentOrParents": Subscriber {
               "_parentOrParents": null,
@@ -1031,17 +1001,7 @@ exports[`Header renders 1`] = `
                 "index": 1,
                 "isStopped": false,
                 "outerIndex": 0,
-                "outerValue": BehaviorSubject {
-                  "_isScalar": false,
-                  "_value": undefined,
-                  "closed": false,
-                  "hasError": false,
-                  "isStopped": false,
-                  "observers": Array [
-                    [Circular],
-                  ],
-                  "thrownError": null,
-                },
+                "outerValue": undefined,
                 "parent": [Circular],
                 "syncErrorThrowable": false,
                 "syncErrorThrown": false,
@@ -1112,7 +1072,7 @@ exports[`Header renders 1`] = `
                     "index": 1,
                     "isStopped": false,
                     "outerIndex": 0,
-                    "outerValue": [Circular],
+                    "outerValue": undefined,
                     "parent": [Circular],
                     "syncErrorThrowable": false,
                     "syncErrorThrown": false,
@@ -1123,7 +1083,7 @@ exports[`Header renders 1`] = `
               },
               [Circular],
             ],
-            "resultSelector": null,
+            "resultSelector": undefined,
             "syncErrorThrowable": true,
             "syncErrorThrown": false,
             "syncErrorValue": null,
@@ -1690,66 +1650,6 @@ exports[`Header renders 1`] = `
     }
   }
 >
-  <LoadingIndicator
-    loadingCount$={
-      BehaviorSubject {
-        "_isScalar": false,
-        "_value": 0,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [
-          Subscriber {
-            "_parentOrParents": null,
-            "_subscriptions": Array [
-              SubjectSubscription {
-                "_parentOrParents": [Circular],
-                "_subscriptions": null,
-                "closed": false,
-                "subject": [Circular],
-                "subscriber": [Circular],
-              },
-            ],
-            "closed": false,
-            "destination": SafeSubscriber {
-              "_complete": undefined,
-              "_context": [Circular],
-              "_error": undefined,
-              "_next": [Function],
-              "_parentOrParents": null,
-              "_parentSubscriber": [Circular],
-              "_subscriptions": null,
-              "closed": false,
-              "destination": Object {
-                "closed": true,
-                "complete": [Function],
-                "error": [Function],
-                "next": [Function],
-              },
-              "isStopped": false,
-              "syncErrorThrowable": false,
-              "syncErrorThrown": false,
-              "syncErrorValue": null,
-            },
-            "isStopped": false,
-            "syncErrorThrowable": true,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
-          },
-        ],
-        "thrownError": null,
-      }
-    }
-  >
-    <div
-      className="kbnLoadingIndicator hidden"
-      data-test-subj="globalLoadingIndicator-hidden"
-    >
-      <div
-        className="kbnLoadingIndicator__bar essentialAnimation"
-      />
-    </div>
-  </LoadingIndicator>
   <header
     className="hide-for-sharing headerGlobalNav"
     data-test-subj="headerGlobalNav"
@@ -1910,16 +1810,11 @@ exports[`Header renders 1`] = `
                   }
                   navigateToApp={[MockFunction]}
                 />,
-              ],
-            },
-            Object {
-              "borders": "none",
-              "items": Array [
-                <HeaderNavControls
-                  navControls$={
+                <LoadingIndicator
+                  loadingCount$={
                     BehaviorSubject {
                       "_isScalar": false,
-                      "_value": Array [],
+                      "_value": 0,
                       "closed": false,
                       "hasError": false,
                       "isStopped": false,
@@ -1965,12 +1860,140 @@ exports[`Header renders 1`] = `
                       "thrownError": null,
                     }
                   }
+                  showAsBar={false}
                 />,
               ],
             },
             Object {
               "borders": "none",
               "items": Array [
+                <EuiShowFor
+                  sizes={
+                    Array [
+                      "m",
+                      "l",
+                      "xl",
+                    ]
+                  }
+                >
+                  <HeaderNavControls
+                    navControls$={
+                      BehaviorSubject {
+                        "_isScalar": false,
+                        "_value": Array [],
+                        "closed": false,
+                        "hasError": false,
+                        "isStopped": false,
+                        "observers": Array [
+                          Subscriber {
+                            "_parentOrParents": null,
+                            "_subscriptions": Array [
+                              SubjectSubscription {
+                                "_parentOrParents": [Circular],
+                                "_subscriptions": null,
+                                "closed": false,
+                                "subject": [Circular],
+                                "subscriber": [Circular],
+                              },
+                            ],
+                            "closed": false,
+                            "destination": SafeSubscriber {
+                              "_complete": undefined,
+                              "_context": [Circular],
+                              "_error": undefined,
+                              "_next": [Function],
+                              "_parentOrParents": null,
+                              "_parentSubscriber": [Circular],
+                              "_subscriptions": null,
+                              "closed": false,
+                              "destination": Object {
+                                "closed": true,
+                                "complete": [Function],
+                                "error": [Function],
+                                "next": [Function],
+                              },
+                              "isStopped": false,
+                              "syncErrorThrowable": false,
+                              "syncErrorThrown": false,
+                              "syncErrorValue": null,
+                            },
+                            "isStopped": false,
+                            "syncErrorThrowable": true,
+                            "syncErrorThrown": false,
+                            "syncErrorValue": null,
+                          },
+                        ],
+                        "thrownError": null,
+                      }
+                    }
+                  />
+                </EuiShowFor>,
+              ],
+            },
+            Object {
+              "borders": "none",
+              "items": Array [
+                <EuiHideFor
+                  sizes={
+                    Array [
+                      "m",
+                      "l",
+                      "xl",
+                    ]
+                  }
+                >
+                  <HeaderNavControls
+                    navControls$={
+                      BehaviorSubject {
+                        "_isScalar": false,
+                        "_value": Array [],
+                        "closed": false,
+                        "hasError": false,
+                        "isStopped": false,
+                        "observers": Array [
+                          Subscriber {
+                            "_parentOrParents": null,
+                            "_subscriptions": Array [
+                              SubjectSubscription {
+                                "_parentOrParents": [Circular],
+                                "_subscriptions": null,
+                                "closed": false,
+                                "subject": [Circular],
+                                "subscriber": [Circular],
+                              },
+                            ],
+                            "closed": false,
+                            "destination": SafeSubscriber {
+                              "_complete": undefined,
+                              "_context": [Circular],
+                              "_error": undefined,
+                              "_next": [Function],
+                              "_parentOrParents": null,
+                              "_parentSubscriber": [Circular],
+                              "_subscriptions": null,
+                              "closed": false,
+                              "destination": Object {
+                                "closed": true,
+                                "complete": [Function],
+                                "error": [Function],
+                                "next": [Function],
+                              },
+                              "isStopped": false,
+                              "syncErrorThrowable": false,
+                              "syncErrorThrown": false,
+                              "syncErrorValue": null,
+                            },
+                            "isStopped": false,
+                            "syncErrorThrowable": true,
+                            "syncErrorThrown": false,
+                            "syncErrorValue": null,
+                          },
+                        ],
+                        "thrownError": null,
+                      }
+                    }
+                  />
+                </EuiHideFor>,
                 <InjectIntl(HeaderHelpMenuUI)
                   helpExtension$={
                     BehaviorSubject {
@@ -2046,17 +2069,7 @@ exports[`Header renders 1`] = `
                                 "index": 1,
                                 "isStopped": false,
                                 "outerIndex": 1,
-                                "outerValue": BehaviorSubject {
-                                  "_isScalar": false,
-                                  "_value": "",
-                                  "closed": false,
-                                  "hasError": false,
-                                  "isStopped": false,
-                                  "observers": Array [
-                                    [Circular],
-                                  ],
-                                  "thrownError": null,
-                                },
+                                "outerValue": undefined,
                                 "parent": [Circular],
                                 "syncErrorThrowable": false,
                                 "syncErrorThrown": false,
@@ -2127,7 +2140,7 @@ exports[`Header renders 1`] = `
                                     "index": 1,
                                     "isStopped": false,
                                     "outerIndex": 1,
-                                    "outerValue": [Circular],
+                                    "outerValue": undefined,
                                     "parent": [Circular],
                                     "syncErrorThrowable": false,
                                     "syncErrorThrown": false,
@@ -2137,7 +2150,7 @@ exports[`Header renders 1`] = `
                                 "thrownError": null,
                               },
                             ],
-                            "resultSelector": null,
+                            "resultSelector": undefined,
                             "syncErrorThrowable": true,
                             "syncErrorThrown": false,
                             "syncErrorValue": null,
@@ -2166,7 +2179,7 @@ exports[`Header renders 1`] = `
                           "index": 1,
                           "isStopped": false,
                           "outerIndex": 0,
-                          "outerValue": [Circular],
+                          "outerValue": undefined,
                           "parent": CombineLatestSubscriber {
                             "_parentOrParents": Subscriber {
                               "_parentOrParents": null,
@@ -2232,17 +2245,7 @@ exports[`Header renders 1`] = `
                                 "index": 1,
                                 "isStopped": false,
                                 "outerIndex": 1,
-                                "outerValue": BehaviorSubject {
-                                  "_isScalar": false,
-                                  "_value": "",
-                                  "closed": false,
-                                  "hasError": false,
-                                  "isStopped": false,
-                                  "observers": Array [
-                                    [Circular],
-                                  ],
-                                  "thrownError": null,
-                                },
+                                "outerValue": undefined,
                                 "parent": [Circular],
                                 "syncErrorThrowable": false,
                                 "syncErrorThrown": false,
@@ -2313,7 +2316,7 @@ exports[`Header renders 1`] = `
                                     "index": 1,
                                     "isStopped": false,
                                     "outerIndex": 1,
-                                    "outerValue": [Circular],
+                                    "outerValue": undefined,
                                     "parent": [Circular],
                                     "syncErrorThrowable": false,
                                     "syncErrorThrown": false,
@@ -2323,7 +2326,7 @@ exports[`Header renders 1`] = `
                                 "thrownError": null,
                               },
                             ],
-                            "resultSelector": null,
+                            "resultSelector": undefined,
                             "syncErrorThrowable": true,
                             "syncErrorThrown": false,
                             "syncErrorValue": null,
@@ -2414,17 +2417,7 @@ exports[`Header renders 1`] = `
                                 "index": 1,
                                 "isStopped": false,
                                 "outerIndex": 0,
-                                "outerValue": BehaviorSubject {
-                                  "_isScalar": false,
-                                  "_value": undefined,
-                                  "closed": false,
-                                  "hasError": false,
-                                  "isStopped": false,
-                                  "observers": Array [
-                                    [Circular],
-                                  ],
-                                  "thrownError": null,
-                                },
+                                "outerValue": undefined,
                                 "parent": [Circular],
                                 "syncErrorThrowable": false,
                                 "syncErrorThrown": false,
@@ -2495,7 +2488,7 @@ exports[`Header renders 1`] = `
                                     "index": 1,
                                     "isStopped": false,
                                     "outerIndex": 0,
-                                    "outerValue": [Circular],
+                                    "outerValue": undefined,
                                     "parent": [Circular],
                                     "syncErrorThrowable": false,
                                     "syncErrorThrown": false,
@@ -2506,7 +2499,7 @@ exports[`Header renders 1`] = `
                               },
                               [Circular],
                             ],
-                            "resultSelector": null,
+                            "resultSelector": undefined,
                             "syncErrorThrowable": true,
                             "syncErrorThrown": false,
                             "syncErrorValue": null,
@@ -2535,7 +2528,7 @@ exports[`Header renders 1`] = `
                           "index": 1,
                           "isStopped": false,
                           "outerIndex": 1,
-                          "outerValue": [Circular],
+                          "outerValue": undefined,
                           "parent": CombineLatestSubscriber {
                             "_parentOrParents": Subscriber {
                               "_parentOrParents": null,
@@ -2600,17 +2593,7 @@ exports[`Header renders 1`] = `
                                 "index": 1,
                                 "isStopped": false,
                                 "outerIndex": 0,
-                                "outerValue": BehaviorSubject {
-                                  "_isScalar": false,
-                                  "_value": undefined,
-                                  "closed": false,
-                                  "hasError": false,
-                                  "isStopped": false,
-                                  "observers": Array [
-                                    [Circular],
-                                  ],
-                                  "thrownError": null,
-                                },
+                                "outerValue": undefined,
                                 "parent": [Circular],
                                 "syncErrorThrowable": false,
                                 "syncErrorThrown": false,
@@ -2681,7 +2664,7 @@ exports[`Header renders 1`] = `
                                     "index": 1,
                                     "isStopped": false,
                                     "outerIndex": 0,
-                                    "outerValue": [Circular],
+                                    "outerValue": undefined,
                                     "parent": [Circular],
                                     "syncErrorThrowable": false,
                                     "syncErrorThrown": false,
@@ -2692,7 +2675,7 @@ exports[`Header renders 1`] = `
                               },
                               [Circular],
                             ],
-                            "resultSelector": null,
+                            "resultSelector": undefined,
                             "syncErrorThrowable": true,
                             "syncErrorThrown": false,
                             "syncErrorValue": null,
@@ -2971,26 +2954,18 @@ exports[`Header renders 1`] = `
                   </HeaderLogo>
                 </div>
               </EuiHeaderSectionItem>
-            </div>
-          </EuiHeaderSection>
-          <EuiHeaderSection
-            key="items-1"
-          >
-            <div
-              className="euiHeaderSection euiHeaderSection--dontGrow euiHeaderSection--left"
-            >
               <EuiHeaderSectionItem
                 border="none"
-                key="0"
+                key="1"
               >
                 <div
                   className="euiHeaderSectionItem"
                 >
-                  <HeaderNavControls
-                    navControls$={
+                  <LoadingIndicator
+                    loadingCount$={
                       BehaviorSubject {
                         "_isScalar": false,
-                        "_value": Array [],
+                        "_value": 0,
                         "closed": false,
                         "hasError": false,
                         "isStopped": false,
@@ -3036,7 +3011,100 @@ exports[`Header renders 1`] = `
                         "thrownError": null,
                       }
                     }
-                  />
+                    showAsBar={false}
+                  >
+                    <EuiLoadingSpinner
+                      aria-hidden={true}
+                      aria-label="Loading content"
+                      className="kbnLoadingIndicator-hidden"
+                      data-test-subj="globalLoadingIndicator-hidden"
+                    >
+                      <span
+                        aria-hidden={true}
+                        aria-label="Loading content"
+                        className="euiLoadingSpinner euiLoadingSpinner--medium kbnLoadingIndicator-hidden"
+                        data-test-subj="globalLoadingIndicator-hidden"
+                      />
+                    </EuiLoadingSpinner>
+                  </LoadingIndicator>
+                </div>
+              </EuiHeaderSectionItem>
+            </div>
+          </EuiHeaderSection>
+          <EuiHeaderSection
+            key="items-1"
+          >
+            <div
+              className="euiHeaderSection euiHeaderSection--dontGrow euiHeaderSection--left"
+            >
+              <EuiHeaderSectionItem
+                border="none"
+                key="0"
+              >
+                <div
+                  className="euiHeaderSectionItem"
+                >
+                  <EuiShowFor
+                    sizes={
+                      Array [
+                        "m",
+                        "l",
+                        "xl",
+                      ]
+                    }
+                  >
+                    <HeaderNavControls
+                      navControls$={
+                        BehaviorSubject {
+                          "_isScalar": false,
+                          "_value": Array [],
+                          "closed": false,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [
+                            Subscriber {
+                              "_parentOrParents": null,
+                              "_subscriptions": Array [
+                                SubjectSubscription {
+                                  "_parentOrParents": [Circular],
+                                  "_subscriptions": null,
+                                  "closed": false,
+                                  "subject": [Circular],
+                                  "subscriber": [Circular],
+                                },
+                              ],
+                              "closed": false,
+                              "destination": SafeSubscriber {
+                                "_complete": undefined,
+                                "_context": [Circular],
+                                "_error": undefined,
+                                "_next": [Function],
+                                "_parentOrParents": null,
+                                "_parentSubscriber": [Circular],
+                                "_subscriptions": null,
+                                "closed": false,
+                                "destination": Object {
+                                  "closed": true,
+                                  "complete": [Function],
+                                  "error": [Function],
+                                  "next": [Function],
+                                },
+                                "isStopped": false,
+                                "syncErrorThrowable": false,
+                                "syncErrorThrown": false,
+                                "syncErrorValue": null,
+                              },
+                              "isStopped": false,
+                              "syncErrorThrowable": true,
+                              "syncErrorThrown": false,
+                              "syncErrorValue": null,
+                            },
+                          ],
+                          "thrownError": null,
+                        }
+                      }
+                    />
+                  </EuiShowFor>
                 </div>
               </EuiHeaderSectionItem>
             </div>
@@ -3050,6 +3118,24 @@ exports[`Header renders 1`] = `
               <EuiHeaderSectionItem
                 border="none"
                 key="0"
+              >
+                <div
+                  className="euiHeaderSectionItem"
+                >
+                  <EuiHideFor
+                    sizes={
+                      Array [
+                        "m",
+                        "l",
+                        "xl",
+                      ]
+                    }
+                  />
+                </div>
+              </EuiHeaderSectionItem>
+              <EuiHeaderSectionItem
+                border="none"
+                key="1"
               >
                 <div
                   className="euiHeaderSectionItem"
@@ -3129,17 +3215,7 @@ exports[`Header renders 1`] = `
                                   "index": 1,
                                   "isStopped": false,
                                   "outerIndex": 1,
-                                  "outerValue": BehaviorSubject {
-                                    "_isScalar": false,
-                                    "_value": "",
-                                    "closed": false,
-                                    "hasError": false,
-                                    "isStopped": false,
-                                    "observers": Array [
-                                      [Circular],
-                                    ],
-                                    "thrownError": null,
-                                  },
+                                  "outerValue": undefined,
                                   "parent": [Circular],
                                   "syncErrorThrowable": false,
                                   "syncErrorThrown": false,
@@ -3210,7 +3286,7 @@ exports[`Header renders 1`] = `
                                       "index": 1,
                                       "isStopped": false,
                                       "outerIndex": 1,
-                                      "outerValue": [Circular],
+                                      "outerValue": undefined,
                                       "parent": [Circular],
                                       "syncErrorThrowable": false,
                                       "syncErrorThrown": false,
@@ -3220,7 +3296,7 @@ exports[`Header renders 1`] = `
                                   "thrownError": null,
                                 },
                               ],
-                              "resultSelector": null,
+                              "resultSelector": undefined,
                               "syncErrorThrowable": true,
                               "syncErrorThrown": false,
                               "syncErrorValue": null,
@@ -3249,7 +3325,7 @@ exports[`Header renders 1`] = `
                             "index": 1,
                             "isStopped": false,
                             "outerIndex": 0,
-                            "outerValue": [Circular],
+                            "outerValue": undefined,
                             "parent": CombineLatestSubscriber {
                               "_parentOrParents": Subscriber {
                                 "_parentOrParents": null,
@@ -3315,17 +3391,7 @@ exports[`Header renders 1`] = `
                                   "index": 1,
                                   "isStopped": false,
                                   "outerIndex": 1,
-                                  "outerValue": BehaviorSubject {
-                                    "_isScalar": false,
-                                    "_value": "",
-                                    "closed": false,
-                                    "hasError": false,
-                                    "isStopped": false,
-                                    "observers": Array [
-                                      [Circular],
-                                    ],
-                                    "thrownError": null,
-                                  },
+                                  "outerValue": undefined,
                                   "parent": [Circular],
                                   "syncErrorThrowable": false,
                                   "syncErrorThrown": false,
@@ -3396,7 +3462,7 @@ exports[`Header renders 1`] = `
                                       "index": 1,
                                       "isStopped": false,
                                       "outerIndex": 1,
-                                      "outerValue": [Circular],
+                                      "outerValue": undefined,
                                       "parent": [Circular],
                                       "syncErrorThrowable": false,
                                       "syncErrorThrown": false,
@@ -3406,7 +3472,7 @@ exports[`Header renders 1`] = `
                                   "thrownError": null,
                                 },
                               ],
-                              "resultSelector": null,
+                              "resultSelector": undefined,
                               "syncErrorThrowable": true,
                               "syncErrorThrown": false,
                               "syncErrorValue": null,
@@ -3497,17 +3563,7 @@ exports[`Header renders 1`] = `
                                   "index": 1,
                                   "isStopped": false,
                                   "outerIndex": 0,
-                                  "outerValue": BehaviorSubject {
-                                    "_isScalar": false,
-                                    "_value": undefined,
-                                    "closed": false,
-                                    "hasError": false,
-                                    "isStopped": false,
-                                    "observers": Array [
-                                      [Circular],
-                                    ],
-                                    "thrownError": null,
-                                  },
+                                  "outerValue": undefined,
                                   "parent": [Circular],
                                   "syncErrorThrowable": false,
                                   "syncErrorThrown": false,
@@ -3578,7 +3634,7 @@ exports[`Header renders 1`] = `
                                       "index": 1,
                                       "isStopped": false,
                                       "outerIndex": 0,
-                                      "outerValue": [Circular],
+                                      "outerValue": undefined,
                                       "parent": [Circular],
                                       "syncErrorThrowable": false,
                                       "syncErrorThrown": false,
@@ -3589,7 +3645,7 @@ exports[`Header renders 1`] = `
                                 },
                                 [Circular],
                               ],
-                              "resultSelector": null,
+                              "resultSelector": undefined,
                               "syncErrorThrowable": true,
                               "syncErrorThrown": false,
                               "syncErrorValue": null,
@@ -3618,7 +3674,7 @@ exports[`Header renders 1`] = `
                             "index": 1,
                             "isStopped": false,
                             "outerIndex": 1,
-                            "outerValue": [Circular],
+                            "outerValue": undefined,
                             "parent": CombineLatestSubscriber {
                               "_parentOrParents": Subscriber {
                                 "_parentOrParents": null,
@@ -3683,17 +3739,7 @@ exports[`Header renders 1`] = `
                                   "index": 1,
                                   "isStopped": false,
                                   "outerIndex": 0,
-                                  "outerValue": BehaviorSubject {
-                                    "_isScalar": false,
-                                    "_value": undefined,
-                                    "closed": false,
-                                    "hasError": false,
-                                    "isStopped": false,
-                                    "observers": Array [
-                                      [Circular],
-                                    ],
-                                    "thrownError": null,
-                                  },
+                                  "outerValue": undefined,
                                   "parent": [Circular],
                                   "syncErrorThrowable": false,
                                   "syncErrorThrown": false,
@@ -3764,7 +3810,7 @@ exports[`Header renders 1`] = `
                                       "index": 1,
                                       "isStopped": false,
                                       "outerIndex": 0,
-                                      "outerValue": [Circular],
+                                      "outerValue": undefined,
                                       "parent": [Circular],
                                       "syncErrorThrowable": false,
                                       "syncErrorThrown": false,
@@ -3775,7 +3821,7 @@ exports[`Header renders 1`] = `
                                 },
                                 [Circular],
                               ],
-                              "resultSelector": null,
+                              "resultSelector": undefined,
                               "syncErrorThrowable": true,
                               "syncErrorThrown": false,
                               "syncErrorValue": null,
@@ -3872,17 +3918,7 @@ exports[`Header renders 1`] = `
                                     "index": 1,
                                     "isStopped": false,
                                     "outerIndex": 1,
-                                    "outerValue": BehaviorSubject {
-                                      "_isScalar": false,
-                                      "_value": "",
-                                      "closed": false,
-                                      "hasError": false,
-                                      "isStopped": false,
-                                      "observers": Array [
-                                        [Circular],
-                                      ],
-                                      "thrownError": null,
-                                    },
+                                    "outerValue": undefined,
                                     "parent": [Circular],
                                     "syncErrorThrowable": false,
                                     "syncErrorThrown": false,
@@ -3953,7 +3989,7 @@ exports[`Header renders 1`] = `
                                         "index": 1,
                                         "isStopped": false,
                                         "outerIndex": 1,
-                                        "outerValue": [Circular],
+                                        "outerValue": undefined,
                                         "parent": [Circular],
                                         "syncErrorThrowable": false,
                                         "syncErrorThrown": false,
@@ -3963,7 +3999,7 @@ exports[`Header renders 1`] = `
                                     "thrownError": null,
                                   },
                                 ],
-                                "resultSelector": null,
+                                "resultSelector": undefined,
                                 "syncErrorThrowable": true,
                                 "syncErrorThrown": false,
                                 "syncErrorValue": null,
@@ -3992,7 +4028,7 @@ exports[`Header renders 1`] = `
                               "index": 1,
                               "isStopped": false,
                               "outerIndex": 0,
-                              "outerValue": [Circular],
+                              "outerValue": undefined,
                               "parent": CombineLatestSubscriber {
                                 "_parentOrParents": Subscriber {
                                   "_parentOrParents": null,
@@ -4058,17 +4094,7 @@ exports[`Header renders 1`] = `
                                     "index": 1,
                                     "isStopped": false,
                                     "outerIndex": 1,
-                                    "outerValue": BehaviorSubject {
-                                      "_isScalar": false,
-                                      "_value": "",
-                                      "closed": false,
-                                      "hasError": false,
-                                      "isStopped": false,
-                                      "observers": Array [
-                                        [Circular],
-                                      ],
-                                      "thrownError": null,
-                                    },
+                                    "outerValue": undefined,
                                     "parent": [Circular],
                                     "syncErrorThrowable": false,
                                     "syncErrorThrown": false,
@@ -4139,7 +4165,7 @@ exports[`Header renders 1`] = `
                                         "index": 1,
                                         "isStopped": false,
                                         "outerIndex": 1,
-                                        "outerValue": [Circular],
+                                        "outerValue": undefined,
                                         "parent": [Circular],
                                         "syncErrorThrowable": false,
                                         "syncErrorThrown": false,
@@ -4149,7 +4175,7 @@ exports[`Header renders 1`] = `
                                     "thrownError": null,
                                   },
                                 ],
-                                "resultSelector": null,
+                                "resultSelector": undefined,
                                 "syncErrorThrowable": true,
                                 "syncErrorThrown": false,
                                 "syncErrorValue": null,
@@ -4240,17 +4266,7 @@ exports[`Header renders 1`] = `
                                     "index": 1,
                                     "isStopped": false,
                                     "outerIndex": 0,
-                                    "outerValue": BehaviorSubject {
-                                      "_isScalar": false,
-                                      "_value": undefined,
-                                      "closed": false,
-                                      "hasError": false,
-                                      "isStopped": false,
-                                      "observers": Array [
-                                        [Circular],
-                                      ],
-                                      "thrownError": null,
-                                    },
+                                    "outerValue": undefined,
                                     "parent": [Circular],
                                     "syncErrorThrowable": false,
                                     "syncErrorThrown": false,
@@ -4321,7 +4337,7 @@ exports[`Header renders 1`] = `
                                         "index": 1,
                                         "isStopped": false,
                                         "outerIndex": 0,
-                                        "outerValue": [Circular],
+                                        "outerValue": undefined,
                                         "parent": [Circular],
                                         "syncErrorThrowable": false,
                                         "syncErrorThrown": false,
@@ -4332,7 +4348,7 @@ exports[`Header renders 1`] = `
                                   },
                                   [Circular],
                                 ],
-                                "resultSelector": null,
+                                "resultSelector": undefined,
                                 "syncErrorThrowable": true,
                                 "syncErrorThrown": false,
                                 "syncErrorValue": null,
@@ -4361,7 +4377,7 @@ exports[`Header renders 1`] = `
                               "index": 1,
                               "isStopped": false,
                               "outerIndex": 1,
-                              "outerValue": [Circular],
+                              "outerValue": undefined,
                               "parent": CombineLatestSubscriber {
                                 "_parentOrParents": Subscriber {
                                   "_parentOrParents": null,
@@ -4426,17 +4442,7 @@ exports[`Header renders 1`] = `
                                     "index": 1,
                                     "isStopped": false,
                                     "outerIndex": 0,
-                                    "outerValue": BehaviorSubject {
-                                      "_isScalar": false,
-                                      "_value": undefined,
-                                      "closed": false,
-                                      "hasError": false,
-                                      "isStopped": false,
-                                      "observers": Array [
-                                        [Circular],
-                                      ],
-                                      "thrownError": null,
-                                    },
+                                    "outerValue": undefined,
                                     "parent": [Circular],
                                     "syncErrorThrowable": false,
                                     "syncErrorThrown": false,
@@ -4507,7 +4513,7 @@ exports[`Header renders 1`] = `
                                         "index": 1,
                                         "isStopped": false,
                                         "outerIndex": 0,
-                                        "outerValue": [Circular],
+                                        "outerValue": undefined,
                                         "parent": [Circular],
                                         "syncErrorThrowable": false,
                                         "syncErrorThrown": false,
@@ -4518,7 +4524,7 @@ exports[`Header renders 1`] = `
                                   },
                                   [Circular],
                                 ],
-                                "resultSelector": null,
+                                "resultSelector": undefined,
                                 "syncErrorThrowable": true,
                                 "syncErrorThrown": false,
                                 "syncErrorValue": null,
@@ -4719,7 +4725,7 @@ exports[`Header renders 1`] = `
               </EuiHeaderSectionItem>
               <EuiHeaderSectionItem
                 border="none"
-                key="1"
+                key="2"
               >
                 <div
                   className="euiHeaderSectionItem"
@@ -4830,13 +4836,6 @@ exports[`Header renders 1`] = `
                     </button>
                   </EuiHeaderSectionItemButton>
                 </div>
-              </EuiHeaderSectionItem>
-              <EuiHeaderSectionItem
-                border="right"
-              >
-                <div
-                  className="euiHeaderSectionItem euiHeaderSectionItem--borderRight"
-                />
               </EuiHeaderSectionItem>
               <HeaderNavControls
                 navControls$={

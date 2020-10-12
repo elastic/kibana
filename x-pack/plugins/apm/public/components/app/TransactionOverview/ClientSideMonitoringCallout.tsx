@@ -11,14 +11,14 @@ import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 
 export function ClientSideMonitoringCallout() {
   const { core } = useApmPluginContext();
-  const clientSideMonitoringHref = core.http.basePath.prepend(`/app/csm`);
+  const clientSideMonitoringHref = core.http.basePath.prepend(`/app/ux`);
 
   return (
     <EuiCallOut
       iconType="cheer"
       title={i18n.translate(
         'xpack.apm.transactionOverview.clientSideMonitoring.calloutTitle',
-        { defaultMessage: 'Introducing: Client Side Monitoring' }
+        { defaultMessage: 'Introducing: Elastic User Experience' }
       )}
     >
       <EuiText>

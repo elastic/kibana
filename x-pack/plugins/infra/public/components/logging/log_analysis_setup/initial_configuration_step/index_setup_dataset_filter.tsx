@@ -7,6 +7,7 @@
 import {
   EuiFilterButton,
   EuiFilterGroup,
+  EuiIconTip,
   EuiPopover,
   EuiPopoverTitle,
   EuiSelectable,
@@ -14,11 +15,15 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useMemo } from 'react';
-import { DatasetFilter } from '../../../../../common/log_analysis';
+import { DatasetFilter, QualityWarning } from '../../../../../common/log_analysis';
 import { useVisibilityState } from '../../../../utils/use_visibility_state';
+import { CategoryQualityWarningReasonDescription } from '../../log_analysis_job_status/quality_warning_notices';
 
 export const IndexSetupDatasetFilter: React.FC<{
-  availableDatasets: string[];
+  availableDatasets: Array<{
+    dataset: string;
+    warnings: QualityWarning[];
+  }>;
   datasetFilter: DatasetFilter;
   isDisabled?: boolean;
   onChangeDatasetFilter: (datasetFilter: DatasetFilter) => void;
@@ -40,12 +45,13 @@ export const IndexSetupDatasetFilter: React.FC<{
     [onChangeDatasetFilter]
   );
 
-  const selectableOptions: EuiSelectableOption[] = useMemo(
+  const selectableOptions = useMemo<EuiSelectableOption[]>(
     () =>
-      availableDatasets.map((datasetName) => ({
-        label: datasetName,
+      availableDatasets.map(({ dataset, warnings }) => ({
+        label: dataset,
+        append: warnings.length > 0 ? <DatasetWarningMarker warnings={warnings} /> : null,
         checked:
-          datasetFilter.type === 'includeSome' && datasetFilter.datasets.includes(datasetName)
+          datasetFilter.type === 'includeSome' && datasetFilter.datasets.includes(dataset)
             ? 'on'
             : undefined,
       })),
@@ -85,4 +91,16 @@ export const IndexSetupDatasetFilter: React.FC<{
       </EuiPopover>
     </EuiFilterGroup>
   );
+};
+
+const DatasetWarningMarker: React.FC<{ warnings: QualityWarning[] }> = ({ warnings }) => {
+  const warningDescriptions = warnings.flatMap((warning) =>
+    warning.type === 'categoryQualityWarning'
+      ? warning.reasons.map((reason) => (
+          <CategoryQualityWarningReasonDescription key={reason.type} reason={reason} />
+        ))
+      : []
+  );
+
+  return <EuiIconTip content={warningDescriptions} type="alert" color="warning" />;
 };

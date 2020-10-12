@@ -9,7 +9,7 @@ import { noop } from 'lodash/fp';
 import React, { useEffect, useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
-import { HostItem } from '../../../../common/search_strategy';
+import { HostItem, LastEventIndexKey } from '../../../../common/search_strategy';
 import { SecurityPageName } from '../../../app/types';
 import { UpdateDateRange } from '../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../common/components/filters_global';
@@ -28,8 +28,6 @@ import { SiemSearchBar } from '../../../common/components/search_bar';
 import { WrapperPage } from '../../../common/components/wrapper_page';
 import { HostOverviewByNameQuery } from '../../containers/hosts/details';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
-import { useWithSource } from '../../../common/containers/source';
-import { LastEventIndexKey } from '../../../graphql/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
 import { inputsSelectors, State } from '../../../common/store';
@@ -51,6 +49,7 @@ import { timelineSelectors } from '../../../timelines/store/timeline';
 import { TimelineModel } from '../../../timelines/store/timeline/model';
 import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import { useSourcererScope } from '../../../common/containers/sourcerer';
 
 const HostOverviewManage = manageQuery(HostOverview);
 
@@ -89,7 +88,7 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
       },
       [setAbsoluteRangeDatePicker]
     );
-    const { docValueFields, indicesExist, indexPattern } = useWithSource();
+    const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
     const filterQuery = convertToBuildEsQuery({
       config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
       indexPattern,
@@ -111,12 +110,18 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
                 <HeaderPage
                   border
                   subtitle={
-                    <LastEventTime indexKey={LastEventIndexKey.hostDetails} hostName={detailName} />
+                    <LastEventTime
+                      docValueFields={docValueFields}
+                      indexKey={LastEventIndexKey.hostDetails}
+                      hostName={detailName}
+                      indexNames={selectedPatterns}
+                    />
                   }
                   title={detailName}
                 />
 
                 <HostOverviewByNameQuery
+                  indexNames={selectedPatterns}
                   sourceId="default"
                   hostName={detailName}
                   skip={isInitializing}
@@ -132,6 +137,7 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
                     >
                       {({ isLoadingAnomaliesData, anomaliesData }) => (
                         <HostOverviewManage
+                          docValueFields={docValueFields}
                           id={id}
                           inspect={inspect}
                           refetch={refetch}
@@ -139,6 +145,7 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
                           data={hostOverview as HostItem}
                           anomaliesData={anomaliesData}
                           isLoadingAnomaliesData={isLoadingAnomaliesData}
+                          indexNames={selectedPatterns}
                           loading={loading}
                           startDate={from}
                           endDate={to}
@@ -161,6 +168,7 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
                 <HostsDetailsKpiComponent
                   filterQuery={filterQuery}
                   from={from}
+                  indexNames={selectedPatterns}
                   setQuery={setQuery}
                   to={to}
                   narrowDateRange={narrowDateRange}
@@ -178,6 +186,7 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
 
               <HostDetailsTabs
                 docValueFields={docValueFields}
+                indexNames={selectedPatterns}
                 isInitializing={isInitializing}
                 deleteQuery={deleteQuery}
                 pageFilters={hostDetailsPageFilters}

@@ -33,6 +33,7 @@ import { ConstantKeywordType } from './constant_keyword_type';
 import { RankFeatureType } from './rank_feature_type';
 import { WildcardType } from './wildcard_type';
 import { PointType } from './point_type';
+import { VersionType } from './version_type';
 
 const typeToParametersFormMap: { [key in DataType]?: ComponentType<any> } = {
   alias: AliasType,
@@ -62,6 +63,7 @@ const typeToParametersFormMap: { [key in DataType]?: ComponentType<any> } = {
   rank_feature: RankFeatureType,
   wildcard: WildcardType,
   point: PointType,
+  version: VersionType,
 };
 
 export const getParametersFormForType = (

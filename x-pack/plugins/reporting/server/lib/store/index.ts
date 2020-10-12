@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { Report } from './report';
+export { Report, ReportDocument } from './report';
 export { ReportingStore } from './store';

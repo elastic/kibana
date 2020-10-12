@@ -24,22 +24,6 @@ const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 jest.mock('../../../../common/lib/kibana');
 
 describe('Timeline QueryBar ', () => {
-  // We are doing that because we need to wrapped this component with redux
-  // and redux does not like to be updated and since we need to update our
-  // child component (BODY) and we do not want to scare anyone with this error
-  // we are hiding it!!!
-  // eslint-disable-next-line no-console
-  const originalError = console.error;
-  beforeAll(() => {
-    // eslint-disable-next-line no-console
-    console.error = (...args: string[]) => {
-      if (/<Provider> does not support changing `store` on the fly/.test(args[0])) {
-        return;
-      }
-      originalError.call(console, ...args);
-    };
-  });
-
   const mockApplyKqlFilterQuery = jest.fn();
   const mockSetFilters = jest.fn();
   const mockSetKqlFilterQueryDraft = jest.fn();

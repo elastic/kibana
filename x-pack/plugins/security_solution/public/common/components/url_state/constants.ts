@@ -17,6 +17,7 @@ export enum CONSTANTS {
   networkPage = 'network.page',
   overviewPage = 'overview.page',
   savedQuery = 'savedQuery',
+  sourcerer = 'sourcerer',
   timeline = 'timeline',
   timelinePage = 'timeline.page',
   timerange = 'timerange',

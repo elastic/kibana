@@ -7,10 +7,11 @@
 import { cryptoFactory } from '../../../lib';
 import { CreateJobFn, CreateJobFnFactory } from '../../../types';
 import { validateUrls } from '../../common';
-import { JobParamsPDF } from '../types';
+import { JobParamsPDF, TaskPayloadPDF } from '../types';
 
 export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<
-  JobParamsPDF
+  JobParamsPDF,
+  TaskPayloadPDF
 >> = function createJobFactoryFn(reporting) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));

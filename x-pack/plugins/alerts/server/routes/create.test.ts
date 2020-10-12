@@ -10,6 +10,7 @@ import { mockLicenseState } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { alertsClientMock } from '../alerts_client.mock';
+import { Alert } from '../../common/alert';
 
 const alertsClient = alertsClientMock.create();
 
@@ -46,7 +47,7 @@ describe('createAlertRoute', () => {
     ],
   };
 
-  const createResult = {
+  const createResult: Alert = {
     ...mockedAlert,
     enabled: true,
     muteAll: false,
@@ -64,6 +65,10 @@ describe('createAlertRoute', () => {
         actionTypeId: 'test',
       },
     ],
+    executionStatus: {
+      status: 'unknown',
+      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+    },
   };
 
   it('creates an alert with proper parameters', async () => {

@@ -6,7 +6,8 @@
 
 import sinon, { stub } from 'sinon';
 import { NotificationsStart } from 'src/core/public';
-import { JobSummary, SourceJob } from '../../common/types';
+import { JobSummary } from '../';
+import { ReportDocument } from '../../common/types';
 import { ReportingAPIClient } from './reporting_api_client';
 import { ReportingNotifierStreamHandler } from './stream_handler';
 
@@ -23,7 +24,7 @@ const mockJobsFound = [
     _source: {
       status: 'completed',
       output: { max_size_reached: false, csv_contains_formulas: false },
-      payload: { type: 'spectacular', title: 'specimen' },
+      payload: { title: 'specimen' },
     },
   },
   {
@@ -31,7 +32,7 @@ const mockJobsFound = [
     _source: {
       status: 'failed',
       output: { max_size_reached: false, csv_contains_formulas: false },
-      payload: { type: 'spectacular', title: 'specimen' },
+      payload: { title: 'specimen' },
     },
   },
   {
@@ -39,14 +40,14 @@ const mockJobsFound = [
     _source: {
       status: 'pending',
       output: { max_size_reached: false, csv_contains_formulas: false },
-      payload: { type: 'spectacular', title: 'specimen' },
+      payload: { title: 'specimen' },
     },
   },
 ];
 
 const jobQueueClientMock: ReportingAPIClient = {
   findForJobIds: async (jobIds: string[]) => {
-    return mockJobsFound as SourceJob[];
+    return mockJobsFound as ReportDocument[];
   },
   getContent: (): Promise<any> => {
     return Promise.resolve({ content: 'this is the completed report data' });
@@ -109,7 +110,7 @@ describe('stream handler', () => {
           {
             id: 'yas1',
             title: 'Yas',
-            type: 'yas',
+            jobtype: 'yas',
             status: 'completed',
           } as JobSummary,
         ],
@@ -130,7 +131,7 @@ describe('stream handler', () => {
           {
             id: 'yas2',
             title: 'Yas',
-            type: 'yas',
+            jobtype: 'yas',
             status: 'completed',
             maxSizeReached: true,
           } as JobSummary,
@@ -152,7 +153,7 @@ describe('stream handler', () => {
           {
             id: 'yas3',
             title: 'Yas',
-            type: 'yas',
+            jobtype: 'yas',
             status: 'completed',
             csvContainsFormulas: true,
           } as JobSummary,
@@ -175,7 +176,7 @@ describe('stream handler', () => {
           {
             id: 'yas7',
             title: 'Yas 7',
-            type: 'yas',
+            jobtype: 'yas',
             status: 'failed',
           } as JobSummary,
         ],
@@ -195,20 +196,20 @@ describe('stream handler', () => {
           {
             id: 'yas8',
             title: 'Yas 8',
-            type: 'yas',
+            jobtype: 'yas',
             status: 'completed',
           } as JobSummary,
           {
             id: 'yas9',
             title: 'Yas 9',
-            type: 'yas',
+            jobtype: 'yas',
             status: 'completed',
             csvContainsFormulas: true,
           } as JobSummary,
           {
             id: 'yas10',
             title: 'Yas 10',
-            type: 'yas',
+            jobtype: 'yas',
             status: 'completed',
             maxSizeReached: true,
           } as JobSummary,
@@ -217,7 +218,7 @@ describe('stream handler', () => {
           {
             id: 'yas13',
             title: 'Yas 13',
-            type: 'yas',
+            jobtype: 'yas',
             status: 'failed',
           } as JobSummary,
         ],

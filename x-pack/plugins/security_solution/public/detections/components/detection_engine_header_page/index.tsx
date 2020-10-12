@@ -10,7 +10,7 @@ import { HeaderPage, HeaderPageProps } from '../../../common/components/header_p
 import * as i18n from './translations';
 
 const DetectionEngineHeaderPageComponent: React.FC<HeaderPageProps> = (props) => (
-  <HeaderPage {...props} />
+  <HeaderPage hideSourcerer={true} {...props} />
 );
 
 DetectionEngineHeaderPageComponent.defaultProps = {

@@ -11,7 +11,6 @@ import {
   createMockReportingCore,
 } from '../../../test_helpers';
 import { getConditionalHeaders } from '../../common';
-import { TaskPayloadPDF } from '../types';
 import { getCustomLogo } from './get_custom_logo';
 
 let mockConfig: ReportingConfig;
@@ -39,11 +38,7 @@ test(`gets logo from uiSettings`, async () => {
     get: mockGet,
   });
 
-  const conditionalHeaders = getConditionalHeaders({
-    job: {} as TaskPayloadPDF,
-    filteredHeaders: permittedHeaders,
-    config: mockConfig,
-  });
+  const conditionalHeaders = getConditionalHeaders(mockConfig, permittedHeaders);
 
   const { logo } = await getCustomLogo(mockReportingPlugin, conditionalHeaders);
 

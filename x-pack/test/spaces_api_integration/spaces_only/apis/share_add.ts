@@ -33,6 +33,7 @@ const createSingleTestCases = (spaceId: string) => {
     { ...CASES.DEFAULT_AND_SPACE_1, namespaces, ...fail404(spaceId === SPACE_2_ID) },
     { ...CASES.DEFAULT_AND_SPACE_2, namespaces, ...fail404(spaceId === SPACE_1_ID) },
     { ...CASES.SPACE_1_AND_SPACE_2, namespaces, ...fail404(spaceId === DEFAULT_SPACE_ID) },
+    { ...CASES.EACH_SPACE, namespaces },
     { ...CASES.ALL_SPACES, namespaces },
     { ...CASES.DOES_NOT_EXIST, namespaces, ...fail404() },
   ];
@@ -42,14 +43,26 @@ const createSingleTestCases = (spaceId: string) => {
  * These are non-exhaustive, but they check different permutations of saved objects and spaces to add
  */
 const createMultiTestCases = () => {
-  const allSpaces = [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID];
-  let id = CASES.DEFAULT_ONLY.id;
-  const one = [{ id, namespaces: allSpaces }];
-  id = CASES.DEFAULT_AND_SPACE_1.id;
-  const two = [{ id, namespaces: allSpaces }];
-  id = CASES.ALL_SPACES.id;
-  const three = [{ id, namespaces: allSpaces }];
-  return { one, two, three };
+  const eachSpace = [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID];
+  const allSpaces = ['*'];
+  // for each of the cases below, test adding each space and all spaces to the object
+  const one = [
+    { id: CASES.DEFAULT_ONLY.id, namespaces: eachSpace },
+    { id: CASES.DEFAULT_ONLY.id, namespaces: allSpaces },
+  ];
+  const two = [
+    { id: CASES.DEFAULT_AND_SPACE_1.id, namespaces: eachSpace },
+    { id: CASES.DEFAULT_AND_SPACE_1.id, namespaces: allSpaces },
+  ];
+  const three = [
+    { id: CASES.EACH_SPACE.id, namespaces: eachSpace },
+    { id: CASES.EACH_SPACE.id, namespaces: allSpaces },
+  ];
+  const four = [
+    { id: CASES.ALL_SPACES.id, namespaces: eachSpace },
+    { id: CASES.ALL_SPACES.id, namespaces: allSpaces },
+  ];
+  return { one, two, three, four };
 };
 
 // eslint-disable-next-line import/no-default-export
@@ -68,6 +81,7 @@ export default function ({ getService }: TestInvoker) {
       one: createTestDefinitions(testCases.one, false),
       two: createTestDefinitions(testCases.two, false),
       three: createTestDefinitions(testCases.three, false),
+      four: createTestDefinitions(testCases.four, false),
     };
   };
 
@@ -76,9 +90,10 @@ export default function ({ getService }: TestInvoker) {
       const tests = createSingleTests(spaceId);
       addTests(`targeting the ${spaceId} space`, { spaceId, tests });
     });
-    const { one, two, three } = createMultiTests();
+    const { one, two, three, four } = createMultiTests();
     addTests('for a saved object in the default space', { tests: one });
     addTests('for a saved object in the default and space_1 spaces', { tests: two });
     addTests('for a saved object in the default, space_1, and space_2 spaces', { tests: three });
+    addTests('for a saved object in all spaces', { tests: four });
   });
 }

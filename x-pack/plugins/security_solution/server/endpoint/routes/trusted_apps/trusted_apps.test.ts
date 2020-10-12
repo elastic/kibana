@@ -18,6 +18,7 @@ import {
   TRUSTED_APPS_LIST_API,
 } from '../../../../common/endpoint/constants';
 import {
+  DeleteTrustedAppsRequestParams,
   GetTrustedAppsListRequest,
   PostTrustedAppCreateRequest,
 } from '../../../../common/endpoint/types';
@@ -26,8 +27,10 @@ import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/const
 import { EndpointAppContext } from '../../types';
 import { ExceptionListClient, ListClient } from '../../../../../lists/server';
 import { listMock } from '../../../../../lists/server/mocks';
-import { ExceptionListItemSchema } from '../../../../../lists/common/schemas/response';
-import { DeleteTrustedAppsRequestParams } from './types';
+import {
+  ExceptionListItemSchema,
+  FoundExceptionListItemSchema,
+} from '../../../../../lists/common/schemas/response';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 
 type RequestHandlerContextWithLists = ReturnType<typeof xpackMocks.createRequestHandlerContext> & {
@@ -125,6 +128,97 @@ describe('when invoking endpoint trusted apps route handlers', () => {
       });
     });
 
+    it('should map Exception List Item to Trusted App item', async () => {
+      const request = createListRequest(10, 100);
+      const emptyResponse: FoundExceptionListItemSchema = {
+        data: [
+          {
+            _version: undefined,
+            comments: [],
+            created_at: '2020-09-21T19:43:48.240Z',
+            created_by: 'test',
+            description: '',
+            entries: [
+              {
+                field: 'process.hash.sha256',
+                operator: 'included',
+                type: 'match',
+                value: 'a4370c0cf81686c0b696fa6261c9d3e0d810ae704ab8301839dffd5d5112f476',
+              },
+              {
+                field: 'process.hash.sha1',
+                operator: 'included',
+                type: 'match',
+                value: 'aedb279e378bed6c2db3c9dc9e12ba635e0b391c',
+              },
+              {
+                field: 'process.hash.md5',
+                operator: 'included',
+                type: 'match',
+                value: '741462ab431a22233c787baab9b653c7',
+              },
+            ],
+            id: '1',
+            item_id: '11',
+            list_id: 'trusted apps test',
+            meta: undefined,
+            name: 'test',
+            namespace_type: 'agnostic',
+            os_types: ['windows'],
+            tags: [],
+            tie_breaker_id: '1',
+            type: 'simple',
+            updated_at: '2020-09-21T19:43:48.240Z',
+            updated_by: 'test',
+          },
+        ],
+        page: 10,
+        per_page: 100,
+        total: 0,
+      };
+
+      exceptionsListClient.findExceptionListItem.mockResolvedValue(emptyResponse);
+      await routeHandler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: {
+          data: [
+            {
+              created_at: '2020-09-21T19:43:48.240Z',
+              created_by: 'test',
+              description: '',
+              entries: [
+                {
+                  field: 'process.hash.*',
+                  operator: 'included',
+                  type: 'match',
+                  value: 'a4370c0cf81686c0b696fa6261c9d3e0d810ae704ab8301839dffd5d5112f476',
+                },
+                {
+                  field: 'process.hash.*',
+                  operator: 'included',
+                  type: 'match',
+                  value: 'aedb279e378bed6c2db3c9dc9e12ba635e0b391c',
+                },
+                {
+                  field: 'process.hash.*',
+                  operator: 'included',
+                  type: 'match',
+                  value: '741462ab431a22233c787baab9b653c7',
+                },
+              ],
+              id: '1',
+              name: 'test',
+              os: 'windows',
+            },
+          ],
+          page: 10,
+          per_page: 100,
+          total: 0,
+        },
+      });
+    });
+
     it('should log unexpected error if one occurs', async () => {
       exceptionsListClient.findExceptionListItem.mockImplementation(() => {
         throw new Error('expected error');
@@ -138,24 +232,26 @@ describe('when invoking endpoint trusted apps route handlers', () => {
 
   describe('when creating a trusted app', () => {
     let routeHandler: RequestHandler<undefined, PostTrustedAppCreateRequest>;
-    const createNewTrustedAppBody = (): PostTrustedAppCreateRequest => ({
+    const createNewTrustedAppBody = (): {
+      -readonly [k in keyof PostTrustedAppCreateRequest]: PostTrustedAppCreateRequest[k];
+    } => ({
       name: 'Some Anti-Virus App',
       description: 'this one is ok',
       os: 'windows',
       entries: [
         {
-          field: 'process.path',
+          field: 'process.executable.caseless',
           type: 'match',
           operator: 'included',
           value: 'c:/programs files/Anti-Virus',
         },
       ],
     });
-    const createPostRequest = () => {
+    const createPostRequest = (body?: PostTrustedAppCreateRequest) => {
       return httpServerMock.createKibanaRequest<undefined, PostTrustedAppCreateRequest>({
         path: TRUSTED_APPS_LIST_API,
         method: 'post',
-        body: createNewTrustedAppBody(),
+        body: body ?? createNewTrustedAppBody(),
       });
     };
 
@@ -171,6 +267,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
         return ({
           ...getExceptionListItemSchemaMock(),
           ...newExceptionItem,
+          os_types: newExceptionItem.osTypes,
         } as unknown) as ExceptionListItemSchema;
       });
     });
@@ -192,12 +289,11 @@ describe('when invoking endpoint trusted apps route handlers', () => {
       const request = createPostRequest();
       await routeHandler(context, request, response);
       expect(exceptionsListClient.createExceptionListItem.mock.calls[0][0]).toEqual({
-        _tags: ['os:windows'],
         comments: [],
         description: 'this one is ok',
         entries: [
           {
-            field: 'process.path',
+            field: 'process.executable.caseless',
             operator: 'included',
             type: 'match',
             value: 'c:/programs files/Anti-Virus',
@@ -208,6 +304,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
         meta: undefined,
         name: 'Some Anti-Virus App',
         namespaceType: 'agnostic',
+        osTypes: ['windows'],
         tags: [],
         type: 'simple',
       });
@@ -224,7 +321,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
             description: 'this one is ok',
             entries: [
               {
-                field: 'process.path',
+                field: 'process.executable.caseless',
                 operator: 'included',
                 type: 'match',
                 value: 'c:/programs files/Anti-Virus',
@@ -246,6 +343,134 @@ describe('when invoking endpoint trusted apps route handlers', () => {
       await routeHandler(context, request, response);
       expect(response.internalError).toHaveBeenCalled();
       expect(endpointAppContext.logFactory.get('trusted_apps').error).toHaveBeenCalled();
+    });
+
+    it('should trim trusted app entry name', async () => {
+      const newTrustedApp = createNewTrustedAppBody();
+      newTrustedApp.name = `\n  ${newTrustedApp.name}  \r\n`;
+      const request = createPostRequest(newTrustedApp);
+      await routeHandler(context, request, response);
+      expect(exceptionsListClient.createExceptionListItem.mock.calls[0][0].name).toEqual(
+        'Some Anti-Virus App'
+      );
+    });
+
+    it('should trim condition entry values', async () => {
+      const newTrustedApp = createNewTrustedAppBody();
+      newTrustedApp.entries.push({
+        field: 'process.executable.caseless',
+        value: '\n    some value \r\n ',
+        operator: 'included',
+        type: 'match',
+      });
+      const request = createPostRequest(newTrustedApp);
+      await routeHandler(context, request, response);
+      expect(exceptionsListClient.createExceptionListItem.mock.calls[0][0].entries).toEqual([
+        {
+          field: 'process.executable.caseless',
+          operator: 'included',
+          type: 'match',
+          value: 'c:/programs files/Anti-Virus',
+        },
+        {
+          field: 'process.executable.caseless',
+          value: 'some value',
+          operator: 'included',
+          type: 'match',
+        },
+      ]);
+    });
+
+    it('should convert hash values to lowercase', async () => {
+      const newTrustedApp = createNewTrustedAppBody();
+      newTrustedApp.entries.push({
+        field: 'process.hash.*',
+        value: '741462AB431A22233C787BAAB9B653C7',
+        operator: 'included',
+        type: 'match',
+      });
+      const request = createPostRequest(newTrustedApp);
+      await routeHandler(context, request, response);
+      expect(exceptionsListClient.createExceptionListItem.mock.calls[0][0].entries).toEqual([
+        {
+          field: 'process.executable.caseless',
+          operator: 'included',
+          type: 'match',
+          value: 'c:/programs files/Anti-Virus',
+        },
+        {
+          field: 'process.hash.md5',
+          value: '741462ab431a22233c787baab9b653c7',
+          operator: 'included',
+          type: 'match',
+        },
+      ]);
+    });
+
+    it('should detect md5 hash', async () => {
+      const newTrustedApp = createNewTrustedAppBody();
+      newTrustedApp.entries = [
+        {
+          field: 'process.hash.*',
+          value: '741462ab431a22233c787baab9b653c7',
+          operator: 'included',
+          type: 'match',
+        },
+      ];
+      const request = createPostRequest(newTrustedApp);
+      await routeHandler(context, request, response);
+      expect(exceptionsListClient.createExceptionListItem.mock.calls[0][0].entries).toEqual([
+        {
+          field: 'process.hash.md5',
+          value: '741462ab431a22233c787baab9b653c7',
+          operator: 'included',
+          type: 'match',
+        },
+      ]);
+    });
+
+    it('should detect sha1 hash', async () => {
+      const newTrustedApp = createNewTrustedAppBody();
+      newTrustedApp.entries = [
+        {
+          field: 'process.hash.*',
+          value: 'aedb279e378bed6c2db3c9dc9e12ba635e0b391c',
+          operator: 'included',
+          type: 'match',
+        },
+      ];
+      const request = createPostRequest(newTrustedApp);
+      await routeHandler(context, request, response);
+      expect(exceptionsListClient.createExceptionListItem.mock.calls[0][0].entries).toEqual([
+        {
+          field: 'process.hash.sha1',
+          value: 'aedb279e378bed6c2db3c9dc9e12ba635e0b391c',
+          operator: 'included',
+          type: 'match',
+        },
+      ]);
+    });
+
+    it('should detect sha256 hash', async () => {
+      const newTrustedApp = createNewTrustedAppBody();
+      newTrustedApp.entries = [
+        {
+          field: 'process.hash.*',
+          value: 'a4370c0cf81686c0b696fa6261c9d3e0d810ae704ab8301839dffd5d5112f476',
+          operator: 'included',
+          type: 'match',
+        },
+      ];
+      const request = createPostRequest(newTrustedApp);
+      await routeHandler(context, request, response);
+      expect(exceptionsListClient.createExceptionListItem.mock.calls[0][0].entries).toEqual([
+        {
+          field: 'process.hash.sha256',
+          value: 'a4370c0cf81686c0b696fa6261c9d3e0d810ae704ab8301839dffd5d5112f476',
+          operator: 'included',
+          type: 'match',
+        },
+      ]);
     });
   });
 

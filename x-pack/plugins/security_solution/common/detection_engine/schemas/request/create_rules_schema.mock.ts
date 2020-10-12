@@ -66,7 +66,7 @@ export const getCreateThreatMatchRulesSchemaMock = (ruleId = 'rule-1'): CreateRu
   language: 'kuery',
   rule_id: ruleId,
   threat_query: '*:*',
-  threat_index: 'list-index',
+  threat_index: ['list-index'],
   threat_mapping: [
     {
       entries: [
@@ -124,7 +124,7 @@ export const getCreateThreatMatchRulesSchemaDecodedMock = (): CreateRulesSchemaD
   exceptions_list: [],
   rule_id: 'rule-1',
   threat_query: '*:*',
-  threat_index: 'list-index',
+  threat_index: ['list-index'],
   threat_mapping: [
     {
       entries: [

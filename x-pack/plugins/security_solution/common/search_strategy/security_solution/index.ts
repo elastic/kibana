@@ -9,7 +9,7 @@ import { ESQuery } from '../../typed_json';
 import {
   HostDetailsStrategyResponse,
   HostDetailsRequestOptions,
-  HostOverviewStrategyResponse,
+  HostsOverviewStrategyResponse,
   HostAuthenticationsRequestOptions,
   HostAuthenticationsStrategyResponse,
   HostOverviewRequestOptions,
@@ -18,8 +18,8 @@ import {
   HostsQueries,
   HostsRequestOptions,
   HostsStrategyResponse,
-  HostUncommonProcessesStrategyResponse,
-  HostUncommonProcessesRequestOptions,
+  HostsUncommonProcessesStrategyResponse,
+  HostsUncommonProcessesRequestOptions,
   HostsKpiQueries,
   HostsKpiAuthenticationsStrategyResponse,
   HostsKpiAuthenticationsRequestOptions,
@@ -107,13 +107,13 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   : T extends HostsQueries.details
   ? HostDetailsStrategyResponse
   : T extends HostsQueries.overview
-  ? HostOverviewStrategyResponse
+  ? HostsOverviewStrategyResponse
   : T extends HostsQueries.authentications
   ? HostAuthenticationsStrategyResponse
   : T extends HostsQueries.firstLastSeen
   ? HostFirstLastSeenStrategyResponse
   : T extends HostsQueries.uncommonProcesses
-  ? HostUncommonProcessesStrategyResponse
+  ? HostsUncommonProcessesStrategyResponse
   : T extends HostsKpiQueries.kpiAuthentications
   ? HostsKpiAuthenticationsStrategyResponse
   : T extends HostsKpiQueries.kpiHosts
@@ -161,7 +161,7 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   : T extends HostsQueries.firstLastSeen
   ? HostFirstLastSeenRequestOptions
   : T extends HostsQueries.uncommonProcesses
-  ? HostUncommonProcessesRequestOptions
+  ? HostsUncommonProcessesRequestOptions
   : T extends HostsKpiQueries.kpiAuthentications
   ? HostsKpiAuthenticationsRequestOptions
   : T extends HostsKpiQueries.kpiHosts

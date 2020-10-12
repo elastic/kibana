@@ -15,9 +15,11 @@ import { IField } from '../fields/field';
 import { FieldFormatter, MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
 import { AbstractSourceDescriptor } from '../../../common/descriptor_types';
 import { OnSourceChangeArgs } from '../../connected_components/layer_panel/view';
+import { LICENSED_FEATURES } from '../../licensed_features';
 
 export type SourceEditorArgs = {
   onChange: (...args: OnSourceChangeArgs[]) => void;
+  currentLayerType?: string;
 };
 
 export type ImmutableSourceProperty = {
@@ -50,7 +52,7 @@ export interface ISource {
   getImmutableProperties(): Promise<ImmutableSourceProperty[]>;
   getAttributions(): Promise<Attribution[]>;
   isESSource(): boolean;
-  renderSourceSettingsEditor({ onChange }: SourceEditorArgs): ReactElement<any> | null;
+  renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null;
   supportsFitToBounds(): Promise<boolean>;
   showJoinEditor(): boolean;
   getJoinsDisabledReason(): string | null;
@@ -65,6 +67,7 @@ export interface ISource {
   getValueSuggestions(field: IField, query: string): Promise<string[]>;
   getMinZoom(): number;
   getMaxZoom(): number;
+  getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
 }
 
 export class AbstractSource implements ISource {
@@ -126,7 +129,7 @@ export class AbstractSource implements ISource {
     return [];
   }
 
-  renderSourceSettingsEditor({ onChange }: SourceEditorArgs): ReactElement<any> | null {
+  renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null {
     return null;
   }
 
@@ -186,5 +189,9 @@ export class AbstractSource implements ISource {
 
   getMaxZoom() {
     return MAX_ZOOM;
+  }
+
+  async getLicensedFeatures(): Promise<LICENSED_FEATURES[]> {
+    return [];
   }
 }

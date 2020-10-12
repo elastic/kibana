@@ -2,6 +2,7 @@
 
 exports[`renders matching snapshot 1`] = `
 <EuiGlobalToastList
+  aria-label="Notification message list"
   data-test-subj="globalToastList"
   dismissToast={[Function]}
   side="right"

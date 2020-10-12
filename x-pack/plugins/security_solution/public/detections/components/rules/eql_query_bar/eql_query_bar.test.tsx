@@ -7,9 +7,12 @@
 import React from 'react';
 import { shallow, mount } from 'enzyme';
 
-import { useFormFieldMock } from '../../../../common/mock';
+import { TestProviders, useFormFieldMock } from '../../../../common/mock';
 import { mockQueryBar } from '../../../pages/detection_engine/rules/all/__mocks__/mock';
 import { EqlQueryBar, EqlQueryBarProps } from './eql_query_bar';
+import { getEqlValidationError } from './validators.mock';
+
+jest.mock('../../../../common/lib/kibana');
 
 describe('EqlQueryBar', () => {
   let mockField: EqlQueryBarProps['field'];
@@ -27,7 +30,11 @@ describe('EqlQueryBar', () => {
   });
 
   it('sets the field value on input change', () => {
-    const wrapper = mount(<EqlQueryBar dataTestSubj="myQueryBar" field={mockField} />);
+    const wrapper = mount(
+      <TestProviders>
+        <EqlQueryBar dataTestSubj="myQueryBar" field={mockField} />
+      </TestProviders>
+    );
 
     wrapper
       .find('[data-test-subj="eqlQueryBarTextInput"]')
@@ -43,5 +50,31 @@ describe('EqlQueryBar', () => {
     };
 
     expect(mockField.setValue).toHaveBeenCalledWith(expected);
+  });
+
+  it('does not render errors for a valid query', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <EqlQueryBar dataTestSubj="myQueryBar" field={mockField} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="eql-validation-errors-popover"]').exists()).toEqual(
+      false
+    );
+  });
+
+  it('renders errors for an invalid query', () => {
+    const invalidMockField = useFormFieldMock({
+      value: mockQueryBar,
+      errors: [getEqlValidationError()],
+    });
+    const wrapper = mount(
+      <TestProviders>
+        <EqlQueryBar dataTestSubj="myQueryBar" field={invalidMockField} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="eql-validation-errors-popover"]').exists()).toEqual(true);
   });
 });
