@@ -45,7 +45,7 @@ export async function getFields(
     payload: {},
     pre: {
       indexPatternsService: new IndexPatternsFetcher(
-        requestContext.core.elasticsearch.legacy.client.callAsCurrentUser
+        requestContext.core.elasticsearch.client.asCurrentUser
       ),
     },
     getUiSettingsService: () => requestContext.core.uiSettings.client,

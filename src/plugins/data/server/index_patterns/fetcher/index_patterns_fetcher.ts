@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
 
 import { getFieldCapabilities, resolveTimePattern, createNoMatchingIndicesError } from './lib';
 
@@ -37,10 +37,12 @@ interface FieldSubType {
 }
 
 export class IndexPatternsFetcher {
-  private _callDataCluster: LegacyAPICaller;
+  private elasticsearchClient: ElasticsearchClient;
+  private allowNoIndices: boolean;
 
-  constructor(callDataCluster: LegacyAPICaller) {
-    this._callDataCluster = callDataCluster;
+  constructor(callDataCluster: ElasticsearchClient, allowNoIndices: boolean = false) {
+    this.elasticsearchClient = callDataCluster;
+    this.allowNoIndices = allowNoIndices;
   }
 
   /**
@@ -58,7 +60,9 @@ export class IndexPatternsFetcher {
     fieldCapsOptions?: { allowNoIndices: boolean };
   }): Promise<FieldDescriptor[]> {
     const { pattern, metaFields, fieldCapsOptions } = options;
-    return await getFieldCapabilities(this._callDataCluster, pattern, metaFields, fieldCapsOptions);
+    return await getFieldCapabilities(this.elasticsearchClient, pattern, metaFields, {
+      allowNoIndices: fieldCapsOptions ? fieldCapsOptions.allowNoIndices : this.allowNoIndices,
+    });
   }
 
   /**
@@ -78,11 +82,11 @@ export class IndexPatternsFetcher {
     interval: string;
   }) {
     const { pattern, lookBack, metaFields } = options;
-    const { matches } = await resolveTimePattern(this._callDataCluster, pattern);
+    const { matches } = await resolveTimePattern(this.elasticsearchClient, pattern);
     const indices = matches.slice(0, lookBack);
     if (indices.length === 0) {
       throw createNoMatchingIndicesError(pattern);
     }
-    return await getFieldCapabilities(this._callDataCluster, indices, metaFields);
+    return await getFieldCapabilities(this.elasticsearchClient, indices, metaFields);
   }
 }
