@@ -35,7 +35,7 @@ import { filterById } from './filter_by_id';
 import { readLimits } from '../limits';
 
 export interface Limits {
-  pageLoadAssetSize: {
+  pageLoadAssetSize?: {
     [id: string]: number | undefined;
   };
 }
