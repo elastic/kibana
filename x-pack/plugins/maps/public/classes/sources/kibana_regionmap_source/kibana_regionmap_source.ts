@@ -17,19 +17,26 @@ export const sourceTitle = i18n.translate('xpack.maps.source.kbnRegionMapTitle',
 });
 
 import { AbstractVectorSource, IVectorSource } from '../vector_source';
+import { KibanaRegionmapSourceDescriptor } from '../../../../common/descriptor_types/source_descriptor_types';
+import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 
 export interface IKibanaRegionSource extends IVectorSource {
   getVectorFileMeta(): Promise<unknown>;
 }
 
 export class KibanaRegionmapSource extends AbstractVectorSource implements IKibanaRegionSource {
-  static type = SOURCE_TYPES.REGIONMAP_FILE;
+  readonly _descriptor = KibanaRegionmapSourceDescriptor;
 
   static createDescriptor({ name }) {
     return {
-      type: KibanaRegionmapSource.type,
+      type: SOURCE_TYPES.REGIONMAP_FILE,
       name,
     };
+  }
+
+  constructor(descriptor: KibanaRegionmapSourceDescriptor, inspectorAdapters?: Adapters) {
+    super(descriptor, inspectorAdapters);
+    this._descriptor = descriptor;
   }
 
   createField({ fieldName }) {
