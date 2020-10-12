@@ -37,6 +37,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     describe('Discover', () => {
       before(async () => {
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.selectIndexPattern('shakespeare');
       });
 
       afterEach(async () => {
