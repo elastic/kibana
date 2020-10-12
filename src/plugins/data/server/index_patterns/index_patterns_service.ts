@@ -50,7 +50,6 @@ export class IndexPatternsService implements Plugin<void, IndexPatternsServiceSt
     const { uiSettings } = core;
 
     return {
-      // indexPatternsServiceFactory: async (kibanaRequest: KibanaRequest) => {
       indexPatternsServiceFactory: async (savedObjectsClient: SavedObjectsClientContract) => {
         const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
         const formats = await fieldFormats.fieldFormatServiceFactory(uiSettingsClient);
