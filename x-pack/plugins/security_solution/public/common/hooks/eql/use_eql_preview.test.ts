@@ -20,11 +20,11 @@ jest.mock('../../../common/lib/kibana');
 
 describe('useEqlPreview', () => {
   const params = {
-    to: '2020-10-04T15:00:54.368707900Z',
+    to: '2020-10-04T16:00:54.368707900Z',
     query: 'file where true',
     index: ['foo-*', 'bar-*'],
     interval: 'h' as Unit,
-    from: '2020-10-04T16:00:54.368707900Z',
+    from: '2020-10-04T15:00:54.368707900Z',
   };
 
   beforeEach(() => {

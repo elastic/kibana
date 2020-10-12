@@ -133,12 +133,6 @@ export const PreviewQuery = ({
     [dispatch, index, ruleType]
   );
 
-  const setTimeRange = useCallback((): void => {
-    dispatch({
-      type: 'setToFrom',
-    });
-  }, [dispatch]);
-
   const setTimeframeSelect = useCallback(
     (selection: Unit): void => {
       dispatch({
@@ -218,15 +212,18 @@ export const PreviewQuery = ({
     }
   }, [timeframe, matrixHistTotal, eqlQueryTotal, ruleType, setNoiseWarning]);
 
-  const handlePreviewEqlQuery = useCallback((): void => {
-    startEql({
-      index,
-      query: queryString,
-      from: fromTime,
-      to: toTime,
-      interval: timeframe,
-    });
-  }, [startEql, index, queryString, fromTime, toTime, timeframe]);
+  const handlePreviewEqlQuery = useCallback(
+    (to: string, from: string): void => {
+      startEql({
+        index,
+        query: queryString,
+        from,
+        to,
+        interval: timeframe,
+      });
+    },
+    [startEql, index, queryString, timeframe]
+  );
 
   const handleSelectPreviewTimeframe = useCallback(
     ({ target: { value } }: React.ChangeEvent<HTMLSelectElement>): void => {
@@ -236,16 +233,18 @@ export const PreviewQuery = ({
   );
 
   const handlePreviewClicked = useCallback((): void => {
-    setTimeRange();
+    const to = formatDate('now');
+    const from = formatDate(`now-1${timeframe}`);
+
     setWarnings([]);
     setShowHistogram(true);
 
     if (ruleType === 'eql') {
-      handlePreviewEqlQuery();
+      handlePreviewEqlQuery(to, from);
     } else {
-      startNonEql();
+      startNonEql(to, from);
     }
-  }, [setTimeRange, setWarnings, ruleType, setShowHistogram, handlePreviewEqlQuery, startNonEql]);
+  }, [setWarnings, setShowHistogram, ruleType, handlePreviewEqlQuery, startNonEql, timeframe]);
 
   return (
     <>
@@ -304,7 +303,7 @@ export const PreviewQuery = ({
           data-test-subj="previewThresholdQueryHistogram"
         />
       )}
-      {ruleType === 'eql' && showHistogram && !eqlQueryLoading && (
+      {ruleType === 'eql' && showHistogram && (
         <PreviewEqlQueryHistogram
           to={toTime}
           from={fromTime}

@@ -57,6 +57,15 @@ export const useEqlPreview = (): [
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
+        setResponse((prevResponse) => ({
+          ...prevResponse,
+          data: [],
+          inspect: {
+            dsl: [],
+            response: [],
+          },
+          totalCount: 0,
+        }));
         let searchSubscription$: Subscription | null = null;
         searchSubscription$ = data.search
           .search<EqlSearchStrategyRequest, EqlSearchStrategyResponse<EqlSearchResponse<Source>>>(
@@ -69,8 +78,8 @@ export const useEqlPreview = (): [
                   filter: {
                     range: {
                       '@timestamp': {
-                        gte: to,
-                        lte: from,
+                        gte: from,
+                        lte: to,
                         format: 'strict_date_optional_time',
                       },
                     },
@@ -94,9 +103,9 @@ export const useEqlPreview = (): [
               if (isCompleteResponse(res)) {
                 if (!didCancel.current) {
                   if (hasEqlSequenceQuery(query)) {
-                    setResponse(getSequenceAggs(res, interval, to, from, refetch.current));
+                    setResponse(getSequenceAggs(res, refetch.current));
                   } else {
-                    setResponse(getEqlAggsData(res, interval, to, from, refetch.current));
+                    setResponse(getEqlAggsData(res, interval, to, refetch.current));
                   }
                 }
               } else if (isErrorResponse(res)) {

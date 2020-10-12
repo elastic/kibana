@@ -52,12 +52,11 @@ export const getEqlAggsData = (
   response: EqlSearchStrategyResponse<EqlSearchResponse<Source>>,
   range: Unit,
   to: string,
-  from: string,
   refetch: inputsModel.Refetch
 ): EqlPreviewResponse => {
   const { dsl, response: inspectResponse } = formatInspect(response);
   // The upper bound of the timestamps
-  const relativeNow = Date.parse(from);
+  const relativeNow = Date.parse(to);
   const accumulator = getInterval(range, relativeNow);
   const events = response.rawResponse.body.hits.events ?? [];
   const totalCount = response.rawResponse.body.hits.total.value;
@@ -124,9 +123,6 @@ export const getInterval = (range: Unit, relativeNow: number): EqlAggBuckets => 
 
 export const getSequenceAggs = (
   response: EqlSearchStrategyResponse<EqlSearchResponse<Source>>,
-  range: Unit,
-  to: string,
-  from: string,
   refetch: inputsModel.Refetch
 ): EqlPreviewResponse => {
   const { dsl, response: inspectResponse } = formatInspect(response);

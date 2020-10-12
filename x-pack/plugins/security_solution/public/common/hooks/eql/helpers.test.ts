@@ -264,7 +264,6 @@ describe('eql/helpers', () => {
       const aggs = getEqlAggsData(
         mockResponse,
         'h',
-        '2020-10-04T15:00:00.368707900Z',
         '2020-10-04T16:00:00.368707900Z',
         jest.fn() as inputsModel.Refetch
       );
@@ -365,7 +364,6 @@ describe('eql/helpers', () => {
       const aggs = getEqlAggsData(
         response,
         'd',
-        '2020-10-03T23:50:00.368707900Z',
         '2020-10-04T23:50:00.368707900Z',
         jest.fn() as inputsModel.Refetch
       );
@@ -411,7 +409,6 @@ describe('eql/helpers', () => {
       const aggs = getEqlAggsData(
         mockResponse,
         'h',
-        '2020-10-04T15:00:00.368707900Z',
         '2020-10-04T16:00:00.368707900Z',
         jest.fn() as inputsModel.Refetch
       );
@@ -444,7 +441,6 @@ describe('eql/helpers', () => {
       const aggs = getEqlAggsData(
         response,
         'h',
-        '2020-10-04T15:00:00.368707900Z',
         '2020-10-04T16:00:00.368707900Z',
         jest.fn() as inputsModel.Refetch
       );
@@ -611,13 +607,7 @@ describe('eql/helpers', () => {
   describe('getSequenceAggs', () => {
     test('it aggregates events by sequences', () => {
       const mockResponse = getMockSequenceResponse();
-      const sequenceAggs = getSequenceAggs(
-        mockResponse,
-        'h',
-        '2020-10-04T15:00:00.368707900Z',
-        '2020-10-04T16:00:00.368707900Z',
-        jest.fn() as inputsModel.Refetch
-      );
+      const sequenceAggs = getSequenceAggs(mockResponse, jest.fn() as inputsModel.Refetch);
 
       expect(sequenceAggs.data).toEqual([
         { g: 'Seq. 1', x: '2020-10-04T15:16:54.368707900Z', y: 1 },

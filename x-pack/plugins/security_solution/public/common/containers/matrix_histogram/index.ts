@@ -57,7 +57,11 @@ export const useMatrixHistogram = ({
   startDate,
   threshold,
   skip = false,
-}: MatrixHistogramQueryProps): [boolean, UseMatrixHistogramArgs, () => void] => {
+}: MatrixHistogramQueryProps): [
+  boolean,
+  UseMatrixHistogramArgs,
+  (to: string, from: string) => void
+] => {
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
@@ -179,9 +183,19 @@ export const useMatrixHistogram = ({
     }
   }, [matrixHistogramRequest, hostsSearch, skip]);
 
-  const runMatrixHistogramSearch = useCallback(() => {
-    hostsSearch(matrixHistogramRequest);
-  }, [matrixHistogramRequest, hostsSearch]);
+  const runMatrixHistogramSearch = useCallback(
+    (to: string, from: string) => {
+      hostsSearch({
+        ...matrixHistogramRequest,
+        timerange: {
+          interval: '12h',
+          from,
+          to,
+        },
+      });
+    },
+    [matrixHistogramRequest, hostsSearch]
+  );
 
   return [loading, matrixHistogramResponse, runMatrixHistogramSearch];
 };
