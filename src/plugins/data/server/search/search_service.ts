@@ -194,11 +194,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
                 },
               } as RequestHandlerContext;
 
-              return this.search(
+              return this.search<SearchStrategyRequest, SearchStrategyResponse>(
                 searchStrategyRequest,
                 options,
                 fakeRequestHandlerContext
-              ).toPromise() as Promise<SearchStrategyResponse>;
+              ).toPromise();
             },
             // onResponse isn't used on the server, so we just return the original value
             onResponse: (req, res) => res,
@@ -241,7 +241,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     options: ISearchOptions,
     context: RequestHandlerContext
   ) => {
-    const strategy = this.getSearchStrategy(options.strategy || this.defaultSearchStrategyName);
+    const strategy = this.getSearchStrategy<SearchStrategyRequest, SearchStrategyResponse>(
+      options.strategy || this.defaultSearchStrategyName
+    );
 
     return strategy.search(searchRequest, options, context);
   };
