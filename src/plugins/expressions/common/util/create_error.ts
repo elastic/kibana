@@ -22,7 +22,7 @@ import { ExpressionValueError } from '../../common';
 type ErrorLike = Partial<Pick<Error, 'name' | 'message' | 'stack'>>;
 
 export const createError = (
-  err: string | Error | ErrorLike | ExpressionValueError['error']
+  err: string | Error | (ErrorLike & { original?: Error })
 ): ExpressionValueError => ({
   type: 'error',
   error: {

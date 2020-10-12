@@ -8,8 +8,14 @@ import { i18n } from '@kbn/i18n';
 
 import { ExpressionRenderError } from 'src/plugins/expressions/public';
 
+interface ElasticsearchErrorClause {
+  type: string;
+  reason: string;
+  caused_by?: ElasticsearchErrorClause;
+}
+
 interface RequestError extends Error {
-  body?: { attributes?: { error: { caused_by: { type: string; reason: string } } } };
+  body?: { attributes?: { error: ElasticsearchErrorClause } };
 }
 
 const isRequestError = (e: Error | RequestError): e is RequestError => {
@@ -19,18 +25,25 @@ const isRequestError = (e: Error | RequestError): e is RequestError => {
   return false;
 };
 
+function getNestedErrorClause({
+  type,
+  reason,
+  caused_by: causedBy,
+}: ElasticsearchErrorClause): { type: string; reason: string } {
+  if (causedBy) {
+    return getNestedErrorClause(causedBy);
+  }
+  return { type, reason };
+}
+
 export function getOriginalRequestErrorMessage(error?: ExpressionRenderError | null) {
-  return (
-    error &&
-    'original' in error &&
-    error.original &&
-    isRequestError(error.original) &&
-    i18n.translate('xpack.lens.editorFrame.expressionFailureMessage', {
-      defaultMessage: 'Request error: {causedByType}, {causedByReason}',
-      values: {
-        causedByType: error.original.body?.attributes?.error?.caused_by.type,
-        causedByReason: error.original.body?.attributes?.error?.caused_by.reason,
-      },
-    })
-  );
+  if (error && 'original' in error && error.original && isRequestError(error.original)) {
+    const rootError = getNestedErrorClause(error.original.body!.attributes!.error);
+    if (rootError.reason && rootError.type) {
+      return i18n.translate('xpack.lens.editorFrame.expressionFailureMessage', {
+        defaultMessage: 'Request error: {type}, {reason}',
+        values: rootError,
+      });
+    }
+  }
 }
