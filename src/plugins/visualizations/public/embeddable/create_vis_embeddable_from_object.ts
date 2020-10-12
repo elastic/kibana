@@ -25,7 +25,11 @@ import {
   VisualizeByReferenceInput,
   VisualizeSavedObjectAttributes,
 } from './visualize_embeddable';
-import { IContainer, ErrorEmbeddable } from '../../../../plugins/embeddable/public';
+import {
+  IContainer,
+  ErrorEmbeddable,
+  AttributeService,
+} from '../../../../plugins/embeddable/public';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import {
   getSavedVisualizationsLoader,
@@ -37,7 +41,6 @@ import {
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
 import { SavedVisualizationsLoader } from '../saved_visualizations';
-import { AttributeService } from '../../../dashboard/public';
 
 export const createVisEmbeddableFromObject = (deps: VisualizeEmbeddableFactoryDeps) => async (
   vis: Vis,
