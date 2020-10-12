@@ -40,6 +40,12 @@ export type Enabled = t.TypeOf<typeof enabled>;
 export const enabledOrUndefined = t.union([enabled, t.undefined]);
 export type EnabledOrUndefined = t.TypeOf<typeof enabledOrUndefined>;
 
+export const event_category_override = t.string;
+export type EventCategoryOverride = t.TypeOf<typeof event_category_override>;
+
+export const eventCategoryOverrideOrUndefined = t.union([event_category_override, t.undefined]);
+export type EventCategoryOverrideOrUndefined = t.TypeOf<typeof eventCategoryOverrideOrUndefined>;
+
 export const false_positives = t.array(t.string);
 export type FalsePositives = t.TypeOf<typeof false_positives>;
 
@@ -130,7 +136,7 @@ export type Query = t.TypeOf<typeof query>;
 export const queryOrUndefined = t.union([query, t.undefined]);
 export type QueryOrUndefined = t.TypeOf<typeof queryOrUndefined>;
 
-export const language = t.keyof({ kuery: null, lucene: null });
+export const language = t.keyof({ eql: null, kuery: null, lucene: null });
 export type Language = t.TypeOf<typeof language>;
 
 export const languageOrUndefined = t.union([language, t.undefined]);
@@ -294,10 +300,12 @@ export const toOrUndefined = t.union([to, t.undefined]);
 export type ToOrUndefined = t.TypeOf<typeof toOrUndefined>;
 
 export const type = t.keyof({
+  eql: null,
   machine_learning: null,
   query: null,
   saved_query: null,
   threshold: null,
+  threat_match: null,
 });
 export type Type = t.TypeOf<typeof type>;
 

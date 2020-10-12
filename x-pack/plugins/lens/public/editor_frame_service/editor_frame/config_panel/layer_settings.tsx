@@ -9,7 +9,7 @@ import { EuiPopover, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NativeRenderer } from '../../../native_renderer';
 import { Visualization, VisualizationLayerWidgetProps } from '../../../types';
-import { ToolbarButton } from '../../../toolbar_button';
+import { ToolbarButton } from '../../../shared_components';
 
 export function LayerSettings({
   layerId,

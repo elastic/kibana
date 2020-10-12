@@ -99,7 +99,7 @@ function buildRequest(req, config, esIndexPattern) {
       'aggregations.by_follower_index.buckets.by_shard_id.buckets.follower_lag_ops.value',
     ],
     body: {
-      sort: [{ timestamp: { order: 'desc' } }],
+      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
       query: {
         bool: {
           must: [
@@ -126,7 +126,7 @@ function buildRequest(req, config, esIndexPattern) {
         field: 'ccr_stats.follower_index',
         inner_hits: {
           name: 'by_shard',
-          sort: [{ timestamp: 'desc' }],
+          sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
           size: maxBucketSize,
           collapse: {
             field: 'ccr_stats.shard_id',

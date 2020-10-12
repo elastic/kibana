@@ -5,16 +5,12 @@
  */
 
 import { EuiButtonIcon, EuiPopover, EuiSelectableOption, EuiToolTip } from '@elastic/eui';
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 
 import { OpenTimelineResult } from '../../open_timeline/types';
 import { SelectableTimeline } from '../selectable_timeline';
 import * as i18n from '../translations';
-import { timelineActions, timelineSelectors } from '../../../../timelines/store/timeline';
 import { TimelineType } from '../../../../../common/types/timeline';
-import { State } from '../../../../common/store';
-import { setInsertTimeline } from '../../../store/timeline/actions';
 
 interface InsertTimelinePopoverProps {
   isDisabled: boolean;
@@ -33,24 +29,7 @@ export const InsertTimelinePopoverComponent: React.FC<Props> = ({
   hideUntitled = false,
   onTimelineChange,
 }) => {
-  const dispatch = useDispatch();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
-  const insertTimeline = useSelector((state: State) => {
-    return timelineSelectors.selectInsertTimeline(state);
-  });
-  useEffect(() => {
-    if (insertTimeline != null) {
-      dispatch(timelineActions.showTimeline({ id: insertTimeline.timelineId, show: false }));
-      onTimelineChange(
-        insertTimeline.timelineTitle,
-        insertTimeline.timelineSavedObjectId,
-        insertTimeline.graphEventId
-      );
-      dispatch(setInsertTimeline(null));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [insertTimeline, dispatch]);
 
   const handleClosePopover = useCallback(() => {
     setIsPopoverOpen(false);

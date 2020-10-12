@@ -128,7 +128,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
       }
 
       return res.ok({
-        body: jobOutput,
+        body: jobOutput || {},
         headers: {
           'content-type': 'application/json',
         },

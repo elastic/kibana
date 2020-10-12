@@ -43,7 +43,6 @@ export const networkTopCountries: SecuritySolutionFactory<NetworkQueries.topCoun
     const edges = networkTopCountriesEdges.splice(cursorStart, querySize - cursorStart);
     const inspect = {
       dsl: [inspectStringifyObject(buildTopCountriesQuery(options))],
-      response: [inspectStringifyObject(response)],
     };
     const showMorePagesIndicator = totalCount > fakeTotalCount;
 
@@ -52,7 +51,7 @@ export const networkTopCountries: SecuritySolutionFactory<NetworkQueries.topCoun
       edges,
       inspect,
       pageInfo: {
-        activePage: activePage ? activePage : 0,
+        activePage: activePage ?? 0,
         fakeTotalCount,
         showMorePagesIndicator,
       },

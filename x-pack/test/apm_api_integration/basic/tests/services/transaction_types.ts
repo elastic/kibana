@@ -5,15 +5,20 @@
  */
 
 import expect from '@kbn/expect';
+import archives_metadata from '../../../common/archives_metadata';
+import { expectSnapshot } from '../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
+  const archiveName = 'apm_8.0.0';
+  const metadata = archives_metadata[archiveName];
+
   // url parameters
-  const start = encodeURIComponent('2020-06-29T06:45:00.000Z');
-  const end = encodeURIComponent('2020-06-29T06:49:00.000Z');
+  const start = encodeURIComponent(metadata.start);
+  const end = encodeURIComponent(metadata.end);
 
   describe('Transaction types', () => {
     describe('when data is not loaded ', () => {
@@ -23,13 +28,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         expect(response.status).to.be(200);
-        expect(response.body).to.eql({ transactionTypes: [] });
+
+        expect(response.body.transactionTypes.length).to.be(0);
       });
     });
 
     describe('when data is loaded', () => {
-      before(() => esArchiver.load('8.0.0'));
-      after(() => esArchiver.unload('8.0.0'));
+      before(() => esArchiver.load(archiveName));
+      after(() => esArchiver.unload(archiveName));
 
       it('handles empty state', async () => {
         const response = await supertest.get(
@@ -37,7 +43,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         expect(response.status).to.be(200);
-        expect(response.body).to.eql({ transactionTypes: ['request', 'Worker'] });
+        expect(response.body.transactionTypes.length).to.be.greaterThan(0);
+
+        expectSnapshot(response.body).toMatchInline(`
+          Object {
+            "transactionTypes": Array [
+              "Worker",
+              "request",
+            ],
+          }
+        `);
       });
     });
   });

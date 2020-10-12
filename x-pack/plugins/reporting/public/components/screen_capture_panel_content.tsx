@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { EuiSpacer, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 import { ToastsSetup } from 'src/core/public';
-import { ReportingPanelContent } from './reporting_panel_content';
+import { BaseParams } from '../../common/types';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
+import { ReportingPanelContent } from './reporting_panel_content';
 
 interface Props {
   apiClient: ReportingAPIClient;
@@ -17,7 +18,7 @@ interface Props {
   reportType: string;
   objectId?: string;
   objectType: string;
-  getJobParams: () => any;
+  getJobParams: () => BaseParams;
   isDirty: boolean;
   onClose: () => void;
 }
@@ -83,7 +84,7 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
     );
   };
 
-  private handlePrintLayoutChange = (evt: any) => {
+  private handlePrintLayoutChange = (evt: EuiSwitchEvent) => {
     this.setState({ usePrintLayout: evt.target.checked });
   };
 

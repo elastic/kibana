@@ -5,12 +5,12 @@
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { TransformPivotConfig } from '../../../../plugins/transform/public/app/common';
+import { TransformPivotConfig } from '../../../../plugins/transform/common/types/transform';
 
 function getTransformConfig(): TransformPivotConfig {
   const date = Date.now();
   return {
-    id: `ec_2_${date}`,
+    id: `ec_cloning_${date}`,
     source: { index: ['ft_ecommerce'] },
     pivot: {
       group_by: { category: { terms: { field: 'category.keyword' } } },
@@ -18,6 +18,10 @@ function getTransformConfig(): TransformPivotConfig {
     },
     description:
       'ecommerce batch transform with avg(products.base_price) grouped by terms(category.keyword)',
+    frequency: '3s',
+    settings: {
+      max_page_search_size: 250,
+    },
     dest: { index: `user-ec_2_${date}` },
   };
 }
@@ -32,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/ecommerce');
       await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
-      await transform.api.createAndRunTransform(transformConfig);
+      await transform.api.createAndRunTransform(transformConfig.id, transformConfig);
       await transform.testResources.setKibanaTimeZoneToUTC();
 
       await transform.securityUI.loginAsTransformPowerUser();
@@ -155,7 +159,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           await transform.testExecution.logTestStep('should input the transform description');
           await transform.wizard.assertTransformDescriptionInputExists();
-          await transform.wizard.assertTransformDescriptionValue('');
+          await transform.wizard.assertTransformDescriptionValue(transformConfig.description!);
           await transform.wizard.setTransformDescription(testData.transformDescription);
 
           await transform.testExecution.logTestStep('should input the destination index');
@@ -172,6 +176,15 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.testExecution.logTestStep('should display the continuous mode switch');
           await transform.wizard.assertContinuousModeSwitchExists();
           await transform.wizard.assertContinuousModeSwitchCheckState(false);
+
+          await transform.testExecution.logTestStep(
+            'should display the advanced settings and show pre-filled configuration'
+          );
+          await transform.wizard.openTransformAdvancedSettingsAccordion();
+          await transform.wizard.assertTransformFrequencyValue(transformConfig.frequency!);
+          await transform.wizard.assertTransformMaxPageSearchSizeValue(
+            transformConfig.settings!.max_page_search_size!
+          );
 
           await transform.testExecution.logTestStep('should load the create step');
           await transform.wizard.advanceToCreateStep();

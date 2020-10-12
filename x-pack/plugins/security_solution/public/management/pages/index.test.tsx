@@ -15,10 +15,21 @@ jest.mock('../../common/hooks/endpoint/ingest_enabled');
 
 describe('when in the Admistration tab', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
+  let coreStart: AppContextTestRender['coreStart'];
 
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
+    coreStart = mockedContext.coreStart;
     render = () => mockedContext.render(<ManagementContainer />);
+    coreStart.http.get.mockImplementation(() =>
+      Promise.resolve({
+        response: [
+          {
+            name: 'endpoint',
+          },
+        ],
+      })
+    );
   });
 
   it('should display the No Permissions view when Ingest is OFF', async () => {

@@ -18,6 +18,7 @@
     "kibanaUtils",
     "kibanaReact",
     "home",
-    "discover"
+    "discover",
+    "visDefaultEditor"
   ]
 }

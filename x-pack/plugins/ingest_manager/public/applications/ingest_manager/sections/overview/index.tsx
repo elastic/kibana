@@ -47,7 +47,7 @@ export const IngestManagerOverview: React.FunctionComponent = () => {
                   <h1>
                     <FormattedMessage
                       id="xpack.ingestManager.overviewPageTitle"
-                      defaultMessage="Ingest Manager"
+                      defaultMessage="Fleet"
                     />
                   </h1>
                 </EuiTitle>

@@ -3,11 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { buildHostDetailsQuery as buildQuery } from './query.host_details.dsl';
+import { buildHostDetailsQuery } from './query.host_details.dsl';
 import { mockOptions, expectedDsl } from './__mocks__/';
 
-describe('buildQuery', () => {
+describe('buildHostDetailsQuery', () => {
   test('build query from options correctly', () => {
-    expect(buildQuery(mockOptions)).toEqual(expectedDsl);
+    expect(buildHostDetailsQuery(mockOptions)).toEqual(expectedDsl);
   });
 });

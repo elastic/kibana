@@ -13,6 +13,8 @@ import {
   Position,
   timeFormatter,
   BrushEndListener,
+  XYChartElementEvent,
+  ElementClickListener,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
@@ -23,12 +25,15 @@ import { HistogramPoint } from '../../../../common/runtime_types';
 import { getChartDateLabel, seriesHasDownValues } from '../../../lib/helper';
 import { useUrlParams } from '../../../hooks';
 import { UptimeThemeContext } from '../../../contexts';
+import { getDateRangeFromChartElement } from './utils';
 
 export interface MonitorBarSeriesProps {
   /**
    * The timeseries data to display.
    */
   histogramSeries: HistogramPoint[] | null;
+
+  minInterval: number;
 }
 
 /**
@@ -36,7 +41,7 @@ export interface MonitorBarSeriesProps {
  * so we will only render the series component if there are down counts for the selected monitor.
  * @param props - the values for the monitor this chart visualizes
  */
-export const MonitorBarSeries = ({ histogramSeries }: MonitorBarSeriesProps) => {
+export const MonitorBarSeries = ({ histogramSeries, minInterval }: MonitorBarSeriesProps) => {
   const {
     colors: { danger },
     chartTheme,
@@ -55,14 +60,23 @@ export const MonitorBarSeries = ({ histogramSeries }: MonitorBarSeriesProps) => 
     });
   };
 
+  const onBarClicked: ElementClickListener = ([elementData]) => {
+    updateUrlParams(getDateRangeFromChartElement(elementData as XYChartElementEvent, minInterval));
+  };
+
   const id = 'downSeries';
 
   return seriesHasDownValues(histogramSeries) ? (
     <div style={{ height: 50, width: '100%', maxWidth: '1200px', marginRight: 15 }}>
       <Chart>
         <Settings
-          xDomain={{ min: absoluteDateRangeStart, max: absoluteDateRangeEnd }}
+          xDomain={{
+            minInterval,
+            min: absoluteDateRangeStart,
+            max: absoluteDateRangeEnd,
+          }}
           onBrushEnd={onBrushEnd}
+          onElementClick={onBarClicked}
           {...chartTheme}
         />
         <Axis

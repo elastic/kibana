@@ -26,6 +26,7 @@ exports[`it renders without blowing up 1`] = `
       grow={false}
     >
       <EuiLink
+        data-test-subj="showHidePrivilege"
         onClick={[Function]}
       >
         <FormattedMessage

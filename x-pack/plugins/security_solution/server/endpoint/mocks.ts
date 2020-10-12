@@ -11,6 +11,7 @@ import {
   AgentService,
   IngestManagerStartContract,
   ExternalCallback,
+  PackageService,
 } from '../../../ingest_manager/server';
 import { createPackagePolicyServiceMock } from '../../../ingest_manager/server/mocks';
 import { createMockConfig } from '../lib/detection_engine/routes/__mocks__';
@@ -58,6 +59,7 @@ export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
 > => {
   return {
     agentService: createMockAgentService(),
+    packageService: createMockPackageService(),
     logger: loggingSystemMock.create().get('mock_endpoint_app_context'),
     savedObjectsStart: savedObjectsServiceMock.createStartContract(),
     manifestManager: getManifestManagerMock(),
@@ -65,6 +67,16 @@ export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
       ReturnType<IngestManagerStartContract['registerExternalCallback']>,
       Parameters<IngestManagerStartContract['registerExternalCallback']>
     >(),
+  };
+};
+
+/**
+ * Create mock PackageService
+ */
+
+export const createMockPackageService = (): jest.Mocked<PackageService> => {
+  return {
+    getInstalledEsAssetReferences: jest.fn(),
   };
 };
 
@@ -95,6 +107,7 @@ export const createMockIngestManagerStartContract = (
       getESIndexPattern: jest.fn().mockResolvedValue(indexPattern),
     },
     agentService: createMockAgentService(),
+    packageService: createMockPackageService(),
     registerExternalCallback: jest.fn((...args: ExternalCallback) => {}),
     packagePolicyService: createPackagePolicyServiceMock(),
   };

@@ -9,8 +9,8 @@ import { set } from '@elastic/safer-lodash-set/fp';
 import { mergeFieldsWithHit } from '../../../../../utils/build_query';
 import {
   ProcessHits,
-  UncommonProcessesEdges,
-  UncommonProcessHit,
+  HostsUncommonProcessesEdges,
+  HostsUncommonProcessHit,
 } from '../../../../../../common/search_strategy/security_solution/hosts/uncommon_processes';
 import { toArray } from '../../../../helpers/to_array';
 import { HostHits } from '../../../../../../common/search_strategy';
@@ -25,7 +25,9 @@ export const uncommonProcessesFields = [
   'hosts.name',
 ];
 
-export const getHits = (buckets: readonly UncommonProcessBucket[]): readonly UncommonProcessHit[] =>
+export const getHits = (
+  buckets: readonly UncommonProcessBucket[]
+): readonly HostsUncommonProcessHit[] =>
   buckets.map((bucket: Readonly<UncommonProcessBucket>) => ({
     _id: bucket.process.hits.hits[0]._id,
     _index: bucket.process.hits.hits[0]._index,
@@ -57,10 +59,10 @@ export const getHosts = (buckets: ReadonlyArray<{ key: string; host: HostHits }>
 
 export const formatUncommonProcessesData = (
   fields: readonly string[],
-  hit: UncommonProcessHit,
+  hit: HostsUncommonProcessHit,
   fieldMap: Readonly<Record<string, string>>
-): UncommonProcessesEdges =>
-  fields.reduce<UncommonProcessesEdges>(
+): HostsUncommonProcessesEdges =>
+  fields.reduce<HostsUncommonProcessesEdges>(
     (flattenedFields, fieldName) => {
       flattenedFields.node._id = hit._id;
       flattenedFields.node.instances = getOr(0, 'total.value', hit);

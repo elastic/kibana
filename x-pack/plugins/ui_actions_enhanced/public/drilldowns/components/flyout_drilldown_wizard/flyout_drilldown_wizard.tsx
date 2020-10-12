@@ -16,11 +16,15 @@ import {
   txtEditDrilldownTitle,
 } from './i18n';
 import { DrilldownHelloBar } from '../drilldown_hello_bar';
-import { ActionFactory, BaseActionFactoryContext } from '../../../dynamic_actions';
+import {
+  ActionFactory,
+  BaseActionConfig,
+  BaseActionFactoryContext,
+} from '../../../dynamic_actions';
 import { Trigger, TriggerId } from '../../../../../../../src/plugins/ui_actions/public';
 import { ActionFactoryPlaceContext } from '../types';
 
-export interface DrilldownWizardConfig<ActionConfig extends object = object> {
+export interface DrilldownWizardConfig<ActionConfig extends BaseActionConfig = BaseActionConfig> {
   name: string;
   actionFactory?: ActionFactory;
   actionConfig?: ActionConfig;
@@ -28,7 +32,7 @@ export interface DrilldownWizardConfig<ActionConfig extends object = object> {
 }
 
 export interface FlyoutDrilldownWizardProps<
-  CurrentActionConfig extends object = object,
+  CurrentActionConfig extends BaseActionConfig = BaseActionConfig,
   ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
 > {
   drilldownActionFactories: ActionFactory[];
@@ -71,7 +75,7 @@ function useWizardConfigState(
   DrilldownWizardConfig,
   {
     setName: (name: string) => void;
-    setActionConfig: (actionConfig: object) => void;
+    setActionConfig: (actionConfig: BaseActionConfig) => void;
     setActionFactory: (actionFactory?: ActionFactory) => void;
     setSelectedTriggers: (triggers?: TriggerId[]) => void;
   }
@@ -100,7 +104,7 @@ function useWizardConfigState(
           name,
         });
       },
-      setActionConfig: (actionConfig: object) => {
+      setActionConfig: (actionConfig: BaseActionConfig) => {
         setWizardConfig({
           ...wizardConfig,
           actionConfig,
@@ -108,12 +112,12 @@ function useWizardConfigState(
       },
       setActionFactory: (actionFactory?: ActionFactory) => {
         if (actionFactory) {
+          const actionConfig = (actionConfigCache[actionFactory.id] ??
+            actionFactory.createConfig(actionFactoryContext)) as BaseActionConfig;
           setWizardConfig({
             ...wizardConfig,
             actionFactory,
-            actionConfig:
-              actionConfigCache[actionFactory.id] ??
-              actionFactory.createConfig(actionFactoryContext),
+            actionConfig,
             selectedTriggers: [],
           });
         } else {
@@ -141,7 +145,9 @@ function useWizardConfigState(
   ];
 }
 
-export function FlyoutDrilldownWizard<CurrentActionConfig extends object = object>({
+export function FlyoutDrilldownWizard<
+  CurrentActionConfig extends BaseActionConfig = BaseActionConfig
+>({
   onClose,
   onBack,
   onSubmit = () => {},
@@ -224,7 +230,7 @@ export function FlyoutDrilldownWizard<CurrentActionConfig extends object = objec
         actionFactories={drilldownActionFactories}
         actionFactoryContext={actionFactoryContext}
         onSelectedTriggersChange={setSelectedTriggers}
-        supportedTriggers={supportedTriggers}
+        triggers={supportedTriggers}
         getTriggerInfo={getTrigger}
         triggerPickerDocsLink={triggerPickerDocsLink}
       />

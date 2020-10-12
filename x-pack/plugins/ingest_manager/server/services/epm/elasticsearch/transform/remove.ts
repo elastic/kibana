@@ -12,7 +12,7 @@ export const stopTransforms = async (transformIds: string[], callCluster: CallES
   for (const transformId of transformIds) {
     await callCluster('transport.request', {
       method: 'POST',
-      path: `_transform/${transformId}/_stop`,
+      path: `/_transform/${transformId}/_stop`,
       query: 'force=true',
       ignore: [404],
     });
@@ -25,13 +25,35 @@ export const deleteTransforms = async (
 ) => {
   await Promise.all(
     transformIds.map(async (transformId) => {
+      // get the index the transform
+      const transformResponse: {
+        count: number;
+        transforms: Array<{
+          dest: {
+            index: string;
+          };
+        }>;
+      } = await callCluster('transport.request', {
+        method: 'GET',
+        path: `/_transform/${transformId}`,
+      });
+
       await stopTransforms([transformId], callCluster);
       await callCluster('transport.request', {
         method: 'DELETE',
         query: 'force=true',
-        path: `_transform/${transformId}`,
+        path: `/_transform/${transformId}`,
         ignore: [404],
       });
+
+      // expect this to be 1
+      for (const transform of transformResponse.transforms) {
+        await callCluster('transport.request', {
+          method: 'DELETE',
+          path: `/${transform?.dest?.index}`,
+          ignore: [404],
+        });
+      }
     })
   );
 };

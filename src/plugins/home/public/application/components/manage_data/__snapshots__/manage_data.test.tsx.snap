@@ -9,6 +9,7 @@ exports[`ManageData render 1`] = `
   <section
     aria-labelledby="homDataManage__title"
     className="homDataManage"
+    data-test-subj="homDataManage"
   >
     <EuiTitle
       size="s"
@@ -89,3 +90,5 @@ exports[`ManageData render 1`] = `
   </section>
 </Fragment>
 `;
+
+exports[`ManageData render empty without any features 1`] = `<Fragment />`;

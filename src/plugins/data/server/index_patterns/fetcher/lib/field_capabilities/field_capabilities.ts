@@ -32,14 +32,20 @@ import { FieldDescriptor } from '../../index_patterns_fetcher';
  *  @param  {Function} callCluster bound function for accessing an es client
  *  @param  {Array}  [indices=[]]  the list of indexes to check
  *  @param  {Array}  [metaFields=[]] the list of internal fields to include
+ *  @param  {Object} fieldCapsOptions
  *  @return {Promise<Array<FieldDescriptor>>}
  */
 export async function getFieldCapabilities(
   callCluster: LegacyAPICaller,
   indices: string | string[] = [],
-  metaFields: string[] = []
+  metaFields: string[] = [],
+  fieldCapsOptions?: { allowNoIndices: boolean }
 ) {
-  const esFieldCaps: FieldCapsResponse = await callFieldCapsApi(callCluster, indices);
+  const esFieldCaps: FieldCapsResponse = await callFieldCapsApi(
+    callCluster,
+    indices,
+    fieldCapsOptions
+  );
   const fieldsFromFieldCapsByName = keyBy(readFieldCapsResponse(esFieldCaps), 'name');
 
   const allFieldsUnsorted = Object.keys(fieldsFromFieldCapsByName)

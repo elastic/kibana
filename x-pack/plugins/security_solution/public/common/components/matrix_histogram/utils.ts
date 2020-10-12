@@ -8,7 +8,7 @@ import { get, groupBy, map, toPairs } from 'lodash/fp';
 
 import { UpdateDateRange, ChartSeriesData } from '../charts/common';
 import { MatrixHistogramMappingTypes, BarchartConfigs } from './types';
-import { MatrixOverTimeHistogramData } from '../../../graphql/types';
+import { MatrixHistogramData } from '../../../../common/search_strategy';
 import { histogramDateTimeFormatter } from '../utils';
 
 interface GetBarchartConfigsProps {
@@ -19,6 +19,7 @@ interface GetBarchartConfigsProps {
   onBrushEnd: UpdateDateRange;
   yTickFormatter?: (value: number) => string;
   showLegend?: boolean;
+  yTitle?: string | undefined;
 }
 
 export const DEFAULT_CHART_HEIGHT = 174;
@@ -32,6 +33,7 @@ export const getBarchartConfigs = ({
   onBrushEnd,
   yTickFormatter,
   showLegend,
+  yTitle,
 }: GetBarchartConfigsProps): BarchartConfigs => ({
   series: {
     xScaleType: ScaleType.Time,
@@ -43,6 +45,7 @@ export const getBarchartConfigs = ({
     yTickFormatter: yTickFormatter != null ? yTickFormatter : DEFAULT_Y_TICK_FORMATTER,
     tickSize: 8,
   },
+  yAxisTitle: yTitle,
   settings: {
     legendPosition: legendPosition ?? Position.Right,
     onBrushEnd,
@@ -84,14 +87,14 @@ export const defaultLegendColors = [
 
 export const formatToChartDataItem = ([key, value]: [
   string,
-  MatrixOverTimeHistogramData[]
+  MatrixHistogramData[]
 ]): ChartSeriesData => ({
   key,
   value,
 });
 
 export const getCustomChartData = (
-  data: MatrixOverTimeHistogramData[] | null,
+  data: MatrixHistogramData[] | null,
   mapping?: MatrixHistogramMappingTypes
 ): ChartSeriesData[] => {
   if (!data) return [];

@@ -23,7 +23,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { TransformId } from '../../../../../../common';
+import { TransformId } from '../../../../../../common/types/transform';
 
 import {
   useRefreshTransformList,
@@ -189,7 +189,11 @@ export const TransformList: FC<Props> = ({
       </EuiButtonEmpty>
     </div>,
     <div key="stopAction" className="transform__BulkActionItem">
-      <EuiButtonEmpty onClick={() => stopTransforms(transformSelection)}>
+      <EuiButtonEmpty
+        onClick={() =>
+          stopTransforms(transformSelection.map((t) => ({ id: t.id, state: t.stats.state })))
+        }
+      >
         <StopActionName items={transformSelection} />
       </EuiButtonEmpty>
     </div>,

@@ -71,7 +71,8 @@ describe('copy to space', () => {
     const log = loggingSystemMock.create().get('spaces');
 
     const coreStart = coreMock.createStart();
-    coreStart.savedObjects = createMockSavedObjectsService(spaces);
+    const { savedObjects } = createMockSavedObjectsService(spaces);
+    coreStart.savedObjects = savedObjects;
 
     const service = new SpacesService(log);
     const spacesService = await service.setup({
@@ -102,6 +103,7 @@ describe('copy to space', () => {
       getImportExportObjectLimit: () => 1000,
       log,
       spacesService,
+      authorization: null, // not needed for this route
     });
 
     const [

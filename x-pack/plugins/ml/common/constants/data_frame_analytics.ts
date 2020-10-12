@@ -4,4 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export const ANALYSIS_CONFIG_TYPE = {
+  OUTLIER_DETECTION: 'outlier_detection',
+  REGRESSION: 'regression',
+  CLASSIFICATION: 'classification',
+} as const;
 export const DEFAULT_RESULTS_FIELD = 'ml';

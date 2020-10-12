@@ -5,25 +5,25 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import chartDonutSVG from '../assets/chart_donut.svg';
-import chartPieSVG from '../assets/chart_pie.svg';
-import chartTreemapSVG from '../assets/chart_treemap.svg';
+import { LensIconChartDonut } from '../assets/chart_donut';
+import { LensIconChartPie } from '../assets/chart_pie';
+import { LensIconChartTreemap } from '../assets/chart_treemap';
 
 export const CHART_NAMES = {
   donut: {
-    icon: chartDonutSVG,
+    icon: LensIconChartDonut,
     label: i18n.translate('xpack.lens.pie.donutLabel', {
       defaultMessage: 'Donut',
     }),
   },
   pie: {
-    icon: chartPieSVG,
+    icon: LensIconChartPie,
     label: i18n.translate('xpack.lens.pie.pielabel', {
       defaultMessage: 'Pie',
     }),
   },
   treemap: {
-    icon: chartTreemapSVG,
+    icon: LensIconChartTreemap,
     label: i18n.translate('xpack.lens.pie.treemaplabel', {
       defaultMessage: 'Treemap',
     }),
@@ -33,4 +33,4 @@ export const CHART_NAMES = {
 export const MAX_PIE_BUCKETS = 3;
 export const MAX_TREEMAP_BUCKETS = 2;
 
-export const DEFAULT_PERCENT_DECIMALS = 3;
+export const DEFAULT_PERCENT_DECIMALS = 2;

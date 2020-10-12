@@ -59,6 +59,7 @@ interface MatrixHistogramBasicProps {
 export interface MatrixHistogramQueryProps {
   endDate: string;
   errorMessage: string;
+  indexNames: string[];
   filterQuery?: ESQuery | string | undefined;
   setAbsoluteRangeDatePicker?: ActionCreator<{
     id: InputsModelId;
@@ -68,8 +69,8 @@ export interface MatrixHistogramQueryProps {
   setAbsoluteRangeDatePickerTarget?: InputsModelId;
   stackByField: string;
   startDate: string;
-  indexToAdd?: string[] | null;
   histogramType: MatrixHistogramType;
+  threshold?: { field: string | undefined; value: number } | undefined;
 }
 
 export interface MatrixHistogramProps extends MatrixHistogramBasicProps {
@@ -104,6 +105,7 @@ export interface BarchartConfigs {
     yTickFormatter: TickFormatter;
     tickSize: number;
   };
+  yAxisTitle: string | undefined;
   settings: {
     legendPosition: Position;
     onBrushEnd: UpdateDateRange;

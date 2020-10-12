@@ -53,7 +53,7 @@ export const expectedDsl = {
     query: {
       bool: {
         filter: [
-          '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
+          { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
           {
             range: {
               '@timestamp': {

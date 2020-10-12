@@ -5,7 +5,6 @@
  */
 
 import { Dispatch, SetStateAction } from 'react';
-import { SearchResponse } from 'elasticsearch';
 
 import { EuiDataGridPaginationProps, EuiDataGridSorting, EuiDataGridColumn } from '@elastic/eui';
 
@@ -42,16 +41,6 @@ export type RenderCellValue = ({
 export type EsSorting = Dictionary<{
   order: 'asc' | 'desc';
 }>;
-
-// The types specified in `@types/elasticsearch` are out of date and still have `total: number`.
-export interface SearchResponse7 extends SearchResponse<any> {
-  hits: SearchResponse<any>['hits'] & {
-    total: {
-      value: number;
-      relation: string;
-    };
-  };
-}
 
 export interface UseIndexDataReturnType
   extends Pick<

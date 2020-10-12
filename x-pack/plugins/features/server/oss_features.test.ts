@@ -6,7 +6,7 @@
 
 import { buildOSSFeatures } from './oss_features';
 import { featurePrivilegeIterator } from '../../security/server/authorization';
-import { Feature } from '.';
+import { KibanaFeature } from '.';
 
 describe('buildOSSFeatures', () => {
   it('returns features including timelion', () => {
@@ -48,7 +48,7 @@ Array [
   features.forEach((featureConfig) => {
     it(`returns the ${featureConfig.id} feature augmented with appropriate sub feature privileges`, () => {
       const privileges = [];
-      for (const featurePrivilege of featurePrivilegeIterator(new Feature(featureConfig), {
+      for (const featurePrivilege of featurePrivilegeIterator(new KibanaFeature(featureConfig), {
         augmentWithSubFeaturePrivileges: true,
       })) {
         privileges.push(featurePrivilege);

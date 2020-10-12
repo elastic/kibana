@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PaletteOutput } from 'src/plugins/charts/public';
 import { KibanaDatatableColumn } from 'src/plugins/expressions/public';
 import { LensMultiTable } from '../types';
 
@@ -28,6 +29,8 @@ export interface PieVisualizationState {
 }
 
 export type PieExpressionArgs = SharedLayerState & {
+  title?: string;
+  description?: string;
   shape: 'pie' | 'donut' | 'treemap';
   hideLabels: boolean;
   palette: PaletteOutput;

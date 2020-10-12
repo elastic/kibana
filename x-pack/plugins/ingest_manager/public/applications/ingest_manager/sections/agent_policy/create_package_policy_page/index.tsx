@@ -56,12 +56,10 @@ const StepsWithLessPadding = styled(EuiSteps)`
 export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   const {
     notifications,
-    chrome: { getIsNavDrawerLocked$ },
-    uiSettings,
     application: { navigateToApp },
   } = useCore();
   const {
-    fleet: { enabled: isFleetEnabled },
+    agents: { enabled: isFleetEnabled },
   } = useConfig();
   const {
     params: { policyId, pkgkey },
@@ -70,15 +68,6 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   const history = useHistory();
   const routeState = useIntraAppState<CreatePackagePolicyRouteState>();
   const from: CreatePackagePolicyFrom = policyId ? 'policy' : 'package';
-  const [isNavDrawerLocked, setIsNavDrawerLocked] = useState(false);
-
-  useEffect(() => {
-    const subscription = getIsNavDrawerLocked$().subscribe((newIsNavDrawerLocked: boolean) => {
-      setIsNavDrawerLocked(newIsNavDrawerLocked);
-    });
-
-    return () => subscription.unsubscribe();
-  });
 
   // Agent policy and package info states
   const [agentPolicy, setAgentPolicy] = useState<AgentPolicy>();
@@ -253,7 +242,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
 
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.ingestManager.createPackagePolicy.addedNotificationTitle', {
-          defaultMessage: `Successfully added '{packagePolicyName}'`,
+          defaultMessage: `'{packagePolicyName}' integration added.`,
           values: {
             packagePolicyName: packagePolicy.name,
           },
@@ -261,7 +250,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
         text:
           agentCount && agentPolicy
             ? i18n.translate('xpack.ingestManager.createPackagePolicy.addedNotificationMessage', {
-                defaultMessage: `Fleet will deploy updates to all agents that use the '{agentPolicyName}' policy`,
+                defaultMessage: `Fleet will deploy updates to all agents that use the '{agentPolicyName}' policy.`,
                 values: {
                   agentPolicyName: agentPolicy.name,
                 },
@@ -398,16 +387,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
           )}
       <StepsWithLessPadding steps={steps} />
       <EuiSpacer size="l" />
-      {/* TODO #64541 - Remove classes */}
-      <EuiBottomBar
-        className={
-          uiSettings.get('pageNavigation') === 'legacy'
-            ? isNavDrawerLocked
-              ? 'ingestManager__bottomBar-isNavDrawerLocked'
-              : 'ingestManager__bottomBar'
-            : undefined
-        }
-      >
+      <EuiBottomBar>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
             {!isLoadingSecondStep && agentPolicy && packageInfo && formState === 'INVALID' ? (

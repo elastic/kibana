@@ -72,8 +72,10 @@ it(`#setup returns exposed services`, () => {
     loggers: loggingSystemMock.create(),
     kibanaIndexName,
     packageVersion: 'some-version',
+    buildNumber: 42,
     features: mockFeaturesSetup,
     getSpacesService: mockGetSpacesService,
+    getCurrentUser: jest.fn(),
   });
 
   expect(authz.actions.version).toBe('version:some-version');
@@ -129,14 +131,16 @@ describe('#start', () => {
       loggers: loggingSystemMock.create(),
       kibanaIndexName,
       packageVersion: 'some-version',
+      buildNumber: 42,
       features: featuresPluginMock.createSetup(),
       getSpacesService: jest
         .fn()
         .mockReturnValue({ getSpaceId: jest.fn(), namespaceToSpaceId: jest.fn() }),
+      getCurrentUser: jest.fn(),
     });
 
     const featuresStart = featuresPluginMock.createStart();
-    featuresStart.getFeatures.mockReturnValue([]);
+    featuresStart.getKibanaFeatures.mockReturnValue([]);
 
     authorizationService.start({
       clusterClient: mockClusterClient,
@@ -199,14 +203,17 @@ it('#stop unsubscribes from license and ES updates.', async () => {
     loggers: loggingSystemMock.create(),
     kibanaIndexName,
     packageVersion: 'some-version',
+    buildNumber: 42,
     features: featuresPluginMock.createSetup(),
     getSpacesService: jest
       .fn()
       .mockReturnValue({ getSpaceId: jest.fn(), namespaceToSpaceId: jest.fn() }),
+    getCurrentUser: jest.fn(),
   });
 
   const featuresStart = featuresPluginMock.createStart();
-  featuresStart.getFeatures.mockReturnValue([]);
+  featuresStart.getKibanaFeatures.mockReturnValue([]);
+
   authorizationService.start({
     clusterClient: mockClusterClient,
     features: featuresStart,

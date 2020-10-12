@@ -7,3 +7,4 @@
 export { appSelectors } from './app';
 export { dragAndDropSelectors } from './drag_and_drop';
 export { inputsSelectors } from './inputs';
+export { sourcererSelectors } from './sourcerer';

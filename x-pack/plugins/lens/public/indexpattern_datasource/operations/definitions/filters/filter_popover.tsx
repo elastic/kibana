@@ -7,11 +7,12 @@ import './filter_popover.scss';
 
 import React, { MouseEventHandler, useState } from 'react';
 import { useDebounce } from 'react-use';
-import { EuiPopover, EuiFieldText, EuiSpacer, keys } from '@elastic/eui';
+import { EuiPopover, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FilterValue, defaultLabel, isQueryValid } from '.';
 import { IndexPattern } from '../../../types';
 import { QueryStringInput, Query } from '../../../../../../../../src/plugins/data/public';
+import { LabelInput } from '../shared_components';
 
 export const FilterPopover = ({
   filter,
@@ -51,6 +52,7 @@ export const FilterPopover = ({
 
   return (
     <EuiPopover
+      data-test-subj="indexPattern-filters-existingFilterContainer"
       anchorClassName="eui-fullWidth"
       panelClassName="lnsIndexPatternDimensionEditor__filtersEditor"
       isOpen={isOpenByCreation || isPopoverOpen}
@@ -83,6 +85,7 @@ export const FilterPopover = ({
         placeholder={getPlaceholder(filter.input.query)}
         inputRef={inputRef}
         onSubmit={() => setPopoverOpen(false)}
+        dataTestSubj="indexPattern-filters-label"
       />
     </EuiPopover>
   );
@@ -115,6 +118,7 @@ export const QueryInput = ({
 
   return (
     <QueryStringInput
+      dataTestSubj="indexPattern-filters-queryStringInput"
       size="s"
       isInvalid={isInvalid}
       bubbleSubmitEvent={false}
@@ -138,56 +142,6 @@ export const QueryInput = ({
             })
       }
       languageSwitcherPopoverAnchorPosition="rightDown"
-    />
-  );
-};
-
-export const LabelInput = ({
-  value,
-  onChange,
-  placeholder,
-  inputRef,
-  onSubmit,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-  placeholder: string;
-  inputRef: React.MutableRefObject<HTMLInputElement | undefined>;
-  onSubmit: () => void;
-}) => {
-  const [inputValue, setInputValue] = useState(value);
-
-  React.useEffect(() => {
-    setInputValue(value);
-  }, [value, setInputValue]);
-
-  useDebounce(() => onChange(inputValue), 256, [inputValue]);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = String(e.target.value);
-    setInputValue(val);
-  };
-
-  return (
-    <EuiFieldText
-      data-test-subj="indexPattern-filters-label"
-      value={inputValue}
-      onChange={handleInputChange}
-      fullWidth
-      placeholder={placeholder}
-      inputRef={(node) => {
-        if (node) {
-          inputRef.current = node;
-        }
-      }}
-      onKeyDown={({ key }: React.KeyboardEvent<HTMLInputElement>) => {
-        if (keys.ENTER === key) {
-          onSubmit();
-        }
-      }}
-      prepend={i18n.translate('xpack.lens.indexPattern.filters.label', {
-        defaultMessage: 'Label',
-      })}
     />
   );
 };

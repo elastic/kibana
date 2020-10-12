@@ -23,7 +23,7 @@ describe('test actions handlers schema', () => {
   it('validate that new agent actions schema is valid', async () => {
     expect(
       NewAgentActionSchema.validate({
-        type: 'CONFIG_CHANGE',
+        type: 'POLICY_CHANGE',
         data: 'data',
         sent_at: '2020-03-14T19:45:02.620Z',
       })
@@ -53,7 +53,7 @@ describe('test actions handlers', () => {
     const postNewAgentActionRequest: PostNewAgentActionRequest = {
       body: {
         action: {
-          type: 'CONFIG_CHANGE',
+          type: 'POLICY_CHANGE',
           data: 'data',
           sent_at: '2020-03-14T19:45:02.620Z',
         },
@@ -66,7 +66,7 @@ describe('test actions handlers', () => {
     const mockRequest = httpServerMock.createKibanaRequest(postNewAgentActionRequest);
 
     const agentAction = ({
-      type: 'CONFIG_CHANGE',
+      type: 'POLICY_CHANGE',
       id: 'action1',
       sent_at: '2020-03-14T19:45:02.620Z',
       timestamp: '2019-01-04T14:32:03.36764-05:00',

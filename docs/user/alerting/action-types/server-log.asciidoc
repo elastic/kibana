@@ -2,7 +2,7 @@
 [[server-log-action-type]]
 === Server log action
 
-This action type writes and entry to the {kib} server log.
+This action type writes an entry to the {kib} server log.
 
 [float]
 [[server-log-connector-configuration]]

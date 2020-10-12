@@ -33,7 +33,11 @@ describe('POST /diagnose/screenshot', () => {
   };
 
   const config = {
-    get: jest.fn(),
+    get: jest.fn().mockImplementation((...keys) => {
+      if (keys.join('.') === 'queue.timeout') {
+        return 120000;
+      }
+    }),
     kbnConfig: { get: jest.fn() },
   };
   const mockLogger = createMockLevelLogger();

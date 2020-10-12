@@ -44,7 +44,7 @@ export const config: PluginConfigDescriptor<ConfigType> = {
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [deprecations](./kibana-plugin-core-server.pluginconfigdescriptor.deprecations.md) | <code>ConfigDeprecationProvider</code> | Provider for the [ConfigDeprecation](./kibana-plugin-core-server.configdeprecation.md) to apply to the plugin configuration. |
+|  [deprecations](./kibana-plugin-core-server.pluginconfigdescriptor.deprecations.md) | <code>ConfigDeprecationProvider</code> | Provider for the  to apply to the plugin configuration. |
 |  [exposeToBrowser](./kibana-plugin-core-server.pluginconfigdescriptor.exposetobrowser.md) | <code>{</code><br/><code>        [P in keyof T]?: boolean;</code><br/><code>    }</code> | List of configuration properties that will be available on the client-side plugin. |
 |  [schema](./kibana-plugin-core-server.pluginconfigdescriptor.schema.md) | <code>PluginConfigSchema&lt;T&gt;</code> | Schema to use to validate the plugin configuration.[PluginConfigSchema](./kibana-plugin-core-server.pluginconfigschema.md) |
 

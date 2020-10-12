@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { PaletteDefinition } from 'src/plugins/charts/public';
 import {
   ReactExpressionRendererProps,
   ExpressionsSetup,
@@ -12,13 +13,7 @@ import {
 } from '../../../../../src/plugins/expressions/public';
 import { embeddablePluginMock } from '../../../../../src/plugins/embeddable/public/mocks';
 import { expressionsPluginMock } from '../../../../../src/plugins/expressions/public/mocks';
-import {
-  DatasourcePublicAPI,
-  FramePublicAPI,
-  Datasource,
-  Visualization,
-  PaletteDefinition,
-} from '../types';
+import { DatasourcePublicAPI, FramePublicAPI, Datasource, Visualization } from '../types';
 import { EditorFrameSetupPlugins, EditorFrameStartPlugins } from './service';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
@@ -76,6 +71,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     id: 'mockindexpattern',
     clearLayer: jest.fn((state, _layerId) => state),
     getDatasourceSuggestionsForField: jest.fn((_state, _item) => []),
+    getDatasourceSuggestionsForVisualizeField: jest.fn((_state, _indexpatternId, _fieldName) => []),
     getDatasourceSuggestionsFromCurrentState: jest.fn((_state) => []),
     getPersistableState: jest.fn((x) => ({ state: x, savedObjectReferences: [] })),
     getPublicAPI: jest.fn().mockReturnValue(publicAPIMock),
@@ -103,7 +99,7 @@ export type FrameMock = jest.Mocked<FramePublicAPI>;
 
 export function createMockPaletteDefinition(): jest.Mocked<PaletteDefinition> {
   return {
-    getPreview: jest.fn(() => ({ colors: ['#ff0000', '#00ff00'] })),
+    getColors: jest.fn((_) => ['#ff0000', '#00ff00']),
     title: 'Mock Palette',
     id: 'default',
     renderEditor: jest.fn(),

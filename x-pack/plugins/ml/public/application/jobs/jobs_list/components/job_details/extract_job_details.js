@@ -5,10 +5,10 @@
  */
 
 import React from 'react';
-import { EuiLink } from '@elastic/eui';
 import { detectorToString } from '../../../../util/string_utils';
 import { formatValues, filterObjects } from './format_values';
 import { i18n } from '@kbn/i18n';
+import { Link } from 'react-router-dom';
 
 export function extractJobDetails(job) {
   if (Object.keys(job).length === 0) {
@@ -61,7 +61,7 @@ export function extractJobDetails(job) {
   if (job.calendars) {
     calendars.items = job.calendars.map((c) => [
       '',
-      <EuiLink href={`#/settings/calendars_list/edit_calendar/${c}?_g=()`}>{c}</EuiLink>,
+      <Link to={`/settings/calendars_list/edit_calendar/${c}?_g=()`}>{c}</Link>,
     ]);
     // remove the calendars list from the general section
     // so not to show it twice.

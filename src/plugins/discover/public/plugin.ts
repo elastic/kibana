@@ -54,6 +54,7 @@ import {
   setUrlTracker,
   setAngularModule,
   setServices,
+  setHeaderActionMenuMounter,
   setUiActions,
   setScopedHistory,
   getScopedHistory,
@@ -240,7 +241,7 @@ export class DiscoverPlugin
       title: 'Discover',
       updater$: this.appStateUpdater.asObservable(),
       order: 1000,
-      euiIconType: 'discoverApp',
+      euiIconType: 'logoKibana',
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
@@ -251,6 +252,7 @@ export class DiscoverPlugin
           throw Error('Discover plugin method initializeInnerAngular is undefined');
         }
         setScopedHistory(params.history);
+        setHeaderActionMenuMounter(params.setHeaderActionMenu);
         syncHistoryLocations();
         appMounted();
         const {
@@ -264,6 +266,7 @@ export class DiscoverPlugin
         params.element.classList.add('dscAppWrapper');
         const unmount = await renderApp(innerAngularName, params.element);
         return () => {
+          params.element.classList.remove('dscAppWrapper');
           unmount();
           appUnMounted();
         };
@@ -274,6 +277,14 @@ export class DiscoverPlugin
       return `#${path}`;
     });
     plugins.urlForwarding.forwardApp('context', 'discover', (path) => {
+      const urlParts = path.split('/');
+      // take care of urls containing legacy url, those split in the following way
+      // ["", "context", indexPatternId, _type, id + params]
+      if (urlParts[4]) {
+        // remove _type part
+        const newPath = [...urlParts.slice(0, 3), ...urlParts.slice(4)].join('/');
+        return `#${newPath}`;
+      }
       return `#${path}`;
     });
     plugins.urlForwarding.forwardApp('discover', 'discover', (path) => {
@@ -324,7 +335,12 @@ export class DiscoverPlugin
       if (this.servicesInitialized) {
         return { core, plugins };
       }
-      const services = await buildServices(core, plugins, this.initializerContext);
+      const services = await buildServices(
+        core,
+        plugins,
+        this.initializerContext,
+        this.getEmbeddableInjector
+      );
       setServices(services);
       this.servicesInitialized = true;
 
@@ -377,12 +393,7 @@ export class DiscoverPlugin
       const { core, plugins } = await this.initializeServices();
       getServices().kibanaLegacy.loadFontAwesome();
       const { getInnerAngularModuleEmbeddable } = await import('./get_inner_angular');
-      getInnerAngularModuleEmbeddable(
-        embeddableAngularName,
-        core,
-        plugins,
-        this.initializerContext
-      );
+      getInnerAngularModuleEmbeddable(embeddableAngularName, core, plugins);
       const mountpoint = document.createElement('div');
       this.embeddableInjector = angular.bootstrap(mountpoint, [embeddableAngularName]);
     }

@@ -5,38 +5,72 @@
  */
 
 import { cloneDeep, uniq } from 'lodash';
-import { FeatureConfig, Feature, FeatureKibanaPrivileges } from '../common';
-import { validateFeature } from './feature_schema';
+import {
+  KibanaFeatureConfig,
+  KibanaFeature,
+  FeatureKibanaPrivileges,
+  ElasticsearchFeatureConfig,
+  ElasticsearchFeature,
+} from '../common';
+import { validateKibanaFeature, validateElasticsearchFeature } from './feature_schema';
 
 export class FeatureRegistry {
   private locked = false;
-  private features: Record<string, FeatureConfig> = {};
+  private kibanaFeatures: Record<string, KibanaFeatureConfig> = {};
+  private esFeatures: Record<string, ElasticsearchFeatureConfig> = {};
 
-  public register(feature: FeatureConfig) {
+  public registerKibanaFeature(feature: KibanaFeatureConfig) {
     if (this.locked) {
       throw new Error(
         `Features are locked, can't register new features. Attempt to register ${feature.id} failed.`
       );
     }
 
-    validateFeature(feature);
+    validateKibanaFeature(feature);
 
-    if (feature.id in this.features) {
+    if (feature.id in this.kibanaFeatures || feature.id in this.esFeatures) {
       throw new Error(`Feature with id ${feature.id} is already registered.`);
     }
 
     const featureCopy = cloneDeep(feature);
 
-    this.features[feature.id] = applyAutomaticPrivilegeGrants(featureCopy);
+    this.kibanaFeatures[feature.id] = applyAutomaticPrivilegeGrants(featureCopy);
   }
 
-  public getAll(): Feature[] {
+  public registerElasticsearchFeature(feature: ElasticsearchFeatureConfig) {
+    if (this.locked) {
+      throw new Error(
+        `Features are locked, can't register new features. Attempt to register ${feature.id} failed.`
+      );
+    }
+
+    if (feature.id in this.kibanaFeatures || feature.id in this.esFeatures) {
+      throw new Error(`Feature with id ${feature.id} is already registered.`);
+    }
+
+    validateElasticsearchFeature(feature);
+
+    const featureCopy = cloneDeep(feature);
+
+    this.esFeatures[feature.id] = featureCopy;
+  }
+
+  public getAllKibanaFeatures(): KibanaFeature[] {
     this.locked = true;
-    return Object.values(this.features).map((featureConfig) => new Feature(featureConfig));
+    return Object.values(this.kibanaFeatures).map(
+      (featureConfig) => new KibanaFeature(featureConfig)
+    );
+  }
+
+  public getAllElasticsearchFeatures(): ElasticsearchFeature[] {
+    this.locked = true;
+    return Object.values(this.esFeatures).map(
+      (featureConfig) => new ElasticsearchFeature(featureConfig)
+    );
   }
 }
 
-function applyAutomaticPrivilegeGrants(feature: FeatureConfig): FeatureConfig {
+function applyAutomaticPrivilegeGrants(feature: KibanaFeatureConfig): KibanaFeatureConfig {
   const allPrivilege = feature.privileges?.all;
   const readPrivilege = feature.privileges?.read;
   const reservedPrivileges = (feature.reserved?.privileges ?? []).map((rp) => rp.privilege);
@@ -63,7 +97,12 @@ function applyAutomaticReadPrivilegeGrants(
 ) {
   readPrivileges.forEach((readPrivilege) => {
     if (readPrivilege) {
-      readPrivilege.savedObject.read = uniq([...readPrivilege.savedObject.read, 'config', 'url']);
+      readPrivilege.savedObject.read = uniq([
+        ...readPrivilege.savedObject.read,
+        'config',
+        'telemetry',
+        'url',
+      ]);
     }
   });
 }

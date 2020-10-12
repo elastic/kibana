@@ -7,7 +7,11 @@
 import React from 'react';
 import uuid from 'uuid/v4';
 
-import { convertCompositeRespToGeoJson, convertRegularRespToGeoJson } from './convert_to_geojson';
+import {
+  convertCompositeRespToGeoJson,
+  convertRegularRespToGeoJson,
+  makeESBbox,
+} from '../../../../common/elasticsearch_util';
 import { UpdateSourceEditor } from './update_source_editor';
 import {
   SOURCE_TYPES,
@@ -15,13 +19,22 @@ import {
   RENDER_AS,
   GRID_RESOLUTION,
   VECTOR_SHAPE_TYPE,
+  MVT_SOURCE_LAYER_NAME,
+  GIS_API_PATH,
+  MVT_GETGRIDTILE_API_PATH,
+  GEOTILE_GRID_AGG_NAME,
+  GEOCENTROID_AGG_NAME,
+  ES_GEO_FIELD_TYPE,
 } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { AbstractESAggSource, DEFAULT_METRIC } from '../es_agg_source';
 import { DataRequestAbortError } from '../../util/data_request';
 import { registerSource } from '../source_registry';
-import { makeESBbox } from '../../../../common/elasticsearch_geo_utils';
+import { LICENSED_FEATURES } from '../../../licensed_features';
+
+import rison from 'rison-node';
+import { getHttp } from '../../../kibana_services';
 
 export const MAX_GEOTILE_LEVEL = 29;
 
@@ -48,9 +61,14 @@ export class ESGeoGridSource extends AbstractESAggSource {
     };
   }
 
-  renderSourceSettingsEditor({ onChange }) {
+  constructor(descriptor, inspectorAdapters) {
+    super(descriptor, inspectorAdapters, descriptor.resolution !== GRID_RESOLUTION.SUPER_FINE);
+  }
+
+  renderSourceSettingsEditor({ onChange, currentLayerType }) {
     return (
       <UpdateSourceEditor
+        currentLayerType={currentLayerType}
         indexPatternId={this.getIndexPatternId()}
         onChange={onChange}
         metrics={this._descriptor.metrics}
@@ -100,7 +118,14 @@ export class ESGeoGridSource extends AbstractESAggSource {
   }
 
   isGeoGridPrecisionAware() {
-    return true;
+    if (this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE) {
+      // MVT gridded data should not bootstrap each time the precision changes
+      // mapbox-gl needs to handle this
+      return false;
+    } else {
+      // Should requery each time grid-precision changes
+      return true;
+    }
   }
 
   showJoinEditor() {
@@ -112,6 +137,11 @@ export class ESGeoGridSource extends AbstractESAggSource {
   }
 
   getGeoGridPrecision(zoom) {
+    if (this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE) {
+      // The target-precision needs to be determined server side.
+      return NaN;
+    }
+
     const targetGeotileLevel = Math.ceil(zoom) + this._getGeoGridPrecisionResolutionDelta();
     return Math.min(targetGeotileLevel, MAX_GEOTILE_LEVEL);
   }
@@ -156,7 +186,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
           size: gridsPerRequest,
           sources: [
             {
-              gridSplit: {
+              [GEOTILE_GRID_AGG_NAME]: {
                 geotile_grid: {
                   bounds: makeESBbox(bufferedExtent),
                   field: this._descriptor.geoField,
@@ -167,7 +197,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
           ],
         },
         aggs: {
-          gridCentroid: {
+          [GEOCENTROID_AGG_NAME]: {
             geo_centroid: {
               field: this._descriptor.geoField,
             },
@@ -229,6 +259,28 @@ export class ESGeoGridSource extends AbstractESAggSource {
     return features;
   }
 
+  _addNonCompositeAggsToSearchSource(searchSource, indexPattern, precision, bufferedExtent) {
+    searchSource.setField('aggs', {
+      [GEOTILE_GRID_AGG_NAME]: {
+        geotile_grid: {
+          bounds: bufferedExtent ? makeESBbox(bufferedExtent) : null,
+          field: this._descriptor.geoField,
+          precision,
+          size: DEFAULT_MAX_BUCKETS_LIMIT,
+          shard_size: DEFAULT_MAX_BUCKETS_LIMIT,
+        },
+        aggs: {
+          [GEOCENTROID_AGG_NAME]: {
+            geo_centroid: {
+              field: this._descriptor.geoField,
+            },
+          },
+          ...this.getValueAggsDsl(indexPattern),
+        },
+      },
+    });
+  }
+
   // Do not use composite aggregation when there are no terms sub-aggregations
   // see https://github.com/elastic/kibana/pull/57875#issuecomment-590515482 for explanation on using separate code paths
   async _nonCompositeAggRequest({
@@ -239,25 +291,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
     registerCancelCallback,
     bufferedExtent,
   }) {
-    searchSource.setField('aggs', {
-      gridSplit: {
-        geotile_grid: {
-          bounds: makeESBbox(bufferedExtent),
-          field: this._descriptor.geoField,
-          precision,
-          size: DEFAULT_MAX_BUCKETS_LIMIT,
-          shard_size: DEFAULT_MAX_BUCKETS_LIMIT,
-        },
-        aggs: {
-          gridCentroid: {
-            geo_centroid: {
-              field: this._descriptor.geoField,
-            },
-          },
-          ...this.getValueAggsDsl(indexPattern),
-        },
-      },
-    });
+    this._addNonCompositeAggsToSearchSource(searchSource, indexPattern, precision, bufferedExtent);
 
     const esResponse = await this._runEsQuery({
       requestId: this.getId(),
@@ -313,8 +347,47 @@ export class ESGeoGridSource extends AbstractESAggSource {
     };
   }
 
+  getLayerName() {
+    return MVT_SOURCE_LAYER_NAME;
+  }
+
+  async getUrlTemplateWithMeta(searchFilters) {
+    const indexPattern = await this.getIndexPattern();
+    const searchSource = await this.makeSearchSource(searchFilters, 0);
+
+    this._addNonCompositeAggsToSearchSource(
+      searchSource,
+      indexPattern,
+      null, // needs to be set server-side
+      null // needs to be stripped server-side
+    );
+
+    const dsl = await searchSource.getSearchRequestBody();
+
+    const risonDsl = rison.encode(dsl);
+
+    const mvtUrlServicePath = getHttp().basePath.prepend(
+      `/${GIS_API_PATH}/${MVT_GETGRIDTILE_API_PATH}`
+    );
+
+    const geoField = await this._getGeoField();
+    const urlTemplate = `${mvtUrlServicePath}?x={x}&y={y}&z={z}&geometryFieldName=${this._descriptor.geoField}&index=${indexPattern.title}&requestBody=${risonDsl}&requestType=${this._descriptor.requestType}&geoFieldType=${geoField.type}`;
+    return {
+      layerName: this.getLayerName(),
+      minSourceZoom: this.getMinZoom(),
+      maxSourceZoom: this.getMaxZoom(),
+      urlTemplate: urlTemplate,
+    };
+  }
+
   isFilterByMapBounds() {
-    return true;
+    if (this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE) {
+      //MVT gridded data. Should exclude bounds-filter from ES-DSL
+      return false;
+    } else {
+      //Should include bounds-filter from ES-DSL
+      return true;
+    }
   }
 
   canFormatFeatureProperties() {
@@ -327,6 +400,13 @@ export class ESGeoGridSource extends AbstractESAggSource {
     }
 
     return [VECTOR_SHAPE_TYPE.POINT];
+  }
+
+  async getLicensedFeatures() {
+    const geoField = await this._getGeoField();
+    return geoField.type === ES_GEO_FIELD_TYPE.GEO_SHAPE
+      ? [LICENSED_FEATURES.GEO_SHAPE_AGGS_GEO_TILE]
+      : [];
   }
 }
 

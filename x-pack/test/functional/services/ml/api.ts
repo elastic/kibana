@@ -268,7 +268,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async waitForDFAJobTrainingRecordCountToBePositive(analyticsId: string) {
       await retry.waitForWithTimeout(
         `'${analyticsId}' to have training_docs_count > 0`,
-        10 * 1000,
+        60 * 1000,
         async () => {
           const trainingRecordCount = await this.getDFAJobTrainingRecordCount(analyticsId);
           if (trainingRecordCount > 0) {

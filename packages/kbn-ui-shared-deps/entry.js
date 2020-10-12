@@ -35,7 +35,6 @@ export const MonacoBarePluginApi = require('@kbn/monaco').BarePluginApi;
 export const React = require('react');
 export const ReactDom = require('react-dom');
 export const ReactDomServer = require('react-dom/server');
-export const ReactIntl = require('react-intl');
 export const ReactRouter = require('react-router'); // eslint-disable-line
 export const ReactRouterDom = require('react-router-dom');
 export const StyledComponents = require('styled-components');
@@ -51,6 +50,11 @@ export const ElasticEui = require('@elastic/eui');
 export const ElasticEuiLibServices = require('@elastic/eui/lib/services');
 export const ElasticEuiLibServicesFormat = require('@elastic/eui/lib/services/format');
 export const ElasticEuiChartsTheme = require('@elastic/eui/dist/eui_charts_theme');
+export const Lodash = require('lodash');
+export const LodashFp = require('lodash/fp');
+
+// runtime deps which don't need to be copied across all bundles
+export const TsLib = require('tslib');
 
 import * as Theme from './theme.ts';
 export { Theme };

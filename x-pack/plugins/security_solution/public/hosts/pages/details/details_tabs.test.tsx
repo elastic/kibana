@@ -84,6 +84,7 @@ describe('body', () => {
               setQuery={jest.fn()}
               setAbsoluteRangeDatePicker={(jest.fn() as unknown) as SetAbsoluteRangeDatePicker}
               hostDetailsPagePath={hostDetailsPagePath}
+              indexNames={[]}
               indexPattern={mockIndexPattern}
               type={type}
               pageFilters={mockHostDetailsPageFilters}

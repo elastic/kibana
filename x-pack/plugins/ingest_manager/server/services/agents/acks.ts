@@ -16,6 +16,7 @@ import {
   Agent,
   AgentAction,
   AgentPolicyAction,
+  AgentPolicyActionV7_9,
   AgentEvent,
   AgentEventSOAttributes,
   AgentSOAttributes,
@@ -28,6 +29,7 @@ import {
 } from '../../constants';
 import { getAgentActionByIds } from './actions';
 import { forceUnenrollAgent } from './unenroll';
+import { ackAgentUpgraded } from './upgrade';
 
 const ALLOWED_ACKNOWLEDGEMENT_TYPE: string[] = ['ACTION_RESULT'];
 
@@ -80,6 +82,11 @@ export async function acknowledgeAgentActions(
     await forceUnenrollAgent(soClient, agent.id);
   }
 
+  const upgradeAction = actions.find((action) => action.type === 'UPGRADE');
+  if (upgradeAction) {
+    await ackAgentUpgraded(soClient, upgradeAction);
+  }
+
   const configChangeAction = getLatestConfigChangePolicyActionIfUpdated(agent, actions);
 
   await soClient.bulkUpdate<AgentSOAttributes | AgentActionSOAttributes>([
@@ -126,29 +133,27 @@ async function fetchActionsUsingCache(
   return [...freshActions, ...actions];
 }
 
-function isAgentPolicyAction(action: AgentAction | AgentPolicyAction): action is AgentPolicyAction {
+function isAgentPolicyAction(
+  action: AgentAction | AgentPolicyAction | AgentPolicyActionV7_9
+): action is AgentPolicyAction | AgentPolicyActionV7_9 {
   return (action as AgentPolicyAction).policy_id !== undefined;
 }
 
 function getLatestConfigChangePolicyActionIfUpdated(
   agent: Agent,
-  actions: Array<AgentAction | AgentPolicyAction>
-): AgentPolicyAction | null {
-  return actions.reduce<null | AgentPolicyAction>((acc, action) => {
+  actions: Array<AgentAction | AgentPolicyAction | AgentPolicyActionV7_9>
+): AgentPolicyAction | AgentPolicyActionV7_9 | null {
+  return actions.reduce<null | AgentPolicyAction | AgentPolicyActionV7_9>((acc, action) => {
     if (
       !isAgentPolicyAction(action) ||
-      action.type !== 'CONFIG_CHANGE' ||
+      (action.type !== 'POLICY_CHANGE' && action.type !== 'CONFIG_CHANGE') ||
       action.policy_id !== agent.policy_id ||
-      (acc?.policy_revision ?? 0) < (agent.policy_revision || 0)
+      (action?.policy_revision ?? 0) < (agent.policy_revision || 0)
     ) {
       return acc;
     }
 
-    if (action.policy_revision > (acc?.policy_revision ?? 0)) {
-      return action;
-    }
-
-    return acc;
+    return action;
   }, null);
 }
 

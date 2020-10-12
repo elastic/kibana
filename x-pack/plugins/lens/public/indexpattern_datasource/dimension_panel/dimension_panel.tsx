@@ -5,9 +5,9 @@
  */
 
 import _ from 'lodash';
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiLink } from '@elastic/eui';
+import { EuiLink, EuiIcon, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import {
@@ -20,9 +20,9 @@ import {
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 import { IndexPatternColumn, OperationType } from '../indexpattern';
 import { getAvailableOperationsByMetadata, buildColumn, changeField } from '../operations';
-import { PopoverEditor } from './popover_editor';
+import { DimensionEditor } from './dimension_editor';
 import { changeColumn } from '../state_helpers';
-import { isDraggedField, hasField } from '../utils';
+import { isDraggedField, hasField, fieldIsInvalid } from '../utils';
 import { IndexPatternPrivateState, IndexPatternField } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { DateRange } from '../../../common';
@@ -46,8 +46,9 @@ export type IndexPatternDimensionEditorProps = DatasourceDimensionEditorProps<
   dateRange: DateRange;
 };
 
-export interface OperationFieldSupportMatrix {
+export interface OperationSupportMatrix {
   operationByField: Partial<Record<string, OperationType[]>>;
+  operationWithoutField: OperationType[];
   fieldByOperation: Partial<Record<OperationType, string[]>>;
 }
 
@@ -58,7 +59,7 @@ type Props = Pick<
 
 // TODO: This code has historically been memoized, as a potentially performance
 // sensitive task. If we can add memoization without breaking the behavior, we should.
-const getOperationFieldSupportMatrix = (props: Props): OperationFieldSupportMatrix => {
+const getOperationSupportMatrix = (props: Props): OperationSupportMatrix => {
   const layerId = props.layerId;
   const currentIndexPattern = props.state.indexPatterns[props.state.layers[layerId].indexPatternId];
 
@@ -67,37 +68,43 @@ const getOperationFieldSupportMatrix = (props: Props): OperationFieldSupportMatr
   ).filter((operation) => props.filterOperations(operation.operationMetaData));
 
   const supportedOperationsByField: Partial<Record<string, OperationType[]>> = {};
+  const supportedOperationsWithoutField: OperationType[] = [];
   const supportedFieldsByOperation: Partial<Record<OperationType, string[]>> = {};
 
   filteredOperationsByMetadata.forEach(({ operations }) => {
     operations.forEach((operation) => {
-      if (supportedOperationsByField[operation.field]) {
-        supportedOperationsByField[operation.field]!.push(operation.operationType);
-      } else {
-        supportedOperationsByField[operation.field] = [operation.operationType];
-      }
+      if (operation.type === 'field') {
+        if (supportedOperationsByField[operation.field]) {
+          supportedOperationsByField[operation.field]!.push(operation.operationType);
+        } else {
+          supportedOperationsByField[operation.field] = [operation.operationType];
+        }
 
-      if (supportedFieldsByOperation[operation.operationType]) {
-        supportedFieldsByOperation[operation.operationType]!.push(operation.field);
-      } else {
-        supportedFieldsByOperation[operation.operationType] = [operation.field];
+        if (supportedFieldsByOperation[operation.operationType]) {
+          supportedFieldsByOperation[operation.operationType]!.push(operation.field);
+        } else {
+          supportedFieldsByOperation[operation.operationType] = [operation.field];
+        }
+      } else if (operation.type === 'none') {
+        supportedOperationsWithoutField.push(operation.operationType);
       }
     });
   });
   return {
     operationByField: _.mapValues(supportedOperationsByField, _.uniq),
+    operationWithoutField: _.uniq(supportedOperationsWithoutField),
     fieldByOperation: _.mapValues(supportedFieldsByOperation, _.uniq),
   };
 };
 
 export function canHandleDrop(props: DatasourceDimensionDropProps<IndexPatternPrivateState>) {
-  const operationFieldSupportMatrix = getOperationFieldSupportMatrix(props);
+  const operationSupportMatrix = getOperationSupportMatrix(props);
 
   const { dragging } = props.dragDropContext;
   const layerIndexPatternId = props.state.layers[props.layerId].indexPatternId;
 
   function hasOperationForField(field: IndexPatternField) {
-    return Boolean(operationFieldSupportMatrix.operationByField[field.name]);
+    return Boolean(operationSupportMatrix.operationByField[field.name]);
   }
 
   if (isDraggedField(dragging)) {
@@ -119,11 +126,11 @@ export function canHandleDrop(props: DatasourceDimensionDropProps<IndexPatternPr
 }
 
 export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPrivateState>) {
-  const operationFieldSupportMatrix = getOperationFieldSupportMatrix(props);
+  const operationSupportMatrix = getOperationSupportMatrix(props);
   const droppedItem = props.droppedItem;
 
   function hasOperationForField(field: IndexPatternField) {
-    return Boolean(operationFieldSupportMatrix.operationByField[field.name]);
+    return Boolean(operationSupportMatrix.operationByField[field.name]);
   }
 
   if (isDraggedOperation(droppedItem) && droppedItem.layerId === props.layerId) {
@@ -167,8 +174,7 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
     return false;
   }
 
-  const operationsForNewField =
-    operationFieldSupportMatrix.operationByField[droppedItem.field.name];
+  const operationsForNewField = operationSupportMatrix.operationByField[droppedItem.field.name];
 
   const layerId = props.layerId;
   const selectedColumn: IndexPatternColumn | null =
@@ -223,34 +229,85 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
   return true;
 }
 
+function wrapOnDot(str?: string) {
+  // u200B is a non-width white-space character, which allows
+  // the browser to efficiently word-wrap right after the dot
+  // without us having to draw a lot of extra DOM elements, etc
+  return str ? str.replace(/\./g, '.\u200B') : '';
+}
+
 export const IndexPatternDimensionTriggerComponent = function IndexPatternDimensionTrigger(
   props: IndexPatternDimensionTriggerProps
 ) {
   const layerId = props.layerId;
+  const layer = props.state.layers[layerId];
+  const selectedColumn: IndexPatternColumn | null = layer.columns[props.columnId] || null;
+  const currentIndexPattern = props.state.indexPatterns[layer.indexPatternId];
 
-  const selectedColumn: IndexPatternColumn | null =
-    props.state.layers[layerId].columns[props.columnId] || null;
+  const selectedColumnSourceField =
+    selectedColumn && 'sourceField' in selectedColumn ? selectedColumn.sourceField : undefined;
+  const currentFieldIsInvalid = useMemo(
+    () =>
+      fieldIsInvalid(selectedColumnSourceField, selectedColumn?.operationType, currentIndexPattern),
+    [selectedColumnSourceField, selectedColumn?.operationType, currentIndexPattern]
+  );
 
   const { columnId, uniqueLabel } = props;
   if (!selectedColumn) {
     return null;
   }
+  const formattedLabel = wrapOnDot(uniqueLabel);
+
+  const triggerLinkA11yText = i18n.translate('xpack.lens.configure.editConfig', {
+    defaultMessage: 'Click to edit configuration or drag to move',
+  });
+
+  if (currentFieldIsInvalid) {
+    return (
+      <EuiToolTip
+        content={
+          <p>
+            {i18n.translate('xpack.lens.configure.invalidConfigTooltip', {
+              defaultMessage: 'Invalid configuration.',
+            })}
+            <br />
+            {i18n.translate('xpack.lens.configure.invalidConfigTooltipClick', {
+              defaultMessage: 'Click for more details.',
+            })}
+          </p>
+        }
+        anchorClassName="eui-displayBlock"
+      >
+        <EuiLink
+          color="danger"
+          id={columnId}
+          className="lnsLayerPanel__triggerLink"
+          onClick={props.onClick}
+          data-test-subj="lns-dimensionTrigger"
+          aria-label={triggerLinkA11yText}
+          title={triggerLinkA11yText}
+        >
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiIcon size="s" type="alert" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={true}>{selectedColumn.label}</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiLink>
+      </EuiToolTip>
+    );
+  }
+
   return (
     <EuiLink
       id={columnId}
       className="lnsLayerPanel__triggerLink"
-      onClick={() => {
-        props.togglePopover();
-      }}
+      onClick={props.onClick}
       data-test-subj="lns-dimensionTrigger"
-      aria-label={i18n.translate('xpack.lens.configure.editConfig', {
-        defaultMessage: 'Edit configuration',
-      })}
-      title={i18n.translate('xpack.lens.configure.editConfig', {
-        defaultMessage: 'Edit configuration',
-      })}
+      aria-label={triggerLinkA11yText}
+      title={triggerLinkA11yText}
     >
-      {uniqueLabel}
+      {formattedLabel}
     </EuiLink>
   );
 };
@@ -261,17 +318,17 @@ export const IndexPatternDimensionEditorComponent = function IndexPatternDimensi
   const layerId = props.layerId;
   const currentIndexPattern =
     props.state.indexPatterns[props.state.layers[layerId]?.indexPatternId];
-  const operationFieldSupportMatrix = getOperationFieldSupportMatrix(props);
+  const operationSupportMatrix = getOperationSupportMatrix(props);
 
   const selectedColumn: IndexPatternColumn | null =
     props.state.layers[layerId].columns[props.columnId] || null;
 
   return (
-    <PopoverEditor
+    <DimensionEditor
       {...props}
       currentIndexPattern={currentIndexPattern}
       selectedColumn={selectedColumn}
-      operationFieldSupportMatrix={operationFieldSupportMatrix}
+      operationSupportMatrix={operationSupportMatrix}
     />
   );
 };

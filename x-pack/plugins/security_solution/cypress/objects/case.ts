@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Timeline } from './timeline';
+import { Timeline, TimelineWithId } from './timeline';
 
 export interface TestCase {
   name: string;
@@ -21,10 +21,11 @@ export interface Connector {
   password: string;
 }
 
-const caseTimeline: Timeline = {
+export const caseTimeline: TimelineWithId = {
   title: 'SIEM test',
   description: 'description',
   query: 'host.name:*',
+  id: '0162c130-78be-11ea-9718-118a926974a4',
 };
 
 export const case1: TestCase = {
@@ -41,3 +42,5 @@ export const serviceNowConnector: Connector = {
   username: 'Username Name',
   password: 'password',
 };
+
+export const TIMELINE_CASE_ID = '68248e00-f689-11ea-9ab2-59238b522856';

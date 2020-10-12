@@ -67,17 +67,17 @@ export function getTopNavConfig({
     savedMap.description = newDescription;
     savedMap.copyOnSave = newCopyOnSave;
 
-    let id;
+    let savedObjectId;
     try {
       savedMap.syncWithStore();
-      id = await savedMap.save({
+      savedObjectId = await savedMap.save({
         confirmOverwrite: false,
         isTitleDuplicateConfirmed,
         onTitleDuplicate,
       });
       // id not returned when save fails because of duplicate title check.
       // return and let user confirm duplicate title.
-      if (!id) {
+      if (!savedObjectId) {
         return {};
       }
     } catch (err) {
@@ -105,7 +105,7 @@ export function getTopNavConfig({
 
     getCoreChrome().docTitle.change(savedMap.title);
     setBreadcrumbs();
-    goToSpecifiedPath(`/map/${id}${window.location.hash}`);
+    goToSpecifiedPath(`/map/${savedObjectId}${window.location.hash}`);
 
     const newlyCreated = newCopyOnSave || isNewMap;
     if (newlyCreated && !returnToOrigin) {
@@ -113,83 +113,14 @@ export function getTopNavConfig({
     } else if (!!originatingApp && returnToOrigin) {
       if (newlyCreated && stateTransfer) {
         stateTransfer.navigateToWithEmbeddablePackage(originatingApp, {
-          state: { id, type: MAP_SAVED_OBJECT_TYPE },
+          state: { input: { savedObjectId }, type: MAP_SAVED_OBJECT_TYPE },
         });
       } else {
         getNavigateToApp()(originatingApp);
       }
     }
 
-    return { id };
-  }
-
-  if (hasSaveAndReturnConfig) {
-    topNavConfigs.push({
-      id: 'saveAndReturn',
-      label: i18n.translate('xpack.maps.topNav.saveAndReturnButtonLabel', {
-        defaultMessage: 'Save and return',
-      }),
-      emphasize: true,
-      iconType: 'check',
-      run: () => {
-        onSave({
-          newTitle: savedMap.title ? savedMap.title : '',
-          newDescription: savedMap.description ? savedMap.description : '',
-          newCopyOnSave: false,
-          isTitleDuplicateConfirmed: false,
-          returnToOrigin: true,
-          onTitleDuplicate: () => {},
-        });
-      },
-      testId: 'mapSaveAndReturnButton',
-    });
-  }
-
-  if (hasWritePermissions) {
-    topNavConfigs.push({
-      id: 'save',
-      label: hasSaveAndReturnConfig
-        ? i18n.translate('xpack.maps.topNav.saveAsButtonLabel', {
-            defaultMessage: 'Save as',
-          })
-        : i18n.translate('xpack.maps.topNav.saveMapButtonLabel', {
-            defaultMessage: `save`,
-          }),
-      description: i18n.translate('xpack.maps.topNav.saveMapDescription', {
-        defaultMessage: `Save map`,
-      }),
-      emphasize: !hasSaveAndReturnConfig,
-      testId: 'mapSaveButton',
-      disableButton() {
-        return isSaveDisabled;
-      },
-      tooltip() {
-        if (isSaveDisabled) {
-          return i18n.translate('xpack.maps.topNav.saveMapDisabledButtonTooltip', {
-            defaultMessage: 'Confirm or Cancel your layer changes before saving',
-          });
-        }
-      },
-      run: () => {
-        const saveModal = (
-          <SavedObjectSaveModalOrigin
-            originatingApp={originatingApp}
-            getAppNameFromId={stateTransfer?.getAppNameFromId}
-            onSave={onSave}
-            onClose={() => {}}
-            documentInfo={{
-              description: savedMap.description,
-              id: savedMap.id,
-              title: savedMap.title,
-            }}
-            objectType={i18n.translate('xpack.maps.topNav.saveModalType', {
-              defaultMessage: 'map',
-            })}
-          />
-        );
-        showSaveModal(saveModal, getCoreI18n().Context);
-      },
-    });
+    return { id: savedObjectId };
   }
 
   topNavConfigs.push(
@@ -237,6 +168,76 @@ export function getTopNavConfig({
       },
     }
   );
+
+  if (hasWritePermissions) {
+    topNavConfigs.push({
+      id: 'save',
+      iconType: hasSaveAndReturnConfig ? undefined : 'save',
+      label: hasSaveAndReturnConfig
+        ? i18n.translate('xpack.maps.topNav.saveAsButtonLabel', {
+            defaultMessage: 'Save as',
+          })
+        : i18n.translate('xpack.maps.topNav.saveMapButtonLabel', {
+            defaultMessage: `save`,
+          }),
+      description: i18n.translate('xpack.maps.topNav.saveMapDescription', {
+        defaultMessage: `Save map`,
+      }),
+      emphasize: !hasSaveAndReturnConfig,
+      testId: 'mapSaveButton',
+      disableButton() {
+        return isSaveDisabled;
+      },
+      tooltip() {
+        if (isSaveDisabled) {
+          return i18n.translate('xpack.maps.topNav.saveMapDisabledButtonTooltip', {
+            defaultMessage: 'Confirm or Cancel your layer changes before saving',
+          });
+        }
+      },
+      run: () => {
+        const saveModal = (
+          <SavedObjectSaveModalOrigin
+            originatingApp={originatingApp}
+            getAppNameFromId={stateTransfer?.getAppNameFromId}
+            onSave={onSave}
+            onClose={() => {}}
+            documentInfo={{
+              description: savedMap.description,
+              id: savedMap.id,
+              title: savedMap.title,
+            }}
+            objectType={i18n.translate('xpack.maps.topNav.saveModalType', {
+              defaultMessage: 'map',
+            })}
+          />
+        );
+        showSaveModal(saveModal, getCoreI18n().Context);
+      },
+    });
+  }
+
+  if (hasSaveAndReturnConfig) {
+    topNavConfigs.push({
+      id: 'saveAndReturn',
+      label: i18n.translate('xpack.maps.topNav.saveAndReturnButtonLabel', {
+        defaultMessage: 'Save and return',
+      }),
+      emphasize: true,
+      iconType: 'checkInCircleFilled',
+      run: () => {
+        onSave({
+          newTitle: savedMap.title ? savedMap.title : '',
+          newDescription: savedMap.description ? savedMap.description : '',
+          newCopyOnSave: false,
+          isTitleDuplicateConfirmed: false,
+          returnToOrigin: true,
+          onTitleDuplicate: () => {},
+        });
+      },
+      testId: 'mapSaveAndReturnButton',
+    });
+  }
 
   return topNavConfigs;
 }

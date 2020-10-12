@@ -27,7 +27,7 @@ export function registerKqlTelemetryRoute(
 ) {
   router.post(
     {
-      path: '/api/kibana/kql_opt_in_telemetry',
+      path: '/api/kibana/kql_opt_in_stats',
       validate: {
         body: schema.object({
           opt_in: schema.boolean(),

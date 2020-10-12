@@ -166,6 +166,7 @@ exports[`LoginForm renders as expected 1`] = `
           isLoading={false}
           name="password"
           onChange={[Function]}
+          type="dual"
           value=""
         />
       </EuiFormRow>

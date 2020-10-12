@@ -13,6 +13,7 @@ import {
   SafeResolverEvent,
   SafeResolverChildNode,
   SafeResolverRelatedEvents,
+  ResolverPaginatedEvents,
 } from '../../../../../common/endpoint/types';
 
 /**
@@ -28,6 +29,19 @@ export function createRelatedEvents(
   nextEvent: string | null = null
 ): SafeResolverRelatedEvents {
   return { entityID, events, nextEvent };
+}
+
+/**
+ * Creates an object that the events handler would return
+ *
+ * @param events array of events
+ * @param nextEvent the cursor to retrieve the next event
+ */
+export function createEvents(
+  events: SafeResolverEvent[] = [],
+  nextEvent: string | null = null
+): ResolverPaginatedEvents {
+  return { events, nextEvent };
 }
 
 /**

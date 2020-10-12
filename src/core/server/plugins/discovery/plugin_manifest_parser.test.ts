@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { PluginDiscoveryErrorType } from './plugin_discovery_error';
-
 import { mockReadFile } from './plugin_manifest_parser.test.mocks';
+
+import { PluginDiscoveryErrorType } from './plugin_discovery_error';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 
 import { resolve } from 'path';

@@ -18,6 +18,7 @@ import { PieExpressionArgs } from './types';
 import { EmptyPlaceholder } from '../shared_components';
 import { createMockPaletteDefinition } from '../editor_frame_service/mocks';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+import { LensIconChartDonut } from '../assets/chart_donut';
 
 const chartsThemeService = chartPluginMock.createSetupContract().theme;
 
@@ -269,7 +270,7 @@ describe('PieVisualization component', () => {
       const component = shallow(
         <PieComponent args={args} {...getDefaultArgs()} data={emptyData} />
       );
-      expect(component.find(EmptyPlaceholder).prop('icon')).toEqual('visPie');
+      expect(component.find(EmptyPlaceholder).prop('icon')).toEqual(LensIconChartDonut);
     });
   });
 });

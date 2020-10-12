@@ -14,6 +14,7 @@ import { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui
 import { TypeRegistry } from '../../triggers_actions_ui/public/application/type_registry';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ActionTypeModel, AlertTypeModel } from '../../triggers_actions_ui/public/types';
+import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 
 interface BreadcrumbItem {
   ['data-test-subj']?: string;
@@ -59,13 +60,14 @@ export interface IShims {
   ) => Promise<any>;
   isCloud: boolean;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  usageCollection: UsageCollectionSetup;
 }
 
 export class Legacy {
   private static _shims: IShims;
 
   public static init(
-    { core, data, isCloud, triggersActionsUi }: MonitoringStartPluginDependencies,
+    { core, data, isCloud, triggersActionsUi, usageCollection }: MonitoringStartPluginDependencies,
     ngInjector: angular.auto.IInjectorService
   ) {
     this._shims = {
@@ -119,6 +121,7 @@ export class Legacy {
         }),
       isCloud,
       triggersActionsUi,
+      usageCollection,
     };
   }
 

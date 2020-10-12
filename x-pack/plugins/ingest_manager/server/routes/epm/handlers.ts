@@ -5,7 +5,6 @@
  */
 import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler, CustomHttpResponseOptions } from 'src/core/server';
-import { appContextService } from '../../services';
 import {
   GetInfoResponse,
   InstallPackageResponse,
@@ -13,28 +12,38 @@ import {
   GetCategoriesResponse,
   GetPackagesResponse,
   GetLimitedPackagesResponse,
+  BulkInstallPackageInfo,
+  BulkInstallPackagesResponse,
+  IBulkInstallPackageHTTPError,
 } from '../../../common';
 import {
   GetCategoriesRequestSchema,
   GetPackagesRequestSchema,
   GetFileRequestSchema,
   GetInfoRequestSchema,
-  InstallPackageRequestSchema,
+  InstallPackageFromRegistryRequestSchema,
+  InstallPackageByUploadRequestSchema,
   DeletePackageRequestSchema,
+  BulkUpgradePackagesFromRegistryRequestSchema,
 } from '../../types';
 import {
+  BulkInstallResponse,
+  bulkInstallPackages,
   getCategories,
   getPackages,
   getFile,
   getPackageInfo,
-  installPackage,
+  handleInstallPackageFailure,
+  isBulkInstallError,
+  installPackageFromRegistry,
+  installPackageByUpload,
   removeInstallation,
   getLimitedPackages,
   getInstallationObject,
 } from '../../services/epm/packages';
-import { IngestManagerError, defaultIngestErrorHandler } from '../../errors';
+import { defaultIngestErrorHandler, ingestErrorToResponseOptions } from '../../errors';
 import { splitPkgKey } from '../../services/epm/registry';
-import { getInstallType } from '../../services/epm/packages/install';
+import { licenseService } from '../../services';
 
 export const getCategoriesHandler: RequestHandler<
   undefined,
@@ -129,20 +138,18 @@ export const getInfoHandler: RequestHandler<TypeOf<typeof GetInfoRequestSchema.p
   }
 };
 
-export const installPackageHandler: RequestHandler<
-  TypeOf<typeof InstallPackageRequestSchema.params>,
+export const installPackageFromRegistryHandler: RequestHandler<
+  TypeOf<typeof InstallPackageFromRegistryRequestSchema.params>,
   undefined,
-  TypeOf<typeof InstallPackageRequestSchema.body>
+  TypeOf<typeof InstallPackageFromRegistryRequestSchema.body>
 > = async (context, request, response) => {
-  const logger = appContextService.getLogger();
   const savedObjectsClient = context.core.savedObjects.client;
   const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
   const { pkgkey } = request.params;
   const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
-  const installType = getInstallType({ pkgVersion, installedPkg });
   try {
-    const res = await installPackage({
+    const res = await installPackageFromRegistry({
       savedObjectsClient,
       pkgkey,
       callCluster,
@@ -153,33 +160,82 @@ export const installPackageHandler: RequestHandler<
     };
     return response.ok({ body });
   } catch (e) {
-    // could have also done `return defaultIngestErrorHandler({ error: e, response })` at each of the returns,
-    // but doing it this way will log the outer/install errors before any inner/rollback errors
     const defaultResult = await defaultIngestErrorHandler({ error: e, response });
-    if (e instanceof IngestManagerError) {
-      return defaultResult;
-    }
+    await handleInstallPackageFailure({
+      savedObjectsClient,
+      error: e,
+      pkgName,
+      pkgVersion,
+      installedPkg,
+      callCluster,
+    });
 
-    // if there is an unknown server error, uninstall any package assets or reinstall the previous version if update
-    try {
-      if (installType === 'install' || installType === 'reinstall') {
-        logger.error(`uninstalling ${pkgkey} after error installing`);
-        await removeInstallation({ savedObjectsClient, pkgkey, callCluster });
-      }
-      if (installType === 'update') {
-        // @ts-ignore getInstallType ensures we have installedPkg
-        const prevVersion = `${pkgName}-${installedPkg.attributes.version}`;
-        logger.error(`rolling back to ${prevVersion} after error installing ${pkgkey}`);
-        await installPackage({
-          savedObjectsClient,
-          pkgkey: prevVersion,
-          callCluster,
-        });
-      }
-    } catch (error) {
-      logger.error(`failed to uninstall or rollback package after installation error ${error}`);
-    }
     return defaultResult;
+  }
+};
+
+const bulkInstallServiceResponseToHttpEntry = (
+  result: BulkInstallResponse
+): BulkInstallPackageInfo | IBulkInstallPackageHTTPError => {
+  if (isBulkInstallError(result)) {
+    const { statusCode, body } = ingestErrorToResponseOptions(result.error);
+    return {
+      name: result.name,
+      statusCode,
+      error: body.message,
+    };
+  } else {
+    return result;
+  }
+};
+
+export const bulkInstallPackagesFromRegistryHandler: RequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof BulkUpgradePackagesFromRegistryRequestSchema.body>
+> = async (context, request, response) => {
+  const savedObjectsClient = context.core.savedObjects.client;
+  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
+  const bulkInstalledResponses = await bulkInstallPackages({
+    savedObjectsClient,
+    callCluster,
+    packagesToUpgrade: request.body.packages,
+  });
+  const payload = bulkInstalledResponses.map(bulkInstallServiceResponseToHttpEntry);
+  const body: BulkInstallPackagesResponse = {
+    response: payload,
+  };
+  return response.ok({ body });
+};
+
+export const installPackageByUploadHandler: RequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof InstallPackageByUploadRequestSchema.body>
+> = async (context, request, response) => {
+  if (!licenseService.isEnterprise()) {
+    return response.customError({
+      statusCode: 403,
+      body: { message: 'Requires Enterprise license' },
+    });
+  }
+  const savedObjectsClient = context.core.savedObjects.client;
+  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
+  const contentType = request.headers['content-type'] as string; // from types it could also be string[] or undefined but this is checked later
+  const archiveBuffer = Buffer.from(request.body);
+  try {
+    const res = await installPackageByUpload({
+      savedObjectsClient,
+      callCluster,
+      archiveBuffer,
+      contentType,
+    });
+    const body: InstallPackageResponse = {
+      response: res,
+    };
+    return response.ok({ body });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 

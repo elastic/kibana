@@ -22,6 +22,7 @@ interface QueryTabBodyProps extends Pick<GlobalTimeArgs, 'setQuery' | 'deleteQue
   endDate: string;
   filterQuery?: string | ESTermQuery;
   narrowDateRange?: NarrowDateRange;
+  indexNames: string[];
 }
 
 export type NetworkComponentQueryProps = QueryTabBodyProps;
@@ -45,6 +46,7 @@ export type NetworkRoutesProps = GlobalTimeArgs & {
   type: networkModel.NetworkType;
   filterQuery?: string | ESTermQuery;
   indexPattern: IIndexPattern;
+  indexNames: string[];
   setAbsoluteRangeDatePicker: SetAbsoluteRangeDatePicker;
 };
 

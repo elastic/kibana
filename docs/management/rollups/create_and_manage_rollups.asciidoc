@@ -21,6 +21,13 @@ Before using this feature, you should be familiar with how rollups work.
 {ref}/xpack-rollup.html[Rolling up historical data] is a good source for more detailed information.
 
 [float]
+=== Required permissions
+
+The `manage_rollup` cluster privilege is required to access *Rollup jobs*.
+
+You can add this privilege in *Stack Management > Security > Roles*.
+
+[float]
 [[create-and-manage-rollup-job]]
 === Create a rollup job
 
@@ -60,7 +67,7 @@ You can read more at {ref}/rollup-job-config.html[rollup job configuration].
 === Try it: Create and visualize rolled up data
 
 This example creates a rollup job to capture log data from sample web logs.
-To follow along, add the <<gs-get-data-into-kibana, sample web logs data set>>.
+To follow along, add the sample web logs data set.
 
 In this example, you want data that is older than 7 days in the target index pattern `kibana_sample_data_logs`
 to roll up once a day into the index `rollup_logstash`. You’ll bucket the

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AnyAction, Dispatch } from 'redux';
+import { AnyAction } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { ToolsControl } from './tools_control';
 import { isDrawingFilter } from '../../../selectors/map_selectors';
@@ -18,13 +19,13 @@ function mapStateToProps(state: MapStoreState) {
   };
 }
 
-function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
+function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
     initiateDraw: (drawState: DrawState) => {
-      dispatch<any>(updateDrawState(drawState));
+      dispatch(updateDrawState(drawState));
     },
     cancelDraw: () => {
-      dispatch<any>(updateDrawState(null));
+      dispatch(updateDrawState(null));
     },
   };
 }

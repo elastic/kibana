@@ -18,7 +18,7 @@
  */
 
 import { has, get } from 'lodash';
-import { ConfigDeprecationProvider, ConfigDeprecation } from './types';
+import { ConfigDeprecationProvider, ConfigDeprecation } from '@kbn/config';
 
 const configPathDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   if (has(process.env, 'CONFIG_PATH')) {
@@ -136,6 +136,8 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({ rename, unu
   unusedFromRoot('optimize.workers'),
   unusedFromRoot('optimize.profile'),
   unusedFromRoot('optimize.validateSyntaxOfNodeModules'),
+  unusedFromRoot('elasticsearch.preserveHost'),
+  unusedFromRoot('elasticsearch.startupTimeout'),
   rename('cpu.cgroup.path.override', 'ops.cGroupOverrides.cpuPath'),
   rename('cpuacct.cgroup.path.override', 'ops.cGroupOverrides.cpuAcctPath'),
   configPathDeprecation,

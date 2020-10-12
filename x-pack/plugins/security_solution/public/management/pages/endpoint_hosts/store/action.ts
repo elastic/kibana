@@ -82,6 +82,11 @@ interface ServerReturnedEndpointNonExistingPolicies {
   payload: EndpointState['nonExistingPolicies'];
 }
 
+interface ServerReturnedEndpointAgentPolicies {
+  type: 'serverReturnedEndpointAgentPolicies';
+  payload: EndpointState['agentPolicies'];
+}
+
 interface ServerReturnedEndpointExistValue {
   type: 'serverReturnedEndpointExistValue';
   payload: boolean;
@@ -108,6 +113,26 @@ interface AppRequestedEndpointList {
   type: 'appRequestedEndpointList';
 }
 
+interface ServerReturnedAgenstWithEndpointsTotal {
+  type: 'serverReturnedAgenstWithEndpointsTotal';
+  payload: number;
+}
+
+interface ServerFailedToReturnAgenstWithEndpointsTotal {
+  type: 'serverFailedToReturnAgenstWithEndpointsTotal';
+  payload: ServerApiError;
+}
+
+interface ServerReturnedEndpointsTotal {
+  type: 'serverReturnedEndpointsTotal';
+  payload: number;
+}
+
+interface ServerFailedToReturnEndpointsTotal {
+  type: 'serverFailedToReturnEndpointsTotal';
+  payload: ServerApiError;
+}
+
 export type EndpointAction =
   | ServerReturnedEndpointList
   | ServerFailedToReturnEndpointList
@@ -126,4 +151,9 @@ export type EndpointAction =
   | ServerFailedToReturnMetadataPatterns
   | AppRequestedEndpointList
   | ServerReturnedEndpointNonExistingPolicies
-  | UserUpdatedEndpointListRefreshOptions;
+  | ServerReturnedAgenstWithEndpointsTotal
+  | ServerReturnedEndpointAgentPolicies
+  | UserUpdatedEndpointListRefreshOptions
+  | ServerReturnedEndpointsTotal
+  | ServerFailedToReturnAgenstWithEndpointsTotal
+  | ServerFailedToReturnEndpointsTotal;

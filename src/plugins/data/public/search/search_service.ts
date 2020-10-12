@@ -17,19 +17,35 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
+import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from 'src/core/public';
 import { BehaviorSubject } from 'rxjs';
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './types';
 
-import { createSearchSource, SearchSource, SearchSourceDependencies } from './search_source';
+import { handleResponse } from './fetch';
+import {
+  IEsSearchRequest,
+  IEsSearchResponse,
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchGeneric,
+  ISearchOptions,
+  SearchSourceService,
+  SearchSourceDependencies,
+} from '../../common/search';
+import { getCallMsearch } from './legacy';
 import { AggsService, AggsStartDependencies } from './aggs';
 import { IndexPatternsContract } from '../index_patterns/index_patterns';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
-import { ISearchGeneric } from './types';
 import { SearchUsageCollector, createUsageCollector } from './collectors';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
 import { esdsl, esRawResponse } from './expressions';
 import { ExpressionsSetup } from '../../../expressions/public';
+import { ConfigSchema } from '../../config';
+import {
+  SHARD_DELAY_AGG_NAME,
+  getShardDelayBucketAgg,
+} from '../../common/search/aggs/buckets/shard_delay';
+import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
@@ -45,11 +61,14 @@ export interface SearchServiceStartDependencies {
 
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private readonly aggsService = new AggsService();
+  private readonly searchSourceService = new SearchSourceService();
   private searchInterceptor!: ISearchInterceptor;
   private usageCollector?: SearchUsageCollector;
 
+  constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
+
   public setup(
-    { http, getStartServices, injectedMetadata, notifications, uiSettings }: CoreSetup,
+    { http, getStartServices, notifications, uiSettings }: CoreSetup,
     { expressions, usageCollection }: SearchServiceSetupDependencies
   ): ISearchSetup {
     this.usageCollector = createUsageCollector(getStartServices, usageCollection);
@@ -69,11 +88,18 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     expressions.registerFunction(esdsl);
     expressions.registerType(esRawResponse);
 
+    const aggs = this.aggsService.setup({
+      registerFunction: expressions.registerFunction,
+      uiSettings,
+    });
+
+    if (this.initializerContext.config.get().search.aggs.shardDelay.enabled) {
+      aggs.types.registerBucket(SHARD_DELAY_AGG_NAME, getShardDelayBucketAgg);
+      expressions.registerFunction(aggShardDelay);
+    }
+
     return {
-      aggs: this.aggsService.setup({
-        registerFunction: expressions.registerFunction,
-        uiSettings,
-      }),
+      aggs,
       usageCollector: this.usageCollector!,
       __enhance: (enhancements: SearchEnhancements) => {
         this.searchInterceptor = enhancements.searchInterceptor;
@@ -82,7 +108,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   }
 
   public start(
-    { application, http, injectedMetadata, notifications, uiSettings }: CoreStart,
+    { application, http, notifications, uiSettings }: CoreStart,
     { fieldFormats, indexPatterns }: SearchServiceStartDependencies
   ): ISearchStart {
     const search = ((request, options) => {
@@ -94,30 +120,34 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     const searchSourceDependencies: SearchSourceDependencies = {
       getConfig: uiSettings.get.bind(uiSettings),
-      search,
-      http,
-      loadingCount$,
+      search: <
+        SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
+        SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
+      >(
+        request: SearchStrategyRequest,
+        options: ISearchOptions
+      ) => {
+        return search(request, options).toPromise() as Promise<SearchStrategyResponse>;
+      },
+      onResponse: handleResponse,
+      legacy: {
+        callMsearch: getCallMsearch({ http }),
+        loadingCount$,
+      },
     };
 
     return {
       aggs: this.aggsService.start({ fieldFormats, uiSettings }),
       search,
-      searchSource: {
-        /**
-         * creates searchsource based on serialized search source fields
-         */
-        create: createSearchSource(indexPatterns, searchSourceDependencies),
-        /**
-         * creates an enpty search source
-         */
-        createEmpty: () => {
-          return new SearchSource({}, searchSourceDependencies);
-        },
+      showError: (e: Error) => {
+        this.searchInterceptor.showError(e);
       },
+      searchSource: this.searchSourceService.start(indexPatterns, searchSourceDependencies),
     };
   }
 
   public stop() {
     this.aggsService.stop();
+    this.searchSourceService.stop();
   }
 }

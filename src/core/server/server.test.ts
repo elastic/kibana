@@ -35,14 +35,14 @@ import {
 } from './server.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
+import { REPO_ROOT } from '@kbn/dev-utils';
+import { rawConfigServiceMock, getEnvOptions } from './config/mocks';
 import { Env } from './config';
 import { Server } from './server';
 
-import { getEnvOptions } from './config/__mocks__/env';
 import { loggingSystemMock } from './logging/logging_system.mock';
-import { rawConfigServiceMock } from './config/raw_config_service.mock';
 
-const env = new Env('.', getEnvOptions());
+const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 const logger = loggingSystemMock.create();
 const rawConfigService = rawConfigServiceMock.create({});
 
@@ -214,4 +214,21 @@ test(`doesn't setup core services if legacy config validation fails`, async () =
   expect(mockMetricsService.setup).not.toHaveBeenCalled();
   expect(mockStatusService.setup).not.toHaveBeenCalled();
   expect(mockLoggingService.setup).not.toHaveBeenCalled();
+});
+
+test(`doesn't validate config if env.isDevClusterMaster is true`, async () => {
+  const devParentEnv = Env.createDefault(REPO_ROOT, {
+    ...getEnvOptions(),
+    isDevClusterMaster: true,
+  });
+
+  const server = new Server(rawConfigService, devParentEnv, logger);
+  await server.setup();
+
+  expect(mockEnsureValidConfiguration).not.toHaveBeenCalled();
+  expect(mockContextService.setup).toHaveBeenCalled();
+  expect(mockAuditTrailService.setup).toHaveBeenCalled();
+  expect(mockHttpService.setup).toHaveBeenCalled();
+  expect(mockElasticsearchService.setup).toHaveBeenCalled();
+  expect(mockSavedObjectsService.setup).toHaveBeenCalled();
 });

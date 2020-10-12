@@ -33,6 +33,7 @@ import {
   ChromeStart,
   ToastsStart,
   ScopedHistory,
+  AppMountParameters,
 } from 'kibana/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
 import {
@@ -112,6 +113,7 @@ export interface VisualizeServices extends CoreStart {
   restorePreviousUrl: () => void;
   scopedHistory: ScopedHistory;
   dashboard: DashboardStart;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
 
 export interface SavedVisInstance {

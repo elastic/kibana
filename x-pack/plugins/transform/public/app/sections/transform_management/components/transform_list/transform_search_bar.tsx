@@ -16,8 +16,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TermClause, FieldClause, Value } from './common';
-import { TRANSFORM_STATE } from '../../../../../../common';
-import { TRANSFORM_MODE, TransformListRow } from '../../../../common';
+import { TRANSFORM_MODE, TRANSFORM_STATE } from '../../../../../../common/constants';
+import { TransformListRow } from '../../../../common';
 import { getTaskStateBadge } from './use_columns';
 
 const filters: SearchFilterConfig[] = [

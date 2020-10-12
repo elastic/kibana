@@ -5,17 +5,12 @@
  */
 
 import { ReportingConfig } from '../../';
-import { ConditionalHeaders } from '../../types';
+import { ConditionalHeaders } from './';
 
-export const getConditionalHeaders = <TaskPayloadType>({
-  config,
-  job,
-  filteredHeaders,
-}: {
-  config: ReportingConfig;
-  job: TaskPayloadType;
-  filteredHeaders: Record<string, string>;
-}) => {
+export const getConditionalHeaders = (
+  config: ReportingConfig,
+  filteredHeaders: Record<string, string>
+) => {
   const { kbnConfig } = config;
   const [hostname, port, basePath, protocol] = [
     config.get('kibanaServer', 'hostname'),

@@ -30,6 +30,7 @@ import { EmptyPlaceholder } from '../shared_components';
 import './visualization.scss';
 import { desanitizeFilterContext } from '../utils';
 import { ChartsPluginSetup, SeriesLayer } from '../../../../../src/plugins/charts/public';
+import { LensIconChartDonut } from '../assets/chart_donut';
 
 const EMPTY_SLICE = Symbol('empty_slice');
 
@@ -193,7 +194,7 @@ export function PieComponent(
   const percentFormatter = props.formatFactory({
     id: 'percent',
     params: {
-      pattern: `0,0.${'0'.repeat(percentDecimals ?? DEFAULT_PERCENT_DECIMALS)}%`,
+      pattern: `0,0.[${'0'.repeat(percentDecimals ?? DEFAULT_PERCENT_DECIMALS)}]%`,
     },
   });
 
@@ -217,7 +218,7 @@ export function PieComponent(
     );
 
   if (isEmpty) {
-    return <EmptyPlaceholder icon="visPie" />;
+    return <EmptyPlaceholder icon={LensIconChartDonut} />;
   }
 
   if (hasNegative) {
@@ -234,7 +235,12 @@ export function PieComponent(
     );
   }
   return (
-    <VisualizationContainer className="lnsPieExpression__container" isReady={state.isReady}>
+    <VisualizationContainer
+      reportTitle={props.args.title}
+      reportDescription={props.args.description}
+      className="lnsPieExpression__container"
+      isReady={state.isReady}
+    >
       <Chart>
         <Settings
           // Legend is hidden in many scenarios

@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { Map as MbMap, FeatureIdentifier } from 'mapbox-gl';
 import { FeatureCollection } from 'geojson';
 // @ts-expect-error
@@ -29,7 +29,7 @@ import {
 import { StyleMeta } from './style_meta';
 import { VectorIcon } from './components/legend/vector_icon';
 import { VectorStyleLegend } from './components/legend/vector_style_legend';
-import { getComputedFieldName, isOnlySingleFeatureType } from './style_util';
+import { isOnlySingleFeatureType } from './style_util';
 import { StaticStyleProperty } from './properties/static_style_property';
 import { DynamicStyleProperty } from './properties/dynamic_style_property';
 import { DynamicSizeProperty } from './properties/dynamic_size_property';
@@ -82,11 +82,6 @@ const POINTS = [GEO_JSON_TYPE.POINT, GEO_JSON_TYPE.MULTI_POINT];
 const LINES = [GEO_JSON_TYPE.LINE_STRING, GEO_JSON_TYPE.MULTI_LINE_STRING];
 const POLYGONS = [GEO_JSON_TYPE.POLYGON, GEO_JSON_TYPE.MULTI_POLYGON];
 
-function getNumericalMbFeatureStateValue(value: string) {
-  const valueAsFloat = parseFloat(value);
-  return isNaN(valueAsFloat) ? null : valueAsFloat;
-}
-
 export interface IVectorStyle extends IStyle {
   getAllStyleProperties(): Array<IStyleProperty<StylePropertyOptions>>;
   getDynamicPropertiesArray(): Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>;
@@ -97,6 +92,55 @@ export interface IVectorStyle extends IStyle {
     mapColors: string[]
   ): { hasChanges: boolean; nextStyleDescriptor?: VectorStyleDescriptor };
   pluckStyleMetaFromSourceDataRequest(sourceDataRequest: DataRequest): Promise<StyleMetaDescriptor>;
+  isTimeAware: () => boolean;
+  getIcon: () => ReactElement<any>;
+  hasLegendDetails: () => Promise<boolean>;
+  renderLegendDetails: () => ReactElement<any>;
+  clearFeatureState: (featureCollection: FeatureCollection, mbMap: MbMap, sourceId: string) => void;
+  setFeatureStateAndStyleProps: (
+    featureCollection: FeatureCollection,
+    mbMap: MbMap,
+    mbSourceId: string
+  ) => boolean;
+  arePointsSymbolizedAsCircles: () => boolean;
+  setMBPaintProperties: ({
+    alpha,
+    mbMap,
+    fillLayerId,
+    lineLayerId,
+  }: {
+    alpha: number;
+    mbMap: MbMap;
+    fillLayerId: string;
+    lineLayerId: string;
+  }) => void;
+  setMBPaintPropertiesForPoints: ({
+    alpha,
+    mbMap,
+    pointLayerId,
+  }: {
+    alpha: number;
+    mbMap: MbMap;
+    pointLayerId: string;
+  }) => void;
+  setMBPropertiesForLabelText: ({
+    alpha,
+    mbMap,
+    textLayerId,
+  }: {
+    alpha: number;
+    mbMap: MbMap;
+    textLayerId: string;
+  }) => void;
+  setMBSymbolPropertiesForPoints: ({
+    mbMap,
+    symbolLayerId,
+    alpha,
+  }: {
+    alpha: number;
+    mbMap: MbMap;
+    symbolLayerId: string;
+  }) => void;
 }
 
 export class VectorStyle implements IVectorStyle {
@@ -597,54 +641,34 @@ export class VectorStyle implements IVectorStyle {
     featureCollection: FeatureCollection,
     mbMap: MbMap,
     mbSourceId: string
-  ) {
+  ): boolean {
     if (!featureCollection) {
-      return;
+      return false;
     }
 
     const dynamicStyleProps = this.getDynamicPropertiesArray();
     if (dynamicStyleProps.length === 0) {
-      return;
+      return false;
     }
 
-    const tmpFeatureIdentifier: FeatureIdentifier = {
-      source: '',
-      id: undefined,
-    };
-    const tmpFeatureState: any = {};
-
-    for (let i = 0; i < featureCollection.features.length; i++) {
-      const feature = featureCollection.features[i];
-
-      for (let j = 0; j < dynamicStyleProps.length; j++) {
-        const dynamicStyleProp = dynamicStyleProps[j];
-        const name = dynamicStyleProp.getFieldName();
-        const computedName = getComputedFieldName(dynamicStyleProp.getStyleName(), name);
-        const rawValue = feature.properties ? feature.properties[name] : undefined;
-        if (dynamicStyleProp.supportsMbFeatureState()) {
-          tmpFeatureState[name] = getNumericalMbFeatureStateValue(rawValue); // the same value will be potentially overridden multiple times, if the name remains identical
-        } else {
-          // in practice, a new system property will only be created for:
-          // - label text: this requires the value to be formatted first.
-          // - icon orientation: this is a lay-out property which do not support feature-state (but we're still coercing to a number)
-
-          const formattedValue = dynamicStyleProp.isOrdinal()
-            ? getNumericalMbFeatureStateValue(rawValue)
-            : dynamicStyleProp.formatField(rawValue);
-
-          if (feature.properties) feature.properties[computedName] = formattedValue;
-        }
+    let shouldResetAllData = false;
+    for (let j = 0; j < dynamicStyleProps.length; j++) {
+      const dynamicStyleProp = dynamicStyleProps[j];
+      const usedFeatureState = dynamicStyleProp.enrichGeoJsonAndMbFeatureState(
+        featureCollection,
+        mbMap,
+        mbSourceId
+      );
+      if (!usedFeatureState) {
+        shouldResetAllData = true;
       }
-      tmpFeatureIdentifier.source = mbSourceId;
-      tmpFeatureIdentifier.id = feature.id;
-      mbMap.setFeatureState(tmpFeatureIdentifier, tmpFeatureState);
     }
 
     // returns boolean indicating if styles do not support feature-state and some values are stored in geojson properties
     // this return-value is used in an optimization for style-updates with mapbox-gl.
     // `true` indicates the entire data needs to reset on the source (otherwise the style-rules will not be reapplied)
     // `false` indicates the data does not need to be reset on the store, because styles are re-evaluated if they use featureState
-    return dynamicStyleProps.some((dynamicStyleProp) => !dynamicStyleProp.supportsMbFeatureState());
+    return shouldResetAllData;
   }
 
   arePointsSymbolizedAsCircles() {

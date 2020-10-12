@@ -24,6 +24,9 @@ import { StatusService } from './status_service';
 import { first } from 'rxjs/operators';
 import { mockCoreContext } from '../core_context.mock';
 import { ServiceStatusLevelSnapshotSerializer } from './test_utils';
+import { environmentServiceMock } from '../environment/environment_service.mock';
+import { httpServiceMock } from '../http/http_service.mock';
+import { metricsServiceMock } from '../metrics/metrics_service.mock';
 
 expect.addSnapshotSerializer(ServiceStatusLevelSnapshotSerializer);
 
@@ -44,18 +47,36 @@ describe('StatusService', () => {
     summary: 'This is degraded!',
   };
 
+  type SetupDeps = Parameters<StatusService['setup']>[0];
+  const setupDeps = (overrides: Partial<SetupDeps>): SetupDeps => {
+    return {
+      elasticsearch: {
+        status$: of(available),
+      },
+      savedObjects: {
+        status$: of(available),
+      },
+      pluginDependencies: new Map(),
+      environment: environmentServiceMock.createSetupContract(),
+      http: httpServiceMock.createInternalSetupContract(),
+      metrics: metricsServiceMock.createInternalSetupContract(),
+      ...overrides,
+    };
+  };
+
   describe('setup', () => {
     describe('core$', () => {
       it('rolls up core status observables into single observable', async () => {
-        const setup = await service.setup({
-          elasticsearch: {
-            status$: of(available),
-          },
-          savedObjects: {
-            status$: of(degraded),
-          },
-          pluginDependencies: new Map(),
-        });
+        const setup = await service.setup(
+          setupDeps({
+            elasticsearch: {
+              status$: of(available),
+            },
+            savedObjects: {
+              status$: of(degraded),
+            },
+          })
+        );
         expect(await setup.core$.pipe(first()).toPromise()).toEqual({
           elasticsearch: available,
           savedObjects: degraded,
@@ -63,15 +84,16 @@ describe('StatusService', () => {
       });
 
       it('replays last event', async () => {
-        const setup = await service.setup({
-          elasticsearch: {
-            status$: of(available),
-          },
-          savedObjects: {
-            status$: of(degraded),
-          },
-          pluginDependencies: new Map(),
-        });
+        const setup = await service.setup(
+          setupDeps({
+            elasticsearch: {
+              status$: of(available),
+            },
+            savedObjects: {
+              status$: of(degraded),
+            },
+          })
+        );
         const subResult1 = await setup.core$.pipe(first()).toPromise();
         const subResult2 = await setup.core$.pipe(first()).toPromise();
         const subResult3 = await setup.core$.pipe(first()).toPromise();
@@ -92,15 +114,16 @@ describe('StatusService', () => {
       it('does not emit duplicate events', async () => {
         const elasticsearch$ = new BehaviorSubject(available);
         const savedObjects$ = new BehaviorSubject(degraded);
-        const setup = await service.setup({
-          elasticsearch: {
-            status$: elasticsearch$,
-          },
-          savedObjects: {
-            status$: savedObjects$,
-          },
-          pluginDependencies: new Map(),
-        });
+        const setup = await service.setup(
+          setupDeps({
+            elasticsearch: {
+              status$: elasticsearch$,
+            },
+            savedObjects: {
+              status$: savedObjects$,
+            },
+          })
+        );
 
         const statusUpdates: CoreStatus[] = [];
         const subscription = setup.core$.subscribe((status) => statusUpdates.push(status));
@@ -155,15 +178,16 @@ describe('StatusService', () => {
 
     describe('overall$', () => {
       it('exposes an overall summary', async () => {
-        const setup = await service.setup({
-          elasticsearch: {
-            status$: of(degraded),
-          },
-          savedObjects: {
-            status$: of(degraded),
-          },
-          pluginDependencies: new Map(),
-        });
+        const setup = await service.setup(
+          setupDeps({
+            elasticsearch: {
+              status$: of(degraded),
+            },
+            savedObjects: {
+              status$: of(degraded),
+            },
+          })
+        );
         expect(await setup.overall$.pipe(first()).toPromise()).toMatchObject({
           level: ServiceStatusLevels.degraded,
           summary: '[2] services are degraded',
@@ -171,15 +195,16 @@ describe('StatusService', () => {
       });
 
       it('replays last event', async () => {
-        const setup = await service.setup({
-          elasticsearch: {
-            status$: of(degraded),
-          },
-          savedObjects: {
-            status$: of(degraded),
-          },
-          pluginDependencies: new Map(),
-        });
+        const setup = await service.setup(
+          setupDeps({
+            elasticsearch: {
+              status$: of(degraded),
+            },
+            savedObjects: {
+              status$: of(degraded),
+            },
+          })
+        );
         const subResult1 = await setup.overall$.pipe(first()).toPromise();
         const subResult2 = await setup.overall$.pipe(first()).toPromise();
         const subResult3 = await setup.overall$.pipe(first()).toPromise();
@@ -200,15 +225,16 @@ describe('StatusService', () => {
       it('does not emit duplicate events', async () => {
         const elasticsearch$ = new BehaviorSubject(available);
         const savedObjects$ = new BehaviorSubject(degraded);
-        const setup = await service.setup({
-          elasticsearch: {
-            status$: elasticsearch$,
-          },
-          savedObjects: {
-            status$: savedObjects$,
-          },
-          pluginDependencies: new Map(),
-        });
+        const setup = await service.setup(
+          setupDeps({
+            elasticsearch: {
+              status$: elasticsearch$,
+            },
+            savedObjects: {
+              status$: savedObjects$,
+            },
+          })
+        );
 
         const statusUpdates: ServiceStatus[] = [];
         const subscription = setup.overall$.subscribe((status) => statusUpdates.push(status));
@@ -256,15 +282,16 @@ describe('StatusService', () => {
 
       it('debounces events in quick succession', async () => {
         const savedObjects$ = new BehaviorSubject(available);
-        const setup = await service.setup({
-          elasticsearch: {
-            status$: new BehaviorSubject(available),
-          },
-          savedObjects: {
-            status$: savedObjects$,
-          },
-          pluginDependencies: new Map(),
-        });
+        const setup = await service.setup(
+          setupDeps({
+            elasticsearch: {
+              status$: new BehaviorSubject(available),
+            },
+            savedObjects: {
+              status$: savedObjects$,
+            },
+          })
+        );
 
         const statusUpdates: ServiceStatus[] = [];
         const subscription = setup.overall$.subscribe((status) => statusUpdates.push(status));

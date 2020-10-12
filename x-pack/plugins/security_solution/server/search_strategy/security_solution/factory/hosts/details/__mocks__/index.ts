@@ -5,8 +5,11 @@
  */
 import { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
 import {
+  Direction,
   HostsQueries,
   HostDetailsRequestOptions,
+  SortField,
+  HostsFields,
 } from '../../../../../../../common/search_strategy';
 
 export const mockOptions: HostDetailsRequestOptions = {
@@ -421,8 +424,9 @@ export const mockOptions: HostDetailsRequestOptions = {
       format: 'date_time',
     },
   ],
-  factoryQueryType: HostsQueries.authentications,
-  filterQuery: '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
+  factoryQueryType: HostsQueries.details,
+  filterQuery:
+    '{"bool":{"must":[],"filter":[{"match_all":{}},{"match_phrase":{"host.name":{"query":"bastion00.siem.estc.dev"}}}],"should":[],"must_not":[]}}',
   pagination: {
     activePage: 0,
     cursorStart: 0,
@@ -434,860 +438,15 @@ export const mockOptions: HostDetailsRequestOptions = {
     from: '2020-09-02T15:17:13.678Z',
     to: '2020-09-03T15:17:13.678Z',
   },
-  hostName: 'bastion00',
-};
+  sort: ({
+    direction: Direction.desc,
+    field: 'success',
+  } as unknown) as SortField<HostsFields>,
+  params: {},
+  hostName: 'bastion00.siem.estc.dev',
+} as HostDetailsRequestOptions;
 
 export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
-  isPartial: false,
-  isRunning: false,
-  rawResponse: {
-    took: 14,
-    timed_out: false,
-    _shards: { total: 21, successful: 21, skipped: 0, failed: 0 },
-    hits: { total: -1, max_score: 0, hits: [] },
-    aggregations: {
-      group_by_users: {
-        doc_count_error_upper_bound: -1,
-        sum_other_doc_count: 408,
-        buckets: [
-          {
-            key: 'SYSTEM',
-            doc_count: 281,
-            failures: {
-              meta: {},
-              doc_count: 0,
-              lastFailure: { hits: { total: 0, max_score: 0, hits: [] } },
-            },
-            successes: {
-              meta: {},
-              doc_count: 4,
-              lastSuccess: {
-                hits: {
-                  total: 4,
-                  max_score: 0,
-                  hits: [
-                    {
-                      _index: 'winlogbeat-8.0.0-2020.09.02-000001',
-                      _id: 'zqY7WXQBA6bGZw2uLeKI',
-                      _score: null,
-                      _source: {
-                        process: {
-                          name: 'services.exe',
-                          pid: 564,
-                          executable: 'C:\\Windows\\System32\\services.exe',
-                        },
-                        agent: {
-                          build_date: '2020-07-16 09:16:27 +0000 UTC ',
-                          name: 'siem-windows',
-                          commit: '4dcbde39492bdc3843034bba8db811c68cb44b97 ',
-                          id: '05e1bff7-d7a8-416a-8554-aa10288fa07d',
-                          type: 'winlogbeat',
-                          ephemeral_id: '655abd6c-6c33-435d-a2eb-79b2a01e6d61',
-                          version: '8.0.0',
-                          user: { name: 'inside_winlogbeat_user' },
-                        },
-                        winlog: {
-                          computer_name: 'siem-windows',
-                          process: { pid: 576, thread: { id: 880 } },
-                          keywords: ['Audit Success'],
-                          logon: { id: '0x3e7', type: 'Service' },
-                          channel: 'Security',
-                          event_data: {
-                            LogonGuid: '{00000000-0000-0000-0000-000000000000}',
-                            TargetOutboundDomainName: '-',
-                            VirtualAccount: '%%1843',
-                            LogonType: '5',
-                            IpPort: '-',
-                            TransmittedServices: '-',
-                            SubjectLogonId: '0x3e7',
-                            LmPackageName: '-',
-                            TargetOutboundUserName: '-',
-                            KeyLength: '0',
-                            TargetLogonId: '0x3e7',
-                            RestrictedAdminMode: '-',
-                            SubjectUserName: 'SIEM-WINDOWS$',
-                            TargetLinkedLogonId: '0x0',
-                            ElevatedToken: '%%1842',
-                            SubjectDomainName: 'WORKGROUP',
-                            IpAddress: '-',
-                            ImpersonationLevel: '%%1833',
-                            TargetUserName: 'SYSTEM',
-                            LogonProcessName: 'Advapi  ',
-                            TargetDomainName: 'NT AUTHORITY',
-                            SubjectUserSid: 'S-1-5-18',
-                            TargetUserSid: 'S-1-5-18',
-                            AuthenticationPackageName: 'Negotiate',
-                          },
-                          opcode: 'Info',
-                          version: 2,
-                          record_id: 57818,
-                          task: 'Logon',
-                          event_id: 4624,
-                          provider_guid: '{54849625-5478-4994-a5ba-3e3b0328c30d}',
-                          activity_id: '{d2485217-6bac-0000-8fbb-3f7e2571d601}',
-                          api: 'wineventlog',
-                          provider_name: 'Microsoft-Windows-Security-Auditing',
-                        },
-                        log: { level: 'information' },
-                        source: { domain: '-' },
-                        message:
-                          'An account was successfully logged on.\n\nSubject:\n\tSecurity ID:\t\tS-1-5-18\n\tAccount Name:\t\tSIEM-WINDOWS$\n\tAccount Domain:\t\tWORKGROUP\n\tLogon ID:\t\t0x3E7\n\nLogon Information:\n\tLogon Type:\t\t5\n\tRestricted Admin Mode:\t-\n\tVirtual Account:\t\tNo\n\tElevated Token:\t\tYes\n\nImpersonation Level:\t\tImpersonation\n\nNew Logon:\n\tSecurity ID:\t\tS-1-5-18\n\tAccount Name:\t\tSYSTEM\n\tAccount Domain:\t\tNT AUTHORITY\n\tLogon ID:\t\t0x3E7\n\tLinked Logon ID:\t\t0x0\n\tNetwork Account Name:\t-\n\tNetwork Account Domain:\t-\n\tLogon GUID:\t\t{00000000-0000-0000-0000-000000000000}\n\nProcess Information:\n\tProcess ID:\t\t0x234\n\tProcess Name:\t\tC:\\Windows\\System32\\services.exe\n\nNetwork Information:\n\tWorkstation Name:\t-\n\tSource Network Address:\t-\n\tSource Port:\t\t-\n\nDetailed Authentication Information:\n\tLogon Process:\t\tAdvapi  \n\tAuthentication Package:\tNegotiate\n\tTransited Services:\t-\n\tPackage Name (NTLM only):\t-\n\tKey Length:\t\t0\n\nThis event is generated when a logon session is created. It is generated on the computer that was accessed.\n\nThe subject fields indicate the account on the local system which requested the logon. This is most commonly a service such as the Server service, or a local process such as Winlogon.exe or Services.exe.\n\nThe logon type field indicates the kind of logon that occurred. The most common types are 2 (interactive) and 3 (network).\n\nThe New Logon fields indicate the account for whom the new logon was created, i.e. the account that was logged on.\n\nThe network fields indicate where a remote logon request originated. Workstation name is not always available and may be left blank in some cases.\n\nThe impersonation level field indicates the extent to which a process in the logon session can impersonate.\n\nThe authentication information fields provide detailed information about this specific logon request.\n\t- Logon GUID is a unique identifier that can be used to correlate this event with a KDC event.\n\t- Transited services indicate which intermediate services have participated in this logon request.\n\t- Package name indicates which sub-protocol was used among the NTLM protocols.\n\t- Key length indicates the length of the generated session key. This will be 0 if no session key was requested.',
-                        cloud: {
-                          availability_zone: 'us-central1-c',
-                          instance: { name: 'siem-windows', id: '9156726559029788564' },
-                          provider: 'gcp',
-                          machine: { type: 'g1-small' },
-                          project: { id: 'elastic-siem' },
-                        },
-                        '@timestamp': '2020-09-04T13:08:02.532Z',
-                        related: { user: ['SYSTEM', 'SIEM-WINDOWS$'] },
-                        ecs: { version: '1.5.0' },
-                        host: {
-                          hostname: 'siem-windows',
-                          os: {
-                            build: '17763.1397',
-                            kernel: '10.0.17763.1397 (WinBuild.160101.0800)',
-                            name: 'Windows Server 2019 Datacenter',
-                            family: 'windows',
-                            version: '10.0',
-                            platform: 'windows',
-                          },
-                          ip: ['fe80::ecf5:decc:3ec3:767e', '10.200.0.15'],
-                          name: 'siem-windows',
-                          id: 'ce1d3c9b-a815-4643-9641-ada0f2c00609',
-                          mac: ['42:01:0a:c8:00:0f'],
-                          architecture: 'x86_64',
-                        },
-                        event: {
-                          code: 4624,
-                          provider: 'Microsoft-Windows-Security-Auditing',
-                          created: '2020-09-04T13:08:03.638Z',
-                          kind: 'event',
-                          module: 'security',
-                          action: 'logged-in',
-                          category: 'authentication',
-                          type: 'start',
-                          outcome: 'success',
-                        },
-                        user: { domain: 'NT AUTHORITY', name: 'SYSTEM', id: 'S-1-5-18' },
-                      },
-                      sort: [1599224882532],
-                    },
-                  ],
-                },
-              },
-            },
-          },
-          {
-            key: 'tsg',
-            doc_count: 1,
-            failures: {
-              doc_count: 0,
-              lastFailure: { hits: { total: 0, max_score: 0, hits: [] } },
-            },
-            successes: {
-              doc_count: 1,
-              lastSuccess: {
-                hits: {
-                  total: 1,
-                  max_score: 0,
-                  hits: [
-                    {
-                      _index: '.ds-logs-system.auth-default-000001',
-                      _id: '9_sfWXQBc39KFIJbIsDh',
-                      _score: null,
-                      _source: {
-                        agent: {
-                          hostname: 'siem-kibana',
-                          name: 'siem-kibana',
-                          id: 'aa3d9dc7-fef1-4c2f-a68d-25785d624e35',
-                          ephemeral_id: 'e503bd85-11c7-4bc9-ae7d-70be1d919fb7',
-                          type: 'filebeat',
-                          version: '7.9.1',
-                        },
-                        process: { name: 'sshd', pid: 20764 },
-                        log: { file: { path: '/var/log/auth.log' }, offset: 552463 },
-                        source: {
-                          geo: {
-                            continent_name: 'Europe',
-                            region_iso_code: 'DE-BE',
-                            city_name: 'Berlin',
-                            country_iso_code: 'DE',
-                            region_name: 'Land Berlin',
-                            location: { lon: 13.3512, lat: 52.5727 },
-                          },
-                          as: { number: 6805, organization: { name: 'Telefonica Germany' } },
-                          port: 57457,
-                          ip: '77.183.42.188',
-                        },
-                        cloud: {
-                          availability_zone: 'us-east1-b',
-                          instance: { name: 'siem-kibana', id: '5412578377715150143' },
-                          provider: 'gcp',
-                          machine: { type: 'n1-standard-2' },
-                          project: { id: 'elastic-beats' },
-                        },
-                        input: { type: 'log' },
-                        '@timestamp': '2020-09-04T11:49:21.000Z',
-                        system: {
-                          auth: {
-                            ssh: {
-                              method: 'publickey',
-                              signature: 'RSA SHA256:vv64JNLzKZWYA9vonnGWuW7zxWhyZrL/BFxyIGbISx8',
-                              event: 'Accepted',
-                            },
-                          },
-                        },
-                        ecs: { version: '1.5.0' },
-                        data_stream: { namespace: 'default', type: 'logs', dataset: 'system.auth' },
-                        host: {
-                          hostname: 'siem-kibana',
-                          os: {
-                            kernel: '4.9.0-8-amd64',
-                            codename: 'stretch',
-                            name: 'Debian GNU/Linux',
-                            family: 'debian',
-                            version: '9 (stretch)',
-                            platform: 'debian',
-                          },
-                          containerized: false,
-                          ip: ['10.142.0.7', 'fe80::4001:aff:fe8e:7'],
-                          name: 'siem-kibana',
-                          id: 'aa7ca589f1b8220002f2fc61c64cfbf1',
-                          mac: ['42:01:0a:8e:00:07'],
-                          architecture: 'x86_64',
-                        },
-                        event: {
-                          timezone: '+00:00',
-                          action: 'ssh_login',
-                          type: 'authentication_success',
-                          category: 'authentication',
-                          dataset: 'system.auth',
-                          outcome: 'success',
-                        },
-                        user: { name: 'tsg' },
-                      },
-                      sort: [1599220161000],
-                    },
-                  ],
-                },
-              },
-            },
-          },
-          {
-            key: 'admin',
-            doc_count: 23,
-            failures: {
-              doc_count: 23,
-              lastFailure: {
-                hits: {
-                  total: 23,
-                  max_score: 0,
-                  hits: [
-                    {
-                      _index: '.ds-logs-system.auth-default-000001',
-                      _id: 'ZfxZWXQBc39KFIJbLN5U',
-                      _score: null,
-                      _source: {
-                        agent: {
-                          hostname: 'siem-kibana',
-                          name: 'siem-kibana',
-                          id: 'aa3d9dc7-fef1-4c2f-a68d-25785d624e35',
-                          ephemeral_id: 'e503bd85-11c7-4bc9-ae7d-70be1d919fb7',
-                          type: 'filebeat',
-                          version: '7.9.1',
-                        },
-                        process: { name: 'sshd', pid: 22913 },
-                        log: { file: { path: '/var/log/auth.log' }, offset: 562910 },
-                        source: {
-                          geo: {
-                            continent_name: 'Asia',
-                            region_iso_code: 'KR-28',
-                            city_name: 'Incheon',
-                            country_iso_code: 'KR',
-                            region_name: 'Incheon',
-                            location: { lon: 126.7288, lat: 37.4562 },
-                          },
-                          as: { number: 4766, organization: { name: 'Korea Telecom' } },
-                          ip: '59.15.3.197',
-                        },
-                        cloud: {
-                          availability_zone: 'us-east1-b',
-                          instance: { name: 'siem-kibana', id: '5412578377715150143' },
-                          provider: 'gcp',
-                          machine: { type: 'n1-standard-2' },
-                          project: { id: 'elastic-beats' },
-                        },
-                        input: { type: 'log' },
-                        '@timestamp': '2020-09-04T13:40:46.000Z',
-                        system: { auth: { ssh: { event: 'Invalid' } } },
-                        ecs: { version: '1.5.0' },
-                        data_stream: { namespace: 'default', type: 'logs', dataset: 'system.auth' },
-                        host: {
-                          hostname: 'siem-kibana',
-                          os: {
-                            kernel: '4.9.0-8-amd64',
-                            codename: 'stretch',
-                            name: 'Debian GNU/Linux',
-                            family: 'debian',
-                            version: '9 (stretch)',
-                            platform: 'debian',
-                          },
-                          containerized: false,
-                          ip: ['10.142.0.7', 'fe80::4001:aff:fe8e:7'],
-                          name: 'siem-kibana',
-                          id: 'aa7ca589f1b8220002f2fc61c64cfbf1',
-                          mac: ['42:01:0a:8e:00:07'],
-                          architecture: 'x86_64',
-                        },
-                        event: {
-                          timezone: '+00:00',
-                          action: 'ssh_login',
-                          type: 'authentication_failure',
-                          category: 'authentication',
-                          dataset: 'system.auth',
-                          outcome: 'failure',
-                        },
-                        user: { name: 'admin' },
-                      },
-                      sort: [1599226846000],
-                    },
-                  ],
-                },
-              },
-            },
-            successes: {
-              doc_count: 0,
-              lastSuccess: { hits: { total: 0, max_score: 0, hits: [] } },
-            },
-          },
-          {
-            key: 'user',
-            doc_count: 21,
-            failures: {
-              doc_count: 21,
-              lastFailure: {
-                hits: {
-                  total: 21,
-                  max_score: 0,
-                  hits: [
-                    {
-                      _index: 'filebeat-8.0.0-2020.09.02-000001',
-                      _id: 'M_xLWXQBc39KFIJbY7Cb',
-                      _score: null,
-                      _source: {
-                        agent: {
-                          name: 'bastion00.siem.estc.dev',
-                          id: 'f9a321c1-ec27-49fa-aacf-6a50ef6d836f',
-                          type: 'filebeat',
-                          ephemeral_id: '734ee3da-1a4f-4bc9-b400-e0cf0e5eeebc',
-                          version: '8.0.0',
-                        },
-                        process: { name: 'sshd', pid: 20671 },
-                        log: { file: { path: '/var/log/auth.log' }, offset: 1028103 },
-                        source: {
-                          geo: {
-                            continent_name: 'North America',
-                            region_iso_code: 'US-NY',
-                            city_name: 'New York',
-                            country_iso_code: 'US',
-                            region_name: 'New York',
-                            location: { lon: -74, lat: 40.7157 },
-                          },
-                          ip: '64.227.88.245',
-                        },
-                        fileset: { name: 'auth' },
-                        input: { type: 'log' },
-                        '@timestamp': '2020-09-04T13:25:43.000Z',
-                        system: { auth: { ssh: { event: 'Invalid' } } },
-                        ecs: { version: '1.5.0' },
-                        related: { ip: ['64.227.88.245'], user: ['user'] },
-                        service: { type: 'system' },
-                        host: { hostname: 'bastion00', name: 'bastion00.siem.estc.dev' },
-                        event: {
-                          ingested: '2020-09-04T13:25:47.034172Z',
-                          timezone: '+00:00',
-                          kind: 'event',
-                          module: 'system',
-                          action: 'ssh_login',
-                          type: ['authentication_failure', 'info'],
-                          category: ['authentication'],
-                          dataset: 'system.auth',
-                          outcome: 'failure',
-                        },
-                        user: { name: 'user' },
-                      },
-                      sort: [1599225943000],
-                    },
-                  ],
-                },
-              },
-            },
-            successes: {
-              doc_count: 0,
-              lastSuccess: { hits: { total: 0, max_score: 0, hits: [] } },
-            },
-          },
-          {
-            key: 'ubuntu',
-            doc_count: 18,
-            failures: {
-              doc_count: 18,
-              lastFailure: {
-                hits: {
-                  total: 18,
-                  max_score: 0,
-                  hits: [
-                    {
-                      _index: 'filebeat-8.0.0-2020.09.02-000001',
-                      _id: 'nPxKWXQBc39KFIJb7q4w',
-                      _score: null,
-                      _source: {
-                        agent: {
-                          name: 'bastion00.siem.estc.dev',
-                          id: 'f9a321c1-ec27-49fa-aacf-6a50ef6d836f',
-                          ephemeral_id: '734ee3da-1a4f-4bc9-b400-e0cf0e5eeebc',
-                          type: 'filebeat',
-                          version: '8.0.0',
-                        },
-                        process: { name: 'sshd', pid: 20665 },
-                        log: { file: { path: '/var/log/auth.log' }, offset: 1027372 },
-                        source: {
-                          geo: {
-                            continent_name: 'North America',
-                            region_iso_code: 'US-NY',
-                            city_name: 'New York',
-                            country_iso_code: 'US',
-                            region_name: 'New York',
-                            location: { lon: -74, lat: 40.7157 },
-                          },
-                          ip: '64.227.88.245',
-                        },
-                        fileset: { name: 'auth' },
-                        input: { type: 'log' },
-                        '@timestamp': '2020-09-04T13:25:07.000Z',
-                        system: { auth: { ssh: { event: 'Invalid' } } },
-                        ecs: { version: '1.5.0' },
-                        related: { ip: ['64.227.88.245'], user: ['ubuntu'] },
-                        service: { type: 'system' },
-                        host: { hostname: 'bastion00', name: 'bastion00.siem.estc.dev' },
-                        event: {
-                          ingested: '2020-09-04T13:25:16.974606Z',
-                          timezone: '+00:00',
-                          kind: 'event',
-                          module: 'system',
-                          action: 'ssh_login',
-                          type: ['authentication_failure', 'info'],
-                          category: ['authentication'],
-                          dataset: 'system.auth',
-                          outcome: 'failure',
-                        },
-                        user: { name: 'ubuntu' },
-                      },
-                      sort: [1599225907000],
-                    },
-                  ],
-                },
-              },
-            },
-            successes: {
-              doc_count: 0,
-              lastSuccess: { hits: { total: 0, max_score: 0, hits: [] } },
-            },
-          },
-          {
-            key: 'odoo',
-            doc_count: 17,
-            failures: {
-              doc_count: 17,
-              lastFailure: {
-                hits: {
-                  total: 17,
-                  max_score: 0,
-                  hits: [
-                    {
-                      _index: '.ds-logs-system.auth-default-000001',
-                      _id: 'mPsfWXQBc39KFIJbI8HI',
-                      _score: null,
-                      _source: {
-                        agent: {
-                          hostname: 'siem-kibana',
-                          name: 'siem-kibana',
-                          id: 'aa3d9dc7-fef1-4c2f-a68d-25785d624e35',
-                          type: 'filebeat',
-                          ephemeral_id: 'e503bd85-11c7-4bc9-ae7d-70be1d919fb7',
-                          version: '7.9.1',
-                        },
-                        process: { name: 'sshd', pid: 21506 },
-                        log: { file: { path: '/var/log/auth.log' }, offset: 556761 },
-                        source: {
-                          geo: {
-                            continent_name: 'Asia',
-                            region_iso_code: 'IN-DL',
-                            city_name: 'New Delhi',
-                            country_iso_code: 'IN',
-                            region_name: 'National Capital Territory of Delhi',
-                            location: { lon: 77.2245, lat: 28.6358 },
-                          },
-                          as: { number: 10029, organization: { name: 'SHYAM SPECTRA PVT LTD' } },
-                          ip: '180.151.228.166',
-                        },
-                        cloud: {
-                          availability_zone: 'us-east1-b',
-                          instance: { name: 'siem-kibana', id: '5412578377715150143' },
-                          provider: 'gcp',
-                          machine: { type: 'n1-standard-2' },
-                          project: { id: 'elastic-beats' },
-                        },
-                        input: { type: 'log' },
-                        '@timestamp': '2020-09-04T12:26:36.000Z',
-                        system: { auth: { ssh: { event: 'Invalid' } } },
-                        ecs: { version: '1.5.0' },
-                        data_stream: { namespace: 'default', type: 'logs', dataset: 'system.auth' },
-                        host: {
-                          hostname: 'siem-kibana',
-                          os: {
-                            kernel: '4.9.0-8-amd64',
-                            codename: 'stretch',
-                            name: 'Debian GNU/Linux',
-                            family: 'debian',
-                            version: '9 (stretch)',
-                            platform: 'debian',
-                          },
-                          containerized: false,
-                          ip: ['10.142.0.7', 'fe80::4001:aff:fe8e:7'],
-                          name: 'siem-kibana',
-                          id: 'aa7ca589f1b8220002f2fc61c64cfbf1',
-                          mac: ['42:01:0a:8e:00:07'],
-                          architecture: 'x86_64',
-                        },
-                        event: {
-                          timezone: '+00:00',
-                          action: 'ssh_login',
-                          type: 'authentication_failure',
-                          category: 'authentication',
-                          dataset: 'system.auth',
-                          outcome: 'failure',
-                        },
-                        user: { name: 'odoo' },
-                      },
-                      sort: [1599222396000],
-                    },
-                  ],
-                },
-              },
-            },
-            successes: {
-              doc_count: 0,
-              lastSuccess: { hits: { total: 0, max_score: 0, hits: [] } },
-            },
-          },
-          {
-            key: 'pi',
-            doc_count: 17,
-            failures: {
-              doc_count: 17,
-              lastFailure: {
-                hits: {
-                  total: 17,
-                  max_score: 0,
-                  hits: [
-                    {
-                      _index: 'filebeat-8.0.0-2020.09.02-000001',
-                      _id: 'aaToWHQBA6bGZw2uR-St',
-                      _score: null,
-                      _source: {
-                        agent: {
-                          name: 'bastion00.siem.estc.dev',
-                          id: 'f9a321c1-ec27-49fa-aacf-6a50ef6d836f',
-                          type: 'filebeat',
-                          ephemeral_id: '734ee3da-1a4f-4bc9-b400-e0cf0e5eeebc',
-                          version: '8.0.0',
-                        },
-                        process: { name: 'sshd', pid: 20475 },
-                        log: { file: { path: '/var/log/auth.log' }, offset: 1019218 },
-                        source: {
-                          geo: {
-                            continent_name: 'Europe',
-                            region_iso_code: 'SE-AB',
-                            city_name: 'Stockholm',
-                            country_iso_code: 'SE',
-                            region_name: 'Stockholm',
-                            location: { lon: 17.7833, lat: 59.25 },
-                          },
-                          as: { number: 8473, organization: { name: 'Bahnhof AB' } },
-                          ip: '178.174.148.58',
-                        },
-                        fileset: { name: 'auth' },
-                        input: { type: 'log' },
-                        '@timestamp': '2020-09-04T11:37:22.000Z',
-                        system: { auth: { ssh: { event: 'Invalid' } } },
-                        ecs: { version: '1.5.0' },
-                        related: { ip: ['178.174.148.58'], user: ['pi'] },
-                        service: { type: 'system' },
-                        host: { hostname: 'bastion00', name: 'bastion00.siem.estc.dev' },
-                        event: {
-                          ingested: '2020-09-04T11:37:31.797423Z',
-                          timezone: '+00:00',
-                          kind: 'event',
-                          module: 'system',
-                          action: 'ssh_login',
-                          type: ['authentication_failure', 'info'],
-                          category: ['authentication'],
-                          dataset: 'system.auth',
-                          outcome: 'failure',
-                        },
-                        user: { name: 'pi' },
-                      },
-                      sort: [1599219442000],
-                    },
-                  ],
-                },
-              },
-            },
-            successes: {
-              doc_count: 0,
-              lastSuccess: { hits: { total: 0, max_score: 0, hits: [] } },
-            },
-          },
-          {
-            key: 'demo',
-            doc_count: 14,
-            failures: {
-              doc_count: 14,
-              lastFailure: {
-                hits: {
-                  total: 14,
-                  max_score: 0,
-                  hits: [
-                    {
-                      _index: 'filebeat-8.0.0-2020.09.02-000001',
-                      _id: 'VaP_V3QBA6bGZw2upUbg',
-                      _score: null,
-                      _source: {
-                        agent: {
-                          name: 'bastion00.siem.estc.dev',
-                          id: 'f9a321c1-ec27-49fa-aacf-6a50ef6d836f',
-                          type: 'filebeat',
-                          ephemeral_id: '734ee3da-1a4f-4bc9-b400-e0cf0e5eeebc',
-                          version: '8.0.0',
-                        },
-                        process: { name: 'sshd', pid: 19849 },
-                        log: { file: { path: '/var/log/auth.log' }, offset: 981036 },
-                        source: {
-                          geo: {
-                            continent_name: 'Europe',
-                            country_iso_code: 'HR',
-                            location: { lon: 15.5, lat: 45.1667 },
-                          },
-                          as: {
-                            number: 42864,
-                            organization: { name: 'Giganet Internet Szolgaltato Kft' },
-                          },
-                          ip: '45.95.168.157',
-                        },
-                        fileset: { name: 'auth' },
-                        input: { type: 'log' },
-                        '@timestamp': '2020-09-04T07:23:22.000Z',
-                        system: { auth: { ssh: { event: 'Invalid' } } },
-                        ecs: { version: '1.5.0' },
-                        related: { ip: ['45.95.168.157'], user: ['demo'] },
-                        service: { type: 'system' },
-                        host: { hostname: 'bastion00', name: 'bastion00.siem.estc.dev' },
-                        event: {
-                          ingested: '2020-09-04T07:23:26.046346Z',
-                          timezone: '+00:00',
-                          kind: 'event',
-                          module: 'system',
-                          action: 'ssh_login',
-                          type: ['authentication_failure', 'info'],
-                          category: ['authentication'],
-                          dataset: 'system.auth',
-                          outcome: 'failure',
-                        },
-                        user: { name: 'demo' },
-                      },
-                      sort: [1599204202000],
-                    },
-                  ],
-                },
-              },
-            },
-            successes: {
-              doc_count: 0,
-              lastSuccess: { hits: { total: 0, max_score: 0, hits: [] } },
-            },
-          },
-          {
-            key: 'git',
-            doc_count: 13,
-            failures: {
-              doc_count: 13,
-              lastFailure: {
-                hits: {
-                  total: 13,
-                  max_score: 0,
-                  hits: [
-                    {
-                      _index: '.ds-logs-system.auth-default-000001',
-                      _id: 'PqYfWXQBA6bGZw2uIhVU',
-                      _score: null,
-                      _source: {
-                        agent: {
-                          hostname: 'siem-kibana',
-                          name: 'siem-kibana',
-                          id: 'aa3d9dc7-fef1-4c2f-a68d-25785d624e35',
-                          ephemeral_id: 'e503bd85-11c7-4bc9-ae7d-70be1d919fb7',
-                          type: 'filebeat',
-                          version: '7.9.1',
-                        },
-                        process: { name: 'sshd', pid: 20396 },
-                        log: { file: { path: '/var/log/auth.log' }, offset: 550795 },
-                        source: {
-                          geo: {
-                            continent_name: 'Asia',
-                            region_iso_code: 'CN-BJ',
-                            city_name: 'Beijing',
-                            country_iso_code: 'CN',
-                            region_name: 'Beijing',
-                            location: { lon: 116.3889, lat: 39.9288 },
-                          },
-                          as: {
-                            number: 45090,
-                            organization: {
-                              name: 'Shenzhen Tencent Computer Systems Company Limited',
-                            },
-                          },
-                          ip: '123.206.30.76',
-                        },
-                        cloud: {
-                          availability_zone: 'us-east1-b',
-                          instance: { name: 'siem-kibana', id: '5412578377715150143' },
-                          provider: 'gcp',
-                          machine: { type: 'n1-standard-2' },
-                          project: { id: 'elastic-beats' },
-                        },
-                        input: { type: 'log' },
-                        '@timestamp': '2020-09-04T11:20:26.000Z',
-                        system: { auth: { ssh: { event: 'Invalid' } } },
-                        ecs: { version: '1.5.0' },
-                        data_stream: { namespace: 'default', type: 'logs', dataset: 'system.auth' },
-                        host: {
-                          hostname: 'siem-kibana',
-                          os: {
-                            kernel: '4.9.0-8-amd64',
-                            codename: 'stretch',
-                            name: 'Debian GNU/Linux',
-                            family: 'debian',
-                            version: '9 (stretch)',
-                            platform: 'debian',
-                          },
-                          containerized: false,
-                          ip: ['10.142.0.7', 'fe80::4001:aff:fe8e:7'],
-                          name: 'siem-kibana',
-                          id: 'aa7ca589f1b8220002f2fc61c64cfbf1',
-                          mac: ['42:01:0a:8e:00:07'],
-                          architecture: 'x86_64',
-                        },
-                        event: {
-                          timezone: '+00:00',
-                          action: 'ssh_login',
-                          type: 'authentication_failure',
-                          category: 'authentication',
-                          dataset: 'system.auth',
-                          outcome: 'failure',
-                        },
-                        user: { name: 'git' },
-                      },
-                      sort: [1599218426000],
-                    },
-                  ],
-                },
-              },
-            },
-            successes: {
-              doc_count: 0,
-              lastSuccess: { hits: { total: 0, max_score: 0, hits: [] } },
-            },
-          },
-          {
-            key: 'webadmin',
-            doc_count: 13,
-            failures: {
-              doc_count: 13,
-              lastFailure: {
-                hits: {
-                  total: 13,
-                  max_score: 0,
-                  hits: [
-                    {
-                      _index: 'filebeat-8.0.0-2020.09.02-000001',
-                      _id: 'iMABWHQBB-gskclyitP-',
-                      _score: null,
-                      _source: {
-                        agent: {
-                          name: 'bastion00.siem.estc.dev',
-                          id: 'f9a321c1-ec27-49fa-aacf-6a50ef6d836f',
-                          type: 'filebeat',
-                          ephemeral_id: '734ee3da-1a4f-4bc9-b400-e0cf0e5eeebc',
-                          version: '8.0.0',
-                        },
-                        process: { name: 'sshd', pid: 19870 },
-                        log: { file: { path: '/var/log/auth.log' }, offset: 984133 },
-                        source: {
-                          geo: {
-                            continent_name: 'Europe',
-                            country_iso_code: 'HR',
-                            location: { lon: 15.5, lat: 45.1667 },
-                          },
-                          as: {
-                            number: 42864,
-                            organization: { name: 'Giganet Internet Szolgaltato Kft' },
-                          },
-                          ip: '45.95.168.157',
-                        },
-                        fileset: { name: 'auth' },
-                        input: { type: 'log' },
-                        '@timestamp': '2020-09-04T07:25:28.000Z',
-                        system: { auth: { ssh: { event: 'Invalid' } } },
-                        ecs: { version: '1.5.0' },
-                        related: { ip: ['45.95.168.157'], user: ['webadmin'] },
-                        service: { type: 'system' },
-                        host: { hostname: 'bastion00', name: 'bastion00.siem.estc.dev' },
-                        event: {
-                          ingested: '2020-09-04T07:25:30.236651Z',
-                          timezone: '+00:00',
-                          kind: 'event',
-                          module: 'system',
-                          action: 'ssh_login',
-                          type: ['authentication_failure', 'info'],
-                          category: ['authentication'],
-                          dataset: 'system.auth',
-                          outcome: 'failure',
-                        },
-                        user: { name: 'webadmin' },
-                      },
-                      sort: [1599204328000],
-                    },
-                  ],
-                },
-              },
-            },
-            successes: {
-              doc_count: 0,
-              lastSuccess: { hits: { total: 0, max_score: 0, hits: [] } },
-            },
-          },
-        ],
-      },
-      user_count: { value: 188 },
-    },
-  },
-  total: 21,
-  loaded: 21,
-};
-
-export const formattedSearchStrategyResponse = {
   isPartial: false,
   isRunning: false,
   rawResponse: {
@@ -2132,12 +1291,12 @@ export const formattedSearchStrategyResponse = {
   },
   total: 21,
   loaded: 21,
+};
+
+export const formattedSearchStrategyResponse = {
   inspect: {
     dsl: [
-      '{\n  "allowNoIndices": true,\n  "index": [\n    "apm-*-transaction*",\n    "auditbeat-*",\n    "endgame-*",\n    "filebeat-*",\n    "logs-*",\n    "packetbeat-*",\n    "winlogbeat-*"\n  ],\n  "ignoreUnavailable": true,\n  "body": {\n    "aggregations": {\n      "host_architecture": {\n        "terms": {\n          "field": "host.architecture",\n          "size": 10,\n          "order": {\n            "timestamp": "desc"\n          }\n        },\n        "aggs": {\n          "timestamp": {\n            "max": {\n              "field": "@timestamp"\n            }\n          }\n        }\n      },\n      "host_id": {\n        "terms": {\n          "field": "host.id",\n          "size": 10,\n          "order": {\n            "timestamp": "desc"\n          }\n        },\n        "aggs": {\n          "timestamp": {\n            "max": {\n              "field": "@timestamp"\n            }\n          }\n        }\n      },\n      "host_ip": {\n        "terms": {\n          "field": "host.ip",\n          "size": 10,\n          "order": {\n            "timestamp": "desc"\n          }\n        },\n        "aggs": {\n          "timestamp": {\n            "max": {\n              "field": "@timestamp"\n            }\n          }\n        }\n      },\n      "host_mac": {\n        "terms": {\n          "field": "host.mac",\n          "size": 10,\n          "order": {\n            "timestamp": "desc"\n          }\n        },\n        "aggs": {\n          "timestamp": {\n            "max": {\n              "field": "@timestamp"\n            }\n          }\n        }\n      },\n      "host_name": {\n        "terms": {\n          "field": "host.name",\n          "size": 10,\n          "order": {\n            "timestamp": "desc"\n          }\n        },\n        "aggs": {\n          "timestamp": {\n            "max": {\n              "field": "@timestamp"\n            }\n          }\n        }\n      },\n      "host_os_family": {\n        "terms": {\n          "field": "host.os.family",\n          "size": 10,\n          "order": {\n            "timestamp": "desc"\n          }\n        },\n        "aggs": {\n          "timestamp": {\n            "max": {\n              "field": "@timestamp"\n            }\n          }\n        }\n      },\n      "host_os_name": {\n        "terms": {\n          "field": "host.os.name",\n          "size": 10,\n          "order": {\n            "timestamp": "desc"\n          }\n        },\n        "aggs": {\n          "timestamp": {\n            "max": {\n              "field": "@timestamp"\n            }\n          }\n        }\n      },\n      "host_os_platform": {\n        "terms": {\n          "field": "host.os.platform",\n          "size": 10,\n          "order": {\n            "timestamp": "desc"\n          }\n        },\n        "aggs": {\n          "timestamp": {\n            "max": {\n              "field": "@timestamp"\n            }\n          }\n        }\n      },\n      "host_os_version": {\n        "terms": {\n          "field": "host.os.version",\n          "size": 10,\n          "order": {\n            "timestamp": "desc"\n          }\n        },\n        "aggs": {\n          "timestamp": {\n            "max": {\n              "field": "@timestamp"\n            }\n          }\n        }\n      },\n      "cloud_instance_id": {\n        "terms": {\n          "field": "cloud.instance.id",\n          "size": 10,\n          "order": {\n            "timestamp": "desc"\n          }\n        },\n        "aggs": {\n          "timestamp": {\n            "max": {\n              "field": "@timestamp"\n            }\n          }\n        }\n      },\n      "cloud_machine_type": {\n        "terms": {\n          "field": "cloud.machine.type",\n          "size": 10,\n          "order": {\n            "timestamp": "desc"\n          }\n        },\n        "aggs": {\n          "timestamp": {\n            "max": {\n              "field": "@timestamp"\n            }\n          }\n        }\n      },\n      "cloud_provider": {\n        "terms": {\n          "field": "cloud.provider",\n          "size": 10,\n          "order": {\n            "timestamp": "desc"\n          }\n        },\n        "aggs": {\n          "timestamp": {\n            "max": {\n              "field": "@timestamp"\n            }\n          }\n        }\n      },\n      "cloud_region": {\n        "terms": {\n          "field": "cloud.region",\n          "size": 10,\n          "order": {\n            "timestamp": "desc"\n          }\n        },\n        "aggs": {\n          "timestamp": {\n            "max": {\n              "field": "@timestamp"\n            }\n          }\n        }\n      }\n    },\n    "query": {\n      "bool": {\n        "filter": [\n          {\n            "term": {\n              "host.name": "bastion00"\n            }\n          },\n          {\n            "range": {\n              "@timestamp": {\n                "format": "strict_date_optional_time",\n                "gte": "2020-09-02T15:17:13.678Z",\n                "lte": "2020-09-03T15:17:13.678Z"\n              }\n            }\n          }\n        ]\n      }\n    },\n    "size": 0,\n    "track_total_hits": false\n  }\n}',
-    ],
-    response: [
-      '{\n  "isPartial": false,\n  "isRunning": false,\n  "rawResponse": {\n    "took": 14,\n    "timed_out": false,\n    "_shards": {\n      "total": 21,\n      "successful": 21,\n      "skipped": 0,\n      "failed": 0\n    },\n    "hits": {\n      "total": -1,\n      "max_score": 0,\n      "hits": []\n    },\n    "aggregations": {\n      "group_by_users": {\n        "doc_count_error_upper_bound": -1,\n        "sum_other_doc_count": 408,\n        "buckets": [\n          {\n            "key": "SYSTEM",\n            "doc_count": 281,\n            "failures": {\n              "meta": {},\n              "doc_count": 0,\n              "lastFailure": {\n                "hits": {\n                  "total": 0,\n                  "max_score": 0,\n                  "hits": []\n                }\n              }\n            },\n            "successes": {\n              "meta": {},\n              "doc_count": 4,\n              "lastSuccess": {\n                "hits": {\n                  "total": 4,\n                  "max_score": 0,\n                  "hits": [\n                    {\n                      "_index": "winlogbeat-8.0.0-2020.09.02-000001",\n                      "_id": "zqY7WXQBA6bGZw2uLeKI",\n                      "_score": null,\n                      "_source": {\n                        "process": {\n                          "name": "services.exe",\n                          "pid": 564,\n                          "executable": "C:\\\\Windows\\\\System32\\\\services.exe"\n                        },\n                        "agent": {\n                          "build_date": "2020-07-16 09:16:27 +0000 UTC ",\n                          "name": "siem-windows",\n                          "commit": "4dcbde39492bdc3843034bba8db811c68cb44b97 ",\n                          "id": "05e1bff7-d7a8-416a-8554-aa10288fa07d",\n                          "type": "winlogbeat",\n                          "ephemeral_id": "655abd6c-6c33-435d-a2eb-79b2a01e6d61",\n                          "version": "8.0.0",\n                          "user": {\n                            "name": "inside_winlogbeat_user"\n                          }\n                        },\n                        "winlog": {\n                          "computer_name": "siem-windows",\n                          "process": {\n                            "pid": 576,\n                            "thread": {\n                              "id": 880\n                            }\n                          },\n                          "keywords": [\n                            "Audit Success"\n                          ],\n                          "logon": {\n                            "id": "0x3e7",\n                            "type": "Service"\n                          },\n                          "channel": "Security",\n                          "event_data": {\n                            "LogonGuid": "{00000000-0000-0000-0000-000000000000}",\n                            "TargetOutboundDomainName": "-",\n                            "VirtualAccount": "%%1843",\n                            "LogonType": "5",\n                            "IpPort": "-",\n                            "TransmittedServices": "-",\n                            "SubjectLogonId": "0x3e7",\n                            "LmPackageName": "-",\n                            "TargetOutboundUserName": "-",\n                            "KeyLength": "0",\n                            "TargetLogonId": "0x3e7",\n                            "RestrictedAdminMode": "-",\n                            "SubjectUserName": "SIEM-WINDOWS$",\n                            "TargetLinkedLogonId": "0x0",\n                            "ElevatedToken": "%%1842",\n                            "SubjectDomainName": "WORKGROUP",\n                            "IpAddress": "-",\n                            "ImpersonationLevel": "%%1833",\n                            "TargetUserName": "SYSTEM",\n                            "LogonProcessName": "Advapi  ",\n                            "TargetDomainName": "NT AUTHORITY",\n                            "SubjectUserSid": "S-1-5-18",\n                            "TargetUserSid": "S-1-5-18",\n                            "AuthenticationPackageName": "Negotiate"\n                          },\n                          "opcode": "Info",\n                          "version": 2,\n                          "record_id": 57818,\n                          "task": "Logon",\n                          "event_id": 4624,\n                          "provider_guid": "{54849625-5478-4994-a5ba-3e3b0328c30d}",\n                          "activity_id": "{d2485217-6bac-0000-8fbb-3f7e2571d601}",\n                          "api": "wineventlog",\n                          "provider_name": "Microsoft-Windows-Security-Auditing"\n                        },\n                        "log": {\n                          "level": "information"\n                        },\n                        "source": {\n                          "domain": "-"\n                        },\n                        "message": "An account was successfully logged on.\\n\\nSubject:\\n\\tSecurity ID:\\t\\tS-1-5-18\\n\\tAccount Name:\\t\\tSIEM-WINDOWS$\\n\\tAccount Domain:\\t\\tWORKGROUP\\n\\tLogon ID:\\t\\t0x3E7\\n\\nLogon Information:\\n\\tLogon Type:\\t\\t5\\n\\tRestricted Admin Mode:\\t-\\n\\tVirtual Account:\\t\\tNo\\n\\tElevated Token:\\t\\tYes\\n\\nImpersonation Level:\\t\\tImpersonation\\n\\nNew Logon:\\n\\tSecurity ID:\\t\\tS-1-5-18\\n\\tAccount Name:\\t\\tSYSTEM\\n\\tAccount Domain:\\t\\tNT AUTHORITY\\n\\tLogon ID:\\t\\t0x3E7\\n\\tLinked Logon ID:\\t\\t0x0\\n\\tNetwork Account Name:\\t-\\n\\tNetwork Account Domain:\\t-\\n\\tLogon GUID:\\t\\t{00000000-0000-0000-0000-000000000000}\\n\\nProcess Information:\\n\\tProcess ID:\\t\\t0x234\\n\\tProcess Name:\\t\\tC:\\\\Windows\\\\System32\\\\services.exe\\n\\nNetwork Information:\\n\\tWorkstation Name:\\t-\\n\\tSource Network Address:\\t-\\n\\tSource Port:\\t\\t-\\n\\nDetailed Authentication Information:\\n\\tLogon Process:\\t\\tAdvapi  \\n\\tAuthentication Package:\\tNegotiate\\n\\tTransited Services:\\t-\\n\\tPackage Name (NTLM only):\\t-\\n\\tKey Length:\\t\\t0\\n\\nThis event is generated when a logon session is created. It is generated on the computer that was accessed.\\n\\nThe subject fields indicate the account on the local system which requested the logon. This is most commonly a service such as the Server service, or a local process such as Winlogon.exe or Services.exe.\\n\\nThe logon type field indicates the kind of logon that occurred. The most common types are 2 (interactive) and 3 (network).\\n\\nThe New Logon fields indicate the account for whom the new logon was created, i.e. the account that was logged on.\\n\\nThe network fields indicate where a remote logon request originated. Workstation name is not always available and may be left blank in some cases.\\n\\nThe impersonation level field indicates the extent to which a process in the logon session can impersonate.\\n\\nThe authentication information fields provide detailed information about this specific logon request.\\n\\t- Logon GUID is a unique identifier that can be used to correlate this event with a KDC event.\\n\\t- Transited services indicate which intermediate services have participated in this logon request.\\n\\t- Package name indicates which sub-protocol was used among the NTLM protocols.\\n\\t- Key length indicates the length of the generated session key. This will be 0 if no session key was requested.",\n                        "cloud": {\n                          "availability_zone": "us-central1-c",\n                          "instance": {\n                            "name": "siem-windows",\n                            "id": "9156726559029788564"\n                          },\n                          "provider": "gcp",\n                          "machine": {\n                            "type": "g1-small"\n                          },\n                          "project": {\n                            "id": "elastic-siem"\n                          }\n                        },\n                        "@timestamp": "2020-09-04T13:08:02.532Z",\n                        "related": {\n                          "user": [\n                            "SYSTEM",\n                            "SIEM-WINDOWS$"\n                          ]\n                        },\n                        "ecs": {\n                          "version": "1.5.0"\n                        },\n                        "host": {\n                          "hostname": "siem-windows",\n                          "os": {\n                            "build": "17763.1397",\n                            "kernel": "10.0.17763.1397 (WinBuild.160101.0800)",\n                            "name": "Windows Server 2019 Datacenter",\n                            "family": "windows",\n                            "version": "10.0",\n                            "platform": "windows"\n                          },\n                          "ip": [\n                            "fe80::ecf5:decc:3ec3:767e",\n                            "10.200.0.15"\n                          ],\n                          "name": "siem-windows",\n                          "id": "ce1d3c9b-a815-4643-9641-ada0f2c00609",\n                          "mac": [\n                            "42:01:0a:c8:00:0f"\n                          ],\n                          "architecture": "x86_64"\n                        },\n                        "event": {\n                          "code": 4624,\n                          "provider": "Microsoft-Windows-Security-Auditing",\n                          "created": "2020-09-04T13:08:03.638Z",\n                          "kind": "event",\n                          "module": "security",\n                          "action": "logged-in",\n                          "category": "authentication",\n                          "type": "start",\n                          "outcome": "success"\n                        },\n                        "user": {\n                          "domain": "NT AUTHORITY",\n                          "name": "SYSTEM",\n                          "id": "S-1-5-18"\n                        }\n                      },\n                      "sort": [\n                        1599224882532\n                      ]\n                    }\n                  ]\n                }\n              }\n            }\n          },\n          {\n            "key": "tsg",\n            "doc_count": 1,\n            "failures": {\n              "doc_count": 0,\n              "lastFailure": {\n                "hits": {\n                  "total": 0,\n                  "max_score": 0,\n                  "hits": []\n                }\n              }\n            },\n            "successes": {\n              "doc_count": 1,\n              "lastSuccess": {\n                "hits": {\n                  "total": 1,\n                  "max_score": 0,\n                  "hits": [\n                    {\n                      "_index": ".ds-logs-system.auth-default-000001",\n                      "_id": "9_sfWXQBc39KFIJbIsDh",\n                      "_score": null,\n                      "_source": {\n                        "agent": {\n                          "hostname": "siem-kibana",\n                          "name": "siem-kibana",\n                          "id": "aa3d9dc7-fef1-4c2f-a68d-25785d624e35",\n                          "ephemeral_id": "e503bd85-11c7-4bc9-ae7d-70be1d919fb7",\n                          "type": "filebeat",\n                          "version": "7.9.1"\n                        },\n                        "process": {\n                          "name": "sshd",\n                          "pid": 20764\n                        },\n                        "log": {\n                          "file": {\n                            "path": "/var/log/auth.log"\n                          },\n                          "offset": 552463\n                        },\n                        "source": {\n                          "geo": {\n                            "continent_name": "Europe",\n                            "region_iso_code": "DE-BE",\n                            "city_name": "Berlin",\n                            "country_iso_code": "DE",\n                            "region_name": "Land Berlin",\n                            "location": {\n                              "lon": 13.3512,\n                              "lat": 52.5727\n                            }\n                          },\n                          "as": {\n                            "number": 6805,\n                            "organization": {\n                              "name": "Telefonica Germany"\n                            }\n                          },\n                          "port": 57457,\n                          "ip": "77.183.42.188"\n                        },\n                        "cloud": {\n                          "availability_zone": "us-east1-b",\n                          "instance": {\n                            "name": "siem-kibana",\n                            "id": "5412578377715150143"\n                          },\n                          "provider": "gcp",\n                          "machine": {\n                            "type": "n1-standard-2"\n                          },\n                          "project": {\n                            "id": "elastic-beats"\n                          }\n                        },\n                        "input": {\n                          "type": "log"\n                        },\n                        "@timestamp": "2020-09-04T11:49:21.000Z",\n                        "system": {\n                          "auth": {\n                            "ssh": {\n                              "method": "publickey",\n                              "signature": "RSA SHA256:vv64JNLzKZWYA9vonnGWuW7zxWhyZrL/BFxyIGbISx8",\n                              "event": "Accepted"\n                            }\n                          }\n                        },\n                        "ecs": {\n                          "version": "1.5.0"\n                        },\n                        "data_stream": {\n                          "namespace": "default",\n                          "type": "logs",\n                          "dataset": "system.auth"\n                        },\n                        "host": {\n                          "hostname": "siem-kibana",\n                          "os": {\n                            "kernel": "4.9.0-8-amd64",\n                            "codename": "stretch",\n                            "name": "Debian GNU/Linux",\n                            "family": "debian",\n                            "version": "9 (stretch)",\n                            "platform": "debian"\n                          },\n                          "containerized": false,\n                          "ip": [\n                            "10.142.0.7",\n                            "fe80::4001:aff:fe8e:7"\n                          ],\n                          "name": "siem-kibana",\n                          "id": "aa7ca589f1b8220002f2fc61c64cfbf1",\n                          "mac": [\n                            "42:01:0a:8e:00:07"\n                          ],\n                          "architecture": "x86_64"\n                        },\n                        "event": {\n                          "timezone": "+00:00",\n                          "action": "ssh_login",\n                          "type": "authentication_success",\n                          "category": "authentication",\n                          "dataset": "system.auth",\n                          "outcome": "success"\n                        },\n                        "user": {\n                          "name": "tsg"\n                        }\n                      },\n                      "sort": [\n                        1599220161000\n                      ]\n                    }\n                  ]\n                }\n              }\n            }\n          },\n          {\n            "key": "admin",\n            "doc_count": 23,\n            "failures": {\n              "doc_count": 23,\n              "lastFailure": {\n                "hits": {\n                  "total": 23,\n                  "max_score": 0,\n                  "hits": [\n                    {\n                      "_index": ".ds-logs-system.auth-default-000001",\n                      "_id": "ZfxZWXQBc39KFIJbLN5U",\n                      "_score": null,\n                      "_source": {\n                        "agent": {\n                          "hostname": "siem-kibana",\n                          "name": "siem-kibana",\n                          "id": "aa3d9dc7-fef1-4c2f-a68d-25785d624e35",\n                          "ephemeral_id": "e503bd85-11c7-4bc9-ae7d-70be1d919fb7",\n                          "type": "filebeat",\n                          "version": "7.9.1"\n                        },\n                        "process": {\n                          "name": "sshd",\n                          "pid": 22913\n                        },\n                        "log": {\n                          "file": {\n                            "path": "/var/log/auth.log"\n                          },\n                          "offset": 562910\n                        },\n                        "source": {\n                          "geo": {\n                            "continent_name": "Asia",\n                            "region_iso_code": "KR-28",\n                            "city_name": "Incheon",\n                            "country_iso_code": "KR",\n                            "region_name": "Incheon",\n                            "location": {\n                              "lon": 126.7288,\n                              "lat": 37.4562\n                            }\n                          },\n                          "as": {\n                            "number": 4766,\n                            "organization": {\n                              "name": "Korea Telecom"\n                            }\n                          },\n                          "ip": "59.15.3.197"\n                        },\n                        "cloud": {\n                          "availability_zone": "us-east1-b",\n                          "instance": {\n                            "name": "siem-kibana",\n                            "id": "5412578377715150143"\n                          },\n                          "provider": "gcp",\n                          "machine": {\n                            "type": "n1-standard-2"\n                          },\n                          "project": {\n                            "id": "elastic-beats"\n                          }\n                        },\n                        "input": {\n                          "type": "log"\n                        },\n                        "@timestamp": "2020-09-04T13:40:46.000Z",\n                        "system": {\n                          "auth": {\n                            "ssh": {\n                              "event": "Invalid"\n                            }\n                          }\n                        },\n                        "ecs": {\n                          "version": "1.5.0"\n                        },\n                        "data_stream": {\n                          "namespace": "default",\n                          "type": "logs",\n                          "dataset": "system.auth"\n                        },\n                        "host": {\n                          "hostname": "siem-kibana",\n                          "os": {\n                            "kernel": "4.9.0-8-amd64",\n                            "codename": "stretch",\n                            "name": "Debian GNU/Linux",\n                            "family": "debian",\n                            "version": "9 (stretch)",\n                            "platform": "debian"\n                          },\n                          "containerized": false,\n                          "ip": [\n                            "10.142.0.7",\n                            "fe80::4001:aff:fe8e:7"\n                          ],\n                          "name": "siem-kibana",\n                          "id": "aa7ca589f1b8220002f2fc61c64cfbf1",\n                          "mac": [\n                            "42:01:0a:8e:00:07"\n                          ],\n                          "architecture": "x86_64"\n                        },\n                        "event": {\n                          "timezone": "+00:00",\n                          "action": "ssh_login",\n                          "type": "authentication_failure",\n                          "category": "authentication",\n                          "dataset": "system.auth",\n                          "outcome": "failure"\n                        },\n                        "user": {\n                          "name": "admin"\n                        }\n                      },\n                      "sort": [\n                        1599226846000\n                      ]\n                    }\n                  ]\n                }\n              }\n            },\n            "successes": {\n              "doc_count": 0,\n              "lastSuccess": {\n                "hits": {\n                  "total": 0,\n                  "max_score": 0,\n                  "hits": []\n                }\n              }\n            }\n          },\n          {\n            "key": "user",\n            "doc_count": 21,\n            "failures": {\n              "doc_count": 21,\n              "lastFailure": {\n                "hits": {\n                  "total": 21,\n                  "max_score": 0,\n                  "hits": [\n                    {\n                      "_index": "filebeat-8.0.0-2020.09.02-000001",\n                      "_id": "M_xLWXQBc39KFIJbY7Cb",\n                      "_score": null,\n                      "_source": {\n                        "agent": {\n                          "name": "bastion00.siem.estc.dev",\n                          "id": "f9a321c1-ec27-49fa-aacf-6a50ef6d836f",\n                          "type": "filebeat",\n                          "ephemeral_id": "734ee3da-1a4f-4bc9-b400-e0cf0e5eeebc",\n                          "version": "8.0.0"\n                        },\n                        "process": {\n                          "name": "sshd",\n                          "pid": 20671\n                        },\n                        "log": {\n                          "file": {\n                            "path": "/var/log/auth.log"\n                          },\n                          "offset": 1028103\n                        },\n                        "source": {\n                          "geo": {\n                            "continent_name": "North America",\n                            "region_iso_code": "US-NY",\n                            "city_name": "New York",\n                            "country_iso_code": "US",\n                            "region_name": "New York",\n                            "location": {\n                              "lon": -74,\n                              "lat": 40.7157\n                            }\n                          },\n                          "ip": "64.227.88.245"\n                        },\n                        "fileset": {\n                          "name": "auth"\n                        },\n                        "input": {\n                          "type": "log"\n                        },\n                        "@timestamp": "2020-09-04T13:25:43.000Z",\n                        "system": {\n                          "auth": {\n                            "ssh": {\n                              "event": "Invalid"\n                            }\n                          }\n                        },\n                        "ecs": {\n                          "version": "1.5.0"\n                        },\n                        "related": {\n                          "ip": [\n                            "64.227.88.245"\n                          ],\n                          "user": [\n                            "user"\n                          ]\n                        },\n                        "service": {\n                          "type": "system"\n                        },\n                        "host": {\n                          "hostname": "bastion00",\n                          "name": "bastion00.siem.estc.dev"\n                        },\n                        "event": {\n                          "ingested": "2020-09-04T13:25:47.034172Z",\n                          "timezone": "+00:00",\n                          "kind": "event",\n                          "module": "system",\n                          "action": "ssh_login",\n                          "type": [\n                            "authentication_failure",\n                            "info"\n                          ],\n                          "category": [\n                            "authentication"\n                          ],\n                          "dataset": "system.auth",\n                          "outcome": "failure"\n                        },\n                        "user": {\n                          "name": "user"\n                        }\n                      },\n                      "sort": [\n                        1599225943000\n                      ]\n                    }\n                  ]\n                }\n              }\n            },\n            "successes": {\n              "doc_count": 0,\n              "lastSuccess": {\n                "hits": {\n                  "total": 0,\n                  "max_score": 0,\n                  "hits": []\n                }\n              }\n            }\n          },\n          {\n            "key": "ubuntu",\n            "doc_count": 18,\n            "failures": {\n              "doc_count": 18,\n              "lastFailure": {\n                "hits": {\n                  "total": 18,\n                  "max_score": 0,\n                  "hits": [\n                    {\n                      "_index": "filebeat-8.0.0-2020.09.02-000001",\n                      "_id": "nPxKWXQBc39KFIJb7q4w",\n                      "_score": null,\n                      "_source": {\n                        "agent": {\n                          "name": "bastion00.siem.estc.dev",\n                          "id": "f9a321c1-ec27-49fa-aacf-6a50ef6d836f",\n                          "ephemeral_id": "734ee3da-1a4f-4bc9-b400-e0cf0e5eeebc",\n                          "type": "filebeat",\n                          "version": "8.0.0"\n                        },\n                        "process": {\n                          "name": "sshd",\n                          "pid": 20665\n                        },\n                        "log": {\n                          "file": {\n                            "path": "/var/log/auth.log"\n                          },\n                          "offset": 1027372\n                        },\n                        "source": {\n                          "geo": {\n                            "continent_name": "North America",\n                            "region_iso_code": "US-NY",\n                            "city_name": "New York",\n                            "country_iso_code": "US",\n                            "region_name": "New York",\n                            "location": {\n                              "lon": -74,\n                              "lat": 40.7157\n                            }\n                          },\n                          "ip": "64.227.88.245"\n                        },\n                        "fileset": {\n                          "name": "auth"\n                        },\n                        "input": {\n                          "type": "log"\n                        },\n                        "@timestamp": "2020-09-04T13:25:07.000Z",\n                        "system": {\n                          "auth": {\n                            "ssh": {\n                              "event": "Invalid"\n                            }\n                          }\n                        },\n                        "ecs": {\n                          "version": "1.5.0"\n                        },\n                        "related": {\n                          "ip": [\n                            "64.227.88.245"\n                          ],\n                          "user": [\n                            "ubuntu"\n                          ]\n                        },\n                        "service": {\n                          "type": "system"\n                        },\n                        "host": {\n                          "hostname": "bastion00",\n                          "name": "bastion00.siem.estc.dev"\n                        },\n                        "event": {\n                          "ingested": "2020-09-04T13:25:16.974606Z",\n                          "timezone": "+00:00",\n                          "kind": "event",\n                          "module": "system",\n                          "action": "ssh_login",\n                          "type": [\n                            "authentication_failure",\n                            "info"\n                          ],\n                          "category": [\n                            "authentication"\n                          ],\n                          "dataset": "system.auth",\n                          "outcome": "failure"\n                        },\n                        "user": {\n                          "name": "ubuntu"\n                        }\n                      },\n                      "sort": [\n                        1599225907000\n                      ]\n                    }\n                  ]\n                }\n              }\n            },\n            "successes": {\n              "doc_count": 0,\n              "lastSuccess": {\n                "hits": {\n                  "total": 0,\n                  "max_score": 0,\n                  "hits": []\n                }\n              }\n            }\n          },\n          {\n            "key": "odoo",\n            "doc_count": 17,\n            "failures": {\n              "doc_count": 17,\n              "lastFailure": {\n                "hits": {\n                  "total": 17,\n                  "max_score": 0,\n                  "hits": [\n                    {\n                      "_index": ".ds-logs-system.auth-default-000001",\n                      "_id": "mPsfWXQBc39KFIJbI8HI",\n                      "_score": null,\n                      "_source": {\n                        "agent": {\n                          "hostname": "siem-kibana",\n                          "name": "siem-kibana",\n                          "id": "aa3d9dc7-fef1-4c2f-a68d-25785d624e35",\n                          "type": "filebeat",\n                          "ephemeral_id": "e503bd85-11c7-4bc9-ae7d-70be1d919fb7",\n                          "version": "7.9.1"\n                        },\n                        "process": {\n                          "name": "sshd",\n                          "pid": 21506\n                        },\n                        "log": {\n                          "file": {\n                            "path": "/var/log/auth.log"\n                          },\n                          "offset": 556761\n                        },\n                        "source": {\n                          "geo": {\n                            "continent_name": "Asia",\n                            "region_iso_code": "IN-DL",\n                            "city_name": "New Delhi",\n                            "country_iso_code": "IN",\n                            "region_name": "National Capital Territory of Delhi",\n                            "location": {\n                              "lon": 77.2245,\n                              "lat": 28.6358\n                            }\n                          },\n                          "as": {\n                            "number": 10029,\n                            "organization": {\n                              "name": "SHYAM SPECTRA PVT LTD"\n                            }\n                          },\n                          "ip": "180.151.228.166"\n                        },\n                        "cloud": {\n                          "availability_zone": "us-east1-b",\n                          "instance": {\n                            "name": "siem-kibana",\n                            "id": "5412578377715150143"\n                          },\n                          "provider": "gcp",\n                          "machine": {\n                            "type": "n1-standard-2"\n                          },\n                          "project": {\n                            "id": "elastic-beats"\n                          }\n                        },\n                        "input": {\n                          "type": "log"\n                        },\n                        "@timestamp": "2020-09-04T12:26:36.000Z",\n                        "system": {\n                          "auth": {\n                            "ssh": {\n                              "event": "Invalid"\n                            }\n                          }\n                        },\n                        "ecs": {\n                          "version": "1.5.0"\n                        },\n                        "data_stream": {\n                          "namespace": "default",\n                          "type": "logs",\n                          "dataset": "system.auth"\n                        },\n                        "host": {\n                          "hostname": "siem-kibana",\n                          "os": {\n                            "kernel": "4.9.0-8-amd64",\n                            "codename": "stretch",\n                            "name": "Debian GNU/Linux",\n                            "family": "debian",\n                            "version": "9 (stretch)",\n                            "platform": "debian"\n                          },\n                          "containerized": false,\n                          "ip": [\n                            "10.142.0.7",\n                            "fe80::4001:aff:fe8e:7"\n                          ],\n                          "name": "siem-kibana",\n                          "id": "aa7ca589f1b8220002f2fc61c64cfbf1",\n                          "mac": [\n                            "42:01:0a:8e:00:07"\n                          ],\n                          "architecture": "x86_64"\n                        },\n                        "event": {\n                          "timezone": "+00:00",\n                          "action": "ssh_login",\n                          "type": "authentication_failure",\n                          "category": "authentication",\n                          "dataset": "system.auth",\n                          "outcome": "failure"\n                        },\n                        "user": {\n                          "name": "odoo"\n                        }\n                      },\n                      "sort": [\n                        1599222396000\n                      ]\n                    }\n                  ]\n                }\n              }\n            },\n            "successes": {\n              "doc_count": 0,\n              "lastSuccess": {\n                "hits": {\n                  "total": 0,\n                  "max_score": 0,\n                  "hits": []\n                }\n              }\n            }\n          },\n          {\n            "key": "pi",\n            "doc_count": 17,\n            "failures": {\n              "doc_count": 17,\n              "lastFailure": {\n                "hits": {\n                  "total": 17,\n                  "max_score": 0,\n                  "hits": [\n                    {\n                      "_index": "filebeat-8.0.0-2020.09.02-000001",\n                      "_id": "aaToWHQBA6bGZw2uR-St",\n                      "_score": null,\n                      "_source": {\n                        "agent": {\n                          "name": "bastion00.siem.estc.dev",\n                          "id": "f9a321c1-ec27-49fa-aacf-6a50ef6d836f",\n                          "type": "filebeat",\n                          "ephemeral_id": "734ee3da-1a4f-4bc9-b400-e0cf0e5eeebc",\n                          "version": "8.0.0"\n                        },\n                        "process": {\n                          "name": "sshd",\n                          "pid": 20475\n                        },\n                        "log": {\n                          "file": {\n                            "path": "/var/log/auth.log"\n                          },\n                          "offset": 1019218\n                        },\n                        "source": {\n                          "geo": {\n                            "continent_name": "Europe",\n                            "region_iso_code": "SE-AB",\n                            "city_name": "Stockholm",\n                            "country_iso_code": "SE",\n                            "region_name": "Stockholm",\n                            "location": {\n                              "lon": 17.7833,\n                              "lat": 59.25\n                            }\n                          },\n                          "as": {\n                            "number": 8473,\n                            "organization": {\n                              "name": "Bahnhof AB"\n                            }\n                          },\n                          "ip": "178.174.148.58"\n                        },\n                        "fileset": {\n                          "name": "auth"\n                        },\n                        "input": {\n                          "type": "log"\n                        },\n                        "@timestamp": "2020-09-04T11:37:22.000Z",\n                        "system": {\n                          "auth": {\n                            "ssh": {\n                              "event": "Invalid"\n                            }\n                          }\n                        },\n                        "ecs": {\n                          "version": "1.5.0"\n                        },\n                        "related": {\n                          "ip": [\n                            "178.174.148.58"\n                          ],\n                          "user": [\n                            "pi"\n                          ]\n                        },\n                        "service": {\n                          "type": "system"\n                        },\n                        "host": {\n                          "hostname": "bastion00",\n                          "name": "bastion00.siem.estc.dev"\n                        },\n                        "event": {\n                          "ingested": "2020-09-04T11:37:31.797423Z",\n                          "timezone": "+00:00",\n                          "kind": "event",\n                          "module": "system",\n                          "action": "ssh_login",\n                          "type": [\n                            "authentication_failure",\n                            "info"\n                          ],\n                          "category": [\n                            "authentication"\n                          ],\n                          "dataset": "system.auth",\n                          "outcome": "failure"\n                        },\n                        "user": {\n                          "name": "pi"\n                        }\n                      },\n                      "sort": [\n                        1599219442000\n                      ]\n                    }\n                  ]\n                }\n              }\n            },\n            "successes": {\n              "doc_count": 0,\n              "lastSuccess": {\n                "hits": {\n                  "total": 0,\n                  "max_score": 0,\n                  "hits": []\n                }\n              }\n            }\n          },\n          {\n            "key": "demo",\n            "doc_count": 14,\n            "failures": {\n              "doc_count": 14,\n              "lastFailure": {\n                "hits": {\n                  "total": 14,\n                  "max_score": 0,\n                  "hits": [\n                    {\n                      "_index": "filebeat-8.0.0-2020.09.02-000001",\n                      "_id": "VaP_V3QBA6bGZw2upUbg",\n                      "_score": null,\n                      "_source": {\n                        "agent": {\n                          "name": "bastion00.siem.estc.dev",\n                          "id": "f9a321c1-ec27-49fa-aacf-6a50ef6d836f",\n                          "type": "filebeat",\n                          "ephemeral_id": "734ee3da-1a4f-4bc9-b400-e0cf0e5eeebc",\n                          "version": "8.0.0"\n                        },\n                        "process": {\n                          "name": "sshd",\n                          "pid": 19849\n                        },\n                        "log": {\n                          "file": {\n                            "path": "/var/log/auth.log"\n                          },\n                          "offset": 981036\n                        },\n                        "source": {\n                          "geo": {\n                            "continent_name": "Europe",\n                            "country_iso_code": "HR",\n                            "location": {\n                              "lon": 15.5,\n                              "lat": 45.1667\n                            }\n                          },\n                          "as": {\n                            "number": 42864,\n                            "organization": {\n                              "name": "Giganet Internet Szolgaltato Kft"\n                            }\n                          },\n                          "ip": "45.95.168.157"\n                        },\n                        "fileset": {\n                          "name": "auth"\n                        },\n                        "input": {\n                          "type": "log"\n                        },\n                        "@timestamp": "2020-09-04T07:23:22.000Z",\n                        "system": {\n                          "auth": {\n                            "ssh": {\n                              "event": "Invalid"\n                            }\n                          }\n                        },\n                        "ecs": {\n                          "version": "1.5.0"\n                        },\n                        "related": {\n                          "ip": [\n                            "45.95.168.157"\n                          ],\n                          "user": [\n                            "demo"\n                          ]\n                        },\n                        "service": {\n                          "type": "system"\n                        },\n                        "host": {\n                          "hostname": "bastion00",\n                          "name": "bastion00.siem.estc.dev"\n                        },\n                        "event": {\n                          "ingested": "2020-09-04T07:23:26.046346Z",\n                          "timezone": "+00:00",\n                          "kind": "event",\n                          "module": "system",\n                          "action": "ssh_login",\n                          "type": [\n                            "authentication_failure",\n                            "info"\n                          ],\n                          "category": [\n                            "authentication"\n                          ],\n                          "dataset": "system.auth",\n                          "outcome": "failure"\n                        },\n                        "user": {\n                          "name": "demo"\n                        }\n                      },\n                      "sort": [\n                        1599204202000\n                      ]\n                    }\n                  ]\n                }\n              }\n            },\n            "successes": {\n              "doc_count": 0,\n              "lastSuccess": {\n                "hits": {\n                  "total": 0,\n                  "max_score": 0,\n                  "hits": []\n                }\n              }\n            }\n          },\n          {\n            "key": "git",\n            "doc_count": 13,\n            "failures": {\n              "doc_count": 13,\n              "lastFailure": {\n                "hits": {\n                  "total": 13,\n                  "max_score": 0,\n                  "hits": [\n                    {\n                      "_index": ".ds-logs-system.auth-default-000001",\n                      "_id": "PqYfWXQBA6bGZw2uIhVU",\n                      "_score": null,\n                      "_source": {\n                        "agent": {\n                          "hostname": "siem-kibana",\n                          "name": "siem-kibana",\n                          "id": "aa3d9dc7-fef1-4c2f-a68d-25785d624e35",\n                          "ephemeral_id": "e503bd85-11c7-4bc9-ae7d-70be1d919fb7",\n                          "type": "filebeat",\n                          "version": "7.9.1"\n                        },\n                        "process": {\n                          "name": "sshd",\n                          "pid": 20396\n                        },\n                        "log": {\n                          "file": {\n                            "path": "/var/log/auth.log"\n                          },\n                          "offset": 550795\n                        },\n                        "source": {\n                          "geo": {\n                            "continent_name": "Asia",\n                            "region_iso_code": "CN-BJ",\n                            "city_name": "Beijing",\n                            "country_iso_code": "CN",\n                            "region_name": "Beijing",\n                            "location": {\n                              "lon": 116.3889,\n                              "lat": 39.9288\n                            }\n                          },\n                          "as": {\n                            "number": 45090,\n                            "organization": {\n                              "name": "Shenzhen Tencent Computer Systems Company Limited"\n                            }\n                          },\n                          "ip": "123.206.30.76"\n                        },\n                        "cloud": {\n                          "availability_zone": "us-east1-b",\n                          "instance": {\n                            "name": "siem-kibana",\n                            "id": "5412578377715150143"\n                          },\n                          "provider": "gcp",\n                          "machine": {\n                            "type": "n1-standard-2"\n                          },\n                          "project": {\n                            "id": "elastic-beats"\n                          }\n                        },\n                        "input": {\n                          "type": "log"\n                        },\n                        "@timestamp": "2020-09-04T11:20:26.000Z",\n                        "system": {\n                          "auth": {\n                            "ssh": {\n                              "event": "Invalid"\n                            }\n                          }\n                        },\n                        "ecs": {\n                          "version": "1.5.0"\n                        },\n                        "data_stream": {\n                          "namespace": "default",\n                          "type": "logs",\n                          "dataset": "system.auth"\n                        },\n                        "host": {\n                          "hostname": "siem-kibana",\n                          "os": {\n                            "kernel": "4.9.0-8-amd64",\n                            "codename": "stretch",\n                            "name": "Debian GNU/Linux",\n                            "family": "debian",\n                            "version": "9 (stretch)",\n                            "platform": "debian"\n                          },\n                          "containerized": false,\n                          "ip": [\n                            "10.142.0.7",\n                            "fe80::4001:aff:fe8e:7"\n                          ],\n                          "name": "siem-kibana",\n                          "id": "aa7ca589f1b8220002f2fc61c64cfbf1",\n                          "mac": [\n                            "42:01:0a:8e:00:07"\n                          ],\n                          "architecture": "x86_64"\n                        },\n                        "event": {\n                          "timezone": "+00:00",\n                          "action": "ssh_login",\n                          "type": "authentication_failure",\n                          "category": "authentication",\n                          "dataset": "system.auth",\n                          "outcome": "failure"\n                        },\n                        "user": {\n                          "name": "git"\n                        }\n                      },\n                      "sort": [\n                        1599218426000\n                      ]\n                    }\n                  ]\n                }\n              }\n            },\n            "successes": {\n              "doc_count": 0,\n              "lastSuccess": {\n                "hits": {\n                  "total": 0,\n                  "max_score": 0,\n                  "hits": []\n                }\n              }\n            }\n          },\n          {\n            "key": "webadmin",\n            "doc_count": 13,\n            "failures": {\n              "doc_count": 13,\n              "lastFailure": {\n                "hits": {\n                  "total": 13,\n                  "max_score": 0,\n                  "hits": [\n                    {\n                      "_index": "filebeat-8.0.0-2020.09.02-000001",\n                      "_id": "iMABWHQBB-gskclyitP-",\n                      "_score": null,\n                      "_source": {\n                        "agent": {\n                          "name": "bastion00.siem.estc.dev",\n                          "id": "f9a321c1-ec27-49fa-aacf-6a50ef6d836f",\n                          "type": "filebeat",\n                          "ephemeral_id": "734ee3da-1a4f-4bc9-b400-e0cf0e5eeebc",\n                          "version": "8.0.0"\n                        },\n                        "process": {\n                          "name": "sshd",\n                          "pid": 19870\n                        },\n                        "log": {\n                          "file": {\n                            "path": "/var/log/auth.log"\n                          },\n                          "offset": 984133\n                        },\n                        "source": {\n                          "geo": {\n                            "continent_name": "Europe",\n                            "country_iso_code": "HR",\n                            "location": {\n                              "lon": 15.5,\n                              "lat": 45.1667\n                            }\n                          },\n                          "as": {\n                            "number": 42864,\n                            "organization": {\n                              "name": "Giganet Internet Szolgaltato Kft"\n                            }\n                          },\n                          "ip": "45.95.168.157"\n                        },\n                        "fileset": {\n                          "name": "auth"\n                        },\n                        "input": {\n                          "type": "log"\n                        },\n                        "@timestamp": "2020-09-04T07:25:28.000Z",\n                        "system": {\n                          "auth": {\n                            "ssh": {\n                              "event": "Invalid"\n                            }\n                          }\n                        },\n                        "ecs": {\n                          "version": "1.5.0"\n                        },\n                        "related": {\n                          "ip": [\n                            "45.95.168.157"\n                          ],\n                          "user": [\n                            "webadmin"\n                          ]\n                        },\n                        "service": {\n                          "type": "system"\n                        },\n                        "host": {\n                          "hostname": "bastion00",\n                          "name": "bastion00.siem.estc.dev"\n                        },\n                        "event": {\n                          "ingested": "2020-09-04T07:25:30.236651Z",\n                          "timezone": "+00:00",\n                          "kind": "event",\n                          "module": "system",\n                          "action": "ssh_login",\n                          "type": [\n                            "authentication_failure",\n                            "info"\n                          ],\n                          "category": [\n                            "authentication"\n                          ],\n                          "dataset": "system.auth",\n                          "outcome": "failure"\n                        },\n                        "user": {\n                          "name": "webadmin"\n                        }\n                      },\n                      "sort": [\n                        1599204328000\n                      ]\n                    }\n                  ]\n                }\n              }\n            },\n            "successes": {\n              "doc_count": 0,\n              "lastSuccess": {\n                "hits": {\n                  "total": 0,\n                  "max_score": 0,\n                  "hits": []\n                }\n              }\n            }\n          }\n        ]\n      },\n      "user_count": {\n        "value": 188\n      }\n    }\n  },\n  "total": 21,\n  "loaded": 21\n}',
+      '{\n  "allowNoIndices": true,\n  "index": [\n    "apm-*-transaction*",\n    "auditbeat-*",\n    "endgame-*",\n    "filebeat-*",\n    "logs-*",\n    "packetbeat-*",\n    "winlogbeat-*"\n  ],\n  "ignoreUnavailable": true,\n  "body": {\n    "aggregations": {\n      "host_architecture": {\n        "terms": {\n          "field": "host.architecture",\n          "size": 10,\n          "order": {\n            "timestamp": "desc"\n          }\n        },\n        "aggs": {\n          "timestamp": {\n            "max": {\n              "field": "@timestamp"\n            }\n          }\n        }\n      },\n      "host_id": {\n        "terms": {\n          "field": "host.id",\n          "size": 10,\n          "order": {\n            "timestamp": "desc"\n          }\n        },\n        "aggs": {\n          "timestamp": {\n            "max": {\n              "field": "@timestamp"\n            }\n          }\n        }\n      },\n      "host_ip": {\n        "terms": {\n          "field": "host.ip",\n          "size": 10,\n          "order": {\n            "timestamp": "desc"\n          }\n        },\n        "aggs": {\n          "timestamp": {\n            "max": {\n              "field": "@timestamp"\n            }\n          }\n        }\n      },\n      "host_mac": {\n        "terms": {\n          "field": "host.mac",\n          "size": 10,\n          "order": {\n            "timestamp": "desc"\n          }\n        },\n        "aggs": {\n          "timestamp": {\n            "max": {\n              "field": "@timestamp"\n            }\n          }\n        }\n      },\n      "host_name": {\n        "terms": {\n          "field": "host.name",\n          "size": 10,\n          "order": {\n            "timestamp": "desc"\n          }\n        },\n        "aggs": {\n          "timestamp": {\n            "max": {\n              "field": "@timestamp"\n            }\n          }\n        }\n      },\n      "host_os_family": {\n        "terms": {\n          "field": "host.os.family",\n          "size": 10,\n          "order": {\n            "timestamp": "desc"\n          }\n        },\n        "aggs": {\n          "timestamp": {\n            "max": {\n              "field": "@timestamp"\n            }\n          }\n        }\n      },\n      "host_os_name": {\n        "terms": {\n          "field": "host.os.name",\n          "size": 10,\n          "order": {\n            "timestamp": "desc"\n          }\n        },\n        "aggs": {\n          "timestamp": {\n            "max": {\n              "field": "@timestamp"\n            }\n          }\n        }\n      },\n      "host_os_platform": {\n        "terms": {\n          "field": "host.os.platform",\n          "size": 10,\n          "order": {\n            "timestamp": "desc"\n          }\n        },\n        "aggs": {\n          "timestamp": {\n            "max": {\n              "field": "@timestamp"\n            }\n          }\n        }\n      },\n      "host_os_version": {\n        "terms": {\n          "field": "host.os.version",\n          "size": 10,\n          "order": {\n            "timestamp": "desc"\n          }\n        },\n        "aggs": {\n          "timestamp": {\n            "max": {\n              "field": "@timestamp"\n            }\n          }\n        }\n      },\n      "cloud_instance_id": {\n        "terms": {\n          "field": "cloud.instance.id",\n          "size": 10,\n          "order": {\n            "timestamp": "desc"\n          }\n        },\n        "aggs": {\n          "timestamp": {\n            "max": {\n              "field": "@timestamp"\n            }\n          }\n        }\n      },\n      "cloud_machine_type": {\n        "terms": {\n          "field": "cloud.machine.type",\n          "size": 10,\n          "order": {\n            "timestamp": "desc"\n          }\n        },\n        "aggs": {\n          "timestamp": {\n            "max": {\n              "field": "@timestamp"\n            }\n          }\n        }\n      },\n      "cloud_provider": {\n        "terms": {\n          "field": "cloud.provider",\n          "size": 10,\n          "order": {\n            "timestamp": "desc"\n          }\n        },\n        "aggs": {\n          "timestamp": {\n            "max": {\n              "field": "@timestamp"\n            }\n          }\n        }\n      },\n      "cloud_region": {\n        "terms": {\n          "field": "cloud.region",\n          "size": 10,\n          "order": {\n            "timestamp": "desc"\n          }\n        },\n        "aggs": {\n          "timestamp": {\n            "max": {\n              "field": "@timestamp"\n            }\n          }\n        }\n      }\n    },\n    "query": {\n      "bool": {\n        "filter": [\n          {\n            "term": {\n              "host.name": "bastion00.siem.estc.dev"\n            }\n          },\n          {\n            "range": {\n              "@timestamp": {\n                "format": "strict_date_optional_time",\n                "gte": "2020-09-02T15:17:13.678Z",\n                "lte": "2020-09-03T15:17:13.678Z"\n              }\n            }\n          }\n        ]\n      }\n    },\n    "size": 0,\n    "track_total_hits": false\n  }\n}',
     ],
   },
   hostDetails: {},
@@ -2158,62 +1317,222 @@ export const expectedDsl = {
   body: {
     aggregations: {
       host_architecture: {
-        terms: { field: 'host.architecture', size: 10, order: { timestamp: 'desc' } },
-        aggs: { timestamp: { max: { field: '@timestamp' } } },
+        terms: {
+          field: 'host.architecture',
+          size: 10,
+          order: {
+            timestamp: 'desc',
+          },
+        },
+        aggs: {
+          timestamp: {
+            max: {
+              field: '@timestamp',
+            },
+          },
+        },
       },
       host_id: {
-        terms: { field: 'host.id', size: 10, order: { timestamp: 'desc' } },
-        aggs: { timestamp: { max: { field: '@timestamp' } } },
+        terms: {
+          field: 'host.id',
+          size: 10,
+          order: {
+            timestamp: 'desc',
+          },
+        },
+        aggs: {
+          timestamp: {
+            max: {
+              field: '@timestamp',
+            },
+          },
+        },
       },
       host_ip: {
-        terms: { field: 'host.ip', size: 10, order: { timestamp: 'desc' } },
-        aggs: { timestamp: { max: { field: '@timestamp' } } },
+        terms: {
+          field: 'host.ip',
+          size: 10,
+          order: {
+            timestamp: 'desc',
+          },
+        },
+        aggs: {
+          timestamp: {
+            max: {
+              field: '@timestamp',
+            },
+          },
+        },
       },
       host_mac: {
-        terms: { field: 'host.mac', size: 10, order: { timestamp: 'desc' } },
-        aggs: { timestamp: { max: { field: '@timestamp' } } },
+        terms: {
+          field: 'host.mac',
+          size: 10,
+          order: {
+            timestamp: 'desc',
+          },
+        },
+        aggs: {
+          timestamp: {
+            max: {
+              field: '@timestamp',
+            },
+          },
+        },
       },
       host_name: {
-        terms: { field: 'host.name', size: 10, order: { timestamp: 'desc' } },
-        aggs: { timestamp: { max: { field: '@timestamp' } } },
+        terms: {
+          field: 'host.name',
+          size: 10,
+          order: {
+            timestamp: 'desc',
+          },
+        },
+        aggs: {
+          timestamp: {
+            max: {
+              field: '@timestamp',
+            },
+          },
+        },
       },
       host_os_family: {
-        terms: { field: 'host.os.family', size: 10, order: { timestamp: 'desc' } },
-        aggs: { timestamp: { max: { field: '@timestamp' } } },
+        terms: {
+          field: 'host.os.family',
+          size: 10,
+          order: {
+            timestamp: 'desc',
+          },
+        },
+        aggs: {
+          timestamp: {
+            max: {
+              field: '@timestamp',
+            },
+          },
+        },
       },
       host_os_name: {
-        terms: { field: 'host.os.name', size: 10, order: { timestamp: 'desc' } },
-        aggs: { timestamp: { max: { field: '@timestamp' } } },
+        terms: {
+          field: 'host.os.name',
+          size: 10,
+          order: {
+            timestamp: 'desc',
+          },
+        },
+        aggs: {
+          timestamp: {
+            max: {
+              field: '@timestamp',
+            },
+          },
+        },
       },
       host_os_platform: {
-        terms: { field: 'host.os.platform', size: 10, order: { timestamp: 'desc' } },
-        aggs: { timestamp: { max: { field: '@timestamp' } } },
+        terms: {
+          field: 'host.os.platform',
+          size: 10,
+          order: {
+            timestamp: 'desc',
+          },
+        },
+        aggs: {
+          timestamp: {
+            max: {
+              field: '@timestamp',
+            },
+          },
+        },
       },
       host_os_version: {
-        terms: { field: 'host.os.version', size: 10, order: { timestamp: 'desc' } },
-        aggs: { timestamp: { max: { field: '@timestamp' } } },
+        terms: {
+          field: 'host.os.version',
+          size: 10,
+          order: {
+            timestamp: 'desc',
+          },
+        },
+        aggs: {
+          timestamp: {
+            max: {
+              field: '@timestamp',
+            },
+          },
+        },
       },
       cloud_instance_id: {
-        terms: { field: 'cloud.instance.id', size: 10, order: { timestamp: 'desc' } },
-        aggs: { timestamp: { max: { field: '@timestamp' } } },
+        terms: {
+          field: 'cloud.instance.id',
+          size: 10,
+          order: {
+            timestamp: 'desc',
+          },
+        },
+        aggs: {
+          timestamp: {
+            max: {
+              field: '@timestamp',
+            },
+          },
+        },
       },
       cloud_machine_type: {
-        terms: { field: 'cloud.machine.type', size: 10, order: { timestamp: 'desc' } },
-        aggs: { timestamp: { max: { field: '@timestamp' } } },
+        terms: {
+          field: 'cloud.machine.type',
+          size: 10,
+          order: {
+            timestamp: 'desc',
+          },
+        },
+        aggs: {
+          timestamp: {
+            max: {
+              field: '@timestamp',
+            },
+          },
+        },
       },
       cloud_provider: {
-        terms: { field: 'cloud.provider', size: 10, order: { timestamp: 'desc' } },
-        aggs: { timestamp: { max: { field: '@timestamp' } } },
+        terms: {
+          field: 'cloud.provider',
+          size: 10,
+          order: {
+            timestamp: 'desc',
+          },
+        },
+        aggs: {
+          timestamp: {
+            max: {
+              field: '@timestamp',
+            },
+          },
+        },
       },
       cloud_region: {
-        terms: { field: 'cloud.region', size: 10, order: { timestamp: 'desc' } },
-        aggs: { timestamp: { max: { field: '@timestamp' } } },
+        terms: {
+          field: 'cloud.region',
+          size: 10,
+          order: {
+            timestamp: 'desc',
+          },
+        },
+        aggs: {
+          timestamp: {
+            max: {
+              field: '@timestamp',
+            },
+          },
+        },
       },
     },
     query: {
       bool: {
         filter: [
-          { term: { 'host.name': 'bastion00' } },
+          {
+            term: {
+              'host.name': 'bastion00.siem.estc.dev',
+            },
+          },
           {
             range: {
               '@timestamp': {

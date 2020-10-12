@@ -60,6 +60,16 @@
               }
             }
           },
+          "group": {
+            "properties": {
+              "id": {
+                "type": "keyword"
+              },
+              "index": {
+                "type": "integer"
+              }
+            }
+          },
           "rule": {
             "properties": {
               "id": {

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './expression.scss';
+
 import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
@@ -23,12 +25,15 @@ import {
 import { VisualizationContainer } from '../visualization_container';
 import { EmptyPlaceholder } from '../shared_components';
 import { desanitizeFilterContext } from '../utils';
+import { LensIconChartDatatable } from '../assets/chart_datatable';
+
 export interface DatatableColumns {
   columnIds: string[];
 }
 
 interface Args {
   title: string;
+  description?: string;
   columns: DatatableColumns & { type: 'lens_datatable_columns' };
 }
 
@@ -67,6 +72,10 @@ export const datatable: ExpressionFunctionDefinition<
       help: i18n.translate('xpack.lens.datatable.titleLabel', {
         defaultMessage: 'Title',
       }),
+    },
+    description: {
+      types: ['string'],
+      help: '',
     },
     columns: {
       types: ['lens_datatable_columns'],
@@ -199,11 +208,14 @@ export function DatatableComponent(props: DatatableRenderProps) {
       ));
 
   if (isEmpty) {
-    return <EmptyPlaceholder icon="visTable" />;
+    return <EmptyPlaceholder icon={LensIconChartDatatable} />;
   }
 
   return (
-    <VisualizationContainer>
+    <VisualizationContainer
+      reportTitle={props.args.title}
+      reportDescription={props.args.description}
+    >
       <EuiBasicTable
         className="lnsDataTable"
         data-test-subj="lnsDataTable"

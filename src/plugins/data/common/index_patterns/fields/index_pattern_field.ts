@@ -17,12 +17,9 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
 import { KbnFieldType, getKbnFieldType } from '../../kbn_field_types';
-import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { IFieldType } from './types';
 import { FieldSpec, IndexPattern } from '../..';
-import { FieldTypeUnknownError } from '../errors';
 
 export class IndexPatternField implements IFieldType {
   readonly spec: FieldSpec;
@@ -35,16 +32,12 @@ export class IndexPatternField implements IFieldType {
     this.displayName = displayName;
 
     this.kbnFieldType = getKbnFieldType(spec.type);
-    if (spec.type && this.kbnFieldType?.name === KBN_FIELD_TYPES.UNKNOWN) {
-      const msg = i18n.translate('data.indexPatterns.unknownFieldTypeErrorMsg', {
-        values: { type: spec.type, name: spec.name },
-        defaultMessage: `Field '{name}' Unknown field type '{type}'`,
-      });
-      throw new FieldTypeUnknownError(msg, spec);
-    }
   }
 
   // writable attrs
+  /**
+   * Count is used for field popularity
+   */
   public get count() {
     return this.spec.count || 0;
   }
@@ -53,6 +46,9 @@ export class IndexPatternField implements IFieldType {
     this.spec.count = count;
   }
 
+  /**
+   * Script field code
+   */
   public get script() {
     return this.spec.script;
   }
@@ -61,6 +57,9 @@ export class IndexPatternField implements IFieldType {
     this.spec.script = script;
   }
 
+  /**
+   * Script field language
+   */
   public get lang() {
     return this.spec.lang;
   }
@@ -69,6 +68,9 @@ export class IndexPatternField implements IFieldType {
     this.spec.lang = lang;
   }
 
+  /**
+   * Description of field type conflicts across different indices in the same index pattern
+   */
   public get conflictDescriptions() {
     return this.spec.conflictDescriptions;
   }
@@ -152,7 +154,7 @@ export class IndexPatternField implements IFieldType {
     getFormatterForField,
   }: {
     getFormatterForField?: IndexPattern['getFormatterForField'];
-  } = {}) {
+  } = {}): FieldSpec {
     return {
       count: this.count,
       script: this.script,

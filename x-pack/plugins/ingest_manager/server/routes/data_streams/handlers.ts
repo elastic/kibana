@@ -7,6 +7,7 @@ import { RequestHandler, SavedObjectsClientContract } from 'src/core/server';
 import { DataStream } from '../../types';
 import { GetDataStreamsResponse, KibanaAssetType } from '../../../common';
 import { getPackageSavedObjects, getKibanaSavedObject } from '../../services/epm/packages/get';
+import { defaultIngestErrorHandler } from '../../errors';
 
 const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*';
 
@@ -157,11 +158,8 @@ export const getListHandler: RequestHandler = async (context, request, response)
     return response.ok({
       body,
     });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 

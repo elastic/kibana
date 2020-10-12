@@ -27,7 +27,12 @@ jest.mock('../../../common/components/link_to');
 
 const startDate = '2020-01-20T20:49:57.080Z';
 const endDate = '2020-01-21T20:49:57.080Z';
-
+const testProps = {
+  endDate,
+  indexNames: [],
+  setQuery: jest.fn(),
+  startDate,
+};
 const MOCKED_RESPONSE = {
   overviewHost: {
     auditbeatAuditd: 1,
@@ -79,7 +84,7 @@ describe('OverviewHost', () => {
   test('it renders the expected widget title', () => {
     const wrapper = mount(
       <TestProviders store={store}>
-        <OverviewHost endDate={endDate} setQuery={jest.fn()} startDate={startDate} />
+        <OverviewHost {...testProps} />
       </TestProviders>
     );
 
@@ -92,7 +97,7 @@ describe('OverviewHost', () => {
     useHostOverviewMock.mockReturnValueOnce([true, { overviewHost: {} }]);
     const wrapper = mount(
       <TestProviders store={store}>
-        <OverviewHost endDate={endDate} setQuery={jest.fn()} startDate={startDate} />
+        <OverviewHost {...testProps} />
       </TestProviders>
     );
 
@@ -102,7 +107,7 @@ describe('OverviewHost', () => {
   test('it renders the expected event count in the subtitle after loading events', async () => {
     const wrapper = mount(
       <TestProviders store={store}>
-        <OverviewHost endDate={endDate} setQuery={jest.fn()} startDate={startDate} />
+        <OverviewHost {...testProps} />
       </TestProviders>
     );
 

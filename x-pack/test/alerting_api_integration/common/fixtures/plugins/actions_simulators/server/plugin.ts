@@ -72,10 +72,11 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       },
     };
     actions.registerType(notEnabledActionType);
-    features.registerFeature({
+    features.registerKibanaFeature({
       id: 'actionsSimulators',
       name: 'actionsSimulators',
       app: ['actions', 'kibana'],
+      category: { id: 'foo', label: 'foo' },
       privileges: {
         all: {
           app: ['actions', 'kibana'],

@@ -7,17 +7,6 @@
 
 // Application Layout
 
-// chrome-context
-// TODO #64541
-// Delete this block
-.chrHeaderWrapper:not(.headerWrapper) .content {
-  display: flex;
-  flex-flow: row nowrap;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
-
 .application,
 .app-container {
   > * {

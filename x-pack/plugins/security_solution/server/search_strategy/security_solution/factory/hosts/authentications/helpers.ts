@@ -15,7 +15,7 @@ import {
   StrategyResponseType,
 } from '../../../../../../common/search_strategy/security_solution';
 
-export const authenticationFields = [
+export const authenticationsFields = [
   '_id',
   'failures',
   'successes',
@@ -31,7 +31,7 @@ export const authenticationFields = [
 ];
 
 export const formatAuthenticationData = (
-  fields: readonly string[] = authenticationFields,
+  fields: readonly string[] = authenticationsFields,
   hit: AuthenticationHit,
   fieldMap: Readonly<Record<string, string>>
 ): AuthenticationsEdges =>

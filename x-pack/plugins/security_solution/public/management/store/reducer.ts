@@ -40,7 +40,7 @@ export const mockManagementState: Immutable<ManagementState> = {
   [MANAGEMENT_STORE_POLICY_LIST_NAMESPACE]: initialPolicyListState(),
   [MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE]: initialPolicyDetailsState(),
   [MANAGEMENT_STORE_ENDPOINTS_NAMESPACE]: initialEndpointListState,
-  [MANAGEMENT_STORE_TRUSTED_APPS_NAMESPACE]: initialTrustedAppsPageState,
+  [MANAGEMENT_STORE_TRUSTED_APPS_NAMESPACE]: initialTrustedAppsPageState(),
 };
 
 /**

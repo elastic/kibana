@@ -37,6 +37,6 @@ export const sourceStatusSchema = gql`
     "Whether the configured alias or wildcard pattern resolve to any auditbeat indices"
     indicesExist(defaultIndex: [String!]!): Boolean!
     "The list of fields defined in the index mappings"
-    indexFields(defaultIndex: [String!]!): [IndexField!]!
+    indexFields(defaultIndex: [String!]!): [String!]!
   }
 `;

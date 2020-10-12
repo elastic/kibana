@@ -6,35 +6,25 @@
 import cytoscape from 'cytoscape';
 import { CSSProperties } from 'react';
 import {
+  getServiceHealthStatusColor,
+  ServiceHealthStatus,
+} from '../../../../common/service_health_status';
+import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { EuiTheme } from '../../../../../observability/public';
 import { defaultIcon, iconForNode } from './icons';
 import { ServiceAnomalyStats } from '../../../../common/anomaly_detection';
-import { severity, getSeverity } from './Popover/getSeverity';
 
 export const popoverWidth = 280;
 
-export function getSeverityColor(theme: EuiTheme, nodeSeverity?: string) {
-  switch (nodeSeverity) {
-    case severity.warning:
-      return theme.eui.euiColorVis0;
-    case severity.minor:
-    case severity.major:
-      return theme.eui.euiColorVis5;
-    case severity.critical:
-      return theme.eui.euiColorVis9;
-    default:
-      return;
-  }
-}
-
-function getNodeSeverity(el: cytoscape.NodeSingular) {
+function getServiceAnomalyStats(el: cytoscape.NodeSingular) {
   const serviceAnomalyStats: ServiceAnomalyStats | undefined = el.data(
     'serviceAnomalyStats'
   );
-  return getSeverity(serviceAnomalyStats?.anomalyScore);
+
+  return serviceAnomalyStats;
 }
 
 function getBorderColorFn(
@@ -42,10 +32,11 @@ function getBorderColorFn(
 ): cytoscape.Css.MapperFunction<cytoscape.NodeSingular, string> {
   return (el: cytoscape.NodeSingular) => {
     const hasAnomalyDetectionJob = el.data('serviceAnomalyStats') !== undefined;
-    const nodeSeverity = getNodeSeverity(el);
+    const anomalyStats = getServiceAnomalyStats(el);
     if (hasAnomalyDetectionJob) {
-      return (
-        getSeverityColor(theme, nodeSeverity) || theme.eui.euiColorMediumShade
+      return getServiceHealthStatusColor(
+        theme,
+        anomalyStats?.healthStatus ?? ServiceHealthStatus.unknown
       );
     }
     if (el.hasClass('primary') || el.selected()) {
@@ -59,8 +50,8 @@ const getBorderStyle: cytoscape.Css.MapperFunction<
   cytoscape.NodeSingular,
   cytoscape.Css.LineStyle
 > = (el: cytoscape.NodeSingular) => {
-  const nodeSeverity = getNodeSeverity(el);
-  if (nodeSeverity === severity.critical) {
+  const status = getServiceAnomalyStats(el)?.healthStatus;
+  if (status === ServiceHealthStatus.critical) {
     return 'double';
   } else {
     return 'solid';
@@ -68,11 +59,11 @@ const getBorderStyle: cytoscape.Css.MapperFunction<
 };
 
 function getBorderWidth(el: cytoscape.NodeSingular) {
-  const nodeSeverity = getNodeSeverity(el);
+  const status = getServiceAnomalyStats(el)?.healthStatus;
 
-  if (nodeSeverity === severity.minor || nodeSeverity === severity.major) {
+  if (status === ServiceHealthStatus.warning) {
     return 4;
-  } else if (nodeSeverity === severity.critical) {
+  } else if (status === ServiceHealthStatus.critical) {
     return 8;
   } else {
     return 4;
@@ -145,7 +136,7 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => {
         label: (el: cytoscape.NodeSingular) =>
           isService(el)
             ? el.data(SERVICE_NAME)
-            : el.data(SPAN_DESTINATION_SERVICE_RESOURCE),
+            : el.data('label') || el.data(SPAN_DESTINATION_SERVICE_RESOURCE),
         'min-zoomed-font-size': parseInt(theme.eui.euiSizeS, 10),
         'overlay-opacity': 0,
         shape: (el: cytoscape.NodeSingular) =>

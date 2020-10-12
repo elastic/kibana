@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
 
 import moment from 'moment';
 import { useValues } from 'kea';
@@ -14,7 +14,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { ContentSection } from '../../components/shared/content_section';
 import { sendTelemetry } from '../../../shared/telemetry';
-import { KibanaContext, IKibanaContext } from '../../../index';
+import { HttpLogic } from '../../../shared/http';
+import { getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
 import { SOURCE_DETAILS_PATH, getContentSourcePath } from '../../routes';
 
 import { AppLogic } from '../../app_logic';
@@ -93,10 +94,7 @@ export const RecentActivityItem: React.FC<IFeedActivity> = ({
   timestamp,
   sourceId,
 }) => {
-  const {
-    http,
-    externalUrl: { getWorkplaceSearchUrl },
-  } = useContext(KibanaContext) as IKibanaContext;
+  const { http } = useValues(HttpLogic);
 
   const onClick = () =>
     sendTelemetry({

@@ -17,10 +17,11 @@
  * under the License.
  */
 
+import { SavedObjectsFindOptions } from '../../types';
 import { SavedObjectsUtils } from './utils';
 
 describe('SavedObjectsUtils', () => {
-  const { namespaceIdToString, namespaceStringToId } = SavedObjectsUtils;
+  const { namespaceIdToString, namespaceStringToId, createEmptyFindResponse } = SavedObjectsUtils;
 
   describe('#namespaceIdToString', () => {
     it('converts `undefined` to default namespace string', () => {
@@ -52,6 +53,28 @@ describe('SavedObjectsUtils', () => {
       test(undefined);
       test(null);
       test('');
+    });
+  });
+
+  describe('#createEmptyFindResponse', () => {
+    it('returns expected result', () => {
+      const options = {} as SavedObjectsFindOptions;
+      expect(createEmptyFindResponse(options)).toEqual({
+        page: 1,
+        per_page: 20,
+        total: 0,
+        saved_objects: [],
+      });
+    });
+
+    it('handles `page` field', () => {
+      const options = { page: 42 } as SavedObjectsFindOptions;
+      expect(createEmptyFindResponse(options).page).toEqual(42);
+    });
+
+    it('handles `perPage` field', () => {
+      const options = { perPage: 42 } as SavedObjectsFindOptions;
+      expect(createEmptyFindResponse(options).per_page).toEqual(42);
     });
   });
 });

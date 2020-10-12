@@ -6,13 +6,11 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { act } from 'react-dom/test-utils';
 
 import { TagList } from '.';
 import { getFormMock } from '../__mock__/form';
 import { TestProviders } from '../../../common/mock';
-// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
-import { wait as waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import { useForm } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form';
 import { useGetTags } from '../../containers/use_get_tags';
 
@@ -27,6 +25,14 @@ jest.mock(
       children({ tags: ['rad', 'dude'] }),
   })
 );
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    // eslint-disable-next-line react/display-name
+    EuiFieldText: () => <input />,
+  };
+});
 const onSubmit = jest.fn();
 const defaultProps = {
   disabled: false,
@@ -36,16 +42,6 @@ const defaultProps = {
 };
 
 describe('TagList ', () => {
-  // Suppress warnings about "noSuggestions" prop
-  /* eslint-disable no-console */
-  const originalError = console.error;
-  beforeAll(() => {
-    console.error = jest.fn();
-  });
-  afterAll(() => {
-    console.error = originalError;
-  });
-  /* eslint-enable no-console */
   const sampleTags = ['coke', 'pepsi'];
   const fetchTags = jest.fn();
   const formHookMock = getFormMock({ tags: sampleTags });
@@ -58,6 +54,7 @@ describe('TagList ', () => {
       fetchTags,
     }));
   });
+
   it('Renders no tags, and then edit', () => {
     const wrapper = mount(
       <TestProviders>
@@ -69,6 +66,7 @@ describe('TagList ', () => {
     expect(wrapper.find(`[data-test-subj="no-tags"]`).last().exists()).toBeFalsy();
     expect(wrapper.find(`[data-test-subj="edit-tags"]`).last().exists()).toBeTruthy();
   });
+
   it('Edit tag on submit', async () => {
     const wrapper = mount(
       <TestProviders>
@@ -76,11 +74,10 @@ describe('TagList ', () => {
       </TestProviders>
     );
     wrapper.find(`[data-test-subj="tag-list-edit-button"]`).last().simulate('click');
-    await act(async () => {
-      wrapper.find(`[data-test-subj="edit-tags-submit"]`).last().simulate('click');
-      await waitFor(() => expect(onSubmit).toBeCalledWith(sampleTags));
-    });
+    wrapper.find(`[data-test-subj="edit-tags-submit"]`).last().simulate('click');
+    await waitFor(() => expect(onSubmit).toBeCalledWith(sampleTags));
   });
+
   it('Tag options render with new tags added', () => {
     const wrapper = mount(
       <TestProviders>
@@ -92,7 +89,8 @@ describe('TagList ', () => {
       wrapper.find(`[data-test-subj="caseTags"] [data-test-subj="input"]`).first().prop('options')
     ).toEqual([{ label: 'coke' }, { label: 'pepsi' }, { label: 'rad' }, { label: 'dude' }]);
   });
-  it('Cancels on cancel', async () => {
+
+  it('Cancels on cancel', () => {
     const props = {
       ...defaultProps,
       tags: ['pepsi'],
@@ -102,17 +100,16 @@ describe('TagList ', () => {
         <TagList {...props} />
       </TestProviders>
     );
-    expect(wrapper.find(`[data-test-subj="case-tag-pepsi"]`).last().exists()).toBeTruthy();
+
+    expect(wrapper.find(`[data-test-subj="tag-pepsi"]`).last().exists()).toBeTruthy();
     wrapper.find(`[data-test-subj="tag-list-edit-button"]`).last().simulate('click');
-    await act(async () => {
-      expect(wrapper.find(`[data-test-subj="case-tag-pepsi"]`).last().exists()).toBeFalsy();
-      wrapper.find(`[data-test-subj="edit-tags-cancel"]`).last().simulate('click');
-      await waitFor(() => {
-        wrapper.update();
-        expect(wrapper.find(`[data-test-subj="case-tag-pepsi"]`).last().exists()).toBeTruthy();
-      });
-    });
+
+    expect(wrapper.find(`[data-test-subj="tag-pepsi"]`).last().exists()).toBeFalsy();
+    wrapper.find(`[data-test-subj="edit-tags-cancel"]`).last().simulate('click');
+    wrapper.update();
+    expect(wrapper.find(`[data-test-subj="tag-pepsi"]`).last().exists()).toBeTruthy();
   });
+
   it('Renders disabled button', () => {
     const props = { ...defaultProps, disabled: true };
     const wrapper = mount(

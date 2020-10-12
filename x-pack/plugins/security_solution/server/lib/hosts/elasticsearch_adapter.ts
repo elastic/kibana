@@ -8,11 +8,11 @@ import { set } from '@elastic/safer-lodash-set/fp';
 import { get, getOr, has, head } from 'lodash/fp';
 
 import {
+  EndpointFields,
   FirstLastSeenHost,
   HostItem,
   HostsData,
   HostsEdges,
-  EndpointFields,
 } from '../../graphql/types';
 import { inspectStringifyObject } from '../../utils/build_query';
 import { hostFieldsMap } from '../ecs_fields';
@@ -25,16 +25,16 @@ import {
   HostAggEsData,
   HostAggEsItem,
   HostBuckets,
-  HostOverviewRequestOptions,
   HostEsData,
   HostLastFirstSeenRequestOptions,
+  HostOverviewRequestOptions,
   HostsAdapter,
   HostsRequestOptions,
   HostValue,
 } from './types';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 import { EndpointAppContext } from '../../endpoint/types';
-import { getHostData } from '../../endpoint/routes/metadata';
+import { getHostData } from '../../endpoint/routes/metadata/handlers';
 
 export class ElasticsearchHostsAdapter implements HostsAdapter {
   constructor(
@@ -116,12 +116,12 @@ export class ElasticsearchHostsAdapter implements HostsAdapter {
         throw new Error('agentService not available');
       }
       const metadataRequestContext = {
-        agentService,
+        endpointAppContextService: this.endpointContext.service,
         logger,
         requestHandlerContext: request.context,
       };
       const endpointData =
-        hostId != null && metadataRequestContext.agentService != null
+        hostId != null && metadataRequestContext.endpointAppContextService.getAgentService() != null
           ? await getHostData(metadataRequestContext, hostId)
           : null;
       return endpointData != null && endpointData.metadata

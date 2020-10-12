@@ -13,7 +13,7 @@ jest.mock('../components/vector_style_editor', () => ({
 }));
 
 import React from 'react';
-import { VECTOR_STYLES } from '../../../../../common/constants';
+import { RawValue, VECTOR_STYLES } from '../../../../../common/constants';
 // @ts-ignore
 import { DynamicIconProperty } from './dynamic_icon_property';
 import { mockField, MockLayer } from './__tests__/test_util';
@@ -33,7 +33,7 @@ const makeProperty = (options: Partial<IconDynamicOptions>, field: IField = mock
     field,
     mockVectorLayer,
     () => {
-      return (value: string | number | undefined) => value + '_format';
+      return (value: RawValue) => value + '_format';
     }
   );
 };

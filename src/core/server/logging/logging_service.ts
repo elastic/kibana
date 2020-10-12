@@ -18,10 +18,10 @@
  */
 
 import { Observable, Subscription } from 'rxjs';
+import { Logger } from '@kbn/logging';
 import { CoreService } from '../../types';
 import { LoggingConfig, LoggerContextConfigInput } from './logging_config';
 import { ILoggingSystem } from './logging_system';
-import { Logger } from './logger';
 import { CoreContext } from '../core_context';
 
 /**
