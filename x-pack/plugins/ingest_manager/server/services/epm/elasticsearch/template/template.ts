@@ -415,9 +415,10 @@ const updateExistingIndex = async ({
         index: indexTemplate.index_patterns[0],
         body: {
           size: 1,
+          _source: ['data_stream.namespace', 'data_stream.type', 'data_stream.dataset'],
           query: {
             bool: {
-              must: [
+              filter: [
                 {
                   exists: {
                     field: 'data_stream.type',
