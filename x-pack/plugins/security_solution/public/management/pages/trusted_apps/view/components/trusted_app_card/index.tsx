@@ -117,7 +117,7 @@ export const TrustedAppCard = memo(({ trustedApp, onDelete }: TrustedAppCardProp
         name={PROPERTY_TITLES.description}
         value={
           <TextFieldValue
-            fieldName={PROPERTY_TITLES.description}
+            fieldName={PROPERTY_TITLES.description || ''}
             value={trustedApp.description || ''}
             maxLength={100}
           />
