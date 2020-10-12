@@ -20,30 +20,30 @@
 import React, { memo, useMemo } from 'react';
 import { EuiDataGrid } from '@elastic/eui';
 
-import { ExprVis } from 'src/plugins/visualizations/public';
+import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { createTableVisCell } from './table_vis_cell';
 import { Table } from '../table_vis_response_handler';
-import { TableVisParams } from '../types';
+import { TableVisConfig } from '../types';
 import { useFormattedColumnsAndRows, usePagination } from '../utils';
 import { TableVisNoResults } from './table_vis_no_results';
 import { TableVisControls } from './table_vis_controls';
 
 interface TableVisBasicProps {
+  fireEvent: IInterpreterRenderHandlers['event'];
   table: Table;
-  vis: ExprVis;
-  visParams: TableVisParams;
+  visConfig: TableVisConfig;
 }
 
-export const TableVisBasic = memo(({ table, vis, visParams }: TableVisBasicProps) => {
-  const { columns, rows } = useFormattedColumnsAndRows(table, visParams);
-  const renderCellValue = useMemo(() => createTableVisCell(table, columns, rows, vis), [
+export const TableVisBasic = memo(({ table, fireEvent, visConfig }: TableVisBasicProps) => {
+  const { columns, rows } = useFormattedColumnsAndRows(table, visConfig);
+  const renderCellValue = useMemo(() => createTableVisCell(table, columns, rows, fireEvent), [
     table,
     columns,
     rows,
-    vis,
+    fireEvent,
   ]);
 
-  const pagination = usePagination(visParams);
+  const pagination = usePagination(visConfig);
 
   return rows.length > 0 ? (
     <EuiDataGrid
@@ -62,11 +62,11 @@ export const TableVisBasic = memo(({ table, vis, visParams }: TableVisBasicProps
         setVisibleColumns: () => {},
       }}
       toolbarVisibility={
-        visParams.showToolbar && {
+        visConfig.showToolbar && {
           showColumnSelector: false,
           showFullScreenSelector: false,
           additionalControls: (
-            <TableVisControls cols={columns} rows={rows} table={table} filename={visParams.title} />
+            <TableVisControls cols={columns} rows={rows} table={table} filename={visConfig.title} />
           ),
         }
       }

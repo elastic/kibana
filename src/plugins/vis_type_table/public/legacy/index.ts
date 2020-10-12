@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { TableOptions } from './table_vis_options_lazy';
+export { registerLegacyVis } from './register_legacy_vis';

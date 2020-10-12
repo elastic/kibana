@@ -17,4 +17,19 @@
  * under the License.
  */
 
-export { TableOptions } from './table_vis_options_lazy';
+import { PluginInitializerContext, CoreSetup } from 'kibana/public';
+
+import { TablePluginSetupDependencies, TablePluginStartDependencies } from '../plugin';
+import { createTableVisLegacyFn } from './table_vis_legacy_fn';
+import { getTableVisLegacyRenderer } from './table_vis_legacy_renderer';
+import { tableVisLegacyTypeDefinition } from './table_vis_legacy_type';
+
+export const registerLegacyVis = (
+  core: CoreSetup<TablePluginStartDependencies>,
+  { expressions, visualizations }: TablePluginSetupDependencies,
+  context: PluginInitializerContext
+) => {
+  expressions.registerFunction(createTableVisLegacyFn);
+  expressions.registerRenderer(getTableVisLegacyRenderer(core, context));
+  visualizations.createBaseVisualization(tableVisLegacyTypeDefinition);
+};

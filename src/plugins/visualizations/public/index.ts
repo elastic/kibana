@@ -35,7 +35,6 @@ export { VisualizationContainer, VisualizationNoResults } from './components';
 export { getSchemas as getVisSchemas } from './legacy/build_pipeline';
 
 /** @public types */
-export { ReactVisComponentProps } from './vis_types/react_vis_controller';
 export { VisualizationsSetup, VisualizationsStart };
 export { VisTypeAlias, VisType, BaseVisTypeOptions, ReactVisTypeOptions } from './vis_types';
 export { VisParams, SerializedVis, SerializedVisData, VisData } from './vis';

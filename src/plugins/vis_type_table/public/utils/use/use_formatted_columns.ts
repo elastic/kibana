@@ -21,11 +21,11 @@ import { useMemo } from 'react';
 import { chain, findIndex } from 'lodash';
 
 import { Table } from '../../table_vis_response_handler';
-import { FormattedColumn, TableVisParams, AggTypes } from '../../types';
+import { FormattedColumn, TableVisConfig, AggTypes } from '../../types';
 import { getFormatService } from '../../services';
 import { addPercentageColumn } from '../add_percentage_column';
 
-export const useFormattedColumnsAndRows = (table: Table, visParams: TableVisParams) => {
+export const useFormattedColumnsAndRows = (table: Table, visParams: TableVisConfig) => {
   const { formattedColumns: columns, formattedRows: rows } = useMemo(() => {
     const { buckets, metrics, splitColumn, splitRow } = visParams.dimensions;
     // todo: use for split table by row/column

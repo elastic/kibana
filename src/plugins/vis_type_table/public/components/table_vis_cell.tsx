@@ -26,9 +26,9 @@ import {
   EuiFlexItem,
   EuiToolTip,
 } from '@elastic/eui';
-
-import { ExprVis } from 'src/plugins/visualizations/public';
 import { i18n } from '@kbn/i18n';
+
+import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { Table } from '../table_vis_response_handler';
 import { FormattedColumn } from '../types';
 
@@ -36,7 +36,7 @@ export const createTableVisCell = (
   table: Table,
   formattedColumns: FormattedColumn[],
   rows: Table['rows'],
-  vis: ExprVis
+  fireEvent: IInterpreterRenderHandlers['event']
 ) => ({
   // @ts-expect-error
   colIndex,
@@ -62,16 +62,19 @@ export const createTableVisCell = (
 
   const onFilterClick = useCallback(
     (negate: boolean) => {
-      vis.API.events.filter({
-        data: [
-          {
-            table,
-            row: rowIndex,
-            column: colIndex,
-            value: rowValue,
-          },
-        ],
-        negate,
+      fireEvent({
+        name: 'filterBucket',
+        data: {
+          data: [
+            {
+              table,
+              row: rowIndex,
+              column: colIndex,
+              value: rowValue,
+            },
+          ],
+          negate,
+        },
       });
     },
     [colIndex, rowIndex, rowValue]

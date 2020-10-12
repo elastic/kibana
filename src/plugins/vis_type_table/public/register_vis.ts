@@ -17,4 +17,20 @@
  * under the License.
  */
 
-export { TableOptions } from './table_vis_options_lazy';
+import { PluginInitializerContext, CoreSetup } from 'kibana/public';
+
+import { TablePluginSetupDependencies, TablePluginStartDependencies } from './plugin';
+import { createTableVisFn } from './table_vis_fn';
+import { getTableVisRenderer } from './table_vis_renderer';
+import { tableVisTypeDefinition } from './table_vis_type';
+
+export const registerTableVis = async (
+  core: CoreSetup<TablePluginStartDependencies>,
+  { expressions, visualizations }: TablePluginSetupDependencies,
+  context: PluginInitializerContext
+) => {
+  const [coreStart] = await core.getStartServices();
+  expressions.registerFunction(createTableVisFn);
+  expressions.registerRenderer(getTableVisRenderer(coreStart));
+  visualizations.createBaseVisualization(tableVisTypeDefinition);
+};

@@ -21,37 +21,51 @@ import './table_visualization.scss';
 import React, { useEffect } from 'react';
 import classNames from 'classnames';
 
-import { CoreSetup } from 'kibana/public';
-import { ReactVisComponentProps } from 'src/plugins/visualizations/public';
+import { CoreStart } from 'kibana/public';
+import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { KibanaContextProvider } from '../../../kibana_react/public';
-import { TableVisParams } from '../types';
+import { TableVisConfig } from '../types';
 import { TableContext } from '../table_vis_response_handler';
 import { TableVisBasic } from './table_vis_basic';
 import { TableVisSplit } from './table_vis_split';
 
-export const createTableVisualizationComponent = (core: CoreSetup) => ({
-  renderComplete,
-  vis,
+interface TableVisualizationComponentProps {
+  core: CoreStart;
+  handlers: IInterpreterRenderHandlers;
+  visData: TableContext;
+  visConfig: TableVisConfig;
+}
+
+const TableVisualizationComponent = ({
+  core,
+  handlers,
   visData: { direction, table, tables },
-  visParams,
-}: ReactVisComponentProps<TableContext, TableVisParams>) => {
+  visConfig,
+}: TableVisualizationComponentProps) => {
   useEffect(() => {
-    renderComplete();
-  }, [renderComplete]);
+    handlers.done();
+  }, [handlers]);
 
   const className = classNames('tbvChart', {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     tbvChart__splitColumns: direction === 'column',
   });
 
   return (
-    <KibanaContextProvider services={core}>
-      <div className={className} data-test-subj="tbvChart">
-        {table ? (
-          <TableVisBasic table={table} vis={vis} visParams={visParams} />
-        ) : (
-          <TableVisSplit tables={tables} vis={vis} visParams={visParams} />
-        )}
-      </div>
-    </KibanaContextProvider>
+    <core.i18n.Context>
+      <KibanaContextProvider services={core}>
+        <div className={className} data-test-subj="tbvChart">
+          {table ? (
+            <TableVisBasic table={table} fireEvent={handlers.event} visConfig={visConfig} />
+          ) : (
+            <TableVisSplit tables={tables} fireEvent={handlers.event} visConfig={visConfig} />
+          )}
+        </div>
+      </KibanaContextProvider>
+    </core.i18n.Context>
   );
 };
+
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { TableVisualizationComponent as default };

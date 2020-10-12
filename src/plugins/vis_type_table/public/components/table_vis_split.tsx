@@ -20,18 +20,18 @@
 import React, { memo } from 'react';
 import { EuiTitle } from '@elastic/eui';
 
-import { ExprVis } from 'src/plugins/visualizations/public';
+import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { TableGroup } from '../table_vis_response_handler';
-import { TableVisParams } from '../types';
+import { TableVisConfig } from '../types';
 import { TableVisBasic } from './table_vis_basic';
 
 interface TableVisSplitProps {
+  fireEvent: IInterpreterRenderHandlers['event'];
   tables: TableGroup[];
-  vis: ExprVis;
-  visParams: TableVisParams;
+  visConfig: TableVisConfig;
 }
 
-export const TableVisSplit = memo(({ tables, vis, visParams }: TableVisSplitProps) => {
+export const TableVisSplit = memo(({ fireEvent, tables, visConfig }: TableVisSplitProps) => {
   return (
     <>
       {tables.map(({ tables: dataTable, key, title }) => (
@@ -39,7 +39,7 @@ export const TableVisSplit = memo(({ tables, vis, visParams }: TableVisSplitProp
           <EuiTitle size="xs">
             <h3>{title}</h3>
           </EuiTitle>
-          <TableVisBasic table={dataTable[0]} vis={vis} visParams={visParams} />
+          <TableVisBasic table={dataTable[0]} fireEvent={fireEvent} visConfig={visConfig} />
         </div>
       ))}
     </>
