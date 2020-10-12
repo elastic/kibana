@@ -30,6 +30,11 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
     background-color: rgba(0,0,0,0);
   }
 
+  // Hide global banners and display them manually inside WrapperPage
+  #globalBannerList {
+    display:none;
+  }
+
   div.application {
     background-color: rgba(0,0,0,0);
 

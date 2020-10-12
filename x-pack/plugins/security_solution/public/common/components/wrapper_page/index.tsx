@@ -10,11 +10,12 @@ import styled from 'styled-components';
 import { CommonProps } from '@elastic/eui';
 
 import { useFullScreen } from '../../containers/use_full_screen';
+import { useKibana } from '../../lib/kibana';
 import { gutterTimeline } from '../../lib/helpers';
 import { AppGlobalStyle } from '../page/index';
 
 const Wrapper = styled.div`
-  padding: ${(props) => `${props.theme.eui.paddingSizes.l}`};
+  padding: ${({ theme }) => `${theme.eui.paddingSizes.l}`};
 
   &.siemWrapperPage--fullHeight {
     height: 100%;
@@ -32,6 +33,10 @@ const Wrapper = styled.div`
     display: flex;
     flex-direction: column;
     flex: 1 1 auto;
+  }
+
+  .kbnGlobalBannerList {
+    padding: 0 0 ${({ theme }) => `${theme.eui.paddingSizes.l}`} 0;
   }
 `;
 
@@ -53,6 +58,8 @@ const WrapperPageComponent: React.FC<WrapperPageProps & CommonProps> = ({
   noTimeline,
   ...otherProps
 }) => {
+  const Banners = useKibana().services.overlays.banners.getComponent();
+
   const { globalFullScreen, setGlobalFullScreen } = useFullScreen();
   useEffect(() => {
     setGlobalFullScreen(false); // exit full screen mode on page load
@@ -67,6 +74,7 @@ const WrapperPageComponent: React.FC<WrapperPageProps & CommonProps> = ({
 
   return (
     <Wrapper className={classes} style={style} {...otherProps}>
+      {Banners}
       {children}
       <AppGlobalStyle />
     </Wrapper>
