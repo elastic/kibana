@@ -3,14 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { PluginInitializerContext, Plugin, CoreSetup, CoreStart } from 'src/core/server';
-import { Subject } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { PluginInitializerContext, Plugin, CoreSetup, CoreStart, Logger } from 'src/core/server';
+import { Subject, combineLatest } from 'rxjs';
+import { first, map } from 'rxjs/operators';
 import { TaskDictionary, TaskDefinition } from './task';
 import { TaskManager } from './task_manager';
 import { TaskManagerConfig } from './config';
 import { Middleware } from './lib/middleware';
 import { setupSavedObjects } from './saved_objects';
+import { healthRoute } from './routes';
+import { createMonitoringStats } from './monitoring';
 
 export type TaskManagerSetupContract = Pick<
   TaskManager,
@@ -29,20 +31,46 @@ export class TaskManagerPlugin
   currentConfig: TaskManagerConfig;
   taskManagerId?: string;
   config?: TaskManagerConfig;
+  logger: Logger;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
     this.currentConfig = {} as TaskManagerConfig;
+    this.logger = initContext.logger.get('taskManager');
   }
 
   public async setup(core: CoreSetup): Promise<TaskManagerSetupContract> {
-    this.config = await this.initContext.config
+    const { logger } = this;
+    const config = (this.config = await this.initContext.config
       .create<TaskManagerConfig>()
       .pipe(first())
-      .toPromise();
+      .toPromise());
 
     setupSavedObjects(core.savedObjects, this.config);
     this.taskManagerId = this.initContext.env.instanceUuid;
+
+    // Routes
+    const router = core.http.createRouter();
+    const serviceStatus$ = healthRoute(
+      router,
+      this.taskManager.then((tm) => createMonitoringStats(tm, config, logger)),
+      logger,
+      // if "hot" health stats are any more stale than monitored_stats_required_freshness (pollInterval +1s buffer by default)
+      // consider the system unhealthy
+      config.monitored_stats_required_freshness,
+      // if "cold" health stats are any more stale than the configured refresh, consider the system unhealthy
+      config.monitored_aggregated_stats_refresh_rate + 1000
+    );
+
+    core.getStartServices().then(async () => {
+      core.status.set(
+        combineLatest([core.status.derivedStatus$, serviceStatus$]).pipe(
+          map(([derivedStatus, serviceStatus]) =>
+            serviceStatus.level > derivedStatus.level ? serviceStatus : derivedStatus
+          )
+        )
+      );
+    });
 
     return {
       addMiddleware: (middleware: Middleware) => {
@@ -55,7 +83,7 @@ export class TaskManagerPlugin
   }
 
   public start({ savedObjects, elasticsearch }: CoreStart): TaskManagerStartContract {
-    const logger = this.initContext.logger.get('taskManager');
+    const { logger } = this;
     const savedObjectsRepository = savedObjects.createInternalRepository(['task']);
 
     this.legacyTaskManager$.next(

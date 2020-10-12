@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { Logger } from 'src/core/server';
+import { loggingSystemMock } from 'src/core/server/mocks';
 
 /*
  * A handful of helper functions for testing the task manager.
@@ -15,12 +17,7 @@ const nativeTimeout = setTimeout;
  * Creates a mock task manager Logger.
  */
 export function mockLogger() {
-  return {
-    info: jest.fn(),
-    debug: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-  };
+  return loggingSystemMock.create().get() as jest.Mocked<Logger>;
 }
 
 export interface Resolvable {

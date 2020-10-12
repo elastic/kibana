@@ -3,14 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { Logger } from 'src/core/server';
 import { Subject, Observable, Subscription } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { filter, tap } from 'rxjs/operators';
 
 import { performance } from 'perf_hooks';
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, some, map as mapOptional, getOrElse } from 'fp-ts/lib/Option';
 
+import { ESSearchResponse } from '../../apm/typings/elasticsearch';
 import {
   SavedObjectsSerializer,
   ILegacyScopedClusterClient,
@@ -20,16 +22,19 @@ import { Result, asOk, asErr, either, map, mapErr, promiseResult } from './lib/r
 import { createManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskManagerConfig } from './config';
 
-import { Logger } from './types';
 import {
   TaskMarkRunning,
   TaskRun,
   TaskClaim,
   TaskRunRequest,
+  TaskPollingCycle,
+  ErroredTask,
   isTaskRunEvent,
   isTaskClaimEvent,
   isTaskRunRequestEvent,
   asTaskRunRequestEvent,
+  asTaskPollingCycleEvent,
+  RanTask,
 } from './task_events';
 import { fillPool, FillPoolResult } from './lib/fill_pool';
 import { addMiddlewareToChain, BeforeSaveMiddlewareParams, Middleware } from './lib/middleware';
@@ -61,6 +66,7 @@ import {
   OwnershipClaimingOpts,
   ClaimOwnershipResult,
   SearchOpts,
+  AggregationOpts,
 } from './task_store';
 import { identifyEsError } from './lib/identify_es_error';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
@@ -81,7 +87,12 @@ interface RunNowResult {
   id: string;
 }
 
-export type TaskLifecycleEvent = TaskMarkRunning | TaskRun | TaskClaim | TaskRunRequest;
+export type TaskLifecycleEvent =
+  | TaskMarkRunning
+  | TaskRun
+  | TaskClaim
+  | TaskRunRequest
+  | TaskPollingCycle;
 
 /*
  * The TaskManager is the public interface into the task manager system. This glues together
@@ -202,6 +213,10 @@ export class TaskManager {
     );
   }
 
+  public get events(): Observable<TaskLifecycleEvent> {
+    return this.events$;
+  }
+
   private emitEvent = (event: TaskLifecycleEvent) => {
     this.events$.next(event);
   };
@@ -252,17 +267,23 @@ export class TaskManager {
       this.startQueue.forEach((fn) => fn());
       this.startQueue = [];
 
-      this.pollingSubscription = this.poller$.subscribe(
-        mapErr((error: PollingError<string>) => {
-          if (error.type === PollingErrorType.RequestCapacityReached) {
-            pipe(
-              error.data,
-              mapOptional((id) => this.emitEvent(asTaskRunRequestEvent(id, asErr(error))))
-            );
-          }
-          this.logger.error(error.message);
-        })
-      );
+      this.pollingSubscription = this.poller$
+        .pipe(
+          tap(
+            mapErr((error: PollingError<string>) => {
+              if (error.type === PollingErrorType.RequestCapacityReached) {
+                pipe(
+                  error.data,
+                  mapOptional((id) => this.emitEvent(asTaskRunRequestEvent(id, asErr(error))))
+                );
+              }
+              this.logger.error(error.message);
+            })
+          )
+        )
+        .subscribe((event: Result<FillPoolResult, PollingError<string>>) => {
+          this.emitEvent(asTaskPollingCycleEvent<string>(event));
+        });
     }
   }
 
@@ -379,6 +400,19 @@ export class TaskManager {
   public async fetch(opts: SearchOpts): Promise<FetchResult> {
     await this.waitUntilStarted();
     return this.store.fetch(opts);
+  }
+
+  /**
+   * Fetches a list of scheduled tasks.
+   *
+   * @param opts - The query options used to filter tasks
+   * @returns {Promise<FetchResult>}
+   */
+  public async aggregate<TSearchRequest extends AggregationOpts>(
+    opts: AggregationOpts
+  ): Promise<ESSearchResponse<ConcreteTaskInstance, { body: TSearchRequest }>> {
+    await this.waitUntilStarted();
+    return this.store.aggregate<TSearchRequest>(opts);
   }
 
   /**
@@ -516,26 +550,32 @@ export async function awaitTaskRunResult(
             );
           }, taskEvent.event);
         } else {
-          either<ConcreteTaskInstance, Error | Option<ConcreteTaskInstance>>(
+          either<
+            RanTask | ConcreteTaskInstance | FillPoolResult,
+            Error | ErroredTask | Option<ConcreteTaskInstance>
+          >(
             taskEvent.event,
-            (taskInstance: ConcreteTaskInstance) => {
+            (taskInstance: RanTask | ConcreteTaskInstance | FillPoolResult) => {
               // resolve if the task has run sucessfully
               if (isTaskRunEvent(taskEvent)) {
                 subscription.unsubscribe();
-                resolve({ id: taskInstance.id });
+                resolve({ id: (taskInstance as RanTask).task.id });
               }
             },
-            async (error: Error | Option<ConcreteTaskInstance>) => {
+            async (errorResult: Error | ErroredTask | Option<ConcreteTaskInstance>) => {
               // reject if any error event takes place for the requested task
               subscription.unsubscribe();
-              if (isTaskRunRequestEvent(taskEvent)) {
-                return reject(
-                  new Error(
-                    `Failed to run task "${taskId}" as Task Manager is at capacity, please try again later`
-                  )
-                );
-              }
-              return reject(new Error(`Failed to run task "${taskId}": ${error}`));
+              return reject(
+                new Error(
+                  `Failed to run task "${taskId}"${
+                    isTaskRunRequestEvent(taskEvent)
+                      ? `: Task Manager is at capacity, please try again later`
+                      : isTaskRunEvent(taskEvent)
+                      ? `: ${(errorResult as ErroredTask).error}`
+                      : `: ${errorResult}`
+                  }`
+                )
+              );
             }
           );
         }

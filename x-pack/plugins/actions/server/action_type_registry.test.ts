@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
+import { taskManagerMock } from '../../task_manager/server/mocks';
 import { ActionTypeRegistry, ActionTypeRegistryOpts } from './action_type_registry';
 import { ActionType, ExecutorType } from './types';
 import { ActionExecutor, ExecutorError, ILicenseState, TaskRunnerFactory } from './lib';
@@ -12,7 +12,7 @@ import { actionsConfigMock } from './actions_config.mock';
 import { licenseStateMock } from './lib/license_state.mock';
 import { ActionsConfigurationUtilities } from './actions_config';
 
-const mockTaskManager = taskManagerMock.setup();
+const mockTaskManager = taskManagerMock.createSetup();
 let mockedLicenseState: jest.Mocked<ILicenseState>;
 let mockedActionsConfig: jest.Mocked<ActionsConfigurationUtilities>;
 let actionTypeRegistryParams: ActionTypeRegistryOpts;

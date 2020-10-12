@@ -6,7 +6,7 @@
 
 import { ActionExecutor, TaskRunnerFactory } from '../lib';
 import { ActionTypeRegistry } from '../action_type_registry';
-import { taskManagerMock } from '../../../task_manager/server/task_manager.mock';
+import { taskManagerMock } from '../../../task_manager/server/mocks';
 import { registerBuiltInActionTypes } from './index';
 import { Logger } from '../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../src/core/server/mocks';
@@ -21,7 +21,7 @@ export function createActionTypeRegistry(): {
 } {
   const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
   const actionTypeRegistry = new ActionTypeRegistry({
-    taskManager: taskManagerMock.setup(),
+    taskManager: taskManagerMock.createSetup(),
     taskRunnerFactory: new TaskRunnerFactory(
       new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false })
     ),

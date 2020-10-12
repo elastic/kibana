@@ -6,14 +6,16 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import { minutesFromNow } from './lib/intervals';
+import { secondsFromNow } from './lib/intervals';
 import { asOk, asErr } from './lib/result_type';
-import { TaskEvent, asTaskRunEvent, asTaskMarkRunningEvent } from './task_events';
+import { TaskEvent, asTaskRunEvent, asTaskMarkRunningEvent, TaskRun } from './task_events';
 import { ConcreteTaskInstance, TaskStatus, TaskDictionary, TaskDefinition } from './task';
-import { TaskManagerRunner } from './task_runner';
+import { TaskManagerRunner, TaskRunResult } from './task_runner';
 import { mockLogger } from './test_utils';
 import { SavedObjectsErrorHelpers } from '../../../../src/core/server';
 import moment from 'moment';
+
+const minutesFromNow = (mins: number): Date => secondsFromNow(mins * 60);
 
 let fakeTimer: sinon.SinonFakeTimers;
 
@@ -788,7 +790,9 @@ describe('TaskManagerRunner', () => {
 
       await runner.run();
 
-      expect(onTaskEvent).toHaveBeenCalledWith(asTaskRunEvent(id, asOk(instance)));
+      expect(onTaskEvent).toHaveBeenCalledWith(
+        withAnyTiming(asTaskRunEvent(id, asOk({ task: instance, result: TaskRunResult.Success })))
+      );
     });
 
     test('emits TaskEvent when a recurring task is run successfully', async () => {
@@ -814,14 +818,16 @@ describe('TaskManagerRunner', () => {
 
       await runner.run();
 
-      expect(onTaskEvent).toHaveBeenCalledWith(asTaskRunEvent(id, asOk(instance)));
+      expect(onTaskEvent).toHaveBeenCalledWith(
+        withAnyTiming(asTaskRunEvent(id, asOk({ task: instance, result: TaskRunResult.Success })))
+      );
     });
 
     test('emits TaskEvent when a task run throws an error', async () => {
       const id = _.random(1, 20).toString();
       const error = new Error('Dangit!');
       const onTaskEvent = jest.fn();
-      const { runner } = testOpts({
+      const { runner, instance } = testOpts({
         onTaskEvent,
         instance: {
           id,
@@ -838,7 +844,11 @@ describe('TaskManagerRunner', () => {
       });
       await runner.run();
 
-      expect(onTaskEvent).toHaveBeenCalledWith(asTaskRunEvent(id, asErr(error)));
+      expect(onTaskEvent).toHaveBeenCalledWith(
+        withAnyTiming(
+          asTaskRunEvent(id, asErr({ error, task: instance, result: TaskRunResult.RetryScheduled }))
+        )
+      );
       expect(onTaskEvent).toHaveBeenCalledTimes(1);
     });
 
@@ -846,7 +856,7 @@ describe('TaskManagerRunner', () => {
       const id = _.random(1, 20).toString();
       const error = new Error('Dangit!');
       const onTaskEvent = jest.fn();
-      const { runner } = testOpts({
+      const { runner, instance } = testOpts({
         onTaskEvent,
         instance: {
           id,
@@ -866,7 +876,11 @@ describe('TaskManagerRunner', () => {
 
       await runner.run();
 
-      expect(onTaskEvent).toHaveBeenCalledWith(asTaskRunEvent(id, asErr(error)));
+      expect(onTaskEvent).toHaveBeenCalledWith(
+        withAnyTiming(
+          asTaskRunEvent(id, asErr({ error, task: instance, result: TaskRunResult.RetryScheduled }))
+        )
+      );
       expect(onTaskEvent).toHaveBeenCalledTimes(1);
     });
 
@@ -874,7 +888,7 @@ describe('TaskManagerRunner', () => {
       const id = _.random(1, 20).toString();
       const error = new Error('Dangit!');
       const onTaskEvent = jest.fn();
-      const { runner, store } = testOpts({
+      const { runner, store, instance: originalInstance } = testOpts({
         onTaskEvent,
         instance: {
           id,
@@ -897,7 +911,18 @@ describe('TaskManagerRunner', () => {
       const instance = store.update.args[0][0];
       expect(instance.status).toBe('failed');
 
-      expect(onTaskEvent).toHaveBeenCalledWith(asTaskRunEvent(id, asErr(error)));
+      expect(onTaskEvent).toHaveBeenCalledWith(
+        withAnyTiming(
+          asTaskRunEvent(
+            id,
+            asErr({
+              error,
+              task: originalInstance,
+              result: TaskRunResult.Failed,
+            })
+          )
+        )
+      );
       expect(onTaskEvent).toHaveBeenCalledTimes(1);
     });
   });
@@ -906,6 +931,13 @@ describe('TaskManagerRunner', () => {
     instance?: Partial<ConcreteTaskInstance>;
     definitions?: unknown;
     onTaskEvent?: (event: TaskEvent<unknown, unknown>) => void;
+  }
+
+  function withAnyTiming(taskRun: TaskRun) {
+    return {
+      ...taskRun,
+      timing: { start: expect.any(Number), stop: expect.any(Number) },
+    };
   }
 
   function testOpts(opts: TestOpts) {
