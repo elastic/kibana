@@ -9,12 +9,13 @@ Constructs a new instance of the `IndexPatternsFetcher` class
 <b>Signature:</b>
 
 ```typescript
-constructor(callDataCluster: LegacyAPICaller);
+constructor(callDataCluster: ElasticsearchClient, allowNoIndices?: boolean);
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  callDataCluster | <code>LegacyAPICaller</code> |  |
+|  callDataCluster | <code>ElasticsearchClient</code> |  |
+|  allowNoIndices | <code>boolean</code> |  |
 

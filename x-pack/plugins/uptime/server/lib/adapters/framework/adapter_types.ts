@@ -19,7 +19,10 @@ import { MlPluginSetup as MlSetup } from '../../../../../ml/server';
 export type ESAPICaller = ILegacyScopedClusterClient['callAsCurrentUser'];
 
 export type UMElasticsearchQueryFn<P, R = any> = (
-  params: { callES: ESAPICaller; dynamicSettings: DynamicSettings } & P
+  params: {
+    callES: ESAPICaller;
+    dynamicSettings: DynamicSettings;
+  } & P
 ) => Promise<R>;
 
 export type UMSavedObjectsQueryFn<T = any, P = undefined> = (

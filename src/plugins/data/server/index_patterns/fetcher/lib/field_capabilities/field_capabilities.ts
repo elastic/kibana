@@ -42,7 +42,7 @@ export async function getFieldCapabilities(
   fieldCapsOptions?: { allowNoIndices: boolean }
 ) {
   const esFieldCaps = await callFieldCapsApi(callCluster, indices, fieldCapsOptions);
-  const fieldsFromFieldCapsByName = keyBy(readFieldCapsResponse(esFieldCaps.body.fields), 'name');
+  const fieldsFromFieldCapsByName = keyBy(readFieldCapsResponse(esFieldCaps.body), 'name');
 
   const allFieldsUnsorted = Object.keys(fieldsFromFieldCapsByName)
     .filter((name) => !name.startsWith('_'))
