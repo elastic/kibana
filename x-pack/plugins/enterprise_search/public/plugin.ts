@@ -118,7 +118,8 @@ export class EnterpriseSearchPlugin implements Plugin {
         title: ENTERPRISE_SEARCH_PLUGIN.NAME,
         subtitle: ENTERPRISE_SEARCH_PLUGIN.SUBTITLE,
         icon: 'logoEnterpriseSearch',
-        descriptions: ENTERPRISE_SEARCH_PLUGIN.DESCRIPTIONS,
+        description: ENTERPRISE_SEARCH_PLUGIN.DESCRIPTION,
+        appDescriptions: ENTERPRISE_SEARCH_PLUGIN.APP_DESCRIPTIONS,
         path: ENTERPRISE_SEARCH_PLUGIN.URL,
       });
 

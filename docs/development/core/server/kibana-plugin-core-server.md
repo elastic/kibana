@@ -121,6 +121,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [OnPreAuthToolkit](./kibana-plugin-core-server.onpreauthtoolkit.md) | A tool set defining an outcome of OnPreAuth interceptor for incoming request. |
 |  [OnPreResponseExtensions](./kibana-plugin-core-server.onpreresponseextensions.md) | Additional data to extend a response. |
 |  [OnPreResponseInfo](./kibana-plugin-core-server.onpreresponseinfo.md) | Response status code. |
+|  [OnPreResponseRender](./kibana-plugin-core-server.onpreresponserender.md) | Additional data to extend a response when rendering a new body |
 |  [OnPreResponseToolkit](./kibana-plugin-core-server.onpreresponsetoolkit.md) | A tool set defining an outcome of OnPreResponse interceptor for incoming request. |
 |  [OnPreRoutingToolkit](./kibana-plugin-core-server.onpreroutingtoolkit.md) | A tool set defining an outcome of OnPreRouting interceptor for incoming request. |
 |  [OpsMetrics](./kibana-plugin-core-server.opsmetrics.md) | Regroups metrics gathered by all the collectors. This contains metrics about the os/runtime, the kibana process and the http server. |
