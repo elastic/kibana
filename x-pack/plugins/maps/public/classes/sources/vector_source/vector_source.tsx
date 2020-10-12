@@ -134,16 +134,6 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     );
   }
 
-  /**
-   * factory function creating a new field-instance
-   * @param fieldName
-   * @param label
-   * @returns {IField}
-   */
-  createField({ fieldName }: { fieldName: string }): IField {
-    throw new Error(`Should implement AbstractVectorSource#createField`);
-  }
-
   getFieldNames(): string[] {
     return [];
   }

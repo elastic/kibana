@@ -72,9 +72,9 @@ function getDocValueAndSourceFields(
   sourceOnlyFields: string[];
   scriptFields: Record<string, ScriptField>;
 } {
-  const docValueFields = [];
-  const sourceOnlyFields = [];
-  const scriptFields = {};
+  const docValueFields: string[] = [];
+  const sourceOnlyFields: string[] = [];
+  const scriptFields: Record<string, ScriptField> = {};
   fieldNames.forEach((fieldName) => {
     const field = getField(indexPattern, fieldName);
     if (field.scripted) {
@@ -110,8 +110,8 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       ...descriptor,
       id: descriptor.id ? descriptor.id : uuid(),
       type: SOURCE_TYPES.ES_SEARCH,
-      indexPatternId: descriptor.indexPatternId,
-      geoField: descriptor.geoField,
+      indexPatternId: descriptor.indexPatternId || '',
+      geoField: descriptor.geoField || '',
       filterByMapBounds: _.get(descriptor, 'filterByMapBounds', DEFAULT_FILTER_BY_MAP_BOUNDS),
       tooltipProperties: _.get(descriptor, 'tooltipProperties', []),
       sortField: _.get(descriptor, 'sortField', ''),
@@ -122,7 +122,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     };
   }
 
-  constructor(descriptor: ESSearchSourceDescriptor, inspectorAdapters: Adapters) {
+  constructor(descriptor: ESSearchSourceDescriptor, inspectorAdapters?: Adapters) {
     super(ESSearchSource.createDescriptor(descriptor), inspectorAdapters);
     this._descriptor = descriptor;
     this._tooltipFields = this._descriptor.tooltipProperties
@@ -232,7 +232,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return [
       {
         [sortField]: {
-          order: sortOrder,
+          order: sortOrder as SortDirection,
         },
       },
     ];
@@ -243,7 +243,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     searchFilters: VectorSourceRequestMeta,
     registerCancelCallback: (callback: () => void) => void
   ) {
-    const { topHitsSplitField, topHitsSize } = this._descriptor;
+    const { topHitsSplitField: topHitsSplitFieldName, topHitsSize } = this._descriptor;
 
     if (!topHitsSplitField) {
       throw new Error('Cannot _getTopHits without topHitsSplitField');
@@ -255,19 +255,22 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       indexPattern,
       searchFilters.fieldNames
     );
-    const topHits = {
+    const topHits: {
+      size: number | undefined;
+      docValueFields: string[];
+      scriptFields: Record<string, ScriptField>;
+      _source?: boolean | { includes: string[] };
+      sort?: Array<Record<string, SortDirection | SortDirectionNumeric>>;
+    } = {
       size: topHitsSize,
       script_fields: scriptFields,
       docvalue_fields: docValueFields,
-      _source: undefined,
-      sort: undefined,
     };
 
     if (this._hasSort()) {
       topHits.sort = this._buildEsSort();
-    } else {
-      delete topHits.sort;
     }
+
     if (sourceOnlyFields.length === 0) {
       topHits._source = false;
     } else {
@@ -276,7 +279,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       };
     }
 
-    const topHitsSplitField = getField(indexPattern, topHitsSplitField);
+    const topHitsSplitField: IFieldType = getField(indexPattern, topHitsSplitFieldName);
     const cardinalityAgg = { precision_threshold: 1 };
     const termsAgg = {
       size: DEFAULT_MAX_BUCKETS_LIMIT,
@@ -312,7 +315,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     // can not compare entityBuckets.length to totalEntities because totalEntities is an approximate
     const areEntitiesTrimmed = entityBuckets.length >= DEFAULT_MAX_BUCKETS_LIMIT;
     let areTopHitsTrimmed = false;
-    entityBuckets.forEach((entityBucket) => {
+    entityBuckets.forEach((entityBucket: any) => {
       const total = _.get(entityBucket, 'entityHits.hits.total', 0);
       const hits = _.get(entityBucket, 'entityHits.hits.hits', []);
       // Reverse hits list so top documents by sort are drawn on top
