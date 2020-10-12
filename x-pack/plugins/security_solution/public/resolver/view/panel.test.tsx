@@ -31,14 +31,6 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
 
   beforeEach(() => {
     // create a mock data access layer
-    Object.assign(navigator, {
-      clipboard: {
-        writeText: () => {},
-      },
-    });
-
-    jest.spyOn(navigator.clipboard, 'writeText');
-
     const {
       metadata: dataAccessLayerMetadata,
       dataAccessLayer,
@@ -124,7 +116,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
 
       copyableFields?.map((copyableField) => {
         copyableField.simulate('mouseenter');
-        simulator().testSubject('clipboard').last().simulate('click');
+        simulator().testSubject('resolver:panel:clipboard').last().simulate('click');
         expect(navigator.clipboard.writeText).toHaveBeenCalledWith(copyableField.text());
         copyableField.simulate('mouseleave');
       });
@@ -182,7 +174,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
 
     copyableFields?.map((copyableField) => {
       copyableField.simulate('mouseenter');
-      simulator().testSubject('clipboard').last().simulate('click');
+      simulator().testSubject('resolver:panel:clipboard').last().simulate('click');
       expect(navigator.clipboard.writeText).toHaveBeenCalledWith(copyableField.text());
       copyableField.simulate('mouseleave');
     });
@@ -291,7 +283,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
 
             copyableFields?.map((copyableField) => {
               copyableField.simulate('mouseenter');
-              simulator().testSubject('clipboard').last().simulate('click');
+              simulator().testSubject('resolver:panel:clipboard').last().simulate('click');
               expect(navigator.clipboard.writeText).toHaveBeenCalledWith(copyableField.text());
               copyableField.simulate('mouseleave');
             });

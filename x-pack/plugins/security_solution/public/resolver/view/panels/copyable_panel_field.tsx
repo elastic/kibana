@@ -9,7 +9,7 @@
 import { EuiToolTip, EuiButtonIcon, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import React, { memo, useState } from 'react';
+import React, { memo, useState, useCallback } from 'react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useColors } from '../use_colors';
 import { StyledPanel } from '../styles';
@@ -34,12 +34,6 @@ const StyledCopyableField = styled.div<StyledCopyableField>`
   }
 `;
 
-const TRANSLATED_COPY_TO_CLIPBOARD = i18n.translate(
-  'xpack.securitySolution.resolver.panel.copyToClipboard',
-  {
-    defaultMessage: 'Copy to Clipboard',
-  }
-);
 /**
  * Field that behaves similarly to the current implementation of copyable fields in timeline as of 7.10
  * When the panel is hovered, these fields will show a gray background
@@ -52,6 +46,7 @@ export const CopyablePanelField = memo(
     const toasts = useKibana().services.notifications?.toasts;
 
     const onMouseEnter = () => setIsOpen(true);
+    const onMouseLeave = () => setIsOpen(false);
 
     const ButtonContent = memo(() => (
       <StyledCopyableField
@@ -64,23 +59,23 @@ export const CopyablePanelField = memo(
       </StyledCopyableField>
     ));
 
-    const onMouseLeave = () => setIsOpen(false);
-
-    const onClick = async (event: React.MouseEvent<HTMLButtonElement>) => {
-      event.preventDefault();
-      event.stopPropagation();
-      try {
-        await navigator.clipboard.writeText(textToCopy);
-      } catch (error) {
-        if (toasts) {
-          toasts.addError(error, {
-            title: i18n.translate('xpack.securitySolution.resolver.panel.copyFailureTitle', {
-              defaultMessage: 'Copy Failure',
-            }),
-          });
+    const onClick = useCallback(
+      async (event: React.MouseEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+        try {
+          await navigator.clipboard.writeText(textToCopy);
+        } catch (error) {
+          if (toasts) {
+            toasts.addError(error, {
+              title: i18n.translate('xpack.securitySolution.resolver.panel.copyFailureTitle', {
+                defaultMessage: 'Copy Failure',
+              }),
+            });
+          }
         }
-      }
-    };
+      },
+      [textToCopy, toasts]
+    );
 
     return (
       <div onMouseLeave={onMouseLeave}>
@@ -92,11 +87,17 @@ export const CopyablePanelField = memo(
           isOpen={isOpen}
           panelPaddingSize="s"
         >
-          <EuiToolTip content={TRANSLATED_COPY_TO_CLIPBOARD}>
+          <EuiToolTip
+            content={i18n.translate('xpack.securitySolution.resolver.panel.copyToClipboard', {
+              defaultMessage: 'Copy to Clipboard',
+            })}
+          >
             <EuiButtonIcon
-              aria-label={TRANSLATED_COPY_TO_CLIPBOARD}
+              aria-label={i18n.translate('xpack.securitySolution.resolver.panel.copyToClipboard', {
+                defaultMessage: 'Copy to Clipboard',
+              })}
               color="text"
-              data-test-subj="clipboard"
+              data-test-subj="resolver:panel:clipboard"
               iconType="copyClipboard"
               onClick={onClick}
             />
