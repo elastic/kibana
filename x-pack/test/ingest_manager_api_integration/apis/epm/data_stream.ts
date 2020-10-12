@@ -33,7 +33,6 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('datastreams', async () => {
     skipIfNoDockerRegistry(providerContext);
-    skipIfNoDockerRegistry(providerContext);
     beforeEach(async () => {
       await installPackage(pkgKey);
       await es.transport.request({
