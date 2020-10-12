@@ -133,8 +133,6 @@ export const PreviewQuery = ({
     [dispatch, index, ruleType]
   );
 
-  // const setQueryInfoDebounced = useCallback(debounce(1000, setQueryInfo), []);
-
   const setTimeRange = useCallback((): void => {
     dispatch({
       type: 'setToFrom',
@@ -319,7 +317,8 @@ export const PreviewQuery = ({
           data-test-subj="previewEqlQueryHistogram"
         />
       )}
-      {warnings.length > 0 &&
+      {showHistogram &&
+        warnings.length > 0 &&
         warnings.map((warning, i) => (
           <Fragment key={`${warning}-${i}`}>
             <EuiSpacer size="s" />

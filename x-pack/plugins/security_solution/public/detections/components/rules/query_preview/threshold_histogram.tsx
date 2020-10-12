@@ -58,13 +58,21 @@ export const PreviewThresholdQueryHistogram = ({
 
   const barConfig = useMemo((): ChartSeriesConfigs => getThresholdHistogramConfig(200), []);
 
+  const subtitle = useMemo(
+    (): string =>
+      isLoading
+        ? i18n.PREVIEW_SUBTITLE_LOADING
+        : i18n.QUERY_PREVIEW_THRESHOLD_WITH_FIELD_TITLE(totalCount),
+    [isLoading, totalCount]
+  );
+
   return (
     <PreviewHistogram
       id={ID}
       data={data}
       barConfig={barConfig}
       title={i18n.QUERY_GRAPH_HITS_TITLE}
-      subtitle={i18n.QUERY_PREVIEW_THRESHOLD_WITH_FIELD_TITLE(totalCount)}
+      subtitle={subtitle}
       disclaimer={i18n.PREVIEW_QUERY_DISCLAIMER}
       isLoading={isLoading}
       data-test-subj="thresholdQueryPreviewHistogram"
