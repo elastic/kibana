@@ -7,7 +7,7 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { formatApiName } from '../../utils/format_api_name';
-import { ADMIN, PRIVATE } from './constants';
+import { ApiTokenTypes } from './constants';
 
 import { HttpLogic } from '../../../shared/http';
 import { IMeta } from '../../../../../common/types';
@@ -17,7 +17,7 @@ import { IApiToken, ICredentialsDetails, ITokenReadWrite } from './types';
 
 const defaultApiToken: IApiToken = {
   name: '',
-  type: PRIVATE,
+  type: ApiTokenTypes.Private,
   read: true,
   write: true,
   access_all_engines: true,
@@ -164,11 +164,12 @@ export const CredentialsLogic = kea<
         }),
         setTokenType: (activeApiToken, tokenType) => ({
           ...activeApiToken,
-          access_all_engines: tokenType === ADMIN ? false : activeApiToken.access_all_engines,
-          engines: tokenType === ADMIN ? [] : activeApiToken.engines,
-          write: tokenType === PRIVATE,
-          read: tokenType === PRIVATE,
-          type: tokenType,
+          access_all_engines:
+            tokenType === ApiTokenTypes.Admin ? false : activeApiToken.access_all_engines,
+          engines: tokenType === ApiTokenTypes.Admin ? [] : activeApiToken.engines,
+          write: tokenType === ApiTokenTypes.Private,
+          read: tokenType === ApiTokenTypes.Private,
+          type: tokenType as ApiTokenTypes,
         }),
         showCredentialsForm: (_, activeApiToken) => activeApiToken,
       },
