@@ -14,7 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  const testUsers = [USER.ML_POWERUSER, USER.ML_POWERUSER_SPACES];
+  const testUsers = [USER.ML_POWERUSER /* , USER.ML_POWERUSER_SPACES*/];
 
   describe('for user with full ML access', function () {
     this.tags(['skipFirefox', 'mlqa']);

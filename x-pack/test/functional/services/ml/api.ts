@@ -18,6 +18,7 @@ import {
   ML_ANNOTATIONS_INDEX_ALIAS_READ,
   ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
 } from '../../../../plugins/ml/common/constants/index_patterns';
+import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
 
 interface EsIndexResult {
   _index: string;
@@ -34,6 +35,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
   const esSupertest = getService('esSupertest');
+  const kbnSupertest = getService('supertest');
 
   return {
     async hasJobResults(jobId: string): Promise<boolean> {
@@ -466,13 +468,18 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async createAnomalyDetectionJob(jobConfig: Job) {
       const jobId = jobConfig.job_id;
       log.debug(`Creating anomaly detection job with id '${jobId}'...`);
-      await esSupertest.put(`/_ml/anomaly_detectors/${jobId}`).send(jobConfig).expect(200);
+      await kbnSupertest
+        .put(`/api/ml/anomaly_detectors/${jobId}`)
+        .set(COMMON_REQUEST_HEADERS)
+        .send(jobConfig)
+        .expect(200);
 
       await this.waitForAnomalyDetectionJobToExist(jobId);
     },
 
     async getDatafeed(datafeedId: string) {
       return await esSupertest.get(`/_ml/datafeeds/${datafeedId}`).expect(200);
+      // return await kbnSupertest.get(`/api/ml/datafeeds/${datafeedId}`).expect(200);
     },
 
     async waitForDatafeedToExist(datafeedId: string) {
@@ -488,7 +495,11 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async createDatafeed(datafeedConfig: Datafeed) {
       const datafeedId = datafeedConfig.datafeed_id;
       log.debug(`Creating datafeed with id '${datafeedId}'...`);
-      await esSupertest.put(`/_ml/datafeeds/${datafeedId}`).send(datafeedConfig).expect(200);
+      await kbnSupertest
+        .put(`/api/ml/datafeeds/${datafeedId}`)
+        .set(COMMON_REQUEST_HEADERS)
+        .send(datafeedConfig)
+        .expect(200);
 
       await this.waitForDatafeedToExist(datafeedId);
     },
@@ -576,8 +587,9 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async createDataFrameAnalyticsJob(jobConfig: DataFrameAnalyticsConfig) {
       const { id: analyticsId, ...analyticsConfig } = jobConfig;
       log.debug(`Creating data frame analytic job with id '${analyticsId}'...`);
-      await esSupertest
-        .put(`/_ml/data_frame/analytics/${analyticsId}`)
+      await kbnSupertest
+        .put(`/api/ml/data_frame/analytics/${analyticsId}`)
+        .set(COMMON_REQUEST_HEADERS)
         .send(analyticsConfig)
         .expect(200);
 
