@@ -71,6 +71,7 @@ const getEntriesColumnDefinitions = (): Array<EuiTableFieldDataColumnType<Entry>
     sortable: false,
     truncateText: true,
     width: '60%',
+    'data-test-subj': 'conditionValue',
   },
 ];
 
