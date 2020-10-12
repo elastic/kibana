@@ -2023,6 +2023,7 @@ export class SavedObjectsClient {
     errors: typeof SavedObjectsErrorHelpers;
     find<T = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
     get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
+    removeReferencesTo(type: string, id: string, options?: SavedObjectsRemoveReferencesToOptions): Promise<SavedObjectsRemoveReferencesToResponse>;
     update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
 }
 
@@ -2444,6 +2445,16 @@ export interface SavedObjectsRawDoc {
 }
 
 // @public (undocumented)
+export interface SavedObjectsRemoveReferencesToOptions extends SavedObjectsBaseOptions {
+    refresh?: boolean;
+}
+
+// @public (undocumented)
+export interface SavedObjectsRemoveReferencesToResponse extends SavedObjectsBaseOptions {
+    updated: number;
+}
+
+// @public (undocumented)
 export class SavedObjectsRepository {
     addToNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsAddToNamespacesOptions): Promise<SavedObjectsAddToNamespacesResponse>;
     bulkCreate<T = unknown>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
@@ -2462,6 +2473,8 @@ export class SavedObjectsRepository {
     find<T = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
     get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
     incrementCounter(type: string, id: string, counterFieldName: string, options?: SavedObjectsIncrementCounterOptions): Promise<SavedObject>;
+    // (undocumented)
+    removeReferencesTo(type: string, id: string, options?: SavedObjectsRemoveReferencesToOptions): Promise<SavedObjectsRemoveReferencesToResponse>;
     update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
 }
 
