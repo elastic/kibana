@@ -18,11 +18,8 @@
  */
 
 import { CoreSetup, CoreStart, PluginInitializerContext, Plugin } from 'src/core/public';
-import {
-  SavedObjectTaggingOssPluginSetup,
-  SavedObjectTaggingOssPluginStart,
-  TaggingApi,
-} from './types';
+import { SavedObjectTaggingOssPluginSetup, SavedObjectTaggingOssPluginStart } from './types';
+import { TaggingApi } from './api';
 
 export class SavedObjectTaggingOssPlugin
   implements Plugin<SavedObjectTaggingOssPluginSetup, SavedObjectTaggingOssPluginStart, {}, {}> {

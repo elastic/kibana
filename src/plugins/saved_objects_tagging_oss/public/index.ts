@@ -20,16 +20,16 @@
 import { PluginInitializerContext } from '../../../../src/core/public';
 import { SavedObjectTaggingOssPlugin } from './plugin';
 
+export { SavedObjectTaggingOssPluginSetup, SavedObjectTaggingOssPluginStart } from './types';
+
 export {
-  SavedObjectTaggingOssPluginSetup,
-  SavedObjectTaggingOssPluginStart,
   TaggingApi,
   TaggingApiUi,
   TagListComponentProps,
   GetSearchBarFilterOptions,
   ParsedSearchQuery,
   ParseSearchQueryOptions,
-} from './types';
+} from './api';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new SavedObjectTaggingOssPlugin(initializerContext);
