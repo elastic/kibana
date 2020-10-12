@@ -24,6 +24,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/advanced_settings'),
       require.resolve('./apps/dashboard_edit_panel'),
       require.resolve('./apps/users'),
+      require.resolve('./apps/roles'),
     ],
 
     pageObjects,

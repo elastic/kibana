@@ -85,7 +85,6 @@ export async function installIndexPatterns(
     savedObjectsClient,
     InstallationStatus.installed
   );
-
   // TODO: move to install package
   // cache all installed packages if they don't exist
   const packagePromises = installedPackages.map((pkg) =>
@@ -95,26 +94,32 @@ export async function installIndexPatterns(
   );
   await Promise.all(packagePromises);
 
+  const packageVersionsToFetch = [...installedPackages];
   if (pkgName && pkgVersion) {
-    // add this package to the array if it doesn't already exist
-    const foundPkg = installedPackages.find((pkg) => pkg.pkgName === pkgName);
-    // this may be removed if we add the packged to saved objects before installing index patterns
-    // otherwise this is a first time install
-    // TODO: handle update case when versions are different
-    if (!foundPkg) {
-      installedPackages.push({ pkgName, pkgVersion });
+    const packageToInstall = packageVersionsToFetch.find((pkg) => pkg.pkgName === pkgName);
+
+    if (packageToInstall) {
+      // set the version to the one we want to install
+      // if we're installing for the first time the number will be the same
+      // if this is an upgrade then we'll be modifying the version number to the upgrade version
+      packageToInstall.pkgVersion = pkgVersion;
+    } else {
+      // this will likely not happen because the saved objects should already have the package we're trying
+      // install which means that it should have been found in the case above
+      packageVersionsToFetch.push({ pkgName, pkgVersion });
     }
   }
   // get each package's registry info
-  const installedPackagesFetchInfoPromise = installedPackages.map((pkg) =>
+  const packageVersionsFetchInfoPromise = packageVersionsToFetch.map((pkg) =>
     Registry.fetchInfo(pkg.pkgName, pkg.pkgVersion)
   );
-  const installedPackagesInfo = await Promise.all(installedPackagesFetchInfoPromise);
+
+  const packageVersionsInfo = await Promise.all(packageVersionsFetchInfoPromise);
 
   // for each index pattern type, create an index pattern
   const indexPatternTypes = [IndexPatternType.logs, IndexPatternType.metrics];
   indexPatternTypes.forEach(async (indexPatternType) => {
-    // if this is an update because a package is being unisntalled (no pkgkey argument passed) and no other packages are installed, remove the index pattern
+    // if this is an update because a package is being uninstalled (no pkgkey argument passed) and no other packages are installed, remove the index pattern
     if (!pkgName && installedPackages.length === 0) {
       try {
         await savedObjectsClient.delete(INDEX_PATTERN_SAVED_OBJECT_TYPE, `${indexPatternType}-*`);
@@ -125,8 +130,7 @@ export async function installIndexPatterns(
     }
 
     // get all data stream fields from all installed packages
-    const fields = await getAllDataStreamFieldsByType(installedPackagesInfo, indexPatternType);
-
+    const fields = await getAllDataStreamFieldsByType(packageVersionsInfo, indexPatternType);
     const kibanaIndexPattern = createIndexPattern(indexPatternType, fields);
     // create or overwrite the index pattern
     await savedObjectsClient.create(INDEX_PATTERN_SAVED_OBJECT_TYPE, kibanaIndexPattern, {
