@@ -17,9 +17,14 @@
  * under the License.
  */
 
-import { createGetterSetter } from '../../kibana_utils/public';
-import { DataPublicPluginStart } from '../../data/public';
+import { resolve } from 'path';
+import { CI_PARALLEL_PROCESS_PREFIX } from '../ci_parallel_process_prefix';
 
-export const [getFormatService, setFormatService] = createGetterSetter<
-  DataPublicPluginStart['fieldFormats']
->('table data.fieldFormats');
+export function makeJunitReportPath(rootDirectory: string, reportName: string) {
+  return resolve(
+    rootDirectory,
+    'target/junit',
+    process.env.JOB || '.',
+    `TEST-${CI_PARALLEL_PROCESS_PREFIX}${reportName}.xml`
+  );
+}
