@@ -20,17 +20,17 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
+import { I18nStart, NotificationsStart } from 'src/core/public';
+import { SavedObjectSaveModal, OnSaveProps, SaveResult } from '../../../../saved_objects/public';
 import {
   EmbeddableInput,
   SavedObjectEmbeddableInput,
   isSavedObjectEmbeddableInput,
   IEmbeddable,
   Container,
-  EmbeddableStart,
   EmbeddableFactoryNotFoundError,
-} from '../embeddable_plugin';
-import { I18nStart, NotificationsStart } from '../../../../core/public';
-import { SavedObjectSaveModal, OnSaveProps, SaveResult } from '../../../saved_objects/public';
+  EmbeddableFactory,
+} from '../index';
 
 /**
  * The attribute service is a shared, generic service that embeddables can use to provide the functionality
@@ -66,7 +66,7 @@ export class AttributeService<
     private i18nContext: I18nStart['Context'],
     private toasts: NotificationsStart['toasts'],
     private options: AttributeServiceOptions<SavedObjectAttributes>,
-    getEmbeddableFactory?: EmbeddableStart['getEmbeddableFactory']
+    getEmbeddableFactory?: (embeddableFactoryId: string) => EmbeddableFactory
   ) {
     if (getEmbeddableFactory) {
       const factory = getEmbeddableFactory(this.type);
@@ -113,7 +113,7 @@ export class AttributeService<
       return { ...originalInput } as RefType;
     } catch (error) {
       this.toasts.addDanger({
-        title: i18n.translate('dashboard.attributeService.saveToLibraryError', {
+        title: i18n.translate('embeddableApi.attributeService.saveToLibraryError', {
           defaultMessage: `Panel was not saved to the library. Error: {errorMessage}`,
           values: {
             errorMessage: error.message,
