@@ -5,7 +5,7 @@
  */
 
 import { timer } from 'rxjs';
-import { concatMap, map, catchError } from 'rxjs/operators';
+import { concatMap, map, filter, catchError } from 'rxjs/operators';
 import { Logger } from 'src/core/server';
 import { JsonObject } from 'src/plugins/kibana_utils/common';
 import { keyBy, mapValues } from 'lodash';
@@ -108,6 +108,10 @@ export function createWorkloadAggregator(
   );
 
   return timer(0, refreshInterval).pipe(
+    // Setup might occurr before Kibana is entirely setup
+    // To avoid erros due to ES not being ready, we'll wait until Start
+    // to begin polling for the workload
+    filter(() => taskManager.isStarted),
     concatMap(() =>
       taskManager.aggregate<WorkloadAggregation>({
         aggs: {
