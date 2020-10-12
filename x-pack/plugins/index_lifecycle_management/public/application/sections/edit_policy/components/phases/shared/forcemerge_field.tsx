@@ -88,6 +88,7 @@ export const Forcemerge: React.FunctionComponent<Props> = ({ phase }) => {
       fullWidth
     >
       <UseField
+        key={forceMergeEnabledPath}
         path={forceMergeEnabledPath}
         config={fieldsConfig._meta.forceMergeEnabled}
         component={ToggleField}
@@ -101,9 +102,10 @@ export const Forcemerge: React.FunctionComponent<Props> = ({ phase }) => {
       />
       <EuiSpacer />
       <div id="forcemergeContent" aria-live="polite" role="region">
-        {forceMergeEnabled ? (
+        {forceMergeEnabled && (
           <>
             <UseField
+              key={`phases.${phase}.actions.forcemerge.max_num_segments`}
               path={`phases.${phase}.actions.forcemerge.max_num_segments`}
               config={fieldsConfig.numberOfSegments}
               component={NumericField}
@@ -117,6 +119,7 @@ export const Forcemerge: React.FunctionComponent<Props> = ({ phase }) => {
               }}
             />
             <UseField
+              key="_meta.hot.bestCompression"
               path="_meta.hot.bestCompression"
               component={ToggleField}
               config={fieldsConfig._meta.bestCompression}
@@ -128,7 +131,7 @@ export const Forcemerge: React.FunctionComponent<Props> = ({ phase }) => {
               }}
             />
           </>
-        ) : null}
+        )}
       </div>
     </EuiDescribedFormGroup>
   );

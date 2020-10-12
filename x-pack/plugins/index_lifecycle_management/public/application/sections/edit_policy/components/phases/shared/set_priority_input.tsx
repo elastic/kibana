@@ -56,6 +56,7 @@ export const SetPriorityInput: FunctionComponent<Props> = ({ phase }) => {
       fullWidth
     >
       <UseField
+        key={`phases.${phase}.actions.set_priority.priority`}
         path={`phases.${phase}.actions.set_priority.priority`}
         config={setIndexPriorityConfig}
         component={NumericField}

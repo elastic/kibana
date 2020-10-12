@@ -12,32 +12,32 @@ import { splitSizeAndUnits } from '../../services/policies/policy_serialization'
 
 import { FormInternal } from './components/phases/types';
 
-export const deserializer = (phase: SerializedPolicy): FormInternal =>
-  produce(phase, (draft: SerializedPolicy) => {
-    const _meta: FormInternal['_meta'] = {
-      hot: {
-        useRollover: Boolean(draft.phases.hot?.actions?.rollover),
-        forceMergeEnabled: Boolean(draft.phases.hot?.actions?.forcemerge),
-        bestCompression: draft.phases.hot?.actions?.forcemerge?.index_codec === 'best_compression',
+export const deserializer = (policy: SerializedPolicy): FormInternal =>
+  produce<FormInternal>(
+    {
+      ...policy,
+      _meta: {
+        hot: {
+          useRollover: Boolean(policy.phases.hot?.actions?.rollover),
+          forceMergeEnabled: Boolean(policy.phases.hot?.actions?.forcemerge),
+          bestCompression:
+            policy.phases.hot?.actions?.forcemerge?.index_codec === 'best_compression',
+        },
       },
-    };
+    },
+    (draft) => {
+      if (draft.phases.hot?.actions?.rollover) {
+        if (draft.phases.hot.actions.rollover.max_size) {
+          const maxSize = splitSizeAndUnits(draft.phases.hot.actions.rollover.max_size);
+          draft.phases.hot.actions.rollover.max_size = maxSize.size;
+          draft._meta.hot.maxStorageSizeUnit = maxSize.units;
+        }
 
-    if (draft.phases.hot?.actions?.rollover) {
-      if (draft.phases.hot.actions.rollover.max_size) {
-        const maxSize = splitSizeAndUnits(draft.phases.hot.actions.rollover.max_size);
-        draft.phases.hot.actions.rollover.max_size = maxSize.size;
-        _meta.hot.maxStorageSizeUnit = maxSize.units;
-      }
-
-      if (draft.phases.hot.actions.rollover.max_age) {
-        const maxAge = splitSizeAndUnits(draft.phases.hot.actions.rollover.max_age);
-        draft.phases.hot.actions.rollover.max_age = maxAge.size;
-        _meta.hot.maxAgeUnit = maxAge.units;
+        if (draft.phases.hot.actions.rollover.max_age) {
+          const maxAge = splitSizeAndUnits(draft.phases.hot.actions.rollover.max_age);
+          draft.phases.hot.actions.rollover.max_age = maxAge.size;
+          draft._meta.hot.maxAgeUnit = maxAge.units;
+        }
       }
     }
-
-    return {
-      _meta,
-      ...draft,
-    };
-  });
+  );

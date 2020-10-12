@@ -18,23 +18,20 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { Policy, PolicyFromES } from '../../../../../common/types';
-import { serializePolicy } from '../../../services/policies/policy_serialization';
+import { SerializedPolicy } from '../../../../../common/types';
 
 interface Props {
+  readPolicy: () => SerializedPolicy;
   close: () => void;
-  policy: Policy;
-  existingPolicy?: PolicyFromES;
   policyName: string;
 }
 
 export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({
-  close,
-  policy,
   policyName,
-  existingPolicy,
+  readPolicy,
+  close,
 }) => {
-  const { phases } = serializePolicy(policy, existingPolicy?.policy);
+  const { phases } = readPolicy();
   const json = JSON.stringify(
     {
       policy: {

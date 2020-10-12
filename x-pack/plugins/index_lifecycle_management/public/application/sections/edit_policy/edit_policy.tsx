@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useEffect, useState, useCallback } from 'react';
+import React, { Fragment, useEffect, useState, useCallback, useMemo } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -32,7 +32,7 @@ import { useForm, Form } from '../../../shared_imports';
 
 import { toasts } from '../../services/notification';
 
-import { Phases, Policy, PolicyFromES } from '../../../../common/types';
+import { Phases, Policy, PolicyFromES, SerializedPolicy } from '../../../../common/types';
 
 import { defaultPolicy } from '../../constants';
 
@@ -48,6 +48,7 @@ import {
   deserializePolicy,
   getPolicyByName,
   initializeNewPolicy,
+  legacySerializePolicy,
 } from '../../services/policies/policy_serialization';
 
 import {
@@ -61,7 +62,7 @@ import {
 } from './components';
 
 import { deserializer } from './deserializer';
-import { serializer } from './serializer';
+import { createSerializer } from './serializer';
 
 export interface Props {
   policies: PolicyFromES[];
@@ -75,6 +76,20 @@ export interface Props {
   ) => string;
   history: RouteComponentProps['history'];
 }
+
+const mergeAllSerializedPolicies = (
+  serializedPolicy: SerializedPolicy,
+  legacySerializedPolicy: SerializedPolicy
+): SerializedPolicy => {
+  return {
+    ...legacySerializedPolicy,
+    phases: {
+      ...legacySerializedPolicy.phases,
+      hot: serializedPolicy.phases.hot,
+    },
+  };
+};
+
 export const EditPolicy: React.FunctionComponent<Props> = ({
   policies,
   policyName,
@@ -91,6 +106,9 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
 
   const existingPolicy = getPolicyByName(policies, policyName);
 
+  const serializer = useMemo(() => {
+    return createSerializer(existingPolicy?.policy);
+  }, [existingPolicy?.policy]);
   const { form } = useForm({
     defaultValue: existingPolicy?.policy ?? defaultPolicy,
     deserializer,
@@ -111,7 +129,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
 
   const submit = async () => {
     setIsShowingErrors(true);
-    const { data, isValid: newIsValid } = await form.submit();
+    const { data: formLibPolicy, isValid: newIsValid } = await form.submit();
     const [legacyIsValid, validationErrors] = validatePolicy(
       saveAsNew,
       policy,
@@ -139,7 +157,11 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
         }
       }
     } else {
-      const success = await savePolicy(policy, isNewPolicy || saveAsNew, existingPolicy);
+      const readSerializedPolicy = () => {
+        const legacySerializedPolicy = legacySerializePolicy(policy, existingPolicy?.policy);
+        return mergeAllSerializedPolicies(formLibPolicy, legacySerializedPolicy);
+      };
+      const success = await savePolicy(readSerializedPolicy, isNewPolicy || saveAsNew);
       if (success) {
         backToPolicyList();
       }
@@ -348,6 +370,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
                         fill
                         iconType="check"
                         iconSide="left"
+                        disabled={form.isValid === false || form.isSubmitting}
                         onClick={submit}
                         color="secondary"
                       >
@@ -396,8 +419,14 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
               {isShowingPolicyJsonFlyout ? (
                 <PolicyJsonFlyout
                   policyName={policy.name || ''}
-                  existingPolicy={existingPolicy}
-                  policy={policy}
+                  readPolicy={() => {
+                    const serializedPolicy = form.getFormData();
+                    const legacySerializedPolicy = legacySerializePolicy(
+                      policy,
+                      existingPolicy?.policy
+                    );
+                    return mergeAllSerializedPolicies(serializedPolicy, legacySerializedPolicy);
+                  }}
                   close={() => setIsShowingPolicyJsonFlyout(false)}
                 />
               ) : null}

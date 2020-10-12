@@ -6,7 +6,7 @@
 // Prefer importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
 import cloneDeep from 'lodash/cloneDeep';
-import { deserializePolicy, serializePolicy } from './policy_serialization';
+import { deserializePolicy, legacySerializePolicy } from './policy_serialization';
 import {
   defaultNewColdPhase,
   defaultNewDeletePhase,
@@ -19,7 +19,7 @@ import { coldPhaseInitialization } from './cold_phase';
 describe('Policy serialization', () => {
   test('serialize a policy using "default" data allocation', () => {
     expect(
-      serializePolicy(
+      legacySerializePolicy(
         {
           name: 'test',
           phases: {
@@ -88,7 +88,7 @@ describe('Policy serialization', () => {
 
   test('serialize a policy using "custom" data allocation', () => {
     expect(
-      serializePolicy(
+      legacySerializePolicy(
         {
           name: 'test',
           phases: {
@@ -182,7 +182,7 @@ describe('Policy serialization', () => {
 
   test('serialize a policy using "custom" data allocation with no node attributes', () => {
     expect(
-      serializePolicy(
+      legacySerializePolicy(
         {
           name: 'test',
           phases: {
@@ -253,7 +253,7 @@ describe('Policy serialization', () => {
 
   test('serialize a policy using "none" data allocation with no node attributes', () => {
     expect(
-      serializePolicy(
+      legacySerializePolicy(
         {
           name: 'test',
           phases: {
@@ -363,17 +363,17 @@ describe('Policy serialization', () => {
       },
     };
 
-    serializePolicy(deserializedPolicy, originalPolicy);
+    legacySerializePolicy(deserializedPolicy, originalPolicy);
     deserializedPolicy.phases.warm.dataTierAllocationType = 'custom';
-    serializePolicy(deserializedPolicy, originalPolicy);
+    legacySerializePolicy(deserializedPolicy, originalPolicy);
     deserializedPolicy.phases.warm.dataTierAllocationType = 'default';
-    serializePolicy(deserializedPolicy, originalPolicy);
+    legacySerializePolicy(deserializedPolicy, originalPolicy);
     expect(originalPolicy).toEqual(originalClone);
   });
 
   test('serialize a policy using "best_compression" codec for forcemerge', () => {
     expect(
-      serializePolicy(
+      legacySerializePolicy(
         {
           name: 'test',
           phases: {
@@ -501,7 +501,7 @@ describe('Policy serialization', () => {
 
   test('delete "best_compression" codec for forcemerge if disabled in UI', () => {
     expect(
-      serializePolicy(
+      legacySerializePolicy(
         {
           name: 'test',
           phases: {

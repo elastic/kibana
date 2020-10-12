@@ -138,7 +138,11 @@ export const HotPhase: FunctionComponent = () => {
         }
         fullWidth
       >
-        <UseField<boolean> path="_meta.hot.useRollover" config={fieldsConfig._meta.hot.useRollover}>
+        <UseField<boolean>
+          key="_meta.hot.useRollover"
+          path="_meta.hot.useRollover"
+          config={fieldsConfig._meta.hot.useRollover}
+        >
           {(field) => {
             return (
               <EuiFormRow
@@ -238,6 +242,7 @@ export const HotPhase: FunctionComponent = () => {
                       </EuiFlexItem>
                       <EuiFlexItem style={{ maxWidth: 188 }}>
                         <UseField
+                          key="_meta.hot.maxStorageSizeUnit"
                           path="_meta.hot.maxStorageSizeUnit"
                           component={SelectField}
                           config={fieldsConfig._meta.hot.maxStorageSizeUnit}
@@ -300,6 +305,7 @@ export const HotPhase: FunctionComponent = () => {
                       </EuiFlexItem>
                       <EuiFlexItem style={{ maxWidth: 188 }}>
                         <UseField
+                          key="_meta.hot.maxAgeUnit"
                           path="_meta.hot.maxAgeUnit"
                           config={fieldsConfig._meta.hot.maxAgeUnit}
                           component={SelectField}

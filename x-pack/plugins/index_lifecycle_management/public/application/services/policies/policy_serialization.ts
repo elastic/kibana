@@ -75,7 +75,7 @@ export const deserializePolicy = (policy: PolicyFromES): Policy => {
   };
 };
 
-export const serializePolicy = (
+export const legacySerializePolicy = (
   policy: Policy,
   originalEsPolicy: SerializedPolicy = {
     name: policy.name,
