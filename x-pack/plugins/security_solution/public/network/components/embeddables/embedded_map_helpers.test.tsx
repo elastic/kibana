@@ -126,7 +126,7 @@ describe('embedded_map_helpers', () => {
       expect(matchingIndexPatterns).toEqual([mockFilebeatIndexPattern]);
     });
 
-    test.only('matches on comma separated Kibana index pattern', () => {
+    test('matches on comma separated Kibana index pattern', () => {
       const matchingIndexPatterns = findMatchingIndexPatterns({
         kibanaIndexPatterns: [
           mockCommaFilebeatAuditbeatGlobIndexPattern,
@@ -140,7 +140,7 @@ describe('embedded_map_helpers', () => {
       ]);
     });
 
-    test.only('matches on excluded comma separated Kibana index pattern', () => {
+    test('matches on excluded comma separated Kibana index pattern', () => {
       const matchingIndexPatterns = findMatchingIndexPatterns({
         kibanaIndexPatterns: [
           mockCommaFilebeatExclusionGlobIndexPattern,
@@ -154,7 +154,7 @@ describe('embedded_map_helpers', () => {
       ]);
     });
 
-    test.only('matches on CCS comma separated Kibana index pattern', () => {
+    test('matches on CCS comma separated Kibana index pattern', () => {
       const matchingIndexPatterns = findMatchingIndexPatterns({
         kibanaIndexPatterns: [
           mockCommaFilebeatAuditbeatCCSGlobIndexPattern,

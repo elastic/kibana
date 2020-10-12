@@ -151,11 +151,12 @@ export const findMatchingIndexPatterns = ({
       return (
         !ignoredIndexPatterns.includes(pattern) &&
         siemDefaultIndices.some((sdi) => {
-          const splitPattern = pattern.match(/([^,]+)/g) ?? [];
+          const splitPattern = pattern.split(',') ?? [];
           return splitPattern.length > 1
-            ? splitPattern.some((p) =>
-                minimatch(sdi, p) && p.charAt(0) === '-' ? false : minimatch(sdi, p)
-              )
+            ? splitPattern.some((p) => {
+                const isMatch = minimatch(sdi, p);
+                return isMatch && p.charAt(0) === '-' ? false : isMatch;
+              })
             : minimatch(sdi, pattern);
         })
       );
