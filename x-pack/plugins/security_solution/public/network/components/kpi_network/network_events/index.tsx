@@ -9,7 +9,7 @@ import { euiPaletteColorBlind } from '@elastic/eui';
 
 import { StatItems } from '../../../../common/components/stat_items';
 import { useNetworkKpiNetworkEvents } from '../../../containers/kpi_network/network_events';
-import { KpiNetworkBaseComponentManage } from '../common';
+import { NetworkKpiBaseComponentManage } from '../common';
 import { NetworkKpiProps } from '../types';
 import * as i18n from './translations';
 
@@ -33,6 +33,7 @@ export const fieldsMapping: Readonly<StatItems[]> = [
 const NetworkKpiNetworkEventsComponent: React.FC<NetworkKpiProps> = ({
   filterQuery,
   from,
+  indexNames,
   to,
   narrowDateRange,
   setQuery,
@@ -41,12 +42,13 @@ const NetworkKpiNetworkEventsComponent: React.FC<NetworkKpiProps> = ({
   const [loading, { refetch, id, inspect, ...data }] = useNetworkKpiNetworkEvents({
     filterQuery,
     endDate: to,
+    indexNames,
     startDate: from,
     skip,
   });
 
   return (
-    <KpiNetworkBaseComponentManage
+    <NetworkKpiBaseComponentManage
       data={data}
       id={id}
       inspect={inspect}

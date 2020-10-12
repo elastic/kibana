@@ -67,6 +67,17 @@ export const defaultSearchQuery = {
   match_all: {},
 };
 
+export const getDefaultTrainingFilterQuery = (resultsField: string, isTraining: boolean) => ({
+  bool: {
+    minimum_should_match: 1,
+    should: [
+      {
+        match: { [`${resultsField}.is_training`]: isTraining },
+      },
+    ],
+  },
+});
+
 export interface SearchQuery {
   track_total_hits?: boolean;
   query: SavedSearchQuery;
@@ -148,11 +159,13 @@ interface LoadEvaluateResult {
   error: string | null;
 }
 
-export const getAnalysisType = (analysis: AnalysisConfig): string => {
+export const getAnalysisType = (
+  analysis: AnalysisConfig
+): DataFrameAnalysisConfigType | 'unknown' => {
   const keys = Object.keys(analysis);
 
   if (keys.length === 1) {
-    return keys[0];
+    return keys[0] as DataFrameAnalysisConfigType;
   }
 
   return 'unknown';

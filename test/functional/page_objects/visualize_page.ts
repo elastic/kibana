@@ -70,6 +70,7 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
 
     public async navigateToNewVisualization() {
       await common.navigateToApp('visualize');
+      await header.waitUntilLoadingHasFinished();
       await this.clickNewVisualization();
       await this.waitForVisualizationSelectPage();
     }
@@ -361,6 +362,20 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
     public async notLinkedToOriginatingApp() {
       await header.waitUntilLoadingHasFinished();
       await testSubjects.missingOrFail('visualizesaveAndReturnButton');
+    }
+
+    public async cancelAndReturn(showConfirmModal: boolean) {
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('visualizeCancelAndReturnButton');
+      await testSubjects.click('visualizeCancelAndReturnButton');
+      if (showConfirmModal) {
+        await retry.waitFor(
+          'confirm modal to show',
+          async () => await testSubjects.exists('appLeaveConfirmModal')
+        );
+        await testSubjects.exists('confirmModalConfirmButton');
+        await testSubjects.click('confirmModalConfirmButton');
+      }
     }
   }
 

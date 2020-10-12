@@ -44,6 +44,7 @@ export interface KibanaRouteOptions extends RouteOptionsApp {
  */
 export interface KibanaRequestState extends ApplicationState {
   requestId: string;
+  requestUuid: string;
 }
 
 /**
@@ -152,6 +153,14 @@ export class KibanaRequest<
    * per request.
    */
   public readonly id: string;
+  /**
+   * A UUID to identify this request.
+   *
+   * @remarks
+   * This value is NOT sourced from the incoming request's `X-Opaque-Id` header. it
+   * is always a UUID uniquely identifying the request.
+   */
+  public readonly uuid: string;
   /** a WHATWG URL standard object. */
   public readonly url: Url;
   /** matched route details */
@@ -189,10 +198,11 @@ export class KibanaRequest<
     // until that time we have to expose all the headers
     private readonly withoutSecretHeaders: boolean
   ) {
-    // The `requestId` property will not be populated for requests that are 'faked' by internal systems that leverage
+    // The `requestId` and `requestUuid` properties will not be populated for requests that are 'faked' by internal systems that leverage
     // KibanaRequest in conjunction with scoped Elaticcsearch and SavedObjectsClient in order to pass credentials.
-    // In these cases, the id defaults to a newly generated UUID.
+    // In these cases, the ids default to a newly generated UUID.
     this.id = (request.app as KibanaRequestState | undefined)?.requestId ?? uuid.v4();
+    this.uuid = (request.app as KibanaRequestState | undefined)?.requestUuid ?? uuid.v4();
 
     this.url = request.url;
     this.headers = deepFreeze({ ...request.headers });

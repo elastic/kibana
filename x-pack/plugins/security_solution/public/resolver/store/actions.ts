@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { CameraAction } from './camera';
-import { ResolverEvent } from '../../../common/endpoint/types';
+import { SafeResolverEvent } from '../../../common/endpoint/types';
 import { DataAction } from './data/action';
 
 /**
@@ -16,25 +16,7 @@ interface UserBroughtProcessIntoView {
     /**
      * Used to identify the process node that should be brought into view.
      */
-    readonly process: ResolverEvent;
-    /**
-     * The time (since epoch in milliseconds) when the action was dispatched.
-     */
-    readonly time: number;
-  };
-}
-
-/**
- * When an examination of query params in the UI indicates that state needs to
- * be updated to reflect the new selection
- */
-interface AppDetectedNewIdFromQueryParams {
-  readonly type: 'appDetectedNewIdFromQueryParams';
-  readonly payload: {
-    /**
-     * Used to identify the process the process that should be synced with state.
-     */
-    readonly process: ResolverEvent;
+    readonly process: SafeResolverEvent;
     /**
      * The time (since epoch in milliseconds) when the action was dispatched.
      */
@@ -48,15 +30,6 @@ interface AppDetectedNewIdFromQueryParams {
  */
 interface UserRequestedRelatedEventData {
   readonly type: 'userRequestedRelatedEventData';
-  readonly payload: string;
-}
-
-/**
- * The action dispatched when the app requests related event data for one
- * subject (whose entity_id should be included as `payload`)
- */
-interface AppDetectedMissingEventData {
-  readonly type: 'appDetectedMissingEventData';
   readonly payload: string;
 }
 
@@ -127,6 +100,4 @@ export type ResolverAction =
   | UserBroughtProcessIntoView
   | UserFocusedOnResolverNode
   | UserSelectedResolverNode
-  | UserRequestedRelatedEventData
-  | AppDetectedNewIdFromQueryParams
-  | AppDetectedMissingEventData;
+  | UserRequestedRelatedEventData;

@@ -4,19 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTableColumn, EuiButtonEmpty, EuiSpacer, EuiInMemoryTable } from '@elastic/eui';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { useSelector } from 'react-redux';
-import { StyledBreadcrumbs } from './panel_content_utilities';
+import { Breadcrumbs } from './breadcrumbs';
 import * as event from '../../../../common/endpoint/models/event';
-import { ResolverEvent, ResolverNodeStats } from '../../../../common/endpoint/types';
+import { ResolverNodeStats } from '../../../../common/endpoint/types';
 import * as selectors from '../../store/selectors';
 import { ResolverState } from '../../types';
 import { StyledPanel } from '../styles';
-import { useNavigateOrReplace } from '../use_navigate_or_replace';
 import { PanelLoading } from './panel_loading';
+import { useLinkProps } from '../use_link_props';
 
 export function NodeEvents({ nodeID }: { nodeID: string }) {
   const processEvent = useSelector((state: ResolverState) =>
@@ -26,11 +28,21 @@ export function NodeEvents({ nodeID }: { nodeID: string }) {
     selectors.relatedEventsStats(state)(nodeID)
   );
   if (processEvent === null || relatedEventsStats === undefined) {
-    return <PanelLoading />;
+    return (
+      <StyledPanel>
+        <PanelLoading />
+      </StyledPanel>
+    );
   } else {
     return (
       <StyledPanel>
-        <EventCountsForProcess processEvent={processEvent} relatedStats={relatedEventsStats} />
+        <NodeEventsBreadcrumbs
+          nodeName={event.processNameSafeVersion(processEvent)}
+          nodeID={nodeID}
+          totalEventCount={relatedEventsStats.events.total}
+        />
+        <EuiSpacer size="l" />
+        <EventCategoryLinks nodeID={nodeID} relatedStats={relatedEventsStats} />
       </StyledPanel>
     );
   }
@@ -47,120 +59,29 @@ export function NodeEvents({ nodeID }: { nodeID: string }) {
  * | 2                      | Network                    |
  *
  */
-const EventCountsForProcess = memo(function EventCountsForProcess({
-  processEvent,
+const EventCategoryLinks = memo(function ({
+  nodeID,
   relatedStats,
 }: {
-  processEvent: ResolverEvent;
+  nodeID: string;
   relatedStats: ResolverNodeStats;
 }) {
   interface EventCountsTableView {
-    name: string;
+    eventType: string;
     count: number;
   }
 
-  const relatedEventsState = { stats: relatedStats.events.byCategory };
-  const processName = processEvent && event.eventName(processEvent);
-  const processEntityId = event.entityId(processEvent);
-  /**
-   * totalCount: This will reflect the aggregated total by category for all related events
-   * e.g. [dns,file],[dns,file],[registry] will have an aggregate total of 5. This is to keep the
-   * total number consistent with the "broken out" totals we see elsewhere in the app.
-   * E.g. on the rleated list by type, the above would show as:
-   * 2 dns
-   * 2 file
-   * 1 registry
-   * So it would be extremely disorienting to show the user a "3" above that as a total.
-   */
-  const totalCount = Object.values(relatedStats.events.byCategory).reduce(
-    (sum, val) => sum + val,
-    0
-  );
-  const eventsString = i18n.translate(
-    'xpack.securitySolution.endpoint.resolver.panel.processEventCounts.events',
-    {
-      defaultMessage: 'Events',
-    }
-  );
-  const eventsHref = useSelector((state: ResolverState) =>
-    selectors.relativeHref(state)({ panelView: 'nodes' })
-  );
-
-  const eventLinkNavProps = useNavigateOrReplace({
-    search: eventsHref,
-  });
-
-  const processDetailHref = useSelector((state: ResolverState) =>
-    selectors.relativeHref(state)({
-      panelView: 'nodeDetail',
-      panelParameters: { nodeID: processEntityId },
-    })
-  );
-
-  const processDetailNavProps = useNavigateOrReplace({
-    search: processDetailHref,
-  });
-
-  const nodeDetailHref = useSelector((state: ResolverState) =>
-    selectors.relativeHref(state)({
-      panelView: 'nodeEvents',
-      panelParameters: { nodeID: processEntityId },
-    })
-  );
-
-  const nodeDetailNavProps = useNavigateOrReplace({
-    search: nodeDetailHref!,
-  });
-  const crumbs = useMemo(() => {
-    return [
-      {
-        text: eventsString,
-        ...eventLinkNavProps,
-      },
-      {
-        text: processName,
-        ...processDetailNavProps,
-      },
-      {
-        text: (
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.resolver.panel.relatedCounts.numberOfEventsInCrumb"
-            values={{ totalCount }}
-            defaultMessage="{totalCount} Events"
-          />
-        ),
-        ...nodeDetailNavProps,
-      },
-    ];
-  }, [
-    processName,
-    totalCount,
-    eventsString,
-    eventLinkNavProps,
-    nodeDetailNavProps,
-    processDetailNavProps,
-  ]);
   const rows = useMemo(() => {
-    return Object.entries(relatedEventsState.stats).map(
+    return Object.entries(relatedStats.events.byCategory).map(
       ([eventType, count]): EventCountsTableView => {
         return {
-          name: eventType,
+          eventType,
           count,
         };
       }
     );
-  }, [relatedEventsState]);
+  }, [relatedStats.events.byCategory]);
 
-  const eventDetailHref = useSelector((state: ResolverState) =>
-    selectors.relativeHref(state)({
-      panelView: 'eventDetail',
-      panelParameters: { nodeID: processEntityId, eventType: name, eventID: processEntityId },
-    })
-  );
-
-  const eventDetailNavProps = useNavigateOrReplace({
-    search: eventDetailHref,
-  });
   const columns = useMemo<Array<EuiBasicTableColumn<EventCountsTableView>>>(
     () => [
       {
@@ -168,29 +89,100 @@ const EventCountsForProcess = memo(function EventCountsForProcess({
         name: i18n.translate('xpack.securitySolution.endpoint.resolver.panel.table.row.count', {
           defaultMessage: 'Count',
         }),
+        'data-test-subj': 'resolver:panel:node-events:event-type-count',
         width: '20%',
         sortable: true,
       },
       {
-        field: 'name',
+        field: 'eventType',
         name: i18n.translate('xpack.securitySolution.endpoint.resolver.panel.table.row.eventType', {
           defaultMessage: 'Event Type',
         }),
         width: '80%',
         sortable: true,
-        render(name: string) {
-          return <EuiButtonEmpty {...eventDetailNavProps}>{name}</EuiButtonEmpty>;
+        render(eventType: string) {
+          return (
+            <NodeEventsLink nodeID={nodeID} eventType={eventType}>
+              {eventType}
+            </NodeEventsLink>
+          );
         },
       },
     ],
-    [eventDetailNavProps]
+    [nodeID]
   );
+  return <EuiInMemoryTable<EventCountsTableView> items={rows} columns={columns} sorting />;
+});
+
+const NodeEventsBreadcrumbs = memo(function ({
+  nodeID,
+  nodeName,
+  totalEventCount,
+}: {
+  nodeID: string;
+  nodeName: React.ReactNode;
+  totalEventCount: number;
+}) {
   return (
-    <>
-      <StyledBreadcrumbs breadcrumbs={crumbs} />
-      <EuiSpacer size="l" />
-      <EuiInMemoryTable<EventCountsTableView> items={rows} columns={columns} sorting />
-    </>
+    <Breadcrumbs
+      breadcrumbs={[
+        {
+          text: i18n.translate(
+            'xpack.securitySolution.endpoint.resolver.panel.processEventCounts.events',
+            {
+              defaultMessage: 'Events',
+            }
+          ),
+          ...useLinkProps({
+            panelView: 'nodes',
+          }),
+        },
+        {
+          text: nodeName,
+          ...useLinkProps({
+            panelView: 'nodeDetail',
+            panelParameters: { nodeID },
+          }),
+        },
+        {
+          text: (
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.resolver.panel.relatedCounts.numberOfEventsInCrumb"
+              values={{ totalCount: totalEventCount }}
+              defaultMessage="{totalCount} Events"
+            />
+          ),
+          ...useLinkProps({
+            panelView: 'nodeEvents',
+            panelParameters: { nodeID },
+          }),
+        },
+      ]}
+    />
   );
 });
-EventCountsForProcess.displayName = 'EventCountsForProcess';
+
+const NodeEventsLink = memo(
+  ({
+    nodeID,
+    eventType,
+    children,
+  }: {
+    nodeID: string;
+    eventType: string;
+    children: React.ReactNode;
+  }) => {
+    const props = useLinkProps({
+      panelView: 'nodeEventsInCategory',
+      panelParameters: {
+        nodeID,
+        eventCategory: eventType,
+      },
+    });
+    return (
+      <EuiButtonEmpty data-test-subj="resolver:panel:node-events:event-type-link" {...props}>
+        {children}
+      </EuiButtonEmpty>
+    );
+  }
+);

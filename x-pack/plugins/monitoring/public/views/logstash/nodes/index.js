@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
 import { uiRoutes } from '../../../angular/helpers/routes';
 import { routeInitProvider } from '../../../lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
@@ -15,6 +16,7 @@ import {
   CODE_PATH_LOGSTASH,
   LOGSTASH_SYSTEM_ID,
   ALERT_LOGSTASH_VERSION_MISMATCH,
+  ALERT_MISSING_MONITORING_DATA,
 } from '../../../../common/constants';
 
 uiRoutes.when('/logstash/nodes', {
@@ -30,7 +32,12 @@ uiRoutes.when('/logstash/nodes', {
   controller: class LsNodesList extends MonitoringViewBaseEuiTableController {
     constructor($injector, $scope) {
       super({
-        title: 'Logstash - Nodes',
+        title: i18n.translate('xpack.monitoring.logstash.nodes.routeTitle', {
+          defaultMessage: 'Logstash - Nodes',
+        }),
+        pageTitle: i18n.translate('xpack.monitoring.logstash.nodes.pageTitle', {
+          defaultMessage: 'Logstash nodes',
+        }),
         storageKey: 'logstash.nodes',
         getPageData,
         reactNodeId: 'monitoringLogstashNodesApp',
@@ -39,7 +46,12 @@ uiRoutes.when('/logstash/nodes', {
         alerts: {
           shouldFetch: true,
           options: {
-            alertTypeIds: [ALERT_LOGSTASH_VERSION_MISMATCH],
+            alertTypeIds: [ALERT_LOGSTASH_VERSION_MISMATCH, ALERT_MISSING_MONITORING_DATA],
+            filters: [
+              {
+                stackProduct: LOGSTASH_SYSTEM_ID,
+              },
+            ],
           },
         },
       });

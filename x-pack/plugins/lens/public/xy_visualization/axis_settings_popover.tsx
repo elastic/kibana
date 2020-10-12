@@ -73,7 +73,12 @@ export interface AxisSettingsPopoverProps {
 const popoverConfig = (
   axis: AxesSettingsConfigKeys,
   isHorizontal: boolean
-): { icon: IconType; groupPosition: ToolbarButtonProps['groupPosition']; popoverTitle: string } => {
+): {
+  icon: IconType;
+  groupPosition: ToolbarButtonProps['groupPosition'];
+  popoverTitle: string;
+  buttonDataTestSubj: string;
+} => {
   switch (axis) {
     case 'yLeft':
       return {
@@ -86,6 +91,7 @@ const popoverConfig = (
           : i18n.translate('xpack.lens.xyChart.leftAxisLabel', {
               defaultMessage: 'Left axis',
             }),
+        buttonDataTestSubj: 'lnsLeftAxisButton',
       };
     case 'yRight':
       return {
@@ -98,6 +104,7 @@ const popoverConfig = (
           : i18n.translate('xpack.lens.xyChart.rightAxisLabel', {
               defaultMessage: 'Right axis',
             }),
+        buttonDataTestSubj: 'lnsRightAxisButton',
       };
     case 'x':
     default:
@@ -111,6 +118,8 @@ const popoverConfig = (
           : i18n.translate('xpack.lens.xyChart.bottomAxisLabel', {
               defaultMessage: 'Bottom axis',
             }),
+
+        buttonDataTestSubj: 'lnsBottomAxisButton',
       };
   }
 };
@@ -143,6 +152,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
       type={config.icon}
       groupPosition={config.groupPosition}
       isDisabled={isDisabled}
+      buttonDataTestSubj={config.buttonDataTestSubj}
     >
       <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>

@@ -5,9 +5,10 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { useDispatch, useSelector, shallowEqual } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { assertUnreachable } from '../../../../common/utility_types';
 import { networkActions, networkModel, networkSelectors } from '../../store';
 import {
@@ -68,7 +69,7 @@ const UsersTableComponent: React.FC<UsersTableProps> = ({
 }) => {
   const dispatch = useDispatch();
   const getUsersSelector = networkSelectors.usersSelector();
-  const { activePage, sort, limit } = useSelector(getUsersSelector, shallowEqual);
+  const { activePage, sort, limit } = useShallowEqualSelector(getUsersSelector);
   const updateLimitPagination = useCallback(
     (newLimit) =>
       dispatch(

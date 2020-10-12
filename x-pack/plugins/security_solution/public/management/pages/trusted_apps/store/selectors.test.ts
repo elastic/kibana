@@ -5,215 +5,377 @@
  */
 
 import {
-  getCurrentListResourceState,
+  AsyncResourceState,
+  TrustedAppsListPageLocation,
+  TrustedAppsListPageState,
+} from '../state';
+import { initialTrustedAppsPageState } from './reducer';
+import {
+  getListResourceState,
   getLastLoadedListResourceState,
-  getListCurrentPageIndex,
-  getListCurrentPageSize,
+  getCurrentLocationPageIndex,
+  getCurrentLocationPageSize,
   getListErrorMessage,
   getListItems,
   getListTotalItemsCount,
   isListLoading,
   needsRefreshOfListData,
+  isDeletionDialogOpen,
+  isDeletionInProgress,
+  isDeletionSuccessful,
+  getDeletionError,
+  getDeletionDialogEntry,
+  getDeletionSubmissionResourceState,
 } from './selectors';
 
 import {
-  createDefaultListView,
-  createDefaultPaginationInfo,
+  createDefaultPagination,
   createListComplexLoadingResourceState,
   createListFailedResourceState,
   createListLoadedResourceState,
   createLoadedListViewWithPagination,
+  createSampleTrustedApp,
   createSampleTrustedApps,
+  createServerApiError,
   createUninitialisedResourceState,
 } from '../test_utils';
+
+const initialNow = 111111;
+const dateNowMock = jest.fn();
+dateNowMock.mockReturnValue(initialNow);
+
+Date.now = dateNowMock;
+
+const initialState = initialTrustedAppsPageState();
+
+const createStateWithDeletionSubmissionResourceState = (
+  submissionResourceState: AsyncResourceState
+): TrustedAppsListPageState => ({
+  ...initialState,
+  deletionDialog: { ...initialState.deletionDialog, submissionResourceState },
+});
 
 describe('selectors', () => {
   describe('needsRefreshOfListData()', () => {
     it('returns false for outdated resource state and inactive state', () => {
-      expect(
-        needsRefreshOfListData({
-          listView: createDefaultListView(),
-          active: false,
-          createView: undefined,
-        })
-      ).toBe(false);
+      expect(needsRefreshOfListData(initialState)).toBe(false);
     });
 
     it('returns true for outdated resource state and active state', () => {
-      expect(
-        needsRefreshOfListData({
-          listView: createDefaultListView(),
-          active: true,
-          createView: undefined,
-        })
-      ).toBe(true);
+      expect(needsRefreshOfListData({ ...initialState, active: true })).toBe(true);
     });
 
     it('returns true when current loaded page index is outdated', () => {
-      const listView = createLoadedListViewWithPagination({ index: 1, size: 20 });
+      const listView = createLoadedListViewWithPagination(initialNow, { pageIndex: 1 });
 
-      expect(needsRefreshOfListData({ listView, active: true, createView: undefined })).toBe(true);
+      expect(needsRefreshOfListData({ ...initialState, listView, active: true })).toBe(true);
     });
 
     it('returns true when current loaded page size is outdated', () => {
-      const listView = createLoadedListViewWithPagination({ index: 0, size: 50 });
+      const listView = createLoadedListViewWithPagination(initialNow, { pageSize: 50 });
 
-      expect(needsRefreshOfListData({ listView, active: true, createView: undefined })).toBe(true);
+      expect(needsRefreshOfListData({ ...initialState, listView, active: true })).toBe(true);
+    });
+
+    it('returns true when current loaded data timestamp is outdated', () => {
+      const listView = {
+        ...createLoadedListViewWithPagination(111111),
+        freshDataTimestamp: 222222,
+      };
+
+      expect(needsRefreshOfListData({ ...initialState, listView, active: true })).toBe(true);
     });
 
     it('returns false when current loaded data is up to date', () => {
-      const listView = createLoadedListViewWithPagination();
+      const listView = createLoadedListViewWithPagination(initialNow);
+      const location: TrustedAppsListPageLocation = {
+        page_index: 0,
+        page_size: 10,
+        view_type: 'grid',
+      };
 
-      expect(needsRefreshOfListData({ listView, active: true, createView: undefined })).toBe(false);
+      expect(needsRefreshOfListData({ ...initialState, listView, active: true, location })).toBe(
+        false
+      );
     });
   });
 
-  describe('getCurrentListResourceState()', () => {
+  describe('getListResourceState()', () => {
     it('returns current list resource state', () => {
-      const listView = createDefaultListView();
-
-      expect(
-        getCurrentListResourceState({ listView, active: false, createView: undefined })
-      ).toStrictEqual(createUninitialisedResourceState());
+      expect(getListResourceState(initialState)).toStrictEqual(createUninitialisedResourceState());
     });
   });
 
   describe('getLastLoadedListResourceState()', () => {
     it('returns last loaded list resource state', () => {
-      const listView = {
-        currentListResourceState: createListComplexLoadingResourceState(
-          createDefaultPaginationInfo(),
-          200
-        ),
-        currentPaginationInfo: createDefaultPaginationInfo(),
-        show: undefined,
+      const state = {
+        ...initialState,
+        listView: {
+          listResourceState: createListComplexLoadingResourceState(
+            createDefaultPagination(),
+            initialNow
+          ),
+          freshDataTimestamp: initialNow,
+        },
       };
 
-      expect(
-        getLastLoadedListResourceState({ listView, active: false, createView: undefined })
-      ).toStrictEqual(createListLoadedResourceState(createDefaultPaginationInfo(), 200));
+      expect(getLastLoadedListResourceState(state)).toStrictEqual(
+        createListLoadedResourceState(createDefaultPagination(), initialNow)
+      );
     });
   });
 
   describe('getListItems()', () => {
     it('returns empty list when no valid data loaded', () => {
-      expect(
-        getListItems({ listView: createDefaultListView(), active: false, createView: undefined })
-      ).toStrictEqual([]);
+      expect(getListItems(initialState)).toStrictEqual([]);
     });
 
     it('returns last loaded list items', () => {
-      const listView = {
-        currentListResourceState: createListComplexLoadingResourceState(
-          createDefaultPaginationInfo(),
-          200
-        ),
-        currentPaginationInfo: createDefaultPaginationInfo(),
-        show: undefined,
+      const state = {
+        ...initialState,
+        listView: {
+          listResourceState: createListComplexLoadingResourceState(
+            createDefaultPagination(),
+            initialNow
+          ),
+          freshDataTimestamp: initialNow,
+        },
       };
 
-      expect(getListItems({ listView, active: false, createView: undefined })).toStrictEqual(
-        createSampleTrustedApps(createDefaultPaginationInfo())
-      );
+      expect(getListItems(state)).toStrictEqual(createSampleTrustedApps(createDefaultPagination()));
     });
   });
 
   describe('getListTotalItemsCount()', () => {
     it('returns 0 when no valid data loaded', () => {
-      expect(
-        getListTotalItemsCount({
-          listView: createDefaultListView(),
-          active: false,
-          createView: undefined,
-        })
-      ).toBe(0);
+      expect(getListTotalItemsCount(initialState)).toBe(0);
     });
 
     it('returns last loaded total items count', () => {
-      const listView = {
-        currentListResourceState: createListComplexLoadingResourceState(
-          createDefaultPaginationInfo(),
-          200
-        ),
-        currentPaginationInfo: createDefaultPaginationInfo(),
-        show: undefined,
+      const state = {
+        ...initialState,
+        listView: {
+          listResourceState: createListComplexLoadingResourceState(
+            createDefaultPagination(),
+            initialNow
+          ),
+          freshDataTimestamp: initialNow,
+        },
       };
 
-      expect(getListTotalItemsCount({ listView, active: false, createView: undefined })).toBe(200);
+      expect(getListTotalItemsCount(state)).toBe(200);
     });
   });
 
   describe('getListCurrentPageIndex()', () => {
     it('returns page index', () => {
-      expect(
-        getListCurrentPageIndex({
-          listView: createDefaultListView(),
-          active: false,
-          createView: undefined,
-        })
-      ).toBe(0);
+      const location: TrustedAppsListPageLocation = {
+        page_index: 3,
+        page_size: 10,
+        view_type: 'grid',
+      };
+
+      expect(getCurrentLocationPageIndex({ ...initialState, location })).toBe(3);
     });
   });
 
   describe('getListCurrentPageSize()', () => {
-    it('returns page index', () => {
-      expect(
-        getListCurrentPageSize({
-          listView: createDefaultListView(),
-          active: false,
-          createView: undefined,
-        })
-      ).toBe(20);
+    it('returns page size', () => {
+      const location: TrustedAppsListPageLocation = {
+        page_index: 0,
+        page_size: 20,
+        view_type: 'grid',
+      };
+
+      expect(getCurrentLocationPageSize({ ...initialState, location })).toBe(20);
     });
   });
 
   describe('getListErrorMessage()', () => {
     it('returns undefined when not in failed state', () => {
-      const listView = {
-        currentListResourceState: createListComplexLoadingResourceState(
-          createDefaultPaginationInfo(),
-          200
-        ),
-        currentPaginationInfo: createDefaultPaginationInfo(),
-        show: undefined,
+      const state = {
+        ...initialState,
+        listView: {
+          listResourceState: createListComplexLoadingResourceState(
+            createDefaultPagination(),
+            initialNow
+          ),
+          freshDataTimestamp: initialNow,
+        },
       };
 
-      expect(
-        getListErrorMessage({ listView, active: false, createView: undefined })
-      ).toBeUndefined();
+      expect(getListErrorMessage(state)).toBeUndefined();
     });
 
     it('returns message when not in failed state', () => {
-      const listView = {
-        currentListResourceState: createListFailedResourceState('Internal Server Error'),
-        currentPaginationInfo: createDefaultPaginationInfo(),
-        show: undefined,
+      const state = {
+        ...initialState,
+        listView: {
+          listResourceState: createListFailedResourceState('Internal Server Error'),
+          freshDataTimestamp: initialNow,
+        },
       };
 
-      expect(getListErrorMessage({ listView, active: false, createView: undefined })).toBe(
-        'Internal Server Error'
-      );
+      expect(getListErrorMessage(state)).toBe('Internal Server Error');
     });
   });
 
   describe('isListLoading()', () => {
     it('returns false when no loading is happening', () => {
-      expect(
-        isListLoading({ listView: createDefaultListView(), active: false, createView: undefined })
-      ).toBe(false);
+      expect(isListLoading(initialState)).toBe(false);
     });
 
     it('returns true when loading is in progress', () => {
-      const listView = {
-        currentListResourceState: createListComplexLoadingResourceState(
-          createDefaultPaginationInfo(),
-          200
-        ),
-        currentPaginationInfo: createDefaultPaginationInfo(),
-        show: undefined,
+      const state = {
+        ...initialState,
+        listView: {
+          listResourceState: createListComplexLoadingResourceState(
+            createDefaultPagination(),
+            initialNow
+          ),
+          freshDataTimestamp: initialNow,
+        },
       };
 
-      expect(isListLoading({ listView, active: false, createView: undefined })).toBe(true);
+      expect(isListLoading(state)).toBe(true);
+    });
+  });
+
+  describe('isDeletionDialogOpen()', () => {
+    it('returns false when no entry is set', () => {
+      expect(isDeletionDialogOpen(initialState)).toBe(false);
+    });
+
+    it('returns true when entry is set', () => {
+      const state = {
+        ...initialState,
+        deletionDialog: {
+          ...initialState.deletionDialog,
+          entry: createSampleTrustedApp(5),
+        },
+      };
+
+      expect(isDeletionDialogOpen(state)).toBe(true);
+    });
+  });
+
+  describe('isDeletionInProgress()', () => {
+    it('returns false when resource state is uninitialised', () => {
+      expect(isDeletionInProgress(initialState)).toBe(false);
+    });
+
+    it('returns true when resource state is loading', () => {
+      const state = createStateWithDeletionSubmissionResourceState({
+        type: 'LoadingResourceState',
+        previousState: { type: 'UninitialisedResourceState' },
+      });
+
+      expect(isDeletionInProgress(state)).toBe(true);
+    });
+
+    it('returns false when resource state is loaded', () => {
+      const state = createStateWithDeletionSubmissionResourceState({
+        type: 'LoadedResourceState',
+        data: null,
+      });
+
+      expect(isDeletionInProgress(state)).toBe(false);
+    });
+
+    it('returns false when resource state is failed', () => {
+      const state = createStateWithDeletionSubmissionResourceState({
+        type: 'FailedResourceState',
+        error: createServerApiError('Not Found'),
+      });
+
+      expect(isDeletionInProgress(state)).toBe(false);
+    });
+  });
+
+  describe('isDeletionSuccessful()', () => {
+    it('returns false when resource state is uninitialised', () => {
+      expect(isDeletionSuccessful(initialState)).toBe(false);
+    });
+
+    it('returns false when resource state is loading', () => {
+      const state = createStateWithDeletionSubmissionResourceState({
+        type: 'LoadingResourceState',
+        previousState: { type: 'UninitialisedResourceState' },
+      });
+
+      expect(isDeletionSuccessful(state)).toBe(false);
+    });
+
+    it('returns true when resource state is loaded', () => {
+      const state = createStateWithDeletionSubmissionResourceState({
+        type: 'LoadedResourceState',
+        data: null,
+      });
+
+      expect(isDeletionSuccessful(state)).toBe(true);
+    });
+
+    it('returns false when resource state is failed', () => {
+      const state = createStateWithDeletionSubmissionResourceState({
+        type: 'FailedResourceState',
+        error: createServerApiError('Not Found'),
+      });
+
+      expect(isDeletionSuccessful(state)).toBe(false);
+    });
+  });
+
+  describe('getDeletionError()', () => {
+    it('returns undefined when resource state is uninitialised', () => {
+      expect(getDeletionError(initialState)).toBeUndefined();
+    });
+
+    it('returns undefined when resource state is loading', () => {
+      const state = createStateWithDeletionSubmissionResourceState({
+        type: 'LoadingResourceState',
+        previousState: { type: 'UninitialisedResourceState' },
+      });
+
+      expect(getDeletionError(state)).toBeUndefined();
+    });
+
+    it('returns undefined when resource state is loaded', () => {
+      const state = createStateWithDeletionSubmissionResourceState({
+        type: 'LoadedResourceState',
+        data: null,
+      });
+
+      expect(getDeletionError(state)).toBeUndefined();
+    });
+
+    it('returns error when resource state is failed', () => {
+      const state = createStateWithDeletionSubmissionResourceState({
+        type: 'FailedResourceState',
+        error: createServerApiError('Not Found'),
+      });
+
+      expect(getDeletionError(state)).toStrictEqual(createServerApiError('Not Found'));
+    });
+  });
+
+  describe('getDeletionSubmissionResourceState()', () => {
+    it('returns submission resource state', () => {
+      expect(getDeletionSubmissionResourceState(initialState)).toStrictEqual({
+        type: 'UninitialisedResourceState',
+      });
+    });
+  });
+
+  describe('getDeletionDialogEntry()', () => {
+    it('returns undefined when no entry is set', () => {
+      expect(getDeletionDialogEntry(initialState)).toBeUndefined();
+    });
+
+    it('returns entry when entry is set', () => {
+      const entry = createSampleTrustedApp(5);
+      const state = { ...initialState, deletionDialog: { ...initialState.deletionDialog, entry } };
+
+      expect(getDeletionDialogEntry(state)).toStrictEqual(entry);
     });
   });
 });

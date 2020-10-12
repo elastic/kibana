@@ -17,10 +17,7 @@ import {
 } from '../constants';
 import { trackUiMetric } from './ui_metric';
 import { sendGet, sendPost, sendDelete, useRequest } from './http';
-
-interface GenericObject {
-  [key: string]: any;
-}
+import { IndexSettings } from '../../../../index_management/common/types';
 
 export const useLoadNodes = () => {
   return useRequest<ListNodesRouteResponse>({
@@ -37,9 +34,14 @@ export const useLoadNodeDetails = (selectedNodeAttrs: string) => {
   });
 };
 
-export async function loadIndexTemplates() {
-  return await sendGet(`templates`);
-}
+export const useLoadIndexTemplates = (legacy: boolean = false) => {
+  return useRequest<Array<{ name: string; settings: IndexSettings }>>({
+    path: 'templates',
+    query: { legacy },
+    method: 'get',
+    initialData: [],
+  });
+};
 
 export async function loadPolicies(withIndices: boolean) {
   return await sendGet('policies', { withIndices });
@@ -89,8 +91,15 @@ export const addLifecyclePolicyToIndex = async (body: {
   return response;
 };
 
-export const addLifecyclePolicyToTemplate = async (body: GenericObject) => {
-  const response = await sendPost(`template`, body);
+export const addLifecyclePolicyToTemplate = async (
+  body: {
+    policyName: string;
+    templateName: string;
+    aliasName?: string;
+  },
+  legacy: boolean = false
+) => {
+  const response = await sendPost(`template`, body, { legacy });
   // Only track successful actions.
   trackUiMetric(METRIC_TYPE.COUNT, UIM_POLICY_ATTACH_INDEX_TEMPLATE);
   return response;

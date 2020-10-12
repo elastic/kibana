@@ -20,7 +20,7 @@ import {
 } from '../../../../../common/service_health_status';
 import { useTheme } from '../../../../hooks/useTheme';
 import { fontSize, px } from '../../../../style/variables';
-import { asInteger, asDuration } from '../../../../utils/formatters';
+import { asInteger, asDuration } from '../../../../../common/utils/formatters';
 import { MLJobLink } from '../../../shared/Links/MachineLearningLinks/MLJobLink';
 import { popoverWidth } from '../cytoscapeOptions';
 import { TRANSACTION_REQUEST } from '../../../../../common/transaction_types';

@@ -17,7 +17,13 @@
  * under the License.
  */
 
+import { SavedObjectsFindOptions } from '../../types';
+import { SavedObjectsFindResponse } from '..';
+
 export const DEFAULT_NAMESPACE_STRING = 'default';
+export const ALL_NAMESPACES_STRING = '*';
+export const FIND_DEFAULT_PAGE = 1;
+export const FIND_DEFAULT_PER_PAGE = 20;
 
 /**
  * @public
@@ -50,4 +56,17 @@ export class SavedObjectsUtils {
 
     return namespace !== DEFAULT_NAMESPACE_STRING ? namespace : undefined;
   };
+
+  /**
+   * Creates an empty response for a find operation. This is only intended to be used by saved objects client wrappers.
+   */
+  public static createEmptyFindResponse = <T>({
+    page = FIND_DEFAULT_PAGE,
+    perPage = FIND_DEFAULT_PER_PAGE,
+  }: SavedObjectsFindOptions): SavedObjectsFindResponse<T> => ({
+    page,
+    per_page: perPage,
+    total: 0,
+    saved_objects: [],
+  });
 }

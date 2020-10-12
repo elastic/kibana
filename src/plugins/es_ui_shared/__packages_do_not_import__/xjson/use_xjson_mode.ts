@@ -18,7 +18,8 @@
  */
 
 import { useState, Dispatch } from 'react';
-import { collapseLiteralStrings, expandLiteralStrings } from '../../public';
+
+import { collapseLiteralStrings, expandLiteralStrings } from './json_xjson_translation_tools';
 
 interface ReturnValue {
   xJson: string;

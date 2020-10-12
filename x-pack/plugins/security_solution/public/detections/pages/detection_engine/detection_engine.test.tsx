@@ -7,7 +7,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { useParams } from 'react-router-dom';
-
+import { waitFor } from '@testing-library/react';
 import '../../../common/mock/match_media';
 import {
   apolloClientObservable,
@@ -20,7 +20,7 @@ import {
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { DetectionEnginePageComponent } from './detection_engine';
 import { useUserData } from '../../components/user_info';
-import { useWithSource } from '../../../common/containers/source';
+import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { createStore, State } from '../../../common/store';
 import { mockHistory, Router } from '../../../cases/components/__mock__/router';
 
@@ -34,7 +34,7 @@ jest.mock('../../../common/components/query_bar', () => ({
 }));
 jest.mock('../../containers/detection_engine/lists/use_lists_config');
 jest.mock('../../components/user_info');
-jest.mock('../../../common/containers/source');
+jest.mock('../../../common/containers/sourcerer');
 jest.mock('../../../common/components/link_to');
 jest.mock('../../../common/containers/use_global_time', () => ({
   useGlobalTime: jest.fn().mockReturnValue({
@@ -74,13 +74,13 @@ describe('DetectionEnginePageComponent', () => {
   beforeAll(() => {
     (useParams as jest.Mock).mockReturnValue({});
     (useUserData as jest.Mock).mockReturnValue([{}]);
-    (useWithSource as jest.Mock).mockReturnValue({
+    (useSourcererScope as jest.Mock).mockReturnValue({
       indicesExist: true,
       indexPattern: {},
     });
   });
 
-  it('renders correctly', () => {
+  it('renders correctly', async () => {
     const wrapper = mount(
       <TestProviders store={store}>
         <Router history={mockHistory}>
@@ -93,7 +93,8 @@ describe('DetectionEnginePageComponent', () => {
         </Router>
       </TestProviders>
     );
-
-    expect(wrapper.find('FiltersGlobal').exists()).toBe(true);
+    await waitFor(() => {
+      expect(wrapper.find('FiltersGlobal').exists()).toBe(true);
+    });
   });
 });

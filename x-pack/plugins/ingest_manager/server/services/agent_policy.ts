@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { uniq } from 'lodash';
+import { safeLoad } from 'js-yaml';
 import { SavedObjectsClientContract, SavedObjectsBulkUpdateResponse } from 'src/core/server';
 import { AuthenticatedUser } from '../../../security/server';
 import {
@@ -20,19 +21,25 @@ import {
   AgentPolicyStatus,
   ListWithKuery,
 } from '../types';
-import { DeleteAgentPolicyResponse, storedPackagePoliciesToAgentInputs } from '../../common';
+import {
+  DeleteAgentPolicyResponse,
+  Settings,
+  storedPackagePoliciesToAgentInputs,
+} from '../../common';
+import { AgentPolicyNameExistsError } from '../errors';
 import { createAgentPolicyAction, listAgents } from './agents';
 import { packagePolicyService } from './package_policy';
 import { outputService } from './output';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 import { getSettings } from './settings';
+import { normalizeKuery, escapeSearchQueryPhrase } from './saved_object';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
 class AgentPolicyService {
   private triggerAgentPolicyUpdatedEvent = async (
     soClient: SavedObjectsClientContract,
-    action: string,
+    action: 'created' | 'updated' | 'deleted',
     agentPolicyId: string
   ) => {
     return agentPolicyUpdateEventHandler(soClient, action, agentPolicyId);
@@ -100,6 +107,7 @@ class AgentPolicyService {
     agentPolicy: NewAgentPolicy,
     options?: { id?: string; user?: AuthenticatedUser }
   ): Promise<AgentPolicy> {
+    await this.requireUniqueName(soClient, agentPolicy);
     const newSo = await soClient.create<AgentPolicySOAttributes>(
       SAVED_OBJECT_TYPE,
       {
@@ -116,6 +124,30 @@ class AgentPolicyService {
     }
 
     return { id: newSo.id, ...newSo.attributes };
+  }
+
+  public async requireUniqueName(
+    soClient: SavedObjectsClientContract,
+    { name, namespace }: Pick<NewAgentPolicy, 'name' | 'namespace'>
+  ) {
+    const results = await soClient.find<AgentPolicySOAttributes>({
+      type: SAVED_OBJECT_TYPE,
+      searchFields: ['namespace', 'name'],
+      search: `${namespace} + ${escapeSearchQueryPhrase(name)}`,
+    });
+
+    if (results.total) {
+      const policies = results.saved_objects;
+      const isSinglePolicy = policies.length === 1;
+      const policyList = isSinglePolicy ? policies[0].id : policies.map(({ id }) => id).join(',');
+      const existClause = isSinglePolicy
+        ? `Agent Policy '${policyList}' already exists`
+        : `Agent Policies '${policyList}' already exist`;
+
+      throw new AgentPolicyNameExistsError(
+        `${existClause} in '${namespace}' namespace with name '${name}'`
+      );
+    }
   }
 
   public async get(
@@ -166,13 +198,7 @@ class AgentPolicyService {
       sortOrder,
       page,
       perPage,
-      // To ensure users don't need to know about SO data structure...
-      filter: kuery
-        ? kuery.replace(
-            new RegExp(`${SAVED_OBJECT_TYPE}\.`, 'g'),
-            `${SAVED_OBJECT_TYPE}.attributes.`
-          )
-        : undefined,
+      filter: kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined,
     });
 
     const agentPolicies = await Promise.all(
@@ -209,6 +235,12 @@ class AgentPolicyService {
     agentPolicy: Partial<AgentPolicy>,
     options?: { user?: AuthenticatedUser }
   ): Promise<AgentPolicy> {
+    if (agentPolicy.name && agentPolicy.namespace) {
+      await this.requireUniqueName(soClient, {
+        name: agentPolicy.name,
+        namespace: agentPolicy.namespace,
+      });
+    }
     return this._update(soClient, id, agentPolicy, options?.user);
   }
 
@@ -263,7 +295,11 @@ class AgentPolicyService {
     id: string,
     options?: { user?: AuthenticatedUser }
   ): Promise<AgentPolicy> {
-    return this._update(soClient, id, {}, options?.user);
+    const res = await this._update(soClient, id, {}, options?.user);
+
+    await this.triggerAgentPolicyUpdatedEvent(soClient, 'updated', id);
+
+    return res;
   }
   public async bumpAllAgentPolicies(
     soClient: SavedObjectsClientContract,
@@ -282,7 +318,15 @@ class AgentPolicyService {
       };
       return policy;
     });
-    return soClient.bulkUpdate<AgentPolicySOAttributes>(bumpedPolicies);
+    const res = await soClient.bulkUpdate<AgentPolicySOAttributes>(bumpedPolicies);
+
+    await Promise.all(
+      currentPolicies.saved_objects.map((policy) =>
+        this.triggerAgentPolicyUpdatedEvent(soClient, 'updated', policy.id)
+      )
+    );
+
+    return res;
   }
 
   public async assignPackagePolicies(
@@ -404,8 +448,8 @@ class AgentPolicyService {
     }, []);
 
     await createAgentPolicyAction(soClient, {
-      type: 'CONFIG_CHANGE',
-      data: { config: policy } as any,
+      type: 'POLICY_CHANGE',
+      data: { policy },
       ack_data: { packages },
       created_at: new Date().toISOString(),
       policy_id: policy.id,
@@ -445,13 +489,14 @@ class AgentPolicyService {
         // TEMPORARY as we only support a default output
         ...[defaultOutput].reduce(
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          (outputs, { config: outputConfig, name, type, hosts, ca_sha256, api_key }) => {
+          (outputs, { config_yaml, name, type, hosts, ca_sha256, api_key }) => {
+            const configJs = config_yaml ? safeLoad(config_yaml) : {};
             outputs[name] = {
               type,
               hosts,
               ca_sha256,
               api_key,
-              ...outputConfig,
+              ...configJs,
             };
 
             if (options?.standalone) {
@@ -487,16 +532,22 @@ class AgentPolicyService {
 
     // only add settings if not in standalone
     if (!standalone) {
-      let settings;
+      let settings: Settings;
       try {
         settings = await getSettings(soClient);
       } catch (error) {
         throw new Error('Default settings is not setup');
       }
-      if (!settings.kibana_urls) throw new Error('kibana_urls is missing');
+      if (!settings.kibana_urls || !settings.kibana_urls.length)
+        throw new Error('kibana_urls is missing');
+      const hostsWithoutProtocol = settings.kibana_urls.map((url) => {
+        const parsedURL = new URL(url);
+        return `${parsedURL.host}${parsedURL.pathname !== '/' ? parsedURL.pathname : ''}`;
+      });
       fullAgentPolicy.fleet = {
         kibana: {
-          hosts: settings.kibana_urls,
+          protocol: new URL(settings.kibana_urls[0]).protocol.replace(':', ''),
+          hosts: hostsWithoutProtocol,
         },
       };
     }

@@ -30,6 +30,7 @@ export const Ip = React.memo<{
     fieldName={fieldName}
     fieldType={IP_FIELD_TYPE}
     value={value}
+    truncate
   />
 ));
 

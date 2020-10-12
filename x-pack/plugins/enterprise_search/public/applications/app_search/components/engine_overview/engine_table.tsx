@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
+import { useValues } from 'kea';
 import { EuiBasicTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
 import { FormattedMessage, FormattedDate, FormattedNumber } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { sendTelemetry } from '../../../shared/telemetry';
-import { KibanaContext, IKibanaContext } from '../../../index';
+import { HttpLogic } from '../../../shared/http';
+import { getAppSearchUrl } from '../../../shared/enterprise_search_url';
 import { getEngineRoute } from '../../routes';
 
 import { ENGINES_PAGE_SIZE } from '../../../../../common/constants';
@@ -40,10 +42,7 @@ export const EngineTable: React.FC<IEngineTableProps> = ({
   data,
   pagination: { totalEngines, pageIndex, onPaginate },
 }) => {
-  const {
-    externalUrl: { getAppSearchUrl },
-    http,
-  } = useContext(KibanaContext) as IKibanaContext;
+  const { http } = useValues(HttpLogic);
 
   const engineLinkProps = (name: string) => ({
     href: getAppSearchUrl(getEngineRoute(name)),

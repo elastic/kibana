@@ -121,7 +121,8 @@ export const EditIndexPattern = withRouter(
     const refreshFields = () => {
       overlays.openConfirm(confirmMessage, confirmModalOptionsRefresh).then(async (isConfirmed) => {
         if (isConfirmed) {
-          await indexPattern.refreshFields();
+          await data.indexPatterns.refreshFields(indexPattern);
+          await data.indexPatterns.updateSavedObject(indexPattern);
           setFields(indexPattern.getNonScriptedFields());
         }
       });
@@ -236,7 +237,7 @@ export const EditIndexPattern = withRouter(
           <EuiSpacer />
           <Tabs
             indexPattern={indexPattern}
-            saveIndexPattern={data.indexPatterns.save.bind(data.indexPatterns)}
+            saveIndexPattern={data.indexPatterns.updateSavedObject.bind(data.indexPatterns)}
             fields={fields}
             history={history}
             location={location}

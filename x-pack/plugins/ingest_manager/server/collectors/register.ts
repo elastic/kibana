@@ -50,9 +50,12 @@ export function registerIngestManagerUsageCollector(
         offline: { type: 'long' },
       },
       packages: {
-        name: { type: 'keyword' },
-        version: { type: 'keyword' },
-        enabled: { type: 'boolean' },
+        type: 'array',
+        items: {
+          name: { type: 'keyword' },
+          version: { type: 'keyword' },
+          enabled: { type: 'boolean' },
+        },
       },
     },
   });

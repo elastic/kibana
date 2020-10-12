@@ -8,7 +8,8 @@ import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
 import { PNG_JOB_TYPE } from '../../../../common/constants';
-import { RunTaskFn, RunTaskFnFactory, TaskRunResult } from '../../..//types';
+import { TaskRunResult } from '../../../lib/tasks';
+import { RunTaskFn, RunTaskFnFactory } from '../../../types';
 import {
   decryptJobHeaders,
   getConditionalHeaders,
@@ -18,12 +19,9 @@ import {
 import { generatePngObservableFactory } from '../lib/generate_png';
 import { TaskPayloadPNG } from '../types';
 
-type QueuedPngExecutorFactory = RunTaskFnFactory<RunTaskFn<TaskPayloadPNG>>;
-
-export const runTaskFnFactory: QueuedPngExecutorFactory = function executeJobFactoryFn(
-  reporting,
-  parentLogger
-) {
+export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<
+  TaskPayloadPNG
+>> = function executeJobFactoryFn(reporting, parentLogger) {
   const config = reporting.getConfig();
   const encryptionKey = config.get('encryptionKey');
   const logger = parentLogger.clone([PNG_JOB_TYPE, 'execute']);
@@ -36,11 +34,11 @@ export const runTaskFnFactory: QueuedPngExecutorFactory = function executeJobFac
     const generatePngObservable = await generatePngObservableFactory(reporting);
     const jobLogger = logger.clone([jobId]);
     const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
-      mergeMap(() => decryptJobHeaders({ encryptionKey, job, logger })),
-      map((decryptedHeaders) => omitBlockedHeaders({ job, decryptedHeaders })),
-      map((filteredHeaders) => getConditionalHeaders({ config, job, filteredHeaders })),
+      mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, logger)),
+      map((decryptedHeaders) => omitBlockedHeaders(decryptedHeaders)),
+      map((filteredHeaders) => getConditionalHeaders(config, filteredHeaders)),
       mergeMap((conditionalHeaders) => {
-        const urls = getFullUrls({ config, job });
+        const urls = getFullUrls(config, job);
         const hashUrl = urls[0];
         if (apmGetAssets) apmGetAssets.end();
 
@@ -60,7 +58,6 @@ export const runTaskFnFactory: QueuedPngExecutorFactory = function executeJobFac
           content_type: 'image/png',
           content: base64,
           size: (base64 && base64.length) || 0,
-
           warnings,
         };
       }),

@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { uiRoutes } from '../../../angular/helpers/routes';
 import { routeInitProvider } from '../../../lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
@@ -44,10 +45,14 @@ uiRoutes
       constructor($injector, $scope) {
         super({
           storageKey: 'clusters',
+          pageTitle: i18n.translate('xpack.monitoring.cluster.listing.pageTitle', {
+            defaultMessage: 'Cluster listing',
+          }),
           getPageData,
           $scope,
           $injector,
           reactNodeId: 'monitoringClusterListingApp',
+          telemetryPageViewTitle: 'cluster_listing',
         });
 
         const $route = $injector.get('$route');

@@ -13,7 +13,7 @@ export function toExpression(input: SavedLensInput): string {
 
   expressionParts.push(`id="${input.id}"`);
 
-  if (input.title) {
+  if (input.title !== undefined) {
     expressionParts.push(`title="${input.title}"`);
   }
 

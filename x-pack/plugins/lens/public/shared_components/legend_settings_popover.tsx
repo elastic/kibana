@@ -93,6 +93,7 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
       })}
       type="legend"
       groupPosition="right"
+      buttonDataTestSubj="lnsLegendButton"
     >
       <EuiFormRow
         display="columnCompressed"

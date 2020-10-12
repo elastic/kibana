@@ -8,7 +8,6 @@ import { i18n } from '@kbn/i18n';
 import {
   ColdPhase,
   DeletePhase,
-  FrozenPhase,
   HotPhase,
   Policy,
   PolicyFromES,
@@ -18,7 +17,6 @@ import { validateHotPhase } from './hot_phase';
 import { validateWarmPhase } from './warm_phase';
 import { validateColdPhase } from './cold_phase';
 import { validateDeletePhase } from './delete_phase';
-import { validateFrozenPhase } from './frozen_phase';
 
 export const propertyof = <T>(propertyName: keyof T & string) => propertyName;
 
@@ -117,7 +115,6 @@ export interface ValidationErrors {
   hot: PhaseValidationErrors<HotPhase>;
   warm: PhaseValidationErrors<WarmPhase>;
   cold: PhaseValidationErrors<ColdPhase>;
-  frozen: PhaseValidationErrors<FrozenPhase>;
   delete: PhaseValidationErrors<DeletePhase>;
   policyName: string[];
 }
@@ -158,14 +155,12 @@ export const validatePolicy = (
   const hotPhaseErrors = validateHotPhase(policy.phases.hot);
   const warmPhaseErrors = validateWarmPhase(policy.phases.warm);
   const coldPhaseErrors = validateColdPhase(policy.phases.cold);
-  const frozenPhaseErrors = validateFrozenPhase(policy.phases.frozen);
   const deletePhaseErrors = validateDeletePhase(policy.phases.delete);
   const isValid =
     policyNameErrors.length === 0 &&
     Object.keys(hotPhaseErrors).length === 0 &&
     Object.keys(warmPhaseErrors).length === 0 &&
     Object.keys(coldPhaseErrors).length === 0 &&
-    Object.keys(frozenPhaseErrors).length === 0 &&
     Object.keys(deletePhaseErrors).length === 0;
   return [
     isValid,
@@ -174,7 +169,6 @@ export const validatePolicy = (
       hot: hotPhaseErrors,
       warm: warmPhaseErrors,
       cold: coldPhaseErrors,
-      frozen: frozenPhaseErrors,
       delete: deletePhaseErrors,
     },
   ];

@@ -4,20 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { JobParamPostPayload, TimeRangeParams } from '../../types';
+import { TimeRangeParams } from '../common';
 
 export interface FakeRequest {
-  headers: Record<string, unknown>;
+  headers: Record<string, string>;
 }
 
-export interface JobParamsPostPayloadPanelCsv extends JobParamPostPayload {
+export interface JobParamsPanelCsvPost {
+  timerange?: TimeRangeParams;
   state?: any;
 }
 
 export interface SearchPanel {
   indexPatternSavedObjectId: string;
   attributes: SavedSearchObjectAttributes;
-  timerange: TimeRangeParams;
+  timerange?: TimeRangeParams;
 }
 
 export interface JobPayloadPanelCsv extends JobParamsPanelCsv {
@@ -27,8 +28,7 @@ export interface JobPayloadPanelCsv extends JobParamsPanelCsv {
 export interface JobParamsPanelCsv {
   savedObjectType: string;
   savedObjectId: string;
-  isImmediate: boolean;
-  post?: JobParamsPostPayloadPanelCsv;
+  post?: JobParamsPanelCsvPost;
   visType?: string;
 }
 

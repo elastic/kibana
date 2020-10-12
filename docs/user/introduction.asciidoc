@@ -155,6 +155,6 @@ and start exploring data in minutes.
 You can also <<install, install {kib} on your own>> &mdash; no code, no additional
 infrastructure required.
 
-Our <<create-your-own-dashboard, Getting Started>> and in-product guidance can
+Our <<get-started, Quick start>> and in-product guidance can
 help you get up and running, faster. Click the help icon image:images/intro-help-icon.png[]
 in the top navigation bar for help with questions or to provide feedback.

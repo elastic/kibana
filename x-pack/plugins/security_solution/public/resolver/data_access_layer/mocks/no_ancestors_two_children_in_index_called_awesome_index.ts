@@ -8,6 +8,7 @@ import {
   ResolverRelatedEvents,
   ResolverTree,
   ResolverEntityIndex,
+  SafeResolverEvent,
 } from '../../../../common/endpoint/types';
 import { mockEndpointEvent } from '../../mocks/endpoint_event';
 import { mockTreeWithNoAncestorsAnd2Children } from '../../mocks/resolver_tree';
@@ -61,11 +62,37 @@ export function noAncestorsTwoChildenInIndexCalledAwesomeIndex(): {
           events: [
             mockEndpointEvent({
               entityID,
-              name: 'event',
+              processName: 'event',
               timestamp: 0,
             }),
           ],
           nextEvent: null,
+        });
+      },
+
+      async eventsWithEntityIDAndCategory(
+        entityID: string,
+        category,
+        after?: string
+      ): Promise<{
+        events: SafeResolverEvent[];
+        nextEvent: string | null;
+      }> {
+        return {
+          events: [
+            mockEndpointEvent({
+              entityID,
+              eventCategory: category,
+            }),
+          ],
+          nextEvent: null,
+        };
+      },
+
+      async event(eventID: string): Promise<SafeResolverEvent | null> {
+        return mockEndpointEvent({
+          entityID: metadata.entityIDs.origin,
+          eventID,
         });
       },
 

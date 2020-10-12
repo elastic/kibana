@@ -9,7 +9,7 @@ Search strategy interface contains a search method that takes in a request and r
 <b>Signature:</b>
 
 ```typescript
-export interface ISearchStrategy<SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest, SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse> 
+export interface ISearchStrategy<SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest, SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse> 
 ```
 
 ## Properties

@@ -3,5 +3,5 @@
   // Remove EuiButton's default shadow to make button more subtle
   // sass-lint:disable-block no-important
   box-shadow: none !important;
-  border: 1px dashed currentColor;
+  border-color: $euiColorLightShade;
 }

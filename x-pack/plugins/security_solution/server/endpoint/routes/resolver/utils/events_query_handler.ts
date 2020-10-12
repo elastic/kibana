@@ -3,12 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+/**
+ * @deprecated msearch functionality for querying events will be removed shortly
+ */
 import { SearchResponse } from 'elasticsearch';
 import { ILegacyScopedClusterClient } from 'kibana/server';
 import { SafeResolverRelatedEvents, SafeResolverEvent } from '../../../../../common/endpoint/types';
 import { createRelatedEvents } from './node';
-import { EventsQuery } from '../queries/events';
+import { EventsQuery } from '../queries/related_events';
 import { PaginationBuilder } from './pagination';
 import { QueryInfo } from '../queries/multi_searcher';
 import { SingleQueryHandler } from './fetch';

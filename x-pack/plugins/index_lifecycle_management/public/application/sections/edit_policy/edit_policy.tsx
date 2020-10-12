@@ -43,7 +43,7 @@ import {
 } from '../../services/policies/policy_serialization';
 
 import { ErrableFormRow, LearnMoreLink, PolicyJsonFlyout } from './components';
-import { ColdPhase, DeletePhase, FrozenPhase, HotPhase, WarmPhase } from './phases';
+import { ColdPhase, DeletePhase, HotPhase, WarmPhase } from './phases';
 
 export interface Props {
   policies: PolicyFromES[];
@@ -142,10 +142,6 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
   );
   const setColdPhaseData = useCallback(
     (key: string, value: any) => setPhaseData('cold', key, value),
-    [setPhaseData]
-  );
-  const setFrozenPhaseData = useCallback(
-    (key: string, value: any) => setPhaseData('frozen', key, value),
     [setPhaseData]
   );
   const setDeletePhaseData = useCallback(
@@ -323,16 +319,6 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
               isShowingErrors={isShowingErrors && !!errors && Object.keys(errors.cold).length > 0}
               setPhaseData={setColdPhaseData}
               phaseData={policy.phases.cold}
-              hotPhaseRolloverEnabled={policy.phases.hot.rolloverEnabled}
-            />
-
-            <EuiHorizontalRule />
-
-            <FrozenPhase
-              errors={errors?.frozen}
-              isShowingErrors={isShowingErrors && !!errors && Object.keys(errors.frozen).length > 0}
-              setPhaseData={setFrozenPhaseData}
-              phaseData={policy.phases.frozen}
               hotPhaseRolloverEnabled={policy.phases.hot.rolloverEnabled}
             />
 

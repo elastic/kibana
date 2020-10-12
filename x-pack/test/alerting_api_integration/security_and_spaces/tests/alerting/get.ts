@@ -75,6 +75,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
                 apiKeyOwner: 'elastic',
                 muteAll: false,
                 mutedInstanceIds: [],
+                executionStatus: response.body.executionStatus,
               });
               expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);

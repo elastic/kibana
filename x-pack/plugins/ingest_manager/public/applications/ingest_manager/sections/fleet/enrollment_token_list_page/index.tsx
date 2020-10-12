@@ -268,7 +268,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
       <EuiText color="subdued">
         <FormattedMessage
           id="xpack.ingestManager.enrollmentTokensList.pageDescription"
-          defaultMessage="This is a list of enrollment tokens that are available to enroll your agents."
+          defaultMessage="Create and revoke enrollment tokens. An enrollment token enables one or more agents to enroll in Fleet and send data."
         />
       </EuiText>
       <EuiSpacer size="m" />
@@ -290,7 +290,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
           <EuiButton iconType="plusInCircle" onClick={() => setFlyoutOpen(true)}>
             <FormattedMessage
               id="xpack.ingestManager.enrollmentTokensList.newKeyButton"
-              defaultMessage="New enrollment token"
+              defaultMessage="Create enrollment token"
             />
           </EuiButton>
         </EuiFlexItem>

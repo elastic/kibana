@@ -1876,12 +1876,9 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                   ]
                 }
               >
-                <EuiCollapsibleNavGroup
-                  className="eui-showFor--l eui-showFor--xl"
-                  key=".0"
-                >
+                <EuiCollapsibleNavGroup>
                   <div
-                    className="euiCollapsibleNavGroup eui-showFor--l eui-showFor--xl"
+                    className="euiCollapsibleNavGroup"
                     id="mockId"
                   >
                     <div
@@ -3032,12 +3029,9 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                   ]
                 }
               >
-                <EuiCollapsibleNavGroup
-                  className="eui-showFor--l eui-showFor--xl"
-                  key=".0"
-                >
+                <EuiCollapsibleNavGroup>
                   <div
-                    className="euiCollapsibleNavGroup eui-showFor--l eui-showFor--xl"
+                    className="euiCollapsibleNavGroup"
                     id="mockId"
                   >
                     <div

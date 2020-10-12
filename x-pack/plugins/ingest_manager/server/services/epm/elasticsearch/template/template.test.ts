@@ -212,6 +212,37 @@ test('tests processing keyword field with multi fields with analyzed text field'
   expect(mappings).toEqual(keywordWithAnalyzedMultiFieldsMapping);
 });
 
+test('tests processing keyword field with multi fields with normalized keyword field', () => {
+  const keywordWithNormalizedMultiFieldsLiteralYml = `
+  - name: keywordWithNormalizedMultiField
+    type: keyword
+    multi_fields:
+      - name: normalized
+        type: keyword
+        normalizer: lowercase
+  `;
+
+  const keywordWithNormalizedMultiFieldsMapping = {
+    properties: {
+      keywordWithNormalizedMultiField: {
+        ignore_above: 1024,
+        type: 'keyword',
+        fields: {
+          normalized: {
+            type: 'keyword',
+            ignore_above: 1024,
+            normalizer: 'lowercase',
+          },
+        },
+      },
+    },
+  };
+  const fields: Field[] = safeLoad(keywordWithNormalizedMultiFieldsLiteralYml);
+  const processedFields = processFields(fields);
+  const mappings = generateMappings(processedFields);
+  expect(mappings).toEqual(keywordWithNormalizedMultiFieldsMapping);
+});
+
 test('tests processing object field with no other attributes', () => {
   const objectFieldLiteralYml = `
 - name: objectField

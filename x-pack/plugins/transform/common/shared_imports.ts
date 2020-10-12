@@ -5,3 +5,4 @@
  */
 
 export type { SearchResponse7 } from '../../ml/common';
+export { composeValidators, patternValidator } from '../../ml/common';

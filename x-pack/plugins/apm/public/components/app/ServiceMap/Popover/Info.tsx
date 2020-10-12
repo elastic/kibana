@@ -3,7 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import {
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import cytoscape from 'cytoscape';
 import React from 'react';
@@ -12,20 +16,27 @@ import {
   SPAN_SUBTYPE,
   SPAN_TYPE,
 } from '../../../../../common/elasticsearch_fieldnames';
+import { ExternalConnectionNode } from '../../../../../common/service_map';
 
 const ItemRow = styled.div`
   line-height: 2;
 `;
 
-const ItemTitle = styled.dt`
-  color: ${({ theme }) => theme.eui.textColors.subdued};
+const SubduedDescriptionListTitle = styled(EuiDescriptionListTitle)`
+  &&& {
+    color: ${({ theme }) => theme.eui.textColors.subdued};
+  }
 `;
 
-const ItemDescription = styled.dd``;
+const ExternalResourcesList = styled.section`
+  max-height: 360px;
+  overflow: auto;
+`;
 
 interface InfoProps extends cytoscape.NodeDataDefinition {
   type?: string;
   subtype?: string;
+  className?: string;
 }
 
 export function Info(data: InfoProps) {
@@ -51,15 +62,51 @@ export function Info(data: InfoProps) {
     },
   ];
 
+  if (data.groupedConnections) {
+    return (
+      <ExternalResourcesList>
+        <EuiDescriptionList>
+          {data.groupedConnections.map((resource: ExternalConnectionNode) => {
+            const title =
+              resource.label || resource['span.destination.service.resource'];
+            const desc = `${resource['span.type']} (${resource['span.subtype']})`;
+            return (
+              <>
+                <EuiDescriptionListTitle
+                  className="eui-textTruncate"
+                  title={title}
+                >
+                  {title}
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription
+                  className="eui-textTruncate"
+                  title={desc}
+                >
+                  {desc}
+                </EuiDescriptionListDescription>
+              </>
+            );
+          })}
+        </EuiDescriptionList>
+      </ExternalResourcesList>
+    );
+  }
+
   return (
     <>
       {listItems.map(
         ({ title, description }) =>
           description && (
-            <ItemRow key={title}>
-              <ItemTitle>{title}</ItemTitle>
-              <ItemDescription>{description}</ItemDescription>
-            </ItemRow>
+            <div>
+              <ItemRow key={title}>
+                <SubduedDescriptionListTitle>
+                  {title}
+                </SubduedDescriptionListTitle>
+                <EuiDescriptionListDescription>
+                  {description}
+                </EuiDescriptionListDescription>
+              </ItemRow>
+            </div>
           )
       )}
     </>

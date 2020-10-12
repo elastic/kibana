@@ -38,7 +38,7 @@ export async function FailureDebuggingProvider({ getService }: FtrProviderContex
   const log = getService('log');
   const browser = getService('browser');
 
-  if (process.env.CI !== 'true') {
+  if (process.env.CI !== 'true' && !process.env.stack_functional_integration) {
     await del(config.get('failureDebugging.htmlDirectory'));
   }
 

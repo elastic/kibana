@@ -6,7 +6,7 @@
 
 import { Index as IndexInterface } from '../../../index_management/common/types';
 
-export type PhaseWithAllocation = 'warm' | 'cold' | 'frozen';
+export type PhaseWithAllocation = 'warm' | 'cold';
 
 export interface SerializedPolicy {
   name: string;
@@ -17,7 +17,6 @@ export interface Phases {
   hot?: SerializedHotPhase;
   warm?: SerializedWarmPhase;
   cold?: SerializedColdPhase;
-  frozen?: SerializedFrozenPhase;
   delete?: SerializedDeletePhase;
 }
 
@@ -43,9 +42,7 @@ export interface SerializedHotPhase extends SerializedPhase {
       max_age?: string;
       max_docs?: number;
     };
-    forcemerge?: {
-      max_num_segments: number;
-    };
+    forcemerge?: ForcemergeAction;
     set_priority?: {
       priority: number | null;
     };
@@ -58,9 +55,7 @@ export interface SerializedWarmPhase extends SerializedPhase {
     shrink?: {
       number_of_shards: number;
     };
-    forcemerge?: {
-      max_num_segments: number;
-    };
+    forcemerge?: ForcemergeAction;
     set_priority?: {
       priority: number | null;
     };
@@ -69,17 +64,6 @@ export interface SerializedWarmPhase extends SerializedPhase {
 }
 
 export interface SerializedColdPhase extends SerializedPhase {
-  actions: {
-    freeze?: {};
-    allocate?: AllocateAction;
-    set_priority?: {
-      priority: number | null;
-    };
-    migrate?: { enabled: boolean };
-  };
-}
-
-export interface SerializedFrozenPhase extends SerializedPhase {
   actions: {
     freeze?: {};
     allocate?: AllocateAction;
@@ -117,13 +101,18 @@ export interface AllocateAction {
   };
 }
 
+export interface ForcemergeAction {
+  max_num_segments: number;
+  // only accepted value for index_codec
+  index_codec?: 'best_compression';
+}
+
 export interface Policy {
   name: string;
   phases: {
     hot: HotPhase;
     warm: WarmPhase;
     cold: ColdPhase;
-    frozen: FrozenPhase;
     delete: DeletePhase;
   };
 }
@@ -163,6 +152,7 @@ export interface PhaseWithIndexPriority {
 export interface PhaseWithForcemergeAction {
   forceMergeEnabled: boolean;
   selectedForceMergeSegments: string;
+  bestCompressionEnabled: boolean;
 }
 
 export interface HotPhase
@@ -189,14 +179,6 @@ export interface WarmPhase
 }
 
 export interface ColdPhase
-  extends CommonPhaseSettings,
-    PhaseWithMinAge,
-    PhaseWithAllocationAction,
-    PhaseWithIndexPriority {
-  freezeEnabled: boolean;
-}
-
-export interface FrozenPhase
   extends CommonPhaseSettings,
     PhaseWithMinAge,
     PhaseWithAllocationAction,

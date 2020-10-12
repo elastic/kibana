@@ -9,6 +9,8 @@ import moment from 'moment';
 import memoizeOne from 'memoize-one';
 import { useLocation } from 'react-router-dom';
 
+import styled from 'styled-components';
+import { EuiFlexItem } from '@elastic/eui';
 import { ActionVariable } from '../../../../../../triggers_actions_ui/public';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { assertUnreachable } from '../../../../../common/utility_types';
@@ -79,6 +81,13 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
   anomalyThreshold: rule.anomaly_threshold ?? 50,
   machineLearningJobId: rule.machine_learning_job_id ?? '',
   index: rule.index ?? [],
+  threatIndex: rule.threat_index ?? [],
+  threatQueryBar: {
+    query: { query: rule.threat_query ?? '', language: rule.threat_language ?? '' },
+    filters: (rule.threat_filters ?? []) as Filter[],
+    saved_id: undefined,
+  },
+  threatMapping: rule.threat_mapping ?? [],
   queryBar: {
     query: { query: rule.query ?? '', language: rule.language ?? '' },
     filters: (rule.filters ?? []) as Filter[],
@@ -315,6 +324,7 @@ const getRuleSpecificRuleParamKeys = (ruleType: Type) => {
       return ['anomaly_threshold', 'machine_learning_job_id'];
     case 'threshold':
       return ['threshold', ...queryRuleParams];
+    case 'threat_match':
     case 'query':
     case 'saved_query':
     case 'eql':
@@ -340,7 +350,6 @@ export const getActionMessageRuleParams = (ruleType: Type): string[] => {
     'threat',
     'type',
     'version',
-    // 'lists',
   ];
 
   const ruleParamsKeys = [
@@ -370,3 +379,8 @@ export const getActionMessageParams = memoizeOne((ruleType: Type | undefined): A
 // typed as null not undefined as the initial state for this value is null.
 export const userHasNoPermissions = (canUserCRUD: boolean | null): boolean =>
   canUserCRUD != null ? !canUserCRUD : false;
+
+export const MaxWidthEuiFlexItem = styled(EuiFlexItem)`
+  max-width: 1000px;
+  overflow: hidden;
+`;

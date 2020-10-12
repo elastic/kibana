@@ -7,6 +7,7 @@
 import { SavedObjectsClientContract } from 'src/core/server';
 import { AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { AgentEventSOAttributes, AgentEvent } from '../../types';
+import { normalizeKuery } from '../saved_object';
 
 export async function getAgentEvents(
   soClient: SavedObjectsClientContract,
@@ -23,12 +24,7 @@ export async function getAgentEvents(
   const { total, saved_objects } = await soClient.find<AgentEventSOAttributes>({
     type: AGENT_EVENT_SAVED_OBJECT_TYPE,
     filter:
-      kuery && kuery !== ''
-        ? kuery.replace(
-            new RegExp(`${AGENT_EVENT_SAVED_OBJECT_TYPE}\.`, 'g'),
-            `${AGENT_EVENT_SAVED_OBJECT_TYPE}.attributes.`
-          )
-        : undefined,
+      kuery && kuery !== '' ? normalizeKuery(AGENT_EVENT_SAVED_OBJECT_TYPE, kuery) : undefined,
     perPage,
     page,
     sortField: 'timestamp',

@@ -20,3 +20,4 @@ export function plugin(context: PluginInitializerContext) {
 
 export { EnhancedEmbeddable, EnhancedEmbeddableContext } from './types';
 export { isEnhancedEmbeddable } from './embeddables';
+export { contextMenuDrilldownGrouping as embeddableEnhancedContextMenuDrilldownGrouping } from './actions';

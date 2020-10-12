@@ -19,7 +19,7 @@ the field, the top 5 values for the field, and the percentage of documents
 that contain each value.
 +
 [role="screenshot"]
-image::images/filter-field.png[height=317]
+image::images/filter-field.png[Picture showing top 5 values for each field, and correspnding percentage of documents that contain each value]
 
 . Use the image:images/PositiveFilter.jpg[Positive Filter] icon to
 show only documents that contain that value,

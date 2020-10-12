@@ -18,8 +18,10 @@ import { get, getOr } from 'lodash/fp';
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
-import { NetworkKpiStrategyResponse } from '../../../../common/search_strategy';
-import { KpiHostsData } from '../../../graphql/types';
+import {
+  HostsKpiStrategyResponse,
+  NetworkKpiStrategyResponse,
+} from '../../../../common/search_strategy';
 import { AreaChart } from '../charts/areachart';
 import { BarChart } from '../charts/barchart';
 import { ChartSeriesData, ChartData, ChartSeriesConfigs, UpdateDateRange } from '../charts/common';
@@ -113,12 +115,12 @@ export const barchartConfigs = (config?: { onElementClick?: ElementClickListener
 
 export const addValueToFields = (
   fields: StatItem[],
-  data: KpiHostsData | NetworkKpiStrategyResponse
+  data: HostsKpiStrategyResponse | NetworkKpiStrategyResponse
 ): StatItem[] => fields.map((field) => ({ ...field, value: get(field.key, data) }));
 
 export const addValueToAreaChart = (
   fields: StatItem[],
-  data: KpiHostsData | NetworkKpiStrategyResponse
+  data: HostsKpiStrategyResponse | NetworkKpiStrategyResponse
 ): ChartSeriesData[] =>
   fields
     .filter((field) => get(`${field.key}Histogram`, data) != null)
@@ -130,7 +132,7 @@ export const addValueToAreaChart = (
 
 export const addValueToBarChart = (
   fields: StatItem[],
-  data: KpiHostsData | NetworkKpiStrategyResponse
+  data: HostsKpiStrategyResponse | NetworkKpiStrategyResponse
 ): ChartSeriesData[] => {
   if (fields.length === 0) return [];
   return fields.reduce((acc: ChartSeriesData[], field: StatItem, idx: number) => {
@@ -159,7 +161,7 @@ export const addValueToBarChart = (
 
 export const useKpiMatrixStatus = (
   mappings: Readonly<StatItems[]>,
-  data: KpiHostsData | NetworkKpiStrategyResponse,
+  data: HostsKpiStrategyResponse | NetworkKpiStrategyResponse,
   id: string,
   from: string,
   to: string,

@@ -36,6 +36,11 @@ export const initialEndpointListState: Immutable<EndpointState> = {
   patternsError: undefined,
   isAutoRefreshEnabled: true,
   autoRefreshInterval: DEFAULT_POLL_INTERVAL,
+  agentsWithEndpointsTotal: 0,
+  agentsWithEndpointsTotalError: undefined,
+  endpointsTotal: 0,
+  endpointsTotalError: undefined,
+  queryStrategyVersion: undefined,
 };
 
 /* eslint-disable-next-line complexity */
@@ -49,6 +54,7 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
       total,
       request_page_size: pageSize,
       request_page_index: pageIndex,
+      query_strategy_version: queryStrategyVersion,
     } = action.payload;
     return {
       ...state,
@@ -56,6 +62,7 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
       total,
       pageSize,
       pageIndex,
+      queryStrategyVersion,
       loading: false,
       error: undefined,
     };
@@ -156,6 +163,28 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
     return {
       ...state,
       endpointsExist: action.payload,
+    };
+  } else if (action.type === 'serverReturnedAgenstWithEndpointsTotal') {
+    return {
+      ...state,
+      agentsWithEndpointsTotal: action.payload,
+      agentsWithEndpointsTotalError: undefined,
+    };
+  } else if (action.type === 'serverFailedToReturnAgenstWithEndpointsTotal') {
+    return {
+      ...state,
+      agentsWithEndpointsTotalError: action.payload,
+    };
+  } else if (action.type === 'serverReturnedEndpointsTotal') {
+    return {
+      ...state,
+      endpointsTotal: action.payload,
+      endpointsTotalError: undefined,
+    };
+  } else if (action.type === 'serverFailedToReturnEndpointsTotal') {
+    return {
+      ...state,
+      endpointsTotalError: action.payload,
     };
   } else if (action.type === 'userUpdatedEndpointListRefreshOptions') {
     return {

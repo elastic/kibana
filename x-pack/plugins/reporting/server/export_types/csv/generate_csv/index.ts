@@ -37,9 +37,7 @@ interface SearchRequest {
 }
 
 export interface GenerateCsvParams {
-  jobParams: {
-    browserTimezone: string;
-  };
+  browserTimezone?: string;
   searchRequest: SearchRequest;
   indexPatternSavedObject: IndexPatternSavedObject;
   fields: string[];
@@ -57,12 +55,7 @@ export function createGenerateCsv(logger: LevelLogger) {
     callEndpoint: EndpointCaller,
     cancellationToken: CancellationToken
   ): Promise<SavedSearchGeneratorResult> {
-    const settings = await getUiSettings(
-      job.jobParams?.browserTimezone,
-      uiSettingsClient,
-      config,
-      logger
-    );
+    const settings = await getUiSettings(job.browserTimezone, uiSettingsClient, config, logger);
     const escapeValue = createEscapeValue(settings.quoteValues, settings.escapeFormulaValues);
     const bom = config.get('csv', 'useByteOrderMarkEncoding') ? CSV_BOM_CHARS : '';
     const builder = new MaxSizeStringBuilder(byteSizeValueToNumber(settings.maxSizeBytes), bom);

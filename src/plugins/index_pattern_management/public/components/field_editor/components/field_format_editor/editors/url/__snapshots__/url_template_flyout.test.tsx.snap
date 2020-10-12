@@ -4,6 +4,7 @@ exports[`UrlTemplateFlyout should not render if not visible 1`] = `""`;
 
 exports[`UrlTemplateFlyout should render normally 1`] = `
 <EuiFlyout
+  data-test-subj="urlTemplateFlyoutTestSubj"
   onClose={[Function]}
 >
   <EuiFlyoutBody>

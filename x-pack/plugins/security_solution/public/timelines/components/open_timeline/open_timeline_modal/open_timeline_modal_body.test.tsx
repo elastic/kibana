@@ -49,7 +49,7 @@ describe('OpenTimelineModal', () => {
     sortField: DEFAULT_SORT_FIELD,
     timelineType: TimelineType.default,
     timelineStatus: TimelineStatus.active,
-    templateTimelineFilter: [<div />],
+    templateTimelineFilter: [<div key={0} />],
     title,
     totalSearchResultsCount: mockSearchResults.length,
   });

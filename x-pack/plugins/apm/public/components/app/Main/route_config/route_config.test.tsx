@@ -14,7 +14,7 @@ describe('routes', () => {
       it('redirects to /services', () => {
         const location = { hash: '', pathname: '/', search: '' };
         expect(
-          (route as any).component({ location } as any).props.to.pathname
+          (route!.render!({ location } as any) as any).props.to.pathname
         ).toEqual('/services');
       });
     });
@@ -28,9 +28,7 @@ describe('routes', () => {
           search: '',
         };
 
-        expect(
-          ((route as any).component({ location }) as any).props.to
-        ).toEqual({
+        expect((route!.render!({ location } as any) as any).props.to).toEqual({
           hash: '',
           pathname: '/services/opbeans-python/transactions/view',
           search:

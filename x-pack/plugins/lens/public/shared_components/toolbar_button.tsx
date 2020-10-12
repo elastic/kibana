@@ -33,6 +33,7 @@ export type ToolbarButtonProps = PropsOf<typeof EuiButton> & {
    * Adjusts the borders for groupings
    */
   groupPosition?: 'none' | 'left' | 'center' | 'right';
+  dataTestSubj?: string;
 };
 
 export const ToolbarButton: React.FunctionComponent<ToolbarButtonProps> = ({
@@ -42,6 +43,7 @@ export const ToolbarButton: React.FunctionComponent<ToolbarButtonProps> = ({
   size = 'm',
   hasArrow = true,
   groupPosition = 'none',
+  dataTestSubj = '',
   ...rest
 }) => {
   const classes = classNames(
@@ -52,6 +54,7 @@ export const ToolbarButton: React.FunctionComponent<ToolbarButtonProps> = ({
   );
   return (
     <EuiButton
+      data-test-subj={dataTestSubj}
       className={classes}
       iconSide="right"
       iconType={hasArrow ? 'arrowDown' : ''}

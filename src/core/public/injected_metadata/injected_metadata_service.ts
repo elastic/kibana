@@ -58,19 +58,6 @@ export interface InjectedMetadataParams {
     uiPlugins: InjectedPluginMetadata[];
     anonymousStatusPage: boolean;
     legacyMetadata: {
-      app: {
-        id: string;
-        title: string;
-      };
-      bundleId: string;
-      version: string;
-      branch: string;
-      buildNum: number;
-      buildSha: string;
-      basePath: string;
-      serverName: string;
-      devMode: boolean;
-      category?: AppCategory;
       uiSettings: {
         defaults: Record<string, UiSettingsParams>;
         user?: Record<string, UserProvidedValues>;
@@ -167,18 +154,6 @@ export interface InjectedMetadataSetup {
   getPlugins: () => InjectedPluginMetadata[];
   getAnonymousStatusPage: () => boolean;
   getLegacyMetadata: () => {
-    app: {
-      id: string;
-      title: string;
-    };
-    bundleId: string;
-    version: string;
-    branch: string;
-    buildNum: number;
-    buildSha: string;
-    basePath: string;
-    serverName: string;
-    devMode: boolean;
     uiSettings: {
       defaults: Record<string, UiSettingsParams>;
       user?: Record<string, UserProvidedValues> | undefined;

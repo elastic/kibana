@@ -130,6 +130,20 @@ export function getPreviewTransformRequestBody(
   return request;
 }
 
+export const getCreateTransformSettingsRequestBody = (
+  transformDetailsState: Partial<StepDetailsExposedState>
+): { settings?: PutTransformsRequestSchema['settings'] } => {
+  const settings: PutTransformsRequestSchema['settings'] = {
+    ...(transformDetailsState.transformSettingsMaxPageSearchSize
+      ? { max_page_search_size: transformDetailsState.transformSettingsMaxPageSearchSize }
+      : {}),
+    ...(transformDetailsState.transformSettingsDocsPerSecond
+      ? { docs_per_second: transformDetailsState.transformSettingsDocsPerSecond }
+      : {}),
+  };
+  return Object.keys(settings).length > 0 ? { settings } : {};
+};
+
 export const getCreateTransformRequestBody = (
   indexPatternTitle: IndexPattern['title'],
   pivotState: StepDefineExposedState,
@@ -145,6 +159,10 @@ export const getCreateTransformRequestBody = (
   ...(transformDetailsState.transformDescription !== ''
     ? { description: transformDetailsState.transformDescription }
     : {}),
+  // conditionally add optional frequency
+  ...(transformDetailsState.transformFrequency !== ''
+    ? { frequency: transformDetailsState.transformFrequency }
+    : {}),
   dest: {
     index: transformDetailsState.destinationIndex,
   },
@@ -159,6 +177,8 @@ export const getCreateTransformRequestBody = (
         },
       }
     : {}),
+  // conditionally add additional settings
+  ...getCreateTransformSettingsRequestBody(transformDetailsState),
 });
 
 export function isHttpFetchError(error: any): error is HttpFetchError {

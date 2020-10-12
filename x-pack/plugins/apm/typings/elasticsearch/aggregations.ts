@@ -153,6 +153,11 @@ export interface AggregationOptionsByType {
     keyed?: boolean;
     hdr?: { number_of_significant_value_digits: number };
   } & AggregationSourceOptions;
+  bucket_sort: {
+    sort?: SortOptions;
+    from?: number;
+    size?: number;
+  };
 }
 
 type AggregationType = keyof AggregationOptionsByType;
@@ -329,6 +334,7 @@ interface AggregationResponsePart<
       ? Array<{ key: number; value: number }>
       : Record<string, number>;
   };
+  bucket_sort: undefined;
 }
 
 // Type for debugging purposes. If you see an error in AggregationResponseMap

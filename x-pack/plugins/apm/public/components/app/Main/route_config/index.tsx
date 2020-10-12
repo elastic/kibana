@@ -62,15 +62,6 @@ export function renderAsRedirectTo(to: string) {
 // If you provide an inline function to the component prop, you would create a
 // new component every render. This results in the existing component unmounting
 // and the new component mounting instead of just updating the existing component.
-//
-// This means you should use `render` if you're providing an inline function.
-// However, the `ApmRoute` component from @elastic/apm-rum-react, only supports
-// `component`, and will give you a large console warning if you use `render`.
-//
-// This warning cannot be turned off
-// (see https://github.com/elastic/apm-agent-rum-js/issues/881) so while this is
-// slightly more code, it provides better performance without causing console
-// warnings to appear.
 function HomeServices() {
   return <Home tab="services" />;
 }
@@ -153,7 +144,7 @@ export const routes: APMRouteDefinition[] = [
   {
     exact: true,
     path: '/',
-    component: renderAsRedirectTo('/services'),
+    render: renderAsRedirectTo('/services'),
     breadcrumb: 'APM',
   },
   {
@@ -175,7 +166,7 @@ export const routes: APMRouteDefinition[] = [
   {
     exact: true,
     path: '/settings',
-    component: renderAsRedirectTo('/settings/agent-configuration'),
+    render: renderAsRedirectTo('/settings/agent-configuration'),
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.listSettingsTitle', {
       defaultMessage: 'Settings',
     }),
@@ -219,7 +210,7 @@ export const routes: APMRouteDefinition[] = [
     exact: true,
     path: '/services/:serviceName',
     breadcrumb: ({ match }) => match.params.serviceName,
-    component: (props: RouteComponentProps<{ serviceName: string }>) =>
+    render: (props: RouteComponentProps<{ serviceName: string }>) =>
       renderAsRedirectTo(
         `/services/${props.match.params.serviceName}/transactions`
       )(props),

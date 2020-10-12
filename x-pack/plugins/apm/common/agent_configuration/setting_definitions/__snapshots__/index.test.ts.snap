@@ -172,7 +172,7 @@ Array [
   },
   Object {
     "key": "transaction_max_spans",
-    "max": 32000,
+    "max": undefined,
     "min": 0,
     "type": "integer",
     "validationName": "integerRt",
