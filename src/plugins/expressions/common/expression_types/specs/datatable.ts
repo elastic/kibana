@@ -22,6 +22,7 @@ import { map, pick, zipObject } from 'lodash';
 import { ExpressionTypeDefinition } from '../types';
 import { PointSeries, PointSeriesColumn } from './pointseries';
 import { ExpressionValueRender } from './render';
+import { SerializedFieldFormat } from '../../types';
 
 type State = string | number | boolean | null | undefined | SerializableState;
 
@@ -66,14 +67,33 @@ export type DatatableColumnType =
  */
 export type DatatableRow = Record<string, any>;
 
+/**
+ * Datatable column meta information
+ */
 export interface DatatableColumnMeta {
   type: DatatableColumnType;
+  /**
+   * field this column is based on
+   */
   field?: string;
+  /**
+   * index/table this column is based on
+   */
   index?: string;
-  params?: SerializableState;
+  /**
+   * serialized field format
+   */
+  params?: SerializedFieldFormat;
+  /**
+   * source function that produced this column
+   */
   source?: string;
+  /**
+   * any extra parameters for the source that produced this column
+   */
   sourceParams?: SerializableState;
 }
+
 /**
  * This type represents the shape of a column in a `Datatable`.
  */
