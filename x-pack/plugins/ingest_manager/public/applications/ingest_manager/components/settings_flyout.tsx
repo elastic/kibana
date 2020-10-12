@@ -306,7 +306,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
           <h2 id="IngestManagerSettingsFlyoutTitle">
             <FormattedMessage
               id="xpack.ingestManager.settings.flyoutTitle"
-              defaultMessage="Ingest Manager settings"
+              defaultMessage="Fleet settings"
             />
           </h2>
         </EuiTitle>
