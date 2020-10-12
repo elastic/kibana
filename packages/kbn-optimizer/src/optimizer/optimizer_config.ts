@@ -32,6 +32,13 @@ import {
 import { findKibanaPlatformPlugins, KibanaPlatformPlugin } from './kibana_platform_plugins';
 import { getPluginBundles } from './get_plugin_bundles';
 import { filterById } from './filter_by_id';
+import { readLimits } from '../limits';
+
+export interface Limits {
+  pageLoadAssetSize?: {
+    [id: string]: number | undefined;
+  };
+}
 
 function pickMaxWorkerCount(dist: boolean) {
   // don't break if cpus() returns nothing, or an empty array
@@ -238,7 +245,8 @@ export class OptimizerConfig {
       options.maxWorkerCount,
       options.dist,
       options.profileWebpack,
-      options.themeTags
+      options.themeTags,
+      readLimits()
     );
   }
 
@@ -252,7 +260,8 @@ export class OptimizerConfig {
     public readonly maxWorkerCount: number,
     public readonly dist: boolean,
     public readonly profileWebpack: boolean,
-    public readonly themeTags: ThemeTags
+    public readonly themeTags: ThemeTags,
+    public readonly limits: Limits
   ) {}
 
   getWorkerConfig(optimizerCacheKey: unknown): WorkerConfig {

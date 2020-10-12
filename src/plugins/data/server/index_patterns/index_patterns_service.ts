@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin, KibanaRequest, Logger } from 'kibana/server';
+import { CoreSetup, CoreStart, Plugin, Logger, SavedObjectsClientContract } from 'kibana/server';
 import { registerRoutes } from './routes';
 import { indexPatternSavedObjectType } from '../saved_objects';
 import { capabilitiesProvider } from './capabilities_provider';
@@ -29,7 +29,7 @@ import { SavedObjectsClientServerToCommon } from './saved_objects_client_wrapper
 
 export interface IndexPatternsServiceStart {
   indexPatternsServiceFactory: (
-    kibanaRequest: KibanaRequest
+    savedObjectsClient: SavedObjectsClientContract
   ) => Promise<IndexPatternsCommonService>;
 }
 
@@ -47,11 +47,10 @@ export class IndexPatternsService implements Plugin<void, IndexPatternsServiceSt
   }
 
   public start(core: CoreStart, { fieldFormats, logger }: IndexPatternsServiceStartDeps) {
-    const { uiSettings, savedObjects } = core;
+    const { uiSettings } = core;
 
     return {
-      indexPatternsServiceFactory: async (kibanaRequest: KibanaRequest) => {
-        const savedObjectsClient = savedObjects.getScopedClient(kibanaRequest);
+      indexPatternsServiceFactory: async (savedObjectsClient: SavedObjectsClientContract) => {
         const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
         const formats = await fieldFormats.fieldFormatServiceFactory(uiSettingsClient);
 

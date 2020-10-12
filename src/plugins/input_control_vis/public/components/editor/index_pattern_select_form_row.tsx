@@ -49,8 +49,6 @@ function IndexPatternSelectFormRowUi(props: IndexPatternSelectFormRowUiProps) {
         indexPatternId={indexPatternId}
         onChange={onChange}
         data-test-subj={selectId}
-        // TODO: supply actual savedObjectsClient here
-        savedObjectsClient={{} as any}
       />
     </EuiFormRow>
   );
