@@ -78,12 +78,14 @@ export const cumulativeSum: ExpressionFunctionCumulativeSum = {
       }),
       multi: true,
       types: ['string'],
+      required: false,
     },
     column: {
       help: i18n.translate('expressions.functions.cumulativeSum.args.columnHelpText', {
         defaultMessage: 'Column to calculate the cumulative sum of',
       }),
       types: ['string'],
+      required: true,
     },
   },
 
