@@ -34,12 +34,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
 
-  describe('Audit trail service', function () {
-    this.tags('ciGroup7');
-    const logFilePath = Path.resolve(
-      __dirname,
-      '../../plugins/audit_trail_test/server/audit_trail.log'
-    );
+  describe('Audit Log', function () {
+    const logFilePath = Path.resolve(__dirname, '../../fixtures/audit/audit.log');
     const logFile = new FileWrapper(logFilePath);
 
     beforeEach(async () => {
@@ -47,7 +43,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('logs audit events from saved objects client', async () => {
-      await supertest.get('/audit_trail_test').set('kbn-xsrf', 'foo').expect(204);
+      await supertest.get('/audit_log').set('kbn-xsrf', 'foo').expect(204);
 
       await retry.waitFor('logs event in the dest file', async () => {
         return await logFile.isNotEmpty();
