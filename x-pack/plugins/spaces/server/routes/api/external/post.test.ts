@@ -67,6 +67,7 @@ describe('Spaces Public API', () => {
       getImportExportObjectLimit: () => 1000,
       log,
       spacesService,
+      authorization: null, // not needed for this route
     });
 
     const [routeDefinition, routeHandler] = router.post.mock.calls[0];

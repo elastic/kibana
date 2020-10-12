@@ -20,6 +20,7 @@ export interface GetAgentsRequest {
     perPage: number;
     kuery?: string;
     showInactive: boolean;
+    showUpgradeable?: boolean;
   };
 }
 
@@ -113,11 +114,6 @@ export interface PostAgentUnenrollRequest {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PostAgentUnenrollResponse {}
 
-export interface PostAgentUpgradeRequest {
-  params: {
-    agentId: string;
-  };
-}
 export interface PostBulkAgentUnenrollRequest {
   body: {
     agents: string[] | string;
@@ -126,9 +122,30 @@ export interface PostBulkAgentUnenrollRequest {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PostAgentUpgradeResponse {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PostBulkAgentUnenrollResponse {}
+
+export interface PostAgentUpgradeRequest {
+  params: {
+    agentId: string;
+  };
+  body: {
+    source_uri?: string;
+    version: string;
+  };
+}
+
+export interface PostBulkAgentUpgradeRequest {
+  body: {
+    agents: string[] | string;
+    source_uri?: string;
+    version: string;
+  };
+}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PostBulkAgentUpgradeResponse {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PostAgentUpgradeResponse {}
 
 export interface PutAgentReassignRequest {
   params: {

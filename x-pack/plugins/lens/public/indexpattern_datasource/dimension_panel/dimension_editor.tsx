@@ -14,10 +14,10 @@ import {
   EuiFieldText,
   EuiSpacer,
   EuiListGroupItemProps,
+  EuiFormLabel,
 } from '@elastic/eui';
-import { EuiFormLabel } from '@elastic/eui';
-import { IndexPatternColumn, OperationType } from '../indexpattern';
 import { IndexPatternDimensionEditorProps, OperationSupportMatrix } from './dimension_panel';
+import { IndexPatternColumn, OperationType } from '../indexpattern';
 import {
   operationDefinitionMap,
   getOperationDisplay,
@@ -411,7 +411,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             />
           )}
 
-          {!hideGrouping && (
+          {!incompatibleSelectedOperationType && !hideGrouping && (
             <BucketNestingEditor
               fieldMap={fieldMap}
               layer={state.layers[props.layerId]}

@@ -18,7 +18,7 @@ import {
 import { ExecutionContextSearch } from 'src/plugins/expressions';
 
 import { Subscription } from 'rxjs';
-import { Ast } from '@kbn/interpreter/common';
+import { toExpression, Ast } from '@kbn/interpreter/common';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
@@ -59,7 +59,6 @@ export interface LensEmbeddableOutput extends EmbeddableOutput {
 export interface LensEmbeddableDeps {
   attributeService: LensAttributeService;
   documentToExpression: (doc: Document) => Promise<Ast | null>;
-  toExpressionString: (astObj: Ast, type?: string) => string;
   editable: boolean;
   indexPatternService: IndexPatternsContract;
   expressionRenderer: ReactExpressionRendererType;
@@ -135,7 +134,7 @@ export class Embeddable
       savedObjectId: (input as LensByReferenceInput)?.savedObjectId,
     };
     const expression = await this.deps.documentToExpression(this.savedVis);
-    this.expression = expression ? this.deps.toExpressionString(expression) : null;
+    this.expression = expression ? toExpression(expression) : null;
     await this.initializeOutput();
     this.isInitialized = true;
     if (this.domNode) {

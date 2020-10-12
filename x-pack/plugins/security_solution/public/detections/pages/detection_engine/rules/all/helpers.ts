@@ -33,3 +33,7 @@ export const showRulesTable = ({
 }) =>
   (rulesCustomInstalled != null && rulesCustomInstalled > 0) ||
   (rulesInstalled != null && rulesInstalled > 0);
+
+export const caseInsensitiveSort = (tags: string[]): string[] => {
+  return tags.sort((a: string, b: string) => a.toLowerCase().localeCompare(b.toLowerCase())); // Case insensitive
+};
