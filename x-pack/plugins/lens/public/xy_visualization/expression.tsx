@@ -248,12 +248,17 @@ export function XYChart({
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
 
-  const filteredLayers = layers.filter(({ layerId, xAccessor, accessors }) => {
+  const filteredLayers = layers.filter(({ layerId, xAccessor, accessors, splitAccessor }) => {
     return !(
       !accessors.length ||
       !data.tables[layerId] ||
       data.tables[layerId].rows.length === 0 ||
-      (xAccessor && data.tables[layerId].rows.every((row) => typeof row[xAccessor] === 'undefined'))
+      (xAccessor &&
+        data.tables[layerId].rows.every((row) => typeof row[xAccessor] === 'undefined')) ||
+      // stacked percentage bars have no xAccessors but splitAccessor with undefined values in them when empty
+      (!xAccessor &&
+        splitAccessor &&
+        data.tables[layerId].rows.every((row) => typeof row[splitAccessor] === 'undefined'))
     );
   });
 
@@ -337,6 +342,7 @@ export function XYChart({
   }
 
   const isTimeViz = data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time');
+  const isHistogramViz = filteredLayers.every((l) => l.isHistogram);
 
   const xDomain = isTimeViz
     ? {
@@ -402,8 +408,7 @@ export function XYChart({
             return;
           }
           const [min, max] = x;
-          // in the future we want to make it also for histogram
-          if (!xAxisColumn || !isTimeViz) {
+          if (!xAxisColumn || !isHistogramViz) {
             return;
           }
 
@@ -412,7 +417,9 @@ export function XYChart({
           const xAxisColumnIndex = table.columns.findIndex(
             (el) => el.id === filteredLayers[0].xAccessor
           );
-          const timeFieldName = table.columns[xAxisColumnIndex]?.meta?.aggConfigParams?.field;
+          const timeFieldName = isTimeViz
+            ? table.columns[xAxisColumnIndex]?.meta?.aggConfigParams?.field
+            : undefined;
 
           const context: LensBrushEvent['data'] = {
             range: [min, max],

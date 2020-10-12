@@ -69,7 +69,7 @@ export class EnterpriseSearchRequestHandler {
         const queryString = !this.isEmptyObj(queryParams)
           ? `?${querystring.stringify(queryParams)}`
           : '';
-        const url = encodeURI(this.enterpriseSearchUrl + path + queryString);
+        const url = encodeURI(this.enterpriseSearchUrl + path) + queryString;
 
         // Set up API options
         const { method } = request.route;
