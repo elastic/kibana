@@ -25,27 +25,26 @@ import del from 'del';
 import execa from 'execa';
 import xml2js from 'xml2js';
 import { makeJunitReportPath } from '@kbn/test';
+import { REPO_ROOT } from '@kbn/utils';
 
 const MINUTE = 1000 * 60;
-const ROOT_DIR = resolve(__dirname, '../../../../');
 const FIXTURE_DIR = resolve(__dirname, '__fixtures__');
 const TARGET_DIR = resolve(FIXTURE_DIR, 'target');
-const XML_PATH = makeJunitReportPath(FIXTURE_DIR, 'Jest Tests');
+const XML_PATH = makeJunitReportPath(FIXTURE_DIR, 'JUnit Reporter Integration Test');
 
 afterAll(async () => {
   await del(TARGET_DIR);
 });
 
 const parseXml = promisify(xml2js.parseString);
-
 it(
   'produces a valid junit report for failures',
   async () => {
     const result = await execa(
-      process.execPath,
-      ['-r', require.resolve('../../../setup_node_env'), require.resolve('jest/bin/jest')],
+      './node_modules/.bin/jest',
+      ['--config', 'packages/kbn-test/src/jest/integration_tests/__fixtures__/jest.config.js'],
       {
-        cwd: FIXTURE_DIR,
+        cwd: REPO_ROOT,
         env: {
           CI: 'true',
         },
@@ -57,6 +56,7 @@ it(
     await expect(parseXml(readFileSync(XML_PATH, 'utf8'))).resolves.toEqual({
       testsuites: {
         $: {
+          failures: '1',
           name: 'jest',
           skipped: '0',
           tests: '1',
@@ -67,7 +67,7 @@ it(
           {
             $: {
               failures: '1',
-              file: resolve(ROOT_DIR, 'src/dev/jest/integration_tests/__fixtures__/test.js'),
+              file: resolve(FIXTURE_DIR, './test.js'),
               name: 'test.js',
               skipped: '0',
               tests: '1',
@@ -77,8 +77,8 @@ it(
             testcase: [
               {
                 $: {
-                  classname: 'Jest Tests.·',
-                  name: 'fails',
+                  classname: 'JUnit Reporter Integration Test.·',
+                  name: 'JUnit Reporter fails',
                   time: expect.anything(),
                 },
                 failure: [expect.stringMatching(/Error: failure\s+at /m)],

@@ -22,21 +22,31 @@ import { writeFileSync, mkdirSync } from 'fs';
 
 import xmlBuilder from 'xmlbuilder';
 
-import { escapeCdata } from '../xml';
-import { makeJunitReportPath } from '@kbn/test';
+import type { Config } from '@jest/types';
+import { AggregatedResult, Test, BaseReporter } from '@jest/reporters';
 
-const ROOT_DIR = dirname(require.resolve('../../../package.json'));
+import { escapeCdata } from '../mocha/xml';
+import { makeJunitReportPath } from './report_path';
+
+interface ReporterOptions {
+  reportName?: string;
+  rootDirectory?: string;
+}
 
 /**
  * Jest reporter that produces JUnit report when running on CI
  * @class JestJUnitReporter
  */
-export default class JestJUnitReporter {
-  constructor(globalConfig, options = {}) {
-    const { reportName = 'Jest Tests', rootDirectory = ROOT_DIR } = options;
 
-    this._reportName = reportName;
-    this._rootDirectory = resolve(rootDirectory);
+// eslint-disable-next-line import/no-default-export
+export default class JestJUnitReporter extends BaseReporter {
+  private _reportName: string;
+  private _rootDirectory: string;
+
+  constructor(globalConfig: Config.GlobalConfig, { rootDirectory, reportName }: ReporterOptions) {
+    super();
+    this._reportName = reportName || 'Jest Tests';
+    this._rootDirectory = rootDirectory ? resolve(rootDirectory) : resolve(__dirname, '../..');
   }
 
   /**
@@ -45,7 +55,7 @@ export default class JestJUnitReporter {
    * @param {JestResults} results see https://facebook.github.io/jest/docs/en/configuration.html#testresultsprocessor-string
    * @return {undefined}
    */
-  onRunComplete(contexts, results) {
+  onRunComplete(contexts: Set<Test['context']>, results: AggregatedResult): void {
     if (!process.env.CI || process.env.DISABLE_JUNIT_REPORTER || !results.testResults.length) {
       return;
     }
@@ -56,18 +66,19 @@ export default class JestJUnitReporter {
       'testsuites',
       { encoding: 'utf-8' },
       {},
-      { skipNullAttributes: true }
+      { keepNullAttributes: false }
     );
 
-    const msToIso = (ms) => (ms ? new Date(ms).toISOString().slice(0, -5) : undefined);
-    const msToSec = (ms) => (ms ? (ms / 1000).toFixed(3) : undefined);
+    const msToIso = (ms: number | null | undefined) =>
+      ms ? new Date(ms).toISOString().slice(0, -5) : undefined;
+    const msToSec = (ms: number | null | undefined) => (ms ? (ms / 1000).toFixed(3) : undefined);
 
     root.att({
       name: 'jest',
       timestamp: msToIso(results.startTime),
       time: msToSec(Date.now() - results.startTime),
       tests: results.numTotalTests,
-      failures: results.numFailingTests,
+      failures: results.numFailedTests,
       skipped: results.numPendingTests,
     });
 
