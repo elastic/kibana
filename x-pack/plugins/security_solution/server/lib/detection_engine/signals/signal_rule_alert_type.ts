@@ -8,6 +8,7 @@
 
 import { Logger, KibanaRequest } from 'src/core/server';
 
+import { get } from 'lodash';
 import {
   SIGNALS_ID,
   DEFAULT_SEARCH_AFTER_PAGE_SIZE,
@@ -98,6 +99,7 @@ export const signalRulesAlertType = ({
         from,
         ruleId,
         index,
+        eventCategoryOverride,
         filters,
         language,
         maxSignals,
@@ -113,9 +115,22 @@ export const signalRulesAlertType = ({
         threatIndex,
         threatMapping,
         threatLanguage,
+        timestampOverride,
         type,
         exceptionsList,
       } = params;
+      const outputIndexTemplateMapping: unknown = await services.callCluster(
+        'indices.getTemplate',
+        { name: outputIndex }
+      );
+      const signalMappingVersion: number | undefined = get(outputIndexTemplateMapping, [
+        outputIndex,
+        'version',
+      ]);
+      if (signalMappingVersion !== undefined && typeof signalMappingVersion !== 'number') {
+        throw new Error('Found non-numeric value for "version" in output index template');
+      }
+
       const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
       let hasError: boolean = false;
       let result = createSearchAfterReturnType();
@@ -300,6 +315,7 @@ export const signalRulesAlertType = ({
             logger,
             filter: esFilter,
             threshold,
+            timestampOverride,
             buildRuleMessage,
           });
 
@@ -333,7 +349,10 @@ export const signalRulesAlertType = ({
           });
           result = mergeReturns([
             result,
-            createSearchAfterReturnTypeFromResponse({ searchResult: thresholdResults }),
+            createSearchAfterReturnTypeFromResponse({
+              searchResult: thresholdResults,
+              timestampOverride,
+            }),
             createSearchAfterReturnType({
               success,
               errors: [...errors, ...searchErrors],
@@ -436,18 +455,27 @@ export const signalRulesAlertType = ({
           });
         } else if (isEqlRule(type)) {
           if (query === undefined) {
-            throw new Error('eql query rule must have a query defined');
+            throw new Error('EQL query rule must have a query defined');
+          }
+          const MIN_EQL_RULE_TEMPLATE_VERSION = 2;
+          if (
+            signalMappingVersion === undefined ||
+            signalMappingVersion < MIN_EQL_RULE_TEMPLATE_VERSION
+          ) {
+            throw new Error(
+              `EQL based rules require an update to version ${MIN_EQL_RULE_TEMPLATE_VERSION} of the detection alerts index mapping`
+            );
           }
           const inputIndex = await getInputIndex(services, version, index);
           const request = buildEqlSearchRequest(
             query,
             inputIndex,
-            params.from,
-            params.to,
+            from,
+            to,
             searchAfterSize,
-            params.timestampOverride,
+            timestampOverride,
             exceptionItems ?? [],
-            params.eventCategoryOverride
+            eventCategoryOverride
           );
           const response: EqlSignalSearchResponse = await services.callCluster(
             'transport.request',

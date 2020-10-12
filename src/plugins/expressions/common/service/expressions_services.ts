@@ -23,6 +23,8 @@ import { ExpressionAstExpression } from '../ast';
 import { ExecutionContract } from '../execution/execution_contract';
 import { AnyExpressionTypeDefinition } from '../expression_types';
 import { AnyExpressionFunctionDefinition } from '../expression_functions';
+import { SavedObjectReference } from '../../../../core/types';
+import { PersistableState } from '../../../kibana_utils/common';
 
 /**
  * The public contract that `ExpressionsService` provides to other plugins
@@ -154,7 +156,7 @@ export interface ExpressionServiceParams {
  *
  *    so that JSDoc appears in developers IDE when they use those `plugins.expressions.registerFunction(`.
  */
-export class ExpressionsService {
+export class ExpressionsService implements PersistableState<ExpressionAstExpression> {
   public readonly executor: Executor;
   public readonly renderers: ExpressionRendererRegistry;
 
@@ -254,6 +256,36 @@ export class ExpressionsService {
     const fork = new ExpressionsService({ executor, renderers });
 
     return fork;
+  };
+
+  /**
+   * Extracts telemetry from expression AST
+   * @param state expression AST to extract references from
+   */
+  public readonly telemetry = (
+    state: ExpressionAstExpression,
+    telemetryData: Record<string, any> = {}
+  ) => {
+    return this.executor.telemetry(state, telemetryData);
+  };
+
+  /**
+   * Extracts saved object references from expression AST
+   * @param state expression AST to extract references from
+   * @returns new expression AST with references removed and array of references
+   */
+  public readonly extract = (state: ExpressionAstExpression) => {
+    return this.executor.extract(state);
+  };
+
+  /**
+   * Injects saved object references into expression AST
+   * @param state expression AST to update
+   * @param references array of saved object references
+   * @returns new expression AST with references injected
+   */
+  public readonly inject = (state: ExpressionAstExpression, references: SavedObjectReference[]) => {
+    return this.executor.inject(state, references);
   };
 
   /**

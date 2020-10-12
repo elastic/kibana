@@ -9,11 +9,22 @@ import { PropTypes } from 'prop-types';
 import { CustomSelectionTable } from '../../custom_selection_table';
 import { JobSelectorBadge } from '../job_selector_badge';
 import { TimeRangeBar } from '../timerange_bar';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiTabbedContent } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTabbedContent,
+  EuiCallOut,
+  EuiButton,
+  EuiText,
+} from '@elastic/eui';
 
 import { LEFT_ALIGNMENT, CENTER_ALIGNMENT, SortableProperties } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
+import { useMlKibana } from '../../../contexts/kibana';
+import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { PLUGIN_ID } from '../../../../../common/constants/app';
 
 const JOB_FILTER_FIELDS = ['job_id', 'groups'];
 const GROUP_FILTER_FIELDS = ['id'];
@@ -26,9 +37,16 @@ export function JobSelectorTable({
   selectedIds,
   singleSelection,
   timeseriesOnly,
+  withTimeRangeSelector,
 }) {
   const [sortableProperties, setSortableProperties] = useState();
   const [currentTab, setCurrentTab] = useState('Jobs');
+
+  const {
+    services: {
+      application: { navigateToApp },
+    },
+  } = useMlKibana();
 
   useEffect(() => {
     let sortablePropertyItems = [];
@@ -125,15 +143,18 @@ export function JobSelectorTable({
             <JobSelectorBadge key={`${group}-key`} id={group} isGroup={true} />
           )),
       },
-      {
+    ];
+
+    if (withTimeRangeSelector) {
+      columns.push({
         label: 'time range',
         id: 'timerange',
         alignment: LEFT_ALIGNMENT,
         render: ({ timeRange = {}, isRunning }) => (
           <TimeRangeBar timerange={timeRange} isRunning={isRunning} ganttBarWidth={ganttBarWidth} />
         ),
-      },
-    ];
+      });
+    }
 
     const filters = [
       {
@@ -190,15 +211,18 @@ export function JobSelectorTable({
         alignment: CENTER_ALIGNMENT,
         render: ({ jobIds = [] }) => jobIds.length,
       },
-      {
+    ];
+
+    if (withTimeRangeSelector) {
+      groupColumns.push({
         label: 'time range',
         id: 'timerange',
         alignment: LEFT_ALIGNMENT,
         render: ({ timeRange = {} }) => (
           <TimeRangeBar timerange={timeRange} ganttBarWidth={ganttBarWidth} />
         ),
-      },
-    ];
+      });
+    }
 
     return (
       <CustomSelectionTable
@@ -225,9 +249,32 @@ export function JobSelectorTable({
     );
   }
 
+  const navigateToWizard = async () => {
+    await navigateToApp(PLUGIN_ID, { path: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB });
+  };
+
   return (
     <Fragment>
-      {jobs.length === 0 && <EuiLoadingSpinner size="l" />}
+      {jobs.length === 0 && (
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="xpack.ml.jobSelector.noJobsFoundTitle"
+              defaultMessage="No anomaly detection jobs found"
+            />
+          }
+          iconType="iInCircle"
+        >
+          <EuiText textAlign="center">
+            <EuiButton color="primary" onClick={navigateToWizard}>
+              <FormattedMessage
+                id="xpack.ml.jobSelector.createJobButtonLabel"
+                defaultMessage="Create job"
+              />
+            </EuiButton>
+          </EuiText>
+        </EuiCallOut>
+      )}
       {jobs.length !== 0 && singleSelection === true && renderJobsTable()}
       {jobs.length !== 0 && !singleSelection && renderTabs()}
     </Fragment>
@@ -242,4 +289,5 @@ JobSelectorTable.propTypes = {
   selectedIds: PropTypes.array.isRequired,
   singleSelection: PropTypes.bool,
   timeseriesOnly: PropTypes.bool,
+  withTimeRangeSelector: PropTypes.bool,
 };

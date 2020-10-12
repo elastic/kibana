@@ -39,7 +39,7 @@ Create the *Host Overview* drilldown shown above.
 
 *Set up the dashboards*
 
-. Add the <<gs-get-data-into-kibana, sample web logs>> data set.
+. Add the sample web logs data set.
 
 . Create a new dashboard, called `Host Overview`, and include these visualizations
 from the sample data set:

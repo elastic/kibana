@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller } from 'src/core/server';
-
 import { ListNodesRouteResponse, NodeDataRole } from '../../../../common/types';
 
 import { RouteDependencies } from '../../../types';
@@ -47,15 +45,7 @@ function convertStatsIntoList(
   );
 }
 
-async function fetchNodeStats(callAsCurrentUser: LegacyAPICaller): Promise<any> {
-  const params = {
-    format: 'json',
-  };
-
-  return await callAsCurrentUser('nodes.stats', params);
-}
-
-export function registerListRoute({ router, config, license, lib }: RouteDependencies) {
+export function registerListRoute({ router, config, license }: RouteDependencies) {
   const { filteredNodeAttributes } = config;
 
   const NODE_ATTRS_KEYS_TO_IGNORE: string[] = [
@@ -74,16 +64,19 @@ export function registerListRoute({ router, config, license, lib }: RouteDepende
     { path: addBasePath('/nodes/list'), validate: false },
     license.guardApiRoute(async (context, request, response) => {
       try {
-        const stats = await fetchNodeStats(
-          context.core.elasticsearch.legacy.client.callAsCurrentUser
+        const statsResponse = await context.core.elasticsearch.client.asCurrentUser.nodes.stats<
+          Stats
+        >();
+        const body: ListNodesRouteResponse = convertStatsIntoList(
+          statsResponse.body,
+          disallowedNodeAttributes
         );
-        const body: ListNodesRouteResponse = convertStatsIntoList(stats, disallowedNodeAttributes);
         return response.ok({ body });
       } catch (e) {
-        if (lib.isEsError(e)) {
+        if (e.name === 'ResponseError') {
           return response.customError({
             statusCode: e.statusCode,
-            body: e,
+            body: { message: e.body.error?.reason },
           });
         }
         // Case: default

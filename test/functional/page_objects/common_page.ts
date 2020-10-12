@@ -505,6 +505,16 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     async scrollKibanaBodyTop() {
       await browser.setScrollToById('kibana-body', 0, 0);
     }
+
+    /**
+     * Dismiss Banner if available.
+     */
+    async dismissBanner() {
+      if (await testSubjects.exists('global-banner-item')) {
+        const button = await find.byButtonText('Dismiss');
+        await button.click();
+      }
+    }
   }
 
   return new CommonPage();
