@@ -5,6 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { TrustedApp } from '../types';
 
 const hashLengths: readonly number[] = [
   32, // MD5
@@ -12,6 +13,12 @@ const hashLengths: readonly number[] = [
   64, // SHA256
 ];
 const hasInvalidCharacters = /[^0-9a-f]/i;
+
+const entryFieldLabels: { [k in TrustedApp['entries'][0]['field']]: string } = {
+  'process.hash.*': 'Hash',
+  'process.executable.caseless': 'Path',
+  'process.code_signature': 'Signer',
+};
 
 export const DeleteTrustedAppsRequestSchema = {
   params: schema.object({
@@ -28,7 +35,7 @@ export const GetTrustedAppsRequestSchema = {
 
 export const PostTrustedAppCreateRequestSchema = {
   body: schema.object({
-    name: schema.string({ minLength: 1 }),
+    name: schema.string({ minLength: 1, maxLength: 256 }),
     description: schema.maybe(schema.string({ minLength: 0, maxLength: 256, defaultValue: '' })),
     os: schema.oneOf([schema.literal('linux'), schema.literal('macos'), schema.literal('windows')]),
     entries: schema.arrayOf(
@@ -47,7 +54,7 @@ export const PostTrustedAppCreateRequestSchema = {
           const usedFields: string[] = [];
           for (const { field, value } of entries) {
             if (usedFields.includes(field)) {
-              return `[Hash] field can only be used once`;
+              return `[${entryFieldLabels[field]}] field can only be used once`;
             }
 
             usedFields.push(field);
