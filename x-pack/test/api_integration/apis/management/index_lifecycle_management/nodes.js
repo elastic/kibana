@@ -13,7 +13,7 @@ import { initElasticsearchHelpers } from './lib';
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   const { getNodesStats } = initElasticsearchHelpers(es);
   const { loadNodes, getNodeDetails } = registerHelpers({ supertest });
