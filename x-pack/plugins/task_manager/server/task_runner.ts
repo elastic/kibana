@@ -13,7 +13,7 @@
 import apm from 'elastic-apm-node';
 import { performance } from 'perf_hooks';
 import Joi from 'joi';
-import { identity, defaults, flow } from 'lodash';
+import { identity, defaults, flow, isEmpty } from 'lodash';
 
 import { asOk, asErr, mapErr, eitherAsync, unwrap, mapOk, Result } from './lib/result_type';
 import { TaskRun, TaskMarkRunning, asTaskRunEvent, asTaskMarkRunningEvent } from './task_events';
@@ -24,7 +24,7 @@ import {
   CancelFunction,
   CancellableTask,
   ConcreteTaskInstance,
-  RunResult,
+  isFailedRunResult,
   SuccessfulRunResult,
   FailedRunResult,
   FailedTaskResult,
@@ -35,7 +35,7 @@ import {
 } from './task';
 
 const defaultBackoffPerFailure = 5 * 60 * 1000;
-const EMPTY_RUN_RESULT: SuccessfulRunResult = {};
+const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
 export interface TaskRunner {
   isExpired: boolean;
@@ -286,7 +286,9 @@ export class TaskManagerRunner implements TaskRunner {
     this.logger.debug(`The task ${this} is not cancellable.`);
   }
 
-  private validateResult(result?: RunResult | void): Result<SuccessfulRunResult, FailedRunResult> {
+  private validateResult(
+    result?: SuccessfulRunResult | FailedRunResult | void
+  ): Result<SuccessfulRunResult, FailedRunResult> {
     const { error } = Joi.validate(result, validateRunResult);
 
     if (error) {
@@ -300,7 +302,7 @@ export class TaskManagerRunner implements TaskRunner {
       return asOk(EMPTY_RUN_RESULT);
     }
 
-    return result.error ? asErr({ ...result, error: result.error as Error }) : asOk(result);
+    return isFailedRunResult(result) ? asErr({ ...result, error: result.error }) : asOk(result);
   }
 
   private shouldTryToScheduleRetry(): boolean {
@@ -316,11 +318,20 @@ export class TaskManagerRunner implements TaskRunner {
     failureResult: FailedRunResult
   ): Result<SuccessfulRunResult, FailedTaskResult> => {
     if (this.shouldTryToScheduleRetry()) {
-      const { runAt, state, error } = failureResult;
       // if we're retrying, keep the number of attempts
       const { schedule, attempts } = this.instance;
-      if (runAt || schedule) {
-        return asOk({ state, attempts, runAt });
+
+      const { state, error } = failureResult;
+      const reschedule = failureResult.runAt
+        ? { runAt: failureResult.runAt }
+        : failureResult.schedule
+        ? { schedule: failureResult.schedule }
+        : schedule
+        ? { schedule }
+        : false;
+
+      if (reschedule) {
+        return asOk({ state, attempts, ...reschedule });
       } else {
         // when result.error is truthy, then we're retrying because it failed
         const newRunAt = this.getRetryDelay({
@@ -344,15 +355,19 @@ export class TaskManagerRunner implements TaskRunner {
       // if running the task has failed ,try to correct by scheduling a retry in the near future
       mapErr(this.rescheduleFailedRun),
       // if retrying is possible (new runAt) or this is an recurring task - reschedule
-      mapOk(({ runAt, state, attempts = 0 }: Partial<ConcreteTaskInstance>) => {
-        const { startedAt, schedule: { interval = undefined } = {} } = this.instance;
-        return asOk({
-          runAt: runAt || intervalFromDate(startedAt!, interval)!,
-          state,
-          attempts,
-          status: TaskStatus.Idle,
-        });
-      }),
+      mapOk(
+        ({ runAt, schedule: reschedule, state, attempts = 0 }: Partial<ConcreteTaskInstance>) => {
+          const { startedAt, schedule } = this.instance;
+          return asOk({
+            runAt:
+              runAt || intervalFromDate(startedAt!, reschedule?.interval ?? schedule?.interval)!,
+            state,
+            schedule: reschedule ?? schedule,
+            attempts,
+            status: TaskStatus.Idle,
+          });
+        }
+      ),
       unwrap
     )(result);
 

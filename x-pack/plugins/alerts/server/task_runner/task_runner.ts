@@ -42,7 +42,7 @@ const FALLBACK_RETRY_INTERVAL: IntervalSchedule = { interval: '5m' };
 
 interface AlertTaskRunResult {
   state: AlertTaskState;
-  runAt: Date | undefined;
+  schedule: IntervalSchedule | undefined;
 }
 
 interface AlertTaskInstance extends ConcreteTaskInstance {
@@ -307,15 +307,7 @@ export class TaskRunner {
       state: await promiseResult<AlertTaskState, Error>(
         this.validateAndExecuteAlert(services, apiKey, alert)
       ),
-      runAt: asOk(
-        getNextRunAt(
-          new Date(this.taskInstance.startedAt!),
-          // we do not currently have a good way of returning the type
-          // from SavedObjectsClient, and as we currenrtly require a schedule
-          // and we only support `interval`, we can cast this safely
-          alert.schedule
-        )
-      ),
+      schedule: asOk(alert.schedule),
     };
   }
 
@@ -326,7 +318,7 @@ export class TaskRunner {
       state: originalState,
     } = this.taskInstance;
 
-    const { state, runAt } = await errorAsAlertTaskRunResult(this.loadAlertAttributesAndRun());
+    const { state, schedule } = await errorAsAlertTaskRunResult(this.loadAlertAttributesAndRun());
     const namespace = spaceId === 'default' ? undefined : spaceId;
 
     const executionStatus: AlertExecutionStatus = map(
@@ -376,16 +368,8 @@ export class TaskRunner {
           };
         }
       ),
-      runAt: resolveErr<Date | undefined, Error>(runAt, (err) => {
-        return isAlertSavedObjectNotFoundError(err, alertId)
-          ? undefined
-          : getNextRunAt(
-              new Date(),
-              // if we fail at this point we wish to recover but don't have access to the Alert's
-              // attributes, so we'll use a default interval to prevent the underlying task from
-              // falling into a failed state
-              FALLBACK_RETRY_INTERVAL
-            );
+      schedule: resolveErr<IntervalSchedule | undefined, Error>(schedule, (err) => {
+        return isAlertSavedObjectNotFoundError(err, alertId) ? undefined : FALLBACK_RETRY_INTERVAL;
       }),
     };
   }
@@ -463,7 +447,7 @@ async function errorAsAlertTaskRunResult(
   } catch (e) {
     return {
       state: asErr(e),
-      runAt: asErr(e),
+      schedule: asErr(e),
     };
   }
 }
