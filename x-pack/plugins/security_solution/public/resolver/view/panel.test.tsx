@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { createMemoryHistory, History as HistoryPackageHistoryInterface } from 'history';
-import copy from 'copy-to-clipboard';
 import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from '../data_access_layer/mocks/no_ancestors_two_children_with_related_events_on_origin';
 import { Simulator } from '../test_utilities/simulator';
 // Extend jest with a custom matcher
@@ -14,9 +13,12 @@ import { urlSearch } from '../test_utilities/url_search';
 // the resolver component instance ID, used by the react code to distinguish piece of global state from those used by other resolver instances
 const resolverComponentInstanceID = 'resolverComponentInstanceID';
 
-jest.mock('copy-to-clipboard', () => {
-  return jest.fn();
+Object.assign(navigator, {
+  clipboard: {
+    writeText: () => {},
+  },
 });
+jest.spyOn(navigator.clipboard, 'writeText');
 
 describe(`Resolver: when analyzing a tree with no ancestors and two children and two related registry event on the origin, and when the component instance ID is ${resolverComponentInstanceID}`, () => {
   /**
@@ -122,7 +124,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
       copyableFields?.map((copyableField) => {
         copyableField.simulate('mouseenter');
         simulator().testSubject('clipboard').last().simulate('click');
-        expect(copy).toHaveBeenLastCalledWith(copyableField.text(), expect.any(Object));
+        expect(navigator.clipboard.writeText).toHaveBeenCalledWith(copyableField.text());
         copyableField.simulate('mouseleave');
       });
     });
@@ -180,7 +182,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
     copyableFields?.map((copyableField) => {
       copyableField.simulate('mouseenter');
       simulator().testSubject('clipboard').last().simulate('click');
-      expect(copy).toHaveBeenLastCalledWith(copyableField.text(), expect.any(Object));
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(copyableField.text());
       copyableField.simulate('mouseleave');
     });
   });
@@ -289,7 +291,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
             copyableFields?.map((copyableField) => {
               copyableField.simulate('mouseenter');
               simulator().testSubject('clipboard').last().simulate('click');
-              expect(copy).toHaveBeenLastCalledWith(copyableField.text(), expect.any(Object));
+              expect(navigator.clipboard.writeText).toHaveBeenCalledWith(copyableField.text());
               copyableField.simulate('mouseleave');
             });
           });
