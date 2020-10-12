@@ -10,7 +10,7 @@ import { NumberFromString } from '../saved_object';
 import { UserRT } from '../user';
 import { CommentResponseRt } from './comment';
 import { CasesStatusResponseRt } from './status';
-import { CaseConnectorRt, ESCaseConnector, ConnectorFieldsRt } from '../connectors';
+import { CaseConnectorRt, ESCaseConnector, ConnectorPartialFieldsRt } from '../connectors';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 export { ActionTypeExecutorResult } from '../../../../actions/server/types';
@@ -145,14 +145,9 @@ export const ServiceConnectorBasicCaseParamsRt = rt.type({
   updatedBy: rt.union([ServiceConnectorUserParams, rt.null]),
 });
 
-export const ServiceConnectorCaseParamsWithFieldsRt = rt.intersection([
+export const ServiceConnectorCaseParamsRt = rt.intersection([
   ServiceConnectorBasicCaseParamsRt,
-  ConnectorFieldsRt,
-]);
-
-export const ServiceConnectorCaseParamsRt = rt.union([
-  ServiceConnectorBasicCaseParamsRt,
-  ServiceConnectorCaseParamsWithFieldsRt,
+  ConnectorPartialFieldsRt,
 ]);
 
 export const ServiceConnectorCaseResponseRt = rt.intersection([
