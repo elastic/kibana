@@ -19,7 +19,6 @@ describe('SyntheticsCallout', () => {
       setItem: setItemMock,
     };
 
-    //  @ts-expect-error replacing a call to localStorage we use for monitor list size
     global.localStorage = localStorageMock;
   });
 
