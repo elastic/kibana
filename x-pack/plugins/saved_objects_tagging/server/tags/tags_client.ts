@@ -57,7 +57,7 @@ export class TagsClient implements ITagsClient {
   public async getAll() {
     const result = await this.soClient.find<TagAttributes>({
       type: this.type,
-      perPage: 1000,
+      perPage: 10000,
     });
 
     return result.saved_objects.map(savedObjectToTag);
