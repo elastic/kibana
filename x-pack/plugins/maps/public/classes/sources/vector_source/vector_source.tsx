@@ -145,7 +145,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     throw new Error(`Should implemement AbstractVectorSource#createField`);
   }
 
-  getFieldNames() {
+  getFieldNames(): string[] {
     return [];
   }
 

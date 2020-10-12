@@ -32,9 +32,14 @@ const TERMS_BUCKET_KEYS_TO_IGNORE = ['key', 'doc_count'];
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MapQuery, VectorJoinSourceRequestMeta } from '../../../../common/descriptor_types';
+import {
+  ESTermSourceDescriptor,
+  MapQuery,
+  VectorJoinSourceRequestMeta,
+} from '../../../../common/descriptor_types';
 import { IField } from '../../fields/field';
 import { PropertiesMap } from '../../joins/join';
+import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 
 export interface IESTermSource extends IESAggSource {
   getTermField(): IField;
@@ -64,11 +69,13 @@ export class ESTermSource extends AbstractESAggSource implements IESTermSource {
   static type = SOURCE_TYPES.ES_TERM_SOURCE;
 
   private readonly _termField: ESDocField;
+  readonly _descriptor: ESTermSourceDescriptor;
 
-  constructor(descriptor, inspectorAdapters) {
+  constructor(descriptor: ESTermSourceDescriptor, inspectorAdapters?: Adapters) {
     super(descriptor, inspectorAdapters);
+    this._descriptor = descriptor;
     this._termField = new ESDocField({
-      fieldName: descriptor.term,
+      fieldName: this._descriptor.term,
       source: this,
       origin: this.getOriginForField(),
     });
@@ -90,7 +97,7 @@ export class ESTermSource extends AbstractESAggSource implements IESTermSource {
     return this._descriptor.whereQuery;
   }
 
-  getAggKey(aggType, fieldName): string {
+  getAggKey(aggType: AGG_TYPE, fieldName?: string): string {
     return getJoinAggKey({
       aggType,
       aggFieldName: fieldName,
@@ -107,7 +114,12 @@ export class ESTermSource extends AbstractESAggSource implements IESTermSource {
       : super.getAggLabel(aggType, fieldName);
   }
 
-  async getPropertiesMap(searchFilters, leftSourceName, leftFieldName, registerCancelCallback) {
+  async getPropertiesMap(
+    searchFilters: VectorJoinSourceRequestMeta,
+    leftSourceName: string,
+    leftFieldName: string,
+    registerCancelCallback: (callback: () => void) => void
+  ) {
     if (!this.hasCompleteConfig()) {
       return [];
     }
