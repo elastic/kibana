@@ -24,6 +24,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import Url from 'url';
 import { ChromeNavLink } from '../..';
+import theme from '../../../../../config/theme.json';
 
 function findClosestAnchor(element: HTMLElement): HTMLAnchorElement | void {
   let current = element;
@@ -99,14 +100,14 @@ export function HeaderLogo({ href, navigateToApp, ...observables }: Props) {
   return (
     <EuiHeaderLogo
       data-test-subj="logo"
-      iconType="logoElastic"
+      iconType={theme.headerLogo}
       onClick={(e) => onClick(e, forceNavigation, navLinks, navigateToApp)}
       href={href}
       aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel', {
         defaultMessage: 'Go to home page',
       })}
     >
-      Elastic
+      {theme.title}
     </EuiHeaderLogo>
   );
 }

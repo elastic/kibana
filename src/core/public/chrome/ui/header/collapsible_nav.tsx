@@ -38,6 +38,7 @@ import { AppCategory } from '../../../../types';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
 import { OnIsLockedUpdate } from './';
+import theme from '../../../../../config/theme.json';
 import { createEuiListItem, createRecentNavLink, isModifiedOrPrevented } from './nav_link';
 
 function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLink[]>) {
@@ -264,7 +265,9 @@ export function CollapsibleNav({
           return (
             <EuiCollapsibleNavGroup
               key={category.id}
-              iconType={category.euiIconType}
+              iconType={
+                category.euiIconType === 'logoKibana' ? theme.navLogo : category.euiIconType
+              }
               title={category.label}
               isCollapsible={true}
               initialIsOpen={getIsCategoryOpen(category.id, storage)}

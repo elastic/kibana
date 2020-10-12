@@ -4,3 +4,20 @@
 @import './overlays/index';
 @import './rendering/index';
 @import './styles/index';
+
+@import './theme'
+
+// with a more detailed requirement and goal understanding this should have been a nicer solution
+// but leaving this code all together here for clarity purposes
+.homWrapper{
+  background-color: $mainBgColor !important;
+}
+.kbnOverviewPageHeader{
+  background-color: $secondaryBgColor !important;
+}
+.euiTitle{
+  color: $textColor;
+}
+a {
+  color: $linkColor !important;
+}
