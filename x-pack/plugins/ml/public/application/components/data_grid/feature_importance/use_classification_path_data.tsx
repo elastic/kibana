@@ -196,13 +196,67 @@ export const buildClassificationDecisionPathData = ({
     )
     .map((d) => [d[FEATURE_NAME] as string, d[FEATURE_IMPORTANCE] as number, NaN]);
 
-  // transform the numbers into the probability space
-  // starting with the baseline retrieved from trained_models metadata
-  let logOddSoFar = baselineClass?.baseline ? baselineClass?.baseline : 0;
+  /**
+   * For binary classification
+   */
+  if (baselines.length === 2) {
+    // transform the numbers into the probability space
+    // starting with the baseline retrieved from trained_models metadata
+    let logOddSoFar = baselineClass?.baseline ? baselineClass?.baseline : 0;
+    for (let i = featureImportance.length - 1; i >= 0; i--) {
+      logOddSoFar += finalResult[i][1];
+      const predictionProbabilitySoFar = Math.exp(logOddSoFar) / (Math.exp(logOddSoFar) + 1);
+      finalResult[i][2] = predictionProbabilitySoFar;
+    }
+    return finalResult;
+  }
+
+  /**
+   * For multiclass classification
+   */
+
+  // first calculate the denominator
+  // (\sum_{x\in{A,B,C}} exp(baseline(x) + \sum_{i=0}^j feature_importance_i(x)))
+  let denominator = 0;
+  for (let x = 0; x < baselines.length; x++) {
+    // grab the feature importance for class x
+    const _featureImportanceOfClassX: ExtendedFeatureImportance[] = featureImportance
+      .map((feature) => {
+        const classFeatureImportance = Array.isArray(feature.classes)
+          ? feature.classes.find(
+              (c) => getStringBasedClassName(c.class_name) === baselines[x].class_name
+            )
+          : feature;
+        if (
+          classFeatureImportance &&
+          typeof classFeatureImportance[FEATURE_IMPORTANCE] === 'number'
+        ) {
+          return {
+            [FEATURE_NAME]: feature[FEATURE_NAME],
+            [FEATURE_IMPORTANCE]: classFeatureImportance[FEATURE_IMPORTANCE],
+            absImportance: Math.abs(classFeatureImportance[FEATURE_IMPORTANCE] as number),
+          };
+        }
+        return undefined;
+      })
+      .filter((d) => d !== undefined) as ExtendedFeatureImportance[];
+
+    const featureImportanceOfClassX = _featureImportanceOfClassX.reduce(
+      (acc, a) => acc + a.importance!,
+      0
+    );
+
+    denominator += Math.exp(baselines[x].baseline + featureImportanceOfClassX);
+  }
+
+  // calculate the probability path
+  // p_j = exp(baseline(A) + \sum_{i=0}^j feature_importance_i(A)) / denominator
+  const baseline = baselineClass?.baseline !== undefined ? baselineClass.baseline : 0;
+  let featureImportanceRunningSum = 0;
   for (let i = featureImportance.length - 1; i >= 0; i--) {
-    logOddSoFar += finalResult[i][1];
-    const predictionProbabilitySoFar = Math.exp(logOddSoFar) / (Math.exp(logOddSoFar) + 1);
-    finalResult[i][2] = predictionProbabilitySoFar;
+    featureImportanceRunningSum += finalResult[i][1];
+    const numerator = Math.exp(baseline + featureImportanceRunningSum);
+    finalResult[i][2] = numerator / denominator;
   }
 
   return finalResult;
