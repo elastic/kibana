@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CSV_JOB_TYPE } from '../../../../constants';
+import { PDF_JOB_TYPE } from '../../../../constants';
 import { cryptoFactory } from '../../../lib';
 import { CreateJobFn, CreateJobFnFactory } from '../../../types';
 import { validateUrls } from '../../common';
@@ -16,7 +16,7 @@ export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<
 >> = function createJobFactoryFn(reporting, parentLogger) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
-  const logger = parentLogger.clone([CSV_JOB_TYPE, 'create-job']);
+  const logger = parentLogger.clone([PDF_JOB_TYPE, 'create-job']);
 
   return async function createJob(
     { title, relativeUrls, browserTimezone, layout, objectType },
