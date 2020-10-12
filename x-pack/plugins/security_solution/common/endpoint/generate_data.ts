@@ -265,6 +265,19 @@ interface NodeState {
 }
 
 /**
+ * The data_stream fields in an elasticsearch document.
+ */
+export interface DataStream {
+  dataset: string;
+  namespace: string;
+  type: string;
+}
+
+interface DataStreamField {
+  data_stream: DataStream;
+}
+
+/**
  * The Tree and TreeNode interfaces define structures to make testing of resolver functionality easier. The `generateTree`
  * method builds a `Tree` structures which organizes the different parts of the resolver tree. Maps are used to allow
  * tests to quickly verify if the node they retrieved from ES was actually created by the generator or if there is an
@@ -354,16 +367,92 @@ export function getTreeOptionsWithDef(options?: TreeOptions): TreeOptionDefaults
   };
 }
 
+const metadataDefaultDataStream = {
+  type: 'metrics',
+  dataset: 'endpoint.metadata',
+  namespace: 'default',
+};
+
+const policyDefaultDataStream = {
+  type: 'metrics',
+  dataset: 'endpoint.policy',
+  namespace: 'default',
+};
+
+const eventsDefaultDataStream = {
+  type: 'logs',
+  dataset: 'endpoint.events.process',
+  namespace: 'default',
+};
+
+const alertsDefaultDataStream = {
+  type: 'logs',
+  dataset: 'endpoint.alerts',
+  namespace: 'default',
+};
+
+interface EndpointDocGeneratorParams {
+  seed?: string | seedrandom.prng;
+  metadataDataStream?: DataStream;
+  policyDataStream?: DataStream;
+  eventsDataStream?: DataStream;
+  alertsDataStream?: DataStream;
+}
+
+function createDataStreamField(ds: DataStream) {
+  return { data_stream: ds };
+}
+
 export class EndpointDocGenerator {
   commonInfo: HostInfo;
   random: seedrandom.prng;
   sequence: number = 0;
-  constructor(seed: string | seedrandom.prng = Math.random().toString()) {
-    if (typeof seed === 'string') {
-      this.random = seedrandom(seed);
-    } else {
-      this.random = seed;
+  metadataDataStream: DataStreamField = createDataStreamField(metadataDefaultDataStream);
+  policyDataStream: DataStreamField = createDataStreamField(policyDefaultDataStream);
+  eventsDataStream: DataStreamField = createDataStreamField(eventsDefaultDataStream);
+  alertsDataStream: DataStreamField = createDataStreamField(alertsDefaultDataStream);
+  /**
+   * The EndpointDocGenerator parameters
+   *
+   * @param seed either a string to seed the random number generator or a random number generator function
+   * @param metadataDataStream the values to populate the data_stream fields when generating metadata documents
+   * @param policyDataStream the values to populate the data_stream fields when generating policy documents
+   * @param eventsDataStream the values to populate the data_stream fields when generating event documents
+   * @param alertsDataStream the values to populate the data_stream fields when generating alert documents
+   */
+  constructor(
+    options: string | seedrandom.prng | EndpointDocGeneratorParams = {
+      seed: Math.random().toString(),
+      metadataDataStream: metadataDefaultDataStream,
+      policyDataStream: policyDefaultDataStream,
+      eventsDataStream: eventsDefaultDataStream,
+      alertsDataStream: alertsDefaultDataStream,
     }
+  ) {
+    if (typeof options === 'string') {
+      this.random = seedrandom(options);
+    } else if ('quick' in options) {
+      this.random = options;
+    } else {
+      if (typeof options.seed === 'string') {
+        this.random = seedrandom(options.seed);
+      } else {
+        this.random = options.seed ?? seedrandom(Math.random().toString());
+      }
+      this.metadataDataStream = createDataStreamField(
+        options.metadataDataStream ?? metadataDefaultDataStream
+      );
+      this.policyDataStream = createDataStreamField(
+        options.policyDataStream ?? policyDefaultDataStream
+      );
+      this.eventsDataStream = createDataStreamField(
+        options.eventsDataStream ?? eventsDefaultDataStream
+      );
+      this.alertsDataStream = createDataStreamField(
+        options.alertsDataStream ?? alertsDefaultDataStream
+      );
+    }
+
     this.commonInfo = this.createHostData();
   }
 
@@ -381,6 +470,16 @@ export class EndpointDocGenerator {
   public updateHostPolicyData() {
     this.commonInfo.Endpoint.policy.applied = this.randomChoice(APPLIED_POLICIES);
     this.commonInfo.Endpoint.policy.applied.status = this.randomChoice(POLICY_RESPONSE_STATUSES);
+  }
+
+  public static createDataStreamFromIndex(index: string): DataStream {
+    // e.g. logs-endpoint.events.network-default
+    const parts = index.split('-');
+    return {
+      type: parts[0], // logs
+      dataset: parts[1], // endpoint.events.network
+      namespace: parts[2], // default
+    };
   }
 
   private createHostData(): HostInfo {
@@ -432,6 +531,7 @@ export class EndpointDocGenerator {
         dataset: 'endpoint.metadata',
       },
       ...this.commonInfo,
+      ...this.metadataDataStream,
     };
   }
 
@@ -450,6 +550,7 @@ export class EndpointDocGenerator {
   ): AlertEvent {
     return {
       ...this.commonInfo,
+      ...this.alertsDataStream,
       '@timestamp': ts,
       ecs: {
         version: '1.4.0',
@@ -598,6 +699,7 @@ export class EndpointDocGenerator {
         return {};
       })(options.eventCategory);
     return {
+      ...this.eventsDataStream,
       '@timestamp': options.timestamp ? options.timestamp : new Date().getTime(),
       agent: { ...this.commonInfo.agent, type: 'endpoint' },
       ecs: {
@@ -1236,6 +1338,7 @@ export class EndpointDocGenerator {
       return allStatus || this.randomHostPolicyResponseActionStatus();
     };
     return {
+      ...this.policyDataStream,
       '@timestamp': ts,
       agent: {
         id: this.commonInfo.agent.id,

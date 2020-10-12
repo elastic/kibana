@@ -52,9 +52,18 @@ export async function indexHostsAndAlerts(
   const epmEndpointPackage = await getEndpointPackageInfo(kbnClient);
   // Keep a map of host applied policy ids (fake) to real ingest package configs (policy record)
   const realPolicies: Record<string, CreatePackagePolicyResponse['item']> = {};
-
+  const metadataDataStream = EndpointDocGenerator.createDataStreamFromIndex(metadataIndex);
+  const policyDataStream = EndpointDocGenerator.createDataStreamFromIndex(policyResponseIndex);
+  const eventsDataStream = EndpointDocGenerator.createDataStreamFromIndex(eventIndex);
+  const alertsDataStream = EndpointDocGenerator.createDataStreamFromIndex(alertIndex);
   for (let i = 0; i < numHosts; i++) {
-    const generator = new EndpointDocGenerator(random);
+    const generator = new EndpointDocGenerator({
+      seed: random,
+      metadataDataStream,
+      policyDataStream,
+      eventsDataStream,
+      alertsDataStream,
+    });
     await indexHostDocs(
       numDocs,
       client,

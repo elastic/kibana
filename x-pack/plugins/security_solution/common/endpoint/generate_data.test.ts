@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import _ from 'lodash';
+import seedrandom from 'seedrandom';
 import {
   EndpointDocGenerator,
   Event,
@@ -12,6 +13,7 @@ import {
   RelatedEventCategory,
   ECSCategory,
   ANCESTRY_LIMIT,
+  DataStream,
 } from './generate_data';
 import { firstNonNullValue, values } from './models/ecs_safety_helpers';
 import {
@@ -25,6 +27,109 @@ interface Node {
   children: Node[];
   parent_entity_id?: string;
 }
+
+interface EventWithDataStream {
+  data_stream: DataStream;
+}
+
+describe('data generator options', () => {
+  it.each`
+    param                                                                                               | description
+    ${'seed'}                                                                                           | ${'string'}
+    ${seedrandom('yo')}                                                                                 | ${'seedrandom class'}
+    ${{ seed: 'blah' }}                                                                                 | ${'object with seed defined as a string'}
+    ${{ eventsDataStream: { type: 'logs', dataset: 'endpoint.events.process', namespace: 'default' } }} | ${'object with a data stream field defined'}
+  `(
+    'sets the data stream fields correctly when the parameter is $param a $description',
+    ({ param }) => {
+      const generator = new EndpointDocGenerator(param);
+      expect(
+        ((generator.generateHostMetadata() as unknown) as EventWithDataStream).data_stream
+      ).toEqual({
+        type: 'metrics',
+        dataset: 'endpoint.metadata',
+        namespace: 'default',
+      });
+      expect(
+        ((generator.generatePolicyResponse() as unknown) as EventWithDataStream).data_stream
+      ).toEqual({
+        type: 'metrics',
+        dataset: 'endpoint.policy',
+        namespace: 'default',
+      });
+      expect(((generator.generateEvent() as unknown) as EventWithDataStream).data_stream).toEqual({
+        type: 'logs',
+        dataset: 'endpoint.events.process',
+        namespace: 'default',
+      });
+      expect(((generator.generateAlert() as unknown) as EventWithDataStream).data_stream).toEqual({
+        type: 'logs',
+        dataset: 'endpoint.alerts',
+        namespace: 'default',
+      });
+    }
+  );
+
+  it('creates a generator with a custom seedrandom class', () => {
+    const ran = seedrandom('yo');
+    const generator = new EndpointDocGenerator(ran);
+    expect(generator.random).toBe(ran);
+    expect(
+      ((generator.generateHostMetadata() as unknown) as EventWithDataStream).data_stream
+    ).toEqual({
+      type: 'metrics',
+      dataset: 'endpoint.metadata',
+      namespace: 'default',
+    });
+    expect(
+      ((generator.generatePolicyResponse() as unknown) as EventWithDataStream).data_stream
+    ).toEqual({
+      type: 'metrics',
+      dataset: 'endpoint.policy',
+      namespace: 'default',
+    });
+    expect(((generator.generateEvent() as unknown) as EventWithDataStream).data_stream).toEqual({
+      type: 'logs',
+      dataset: 'endpoint.events.process',
+      namespace: 'default',
+    });
+    expect(((generator.generateAlert() as unknown) as EventWithDataStream).data_stream).toEqual({
+      type: 'logs',
+      dataset: 'endpoint.alerts',
+      namespace: 'default',
+    });
+  });
+
+  it('creates a generator with a custom seedrandom class from an object parameter', () => {
+    const metadataDataStream = { type: 'meta', dataset: 'dataset', namespace: 'name' };
+    const ran = seedrandom('yo');
+    const generator = new EndpointDocGenerator({
+      seed: ran,
+      metadataDataStream,
+    });
+    expect(generator.random).toBe(ran);
+    expect(
+      ((generator.generateHostMetadata() as unknown) as EventWithDataStream).data_stream
+    ).toStrictEqual(metadataDataStream);
+    expect(
+      ((generator.generatePolicyResponse() as unknown) as EventWithDataStream).data_stream
+    ).toEqual({
+      type: 'metrics',
+      dataset: 'endpoint.policy',
+      namespace: 'default',
+    });
+    expect(((generator.generateEvent() as unknown) as EventWithDataStream).data_stream).toEqual({
+      type: 'logs',
+      dataset: 'endpoint.events.process',
+      namespace: 'default',
+    });
+    expect(((generator.generateAlert() as unknown) as EventWithDataStream).data_stream).toEqual({
+      type: 'logs',
+      dataset: 'endpoint.alerts',
+      namespace: 'default',
+    });
+  });
+});
 
 describe('data generator', () => {
   let generator: EndpointDocGenerator;
