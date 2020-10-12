@@ -25,6 +25,8 @@ import {
   EmbeddableFactoryDefinition,
   IContainer,
   EmbeddableFactory,
+  EmbeddableStart,
+  AttributeService,
 } from '../../../../src/plugins/embeddable/public';
 import {
   BookEmbeddable,
@@ -38,11 +40,10 @@ import {
   SavedObjectsClientContract,
   SimpleSavedObject,
 } from '../../../../src/core/public';
-import { DashboardStart, AttributeService } from '../../../../src/plugins/dashboard/public';
 import { checkForDuplicateTitle, OnSaveProps } from '../../../../src/plugins/saved_objects/public';
 
 interface StartServices {
-  getAttributeService: DashboardStart['getAttributeService'];
+  getAttributeService: EmbeddableStart['getAttributeService'];
   openModal: OverlayStart['openModal'];
   savedObjectsClient: SavedObjectsClientContract;
   overlays: OverlayStart;

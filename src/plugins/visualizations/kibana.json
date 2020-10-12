@@ -9,7 +9,6 @@
     "uiActions",
     "embeddable",
     "inspector",
-    "dashboard",
     "savedObjects"
   ],
   "optionalPlugins": ["usageCollection"],
