@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import RE2 from 're2';
 import { SavedObjectsClientContract, SavedObjectsFindOptions } from 'kibana/server';
 // import Boom from 'boom';
 import { ML_SAVED_OBJECT_TYPE } from './saved_objects';
@@ -130,6 +131,9 @@ export function filterJobIdsFactory(savedObjectsClient: SavedObjectsClientContra
     field: keyof T,
     key: keyof JobObject
   ): Promise<T[]> {
+    if (list.length === 0) {
+      return [];
+    }
     const jobIds = await getIds(jobType, key);
     return list.filter((j) => jobIds.includes((j[field] as unknown) as string));
   }
@@ -151,8 +155,24 @@ export function filterJobIdsFactory(savedObjectsClient: SavedObjectsClientContra
     ids: string[],
     key: keyof JobObject
   ): Promise<string[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+
     const jobIds = await getIds(jobType, key);
-    return ids.filter((id) => jobIds.includes(id));
+    if (ids.join().match('\\*') === null) {
+      // check to see if any of the ids supplied contain a wildcard
+      return ids.filter((id) => jobIds.includes(id));
+    }
+
+    // if any of the ids contain a wildcard, check each one.
+    return ids.filter((id) => {
+      if (id.match('\\*') === null) {
+        return jobIds.includes(id);
+      }
+      const regex = new RE2(id.replace('*', '.*'));
+      return jobIds.some((jId) => typeof jId === 'string' && regex.exec(jId));
+    });
   }
 
   async function filterJobIdsForSpace(jobType: JobType, ids: string[]): Promise<string[]> {
