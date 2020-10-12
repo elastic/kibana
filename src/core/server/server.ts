@@ -120,10 +120,13 @@ export class Server {
     });
     const legacyConfigSetup = await this.legacy.setupLegacyConfig();
 
-    // Immediately terminate in case of invalid configuration
-    // This needs to be done after plugin discovery
-    await this.configService.validate();
-    await ensureValidConfiguration(this.configService, legacyConfigSetup);
+    // rely on dev server to validate config, don't validate in the parent process
+    if (!this.env.isDevClusterMaster) {
+      // Immediately terminate in case of invalid configuration
+      // This needs to be done after plugin discovery
+      await this.configService.validate();
+      await ensureValidConfiguration(this.configService, legacyConfigSetup);
+    }
 
     const contextServiceSetup = this.context.setup({
       // We inject a fake "legacy plugin" with dependencies on every plugin so that legacy plugins:
