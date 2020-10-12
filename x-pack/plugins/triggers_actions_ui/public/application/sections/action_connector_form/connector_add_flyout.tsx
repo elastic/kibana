@@ -252,7 +252,7 @@ export const ConnectorAddFlyout = ({
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             {!actionType ? (
-              <EuiButtonEmpty onClick={closeFlyout}>
+              <EuiButtonEmpty data-test-subj="cancelButton" onClick={closeFlyout}>
                 {i18n.translate(
                   'xpack.triggersActionsUI.sections.actionConnectorAdd.cancelButtonLabel',
                   {
@@ -262,6 +262,7 @@ export const ConnectorAddFlyout = ({
               </EuiButtonEmpty>
             ) : (
               <EuiButtonEmpty
+                data-test-subj="backButton"
                 onClick={() => {
                   setActionType(undefined);
                   setConnector(initialConnector);
