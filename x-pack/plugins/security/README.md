@@ -73,19 +73,20 @@ inherent tradeoff between the following logging approaches:
 - **Read operations**, on the other hand, should be logged after the operation
   completed (logging the outcome) since we won't know what resources were
   accessed before receiving the response.
+- Be explicit about the timing and outcome of an action in your messaging. (e.g.
+  "User has logged in" vs. "User is creating dashboard")
 
 ### Can an action trigger multiple events?
 
-An action can be a combination of different operations, each of which should be
-captured as separate events:
-
-- Actions that are performed on multiple resources (**bulk operations**) should
-  be logged as separate events, one for each resource.
+- A request to Kibana can perform a combination of different operations, each of
+  which should be captured as separate events.
+- Operations that are performed on multiple resources (**bulk operations**)
+  should be logged as separate events, one for each resource.
 - Actions that kick off **background tasks** should be logged as separate
   events, one for creating the task and another one for executing it.
 - **Internal checks**, which have been carried out in order to perform an
   operation, or **errors** that occured as a result of an operation should be
-  logged as an outcome of the operation itself, instead of a separate event,
-  using the ECS `event.outcome` and `error` fields.
+  logged as an outcome of the operation itself, using the ECS `event.outcome`
+  and `error` fields, instead of logging a separate event.
 - Multiple events that were part of the same request can be correlated in the
   audit log using the ECS `trace.id` property.
