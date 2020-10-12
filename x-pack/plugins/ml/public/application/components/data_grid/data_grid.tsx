@@ -30,7 +30,7 @@ import { ANALYSIS_CONFIG_TYPE, INDEX_STATUS } from '../../data_frame_analytics/c
 import { euiDataGridStyle, euiDataGridToolbarSettings } from './common';
 import { UseIndexDataReturnType } from './types';
 import { DecisionPathPopover } from './feature_importance/decision_path_popover';
-import { TopClasses } from '../../../../common/types/feature_importance';
+import { FeatureImportanceBaseline, TopClasses } from '../../../../common/types/feature_importance';
 import { DEFAULT_RESULTS_FIELD } from '../../../../common/constants/data_frame_analytics';
 import { DataFrameAnalysisConfigType } from '../../../../common/types/data_frame_analytics';
 
@@ -44,7 +44,7 @@ export const DataGridTitle: FC<{ title: string }> = ({ title }) => (
 );
 
 interface PropsWithoutHeader extends UseIndexDataReturnType {
-  baseline?: number;
+  baseline?: FeatureImportanceBaseline;
   analysisType?: DataFrameAnalysisConfigType | 'unknown';
   resultsField?: string;
   dataTestSubj: string;

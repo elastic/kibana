@@ -23,7 +23,7 @@ export interface InferenceQueryParams {
   tags?: string;
   // Custom kibana endpoint query params
   with_pipelines?: boolean;
-  include?: 'total_feature_importance';
+  include?: 'total_feature_importance' | string;
 }
 
 export interface InferenceStatsQueryParams {

@@ -49,6 +49,22 @@ export type TotalFeatureImportance =
   | ClassificationTotalFeatureImportance
   | RegressionTotalFeatureImportance;
 
+export interface FeatureImportanceClassBaseline {
+  class_name: string;
+  baseline: number;
+}
+export interface ClassificationFeatureImportanceBaseline {
+  classes: FeatureImportanceClassBaseline[];
+}
+
+export interface RegressionFeatureImportanceBaseline {
+  baseline: number;
+}
+
+export type FeatureImportanceBaseline =
+  | ClassificationFeatureImportanceBaseline
+  | RegressionFeatureImportanceBaseline;
+
 export function isClassificationTotalFeatureImportance(
   summary: ClassificationTotalFeatureImportance | RegressionTotalFeatureImportance
 ): summary is ClassificationTotalFeatureImportance {
@@ -59,4 +75,16 @@ export function isRegressionTotalFeatureImportance(
   summary: ClassificationTotalFeatureImportance | RegressionTotalFeatureImportance
 ): summary is RegressionTotalFeatureImportance {
   return (summary as RegressionTotalFeatureImportance).importance !== undefined;
+}
+
+export function isClassificationFeatureImportanceBaseline(
+  baselineData: ClassificationFeatureImportanceBaseline | RegressionFeatureImportanceBaseline
+): baselineData is ClassificationFeatureImportanceBaseline {
+  return (baselineData as ClassificationFeatureImportanceBaseline).classes !== undefined;
+}
+
+export function isRegressionFeatureImportanceBaseline(
+  baselineData: ClassificationFeatureImportanceBaseline | RegressionFeatureImportanceBaseline
+): baselineData is RegressionFeatureImportanceBaseline {
+  return (baselineData as RegressionFeatureImportanceBaseline).baseline !== undefined;
 }

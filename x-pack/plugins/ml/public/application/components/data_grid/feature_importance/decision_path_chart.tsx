@@ -25,6 +25,10 @@ import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import euiVars from '@elastic/eui/dist/eui_theme_light.json';
 import { DecisionPathPlotData } from './use_classification_path_data';
+import {
+  FeatureImportanceBaseline,
+  isRegressionFeatureImportanceBaseline,
+} from '../../../../../common/types/feature_importance';
 
 const { euiColorFullShade, euiColorMediumShade } = euiVars;
 const axisColor = euiColorMediumShade;
@@ -71,7 +75,7 @@ const theme: PartialTheme = {
 interface DecisionPathChartProps {
   decisionPathData: DecisionPathPlotData;
   predictionFieldName?: string;
-  baseline?: number;
+  baseline?: FeatureImportanceBaseline;
   minDomain: number | undefined;
   maxDomain: number | undefined;
   showValues?: boolean;
@@ -95,7 +99,10 @@ export const DecisionPathChart = ({
     () => [
       {
         dataValue: baseline,
-        header: baseline ? baseline.toPrecision(NUM_PRECISION) : '',
+        header:
+          baseline && isRegressionFeatureImportanceBaseline(baseline)
+            ? baseline.baseline.toPrecision(NUM_PRECISION)
+            : '',
         details: i18n.translate(
           'xpack.ml.dataframe.analytics.explorationResults.decisionPathBaselineText',
           {

@@ -5,7 +5,7 @@
  */
 
 import { DataFrameAnalyticsConfig } from './data_frame_analytics';
-import { TotalFeatureImportance } from './feature_importance';
+import { FeatureImportanceBaseline, TotalFeatureImportance } from './feature_importance';
 
 export interface IngestStats {
   count: number;
@@ -56,6 +56,7 @@ export interface TrainedModelConfigResponse {
         analytics_config: DataFrameAnalyticsConfig;
         input: any;
         total_feature_importance?: TotalFeatureImportance[];
+        feature_importance_baseline?: FeatureImportanceBaseline;
       }
     | Record<string, any>;
   model_id: string;

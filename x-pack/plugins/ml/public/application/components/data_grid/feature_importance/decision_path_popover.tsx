@@ -9,7 +9,13 @@ import { EuiLink, EuiTab, EuiTabs, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { RegressionDecisionPath } from './decision_path_regression';
 import { DecisionPathJSONViewer } from './decision_path_json_viewer';
-import { FeatureImportance, TopClasses } from '../../../../../common/types/feature_importance';
+import {
+  FeatureImportance,
+  FeatureImportanceBaseline,
+  isClassificationFeatureImportanceBaseline,
+  isRegressionFeatureImportanceBaseline,
+  TopClasses,
+} from '../../../../../common/types/feature_importance';
 import { ANALYSIS_CONFIG_TYPE } from '../../../data_frame_analytics/common';
 import { ClassificationDecisionPath } from './decision_path_classification';
 import { useMlKibana } from '../../../contexts/kibana';
@@ -19,7 +25,7 @@ interface DecisionPathPopoverProps {
   featureImportance: FeatureImportance[];
   analysisType: DataFrameAnalysisConfigType;
   predictionFieldName?: string;
-  baseline?: number;
+  baseline?: FeatureImportanceBaseline;
   predictedValue?: number | string | undefined;
   topClasses?: TopClasses;
 }
@@ -109,22 +115,26 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
               }}
             />
           </EuiText>
-          {analysisType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION && (
-            <ClassificationDecisionPath
-              featureImportance={featureImportance}
-              topClasses={topClasses as TopClasses}
-              predictedValue={predictedValue as string}
-              predictionFieldName={predictionFieldName}
-            />
-          )}
-          {analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION && (
-            <RegressionDecisionPath
-              featureImportance={featureImportance}
-              baseline={baseline}
-              predictedValue={predictedValue as number}
-              predictionFieldName={predictionFieldName}
-            />
-          )}
+          {analysisType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION &&
+            baseline &&
+            isClassificationFeatureImportanceBaseline(baseline) && (
+              <ClassificationDecisionPath
+                featureImportance={featureImportance}
+                topClasses={topClasses as TopClasses}
+                predictedValue={predictedValue as string}
+                predictionFieldName={predictionFieldName}
+              />
+            )}
+          {analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION &&
+            baseline &&
+            isRegressionFeatureImportanceBaseline(baseline) && (
+              <RegressionDecisionPath
+                featureImportance={featureImportance}
+                baseline={baseline}
+                predictedValue={predictedValue as number}
+                predictionFieldName={predictionFieldName}
+              />
+            )}
         </>
       )}
       {selectedTabId === DECISION_PATH_TABS.JSON && (

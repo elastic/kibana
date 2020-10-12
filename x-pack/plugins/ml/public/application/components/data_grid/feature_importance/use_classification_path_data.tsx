@@ -6,14 +6,21 @@
 
 import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FeatureImportance, TopClasses } from '../../../../../common/types/feature_importance';
+import {
+  ClassificationFeatureImportanceBaseline,
+  FeatureImportance,
+  FeatureImportanceBaseline,
+  isClassificationFeatureImportanceBaseline,
+  isRegressionFeatureImportanceBaseline,
+  TopClasses,
+} from '../../../../../common/types/feature_importance';
 import { ExtendedFeatureImportance } from './decision_path_popover';
 
 export type DecisionPathPlotData = Array<[string, number, number]>;
 
 interface UseDecisionPathDataParams {
   featureImportance: FeatureImportance[];
-  baseline?: number;
+  baseline?: FeatureImportanceBaseline;
   predictedValue?: string | number | undefined;
   topClasses?: TopClasses;
 }
@@ -55,16 +62,22 @@ export const useDecisionPathData = ({
   predictedValue,
 }: UseDecisionPathDataParams): { decisionPathData: DecisionPathPlotData | undefined } => {
   const decisionPathData = useMemo(() => {
-    return baseline
-      ? buildRegressionDecisionPathData({
-          baseline,
+    if (baseline !== undefined) {
+      if (isRegressionFeatureImportanceBaseline(baseline)) {
+        return buildRegressionDecisionPathData({
+          baseline: baseline.baseline,
           featureImportance,
           predictedValue: predictedValue as number | undefined,
-        })
-      : buildClassificationDecisionPathData({
+        });
+      }
+      if (isClassificationFeatureImportanceBaseline(baseline)) {
+        return buildClassificationDecisionPathData({
+          baselines: baseline.classes,
           featureImportance,
           currentClass: predictedValue as string | undefined,
         });
+      }
+    }
   }, [baseline, featureImportance, predictedValue]);
 
   return { decisionPathData };
@@ -143,9 +156,11 @@ export const buildRegressionDecisionPathData = ({
 };
 
 export const buildClassificationDecisionPathData = ({
+  baselines,
   featureImportance,
   currentClass,
 }: {
+  baselines: ClassificationFeatureImportanceBaseline['classes'];
   featureImportance: FeatureImportance[];
   currentClass: string | undefined;
 }): DecisionPathPlotData | undefined => {
