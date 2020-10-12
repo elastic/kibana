@@ -105,9 +105,12 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
 
   async getLeftJoinFields(): Promise<IField[]> {
     const vectorFileMeta: VectorFileMeta = await this.getVectorFileMeta();
-    return vectorFileMeta.fields.map((field: VectorFileField) => {
-      return this.createField({ fieldName: field.name });
-    });
+    const fields = vectorFileMeta.fields.map(
+      (field: VectorFileField): KibanaRegionField => {
+        return this.createField({ fieldName: field.name }) as KibanaRegionField;
+      }
+    );
+    return fields as KibanaRegionField[];
   }
 
   async getDisplayName(): Promise<string> {

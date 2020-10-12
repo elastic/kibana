@@ -7,7 +7,7 @@
 import _ from 'lodash';
 
 import { i18n } from '@kbn/i18n';
-import { Query } from 'src/plugins/data/public';
+import { ISearchSource, Query } from 'src/plugins/data/public';
 import {
   AGG_TYPE,
   DEFAULT_MAX_BUCKETS_LIMIT,
@@ -41,6 +41,7 @@ import {
 import { IField } from '../../fields/field';
 import { PropertiesMap } from '../../joins/join';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
+import { SearchSource } from '../../../../../../../src/plugins/data/common/search/search_source';
 
 export interface IESTermSource extends IESAggSource {
   getTermField(): IField;
@@ -127,7 +128,7 @@ export class ESTermSource extends AbstractESAggSource implements IESTermSource {
     }
 
     const indexPattern = await this.getIndexPattern();
-    const searchSource = await this.makeSearchSource(searchFilters, 0);
+    const searchSource: ISearchSource = await this.makeSearchSource(searchFilters, 0);
     const termsField = getField(indexPattern, this._termField.getName());
     const termsAgg = { size: DEFAULT_MAX_BUCKETS_LIMIT };
     searchSource.setField('aggs', {
