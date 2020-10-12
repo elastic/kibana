@@ -30,8 +30,6 @@ function getFeatureCollection(geoJson: Feature | FeatureCollection | null): Feat
 }
 
 export class GeojsonFileSource extends AbstractVectorSource {
-  static type = SOURCE_TYPES.GEOJSON_FILE;
-
   static createDescriptor(
     geoJson: Feature | FeatureCollection | null,
     name: string

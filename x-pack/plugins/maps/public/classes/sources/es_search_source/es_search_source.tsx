@@ -103,6 +103,7 @@ function getDocValueAndSourceFields(
 
 export class ESSearchSource extends AbstractESSource implements ITiledSingleLayerVectorSource {
   readonly _descriptor: ESSearchSourceDescriptor;
+  protected readonly _tooltipFields: ESDocField[];
 
   static createDescriptor(descriptor: Partial<ESSearchSourceDescriptor>): ESSearchSourceDescriptor {
     return {
@@ -483,6 +484,10 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       }
     });
     return properties;
+  }
+
+  _getTooltipPropertyNames() {
+    return this._tooltipFields.map((field: IField) => field.getName());
   }
 
   async getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]> {

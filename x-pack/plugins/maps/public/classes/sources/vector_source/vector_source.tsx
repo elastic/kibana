@@ -93,15 +93,13 @@ export interface ITiledSingleLayerVectorSource extends IVectorSource {
 }
 
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {
-  protected readonly _tooltipFields: IField[];
-
   static async getGeoJson({
     format,
     featureCollectionPath,
     fetchUrl,
   }: {
     format: FORMAT_TYPE;
-    featureCollectionPAth: string;
+    featureCollectionPath: string;
     fetchUrl: string;
   }) {
     let fetchedJson;
@@ -143,7 +141,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
    * @param label
    * @returns {IField}
    */
-  createField({ fieldName }: { fieldName: string }) {
+  createField({ fieldName }: { fieldName: string }): IField {
     throw new Error(`Should implemement AbstractVectorSource#createField`);
   }
 
@@ -159,10 +157,6 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
    */
   getFieldByName(fieldName: string): IField | null {
     return this.createField({ fieldName: name });
-  }
-
-  _getTooltipPropertyNames() {
-    return this._tooltipFields.map((field: IField) => field.getName());
   }
 
   isFilterByMapBounds() {
@@ -231,6 +225,6 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
   }
 
   getSyncMeta() {
-    return {};
+    return null;
   }
 }

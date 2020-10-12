@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { AbstractVectorSource } from '../vector_source';
 import { getKibanaRegionList } from '../../../meta';
-import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { FIELD_ORIGIN, SOURCE_TYPES } from '../../../../common/constants';
 import { KibanaRegionField } from '../../fields/kibana_region_field';
@@ -16,13 +16,19 @@ export const sourceTitle = i18n.translate('xpack.maps.source.kbnRegionMapTitle',
   defaultMessage: 'Configured GeoJSON',
 });
 
-export class KibanaRegionmapSource extends AbstractVectorSource {
+import { AbstractVectorSource, IVectorSource } from '../vector_source';
+
+export interface IKibanaRegionSource extends IVectorSource {
+  getVectorFileMeta(): Promise<unknown>;
+}
+
+export class KibanaRegionmapSource extends AbstractVectorSource implements IKibanaRegionSource {
   static type = SOURCE_TYPES.REGIONMAP_FILE;
 
   static createDescriptor({ name }) {
     return {
       type: KibanaRegionmapSource.type,
-      name: name,
+      name,
     };
   }
 
@@ -49,7 +55,7 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
     ];
   }
 
-  async getVectorFileMeta() {
+  async getVectorFileMeta(): Promise<unknown> {
     const regionList = getKibanaRegionList();
     const meta = regionList.find((source) => source.name === this._descriptor.name);
     if (!meta) {

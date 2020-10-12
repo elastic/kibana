@@ -63,6 +63,8 @@ export function extractPropertiesMap(rawEsData, countPropertyName) {
 export class ESTermSource extends AbstractESAggSource implements IESTermSource {
   static type = SOURCE_TYPES.ES_TERM_SOURCE;
 
+  private readonly _termField: ESDocField;
+
   constructor(descriptor, inspectorAdapters) {
     super(descriptor, inspectorAdapters);
     this._termField = new ESDocField({
@@ -72,28 +74,23 @@ export class ESTermSource extends AbstractESAggSource implements IESTermSource {
     });
   }
 
-  static renderEditor({}) {
-    // no need to localize. this editor is never rendered.
-    return `<div>editor details</div>`;
-  }
-
   hasCompleteConfig() {
     return _.has(this._descriptor, 'indexPatternId') && _.has(this._descriptor, 'term');
   }
 
-  getTermField() {
+  getTermField(): ESDocField {
     return this._termField;
   }
 
-  getOriginForField() {
+  getOriginForField(): FIELD_ORIGIN {
     return FIELD_ORIGIN.JOIN;
   }
 
-  getWhereQuery() {
+  getWhereQuery(): string {
     return this._descriptor.whereQuery;
   }
 
-  getAggKey(aggType, fieldName) {
+  getAggKey(aggType, fieldName): string {
     return getJoinAggKey({
       aggType,
       aggFieldName: fieldName,
@@ -153,7 +150,7 @@ export class ESTermSource extends AbstractESAggSource implements IESTermSource {
     return `es_table ${this.getIndexPatternId()}`;
   }
 
-  getFieldNames() {
+  getFieldNames(): string[] {
     return this.getMetricFields().map((esAggMetricField) => esAggMetricField.getName());
   }
 }
