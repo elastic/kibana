@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fireEvent, render, wait, RenderResult } from '@testing-library/react';
+import {
+  fireEvent,
+  render,
+  waitFor,
+  RenderResult,
+} from '@testing-library/react';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import * as apmApi from '../../../../../services/rest/createCallApmApi';
@@ -181,7 +186,7 @@ describe('CustomLink', () => {
       act(() => {
         fireEvent.click(editButtons[0]);
       });
-      await wait(() =>
+      await waitFor(() =>
         expect(component.queryByText('Create link')).toBeInTheDocument()
       );
       await act(async () => {

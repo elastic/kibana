@@ -18,11 +18,8 @@
  */
 
 import React from 'react';
-import { wait } from '@testing-library/dom';
-import { render, cleanup } from '@testing-library/react/pure';
+import { wait, render } from '@testing-library/react';
 import MarkdownVisComponent from './markdown_vis_controller';
-
-afterEach(cleanup);
 
 describe('markdown vis controller', () => {
   it('should set html from markdown params', async () => {

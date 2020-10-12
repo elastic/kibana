@@ -10,9 +10,9 @@ import {
   LineAnnotation,
   LineAnnotationDatum,
   LineAnnotationStyle,
+  Position,
 } from '@elastic/charts';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
-import styled from 'styled-components';
 import { EuiToolTip } from '@elastic/eui';
 
 interface Props {
@@ -27,11 +27,6 @@ function generateAnnotationData(
     details: `${(+value[0]).toFixed(0)}`,
   }));
 }
-
-const PercentileMarker = styled.span`
-  position: relative;
-  bottom: 205px;
-`;
 
 export function PercentileAnnotations({ percentiles }: Props) {
   const dataValues = generateAnnotationData(percentiles) ?? [];
@@ -66,8 +61,9 @@ export function PercentileAnnotations({ percentiles }: Props) {
           dataValues={[annotation]}
           style={style}
           hideTooltips={true}
+          markerPosition={Position.Top}
           marker={
-            <PercentileMarker data-cy="percentile-markers">
+            <span data-cy="percentile-markers">
               <EuiToolTip
                 title={<PercentileTooltip annotation={annotation} />}
                 content={
@@ -76,7 +72,7 @@ export function PercentileAnnotations({ percentiles }: Props) {
               >
                 <>{annotation.details}th</>
               </EuiToolTip>
-            </PercentileMarker>
+            </span>
           }
         />
       ))}

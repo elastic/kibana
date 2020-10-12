@@ -5,7 +5,6 @@
  */
 
 import '../../__mocks__/kea.mock';
-import '../../__mocks__/react_router_history.mock';
 
 import React from 'react';
 import { shallow, mount } from 'enzyme';

@@ -29,13 +29,14 @@ import {
   STYLE_TYPE,
 } from '../../../../common/constants';
 import { NUMERICAL_COLOR_PALETTES } from '../../styles/color_palettes';
+import { ClustersLayerIcon } from './clusters_layer_icon';
 
 export const clustersLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.source.esGridClustersDescription', {
     defaultMessage: 'Geospatial data grouped in grids with metrics for each gridded cell',
   }),
-  icon: 'logoElasticsearch',
+  icon: ClustersLayerIcon,
   renderWizard: ({ previewLayers }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: Partial<ESGeoGridSourceDescriptor>) => {
       if (!sourceConfig) {

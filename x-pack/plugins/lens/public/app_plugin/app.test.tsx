@@ -145,8 +145,9 @@ describe('Lens App', () => {
     >(
       DOC_TYPE,
       {
-        customSaveMethod: jest.fn(),
-        customUnwrapMethod: jest.fn(),
+        saveMethod: jest.fn(),
+        unwrapMethod: jest.fn(),
+        checkForDuplicateTitle: jest.fn(),
       },
       core
     );
@@ -280,6 +281,7 @@ describe('Lens App', () => {
             },
             "doc": undefined,
             "filters": Array [],
+            "initialContext": undefined,
             "onChange": [Function],
             "onError": [Function],
             "query": Object {

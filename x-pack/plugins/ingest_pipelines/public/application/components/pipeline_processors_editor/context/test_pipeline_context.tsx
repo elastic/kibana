@@ -51,11 +51,14 @@ type Action =
   | {
       type: 'updateIsExecutingPipeline';
       payload: Pick<TestPipelineData, 'isExecutingPipeline'>;
+    }
+  | {
+      type: 'reset';
     };
 
 export interface TestPipelineContext {
   testPipelineData: TestPipelineData;
-  setCurrentTestPipelineData: (data: Action) => void;
+  testPipelineDataDispatch: (data: Action) => void;
   updateTestOutputPerProcessor: (
     documents: Document[] | undefined,
     processors: DeserializeResult
@@ -69,7 +72,7 @@ const DEFAULT_TEST_PIPELINE_CONTEXT = {
     },
     isExecutingPipeline: false,
   },
-  setCurrentTestPipelineData: () => {},
+  testPipelineDataDispatch: () => {},
   updateTestOutputPerProcessor: () => {},
 };
 
@@ -120,6 +123,10 @@ export const reducer: Reducer<TestPipelineData, Action> = (state, action) => {
       ...state,
       isExecutingPipeline: action.payload.isExecutingPipeline,
     };
+  }
+
+  if (action.type === 'reset') {
+    return DEFAULT_TEST_PIPELINE_CONTEXT.testPipelineData;
   }
 
   return state;
@@ -193,7 +200,7 @@ export const TestPipelineContextProvider = ({ children }: { children: React.Reac
     <TestPipelineContext.Provider
       value={{
         testPipelineData: state,
-        setCurrentTestPipelineData: dispatch,
+        testPipelineDataDispatch: dispatch,
         updateTestOutputPerProcessor,
       }}
     >

@@ -44,13 +44,13 @@ export function dataAccessLayerFactory(
      * Return events that have `process.entity_id` that includes `entityID` and that have
      * a `event.category` that includes `category`.
      */
-    async eventsWithEntityIDAndCategory(
+    eventsWithEntityIDAndCategory(
       entityID: string,
       category: string,
       after?: string
     ): Promise<ResolverPaginatedEvents> {
       return context.services.http.post('/api/endpoint/resolver/events', {
-        query: { afterEvent: after },
+        query: { afterEvent: after, limit: 25 },
         body: JSON.stringify({
           filter: `process.entity_id:"${entityID}" and event.category:"${category}"`,
         }),
@@ -64,7 +64,7 @@ export function dataAccessLayerFactory(
       const response: ResolverPaginatedEvents = await context.services.http.post(
         '/api/endpoint/resolver/events',
         {
-          query: {},
+          query: { limit: 1 },
           body: JSON.stringify({ filter: `event.id:"${eventID}"` }),
         }
       );

@@ -251,5 +251,6 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
       asScopedToClient: deps.uiSettings.asScopedToClient,
     },
     auditTrail: deps.auditTrail,
+    coreUsageData: deps.coreUsageData,
   };
 }

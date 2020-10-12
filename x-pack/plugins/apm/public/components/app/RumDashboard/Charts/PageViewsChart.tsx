@@ -71,6 +71,8 @@ export function PageViewsChart({ data, loading }: Props) {
     });
   };
 
+  const hasBreakdowns = !!data?.topItems?.length;
+
   const breakdownAccessors = data?.topItems?.length ? data?.topItems : ['y'];
 
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
@@ -83,17 +85,17 @@ export function PageViewsChart({ data, loading }: Props) {
     return yAccessor;
   };
 
+  const euiChartTheme = darkMode
+    ? EUI_CHARTS_THEME_DARK
+    : EUI_CHARTS_THEME_LIGHT;
+
   return (
     <ChartWrapper loading={loading} height="250px">
       {(!loading || data) && (
         <Chart>
           <Settings
             baseTheme={darkMode ? DARK_THEME : LIGHT_THEME}
-            theme={
-              darkMode
-                ? EUI_CHARTS_THEME_DARK.theme
-                : EUI_CHARTS_THEME_LIGHT.theme
-            }
+            theme={euiChartTheme.theme}
             showLegend
             onBrushEnd={onBrushEnd}
             xDomain={{
@@ -122,6 +124,11 @@ export function PageViewsChart({ data, loading }: Props) {
             stackAccessors={['x']}
             data={data?.items ?? []}
             name={customSeriesNaming}
+            color={
+              !hasBreakdowns
+                ? euiChartTheme.theme.colors?.vizColors?.[1]
+                : undefined
+            }
           />
         </Chart>
       )}

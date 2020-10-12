@@ -23,7 +23,7 @@ import {
   UngroupedSearchQueryResponse,
   GroupedSearchQueryResponse,
   GroupedSearchQueryResponseRT,
-} from '../../../../common/alerting/logs/types';
+} from '../../../../common/alerting/logs/log_threshold/types';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 
 const COMPOSITE_GROUP_SIZE = 40;

@@ -30,7 +30,7 @@ jest.mock('./components/time_field', () => ({ TimeField: 'TimeField' }));
 jest.mock('./components/advanced_options', () => ({ AdvancedOptions: 'AdvancedOptions' }));
 jest.mock('./components/action_buttons', () => ({ ActionButtons: 'ActionButtons' }));
 jest.mock('./../../lib', () => ({
-  extractTimeFields: require.requireActual('./../../lib').extractTimeFields,
+  extractTimeFields: jest.requireActual('./../../lib').extractTimeFields,
   ensureMinimumTime: async (fields: IFieldType) => Promise.resolve(fields),
 }));
 
