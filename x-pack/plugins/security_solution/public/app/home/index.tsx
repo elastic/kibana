@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import { TimelineId } from '../../../common/types/timeline';
@@ -49,7 +49,7 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
   const { ref, height = 0 } = useThrottledResizeObserver(300);
   const banners$ = overlays.banners.get$();
   const [headerFixed, setHeaderFixed] = useState<boolean>(true);
-  const mainPaddingTop = useMemo(() => (headerFixed ? height : 0), [headerFixed, height]);
+  const mainPaddingTop = headerFixed ? height : 0;
 
   useEffect(() => {
     const subscription = banners$.subscribe((banners) => setHeaderFixed(!banners.length));
