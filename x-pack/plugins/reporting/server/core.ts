@@ -204,7 +204,7 @@ export class ReportingCore {
         logger.info(`Request uses Space ID: ` + spaceId);
         return spaceId;
       } else {
-        logger.info(`Request uses default Space`);
+        logger.debug(`Request uses default Space`);
       }
     }
   }
