@@ -152,7 +152,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       }
     >
   ];
-  const [errorExists, setErrorExists] = useState(false);
+  const [isQueryBarValid, setIsQueryBarValid] = useState(false);
   const index = formIndex || initialState.index;
   const threatIndex = formThreatIndex || initialState.threatIndex;
   const ruleType = formRuleType || initialState.ruleType;
@@ -283,7 +283,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   path="queryBar"
                   component={EqlQueryBar}
                   componentProps={{
-                    onError: setErrorExists,
+                    onError: setIsQueryBarValid,
                     idAria: 'detectionEngineStepDefineRuleEqlQueryBar',
                     isDisabled: isLoading,
                     isLoading: indexPatternsLoading,
@@ -319,7 +319,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     isLoading: indexPatternsLoading,
                     dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
                     openTimelineSearch,
-                    onError: setErrorExists,
+                    onError: setIsQueryBarValid,
                     onCloseTimelineSearch: handleCloseTimelineSearch,
                   }}
                 />
@@ -400,7 +400,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               ruleType={ruleType}
               index={index}
               query={formQuery}
-              isDisabled={queryBarQuery.trim() === '' || errorExists || index.length === 0}
+              isDisabled={queryBarQuery.trim() === '' || !isQueryBarValid || index.length === 0}
               threshold={
                 formThresholdValue != null && formThresholdField != null
                   ? { value: formThresholdValue, field: formThresholdField[0] }
