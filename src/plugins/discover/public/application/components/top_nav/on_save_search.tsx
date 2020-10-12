@@ -81,14 +81,12 @@ async function saveDataSource({
       text: error.message,
     });
   }
-  return persistSavedSearch({
-    config: services.uiSettings,
-    data: services.data,
+  return persistSavedSearch(savedSearch, {
     indexPattern,
     onError,
     onSuccess,
-    savedSearch,
     saveOptions,
+    services,
     state: state.appStateContainer.getState(),
   });
 }

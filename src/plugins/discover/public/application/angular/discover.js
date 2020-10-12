@@ -701,9 +701,8 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
   $scope.updateDataSource = () => {
     updateSearchSource($scope.searchSource, {
       indexPattern: $scope.indexPattern,
-      config,
+      services,
       state: $scope.state,
-      data,
     });
     return Promise.resolve();
   };

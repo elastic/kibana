@@ -16,37 +16,39 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IUiSettingsClient } from 'kibana/public';
 import { getSortForSearchSource } from '../angular/doc_table';
 import { SAMPLE_SIZE_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../common';
 import { IndexPattern, ISearchSource } from '../../../../data/common/';
 import { AppState } from '../angular/discover_state';
 import { SortOrder } from '../../saved_searches/types';
-import { DataPublicPluginStart } from '../../../../data/public';
+import { DiscoverServices } from '../../build_services';
 
+/**
+ * Helper function to update the given searchSource before fetching/sharing/persisting
+ */
 export function updateSearchSource(
   searchSource: ISearchSource,
   {
-    config,
-    data,
     indexPattern,
+    services,
     state,
   }: {
-    config: IUiSettingsClient;
-    data: DataPublicPluginStart;
+    services: DiscoverServices;
     indexPattern: IndexPattern;
     state: AppState;
   }
 ) {
+  const { uiSettings, data } = services;
+
   searchSource
     .setField('index', indexPattern)
-    .setField('size', config.get(SAMPLE_SIZE_SETTING))
+    .setField('size', uiSettings.get(SAMPLE_SIZE_SETTING))
     .setField(
       'sort',
       getSortForSearchSource(
         state.sort as SortOrder[],
         indexPattern,
-        config.get(SORT_DEFAULT_ORDER_SETTING)
+        uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
       )
     )
     .setField('query', data.query.queryString.getQuery() || null)

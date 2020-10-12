@@ -16,38 +16,39 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IUiSettingsClient } from 'kibana/public';
 import { updateSearchSource } from './update_search_source';
-import { DataPublicPluginStart, IndexPattern } from '../../../../data/public';
+import { IndexPattern } from '../../../../data/public';
 import { SavedSearch } from '../../saved_searches';
 import { AppState } from '../angular/discover_state';
 import { SortOrder } from '../../saved_searches/types';
 import { SavedObjectSaveOpts } from '../../../../saved_objects/public';
+import { DiscoverServices } from '../../build_services';
 
-export async function persistSavedSearch({
-  config,
-  data,
-  indexPattern,
-  onError,
-  onSuccess,
-  savedSearch,
-  saveOptions,
-  state,
-}: {
-  config: IUiSettingsClient;
-  data: DataPublicPluginStart;
-  indexPattern: IndexPattern;
-  onError: (error: Error, savedSearch: SavedSearch) => void;
-  onSuccess: (id: string) => void;
-  savedSearch: SavedSearch;
-  saveOptions: SavedObjectSaveOpts;
-  state: AppState;
-}) {
+/**
+ * Helper function to update and persist the given savedSearch
+ */
+export async function persistSavedSearch(
+  savedSearch: SavedSearch,
+  {
+    indexPattern,
+    onError,
+    onSuccess,
+    services,
+    saveOptions,
+    state,
+  }: {
+    indexPattern: IndexPattern;
+    onError: (error: Error, savedSearch: SavedSearch) => void;
+    onSuccess: (id: string) => void;
+    saveOptions: SavedObjectSaveOpts;
+    services: DiscoverServices;
+    state: AppState;
+  }
+) {
   updateSearchSource(savedSearch.searchSource, {
     indexPattern,
-    config,
+    services,
     state,
-    data,
   });
 
   savedSearch.columns = state.columns || [];
