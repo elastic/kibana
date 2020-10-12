@@ -84,7 +84,7 @@ export class AbstractSearchStrategy {
 
     return await indexPatternsService!.getFieldsForWildcard({
       pattern: indexPattern,
-      fieldCapsOptions: { allowNoIndices: true },
+      fieldCapsOptions: { allow_no_indices: true },
     });
   }
 

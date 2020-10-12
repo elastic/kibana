@@ -75,7 +75,7 @@ export async function callIndexAliasApi(
 export async function callFieldCapsApi(
   callCluster: ElasticsearchClient,
   indices: string[] | string,
-  fieldCapsOptions: { allowNoIndices: boolean } = { allowNoIndices: false }
+  fieldCapsOptions: { allow_no_indices: boolean } = { allow_no_indices: false }
 ) {
   try {
     return await callCluster.fieldCaps<FieldCapsResponse>({
