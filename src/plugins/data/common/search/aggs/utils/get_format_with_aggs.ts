@@ -53,16 +53,14 @@ export function getFormatWithAggs(getFieldFormat: GetFieldFormat): GetFieldForma
             id: nestedFormatter.id,
             params: nestedFormatter.params,
           });
-          const lte = '\u2264';
+
           const gte = '\u2265';
           const lt = '\u003c';
-          if (params.template === 'within') {
+          if (params.template === 'compact') {
             return i18n.translate('data.aggTypes.buckets.ranges.rangesFormatMessageWithin', {
-              defaultMessage: '{from} {lte} and {lt} {to}',
+              defaultMessage: '{from} - {to}',
               values: {
-                lte,
                 from: format.convert(range.gte),
-                lt,
                 to: format.convert(range.lt),
               },
             });

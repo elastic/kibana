@@ -149,7 +149,10 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
     };
   },
   paramEditor: ({ state, setState, currentColumn, layerId, columnId, uiSettings, data }) => {
-    const rangeFormatter = data.fieldFormats.deserialize({ id: 'range' });
+    const rangeFormatter = data.fieldFormats.deserialize({
+      id: 'range',
+      params: { template: 'compact' },
+    });
     const MAX_HISTOGRAM_BARS = uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS);
     const granularityStep = (MAX_HISTOGRAM_BARS - MIN_HISTOGRAM_BARS) / SLICES;
     const maxBarsDefaultValue = (MAX_HISTOGRAM_BARS - MIN_HISTOGRAM_BARS) / 2;
