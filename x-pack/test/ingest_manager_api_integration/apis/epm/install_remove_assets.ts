@@ -134,6 +134,24 @@ export default function (providerContext: FtrProviderContext) {
         });
         expect(resSearch.id).equal('sample_search');
       });
+      it('should create an index pattern with the package fields', async () => {
+        const resIndexPatternLogs = await kibanaServer.savedObjects.get({
+          type: 'index-pattern',
+          id: 'logs-*',
+        });
+        const fields = JSON.parse(resIndexPatternLogs.attributes.fields);
+        const exists = fields.find((field: { name: string }) => field.name === 'logs_test_name');
+        expect(exists).not.to.be(undefined);
+        const resIndexPatternMetrics = await kibanaServer.savedObjects.get({
+          type: 'index-pattern',
+          id: 'metrics-*',
+        });
+        const fieldsMetrics = JSON.parse(resIndexPatternMetrics.attributes.fields);
+        const metricsExists = fieldsMetrics.find(
+          (field: { name: string }) => field.name === 'metrics_test_name'
+        );
+        expect(metricsExists).not.to.be(undefined);
+      });
       it('should have created the correct saved object', async function () {
         const res = await kibanaServer.savedObjects.get({
           type: 'epm-packages',
