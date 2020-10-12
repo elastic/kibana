@@ -101,7 +101,6 @@ export interface SubPluginClasses {
  * These dependencies are needed to mount the applications registered by this plugin. They are grouped into a single object for the sake of bundling the in a single Webpack chunk.
  */
 export interface LazyApplicationDependencies {
-  subPluginClasses: SubPluginClasses;
   renderApp: (renderAppProps: RenderAppProps) => () => void;
   composeLibs: (core: CoreStart) => AppFrontendLibs;
   createInitialState: (
@@ -116,4 +115,8 @@ export interface LazyApplicationDependencies {
     storage: Storage,
     additionalMiddleware?: Array<Middleware<{}, State, Dispatch<AppAction | Immutable<AppAction>>>>
   ): SecurityAppStore;
+}
+
+export interface LazySubPlugins {
+  subPluginClasses: SubPluginClasses;
 }

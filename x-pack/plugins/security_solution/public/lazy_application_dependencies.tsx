@@ -13,6 +13,5 @@ import { renderApp } from './app';
 import { composeLibs } from './common/lib/compose/kibana_compose';
 
 import { createStore, createInitialState } from './common/store';
-import { SubPluginClasses } from './types';
 
 export { renderApp, composeLibs, createStore, createInitialState };

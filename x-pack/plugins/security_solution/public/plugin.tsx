@@ -23,6 +23,7 @@ import {
   StartPlugins,
   StartServices,
   AppObservableLibs,
+  LazySubPlugins,
 } from './types';
 import {
   AppMountParameters,
@@ -362,7 +363,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
    * The dependencies needed to mount the applications. These are dynamically loaded for the sake of webpack bundling efficiency.
    * Webpack is smart enough to only request (and download) this even when it is imported multiple times concurrently.
    */
-  private lazySubPlugins(): Promise<LazyApplicationDependencies> {
+  private lazySubPlugins(): Promise<LazySubPlugins> {
     /**
      * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
      * See https://webpack.js.org/api/module-methods/#magic-comments
