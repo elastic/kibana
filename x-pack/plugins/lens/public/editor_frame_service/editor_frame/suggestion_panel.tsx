@@ -8,6 +8,7 @@ import './suggestion_panel.scss';
 
 import _, { camelCase } from 'lodash';
 import React, { useState, useEffect, useMemo } from 'react';
+import { useDebounce } from 'react-use';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiIcon,
@@ -24,6 +25,7 @@ import { Ast, toExpression } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import { ExecutionContextSearch } from 'src/plugins/expressions';
+import { EuiProgress } from '@elastic/eui';
 import { Action, PreviewState } from './state_management';
 import { Datasource, Visualization, FramePublicAPI, DatasourcePublicAPI } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
@@ -32,15 +34,10 @@ import {
   ReactExpressionRendererType,
 } from '../../../../../../src/plugins/expressions/public';
 import { prependDatasourceExpression } from './expression_helpers';
-import { debouncedComponent } from '../../debounced_component';
 import { trackUiEvent, trackSuggestionEvent } from '../../lens_ui_telemetry';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
-
-// TODO: Remove this <any> when upstream fix is merged https://github.com/elastic/eui/issues/2329
-// eslint-disable-next-line
-const EuiPanelFixed = EuiPanel as React.ComponentType<any>;
 
 export interface SuggestionPanelProps {
   activeDatasourceId: string | null;
@@ -104,8 +101,6 @@ const PreviewRenderer = ({
   );
 };
 
-const DebouncedPreviewRenderer = debouncedComponent(PreviewRenderer, 2000);
-
 const SuggestionPreview = ({
   preview,
   ExpressionRenderer: ExpressionRendererComponent,
@@ -123,10 +118,21 @@ const SuggestionPreview = ({
   selected: boolean;
   showTitleAsLabel?: boolean;
 }) => {
+  const [renderedSuggestion, setRenderedSuggestion] = useState(
+    () => preview.expression && toExpression(preview.expression)
+  );
+  const currentExpression = preview.expression && toExpression(preview.expression);
+  useDebounce(
+    () => {
+      setRenderedSuggestion(preview.expression && toExpression(preview.expression));
+    },
+    2000,
+    [preview.expression]
+  );
   return (
     <EuiToolTip content={preview.title}>
       <div data-test-subj={`lnsSuggestion-${camelCase(preview.title)}`}>
-        <EuiPanelFixed
+        <EuiPanel
           className={classNames('lnsSuggestionPanel__button', {
             // eslint-disable-next-line @typescript-eslint/naming-convention
             'lnsSuggestionPanel__button-isSelected': selected,
@@ -135,10 +141,13 @@ const SuggestionPreview = ({
           data-test-subj="lnsSuggestion"
           onClick={onSelect}
         >
-          {preview.expression ? (
-            <DebouncedPreviewRenderer
+          {preview.expression && currentExpression !== renderedSuggestion && (
+            <EuiProgress size="xs" color="accent" position="absolute" />
+          )}
+          {renderedSuggestion ? (
+            <PreviewRenderer
               ExpressionRendererComponent={ExpressionRendererComponent}
-              expression={toExpression(preview.expression)}
+              expression={renderedSuggestion}
               withLabel={Boolean(showTitleAsLabel)}
             />
           ) : (
@@ -149,7 +158,7 @@ const SuggestionPreview = ({
           {showTitleAsLabel && (
             <span className="lnsSuggestionPanel__buttonLabel">{preview.title}</span>
           )}
-        </EuiPanelFixed>
+        </EuiPanel>
       </div>
     </EuiToolTip>
   );
