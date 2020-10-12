@@ -38,7 +38,9 @@ export function loadFullJob(jobId) {
 }
 
 export function isStartable(jobs) {
-  return jobs.some((j) => j.datafeedState === DATAFEED_STATE.STOPPED);
+  return jobs.some(
+    (j) => j.datafeedState === DATAFEED_STATE.STOPPED && j.jobState !== JOB_STATE.CLOSING
+  );
 }
 
 export function isStoppable(jobs) {
@@ -49,7 +51,10 @@ export function isStoppable(jobs) {
 
 export function isClosable(jobs) {
   return jobs.some(
-    (j) => j.datafeedState === DATAFEED_STATE.STOPPED && j.jobState !== JOB_STATE.CLOSED
+    (j) =>
+      j.datafeedState === DATAFEED_STATE.STOPPED &&
+      j.jobState !== JOB_STATE.CLOSED &&
+      j.jobState !== JOB_STATE.CLOSING
   );
 }
 

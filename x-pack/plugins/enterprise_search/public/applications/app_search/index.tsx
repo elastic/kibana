@@ -8,7 +8,6 @@ import React, { useEffect } from 'react';
 import { Route, Redirect, Switch } from 'react-router-dom';
 import { useActions, useValues } from 'kea';
 
-import { EuiPage, EuiPageBody } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { getAppSearchUrl } from '../shared/enterprise_search_url';
@@ -18,7 +17,7 @@ import { AppLogic } from './app_logic';
 import { IInitialAppData } from '../../../common/types';
 
 import { APP_SEARCH_PLUGIN } from '../../../common/constants';
-import { SideNav, SideNavLink } from '../shared/layout';
+import { Layout, SideNav, SideNavLink } from '../shared/layout';
 
 import {
   ROOT_PATH,
@@ -33,6 +32,7 @@ import { SetupGuide } from './components/setup_guide';
 import { ErrorConnecting } from './components/error_connecting';
 import { NotFound } from '../shared/not_found';
 import { EngineOverview } from './components/engine_overview';
+import { Credentials } from './components/credentials';
 
 export const AppSearch: React.FC<IInitialAppData> = (props) => {
   const { config } = useValues(KibanaLogic);
@@ -53,7 +53,7 @@ export const AppSearchUnconfigured: React.FC = () => (
 export const AppSearchConfigured: React.FC<IInitialAppData> = (props) => {
   const { initializeAppData } = useActions(AppLogic);
   const { hasInitialized } = useValues(AppLogic);
-  const { errorConnecting } = useValues(HttpLogic);
+  const { errorConnecting, readOnlyMode } = useValues(HttpLogic);
 
   useEffect(() => {
     if (!hasInitialized) initializeAppData(props);
@@ -65,25 +65,26 @@ export const AppSearchConfigured: React.FC<IInitialAppData> = (props) => {
         <SetupGuide />
       </Route>
       <Route>
-        <EuiPage>
-          <EuiPageBody restrictWidth>
-            {errorConnecting ? (
-              <ErrorConnecting />
-            ) : (
-              <Switch>
-                <Route exact path={ROOT_PATH}>
-                  <Redirect to={ENGINES_PATH} />
-                </Route>
-                <Route exact path={ENGINES_PATH}>
-                  <EngineOverview />
-                </Route>
-                <Route>
-                  <NotFound product={APP_SEARCH_PLUGIN} />
-                </Route>
-              </Switch>
-            )}
-          </EuiPageBody>
-        </EuiPage>
+        <Layout navigation={<AppSearchNav />} readOnlyMode={readOnlyMode}>
+          {errorConnecting ? (
+            <ErrorConnecting />
+          ) : (
+            <Switch>
+              <Route exact path={ROOT_PATH}>
+                <Redirect to={ENGINES_PATH} />
+              </Route>
+              <Route exact path={ENGINES_PATH}>
+                <EngineOverview />
+              </Route>
+              <Route exact path={CREDENTIALS_PATH}>
+                <Credentials />
+              </Route>
+              <Route>
+                <NotFound product={APP_SEARCH_PLUGIN} />
+              </Route>
+            </Switch>
+          )}
+        </Layout>
       </Route>
     </Switch>
   );
@@ -109,7 +110,7 @@ export const AppSearchNav: React.FC = () => {
         </SideNavLink>
       )}
       {canViewAccountCredentials && (
-        <SideNavLink isExternal to={getAppSearchUrl(CREDENTIALS_PATH)}>
+        <SideNavLink to={CREDENTIALS_PATH}>
           {i18n.translate('xpack.enterpriseSearch.appSearch.nav.credentials', {
             defaultMessage: 'Credentials',
           })}

@@ -48,7 +48,8 @@ export function UXMetrics() {
           <KeyUXMetrics data={data} loading={status !== 'success'} />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiHorizontalRule />
+      <EuiSpacer size="xs" />
+      <EuiHorizontalRule margin="xs" />
 
       <EuiFlexGroup justifyContent="spaceBetween" wrap>
         <EuiFlexItem grow={1} data-cy={`client-metrics`}>

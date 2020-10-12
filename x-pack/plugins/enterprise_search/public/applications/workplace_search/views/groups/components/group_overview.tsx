@@ -22,9 +22,6 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../../shared/kibana_chrome';
-import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../../shared/telemetry';
-
 import { AppLogic } from '../../../app_logic';
 import { TruncatedContent } from '../../../../shared/truncate';
 import { ContentSection } from '../../../components/shared/content_section';
@@ -260,9 +257,6 @@ export const GroupOverview: React.FC = () => {
 
   return (
     <>
-      <SetPageChrome trail={['Group Overview']} />
-      <SendTelemetry action="viewed" metric="group_overview" />
-
       <ViewContentHeader title={truncatedName} />
       <EuiSpacer />
       {sourcesSection}

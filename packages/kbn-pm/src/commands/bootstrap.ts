@@ -58,7 +58,9 @@ export const BootstrapCommand: ICommand = {
 
     const yarnLock = await readYarnLock(kbn);
 
-    await validateYarnLock(kbn, yarnLock);
+    if (options.validate) {
+      await validateYarnLock(kbn, yarnLock);
+    }
 
     await linkProjectExecutables(projects, projectGraph);
 
