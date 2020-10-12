@@ -35,6 +35,7 @@ import { SerializableState } from '../../kibana_utils/common';
 import { EmbeddableInput } from '../common/types';
 
 export interface EmbeddableSetup {
+  getAttributeService: any;
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
   registerEnhancement: (enhancement: EnhancementRegistryDefinition) => void;
 }
