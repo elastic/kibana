@@ -10,11 +10,10 @@ import { EuiCallOut } from '@elastic/eui';
 
 const i18nTexts = {
   title: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.cloudDataTierCallout.title', {
-    defaultMessage: 'No cold tier found',
+    defaultMessage: 'Create a cold tier',
   }),
   body: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.cloudDataTierCallout.body', {
-    defaultMessage:
-      'Data in this phase will be allocated to hot and warm tier nodes. Go to the Cloud UI to create a cold tier.',
+    defaultMessage: 'Edit your deployment on Cloud to create cold tier nodes.',
   }),
 };
 
