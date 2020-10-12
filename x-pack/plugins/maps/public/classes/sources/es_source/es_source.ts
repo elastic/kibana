@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
-import { IFieldType, IndexPattern, ISearchSource } from 'src/plugins/data/public';
+import { Filter, IFieldType, IndexPattern, ISearchSource } from 'src/plugins/data/public';
 import { AbstractVectorSource, BoundsFilters } from '../vector_source';
 import {
   getAutocompleteService,
@@ -34,7 +34,7 @@ import {
 import { IVectorStyle } from '../../styles/vector/vector_style';
 import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 import { IField } from '../../fields/field';
-import { FieldFormatter } from '../../../../common/constants';
+import { ES_GEO_FIELD_TYPE, FieldFormatter } from '../../../../common/constants';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 
 export interface IESSource extends IVectorSource {
@@ -64,6 +64,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   indexPattern?: IndexPattern;
 
   readonly _descriptor: AbstractESSourceDescriptor;
+  readonly _inspectorAdapters: Adapters;
 
   constructor(descriptor: AbstractESSourceDescriptor, inspectorAdapters: Adapters) {
     super(
@@ -74,6 +75,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       inspectorAdapters
     );
     this._descriptor = descriptor;
+    this._inspectorAdapters = inspectorAdapters;
   }
 
   getId(): string {
@@ -177,15 +179,23 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     const isTimeAware = await this.isTimeAware();
     const applyGlobalQuery =
       typeof searchFilters.applyGlobalQuery === 'boolean' ? searchFilters.applyGlobalQuery : true;
-    const globalFilters = applyGlobalQuery ? searchFilters.filters : [];
-    const allFilters = [...globalFilters];
-    if (this.isFilterByMapBounds() && searchFilters.buffer) {
+    const globalFilters: Filter[] = applyGlobalQuery ? searchFilters.filters : [];
+    const allFilters: Filter[] = [...globalFilters];
+    if (this.isFilterByMapBounds() && 'buffer' in searchFilters && searchFilters.buffer) {
       // buffer can be empty
       const geoField = await this._getGeoField();
-      const buffer = this.isGeoGridPrecisionAware()
-        ? expandToTileBoundaries(searchFilters.buffer, searchFilters.geogridPrecision)
-        : searchFilters.buffer;
-      allFilters.push(createExtentFilter(buffer, geoField.name, geoField.type));
+      const buffer: MapExtent =
+        this.isGeoGridPrecisionAware() &&
+        'geogridPrecision' in searchFilters &&
+        typeof searchFilters.geogridPrecision === 'number'
+          ? expandToTileBoundaries(searchFilters.buffer, searchFilters.geogridPrecision)
+          : searchFilters.buffer;
+      const extentFilter: unknown = createExtentFilter(
+        buffer,
+        geoField.name,
+        geoField.type as ES_GEO_FIELD_TYPE
+      ) as Filter;
+      allFilters.push(extentFilter as Filter);
     }
     if (isTimeAware) {
       const filter = getTimeFilter().createFilter(indexPattern, searchFilters.timeFilters);
@@ -368,9 +378,12 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     });
 
     const fieldAggRequests = await Promise.all(promises);
-    const aggs = fieldAggRequests.reduce((aAggs, fieldAggRequest) => {
-      return fieldAggRequest ? { ...aAggs, ...fieldAggRequest } : aAggs;
-    }, {});
+    const aggs: Record<string, any> = fieldAggRequests.reduce(
+      (aAggs: Record<string, any>, fieldAggRequest: unknown) => {
+        return fieldAggRequest ? { ...aAggs, ...(fieldAggRequest as Record<string, any>) } : aAggs;
+      },
+      {}
+    );
 
     const indexPattern = await this.getIndexPattern();
     const searchService = getSearchService();

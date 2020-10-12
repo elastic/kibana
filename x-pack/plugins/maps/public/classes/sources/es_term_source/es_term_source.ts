@@ -110,7 +110,7 @@ export class ESTermSource extends AbstractESAggSource {
     registerCancelCallback: (callback: () => void) => void
   ): Promise<PropertiesMap> {
     if (!this.hasCompleteConfig()) {
-      return [];
+      return new Map<string, BucketProperties>();
     }
 
     const indexPattern = await this.getIndexPattern();
@@ -142,11 +142,11 @@ export class ESTermSource extends AbstractESAggSource {
     return extractPropertiesMap(rawEsData, countPropertyName);
   }
 
-  isFilterByMapBounds() {
+  isFilterByMapBounds(): boolean {
     return false;
   }
 
-  async getDisplayName() {
+  async getDisplayName(): Promise<string> {
     // no need to localize. this is never rendered.
     return `es_table ${this.getIndexPatternId()}`;
   }

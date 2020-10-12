@@ -37,6 +37,7 @@ import { LICENSED_FEATURES } from '../../../licensed_features';
 
 import { getHttp } from '../../../kibana_services';
 import { ITiledSingleLayerVectorSource } from '../vector_source';
+import { VectorSourceRequestMeta, VectorSourceSyncMeta } from '../../../../common/descriptor_types';
 
 export const MAX_GEOTILE_LEVEL = 29;
 
@@ -49,8 +50,6 @@ export const heatmapTitle = i18n.translate('xpack.maps.source.esGridHeatmapTitle
 });
 
 export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingleLayerVectorSource {
-  static type = SOURCE_TYPES.ES_GEO_GRID;
-
   static createDescriptor({ indexPatternId, geoField, metrics, requestType, resolution }) {
     return {
       type: ESGeoGridSource.type,
@@ -80,7 +79,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     );
   }
 
-  getSyncMeta() {
+  getSyncMeta(): VectorSourceSyncMeta | null {
     return {
       requestType: this._descriptor.requestType,
     };
@@ -308,7 +307,12 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     return convertRegularRespToGeoJson(esResponse, this._descriptor.requestType);
   }
 
-  async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback, isRequestStillActive) {
+  async getGeoJsonWithMeta(
+    layerName: string,
+    searchFilters: VectorSourceRequestMeta,
+    registerCancelCallback: (callback: () => void) => void,
+    isRequestStillActive: () => boolean
+  ) {
     const indexPattern = await this.getIndexPattern();
     const searchSource = await this.makeSearchSource(searchFilters, 0);
 

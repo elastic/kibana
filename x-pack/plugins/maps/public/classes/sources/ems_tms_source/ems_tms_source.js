@@ -20,11 +20,9 @@ export const sourceTitle = i18n.translate('xpack.maps.source.emsTileTitle', {
 });
 
 export class EMSTMSSource extends AbstractTMSSource {
-  static type = SOURCE_TYPES.EMS_TMS;
-
   static createDescriptor(sourceConfig) {
     return {
-      type: EMSTMSSource.type,
+      type: SOURCE_TYPES.EMS_TMS,
       id: sourceConfig.id,
       isAutoSelect: sourceConfig.isAutoSelect,
     };

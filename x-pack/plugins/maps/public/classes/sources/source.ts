@@ -9,6 +9,7 @@
 import { ReactElement } from 'react';
 
 import { Adapters } from 'src/plugins/inspector/public';
+import { GeoJsonProperties } from 'geojson';
 import { copyPersistentState } from '../../reducers/util';
 
 import { IField } from '../fields/field';
@@ -62,7 +63,7 @@ export interface ISource {
   getIndexPatternIds(): string[];
   getQueryableIndexPatternIds(): string[];
   getGeoGridPrecision(zoom: number): number;
-  getPreIndexedShape(): Promise<PreIndexedShape | null>;
+  getPreIndexedShape(properties: GeoJsonProperties): Promise<PreIndexedShape | null>;
   createFieldFormatter(field: IField): Promise<FieldFormatter | null>;
   getValueSuggestions(field: IField, query: string): Promise<string[]>;
   getMinZoom(): number;
@@ -72,9 +73,9 @@ export interface ISource {
 
 export class AbstractSource implements ISource {
   readonly _descriptor: AbstractSourceDescriptor;
-  readonly _inspectorAdapters: Adapters;
+  readonly _inspectorAdapters?: Adapters;
 
-  constructor(descriptor: AbstractSourceDescriptor, inspectorAdapters: Adapters) {
+  constructor(descriptor: AbstractSourceDescriptor, inspectorAdapters?: Adapters) {
     this._descriptor = descriptor;
     this._inspectorAdapters = inspectorAdapters;
   }
@@ -162,7 +163,7 @@ export class AbstractSource implements ISource {
   }
 
   // Returns geo_shape indexed_shape context for spatial quering by pre-indexed shapes
-  async getPreIndexedShape(/* properties */): Promise<PreIndexedShape | null> {
+  async getPreIndexedShape(properties: GeoJsonProperties): Promise<PreIndexedShape | null> {
     return null;
   }
 

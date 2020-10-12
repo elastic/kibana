@@ -25,7 +25,6 @@ import { IField } from '../../fields/field';
 import {
   ESSearchSourceResponseMeta,
   MapExtent,
-  MapFilters,
   MapQuery,
   VectorSourceRequestMeta,
   VectorSourceSyncMeta,
@@ -60,7 +59,7 @@ export interface IVectorSource extends ISource {
   ): Promise<MapExtent | null>;
   getGeoJsonWithMeta(
     layerName: string,
-    searchFilters: MapFilters,
+    searchFilters: VectorSourceRequestMeta,
     registerCancelCallback: (callback: () => void) => void,
     isRequestStillActive: () => boolean
   ): Promise<GeoJsonWithMeta>;
@@ -178,13 +177,13 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     return [];
   }
 
-  async getLeftJoinFields() {
+  async getLeftJoinFields(): Promise<IField[]> {
     return [];
   }
 
   async getGeoJsonWithMeta(
     layerName: string,
-    searchFilters: MapFilters,
+    searchFilters: VectorSourceRequestMeta,
     registerCancelCallback: (callback: () => void) => void,
     isRequestStillActive: () => boolean
   ): Promise<GeoJsonWithMeta> {
@@ -196,8 +195,8 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
   }
 
   // Allow source to filter and format feature properties before displaying to user
-  async getTooltipProperties(properties: GeoJsonProperties) {
-    const tooltipProperties = [];
+  async getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]> {
+    const tooltipProperties: ITooltipProperty[] = [];
     for (const key in properties) {
       if (key.startsWith('__kbn')) {
         // these are system properties and should be ignored
@@ -224,7 +223,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     return { tooltipContent: null, areResultsTrimmed: false };
   }
 
-  getSyncMeta() {
+  getSyncMeta(): VectorSourceSyncMeta | null {
     return null;
   }
 }

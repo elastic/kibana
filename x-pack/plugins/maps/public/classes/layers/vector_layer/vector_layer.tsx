@@ -239,7 +239,7 @@ export class VectorLayer extends AbstractLayer {
     }
 
     const requestToken = Symbol(`${SOURCE_BOUNDS_DATA_REQUEST_ID}-${this.getId()}`);
-    const searchFilters = this._getSearchFilters(
+    const searchFilters: VectorSourceRequestMeta = this._getSearchFilters(
       dataFilters,
       this.getSource(),
       this.getCurrentStyle()
@@ -464,7 +464,11 @@ export class VectorLayer extends AbstractLayer {
     } = syncContext;
     const dataRequestId = SOURCE_DATA_REQUEST_ID;
     const requestToken = Symbol(`layer-${this.getId()}-${dataRequestId}`);
-    const searchFilters = this._getSearchFilters(dataFilters, source, style);
+    const searchFilters: VectorSourceRequestMeta = this._getSearchFilters(
+      dataFilters,
+      source,
+      style
+    );
     const prevDataRequest = this.getSourceDataRequest();
     const canSkipFetch = await canSkipSourceUpdate({
       source,

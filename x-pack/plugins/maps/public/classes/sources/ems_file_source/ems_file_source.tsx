@@ -35,11 +35,9 @@ export const sourceTitle = i18n.translate('xpack.maps.source.emsFileTitle', {
 });
 
 export class EMSFileSource extends AbstractVectorSource implements IEmsFileSource {
-  static type = SOURCE_TYPES.EMS_FILE;
-
   static createDescriptor({ id, tooltipProperties = [] }: Partial<EMSFileSourceDescriptor>) {
     return {
-      type: EMSFileSource.type,
+      type: SOURCE_TYPES.EMS_FILE,
       id: id!,
       tooltipProperties,
     };

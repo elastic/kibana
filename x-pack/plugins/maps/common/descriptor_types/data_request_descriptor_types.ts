@@ -88,10 +88,10 @@ export type StyleMetaData = {
   [key: string]: NumericalStyleFieldData | CategoricalStyleFieldData;
 };
 
-export type DataRequestDescriptor<T> = {
+export type DataRequestDescriptor = {
   dataId: string;
   dataMetaAtStart?: DataMeta | null;
   dataRequestToken?: symbol;
-  data?: T;
+  data?: object;
   dataMeta?: DataMeta;
 };

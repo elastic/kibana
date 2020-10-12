@@ -128,7 +128,7 @@ export abstract class AbstractESAggSource extends AbstractESSource {
     return valueAggsDsl;
   }
 
-  async getTooltipProperties(properties: GeoJsonProperties) {
+  async getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]> {
     const metricFields = await this.getFields();
     const promises: Array<Promise<ITooltipProperty>> = [];
     metricFields.forEach((metricField) => {

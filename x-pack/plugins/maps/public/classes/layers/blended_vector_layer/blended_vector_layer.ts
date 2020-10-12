@@ -36,10 +36,12 @@ import {
   StylePropertyOptions,
   LayerDescriptor,
   VectorLayerDescriptor,
+  VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { IVectorSource } from '../../sources/vector_source';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 import { ESSearchSource } from '../../sources/es_search_source/es_search_source';
+import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 
 const ACTIVE_COUNT_DATA_ID = 'ACTIVE_COUNT_DATA_ID';
 
@@ -71,7 +73,10 @@ function getClusterSource(documentSource: IESSource, documentStyle: IVectorStyle
     }),
   ];
   clusterSourceDescriptor.id = documentSource.getId();
-  return new ESGeoGridSource(clusterSourceDescriptor, documentSource.getInspectorAdapters());
+  return new ESGeoGridSource(
+    clusterSourceDescriptor,
+    documentSource.getInspectorAdapters() as Adapters
+  );
 }
 
 function getClusterStyleDescriptor(
@@ -280,7 +285,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
   async syncData(syncContext: DataRequestContext) {
     const dataRequestId = ACTIVE_COUNT_DATA_ID;
     const requestToken = Symbol(`layer-active-count:${this.getId()}`);
-    const searchFilters = this._getSearchFilters(
+    const searchFilters: VectorSourceRequestMeta = this._getSearchFilters(
       syncContext.dataFilters,
       this.getSource(),
       this.getCurrentStyle()
