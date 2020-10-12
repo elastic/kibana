@@ -37,11 +37,7 @@ import { sortExplorationResultsFields, ML__ID_COPY } from '../../../../common/fi
 import { isRegressionAnalysis } from '../../../../common/analytics';
 import { extractErrorMessage } from '../../../../../../../common/util/errors';
 import { useTrainedModelsApiService } from '../../../../../services/ml_api_service/trained_models';
-import {
-  FeatureImportanceBaseline,
-  isClassificationFeatureImportanceBaseline,
-  isRegressionFeatureImportanceBaseline,
-} from '../../../../../../../common/types/feature_importance';
+import { FeatureImportanceBaseline } from '../../../../../../../common/types/feature_importance';
 
 export const useExplorationResults = (
   indexPattern: IndexPattern | undefined,
@@ -150,26 +146,6 @@ export const useExplorationResults = (
         if (inferenceModel?.metadata?.feature_importance_baseline !== undefined) {
           setBaseLine(inferenceModel?.metadata?.feature_importance_baseline);
         }
-
-        // if (
-        //   isRegressionFeatureImportanceBaseline(
-        //     inferenceModel?.metadata?.feature_importance_baseline
-        //   )
-        // ) {
-        //   setBaseLine(inferenceModel?.metadata?.feature_importance_baseline.baseline);
-        // }
-        //
-        // if (
-        //   isClassificationFeatureImportanceBaseline(
-        //     inferenceModel?.metadata?.feature_importance_baseline
-        //   )
-        // ) {
-        //   if (
-        //     Array.isArray(inferenceModel?.metadata?.feature_importance_baseline?.classes) === true
-        //   ) {
-        //     setBaseLine(inferenceModel?.metadata?.feature_importance_baseline);
-        //   }
-        // }
       }
     } catch (e) {
       const error = extractErrorMessage(e);
