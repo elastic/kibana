@@ -36,7 +36,7 @@ import {
   LensByReferenceInput,
 } from '../editor_frame_service/embeddable/embeddable';
 import { SavedObjectReference } from '../../../../../src/core/types';
-import { mockAttributeService } from '../../../../../src/plugins/dashboard/public/mocks';
+import { mockAttributeService } from '../../../../../src/plugins/embeddable/public/mocks';
 import { LensAttributeService } from '../lens_attribute_service';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 

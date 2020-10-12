@@ -1290,11 +1290,11 @@ export type IndexPatternsContract = PublicMethodsOf<IndexPatternsService>;
 // Warning: (ae-missing-release-tag) "IndexPatternSelectProps" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type IndexPatternSelectProps = Required<Omit<EuiComboBoxProps<any>, 'isLoading' | 'onSearchChange' | 'options' | 'selectedOptions'>, 'onChange' | 'placeholder'> & {
+export type IndexPatternSelectProps = Required<Omit<EuiComboBoxProps<any>, 'isLoading' | 'onSearchChange' | 'options' | 'selectedOptions' | 'onChange'>, 'placeholder'> & {
+    onChange: (indexPatternId?: string) => void;
     indexPatternId: string;
     fieldTypes?: string[];
     onNoIndexPatterns?: () => void;
-    savedObjectsClient: SavedObjectsClientContract;
 };
 
 // Warning: (ae-missing-release-tag) "IndexPatternSpec" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
