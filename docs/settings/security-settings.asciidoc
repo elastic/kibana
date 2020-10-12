@@ -244,13 +244,13 @@ The format is a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h',
 [[audit-logging-settings]]
 ===== Audit logging settings
 
-You can enable audit logging to support compliance, accountability and security. When enabled {kib} will capture:
+You can enable audit logging to support compliance, accountability, and security. When enabled, {kib} will capture:
 
 - Who performed an action
 - What action was performed
-- When it occurred
+- When the action occurred
 
-For more details and a reference of audit events see <<xpack-security-audit-logging>>.
+For more details and a reference of audit events, refer to <<xpack-security-audit-logging>>.
 
 [cols="2*<"]
 |===
@@ -260,7 +260,7 @@ For more details and a reference of audit events see <<xpack-security-audit-logg
 
 [float]
 [[audit-logging-settings-beta]]
-===== Audit logging settings (beta)
+===== Audit logging settings
 
 beta[]
 
@@ -284,7 +284,7 @@ xpack.security.audit.appender:
 ----------------------------------------
 
 | `xpack.security.audit.appender.kind`
-| Mandatory. Specifies where audit logs should be written to. Allowed values are `console` or `file`.
+| Required. Specifies where audit logs should be written to. Allowed values are `console` or `file`.
 |===
 
 [float]
@@ -296,10 +296,10 @@ The file appender can be configured using the following settings:
 [cols="2*<"]
 |===
 | `xpack.security.audit.appender.path`
-| Mandatory. Full file path the log file should be written to.
+| Required. Full file path the log file should be written to.
 
 | `xpack.security.audit.appender.layout.kind`
-| Mandatory. Specifies how audit logs should be formatted. Allowed values are `json` or `pattern`.
+| Required. Specifies how audit logs should be formatted. Allowed values are `json` or `pattern`.
 |===
 
 [float]
@@ -311,7 +311,7 @@ The pattern layout can be configured using the following settings:
 [cols="2*<"]
 |===
 | `xpack.security.audit.appender.layout.highlight`
-| Optional. Set to `true` to enable highlighting log messages with colors
+| Optional. Set to `true` to enable highlighting log messages with colors.
 
 | `xpack.security.audit.appender.layout.pattern`
 | Optional. Specifies how the log line should be formatted. *Default:* `[%date][%level][%logger]%meta %message`
@@ -339,14 +339,14 @@ xpack.security.audit.ignore_filters:
 <2> Filters out any data write events
 
 | `xpack.security.audit.ignore_filters[].actions[]`
-| List of values matched against the `event.action` field of an audit event. See <<xpack-security-audit-logging>> for a list of available events.
+| List of values matched against the `event.action` field of an audit event. Refer to <<xpack-security-audit-logging>> for a list of available events.
 
 | `xpack.security.audit.ignore_filters[].categories[]`
-| List of values matched against the `event.category` field of an audit event. See https://www.elastic.co/guide/en/ecs/current/ecs-allowed-values-event-category.html[ECS categorization field] for allowed values.
+| List of values matched against the `event.category` field of an audit event. Refer to https://www.elastic.co/guide/en/ecs/current/ecs-allowed-values-event-category.html[ECS categorization field] for allowed values.
 
 | `xpack.security.audit.ignore_filters[].types[]`
-| List of values matched against the `event.type` field of an audit event. See https://www.elastic.co/guide/en/ecs/current/ecs-allowed-values-event-type.html[ECS type field] for allowed values.
+| List of values matched against the `event.type` field of an audit event. Refer to https://www.elastic.co/guide/en/ecs/current/ecs-allowed-values-event-type.html[ECS type field] for allowed values.
 
 | `xpack.security.audit.ignore_filters[].outcomes[]`
-| List of values matched against the `event.outcome` field of an audit event. See https://www.elastic.co/guide/en/ecs/current/ecs-allowed-values-event-outcome.html[ECS outcome field] for allowed values.
+| List of values matched against the `event.outcome` field of an audit event. Refer to https://www.elastic.co/guide/en/ecs/current/ecs-allowed-values-event-outcome.html[ECS outcome field] for allowed values.
 |===
