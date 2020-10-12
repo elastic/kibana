@@ -23,6 +23,7 @@ import React, { FC, memo, useCallback, useEffect, useMemo, useState } from 'reac
 import { useParams, useHistory } from 'react-router-dom';
 import { connect, ConnectedProps } from 'react-redux';
 
+import { useKibana } from '../../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import { UpdateDateRange } from '../../../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../../../common/components/filters_global';
@@ -166,6 +167,19 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   // TODO: Refactor license check + hasMlAdminPermissions to common check
   const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
   const ruleDetailTabs = getRuleDetailsTabs(rule);
+  const {
+    services: {
+      application: {
+        capabilities: { actions },
+      },
+    },
+  } = useKibana();
+  const hasActionsPrivileges = useMemo(() => {
+    if (rule?.actions != null && rule?.actions.length > 0) {
+      return actions.show;
+    }
+    return true;
+  }, [actions, rule?.actions]);
 
   // persist rule until refresh is complete
   useEffect(() => {
@@ -414,7 +428,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                         <LinkButton
                           onClick={goToEditRule}
                           iconType="controlsHorizontal"
-                          isDisabled={userHasNoPermissions(canUserCRUD) ?? true}
+                          isDisabled={!hasActionsPrivileges || userHasNoPermissions(canUserCRUD)}
                           href={formatUrl(getEditRuleUrl(ruleId ?? ''))}
                         >
                           {ruleI18n.EDIT_RULE_SETTINGS}
