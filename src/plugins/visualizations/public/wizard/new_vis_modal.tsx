@@ -32,7 +32,7 @@ import {
 import { SearchSelection } from './search_selection';
 import { GroupSelection } from './group_selection';
 import { AggBasedSelection } from './agg_based_selection';
-import { TypesStart, VisType, VisTypeAlias } from '../vis_types';
+import type { TypesStart, VisType, VisTypeAlias } from '../vis_types';
 import { UsageCollectionSetup } from '../../../../plugins/usage_collection/public';
 import { EmbeddableStateTransfer } from '../../../embeddable/public';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';

@@ -30,14 +30,15 @@ import {
   EuiSpacer,
   EuiIcon,
   EuiCard,
-  EuiLink,
   EuiModalBody,
   EuiModalHeader,
   EuiModalHeaderTitle,
 } from '@elastic/eui';
 
 import { memoizeLast } from '../../legacy/memoize';
-import { VisType, TypesStart, VisGroups } from '../../vis_types';
+import type { VisType, TypesStart } from '../../vis_types';
+import { VisGroups } from '../../vis_types';
+import { DialogNavigation } from '../dialog_navigation';
 
 interface VisTypeListEntry {
   type: VisType;
@@ -74,19 +75,7 @@ class AggBasedSelection extends React.Component<AggBasedSelectionProps, AggBased
           </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
-          <EuiLink data-test-subj="goBackLink" onClick={() => this.props.toggleGroups(true)}>
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="arrowLeft" />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                {i18n.translate('visualizations.newVisWizard.goBackLink', {
-                  defaultMessage: 'Go Back',
-                })}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiLink>
-          <EuiSpacer />
+          <DialogNavigation goBack={() => this.props.toggleGroups(true)} />
           <EuiFieldSearch
             placeholder="Filter"
             value={query}
@@ -163,7 +152,7 @@ class AggBasedSelection extends React.Component<AggBasedSelectionProps, AggBased
           onClick={onClick}
           data-test-subj={`visType-${visType.type.name}`}
           data-vis-stage={visType.type.stage}
-          aria-describedby={`visTypeDescription-${visType.type.name}`}
+          aria-label={`visType-${visType.type.name}`}
           description={visType.type.description || ''}
           layout="horizontal"
           isDisabled={isDisabled}

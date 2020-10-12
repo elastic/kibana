@@ -37,7 +37,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { DocLinksStart } from '../../../../../core/public';
 import { VisTypeAlias } from '../../vis_types/vis_type_alias_registry';
-import { VisType, TypesStart, VisGroups } from '../../vis_types';
+import type { VisType, TypesStart } from '../../vis_types';
+import { VisGroups } from '../../vis_types';
 
 interface GroupSelectionProps {
   onVisTypeSelected: (visType: VisType | VisTypeAlias) => void;
@@ -105,12 +106,11 @@ function GroupSelection(props: GroupSelectionProps) {
                 title={
                   <span data-test-subj="visGroupAggBasedTitle">
                     {i18n.translate('visualizations.newVisWizard.aggBasedGroupTitle', {
-                      defaultMessage: 'Aggregation Based',
+                      defaultMessage: 'Aggregation based',
                     })}
                   </span>
                 }
                 data-test-subj="visGroup-aggbased"
-                aria-describedby="visGroup-aggbased"
                 description={i18n.translate(
                   'visualizations.newVisWizard.aggBasedGroupDescription',
                   {
@@ -203,7 +203,7 @@ const VisGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
         }
         data-test-subj={`visType-${visType.name}`}
         data-vis-stage={!('aliasPath' in visType) ? visType.stage : 'alias'}
-        aria-describedby={`visTypeDescription-${visType.name}`}
+        aria-label={`visType-${visType.name}`}
         description={visType.description || ''}
         layout="horizontal"
         icon={<EuiIcon type={visType.icon || 'empty'} size="xl" color="secondary" />}
