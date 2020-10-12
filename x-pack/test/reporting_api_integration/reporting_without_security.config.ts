@@ -7,7 +7,7 @@
 import { esTestConfig, kbnTestConfig } from '@kbn/test';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { format as formatUrl } from 'url';
-import { pageObjects } from './page_objects';
+import { pageObjects } from '../functional/page_objects'; // Reporting APIs depend on UI functionality
 import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
