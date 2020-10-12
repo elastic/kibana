@@ -434,6 +434,7 @@ export class EndpointDocGenerator {
     } else if ('quick' in options) {
       this.random = options;
     } else {
+      // options is an object so check the internal `seed` field
       if (typeof options.seed === 'string') {
         this.random = seedrandom(options.seed);
       } else {
@@ -472,6 +473,11 @@ export class EndpointDocGenerator {
     this.commonInfo.Endpoint.policy.applied.status = this.randomChoice(POLICY_RESPONSE_STATUSES);
   }
 
+  /**
+   * Parses an index and returns the data stream fields extracted from the index.
+   *
+   * @param index the index name to parse into the data stream parts
+   */
   public static createDataStreamFromIndex(index: string): DataStream {
     // e.g. logs-endpoint.events.network-default
     const parts = index.split('-');

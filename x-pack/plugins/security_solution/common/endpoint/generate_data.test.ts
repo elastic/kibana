@@ -33,6 +33,7 @@ interface EventWithDataStream {
 }
 
 describe('data generator options', () => {
+  // these tests cast the result of the generate methods so that we can specifically compare the `data_stream` fields
   it.each`
     param                                                                                               | description
     ${'seed'}                                                                                           | ${'string'}
