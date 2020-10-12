@@ -38,6 +38,9 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       before(async () => {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.selectIndexPattern('shakespeare');
+        await PageObjects.timePicker.setCommonlyUsedTime('Last_30 days');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await toasts.dismissAllToasts();
       });
 
       afterEach(async () => {
