@@ -29,6 +29,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
   const globalNav = getService('globalNav');
   const elasticChart = getService('elasticChart');
   const docTable = getService('docTable');
+  const config = getService('config');
+  const defaultFindTimeout = config.get('timeouts.find');
 
   class DiscoverPage {
     public async getChartTimespan() {
@@ -82,10 +84,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async waitUntilSearchingHasFinished() {
-      await retry.waitFor('loading spinner doesnt exist', async () => {
-        const spinner = await testSubjects.exists('loadingSpinner');
-        return !spinner;
-      });
+      await testSubjects.missingOrFail('loadingSpinner', { timeout: defaultFindTimeout * 10 });
     }
 
     public async getColumnHeaders() {
