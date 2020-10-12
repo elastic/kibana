@@ -28,7 +28,7 @@ export const ConfirmAlertSave: React.FC<Props> = ({ onConfirm, onCancel }) => {
         confirmButtonText={i18n.translate(
           'xpack.triggersActionsUI.sections.confirmAlertSave.confirmAlertSaveConfirmButtonText',
           {
-            defaultMessage: 'Save',
+            defaultMessage: 'Save alert',
           }
         )}
         cancelButtonText={i18n.translate(
@@ -43,7 +43,7 @@ export const ConfirmAlertSave: React.FC<Props> = ({ onConfirm, onCancel }) => {
         <p>
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.confirmAlertSave.confirmAlertSaveWithoutActionsMessage"
-            defaultMessage="Are you sure you want to save this alert without defining any actions?"
+            defaultMessage="You can add an action at anytime."
           />
         </p>
       </EuiConfirmModal>
