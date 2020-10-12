@@ -9,24 +9,26 @@ import React, { useCallback, useEffect } from 'react';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../../shared_imports';
 import { ConnectorsDropdown } from '../configure_cases/connectors_dropdown';
-import { Connector } from '../../../../../case/common/api/cases';
+import { ActionConnector } from '../../../../../case/common/api/cases';
 
 interface ConnectorSelectorProps {
-  connectors: Connector[];
+  connectors: ActionConnector[];
   dataTestSubj: string;
+  defaultValue?: ActionConnector;
+  disabled: boolean;
   field: FieldHook;
   idAria: string;
-  defaultValue?: string;
-  disabled: boolean;
+  isEdit: boolean;
   isLoading: boolean;
 }
 export const ConnectorSelector = ({
   connectors,
   dataTestSubj,
   defaultValue,
+  disabled = false,
   field,
   idAria,
-  disabled = false,
+  isEdit = true,
   isLoading = false,
 }: ConnectorSelectorProps) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
@@ -37,13 +39,13 @@ export const ConnectorSelector = ({
   }, [defaultValue]);
 
   const handleContentChange = useCallback(
-    (newContent: string) => {
-      field.setValue(newContent);
+    (newConnector: string) => {
+      field.setValue(newConnector);
     },
     [field]
   );
 
-  return (
+  return isEdit ? (
     <EuiFormRow
       data-test-subj={dataTestSubj}
       describedByIds={idAria ? [idAria] : undefined}
@@ -56,11 +58,11 @@ export const ConnectorSelector = ({
     >
       <ConnectorsDropdown
         connectors={connectors}
-        selectedConnector={field.value as string}
         disabled={disabled}
         isLoading={isLoading}
         onChange={handleContentChange}
+        selectedConnector={(field.value as string) ?? 'none'}
       />
     </EuiFormRow>
-  );
+  ) : null;
 };

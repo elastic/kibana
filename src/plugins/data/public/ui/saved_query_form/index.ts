@@ -17,4 +17,5 @@
  * under the License.
  */
 
+// @internal
 export { SavedQueryMeta, SaveQueryForm } from '../saved_query_form/save_query_form';

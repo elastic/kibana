@@ -75,11 +75,11 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const es = getService('legacyEs');
 
-  const { addTests, createTestDefinitions, expectForbidden } = bulkCreateTestSuiteFactory(
-    es,
-    esArchiver,
-    supertest
-  );
+  const {
+    addTests,
+    createTestDefinitions,
+    expectSavedObjectForbidden,
+  } = bulkCreateTestSuiteFactory(es, esArchiver, supertest);
   const createTests = (overwrite: boolean, spaceId: string, user: TestUser) => {
     const { normalTypes, crossNamespace, hiddenType, allTypes } = createTestCases(
       overwrite,
@@ -97,7 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
         spaceId,
         user,
         singleRequest: true,
-        responseBodyOverride: expectForbidden(['hiddentype']),
+        responseBodyOverride: expectSavedObjectForbidden(['hiddentype']),
       }),
     ].flat();
     return {
