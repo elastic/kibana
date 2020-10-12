@@ -146,6 +146,10 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
   fetchIndices = async (query: string) => {
     const { indexPatternCreationType } = this.props;
     const { existingIndexPatterns } = this.state;
+    const { http } = this.context.services;
+    const getIndexTags = (indexName: string) => indexPatternCreationType.getIndexTags(indexName);
+    const searchClient = this.context.services.data.search.search;
+    const showAllIndices = this.state.isIncludingSystemIndices;
 
     if ((existingIndexPatterns as string[]).includes(query)) {
       this.setState({ indexPatternExists: true });
@@ -156,12 +160,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
 
     if (query.endsWith('*')) {
       const exactMatchedIndices = await ensureMinimumTime(
-        getIndices(
-          this.context.services.http,
-          indexPatternCreationType,
-          query,
-          this.state.isIncludingSystemIndices
-        )
+        getIndices({ http, getIndexTags, pattern: query, showAllIndices, searchClient })
       );
       // If the search changed, discard this state
       if (query !== this.lastQuery) {
@@ -172,18 +171,8 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     }
 
     const [partialMatchedIndices, exactMatchedIndices] = await ensureMinimumTime([
-      getIndices(
-        this.context.services.http,
-        indexPatternCreationType,
-        `${query}*`,
-        this.state.isIncludingSystemIndices
-      ),
-      getIndices(
-        this.context.services.http,
-        indexPatternCreationType,
-        query,
-        this.state.isIncludingSystemIndices
-      ),
+      getIndices({ http, getIndexTags, pattern: `${query}*`, showAllIndices, searchClient }),
+      getIndices({ http, getIndexTags, pattern: query, showAllIndices, searchClient }),
     ]);
 
     // If the search changed, discard this state

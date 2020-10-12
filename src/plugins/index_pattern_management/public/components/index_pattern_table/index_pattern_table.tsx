@@ -40,6 +40,8 @@ import { CreateIndexPatternPrompt } from '../create_index_pattern_prompt';
 import { IndexPatternTableItem, IndexPatternCreationOption } from '../types';
 import { getIndexPatterns } from '../utils';
 import { getListBreadcrumbs } from '../breadcrumbs';
+// import { MatchedItem, ResolveIndexResponseItemAlias } from '../create_index_pattern_wizard/types';
+// import { getIndices } from '../create_index_pattern_wizard/lib';
 
 const pagination = {
   initialPageSize: 10,
@@ -81,10 +83,18 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
     uiSettings,
     indexPatternManagementStart,
     chrome,
+    // http,
+    // data,
   } = useKibana<IndexPatternManagmentContext>().services;
   const [showFlyout, setShowFlyout] = useState(false);
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
   const [creationOptions, setCreationOptions] = useState<IndexPatternCreationOption[]>([]);
+  /*
+  const [sources, setSources] = useState<MatchedItem[]>([]);
+  const [remoteClustersExist, setRemoteClustersExist] = useState<boolean>(false);
+  const [isLoadingSources, setIsLoadingSources] = useState<boolean>(true);
+  const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
+  */
 
   setBreadcrumbs(getListBreadcrumbs());
 
@@ -98,9 +108,9 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
         uiSettings.get('defaultIndex'),
         indexPatternManagementStart
       );
+      // setIsLoadingIndexPatterns(false);
       setCreationOptions(options);
       setIndexPatterns(gettedIndexPatterns);
-      setShowFlyout(gettedIndexPatterns.length === 0);
     })();
   }, [
     history.push,
@@ -109,6 +119,35 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
     uiSettings,
     savedObjects.client,
   ]);
+
+  /*
+  const removeAliases = (item: MatchedItem) =>
+    !((item as unknown) as ResolveIndexResponseItemAlias).indices;
+
+  const searchClient = data.search.search;
+
+  /*
+  const loadSources = () => {
+    getIndices({ http, pattern: '*', searchClient }).then((dataSources) =>
+      setSources(dataSources.filter(removeAliases))
+    );
+    getIndices({ http, pattern: '*:*', searchClient }).then((dataSources) =>
+      setRemoteClustersExist(!!dataSources.filter(removeAliases).length)
+    );
+  };
+  */
+
+  /*
+  useEffect(() => {
+    getIndices({ http, pattern: '*', searchClient }).then((dataSources) => {
+      setSources(dataSources.filter(removeAliases));
+      setIsLoadingSources(false);
+    });
+    getIndices({ http, pattern: '*:*', searchClient }).then((dataSources) =>
+      setRemoteClustersExist(!!dataSources.filter(removeAliases).length)
+    );
+  }, [http, creationOptions, searchClient]);
+  */
 
   chrome.docTitle.change(title);
 
