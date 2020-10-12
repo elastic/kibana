@@ -6,14 +6,18 @@
 
 import React, { useState, useEffect } from 'react';
 
-import { EuiButtonEmpty, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexItem, EuiFlexGroup, EuiFlyout } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { Dictionary } from '../../../../common/types/common';
 import { useUrlState } from '../../util/url_state';
 // @ts-ignore
 import { IdBadges } from './id_badges/index';
-import { BADGE_LIMIT, JobSelectorFlyout, JobSelectorFlyoutProps } from './job_selector_flyout';
+import {
+  BADGE_LIMIT,
+  JobSelectorFlyoutContent,
+  JobSelectorFlyoutProps,
+} from './job_selector_flyout';
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 
 interface GroupObj {
@@ -163,16 +167,18 @@ export function JobSelector({ dateFormatTz, singleSelection, timeseriesOnly }: J
   function renderFlyout() {
     if (isFlyoutVisible) {
       return (
-        <JobSelectorFlyout
-          dateFormatTz={dateFormatTz}
-          timeseriesOnly={timeseriesOnly}
-          singleSelection={singleSelection}
-          selectedIds={selectedIds}
-          onSelectionConfirmed={applySelection}
-          onJobsFetched={setMaps}
-          onFlyoutClose={closeFlyout}
-          maps={maps}
-        />
+        <EuiFlyout onClose={closeFlyout}>
+          <JobSelectorFlyoutContent
+            dateFormatTz={dateFormatTz}
+            timeseriesOnly={timeseriesOnly}
+            singleSelection={singleSelection}
+            selectedIds={selectedIds}
+            onSelectionConfirmed={applySelection}
+            onJobsFetched={setMaps}
+            onFlyoutClose={closeFlyout}
+            maps={maps}
+          />
+        </EuiFlyout>
       );
     }
   }
