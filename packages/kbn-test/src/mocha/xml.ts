@@ -17,24 +17,22 @@
  * under the License.
  */
 
-import config from './config';
+// @ts-ignore
+import regenerate from 'regenerate';
+import stripAnsi from 'strip-ansi';
 
-export default {
-  ...config,
-  testMatch: [
-    '**/integration_tests/**/*.test.js',
-    '**/integration_tests/**/*.test.ts',
-    '**/integration_tests/**/*.test.tsx',
-  ],
-  testPathIgnorePatterns: config.testPathIgnorePatterns.filter(
-    (pattern) => !pattern.includes('integration_tests')
-  ),
-  reporters: [
-    'default',
-    [
-      '<rootDir>/packages/kbn-test/target/jest/junit_reporter',
-      { reportName: 'Jest Integration Tests' },
-    ],
-  ],
-  setupFilesAfterEnv: ['<rootDir>/src/dev/jest/setup/after_env.integration.js'],
-};
+// create a regular expression using regenerate() that selects any character that is explicitly allowed by https://www.w3.org/TR/xml/#NT-Char
+const validXmlCharsRE = new RegExp(
+  `(?:${regenerate()
+    .add(0x9, 0xa, 0xd)
+    .addRange(0x20, 0xd7ff)
+    .addRange(0xe000, 0xfffd)
+    .addRange(0x10000, 0x10ffff)
+    .toString()})*`,
+  'g'
+);
+
+export function escapeCdata(input: string) {
+  const match = stripAnsi(input).match(validXmlCharsRE) || [];
+  return match.join('');
+}
