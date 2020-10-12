@@ -162,7 +162,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         asScoped: async (request: KibanaRequest) => {
           const esClient = elasticsearch.client.asScoped(request);
           const savedObjectsClient = savedObjects.getScopedClient(request);
-          const scopedIndexPatterns = await indexPatterns.indexPatternsServiceFactory(request);
+          const scopedIndexPatterns = await indexPatterns.indexPatternsServiceFactory(
+            savedObjectsClient
+          );
           const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
 
           // cache ui settings, only including items which are explicitly needed by SearchSource

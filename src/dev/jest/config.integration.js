@@ -31,7 +31,10 @@ export default {
   ),
   reporters: [
     'default',
-    ['<rootDir>/src/dev/jest/junit_reporter.js', { reportName: 'Jest Integration Tests' }],
+    [
+      '<rootDir>/packages/kbn-test/target/jest/junit_reporter',
+      { reportName: 'Jest Integration Tests' },
+    ],
   ],
   setupFilesAfterEnv: ['<rootDir>/src/dev/jest/setup/after_env.integration.js'],
 };

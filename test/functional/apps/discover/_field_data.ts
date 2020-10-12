@@ -29,7 +29,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const PageObjects = getPageObjects(['common', 'header', 'discover', 'visualize', 'timePicker']);
 
-  describe('discover tab', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/78689
+  describe.skip('discover tab', function describeIndexTests() {
     this.tags('includeFirefox');
     before(async function () {
       await esArchiver.loadIfNeeded('logstash_functional');
