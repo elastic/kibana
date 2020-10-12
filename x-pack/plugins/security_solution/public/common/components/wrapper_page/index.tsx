@@ -10,12 +10,11 @@ import styled from 'styled-components';
 import { CommonProps } from '@elastic/eui';
 
 import { useFullScreen } from '../../containers/use_full_screen';
-import { useKibana } from '../../lib/kibana';
 import { gutterTimeline } from '../../lib/helpers';
 import { AppGlobalStyle } from '../page/index';
 
 const Wrapper = styled.div`
-  padding: ${({ theme }) => `${theme.eui.paddingSizes.l}`};
+  padding: ${(props) => `${props.theme.eui.paddingSizes.l}`};
 
   &.siemWrapperPage--fullHeight {
     height: 100%;
@@ -37,12 +36,6 @@ const Wrapper = styled.div`
 `;
 
 Wrapper.displayName = 'Wrapper';
-
-const BannersWrapper = styled.div`
-  > div {
-    padding: 0 0 ${({ theme }) => `${theme.eui.paddingSizes.l}`} 0;
-  }
-`;
 
 interface WrapperPageProps {
   children: React.ReactNode;
