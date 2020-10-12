@@ -68,10 +68,10 @@ export interface BodyProps {
   updateNote: UpdateNote;
 }
 
-export const hasAdditionalActions = (id: string, eventType?: TimelineEventsType): boolean =>
-  id === TimelineId.detectionsPage ||
-  id === TimelineId.detectionsRulesDetailsPage ||
-  (id === TimelineId.active && eventType);
+export const hasAdditionalActions = (id: TimelineId): boolean =>
+  [TimelineId.detectionsPage, TimelineId.detectionsRulesDetailsPage, TimelineId.active].includes(
+    id
+  );
 
 const EXTRA_WIDTH = 4; // px
 
@@ -117,9 +117,9 @@ export const Body = React.memo<BodyProps>(
         getActionsColumnWidth(
           isEventViewer,
           showCheckboxes,
-          hasAdditionalActions(timelineId, eventType) ? DEFAULT_ICON_BUTTON_WIDTH + EXTRA_WIDTH : 0
+          hasAdditionalActions(timelineId) ? DEFAULT_ICON_BUTTON_WIDTH + EXTRA_WIDTH : 0
         ),
-      [isEventViewer, showCheckboxes, timelineId, eventType]
+      [isEventViewer, showCheckboxes, timelineId]
     );
 
     const columnWidths = useMemo(
