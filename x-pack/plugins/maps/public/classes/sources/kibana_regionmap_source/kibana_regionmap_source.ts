@@ -5,10 +5,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AbstractVectorSource } from '../vector_source';
+import { AbstractVectorSource, GeoJsonWithMeta } from '../vector_source';
 import { getKibanaRegionList } from '../../../meta';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
-import { FIELD_ORIGIN, SOURCE_TYPES } from '../../../../common/constants';
+import { FIELD_ORIGIN, FORMAT_TYPE, SOURCE_TYPES } from '../../../../common/constants';
 import { KibanaRegionField } from '../../fields/kibana_region_field';
 import { registerSource } from '../source_registry';
 
@@ -16,18 +16,28 @@ export const sourceTitle = i18n.translate('xpack.maps.source.kbnRegionMapTitle',
   defaultMessage: 'Configured GeoJSON',
 });
 
-import { AbstractVectorSource, IVectorSource } from '../vector_source';
 import { KibanaRegionmapSourceDescriptor } from '../../../../common/descriptor_types/source_descriptor_types';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
+import { IField } from '../../fields/field';
 
-export interface IKibanaRegionSource extends IVectorSource {
-  getVectorFileMeta(): Promise<unknown>;
+interface VectorFileField {
+  name: string;
+  description: string;
 }
 
-export class KibanaRegionmapSource extends AbstractVectorSource implements IKibanaRegionSource {
-  readonly _descriptor = KibanaRegionmapSourceDescriptor;
+interface VectorFileMeta {
+  url: string;
+  format: {
+    type: FORMAT_TYPE;
+  };
+  meta: {};
+  fields: VectorFileField[];
+}
 
-  static createDescriptor({ name }) {
+export class KibanaRegionmapSource extends AbstractVectorSource {
+  readonly _descriptor: KibanaRegionmapSourceDescriptor;
+
+  static createDescriptor({ name }: { name: string }): KibanaRegionmapSourceDescriptor {
     return {
       type: SOURCE_TYPES.REGIONMAP_FILE,
       name,
@@ -39,7 +49,7 @@ export class KibanaRegionmapSource extends AbstractVectorSource implements IKiba
     this._descriptor = descriptor;
   }
 
-  createField({ fieldName }) {
+  createField({ fieldName }: { fieldName: string }): KibanaRegionField {
     return new KibanaRegionField({
       fieldName,
       source: this,
@@ -62,9 +72,11 @@ export class KibanaRegionmapSource extends AbstractVectorSource implements IKiba
     ];
   }
 
-  async getVectorFileMeta(): Promise<unknown> {
-    const regionList = getKibanaRegionList();
-    const meta = regionList.find((source) => source.name === this._descriptor.name);
+  async getVectorFileMeta(): Promise<VectorFileMeta> {
+    const regionList: any[] = getKibanaRegionList();
+    const meta: VectorFileMeta | undefined = regionList.find(
+      (regionConfig: any) => (regionConfig.name as string) === this._descriptor.name
+    );
     if (!meta) {
       throw new Error(
         i18n.translate('xpack.maps.source.kbnRegionMap.noConfigErrorMessage', {
@@ -75,15 +87,15 @@ export class KibanaRegionmapSource extends AbstractVectorSource implements IKiba
         })
       );
     }
-    return meta;
+    return meta as VectorFileMeta;
   }
 
-  async getGeoJsonWithMeta() {
-    const vectorFileMeta = await this.getVectorFileMeta();
+  async getGeoJsonWithMeta(): Promise<GeoJsonWithMeta> {
+    const vectorFileMeta: VectorFileMeta = await this.getVectorFileMeta();
     const featureCollection = await AbstractVectorSource.getGeoJson({
-      format: vectorFileMeta.format.type,
-      featureCollectionPath: vectorFileMeta.meta.feature_collection_path,
-      fetchUrl: vectorFileMeta.url,
+      format: (vectorFileMeta.format as any).type as FORMAT_TYPE,
+      featureCollectionPath: (vectorFileMeta.meta as any).feature_collection_path as string,
+      fetchUrl: vectorFileMeta.url as string,
     });
     return {
       data: featureCollection,
@@ -91,12 +103,14 @@ export class KibanaRegionmapSource extends AbstractVectorSource implements IKiba
     };
   }
 
-  async getLeftJoinFields() {
-    const vectorFileMeta = await this.getVectorFileMeta();
-    return vectorFileMeta.fields.map((f) => this.createField({ fieldName: f.name }));
+  async getLeftJoinFields(): Promise<IField[]> {
+    const vectorFileMeta: VectorFileMeta = await this.getVectorFileMeta();
+    return vectorFileMeta.fields.map((field: VectorFileField) => {
+      return this.createField({ fieldName: field.name });
+    });
   }
 
-  async getDisplayName() {
+  async getDisplayName(): Promise<string> {
     return this._descriptor.name;
   }
 

@@ -35,7 +35,7 @@ export class GeojsonFileSource extends AbstractVectorSource {
     name: string
   ): GeojsonFileSourceDescriptor {
     return {
-      type: GeojsonFileSource.type,
+      type: SOURCE_TYPES.GEOJSON_FILE,
       __featureCollection: getFeatureCollection(geoJson),
       name,
     };

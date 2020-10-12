@@ -27,6 +27,7 @@ import {
   DynamicStylePropertyOptions,
   MapExtent,
   MapQuery,
+  VectorJoinSourceRequestMeta,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { IVectorStyle } from '../../styles/vector/vector_style';
@@ -40,7 +41,6 @@ export interface IESSource extends IVectorSource {
   getIndexPattern(): Promise<IndexPattern>;
   getIndexPatternId(): string;
   getGeoFieldName(): string;
-  getMaxResultWindow(): Promise<number>;
   loadStylePropsMeta({
     layerName,
     style,
@@ -161,13 +161,14 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   }
 
   async makeSearchSource(
-    searchFilters: VectorSourceRequestMeta,
+    searchFilters: VectorSourceRequestMeta | VectorJoinSourceRequestMeta,
     limit: number,
     initialSearchContext?: object
   ): Promise<ISearchSource> {
     const indexPattern = await this.getIndexPattern();
     const isTimeAware = await this.isTimeAware();
-    const applyGlobalQuery = _.get(searchFilters, 'applyGlobalQuery', true);
+    const applyGlobalQuery =
+      typeof searchFilters.applyGlobalQuery === 'boolean' ? searchFilters.applyGlobalQuery : true;
     const globalFilters = applyGlobalQuery ? searchFilters.filters : [];
     const allFilters = [...globalFilters];
     if (this.isFilterByMapBounds() && searchFilters.buffer) {

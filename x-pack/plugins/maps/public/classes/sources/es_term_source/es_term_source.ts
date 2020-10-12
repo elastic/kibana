@@ -7,6 +7,7 @@
 import _ from 'lodash';
 
 import { i18n } from '@kbn/i18n';
+import { Query } from 'src/plugins/data/public';
 import {
   AGG_TYPE,
   DEFAULT_MAX_BUCKETS_LIMIT,
@@ -55,7 +56,8 @@ export interface IESTermSource extends IESAggSource {
 
 export function extractPropertiesMap(rawEsData, countPropertyName) {
   const propertiesMap = new Map();
-  _.get(rawEsData, ['aggregations', TERMS_AGG_NAME, 'buckets'], []).forEach((termBucket) => {
+  const buckets = _.get(rawEsData, ['aggregations', TERMS_AGG_NAME, 'buckets'], []);
+  buckets.forEach((termBucket) => {
     const properties = extractPropertiesFromBucket(termBucket, TERMS_BUCKET_KEYS_TO_IGNORE);
     if (countPropertyName) {
       properties[countPropertyName] = termBucket.doc_count;
@@ -71,7 +73,7 @@ export class ESTermSource extends AbstractESAggSource implements IESTermSource {
   private readonly _termField: ESDocField;
   readonly _descriptor: ESTermSourceDescriptor;
 
-  constructor(descriptor: ESTermSourceDescriptor, inspectorAdapters?: Adapters) {
+  constructor(descriptor: ESTermSourceDescriptor, inspectorAdapters: Adapters) {
     super(descriptor, inspectorAdapters);
     this._descriptor = descriptor;
     this._termField = new ESDocField({
@@ -93,7 +95,7 @@ export class ESTermSource extends AbstractESAggSource implements IESTermSource {
     return FIELD_ORIGIN.JOIN;
   }
 
-  getWhereQuery(): string {
+  getWhereQuery(): Query | undefined {
     return this._descriptor.whereQuery;
   }
 
@@ -105,7 +107,7 @@ export class ESTermSource extends AbstractESAggSource implements IESTermSource {
     });
   }
 
-  getAggLabel(aggType, fieldName) {
+  getAggLabel(aggType: AGG_TYPE, fieldName: string) {
     return aggType === AGG_TYPE.COUNT
       ? i18n.translate('xpack.maps.source.esJoin.countLabel', {
           defaultMessage: `Count of {indexPatternTitle}`,
