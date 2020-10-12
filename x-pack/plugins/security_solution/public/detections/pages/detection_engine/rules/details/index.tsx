@@ -311,6 +311,33 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
     [history, ruleId]
   );
 
+  const canEditRule = useMemo(() => {
+    if (!hasActionsPrivileges) {
+      return (
+        <EuiToolTip position="top" content={ruleI18n.EDIT_RULE_SETTINGS_TOOLTIP}>
+          <LinkButton
+            onClick={goToEditRule}
+            iconType="controlsHorizontal"
+            isDisabled={true}
+            href={formatUrl(getEditRuleUrl(ruleId ?? ''))}
+          >
+            {ruleI18n.EDIT_RULE_SETTINGS}
+          </LinkButton>
+        </EuiToolTip>
+      );
+    }
+    return (
+      <LinkButton
+        onClick={goToEditRule}
+        iconType="controlsHorizontal"
+        isDisabled={userHasNoPermissions(canUserCRUD) ?? true}
+        href={formatUrl(getEditRuleUrl(ruleId ?? ''))}
+      >
+        {ruleI18n.EDIT_RULE_SETTINGS}
+      </LinkButton>
+    );
+  }, [canUserCRUD, formatUrl, goToEditRule, hasActionsPrivileges, ruleId]);
+
   const onShowBuildingBlockAlertsChangedCallback = useCallback(
     (newShowBuildingBlockAlerts: boolean) => {
       setShowBuildingBlockAlerts(newShowBuildingBlockAlerts);
@@ -424,16 +451,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
 
                   <EuiFlexItem grow={false}>
                     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                      <EuiFlexItem grow={false}>
-                        <LinkButton
-                          onClick={goToEditRule}
-                          iconType="controlsHorizontal"
-                          isDisabled={!hasActionsPrivileges || userHasNoPermissions(canUserCRUD)}
-                          href={formatUrl(getEditRuleUrl(ruleId ?? ''))}
-                        >
-                          {ruleI18n.EDIT_RULE_SETTINGS}
-                        </LinkButton>
-                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>{canEditRule}</EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <RuleActionsOverflow
                           rule={rule}
