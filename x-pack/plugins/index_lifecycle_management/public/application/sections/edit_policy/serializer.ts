@@ -16,8 +16,8 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
     rest.phases = { hot: { actions: {} } };
   }
 
-  if (originalPolicy?.phases.hot?.min_age && rest.phases.hot) {
-    rest.phases.hot.min_age = originalPolicy.phases.hot.min_age;
+  if (rest.phases.hot) {
+    rest.phases.hot.min_age = originalPolicy?.phases.hot?.min_age ?? '0ms';
   }
 
   if (rest.phases.hot?.actions) {
