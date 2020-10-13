@@ -9100,7 +9100,6 @@
     "xpack.ingestManager.epmList.updatesAvailableFilterLinkText": "更新が可能です",
     "xpack.ingestManager.genericActionsMenuText": "開く",
     "xpack.ingestManager.homeIntegration.tutorialDirectory.dismissNoticeButtonText": "メッセージを消去",
-    "xpack.ingestManager.homeIntegration.tutorialDirectory.ingestManagerAppButtonText": "Ingest Managerベータを試す",
     "xpack.ingestManager.homeIntegration.tutorialDirectory.noticeText": "Elasticエージェントでは、シンプルかつ統合された方法で、ログ、メトリック、他の種類のデータの監視をホストに追加することができます。複数のBeatsと他のエージェントをインストールする必要はありません。このため、インフラストラクチャ全体での構成のデプロイが簡単で高速になりました。詳細については、{blogPostLink}をお読みください。",
     "xpack.ingestManager.homeIntegration.tutorialDirectory.noticeText.blogPostLink": "発表ブログ投稿",
     "xpack.ingestManager.homeIntegration.tutorialDirectory.noticeTitle": "{newPrefix} ElasticエージェントおよびIngest Managerベータ",
