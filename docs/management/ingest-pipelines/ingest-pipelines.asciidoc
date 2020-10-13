@@ -124,7 +124,7 @@ Alternatively, you can click the **Import processors** link and define the proce
 +
 The four {ref}/ingest-processors.html[processors] will run sequentially:
 {ref}/grok-processor.html[grok], {ref}/date-processor.html[date],
-{ref}/geoip-processor.html[geoip], and {ref}/user-agent-processor.html[user_agent]. You can reorder processors using the arrow icon next to each processor. Reordering is not required for this example.
+{ref}/geoip-processor.html[geoip], and {ref}/user-agent-processor.html[user_agent]. You can reorder processors using the arrow icon next to each processor. 
 
 . To test the pipeline to verify that it produces the expected results, click *Add documents*.
 
