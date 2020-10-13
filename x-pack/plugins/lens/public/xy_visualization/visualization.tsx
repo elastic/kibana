@@ -10,6 +10,7 @@ import { render } from 'react-dom';
 import { Position } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { ChartsPluginSetup } from 'src/plugins/charts/public';
 import { getSuggestions } from './xy_suggestions';
 import { LayerContextMenu, XyToolbar, DimensionEditor } from './xy_config_panel';
 import { Visualization, OperationMetadata, VisualizationType } from '../types';
@@ -73,7 +74,11 @@ function getDescription(state?: State) {
   };
 }
 
-export const xyVisualization: Visualization<State> = {
+export const getXyVisualization = ({
+  paletteService,
+}: {
+  paletteService: ChartsPluginSetup['palettes'];
+}): Visualization<State> => ({
   id: 'lnsXY',
 
   visualizationTypes,
@@ -276,9 +281,10 @@ export const xyVisualization: Visualization<State> = {
     );
   },
 
-  toExpression,
-  toPreviewExpression,
-};
+  toExpression: (state, layers, attributes) =>
+    toExpression(state, layers, paletteService, attributes),
+  toPreviewExpression: (state, layers) => toPreviewExpression(state, layers, paletteService),
+});
 
 function newLayerState(seriesType: SeriesType, layerId: string): LayerConfig {
   return {

@@ -8,6 +8,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
+import { ChartsPluginSetup } from 'src/plugins/charts/public';
 import { Visualization, OperationMetadata } from '../types';
 import { toExpression, toPreviewExpression } from './to_expression';
 import { LayerState, PieVisualizationState } from './types';
@@ -31,7 +32,11 @@ const bucketedOperations = (op: OperationMetadata) => op.isBucketed;
 const numberMetricOperations = (op: OperationMetadata) =>
   !op.isBucketed && op.dataType === 'number';
 
-export const pieVisualization: Visualization<PieVisualizationState> = {
+export const getPieVisualization = ({
+  paletteService,
+}: {
+  paletteService: ChartsPluginSetup['palettes'];
+}): Visualization<PieVisualizationState> => ({
   id: 'lnsPie',
 
   visualizationTypes: [
@@ -203,8 +208,9 @@ export const pieVisualization: Visualization<PieVisualizationState> = {
     };
   },
 
-  toExpression,
-  toPreviewExpression,
+  toExpression: (state, layers, attributes) =>
+    toExpression(state, layers, paletteService, attributes),
+  toPreviewExpression: (state, layers) => toPreviewExpression(state, layers, paletteService),
 
   renderToolbar(domElement, props) {
     render(
@@ -214,4 +220,4 @@ export const pieVisualization: Visualization<PieVisualizationState> = {
       domElement
     );
   },
-};
+});

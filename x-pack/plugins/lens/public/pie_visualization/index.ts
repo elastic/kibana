@@ -29,7 +29,7 @@ export class PieVisualization {
     { expressions, formatFactory, editorFrame, charts }: PieVisualizationPluginSetupPlugins
   ) {
     editorFrame.registerVisualization(async () => {
-      const { pieVisualization, pie, getPieRenderer } = await import('../async_services');
+      const { getPieVisualization, pie, getPieRenderer } = await import('../async_services');
 
       expressions.registerFunction(() => pie);
 
@@ -40,7 +40,7 @@ export class PieVisualization {
           paletteService: charts.palettes,
         })
       );
-      return pieVisualization;
+      return getPieVisualization({ paletteService: charts.palettes });
     });
   }
 }

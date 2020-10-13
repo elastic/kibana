@@ -145,7 +145,7 @@ export const xyChart: ExpressionFunctionDefinition<
       }),
     },
     palette: {
-      default: `{theme "palette" default={system_palette name="warm"} }`,
+      default: `{theme "palette" default={system_palette name="default"} }`,
       help: '',
       types: ['palette'],
     },

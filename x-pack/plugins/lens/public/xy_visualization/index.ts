@@ -44,7 +44,7 @@ export class XyVisualization {
         layerConfig,
         xyChart,
         getXyChartRenderer,
-        xyVisualization,
+        getXyVisualization,
       } = await import('../async_services');
       expressions.registerFunction(() => legendConfig);
       expressions.registerFunction(() => yAxisConfig);
@@ -63,7 +63,7 @@ export class XyVisualization {
           histogramBarTarget: core.uiSettings.get<number>(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
         })
       );
-      return xyVisualization;
+      return getXyVisualization({ paletteService: charts.palettes });
     });
   }
 }
