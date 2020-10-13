@@ -19,7 +19,11 @@ export const DELETE_PHASE_POLICY: PolicyFromES = {
         min_age: '0ms',
         actions: {
           rollover: {
+            max_age: '30d',
             max_size: '50gb',
+          },
+          set_priority: {
+            priority: 100,
           },
         },
       },
