@@ -18,7 +18,8 @@
  */
 import _ from 'lodash';
 import { SavedObject, SavedObjectConfig } from '../../types';
-import { extractSearchSourceReferences, expandShorthand } from '../../../../data/public';
+import { extractSearchSourceReferences } from '../../../../data/public';
+import { expandShorthand } from './field_mapping';
 
 export function serializeSavedObject(savedObject: SavedObject, config: SavedObjectConfig) {
   // mapping definition for the fields that this object will expose
