@@ -18,6 +18,16 @@ describe('get_threat_signals', () => {
       expect(sortOrder).toEqual([{ '@timestamp': 'asc' }]);
     });
 
+    test('it should return sort field of just timestamp if given no sort order for a list item index', () => {
+      const sortOrder = getSortWithTieBreaker({
+        sortField: undefined,
+        sortOrder: undefined,
+        index: ['list-item-index-123'],
+        listItemIndex: 'list-item-index-123',
+      });
+      expect(sortOrder).toEqual([{ tie_breaker_id: 'asc' }]);
+    });
+
     test('it should return sort field of timestamp with asc even if sortOrder is changed as it is hard wired in', () => {
       const sortOrder = getSortWithTieBreaker({
         sortField: undefined,
@@ -26,6 +36,16 @@ describe('get_threat_signals', () => {
         listItemIndex: 'list-index-123',
       });
       expect(sortOrder).toEqual([{ '@timestamp': 'asc' }]);
+    });
+
+    test('it should return sort field of timestamp with asc even if sortOrder is changed as it is hard wired in for a list item index', () => {
+      const sortOrder = getSortWithTieBreaker({
+        sortField: undefined,
+        sortOrder: 'desc',
+        index: ['list-index-123'],
+        listItemIndex: 'list-index-123',
+      });
+      expect(sortOrder).toEqual([{ tie_breaker_id: 'asc' }]);
     });
 
     test('it should return sort field of an extra field if given one', () => {
@@ -38,6 +58,16 @@ describe('get_threat_signals', () => {
       expect(sortOrder).toEqual([{ 'some-field': 'asc', '@timestamp': 'asc' }]);
     });
 
+    test('it should return sort field of an extra field if given one for a list item index', () => {
+      const sortOrder = getSortWithTieBreaker({
+        sortField: 'some-field',
+        sortOrder: undefined,
+        index: ['list-index-123'],
+        listItemIndex: 'list-index-123',
+      });
+      expect(sortOrder).toEqual([{ 'some-field': 'asc', tie_breaker_id: 'asc' }]);
+    });
+
     test('it should return sort field of desc if given one', () => {
       const sortOrder = getSortWithTieBreaker({
         sortField: 'some-field',
@@ -46,6 +76,16 @@ describe('get_threat_signals', () => {
         listItemIndex: 'list-index-123',
       });
       expect(sortOrder).toEqual([{ 'some-field': 'desc', '@timestamp': 'asc' }]);
+    });
+
+    test('it should return sort field of desc if given one for a list item index', () => {
+      const sortOrder = getSortWithTieBreaker({
+        sortField: 'some-field',
+        sortOrder: 'desc',
+        index: ['list-index-123'],
+        listItemIndex: 'list-index-123',
+      });
+      expect(sortOrder).toEqual([{ 'some-field': 'desc', tie_breaker_id: 'asc' }]);
     });
   });
 });
