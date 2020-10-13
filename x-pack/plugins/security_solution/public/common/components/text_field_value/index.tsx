@@ -22,6 +22,13 @@ interface Props {
   className?: string;
 }
 
+/*
+ * Component to display text field value. Text field values can be large and need
+ * programmatic truncation to a fixed text length. As text can be truncated the tooltip
+ * is shown displaying the field name and full value. If the use case allows single
+ * line truncation with CSS use eui-textTruncate class on this component instead of
+ * maxLength property.
+ */
 export const TextFieldValue = ({ fieldName, value, maxLength, className }: Props) => {
   return (
     <EuiToolTip
