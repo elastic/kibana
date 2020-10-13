@@ -26,7 +26,7 @@ interface MonitoringStats {
         taskTypes: Record<string, object>;
         schedule: Array<[string, number]>;
         overdue: number;
-        scheduleDensity: number[];
+        estimatedScheduleDensity: number[];
       };
     };
     runtime: {
@@ -148,11 +148,11 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(typeof workload.overdue).to.eql('number');
 
-      expect(Array.isArray(workload.scheduleDensity)).to.eql(true);
+      expect(Array.isArray(workload.estimatedScheduleDensity)).to.eql(true);
 
       // test run with the default poll_interval of 3s and a monitored_aggregated_stats_refresh_rate of 5s,
-      // so we expect the scheduleDensity to span a minute (which means 20 buckets, as 60s / 3s = 20)
-      expect(workload.scheduleDensity.length).to.eql(20);
+      // so we expect the estimatedScheduleDensity to span a minute (which means 20 buckets, as 60s / 3s = 20)
+      expect(workload.estimatedScheduleDensity.length).to.eql(20);
     });
 
     it('should return the task manager runtime stats', async () => {
@@ -172,11 +172,15 @@ export default function ({ getService }: FtrProviderContext) {
       expect(typeof polling.resultFrequency.RanOutOfCapacity).to.eql('number');
       expect(typeof polling.resultFrequency.PoolFilled).to.eql('number');
 
-      expect(typeof drift.mean).to.eql('number');
-      expect(typeof drift.median).to.eql('number');
+      expect(typeof drift.p50).to.eql('number');
+      expect(typeof drift.p90).to.eql('number');
+      expect(typeof drift.p95).to.eql('number');
+      expect(typeof drift.p99).to.eql('number');
 
-      expect(typeof execution.duration.sampleTask.mean).to.eql('number');
-      expect(typeof execution.duration.sampleTask.median).to.eql('number');
+      expect(typeof execution.duration.sampleTask.p50).to.eql('number');
+      expect(typeof execution.duration.sampleTask.p90).to.eql('number');
+      expect(typeof execution.duration.sampleTask.p95).to.eql('number');
+      expect(typeof execution.duration.sampleTask.p99).to.eql('number');
 
       expect(typeof execution.resultFrequency.sampleTask.Success).to.eql('number');
       expect(typeof execution.resultFrequency.sampleTask.RetryScheduled).to.eql('number');

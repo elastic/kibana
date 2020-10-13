@@ -11,8 +11,8 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
-import { Observable, from } from 'rxjs';
-import { take, mergeMap, map } from 'rxjs/operators';
+import { Observable, from, Subject } from 'rxjs';
+import { take, mergeMap, tap, map } from 'rxjs/operators';
 import { throttleTime } from 'rxjs/operators';
 import { isString } from 'lodash';
 import { JsonValue } from 'src/plugins/kibana_utils/common';
@@ -43,7 +43,6 @@ export function healthRoute(
   function calculateStatus(monitoredStats: MonitoringStats): MonitoredHealth {
     const now = Date.now();
     const timestamp = new Date(now).toISOString();
-
     const summarizedStats = summarizeMonitoringStats(monitoredStats);
 
     /**
@@ -60,21 +59,30 @@ export function healthRoute(
     return { id: taskManagerId, timestamp, status: healthStatus, ...summarizedStats };
   }
 
-  // Only calculate the summerized stats (calculates all runnign averages and evaluates state)
-  // when needed by throttling down to the requiredHotStatsFreshness
-  const throttledMonitoredStats$ = from(monitoringStats).pipe(
-    mergeMap((monitoringStats$) =>
-      monitoringStats$.pipe(
-        throttleTime(requiredHotStatsFreshness),
-        map((stats) => calculateStatus(stats))
-      )
-    )
-  );
+  const serviceStatus$: Subject<ServiceStatus> = new Subject<ServiceStatus>();
+
+  /* keep track of last health summary, as we'll return that to the next call to _health */
+  let lastMonitoredStats: MonitoringStats | null = null;
 
   /* Log Task Manager stats as a Debug log line at a fixed interval */
-  throttledMonitoredStats$.subscribe((stats) => {
-    logger.debug(JSON.stringify(stats));
-  });
+  from(monitoringStats)
+    .pipe(
+      mergeMap((monitoringStats$) =>
+        monitoringStats$.pipe(
+          throttleTime(requiredHotStatsFreshness),
+          tap((stats) => {
+            lastMonitoredStats = stats;
+          }),
+          // Only calculate the summerized stats (calculates all runnign averages and evaluates state)
+          // when needed by throttling down to the requiredHotStatsFreshness
+          map((stats) => withServiceStatus(calculateStatus(stats)))
+        )
+      )
+    )
+    .subscribe(([monitoredHealth, serviceStatus]) => {
+      serviceStatus$.next(serviceStatus);
+      logger.debug(JSON.stringify(monitoredHealth));
+    });
 
   router.get(
     {
@@ -87,32 +95,32 @@ export function healthRoute(
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse> {
       return res.ok({
-        body: calculateStatus(await getLatestStats(await monitoringStats)),
+        body: lastMonitoredStats
+          ? calculateStatus(lastMonitoredStats)
+          : { id: taskManagerId, timestamp: new Date().toISOString(), status: HealthStatus.Error },
       });
     }
   );
-
-  return asServiceStatus(throttledMonitoredStats$);
+  return serviceStatus$;
 }
 
-export function asServiceStatus(
-  monitoredHealth$: Observable<MonitoredHealth>
-): Observable<ServiceStatus> {
-  return monitoredHealth$.pipe(
-    map((monitoredHealth) => {
-      const level =
-        monitoredHealth.status === HealthStatus.OK
-          ? ServiceStatusLevels.available
-          : monitoredHealth.status === HealthStatus.Warning
-          ? ServiceStatusLevels.degraded
-          : ServiceStatusLevels.unavailable;
-      return {
-        level,
-        summary: LEVEL_SUMMARY[level.toString()],
-        meta: monitoredHealth,
-      };
-    })
-  );
+export function withServiceStatus(
+  monitoredHealth: MonitoredHealth
+): [MonitoredHealth, ServiceStatus] {
+  const level =
+    monitoredHealth.status === HealthStatus.OK
+      ? ServiceStatusLevels.available
+      : monitoredHealth.status === HealthStatus.Warning
+      ? ServiceStatusLevels.degraded
+      : ServiceStatusLevels.unavailable;
+  return [
+    monitoredHealth,
+    {
+      level,
+      summary: LEVEL_SUMMARY[level.toString()],
+      meta: monitoredHealth,
+    },
+  ];
 }
 
 /**
@@ -155,10 +163,4 @@ function getOldestTimestamp(...timestamps: Array<JsonValue | undefined>): number
     .map((timestamp) => (isString(timestamp) ? Date.parse(timestamp) : NaN))
     .filter((timestamp) => !isNaN(timestamp));
   return validTimestamps.length ? Math.min(...validTimestamps) : 0;
-}
-
-async function getLatestStats(monitoringStats$: Observable<MonitoringStats>) {
-  return new Promise<MonitoringStats>((resolve) =>
-    monitoringStats$.pipe(take(1)).subscribe((stats) => resolve(stats))
-  );
 }

@@ -5,7 +5,7 @@
  */
 
 import { timer } from 'rxjs';
-import { concatMap, map, filter, catchError } from 'rxjs/operators';
+import { mergeMap, map, filter, catchError } from 'rxjs/operators';
 import { Logger } from 'src/core/server';
 import { JsonObject } from 'src/plugins/kibana_utils/common';
 import { keyBy, mapValues } from 'lodash';
@@ -112,7 +112,7 @@ export function createWorkloadAggregator(
     // To avoid erros due to ES not being ready, we'll wait until Start
     // to begin polling for the workload
     filter(() => taskManager.isStarted),
-    concatMap(() =>
+    mergeMap(() =>
       taskManager.aggregate<WorkloadAggregation>({
         aggs: {
           taskType: {
@@ -136,7 +136,10 @@ export function createWorkloadAggregator(
                 range: {
                   field: 'task.runAt',
                   ranges: [
-                    { from: `now`, to: `now+${asInterval(scheduleDensityBuckets * pollInterval)}` },
+                    {
+                      from: `now`,
+                      to: `now+${asInterval(scheduleDensityBuckets * pollInterval)}`,
+                    },
                   ],
                 },
                 aggs: {

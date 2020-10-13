@@ -15,10 +15,14 @@ import {
 
 describe('calculateRunningAverage', () => {
   test('calculates the running average and median of a window of values', async () => {
-    expect(calculateRunningAverage([2, 2, 4, 6, 6])).toEqual({
-      mean: 4,
-      median: 4,
-    });
+    expect(calculateRunningAverage([2, 2, 4, 6, 6])).toMatchInlineSnapshot(`
+      Object {
+        "p50": 4,
+        "p90": 6,
+        "p95": 6,
+        "p99": 6,
+      }
+    `);
   });
 });
 

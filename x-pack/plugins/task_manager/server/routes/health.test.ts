@@ -81,24 +81,30 @@ describe('healthRoute', () => {
   it('returns a error status if the overall stats have not been updated within the required hot freshness', async () => {
     const router = httpServiceMock.createRouter();
 
-    const mockStat = mockHealthStats({
-      lastUpdate: new Date(Date.now() - 1500).toISOString(),
-    });
+    const stats$ = new Subject<MonitoringStats>();
 
     const serviceStatus$ = healthRoute(
       router,
-      Promise.resolve(of(mockStat)),
+      Promise.resolve(stats$),
       mockLogger(),
       uuid.v4(),
       1000,
       60000
     );
 
+    const serviceStatus = getLatest(serviceStatus$);
+
     const [, handler] = router.get.mock.calls[0];
 
     const [context, req, res] = mockHandlerArguments({}, {}, ['ok', 'internalError']);
 
-    await sleep(2000);
+    await sleep(0);
+
+    stats$.next(
+      mockHealthStats({
+        lastUpdate: new Date(Date.now() - 1500).toISOString(),
+      })
+    );
 
     expect(await handler(context, req, res)).toMatchObject({
       body: {
@@ -127,7 +133,7 @@ describe('healthRoute', () => {
       },
     });
 
-    expect(await getLatest(serviceStatus$)).toMatchObject({
+    expect(await serviceStatus).toMatchObject({
       level: ServiceStatusLevels.unavailable,
       summary: 'Task Manager is unavailable',
       meta: {
@@ -160,15 +166,22 @@ describe('healthRoute', () => {
   it('returns a error status if the workload stats have not been updated within the required cold freshness', async () => {
     const router = httpServiceMock.createRouter();
 
+    const stats$ = new Subject<MonitoringStats>();
+
+    healthRoute(router, Promise.resolve(stats$), mockLogger(), uuid.v4(), 5000, 60000);
+
+    await sleep(0);
+
     const lastUpdateOfWorkload = new Date(Date.now() - 120000).toISOString();
-    const mockStat = mockHealthStats({
-      stats: {
-        workload: {
-          timestamp: lastUpdateOfWorkload,
+    stats$.next(
+      mockHealthStats({
+        stats: {
+          workload: {
+            timestamp: lastUpdateOfWorkload,
+          },
         },
-      },
-    });
-    healthRoute(router, Promise.resolve(of(mockStat)), mockLogger(), uuid.v4(), 5000, 60000);
+      })
+    );
 
     const [, handler] = router.get.mock.calls[0];
 
@@ -207,19 +220,25 @@ describe('healthRoute', () => {
   it('returns a error status if the poller hasnt polled within the required hot freshness', async () => {
     const router = httpServiceMock.createRouter();
 
+    const stats$ = new Subject<MonitoringStats>();
+    healthRoute(router, Promise.resolve(stats$), mockLogger(), uuid.v4(), 1000, 60000);
+
+    await sleep(0);
+
     const lastSuccessfulPoll = new Date(Date.now() - 2000).toISOString();
-    const mockStat = mockHealthStats({
-      stats: {
-        runtime: {
-          value: {
-            polling: {
-              lastSuccessfulPoll,
+    stats$.next(
+      mockHealthStats({
+        stats: {
+          runtime: {
+            value: {
+              polling: {
+                lastSuccessfulPoll,
+              },
             },
           },
         },
-      },
-    });
-    healthRoute(router, Promise.resolve(of(mockStat)), mockLogger(), uuid.v4(), 1000, 60000);
+      })
+    );
 
     const [, handler] = router.get.mock.calls[0];
 

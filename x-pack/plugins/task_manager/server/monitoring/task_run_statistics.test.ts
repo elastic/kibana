@@ -49,8 +49,10 @@ describe('Task Run Statistics', () => {
       window: number[]
     ) {
       expect(taskStat.value.drift).toMatchObject({
-        mean: Math.round(stats.mean(window)),
-        median: stats.median(window),
+        p50: stats.percentile(window, 0.5),
+        p90: stats.percentile(window, 0.9),
+        p95: stats.percentile(window, 0.95),
+        p99: stats.percentile(window, 0.99),
       });
     }
 
@@ -111,8 +113,10 @@ describe('Task Run Statistics', () => {
     ) {
       for (const [type, window] of Object.entries(windows)) {
         expect(taskStat.value.execution.duration[type]).toMatchObject({
-          mean: Math.round(stats.mean(window)),
-          median: stats.median(window),
+          p50: stats.percentile(window, 0.5),
+          p90: stats.percentile(window, 0.9),
+          p95: stats.percentile(window, 0.95),
+          p99: stats.percentile(window, 0.99),
         });
       }
     }

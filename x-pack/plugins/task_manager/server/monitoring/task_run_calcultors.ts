@@ -9,14 +9,18 @@ import { JsonObject } from 'src/plugins/kibana_utils/common';
 import { isUndefined, countBy, mapValues } from 'lodash';
 
 export interface AveragedStat extends JsonObject {
-  mean: number;
-  median: number;
+  p50: number;
+  p90: number;
+  p95: number;
+  p99: number;
 }
 
 export function calculateRunningAverage(values: number[]): AveragedStat {
   return {
-    mean: Math.round(stats.mean(values)),
-    median: stats.median(values),
+    p50: stats.percentile(values, 0.5),
+    p90: stats.percentile(values, 0.9),
+    p95: stats.percentile(values, 0.95),
+    p99: stats.percentile(values, 0.99),
   };
 }
 
