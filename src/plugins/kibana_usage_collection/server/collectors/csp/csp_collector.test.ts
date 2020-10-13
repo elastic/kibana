@@ -38,6 +38,7 @@ describe('csp collector', () => {
   test('fetches whether strict mode is enabled', async () => {
     const collector = createCspCollector(httpMock);
 
+    updateCsp({ strict: true });
     expect((await collector.fetch(mockedFetchContext)).strict).toEqual(true);
 
     updateCsp({ strict: false });
