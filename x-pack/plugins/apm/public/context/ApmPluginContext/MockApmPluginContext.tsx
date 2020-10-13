@@ -87,6 +87,11 @@ const mockPlugin = {
       useHash: false,
     }),
   },
+  data: {
+    query: {
+      timefilter: { timefilter: { setTime: () => {}, getTime: () => ({}) } },
+    },
+  },
 };
 export const mockApmPluginContextValue = {
   config: mockConfig,

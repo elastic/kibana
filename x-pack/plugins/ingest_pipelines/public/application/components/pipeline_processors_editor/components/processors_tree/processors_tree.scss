@@ -31,15 +31,14 @@
     }
   }
   $dropZoneButtonHeight: 60px;
-  $dropZoneButtonOffsetY: $dropZoneButtonHeight * -0.5;
+  $dropZoneButtonOffsetY: $dropZoneButtonHeight * 0.5;
 
   &__dropZoneButton {
     position: absolute;
     padding: 0;
     height: $dropZoneButtonHeight;
-    margin-top: $dropZoneButtonOffsetY;
+    margin-top: -$dropZoneButtonOffsetY;
     width: 100%;
-    opacity: 0;
     text-decoration: none !important;
     z-index: $dropZoneZIndex;
 
@@ -48,6 +47,10 @@
       &:hover {
         transform: none !important;
       }
+    }
+
+    &--compressed {
+      height: $dropZoneButtonOffsetY;
     }
   }
 

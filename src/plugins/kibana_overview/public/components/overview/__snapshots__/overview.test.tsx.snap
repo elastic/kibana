@@ -1,0 +1,1222 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Overview render 1`] = `
+<main
+  aria-labelledby="kbnOverviewPageHeader__title"
+  className="kbnOverviewWrapper"
+>
+  <mockConstructor
+    addBasePath={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            "kibana_landing_page",
+          ],
+          Array [
+            "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-two",
+          ],
+          Array [
+            "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-three",
+          ],
+          Array [
+            "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-four",
+          ],
+          Array [
+            "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": "kibana_landing_page",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-two",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-three",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-four",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+          },
+        ],
+      }
+    }
+    hideToolbar={false}
+    iconType="logoKibana"
+    title={
+      <FormattedMessage
+        defaultMessage="Kibana"
+        id="kibanaOverview.header.title"
+        values={Object {}}
+      />
+    }
+  />
+  <div
+    className="kbnOverviewContent"
+  >
+    <section
+      aria-labelledby="kbnOverviewApps__title"
+      className="kbnOverviewApps"
+    >
+      <EuiScreenReaderOnly>
+        <h2
+          id="kbnOverviewApps__title"
+        >
+          <FormattedMessage
+            defaultMessage="Explore these apps"
+            id="kibanaOverview.apps.title"
+            values={Object {}}
+          />
+        </h2>
+      </EuiScreenReaderOnly>
+      <EuiFlexGroup
+        className="kbnOverviewApps__group kbnOverviewApps__group--primary"
+        justifyContent="center"
+      />
+      <EuiSpacer
+        size="l"
+      />
+    </section>
+    <EuiHorizontalRule
+      aria-hidden="true"
+      margin="xl"
+    />
+    <EuiFlexGroup
+      alignItems="flexStart"
+      className="kbnOverviewSupplements kbnOverviewSupplements--hasNews"
+    >
+      <EuiFlexItem
+        grow={1}
+      >
+        <NewsFeed
+          newsFetchResult={
+            Object {
+              "error": null,
+              "feedItems": Array [
+                Object {
+                  "badge": null,
+                  "description": "The official Go client now includes features like request retries and node discovery. Learn more about its architecture and package and repository layout.",
+                  "expireOn": "2050-12-31T11:59:59.000Z",
+                  "hash": "8e18fcedbc",
+                  "linkText": "Read more on the blog",
+                  "linkUrl": "https://www.elastic.co/blog/the-go-client-for-elasticsearch-introduction?blade=kibanafeed",
+                  "publishOn": "2020-08-31T10:23:47.000Z",
+                  "title": "The Go client for Elasticsearch: Introduction",
+                },
+                Object {
+                  "badge": null,
+                  "description": "Learn how to use Elastic Uptime to configure alerting and anomaly detection for sites, services, and APIs.",
+                  "expireOn": "2050-12-31T11:59:59.000Z",
+                  "hash": "fb3e3d42ef",
+                  "linkText": "Read more on the blog",
+                  "linkUrl": "https://www.elastic.co/blog/alerting-and-anomaly-detection-for-uptime-and-reliability?blade=kibanafeed",
+                  "publishOn": "2020-08-14T10:23:47.000Z",
+                  "title": "Alerting and anomaly detection for uptime and reliability",
+                },
+                Object {
+                  "badge": null,
+                  "description": "Managing data using hot-warm architecture and ILM is a cost-effective way of retaining data — and a great way to easily keep your cloud costs down.",
+                  "expireOn": "2050-12-31T11:59:59.000Z",
+                  "hash": "b2fc7d47d5",
+                  "linkText": "Learn more on the blog",
+                  "linkUrl": "https://www.elastic.co/blog/optimizing-costs-elastic-cloud-hot-warm-index-lifecycle-management?blade=kibanafeed",
+                  "publishOn": "2020-08-01T10:23:47.000Z",
+                  "title": "Optimizing costs in Elastic Cloud: Hot-warm + index lifecycle management",
+                },
+              ],
+              "hasNew": true,
+              "kibanaVersion": "8.0.0",
+            }
+          }
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={3}
+      >
+        <section
+          aria-labelledby="kbnOverviewMore__title"
+          className="kbnOverviewMore"
+        >
+          <EuiTitle
+            size="s"
+          >
+            <h2
+              id="kbnOverviewMore__title"
+            >
+              <FormattedMessage
+                defaultMessage="Do more with Elastic"
+                id="kibanaOverview.more.title"
+                values={Object {}}
+              />
+            </h2>
+          </EuiTitle>
+          <EuiSpacer
+            size="m"
+          />
+          <EuiFlexGroup
+            className="kbnOverviewMore__content"
+          >
+            <EuiFlexItem
+              className="kbnOverviewMore__item"
+              key="kibana"
+            >
+              <mockConstructor>
+                <EuiCard
+                  className="kbnOverviewSolution"
+                  description=""
+                  href="kibana_landing_page"
+                  icon={
+                    <EuiToken
+                      className="kbnOverviewSolution__icon"
+                      fill="light"
+                      iconType="logoKibana"
+                      shape="circle"
+                      size="l"
+                    />
+                  }
+                  image="/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png"
+                  title="Kibana"
+                  titleElement="h3"
+                  titleSize="xs"
+                />
+              </mockConstructor>
+            </EuiFlexItem>
+            <EuiFlexItem
+              className="kbnOverviewMore__item"
+              key="solution-2"
+            >
+              <mockConstructor>
+                <EuiCard
+                  className="kbnOverviewSolution"
+                  description="Description of solution two"
+                  href="path-to-solution-two"
+                  icon={
+                    <EuiToken
+                      className="kbnOverviewSolution__icon"
+                      fill="light"
+                      iconType="empty"
+                      shape="circle"
+                      size="l"
+                    />
+                  }
+                  image="/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png"
+                  title="Solution two"
+                  titleElement="h3"
+                  titleSize="xs"
+                />
+              </mockConstructor>
+            </EuiFlexItem>
+            <EuiFlexItem
+              className="kbnOverviewMore__item"
+              key="solution-3"
+            >
+              <mockConstructor>
+                <EuiCard
+                  className="kbnOverviewSolution"
+                  description="Description of solution three"
+                  href="path-to-solution-three"
+                  icon={
+                    <EuiToken
+                      className="kbnOverviewSolution__icon"
+                      fill="light"
+                      iconType="empty"
+                      shape="circle"
+                      size="l"
+                    />
+                  }
+                  image="/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png"
+                  title="Solution three"
+                  titleElement="h3"
+                  titleSize="xs"
+                />
+              </mockConstructor>
+            </EuiFlexItem>
+            <EuiFlexItem
+              className="kbnOverviewMore__item"
+              key="solution-4"
+            >
+              <mockConstructor>
+                <EuiCard
+                  className="kbnOverviewSolution"
+                  description="Description of solution four"
+                  href="path-to-solution-four"
+                  icon={
+                    <EuiToken
+                      className="kbnOverviewSolution__icon"
+                      fill="light"
+                      iconType="empty"
+                      shape="circle"
+                      size="l"
+                    />
+                  }
+                  image="/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png"
+                  title="Solution four"
+                  titleElement="h3"
+                  titleSize="xs"
+                />
+              </mockConstructor>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </section>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiHorizontalRule
+      aria-hidden="true"
+      margin="xl"
+    />
+    <mockConstructor
+      addBasePath={
+        [MockFunction] {
+          "calls": Array [
+            Array [
+              "kibana_landing_page",
+            ],
+            Array [
+              "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-two",
+            ],
+            Array [
+              "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-three",
+            ],
+            Array [
+              "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-four",
+            ],
+            Array [
+              "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": "kibana_landing_page",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-two",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-three",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-four",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+            },
+          ],
+        }
+      }
+      path="/app/kibana_overview"
+    />
+  </div>
+</main>
+`;
+
+exports[`Overview without features 1`] = `
+<main
+  aria-labelledby="kbnOverviewPageHeader__title"
+  className="kbnOverviewWrapper"
+>
+  <mockConstructor
+    addBasePath={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            "kibana_landing_page",
+          ],
+          Array [
+            "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-two",
+          ],
+          Array [
+            "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-three",
+          ],
+          Array [
+            "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-four",
+          ],
+          Array [
+            "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+          ],
+          Array [
+            "kibana_landing_page",
+          ],
+          Array [
+            "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-two",
+          ],
+          Array [
+            "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-three",
+          ],
+          Array [
+            "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-four",
+          ],
+          Array [
+            "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": "kibana_landing_page",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-two",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-three",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-four",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "kibana_landing_page",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-two",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-three",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-four",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+          },
+        ],
+      }
+    }
+    hideToolbar={false}
+    iconType="logoKibana"
+    title={
+      <FormattedMessage
+        defaultMessage="Kibana"
+        id="kibanaOverview.header.title"
+        values={Object {}}
+      />
+    }
+  />
+  <div
+    className="kbnOverviewContent"
+  >
+    <section
+      aria-labelledby="kbnOverviewApps__title"
+      className="kbnOverviewApps"
+    >
+      <EuiScreenReaderOnly>
+        <h2
+          id="kbnOverviewApps__title"
+        >
+          <FormattedMessage
+            defaultMessage="Explore these apps"
+            id="kibanaOverview.apps.title"
+            values={Object {}}
+          />
+        </h2>
+      </EuiScreenReaderOnly>
+      <EuiFlexGroup
+        className="kbnOverviewApps__group kbnOverviewApps__group--primary"
+        justifyContent="center"
+      />
+      <EuiSpacer
+        size="l"
+      />
+    </section>
+    <EuiHorizontalRule
+      aria-hidden="true"
+      margin="xl"
+    />
+    <EuiFlexGroup
+      alignItems="flexStart"
+      className="kbnOverviewSupplements kbnOverviewSupplements--hasNews"
+    >
+      <EuiFlexItem
+        grow={1}
+      >
+        <NewsFeed
+          newsFetchResult={
+            Object {
+              "error": null,
+              "feedItems": Array [
+                Object {
+                  "badge": null,
+                  "description": "The official Go client now includes features like request retries and node discovery. Learn more about its architecture and package and repository layout.",
+                  "expireOn": "2050-12-31T11:59:59.000Z",
+                  "hash": "8e18fcedbc",
+                  "linkText": "Read more on the blog",
+                  "linkUrl": "https://www.elastic.co/blog/the-go-client-for-elasticsearch-introduction?blade=kibanafeed",
+                  "publishOn": "2020-08-31T10:23:47.000Z",
+                  "title": "The Go client for Elasticsearch: Introduction",
+                },
+                Object {
+                  "badge": null,
+                  "description": "Learn how to use Elastic Uptime to configure alerting and anomaly detection for sites, services, and APIs.",
+                  "expireOn": "2050-12-31T11:59:59.000Z",
+                  "hash": "fb3e3d42ef",
+                  "linkText": "Read more on the blog",
+                  "linkUrl": "https://www.elastic.co/blog/alerting-and-anomaly-detection-for-uptime-and-reliability?blade=kibanafeed",
+                  "publishOn": "2020-08-14T10:23:47.000Z",
+                  "title": "Alerting and anomaly detection for uptime and reliability",
+                },
+                Object {
+                  "badge": null,
+                  "description": "Managing data using hot-warm architecture and ILM is a cost-effective way of retaining data — and a great way to easily keep your cloud costs down.",
+                  "expireOn": "2050-12-31T11:59:59.000Z",
+                  "hash": "b2fc7d47d5",
+                  "linkText": "Learn more on the blog",
+                  "linkUrl": "https://www.elastic.co/blog/optimizing-costs-elastic-cloud-hot-warm-index-lifecycle-management?blade=kibanafeed",
+                  "publishOn": "2020-08-01T10:23:47.000Z",
+                  "title": "Optimizing costs in Elastic Cloud: Hot-warm + index lifecycle management",
+                },
+              ],
+              "hasNew": true,
+              "kibanaVersion": "8.0.0",
+            }
+          }
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={3}
+      >
+        <section
+          aria-labelledby="kbnOverviewMore__title"
+          className="kbnOverviewMore"
+        >
+          <EuiTitle
+            size="s"
+          >
+            <h2
+              id="kbnOverviewMore__title"
+            >
+              <FormattedMessage
+                defaultMessage="Do more with Elastic"
+                id="kibanaOverview.more.title"
+                values={Object {}}
+              />
+            </h2>
+          </EuiTitle>
+          <EuiSpacer
+            size="m"
+          />
+          <EuiFlexGroup
+            className="kbnOverviewMore__content"
+          >
+            <EuiFlexItem
+              className="kbnOverviewMore__item"
+              key="kibana"
+            >
+              <mockConstructor>
+                <EuiCard
+                  className="kbnOverviewSolution"
+                  description=""
+                  href="kibana_landing_page"
+                  icon={
+                    <EuiToken
+                      className="kbnOverviewSolution__icon"
+                      fill="light"
+                      iconType="logoKibana"
+                      shape="circle"
+                      size="l"
+                    />
+                  }
+                  image="/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png"
+                  title="Kibana"
+                  titleElement="h3"
+                  titleSize="xs"
+                />
+              </mockConstructor>
+            </EuiFlexItem>
+            <EuiFlexItem
+              className="kbnOverviewMore__item"
+              key="solution-2"
+            >
+              <mockConstructor>
+                <EuiCard
+                  className="kbnOverviewSolution"
+                  description="Description of solution two"
+                  href="path-to-solution-two"
+                  icon={
+                    <EuiToken
+                      className="kbnOverviewSolution__icon"
+                      fill="light"
+                      iconType="empty"
+                      shape="circle"
+                      size="l"
+                    />
+                  }
+                  image="/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png"
+                  title="Solution two"
+                  titleElement="h3"
+                  titleSize="xs"
+                />
+              </mockConstructor>
+            </EuiFlexItem>
+            <EuiFlexItem
+              className="kbnOverviewMore__item"
+              key="solution-3"
+            >
+              <mockConstructor>
+                <EuiCard
+                  className="kbnOverviewSolution"
+                  description="Description of solution three"
+                  href="path-to-solution-three"
+                  icon={
+                    <EuiToken
+                      className="kbnOverviewSolution__icon"
+                      fill="light"
+                      iconType="empty"
+                      shape="circle"
+                      size="l"
+                    />
+                  }
+                  image="/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png"
+                  title="Solution three"
+                  titleElement="h3"
+                  titleSize="xs"
+                />
+              </mockConstructor>
+            </EuiFlexItem>
+            <EuiFlexItem
+              className="kbnOverviewMore__item"
+              key="solution-4"
+            >
+              <mockConstructor>
+                <EuiCard
+                  className="kbnOverviewSolution"
+                  description="Description of solution four"
+                  href="path-to-solution-four"
+                  icon={
+                    <EuiToken
+                      className="kbnOverviewSolution__icon"
+                      fill="light"
+                      iconType="empty"
+                      shape="circle"
+                      size="l"
+                    />
+                  }
+                  image="/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png"
+                  title="Solution four"
+                  titleElement="h3"
+                  titleSize="xs"
+                />
+              </mockConstructor>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </section>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiHorizontalRule
+      aria-hidden="true"
+      margin="xl"
+    />
+    <mockConstructor
+      addBasePath={
+        [MockFunction] {
+          "calls": Array [
+            Array [
+              "kibana_landing_page",
+            ],
+            Array [
+              "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-two",
+            ],
+            Array [
+              "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-three",
+            ],
+            Array [
+              "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-four",
+            ],
+            Array [
+              "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+            ],
+            Array [
+              "kibana_landing_page",
+            ],
+            Array [
+              "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-two",
+            ],
+            Array [
+              "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-three",
+            ],
+            Array [
+              "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-four",
+            ],
+            Array [
+              "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": "kibana_landing_page",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-two",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-three",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-four",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "kibana_landing_page",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-two",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-three",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-four",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+            },
+          ],
+        }
+      }
+      path="/app/kibana_overview"
+    />
+  </div>
+</main>
+`;
+
+exports[`Overview without solutions 1`] = `
+<main
+  aria-labelledby="kbnOverviewPageHeader__title"
+  className="kbnOverviewWrapper"
+>
+  <mockConstructor
+    addBasePath={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            "kibana_landing_page",
+          ],
+          Array [
+            "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-two",
+          ],
+          Array [
+            "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-three",
+          ],
+          Array [
+            "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-four",
+          ],
+          Array [
+            "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": "kibana_landing_page",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-two",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-three",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-four",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+          },
+        ],
+      }
+    }
+    hideToolbar={false}
+    iconType="logoKibana"
+    title={
+      <FormattedMessage
+        defaultMessage="Kibana"
+        id="kibanaOverview.header.title"
+        values={Object {}}
+      />
+    }
+  />
+  <div
+    className="kbnOverviewContent"
+  >
+    <section
+      aria-labelledby="kbnOverviewApps__title"
+      className="kbnOverviewApps"
+    >
+      <EuiScreenReaderOnly>
+        <h2
+          id="kbnOverviewApps__title"
+        >
+          <FormattedMessage
+            defaultMessage="Explore these apps"
+            id="kibanaOverview.apps.title"
+            values={Object {}}
+          />
+        </h2>
+      </EuiScreenReaderOnly>
+      <EuiFlexGroup
+        className="kbnOverviewApps__group kbnOverviewApps__group--primary"
+        justifyContent="center"
+      />
+      <EuiSpacer
+        size="l"
+      />
+    </section>
+    <EuiHorizontalRule
+      aria-hidden="true"
+      margin="xl"
+    />
+    <EuiFlexGroup
+      alignItems="flexStart"
+      className="kbnOverviewSupplements kbnOverviewSupplements--hasNews"
+    >
+      <EuiFlexItem
+        grow={1}
+      >
+        <NewsFeed
+          newsFetchResult={
+            Object {
+              "error": null,
+              "feedItems": Array [
+                Object {
+                  "badge": null,
+                  "description": "The official Go client now includes features like request retries and node discovery. Learn more about its architecture and package and repository layout.",
+                  "expireOn": "2050-12-31T11:59:59.000Z",
+                  "hash": "8e18fcedbc",
+                  "linkText": "Read more on the blog",
+                  "linkUrl": "https://www.elastic.co/blog/the-go-client-for-elasticsearch-introduction?blade=kibanafeed",
+                  "publishOn": "2020-08-31T10:23:47.000Z",
+                  "title": "The Go client for Elasticsearch: Introduction",
+                },
+                Object {
+                  "badge": null,
+                  "description": "Learn how to use Elastic Uptime to configure alerting and anomaly detection for sites, services, and APIs.",
+                  "expireOn": "2050-12-31T11:59:59.000Z",
+                  "hash": "fb3e3d42ef",
+                  "linkText": "Read more on the blog",
+                  "linkUrl": "https://www.elastic.co/blog/alerting-and-anomaly-detection-for-uptime-and-reliability?blade=kibanafeed",
+                  "publishOn": "2020-08-14T10:23:47.000Z",
+                  "title": "Alerting and anomaly detection for uptime and reliability",
+                },
+                Object {
+                  "badge": null,
+                  "description": "Managing data using hot-warm architecture and ILM is a cost-effective way of retaining data — and a great way to easily keep your cloud costs down.",
+                  "expireOn": "2050-12-31T11:59:59.000Z",
+                  "hash": "b2fc7d47d5",
+                  "linkText": "Learn more on the blog",
+                  "linkUrl": "https://www.elastic.co/blog/optimizing-costs-elastic-cloud-hot-warm-index-lifecycle-management?blade=kibanafeed",
+                  "publishOn": "2020-08-01T10:23:47.000Z",
+                  "title": "Optimizing costs in Elastic Cloud: Hot-warm + index lifecycle management",
+                },
+              ],
+              "hasNew": true,
+              "kibanaVersion": "8.0.0",
+            }
+          }
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={3}
+      >
+        <EuiFlexGroup
+          className="kbnOverviewData kbnOverviewData--expanded"
+        >
+          <EuiFlexItem>
+            <AddData
+              addBasePath={
+                [MockFunction] {
+                  "calls": Array [
+                    Array [
+                      "kibana_landing_page",
+                    ],
+                    Array [
+                      "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-two",
+                    ],
+                    Array [
+                      "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-three",
+                    ],
+                    Array [
+                      "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-four",
+                    ],
+                    Array [
+                      "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+                    ],
+                  ],
+                  "results": Array [
+                    Object {
+                      "type": "return",
+                      "value": "kibana_landing_page",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-two",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-three",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-four",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+                    },
+                  ],
+                }
+              }
+              features={Array []}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <ManageData
+              addBasePath={
+                [MockFunction] {
+                  "calls": Array [
+                    Array [
+                      "kibana_landing_page",
+                    ],
+                    Array [
+                      "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-two",
+                    ],
+                    Array [
+                      "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-three",
+                    ],
+                    Array [
+                      "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-four",
+                    ],
+                    Array [
+                      "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+                    ],
+                  ],
+                  "results": Array [
+                    Object {
+                      "type": "return",
+                      "value": "kibana_landing_page",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-two",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-three",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-four",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+                    },
+                  ],
+                }
+              }
+              features={Array []}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiHorizontalRule
+      aria-hidden="true"
+      margin="xl"
+    />
+    <mockConstructor
+      addBasePath={
+        [MockFunction] {
+          "calls": Array [
+            Array [
+              "kibana_landing_page",
+            ],
+            Array [
+              "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-two",
+            ],
+            Array [
+              "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-three",
+            ],
+            Array [
+              "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-four",
+            ],
+            Array [
+              "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": "kibana_landing_page",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-two",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-three",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-four",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+            },
+          ],
+        }
+      }
+      path="/app/kibana_overview"
+    />
+  </div>
+</main>
+`;

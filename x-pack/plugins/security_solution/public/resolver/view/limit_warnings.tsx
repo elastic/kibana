@@ -7,7 +7,7 @@
 /* eslint-disable react/display-name */
 
 import React from 'react';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { LimitWarningsEuiCallOut } from './styles';
 
 const lineageLimitMessage = (

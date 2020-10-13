@@ -13,6 +13,8 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import React, { memo, useCallback, useEffect, useState } from 'react';
@@ -29,6 +31,7 @@ import { useTrustedAppsSelector } from '../hooks';
 import { getApiCreateErrors, isCreatePending, wasCreateSuccessful } from '../../store/selectors';
 import { AppAction } from '../../../../../common/store/actions';
 import { useToasts } from '../../../../../common/lib/kibana';
+import { ABOUT_TRUSTED_APPS } from '../translations';
 
 type CreateTrustedAppFlyoutProps = Omit<EuiFlyoutProps, 'hideCloseButton'>;
 export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
@@ -105,6 +108,10 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>
+          <EuiText color="subdued" size="xs">
+            <p data-test-subj={getTestId('about')}>{ABOUT_TRUSTED_APPS}</p>
+            <EuiSpacer size="m" />
+          </EuiText>
           <CreateTrustedAppForm
             fullWidth
             onChange={handleFormOnChange}
