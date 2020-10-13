@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { ReactElement } from 'react';
 import uuid from 'uuid/v4';
 
 import { i18n } from '@kbn/i18n';
@@ -43,9 +43,10 @@ import {
   VectorSourceRequestMeta,
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
-import { ImmutableSourceProperty } from '../source';
+import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { ISearchSource } from '../../../../../../../src/plugins/data/common/search/search_source';
 import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 
 export const MAX_GEOTILE_LEVEL = 29;
 
@@ -78,7 +79,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
 
   readonly _descriptor: ESGeoGridSourceDescriptor;
 
-  constructor(descriptor, inspectorAdapters) {
+  constructor(descriptor: Partial<ESGeoGridSourceDescriptor>, inspectorAdapters: Adapters) {
     const sourceDescriptor = ESGeoGridSource.createDescriptor(descriptor);
     super(
       sourceDescriptor,
@@ -88,12 +89,12 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     this._descriptor = sourceDescriptor;
   }
 
-  renderSourceSettingsEditor({ onChange, currentLayerType }) {
+  renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null {
     return (
       <UpdateSourceEditor
-        currentLayerType={currentLayerType}
+        currentLayerType={sourceEditorArgs.currentLayerType}
         indexPatternId={this.getIndexPatternId()}
-        onChange={onChange}
+        onChange={sourceEditorArgs.onChange}
         metrics={this._descriptor.metrics}
         renderAs={this._descriptor.requestType}
         resolution={this._descriptor.resolution}
@@ -125,13 +126,13 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
         label: i18n.translate('xpack.maps.source.esGrid.indexPatternLabel', {
           defaultMessage: 'Index pattern',
         }),
-        value: indexPatternTitle,
+        value: indexPatternTitle || '',
       },
       {
         label: i18n.translate('xpack.maps.source.esGrid.geospatialFieldLabel', {
           defaultMessage: 'Geospatial field',
         }),
-        value: this._descriptor.geoField,
+        value: this._descriptor.geoField || '',
       },
     ];
   }
@@ -140,7 +141,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     return this.getMetricFields().map((esAggMetricField) => esAggMetricField.getName());
   }
 
-  isGeoGridPrecisionAware() {
+  isGeoGridPrecisionAware(): boolean {
     if (this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE) {
       // MVT gridded data should not bootstrap each time the precision changes
       // mapbox-gl needs to handle this
@@ -159,7 +160,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     return this._descriptor.resolution;
   }
 
-  getGeoGridPrecision(zoom) {
+  getGeoGridPrecision(zoom: number) {
     if (this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE) {
       // The target-precision needs to be determined server side.
       return NaN;

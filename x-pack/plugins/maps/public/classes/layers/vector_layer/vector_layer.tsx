@@ -43,21 +43,24 @@ import {
 } from '../../util/mb_filter_expressions';
 
 import {
+  DataMeta,
   DynamicStylePropertyOptions,
   MapFilters,
   MapQuery,
+  VectorJoinSourceRequestMeta,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
   VectorStyleRequestMeta,
 } from '../../../../common/descriptor_types';
 import { IVectorSource } from '../../sources/vector_source';
 import { CustomIconAndTooltipContent, ILayer } from '../layer';
-import { IJoin, PropertiesMap } from '../../joins/join';
+import { IJoin } from '../../joins/join';
 import { IField } from '../../fields/field';
 import { DataRequestContext } from '../../../actions';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 import { IESSource } from '../../sources/es_source';
+import { PropertiesMap } from '../../../../common/elasticsearch_util';
 
 interface SourceResult {
   refreshed: boolean;
@@ -324,7 +327,7 @@ export class VectorLayer extends AbstractLayer {
     const joinSource = join.getRightJoinSource();
     const sourceDataId = join.getSourceDataRequestId();
     const requestToken = Symbol(`layer-join-refresh:${this.getId()} - ${sourceDataId}`);
-    const searchFilters = {
+    const searchFilters: DataMeta = {
       ...dataFilters,
       fieldNames: joinSource.getFieldNames(),
       sourceQuery: joinSource.getWhereQuery(),
@@ -349,7 +352,7 @@ export class VectorLayer extends AbstractLayer {
       startLoading(sourceDataId, requestToken, searchFilters);
       const leftSourceName = await this._source.getDisplayName();
       const propertiesMap = await joinSource.getPropertiesMap(
-        searchFilters,
+        searchFilters as VectorJoinSourceRequestMeta,
         leftSourceName,
         join.getLeftField().getName(),
         registerCancelCallback.bind(null, requestToken)

@@ -113,8 +113,8 @@ export abstract class AbstractESAggSource extends AbstractESSource {
     }
   }
 
-  async getFields() {
-    return this.getMetricFields();
+  async getFields(): Promise<IField[]> {
+    return this.getMetricFields() as IFields[];
   }
 
   getValueAggsDsl(indexPattern: IndexPattern) {

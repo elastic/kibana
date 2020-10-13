@@ -6,7 +6,7 @@
 
 import { FeatureCollection, GeoJsonProperties } from 'geojson';
 import { MapExtent } from '../descriptor_types';
-import { ES_GEO_FIELD_TYPE, ES_SPATIAL_RELATIONS } from '../constants';
+import { ES_GEO_FIELD_TYPE } from '../constants';
 
 export function scaleBounds(bounds: MapExtent, scaleFactor: number): MapExtent;
 
@@ -29,3 +29,18 @@ export function createExtentFilter(
   geoFieldName: string,
   geoFieldType: ES_GEO_FIELD_TYPE
 ): unknown;
+
+export function makeESBbox({
+  maxLat,
+  maxLon,
+  minLat,
+  minLon,
+}: {
+  maxLat: number;
+  maxLon: number;
+  minLat: number;
+  minLon: number;
+}): {
+  top_left: number[];
+  bottom_right: number[];
+};

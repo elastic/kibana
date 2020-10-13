@@ -9,6 +9,7 @@ import { ESTermSource } from '../sources/es_term_source';
 import { JoinDescriptor } from '../../../common/descriptor_types';
 import { ITooltipProperty } from '../tooltips/tooltip_property';
 import { IField } from '../fields/field';
+import { PropertiesMap } from '../../../common/elasticsearch_util';
 
 export interface IJoin {
   destroy: () => void;
