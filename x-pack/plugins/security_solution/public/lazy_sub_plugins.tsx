@@ -16,12 +16,11 @@ import { Network } from './network';
 import { Overview } from './overview';
 import { Timelines } from './timelines';
 import { Management } from './management';
-import { SubPluginClasses } from './types';
 
 /**
  * The classes used to instantiate the sub plugins. These are grouped into a single object for the sake of bundling them in a single dynamic import.
  */
-const subPluginClasses: SubPluginClasses = {
+const subPluginClasses = {
   Detections,
   Cases,
   Hosts,

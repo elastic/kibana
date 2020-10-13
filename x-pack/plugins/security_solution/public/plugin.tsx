@@ -7,23 +7,15 @@
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { pluck } from 'rxjs/operators';
-import { Detections } from './detections';
-import { Cases } from './cases';
-import { Hosts } from './hosts';
-import { Network } from './network';
-import { Overview } from './overview';
-import { Timelines } from './timelines';
-import { Management } from './management';
 
 import {
-  LazyApplicationDependencies,
   PluginSetup,
   PluginStart,
   SetupPlugins,
   StartPlugins,
   StartServices,
   AppObservableLibs,
-  LazySubPlugins,
+  SubPlugins,
 } from './types';
 import {
   AppMountParameters,
@@ -348,7 +340,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
    * The dependencies needed to mount the applications. These are dynamically loaded for the sake of webpack bundling efficiency.
    * Webpack is smart enough to only request (and download) this even when it is imported multiple times concurrently.
    */
-  private lazyApplicationDependencies(): Promise<LazyApplicationDependencies> {
+  private lazyApplicationDependencies() {
     /**
      * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
      * See https://webpack.js.org/api/module-methods/#magic-comments
@@ -363,7 +355,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
    * The dependencies needed to mount the applications. These are dynamically loaded for the sake of webpack bundling efficiency.
    * Webpack is smart enough to only request (and download) this even when it is imported multiple times concurrently.
    */
-  private lazySubPlugins(): Promise<LazySubPlugins> {
+  private lazySubPlugins() {
     /**
      * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
      * See https://webpack.js.org/api/module-methods/#magic-comments
@@ -478,13 +470,3 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 const APP_NAME = i18n.translate('xpack.securitySolution.security.title', {
   defaultMessage: 'Security',
 });
-
-interface SubPlugins {
-  detections: Detections;
-  cases: Cases;
-  hosts: Hosts;
-  network: Network;
-  overview: Overview;
-  timelines: Timelines;
-  management: Management;
-}

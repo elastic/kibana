@@ -4,24 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Observable } from 'rxjs';
-
-import { PreloadedState, Middleware, Dispatch } from 'redux';
-import { AppApolloClient, AppFrontendLibs } from './common/lib/lib';
-import { SubPluginsInitReducer } from './common/store/reducer';
-
-import { SecuritySubPlugins, RenderAppProps } from './app/types';
-
-import { Detections } from './detections';
-import { Cases } from './cases';
-import { Hosts } from './hosts';
-import { Network } from './network';
-import { Overview } from './overview';
-import { Timelines } from './timelines';
-import { Management } from './management';
-
+import { AppFrontendLibs } from './common/lib/lib';
 import { CoreStart } from '../../../../src/core/public';
-
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
@@ -40,11 +24,14 @@ import { SecurityPluginSetup } from '../../security/public';
 import { ResolverPluginSetup } from './resolver/types';
 import { Inspect } from '../common/search_strategy';
 import { MlPluginSetup, MlPluginStart } from '../../ml/public';
-import { State } from './common/store/types';
-import { KibanaIndexPatterns } from './common/store/sourcerer/model';
-import { AppAction } from './common/store/actions';
-import { SecurityAppStore } from './common/store/store';
-import { Immutable } from '../common/endpoint/types';
+
+import { Detections } from './detections';
+import { Cases } from './cases';
+import { Hosts } from './hosts';
+import { Network } from './network';
+import { Overview } from './overview';
+import { Timelines } from './timelines';
+import { Management } from './management';
 
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
@@ -84,39 +71,12 @@ export interface AppObservableLibs extends AppFrontendLibs {
 
 export type InspectResponse = Inspect & { response: string[] };
 
-/**
- * The classes used to instantiate the sub plugins. These are grouped into a single object for the sake of bundling them in a single dynamic import.
- */
-export interface SubPluginClasses {
-  Detections: new () => Detections;
-  Cases: new () => Cases;
-  Hosts: new () => Hosts;
-  Network: new () => Network;
-  Overview: new () => Overview;
-  Timelines: new () => Timelines;
-  Management: new () => Management;
-}
-
-/**
- * These dependencies are needed to mount the applications registered by this plugin. They are grouped into a single object for the sake of bundling the in a single Webpack chunk.
- */
-export interface LazyApplicationDependencies {
-  renderApp: (renderAppProps: RenderAppProps) => () => void;
-  composeLibs: (core: CoreStart) => AppFrontendLibs;
-  createInitialState: (
-    pluginsInitState: SecuritySubPlugins['store']['initialState'],
-    patterns: { kibanaIndexPatterns: KibanaIndexPatterns; configIndexPatterns: string[] }
-  ) => PreloadedState<State>;
-  createStore(
-    state: PreloadedState<State>,
-    pluginsReducer: SubPluginsInitReducer,
-    apolloClient: Observable<AppApolloClient>,
-    kibana: Observable<CoreStart>,
-    storage: Storage,
-    additionalMiddleware?: Array<Middleware<{}, State, Dispatch<AppAction | Immutable<AppAction>>>>
-  ): SecurityAppStore;
-}
-
-export interface LazySubPlugins {
-  subPluginClasses: SubPluginClasses;
+export interface SubPlugins {
+  detections: Detections;
+  cases: Cases;
+  hosts: Hosts;
+  network: Network;
+  overview: Overview;
+  timelines: Timelines;
+  management: Management;
 }
