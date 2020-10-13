@@ -36,12 +36,13 @@ import { registerSource } from '../source_registry';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 
 import { getHttp } from '../../../kibana_services';
-import { ITiledSingleLayerVectorSource } from '../vector_source';
+import { GeoJsonWithMeta, ITiledSingleLayerVectorSource } from '../vector_source';
 import {
   ESGeoGridSourceDescriptor,
   VectorSourceRequestMeta,
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
+import { ImmutableSourceProperty } from '../source';
 
 export const MAX_GEOTILE_LEVEL = 29;
 
@@ -103,7 +104,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     };
   }
 
-  async getImmutableProperties() {
+  async getImmutableProperties(): Promise<ImmutableSourceProperty[]> {
     let indexPatternTitle = this.getIndexPatternId();
     try {
       const indexPattern = await this.getIndexPattern();
@@ -330,7 +331,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     searchFilters: VectorSourceRequestMeta,
     registerCancelCallback: (callback: () => void) => void,
     isRequestStillActive: () => boolean
-  ) {
+  ): Promise<GeoJsonWithMeta> {
     const indexPattern = await this.getIndexPattern();
     const searchSource = await this.makeSearchSource(searchFilters, 0);
 
@@ -368,14 +369,21 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
       meta: {
         areResultsTrimmed: false,
       },
-    };
+    } as GeoJsonWithMeta;
   }
 
   getLayerName() {
     return MVT_SOURCE_LAYER_NAME;
   }
 
-  async getUrlTemplateWithMeta(searchFilters) {
+  async getUrlTemplateWithMeta(
+    searchFilters: VectorSourceRequestMeta
+  ): Promise<{
+    layerName: string;
+    urlTemplate: string;
+    minSourceZoom: number;
+    maxSourceZoom: number;
+  }> {
     const indexPattern = await this.getIndexPattern();
     const searchSource = await this.makeSearchSource(searchFilters, 0);
 

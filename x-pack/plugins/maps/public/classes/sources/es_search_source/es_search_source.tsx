@@ -68,9 +68,9 @@ function getDocValueAndSourceFields(
   indexPattern: IndexPattern,
   fieldNames: string[]
 ): {
-  docValueFields: Array<string | { format: 'epoch_millis'; type: string }>;
+  docValueFields: Array<string | { format: 'epoch_millis'; field: string }>;
   sourceOnlyFields: string[];
-  scriptFields: Record<string, ScriptField>;
+  scriptFields: Record<string, { script: ScriptField }>;
 } {
   const docValueFields: Array<string | { format: 'epoch_millis'; type: string }> = [];
   const sourceOnlyFields: string[] = [];
