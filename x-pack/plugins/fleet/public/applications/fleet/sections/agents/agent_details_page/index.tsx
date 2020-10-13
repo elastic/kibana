@@ -34,7 +34,12 @@ import {
 import { WithHeaderLayout } from '../../../layouts';
 import { AgentHealth } from '../components';
 import { AgentRefreshContext } from './hooks';
-import { AgentEventsTable, AgentDetailsActionMenu, AgentDetailsContent } from './components';
+import {
+  AgentEventsTable,
+  AgentLogs,
+  AgentDetailsActionMenu,
+  AgentDetailsContent,
+} from './components';
 import { useIntraAppState } from '../../../hooks/use_intra_app_state';
 import { isAgentUpgradeable } from '../../../services';
 
@@ -225,11 +230,19 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     return [
       {
         id: 'activity_log',
-        name: i18n.translate('xpack.fleet.agentDetails.subTabs.activityLogTab', {
-          defaultMessage: 'Activity log',
+        name: i18n.translate('xpack.fleet.agentDetails.subTabs.activityTab', {
+          defaultMessage: 'Activity',
         }),
         href: getHref('fleet_agent_details', { agentId, tabId: 'activity' }),
         isSelected: !tabId || tabId === 'activity',
+      },
+      {
+        id: 'logs',
+        name: i18n.translate('xpack.fleet.agentDetails.subTabs.agentLogTab', {
+          defaultMessage: 'Agent logs',
+        }),
+        href: getHref('fleet_agent_details', { agentId, tabId: 'logs' }),
+        isSelected: tabId === 'logs',
       },
       {
         id: 'details',
@@ -308,6 +321,12 @@ const AgentDetailsPageContent: React.FunctionComponent<{
         path={PAGE_ROUTING_PATHS.fleet_agent_details_details}
         render={() => {
           return <AgentDetailsContent agent={agent} agentPolicy={agentPolicy} />;
+        }}
+      />
+      <Route
+        path={PAGE_ROUTING_PATHS.fleet_agent_details_logs}
+        render={() => {
+          return <AgentLogs agent={agent} />;
         }}
       />
       <Route
