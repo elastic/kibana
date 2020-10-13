@@ -19,7 +19,7 @@
 
 import { URL } from 'url';
 import uuid from 'uuid';
-import { Request, RouteOptionsApp, ApplicationState } from '@hapi/hapi';
+import { Request, RouteOptionsApp, RequestApplicationState } from '@hapi/hapi';
 import { Observable, fromEvent, merge } from 'rxjs';
 import { shareReplay, first, takeUntil } from 'rxjs/operators';
 import { RecursiveReadonly } from '@kbn/utility-types';
@@ -42,7 +42,7 @@ export interface KibanaRouteOptions extends RouteOptionsApp {
 /**
  * @internal
  */
-export interface KibanaRequestState extends ApplicationState {
+export interface KibanaRequestState extends RequestApplicationState {
   requestId: string;
   requestUuid: string;
   rewrittenUrl?: URL;
