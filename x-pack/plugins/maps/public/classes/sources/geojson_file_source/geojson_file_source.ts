@@ -9,6 +9,7 @@ import { AbstractVectorSource, GeoJsonWithMeta } from '../vector_source';
 import { EMPTY_FEATURE_COLLECTION, SOURCE_TYPES } from '../../../../common/constants';
 import { GeojsonFileSourceDescriptor } from '../../../../common/descriptor_types';
 import { registerSource } from '../source_registry';
+import { IField } from '../../fields/field';
 
 function getFeatureCollection(geoJson: Feature | FeatureCollection | null): FeatureCollection {
   if (!geoJson) {
@@ -46,6 +47,10 @@ export class GeojsonFileSource extends AbstractVectorSource {
       data: (this._descriptor as GeojsonFileSourceDescriptor).__featureCollection,
       meta: {},
     };
+  }
+
+  createField({ fieldName }: { fieldName: string }): IField {
+    throw new Error('Not implemented');
   }
 
   async getDisplayName() {

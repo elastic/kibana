@@ -37,7 +37,11 @@ import { LICENSED_FEATURES } from '../../../licensed_features';
 
 import { getHttp } from '../../../kibana_services';
 import { ITiledSingleLayerVectorSource } from '../vector_source';
-import { VectorSourceRequestMeta, VectorSourceSyncMeta } from '../../../../common/descriptor_types';
+import {
+  ESGeoGridSourceDescriptor,
+  VectorSourceRequestMeta,
+  VectorSourceSyncMeta,
+} from '../../../../common/descriptor_types';
 
 export const MAX_GEOTILE_LEVEL = 29;
 
@@ -50,20 +54,34 @@ export const heatmapTitle = i18n.translate('xpack.maps.source.esGridHeatmapTitle
 });
 
 export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingleLayerVectorSource {
-  static createDescriptor({ indexPatternId, geoField, metrics, requestType, resolution }) {
+  static createDescriptor({
+    indexPatternId,
+    geoField,
+    metrics,
+    requestType,
+    resolution,
+  }: Partial<ESGeoGridSourceDescriptor>): ESGeoGridSourceDescriptor {
     return {
-      type: ESGeoGridSource.type,
+      type: SOURCE_TYPES.ES_GEO_GRID,
       id: uuid(),
-      indexPatternId,
-      geoField,
+      indexPatternId: indexPatternId || '',
+      geoField: geoField || '',
       metrics: metrics ? metrics : [DEFAULT_METRIC],
-      requestType,
+      requestType: requestType || RENDER_AS.POINT,
       resolution: resolution ? resolution : GRID_RESOLUTION.COARSE,
     };
   }
 
+  readonly _descriptor: ESGeoGridSourceDescriptor;
+
   constructor(descriptor, inspectorAdapters) {
-    super(descriptor, inspectorAdapters, descriptor.resolution !== GRID_RESOLUTION.SUPER_FINE);
+    const sourceDescriptor = ESGeoGridSource.createDescriptor(descriptor);
+    super(
+      sourceDescriptor,
+      inspectorAdapters,
+      descriptor.resolution !== GRID_RESOLUTION.SUPER_FINE
+    );
+    this._descriptor = sourceDescriptor;
   }
 
   renderSourceSettingsEditor({ onChange, currentLayerType }) {

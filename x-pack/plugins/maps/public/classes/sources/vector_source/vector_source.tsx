@@ -138,6 +138,10 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     return [];
   }
 
+  createField({ fieldName }: { fieldName: string }): IField {
+    throw new Error('Not implemented');
+  }
+
   /**
    * Retrieves a field. This may be an existing instance.
    * @param fieldName

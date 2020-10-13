@@ -68,20 +68,20 @@ function getDocValueAndSourceFields(
   indexPattern: IndexPattern,
   fieldNames: string[]
 ): {
-  docValueFields: string[];
+  docValueFields: Array<string | { format: 'epoch_millis'; type: string }>;
   sourceOnlyFields: string[];
   scriptFields: Record<string, ScriptField>;
 } {
-  const docValueFields: string[] = [];
+  const docValueFields: Array<string | { format: 'epoch_millis'; type: string }> = [];
   const sourceOnlyFields: string[] = [];
-  const scriptFields: Record<string, ScriptField> = {};
+  const scriptFields: Record<string, { script: ScriptField }> = {};
   fieldNames.forEach((fieldName) => {
     const field = getField(indexPattern, fieldName);
     if (field.scripted) {
       scriptFields[field.name] = {
         script: {
-          source: field.script,
-          lang: field.lang,
+          source: field.script || '',
+          lang: field.lang || '',
         },
       };
     } else if (field.readFromDocValues) {
@@ -122,7 +122,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     };
   }
 
-  constructor(descriptor: ESSearchSourceDescriptor, inspectorAdapters?: Adapters) {
+  constructor(descriptor: Partial<ESSearchSourceDescriptor>, inspectorAdapters?: Adapters) {
     super(ESSearchSource.createDescriptor(descriptor), inspectorAdapters);
     this._descriptor = descriptor;
     this._tooltipFields = this._descriptor.tooltipProperties
@@ -171,9 +171,9 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
         return field.aggregatable;
       });
 
-      return fields.map((field) => {
+      return (fields.map((field) => {
         return this.createField({ fieldName: field.name }) as IField;
-      });
+      }) as unknown) as IField[];
     } catch (error) {
       // failed index-pattern retrieval will show up as error-message in the layer-toc-entry
       return [];
@@ -232,7 +232,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return [
       {
         [sortField]: {
-          order: sortOrder as SortDirection,
+          order: (sortOrder as unknown) as SortDirection,
         },
       },
     ];
@@ -245,7 +245,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   ) {
     const { topHitsSplitField: topHitsSplitFieldName, topHitsSize } = this._descriptor;
 
-    if (!topHitsSplitField) {
+    if (!topHitsSplitFieldName) {
       throw new Error('Cannot _getTopHits without topHitsSplitField');
     }
 
@@ -257,8 +257,8 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     );
     const topHits: {
       size: number | undefined;
-      docValueFields: string[];
-      scriptFields: Record<string, ScriptField>;
+      script_fields: Record<string, ScriptField>;
+      docvalue_fields: string[];
       _source?: boolean | { includes: string[] };
       sort?: Array<Record<string, SortDirection | SortDirectionNumeric>>;
     } = {
