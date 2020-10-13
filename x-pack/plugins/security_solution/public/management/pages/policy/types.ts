@@ -145,8 +145,6 @@ export enum OS {
   linux = 'linux',
 }
 
-export type AdvancedOSes = KeysByValueCriteria<UIPolicyConfig, { advanced: AdvancedFields }>;
-
 /**
  * Returns the keys of an object whose values meet a criteria.
  *  Ex) interface largeNestedObject = {
