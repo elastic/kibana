@@ -19,18 +19,18 @@
 
 import { CoreSetup, CoreStart, PluginInitializerContext, Plugin } from 'src/core/public';
 import { SavedObjectTaggingOssPluginSetup, SavedObjectTaggingOssPluginStart } from './types';
-import { TaggingApi } from './api';
+import { SavedObjectsTaggingApi } from './api';
 
 export class SavedObjectTaggingOssPlugin
   implements Plugin<SavedObjectTaggingOssPluginSetup, SavedObjectTaggingOssPluginStart, {}, {}> {
   private apiRegistered = false;
-  private api?: TaggingApi;
+  private api?: SavedObjectsTaggingApi;
 
   constructor(context: PluginInitializerContext) {}
 
   public setup({}: CoreSetup) {
     return {
-      registerTaggingApi: (provider: Promise<TaggingApi>) => {
+      registerTaggingApi: (provider: Promise<SavedObjectsTaggingApi>) => {
         if (this.apiRegistered) {
           throw new Error('tagging API can only be registered once');
         }

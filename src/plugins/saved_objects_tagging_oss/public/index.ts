@@ -23,9 +23,9 @@ import { SavedObjectTaggingOssPlugin } from './plugin';
 export { SavedObjectTaggingOssPluginSetup, SavedObjectTaggingOssPluginStart } from './types';
 
 export {
-  TaggingApi,
-  TaggingApiUi,
-  TaggingApiUiComponent,
+  SavedObjectsTaggingApi,
+  SavedObjectsTaggingApiUi,
+  SavedObjectsTaggingApiUiComponent,
   TagListComponentProps,
   GetSearchBarFilterOptions,
   ParsedSearchQuery,

@@ -65,7 +65,7 @@ export class DashboardListing extends React.Component {
           uiSettings={this.props.core.uiSettings}
           searchFilters={
             this.props.taggingApi
-              ? [this.props.taggingApi.ui.getSearchBarFilter({ valueField: 'name' })]
+              ? [this.props.taggingApi.ui.getSearchBarFilter({ useName: true })]
               : []
           }
         />

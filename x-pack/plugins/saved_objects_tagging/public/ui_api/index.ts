@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TaggingApiUi } from '../../../../../src/plugins/saved_objects_tagging_oss/public';
+import { SavedObjectsTaggingApiUi } from '../../../../../src/plugins/saved_objects_tagging_oss/public';
 import { ITagsCache, ITagInternalClient } from '../tags';
 import { getComponents } from './components';
 import { buildGetTableColumnDefinition } from './get_table_column_definition';
@@ -17,7 +17,7 @@ interface GetUiApiOptions {
   client: ITagInternalClient;
 }
 
-export const getUiApi = ({ cache }: GetUiApiOptions): TaggingApiUi => {
+export const getUiApi = ({ cache }: GetUiApiOptions): SavedObjectsTaggingApiUi => {
   const components = getComponents({ cache });
 
   return {

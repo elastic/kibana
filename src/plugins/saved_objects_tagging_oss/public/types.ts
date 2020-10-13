@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { TaggingApi } from './api';
+import { SavedObjectsTaggingApi } from './api';
 
 export interface SavedObjectTaggingOssPluginSetup {
   /**
@@ -29,7 +29,7 @@ export interface SavedObjectTaggingOssPluginSetup {
    *          (after `getStartServices` resolves). Not respecting this condition may cause
    *          runtime failures.
    */
-  registerTaggingApi(provider: Promise<TaggingApi>): void;
+  registerTaggingApi(provider: Promise<SavedObjectsTaggingApi>): void;
 }
 
 export interface SavedObjectTaggingOssPluginStart {
@@ -42,5 +42,5 @@ export interface SavedObjectTaggingOssPluginStart {
    * Returns the tagging API, if registered.
    * This will always returns a value if `isTaggingAvailable` returns true, and undefined otherwise.
    */
-  getTaggingApi(): TaggingApi | undefined;
+  getTaggingApi(): SavedObjectsTaggingApi | undefined;
 }

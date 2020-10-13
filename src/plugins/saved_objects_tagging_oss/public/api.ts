@@ -23,64 +23,31 @@ import { SavedObject } from '../../../core/types';
 import { SavedObjectsFindOptionsReference } from '../../../core/public';
 import { ITagsClient } from '../common';
 
-export interface TaggingApi {
+/**
+ * @public
+ */
+export interface SavedObjectsTaggingApi {
   client: ITagsClient;
-  ui: TaggingApiUi;
-}
-
-export interface TagListComponentProps {
-  /**
-   * The object to display tags for.
-   */
-  object: SavedObject;
-}
-
-export interface GetSearchBarFilterOptions {
-  /**
-   * The field that will be used as value when an option is selected. Can either
-   * be `id` or `name`.
-   * Default to `id`
-   */
-  valueField?: 'id' | 'name';
-}
-
-export interface ParsedSearchQuery {
-  searchTerm: string;
-  tagReferences?: SavedObjectsFindOptionsReference[];
-}
-
-export interface ParseSearchQueryOptions {
-  /**
-   * If set to true, will assume the tag clause is using tag names instead of ids.
-   * In that case, will perform a reverse lookup from the client-side tag cache to resolve tag ids from names.
-   *
-   * Defaults to false.
-   *
-   * @remarks this must be set to to true if the filter is configured to use tag names instead of id in the query.
-   *           see {@link GetSearchBarFilterOptions.valueField} for more details.
-   */
-  useName?: boolean;
-  /**
-   * The tag clause field name to extract the tags from. Defaults to `tag`.
-   *
-   * @remarks It is very unlikely that this option is needed for external consumers.
-   */
-  tagClause?: string;
-}
-
-export interface TaggingApiUiComponent {
-  /**
-   * Displays the tags for given saved object.
-   */
-  TagList: FunctionComponent<TagListComponentProps>;
+  ui: SavedObjectsTaggingApiUi;
 }
 
 /**
  * React components and utility methods to use the SO tagging feature
+ *
+ * @public
  */
-export interface TaggingApiUi {
+export interface SavedObjectsTaggingApiUi {
   /**
-   * Returns a filter that can be used by filter by tag with `EuiSearchBar` or EUI tables using `EuiSearchBar`.
+   * Return a filter that can be used to filter by tag with `EuiSearchBar` or EUI tables using `EuiSearchBar`.
+   *
+   * @example
+   * ```ts
+   * // inside a react render
+   * const filters = taggingApi ? [taggingApi.ui.getSearchBarFilter({ useName: true })] : []
+   * return (
+   *  <EuiSearchBar {...props} filters={filters} />
+   * )
+   * ```
    */
   getSearchBarFilter(options?: GetSearchBarFilterOptions): SearchFilterConfig;
 
@@ -92,13 +59,13 @@ export interface TaggingApiUi {
   getTableColumnDefinition(): EuiTableFieldDataColumnType<SavedObject>;
 
   /**
-   * Converts given tag name to a reference to be used to search using the _find API.
+   * Convert given tag name to a reference to be used to search using the `_find` API.
    */
   convertNameToReference(tagName: string): SavedObjectsFindOptionsReference | undefined;
 
   /**
    * Parse given query using EUI's `Query` syntax, and returns the search term and the tag references
-   * to be used when using the `_find` API.
+   * to be used when using the `_find` API to retrieve the filtered objects.
    *
    * @param query The query to parse
    * @param options see {@link ParseSearchQueryOptions}
@@ -126,7 +93,86 @@ export interface TaggingApiUi {
   parseSearchQuery(query: string, options?: ParseSearchQueryOptions): ParsedSearchQuery;
 
   /**
-   * React component to support the tagging feature.
+   * {@link SavedObjectsTaggingApiUiComponent | React components} to support the tagging feature.
    */
-  components: TaggingApiUiComponent;
+  components: SavedObjectsTaggingApiUiComponent;
+}
+
+/**
+ * @public
+ */
+export interface SavedObjectsTaggingApiUiComponent {
+  /**
+   * Displays the tags for given saved object.
+   */
+  TagList: FunctionComponent<TagListComponentProps>;
+}
+
+/**
+ * @public
+ */
+export interface TagListComponentProps {
+  /**
+   * The object to display tags for.
+   */
+  object: SavedObject;
+}
+
+/**
+ * @public
+ */
+export interface GetSearchBarFilterOptions {
+  /**
+   * If set to true, will use the tag's `name` instead of `id` for the tag field clause, which is recommended
+   * for a better end-user experience.
+   *
+   * Defaults to true.
+   *
+   * @example
+   * ```
+   * // query generated with { useName: true }
+   * `tag:(tag-1 OR tag-2) my search term`
+   * // query generated with { useName: false }
+   * `tag:(d97721fc-542b-4485-a329-65ed04c84a4c OR d97721fc-542b-4485-a329-65ed04c84a4c) my search term`
+   * ```
+   *
+   * @remarks this must consistent with the {@link ParseSearchQueryOptions.useName} when parsing the query.
+   */
+  useName?: boolean;
+  /**
+   * The tag clause field name to generate the query. Defaults to `tag`.
+   *
+   * @remarks It is very unlikely that this option is needed for external consumers.
+   */
+  tagField?: string;
+}
+
+/**
+ * @public
+ */
+export interface ParsedSearchQuery {
+  searchTerm: string;
+  tagReferences?: SavedObjectsFindOptionsReference[];
+}
+
+/**
+ * @public
+ */
+export interface ParseSearchQueryOptions {
+  /**
+   * If set to true, will assume the tag clause is using tag names instead of ids.
+   * In that case, will perform a reverse lookup from the client-side tag cache to resolve tag ids from names.
+   *
+   * Defaults to true.
+   *
+   * @remarks this must be set to to true if the filter is configured to use tag names instead of id in the query.
+   *           see {@link GetSearchBarFilterOptions.valueField} for more details.
+   */
+  useName?: boolean;
+  /**
+   * The tag clause field name to extract the tags from. Defaults to `tag`.
+   *
+   * @remarks It is very unlikely that this option is needed for external consumers.
+   */
+  tagField?: string;
 }

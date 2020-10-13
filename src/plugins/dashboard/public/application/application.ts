@@ -44,7 +44,7 @@ import { SharePluginStart } from '../../../share/public';
 import { KibanaLegacyStart, configureAppAngularModule } from '../../../kibana_legacy/public';
 import { UrlForwardingStart } from '../../../url_forwarding/public';
 import { SavedObjectLoader, SavedObjectsStart } from '../../../saved_objects/public';
-import { TaggingApi } from '../../../saved_objects_tagging_oss/public';
+import { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
 
 // required for i18nIdDirective
 import 'angular-sanitize';
@@ -77,7 +77,7 @@ export interface RenderDeps {
   scopedHistory: () => ScopedHistory;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   savedObjects: SavedObjectsStart;
-  savedObjectsTagging?: TaggingApi;
+  savedObjectsTagging?: SavedObjectsTaggingApi;
   restorePreviousUrl: () => void;
 }
 

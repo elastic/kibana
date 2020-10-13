@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TaggingApiUiComponent } from '../../../../../src/plugins/saved_objects_tagging_oss/public';
+import { SavedObjectsTaggingApiUiComponent } from '../../../../../src/plugins/saved_objects_tagging_oss/public';
 import { ITagsCache } from '../tags';
 import { getConnectedTagListComponent } from '../components/connected';
 
@@ -12,7 +12,9 @@ export interface GetComponentsOptions {
   cache: ITagsCache;
 }
 
-export const getComponents = ({ cache }: GetComponentsOptions): TaggingApiUiComponent => {
+export const getComponents = ({
+  cache,
+}: GetComponentsOptions): SavedObjectsTaggingApiUiComponent => {
   return {
     TagList: getConnectedTagListComponent(cache),
   };

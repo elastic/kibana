@@ -6,7 +6,7 @@
 
 import React from 'react';
 import {
-  TaggingApiUi,
+  SavedObjectsTaggingApiUi,
   GetSearchBarFilterOptions,
 } from '../../../../../src/plugins/saved_objects_tagging_oss/public';
 import { ITagsCache } from '../tags';
@@ -18,11 +18,11 @@ export interface BuildGetSearchBarFilterOptions {
 
 export const buildGetSearchBarFilter = ({
   cache,
-}: BuildGetSearchBarFilterOptions): TaggingApiUi['getSearchBarFilter'] => {
-  return ({ valueField = 'id' }: GetSearchBarFilterOptions = {}) => {
+}: BuildGetSearchBarFilterOptions): SavedObjectsTaggingApiUi['getSearchBarFilter'] => {
+  return ({ useName = true, tagField = 'tag' }: GetSearchBarFilterOptions = {}) => {
     return {
       type: 'field_value_selection',
-      field: 'tag',
+      field: tagField,
       name: 'Tags',
       multiSelect: 'or',
       options: () => {
@@ -32,7 +32,7 @@ export const buildGetSearchBarFilter = ({
         return Promise.resolve(
           cache.getState().map((tag) => {
             return {
-              value: valueField === 'name' ? tag.name : tag.id,
+              value: useName ? tag.name : tag.id,
               name: tag.name,
               view: <TagSearchBarOption tag={tag} />,
             };

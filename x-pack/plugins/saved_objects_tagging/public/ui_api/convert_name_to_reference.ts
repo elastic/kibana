@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TaggingApiUi } from '../../../../../src/plugins/saved_objects_tagging_oss/public';
+import { SavedObjectsTaggingApiUi } from '../../../../../src/plugins/saved_objects_tagging_oss/public';
 import { ITagsCache } from '../tags';
 import { convertTagNameToId } from '../utils';
 
@@ -14,7 +14,7 @@ export interface BuildConvertNameToReferenceOptions {
 
 export const buildConvertNameToReference = ({
   cache,
-}: BuildConvertNameToReferenceOptions): TaggingApiUi['convertNameToReference'] => {
+}: BuildConvertNameToReferenceOptions): SavedObjectsTaggingApiUi['convertNameToReference'] => {
   return (tagName: string) => {
     const tagId = convertTagNameToId(tagName, cache.getState());
     return tagId ? { type: 'tag', id: tagId } : undefined;

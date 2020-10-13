@@ -37,7 +37,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { TaggingApi } from '../../../../../saved_objects_tagging_oss/public';
+import { SavedObjectsTaggingApi } from '../../../../../saved_objects_tagging_oss/public';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
 import { SavedObjectWithMetadata } from '../../../types';
 import {
@@ -47,7 +47,7 @@ import {
 } from '../../../services';
 
 export interface TableProps {
-  taggingApi?: TaggingApi;
+  taggingApi?: SavedObjectsTaggingApi;
   basePath: IBasePath;
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
@@ -183,7 +183,7 @@ export class Table extends PureComponent<TableProps, TableState> {
         multiSelect: 'or',
         options: filterOptions,
       },
-      ...(taggingApi ? [taggingApi.ui.getSearchBarFilter({ valueField: 'name' })] : []),
+      ...(taggingApi ? [taggingApi.ui.getSearchBarFilter({ useName: true })] : []),
     ];
 
     const columns = [

@@ -57,7 +57,7 @@ import {
   SavedObjectsFindOptionsReference,
 } from 'src/core/public';
 import { RedirectAppLinks } from '../../../../kibana_react/public';
-import { TaggingApi } from '../../../../saved_objects_tagging_oss/public';
+import { SavedObjectsTaggingApi } from '../../../../saved_objects_tagging_oss/public';
 import { IndexPatternsContract } from '../../../../data/public';
 import {
   parseQuery,
@@ -92,7 +92,7 @@ export interface SavedObjectsTableProps {
   columnRegistry: SavedObjectsManagementColumnServiceStart;
   savedObjectsClient: SavedObjectsClientContract;
   indexPatterns: IndexPatternsContract;
-  taggingApi?: TaggingApi;
+  taggingApi?: SavedObjectsTaggingApi;
   http: HttpStart;
   search: DataPublicPluginStart['search'];
   overlays: OverlayStart;

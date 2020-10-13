@@ -7,7 +7,7 @@ import { Query } from '@elastic/eui';
 import { SavedObjectsFindOptionsReference } from 'src/core/public';
 import {
   ParseSearchQueryOptions,
-  TaggingApiUi,
+  SavedObjectsTaggingApiUi,
 } from '../../../../../src/plugins/saved_objects_tagging_oss/public';
 import { ITagsCache } from '../tags';
 
@@ -17,8 +17,8 @@ export interface BuildParseSearchQueryOptions {
 
 export const buildParseSearchQuery = ({
   cache,
-}: BuildParseSearchQueryOptions): TaggingApiUi['parseSearchQuery'] => {
-  return (query: string, { tagClause = 'tag', useName = false }: ParseSearchQueryOptions = {}) => {
+}: BuildParseSearchQueryOptions): SavedObjectsTaggingApiUi['parseSearchQuery'] => {
+  return (query: string, { tagField = 'tag', useName = true }: ParseSearchQueryOptions = {}) => {
     const parsed = Query.parse(query);
     // from other usages of `Query.parse` in the codebase, it seems that
     // for empty term, the parsed query can be undefined, even if the type def state otherwise.
@@ -38,8 +38,8 @@ export const buildParseSearchQuery = ({
         .map((clause: any) => clause.value)
         .join(' ');
     }
-    if (parsed.ast.getFieldClauses(tagClause)) {
-      const selectedTags = parsed.ast.getFieldClauses(tagClause)[0].value as string[];
+    if (parsed.ast.getFieldClauses(tagField)) {
+      const selectedTags = parsed.ast.getFieldClauses(tagField)[0].value as string[];
       if (useName) {
         // TODO: use convertNameToReference directly instead
         selectedTags.forEach((tagName) => {

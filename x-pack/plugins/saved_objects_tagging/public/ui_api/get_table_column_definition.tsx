@@ -8,17 +8,17 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { SavedObject, SavedObjectReference } from 'src/core/public';
 import {
-  TaggingApiUi,
-  TaggingApiUiComponent,
+  SavedObjectsTaggingApiUi,
+  SavedObjectsTaggingApiUiComponent,
 } from '../../../../../src/plugins/saved_objects_tagging_oss/public';
 
 export interface GetTableColumnDefinitionOptions {
-  components: TaggingApiUiComponent;
+  components: SavedObjectsTaggingApiUiComponent;
 }
 
 export const buildGetTableColumnDefinition = ({
   components,
-}: GetTableColumnDefinitionOptions): TaggingApiUi['getTableColumnDefinition'] => {
+}: GetTableColumnDefinitionOptions): SavedObjectsTaggingApiUi['getTableColumnDefinition'] => {
   return () => {
     return {
       field: 'references',

@@ -142,7 +142,7 @@ export const VisualizeListing = () => {
 
   const searchFilters = useMemo(() => {
     return savedObjectsTagging
-      ? [savedObjectsTagging.ui.getSearchBarFilter({ valueField: 'name' })]
+      ? [savedObjectsTagging.ui.getSearchBarFilter({ useName: true })]
       : [];
   }, [savedObjectsTagging]);
 
