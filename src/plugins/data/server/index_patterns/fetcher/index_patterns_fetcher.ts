@@ -40,8 +40,8 @@ export class IndexPatternsFetcher {
   private elasticsearchClient: ElasticsearchClient;
   private allowNoIndices: boolean;
 
-  constructor(callDataCluster: ElasticsearchClient, allowNoIndices: boolean = false) {
-    this.elasticsearchClient = callDataCluster;
+  constructor(elasticsearchClient: ElasticsearchClient, allowNoIndices: boolean = false) {
+    this.elasticsearchClient = elasticsearchClient;
     this.allowNoIndices = allowNoIndices;
   }
 
@@ -57,11 +57,11 @@ export class IndexPatternsFetcher {
   async getFieldsForWildcard(options: {
     pattern: string | string[];
     metaFields?: string[];
-    fieldCapsOptions?: { allowNoIndices: boolean };
+    fieldCapsOptions?: { allow_no_indices: boolean };
   }): Promise<FieldDescriptor[]> {
     const { pattern, metaFields, fieldCapsOptions } = options;
     return await getFieldCapabilities(this.elasticsearchClient, pattern, metaFields, {
-      allowNoIndices: fieldCapsOptions ? fieldCapsOptions.allowNoIndices : this.allowNoIndices,
+      allow_no_indices: fieldCapsOptions ? fieldCapsOptions.allow_no_indices : this.allowNoIndices,
     });
   }
 

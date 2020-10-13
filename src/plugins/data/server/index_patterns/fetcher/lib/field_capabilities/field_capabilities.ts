@@ -39,10 +39,10 @@ export async function getFieldCapabilities(
   callCluster: ElasticsearchClient,
   indices: string | string[] = [],
   metaFields: string[] = [],
-  fieldCapsOptions?: { allowNoIndices: boolean }
+  fieldCapsOptions?: { allow_no_indices: boolean }
 ) {
   const esFieldCaps = await callFieldCapsApi(callCluster, indices, fieldCapsOptions);
-  const fieldsFromFieldCapsByName = keyBy(readFieldCapsResponse(esFieldCaps.body.fields), 'name');
+  const fieldsFromFieldCapsByName = keyBy(readFieldCapsResponse(esFieldCaps.body), 'name');
 
   const allFieldsUnsorted = Object.keys(fieldsFromFieldCapsByName)
     .filter((name) => !name.startsWith('_'))
