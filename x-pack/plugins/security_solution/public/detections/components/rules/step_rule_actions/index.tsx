@@ -120,9 +120,13 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   }, [getFormData, submit]);
 
   useEffect(() => {
-    if (setForm) {
+    let didCancel = false;
+    if (setForm && !didCancel) {
       setForm(RuleStep.ruleActions, getData);
     }
+    return () => {
+      didCancel = true;
+    };
   }, [getData, setForm]);
 
   const throttleOptions = useMemo(() => {
