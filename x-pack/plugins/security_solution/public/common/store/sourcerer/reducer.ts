@@ -5,8 +5,7 @@
  */
 
 // Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import isEmpty from 'lodash/isEmpty';
+
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
@@ -16,7 +15,8 @@ import {
   setSignalIndexName,
   setSource,
 } from './actions';
-import { initialSourcererState, SourcererModel, SourcererScopeName } from './model';
+import { initialSourcererState, SourcererModel } from './model';
+import { createDefaultIndexPatterns } from './helpers';
 
 export type SourcererState = SourcererModel;
 
@@ -41,37 +41,13 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
     },
   }))
   .case(setSelectedIndexPatterns, (state, { id, selectedPatterns, eventType }) => {
-    const kibanaIndexPatterns = state.kibanaIndexPatterns.map((kip) => kip.title);
-    const newSelectedPatterns = selectedPatterns.filter(
-      (sp) =>
-        state.configIndexPatterns.includes(sp) ||
-        kibanaIndexPatterns.includes(sp) ||
-        (!isEmpty(state.signalIndexName) && state.signalIndexName === sp)
-    );
-    let defaultIndexPatterns = state.configIndexPatterns;
-    if (id === SourcererScopeName.timeline && isEmpty(newSelectedPatterns)) {
-      if (eventType === 'all' && !isEmpty(state.signalIndexName)) {
-        defaultIndexPatterns = [...state.configIndexPatterns, state.signalIndexName ?? ''];
-      } else if (eventType === 'raw') {
-        defaultIndexPatterns = state.configIndexPatterns;
-      } else if (
-        !isEmpty(state.signalIndexName) &&
-        (eventType === 'signal' || eventType === 'alert')
-      ) {
-        defaultIndexPatterns = [state.signalIndexName ?? ''];
-      }
-    } else if (id === SourcererScopeName.detections && isEmpty(newSelectedPatterns)) {
-      defaultIndexPatterns = [state.signalIndexName ?? ''];
-    }
     return {
       ...state,
       sourcererScopes: {
         ...state.sourcererScopes,
         [id]: {
           ...state.sourcererScopes[id],
-          selectedPatterns: isEmpty(newSelectedPatterns)
-            ? defaultIndexPatterns
-            : newSelectedPatterns,
+          selectedPatterns: createDefaultIndexPatterns({ eventType, id, selectedPatterns, state }),
         },
       },
     };
