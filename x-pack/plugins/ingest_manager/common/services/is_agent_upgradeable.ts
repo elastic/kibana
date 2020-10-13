@@ -13,6 +13,7 @@ export function isAgentUpgradeable(agent: Agent, kibanaVersion: string) {
   } else {
     return false;
   }
+  if (agent.unenrollment_started_at || agent.unenrolled_at) return false;
   const kibanaVersionParsed = semver.parse(kibanaVersion);
   const agentVersionParsed = semver.parse(agentVersion);
   if (!agentVersionParsed || !kibanaVersionParsed) return false;

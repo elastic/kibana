@@ -82,12 +82,7 @@ export async function sendUpgradeAgentsActions(
             showInactive: false,
           })
         ).agents;
-  const agentsToUpdate = agents.filter(
-    (agent) =>
-      !agent.unenrollment_started_at &&
-      !agent.unenrolled_at &&
-      isAgentUpgradeable(agent, kibanaVersion)
-  );
+  const agentsToUpdate = agents.filter((agent) => isAgentUpgradeable(agent, kibanaVersion));
   const now = new Date().toISOString();
   const data = {
     version: options.version,
