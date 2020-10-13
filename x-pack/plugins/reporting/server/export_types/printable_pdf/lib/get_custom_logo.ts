@@ -21,7 +21,6 @@ export const getCustomLogo = async (
     logger
   );
   const uiSettingsClient = await reporting.getUiSettingsClient(fakeRequest, logger);
-
   const logo: string = await uiSettingsClient.get(UI_SETTINGS_CUSTOM_PDF_LOGO);
 
   // continue the pipeline
