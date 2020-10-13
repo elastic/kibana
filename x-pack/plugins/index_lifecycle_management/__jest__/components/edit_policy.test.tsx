@@ -253,8 +253,8 @@ describe('edit policy', () => {
                     priority: 100,
                   },
                   rollover: {
-                    max_size: '50gb',
                     max_age: '30d',
+                    max_size: '50gb',
                   },
                 },
                 min_age: '0ms',
