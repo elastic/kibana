@@ -645,6 +645,8 @@ export const AlertsList: React.FunctionComponent = () => {
           charts,
           dataFieldsFormats: dataPlugin.fieldFormats,
           capabilities,
+          dataUi: dataPlugin.ui,
+          dataIndexPatterns: dataPlugin.indexPatterns,
         }}
       >
         <AlertAdd

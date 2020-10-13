@@ -1,0 +1,58 @@
+title: NewPackagePolicy
+type: object
+description: ''
+properties:
+  enabled:
+    type: boolean
+  package:
+    type: object
+    properties:
+      name:
+        type: string
+      version:
+        type: string
+      title:
+        type: string
+    required:
+      - name
+      - version
+      - title
+  namespace:
+    type: string
+  output_id:
+    type: string
+  inputs:
+    type: array
+    items:
+      type: object
+      properties:
+        type:
+          type: string
+        enabled:
+          type: boolean
+        processors:
+          type: array
+          items:
+            type: string
+        streams:
+          type: array
+          items: {}
+        config:
+          type: object
+        vars:
+          type: object
+      required:
+        - type
+        - enabled
+        - streams
+  policy_id:
+    type: string
+  name:
+    type: string
+  description:
+    type: string
+required:
+  - output_id
+  - inputs
+  - policy_id
+  - name

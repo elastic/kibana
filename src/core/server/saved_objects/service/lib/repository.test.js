@@ -635,13 +635,13 @@ describe('SavedObjectsRepository', () => {
         await test(namespace);
       });
 
-      it(`adds namespaces instead of namespace`, async () => {
+      it(`adds initialNamespaces instead of namespace`, async () => {
         const test = async (namespace) => {
           const ns2 = 'bar-namespace';
           const ns3 = 'baz-namespace';
           const objects = [
-            { ...obj1, type: MULTI_NAMESPACE_TYPE, namespaces: [ns2] },
-            { ...obj2, type: MULTI_NAMESPACE_TYPE, namespaces: [ns3] },
+            { ...obj1, type: MULTI_NAMESPACE_TYPE, initialNamespaces: [ns2] },
+            { ...obj2, type: MULTI_NAMESPACE_TYPE, initialNamespaces: [ns3] },
           ];
           await bulkCreateSuccess(objects, { namespace, overwrite: true });
           const body = [
@@ -758,15 +758,15 @@ describe('SavedObjectsRepository', () => {
         ).rejects.toThrowError(createBadRequestError('"options.namespace" cannot be "*"'));
       });
 
-      it(`returns error when namespaces is used with a non-multi-namespace object`, async () => {
+      it(`returns error when initialNamespaces is used with a non-multi-namespace object`, async () => {
         const test = async (objType) => {
-          const obj = { ...obj3, type: objType, namespaces: [] };
+          const obj = { ...obj3, type: objType, initialNamespaces: [] };
           await bulkCreateError(
             obj,
             undefined,
             expectErrorResult(
               obj,
-              createBadRequestError('"namespaces" can only be used on multi-namespace types')
+              createBadRequestError('"initialNamespaces" can only be used on multi-namespace types')
             )
           );
         };
@@ -774,14 +774,14 @@ describe('SavedObjectsRepository', () => {
         await test(NAMESPACE_AGNOSTIC_TYPE);
       });
 
-      it(`throws when options.namespaces is used with a multi-namespace type and is empty`, async () => {
-        const obj = { ...obj3, type: MULTI_NAMESPACE_TYPE, namespaces: [] };
+      it(`throws when options.initialNamespaces is used with a multi-namespace type and is empty`, async () => {
+        const obj = { ...obj3, type: MULTI_NAMESPACE_TYPE, initialNamespaces: [] };
         await bulkCreateError(
           obj,
           undefined,
           expectErrorResult(
             obj,
-            createBadRequestError('"namespaces" must be a non-empty array of strings')
+            createBadRequestError('"initialNamespaces" must be a non-empty array of strings')
           )
         );
       });
@@ -1993,13 +1993,13 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
-      it(`adds namespaces instead of namespace`, async () => {
-        const options = { id, namespace, namespaces: ['bar-namespace', 'baz-namespace'] };
+      it(`adds initialNamespaces instead of namespace`, async () => {
+        const options = { id, namespace, initialNamespaces: ['bar-namespace', 'baz-namespace'] };
         await createSuccess(MULTI_NAMESPACE_TYPE, attributes, options);
         expect(client.create).toHaveBeenCalledWith(
           expect.objectContaining({
             id: `${MULTI_NAMESPACE_TYPE}:${id}`,
-            body: expect.objectContaining({ namespaces: options.namespaces }),
+            body: expect.objectContaining({ namespaces: options.initialNamespaces }),
           }),
           expect.anything()
         );
@@ -2021,23 +2021,25 @@ describe('SavedObjectsRepository', () => {
     });
 
     describe('errors', () => {
-      it(`throws when options.namespaces is used with a non-multi-namespace object`, async () => {
+      it(`throws when options.initialNamespaces is used with a non-multi-namespace object`, async () => {
         const test = async (objType) => {
           await expect(
-            savedObjectsRepository.create(objType, attributes, { namespaces: [namespace] })
+            savedObjectsRepository.create(objType, attributes, { initialNamespaces: [namespace] })
           ).rejects.toThrowError(
-            createBadRequestError('"options.namespaces" can only be used on multi-namespace types')
+            createBadRequestError(
+              '"options.initialNamespaces" can only be used on multi-namespace types'
+            )
           );
         };
         await test('dashboard');
         await test(NAMESPACE_AGNOSTIC_TYPE);
       });
 
-      it(`throws when options.namespaces is used with a multi-namespace type and is empty`, async () => {
+      it(`throws when options.initialNamespaces is used with a multi-namespace type and is empty`, async () => {
         await expect(
-          savedObjectsRepository.create(MULTI_NAMESPACE_TYPE, attributes, { namespaces: [] })
+          savedObjectsRepository.create(MULTI_NAMESPACE_TYPE, attributes, { initialNamespaces: [] })
         ).rejects.toThrowError(
-          createBadRequestError('"options.namespaces" must be a non-empty array of strings')
+          createBadRequestError('"options.initialNamespaces" must be a non-empty array of strings')
         );
       });
 
