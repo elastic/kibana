@@ -126,9 +126,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="trusted app 0"
+                          class="euiToolTipAnchor"
                         >
-                          trusted app 0
+                          <span>
+                            trusted app 0
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -140,9 +142,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          Windows
+                          <span>
+                            Windows
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -153,11 +157,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        <span
-                          title=""
-                        >
-                          1 minute ago
-                        </span>
+                        1 minute ago
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -168,9 +168,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          someone
+                          <span>
+                            someone
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -182,9 +184,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="Trusted App 0"
+                          class="euiToolTipAnchor"
                         >
-                          Trusted App 0
+                          <span>
+                            Trusted App 0
+                          </span>
                         </span>
                       </dd>
                     </dl>
@@ -386,9 +390,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="trusted app 1"
+                          class="euiToolTipAnchor"
                         >
-                          trusted app 1
+                          <span>
+                            trusted app 1
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -400,9 +406,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          Mac OS
+                          <span>
+                            Mac OS
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -413,11 +421,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        <span
-                          title=""
-                        >
-                          1 minute ago
-                        </span>
+                        1 minute ago
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -428,9 +432,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          someone
+                          <span>
+                            someone
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -442,9 +448,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="Trusted App 1"
+                          class="euiToolTipAnchor"
                         >
-                          Trusted App 1
+                          <span>
+                            Trusted App 1
+                          </span>
                         </span>
                       </dd>
                     </dl>
@@ -646,9 +654,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="trusted app 2"
+                          class="euiToolTipAnchor"
                         >
-                          trusted app 2
+                          <span>
+                            trusted app 2
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -660,9 +670,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          Linux
+                          <span>
+                            Linux
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -673,11 +685,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        <span
-                          title=""
-                        >
-                          1 minute ago
-                        </span>
+                        1 minute ago
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -688,9 +696,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          someone
+                          <span>
+                            someone
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -702,9 +712,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="Trusted App 2"
+                          class="euiToolTipAnchor"
                         >
-                          Trusted App 2
+                          <span>
+                            Trusted App 2
+                          </span>
                         </span>
                       </dd>
                     </dl>
@@ -906,9 +918,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="trusted app 3"
+                          class="euiToolTipAnchor"
                         >
-                          trusted app 3
+                          <span>
+                            trusted app 3
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -920,9 +934,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          Windows
+                          <span>
+                            Windows
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -933,11 +949,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        <span
-                          title=""
-                        >
-                          1 minute ago
-                        </span>
+                        1 minute ago
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -948,9 +960,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          someone
+                          <span>
+                            someone
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -962,9 +976,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="Trusted App 3"
+                          class="euiToolTipAnchor"
                         >
-                          Trusted App 3
+                          <span>
+                            Trusted App 3
+                          </span>
                         </span>
                       </dd>
                     </dl>
@@ -1166,9 +1182,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="trusted app 4"
+                          class="euiToolTipAnchor"
                         >
-                          trusted app 4
+                          <span>
+                            trusted app 4
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -1180,9 +1198,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          Mac OS
+                          <span>
+                            Mac OS
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -1193,11 +1213,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        <span
-                          title=""
-                        >
-                          1 minute ago
-                        </span>
+                        1 minute ago
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -1208,9 +1224,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          someone
+                          <span>
+                            someone
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -1222,9 +1240,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="Trusted App 4"
+                          class="euiToolTipAnchor"
                         >
-                          Trusted App 4
+                          <span>
+                            Trusted App 4
+                          </span>
                         </span>
                       </dd>
                     </dl>
@@ -1426,9 +1446,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="trusted app 5"
+                          class="euiToolTipAnchor"
                         >
-                          trusted app 5
+                          <span>
+                            trusted app 5
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -1440,9 +1462,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          Linux
+                          <span>
+                            Linux
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -1453,11 +1477,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        <span
-                          title=""
-                        >
-                          1 minute ago
-                        </span>
+                        1 minute ago
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -1468,9 +1488,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          someone
+                          <span>
+                            someone
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -1482,9 +1504,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="Trusted App 5"
+                          class="euiToolTipAnchor"
                         >
-                          Trusted App 5
+                          <span>
+                            Trusted App 5
+                          </span>
                         </span>
                       </dd>
                     </dl>
@@ -1686,9 +1710,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="trusted app 6"
+                          class="euiToolTipAnchor"
                         >
-                          trusted app 6
+                          <span>
+                            trusted app 6
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -1700,9 +1726,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          Windows
+                          <span>
+                            Windows
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -1713,11 +1741,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        <span
-                          title=""
-                        >
-                          1 minute ago
-                        </span>
+                        1 minute ago
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -1728,9 +1752,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          someone
+                          <span>
+                            someone
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -1742,9 +1768,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="Trusted App 6"
+                          class="euiToolTipAnchor"
                         >
-                          Trusted App 6
+                          <span>
+                            Trusted App 6
+                          </span>
                         </span>
                       </dd>
                     </dl>
@@ -1946,9 +1974,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="trusted app 7"
+                          class="euiToolTipAnchor"
                         >
-                          trusted app 7
+                          <span>
+                            trusted app 7
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -1960,9 +1990,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          Mac OS
+                          <span>
+                            Mac OS
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -1973,11 +2005,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        <span
-                          title=""
-                        >
-                          1 minute ago
-                        </span>
+                        1 minute ago
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -1988,9 +2016,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          someone
+                          <span>
+                            someone
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -2002,9 +2032,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="Trusted App 7"
+                          class="euiToolTipAnchor"
                         >
-                          Trusted App 7
+                          <span>
+                            Trusted App 7
+                          </span>
                         </span>
                       </dd>
                     </dl>
@@ -2206,9 +2238,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="trusted app 8"
+                          class="euiToolTipAnchor"
                         >
-                          trusted app 8
+                          <span>
+                            trusted app 8
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -2220,9 +2254,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          Linux
+                          <span>
+                            Linux
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -2233,11 +2269,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        <span
-                          title=""
-                        >
-                          1 minute ago
-                        </span>
+                        1 minute ago
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -2248,9 +2280,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          someone
+                          <span>
+                            someone
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -2262,9 +2296,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="Trusted App 8"
+                          class="euiToolTipAnchor"
                         >
-                          Trusted App 8
+                          <span>
+                            Trusted App 8
+                          </span>
                         </span>
                       </dd>
                     </dl>
@@ -2466,9 +2502,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="trusted app 9"
+                          class="euiToolTipAnchor"
                         >
-                          trusted app 9
+                          <span>
+                            trusted app 9
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -2480,9 +2518,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          Windows
+                          <span>
+                            Windows
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -2493,11 +2533,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        <span
-                          title=""
-                        >
-                          1 minute ago
-                        </span>
+                        1 minute ago
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -2508,9 +2544,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          someone
+                          <span>
+                            someone
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -2522,9 +2560,11 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="Trusted App 9"
+                          class="euiToolTipAnchor"
                         >
-                          Trusted App 9
+                          <span>
+                            Trusted App 9
+                          </span>
                         </span>
                       </dd>
                     </dl>
@@ -3004,9 +3044,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="trusted app 0"
+                          class="euiToolTipAnchor"
                         >
-                          trusted app 0
+                          <span>
+                            trusted app 0
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -3018,9 +3060,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          Windows
+                          <span>
+                            Windows
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -3031,11 +3075,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        <span
-                          title=""
-                        >
-                          1 minute ago
-                        </span>
+                        1 minute ago
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -3046,9 +3086,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          someone
+                          <span>
+                            someone
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -3060,9 +3102,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="Trusted App 0"
+                          class="euiToolTipAnchor"
                         >
-                          Trusted App 0
+                          <span>
+                            Trusted App 0
+                          </span>
                         </span>
                       </dd>
                     </dl>
@@ -3264,9 +3308,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="trusted app 1"
+                          class="euiToolTipAnchor"
                         >
-                          trusted app 1
+                          <span>
+                            trusted app 1
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -3278,9 +3324,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          Mac OS
+                          <span>
+                            Mac OS
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -3291,11 +3339,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        <span
-                          title=""
-                        >
-                          1 minute ago
-                        </span>
+                        1 minute ago
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -3306,9 +3350,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          someone
+                          <span>
+                            someone
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -3320,9 +3366,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="Trusted App 1"
+                          class="euiToolTipAnchor"
                         >
-                          Trusted App 1
+                          <span>
+                            Trusted App 1
+                          </span>
                         </span>
                       </dd>
                     </dl>
@@ -3524,9 +3572,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="trusted app 2"
+                          class="euiToolTipAnchor"
                         >
-                          trusted app 2
+                          <span>
+                            trusted app 2
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -3538,9 +3588,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          Linux
+                          <span>
+                            Linux
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -3551,11 +3603,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        <span
-                          title=""
-                        >
-                          1 minute ago
-                        </span>
+                        1 minute ago
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -3566,9 +3614,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          someone
+                          <span>
+                            someone
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -3580,9 +3630,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="Trusted App 2"
+                          class="euiToolTipAnchor"
                         >
-                          Trusted App 2
+                          <span>
+                            Trusted App 2
+                          </span>
                         </span>
                       </dd>
                     </dl>
@@ -3784,9 +3836,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="trusted app 3"
+                          class="euiToolTipAnchor"
                         >
-                          trusted app 3
+                          <span>
+                            trusted app 3
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -3798,9 +3852,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          Windows
+                          <span>
+                            Windows
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -3811,11 +3867,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        <span
-                          title=""
-                        >
-                          1 minute ago
-                        </span>
+                        1 minute ago
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -3826,9 +3878,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          someone
+                          <span>
+                            someone
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -3840,9 +3894,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="Trusted App 3"
+                          class="euiToolTipAnchor"
                         >
-                          Trusted App 3
+                          <span>
+                            Trusted App 3
+                          </span>
                         </span>
                       </dd>
                     </dl>
@@ -4044,9 +4100,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="trusted app 4"
+                          class="euiToolTipAnchor"
                         >
-                          trusted app 4
+                          <span>
+                            trusted app 4
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -4058,9 +4116,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          Mac OS
+                          <span>
+                            Mac OS
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -4071,11 +4131,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        <span
-                          title=""
-                        >
-                          1 minute ago
-                        </span>
+                        1 minute ago
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -4086,9 +4142,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          someone
+                          <span>
+                            someone
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -4100,9 +4158,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="Trusted App 4"
+                          class="euiToolTipAnchor"
                         >
-                          Trusted App 4
+                          <span>
+                            Trusted App 4
+                          </span>
                         </span>
                       </dd>
                     </dl>
@@ -4304,9 +4364,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="trusted app 5"
+                          class="euiToolTipAnchor"
                         >
-                          trusted app 5
+                          <span>
+                            trusted app 5
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -4318,9 +4380,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          Linux
+                          <span>
+                            Linux
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -4331,11 +4395,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        <span
-                          title=""
-                        >
-                          1 minute ago
-                        </span>
+                        1 minute ago
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -4346,9 +4406,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          someone
+                          <span>
+                            someone
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -4360,9 +4422,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="Trusted App 5"
+                          class="euiToolTipAnchor"
                         >
-                          Trusted App 5
+                          <span>
+                            Trusted App 5
+                          </span>
                         </span>
                       </dd>
                     </dl>
@@ -4564,9 +4628,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="trusted app 6"
+                          class="euiToolTipAnchor"
                         >
-                          trusted app 6
+                          <span>
+                            trusted app 6
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -4578,9 +4644,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          Windows
+                          <span>
+                            Windows
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -4591,11 +4659,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        <span
-                          title=""
-                        >
-                          1 minute ago
-                        </span>
+                        1 minute ago
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -4606,9 +4670,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          someone
+                          <span>
+                            someone
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -4620,9 +4686,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="Trusted App 6"
+                          class="euiToolTipAnchor"
                         >
-                          Trusted App 6
+                          <span>
+                            Trusted App 6
+                          </span>
                         </span>
                       </dd>
                     </dl>
@@ -4824,9 +4892,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="trusted app 7"
+                          class="euiToolTipAnchor"
                         >
-                          trusted app 7
+                          <span>
+                            trusted app 7
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -4838,9 +4908,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          Mac OS
+                          <span>
+                            Mac OS
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -4851,11 +4923,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        <span
-                          title=""
-                        >
-                          1 minute ago
-                        </span>
+                        1 minute ago
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -4866,9 +4934,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          someone
+                          <span>
+                            someone
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -4880,9 +4950,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="Trusted App 7"
+                          class="euiToolTipAnchor"
                         >
-                          Trusted App 7
+                          <span>
+                            Trusted App 7
+                          </span>
                         </span>
                       </dd>
                     </dl>
@@ -5084,9 +5156,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="trusted app 8"
+                          class="euiToolTipAnchor"
                         >
-                          trusted app 8
+                          <span>
+                            trusted app 8
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -5098,9 +5172,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          Linux
+                          <span>
+                            Linux
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -5111,11 +5187,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        <span
-                          title=""
-                        >
-                          1 minute ago
-                        </span>
+                        1 minute ago
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -5126,9 +5198,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          someone
+                          <span>
+                            someone
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -5140,9 +5214,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="Trusted App 8"
+                          class="euiToolTipAnchor"
                         >
-                          Trusted App 8
+                          <span>
+                            Trusted App 8
+                          </span>
                         </span>
                       </dd>
                     </dl>
@@ -5344,9 +5420,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="trusted app 9"
+                          class="euiToolTipAnchor"
                         >
-                          trusted app 9
+                          <span>
+                            trusted app 9
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -5358,9 +5436,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          Windows
+                          <span>
+                            Windows
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -5371,11 +5451,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        <span
-                          title=""
-                        >
-                          1 minute ago
-                        </span>
+                        1 minute ago
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -5386,9 +5462,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          someone
+                          <span>
+                            someone
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -5400,9 +5478,11 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="Trusted App 9"
+                          class="euiToolTipAnchor"
                         >
-                          Trusted App 9
+                          <span>
+                            Trusted App 9
+                          </span>
                         </span>
                       </dd>
                     </dl>
@@ -5846,9 +5926,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="trusted app 0"
+                          class="euiToolTipAnchor"
                         >
-                          trusted app 0
+                          <span>
+                            trusted app 0
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -5860,9 +5942,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          Windows
+                          <span>
+                            Windows
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -5873,11 +5957,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        <span
-                          title=""
-                        >
-                          1 minute ago
-                        </span>
+                        1 minute ago
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -5888,9 +5968,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          someone
+                          <span>
+                            someone
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -5902,9 +5984,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="Trusted App 0"
+                          class="euiToolTipAnchor"
                         >
-                          Trusted App 0
+                          <span>
+                            Trusted App 0
+                          </span>
                         </span>
                       </dd>
                     </dl>
@@ -6106,9 +6190,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="trusted app 1"
+                          class="euiToolTipAnchor"
                         >
-                          trusted app 1
+                          <span>
+                            trusted app 1
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -6120,9 +6206,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          Mac OS
+                          <span>
+                            Mac OS
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -6133,11 +6221,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        <span
-                          title=""
-                        >
-                          1 minute ago
-                        </span>
+                        1 minute ago
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -6148,9 +6232,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          someone
+                          <span>
+                            someone
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -6162,9 +6248,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="Trusted App 1"
+                          class="euiToolTipAnchor"
                         >
-                          Trusted App 1
+                          <span>
+                            Trusted App 1
+                          </span>
                         </span>
                       </dd>
                     </dl>
@@ -6366,9 +6454,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="trusted app 2"
+                          class="euiToolTipAnchor"
                         >
-                          trusted app 2
+                          <span>
+                            trusted app 2
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -6380,9 +6470,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          Linux
+                          <span>
+                            Linux
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -6393,11 +6485,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        <span
-                          title=""
-                        >
-                          1 minute ago
-                        </span>
+                        1 minute ago
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -6408,9 +6496,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          someone
+                          <span>
+                            someone
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -6422,9 +6512,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="Trusted App 2"
+                          class="euiToolTipAnchor"
                         >
-                          Trusted App 2
+                          <span>
+                            Trusted App 2
+                          </span>
                         </span>
                       </dd>
                     </dl>
@@ -6626,9 +6718,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="trusted app 3"
+                          class="euiToolTipAnchor"
                         >
-                          trusted app 3
+                          <span>
+                            trusted app 3
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -6640,9 +6734,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          Windows
+                          <span>
+                            Windows
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -6653,11 +6749,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        <span
-                          title=""
-                        >
-                          1 minute ago
-                        </span>
+                        1 minute ago
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -6668,9 +6760,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          someone
+                          <span>
+                            someone
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -6682,9 +6776,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="Trusted App 3"
+                          class="euiToolTipAnchor"
                         >
-                          Trusted App 3
+                          <span>
+                            Trusted App 3
+                          </span>
                         </span>
                       </dd>
                     </dl>
@@ -6886,9 +6982,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="trusted app 4"
+                          class="euiToolTipAnchor"
                         >
-                          trusted app 4
+                          <span>
+                            trusted app 4
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -6900,9 +6998,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          Mac OS
+                          <span>
+                            Mac OS
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -6913,11 +7013,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        <span
-                          title=""
-                        >
-                          1 minute ago
-                        </span>
+                        1 minute ago
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -6928,9 +7024,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          someone
+                          <span>
+                            someone
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -6942,9 +7040,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="Trusted App 4"
+                          class="euiToolTipAnchor"
                         >
-                          Trusted App 4
+                          <span>
+                            Trusted App 4
+                          </span>
                         </span>
                       </dd>
                     </dl>
@@ -7146,9 +7246,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="trusted app 5"
+                          class="euiToolTipAnchor"
                         >
-                          trusted app 5
+                          <span>
+                            trusted app 5
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -7160,9 +7262,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          Linux
+                          <span>
+                            Linux
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -7173,11 +7277,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        <span
-                          title=""
-                        >
-                          1 minute ago
-                        </span>
+                        1 minute ago
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -7188,9 +7288,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          someone
+                          <span>
+                            someone
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -7202,9 +7304,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="Trusted App 5"
+                          class="euiToolTipAnchor"
                         >
-                          Trusted App 5
+                          <span>
+                            Trusted App 5
+                          </span>
                         </span>
                       </dd>
                     </dl>
@@ -7406,9 +7510,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="trusted app 6"
+                          class="euiToolTipAnchor"
                         >
-                          trusted app 6
+                          <span>
+                            trusted app 6
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -7420,9 +7526,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          Windows
+                          <span>
+                            Windows
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -7433,11 +7541,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        <span
-                          title=""
-                        >
-                          1 minute ago
-                        </span>
+                        1 minute ago
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -7448,9 +7552,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          someone
+                          <span>
+                            someone
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -7462,9 +7568,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="Trusted App 6"
+                          class="euiToolTipAnchor"
                         >
-                          Trusted App 6
+                          <span>
+                            Trusted App 6
+                          </span>
                         </span>
                       </dd>
                     </dl>
@@ -7666,9 +7774,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="trusted app 7"
+                          class="euiToolTipAnchor"
                         >
-                          trusted app 7
+                          <span>
+                            trusted app 7
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -7680,9 +7790,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          Mac OS
+                          <span>
+                            Mac OS
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -7693,11 +7805,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        <span
-                          title=""
-                        >
-                          1 minute ago
-                        </span>
+                        1 minute ago
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -7708,9 +7816,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          someone
+                          <span>
+                            someone
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -7722,9 +7832,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="Trusted App 7"
+                          class="euiToolTipAnchor"
                         >
-                          Trusted App 7
+                          <span>
+                            Trusted App 7
+                          </span>
                         </span>
                       </dd>
                     </dl>
@@ -7926,9 +8038,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="trusted app 8"
+                          class="euiToolTipAnchor"
                         >
-                          trusted app 8
+                          <span>
+                            trusted app 8
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -7940,9 +8054,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          Linux
+                          <span>
+                            Linux
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -7953,11 +8069,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        <span
-                          title=""
-                        >
-                          1 minute ago
-                        </span>
+                        1 minute ago
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -7968,9 +8080,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          someone
+                          <span>
+                            someone
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -7982,9 +8096,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="Trusted App 8"
+                          class="euiToolTipAnchor"
                         >
-                          Trusted App 8
+                          <span>
+                            Trusted App 8
+                          </span>
                         </span>
                       </dd>
                     </dl>
@@ -8186,9 +8302,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="trusted app 9"
+                          class="euiToolTipAnchor"
                         >
-                          trusted app 9
+                          <span>
+                            trusted app 9
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -8200,9 +8318,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          Windows
+                          <span>
+                            Windows
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -8213,11 +8333,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       <dd
                         class="euiDescriptionList__description c2"
                       >
-                        <span
-                          title=""
-                        >
-                          1 minute ago
-                        </span>
+                        1 minute ago
                       </dd>
                       <dt
                         class="euiDescriptionList__title c1"
@@ -8228,9 +8344,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title=""
+                          class="euiToolTipAnchor"
                         >
-                          someone
+                          <span>
+                            someone
+                          </span>
                         </span>
                       </dd>
                       <dt
@@ -8242,9 +8360,11 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         class="euiDescriptionList__description c2"
                       >
                         <span
-                          title="Trusted App 9"
+                          class="euiToolTipAnchor"
                         >
-                          Trusted App 9
+                          <span>
+                            Trusted App 9
+                          </span>
                         </span>
                       </dd>
                     </dl>
