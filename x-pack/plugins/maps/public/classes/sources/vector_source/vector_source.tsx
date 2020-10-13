@@ -167,7 +167,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     return null;
   }
 
-  async getFields() {
+  async getFields(): Promise<IField[]> {
     return [];
   }
 

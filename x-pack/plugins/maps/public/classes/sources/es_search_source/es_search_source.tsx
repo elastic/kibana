@@ -60,8 +60,8 @@ export const sourceTitle = i18n.translate('xpack.maps.source.esSearchTitle', {
 });
 
 export interface ScriptField {
-  source: 'string';
-  lang: 'string';
+  source: string;
+  lang: string;
 }
 
 function getDocValueAndSourceFields(
@@ -258,8 +258,8 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     );
     const topHits: {
       size: number | undefined;
-      script_fields: Record<string, ScriptField>;
-      docvalue_fields: string[];
+      script_fields: Record<string, { script: ScriptField }>;
+      docvalue_fields: Array<string | { format: 'epoch_millis'; field: string }>;
       _source?: boolean | { includes: string[] };
       sort?: Array<Record<string, SortDirection | SortDirectionNumeric>>;
     } = {

@@ -17,17 +17,17 @@ import {
 // @ts-expect-error
 import { UpdateSourceEditor } from './update_source_editor';
 import {
-  SOURCE_TYPES,
   DEFAULT_MAX_BUCKETS_LIMIT,
-  RENDER_AS,
-  GRID_RESOLUTION,
-  VECTOR_SHAPE_TYPE,
-  MVT_SOURCE_LAYER_NAME,
-  GIS_API_PATH,
-  MVT_GETGRIDTILE_API_PATH,
-  GEOTILE_GRID_AGG_NAME,
-  GEOCENTROID_AGG_NAME,
   ES_GEO_FIELD_TYPE,
+  GEOCENTROID_AGG_NAME,
+  GEOTILE_GRID_AGG_NAME,
+  GIS_API_PATH,
+  GRID_RESOLUTION,
+  MVT_GETGRIDTILE_API_PATH,
+  MVT_SOURCE_LAYER_NAME,
+  RENDER_AS,
+  SOURCE_TYPES,
+  VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { AbstractESAggSource, DEFAULT_METRIC } from '../es_agg_source';
@@ -355,7 +355,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
       }),
     });
 
-    return convertRegularRespToGeoJson(esResponse, this._descriptor.requestType);
+    return convertRegularRespToGeoJson(esResponse, this._descriptor.requestType || RENDER_AS.POINT);
   }
 
   async getGeoJsonWithMeta(
