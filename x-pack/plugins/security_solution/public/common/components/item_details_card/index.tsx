@@ -68,7 +68,7 @@ interface ItemDetailsPropertySummaryProps {
   value: ReactNode | ReactNode[];
 }
 
-export const ItemDetailsPropertySummary: FC<ItemDetailsPropertySummaryProps> = memo(
+export const ItemDetailsPropertySummary = memo<ItemDetailsPropertySummaryProps>(
   ({ name, value }) => (
     <>
       <DescriptionListTitle>{name}</DescriptionListTitle>
