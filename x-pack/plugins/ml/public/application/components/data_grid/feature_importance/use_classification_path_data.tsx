@@ -162,7 +162,7 @@ export const buildClassificationDecisionPathData = ({
 }: {
   baselines: ClassificationFeatureImportanceBaseline['classes'];
   featureImportance: FeatureImportance[];
-  currentClass: string | undefined;
+  currentClass: string | number | boolean | undefined;
 }): DecisionPathPlotData | undefined => {
   if (currentClass === undefined || !(Array.isArray(baselines) && baselines.length >= 2)) return [];
 

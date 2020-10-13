@@ -5,7 +5,7 @@
  */
 
 export interface ClassFeatureImportance {
-  class_name: string | boolean;
+  class_name: string | number | boolean;
   importance: number;
 }
 export interface FeatureImportance {
@@ -50,7 +50,7 @@ export type TotalFeatureImportance =
   | RegressionTotalFeatureImportance;
 
 export interface FeatureImportanceClassBaseline {
-  class_name: string;
+  class_name: string | number | boolean;
   baseline: number;
 }
 export interface ClassificationFeatureImportanceBaseline {
