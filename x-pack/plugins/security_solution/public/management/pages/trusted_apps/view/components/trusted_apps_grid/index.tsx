@@ -12,6 +12,7 @@ import {
   EuiProgress,
   EuiIcon,
   EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { Pagination } from '../../../state';
@@ -80,35 +81,47 @@ export const TrustedAppsGrid = memo(() => {
   }));
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" gutterSize="none">
       {isLoading && (
         <EuiFlexItem grow={false}>
           <EuiProgress size="xs" color="primary" />
         </EuiFlexItem>
       )}
       <EuiFlexItem>
+        <EuiSpacer size="l" />
+
         {error && (
-          <div className="euiTextAlign--center">
-            <EuiIcon type="minusInCircle" color="danger" /> {error}
-          </div>
+          <>
+            <div className="euiTextAlign--center">
+              <EuiIcon type="minusInCircle" color="danger" /> {error}
+            </div>
+
+            <EuiSpacer size="l" />
+          </>
         )}
-        {!error && (
+        {!error && listItems.length === 0 && (
+          <>
+            <EuiText size="s" className="euiTextAlign--center">
+              {NO_RESULTS_MESSAGE}
+            </EuiText>
+
+            <EuiSpacer size="l" />
+          </>
+        )}
+        {!error && listItems.length > 0 && (
           <EuiFlexGroup direction="column">
             {listItems.map((item) => (
               <EuiFlexItem grow={false} key={item.id}>
                 <TrustedAppCard trustedApp={item} onDelete={handleTrustedAppDelete} />
               </EuiFlexItem>
             ))}
-            {listItems.length === 0 && (
-              <EuiText size="s" className="euiTextAlign--center">
-                {NO_RESULTS_MESSAGE}
-              </EuiText>
-            )}
           </EuiFlexGroup>
         )}
       </EuiFlexItem>
       {!error && pagination.totalItemCount > 0 && (
         <EuiFlexItem grow={false}>
+          <EuiSpacer size="l" />
+
           <PaginationBar pagination={pagination} onChange={handlePaginationChange} />
         </EuiFlexItem>
       )}
