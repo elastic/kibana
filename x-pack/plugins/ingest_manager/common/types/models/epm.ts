@@ -58,6 +58,11 @@ export enum ElasticsearchAssetType {
   transform = 'transform',
 }
 
+export enum DataType {
+  logs = 'logs',
+  metrics = 'metrics',
+}
+
 export enum AgentAssetType {
   input = 'input',
 }
