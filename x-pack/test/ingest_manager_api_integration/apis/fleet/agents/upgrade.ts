@@ -180,7 +180,7 @@ export default function (providerContext: FtrProviderContext) {
     });
     it('should not upgrade an unenrolled agent during bulk_upgrade', async () => {
       const kibanaVersion = await kibanaServer.version.get();
-      kibanaServer.savedObjects.update({
+      await kibanaServer.savedObjects.update({
         id: 'agent1',
         type: AGENT_SAVED_OBJECT_TYPE,
         attributes: { unenrolled_at: new Date().toISOString() },
