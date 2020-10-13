@@ -49,7 +49,7 @@ import { PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
 import { WrapperPage } from '../../../../common/components/wrapper_page';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { PolicyAdvanced } from './policy_advanced';
-import * as AdvancedPolicySchema from '../../../../../schema.json';
+import * as AdvancedPolicySchema from '../models/advanced_policy_schema.json';
 
 interface AdvancedPolicySchemaType {
   key: string;
