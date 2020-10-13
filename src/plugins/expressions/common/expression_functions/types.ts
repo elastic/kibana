@@ -30,6 +30,8 @@ import {
   ExpressionFunctionVar,
   ExpressionFunctionTheme,
 } from './specs';
+import { ExpressionAstFunction } from '../ast';
+import { PersistableStateDefinition } from '../../../kibana_utils/common';
 
 /**
  * `ExpressionFunctionDefinition` is the interface plugins have to implement to
@@ -41,11 +43,16 @@ export interface ExpressionFunctionDefinition<
   Arguments extends Record<string, any>,
   Output,
   Context extends ExecutionContext = ExecutionContext
-> {
+> extends PersistableStateDefinition<ExpressionAstFunction['arguments']> {
   /**
    * The name of the function, as will be used in expression.
    */
   name: Name;
+
+  /**
+   * if set to true function will be disabled (but its migrate function will still be available)
+   */
+  disabled?: boolean;
 
   /**
    * Name of type of value this function outputs.
