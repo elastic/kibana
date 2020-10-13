@@ -8,7 +8,6 @@ import {
   SerializedPhase,
   ColdPhase,
   DeletePhase,
-  HotPhase,
   WarmPhase,
   SerializedPolicy,
 } from '../../../common/types';
@@ -22,20 +21,6 @@ export const defaultPolicy: SerializedPolicy = {
       },
     },
   },
-};
-
-export const defaultNewHotPhase: HotPhase = {
-  phaseEnabled: true,
-  rolloverEnabled: true,
-  selectedMaxAge: '30',
-  selectedMaxAgeUnits: 'd',
-  selectedMaxSizeStored: '50',
-  selectedMaxSizeStoredUnits: 'gb',
-  forceMergeEnabled: false,
-  selectedForceMergeSegments: '',
-  bestCompressionEnabled: false,
-  phaseIndexPriority: '100',
-  selectedMaxDocuments: '',
 };
 
 export const defaultNewWarmPhase: WarmPhase = {

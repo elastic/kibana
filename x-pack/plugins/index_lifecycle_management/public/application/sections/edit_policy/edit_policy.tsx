@@ -32,7 +32,7 @@ import { useForm, Form } from '../../../shared_imports';
 
 import { toasts } from '../../services/notification';
 
-import { Phases, Policy, PolicyFromES, SerializedPolicy } from '../../../../common/types';
+import { Phases, LegacyPolicy, PolicyFromES, SerializedPolicy } from '../../../../common/types';
 
 import { defaultPolicy } from '../../constants';
 
@@ -115,7 +115,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
     serializer,
   });
 
-  const [policy, setPolicy] = useState<Policy>(() =>
+  const [policy, setPolicy] = useState<LegacyPolicy>(() =>
     existingPolicy ? deserializePolicy(existingPolicy) : initializeNewPolicy(policyName)
   );
 
