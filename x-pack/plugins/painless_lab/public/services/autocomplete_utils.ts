@@ -7,18 +7,25 @@ import { monaco } from '@kbn/monaco';
 
 import { context } from './context';
 
-interface FieldOrMethod {
+interface Field {
   name: string;
+  type: string;
+}
+
+interface Method {
+  name: string;
+  parameters: string[];
+  return: string;
 }
 
 interface ContextClass {
   name: string;
   imported: boolean;
   constructors: any[];
-  static_methods: FieldOrMethod[];
-  methods: FieldOrMethod[];
-  static_fields: FieldOrMethod[];
-  fields: FieldOrMethod[];
+  static_methods: Method[];
+  methods: Method[];
+  static_fields: Field[];
+  fields: Field[];
 }
 
 interface ClassNameMap {
@@ -75,11 +82,45 @@ export const getPainlessClassesToAutocomplete = (
       kind: isType
         ? monaco.languages.CompletionItemKind.Interface
         : monaco.languages.CompletionItemKind.Class,
-      documentation: 'TODO',
+      documentation: `Class ${className}`,
       insertText: className,
       range,
     };
   });
+};
+
+// TODO making the assumption there will never be >5 parameters
+const indexToLetterMap: {
+  [key: number]: string;
+} = {
+  0: 'a',
+  1: 'b',
+  2: 'c',
+  3: 'd',
+  4: 'e',
+  5: 'f',
+};
+
+const getMethodDescription = (
+  methodName: string,
+  parameters: string[],
+  returnValue: string
+): string => {
+  const parameterDescription: string = parameters.reduce(
+    (description: string, parameterType: string, index: number) => {
+      const newParameterDescription = `${parameterType} ${indexToLetterMap[index]}`;
+      const isLastParameter = parameters.length - 1 === index;
+
+      description = `${description}${newParameterDescription}${isLastParameter ? '' : ', '}`;
+
+      return description;
+    },
+    ''
+  );
+
+  // Final format will look something like this:
+  // pow(double a, double b): double
+  return `${methodName}(${parameterDescription}): ${returnValue}`;
 };
 
 export const getPainlessClassToAutocomplete = (
@@ -99,43 +140,44 @@ export const getPainlessClassToAutocomplete = (
     methods,
   } = classNameMap[className];
 
-  // TODO what about constructors?
-  const staticFieldsAutocomplete = staticFields.map((field: any) => {
+  const staticFieldsAutocomplete = staticFields.map(({ name, type }) => {
     return {
-      label: field.name,
+      label: name,
       kind: monaco.languages.CompletionItemKind.Property,
-      documentation: 'TODO',
-      insertText: field.name,
+      documentation: `${name}: ${type}`,
+      insertText: name,
       range,
     };
   });
 
-  const fieldsAutocomplete = fields.map((field: any) => {
+  const fieldsAutocomplete = fields.map(({ name, type }) => {
     return {
-      label: field.name,
+      label: name,
       kind: monaco.languages.CompletionItemKind.Property,
-      documentation: 'TODO',
-      insertText: field.name,
+      documentation: `${name}: ${type}`,
+      insertText: name,
       range,
     };
   });
 
-  const staticMethodsAutocomplete = staticMethods.map((field: any) => {
-    return {
-      label: field.name,
-      kind: monaco.languages.CompletionItemKind.Method,
-      documentation: 'TODO',
-      insertText: field.name,
-      range,
-    };
-  });
+  const staticMethodsAutocomplete = staticMethods.map(
+    ({ name, parameters, return: returnValue }) => {
+      return {
+        label: name,
+        kind: monaco.languages.CompletionItemKind.Method,
+        documentation: getMethodDescription(name, parameters, returnValue),
+        insertText: name,
+        range,
+      };
+    }
+  );
 
-  const methodsAutocomplete = methods.map((field: any) => {
+  const methodsAutocomplete = methods.map(({ name, parameters, return: returnValue }) => {
     return {
-      label: field.name,
+      label: name,
       kind: monaco.languages.CompletionItemKind.Method,
-      documentation: 'TODO',
-      insertText: field.name,
+      documentation: getMethodDescription(name, parameters, returnValue),
+      insertText: name,
       range,
     };
   });
