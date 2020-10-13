@@ -235,7 +235,7 @@ export function FilterItem(props: Props) {
       },
       {
         id: 1,
-        width: 420,
+        width: FILTER_EDITOR_WIDTH,
         content: (
           <div>
             <FilterEditor
