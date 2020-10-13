@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Request, ResponseObject, ResponseToolkit } from 'hapi';
+import { Request, ResponseObject, ResponseToolkit } from '@hapi/hapi';
 import Boom from 'boom';
 
 import { isConfigSchema } from '@kbn/config-schema';

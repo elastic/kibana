@@ -22,7 +22,7 @@ import { Agent as HttpsAgent, ServerOptions as TlsOptions } from 'https';
 
 import apm from 'elastic-apm-node';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { Server, Request } from 'hapi';
+import { Server, Request } from '@hapi/hapi';
 import HapiProxy from 'h2o2';
 import { sampleSize } from 'lodash';
 import * as Rx from 'rxjs';

@@ -77,6 +77,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "resolutions": {
+    "**/@hapi/iron": "^5.1.4",
     "**/@types/node": ">=10.17.17 <10.20.0",
     "**/cross-fetch/node-fetch": "^2.6.1",
     "**/deepmerge": "^4.2.2",
@@ -123,6 +124,7 @@
     "@elastic/request-crypto": "1.1.4",
     "@elastic/safer-lodash-set": "0.0.0",
     "@hapi/good-squeeze": "5.2.1",
+    "@hapi/hapi": "^18.4.1",
     "@hapi/wreck": "^15.0.2",
     "@kbn/ace": "1.0.0",
     "@kbn/analytics": "1.0.0",
@@ -167,7 +169,6 @@
     "globby": "^8.0.1",
     "h2o2": "^8.1.2",
     "handlebars": "4.7.6",
-    "hapi": "^17.5.3",
     "hapi-auth-cookie": "^9.0.0",
     "hjson": "3.2.1",
     "hoek": "^5.0.4",
@@ -295,8 +296,8 @@
     "@types/globby": "^8.0.0",
     "@types/graphql": "^0.13.2",
     "@types/h2o2": "^8.1.1",
-    "@types/hapi": "^17.0.18",
     "@types/hapi-auth-cookie": "^9.1.0",
+    "@types/hapi__hapi": "^18.2.6",
     "@types/has-ansi": "^3.0.0",
     "@types/history": "^4.7.3",
     "@types/hjson": "^2.4.2",

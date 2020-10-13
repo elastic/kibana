@@ -17,7 +17,7 @@
  * under the License.
  */
 import { parse as parseUrl } from 'url';
-import { Request } from 'hapi';
+import { Request } from '@hapi/hapi';
 import { merge } from 'lodash';
 import { Socket } from 'net';
 import { stringify } from 'query-string';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Request, Server } from 'hapi';
+import { Request, Server } from '@hapi/hapi';
 import hapiAuthCookie from 'hapi-auth-cookie';
 // @ts-expect-error no TS definitions
 import Statehood from 'statehood';

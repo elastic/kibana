@@ -19,7 +19,7 @@
 
 import { URL } from 'url';
 import uuid from 'uuid';
-import { Request, RouteOptionsApp, ApplicationState } from 'hapi';
+import { Request, RouteOptionsApp, ApplicationState } from '@hapi/hapi';
 import { Observable, fromEvent, merge } from 'rxjs';
 import { shareReplay, first, takeUntil } from 'rxjs/operators';
 import { RecursiveReadonly } from '@kbn/utility-types';

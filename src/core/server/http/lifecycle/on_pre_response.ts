@@ -17,7 +17,12 @@
  * under the License.
  */
 
-import { Lifecycle, Request, ResponseObject, ResponseToolkit as HapiResponseToolkit } from 'hapi';
+import {
+  Lifecycle,
+  Request,
+  ResponseObject,
+  ResponseToolkit as HapiResponseToolkit,
+} from '@hapi/hapi';
 import Boom from 'boom';
 import { Logger } from '../../logging';
 

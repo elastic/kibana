@@ -22,7 +22,7 @@ import { readFileSync } from 'fs';
 import crypto from 'crypto';
 
 import Chance from 'chance';
-import Hapi from 'hapi';
+import Hapi from '@hapi/hapi';
 import Inert from 'inert';
 
 import { createBundlesRoute } from './bundles_route';
