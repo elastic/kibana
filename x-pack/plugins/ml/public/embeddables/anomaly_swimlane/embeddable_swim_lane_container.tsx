@@ -89,7 +89,7 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
         });
       }
     },
-    [swimlaneData, perPage, fromPage]
+    [swimlaneData, perPage, fromPage, setSelectedCells]
   );
 
   if (error) {
