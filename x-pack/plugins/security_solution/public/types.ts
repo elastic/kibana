@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { CoreStart } from '../../../../src/core/public';
 
+import { AppFrontendLibs } from './common/lib/lib';
+import { CoreStart } from '../../../../src/core/public';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
@@ -20,10 +21,17 @@ import {
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
 } from '../../triggers_actions_ui/public';
 import { SecurityPluginSetup } from '../../security/public';
-import { AppFrontendLibs } from './common/lib/lib';
 import { ResolverPluginSetup } from './resolver/types';
 import { Inspect } from '../common/search_strategy';
 import { MlPluginSetup, MlPluginStart } from '../../ml/public';
+
+import { Detections } from './detections';
+import { Cases } from './cases';
+import { Hosts } from './hosts';
+import { Network } from './network';
+import { Overview } from './overview';
+import { Timelines } from './timelines';
+import { Management } from './management';
 
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
@@ -62,3 +70,13 @@ export interface AppObservableLibs extends AppFrontendLibs {
 }
 
 export type InspectResponse = Inspect & { response: string[] };
+
+export interface SubPlugins {
+  detections: Detections;
+  cases: Cases;
+  hosts: Hosts;
+  network: Network;
+  overview: Overview;
+  timelines: Timelines;
+  management: Management;
+}

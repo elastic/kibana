@@ -512,6 +512,8 @@ export class ExpressionRendererRegistry implements IRegistry<ExpressionRenderer>
 // @public (undocumented)
 export interface ExpressionRenderError extends Error {
     // (undocumented)
+    original?: Error;
+    // (undocumented)
     type?: string;
 }
 
@@ -1095,7 +1097,7 @@ export interface ReactExpressionRendererProps extends IExpressionLoaderParams {
     padding?: 'xs' | 's' | 'm' | 'l' | 'xl';
     reload$?: Observable<unknown>;
     // (undocumented)
-    renderError?: (error?: string | null) => React.ReactElement | React.ReactElement[];
+    renderError?: (message?: string | null, error?: ExpressionRenderError | null) => React.ReactElement | React.ReactElement[];
 }
 
 // Warning: (ae-missing-release-tag) "ReactExpressionRendererType" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
