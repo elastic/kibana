@@ -38,7 +38,7 @@ export function registerRemoveRoute({ router, license }: RouteDependencies) {
         await removeLifecycle(context.core.elasticsearch.client.asCurrentUser, indexNames);
         return response.ok();
       } catch (error) {
-        return esErrorHandler(error);
+        return esErrorHandler({ error, response });
       }
     })
   );

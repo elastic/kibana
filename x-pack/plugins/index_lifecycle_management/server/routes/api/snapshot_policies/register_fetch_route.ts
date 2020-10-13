@@ -25,7 +25,7 @@ export function registerFetchRoute({ router, license }: RouteDependencies) {
         );
         return response.ok({ body: Object.keys(policiesByName) });
       } catch (error) {
-        return esErrorHandler(error);
+        return esErrorHandler({ error, response });
       }
     })
   );

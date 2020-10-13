@@ -35,7 +35,7 @@ export function registerDeleteRoute({ router, license }: RouteDependencies) {
         await deletePolicies(context.core.elasticsearch.client.asCurrentUser, policyNames);
         return response.ok();
       } catch (error) {
-        return esErrorHandler(error);
+        return esErrorHandler({ error, response });
       }
     })
   );

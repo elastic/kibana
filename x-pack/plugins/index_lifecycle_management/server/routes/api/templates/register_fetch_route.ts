@@ -94,7 +94,7 @@ export function registerFetchRoute({ router, license }: RouteDependencies) {
         const okResponse = { body: filterTemplates(templates, isLegacy) };
         return response.ok(okResponse);
       } catch (error) {
-        return esErrorHandler(error);
+        return esErrorHandler({ error, response });
       }
     })
   );

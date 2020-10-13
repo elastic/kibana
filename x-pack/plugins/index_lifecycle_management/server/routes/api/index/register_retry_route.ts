@@ -39,7 +39,7 @@ export function registerRetryRoute({ router, license }: RouteDependencies) {
         await retryLifecycle(context.core.elasticsearch.client.asCurrentUser, indexNames);
         return response.ok();
       } catch (error) {
-        return esErrorHandler(error);
+        return esErrorHandler({ error, response });
       }
     })
   );

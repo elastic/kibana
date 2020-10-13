@@ -42,7 +42,7 @@ export function registerDetailsRoute({ router, license }: RouteDependencies) {
         const okResponse = { body: findMatchingNodes(statsResponse.body, nodeAttrs) };
         return response.ok(okResponse);
       } catch (error) {
-        return esErrorHandler(error);
+        return esErrorHandler({ error, response });
       }
     })
   );

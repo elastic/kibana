@@ -146,7 +146,7 @@ export function registerCreateRoute({ router, license }: RouteDependencies) {
         await createPolicy(context.core.elasticsearch.client.asCurrentUser, name, phases);
         return response.ok();
       } catch (error) {
-        return esErrorHandler(error);
+        return esErrorHandler({ error, response });
       }
     })
   );

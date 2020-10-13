@@ -120,7 +120,7 @@ export function registerAddPolicyRoute({ router, license }: RouteDependencies) {
         }
         return response.ok();
       } catch (error) {
-        return esErrorHandler(error);
+        return esErrorHandler({ error, response });
       }
     })
   );

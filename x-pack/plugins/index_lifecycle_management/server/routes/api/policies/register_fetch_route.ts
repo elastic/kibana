@@ -77,7 +77,7 @@ export function registerFetchRoute({ router, license }: RouteDependencies) {
         }
         return response.ok({ body: formatPolicies(policiesMap) });
       } catch (error) {
-        return esErrorHandler(error);
+        return esErrorHandler({ error, response });
       }
     })
   );
