@@ -23,12 +23,12 @@ import { i18n } from '@kbn/i18n';
 import { EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
 import { LegendAction, XYChartSeriesIdentifier, SeriesName } from '@elastic/charts';
 
-import { ValueClickContext } from '../../../embeddable/public';
+import { ClickTriggerEvent } from '../../../charts/public';
 
 export const getLegendActions = (
-  canFilter: (data: ValueClickContext['data']['data']) => Promise<boolean>,
-  getFilterEventData: (series: XYChartSeriesIdentifier) => ValueClickContext['data']['data'],
-  onFilter: (data: ValueClickContext['data']['data'], negate?: any) => void,
+  canFilter: (data: ClickTriggerEvent | null) => Promise<boolean>,
+  getFilterEventData: (series: XYChartSeriesIdentifier) => ClickTriggerEvent | null,
+  onFilter: (data: ClickTriggerEvent, negate?: any) => void,
   getSeriesName: (series: XYChartSeriesIdentifier) => SeriesName
 ): LegendAction => {
   return ({ series: xySeries }) => {
@@ -39,7 +39,7 @@ export const getLegendActions = (
 
     (async () => setIsfilterable(await canFilter(filterData)))();
 
-    if (!isfilterable) {
+    if (!isfilterable || !filterData) {
       return null;
     }
 

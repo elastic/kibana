@@ -22,6 +22,16 @@ import { XYChartSeriesIdentifier, GeometryValue, XYBrushArea } from '@elastic/ch
 import { RangeSelectContext, ValueClickContext } from '../../../../embeddable/public';
 import { KibanaDatatable } from '../../../../expressions/common/expression_types/specs';
 
+export interface ClickTriggerEvent {
+  name: 'filterBucket';
+  data: ValueClickContext['data'];
+}
+
+export interface BrushTriggerEvent {
+  name: 'brush';
+  data: RangeSelectContext['data'];
+}
+
 /**
  * Helper function to transform `@elastic/charts` click event into filter action event
  */
@@ -29,7 +39,7 @@ export const getFilterFromChartClickEventFn = (
   table: KibanaDatatable,
   xAccessor: string | number,
   negate: boolean = false
-) => (points: Array<[GeometryValue, XYChartSeriesIdentifier]>): ValueClickContext['data'] => {
+) => (points: Array<[GeometryValue, XYChartSeriesIdentifier]>): ClickTriggerEvent => {
   const data: ValueClickContext['data']['data'] = [];
 
   points.forEach((point) => {
@@ -61,8 +71,11 @@ export const getFilterFromChartClickEventFn = (
   });
 
   return {
-    negate,
-    data,
+    name: 'filterBucket',
+    data: {
+      negate,
+      data,
+    },
   };
 };
 
@@ -72,7 +85,7 @@ export const getFilterFromChartClickEventFn = (
 export const getFilterFromSeriesFn = (table: KibanaDatatable) => (
   { splitAccessors }: XYChartSeriesIdentifier,
   negate = false
-): ValueClickContext['data'] => {
+): ClickTriggerEvent => {
   const data = table.columns.reduce<ValueClickContext['data']['data']>((acc, { id }, column) => {
     if ([...splitAccessors.keys()].includes(id)) {
       const value = splitAccessors.get(id);
@@ -89,8 +102,11 @@ export const getFilterFromSeriesFn = (table: KibanaDatatable) => (
   }, []);
 
   return {
-    negate,
-    data,
+    name: 'filterBucket',
+    data: {
+      negate,
+      data,
+    },
   };
 };
 
@@ -100,14 +116,17 @@ export const getFilterFromSeriesFn = (table: KibanaDatatable) => (
 export const getBrushFromChartBrushEventFn = (
   table: KibanaDatatable,
   xAccessor: string | number
-) => ({ x: selectedRange }: XYBrushArea): RangeSelectContext['data'] => {
+) => ({ x: selectedRange }: XYBrushArea): BrushTriggerEvent => {
   const [start, end] = selectedRange ?? [0, 0];
   const range: [number, number] = [start, end];
   const column = table.columns.findIndex((c) => c.id === xAccessor);
 
   return {
-    table,
-    column,
-    range,
+    data: {
+      table,
+      column,
+      range,
+    },
+    name: 'brush',
   };
 };

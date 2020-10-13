@@ -34,6 +34,7 @@ import {
 } from './services';
 import { visTypesDefinitions } from './vis_types';
 import { NEW_CHART_UI } from '../common';
+import { xyVisRenderer } from './vis_renderer';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface VisTypeXyPluginSetup {}
@@ -75,7 +76,8 @@ export class VisTypeXyPlugin
       setColorsService(charts.colors);
 
       [createVisTypeXyVisFn].forEach(expressions.registerFunction);
-      visTypesDefinitions.forEach(visualizations.createReactVisualization);
+      expressions.registerRenderer(xyVisRenderer);
+      visTypesDefinitions.forEach(visualizations.createBaseVisualization);
     }
 
     return {};

@@ -36,7 +36,6 @@ import {
   InterpolationMode,
   XyVisTypeDefinition,
 } from '../types';
-import { VisComponent } from '../vis_component';
 import { toExpressionAst } from '../to_ast';
 import { ChartType } from '../../common';
 import { getConfigCollections } from '../editor/collections';
@@ -52,11 +51,8 @@ export const getAreaVisTypeDefinition = (
     defaultMessage: 'Emphasize the quantity beneath a line chart',
   }),
   toExpressionAst,
-  getSupportedTriggers: () => {
-    return [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush];
-  },
+  getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
   visConfig: {
-    component: VisComponent,
     defaults: {
       type: ChartType.Area,
       grid: {
@@ -137,9 +133,6 @@ export const getAreaVisTypeDefinition = (
       },
       labels: {},
     },
-  },
-  events: {
-    brush: { disabled: false },
   },
   editorConfig: {
     collections: getConfigCollections(),

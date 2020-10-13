@@ -35,7 +35,6 @@ import {
   XyVisTypeDefinition,
   InterpolationMode,
 } from '../types';
-import { VisComponent } from '../vis_component';
 import { toExpressionAst } from '../to_ast';
 import { ChartType } from '../../common';
 import { getConfigCollections } from '../editor/collections';
@@ -54,11 +53,8 @@ export const getHorizontalBarVisTypeDefinition = (
     defaultMessage: 'Assign a continuous variable to each axis',
   }),
   toExpressionAst,
-  getSupportedTriggers: () => {
-    return [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush];
-  },
+  getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
   visConfig: {
-    component: VisComponent,
     defaults: {
       type: ChartType.Histogram,
       grid: {
@@ -139,9 +135,6 @@ export const getHorizontalBarVisTypeDefinition = (
         color: euiPaletteColorBlind()[9],
       },
     },
-  },
-  events: {
-    brush: { disabled: false },
   },
   editorConfig: {
     collections: getConfigCollections(),

@@ -30,14 +30,14 @@ import {
   RenderChangeListener,
 } from '@elastic/charts';
 
-import { ExprVis } from '../../visualizations/public';
 import {
   getFilterFromChartClickEventFn,
   getFilterFromSeriesFn,
   LegendToggle,
   getBrushFromChartBrushEventFn,
+  ClickTriggerEvent,
 } from '../../charts/public';
-import { KibanaDatatable } from '../../expressions/public';
+import { KibanaDatatable, IInterpreterRenderHandlers } from '../../expressions/public';
 
 import { VisParams } from './types';
 import {
@@ -59,7 +59,6 @@ import {
 } from './components';
 import { getConfig } from './config';
 import { getThemeService, getColorsService, getDataActions } from './services';
-import { ValueClickContext } from '../../embeddable/public';
 import { ChartType } from '../common';
 
 import './_chart.scss';
@@ -67,11 +66,14 @@ import './_chart.scss';
 export interface VisComponentProps {
   visParams: VisParams;
   visData: KibanaDatatable;
-  vis: ExprVis;
-  renderComplete: () => void;
+  uiState: IInterpreterRenderHandlers['uiState'];
+  fireEvent: IInterpreterRenderHandlers['event'];
+  renderComplete: IInterpreterRenderHandlers['done'];
 }
 
-export const VisComponent = memo((props: VisComponentProps) => {
+export type VisComponentType = typeof VisComponent;
+
+const VisComponent = (props: VisComponentProps) => {
   /**
    * Stores all series labels to replicate vislib color map lookup
    */
@@ -80,7 +82,7 @@ export const VisComponent = memo((props: VisComponentProps) => {
     // TODO: Check when this bwc can safely be removed
     const bwcLegendStateDefault =
       props.visParams.addLegend == null ? true : props.visParams.addLegend;
-    return props.vis.getUiState().get('vis.legendOpen', bwcLegendStateDefault) as boolean;
+    return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) as boolean;
   });
 
   const onRenderChange = useCallback<RenderChangeListener>(
@@ -97,14 +99,14 @@ export const VisComponent = memo((props: VisComponentProps) => {
       elements
     ) => {
       if (xAccessor !== null) {
-        const filterEvent = getFilterFromChartClickEventFn(
+        const event = getFilterFromChartClickEventFn(
           visData,
           xAccessor
         )(elements as XYChartElementEvent[]);
-        props.vis.API.events.filter(filterEvent);
+        props.fireEvent(event);
       }
     },
-    [props.vis]
+    [props]
   );
 
   const handleBrush = useCallback(
@@ -112,59 +114,68 @@ export const VisComponent = memo((props: VisComponentProps) => {
       brushArea
     ) => {
       if (xAccessor !== null) {
-        const brushEvent = getBrushFromChartBrushEventFn(visData, xAccessor)(brushArea);
-        props.vis.API.events.brush(brushEvent);
+        const event = getBrushFromChartBrushEventFn(visData, xAccessor)(brushArea);
+        props.fireEvent(event);
       }
     },
-    [props.vis]
+    [props]
   );
 
   const getFilterEventData = useCallback(
     (visData: KibanaDatatable, xAccessor: string | number | null) => (
       series: XYChartSeriesIdentifier
-    ): ValueClickContext['data']['data'] => {
+    ): ClickTriggerEvent | null => {
       if (xAccessor !== null) {
-        return getFilterFromSeriesFn(visData)(series).data;
+        return getFilterFromSeriesFn(visData)(series);
       }
 
-      return [];
+      return null;
     },
     []
   );
 
   const handleFilterAction = useCallback(
-    (data: ValueClickContext['data']['data'], negate = false) => {
-      props.vis.API.events.filter({ data, negate });
+    (event: ClickTriggerEvent, negate = false) => {
+      props.fireEvent({
+        ...event,
+        data: {
+          ...event.data,
+          negate,
+        },
+      });
     },
-    [props.vis.API.events]
+    [props]
   );
 
-  const canFilter = async (data: ValueClickContext['data']['data']): Promise<boolean> => {
-    const filters = await getDataActions().createFiltersFromValueClickAction({ data });
+  const canFilter = async (event: ClickTriggerEvent | null): Promise<boolean> => {
+    if (!event) {
+      return false;
+    }
+    const filters = await getDataActions().createFiltersFromValueClickAction(event.data);
     return Boolean(filters.length);
   };
 
   const toggleLegend = useCallback(() => {
     setShowLegend((value) => {
       const newValue = !value;
-      props.vis.getUiState().set('vis.legendOpen', newValue);
+      props.uiState?.set('vis.legendOpen', newValue);
       return newValue;
     });
-  }, [props.vis]);
+  }, [props.uiState?.set]);
 
   const setColor = useCallback(
     (newColor: string, seriesLabel: string | number) => {
-      const colors = props.vis.getUiState().get('vis.colors') || {};
+      const colors = props.uiState?.get('vis.colors') || {};
       if (colors[seriesLabel] === newColor) {
         delete colors[seriesLabel];
       } else {
         colors[seriesLabel] = newColor;
       }
-      props.vis.getUiState().setSilent('vis.colors', null);
-      props.vis.getUiState().set('vis.colors', colors);
-      props.vis.getUiState().emit('colorChanged');
+      props.uiState?.setSilent('vis.colors', null);
+      props.uiState?.set('vis.colors', colors);
+      props.uiState?.emit('colorChanged');
     },
-    [props.vis]
+    [props.uiState?.emit, props.uiState?.get, props.uiState?.set, props.uiState?.setSilent]
   );
 
   const { visData, visParams } = props;
@@ -195,7 +206,7 @@ export const VisComponent = memo((props: VisComponentProps) => {
         return;
       }
 
-      const overwriteColors: Record<string, string> = props.vis.getUiState().get('vis.colors', {});
+      const overwriteColors: Record<string, string> = props.uiState?.get('vis.colors', {});
 
       if (config.isVislibVis) {
         allSeries.push(seriesName);
@@ -204,7 +215,7 @@ export const VisComponent = memo((props: VisComponentProps) => {
 
       return overwriteColors[seriesName];
     },
-    [allSeries, config.isVislibVis, getSeriesName, props.vis]
+    [allSeries, config.isVislibVis, getSeriesName, props.uiState?.get]
   );
 
   if (visParams.dimensions.splitRow || visParams.dimensions.splitRow) {
@@ -268,4 +279,7 @@ export const VisComponent = memo((props: VisComponentProps) => {
       </Chart>
     </div>
   );
-});
+};
+
+// eslint-disable-next-line import/no-default-export
+export default memo(VisComponent);

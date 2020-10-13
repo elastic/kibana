@@ -24,26 +24,27 @@ import { ExpressionFunctionDefinition, KibanaDatatable, Render } from '../../exp
 import { ChartType } from '../common';
 import { VisParams } from './types';
 
-const name = 'xy';
+export const visName = 'xy_vis';
 
 interface Arguments {
   type: ChartType;
   visConfig: string;
 }
-interface RenderValue {
+export interface RenderValue {
+  visData: KibanaDatatable;
   visType: string;
   visConfig: VisParams;
 }
 
 export type VisTypeXyExpressionFunctionDefinition = ExpressionFunctionDefinition<
-  typeof name,
+  typeof visName,
   KibanaDatatable,
   Arguments,
   Render<RenderValue>
 >;
 
 export const createVisTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
-  name,
+  name: visName,
   type: 'render',
   context: {
     types: ['kibana_datatable'],
@@ -68,7 +69,7 @@ export const createVisTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition =>
 
     return {
       type: 'render',
-      as: 'visualization',
+      as: visName,
       value: {
         context,
         visData: context,

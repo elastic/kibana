@@ -17,19 +17,12 @@
  * under the License.
  */
 
-import { ReactNode } from 'react';
-
 import { BaseVisTypeOptions } from '../../../visualizations/public';
+
 import { VisParams } from './param';
 
 export type XyVisTypeDefinition = BaseVisTypeOptions<VisParams> & {
-  events: {
-    brush: {
-      disabled: boolean;
-    };
-  };
   visConfig: {
-    component: ReactNode;
     defaults: Omit<VisParams, 'dimensions'>;
   };
 };
