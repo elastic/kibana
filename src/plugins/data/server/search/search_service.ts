@@ -49,10 +49,10 @@ import {
   IKibanaSearchResponse,
   IEsSearchRequest,
   IEsSearchResponse,
-  ISearchOptions,
   SearchSourceDependencies,
   SearchSourceService,
   searchSourceRequiredUiSettings,
+  ISearchOptions,
 } from '../../common/search';
 import {
   getShardDelayBucketAgg,
@@ -151,13 +151,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     return {
       aggs: this.aggsService.start({ fieldFormats, uiSettings }),
       getSearchStrategy: this.getSearchStrategy,
-      search: (
-        context: RequestHandlerContext,
-        searchRequest: IKibanaSearchRequest,
-        options: Record<string, any>
-      ) => {
-        return this.search(context, searchRequest, options);
-      },
+      search: this.search.bind(this),
       searchSource: {
         asScoped: async (request: KibanaRequest) => {
           const esClient = elasticsearch.client.asScoped(request);
@@ -175,7 +169,13 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
           const searchSourceDependencies: SearchSourceDependencies = {
             getConfig: <T = any>(key: string): T => uiSettingsCache[key],
-            search: (searchRequest, options) => {
+            search: <
+              SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
+              SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
+            >(
+              searchStrategyRequest: SearchStrategyRequest,
+              options: ISearchOptions
+            ) => {
               /**
                * Unless we want all SearchSource users to provide both a KibanaRequest
                * (needed for index patterns) AND the RequestHandlerContext (needed for
@@ -195,7 +195,12 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
                   },
                 },
               } as RequestHandlerContext;
-              return this.search(fakeRequestHandlerContext, searchRequest, options);
+
+              return this.search<SearchStrategyRequest, SearchStrategyResponse>(
+                searchStrategyRequest,
+                options,
+                fakeRequestHandlerContext
+              ).toPromise();
             },
             // onResponse isn't used on the server, so we just return the original value
             onResponse: (req, res) => res,
@@ -234,13 +239,15 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
     SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
   >(
-    context: RequestHandlerContext,
     searchRequest: SearchStrategyRequest,
-    options: ISearchOptions
-  ): Promise<SearchStrategyResponse> => {
-    return this.getSearchStrategy<SearchStrategyRequest, SearchStrategyResponse>(
+    options: ISearchOptions,
+    context: RequestHandlerContext
+  ) => {
+    const strategy = this.getSearchStrategy<SearchStrategyRequest, SearchStrategyResponse>(
       options.strategy || this.defaultSearchStrategyName
-    ).search(context, searchRequest, options);
+    );
+
+    return strategy.search(searchRequest, options, context);
   };
 
   private getSearchStrategy = <

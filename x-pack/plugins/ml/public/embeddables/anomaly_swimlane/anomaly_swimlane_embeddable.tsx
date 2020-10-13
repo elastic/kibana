@@ -9,6 +9,7 @@ import ReactDOM from 'react-dom';
 import { CoreStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { Subject } from 'rxjs';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { Embeddable, IContainer } from '../../../../../../src/plugins/embeddable/public';
 import { EmbeddableSwimLaneContainer } from './embeddable_swim_lane_container_lazy';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
@@ -59,17 +60,19 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
 
     ReactDOM.render(
       <I18nContext>
-        <Suspense fallback={null}>
-          <EmbeddableSwimLaneContainer
-            id={this.input.id}
-            embeddableContext={this}
-            embeddableInput={this.getInput$()}
-            services={this.services}
-            refresh={this.reload$.asObservable()}
-            onInputChange={this.updateInput.bind(this)}
-            onOutputChange={this.updateOutput.bind(this)}
-          />
-        </Suspense>
+        <KibanaContextProvider services={{ ...this.services[0] }}>
+          <Suspense fallback={null}>
+            <EmbeddableSwimLaneContainer
+              id={this.input.id}
+              embeddableContext={this}
+              embeddableInput={this.getInput$()}
+              services={this.services}
+              refresh={this.reload$.asObservable()}
+              onInputChange={this.updateInput.bind(this)}
+              onOutputChange={this.updateOutput.bind(this)}
+            />
+          </Suspense>
+        </KibanaContextProvider>
       </I18nContext>,
       node
     );

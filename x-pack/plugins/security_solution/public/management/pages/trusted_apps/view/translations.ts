@@ -28,7 +28,9 @@ export const OS_TITLES: Readonly<{ [K in TrustedApp['os']]: string }> = {
   }),
 };
 
-export const CONDITION_FIELD_TITLE: { [K in MacosLinuxConditionEntry['field']]: string } = {
+type Entry = MacosLinuxConditionEntry | WindowsConditionEntry;
+
+export const CONDITION_FIELD_TITLE: { [K in Entry['field']]: string } = {
   'process.hash.*': i18n.translate(
     'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.hash',
     { defaultMessage: 'Hash' }
@@ -37,6 +39,16 @@ export const CONDITION_FIELD_TITLE: { [K in MacosLinuxConditionEntry['field']]: 
     'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.path',
     { defaultMessage: 'Path' }
   ),
+  'process.code_signature': i18n.translate(
+    'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.signature',
+    { defaultMessage: 'Signature' }
+  ),
+};
+
+export const OPERATOR_TITLE: { [K in Entry['operator']]: string } = {
+  included: i18n.translate('xpack.securitySolution.trustedapps.card.operator.includes', {
+    defaultMessage: 'is',
+  }),
 };
 
 export const PROPERTY_TITLES: Readonly<

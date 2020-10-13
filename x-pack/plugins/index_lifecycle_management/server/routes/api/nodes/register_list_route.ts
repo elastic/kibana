@@ -9,22 +9,27 @@ import { ListNodesRouteResponse, NodeDataRole } from '../../../../common/types';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
-interface Stats {
+interface Settings {
   nodes: {
     [nodeId: string]: {
       attributes: Record<string, string>;
       roles: string[];
+      settings: {
+        node: {
+          data?: string;
+        };
+      };
     };
   };
 }
 
-function convertStatsIntoList(
-  stats: Stats,
+export function convertSettingsIntoLists(
+  settings: Settings,
   disallowedNodeAttributes: string[]
 ): ListNodesRouteResponse {
-  return Object.entries(stats.nodes).reduce(
-    (accum, [nodeId, nodeStats]) => {
-      const attributes = nodeStats.attributes || {};
+  return Object.entries(settings.nodes).reduce(
+    (accum, [nodeId, nodeSettings]) => {
+      const attributes = nodeSettings.attributes || {};
       for (const [key, value] of Object.entries(attributes)) {
         const isNodeAttributeAllowed = !disallowedNodeAttributes.includes(key);
         if (isNodeAttributeAllowed) {
@@ -34,14 +39,26 @@ function convertStatsIntoList(
         }
       }
 
-      const dataRoles = nodeStats.roles.filter((r) => r.startsWith('data')) as NodeDataRole[];
+      const dataRoles = nodeSettings.roles.filter((r) => r.startsWith('data')) as NodeDataRole[];
       for (const role of dataRoles) {
         accum.nodesByRoles[role as NodeDataRole] = accum.nodesByRoles[role] ?? [];
         accum.nodesByRoles[role as NodeDataRole]!.push(nodeId);
       }
+
+      // If we detect a single node using legacy "data:true" setting we know we are not using data roles for
+      // data allocation.
+      if (nodeSettings.settings?.node?.data === 'true') {
+        accum.isUsingDeprecatedDataRoleConfig = true;
+      }
+
       return accum;
     },
-    { nodesByAttributes: {}, nodesByRoles: {} } as ListNodesRouteResponse
+    {
+      nodesByAttributes: {},
+      nodesByRoles: {},
+      // Start with assumption that we are not using deprecated config
+      isUsingDeprecatedDataRoleConfig: false,
+    } as ListNodesRouteResponse
   );
 }
 
@@ -64,11 +81,17 @@ export function registerListRoute({ router, config, license }: RouteDependencies
     { path: addBasePath('/nodes/list'), validate: false },
     license.guardApiRoute(async (context, request, response) => {
       try {
-        const statsResponse = await context.core.elasticsearch.client.asCurrentUser.nodes.stats<
-          Stats
-        >();
-        const body: ListNodesRouteResponse = convertStatsIntoList(
-          statsResponse.body,
+        const settingsResponse = await context.core.elasticsearch.client.asCurrentUser.transport.request(
+          {
+            method: 'GET',
+            path: '/_nodes/settings',
+            querystring: {
+              format: 'json',
+            },
+          }
+        );
+        const body: ListNodesRouteResponse = convertSettingsIntoLists(
+          settingsResponse.body as Settings,
           disallowedNodeAttributes
         );
         return response.ok({ body });
