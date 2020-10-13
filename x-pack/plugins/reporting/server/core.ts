@@ -221,7 +221,7 @@ export class ReportingCore {
     const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
     if (spacesService) {
       if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
-        logger.info(`Generating request for space: ` + spaceId);
+        logger.info(`Generating request for space: ${spaceId}`);
         this.getPluginSetupDeps().basePath.set(fakeRequest, `/s/${spaceId}`);
       }
     }
