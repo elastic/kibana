@@ -96,9 +96,12 @@ export function createLayerInstance(
 }
 
 function createSourceInstance(
-  sourceDescriptor: AbstractSourceDescriptor,
+  sourceDescriptor: AbstractSourceDescriptor | null,
   inspectorAdapters?: Adapters
 ): ISource {
+  if (sourceDescriptor === null) {
+    throw new Error('Source-descriptor should be initialized');
+  }
   const source = getSourceByType(sourceDescriptor.type);
   if (!source) {
     throw new Error(`Unrecognized sourceType ${sourceDescriptor.type}`);
