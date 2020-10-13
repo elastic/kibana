@@ -16,7 +16,7 @@ describe('ConsoleOutputEventList component', () => {
           journey={{
             checkGroup: 'check_group',
             loading: false,
-            // 3 steps, two console, one step/end
+            // 4 steps, three console, one step/end
             steps: [
               {
                 timestamp: '123',
@@ -61,6 +61,21 @@ describe('ConsoleOutputEventList component', () => {
                 },
                 synthetics: {
                   type: 'step/end',
+                },
+              },
+              {
+                timestamp: '125',
+                docId: '3',
+                monitor: {
+                  id: 'MON_ID',
+                  duration: {
+                    us: 10,
+                  },
+                  status: 'down',
+                  type: 'browser',
+                },
+                synthetics: {
+                  type: 'stdout',
                 },
               },
             ],
@@ -108,6 +123,26 @@ describe('ConsoleOutputEventList component', () => {
             }
           }
           key="2_console-event-row"
+        />
+        <ConsoleEvent
+          event={
+            Object {
+              "docId": "3",
+              "monitor": Object {
+                "duration": Object {
+                  "us": 10,
+                },
+                "id": "MON_ID",
+                "status": "down",
+                "type": "browser",
+              },
+              "synthetics": Object {
+                "type": "stdout",
+              },
+              "timestamp": "125",
+            }
+          }
+          key="3_console-event-row"
         />
       </EuiCodeBlock>
     `);

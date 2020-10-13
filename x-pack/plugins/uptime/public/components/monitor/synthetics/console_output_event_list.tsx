@@ -15,9 +15,10 @@ interface Props {
   journey: JourneyState;
 }
 
-function isConsoleStep(step: Ping) {
-  return step.synthetics?.type === 'stderr' || step.synthetics?.type === 'cmd/status';
-}
+const isConsoleStep = (step: Ping) =>
+  step.synthetics?.type === 'stderr' ||
+  step.synthetics?.type === 'stdout' ||
+  step.synthetics?.type === 'cmd/status';
 
 export const ConsoleOutputEventList: FC<Props> = ({ journey }) => (
   <div>
