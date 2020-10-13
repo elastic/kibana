@@ -184,11 +184,11 @@ export class AbstractSource implements ISource {
     return false;
   }
 
-  getMinZoom() {
+  getMinZoom(): number {
     return MIN_ZOOM;
   }
 
-  getMaxZoom() {
+  getMaxZoom(): number {
     return MAX_ZOOM;
   }
 

@@ -39,10 +39,13 @@ import { getHttp } from '../../../kibana_services';
 import { GeoJsonWithMeta, ITiledSingleLayerVectorSource } from '../vector_source';
 import {
   ESGeoGridSourceDescriptor,
+  MapExtent,
   VectorSourceRequestMeta,
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { ImmutableSourceProperty } from '../source';
+import { ISearchSource } from '../../../../../../../src/plugins/data/common/search/search_source';
+import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
 
 export const MAX_GEOTILE_LEVEL = 29;
 
@@ -100,7 +103,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
 
   getSyncMeta(): VectorSourceSyncMeta | null {
     return {
-      requestType: this._descriptor.requestType,
+      requestType: this._descriptor.requestType || RENDER_AS.POINT,
     };
   }
 
@@ -148,11 +151,11 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     }
   }
 
-  showJoinEditor() {
+  showJoinEditor(): boolean {
     return false;
   }
 
-  getGridResolution() {
+  getGridResolution(): GRID_RESOLUTION {
     return this._descriptor.resolution;
   }
 
@@ -198,9 +201,18 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     bucketsPerGrid,
     isRequestStillActive,
     bufferedExtent,
+  }: {
+    searchSource: ISearchSource;
+    indexPattern: IndexPattern;
+    precision: number;
+    layerName: string;
+    registerCancelCallback: (callback: () => void) => void;
+    bucketsPerGrid: number;
+    isRequestStillActive: () => boolean;
+    bufferedExtent?: MapExtent;
   }) {
-    const gridsPerRequest = Math.floor(DEFAULT_MAX_BUCKETS_LIMIT / bucketsPerGrid);
-    const aggs = {
+    const gridsPerRequest: number = Math.floor(DEFAULT_MAX_BUCKETS_LIMIT / bucketsPerGrid);
+    const aggs: any = {
       compositeSplit: {
         composite: {
           size: gridsPerRequest,
@@ -279,7 +291,12 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     return features;
   }
 
-  _addNonCompositeAggsToSearchSource(searchSource, indexPattern, precision, bufferedExtent) {
+  _addNonCompositeAggsToSearchSource(
+    searchSource: ISearchSource,
+    indexPattern: IndexPattern,
+    precision: number,
+    bufferedExtent?: MapExtent
+  ) {
     searchSource.setField('aggs', {
       [GEOTILE_GRID_AGG_NAME]: {
         geotile_grid: {
@@ -310,6 +327,13 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     layerName,
     registerCancelCallback,
     bufferedExtent,
+  }: {
+    searchSource: ISearchSource;
+    indexPattern: IndexPattern;
+    precision: number;
+    layerName: string;
+    registerCancelCallback: (callback: () => void) => void;
+    bufferedExtent?: MapExtent;
   }) {
     this._addNonCompositeAggsToSearchSource(searchSource, indexPattern, precision, bufferedExtent);
 
@@ -332,8 +356,8 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     registerCancelCallback: (callback: () => void) => void,
     isRequestStillActive: () => boolean
   ): Promise<GeoJsonWithMeta> {
-    const indexPattern = await this.getIndexPattern();
-    const searchSource = await this.makeSearchSource(searchFilters, 0);
+    const indexPattern: IndexPattern = await this.getIndexPattern();
+    const searchSource: ISearchSource = await this.makeSearchSource(searchFilters, 0);
 
     let bucketsPerGrid = 1;
     this.getMetricFields().forEach((metricField) => {
@@ -372,7 +396,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     } as GeoJsonWithMeta;
   }
 
-  getLayerName() {
+  getLayerName(): string {
     return MVT_SOURCE_LAYER_NAME;
   }
 
@@ -412,7 +436,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     };
   }
 
-  isFilterByMapBounds() {
+  isFilterByMapBounds(): boolean {
     if (this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE) {
       // MVT gridded data. Should exclude bounds-filter from ES-DSL
       return false;
@@ -422,11 +446,11 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     }
   }
 
-  canFormatFeatureProperties() {
+  canFormatFeatureProperties(): boolean {
     return true;
   }
 
-  async getSupportedShapeTypes() {
+  async getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]> {
     if (this._descriptor.requestType === RENDER_AS.GRID) {
       return [VECTOR_SHAPE_TYPE.POLYGON];
     }
@@ -434,7 +458,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     return [VECTOR_SHAPE_TYPE.POINT];
   }
 
-  async getLicensedFeatures() {
+  async getLicensedFeatures(): Promise<LICENSED_FEATURES[]> {
     const geoField = await this._getGeoField();
     return geoField.type === ES_GEO_FIELD_TYPE.GEO_SHAPE
       ? [LICENSED_FEATURES.GEO_SHAPE_AGGS_GEO_TILE]
