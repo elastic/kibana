@@ -95,10 +95,15 @@ export const DataTierAllocation: FunctionComponent<SharedProps> = (props) => {
   useEffect(() => {
     if (disableDataTierOption && phaseData.dataTierAllocationType === 'default') {
       /**
+       * @TODO
        * This is a slight hack because we only know we should disable the "default" option further
        * down the component tree (i.e., after the policy has been deserialized).
        *
        * We reset the value to "custom" if we deserialized to "default".
+       *
+       * It would be better if we had all the information we needed before deserializing and
+       * were able to handle this at the deserialization step instead of patching further down
+       * the component tree - this should be a future refactor.
        */
       setPhaseData('dataTierAllocationType', 'custom');
     }
