@@ -17,8 +17,11 @@
  * under the License.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import { get } from 'lodash';
+import { Query } from '@elastic/eui';
+import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
 import { CoreStart, ChromeBreadcrumb } from 'src/core/public';
 import { DataPublicPluginStart } from '../../../data/public';
@@ -51,6 +54,16 @@ const SavedObjectsTablePage = ({
 }) => {
   const capabilities = coreStart.application.capabilities;
   const itemsPerPage = coreStart.uiSettings.get<number>('savedObjects:perPage', 50);
+  const { search } = useLocation();
+
+  const initialQuery = useMemo(() => {
+    const query = parse(search);
+    try {
+      return Query.parse((query.initialQuery as string) ?? '');
+    } catch (e) {
+      return Query.parse('');
+    }
+  }, [search]);
 
   useEffect(() => {
     setBreadcrumbs([
@@ -65,6 +78,7 @@ const SavedObjectsTablePage = ({
 
   return (
     <SavedObjectsTable
+      initialQuery={initialQuery}
       allowedTypes={allowedTypes}
       serviceRegistry={serviceRegistry}
       actionRegistry={actionRegistry}

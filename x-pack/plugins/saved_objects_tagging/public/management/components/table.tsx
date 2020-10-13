@@ -5,9 +5,10 @@
  */
 
 import React, { useRef, useEffect, FC } from 'react';
-import { EuiInMemoryTable } from '@elastic/eui';
+import { EuiInMemoryTable, EuiLink } from '@elastic/eui';
 import { Action as EuiTableAction } from '@elastic/eui/src/components/basic_table/action_types';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { TagsCapabilities, TagWithRelations } from '../../../common';
 import { TagBadge } from '../../components';
 
@@ -19,6 +20,8 @@ interface TagTableProps {
   onSelectionChange: (selection: TagWithRelations[]) => void;
   onEdit: (tag: TagWithRelations) => void;
   onDelete: (tag: TagWithRelations) => void;
+  getTagRelationUrl: (tag: TagWithRelations) => string;
+  onShowRelations: (tag: TagWithRelations) => void;
 }
 
 const tablePagination = {
@@ -33,6 +36,9 @@ const sorting = {
   },
 };
 
+export const isModifiedOrPrevented = (event: React.MouseEvent) =>
+  event.metaKey || event.altKey || event.ctrlKey || event.shiftKey || event.defaultPrevented;
+
 export const TagTable: FC<TagTableProps> = ({
   loading,
   capabilities,
@@ -41,6 +47,8 @@ export const TagTable: FC<TagTableProps> = ({
   selectedTags,
   onEdit,
   onDelete,
+  onShowRelations,
+  getTagRelationUrl,
 }) => {
   const tableRef = useRef<EuiInMemoryTable<any>>();
 
@@ -105,6 +113,37 @@ export const TagTable: FC<TagTableProps> = ({
       }),
       sortable: true,
       'data-test-subj': 'tagsTableRowDescription',
+    },
+    {
+      field: 'relationCount',
+      name: i18n.translate('xpack.savedObjectsTagging.management.table.columns.connections', {
+        defaultMessage: 'Connections',
+      }),
+      sortable: (tag: TagWithRelations) => tag.relationCount,
+      'data-test-subj': 'tagsTableRowConnections',
+      render: (relationCount: number, tag: TagWithRelations) => {
+        if (relationCount < 1) {
+          return undefined;
+        }
+        return (
+          // eslint-disable-next-line @elastic/eui/href-or-on-click
+          <EuiLink
+            href={getTagRelationUrl(tag)}
+            onClick={(e: React.MouseEvent) => {
+              if (!isModifiedOrPrevented(e) && e.button === 0) {
+                e.preventDefault();
+                onShowRelations(tag);
+              }
+            }}
+          >
+            <FormattedMessage
+              id="xpack.savedObjectsTagging.management.table.content.connectionCount"
+              defaultMessage="{relationCount, plural, one {1 app object} other {# app objects}}"
+              values={{ relationCount }}
+            />
+          </EuiLink>
+        );
+      },
     },
     ...(actions.length
       ? [

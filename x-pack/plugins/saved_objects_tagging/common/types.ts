@@ -9,7 +9,12 @@ import type { Tag, TagAttributes } from '../../../../src/plugins/saved_objects_t
 
 export type TagSavedObject = SavedObject<TagAttributes>;
 
-export type TagWithRelations = Tag;
+export type TagWithRelations = Tag & {
+  /**
+   * The number of objects that are assigned to this tag.
+   */
+  relationCount: number;
+};
 
 // re-export types from oss definition
 export type {

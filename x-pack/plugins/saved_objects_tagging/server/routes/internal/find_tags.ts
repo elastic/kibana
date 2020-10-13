@@ -7,7 +7,8 @@
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'src/core/server';
 import { tagsInternalApiPrefix, tagSavedObjectTypeName } from '../../../common/constants';
-import { TagAttributes } from '../../../common/types';
+import { TagAttributes, Tag } from '../../../common/types';
+import { addConnectionCount } from '../lib';
 
 export const registerInternalFindTagsRoute = (router: IRouter) => {
   router.get(
@@ -23,7 +24,7 @@ export const registerInternalFindTagsRoute = (router: IRouter) => {
     },
     router.handleLegacyErrors(async (ctx, req, res) => {
       const { query } = req;
-      const { client } = ctx.core.savedObjects;
+      const { client, typeRegistry } = ctx.core.savedObjects;
 
       const findResponse = await client.find<TagAttributes>({
         page: query.page,
@@ -33,14 +34,17 @@ export const registerInternalFindTagsRoute = (router: IRouter) => {
         searchFields: ['title', 'description'],
       });
 
-      // TODO: get number of connections and enhance the response
+      const tags: Tag[] = findResponse.saved_objects.map((tag) => ({
+        id: tag.id,
+        ...tag.attributes,
+      }));
+
+      const allTypes = typeRegistry.getAllTypes().map((type) => type.name);
+      const tagsWithConnections = await addConnectionCount(tags, allTypes, client);
 
       return res.ok({
         body: {
-          tags: findResponse.saved_objects.map((tag) => ({
-            id: tag.id,
-            ...tag.attributes,
-          })),
+          tags: tagsWithConnections,
           total: findResponse.total,
         },
       });

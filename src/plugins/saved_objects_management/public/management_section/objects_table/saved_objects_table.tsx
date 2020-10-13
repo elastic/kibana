@@ -101,6 +101,7 @@ export interface SavedObjectsTableProps {
   perPageConfig: number;
   goInspectObject: (obj: SavedObjectWithMetadata) => void;
   canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
+  initialQuery?: Query;
 }
 
 export interface SavedObjectsTableState {
@@ -139,7 +140,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         typeToCountMap[type] = 0;
         return typeToCountMap;
       }, {} as Record<string, number>),
-      activeQuery: Query.parse(''),
+      activeQuery: props.initialQuery ?? Query.parse(''),
       selectedSavedObjects: [],
       isShowingImportFlyout: false,
       isSearching: false,
@@ -794,6 +795,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           <Table
             basePath={http.basePath}
             taggingApi={taggingApi}
+            initialQuery={this.props.initialQuery}
             itemId={'id'}
             actionRegistry={this.props.actionRegistry}
             columnRegistry={this.props.columnRegistry}

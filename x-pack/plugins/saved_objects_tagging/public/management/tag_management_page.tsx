@@ -13,6 +13,7 @@ import { TagWithRelations, TagsCapabilities } from '../../common';
 import { getCreateModalOpener, getEditModalOpener } from '../components/edition_modal';
 import { ITagInternalClient } from '../tags';
 import { Header, TagTable } from './components';
+import { getTagConnectionsUrl } from './utils';
 
 interface TagManagementPageParams {
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
@@ -27,7 +28,7 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
   tagClient,
   capabilities,
 }) => {
-  const { overlays, notifications } = core;
+  const { overlays, notifications, application, http } = core;
   const [loading, setLoading] = useState<boolean>(false);
   const [allTags, setAllTags] = useState<TagWithRelations[]>([]);
   const [selectedTags, setSelectedTags] = useState<TagWithRelations[]>([]);
@@ -86,6 +87,20 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
     [editModalOpener, fetchTags]
   );
 
+  const getTagRelationUrl = useCallback(
+    (tag: TagWithRelations) => {
+      return getTagConnectionsUrl(tag, http.basePath);
+    },
+    [http]
+  );
+
+  const showTagRelations = useCallback(
+    (tag: TagWithRelations) => {
+      application.navigateToUrl(getTagRelationUrl(tag));
+    },
+    [application, getTagRelationUrl]
+  );
+
   const deleteTagWithConfirm = useCallback(
     async (tag: TagWithRelations) => {
       const confirmed = await overlays.openConfirm(
@@ -140,6 +155,10 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
         }}
         onDelete={(tag) => {
           deleteTagWithConfirm(tag);
+        }}
+        getTagRelationUrl={getTagRelationUrl}
+        onShowRelations={(tag) => {
+          showTagRelations(tag);
         }}
       />
     </EuiPageContent>
