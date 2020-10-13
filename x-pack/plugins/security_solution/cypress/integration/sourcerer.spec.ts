@@ -9,18 +9,23 @@ import { loginAndWaitForPage } from '../tasks/login';
 import { HOSTS_URL } from '../urls/navigation';
 import { waitForAllHostsToBeLoaded } from '../tasks/hosts/all_hosts';
 import {
-  openSourcerer,
-  isSourcererSelection,
-  isSourcererOptions,
-  setSourcererOption,
-  resetSourcerer,
+  deselectSourcererOptions,
+  clickOutOfSourcererTimeline,
+  clickTimelineRadio,
+  isCustomRadio,
   isHostsStatValue,
-  unsetSourcererOption,
+  isNotCustomRadio,
   isNotSourcererSelection,
-  openTimelineSourcerer,
+  isSourcererOptions,
+  isSourcererSelection,
+  openSourcerer,
+  resetSourcerer,
+  setSourcererOption,
+  unsetSourcererOption,
 } from '../tasks/sourcerer';
 import { openTimelineUsingToggle } from '../tasks/security_main';
-import { executeTimelineKQL } from '../tasks/timeline';
+import { populateTimeline } from '../tasks/timeline';
+import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
 
 describe('Sourcerer', () => {
   beforeEach(() => {
@@ -43,6 +48,7 @@ describe('Sourcerer', () => {
     });
 
     it('does not return data without correct pattern selected', () => {
+      waitForAllHostsToBeLoaded();
       isHostsStatValue('4 ');
       setSourcererOption(`metrics-*`);
       unsetSourcererOption(`auditbeat-*`);
@@ -58,14 +64,53 @@ describe('Sourcerer', () => {
       isNotSourcererSelection(`metrics-*`);
     });
   });
-  describe.only('Timeline scope', () => {
-    it('has SIEM index patterns selected on initial load', () => {
+  describe('Timeline scope', () => {
+    const alertPatterns = ['.siem-signals-default'];
+    const rawPatterns = [
+      'auditbeat-*',
+      'endgame-*',
+      'filebeat-*',
+      'logs-*',
+      'packetbeat-*',
+      'winlogbeat-*',
+    ];
+    const allPatterns = [...alertPatterns, ...rawPatterns];
+    it('Radio buttons select correct sourcerer patterns', () => {
       openTimelineUsingToggle();
-      executeTimelineKQL('host.name: *');
-      openTimelineSourcerer();
-      cy.wait(100000);
-      // openSourcerer();
-      // isSourcererSelection(`auditbeat-*`);
+      openSourcerer('timeline');
+      allPatterns.forEach((ss) => isSourcererSelection(ss, 'timeline'));
+      clickTimelineRadio('raw');
+      rawPatterns.forEach((ss) => isSourcererSelection(ss, 'timeline'));
+      alertPatterns.forEach((ss) => isNotSourcererSelection(ss, 'timeline'));
+      clickTimelineRadio('alert');
+      alertPatterns.forEach((ss) => isSourcererSelection(ss, 'timeline'));
+      rawPatterns.forEach((ss) => isNotSourcererSelection(ss, 'timeline'));
+    });
+    it('Removing an option results in the custom radio becoming active', () => {
+      openTimelineUsingToggle();
+      openSourcerer('timeline');
+      isNotCustomRadio();
+      clickOutOfSourcererTimeline();
+      const luckyOption = 'winlogbeat-*';
+      unsetSourcererOption(luckyOption, 'timeline');
+      openSourcerer('timeline');
+      isCustomRadio();
+      isSourcererOptions([luckyOption], 'timeline');
+    });
+    it('Selected index patterns are properly queried', () => {
+      openTimelineUsingToggle();
+      populateTimeline();
+      openSourcerer('timeline');
+      deselectSourcererOptions(
+        allPatterns.filter((n) => n !== 'endgame-*'),
+        'timeline'
+      );
+      cy.get(SERVER_SIDE_EVENT_COUNT)
+        .invoke('text')
+        .then((strCount) => {
+          const intCount = +strCount;
+          cy.wrap(intCount).should('eq', 0);
+        });
     });
   });
 });
