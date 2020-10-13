@@ -51,12 +51,11 @@ import {
 } from './queries/query_clauses';
 
 import {
-  updateFields,
+  updateFieldsAndMarkAsFailed,
   IdleTaskWithExpiredRunAt,
   InactiveTasks,
   RunningOrClaimingTaskWithExpiredRetryAt,
   TaskWithSchedule,
-  taskWithLessThanMaxAttempts,
   SortByRunAtAndRetryAt,
   tasksClaimedByOwner,
 } from './queries/mark_available_tasks_as_claimed';
@@ -263,12 +262,7 @@ export class TaskStore {
       // status running or claiming with a retryAt <= now.
       shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt),
       // Either task has a schedule or the attempts < the maximum configured
-      shouldBeOneOf<ExistsFilter | TermFilter | RangeFilter>(
-        TaskWithSchedule
-        // ...Object.entries(this.definitions).map(([type, { maxAttempts }]) =>
-        //   taskWithLessThanMaxAttempts(type, maxAttempts || this.maxAttempts)
-        // )
-      )
+      shouldBeOneOf<ExistsFilter | TermFilter | RangeFilter>(TaskWithSchedule)
     );
 
     const apmTrans = apm.startTransaction(`taskManager markAvailableTasksAsClaimed`, 'taskManager');
@@ -282,11 +276,15 @@ export class TaskStore {
           ),
           filterDownBy(InactiveTasks)
         ),
-        update: updateFields({
-          ownerId: this.taskManagerId,
-          retryAt: claimOwnershipUntil,
-          status: 'claiming',
-        }),
+        update: updateFieldsAndMarkAsFailed(
+          {
+            ownerId: this.taskManagerId,
+            retryAt: claimOwnershipUntil,
+          },
+          Object.entries(this.definitions).reduce((accumulator, [type, { maxAttempts }]) => {
+            return { ...accumulator, [type]: maxAttempts };
+          }, {})
+        ),
         sort: [
           // sort by score first, so the "pinned" Tasks are first
           '_score',

@@ -14,8 +14,6 @@ import {
   BoolClauseWithAnyCondition,
 } from './query_clauses';
 
-import { TaskDefinition, TaskDictionary } from './task';
-
 export const TaskWithSchedule: ExistsFilter = {
   exists: { field: 'task.schedule' },
 };
@@ -112,31 +110,22 @@ export const updateFields = (fieldUpdates: {
   params: fieldUpdates,
 });
 
-// export const updateFieldsAndMarkAsFailed = (fieldUpdates: {
-//   [field: string]: string | number | Date;
-// }, taskDefinitions: TaskDictionary<TaskDefinition>): ScriptClause => ({
-//   source: `
-//   `,
-//   lang: 'painless',
-//   // params: {
-//   //   fieldUpdates,
-//   //   taskDefinitions
-//   // }
-// });
-
-// export const updateFields2 = (fieldUpdates: {
-//   [field: string]: string | number | Date;
-// }): ScriptClause => ({
-//   source: `
-//   if (!ctx._source.containsKey('namespaces')) {
-//     ctx.op = "delete";
-//   } else {
-//     ctx._source['namespaces'].removeAll(Collections.singleton(params['namespace']));
-//     if (ctx._source['namespaces'].empty) {
-//       ctx.op = "delete";
-//     }
-//   }
-// `,
-// lang: 'painless',
-//   params: fieldUpdates,
-// });
+export const updateFieldsAndMarkAsFailed = (
+  fieldUpdates: {
+    [field: string]: string | number | Date;
+  },
+  taskMaxAttempts: { [field: string]: number }
+): ScriptClause => ({
+  source: `
+  if (params[ctx._source.task.taskType] != null && params[ctx._source.task.taskType].maxAttempts <= ctx._source.task.attempts && ctx._source.task.status == "running") {
+    ctx._source.task.status = "failed";
+  } else {
+    ctx._source.task.status = "claiming";
+  }
+  ${Object.keys(fieldUpdates)
+    .map((field) => `ctx._source.task.${field}=params.${field};`)
+    .join(' ')}
+  `,
+  lang: 'painless',
+  params: taskMaxAttempts,
+});
