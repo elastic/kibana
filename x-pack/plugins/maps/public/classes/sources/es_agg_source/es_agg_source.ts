@@ -29,7 +29,7 @@ export interface IESAggSource extends IESSource {
   getValueAggsDsl(indexPattern: IndexPattern): { [key: string]: unknown };
 }
 
-export class AbstractESAggSource extends AbstractESSource {
+export abstract class AbstractESAggSource extends AbstractESSource {
   private readonly _metricFields: IESAggField[];
   private readonly _canReadFromGeoJson: boolean;
 

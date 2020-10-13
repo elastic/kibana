@@ -5,6 +5,7 @@
  */
 import moment from 'moment';
 
+import { OsTypeArray } from './schemas/common';
 import { EntriesArray } from './schemas/types';
 import { EndpointEntriesArray } from './schemas/types/endpoint';
 export const DATE_NOW = '2020-04-20T15:25:31.830Z';
@@ -68,7 +69,7 @@ export const ENDPOINT_ENTRIES: EndpointEntriesArray = [
   { field: 'some.not.nested.field', operator: 'included', type: 'match', value: 'some value' },
 ];
 export const ITEM_TYPE = 'simple';
-export const _TAGS = [];
+export const OS_TYPES: OsTypeArray = ['windows'];
 export const TAGS = [];
 export const COMMENTS = [];
 export const FILTER = 'name:Nicolas Bourbaki';

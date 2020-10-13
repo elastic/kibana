@@ -40,7 +40,7 @@ jest.mock('@elastic/eui/lib/components/portal/portal', () => {
   // Local constants are not supported in Jest mocks-- they must be
   // imported within the mock.
   // eslint-disable-next-line no-shadow
-  const React = require.requireActual('react');
+  const React = jest.requireActual('react');
   return {
     EuiPortal: (props: any) => <div>{props.children}</div>,
   };

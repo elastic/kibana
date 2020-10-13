@@ -51,6 +51,7 @@ import {
   threat_query,
   threat_filters,
   threat_mapping,
+  threat_language,
 } from '../types/threat_mapping';
 
 import {
@@ -128,6 +129,7 @@ export const addPrepackagedRulesSchema = t.intersection([
       threat_mapping, // defaults to "undefined" if not set during decode
       threat_query, // defaults to "undefined" if not set during decode
       threat_index, // defaults to "undefined" if not set during decode
+      threat_language, // defaults "undefined" if not set during decode
     })
   ),
 ]);

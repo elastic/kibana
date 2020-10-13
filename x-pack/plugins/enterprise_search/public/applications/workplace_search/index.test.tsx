@@ -76,7 +76,6 @@ describe('WorkplaceSearchConfigured', () => {
     shallow(<WorkplaceSearchConfigured />);
 
     expect(initializeAppData).not.toHaveBeenCalled();
-    expect(mockKibanaValues.renderHeaderActions).not.toHaveBeenCalled();
   });
 
   it('renders ErrorState', () => {

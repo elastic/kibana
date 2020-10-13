@@ -119,6 +119,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 apiKeyOwner: user.username,
                 muteAll: false,
                 mutedInstanceIds: [],
+                executionStatus: response.body.executionStatus,
               });
               expect(typeof response.body.scheduledTaskId).to.be('string');
               expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);

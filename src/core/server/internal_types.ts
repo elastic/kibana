@@ -39,6 +39,7 @@ import { InternalHttpResourcesSetup } from './http_resources';
 import { InternalStatusServiceSetup } from './status';
 import { AuditTrailSetup, AuditTrailStart } from './audit_trail';
 import { InternalLoggingServiceSetup } from './logging';
+import { CoreUsageDataStart } from './core_usage_data';
 
 /** @internal */
 export interface InternalCoreSetup {
@@ -68,6 +69,7 @@ export interface InternalCoreStart {
   savedObjects: InternalSavedObjectsServiceStart;
   uiSettings: InternalUiSettingsServiceStart;
   auditTrail: AuditTrailStart;
+  coreUsageData: CoreUsageDataStart;
 }
 
 /**

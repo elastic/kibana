@@ -209,18 +209,18 @@ visualization, configure the customization options for your visualization.
 
 The data fields that are displayed are based on the selected <<index-patterns,index pattern>> and the <<set-time-filter,time filter>>.
 
-To view the data fields in a different index pattern, click the index pattern, then select a new one. The data fields automatically update.
+To view the data fields in a different index pattern, click the *Change Index Pattern* dropdown, then select a new one.
 
 To filter the data fields:
 
-* Enter the name in the *Search field names*.
-* Click *Field by type*, then select the filter. To show all fields in the index pattern, deselect *Only show fields with data*.
+* Enter the data field name in *Search field names*.
+* Click *Field filters*, then select the filter.
 
 [float]
 [[view-data-summaries]]
-==== View data summaries
+==== View data field summaries
 
-To help you decide exactly the data you want to display, get a quick summary of each field. The summary shows the distribution of
+To help you decide exactly the data you want to display, get a quick summary of each data field. The summary shows the distribution of
 values within the specified time range.
 
 To view the data field summary information, navigate to the field, then click *i*.
@@ -252,11 +252,9 @@ When there is an exclamation point (!) next to a visualization type, *Lens* is u
 
 For each visualization type, you can customize the aggregation and labels. The options available depend on the selected visualization type.
 
-. Click a data field name in the editor, or click *Drop a field here*.
-. Change the options that appear.
-+
-[role="screenshot"]
-image::images/lens_aggregation_labels.png[Quick function options]
+. From the editor, click a data field, or click *Drop a field or click to add*.
+
+. Change the options, then click *Close*.
 
 [float]
 [[add-layers-and-indices]]

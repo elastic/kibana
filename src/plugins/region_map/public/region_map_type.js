@@ -32,7 +32,7 @@ export function createRegionMapTypeDefinition(dependencies) {
 
   return {
     name: 'region_map',
-    getDeprecationMessage,
+    getInfoMessage: getDeprecationMessage,
     title: i18n.translate('regionMap.mapVis.regionMapTitle', { defaultMessage: 'Region Map' }),
     description: i18n.translate('regionMap.mapVis.regionMapDescription', {
       defaultMessage:

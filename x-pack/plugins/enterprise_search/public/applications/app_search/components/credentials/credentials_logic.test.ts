@@ -7,7 +7,7 @@
 import { resetContext } from 'kea';
 
 import { CredentialsLogic } from './credentials_logic';
-import { ADMIN, PRIVATE } from './constants';
+import { ApiTokenTypes } from './constants';
 
 jest.mock('../../../shared/http', () => ({
   HttpLogic: { values: { http: { get: jest.fn(), delete: jest.fn() } } },
@@ -22,7 +22,7 @@ describe('CredentialsLogic', () => {
   const DEFAULT_VALUES = {
     activeApiToken: {
       name: '',
-      type: PRIVATE,
+      type: ApiTokenTypes.Private,
       read: true,
       write: true,
       access_all_engines: true,
@@ -62,7 +62,7 @@ describe('CredentialsLogic', () => {
   const newToken = {
     id: 1,
     name: 'myToken',
-    type: PRIVATE,
+    type: ApiTokenTypes.Private,
     read: true,
     write: true,
     access_all_engines: true,
@@ -270,7 +270,7 @@ describe('CredentialsLogic', () => {
       describe('apiTokens', () => {
         const existingToken = {
           name: 'some_token',
-          type: PRIVATE,
+          type: ApiTokenTypes.Private,
         };
 
         it('should add the provided token to the apiTokens list', () => {
@@ -376,7 +376,7 @@ describe('CredentialsLogic', () => {
       describe('apiTokens', () => {
         const existingToken = {
           name: 'some_token',
-          type: PRIVATE,
+          type: ApiTokenTypes.Private,
         };
 
         it('should replace the existing token with the new token by name', () => {
@@ -385,7 +385,7 @@ describe('CredentialsLogic', () => {
           });
           const updatedExistingToken = {
             ...existingToken,
-            type: ADMIN,
+            type: ApiTokenTypes.Admin,
           };
 
           CredentialsLogic.actions.onApiTokenUpdateSuccess(updatedExistingToken);
@@ -402,7 +402,7 @@ describe('CredentialsLogic', () => {
           });
           const brandNewToken = {
             name: 'brand new token',
-            type: ADMIN,
+            type: ApiTokenTypes.Admin,
           };
 
           CredentialsLogic.actions.onApiTokenUpdateSuccess(brandNewToken);
@@ -419,7 +419,10 @@ describe('CredentialsLogic', () => {
             activeApiToken: newToken,
           });
 
-          CredentialsLogic.actions.onApiTokenUpdateSuccess({ ...newToken, type: ADMIN });
+          CredentialsLogic.actions.onApiTokenUpdateSuccess({
+            ...newToken,
+            type: ApiTokenTypes.Admin,
+          });
           expect(CredentialsLogic.values).toEqual({
             ...values,
             activeApiToken: DEFAULT_VALUES.activeApiToken,
@@ -433,7 +436,10 @@ describe('CredentialsLogic', () => {
             activeApiTokenRawName: 'foo',
           });
 
-          CredentialsLogic.actions.onApiTokenUpdateSuccess({ ...newToken, type: ADMIN });
+          CredentialsLogic.actions.onApiTokenUpdateSuccess({
+            ...newToken,
+            type: ApiTokenTypes.Admin,
+          });
           expect(CredentialsLogic.values).toEqual({
             ...values,
             activeApiTokenRawName: DEFAULT_VALUES.activeApiTokenRawName,
@@ -447,7 +453,10 @@ describe('CredentialsLogic', () => {
             shouldShowCredentialsForm: true,
           });
 
-          CredentialsLogic.actions.onApiTokenUpdateSuccess({ ...newToken, type: ADMIN });
+          CredentialsLogic.actions.onApiTokenUpdateSuccess({
+            ...newToken,
+            type: ApiTokenTypes.Admin,
+          });
           expect(CredentialsLogic.values).toEqual({
             ...values,
             shouldShowCredentialsForm: false,
@@ -650,7 +659,7 @@ describe('CredentialsLogic', () => {
       };
 
       describe('activeApiToken.access_all_engines', () => {
-        describe('when value is ADMIN', () => {
+        describe('when value is admin', () => {
           it('updates access_all_engines to false', () => {
             mount({
               activeApiToken: {
@@ -659,7 +668,7 @@ describe('CredentialsLogic', () => {
               },
             });
 
-            CredentialsLogic.actions.setTokenType(ADMIN);
+            CredentialsLogic.actions.setTokenType(ApiTokenTypes.Admin);
             expect(CredentialsLogic.values).toEqual({
               ...values,
               activeApiToken: {
@@ -670,7 +679,7 @@ describe('CredentialsLogic', () => {
           });
         });
 
-        describe('when value is not ADMIN', () => {
+        describe('when value is not admin', () => {
           it('will maintain access_all_engines value when true', () => {
             mount({
               activeApiToken: {
@@ -679,7 +688,7 @@ describe('CredentialsLogic', () => {
               },
             });
 
-            CredentialsLogic.actions.setTokenType(PRIVATE);
+            CredentialsLogic.actions.setTokenType(ApiTokenTypes.Private);
             expect(CredentialsLogic.values).toEqual({
               ...values,
               activeApiToken: {
@@ -697,7 +706,7 @@ describe('CredentialsLogic', () => {
               },
             });
 
-            CredentialsLogic.actions.setTokenType(PRIVATE);
+            CredentialsLogic.actions.setTokenType(ApiTokenTypes.Private);
             expect(CredentialsLogic.values).toEqual({
               ...values,
               activeApiToken: {
@@ -710,7 +719,7 @@ describe('CredentialsLogic', () => {
       });
 
       describe('activeApiToken.engines', () => {
-        describe('when value is ADMIN', () => {
+        describe('when value is admin', () => {
           it('clears the array', () => {
             mount({
               activeApiToken: {
@@ -719,7 +728,7 @@ describe('CredentialsLogic', () => {
               },
             });
 
-            CredentialsLogic.actions.setTokenType(ADMIN);
+            CredentialsLogic.actions.setTokenType(ApiTokenTypes.Admin);
             expect(CredentialsLogic.values).toEqual({
               ...values,
               activeApiToken: {
@@ -730,7 +739,7 @@ describe('CredentialsLogic', () => {
           });
         });
 
-        describe('when value is not ADMIN', () => {
+        describe('when value is not admin', () => {
           it('will maintain engines array', () => {
             mount({
               activeApiToken: {
@@ -739,7 +748,7 @@ describe('CredentialsLogic', () => {
               },
             });
 
-            CredentialsLogic.actions.setTokenType(PRIVATE);
+            CredentialsLogic.actions.setTokenType(ApiTokenTypes.Private);
             expect(CredentialsLogic.values).toEqual({
               ...values,
               activeApiToken: {
@@ -752,7 +761,7 @@ describe('CredentialsLogic', () => {
       });
 
       describe('activeApiToken.write', () => {
-        describe('when value is PRIVATE', () => {
+        describe('when value is private', () => {
           it('sets this to true', () => {
             mount({
               activeApiToken: {
@@ -761,7 +770,7 @@ describe('CredentialsLogic', () => {
               },
             });
 
-            CredentialsLogic.actions.setTokenType(PRIVATE);
+            CredentialsLogic.actions.setTokenType(ApiTokenTypes.Private);
             expect(CredentialsLogic.values).toEqual({
               ...values,
               activeApiToken: {
@@ -772,7 +781,7 @@ describe('CredentialsLogic', () => {
           });
         });
 
-        describe('when value is not PRIVATE', () => {
+        describe('when value is not private', () => {
           it('sets this to false', () => {
             mount({
               activeApiToken: {
@@ -781,7 +790,7 @@ describe('CredentialsLogic', () => {
               },
             });
 
-            CredentialsLogic.actions.setTokenType(ADMIN);
+            CredentialsLogic.actions.setTokenType(ApiTokenTypes.Admin);
             expect(CredentialsLogic.values).toEqual({
               ...values,
               activeApiToken: {
@@ -794,7 +803,7 @@ describe('CredentialsLogic', () => {
       });
 
       describe('activeApiToken.read', () => {
-        describe('when value is PRIVATE', () => {
+        describe('when value is private', () => {
           it('sets this to true', () => {
             mount({
               activeApiToken: {
@@ -803,7 +812,7 @@ describe('CredentialsLogic', () => {
               },
             });
 
-            CredentialsLogic.actions.setTokenType(PRIVATE);
+            CredentialsLogic.actions.setTokenType(ApiTokenTypes.Private);
             expect(CredentialsLogic.values).toEqual({
               ...values,
               activeApiToken: {
@@ -814,7 +823,7 @@ describe('CredentialsLogic', () => {
           });
         });
 
-        describe('when value is not PRIVATE', () => {
+        describe('when value is not private', () => {
           it('sets this to false', () => {
             mount({
               activeApiToken: {
@@ -823,7 +832,7 @@ describe('CredentialsLogic', () => {
               },
             });
 
-            CredentialsLogic.actions.setTokenType(ADMIN);
+            CredentialsLogic.actions.setTokenType(ApiTokenTypes.Admin);
             expect(CredentialsLogic.values).toEqual({
               ...values,
               activeApiToken: {
@@ -840,16 +849,16 @@ describe('CredentialsLogic', () => {
           mount({
             activeApiToken: {
               ...newToken,
-              type: ADMIN,
+              type: ApiTokenTypes.Admin,
             },
           });
 
-          CredentialsLogic.actions.setTokenType(PRIVATE);
+          CredentialsLogic.actions.setTokenType(ApiTokenTypes.Private);
           expect(CredentialsLogic.values).toEqual({
             ...values,
             activeApiToken: {
               ...values.activeApiToken,
-              type: PRIVATE,
+              type: ApiTokenTypes.Private,
             },
           });
         });

@@ -3,13 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { Logger } from '@kbn/logging';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { PromiseReturnType } from '../../../../typings/common';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getServicesProjection } from '../../../projections/services';
 import {
   getTransactionDurationAverages,
@@ -21,17 +18,17 @@ import {
 } from './get_services_items_stats';
 
 export type ServiceListAPIResponse = PromiseReturnType<typeof getServicesItems>;
-export type ServicesItemsSetup = Setup & SetupTimeRange & SetupUIFilters;
+export type ServicesItemsSetup = Setup & SetupTimeRange;
 export type ServicesItemsProjection = ReturnType<typeof getServicesProjection>;
 
 export async function getServicesItems({
   setup,
   searchAggregatedTransactions,
-  mlAnomaliesEnvironment,
+  logger,
 }: {
   setup: ServicesItemsSetup;
   searchAggregatedTransactions: boolean;
-  mlAnomaliesEnvironment?: string;
+  logger: Logger;
 }) {
   const params = {
     projection: getServicesProjection({
@@ -55,7 +52,10 @@ export async function getServicesItems({
     getTransactionRates(params),
     getTransactionErrorRates(params),
     getEnvironments(params),
-    getHealthStatuses(params, mlAnomaliesEnvironment),
+    getHealthStatuses(params, setup.uiFilters.environment).catch((err) => {
+      logger.error(err);
+      return [];
+    }),
   ]);
 
   const allMetrics = [
