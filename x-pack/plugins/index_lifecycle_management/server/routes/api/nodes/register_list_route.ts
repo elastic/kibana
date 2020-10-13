@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller } from 'src/core/server';
-
 import { ListNodesRouteResponse, NodeDataRole } from '../../../../common/types';
 
 import { RouteDependencies } from '../../../types';
@@ -63,17 +61,7 @@ export function convertSettingsIntoLists(
   );
 }
 
-async function fetchNodeSettings(callAsCurrentUser: LegacyAPICaller): Promise<any> {
-  return await callAsCurrentUser('transport.request', {
-    method: 'GET',
-    path: '/_nodes/settings',
-    query: {
-      format: 'json',
-    },
-  });
-}
-
-export function registerListRoute({ router, config, license, lib }: RouteDependencies) {
+export function registerListRoute({ router, config, license }: RouteDependencies) {
   const { filteredNodeAttributes } = config;
 
   const NODE_ATTRS_KEYS_TO_IGNORE: string[] = [
@@ -92,19 +80,25 @@ export function registerListRoute({ router, config, license, lib }: RouteDepende
     { path: addBasePath('/nodes/list'), validate: false },
     license.guardApiRoute(async (context, request, response) => {
       try {
-        const settings = await fetchNodeSettings(
-          context.core.elasticsearch.legacy.client.callAsCurrentUser
+        const settingsResponse = await context.core.elasticsearch.client.asCurrentUser.transport.request(
+          {
+            method: 'GET',
+            path: '/_nodes/settings',
+            querystring: {
+              format: 'json',
+            },
+          }
         );
         const body: ListNodesRouteResponse = convertSettingsIntoLists(
-          settings,
+          settingsResponse.body as Settings,
           disallowedNodeAttributes
         );
         return response.ok({ body });
       } catch (e) {
-        if (lib.isEsError(e)) {
+        if (e.name === 'ResponseError') {
           return response.customError({
             statusCode: e.statusCode,
-            body: e,
+            body: { message: e.body.error?.reason },
           });
         }
         // Case: default

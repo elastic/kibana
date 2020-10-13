@@ -340,10 +340,8 @@ export default function ({ getService }: FtrProviderContext) {
             .get(`/api/endpoint/resolver/93933?legacyEndpointID=${endpointID}`)
             .expect(200);
           expect(body.ancestry.nextAncestor).to.equal(null);
-          expect(body.relatedEvents.nextEvent).to.equal(null);
           expect(body.children.nextChild).to.equal(null);
           expect(body.children.childNodes.length).to.equal(0);
-          expect(body.relatedEvents.events.length).to.equal(0);
           expect(body.lifecycle.length).to.equal(2);
         });
       });
@@ -364,9 +362,6 @@ export default function ({ getService }: FtrProviderContext) {
           expect(body.ancestry.nextAncestor).to.equal(null);
           verifyAncestry(body.ancestry.ancestors, tree, true);
           verifyLifecycleStats(body.ancestry.ancestors, relatedEventsToGen, relatedAlerts);
-
-          expect(body.relatedEvents.nextEvent).to.equal(null);
-          compareArrays(tree.origin.relatedEvents, body.relatedEvents.events, true);
 
           expect(body.relatedAlerts.nextAlert).to.equal(null);
           compareArrays(tree.origin.relatedAlerts, body.relatedAlerts.alerts, true);
