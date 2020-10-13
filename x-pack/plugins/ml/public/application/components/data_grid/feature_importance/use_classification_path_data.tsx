@@ -56,6 +56,13 @@ export const getStringBasedClassName = (v: string | boolean | undefined | number
   return v;
 };
 
+export const formatValue = (number: number, precision = 3, fractionDigits = 1): string => {
+  if (Math.abs(number) < 10) {
+    return Number(number.toPrecision(precision)).toString();
+  }
+  return number.toFixed(fractionDigits);
+};
+
 export const useDecisionPathData = ({
   baseline,
   featureImportance,

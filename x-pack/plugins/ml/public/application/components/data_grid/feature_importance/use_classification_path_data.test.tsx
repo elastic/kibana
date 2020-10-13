@@ -7,10 +7,20 @@
 import {
   buildClassificationDecisionPathData,
   buildRegressionDecisionPathData,
+  formatValue,
 } from './use_classification_path_data';
 import { FeatureImportance } from '../../../../../common/types/feature_importance';
 
 describe('useDecisionPathData', () => {
+  test('formatValue', () => {
+    expect(formatValue(0.000033243242)).toBe('0.0000332');
+    expect(formatValue(0.33243242)).toBe('0.332');
+    expect(formatValue(33.243242)).toBe('33.2');
+    expect(formatValue(332.43242)).toBe('332.4');
+    expect(formatValue(-1.33243242)).toBe('-1.33');
+    expect(formatValue(133243242)).toBe('133243242');
+  });
+
   test('buildRegressionDecisionPathData() should return correct decision path', () => {
     const predictedValue = 0.008000000000000005;
     const baseline = 0.01570748450465414;

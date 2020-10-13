@@ -24,7 +24,7 @@ import { EuiIcon } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import euiVars from '@elastic/eui/dist/eui_theme_light.json';
-import { DecisionPathPlotData } from './use_classification_path_data';
+import { DecisionPathPlotData, formatValue } from './use_classification_path_data';
 import {
   FeatureImportanceBaseline,
   isRegressionFeatureImportanceBaseline,
@@ -99,7 +99,7 @@ export const DecisionPathChart = ({
         dataValue: baseline,
         header:
           baseline && isRegressionFeatureImportanceBaseline(baseline)
-            ? baseline.baseline.toPrecision(NUM_PRECISION)
+            ? formatValue(baseline.baseline, NUM_PRECISION)
             : '',
         details: i18n.translate(
           'xpack.ml.dataframe.analytics.explorationResults.decisionPathBaselineText',
@@ -114,7 +114,7 @@ export const DecisionPathChart = ({
   );
   // if regression, guarantee up to num_precision significant digits without having it in scientific notation
   // if classification, hide the numeric values since we only want to show the path
-  const tickFormatter = useCallback((d) => Number(d.toPrecision(NUM_PRECISION)).toString(), []);
+  const tickFormatter = useCallback((d) => formatValue(d, NUM_PRECISION), []);
 
   return (
     <Chart
