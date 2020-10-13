@@ -12,7 +12,6 @@ import { CommentRequest } from '../../../../../case/common/api';
 import { usePostComment } from '../../containers/use_post_comment';
 import { Case } from '../../containers/types';
 import { MarkdownEditorForm } from '../../../common/components/markdown_editor/eui_form';
-import { InsertTimelinePopover } from '../../../timelines/components/timeline/insert_timeline_popover';
 import { useInsertTimeline } from '../../../timelines/components/timeline/insert_timeline_popover/use_insert_timeline';
 import { Form, useForm, UseField, useFormData } from '../../../shared_imports';
 
@@ -61,10 +60,7 @@ export const AddComment = React.memo(
         setFieldValue,
       ]);
 
-      const { handleCursorChange, handleOnTimelineChange } = useInsertTimeline(
-        comment,
-        onCommentChange
-      );
+      const { handleCursorChange } = useInsertTimeline(comment, onCommentChange);
 
       const addQuote = useCallback(
         (quote) => {
@@ -115,13 +111,6 @@ export const AddComment = React.memo(
                   >
                     {i18n.ADD_COMMENT}
                   </EuiButton>
-                ),
-                topRightContent: (
-                  <InsertTimelinePopover
-                    hideUntitled={true}
-                    isDisabled={isLoading}
-                    onTimelineChange={handleOnTimelineChange}
-                  />
                 ),
               }}
             />
