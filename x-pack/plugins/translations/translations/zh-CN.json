@@ -15587,7 +15587,7 @@
     "xpack.securitySolution.detectionEngine.rules.deleteDescription": "删除",
     "xpack.securitySolution.detectionEngine.rules.editPageTitle": "编辑",
     "xpack.securitySolution.detectionEngine.rules.importRuleTitle": "导入规则……",
-    "xpack.securitySolution.detectionEngine.rules.loadPrePackagedRulesButton": "加载 Elastic 预构建规则和时间线模板",
+    "xpack.securitySolution.detectionEngine.rules.loadPrePackagedRulesAndTemplatesButton": "加载 Elastic 预构建规则和时间线模板",
     "xpack.securitySolution.detectionEngine.rules.optionalFieldDescription": "可选",
     "xpack.securitySolution.detectionEngine.rules.pageTitle": "检测规则",
     "xpack.securitySolution.detectionEngine.rules.prePackagedRules.createOwnRuletButton": "创建自己的规则",

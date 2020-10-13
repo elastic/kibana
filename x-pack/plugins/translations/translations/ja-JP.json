@@ -15578,7 +15578,7 @@
     "xpack.securitySolution.detectionEngine.rules.deleteDescription": "削除",
     "xpack.securitySolution.detectionEngine.rules.editPageTitle": "編集",
     "xpack.securitySolution.detectionEngine.rules.importRuleTitle": "ルールのインポート...",
-    "xpack.securitySolution.detectionEngine.rules.loadPrePackagedRulesButton": "Elastic事前構築済みルールおよびタイムラインテンプレートを読み込む",
+    "xpack.securitySolution.detectionEngine.rules.loadPrePackagedRulesAndTemplatesButton": "Elastic事前構築済みルールおよびタイムラインテンプレートを読み込む",
     "xpack.securitySolution.detectionEngine.rules.optionalFieldDescription": "オプション",
     "xpack.securitySolution.detectionEngine.rules.pageTitle": "検出ルール",
     "xpack.securitySolution.detectionEngine.rules.prePackagedRules.createOwnRuletButton": "独自のルールの作成",
