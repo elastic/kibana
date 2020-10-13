@@ -8,30 +8,37 @@ import React, { useEffect, useMemo } from 'react';
 
 import * as i18n from './translations';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { getThresholdHistogramConfig } from './helpers';
-import { ChartSeriesConfigs, ChartSeriesData } from '../../../../common/components/charts/common';
+import { getHistogramConfig } from './helpers';
+import {
+  ChartSeriesConfigs,
+  ChartSeriesData,
+  ChartData,
+} from '../../../../common/components/charts/common';
 import { InspectResponse } from '../../../../../public/types';
 import { inputsModel } from '../../../../common/store';
 import { PreviewHistogram } from './histogram';
 
-export const ID = 'queryPreviewThresholdHistogramQuery';
+export const ID = 'queryPreviewCustomHistogramQuery';
 
-interface PreviewThresholdQueryHistogramProps {
+interface PreviewCustomQueryHistogramProps {
+  to: string;
+  from: string;
   isLoading: boolean;
-  buckets: Array<{
-    key: string;
-    doc_count: number;
-  }>;
+  data: ChartData[];
+  totalCount: number;
   inspect: InspectResponse;
   refetch: inputsModel.Refetch;
 }
 
-export const PreviewThresholdQueryHistogram = ({
-  buckets,
+export const PreviewCustomQueryHistogram = ({
+  to,
+  from,
+  data,
+  totalCount,
   inspect,
   refetch,
   isLoading,
-}: PreviewThresholdQueryHistogramProps) => {
+}: PreviewCustomQueryHistogramProps) => {
   const { setQuery, isInitializing } = useGlobalTime();
 
   useEffect((): void => {
@@ -40,42 +47,29 @@ export const PreviewThresholdQueryHistogram = ({
     }
   }, [setQuery, inspect, isLoading, isInitializing, refetch]);
 
-  const { data, totalCount } = useMemo((): { data: ChartSeriesData[]; totalCount: number } => {
-    const total = buckets.length;
-
-    const dataBuckets = buckets.map<{ x: string; y: number; g: string }>(
-      ({ key, doc_count: docCount }) => ({
-        x: key,
-        y: docCount,
-        g: key,
-      })
-    );
-    return {
-      data: [{ key: 'hits', value: dataBuckets }],
-      totalCount: total,
-    };
-  }, [buckets]);
-
-  const barConfig = useMemo((): ChartSeriesConfigs => getThresholdHistogramConfig(200), []);
+  const barConfig = useMemo((): ChartSeriesConfigs => getHistogramConfig(to, from, true), [
+    from,
+    to,
+  ]);
 
   const subtitle = useMemo(
     (): string =>
-      isLoading
-        ? i18n.PREVIEW_SUBTITLE_LOADING
-        : i18n.QUERY_PREVIEW_THRESHOLD_WITH_FIELD_TITLE(totalCount),
+      isLoading ? i18n.PREVIEW_SUBTITLE_LOADING : i18n.QUERY_PREVIEW_TITLE(totalCount),
     [isLoading, totalCount]
   );
+
+  const chartData = useMemo((): ChartSeriesData[] => [{ key: 'hits', value: data }], [data]);
 
   return (
     <PreviewHistogram
       id={ID}
-      data={data}
+      data={chartData}
       barConfig={barConfig}
       title={i18n.QUERY_GRAPH_HITS_TITLE}
       subtitle={subtitle}
       disclaimer={i18n.PREVIEW_QUERY_DISCLAIMER}
       isLoading={isLoading}
-      data-test-subj="thresholdQueryPreviewHistogram"
+      data-test-subj="queryPreviewCustomHistogram"
     />
   );
 };
