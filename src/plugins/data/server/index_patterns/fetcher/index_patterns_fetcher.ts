@@ -40,8 +40,8 @@ export class IndexPatternsFetcher {
   private elasticsearchClient: ElasticsearchClient;
   private allowNoIndices: boolean;
 
-  constructor(callDataCluster: ElasticsearchClient, allowNoIndices: boolean = false) {
-    this.elasticsearchClient = callDataCluster;
+  constructor(elasticsearchClient: ElasticsearchClient, allowNoIndices: boolean = false) {
+    this.elasticsearchClient = elasticsearchClient;
     this.allowNoIndices = allowNoIndices;
   }
 
