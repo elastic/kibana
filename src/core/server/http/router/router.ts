@@ -18,7 +18,7 @@
  */
 
 import { Request, ResponseObject, ResponseToolkit } from '@hapi/hapi';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 import { isConfigSchema } from '@kbn/config-schema';
 import { Logger } from '../../logging';

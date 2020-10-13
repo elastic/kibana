@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { createListStream } from '../../utils/streams';
 import { SavedObjectsClientContract, SavedObject } from '../types';
 import { fetchNestedDependencies } from './inject_nested_depdendencies';

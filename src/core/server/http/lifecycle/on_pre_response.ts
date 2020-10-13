@@ -23,7 +23,7 @@ import {
   ResponseObject,
   ResponseToolkit as HapiResponseToolkit,
 } from '@hapi/hapi';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { Logger } from '../../logging';
 
 import { HapiResponseAdapter, KibanaRequest, ResponseHeaders } from '../router';

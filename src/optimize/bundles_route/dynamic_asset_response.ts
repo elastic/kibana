@@ -22,7 +22,7 @@ import { resolve } from 'path';
 import { promisify } from 'util';
 
 import Accept from 'accept';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import Hapi from '@hapi/hapi';
 
 import { FileHashCache } from './file_hash_cache';

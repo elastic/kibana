@@ -1532,7 +1532,7 @@
   dependencies:
     "@hapi/hoek" "8.x.x"
 
-"@hapi/boom@7.x.x":
+"@hapi/boom@7.x.x", "@hapi/boom@^7.4.11":
   version "7.4.11"
   resolved "https://registry.yarnpkg.com/@hapi/boom/-/boom-7.4.11.tgz#37af8417eb9416aef3367aa60fa04a1a9f1fc262"
   integrity sha512-VSU/Cnj1DXouukYxxkes4nNJonCnlogHvIff1v1RVoN4xzkKhMXX+GRmb3NyH1iar10I9WFPDv2JPwfH3GaV0A==
@@ -3954,7 +3954,7 @@
   resolved "https://registry.yarnpkg.com/@types/bluebird/-/bluebird-3.5.30.tgz#ee034a0eeea8b84ed868b1aa60d690b08a6cfbc5"
   integrity sha512-8LhzvcjIoqoi1TghEkRMkbbmM+jhHnBokPGkJWjclMK+Ks0MxEBow3/p2/iFTZ+OIbJHQDSfpgdZEb+af3gfVw==
 
-"@types/boom@*", "@types/boom@^7.2.0":
+"@types/boom@*":
   version "7.2.0"
   resolved "https://registry.yarnpkg.com/@types/boom/-/boom-7.2.0.tgz#19c36cbb5811a7493f0f2e37f31d42b28df1abc1"
   integrity sha512-HonbGsHFbskh9zRAzA6tabcw18mCOsSEOL2ibGAuVqk6e7nElcRmWO5L4UfIHpDbWBWw+eZYFdsQ1+MEGgpcVA==
@@ -4309,10 +4309,10 @@
     "@types/podium" "*"
     "@types/shot" "*"
 
-"@types/hapi__boom@*":
-  version "7.4.0"
-  resolved "https://registry.yarnpkg.com/@types/hapi__boom/-/hapi__boom-7.4.0.tgz#81d58cffb67c54896614560c007a5015a79c30ba"
-  integrity sha512-i4nerd/aJd5zW8OPHxgeuDYiuiuHxHczkqIaALhINUqBCavRgbiwjfndpgrarB43jcb/2LxzrohMOH7akyt3og==
+"@types/hapi__boom@*", "@types/hapi__boom@^7.4.1":
+  version "7.4.1"
+  resolved "https://registry.yarnpkg.com/@types/hapi__boom/-/hapi__boom-7.4.1.tgz#06439d7637245dcbe6dd6548d2a91f2c1243d80b"
+  integrity sha512-x/ZK824GomII7Yoei/nMoB46NQcSfGe0iVpZK3uUivxIAfUUSzRvu8RQO7ZkKapIgzgshHZc+GR+z/BQ8l2VLg==
 
 "@types/hapi__catbox@*":
   version "10.2.3"
@@ -7855,7 +7855,7 @@ boolbase@^1.0.0, boolbase@~1.0.0:
   resolved "https://registry.yarnpkg.com/boolbase/-/boolbase-1.0.0.tgz#68dff5fbe60c51eb37725ea9e3ed310dcc1e776e"
   integrity sha1-aN/1++YMUes3cl6p4+0xDcwed24=
 
-boom@7.x.x, boom@^7.1.0, boom@^7.2.0:
+boom@7.x.x, boom@^7.1.0:
   version "7.2.2"
   resolved "https://registry.yarnpkg.com/boom/-/boom-7.2.2.tgz#ac92101451aa5cea901aed07d881dd32b4f08345"
   integrity sha512-IFUbOa8PS7xqmhIjpeStwT3d09hGkNYQ6aj2iELSTxcVs2u0aKn1NzhkdUQSzsRg1FVkj3uit3I6mXQCBixw+A==
