@@ -1,0 +1,3 @@
+type: string
+title: EnrollmentApiKey
+format: byte

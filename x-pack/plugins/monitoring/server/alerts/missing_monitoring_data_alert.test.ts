@@ -234,9 +234,9 @@ describe('MissingMonitoringDataAlert', () => {
         ],
       });
       expect(scheduleActions).toHaveBeenCalledWith('default', {
-        internalFullMessage: `We have not detected any monitoring data for 2 stack product(s) in cluster: testCluster. [View what monitoring data we do have for these stack products.](http://localhost:5601/app/monitoring#overview?_g=(cluster_uuid:abc123))`,
+        internalFullMessage: `We have not detected any monitoring data for 2 stack product(s) in cluster: testCluster. [View what monitoring data we do have for these stack products.](http://localhost:5601/app/monitoring#/overview?_g=(cluster_uuid:abc123))`,
         internalShortMessage: `We have not detected any monitoring data for 2 stack product(s) in cluster: testCluster. Verify these stack products are up and running, then double check the monitoring settings.`,
-        action: `[View what monitoring data we do have for these stack products.](http://localhost:5601/app/monitoring#overview?_g=(cluster_uuid:abc123))`,
+        action: `[View what monitoring data we do have for these stack products.](http://localhost:5601/app/monitoring#/overview?_g=(cluster_uuid:abc123))`,
         actionPlain:
           'Verify these stack products are up and running, then double check the monitoring settings.',
         clusterName,
@@ -414,9 +414,9 @@ describe('MissingMonitoringDataAlert', () => {
       } as any);
       const count = 1;
       expect(scheduleActions).toHaveBeenCalledWith('default', {
-        internalFullMessage: `We have not detected any monitoring data for 1 stack product(s) in cluster: testCluster. [View what monitoring data we do have for these stack products.](http://localhost:5601/app/monitoring#overview?_g=(cluster_uuid:abc123,ccs:testCluster))`,
+        internalFullMessage: `We have not detected any monitoring data for 1 stack product(s) in cluster: testCluster. [View what monitoring data we do have for these stack products.](http://localhost:5601/app/monitoring#/overview?_g=(cluster_uuid:abc123,ccs:testCluster))`,
         internalShortMessage: `We have not detected any monitoring data for 1 stack product(s) in cluster: testCluster. Verify these stack products are up and running, then double check the monitoring settings.`,
-        action: `[View what monitoring data we do have for these stack products.](http://localhost:5601/app/monitoring#overview?_g=(cluster_uuid:abc123,ccs:testCluster))`,
+        action: `[View what monitoring data we do have for these stack products.](http://localhost:5601/app/monitoring#/overview?_g=(cluster_uuid:abc123,ccs:testCluster))`,
         actionPlain:
           'Verify these stack products are up and running, then double check the monitoring settings.',
         clusterName,
@@ -446,7 +446,7 @@ describe('MissingMonitoringDataAlert', () => {
       expect(scheduleActions).toHaveBeenCalledWith('default', {
         internalFullMessage: `We have not detected any monitoring data for 2 stack product(s) in cluster: testCluster. Verify these stack products are up and running, then double check the monitoring settings.`,
         internalShortMessage: `We have not detected any monitoring data for 2 stack product(s) in cluster: testCluster. Verify these stack products are up and running, then double check the monitoring settings.`,
-        action: `[View what monitoring data we do have for these stack products.](http://localhost:5601/app/monitoring#overview?_g=(cluster_uuid:abc123))`,
+        action: `[View what monitoring data we do have for these stack products.](http://localhost:5601/app/monitoring#/overview?_g=(cluster_uuid:abc123))`,
         actionPlain:
           'Verify these stack products are up and running, then double check the monitoring settings.',
         clusterName,

@@ -10,8 +10,6 @@ import moment from 'moment-timezone';
 import {
   getOperatorType,
   getExceptionOperatorSelect,
-  getOperatingSystems,
-  getTagsInclude,
   getFormattedComments,
   filterExceptionItems,
   getNewExceptionItem,
@@ -52,6 +50,7 @@ import {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
   EntriesArray,
+  OsTypeArray,
 } from '../../../../../lists/common/schemas';
 import { IIndexPattern } from 'src/plugins/data/common';
 
@@ -186,73 +185,15 @@ describe('Exception helpers', () => {
     });
   });
 
-  describe('#getOperatingSystems', () => {
-    test('it returns null if no operating system tag specified', () => {
-      const result = getOperatingSystems(['some tag', 'some other tag']);
-
-      expect(result).toEqual([]);
-    });
-
-    test('it returns null if operating system tag malformed', () => {
-      const result = getOperatingSystems(['some tag', 'jibberos:mac,windows', 'some other tag']);
-
-      expect(result).toEqual([]);
-    });
-
-    test('it returns operating systems if space included in os tag', () => {
-      const result = getOperatingSystems(['some tag', 'os: macos', 'some other tag']);
-      expect(result).toEqual(['macos']);
-    });
-
-    test('it returns operating systems if multiple os tags specified', () => {
-      const result = getOperatingSystems(['some tag', 'os: macos', 'some other tag', 'os:windows']);
-      expect(result).toEqual(['macos', 'windows']);
-    });
-  });
-
   describe('#formatOperatingSystems', () => {
     test('it returns null if no operating system tag specified', () => {
-      const result = formatOperatingSystems(getOperatingSystems(['some tag', 'some other tag']));
-
+      const result = formatOperatingSystems(['some os', 'some other os']);
       expect(result).toEqual('');
     });
 
-    test('it returns null if operating system tag malformed', () => {
-      const result = formatOperatingSystems(
-        getOperatingSystems(['some tag', 'jibberos:mac,windows', 'some other tag'])
-      );
-
-      expect(result).toEqual('');
-    });
-
-    test('it returns formatted operating systems if space included in os tag', () => {
-      const result = formatOperatingSystems(
-        getOperatingSystems(['some tag', 'os: macos', 'some other tag'])
-      );
-
-      expect(result).toEqual('macOS');
-    });
-
-    test('it returns formatted operating systems if multiple os tags specified', () => {
-      const result = formatOperatingSystems(
-        getOperatingSystems(['some tag', 'os: macos', 'some other tag', 'os:windows'])
-      );
-
+    test('it returns formatted operating systems if multiple specified', () => {
+      const result = formatOperatingSystems(['some tag', 'macos', 'some other tag', 'windows']);
       expect(result).toEqual('macOS, Windows');
-    });
-  });
-
-  describe('#getTagsInclude', () => {
-    test('it returns a tuple of "false" and "null" if no matches found', () => {
-      const result = getTagsInclude({ tags: ['some', 'tags', 'here'], regex: /(no match)/ });
-
-      expect(result).toEqual([false, null]);
-    });
-
-    test('it returns a tuple of "true" and matching string if matches found', () => {
-      const result = getTagsInclude({ tags: ['some', 'tags', 'here'], regex: /(some)/ });
-
-      expect(result).toEqual([true, 'some']);
     });
   });
 
@@ -384,7 +325,6 @@ describe('Exception helpers', () => {
 
     test('it removes `temporaryId` from items', () => {
       const { meta, ...rest } = getNewExceptionItem({
-        listType: 'detection',
         listId: '123',
         namespaceType: 'single',
         ruleName: 'rule name',
@@ -400,7 +340,6 @@ describe('Exception helpers', () => {
       const payload = getExceptionListItemSchemaMock();
       const result = formatExceptionItemForUpdate(payload);
       const expected = {
-        _tags: ['endpoint', 'process', 'malware', 'os:linux'],
         comments: [],
         description: 'some description',
         entries: ENTRIES,
@@ -409,6 +348,7 @@ describe('Exception helpers', () => {
         meta: {},
         name: 'some name',
         namespace_type: 'single',
+        os_types: ['linux'],
         tags: ['user added string for a tag', 'malware'],
         type: 'simple',
       };
@@ -489,14 +429,14 @@ describe('Exception helpers', () => {
   });
 
   describe('#enrichExceptionItemsWithOS', () => {
-    test('it should add an os tag to an exception item', () => {
+    test('it should add an os to an exception item', () => {
       const payload = [getExceptionListItemSchemaMock()];
-      const osTypes = ['windows'];
+      const osTypes: OsTypeArray = ['windows'];
       const result = enrichExceptionItemsWithOS(payload, osTypes);
       const expected = [
         {
           ...getExceptionListItemSchemaMock(),
-          _tags: [...getExceptionListItemSchemaMock()._tags, 'os:windows'],
+          os_types: ['windows'],
         },
       ];
       expect(result).toEqual(expected);
@@ -504,36 +444,16 @@ describe('Exception helpers', () => {
 
     test('it should add multiple os tags to all exception items', () => {
       const payload = [getExceptionListItemSchemaMock(), getExceptionListItemSchemaMock()];
-      const osTypes = ['windows', 'macos'];
+      const osTypes: OsTypeArray = ['windows', 'macos'];
       const result = enrichExceptionItemsWithOS(payload, osTypes);
       const expected = [
         {
           ...getExceptionListItemSchemaMock(),
-          _tags: [...getExceptionListItemSchemaMock()._tags, 'os:windows', 'os:macos'],
+          os_types: ['windows', 'macos'],
         },
         {
           ...getExceptionListItemSchemaMock(),
-          _tags: [...getExceptionListItemSchemaMock()._tags, 'os:windows', 'os:macos'],
-        },
-      ];
-      expect(result).toEqual(expected);
-    });
-
-    test('it should add os tag to all exception items without duplication', () => {
-      const payload = [
-        { ...getExceptionListItemSchemaMock(), _tags: ['os:linux', 'os:windows'] },
-        { ...getExceptionListItemSchemaMock(), _tags: ['os:linux'] },
-      ];
-      const osTypes = ['windows'];
-      const result = enrichExceptionItemsWithOS(payload, osTypes);
-      const expected = [
-        {
-          ...getExceptionListItemSchemaMock(),
-          _tags: ['os:linux', 'os:windows'],
-        },
-        {
-          ...getExceptionListItemSchemaMock(),
-          _tags: ['os:linux', 'os:windows'],
+          os_types: ['windows', 'macos'],
         },
       ];
       expect(result).toEqual(expected);
@@ -715,7 +635,6 @@ describe('Exception helpers', () => {
   describe('getPrepopulatedItem', () => {
     test('it returns prepopulated items', () => {
       const prepopulatedItem = getPrepopulatedItem({
-        listType: 'endpoint',
         listId: 'some_id',
         ruleName: 'my rule',
         codeSignature: { subjectName: '', trusted: '' },
@@ -733,7 +652,7 @@ describe('Exception helpers', () => {
           field: 'file.Ext.code_signature',
           type: 'nested',
         },
-        { field: 'file.path.text', operator: 'included', type: 'match', value: '' },
+        { field: 'file.path.caseless', operator: 'included', type: 'match', value: '' },
         { field: 'file.hash.sha256', operator: 'included', type: 'match', value: '' },
         { field: 'event.code', operator: 'included', type: 'match', value: '' },
       ]);
@@ -741,7 +660,6 @@ describe('Exception helpers', () => {
 
     test('it returns prepopulated items with values', () => {
       const prepopulatedItem = getPrepopulatedItem({
-        listType: 'endpoint',
         listId: 'some_id',
         ruleName: 'my rule',
         codeSignature: { subjectName: 'someSubjectName', trusted: 'false' },
@@ -764,7 +682,12 @@ describe('Exception helpers', () => {
           field: 'file.Ext.code_signature',
           type: 'nested',
         },
-        { field: 'file.path.text', operator: 'included', type: 'match', value: 'some-file-path' },
+        {
+          field: 'file.path.caseless',
+          operator: 'included',
+          type: 'match',
+          value: 'some-file-path',
+        },
         { field: 'file.hash.sha256', operator: 'included', type: 'match', value: 'some-hash' },
         { field: 'event.code', operator: 'included', type: 'match', value: 'some-event-code' },
       ]);
@@ -847,7 +770,7 @@ describe('Exception helpers', () => {
 
   describe('defaultEndpointExceptionItems', () => {
     test('it should return pre-populated items', () => {
-      const defaultItems = defaultEndpointExceptionItems('endpoint', 'list_id', 'my_rule', {
+      const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
         _id: '123',
         file: {
           Ext: {
@@ -881,7 +804,7 @@ describe('Exception helpers', () => {
           type: 'nested',
         },
         {
-          field: 'file.path.text',
+          field: 'file.path.caseless',
           operator: 'included',
           type: 'match',
           value: 'some file path',
@@ -904,7 +827,7 @@ describe('Exception helpers', () => {
           type: 'nested',
         },
         {
-          field: 'file.path.text',
+          field: 'file.path.caseless',
           operator: 'included',
           type: 'match',
           value: 'some file path',

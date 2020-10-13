@@ -22,7 +22,7 @@ export interface State {
   signalIndexName: string | null;
 }
 
-const initialState: State = {
+export const initialState: State = {
   canUserCRUD: null,
   hasIndexManage: null,
   hasIndexWrite: null,

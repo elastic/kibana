@@ -35,6 +35,7 @@ import { OnUpdateColumns } from '../timeline/events';
 import { TruncatableText } from '../../../common/components/truncatable_text';
 import { FieldName } from './field_name';
 import * as i18n from './translations';
+import { getAlertColumnHeader } from './helpers';
 
 const TypeIcon = styled(EuiIcon)`
   margin-left: 5px;
@@ -127,6 +128,7 @@ export const getFieldItems = ({
                           columnHeaderType: defaultColumnHeaderType,
                           id: field.name || '',
                           width: DEFAULT_COLUMN_MIN_WIDTH,
+                          ...getAlertColumnHeader(timelineId, field.name || ''),
                         })
                       }
                     />
