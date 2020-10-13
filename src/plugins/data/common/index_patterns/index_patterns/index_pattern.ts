@@ -74,7 +74,6 @@ export class IndexPattern implements IIndexPattern {
   public metaFields: string[];
   // savedObject version
   public version: string | undefined;
-  private savedObjectsClient: SavedObjectsClientCommon;
   public sourceFilters?: SourceFilter[];
   private originalSavedObjectBody: SavedObjectBody = {};
   private shortDotsEnable: boolean = false;
@@ -82,13 +81,11 @@ export class IndexPattern implements IIndexPattern {
 
   constructor({
     spec = {},
-    savedObjectsClient,
     fieldFormats,
     shortDotsEnable = false,
     metaFields = [],
   }: IndexPatternDeps) {
     // set dependencies
-    this.savedObjectsClient = savedObjectsClient;
     this.fieldFormats = fieldFormats;
     // set config
     this.shortDotsEnable = shortDotsEnable;
@@ -264,39 +261,6 @@ export class IndexPattern implements IIndexPattern {
     const field = this.fields.getByName(fieldName);
     if (field) {
       this.fields.remove(field);
-    }
-  }
-
-  async popularizeField(fieldName: string, unit = 1) {
-    /**
-     * This function is just used by Discover and it's high likely to be removed in the near future
-     * It doesn't use the save function to skip the error message that's displayed when
-     * a user adds several columns in a higher frequency that the changes can be persisted to ES
-     * resulting in 409 errors
-     */
-    if (!this.id) return;
-    const field = this.fields.getByName(fieldName);
-    if (!field) {
-      return;
-    }
-    const count = Math.max((field.count || 0) + unit, 0);
-    if (field.count === count) {
-      return;
-    }
-    field.count = count;
-
-    try {
-      const res = await this.savedObjectsClient.update(
-        'index-pattern',
-        this.id,
-        this.getAsSavedObjectBody(),
-        {
-          version: this.version,
-        }
-      );
-      this.version = res.version;
-    } catch (e) {
-      // no need for an error message here
     }
   }
 

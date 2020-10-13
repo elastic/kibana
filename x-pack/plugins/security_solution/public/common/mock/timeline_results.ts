@@ -32,7 +32,7 @@ export interface MockedProvidedQuery {
 export const mockOpenTimelineQueryResults: MockedProvidedQuery[] = [
   {
     request: {
-      query: allTimelinesQuery,
+      query: (allTimelinesQuery as unknown) as GetAllTimeline.Query,
       variables: {
         onlyUserFavorite: false,
         pageInfo: {

@@ -87,6 +87,11 @@ export function QueryBarProvider({ getService, getPageObjects }: FtrProviderCont
       const queryLanguageButton = await testSubjects.find('switchQueryLanguageButton');
       expect((await queryLanguageButton.getVisibleText()).toLowerCase()).to.eql(lang);
     }
+
+    public async getSuggestions() {
+      const suggestions = await testSubjects.findAll('autoCompleteSuggestionText');
+      return Promise.all(suggestions.map((suggestion) => suggestion.getVisibleText()));
+    }
   }
 
   return new QueryBar();

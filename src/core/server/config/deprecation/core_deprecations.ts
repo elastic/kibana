@@ -148,6 +148,8 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({
   renameFromRoot('xpack.telemetry.url', 'telemetry.url'),
   renameFromRoot('cpu.cgroup.path.override', 'ops.cGroupOverrides.cpuPath'),
   renameFromRoot('cpuacct.cgroup.path.override', 'ops.cGroupOverrides.cpuAcctPath'),
+  unusedFromRoot('elasticsearch.preserveHost'),
+  unusedFromRoot('elasticsearch.startupTimeout'),
   configPathDeprecation,
   dataPathDeprecation,
   rewriteBasePathDeprecation,

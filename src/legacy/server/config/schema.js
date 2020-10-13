@@ -25,6 +25,10 @@ const HANDLED_IN_NEW_PLATFORM = Joi.any().description(
 );
 export default () =>
   Joi.object({
+    elastic: Joi.object({
+      apm: HANDLED_IN_NEW_PLATFORM,
+    }).default(),
+
     pkg: Joi.object({
       version: Joi.string().default(Joi.ref('$version')),
       branch: Joi.string().default(Joi.ref('$branch')),

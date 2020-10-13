@@ -35,7 +35,7 @@ export const ProcessorsEmptyPrompt: FunctionComponent<Props> = ({ onLoadJson }) 
         <p>
           <FormattedMessage
             id="xpack.ingestPipelines.pipelineEditor.emptyPrompt.description"
-            defaultMessage="Processors are used to pre-process documents before indexing. {learnMoreLink}"
+            defaultMessage="Use processors to transform data before indexing. {learnMoreLink}"
             values={{
               learnMoreLink: (
                 <EuiLink

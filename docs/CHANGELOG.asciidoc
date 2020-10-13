@@ -150,6 +150,8 @@ Operations::
 [float]
 [[enhancement-7.9.0]]
 === Enhancements
+Alerting::
+* Actions add proxy support {kibana-pull}74289[#74289]
 APM::
 * Shows `trace.id`, `transaction.id` and/or `error.id` in metadata table {kibana-pull}66376[#66376]
 * Adds error rate chart to Transaction overview and detail views {kibana-pull}67327[#67327]

@@ -549,7 +549,8 @@ export class IndexPatternsService {
 
   async updateSavedObject(
     indexPattern: IndexPattern,
-    saveAttempts: number = 0
+    saveAttempts: number = 0,
+    ignoreErrors: boolean = false
   ): Promise<void | Error> {
     if (!indexPattern.id) return;
 
@@ -600,6 +601,9 @@ export class IndexPatternsService {
           }
 
           if (unresolvedCollision) {
+            if (ignoreErrors) {
+              return;
+            }
             const title = i18n.translate('data.indexPatterns.unableWriteLabel', {
               defaultMessage:
                 'Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.',
@@ -619,7 +623,7 @@ export class IndexPatternsService {
           indexPatternCache.clear(indexPattern.id!);
 
           // Try the save again
-          return this.updateSavedObject(indexPattern, saveAttempts);
+          return this.updateSavedObject(indexPattern, saveAttempts, ignoreErrors);
         }
         throw err;
       });

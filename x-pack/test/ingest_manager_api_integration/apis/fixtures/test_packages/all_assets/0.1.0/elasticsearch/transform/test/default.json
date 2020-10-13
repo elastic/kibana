@@ -3,7 +3,7 @@
     "index": "logs-all_assets.test_log-default*"
   },
   "dest": {
-    "index": "logs-all_assets.test_log_current-default"
+    "index": "logs-all_assets.test_log_current_default"
   },
   "pivot": {
     "group_by": {

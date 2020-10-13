@@ -12,7 +12,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5601/api/ingest_manager",
+      "url": "http://localhost:5601/api/fleet",
       "description": "local"
     }
   ],
@@ -1280,9 +1280,9 @@
         ]
       }
     },
-    "/fleet/setup": {
+    "/agents/setup": {
       "get": {
-        "summary": "Fleet setup - Info",
+        "summary": "Agents setup - Info",
         "tags": [],
         "responses": {
           "200": {
@@ -1314,7 +1314,7 @@
             }
           }
         },
-        "operationId": "get-fleet-setup",
+        "operationId": "get-agents-setup",
         "security": [
           {
             "basicAuth": []
@@ -1322,8 +1322,8 @@
         ]
       },
       "post": {
-        "summary": "Fleet setup - Create",
-        "operationId": "post-fleet-setup",
+        "summary": "Agents setup - Create",
+        "operationId": "post-agents-setup",
         "responses": {
           "200": {
             "description": "OK",
@@ -1543,7 +1543,7 @@
                           }
                         },
                         "format_version": "1.0.0",
-                        "datasets": [
+                        "data_streams": [
                           {
                             "title": "CoreDNS logs",
                             "name": "log",
@@ -1764,7 +1764,7 @@
                             ]
                           }
                         },
-                        "datasets": [
+                        "data_streams": [
                           {
                             "id": "endpoint",
                             "title": "Endpoint Events",
@@ -2757,7 +2757,7 @@
                               "data": "{\"config\":{\"id\":\"ae556400-5e39-11ea-8b49-f9747e466f7b\",\"outputs\":{\"default\":{\"type\":\"elasticsearch\",\"hosts\":[\"http://localhost:9200\"],\"api_key\":\"\",\"api_token\":\"6ckkp3ABz7e_XRqr3LM8:gQuDfUNSRgmY0iziYqP9Hw\"}},\"packagePolicies\":[]}}",
                               "created_at": "2020-03-04T20:02:56.149Z",
                               "id": "6a95c00a-d76d-4931-97c3-0bf935272d7d",
-                              "type": "CONFIG_CHANGE"
+                              "type": "POLICY_CHANGE"
                             }
                           ],
                           "access_api_key_id": "6Mkkp3ABz7e_XRqrzLNJ",
@@ -2920,7 +2920,7 @@
                       "actions": [
                         {
                           "agent_id": "a6f14bd2-1a2a-481c-9212-9494d064ffdf",
-                          "type": "CONFIG_CHANGE",
+                          "type": "POLICY_CHANGE",
                           "data": {
                             "config": {
                               "id": "2fe89350-a5e0-11ea-a587-5f886c8a849f",
@@ -3520,6 +3520,172 @@
         }
       }
     },
+    "/fleet/agents/{agentId}/upgrade": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "agentId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "post": {
+        "summary": "Fleet - Agent - Upgrade",
+        "tags": [],
+                "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpgradeAgent"
+                },
+                "examples": {
+                  "success": {
+                    "value": {}
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "BAD REQUEST",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpgradeAgent"
+                },
+                "examples": {
+                  "bad request not upgradeable": {
+                    "value": {
+                      "statusCode": 400,
+                      "error": "Bad Request",
+                       "message": "agent d133b07d-5c2b-42f0-8e6b-bbae53bdce88 is not upgradeable"
+                    }
+                  },
+                  "bad request kibana version": {
+                    "value": {
+                      "statusCode": 400,
+                      "error": "Bad Request",
+                       "message": "cannot upgrade agent to 8.0.0 because it is different than the installed kibana version 7.9.10"
+                    }
+                  },
+                  "bad request agent unenrolling": {
+                    "value": {
+                      "statusCode": 400,
+                      "error": "Bad Request",
+                       "message": "cannot upgrade an unenrolling or unenrolled agent"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "post-fleet-agents-upgrade",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/xsrfHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpgradeAgent"
+              },
+              "examples":{
+                "version":{
+                   "value": {
+                     "version": "8.0.0"
+                   }
+                },
+                "version and source_uri":{
+                   "value": {
+                     "version": "8.0.0",
+                     "source_uri": "http://localhost:8000"
+                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fleet/agents/bulk_upgrade": {
+      "post": {
+        "summary": "Fleet - Agent - Bulk Upgrade",
+        "tags": [],
+                "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkUpgradeAgents"
+                },
+                "examples": {
+                  "success": {
+                    "value": {}
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "BAD REQUEST",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpgradeAgent"
+                },
+                "examples": {
+                  "bad request kibana version": {
+                    "value": {
+                      "statusCode": 400,
+                      "error": "Bad Request",
+                       "message": "cannot upgrade agent to 8.0.0 because it is different than the installed kibana version 7.9.10"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "post-fleet-agents-bulk-upgrade",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/xsrfHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkUpgradeAgents"
+              },
+              "examples":{
+                "version":{
+                   "value": {
+                     "version": "8.0.0"
+                   }
+                },
+                "version and source_uri":{
+                   "value": {
+                     "version": "8.0.0",
+                     "source_uri": "http://localhost:8000"
+                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/fleet/agent-status": {
       "get": {
         "summary": "Fleet - Agent - Status for policy",
@@ -3961,7 +4127,7 @@
           "format_version": {
             "type": "string"
           },
-          "datasets": {
+          "data_streams": {
             "type": "array",
             "items": {
               "type": "object",
@@ -4226,8 +4392,88 @@
         "type": "string",
         "title": "EnrollmentApiKey",
         "format": "byte"
+      },
+      "UpgradeAgent":{
+        "title": "UpgradeAgent",
+        "oneOf": [
+          { 
+            "type": "object",
+            "properties": {
+              "version": {
+                "type": "string"
+              }
+            },
+            "required": ["version"]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "version": {
+                "type": "string"
+              },
+              "source_uri": {
+                "type": "string"
+              }
+            },
+            "required": ["version"]
+          }
+        ]
+      },
+    "BulkUpgradeAgents":{
+        "title": "BulkUpgradeAgents",
+        "oneOf": [
+          { 
+            "type": "object",
+            "properties": {
+              "version": {
+                "type": "string"
+              },
+              "agents":{
+                "type": "array",
+                "items":{
+                  "type": "string"
+                }
+              }
+            },
+            "required": ["version", "agents"]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "version": {
+                "type": "string"
+              },
+              "source_uri": {
+                "type": "string"
+              },
+             "agents":{
+                "type": "array",
+                "items":{
+                  "type": "string"
+                }
+              }
+            },
+            "required": ["version", "agents"]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "version": {
+                "type": "string"
+              },
+              "source_uri": {
+                "type": "string"
+              },
+             "agents":{
+                "type": "string"
+              }
+            },
+            "required": ["version", "agents"]
+          }
+        ]
       }
     },
+    
     "parameters": {
       "pageSizeParam": {
         "name": "perPage",

@@ -6,6 +6,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { DatasetFilter } from '../../../../common/log_analysis';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { useModuleStatus } from './log_analysis_module_status';
 import { ModuleDescriptor, ModuleSourceConfiguration } from './log_analysis_module_types';
@@ -17,6 +18,7 @@ export const useLogAnalysisModule = <JobType extends string>({
   sourceConfiguration: ModuleSourceConfiguration;
   moduleDescriptor: ModuleDescriptor<JobType>;
 }) => {
+  const { services } = useKibanaContextForPlugin();
   const { spaceId, sourceId, timestampField } = sourceConfiguration;
   const [moduleStatus, dispatchModuleStatus] = useModuleStatus(moduleDescriptor.jobTypes);
 
@@ -25,7 +27,7 @@ export const useLogAnalysisModule = <JobType extends string>({
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
         dispatchModuleStatus({ type: 'fetchingJobStatuses' });
-        return await moduleDescriptor.getJobSummary(spaceId, sourceId);
+        return await moduleDescriptor.getJobSummary(spaceId, sourceId, services.http.fetch);
       },
       onResolve: (jobResponse) => {
         dispatchModuleStatus({
@@ -52,13 +54,23 @@ export const useLogAnalysisModule = <JobType extends string>({
         datasetFilter: DatasetFilter
       ) => {
         dispatchModuleStatus({ type: 'startedSetup' });
-        const setupResult = await moduleDescriptor.setUpModule(start, end, datasetFilter, {
-          indices: selectedIndices,
-          sourceId,
+        const setupResult = await moduleDescriptor.setUpModule(
+          start,
+          end,
+          datasetFilter,
+          {
+            indices: selectedIndices,
+            sourceId,
+            spaceId,
+            timestampField,
+          },
+          services.http.fetch
+        );
+        const jobSummaries = await moduleDescriptor.getJobSummary(
           spaceId,
-          timestampField,
-        });
-        const jobSummaries = await moduleDescriptor.getJobSummary(spaceId, sourceId);
+          sourceId,
+          services.http.fetch
+        );
         return { setupResult, jobSummaries };
       },
       onResolve: ({ setupResult: { datafeeds, jobs }, jobSummaries }) => {
@@ -82,7 +94,7 @@ export const useLogAnalysisModule = <JobType extends string>({
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
-        return await moduleDescriptor.cleanUpModule(spaceId, sourceId);
+        return await moduleDescriptor.cleanUpModule(spaceId, sourceId, services.http.fetch);
       },
     },
     [spaceId, sourceId]

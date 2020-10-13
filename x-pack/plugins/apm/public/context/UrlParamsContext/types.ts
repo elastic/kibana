@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { LocalUIFilterName } from '../../../server/lib/ui_filters/local_ui_filters/config';
+import { LocalUIFilterName } from '../../../common/ui_filter';
 
 export type IUrlParams = {
   detailTab?: string;
@@ -28,4 +27,5 @@ export type IUrlParams = {
   page?: number;
   pageSize?: number;
   searchTerm?: string;
+  percentile?: number;
 } & Partial<Record<LocalUIFilterName, string>>;

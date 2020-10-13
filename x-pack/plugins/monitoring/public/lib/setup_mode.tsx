@@ -206,7 +206,7 @@ export const initSetupModeState = async ($scope: any, $injector: any, callback?:
 
   const globalState = $injector.get('globalState');
   if (globalState.inSetupMode) {
-    await toggleSetupMode(true);
+    toggleSetupMode(true);
   }
 };
 

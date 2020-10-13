@@ -7,7 +7,6 @@
 import { ILegacyScopedClusterClient } from 'kibana/server';
 import {
   SafeResolverChildren,
-  SafeResolverRelatedEvents,
   SafeResolverAncestry,
   ResolverRelatedAlerts,
   SafeResolverLifecycleNode,
@@ -18,7 +17,6 @@ import { StatsQuery } from '../queries/stats';
 import { createLifecycle } from './node';
 import { MultiSearcher, QueryInfo } from '../queries/multi_searcher';
 import { AncestryQueryHandler } from './ancestry_query_handler';
-import { RelatedEventsQueryHandler } from './events_query_handler';
 import { RelatedAlertsQueryHandler } from './alerts_query_handler';
 import { ChildrenStartQueryHandler } from './children_start_query_handler';
 import { ChildrenLifecycleQueryHandler } from './children_lifecycle_query_handler';
@@ -110,14 +108,6 @@ export class Fetcher {
       this.endpointID
     );
 
-    const eventsHandler = new RelatedEventsQueryHandler({
-      limit: options.events,
-      entityID: this.id,
-      after: options.afterEvent,
-      indexPattern: this.eventsIndexPattern,
-      legacyEndpointID: this.endpointID,
-    });
-
     const alertsHandler = new RelatedAlertsQueryHandler({
       limit: options.alerts,
       entityID: this.id,
@@ -139,7 +129,6 @@ export class Fetcher {
     const msearch = new MultiSearcher(this.client);
 
     let queries: QueryInfo[] = [];
-    addQueryToList(eventsHandler, queries);
     addQueryToList(alertsHandler, queries);
     addQueryToList(childrenHandler, queries);
     addQueryToList(originHandler, queries);
@@ -176,7 +165,6 @@ export class Fetcher {
 
     const tree = new Tree(this.id, {
       ancestry: ancestryHandler.getResults(),
-      relatedEvents: eventsHandler.getResults(),
       relatedAlerts: alertsHandler.getResults(),
       children: childrenLifecycleHandler.getResults(),
     });
@@ -223,31 +211,6 @@ export class Fetcher {
     );
 
     return childrenLifecycleHandler.search(this.client);
-  }
-
-  /**
-   * Retrieves the related events for the origin node.
-   *
-   * @param limit the upper bound number of related events to return. The limit is applied after the cursor is used to
-   *  skip the previous results.
-   * @param after a cursor to use as the starting point for retrieving related events
-   * @param filter a kql query for filtering the results
-   */
-  public async events(
-    limit: number,
-    after?: string,
-    filter?: string
-  ): Promise<SafeResolverRelatedEvents> {
-    const eventsHandler = new RelatedEventsQueryHandler({
-      limit,
-      entityID: this.id,
-      after,
-      indexPattern: this.eventsIndexPattern,
-      legacyEndpointID: this.endpointID,
-      filter,
-    });
-
-    return eventsHandler.search(this.client);
   }
 
   /**

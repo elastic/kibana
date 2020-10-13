@@ -93,7 +93,7 @@ export const EditFieldFormRow = React.memo(
           showLabel={false}
         />
       ) : (
-        <UseField
+        <UseField<boolean>
           path={formFieldPath}
           config={{
             ...getFieldConfig(configPath ? configPath : formFieldPath),
