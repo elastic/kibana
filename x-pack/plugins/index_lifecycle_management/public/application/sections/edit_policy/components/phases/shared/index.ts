@@ -12,4 +12,4 @@ export { Forcemerge } from './forcemerge_field';
 
 export { SetPriorityInput } from './set_priority_input';
 
-export { ifExistsNumberGreatThanZero } from './validations';
+export { ifExistsNumberGreaterThanZero } from './validations';

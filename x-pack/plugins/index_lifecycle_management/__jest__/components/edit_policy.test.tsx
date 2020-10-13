@@ -31,15 +31,12 @@ import {
   positiveNumbersAboveZeroErrorMessage,
   positiveNumberRequiredMessage,
   numberRequiredMessage,
-  maximumAgeRequiredMessage,
-  maximumSizeRequiredMessage,
   policyNameRequiredMessage,
   policyNameStartsWithUnderscoreErrorMessage,
   policyNameContainsCommaErrorMessage,
   policyNameContainsSpaceErrorMessage,
   policyNameMustBeDifferentErrorMessage,
   policyNameAlreadyUsedErrorMessage,
-  maximumDocumentsRequiredMessage,
 } from '../../public/application/services/policies/policy_validation';
 import { editPolicyHelpers } from './helpers';
 
@@ -140,12 +137,27 @@ const setPhaseIndexPriority = (
   priorityInput.simulate('change', { target: { value: priority } });
   rendered.update();
 };
-const save = (rendered: ReactWrapper) => {
+const save = async (rendered: ReactWrapper) => {
   const saveButton = findTestSubject(rendered, 'savePolicyButton');
-  saveButton.simulate('click');
+  await act(async () => {
+    await saveButton.simulate('click');
+  });
   rendered.update();
 };
 describe('edit policy', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  const waitForFormLibValidation = () => {
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+  };
+
   beforeEach(() => {
     component = (
       <EditPolicy history={history} getUrlForApp={jest.fn()} policies={policies} policyName={''} />
@@ -157,27 +169,27 @@ describe('edit policy', () => {
     httpRequestsMockHelpers.setPoliciesResponse(policies);
   });
   describe('top level form', () => {
-    test('should show error when trying to save empty form', () => {
+    test('should show error when trying to save empty form', async () => {
       const rendered = mountWithIntl(component);
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, [policyNameRequiredMessage]);
     });
-    test('should show error when trying to save policy name with space', () => {
+    test('should show error when trying to save policy name with space', async () => {
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'my policy');
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, [policyNameContainsSpaceErrorMessage]);
     });
-    test('should show error when trying to save policy name that is already used', () => {
+    test('should show error when trying to save policy name that is already used', async () => {
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'testy0');
       rendered.update();
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, [policyNameAlreadyUsedErrorMessage]);
     });
-    test('should show error when trying to save as new policy but using the same name', () => {
+    test('should show error when trying to save as new policy but using the same name', async () => {
       component = (
         <EditPolicy
           policyName={'testy0'}
@@ -190,21 +202,21 @@ describe('edit policy', () => {
       findTestSubject(rendered, 'saveAsNewSwitch').simulate('click');
       rendered.update();
       setPolicyName(rendered, 'testy0');
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, [policyNameMustBeDifferentErrorMessage]);
     });
-    test('should show error when trying to save policy name with comma', () => {
+    test('should show error when trying to save policy name with comma', async () => {
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'my,policy');
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, [policyNameContainsCommaErrorMessage]);
     });
-    test('should show error when trying to save policy name starting with underscore', () => {
+    test('should show error when trying to save policy name starting with underscore', async () => {
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, '_mypolicy');
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, [policyNameStartsWithUnderscoreErrorMessage]);
     });
     test('should show correct json in policy flyout', () => {
@@ -216,16 +228,16 @@ describe('edit policy', () => {
           policy: {
             phases: {
               hot: {
-                min_age: '0ms',
                 actions: {
-                  rollover: {
-                    max_age: '30d',
-                    max_size: '50gb',
-                  },
                   set_priority: {
                     priority: 100,
                   },
+                  rollover: {
+                    max_size: '50gb',
+                    max_age: '30d',
+                  },
                 },
+                min_age: '0ms',
               },
             },
           },
@@ -237,55 +249,64 @@ describe('edit policy', () => {
     });
   });
   describe('hot phase', () => {
-    test('should show errors when trying to save with no max size and no max age', () => {
+    test('should show errors when trying to save with no max size and no max age', async () => {
       const rendered = mountWithIntl(component);
+      expect(findTestSubject(rendered, 'rolloverSettingsRequired').exists()).toBeFalsy();
       setPolicyName(rendered, 'mypolicy');
-      const maxSizeInput = rendered.find(`input#hot-selectedMaxSizeStored`);
-      maxSizeInput.simulate('change', { target: { value: '' } });
-      const maxAgeInput = rendered.find(`input#hot-selectedMaxAge`);
-      maxAgeInput.simulate('change', { target: { value: '' } });
+      const maxSizeInput = findTestSubject(rendered, 'hot-selectedMaxSizeStored');
+      await act(async () => {
+        maxSizeInput.simulate('change', { target: { value: '' } });
+      });
+      const maxAgeInput = findTestSubject(rendered, 'hot-selectedMaxAge');
+      await act(async () => {
+        maxAgeInput.simulate('change', { target: { value: '' } });
+      });
       rendered.update();
-      save(rendered);
-      expectedErrorMessages(rendered, [
-        maximumSizeRequiredMessage,
-        maximumAgeRequiredMessage,
-        maximumDocumentsRequiredMessage,
-      ]);
+      await save(rendered);
+      expect(findTestSubject(rendered, 'rolloverSettingsRequired').exists()).toBeTruthy();
     });
-    test('should show number above 0 required error when trying to save with -1 for max size', () => {
+    test('should show number above 0 required error when trying to save with -1 for max size', async () => {
       const rendered = mountWithIntl(component);
       setPolicyName(rendered, 'mypolicy');
-      const maxSizeInput = rendered.find(`input#hot-selectedMaxSizeStored`);
-      maxSizeInput.simulate('change', { target: { value: -1 } });
+      const maxSizeInput = findTestSubject(rendered, 'hot-selectedMaxSizeStored');
+      await act(async () => {
+        maxSizeInput.simulate('change', { target: { value: '-1' } });
+      });
+      waitForFormLibValidation();
       rendered.update();
-      save(rendered);
       expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
     });
-    test('should show number above 0 required error when trying to save with 0 for max size', () => {
+    test('should show number above 0 required error when trying to save with 0 for max size', async () => {
       const rendered = mountWithIntl(component);
       setPolicyName(rendered, 'mypolicy');
-      const maxSizeInput = rendered.find(`input#hot-selectedMaxSizeStored`);
-      maxSizeInput.simulate('change', { target: { value: 0 } });
+      const maxSizeInput = findTestSubject(rendered, 'hot-selectedMaxSizeStored');
+      await act(async () => {
+        maxSizeInput.simulate('change', { target: { value: '-1' } });
+      });
+      waitForFormLibValidation();
       rendered.update();
-      save(rendered);
       expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
     });
-    test('should show number above 0 required error when trying to save with -1 for max age', () => {
+    test('should show number above 0 required error when trying to save with -1 for max age', async () => {
       const rendered = mountWithIntl(component);
       setPolicyName(rendered, 'mypolicy');
-      const maxSizeInput = rendered.find(`input#hot-selectedMaxAge`);
-      maxSizeInput.simulate('change', { target: { value: -1 } });
+      const maxAgeInput = findTestSubject(rendered, 'hot-selectedMaxAge');
+      await act(async () => {
+        maxAgeInput.simulate('change', { target: { value: '-1' } });
+      });
+      waitForFormLibValidation();
       rendered.update();
-      save(rendered);
       expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
     });
-    test('should show number above 0 required error when trying to save with 0 for max age', () => {
+    test('should show number above 0 required error when trying to save with 0 for max age', async () => {
       const rendered = mountWithIntl(component);
       setPolicyName(rendered, 'mypolicy');
-      const maxSizeInput = rendered.find(`input#hot-selectedMaxAge`);
-      maxSizeInput.simulate('change', { target: { value: 0 } });
+      const maxAgeInput = findTestSubject(rendered, 'hot-selectedMaxAge');
+      await act(async () => {
+        maxAgeInput.simulate('change', { target: { value: '0' } });
+      });
+      waitForFormLibValidation();
       rendered.update();
-      save(rendered);
       expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
     });
     test('should show forcemerge input when rollover enabled', () => {
@@ -303,12 +324,16 @@ describe('edit policy', () => {
     test('should show positive number required above zero error when trying to save hot phase with 0 for force merge', async () => {
       const rendered = mountWithIntl(component);
       setPolicyName(rendered, 'mypolicy');
-      findTestSubject(rendered, 'hot-forceMergeSwitch').simulate('click');
+      act(() => {
+        findTestSubject(rendered, 'hot-forceMergeSwitch').simulate('click');
+      });
       rendered.update();
       const forcemergeInput = findTestSubject(rendered, 'hot-selectedForceMergeSegments');
-      forcemergeInput.simulate('change', { target: { value: '0' } });
+      await act(async () => {
+        forcemergeInput.simulate('change', { target: { value: '0' } });
+      });
+      waitForFormLibValidation();
       rendered.update();
-      save(rendered);
       expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
     });
     test('should show positive number above 0 required error when trying to save hot phase with -1 for force merge', async () => {
@@ -319,15 +344,15 @@ describe('edit policy', () => {
       const forcemergeInput = findTestSubject(rendered, 'hot-selectedForceMergeSegments');
       forcemergeInput.simulate('change', { target: { value: '-1' } });
       rendered.update();
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
     });
-    test('should show positive number required error when trying to save with -1 for index priority', () => {
+    test('should show positive number required error when trying to save with -1 for index priority', async () => {
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       setPhaseIndexPriority(rendered, 'hot', '-1');
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
     });
   });
@@ -346,7 +371,7 @@ describe('edit policy', () => {
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       setPhaseAfter(rendered, 'warm', '');
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, [numberRequiredMessage]);
     });
     test('should allow 0 for phase timing', async () => {
@@ -355,7 +380,7 @@ describe('edit policy', () => {
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       setPhaseAfter(rendered, 'warm', '0');
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, []);
     });
     test('should show positive number required error when trying to save warm phase with -1 for after', async () => {
@@ -364,7 +389,7 @@ describe('edit policy', () => {
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       setPhaseAfter(rendered, 'warm', '-1');
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
     });
     test('should show positive number required error when trying to save warm phase with -1 for index priority', async () => {
@@ -374,7 +399,7 @@ describe('edit policy', () => {
       await activatePhase(rendered, 'warm');
       setPhaseAfter(rendered, 'warm', '1');
       setPhaseIndexPriority(rendered, 'warm', '-1');
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
     });
     test('should show positive number required above zero error when trying to save warm phase with 0 for shrink', async () => {
@@ -388,7 +413,7 @@ describe('edit policy', () => {
       const shrinkInput = rendered.find('input#warm-selectedPrimaryShardCount');
       shrinkInput.simulate('change', { target: { value: '0' } });
       rendered.update();
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
     });
     test('should show positive number above 0 required error when trying to save warm phase with -1 for shrink', async () => {
@@ -402,7 +427,7 @@ describe('edit policy', () => {
       const shrinkInput = rendered.find('input#warm-selectedPrimaryShardCount');
       shrinkInput.simulate('change', { target: { value: '-1' } });
       rendered.update();
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
     });
     test('should show positive number required above zero error when trying to save warm phase with 0 for force merge', async () => {
@@ -416,7 +441,7 @@ describe('edit policy', () => {
       const forcemergeInput = findTestSubject(rendered, 'warm-selectedForceMergeSegments');
       forcemergeInput.simulate('change', { target: { value: '0' } });
       rendered.update();
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
     });
     test('should show positive number above 0 required error when trying to save warm phase with -1 for force merge', async () => {
@@ -430,7 +455,7 @@ describe('edit policy', () => {
       const forcemergeInput = findTestSubject(rendered, 'warm-selectedForceMergeSegments');
       forcemergeInput.simulate('change', { target: { value: '-1' } });
       rendered.update();
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
     });
     test('should show spinner for node attributes input when loading', async () => {
@@ -542,7 +567,7 @@ describe('edit policy', () => {
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'cold');
       setPhaseAfter(rendered, 'cold', '0');
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, []);
     });
     test('should show positive number required error when trying to save cold phase with -1 for after', async () => {
@@ -551,7 +576,7 @@ describe('edit policy', () => {
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'cold');
       setPhaseAfter(rendered, 'cold', '-1');
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
     });
     test('should show spinner for node attributes input when loading', async () => {
@@ -619,7 +644,7 @@ describe('edit policy', () => {
       await activatePhase(rendered, 'cold');
       setPhaseAfter(rendered, 'cold', '1');
       setPhaseIndexPriority(rendered, 'cold', '-1');
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
     });
     test('should show default allocation warning when no node roles are found', async () => {
@@ -666,7 +691,7 @@ describe('edit policy', () => {
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'delete');
       setPhaseAfter(rendered, 'delete', '0');
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, []);
     });
     test('should show positive number required error when trying to save delete phase with -1 for after', async () => {
@@ -675,7 +700,7 @@ describe('edit policy', () => {
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'delete');
       setPhaseAfter(rendered, 'delete', '-1');
-      save(rendered);
+      await save(rendered);
       expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
     });
   });

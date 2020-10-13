@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -16,13 +17,14 @@ import { propertyof } from '../../../../../services/policies/policy_validation';
 
 import { LearnMoreLink } from '../../';
 
-import { ifExistsNumberGreatThanZero } from './validations';
+import { ifExistsNumberGreaterThanZero } from './validations';
 
 const setIndexPriorityConfig: FieldConfig<string> = {
-  label: i18n.translate('xpack.indexLifecycleMgmt.indexPriorityLabel', {
+  defaultValue: '100',
+  label: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.indexPriorityLabel', {
     defaultMessage: 'Index priority (optional)',
   }),
-  validations: [{ validator: ifExistsNumberGreatThanZero }],
+  validations: [{ validator: ifExistsNumberGreaterThanZero }],
   serializer: (v: string): any => (v ? parseInt(v, 10) : undefined),
 };
 

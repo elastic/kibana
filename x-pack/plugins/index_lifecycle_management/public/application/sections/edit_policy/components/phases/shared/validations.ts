@@ -7,16 +7,16 @@
 import { i18n } from '@kbn/i18n';
 import { ValidationFunc, fieldValidators } from '../../../../../../shared_imports';
 
-const positiveNumberRequiredMessage = i18n.translate(
+export const positiveNumberRequiredMessage = i18n.translate(
   'xpack.indexLifecycleMgmt.editPolicy.positiveNumberRequiredError',
   {
-    defaultMessage: 'Only positive numbers are allowed.',
+    defaultMessage: 'Only numbers above 0 are allowed.',
   }
 );
 
 const { numberGreaterThanField } = fieldValidators;
 
-export const ifExistsNumberGreatThanZero: ValidationFunc<any, any, any> = (arg) => {
+export const ifExistsNumberGreaterThanZero: ValidationFunc<any, any, any> = (arg) => {
   if (arg.value) {
     return numberGreaterThanField({
       than: 0,

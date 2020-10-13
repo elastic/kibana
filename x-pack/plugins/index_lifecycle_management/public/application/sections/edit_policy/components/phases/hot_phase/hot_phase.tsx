@@ -32,7 +32,7 @@ import {
 
 import { LearnMoreLink, ActiveBadge, PhaseErrorMessage, ErrableFormRow } from '../../';
 
-import { Forcemerge, SetPriorityInput, ifExistsNumberGreatThanZero } from '../shared';
+import { Forcemerge, SetPriorityInput, ifExistsNumberGreaterThanZero } from '../shared';
 
 import { maxSizeStoredUnits, maxAgeUnits, ROLLOVER_FORM_PATHS } from './constants';
 
@@ -61,6 +61,7 @@ const fieldsConfig = {
   },
   rollover: {
     maxStorageSize: {
+      defaultValue: '50',
       label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumIndexSizeLabel', {
         defaultMessage: 'Maximum index size',
       }),
@@ -69,7 +70,7 @@ const fieldsConfig = {
           validator: rolloverThresholdsValidator,
         },
         {
-          validator: ifExistsNumberGreatThanZero,
+          validator: ifExistsNumberGreaterThanZero,
         },
       ],
     } as FieldConfig<string>,
@@ -82,22 +83,22 @@ const fieldsConfig = {
           validator: rolloverThresholdsValidator,
         },
         {
-          validator: ifExistsNumberGreatThanZero,
+          validator: ifExistsNumberGreaterThanZero,
         },
       ],
       serializer: (v: string): any => (v ? parseInt(v, 10) : undefined),
     } as FieldConfig<string>,
     maxAge: {
+      defaultValue: '30',
       label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumAgeLabel', {
         defaultMessage: 'Maximum age',
       }),
-      defaultValue: '30',
       validations: [
         {
           validator: rolloverThresholdsValidator,
         },
         {
-          validator: ifExistsNumberGreatThanZero,
+          validator: ifExistsNumberGreaterThanZero,
         },
       ],
     } as FieldConfig<string>,
@@ -224,14 +225,14 @@ export const HotPhase: FunctionComponent = () => {
                     <EuiFlexGroup>
                       <EuiFlexItem style={{ maxWidth: 188 }}>
                         <ErrableFormRow
-                          data-test-subj={`${hotProperty}-${phaseProperty(
-                            'selectedMaxSizeStored'
-                          )}`}
                           label={maxSize.label}
                           isShowingErrors={maxSizeValidity.isInvalid}
+                          errors={maxSizeValidity.errorMessage}
                         >
                           <EuiFieldNumber
-                            id={`${hotProperty}-${phaseProperty('selectedMaxSizeStored')}`}
+                            data-test-subj={`${hotProperty}-${phaseProperty(
+                              'selectedMaxSizeStored'
+                            )}`}
                             value={maxSize.value}
                             onChange={(e) => {
                               maxSize.setValue(e.target.value);
@@ -268,9 +269,9 @@ export const HotPhase: FunctionComponent = () => {
                     <EuiFlexGroup>
                       <EuiFlexItem style={{ maxWidth: 188 }}>
                         <ErrableFormRow
-                          data-test-subj={`${hotProperty}-${phaseProperty('selectedMaxDocuments')}`}
                           label={maxDocs.label}
                           isShowingErrors={maxDocsValidity.isInvalid}
+                          errors={maxDocsValidity.errorMessage}
                         >
                           <EuiFieldNumber
                             data-test-subj={`${hotProperty}-${phaseProperty(
@@ -289,9 +290,9 @@ export const HotPhase: FunctionComponent = () => {
                     <EuiFlexGroup>
                       <EuiFlexItem style={{ maxWidth: 188 }}>
                         <ErrableFormRow
-                          data-test-subj={`${hotProperty}-${phaseProperty('selectedMaxAge')}`}
                           label={maxAge.label}
                           isShowingErrors={maxAgeValidity.isInvalid}
+                          errors={maxAgeValidity.errorMessage}
                         >
                           <EuiFieldNumber
                             data-test-subj={`${hotProperty}-${phaseProperty('selectedMaxAge')}`}

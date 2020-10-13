@@ -21,7 +21,7 @@ import {
 
 import { LearnMoreLink } from '../../';
 
-import { ifExistsNumberGreatThanZero } from './validations';
+import { ifExistsNumberGreaterThanZero } from './validations';
 
 const fieldsConfig = {
   _meta: {
@@ -48,7 +48,7 @@ const fieldsConfig = {
     }),
     validations: [
       {
-        validator: ifExistsNumberGreatThanZero,
+        validator: ifExistsNumberGreaterThanZero,
       },
     ],
     serializer: (v: string): any => (v ? parseInt(v, 10) : undefined),
@@ -110,7 +110,6 @@ export const Forcemerge: React.FunctionComponent<Props> = ({ phase }) => {
               config={fieldsConfig.numberOfSegments}
               component={NumericField}
               componentProps={{
-                'data-test-subj': `${phase}-selectedForceMergeSegments`,
                 fullWidth: false,
                 euiFieldProps: {
                   'data-test-subj': `${phase}-selectedForceMergeSegments`,
