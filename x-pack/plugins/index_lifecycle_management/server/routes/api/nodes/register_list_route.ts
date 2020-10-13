@@ -41,7 +41,7 @@ export function convertSettingsIntoLists(
         }
       }
 
-      const dataRoles = nodeSettings.roles.filter(r => r.startsWith('data')) as NodeDataRole[];
+      const dataRoles = nodeSettings.roles.filter((r) => r.startsWith('data')) as NodeDataRole[];
       for (const role of dataRoles) {
         accum.nodesByRoles[role as NodeDataRole] = accum.nodesByRoles[role] ?? [];
         accum.nodesByRoles[role as NodeDataRole]!.push(nodeId);
