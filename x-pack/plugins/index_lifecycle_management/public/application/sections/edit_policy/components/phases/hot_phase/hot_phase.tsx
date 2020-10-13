@@ -193,10 +193,6 @@ export const HotPhase: FunctionComponent<{ setWarmPhaseOnRollover: (v: boolean) 
             <EuiSpacer size="m" />
             <UseMultiFields
               fields={{
-                maxAge: {
-                  path: ROLLOVER_FORM_PATHS.maxAge,
-                  config: fieldsConfig.rollover.maxAge,
-                },
                 maxSize: {
                   path: ROLLOVER_FORM_PATHS.maxSize,
                   config: fieldsConfig.rollover.maxStorageSize,
@@ -205,12 +201,16 @@ export const HotPhase: FunctionComponent<{ setWarmPhaseOnRollover: (v: boolean) 
                   path: ROLLOVER_FORM_PATHS.maxDocs,
                   config: fieldsConfig.rollover.maxDocs,
                 },
+                maxAge: {
+                  path: ROLLOVER_FORM_PATHS.maxAge,
+                  config: fieldsConfig.rollover.maxAge,
+                },
               }}
             >
               {({ maxAge, maxSize, maxDocs }) => {
-                const maxAgeValidity = getFieldValidityAndErrorMessage(maxAge);
                 const maxSizeValidity = getFieldValidityAndErrorMessage(maxSize);
                 const maxDocsValidity = getFieldValidityAndErrorMessage(maxDocs);
+                const maxAgeValidity = getFieldValidityAndErrorMessage(maxAge);
                 return (
                   <>
                     {maxAge.errors.some((e) => e.validationType === ROLLOVER_EMPTY_VALIDATION) && (

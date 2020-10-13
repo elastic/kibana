@@ -17,7 +17,7 @@ import { createSerializer } from '../serializer';
 import { deserializer } from '../deserializer';
 
 interface Props {
-  defaultValue: SerializedPolicy;
+  defaultValue?: SerializedPolicy;
   onChange: (arg: OnFormUpdateArg<any>) => void;
   serializer: any;
 }
@@ -40,13 +40,60 @@ const setupTestBed = registerTestBed<TestSubject>(MyForm);
 const setup = async (props: Props) => {
   const testBed = await setupTestBed(props);
   const { find } = testBed;
+
   const toggleRollover = (checked: boolean) => {
     find('rolloverSwitch').simulate('click', { target: { checked } });
   };
+
+  const setMaxSize = (value: string, units?: string) => {
+    find('hot-selectedMaxSizeStored').simulate('change', { target: { value } });
+    if (units) {
+      find('hot-selectedMaxSizeStoredUnits.select').simulate('change', {
+        target: { value: units },
+      });
+    }
+  };
+
+  const setMaxDocs = (value: string) => {
+    find('hot-selectedMaxDocuments').simulate('change', { target: { value } });
+  };
+
+  const setMaxAge = (value: string, units?: string) => {
+    find('hot-selectedMaxAge').simulate('change', { target: { value } });
+    if (units) {
+      find('hot-selectedMaxAgeUnits.select').simulate('change', { target: { value: units } });
+    }
+  };
+
+  const toggleForceMerge = (phase: string) => (checked: boolean) => {
+    find(`${phase}-forceMergeSwitch`).simulate('click', { target: { checked } });
+  };
+
+  const setForcemergeSegmentsCount = (phase: string) => (value: string) => {
+    find(`${phase}-selectedForceMergeSegments`).simulate('change', { target: { value } });
+  };
+
+  const setBestCompression = (phase: string) => (checked: boolean) => {
+    find(`${phase}-bestCompression`).simulate('click', { target: { checked } });
+  };
+
+  const setIndexPriority = (phase: string) => (value: string) => {
+    find(`${phase}-phaseIndexPriority`).simulate('change', { target: { value } });
+  };
+
   return {
     ...testBed,
     actions: {
-      toggleRollover,
+      hot: {
+        setMaxSize,
+        setMaxDocs,
+        setMaxAge,
+        toggleRollover,
+        toggleForceMerge: toggleForceMerge('hot'),
+        setForcemergeSegments: setForcemergeSegmentsCount('hot'),
+        setBestCompression: setBestCompression('hot'),
+        setIndexPriority: setIndexPriority('hot'),
+      },
     },
   };
 };
@@ -62,7 +109,8 @@ type TestSubject =
   | 'hot-selectedMaxSizeStoredUnits'
   | 'hot-selectedMaxDocuments'
   | 'hot-selectedMaxAge'
-  | 'hot-selectedMaxAgeUnits';
+  | 'hot-selectedMaxAgeUnits'
+  | string;
 
 describe('<HotPhase />', () => {
   let testBed: TestBed;
@@ -71,22 +119,62 @@ describe('<HotPhase />', () => {
     name: '',
     phases: {
       hot: {
+        min_age: '123ms',
         actions: {
           rollover: {},
         },
       },
     },
   };
+
   beforeEach(async () => {
     onChange = jest.fn();
     testBed = await setup({ onChange, defaultValue, serializer: createSerializer(defaultValue) });
   });
 
   describe('serialization', () => {
+    test('setting all values', async () => {
+      const { actions } = testBed;
+
+      await act(async () => {
+        actions.hot.setMaxSize('123', 'mb');
+        actions.hot.setMaxDocs('123');
+        actions.hot.setMaxAge('123', 'h');
+        actions.hot.toggleForceMerge(true);
+        actions.hot.setForcemergeSegments('123');
+        actions.hot.setBestCompression(true);
+        actions.hot.setIndexPriority('123');
+      });
+      const [arg] = onChange.mock.calls[onChange.mock.calls.length - 1];
+      expect(arg.data.format()).toMatchInlineSnapshot(`
+        Object {
+          "phases": Object {
+            "hot": Object {
+              "actions": Object {
+                "forcemerge": Object {
+                  "index_codec": "best_compression",
+                  "max_num_segments": 123,
+                },
+                "rollover": Object {
+                  "max_age": "123h",
+                  "max_docs": 123,
+                  "max_size": "123mb",
+                },
+                "set_priority": Object {
+                  "priority": 123,
+                },
+              },
+              "min_age": "123ms",
+            },
+          },
+        }
+      `);
+    });
+
     test('toggling rollover', async () => {
       const { actions } = testBed;
       await act(async () => {
-        actions.toggleRollover(false);
+        actions.hot.toggleRollover(false);
       });
       const [noRolloverFormUpdate] = onChange.mock.calls[onChange.mock.calls.length - 1];
       expect(noRolloverFormUpdate.data.format()).toMatchInlineSnapshot(`
@@ -98,12 +186,13 @@ describe('<HotPhase />', () => {
                   "priority": 100,
                 },
               },
+              "min_age": "123ms",
             },
           },
         }
       `);
       await act(async () => {
-        actions.toggleRollover(true);
+        actions.hot.toggleRollover(true);
       });
       const [rolloverFormUpdate] = onChange.mock.calls[onChange.mock.calls.length - 1];
       expect(rolloverFormUpdate.data.format()).toMatchInlineSnapshot(`
@@ -119,6 +208,7 @@ describe('<HotPhase />', () => {
                   "priority": 100,
                 },
               },
+              "min_age": "123ms",
             },
           },
         }

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { merge } from 'lodash';
+
 import { FormInternal } from './components/phases/types';
 import { SerializedPolicy } from '../../../../common/types';
 
@@ -16,8 +16,8 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
     rest.phases = { hot: { actions: {} } };
   }
 
-  if (!originalPolicy && rest.phases.hot) {
-    rest.phases.hot.min_age = '0ms';
+  if (originalPolicy?.phases.hot?.min_age && rest.phases.hot) {
+    rest.phases.hot.min_age = originalPolicy.phases.hot.min_age;
   }
 
   if (rest.phases.hot?.actions) {
@@ -33,11 +33,6 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
       if (_meta.hot.bestCompression && rest.phases.hot.actions?.forcemerge) {
         rest.phases.hot.actions.forcemerge.index_codec = 'best_compression';
       }
-      // Merge with all other existing hot actions
-      rest.phases.hot.actions.rollover = merge(
-        originalPolicy?.phases?.hot?.actions.rollover ?? {},
-        rest.phases.hot.actions.rollover
-      );
     } else {
       delete rest.phases.hot.actions?.rollover;
     }
