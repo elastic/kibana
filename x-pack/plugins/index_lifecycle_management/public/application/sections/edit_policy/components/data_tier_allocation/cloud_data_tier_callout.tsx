@@ -13,7 +13,7 @@ const i18nTexts = {
     defaultMessage: 'Create a cold tier',
   }),
   body: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.cloudDataTierCallout.body', {
-    defaultMessage: 'Edit your deployment on Cloud to create cold tier nodes.',
+    defaultMessage: 'Edit your Elastic Cloud deployment to set up a cold tier.',
   }),
 };
 

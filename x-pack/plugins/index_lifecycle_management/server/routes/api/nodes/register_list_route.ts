@@ -47,16 +47,17 @@ export function convertSettingsIntoLists(
 
       // If we detect a single node using legacy "data:true" setting we know we are not using data roles for
       // data allocation.
-      if (!accum.isUsingLegacyDataRoleConfig) {
-        accum.isUsingLegacyDataRoleConfig = nodeSettings.settings?.node?.data === 'true';
+      if (nodeSettings.settings?.node?.data === 'true') {
+        accum.isUsingDeprecatedDataRoleConfig = true;
       }
+
       return accum;
     },
     {
       nodesByAttributes: {},
       nodesByRoles: {},
-      // Start with assumption that we are not using legacy config
-      isUsingLegacyDataRoleConfig: false,
+      // Start with assumption that we are not using deprecated config
+      isUsingDeprecatedDataRoleConfig: false,
     } as ListNodesRouteResponse
   );
 }

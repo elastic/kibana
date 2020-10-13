@@ -8,15 +8,15 @@ import { convertSettingsIntoLists } from '../register_list_route';
 import { cloudNodeSettingsWithLegacy, cloudNodeSettingsWithoutLegacy } from './fixtures';
 
 describe('convertSettingsIntoLists', () => {
-  it('does not flag legacy config incorrectly', () => {
+  it('detects node role config', () => {
     const result = convertSettingsIntoLists(cloudNodeSettingsWithoutLegacy, []);
-    expect(result.isUsingLegacyDataRoleConfig).toBe(false);
+    expect(result.isUsingDeprecatedDataRoleConfig).toBe(false);
   });
 
-  it('converts cloud settings into the expected response and detects legacy config', () => {
+  it('converts cloud settings into the expected response and detects deprecated config', () => {
     const result = convertSettingsIntoLists(cloudNodeSettingsWithLegacy, []);
 
-    expect(result.isUsingLegacyDataRoleConfig).toBe(true);
+    expect(result.isUsingDeprecatedDataRoleConfig).toBe(true);
     expect(result.nodesByRoles).toEqual({
       data: [
         't49k7mdeRIiELuOt_MOZ1g',

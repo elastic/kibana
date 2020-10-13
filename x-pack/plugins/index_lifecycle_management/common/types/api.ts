@@ -11,10 +11,10 @@ export interface ListNodesRouteResponse {
   nodesByRoles: { [role in NodeDataRoleWithCatchAll]?: string[] };
 
   /**
-   * A flag to indicate whether a node is using `settings.node.data` which is the legacy way cloud configured nodes
-   * to have data (and other) roles.
+   * A flag to indicate whether a node is using `settings.node.data` which is the now deprecated way cloud configured
+   * nodes to have data (and other) roles.
    *
    * If this is true, it means the cluster is using legacy cloud configuration for data allocation, not node roles.
    */
-  isUsingLegacyDataRoleConfig: boolean;
+  isUsingDeprecatedDataRoleConfig: boolean;
 }
