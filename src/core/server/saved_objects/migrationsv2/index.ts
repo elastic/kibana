@@ -23,8 +23,9 @@ import { ElasticsearchClient } from 'src/core/server/elasticsearch';
 import { gt } from 'semver';
 import chalk from 'chalk';
 import { isLeft } from 'fp-ts/lib/Either';
+import { TaskEither } from 'fp-ts/lib/TaskEither';
 import * as Actions from './actions';
-import { ActionResponse, ActionThunk } from './actions';
+import { ActionResponse, AllResponses } from './actions';
 
 export interface BaseState {
   kibanaVersion: string;
@@ -76,7 +77,10 @@ export type State =
   | CloneSourceState;
 
 type Model = (currentState: State, result: ActionResponse) => State;
-type NextAction = (client: ElasticsearchClient, state: State) => ActionThunk | null;
+type NextAction = (
+  client: ElasticsearchClient,
+  state: State
+) => TaskEither<Error, AllResponses> | null;
 
 /**
  * A helper function/type for ensuring that all control state's are handled.
@@ -105,20 +109,21 @@ export const model: Model = (currentState: State, res: ActionResponse): State =>
       };
       return stateP;
     } else {
+      const retryCount = stateP.retryCount + 1;
+      const retryDelay = 1000 * Math.pow(2, retryCount); // 2s, 4s, 8s, 16s, 32s, 64s
+
       stateP = {
         ...stateP,
-        controlState: 'FATAL',
-        error: res.left,
-        retryCount: stateP.retryCount + 1,
-        retryDelay: 1000 * Math.pow(2, stateP.retryCount + 1), // 2s, 4s, 8s, 16s, 32s, 64s
+        retryCount,
+        retryDelay,
         log: [
           {
             level: 'error',
             message:
               chalk.red('ERROR: ') +
-              `Action failed with '${res.left.message}'. Retrying attempt ${
-                stateP.retryCount
-              } out of 5 in ${stateP.retryDelay / 1000} seconds.`,
+              `Action failed with '${
+                res.left.message
+              }'. Retrying attempt ${retryCount} out of 5 in ${retryDelay / 1000} seconds.`,
           },
           ...stateP.log,
         ],
@@ -185,12 +190,12 @@ export const model: Model = (currentState: State, res: ActionResponse): State =>
     }
     return stateP;
   } else if (stateP.controlState === 'SET_SOURCE_WRITE_BLOCK') {
-    if ('setIndexWriteBlock' in res) {
+    if ('setIndexWriteBlock' in res.right) {
       stateP = { ...stateP, controlState: 'CLONE_SOURCE' };
     }
     return stateP;
   } else if (stateP.controlState === 'CLONE_SOURCE') {
-    if ('cloneIndex' in res) {
+    if ('cloneIndex' in res.right) {
       stateP = { ...stateP, controlState: 'DONE' };
     }
     return stateP;
@@ -205,7 +210,7 @@ export const model: Model = (currentState: State, res: ActionResponse): State =>
   }
 };
 
-export const next: NextAction = (client: ElasticsearchClient, state: State) => {
+export const next: NextAction = (client, state) => {
   // If for every state there is only one action (deterministic) we can define
   // next as a state -> action set.
   const delay = <F extends () => any>(fn: F): (() => ReturnType<F>) => {
@@ -217,6 +222,7 @@ export const next: NextAction = (client: ElasticsearchClient, state: State) => {
   };
 
   if (state.controlState === 'INIT') {
+    // return Actions.fetchIndex(client, '.kibana');
     return delay(Actions.fetchAliases(client, ['.kibana', '.kibana_current', '.kibana_7.11.0']));
   } else if (state.controlState === 'SET_SOURCE_WRITE_BLOCK') {
     return delay(Actions.setIndexWriteBlock(client, state.source));
@@ -268,10 +274,10 @@ export async function migrationStateMachine(client: ElasticsearchClient, kibanaV
   let controlStateStepCounter = 0;
 
   console.log(chalk.magentaBright('INIT\n'), state);
-  let actionThunk: ActionThunk | null = next(client, state);
+  let nextTask = next(client, state);
 
-  while (actionThunk != null) {
-    const actionResult = await actionThunk();
+  while (nextTask != null) {
+    const actionResult = await nextTask();
 
     console.log(chalk.cyanBright('ACTION RESPONSE\n'), actionResult);
 
@@ -287,7 +293,7 @@ export async function migrationStateMachine(client: ElasticsearchClient, kibanaV
     state = newState;
     console.log(chalk.magentaBright('STATE\n'), state);
 
-    actionThunk = next(client, state);
+    nextTask = next(client, state);
   }
 
   console.log(chalk.greenBright('DONE\n'), state);
