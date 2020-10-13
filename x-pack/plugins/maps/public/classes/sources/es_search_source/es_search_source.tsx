@@ -68,11 +68,11 @@ function getDocValueAndSourceFields(
   indexPattern: IndexPattern,
   fieldNames: string[]
 ): {
-  docValueFields: Array<string | { format: 'epoch_millis'; field: string }>;
+  docValueFields: Array<string | { format: string; field: string }>;
   sourceOnlyFields: string[];
   scriptFields: Record<string, { script: ScriptField }>;
 } {
-  const docValueFields: Array<string | { format: 'epoch_millis'; field: string }> = [];
+  const docValueFields: Array<string | { format: string; field: string }> = [];
   const sourceOnlyFields: string[] = [];
   const scriptFields: Record<string, { script: ScriptField }> = {};
   fieldNames.forEach((fieldName) => {
@@ -122,7 +122,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     };
   }
 
-  constructor(descriptor: Partial<ESSearchSourceDescriptor>, inspectorAdapters?: Adapters) {
+  constructor(descriptor: Partial<ESSearchSourceDescriptor>, inspectorAdapters: Adapters) {
     const sourceDescriptor = ESSearchSource.createDescriptor(descriptor);
     super(sourceDescriptor, inspectorAdapters);
     this._descriptor = sourceDescriptor;
@@ -259,7 +259,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     const topHits: {
       size: number | undefined;
       script_fields: Record<string, { script: ScriptField }>;
-      docvalue_fields: Array<string | { format: 'epoch_millis'; field: string }>;
+      docvalue_fields: Array<string | { format: string; field: string }>;
       _source?: boolean | { includes: string[] };
       sort?: Array<Record<string, SortDirection | SortDirectionNumeric>>;
     } = {
