@@ -58,8 +58,8 @@ export interface LensPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
   uiActions: UiActionsStart;
   dashboard: DashboardStart;
-  embeddable?: EmbeddableStart;
   visualizations: VisualizationsStart;
+  embeddable: EmbeddableStart;
 }
 export class LensPlugin {
   private datatableVisualization: DatatableVisualization;
