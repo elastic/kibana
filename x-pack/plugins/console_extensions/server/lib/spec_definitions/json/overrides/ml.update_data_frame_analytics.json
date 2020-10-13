@@ -1,8 +1,10 @@
 {
   "ml.update_data_frame_analytics": {
-    "allow_lazy_start": false,
-    "description": "",
-    "max_num_threads": 1,
-    "model_memory_limit": "1gb"
+    "data_autocomplete_rules": {
+      "allow_lazy_start": false,
+      "description": "",
+      "max_num_threads": 1,
+      "model_memory_limit": "1gb"
+    }
   }
 }
