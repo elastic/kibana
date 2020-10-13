@@ -32,7 +32,7 @@ import { useForm, Form } from '../../../shared_imports';
 
 import { toasts } from '../../services/notification';
 
-import { Phases, LegacyPolicy, PolicyFromES, SerializedPolicy } from '../../../../common/types';
+import { LegacyPolicy, PolicyFromES, SerializedPolicy } from '../../../../common/types';
 
 import { defaultPolicy } from '../../constants';
 
@@ -189,7 +189,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
   };
 
   const setPhaseData = useCallback(
-    (phase: keyof Phases, key: string, value: any) => {
+    (phase: keyof LegacyPolicy['phases'], key: string, value: any) => {
       setPolicy((nextPolicy) => ({
         ...nextPolicy,
         phases: {

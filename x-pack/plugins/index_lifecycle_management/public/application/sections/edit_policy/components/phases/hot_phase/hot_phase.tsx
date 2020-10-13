@@ -18,7 +18,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import { HotPhase as HotPhaseInterface, Phases } from '../../../../../../../common/types';
+import { Phases } from '../../../../../../../common/types';
 
 import {
   useFormContext,
@@ -43,7 +43,6 @@ import { i18nTexts } from './i18n_texts';
 import { useRolloverPath } from '../shared';
 
 const hotProperty: keyof Phases = 'hot';
-const phaseProperty = (propertyName: keyof HotPhaseInterface) => propertyName;
 
 const fieldsConfig = {
   _meta: {
@@ -234,9 +233,7 @@ export const HotPhase: FunctionComponent<{ setWarmPhaseOnRollover: (v: boolean) 
                           errors={maxSizeValidity.errorMessage}
                         >
                           <EuiFieldNumber
-                            data-test-subj={`${hotProperty}-${phaseProperty(
-                              'selectedMaxSizeStored'
-                            )}`}
+                            data-test-subj={`${hotProperty}-selectedMaxSizeStored`}
                             value={maxSize.value}
                             onChange={(e) => {
                               maxSize.setValue(e.target.value);
@@ -252,9 +249,7 @@ export const HotPhase: FunctionComponent<{ setWarmPhaseOnRollover: (v: boolean) 
                           component={SelectField}
                           config={fieldsConfig._meta.hot.maxStorageSizeUnit}
                           componentProps={{
-                            'data-test-subj': `${hotProperty}-${phaseProperty(
-                              'selectedMaxSizeStoredUnits'
-                            )}`,
+                            'data-test-subj': `${hotProperty}-selectedMaxSizeStoredUnits`,
                             hasEmptyLabelSpace: true,
                             euiFieldProps: {
                               options: maxSizeStoredUnits,
@@ -278,9 +273,7 @@ export const HotPhase: FunctionComponent<{ setWarmPhaseOnRollover: (v: boolean) 
                           errors={maxDocsValidity.errorMessage}
                         >
                           <EuiFieldNumber
-                            data-test-subj={`${hotProperty}-${phaseProperty(
-                              'selectedMaxDocuments'
-                            )}`}
+                            data-test-subj={`${hotProperty}-selectedMaxDocuments`}
                             value={maxDocs.value}
                             onChange={(e) => {
                               maxDocs.setValue(e.target.value);
@@ -299,7 +292,7 @@ export const HotPhase: FunctionComponent<{ setWarmPhaseOnRollover: (v: boolean) 
                           errors={maxAgeValidity.errorMessage}
                         >
                           <EuiFieldNumber
-                            data-test-subj={`${hotProperty}-${phaseProperty('selectedMaxAge')}`}
+                            data-test-subj={`${hotProperty}-selectedMaxAge`}
                             value={maxAge.value}
                             onChange={(e) => {
                               maxAge.setValue(e.target.value);
@@ -315,9 +308,7 @@ export const HotPhase: FunctionComponent<{ setWarmPhaseOnRollover: (v: boolean) 
                           config={fieldsConfig._meta.hot.maxAgeUnit}
                           component={SelectField}
                           componentProps={{
-                            'data-test-subj': `${hotProperty}-${phaseProperty(
-                              'selectedMaxAgeUnits'
-                            )}`,
+                            'data-test-subj': `${hotProperty}-selectedMaxAgeUnits`,
                             hasEmptyLabelSpace: true,
                             euiFieldProps: {
                               'aria-label': i18n.translate(
