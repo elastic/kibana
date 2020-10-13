@@ -8,7 +8,7 @@ import { EuiPanel, EuiTabbedContent, EuiTextArea } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
-import { Markdown } from '../../../../common/components/markdown';
+import { MarkdownRenderer, MarkdownEditor } from '../../../../common/components/markdown_editor';
 import { UpdateInternalNewNote } from '../helpers';
 import * as i18n from '../translations';
 
@@ -43,16 +43,12 @@ export const NewNote = React.memo<{
       id: 'note',
       name: i18n.NOTE,
       content: (
-        <TextArea
-          autoFocus
-          aria-label={i18n.NOTE}
-          data-test-subj="add-a-note"
-          fullWidth={true}
-          height={noteInputHeight}
-          onChange={(e) => updateNewNote(e.target.value)}
-          placeholder={i18n.ADD_A_NOTE}
-          spellCheck={true}
+        <MarkdownEditor
+          ariaLabel={i18n.NOTE}
+          onChange={updateNewNote}
           value={note}
+          dataTestSubj="add-a-note"
+          height={noteInputHeight}
         />
       ),
     },
@@ -65,7 +61,7 @@ export const NewNote = React.memo<{
           height={noteInputHeight}
           paddingSize="s"
         >
-          <Markdown raw={note} />
+          <MarkdownRenderer>{note}</MarkdownRenderer>
         </MarkdownContainer>
       ),
     },
