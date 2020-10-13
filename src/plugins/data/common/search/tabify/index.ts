@@ -17,6 +17,16 @@
  * under the License.
  */
 
+import { SearchSource } from '../search_source';
+import { tabifyAggResponse } from './tabify';
+import { tabifyDocs } from './tabify_docs';
+
+export const tabify = (searchSource: SearchSource, esResponse: any, opts: any) => {
+  return !esResponse.aggregations
+    ? tabifyDocs(searchSource, esResponse, opts)
+    : tabifyAggResponse(searchSource.getField('aggs'), esResponse, opts);
+};
+
 export { tabifyAggResponse } from './tabify';
 export { tabifyGetColumns } from './get_columns';
 
