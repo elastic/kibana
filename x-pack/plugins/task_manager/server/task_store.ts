@@ -264,10 +264,10 @@ export class TaskStore {
       shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt),
       // Either task has a schedule or the attempts < the maximum configured
       shouldBeOneOf<ExistsFilter | TermFilter | RangeFilter>(
-        TaskWithSchedule,
-        ...Object.entries(this.definitions).map(([type, { maxAttempts }]) =>
-          taskWithLessThanMaxAttempts(type, maxAttempts || this.maxAttempts)
-        )
+        TaskWithSchedule
+        // ...Object.entries(this.definitions).map(([type, { maxAttempts }]) =>
+        //   taskWithLessThanMaxAttempts(type, maxAttempts || this.maxAttempts)
+        // )
       )
     );
 
@@ -284,8 +284,8 @@ export class TaskStore {
         ),
         update: updateFields({
           ownerId: this.taskManagerId,
-          status: 'claiming',
           retryAt: claimOwnershipUntil,
+          status: 'claiming',
         }),
         sort: [
           // sort by score first, so the "pinned" Tasks are first

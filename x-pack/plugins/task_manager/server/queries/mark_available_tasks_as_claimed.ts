@@ -14,6 +14,8 @@ import {
   BoolClauseWithAnyCondition,
 } from './query_clauses';
 
+import { TaskDefinition, TaskDictionary } from './task';
+
 export const TaskWithSchedule: ExistsFilter = {
   exists: { field: 'task.schedule' },
 };
@@ -109,3 +111,32 @@ export const updateFields = (fieldUpdates: {
   lang: 'painless',
   params: fieldUpdates,
 });
+
+// export const updateFieldsAndMarkAsFailed = (fieldUpdates: {
+//   [field: string]: string | number | Date;
+// }, taskDefinitions: TaskDictionary<TaskDefinition>): ScriptClause => ({
+//   source: `
+//   `,
+//   lang: 'painless',
+//   // params: {
+//   //   fieldUpdates,
+//   //   taskDefinitions
+//   // }
+// });
+
+// export const updateFields2 = (fieldUpdates: {
+//   [field: string]: string | number | Date;
+// }): ScriptClause => ({
+//   source: `
+//   if (!ctx._source.containsKey('namespaces')) {
+//     ctx.op = "delete";
+//   } else {
+//     ctx._source['namespaces'].removeAll(Collections.singleton(params['namespace']));
+//     if (ctx._source['namespaces'].empty) {
+//       ctx.op = "delete";
+//     }
+//   }
+// `,
+// lang: 'painless',
+//   params: fieldUpdates,
+// });

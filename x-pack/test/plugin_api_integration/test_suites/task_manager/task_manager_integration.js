@@ -607,5 +607,24 @@ export default function ({ getService }) {
         expect(getTaskById(tasks, longRunningTask.id).state.count).to.eql(1);
       });
     });
+
+    it('ying', async () => {
+      console.log('hihihi');
+      const task = await scheduleTask({
+        taskType: 'sampleTaskTimingOut',
+        schedule: { interval: '1s' },
+        params: {},
+      });
+      let counter = 0;
+
+      await retry.try(async () => {
+        console.log(`counter: ${counter++}`);
+        const [scheduledTask] = (await currentTasks()).docs;
+        console.log(scheduledTask);
+        expect(scheduledTask.id).to.eql(task.id);
+        expect(scheduledTask.status).to.eql('claiming');
+        expect(scheduledTask.attempts).to.eql(3);
+      });
+    });
   });
 }

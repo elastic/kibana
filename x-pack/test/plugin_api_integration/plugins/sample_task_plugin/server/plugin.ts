@@ -105,6 +105,18 @@ export class SampleTaskManagerFixturePlugin
         // fail after the first failed run
         maxAttempts: 1,
       },
+      sampleTaskTimingOut: {
+        type: 'sampleTaskTimingOut',
+        title: 'Sample Task that Times Out',
+        description: 'A sample task that times out each run.',
+        maxAttempts: 3,
+        timeout: '1s',
+        createTaskRunner: () => ({
+          async run() {
+            return await new Promise((resolve) => {});
+          },
+        }),
+      },
     });
 
     taskManager.addMiddleware({
