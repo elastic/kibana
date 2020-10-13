@@ -6,7 +6,6 @@
 
 import RE2 from 're2';
 import { SavedObjectsClientContract, SavedObjectsFindOptions } from 'kibana/server';
-// import Boom from 'boom';
 import { ML_SAVED_OBJECT_TYPE } from './saved_objects';
 
 export type JobType = 'anomaly-detector' | 'data-frame-analytics';
@@ -153,7 +152,8 @@ export function filterJobIdsFactory(savedObjectsClient: SavedObjectsClientContra
   async function filterJobObjectIdsForSpace(
     jobType: JobType,
     ids: string[],
-    key: keyof JobObject
+    key: keyof JobObject,
+    allowWildcards: boolean = false
   ): Promise<string[]> {
     if (ids.length === 0) {
       return [];
@@ -161,7 +161,7 @@ export function filterJobIdsFactory(savedObjectsClient: SavedObjectsClientContra
 
     const jobIds = await getIds(jobType, key);
     // check to see if any of the ids supplied contain a wildcard
-    if (ids.join().match('\\*') === null) {
+    if (allowWildcards === false || ids.join().match('\\*') === null) {
       return ids.filter((id) => jobIds.includes(id));
     }
 
@@ -175,16 +175,23 @@ export function filterJobIdsFactory(savedObjectsClient: SavedObjectsClientContra
     });
   }
 
-  async function filterJobIdsForSpace(jobType: JobType, ids: string[]): Promise<string[]> {
-    return filterJobObjectIdsForSpace(jobType, ids, 'job_id');
+  async function filterJobIdsForSpace(
+    jobType: JobType,
+    ids: string[],
+    allowWildcards: boolean = false
+  ): Promise<string[]> {
+    return filterJobObjectIdsForSpace(jobType, ids, 'job_id', allowWildcards);
   }
 
-  async function filterDatafeedIdsForSpace(ids: string[]): Promise<string[]> {
-    return filterJobObjectIdsForSpace('anomaly-detector', ids, 'datafeed_id');
+  async function filterDatafeedIdsForSpace(
+    ids: string[],
+    allowWildcards: boolean = false
+  ): Promise<string[]> {
+    return filterJobObjectIdsForSpace('anomaly-detector', ids, 'datafeed_id', allowWildcards);
   }
 
   async function jobsExists(jobType: JobType, ids: string[]) {
-    const existIds = await filterJobObjectIdsForSpace(jobType, ids, 'job_id');
+    const existIds = await filterJobObjectIdsForSpace(jobType, ids, 'job_id', false);
     return ids.map((id) =>
       existIds.includes(id)
         ? { exists: true }

@@ -35,8 +35,7 @@ export function getMlClient(client: IScopedClusterClient, jobsInSpaces: JobsInSp
       const filteredJobIds = await jobsInSpaces.filterJobIdsForSpace(jobType, jobIds);
       const missingIds = jobIds.filter((j) => filteredJobIds.indexOf(j) === -1);
       if (missingIds.length) {
-        throw new MLJobNotFound(`${missingIds.join(',')} missing`);
-        // throw Boom.notFound(`${missingIds.join(',')} missing`);
+        throw new MLJobNotFound(`No known job with id '${missingIds.join(',')}'`);
       }
     }
   }
@@ -47,8 +46,7 @@ export function getMlClient(client: IScopedClusterClient, jobsInSpaces: JobsInSp
       const filteredDatafeedIds = await jobsInSpaces.filterDatafeedIdsForSpace(datafeedIds);
       const missingIds = datafeedIds.filter((j) => filteredDatafeedIds.indexOf(j) === -1);
       if (missingIds.length) {
-        throw new MLJobNotFound(`${missingIds.join(',')} missing`);
-        // throw Boom.notFound(`${missingIds.join(',')} missing`);
+        throw new MLJobNotFound(`No known job with id '${missingIds.join(',')}'`);
       }
     }
   }
@@ -211,26 +209,36 @@ export function getMlClient(client: IScopedClusterClient, jobsInSpaces: JobsInSp
       return mlClient.getInfluencers(...p);
     },
     async getJobStats(...p: Parameters<MlClient['getJobStats']>) {
-      await jobIdsCheck('anomaly-detector', p);
-      const { body } = await mlClient.getJobStats<{ jobs: JobStats[] }>(...p);
-      const jobs = await jobsInSpaces.filterJobsForSpace<JobStats>(
-        'anomaly-detector',
-        body.jobs,
-        'job_id'
-      );
-      return { body: { ...body, count: jobs.length, jobs } };
+      try {
+        const { body } = await mlClient.getJobStats<{ jobs: JobStats[] }>(...p);
+        const jobs = await jobsInSpaces.filterJobsForSpace<JobStats>(
+          'anomaly-detector',
+          body.jobs,
+          'job_id'
+        );
+        return { body: { ...body, count: jobs.length, jobs } };
+      } catch (error) {
+        if (error.statusCode === 404) {
+          throw new MLJobNotFound(error.body.error.reason);
+        }
+        throw error.body ?? error;
+      }
     },
     async getJobs(...p: Parameters<MlClient['getJobs']>) {
-      await jobIdsCheck('anomaly-detector', p);
-      // if ids specified, should we get only use for the get jobs?
-      // we would have to expand wildcards and send them to getJobs
-      const { body } = await mlClient.getJobs<{ jobs: Job[] }>(...p);
-      const jobs = await jobsInSpaces.filterJobsForSpace<Job>(
-        'anomaly-detector',
-        body.jobs,
-        'job_id'
-      );
-      return { body: { ...body, count: jobs.length, jobs } };
+      try {
+        const { body } = await mlClient.getJobs<{ jobs: Job[] }>(...p);
+        const jobs = await jobsInSpaces.filterJobsForSpace<Job>(
+          'anomaly-detector',
+          body.jobs,
+          'job_id'
+        );
+        return { body: { ...body, count: jobs.length, jobs } };
+      } catch (error) {
+        if (error.statusCode === 404) {
+          throw new MLJobNotFound(error.body.error.reason);
+        }
+        throw error.body ?? error;
+      }
     },
     async getModelSnapshots(...p: Parameters<MlClient['getModelSnapshots']>) {
       await jobIdsCheck('anomaly-detector', p);
