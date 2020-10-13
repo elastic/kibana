@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { ValidationFunc, fieldValidators } from '../../../../../../shared_imports';
 
 export const positiveNumberRequiredMessage = i18n.translate(
-  'xpack.indexLifecycleMgmt.editPolicy.positiveNumberRequiredError',
+  'xpack.indexLifecycleMgmt.editPolicy.numberAboveZeroRequiredError',
   {
     defaultMessage: 'Only numbers above 0 are allowed.',
   }

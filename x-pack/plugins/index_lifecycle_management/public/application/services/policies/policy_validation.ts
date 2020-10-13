@@ -33,27 +33,6 @@ export const positiveNumberRequiredMessage = i18n.translate(
   }
 );
 
-export const maximumAgeRequiredMessage = i18n.translate(
-  'xpack.indexLifecycleMgmt.editPolicy.maximumAgeMissingError',
-  {
-    defaultMessage: 'A maximum age is required.',
-  }
-);
-
-export const maximumSizeRequiredMessage = i18n.translate(
-  'xpack.indexLifecycleMgmt.editPolicy.maximumIndexSizeMissingError',
-  {
-    defaultMessage: 'A maximum index size is required.',
-  }
-);
-
-export const maximumDocumentsRequiredMessage = i18n.translate(
-  'xpack.indexLifecycleMgmt.editPolicy.maximumDocumentsMissingError',
-  {
-    defaultMessage: 'Maximum documents is required.',
-  }
-);
-
 export const positiveNumbersAboveZeroErrorMessage = i18n.translate(
   'xpack.indexLifecycleMgmt.editPolicy.positiveNumberAboveZeroRequiredError',
   {
