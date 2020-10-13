@@ -858,6 +858,12 @@ export interface PolicyConfig {
     logging: {
       file: string;
     };
+    popup: {
+      malware: {
+        message: string;
+        enabled: boolean;
+      };
+    };
   };
   mac: {
     events: {
@@ -866,6 +872,12 @@ export interface PolicyConfig {
       network: boolean;
     };
     malware: MalwareFields;
+    popup: {
+      malware: {
+        message: string;
+        enabled: boolean;
+      };
+    };
     logging: {
       file: string;
     };
@@ -889,11 +901,11 @@ export interface UIPolicyConfig {
   /**
    * Windows-specific policy configuration that is supported via the UI
    */
-  windows: Pick<PolicyConfig['windows'], 'events' | 'malware'>;
+  windows: Pick<PolicyConfig['windows'], 'events' | 'malware' | 'popup'>;
   /**
    * Mac-specific policy configuration that is supported via the UI
    */
-  mac: Pick<PolicyConfig['mac'], 'malware' | 'events'>;
+  mac: Pick<PolicyConfig['mac'], 'malware' | 'events' | 'popup'>;
   /**
    * Linux-specific policy configuration that is supported via the UI
    */
@@ -903,7 +915,6 @@ export interface UIPolicyConfig {
 /** Policy: Malware protection fields */
 export interface MalwareFields {
   mode: ProtectionModes;
-  userNotification?: boolean;
 }
 
 /** Policy protection mode options */
