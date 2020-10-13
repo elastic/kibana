@@ -127,7 +127,7 @@ image::getting-started/images/tutorial-visualization-dropdown.png[Visualization 
 
 . On the *Save Lens visualization*, enter a title and make sure *Add to Dashboard after saving* is selected, then click *Save and return*.
 +
-The treemap appears as the last visualization panel ßon the dashboard.
+The treemap appears as the last visualization panel on the dashboard.
 +
 [role="screenshot"]
 image::getting-started/images/tutorial-final-dashboard.gif[Final dashboard with new treemap visualization]
