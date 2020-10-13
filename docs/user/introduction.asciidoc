@@ -156,5 +156,4 @@ You can also <<install, install {kib} on your own>> &mdash; no code, no addi
 infrastructure required.
 
 Our <<get-started, Quick start>> and in-product guidance can
-help you get up and running, faster. Click the help icon image:images/intro-help-icon.png[]
-in the top navigation bar for help with questions or to provide feedback.
+help you get up and running, faster. Click the help icon image:images/intro-help-icon.png[Help icon in navigation bar] for help with questions or to provide feedback.
