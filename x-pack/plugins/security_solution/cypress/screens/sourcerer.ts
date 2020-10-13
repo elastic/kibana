@@ -12,7 +12,7 @@ export const SOURCERER_OPTIONS =
 export const SOURCERER_SAVE_BUTTON = 'button[data-test-subj="add-index"]';
 export const SOURCERER_RESET_BUTTON = 'button[data-test-subj="sourcerer-reset"]';
 export const SOURCERER_POPOVER_TITLE = '.euiPopoverTitle';
-export const HOSTS_STAT = '[data-test-subj="stat-title"]';
+export const HOSTS_STAT = '[data-test-subj="stat-hosts"] [data-test-subj="stat-title"]';
 
 export const SOURCERER_TIMELINE = {
   trigger: '[data-test-subj="sourcerer-timeline-trigger"]',

@@ -9,9 +9,9 @@ import { loginAndWaitForPage } from '../tasks/login';
 import { HOSTS_URL } from '../urls/navigation';
 import { waitForAllHostsToBeLoaded } from '../tasks/hosts/all_hosts';
 import {
-  deselectSourcererOptions,
   clickOutOfSourcererTimeline,
   clickTimelineRadio,
+  deselectSourcererOptions,
   isCustomRadio,
   isHostsStatValue,
   isNotCustomRadio,
@@ -66,14 +66,7 @@ describe('Sourcerer', () => {
   });
   describe('Timeline scope', () => {
     const alertPatterns = ['.siem-signals-default'];
-    const rawPatterns = [
-      'auditbeat-*',
-      'endgame-*',
-      'filebeat-*',
-      'logs-*',
-      'packetbeat-*',
-      'winlogbeat-*',
-    ];
+    const rawPatterns = ['auditbeat-*'];
     const allPatterns = [...alertPatterns, ...rawPatterns];
     it('Radio buttons select correct sourcerer patterns', () => {
       openTimelineUsingToggle();
@@ -86,25 +79,21 @@ describe('Sourcerer', () => {
       alertPatterns.forEach((ss) => isSourcererSelection(ss, 'timeline'));
       rawPatterns.forEach((ss) => isNotSourcererSelection(ss, 'timeline'));
     });
-    it('Removing an option results in the custom radio becoming active', () => {
+    it('Adding an option results in the custom radio becoming active', () => {
       openTimelineUsingToggle();
       openSourcerer('timeline');
       isNotCustomRadio();
       clickOutOfSourcererTimeline();
-      const luckyOption = 'winlogbeat-*';
-      unsetSourcererOption(luckyOption, 'timeline');
+      const luckyOption = 'logs-*';
+      setSourcererOption(luckyOption, 'timeline');
       openSourcerer('timeline');
       isCustomRadio();
-      isSourcererOptions([luckyOption], 'timeline');
     });
     it('Selected index patterns are properly queried', () => {
       openTimelineUsingToggle();
       populateTimeline();
       openSourcerer('timeline');
-      deselectSourcererOptions(
-        allPatterns.filter((n) => n !== 'endgame-*'),
-        'timeline'
-      );
+      deselectSourcererOptions(rawPatterns, 'timeline');
       cy.get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')
         .then((strCount) => {
