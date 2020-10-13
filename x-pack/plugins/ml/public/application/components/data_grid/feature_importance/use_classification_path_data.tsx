@@ -85,7 +85,7 @@ export const useDecisionPathData = ({
 
 export const buildDecisionPathData = (featureImportance: ExtendedFeatureImportance[]) => {
   const finalResult: DecisionPathPlotData = featureImportance
-    // sort so absolute importance so it goes from bottom (baseline) to top
+    // sort by absolute importance so it goes from bottom (baseline) to top
     .sort(
       (a: ExtendedFeatureImportance, b: ExtendedFeatureImportance) =>
         b.absImportance! - a.absImportance!
@@ -170,7 +170,9 @@ export const buildClassificationDecisionPathData = ({
     ExtendedFeatureImportance | undefined
   > = featureImportance.map((feature) => {
     const classFeatureImportance = Array.isArray(feature.classes)
-      ? feature.classes.find((c) => getStringBasedClassName(c.class_name) === currentClass)
+      ? feature.classes.find(
+          (c) => getStringBasedClassName(c.class_name) === getStringBasedClassName(currentClass)
+        )
       : feature;
     if (classFeatureImportance && typeof classFeatureImportance[FEATURE_IMPORTANCE] === 'number') {
       return {
@@ -184,14 +186,14 @@ export const buildClassificationDecisionPathData = ({
 
   // get the baseline for the current class from the trained_models metadata
   const baselineClass = baselines.find(
-    (bl) => getStringBasedClassName(bl.class_name) === currentClass
+    (bl) => getStringBasedClassName(bl.class_name) === getStringBasedClassName(currentClass)
   );
   const filteredFeatureImportance = mappedFeatureImportance.filter(
     (f) => f !== undefined
   ) as ExtendedFeatureImportance[];
 
   const finalResult: DecisionPathPlotData = filteredFeatureImportance
-    // sort so absolute importance so it goes from bottom (baseline) to top
+    // sort by absolute importance so it goes from bottom (baseline) to top
     .sort(
       (a: ExtendedFeatureImportance, b: ExtendedFeatureImportance) =>
         b.absImportance! - a.absImportance!
@@ -226,7 +228,9 @@ export const buildClassificationDecisionPathData = ({
       .map((feature) => {
         const classFeatureImportance = Array.isArray(feature.classes)
           ? feature.classes.find(
-              (c) => getStringBasedClassName(c.class_name) === baselines[x].class_name
+              (c) =>
+                getStringBasedClassName(c.class_name) ===
+                getStringBasedClassName(baselines[x].class_name)
             )
           : feature;
         if (
