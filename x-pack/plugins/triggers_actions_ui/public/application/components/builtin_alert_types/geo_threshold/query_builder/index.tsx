@@ -72,6 +72,7 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
   const {
     index,
     indexId,
+    indexQuery,
     geoField,
     entity,
     dateField,
@@ -79,6 +80,7 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
     boundaryType,
     boundaryIndexTitle,
     boundaryIndexId,
+    boundaryIndexQuery,
     boundaryGeoField,
     boundaryNameField,
     delayOffsetWithUnits,
@@ -246,6 +248,19 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
         indexFields={indexPattern.fields}
         isInvalid={indexId && dateField && geoField ? !entity : false}
       />
+      <EuiSpacer size="s" />
+      <EuiFlexItem>
+        <QueryStringInput
+          indexPatterns={indexPattern ? [indexPattern] : []}
+          query={
+            indexQuery || {
+              query: '',
+              language: 'KQL',
+            }
+          }
+          onSubmit={({ query }) => setAlertParams('indexQuery', query)}
+        />
+      </EuiFlexItem>
 
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
