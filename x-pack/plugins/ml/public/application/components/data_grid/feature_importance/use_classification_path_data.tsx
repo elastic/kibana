@@ -101,6 +101,11 @@ export const buildDecisionPathData = (featureImportance: ExtendedFeatureImportan
   }
   return finalResult;
 };
+
+/**
+ * Returns values to build decision path for regression jobs
+ * where first data point of array is the final predicted value (end of decision path)
+ */
 export const buildRegressionDecisionPathData = ({
   baseline,
   featureImportance,
@@ -155,6 +160,10 @@ export const buildRegressionDecisionPathData = ({
   return buildDecisionPathData(filteredFeatureImportance);
 };
 
+/**
+ * Returns values to build decision path for classification jobs
+ * where first data point of array is the final predicted probability (end of decision path)
+ */
 export const buildClassificationDecisionPathData = ({
   baselines,
   featureImportance,

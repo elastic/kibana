@@ -11,7 +11,7 @@ import {
 import { FeatureImportance } from '../../../../../common/types/feature_importance';
 
 describe('useDecisionPathData', () => {
-  test('buildRegressionDecisionPathData() should yield correct decision path', () => {
+  test('buildRegressionDecisionPathData() should return correct decision path', () => {
     const predictedValue = 0.008000000000000005;
     const baseline = 0.01570748450465414;
     const featureImportanceData: FeatureImportance[] = [
@@ -38,7 +38,7 @@ describe('useDecisionPathData', () => {
     }
   });
 
-  test('buildClassificationDecisionPathData() should yield correct prediction probability for binary classification', () => {
+  test('buildClassificationDecisionPathData() should return correct prediction probability for binary classification', () => {
     const expectedResults = [
       { className: 'yes', probability: 0.35859594377154846 },
       { className: 'no', probability: 1 - 0.35859594377154846 },
@@ -154,12 +154,13 @@ describe('useDecisionPathData', () => {
         expect(result).toHaveLength(featureImportanceData.length);
         expect(result[0]).toHaveLength(3);
         expect(featureNames).toContain(result[0][0]);
+        // top of the path (first data point in result) should have the same probability as the predicted probability
         expect(result[0][2]).toEqual(probability);
       }
     }
   });
 
-  test('buildClassificationDecisionPathData() should yield correct prediction probability for multiclass classification', () => {
+  test('buildClassificationDecisionPathData() should return correct prediction probability for multiclass classification', () => {
     const expectedResults = [{ className: 1, probability: 0.20242385407147057 }];
     const baselinesData = {
       classes: [
