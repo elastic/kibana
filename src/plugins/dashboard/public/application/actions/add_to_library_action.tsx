@@ -41,7 +41,7 @@ export class AddToLibraryAction implements ActionByType<typeof ACTION_ADD_TO_LIB
   public readonly id = ACTION_ADD_TO_LIBRARY;
   public order = 15;
 
-  constructor(private toasts: NotificationsStart['toasts']) {}
+  constructor(private deps: { toasts: NotificationsStart['toasts'] }) {}
 
   public getDisplayName({ embeddable }: AddToLibraryActionContext) {
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
@@ -95,7 +95,7 @@ export class AddToLibraryAction implements ActionByType<typeof ACTION_ADD_TO_LIB
       defaultMessage: `Panel '{panelTitle}' was added to the visualize library`,
       values: { panelTitle: embeddable.getTitle() },
     });
-    this.toasts.addSuccess({
+    this.deps.toasts.addSuccess({
       title,
       'data-test-subj': 'unlinkPanelSuccess',
     });

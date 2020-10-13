@@ -68,14 +68,13 @@ function renderNotifications(
     const context = { embeddable };
 
     let badge = notification.MenuItem ? (
-      <span key={notification.id}>
-        {React.createElement(uiToReactComponent(notification.MenuItem), {
-          context: {
-            embeddable,
-            trigger: panelNotificationTrigger,
-          },
-        })}
-      </span>
+      React.createElement(uiToReactComponent(notification.MenuItem), {
+        key: notification.id,
+        context: {
+          embeddable,
+          trigger: panelNotificationTrigger,
+        },
+      })
     ) : (
       <EuiNotificationBadge
         data-test-subj={`embeddablePanelNotification-${notification.id}`}

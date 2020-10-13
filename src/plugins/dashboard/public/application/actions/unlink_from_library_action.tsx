@@ -41,7 +41,7 @@ export class UnlinkFromLibraryAction implements ActionByType<typeof ACTION_UNLIN
   public readonly id = ACTION_UNLINK_FROM_LIBRARY;
   public order = 15;
 
-  constructor(private toasts: NotificationsStart['toasts']) {}
+  constructor(private deps: { toasts: NotificationsStart['toasts'] }) {}
 
   public getDisplayName({ embeddable }: UnlinkFromLibraryActionContext) {
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
@@ -92,13 +92,13 @@ export class UnlinkFromLibraryAction implements ActionByType<typeof ACTION_UNLIN
 
     const title = embeddable.getTitle()
       ? i18n.translate('dashboard.panel.unlinkFromLibrary.successMessageWithTitle', {
-          defaultMessage: `Panel '{panelTitle}' was unlinked from the visualize library`,
+          defaultMessage: `Panel '{panelTitle}' is no longer connected to the visualize library`,
           values: { panelTitle: embeddable.getTitle() },
         })
       : i18n.translate('dashboard.panel.unlinkFromLibrary.successMessage', {
-          defaultMessage: `Panel was unlinked from the visualize library`,
+          defaultMessage: `Panel is no longer connected to the visualize library`,
         });
-    this.toasts.addSuccess({
+    this.deps.toasts.addSuccess({
       title,
       'data-test-subj': 'unlinkPanelSuccess',
     });
