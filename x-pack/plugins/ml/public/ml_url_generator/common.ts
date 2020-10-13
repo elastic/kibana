@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import isEmpty from 'lodash/isEmpty';
+import { isEmpty } from 'lodash';
 import { MlGenericUrlState } from '../../common/types/ml_url_generator';
 import { setStateToKbnUrl } from '../../../../../src/plugins/kibana_utils/public';
 

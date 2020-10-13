@@ -6,7 +6,18 @@
 import { get } from 'lodash';
 import { AlertCluster } from '../../alerts/types';
 
-export async function fetchClusters(callCluster: any, index: string): Promise<AlertCluster[]> {
+interface RangeFilter {
+  [field: string]: {
+    format?: string;
+    gte: string | number;
+  };
+}
+
+export async function fetchClusters(
+  callCluster: any,
+  index: string,
+  rangeFilter: RangeFilter = { timestamp: { gte: 'now-2m' } }
+): Promise<AlertCluster[]> {
   const params = {
     index,
     filterPath: [
@@ -25,11 +36,7 @@ export async function fetchClusters(callCluster: any, index: string): Promise<Al
               },
             },
             {
-              range: {
-                timestamp: {
-                  gte: 'now-2m',
-                },
-              },
+              range: rangeFilter,
             },
           ],
         },

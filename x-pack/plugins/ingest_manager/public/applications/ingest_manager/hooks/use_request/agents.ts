@@ -22,6 +22,10 @@ import {
   GetAgentsResponse,
   GetAgentStatusRequest,
   GetAgentStatusResponse,
+  PostAgentUpgradeRequest,
+  PostBulkAgentUpgradeRequest,
+  PostAgentUpgradeResponse,
+  PostBulkAgentUpgradeResponse,
 } from '../../types';
 
 type RequestOptions = Pick<Partial<UseRequestConfig>, 'pollIntervalMs'>;
@@ -121,6 +125,31 @@ export function sendPostBulkAgentUnenroll(
 ) {
   return sendRequest<PostBulkAgentUnenrollResponse>({
     path: agentRouteService.getBulkUnenrollPath(),
+    method: 'post',
+    body,
+    ...options,
+  });
+}
+
+export function sendPostAgentUpgrade(
+  agentId: string,
+  body: PostAgentUpgradeRequest['body'],
+  options?: RequestOptions
+) {
+  return sendRequest<PostAgentUpgradeResponse>({
+    path: agentRouteService.getUpgradePath(agentId),
+    method: 'post',
+    body,
+    ...options,
+  });
+}
+
+export function sendPostBulkAgentUpgrade(
+  body: PostBulkAgentUpgradeRequest['body'],
+  options?: RequestOptions
+) {
+  return sendRequest<PostBulkAgentUpgradeResponse>({
+    path: agentRouteService.getBulkUpgradePath(),
     method: 'post',
     body,
     ...options,

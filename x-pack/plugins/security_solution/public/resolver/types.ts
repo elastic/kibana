@@ -227,6 +227,17 @@ export interface NodeEventsInCategoryState {
    * The cursor, if any, that can be used to retrieve more events.
    */
   cursor: null | string;
+
+  /**
+   * The cursor, if any, that was last used to fetch additional related events.
+   */
+
+  lastCursorRequested?: null | string;
+
+  /**
+   * Flag for showing an error message when fetching additional related events.
+   */
+  error?: boolean;
 }
 
 /**
@@ -244,6 +255,15 @@ export interface DataState {
    * If new data is returned for the panel view, this may be updated.
    */
   readonly nodeEventsInCategory?: NodeEventsInCategoryState;
+
+  /**
+   * Used when the panelView is `eventDetail`.
+   *
+   */
+  readonly currentRelatedEvent: {
+    loading: boolean;
+    data: SafeResolverEvent | null;
+  };
 
   readonly tree?: {
     /**

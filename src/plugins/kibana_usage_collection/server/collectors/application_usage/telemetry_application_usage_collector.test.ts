@@ -17,7 +17,11 @@
  * under the License.
  */
 
-import { savedObjectsRepositoryMock, loggingSystemMock } from '../../../../../core/server/mocks';
+import {
+  savedObjectsRepositoryMock,
+  loggingSystemMock,
+  elasticsearchServiceMock,
+} from '../../../../../core/server/mocks';
 import {
   CollectorOptions,
   createUsageCollectionSetupMock,
@@ -50,6 +54,7 @@ describe('telemetry_application_usage', () => {
   const getUsageCollector = jest.fn();
   const registerType = jest.fn();
   const callCluster = jest.fn();
+  const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
   beforeAll(() =>
     registerApplicationUsageCollector(logger, usageCollectionMock, registerType, getUsageCollector)
@@ -62,7 +67,7 @@ describe('telemetry_application_usage', () => {
 
   test('if no savedObjectClient initialised, return undefined', async () => {
     expect(collector.isReady()).toBe(false);
-    expect(await collector.fetch(callCluster)).toBeUndefined();
+    expect(await collector.fetch(callCluster, esClient)).toBeUndefined();
     jest.runTimersToTime(ROLL_INDICES_START);
   });
 
@@ -80,7 +85,7 @@ describe('telemetry_application_usage', () => {
     jest.runTimersToTime(ROLL_TOTAL_INDICES_INTERVAL); // Force rollTotals to run
 
     expect(collector.isReady()).toBe(true);
-    expect(await collector.fetch(callCluster)).toStrictEqual({});
+    expect(await collector.fetch(callCluster, esClient)).toStrictEqual({});
     expect(savedObjectClient.bulkCreate).not.toHaveBeenCalled();
   });
 
@@ -137,7 +142,7 @@ describe('telemetry_application_usage', () => {
 
     jest.runTimersToTime(ROLL_TOTAL_INDICES_INTERVAL); // Force rollTotals to run
 
-    expect(await collector.fetch(callCluster)).toStrictEqual({
+    expect(await collector.fetch(callCluster, esClient)).toStrictEqual({
       appId: {
         clicks_total: total + 1 + 10,
         clicks_7_days: total + 1,
@@ -197,7 +202,7 @@ describe('telemetry_application_usage', () => {
 
     getUsageCollector.mockImplementation(() => savedObjectClient);
 
-    expect(await collector.fetch(callCluster)).toStrictEqual({
+    expect(await collector.fetch(callCluster, esClient)).toStrictEqual({
       appId: {
         clicks_total: 1,
         clicks_7_days: 0,

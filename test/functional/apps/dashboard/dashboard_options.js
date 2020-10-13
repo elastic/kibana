@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.checkHideTitle();
       await retry.try(async () => {
         const titles = await PageObjects.dashboard.getPanelTitles();
-        expect(titles[0]).to.eql(undefined);
+        expect(titles[0]).to.eql('');
       });
     });
 

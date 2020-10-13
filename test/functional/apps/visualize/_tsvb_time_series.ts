@@ -84,8 +84,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await visualBuilder.clickSeriesOption();
         await visualBuilder.enterSeriesTemplate('$ {{value}}');
-        const actualCount = await visualBuilder.getRhythmChartLegendValue();
-        expect(actualCount).to.be(expectedLegendValue);
+        await retry.try(async () => {
+          const actualCount = await visualBuilder.getRhythmChartLegendValue();
+          expect(actualCount).to.be(expectedLegendValue);
+        });
       });
 
       it('should show the correct count in the legend with percent formatter', async () => {

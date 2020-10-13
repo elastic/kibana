@@ -196,7 +196,7 @@
       "type": "fleet-agent-actions",
       "fleet-agent-actions": {
         "agent_id": "agent1",
-        "type": "CONFIG_CHANGE",
+        "type": "POLICY_CHANGE",
         "created_at": "2020-03-15T03:47:15.129Z",
         "sent_at": "2020-03-04T15:03:07+0000"
       }
@@ -213,7 +213,7 @@
       "type": "fleet-agent-actions",
       "fleet-agent-actions": {
         "agent_id": "agent1",
-        "type": "CONFIG_CHANGE",
+        "type": "POLICY_CHANGE",
         "created_at": "2020-03-15T03:47:15.129Z",
         "sent_at": "2020-03-04T15:03:07+0000"
       }

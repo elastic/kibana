@@ -53,7 +53,7 @@ export const getDefaultWhenTooltipIsUnspecified = ({
 /**
  * Renders the content of the draggable, wrapped in a tooltip
  */
-const Content = React.memo<{
+export const Content = React.memo<{
   children?: React.ReactNode;
   field: string;
   tooltipContent?: React.ReactNode;
@@ -135,7 +135,7 @@ DefaultDraggable.displayName = 'DefaultDraggable';
 
 export const Badge = styled(EuiBadge)`
   vertical-align: top;
-` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+`;
 
 Badge.displayName = 'Badge';
 

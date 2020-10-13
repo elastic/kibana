@@ -67,7 +67,7 @@ describe('ExpressionsPublicPlugin', () => {
         const { doStart } = await expressionsPluginMock.createPlugin();
         const start = await doStart();
 
-        const handler = start.execute('clog');
+        const handler = start.execute('clog', null);
         expect(handler.getAst()).toMatchInlineSnapshot(`
           Object {
             "chain": Array [
@@ -85,7 +85,7 @@ describe('ExpressionsPublicPlugin', () => {
       test('"kibana" function return value of type "kibana_context"', async () => {
         const { doStart } = await expressionsPluginMock.createPlugin();
         const start = await doStart();
-        const execution = start.execute('kibana');
+        const execution = start.execute('kibana', null);
         const result = await execution.getData();
 
         expect((result as any).type).toBe('kibana_context');

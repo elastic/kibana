@@ -20,7 +20,7 @@ import {
 import { isGraphableProcess, isTerminatedProcess } from '../../models/process_event';
 import * as indexedProcessTreeModel from '../../models/indexed_process_tree';
 import * as eventModel from '../../../../common/endpoint/models/event';
-
+import * as nodeEventsInCategoryModel from './node_events_in_category_model';
 import {
   ResolverTree,
   ResolverNodeStats,
@@ -183,6 +183,27 @@ export function relatedEventsByEntityId(data: DataState): Map<string, ResolverRe
   return data.relatedEvents;
 }
 
+/**
+ *
+ *
+ * @export
+ * @param {DataState} state
+ * @returns the loading state of the current related event data for the `event_detail` view
+ */
+export function isCurrentRelatedEventLoading(state: DataState) {
+  return state.currentRelatedEvent.loading;
+}
+
+/**
+ *
+ *
+ * @export
+ * @param {DataState} state
+ * @returns {(SafeResolverEvent | null)} the current related event data for the `event_detail` view
+ */
+export function currentRelatedEventData(state: DataState): SafeResolverEvent | null {
+  return state.currentRelatedEvent.data;
+}
 /**
  * Get an event (from memory) by its `event.id`.
  * @deprecated Use the API to find events by ID
@@ -644,3 +665,74 @@ export const panelViewAndParameters = createSelector(
 export const nodeEventsInCategory = (state: DataState) => {
   return state.nodeEventsInCategory?.events ?? [];
 };
+
+export const lastRelatedEventResponseContainsCursor = createSelector(
+  (state: DataState) => state.nodeEventsInCategory,
+  panelViewAndParameters,
+  /* eslint-disable-next-line no-shadow */
+  function (nodeEventsInCategory, panelViewAndParameters) {
+    if (
+      nodeEventsInCategory !== undefined &&
+      nodeEventsInCategoryModel.isRelevantToPanelViewAndParameters(
+        nodeEventsInCategory,
+        panelViewAndParameters
+      )
+    ) {
+      return nodeEventsInCategory.cursor !== null;
+    } else {
+      return false;
+    }
+  }
+);
+
+export const hadErrorLoadingNodeEventsInCategory = createSelector(
+  (state: DataState) => state.nodeEventsInCategory,
+  panelViewAndParameters,
+  /* eslint-disable-next-line no-shadow */
+  function (nodeEventsInCategory, panelViewAndParameters) {
+    if (
+      nodeEventsInCategory !== undefined &&
+      nodeEventsInCategoryModel.isRelevantToPanelViewAndParameters(
+        nodeEventsInCategory,
+        panelViewAndParameters
+      )
+    ) {
+      return nodeEventsInCategory && nodeEventsInCategory.error === true;
+    } else {
+      return false;
+    }
+  }
+);
+
+export const isLoadingNodeEventsInCategory = createSelector(
+  (state: DataState) => state.nodeEventsInCategory,
+  panelViewAndParameters,
+  /* eslint-disable-next-line no-shadow */
+  function (nodeEventsInCategory, panelViewAndParameters) {
+    const { panelView } = panelViewAndParameters;
+    return panelView === 'nodeEventsInCategory' && nodeEventsInCategory === undefined;
+  }
+);
+
+export const isLoadingMoreNodeEventsInCategory = createSelector(
+  (state: DataState) => state.nodeEventsInCategory,
+  panelViewAndParameters,
+  /* eslint-disable-next-line no-shadow */
+  function (nodeEventsInCategory, panelViewAndParameters) {
+    if (
+      nodeEventsInCategory !== undefined &&
+      nodeEventsInCategoryModel.isRelevantToPanelViewAndParameters(
+        nodeEventsInCategory,
+        panelViewAndParameters
+      )
+    ) {
+      return (
+        nodeEventsInCategory &&
+        nodeEventsInCategory.lastCursorRequested !== null &&
+        nodeEventsInCategory.cursor === nodeEventsInCategory.lastCursorRequested
+      );
+    } else {
+      return false;
+    }
+  }
+);

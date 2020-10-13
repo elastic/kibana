@@ -441,6 +441,34 @@ describe('loader', () => {
       });
     });
 
+    it('should use the indexPatternId of the visualize trigger field, if provided', async () => {
+      const storage = createMockStorage();
+      const state = await loadInitialState({
+        savedObjectsClient: mockClient(),
+        indexPatternsService: mockIndexPatternsService(),
+        storage,
+        initialContext: {
+          indexPatternId: '1',
+          fieldName: '',
+        },
+      });
+
+      expect(state).toMatchObject({
+        currentIndexPatternId: '1',
+        indexPatternRefs: [
+          { id: '1', title: sampleIndexPatterns['1'].title },
+          { id: '2', title: sampleIndexPatterns['2'].title },
+        ],
+        indexPatterns: {
+          '1': sampleIndexPatterns['1'],
+        },
+        layers: {},
+      });
+      expect(storage.set).toHaveBeenCalledWith('lens-settings', {
+        indexPatternId: '1',
+      });
+    });
+
     it('should initialize from saved state', async () => {
       const savedState: IndexPatternPersistedState = {
         layers: {

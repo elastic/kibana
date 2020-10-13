@@ -58,6 +58,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
 
           expectSnapshot(serviceNames).toMatchInline(`
             Array [
+              "elastic-co-frontend",
               "opbeans-dotnet",
               "opbeans-go",
               "opbeans-java",
@@ -95,7 +96,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
           body.elements.forEach((element: { data: Record<string, any> }) => {
             environments.add(element.data['service.environment']);
           });
-          expect(environments.size).to.eql(1);
+
           expect(environments.has(ENVIRONMENT_NOT_DEFINED)).to.eql(true);
           expectSnapshot(body).toMatch();
         });
@@ -153,31 +154,17 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
           (el: { data: { serviceAnomalyStats?: {} } }) => !isEmpty(el.data.serviceAnomalyStats)
         );
 
-        expectSnapshot(dataWithAnomalies.length).toMatchInline(`6`);
+        expectSnapshot(dataWithAnomalies.length).toMatchInline(`5`);
         expectSnapshot(dataWithAnomalies.slice(0, 3)).toMatchInline(`
           Array [
             Object {
               "data": Object {
-                "agent.name": "rum-js",
-                "id": "opbeans-rum",
-                "service.environment": "testing",
-                "service.name": "opbeans-rum",
-                "serviceAnomalyStats": Object {
-                  "anomalyScore": 0,
-                  "healthStatus": "healthy",
-                  "jobId": "apm-environment_not_defined-7ed6-high_mean_transaction_duration",
-                  "transactionType": "page-load",
-                },
-              },
-            },
-            Object {
-              "data": Object {
-                "agent.name": "python",
-                "id": "opbeans-python",
+                "agent.name": "ruby",
+                "id": "opbeans-ruby",
                 "service.environment": "production",
-                "service.name": "opbeans-python",
+                "service.name": "opbeans-ruby",
                 "serviceAnomalyStats": Object {
-                  "actualValue": 66218.0833333333,
+                  "actualValue": 141536.936507937,
                   "anomalyScore": 0,
                   "healthStatus": "healthy",
                   "jobId": "apm-production-229a-high_mean_transaction_duration",
@@ -192,11 +179,24 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
                 "service.environment": "production",
                 "service.name": "opbeans-java",
                 "serviceAnomalyStats": Object {
-                  "actualValue": 14901.32,
+                  "actualValue": 559010.6,
                   "anomalyScore": 0,
                   "healthStatus": "healthy",
                   "jobId": "apm-production-229a-high_mean_transaction_duration",
                   "transactionType": "request",
+                },
+              },
+            },
+            Object {
+              "data": Object {
+                "agent.name": "rum-js",
+                "id": "elastic-co-frontend",
+                "service.name": "elastic-co-frontend",
+                "serviceAnomalyStats": Object {
+                  "anomalyScore": 0,
+                  "healthStatus": "healthy",
+                  "jobId": "apm-environment_not_defined-7ed6-high_mean_transaction_duration",
+                  "transactionType": "page-load",
                 },
               },
             },

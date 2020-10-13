@@ -28,7 +28,7 @@ describe('test agent acks services', () => {
             references: [],
             type: AGENT_ACTION_SAVED_OBJECT_TYPE,
             attributes: {
-              type: 'CONFIG_CHANGE',
+              type: 'POLICY_CHANGE',
               agent_id: 'id',
               sent_at: '2020-03-14T19:45:02.620Z',
               timestamp: '2019-01-04T14:32:03.36764-05:00',
@@ -61,7 +61,7 @@ describe('test agent acks services', () => {
     const mockSavedObjectsClient = savedObjectsClientMock.create();
 
     const actionAttributes = {
-      type: 'CONFIG_CHANGE',
+      type: 'POLICY_CHANGE',
       policy_id: 'policy1',
       policy_revision: 4,
       sent_at: '2020-03-14T19:45:02.620Z',
@@ -120,7 +120,7 @@ describe('test agent acks services', () => {
     const mockSavedObjectsClient = savedObjectsClientMock.create();
 
     const actionAttributes = {
-      type: 'CONFIG_CHANGE',
+      type: 'POLICY_CHANGE',
       policy_id: 'policy1',
       policy_revision: 4,
       sent_at: '2020-03-14T19:45:02.620Z',
@@ -180,7 +180,7 @@ describe('test agent acks services', () => {
     const mockSavedObjectsClient = savedObjectsClientMock.create();
 
     const actionAttributes = {
-      type: 'CONFIG_CHANGE',
+      type: 'POLICY_CHANGE',
       policy_id: 'policy1',
       policy_revision: 4,
       sent_at: '2020-03-14T19:45:02.620Z',
@@ -235,7 +235,7 @@ describe('test agent acks services', () => {
             references: [],
             type: AGENT_ACTION_SAVED_OBJECT_TYPE,
             attributes: {
-              type: 'CONFIG_CHANGE',
+              type: 'POLICY_CHANGE',
               sent_at: '2020-03-14T19:45:02.620Z',
               timestamp: '2019-01-04T14:32:03.36764-05:00',
               created_at: '2020-03-14T19:45:02.620Z',
@@ -319,7 +319,7 @@ describe('test agent acks services', () => {
             references: [],
             type: AGENT_ACTION_SAVED_OBJECT_TYPE,
             attributes: {
-              type: 'CONFIG_CHANGE',
+              type: 'POLICY_CHANGE',
               agent_id: 'id',
               sent_at: '2020-03-14T19:45:02.620Z',
               timestamp: '2019-01-04T14:32:03.36764-05:00',

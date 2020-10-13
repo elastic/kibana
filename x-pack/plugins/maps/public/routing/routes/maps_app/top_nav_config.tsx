@@ -123,75 +123,6 @@ export function getTopNavConfig({
     return { id: savedObjectId };
   }
 
-  if (hasSaveAndReturnConfig) {
-    topNavConfigs.push({
-      id: 'saveAndReturn',
-      label: i18n.translate('xpack.maps.topNav.saveAndReturnButtonLabel', {
-        defaultMessage: 'Save and return',
-      }),
-      emphasize: true,
-      iconType: 'check',
-      run: () => {
-        onSave({
-          newTitle: savedMap.title ? savedMap.title : '',
-          newDescription: savedMap.description ? savedMap.description : '',
-          newCopyOnSave: false,
-          isTitleDuplicateConfirmed: false,
-          returnToOrigin: true,
-          onTitleDuplicate: () => {},
-        });
-      },
-      testId: 'mapSaveAndReturnButton',
-    });
-  }
-
-  if (hasWritePermissions) {
-    topNavConfigs.push({
-      id: 'save',
-      label: hasSaveAndReturnConfig
-        ? i18n.translate('xpack.maps.topNav.saveAsButtonLabel', {
-            defaultMessage: 'Save as',
-          })
-        : i18n.translate('xpack.maps.topNav.saveMapButtonLabel', {
-            defaultMessage: `save`,
-          }),
-      description: i18n.translate('xpack.maps.topNav.saveMapDescription', {
-        defaultMessage: `Save map`,
-      }),
-      emphasize: !hasSaveAndReturnConfig,
-      testId: 'mapSaveButton',
-      disableButton() {
-        return isSaveDisabled;
-      },
-      tooltip() {
-        if (isSaveDisabled) {
-          return i18n.translate('xpack.maps.topNav.saveMapDisabledButtonTooltip', {
-            defaultMessage: 'Confirm or Cancel your layer changes before saving',
-          });
-        }
-      },
-      run: () => {
-        const saveModal = (
-          <SavedObjectSaveModalOrigin
-            originatingApp={originatingApp}
-            getAppNameFromId={stateTransfer?.getAppNameFromId}
-            onSave={onSave}
-            onClose={() => {}}
-            documentInfo={{
-              description: savedMap.description,
-              id: savedMap.id,
-              title: savedMap.title,
-            }}
-            objectType={i18n.translate('xpack.maps.topNav.saveModalType', {
-              defaultMessage: 'map',
-            })}
-          />
-        );
-        showSaveModal(saveModal, getCoreI18n().Context);
-      },
-    });
-  }
-
   topNavConfigs.push(
     {
       id: 'mapSettings',
@@ -237,6 +168,76 @@ export function getTopNavConfig({
       },
     }
   );
+
+  if (hasWritePermissions) {
+    topNavConfigs.push({
+      id: 'save',
+      iconType: hasSaveAndReturnConfig ? undefined : 'save',
+      label: hasSaveAndReturnConfig
+        ? i18n.translate('xpack.maps.topNav.saveAsButtonLabel', {
+            defaultMessage: 'Save as',
+          })
+        : i18n.translate('xpack.maps.topNav.saveMapButtonLabel', {
+            defaultMessage: `save`,
+          }),
+      description: i18n.translate('xpack.maps.topNav.saveMapDescription', {
+        defaultMessage: `Save map`,
+      }),
+      emphasize: !hasSaveAndReturnConfig,
+      testId: 'mapSaveButton',
+      disableButton() {
+        return isSaveDisabled;
+      },
+      tooltip() {
+        if (isSaveDisabled) {
+          return i18n.translate('xpack.maps.topNav.saveMapDisabledButtonTooltip', {
+            defaultMessage: 'Confirm or Cancel your layer changes before saving',
+          });
+        }
+      },
+      run: () => {
+        const saveModal = (
+          <SavedObjectSaveModalOrigin
+            originatingApp={originatingApp}
+            getAppNameFromId={stateTransfer?.getAppNameFromId}
+            onSave={onSave}
+            onClose={() => {}}
+            documentInfo={{
+              description: savedMap.description,
+              id: savedMap.id,
+              title: savedMap.title,
+            }}
+            objectType={i18n.translate('xpack.maps.topNav.saveModalType', {
+              defaultMessage: 'map',
+            })}
+          />
+        );
+        showSaveModal(saveModal, getCoreI18n().Context);
+      },
+    });
+  }
+
+  if (hasSaveAndReturnConfig) {
+    topNavConfigs.push({
+      id: 'saveAndReturn',
+      label: i18n.translate('xpack.maps.topNav.saveAndReturnButtonLabel', {
+        defaultMessage: 'Save and return',
+      }),
+      emphasize: true,
+      iconType: 'checkInCircleFilled',
+      run: () => {
+        onSave({
+          newTitle: savedMap.title ? savedMap.title : '',
+          newDescription: savedMap.description ? savedMap.description : '',
+          newCopyOnSave: false,
+          isTitleDuplicateConfirmed: false,
+          returnToOrigin: true,
+          onTitleDuplicate: () => {},
+        });
+      },
+      testId: 'mapSaveAndReturnButton',
+    });
+  }
 
   return topNavConfigs;
 }

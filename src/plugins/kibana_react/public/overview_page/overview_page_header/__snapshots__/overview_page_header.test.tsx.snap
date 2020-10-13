@@ -1,0 +1,68 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`OverviewPageHeader render 1`] = `
+<header
+  className="kbnOverviewPageHeader kbnOverviewPageHeader--noOverlap"
+>
+  <div
+    className="kbnOverviewPageHeader__inner"
+  >
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiFlexGroup
+          gutterSize="m"
+          responsive={false}
+        >
+          <EuiFlexItem>
+            <EuiTitle
+              size="m"
+            >
+              <h1
+                id="kbnOverviewPageHeader__title"
+              >
+                Page Title
+              </h1>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiFlexGroup
+          className="kbnOverviewPageHeader__actions"
+          responsive={false}
+          wrap={true}
+        >
+          <EuiFlexItem
+            className="kbnOverviewPageHeader__actionItem"
+            grow={false}
+          >
+            <mockConstructor
+              application={
+                Object {
+                  "capabilities": Object {
+                    "navLinks": Object {
+                      "dev_tools": true,
+                      "management": true,
+                    },
+                  },
+                }
+              }
+            >
+              <EuiButtonEmpty
+                className="kbnOverviewPageHeader__actionButton"
+                flush="both"
+                href="/app/home#/tutorial_directory"
+                iconType="indexOpen"
+              >
+                Add data
+              </EuiButtonEmpty>
+            </mockConstructor>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </div>
+</header>
+`;

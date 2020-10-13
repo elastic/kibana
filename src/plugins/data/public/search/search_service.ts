@@ -23,9 +23,13 @@ import { ISearchSetup, ISearchStart, SearchEnhancements } from './types';
 
 import { handleResponse } from './fetch';
 import {
-  createSearchSource,
+  IEsSearchRequest,
+  IEsSearchResponse,
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
   ISearchGeneric,
-  SearchSource,
+  ISearchOptions,
+  SearchSourceService,
   SearchSourceDependencies,
 } from '../../common/search';
 import { getCallMsearch } from './legacy';
@@ -57,6 +61,7 @@ export interface SearchServiceStartDependencies {
 
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private readonly aggsService = new AggsService();
+  private readonly searchSourceService = new SearchSourceService();
   private searchInterceptor!: ISearchInterceptor;
   private usageCollector?: SearchUsageCollector;
 
@@ -115,7 +120,15 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     const searchSourceDependencies: SearchSourceDependencies = {
       getConfig: uiSettings.get.bind(uiSettings),
-      search,
+      search: <
+        SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
+        SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
+      >(
+        request: SearchStrategyRequest,
+        options: ISearchOptions
+      ) => {
+        return search(request, options).toPromise() as Promise<SearchStrategyResponse>;
+      },
       onResponse: handleResponse,
       legacy: {
         callMsearch: getCallMsearch({ http }),
@@ -129,22 +142,12 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       showError: (e: Error) => {
         this.searchInterceptor.showError(e);
       },
-      searchSource: {
-        /**
-         * creates searchsource based on serialized search source fields
-         */
-        create: createSearchSource(indexPatterns, searchSourceDependencies),
-        /**
-         * creates an enpty search source
-         */
-        createEmpty: () => {
-          return new SearchSource({}, searchSourceDependencies);
-        },
-      },
+      searchSource: this.searchSourceService.start(indexPatterns, searchSourceDependencies),
     };
   }
 
   public stop() {
     this.aggsService.stop();
+    this.searchSourceService.stop();
   }
 }

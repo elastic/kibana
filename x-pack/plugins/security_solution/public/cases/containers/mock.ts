@@ -19,6 +19,7 @@ import {
   CasesFindResponse,
 } from '../../../../case/common/api/cases';
 import { UseGetCasesState, DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
+import { ConnectorTypes } from '../../../../case/common/api/connectors';
 export { connectorsMock } from './configure/mock';
 
 export const basicCaseId = 'basic-case-id';
@@ -58,7 +59,12 @@ export const basicCase: Case = {
   comments: [basicComment],
   createdAt: basicCreatedAt,
   createdBy: elasticUser,
-  connectorId: '123',
+  connector: {
+    id: '123',
+    name: 'My Connector',
+    type: ConnectorTypes.none,
+    fields: null,
+  },
   description: 'Security banana Issue',
   externalService: null,
   status: 'open',
@@ -199,7 +205,12 @@ export const basicCaseSnake: CaseResponse = {
   closed_at: null,
   closed_by: null,
   comments: [basicCommentSnake],
-  connector_id: '123',
+  connector: {
+    id: '123',
+    name: 'My Connector',
+    type: ConnectorTypes.none,
+    fields: null,
+  },
   created_at: basicCreatedAt,
   created_by: elasticUserSnake,
   external_service: null,

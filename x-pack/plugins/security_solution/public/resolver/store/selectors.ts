@@ -139,6 +139,22 @@ export const relatedEventCountByCategory: (
 );
 
 /**
+ * the loading state of the current related event data for the `event_detail` view
+ */
+export const isCurrentRelatedEventLoading = composeSelectors(
+  dataStateSelector,
+  dataSelectors.isCurrentRelatedEventLoading
+);
+
+/**
+ * the current related event data for the `event_detail` view
+ */
+export const currentRelatedEventData = composeSelectors(
+  dataStateSelector,
+  dataSelectors.currentRelatedEventData
+);
+
+/**
  * Map of related events... by entity id
  * @deprecated
  */
@@ -346,6 +362,37 @@ export const relatedEventCountOfTypeForNode = composeSelectors(
 export const nodeEventsInCategory = composeSelectors(
   dataStateSelector,
   dataSelectors.nodeEventsInCategory
+);
+
+/**
+ * Flag used to show a Load More Data button in the nodeEventsOfType panel view.
+ */
+export const lastRelatedEventResponseContainsCursor = composeSelectors(
+  dataStateSelector,
+  dataSelectors.lastRelatedEventResponseContainsCursor
+);
+
+/**
+ * Flag to show an error message when loading more related events.
+ */
+export const hadErrorLoadingNodeEventsInCategory = composeSelectors(
+  dataStateSelector,
+  dataSelectors.hadErrorLoadingNodeEventsInCategory
+);
+/**
+ * Flag used to show a loading view for the initial loading of related events.
+ */
+export const isLoadingNodeEventsInCategory = composeSelectors(
+  dataStateSelector,
+  dataSelectors.isLoadingNodeEventsInCategory
+);
+
+/**
+ * Flag used to show a loading state for any additional related events.
+ */
+export const isLoadingMoreNodeEventsInCategory = composeSelectors(
+  dataStateSelector,
+  dataSelectors.isLoadingMoreNodeEventsInCategory
 );
 
 /**

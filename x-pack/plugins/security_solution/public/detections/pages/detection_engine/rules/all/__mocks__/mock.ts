@@ -212,10 +212,13 @@ export const mockDefineStepRule = (): DefineStepRule => ({
   machineLearningJobId: '',
   index: ['filebeat-'],
   queryBar: mockQueryBar,
+  threatQueryBar: mockQueryBar,
+  threatMapping: [],
   timeline: {
     id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
     title: 'Titled timeline',
   },
+  threatIndex: [],
   threshold: {
     field: [''],
     value: '100',

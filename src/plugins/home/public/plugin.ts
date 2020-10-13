@@ -58,7 +58,12 @@ export interface HomePluginSetupDependencies {
 
 export class HomePublicPlugin
   implements
-    Plugin<HomePublicPluginSetup, void, HomePluginSetupDependencies, HomePluginStartDependencies> {
+    Plugin<
+      HomePublicPluginSetup,
+      HomePublicPluginStart,
+      HomePluginSetupDependencies,
+      HomePluginStartDependencies
+    > {
   private readonly featuresCatalogueRegistry = new FeatureCatalogueRegistry();
   private readonly environmentService = new EnvironmentService();
   private readonly tutorialService = new TutorialService();
@@ -128,39 +133,6 @@ export class HomePublicPlugin
       order: 500,
     });
 
-    featureCatalogue.registerSolution({
-      id: 'kibana',
-      title: i18n.translate('home.kibana.featureCatalogue.title', {
-        defaultMessage: 'Kibana',
-      }),
-      subtitle: i18n.translate('home.kibana.featureCatalogue.subtitle', {
-        defaultMessage: 'Visualize & analyze',
-      }),
-      descriptions: [
-        i18n.translate('home.kibana.featureCatalogueDescription1', {
-          defaultMessage: 'Analyze data in dashboards.',
-        }),
-        i18n.translate('home.kibana.featureCatalogueDescription2', {
-          defaultMessage: 'Search and find insights.',
-        }),
-        i18n.translate('home.kibana.featureCatalogueDescription3', {
-          defaultMessage: 'Design pixel-perfect reports.',
-        }),
-        i18n.translate('home.kibana.featureCatalogueDescription4', {
-          defaultMessage: 'Plot geographic data.',
-        }),
-        i18n.translate('home.kibana.featureCatalogueDescription5', {
-          defaultMessage: 'Model, predict, and detect.',
-        }),
-        i18n.translate('home.kibana.featureCatalogueDescription6', {
-          defaultMessage: 'Reveal patterns and relationships.',
-        }),
-      ],
-      icon: 'logoKibana',
-      path: '/app/dashboards',
-      order: 400,
-    });
-
     return {
       featureCatalogue,
       environment: { ...this.environmentService.setup() },
@@ -188,6 +160,8 @@ export class HomePublicPlugin
         }
       });
     }
+
+    return { featureCatalogue: this.featuresCatalogueRegistry };
   }
 }
 
@@ -211,4 +185,7 @@ export interface HomePublicPluginSetup {
    */
 
   environment: EnvironmentSetup;
+}
+export interface HomePublicPluginStart {
+  featureCatalogue: FeatureCatalogueRegistry;
 }

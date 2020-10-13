@@ -39,6 +39,7 @@ export function updatedWith(
       eventCategory: first.eventCategory,
       events: [...first.events, ...second.events],
       cursor: second.cursor,
+      lastCursorRequested: null,
     };
   } else {
     return undefined;

@@ -9,6 +9,7 @@ import {
   MLErrorObject,
   isBoomError,
   isErrorString,
+  isErrorMessage,
   isEsErrorBody,
   isMLResponseError,
 } from './types';
@@ -40,7 +41,7 @@ export const extractErrorProperties = (error: ErrorType): MLErrorObject => {
     };
   }
 
-  if (error?.body === undefined) {
+  if (error?.body === undefined && !error?.message) {
     return {
       message: '',
     };
@@ -68,6 +69,12 @@ export const extractErrorProperties = (error: ErrorType): MLErrorObject => {
         statusCode: error.body.statusCode,
       };
     }
+  }
+
+  if (isErrorMessage(error)) {
+    return {
+      message: error.message,
+    };
   }
 
   // If all else fail return an empty message instead of JSON.stringify

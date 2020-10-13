@@ -168,7 +168,7 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
             },
           ];
         }
-        return [];
+        return [{ value: '' }];
       },
       serializer: (fieldType: ComboBoxOption[] | undefined) =>
         fieldType && fieldType.length ? fieldType[0].value : fieldType,
@@ -273,15 +273,15 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
       min: {
         fieldConfig: {
           defaultValue: 0.01,
-          serializer: (value) => (value === '' ? '' : toInt(value) / 100),
-          deserializer: (value) => Math.round(value * 100),
+          serializer: (value: string) => (value === '' ? '' : toInt(value) / 100),
+          deserializer: (value: number) => Math.round(value * 100),
         } as FieldConfig,
       },
       max: {
         fieldConfig: {
           defaultValue: 1,
-          serializer: (value) => (value === '' ? '' : toInt(value) / 100),
-          deserializer: (value) => Math.round(value * 100),
+          serializer: (value: string) => (value === '' ? '' : toInt(value) / 100),
+          deserializer: (value: number) => Math.round(value * 100),
         } as FieldConfig,
       },
     },
@@ -949,8 +949,8 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
           ),
         },
       ],
-      serializer: (value: AliasOption[]) => (value.length === 0 ? '' : value[0].id),
-    } as FieldConfig<any, string>,
+      serializer: (value) => (value.length === 0 ? '' : value[0].id),
+    } as FieldConfig<string, {}, AliasOption[]>,
     targetTypesNotAllowed: ['object', 'nested', 'alias'] as DataType[],
     schema: t.string,
   },
@@ -991,14 +991,14 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
         fieldConfig: {
           type: FIELD_TYPES.NUMBER,
           defaultValue: 2,
-          serializer: (value) => (value === '' ? '' : toInt(value)),
+          serializer: (value: string) => (value === '' ? '' : toInt(value)),
         } as FieldConfig,
       },
       max_chars: {
         fieldConfig: {
           type: FIELD_TYPES.NUMBER,
           defaultValue: 5,
-          serializer: (value) => (value === '' ? '' : toInt(value)),
+          serializer: (value: string) => (value === '' ? '' : toInt(value)),
         } as FieldConfig,
       },
     },

@@ -14,6 +14,7 @@ import {
 } from 'kibana/public';
 import { ChartsPluginSetup } from 'src/plugins/charts/public';
 import { FieldFormatsRegistry } from 'src/plugins/data/common/field_formats';
+import { DataPublicPluginStartUi, IndexPatternsContract } from 'src/plugins/data/public';
 import { TypeRegistry } from '../type_registry';
 import { AlertTypeModel, ActionTypeModel } from '../../types';
 
@@ -29,6 +30,8 @@ export interface AlertsContextValue<MetaData = Record<string, any>> {
   docLinks: DocLinksStart;
   capabilities: ApplicationStart['capabilities'];
   metadata?: MetaData;
+  dataUi?: DataPublicPluginStartUi;
+  dataIndexPatterns?: IndexPatternsContract;
 }
 
 const AlertsContext = createContext<AlertsContextValue>(null as any);

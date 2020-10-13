@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Logger, LegacyAPICaller } from 'kibana/server';
+import { Logger, LegacyAPICaller, ElasticsearchClient } from 'kibana/server';
 
 export type CollectorFormatForBulkUpload<T, U> = (result: T) => { type: string; payload: U };
 
@@ -49,7 +49,7 @@ export interface CollectorOptions<T = unknown, U = T> {
   type: string;
   init?: Function;
   schema?: MakeSchemaFrom<T>;
-  fetch: (callCluster: LegacyAPICaller) => Promise<T> | T;
+  fetch: (callCluster: LegacyAPICaller, esClient?: ElasticsearchClient) => Promise<T> | T;
   /*
    * A hook for allowing the fetched data payload to be organized into a typed
    * data model for internal bulk upload. See defaultFormatterForBulkUpload for

@@ -30,9 +30,6 @@ export const INSPECT_MODAL = '[data-test-subj="modal-inspect-euiModal"]';
 export const INSPECT_QUERY =
   '[data-test-subj="events-viewer-panel"] [data-test-subj="inspect-icon-button"]';
 
-export const LOCAL_EVENTS_COUNT =
-  '[data-test-subj="events-viewer-panel"] [data-test-subj="local-events-count"';
-
 export const LOAD_MORE =
   '[data-test-subj="events-viewer-panel"] [data-test-subj="TimelineMoreButton"';
 

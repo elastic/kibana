@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import cloneDeep from 'lodash/cloneDeep';
-import each from 'lodash/each';
-import remove from 'lodash/remove';
-import sortBy from 'lodash/sortBy';
-import get from 'lodash/get';
+import { cloneDeep, each, remove, sortBy, get } from 'lodash';
 
 import { mlLog } from '../../client/log';
 

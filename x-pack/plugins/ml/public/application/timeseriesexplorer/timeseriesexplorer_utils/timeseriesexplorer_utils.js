@@ -10,9 +10,7 @@
  * Viewer dashboard.
  */
 
-import each from 'lodash/each';
-import get from 'lodash/get';
-import find from 'lodash/find';
+import { each, get, find } from 'lodash';
 import moment from 'moment-timezone';
 
 import { isTimeSeriesViewJob } from '../../../../common/util/job_utils';
