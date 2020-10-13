@@ -19,11 +19,17 @@
 
 import { ExpressionValueError } from '../../common';
 
-type ErrorLike = Partial<Pick<Error, 'name' | 'message' | 'stack'>>;
+export type SerializedError = {
+  name: string;
+  message: string;
+  stack?: string;
+};
 
-export const createError = (
-  err: string | Error | (ErrorLike & { original?: Error })
-): ExpressionValueError => ({
+export type ErrorLike = SerializedError & {
+  original?: SerializedError;
+};
+
+export const createError = (err: string | ErrorLike): ExpressionValueError => ({
   type: 'error',
   error: {
     stack:
