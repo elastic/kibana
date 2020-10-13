@@ -8,7 +8,7 @@
 .tbvChart {
   display: flex;
   flex-direction: column;
-  flex: 1 0 100%;
+  flex: 1 0 0;
   overflow: auto;
 
   @include euiScrollBar;

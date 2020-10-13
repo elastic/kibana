@@ -24,7 +24,6 @@ export const usePagination = (visParams: TableVisParams) => {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: visParams.perPage || 0,
-    pageSizeOptions: [visParams.perPage || 0, 50],
   });
   const onChangeItemsPerPage = useCallback(
     (pageSize: number) => setPagination((pag) => ({ ...pag, pageSize, pageIndex: 0 })),
@@ -39,7 +38,6 @@ export const usePagination = (visParams: TableVisParams) => {
     setPagination({
       pageIndex: 0,
       pageSize: visParams.perPage || 0,
-      pageSizeOptions: [visParams.perPage || 0, 50],
     });
   }, [visParams.perPage]);
 

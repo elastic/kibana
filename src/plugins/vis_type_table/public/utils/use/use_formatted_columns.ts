@@ -25,18 +25,22 @@ import { FormattedColumn, TableVisConfig, AggTypes } from '../../types';
 import { getFormatService } from '../../services';
 import { addPercentageColumn } from '../add_percentage_column';
 
-export const useFormattedColumnsAndRows = (table: Table, visParams: TableVisConfig) => {
-  const { formattedColumns: columns, formattedRows: rows } = useMemo(() => {
-    const { buckets, metrics, splitColumn, splitRow } = visParams.dimensions;
+export const useFormattedColumnsAndRows = (table: Table, visConfig: TableVisConfig) => {
+  const {
+    formattedColumns: columns,
+    formattedRows: rows,
+    splitRowGlobal: splitRow,
+  } = useMemo(() => {
+    const { buckets, metrics, splitColumn, splitRow: splitRowLocal } = visConfig.dimensions;
     // todo: use for split table by row/column
-    let splitRowGlobal: FormattedColumn;
+    let splitRowGlobal: FormattedColumn | undefined;
     let formattedRows = table.rows;
 
     let formattedColumns = table.columns
       .map<FormattedColumn | undefined>((col, i) => {
         const isBucket = buckets.find(({ accessor }) => accessor === i);
         const isSplitColumn = splitColumn?.find(({ accessor }) => accessor === i);
-        const isSplitRow = splitRow?.find(({ accessor }) => accessor === i);
+        const isSplitRow = splitRowLocal?.find(({ accessor }) => accessor === i);
         const dimension =
           isBucket || isSplitColumn || metrics.find(({ accessor }) => accessor === i);
 
@@ -59,7 +63,7 @@ export const useFormattedColumnsAndRows = (table: Table, visParams: TableVisConf
         // @ts-expect-error
         const allowsNumericalAggregations: boolean = formatter?.allowsNumericalAggregations;
 
-        if (allowsNumericalAggregations || isDate || visParams.totalFunc === AggTypes.COUNT) {
+        if (allowsNumericalAggregations || isDate || visConfig.totalFunc === AggTypes.COUNT) {
           const sumOfColumnValues = table.rows.reduce((prev, curr) => {
             // some metrics return undefined for some of the values
             // derivative is an example of this as it returns undefined in the first row
@@ -69,12 +73,11 @@ export const useFormattedColumnsAndRows = (table: Table, visParams: TableVisConf
 
           formattedColumn.sumTotal = sumOfColumnValues;
 
-          switch (visParams.totalFunc) {
+          switch (visConfig.totalFunc) {
             case 'sum': {
               if (!isDate) {
-                const total = formattedColumn.sumTotal;
-                formattedColumn.formattedTotal = formatter?.convert(total);
-                formattedColumn.total = formattedColumn.sumTotal;
+                formattedColumn.formattedTotal = formatter?.convert(sumOfColumnValues);
+                formattedColumn.total = sumOfColumnValues;
               }
               break;
             }
@@ -113,15 +116,15 @@ export const useFormattedColumnsAndRows = (table: Table, visParams: TableVisConf
       })
       .filter((column): column is FormattedColumn => !!column);
 
-    if (visParams.percentageCol) {
-      const insertAtIndex = findIndex(formattedColumns, { title: visParams.percentageCol });
+    if (visConfig.percentageCol) {
+      const insertAtIndex = findIndex(formattedColumns, { title: visConfig.percentageCol });
 
       // column to show percentage for was removed
       if (insertAtIndex < 0) return { formattedColumns, formattedRows };
 
       const { cols, rows: rowsWithPercentage } = addPercentageColumn(
         formattedColumns,
-        visParams.percentageCol,
+        visConfig.percentageCol,
         table.rows,
         insertAtIndex
       );
@@ -130,8 +133,8 @@ export const useFormattedColumnsAndRows = (table: Table, visParams: TableVisConf
       formattedColumns = cols;
     }
 
-    return { formattedColumns, formattedRows };
-  }, [table, visParams.dimensions, visParams.percentageCol, visParams.totalFunc]);
+    return { formattedColumns, formattedRows, splitRowGlobal };
+  }, [table, visConfig.dimensions, visConfig.percentageCol, visConfig.totalFunc]);
 
-  return { columns, rows };
+  return { columns, rows, splitRow };
 };

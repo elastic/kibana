@@ -35,7 +35,7 @@ interface TableVisBasicProps {
 }
 
 export const TableVisBasic = memo(({ table, fireEvent, visConfig }: TableVisBasicProps) => {
-  const { columns, rows } = useFormattedColumnsAndRows(table, visConfig);
+  const { columns, rows, splitRow } = useFormattedColumnsAndRows(table, visConfig);
   const renderCellValue = useMemo(() => createTableVisCell(table, columns, rows, fireEvent), [
     table,
     columns,
@@ -66,11 +66,21 @@ export const TableVisBasic = memo(({ table, fireEvent, visConfig }: TableVisBasi
           showColumnSelector: false,
           showFullScreenSelector: false,
           additionalControls: (
-            <TableVisControls cols={columns} rows={rows} table={table} filename={visConfig.title} />
+            <TableVisControls
+              cols={columns}
+              rows={rows}
+              table={table}
+              filename={visConfig.title}
+              splitRow={splitRow}
+            />
           ),
         }
       }
       renderCellValue={renderCellValue}
+      renderFooterCellValue={
+        // @ts-expect-error
+        visConfig.showTotal ? ({ colIndex }) => columns[colIndex].formattedTotal || null : undefined
+      }
       pagination={pagination}
     />
   ) : (

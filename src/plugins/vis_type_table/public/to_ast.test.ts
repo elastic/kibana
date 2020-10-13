@@ -70,6 +70,7 @@ describe('table vis toExpressionAst function', () => {
       showMetricsAtAllLevels: true,
       showPartialRows: true,
       showTotal: true,
+      showToolbar: false,
       sort: { columnIndex: null, direction: null },
       totalFunc: AggTypes.SUM,
     };

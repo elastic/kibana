@@ -22,7 +22,7 @@ import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } f
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { KibanaDatatableRow } from 'src/plugins/expressions';
-import { CoreSetup } from 'kibana/public';
+import { CoreStart } from 'kibana/public';
 import { useKibana } from '../../../kibana_react/public';
 import { FormattedColumn } from '../types';
 import { Table } from '../table_vis_response_handler';
@@ -33,6 +33,7 @@ interface TableVisControlsProps {
   cols: FormattedColumn[];
   rows: KibanaDatatableRow[];
   table: Table;
+  splitRow?: FormattedColumn;
 }
 
 export const TableVisControls = memo((props: TableVisControlsProps) => {
@@ -42,7 +43,7 @@ export const TableVisControls = memo((props: TableVisControlsProps) => {
 
   const {
     services: { uiSettings },
-  } = useKibana<CoreSetup>();
+  } = useKibana<CoreStart>();
 
   const onClickRawExport = useCallback(
     () =>

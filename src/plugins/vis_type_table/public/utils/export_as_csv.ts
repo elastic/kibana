@@ -21,7 +21,7 @@ import { isObject } from 'lodash';
 // @ts-ignore
 import { saveAs } from '@elastic/filesaver';
 
-import { CoreSetup } from 'kibana/public';
+import { CoreStart } from 'kibana/public';
 import { KibanaDatatableRow, KibanaDatatableColumn } from 'src/plugins/expressions';
 import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../../../share/public';
 import { FormattedColumn } from '../types';
@@ -36,7 +36,7 @@ interface ToCsvData {
   rows: KibanaDatatableRow[];
   table: Table;
   splitRow?: FormattedColumn;
-  uiSettings: CoreSetup['uiSettings'];
+  uiSettings: CoreStart['uiSettings'];
 }
 
 const toCsv = (formatted: boolean, { cols, rows, table, splitRow, uiSettings }: ToCsvData) => {
