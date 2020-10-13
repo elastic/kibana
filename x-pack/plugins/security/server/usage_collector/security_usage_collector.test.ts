@@ -7,8 +7,10 @@
 import { createConfig, ConfigSchema } from '../config';
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { TypeOf } from '@kbn/config-schema';
-import { usageCollectionPluginMock } from 'src/plugins/usage_collection/server/mocks';
-import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/usage_collection.mock';
+import {
+  usageCollectionPluginMock,
+  createCollectorFetchContextMock,
+} from 'src/plugins/usage_collection/server/mocks';
 import { registerSecurityUsageCollector } from './security_usage_collector';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { SecurityLicenseFeatures } from '../../common/licensing';

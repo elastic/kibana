@@ -7,7 +7,7 @@
 import * as Rx from 'rxjs';
 import sinon from 'sinon';
 import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/usage_collection.mock';
+import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
 import { ReportingConfig, ReportingCore } from '../';
 import { getExportTypesRegistry } from '../lib/export_types_registry';
 import { createMockConfig, createMockConfigSchema, createMockReportingCore } from '../test_helpers';

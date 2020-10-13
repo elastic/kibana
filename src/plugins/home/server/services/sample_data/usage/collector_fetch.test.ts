@@ -18,7 +18,7 @@
  */
 
 import { CollectorFetchContext } from 'src/plugins/usage_collection/server';
-import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/usage_collection.mock';
+import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
 import { fetchProvider } from './collector_fetch';
 
 const getMockFetchClients = (hits?: unknown[]) => {

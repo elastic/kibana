@@ -20,9 +20,8 @@
 import {
   CollectorOptions,
   createUsageCollectionSetupMock,
-  createCollectorFetchContextMock,
 } from '../../../../usage_collection/server/usage_collection.mock';
-
+import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
 import { registerCoreUsageCollector } from '.';
 import { coreUsageDataServiceMock } from '../../../../../core/server/mocks';
 import { CoreUsageData } from 'src/core/server/';

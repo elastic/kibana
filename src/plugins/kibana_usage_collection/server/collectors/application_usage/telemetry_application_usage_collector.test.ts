@@ -20,10 +20,10 @@
 import { savedObjectsRepositoryMock, loggingSystemMock } from '../../../../../core/server/mocks';
 import {
   CollectorOptions,
-  createCollectorFetchContextMock,
   createUsageCollectionSetupMock,
 } from '../../../../usage_collection/server/usage_collection.mock';
 
+import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
 import {
   ROLL_INDICES_START,
   ROLL_TOTAL_INDICES_INTERVAL,

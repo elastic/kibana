@@ -5,7 +5,7 @@
  */
 
 import { createCloudUsageCollector } from './cloud_usage_collector';
-import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/usage_collection.mock';
+import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
 
 const mockUsageCollection = () => ({
   makeUsageCollector: jest.fn().mockImplementation((args: any) => ({ ...args })),

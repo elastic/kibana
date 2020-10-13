@@ -5,7 +5,7 @@
  */
 
 import { KibanaTelemetryAdapter } from '../kibana_telemetry_adapter';
-import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/usage_collection.mock';
+import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
 jest
   .spyOn(KibanaTelemetryAdapter, 'countNoOfUniqueMonitorAndLocations')
   .mockResolvedValue(undefined as any);

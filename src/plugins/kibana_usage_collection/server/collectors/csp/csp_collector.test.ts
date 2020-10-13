@@ -20,7 +20,7 @@
 import { CspConfig, ICspConfig } from '../../../../../core/server';
 import { createCspCollector } from './csp_collector';
 import { httpServiceMock } from '../../../../../core/server/mocks';
-import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/usage_collection.mock';
+import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
 
 describe('csp collector', () => {
   let httpMock: ReturnType<typeof httpServiceMock.createSetupContract>;

@@ -20,7 +20,7 @@
 import { fetchProvider } from './fetch';
 import { LegacyAPICaller } from 'kibana/server';
 import { CollectorFetchContext } from 'src/plugins/usage_collection/server';
-import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/usage_collection.mock';
+import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
 
 jest.mock('../../../common', () => ({
   DEFAULT_QUERY_LANGUAGE: 'lucene',
