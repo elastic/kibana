@@ -18,13 +18,13 @@
  */
 
 import { functionWrapper } from './utils';
-import { cumulativeSum } from '../cumulative_sum';
+import { cumulativeSum, CumulativeSumArgs } from '../cumulative_sum';
 import { ExecutionContext } from '../../../execution/types';
 import { Datatable } from '../../../expression_types/specs/datatable';
 
 describe('interpreter/functions#cumulative_sum', () => {
   const fn = functionWrapper(cumulativeSum);
-  const runFn = (input: Datatable, args: { by?: string[]; column: string }) =>
+  const runFn = (input: Datatable, args: CumulativeSumArgs) =>
     fn(input, args, {} as ExecutionContext);
 
   it('calculates cumulative sum', () => {
@@ -35,7 +35,7 @@ describe('interpreter/functions#cumulative_sum', () => {
           columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
           rows: [{ val: 5 }, { val: 7 }, { val: 3 }, { val: 2 }],
         },
-        { column: 'val' }
+        { inputColumnId: 'val', outputColumnId: 'output' }
       )
     ).toMatchInlineSnapshot(`
       Object {
@@ -47,19 +47,30 @@ describe('interpreter/functions#cumulative_sum', () => {
             },
             "name": "val",
           },
+          Object {
+            "id": "output",
+            "meta": Object {
+              "type": "number",
+            },
+            "name": "output",
+          },
         ],
         "rows": Array [
           Object {
+            "output": 5,
             "val": 5,
           },
           Object {
-            "val": 12,
+            "output": 12,
+            "val": 7,
           },
           Object {
-            "val": 15,
+            "output": 10,
+            "val": 3,
           },
           Object {
-            "val": 17,
+            "output": 5,
+            "val": 2,
           },
         ],
         "type": "datatable",
@@ -87,7 +98,7 @@ describe('interpreter/functions#cumulative_sum', () => {
             { val: 8, split: 'B' },
           ],
         },
-        { column: 'val', by: ['split'] }
+        { inputColumnId: 'val', outputColumnId: 'output', by: ['split'] }
       )
     ).toMatchInlineSnapshot(`
       Object {
@@ -100,6 +111,13 @@ describe('interpreter/functions#cumulative_sum', () => {
             "name": "val",
           },
           Object {
+            "id": "output",
+            "meta": Object {
+              "type": "number",
+            },
+            "name": "output",
+          },
+          Object {
             "id": "split",
             "meta": Object {
               "type": "string",
@@ -109,36 +127,44 @@ describe('interpreter/functions#cumulative_sum', () => {
         ],
         "rows": Array [
           Object {
+            "output": 1,
             "split": "A",
             "val": 1,
           },
           Object {
+            "output": 2,
             "split": "B",
             "val": 2,
           },
           Object {
+            "output": 5,
             "split": "B",
-            "val": 5,
+            "val": 3,
           },
           Object {
+            "output": 5,
+            "split": "A",
+            "val": 4,
+          },
+          Object {
+            "output": 9,
             "split": "A",
             "val": 5,
           },
           Object {
+            "output": 11,
             "split": "A",
-            "val": 10,
+            "val": 6,
           },
           Object {
-            "split": "A",
-            "val": 16,
-          },
-          Object {
+            "output": 10,
             "split": "B",
-            "val": 12,
+            "val": 7,
           },
           Object {
+            "output": 15,
             "split": "B",
-            "val": 20,
+            "val": 8,
           },
         ],
         "type": "datatable",
@@ -166,7 +192,7 @@ describe('interpreter/functions#cumulative_sum', () => {
             { val: 8, split: 'B' },
           ],
         },
-        { column: 'val', by: ['split'] }
+        { inputColumnId: 'val', outputColumnId: 'output', by: ['split'] }
       )
     ).toMatchInlineSnapshot(`
       Object {
@@ -179,6 +205,13 @@ describe('interpreter/functions#cumulative_sum', () => {
             "name": "val",
           },
           Object {
+            "id": "output",
+            "meta": Object {
+              "type": "number",
+            },
+            "name": "output",
+          },
+          Object {
             "id": "split",
             "meta": Object {
               "type": "string",
@@ -188,34 +221,42 @@ describe('interpreter/functions#cumulative_sum', () => {
         ],
         "rows": Array [
           Object {
+            "output": 1,
             "split": "A",
             "val": 1,
           },
           Object {
+            "output": 2,
             "split": "B",
             "val": 2,
           },
           Object {
+            "output": 3,
             "val": 3,
           },
           Object {
+            "output": 5,
             "split": "A",
+            "val": 4,
+          },
+          Object {
+            "output": 8,
             "val": 5,
           },
           Object {
-            "val": 8,
-          },
-          Object {
+            "output": 10,
             "split": "A",
-            "val": 11,
+            "val": 6,
           },
           Object {
+            "output": 9,
             "split": "B",
-            "val": 9,
+            "val": 7,
           },
           Object {
+            "output": 15,
             "split": "B",
-            "val": 17,
+            "val": 8,
           },
         ],
         "type": "datatable",
@@ -244,7 +285,7 @@ describe('interpreter/functions#cumulative_sum', () => {
             { val: 9, split: '' },
           ],
         },
-        { column: 'val', by: ['split'] }
+        { inputColumnId: 'val', outputColumnId: 'output', by: ['split'] }
       )
     ).toMatchInlineSnapshot(`
       Object {
@@ -257,6 +298,13 @@ describe('interpreter/functions#cumulative_sum', () => {
             "name": "val",
           },
           Object {
+            "id": "output",
+            "meta": Object {
+              "type": "number",
+            },
+            "name": "output",
+          },
+          Object {
             "id": "split",
             "meta": Object {
               "type": "string",
@@ -266,38 +314,47 @@ describe('interpreter/functions#cumulative_sum', () => {
         ],
         "rows": Array [
           Object {
+            "output": 1,
             "split": "A",
             "val": 1,
           },
           Object {
+            "output": 2,
             "split": "B",
             "val": 2,
           },
           Object {
+            "output": 3,
             "val": 3,
           },
           Object {
+            "output": 5,
             "split": "A",
+            "val": 4,
+          },
+          Object {
+            "output": 8,
             "val": 5,
           },
           Object {
+            "output": 10,
+            "split": "A",
+            "val": 6,
+          },
+          Object {
+            "output": 12,
+            "split": null,
+            "val": 7,
+          },
+          Object {
+            "output": 10,
+            "split": "B",
             "val": 8,
           },
           Object {
-            "split": "A",
-            "val": 11,
-          },
-          Object {
-            "split": null,
-            "val": 15,
-          },
-          Object {
-            "split": "B",
-            "val": 10,
-          },
-          Object {
+            "output": 16,
             "split": "",
-            "val": 24,
+            "val": 9,
           },
         ],
         "type": "datatable",
@@ -326,7 +383,7 @@ describe('interpreter/functions#cumulative_sum', () => {
             { val: 8, split: 'B', split2: 'D' },
           ],
         },
-        { column: 'val', by: ['split', 'split2'] }
+        { inputColumnId: 'val', outputColumnId: 'output', by: ['split', 'split2'] }
       )
     ).toMatchInlineSnapshot(`
       Object {
@@ -337,6 +394,13 @@ describe('interpreter/functions#cumulative_sum', () => {
               "type": "number",
             },
             "name": "val",
+          },
+          Object {
+            "id": "output",
+            "meta": Object {
+              "type": "number",
+            },
+            "name": "output",
           },
           Object {
             "id": "split",
@@ -355,41 +419,49 @@ describe('interpreter/functions#cumulative_sum', () => {
         ],
         "rows": Array [
           Object {
+            "output": 1,
             "split": "A",
             "split2": "C",
             "val": 1,
           },
           Object {
+            "output": 2,
             "split": "B",
             "split2": "C",
             "val": 2,
           },
           Object {
+            "output": 3,
             "split2": "C",
             "val": 3,
           },
           Object {
+            "output": 5,
             "split": "A",
             "split2": "C",
+            "val": 4,
+          },
+          Object {
+            "output": 5,
             "val": 5,
           },
           Object {
-            "val": 5,
-          },
-          Object {
+            "output": 6,
             "split": "A",
             "split2": "D",
             "val": 6,
           },
           Object {
+            "output": 7,
             "split": "B",
             "split2": "D",
             "val": 7,
           },
           Object {
+            "output": 15,
             "split": "B",
             "split2": "D",
-            "val": 15,
+            "val": 8,
           },
         ],
         "type": "datatable",
@@ -413,7 +485,7 @@ describe('interpreter/functions#cumulative_sum', () => {
             { val: 4, split: '5' },
           ],
         },
-        { column: 'val', by: ['split'] }
+        { inputColumnId: 'val', outputColumnId: 'output', by: ['split'] }
       )
     ).toMatchInlineSnapshot(`
       Object {
@@ -426,6 +498,13 @@ describe('interpreter/functions#cumulative_sum', () => {
             "name": "val",
           },
           Object {
+            "id": "output",
+            "meta": Object {
+              "type": "number",
+            },
+            "name": "output",
+          },
+          Object {
             "id": "split",
             "meta": Object {
               "type": "string",
@@ -435,24 +514,28 @@ describe('interpreter/functions#cumulative_sum', () => {
         ],
         "rows": Array [
           Object {
+            "output": 1,
             "split": Object {
               "anObj": 3,
             },
             "val": 1,
           },
           Object {
+            "output": 3,
             "split": Object {
               "anotherObj": 5,
             },
-            "val": 3,
+            "val": 2,
           },
           Object {
+            "output": 3,
             "split": 5,
             "val": 3,
           },
           Object {
+            "output": 7,
             "split": "5",
-            "val": 7,
+            "val": 4,
           },
         ],
         "type": "datatable",
@@ -468,7 +551,7 @@ describe('interpreter/functions#cumulative_sum', () => {
           columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
           rows: [{ val: 5 }, { val: '7' }, { val: '3' }, { val: 2 }],
         },
-        { column: 'val' }
+        { inputColumnId: 'val', outputColumnId: 'output' }
       )
     ).toMatchInlineSnapshot(`
       Object {
@@ -480,19 +563,30 @@ describe('interpreter/functions#cumulative_sum', () => {
             },
             "name": "val",
           },
+          Object {
+            "id": "output",
+            "meta": Object {
+              "type": "number",
+            },
+            "name": "output",
+          },
         ],
         "rows": Array [
           Object {
+            "output": 5,
             "val": 5,
           },
           Object {
-            "val": 12,
+            "output": 12,
+            "val": "7",
           },
           Object {
-            "val": 15,
+            "output": "37",
+            "val": "3",
           },
           Object {
-            "val": 17,
+            "output": "23",
+            "val": 2,
           },
         ],
         "type": "datatable",
@@ -508,7 +602,7 @@ describe('interpreter/functions#cumulative_sum', () => {
           columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
           rows: [{ val: 5 }, { val: '7' }, { val: {} }, { val: 2 }],
         },
-        { column: 'val' }
+        { inputColumnId: 'val', outputColumnId: 'output' }
       )
     ).toMatchInlineSnapshot(`
       Object {
@@ -520,19 +614,30 @@ describe('interpreter/functions#cumulative_sum', () => {
             },
             "name": "val",
           },
+          Object {
+            "id": "output",
+            "meta": Object {
+              "type": "number",
+            },
+            "name": "output",
+          },
         ],
         "rows": Array [
           Object {
+            "output": 5,
             "val": 5,
           },
           Object {
-            "val": 12,
+            "output": 12,
+            "val": "7",
           },
           Object {
-            "val": NaN,
+            "output": "NaN7",
+            "val": Object {},
           },
           Object {
-            "val": NaN,
+            "output": "2[object Object]",
+            "val": 2,
           },
         ],
         "type": "datatable",
@@ -558,7 +663,7 @@ describe('interpreter/functions#cumulative_sum', () => {
             { val: null },
           ],
         },
-        { column: 'val' }
+        { inputColumnId: 'val', outputColumnId: 'output' }
       )
     ).toMatchInlineSnapshot(`
       Object {
@@ -570,38 +675,218 @@ describe('interpreter/functions#cumulative_sum', () => {
             },
             "name": "val",
           },
+          Object {
+            "id": "output",
+            "meta": Object {
+              "type": "number",
+            },
+            "name": "output",
+          },
         ],
         "rows": Array [
           Object {
-            "val": 0,
+            "output": 0,
+            "val": null,
           },
           Object {
+            "output": 7,
             "val": 7,
           },
           Object {
-            "val": 7,
+            "output": 7,
+            "val": undefined,
           },
           Object {
-            "val": 7,
+            "output": 7,
+            "val": undefined,
           },
           Object {
-            "val": 7,
+            "output": 7,
+            "val": undefined,
           },
           Object {
-            "val": 7,
+            "output": 7,
+            "val": undefined,
           },
           Object {
-            "val": 10,
+            "output": 10,
+            "val": "3",
           },
           Object {
-            "val": 12,
+            "output": "23",
+            "val": 2,
           },
           Object {
-            "val": 12,
+            "output": 2,
+            "val": null,
           },
         ],
         "type": "datatable",
       }
     `);
+  });
+
+  it('copies over meta information from the source column', () => {
+    expect(
+      runFn(
+        {
+          type: 'datatable',
+          columns: [
+            {
+              id: 'val',
+              name: 'val',
+              meta: {
+                type: 'number',
+
+                field: 'afield',
+                index: 'anindex',
+                params: { id: 'number', params: { pattern: '000' } },
+                source: 'synthetic',
+                sourceParams: {
+                  some: 'params',
+                },
+              },
+            },
+          ],
+          rows: [{ val: 5 }],
+        },
+        { inputColumnId: 'val', outputColumnId: 'output' }
+      )
+    ).toMatchInlineSnapshot(`
+      Object {
+        "columns": Array [
+          Object {
+            "id": "val",
+            "meta": Object {
+              "field": "afield",
+              "index": "anindex",
+              "params": Object {
+                "id": "number",
+                "params": Object {
+                  "pattern": "000",
+                },
+              },
+              "source": "synthetic",
+              "sourceParams": Object {
+                "some": "params",
+              },
+              "type": "number",
+            },
+            "name": "val",
+          },
+          Object {
+            "id": "output",
+            "meta": Object {
+              "field": "afield",
+              "index": "anindex",
+              "params": Object {
+                "id": "number",
+                "params": Object {
+                  "pattern": "000",
+                },
+              },
+              "source": "synthetic",
+              "sourceParams": Object {
+                "some": "params",
+              },
+              "type": "number",
+            },
+            "name": "output",
+          },
+        ],
+        "rows": Array [
+          Object {
+            "output": 5,
+            "val": 5,
+          },
+        ],
+        "type": "datatable",
+      }
+    `);
+  });
+
+  it('sets output name on output column if specified', () => {
+    expect(
+      runFn(
+        {
+          type: 'datatable',
+          columns: [
+            {
+              id: 'val',
+              name: 'val',
+              meta: {
+                type: 'number',
+              },
+            },
+          ],
+          rows: [{ val: 5 }],
+        },
+        { inputColumnId: 'val', outputColumnId: 'output', outputColumnName: 'Output name' }
+      )
+    ).toMatchInlineSnapshot(`
+      Object {
+        "columns": Array [
+          Object {
+            "id": "val",
+            "meta": Object {
+              "type": "number",
+            },
+            "name": "val",
+          },
+          Object {
+            "id": "output",
+            "meta": Object {
+              "type": "number",
+            },
+            "name": "Output name",
+          },
+        ],
+        "rows": Array [
+          Object {
+            "output": 5,
+            "val": 5,
+          },
+        ],
+        "type": "datatable",
+      }
+    `);
+  });
+
+  it('returns source table if input column does not exist', () => {
+    const input: Datatable = {
+      type: 'datatable',
+      columns: [
+        {
+          id: 'val',
+          name: 'val',
+          meta: {
+            type: 'number',
+          },
+        },
+      ],
+      rows: [{ val: 5 }],
+    };
+    expect(runFn(input, { inputColumnId: 'nonexisting', outputColumnId: 'output' })).toBe(input);
+  });
+
+  it('throws an error if output column exists already', () => {
+    expect(() =>
+      runFn(
+        {
+          type: 'datatable',
+          columns: [
+            {
+              id: 'val',
+              name: 'val',
+              meta: {
+                type: 'number',
+              },
+            },
+          ],
+          rows: [{ val: 5 }],
+        },
+        { inputColumnId: 'val', outputColumnId: 'val' }
+      )
+    ).toThrow();
   });
 });

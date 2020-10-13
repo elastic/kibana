@@ -21,10 +21,17 @@ import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '../types';
 import { Datatable, DatatableRow } from '../../expression_types';
 
+export interface CumulativeSumArgs {
+  by?: string[];
+  inputColumnId: string;
+  outputColumnId: string;
+  outputColumnName?: string;
+}
+
 export type ExpressionFunctionCumulativeSum = ExpressionFunctionDefinition<
   'cumulative_sum',
   Datatable,
-  { by?: string[]; column: string },
+  CumulativeSumArgs,
   Datatable
 >;
 
@@ -43,15 +50,18 @@ function getBucketIdentifier(row: DatatableRow, groupColumns?: string[]) {
  * Also supports multiple series in a single data table - use the `by` argument
  * to specify the columns to split the calculation by.
  * For each unique combination of all `by` columns a separate cumulative sum will be calculated.
- * The order of rows won't be changed - this function is not adding or removing rows and columns,
- * it's only changes the values of the column specified by the `column` argument.
+ * The order of rows won't be changed - this function is not modifying any existing columns, it's only
+ * adding the specified `outputColumnId` column to every row of the table without adding or removing rows.
  *
  * Behavior:
- * * Will overwrite the specified column with the cumulative sum.
+ * * Will write the cumulative sum of `inputColumnId` into `outputColumnId`
+ * * If provided will use `outputColumnName` as name for the newly created column. Otherwise falls back to `outputColumnId`
  * * Cumulative sums always start with 0, a cell will contain its own value plus the values of
  *   all cells of the same series further up in the table.
  *
  * Edge cases:
+ * * Will return the input table if `inputColumnId` does not exist
+ * * Will throw an error if `outputColumnId` exists already in provided data table
  * * If `column` contains `null` or `undefined`, it will be ignored and overwritten with the cumulative sum of
  *   all cells of the same series further up in the table.
  * * For all values besides `null` and `undefined`, the value will be cast to a number before it's added to the
@@ -80,30 +90,77 @@ export const cumulativeSum: ExpressionFunctionCumulativeSum = {
       types: ['string'],
       required: false,
     },
-    column: {
-      help: i18n.translate('expressions.functions.cumulativeSum.args.columnHelpText', {
+    inputColumnId: {
+      help: i18n.translate('expressions.functions.cumulativeSum.args.inputColumnIdHelpText', {
         defaultMessage: 'Column to calculate the cumulative sum of',
       }),
       types: ['string'],
       required: true,
     },
+    outputColumnId: {
+      help: i18n.translate('expressions.functions.cumulativeSum.args.outputColumnIdHelpText', {
+        defaultMessage: 'Column to store the resulting cumulative sum in',
+      }),
+      types: ['string'],
+      required: true,
+    },
+    outputColumnName: {
+      help: i18n.translate('expressions.functions.cumulativeSum.args.outputColumnNameHelpText', {
+        defaultMessage: 'Name of the column to store the resulting cumulative sum in',
+      }),
+      types: ['string'],
+      required: false,
+    },
   },
 
-  fn(input, { by, column }) {
+  fn(input, { by, inputColumnId, outputColumnId, outputColumnName }) {
+    if (input.columns.some((column) => column.id === outputColumnId)) {
+      throw new Error(
+        i18n.translate('expressions.functions.cumulativeSum.columnConflictMessage', {
+          defaultMessage:
+            'Specified outputColumnId {columnId} already exists. Please pick another column id.',
+          values: {
+            columnId: outputColumnId,
+          },
+        })
+      );
+    }
+
+    const inputColumnDefinition = input.columns.find((column) => column.id === inputColumnId);
+
+    if (!inputColumnDefinition) {
+      return input;
+    }
+
+    const outputColumnDefinition = {
+      ...inputColumnDefinition,
+      id: outputColumnId,
+      name: outputColumnName || outputColumnId,
+    };
+
+    const resultColumns = [...input.columns];
+    // add output column after input column in the table
+    resultColumns.splice(
+      resultColumns.indexOf(inputColumnDefinition) + 1,
+      0,
+      outputColumnDefinition
+    );
+
     const accumulators: Partial<Record<string, number>> = {};
     return {
       ...input,
+      columns: resultColumns,
       rows: input.rows.map((row) => {
         const newRow = { ...row };
 
         const bucketIdentifier = getBucketIdentifier(row, by);
         const accumulatorValue = accumulators[bucketIdentifier] ?? 0;
-        const currentValue = newRow[column];
+        const currentValue = newRow[inputColumnId];
         if (currentValue != null) {
-          newRow[column] = Number(newRow[column]) + accumulatorValue;
-          accumulators[bucketIdentifier] = newRow[column];
+          newRow[outputColumnId] = Number(currentValue) + accumulatorValue;
+          accumulators[bucketIdentifier] = currentValue;
         } else {
-          newRow[column] = accumulatorValue;
+          newRow[outputColumnId] = accumulatorValue;
         }
 
         return newRow;
