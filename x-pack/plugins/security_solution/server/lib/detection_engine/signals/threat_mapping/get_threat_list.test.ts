@@ -9,22 +9,42 @@ import { getSortWithTieBreaker } from './get_threat_list';
 describe('get_threat_signals', () => {
   describe('getSortWithTieBreaker', () => {
     test('it should return sort field of just timestamp if given no sort order', () => {
-      const sortOrder = getSortWithTieBreaker({ sortField: undefined, sortOrder: undefined });
+      const sortOrder = getSortWithTieBreaker({
+        sortField: undefined,
+        sortOrder: undefined,
+        index: ['index-123'],
+        listItemIndex: 'list-index-123',
+      });
       expect(sortOrder).toEqual([{ '@timestamp': 'asc' }]);
     });
 
     test('it should return sort field of timestamp with asc even if sortOrder is changed as it is hard wired in', () => {
-      const sortOrder = getSortWithTieBreaker({ sortField: undefined, sortOrder: 'desc' });
+      const sortOrder = getSortWithTieBreaker({
+        sortField: undefined,
+        sortOrder: 'desc',
+        index: ['index-123'],
+        listItemIndex: 'list-index-123',
+      });
       expect(sortOrder).toEqual([{ '@timestamp': 'asc' }]);
     });
 
     test('it should return sort field of an extra field if given one', () => {
-      const sortOrder = getSortWithTieBreaker({ sortField: 'some-field', sortOrder: undefined });
+      const sortOrder = getSortWithTieBreaker({
+        sortField: 'some-field',
+        sortOrder: undefined,
+        index: ['index-123'],
+        listItemIndex: 'list-index-123',
+      });
       expect(sortOrder).toEqual([{ 'some-field': 'asc', '@timestamp': 'asc' }]);
     });
 
     test('it should return sort field of desc if given one', () => {
-      const sortOrder = getSortWithTieBreaker({ sortField: 'some-field', sortOrder: 'desc' });
+      const sortOrder = getSortWithTieBreaker({
+        sortField: 'some-field',
+        sortOrder: 'desc',
+        index: ['index-123'],
+        listItemIndex: 'list-index-123',
+      });
       expect(sortOrder).toEqual([{ 'some-field': 'desc', '@timestamp': 'asc' }]);
     });
   });

@@ -112,6 +112,7 @@ export const createThreatSignal = async ({
     searchAfter,
     sortField: undefined,
     sortOrder: undefined,
+    listClient,
   });
 
   return { threatList, results };
