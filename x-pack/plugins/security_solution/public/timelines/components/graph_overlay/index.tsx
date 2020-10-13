@@ -98,8 +98,6 @@ const Navigation = ({
   </EuiFlexGroup>
 );
 
-const renderResolverPanelFields = (value: string) => <CopyablePanelField value={value} />;
-
 const GraphOverlayComponent = ({
   graphEventId,
   status,
@@ -151,6 +149,11 @@ const GraphOverlayComponent = ({
       return [...siemDefaultIndices, signalIndexName];
     }
   }, [signalIndexName, siemDefaultIndices]);
+
+  const renderResolverPanelFields = useCallback(
+    (value: string) => <CopyablePanelField value={value} />,
+    []
+  );
 
   return (
     <OverlayContainer>
