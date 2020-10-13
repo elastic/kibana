@@ -282,6 +282,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
     const options = getEventTypeOptions();
     return (
       <MyEuiButton
+        data-test-subj="sourcerer-timeline-trigger"
         iconType="arrowDown"
         iconSide="right"
         isLoading={sourcererScope.loading}
