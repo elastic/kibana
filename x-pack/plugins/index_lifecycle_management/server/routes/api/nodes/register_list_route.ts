@@ -8,6 +8,7 @@ import { ListNodesRouteResponse, NodeDataRole } from '../../../../common/types';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
+import { esErrorHandler } from '../../../shared_imports';
 
 interface Stats {
   nodes: {
@@ -72,15 +73,8 @@ export function registerListRoute({ router, config, license }: RouteDependencies
           disallowedNodeAttributes
         );
         return response.ok({ body });
-      } catch (e) {
-        if (e.name === 'ResponseError') {
-          return response.customError({
-            statusCode: e.statusCode,
-            body: { message: e.body.error?.reason },
-          });
-        }
-        // Case: default
-        return response.internalError({ body: e });
+      } catch (error) {
+        return esErrorHandler(error);
       }
     })
   );

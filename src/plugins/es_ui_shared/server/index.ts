@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export { isEsError } from './errors';
+export { isEsError, esErrorHandler } from './errors';
 
 /** dummy plugin*/
 export function plugin() {

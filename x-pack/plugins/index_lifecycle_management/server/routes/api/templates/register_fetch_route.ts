@@ -13,6 +13,7 @@ import {
 } from '../../../../../index_management/common/types';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
+import { esErrorHandler } from '../../../shared_imports';
 
 function isReservedSystemTemplate(templateName: string, indexPatterns: string[]): boolean {
   return (
@@ -92,15 +93,8 @@ export function registerFetchRoute({ router, license }: RouteDependencies) {
         );
         const okResponse = { body: filterTemplates(templates, isLegacy) };
         return response.ok(okResponse);
-      } catch (e) {
-        if (e.name === 'ResponseError') {
-          return response.customError({
-            statusCode: e.statusCode,
-            body: { message: e.body.error?.reason },
-          });
-        }
-        // Case: default
-        return response.internalError({ body: e });
+      } catch (error) {
+        return esErrorHandler(error);
       }
     })
   );

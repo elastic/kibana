@@ -17,4 +17,24 @@
  * under the License.
  */
 
-export { isEsError, esErrorHandler } from '../../__packages_do_not_import__/errors';
+import { ApiError } from '@elastic/elasticsearch';
+import { IKibanaResponse, KibanaResponseFactory } from 'kibana/server';
+
+interface EsErrorHandlerParams {
+  error: ApiError;
+  response: KibanaResponseFactory;
+}
+export const esErrorHandler = ({ error, response }: EsErrorHandlerParams): IKibanaResponse => {
+  // error.name is slightly better in terms of performance, since all errors now have name property
+  if (error.name === 'ResponseError') {
+    return response.customError({
+      // we can ignore typescript error, since error is a ResponseError
+      // @ts-ignore
+      statusCode: error.statusCode,
+      // @ts-ignore
+      body: { message: error.body.error?.reason },
+    });
+  }
+  // Case: default
+  return response.internalError({ body: error });
+};

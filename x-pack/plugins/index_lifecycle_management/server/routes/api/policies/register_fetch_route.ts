@@ -11,6 +11,7 @@ import { ApiResponse } from '@elastic/elasticsearch';
 import { IndexLifecyclePolicy, PolicyFromES } from '../../../../common/types';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
+import { esErrorHandler } from '../../../shared_imports';
 
 interface PoliciesMap {
   [K: string]: Omit<PolicyFromES, 'name'>;
@@ -75,15 +76,8 @@ export function registerFetchRoute({ router, license }: RouteDependencies) {
           await addLinkedIndices(asCurrentUser, policiesMap);
         }
         return response.ok({ body: formatPolicies(policiesMap) });
-      } catch (e) {
-        if (e.name === 'ResponseError') {
-          return response.customError({
-            statusCode: e.statusCode,
-            body: { message: e.body.error?.reason },
-          });
-        }
-        // Case: default
-        return response.internalError({ body: e });
+      } catch (error) {
+        return esErrorHandler(error);
       }
     })
   );

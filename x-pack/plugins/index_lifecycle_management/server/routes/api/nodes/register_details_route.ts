@@ -8,6 +8,7 @@ import { schema } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
+import { esErrorHandler } from '../../../shared_imports';
 
 function findMatchingNodes(stats: any, nodeAttrs: string): any {
   return Object.entries(stats.nodes).reduce((accum: any[], [nodeId, nodeStats]: [any, any]) => {
@@ -40,15 +41,8 @@ export function registerDetailsRoute({ router, license }: RouteDependencies) {
         const statsResponse = await context.core.elasticsearch.client.asCurrentUser.nodes.stats();
         const okResponse = { body: findMatchingNodes(statsResponse.body, nodeAttrs) };
         return response.ok(okResponse);
-      } catch (e) {
-        if (e.name === 'ResponseError') {
-          return response.customError({
-            statusCode: e.statusCode,
-            body: { message: e.body.error?.reason },
-          });
-        }
-        // Case: default
-        return response.internalError({ body: e });
+      } catch (error) {
+        return esErrorHandler(error);
       }
     })
   );

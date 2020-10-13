@@ -9,6 +9,7 @@ import { ElasticsearchClient } from 'kibana/server';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
+import { esErrorHandler } from '../../../shared_imports';
 
 async function addLifecyclePolicy(
   client: ElasticsearchClient,
@@ -47,15 +48,8 @@ export function registerAddPolicyRoute({ router, license }: RouteDependencies) {
           alias
         );
         return response.ok();
-      } catch (e) {
-        if (e.name === 'ResponseError') {
-          return response.customError({
-            statusCode: e.statusCode,
-            body: { message: e.body.error?.reason },
-          });
-        }
-        // Case: default
-        return response.internalError({ body: e });
+      } catch (error) {
+        return esErrorHandler(error);
       }
     })
   );
