@@ -32,6 +32,12 @@ saved-object-finder {
     align-items: center;
   }
 
+  .search-bar__section {
+    position: relative;
+    margin-right: $euiSize;
+    flex: 1;
+  }
+
   .search-bar__icon {
     position: absolute;
     top: $euiSizeS;

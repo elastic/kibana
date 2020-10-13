@@ -49,9 +49,11 @@ select.form-control {
   display: flex;
   align-items: center;
   line-height: 1.5;
+  position: relative;
 }
 
 .form-checkbox__input {
+  appearance: none;
   background-color: $euiColorLightestShade;
   border: 1px solid $euiColorLightShade;
   border-radius: $euiSizeXS;
@@ -64,6 +66,12 @@ select.form-control {
 .form-checkbox__input:checked {
   border-color: $euiColorPrimary;
   background-color: $euiColorPrimary;
+}
+
+.form-checkbox__icon {
+  position: absolute;
+  top: 0;
+  left: 2px;
 }
 
 .form-textarea {
