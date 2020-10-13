@@ -13,7 +13,7 @@ export type JobType = 'anomaly-detector' | 'data-frame-analytics';
 
 interface JobObject {
   job_id: string;
-  datafeed_id: string | null | undefined;
+  datafeed_id: string | null;
   type: JobType;
 }
 
@@ -160,8 +160,8 @@ export function filterJobIdsFactory(savedObjectsClient: SavedObjectsClientContra
     }
 
     const jobIds = await getIds(jobType, key);
+    // check to see if any of the ids supplied contain a wildcard
     if (ids.join().match('\\*') === null) {
-      // check to see if any of the ids supplied contain a wildcard
       return ids.filter((id) => jobIds.includes(id));
     }
 

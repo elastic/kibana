@@ -66,16 +66,12 @@ export function getMlClient(client: IScopedClusterClient, jobsInSpaces: JobsInSp
       return mlClient.deleteCalendarEvent(...p);
     },
     async deleteCalendarJob(...p: Parameters<MlClient['deleteCalendarJob']>) {
-      await jobIdsCheck('anomaly-detector', p);
       return mlClient.deleteCalendarJob(...p);
     },
     async deleteDataFrameAnalytics(...p: Parameters<MlClient['deleteDataFrameAnalytics']>) {
       await jobIdsCheck('data-frame-analytics', p);
       const resp = await mlClient.deleteDataFrameAnalytics(...p);
-      // const [analyticsId] = getDFAJobIds(p);
-      // if (analyticsId !== undefined) {
-      //   await jobsInSpaces.deleteDataFrameAnalyticsJob(analyticsId);
-      // }
+      // don't delete the job object
       return resp;
     },
     async deleteDatafeed(...p: any) {
@@ -101,10 +97,7 @@ export function getMlClient(client: IScopedClusterClient, jobsInSpaces: JobsInSp
     async deleteJob(...p: Parameters<MlClient['deleteJob']>) {
       await jobIdsCheck('anomaly-detector', p);
       const resp = await mlClient.deleteJob(...p);
-      // const [jobId] = getADJobIds(p);
-      // if (jobId !== undefined) {
-      //   await jobsInSpaces.deleteAnomalyDetectionJob(jobId);
-      // }
+      // don't delete the job object
       return resp;
     },
     async deleteModelSnapshot(...p: Parameters<MlClient['deleteModelSnapshot']>) {
@@ -145,13 +138,21 @@ export function getMlClient(client: IScopedClusterClient, jobsInSpaces: JobsInSp
     },
     async getCalendars(...p: Parameters<MlClient['getCalendars']>) {
       const { body } = await mlClient.getCalendars<{ calendars: Calendar[] }, any>(...p);
+      const {
+        body: { jobs: allJobs },
+      } = await mlClient.getJobs<{ jobs: Job[] }>();
+      const allJobIds = allJobs.map((j) => j.job_id);
+
       // flatten the list of all jobs ids and check which ones are valid
-      const filteredJobs = await jobsInSpaces.filterJobIdsForSpace('anomaly-detector', [
-        ...new Set(body.calendars.map((c) => c.job_ids).flat()),
-      ]);
+      const calJobIds = [...new Set(body.calendars.map((c) => c.job_ids).flat())];
+      // find groups by getting the cal job ids which aren't real jobs.
+      const groups = calJobIds.filter((j) => allJobIds.includes(j) === false);
+
+      // get list of calendar jobs which are allowed in this space
+      const filteredJobs = await jobsInSpaces.filterJobIdsForSpace('anomaly-detector', calJobIds);
       const calendars = body.calendars.map((c) => ({
         ...c,
-        job_ids: c.job_ids.filter((id) => filteredJobs.includes(id)),
+        job_ids: c.job_ids.filter((id) => filteredJobs.includes(id) || groups.includes(id)),
       }));
       return { body: { ...body, calendars } };
     },
@@ -272,7 +273,6 @@ export function getMlClient(client: IScopedClusterClient, jobsInSpaces: JobsInSp
       return mlClient.putCalendar(...p);
     },
     async putCalendarJob(...p: Parameters<MlClient['putCalendarJob']>) {
-      await jobIdsCheck('anomaly-detector', p);
       return mlClient.putCalendarJob(...p);
     },
     async putDataFrameAnalytics(...p: Parameters<MlClient['putDataFrameAnalytics']>) {
@@ -355,9 +355,7 @@ export function getMlClient(client: IScopedClusterClient, jobsInSpaces: JobsInSp
     async validateDetector(...p: Parameters<MlClient['validateDetector']>) {
       return mlClient.validateDetector(...p);
     },
-    // async anomalySearch(...p: Parameters<MlClient['validate']>) {
-    //   return mlClient.validate(...p);
-    // },
+
     ...searchProvider(client, jobsInSpaces),
   } as MlClient;
 }
