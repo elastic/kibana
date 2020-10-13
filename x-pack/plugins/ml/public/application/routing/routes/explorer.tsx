@@ -94,7 +94,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
         });
       }
     }
-  }, [refresh?.lastRefresh]);
+  }, [refresh?.lastRefresh, setLastRefresh, setGlobalState]);
 
   // We cannot simply infer bounds from the globalState's `time` attribute
   // with `moment` since it can contain custom strings such as `now-15m`.
@@ -194,6 +194,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const [tableSeverity] = useTableSeverity();
 
   const [selectedCells, setSelectedCells] = useSelectedCells(appState, setAppState);
+
   useEffect(() => {
     explorerService.setSelectedCells(selectedCells);
   }, [JSON.stringify(selectedCells)]);
@@ -220,9 +221,9 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     if (explorerState && explorerState.swimlaneContainerWidth > 0) {
       loadExplorerData({
         ...loadExplorerDataConfig,
-        swimlaneLimit:
-          isViewBySwimLaneData(explorerState?.viewBySwimlaneData) &&
-          explorerState?.viewBySwimlaneData.cardinality,
+        swimlaneLimit: isViewBySwimLaneData(explorerState?.viewBySwimlaneData)
+          ? explorerState?.viewBySwimlaneData.cardinality
+          : 0,
       });
     }
   }, [JSON.stringify(loadExplorerDataConfig)]);

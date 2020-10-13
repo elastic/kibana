@@ -287,8 +287,8 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
         fill: `#98A2B3`,
         formatter: (v: number) => {
           timeBuckets.setInterval(`${swimlaneData.interval}s`);
-          const a = timeBuckets.getScaledDateFormat();
-          return moment(v).format(a);
+          const scaledDateFormat = timeBuckets.getScaledDateFormat();
+          return moment(v).format(scaledDateFormat);
         },
       },
       brushMask: {
@@ -298,8 +298,16 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
         stroke: isDarkTheme ? 'rgb(255, 255, 255)' : 'rgb(105, 112, 125)',
       },
       maxLegendHeight: LEGEND_HEIGHT,
+      timeZone: 'UTC',
     };
-  }, [showSwimlane, swimlaneType, swimlaneData?.fieldName, isDarkTheme]);
+  }, [
+    showSwimlane,
+    swimlaneType,
+    swimlaneData?.fieldName,
+    isDarkTheme,
+    timeBuckets,
+    onCellsSelection,
+  ]);
 
   // @ts-ignore
   const onElementClick: ElementClickListener = useCallback(
@@ -314,7 +322,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
       };
       onCellsSelection(payload);
     },
-    [swimlaneType, swimlaneData?.fieldName, swimlaneData?.interval]
+    [swimlaneType, swimlaneData?.fieldName, swimlaneData?.interval, onCellsSelection]
   );
 
   const tooltipOptions: TooltipSettings = useMemo(
