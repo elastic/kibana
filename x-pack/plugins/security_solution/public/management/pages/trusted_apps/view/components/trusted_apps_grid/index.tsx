@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useCallback, useEffect } from 'react';
+import React, { FC, memo, useCallback, useEffect } from 'react';
 import {
   EuiTablePagination,
   EuiFlexGroup,
@@ -65,6 +65,14 @@ const PaginationBar = ({ pagination, onChange }: PaginationBarProps) => {
   );
 };
 
+const GridMessage: FC = ({ children }) => (
+  <div className="euiTextAlign--center">
+    <EuiSpacer size="m" />
+    {children}
+    <EuiSpacer size="m" />
+  </div>
+);
+
 export const TrustedAppsGrid = memo(() => {
   const pagination = useTrustedAppsSelector(getListPagination);
   const listItems = useTrustedAppsSelector(getListItems);
@@ -88,34 +96,28 @@ export const TrustedAppsGrid = memo(() => {
         </EuiFlexItem>
       )}
       <EuiFlexItem>
-        <EuiSpacer size="l" />
-
         {error && (
-          <>
-            <div className="euiTextAlign--center">
-              <EuiIcon type="minusInCircle" color="danger" /> {error}
-            </div>
-
-            <EuiSpacer size="l" />
-          </>
+          <GridMessage>
+            <EuiIcon type="minusInCircle" color="danger" /> {error}
+          </GridMessage>
         )}
         {!error && listItems.length === 0 && (
-          <>
-            <EuiText size="s" className="euiTextAlign--center">
-              {NO_RESULTS_MESSAGE}
-            </EuiText>
-
-            <EuiSpacer size="l" />
-          </>
+          <GridMessage>
+            <EuiText size="s">{NO_RESULTS_MESSAGE}</EuiText>
+          </GridMessage>
         )}
         {!error && listItems.length > 0 && (
-          <EuiFlexGroup direction="column">
-            {listItems.map((item) => (
-              <EuiFlexItem grow={false} key={item.id}>
-                <TrustedAppCard trustedApp={item} onDelete={handleTrustedAppDelete} />
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
+          <>
+            <EuiSpacer size="l" />
+
+            <EuiFlexGroup direction="column">
+              {listItems.map((item) => (
+                <EuiFlexItem grow={false} key={item.id}>
+                  <TrustedAppCard trustedApp={item} onDelete={handleTrustedAppDelete} />
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          </>
         )}
       </EuiFlexItem>
       {!error && pagination.totalItemCount > 0 && (
