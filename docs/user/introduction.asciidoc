@@ -15,7 +15,7 @@ Use {kib} to explore your {es} data, and then build beautiful visualizations and
 * **A UI for managing the Elastic Stack.**
 Manage your security settings, assign user roles, take snapshots, roll up your data,
 and more &mdash; all from the convenience of a {kib} UI.
-ß
+
 * **A centralized hub for Elastic's solutions.** From log analytics to
 document discovery to SIEM, {kib} is the portal for accessing these and other capabilities.
 
