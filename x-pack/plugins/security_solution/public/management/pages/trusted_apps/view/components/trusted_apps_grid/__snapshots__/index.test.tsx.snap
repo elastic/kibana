@@ -3,19 +3,25 @@
 exports[`TrustedAppsGrid renders correctly initially 1`] = `
 <div>
   <div
-    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+    class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
   >
     <div
       class="euiFlexItem"
     >
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+        class="euiTextAlign--center"
       >
         <div
-          class="euiText euiText--small euiTextAlign--center"
+          class="euiSpacer euiSpacer--m"
+        />
+        <div
+          class="euiText euiText--small"
         >
           No items found
         </div>
+        <div
+          class="euiSpacer euiSpacer--m"
+        />
       </div>
     </div>
   </div>
@@ -25,7 +31,7 @@ exports[`TrustedAppsGrid renders correctly initially 1`] = `
 exports[`TrustedAppsGrid renders correctly when failed loading data for the first time 1`] = `
 <div>
   <div
-    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+    class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
   >
     <div
       class="euiFlexItem"
@@ -34,11 +40,17 @@ exports[`TrustedAppsGrid renders correctly when failed loading data for the firs
         class="euiTextAlign--center"
       >
         <div
+          class="euiSpacer euiSpacer--m"
+        />
+        <div
           color="danger"
           data-euiicon-type="minusInCircle"
         />
          
         Intenal Server Error
+        <div
+          class="euiSpacer euiSpacer--m"
+        />
       </div>
     </div>
   </div>
@@ -48,7 +60,7 @@ exports[`TrustedAppsGrid renders correctly when failed loading data for the firs
 exports[`TrustedAppsGrid renders correctly when failed loading data for the second time 1`] = `
 <div>
   <div
-    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+    class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
   >
     <div
       class="euiFlexItem"
@@ -57,11 +69,17 @@ exports[`TrustedAppsGrid renders correctly when failed loading data for the seco
         class="euiTextAlign--center"
       >
         <div
+          class="euiSpacer euiSpacer--m"
+        />
+        <div
           color="danger"
           data-euiicon-type="minusInCircle"
         />
          
         Intenal Server Error
+        <div
+          class="euiSpacer euiSpacer--m"
+        />
       </div>
     </div>
   </div>
@@ -88,11 +106,14 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
 
 <div>
   <div
-    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+    class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
   >
     <div
       class="euiFlexItem"
     >
+      <div
+        class="euiSpacer euiSpacer--l"
+      />
       <div
         class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
       >
@@ -2701,6 +2722,9 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
     <div
       class="euiFlexItem euiFlexItem--flexGrowZero"
     >
+      <div
+        class="euiSpacer euiSpacer--l"
+      />
       <div>
         <div
           class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
@@ -2913,7 +2937,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
 exports[`TrustedAppsGrid renders correctly when loading data for the first time 1`] = `
 <div>
   <div
-    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+    class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
   >
     <div
       class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -2926,13 +2950,19 @@ exports[`TrustedAppsGrid renders correctly when loading data for the first time 
       class="euiFlexItem"
     >
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+        class="euiTextAlign--center"
       >
         <div
-          class="euiText euiText--small euiTextAlign--center"
+          class="euiSpacer euiSpacer--m"
+        />
+        <div
+          class="euiText euiText--small"
         >
           No items found
         </div>
+        <div
+          class="euiSpacer euiSpacer--m"
+        />
       </div>
     </div>
   </div>
@@ -2959,7 +2989,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
 
 <div>
   <div
-    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+    class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
   >
     <div
       class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -2971,6 +3001,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
     <div
       class="euiFlexItem"
     >
+      <div
+        class="euiSpacer euiSpacer--l"
+      />
       <div
         class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
       >
@@ -5579,6 +5612,9 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
     <div
       class="euiFlexItem euiFlexItem--flexGrowZero"
     >
+      <div
+        class="euiSpacer euiSpacer--l"
+      />
       <div>
         <div
           class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
@@ -5808,11 +5844,14 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
 
 <div>
   <div
-    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+    class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
   >
     <div
       class="euiFlexItem"
     >
+      <div
+        class="euiSpacer euiSpacer--l"
+      />
       <div
         class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
       >
@@ -8421,6 +8460,9 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
     <div
       class="euiFlexItem euiFlexItem--flexGrowZero"
     >
+      <div
+        class="euiSpacer euiSpacer--l"
+      />
       <div>
         <div
           class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
