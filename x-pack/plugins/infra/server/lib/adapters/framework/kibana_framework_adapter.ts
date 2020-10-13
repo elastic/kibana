@@ -26,7 +26,6 @@ import {
   RequestHandlerContext,
   KibanaResponseFactory,
   RouteMethod,
-  LegacyAPICaller,
 } from '../../../../../../../src/core/server';
 import { RequestHandler } from '../../../../../../../src/core/server';
 import { InfraConfig } from '../../../plugin';

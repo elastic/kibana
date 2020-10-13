@@ -301,6 +301,7 @@ export class AlertingPlugin {
   ): (request: KibanaRequest) => Services {
     return (request) => ({
       callCluster: elasticsearch.legacy.client.asScoped(request).callAsCurrentUser,
+      esClient: elasticsearch.client.asScoped(request).asCurrentUser,
       savedObjectsClient: this.getScopedClientWithAlertSavedObjectType(savedObjects, request),
       getLegacyScopedClusterClient(clusterClient: ILegacyClusterClient) {
         return clusterClient.asScoped(request);
