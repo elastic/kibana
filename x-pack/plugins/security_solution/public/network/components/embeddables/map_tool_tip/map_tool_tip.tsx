@@ -43,14 +43,14 @@ export const MapToolTipComponent = ({
   }, [closeTooltip]);
 
   const handlePreviousFeature = useCallback(() => {
-    setFeatureIndex(featureIndex + 1);
+    setFeatureIndex((prevFeatureIndex) => prevFeatureIndex - 1);
     setIsLoadingNextFeature(true);
-  }, [featureIndex]);
+  }, []);
 
   const handleNextFeature = useCallback(() => {
-    setFeatureIndex(featureIndex + 1);
+    setFeatureIndex((prevFeatureIndex) => prevFeatureIndex + 1);
     setIsLoadingNextFeature(true);
-  }, [featureIndex]);
+  }, []);
 
   const content = useMemo(() => {
     if (isError) {

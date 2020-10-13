@@ -260,7 +260,7 @@ MoreContainer.displayName = 'MoreContainer';
 export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverflowProps>(
   ({ idPrefix, moreMaxHeight, overflowIndexStart = 5, render, rowItems }) => {
     const [isOpen, setIsOpen] = useState(false);
-    const handleClose = useCallback(() => setIsOpen(!isOpen), [isOpen]);
+    const handleClose = useCallback(() => setIsOpen(false), []);
     const button = useMemo(
       () => (
         <>

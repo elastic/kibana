@@ -6,6 +6,7 @@
 
 import { getOr } from 'lodash/fp';
 
+import { assertUnreachable } from '../../../../../../common/utility_types';
 import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 import {
   Direction,
@@ -124,4 +125,5 @@ export const getQueryOrder = (
     case NetworkTopTablesFields.source_ips:
       return { source_ips: networkTopNFlowSortField.direction };
   }
+  assertUnreachable(networkTopNFlowSortField.field);
 };
