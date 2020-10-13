@@ -23,7 +23,6 @@ import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { ISearchOptions as ISearchOptions_2 } from 'src/plugins/data/public';
 import { ISearchSource } from 'src/plugins/data/public';
 import { KibanaRequest } from 'src/core/server';
-import { KibanaRequest as KibanaRequest_2 } from 'kibana/server';
 import { LegacyAPICaller } from 'kibana/server';
 import { Logger } from 'kibana/server';
 import { LoggerFactory } from '@kbn/logging';
@@ -42,6 +41,7 @@ import { RequestHandlerContext } from 'src/core/server';
 import { RequestStatistics } from 'src/plugins/inspector/common';
 import { SavedObject } from 'src/core/server';
 import { SavedObjectsClientContract } from 'src/core/server';
+import { SavedObjectsClientContract as SavedObjectsClientContract_2 } from 'kibana/server';
 import { Search } from '@elastic/elasticsearch/api/requestParams';
 import { SearchResponse } from 'elasticsearch';
 import { SerializedFieldFormat as SerializedFieldFormat_2 } from 'src/plugins/expressions/common';
@@ -675,7 +675,7 @@ export class IndexPatternsService implements Plugin_3<void, IndexPatternsService
     //
     // (undocumented)
     start(core: CoreStart_2, { fieldFormats, logger }: IndexPatternsServiceStartDeps): {
-        indexPatternsServiceFactory: (kibanaRequest: KibanaRequest_2) => Promise<IndexPatternsService_2>;
+        indexPatternsServiceFactory: (savedObjectsClient: SavedObjectsClientContract_2) => Promise<IndexPatternsService_2>;
     };
 }
 
@@ -879,7 +879,7 @@ export class Plugin implements Plugin_2<PluginSetup, PluginStart, DataPluginSetu
             fieldFormatServiceFactory: (uiSettings: import("../../../core/server").IUiSettingsClient) => Promise<import("../common").FieldFormatsRegistry>;
         };
         indexPatterns: {
-            indexPatternsServiceFactory: (kibanaRequest: import("../../../core/server").KibanaRequest<unknown, unknown, unknown, any>) => Promise<import("../public").IndexPatternsService>;
+            indexPatternsServiceFactory: (savedObjectsClient: Pick<import("../../../core/server").SavedObjectsClient, "update" | "find" | "get" | "delete" | "errors" | "create" | "bulkCreate" | "checkConflicts" | "bulkGet" | "addToNamespaces" | "deleteFromNamespaces" | "bulkUpdate">) => Promise<import("../public").IndexPatternsService>;
         };
         search: ISearchStart<import("./search").IEsSearchRequest, import("./search").IEsSearchResponse<any>>;
     };
