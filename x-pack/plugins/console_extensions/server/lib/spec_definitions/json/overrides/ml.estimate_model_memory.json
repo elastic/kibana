@@ -1,0 +1,7 @@
+{
+  "ml.estimate_model_memory": {
+    "analysis_config": {},
+    "max_bucket_cardinality": {},
+    "overall_cardinality": {}
+  }
+}
