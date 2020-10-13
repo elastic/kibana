@@ -6,7 +6,6 @@
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'src/core/server';
 
-import { INDEX_NAMES } from '../../../common/constants';
 import { Pipeline } from '../../models/pipeline';
 import { wrapRouteWithLicenseCheck } from '../../../../licensing/server';
 import { checkLicense } from '../../lib/check_license';
@@ -26,20 +25,21 @@ export function registerPipelineLoadRoute(router: IRouter) {
       router.handleLegacyErrors(async (context, request, response) => {
         const client = context.logstash!.esClient;
 
-        const result = await client.callAsCurrentUser('get', {
-          index: INDEX_NAMES.PIPELINES,
-          id: request.params.id,
-          _source: ['description', 'username', 'pipeline', 'pipeline_settings'],
-          ignore: [404],
-        });
+        try {
+          const result = await client.callAsCurrentUser('transport.request', {
+            path: '/_logstash/pipeline/' + encodeURIComponent(request.params.id),
+            method: 'GET',
+          });
+          return response.ok({
+            body: Pipeline.fromUpstreamJSON(result).downstreamJSON,
+          });
+        } catch (err) {
+          if (err.statusCode === 404) {
+            return response.notFound();
+          }
 
-        if (!result.found) {
-          return response.notFound();
+          throw err;
         }
-
-        return response.ok({
-          body: Pipeline.fromUpstreamJSON(result).downstreamJSON,
-        });
       })
     )
   );
