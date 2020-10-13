@@ -18,7 +18,7 @@
  */
 
 import { Request, Server } from '@hapi/hapi';
-import hapiAuthCookie from 'hapi-auth-cookie';
+import hapiAuthCookie from '@hapi/cookie';
 // @ts-expect-error no TS definitions
 import Statehood from 'statehood';
 

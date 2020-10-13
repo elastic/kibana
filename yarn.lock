@@ -1585,6 +1585,16 @@
   dependencies:
     "@hapi/boom" "7.x.x"
 
+"@hapi/cookie@^10.1.2":
+  version "10.1.2"
+  resolved "https://registry.yarnpkg.com/@hapi/cookie/-/cookie-10.1.2.tgz#9ea7d80f05d764faaf892b84e80c1bf13f5e3bf5"
+  integrity sha512-wch/uT5NgDEujmaLIqUoohbEP6PUr4ML2Z6zqheWHeHrSzXangPH4dveW+fiMsoPMW2S9ecAyUjCfkh4qRfxjg==
+  dependencies:
+    "@hapi/boom" "7.x.x"
+    "@hapi/bounce" "1.x.x"
+    "@hapi/hoek" "8.x.x"
+    "@hapi/joi" "16.x.x"
+
 "@hapi/cryptiles@4.x.x":
   version "4.2.1"
   resolved "https://registry.yarnpkg.com/@hapi/cryptiles/-/cryptiles-4.2.1.tgz#ff0f18d79074659838caedbb911851313ad1ffbc"
@@ -4288,13 +4298,6 @@
     "@types/hapi" "*"
     "@types/node" "*"
 
-"@types/hapi-auth-cookie@^9.1.0":
-  version "9.1.0"
-  resolved "https://registry.yarnpkg.com/@types/hapi-auth-cookie/-/hapi-auth-cookie-9.1.0.tgz#cbcd2236b7d429bd0632a8cc45cfd355fdd7e7a2"
-  integrity sha512-qsP08L+fNaE2K5dsDVKvHp0AmSBs8m9PD5eWsTdHnkJOk81iD7c0J4GYt/1aDJwZsyx6CgcxpbkPOCwBJmrwAg==
-  dependencies:
-    "@types/hapi" "*"
-
 "@types/hapi@*":
   version "17.0.18"
   resolved "https://registry.yarnpkg.com/@types/hapi/-/hapi-17.0.18.tgz#f855fe18766aa2592a3a689c3e6eabe72989ff1a"
@@ -4319,7 +4322,14 @@
   resolved "https://registry.yarnpkg.com/@types/hapi__catbox/-/hapi__catbox-10.2.3.tgz#c9279c16d709bf2987491c332e11d18124ae018f"
   integrity sha512-gs6MKMKXzWpSqeYsPaDIDAxD8jLNg7aFxgAJE6Jnc+ns072Z9fuh39/NF5gSk1KNoGCLnIpeZ0etT9gY9QDCKg==
 
-"@types/hapi__hapi@^18.2.6":
+"@types/hapi__cookie@^10.1.1":
+  version "10.1.1"
+  resolved "https://registry.yarnpkg.com/@types/hapi__cookie/-/hapi__cookie-10.1.1.tgz#4420c7f89ef466aa8c1f4d9975c62e6b5b066b1c"
+  integrity sha512-sWVS20wvqbYSjpjpfOwsD/gtDBba3mi+Y4Yg2qZMBs0/VAgvhOOmpBXzFf2rE8rrEuR44n7tzmEgPWRw5q7kaw==
+  dependencies:
+    "@types/hapi__hapi" "*"
+
+"@types/hapi__hapi@*", "@types/hapi__hapi@^18.2.6":
   version "18.2.6"
   resolved "https://registry.yarnpkg.com/@types/hapi__hapi/-/hapi__hapi-18.2.6.tgz#61c1b210c55dee4636df594e7a0868ad48c8042a"
   integrity sha512-sXFlSg9btu/LdHqK/N/kuQXVqZhSvibXbtZc0KfEcelRXKthdU5ZSu5qItDIov7SYnyK2faMe7dbZaC/VpC33w==
@@ -14929,16 +14939,6 @@ handlebars@4.7.6:
     wordwrap "^1.0.0"
   optionalDependencies:
     uglify-js "^3.1.4"
-
-hapi-auth-cookie@^9.0.0:
-  version "9.0.0"
-  resolved "https://registry.yarnpkg.com/hapi-auth-cookie/-/hapi-auth-cookie-9.0.0.tgz#3b0af443334e2bd92490ddb17bed16e3e9edfd01"
-  integrity sha512-N71Mt7Jk0+7WLnuvfSv0DoGzgpn7TqOd+/AB73RfHpLvzYoskJ9AlFV3Op60DB01RJNaABZtdcH1l4HM3DMbog==
-  dependencies:
-    boom "7.x.x"
-    bounce "1.x.x"
-    hoek "5.x.x"
-    joi "13.x.x"
 
 har-schema@^2.0.0:
   version "2.0.0"
