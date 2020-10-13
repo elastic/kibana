@@ -10,6 +10,7 @@ import { NumberFromString } from '../saved_object';
 import { UserRT } from '../user';
 import { CommentResponseRt } from './comment';
 import { CasesStatusResponseRt } from './status';
+import { CaseConnectorRt, ESCaseConnector, ConnectorPartialFieldsRt } from '../connectors';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 export { ActionTypeExecutorResult } from '../../../../actions/server/types';
@@ -17,7 +18,7 @@ export { ActionTypeExecutorResult } from '../../../../actions/server/types';
 const StatusRt = rt.union([rt.literal('open'), rt.literal('closed')]);
 
 const CaseBasicRt = rt.type({
-  connector_id: rt.string,
+  connector: CaseConnectorRt,
   description: rt.string,
   status: StatusRt,
   tags: rt.array(rt.string),
@@ -60,6 +61,7 @@ export const CasePostRequestRt = rt.type({
   description: rt.string,
   tags: rt.array(rt.string),
   title: rt.string,
+  connector: CaseConnectorRt,
 });
 
 export const CaseExternalServiceRequestRt = CaseExternalServiceBasicRt;
@@ -115,6 +117,8 @@ export const CasesResponseRt = rt.array(CaseResponseRt);
  * so we redefine then so we can use/validate types
  */
 
+// TODO: Refactor to support multiple connectors with various fields
+
 const ServiceConnectorUserParams = rt.type({
   fullName: rt.union([rt.string, rt.null]),
   username: rt.string,
@@ -129,17 +133,22 @@ export const ServiceConnectorCommentParamsRt = rt.type({
   updatedBy: rt.union([ServiceConnectorUserParams, rt.null]),
 });
 
-export const ServiceConnectorCaseParamsRt = rt.type({
-  savedObjectId: rt.string,
+export const ServiceConnectorBasicCaseParamsRt = rt.type({
+  comments: rt.union([rt.array(ServiceConnectorCommentParamsRt), rt.null]),
   createdAt: rt.string,
   createdBy: ServiceConnectorUserParams,
+  description: rt.union([rt.string, rt.null]),
   externalId: rt.union([rt.string, rt.null]),
+  savedObjectId: rt.string,
   title: rt.string,
   updatedAt: rt.union([rt.string, rt.null]),
   updatedBy: rt.union([ServiceConnectorUserParams, rt.null]),
-  description: rt.union([rt.string, rt.null]),
-  comments: rt.union([rt.array(ServiceConnectorCommentParamsRt), rt.null]),
 });
+
+export const ServiceConnectorCaseParamsRt = rt.intersection([
+  ServiceConnectorBasicCaseParamsRt,
+  ConnectorPartialFieldsRt,
+]);
 
 export const ServiceConnectorCaseResponseRt = rt.intersection([
   rt.type({
@@ -174,3 +183,8 @@ export type ServiceConnectorCaseParams = rt.TypeOf<typeof ServiceConnectorCasePa
 export type ServiceConnectorCaseResponse = rt.TypeOf<typeof ServiceConnectorCaseResponseRt>;
 export type CaseFullExternalService = rt.TypeOf<typeof CaseFullExternalServiceRt>;
 export type ServiceConnectorCommentParams = rt.TypeOf<typeof ServiceConnectorCommentParamsRt>;
+
+export type ESCaseAttributes = Omit<CaseAttributes, 'connector'> & { connector: ESCaseConnector };
+export type ESCasePatchRequest = Omit<CasePatchRequest, 'connector'> & {
+  connector?: ESCaseConnector;
+};

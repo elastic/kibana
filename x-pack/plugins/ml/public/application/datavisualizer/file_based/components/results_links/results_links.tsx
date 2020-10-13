@@ -45,16 +45,12 @@ export const ResultsLinks: FC<Props> = ({
   const [globalState, setGlobalState] = useState<MlCommonGlobalState | undefined>();
 
   const [discoverLink, setDiscoverLink] = useState('');
-  const {
-    services: {
-      http: { basePath },
-    },
-  } = useMlKibana();
   const mlUrlGenerator = useMlUrlGenerator();
   const navigateToPath = useNavigateToPath();
 
   const {
     services: {
+      application: { navigateToApp, navigateToUrl },
       share: {
         urlGenerators: { getUrlGenerator },
       },
@@ -72,9 +68,19 @@ export const ResultsLinks: FC<Props> = ({
       if (globalState?.time) {
         state.timeRange = globalState.time;
       }
+
+      let discoverUrlGenerator;
+      try {
+        discoverUrlGenerator = getUrlGenerator(DISCOVER_APP_URL_GENERATOR);
+      } catch (error) {
+        // ignore error thrown when url generator is not available
+      }
+
+      if (!discoverUrlGenerator) {
+        return;
+      }
+      const discoverUrl = await discoverUrlGenerator.createUrl(state);
       if (!unmounted) {
-        const discoverUrlGenerator = getUrlGenerator(DISCOVER_APP_URL_GENERATOR);
-        const discoverUrl = await discoverUrlGenerator.createUrl(state);
         setDiscoverLink(discoverUrl);
       }
     };
@@ -142,9 +148,26 @@ export const ResultsLinks: FC<Props> = ({
     }
   }
 
+  function openInDiscover(e: React.MouseEvent<HTMLButtonElement>) {
+    e.preventDefault();
+    navigateToUrl(discoverLink);
+  }
+
+  function openIndexManagement(e: React.MouseEvent<HTMLButtonElement>) {
+    e.preventDefault();
+    navigateToApp('management', { path: '/data/index_management/indices' });
+  }
+
+  function openIndexPatternManagement(e: React.MouseEvent<HTMLButtonElement>) {
+    e.preventDefault();
+    navigateToApp('management', {
+      path: `/kibana/indexPatterns${createIndexPattern ? `/patterns/${indexPatternId}` : ''}`,
+    });
+  }
+
   return (
     <EuiFlexGroup gutterSize="l">
-      {createIndexPattern && (
+      {createIndexPattern && discoverLink && (
         <EuiFlexItem>
           <EuiCard
             icon={<EuiIcon size="xxl" type={`discoverApp`} />}
@@ -155,7 +178,7 @@ export const ResultsLinks: FC<Props> = ({
               />
             }
             description=""
-            href={discoverLink}
+            onClick={openInDiscover}
           />
         </EuiFlexItem>
       )}
@@ -205,7 +228,7 @@ export const ResultsLinks: FC<Props> = ({
             />
           }
           description=""
-          href={`${basePath.get()}/app/management/data/index_management/indices`}
+          onClick={openIndexManagement}
         />
       </EuiFlexItem>
 
@@ -219,9 +242,7 @@ export const ResultsLinks: FC<Props> = ({
             />
           }
           description=""
-          href={`${basePath.get()}/app/management/kibana/indexPatterns${
-            createIndexPattern ? `/patterns/${indexPatternId}` : ''
-          }`}
+          onClick={openIndexPatternManagement}
         />
       </EuiFlexItem>
       <EuiFlexItem>

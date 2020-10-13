@@ -81,7 +81,7 @@ export const ManagedInstructions = React.memo<Props>(({ agentPolicies }) => {
                 <EuiLink href={getHref('fleet')}>
                   <FormattedMessage
                     id="xpack.ingestManager.agentEnrollment.setUpAgentsLink"
-                    defaultMessage="set up Agents"
+                    defaultMessage="set up central management for Elastic Agents"
                   />
                 </EuiLink>
               ),

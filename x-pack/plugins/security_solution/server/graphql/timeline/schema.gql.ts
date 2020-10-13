@@ -317,7 +317,7 @@ export const timelineSchema = gql`
   #########################
 
   extend type Query {
-    getOneTimeline(id: ID!): TimelineResult!
+    getOneTimeline(id: ID!, timelineType: TimelineType): TimelineResult!
     getAllTimeline(pageInfo: PageInfoTimeline!, search: String, sort: SortTimeline, onlyUserFavorite: Boolean, timelineType: TimelineType, status: TimelineStatus): ResponseTimelines!
   }
 

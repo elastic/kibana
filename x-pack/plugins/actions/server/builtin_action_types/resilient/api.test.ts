@@ -74,6 +74,8 @@ describe('api', () => {
 
         expect(externalService.createIncident).toHaveBeenCalledWith({
           incident: {
+            incidentTypes: [1001],
+            severityCode: 6,
             description:
               'Incident description (created at 2020-06-03T15:09:13.606Z by Elastic User)',
             name: 'Incident title (created at 2020-06-03T15:09:13.606Z by Elastic User)',
@@ -175,6 +177,8 @@ describe('api', () => {
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
+            incidentTypes: [1001],
+            severityCode: 6,
             description:
               'Incident description (updated at 2020-06-03T15:09:13.606Z by Elastic User)',
             name: 'Incident title (updated at 2020-06-03T15:09:13.606Z by Elastic User)',
@@ -298,6 +302,8 @@ describe('api', () => {
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
+            incidentTypes: [1001],
+            severityCode: 6,
             name: 'Incident title (updated at 2020-06-03T15:09:13.606Z by Elastic User)',
             description:
               'description from ibm resilient \r\nIncident description (updated at 2020-06-03T15:09:13.606Z by Elastic User)',
@@ -335,6 +341,8 @@ describe('api', () => {
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
+            incidentTypes: [1001],
+            severityCode: 6,
             description:
               'description from ibm resilient \r\nIncident description (updated at 2020-06-03T15:09:13.606Z by Elastic User)',
           },
@@ -371,6 +379,8 @@ describe('api', () => {
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
+            incidentTypes: [1001],
+            severityCode: 6,
             name:
               'title from ibm resilient \r\nIncident title (updated at 2020-06-03T15:09:13.606Z by Elastic User)',
             description:
@@ -408,7 +418,10 @@ describe('api', () => {
         });
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
-          incident: {},
+          incident: {
+            incidentTypes: [1001],
+            severityCode: 6,
+          },
         });
       });
 
@@ -442,6 +455,8 @@ describe('api', () => {
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
+            incidentTypes: [1001],
+            severityCode: 6,
             name: 'Incident title (updated at 2020-06-03T15:09:13.606Z by Elastic User)',
           },
         });
@@ -477,6 +492,8 @@ describe('api', () => {
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
+            incidentTypes: [1001],
+            severityCode: 6,
             name: 'Incident title (updated at 2020-06-03T15:09:13.606Z by Elastic User)',
             description:
               'Incident description (updated at 2020-06-03T15:09:13.606Z by Elastic User)',
@@ -514,6 +531,8 @@ describe('api', () => {
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
+            incidentTypes: [1001],
+            severityCode: 6,
             description:
               'Incident description (updated at 2020-06-03T15:09:13.606Z by Elastic User)',
           },
@@ -550,6 +569,8 @@ describe('api', () => {
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
+            incidentTypes: [1001],
+            severityCode: 6,
             name:
               'title from ibm resilient \r\nIncident title (updated at 2020-06-03T15:09:13.606Z by Elastic User)',
             description:
@@ -588,6 +609,8 @@ describe('api', () => {
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
+            incidentTypes: [1001],
+            severityCode: 6,
             name:
               'title from ibm resilient \r\nIncident title (updated at 2020-06-03T15:09:13.606Z by Elastic User)',
           },
