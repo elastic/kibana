@@ -297,8 +297,6 @@ class AgentPolicyService {
   ): Promise<AgentPolicy> {
     const res = await this._update(soClient, id, {}, options?.user);
 
-    await this.triggerAgentPolicyUpdatedEvent(soClient, 'updated', id);
-
     return res;
   }
   public async bumpAllAgentPolicies(
