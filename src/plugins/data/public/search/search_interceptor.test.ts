@@ -99,29 +99,22 @@ describe('SearchInterceptor', () => {
         params: {},
       };
       const response = searchInterceptor.search(mockRequest);
-
-      const result = await response.toPromise();
-      expect(result).toBe(mockResponse);
+      expect(response.toPromise()).resolves.toBe(mockResponse);
     });
 
     describe('Should throw typed errors', () => {
       test('Observable should fail if fetch has an internal error', async () => {
-        const mockResponse: any = { result: 500, message: 'Internal Error' };
-        mockCoreSetup.http.fetch.mockRejectedValueOnce(mockResponse);
+        const mockResponse: any = new Error('Internal Error');
+        mockCoreSetup.http.fetch.mockRejectedValue(mockResponse);
         const mockRequest: IEsSearchRequest = {
           params: {},
         };
         const response = searchInterceptor.search(mockRequest);
-
-        try {
-          await response.toPromise();
-        } catch (e) {
-          expect(e).toBe(mockResponse);
-        }
+        await expect(response.toPromise()).rejects.toThrow('Internal Error');
       });
 
       describe('Should handle Timeout errors', () => {
-        test('Should throw SearchTimeoutError on server timeout AND show toast', async (done) => {
+        test('Should throw SearchTimeoutError on server timeout AND show toast', async () => {
           const mockResponse: any = {
             result: 500,
             body: {
@@ -133,17 +126,11 @@ describe('SearchInterceptor', () => {
             params: {},
           };
           const response = searchInterceptor.search(mockRequest);
-
-          try {
-            await response.toPromise();
-          } catch (e) {
-            expect(e).toBeInstanceOf(SearchTimeoutError);
-            expect(mockCoreSetup.notifications.toasts.addDanger).toBeCalledTimes(1);
-            done();
-          }
+          await expect(response.toPromise()).rejects.toThrow(SearchTimeoutError);
+          expect(mockCoreSetup.notifications.toasts.addDanger).toBeCalledTimes(1);
         });
 
-        test('Timeout error should show multiple times if not in a session', async (done) => {
+        test('Timeout error should show multiple times if not in a session', async () => {
           const mockResponse: any = {
             result: 500,
             body: {
@@ -154,20 +141,17 @@ describe('SearchInterceptor', () => {
           const mockRequest: IEsSearchRequest = {
             params: {},
           };
-          try {
-            await searchInterceptor.search(mockRequest).toPromise();
-          } catch (e) {
-            expect(e).toBeInstanceOf(SearchTimeoutError);
-            try {
-              await searchInterceptor.search(mockRequest).toPromise();
-            } catch (e2) {
-              expect(mockCoreSetup.notifications.toasts.addDanger).toBeCalledTimes(2);
-              done();
-            }
-          }
+
+          await expect(searchInterceptor.search(mockRequest).toPromise()).rejects.toThrow(
+            SearchTimeoutError
+          );
+          await expect(searchInterceptor.search(mockRequest).toPromise()).rejects.toThrow(
+            SearchTimeoutError
+          );
+          expect(mockCoreSetup.notifications.toasts.addDanger).toBeCalledTimes(2);
         });
 
-        test('Timeout error should show once per each session', async (done) => {
+        test('Timeout error should show once per each session', async () => {
           const mockResponse: any = {
             result: 500,
             body: {
@@ -178,20 +162,17 @@ describe('SearchInterceptor', () => {
           const mockRequest: IEsSearchRequest = {
             params: {},
           };
-          try {
-            await searchInterceptor.search(mockRequest, { sessionId: 'abc' }).toPromise();
-          } catch (e) {
-            expect(e).toBeInstanceOf(SearchTimeoutError);
-            try {
-              await searchInterceptor.search(mockRequest, { sessionId: 'def' }).toPromise();
-            } catch (e2) {
-              expect(mockCoreSetup.notifications.toasts.addDanger).toBeCalledTimes(2);
-              done();
-            }
-          }
+
+          await expect(
+            searchInterceptor.search(mockRequest, { sessionId: 'abc' }).toPromise()
+          ).rejects.toThrow(SearchTimeoutError);
+          await expect(
+            searchInterceptor.search(mockRequest, { sessionId: 'def' }).toPromise()
+          ).rejects.toThrow(SearchTimeoutError);
+          expect(mockCoreSetup.notifications.toasts.addDanger).toBeCalledTimes(2);
         });
 
-        test('Timeout error should show once in a single session', async (done) => {
+        test('Timeout error should show once in a single session', async () => {
           const mockResponse: any = {
             result: 500,
             body: {
@@ -202,21 +183,17 @@ describe('SearchInterceptor', () => {
           const mockRequest: IEsSearchRequest = {
             params: {},
           };
-          try {
-            await searchInterceptor.search(mockRequest, { sessionId: 'abc' }).toPromise();
-          } catch (e) {
-            expect(e).toBeInstanceOf(SearchTimeoutError);
-            try {
-              await searchInterceptor.search(mockRequest, { sessionId: 'abc' }).toPromise();
-            } catch (e2) {
-              expect(mockCoreSetup.notifications.toasts.addDanger).toBeCalledTimes(1);
-              done();
-            }
-          }
+          await expect(
+            searchInterceptor.search(mockRequest, { sessionId: 'abc' }).toPromise()
+          ).rejects.toThrow(SearchTimeoutError);
+          await expect(
+            searchInterceptor.search(mockRequest, { sessionId: 'abc' }).toPromise()
+          ).rejects.toThrow(SearchTimeoutError);
+          expect(mockCoreSetup.notifications.toasts.addDanger).toBeCalledTimes(1);
         });
       });
 
-      test('Should throw Painless error on server error with OSS format', async (done) => {
+      test('Should throw Painless error on server error with OSS format', async () => {
         const mockResponse: any = {
           result: 500,
           body: {
@@ -240,13 +217,7 @@ describe('SearchInterceptor', () => {
           params: {},
         };
         const response = searchInterceptor.search(mockRequest);
-
-        try {
-          await response.toPromise();
-        } catch (e) {
-          expect(e).toBeInstanceOf(PainlessError);
-          done();
-        }
+        await expect(response.toPromise()).rejects.toThrow(PainlessError);
       });
 
       test('Observable should fail if user aborts (test merged signal)', async () => {
