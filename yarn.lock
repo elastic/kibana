@@ -1663,7 +1663,7 @@
     "@hapi/hoek" "8.x.x"
     "@hapi/joi" "16.x.x"
 
-"@hapi/hoek@8.x.x", "@hapi/hoek@^8.2.4", "@hapi/hoek@^8.3.0", "@hapi/hoek@^8.3.1":
+"@hapi/hoek@8.x.x", "@hapi/hoek@^8.2.4", "@hapi/hoek@^8.3.0", "@hapi/hoek@^8.3.1", "@hapi/hoek@^8.5.1":
   version "8.5.1"
   resolved "https://registry.yarnpkg.com/@hapi/hoek/-/hoek-8.5.1.tgz#fde96064ca446dec8c55a8c2f130957b070c6e06"
   integrity sha512-yN7kbciD87WzLGc5539Tn0sApjyiGHAJgKvG9W8C7O+6c7qmoQMfVs0W4bX17eqz6C78QJqqFrtgdK5EWf6Qow==
@@ -4353,6 +4353,11 @@
     "@types/hapi__shot" "*"
     "@types/node" "*"
 
+"@types/hapi__hoek@^6.2.0":
+  version "6.2.0"
+  resolved "https://registry.yarnpkg.com/@types/hapi__hoek/-/hapi__hoek-6.2.0.tgz#61ec4dfb93e6aaccf2b407d6074a0633069e5d2d"
+  integrity sha512-MMS8ZD0SR2lklVkpNJw7iUYBmlvBLw1T04VSBhbWpiOi0ee6RoJUCcocVao1FLnSYR8Tt03dykRBv+FkvPIJSg==
+
 "@types/hapi__iron@*":
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/@types/hapi__iron/-/hapi__iron-6.0.1.tgz#ec8b23eff3d69313f1187c234deb80652384ad6b"
@@ -4418,11 +4423,6 @@
   version "2.4.2"
   resolved "https://registry.yarnpkg.com/@types/hjson/-/hjson-2.4.2.tgz#fd0288a5b6778cda993c978e43cc978ddc8f22e9"
   integrity sha512-MSKTfEyR8DbzJTOAY47BIJBD72ol4cu6BOw5inda0q1eEtEmurVHL4OmYB3Lxa4/DwXbWidkddvtoygbGQEDIw==
-
-"@types/hoek@^4.1.3":
-  version "4.1.3"
-  resolved "https://registry.yarnpkg.com/@types/hoek/-/hoek-4.1.3.tgz#d1982d48fb0d2a0e5d7e9d91838264d8e428d337"
-  integrity sha1-0ZgtSPsNKg5dfp2Rg4Jk2OQo0zc=
 
 "@types/hoist-non-react-statics@*", "@types/hoist-non-react-statics@^3.3.0", "@types/hoist-non-react-statics@^3.3.1":
   version "3.3.1"
@@ -15305,7 +15305,7 @@ hmac-drbg@^1.0.0:
     minimalistic-assert "^1.0.0"
     minimalistic-crypto-utils "^1.0.1"
 
-hoek@5.x.x, hoek@^5.0.4:
+hoek@5.x.x:
   version "5.0.4"
   resolved "https://registry.yarnpkg.com/hoek/-/hoek-5.0.4.tgz#0f7fa270a1cafeb364a4b2ddfaa33f864e4157da"
   integrity sha512-Alr4ZQgoMlnere5FZJsIyfIjORBqZll5POhDsF4q64dPuJR6rNxXdDxtHSQq8OXRurhmx+PWYEE8bXRROY8h0w==
