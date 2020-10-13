@@ -11,7 +11,7 @@ import {
   RequestHandler,
 } from 'kibana/server';
 
-import { filterJobIdsFactory, JobsInSpaces } from '../../saved_objects/filter';
+import { jobSavedObjectServiceFactory, JobSavedObjectService } from '../../saved_objects/filter';
 import { MlLicense } from '../../../common/license';
 
 import { MlClient, getMlClient } from '../ml_client';
@@ -21,7 +21,7 @@ type Handler = (handlerParams: {
   request: KibanaRequest<any, any, any, any>;
   response: KibanaResponseFactory;
   context: RequestHandlerContext;
-  jobsInSpaces: JobsInSpaces;
+  jobSavedObjectService: JobSavedObjectService;
   mlClient: MlClient;
 }) => ReturnType<RequestHandler>;
 
@@ -44,7 +44,7 @@ function guard(check: () => boolean, handler: Handler) {
       return response.forbidden();
     }
 
-    const jobsInSpaces = filterJobIdsFactory(context.core.savedObjects.client);
+    const jobSavedObjectService = jobSavedObjectServiceFactory(context.core.savedObjects.client);
     const client = context.core.elasticsearch.client;
 
     return handler({
@@ -52,8 +52,8 @@ function guard(check: () => boolean, handler: Handler) {
       request,
       response,
       context,
-      jobsInSpaces,
-      mlClient: getMlClient(client, jobsInSpaces),
+      jobSavedObjectService,
+      mlClient: getMlClient(client, jobSavedObjectService),
     });
   };
 }

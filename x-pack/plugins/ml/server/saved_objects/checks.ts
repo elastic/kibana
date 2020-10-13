@@ -6,7 +6,7 @@
 
 import { IScopedClusterClient } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
-import { JobsInSpaces, JobType } from './filter';
+import { JobSavedObjectService, JobType } from './filter';
 import { ML_SAVED_OBJECT_TYPE } from './saved_objects';
 
 import { Job } from '../../common/types/anomaly_detection_jobs';
@@ -31,9 +31,12 @@ interface SavedObjectJob {
   namespaces: string[];
 }
 
-export function checksFactory(client: IScopedClusterClient, jobsInSpaces: JobsInSpaces) {
+export function checksFactory(
+  client: IScopedClusterClient,
+  jobSavedObjectService: JobSavedObjectService
+) {
   async function checkStatus() {
-    const jobObjects = await jobsInSpaces.getAllJobObjects();
+    const jobObjects = await jobSavedObjectService.getAllJobObjects();
     // load all non-space jobs and datafeeds
     const { body: adJobs } = await client.asInternalUser.ml.getJobs<{ jobs: Job[] }>();
     const { body: datafeeds } = await client.asInternalUser.ml.getDatafeeds<{
@@ -154,10 +157,10 @@ export function checksFactory(client: IScopedClusterClient, jobsInSpaces: JobsIn
       if (job.checks.savedObjectExits === false) {
         results.savedObjectsCreated.push(job.jobId);
         if (simulate === false) {
-          await jobsInSpaces.createAnomalyDetectionJob(job.jobId);
+          await jobSavedObjectService.createAnomalyDetectionJob(job.jobId);
           if (job.datafeedId !== null) {
             //
-            await jobsInSpaces.addDatafeed(job.datafeedId, job.jobId);
+            await jobSavedObjectService.addDatafeed(job.datafeedId, job.jobId);
           }
         }
       }
@@ -167,7 +170,7 @@ export function checksFactory(client: IScopedClusterClient, jobsInSpaces: JobsIn
         results.savedObjectsCreated.push(job.jobId);
         if (simulate === false) {
           //
-          await jobsInSpaces.createDataFrameAnalyticsJob(job.jobId);
+          await jobSavedObjectService.createDataFrameAnalyticsJob(job.jobId);
         }
       }
     }
@@ -177,7 +180,7 @@ export function checksFactory(client: IScopedClusterClient, jobsInSpaces: JobsIn
         results.savedObjectsDeleted.push(job.jobId);
         if (simulate === false) {
           //
-          await jobsInSpaces.deleteAnomalyDetectionJob(job.jobId);
+          await jobSavedObjectService.deleteAnomalyDetectionJob(job.jobId);
         }
       }
     }
@@ -186,7 +189,7 @@ export function checksFactory(client: IScopedClusterClient, jobsInSpaces: JobsIn
         results.savedObjectsDeleted.push(job.jobId);
         if (simulate === false) {
           //
-          await jobsInSpaces.deleteDataFrameAnalyticsJob(job.jobId);
+          await jobSavedObjectService.deleteDataFrameAnalyticsJob(job.jobId);
         }
       }
     }
@@ -199,7 +202,7 @@ export function checksFactory(client: IScopedClusterClient, jobsInSpaces: JobsIn
           //
           const df = datafeeds.datafeeds.find((d) => d.job_id === job.jobId);
           if (df !== undefined) {
-            await jobsInSpaces.addDatafeed(df.datafeed_id, job.jobId);
+            await jobSavedObjectService.addDatafeed(df.datafeed_id, job.jobId);
           }
         }
       } else if (
@@ -211,7 +214,7 @@ export function checksFactory(client: IScopedClusterClient, jobsInSpaces: JobsIn
         results.datafeedsRemoved.push(job.jobId);
         if (simulate === false) {
           //
-          await jobsInSpaces.deleteDatafeed(job.datafeedId);
+          await jobSavedObjectService.deleteDatafeed(job.datafeedId);
         }
       }
     }

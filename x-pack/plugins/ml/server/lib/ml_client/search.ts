@@ -9,14 +9,17 @@ import { IScopedClusterClient } from 'kibana/server';
 // import { SearchResponse } from 'elasticsearch';
 import { RequestParams, ApiResponse } from '@elastic/elasticsearch';
 
-import { JobsInSpaces, JobType } from '../../saved_objects/filter';
+import { JobSavedObjectService, JobType } from '../../saved_objects/filter';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import type { SearchResponse7 } from '../../../common/types/es_client';
 
-export function searchProvider(client: IScopedClusterClient, jobsInSpaces: JobsInSpaces) {
+export function searchProvider(
+  client: IScopedClusterClient,
+  jobSavedObjectService: JobSavedObjectService
+) {
   async function jobIdsCheck(jobType: JobType, jobIds: string[]) {
     if (jobIds.length) {
-      const filteredJobIds = await jobsInSpaces.filterJobIdsForSpace(jobType, jobIds);
+      const filteredJobIds = await jobSavedObjectService.filterJobIdsForSpace(jobType, jobIds);
       const missingIds = jobIds.filter((j) => filteredJobIds.indexOf(j) === -1);
       if (missingIds.length) {
         throw Boom.notFound(`${missingIds.join(',')} missing`);

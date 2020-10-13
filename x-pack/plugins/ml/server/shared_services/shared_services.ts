@@ -26,7 +26,7 @@ import { ResolveMlCapabilities, MlCapabilitiesKey } from '../../common/types/cap
 import { hasMlCapabilitiesProvider, HasMlCapabilities } from '../lib/capabilities';
 import { MLClusterClientUninitialized } from './errors';
 import { MlClient, getMlClient } from '../lib/ml_client';
-import { filterJobIdsFactory } from '../saved_objects/filter';
+import { jobSavedObjectServiceFactory } from '../saved_objects/filter';
 
 export type SharedServices = JobServiceProvider &
   AnomalyDetectorsProvider &
@@ -124,7 +124,7 @@ function getRequestItemsProvider(
     // will not receive a real request object when being called from an alert.
     // instead a dummy request object will be supplied
     const clusterClient = getClusterClient();
-    const jobsInSpaces = filterJobIdsFactory(savedObjectsClient);
+    const jobSavedObjectService = jobSavedObjectServiceFactory(savedObjectsClient);
 
     if (clusterClient === null) {
       throw new MLClusterClientUninitialized(`ML's cluster client has not been initialized`);
@@ -133,7 +133,7 @@ function getRequestItemsProvider(
     if (request instanceof KibanaRequest) {
       hasMlCapabilities = getHasMlCapabilities(request);
       scopedClient = clusterClient.asScoped(request);
-      mlClient = getMlClient(scopedClient, jobsInSpaces);
+      mlClient = getMlClient(scopedClient, jobSavedObjectService);
     } else {
       hasMlCapabilities = () => Promise.resolve();
       const { asInternalUser } = clusterClient;
@@ -141,7 +141,7 @@ function getRequestItemsProvider(
         asInternalUser,
         asCurrentUser: asInternalUser,
       };
-      mlClient = getMlClient(scopedClient, jobsInSpaces);
+      mlClient = getMlClient(scopedClient, jobSavedObjectService);
     }
     return { hasMlCapabilities, scopedClient, mlClient };
   };

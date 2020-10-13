@@ -30,18 +30,20 @@ export function savedObjectsRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canStartStopDatafeed'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, mlClient, request, response, jobsInSpaces }) => {
-      try {
-        const { checkStatus } = checksFactory(client, jobsInSpaces);
-        const savedObjects = await checkStatus();
+    mlLicense.fullLicenseAPIGuard(
+      async ({ client, mlClient, request, response, jobSavedObjectService }) => {
+        try {
+          const { checkStatus } = checksFactory(client, jobSavedObjectService);
+          const savedObjects = await checkStatus();
 
-        return response.ok({
-          body: savedObjects,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
+          return response.ok({
+            body: savedObjects,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
       }
-    })
+    )
   );
 
   /**
@@ -63,18 +65,20 @@ export function savedObjectsRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canStartStopDatafeed'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, mlClient, request, response, jobsInSpaces }) => {
-      try {
-        const { simulate } = request.query;
-        const { repairJobs } = checksFactory(client, jobsInSpaces);
-        const savedObjects = await repairJobs(simulate);
+    mlLicense.fullLicenseAPIGuard(
+      async ({ client, mlClient, request, response, jobSavedObjectService }) => {
+        try {
+          const { simulate } = request.query;
+          const { repairJobs } = checksFactory(client, jobSavedObjectService);
+          const savedObjects = await repairJobs(simulate);
 
-        return response.ok({
-          body: savedObjects,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
+          return response.ok({
+            body: savedObjects,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
       }
-    })
+    )
   );
 }

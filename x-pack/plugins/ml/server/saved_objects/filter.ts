@@ -16,9 +16,9 @@ interface JobObject {
   type: JobType;
 }
 
-export type JobsInSpaces = ReturnType<typeof filterJobIdsFactory>;
+export type JobSavedObjectService = ReturnType<typeof jobSavedObjectServiceFactory>;
 
-export function filterJobIdsFactory(savedObjectsClient: SavedObjectsClientContract) {
+export function jobSavedObjectServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
   async function _getJobObjects(jobType?: JobType, jobId?: string, datafeedId?: string) {
     const options: SavedObjectsFindOptions = {
       type: ML_SAVED_OBJECT_TYPE,
