@@ -18,7 +18,7 @@ describe('get_threat_signals', () => {
       expect(sortOrder).toEqual([{ '@timestamp': 'asc' }]);
     });
 
-    test('it should return sort field of just timestamp if given no sort order for a list item index', () => {
+    test('it should return sort field of just tie_breaker_id if given no sort order for a list item index', () => {
       const sortOrder = getSortWithTieBreaker({
         sortField: undefined,
         sortOrder: undefined,
@@ -38,7 +38,7 @@ describe('get_threat_signals', () => {
       expect(sortOrder).toEqual([{ '@timestamp': 'asc' }]);
     });
 
-    test('it should return sort field of timestamp with asc even if sortOrder is changed as it is hard wired in for a list item index', () => {
+    test('it should return sort field of tie_breaker_id with asc even if sortOrder is changed as it is hard wired in for a list item index', () => {
       const sortOrder = getSortWithTieBreaker({
         sortField: undefined,
         sortOrder: 'desc',
