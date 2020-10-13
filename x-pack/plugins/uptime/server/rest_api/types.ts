@@ -9,11 +9,11 @@ import {
   RequestHandler,
   RouteConfig,
   RouteMethod,
-  LegacyCallAPIOptions,
   SavedObjectsClientContract,
   RequestHandlerContext,
   KibanaRequest,
   KibanaResponseFactory,
+  ElasticsearchClient,
   IKibanaResponse,
 } from 'kibana/server';
 import { DynamicSettings } from '../../common/runtime_types';
@@ -63,11 +63,7 @@ export type UMKibanaRouteWrapper = (uptimeRoute: UptimeRoute) => UMKibanaRoute;
  * This type can store custom parameters used by the internal Uptime route handlers.
  */
 export interface UMRouteParams {
-  callES: (
-    endpoint: string,
-    clientParams?: Record<string, any>,
-    options?: LegacyCallAPIOptions | undefined
-  ) => Promise<any>;
+  callES: ElasticsearchClient;
   dynamicSettings: DynamicSettings;
   savedObjectsClient: SavedObjectsClientContract;
 }

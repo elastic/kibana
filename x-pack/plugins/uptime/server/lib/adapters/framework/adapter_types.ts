@@ -9,14 +9,14 @@ import {
   IRouter,
   SavedObjectsClientContract,
   ISavedObjectsRepository,
-  ILegacyScopedClusterClient,
+  ElasticsearchClient,
 } from 'src/core/server';
 import { UMKibanaRoute } from '../../../rest_api';
 import { PluginSetupContract } from '../../../../../features/server';
 import { DynamicSettings } from '../../../../common/runtime_types';
 import { MlPluginSetup as MlSetup } from '../../../../../ml/server';
 
-export type ESAPICaller = ILegacyScopedClusterClient['callAsCurrentUser'];
+export type ESAPICaller = ElasticsearchClient;
 
 export type UMElasticsearchQueryFn<P, R = any> = (
   params: { callES: ESAPICaller; dynamicSettings: DynamicSettings } & P
