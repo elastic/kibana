@@ -58,6 +58,7 @@ export class XyVisualization {
         getXyChartRenderer({
           formatFactory,
           chartsThemeService: charts.theme,
+          paletteService: charts.palettes,
           timeZone: getTimeZone(core.uiSettings),
           histogramBarTarget: core.uiSettings.get<number>(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
         })

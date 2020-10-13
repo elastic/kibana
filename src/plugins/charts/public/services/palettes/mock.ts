@@ -27,6 +27,18 @@ export const paletteServiceMock: PaletteService = {
         title: 'My Palette',
         getColor: () => 'black',
         getColors: () => ['red', 'black'],
+        toExpression: () => ({
+          type: 'expression',
+          chain: [
+            {
+              type: 'function',
+              function: 'system_palette',
+              arguments: {
+                name: ['default'],
+              },
+            },
+          ],
+        }),
       },
     };
   },

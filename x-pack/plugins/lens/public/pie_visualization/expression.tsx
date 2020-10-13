@@ -92,9 +92,9 @@ export const pie: ExpressionFunctionDefinition<
       help: '',
     },
     palette: {
-      types: ['lens_palette'],
+      default: `{theme "palette" default={system_palette name="default"} }`,
       help: '',
-      default: `{lens_palette_default}`,
+      types: ['palette'],
     },
   },
   inputTypes: ['lens_multitable'],
@@ -113,6 +113,7 @@ export const pie: ExpressionFunctionDefinition<
 export const getPieRenderer = (dependencies: {
   formatFactory: Promise<FormatFactory>;
   chartsThemeService: ChartsPluginSetup['theme'];
+  paletteService: ChartsPluginSetup['palettes'];
 }): ExpressionRenderDefinition<PieExpressionProps> => ({
   name: 'lens_pie_renderer',
   displayName: i18n.translate('xpack.lens.pie.visualizationName', {
@@ -136,6 +137,7 @@ export const getPieRenderer = (dependencies: {
           {...config}
           formatFactory={formatFactory}
           chartsThemeService={dependencies.chartsThemeService}
+          paletteService={dependencies.paletteService}
           onClickValue={onClickValue}
         />
       </I18nProvider>,

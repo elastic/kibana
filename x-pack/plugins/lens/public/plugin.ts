@@ -13,7 +13,7 @@ import { VisualizationsSetup } from 'src/plugins/visualizations/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { UrlForwardingSetup } from 'src/plugins/url_forwarding/public';
 import { GlobalSearchPluginSetup } from '../../global_search/public';
-import { ChartsPluginSetup } from '../../../../src/plugins/charts/public';
+import { ChartsPluginSetup, ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import { EditorFrameService } from './editor_frame_service';
 import {
   IndexPatternDatasource,
@@ -28,7 +28,6 @@ import {
 import { PieVisualization, PieVisualizationPluginSetupPlugins } from './pie_visualization';
 import { stopReportManager } from './lens_ui_telemetry';
 import { AppNavLinkStatus } from '../../../../src/core/public';
-import { ChartsPluginSetup } from '../../../../src/plugins/charts/public';
 
 import {
   UiActionsStart,
@@ -60,6 +59,7 @@ export interface LensPluginStartDependencies {
   uiActions: UiActionsStart;
   dashboard: DashboardStart;
   embeddable: EmbeddableStart;
+  charts: ChartsPluginStart;
 }
 export class LensPlugin {
   private datatableVisualization: DatatableVisualization;

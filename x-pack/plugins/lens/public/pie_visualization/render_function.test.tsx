@@ -61,7 +61,7 @@ describe('PieVisualization component', () => {
       nestedLegend: false,
       percentDecimals: 3,
       hideLabels: false,
-      palette: { getColor: createMockPaletteDefinition().getColor, type: 'lens_palette' },
+      palette: { name: 'mock', type: 'palette' },
     };
 
     function getDefaultArgs() {
@@ -70,6 +70,9 @@ describe('PieVisualization component', () => {
         formatFactory: getFormatSpy,
         onClickValue: jest.fn(),
         chartsThemeService,
+        paletteService: {
+          mock: createMockPaletteDefinition(),
+        },
       };
     }
 
@@ -100,10 +103,11 @@ describe('PieVisualization component', () => {
     });
 
     test('it calls the color function with the right series layers', () => {
+      const defaultArgs = getDefaultArgs();
       const component = shallow(
         <PieComponent
           args={args}
-          {...getDefaultArgs()}
+          {...defaultArgs}
           data={{
             ...data,
             tables: {
@@ -154,7 +158,7 @@ describe('PieVisualization component', () => {
         [] as HierarchyOfArrays
       );
 
-      expect(args.palette.getColor).toHaveBeenCalledWith([
+      expect(defaultArgs.paletteService.mock.getColor).toHaveBeenCalledWith([
         {
           name: 'css',
           maxDepth: 2,

@@ -5,6 +5,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import { ChartsPluginSetup } from 'src/plugins/charts/public';
 import {
   CoreSetup,
   CoreStart,
@@ -43,6 +44,7 @@ export interface CanvasSetupDeps {
   home?: HomePublicPluginSetup;
   usageCollection?: UsageCollectionSetup;
   bfetch: BfetchPublicSetup;
+  charts: ChartsPluginSetup;
 }
 
 export interface CanvasStartDeps {

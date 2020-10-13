@@ -38,13 +38,14 @@ export function PieComponent(
   props: PieExpressionProps & {
     formatFactory: FormatFactory;
     chartsThemeService: ChartsPluginSetup['theme'];
+    paletteService: ChartsPluginSetup['palettes'];
     onClickValue: (data: LensFilterEvent['data']) => void;
   }
 ) {
   const [firstTable] = Object.values(props.data.tables);
   const formatters: Record<string, ReturnType<FormatFactory>> = {};
 
-  const { chartsThemeService, onClickValue } = props;
+  const { chartsThemeService, paletteService, onClickValue } = props;
   const {
     shape,
     groups,
@@ -145,7 +146,7 @@ export function PieComponent(
             }
           }
 
-          const outputColor = palette.getColor(seriesLayers);
+          const outputColor = paletteService[palette.name].getColor(seriesLayers, palette.params);
 
           return outputColor || 'rgba(0,0,0,0)';
         },

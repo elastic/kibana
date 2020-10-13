@@ -4,9 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { functionWrapper } from '../../../__tests__/helpers/function_wrapper';
-import { testPie } from './__tests__/fixtures/test_pointseries';
-import { fontStyle, grayscalePalette, seriesStyle } from './__tests__/fixtures/test_styles';
+import { functionWrapper } from '../../__tests__/helpers/function_wrapper';
+import { testPie } from '../../canvas_plugin_src/functions/common/__tests__/fixtures/test_pointseries';
+import {
+  fontStyle,
+  grayscalePalette,
+  seriesStyle,
+} from '../../canvas_plugin_src/functions/common/__tests__/fixtures/test_styles';
 import { pie } from './pie';
 
 describe('pie', () => {

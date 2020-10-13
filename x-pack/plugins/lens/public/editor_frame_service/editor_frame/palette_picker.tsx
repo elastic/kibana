@@ -13,14 +13,16 @@ export function PalettePicker({ frame }: { frame: FramePublicAPI }) {
   return (
     <>
       <EuiColorPalettePicker
-        palettes={Object.entries(frame.globalPalette.availablePalettes).map(([id, palette]) => {
-          return {
-            value: id,
-            title: palette.title,
-            type: 'fixed',
-            palette: palette.getPreview(frame.globalPalette.state).colors,
-          };
-        })}
+        palettes={Object.entries(frame.globalPalette.availablePalettes)
+          .filter(([, { internal }]) => !internal)
+          .map(([id, palette]) => {
+            return {
+              value: id,
+              title: palette.title,
+              type: 'fixed',
+              palette: palette.getColors(10, frame.globalPalette.state),
+            };
+          })}
         onChange={frame.globalPalette.setActivePalette}
         valueOfSelected={frame.globalPalette.activePalette.id || 'default'}
         selectionDisplay={'palette'}

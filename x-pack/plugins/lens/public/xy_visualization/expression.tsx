@@ -66,6 +66,7 @@ export interface XYRender {
 
 type XYChartRenderProps = XYChartProps & {
   chartsThemeService: ChartsPluginSetup['theme'];
+  paletteService: ChartsPluginSetup['palettes'];
   formatFactory: FormatFactory;
   timeZone: string;
   histogramBarTarget: number;
@@ -144,9 +145,9 @@ export const xyChart: ExpressionFunctionDefinition<
       }),
     },
     palette: {
-      default: `{theme "palette" default={palette name="default"} }`,
+      default: `{theme "palette" default={system_palette name="warm"} }`,
       help: '',
-      types: ['string'],
+      types: ['palette'],
     },
     layers: {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -170,6 +171,7 @@ export const xyChart: ExpressionFunctionDefinition<
 export const getXyChartRenderer = (dependencies: {
   formatFactory: Promise<FormatFactory>;
   chartsThemeService: ChartsPluginSetup['theme'];
+  paletteService: ChartsPluginSetup['palettes'];
   histogramBarTarget: number;
   timeZone: string;
 }): ExpressionRenderDefinition<XYChartProps> => ({
@@ -199,6 +201,7 @@ export const getXyChartRenderer = (dependencies: {
           {...config}
           formatFactory={formatFactory}
           chartsThemeService={dependencies.chartsThemeService}
+          paletteService={dependencies.paletteService}
           timeZone={dependencies.timeZone}
           histogramBarTarget={dependencies.histogramBarTarget}
           onClickValue={onClickValue}
@@ -246,6 +249,7 @@ export function XYChart({
   formatFactory,
   timeZone,
   chartsThemeService,
+  paletteService,
   histogramBarTarget,
   onClickValue,
   onSelectRange,
@@ -639,7 +643,7 @@ export function XYChart({
                   behindText: false,
                 },
               ];
-              return palette.getColor(seriesLayers);
+              return paletteService[palette.name].getColor(seriesLayers, palette.params);
             },
             groupId: yAxesConfiguration.find((axisConfiguration) =>
               axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)

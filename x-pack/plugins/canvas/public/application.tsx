@@ -86,6 +86,7 @@ export const initializeCanvas = async (
     timefilter: setupPlugins.data.query.timefilter.timefilter,
     prependBasePath: coreSetup.http.basePath.prepend,
     types: setupPlugins.expressions.getTypes(),
+    paletteService: setupPlugins.charts.palettes,
   });
 
   for (const fn of canvasFunctions) {

@@ -69,11 +69,15 @@ export interface PaletteDefinition<T = unknown> {
    */
   title: string;
   /**
+   * Flag indicating whether users should be able to pick this palette manually.
+   */
+  internal?: boolean;
+  /**
    * Serialize the internal state of the palette into an expression function.
    * This function should be used to pass the palette to the expression function applying color and other styles
    * @param state The internal state of the palette
    */
-  toExpression?: (state?: T) => Ast;
+  toExpression: (state?: T) => Ast;
   /**
    * Renders the UI for editing the internal state of the palette.
    * Not each palette has to feature an internal state, so this is an optional property.

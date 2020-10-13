@@ -38,7 +38,8 @@ export interface SystemPaletteArguments {
 
 export interface PaletteOutput<T = unknown> {
   type: 'palette';
-  params: T;
+  name: string;
+  params?: T;
 }
 export const defaultCustomColors = [
   '#882E72',

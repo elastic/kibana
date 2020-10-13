@@ -17,6 +17,8 @@
  * under the License.
  */
 
+// @ts-ignore
+import chroma from 'chroma-js';
 import { i18n } from '@kbn/i18n';
 import {
   euiPaletteColorBlind,
@@ -37,7 +39,7 @@ function buildRoundRobinCategoricalWithMappedColors(
   id: string,
   colors: (n: number) => string[],
   behindTextColors?: (n: number) => string[]
-) {
+): Omit<PaletteDefinition, 'title'> {
   const colorCache: Partial<Record<string, string>> = {};
   function getColor(series: SeriesLayer[]) {
     const colorFromSettings = colorService.mappedColors.getColorFromConfig(series[0].name);
@@ -53,7 +55,7 @@ function buildRoundRobinCategoricalWithMappedColors(
 
     // translate the color to the behind text variant if possible
     if (series[0].behindText && actualBehindTextColors) {
-      const colorIndex = actualColors.findIndex((color) => outputColor);
+      const colorIndex = actualColors.findIndex((color) => outputColor === color);
       if (colorIndex !== -1) {
         outputColor = actualBehindTextColors[colorIndex];
       }
@@ -69,11 +71,24 @@ function buildRoundRobinCategoricalWithMappedColors(
     id,
     getColor,
     getColors: colors,
-    getPreview: () => ({ colors: colors(10) }),
+    toExpression: () => ({
+      type: 'expression',
+      chain: [
+        {
+          type: 'function',
+          function: 'system_palette',
+          arguments: {
+            name: [id],
+          },
+        },
+      ],
+    }),
   };
 }
 
-function buildSyncedKibanaPalette(colors: ChartsPluginSetup['legacyColors']) {
+function buildSyncedKibanaPalette(
+  colors: ChartsPluginSetup['legacyColors']
+): Omit<PaletteDefinition, 'title'> {
   function getColor(series: SeriesLayer[]) {
     colors.mappedColors.mapKeys([series[0].name]);
     const outputColor = colors.mappedColors.get(series[0].name);
@@ -84,7 +99,18 @@ function buildSyncedKibanaPalette(colors: ChartsPluginSetup['legacyColors']) {
     id: 'kibana_palette',
     getColor,
     getColors: () => colors.seedColors.slice(0, 10),
-    getPreview: () => ({ colors: colors.seedColors.slice(0, 10) }),
+    toExpression: () => ({
+      type: 'expression',
+      chain: [
+        {
+          type: 'function',
+          function: 'system_palette',
+          arguments: {
+            name: ['kibana_palette'],
+          },
+        },
+      ],
+    }),
   };
 }
 
@@ -140,5 +166,28 @@ export const buildPalettes: (
       title: i18n.translate('charts.palettes.grayLabel', { defaultMessage: 'gray' }),
       ...buildRoundRobinCategorical('gray', euiPaletteGray),
     },
+    custom: {
+      id: 'custom',
+      // TODO implement this in a meaningful way
+      getColor: () => 'black',
+      internal: true,
+      title: i18n.translate('charts.palettes.customLabel', { defaultMessage: 'custom' }),
+      getColors: (size: number, { colors, gradient }: { colors: string[]; gradient: boolean }) => {
+        return gradient ? chroma.scale(colors).colors(size) : colors;
+      },
+      toExpression: ({ colors, gradient }: { colors: string[]; gradient: boolean }) => ({
+        type: 'expression',
+        chain: [
+          {
+            type: 'function',
+            function: 'palette',
+            arguments: {
+              colors,
+              gradient: [gradient],
+            },
+          },
+        ],
+      }),
+    } as PaletteDefinition<unknown>,
   };
 };
