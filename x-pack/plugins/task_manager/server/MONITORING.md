@@ -150,7 +150,7 @@ For example, if you _curl_ the `/api/task_manager/_health` endpoint, you might g
 				    Here we see that on the 3rd polling interval from *now* (which is ~9 seconds from now, as pollInterval is `3s`) there is one task due to run.
 				    We also see that there are 5 due two intervals later, which is fine as we have a max workers of `10`
 				 */
-				"scheduleDensity": [0, 0, 1, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+				"estimatedScheduleDensity": [0, 0, 1, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 			}
 		},
 		"runtime": {

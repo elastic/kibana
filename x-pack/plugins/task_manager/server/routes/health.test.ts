@@ -7,6 +7,7 @@
 import { Observable, of, Subject } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { merge } from 'lodash';
+import uuid from 'uuid';
 import { httpServiceMock } from 'src/core/server/mocks';
 import { healthRoute } from './health';
 import { mockHandlerArguments } from './_mock_handler_arguments';
@@ -22,7 +23,7 @@ describe('healthRoute', () => {
   it('registers the route', async () => {
     const router = httpServiceMock.createRouter();
 
-    healthRoute(router, Promise.resolve(of()), mockLogger(), 1000, 1000);
+    healthRoute(router, Promise.resolve(of()), mockLogger(), uuid.v4(), 1000, 1000);
 
     const [config] = router.get.mock.calls[0];
 
@@ -41,7 +42,8 @@ describe('healthRoute', () => {
 
     const stats = Promise.resolve(new Subject<MonitoringStats>());
 
-    healthRoute(router, stats, logger, 1000, 60000);
+    const id = uuid.v4();
+    healthRoute(router, stats, logger, id, 1000, 60000);
 
     const stats$ = await stats;
 
@@ -53,6 +55,7 @@ describe('healthRoute', () => {
 
     const firstDebug = JSON.parse(logger.debug.mock.calls[0][0]);
     expect(firstDebug).toMatchObject({
+      id,
       timestamp: expect.any(String),
       status: expect.any(String),
       ...summarizeMonitoringStats(mockStat),
@@ -60,11 +63,13 @@ describe('healthRoute', () => {
 
     const secondDebug = JSON.parse(logger.debug.mock.calls[1][0]);
     expect(secondDebug).not.toMatchObject({
+      id,
       timestamp: expect.any(String),
       status: expect.any(String),
       ...summarizeMonitoringStats(skippedMockStat),
     });
     expect(secondDebug).toMatchObject({
+      id,
       timestamp: expect.any(String),
       status: expect.any(String),
       ...summarizeMonitoringStats(nextMockStat),
@@ -84,6 +89,7 @@ describe('healthRoute', () => {
       router,
       Promise.resolve(of(mockStat)),
       mockLogger(),
+      uuid.v4(),
       1000,
       60000
     );
@@ -162,7 +168,7 @@ describe('healthRoute', () => {
         },
       },
     });
-    healthRoute(router, Promise.resolve(of(mockStat)), mockLogger(), 5000, 60000);
+    healthRoute(router, Promise.resolve(of(mockStat)), mockLogger(), uuid.v4(), 5000, 60000);
 
     const [, handler] = router.get.mock.calls[0];
 
@@ -213,7 +219,7 @@ describe('healthRoute', () => {
         },
       },
     });
-    healthRoute(router, Promise.resolve(of(mockStat)), mockLogger(), 1000, 60000);
+    healthRoute(router, Promise.resolve(of(mockStat)), mockLogger(), uuid.v4(), 1000, 60000);
 
     const [, handler] = router.get.mock.calls[0];
 
@@ -277,7 +283,7 @@ function mockHealthStats(overrides = {}) {
             },
             schedule: {},
             overdue: 0,
-            scheduleDensity: [],
+            estimatedScheduleDensity: [],
           },
         },
         runtime: {

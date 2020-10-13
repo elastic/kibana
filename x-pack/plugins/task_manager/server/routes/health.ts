@@ -24,7 +24,7 @@ import {
   RawMonitoringStats,
 } from '../monitoring';
 
-type MonitoredHealth = RawMonitoringStats & { status: HealthStatus; timestamp: string };
+type MonitoredHealth = RawMonitoringStats & { id: string; status: HealthStatus; timestamp: string };
 
 const LEVEL_SUMMARY = {
   [ServiceStatusLevels.available.toString()]: 'Task Manager is healthy',
@@ -36,6 +36,7 @@ export function healthRoute(
   router: IRouter,
   monitoringStats: Promise<Observable<MonitoringStats>>,
   logger: Logger,
+  taskManagerId: string,
   requiredHotStatsFreshness: number,
   requiredColdStatsFreshness: number
 ): Observable<ServiceStatus> {
@@ -56,7 +57,7 @@ export function healthRoute(
         : hasStatus(summarizedStats.stats, HealthStatus.Warning)
         ? HealthStatus.Warning
         : HealthStatus.OK;
-    return { timestamp, status: healthStatus, ...summarizedStats };
+    return { id: taskManagerId, timestamp, status: healthStatus, ...summarizedStats };
   }
 
   // Only calculate the summerized stats (calculates all runnign averages and evaluates state)

@@ -32,7 +32,7 @@ export interface WorkloadStat extends JsonObject {
   taskTypes: TaskTypeStat;
   schedule: Array<[string, number]>;
   overdue: number;
-  scheduleDensity: number[];
+  estimatedScheduleDensity: number[];
 }
 
 export interface WorkloadAggregation {
@@ -219,7 +219,7 @@ export function createWorkloadAggregator(
           )
           .map((schedule) => [schedule.key as string, schedule.doc_count]),
         overdue,
-        scheduleDensity: padBuckets(scheduleDensityBuckets, pollInterval, scheduleDensity),
+        estimatedScheduleDensity: padBuckets(scheduleDensityBuckets, pollInterval, scheduleDensity),
       };
       return {
         key: 'workload',

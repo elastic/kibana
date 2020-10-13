@@ -274,7 +274,7 @@ describe('Workload Statistics Aggregator', () => {
           //  0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45, 48, 51, 54, 57
           // [0, 0, 0, 0,  0,  0,  0,  2,  2,  5,  0,  0,  0,  0,  0,  0,  1,  0,  0, 0 ]
           //  Above you see each bucket and the number of scheduled tasks we expect to have in them
-          scheduleDensity: [0, 0, 0, 0, 0, 0, 0, 2, 2, 5, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+          estimatedScheduleDensity: [0, 0, 0, 0, 0, 0, 0, 2, 2, 5, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
         });
         resolve();
       });

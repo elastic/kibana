@@ -55,6 +55,7 @@ export class TaskManagerPlugin
       router,
       this.taskManager.then((tm) => createMonitoringStats(tm, config, logger)),
       logger,
+      this.taskManagerId,
       // if "hot" health stats are any more stale than monitored_stats_required_freshness (pollInterval +1s buffer by default)
       // consider the system unhealthy
       config.monitored_stats_required_freshness,
