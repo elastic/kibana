@@ -68,6 +68,13 @@ export interface ParseSearchQueryOptions {
   tagClause?: string;
 }
 
+export interface TaggingApiUiComponent {
+  /**
+   * Displays the tags for given saved object.
+   */
+  TagList: FunctionComponent<TagListComponentProps>;
+}
+
 /**
  * React components and utility methods to use the SO tagging feature
  */
@@ -121,10 +128,5 @@ export interface TaggingApiUi {
   /**
    * React component to support the tagging feature.
    */
-  components: {
-    /**
-     * Displays the tags for given saved object.
-     */
-    TagList: FunctionComponent<TagListComponentProps>;
-  };
+  components: TaggingApiUiComponent;
 }

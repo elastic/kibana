@@ -25,6 +25,7 @@ export { SavedObjectTaggingOssPluginSetup, SavedObjectTaggingOssPluginStart } fr
 export {
   TaggingApi,
   TaggingApiUi,
+  TaggingApiUiComponent,
   TagListComponentProps,
   GetSearchBarFilterOptions,
   ParsedSearchQuery,

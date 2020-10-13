@@ -11,7 +11,7 @@ import { SavedObjectTaggingOssPluginSetup } from '../../../../src/plugins/saved_
 import { tagManagementSectionId } from '../common/constants';
 import { SavedObjectTaggingPluginStart } from './types';
 import { TagsClient, TagsCache } from './tags';
-import { getApiComponents } from './ui_api';
+import { getUiApi } from './ui_api';
 
 interface SetupDeps {
   management: ManagementSetup;
@@ -56,11 +56,12 @@ export class SavedObjectTaggingPlugin
     const tagCache = new TagsCache(() => this.tagClient!.getAll());
     this.tagClient = new TagsClient({ http, changeListener: tagCache });
 
+    // we don't need to wait for this to resolve.
     tagCache.populate();
 
     return {
       client: this.tagClient,
-      ui: getApiComponents({ cache: tagCache }),
+      ui: getUiApi({ cache: tagCache, client: this.tagClient }),
     };
   }
 }

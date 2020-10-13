@@ -1,0 +1,30 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { TaggingApiUi } from '../../../../../src/plugins/saved_objects_tagging_oss/public';
+import { ITagsCache, ITagInternalClient } from '../tags';
+import { getComponents } from './components';
+import { buildGetTableColumnDefinition } from './get_table_column_definition';
+import { buildGetSearchBarFilter } from './get_search_bar_filter';
+import { buildParseSearchQuery } from './parse_search_query';
+import { buildConvertNameToReference } from './convert_name_to_reference';
+
+interface GetUiApiOptions {
+  cache: ITagsCache;
+  client: ITagInternalClient;
+}
+
+export const getUiApi = ({ cache }: GetUiApiOptions): TaggingApiUi => {
+  const components = getComponents({ cache });
+
+  return {
+    components,
+    getTableColumnDefinition: buildGetTableColumnDefinition({ components }),
+    getSearchBarFilter: buildGetSearchBarFilter({ cache }),
+    parseSearchQuery: buildParseSearchQuery({ cache }),
+    convertNameToReference: buildConvertNameToReference({ cache }),
+  };
+};

@@ -27,3 +27,8 @@ export const getObjectTags = (object: SavedObject, allTags: Tag[]) => {
     missingRefs,
   };
 };
+
+export const convertTagNameToId = (tagName: string, allTags: Tag[]): string | undefined => {
+  const found = allTags.find((tag) => tag.name === tagName);
+  return found?.id;
+};
