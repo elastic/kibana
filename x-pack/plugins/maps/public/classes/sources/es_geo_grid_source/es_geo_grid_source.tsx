@@ -372,26 +372,31 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
       bucketsPerGrid += metricField.getBucketCount();
     });
 
-    const features =
-      bucketsPerGrid === 1
-        ? await this._nonCompositeAggRequest({
-            searchSource,
-            indexPattern,
-            precision: searchFilters.geogridPrecision || 0,
-            layerName,
-            registerCancelCallback,
-            bufferedExtent: searchFilters.buffer,
-          })
-        : await this._compositeAggRequest({
-            searchSource,
-            indexPattern,
-            precision: searchFilters.geogridPrecision || 0,
-            layerName,
-            registerCancelCallback,
-            bucketsPerGrid,
-            isRequestStillActive,
-            bufferedExtent: searchFilters.buffer,
-          });
+    let features;
+    if (searchFilters.buffer) {
+      features =
+        bucketsPerGrid === 1
+          ? await this._nonCompositeAggRequest({
+              searchSource,
+              indexPattern,
+              precision: searchFilters.geogridPrecision || 0,
+              layerName,
+              registerCancelCallback,
+              bufferedExtent: searchFilters.buffer,
+            })
+          : await this._compositeAggRequest({
+              searchSource,
+              indexPattern,
+              precision: searchFilters.geogridPrecision || 0,
+              layerName,
+              registerCancelCallback,
+              bucketsPerGrid,
+              isRequestStillActive,
+              bufferedExtent: searchFilters.buffer,
+            });
+    } else {
+      features = [];
+    }
 
     return {
       data: {

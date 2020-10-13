@@ -66,7 +66,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   readonly _descriptor: AbstractESSourceDescriptor;
   readonly _inspectorAdapters: Adapters;
 
-  constructor(descriptor: AbstractESSourceDescriptor, inspectorAdapters?: Adapters) {
+  constructor(descriptor: AbstractESSourceDescriptor, inspectorAdapters: Adapters) {
     super(
       {
         ...descriptor,

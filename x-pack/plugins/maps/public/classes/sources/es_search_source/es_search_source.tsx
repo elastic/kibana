@@ -72,7 +72,7 @@ function getDocValueAndSourceFields(
   sourceOnlyFields: string[];
   scriptFields: Record<string, { script: ScriptField }>;
 } {
-  const docValueFields: Array<string | { format: 'epoch_millis'; type: string }> = [];
+  const docValueFields: Array<string | { format: 'epoch_millis'; field: string }> = [];
   const sourceOnlyFields: string[] = [];
   const scriptFields: Record<string, { script: ScriptField }> = {};
   fieldNames.forEach((fieldName) => {
