@@ -67,8 +67,14 @@ export const getActions = (
   {
     'data-test-subj': 'editRuleAction',
     description: i18n.EDIT_RULE_SETTINGS,
+    name: actionsPrivileges ? (
+      <EuiToolTip position="top" content={i18n.EDIT_RULE_SETTINGS_TOOLTIP}>
+        <>{i18n.EDIT_RULE_SETTINGS}</>
+      </EuiToolTip>
+    ) : (
+      i18n.EDIT_RULE_SETTINGS
+    ),
     icon: 'controlsHorizontal',
-    name: i18n.EDIT_RULE_SETTINGS,
     onClick: (rowItem: Rule) => editRuleAction(rowItem, history),
     enabled: (rowItem: Rule) => canEditRule(rowItem, actionsPrivileges),
   },
