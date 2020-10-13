@@ -105,7 +105,9 @@ const fieldsConfig = {
   },
 };
 
-export const HotPhase: FunctionComponent = () => {
+export const HotPhase: FunctionComponent<{ setWarmPhaseOnRollover: (v: boolean) => void }> = ({
+  setWarmPhaseOnRollover,
+}) => {
   const [{ [useRolloverPath]: isRolloverEnabled }] = useFormData({ watch: [useRolloverPath] });
   const form = useFormContext();
   const isShowingErrors = form.isValid === false;
@@ -175,7 +177,9 @@ export const HotPhase: FunctionComponent = () => {
                   data-test-subj="rolloverSwitch"
                   checked={field.value}
                   onChange={(e) => {
-                    field.setValue(e.target.checked);
+                    const value = e.target.checked;
+                    setWarmPhaseOnRollover(value);
+                    field.setValue(value);
                   }}
                   label={i18n.translate('xpack.indexLifecycleMgmt.hotPhase.enableRolloverLabel', {
                     defaultMessage: 'Enable rollover',

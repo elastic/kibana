@@ -127,6 +127,22 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
     history.push('/policies');
   };
 
+  const setWarmPhaseOnRollover = useCallback(
+    (value: boolean) => {
+      setPolicy((p) => ({
+        ...p,
+        phases: {
+          ...p.phases,
+          warm: {
+            ...p.phases.warm,
+            warmPhaseOnRollover: value,
+          },
+        },
+      }));
+    },
+    [setPolicy]
+  );
+
   const submit = async () => {
     setIsShowingErrors(true);
     const { data: formLibPolicy, isValid: newIsValid } = await form.submit();
@@ -327,7 +343,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
 
               <EuiSpacer />
 
-              <HotPhase />
+              <HotPhase setWarmPhaseOnRollover={setWarmPhaseOnRollover} />
 
               <EuiHorizontalRule />
 

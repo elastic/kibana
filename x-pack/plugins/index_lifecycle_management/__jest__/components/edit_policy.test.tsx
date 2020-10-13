@@ -137,10 +137,21 @@ const setPhaseIndexPriority = (
   priorityInput.simulate('change', { target: { value: priority } });
   rendered.update();
 };
+const setPhaseIndexPriorityFormLib = async (
+  rendered: ReactWrapper,
+  phase: string,
+  priority: string | number
+) => {
+  const priorityInput = findTestSubject(rendered, `${phase}-phaseIndexPriority`);
+  await act(async () => {
+    priorityInput.simulate('change', { target: { value: priority } });
+  });
+  rendered.update();
+};
 const save = async (rendered: ReactWrapper) => {
   const saveButton = findTestSubject(rendered, 'savePolicyButton');
   await act(async () => {
-    await saveButton.simulate('click');
+    saveButton.simulate('click');
   });
   rendered.update();
 };
@@ -342,7 +353,10 @@ describe('edit policy', () => {
       findTestSubject(rendered, 'hot-forceMergeSwitch').simulate('click');
       rendered.update();
       const forcemergeInput = findTestSubject(rendered, 'hot-selectedForceMergeSegments');
-      forcemergeInput.simulate('change', { target: { value: '-1' } });
+      await act(async () => {
+        forcemergeInput.simulate('change', { target: { value: '-1' } });
+      });
+      waitForFormLibValidation();
       rendered.update();
       await save(rendered);
       expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
@@ -351,9 +365,10 @@ describe('edit policy', () => {
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
-      setPhaseIndexPriority(rendered, 'hot', '-1');
-      await save(rendered);
-      expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
+      await setPhaseIndexPriorityFormLib(rendered, 'hot', '-1');
+      waitForFormLibValidation();
+      rendered.update();
+      expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
     });
   });
   describe('warm phase', () => {

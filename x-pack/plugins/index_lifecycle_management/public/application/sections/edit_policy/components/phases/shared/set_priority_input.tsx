@@ -63,7 +63,6 @@ export const SetPriorityInput: FunctionComponent<Props> = ({ phase }) => {
         config={setIndexPriorityConfig}
         component={NumericField}
         componentProps={{
-          'data-test-subj': `${phase}-${phaseIndexPriorityProperty}`,
           fullWidth: false,
           euiFieldProps: {
             'data-test-subj': `${phase}-${phaseIndexPriorityProperty}`,
