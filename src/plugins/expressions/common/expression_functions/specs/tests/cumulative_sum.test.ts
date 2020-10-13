@@ -65,11 +65,11 @@ describe('interpreter/functions#cumulative_sum', () => {
             "val": 7,
           },
           Object {
-            "output": 10,
+            "output": 15,
             "val": 3,
           },
           Object {
-            "output": 5,
+            "output": 17,
             "val": 2,
           },
         ],
@@ -147,22 +147,22 @@ describe('interpreter/functions#cumulative_sum', () => {
             "val": 4,
           },
           Object {
-            "output": 9,
+            "output": 10,
             "split": "A",
             "val": 5,
           },
           Object {
-            "output": 11,
+            "output": 16,
             "split": "A",
             "val": 6,
           },
           Object {
-            "output": 10,
+            "output": 12,
             "split": "B",
             "val": 7,
           },
           Object {
-            "output": 15,
+            "output": 20,
             "split": "B",
             "val": 8,
           },
@@ -244,7 +244,7 @@ describe('interpreter/functions#cumulative_sum', () => {
             "val": 5,
           },
           Object {
-            "output": 10,
+            "output": 11,
             "split": "A",
             "val": 6,
           },
@@ -254,7 +254,7 @@ describe('interpreter/functions#cumulative_sum', () => {
             "val": 7,
           },
           Object {
-            "output": 15,
+            "output": 17,
             "split": "B",
             "val": 8,
           },
@@ -337,12 +337,12 @@ describe('interpreter/functions#cumulative_sum', () => {
             "val": 5,
           },
           Object {
-            "output": 10,
+            "output": 11,
             "split": "A",
             "val": 6,
           },
           Object {
-            "output": 12,
+            "output": 15,
             "split": null,
             "val": 7,
           },
@@ -352,7 +352,7 @@ describe('interpreter/functions#cumulative_sum', () => {
             "val": 8,
           },
           Object {
-            "output": 16,
+            "output": 24,
             "split": "",
             "val": 9,
           },
@@ -581,11 +581,11 @@ describe('interpreter/functions#cumulative_sum', () => {
             "val": "7",
           },
           Object {
-            "output": "37",
+            "output": 15,
             "val": "3",
           },
           Object {
-            "output": "23",
+            "output": 17,
             "val": 2,
           },
         ],
@@ -632,11 +632,11 @@ describe('interpreter/functions#cumulative_sum', () => {
             "val": "7",
           },
           Object {
-            "output": "NaN7",
+            "output": NaN,
             "val": Object {},
           },
           Object {
-            "output": "2[object Object]",
+            "output": NaN,
             "val": 2,
           },
         ],
@@ -713,11 +713,11 @@ describe('interpreter/functions#cumulative_sum', () => {
             "val": "3",
           },
           Object {
-            "output": "23",
+            "output": 12,
             "val": 2,
           },
           Object {
-            "output": 2,
+            "output": 12,
             "val": null,
           },
         ],

@@ -158,7 +158,7 @@ export const cumulativeSum: ExpressionFunctionCumulativeSum = {
         const currentValue = newRow[inputColumnId];
         if (currentValue != null) {
           newRow[outputColumnId] = Number(currentValue) + accumulatorValue;
-          accumulators[bucketIdentifier] = currentValue;
+          accumulators[bucketIdentifier] = newRow[outputColumnId];
         } else {
           newRow[outputColumnId] = accumulatorValue;
         }
