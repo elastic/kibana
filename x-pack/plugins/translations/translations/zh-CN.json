@@ -9106,7 +9106,6 @@
     "xpack.ingestManager.epmList.updatesAvailableFilterLinkText": "有可用更新",
     "xpack.ingestManager.genericActionsMenuText": "打开",
     "xpack.ingestManager.homeIntegration.tutorialDirectory.dismissNoticeButtonText": "关闭消息",
-    "xpack.ingestManager.homeIntegration.tutorialDirectory.ingestManagerAppButtonText": "试用采集管理器公测版",
     "xpack.ingestManager.homeIntegration.tutorialDirectory.noticeText": "通过 Elastic 代理，您能够以简单统一的方式将日志、指标和其他类型数据的监测添加到主机。不再需要安装多个 Beats 和其他代理，这样在整个基础设施中部署配置会更轻松更快速。有关更多信息，请阅读我们的{blogPostLink}。",
     "xpack.ingestManager.homeIntegration.tutorialDirectory.noticeText.blogPostLink": "公告博客",
     "xpack.ingestManager.homeIntegration.tutorialDirectory.noticeTitle": "{newPrefix}Elastic 代理和采集管理器公测版",
