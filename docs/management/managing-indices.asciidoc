@@ -12,6 +12,7 @@ way possible.
 
 This page shows you how to use *Index Management* features to:
 
+<<<<<<< HEAD
 * View and edit index settings.
 * View mappings and statistics for an index.
 * Perform index-level operations, such as refreshes and freezes.
@@ -21,6 +22,9 @@ indices.
 
 To manage your indices, open the menu, then click *Stack Management > Index
 Management*.
+=======
+To manage your indices, open the menu, then click *Stack Management > Index Management*.
+>>>>>>> f6d0eb8e2ed... [DOCS] 7.10 screenCore UI changes
 
 [role="screenshot"]
 image::images/management_index_labels.png[Index Management UI]
