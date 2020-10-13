@@ -73,7 +73,7 @@ export interface ISource {
 
 export class AbstractSource implements ISource {
   readonly _descriptor: AbstractSourceDescriptor;
-  readonly _inspectorAdapters?: Adapters;
+  private readonly _inspectorAdapters?: Adapters;
 
   constructor(descriptor: AbstractSourceDescriptor, inspectorAdapters?: Adapters) {
     this._descriptor = descriptor;

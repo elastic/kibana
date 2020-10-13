@@ -35,7 +35,7 @@ export abstract class AbstractESAggSource extends AbstractESSource {
 
   constructor(
     descriptor: AbstractESAggSourceDescriptor,
-    inspectorAdapters: Adapters,
+    inspectorAdapters?: Adapters,
     canReadFromGeoJson = true
   ) {
     super(descriptor, inspectorAdapters);

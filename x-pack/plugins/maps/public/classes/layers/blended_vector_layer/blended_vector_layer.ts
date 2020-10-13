@@ -41,7 +41,6 @@ import {
 import { IVectorSource } from '../../sources/vector_source';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 import { ESSearchSource } from '../../sources/es_search_source/es_search_source';
-import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 
 const ACTIVE_COUNT_DATA_ID = 'ACTIVE_COUNT_DATA_ID';
 
@@ -73,10 +72,7 @@ function getClusterSource(documentSource: IESSource, documentStyle: IVectorStyle
     }),
   ];
   clusterSourceDescriptor.id = documentSource.getId();
-  return new ESGeoGridSource(
-    clusterSourceDescriptor,
-    documentSource.getInspectorAdapters() as Adapters
-  );
+  return new ESGeoGridSource(clusterSourceDescriptor, documentSource.getInspectorAdapters());
 }
 
 function getClusterStyleDescriptor(

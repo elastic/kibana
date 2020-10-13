@@ -28,6 +28,7 @@ import {
 import { MVTField } from '../../fields/mvt_field';
 import { UpdateSourceEditor } from './update_source_editor';
 import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
+import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 
 export const sourceTitle = i18n.translate(
   'xpack.maps.source.MVTSingleLayerVectorSource.sourceTitle',
@@ -66,7 +67,7 @@ export class MVTSingleLayerVectorSource
 
   constructor(
     sourceDescriptor: TiledSingleLayerVectorSourceDescriptor,
-    inspectorAdapters?: object
+    inspectorAdapters?: Adapters
   ) {
     super(sourceDescriptor, inspectorAdapters);
     this._descriptor = MVTSingleLayerVectorSource.createDescriptor(sourceDescriptor);

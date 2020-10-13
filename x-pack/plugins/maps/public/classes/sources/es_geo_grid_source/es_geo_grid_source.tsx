@@ -9,6 +9,7 @@ import uuid from 'uuid/v4';
 
 import { i18n } from '@kbn/i18n';
 import rison from 'rison-node';
+import { Feature } from 'geojson';
 import {
   convertCompositeRespToGeoJson,
   convertRegularRespToGeoJson,
@@ -372,7 +373,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
       bucketsPerGrid += metricField.getBucketCount();
     });
 
-    let features;
+    let features: Feature[];
     if (searchFilters.buffer) {
       features =
         bucketsPerGrid === 1

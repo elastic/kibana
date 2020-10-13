@@ -64,9 +64,8 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   indexPattern?: IndexPattern;
 
   readonly _descriptor: AbstractESSourceDescriptor;
-  readonly _inspectorAdapters: Adapters;
 
-  constructor(descriptor: AbstractESSourceDescriptor, inspectorAdapters: Adapters) {
+  constructor(descriptor: AbstractESSourceDescriptor, inspectorAdapters?: Adapters) {
     super(
       {
         ...descriptor,
@@ -75,7 +74,6 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       inspectorAdapters
     );
     this._descriptor = descriptor;
-    this._inspectorAdapters = inspectorAdapters;
   }
 
   getId(): string {
@@ -113,7 +111,10 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   }
 
   destroy() {
-    this._inspectorAdapters.requests.resetRequest(this.getId());
+    const inspectorAdapters = this.getInspectorAdapters();
+    if (inspectorAdapters) {
+      inspectorAdapters.requests.resetRequest(this.getId());
+    }
   }
 
   cloneDescriptor(): AbstractSourceDescriptor {
@@ -139,22 +140,33 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     const abortController = new AbortController();
     registerCancelCallback(() => abortController.abort());
 
-    const inspectorRequest = this._inspectorAdapters.requests.start(requestName, {
-      id: requestId,
-      description: requestDescription,
-    });
+    const inspectorAdapters = this.getInspectorAdapters();
+    let inspectorRequest: any;
+    if (inspectorAdapters) {
+      inspectorRequest = inspectorAdapters.requests.start(requestName, {
+        id: requestId,
+        description: requestDescription,
+      });
+    }
+
     let resp;
     try {
-      inspectorRequest.stats(search.getRequestInspectorStats(searchSource));
-      searchSource.getSearchRequestBody().then((body) => {
-        inspectorRequest.json(body);
-      });
+      if (inspectorRequest) {
+        inspectorRequest.stats(search.getRequestInspectorStats(searchSource));
+        searchSource.getSearchRequestBody().then((body) => {
+          inspectorRequest.json(body);
+        });
+      }
       resp = await searchSource.fetch({ abortSignal: abortController.signal });
-      inspectorRequest
-        .stats(search.getResponseInspectorStats(resp, searchSource))
-        .ok({ json: resp });
+      if (inspectorRequest) {
+        inspectorRequest
+          .stats(search.getResponseInspectorStats(resp, searchSource))
+          .ok({ json: resp });
+      }
     } catch (error) {
-      inspectorRequest.error({ error });
+      if (inspectorRequest) {
+        inspectorRequest.error({ error });
+      }
       if (error.name === 'AbortError') {
         throw new DataRequestAbortError();
       }
