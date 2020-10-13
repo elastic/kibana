@@ -61,7 +61,6 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     data,
     docValueFields,
     eventIdToNoteIds,
-    eventType,
     excludedRowRendererIds,
     id,
     isEventViewer = false,
@@ -197,7 +196,6 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
         data={data}
         docValueFields={docValueFields}
         eventIdToNoteIds={eventIdToNoteIds}
-        eventType={eventType}
         getNotesByIds={getNotesByIds}
         graphEventId={graphEventId}
         isEventViewer={isEventViewer}
@@ -232,7 +230,6 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     deepEqual(prevProps.excludedRowRendererIds, nextProps.excludedRowRendererIds) &&
     deepEqual(prevProps.docValueFields, nextProps.docValueFields) &&
     prevProps.eventIdToNoteIds === nextProps.eventIdToNoteIds &&
-    prevProps.eventType === nextProps.eventType &&
     prevProps.graphEventId === nextProps.graphEventId &&
     deepEqual(prevProps.notesById, nextProps.notesById) &&
     prevProps.id === nextProps.id &&
@@ -262,7 +259,6 @@ const makeMapStateToProps = () => {
     const {
       columns,
       eventIdToNoteIds,
-      eventType,
       excludedRowRendererIds,
       graphEventId,
       isSelectAllChecked,
@@ -277,7 +273,6 @@ const makeMapStateToProps = () => {
     return {
       columnHeaders: memoizedColumnHeaders(columns, browserFields),
       eventIdToNoteIds,
-      eventType,
       excludedRowRendererIds,
       graphEventId,
       isSelectAllChecked,
