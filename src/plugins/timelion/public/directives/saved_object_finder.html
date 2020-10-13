@@ -1,13 +1,11 @@
 <form
   role="form"
-  class="kuiVerticalRhythm"
 >
-  <div class="kuiBar">
-    <div class="kuiBarSection">
-      <div class="kuiSearchInput fullWidth">
-        <div class="kuiSearchInput__icon kuiIcon fa-search"></div>
+  <div class="search-bar">
+      <div style="position: relative; margin-right:16px; flex:1">
+        <icon class="search-bar__icon" type="'search'"></icon>
         <input
-          class="kuiSearchInput__input"
+          class="search-bar__input"
           input-focus
           disable-input-focus="disableAutoFocus"
           ng-model="filter"
@@ -18,18 +16,17 @@
           autocomplete="off"
           data-test-subj="savedObjectFinderSearchInput"
         >
-      </div>
     </div>
 
-    <div class="kuiBarSection">
-      <p class="kuiText kuiSubduedText"
+    <div>
+      <p class="search-bar__pagecount"
         i18n-id="timelion.savedObjectFinder.pageItemsFromHitCountDescription"
         i18n-default-message="{pageFirstItem}-{pageLastItem} of {hitCount}"
         i18n-values="{pageFirstItem, pageLastItem, hitCount: finder.hitCount}"
       ></p>
-      <div class="kuiButtonGroup">
+      <div>
         <button
-          class="kuiButton kuiButton--primary"
+          class="timApp__button"
           ng-if="onAddNew"
           ng-click="onAddNew()"
           data-test-subj="addNewSavedObjectLink"
@@ -40,7 +37,7 @@
         ></button>
 
         <button
-          class="kuiButton kuiButton--secondary"
+          class="timApp__button--secondary"
           ng-if="!useLocalManagement"
           ng-click="finder.manageObjects(finder.properties.name)"
           i18n-id="timelion.savedObjectFinder.manageItemsButtonLabel"
@@ -56,7 +53,6 @@
 <paginate
   list="finder.hits"
   per-page="20"
-  class="kuiVerticalRhythm"
 >
   <button
     class="paginate-heading list-group-item list-sort-button"
@@ -99,7 +95,7 @@
           ng-blur="finder.hitBlur($event)"
           ng-click="finder.preventClick($event)">
           <span aria-hidden="true" class="finder-type fa" ng-if="hit.icon" ng-class="hit.icon"></span>
-          <div class="kuiIcon fa-flask ng-scope" ng-if="hit.type.shouldMarkAsExperimentalInUI()"></div>
+          <icon type="'beaker'" ng-if="hit.type.shouldMarkAsExperimentalInUI()"></icon>
           <span>{{hit.title}}</span>
           <p ng-if="hit.description" ng-bind="hit.description"></p>
       </a>

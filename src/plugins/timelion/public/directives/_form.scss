@@ -1,3 +1,5 @@
+$warningColor: '#BD271E';
+
 .form-control {
   @include euiFontSizeS;
   display: block;
@@ -33,4 +35,45 @@ select.form-control {
 
 .fullWidth {
   width: 100%;
+}
+
+.dropdownWarning {
+  margin-bottom: $euiSize;
+  padding: $euiSizeXS $euiSizeS;
+  color: $euiColorDarkestShade;
+  border-left: solid 2px $warningColor;
+  font-size: $euiSizeM;
+}
+
+.form-checkbox {
+  display: flex;
+  align-items: center;
+  line-height: 1.5;
+}
+
+.form-checkbox__input {
+  background-color: $euiColorLightestShade;
+  border: 1px solid $euiColorLightShade;
+  border-radius: $euiSizeXS;
+  width: $euiSize;
+  height: $euiSize;
+  font-size: $euiSizeM;
+  transition: background-color .1s linear;
+}
+
+.form-checkbox__input:checked {
+  border-color: $euiColorPrimary;
+  background-color: $euiColorPrimary;
+}
+
+.form-textarea {
+  padding: $euiSizeXS $euiSizeM;
+  font-size: $euiSize;
+  line-height: 1.5;
+  color: $euiColorDarkestShade;
+  background-color: $euiColorLightestShade;
+  border: 1px solid $euiColorLightShade;
+  border-radius: $euiSizeXS;
+  transition: border-color .1s linear;
+  margin-bottom: $euiSize;
 }
