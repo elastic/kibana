@@ -6,7 +6,14 @@
 
 import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { EuiFieldText, EuiText, EuiIconTip } from '@elastic/eui';
+import {
+  EuiFieldText,
+  EuiText,
+  EuiIconTip,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { cloneDeep } from 'lodash';
 import { policyConfig } from '../store/policy_details/selectors';
@@ -66,23 +73,29 @@ export const PolicyAdvanced = React.memo(
 
     return (
       <>
-        <EuiText>
+        <EuiFlexItem>
           <h1>
             <FormattedMessage
               id="xpack.securitySolution.policyAdvanced.field"
               defaultMessage={configPath.join('.')}
             />
           </h1>
-        </EuiText>
-        <EuiIconTip
-          type="iInCircle"
-          content={
-            lastSupportedVersion
-              ? `${firstSupportedVersion}-${lastSupportedVersion}`
-              : `${firstSupportedVersion}+`
-          }
-        />
-        <EuiFieldText value={value as string} onChange={onChange} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <h1>
+            <FormattedMessage
+              id="xpack.securitySolution.policyAdvanced.version"
+              defaultMessage={
+                lastSupportedVersion
+                  ? `${firstSupportedVersion}-${lastSupportedVersion}`
+                  : `${firstSupportedVersion}+`
+              }
+            />
+          </h1>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFieldText value={value as string} onChange={onChange} />
+        </EuiFlexItem>
       </>
     );
   }

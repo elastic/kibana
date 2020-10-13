@@ -6,6 +6,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
@@ -58,7 +59,16 @@ interface AdvancedPolicySchemaType {
 
 const AdvancedPolicyForms = React.memo(() => {
   return (
-    <>
+    <EuiFlexGrid columns={3}>
+      <EuiFlexItem>
+        <h1>{'Field name'}</h1>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <h1>{'Supported endpoint version'}</h1>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <h1>{'Value'}</h1>
+      </EuiFlexItem>
       {((AdvancedPolicySchema as unknown) as AdvancedPolicySchemaType[]).map(
         (advancedField, index) => {
           const configPath = advancedField.key.split('.');
@@ -72,7 +82,7 @@ const AdvancedPolicyForms = React.memo(() => {
           );
         }
       )}
-    </>
+    </EuiFlexGrid>
   );
 });
 
