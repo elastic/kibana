@@ -456,7 +456,7 @@ describe('edit policy', () => {
       http.setupNodeListResponse({
         nodesByAttributes: {},
         nodesByRoles: { data: ['node1'] },
-        isUsingLegacyDataRoleConfig: false,
+        isUsingDeprecatedDataRoleConfig: false,
       });
       const rendered = mountWithIntl(component);
       noRollover(rendered);
@@ -505,7 +505,7 @@ describe('edit policy', () => {
       http.setupNodeListResponse({
         nodesByAttributes: {},
         nodesByRoles: {},
-        isUsingLegacyDataRoleConfig: false,
+        isUsingDeprecatedDataRoleConfig: false,
       });
       const rendered = mountWithIntl(component);
       noRollover(rendered);
@@ -518,7 +518,7 @@ describe('edit policy', () => {
       http.setupNodeListResponse({
         nodesByAttributes: {},
         nodesByRoles: { data_hot: ['test'], data_cold: ['test'] },
-        isUsingLegacyDataRoleConfig: false,
+        isUsingDeprecatedDataRoleConfig: false,
       });
       const rendered = mountWithIntl(component);
       noRollover(rendered);
@@ -531,7 +531,7 @@ describe('edit policy', () => {
       http.setupNodeListResponse({
         nodesByAttributes: {},
         nodesByRoles: { data: ['test'] },
-        isUsingLegacyDataRoleConfig: false,
+        isUsingDeprecatedDataRoleConfig: false,
       });
       const rendered = mountWithIntl(component);
       noRollover(rendered);
@@ -581,7 +581,7 @@ describe('edit policy', () => {
       http.setupNodeListResponse({
         nodesByAttributes: {},
         nodesByRoles: { data: ['node1'] },
-        isUsingLegacyDataRoleConfig: false,
+        isUsingDeprecatedDataRoleConfig: false,
       });
       const rendered = mountWithIntl(component);
       noRollover(rendered);
@@ -640,7 +640,7 @@ describe('edit policy', () => {
       http.setupNodeListResponse({
         nodesByAttributes: {},
         nodesByRoles: {},
-        isUsingLegacyDataRoleConfig: false,
+        isUsingDeprecatedDataRoleConfig: false,
       });
       const rendered = mountWithIntl(component);
       noRollover(rendered);
@@ -653,7 +653,7 @@ describe('edit policy', () => {
       http.setupNodeListResponse({
         nodesByAttributes: {},
         nodesByRoles: { data_hot: ['test'], data_warm: ['test'] },
-        isUsingLegacyDataRoleConfig: false,
+        isUsingDeprecatedDataRoleConfig: false,
       });
       const rendered = mountWithIntl(component);
       noRollover(rendered);
@@ -666,7 +666,7 @@ describe('edit policy', () => {
       http.setupNodeListResponse({
         nodesByAttributes: {},
         nodesByRoles: { data: ['test'] },
-        isUsingLegacyDataRoleConfig: false,
+        isUsingDeprecatedDataRoleConfig: false,
       });
       const rendered = mountWithIntl(component);
       noRollover(rendered);
@@ -704,7 +704,7 @@ describe('edit policy', () => {
       http.setupNodeListResponse({
         nodesByAttributes: { test: ['123'] },
         nodesByRoles: { data: ['test'], data_hot: ['test'], data_warm: ['test'] },
-        isUsingLegacyDataRoleConfig: true,
+        isUsingDeprecatedDataRoleConfig: true,
       });
       const rendered = mountWithIntl(component);
       noRollover(rendered);
@@ -743,7 +743,7 @@ describe('edit policy', () => {
         http.setupNodeListResponse({
           nodesByAttributes: { test: ['123'] },
           nodesByRoles: { data: ['test'], data_hot: ['test'], data_warm: ['test'] },
-          isUsingLegacyDataRoleConfig: true,
+          isUsingDeprecatedDataRoleConfig: true,
         });
         const rendered = mountWithIntl(component);
         noRollover(rendered);
@@ -764,7 +764,7 @@ describe('edit policy', () => {
         http.setupNodeListResponse({
           nodesByAttributes: { test: ['123'] },
           nodesByRoles: { data: ['test'], data_hot: ['test'], data_warm: ['test'] },
-          isUsingLegacyDataRoleConfig: false,
+          isUsingDeprecatedDataRoleConfig: false,
         });
         const rendered = mountWithIntl(component);
         noRollover(rendered);
@@ -782,7 +782,7 @@ describe('edit policy', () => {
         http.setupNodeListResponse({
           nodesByAttributes: {},
           nodesByRoles: { data: ['test'], data_hot: ['test'], data_warm: ['test'] },
-          isUsingLegacyDataRoleConfig: false,
+          isUsingDeprecatedDataRoleConfig: false,
         });
         const rendered = mountWithIntl(component);
         noRollover(rendered);
