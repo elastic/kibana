@@ -24,6 +24,24 @@ jest.mock('react-router-dom', () => {
   };
 });
 
+jest.mock('../../../../../common/lib/kibana', () => ({
+  useKibana: jest.fn().mockReturnValue({
+    services: {
+      application: {
+        getUrlForApp: jest.fn(),
+        capabilities: {
+          siem: {
+            crud: true,
+          },
+          actions: {
+            read: true,
+          },
+        },
+      },
+    },
+  }),
+}));
+
 jest.mock('../../../../../common/components/link_to');
 
 jest.mock('./reducer', () => {
