@@ -37,10 +37,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     describe('Discover', () => {
       before(async () => {
         await PageObjects.common.navigateToApp('discover');
-        await PageObjects.discover.selectIndexPattern('shakespeare');
-        await PageObjects.timePicker.setCommonlyUsedTime('Last_30 days');
+        await testSubjects.click('clearSessionsButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await toasts.dismissAllToasts();
       });
 
       afterEach(async () => {
@@ -48,7 +46,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         await toasts.dismissAllToasts();
       });
 
-      it('Starts a new session', async () => {
+      it('Starts on index pattern select', async () => {
+        await PageObjects.discover.selectIndexPattern('shakespeare');
         await PageObjects.header.waitUntilLoadingHasFinished();
         const sessionIds = await getSessionIds();
         expect(sessionIds.length).to.be(1);
