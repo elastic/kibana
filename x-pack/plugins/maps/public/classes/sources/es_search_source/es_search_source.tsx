@@ -123,8 +123,9 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   }
 
   constructor(descriptor: Partial<ESSearchSourceDescriptor>, inspectorAdapters?: Adapters) {
-    super(ESSearchSource.createDescriptor(descriptor), inspectorAdapters);
-    this._descriptor = descriptor;
+    const sourceDescriptor = ESSearchSource.createDescriptor(descriptor);
+    super(sourceDescriptor, inspectorAdapters);
+    this._descriptor = sourceDescriptor;
     this._tooltipFields = this._descriptor.tooltipProperties
       ? this._descriptor.tooltipProperties.map((property) => {
           return this.createField({ fieldName: property });

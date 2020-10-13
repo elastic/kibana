@@ -79,7 +79,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
 
   readonly _descriptor: ESGeoGridSourceDescriptor;
 
-  constructor(descriptor: Partial<ESGeoGridSourceDescriptor>, inspectorAdapters: Adapters) {
+  constructor(descriptor: Partial<ESGeoGridSourceDescriptor>, inspectorAdapters?: Adapters) {
     const sourceDescriptor = ESGeoGridSource.createDescriptor(descriptor);
     super(
       sourceDescriptor,
@@ -157,7 +157,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
   }
 
   getGridResolution(): GRID_RESOLUTION {
-    return this._descriptor.resolution;
+    return this._descriptor.resolution || GRID_RESOLUTION.COARSE;
   }
 
   getGeoGridPrecision(zoom: number) {
@@ -210,7 +210,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     registerCancelCallback: (callback: () => void) => void;
     bucketsPerGrid: number;
     isRequestStillActive: () => boolean;
-    bufferedExtent?: MapExtent;
+    bufferedExtent: MapExtent;
   }) {
     const gridsPerRequest: number = Math.floor(DEFAULT_MAX_BUCKETS_LIMIT / bucketsPerGrid);
     const aggs: any = {
@@ -265,8 +265,10 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
         aggs.compositeSplit.composite.after = afterKey;
       }
       searchSource.setField('aggs', aggs);
-      const requestId = afterKey ? `${this.getId()} afterKey ${afterKey.geoSplit}` : this.getId();
-      const esResponse = await this._runEsQuery({
+      const requestId: string = afterKey
+        ? `${this.getId()} afterKey ${afterKey.geoSplit}`
+        : this.getId();
+      const esResponse: any = await this._runEsQuery({
         requestId,
         requestName: `${layerName} (${requestCount})`,
         searchSource,
@@ -280,7 +282,12 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
         ),
       });
 
-      features.push(...convertCompositeRespToGeoJson(esResponse, this._descriptor.requestType));
+      features.push(
+        ...convertCompositeRespToGeoJson(
+          esResponse,
+          this._descriptor.requestType || RENDER_AS.POINT
+        )
+      );
 
       afterKey = esResponse.aggregations.compositeSplit.after_key;
       if (esResponse.aggregations.compositeSplit.buckets.length < gridsPerRequest) {
@@ -295,8 +302,8 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
   _addNonCompositeAggsToSearchSource(
     searchSource: ISearchSource,
     indexPattern: IndexPattern,
-    precision: number,
-    bufferedExtent?: MapExtent
+    precision: number | null,
+    bufferedExtent?: MapExtent | null
   ) {
     searchSource.setField('aggs', {
       [GEOTILE_GRID_AGG_NAME]: {
@@ -370,7 +377,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
         ? await this._nonCompositeAggRequest({
             searchSource,
             indexPattern,
-            precision: searchFilters.geogridPrecision,
+            precision: searchFilters.geogridPrecision || 0,
             layerName,
             registerCancelCallback,
             bufferedExtent: searchFilters.buffer,
@@ -378,7 +385,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
         : await this._compositeAggRequest({
             searchSource,
             indexPattern,
-            precision: searchFilters.geogridPrecision,
+            precision: searchFilters.geogridPrecision || 0,
             layerName,
             registerCancelCallback,
             bucketsPerGrid,
