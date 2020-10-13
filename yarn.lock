@@ -1620,6 +1620,16 @@
     "@hapi/hoek" "8.x.x"
     fast-safe-stringify "2.x.x"
 
+"@hapi/h2o2@^8.3.2":
+  version "8.3.2"
+  resolved "https://registry.yarnpkg.com/@hapi/h2o2/-/h2o2-8.3.2.tgz#008a8f9ec3d9bba29077691aa9ec0ace93d4de80"
+  integrity sha512-2WkZq+QAkvYHWGqnUuG0stcVeGyv9T7bopBYnCJSUEuvBZlUf2BTX2JCVSKxsnTLOxCYwoC/aI4Rr0ZSRd2oVg==
+  dependencies:
+    "@hapi/boom" "7.x.x"
+    "@hapi/hoek" "8.x.x"
+    "@hapi/joi" "16.x.x"
+    "@hapi/wreck" "15.x.x"
+
 "@hapi/hapi@^18.4.1":
   version "18.4.1"
   resolved "https://registry.yarnpkg.com/@hapi/hapi/-/hapi-18.4.1.tgz#023fbc131074b1cb2cd7f6766d65f4b0e92df788"
@@ -4289,15 +4299,6 @@
     "@types/vinyl-fs" "*"
     chokidar "^2.1.2"
 
-"@types/h2o2@^8.1.1":
-  version "8.1.1"
-  resolved "https://registry.yarnpkg.com/@types/h2o2/-/h2o2-8.1.1.tgz#f990302cd2fdfd7909cff9d6643052002b69998f"
-  integrity sha512-lwF9WSvo4sfT0TnDZDXKef9Yza4xUXC3561QG4Q3Axhrkr+ZFBVJ7kCwI1mUNzk60jI1aMTYVIIoHKZjwCGuHw==
-  dependencies:
-    "@types/boom" "*"
-    "@types/hapi" "*"
-    "@types/node" "*"
-
 "@types/hapi@*":
   version "17.0.18"
   resolved "https://registry.yarnpkg.com/@types/hapi/-/hapi-17.0.18.tgz#f855fe18766aa2592a3a689c3e6eabe72989ff1a"
@@ -4328,6 +4329,15 @@
   integrity sha512-sWVS20wvqbYSjpjpfOwsD/gtDBba3mi+Y4Yg2qZMBs0/VAgvhOOmpBXzFf2rE8rrEuR44n7tzmEgPWRw5q7kaw==
   dependencies:
     "@types/hapi__hapi" "*"
+
+"@types/hapi__h2o2@8.3.0":
+  version "8.3.0"
+  resolved "https://registry.yarnpkg.com/@types/hapi__h2o2/-/hapi__h2o2-8.3.0.tgz#c2e6598ab6ed28edb1a5edd44ddc185e1c252dd8"
+  integrity sha512-jD6L+8BJ+SVbwBzQK3W7zGnDYgrwuCNDl9r1P0GdwoYsysNADl7STfrhJ/m9qPt2fD1vFVJsfsFjoJ/iCyNlOQ==
+  dependencies:
+    "@types/hapi__boom" "*"
+    "@types/hapi__hapi" "*"
+    "@types/node" "*"
 
 "@types/hapi__hapi@*", "@types/hapi__hapi@^18.2.6":
   version "18.2.6"
@@ -14912,16 +14922,6 @@ gzip-size@5.1.1:
   dependencies:
     duplexer "^0.1.1"
     pify "^4.0.1"
-
-h2o2@^8.1.2:
-  version "8.1.2"
-  resolved "https://registry.yarnpkg.com/h2o2/-/h2o2-8.1.2.tgz#25e6f69f453175c9ca1e3618741c5ebe1b5000c1"
-  integrity sha1-Jeb2n0UxdcnKHjYYdBxevhtQAME=
-  dependencies:
-    boom "7.x.x"
-    hoek "5.x.x"
-    joi "13.x.x"
-    wreck "14.x.x"
 
 handle-thing@^2.0.0:
   version "2.0.0"
@@ -29302,14 +29302,6 @@ wrappy@1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/wrappy/-/wrappy-1.0.2.tgz#b5243d8f3ec1aa35f1364605bc0d1036e30ab69f"
   integrity sha1-tSQ9jz7BqjXxNkYFvA0QNuMKtp8=
-
-wreck@14.x.x:
-  version "14.1.0"
-  resolved "https://registry.yarnpkg.com/wreck/-/wreck-14.1.0.tgz#b13e526b6a8318e5ebc6969c0b21075c06337067"
-  integrity sha512-y/iwFhwdGoM8Hk1t1I4LbuLhM3curVD8STd5NcFI0c/4b4cQAMLcnCRxXX9sLQAggDC8dXYSaQNsT64hga6lvA==
-  dependencies:
-    boom "7.x.x"
-    hoek "5.x.x"
 
 write-file-atomic@^1.1.2:
   version "1.3.4"

@@ -19,7 +19,7 @@
 
 import HapiTemplates from 'vision';
 import HapiStaticFiles from 'inert';
-import HapiProxy from 'h2o2';
+import HapiProxy from '@hapi/h2o2';
 
 const plugins = [HapiTemplates, HapiStaticFiles, HapiProxy];
 
