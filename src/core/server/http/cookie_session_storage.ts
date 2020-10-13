@@ -150,7 +150,7 @@ export async function createCookieSessionStorageFactory<T>(
       isHttpOnly: true,
       isSameSite: cookieOptions.sameSite === 'None' ? false : cookieOptions.sameSite ?? false,
     },
-    validateFunc: async (req, session: T | T[]) => {
+    validateFunc: async (req: Request, session: T | T[]) => {
       const result = cookieOptions.validate(session);
       if (!result.isValid) {
         clearInvalidCookie(req, result.path);

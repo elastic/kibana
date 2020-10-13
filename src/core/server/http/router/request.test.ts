@@ -198,6 +198,7 @@ describe('KibanaRequest', () => {
       const request = httpServerMock.createRawRequest({
         route: {
           settings: {
+            // @ts-expect-error According to types/hapi__hapi, `auth` can't be a boolean, but it can according to the @hapi/hapi source (https://github.com/hapijs/hapi/blob/v18.4.2/lib/route.js#L139)
             auth,
           },
         },
@@ -211,6 +212,7 @@ describe('KibanaRequest', () => {
       const request = httpServerMock.createRawRequest({
         route: {
           settings: {
+            // @ts-expect-error According to types/hapi__hapi, the `auth` object has to have a `strategies` array, but it doesn't look like it needs it
             auth,
           },
         },
@@ -225,6 +227,7 @@ describe('KibanaRequest', () => {
       const request = httpServerMock.createRawRequest({
         route: {
           settings: {
+            // @ts-expect-error According to types/hapi__hapi, the `auth` object has to have a `strategies` array, but it doesn't look like it needs it
             auth,
           },
         },
@@ -239,6 +242,7 @@ describe('KibanaRequest', () => {
       const request = httpServerMock.createRawRequest({
         route: {
           settings: {
+            // @ts-expect-error According to types/hapi__hapi, the `auth` object has to have a `strategies` array, but it doesn't look like it needs it
             auth,
           },
         },
@@ -253,6 +257,7 @@ describe('KibanaRequest', () => {
       const request = httpServerMock.createRawRequest({
         route: {
           settings: {
+            // @ts-expect-error According to types/hapi__hapi, `auth` can't be a string, but I'm not sure that's true
             auth,
           },
         },
@@ -268,6 +273,7 @@ describe('KibanaRequest', () => {
       const request = httpServerMock.createRawRequest({
         route: {
           settings: {
+            // @ts-expect-error According to types/hapi__hapi, the `auth` object has to have a `strategies` array, but it doesn't look like it needs it
             auth,
           },
         },
