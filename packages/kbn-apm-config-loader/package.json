@@ -11,6 +11,7 @@
     "kbn:watch": "yarn build --watch"
   },
   "dependencies": {
+    "@elastic/safer-lodash-set": "link:../elastic-safer-lodash-set",
     "@kbn/utils": "link:../kbn-utils"
   }
 }
