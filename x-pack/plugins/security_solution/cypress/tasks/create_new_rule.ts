@@ -190,7 +190,7 @@ export const fillDefineCustomRuleWithImportedQueryAndContinue = (
 ) => {
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
   cy.get(TIMELINE(rule.timelineId)).click();
-  cy.get(CUSTOM_QUERY_INPUT).should('have.text', rule.customQuery);
+  cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 
   cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
@@ -208,7 +208,7 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
   const threshold = 1;
 
   cy.get(CUSTOM_QUERY_INPUT).type(rule.customQuery);
-  cy.get(CUSTOM_QUERY_INPUT).invoke('text').should('eq', rule.customQuery);
+  cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
   cy.get(THRESHOLD_INPUT_AREA)
     .find(INPUT)
     .then((inputs) => {
