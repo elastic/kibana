@@ -1381,7 +1381,7 @@ describe('IndexPattern Data Source suggestions', () => {
       );
     });
 
-    it('adds date histogram over default time field for tables with numeric buckets without time dimension', async () => {
+    it('does not create an over time suggestion if tables with numeric buckets with time dimension', async () => {
       const initialState = testInitialState();
       const state: IndexPatternPrivateState = {
         ...initialState,
@@ -1415,42 +1415,12 @@ describe('IndexPattern Data Source suggestions', () => {
         },
       };
 
-      expect(getDatasourceSuggestionsFromCurrentState(state)).toContainEqual(
+      expect(getDatasourceSuggestionsFromCurrentState(state)).not.toContainEqual(
         expect.objectContaining({
           table: {
             isMultiRow: true,
-            changeType: 'reorder',
             label: 'Over time',
             layerId: 'first',
-            columns: [
-              {
-                columnId: 'id1',
-                operation: {
-                  label: 'timestampLabel',
-                  dataType: 'date',
-                  isBucketed: true,
-                  scale: 'interval',
-                },
-              },
-              {
-                columnId: 'colb',
-                operation: {
-                  label: 'My Op',
-                  dataType: 'number',
-                  isBucketed: true,
-                  scale: 'interval',
-                },
-              },
-              {
-                columnId: 'cola',
-                operation: {
-                  dataType: 'number',
-                  isBucketed: false,
-                  label: 'Unique count of dest',
-                  scale: undefined,
-                },
-              },
-            ],
           },
         })
       );
