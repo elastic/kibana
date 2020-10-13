@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   SavedObjectsTaggingApiUi,
   GetSearchBarFilterOptions,
@@ -23,7 +24,9 @@ export const buildGetSearchBarFilter = ({
     return {
       type: 'field_value_selection',
       field: tagField,
-      name: 'Tags',
+      name: i18n.translate('xpack.savedObjectsTagging.uiApi.searchBar.filterButtonLabel', {
+        defaultMessage: 'Tags',
+      }),
       multiSelect: 'or',
       options: () => {
         // we are using the promise version of `options` because the handler is called

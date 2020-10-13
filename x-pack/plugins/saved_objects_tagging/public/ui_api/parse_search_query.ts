@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { Query } from '@elastic/eui';
 import { SavedObjectsFindOptionsReference } from 'src/core/public';
 import {
@@ -41,7 +42,6 @@ export const buildParseSearchQuery = ({
     if (parsed.ast.getFieldClauses(tagField)) {
       const selectedTags = parsed.ast.getFieldClauses(tagField)[0].value as string[];
       if (useName) {
-        // TODO: use convertNameToReference directly instead
         selectedTags.forEach((tagName) => {
           const found = cache.getState().find((tag) => tag.name === tagName);
           if (found) {
