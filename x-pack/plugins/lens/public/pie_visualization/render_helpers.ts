@@ -5,14 +5,14 @@
  */
 
 import { Datum, LayerValue } from '@elastic/charts';
-import { KibanaDatatable, KibanaDatatableColumn } from 'src/plugins/expressions/public';
+import { Datatable, DatatableColumn } from 'src/plugins/expressions/public';
 import { ColumnGroups } from './types';
 import { LensFilterEvent } from '../types';
 
 export function getSliceValueWithFallback(
   d: Datum,
   reverseGroups: ColumnGroups,
-  metricColumn: KibanaDatatableColumn
+  metricColumn: DatatableColumn
 ) {
   if (typeof d[metricColumn.id] === 'number' && d[metricColumn.id] !== 0) {
     return d[metricColumn.id];
@@ -27,7 +27,7 @@ export function getSliceValueWithFallback(
 export function getFilterContext(
   clickedLayers: LayerValue[],
   layerColumnIds: string[],
-  table: KibanaDatatable
+  table: Datatable
 ): LensFilterEvent['data'] {
   const matchingIndex = table.rows.findIndex((row) =>
     clickedLayers.every((layer, index) => {
