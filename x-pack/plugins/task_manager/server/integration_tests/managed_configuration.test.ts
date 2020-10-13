@@ -7,6 +7,7 @@
 import sinon from 'sinon';
 import { mockLogger } from '../test_utils';
 import { TaskManager } from '../task_manager';
+import { TaskTypeDictionary } from '../task_type_dictionary';
 import { savedObjectsRepositoryMock } from '../../../../../src/core/server/mocks';
 import {
   SavedObjectsSerializer,
@@ -36,6 +37,7 @@ describe('managed configuration', () => {
     jest.resetAllMocks();
     callAsInternalUser.mockResolvedValue({ total: 0, updated: 0, version_conflicts: 0 });
     clock = sinon.useFakeTimers();
+    const definitions = new TaskTypeDictionary(logger);
     taskManager = new TaskManager({
       config,
       logger,
@@ -43,8 +45,9 @@ describe('managed configuration', () => {
       callAsInternalUser,
       taskManagerId: 'some-uuid',
       savedObjectsRepository: savedObjectsClient,
+      definitions,
     });
-    taskManager.registerTaskDefinitions({
+    definitions.registerTaskDefinitions({
       foo: {
         type: 'foo',
         title: 'Foo',

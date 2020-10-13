@@ -154,13 +154,6 @@ export const validateTaskDefinition = Joi.object({
   getRetry: Joi.func().optional(),
 }).default();
 
-/**
- * A dictionary mapping task types to their definitions.
- */
-export interface TaskDictionary<T extends TaskDefinition> {
-  [taskType: string]: T;
-}
-
 export enum TaskStatus {
   Idle = 'idle',
   Claiming = 'claiming',

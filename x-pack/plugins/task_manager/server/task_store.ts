@@ -27,8 +27,6 @@ import { asOk, asErr, Result } from './lib/result_type';
 import {
   ConcreteTaskInstance,
   ElasticJs,
-  TaskDefinition,
-  TaskDictionary,
   TaskInstance,
   TaskLifecycle,
   TaskLifecycleResult,
@@ -60,13 +58,14 @@ import {
   SortByRunAtAndRetryAt,
   tasksClaimedByOwner,
 } from './queries/mark_available_tasks_as_claimed';
+import { TaskTypeDictionary } from './task_type_dictionary';
 
 export interface StoreOpts {
   callCluster: ElasticJs;
   index: string;
   taskManagerId: string;
   maxAttempts: number;
-  definitions: TaskDictionary<TaskDefinition>;
+  definitions: TaskTypeDictionary;
   savedObjectsRepository: ISavedObjectsRepository;
   serializer: SavedObjectsSerializer;
 }
@@ -124,7 +123,7 @@ export class TaskStore {
   public readonly errors$ = new Subject<Error>();
 
   private callCluster: ElasticJs;
-  private definitions: TaskDictionary<TaskDefinition>;
+  private definitions: TaskTypeDictionary;
   private savedObjectsRepository: ISavedObjectsRepository;
   private serializer: SavedObjectsSerializer;
   private events$: Subject<TaskClaim>;
@@ -164,13 +163,7 @@ export class TaskStore {
    * @param task - The task being scheduled.
    */
   public async schedule(taskInstance: TaskInstance): Promise<ConcreteTaskInstance> {
-    if (!this.definitions[taskInstance.taskType]) {
-      throw new Error(
-        `Unsupported task type "${taskInstance.taskType}". Supported types are ${Object.keys(
-          this.definitions
-        ).join(', ')}`
-      );
-    }
+    this.definitions.ensureHas(taskInstance.taskType);
 
     let savedObject;
     try {
@@ -265,6 +258,9 @@ export class TaskStore {
     claimTasksById: OwnershipClaimingOpts['claimTasksById'],
     size: OwnershipClaimingOpts['size']
   ): Promise<number> {
+    const tasksWithRemainingAttempts = [...this.definitions].map(([type, { maxAttempts }]) =>
+      taskWithLessThanMaxAttempts(type, maxAttempts || this.maxAttempts)
+    );
     const queryForScheduledTasks = mustBeAllOf(
       // Either a task with idle status and runAt <= now or
       // status running or claiming with a retryAt <= now.
@@ -272,9 +268,7 @@ export class TaskStore {
       // Either task has a schedule or the attempts < the maximum configured
       shouldBeOneOf<ExistsFilter | TermFilter | RangeFilter>(
         TaskWithSchedule,
-        ...Object.entries(this.definitions).map(([type, { maxAttempts }]) =>
-          taskWithLessThanMaxAttempts(type, maxAttempts || this.maxAttempts)
-        )
+        ...tasksWithRemainingAttempts
       )
     );
 

@@ -29,10 +29,10 @@ import {
   FailedRunResult,
   FailedTaskResult,
   TaskDefinition,
-  TaskDictionary,
   validateRunResult,
   TaskStatus,
 } from './task';
+import { TaskTypeDictionary } from './task_type_dictionary';
 
 const defaultBackoffPerFailure = 5 * 60 * 1000;
 const EMPTY_RUN_RESULT: SuccessfulRunResult = {};
@@ -57,7 +57,7 @@ export interface Updatable {
 
 interface Opts {
   logger: Logger;
-  definitions: TaskDictionary<TaskDefinition>;
+  definitions: TaskTypeDictionary;
   instance: ConcreteTaskInstance;
   store: Updatable;
   beforeRun: BeforeRunFunction;
@@ -76,7 +76,7 @@ interface Opts {
 export class TaskManagerRunner implements TaskRunner {
   private task?: CancellableTask;
   private instance: ConcreteTaskInstance;
-  private definitions: TaskDictionary<TaskDefinition>;
+  private definitions: TaskTypeDictionary;
   private logger: Logger;
   private bufferedTaskStore: Updatable;
   private beforeRun: BeforeRunFunction;
@@ -129,7 +129,7 @@ export class TaskManagerRunner implements TaskRunner {
    * Gets the task defintion from the dictionary.
    */
   public get definition() {
-    return this.definitions[this.taskType];
+    return this.definitions.get(this.taskType);
   }
 
   /**

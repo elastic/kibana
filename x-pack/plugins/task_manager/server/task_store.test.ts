@@ -11,14 +11,13 @@ import { filter, take, first } from 'rxjs/operators';
 import { Option, some, none } from 'fp-ts/lib/Option';
 
 import {
-  TaskDictionary,
-  TaskDefinition,
   TaskInstance,
   TaskStatus,
   TaskLifecycleResult,
   SerializedConcreteTaskInstance,
   ConcreteTaskInstance,
 } from './task';
+import { mockLogger } from './test_utils';
 import { StoreOpts, OwnershipClaimingOpts, TaskStore, SearchOpts } from './task_store';
 import { savedObjectsRepositoryMock } from 'src/core/server/mocks';
 import {
@@ -29,24 +28,7 @@ import {
 } from 'src/core/server';
 import { asTaskClaimEvent, TaskEvent } from './task_events';
 import { asOk, asErr } from './lib/result_type';
-
-const taskDefinitions: TaskDictionary<TaskDefinition> = {
-  report: {
-    type: 'report',
-    title: '',
-    createTaskRunner: jest.fn(),
-  },
-  dernstraight: {
-    type: 'dernstraight',
-    title: '',
-    createTaskRunner: jest.fn(),
-  },
-  yawn: {
-    type: 'yawn',
-    title: '',
-    createTaskRunner: jest.fn(),
-  },
-};
+import { TaskTypeDictionary } from './task_type_dictionary';
 
 const savedObjectsClient = savedObjectsRepositoryMock.create();
 const serializer = new SavedObjectsSerializer(new SavedObjectTypeRegistry());
@@ -63,6 +45,25 @@ const mockedDate = new Date('2019-02-12T21:01:22.479Z');
     return mockedDate.getTime();
   }
 };
+
+const taskDefinitions = new TaskTypeDictionary(mockLogger());
+taskDefinitions.registerTaskDefinitions({
+  report: {
+    type: 'report',
+    title: 'report',
+    createTaskRunner: jest.fn(),
+  },
+  dernstraight: {
+    type: 'dernstraight',
+    title: 'dernstraight',
+    createTaskRunner: jest.fn(),
+  },
+  yawn: {
+    type: 'yawn',
+    title: 'yawn',
+    createTaskRunner: jest.fn(),
+  },
+});
 
 describe('TaskStore', () => {
   describe('schedule', () => {
@@ -335,6 +336,22 @@ describe('TaskStore', () => {
     test('it filters claimed tasks down by supported types, maxAttempts, status, and runAt', async () => {
       const maxAttempts = _.random(2, 43);
       const customMaxAttempts = _.random(44, 100);
+
+      const definitions = new TaskTypeDictionary(mockLogger());
+      definitions.registerTaskDefinitions({
+        foo: {
+          type: 'foo',
+          title: 'foo',
+          createTaskRunner: jest.fn(),
+        },
+        bar: {
+          type: 'bar',
+          title: 'bar',
+          maxAttempts: customMaxAttempts,
+          createTaskRunner: jest.fn(),
+        },
+      });
+
       const {
         args: {
           updateByQuery: {
@@ -344,19 +361,7 @@ describe('TaskStore', () => {
       } = await testClaimAvailableTasks({
         opts: {
           maxAttempts,
-          definitions: {
-            foo: {
-              type: 'foo',
-              title: '',
-              createTaskRunner: jest.fn(),
-            },
-            bar: {
-              type: 'bar',
-              title: '',
-              maxAttempts: customMaxAttempts,
-              createTaskRunner: jest.fn(),
-            },
-          },
+          definitions,
         },
         claimingOpts: { claimOwnershipUntil: new Date(), size: 10 },
       });
@@ -465,6 +470,20 @@ describe('TaskStore', () => {
     test('it supports claiming specific tasks by id', async () => {
       const maxAttempts = _.random(2, 43);
       const customMaxAttempts = _.random(44, 100);
+      const definitions = new TaskTypeDictionary(mockLogger());
+      definitions.registerTaskDefinitions({
+        foo: {
+          type: 'foo',
+          title: 'foo',
+          createTaskRunner: jest.fn(),
+        },
+        bar: {
+          type: 'bar',
+          title: 'bar',
+          maxAttempts: customMaxAttempts,
+          createTaskRunner: jest.fn(),
+        },
+      });
       const {
         args: {
           updateByQuery: {
@@ -474,19 +493,7 @@ describe('TaskStore', () => {
       } = await testClaimAvailableTasks({
         opts: {
           maxAttempts,
-          definitions: {
-            foo: {
-              type: 'foo',
-              title: '',
-              createTaskRunner: jest.fn(),
-            },
-            bar: {
-              type: 'bar',
-              title: '',
-              maxAttempts: customMaxAttempts,
-              createTaskRunner: jest.fn(),
-            },
-          },
+          definitions,
         },
         claimingOpts: {
           claimOwnershipUntil: new Date(),

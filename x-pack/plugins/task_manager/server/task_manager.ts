@@ -33,11 +33,8 @@ import {
 } from './task_events';
 import { fillPool, FillPoolResult } from './lib/fill_pool';
 import { addMiddlewareToChain, BeforeSaveMiddlewareParams, Middleware } from './lib/middleware';
-import { sanitizeTaskDefinitions } from './lib/sanitize_task_definitions';
 import { intervalFromNow } from './lib/intervals';
 import {
-  TaskDefinition,
-  TaskDictionary,
   ConcreteTaskInstance,
   RunContext,
   TaskInstanceWithId,
@@ -65,11 +62,13 @@ import {
 import { identifyEsError } from './lib/identify_es_error';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
 import { BufferedTaskStore } from './buffered_task_store';
+import { TaskTypeDictionary } from './task_type_dictionary';
 
 const VERSION_CONFLICT_STATUS = 409;
 
 export interface TaskManagerOpts {
   logger: Logger;
+  definitions: TaskTypeDictionary;
   config: TaskManagerConfig;
   callAsInternalUser: ILegacyScopedClusterClient['callAsInternalUser'];
   savedObjectsRepository: ISavedObjectsRepository;
@@ -97,7 +96,7 @@ export type TaskLifecycleEvent = TaskMarkRunning | TaskRun | TaskClaim | TaskRun
  * The public interface into the task manager system.
  */
 export class TaskManager {
-  private definitions: TaskDictionary<TaskDefinition> = {};
+  private definitions: TaskTypeDictionary;
 
   private store: TaskStore;
   private bufferedStore: BufferedTaskStore;
@@ -138,6 +137,7 @@ export class TaskManager {
       this.logger.info(`TaskManager is identified by the Kibana UUID: ${taskManagerId}`);
     }
 
+    this.definitions = opts.definitions;
     this.store = new TaskStore({
       serializer: opts.serializer,
       savedObjectsRepository: opts.savedObjectsRepository,
@@ -281,26 +281,6 @@ export class TaskManager {
     if (this.isStarted) {
       this.pollingSubscription.unsubscribe();
       this.pool.cancelRunningTasks();
-    }
-  }
-
-  /**
-   * Method for allowing consumers to register task definitions into the system.
-   * @param taskDefinitions - The Kibana task definitions dictionary
-   */
-  public registerTaskDefinitions(taskDefinitions: TaskDictionary<TaskDefinition>) {
-    this.assertUninitialized('register task definitions', Object.keys(taskDefinitions).join(', '));
-    const duplicate = Object.keys(taskDefinitions).find((k) => !!this.definitions[k]);
-    if (duplicate) {
-      throw new Error(`Task ${duplicate} is already defined!`);
-    }
-
-    try {
-      const sanitized = sanitizeTaskDefinitions(taskDefinitions);
-
-      Object.assign(this.definitions, sanitized);
-    } catch (e) {
-      this.logger.error('Could not sanitize task definitions');
     }
   }
 

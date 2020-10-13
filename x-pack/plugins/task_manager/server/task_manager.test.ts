@@ -27,6 +27,7 @@ import { mockLogger } from './test_utils';
 import { asErr, asOk } from './lib/result_type';
 import { ConcreteTaskInstance, TaskLifecycleResult, TaskStatus } from './task';
 import { Middleware } from './lib/middleware';
+import { TaskTypeDictionary } from './task_type_dictionary';
 
 const savedObjectsClient = savedObjectsRepositoryMock.create();
 const serializer = new SavedObjectsSerializer(new SavedObjectTypeRegistry());
@@ -43,6 +44,8 @@ describe('TaskManager', () => {
     max_poll_inactivity_cycles: 10,
     request_capacity: 1000,
   };
+
+  const taskManagerLogger = mockLogger();
   const taskManagerOpts = {
     config,
     savedObjectsRepository: savedObjectsClient,
@@ -50,10 +53,12 @@ describe('TaskManager', () => {
     callAsInternalUser: jest.fn(),
     logger: mockLogger(),
     taskManagerId: 'some-uuid',
+    definitions: new TaskTypeDictionary(taskManagerLogger),
   };
 
   beforeEach(() => {
     clock = sinon.useFakeTimers();
+    taskManagerOpts.definitions = new TaskTypeDictionary(taskManagerLogger);
   });
 
   afterEach(() => clock.restore());
@@ -71,7 +76,7 @@ describe('TaskManager', () => {
 
   test('allows and queues scheduling tasks before starting', async () => {
     const client = new TaskManager(taskManagerOpts);
-    client.registerTaskDefinitions({
+    taskManagerOpts.definitions.registerTaskDefinitions({
       foo: {
         type: 'foo',
         title: 'Foo',
@@ -98,7 +103,7 @@ describe('TaskManager', () => {
 
   test('allows scheduling tasks after starting', async () => {
     const client = new TaskManager(taskManagerOpts);
-    client.registerTaskDefinitions({
+    taskManagerOpts.definitions.registerTaskDefinitions({
       foo: {
         type: 'foo',
         title: 'Foo',
@@ -123,7 +128,7 @@ describe('TaskManager', () => {
 
   test('allows scheduling existing tasks that may have already been scheduled', async () => {
     const client = new TaskManager(taskManagerOpts);
-    client.registerTaskDefinitions({
+    taskManagerOpts.definitions.registerTaskDefinitions({
       foo: {
         type: 'foo',
         title: 'Foo',
@@ -148,7 +153,7 @@ describe('TaskManager', () => {
 
   test('doesnt ignore failure to scheduling existing tasks for reasons other than already being scheduled', async () => {
     const client = new TaskManager(taskManagerOpts);
-    client.registerTaskDefinitions({
+    taskManagerOpts.definitions.registerTaskDefinitions({
       foo: {
         type: 'foo',
         title: 'Foo',
@@ -175,7 +180,7 @@ describe('TaskManager', () => {
 
   test('doesnt allow naively rescheduling existing tasks that have already been scheduled', async () => {
     const client = new TaskManager(taskManagerOpts);
-    client.registerTaskDefinitions({
+    taskManagerOpts.definitions.registerTaskDefinitions({
       foo: {
         type: 'foo',
         title: 'Foo',

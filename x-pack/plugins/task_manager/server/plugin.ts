@@ -3,19 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { PluginInitializerContext, Plugin, CoreSetup, CoreStart } from 'src/core/server';
+import { PluginInitializerContext, Plugin, CoreSetup, Logger, CoreStart } from 'src/core/server';
 import { Subject } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { TaskDictionary, TaskDefinition } from './task';
+import { TaskDefinition } from './task';
 import { TaskManager } from './task_manager';
 import { TaskManagerConfig } from './config';
 import { Middleware } from './lib/middleware';
 import { setupSavedObjects } from './saved_objects';
+import { TaskTypeDictionary } from './task_type_dictionary';
 
-export type TaskManagerSetupContract = Pick<
-  TaskManager,
-  'addMiddleware' | 'registerTaskDefinitions'
->;
+export type TaskManagerSetupContract = Pick<TaskManager, 'addMiddleware'> &
+  Pick<TaskTypeDictionary, 'registerTaskDefinitions'>;
 
 export type TaskManagerStartContract = Pick<
   TaskManager,
@@ -24,15 +23,17 @@ export type TaskManagerStartContract = Pick<
 
 export class TaskManagerPlugin
   implements Plugin<TaskManagerSetupContract, TaskManagerStartContract> {
-  legacyTaskManager$: Subject<TaskManager> = new Subject<TaskManager>();
-  taskManager: Promise<TaskManager> = this.legacyTaskManager$.pipe(first()).toPromise();
-  currentConfig: TaskManagerConfig;
-  taskManagerId?: string;
-  config?: TaskManagerConfig;
+  private legacyTaskManager$: Subject<TaskManager> = new Subject<TaskManager>();
+  private taskManager: Promise<TaskManager> = this.legacyTaskManager$.pipe(first()).toPromise();
+  private taskManagerId?: string;
+  private config?: TaskManagerConfig;
+  private logger: Logger;
+  private definitions: TaskTypeDictionary;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
-    this.currentConfig = {} as TaskManagerConfig;
+    this.logger = initContext.logger.get('taskManager');
+    this.definitions = new TaskTypeDictionary(this.logger);
   }
 
   public async setup(core: CoreSetup): Promise<TaskManagerSetupContract> {
@@ -48,14 +49,13 @@ export class TaskManagerPlugin
       addMiddleware: (middleware: Middleware) => {
         this.taskManager.then((tm) => tm.addMiddleware(middleware));
       },
-      registerTaskDefinitions: (taskDefinition: TaskDictionary<TaskDefinition>) => {
-        this.taskManager.then((tm) => tm.registerTaskDefinitions(taskDefinition));
+      registerTaskDefinitions: (taskDefinition: Record<string, TaskDefinition>) => {
+        this.definitions.registerTaskDefinitions(taskDefinition);
       },
     };
   }
 
   public start({ savedObjects, elasticsearch }: CoreStart): TaskManagerStartContract {
-    const logger = this.initContext.logger.get('taskManager');
     const savedObjectsRepository = savedObjects.createInternalRepository(['task']);
 
     this.legacyTaskManager$.next(
@@ -63,9 +63,10 @@ export class TaskManagerPlugin
         taskManagerId: this.taskManagerId!,
         config: this.config!,
         savedObjectsRepository,
+        definitions: this.definitions,
         serializer: savedObjects.createSerializer(),
         callAsInternalUser: elasticsearch.legacy.client.callAsInternalUser,
-        logger,
+        logger: this.logger,
       })
     );
     this.legacyTaskManager$.complete();
