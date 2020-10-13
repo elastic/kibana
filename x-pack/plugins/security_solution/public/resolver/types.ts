@@ -609,6 +609,11 @@ export interface ResolverProps {
   databaseDocumentID: string;
 
   /**
+   * Wrapper used to render fields within the resolver panel
+   */
+  panelFieldRenderer: (value: string) => React.ReactElement;
+
+  /**
    * An ID that is used to differentiate this Resolver instance from others concurrently running on the same page.
    * Used to prevent collisions in things like query parameters.
    */

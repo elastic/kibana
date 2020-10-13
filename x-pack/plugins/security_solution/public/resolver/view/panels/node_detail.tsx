@@ -17,13 +17,12 @@ import { StyledDescriptionList, StyledTitle } from './styles';
 import * as selectors from '../../store/selectors';
 import * as eventModel from '../../../../common/endpoint/models/event';
 import { GeneratedText } from './panel_content_utilities';
-import { CopyablePanelField } from './copyable_panel_field';
 import { Breadcrumbs } from './breadcrumbs';
 import { processPath, processPID } from '../../models/process_event';
 import { CubeForProcess } from './cube_for_process';
 import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { useCubeAssets } from '../use_cube_assets';
-import { ResolverState } from '../../types';
+import { ResolverProps, ResolverState } from '../../types';
 import { PanelLoading } from './panel_loading';
 import { StyledPanel } from '../styles';
 import { useLinkProps } from '../use_link_props';
@@ -34,7 +33,13 @@ const StyledCubeForProcess = styled(CubeForProcess)`
   top: 0.75em;
 `;
 
-export const NodeDetail = memo(function ({ nodeID }: { nodeID: string }) {
+export const NodeDetail = memo(function ({
+  nodeID,
+  panelFieldRenderer,
+}: {
+  nodeID: string;
+  panelFieldRenderer: ResolverProps['panelFieldRenderer'];
+}) {
   const processEvent = useSelector((state: ResolverState) =>
     selectors.processEventForID(state)(nodeID)
   );
@@ -46,7 +51,11 @@ export const NodeDetail = memo(function ({ nodeID }: { nodeID: string }) {
         </StyledPanel>
       ) : (
         <StyledPanel data-test-subj="resolver:panel:node-detail">
-          <NodeDetailView nodeID={nodeID} processEvent={processEvent} />
+          <NodeDetailView
+            nodeID={nodeID}
+            processEvent={processEvent}
+            panelFieldRenderer={panelFieldRenderer}
+          />
         </StyledPanel>
       )}
     </>
@@ -60,9 +69,11 @@ export const NodeDetail = memo(function ({ nodeID }: { nodeID: string }) {
 const NodeDetailView = memo(function ({
   processEvent,
   nodeID,
+  panelFieldRenderer,
 }: {
   processEvent: SafeResolverEvent;
   nodeID: string;
+  panelFieldRenderer: ResolverProps['panelFieldRenderer'];
 }) {
   const processName = eventModel.processNameSafeVersion(processEvent);
   const isProcessTerminated = useSelector((state: ResolverState) =>
@@ -132,17 +143,12 @@ const NodeDetailView = memo(function ({
       .map((entry) => {
         return {
           ...entry,
-          description: (
-            <CopyablePanelField
-              textToCopy={String(entry.description)}
-              content={<GeneratedText>{String(entry.description)}</GeneratedText>}
-            />
-          ),
+          description: panelFieldRenderer(String(entry.description)),
         };
       });
 
     return processDescriptionListData;
-  }, [dateTime, processEvent]);
+  }, [dateTime, processEvent, panelFieldRenderer]);
 
   const nodesLinkNavProps = useLinkProps({
     panelView: 'nodes',

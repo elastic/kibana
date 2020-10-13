@@ -14,16 +14,22 @@ import { NodeEvents } from './node_events';
 import { NodeDetail } from './node_detail';
 import { NodeList } from './node_list';
 import { EventDetail } from './event_detail';
-import { PanelViewAndParameters } from '../../types';
+import { PanelViewAndParameters, ResolverProps } from '../../types';
 
 /**
  * Show the panel that matches the `panelViewAndParameters` (derived from the browser's location.search)
  */
 
-export const PanelRouter = memo(function () {
+export const PanelRouter = memo(function ({
+  panelFieldRenderer,
+}: {
+  panelFieldRenderer: ResolverProps['panelFieldRenderer'];
+}) {
   const params: PanelViewAndParameters = useSelector(selectors.panelViewAndParameters);
   if (params.panelView === 'nodeDetail') {
-    return <NodeDetail nodeID={params.panelParameters.nodeID} />;
+    return (
+      <NodeDetail nodeID={params.panelParameters.nodeID} panelFieldRenderer={panelFieldRenderer} />
+    );
   } else if (params.panelView === 'nodeEvents') {
     return <NodeEvents nodeID={params.panelParameters.nodeID} />;
   } else if (params.panelView === 'nodeEventsInCategory') {
@@ -39,10 +45,11 @@ export const PanelRouter = memo(function () {
         nodeID={params.panelParameters.nodeID}
         eventID={params.panelParameters.eventID}
         eventCategory={params.panelParameters.eventCategory}
+        panelFieldRenderer={panelFieldRenderer}
       />
     );
   } else {
     /* The default 'Event List' / 'List of all processes' view */
-    return <NodeList />;
+    return <NodeList panelFieldRenderer={panelFieldRenderer} />;
   }
 });

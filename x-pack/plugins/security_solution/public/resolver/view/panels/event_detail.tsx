@@ -21,13 +21,12 @@ import {
   GeneratedText,
   noTimestampRetrievedText,
 } from './panel_content_utilities';
-import { CopyablePanelField } from './copyable_panel_field';
 import { Breadcrumbs } from './breadcrumbs';
 import * as eventModel from '../../../../common/endpoint/models/event';
 import * as selectors from '../../store/selectors';
 import { PanelLoading } from './panel_loading';
 import { PanelContentError } from './panel_content_error';
-import { ResolverState } from '../../types';
+import { ResolverProps, ResolverState } from '../../types';
 import { DescriptiveName } from './descriptive_name';
 import { useLinkProps } from '../use_link_props';
 import { SafeResolverEvent } from '../../../../common/endpoint/types';
@@ -45,11 +44,13 @@ export const EventDetail = memo(function EventDetail({
   nodeID,
   eventID,
   eventCategory: eventType,
+  panelFieldRenderer,
 }: {
   nodeID: string;
   eventID: string;
   /** The event type to show in the breadcrumbs */
   eventCategory: string;
+  panelFieldRenderer: ResolverProps['panelFieldRenderer'];
 }) {
   const isEventLoading = useSelector(selectors.isCurrentRelatedEventLoading);
   const isProcessTreeLoading = useSelector(selectors.isTreeLoading);
@@ -68,6 +69,7 @@ export const EventDetail = memo(function EventDetail({
     <EventDetailContents
       nodeID={nodeID}
       event={event}
+      panelFieldRenderer={panelFieldRenderer}
       processEvent={processEvent}
       eventType={eventType}
     />
@@ -86,6 +88,7 @@ const EventDetailContents = memo(function ({
   nodeID,
   event,
   eventType,
+  panelFieldRenderer,
   processEvent,
 }: {
   nodeID: string;
@@ -94,6 +97,7 @@ const EventDetailContents = memo(function ({
    * Event type to use in the breadcrumbs
    */
   eventType: string;
+  panelFieldRenderer: ResolverProps['panelFieldRenderer'];
   processEvent: SafeResolverEvent | null;
 }) {
   const timestamp = eventModel.timestampSafeVersion(event);
@@ -135,12 +139,18 @@ const EventDetailContents = memo(function ({
         </GeneratedText>
       </StyledDescriptiveName>
       <EuiSpacer size="l" />
-      <EventDetailFields event={event} />
+      <EventDetailFields event={event} panelFieldRenderer={panelFieldRenderer} />
     </StyledPanel>
   );
 });
 
-function EventDetailFields({ event }: { event: SafeResolverEvent }) {
+function EventDetailFields({
+  event,
+  panelFieldRenderer,
+}: {
+  event: SafeResolverEvent;
+  panelFieldRenderer: ResolverProps['panelFieldRenderer'];
+}) {
   const sections = useMemo(() => {
     const returnValue: Array<{
       namespace: React.ReactNode;
@@ -157,18 +167,13 @@ function EventDetailFields({ event }: { event: SafeResolverEvent }) {
         namespace: <GeneratedText>{key}</GeneratedText>,
         descriptions: deepObjectEntries(value).map(([path, fieldValue]) => ({
           title: <GeneratedText>{path.join('.')}</GeneratedText>,
-          description: (
-            <CopyablePanelField
-              textToCopy={String(fieldValue)}
-              content={<GeneratedText>{String(fieldValue)}</GeneratedText>}
-            />
-          ),
+          description: panelFieldRenderer(String(fieldValue)),
         })),
       };
       returnValue.push(section);
     }
     return returnValue;
-  }, [event]);
+  }, [event, panelFieldRenderer]);
   return (
     <>
       {sections.map(({ namespace, descriptions }, index) => {

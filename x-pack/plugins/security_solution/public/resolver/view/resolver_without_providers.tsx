@@ -33,7 +33,13 @@ export const ResolverWithoutProviders = React.memo(
    * Use `forwardRef` so that the `Simulator` used in testing can access the top level DOM element.
    */
   React.forwardRef(function (
-    { className, databaseDocumentID, resolverComponentInstanceID, indices }: ResolverProps,
+    {
+      className,
+      panelFieldRenderer,
+      databaseDocumentID,
+      resolverComponentInstanceID,
+      indices,
+    }: ResolverProps,
     refToForward
   ) {
     useResolverQueryParamCleaner();
@@ -128,7 +134,7 @@ export const ResolverWithoutProviders = React.memo(
             })}
           </GraphContainer>
         )}
-        <PanelRouter />
+        <PanelRouter panelFieldRenderer={panelFieldRenderer} />
         <GraphControls />
         <SymbolDefinitions />
       </StyledMapContainer>

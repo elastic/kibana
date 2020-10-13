@@ -32,10 +32,10 @@ import { NewCase, ExistingCase } from '../timeline/properties/helpers';
 import { updateTimelineGraphEventId } from '../../../timelines/store/timeline/actions';
 import { Resolver } from '../../../resolver/view';
 import { useAllCasesModal } from '../../../cases/components/use_all_cases_modal';
-
 import * as i18n from './translations';
 import { useUiSetting$ } from '../../../common/lib/kibana';
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
+import { CopyablePanelField } from '../../../resolver/view/panels/copyable_panel_field';
 
 const OverlayContainer = styled.div`
   height: 100%;
@@ -97,6 +97,8 @@ const Navigation = ({
     </EuiFlexItem>
   </EuiFlexGroup>
 );
+
+const renderResolverPanelFields = (value: string) => <CopyablePanelField value={value} />;
 
 const GraphOverlayComponent = ({
   graphEventId,
@@ -194,6 +196,7 @@ const GraphOverlayComponent = ({
       {graphEventId !== undefined && indices !== null && (
         <StyledResolver
           databaseDocumentID={graphEventId}
+          panelFieldRenderer={renderResolverPanelFields}
           resolverComponentInstanceID={currentTimeline.id}
           indices={indices}
         />

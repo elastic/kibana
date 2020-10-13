@@ -35,14 +35,13 @@ import * as selectors from '../../store/selectors';
 import { Breadcrumbs } from './breadcrumbs';
 import { CubeForProcess } from './cube_for_process';
 import { LimitWarning } from '../limit_warnings';
-import { ResolverState } from '../../types';
+import { ResolverProps, ResolverState } from '../../types';
 import { useLinkProps } from '../use_link_props';
 import { useColors } from '../use_colors';
 import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { ResolverAction } from '../../store/actions';
 import { useFormattedDate } from './use_formatted_date';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
-import { CopyablePanelField } from './copyable_panel_field';
 
 interface ProcessTableView {
   name?: string;
@@ -54,92 +53,96 @@ interface ProcessTableView {
 /**
  * The "default" view for the panel: A list of all the processes currently in the graph.
  */
-export const NodeList = memo(() => {
-  const columns = useMemo<Array<EuiBasicTableColumn<ProcessTableView>>>(
-    () => [
-      {
-        field: 'name',
-        name: i18n.translate(
-          'xpack.securitySolution.endpoint.resolver.panel.table.row.processNameTitle',
-          {
-            defaultMessage: 'Process Name',
-          }
-        ),
-        sortable: true,
-        truncateText: true,
-        render(name: string | undefined, item: ProcessTableView) {
-          return <NodeDetailLink name={name} event={item.event} nodeID={item.nodeID} />;
+export const NodeList = memo(
+  ({ panelFieldRenderer }: { panelFieldRenderer: ResolverProps['panelFieldRenderer'] }) => {
+    const columns = useMemo<Array<EuiBasicTableColumn<ProcessTableView>>>(
+      () => [
+        {
+          field: 'name',
+          name: i18n.translate(
+            'xpack.securitySolution.endpoint.resolver.panel.table.row.processNameTitle',
+            {
+              defaultMessage: 'Process Name',
+            }
+          ),
+          sortable: true,
+          truncateText: true,
+          render(name: string | undefined, item: ProcessTableView) {
+            return <NodeDetailLink name={name} event={item.event} nodeID={item.nodeID} />;
+          },
         },
-      },
-      {
-        field: 'timestamp',
-        name: i18n.translate(
-          'xpack.securitySolution.endpoint.resolver.panel.table.row.timestampTitle',
-          {
-            defaultMessage: 'Timestamp',
-          }
-        ),
-        dataType: 'date',
-        sortable: true,
-        render(eventDate?: Date) {
-          return <NodeDetailTimestamp eventDate={eventDate} />;
+        {
+          field: 'timestamp',
+          name: i18n.translate(
+            'xpack.securitySolution.endpoint.resolver.panel.table.row.timestampTitle',
+            {
+              defaultMessage: 'Timestamp',
+            }
+          ),
+          dataType: 'date',
+          sortable: true,
+          render(eventDate?: Date) {
+            return (
+              <NodeDetailTimestamp eventDate={eventDate} panelFieldRenderer={panelFieldRenderer} />
+            );
+          },
         },
-      },
-    ],
-    []
-  );
+      ],
+      [panelFieldRenderer]
+    );
 
-  const processTableView: ProcessTableView[] = useSelector(
-    useCallback((state: ResolverState) => {
-      const { processNodePositions } = selectors.layout(state);
-      const view: ProcessTableView[] = [];
-      for (const processEvent of processNodePositions.keys()) {
-        const name = eventModel.processNameSafeVersion(processEvent);
-        const nodeID = eventModel.entityIDSafeVersion(processEvent);
-        if (nodeID !== undefined) {
-          view.push({
-            name,
-            timestamp: eventModel.timestampAsDateSafeVersion(processEvent),
-            nodeID,
-            event: processEvent,
-          });
+    const processTableView: ProcessTableView[] = useSelector(
+      useCallback((state: ResolverState) => {
+        const { processNodePositions } = selectors.layout(state);
+        const view: ProcessTableView[] = [];
+        for (const processEvent of processNodePositions.keys()) {
+          const name = eventModel.processNameSafeVersion(processEvent);
+          const nodeID = eventModel.entityIDSafeVersion(processEvent);
+          if (nodeID !== undefined) {
+            view.push({
+              name,
+              timestamp: eventModel.timestampAsDateSafeVersion(processEvent),
+              nodeID,
+              event: processEvent,
+            });
+          }
         }
-      }
-      return view;
-    }, [])
-  );
+        return view;
+      }, [])
+    );
 
-  const numberOfProcesses = processTableView.length;
+    const numberOfProcesses = processTableView.length;
 
-  const crumbs = useMemo(() => {
-    return [
-      {
-        text: i18n.translate('xpack.securitySolution.resolver.panel.nodeList.title', {
-          defaultMessage: 'All Process Events',
-        }),
-      },
-    ];
-  }, []);
+    const crumbs = useMemo(() => {
+      return [
+        {
+          text: i18n.translate('xpack.securitySolution.resolver.panel.nodeList.title', {
+            defaultMessage: 'All Process Events',
+          }),
+        },
+      ];
+    }, []);
 
-  const children = useSelector(selectors.hasMoreChildren);
-  const ancestors = useSelector(selectors.hasMoreAncestors);
-  const showWarning = children === true || ancestors === true;
-  const rowProps = useMemo(() => ({ 'data-test-subj': 'resolver:node-list:item' }), []);
-  return (
-    <StyledPanel>
-      <Breadcrumbs breadcrumbs={crumbs} />
-      {showWarning && <LimitWarning numberDisplayed={numberOfProcesses} />}
-      <EuiSpacer size="l" />
-      <EuiInMemoryTable<ProcessTableView>
-        rowProps={rowProps}
-        data-test-subj="resolver:node-list"
-        items={processTableView}
-        columns={columns}
-        sorting
-      />
-    </StyledPanel>
-  );
-});
+    const children = useSelector(selectors.hasMoreChildren);
+    const ancestors = useSelector(selectors.hasMoreAncestors);
+    const showWarning = children === true || ancestors === true;
+    const rowProps = useMemo(() => ({ 'data-test-subj': 'resolver:node-list:item' }), []);
+    return (
+      <StyledPanel>
+        <Breadcrumbs breadcrumbs={crumbs} />
+        {showWarning && <LimitWarning numberDisplayed={numberOfProcesses} />}
+        <EuiSpacer size="l" />
+        <EuiInMemoryTable<ProcessTableView>
+          rowProps={rowProps}
+          data-test-subj="resolver:node-list"
+          items={processTableView}
+          columns={columns}
+          sorting
+        />
+      </StyledPanel>
+    );
+  }
+);
 
 function NodeDetailLink({
   name,
@@ -212,12 +215,15 @@ function NodeDetailLink({
   );
 }
 
-const NodeDetailTimestamp = memo(({ eventDate }: { eventDate: Date | undefined }) => {
-  const formattedDate = useFormattedDate(eventDate);
-
-  return formattedDate ? (
-    <CopyablePanelField textToCopy={formattedDate} content={formattedDate} />
-  ) : (
-    getEmptyTagValue()
-  );
-});
+const NodeDetailTimestamp = memo(
+  ({
+    eventDate,
+    panelFieldRenderer,
+  }: {
+    eventDate: Date | undefined;
+    panelFieldRenderer: ResolverProps['panelFieldRenderer'];
+  }) => {
+    const formattedDate = useFormattedDate(eventDate);
+    return formattedDate ? panelFieldRenderer(formattedDate) : getEmptyTagValue();
+  }
+);

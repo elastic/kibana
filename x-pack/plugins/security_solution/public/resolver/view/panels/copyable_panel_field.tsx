@@ -13,6 +13,7 @@ import React, { memo, useState, useCallback } from 'react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useColors } from '../use_colors';
 import { StyledPanel } from '../styles';
+import { GeneratedText } from './panel_content_utilities';
 
 interface StyledCopyableField {
   readonly backgroundColor: string;
@@ -39,70 +40,69 @@ const StyledCopyableField = styled.div<StyledCopyableField>`
  * When the panel is hovered, these fields will show a gray background
  * When you then hover over these fields they will show a blue background and a tooltip with a copy button will appear
  */
-export const CopyablePanelField = memo(
-  ({ textToCopy, content }: { textToCopy: string; content: JSX.Element | string }) => {
-    const { linkColor, copyableFieldBackground } = useColors();
-    const [isOpen, setIsOpen] = useState(false);
-    const toasts = useKibana().services.notifications?.toasts;
 
-    const onMouseEnter = () => setIsOpen(true);
-    const onMouseLeave = () => setIsOpen(false);
+export const CopyablePanelField = memo(({ value }: { value: string }) => {
+  const { linkColor, copyableFieldBackground } = useColors();
+  const [isOpen, setIsOpen] = useState(false);
+  const toasts = useKibana().services.notifications?.toasts;
 
-    const ButtonContent = memo(() => (
-      <StyledCopyableField
-        backgroundColor={copyableFieldBackground}
-        data-test-subj="resolver:panel:copyable-field"
-        activeBackgroundColor={linkColor}
-        onMouseEnter={onMouseEnter}
-      >
-        {content}
-      </StyledCopyableField>
-    ));
+  const onMouseEnter = () => setIsOpen(true);
+  const onMouseLeave = () => setIsOpen(false);
 
-    const onClick = useCallback(
-      async (event: React.MouseEvent<HTMLButtonElement>) => {
-        try {
-          await navigator.clipboard.writeText(textToCopy);
-        } catch (error) {
-          if (toasts) {
-            toasts.addError(error, {
-              title: i18n.translate('xpack.securitySolution.resolver.panel.copyFailureTitle', {
-                defaultMessage: 'Copy Failure',
-              }),
-            });
-          }
+  const ButtonContent = memo(() => (
+    <StyledCopyableField
+      backgroundColor={copyableFieldBackground}
+      data-test-subj="resolver:panel:copyable-field"
+      activeBackgroundColor={linkColor}
+      onMouseEnter={onMouseEnter}
+    >
+      <GeneratedText>{value}</GeneratedText>
+    </StyledCopyableField>
+  ));
+
+  const onClick = useCallback(
+    async (event: React.MouseEvent<HTMLButtonElement>) => {
+      try {
+        await navigator.clipboard.writeText(value);
+      } catch (error) {
+        if (toasts) {
+          toasts.addError(error, {
+            title: i18n.translate('xpack.securitySolution.resolver.panel.copyFailureTitle', {
+              defaultMessage: 'Copy Failure',
+            }),
+          });
         }
-      },
-      [textToCopy, toasts]
-    );
+      }
+    },
+    [value, toasts]
+  );
 
-    return (
-      <div onMouseLeave={onMouseLeave}>
-        <EuiPopover
-          anchorPosition={'downCenter'}
-          button={<ButtonContent />}
-          closePopover={onMouseLeave}
-          hasArrow={false}
-          isOpen={isOpen}
-          panelPaddingSize="s"
+  return (
+    <div onMouseLeave={onMouseLeave}>
+      <EuiPopover
+        anchorPosition={'downCenter'}
+        button={<ButtonContent />}
+        closePopover={onMouseLeave}
+        hasArrow={false}
+        isOpen={isOpen}
+        panelPaddingSize="s"
+      >
+        <EuiToolTip
+          content={i18n.translate('xpack.securitySolution.resolver.panel.copyToClipboard', {
+            defaultMessage: 'Copy to Clipboard',
+          })}
         >
-          <EuiToolTip
-            content={i18n.translate('xpack.securitySolution.resolver.panel.copyToClipboard', {
+          <EuiButtonIcon
+            aria-label={i18n.translate('xpack.securitySolution.resolver.panel.copyToClipboard', {
               defaultMessage: 'Copy to Clipboard',
             })}
-          >
-            <EuiButtonIcon
-              aria-label={i18n.translate('xpack.securitySolution.resolver.panel.copyToClipboard', {
-                defaultMessage: 'Copy to Clipboard',
-              })}
-              color="text"
-              data-test-subj="resolver:panel:clipboard"
-              iconType="copyClipboard"
-              onClick={onClick}
-            />
-          </EuiToolTip>
-        </EuiPopover>
-      </div>
-    );
-  }
-);
+            color="text"
+            data-test-subj="resolver:panel:clipboard"
+            iconType="copyClipboard"
+            onClick={onClick}
+          />
+        </EuiToolTip>
+      </EuiPopover>
+    </div>
+  );
+});
