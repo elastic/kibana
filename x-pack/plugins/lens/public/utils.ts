@@ -14,7 +14,7 @@ export const desanitizeFilterContext = (
   const emptyTextValue = i18n.translate('xpack.lens.indexpattern.emptyTextColumnValue', {
     defaultMessage: '(empty)',
   });
-  const result: LensFilterEvent['data'] = {
+  return {
     ...context,
     data: context.data.map((point) =>
       point.value === emptyTextValue
@@ -36,8 +36,4 @@ export const desanitizeFilterContext = (
         : point
     ),
   };
-  if (context.timeFieldName) {
-    result.timeFieldName = context.timeFieldName;
-  }
-  return result;
 };

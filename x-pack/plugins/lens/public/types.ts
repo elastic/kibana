@@ -11,7 +11,7 @@ import { SavedObjectReference } from 'kibana/public';
 import {
   ExpressionRendererEvent,
   IInterpreterRenderHandlers,
-  Datatable,
+  KibanaDatatable,
   SerializedFieldFormat,
 } from '../../../../src/plugins/expressions/public';
 import { DragContextState } from './drag_drop';
@@ -304,7 +304,7 @@ export interface OperationMetadata {
 
 export interface LensMultiTable {
   type: 'lens_multitable';
-  tables: Record<string, Datatable>;
+  tables: Record<string, KibanaDatatable>;
   dateRange?: {
     fromDate: Date;
     toDate: Date;

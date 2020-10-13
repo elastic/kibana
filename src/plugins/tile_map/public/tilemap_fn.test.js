@@ -41,7 +41,7 @@ import { convertToGeoJson } from '../../maps_legacy/public';
 describe('interpreter/functions#tilemap', () => {
   const fn = functionWrapper(createTileMapFn());
   const context = {
-    type: 'datatable',
+    type: 'kibana_datatable',
     rows: [{ 'col-0-1': 0 }],
     columns: [{ id: 'col-0-1', name: 'Count' }],
   };

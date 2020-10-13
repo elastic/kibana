@@ -9,7 +9,6 @@ import {
   getMockEventScope,
   ValueClickTriggerEventScope,
 } from './url_drilldown_scope';
-import { DatatableColumnType } from '../../../../../../src/plugins/expressions/common';
 
 const createPoint = ({
   field,
@@ -24,12 +23,10 @@ const createPoint = ({
         name: field,
         id: '1-1',
         meta: {
-          type: 'date' as DatatableColumnType,
-          field,
-          source: 'esaggs',
-          sourceParams: {
-            type: 'histogram',
-            indexPatternId: 'logstash-*',
+          type: 'histogram',
+          indexPatternId: 'logstash-*',
+          aggConfigParams: {
+            field,
             interval: 30,
             otherBucket: true,
           },

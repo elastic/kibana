@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 
 import {
   ExpressionFunctionDefinition,
-  Datatable,
+  KibanaDatatable,
   Range,
   Render,
   Style,
@@ -29,7 +29,7 @@ import {
 import { visType, DimensionsVisParam, VisParams } from './types';
 import { ColorSchemas, vislibColorMaps, ColorModes } from '../../charts/public';
 
-export type Input = Datatable;
+export type Input = KibanaDatatable;
 
 interface Arguments {
   percentageMode: boolean;
@@ -63,7 +63,7 @@ export type MetricVisExpressionFunctionDefinition = ExpressionFunctionDefinition
 export const createMetricVisFn = (): MetricVisExpressionFunctionDefinition => ({
   name: 'metricVis',
   type: 'render',
-  inputTypes: ['datatable'],
+  inputTypes: ['kibana_datatable'],
   help: i18n.translate('visTypeMetric.function.help', {
     defaultMessage: 'Metric visualization',
   }),
