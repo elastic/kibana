@@ -20,6 +20,7 @@
 import uuid from 'uuid';
 import { config, HttpConfig } from './http_config';
 import { CspConfig } from '../csp';
+import { ExternalUrlConfig } from '../external_url';
 
 const validHostnames = ['www.example.com', '8.8.8.8', '::1', 'localhost'];
 const invalidHostname = 'asdf$%^';
@@ -276,7 +277,7 @@ describe('HttpConfig', () => {
         },
       },
     });
-    const httpConfig = new HttpConfig(rawConfig, CspConfig.DEFAULT);
+    const httpConfig = new HttpConfig(rawConfig, CspConfig.DEFAULT, ExternalUrlConfig.DEFAULT);
 
     expect(httpConfig.customResponseHeaders).toEqual({
       string: 'string',

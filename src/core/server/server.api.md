@@ -896,6 +896,18 @@ export interface ICustomClusterClient extends IClusterClient {
 }
 
 // @public
+export interface IExternalUrlConfig {
+    readonly policy: IExternalUrlPolicy[];
+}
+
+// @public
+export interface IExternalUrlPolicy {
+    allow: boolean;
+    host?: string;
+    protocol?: string;
+}
+
+// @public
 export interface IKibanaResponse<T extends HttpResponsePayload | ResponseError = any> {
     // (undocumented)
     readonly options: HttpResponseOptions;

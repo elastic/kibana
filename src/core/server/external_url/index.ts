@@ -17,10 +17,7 @@
  * under the License.
  */
 
-/** This module is intended for consumption by public to avoid import issues with server-side code */
-export { PluginOpaqueId } from './plugins/types';
-export * from './saved_objects/types';
-export * from './ui_settings/types';
-export * from './legacy/types';
-export type { EnvironmentMode, PackageInfo } from '@kbn/config';
-export type { ExternalUrlConfig, IExternalUrlPolicy } from './external_url';
+import { ExternalUrlConfig, IExternalUrlConfig, IExternalUrlPolicy } from './external_url_config';
+import { ExternalUrlConfigType, config } from './config';
+
+export { ExternalUrlConfig, ExternalUrlConfigType, config, IExternalUrlConfig, IExternalUrlPolicy };

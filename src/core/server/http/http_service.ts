@@ -44,6 +44,7 @@ import {
 
 import { RequestHandlerContext } from '../../server';
 import { registerCoreHandlers } from './lifecycle_handlers';
+import { ExternalUrlConfigType, config as externalUrlConfig } from '../external_url';
 
 interface SetupDeps {
   context: ContextSetup;
@@ -73,7 +74,8 @@ export class HttpService
     this.config$ = combineLatest([
       configService.atPath<HttpConfigType>(httpConfig.path),
       configService.atPath<CspConfigType>(cspConfig.path),
-    ]).pipe(map(([http, csp]) => new HttpConfig(http, csp)));
+      configService.atPath<ExternalUrlConfigType>(externalUrlConfig.path),
+    ]).pipe(map(([http, csp, externalUrl]) => new HttpConfig(http, csp, externalUrl)));
     this.httpServer = new HttpServer(logger, 'Kibana');
     this.httpsRedirectServer = new HttpsRedirectServer(logger.get('http', 'redirect', 'server'));
   }
@@ -102,6 +104,8 @@ export class HttpService
 
     this.internalSetup = {
       ...serverContract,
+
+      externalUrl: config.externalUrl,
 
       createRouter: (path: string, pluginId: PluginOpaqueId = this.coreContext.coreId) => {
         const enhanceHandler = this.requestHandlerContext!.createHandler.bind(null, pluginId);

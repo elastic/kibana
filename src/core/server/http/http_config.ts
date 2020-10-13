@@ -21,6 +21,7 @@ import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
 import { hostname } from 'os';
 
 import { CspConfigType, CspConfig, ICspConfig } from '../csp';
+import { ExternalUrlConfig, IExternalUrlConfig } from '../external_url';
 import { SslConfig, sslSchema } from './ssl_config';
 
 const validBasePathRegex = /^\/.*[^\/]$/;
@@ -142,13 +143,18 @@ export class HttpConfig {
   public ssl: SslConfig;
   public compression: { enabled: boolean; referrerWhitelist?: string[] };
   public csp: ICspConfig;
+  public externalUrl: IExternalUrlConfig;
   public xsrf: { disableProtection: boolean; whitelist: string[] };
   public requestId: { allowFromAnyIp: boolean; ipAllowlist: string[] };
 
   /**
    * @internal
    */
-  constructor(rawHttpConfig: HttpConfigType, rawCspConfig: CspConfigType) {
+  constructor(
+    rawHttpConfig: HttpConfigType,
+    rawCspConfig: CspConfigType,
+    rawExternalUrlConfig: ExternalUrlConfig
+  ) {
     this.autoListen = rawHttpConfig.autoListen;
     this.host = rawHttpConfig.host;
     this.port = rawHttpConfig.port;
@@ -171,6 +177,7 @@ export class HttpConfig {
     this.ssl = new SslConfig(rawHttpConfig.ssl || {});
     this.compression = rawHttpConfig.compression;
     this.csp = new CspConfig(rawCspConfig);
+    this.externalUrl = new ExternalUrlConfig(rawExternalUrlConfig);
     this.xsrf = rawHttpConfig.xsrf;
     this.requestId = rawHttpConfig.requestId;
   }

@@ -71,7 +71,7 @@ describe('rolesManagementApp', () => {
     expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: `/`, text: 'Roles' }]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Roles Page: {"notifications":{"toasts":{}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/","search":"","hash":""}}}
+        Roles Page: {"notifications":{"toasts":{}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/","search":"","hash":""}}}
       </div>
     `);
 
@@ -87,7 +87,7 @@ describe('rolesManagementApp', () => {
     expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: `/`, text: 'Roles' }, { text: 'Create' }]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Role Edit Page: {"action":"edit","rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"indicesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"privilegesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}},"notifications":{"toasts":{}},"fatalErrors":{},"license":{"features$":{"_isScalar":false}},"docLinks":{"esDocBasePath":"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/"},"uiCapabilities":{"catalogue":{},"management":{},"navLinks":{}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/edit","search":"","hash":""}}}
+        Role Edit Page: {"action":"edit","rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"indicesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"privilegesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}},"notifications":{"toasts":{}},"fatalErrors":{},"license":{"features$":{"_isScalar":false}},"docLinks":{"esDocBasePath":"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/"},"uiCapabilities":{"catalogue":{},"management":{},"navLinks":{}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/edit","search":"","hash":""}}}
       </div>
     `);
 
@@ -108,7 +108,7 @@ describe('rolesManagementApp', () => {
     ]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Role Edit Page: {"action":"edit","roleName":"someRoleName","rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"indicesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"privilegesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}},"notifications":{"toasts":{}},"fatalErrors":{},"license":{"features$":{"_isScalar":false}},"docLinks":{"esDocBasePath":"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/"},"uiCapabilities":{"catalogue":{},"management":{},"navLinks":{}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/someRoleName","search":"","hash":""}}}
+        Role Edit Page: {"action":"edit","roleName":"someRoleName","rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"indicesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"privilegesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}},"notifications":{"toasts":{}},"fatalErrors":{},"license":{"features$":{"_isScalar":false}},"docLinks":{"esDocBasePath":"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/"},"uiCapabilities":{"catalogue":{},"management":{},"navLinks":{}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/someRoleName","search":"","hash":""}}}
       </div>
     `);
 
@@ -126,7 +126,7 @@ describe('rolesManagementApp', () => {
     expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: `/`, text: 'Roles' }, { text: 'Create' }]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Role Edit Page: {"action":"clone","roleName":"someRoleName","rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"indicesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"privilegesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}},"notifications":{"toasts":{}},"fatalErrors":{},"license":{"features$":{"_isScalar":false}},"docLinks":{"esDocBasePath":"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/"},"uiCapabilities":{"catalogue":{},"management":{},"navLinks":{}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/clone/someRoleName","search":"","hash":""}}}
+        Role Edit Page: {"action":"clone","roleName":"someRoleName","rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"indicesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"privilegesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}},"notifications":{"toasts":{}},"fatalErrors":{},"license":{"features$":{"_isScalar":false}},"docLinks":{"esDocBasePath":"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/"},"uiCapabilities":{"catalogue":{},"management":{},"navLinks":{}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/clone/someRoleName","search":"","hash":""}}}
       </div>
     `);
 

@@ -33,6 +33,8 @@ export interface HttpSetup {
    */
   anonymousPaths: IAnonymousPaths;
 
+  externalUrl: IExternalUrl;
+
   /**
    * Adds a new {@link HttpInterceptor} to the global HTTP client.
    * @param interceptor a {@link HttpInterceptor}
@@ -102,6 +104,10 @@ export interface IBasePath {
    * See {@link BasePath.get} for getting the basePath value for a specific request
    */
   readonly serverBasePath: string;
+}
+
+export interface IExternalUrl {
+  validateUrl(relativeOrAbsoluteUrl: string): URL | null;
 }
 
 /**

@@ -17,6 +17,9 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
         "serverBasePath": "",
       },
       "delete": [MockFunction],
+      "externalUrl": Object {
+        "validateUrl": [MockFunction],
+      },
       "fetch": [MockFunction],
       "get": [MockFunction],
       "getLoadingCount$": [MockFunction],
@@ -380,6 +383,9 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
         "serverBasePath": "",
       },
       "delete": [MockFunction],
+      "externalUrl": Object {
+        "validateUrl": [MockFunction],
+      },
       "fetch": [MockFunction],
       "get": [MockFunction],
       "getLoadingCount$": [MockFunction],
@@ -751,6 +757,9 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
         "serverBasePath": "",
       },
       "delete": [MockFunction],
+      "externalUrl": Object {
+        "validateUrl": [MockFunction],
+      },
       "fetch": [MockFunction],
       "get": [MockFunction],
       "getLoadingCount$": [MockFunction],

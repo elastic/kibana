@@ -73,6 +73,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [IAnonymousPaths](./kibana-plugin-core-public.ianonymouspaths.md) | APIs for denoting paths as not requiring authentication |
 |  [IBasePath](./kibana-plugin-core-public.ibasepath.md) | APIs for manipulating the basePath on URL segments. |
 |  [IContextContainer](./kibana-plugin-core-public.icontextcontainer.md) | An object that handles registration of context providers and configuring handlers with context. |
+|  [IExternalUrlPolicy](./kibana-plugin-core-public.iexternalurlpolicy.md) | A policy describing whether access to an external destination is allowed. |
 |  [IHttpFetchError](./kibana-plugin-core-public.ihttpfetcherror.md) |  |
 |  [IHttpInterceptController](./kibana-plugin-core-public.ihttpinterceptcontroller.md) | Used to halt a request Promise chain in a [HttpInterceptor](./kibana-plugin-core-public.httpinterceptor.md)<!-- -->. |
 |  [IHttpResponseInterceptorOverrides](./kibana-plugin-core-public.ihttpresponseinterceptoroverrides.md) | Properties that can be returned by HttpInterceptor.request to override the response. |

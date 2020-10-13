@@ -22,6 +22,8 @@ import { deepFreeze } from '@kbn/std';
 import { DiscoveredPlugin, PluginName } from '../../server';
 import {
   EnvironmentMode,
+  ExternalUrlConfig,
+  IExternalUrlPolicy,
   PackageInfo,
   UiSettingsParams,
   UserProvidedValues,
@@ -47,6 +49,9 @@ export interface InjectedMetadataParams {
     category?: AppCategory;
     csp: {
       warnLegacyBrowsers: boolean;
+    };
+    externalUrl: {
+      policy: ExternalUrlConfig['policy'];
     };
     vars: {
       [key: string]: unknown;
@@ -107,6 +112,10 @@ export class InjectedMetadataService {
         return this.state.csp;
       },
 
+      getExternalUrlConfig: () => {
+        return this.state.externalUrl;
+      },
+
       getPlugins: () => {
         return this.state.uiPlugins;
       },
@@ -147,6 +156,9 @@ export interface InjectedMetadataSetup {
   getKibanaVersion: () => string;
   getCspConfig: () => {
     warnLegacyBrowsers: boolean;
+  };
+  getExternalUrlConfig: () => {
+    policy: IExternalUrlPolicy[];
   };
   /**
    * An array of frontend plugins in topological order.
