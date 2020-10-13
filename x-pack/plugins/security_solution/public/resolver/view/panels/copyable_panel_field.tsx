@@ -61,7 +61,6 @@ export const CopyablePanelField = memo(
 
     const onClick = useCallback(
       async (event: React.MouseEvent<HTMLButtonElement>) => {
-        event.preventDefault();
         try {
           await navigator.clipboard.writeText(textToCopy);
         } catch (error) {
