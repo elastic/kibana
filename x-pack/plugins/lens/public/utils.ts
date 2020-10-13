@@ -15,6 +15,7 @@ export const desanitizeFilterContext = (
     defaultMessage: '(empty)',
   });
   const result: LensFilterEvent['data'] = {
+    ...context,
     data: context.data.map((point) =>
       point.value === emptyTextValue
         ? {

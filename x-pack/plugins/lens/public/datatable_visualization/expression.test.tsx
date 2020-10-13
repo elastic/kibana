@@ -140,6 +140,7 @@ describe('datatable_expression', () => {
             value: 'shoes',
           },
         ],
+        negate: true,
         timeFieldName: 'a',
       });
     });
@@ -174,6 +175,7 @@ describe('datatable_expression', () => {
             value: 1588024800000,
           },
         ],
+        negate: false,
         timeFieldName: 'b',
       });
     });
@@ -242,7 +244,7 @@ describe('datatable_expression', () => {
             value: 1588024800000,
           },
         ],
-        // negate: false,
+        negate: false,
         timeFieldName: 'a',
       });
     });
