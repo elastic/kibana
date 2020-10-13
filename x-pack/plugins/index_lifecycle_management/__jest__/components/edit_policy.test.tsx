@@ -21,8 +21,10 @@ import {
   fatalErrorsServiceMock,
 } from '../../../../../src/core/public/mocks';
 import { usageCollectionPluginMock } from '../../../../../src/plugins/usage_collection/public/mocks';
+import { CloudSetup } from '../../../cloud/public';
 
 import { EditPolicy } from '../../public/application/sections/edit_policy/edit_policy';
+import { KibanaContextProvider } from '../../public/shared_imports';
 import { init as initHttp } from '../../public/application/services/http';
 import { init as initUiMetric } from '../../public/application/services/ui_metric';
 import { init as initNotification } from '../../public/application/services/notification';
@@ -171,7 +173,14 @@ describe('edit policy', () => {
 
   beforeEach(() => {
     component = (
-      <EditPolicy history={history} getUrlForApp={jest.fn()} policies={policies} policyName={''} />
+      <KibanaContextProvider services={{ cloud: { isCloudEnabled: false } as CloudSetup }}>
+        <EditPolicy
+          history={history}
+          getUrlForApp={jest.fn()}
+          policies={policies}
+          policyName={''}
+        />
+      </KibanaContextProvider>
     );
 
     ({ http } = editPolicyHelpers.setup());
@@ -487,6 +496,7 @@ describe('edit policy', () => {
       http.setupNodeListResponse({
         nodesByAttributes: {},
         nodesByRoles: { data: ['node1'] },
+        isUsingDeprecatedDataRoleConfig: false,
       });
       const rendered = mountWithIntl(component);
       noRollover(rendered);
@@ -535,6 +545,7 @@ describe('edit policy', () => {
       http.setupNodeListResponse({
         nodesByAttributes: {},
         nodesByRoles: {},
+        isUsingDeprecatedDataRoleConfig: false,
       });
       const rendered = mountWithIntl(component);
       noRollover(rendered);
@@ -547,6 +558,7 @@ describe('edit policy', () => {
       http.setupNodeListResponse({
         nodesByAttributes: {},
         nodesByRoles: { data_hot: ['test'], data_cold: ['test'] },
+        isUsingDeprecatedDataRoleConfig: false,
       });
       const rendered = mountWithIntl(component);
       noRollover(rendered);
@@ -559,6 +571,7 @@ describe('edit policy', () => {
       http.setupNodeListResponse({
         nodesByAttributes: {},
         nodesByRoles: { data: ['test'] },
+        isUsingDeprecatedDataRoleConfig: false,
       });
       const rendered = mountWithIntl(component);
       noRollover(rendered);
@@ -608,6 +621,7 @@ describe('edit policy', () => {
       http.setupNodeListResponse({
         nodesByAttributes: {},
         nodesByRoles: { data: ['node1'] },
+        isUsingDeprecatedDataRoleConfig: false,
       });
       const rendered = mountWithIntl(component);
       noRollover(rendered);
@@ -666,6 +680,7 @@ describe('edit policy', () => {
       http.setupNodeListResponse({
         nodesByAttributes: {},
         nodesByRoles: {},
+        isUsingDeprecatedDataRoleConfig: false,
       });
       const rendered = mountWithIntl(component);
       noRollover(rendered);
@@ -678,6 +693,7 @@ describe('edit policy', () => {
       http.setupNodeListResponse({
         nodesByAttributes: {},
         nodesByRoles: { data_hot: ['test'], data_warm: ['test'] },
+        isUsingDeprecatedDataRoleConfig: false,
       });
       const rendered = mountWithIntl(component);
       noRollover(rendered);
@@ -690,6 +706,7 @@ describe('edit policy', () => {
       http.setupNodeListResponse({
         nodesByAttributes: {},
         nodesByRoles: { data: ['test'] },
+        isUsingDeprecatedDataRoleConfig: false,
       });
       const rendered = mountWithIntl(component);
       noRollover(rendered);
@@ -717,6 +734,106 @@ describe('edit policy', () => {
       setPhaseAfter(rendered, 'delete', '-1');
       await save(rendered);
       expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
+    });
+  });
+  describe('not on cloud', () => {
+    beforeEach(() => {
+      server.respondImmediately = true;
+    });
+    test('should show all allocation options, even if using legacy config', async () => {
+      http.setupNodeListResponse({
+        nodesByAttributes: { test: ['123'] },
+        nodesByRoles: { data: ['test'], data_hot: ['test'], data_warm: ['test'] },
+        isUsingDeprecatedDataRoleConfig: true,
+      });
+      const rendered = mountWithIntl(component);
+      noRollover(rendered);
+      setPolicyName(rendered, 'mypolicy');
+      await activatePhase(rendered, 'warm');
+      expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
+
+      // Assert that only the custom and off options exist
+      findTestSubject(rendered, 'dataTierSelect').simulate('click');
+      expect(findTestSubject(rendered, 'defaultDataAllocationOption').exists()).toBeTruthy();
+      expect(findTestSubject(rendered, 'customDataAllocationOption').exists()).toBeTruthy();
+      expect(findTestSubject(rendered, 'noneDataAllocationOption').exists()).toBeTruthy();
+    });
+  });
+  describe('on cloud', () => {
+    beforeEach(() => {
+      component = (
+        <KibanaContextProvider services={{ cloud: { isCloudEnabled: true } as CloudSetup }}>
+          <EditPolicy
+            history={history}
+            getUrlForApp={jest.fn()}
+            policies={policies}
+            policyName="test"
+          />
+        </KibanaContextProvider>
+      );
+      ({ http } = editPolicyHelpers.setup());
+      ({ server, httpRequestsMockHelpers } = http);
+      server.respondImmediately = true;
+
+      httpRequestsMockHelpers.setPoliciesResponse(policies);
+    });
+
+    describe('with legacy data role config', () => {
+      test('should hide data tier option on cloud using legacy node role configuration', async () => {
+        http.setupNodeListResponse({
+          nodesByAttributes: { test: ['123'] },
+          nodesByRoles: { data: ['test'], data_hot: ['test'], data_warm: ['test'] },
+          isUsingDeprecatedDataRoleConfig: true,
+        });
+        const rendered = mountWithIntl(component);
+        noRollover(rendered);
+        setPolicyName(rendered, 'mypolicy');
+        await activatePhase(rendered, 'warm');
+        expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
+
+        // Assert that only the custom and off options exist
+        findTestSubject(rendered, 'dataTierSelect').simulate('click');
+        expect(findTestSubject(rendered, 'defaultDataAllocationOption').exists()).toBeFalsy();
+        expect(findTestSubject(rendered, 'customDataAllocationOption').exists()).toBeTruthy();
+        expect(findTestSubject(rendered, 'noneDataAllocationOption').exists()).toBeTruthy();
+      });
+    });
+
+    describe('with node role config', () => {
+      test('should show off, custom and data role options on cloud with data roles', async () => {
+        http.setupNodeListResponse({
+          nodesByAttributes: { test: ['123'] },
+          nodesByRoles: { data: ['test'], data_hot: ['test'], data_warm: ['test'] },
+          isUsingDeprecatedDataRoleConfig: false,
+        });
+        const rendered = mountWithIntl(component);
+        noRollover(rendered);
+        setPolicyName(rendered, 'mypolicy');
+        await activatePhase(rendered, 'warm');
+        expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
+
+        findTestSubject(rendered, 'dataTierSelect').simulate('click');
+        expect(findTestSubject(rendered, 'defaultDataAllocationOption').exists()).toBeTruthy();
+        expect(findTestSubject(rendered, 'customDataAllocationOption').exists()).toBeTruthy();
+        expect(findTestSubject(rendered, 'noneDataAllocationOption').exists()).toBeTruthy();
+      });
+
+      test('should show cloud notice when cold tier nodes do not exist', async () => {
+        http.setupNodeListResponse({
+          nodesByAttributes: {},
+          nodesByRoles: { data: ['test'], data_hot: ['test'], data_warm: ['test'] },
+          isUsingDeprecatedDataRoleConfig: false,
+        });
+        const rendered = mountWithIntl(component);
+        noRollover(rendered);
+        setPolicyName(rendered, 'mypolicy');
+        await activatePhase(rendered, 'cold');
+        expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
+        expect(findTestSubject(rendered, 'cloudDataTierCallout').exists()).toBeTruthy();
+        // Assert that other notices are not showing
+        expect(findTestSubject(rendered, 'defaultAllocationNotice').exists()).toBeFalsy();
+        expect(findTestSubject(rendered, 'noNodeAttributesWarning').exists()).toBeFalsy();
+      });
     });
   });
 });

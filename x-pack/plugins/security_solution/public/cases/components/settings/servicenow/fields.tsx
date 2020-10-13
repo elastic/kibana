@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { EuiFormRow, EuiSelect, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import * as i18n from './translations';
 
@@ -68,6 +68,13 @@ const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsPro
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const onChangeCb = useCallback(
+    (key: keyof ServiceNowFieldsType, value: ServiceNowFieldsType[keyof ServiceNowFieldsType]) => {
+      onChange({ ...fields, [key]: value });
+    },
+    [fields, onChange]
+  );
+
   return isEdit ? (
     <span data-test-subj={'connector-settings-sn'}>
       <EuiFormRow fullWidth label={i18n.URGENCY}>
@@ -77,9 +84,7 @@ const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsPro
           options={selectOptions}
           value={urgency ?? undefined}
           hasNoInitialSelection
-          onChange={(e) => {
-            onChange({ ...fields, urgency: e.target.value });
-          }}
+          onChange={(e) => onChangeCb('urgency', e.target.value)}
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
@@ -92,9 +97,7 @@ const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsPro
               options={selectOptions}
               value={severity ?? undefined}
               hasNoInitialSelection
-              onChange={(e) => {
-                onChange({ ...fields, severity: e.target.value });
-              }}
+              onChange={(e) => onChangeCb('severity', e.target.value)}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -106,9 +109,7 @@ const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsPro
               options={selectOptions}
               value={impact ?? undefined}
               hasNoInitialSelection
-              onChange={(e) => {
-                onChange({ ...fields, impact: e.target.value });
-              }}
+              onChange={(e) => onChangeCb('impact', e.target.value)}
             />
           </EuiFormRow>
         </EuiFlexItem>

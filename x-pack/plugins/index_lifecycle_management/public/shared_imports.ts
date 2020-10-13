@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AppServicesContext } from './types';
+import { useKibana as _useKibana } from '../../../../src/plugins/kibana_react/public';
+
 export {
   useForm,
   useFormData,
@@ -24,3 +27,7 @@ export {
   NumericField,
   SelectField,
 } from '../../../../src/plugins/es_ui_shared/static/forms/components';
+
+export { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
+
+export const useKibana = () => _useKibana<AppServicesContext>();
