@@ -12,7 +12,7 @@ import { TagAttributes } from '../../../common/types';
 export const registerInternalFindTagsRoute = (router: IRouter) => {
   router.get(
     {
-      path: `${tagsInternalApiPrefix}/_find`,
+      path: `${tagsInternalApiPrefix}/tags/_find`,
       validate: {
         query: schema.object({
           perPage: schema.number({ min: 0, defaultValue: 20 }),

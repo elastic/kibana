@@ -9,18 +9,18 @@ import { tagsApiPrefix, tagsInternalApiPrefix } from '../../common/constants';
 import { Tag, TagAttributes, ITagsClient, TagWithRelations } from '../../common/types';
 import { ITagsChangeListener } from './tags_cache';
 
-interface TagsClientOptions {
+export interface TagsClientOptions {
   http: HttpSetup;
   changeListener?: ITagsChangeListener;
 }
 
-interface FindTagsOptions {
+export interface FindTagsOptions {
   page?: number;
   perPage?: number;
   search?: string;
 }
 
-interface FindTagsResponse {
+export interface FindTagsResponse {
   tags: TagWithRelations[];
   total: number;
 }
@@ -69,7 +69,8 @@ export class TagsClient implements ITagInternalClient {
 
     trapErrors(() => {
       if (this.changeListener) {
-        this.changeListener.onUpdate(id, attributes);
+        const { id: newId, ...newAttributes } = tag;
+        this.changeListener.onUpdate(newId, newAttributes);
       }
     });
 
@@ -77,12 +78,12 @@ export class TagsClient implements ITagInternalClient {
   }
 
   public async get(id: string) {
-    const { tag } = await this.http.get<{ tag: Tag }>(`${tagsApiPrefix}/${id}`);
+    const { tag } = await this.http.get<{ tag: Tag }>(`${tagsApiPrefix}/tags/${id}`);
     return tag;
   }
 
   public async getAll() {
-    const { tags } = await this.http.get<{ tags: Tag[] }>(`${tagsApiPrefix}/tags/get_all`);
+    const { tags } = await this.http.get<{ tags: Tag[] }>(`${tagsApiPrefix}/tags`);
 
     trapErrors(() => {
       if (this.changeListener) {
@@ -106,7 +107,7 @@ export class TagsClient implements ITagInternalClient {
   // internal APIs from ITagInternalClient
 
   public async find({ page, perPage, search }: FindTagsOptions) {
-    return await this.http.get<FindTagsResponse>(`${tagsInternalApiPrefix}/_find`, {
+    return await this.http.get<FindTagsResponse>(`${tagsInternalApiPrefix}/tags/_find`, {
       query: {
         page,
         perPage,
