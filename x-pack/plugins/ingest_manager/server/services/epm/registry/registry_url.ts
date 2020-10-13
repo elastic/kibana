@@ -31,7 +31,6 @@ const getDefaultRegistryUrl = (): string => {
 // Custom registry URL is currently only for internal Elastic development and is unsupported
 export const getRegistryUrl = (): string => {
   const customUrl = appContextService.getConfig()?.registryUrl;
-  console.log('REGISTRY URL', customUrl);
   const isEnterprise = licenseService.isEnterprise();
 
   if (customUrl && isEnterprise) {
