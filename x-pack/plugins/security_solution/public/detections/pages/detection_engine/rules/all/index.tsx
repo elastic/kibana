@@ -34,6 +34,7 @@ import {
   UtilityBarSection,
   UtilityBarText,
 } from '../../../../../common/components/utility_bar';
+import { useKibana } from '../../../../../common/lib/kibana';
 import { useStateToaster } from '../../../../../common/components/toasters';
 import { Loader } from '../../../../../common/components/loader';
 import { Panel } from '../../../../../common/components/panel';
@@ -230,6 +231,14 @@ export const AllRules = React.memo<AllRulesProps>(
       [dispatch]
     );
 
+    const {
+      services: {
+        application: {
+          capabilities: { actions },
+        },
+      },
+    } = useKibana();
+
     const rulesColumns = useMemo(() => {
       return getColumns({
         dispatch,
@@ -244,6 +253,7 @@ export const AllRules = React.memo<AllRulesProps>(
             ? loadingRuleIds
             : [],
         reFetchRules: reFetchRulesData,
+        hasReadActionsPrivileges: actions.show,
       });
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [

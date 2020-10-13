@@ -39,11 +39,30 @@ import * as detectionI18n from '../../translations';
 import { LinkAnchor } from '../../../../../common/components/links';
 import { TagsDisplay } from './tag_display';
 
+const canEditRule = (
+  rule: Rule,
+  privileges:
+    | boolean
+    | Readonly<{
+        [x: string]: boolean;
+      }>
+) => {
+  if (rule.actions != null && rule.actions.length > 0) {
+    return privileges;
+  }
+  return true;
+};
+
 export const getActions = (
   dispatch: React.Dispatch<Action>,
   dispatchToaster: Dispatch<ActionToaster>,
   history: H.History,
-  reFetchRules: (refreshPrePackagedRule?: boolean) => void
+  reFetchRules: (refreshPrePackagedRule?: boolean) => void,
+  actionsPrivileges:
+    | boolean
+    | Readonly<{
+        [x: string]: boolean;
+      }>
 ) => [
   {
     'data-test-subj': 'editRuleAction',
@@ -51,6 +70,7 @@ export const getActions = (
     icon: 'controlsHorizontal',
     name: i18n.EDIT_RULE_SETTINGS,
     onClick: (rowItem: Rule) => editRuleAction(rowItem, history),
+    enabled: (rowItem: Rule) => canEditRule(rowItem, actionsPrivileges),
   },
   {
     description: i18n.DUPLICATE_RULE,
@@ -97,6 +117,11 @@ interface GetColumns {
   hasNoPermissions: boolean;
   loadingRuleIds: string[];
   reFetchRules: (refreshPrePackagedRule?: boolean) => void;
+  hasReadActionsPrivileges:
+    | boolean
+    | Readonly<{
+        [x: string]: boolean;
+      }>;
 }
 
 export const getColumns = ({
@@ -108,6 +133,7 @@ export const getColumns = ({
   hasNoPermissions,
   loadingRuleIds,
   reFetchRules,
+  hasReadActionsPrivileges,
 }: GetColumns): RulesColumns[] => {
   const cols: RulesColumns[] = [
     {
@@ -251,7 +277,13 @@ export const getColumns = ({
   ];
   const actions: RulesColumns[] = [
     {
-      actions: getActions(dispatch, dispatchToaster, history, reFetchRules),
+      actions: getActions(
+        dispatch,
+        dispatchToaster,
+        history,
+        reFetchRules,
+        hasReadActionsPrivileges
+      ),
       width: '40px',
     } as EuiTableActionsColumnType<Rule>,
   ];
