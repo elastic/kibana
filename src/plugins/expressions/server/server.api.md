@@ -79,7 +79,7 @@ export interface DatatableColumn {
 // Warning: (ae-missing-release-tag) "DatatableColumnType" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export type DatatableColumnType = 'string' | 'number' | 'boolean' | 'date' | 'null';
+export type DatatableColumnType = '_source' | 'attachment' | 'boolean' | 'date' | 'geo_point' | 'geo_shape' | 'ip' | 'murmur3' | 'number' | 'string' | 'unknown' | 'conflict' | 'object' | 'nested' | 'histogram' | 'null';
 
 // Warning: (ae-missing-release-tag) "DatatableRow" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -768,54 +768,6 @@ export type KIBANA_CONTEXT_NAME = 'kibana_context';
 // @public (undocumented)
 export type KibanaContext = ExpressionValueSearchContext;
 
-// Warning: (ae-missing-release-tag) "KibanaDatatable" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export interface KibanaDatatable {
-    // (undocumented)
-    columns: KibanaDatatableColumn[];
-    // (undocumented)
-    rows: KibanaDatatableRow[];
-    // Warning: (ae-forgotten-export) The symbol "name" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    type: typeof name_3;
-}
-
-// Warning: (ae-missing-release-tag) "KibanaDatatableColumn" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export interface KibanaDatatableColumn {
-    // (undocumented)
-    formatHint?: SerializedFieldFormat;
-    // (undocumented)
-    id: string;
-    // (undocumented)
-    meta?: KibanaDatatableColumnMeta;
-    // (undocumented)
-    name: string;
-}
-
-// Warning: (ae-missing-release-tag) "KibanaDatatableColumnMeta" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export interface KibanaDatatableColumnMeta {
-    // (undocumented)
-    aggConfigParams?: Record<string, any>;
-    // (undocumented)
-    indexPatternId?: string;
-    // (undocumented)
-    type: string;
-}
-
-// Warning: (ae-missing-release-tag) "KibanaDatatableRow" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export interface KibanaDatatableRow {
-    // (undocumented)
-    [key: string]: unknown;
-}
-
 // Warning: (ae-missing-release-tag) "KnownTypeToString" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
@@ -898,7 +850,7 @@ export interface Range {
     // Warning: (ae-forgotten-export) The symbol "name" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    type: typeof name_4;
+    type: typeof name_3;
 }
 
 // Warning: (ae-missing-release-tag) "SerializedDatatable" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)

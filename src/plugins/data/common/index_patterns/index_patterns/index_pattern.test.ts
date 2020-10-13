@@ -34,34 +34,6 @@ class MockFieldFormatter {}
 
 fieldFormatsMock.getInstance = jest.fn().mockImplementation(() => new MockFieldFormatter()) as any;
 
-jest.mock('../../field_mapping', () => {
-  const originalModule = jest.requireActual('../../field_mapping');
-
-  return {
-    ...originalModule,
-    expandShorthand: jest.fn(() => ({
-      id: true,
-      title: true,
-      fieldFormatMap: {
-        _serialize: jest.fn().mockImplementation(() => {}),
-        _deserialize: jest.fn().mockImplementation(() => []),
-      },
-      fields: {
-        _serialize: jest.fn().mockImplementation(() => {}),
-        _deserialize: jest.fn().mockImplementation((fields) => fields),
-      },
-      sourceFilters: {
-        _serialize: jest.fn().mockImplementation(() => {}),
-        _deserialize: jest.fn().mockImplementation(() => undefined),
-      },
-      typeMeta: {
-        _serialize: jest.fn().mockImplementation(() => {}),
-        _deserialize: jest.fn().mockImplementation(() => undefined),
-      },
-    })),
-  };
-});
-
 // helper function to create index patterns
 function create(id: string) {
   const {

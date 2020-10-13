@@ -54,7 +54,7 @@ export const DatePickerWrapper: FC = () => {
   useEffect(() => {
     setGlobalState({ refreshInterval });
     timefilter.setRefreshInterval(refreshInterval);
-  }, [refreshInterval?.pause, refreshInterval?.value]);
+  }, [refreshInterval?.pause, refreshInterval?.value, setGlobalState]);
 
   const [time, setTime] = useState(timefilter.getTime());
   const [recentlyUsedRanges, setRecentlyUsedRanges] = useState(getRecentlyUsedRanges());
