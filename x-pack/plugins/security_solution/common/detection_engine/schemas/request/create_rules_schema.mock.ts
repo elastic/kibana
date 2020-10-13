@@ -155,3 +155,18 @@ export const getCreateThreatMatchRulesSchemaDecodedMock = (): CreateRulesSchemaD
     },
   ],
 });
+
+/**
+ * This is a representative ML rule payload as expected by the server
+ * @param ruleId
+ */
+export const getSimpleMlRule = (ruleId = 'rule-1'): CreateRulesSchema => ({
+  name: 'Simple ML Rule',
+  description: 'Simple Machine Learning Rule',
+  anomaly_threshold: 44,
+  risk_score: 1,
+  rule_id: ruleId,
+  severity: 'high',
+  machine_learning_job_id: 'some_job_id',
+  type: 'machine_learning',
+});
