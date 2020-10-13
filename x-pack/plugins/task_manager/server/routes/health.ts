@@ -12,7 +12,7 @@ import {
   KibanaResponseFactory,
 } from 'kibana/server';
 import { Observable, from, Subject } from 'rxjs';
-import { take, mergeMap, tap, map } from 'rxjs/operators';
+import { mergeMap, tap, map } from 'rxjs/operators';
 import { throttleTime } from 'rxjs/operators';
 import { isString } from 'lodash';
 import { JsonValue } from 'src/plugins/kibana_utils/common';
