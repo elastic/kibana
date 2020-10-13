@@ -82,8 +82,9 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const { jobIds } = useJobSelection(jobsWithTimeRange);
 
   const refresh = useRefresh();
+
   useEffect(() => {
-    if (refresh !== undefined) {
+    if (refresh !== undefined && lastRefresh !== refresh.lastRefresh) {
       setLastRefresh(refresh?.lastRefresh);
 
       if (refresh.timeRange !== undefined) {
@@ -94,7 +95,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
         });
       }
     }
-  }, [refresh?.lastRefresh, setLastRefresh, setGlobalState]);
+  }, [refresh?.lastRefresh, lastRefresh, setLastRefresh, setGlobalState]);
 
   // We cannot simply infer bounds from the globalState's `time` attribute
   // with `moment` since it can contain custom strings such as `now-15m`.

@@ -82,7 +82,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
 
   const flyoutEl = useRef<HTMLElement | null>(null);
 
-  function applySelection() {
+  const applySelection = useCallback(() => {
     // allNewSelection will be a list of all job ids (including those from groups) selected from the table
     const allNewSelection: string[] = [];
     const groupSelection: Array<{ groupId: string; jobIds: string[] }> = [];
@@ -110,7 +110,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
       groups: groupSelection,
       time,
     });
-  }
+  }, [onSelectionConfirmed, newSelection, jobGroupsMaps, applyTimeRange]);
 
   function removeId(id: string) {
     setNewSelection(newSelection.filter((item) => item !== id));
