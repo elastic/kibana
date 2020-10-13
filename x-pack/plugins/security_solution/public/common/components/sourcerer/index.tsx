@@ -180,6 +180,7 @@ export const SourcererComponent = React.memo<SourcererComponentProps>(({ scope: 
         closePopover={handleClosePopOver}
         display="block"
         panelPaddingSize="s"
+        repositionOnScroll
         ownFocus
       >
         <PopoverContent>
