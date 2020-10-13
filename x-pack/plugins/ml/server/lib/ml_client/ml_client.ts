@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import { ElasticsearchClient, IScopedClusterClient } from 'kibana/server';
 
 import { JobsInSpaces, JobType } from '../../saved_objects/filter';
@@ -19,15 +18,13 @@ import { Calendar } from '../../../common/types/calendars';
 import { searchProvider } from './search';
 
 import { DataFrameAnalyticsConfig } from '../../../common/types/data_frame_analytics';
+import { MLJobNotFound } from './errors';
 
 type OrigMlClient = ElasticsearchClient['ml'];
 
 export interface MlClient extends OrigMlClient {
   anomalySearch: ReturnType<typeof searchProvider>['anomalySearch'];
-  // anomalySearch: ReturnType<typeof searchProvider>['anomalySearch'];
 }
-
-// export type MlClient = ElasticsearchClient['ml'];
 
 export function getMlClient(client: IScopedClusterClient, jobsInSpaces: JobsInSpaces): MlClient {
   const mlClient = client.asInternalUser.ml;
@@ -38,7 +35,8 @@ export function getMlClient(client: IScopedClusterClient, jobsInSpaces: JobsInSp
       const filteredJobIds = await jobsInSpaces.filterJobIdsForSpace(jobType, jobIds);
       const missingIds = jobIds.filter((j) => filteredJobIds.indexOf(j) === -1);
       if (missingIds.length) {
-        throw Boom.notFound(`${missingIds.join(',')} missing`);
+        throw new MLJobNotFound(`${missingIds.join(',')} missing`);
+        // throw Boom.notFound(`${missingIds.join(',')} missing`);
       }
     }
   }
@@ -49,7 +47,8 @@ export function getMlClient(client: IScopedClusterClient, jobsInSpaces: JobsInSp
       const filteredDatafeedIds = await jobsInSpaces.filterDatafeedIdsForSpace(datafeedIds);
       const missingIds = datafeedIds.filter((j) => filteredDatafeedIds.indexOf(j) === -1);
       if (missingIds.length) {
-        throw Boom.notFound(`${missingIds.join(',')} missing`);
+        throw new MLJobNotFound(`${missingIds.join(',')} missing`);
+        // throw Boom.notFound(`${missingIds.join(',')} missing`);
       }
     }
   }
