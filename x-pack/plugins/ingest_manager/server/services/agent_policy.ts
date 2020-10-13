@@ -135,16 +135,14 @@ class AgentPolicyService {
       searchFields: ['namespace', 'name'],
       search: `${givenPolicy.namespace} + ${escapeSearchQueryPhrase(givenPolicy.name)}`,
     });
-
-    if (results.total) {
-      const existingPolicies = results.saved_objects;
-      const existingIds = existingPolicies.map(({ id }) => id);
-      const isSinglePolicy = existingIds.length === 1;
-      const policyList = isSinglePolicy ? existingIds[0] : existingIds.join(',');
-      if (givenPolicy.id && !existingIds.includes(givenPolicy.id)) {
+    const idsWithName = results.total && results.saved_objects.map(({ id }) => id);
+    if (Array.isArray(idsWithName)) {
+      const isEditingSelf = givenPolicy.id && idsWithName.includes(givenPolicy.id);
+      if (!givenPolicy.id || !isEditingSelf) {
+        const isSinglePolicy = idsWithName.length === 1;
         const existClause = isSinglePolicy
-          ? `Agent Policy '${policyList}' already exists`
-          : `Agent Policies '${policyList}' already exist`;
+          ? `Agent Policy '${idsWithName[0]}' already exists`
+          : `Agent Policies '${idsWithName.join(',')}' already exist`;
 
         throw new AgentPolicyNameExistsError(
           `${existClause} in '${givenPolicy.namespace}' namespace with name '${givenPolicy.name}'`
