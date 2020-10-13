@@ -17,7 +17,7 @@
  * under the License.
  */
 import { Server } from '@hapi/hapi';
-import HapiStaticFiles from 'inert';
+import HapiStaticFiles from '@hapi/inert';
 import url from 'url';
 import uuid from 'uuid';
 

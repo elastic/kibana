@@ -23,7 +23,7 @@ import crypto from 'crypto';
 
 import Chance from 'chance';
 import Hapi from '@hapi/hapi';
-import Inert from 'inert';
+import Inert from '@hapi/inert';
 
 import { createBundlesRoute } from './bundles_route';
 
