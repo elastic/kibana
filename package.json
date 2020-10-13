@@ -132,6 +132,7 @@
     "@hapi/hapi": "^18.4.1",
     "@hapi/hoek": "^8.5.1",
     "@hapi/inert": "^5.2.2",
+    "@hapi/vision": "^5.5.4",
     "@hapi/wreck": "^15.0.2",
     "@kbn/ace": "1.0.0",
     "@kbn/analytics": "1.0.0",
@@ -223,7 +224,6 @@
     "tslib": "^2.0.0",
     "type-detect": "^4.0.8",
     "uuid": "3.3.2",
-    "vision": "^5.3.3",
     "whatwg-fetch": "^3.0.0",
     "yauzl": "^2.10.0"
   },
