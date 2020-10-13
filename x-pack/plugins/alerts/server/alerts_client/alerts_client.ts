@@ -14,8 +14,8 @@ import {
   SavedObject,
   PluginInitializerContext,
 } from 'src/core/server';
-import { esKuery } from '../../../../src/plugins/data/server';
-import { ActionsClient, ActionsAuthorization } from '../../actions/server';
+import { esKuery } from '../../../../../src/plugins/data/server';
+import { ActionsClient, ActionsAuthorization } from '../../../actions/server';
 import {
   Alert,
   PartialAlert,
@@ -27,26 +27,26 @@ import {
   SanitizedAlert,
   AlertTaskState,
   AlertInstanceSummary,
-} from './types';
-import { validateAlertTypeParams, alertExecutionStatusFromRaw } from './lib';
+} from '../types';
+import { validateAlertTypeParams, alertExecutionStatusFromRaw } from '../lib';
 import {
   InvalidateAPIKeyParams,
   GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
-} from '../../security/server';
-import { EncryptedSavedObjectsClient } from '../../encrypted_saved_objects/server';
-import { TaskManagerStartContract } from '../../task_manager/server';
-import { taskInstanceToAlertTaskInstance } from './task_runner/alert_task_instance';
-import { deleteTaskIfItExists } from './lib/delete_task_if_it_exists';
-import { RegistryAlertType } from './alert_type_registry';
-import { AlertsAuthorization, WriteOperations, ReadOperations, and } from './authorization';
-import { IEventLogClient } from '../../../plugins/event_log/server';
-import { parseIsoOrRelativeDate } from './lib/iso_or_relative_date';
-import { alertInstanceSummaryFromEventLog } from './lib/alert_instance_summary_from_event_log';
-import { IEvent } from '../../event_log/server';
-import { parseDuration } from '../common/parse_duration';
-import { retryIfConflicts } from './lib/retry_if_conflicts';
-import { partiallyUpdateAlert } from './saved_objects';
+} from '../../../security/server';
+import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
+import { TaskManagerStartContract } from '../../../task_manager/server';
+import { taskInstanceToAlertTaskInstance } from '../task_runner/alert_task_instance';
+import { deleteTaskIfItExists } from '../lib/delete_task_if_it_exists';
+import { RegistryAlertType } from '../alert_type_registry';
+import { AlertsAuthorization, WriteOperations, ReadOperations, and } from '../authorization';
+import { IEventLogClient } from '../../../../plugins/event_log/server';
+import { parseIsoOrRelativeDate } from '../lib/iso_or_relative_date';
+import { alertInstanceSummaryFromEventLog } from '../lib/alert_instance_summary_from_event_log';
+import { IEvent } from '../../../event_log/server';
+import { parseDuration } from '../../common/parse_duration';
+import { retryIfConflicts } from '../lib/retry_if_conflicts';
+import { partiallyUpdateAlert } from '../saved_objects';
 
 export interface RegistryAlertTypeWithAuth extends RegistryAlertType {
   authorizedConsumers: string[];
