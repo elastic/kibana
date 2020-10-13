@@ -58,15 +58,22 @@ describe('HasDataContextProvider', () => {
   });
 
   describe('when no plugin has registered', () => {
-    it('hasAnyData returns false and all apps return undefined', () => {
-      const { result } = renderHook(() => useHasData(), { wrapper });
+    it('hasAnyData returns false and all apps return undefined', async () => {
+      const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
+      expect(result.current).toEqual({
+        hasData: {},
+        hasAnyData: undefined,
+      });
+
+      await waitForNextUpdate();
+
       expect(result.current).toEqual({
         hasData: {
-          apm: undefined,
-          infra_logs: undefined,
-          infra_metrics: undefined,
-          uptime: undefined,
-          ux: undefined,
+          apm: { hasData: undefined, status: 'success' },
+          uptime: { hasData: undefined, status: 'success' },
+          infra_logs: { hasData: undefined, status: 'success' },
+          infra_metrics: { hasData: undefined, status: 'success' },
+          ux: { hasData: undefined, status: 'success' },
         },
         hasAnyData: false,
       });
@@ -87,15 +94,9 @@ describe('HasDataContextProvider', () => {
         afterAll(unregisterAll);
 
         it('hasAnyData returns false and all apps return false', async () => {
-          const { result, waitForNextUpdate } = renderHook(() => useHasDataContext(), { wrapper });
+          const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
           expect(result.current).toEqual({
-            hasData: {
-              apm: undefined,
-              infra_logs: undefined,
-              infra_metrics: undefined,
-              uptime: undefined,
-              ux: undefined,
-            },
+            hasData: {},
             hasAnyData: undefined,
           });
 
@@ -103,11 +104,11 @@ describe('HasDataContextProvider', () => {
 
           expect(result.current).toEqual({
             hasData: {
-              apm: false,
-              infra_logs: false,
-              infra_metrics: false,
-              uptime: false,
-              ux: { hasData: false, serviceName: undefined },
+              apm: { hasData: false, status: 'success' },
+              uptime: { hasData: false, status: 'success' },
+              infra_logs: { hasData: false, status: 'success' },
+              infra_metrics: { hasData: false, status: 'success' },
+              ux: { hasData: { hasData: false, serviceName: undefined }, status: 'success' },
             },
             hasAnyData: false,
           });
@@ -128,15 +129,9 @@ describe('HasDataContextProvider', () => {
         afterAll(unregisterAll);
 
         it('hasAnyData returns true apm returns true and all other apps return false', async () => {
-          const { result, waitForNextUpdate } = renderHook(() => useHasDataContext(), { wrapper });
+          const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
           expect(result.current).toEqual({
-            hasData: {
-              apm: undefined,
-              infra_logs: undefined,
-              infra_metrics: undefined,
-              uptime: undefined,
-              ux: undefined,
-            },
+            hasData: {},
             hasAnyData: undefined,
           });
 
@@ -144,11 +139,11 @@ describe('HasDataContextProvider', () => {
 
           expect(result.current).toEqual({
             hasData: {
-              apm: true,
-              infra_logs: false,
-              infra_metrics: false,
-              uptime: false,
-              ux: { hasData: false, serviceName: undefined },
+              apm: { hasData: true, status: 'success' },
+              uptime: { hasData: false, status: 'success' },
+              infra_logs: { hasData: false, status: 'success' },
+              infra_metrics: { hasData: false, status: 'success' },
+              ux: { hasData: { hasData: false, serviceName: undefined }, status: 'success' },
             },
             hasAnyData: true,
           });
@@ -169,15 +164,9 @@ describe('HasDataContextProvider', () => {
         afterAll(unregisterAll);
 
         it('hasAnyData returns true and all apps return true', async () => {
-          const { result, waitForNextUpdate } = renderHook(() => useHasDataContext(), { wrapper });
+          const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
           expect(result.current).toEqual({
-            hasData: {
-              apm: undefined,
-              infra_logs: undefined,
-              infra_metrics: undefined,
-              uptime: undefined,
-              ux: undefined,
-            },
+            hasData: {},
             hasAnyData: undefined,
           });
 
@@ -185,11 +174,11 @@ describe('HasDataContextProvider', () => {
 
           expect(result.current).toEqual({
             hasData: {
-              apm: true,
-              infra_logs: true,
-              infra_metrics: true,
-              uptime: true,
-              ux: { hasData: true, serviceName: 'ux' },
+              apm: { hasData: true, status: 'success' },
+              uptime: { hasData: true, status: 'success' },
+              infra_logs: { hasData: true, status: 'success' },
+              infra_metrics: { hasData: true, status: 'success' },
+              ux: { hasData: { hasData: true, serviceName: 'ux' }, status: 'success' },
             },
             hasAnyData: true,
           });
@@ -205,17 +194,11 @@ describe('HasDataContextProvider', () => {
           afterAll(unregisterAll);
 
           it('hasAnyData returns true, apm returns true and all other apps return undefined', async () => {
-            const { result, waitForNextUpdate } = renderHook(() => useHasDataContext(), {
+            const { result, waitForNextUpdate } = renderHook(() => useHasData(), {
               wrapper,
             });
             expect(result.current).toEqual({
-              hasData: {
-                apm: undefined,
-                infra_logs: undefined,
-                infra_metrics: undefined,
-                uptime: undefined,
-                ux: undefined,
-              },
+              hasData: {},
               hasAnyData: undefined,
             });
 
@@ -223,11 +206,11 @@ describe('HasDataContextProvider', () => {
 
             expect(result.current).toEqual({
               hasData: {
-                apm: true,
-                infra_logs: undefined,
-                infra_metrics: undefined,
-                uptime: undefined,
-                ux: undefined,
+                apm: { hasData: true, status: 'success' },
+                uptime: { hasData: undefined, status: 'success' },
+                infra_logs: { hasData: undefined, status: 'success' },
+                infra_metrics: { hasData: undefined, status: 'success' },
+                ux: { hasData: undefined, status: 'success' },
               },
               hasAnyData: true,
             });
@@ -242,17 +225,11 @@ describe('HasDataContextProvider', () => {
           afterAll(unregisterAll);
 
           it('hasAnyData returns false, apm returns false and all other apps return undefined', async () => {
-            const { result, waitForNextUpdate } = renderHook(() => useHasDataContext(), {
+            const { result, waitForNextUpdate } = renderHook(() => useHasData(), {
               wrapper,
             });
             expect(result.current).toEqual({
-              hasData: {
-                apm: undefined,
-                infra_logs: undefined,
-                infra_metrics: undefined,
-                uptime: undefined,
-                ux: undefined,
-              },
+              hasData: {},
               hasAnyData: undefined,
             });
 
@@ -260,11 +237,11 @@ describe('HasDataContextProvider', () => {
 
             expect(result.current).toEqual({
               hasData: {
-                apm: false,
-                infra_logs: undefined,
-                infra_metrics: undefined,
-                uptime: undefined,
-                ux: undefined,
+                apm: { hasData: false, status: 'success' },
+                uptime: { hasData: undefined, status: 'success' },
+                infra_logs: { hasData: undefined, status: 'success' },
+                infra_metrics: { hasData: undefined, status: 'success' },
+                ux: { hasData: undefined, status: 'success' },
               },
               hasAnyData: false,
             });
@@ -291,15 +268,9 @@ describe('HasDataContextProvider', () => {
         afterAll(unregisterAll);
 
         it('hasAnyData returns true, apm is undefined and all other apps return true', async () => {
-          const { result, waitForNextUpdate } = renderHook(() => useHasDataContext(), { wrapper });
+          const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
           expect(result.current).toEqual({
-            hasData: {
-              apm: undefined,
-              infra_logs: undefined,
-              infra_metrics: undefined,
-              uptime: undefined,
-              ux: undefined,
-            },
+            hasData: {},
             hasAnyData: undefined,
           });
 
@@ -307,11 +278,11 @@ describe('HasDataContextProvider', () => {
 
           expect(result.current).toEqual({
             hasData: {
-              apm: undefined,
-              infra_logs: true,
-              infra_metrics: true,
-              uptime: true,
-              ux: { hasData: true, serviceName: 'ux' },
+              apm: { hasData: undefined, status: 'failure' },
+              uptime: { hasData: true, status: 'success' },
+              infra_logs: { hasData: true, status: 'success' },
+              infra_metrics: { hasData: true, status: 'success' },
+              ux: { hasData: { hasData: true, serviceName: 'ux' }, status: 'success' },
             },
             hasAnyData: true,
           });
@@ -357,15 +328,9 @@ describe('HasDataContextProvider', () => {
         afterAll(unregisterAll);
 
         it('hasAnyData returns false and all apps return undefined', async () => {
-          const { result, waitForNextUpdate } = renderHook(() => useHasDataContext(), { wrapper });
+          const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
           expect(result.current).toEqual({
-            hasData: {
-              apm: undefined,
-              infra_logs: undefined,
-              infra_metrics: undefined,
-              uptime: undefined,
-              ux: undefined,
-            },
+            hasData: {},
             hasAnyData: undefined,
           });
 
@@ -373,11 +338,11 @@ describe('HasDataContextProvider', () => {
 
           expect(result.current).toEqual({
             hasData: {
-              apm: undefined,
-              infra_logs: undefined,
-              infra_metrics: undefined,
-              uptime: undefined,
-              ux: undefined,
+              apm: { hasData: undefined, status: 'failure' },
+              uptime: { hasData: undefined, status: 'failure' },
+              infra_logs: { hasData: undefined, status: 'failure' },
+              infra_metrics: { hasData: undefined, status: 'failure' },
+              ux: { hasData: undefined, status: 'failure' },
             },
             hasAnyData: false,
           });
