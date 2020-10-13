@@ -20,6 +20,12 @@ export const ConnectorFieldsRt = rt.union([
   rt.null,
 ]);
 
+export const ConnectorPartialFieldsRt = rt.partial({
+  ...JiraFieldsRT.props,
+  ...ResilientFieldsRT.props,
+  ...ServiceNowFieldsRT.props,
+});
+
 export enum ConnectorTypes {
   jira = '.jira',
   resilient = '.resilient',
