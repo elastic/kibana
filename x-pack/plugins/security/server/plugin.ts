@@ -67,7 +67,7 @@ export interface SecurityPluginSetup {
     'actions' | 'checkPrivilegesDynamicallyWithRequest' | 'checkPrivilegesWithRequest' | 'mode'
   >;
   license: SecurityLicense;
-  audit: Pick<AuditServiceSetup, 'getLogger' | 'withRequest'>;
+  audit: AuditServiceSetup;
 
   /**
    * If Spaces plugin is available it's supposed to register its SpacesService with Security plugin
@@ -249,7 +249,7 @@ export class Plugin {
 
     return deepFreeze<SecurityPluginSetup>({
       audit: {
-        withRequest: audit.withRequest,
+        asScoped: audit.asScoped,
         getLogger: audit.getLogger,
       },
 

@@ -8,7 +8,7 @@ Kibana](https://www.elastic.co/guide/en/kibana/current/using-kibana-with-securit
 ### Example
 
 ```typescript
-const auditLogger = securitySetup.audit.withRequest(request);
+const auditLogger = securitySetup.audit.asScoped(request);
 auditLogger.log({
   message: 'User is updating dashboard [id=123]',
   event: {

@@ -40,7 +40,7 @@ interface AuditLogMeta extends AuditEvent {
 }
 
 export interface AuditServiceSetup {
-  withRequest: (request: KibanaRequest) => AuditLogger;
+  asScoped: (request: KibanaRequest) => AuditLogger;
   getLogger: (id?: string) => LegacyAuditLogger;
 }
 
@@ -94,11 +94,11 @@ export class AuditService {
      *
      * @example
      * ```typescript
-     * const auditLogger = securitySetup.audit.withRequest(request);
+     * const auditLogger = securitySetup.audit.asScoped(request);
      * auditLogger.log(event);
      * ```
      */
-    const withRequest = (request: KibanaRequest): AuditLogger => {
+    const asScoped = (request: KibanaRequest): AuditLogger => {
       /**
        * Logs an {@link AuditEvent} and automatically adds meta data about the
        * current user, space and correlation id.
@@ -108,7 +108,7 @@ export class AuditService {
        *
        * @example
        * ```typescript
-       * const auditLogger = securitySetup.audit.withRequest(request);
+       * const auditLogger = securitySetup.audit.asScoped(request);
        * auditLogger.log({
        *   message: 'User is updating dashboard [id=123]',
        *   event: {
@@ -149,7 +149,7 @@ export class AuditService {
 
     /**
      * @deprecated
-     * Use `audit.withRequest(request)` method instead to create an audit logger
+     * Use `audit.asScoped(request)` method instead to create an audit logger
      */
     const getLogger = (id?: string): LegacyAuditLogger => {
       return {
@@ -169,12 +169,12 @@ export class AuditService {
 
     http.registerOnPostAuth((request, response, t) => {
       if (request.auth.isAuthenticated) {
-        withRequest(request).log(httpRequestEvent({ request }));
+        asScoped(request).log(httpRequestEvent({ request }));
       }
       return t.next();
     });
 
-    return { withRequest, getLogger };
+    return { asScoped, getLogger };
   }
 
   stop() {

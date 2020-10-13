@@ -53,7 +53,7 @@ export function setupSavedObjects({
       ? new SecureSavedObjectsClientWrapper({
           actions: authz.actions,
           legacyAuditLogger,
-          auditLogger: audit.withRequest(kibanaRequest),
+          auditLogger: audit.asScoped(kibanaRequest),
           baseClient: client,
           checkSavedObjectsPrivilegesAsCurrentUser: authz.checkSavedObjectsPrivilegesWithRequest(
             kibanaRequest

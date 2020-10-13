@@ -298,7 +298,7 @@ export class Authenticator {
         // `success()` method since that indicates a successful authentication and `redirect()`
         // could also (but does not always) authenticate a user successfully (e.g. SAML flow)
         if (authenticationResult.user || authenticationResult.failed()) {
-          const auditLogger = this.options.audit.withRequest(request);
+          const auditLogger = this.options.audit.asScoped(request);
           auditLogger.log(
             userLoginEvent({
               authenticationResult,

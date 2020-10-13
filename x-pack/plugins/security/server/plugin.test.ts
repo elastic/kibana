@@ -55,8 +55,8 @@ describe('Security Plugin', () => {
       await expect(plugin.setup(mockCoreSetup, mockDependencies)).resolves.toMatchInlineSnapshot(`
               Object {
                 "audit": Object {
+                  "asScoped": [Function],
                   "getLogger": [Function],
-                  "withRequest": [Function],
                 },
                 "authc": Object {
                   "areAPIKeysEnabled": [Function],

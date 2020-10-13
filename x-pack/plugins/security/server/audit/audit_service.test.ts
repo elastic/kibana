@@ -47,8 +47,8 @@ describe('#setup', () => {
       })
     ).toMatchInlineSnapshot(`
       Object {
+        "asScoped": [Function],
         "getLogger": [Function],
-        "withRequest": [Function],
       }
     `);
   });
@@ -78,7 +78,7 @@ describe('#setup', () => {
   });
 });
 
-describe('#withRequest', () => {
+describe('#asScoped', () => {
   it('logs event enriched with meta data', async () => {
     const audit = new AuditService(logger).setup({
       license,
@@ -92,7 +92,7 @@ describe('#withRequest', () => {
       kibanaRequestState: { requestId: 'REQUEST_ID', requestUuid: 'REQUEST_UUID' },
     });
 
-    audit.withRequest(request).log({ message: 'MESSAGE', event: { action: 'ACTION' } });
+    audit.asScoped(request).log({ message: 'MESSAGE', event: { action: 'ACTION' } });
     expect(logger.info).toHaveBeenCalledWith('MESSAGE', {
       event: { action: 'ACTION' },
       kibana: { space_id: 'default' },
@@ -118,7 +118,7 @@ describe('#withRequest', () => {
       kibanaRequestState: { requestId: 'REQUEST_ID', requestUuid: 'REQUEST_UUID' },
     });
 
-    audit.withRequest(request).log({ message: 'MESSAGE', event: { action: 'ACTION' } });
+    audit.asScoped(request).log({ message: 'MESSAGE', event: { action: 'ACTION' } });
     expect(logger.info).not.toHaveBeenCalled();
   });
 });

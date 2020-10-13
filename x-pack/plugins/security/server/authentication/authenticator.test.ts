@@ -223,7 +223,7 @@ describe('Authenticator', () => {
     beforeEach(() => {
       mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } } });
       mockOptions.session.get.mockResolvedValue(null);
-      mockOptions.audit.withRequest.mockReturnValue(auditLogger);
+      mockOptions.audit.asScoped.mockReturnValue(auditLogger);
       mockSessVal = sessionMock.createValue({ state: { authorization: 'Basic xxx' } });
 
       authenticator = new Authenticator(mockOptions);

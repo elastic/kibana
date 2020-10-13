@@ -40,7 +40,7 @@ const createSecureSavedObjectsClientWrapperOptions = () => {
     errors,
     getSpacesService,
     legacyAuditLogger: securityAuditLoggerMock.create(),
-    auditLogger: auditServiceMock.create().withRequest(httpServerMock.createKibanaRequest()),
+    auditLogger: auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest()),
     forbiddenError,
     generalError,
   };

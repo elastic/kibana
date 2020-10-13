@@ -55,7 +55,7 @@ to make it easy to filter, query and aggregate the resulting logs.
 ============================================================================
 To ensure that a record of every operation is persisted even in case of an
 unexpected error, asynchronous write operations are logged immediately after all
-authorization checks have passed, but before the response is received.
+authorization checks have passed, but before the response from {es} is received.
 Refer to the corresponding {es} logs for potential write errors.
 ============================================================================
 
