@@ -23,12 +23,19 @@ import loadJsonFile from 'load-json-file';
 export interface KibanaPlatformPlugin {
   readonly directory: string;
   readonly manifestPath: string;
-  readonly manifest: {
-    id: string;
-    ui: boolean;
-    server: boolean;
-    [key: string]: unknown;
-  };
+  readonly manifest: Manifest;
+}
+
+interface Manifest {
+  id: string;
+  ui: boolean;
+  server: boolean;
+  kibanaVersion: string;
+  version: string;
+  requiredPlugins: readonly string[];
+  optionalPlugins: readonly string[];
+  requiredBundles: readonly string[];
+  extraPublicDirs: readonly string[];
 }
 
 export function parseKibanaPlatformPlugin(manifestPath: string): KibanaPlatformPlugin {
@@ -36,7 +43,7 @@ export function parseKibanaPlatformPlugin(manifestPath: string): KibanaPlatformP
     throw new TypeError('expected new platform manifest path to be absolute');
   }
 
-  const manifest = loadJsonFile.sync(manifestPath);
+  const manifest: Partial<Manifest> = loadJsonFile.sync(manifestPath);
   if (!manifest || typeof manifest !== 'object' || Array.isArray(manifest)) {
     throw new TypeError('expected new platform plugin manifest to be a JSON encoded object');
   }
@@ -54,6 +61,12 @@ export function parseKibanaPlatformPlugin(manifestPath: string): KibanaPlatformP
       ui: !!manifest.ui,
       server: !!manifest.server,
       id: manifest.id,
+      version: manifest.version!,
+      kibanaVersion: manifest.kibanaVersion || manifest.version!,
+      requiredPlugins: Array.isArray(manifest.requiredPlugins) ? manifest.requiredPlugins : [],
+      optionalPlugins: Array.isArray(manifest.optionalPlugins) ? manifest.optionalPlugins : [],
+      requiredBundles: Array.isArray(manifest.requiredBundles) ? manifest.requiredBundles : [],
+      extraPublicDirs: Array.isArray(manifest.extraPublicDirs) ? manifest.extraPublicDirs : [],
     },
   };
 }
