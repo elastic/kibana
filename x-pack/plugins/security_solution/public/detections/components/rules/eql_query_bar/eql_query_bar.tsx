@@ -32,7 +32,7 @@ export interface EqlQueryBarProps {
 export const EqlQueryBar: FC<EqlQueryBarProps> = ({ dataTestSubj, field, idAria }) => {
   const { addError } = useAppToasts();
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
-  const { setValue } = field;
+  const { isValidating, setValue } = field;
   const { isValid, message, messages, error } = getValidationResults(field);
   const fieldValue = field.value.query.query as string;
 
@@ -81,7 +81,7 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({ dataTestSubj, field, idAria 
           value={fieldValue}
           onChange={handleChange}
         />
-        <EqlQueryBarFooter errors={errorMessages} />
+        <EqlQueryBarFooter errors={errorMessages} isLoading={isValidating} />
       </>
     </EuiFormRow>
   );
