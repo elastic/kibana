@@ -28,6 +28,10 @@ import { NavigationPublicPluginStart } from '../../../../../src/plugins/navigati
 import { LensAttributeService } from '../lens_attribute_service';
 import { IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public';
 import { DashboardFeatureFlagConfig } from '../../../../../src/plugins/dashboard/public';
+import {
+  VisualizeFieldContext,
+  ACTION_VISUALIZE_LENS_FIELD,
+} from '../../../../../src/plugins/ui_actions/public';
 import { EmbeddableEditorState } from '../../../../../src/plugins/embeddable/public';
 import { EditorFrameInstance } from '..';
 
@@ -75,6 +79,12 @@ export interface LensAppProps {
 
   // State passed in by the container which is used to determine the id of the Originating App.
   incomingState?: EmbeddableEditorState;
+  initialContext?: VisualizeFieldContext;
+}
+
+export interface HistoryLocationState {
+  type: typeof ACTION_VISUALIZE_LENS_FIELD;
+  payload: VisualizeFieldContext;
 }
 
 export interface LensAppServices {

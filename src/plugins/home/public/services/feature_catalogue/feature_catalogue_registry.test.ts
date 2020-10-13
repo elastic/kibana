@@ -38,7 +38,7 @@ const KIBANA_SOLUTION: FeatureCatalogueSolution = {
   id: 'kibana',
   title: 'Kibana',
   subtitle: 'Visualize & analyze',
-  descriptions: ['Analyze data in dashboards.', 'Search and find insights.'],
+  appDescriptions: ['Analyze data in dashboards.', 'Search and find insights.'],
   icon: 'kibanaApp',
   path: `/app/home`,
 };

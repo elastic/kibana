@@ -64,6 +64,7 @@ export interface FullAgentPolicy {
   fleet?: {
     kibana: {
       hosts: string[];
+      protocol: string;
     };
   };
   inputs: FullAgentPolicyInput[];

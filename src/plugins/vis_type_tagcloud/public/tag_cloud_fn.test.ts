@@ -24,7 +24,7 @@ import { functionWrapper } from '../../expressions/common/expression_functions/s
 describe('interpreter/functions#tagcloud', () => {
   const fn = functionWrapper(createTagCloudFn());
   const context = {
-    type: 'kibana_datatable',
+    type: 'datatable',
     rows: [{ 'col-0-1': 0 }],
     columns: [{ id: 'col-0-1', name: 'Count' }],
   };

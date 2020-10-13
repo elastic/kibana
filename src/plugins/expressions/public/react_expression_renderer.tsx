@@ -35,7 +35,10 @@ export interface ReactExpressionRendererProps extends IExpressionLoaderParams {
   className?: string;
   dataAttrs?: string[];
   expression: string | ExpressionAstExpression;
-  renderError?: (error?: string | null) => React.ReactElement | React.ReactElement[];
+  renderError?: (
+    message?: string | null,
+    error?: ExpressionRenderError | null
+  ) => React.ReactElement | React.ReactElement[];
   padding?: 'xs' | 's' | 'm' | 'l' | 'xl';
   onEvent?: (event: ExpressionRendererEvent) => void;
   /**
@@ -186,7 +189,10 @@ export const ReactExpressionRenderer = ({
     <div {...dataAttrs} className={classes}>
       {state.isEmpty && <EuiLoadingChart mono size="l" />}
       {state.isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
-      {!state.isLoading && state.error && renderError && renderError(state.error.message)}
+      {!state.isLoading &&
+        state.error &&
+        renderError &&
+        renderError(state.error.message, state.error)}
       <div
         className="expExpressionRenderer__expression"
         style={expressionStyles}

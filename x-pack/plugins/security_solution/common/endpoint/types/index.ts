@@ -197,7 +197,6 @@ export interface SafeResolverTree {
    */
   entityID: string;
   children: SafeResolverChildren;
-  relatedEvents: Omit<SafeResolverRelatedEvents, 'entityID'>;
   relatedAlerts: Omit<ResolverRelatedAlerts, 'entityID'>;
   ancestry: SafeResolverAncestry;
   lifecycle: SafeResolverEvent[];
@@ -262,15 +261,6 @@ export interface SafeResolverAncestry {
  * Response structure for the related events route.
  */
 export interface ResolverRelatedEvents {
-  entityID: string;
-  events: SafeResolverEvent[];
-  nextEvent: string | null;
-}
-
-/**
- * Safe version of `ResolverRelatedEvents`
- */
-export interface SafeResolverRelatedEvents {
   entityID: string;
   events: SafeResolverEvent[];
   nextEvent: string | null;
@@ -718,7 +708,10 @@ export type SafeEndpointEvent = Partial<{
     forwarded_ip: ECSField<string>;
   }>;
   dns: Partial<{
-    question: Partial<{ name: ECSField<string> }>;
+    question: Partial<{
+      name: ECSField<string>;
+      type: ECSField<string>;
+    }>;
   }>;
   process: Partial<{
     entity_id: ECSField<string>;

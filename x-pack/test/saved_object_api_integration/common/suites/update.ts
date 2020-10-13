@@ -34,12 +34,12 @@ export const TEST_CASES: Record<string, UpdateTestCase> = Object.freeze({
 });
 
 export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const expectForbidden = expectResponses.forbiddenTypes('update');
+  const expectSavedObjectForbidden = expectResponses.forbiddenTypes('update');
   const expectResponseBody = (testCase: UpdateTestCase): ExpectResponseBody => async (
     response: Record<string, any>
   ) => {
     if (testCase.failure === 403) {
-      await expectForbidden(testCase.type)(response);
+      await expectSavedObjectForbidden(testCase.type)(response);
     } else {
       // permitted
       const object = response.body;

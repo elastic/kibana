@@ -5,6 +5,7 @@
  */
 
 export * from './default_actions_array';
+export * from './default_array';
 export * from './default_boolean_false';
 export * from './default_boolean_true';
 export * from './default_empty_string';

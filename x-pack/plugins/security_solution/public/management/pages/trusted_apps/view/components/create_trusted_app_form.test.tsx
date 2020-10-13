@@ -76,7 +76,7 @@ describe('When showing the Trusted App Create Form', () => {
     dataTestSub: string = dataTestSubjForForm
   ): HTMLButtonElement => {
     return renderResult.getByTestId(
-      `${dataTestSub}-conditionsBuilder-AndButton`
+      `${dataTestSub}-conditionsBuilder-group1-AndButton`
     ) as HTMLButtonElement;
   };
   const getConditionBuilderAndConnectorBadge = (

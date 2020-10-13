@@ -39,7 +39,6 @@ export const createExceptionListItemRoute = (router: IRouter): void => {
         const {
           namespace_type: namespaceType,
           name,
-          _tags,
           tags,
           meta,
           comments,
@@ -47,6 +46,7 @@ export const createExceptionListItemRoute = (router: IRouter): void => {
           entries,
           item_id: itemId,
           list_id: listId,
+          os_types: osTypes,
           type,
         } = request.body;
         const exceptionLists = getExceptionListClient(context);
@@ -87,7 +87,6 @@ export const createExceptionListItemRoute = (router: IRouter): void => {
               }
             }
             const createdList = await exceptionLists.createExceptionListItem({
-              _tags,
               comments,
               description,
               entries,
@@ -96,6 +95,7 @@ export const createExceptionListItemRoute = (router: IRouter): void => {
               meta,
               name,
               namespaceType,
+              osTypes,
               tags,
               type,
             });

@@ -5,7 +5,7 @@ Acknowledge actions received during checkin
 
 ## Request
 
-`POST /api/ingest_manager/fleet/agents/{agentId}/acks`
+`POST /api/fleet/agents/{agentId}/acks`
 
 ## Headers
 
@@ -22,7 +22,7 @@ Acknowledge actions received during checkin
 ## Example
 
 ```js
-POST /api/ingest_manager/fleet/agents/a4937110-e53e-11e9-934f-47a8e38a522c/acks
+POST /api/fleet/agents/a4937110-e53e-11e9-934f-47a8e38a522c/acks
 Authorization: ApiKey VALID_ACCESS_API_KEY
 {
   "action_ids": ["action-1", "action-2"]

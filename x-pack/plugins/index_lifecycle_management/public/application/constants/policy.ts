@@ -21,6 +21,7 @@ export const defaultNewHotPhase: HotPhase = {
   selectedMaxSizeStoredUnits: 'gb',
   forceMergeEnabled: false,
   selectedForceMergeSegments: '',
+  bestCompressionEnabled: false,
   phaseIndexPriority: '100',
   selectedMaxDocuments: '',
 };
@@ -29,6 +30,7 @@ export const defaultNewWarmPhase: WarmPhase = {
   phaseEnabled: false,
   forceMergeEnabled: false,
   selectedForceMergeSegments: '',
+  bestCompressionEnabled: false,
   selectedMinimumAge: '0',
   selectedMinimumAgeUnits: 'd',
   selectedNodeAttrs: '',
