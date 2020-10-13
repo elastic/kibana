@@ -5,7 +5,8 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { noop } from 'lodash/fp';
-import { Subscription } from 'rxjs';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 import * as i18n from '../translations';
 import { useKibana } from '../../../common/lib/kibana';
@@ -34,6 +35,7 @@ export const useEqlPreview = (): [
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
+  const unsubscribeStream = useRef(new Subject());
   const [loading, setLoading] = useState(false);
   const didCancel = useRef(false);
 
@@ -66,8 +68,8 @@ export const useEqlPreview = (): [
           },
           totalCount: 0,
         }));
-        let searchSubscription$: Subscription | null = null;
-        searchSubscription$ = data.search
+
+        data.search
           .search<EqlSearchStrategyRequest, EqlSearchStrategyResponse<EqlSearchResponse<Source>>>(
             {
               params: {
@@ -98,25 +100,23 @@ export const useEqlPreview = (): [
               abortSignal: abortCtrl.current.signal,
             }
           )
+          .pipe(takeUntil(unsubscribeStream.current))
           .subscribe({
             next: (res) => {
               if (isCompleteResponse(res)) {
                 if (!didCancel.current) {
+                  setLoading(false);
                   if (hasEqlSequenceQuery(query)) {
                     setResponse(getSequenceAggs(res, refetch.current));
                   } else {
                     setResponse(getEqlAggsData(res, interval, to, refetch.current));
                   }
                 }
+                unsubscribeStream.current.next();
               } else if (isErrorResponse(res)) {
-                notifications.toasts.addWarning(i18n.EQL_PREVIEW_FETCH_FAILURE);
-              }
-
-              if (!didCancel.current) {
                 setLoading(false);
-                if (searchSubscription$ != null) {
-                  searchSubscription$.unsubscribe();
-                }
+                notifications.toasts.addWarning(i18n.EQL_PREVIEW_FETCH_FAILURE);
+                unsubscribeStream.current.next();
               }
             },
             error: (err) => {
@@ -149,6 +149,9 @@ export const useEqlPreview = (): [
   useEffect((): (() => void) => {
     return (): void => {
       didCancel.current = true;
+      abortCtrl.current.abort();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      unsubscribeStream.current.complete();
     };
   }, []);
 
