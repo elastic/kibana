@@ -1744,7 +1744,7 @@
   resolved "https://registry.yarnpkg.com/@hapi/pinpoint/-/pinpoint-1.0.2.tgz#025b7a36dbbf4d35bf1acd071c26b20ef41e0d13"
   integrity sha512-dtXC/WkZBfC5vxscazuiJ6iq4j9oNx1SHknmIr8hofarpKUZKmlUVYVIhNVzIEgK5Wrc4GMHL5lZtt1uS2flmQ==
 
-"@hapi/podium@3.x.x":
+"@hapi/podium@3.x.x", "@hapi/podium@^3.4.3":
   version "3.4.3"
   resolved "https://registry.yarnpkg.com/@hapi/podium/-/podium-3.4.3.tgz#d28935870ae1372e2f983a7161e710c968a60de1"
   integrity sha512-QJlnYLEYZWlKQ9fSOtuUcpANyoVGwT68GA9P0iQQCAetBK0fI+nbRBt58+aMixoifczWZUthuGkNjqKxgPh/CQ==
@@ -4382,7 +4382,7 @@
   dependencies:
     "@types/mime-db" "*"
 
-"@types/hapi__podium@*":
+"@types/hapi__podium@*", "@types/hapi__podium@^3.4.1":
   version "3.4.1"
   resolved "https://registry.yarnpkg.com/@types/hapi__podium/-/hapi__podium-3.4.1.tgz#826ffed038979c844410e576b574f8237afd59bc"
   integrity sha512-qgMyeXTZhGWvvUnXFavW2Pksf07IV1haBM/Fdq6cFi1lCIXhUHsaTrr2w651q+rhHZf+1dgP1vltJ0/quLxYYw==
@@ -4916,11 +4916,6 @@
   integrity sha512-LJVPDraJ5YFEnMHnzxTN4psdWz1M61MtaAAWPn3qnDk5fvs7BAmmQ9pd3KPlrdrvozMyne4ktanD4pg0L7x1Pw==
   dependencies:
     "@types/node" "*"
-
-"@types/podium@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@types/podium/-/podium-1.0.0.tgz#bfaa2151be2b1d6109cc69f7faa9dac2cba3bb20"
-  integrity sha1-v6ohUb4rHWEJzGn3+qnawsujuyA=
 
 "@types/prettier@1.16.1":
   version "1.16.1"
@@ -21904,14 +21899,6 @@ pnp-webpack-plugin@1.6.4:
   integrity sha512-7Wjy+9E3WwLOEL30D+m8TSTF7qJJUJLONBnwQp0518siuMxUQUbgZwssaFX+QKlZkjHZcw/IpZCt/H0srrntSg==
   dependencies:
     ts-pnp "^1.1.6"
-
-podium@3.1.2:
-  version "3.1.2"
-  resolved "https://registry.yarnpkg.com/podium/-/podium-3.1.2.tgz#b701429739cf6bdde6b3015ae6b48d400817ce9e"
-  integrity sha512-18VrjJAduIdPv7d9zWsfmKxTj3cQTYC5Pv5gtKxcWujYBpGbV+mhNSPYhlHW5xeWoazYyKfB9FEsPT12r5rY1A==
-  dependencies:
-    hoek "5.x.x"
-    joi "13.x.x"
 
 polished@^1.9.2:
   version "1.9.2"
