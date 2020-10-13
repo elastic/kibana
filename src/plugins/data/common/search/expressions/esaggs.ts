@@ -19,12 +19,12 @@
 
 import {
   KibanaContext,
-  KibanaDatatable,
+  Datatable,
   ExpressionFunctionDefinition,
 } from '../../../../../plugins/expressions/common';
 
 type Input = KibanaContext | null;
-type Output = Promise<KibanaDatatable>;
+type Output = Promise<Datatable>;
 
 interface Arguments {
   index: string;
