@@ -127,7 +127,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         request: SearchStrategyRequest,
         options: ISearchOptions
       ) => {
-        return search(request, options).toPromise() as Promise<SearchStrategyResponse>;
+        return search<SearchStrategyRequest, SearchStrategyResponse>(request, options).toPromise();
       },
       onResponse: handleResponse,
       legacy: {
