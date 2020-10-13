@@ -1,0 +1,74 @@
+[role="xpack"]
+[[reporting-network-policy]]
+=== Restricting requests with a Reporting Network Policy
+
+When {report-features} generates PDF reports, it uses the Chromium browser to fully load the Kibana page on the server. This
+potentially involves sending requests to external hosts, for example, a request may go to an external image server for showing a
+field formatted as an image, or to show an image in a Markdown visualization.
+
+If the Chromium browser is requested to send a request that violates the network policy, Reporting will stop processing the page
+before the request goes out, and the report will be marked as a failure. Additional information about the event can be found in
+Kibana's server logs.
+
+A network policy applies not only to outgoing requests, but also incoming responses. That means if a request goes out to an allowed
+host, but is redirected and a response returns from a denied host, the response will be denied, and the report will fail.
+
+[NOTE]
+============
+Kibana installations are not designed to be publicly accessible over the Internet. The Reporting network policy and other capabilities
+of the Elastic Stack security features do not change this condition.
+============
+
+==== Configuring Reporting Network Policy
+
+You configure the network policy by specifying the `xpack.reporting.capture.networkPolicy.rules` setting in `kibana.yml`. A policy is specified as
+an array of objects that describe what to allow or deny based on an optionally-provided host and/or protocol. If a host or protocol
+is not specified, the rule will match any host or protocol, respectively.
+
+The rule objects are evaluated sequentially from the beginning to the end of the array, and continue until there is a matching rule.
+If none of the rules allow a request, the request will be denied.
+
+[source,yaml]
+-------------------------------------------------------
+# Only allow requests to placeholder.com
+xpack.reporting.capture.networkPolicy:
+  rules: [ { allow: true, host: "placeholder.com" } ] 
+-------------------------------------------------------
+
+[source,yaml]
+-------------------------------------------------------
+# Only allow requests to https://placeholder.com 
+xpack.reporting.capture.networkPolicy:
+  rules: [ { allow: true, host: "placeholder.com", protocol: "https:" } ] 
+-------------------------------------------------------
+
+A final `allow` rule with no host or protocol will allow all requests that are not explicitly denied.
+
+[source,yaml]
+-------------------------------------------------------
+# Denies requests from http://placeholder.com, but anything else is allowed.
+xpack.reporting.capture.networkPolicy:
+  rules: [{ allow: false, host: "placeholder.com", protocol: "http:" }, { allow: true }];
+-------------------------------------------------------
+
+A network policy can be composed of multiple rules.
+
+[source,yaml]
+-------------------------------------------------------
+# Allow any request to http://placeholder.com but for any other host, https is required
+xpack.reporting.capture.networkPolicy
+  rules: [
+    { allow: true, host: "placeholder.com", protocol: "http:" },
+    { allow: true, protocol: "https:" },
+  ]
+-------------------------------------------------------
+
+[NOTE]
+============
+The `file:` protocol will always be denied, even if there is no network policy configured.
+============
+
+==== Disabling Reporting Network Policy
+
+You can use the `xpack.reporting.capture.networkPolicy.enabled: false` setting to disable the network policy feature. The default for
+this configuration property is `true`, so it is not necessary to explicitly enable it.  

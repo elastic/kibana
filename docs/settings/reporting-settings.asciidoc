@@ -248,6 +248,11 @@ a| `xpack.reporting.capture.browser`
   exist. Configure this to a unique value, beginning with `.reporting-`, for every
   {kib} instance that has a unique <<kibana-index, `kibana.index`>> setting. Defaults to `.reporting`.
 
+| `xpack.reporting.capture.networkPolicy`
+  | Capturing a screenshot from a Kibana page involves sending out requests for all the linked web assets. For example, a Markdown
+  visualization can show an image from a remote server. You can configure what kind of requests to allow or filter by setting a
+  Network Policy for Reporting. See <<reporting-network-policy, Network Policy>> for more details.
+
 | `xpack.reporting.roles.allow`
   | Specifies the roles in addition to superusers that can use reporting.
   Defaults to `[ "reporting_user" ]`. +
