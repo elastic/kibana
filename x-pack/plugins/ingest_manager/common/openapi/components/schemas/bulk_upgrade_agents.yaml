@@ -1,0 +1,37 @@
+title: BulkUpgradeAgents
+oneOf:
+  - type: object
+    properties:
+      version:
+        type: string
+      agents:
+        type: array
+        items:
+          type: string
+    required:
+      - version
+      - agents
+  - type: object
+    properties:
+      version:
+        type: string
+      source_uri:
+        type: string
+      agents:
+        type: array
+        items:
+          type: string
+    required:
+      - version
+      - agents
+  - type: object
+    properties:
+      version:
+        type: string
+      source_uri:
+        type: string
+      agents:
+        type: string
+    required:
+      - version
+      - agents

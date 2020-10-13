@@ -45,11 +45,23 @@ export type MakeSchemaFrom<Base> = {
     : RecursiveMakeSchemaFrom<Required<Base>[Key]>;
 };
 
+export interface CollectorFetchContext {
+  /**
+   * @depricated Scoped Legacy Elasticsearch client: use esClient instead
+   */
+  callCluster: LegacyAPICaller;
+  /**
+   * Request-scoped Elasticsearch client:
+   * - When users are requesting a sample of data, it is scoped to their role to avoid exposing data they should't read
+   * - When building the telemetry data payload to report to the remote cluster, the requests are scoped to the `kibana` internal user
+   */
+  esClient: ElasticsearchClient;
+}
 export interface CollectorOptions<T = unknown, U = T> {
   type: string;
   init?: Function;
   schema?: MakeSchemaFrom<T>;
-  fetch: (callCluster: LegacyAPICaller, esClient?: ElasticsearchClient) => Promise<T> | T;
+  fetch: (collectorFetchContext: CollectorFetchContext) => Promise<T> | T;
   /*
    * A hook for allowing the fetched data payload to be organized into a typed
    * data model for internal bulk upload. See defaultFormatterForBulkUpload for

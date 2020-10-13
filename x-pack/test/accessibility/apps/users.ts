@@ -46,23 +46,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('showReservedUsersSwitch');
     });
 
-    it('a11y test for toggle button for show reserved users only', async () => {
-      await retry.waitFor(
-        'show reserved users toggle button is visible',
-        async () => await testSubjects.exists('showReservedUsersSwitch')
-      );
-      await testSubjects.click('showReservedUsersSwitch');
-      await a11y.testAppSnapshot();
-      await testSubjects.click('showReservedUsersSwitch');
-    });
-
     it('a11y test for create user panel', async () => {
       await testSubjects.click('createUserButton');
       await a11y.testAppSnapshot();
     });
 
-    // https://github.com/elastic/eui/issues/2841
-    it.skip('a11y test for roles drop down', async () => {
+    it('a11y test for roles drop down', async () => {
       await testSubjects.setValue('userFormUserNameInput', 'a11y');
       await testSubjects.setValue('passwordInput', 'password');
       await testSubjects.setValue('passwordConfirmationInput', 'password');
@@ -96,8 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    // https://github.com/elastic/eui/issues/2841
-    it.skip('a11y test for Change password screen', async () => {
+    it('a11y test for Change password screen', async () => {
       await PageObjects.settings.clickLinkText('deleteA11y');
       await testSubjects.click('changePassword');
       await a11y.testAppSnapshot();
