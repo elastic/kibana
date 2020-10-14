@@ -2,7 +2,7 @@
 
 ## Requirements
 
-To use machine learning features, you must have Platinum or Enterprise license or a free 14-day trial. File Data Visualizer requires Basic license.
+To use machine learning features, you must have a Platinum or Enterprise license or a free 14-day trial. File Data Visualizer requires a Basic license.
 
 ## Setup local environment
 
