@@ -5,7 +5,7 @@
  */
 
 import { orderByTime } from '../process_event';
-import { IndexedProcessTree } from '../../types';
+import { LegacyIndexedProcessTree } from '../../types';
 import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { levelOrder as baseLevelOrder } from '../../lib/tree_sequencers';
 import * as eventModel from '../../../../common/endpoint/models/event';
@@ -17,7 +17,7 @@ import * as eventModel from '../../../../common/endpoint/models/event';
 export function factory(
   // Array of processes to index as a tree
   processes: SafeResolverEvent[]
-): IndexedProcessTree {
+): LegacyIndexedProcessTree {
   const idToChildren = new Map<string | undefined, SafeResolverEvent[]>();
   const idToValue = new Map<string, SafeResolverEvent>();
 
@@ -52,7 +52,7 @@ export function factory(
  * Returns an array with any children `ProcessEvent`s of the passed in `process`
  */
 export function children(
-  tree: IndexedProcessTree,
+  tree: LegacyIndexedProcessTree,
   parentID: string | undefined
 ): SafeResolverEvent[] {
   const currentProcessSiblings = tree.idToChildren.get(parentID);
@@ -62,7 +62,10 @@ export function children(
 /**
  * Get the indexed process event for the ID
  */
-export function processEvent(tree: IndexedProcessTree, entityID: string): SafeResolverEvent | null {
+export function processEvent(
+  tree: LegacyIndexedProcessTree,
+  entityID: string
+): SafeResolverEvent | null {
   return tree.idToProcess.get(entityID) ?? null;
 }
 
@@ -70,7 +73,7 @@ export function processEvent(tree: IndexedProcessTree, entityID: string): SafeRe
  * Returns the parent ProcessEvent, if any, for the passed in `childProcess`
  */
 export function parent(
-  tree: IndexedProcessTree,
+  tree: LegacyIndexedProcessTree,
   childProcess: SafeResolverEvent
 ): SafeResolverEvent | undefined {
   const uniqueParentPid = eventModel.parentEntityIDSafeVersion(childProcess);
@@ -84,14 +87,14 @@ export function parent(
 /**
  * Number of processes in the tree
  */
-export function size(tree: IndexedProcessTree) {
+export function size(tree: LegacyIndexedProcessTree) {
   return tree.idToProcess.size;
 }
 
 /**
  * Return the root process
  */
-export function root(tree: IndexedProcessTree) {
+export function root(tree: LegacyIndexedProcessTree) {
   if (size(tree) === 0) {
     return null;
   }
@@ -108,7 +111,7 @@ export function root(tree: IndexedProcessTree) {
 /**
  * Yield processes in level order
  */
-export function* levelOrder(tree: IndexedProcessTree) {
+export function* levelOrder(tree: LegacyIndexedProcessTree) {
   const rootNode = root(tree);
   if (rootNode !== null) {
     yield* baseLevelOrder(rootNode, (parentNode: SafeResolverEvent): SafeResolverEvent[] =>

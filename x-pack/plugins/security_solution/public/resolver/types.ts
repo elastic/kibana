@@ -380,7 +380,7 @@ export interface ProcessEvent {
 /**
  * A representation of a process tree with indices for O(1) access to children and values by id.
  */
-export interface IndexedProcessTree {
+export interface LegacyIndexedProcessTree {
   /**
    * Map of ID to a process's ordered children
    */

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
-  IndexedProcessTree,
+  LegacyIndexedProcessTree,
   Vector2,
   EdgeLineSegment,
   ProcessWidths,
@@ -24,7 +24,7 @@ import { getFriendlyElapsedTime as elapsedTime } from '../../lib/date';
  * Graph the process tree
  */
 export function isometricTaxiLayoutFactory(
-  indexedProcessTree: IndexedProcessTree
+  indexedProcessTree: LegacyIndexedProcessTree
 ): IsometricTaxiLayout {
   /**
    * Walk the tree in reverse level order, calculating the 'width' of subtrees.
@@ -86,7 +86,7 @@ export function isometricTaxiLayoutFactory(
 /**
  * Calculate a level (starting at 1) for each node.
  */
-function ariaLevels(indexedProcessTree: IndexedProcessTree): Map<SafeResolverEvent, number> {
+function ariaLevels(indexedProcessTree: LegacyIndexedProcessTree): Map<SafeResolverEvent, number> {
   const map: Map<SafeResolverEvent, number> = new Map();
   for (const node of indexedProcessTreeModel.levelOrder(indexedProcessTree)) {
     const parentNode = indexedProcessTreeModel.parent(indexedProcessTree, node);
@@ -145,7 +145,7 @@ function ariaLevels(indexedProcessTree: IndexedProcessTree): Map<SafeResolverEve
  *                   H
  *
  */
-function widthsOfProcessSubtrees(indexedProcessTree: IndexedProcessTree): ProcessWidths {
+function widthsOfProcessSubtrees(indexedProcessTree: LegacyIndexedProcessTree): ProcessWidths {
   const widths = new Map<SafeResolverEvent, number>();
 
   if (indexedProcessTreeModel.size(indexedProcessTree) === 0) {
@@ -185,7 +185,7 @@ function widthsOfProcessSubtrees(indexedProcessTree: IndexedProcessTree): Proces
  * Layout the graph. Note: if any process events are missing the `entity_id`, this will throw an Error.
  */
 function processEdgeLineSegments(
-  indexedProcessTree: IndexedProcessTree,
+  indexedProcessTree: LegacyIndexedProcessTree,
   widths: ProcessWidths,
   positions: ProcessPositions
 ): EdgeLineSegment[] {
@@ -315,7 +315,7 @@ function processEdgeLineSegments(
 }
 
 function processPositions(
-  indexedProcessTree: IndexedProcessTree,
+  indexedProcessTree: LegacyIndexedProcessTree,
   widths: ProcessWidths
 ): ProcessPositions {
   const positions = new Map<SafeResolverEvent, Vector2>();
@@ -404,7 +404,7 @@ function processPositions(
   return positions;
 }
 function* levelOrderWithWidths(
-  tree: IndexedProcessTree,
+  tree: LegacyIndexedProcessTree,
   widths: ProcessWidths
 ): Iterable<ProcessWithWidthMetadata> {
   for (const process of indexedProcessTreeModel.levelOrder(tree)) {
