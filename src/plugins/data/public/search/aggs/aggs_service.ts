@@ -20,7 +20,7 @@
 import { Subscription } from 'rxjs';
 
 import { IUiSettingsClient } from 'src/core/public';
-import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
+import { DatatableColumn, ExpressionsServiceSetup } from 'src/plugins/expressions/common';
 import { FieldFormatsStart } from '../../field_formats';
 import { getForceNow } from '../../query/timefilter/lib/get_force_now';
 import { calculateBounds, TimeRange } from '../../../common';
@@ -137,6 +137,18 @@ export class AggsService {
 
     return {
       calculateAutoTimeExpression,
+      getDateMetaByDatatableColumn: (column: DatatableColumn) => {
+        if (column.meta.source !== 'esaggs') return;
+        if (column.meta.sourceParams?.type !== BUCKET_TYPES.DATE_HISTOGRAM) return;
+        return {
+          timeZone: column.meta.sourceParams?.params?.time_zone,
+          timeRange: column.meta.sourceParams?.appliedTimeRange,
+          interval:
+            column.meta.sourceParams?.params?.interval === 'auto'
+              ? calculateAutoTimeExpression(column.meta.sourceParams?.appliedTimeRange)
+              : column.meta.sourceParams?.params?.interval,
+        };
+      },
       createAggConfigs: (indexPattern, configStates = [], schemas) => {
         return new AggConfigs(indexPattern, configStates, { typesRegistry });
       },
