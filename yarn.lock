@@ -4478,6 +4478,13 @@
   dependencies:
     "@types/jquery" "*"
 
+"@types/fs-extra@^8.0.0":
+  version "8.1.1"
+  resolved "https://registry.yarnpkg.com/@types/fs-extra/-/fs-extra-8.1.1.tgz#1e49f22d09aa46e19b51c0b013cb63d0d923a068"
+  integrity sha512-TcUlBem321DFQzBNuz8p0CLLKp0VvF/XH9E4KHNmgwyp4E3AfgI5cjiIVZWlbfThBop2qxFIh4+LeY6hVWWZ2w==
+  dependencies:
+    "@types/node" "*"
+
 "@types/geojson@*", "@types/geojson@7946.0.7":
   version "7946.0.7"
   resolved "https://registry.yarnpkg.com/@types/geojson/-/geojson-7946.0.7.tgz#c8fa532b60a0042219cdf173ca21a975ef0666ad"
@@ -11936,6 +11943,22 @@ downgrade-root@^1.0.0:
   dependencies:
     default-uid "^1.0.0"
     is-root "^1.0.0"
+
+dpdm@3.4.3:
+  version "3.4.3"
+  resolved "https://registry.yarnpkg.com/dpdm/-/dpdm-3.4.3.tgz#44a9fa9c6c39d164aa05f918968b94b170905fc9"
+  integrity sha512-F9GZbsh7KKxA3hJ35JQJVB3A/k9Mq7RRlZyrD2rPNFrvFUb36c18kwGPLEiyCyU+TxT35d+7USwhSy18s1L3XA==
+  dependencies:
+    "@types/fs-extra" "^8.0.0"
+    "@types/glob" "^7.1.1"
+    "@types/yargs" "^13.0.0"
+    chalk "^2.4.2"
+    fs-extra "^8.1.0"
+    glob "^7.1.4"
+    ora "^4.0.3"
+    tslib "^1.10.0"
+    typescript "^3.5.3"
+    yargs "^13.3.0"
 
 dtrace-provider@~0.8:
   version "0.8.8"
@@ -21888,7 +21911,7 @@ ora@^3.0.0:
     strip-ansi "^5.2.0"
     wcwidth "^1.0.1"
 
-ora@^4.0.4:
+ora@^4.0.3, ora@^4.0.4:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/ora/-/ora-4.1.1.tgz#566cc0348a15c36f5f0e979612842e02ba9dddbc"
   integrity sha512-sjYP8QyVWBpBZWD6Vr1M/KwknSw6kJOz41tvGMlwWeClHBtYKTbHMki1PsLZnxKpXMPbTKv9b3pjQu3REib96A==
@@ -28539,7 +28562,7 @@ typescript-tuple@^2.2.1:
   dependencies:
     typescript-compare "^0.0.2"
 
-typescript@4.0.2, typescript@^3.0.3, typescript@^3.2.2, typescript@^3.3.3333, typescript@^3.4.5, typescript@~3.7.2:
+typescript@4.0.2, typescript@^3.0.3, typescript@^3.2.2, typescript@^3.3.3333, typescript@^3.4.5, typescript@^3.5.3, typescript@~3.7.2:
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.0.2.tgz#7ea7c88777c723c681e33bf7988be5d008d05ac2"
   integrity sha512-e4ERvRV2wb+rRZ/IQeb3jm2VxBsirQLpQhdxplZ2MEzGvDkkMmPglecnNDfSUBivMjP93vRbngYYDQqQ/78bcQ==
