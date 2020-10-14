@@ -51,7 +51,9 @@ export const mockData: { Authentications: HostAuthenticationsStrategyResponse } 
           },
           lastFailure: {
             timestamp: '2019-01-23T22:35:32.222Z',
-            'source.ip': '8.8.8.8',
+            source: {
+              ip: ['8.8.8.8'],
+            },
             host: {
               id: ['host-id-1'],
               name: ['host-2'],
@@ -70,7 +72,9 @@ export const mockData: { Authentications: HostAuthenticationsStrategyResponse } 
           user: { name: ['Braden Hassanabad'] },
           lastSuccess: {
             timestamp: '2019-01-23T22:35:32.222Z',
-            'source.ip': '127.0.0.1',
+            source: {
+              ip: ['127.0.0.1'],
+            },
             host: {
               id: ['host-id-1'],
               name: ['host-1'],

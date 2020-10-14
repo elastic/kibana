@@ -256,10 +256,7 @@ const getAuthenticationColumns = (): AuthTableColumns => [
     hideForMobile: false,
     render: ({ node }) =>
       getRowItemDraggables({
-        rowItems:
-          node.lastSuccess?.source?.ip ||
-          (node.lastSuccess?.['source.ip'] && [node.lastSuccess?.['source.ip']]) ||
-          null,
+        rowItems: node.lastSuccess?.source?.ip || null,
         attrName: 'source.ip',
         idPrefix: `authentications-table-${node._id}-lastSuccessSource`,
         render: (item) => <NetworkDetailsLink ip={item} />,
@@ -294,10 +291,7 @@ const getAuthenticationColumns = (): AuthTableColumns => [
     hideForMobile: false,
     render: ({ node }) =>
       getRowItemDraggables({
-        rowItems:
-          node.lastFailure?.source?.ip ||
-          (node.lastFailure?.['source.ip'] && [node.lastFailure?.['source.ip']]) ||
-          null,
+        rowItems: node.lastFailure?.source?.ip || null,
         attrName: 'source.ip',
         idPrefix: `authentications-table-${node._id}-lastFailureSource`,
         render: (item) => <NetworkDetailsLink ip={item} />,
