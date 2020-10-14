@@ -66,7 +66,7 @@ export function initPostCaseApi({
               actionAt: createdDate,
               actionBy: { username, full_name, email },
               caseId: newCase.id,
-              fields: ['description', 'status', 'tags', 'title'],
+              fields: ['description', 'status', 'tags', 'title', 'connector'],
               newValue: JSON.stringify(query),
             }),
           ],

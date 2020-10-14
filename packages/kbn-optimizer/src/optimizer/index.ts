@@ -25,3 +25,4 @@ export * from './watch_bundles_for_changes';
 export * from './run_workers';
 export * from './bundle_cache';
 export * from './handle_optimizer_completion';
+export * from './get_output_stats';

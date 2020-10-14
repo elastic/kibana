@@ -391,6 +391,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                   data-test-subj="alert-exception-builder"
                   id-aria="alert-exception-builder"
                   onChange={handleBuilderOnChange}
+                  ruleType={maybeRule?.type}
                 />
 
                 <EuiSpacer />

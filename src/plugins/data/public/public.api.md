@@ -652,11 +652,6 @@ export type ExistsFilter = Filter & {
     exists?: FilterExistsProperty;
 };
 
-// Warning: (ae-forgotten-export) The symbol "ShorthandFieldMapObject" needs to be exported by the entry point index.d.ts
-//
-// @public (undocumented)
-export const expandShorthand: (sh: Record<string, ShorthandFieldMapObject>) => MappingObject;
-
 // Warning: (ae-missing-release-tag) "extractReferences" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -782,16 +777,6 @@ export type FieldFormatsStart = Omit<FieldFormatsRegistry, 'init' & 'register'> 
 //
 // @public (undocumented)
 export const fieldList: (specs?: FieldSpec[], shortDotsEnable?: boolean) => IIndexPatternFieldList;
-
-// @public (undocumented)
-export interface FieldMappingSpec {
-    // (undocumented)
-    _deserialize?: (mapping: string) => any | undefined;
-    // (undocumented)
-    _serialize?: (mapping: any) => string | undefined;
-    // (undocumented)
-    type: ES_FIELD_TYPES;
-}
 
 // Warning: (ae-missing-release-tag) "Filter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1291,11 +1276,11 @@ export type IndexPatternsContract = PublicMethodsOf<IndexPatternsService>;
 // Warning: (ae-missing-release-tag) "IndexPatternSelectProps" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type IndexPatternSelectProps = Required<Omit<EuiComboBoxProps<any>, 'isLoading' | 'onSearchChange' | 'options' | 'selectedOptions'>, 'onChange' | 'placeholder'> & {
+export type IndexPatternSelectProps = Required<Omit<EuiComboBoxProps<any>, 'isLoading' | 'onSearchChange' | 'options' | 'selectedOptions' | 'onChange'>, 'placeholder'> & {
+    onChange: (indexPatternId?: string) => void;
     indexPatternId: string;
     fieldTypes?: string[];
     onNoIndexPatterns?: () => void;
-    savedObjectsClient: SavedObjectsClientContract;
 };
 
 // Warning: (ae-missing-release-tag) "IndexPatternSpec" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -1518,9 +1503,6 @@ export interface KueryNode {
     // (undocumented)
     type: keyof NodeTypes;
 }
-
-// @public (undocumented)
-export type MappingObject = Record<string, FieldMappingSpec>;
 
 // Warning: (ae-missing-release-tag) "MatchAllFilter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
