@@ -2,7 +2,10 @@
 
 ## Requirements
 
-To use machine learning features, you must have a Platinum or Enterprise license or a free 14-day trial. File Data Visualizer requires a Basic license.
+To use machine learning features, you must have a Platinum or Enterprise license 
+or a free 14-day trial. File Data Visualizer requires a Basic license. For more 
+info, refer to 
+[Set up machine learning features](https://www.elastic.co/guide/en/machine-learning/master/setup.html).
 
 ## Setup local environment
 
