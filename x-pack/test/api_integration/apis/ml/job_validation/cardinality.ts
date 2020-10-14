@@ -60,9 +60,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body).to.eql([{ id: 'success_cardinality' }]);
     });
 
-    // Failing ES promotion due to changes in the cardinality agg,
-    // see https://github.com/elastic/kibana/issues/80418
-    it.skip(`should recognize a high model plot cardinality`, async () => {
+    it(`should recognize a high model plot cardinality`, async () => {
       const requestBody = {
         job_id: '',
         description: '',
@@ -164,10 +162,10 @@ export default ({ getService }: FtrProviderContext) => {
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS)
         .send(requestBody)
-        .expect(404);
+        .expect(403);
 
-      expect(body.error).to.eql('Not Found');
-      expect(body.message).to.eql('Not Found');
+      expect(body.error).to.eql('Forbidden');
+      expect(body.message).to.eql('Forbidden');
     });
   });
 };
