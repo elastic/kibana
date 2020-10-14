@@ -28,7 +28,7 @@ import {
 } from '../../embeddable_plugin_test_samples';
 import { coreMock } from '../../../../../core/public/mocks';
 import { CoreStart } from 'kibana/public';
-import { LibraryNotificationAction } from '.';
+import { LibraryNotificationAction, UnlinkFromLibraryAction } from '.';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 import { ViewMode } from '../../../../embeddable/public';
 
@@ -42,8 +42,15 @@ const start = doStart();
 let container: DashboardContainer;
 let embeddable: ContactCardEmbeddable & ReferenceOrValueEmbeddable;
 let coreStart: CoreStart;
+let unlinkAction: UnlinkFromLibraryAction;
+
 beforeEach(async () => {
   coreStart = coreMock.createStart();
+
+  unlinkAction = ({
+    getDisplayName: () => 'unlink from dat library',
+    execute: jest.fn(),
+  } as unknown) as UnlinkFromLibraryAction;
 
   const containerOptions = {
     ExitFullScreenButton: () => null,
@@ -81,19 +88,19 @@ beforeEach(async () => {
 });
 
 test('Notification is shown when embeddable on dashboard has reference type input', async () => {
-  const action = new LibraryNotificationAction();
+  const action = new LibraryNotificationAction(unlinkAction);
   embeddable.updateInput(await embeddable.getInputAsRefType());
   expect(await action.isCompatible({ embeddable })).toBe(true);
 });
 
 test('Notification is not shown when embeddable input is by value', async () => {
-  const action = new LibraryNotificationAction();
+  const action = new LibraryNotificationAction(unlinkAction);
   embeddable.updateInput(await embeddable.getInputAsValueType());
   expect(await action.isCompatible({ embeddable })).toBe(false);
 });
 
 test('Notification is not shown when view mode is set to view', async () => {
-  const action = new LibraryNotificationAction();
+  const action = new LibraryNotificationAction(unlinkAction);
   embeddable.updateInput(await embeddable.getInputAsRefType());
   embeddable.updateInput({ viewMode: ViewMode.VIEW });
   expect(await action.isCompatible({ embeddable })).toBe(false);
