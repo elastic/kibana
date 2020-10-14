@@ -479,7 +479,7 @@ routes, etc.
 |Gathers all usage collection, retrieving them from both: OSS and X-Pack plugins.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/transform/readme.md[transform]
+|{kib-repo}blob/{branch}/x-pack/plugins/transform[transform]
 |WARNING: Missing README.
 
 
