@@ -55,8 +55,8 @@ export interface QueryBarTimelineComponentProps {
 
 export const TIMELINE_FILTER_DROP_AREA = 'timeline-filter-drop-area';
 
-const getNonDropAreaFilters = (filters: Filter[] | undefined) =>
-  filters ? filters.filter((f: Filter) => f.meta.controlledBy !== TIMELINE_FILTER_DROP_AREA) : filters;
+const getNonDropAreaFilters = (filters: Filter[] = []) =>
+  filters.filter((f: Filter) => f.meta.controlledBy !== TIMELINE_FILTER_DROP_AREA);
 
 export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
   ({
