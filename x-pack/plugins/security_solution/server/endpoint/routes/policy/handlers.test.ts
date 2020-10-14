@@ -51,7 +51,7 @@ describe('test policy response handler', () => {
 
     mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
     const mockRequest = httpServerMock.createKibanaRequest({
-      params: { hostId: 'id' },
+      params: { agentId: 'id' },
     });
 
     await hostPolicyResponseHandler(
@@ -62,7 +62,7 @@ describe('test policy response handler', () => {
 
     expect(mockResponse.ok).toBeCalled();
     const result = mockResponse.ok.mock.calls[0][0]?.body as GetHostPolicyResponse;
-    expect(result.policy_response.host.id).toEqual(response.hits.hits[0]._source.host.id);
+    expect(result.policy_response.agent.id).toEqual(response.hits.hits[0]._source.agent.id);
   });
 
   it('should return not found when there is no response policy for host', async () => {
@@ -77,7 +77,7 @@ describe('test policy response handler', () => {
     );
 
     const mockRequest = httpServerMock.createKibanaRequest({
-      params: { hostId: 'id' },
+      params: { agentId: 'id' },
     });
 
     await hostPolicyResponseHandler(
