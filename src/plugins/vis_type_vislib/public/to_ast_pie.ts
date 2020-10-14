@@ -17,14 +17,15 @@
  * under the License.
  */
 
-import { Vis, VisToExpressionAst } from '../../visualizations/public';
+import { Vis, VisToExpressionAst, getVisSchemas } from '../../visualizations/public';
 import { EsaggsExpressionFunctionDefinition } from '../../data/public';
 import { buildExpression, buildExpressionFunction } from '../../expressions/public';
 
 import { PieVisParams } from './pie';
 import { vislibPieName, VisTypeVislibPieExpressionFunctionDefinition } from './pie_fn';
 
-export const toExpressionAst: VisToExpressionAst<PieVisParams> = async (vis, params, schemas) => {
+export const toExpressionAst: VisToExpressionAst<PieVisParams> = async (vis, params) => {
+  const schemas = getVisSchemas(vis, params);
   const visConfig = {
     ...vis.params,
     dimensions: {

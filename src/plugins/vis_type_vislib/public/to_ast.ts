@@ -20,7 +20,7 @@
 import moment from 'moment';
 import { get } from 'lodash';
 
-import { Vis, VisToExpressionAst } from '../../visualizations/public';
+import { Vis, VisToExpressionAst, getVisSchemas } from '../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../expressions/public';
 import { EsaggsExpressionFunctionDefinition } from '../../data/public';
 import { Dimensions, DateHistogramParams, HistogramParams } from '../../vis_type_xy/public';
@@ -28,11 +28,8 @@ import { Dimensions, DateHistogramParams, HistogramParams } from '../../vis_type
 import { vislibVisName, VisTypeVislibExpressionFunctionDefinition } from './vis_type_vislib_vis_fn';
 import { BasicVislibParams } from './types';
 
-export const toExpressionAst: VisToExpressionAst<BasicVislibParams> = async (
-  vis,
-  params,
-  schemas
-) => {
+export const toExpressionAst: VisToExpressionAst<BasicVislibParams> = async (vis, params) => {
+  const schemas = getVisSchemas(vis, params);
   const dimensions: Dimensions = {
     x: schemas.segment ? schemas.segment[0] : null,
     y: schemas.metric,

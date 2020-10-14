@@ -77,6 +77,5 @@ export interface VisToExpressionAstParams {
 
 export type VisToExpressionAst<TVisParams = VisParams> = (
   vis: Vis<TVisParams>,
-  params: VisToExpressionAstParams,
-  schemas: Schemas
+  params: VisToExpressionAstParams
 ) => Promise<ExpressionAstExpression> | ExpressionAstExpression;

@@ -289,10 +289,8 @@ export const buildPipeline = async (vis: Vis, params: BuildPipelineParams) => {
   }
   pipeline += '| ';
 
-  const schemas = getSchemas(vis, params);
-
   if (vis.type.toExpressionAst) {
-    const visAst = await vis.type.toExpressionAst(vis, params, schemas);
+    const visAst = await vis.type.toExpressionAst(vis, params);
     pipeline += formatExpression(visAst);
   } else {
     // request handler
@@ -303,6 +301,8 @@ export const buildPipeline = async (vis: Vis, params: BuildPipelineParams) => {
     partialRows=${vis.params.showPartialRows || false}
     ${prepareJson('aggConfigs', vis.data.aggs!.aggs)} | `;
     }
+
+    const schemas = getSchemas(vis, params);
 
     if (buildPipelineVisFunction[vis.type.name]) {
       pipeline += buildPipelineVisFunction[vis.type.name](
