@@ -13,7 +13,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'security', 'savedObjects', 'tagManagement']);
   const tagManagementPage = PageObjects.tagManagement;
 
-  describe('saved objects tagging - table listing', () => {
+  describe('table listing', () => {
     before(async () => {
       await esArchiver.load('functional_base');
       await tagManagementPage.navigateTo();

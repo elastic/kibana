@@ -4,8 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// eslint-disable-next-line max-classes-per-file
 import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
+
+interface FillTagFormFields {
+  name?: string;
+  color?: string;
+  description?: string;
+}
+
+type TagFormValidation = FillTagFormFields;
 
 export function TagManagementPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -14,7 +23,130 @@ export function TagManagementPageProvider({ getService, getPageObjects }: FtrPro
   const PageObjects = getPageObjects(['header', 'common', 'savedObjects', 'settings']);
   const retry = getService('retry');
 
+  class TagModal {
+    constructor(private readonly page: TagManagementPage) {}
+    /**
+     * Open the create tag modal, by clicking on the associated button.
+     */
+    async openCreate() {
+      return await testSubjects.click('createTagButton');
+    }
+
+    /**
+     * Open the edit tag modal for given tag name. The tag must be in the currently displayed tags.
+     */
+    async openEdit(tagName: string) {
+      await this.page.clickEdit(tagName);
+    }
+
+    /**
+     * Fills the given fields in the form.
+     *
+     * If a field is undefined, will not set the value (use a empty string for that)
+     * If `submit` is true, will call `clickConfirm` once the fields have been filled.
+     */
+    async fillForm(fields: FillTagFormFields, { submit = false }: { submit?: boolean } = {}) {
+      if (fields.name !== undefined) {
+        await testSubjects.click('createModalField-name');
+        await testSubjects.setValue('createModalField-name', fields.name);
+      }
+      if (fields.color !== undefined) {
+        // EuiColorPicker does not allow to specify data-test-subj for the colorpicker input
+        await testSubjects.setValue('colorPickerAnchor', fields.color);
+      }
+      if (fields.description !== undefined) {
+        await testSubjects.click('createModalField-description');
+        await testSubjects.setValue('createModalField-description', fields.description);
+      }
+
+      if (submit) {
+        await this.clickConfirm();
+      }
+    }
+
+    /**
+     * Return the values currently displayed in the form.
+     */
+    async getFormValues(): Promise<Required<FillTagFormFields>> {
+      return {
+        name: await testSubjects.getAttribute('createModalField-name', 'value'),
+        color: await testSubjects.getAttribute('colorPickerAnchor', 'value'),
+        description: await testSubjects.getAttribute('createModalField-description', 'value'),
+      };
+    }
+
+    async getValidationErrors(): Promise<TagFormValidation> {
+      const errors: TagFormValidation = {};
+
+      const getError = async (rowDataTestSubj: string) => {
+        const row = await testSubjects.find(rowDataTestSubj);
+        const errorElements = await row.findAllByClassName('euiFormErrorText');
+        return errorElements.length ? await errorElements[0].getVisibleText() : undefined;
+      };
+
+      errors.name = await getError('createModalRow-name');
+      errors.color = await getError('createModalRow-color');
+      errors.description = await getError('createModalRow-description');
+
+      return errors;
+    }
+
+    /**
+     * Click on the 'cancel' button in the create/edit modal.
+     */
+    async clickCancel() {
+      await testSubjects.click('createModalCancelButton');
+    }
+
+    /**
+     * Click on the 'confirm' button in the create/edit modal if not disabled.
+     */
+    async clickConfirm() {
+      if (!(await this.isConfirmDisabled())) {
+        await testSubjects.click('createModalConfirmButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+      }
+    }
+
+    /**
+     * Return true if the confirm button is disabled, false otherwise.
+     */
+    async isConfirmDisabled() {
+      const disabled = await testSubjects.getAttribute('createModalConfirmButton', 'disabled');
+      return disabled === 'true';
+    }
+
+    /**
+     * Return true if the modal is currently opened.
+     */
+    async isOpened() {
+      return await testSubjects.exists('tagModalForm');
+    }
+
+    /**
+     * Wait until the modal is closed.
+     */
+    async waitUntilClosed() {
+      await retry.try(async () => {
+        if (await this.isOpened()) {
+          throw new Error('save modal still open');
+        }
+      });
+    }
+
+    /**
+     * Close the modal if currently opened.
+     */
+    async closeIfOpened() {
+      if (await this.isOpened()) {
+        await this.clickCancel();
+      }
+    }
+  }
+
   class TagManagementPage {
+    public readonly tagModal = new TagModal(this);
+
     /**
      * Navigate to the tag management section, by accessing the management app, then clicking
      * on the `tags` link.
@@ -86,7 +218,22 @@ export function TagManagementPageProvider({ getService, getPageObjects }: FtrPro
     async isConnectionLinkDisplayed(tagName: string) {
       const tags = await this.getDisplayedTagsInfo();
       const tag = tags.find((t) => t.name === tagName);
-      return tag ? tag.connectionCount === undefined : false;
+      return tag ? tag.connectionCount !== undefined : false;
+    }
+
+    async clickEdit(tagName: string) {
+      const tagRow = await this.getRowByName(tagName);
+      if (tagRow) {
+        const editButton = await testSubjects.findDescendant('tagsTableAction-edit', tagRow);
+        editButton?.click();
+      }
+    }
+
+    async getRowByName(tagName: string) {
+      const tagNames = await this.getDisplayedTagNames();
+      const tagIndex = tagNames.indexOf(tagName);
+      const rows = await testSubjects.findAll('tagsTableRow');
+      return rows[tagIndex];
     }
 
     /**
@@ -105,6 +252,7 @@ export function TagManagementPageProvider({ getService, getPageObjects }: FtrPro
     const rawConnectionCount = connectionsText.replace(/[^0-9]/g, '');
     const connectionCount = rawConnectionCount ? parseInt(rawConnectionCount, 10) : undefined;
 
+    // ideally we would also return the color, but it can't be easily retrieved from the DOM
     return {
       name: dom.findTestSubject('tagsTableRowName').find('.euiTableCellContent').text(),
       description: dom

@@ -21,7 +21,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
   };
 
-  describe('saved objects tagging - feature controls', () => {
+  describe('feature controls', () => {
     before(async () => {
       await esArchiver.load('functional_base');
     });

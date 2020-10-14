@@ -43,13 +43,13 @@ export const EditTagModal: FC<EditTagModalProps> = ({ tag, onSave, onClose, tagC
   );
 
   useEffect(() => {
-    const newValidation = validateTag(tag);
+    const newValidation = validateTag(tagAttributes);
     // we don't want to display error if the form has not been touched.
     if (pristine) {
       newValidation.errors = {};
     }
     setValidation(newValidation);
-  }, [tag, pristine]);
+  }, [tagAttributes, pristine]);
 
   const onSubmit = useCallback(async () => {
     try {

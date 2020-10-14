@@ -32,11 +32,11 @@ const initialValidation: TagValidation = {
 export const CreateTagModal: FC<CreateTagModalProps> = ({ tagClient, onClose, onSave }) => {
   const [pristine, setPristine] = useState<boolean>(true);
   const [validation, setValidation] = useState<TagValidation>(initialValidation);
-  const [tag, setTag] = useState<TagAttributes>(createEmptyTag());
+  const [tagAttributes, setTagAttributes] = useState<TagAttributes>(createEmptyTag());
 
   const setField = useCallback(
     <T extends keyof TagAttributes>(field: T) => (value: TagAttributes[T]) => {
-      setTag((current) => ({
+      setTagAttributes((current) => ({
         ...current,
         [field]: value,
       }));
@@ -46,17 +46,17 @@ export const CreateTagModal: FC<CreateTagModalProps> = ({ tagClient, onClose, on
   );
 
   useEffect(() => {
-    const newValidation = validateTag(tag);
+    const newValidation = validateTag(tagAttributes);
     // we don't want to display error if the form has not been touched.
     if (pristine) {
       newValidation.errors = {};
     }
     setValidation(newValidation);
-  }, [tag, pristine]);
+  }, [tagAttributes, pristine]);
 
   const onSubmit = useCallback(async () => {
     try {
-      const createdTag = await tagClient.create(tag);
+      const createdTag = await tagClient.create(tagAttributes);
       onSave(createdTag);
     } catch (e) {
       // if e is HttpFetchError, actual server error payload is in e.body
@@ -64,14 +64,14 @@ export const CreateTagModal: FC<CreateTagModalProps> = ({ tagClient, onClose, on
         setValidation(e.body.attributes);
       }
     }
-  }, [tag, tagClient, onSave]);
+  }, [tagAttributes, tagClient, onSave]);
 
   return (
     <CreateOrEditModal
       onClose={onClose}
       onSubmit={onSubmit}
       mode={'create'}
-      tag={tag}
+      tag={tagAttributes}
       setField={setField}
       validation={validation}
     />

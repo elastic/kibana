@@ -16,7 +16,9 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
       await createUsersAndRoles(getService);
     });
 
+    loadTestFile(require.resolve('./listing'));
+    loadTestFile(require.resolve('./create'));
+    loadTestFile(require.resolve('./edit'));
     loadTestFile(require.resolve('./feature_control'));
-    loadTestFile(require.resolve('./table_listing'));
   });
 }

@@ -97,10 +97,11 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiForm data-test-subj="savedObjectEditForm" role="form">
+        <EuiForm data-test-subj="tagModalForm" role="form">
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
             <EuiFlexItem>
               <EuiFormRow
+                data-test-subj="createModalRow-name"
                 fullWidth={true}
                 label={i18n.translate('xpack.savedObjectsTagging.tagAttributeLabels.name', {
                   defaultMessage: 'Name',
@@ -117,6 +118,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFormRow
+                data-test-subj="createModalRow-color"
                 fullWidth={true}
                 label={i18n.translate('xpack.savedObjectsTagging.tagAttributeLabels.color', {
                   defaultMessage: 'Color',
@@ -147,6 +149,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
           </EuiFlexGroup>
           <EuiSpacer size="s" />
           <EuiFormRow
+            data-test-subj="createModalRow-description"
             fullWidth={true}
             label={i18n.translate('xpack.savedObjectsTagging.tagAttributeLabels.description', {
               defaultMessage: 'Description',
@@ -205,7 +208,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
                   iconType={isEdit ? 'save' : 'tag'}
                   color="primary"
                   fill
-                  data-test-subj={isEdit ? 'editModalConfirmButton' : 'createModalConfirmButton'}
+                  data-test-subj="createModalConfirmButton"
                   onClick={onFormSubmit}
                   isDisabled={!validation.valid && !submitting}
                 >
