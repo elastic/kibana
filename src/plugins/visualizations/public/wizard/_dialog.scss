@@ -2,12 +2,20 @@ $modalWidth: $euiSizeL * 34;
 $modalHeight: $euiSizeL * 29;
 
 .visNewVisDialog {
+  @include euiBreakpoint('xs', 's') {
+    max-height: 100%;
+  }
+
   max-width: $modalWidth;
   max-height: $modalHeight;
   background: $euiColorEmptyShade;
 }
 
 .visNewVisDialog--aggbased {
+  @include euiBreakpoint('xs', 's') {
+    max-height: 100%;
+  }
+
   max-width: $modalWidth;
   max-height: $modalHeight;
   background-repeat: no-repeat;
