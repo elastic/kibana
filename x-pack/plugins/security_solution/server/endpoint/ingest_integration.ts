@@ -101,6 +101,17 @@ export const getPackagePolicyCreateCallback = (
     // Create detection index & rules (if necessary). move past any failure, this is just a convenience
     try {
       await createDetectionIndex(context, appClient);
+    } catch (err) {
+      if (err.statusCode !== 409) {
+        // 409 -> detection index already exists, which is fine
+        logger.warn(
+          `Possible problem creating detection signals index (${err.statusCode}): ${err.message}`
+        );
+      }
+    }
+    try {
+      // this checks to make sure index exists first, safe to try in case of failure above
+      // may be able to recover from minor errors
       await createPrepackagedRules(
         context,
         appClient,
@@ -109,19 +120,9 @@ export const getPackagePolicyCreateCallback = (
         maxTimelineImportExportSize
       );
     } catch (err) {
-      if (err.statusCode === 409) {
-        logger.debug('Detection index may already exist. Not recreating index or rules');
-      } else if (err.statusCode === 404) {
-        logger.warn(
-          'Unable to automatically create detection index and rules: dependency not satisfied'
-        );
-      } else if (err.statusCode === 400) {
-        logger.warn('Unable to populate detection rules, signals index not created properly');
-      } else {
-        logger.error(
-          `Unable to create detection rules automatically (${err.statusCode}): ${err.message}`
-        );
-      }
+      logger.error(
+        `Unable to create detection rules automatically (${err.statusCode}): ${err.message}`
+      );
     }
 
     // Get most recent manifest
