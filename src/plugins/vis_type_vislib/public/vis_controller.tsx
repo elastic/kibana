@@ -47,12 +47,11 @@ export const createVislibVisController = (
     private removeListeners?: () => void;
 
     unmount?: () => void;
-    visParams?: BasicVislibParams;
     legendRef: RefObject<VisLegend>;
     container: HTMLDivElement;
     chartEl: HTMLDivElement;
     legendEl: HTMLDivElement;
-    vislibVis: any;
+    vislibVis?: any;
 
     constructor(public el: Element) {
       this.el = el;
@@ -66,8 +65,6 @@ export const createVislibVisController = (
       // chart mount point
       this.chartEl = document.createElement('div');
       this.chartEl.className = 'visLib__chart';
-      // Used in functional tests to know when chart is loaded by type
-      this.chartEl.dataset.vislibChartType = this.visParams?.type;
       this.container.appendChild(this.chartEl);
 
       // legend mount point
@@ -84,6 +81,9 @@ export const createVislibVisController = (
       if (this.vislibVis) {
         this.destroy();
       }
+
+      // Used in functional tests to know when chart is loaded by type
+      this.chartEl.dataset.vislibChartType = visParams.type;
 
       return new Promise(async (resolve) => {
         if (this.el.clientWidth === 0 || this.el.clientHeight === 0) {
