@@ -16,6 +16,17 @@ export const ROLES = {
       ],
     },
   },
+  KIBANA_RBAC_DEFAULT_SPACE_WRITE_USER: {
+    name: 'kibana_rbac_default_space_write_user',
+    privileges: {
+      kibana: [
+        {
+          base: ['all'],
+          spaces: ['default'],
+        },
+      ],
+    },
+  },
   KIBANA_RBAC_DEFAULT_SPACE_SO_MANAGEMENT_WRITE_USER: {
     name: 'kibana_rbac_default_space_so_management_write_user',
     privileges: {
@@ -23,6 +34,19 @@ export const ROLES = {
         {
           feature: {
             savedObjectsManagement: ['all'],
+          },
+          spaces: ['default'],
+        },
+      ],
+    },
+  },
+  KIBANA_RBAC_DEFAULT_SPACE_SO_MANAGEMENT_READ_USER: {
+    name: 'kibana_rbac_default_space_so_management_read_user',
+    privileges: {
+      kibana: [
+        {
+          feature: {
+            savedObjectsManagement: ['read'],
           },
           spaces: ['default'],
         },
@@ -90,6 +114,12 @@ export const USERS = {
     roles: [ROLES.KIBANA_RBAC_DEFAULT_SPACE_READ_USER.name],
     description: 'rbac user with read on default space',
   },
+  DEFAULT_SPACE_WRITE_USER: {
+    username: 'a_kibana_rbac_default_space_write_user',
+    password: 'password',
+    roles: [ROLES.KIBANA_RBAC_DEFAULT_SPACE_WRITE_USER.name],
+    description: 'rbac user with all on default space',
+  },
   DEFAULT_SPACE_SO_MANAGEMENT_WRITE_USER: {
     username: 'a_kibana_rbac_default_space_so_management_write_user',
     password: 'password',
@@ -100,6 +130,14 @@ export const USERS = {
     username: 'a_kibana_rbac_default_space_so_tagging_read_user',
     password: 'password',
     roles: [ROLES.KIBANA_RBAC_DEFAULT_SPACE_SO_TAGGING_READ_USER.name],
+  },
+  DEFAULT_SPACE_SO_TAGGING_READ_SO_MANAGEMENT_READ_USER: {
+    username: 'a_kibana_rbac_default_space_so_tagging_read_so_management_read_user',
+    password: 'password',
+    roles: [
+      ROLES.KIBANA_RBAC_DEFAULT_SPACE_SO_TAGGING_READ_USER.name,
+      ROLES.KIBANA_RBAC_DEFAULT_SPACE_SO_MANAGEMENT_READ_USER.name,
+    ],
   },
   DEFAULT_SPACE_SO_TAGGING_WRITE_USER: {
     username: 'a_kibana_rbac_default_space_so_tagging_write_user',
