@@ -101,7 +101,8 @@ export interface ExpressionsServiceStart {
   run: <Input, Output, ExtraContext extends Record<string, unknown> = Record<string, unknown>>(
     ast: string | ExpressionAstExpression,
     input: Input,
-    context?: ExtraContext
+    context?: ExtraContext,
+    options?: ExpressionExecOptions
   ) => Promise<Output>;
 
   /**
@@ -117,7 +118,8 @@ export interface ExpressionsServiceStart {
     ast: string | ExpressionAstExpression,
     // This any is for legacy reasons.
     input: Input,
-    context?: ExtraContext
+    context?: ExtraContext,
+    options?: ExpressionExecOptions
   ) => ExecutionContract<ExtraContext, Input, Output>;
 
   /**
@@ -212,17 +214,8 @@ export class ExpressionsService implements PersistableState<ExpressionAstExpress
     definition: AnyExpressionRenderDefinition | (() => AnyExpressionRenderDefinition)
   ): void => this.renderers.register(definition);
 
-  public readonly run = <
-    Input,
-    Output,
-    ExtraContext extends Record<string, unknown> = Record<string, unknown>
-  >(
-    ast: string | ExpressionAstExpression,
-    input: Input,
-    context?: ExtraContext,
-    options?: ExpressionExecOptions
-  ): Promise<Output> =>
-    this.executor.run<Input, Output, ExtraContext>(ast, input, context, options);
+  public readonly run: ExpressionsServiceStart['run'] = (ast, input, context, options) =>
+    this.executor.run(ast, input, context, options);
 
   public readonly getFunction: ExpressionsServiceStart['getFunction'] = (name) =>
     this.executor.getFunction(name);
