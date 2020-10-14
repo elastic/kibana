@@ -29,16 +29,11 @@ interface ReturnPrePackagedTimelines {
   timelinesNotUpdated: number | null;
 }
 
-type GetLoadPrebuiltRulesAndTemplatesButton = ({
-  isDisabled,
-  onClick,
-  fill,
-  testSubj,
-}: {
+type GetLoadPrebuiltRulesAndTemplatesButton = (args: {
   isDisabled: boolean;
   onClick: () => void;
   fill?: boolean;
-  testSubj?: string;
+  'data-test-subj'?: string;
 }) => React.ReactNode | null;
 
 type GetReloadPrebuiltRulesAndTemplatesButton = ({
@@ -281,7 +276,7 @@ export const usePrePackagedRules = ({
     ]
   );
   const getLoadPrebuiltRulesAndTemplatesButton = useCallback(
-    ({ isDisabled, onClick, fill, testSubj = 'loadPrebuiltRulesBtn' }) => {
+    ({ isDisabled, onClick, fill, 'data-test-subj': dataTestSubj = 'loadPrebuiltRulesBtn' }) => {
       return prePackagedRuleStatus === 'ruleNotInstalled' ||
         prePackagedTimelineStatus === 'timelinesNotInstalled' ? (
         <EuiButton
@@ -290,7 +285,7 @@ export const usePrePackagedRules = ({
           isLoading={loadingCreatePrePackagedRules}
           isDisabled={isDisabled}
           onClick={onClick}
-          data-test-subj={testSubj}
+          data-test-subj={dataTestSubj}
         >
           {prePackagedRuleStatus === 'ruleNotInstalled' &&
             prePackagedTimelineStatus === 'timelinesNotInstalled' &&

@@ -5,7 +5,7 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { usePrePackagedRules, importRules } from '../../../containers/detection_engine/rules';
@@ -123,6 +123,24 @@ const RulesPageComponent: React.FC = () => {
     [history]
   );
 
+  const loadPrebuiltRulesAndTemplatesButton = useMemo(
+    () =>
+      getLoadPrebuiltRulesAndTemplatesButton({
+        isDisabled: userHasNoPermissions(canUserCRUD) || loading,
+        onClick: handleCreatePrePackagedRules,
+      }),
+    [canUserCRUD, getLoadPrebuiltRulesAndTemplatesButton, handleCreatePrePackagedRules, loading]
+  );
+
+  const reloadPrebuiltRulesAndTemplatesButton = useMemo(
+    () =>
+      getReloadPrebuiltRulesAndTemplatesButton({
+        isDisabled: userHasNoPermissions(canUserCRUD) || loading,
+        onClick: handleCreatePrePackagedRules,
+      }),
+    [canUserCRUD, getReloadPrebuiltRulesAndTemplatesButton, handleCreatePrePackagedRules, loading]
+  );
+
   if (
     redirectToDetections(
       isSignalIndexExists,
@@ -135,15 +153,6 @@ const RulesPageComponent: React.FC = () => {
     return null;
   }
 
-  const loadPrebuiltRulesAndTemplatesButton = getLoadPrebuiltRulesAndTemplatesButton({
-    isDisabled: userHasNoPermissions(canUserCRUD) || loading,
-    onClick: handleCreatePrePackagedRules,
-  });
-
-  const reloadPrebuiltRulesAndTemplatesButton = getReloadPrebuiltRulesAndTemplatesButton({
-    isDisabled: userHasNoPermissions(canUserCRUD) || loading,
-    onClick: handleCreatePrePackagedRules,
-  });
   return (
     <>
       {userHasNoPermissions(canUserCRUD) && <ReadOnlyCallOut />}

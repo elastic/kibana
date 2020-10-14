@@ -5,7 +5,7 @@
  */
 
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { useHistory } from 'react-router-dom';
@@ -60,12 +60,16 @@ const PrePackagedRulesPromptComponent: React.FC<PrePackagedRulesPromptProps> = (
     hasEncryptionKey,
   });
 
-  const loadPrebuiltRulesAndTemplatesButton = getLoadPrebuiltRulesAndTemplatesButton({
-    isDisabled: userHasNoPermissions,
-    onClick: handlePreBuiltCreation,
-    fill: true,
-    testSubj: 'load-prebuilt-rules',
-  });
+  const loadPrebuiltRulesAndTemplatesButton = useMemo(
+    () =>
+      getLoadPrebuiltRulesAndTemplatesButton({
+        isDisabled: userHasNoPermissions,
+        onClick: handlePreBuiltCreation,
+        fill: true,
+        'data-test-subj': 'load-prebuilt-rules',
+      }),
+    [getLoadPrebuiltRulesAndTemplatesButton, handlePreBuiltCreation, userHasNoPermissions]
+  );
 
   return (
     <EmptyPrompt
