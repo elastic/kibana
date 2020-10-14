@@ -25,7 +25,6 @@ import { createTableVisCell } from './table_vis_cell';
 import { Table } from '../table_vis_response_handler';
 import { TableVisConfig } from '../types';
 import { useFormattedColumnsAndRows, usePagination } from '../utils';
-import { TableVisNoResults } from './table_vis_no_results';
 import { TableVisControls } from './table_vis_controls';
 
 interface TableVisBasicProps {
@@ -45,7 +44,7 @@ export const TableVisBasic = memo(({ table, fireEvent, visConfig }: TableVisBasi
 
   const pagination = usePagination(visConfig);
 
-  return rows.length > 0 ? (
+  return (
     <EuiDataGrid
       aria-label=""
       columns={columns.map((col) => ({
@@ -83,7 +82,5 @@ export const TableVisBasic = memo(({ table, fireEvent, visConfig }: TableVisBasi
       }
       pagination={pagination}
     />
-  ) : (
-    <TableVisNoResults />
   );
 });

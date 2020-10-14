@@ -37,8 +37,16 @@ export const getTableVisRenderer: (
       unmountComponentAtNode(domNode);
     });
 
+    const showNoResult =
+      visData.table?.rows.length === 0 || (!visData.table && visData.tables.length === 0);
+
+    if (showNoResult) {
+      // notify that rendering is done, since the visualization doesn't have data to display
+      handlers.done();
+    }
+
     render(
-      <VisualizationContainer>
+      <VisualizationContainer data-test-subj="tbvChartContainer" showNoResult={showNoResult}>
         <TableVisualizationComponent
           core={core}
           handlers={handlers}

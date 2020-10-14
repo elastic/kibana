@@ -23,12 +23,14 @@ import classNames from 'classnames';
 import { VisualizationNoResults } from './visualization_noresults';
 
 interface VisualizationContainerProps {
+  'data-test-subj'?: string;
   className?: string;
   children: ReactNode;
   showNoResult?: boolean;
 }
 
 export const VisualizationContainer = ({
+  ['data-test-subj']: dataTestSubj,
   className,
   children,
   showNoResult = false,
@@ -42,7 +44,7 @@ export const VisualizationContainer = ({
   );
 
   return (
-    <div className={classes}>
+    <div data-test-subj={dataTestSubj} className={classes}>
       <Suspense fallback={fallBack}>
         {showNoResult ? <VisualizationNoResults /> : children}
       </Suspense>

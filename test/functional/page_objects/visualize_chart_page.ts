@@ -297,7 +297,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
     // Table visualization
 
     public async getTableVisNoResult() {
-      return await testSubjects.find('tbvChart>tbvChartNoResult');
+      return await testSubjects.find('tbvChartContainer>visNoResults');
     }
 
     public async getFieldLinkInVisTable(fieldName: string, rowIndex: number = 1) {
