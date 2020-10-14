@@ -4375,10 +4375,10 @@
   resolved "https://registry.yarnpkg.com/@types/hapi__joi/-/hapi__joi-17.1.6.tgz#b84663676aa9753c17183718338dd40ddcbd3754"
   integrity sha512-y3A1MzNC0FmzD5+ys59RziE1WqKrL13nxtJgrSzjoO7boue5B7zZD2nZLPwrSuUviFjpKFQtgHYSvhDGfIE4jA==
 
-"@types/hapi__mimos@*":
-  version "4.1.3"
-  resolved "https://registry.yarnpkg.com/@types/hapi__mimos/-/hapi__mimos-4.1.3.tgz#e2ad0510af090a87c16f5a7bdffbb9638ef36444"
-  integrity sha512-vZiKXZ0QqwSh0v1z9/f/VEPvmAHQaAXeVK9kGQIQH+2cqxrb2IL4TSDF0aPhPnNzuCvcUWaeCuGXj8V79v/kEA==
+"@types/hapi__mimos@*", "@types/hapi__mimos@4.1.0":
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/@types/hapi__mimos/-/hapi__mimos-4.1.0.tgz#47dbf89ebfc05183c1de2797e9426793db9a0d85"
+  integrity sha512-hcdSoYa32wcP+sEfyf85ieGwElwokcZ/mma8eyqQ4OTHeCAGwfaoiGxjG4z1Dm+RGhIYLHlW54ji5FFwahH12A==
   dependencies:
     "@types/mime-db" "*"
 

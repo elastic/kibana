@@ -80,6 +80,7 @@
     "**/@hapi/iron": "^5.1.4",
     "**/@types/hapi__boom": "^7.4.1",
     "**/@types/hapi__hapi": "^18.2.6",
+    "**/@types/hapi__mimos": "4.1.0",
     "**/@types/node": ">=10.17.17 <10.20.0",
     "**/cross-fetch/node-fetch": "^2.6.1",
     "**/deepmerge": "^4.2.2",
