@@ -160,11 +160,13 @@ export class OptimizerConfig {
       throw new TypeError('outputRoot must be an absolute path');
     }
 
-    const pluginScanDirs = getPluginSearchPaths({
-      rootDir: repoRoot,
-      oss,
-      examples,
-    });
+    const pluginScanDirs =
+      options.pluginScanDirs ||
+      getPluginSearchPaths({
+        rootDir: repoRoot,
+        oss,
+        examples,
+      });
 
     if (!pluginScanDirs.every((p) => Path.isAbsolute(p))) {
       throw new TypeError('pluginScanDirs must all be absolute paths');
