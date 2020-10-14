@@ -22,10 +22,17 @@ export interface AlertState {
   ui: AlertUiState;
 }
 
-export interface AlertCpuUsageState extends AlertState {
-  cpuUsage: number;
+export interface AlertNodeState extends AlertState {
   nodeId: string;
-  nodeName: string;
+  nodeName?: string;
+}
+
+export interface AlertCpuUsageState extends AlertNodeState {
+  cpuUsage: number;
+}
+
+export interface AlertDiskUsageState extends AlertNodeState {
+  diskUsage: number;
 }
 
 export interface AlertMissingDataState extends AlertState {
@@ -35,10 +42,8 @@ export interface AlertMissingDataState extends AlertState {
   gapDuration: number;
 }
 
-export interface AlertDiskUsageState extends AlertState {
-  diskUsage: number;
-  nodeId: string;
-  nodeName?: string;
+export interface AlertMemoryUsageState extends AlertNodeState {
+  memoryUsage: number;
 }
 
 export interface AlertUiState {
@@ -81,23 +86,26 @@ export interface AlertCluster {
   clusterName: string;
 }
 
-export interface AlertCpuUsageNodeStats {
+export interface AlertNodeStats {
   clusterUuid: string;
   nodeId: string;
-  nodeName: string;
+  nodeName?: string;
+  ccs?: string;
+}
+
+export interface AlertCpuUsageNodeStats extends AlertNodeStats {
   cpuUsage: number;
   containerUsage: number;
   containerPeriods: number;
   containerQuota: number;
-  ccs?: string;
 }
 
-export interface AlertDiskUsageNodeStats {
-  clusterUuid: string;
-  nodeId: string;
-  nodeName: string;
+export interface AlertDiskUsageNodeStats extends AlertNodeStats {
   diskUsage: number;
-  ccs?: string;
+}
+
+export interface AlertMemoryUsageNodeStats extends AlertNodeStats {
+  memoryUsage: number;
 }
 
 export interface AlertMissingData {

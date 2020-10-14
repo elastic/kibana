@@ -51,7 +51,7 @@ export const ProductSelector: React.FC<IProductSelectorProps> = ({ access }) => 
 
   return (
     <EuiPage restrictWidth className="enterpriseSearchOverview">
-      <SetPageChrome isRoot />
+      <SetPageChrome />
       <SendTelemetry action="viewed" metric="overview" />
 
       <EuiPageBody>

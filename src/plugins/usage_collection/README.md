@@ -37,10 +37,9 @@ All you need to provide is a `type` for organizing your fields, `schema` field t
     ```
 
 3. Creating and registering a Usage Collector. Ideally collectors would be defined in a separate directory `server/collectors/register.ts`.
-
     ```ts
     // server/collectors/register.ts
-    import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+    import { UsageCollectionSetup, CollectorFetchContext } from 'src/plugins/usage_collection/server';
     import { APICluster } from 'kibana/server';
 
     interface Usage {
@@ -63,7 +62,7 @@ All you need to provide is a `type` for organizing your fields, `schema` field t
             total: 'long',
           },
         },
-        fetch: async (callCluster: APICluster, esClient: IClusterClient) => {
+        fetch: async (collectorFetchContext: CollectorFetchContext) => {
 
         // query ES and get some data
         // summarize the data into a model
@@ -325,3 +324,8 @@ By storing these metrics and their counts as key-value pairs, we can add more me
 to worry about exceeding the 1000-field soft limit in Elasticsearch.
 
 The only caveat is that it makes it harder to consume in Kibana when analysing each entry in the array separately. In the telemetry team we are working to find a solution to this.
+
+# Routes registered by this plugin
+
+- `/api/ui_metric/report`: Used by `ui_metrics` usage collector instances to report their usage data to the server
+- `/api/stats`: Get the metrics and usage ([details](./server/routes/stats/README.md))

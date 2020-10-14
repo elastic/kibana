@@ -61,7 +61,7 @@ export const useTimelineLastEventTime = ({
     details,
   });
 
-  const [TimelineLastEventTimeResponse, setTimelineLastEventTimeResponse] = useState<
+  const [timelineLastEventTimeResponse, setTimelineLastEventTimeResponse] = useState<
     UseTimelineLastEventTimeArgs
   >({
     lastSeen: null,
@@ -151,5 +151,5 @@ export const useTimelineLastEventTime = ({
     timelineLastEventTimeSearch(TimelineLastEventTimeRequest);
   }, [TimelineLastEventTimeRequest, timelineLastEventTimeSearch]);
 
-  return [loading, TimelineLastEventTimeResponse];
+  return [loading, timelineLastEventTimeResponse];
 };

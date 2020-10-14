@@ -18,7 +18,7 @@ import {
 import { TextEditor } from '../../field_components';
 import { to, from, EDITOR_PX_HEIGHT } from '../shared';
 
-const ignoreFailureConfig: FieldConfig = {
+const ignoreFailureConfig: FieldConfig<any> = {
   defaultValue: false,
   deserializer: to.booleanOrUndef,
   serializer: from.undefinedIfValue(false),

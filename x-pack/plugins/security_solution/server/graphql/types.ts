@@ -276,6 +276,11 @@ export enum HostPolicyResponseActionStatus {
   warning = 'warning',
 }
 
+export enum TimelineType {
+  default = 'default',
+  template = 'template',
+}
+
 export enum DataProviderType {
   default = 'default',
   template = 'template',
@@ -301,11 +306,6 @@ export enum TimelineStatus {
   active = 'active',
   draft = 'draft',
   immutable = 'immutable',
-}
-
-export enum TimelineType {
-  default = 'default',
-  template = 'template',
 }
 
 export enum SortFieldTimeline {
@@ -1601,6 +1601,8 @@ export interface SourceQueryArgs {
 }
 export interface GetOneTimelineQueryArgs {
   id: string;
+
+  timelineType?: Maybe<TimelineType>;
 }
 export interface GetAllTimelineQueryArgs {
   pageInfo: PageInfoTimeline;
@@ -1838,6 +1840,8 @@ export namespace QueryResolvers {
   > = Resolver<R, Parent, TContext, GetOneTimelineArgs>;
   export interface GetOneTimelineArgs {
     id: string;
+
+    timelineType?: Maybe<TimelineType>;
   }
 
   export type GetAllTimelineResolver<

@@ -76,6 +76,14 @@ export const MonitorStatusBar: React.FC = () => {
         </MonListDescription>
         <MonListTitle>{MonitorIDLabel}</MonListTitle>
         <MonListDescription data-test-subj="monitor-page-title">{monitorId}</MonListDescription>
+        {monitorStatus?.monitor?.type && (
+          <>
+            <MonListTitle aria-label={labels.typeAriaLabel}>{labels.typeLabel}</MonListTitle>
+            <MonListDescription data-test-subj="monitor-page-type">
+              {monitorStatus.monitor.type}
+            </MonListDescription>
+          </>
+        )}
         <MonitorSSLCertificate tls={monitorStatus?.tls} />
         <MonitorRedirects monitorStatus={monitorStatus} />
       </EuiDescriptionList>
