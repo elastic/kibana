@@ -36,24 +36,27 @@ import { SharePluginStart } from '../../../share/public';
 import { UrlForwardingStart } from '../../../url_forwarding/public';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
 import { DashboardSetupDependencies, DashboardStart, DashboardStartDependencies } from '../plugin';
-import { Storage } from '../../../kibana_utils/public';
+import { IKbnUrlStateStorage, Storage } from '../../../kibana_utils/public';
 import { DashboardCapabilities } from '../types';
 
 export type RedirectToDashboard = (props: RedirectToDashboardProps) => void;
 
 export interface RedirectToDashboardProps {
   id?: string;
+  filter?: string;
   useReplace?: boolean;
 }
 export interface DashboardAppProps {
   savedDashboardId?: string;
   history: History; // TODO: Remove history after state deangularize?
+  kbnUrlStateStorage: IKbnUrlStateStorage;
 }
 
 export interface DashboardListingProps {
   initialFilter?: string;
   title?: string;
   redirectToDashboard: RedirectToDashboard;
+  kbnUrlStateStorage: IKbnUrlStateStorage;
 }
 
 export interface DashboardMountProps {

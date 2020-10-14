@@ -17,17 +17,22 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import { I18nProvider } from '@kbn/i18n/react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Switch, Route, RouteComponentProps, HashRouter } from 'react-router-dom';
 import { parse } from 'query-string';
-import { Storage } from '../../../kibana_utils/public';
+import {
+  createKbnUrlStateStorage,
+  Storage,
+  withNotifyOnErrors,
+} from '../../../kibana_utils/public';
 import { KibanaContextProvider } from '../../../kibana_react/public';
 import { DashboardListing, Dashboard404 } from './listing';
 import { DashboardAppServices, DashboardMountProps, RedirectToDashboardProps } from './types';
 import { DashboardApp } from './dashboard_app';
+import { createDashboardListingFilterUrl } from '../dashboard_constants';
 import { createDashboardEditUrl, DashboardConstants } from '..';
 
 export async function mountApp({
@@ -82,25 +87,34 @@ export async function mountApp({
     },
   };
 
+  const getUrlStateStorage = (history: RouteComponentProps['history']) =>
+    createKbnUrlStateStorage({
+      history,
+      useHash: coreStart.uiSettings.get('state:storeInSessionStorage'),
+      ...withNotifyOnErrors(core.notifications.toasts),
+    });
+
   const renderDashboard = (routeProps: RouteComponentProps<{ id?: string }>) => {
     return (
-      <DashboardApp history={routeProps.history} savedDashboardId={routeProps.match.params.id} />
+      <DashboardApp
+        history={routeProps.history}
+        kbnUrlStateStorage={getUrlStateStorage(routeProps.history)}
+        savedDashboardId={routeProps.match.params.id}
+      />
     );
   };
 
   const redirect = (
     routeProps: RouteComponentProps,
-    { id, useReplace }: RedirectToDashboardProps
+    { id, useReplace, filter }: RedirectToDashboardProps
   ) => {
-    if (useReplace) {
-      routeProps.history.replace(
-        id ? createDashboardEditUrl(id) : DashboardConstants.CREATE_NEW_DASHBOARD_URL
-      );
-      return;
-    }
-    routeProps.history.push(
-      id ? createDashboardEditUrl(id) : DashboardConstants.CREATE_NEW_DASHBOARD_URL
-    );
+    const historyFunction = useReplace ? routeProps.history.replace : routeProps.history.push;
+    const destination = id
+      ? createDashboardEditUrl(id)
+      : filter
+      ? createDashboardListingFilterUrl(filter)
+      : DashboardConstants.CREATE_NEW_DASHBOARD_URL;
+    historyFunction(destination);
   };
 
   const renderListingPage = (routeProps: RouteComponentProps) => {
@@ -111,6 +125,7 @@ export async function mountApp({
       <DashboardListing
         initialFilter={filter}
         title={title}
+        kbnUrlStateStorage={getUrlStateStorage(routeProps.history)}
         redirectToDashboard={(props: RedirectToDashboardProps) => redirect(routeProps, props)}
       />
     );

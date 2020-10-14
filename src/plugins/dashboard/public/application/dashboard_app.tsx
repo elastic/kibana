@@ -20,14 +20,12 @@
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useCallback } from 'react';
 
-import _ from 'lodash';
-import { map } from 'rxjs/operators';
+import _, { uniqBy } from 'lodash';
+import deepEqual from 'fast-deep-equal';
+import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
+import { Observable, pipe } from 'rxjs';
 import { DashboardStateManager } from './dashboard_state_manager';
-import {
-  createKbnUrlStateStorage,
-  SavedObjectNotFound,
-  withNotifyOnErrors,
-} from '../../../kibana_utils/public';
+import { SavedObjectNotFound } from '../../../kibana_utils/public';
 import { DashboardAppProps, DashboardAppServices } from './types';
 import { useKibana } from '../../../kibana_react/public';
 import { DashboardSavedObject } from '../saved_dashboards';
@@ -35,10 +33,24 @@ import { migrateLegacyQuery } from './lib/migrate_legacy_query';
 import {
   connectToQueryState,
   esFilters,
+  IndexPattern,
   QueryState,
   syncQueryStateWithUrl,
 } from '../../../data/public';
-import { DashboardConstants } from '..';
+import {
+  ContainerOutput,
+  EmbeddableFactoryNotFoundError,
+  ErrorEmbeddable,
+  isErrorEmbeddable,
+} from '../../../embeddable/public';
+import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE } from '.';
+import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
+import {
+  DashboardConstants,
+  DashboardContainer,
+  DashboardContainerInput,
+  SavedDashboardPanel,
+} from '..';
 
 enum UrlParams {
   SHOW_TOP_MENU = 'show-top-menu',
@@ -59,18 +71,18 @@ interface UrlParamsSelectedMap {
 //   [UrlParams.HIDE_FILTER_BAR]: boolean;
 // }
 
-export function DashboardApp({ savedDashboardId, history }: DashboardAppProps) {
+export function DashboardApp({ savedDashboardId, history, kbnUrlStateStorage }: DashboardAppProps) {
   const {
     core,
     chrome,
     // localStorage,
-    // embeddable,
+    embeddable,
     data,
     uiSettings,
     // savedObjects,
     savedDashboards,
     initializerContext,
-    // indexPatterns,
+    indexPatterns,
     // navigation,
     // dashboardCapabilities,
     // savedObjectsClient,
@@ -87,17 +99,54 @@ export function DashboardApp({ savedDashboardId, history }: DashboardAppProps) {
     // share,
   } = useKibana<DashboardAppServices>().services;
 
+  // const updateIndexPatternsOperator = pipe(
+  //   filter((container: DashboardContainer) => !!container && !isErrorEmbeddable(container)),
+  //   map((container: DashboardContainer): IndexPattern[] => {
+  //     let panelIndexPatterns: IndexPattern[] = [];
+  //     Object.values(container.getChildIds()).forEach((id) => {
+  //       const embeddableInstance = container.getChild(id);
+  //       if (isErrorEmbeddable(embeddableInstance)) return;
+  //       const embeddableIndexPatterns = (embeddableInstance.getOutput() as any).indexPatterns;
+  //       if (!embeddableIndexPatterns) return;
+  //       panelIndexPatterns.push(...embeddableIndexPatterns);
+  //     });
+  //     panelIndexPatterns = uniqBy(panelIndexPatterns, 'id');
+  //     return panelIndexPatterns;
+  //   }),
+  //   distinctUntilChanged((a, b) =>
+  //     deepEqual(
+  //       a.map((ip) => ip.id),
+  //       b.map((ip) => ip.id)
+  //     )
+  //   ),
+  //   // using switchMap for previous task cancellation
+  //   switchMap((panelIndexPatterns: IndexPattern[]) => {
+  //     return new Observable((observer) => {
+  //       if (panelIndexPatterns && panelIndexPatterns.length > 0) {
+  //         $scope.$evalAsync(() => {
+  //           if (observer.closed) return;
+  //           $scope.indexPatterns = panelIndexPatterns;
+  //           observer.complete();
+  //         });
+  //       } else {
+  //         indexPatterns.getDefault().then((defaultIndexPattern) => {
+  //           if (observer.closed) return;
+  //           $scope.$evalAsync(() => {
+  //             if (observer.closed) return;
+  //             $scope.indexPatterns = [defaultIndexPattern as IndexPattern];
+  //             observer.complete();
+  //           });
+  //         });
+  //       }
+  //     });
+  //   })
+  // );
+
   const initializeStateSyncing = useCallback(
     (savedDashboard: DashboardSavedObject) => {
       const filterManager = data.query.filterManager;
       const timefilter = data.query.timefilter.timefilter;
       const queryStringManager = data.query.queryString;
-
-      const kbnUrlStateStorage = createKbnUrlStateStorage({
-        history,
-        useHash: uiSettings.get('state:storeInSessionStorage'),
-        ...withNotifyOnErrors(core.notifications.toasts),
-      });
 
       const dashboardStateManager = new DashboardStateManager({
         savedDashboard,
@@ -162,19 +211,74 @@ export function DashboardApp({ savedDashboardId, history }: DashboardAppProps) {
       dashboardStateManager.startStateSyncing();
 
       return {
+        dashboardStateManager,
         stopSyncingQueryServiceStateWithUrl,
         stopSyncingAppFilters,
       };
     },
     [
-      core.notifications.toasts,
+      kbnUrlStateStorage,
       dashboardConfig,
       history,
-      uiSettings,
       usageCollection,
       initializerContext.env,
       data.query,
     ]
+  );
+
+  const getDashboardInput = useCallback(
+    ({
+      dashboardStateManager,
+    }: {
+      dashboardStateManager: DashboardStateManager;
+    }): DashboardContainerInput => {
+      const embeddablesMap: {
+        [key: string]: DashboardPanelState;
+      } = {};
+      dashboardStateManager.getPanels().forEach((panel: SavedDashboardPanel) => {
+        embeddablesMap[panel.panelIndex] = convertSavedDashboardPanelToPanelState(panel);
+      });
+
+      // If the incoming embeddable state's id already exists in the embeddables map, replace the input, retaining the existing gridData for that panel.
+      // if (incomingEmbeddable?.embeddableId && embeddablesMap[incomingEmbeddable.embeddableId]) {
+      //   const originalPanelState = embeddablesMap[incomingEmbeddable.embeddableId];
+      //   embeddablesMap[incomingEmbeddable.embeddableId] = {
+      //     gridData: originalPanelState.gridData,
+      //     type: incomingEmbeddable.type,
+      //     explicitInput: {
+      //       ...originalPanelState.explicitInput,
+      //       ...incomingEmbeddable.input,
+      //       id: incomingEmbeddable.embeddableId,
+      //     },
+      //   };
+      //   incomingEmbeddable = undefined;
+      // }
+
+      // const shouldShowEditHelp = getShouldShowEditHelp();
+      // const shouldShowViewHelp = getShouldShowViewHelp();
+      // const isEmptyInReadonlyMode = shouldShowUnauthorizedEmptyState();
+      return {
+        id: dashboardStateManager.savedDashboard.id || '',
+        filters: data.query.filterManager.getFilters(),
+        hidePanelTitles: dashboardStateManager.getHidePanelTitles(),
+        query: data.query.queryString.getQuery(),
+        timeRange: {
+          ..._.cloneDeep(data.query.timefilter.timefilter.getTime()),
+        },
+        refreshConfig: data.query.timefilter.timefilter.getRefreshInterval(),
+        viewMode: dashboardStateManager.getViewMode(),
+        panels: embeddablesMap,
+        isFullScreenMode: dashboardStateManager.getFullScreenMode(),
+        // isEmbeddedExternally,
+        // isEmptyState: shouldShowEditHelp || shouldShowViewHelp || isEmptyInReadonlyMode,
+        useMargins: dashboardStateManager.getUseMargins(),
+        // lastReloadRequestTime,
+        title: dashboardStateManager.getTitle(),
+        description: dashboardStateManager.getDescription(),
+        expandedPanelId: dashboardStateManager.getExpandedPanelId(),
+      };
+    },
+    [data.query]
   );
 
   // Dashboard loading useEffect
@@ -191,6 +295,38 @@ export function DashboardApp({ savedDashboardId, history }: DashboardAppProps) {
             savedDashboardId
           );
         }
+
+        const {
+          dashboardStateManager,
+          stopSyncingQueryServiceStateWithUrl,
+          stopSyncingAppFilters,
+        } = initializeStateSyncing(savedDashboard);
+
+        const dashboardFactory = embeddable.getEmbeddableFactory<
+          DashboardContainerInput,
+          ContainerOutput,
+          DashboardContainer
+        >(DASHBOARD_CONTAINER_TYPE);
+        if (!dashboardFactory) {
+          throw new EmbeddableFactoryNotFoundError(
+            'dashboard app requires dashboard embeddable factory'
+          );
+        }
+
+        dashboardFactory
+          .create(getDashboardInput({ dashboardStateManager }))
+          .then((container: DashboardContainer | ErrorEmbeddable | undefined) => {
+            if (!container || isErrorEmbeddable(container)) {
+              return;
+            }
+
+            container.render(document.getElementById('dashboardViewport')!);
+          });
+
+        return () => {
+          stopSyncingQueryServiceStateWithUrl();
+          stopSyncingAppFilters();
+        };
       })
       .catch((error) => {
         // Preserve BWC of v5.3.0 links for new, unsaved dashboards.
@@ -218,13 +354,16 @@ export function DashboardApp({ savedDashboardId, history }: DashboardAppProps) {
         }
       });
   }, [
+    embeddable,
     history,
     savedDashboards,
     savedDashboardId,
     data.indexPatterns,
     chrome.recentlyAccessed,
     core.notifications.toasts,
+    initializeStateSyncing,
+    getDashboardInput,
   ]);
 
-  return <h1>This is the BRAND NEW DASHBOARD APP</h1>;
+  return <div id="dashboardViewport" />;
 }

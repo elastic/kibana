@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { Fragment, useCallback } from 'react';
+import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
@@ -26,6 +26,7 @@ import { TableListView, useKibana } from '../../../../kibana_react/public';
 import { DashboardConstants, createDashboardEditUrl } from '../..';
 import { ApplicationStart } from '../../../../../core/public';
 import { DashboardSavedObject } from '../../saved_dashboards';
+import { syncQueryStateWithUrl } from '../../../../data/public';
 
 export const EMPTY_FILTER = '';
 
@@ -38,30 +39,43 @@ export const DashboardListing = ({
   initialFilter,
   title,
   redirectToDashboard,
+  kbnUrlStateStorage,
 }: DashboardListingProps) => {
   const {
-    services: { core, savedObjects, savedDashboards, dashboardConfig, savedObjectsClient },
+    services: { core, data, savedObjects, savedDashboards, dashboardConfig, savedObjectsClient },
   } = useKibana<DashboardAppServices>();
 
-  if (title) {
-    savedObjectsClient
-      .find<DashboardSavedObject>({
-        search: `"${title}"`,
-        searchFields: ['title'],
-        type: 'dashboard',
-      })
-      .then((results) => {
-        // The search isn't an exact match, lets see if we can find a single exact match to use
-        const matchingDashboards = results.savedObjects.filter(
-          (dashboard) => dashboard.attributes.title.toLowerCase() === title.toLowerCase()
-        );
-        if (matchingDashboards.length === 1) {
-          redirectToDashboard({ id: matchingDashboards[0].id, useReplace: true });
-        } else {
-          initialFilter = title;
-        }
-      });
-  }
+  useEffect(() => {
+    // syncs `_g` portion of url with query services
+    const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
+      data.query,
+      kbnUrlStateStorage
+    );
+
+    if (title) {
+      savedObjectsClient
+        .find<DashboardSavedObject>({
+          search: `"${title}"`,
+          searchFields: ['title'],
+          type: 'dashboard',
+        })
+        .then((results) => {
+          // The search isn't an exact match, lets see if we can find a single exact match to use
+          const matchingDashboards = results.savedObjects.filter(
+            (dashboard) => dashboard.attributes.title.toLowerCase() === title.toLowerCase()
+          );
+          if (matchingDashboards.length === 1) {
+            redirectToDashboard({ id: matchingDashboards[0].id, useReplace: true });
+          } else {
+            redirectToDashboard({ filter: title, useReplace: true });
+          }
+        });
+    }
+
+    return () => {
+      stopSyncingQueryServiceStateWithUrl();
+    };
+  }, [title, savedObjectsClient, redirectToDashboard, data.query, kbnUrlStateStorage]);
 
   const hideWriteControls = dashboardConfig.getHideWriteControls();
   const listingLimit = savedObjects.settings.getListingLimit();

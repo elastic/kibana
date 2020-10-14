@@ -30,3 +30,7 @@ export const DashboardConstants = {
 export function createDashboardEditUrl(id: string) {
   return `${DashboardConstants.VIEW_DASHBOARD_URL}/${id}`;
 }
+
+export function createDashboardListingFilterUrl(filter: string) {
+  return `${DashboardConstants.LANDING_PAGE_PATH}?filter="${filter}"`;
+}
