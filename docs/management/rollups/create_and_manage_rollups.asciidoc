@@ -8,11 +8,7 @@ by an index pattern, and then rolls it into a new index. Rollup indices are a go
 compactly store months or years of historical
 data for use in visualizations and reports.
 
-To get started, open the menu, then click *Stack Management > Rollup Jobs*. With this UI,
-you can:
-
-* <<create-and-manage-rollup-job, Create a rollup job>>
-* <<manage-rollup-job, Start&comma; stop&comma; and delete rollup jobs>>
+To get started, open the menu, then click *Stack Management > Rollup Jobs*.
 
 [role="screenshot"]
 image::images/management_rollup_list.png[][List of currently active rollup jobs]
