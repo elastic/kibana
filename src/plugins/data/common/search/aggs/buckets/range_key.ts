@@ -33,7 +33,7 @@ export class RangeKey {
   lt: string | number;
   label?: string;
 
-  private static findCustomLabel(
+  private findCustomLabel(
     from: string | number | undefined | null,
     to: string | number | undefined | null,
     ranges?: Ranges
@@ -48,14 +48,13 @@ export class RangeKey {
   constructor(bucket: any, allRanges?: Ranges) {
     this.gte = bucket.from == null ? -Infinity : bucket.from;
     this.lt = bucket.to == null ? +Infinity : bucket.to;
-    this.label = RangeKey.findCustomLabel(bucket.from, bucket.to, allRanges);
+    this.label = this.findCustomLabel(bucket.from, bucket.to, allRanges);
 
     this[id] = RangeKey.idBucket(bucket);
   }
 
-  static idBucket(bucket: any, allRanges?: Ranges) {
-    const customLabel = RangeKey.findCustomLabel(bucket.from, bucket.to, allRanges);
-    return `from:${bucket.from},to:${bucket.to},label:${customLabel}`;
+  static idBucket(bucket: any) {
+    return `from:${bucket.from},to:${bucket.to}`;
   }
 
   toString() {
