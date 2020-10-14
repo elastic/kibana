@@ -35,23 +35,9 @@ import {
 } from './actions';
 import { Action } from './reducer';
 import { LocalizedDateTooltip } from '../../../../../common/components/localized_date_tooltip';
-import * as detectionI18n from '../../translations';
 import { LinkAnchor } from '../../../../../common/components/links';
+import { getToolTipContent, canEditRule } from '../../../../../common/utils/privileges';
 import { TagsDisplay } from './tag_display';
-
-const canEditRule = (
-  rule: Rule,
-  privileges:
-    | boolean
-    | Readonly<{
-        [x: string]: boolean;
-      }>
-) => {
-  if (rule.actions != null && rule.actions.length > 0) {
-    return privileges;
-  }
-  return true;
-};
 
 export const getActions = (
   dispatch: React.Dispatch<Action>,
@@ -259,11 +245,7 @@ export const getColumns = ({
       render: (value: Rule['enabled'], item: Rule) => (
         <EuiToolTip
           position="top"
-          content={
-            isMlRule(item.type) && !hasMlPermissions
-              ? detectionI18n.ML_RULES_DISABLED_MESSAGE
-              : undefined
-          }
+          content={getToolTipContent(item, hasMlPermissions, hasReadActionsPrivileges as boolean)}
         >
           <RuleSwitch
             data-test-subj="enabled"
@@ -271,7 +253,9 @@ export const getColumns = ({
             id={item.id}
             enabled={item.enabled}
             isDisabled={
-              hasNoPermissions || (isMlRule(item.type) && !hasMlPermissions && !item.enabled)
+              !canEditRule(item, hasReadActionsPrivileges) ||
+              hasNoPermissions ||
+              (isMlRule(item.type) && !hasMlPermissions && !item.enabled)
             }
             isLoading={loadingRuleIds.includes(item.id)}
           />

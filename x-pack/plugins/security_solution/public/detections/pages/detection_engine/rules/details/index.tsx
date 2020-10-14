@@ -89,6 +89,8 @@ import { timelineDefaults } from '../../../../../timelines/store/timeline/defaul
 import { TimelineModel } from '../../../../../timelines/store/timeline/model';
 import { useSourcererScope } from '../../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
+import { getToolTipContent, canEditRule } from '../../../../../common/utils/privileges';
+
 import { AlertsHistogramOption } from '../../../../components/alerts_histogram_panel/types';
 
 enum RuleDetailTabs {
@@ -176,7 +178,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   } = useKibana();
   const hasActionsPrivileges = useMemo(() => {
     if (rule?.actions != null && rule?.actions.length > 0) {
-      return actions.show;
+      return actions.show as boolean;
     }
     return true;
   }, [actions, rule?.actions]);
@@ -311,7 +313,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
     [history, ruleId]
   );
 
-  const canEditRule = useMemo(() => {
+  const editRule = useMemo(() => {
     if (!hasActionsPrivileges) {
       return (
         <EuiToolTip position="top" content={ruleI18n.EDIT_RULE_SETTINGS_TOOLTIP}>
@@ -431,16 +433,14 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                   <EuiFlexItem grow={false}>
                     <EuiToolTip
                       position="top"
-                      content={
-                        isMlRule(rule?.type) && !hasMlPermissions
-                          ? detectionI18n.ML_RULES_DISABLED_MESSAGE
-                          : undefined
-                      }
+                      content={getToolTipContent(rule, hasMlPermissions, hasActionsPrivileges)}
                     >
                       <RuleSwitch
                         id={rule?.id ?? '-1'}
                         isDisabled={
-                          userHasNoPermissions(canUserCRUD) || (!hasMlPermissions && !rule?.enabled)
+                          !canEditRule(rule, hasActionsPrivileges) ||
+                          userHasNoPermissions(canUserCRUD) ||
+                          (!hasMlPermissions && !rule?.enabled)
                         }
                         enabled={rule?.enabled ?? false}
                         optionLabel={i18n.ACTIVATE_RULE}
@@ -451,7 +451,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
 
                   <EuiFlexItem grow={false}>
                     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                      <EuiFlexItem grow={false}>{canEditRule}</EuiFlexItem>
+                      <EuiFlexItem grow={false}>{editRule}</EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <RuleActionsOverflow
                           rule={rule}
