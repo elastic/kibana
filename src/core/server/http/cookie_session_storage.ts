@@ -20,7 +20,7 @@
 import { Request, Server } from '@hapi/hapi';
 import hapiAuthCookie from '@hapi/cookie';
 // @ts-expect-error no TS definitions
-import Statehood from 'statehood';
+import Statehood from '@hapi/statehood';
 
 import { KibanaRequest, ensureRawRequest } from './router';
 import { SessionStorageFactory, SessionStorage } from './session_storage';
