@@ -12,7 +12,7 @@ import {
 
 import { SafeResolverEvent } from '../../../../common/endpoint/types';
 
-describe('indexed tree when representing a process tree', () => {
+describe('When `IndexedTree.fromIterable` is called with `nodes` and `edges` functions that can build a process tree from ECS events', () => {
   function* processTreeNodes(event: SafeResolverEvent): Iterable<string> {
     const entityID = entityIDSafeVersion(event);
     const parentEntitydID = parentEntityIDSafeVersion(event);
@@ -24,17 +24,23 @@ describe('indexed tree when representing a process tree', () => {
     const parentEntitydID = parentEntityIDSafeVersion(event);
     if (entityID && parentEntitydID) yield [parentEntitydID, entityID];
   }
-  describe(`when representing a tree with a single node ('root')`, () => {
+  function iterableWithSingleNode(): Iterable<SafeResolverEvent> {
+    return [
+      {
+        process: {
+          entity_id: 'root',
+        },
+      },
+    ];
+  }
+  describe(`and when the iterable is ${JSON.stringify(iterableWithSingleNode())}`, () => {
     let tree: IndexedTree;
     beforeEach(() => {
-      const iterable: Iterable<SafeResolverEvent> = [
-        {
-          process: {
-            entity_id: 'root',
-          },
-        },
-      ];
-      tree = IndexedTree.fromIterable(iterable, processTreeNodes, processTreeEdges)!;
+      tree = IndexedTree.fromIterable(
+        iterableWithSingleNode(),
+        processTreeNodes,
+        processTreeEdges
+      )!;
     });
     it(`should not have any children for 'root'`, () => {
       expect([...tree.children('root')]).toEqual([]);
