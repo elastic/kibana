@@ -69,7 +69,7 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({
                     : !nodesByRoles.data_cold?.length;
 
                 if (isUsingNodeRolesAllocation && hasNoNodesWithNodeRole) {
-                  // Tell cloud users they can deploy cold tier nodes.
+                  // Tell cloud users they can deploy nodes on cloud.
                   return (
                     <>
                       <EuiSpacer size="s" />
