@@ -64,6 +64,7 @@ const PrePackagedRulesPromptComponent: React.FC<PrePackagedRulesPromptProps> = (
     isDisabled: userHasNoPermissions,
     onClick: handlePreBuiltCreation,
     fill: true,
+    testSubj: 'load-prebuilt-rules',
   });
 
   return (

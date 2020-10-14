@@ -33,10 +33,12 @@ type GetLoadPrebuiltRulesAndTemplatesButton = ({
   isDisabled,
   onClick,
   fill,
+  testSubj,
 }: {
   isDisabled: boolean;
   onClick: () => void;
   fill?: boolean;
+  testSubj?: string;
 }) => React.ReactNode | null;
 
 type GetReloadPrebuiltRulesAndTemplatesButton = ({
@@ -279,7 +281,7 @@ export const usePrePackagedRules = ({
     ]
   );
   const getLoadPrebuiltRulesAndTemplatesButton = useCallback(
-    ({ isDisabled, onClick, fill }) => {
+    ({ isDisabled, onClick, fill, testSubj = 'loadPrebuiltRulesBtn' }) => {
       return prePackagedRuleStatus === 'ruleNotInstalled' ||
         prePackagedTimelineStatus === 'timelinesNotInstalled' ? (
         <EuiButton
@@ -288,7 +290,7 @@ export const usePrePackagedRules = ({
           isLoading={loadingCreatePrePackagedRules}
           isDisabled={isDisabled}
           onClick={onClick}
-          data-test-subj="loadPrebuiltRulesBtn"
+          data-test-subj={testSubj}
         >
           {prePackagedRuleStatus === 'ruleNotInstalled' &&
             prePackagedTimelineStatus === 'timelinesNotInstalled' &&
