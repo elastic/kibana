@@ -143,7 +143,7 @@ export class Plugin {
         kibanaUrl,
         isCloud
       );
-      plugins.alerts.registerType(alert.getAlertType());
+      plugins.alerts?.registerType(alert.getAlertType());
     }
 
     // Initialize telemetry

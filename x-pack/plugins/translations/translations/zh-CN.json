@@ -16425,7 +16425,6 @@
     "xpack.securitySolution.timeline.flyout.pane.timelinePropertiesAriaLabel": "时间线属性",
     "xpack.securitySolution.timeline.flyoutTimelineTemplateLabel": "时间线模板",
     "xpack.securitySolution.timeline.fullScreenButton": "全屏",
-    "xpack.securitySolution.timeline.graphOverlay.backToEventsButton": "&lt; 返回至事件",
     "xpack.securitySolution.timeline.properties.attachTimelineToCaseTooltip": "请为您的时间线提供标题，以便将其附加到案例",
     "xpack.securitySolution.timeline.properties.attachToExistingCaseButtonLabel": "附加到现有案例......",
     "xpack.securitySolution.timeline.properties.attachToNewCaseButtonLabel": "附加到新案例",
