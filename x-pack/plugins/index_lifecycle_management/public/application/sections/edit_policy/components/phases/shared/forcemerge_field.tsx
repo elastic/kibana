@@ -20,6 +20,8 @@ import {
   fieldValidators,
 } from '../../../../../../shared_imports';
 
+import { ifExistsNumberGreaterThanZero } from './validations';
+
 const { emptyField } = fieldValidators;
 
 const i18nTexts = {
@@ -57,6 +59,9 @@ const fieldsConfig = {
     validations: [
       {
         validator: emptyField(i18nTexts.numberOfSegmentsRequiredError),
+      },
+      {
+        validator: ifExistsNumberGreaterThanZero,
       },
     ],
     serializer: (v: string): any => (v ? parseInt(v, 10) : undefined),
