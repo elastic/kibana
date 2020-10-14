@@ -55,25 +55,6 @@ These data sets are now ready be analyzed in ML jobs in Kibana.
 
 ## Running tests
 
-### Unit tests
-
-Run the test following unit tests from `kibana/x-pack`.
-
-Client side tests:
-
-```
-yarn test:browser:dev
-```
-```
-yarn test:browser:dev --plugins ml
-```
-
-Server side test:
-
-```
-yarn test:server -s
-```
-
 ### Jest tests
 
 Run the test following jest tests from `kibana/x-pack`.
@@ -102,3 +83,55 @@ Run tests with verbose output:
 node scripts/jest plugins/ml --verbose
 ```
 
+### Functional tests
+
+Before running the test server, make sure to quit all other instances of 
+Elasticsearch.
+
+1. From one terminal, in the x-pack directory, run:
+
+        node scripts/functional_tests_server.js --config test/functional/config.js
+
+   This command starts an Elasticsearch and Kibana instance that the tests will be run against. 
+
+1. In another tab, run the following command to perform API integration tests (from the x-pack directory):
+
+        node scripts/functional_test_runner.js --config test/api_integration/config
+
+1. In another tab, run the following command to perform UI functional tests (from the x-pack directory):
+
+        node scripts/functional_test_runner.js --config test/functional/config
+
+
+## Shared functions
+
+
+You can find the ML shared functions in the following files in GitHub:
+
+```
+https://github.com/elastic/kibana/blob/master/x-pack/plugins/ml/public/shared.ts
+```
+
+```
+https://github.com/elastic/kibana/blob/master/x-pack/plugins/ml/server/shared.ts
+```
+
+These functions are shared from the root of the ML plugin, you can import them with an import statement. For example:
+
+```
+import { MlPluginSetup } from '../../../../ml/server';
+```
+
+or 
+
+```
+import { ANOMALY_SEVERITY } from '../../ml/common';
+```
+
+Functions are shared from the following directories:
+
+```
+ml/common
+ml/public
+ml/server
+```
