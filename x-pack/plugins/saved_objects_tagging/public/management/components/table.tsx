@@ -128,6 +128,7 @@ export const TagTable: FC<TagTableProps> = ({
         return (
           // eslint-disable-next-line @elastic/eui/href-or-on-click
           <EuiLink
+            data-test-subj="tagsTableRowConnectionsLink"
             href={getTagRelationUrl(tag)}
             onClick={(e: React.MouseEvent) => {
               if (!isModifiedOrPrevented(e) && e.button === 0) {
@@ -160,6 +161,7 @@ export const TagTable: FC<TagTableProps> = ({
 
   return (
     <EuiInMemoryTable
+      data-test-subj="tagsManagementTable"
       ref={tableRef as any}
       loading={loading}
       itemId={'id'}
@@ -173,6 +175,7 @@ export const TagTable: FC<TagTableProps> = ({
       sorting={sorting}
       search={{
         box: {
+          'data-test-subj': 'tagsManagementSearchBar',
           incremental: true,
           schema: {
             fields: {
@@ -183,7 +186,7 @@ export const TagTable: FC<TagTableProps> = ({
         },
       }}
       rowProps={(item) => ({
-        'data-test-subj': `tagsTableRow row-${item.id}`,
+        'data-test-subj': 'tagsTableRow',
       })}
     />
   );

@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SuperTest } from 'supertest';
+import { FtrProviderContext as CommonFtrProviderContext } from '../../../common/ftr_provider_context';
 import { USERS, ROLES } from './authentication';
 import { User, Role } from './types';
 
-export const createUsersAndRoles = async (es: any, supertest: SuperTest<any>) => {
+export const createUsersAndRoles = async (getService: CommonFtrProviderContext['getService']) => {
+  const security = getService('security');
+
   const createRole = async ({ name, privileges }: Role) => {
-    return await supertest.put(`/api/security/role/${name}`).send(privileges).expect(204);
+    return await security.role.create(name, privileges);
   };
 
   const createUser = async ({ username, password, roles, superuser }: User) => {
@@ -18,14 +20,12 @@ export const createUsersAndRoles = async (es: any, supertest: SuperTest<any>) =>
     if (superuser) {
       return;
     }
-    return await es.shield.putUser({
-      username,
-      body: {
-        password,
-        roles,
-        full_name: username.replace('_', ' '),
-        email: `${username}@elastic.co`,
-      },
+
+    return await security.user.create(username, {
+      password,
+      roles,
+      full_name: username.replace('_', ' '),
+      email: `${username}@elastic.co`,
     });
   };
 

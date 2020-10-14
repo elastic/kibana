@@ -5,18 +5,15 @@
  */
 
 import { FtrProviderContext } from '../services';
-import { createUsersAndRoles } from '../../../common/lib/create_users_and_roles';
+import { createUsersAndRoles } from '../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
-  const es = getService('legacyEs');
-  const supertest = getService('supertest');
-
   describe('saved objects tagging API - security and spaces integration', function () {
-    this.tags('ciGroup9');
+    this.tags('ciGroup10');
 
     before(async () => {
-      await createUsersAndRoles(es, supertest);
+      await createUsersAndRoles(getService);
     });
 
     loadTestFile(require.resolve('./get'));

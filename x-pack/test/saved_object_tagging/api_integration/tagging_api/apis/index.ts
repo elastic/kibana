@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../services';
 // eslint-disable-next-line import/no-default-export
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('saved objects tagging API', function () {
-    this.tags('ciGroup9');
+    this.tags('ciGroup10');
 
     loadTestFile(require.resolve('./delete'));
   });
