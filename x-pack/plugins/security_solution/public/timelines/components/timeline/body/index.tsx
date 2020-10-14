@@ -134,6 +134,7 @@ export const Body = React.memo<BodyProps>(
         {graphEventId && (
           <GraphOverlay
             graphEventId={graphEventId}
+            isEventViewer={isEventViewer}
             timelineId={timelineId}
             timelineType={timelineType}
           />
