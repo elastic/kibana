@@ -21,6 +21,7 @@ import { Required } from '@kbn/utility-types';
 
 import { getFormatService } from './services';
 import { Input } from './table_vis_fn';
+import { Dimensions } from './types';
 
 export interface TableContext {
   table?: Table;
@@ -43,7 +44,7 @@ export interface Table {
   rows: Input['rows'];
 }
 
-export function tableVisResponseHandler(input: Input, dimensions: any): TableContext {
+export function tableVisResponseHandler(input: Input, dimensions: Dimensions): TableContext {
   let table: Table | undefined;
   let tables: TableGroup[] = [];
   let direction: TableContext['direction'];
