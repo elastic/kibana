@@ -13,10 +13,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'security', 'savedObjects', 'tagManagement']);
 
   const tagManagementPage = PageObjects.tagManagement;
-  const { tagModal } = tagManagementPage;
 
   describe('edit tag', () => {
+    let tagModal: typeof tagManagementPage['tagModal'];
+
     before(async () => {
+      tagModal = tagManagementPage.tagModal;
       await esArchiver.load('functional_base');
       await tagManagementPage.navigateTo();
     });
