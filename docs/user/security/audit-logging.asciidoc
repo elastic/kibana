@@ -35,6 +35,7 @@ events. The following is a list of the events that can be generated:
                                              objects when using a role with <<kibana-privileges>>
 |======
 
+[[xpack-security-ecs-audit-logging]]
 ==== ECS audit events
 
 beta[]
