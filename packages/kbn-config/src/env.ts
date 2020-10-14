@@ -19,7 +19,7 @@
 
 import { resolve, join } from 'path';
 import loadJsonFile from 'load-json-file';
-import { getPluginSearchPaths } from '@kbn/dev-utils';
+import { getPluginSearchPaths } from './plugins';
 import { PackageInfo, EnvironmentMode } from './types';
 
 /** @internal */

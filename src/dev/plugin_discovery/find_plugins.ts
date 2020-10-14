@@ -17,7 +17,8 @@
  * under the License.
  */
 import Path from 'path';
-import { getPluginSearchPaths, REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/dev-utils';
+import { getPluginSearchPaths } from '@kbn/config';
 import { KibanaPlatformPlugin, simpleKibanaPlatformPluginDiscovery } from '@kbn/dev-utils';
 
 export interface SearchOptions {
