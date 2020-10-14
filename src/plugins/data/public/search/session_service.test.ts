@@ -19,12 +19,17 @@
 
 import { SessionService } from './session_service';
 import { ISessionService } from '../../common';
+import { coreMock } from '../../../../core/public/mocks';
 
 describe('Session service', () => {
   let sessionService: ISessionService;
 
   beforeEach(() => {
-    sessionService = new SessionService();
+    const initializerContext = coreMock.createPluginInitializerContext();
+    sessionService = new SessionService(
+      initializerContext,
+      coreMock.createSetup().getStartServices
+    );
   });
 
   describe('Session management', () => {
