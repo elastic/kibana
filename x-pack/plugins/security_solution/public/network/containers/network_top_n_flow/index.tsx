@@ -85,7 +85,7 @@ export const useNetworkTopNFlow = ({
           factoryQueryType: NetworkQueries.topNFlow,
           filterQuery: createFilter(filterQuery),
           flowTarget,
-          id: ID,
+          id: `${ID}-${flowTarget}`,
           ip,
           pagination: generateTablePaginationOptions(activePage, limit),
           sort,
@@ -201,7 +201,7 @@ export const useNetworkTopNFlow = ({
         factoryQueryType: NetworkQueries.topNFlow,
         filterQuery: createFilter(filterQuery),
         flowTarget,
-        id: ID,
+        id: `${ID}-${flowTarget}`,
         ip,
         pagination: generateTablePaginationOptions(activePage, limit),
         timerange: {
