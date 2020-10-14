@@ -6,6 +6,7 @@
 
 import * as React from 'react';
 import { lazy, Suspense, FC } from 'react';
+import { PanelSpinner } from './panel_spinner';
 import type { Props } from './screen_capture_panel_content';
 
 const LazyComponent = lazy(() =>
@@ -16,7 +17,7 @@ const LazyComponent = lazy(() =>
 
 export const ScreenCapturePanelContent: FC<Props> = (props) => {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<PanelSpinner />}>
       <LazyComponent {...props} />
     </Suspense>
   );
