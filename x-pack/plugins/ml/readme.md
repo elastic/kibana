@@ -101,7 +101,6 @@ Elasticsearch.
         node scripts/functional_tests_server.js --config test/functional/config.js
 
    This command starts an Elasticsearch and Kibana instance that the tests will be run against.
-   ML functional tests are located in `x-pack/test/functional/apps/ml`.
 
 1. In another tab, run the following command to perform API integration tests (from the x-pack directory):
 
@@ -112,7 +111,8 @@ Elasticsearch.
 1. In another tab, run the following command to perform UI functional tests (from the x-pack directory):
 
         node scripts/functional_test_runner.js --include-tag mlqa
-
+        
+   ML functional tests are located in `x-pack/test/functional/apps/ml`.
 
 ## Shared functions
 
