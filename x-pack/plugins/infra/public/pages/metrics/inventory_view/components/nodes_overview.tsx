@@ -97,7 +97,7 @@ export const NodesOverview = ({
   }
   const dataBounds = calculateBoundsFromNodes(nodes);
   const bounds = autoBounds ? dataBounds : boundsOverride;
-  const isStatic = getBreakpoint(window.innerWidth) === 'xs';
+  const isStatic = ['xs', 's'].includes(getBreakpoint(window.innerWidth)!);
 
   if (view === 'table') {
     return (
