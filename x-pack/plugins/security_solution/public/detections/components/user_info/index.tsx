@@ -180,7 +180,7 @@ export const useUserInfo = (): State => {
     typeof uiCapabilities.siem.crud === 'boolean' ? uiCapabilities.siem.crud : false;
 
   useEffect(() => {
-    if (loading !== privilegeLoading || indexNameLoading) {
+    if (loading !== (privilegeLoading || indexNameLoading)) {
       dispatch({ type: 'updateLoading', loading: privilegeLoading || indexNameLoading });
     }
   }, [dispatch, loading, privilegeLoading, indexNameLoading]);
