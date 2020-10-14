@@ -354,7 +354,8 @@ export default ({ getService }: FtrProviderContext) => {
           .send(getSimpleRule())
           .expect(200);
 
-        // The installed rule should be the same as what the user added originally
+        // The installed rule should have both the original immutable exceptions list back and the
+        // new list the user added.
         expect(body.exceptions_list).to.eql([
           ...immutableRule.exceptions_list,
           {
@@ -364,6 +365,44 @@ export default ({ getService }: FtrProviderContext) => {
             type,
           },
         ]);
+      });
+
+      it('should NOT add an extra exceptions_list that already exists on a rule during an upgrade', async () => {
+        await supertest
+          .put(DETECTION_ENGINE_PREPACKAGED_URL)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
+
+        // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
+        // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
+        // This rule has an existing exceptions_list that we are going to ensure does not stomp on our existing rule
+        const { body: immutableRule } = await supertest
+          .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=9a1a2dae-0b5f-4c3d-8305-a268d404c306`)
+          .set('kbn-xsrf', 'true')
+          .send(getSimpleRule())
+          .expect(200);
+
+        // downgrade the version number of the rule
+        await downgradeImmutableRule(es, '9a1a2dae-0b5f-4c3d-8305-a268d404c306');
+
+        // re-add the pre-packaged rule to get the single upgrade to happen
+        await supertest
+          .put(DETECTION_ENGINE_PREPACKAGED_URL)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
+
+        // get the immutable rule after we installed it a second time
+        const { body } = await supertest
+          .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=9a1a2dae-0b5f-4c3d-8305-a268d404c306`)
+          .set('kbn-xsrf', 'true')
+          .send(getSimpleRule())
+          .expect(200);
+
+        // The installed rule should have both the original immutable exceptions list back and the
+        // new list the user added.
+        expect(body.exceptions_list).to.eql([...immutableRule.exceptions_list]);
       });
 
       it('should NOT allow updates to pre-packaged rules to overwrite existing exception based rules when the user adds an additional exception list', async () => {
