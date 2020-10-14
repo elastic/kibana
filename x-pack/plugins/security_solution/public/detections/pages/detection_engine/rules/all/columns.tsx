@@ -36,7 +36,7 @@ import {
 import { Action } from './reducer';
 import { LocalizedDateTooltip } from '../../../../../common/components/localized_date_tooltip';
 import { LinkAnchor } from '../../../../../common/components/links';
-import { getToolTipContent, canEditRule } from '../../../../../common/utils/privileges';
+import { getToolTipContent, canEditRuleWithActions } from '../../../../../common/utils/privileges';
 import { TagsDisplay } from './tag_display';
 
 export const getActions = (
@@ -62,12 +62,13 @@ export const getActions = (
     ),
     icon: 'controlsHorizontal',
     onClick: (rowItem: Rule) => editRuleAction(rowItem, history),
-    enabled: (rowItem: Rule) => canEditRule(rowItem, actionsPrivileges),
+    enabled: (rowItem: Rule) => canEditRuleWithActions(rowItem, actionsPrivileges),
   },
   {
     description: i18n.DUPLICATE_RULE,
     icon: 'copy',
     name: i18n.DUPLICATE_RULE,
+    enabled: (rowItem: Rule) => canEditRuleWithActions(rowItem, actionsPrivileges),
     onClick: async (rowItem: Rule) => {
       await duplicateRulesAction([rowItem], [rowItem.id], dispatch, dispatchToaster);
       await reFetchRules(true);
@@ -253,7 +254,7 @@ export const getColumns = ({
             id={item.id}
             enabled={item.enabled}
             isDisabled={
-              !canEditRule(item, hasReadActionsPrivileges) ||
+              !canEditRuleWithActions(item, hasReadActionsPrivileges) ||
               hasNoPermissions ||
               (isMlRule(item.type) && !hasMlPermissions && !item.enabled)
             }

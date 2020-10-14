@@ -89,7 +89,11 @@ import { timelineDefaults } from '../../../../../timelines/store/timeline/defaul
 import { TimelineModel } from '../../../../../timelines/store/timeline/model';
 import { useSourcererScope } from '../../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
-import { getToolTipContent, canEditRule, isBoolean } from '../../../../../common/utils/privileges';
+import {
+  getToolTipContent,
+  canEditRuleWithActions,
+  isBoolean,
+} from '../../../../../common/utils/privileges';
 
 import { AlertsHistogramOption } from '../../../../components/alerts_histogram_panel/types';
 
@@ -438,7 +442,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                       <RuleSwitch
                         id={rule?.id ?? '-1'}
                         isDisabled={
-                          !canEditRule(rule, hasActionsPrivileges) ||
+                          !canEditRuleWithActions(rule, hasActionsPrivileges) ||
                           userHasNoPermissions(canUserCRUD) ||
                           (!hasMlPermissions && !rule?.enabled)
                         }
@@ -456,6 +460,10 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                         <RuleActionsOverflow
                           rule={rule}
                           userHasNoPermissions={userHasNoPermissions(canUserCRUD)}
+                          canDuplicateRuleWithActions={canEditRuleWithActions(
+                            rule,
+                            hasActionsPrivileges
+                          )}
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>

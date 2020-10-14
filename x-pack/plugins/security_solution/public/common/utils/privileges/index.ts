@@ -11,7 +11,7 @@ import * as detectionI18n from '../../../detections/pages/detection_engine/trans
 
 export const isBoolean = (obj: unknown): obj is boolean => typeof obj === 'boolean';
 
-export const canEditRule = (
+export const canEditRuleWithActions = (
   rule: Rule | null | undefined,
   privileges:
     | boolean
@@ -41,7 +41,7 @@ export const getToolTipContent = (
     return undefined;
   } else if (isMlRule(rule.type) && !hasMlPermissions) {
     return detectionI18n.ML_RULES_DISABLED_MESSAGE;
-  } else if (!canEditRule(rule, hasReadActionsPrivileges)) {
+  } else if (!canEditRuleWithActions(rule, hasReadActionsPrivileges)) {
     return i18n.EDIT_RULE_SETTINGS_TOOLTIP;
   } else {
     return undefined;

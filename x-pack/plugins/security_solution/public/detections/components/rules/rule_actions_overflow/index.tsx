@@ -41,6 +41,7 @@ const MyEuiButtonIcon = styled(EuiButtonIcon)`
 interface RuleActionsOverflowComponentProps {
   rule: Rule | null;
   userHasNoPermissions: boolean;
+  canDuplicateRuleWithActions: boolean;
 }
 
 /**
@@ -49,6 +50,7 @@ interface RuleActionsOverflowComponentProps {
 const RuleActionsOverflowComponent = ({
   rule,
   userHasNoPermissions,
+  canDuplicateRuleWithActions,
 }: RuleActionsOverflowComponentProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [rulesToExport, setRulesToExport] = useState<string[]>([]);
@@ -66,7 +68,7 @@ const RuleActionsOverflowComponent = ({
             <EuiContextMenuItem
               key={i18nActions.DUPLICATE_RULE}
               icon="copy"
-              disabled={userHasNoPermissions}
+              disabled={!canDuplicateRuleWithActions || userHasNoPermissions}
               data-test-subj="rules-details-duplicate-rule"
               onClick={async () => {
                 setIsPopoverOpen(false);
