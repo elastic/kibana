@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { waitFor } from '@testing-library/react';
 import { shallow, mount, ReactWrapper } from 'enzyme';
 
 import '../../../../common/mock/match_media';
@@ -63,16 +63,15 @@ describe('LoadPrebuiltRulesAndTemplatesButton', () => {
       timelines_not_updated: 0,
     });
 
-    let wrapper: ReactWrapper;
-    await act(async () => {
-      wrapper = mount(<PrePackagedRulesPrompt {...props} />);
-    });
-    wrapper!.update();
+    const wrapper: ReactWrapper = mount(<PrePackagedRulesPrompt {...props} />);
+    await waitFor(() => {
+      wrapper!.update();
 
-    expect(wrapper!.find('[data-test-subj="load-prebuilt-rules"]').exists()).toEqual(true);
-    expect(wrapper!.find('[data-test-subj="load-prebuilt-rules"]').last().text()).toEqual(
-      'Load Elastic prebuilt rules and timeline templates'
-    );
+      expect(wrapper!.find('[data-test-subj="load-prebuilt-rules"]').exists()).toEqual(true);
+      expect(wrapper!.find('[data-test-subj="load-prebuilt-rules"]').last().text()).toEqual(
+        'Load Elastic prebuilt rules and timeline templates'
+      );
+    });
   });
 
   it('renders correct button with correct text - Load Elastic prebuilt rules', async () => {
@@ -85,16 +84,15 @@ describe('LoadPrebuiltRulesAndTemplatesButton', () => {
       timelines_not_updated: 0,
     });
 
-    let wrapper: ReactWrapper;
-    await act(async () => {
-      wrapper = mount(<PrePackagedRulesPrompt {...props} />);
-    });
-    wrapper!.update();
+    const wrapper: ReactWrapper = mount(<PrePackagedRulesPrompt {...props} />);
+    await waitFor(() => {
+      wrapper!.update();
 
-    expect(wrapper!.find('[data-test-subj="load-prebuilt-rules"]').exists()).toEqual(true);
-    expect(wrapper!.find('[data-test-subj="load-prebuilt-rules"]').last().text()).toEqual(
-      'Load Elastic prebuilt rules'
-    );
+      expect(wrapper!.find('[data-test-subj="load-prebuilt-rules"]').exists()).toEqual(true);
+      expect(wrapper!.find('[data-test-subj="load-prebuilt-rules"]').last().text()).toEqual(
+        'Load Elastic prebuilt rules'
+      );
+    });
   });
 
   it('renders correct button with correct text - Load Elastic prebuilt timeline templates', async () => {
@@ -107,15 +105,14 @@ describe('LoadPrebuiltRulesAndTemplatesButton', () => {
       timelines_not_updated: 0,
     });
 
-    let wrapper: ReactWrapper;
-    await act(async () => {
-      wrapper = mount(<PrePackagedRulesPrompt {...props} />);
-    });
-    wrapper!.update();
+    const wrapper: ReactWrapper = mount(<PrePackagedRulesPrompt {...props} />);
+    await waitFor(() => {
+      wrapper!.update();
 
-    expect(wrapper!.find('[data-test-subj="load-prebuilt-rules"]').exists()).toEqual(true);
-    expect(wrapper!.find('[data-test-subj="load-prebuilt-rules"]').last().text()).toEqual(
-      'Load Elastic prebuilt timeline templates'
-    );
+      expect(wrapper!.find('[data-test-subj="load-prebuilt-rules"]').exists()).toEqual(true);
+      expect(wrapper!.find('[data-test-subj="load-prebuilt-rules"]').last().text()).toEqual(
+        'Load Elastic prebuilt timeline templates'
+      );
+    });
   });
 });

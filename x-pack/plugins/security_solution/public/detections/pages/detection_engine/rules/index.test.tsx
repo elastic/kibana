@@ -10,7 +10,7 @@ import { shallow, mount, ReactWrapper } from 'enzyme';
 import '../../../../common/mock/match_media';
 import { RulesPage } from './index';
 import { useUserData } from '../../../components/user_info';
-import { act } from 'react-dom/test-utils';
+import { waitFor } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { getPrePackagedRulesStatus } from '../../../containers/detection_engine/rules/api';
 jest.mock('react-router-dom', () => {
@@ -100,20 +100,19 @@ describe('RulesPage', () => {
       timelines_not_updated: 0,
     });
 
-    let wrapper: ReactWrapper;
-    await act(async () => {
-      wrapper = mount(
-        <TestProviders>
-          <RulesPage />
-        </TestProviders>
+    const wrapper: ReactWrapper = mount(
+      <TestProviders>
+        <RulesPage />
+      </TestProviders>
+    );
+    await waitFor(() => {
+      wrapper.update();
+
+      expect(wrapper.find('[data-test-subj="loadPrebuiltRulesBtn"]').exists()).toEqual(true);
+      expect(wrapper.find('[data-test-subj="loadPrebuiltRulesBtn"]').last().text()).toEqual(
+        'Load Elastic prebuilt rules and timeline templates'
       );
     });
-    wrapper!.update();
-
-    expect(wrapper!.find('[data-test-subj="loadPrebuiltRulesBtn"]').exists()).toEqual(true);
-    expect(wrapper!.find('[data-test-subj="loadPrebuiltRulesBtn"]').last().text()).toEqual(
-      'Load Elastic prebuilt rules and timeline templates'
-    );
   });
 
   it('renders correct button with correct text - Load Elastic prebuilt rules', async () => {
@@ -126,20 +125,20 @@ describe('RulesPage', () => {
       timelines_not_updated: 0,
     });
 
-    let wrapper: ReactWrapper;
-    await act(async () => {
-      wrapper = mount(
-        <TestProviders>
-          <RulesPage />
-        </TestProviders>
+    const wrapper: ReactWrapper = mount(
+      <TestProviders>
+        <RulesPage />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      wrapper.update();
+
+      expect(wrapper.find('[data-test-subj="loadPrebuiltRulesBtn"]').exists()).toEqual(true);
+      expect(wrapper.find('[data-test-subj="loadPrebuiltRulesBtn"]').last().text()).toEqual(
+        'Load Elastic prebuilt rules'
       );
     });
-    wrapper!.update();
-
-    expect(wrapper!.find('[data-test-subj="loadPrebuiltRulesBtn"]').exists()).toEqual(true);
-    expect(wrapper!.find('[data-test-subj="loadPrebuiltRulesBtn"]').last().text()).toEqual(
-      'Load Elastic prebuilt rules'
-    );
   });
 
   it('renders correct button with correct text - Load Elastic prebuilt timeline templates', async () => {
@@ -152,20 +151,19 @@ describe('RulesPage', () => {
       timelines_not_updated: 0,
     });
 
-    let wrapper: ReactWrapper;
-    await act(async () => {
-      wrapper = mount(
-        <TestProviders>
-          <RulesPage />
-        </TestProviders>
+    const wrapper: ReactWrapper = mount(
+      <TestProviders>
+        <RulesPage />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      wrapper.update();
+      expect(wrapper.find('[data-test-subj="loadPrebuiltRulesBtn"]').exists()).toEqual(true);
+      expect(wrapper.find('[data-test-subj="loadPrebuiltRulesBtn"]').last().text()).toEqual(
+        'Load Elastic prebuilt timeline templates'
       );
     });
-    wrapper!.update();
-
-    expect(wrapper!.find('[data-test-subj="loadPrebuiltRulesBtn"]').exists()).toEqual(true);
-    expect(wrapper!.find('[data-test-subj="loadPrebuiltRulesBtn"]').last().text()).toEqual(
-      'Load Elastic prebuilt timeline templates'
-    );
   });
 
   it('renders a callout - Update Elastic prebuilt rules', async () => {
@@ -178,16 +176,15 @@ describe('RulesPage', () => {
       timelines_not_updated: 0,
     });
 
-    let wrapper: ReactWrapper;
-    await act(async () => {
-      wrapper = mount(
-        <TestProviders>
-          <RulesPage />
-        </TestProviders>
-      );
-    });
-    wrapper!.update();
+    const wrapper: ReactWrapper = mount(
+      <TestProviders>
+        <RulesPage />
+      </TestProviders>
+    );
 
-    expect(wrapper!.find('[data-test-subj="update-callout-button"]').exists()).toEqual(true);
+    await waitFor(() => {
+      wrapper.update();
+      expect(wrapper.find('[data-test-subj="update-callout-button"]').exists()).toEqual(true);
+    });
   });
 });
