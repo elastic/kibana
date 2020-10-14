@@ -17,14 +17,28 @@
  * under the License.
  */
 
-import { Observable } from 'rxjs';
-import { first, last } from 'rxjs/operators';
+import { Bundle } from '../common';
+import { filterById } from './filter_by_id';
 
-export function firstValueFrom<T>(source: Observable<T>) {
-  // we can't use SafeSubscriber the same way that RxJS 7 does, so instead we
-  return source.pipe(first()).toPromise();
-}
+export function focusBundles(filters: string[], bundles: Bundle[]) {
+  if (!filters.length) {
+    return [...bundles];
+  }
 
-export function lastValueFrom<T>(source: Observable<T>) {
-  return source.pipe(last()).toPromise();
+  const queue = new Set<Bundle>(filterById(filters, bundles));
+  const focused: Bundle[] = [];
+
+  for (const bundle of queue) {
+    focused.push(bundle);
+
+    const { explicit, implicit } = bundle.readBundleDeps();
+    const depIds = [...explicit, ...implicit];
+    if (depIds.length) {
+      for (const dep of filterById(depIds, bundles)) {
+        queue.add(dep);
+      }
+    }
+  }
+
+  return focused;
 }
