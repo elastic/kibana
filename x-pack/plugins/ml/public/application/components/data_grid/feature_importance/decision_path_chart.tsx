@@ -93,35 +93,35 @@ export const DecisionPathChart = ({
   baseline,
 }: DecisionPathChartProps) => {
   // adjust the height so it's compact for items with more features
-  const baselineData: LineAnnotationDatum[] = useMemo(
-    () => [
-      {
-        dataValue: baseline,
-        header:
-          baseline && isRegressionFeatureImportanceBaseline(baseline)
-            ? formatSingleValue(baseline.baseline, '')
-            : '',
-        details: i18n.translate(
-          'xpack.ml.dataframe.analytics.explorationResults.decisionPathBaselineText',
-          {
-            defaultMessage:
-              'baseline (average of predictions for all data points in the training data set)',
-          }
-        ),
-      },
-    ],
+  const baselineData: LineAnnotationDatum[] | undefined = useMemo(
+    () =>
+      baseline && isRegressionFeatureImportanceBaseline(baseline)
+        ? [
+            {
+              dataValue: baseline.baseline,
+              header: formatSingleValue(baseline.baseline, '').toString(),
+              details: i18n.translate(
+                'xpack.ml.dataframe.analytics.explorationResults.decisionPathBaselineText',
+                {
+                  defaultMessage:
+                    'baseline (average of predictions for all data points in the training data set)',
+                }
+              ),
+            },
+          ]
+        : undefined,
     [baseline]
   );
   // if regression, guarantee up to num_precision significant digits without having it in scientific notation
   // if classification, hide the numeric values since we only want to show the path
-  const tickFormatter = useCallback((d) => formatSingleValue(d, ''), []);
+  const tickFormatter = useCallback((d) => formatSingleValue(d, '').toString(), []);
 
   return (
     <Chart
       size={{ height: DECISION_PATH_MARGIN + decisionPathData.length * DECISION_PATH_ROW_HEIGHT }}
     >
       <Settings theme={theme} rotation={90} />
-      {baseline && (
+      {baselineData && (
         <LineAnnotation
           id="xpack.ml.dataframe.analytics.explorationResults.decisionPathBaseline"
           domainType={AnnotationDomainTypes.YDomain}
