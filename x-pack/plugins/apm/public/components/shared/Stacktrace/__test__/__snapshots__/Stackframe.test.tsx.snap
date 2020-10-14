@@ -94,6 +94,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
 
 .c1 {
   color: #000000;
+  word-break: break-word;
 }
 
 .c2 {
@@ -246,6 +247,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
   color: ",
                             [Function],
                             ";
+  word-break: break-word;
 ",
                           ],
                           "staticRulesId": "",
