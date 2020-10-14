@@ -185,7 +185,8 @@ export abstract class FieldFormat {
 
     const params = transform(
       this._params,
-      (uniqParams: any, val, param) => {
+      (uniqParams: any, val, param: string) => {
+        if (param === 'parsedUrl') return;
         if (param && val !== get(defaultsParams, param)) {
           uniqParams[param] = val;
         }
