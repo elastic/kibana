@@ -1,4 +1,5 @@
-$warningColor: '#BD271E';
+$timAppWarningColor: '#BD271E';
+$timAppTextAreaBgColor: #FBFCFD;
 
 .form-control {
   @include euiFontSizeS;
@@ -41,7 +42,7 @@ select.form-control {
   margin-bottom: $euiSize;
   padding: $euiSizeXS $euiSizeS;
   color: $euiColorDarkestShade;
-  border-left: solid 2px $warningColor;
+  border-left: solid 2px $timAppWarningColor;
   font-size: $euiSizeM;
 }
 
@@ -79,9 +80,8 @@ select.form-control {
   font-size: $euiSize;
   line-height: 1.5;
   color: $euiColorDarkestShade;
-  background-color: $euiColorLightestShade;
+  background-color: $timAppTextAreaBgColor;
   border: 1px solid $euiColorLightShade;
   border-radius: $euiSizeXS;
   transition: border-color .1s linear;
-  margin-bottom: $euiSize;
 }
