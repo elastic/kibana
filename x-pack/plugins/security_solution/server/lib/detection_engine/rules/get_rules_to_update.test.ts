@@ -58,6 +58,8 @@ describe('get_rules_to_update', () => {
     const installedRule = getResult();
     installedRule.params.ruleId = 'rule-1';
     installedRule.params.version = 1;
+    installedRule.params.exceptionsList = [];
+
     const update = getRulesToUpdate([ruleFromFileSystem], [installedRule]);
     expect(update).toEqual([ruleFromFileSystem]);
   });
@@ -70,10 +72,12 @@ describe('get_rules_to_update', () => {
     const installedRule1 = getResult();
     installedRule1.params.ruleId = 'rule-1';
     installedRule1.params.version = 1;
+    installedRule1.params.exceptionsList = [];
 
     const installedRule2 = getResult();
     installedRule2.params.ruleId = 'rule-2';
     installedRule2.params.version = 1;
+    installedRule2.params.exceptionsList = [];
 
     const update = getRulesToUpdate([ruleFromFileSystem], [installedRule1, installedRule2]);
     expect(update).toEqual([ruleFromFileSystem]);
@@ -91,15 +95,122 @@ describe('get_rules_to_update', () => {
     const installedRule1 = getResult();
     installedRule1.params.ruleId = 'rule-1';
     installedRule1.params.version = 1;
+    installedRule1.params.exceptionsList = [];
 
     const installedRule2 = getResult();
     installedRule2.params.ruleId = 'rule-2';
     installedRule2.params.version = 1;
+    installedRule2.params.exceptionsList = [];
 
     const update = getRulesToUpdate(
       [ruleFromFileSystem1, ruleFromFileSystem2],
       [installedRule1, installedRule2]
     );
     expect(update).toEqual([ruleFromFileSystem1, ruleFromFileSystem2]);
+  });
+
+  test('should add back an exception_list if it was removed by the end user on an immutable rule during an upgrade', () => {
+    const ruleFromFileSystem1 = getAddPrepackagedRulesSchemaDecodedMock();
+    ruleFromFileSystem1.exceptions_list = [
+      {
+        id: 'endpoint_list',
+        list_id: 'endpoint_list',
+        namespace_type: 'agnostic',
+        type: 'endpoint',
+      },
+    ];
+    ruleFromFileSystem1.rule_id = 'rule-1';
+    ruleFromFileSystem1.version = 2;
+
+    const installedRule1 = getResult();
+    installedRule1.params.ruleId = 'rule-1';
+    installedRule1.params.version = 1;
+    installedRule1.params.exceptionsList = [];
+
+    const [update] = getRulesToUpdate([ruleFromFileSystem1], [installedRule1]);
+    expect(update.exceptions_list).toEqual(ruleFromFileSystem1.exceptions_list);
+  });
+
+  test('should not remove an additional exception_list if an additional one was added by the end user on an immutable rule during an upgrade', () => {
+    const ruleFromFileSystem1 = getAddPrepackagedRulesSchemaDecodedMock();
+    ruleFromFileSystem1.exceptions_list = [
+      {
+        id: 'endpoint_list',
+        list_id: 'endpoint_list',
+        namespace_type: 'agnostic',
+        type: 'endpoint',
+      },
+    ];
+    ruleFromFileSystem1.rule_id = 'rule-1';
+    ruleFromFileSystem1.version = 2;
+
+    const installedRule1 = getResult();
+    installedRule1.params.ruleId = 'rule-1';
+    installedRule1.params.version = 1;
+    installedRule1.params.exceptionsList = [
+      {
+        id: 'second_exception_list',
+        list_id: 'some-other-id',
+        namespace_type: 'single',
+        type: 'detection',
+      },
+    ];
+
+    const [update] = getRulesToUpdate([ruleFromFileSystem1], [installedRule1]);
+    expect(update.exceptions_list).toEqual([
+      ...ruleFromFileSystem1.exceptions_list,
+      ...installedRule1.params.exceptionsList,
+    ]);
+  });
+
+  test('should not remove an existing exception_list if they are the same between the current installed one and the upgraded one', () => {
+    const ruleFromFileSystem1 = getAddPrepackagedRulesSchemaDecodedMock();
+    ruleFromFileSystem1.exceptions_list = [
+      {
+        id: 'endpoint_list',
+        list_id: 'endpoint_list',
+        namespace_type: 'agnostic',
+        type: 'endpoint',
+      },
+    ];
+    ruleFromFileSystem1.rule_id = 'rule-1';
+    ruleFromFileSystem1.version = 2;
+
+    const installedRule1 = getResult();
+    installedRule1.params.ruleId = 'rule-1';
+    installedRule1.params.version = 1;
+    installedRule1.params.exceptionsList = [
+      {
+        id: 'endpoint_list',
+        list_id: 'endpoint_list',
+        namespace_type: 'agnostic',
+        type: 'endpoint',
+      },
+    ];
+
+    const [update] = getRulesToUpdate([ruleFromFileSystem1], [installedRule1]);
+    expect(update.exceptions_list).toEqual(ruleFromFileSystem1.exceptions_list);
+  });
+
+  test('should not remove an existing exception_list if the rule has an empty exceptions list', () => {
+    const ruleFromFileSystem1 = getAddPrepackagedRulesSchemaDecodedMock();
+    ruleFromFileSystem1.exceptions_list = [];
+    ruleFromFileSystem1.rule_id = 'rule-1';
+    ruleFromFileSystem1.version = 2;
+
+    const installedRule1 = getResult();
+    installedRule1.params.ruleId = 'rule-1';
+    installedRule1.params.version = 1;
+    installedRule1.params.exceptionsList = [
+      {
+        id: 'endpoint_list',
+        list_id: 'endpoint_list',
+        namespace_type: 'agnostic',
+        type: 'endpoint',
+      },
+    ];
+
+    const [update] = getRulesToUpdate([ruleFromFileSystem1], [installedRule1]);
+    expect(update.exceptions_list).toEqual(installedRule1.params.exceptionsList);
   });
 });
