@@ -1413,6 +1413,14 @@
             "deprecationReason": null
           },
           {
+            "name": "agent",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "AgentFields", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "cloud",
             "description": "",
             "args": [],
@@ -1449,6 +1457,25 @@
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Date", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AgentFields",
+        "description": "",
+        "fields": [
+          {
+            "name": "id",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
