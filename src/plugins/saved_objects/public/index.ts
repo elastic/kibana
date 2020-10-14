@@ -30,7 +30,6 @@ export {
 export { getSavedObjectFinder, SavedObjectFinderUi, SavedObjectMetaData } from './finder';
 export {
   SavedObjectLoader,
-  createSavedObjectClass,
   checkForDuplicateTitle,
   saveWithConfirmation,
   isErrorNonFatal,
