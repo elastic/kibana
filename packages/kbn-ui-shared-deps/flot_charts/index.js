@@ -1,7 +1,20 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 /* @notice
@@ -32,17 +45,15 @@
  * THE SOFTWARE.
  */
 
-import $ from 'jquery';
-if (window) window.jQuery = $;
-require('./jquery.flot');
-require('./jquery.flot.time');
-require('./jquery.flot.canvas');
-require('./jquery.flot.symbol');
-require('./jquery.flot.crosshair');
-require('./jquery.flot.selection');
-require('./jquery.flot.pie');
-require('./jquery.flot.stack');
-require('./jquery.flot.threshold');
-require('./jquery.flot.fillbetween');
-require('./jquery.flot.log');
-module.exports = $;
+import './jquery_flot';
+import './jquery_flot_canvas';
+import './jquery_flot_time';
+import './jquery_flot_symbol';
+import './jquery_flot_crosshair';
+import './jquery_flot_selection';
+import './jquery_flot_pie';
+import './jquery_flot_stack';
+import './jquery_flot_threshold';
+import './jquery_flot_fillbetween';
+import './jquery_flot_log';
+import './jquery_flot_axislabels';
