@@ -17,10 +17,18 @@
  * under the License.
  */
 
-import './jquery.flot';
-import './jquery.flot.time';
-import './jquery.flot.symbol';
-import './jquery.flot.crosshair';
-import './jquery.flot.selection';
-import './jquery.flot.stack';
-import './jquery.flot.axislabels';
+import { SavedObjectsStart } from './plugin';
+
+const createStartContract = (): SavedObjectsStart => {
+  return {
+    SavedObjectClass: jest.fn(),
+    settings: {
+      getPerPage: () => 20,
+      getListingLimit: () => 100,
+    },
+  };
+};
+
+export const savedObjectsPluginMock = {
+  createStartContract,
+};
