@@ -32,49 +32,10 @@ interface EventWithDataStream {
   data_stream: DataStream;
 }
 
-describe('data generator options', () => {
+describe('data generator data streams', () => {
   // these tests cast the result of the generate methods so that we can specifically compare the `data_stream` fields
-  it.each`
-    param                                                                                               | description
-    ${'seed'}                                                                                           | ${'string'}
-    ${seedrandom('yo')}                                                                                 | ${'seedrandom class'}
-    ${{ seed: 'blah' }}                                                                                 | ${'object with seed defined as a string'}
-    ${{ eventsDataStream: { type: 'logs', dataset: 'endpoint.events.process', namespace: 'default' } }} | ${'object with a data stream field defined'}
-  `(
-    'sets the data stream fields correctly when the parameter is $param a $description',
-    ({ param }) => {
-      const generator = new EndpointDocGenerator(param);
-      expect(
-        ((generator.generateHostMetadata() as unknown) as EventWithDataStream).data_stream
-      ).toEqual({
-        type: 'metrics',
-        dataset: 'endpoint.metadata',
-        namespace: 'default',
-      });
-      expect(
-        ((generator.generatePolicyResponse() as unknown) as EventWithDataStream).data_stream
-      ).toEqual({
-        type: 'metrics',
-        dataset: 'endpoint.policy',
-        namespace: 'default',
-      });
-      expect(((generator.generateEvent() as unknown) as EventWithDataStream).data_stream).toEqual({
-        type: 'logs',
-        dataset: 'endpoint.events.process',
-        namespace: 'default',
-      });
-      expect(((generator.generateAlert() as unknown) as EventWithDataStream).data_stream).toEqual({
-        type: 'logs',
-        dataset: 'endpoint.alerts',
-        namespace: 'default',
-      });
-    }
-  );
-
-  it('creates a generator with a custom seedrandom class', () => {
-    const ran = seedrandom('yo');
-    const generator = new EndpointDocGenerator(ran);
-    expect(generator.random).toBe(ran);
+  it('creates a generator with default data streams', () => {
+    const generator = new EndpointDocGenerator('seed');
     expect(
       ((generator.generateHostMetadata() as unknown) as EventWithDataStream).data_stream
     ).toEqual({
@@ -101,34 +62,28 @@ describe('data generator options', () => {
     });
   });
 
-  it('creates a generator with a custom seedrandom class from an object parameter', () => {
+  it('creates a generator with custom data streams', () => {
     const metadataDataStream = { type: 'meta', dataset: 'dataset', namespace: 'name' };
-    const ran = seedrandom('yo');
-    const generator = new EndpointDocGenerator({
-      seed: ran,
-      metadataDataStream,
-    });
-    expect(generator.random).toBe(ran);
+    const policyDataStream = { type: 'policy', dataset: 'fake', namespace: 'something' };
+    const eventsDataStream = { type: 'events', dataset: 'events stuff', namespace: 'name' };
+    const alertsDataStream = { type: 'alerts', dataset: 'alerts stuff', namespace: 'name' };
+    const generator = new EndpointDocGenerator('seed');
     expect(
-      ((generator.generateHostMetadata() as unknown) as EventWithDataStream).data_stream
+      ((generator.generateHostMetadata(0, metadataDataStream) as unknown) as EventWithDataStream)
+        .data_stream
     ).toStrictEqual(metadataDataStream);
     expect(
-      ((generator.generatePolicyResponse() as unknown) as EventWithDataStream).data_stream
-    ).toEqual({
-      type: 'metrics',
-      dataset: 'endpoint.policy',
-      namespace: 'default',
-    });
-    expect(((generator.generateEvent() as unknown) as EventWithDataStream).data_stream).toEqual({
-      type: 'logs',
-      dataset: 'endpoint.events.process',
-      namespace: 'default',
-    });
-    expect(((generator.generateAlert() as unknown) as EventWithDataStream).data_stream).toEqual({
-      type: 'logs',
-      dataset: 'endpoint.alerts',
-      namespace: 'default',
-    });
+      ((generator.generatePolicyResponse({ policyDataStream }) as unknown) as EventWithDataStream)
+        .data_stream
+    ).toStrictEqual(policyDataStream);
+    expect(
+      ((generator.generateEvent({ eventsDataStream }) as unknown) as EventWithDataStream)
+        .data_stream
+    ).toStrictEqual(eventsDataStream);
+    expect(
+      ((generator.generateAlert({ alertsDataStream }) as unknown) as EventWithDataStream)
+        .data_stream
+    ).toStrictEqual(alertsDataStream);
   });
 });
 
@@ -175,7 +130,7 @@ describe('data generator', () => {
 
   it('creates policy response documents', () => {
     const timestamp = new Date().getTime();
-    const hostPolicyResponse = generator.generatePolicyResponse(timestamp);
+    const hostPolicyResponse = generator.generatePolicyResponse({ ts: timestamp });
     expect(hostPolicyResponse['@timestamp']).toEqual(timestamp);
     expect(hostPolicyResponse.event.created).toEqual(timestamp);
     expect(hostPolicyResponse.Endpoint).not.toBeNull();
@@ -186,7 +141,7 @@ describe('data generator', () => {
 
   it('creates alert event documents', () => {
     const timestamp = new Date().getTime();
-    const alert = generator.generateAlert(timestamp);
+    const alert = generator.generateAlert({ ts: timestamp });
     expect(alert['@timestamp']).toEqual(timestamp);
     expect(alert.event?.action).not.toBeNull();
     expect(alert.Endpoint).not.toBeNull();

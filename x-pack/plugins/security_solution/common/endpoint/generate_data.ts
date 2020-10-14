@@ -59,6 +59,7 @@ interface EventOptions {
   pid?: number;
   parentPid?: number;
   extensions?: object;
+  eventsDataStream?: DataStream;
 }
 
 const Windows: OSFields[] = [
@@ -273,10 +274,6 @@ export interface DataStream {
   type: string;
 }
 
-interface DataStreamField {
-  data_stream: DataStream;
-}
-
 /**
  * The Tree and TreeNode interfaces define structures to make testing of resolver functionality easier. The `generateTree`
  * method builds a `Tree` structures which organizes the different parts of the resolver tree. Maps are used to allow
@@ -343,6 +340,8 @@ export interface TreeOptions {
   percentTerminated?: number;
   alwaysGenMaxChildrenPerNode?: boolean;
   ancestryArraySize?: number;
+  eventsDataStream?: DataStream;
+  alertsDataStream?: DataStream;
 }
 
 type TreeOptionDefaults = Required<TreeOptions>;
@@ -364,6 +363,8 @@ export function getTreeOptionsWithDef(options?: TreeOptions): TreeOptionDefaults
     percentTerminated: options?.percentTerminated ?? 100,
     alwaysGenMaxChildrenPerNode: options?.alwaysGenMaxChildrenPerNode ?? false,
     ancestryArraySize: options?.ancestryArraySize ?? ANCESTRY_LIMIT,
+    eventsDataStream: options?.eventsDataStream ?? eventsDefaultDataStream,
+    alertsDataStream: options?.alertsDataStream ?? alertsDefaultDataStream,
   };
 }
 
@@ -391,14 +392,6 @@ const alertsDefaultDataStream = {
   namespace: 'default',
 };
 
-interface EndpointDocGeneratorParams {
-  seed?: string | seedrandom.prng;
-  metadataDataStream?: DataStream;
-  policyDataStream?: DataStream;
-  eventsDataStream?: DataStream;
-  alertsDataStream?: DataStream;
-}
-
 function createDataStreamField(ds: DataStream) {
   return { data_stream: ds };
 }
@@ -407,51 +400,16 @@ export class EndpointDocGenerator {
   commonInfo: HostInfo;
   random: seedrandom.prng;
   sequence: number = 0;
-  metadataDataStream: DataStreamField = createDataStreamField(metadataDefaultDataStream);
-  policyDataStream: DataStreamField = createDataStreamField(policyDefaultDataStream);
-  eventsDataStream: DataStreamField = createDataStreamField(eventsDefaultDataStream);
-  alertsDataStream: DataStreamField = createDataStreamField(alertsDefaultDataStream);
   /**
    * The EndpointDocGenerator parameters
    *
    * @param seed either a string to seed the random number generator or a random number generator function
-   * @param metadataDataStream the values to populate the data_stream fields when generating metadata documents
-   * @param policyDataStream the values to populate the data_stream fields when generating policy documents
-   * @param eventsDataStream the values to populate the data_stream fields when generating event documents
-   * @param alertsDataStream the values to populate the data_stream fields when generating alert documents
    */
-  constructor(
-    options: string | seedrandom.prng | EndpointDocGeneratorParams = {
-      seed: Math.random().toString(),
-      metadataDataStream: metadataDefaultDataStream,
-      policyDataStream: policyDefaultDataStream,
-      eventsDataStream: eventsDefaultDataStream,
-      alertsDataStream: alertsDefaultDataStream,
-    }
-  ) {
-    if (typeof options === 'string') {
-      this.random = seedrandom(options);
-    } else if ('quick' in options) {
-      this.random = options;
+  constructor(seed: string | seedrandom.prng = Math.random().toString()) {
+    if (typeof seed === 'string') {
+      this.random = seedrandom(seed);
     } else {
-      // options is an object so check the internal `seed` field
-      if (typeof options.seed === 'string') {
-        this.random = seedrandom(options.seed);
-      } else {
-        this.random = options.seed ?? seedrandom(Math.random().toString());
-      }
-      this.metadataDataStream = createDataStreamField(
-        options.metadataDataStream ?? metadataDefaultDataStream
-      );
-      this.policyDataStream = createDataStreamField(
-        options.policyDataStream ?? policyDefaultDataStream
-      );
-      this.eventsDataStream = createDataStreamField(
-        options.eventsDataStream ?? eventsDefaultDataStream
-      );
-      this.alertsDataStream = createDataStreamField(
-        options.alertsDataStream ?? alertsDefaultDataStream
-      );
+      this.random = seed;
     }
 
     this.commonInfo = this.createHostData();
@@ -522,8 +480,12 @@ export class EndpointDocGenerator {
   /**
    * Creates a host metadata document
    * @param ts - Timestamp to put in the event
+   * @param metadataDataStream the values to populate the data_stream fields when generating metadata documents
    */
-  public generateHostMetadata(ts = new Date().getTime()): HostMetadata {
+  public generateHostMetadata(
+    ts = new Date().getTime(),
+    metadataDataStream = metadataDefaultDataStream
+  ): HostMetadata {
     return {
       '@timestamp': ts,
       event: {
@@ -537,7 +499,7 @@ export class EndpointDocGenerator {
         dataset: 'endpoint.metadata',
       },
       ...this.commonInfo,
-      ...this.metadataDataStream,
+      ...createDataStreamField(metadataDataStream),
     };
   }
 
@@ -547,16 +509,24 @@ export class EndpointDocGenerator {
    * @param entityID - entityID of the originating process
    * @param parentEntityID - optional entityID of the parent process, if it exists
    * @param ancestry - an array of ancestors for the generated alert
+   * @param alertsDataStream the values to populate the data_stream fields when generating alert documents
    */
-  public generateAlert(
+  public generateAlert({
     ts = new Date().getTime(),
     entityID = this.randomString(10),
-    parentEntityID?: string,
-    ancestry: string[] = []
-  ): AlertEvent {
+    parentEntityID,
+    ancestry = [],
+    alertsDataStream = alertsDefaultDataStream,
+  }: {
+    ts?: number;
+    entityID?: string;
+    parentEntityID?: string;
+    ancestry?: string[];
+    alertsDataStream?: DataStream;
+  } = {}): AlertEvent {
     return {
       ...this.commonInfo,
-      ...this.alertsDataStream,
+      ...createDataStreamField(alertsDataStream),
       '@timestamp': ts,
       ecs: {
         version: '1.4.0',
@@ -705,7 +675,7 @@ export class EndpointDocGenerator {
         return {};
       })(options.eventCategory);
     return {
-      ...this.eventsDataStream,
+      ...createDataStreamField(options?.eventsDataStream ?? eventsDefaultDataStream),
       '@timestamp': options.timestamp ? options.timestamp : new Date().getTime(),
       agent: { ...this.commonInfo.agent, type: 'endpoint' },
       ecs: {
@@ -921,6 +891,7 @@ export class EndpointDocGenerator {
     const startDate = new Date().getTime();
     const root = this.generateEvent({
       timestamp: startDate + 1000,
+      eventsDataStream: opts.eventsDataStream,
     });
     events.push(root);
     let ancestor = root;
@@ -932,18 +903,24 @@ export class EndpointDocGenerator {
       secBeforeAlert: number,
       eventList: Event[]
     ) => {
-      for (const relatedAlert of this.relatedAlertsGenerator(node, alertsPerNode, secBeforeAlert)) {
+      for (const relatedAlert of this.relatedAlertsGenerator({
+        node,
+        relatedAlerts: alertsPerNode,
+        alertCreationTime: secBeforeAlert,
+        alertsDataStream: opts.alertsDataStream,
+      })) {
         eventList.push(relatedAlert);
       }
     };
 
     const addRelatedEvents = (node: Event, secBeforeEvent: number, eventList: Event[]) => {
-      for (const relatedEvent of this.relatedEventsGenerator(
+      for (const relatedEvent of this.relatedEventsGenerator({
         node,
-        opts.relatedEvents,
-        secBeforeEvent,
-        opts.relatedEventsOrdered
-      )) {
+        relatedEvents: opts.relatedEvents,
+        processDuration: secBeforeEvent,
+        ordered: opts.relatedEventsOrdered,
+        eventsDataStream: opts.eventsDataStream,
+      })) {
         eventList.push(relatedEvent);
       }
     };
@@ -965,6 +942,7 @@ export class EndpointDocGenerator {
           parentEntityID: parentEntityIDSafeVersion(root),
           eventCategory: ['process'],
           eventType: ['end'],
+          eventsDataStream: opts.eventsDataStream,
         })
       );
     }
@@ -985,6 +963,7 @@ export class EndpointDocGenerator {
         ancestryArrayLimit: opts.ancestryArraySize,
         parentPid: firstNonNullValue(ancestor.process?.pid),
         pid: this.randomN(5000),
+        eventsDataStream: opts.eventsDataStream,
       });
       events.push(ancestor);
       timestamp = timestamp + 1000;
@@ -1000,6 +979,7 @@ export class EndpointDocGenerator {
             eventType: ['end'],
             ancestry: ancestryArray(ancestor),
             ancestryArrayLimit: opts.ancestryArraySize,
+            eventsDataStream: opts.eventsDataStream,
           })
         );
       }
@@ -1020,12 +1000,13 @@ export class EndpointDocGenerator {
     timestamp = timestamp + 1000;
 
     events.push(
-      this.generateAlert(
-        timestamp,
-        entityIDSafeVersion(ancestor),
-        parentEntityIDSafeVersion(ancestor),
-        ancestryArray(ancestor)
-      )
+      this.generateAlert({
+        ts: timestamp,
+        entityID: entityIDSafeVersion(ancestor),
+        parentEntityID: parentEntityIDSafeVersion(ancestor),
+        ancestry: ancestryArray(ancestor),
+        alertsDataStream: opts.alertsDataStream,
+      })
     );
     return events;
   }
@@ -1081,6 +1062,7 @@ export class EndpointDocGenerator {
         parentEntityID: currentStateEntityID,
         ancestry,
         ancestryArrayLimit: opts.ancestryArraySize,
+        eventsDataStream: opts.eventsDataStream,
       });
 
       maxChildren = this.randomN(opts.children + 1);
@@ -1104,16 +1086,23 @@ export class EndpointDocGenerator {
           eventType: ['end'],
           ancestry,
           ancestryArrayLimit: opts.ancestryArraySize,
+          eventsDataStream: opts.eventsDataStream,
         });
       }
       if (this.randomN(100) < opts.percentWithRelated) {
-        yield* this.relatedEventsGenerator(
-          child,
-          opts.relatedEvents,
+        yield* this.relatedEventsGenerator({
+          node: child,
+          relatedEvents: opts.relatedEvents,
           processDuration,
-          opts.relatedEventsOrdered
-        );
-        yield* this.relatedAlertsGenerator(child, opts.relatedAlerts, processDuration);
+          ordered: opts.relatedEventsOrdered,
+          eventsDataStream: opts.eventsDataStream,
+        });
+        yield* this.relatedAlertsGenerator({
+          node: child,
+          relatedAlerts: opts.relatedAlerts,
+          alertCreationTime: processDuration,
+          alertsDataStream: opts.alertsDataStream,
+        });
       }
     }
   }
@@ -1127,12 +1116,19 @@ export class EndpointDocGenerator {
    * @param ordered - if true the events will have an increasing timestamp, otherwise their timestamp will be random but
    *  guaranteed to be greater than or equal to the originating event
    */
-  public *relatedEventsGenerator(
-    node: Event,
-    relatedEvents: RelatedEventInfo[] | number = 10,
-    processDuration: number = 6 * 3600,
-    ordered: boolean = false
-  ) {
+  public *relatedEventsGenerator({
+    node,
+    relatedEvents = 10,
+    processDuration = 6 * 3600,
+    ordered = false,
+    eventsDataStream = eventsDefaultDataStream,
+  }: {
+    node: Event;
+    relatedEvents?: RelatedEventInfo[] | number;
+    processDuration?: number;
+    ordered?: boolean;
+    eventsDataStream?: DataStream;
+  }) {
     let relatedEventsInfo: RelatedEventInfo[];
     const nodeTimestamp = timestampSafeVersion(node) ?? 0;
     let ts = nodeTimestamp + 1;
@@ -1164,6 +1160,7 @@ export class EndpointDocGenerator {
           eventCategory: eventInfo.category,
           eventType: eventInfo.creationType,
           ancestry: ancestryArray(node),
+          eventsDataStream,
         });
       }
     }
@@ -1175,19 +1172,26 @@ export class EndpointDocGenerator {
    * @param relatedAlerts - number which defines the number of related alerts to create
    * @param alertCreationTime - maximum number of seconds after process event that related alert timestamp can be
    */
-  public *relatedAlertsGenerator(
-    node: Event,
-    relatedAlerts: number = 3,
-    alertCreationTime: number = 6 * 3600
-  ) {
+  public *relatedAlertsGenerator({
+    node,
+    relatedAlerts = 3,
+    alertCreationTime = 6 * 3600,
+    alertsDataStream = alertsDefaultDataStream,
+  }: {
+    node: Event;
+    relatedAlerts: number;
+    alertCreationTime: number;
+    alertsDataStream: DataStream;
+  }) {
     for (let i = 0; i < relatedAlerts; i++) {
       const ts = (timestampSafeVersion(node) ?? 0) + this.randomN(alertCreationTime) * 1000;
-      yield this.generateAlert(
+      yield this.generateAlert({
         ts,
-        entityIDSafeVersion(node),
-        parentEntityIDSafeVersion(node),
-        ancestryArray(node)
-      );
+        entityID: entityIDSafeVersion(node),
+        parentEntityID: parentEntityIDSafeVersion(node),
+        ancestry: ancestryArray(node),
+        alertsDataStream,
+      });
     }
   }
 
@@ -1335,16 +1339,21 @@ export class EndpointDocGenerator {
   /**
    * Generates a Host Policy response message
    */
-  public generatePolicyResponse(
+  public generatePolicyResponse({
     ts = new Date().getTime(),
-    allStatus?: HostPolicyResponseActionStatus
-  ): HostPolicyResponse {
+    allStatus,
+    policyDataStream = policyDefaultDataStream,
+  }: {
+    ts?: number;
+    allStatus?: HostPolicyResponseActionStatus;
+    policyDataStream?: DataStream;
+  } = {}): HostPolicyResponse {
     const policyVersion = this.seededUUIDv4();
     const status = () => {
       return allStatus || this.randomHostPolicyResponseActionStatus();
     };
     return {
-      ...this.policyDataStream,
+      ...createDataStreamField(policyDataStream),
       '@timestamp': ts,
       agent: {
         id: this.commonInfo.agent.id,
