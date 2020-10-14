@@ -136,6 +136,7 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<Jir
     },
     [currentIssueType, fields, onChange, parent, priority]
   );
+
   return isEdit ? (
     <span data-test-subj={'connector-settings-jira'}>
       <EuiFormRow fullWidth label={i18n.ISSUE_TYPE}>

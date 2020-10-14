@@ -66,16 +66,13 @@ const DescriptionListDescription = styled(EuiDescriptionListDescription)`
 interface ItemDetailsPropertySummaryProps {
   name: ReactNode | ReactNode[];
   value: ReactNode | ReactNode[];
-  title?: string;
 }
 
-export const ItemDetailsPropertySummary: FC<ItemDetailsPropertySummaryProps> = memo(
-  ({ name, value, title = '' }) => (
+export const ItemDetailsPropertySummary = memo<ItemDetailsPropertySummaryProps>(
+  ({ name, value }) => (
     <>
       <DescriptionListTitle>{name}</DescriptionListTitle>
-      <DescriptionListDescription>
-        <span title={title}>{value}</span>
-      </DescriptionListDescription>
+      <DescriptionListDescription>{value}</DescriptionListDescription>
     </>
   )
 );

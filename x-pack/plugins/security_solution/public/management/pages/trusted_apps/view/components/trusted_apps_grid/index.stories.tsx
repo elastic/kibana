@@ -8,6 +8,7 @@ import { Provider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
 import { storiesOf } from '@storybook/react';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import { EuiHorizontalRule } from '@elastic/eui';
 
 import { KibanaContextProvider } from '../../../../../../../../../../src/plugins/kibana_react/public';
 
@@ -27,7 +28,11 @@ const renderGrid = (store: ReturnType<typeof createGlobalNoMiddlewareStore>) => 
   <Provider store={store}>
     <KibanaContextProvider services={{ uiSettings: { get: () => 'MMM D, YYYY @ HH:mm:ss.SSS' } }}>
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <EuiHorizontalRule margin="none" />
+
         <TrustedAppsGrid />
+
+        <EuiHorizontalRule margin="none" />
       </ThemeProvider>
     </KibanaContextProvider>
   </Provider>

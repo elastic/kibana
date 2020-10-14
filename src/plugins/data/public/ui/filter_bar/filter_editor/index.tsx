@@ -245,7 +245,7 @@ class FilterEditorUI extends Component<Props, State> {
   private renderRegularEditor() {
     return (
       <div>
-        <EuiFlexGroup responsive={false} gutterSize="s">
+        <EuiFlexGroup responsive={true} gutterSize="s">
           <EuiFlexItem grow={2}>{this.renderFieldInput()}</EuiFlexItem>
           <EuiFlexItem grow={false} style={{ flexBasis: 160 }}>
             {this.renderOperatorInput()}
