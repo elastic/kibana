@@ -299,6 +299,7 @@ export const mockGetHostOverviewOptions: HostOverviewRequestOptions = {
   defaultIndex: DEFAULT_INDEX_PATTERN,
   fields: [
     '_id',
+    'agent.id',
     'host.architecture',
     'host.id',
     'host.ip',
@@ -328,7 +329,7 @@ export const mockGetHostOverviewRequest = {
     operationName: 'GetHostOverviewQuery',
     variables: { sourceId: 'default', hostName: 'siem-es' },
     query:
-      'query GetHostOverviewQuery($sourceId: ID!, $hostName: String!, $timerange: TimerangeInput!) {\n  source(id: $sourceId) {\n    id\n    HostOverview(hostName: $hostName, timerange: $timerange) {\n      _id\n      host {\n        architecture\n        id\n        ip\n        mac\n        name\n        os {\n          family\n          name\n          platform\n          version\n          __typename\n        }\n        type\n        __typename\n      }\n      cloud {\n        instance {\n          id\n          __typename\n        }\n        machine {\n          type\n          __typename\n        }\n        provider\n        region\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n',
+      'query GetHostOverviewQuery($sourceId: ID!, $hostName: String!, $timerange: TimerangeInput!) {\n  source(id: $sourceId) {\n    id\n    HostOverview(hostName: $hostName, timerange: $timerange) {\n      _id\n      agent {\n        id\n      }\n      host {\n        architecture\n        id\n        ip\n        mac\n        name\n        os {\n          family\n          name\n          platform\n          version\n          __typename\n        }\n        type\n        __typename\n      }\n      cloud {\n        instance {\n          id\n          __typename\n        }\n        machine {\n          type\n          __typename\n        }\n        provider\n        region\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n',
   },
 };
 
@@ -461,6 +462,17 @@ export const mockGetHostOverviewResponse = {
         },
       ],
     },
+    agent_id: {
+      doc_count_error_upper_bound: 0,
+      sum_other_doc_count: 0,
+      buckets: [
+        {
+          key: '9f48a9ab-749a-4ff0-b4e2-7e53910a985',
+          doc_count: 611894,
+          timestamp: { value: 1554826117972, value_as_string: '2019-04-09T16:08:37.972Z' },
+        },
+      ],
+    },
   },
 };
 
@@ -474,6 +486,9 @@ export const mockGetHostOverviewResult = {
     response: [JSON.stringify(mockGetHostOverviewResponse, null, 2)],
   },
   _id: 'siem-es',
+  agent: {
+    id: '9f48a9ab-749a-4ff0-b4e2-7e53910a985',
+  },
   host: {
     architecture: 'x86_64',
     id: 'b6d5264e4b9c8880ad1053841067a4a6',
