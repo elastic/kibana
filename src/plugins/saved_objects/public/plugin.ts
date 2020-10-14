@@ -23,9 +23,10 @@ import './index.scss';
 import { createSavedObjectClass } from './saved_object';
 import { DataPublicPluginStart } from '../../data/public';
 import { PER_PAGE_SETTING, LISTING_LIMIT_SETTING } from '../common';
+import { SavedObject } from './types';
 
 export interface SavedObjectsStart {
-  SavedObjectClass: any;
+  SavedObjectClass: new (raw: Record<string, any>) => SavedObject;
   settings: {
     getPerPage: () => number;
     getListingLimit: () => number;
