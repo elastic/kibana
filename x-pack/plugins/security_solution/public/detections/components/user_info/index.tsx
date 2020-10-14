@@ -23,7 +23,7 @@ export interface State {
   signalIndexTemplateOutdated: boolean | null;
 }
 
-const initialState: State = {
+export const initialState: State = {
   canUserCRUD: null,
   hasIndexManage: null,
   hasIndexWrite: null,
