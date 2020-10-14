@@ -32,3 +32,10 @@ export const INDEX_PATTERN_FETCH_FAILURE = i18n.translate(
     defaultMessage: 'Index pattern fetch failure',
   }
 );
+
+export const EQL_PREVIEW_FETCH_FAILURE = i18n.translate(
+  'xpack.securitySolution.components.hooks.eql.partialResponse',
+  {
+    defaultMessage: 'EQL Preview Error',
+  }
+);
