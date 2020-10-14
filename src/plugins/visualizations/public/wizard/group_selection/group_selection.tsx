@@ -22,6 +22,7 @@ import React from 'react';
 import { orderBy } from 'lodash';
 import {
   EuiFlexGroup,
+  EuiFlexGrid,
   EuiFlexItem,
   EuiCard,
   EuiIcon,
@@ -33,6 +34,9 @@ import {
   EuiSpacer,
   EuiBetaBadge,
   EuiTitle,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
+  EuiDescriptionList,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DocLinksStart } from '../../../../../core/public';
@@ -78,101 +82,105 @@ function GroupSelection(props: GroupSelectionProps) {
           />
         </EuiModalHeaderTitle>
       </EuiModalHeader>
-      <EuiModalBody>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup
-          gutterSize="l"
-          wrap
-          justifyContent="center"
-          responsive={false}
-          data-test-subj="visNewDialogGroups"
-        >
-          {promotedVisGroups.map((visType) => (
-            <VisGroup
-              visType={visType}
-              key={visType.name}
-              onVisTypeSelected={props.onVisTypeSelected}
-            />
-          ))}
-        </EuiFlexGroup>
-        <EuiSpacer size="xl" />
-        <EuiSpacer size="xl" />
-        <EuiFlexGroup gutterSize="l" wrap justifyContent="center" responsive={false}>
-          {props.visTypesRegistry.getByGroup(VisGroups.AGGBASED).length > 0 && (
-            <EuiFlexItem grow={false}>
-              <EuiCard
-                titleSize="xs"
-                layout="horizontal"
-                title={
-                  <span data-test-subj="visGroupAggBasedTitle">
-                    {i18n.translate('visualizations.newVisWizard.aggBasedGroupTitle', {
-                      defaultMessage: 'Aggregation based',
+      <EuiModalBody className="visNewVisDialogGroupSelection__body">
+        <div className="visNewVisDialogGroupSelection__visGroups">
+          <EuiSpacer size="s" />
+          <EuiFlexGrid columns={2} data-test-subj="visNewDialogGroups">
+            {promotedVisGroups.map((visType) => (
+              <VisGroup
+                visType={visType}
+                key={visType.name}
+                onVisTypeSelected={props.onVisTypeSelected}
+              />
+            ))}
+          </EuiFlexGrid>
+          <EuiSpacer size="l" />
+        </div>
+        <div className="visNewVisDialogGroupSelection__footer">
+          <EuiSpacer size="l" />
+          <EuiFlexGrid columns={2}>
+            {props.visTypesRegistry.getByGroup(VisGroups.AGGBASED).length > 0 && (
+              <EuiFlexItem>
+                <EuiCard
+                  titleSize="xs"
+                  layout="horizontal"
+                  title={
+                    <span data-test-subj="visGroupAggBasedTitle">
+                      {i18n.translate('visualizations.newVisWizard.aggBasedGroupTitle', {
+                        defaultMessage: 'Aggregation based',
+                      })}
+                    </span>
+                  }
+                  data-test-subj="visGroup-aggbased"
+                  description={i18n.translate(
+                    'visualizations.newVisWizard.aggBasedGroupDescription',
+                    {
+                      defaultMessage:
+                        'A set of frequently used visualizations that allows you to plot aggregated data to find trends, spikes and dips you need to know about',
+                    }
+                  )}
+                  icon={<EuiIcon type="heatmap" size="xl" color="secondary" />}
+                  className="visNewVisDialog__groupsCard"
+                >
+                  <EuiLink
+                    data-test-subj="visGroupAggBasedExploreLink"
+                    onClick={() => props.toggleGroups(false)}
+                  >
+                    <EuiText size="s">
+                      {i18n.translate('visualizations.newVisWizard.exploreOptionLinkText', {
+                        defaultMessage: 'Explore Options',
+                      })}{' '}
+                      <EuiIcon type="sortRight" />
+                    </EuiText>
+                  </EuiLink>
+                </EuiCard>
+              </EuiFlexItem>
+            )}
+            {props.visTypesRegistry.getByGroup(VisGroups.TOOLS).length > 0 && (
+              <EuiFlexItem className="visNewVisDialog__toolsCard">
+                <EuiSpacer size="m" />
+                <EuiTitle size="xs">
+                  <span data-test-subj="visGroup-tools">
+                    {i18n.translate('visualizations.newVisWizard.toolsGroupTitle', {
+                      defaultMessage: 'Tools',
                     })}
                   </span>
-                }
-                data-test-subj="visGroup-aggbased"
-                description={i18n.translate(
-                  'visualizations.newVisWizard.aggBasedGroupDescription',
-                  {
-                    defaultMessage:
-                      'A set of frequently used visualizations that allows you to plot aggregated data to find trends, spikes and dips you need to know about',
-                  }
-                )}
-                icon={<EuiIcon type="heatmap" size="xl" color="secondary" />}
-                className="visNewVisDialog__groupsCard"
-              >
-                <EuiLink
-                  data-test-subj="visGroupAggBasedExploreLink"
-                  onClick={() => props.toggleGroups(false)}
-                >
-                  <EuiText size="s">
-                    {i18n.translate('visualizations.newVisWizard.exploreOptionLinkText', {
-                      defaultMessage: 'Explore Options',
-                    })}{' '}
-                    <EuiIcon type="sortRight" />
-                  </EuiText>
-                </EuiLink>
-              </EuiCard>
-            </EuiFlexItem>
-          )}
-          {props.visTypesRegistry.getByGroup(VisGroups.TOOLS).length > 0 && (
-            <EuiFlexItem grow={false} className="visNewVisDialog__toolsCard">
-              <EuiSpacer size="m" />
-              <EuiTitle size="xs">
-                <span data-test-subj="visGroup-tools">
-                  {i18n.translate('visualizations.newVisWizard.toolsGroupTitle', {
-                    defaultMessage: 'Tools',
-                  })}
-                </span>
-              </EuiTitle>
-              {props.visTypesRegistry.getByGroup(VisGroups.TOOLS).map((visType) => (
-                <ToolsGroup
-                  visType={visType}
-                  key={visType.name}
-                  onVisTypeSelected={props.onVisTypeSelected}
-                  showExperimental={props.showExperimental}
+                </EuiTitle>
+                <EuiSpacer size="s" />
+                <div className="visNewVisDialog__toolsCardGroupContainer">
+                  {props.visTypesRegistry.getByGroup(VisGroups.TOOLS).map((visType) => (
+                    <ToolsGroup
+                      visType={visType}
+                      key={visType.name}
+                      onVisTypeSelected={props.onVisTypeSelected}
+                      showExperimental={props.showExperimental}
+                    />
+                  ))}
+                </div>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGrid>
+          <EuiSpacer size="m" />
+          <EuiDescriptionList
+            className="visNewVisDialogGroupSelection__footerDescriptionList"
+            type="responsiveColumn"
+          >
+            <EuiDescriptionListTitle className="visNewVisDialogGroupSelection__footerDescriptionListTitle">
+              <FormattedMessage
+                id="visualizations.newVisWizard.learnMoreText"
+                defaultMessage="Want to learn more?"
+              />
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              <EuiLink href={visualizeGuideLink} target="_blank" external>
+                <FormattedMessage
+                  id="isualizations.newVisWizard.readDocumentationLink"
+                  defaultMessage="Read documentation"
                 />
-              ))}
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiText>
-              {i18n.translate('visualizations.newVisWizard.learnMoreText', {
-                defaultMessage: 'Want to learn more?',
-              })}{' '}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiLink href={visualizeGuideLink} target="_blank" external>
-              {i18n.translate('visualizations.newVisWizard.readDocumentationLink', {
-                defaultMessage: 'Read documentation',
-              })}
-            </EuiLink>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+              </EuiLink>
+            </EuiDescriptionListDescription>
+          </EuiDescriptionList>
+        </div>
       </EuiModalBody>
     </>
   );
@@ -181,7 +189,7 @@ function GroupSelection(props: GroupSelectionProps) {
 const VisGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
   const onClick = () => onVisTypeSelected(visType);
   return (
-    <EuiFlexItem grow={false}>
+    <EuiFlexItem>
       <EuiCard
         titleSize="xs"
         title={<span data-test-subj="visTypeTitle">{visType.title}</span>}

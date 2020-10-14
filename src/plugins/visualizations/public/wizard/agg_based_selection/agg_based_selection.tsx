@@ -24,7 +24,7 @@ import React, { ChangeEvent } from 'react';
 
 import {
   EuiFieldSearch,
-  EuiFlexGroup,
+  EuiFlexGrid,
   EuiFlexItem,
   EuiScreenReaderOnly,
   EuiSpacer,
@@ -103,14 +103,9 @@ class AggBasedSelection extends React.Component<AggBasedSelectionProps, AggBased
               )}
             </span>
           </EuiScreenReaderOnly>
-          <EuiFlexGroup
-            data-test-subj="visNewDialogTypes"
-            wrap
-            responsive={false}
-            justifyContent="center"
-          >
+          <EuiFlexGrid columns={3} data-test-subj="visNewDialogTypes">
             {visTypes.map(this.renderVisType)}
-          </EuiFlexGroup>
+          </EuiFlexGrid>
         </EuiModalBody>
       </>
     );
@@ -144,9 +139,8 @@ class AggBasedSelection extends React.Component<AggBasedSelectionProps, AggBased
     const onClick = () => this.props.onVisTypeSelected(visType.type);
 
     return (
-      <EuiFlexItem key={visType.type.name} grow={false}>
+      <EuiFlexItem key={visType.type.name}>
         <EuiCard
-          className="visNewVisDialog__card"
           titleSize="xs"
           title={<span data-test-subj="visTypeTitle">{visType.type.title}</span>}
           onClick={onClick}

@@ -118,7 +118,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
       ) : (
         <EuiModal
           onClose={this.onCloseModal}
-          className={this.state.showGroups ? 'visNewVisDialog' : 'visNewVisDialog__aggbased'}
+          className={this.state.showGroups ? 'visNewVisDialog' : 'visNewVisDialog--aggbased'}
           aria-label={visNewVisDialogAriaLabel}
         >
           <WizardComponent
