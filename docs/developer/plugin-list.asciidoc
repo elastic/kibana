@@ -480,7 +480,7 @@ routes, etc.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/transform/readme.md[transform]
-|To use the transform feature, you must have at least Basic license.
+|WARNING: Missing README.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/translations[translations]
