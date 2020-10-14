@@ -12,7 +12,7 @@ image::images/management-index-patterns.png[]
 
 The `Index Pattern Management` {kib} privilege is required to access the *Index patterns* UI.
 
-You can add this privilege in *Stack Management > Security > Roles*.
+To add the privilege, open the menu, then click *Stack Management > Roles*.
 
 [float]
 === Create an index pattern

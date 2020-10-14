@@ -16,7 +16,7 @@ values.
 
 The `Advanced Settings` {kib} privilege is required to access *Advanced Settings*.
 
-You can add this privilege in *Stack Management > Security > Roles*.
+To add the privilege, open the menu, then click *Stack Management > Roles*.
 
 
 [float]
