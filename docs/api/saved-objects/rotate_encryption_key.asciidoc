@@ -1,3 +1,4 @@
+[role="xpack"]
 [[saved-objects-api-rotate-encryption-key]]
 === Rotate encryption key API
 ++++
