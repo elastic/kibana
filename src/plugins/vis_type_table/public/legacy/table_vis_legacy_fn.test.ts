@@ -22,7 +22,7 @@ import { tableVisLegacyResponseHandler } from './table_vis_legacy_response_handl
 
 import { functionWrapper } from '../../../expressions/common/expression_functions/specs/tests/utils';
 
-jest.mock('./table_vis_response_handler', () => ({
+jest.mock('./table_vis_legacy_response_handler', () => ({
   tableVisLegacyResponseHandler: jest.fn().mockReturnValue({
     tables: [{ columns: [], rows: [] }],
   }),

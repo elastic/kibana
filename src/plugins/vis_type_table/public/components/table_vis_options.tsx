@@ -115,7 +115,7 @@ function TableOptions({
       />
 
       <SwitchOption
-        label={i18n.translate('visTypeTable.params.showTotalLabel', {
+        label={i18n.translate('visTypeTable.params.showToolbarLabel', {
           defaultMessage: 'Show toolbar',
         })}
         paramName="showToolbar"
