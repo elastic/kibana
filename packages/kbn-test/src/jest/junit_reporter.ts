@@ -22,6 +22,7 @@ import { writeFileSync, mkdirSync } from 'fs';
 
 import xmlBuilder from 'xmlbuilder';
 
+import { REPO_ROOT } from '@kbn/utils';
 import type { Config } from '@jest/types';
 import { AggregatedResult, Test, BaseReporter } from '@jest/reporters';
 
@@ -46,7 +47,7 @@ export default class JestJUnitReporter extends BaseReporter {
   constructor(globalConfig: Config.GlobalConfig, { rootDirectory, reportName }: ReporterOptions) {
     super();
     this._reportName = reportName || 'Jest Tests';
-    this._rootDirectory = rootDirectory ? resolve(rootDirectory) : resolve(__dirname, '../..');
+    this._rootDirectory = rootDirectory ? resolve(rootDirectory) : REPO_ROOT;
   }
 
   /**
