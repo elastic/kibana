@@ -13,6 +13,8 @@ import { PhaseWithIndexPriority, Phases } from '../../../../../../../common/type
 
 import { UseField, NumericField, FieldConfig } from '../../../../../../shared_imports';
 
+import { defaultSetPriority } from '../../../../../constants';
+
 import { propertyof } from '../../../../../services/policies/policy_validation';
 
 import { LearnMoreLink } from '../../';
@@ -20,7 +22,7 @@ import { LearnMoreLink } from '../../';
 import { ifExistsNumberGreaterThanZero } from './validations';
 
 const setIndexPriorityConfig: FieldConfig<string> = {
-  defaultValue: '100',
+  defaultValue: defaultSetPriority,
   label: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.indexPriorityLabel', {
     defaultMessage: 'Index priority (optional)',
   }),

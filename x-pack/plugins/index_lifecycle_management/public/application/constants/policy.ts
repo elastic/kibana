@@ -12,6 +12,8 @@ import {
   SerializedPolicy,
 } from '../../../common/types';
 
+export const defaultSetPriority: string = '100';
+
 export const defaultPolicy: SerializedPolicy = {
   name: '',
   phases: {

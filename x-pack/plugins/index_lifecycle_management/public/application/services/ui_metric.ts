@@ -15,6 +15,7 @@ import {
   UIM_CONFIG_WARM_PHASE,
   defaultNewColdPhase,
   defaultNewWarmPhase,
+  defaultSetPriority,
 } from '../constants';
 
 import { Phases } from '../../../common/types';
@@ -41,11 +42,10 @@ export function getUiMetricsForPhases(phases: Phases): string[] {
       metric: UIM_CONFIG_SET_PRIORITY,
       isTracked: () => {
         // We only care about whether the user has interacted with the priority of *any* phase at all.
-        // const isHotPhasePriorityChanged =
-        //   phases.hot &&
-        //   phases.hot.actions.set_priority &&
-        //   phases.hot.actions.set_priority.priority !==
-        //     parseInt(defaultNewHotPhase.phaseIndexPriority, 10);
+        const isHotPhasePriorityChanged =
+          phases.hot &&
+          phases.hot.actions.set_priority &&
+          phases.hot.actions.set_priority.priority !== parseInt(defaultSetPriority, 10);
 
         const isWarmPhasePriorityChanged =
           phases.warm &&
@@ -60,7 +60,9 @@ export function getUiMetricsForPhases(phases: Phases): string[] {
             parseInt(defaultNewColdPhase.phaseIndexPriority, 10);
         // If the priority is different than the default, we'll consider it a user interaction,
         // even if the user has set it to undefined.
-        return isWarmPhasePriorityChanged || isColdPhasePriorityChanged;
+        return (
+          isHotPhasePriorityChanged || isWarmPhasePriorityChanged || isColdPhasePriorityChanged
+        );
       },
     },
     {
