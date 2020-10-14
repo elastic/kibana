@@ -260,11 +260,11 @@ For more details and a reference of audit events, refer to <<xpack-security-audi
 
 [float]
 [[audit-logging-settings-beta]]
-===== Audit logging settings
+===== ECS audit logging settings
 
 beta[]
 
-To enable the audit logger, specify where you want to write the audit events using `xpack.security.audit.appender`.
+To enable the <<xpack-security-ecs-audit-logging, ECS audit logger>>, specify where you want to write the audit events using `xpack.security.audit.appender`.
 
 [cols="2*<"]
 |===
