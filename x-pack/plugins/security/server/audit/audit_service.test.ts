@@ -124,7 +124,7 @@ describe('#asScoped', () => {
 });
 
 describe('#createLoggingConfig', () => {
-  test('sets log level to `on` when audit logging is enabled', async () => {
+  test('sets log level to `info` when audit logging is enabled and appender is defined', async () => {
     const features$ = of({
       allowAuditLogging: true,
     });
