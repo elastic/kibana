@@ -17,10 +17,14 @@
  * under the License.
  */
 
-import './jquery.flot';
-import './jquery.flot.time';
-import './jquery.flot.symbol';
-import './jquery.flot.crosshair';
-import './jquery.flot.selection';
-import './jquery.flot.stack';
-import './jquery.flot.axislabels';
+import moment from 'moment';
+
+export const labelDateFormatter = (label: string, dateformat = 'lll') => {
+  let formattedLabel = label;
+  // Use moment isValid function on strict mode
+  const isDate = moment(label, '', true).isValid();
+  if (isDate) {
+    formattedLabel = moment(label).format(dateformat);
+  }
+  return formattedLabel;
+};
