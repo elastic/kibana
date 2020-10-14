@@ -107,6 +107,7 @@ export const RangePopover = ({
         <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
           <EuiFlexItem>
             <EuiFieldNumber
+              className="lnsRangesOperation__popoverNumberField"
               value={isValidNumber(from) ? Number(from) : ''}
               onChange={({ target }) => {
                 const newRange = {
@@ -116,12 +117,6 @@ export const RangePopover = ({
                 setTempRange(newRange);
                 saveRangeAndReset(newRange);
               }}
-              append={
-                <EuiToolTip content={lteTooltipContent}>
-                  <EuiText size="s">{lteAppendLabel}</EuiText>
-                </EuiToolTip>
-              }
-              fullWidth
               compressed
               placeholder={FROM_PLACEHOLDER}
               isInvalid={!isValidRange(tempRange)}
@@ -132,6 +127,7 @@ export const RangePopover = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFieldNumber
+              className="lnsRangesOperation__popoverNumberField"
               value={isValidNumber(to) ? Number(to) : ''}
               onChange={({ target }) => {
                 const newRange = {
@@ -141,12 +137,6 @@ export const RangePopover = ({
                 setTempRange(newRange);
                 saveRangeAndReset(newRange);
               }}
-              prepend={
-                <EuiToolTip content={ltTooltipContent}>
-                  <EuiText size="s">{ltPrependLabel}</EuiText>
-                </EuiToolTip>
-              }
-              fullWidth
               compressed
               placeholder={TO_PLACEHOLDER}
               isInvalid={!isValidRange(tempRange)}
