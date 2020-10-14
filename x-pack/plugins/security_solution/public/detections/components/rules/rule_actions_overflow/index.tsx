@@ -26,6 +26,7 @@ import {
 } from '../../../pages/detection_engine/rules/all/actions';
 import { GenericDownloader } from '../../../../common/components/generic_downloader';
 import { getRulesUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
+import { getToolTipContent } from '../../../../common/utils/privileges';
 
 const MyEuiButtonIcon = styled(EuiButtonIcon)`
   &.euiButtonIcon {
@@ -65,18 +66,23 @@ const RuleActionsOverflowComponent = ({
     () =>
       rule != null
         ? [
-            <EuiContextMenuItem
-              key={i18nActions.DUPLICATE_RULE}
-              icon="copy"
-              disabled={!canDuplicateRuleWithActions || userHasNoPermissions}
-              data-test-subj="rules-details-duplicate-rule"
-              onClick={async () => {
-                setIsPopoverOpen(false);
-                await duplicateRulesAction([rule], [rule.id], noop, dispatchToaster);
-              }}
+            <EuiToolTip
+              position="left"
+              content={getToolTipContent(rule, true, canDuplicateRuleWithActions)}
             >
-              {i18nActions.DUPLICATE_RULE}
-            </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                key={i18nActions.DUPLICATE_RULE}
+                icon="copy"
+                disabled={!canDuplicateRuleWithActions || userHasNoPermissions}
+                data-test-subj="rules-details-duplicate-rule"
+                onClick={async () => {
+                  setIsPopoverOpen(false);
+                  await duplicateRulesAction([rule], [rule.id], noop, dispatchToaster);
+                }}
+              >
+                {i18nActions.DUPLICATE_RULE}
+              </EuiContextMenuItem>
+            </EuiToolTip>,
             <EuiContextMenuItem
               key={i18nActions.EXPORT_RULE}
               icon="exportAction"

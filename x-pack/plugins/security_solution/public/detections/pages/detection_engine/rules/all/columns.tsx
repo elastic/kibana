@@ -53,8 +53,8 @@ export const getActions = (
   {
     'data-test-subj': 'editRuleAction',
     description: i18n.EDIT_RULE_SETTINGS,
-    name: actionsPrivileges ? (
-      <EuiToolTip position="top" content={i18n.EDIT_RULE_SETTINGS_TOOLTIP}>
+    name: !actionsPrivileges ? (
+      <EuiToolTip position="left" content={i18n.EDIT_RULE_SETTINGS_TOOLTIP}>
         <>{i18n.EDIT_RULE_SETTINGS}</>
       </EuiToolTip>
     ) : (
@@ -67,7 +67,13 @@ export const getActions = (
   {
     description: i18n.DUPLICATE_RULE,
     icon: 'copy',
-    name: i18n.DUPLICATE_RULE,
+    name: !actionsPrivileges ? (
+      <EuiToolTip position="left" content={i18n.EDIT_RULE_SETTINGS_TOOLTIP}>
+        <>{i18n.DUPLICATE_RULE}</>
+      </EuiToolTip>
+    ) : (
+      i18n.DUPLICATE_RULE
+    ),
     enabled: (rowItem: Rule) => canEditRuleWithActions(rowItem, actionsPrivileges),
     onClick: async (rowItem: Rule) => {
       await duplicateRulesAction([rowItem], [rowItem.id], dispatch, dispatchToaster);
