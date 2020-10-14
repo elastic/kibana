@@ -20,7 +20,11 @@ exports[`Authentication Table Component rendering it renders the authentication 
                 "host-2",
               ],
             },
-            "source.ip": "8.8.8.8",
+            "source": Object {
+              "ip": Array [
+                "8.8.8.8",
+              ],
+            },
             "timestamp": "2019-01-23T22:35:32.222Z",
           },
           "lastSuccess": Object {
@@ -79,7 +83,11 @@ exports[`Authentication Table Component rendering it renders the authentication 
                 "host-1",
               ],
             },
-            "source.ip": "127.0.0.1",
+            "source": Object {
+              "ip": Array [
+                "127.0.0.1",
+              ],
+            },
             "timestamp": "2019-01-23T22:35:32.222Z",
           },
           "successes": 0,
