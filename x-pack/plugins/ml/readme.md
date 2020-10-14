@@ -41,7 +41,7 @@ For more details, refer to this [getting started](https://www.elastic.co/guide/e
 ### Adding sample data to Kibana
 
 Kibana has sample data sets that you can add to your setup so that you can test 
-different configurations on dummy data.
+different configurations on sample data.
 
 1. Click the Elastic logo in the upper left hand corner of your browser to 
    navigate to the Kibana home page.
