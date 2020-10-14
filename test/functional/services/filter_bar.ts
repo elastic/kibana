@@ -124,9 +124,10 @@ export function FilterBarProvider({ getService, getPageObjects }: FtrProviderCon
       await comboBox.set('filterOperatorList', operator);
       const params = await testSubjects.find('filterParams');
       const paramsComboBoxes = await params.findAllByCssSelector(
-        '[data-test-subj~="filterParamsComboBox"]'
+        '[data-test-subj~="filterParamsComboBox"]',
+        1000
       );
-      const paramFields = await params.findAllByTagName('input');
+      const paramFields = await params.findAllByTagName('input', 1000);
       for (let i = 0; i < values.length; i++) {
         let fieldValues = values[i];
         if (!Array.isArray(fieldValues)) {
