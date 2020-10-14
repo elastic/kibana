@@ -23,6 +23,9 @@ import {
   KibanaRequest,
   ILegacyClusterClient,
   IClusterClient,
+  SavedObjectsServiceStart,
+  SavedObjectsClientContract,
+  ISavedObjectsRepository,
 } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { ElasticsearchClient } from '../../../../src/core/server';
@@ -77,6 +80,7 @@ export interface StatsCollectionConfig {
   start: string | number;
   end: string | number;
   esClient: ElasticsearchClient;
+  soClient: SavedObjectsClientContract | ISavedObjectsRepository;
 }
 
 export interface BasicStatsPayload {
@@ -141,6 +145,7 @@ export interface CollectionConfig<
   priority: number;
   esCluster: ILegacyClusterClient;
   esClientGetter: () => IClusterClient | undefined; // --> by now we know that the client getter will return the IClusterClient but we assure that through a code check
+  soServiceGetter: () => SavedObjectsServiceStart | undefined; // --> by now we know that the service getter will return the SavedObjectsServiceStart but we assure that through a code check
   statsGetter: StatsGetter<CustomContext, T>;
   clusterDetailsGetter: ClusterDetailsGetter<CustomContext>;
   licenseGetter: LicenseGetter<CustomContext>;
@@ -157,5 +162,6 @@ export interface Collection<
   clusterDetailsGetter: ClusterDetailsGetter<CustomContext>;
   esCluster: ILegacyClusterClient;
   esClientGetter: () => IClusterClient | undefined; // the collection could still return undefined for the es client getter.
+  soServiceGetter: () => SavedObjectsServiceStart | undefined; // the collection could still return undefined for the Saved Objects Service getter.
   title: string;
 }
