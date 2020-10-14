@@ -18,16 +18,21 @@ To manage your indices, open the menu, then go to *Stack Management > Data > Ind
 [role="screenshot"]
 image::images/management_index_labels.png[Index Management UI]
 
-If security is enabled,
-you must have the `monitor` cluster privilege and the `view_index_metadata`
+Before using this feature, you should be familiar with index management
+operations. Refer to the {ref}/indices.html[index management APIs]
+and the {ref}/indices-templates.html[index template APIs].
+
+[float]
+=== Required permissions
+
+The minimum required permissions to access *Index Management* are
+the `monitor` cluster privilege and the `view_index_metadata`
 and `manage` index privileges to view the data.
 For index templates, you must have the `manage_index_templates` cluster privilege.
 See {ref}/security-privileges.html[Security privileges] for more
 information.
 
-Before using this feature, you should be familiar with index management
-operations. Refer to the {ref}/indices.html[index management APIs]
-and the {ref}/indices-templates.html[index template APIs].
+You can add these privileges in *Stack Management > Security > Roles*.
 
 [float]
 === View and edit indices

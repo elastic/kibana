@@ -29,6 +29,13 @@ more information, see https://www.elastic.co/subscriptions and
 enrollment and configuration process step by step the first time you use the
 Central Management UI.
 
+[float]
+=== Required permissions
+
+You must have the `beats_admin` role assigned to use **{beats} Central Management**
+
+You can assign this role in *Stack Management > Security > Users*.
+
 
 [float]
 === Enroll {beats}
