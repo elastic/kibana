@@ -62,6 +62,7 @@ interface ActionAccordionFormProps {
   messageVariables?: ActionVariable[];
   defaultActionMessage?: string;
   setHasActionsDisabled?: (value: boolean) => void;
+  setHasActionsWithBrokenConnector?: (value: boolean) => void;
   capabilities: ApplicationStart['capabilities'];
 }
 
@@ -83,6 +84,7 @@ export const ActionForm = ({
   defaultActionMessage,
   toastNotifications,
   setHasActionsDisabled,
+  setHasActionsWithBrokenConnector,
   capabilities,
   docLinks,
 }: ActionAccordionFormProps) => {
@@ -164,6 +166,7 @@ export const ActionForm = ({
       if (setHasActionsDisabled) {
         setHasActionsDisabled(hasActionsDisabled);
       }
+      testForBrokenConnector(actions);
     };
     if (connectors.length > 0 && actionTypesIndex) {
       setActionTypesAvalilability();
@@ -177,6 +180,20 @@ export const ActionForm = ({
       defaultMessage: '(preconfigured)',
     }
   );
+
+  const updateActions = (updatedActions: AlertAction[]) => {
+    setAlertProperty(updatedActions);
+    // testForBrokenConnector(updatedActions);
+  };
+
+  const testForBrokenConnector = (alertActions: AlertAction[]) => {
+    const hasActionWithBrokenConnector = alertActions.some(
+      (action) => !connectors.find((connector) => connector.id === action.id)
+    );
+    if (setHasActionsWithBrokenConnector) {
+      setHasActionsWithBrokenConnector(hasActionWithBrokenConnector);
+    }
+  };
 
   const getSelectedOptions = (actionItemId: string) => {
     const selectedConnector = connectors.find((connector) => connector.id === actionItemId);
@@ -385,7 +402,7 @@ export const ActionForm = ({
                 const updatedActions = actions.filter(
                   (_item: AlertAction, i: number) => i !== index
                 );
-                setAlertProperty(updatedActions);
+                updateActions(updatedActions);
                 setIsAddActionPanelOpen(
                   updatedActions.filter((item: AlertAction) => item.id !== actionItem.id).length ===
                     0
@@ -462,7 +479,7 @@ export const ActionForm = ({
                 const updatedActions = actions.filter(
                   (_item: AlertAction, i: number) => i !== index
                 );
-                setAlertProperty(updatedActions);
+                updateActions(updatedActions);
                 setIsAddActionPanelOpen(
                   updatedActions.filter((item: AlertAction) => item.id !== actionItem.id).length ===
                     0
