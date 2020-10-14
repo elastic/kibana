@@ -38119,12 +38119,11 @@ async function validateDependencies(kbn, yarnLock) {
 
   if (devOnlyProjectsInProduction) {
     _log__WEBPACK_IMPORTED_MODULE_4__["log"].error(dedent__WEBPACK_IMPORTED_MODULE_1___default.a`
+      Some of the packages in the production dependency chain for Kibana and X-Pack are
+      flagged with "kibana.devOnly" in their package.json. Please check changes made to
+      packages and their dependencies to ensure they don't end up in production.
 
-      There are some kibana packages which are not intended to be production dependencies
-      of Kibana, and they are flagged with the "kibana.devOnly" property in their package.json
-      file. Please double-check changes made to packages and their dependencies to ensure they
-      don't end up in production. We've highlighted the problematic packages in the map of
-      production dependencies below:
+      The devOnly dependencies that are being dependend on in production are:
 
         ${Object(_projects_tree__WEBPACK_IMPORTED_MODULE_5__["treeToString"])(devOnlyProjectsInProduction).split('\n').join('\n        ')}
     `);
