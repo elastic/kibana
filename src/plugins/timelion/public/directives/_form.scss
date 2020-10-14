@@ -37,7 +37,7 @@ select.form-control {
   width: 100%;
 }
 
-.dropdownWarning {
+.timDropdownWarning {
   margin-bottom: $euiSize;
   padding: $euiSizeXS $euiSizeS;
   color: $euiColorDarkestShade;
@@ -45,14 +45,14 @@ select.form-control {
   font-size: $euiSizeM;
 }
 
-.form-checkbox {
+.timFormCheckbox {
   display: flex;
   align-items: center;
   line-height: 1.5;
   position: relative;
 }
 
-.form-checkbox__input {
+.timFormCheckbox__input {
   appearance: none;
   background-color: $euiColorLightestShade;
   border: 1px solid $euiColorLightShade;
@@ -63,18 +63,18 @@ select.form-control {
   transition: background-color .1s linear;
 }
 
-.form-checkbox__input:checked {
+.timFormCheckbox__input:checked {
   border-color: $euiColorPrimary;
   background-color: $euiColorPrimary;
 }
 
-.form-checkbox__icon {
+.timFormCheckbox__icon {
   position: absolute;
   top: 0;
   left: 2px;
 }
 
-.form-textarea {
+.timFormTextarea {
   padding: $euiSizeXS $euiSizeM;
   font-size: $euiSize;
   line-height: 1.5;

@@ -27,18 +27,18 @@
 
 saved-object-finder {
 
-  .search-bar {
+  .timSearchBar {
     display: flex;
     align-items: center;
   }
 
-  .search-bar__section {
+  .timSearchBar__section {
     position: relative;
     margin-right: $euiSize;
     flex: 1;
   }
 
-  .search-bar__icon {
+  .timSearchBar__icon {
     position: absolute;
     top: $euiSizeS;
     left: $euiSizeS;
@@ -46,7 +46,7 @@ saved-object-finder {
     color: $euiColorDarkShade;
   }
 
-  .search-bar__input {
+  .timSearchBar__input {
     padding: $euiSizeS $euiSizeM;
     color: $euiColorDarkestShade;
     background-color: $euiColorEmptyShade;
@@ -58,7 +58,7 @@ saved-object-finder {
     font-size: $euiSize;
   }
 
-  .search-bar__pagecount {
+  .timSearchBar__pagecount {
     font-size: $euiSize;
     color: $euiColorDarkShade;
   }

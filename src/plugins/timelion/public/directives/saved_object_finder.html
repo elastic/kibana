@@ -1,11 +1,11 @@
 <form
   role="form"
 >
-  <div class="search-bar">
-      <div class="search-bar__section">
-        <icon class="search-bar__icon" type="'search'"></icon>
+  <div class="timSearchBar">
+      <div class="timSearchBar__section">
+        <icon class="timSearchBar__icon" type="'search'"></icon>
         <input
-          class="search-bar__input"
+          class="timSearchBar__input"
           input-focus
           disable-input-focus="disableAutoFocus"
           ng-model="filter"
@@ -19,7 +19,7 @@
     </div>
 
     <div>
-      <p class="search-bar__pagecount"
+      <p class="timSearchBar__pagecount"
         i18n-id="timelion.savedObjectFinder.pageItemsFromHitCountDescription"
         i18n-default-message="{pageFirstItem}-{pageLastItem} of {hitCount}"
         i18n-values="{pageFirstItem, pageLastItem, hitCount: finder.hitCount}"
