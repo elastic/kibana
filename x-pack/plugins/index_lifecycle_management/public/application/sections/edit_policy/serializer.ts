@@ -12,7 +12,7 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
 ): SerializedPolicy => {
   const { _meta, ...rest } = data;
 
-  if (!rest.phases) {
+  if (!rest.phases || !rest.phases.hot) {
     rest.phases = { hot: { actions: {} } };
   }
 

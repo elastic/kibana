@@ -17,11 +17,19 @@ import {
   ToggleField,
   NumericField,
   useFormData,
+  fieldValidators,
 } from '../../../../../../shared_imports';
 
-import { LearnMoreLink } from '../../';
+const { emptyField } = fieldValidators;
 
-import { ifExistsNumberGreaterThanZero } from './validations';
+const i18nTexts = {
+  numberOfSegmentsRequiredError: i18n.translate(
+    'xpack.indexLifecycleMgmt.editPolicy.forcemerge.numberOfSegmentsRequiredError',
+    { defaultMessage: 'A value for number of segments is required.' }
+  ),
+};
+
+import { LearnMoreLink } from '../../';
 
 const fieldsConfig = {
   _meta: {
@@ -48,7 +56,7 @@ const fieldsConfig = {
     }),
     validations: [
       {
-        validator: ifExistsNumberGreaterThanZero,
+        validator: emptyField(i18nTexts.numberOfSegmentsRequiredError),
       },
     ],
     serializer: (v: string): any => (v ? parseInt(v, 10) : undefined),

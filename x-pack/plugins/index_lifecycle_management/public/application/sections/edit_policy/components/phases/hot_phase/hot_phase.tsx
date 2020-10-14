@@ -25,6 +25,7 @@ import {
   useFormData,
   UseField,
   SelectField,
+  ToggleField,
   UseMultiFields,
   FieldConfig,
   getFieldValidityAndErrorMessage,
@@ -49,6 +50,30 @@ const fieldsConfig = {
     hot: {
       useRollover: {
         defaultValue: true,
+        label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.enableRolloverLabel', {
+          defaultMessage: 'Enable rollover',
+        }),
+        helpText: (
+          <>
+            <p>
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.rolloverDescriptionMessage"
+                defaultMessage="The new index created by rollover is added
+            to the index alias and designated as the write index."
+              />
+            </p>
+            <LearnMoreLink
+              text={
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.learnAboutRolloverLinkText"
+                  defaultMessage="Learn about rollover"
+                />
+              }
+              docPath="indices-rollover-index.html"
+            />
+            <EuiSpacer size="m" />
+          </>
+        ),
       } as FieldConfig<boolean>,
       maxStorageSizeUnit: {
         defaultValue: 'gb',
@@ -144,50 +169,15 @@ export const HotPhase: FunctionComponent<{ setWarmPhaseOnRollover: (v: boolean) 
           key="_meta.hot.useRollover"
           path="_meta.hot.useRollover"
           config={fieldsConfig._meta.hot.useRollover}
-        >
-          {(field) => {
-            return (
-              <EuiFormRow
-                id="rolloverFormRow"
-                hasEmptyLabelSpace
-                helpText={
-                  <Fragment>
-                    <p>
-                      <FormattedMessage
-                        id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.rolloverDescriptionMessage"
-                        defaultMessage="The new index created by rollover is added
-                    to the index alias and designated as the write index."
-                      />
-                    </p>
-                    <LearnMoreLink
-                      text={
-                        <FormattedMessage
-                          id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.learnAboutRolloverLinkText"
-                          defaultMessage="Learn about rollover"
-                        />
-                      }
-                      docPath="indices-rollover-index.html"
-                    />
-                    <EuiSpacer size="m" />
-                  </Fragment>
-                }
-              >
-                <EuiSwitch
-                  data-test-subj="rolloverSwitch"
-                  checked={field.value}
-                  onChange={(e) => {
-                    const value = e.target.checked;
-                    setWarmPhaseOnRollover(value);
-                    field.setValue(value);
-                  }}
-                  label={i18n.translate('xpack.indexLifecycleMgmt.hotPhase.enableRolloverLabel', {
-                    defaultMessage: 'Enable rollover',
-                  })}
-                />
-              </EuiFormRow>
-            );
+          component={ToggleField}
+          componentProps={{
+            hasEmptyLabelSpace: true,
+            fullWidth: false,
+            euiFieldProps: {
+              'data-test-subj': 'rolloverSwitch',
+            },
           }}
-        </UseField>
+        />
         {isRolloverEnabled && (
           <Fragment>
             <EuiSpacer size="m" />
