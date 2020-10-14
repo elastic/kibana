@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiContextMenuItem } from '@elastic/eui';
+import { EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
 import React, { Dispatch } from 'react';
 import * as i18n from '../translations';
 import { Action } from './reducer';
@@ -18,12 +18,14 @@ import { ActionToaster, displayWarningToast } from '../../../../../common/compon
 import { Rule } from '../../../../containers/detection_engine/rules';
 import * as detectionI18n from '../../translations';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
+import { canEditRuleWithActions } from '../../../../../common/utils/privileges';
 
 interface GetBatchItems {
   closePopover: () => void;
   dispatch: Dispatch<Action>;
   dispatchToaster: Dispatch<ActionToaster>;
   hasMlPermissions: boolean;
+  hasActionsPrivileges: boolean;
   loadingRuleIds: string[];
   reFetchRules: (refreshPrePackagedRule?: boolean) => void;
   rules: Rule[];
@@ -39,6 +41,7 @@ export const getBatchItems = ({
   reFetchRules,
   rules,
   selectedRuleIds,
+  hasActionsPrivileges,
 }: GetBatchItems) => {
   const containsEnabled = selectedRuleIds.some(
     (id) => rules.find((r) => r.id === id)?.enabled ?? false
@@ -51,40 +54,61 @@ export const getBatchItems = ({
     (id) => rules.find((r) => r.id === id)?.immutable ?? false
   );
 
-  return [
-    <EuiContextMenuItem
-      key={i18n.BATCH_ACTION_ACTIVATE_SELECTED}
-      icon="checkInCircleFilled"
-      disabled={containsLoading || !containsDisabled}
-      onClick={async () => {
-        closePopover();
-        const deactivatedIds = selectedRuleIds.filter(
-          (id) => !rules.find((r) => r.id === id)?.enabled ?? false
-        );
-
-        const deactivatedIdsNoML = deactivatedIds.filter(
-          (id) => !isMlRule(rules.find((r) => r.id === id)?.type)
-        );
-
-        const mlRuleCount = deactivatedIds.length - deactivatedIdsNoML.length;
-        if (!hasMlPermissions && mlRuleCount > 0) {
-          displayWarningToast(detectionI18n.ML_RULES_UNAVAILABLE(mlRuleCount), dispatchToaster);
+  const canBulkActivateRulesWithActions = selectedRuleIds.every((id) => {
+    const found = rules.find((rule) => rule.id === id);
+    if (found != null) {
+      if (found.actions.length > 0) {
+        if (canEditRuleWithActions(found, hasActionsPrivileges)) {
+          return true;
+        } else {
+          return false;
         }
+      } else {
+        return true;
+      }
+    }
+    return true;
+  });
 
-        await enableRulesAction(
-          hasMlPermissions ? deactivatedIds : deactivatedIdsNoML,
-          true,
-          dispatch,
-          dispatchToaster
-        );
-      }}
+  return [
+    <EuiToolTip
+      position="right"
+      content={!canBulkActivateRulesWithActions ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined}
     >
-      {i18n.BATCH_ACTION_ACTIVATE_SELECTED}
-    </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        key={i18n.BATCH_ACTION_ACTIVATE_SELECTED}
+        icon="checkInCircleFilled"
+        disabled={!canBulkActivateRulesWithActions || containsLoading || !containsDisabled}
+        onClick={async () => {
+          closePopover();
+          const deactivatedIds = selectedRuleIds.filter(
+            (id) => !rules.find((r) => r.id === id)?.enabled ?? false
+          );
+
+          const deactivatedIdsNoML = deactivatedIds.filter(
+            (id) => !isMlRule(rules.find((r) => r.id === id)?.type)
+          );
+
+          const mlRuleCount = deactivatedIds.length - deactivatedIdsNoML.length;
+          if (!hasMlPermissions && mlRuleCount > 0) {
+            displayWarningToast(detectionI18n.ML_RULES_UNAVAILABLE(mlRuleCount), dispatchToaster);
+          }
+
+          await enableRulesAction(
+            hasMlPermissions ? deactivatedIds : deactivatedIdsNoML,
+            true,
+            dispatch,
+            dispatchToaster
+          );
+        }}
+      >
+        {i18n.BATCH_ACTION_ACTIVATE_SELECTED}
+      </EuiContextMenuItem>
+    </EuiToolTip>,
     <EuiContextMenuItem
       key={i18n.BATCH_ACTION_DEACTIVATE_SELECTED}
       icon="crossInACircleFilled"
-      disabled={containsLoading || !containsEnabled}
+      disabled={!canBulkActivateRulesWithActions || containsLoading || !containsEnabled}
       onClick={async () => {
         closePopover();
         const activatedIds = selectedRuleIds.filter(
@@ -109,23 +133,30 @@ export const getBatchItems = ({
     >
       {i18n.BATCH_ACTION_EXPORT_SELECTED}
     </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key={i18n.BATCH_ACTION_DUPLICATE_SELECTED}
-      icon="copy"
-      disabled={containsLoading || selectedRuleIds.length === 0}
-      onClick={async () => {
-        closePopover();
-        await duplicateRulesAction(
-          rules.filter((r) => selectedRuleIds.includes(r.id)),
-          selectedRuleIds,
-          dispatch,
-          dispatchToaster
-        );
-        reFetchRules(true);
-      }}
+    <EuiToolTip
+      position="right"
+      content={!canBulkActivateRulesWithActions ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined}
     >
-      {i18n.BATCH_ACTION_DUPLICATE_SELECTED}
-    </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        key={i18n.BATCH_ACTION_DUPLICATE_SELECTED}
+        icon="copy"
+        disabled={
+          !canBulkActivateRulesWithActions || containsLoading || selectedRuleIds.length === 0
+        }
+        onClick={async () => {
+          closePopover();
+          await duplicateRulesAction(
+            rules.filter((r) => selectedRuleIds.includes(r.id)),
+            selectedRuleIds,
+            dispatch,
+            dispatchToaster
+          );
+          reFetchRules(true);
+        }}
+      >
+        {i18n.BATCH_ACTION_DUPLICATE_SELECTED}
+      </EuiContextMenuItem>
+    </EuiToolTip>,
     <EuiContextMenuItem
       data-test-subj="deleteRuleBulk"
       key={i18n.BATCH_ACTION_DELETE_SELECTED}

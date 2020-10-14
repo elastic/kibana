@@ -54,6 +54,7 @@ import { hasMlAdminPermissions } from '../../../../../../common/machine_learning
 import { hasMlLicense } from '../../../../../../common/machine_learning/has_ml_license';
 import { SecurityPageName } from '../../../../../app/types';
 import { useFormatUrl } from '../../../../../common/components/link_to';
+import { isBoolean } from '../../../../../common/utils/privileges';
 
 const INITIAL_SORT_FIELD = 'enabled';
 const initialState: State = {
@@ -180,6 +181,17 @@ export const AllRules = React.memo<AllRulesProps>(
       rulesNotInstalled,
       rulesNotUpdated
     );
+    const {
+      services: {
+        application: {
+          capabilities: { actions },
+        },
+      },
+    } = useKibana();
+
+    const hasActionsPrivileges = useMemo(() => (isBoolean(actions.show) ? actions.show : true), [
+      actions,
+    ]);
 
     const getBatchItemsPopoverContent = useCallback(
       (closePopover: () => void) => (
@@ -189,6 +201,7 @@ export const AllRules = React.memo<AllRulesProps>(
             dispatch,
             dispatchToaster,
             hasMlPermissions,
+            hasActionsPrivileges,
             loadingRuleIds,
             selectedRuleIds,
             reFetchRules: reFetchRulesData,
@@ -204,6 +217,7 @@ export const AllRules = React.memo<AllRulesProps>(
         reFetchRulesData,
         rules,
         selectedRuleIds,
+        hasActionsPrivileges,
       ]
     );
 
@@ -231,14 +245,6 @@ export const AllRules = React.memo<AllRulesProps>(
       [dispatch]
     );
 
-    const {
-      services: {
-        application: {
-          capabilities: { actions },
-        },
-      },
-    } = useKibana();
-
     const rulesColumns = useMemo(() => {
       return getColumns({
         dispatch,
@@ -253,7 +259,7 @@ export const AllRules = React.memo<AllRulesProps>(
             ? loadingRuleIds
             : [],
         reFetchRules: reFetchRulesData,
-        hasReadActionsPrivileges: actions.show,
+        hasReadActionsPrivileges: hasActionsPrivileges,
       });
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
