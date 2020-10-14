@@ -39,7 +39,7 @@ export const getTagCloudVisRenderer: (
     });
 
     render(
-      <VisualizationContainer handlers={handlers}>
+      <VisualizationContainer>
         <TagCloudChart
           {...config}
           colors={colors}

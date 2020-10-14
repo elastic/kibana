@@ -131,7 +131,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     options: { stripEmptyFields: false },
     schema,
   });
-  const { getErrors, getFields, getFormData, reset, submit } = form;
+  const { getFields, getFormData, reset, submit } = form;
   const [
     {
       index: formIndex,
@@ -152,14 +152,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       }
     >
   ];
+  const [isQueryBarValid, setIsQueryBarValid] = useState(false);
   const index = formIndex || initialState.index;
   const threatIndex = formThreatIndex || initialState.threatIndex;
   const ruleType = formRuleType || initialState.ruleType;
   const queryBarQuery =
     formQuery != null ? formQuery.query.query : '' || initialState.queryBar.query.query;
-  const errorExists = getErrors().length > 0;
   const [indexPatternsLoading, { browserFields, indexPatterns }] = useFetchIndex(index);
-
   const [
     threatIndexPatternsLoading,
     { browserFields: threatBrowserFields, indexPatterns: threatIndexPatterns },
@@ -191,9 +190,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   }, [getFormData, submit]);
 
   useEffect(() => {
-    if (setForm) {
+    let didCancel = false;
+    if (setForm && !didCancel) {
       setForm(RuleStep.defineRule, getData);
     }
+    return () => {
+      didCancel = true;
+    };
   }, [getData, setForm]);
 
   const handleResetIndices = useCallback(() => {
@@ -284,6 +287,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   path="queryBar"
                   component={EqlQueryBar}
                   componentProps={{
+                    onValidityChange: setIsQueryBarValid,
                     idAria: 'detectionEngineStepDefineRuleEqlQueryBar',
                     isDisabled: isLoading,
                     isLoading: indexPatternsLoading,
@@ -319,6 +323,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     isLoading: indexPatternsLoading,
                     dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
                     openTimelineSearch,
+                    onValidityChange: setIsQueryBarValid,
                     onCloseTimelineSearch: handleCloseTimelineSearch,
                   }}
                 />
@@ -394,12 +399,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           <>
             <EuiSpacer size="s" />
             <PreviewQuery
-              dataTestSubj="something"
-              idAria="someAriaId"
+              dataTestSubj="ruleCreationQueryPreview"
+              idAria="ruleCreationQueryPreview"
               ruleType={ruleType}
               index={index}
               query={formQuery}
-              isDisabled={queryBarQuery.trim() === '' || errorExists}
+              isDisabled={queryBarQuery.trim() === '' || !isQueryBarValid || index.length === 0}
               threshold={
                 formThresholdValue != null && formThresholdField != null
                   ? { value: formThresholdValue, field: formThresholdField[0] }

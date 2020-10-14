@@ -9,7 +9,7 @@
 ```typescript
 data: {
         data: Array<{
-            table: Pick<Datatable, 'rows' | 'columns'>;
+            table: Pick<KibanaDatatable, 'rows' | 'columns'>;
             column: number;
             row: number;
             value: any;
