@@ -4,12 +4,22 @@ exports[`trusted_app_card TrustedAppCard should render correctly 1`] = `
 <ItemDetailsCard>
   <ItemPropertySummary
     name="Name"
-    title="trusted app 4"
-    value="trusted app 4"
+    value={
+      <TextFieldValue
+        fieldName="Name"
+        maxLength={100}
+        value="trusted app 4"
+      />
+    }
   />
   <ItemPropertySummary
     name="OS"
-    value="Mac OS"
+    value={
+      <TextFieldValue
+        fieldName="OS"
+        value="Mac OS"
+      />
+    }
   />
   <ItemPropertySummary
     name="Date Created"
@@ -23,12 +33,22 @@ exports[`trusted_app_card TrustedAppCard should render correctly 1`] = `
   />
   <ItemPropertySummary
     name="Created By"
-    value="someone"
+    value={
+      <TextFieldValue
+        fieldName="Created By"
+        value="someone"
+      />
+    }
   />
   <ItemPropertySummary
     name="Description"
-    title="Trusted App 4"
-    value="Trusted App 4"
+    value={
+      <TextFieldValue
+        fieldName="Description"
+        maxLength={100}
+        value="Trusted App 4"
+      />
+    }
   />
   <ConditionsTable
     badge="and"
@@ -52,10 +72,11 @@ exports[`trusted_app_card TrustedAppCard should render correctly 1`] = `
           "width": "20%",
         },
         Object {
+          "data-test-subj": "conditionValue",
           "field": "value",
           "name": "Value",
+          "render": [Function],
           "sortable": false,
-          "truncateText": true,
           "width": "60%",
         },
       ]
@@ -78,12 +99,22 @@ exports[`trusted_app_card TrustedAppCard should trim long texts 1`] = `
 <ItemDetailsCard>
   <ItemPropertySummary
     name="Name"
-    title="trusted app 4 trusted app 4 trusted app 4 trusted app 4 trusted app 4 trusted app 4 trusted app 4 trusted app 4 trusted app 4 trusted app 4"
-    value="trusted app 4 trusted app 4 trusted app 4 trusted app 4 trusted app 4 trusted app 4 trusted app 4 tr..."
+    value={
+      <TextFieldValue
+        fieldName="Name"
+        maxLength={100}
+        value="trusted app 4 trusted app 4 trusted app 4 trusted app 4 trusted app 4 trusted app 4 trusted app 4 trusted app 4 trusted app 4 trusted app 4"
+      />
+    }
   />
   <ItemPropertySummary
     name="OS"
-    value="Mac OS"
+    value={
+      <TextFieldValue
+        fieldName="OS"
+        value="Mac OS"
+      />
+    }
   />
   <ItemPropertySummary
     name="Date Created"
@@ -97,12 +128,22 @@ exports[`trusted_app_card TrustedAppCard should trim long texts 1`] = `
   />
   <ItemPropertySummary
     name="Created By"
-    value="someone"
+    value={
+      <TextFieldValue
+        fieldName="Created By"
+        value="someone"
+      />
+    }
   />
   <ItemPropertySummary
     name="Description"
-    title="Trusted App 4 Trusted App 4 Trusted App 4 Trusted App 4 Trusted App 4 Trusted App 4 Trusted App 4 Trusted App 4 Trusted App 4 Trusted App 4"
-    value="Trusted App 4 Trusted App 4 Trusted App 4 Trusted App 4 Trusted App 4 Trusted App 4 Trusted App 4 Tr..."
+    value={
+      <TextFieldValue
+        fieldName="Description"
+        maxLength={100}
+        value="Trusted App 4 Trusted App 4 Trusted App 4 Trusted App 4 Trusted App 4 Trusted App 4 Trusted App 4 Trusted App 4 Trusted App 4 Trusted App 4"
+      />
+    }
   />
   <ConditionsTable
     badge="and"
@@ -126,10 +167,11 @@ exports[`trusted_app_card TrustedAppCard should trim long texts 1`] = `
           "width": "20%",
         },
         Object {
+          "data-test-subj": "conditionValue",
           "field": "value",
           "name": "Value",
+          "render": [Function],
           "sortable": false,
-          "truncateText": true,
           "width": "60%",
         },
       ]
