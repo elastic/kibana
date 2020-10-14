@@ -128,25 +128,26 @@ class AgentPolicyService {
 
   public async requireUniqueName(
     soClient: SavedObjectsClientContract,
-    { name, namespace }: Pick<NewAgentPolicy, 'name' | 'namespace'>
+    givenPolicy: { id?: string; name: string; namespace: string }
   ) {
     const results = await soClient.find<AgentPolicySOAttributes>({
       type: SAVED_OBJECT_TYPE,
       searchFields: ['namespace', 'name'],
-      search: `${namespace} + ${escapeSearchQueryPhrase(name)}`,
+      search: `${givenPolicy.namespace} + ${escapeSearchQueryPhrase(givenPolicy.name)}`,
     });
+    const idsWithName = results.total && results.saved_objects.map(({ id }) => id);
+    if (Array.isArray(idsWithName)) {
+      const isEditingSelf = givenPolicy.id && idsWithName.includes(givenPolicy.id);
+      if (!givenPolicy.id || !isEditingSelf) {
+        const isSinglePolicy = idsWithName.length === 1;
+        const existClause = isSinglePolicy
+          ? `Agent Policy '${idsWithName[0]}' already exists`
+          : `Agent Policies '${idsWithName.join(',')}' already exist`;
 
-    if (results.total) {
-      const policies = results.saved_objects;
-      const isSinglePolicy = policies.length === 1;
-      const policyList = isSinglePolicy ? policies[0].id : policies.map(({ id }) => id).join(',');
-      const existClause = isSinglePolicy
-        ? `Agent Policy '${policyList}' already exists`
-        : `Agent Policies '${policyList}' already exist`;
-
-      throw new AgentPolicyNameExistsError(
-        `${existClause} in '${namespace}' namespace with name '${name}'`
-      );
+        throw new AgentPolicyNameExistsError(
+          `${existClause} in '${givenPolicy.namespace}' namespace with name '${givenPolicy.name}'`
+        );
+      }
     }
   }
 
@@ -237,6 +238,7 @@ class AgentPolicyService {
   ): Promise<AgentPolicy> {
     if (agentPolicy.name && agentPolicy.namespace) {
       await this.requireUniqueName(soClient, {
+        id,
         name: agentPolicy.name,
         namespace: agentPolicy.namespace,
       });
