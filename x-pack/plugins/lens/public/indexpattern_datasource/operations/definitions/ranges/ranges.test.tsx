@@ -23,6 +23,7 @@ import {
 } from './constants';
 import { RangePopover } from './advanced_editor';
 import { DragDropBuckets } from '../shared_components';
+import { EuiFieldText } from '@elastic/eui';
 
 const dataPluginMockValue = dataPluginMock.createStartContract();
 // need to overwrite the formatter field first
@@ -149,6 +150,25 @@ describe('ranges', () => {
       expect(esAggsConfig).toEqual(
         expect.objectContaining({
           type: MODES.Range,
+        })
+      );
+    });
+
+    it('should include custom labels', () => {
+      setToRangeMode();
+      (state.layers.first.columns.col1 as RangeIndexPatternColumn).params.ranges = [
+        { from: 0, to: 100, label: 'customlabel' },
+      ];
+
+      const esAggsConfig = rangeOperation.toEsAggsConfig(
+        state.layers.first.columns.col1 as RangeIndexPatternColumn,
+        'col1',
+        {} as IndexPattern
+      );
+
+      expect((esAggsConfig as { params: unknown }).params).toEqual(
+        expect.objectContaining({
+          ranges: [{ from: 0, to: 100, label: 'customlabel' }],
         })
       );
     });
@@ -409,6 +429,63 @@ describe('ranges', () => {
                       ranges: [
                         { from: 0, to: DEFAULT_INTERVAL, label: '' },
                         { from: 50, to: Infinity, label: '' },
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          });
+        });
+      });
+
+      it('should add a new range with custom label', () => {
+        const setStateSpy = jest.fn();
+
+        const instance = mount(
+          <InlineOptions
+            {...defaultOptions}
+            state={state}
+            setState={setStateSpy}
+            columnId="col1"
+            currentColumn={state.layers.first.columns.col1 as RangeIndexPatternColumn}
+            layerId="first"
+          />
+        );
+
+        // This series of act clojures are made to make it work properly the update flush
+        act(() => {
+          instance.find(EuiButtonEmpty).prop('onClick')!({} as ReactMouseEvent);
+        });
+
+        act(() => {
+          // need another wrapping for this in order to work
+          instance.update();
+
+          expect(instance.find(RangePopover)).toHaveLength(2);
+
+          // edit the label and check
+          instance.find(RangePopover).find(EuiFieldText).first().prop('onChange')!({
+            target: {
+              value: 'customlabel',
+            },
+          } as React.ChangeEvent<HTMLInputElement>);
+          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
+
+          expect(setStateSpy).toHaveBeenCalledWith({
+            ...state,
+            layers: {
+              first: {
+                ...state.layers.first,
+                columns: {
+                  ...state.layers.first.columns,
+                  col1: {
+                    ...state.layers.first.columns.col1,
+                    params: {
+                      ...state.layers.first.columns.col1.params,
+                      ranges: [
+                        { from: 0, to: DEFAULT_INTERVAL, label: '' },
+                        { from: DEFAULT_INTERVAL, to: Infinity, label: 'customlabel' },
                       ],
                     },
                   },
