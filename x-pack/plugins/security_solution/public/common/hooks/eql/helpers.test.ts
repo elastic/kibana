@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import dateMath from '@elastic/datemath';
+import moment from 'moment';
 
 import { EqlSearchStrategyResponse } from '../../../../../data_enhanced/common';
 import { Source } from './types';
 import { EqlSearchResponse } from '../../../../common/detection_engine/types';
+import { inputsModel } from '../../../common/store';
 
 import {
   calculateBucketForHour,
@@ -18,7 +20,7 @@ import {
   getSequenceAggs,
 } from './helpers';
 
-const getMockResponse = (): EqlSearchStrategyResponse<EqlSearchResponse<Source>> =>
+export const getMockResponse = (): EqlSearchStrategyResponse<EqlSearchResponse<Source>> =>
   ({
     id: 'some-id',
     rawResponse: {
@@ -129,6 +131,17 @@ const getMockSequenceResponse = (): EqlSearchStrategyResponse<EqlSearchResponse<
       meta: {
         request: {
           params: {
+            body: JSON.stringify({
+              filter: {
+                range: {
+                  '@timestamp': {
+                    gte: '2020-10-07T00:46:12.414Z',
+                    lte: '2020-10-07T01:46:12.414Z',
+                    format: 'strict_date_optional_time',
+                  },
+                },
+              },
+            }),
             method: 'GET',
             path: '/_eql/search/',
           },
@@ -142,7 +155,7 @@ const getMockSequenceResponse = (): EqlSearchStrategyResponse<EqlSearchResponse<
 
 describe('eql/helpers', () => {
   describe('calculateBucketForHour', () => {
-    test('returns 2 if event occured within 2 minutes of "now"', () => {
+    test('returns 2 if event occurred within 2 minutes of "now"', () => {
       const diff = calculateBucketForHour(
         Number(dateMath.parse('now-1m')?.format('x')),
         Number(dateMath.parse('now')?.format('x'))
@@ -151,7 +164,7 @@ describe('eql/helpers', () => {
       expect(diff).toEqual(2);
     });
 
-    test('returns 10 if event occured within 8-10 minutes of "now"', () => {
+    test('returns 10 if event occurred within 8-10 minutes of "now"', () => {
       const diff = calculateBucketForHour(
         Number(dateMath.parse('now-9m')?.format('x')),
         Number(dateMath.parse('now')?.format('x'))
@@ -160,7 +173,7 @@ describe('eql/helpers', () => {
       expect(diff).toEqual(10);
     });
 
-    test('returns 16 if event occured within 10-15 minutes of "now"', () => {
+    test('returns 16 if event occurred within 10-15 minutes of "now"', () => {
       const diff = calculateBucketForHour(
         Number(dateMath.parse('now-15m')?.format('x')),
         Number(dateMath.parse('now')?.format('x'))
@@ -169,7 +182,7 @@ describe('eql/helpers', () => {
       expect(diff).toEqual(16);
     });
 
-    test('returns 60 if event occured within 58-60 minutes of "now"', () => {
+    test('returns 60 if event occurred within 58-60 minutes of "now"', () => {
       const diff = calculateBucketForHour(
         Number(dateMath.parse('now-59m')?.format('x')),
         Number(dateMath.parse('now')?.format('x'))
@@ -207,7 +220,7 @@ describe('eql/helpers', () => {
       expect(diff).toEqual(0);
     });
 
-    test('returns 1 if event occured within 60 minutes of "now"', () => {
+    test('returns 1 if event occurred within 60 minutes of "now"', () => {
       const diff = calculateBucketForDay(
         Number(dateMath.parse('now-40m')?.format('x')),
         Number(dateMath.parse('now')?.format('x'))
@@ -216,7 +229,7 @@ describe('eql/helpers', () => {
       expect(diff).toEqual(1);
     });
 
-    test('returns 2 if event occured 60-120 minutes from "now"', () => {
+    test('returns 2 if event occurred 60-120 minutes from "now"', () => {
       const diff = calculateBucketForDay(
         Number(dateMath.parse('now-120m')?.format('x')),
         Number(dateMath.parse('now')?.format('x'))
@@ -225,7 +238,7 @@ describe('eql/helpers', () => {
       expect(diff).toEqual(2);
     });
 
-    test('returns 3 if event occured 120-180 minutes from "now', () => {
+    test('returns 3 if event occurred 120-180 minutes from "now', () => {
       const diff = calculateBucketForDay(
         Number(dateMath.parse('now-121m')?.format('x')),
         Number(dateMath.parse('now')?.format('x'))
@@ -234,7 +247,7 @@ describe('eql/helpers', () => {
       expect(diff).toEqual(3);
     });
 
-    test('returns 4 if event occured 180-240 minutes from "now', () => {
+    test('returns 4 if event occurred 180-240 minutes from "now', () => {
       const diff = calculateBucketForDay(
         Number(dateMath.parse('now-220m')?.format('x')),
         Number(dateMath.parse('now')?.format('x'))
@@ -245,16 +258,22 @@ describe('eql/helpers', () => {
   });
 
   describe('getEqlAggsData', () => {
-    test('it returns results bucketed into 5 min intervals when range is "h"', () => {
+    test('it returns results bucketed into 2 min intervals when range is "h"', () => {
       const mockResponse = getMockResponse();
 
       const aggs = getEqlAggsData(
         mockResponse,
         'h',
-        '2020-10-04T15:00:00.368707900Z',
-        '2020-10-04T16:00:00.368707900Z'
+        '2020-10-04T16:00:00.368707900Z',
+        jest.fn() as inputsModel.Refetch
       );
 
+      const date1 = moment(aggs.data[0].x);
+      const date2 = moment(aggs.data[1].x);
+      // This'll be in ms
+      const diff = date1.diff(date2);
+
+      expect(diff).toEqual(120000);
       expect(aggs.data).toHaveLength(31);
       expect(aggs.data).toEqual([
         { g: 'hits', x: 1601827200368, y: 0 },
@@ -345,10 +364,15 @@ describe('eql/helpers', () => {
       const aggs = getEqlAggsData(
         response,
         'd',
-        '2020-10-03T23:50:00.368707900Z',
-        '2020-10-04T23:50:00.368707900Z'
+        '2020-10-04T23:50:00.368707900Z',
+        jest.fn() as inputsModel.Refetch
       );
+      const date1 = moment(aggs.data[0].x);
+      const date2 = moment(aggs.data[1].x);
+      // This'll be in ms
+      const diff = date1.diff(date2);
 
+      expect(diff).toEqual(3600000);
       expect(aggs.data).toHaveLength(25);
       expect(aggs.data).toEqual([
         { g: 'hits', x: 1601855400368, y: 0 },
@@ -385,8 +409,8 @@ describe('eql/helpers', () => {
       const aggs = getEqlAggsData(
         mockResponse,
         'h',
-        '2020-10-04T15:00:00.368707900Z',
-        '2020-10-04T16:00:00.368707900Z'
+        '2020-10-04T16:00:00.368707900Z',
+        jest.fn() as inputsModel.Refetch
       );
 
       expect(aggs.totalCount).toEqual(4);
@@ -417,53 +441,12 @@ describe('eql/helpers', () => {
       const aggs = getEqlAggsData(
         response,
         'h',
-        '2020-10-04T15:00:00.368707900Z',
-        '2020-10-04T16:00:00.368707900Z'
+        '2020-10-04T16:00:00.368707900Z',
+        jest.fn() as inputsModel.Refetch
       );
 
-      expect(aggs).toEqual({
-        data: [
-          { g: 'hits', x: 1601827200368, y: 0 },
-          { g: 'hits', x: 1601827080368, y: 0 },
-          { g: 'hits', x: 1601826960368, y: 0 },
-          { g: 'hits', x: 1601826840368, y: 0 },
-          { g: 'hits', x: 1601826720368, y: 0 },
-          { g: 'hits', x: 1601826600368, y: 0 },
-          { g: 'hits', x: 1601826480368, y: 0 },
-          { g: 'hits', x: 1601826360368, y: 0 },
-          { g: 'hits', x: 1601826240368, y: 0 },
-          { g: 'hits', x: 1601826120368, y: 0 },
-          { g: 'hits', x: 1601826000368, y: 0 },
-          { g: 'hits', x: 1601825880368, y: 0 },
-          { g: 'hits', x: 1601825760368, y: 0 },
-          { g: 'hits', x: 1601825640368, y: 0 },
-          { g: 'hits', x: 1601825520368, y: 0 },
-          { g: 'hits', x: 1601825400368, y: 0 },
-          { g: 'hits', x: 1601825280368, y: 0 },
-          { g: 'hits', x: 1601825160368, y: 0 },
-          { g: 'hits', x: 1601825040368, y: 0 },
-          { g: 'hits', x: 1601824920368, y: 0 },
-          { g: 'hits', x: 1601824800368, y: 0 },
-          { g: 'hits', x: 1601824680368, y: 0 },
-          { g: 'hits', x: 1601824560368, y: 0 },
-          { g: 'hits', x: 1601824440368, y: 0 },
-          { g: 'hits', x: 1601824320368, y: 0 },
-          { g: 'hits', x: 1601824200368, y: 0 },
-          { g: 'hits', x: 1601824080368, y: 0 },
-          { g: 'hits', x: 1601823960368, y: 0 },
-          { g: 'hits', x: 1601823840368, y: 0 },
-          { g: 'hits', x: 1601823720368, y: 0 },
-          { g: 'hits', x: 1601823600368, y: 0 },
-        ],
-        gte: '2020-10-04T15:00:00.368707900Z',
-        inspect: {
-          dsl: [JSON.stringify(response.rawResponse.meta.request.params, null, 2)],
-          response: [JSON.stringify(response.rawResponse.body, null, 2)],
-        },
-        lte: '2020-10-04T16:00:00.368707900Z',
-        totalCount: 0,
-        warnings: [],
-      });
+      expect(aggs.data.every(({ y }) => y === 0)).toBeTruthy();
+      expect(aggs.totalCount).toEqual(0);
     });
   });
 
@@ -510,7 +493,7 @@ describe('eql/helpers', () => {
       ]);
     });
 
-    test('returns array of 30 numbers from start param to end param if multiplier is 1', () => {
+    test('returns array of numbers from start param to end param if multiplier is 1', () => {
       const arrayOfNumbers = createIntervalArray(0, 12, 1);
       expect(arrayOfNumbers).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
     });
@@ -518,8 +501,15 @@ describe('eql/helpers', () => {
 
   describe('getInterval', () => {
     test('returns object with 2 minute interval keys if range is "h"', () => {
-      const intervals = getInterval('h', 1601856270140);
+      const intervals = getInterval('h', Date.parse('2020-10-04T15:00:00.368707900Z'));
       const keys = Object.keys(intervals);
+      const date1 = moment(Number(intervals['0'].timestamp));
+      const date2 = moment(Number(intervals['2'].timestamp));
+
+      // This'll be in ms
+      const diff = date1.diff(date2);
+
+      expect(diff).toEqual(120000);
       expect(keys).toEqual([
         '0',
         '2',
@@ -557,40 +547,13 @@ describe('eql/helpers', () => {
 
     test('returns object with 2 minute interval timestamps if range is "h"', () => {
       const intervals = getInterval('h', 1601856270140);
-      const timestamps = Object.keys(intervals).map((key) => intervals[key].timestamp);
-      expect(timestamps).toEqual([
-        '1601856270140',
-        '1601856150140',
-        '1601856030140',
-        '1601855910140',
-        '1601855790140',
-        '1601855670140',
-        '1601855550140',
-        '1601855430140',
-        '1601855310140',
-        '1601855190140',
-        '1601855070140',
-        '1601854950140',
-        '1601854830140',
-        '1601854710140',
-        '1601854590140',
-        '1601854470140',
-        '1601854350140',
-        '1601854230140',
-        '1601854110140',
-        '1601853990140',
-        '1601853870140',
-        '1601853750140',
-        '1601853630140',
-        '1601853510140',
-        '1601853390140',
-        '1601853270140',
-        '1601853150140',
-        '1601853030140',
-        '1601852910140',
-        '1601852790140',
-        '1601852670140',
-      ]);
+      const date1 = moment(Number(intervals['0'].timestamp));
+      const date2 = moment(Number(intervals['2'].timestamp));
+
+      // This'll be in ms
+      const diff = date1.diff(date2);
+
+      expect(diff).toEqual(120000);
     });
 
     test('returns object with 1 hour interval keys if range is "d"', () => {
@@ -627,34 +590,13 @@ describe('eql/helpers', () => {
 
     test('returns object with 1 hour interval timestamps if range is "d"', () => {
       const intervals = getInterval('d', 1601856270140);
-      const timestamps = Object.keys(intervals).map((key) => intervals[key].timestamp);
-      expect(timestamps).toEqual([
-        '1601856270140',
-        '1601852670140',
-        '1601849070140',
-        '1601845470140',
-        '1601841870140',
-        '1601838270140',
-        '1601834670140',
-        '1601831070140',
-        '1601827470140',
-        '1601823870140',
-        '1601820270140',
-        '1601816670140',
-        '1601813070140',
-        '1601809470140',
-        '1601805870140',
-        '1601802270140',
-        '1601798670140',
-        '1601795070140',
-        '1601791470140',
-        '1601787870140',
-        '1601784270140',
-        '1601780670140',
-        '1601777070140',
-        '1601773470140',
-        '1601769870140',
-      ]);
+      const date1 = moment(Number(intervals['0'].timestamp));
+      const date2 = moment(Number(intervals['1'].timestamp));
+
+      // This'll be in ms
+      const diff = date1.diff(date2);
+
+      expect(diff).toEqual(3600000);
     });
 
     test('returns error if range is anything other than "h" or "d"', () => {
@@ -665,12 +607,7 @@ describe('eql/helpers', () => {
   describe('getSequenceAggs', () => {
     test('it aggregates events by sequences', () => {
       const mockResponse = getMockSequenceResponse();
-      const sequenceAggs = getSequenceAggs(
-        mockResponse,
-        'h',
-        '2020-10-04T15:00:00.368707900Z',
-        '2020-10-04T16:00:00.368707900Z'
-      );
+      const sequenceAggs = getSequenceAggs(mockResponse, jest.fn() as inputsModel.Refetch);
 
       expect(sequenceAggs.data).toEqual([
         { g: 'Seq. 1', x: '2020-10-04T15:16:54.368707900Z', y: 1 },
