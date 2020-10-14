@@ -166,13 +166,22 @@ export const ActionForm = ({
       if (setHasActionsDisabled) {
         setHasActionsDisabled(hasActionsDisabled);
       }
-      testForBrokenConnector(actions);
     };
     if (connectors.length > 0 && actionTypesIndex) {
       setActionTypesAvalilability();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connectors, actionTypesIndex]);
+
+  useEffect(() => {
+    const hasActionWithBrokenConnector = actions.some(
+      (action) => !connectors.find((connector) => connector.id === action.id)
+    );
+    if (setHasActionsWithBrokenConnector) {
+      setHasActionsWithBrokenConnector(hasActionWithBrokenConnector);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actions, connectors]);
 
   const preconfiguredMessage = i18n.translate(
     'xpack.triggersActionsUI.sections.actionForm.preconfiguredTitleMessage',
@@ -183,16 +192,6 @@ export const ActionForm = ({
 
   const updateActions = (updatedActions: AlertAction[]) => {
     setAlertProperty(updatedActions);
-    // testForBrokenConnector(updatedActions);
-  };
-
-  const testForBrokenConnector = (alertActions: AlertAction[]) => {
-    const hasActionWithBrokenConnector = alertActions.some(
-      (action) => !connectors.find((connector) => connector.id === action.id)
-    );
-    if (setHasActionsWithBrokenConnector) {
-      setHasActionsWithBrokenConnector(hasActionWithBrokenConnector);
-    }
   };
 
   const getSelectedOptions = (actionItemId: string) => {
