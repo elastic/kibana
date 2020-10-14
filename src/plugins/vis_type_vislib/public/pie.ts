@@ -22,14 +22,13 @@ import { Position } from '@elastic/charts';
 
 import { AggGroupNames } from '../../data/public';
 import { Schemas } from '../../vis_default_editor/public';
-import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
+import { BaseVisTypeOptions, VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
 import { getPositions } from '../../vis_type_xy/public';
 
-import { createVislibVisController } from './vis_controller';
-import { CommonVislibParams } from './types';
-import { VisTypeVislibDependencies } from './plugin';
-import { PieOptions } from './editor';
 import { Dimensions } from './vislib/helpers/hierarchical/build_hierarchical_data';
+import { CommonVislibParams } from './types';
+import { PieOptions } from './editor';
+import { toExpressionAst } from './to_ast_pie';
 
 export interface PieVisParams extends CommonVislibParams {
   type: 'pie';
@@ -44,17 +43,15 @@ export interface PieVisParams extends CommonVislibParams {
   };
 }
 
-export const createPieVisTypeDefinition = (deps: VisTypeVislibDependencies) => ({
+export const pieVisTypeDefinition: BaseVisTypeOptions<PieVisParams> = {
   name: 'pie',
   title: i18n.translate('visTypeVislib.pie.pieTitle', { defaultMessage: 'Pie' }),
   icon: 'visPie',
   description: i18n.translate('visTypeVislib.pie.pieDescription', {
     defaultMessage: 'Compare parts of a whole',
   }),
-  visualization: createVislibVisController(deps),
-  getSupportedTriggers: () => {
-    return [VIS_EVENT_TO_TRIGGER.filter];
-  },
+  getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter],
+  toExpressionAst,
   visConfig: {
     defaults: {
       type: 'pie',
@@ -112,4 +109,4 @@ export const createPieVisTypeDefinition = (deps: VisTypeVislibDependencies) => (
   },
   hierarchicalData: true,
   responseHandler: 'vislib_slices',
-});
+};

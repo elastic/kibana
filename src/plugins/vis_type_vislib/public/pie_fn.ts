@@ -24,25 +24,29 @@ import { ExpressionFunctionDefinition, KibanaDatatable, Render } from '../../exp
 // @ts-ignore
 import { vislibSlicesResponseHandler } from './vislib/response_handler';
 import { PieVisParams } from './pie';
+import { VislibChartType } from './types';
+import { vislibVisName } from './vis_type_vislib_vis_fn';
+
+export const vislibPieName = 'vislib_pie_vis';
 
 interface Arguments {
   visConfig: string;
 }
 
 interface RenderValue {
-  visType: 'pie';
+  visType: Extract<VislibChartType, 'pie'>;
   visConfig: PieVisParams;
 }
 
 export type VisTypeVislibPieExpressionFunctionDefinition = ExpressionFunctionDefinition<
-  'kibana_pie',
+  typeof vislibPieName,
   KibanaDatatable,
   Arguments,
   Render<RenderValue>
 >;
 
 export const createPieVisFn = (): VisTypeVislibPieExpressionFunctionDefinition => ({
-  name: 'kibana_pie',
+  name: vislibPieName,
   type: 'render',
   inputTypes: ['kibana_datatable'],
   help: i18n.translate('visTypeVislib.functions.pie.help', {
@@ -57,15 +61,15 @@ export const createPieVisFn = (): VisTypeVislibPieExpressionFunctionDefinition =
   },
   fn(input, args) {
     const visConfig = JSON.parse(args.visConfig) as PieVisParams;
-    const convertedData = vislibSlicesResponseHandler(input, visConfig.dimensions);
+    const visData = vislibSlicesResponseHandler(input, visConfig.dimensions);
 
     return {
       type: 'render',
-      as: 'visualization',
+      as: vislibVisName,
       value: {
-        visData: convertedData,
-        visType: 'pie',
+        visData,
         visConfig,
+        visType: VislibChartType.Pie,
         params: {
           listenOnChange: true,
         },

@@ -27,10 +27,8 @@ import { VIS_EVENT_TO_TRIGGER, BaseVisTypeOptions } from '../../visualizations/p
 import { ValueAxis, ScaleType, AxisType } from '../../vis_type_xy/public';
 
 import { HeatmapOptions, getHeatmapCollections } from './editor';
-import { createVislibVisController } from './vis_controller';
 import { TimeMarker } from './vislib/visualizations/time_marker';
-import { CommonVislibParams, BasicVislibParams } from './types';
-import { VisTypeVislibDependencies } from './plugin';
+import { CommonVislibParams, BasicVislibParams, VislibChartType } from './types';
 import { toExpressionAst } from './to_ast';
 
 export interface HeatmapVisParams extends CommonVislibParams, ColorSchemaParams {
@@ -45,9 +43,7 @@ export interface HeatmapVisParams extends CommonVislibParams, ColorSchemaParams 
   times: TimeMarker[];
 }
 
-export const createHeatmapVisTypeDefinition = (
-  deps: VisTypeVislibDependencies
-): BaseVisTypeOptions<BasicVislibParams> & { events: any } => ({
+export const heatmapVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
   name: 'heatmap',
   title: i18n.translate('visTypeVislib.heatmap.heatmapTitle', { defaultMessage: 'Heat Map' }),
   icon: 'heatmap',
@@ -55,13 +51,10 @@ export const createHeatmapVisTypeDefinition = (
     defaultMessage: 'Shade cells within a matrix',
   }),
   toExpressionAst,
-  getSupportedTriggers: () => {
-    return [VIS_EVENT_TO_TRIGGER.filter];
-  },
-  visualization: createVislibVisController(deps),
+  getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter],
   visConfig: {
     defaults: {
-      type: 'heatmap',
+      type: VislibChartType.Heatmap,
       addTooltip: true,
       addLegend: true,
       enableHover: false,
@@ -91,9 +84,6 @@ export const createHeatmapVisTypeDefinition = (
         },
       ],
     },
-  },
-  events: {
-    brush: { disabled: false },
   },
   editorConfig: {
     collections: getHeatmapCollections(),
@@ -148,4 +138,4 @@ export const createHeatmapVisTypeDefinition = (
       },
     ]),
   },
-});
+};

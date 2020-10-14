@@ -23,29 +23,30 @@ import { ExpressionFunctionDefinition, KibanaDatatable, Render } from '../../exp
 
 // @ts-ignore
 import { vislibSeriesResponseHandler } from './vislib/response_handler';
-import { BasicVislibParams } from './types';
+import { BasicVislibParams, VislibChartType } from './types';
 
-const name = 'vislib';
+export const vislibVisName = 'vislib_vis';
 
 interface Arguments {
   type: string;
   visConfig: string;
 }
 
-interface RenderValue {
-  visType: string;
+export interface VislibRenderValue {
+  visData: any;
+  visType: Omit<VislibChartType, 'pie'>;
   visConfig: BasicVislibParams;
 }
 
 export type VisTypeVislibExpressionFunctionDefinition = ExpressionFunctionDefinition<
-  typeof name,
+  typeof vislibVisName,
   KibanaDatatable,
   Arguments,
-  Render<RenderValue>
+  Render<VislibRenderValue>
 >;
 
 export const createVisTypeVislibVisFn = (): VisTypeVislibExpressionFunctionDefinition => ({
-  name,
+  name: vislibVisName,
   type: 'render',
   inputTypes: ['kibana_datatable'],
   help: i18n.translate('visTypeVislib.functions.vislib.help', {
@@ -64,16 +65,17 @@ export const createVisTypeVislibVisFn = (): VisTypeVislibExpressionFunctionDefin
     },
   },
   fn(context, args) {
+    const visType = args.type as VislibChartType;
     const visConfig = JSON.parse(args.visConfig) as BasicVislibParams;
-    const convertedData = vislibSeriesResponseHandler(context, visConfig.dimensions);
+    const visData = vislibSeriesResponseHandler(context, visConfig.dimensions);
 
     return {
       type: 'render',
-      as: 'visualization',
+      as: vislibVisName,
       value: {
-        visData: convertedData,
-        visType: args.type,
+        visData,
         visConfig,
+        visType,
         params: {
           listenOnChange: true,
         },

@@ -25,8 +25,7 @@ import { buildExpression, buildExpressionFunction } from '../../expressions/publ
 import { EsaggsExpressionFunctionDefinition } from '../../data/public';
 import { Dimensions, DateHistogramParams, HistogramParams } from '../../vis_type_xy/public';
 
-import { VisTypeVislibExpressionFunctionDefinition } from './vis_type_vislib_vis_fn';
-import { VisTypeVislibPieExpressionFunctionDefinition } from './pie_fn';
+import { vislibVisName, VisTypeVislibExpressionFunctionDefinition } from './vis_type_vislib_vis_fn';
 import { BasicVislibParams } from './types';
 
 export const toExpressionAst: VisToExpressionAst<BasicVislibParams> = async (
@@ -88,15 +87,15 @@ export const toExpressionAst: VisToExpressionAst<BasicVislibParams> = async (
   });
 
   visConfig.dimensions = dimensions;
-  const type = vis.type.name === 'pie' ? { type: vis.type.name } : {};
 
   const configStr = JSON.stringify(visConfig).replace(/\\/g, `\\\\`).replace(/'/g, `\\'`);
-  const visTypeXy = buildExpressionFunction<
-    VisTypeVislibExpressionFunctionDefinition | VisTypeVislibPieExpressionFunctionDefinition
-  >('vislib', {
-    ...type,
-    visConfig: configStr,
-  });
+  const visTypeXy = buildExpressionFunction<VisTypeVislibExpressionFunctionDefinition>(
+    vislibVisName,
+    {
+      type: vis.type.name,
+      visConfig: configStr,
+    }
+  );
 
   const ast = buildExpression([getEsaggsFn(vis), visTypeXy]);
 

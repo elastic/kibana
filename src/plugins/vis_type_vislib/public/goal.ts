@@ -25,14 +25,10 @@ import { ColorMode, ColorSchemas } from '../../charts/public';
 import { BaseVisTypeOptions } from '../../visualizations/public';
 
 import { getGaugeCollections, GaugeOptions } from './editor';
-import { createVislibVisController } from './vis_controller';
-import { VisTypeVislibDependencies } from './plugin';
 import { toExpressionAst } from './to_ast';
 import { GaugeType, BasicVislibParams } from './types';
 
-export const createGoalVisTypeDefinition = (
-  deps: VisTypeVislibDependencies
-): BaseVisTypeOptions<BasicVislibParams> => ({
+export const goalVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
   name: 'goal',
   title: i18n.translate('visTypeVislib.goal.goalTitle', { defaultMessage: 'Goal' }),
   icon: 'visGoal',
@@ -40,7 +36,6 @@ export const createGoalVisTypeDefinition = (
     defaultMessage: 'A goal chart indicates how close you are to your final goal.',
   }),
   toExpressionAst,
-  visualization: createVislibVisController(deps),
   visConfig: {
     defaults: {
       addTooltip: true,
@@ -116,4 +111,4 @@ export const createGoalVisTypeDefinition = (
     ]),
   },
   useCustomNoDataScreen: true,
-});
+};

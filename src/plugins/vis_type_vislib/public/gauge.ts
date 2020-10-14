@@ -24,10 +24,8 @@ import { RangeValues, Schemas } from '../../vis_default_editor/public';
 import { AggGroupNames } from '../../data/public';
 import { BaseVisTypeOptions } from '../../visualizations/public';
 
-import { createVislibVisController } from './vis_controller';
-import { VisTypeVislibDependencies } from './plugin';
 import { toExpressionAst } from './to_ast';
-import { Alignment, GaugeType, BasicVislibParams } from './types';
+import { Alignment, GaugeType, BasicVislibParams, VislibChartType } from './types';
 import { getGaugeCollections, GaugeOptions } from './editor';
 
 export interface Gauge extends ColorSchemaParams {
@@ -58,9 +56,7 @@ export interface GaugeVisParams {
   gauge: Gauge;
 }
 
-export const createGaugeVisTypeDefinition = (
-  deps: VisTypeVislibDependencies
-): BaseVisTypeOptions<BasicVislibParams> => ({
+export const gaugeVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
   name: 'gauge',
   title: i18n.translate('visTypeVislib.gauge.gaugeTitle', { defaultMessage: 'Gauge' }),
   icon: 'visGauge',
@@ -69,10 +65,9 @@ export const createGaugeVisTypeDefinition = (
       "Gauges indicate the status of a metric. Use it to show how a metric's value relates to reference threshold values.",
   }),
   toExpressionAst,
-  visualization: createVislibVisController(deps),
   visConfig: {
     defaults: {
-      type: 'gauge',
+      type: VislibChartType.Gauge,
       addTooltip: true,
       addLegend: true,
       isDisplayWarning: false,
@@ -151,4 +146,4 @@ export const createGaugeVisTypeDefinition = (
     ]),
   },
   useCustomNoDataScreen: true,
-});
+};

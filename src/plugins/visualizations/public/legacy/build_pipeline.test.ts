@@ -142,15 +142,6 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
       const actual = buildPipelineVisFunction.tile_map(params, schemas, uiState);
       expect(actual).toMatchSnapshot();
     });
-
-    it('handles pie function', () => {
-      const schemas = {
-        ...schemasDef,
-        segment: [1, 2],
-      };
-      const actual = buildPipelineVisFunction.pie({}, schemas, uiState);
-      expect(actual).toMatchSnapshot();
-    });
   });
 
   describe('buildPipeline', () => {

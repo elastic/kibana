@@ -20,18 +20,15 @@
 import $ from 'jquery';
 import React, { RefObject } from 'react';
 
-import { Position } from '@elastic/charts';
-
 import { mountReactNode } from '../../../core/public/utils';
-import {
-  VisParams,
-  ExprVis,
-  VisualizationControllerConstructor,
-} from '../../visualizations/public';
+import { ChartsPluginSetup } from '../../charts/public';
+import { PersistedState } from '../../visualizations/public';
+import { IInterpreterRenderHandlers } from '../../expressions/public';
 
-import { VisTypeVislibDependencies } from './plugin';
+import { VisTypeVislibCoreSetup } from './plugin';
 import { VisLegend, CUSTOM_LEGEND_VIS_TYPES } from './vislib/components/legend';
-import { getKibanaLegacy } from './services';
+import { BasicVislibParams } from './types';
+import { PieVisParams } from './pie';
 
 const legendClassName = {
   top: 'visLib--legend-top',
@@ -40,22 +37,25 @@ const legendClassName = {
   right: 'visLib--legend-right',
 };
 
+export type VislibVisController = InstanceType<ReturnType<typeof createVislibVisController>>;
+
 export const createVislibVisController = (
-  deps: VisTypeVislibDependencies
-): VisualizationControllerConstructor => {
+  core: VisTypeVislibCoreSetup,
+  charts: ChartsPluginSetup
+) => {
   return class VislibVisController {
-    unmount: (() => void) | null = null;
-    visParams?: VisParams;
+    private removeListeners?: () => void;
+
+    unmount?: () => void;
+    visParams?: BasicVislibParams;
     legendRef: RefObject<VisLegend>;
     container: HTMLDivElement;
     chartEl: HTMLDivElement;
     legendEl: HTMLDivElement;
     vislibVis: any;
 
-    constructor(public el: Element, public vis: ExprVis) {
+    constructor(public el: Element) {
       this.el = el;
-      this.vis = vis;
-      this.unmount = null;
       this.legendRef = React.createRef();
 
       // vis mount point
@@ -67,7 +67,7 @@ export const createVislibVisController = (
       this.chartEl = document.createElement('div');
       this.chartEl.className = 'visLib__chart';
       // Used in functional tests to know when chart is loaded by type
-      this.chartEl.dataset.vislibChartType = this.vis.type.name;
+      this.chartEl.dataset.vislibChartType = this.visParams?.type;
       this.container.appendChild(this.chartEl);
 
       // legend mount point
@@ -76,27 +76,37 @@ export const createVislibVisController = (
       this.container.appendChild(this.legendEl);
     }
 
-    render(esResponse: any, visParams: VisParams): Promise<void> {
+    async render(
+      esResponse: any,
+      visParams: BasicVislibParams | PieVisParams,
+      handlers: IInterpreterRenderHandlers
+    ): Promise<void> {
       if (this.vislibVis) {
         this.destroy();
       }
-
-      getKibanaLegacy().loadFontAwesome();
 
       return new Promise(async (resolve) => {
         if (this.el.clientWidth === 0 || this.el.clientHeight === 0) {
           return resolve();
         }
 
+        const [, { kibanaLegacy }] = await core.getStartServices();
+        kibanaLegacy.loadFontAwesome();
+
         // @ts-expect-error
         const { Vis: Vislib } = await import('./vislib/vis');
+        const { uiState, event: fireEvent } = handlers;
 
-        this.vislibVis = new Vislib(this.chartEl, visParams, deps);
-        this.vislibVis.on('brush', this.vis.API.events.brush);
-        this.vislibVis.on('click', this.vis.API.events.filter);
+        this.vislibVis = new Vislib(this.chartEl, visParams, core, charts);
+        this.vislibVis.on('brush', fireEvent);
+        this.vislibVis.on('click', fireEvent);
         this.vislibVis.on('renderComplete', resolve);
+        this.removeListeners = () => {
+          this.vislibVis.off('brush', fireEvent);
+          this.vislibVis.off('click', fireEvent);
+        };
 
-        this.vislibVis.initVisConfig(esResponse, this.vis.getUiState());
+        this.vislibVis.initVisConfig(esResponse, uiState);
 
         if (visParams.addLegend) {
           $(this.container)
@@ -105,10 +115,10 @@ export const createVislibVisController = (
             })
             .addClass((legendClassName as any)[visParams.legendPosition]);
 
-          this.mountLegend(esResponse, visParams.legendPosition);
+          this.mountLegend(esResponse, visParams, fireEvent, uiState);
         }
 
-        this.vislibVis.render(esResponse, this.vis.getUiState());
+        this.vislibVis.render(esResponse, uiState);
 
         // refreshing the legend after the chart is rendered.
         // this is necessary because some visualizations
@@ -118,39 +128,40 @@ export const createVislibVisController = (
           CUSTOM_LEGEND_VIS_TYPES.includes(this.vislibVis.visConfigArgs.type)
         ) {
           this.unmountLegend();
-          this.mountLegend(esResponse, visParams.legendPosition);
-          this.vislibVis.render(esResponse, this.vis.getUiState());
+          this.mountLegend(esResponse, visParams, fireEvent, uiState);
+          this.vislibVis.render(esResponse, uiState);
         }
       });
     }
 
-    mountLegend(visData: any, position: Position) {
+    mountLegend(
+      visData: any,
+      { legendPosition, addLegend }: BasicVislibParams | PieVisParams,
+      fireEvent: IInterpreterRenderHandlers['event'],
+      uiState?: PersistedState
+    ) {
       this.unmount = mountReactNode(
         <VisLegend
           ref={this.legendRef}
-          vis={this.vis}
           vislibVis={this.vislibVis}
           visData={visData}
-          position={position}
-          uiState={this.vis.getUiState()}
+          uiState={uiState}
+          fireEvent={fireEvent}
+          addLegend={addLegend}
+          position={legendPosition}
         />
       )(this.legendEl);
     }
 
     unmountLegend() {
-      if (this.unmount) {
-        this.unmount();
-      }
+      this.unmount?.();
     }
 
     destroy() {
-      if (this.unmount) {
-        this.unmount();
-      }
+      this.unmount?.();
 
       if (this.vislibVis) {
-        this.vislibVis.off('brush', this.vis.API.events.brush);
-        this.vislibVis.off('click', this.vis.API.events.filter);
+        this.removeListeners?.();
         this.vislibVis.destroy();
         delete this.vislibVis;
       }

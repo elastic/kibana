@@ -20,19 +20,11 @@
 import { xyVisTypes } from '../../vis_type_xy/public';
 import { BaseVisTypeOptions } from '../../visualizations/public';
 
-import { createVislibVisController } from './vis_controller';
-import { VisTypeVislibDependencies } from './plugin';
 import { toExpressionAst } from './to_ast';
 import { BasicVislibParams } from './types';
 
-export const createLineVisTypeDefinition = (
-  deps: VisTypeVislibDependencies
-): BaseVisTypeOptions<BasicVislibParams> => ({
-  ...xyVisTypes.line(),
+export const lineVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
+  ...(xyVisTypes.line() as BaseVisTypeOptions<BasicVislibParams>),
   toExpressionAst,
-  visualization: createVislibVisController(deps),
-  visConfig: {
-    ...xyVisTypes.line().visConfig,
-    component: undefined,
-  },
-});
+  visualization: undefined,
+};

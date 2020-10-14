@@ -20,19 +20,11 @@
 import { xyVisTypes } from '../../vis_type_xy/public';
 import { BaseVisTypeOptions } from '../../visualizations/public';
 
-import { createVislibVisController } from './vis_controller';
-import { VisTypeVislibDependencies } from './plugin';
 import { toExpressionAst } from './to_ast';
 import { BasicVislibParams } from './types';
 
-export const createHistogramVisTypeDefinition = (
-  deps: VisTypeVislibDependencies
-): BaseVisTypeOptions<BasicVislibParams> => ({
-  ...xyVisTypes.histogram(),
+export const histogramVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
+  ...(xyVisTypes.histogram() as BaseVisTypeOptions<BasicVislibParams>),
   toExpressionAst,
-  visualization: createVislibVisController(deps),
-  visConfig: {
-    ...xyVisTypes.histogram().visConfig,
-    component: undefined,
-  },
-});
+  visualization: undefined,
+};

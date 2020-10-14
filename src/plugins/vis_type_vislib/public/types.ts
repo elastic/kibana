@@ -21,7 +21,6 @@ import { $Values } from '@kbn/utility-types';
 import { Position } from '@elastic/charts';
 
 import { Labels } from '../../charts/public';
-import { ChartType } from '../../vis_type_xy/public';
 import {
   CategoryAxis,
   Dimensions,
@@ -37,17 +36,31 @@ import { TimeMarker } from './vislib/visualizations/time_marker';
  * Gauge title alignment
  */
 export const Alignment = Object.freeze({
-  Automatic: 'automatic' as 'automatic',
-  Horizontal: 'horizontal' as 'horizontal',
-  Vertical: 'vertical' as 'vertical',
+  Automatic: 'automatic' as const,
+  Horizontal: 'horizontal' as const,
+  Vertical: 'vertical' as const,
 });
 export type Alignment = $Values<typeof Alignment>;
 
 export const GaugeType = Object.freeze({
-  Arc: 'Arc' as 'Arc',
-  Circle: 'Circle' as 'Circle',
+  Arc: 'Arc' as const,
+  Circle: 'Circle' as const,
 });
 export type GaugeType = $Values<typeof GaugeType>;
+
+export const VislibChartType = Object.freeze({
+  Histogram: 'histogram' as const,
+  HorizontalBar: 'horizontal_bar' as const,
+  Line: 'line' as const,
+  Pie: 'pie' as const,
+  Area: 'area' as const,
+  PointSeries: 'point_series' as const,
+  Heatmap: 'heatmap' as const,
+  Gauge: 'gauge' as const,
+  Goal: 'goal' as const,
+  Metric: 'metric' as const,
+});
+export type VislibChartType = $Values<typeof VislibChartType>;
 
 export interface CommonVislibParams {
   addTooltip: boolean;
@@ -55,7 +68,7 @@ export interface CommonVislibParams {
 }
 
 export interface BasicVislibParams extends CommonVislibParams {
-  type: ChartType;
+  type: VislibChartType;
   addLegend: boolean;
   addTimeMarker: boolean;
   categoryAxes: CategoryAxis[];

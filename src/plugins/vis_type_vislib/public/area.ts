@@ -20,19 +20,11 @@
 import { xyVisTypes } from '../../vis_type_xy/public';
 import { BaseVisTypeOptions } from '../../visualizations/public';
 
-import { createVislibVisController } from './vis_controller';
-import { VisTypeVislibDependencies } from './plugin';
 import { toExpressionAst } from './to_ast';
 import { BasicVislibParams } from './types';
 
-export const createAreaVisTypeDefinition = (
-  deps: VisTypeVislibDependencies
-): BaseVisTypeOptions<BasicVislibParams> => ({
-  ...xyVisTypes.area(),
+export const areaVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
+  ...(xyVisTypes.area() as BaseVisTypeOptions<BasicVislibParams>),
   toExpressionAst,
-  visualization: createVislibVisController(deps),
-  visConfig: {
-    ...xyVisTypes.area().visConfig,
-    component: undefined,
-  },
-});
+  visualization: undefined,
+};
