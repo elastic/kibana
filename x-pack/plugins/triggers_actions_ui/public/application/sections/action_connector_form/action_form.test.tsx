@@ -361,7 +361,7 @@ describe('action_form', () => {
       `);
     });
 
-    it('does not render "Add new" button for preconfigured only action type', async () => {
+    it('does not render "Add new connector" button for preconfigured only action type', async () => {
       await setup();
       const actionOption = wrapper.find('[data-test-subj="preconfigured-ActionTypeSelectOption"]');
       actionOption.first().simulate('click');
