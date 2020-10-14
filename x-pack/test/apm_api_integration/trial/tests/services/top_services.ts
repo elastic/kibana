@@ -25,7 +25,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   const uiFilters = encodeURIComponent(JSON.stringify({}));
 
-  describe('APM Services Overview', () => {
+  describe('APM Services Overview', function () {
+    this.tags(['james']);
     describe('when data is loaded', () => {
       before(() => esArchiver.load(archiveName));
       after(() => esArchiver.unload(archiveName));
