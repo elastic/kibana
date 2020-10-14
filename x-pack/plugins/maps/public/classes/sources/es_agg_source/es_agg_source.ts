@@ -33,6 +33,13 @@ export abstract class AbstractESAggSource extends AbstractESSource {
   private readonly _metricFields: IESAggField[];
   private readonly _canReadFromGeoJson: boolean;
 
+  static createDescriptor(
+    descriptor: Partial<AbstractESAggSourceDescriptor>
+  ): AbstractESAggSourceDescriptor {
+    descriptor = AbstractESSource.createDescriptor(descriptor);
+    return { ...descriptor, metrics: descriptor.metrics ? descriptor.metrics : [] };
+  }
+
   constructor(
     descriptor: AbstractESAggSourceDescriptor,
     inspectorAdapters?: Adapters,

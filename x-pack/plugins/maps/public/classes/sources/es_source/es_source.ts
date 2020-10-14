@@ -65,14 +65,17 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
 
   readonly _descriptor: AbstractESSourceDescriptor;
 
+  static createDescriptor(
+    descriptor: Partial<AbstractESSourceDescriptor>
+  ): AbstractESSourceDescriptor {
+    return {
+      ...descriptor,
+      applyGlobalQuery: _.get(descriptor, 'applyGlobalQuery', true),
+    };
+  }
+
   constructor(descriptor: AbstractESSourceDescriptor, inspectorAdapters?: Adapters) {
-    super(
-      {
-        ...descriptor,
-        applyGlobalQuery: _.get(descriptor, 'applyGlobalQuery', true),
-      },
-      inspectorAdapters
-    );
+    super(AbstractESSource.createDescriptor(descriptor), inspectorAdapters);
     this._descriptor = descriptor;
   }
 

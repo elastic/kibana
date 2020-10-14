@@ -60,21 +60,20 @@ export const heatmapTitle = i18n.translate('xpack.maps.source.esGridHeatmapTitle
 });
 
 export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingleLayerVectorSource {
-  static createDescriptor({
-    indexPatternId,
-    geoField,
-    metrics,
-    requestType,
-    resolution,
-  }: Partial<ESGeoGridSourceDescriptor>): ESGeoGridSourceDescriptor {
+  static createDescriptor(
+    descriptor: Partial<ESGeoGridSourceDescriptor>
+  ): ESGeoGridSourceDescriptor {
+    descriptor = AbstractESAggSource.createDescriptor(descriptor);
     return {
+      ...descriptor,
       type: SOURCE_TYPES.ES_GEO_GRID,
       id: uuid(),
-      indexPatternId: indexPatternId || '',
-      geoField: geoField || '',
-      metrics: metrics ? metrics : [DEFAULT_METRIC],
-      requestType: requestType || RENDER_AS.POINT,
-      resolution: resolution ? resolution : GRID_RESOLUTION.COARSE,
+      indexPatternId: descriptor.indexPatternId || '',
+      geoField: descriptor.geoField || '',
+      metrics:
+        descriptor.metrics && descriptor.metrics.length > 0 ? descriptor.metrics : [DEFAULT_METRIC],
+      requestType: descriptor.requestType || RENDER_AS.POINT,
+      resolution: descriptor.resolution ? descriptor.resolution : GRID_RESOLUTION.COARSE,
     };
   }
 

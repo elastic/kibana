@@ -106,6 +106,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   protected readonly _tooltipFields: ESDocField[];
 
   static createDescriptor(descriptor: Partial<ESSearchSourceDescriptor>): ESSearchSourceDescriptor {
+    descriptor = AbstractESSource.createDescriptor(descriptor);
     return {
       ...descriptor,
       id: descriptor.id ? descriptor.id : uuid(),

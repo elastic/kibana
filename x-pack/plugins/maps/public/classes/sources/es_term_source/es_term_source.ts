@@ -61,7 +61,7 @@ export class ESTermSource extends AbstractESAggSource {
   readonly _descriptor: ESTermSourceDescriptor;
 
   constructor(descriptor: ESTermSourceDescriptor, inspectorAdapters: Adapters) {
-    super(descriptor, inspectorAdapters);
+    super(AbstractESAggSource.createDescriptor(descriptor), inspectorAdapters);
     this._descriptor = descriptor;
     this._termField = new ESDocField({
       fieldName: this._descriptor.term,
