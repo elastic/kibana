@@ -198,7 +198,7 @@
     "loader-utils": "^1.2.3",
     "lz-string": "^1.4.4",
     "madge": "3.4.4",
-    "mapbox-gl": "^1.10.0",
+    "mapbox-gl": "^1.12.0",
     "mapbox-gl-draw-rectangle-mode": "^1.0.4",
     "marge": "^1.0.1",
     "memoize-one": "^5.0.0",
