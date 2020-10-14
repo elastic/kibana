@@ -382,7 +382,7 @@ const UnstyledProcessEventDot = React.memo(
             />
           </StyledDescriptionText>
           <div
-            className={xScale >= 2 ? 'euiButton' : 'euiButton euiButton--small'}
+            className={'euiButton euiButton--small'}
             id={labelHTMLID}
             onClick={handleClick}
             onFocus={handleFocus}
