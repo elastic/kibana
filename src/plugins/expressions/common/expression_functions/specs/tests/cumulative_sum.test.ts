@@ -28,828 +28,297 @@ describe('interpreter/functions#cumulative_sum', () => {
     fn(input, args, {} as ExecutionContext);
 
   it('calculates cumulative sum', () => {
-    expect(
-      runFn(
-        {
-          type: 'datatable',
-          columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
-          rows: [{ val: 5 }, { val: 7 }, { val: 3 }, { val: 2 }],
-        },
-        { inputColumnId: 'val', outputColumnId: 'output' }
-      )
-    ).toMatchInlineSnapshot(`
-      Object {
-        "columns": Array [
-          Object {
-            "id": "val",
-            "meta": Object {
-              "type": "number",
-            },
-            "name": "val",
-          },
-          Object {
-            "id": "output",
-            "meta": Object {
-              "type": "number",
-            },
-            "name": "output",
-          },
-        ],
-        "rows": Array [
-          Object {
-            "output": 5,
-            "val": 5,
-          },
-          Object {
-            "output": 12,
-            "val": 7,
-          },
-          Object {
-            "output": 15,
-            "val": 3,
-          },
-          Object {
-            "output": 17,
-            "val": 2,
-          },
-        ],
-        "type": "datatable",
-      }
-    `);
+    const result = runFn(
+      {
+        type: 'datatable',
+        columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
+        rows: [{ val: 5 }, { val: 7 }, { val: 3 }, { val: 2 }],
+      },
+      { inputColumnId: 'val', outputColumnId: 'output' }
+    );
+    expect(result.columns).toContainEqual({
+      id: 'output',
+      name: 'output',
+      meta: { type: 'number' },
+    });
+    expect(result.rows.map((row) => row.output)).toEqual([5, 12, 15, 17]);
+  });
+
+  it('replaces null or undefined data with zeroes until there is real data', () => {
+    const result = runFn(
+      {
+        type: 'datatable',
+        columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
+        rows: [{}, { val: null }, { val: undefined }, { val: 1 }],
+      },
+      { inputColumnId: 'val', outputColumnId: 'output' }
+    );
+    expect(result.columns).toContainEqual({
+      id: 'output',
+      name: 'output',
+      meta: { type: 'number' },
+    });
+    expect(result.rows.map((row) => row.output)).toEqual([0, 0, 0, 1]);
   });
 
   it('calculates cumulative sum for multiple series', () => {
-    expect(
-      runFn(
-        {
-          type: 'datatable',
-          columns: [
-            { id: 'val', name: 'val', meta: { type: 'number' } },
-            { id: 'split', name: 'split', meta: { type: 'string' } },
-          ],
-          rows: [
-            { val: 1, split: 'A' },
-            { val: 2, split: 'B' },
-            { val: 3, split: 'B' },
-            { val: 4, split: 'A' },
-            { val: 5, split: 'A' },
-            { val: 6, split: 'A' },
-            { val: 7, split: 'B' },
-            { val: 8, split: 'B' },
-          ],
-        },
-        { inputColumnId: 'val', outputColumnId: 'output', by: ['split'] }
-      )
-    ).toMatchInlineSnapshot(`
-      Object {
-        "columns": Array [
-          Object {
-            "id": "val",
-            "meta": Object {
-              "type": "number",
-            },
-            "name": "val",
-          },
-          Object {
-            "id": "output",
-            "meta": Object {
-              "type": "number",
-            },
-            "name": "output",
-          },
-          Object {
-            "id": "split",
-            "meta": Object {
-              "type": "string",
-            },
-            "name": "split",
-          },
+    const result = runFn(
+      {
+        type: 'datatable',
+        columns: [
+          { id: 'val', name: 'val', meta: { type: 'number' } },
+          { id: 'split', name: 'split', meta: { type: 'string' } },
         ],
-        "rows": Array [
-          Object {
-            "output": 1,
-            "split": "A",
-            "val": 1,
-          },
-          Object {
-            "output": 2,
-            "split": "B",
-            "val": 2,
-          },
-          Object {
-            "output": 5,
-            "split": "B",
-            "val": 3,
-          },
-          Object {
-            "output": 5,
-            "split": "A",
-            "val": 4,
-          },
-          Object {
-            "output": 10,
-            "split": "A",
-            "val": 5,
-          },
-          Object {
-            "output": 16,
-            "split": "A",
-            "val": 6,
-          },
-          Object {
-            "output": 12,
-            "split": "B",
-            "val": 7,
-          },
-          Object {
-            "output": 20,
-            "split": "B",
-            "val": 8,
-          },
+        rows: [
+          { val: 1, split: 'A' },
+          { val: 2, split: 'B' },
+          { val: 3, split: 'B' },
+          { val: 4, split: 'A' },
+          { val: 5, split: 'A' },
+          { val: 6, split: 'A' },
+          { val: 7, split: 'B' },
+          { val: 8, split: 'B' },
         ],
-        "type": "datatable",
-      }
-    `);
+      },
+      { inputColumnId: 'val', outputColumnId: 'output', by: ['split'] }
+    );
+
+    expect(result.rows.map((row) => row.output)).toEqual([
+      1,
+      2,
+      2 + 3,
+      1 + 4,
+      1 + 4 + 5,
+      1 + 4 + 5 + 6,
+      2 + 3 + 7,
+      2 + 3 + 7 + 8,
+    ]);
   });
 
   it('treats missing split column as separate series', () => {
-    expect(
-      runFn(
-        {
-          type: 'datatable',
-          columns: [
-            { id: 'val', name: 'val', meta: { type: 'number' } },
-            { id: 'split', name: 'split', meta: { type: 'string' } },
-          ],
-          rows: [
-            { val: 1, split: 'A' },
-            { val: 2, split: 'B' },
-            { val: 3 },
-            { val: 4, split: 'A' },
-            { val: 5 },
-            { val: 6, split: 'A' },
-            { val: 7, split: 'B' },
-            { val: 8, split: 'B' },
-          ],
-        },
-        { inputColumnId: 'val', outputColumnId: 'output', by: ['split'] }
-      )
-    ).toMatchInlineSnapshot(`
-      Object {
-        "columns": Array [
-          Object {
-            "id": "val",
-            "meta": Object {
-              "type": "number",
-            },
-            "name": "val",
-          },
-          Object {
-            "id": "output",
-            "meta": Object {
-              "type": "number",
-            },
-            "name": "output",
-          },
-          Object {
-            "id": "split",
-            "meta": Object {
-              "type": "string",
-            },
-            "name": "split",
-          },
+    const result = runFn(
+      {
+        type: 'datatable',
+        columns: [
+          { id: 'val', name: 'val', meta: { type: 'number' } },
+          { id: 'split', name: 'split', meta: { type: 'string' } },
         ],
-        "rows": Array [
-          Object {
-            "output": 1,
-            "split": "A",
-            "val": 1,
-          },
-          Object {
-            "output": 2,
-            "split": "B",
-            "val": 2,
-          },
-          Object {
-            "output": 3,
-            "val": 3,
-          },
-          Object {
-            "output": 5,
-            "split": "A",
-            "val": 4,
-          },
-          Object {
-            "output": 8,
-            "val": 5,
-          },
-          Object {
-            "output": 11,
-            "split": "A",
-            "val": 6,
-          },
-          Object {
-            "output": 9,
-            "split": "B",
-            "val": 7,
-          },
-          Object {
-            "output": 17,
-            "split": "B",
-            "val": 8,
-          },
+        rows: [
+          { val: 1, split: 'A' },
+          { val: 2, split: 'B' },
+          { val: 3 },
+          { val: 4, split: 'A' },
+          { val: 5 },
+          { val: 6, split: 'A' },
+          { val: 7, split: 'B' },
+          { val: 8, split: 'B' },
         ],
-        "type": "datatable",
-      }
-    `);
+      },
+      { inputColumnId: 'val', outputColumnId: 'output', by: ['split'] }
+    );
+    expect(result.rows.map((row) => row.output)).toEqual([
+      1,
+      2,
+      3,
+      1 + 4,
+      3 + 5,
+      1 + 4 + 6,
+      2 + 7,
+      2 + 7 + 8,
+    ]);
   });
 
   it('treats null like undefined and empty string for split columns', () => {
-    expect(
-      runFn(
-        {
-          type: 'datatable',
-          columns: [
-            { id: 'val', name: 'val', meta: { type: 'number' } },
-            { id: 'split', name: 'split', meta: { type: 'string' } },
-          ],
-          rows: [
-            { val: 1, split: 'A' },
-            { val: 2, split: 'B' },
-            { val: 3 },
-            { val: 4, split: 'A' },
-            { val: 5 },
-            { val: 6, split: 'A' },
-            { val: 7, split: null },
-            { val: 8, split: 'B' },
-            { val: 9, split: '' },
-          ],
-        },
-        { inputColumnId: 'val', outputColumnId: 'output', by: ['split'] }
-      )
-    ).toMatchInlineSnapshot(`
-      Object {
-        "columns": Array [
-          Object {
-            "id": "val",
-            "meta": Object {
-              "type": "number",
-            },
-            "name": "val",
-          },
-          Object {
-            "id": "output",
-            "meta": Object {
-              "type": "number",
-            },
-            "name": "output",
-          },
-          Object {
-            "id": "split",
-            "meta": Object {
-              "type": "string",
-            },
-            "name": "split",
-          },
+    const result = runFn(
+      {
+        type: 'datatable',
+        columns: [
+          { id: 'val', name: 'val', meta: { type: 'number' } },
+          { id: 'split', name: 'split', meta: { type: 'string' } },
         ],
-        "rows": Array [
-          Object {
-            "output": 1,
-            "split": "A",
-            "val": 1,
-          },
-          Object {
-            "output": 2,
-            "split": "B",
-            "val": 2,
-          },
-          Object {
-            "output": 3,
-            "val": 3,
-          },
-          Object {
-            "output": 5,
-            "split": "A",
-            "val": 4,
-          },
-          Object {
-            "output": 8,
-            "val": 5,
-          },
-          Object {
-            "output": 11,
-            "split": "A",
-            "val": 6,
-          },
-          Object {
-            "output": 15,
-            "split": null,
-            "val": 7,
-          },
-          Object {
-            "output": 10,
-            "split": "B",
-            "val": 8,
-          },
-          Object {
-            "output": 24,
-            "split": "",
-            "val": 9,
-          },
+        rows: [
+          { val: 1, split: 'A' },
+          { val: 2, split: 'B' },
+          { val: 3 },
+          { val: 4, split: 'A' },
+          { val: 5 },
+          { val: 6, split: 'A' },
+          { val: 7, split: null },
+          { val: 8, split: 'B' },
+          { val: 9, split: '' },
         ],
-        "type": "datatable",
-      }
-    `);
+      },
+      { inputColumnId: 'val', outputColumnId: 'output', by: ['split'] }
+    );
+    expect(result.rows.map((row) => row.output)).toEqual([
+      1,
+      2,
+      3,
+      1 + 4,
+      3 + 5,
+      1 + 4 + 6,
+      3 + 5 + 7,
+      2 + 8,
+      3 + 5 + 7 + 9,
+    ]);
   });
 
   it('calculates cumulative sum for multiple series by multiple split columns', () => {
-    expect(
-      runFn(
-        {
-          type: 'datatable',
-          columns: [
-            { id: 'val', name: 'val', meta: { type: 'number' } },
-            { id: 'split', name: 'split', meta: { type: 'string' } },
-            { id: 'split2', name: 'split2', meta: { type: 'string' } },
-          ],
-          rows: [
-            { val: 1, split: 'A', split2: 'C' },
-            { val: 2, split: 'B', split2: 'C' },
-            { val: 3, split2: 'C' },
-            { val: 4, split: 'A', split2: 'C' },
-            { val: 5 },
-            { val: 6, split: 'A', split2: 'D' },
-            { val: 7, split: 'B', split2: 'D' },
-            { val: 8, split: 'B', split2: 'D' },
-          ],
-        },
-        { inputColumnId: 'val', outputColumnId: 'output', by: ['split', 'split2'] }
-      )
-    ).toMatchInlineSnapshot(`
-      Object {
-        "columns": Array [
-          Object {
-            "id": "val",
-            "meta": Object {
-              "type": "number",
-            },
-            "name": "val",
-          },
-          Object {
-            "id": "output",
-            "meta": Object {
-              "type": "number",
-            },
-            "name": "output",
-          },
-          Object {
-            "id": "split",
-            "meta": Object {
-              "type": "string",
-            },
-            "name": "split",
-          },
-          Object {
-            "id": "split2",
-            "meta": Object {
-              "type": "string",
-            },
-            "name": "split2",
-          },
+    const result = runFn(
+      {
+        type: 'datatable',
+        columns: [
+          { id: 'val', name: 'val', meta: { type: 'number' } },
+          { id: 'split', name: 'split', meta: { type: 'string' } },
+          { id: 'split2', name: 'split2', meta: { type: 'string' } },
         ],
-        "rows": Array [
-          Object {
-            "output": 1,
-            "split": "A",
-            "split2": "C",
-            "val": 1,
-          },
-          Object {
-            "output": 2,
-            "split": "B",
-            "split2": "C",
-            "val": 2,
-          },
-          Object {
-            "output": 3,
-            "split2": "C",
-            "val": 3,
-          },
-          Object {
-            "output": 5,
-            "split": "A",
-            "split2": "C",
-            "val": 4,
-          },
-          Object {
-            "output": 5,
-            "val": 5,
-          },
-          Object {
-            "output": 6,
-            "split": "A",
-            "split2": "D",
-            "val": 6,
-          },
-          Object {
-            "output": 7,
-            "split": "B",
-            "split2": "D",
-            "val": 7,
-          },
-          Object {
-            "output": 15,
-            "split": "B",
-            "split2": "D",
-            "val": 8,
-          },
+        rows: [
+          { val: 1, split: 'A', split2: 'C' },
+          { val: 2, split: 'B', split2: 'C' },
+          { val: 3, split2: 'C' },
+          { val: 4, split: 'A', split2: 'C' },
+          { val: 5 },
+          { val: 6, split: 'A', split2: 'D' },
+          { val: 7, split: 'B', split2: 'D' },
+          { val: 8, split: 'B', split2: 'D' },
         ],
-        "type": "datatable",
-      }
-    `);
+      },
+      { inputColumnId: 'val', outputColumnId: 'output', by: ['split', 'split2'] }
+    );
+    expect(result.rows.map((row) => row.output)).toEqual([1, 2, 3, 1 + 4, 5, 6, 7, 7 + 8]);
   });
 
   it('splits separate series by the string representation of the cell values', () => {
-    expect(
-      runFn(
-        {
-          type: 'datatable',
-          columns: [
-            { id: 'val', name: 'val', meta: { type: 'number' } },
-            { id: 'split', name: 'split', meta: { type: 'string' } },
-          ],
-          rows: [
-            { val: 1, split: { anObj: 3 } },
-            { val: 2, split: { anotherObj: 5 } },
-            { val: 3, split: 5 },
-            { val: 4, split: '5' },
-          ],
-        },
-        { inputColumnId: 'val', outputColumnId: 'output', by: ['split'] }
-      )
-    ).toMatchInlineSnapshot(`
-      Object {
-        "columns": Array [
-          Object {
-            "id": "val",
-            "meta": Object {
-              "type": "number",
-            },
-            "name": "val",
-          },
-          Object {
-            "id": "output",
-            "meta": Object {
-              "type": "number",
-            },
-            "name": "output",
-          },
-          Object {
-            "id": "split",
-            "meta": Object {
-              "type": "string",
-            },
-            "name": "split",
-          },
+    const result = runFn(
+      {
+        type: 'datatable',
+        columns: [
+          { id: 'val', name: 'val', meta: { type: 'number' } },
+          { id: 'split', name: 'split', meta: { type: 'string' } },
         ],
-        "rows": Array [
-          Object {
-            "output": 1,
-            "split": Object {
-              "anObj": 3,
-            },
-            "val": 1,
-          },
-          Object {
-            "output": 3,
-            "split": Object {
-              "anotherObj": 5,
-            },
-            "val": 2,
-          },
-          Object {
-            "output": 3,
-            "split": 5,
-            "val": 3,
-          },
-          Object {
-            "output": 7,
-            "split": "5",
-            "val": 4,
-          },
+        rows: [
+          { val: 1, split: { anObj: 3 } },
+          { val: 2, split: { anotherObj: 5 } },
+          { val: 10, split: 5 },
+          { val: 11, split: '5' },
         ],
-        "type": "datatable",
-      }
-    `);
+      },
+      { inputColumnId: 'val', outputColumnId: 'output', by: ['split'] }
+    );
+
+    expect(result.rows.map((row) => row.output)).toEqual([1, 1 + 2, 10, 21]);
   });
 
   it('casts values to number before calculating cumulative sum', () => {
-    expect(
-      runFn(
-        {
-          type: 'datatable',
-          columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
-          rows: [{ val: 5 }, { val: '7' }, { val: '3' }, { val: 2 }],
-        },
-        { inputColumnId: 'val', outputColumnId: 'output' }
-      )
-    ).toMatchInlineSnapshot(`
-      Object {
-        "columns": Array [
-          Object {
-            "id": "val",
-            "meta": Object {
-              "type": "number",
-            },
-            "name": "val",
-          },
-          Object {
-            "id": "output",
-            "meta": Object {
-              "type": "number",
-            },
-            "name": "output",
-          },
-        ],
-        "rows": Array [
-          Object {
-            "output": 5,
-            "val": 5,
-          },
-          Object {
-            "output": 12,
-            "val": "7",
-          },
-          Object {
-            "output": 15,
-            "val": "3",
-          },
-          Object {
-            "output": 17,
-            "val": 2,
-          },
-        ],
-        "type": "datatable",
-      }
-    `);
+    const result = runFn(
+      {
+        type: 'datatable',
+        columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
+        rows: [{ val: 5 }, { val: '7' }, { val: '3' }, { val: 2 }],
+      },
+      { inputColumnId: 'val', outputColumnId: 'output' }
+    );
+    expect(result.rows.map((row) => row.output)).toEqual([5, 12, 15, 17]);
   });
 
   it('casts values to number before calculating cumulative sum for NaN like values', () => {
-    expect(
-      runFn(
-        {
-          type: 'datatable',
-          columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
-          rows: [{ val: 5 }, { val: '7' }, { val: {} }, { val: 2 }],
-        },
-        { inputColumnId: 'val', outputColumnId: 'output' }
-      )
-    ).toMatchInlineSnapshot(`
-      Object {
-        "columns": Array [
-          Object {
-            "id": "val",
-            "meta": Object {
-              "type": "number",
-            },
-            "name": "val",
-          },
-          Object {
-            "id": "output",
-            "meta": Object {
-              "type": "number",
-            },
-            "name": "output",
-          },
-        ],
-        "rows": Array [
-          Object {
-            "output": 5,
-            "val": 5,
-          },
-          Object {
-            "output": 12,
-            "val": "7",
-          },
-          Object {
-            "output": NaN,
-            "val": Object {},
-          },
-          Object {
-            "output": NaN,
-            "val": 2,
-          },
-        ],
-        "type": "datatable",
-      }
-    `);
+    const result = runFn(
+      {
+        type: 'datatable',
+        columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
+        rows: [{ val: 5 }, { val: '7' }, { val: {} }, { val: 2 }],
+      },
+      { inputColumnId: 'val', outputColumnId: 'output' }
+    );
+    expect(result.rows.map((row) => row.output)).toEqual([5, 12, NaN, NaN]);
   });
 
   it('skips undefined and null values', () => {
-    expect(
-      runFn(
-        {
-          type: 'datatable',
-          columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
-          rows: [
-            { val: null },
-            { val: 7 },
-            { val: undefined },
-            { val: undefined },
-            { val: undefined },
-            { val: undefined },
-            { val: '3' },
-            { val: 2 },
-            { val: null },
-          ],
-        },
-        { inputColumnId: 'val', outputColumnId: 'output' }
-      )
-    ).toMatchInlineSnapshot(`
-      Object {
-        "columns": Array [
-          Object {
-            "id": "val",
-            "meta": Object {
-              "type": "number",
-            },
-            "name": "val",
-          },
-          Object {
-            "id": "output",
-            "meta": Object {
-              "type": "number",
-            },
-            "name": "output",
-          },
+    const result = runFn(
+      {
+        type: 'datatable',
+        columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
+        rows: [
+          { val: null },
+          { val: 7 },
+          { val: undefined },
+          { val: undefined },
+          { val: undefined },
+          { val: undefined },
+          { val: '3' },
+          { val: 2 },
+          { val: null },
         ],
-        "rows": Array [
-          Object {
-            "output": 0,
-            "val": null,
-          },
-          Object {
-            "output": 7,
-            "val": 7,
-          },
-          Object {
-            "output": 7,
-            "val": undefined,
-          },
-          Object {
-            "output": 7,
-            "val": undefined,
-          },
-          Object {
-            "output": 7,
-            "val": undefined,
-          },
-          Object {
-            "output": 7,
-            "val": undefined,
-          },
-          Object {
-            "output": 10,
-            "val": "3",
-          },
-          Object {
-            "output": 12,
-            "val": 2,
-          },
-          Object {
-            "output": 12,
-            "val": null,
-          },
-        ],
-        "type": "datatable",
-      }
-    `);
+      },
+      { inputColumnId: 'val', outputColumnId: 'output' }
+    );
+    expect(result.rows.map((row) => row.output)).toEqual([0, 7, 7, 7, 7, 7, 10, 12, 12]);
   });
 
   it('copies over meta information from the source column', () => {
-    expect(
-      runFn(
-        {
-          type: 'datatable',
-          columns: [
-            {
-              id: 'val',
-              name: 'val',
-              meta: {
-                type: 'number',
+    const result = runFn(
+      {
+        type: 'datatable',
+        columns: [
+          {
+            id: 'val',
+            name: 'val',
+            meta: {
+              type: 'number',
 
-                field: 'afield',
-                index: 'anindex',
-                params: { id: 'number', params: { pattern: '000' } },
-                source: 'synthetic',
-                sourceParams: {
-                  some: 'params',
-                },
+              field: 'afield',
+              index: 'anindex',
+              params: { id: 'number', params: { pattern: '000' } },
+              source: 'synthetic',
+              sourceParams: {
+                some: 'params',
               },
             },
-          ],
-          rows: [{ val: 5 }],
+          },
+        ],
+        rows: [{ val: 5 }],
+      },
+      { inputColumnId: 'val', outputColumnId: 'output' }
+    );
+    expect(result.columns).toContainEqual({
+      id: 'output',
+      name: 'output',
+      meta: {
+        type: 'number',
+
+        field: 'afield',
+        index: 'anindex',
+        params: { id: 'number', params: { pattern: '000' } },
+        source: 'synthetic',
+        sourceParams: {
+          some: 'params',
         },
-        { inputColumnId: 'val', outputColumnId: 'output' }
-      )
-    ).toMatchInlineSnapshot(`
-      Object {
-        "columns": Array [
-          Object {
-            "id": "val",
-            "meta": Object {
-              "field": "afield",
-              "index": "anindex",
-              "params": Object {
-                "id": "number",
-                "params": Object {
-                  "pattern": "000",
-                },
-              },
-              "source": "synthetic",
-              "sourceParams": Object {
-                "some": "params",
-              },
-              "type": "number",
-            },
-            "name": "val",
-          },
-          Object {
-            "id": "output",
-            "meta": Object {
-              "field": "afield",
-              "index": "anindex",
-              "params": Object {
-                "id": "number",
-                "params": Object {
-                  "pattern": "000",
-                },
-              },
-              "source": "synthetic",
-              "sourceParams": Object {
-                "some": "params",
-              },
-              "type": "number",
-            },
-            "name": "output",
-          },
-        ],
-        "rows": Array [
-          Object {
-            "output": 5,
-            "val": 5,
-          },
-        ],
-        "type": "datatable",
-      }
-    `);
+      },
+    });
   });
 
   it('sets output name on output column if specified', () => {
-    expect(
-      runFn(
-        {
-          type: 'datatable',
-          columns: [
-            {
-              id: 'val',
-              name: 'val',
-              meta: {
-                type: 'number',
-              },
+    const result = runFn(
+      {
+        type: 'datatable',
+        columns: [
+          {
+            id: 'val',
+            name: 'val',
+            meta: {
+              type: 'number',
             },
-          ],
-          rows: [{ val: 5 }],
-        },
-        { inputColumnId: 'val', outputColumnId: 'output', outputColumnName: 'Output name' }
-      )
-    ).toMatchInlineSnapshot(`
-      Object {
-        "columns": Array [
-          Object {
-            "id": "val",
-            "meta": Object {
-              "type": "number",
-            },
-            "name": "val",
-          },
-          Object {
-            "id": "output",
-            "meta": Object {
-              "type": "number",
-            },
-            "name": "Output name",
           },
         ],
-        "rows": Array [
-          Object {
-            "output": 5,
-            "val": 5,
-          },
-        ],
-        "type": "datatable",
-      }
-    `);
+        rows: [{ val: 5 }],
+      },
+      { inputColumnId: 'val', outputColumnId: 'output', outputColumnName: 'Output name' }
+    );
+    expect(result.columns).toContainEqual({
+      id: 'output',
+      name: 'Output name',
+      meta: { type: 'number' },
+    });
   });
 
   it('returns source table if input column does not exist', () => {
