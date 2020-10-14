@@ -141,8 +141,15 @@ export async function createCookieSessionStorageFactory<T>(
   await server.register({ plugin: hapiAuthCookie });
 
   server.auth.strategy('security-cookie', 'cookie', {
-    cookie: cookieOptions.name,
-    password: cookieOptions.encryptionKey,
+    cookie: {
+      name: cookieOptions.name,
+      password: cookieOptions.encryptionKey,
+      isSecure: cookieOptions.isSecure,
+      path: basePath === undefined ? '/' : basePath,
+      clearInvalid: false,
+      isHttpOnly: true,
+      isSameSite: cookieOptions.sameSite === 'None' ? false : cookieOptions.sameSite ?? false,
+    },
     validateFunc: async (req, session: T | T[]) => {
       const result = cookieOptions.validate(session);
       if (!result.isValid) {
@@ -150,11 +157,6 @@ export async function createCookieSessionStorageFactory<T>(
       }
       return { valid: result.isValid };
     },
-    isSecure: cookieOptions.isSecure,
-    path: basePath,
-    clearInvalid: false,
-    isHttpOnly: true,
-    isSameSite: cookieOptions.sameSite === 'None' ? false : cookieOptions.sameSite ?? false,
   });
 
   // A hack to support SameSite: 'None'.
