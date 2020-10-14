@@ -229,7 +229,7 @@ describe('#createLoggingConfig', () => {
 
 describe('#filterEvent', () => {
   const event: AuditEvent = {
-    message: "HTTP request '/path' by user 'jdoe' succeeded",
+    message: 'this is my audit message',
     event: {
       action: 'http_request',
       category: EventCategory.WEB,
