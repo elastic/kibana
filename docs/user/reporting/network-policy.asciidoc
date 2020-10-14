@@ -2,7 +2,7 @@
 [[reporting-network-policy]]
 === Restricting requests with a Reporting Network Policy
 
-When {report-features} generates PDF reports, it uses the Chromium browser to fully load the Kibana page on the server. This
+When {report-features} generates PDF reports, it uses the Chromium browser to fully load the {kib} page on the server. This
 potentially involves sending requests to external hosts, for example, a request may go to an external image server for showing a
 field formatted as an image, or to show an image in a Markdown visualization.
 
@@ -15,7 +15,7 @@ host, but is redirected and a response returns from a denied host, the response 
 
 [NOTE]
 ============
-Kibana installations are not designed to be publicly accessible over the Internet. The Reporting network policy and other capabilities
+{kib} installations are not designed to be publicly accessible over the Internet. The Reporting network policy and other capabilities
 of the Elastic Stack security features do not change this condition.
 ============
 
