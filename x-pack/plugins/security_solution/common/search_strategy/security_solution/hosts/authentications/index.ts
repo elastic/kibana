@@ -47,6 +47,7 @@ export interface AuthenticationItem {
 export interface LastSourceHost {
   timestamp?: Maybe<string>;
   source?: Maybe<SourceEcs>;
+  'source.ip'?: string;
   host?: Maybe<HostEcs>;
 }
 
