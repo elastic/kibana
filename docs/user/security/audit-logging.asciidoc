@@ -60,113 +60,86 @@ authorization checks have passed, but before the response from {es} is received.
 Refer to the corresponding {es} logs for potential write errors.
 ============================================================================
 
-[cols="5*<",options="header"]
+
+[cols="3*<"]
 |======
-| Category
-| Type
-| Action
-| Outcome
-| Description
+3+a|
+===== Category: authentication
 
-| `authentication`
-| 
-| `user_login`
-| `success`
-| User has logged in successfully.
+| *Action*
+| *Outcome*
+| *Description*
 
-| `authentication`
-| 
-| `user_login`
-| `failure`
-| Failed login attempt (e.g. due to invalid credentials).
+.2+| `user_login`
+| `success` | User has logged in successfully.
+| `failure` | Failed login attempt (e.g. due to invalid credentials).
 
-| `database`
-| `creation`
-| `saved_object_create`
-| `unknown`
-| User is creating a saved object.
+3+a|
+===== Category: database
+====== Type: creation
 
-| `database`
-| `creation`
-| `saved_object_create`
-| `failure`
-| User is not authorized to create a saved object.
+| *Action*
+| *Outcome*
+| *Description*
 
-| `database`
-| `change`
-| `saved_object_update`
-| `unknown`
-| User is updating a saved object.
+.2+| `saved_object_create`
+| `unknown` | User is creating a saved object.
+| `failure` | User is not authorized to create a saved object.
 
-| `database`
-| `change`
-| `saved_object_update`
-| `failure`
-| User is not authorized to update a saved object.
 
-| `database`
-| `change`
-| `saved_object_add_to_spaces`
-| `unknown`
-| User is adding a saved object to other spaces.
+3+a|
+====== Type: change
 
-| `database`
-| `change`
-| `saved_object_add_to_spaces`
-| `failure`
-| User is not authorized to add a saved object to other spaces.
+| *Action*
+| *Outcome*
+| *Description*
 
-| `database`
-| `change`
-| `saved_object_delete_from_spaces`
-| `unknown`
-| User is removing a saved object from other spaces.
+.2+| `saved_object_update`
+| `unknown` | User is updating a saved object.
+| `failure` | User is not authorized to update a saved object.
 
-| `database`
-| `change`
-| `saved_object_delete_from_spaces`
-| `failure`
-| User is not authorized to remove a saved object from other spaces.
+.2+| `saved_object_add_to_spaces`
+| `unknown` | User is adding a saved object to other spaces.
+| `failure` | User is not authorized to add a saved object to other spaces.
 
-| `database`
-| `deletion`
-| `saved_object_delete`
-| `unknown`
-| User is deleting a saved object.
+.2+| `saved_object_delete_from_spaces`
+| `unknown` | User is removing a saved object from other spaces.
+| `failure` | User is not authorized to remove a saved object from other spaces.
 
-| `database`
-| `deletion`
-| `saved_object_delete`
-| `failure`
-| User is not authorized to delete a saved object.
+3+a|
+====== Type: deletion
 
-| `database`
-| `access`
-| `saved_object_get`
-| `success`
-| User has accessed a saved object.
+| *Action*
+| *Outcome*
+| *Description*
 
-| `database`
-| `access`
-| `saved_object_get`
-| `failure`
-| User is not authorized to access a saved object.
+.2+| `saved_object_delete`
+| `unknown` | User is deleting a saved object.
+| `failure` | User is not authorized to delete a saved object.
 
-| `database`
-| `access`
-| `saved_object_find`
-| `success`
-| User has accessed a saved object as part of a search operation.
+3+a|
+====== Type: access
 
-| `database`
-| `access`
-| `saved_object_find`
-| `failure`
-| User is not authorized to search for saved objects.
+| *Action*
+| *Outcome*
+| *Description*
 
-| `web`
-| 
+.2+| `saved_object_get`
+| `success` | User has accessed a saved object.
+| `failure` | User is not authorized to access a saved object.
+
+.2+| `saved_object_find`
+| `success` | User has accessed a saved object as part of a search operation.
+| `failure` | User is not authorized to search for saved objects.
+
+
+3+a|
+===== Category: web
+
+| *Action*
+| *Outcome*
+| *Description*
+
 | `http_request`
-| `unknown`
-| User is making an HTTP request.
+| `unknown` | User is making an HTTP request.
 |======
