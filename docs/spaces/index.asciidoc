@@ -95,7 +95,7 @@ image::spaces/images/spaces-roles.png["Controlling features visiblity"]
 === Move saved objects between spaces
 
 To <<managing-saved-objects-copy-to-space, copy objects>> from one space to another, open the menu,
-then click *Stack Management > Saved objects*.
+then click *Stack Management > Saved Objects*.
 
 Alternately, you can move objects using {kib}'s <<managing-saved-objects-export-objects, import and export>>
 interface.
