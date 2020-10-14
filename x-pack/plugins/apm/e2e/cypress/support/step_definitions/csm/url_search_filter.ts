@@ -55,7 +55,7 @@ Then(`it should filter results based on query`, () => {
     listOfUrls.should('have.length', 1);
 
     const actualUrlsText = [
-      'http://opbeans-node:3000/customersPage views: 10Page load duration: 76 ms ',
+      'http://opbeans-node:3000/customersPage views: 10Page load duration: 76 ms',
     ];
 
     cy.get('li.euiSelectableListItem')

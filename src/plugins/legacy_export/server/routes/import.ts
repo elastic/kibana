@@ -28,7 +28,7 @@ export const registerImportRoute = (router: IRouter, maxImportPayloadBytes: numb
       validate: {
         body: schema.object({
           objects: schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
-          version: schema.string(),
+          version: schema.maybe(schema.string()),
         }),
         query: schema.object({
           force: schema.boolean({ defaultValue: false }),

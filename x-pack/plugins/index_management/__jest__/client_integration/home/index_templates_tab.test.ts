@@ -127,7 +127,7 @@ describe('Index Templates tab', () => {
         const indexTemplate = templates[i];
         const { name, indexPatterns, ilmPolicy, composedOf, template } = indexTemplate;
 
-        const hasContent = !!template.settings || !!template.mappings || !!template.aliases;
+        const hasContent = !!template?.settings || !!template?.mappings || !!template?.aliases;
         const ilmPolicyName = ilmPolicy && ilmPolicy.name ? ilmPolicy.name : '';
         const composedOfString = composedOf ? composedOf.join(',') : '';
 
@@ -152,7 +152,7 @@ describe('Index Templates tab', () => {
         const legacyIndexTemplate = legacyTemplates[i];
         const { name, indexPatterns, ilmPolicy, template } = legacyIndexTemplate;
 
-        const hasContent = !!template.settings || !!template.mappings || !!template.aliases;
+        const hasContent = !!template?.settings || !!template?.mappings || !!template?.aliases;
         const ilmPolicyName = ilmPolicy && ilmPolicy.name ? ilmPolicy.name : '';
 
         try {

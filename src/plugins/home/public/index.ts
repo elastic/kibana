@@ -24,6 +24,7 @@ export {
   EnvironmentSetup,
   TutorialSetup,
   HomePublicPluginSetup,
+  HomePublicPluginStart,
 } from './plugin';
 export {
   FeatureCatalogueEntry,

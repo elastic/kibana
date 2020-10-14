@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SafeResolverEvent } from './../../../../common/endpoint/types/index';
+
 import {
   ResolverRelatedEvents,
   ResolverTree,
@@ -11,7 +13,12 @@ import {
 } from '../../../../common/endpoint/types';
 import { DataAccessLayer } from '../../types';
 
-type PausableRequests = 'relatedEvents' | 'resolverTree' | 'entities';
+type PausableRequests =
+  | 'relatedEvents'
+  | 'resolverTree'
+  | 'entities'
+  | 'eventsWithEntityIDAndCategory'
+  | 'event';
 
 interface Metadata<T> {
   /**
@@ -40,10 +47,14 @@ export function pausifyMock<T>({
   resume: (pausableRequests: PausableRequests[]) => void;
 } {
   let relatedEventsPromise = Promise.resolve();
+  let eventsWithEntityIDAndCategoryPromise = Promise.resolve();
+  let eventPromise = Promise.resolve();
   let resolverTreePromise = Promise.resolve();
   let entitiesPromise = Promise.resolve();
 
   let relatedEventsResolver: (() => void) | null;
+  let eventsWithEntityIDAndCategoryResolver: (() => void) | null;
+  let eventResolver: (() => void) | null;
   let resolverTreeResolver: (() => void) | null;
   let entitiesResolver: (() => void) | null;
 
@@ -53,7 +64,26 @@ export function pausifyMock<T>({
       const pauseRelatedEventsRequest = pausableRequests.includes('relatedEvents');
       const pauseResolverTreeRequest = pausableRequests.includes('resolverTree');
       const pauseEntitiesRequest = pausableRequests.includes('entities');
+      const pauseEventsWithEntityIDAndCategoryRequest = pausableRequests.includes(
+        'eventsWithEntityIDAndCategory'
+      );
+      const pauseEventRequest = pausableRequests.includes('event');
 
+      if (pauseRelatedEventsRequest && !relatedEventsResolver) {
+        relatedEventsPromise = new Promise((resolve) => {
+          relatedEventsResolver = resolve;
+        });
+      }
+      if (pauseEventsWithEntityIDAndCategoryRequest && !eventsWithEntityIDAndCategoryResolver) {
+        eventsWithEntityIDAndCategoryPromise = new Promise((resolve) => {
+          eventsWithEntityIDAndCategoryResolver = resolve;
+        });
+      }
+      if (pauseEventRequest && !eventResolver) {
+        eventPromise = new Promise((resolve) => {
+          eventResolver = resolve;
+        });
+      }
       if (pauseRelatedEventsRequest && !relatedEventsResolver) {
         relatedEventsPromise = new Promise((resolve) => {
           relatedEventsResolver = resolve;
@@ -74,6 +104,10 @@ export function pausifyMock<T>({
       const resumeEntitiesRequest = pausableRequests.includes('entities');
       const resumeResolverTreeRequest = pausableRequests.includes('resolverTree');
       const resumeRelatedEventsRequest = pausableRequests.includes('relatedEvents');
+      const resumeEventsWithEntityIDAndCategoryRequest = pausableRequests.includes(
+        'eventsWithEntityIDAndCategory'
+      );
+      const resumeEventRequest = pausableRequests.includes('event');
 
       if (resumeEntitiesRequest && entitiesResolver) {
         entitiesResolver();
@@ -87,6 +121,14 @@ export function pausifyMock<T>({
         relatedEventsResolver();
         relatedEventsResolver = null;
       }
+      if (resumeEventsWithEntityIDAndCategoryRequest && eventsWithEntityIDAndCategoryResolver) {
+        eventsWithEntityIDAndCategoryResolver();
+        eventsWithEntityIDAndCategoryResolver = null;
+      }
+      if (resumeEventRequest && eventResolver) {
+        eventResolver();
+        eventResolver = null;
+      }
     },
     dataAccessLayer: {
       ...dataAccessLayer,
@@ -96,6 +138,27 @@ export function pausifyMock<T>({
       async relatedEvents(...args): Promise<ResolverRelatedEvents> {
         await relatedEventsPromise;
         return dataAccessLayer.relatedEvents(...args);
+      },
+
+      /**
+       * Fetch related events for an entity ID
+       */
+      async eventsWithEntityIDAndCategory(
+        ...args
+      ): Promise<{
+        events: SafeResolverEvent[];
+        nextEvent: string | null;
+      }> {
+        await eventsWithEntityIDAndCategoryPromise;
+        return dataAccessLayer.eventsWithEntityIDAndCategory(...args);
+      },
+
+      /**
+       * Fetch related events for an entity ID
+       */
+      async event(...args): Promise<SafeResolverEvent | null> {
+        await eventPromise;
+        return dataAccessLayer.event(...args);
       },
 
       /**

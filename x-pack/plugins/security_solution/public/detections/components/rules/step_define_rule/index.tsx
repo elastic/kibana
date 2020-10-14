@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import React, { FC, memo, useCallback, useState, useEffect } from 'react';
 import styled from 'styled-components';
 // Prefer importing entire lodash library, e.g. import { get } from "lodash"
@@ -19,10 +19,7 @@ import { hasMlAdminPermissions } from '../../../../../common/machine_learning/ha
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { useUiSetting$ } from '../../../../common/lib/kibana';
-import {
-  filterRuleFieldsForType,
-  RuleFields,
-} from '../../../pages/detection_engine/rules/create/helpers';
+import { filterRuleFieldsForType } from '../../../pages/detection_engine/rules/create/helpers';
 import {
   DefineStepRule,
   RuleStep,
@@ -56,6 +53,7 @@ import {
 import { EqlQueryBar } from '../eql_query_bar';
 import { ThreatMatchInput } from '../threatmatch_input';
 import { useFetchIndex } from '../../../../common/containers/source';
+import { PreviewQuery } from '../query_preview';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -134,17 +132,33 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     schema,
   });
   const { getFields, getFormData, reset, submit } = form;
-  const [{ index: formIndex, ruleType: formRuleType, threatIndex: formThreatIndex }] = (useFormData(
+  const [
     {
-      form,
-      watch: ['index', 'ruleType', 'threatIndex'],
-    }
-  ) as unknown) as [Partial<DefineStepRule>];
+      index: formIndex,
+      ruleType: formRuleType,
+      queryBar: formQuery,
+      threatIndex: formThreatIndex,
+      'threshold.value': formThresholdValue,
+      'threshold.field': formThresholdField,
+    },
+  ] = (useFormData({
+    form,
+    watch: ['index', 'ruleType', 'queryBar', 'threshold.value', 'threshold.field', 'threatIndex'],
+  }) as unknown) as [
+    Partial<
+      DefineStepRule & {
+        'threshold.value': number | undefined;
+        'threshold.field': string[] | undefined;
+      }
+    >
+  ];
+  const [isQueryBarValid, setIsQueryBarValid] = useState(false);
   const index = formIndex || initialState.index;
   const threatIndex = formThreatIndex || initialState.threatIndex;
   const ruleType = formRuleType || initialState.ruleType;
+  const queryBarQuery =
+    formQuery != null ? formQuery.query.query : '' || initialState.queryBar.query.query;
   const [indexPatternsLoading, { browserFields, indexPatterns }] = useFetchIndex(index);
-
   const [
     threatIndexPatternsLoading,
     { browserFields: threatBrowserFields, indexPatterns: threatIndexPatterns },
@@ -223,7 +237,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       <StepRuleDescription
         columns={descriptionColumns}
         indexPatterns={indexPatterns}
-        schema={filterRuleFieldsForType(schema as typeof schema & RuleFields, ruleType)}
+        schema={filterRuleFieldsForType(schema, ruleType)}
         data={filterRuleFieldsForType(initialState, ruleType)}
       />
     </StepContentWrapper>
@@ -236,7 +250,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             component={SelectRuleType}
             componentProps={{
               describedByIds: ['detectionEngineStepDefineRuleType'],
-              isReadOnly: isUpdateView,
+              isUpdateView,
               hasValidLicense: hasMlLicense(mlCapabilities),
               isMlAdmin: hasMlAdminPermissions(mlCapabilities),
             }}
@@ -269,10 +283,15 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   path="queryBar"
                   component={EqlQueryBar}
                   componentProps={{
+                    onValidityChange: setIsQueryBarValid,
                     idAria: 'detectionEngineStepDefineRuleEqlQueryBar',
                     isDisabled: isLoading,
                     isLoading: indexPatternsLoading,
                     dataTestSubj: 'detectionEngineStepDefineRuleEqlQueryBar',
+                  }}
+                  config={{
+                    ...schema.queryBar,
+                    label: i18n.EQL_QUERY_BAR_LABEL,
                   }}
                 />
               ) : (
@@ -281,6 +300,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   path="queryBar"
                   config={{
                     ...schema.queryBar,
+                    label: i18n.QUERY_BAR_LABEL,
                     labelAppend: (
                       <MyLabelButton
                         data-test-subj="importQueryFromSavedTimeline"
@@ -299,6 +319,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     isLoading: indexPatternsLoading,
                     dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
                     openTimelineSearch,
+                    onValidityChange: setIsQueryBarValid,
                     onCloseTimelineSearch: handleCloseTimelineSearch,
                   }}
                 />
@@ -370,6 +391,24 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             }}
           />
         </Form>
+        {ruleType !== 'machine_learning' && ruleType !== 'threat_match' && (
+          <>
+            <EuiSpacer size="s" />
+            <PreviewQuery
+              dataTestSubj="ruleCreationQueryPreview"
+              idAria="ruleCreationQueryPreview"
+              ruleType={ruleType}
+              index={index}
+              query={formQuery}
+              isDisabled={queryBarQuery.trim() === '' || !isQueryBarValid || index.length === 0}
+              threshold={
+                formThresholdValue != null && formThresholdField != null
+                  ? { value: formThresholdValue, field: formThresholdField[0] }
+                  : undefined
+              }
+            />
+          </>
+        )}
       </StepContentWrapper>
 
       {!isUpdateView && (
