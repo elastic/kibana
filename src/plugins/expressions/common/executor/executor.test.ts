@@ -21,7 +21,7 @@ import { Executor } from './executor';
 import * as expressionTypes from '../expression_types';
 import * as expressionFunctions from '../expression_functions';
 import { Execution } from '../execution';
-import { parseExpression } from '../ast';
+import { ExpressionAstFunction, parseExpression } from '../ast';
 
 describe('Executor', () => {
   test('can instantiate', () => {
@@ -149,6 +149,49 @@ describe('Executor', () => {
         const execution = executor.createExecution('foo bar="baz"');
 
         expect((execution.context as any).foo).toBe(foo);
+      });
+    });
+  });
+
+  describe('.inject', () => {
+    const executor = new Executor();
+
+    const injectFn = jest.fn().mockImplementation((args, references) => args);
+    const extractFn = jest.fn().mockReturnValue({ args: {}, references: [] });
+
+    const fooFn = {
+      name: 'foo',
+      help: 'test',
+      args: {
+        bar: {
+          types: ['string'],
+          help: 'test',
+        },
+      },
+      extract: (state: ExpressionAstFunction['arguments']) => {
+        return extractFn(state);
+      },
+      inject: (state: ExpressionAstFunction['arguments']) => {
+        return injectFn(state);
+      },
+      fn: jest.fn(),
+    };
+    executor.registerFunction(fooFn);
+
+    test('calls inject function for every expression function in expression', () => {
+      executor.inject(
+        parseExpression('foo bar="baz" | foo bar={foo bar="baz" | foo bar={foo bar="baz"}}'),
+        []
+      );
+      expect(injectFn).toBeCalledTimes(5);
+    });
+
+    describe('.extract', () => {
+      test('calls extract function for every expression function in expression', () => {
+        executor.extract(
+          parseExpression('foo bar="baz" | foo bar={foo bar="baz" | foo bar={foo bar="baz"}}')
+        );
+        expect(extractFn).toBeCalledTimes(5);
       });
     });
   });
