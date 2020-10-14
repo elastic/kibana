@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "_ml/calendars/{calendar_id}"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-put-calendar.html"
   }
 }

@@ -1,0 +1,11 @@
+{
+  "autoscaling.put_autoscaling_policy": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_autoscaling/policy/{name}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/autoscaling-put-autoscaling-policy.html"
+  }
+}
