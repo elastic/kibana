@@ -25,7 +25,6 @@ import { useResizeObserver } from '@elastic/eui';
 
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { useKibana } from '../../../kibana_react/public';
-import '../flot';
 import { DEFAULT_TIME_FORMAT } from '../../common/lib';
 
 import {
