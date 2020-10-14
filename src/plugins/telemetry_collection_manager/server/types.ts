@@ -80,7 +80,7 @@ export interface StatsCollectionConfig {
   start: string | number;
   end: string | number;
   esClient: ElasticsearchClient;
-  soClient: SavedObjectsClientContract | ISavedObjectsRepository; // already scoped to either the internal repository or scopedRepository
+  soClient: SavedObjectsClientContract | ISavedObjectsRepository;
 }
 
 export interface BasicStatsPayload {

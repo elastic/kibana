@@ -255,7 +255,9 @@ export class Plugin {
   start({ elasticsearch, savedObjects }: CoreStart) {
     // TODO: For the telemetry plugin to work, we need to provide the new ES client.
     // The new client should be inititalized with a similar config to `this.cluster` but, since we're not using
-    // the new client in Monitoring Telemetry collection yet, setting the local client allos progress for now.
+    // the new client in Monitoring Telemetry collection yet, setting the local client allows progress for now.
+    // The usage collector `fetch` method has been refactored to accept a `collectorFetchContext` object,
+    // exposing both es clients and the saved objects client.
     // We will update the client in a follow up PR.
     this.telemetryElasticsearchClient = elasticsearch.client;
     this.telemetrySavedObjectsService = savedObjects;

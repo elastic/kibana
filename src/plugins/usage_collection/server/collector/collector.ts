@@ -69,6 +69,7 @@ export interface CollectorFetchContext {
    */
   soClient: SavedObjectsClientContract | ISavedObjectsRepository;
 }
+
 export interface CollectorOptions<T = unknown, U = T> {
   type: string;
   init?: Function;

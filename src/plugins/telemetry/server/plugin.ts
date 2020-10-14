@@ -87,9 +87,8 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
    * @private Used to mark the completion of the old UI Settings migration
    */
   private readonly oldUiSettingsHandled$ = new AsyncSubject();
-  private savedObjectsClient?: ISavedObjectsRepository; // Internal repository scoped to the kibana-system user
+  private savedObjectsClient?: ISavedObjectsRepository;
   private elasticsearchClient?: IClusterClient;
-  // unscoped Saved Objects Service  thst can be scoped to the internal Kibana user or as the current user
   private savedObjectsService?: SavedObjectsServiceStart;
 
   constructor(initializerContext: PluginInitializerContext<TelemetryConfigType>) {
