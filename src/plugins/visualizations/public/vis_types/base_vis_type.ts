@@ -56,15 +56,9 @@ interface VisualizationBaseVisTypeOptions<TVisParams> extends CommonBaseVisTypeO
   visualization: VisType<TVisParams>['visualization'];
 }
 
-interface CombinedVisTypeOptions<TVisParams> extends CommonBaseVisTypeOptions<TVisParams> {
-  toExpressionAst: VisType<TVisParams>['toExpressionAst'];
-  visualization: VisType<TVisParams>['visualization'];
-}
-
 export type BaseVisTypeOptions<TVisParams = VisParams> =
   | ExpressionBaseVisTypeOptions<TVisParams>
-  | VisualizationBaseVisTypeOptions<TVisParams>
-  | CombinedVisTypeOptions<TVisParams>;
+  | VisualizationBaseVisTypeOptions<TVisParams>;
 
 const defaultOptions: VisTypeOptions = {
   showTimePicker: true,
