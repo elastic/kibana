@@ -53,4 +53,22 @@ describe('tapOnce', () => {
       },
     });
   });
+
+  test('fires once even when there is an error', async (done) => {
+    const tester = jest.fn().mockImplementation(() => {
+      throw new Error();
+    });
+
+    const source = from([1, 2, 3, 4]).pipe(tapOnce(tester));
+
+    source.subscribe(() => {});
+    source.subscribe({
+      next: () => {},
+      complete: () => {
+        expect(tester).toBeCalledWith(1);
+        expect(tester).toBeCalledTimes(1);
+        done();
+      },
+    });
+  });
 });

@@ -29,10 +29,14 @@ export function tapOnce<T>(fn: (v: T) => any) {
     let first = true;
     return source$.pipe(
       tap((payload) => {
-        if (first) {
-          fn(payload);
+        try {
+          if (first) {
+            fn(payload);
+          }
+          first = false;
+        } catch (e) {
+          first = false;
         }
-        first = false;
       })
     );
   };
