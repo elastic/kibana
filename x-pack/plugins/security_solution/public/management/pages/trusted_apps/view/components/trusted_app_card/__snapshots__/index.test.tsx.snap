@@ -72,6 +72,7 @@ exports[`trusted_app_card TrustedAppCard should render correctly 1`] = `
           "width": "20%",
         },
         Object {
+          "data-test-subj": "conditionValue",
           "field": "value",
           "name": "Value",
           "render": [Function],
@@ -166,6 +167,7 @@ exports[`trusted_app_card TrustedAppCard should trim long texts 1`] = `
           "width": "20%",
         },
         Object {
+          "data-test-subj": "conditionValue",
           "field": "value",
           "name": "Value",
           "render": [Function],
