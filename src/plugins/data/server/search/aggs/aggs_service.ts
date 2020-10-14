@@ -20,6 +20,7 @@
 import { pick } from 'lodash';
 
 import { UiSettingsServiceStart, SavedObjectsClientContract } from 'src/core/server';
+import { IndexPatternsContract } from 'src/plugins/data/common/index_patterns/index_patterns';
 import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
 import {
   AggsCommonService,
@@ -41,6 +42,7 @@ export interface AggsSetupDependencies {
 export interface AggsStartDependencies {
   fieldFormats: FieldFormatsStart;
   uiSettings: UiSettingsServiceStart;
+  indexPatterns: IndexPatternsContract;
 }
 
 /**
@@ -61,7 +63,7 @@ export class AggsService {
     return this.aggsCommonService.setup({ registerFunction });
   }
 
-  public start({ fieldFormats, uiSettings }: AggsStartDependencies): AggsStart {
+  public start({ fieldFormats, uiSettings, indexPatterns }: AggsStartDependencies): AggsStart {
     return {
       asScopedToClient: async (savedObjectsClient: SavedObjectsClientContract) => {
         const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
@@ -72,8 +74,17 @@ export class AggsService {
         const getConfig = <T = any>(key: string): T => {
           return uiSettingsCache[key];
         };
+        const isDefaultTimezone = () => !uiSettingsClient.isOverridden('dateFormat:tz');
 
-        const { calculateAutoTimeExpression, types } = this.aggsCommonService.start({ getConfig });
+        const {
+          calculateAutoTimeExpression,
+          getDateMetaByDatatableColumn,
+          types,
+        } = this.aggsCommonService.start({
+          getConfig,
+          getIndexPattern: indexPatterns.get,
+          isDefaultTimezone,
+        });
 
         const aggTypesDependencies: AggTypesDependencies = {
           calculateBounds: this.calculateBounds,
@@ -109,6 +120,7 @@ export class AggsService {
 
         return {
           calculateAutoTimeExpression,
+          getDateMetaByDatatableColumn,
           createAggConfigs: (indexPattern, configStates = [], schemas) => {
             return new AggConfigs(indexPattern, configStates, { typesRegistry });
           },

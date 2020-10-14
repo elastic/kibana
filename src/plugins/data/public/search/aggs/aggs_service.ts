@@ -20,7 +20,7 @@
 import { Subscription } from 'rxjs';
 
 import { IUiSettingsClient } from 'src/core/public';
-import { DatatableColumn, ExpressionsServiceSetup } from 'src/plugins/expressions/common';
+import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
 import { FieldFormatsStart } from '../../field_formats';
 import { getForceNow } from '../../query/timefilter/lib/get_force_now';
 import { calculateBounds, TimeRange } from '../../../common';
@@ -32,6 +32,7 @@ import {
   AggTypesDependencies,
 } from '../../../common/search/aggs';
 import { AggsSetup, AggsStart } from './types';
+import { IndexPatternsContract } from '../../index_patterns';
 
 /**
  * Aggs needs synchronous access to specific uiSettings. Since settings can change
@@ -68,6 +69,7 @@ export interface AggsSetupDependencies {
 export interface AggsStartDependencies {
   fieldFormats: FieldFormatsStart;
   uiSettings: IUiSettingsClient;
+  indexPatterns: IndexPatternsContract;
 }
 
 /**
@@ -94,9 +96,17 @@ export class AggsService {
     return this.aggsCommonService.setup({ registerFunction });
   }
 
-  public start({ fieldFormats, uiSettings }: AggsStartDependencies): AggsStart {
-    const { calculateAutoTimeExpression, types } = this.aggsCommonService.start({
+  public start({ fieldFormats, uiSettings, indexPatterns }: AggsStartDependencies): AggsStart {
+    const isDefaultTimezone = () => uiSettings.isDefault('dateFormat:tz');
+
+    const {
+      calculateAutoTimeExpression,
+      getDateMetaByDatatableColumn,
+      types,
+    } = this.aggsCommonService.start({
       getConfig: this.getConfig!,
+      getIndexPattern: indexPatterns.get,
+      isDefaultTimezone,
     });
 
     const aggTypesDependencies: AggTypesDependencies = {
@@ -106,7 +116,7 @@ export class AggsService {
         deserialize: fieldFormats.deserialize,
         getDefaultInstance: fieldFormats.getDefaultInstance,
       }),
-      isDefaultTimezone: () => uiSettings.isDefault('dateFormat:tz'),
+      isDefaultTimezone,
     };
 
     // initialize each agg type and store in memory
@@ -137,18 +147,7 @@ export class AggsService {
 
     return {
       calculateAutoTimeExpression,
-      getDateMetaByDatatableColumn: (column: DatatableColumn) => {
-        if (column.meta.source !== 'esaggs') return;
-        if (column.meta.sourceParams?.type !== BUCKET_TYPES.DATE_HISTOGRAM) return;
-        return {
-          timeZone: column.meta.sourceParams?.params?.time_zone,
-          timeRange: column.meta.sourceParams?.appliedTimeRange,
-          interval:
-            column.meta.sourceParams?.params?.interval === 'auto'
-              ? calculateAutoTimeExpression(column.meta.sourceParams?.appliedTimeRange)
-              : column.meta.sourceParams?.params?.interval,
-        };
-      },
+      getDateMetaByDatatableColumn,
       createAggConfigs: (indexPattern, configStates = [], schemas) => {
         return new AggConfigs(indexPattern, configStates, { typesRegistry });
       },

@@ -60,6 +60,7 @@ import {
   getCalculateAutoTimeExpression,
   METRIC_TYPES,
   BUCKET_TYPES,
+  getDateMetaByDatatableColumn,
 } from './';
 
 export { IAggConfig, AggConfigSerialized } from './agg_config';
@@ -80,6 +81,7 @@ export interface AggsCommonSetup {
 /** @internal */
 export interface AggsCommonStart {
   calculateAutoTimeExpression: ReturnType<typeof getCalculateAutoTimeExpression>;
+  getDateMetaByDatatableColumn: ReturnType<typeof getDateMetaByDatatableColumn>;
   createAggConfigs: (
     indexPattern: IndexPattern,
     configStates?: CreateAggConfigParams[],
