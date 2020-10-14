@@ -1,5 +1,9 @@
 # Documentation for ML UI developers
 
+## Requirements
+
+To use machine learning features, you must have Platinum or Enterprise license or a free 14-day trial. File Data Visualizer requires Basic license.
+
 ## Setup local environment
 
 ### Kibana
