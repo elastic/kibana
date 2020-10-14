@@ -21,13 +21,16 @@ const deployment = i18n.translate(
 
 const i18nTexts = {
   warm: {
-    title: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.cloudDataTierCallout.title', {
-      defaultMessage: 'Create a warm tier',
-    }),
+    title: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.cloudDataTierCallout.warmTierTitle',
+      {
+        defaultMessage: 'Create a warm tier',
+      }
+    ),
     body: (deploymentUrl?: string) => {
       return (
         <FormattedMessage
-          id="xpack.indexLifecycleMgmt.editPolicy.cloudDataTierCallout.body"
+          id="xpack.indexLifecycleMgmt.editPolicy.cloudDataTierCallout.warmTierBody"
           defaultMessage="No warm nodes are available. Edit your Elastic {deployment} to set up a warm tier."
           values={{
             deployment: deploymentUrl ? (
@@ -43,13 +46,16 @@ const i18nTexts = {
     },
   },
   cold: {
-    title: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.cloudDataTierCallout.title', {
-      defaultMessage: 'Create a cold tier',
-    }),
+    title: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.cloudDataTierCallout.coldTierTitle',
+      {
+        defaultMessage: 'Create a cold tier',
+      }
+    ),
     body: (deploymentUrl?: string) => {
       return (
         <FormattedMessage
-          id="xpack.indexLifecycleMgmt.editPolicy.cloudDataTierCallout.body"
+          id="xpack.indexLifecycleMgmt.editPolicy.cloudDataTierCallout.coldTierBody"
           defaultMessage="No cold nodes are available. Edit your Elastic {deployment} to set up a cold tier."
           values={{
             deployment: deploymentUrl ? (
