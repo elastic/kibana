@@ -17,11 +17,11 @@ function sampleArgs() {
     type: 'lens_multitable',
     tables: {
       l1: {
-        type: 'datatable',
+        type: 'kibana_datatable',
         columns: [
-          { id: 'a', name: 'a', meta: { type: 'string' } },
-          { id: 'b', name: 'b', meta: { type: 'string' } },
-          { id: 'c', name: 'c', meta: { type: 'number' } },
+          { id: 'a', name: 'a' },
+          { id: 'b', name: 'b' },
+          { id: 'c', name: 'c' },
         ],
         rows: [{ a: 10110, b: 2, c: 3 }],
       },

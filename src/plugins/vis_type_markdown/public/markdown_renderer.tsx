@@ -36,7 +36,7 @@ export const markdownVisRenderer: ExpressionRenderDefinition<MarkdownVisRenderVa
     });
 
     render(
-      <VisualizationContainer className="markdownVis" handlers={handlers}>
+      <VisualizationContainer className="markdownVis">
         <MarkdownVisComponent {...visParams} renderComplete={handlers.done} />
       </VisualizationContainer>,
       domNode

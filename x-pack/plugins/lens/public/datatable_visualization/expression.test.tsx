@@ -13,50 +13,20 @@ import { DatatableProps } from './expression';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import { IFieldFormat } from '../../../../../src/plugins/data/public';
 import { IAggType } from 'src/plugins/data/public';
+const onClickValue = jest.fn();
 import { EmptyPlaceholder } from '../shared_components';
 import { LensIconChartDatatable } from '../assets/chart_datatable';
 
 function sampleArgs() {
-  const indexPatternId = 'indexPatternId';
   const data: LensMultiTable = {
     type: 'lens_multitable',
     tables: {
       l1: {
-        type: 'datatable',
+        type: 'kibana_datatable',
         columns: [
-          {
-            id: 'a',
-            name: 'a',
-            meta: {
-              type: 'string',
-              source: 'esaggs',
-              field: 'a',
-              sourceParams: { type: 'terms', indexPatternId },
-            },
-          },
-          {
-            id: 'b',
-            name: 'b',
-            meta: {
-              type: 'date',
-              field: 'b',
-              source: 'esaggs',
-              sourceParams: {
-                type: 'date_histogram',
-                indexPatternId,
-              },
-            },
-          },
-          {
-            id: 'c',
-            name: 'c',
-            meta: {
-              type: 'number',
-              source: 'esaggs',
-              field: 'c',
-              sourceParams: { indexPatternId, type: 'count' },
-            },
-          },
+          { id: 'a', name: 'a', meta: { type: 'terms' } },
+          { id: 'b', name: 'b', meta: { type: 'date_histogram', aggConfigParams: { field: 'b' } } },
+          { id: 'c', name: 'c', meta: { type: 'count' } },
         ],
         rows: [{ a: 'shoes', b: 1588024800000, c: 3 }],
       },
@@ -75,11 +45,6 @@ function sampleArgs() {
 }
 
 describe('datatable_expression', () => {
-  let onClickValue: jest.Mock;
-  beforeEach(() => {
-    onClickValue = jest.fn();
-  });
-
   describe('datatable renders', () => {
     test('it renders with the specified data and args', () => {
       const { data, args } = sampleArgs();
@@ -141,7 +106,7 @@ describe('datatable_expression', () => {
           },
         ],
         negate: true,
-        timeFieldName: 'a',
+        timeFieldName: undefined,
       });
     });
 
@@ -185,27 +150,10 @@ describe('datatable_expression', () => {
         type: 'lens_multitable',
         tables: {
           l1: {
-            type: 'datatable',
+            type: 'kibana_datatable',
             columns: [
-              {
-                id: 'a',
-                name: 'a',
-                meta: {
-                  type: 'date',
-                  source: 'esaggs',
-                  field: 'a',
-                  sourceParams: { type: 'date_range', indexPatternId: 'a' },
-                },
-              },
-              {
-                id: 'b',
-                name: 'b',
-                meta: {
-                  type: 'number',
-                  source: 'esaggs',
-                  sourceParams: { type: 'count', indexPatternId: 'a' },
-                },
-              },
+              { id: 'a', name: 'a', meta: { type: 'date_range', aggConfigParams: { field: 'a' } } },
+              { id: 'b', name: 'b', meta: { type: 'count' } },
             ],
             rows: [{ a: 1588024800000, b: 3 }],
           },

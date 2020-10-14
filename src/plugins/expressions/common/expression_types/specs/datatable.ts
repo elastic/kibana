@@ -22,7 +22,6 @@ import { map, pick, zipObject } from 'lodash';
 import { ExpressionTypeDefinition } from '../types';
 import { PointSeries, PointSeriesColumn } from './pointseries';
 import { ExpressionValueRender } from './render';
-import { SerializedFieldFormat } from '../../types';
 
 type State = string | number | boolean | null | undefined | SerializableState;
 
@@ -42,58 +41,22 @@ export const isDatatable = (datatable: unknown): datatable is Datatable =>
 
 /**
  * This type represents the `type` of any `DatatableColumn` in a `Datatable`.
- * its duplicated from KBN_FIELD_TYPES
  */
-export type DatatableColumnType =
-  | '_source'
-  | 'attachment'
-  | 'boolean'
-  | 'date'
-  | 'geo_point'
-  | 'geo_shape'
-  | 'ip'
-  | 'murmur3'
-  | 'number'
-  | 'string'
-  | 'unknown'
-  | 'conflict'
-  | 'object'
-  | 'nested'
-  | 'histogram'
-  | 'null';
+export type DatatableColumnType = 'string' | 'number' | 'boolean' | 'date' | 'null';
 
 /**
  * This type represents a row in a `Datatable`.
  */
 export type DatatableRow = Record<string, any>;
 
-/**
- * Datatable column meta information
- */
 export interface DatatableColumnMeta {
   type: DatatableColumnType;
-  /**
-   * field this column is based on
-   */
   field?: string;
-  /**
-   * index/table this column is based on
-   */
   index?: string;
-  /**
-   * serialized field format
-   */
-  params?: SerializedFieldFormat;
-  /**
-   * source function that produced this column
-   */
+  params?: SerializableState;
   source?: string;
-  /**
-   * any extra parameters for the source that produced this column
-   */
   sourceParams?: SerializableState;
 }
-
 /**
  * This type represents the shape of a column in a `Datatable`.
  */
