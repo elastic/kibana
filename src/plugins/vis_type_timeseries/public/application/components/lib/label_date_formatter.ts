@@ -17,19 +17,14 @@
  * under the License.
  */
 
-import { Filter, FILTERS, PhraseFilter, PhrasesFilter, RangeFilter } from '.';
+import moment from 'moment';
 
-export function getFilterParams(filter: Filter) {
-  switch (filter.meta.type) {
-    case FILTERS.PHRASE:
-      return (filter as PhraseFilter).meta.params.query;
-    case FILTERS.PHRASES:
-      return (filter as PhrasesFilter).meta.params;
-    case FILTERS.RANGE:
-      const { gte, gt, lte, lt } = (filter as RangeFilter).meta.params;
-      return {
-        from: gte ?? gt,
-        to: lt ?? lte,
-      };
+export const labelDateFormatter = (label: string, dateformat = 'lll') => {
+  let formattedLabel = label;
+  // Use moment isValid function on strict mode
+  const isDate = moment(label, '', true).isValid();
+  if (isDate) {
+    formattedLabel = moment(label).format(dateformat);
   }
-}
+  return formattedLabel;
+};

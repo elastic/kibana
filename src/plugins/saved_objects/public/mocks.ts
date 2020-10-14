@@ -17,19 +17,18 @@
  * under the License.
  */
 
-import { Filter, FILTERS, PhraseFilter, PhrasesFilter, RangeFilter } from '.';
+import { SavedObjectsStart } from './plugin';
 
-export function getFilterParams(filter: Filter) {
-  switch (filter.meta.type) {
-    case FILTERS.PHRASE:
-      return (filter as PhraseFilter).meta.params.query;
-    case FILTERS.PHRASES:
-      return (filter as PhrasesFilter).meta.params;
-    case FILTERS.RANGE:
-      const { gte, gt, lte, lt } = (filter as RangeFilter).meta.params;
-      return {
-        from: gte ?? gt,
-        to: lt ?? lte,
-      };
-  }
-}
+const createStartContract = (): SavedObjectsStart => {
+  return {
+    SavedObjectClass: jest.fn(),
+    settings: {
+      getPerPage: () => 20,
+      getListingLimit: () => 100,
+    },
+  };
+};
+
+export const savedObjectsPluginMock = {
+  createStartContract,
+};
