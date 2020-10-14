@@ -70,6 +70,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   ): AbstractESSourceDescriptor {
     return {
       ...descriptor,
+      type: descriptor.type ? descriptor.type : '',
       applyGlobalQuery: _.get(descriptor, 'applyGlobalQuery', true),
     };
   }

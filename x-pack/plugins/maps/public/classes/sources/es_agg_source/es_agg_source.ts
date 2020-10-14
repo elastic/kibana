@@ -37,7 +37,11 @@ export abstract class AbstractESAggSource extends AbstractESSource {
     descriptor: Partial<AbstractESAggSourceDescriptor>
   ): AbstractESAggSourceDescriptor {
     descriptor = AbstractESSource.createDescriptor(descriptor);
-    return { ...descriptor, metrics: descriptor.metrics ? descriptor.metrics : [] };
+    return {
+      ...descriptor,
+      type: descriptor.type ? descriptor.type : '',
+      metrics: descriptor.metrics ? descriptor.metrics : [],
+    };
   }
 
   constructor(
