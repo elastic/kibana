@@ -10,6 +10,7 @@ import uuid from 'uuid/v4';
 import { i18n } from '@kbn/i18n';
 import rison from 'rison-node';
 import { Feature } from 'geojson';
+import { SearchResponse } from 'elasticsearch';
 import {
   convertCompositeRespToGeoJson,
   convertRegularRespToGeoJson,
@@ -89,7 +90,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     this._descriptor = sourceDescriptor;
   }
 
-  renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null {
+  renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> {
     return (
       <UpdateSourceEditor
         currentLayerType={sourceEditorArgs.currentLayerType}
@@ -102,7 +103,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     );
   }
 
-  getSyncMeta(): VectorSourceSyncMeta | null {
+  getSyncMeta(): VectorSourceSyncMeta {
     return {
       requestType: this._descriptor.requestType || RENDER_AS.POINT,
     };
@@ -160,7 +161,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     return this._descriptor.resolution || GRID_RESOLUTION.COARSE;
   }
 
-  getGeoGridPrecision(zoom: number) {
+  getGeoGridPrecision(zoom: number): number {
     if (this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE) {
       // The target-precision needs to be determined server side.
       return NaN;
@@ -268,7 +269,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
       const requestId: string = afterKey
         ? `${this.getId()} afterKey ${afterKey.geoSplit}`
         : this.getId();
-      const esResponse: any = await this._runEsQuery({
+      const esResponse: SearchResponse<unknown> = await this._runEsQuery({
         requestId,
         requestName: `${layerName} (${requestCount})`,
         searchSource,
@@ -342,7 +343,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     layerName: string;
     registerCancelCallback: (callback: () => void) => void;
     bufferedExtent?: MapExtent;
-  }) {
+  }): Promise<Feature[]> {
     this._addNonCompositeAggsToSearchSource(searchSource, indexPattern, precision, bufferedExtent);
 
     const esResponse = await this._runEsQuery({
