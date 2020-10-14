@@ -36,6 +36,7 @@
 1. Go to http://localhost:560x/xxx (check the terminal message for the exact 
    path).
 
+For more details, refer to this [getting started](https://www.elastic.co/guide/en/kibana/master/development-getting-started.html) page.
 
 ### Adding sample data to Kibana
 
@@ -74,7 +75,7 @@ node scripts/jest plugins/ml -u
 Update snapshots for a specific directory only: 
 
 ```
-node scripts/jest plugins/ml/public/settings/filter_lists
+node scripts/jest plugins/ml/public/application/settings/filter_lists
 ```
 
 Run tests with verbose output: 
@@ -92,15 +93,18 @@ Elasticsearch.
 
         node scripts/functional_tests_server.js --config test/functional/config.js
 
-   This command starts an Elasticsearch and Kibana instance that the tests will be run against. 
+   This command starts an Elasticsearch and Kibana instance that the tests will be run against.
+   ML functional tests are located in `x-pack/test/functional/apps/ml`.
 
 1. In another tab, run the following command to perform API integration tests (from the x-pack directory):
 
-        node scripts/functional_test_runner.js --config test/api_integration/config
+        node scripts/functional_test_runner.js --include-tag mlqa --config test/api_integration/config
+        
+   ML API integration tests are located in `x-pack/test/api_integration/apis/ml`.
 
 1. In another tab, run the following command to perform UI functional tests (from the x-pack directory):
 
-        node scripts/functional_test_runner.js --config test/functional/config
+        node scripts/functional_test_runner.js --include-tag mlqa
 
 
 ## Shared functions
