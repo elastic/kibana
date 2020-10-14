@@ -379,6 +379,7 @@ export interface ProcessEvent {
 
 /**
  * A representation of a process tree with indices for O(1) access to children and values by id.
+ * @deprecated use `IndexedTree`
  */
 export interface LegacyIndexedProcessTree {
   /**
@@ -389,6 +390,21 @@ export interface LegacyIndexedProcessTree {
    * Map of ID to process
    */
   idToProcess: Map<string, SafeResolverEvent>;
+}
+
+/**
+ * Represents a tree with quick access to the parent and children of any node.
+ * Nodes are strings. You will need to store metadata in other structures.
+ */
+export interface IndexedTree {
+  /**
+   * Keys are nodeIDs. The values are arrays of children nodeIDs.
+   */
+  idToChildren: Map<string, string[]>;
+  /**
+   * Keys are nodeIDs. The values are the parents.
+   */
+  idToParent: Map<string, string>;
 }
 
 /**

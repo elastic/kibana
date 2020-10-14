@@ -7,7 +7,7 @@
 /**
  * Sequences a tree, yielding children returned by the `children` function. Sequencing is done in 'level order' fashion.
  */
-export function* levelOrder<T>(root: T, children: (parent: T) => T[]): Iterable<T> {
+export function* levelOrder<T>(root: T, children: (parent: T) => Iterable<T>): Iterable<T> {
   let level = [root];
   while (level.length !== 0) {
     let nextLevel = [];
