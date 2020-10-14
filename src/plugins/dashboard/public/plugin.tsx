@@ -412,10 +412,7 @@ export class DashboardPlugin
 
   public start(core: CoreStart, plugins: StartDependencies): DashboardStart {
     const { notifications } = core;
-    const {
-      uiActions,
-      data: { indexPatterns, search },
-    } = plugins;
+    const { uiActions } = plugins;
 
     const SavedObjectFinder = getSavedObjectFinder(core.savedObjects, core.uiSettings);
 
@@ -448,10 +445,7 @@ export class DashboardPlugin
 
     const savedDashboardLoader = createSavedDashboardLoader({
       savedObjectsClient: core.savedObjects.client,
-      indexPatterns,
-      search,
-      chrome: core.chrome,
-      overlays: core.overlays,
+      savedObjects: plugins.savedObjects,
     });
     const dashboardContainerFactory = plugins.embeddable.getEmbeddableFactory(
       DASHBOARD_CONTAINER_TYPE
