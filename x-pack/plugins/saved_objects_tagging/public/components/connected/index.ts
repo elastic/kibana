@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getConnectedTagListComponent } from './connected_tag_list';
+export { getConnectedTagListComponent } from './tag_list';
+export { getConnectedTagSelectorComponent } from './tag_selector';
+export { getConnectedSavedObjectModalTagSelectorComponent } from './saved_object_save_modal_tag_selector';

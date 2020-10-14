@@ -11,7 +11,7 @@ import { Tag } from '../../../common';
 type TagComboBoxOptions = EuiComboBoxOptionOption<Tag>;
 
 // TODO: add required props to pass down to EuiComboBox such as fullWidth, className, data-test-subj
-export interface TagComboBoxProps {
+export interface TagSelectorProps {
   tags: Tag[];
   selected: string[];
   setSelected: (ids: string[]) => void;
@@ -32,7 +32,7 @@ const renderTagOption = (
   );
 };
 
-export const TagComboBox: FC<TagComboBoxProps> = ({ tags, selected, setSelected }) => {
+export const TagSelector: FC<TagSelectorProps> = ({ tags, selected, setSelected }) => {
   const options = useMemo(() => {
     return tags.map((tag) => ({
       label: tag.name,

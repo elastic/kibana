@@ -27,9 +27,11 @@ export {
   SavedObjectsTaggingApiUi,
   SavedObjectsTaggingApiUiComponent,
   TagListComponentProps,
+  TagSelectorComponentProps,
   GetSearchBarFilterOptions,
   ParsedSearchQuery,
   ParseSearchQueryOptions,
+  SavedObjectSaveModalTagSelectorComponentProps,
 } from './api';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>

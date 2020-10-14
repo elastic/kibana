@@ -5,8 +5,8 @@
  */
 
 export {
-  TagComboBox,
-  TagComboBoxProps,
+  TagSelector,
+  TagSelectorProps,
   TagList,
   TagListProps,
   TagBadge,

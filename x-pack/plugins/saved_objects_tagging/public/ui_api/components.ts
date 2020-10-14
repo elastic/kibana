@@ -6,7 +6,11 @@
 
 import { SavedObjectsTaggingApiUiComponent } from '../../../../../src/plugins/saved_objects_tagging_oss/public';
 import { ITagsCache } from '../tags';
-import { getConnectedTagListComponent } from '../components/connected';
+import {
+  getConnectedTagListComponent,
+  getConnectedTagSelectorComponent,
+  getConnectedSavedObjectModalTagSelectorComponent,
+} from '../components/connected';
 
 export interface GetComponentsOptions {
   cache: ITagsCache;
@@ -17,5 +21,7 @@ export const getComponents = ({
 }: GetComponentsOptions): SavedObjectsTaggingApiUiComponent => {
   return {
     TagList: getConnectedTagListComponent(cache),
+    TagSelector: getConnectedTagSelectorComponent(cache),
+    SavedObjectSaveModalTagSelector: getConnectedSavedObjectModalTagSelectorComponent(cache),
   };
 };

@@ -106,6 +106,16 @@ export interface SavedObjectsTaggingApiUiComponent {
    * Displays the tags for given saved object.
    */
   TagList: FunctionComponent<TagListComponentProps>;
+  /**
+   * Widget to select tags.
+   */
+  TagSelector: FunctionComponent<TagSelectorComponentProps>;
+  /**
+   * Component to be used with the `options` property of the `SavedObjectSaveModal` or `SavedObjectSaveModalOrigin`
+   * modals from the `savedObjects` plugin. It displays the whole field row and handles the 'stateless' nature
+   * of props passed to inline components
+   */
+  SavedObjectSaveModalTagSelector: FunctionComponent<SavedObjectSaveModalTagSelectorComponentProps>;
 }
 
 /**
@@ -116,6 +126,19 @@ export interface TagListComponentProps {
    * The object to display tags for.
    */
   object: SavedObject;
+}
+
+/**
+ * @public
+ */
+export interface TagSelectorComponentProps {
+  selected: string[];
+  setSelected: (ids: string[]) => void;
+}
+
+export interface SavedObjectSaveModalTagSelectorComponentProps {
+  initialSelection: string[];
+  setSelected: (ids: string[]) => void;
 }
 
 /**
