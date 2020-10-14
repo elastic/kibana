@@ -55,7 +55,7 @@ export function formatValue(
 // order to correctly format the day or week offset to the time of the anomaly.
 export function formatSingleValue(
   value: number,
-  mlFunction: string,
+  mlFunction?: string,
   fieldFormat?: any,
   record?: AnomalyRecordDoc
 ) {

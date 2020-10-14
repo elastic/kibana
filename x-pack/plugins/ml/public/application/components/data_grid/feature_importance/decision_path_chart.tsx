@@ -95,7 +95,7 @@ export const DecisionPathChart = ({
     () => [
       {
         dataValue: baseline,
-        header: baseline ? formatSingleValue(baseline, '').toString() : '',
+        header: baseline ? formatSingleValue(baseline).toString() : '',
         details: i18n.translate(
           'xpack.ml.dataframe.analytics.explorationResults.decisionPathBaselineText',
           {
@@ -110,7 +110,7 @@ export const DecisionPathChart = ({
   // if regression, guarantee up to num_precision significant digits without having it in scientific notation
   // if classification, hide the numeric values since we only want to show the path
   const tickFormatter = useCallback(
-    (d) => (showValues === false ? '' : formatSingleValue(d, '').toString()),
+    (d) => (showValues === false ? '' : formatSingleValue(d).toString()),
     []
   );
 
