@@ -53,16 +53,6 @@ afterEach(function () {
   count = 0;
 });
 
-const getDeps = () => {
-  const mockUiSettings = coreMock.createSetup().uiSettings;
-  const charts = chartPluginMock.createStartContract();
-
-  return {
-    uiSettings: mockUiSettings,
-    charts: charts,
-  };
-};
-
 export function getVis(visLibParams, element) {
   return new Vis(
     element || $visCanvas.new(),
@@ -74,6 +64,7 @@ export function getVis(visLibParams, element) {
       yAxis: {},
       type: 'histogram',
     }),
-    getDeps()
+    coreMock.createSetup(),
+    chartPluginMock.createStartContract()
   );
 }

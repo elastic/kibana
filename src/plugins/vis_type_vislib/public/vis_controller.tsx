@@ -97,6 +97,8 @@ export const createVislibVisController = (
         const { Vis: Vislib } = await import('./vislib/vis');
         const { uiState, event: fireEvent } = handlers;
 
+        console.log(charts);
+
         this.vislibVis = new Vislib(this.chartEl, visParams, core, charts);
         this.vislibVis.on('brush', fireEvent);
         this.vislibVis.on('click', fireEvent);

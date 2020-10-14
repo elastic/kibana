@@ -26,7 +26,6 @@ import {
 import { ExpressionAstExpression } from '../../expressions/public';
 
 import { SerializedVis, Vis, VisParams } from './vis';
-import { Schemas } from './legacy/build_pipeline';
 import { ExprVis } from './expressions/vis';
 
 export { Vis, SerializedVis, VisParams };
