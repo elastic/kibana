@@ -196,7 +196,7 @@ export abstract class FieldFormat {
 
     return {
       id,
-      params: size(params) ? params : undefined,
+      params: size(params) ? (params as any) : undefined,
     };
   }
 
