@@ -9,14 +9,14 @@ import { ILegacyScopedClusterClient } from 'kibana/server';
 import { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
 import { INITIAL_POLICY_ID } from './index';
 
-export function getESQueryPolicyResponseByHostID(hostID: string, index: string) {
+export function getESQueryPolicyResponseByAgentID(agentID: string, index: string) {
   return {
     body: {
       query: {
         bool: {
           filter: {
             term: {
-              'host.id': hostID,
+              'agent.id': agentID,
             },
           },
           must_not: {
@@ -39,12 +39,12 @@ export function getESQueryPolicyResponseByHostID(hostID: string, index: string) 
   };
 }
 
-export async function getPolicyResponseByHostId(
+export async function getPolicyResponseByAgentId(
   index: string,
-  hostId: string,
+  agentID: string,
   dataClient: ILegacyScopedClusterClient
 ): Promise<GetHostPolicyResponse | undefined> {
-  const query = getESQueryPolicyResponseByHostID(hostId, index);
+  const query = getESQueryPolicyResponseByAgentID(agentID, index);
   const response = (await dataClient.callAsCurrentUser('search', query)) as SearchResponse<
     HostPolicyResponse
   >;
