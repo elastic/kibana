@@ -31,11 +31,11 @@ describe('PieVisualization component', () => {
       type: 'lens_multitable',
       tables: {
         first: {
-          type: 'datatable',
+          type: 'kibana_datatable',
           columns: [
-            { id: 'a', name: 'a', meta: { type: 'number' } },
-            { id: 'b', name: 'b', meta: { type: 'number' } },
-            { id: 'c', name: 'c', meta: { type: 'string' } },
+            { id: 'a', name: 'a' },
+            { id: 'b', name: 'b' },
+            { id: 'c', name: 'c' },
           ],
           rows: [
             { a: 6, b: 2, c: 'I', d: 'Row 1' },
@@ -138,23 +138,14 @@ describe('PieVisualization component', () => {
                 "columns": Array [
                   Object {
                     "id": "a",
-                    "meta": Object {
-                      "type": "number",
-                    },
                     "name": "a",
                   },
                   Object {
                     "id": "b",
-                    "meta": Object {
-                      "type": "number",
-                    },
                     "name": "b",
                   },
                   Object {
                     "id": "c",
-                    "meta": Object {
-                      "type": "string",
-                    },
                     "name": "c",
                   },
                 ],
@@ -172,7 +163,7 @@ describe('PieVisualization component', () => {
                     "d": "Row 2",
                   },
                 ],
-                "type": "datatable",
+                "type": "kibana_datatable",
               },
               "value": 6,
             },

@@ -21,8 +21,8 @@ import { i18n } from '@kbn/i18n';
 import {
   ExpressionFunctionDefinition,
   ExpressionValueBoxed,
-  Datatable,
-  DatatableColumn,
+  KibanaDatatable,
+  KibanaDatatableColumn,
 } from '../../../expressions/public';
 
 interface Arguments {
@@ -34,7 +34,7 @@ interface Arguments {
 type ExpressionValueVisDimension = ExpressionValueBoxed<
   'vis_dimension',
   {
-    accessor: number | DatatableColumn;
+    accessor: number | KibanaDatatableColumn;
     format: {
       id?: string;
       params: unknown;
@@ -44,7 +44,7 @@ type ExpressionValueVisDimension = ExpressionValueBoxed<
 
 export const visDimension = (): ExpressionFunctionDefinition<
   'visdimension',
-  Datatable,
+  KibanaDatatable,
   Arguments,
   ExpressionValueVisDimension
 > => ({
@@ -53,7 +53,7 @@ export const visDimension = (): ExpressionFunctionDefinition<
     defaultMessage: 'Generates visConfig dimension object',
   }),
   type: 'vis_dimension',
-  inputTypes: ['datatable'],
+  inputTypes: ['kibana_datatable'],
   args: {
     accessor: {
       types: ['string', 'number'],

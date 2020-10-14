@@ -6,7 +6,6 @@
 
 import { UrlDrilldown, ActionContext, Config } from './url_drilldown';
 import { IEmbeddable } from '../../../../../../src/plugins/embeddable/public/lib/embeddables';
-import { DatatableColumnType } from '../../../../../../src/plugins/expressions/common';
 
 const mockDataPoints = [
   {
@@ -16,17 +15,12 @@ const mockDataPoints = [
           name: 'test',
           id: '1-1',
           meta: {
-            type: 'number' as DatatableColumnType,
-            field: 'bytes',
-            index: 'logstash-*',
-            sourceParams: {
-              indexPatternId: 'logstash-*',
-              type: 'histogram',
-              params: {
-                field: 'bytes',
-                interval: 30,
-                otherBucket: true,
-              },
+            type: 'histogram',
+            indexPatternId: 'logstash-*',
+            aggConfigParams: {
+              field: 'bytes',
+              interval: 30,
+              otherBucket: true,
             },
           },
         },
