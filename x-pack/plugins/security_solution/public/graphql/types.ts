@@ -274,6 +274,11 @@ export enum HostPolicyResponseActionStatus {
   warning = 'warning',
 }
 
+export enum TimelineType {
+  default = 'default',
+  template = 'template',
+}
+
 export enum DataProviderType {
   default = 'default',
   template = 'template',
@@ -299,11 +304,6 @@ export enum TimelineStatus {
   active = 'active',
   draft = 'draft',
   immutable = 'immutable',
-}
-
-export enum TimelineType {
-  default = 'default',
-  template = 'template',
 }
 
 export enum SortFieldTimeline {
@@ -1599,6 +1599,8 @@ export interface SourceQueryArgs {
 }
 export interface GetOneTimelineQueryArgs {
   id: string;
+
+  timelineType?: Maybe<TimelineType>;
 }
 export interface GetAllTimelineQueryArgs {
   pageInfo: PageInfoTimeline;
@@ -2166,6 +2168,7 @@ export namespace PersistTimelineNoteMutation {
 export namespace GetOneTimeline {
   export type Variables = {
     id: string;
+    timelineType?: Maybe<TimelineType>;
   };
 
   export type Query = {

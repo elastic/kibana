@@ -5,7 +5,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { noop } from 'lodash/fp';
+import { getOr, noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { MatrixHistogramQueryProps } from '../../components/matrix_histogram/types';
@@ -27,11 +27,22 @@ import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
 
+export type Buckets = Array<{
+  key: string;
+  doc_count: number;
+}>;
+
+const bucketEmpty: Buckets = [];
+
 export interface UseMatrixHistogramArgs {
   data: MatrixHistogramData[];
   inspect: InspectResponse;
   refetch: inputsModel.Refetch;
   totalCount: number;
+  buckets: Array<{
+    key: string;
+    doc_count: number;
+  }>;
 }
 
 const ID = 'matrixHistogramQuery';
@@ -44,7 +55,13 @@ export const useMatrixHistogram = ({
   indexNames,
   stackByField,
   startDate,
-}: MatrixHistogramQueryProps): [boolean, UseMatrixHistogramArgs] => {
+  threshold,
+  skip = false,
+}: MatrixHistogramQueryProps): [
+  boolean,
+  UseMatrixHistogramArgs,
+  (to: string, from: string) => void
+] => {
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
@@ -63,6 +80,7 @@ export const useMatrixHistogram = ({
       to: endDate,
     },
     stackByField,
+    threshold,
   });
 
   const [matrixHistogramResponse, setMatrixHistogramResponse] = useState<UseMatrixHistogramArgs>({
@@ -73,6 +91,7 @@ export const useMatrixHistogram = ({
     },
     refetch: refetch.current,
     totalCount: -1,
+    buckets: [],
   });
 
   const hostsSearch = useCallback(
@@ -91,6 +110,11 @@ export const useMatrixHistogram = ({
             next: (response) => {
               if (isCompleteResponse(response)) {
                 if (!didCancel) {
+                  const histogramBuckets: Buckets = getOr(
+                    bucketEmpty,
+                    'rawResponse.aggregations.eventActionGroup.buckets',
+                    response
+                  );
                   setLoading(false);
                   setMatrixHistogramResponse((prevResponse) => ({
                     ...prevResponse,
@@ -98,6 +122,7 @@ export const useMatrixHistogram = ({
                     inspect: getInspectResponse(response, prevResponse.inspect),
                     refetch: refetch.current,
                     totalCount: response.totalCount,
+                    buckets: histogramBuckets,
                   }));
                 }
                 searchSubscription$.unsubscribe();
@@ -111,10 +136,12 @@ export const useMatrixHistogram = ({
               }
             },
             error: (msg) => {
+              if (!didCancel) {
+                setLoading(false);
+              }
               if (!(msg instanceof AbortError)) {
-                notifications.toasts.addDanger({
+                notifications.toasts.addError(msg, {
                   title: errorMessage ?? i18n.FAIL_MATRIX_HISTOGRAM,
-                  text: msg.message,
                 });
               }
             },
@@ -144,17 +171,34 @@ export const useMatrixHistogram = ({
           to: endDate,
         },
         stackByField,
+        threshold,
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [indexNames, endDate, filterQuery, startDate, stackByField, histogramType]);
+  }, [indexNames, endDate, filterQuery, startDate, stackByField, histogramType, threshold]);
 
   useEffect(() => {
-    hostsSearch(matrixHistogramRequest);
-  }, [matrixHistogramRequest, hostsSearch]);
+    if (!skip) {
+      hostsSearch(matrixHistogramRequest);
+    }
+  }, [matrixHistogramRequest, hostsSearch, skip]);
 
-  return [loading, matrixHistogramResponse];
+  const runMatrixHistogramSearch = useCallback(
+    (to: string, from: string) => {
+      hostsSearch({
+        ...matrixHistogramRequest,
+        timerange: {
+          interval: '12h',
+          from,
+          to,
+        },
+      });
+    },
+    [matrixHistogramRequest, hostsSearch]
+  );
+
+  return [loading, matrixHistogramResponse, runMatrixHistogramSearch];
 };

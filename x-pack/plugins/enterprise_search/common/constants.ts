@@ -17,7 +17,10 @@ export const ENTERPRISE_SEARCH_PLUGIN = {
   SUBTITLE: i18n.translate('xpack.enterpriseSearch.featureCatalogue.subtitle', {
     defaultMessage: 'Search everything',
   }),
-  DESCRIPTIONS: [
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.FeatureCatalogue.description', {
+    defaultMessage: 'Create search experiences with a refined set of APIs and tools.',
+  }),
+  APP_DESCRIPTIONS: [
     i18n.translate('xpack.enterpriseSearch.featureCatalogueDescription1', {
       defaultMessage: 'Build a powerful search experience.',
     }),

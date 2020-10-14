@@ -5,7 +5,6 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiTableFieldDataColumnType } from '@elastic/eui';
 
 import {
@@ -17,23 +16,23 @@ import {
 
 import { FormattedDate } from '../../../../../../common/components/formatted_date';
 import { ConditionsTable } from '../../../../../../common/components/conditions_table';
+import { TextFieldValue } from '../../../../../../common/components/text_field_value';
 import {
   ItemDetailsAction,
   ItemDetailsCard,
   ItemDetailsPropertySummary,
 } from '../../../../../../common/components/item_details_card';
 
-import { OS_TITLES, PROPERTY_TITLES, ENTRY_PROPERTY_TITLES } from '../../translations';
+import {
+  OS_TITLES,
+  PROPERTY_TITLES,
+  ENTRY_PROPERTY_TITLES,
+  CARD_DELETE_BUTTON_LABEL,
+  CONDITION_FIELD_TITLE,
+  OPERATOR_TITLE,
+} from '../../translations';
 
 type Entry = MacosLinuxConditionEntry | WindowsConditionEntry;
-
-const trimTextOverflow = (text: string, maxSize: number) => {
-  if (text.length > maxSize) {
-    return `${text.substr(0, maxSize)}...`;
-  } else {
-    return text;
-  }
-};
 
 const getEntriesColumnDefinitions = (): Array<EuiTableFieldDataColumnType<Entry>> => [
   {
@@ -43,6 +42,9 @@ const getEntriesColumnDefinitions = (): Array<EuiTableFieldDataColumnType<Entry>
     truncateText: true,
     textOnly: true,
     width: '30%',
+    render(field: Entry['field'], entry: Entry) {
+      return CONDITION_FIELD_TITLE[field];
+    },
   },
   {
     field: 'operator',
@@ -50,28 +52,52 @@ const getEntriesColumnDefinitions = (): Array<EuiTableFieldDataColumnType<Entry>
     sortable: false,
     truncateText: true,
     width: '20%',
+    render(field: Entry['operator'], entry: Entry) {
+      return OPERATOR_TITLE[field];
+    },
   },
   {
     field: 'value',
     name: ENTRY_PROPERTY_TITLES.value,
     sortable: false,
-    truncateText: true,
     width: '60%',
+    'data-test-subj': 'conditionValue',
+    render(field: Entry['value'], entry: Entry) {
+      return (
+        <TextFieldValue
+          className="eui-textTruncate"
+          fieldName={CONDITION_FIELD_TITLE[entry.field]}
+          value={field}
+        />
+      );
+    },
   },
 ];
 
 interface TrustedAppCardProps {
   trustedApp: Immutable<TrustedApp>;
-  onDelete: (id: string) => void;
+  onDelete: (trustedApp: Immutable<TrustedApp>) => void;
 }
 
 export const TrustedAppCard = memo(({ trustedApp, onDelete }: TrustedAppCardProps) => {
-  const handleDelete = useCallback(() => onDelete(trustedApp.id), [onDelete, trustedApp.id]);
+  const handleDelete = useCallback(() => onDelete(trustedApp), [onDelete, trustedApp]);
 
   return (
     <ItemDetailsCard>
-      <ItemDetailsPropertySummary name={PROPERTY_TITLES.name} value={trustedApp.name} />
-      <ItemDetailsPropertySummary name={PROPERTY_TITLES.os} value={OS_TITLES[trustedApp.os]} />
+      <ItemDetailsPropertySummary
+        name={PROPERTY_TITLES.name}
+        value={
+          <TextFieldValue
+            fieldName={PROPERTY_TITLES.name}
+            value={trustedApp.name}
+            maxLength={100}
+          />
+        }
+      />
+      <ItemDetailsPropertySummary
+        name={PROPERTY_TITLES.os}
+        value={<TextFieldValue fieldName={PROPERTY_TITLES.os} value={OS_TITLES[trustedApp.os]} />}
+      />
       <ItemDetailsPropertySummary
         name={PROPERTY_TITLES.created_at}
         value={
@@ -82,13 +108,21 @@ export const TrustedAppCard = memo(({ trustedApp, onDelete }: TrustedAppCardProp
           />
         }
       />
-      <ItemDetailsPropertySummary name={PROPERTY_TITLES.created_by} value={trustedApp.created_by} />
+      <ItemDetailsPropertySummary
+        name={PROPERTY_TITLES.created_by}
+        value={
+          <TextFieldValue fieldName={PROPERTY_TITLES.created_by} value={trustedApp.created_by} />
+        }
+      />
       <ItemDetailsPropertySummary
         name={PROPERTY_TITLES.description}
-        value={useMemo(() => trimTextOverflow(trustedApp.description || '', 100), [
-          trustedApp.description,
-        ])}
-        title={trustedApp.description}
+        value={
+          <TextFieldValue
+            fieldName={PROPERTY_TITLES.description || ''}
+            value={trustedApp.description || ''}
+            maxLength={100}
+          />
+        }
       />
 
       <ConditionsTable
@@ -98,10 +132,13 @@ export const TrustedAppCard = memo(({ trustedApp, onDelete }: TrustedAppCardProp
         responsive
       />
 
-      <ItemDetailsAction size="s" color="danger" onClick={handleDelete}>
-        {i18n.translate('xpack.securitySolution.trustedapps.card.removeButtonLabel', {
-          defaultMessage: 'Remove',
-        })}
+      <ItemDetailsAction
+        size="s"
+        color="danger"
+        onClick={handleDelete}
+        data-test-subj="trustedAppDeleteButton"
+      >
+        {CARD_DELETE_BUTTON_LABEL}
       </ItemDetailsAction>
     </ItemDetailsCard>
   );
