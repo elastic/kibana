@@ -27,7 +27,9 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   async function getNumberOfSessionDocuments() {
-    return (await es.search({ index: '.kibana_security_session*' })).hits.total.value;
+    return (((await es.search({ index: '.kibana_security_session*' })).hits.total as unknown) as {
+      value: number;
+    }).value;
   }
 
   describe('Session Lifespan cleanup', () => {

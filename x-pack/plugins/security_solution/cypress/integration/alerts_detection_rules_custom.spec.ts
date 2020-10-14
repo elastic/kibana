@@ -93,7 +93,7 @@ import {
   goToScheduleStepTab,
   waitForTheRuleToBeExecuted,
 } from '../tasks/create_new_rule';
-import { saveEditedRule } from '../tasks/edit_rule';
+import { saveEditedRule, waitForKibana } from '../tasks/edit_rule';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 import { refreshPage } from '../tasks/security_header';
@@ -135,7 +135,7 @@ describe('Custom detection rules creation', () => {
 
     // expect define step to repopulate
     cy.get(DEFINE_EDIT_BUTTON).click();
-    cy.get(CUSTOM_QUERY_INPUT).should('have.text', newRule.customQuery);
+    cy.get(CUSTOM_QUERY_INPUT).should('have.value', newRule.customQuery);
     cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
     cy.get(DEFINE_CONTINUE_BUTTON).should('not.exist');
 
@@ -182,7 +182,7 @@ describe('Custom detection rules creation', () => {
     cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
     cy.get(DEFINITION_DETAILS).within(() => {
       getDetails(INDEX_PATTERNS_DETAILS).should('have.text', indexPatterns.join(''));
-      getDetails(CUSTOM_QUERY_DETAILS).should('have.text', `${newRule.customQuery} `);
+      getDetails(CUSTOM_QUERY_DETAILS).should('have.text', newRule.customQuery);
       getDetails(RULE_TYPE_DETAILS).should('have.text', 'Query');
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
     });
@@ -290,9 +290,10 @@ describe('Custom detection rules deletion and edition', () => {
   context('Edition', () => {
     it('Allows a rule to be edited', () => {
       editFirstRule();
+      waitForKibana();
 
       // expect define step to populate
-      cy.get(CUSTOM_QUERY_INPUT).should('have.text', existingRule.customQuery);
+      cy.get(CUSTOM_QUERY_INPUT).should('have.value', existingRule.customQuery);
       if (existingRule.index && existingRule.index.length > 0) {
         cy.get(DEFINE_INDEX_INPUT).should('have.text', existingRule.index.join(''));
       }
@@ -343,7 +344,7 @@ describe('Custom detection rules deletion and edition', () => {
           'have.text',
           expectedEditedIndexPatterns.join('')
         );
-        getDetails(CUSTOM_QUERY_DETAILS).should('have.text', `${editedRule.customQuery} `);
+        getDetails(CUSTOM_QUERY_DETAILS).should('have.text', editedRule.customQuery);
         getDetails(RULE_TYPE_DETAILS).should('have.text', 'Query');
         getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
       });

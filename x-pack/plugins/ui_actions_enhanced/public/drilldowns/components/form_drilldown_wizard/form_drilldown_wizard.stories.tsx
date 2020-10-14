@@ -10,11 +10,7 @@ import { FormDrilldownWizard } from './index';
 import { Trigger, TriggerId } from '../../../../../../../src/plugins/ui_actions/public';
 
 const otherProps = {
-  supportedTriggers: [
-    'VALUE_CLICK_TRIGGER',
-    'SELECT_RANGE_TRIGGER',
-    'FILTER_TRIGGER',
-  ] as TriggerId[],
+  triggers: ['VALUE_CLICK_TRIGGER', 'SELECT_RANGE_TRIGGER', 'FILTER_TRIGGER'] as TriggerId[],
   getTriggerInfo: (id: TriggerId) => ({ id } as Trigger),
   onSelectedTriggersChange: () => {},
   actionFactoryContext: { triggers: [] as TriggerId[] },

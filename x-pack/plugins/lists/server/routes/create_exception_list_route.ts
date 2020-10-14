@@ -36,7 +36,6 @@ export const createExceptionListRoute = (router: IRouter): void => {
       try {
         const {
           name,
-          _tags,
           tags,
           meta,
           namespace_type: namespaceType,
@@ -58,7 +57,6 @@ export const createExceptionListRoute = (router: IRouter): void => {
           });
         } else {
           const createdList = await exceptionLists.createExceptionList({
-            _tags,
             description,
             immutable: false,
             listId,

@@ -102,35 +102,42 @@ const createPlugin = (
   });
 };
 
-describe('PluginsService', () => {
-  beforeEach(async () => {
-    mockPackage.raw = {
-      branch: 'feature-v1',
-      version: 'v1',
-      build: {
-        distributable: true,
-        number: 100,
-        sha: 'feature-v1-build-sha',
-      },
-    };
+async function testSetup(options: { isDevClusterMaster?: boolean } = {}) {
+  mockPackage.raw = {
+    branch: 'feature-v1',
+    version: 'v1',
+    build: {
+      distributable: true,
+      number: 100,
+      sha: 'feature-v1-build-sha',
+    },
+  };
 
-    coreId = Symbol('core');
-    env = Env.createDefault(REPO_ROOT, getEnvOptions());
-
-    config$ = new BehaviorSubject<Record<string, any>>({ plugins: { initialize: true } });
-    const rawConfigService = rawConfigServiceMock.create({ rawConfig$: config$ });
-    configService = new ConfigService(rawConfigService, env, logger);
-    await configService.setSchema(config.path, config.schema);
-    pluginsService = new PluginsService({ coreId, env, logger, configService });
-
-    [mockPluginSystem] = MockPluginsSystem.mock.instances as any;
-    mockPluginSystem.uiPlugins.mockReturnValue(new Map());
-
-    environmentSetup = environmentServiceMock.createSetupContract();
+  coreId = Symbol('core');
+  env = Env.createDefault(REPO_ROOT, {
+    ...getEnvOptions(),
+    isDevClusterMaster: options.isDevClusterMaster ?? false,
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
+  config$ = new BehaviorSubject<Record<string, any>>({ plugins: { initialize: true } });
+  const rawConfigService = rawConfigServiceMock.create({ rawConfig$: config$ });
+  configService = new ConfigService(rawConfigService, env, logger);
+  await configService.setSchema(config.path, config.schema);
+  pluginsService = new PluginsService({ coreId, env, logger, configService });
+
+  [mockPluginSystem] = MockPluginsSystem.mock.instances as any;
+  mockPluginSystem.uiPlugins.mockReturnValue(new Map());
+
+  environmentSetup = environmentServiceMock.createSetupContract();
+}
+
+afterEach(() => {
+  jest.clearAllMocks();
+});
+
+describe('PluginsService', () => {
+  beforeEach(async () => {
+    await testSetup();
   });
 
   describe('#discover()', () => {
@@ -610,6 +617,32 @@ describe('PluginsService', () => {
     it('`stop` stops plugins system', async () => {
       await pluginsService.stop();
       expect(mockPluginSystem.stopPlugins).toHaveBeenCalledTimes(1);
+    });
+  });
+});
+
+describe('PluginService when isDevClusterMaster is true', () => {
+  beforeEach(async () => {
+    await testSetup({
+      isDevClusterMaster: true,
+    });
+  });
+
+  describe('#discover()', () => {
+    it('does not try to run discovery', async () => {
+      await expect(pluginsService.discover({ environment: environmentSetup })).resolves
+        .toMatchInlineSnapshot(`
+              Object {
+                "pluginTree": undefined,
+                "uiPlugins": Object {
+                  "browserConfigs": Map {},
+                  "internal": Map {},
+                  "public": Map {},
+                },
+              }
+            `);
+
+      expect(mockDiscover).not.toHaveBeenCalled();
     });
   });
 });

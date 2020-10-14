@@ -25,7 +25,12 @@ import { keys } from '@elastic/eui';
 import { IFieldFormat } from '../../../../../../../../src/plugins/data/common';
 import { RangeTypeLens, isValidRange, isValidNumber } from './ranges';
 import { FROM_PLACEHOLDER, TO_PLACEHOLDER, TYPING_DEBOUNCE_TIME } from './constants';
-import { NewBucketButton, DragDropBuckets, DraggableBucketContainer } from '../shared_components';
+import {
+  NewBucketButton,
+  DragDropBuckets,
+  DraggableBucketContainer,
+  LabelInput,
+} from '../shared_components';
 
 const generateId = htmlIdGenerator();
 
@@ -63,7 +68,7 @@ export const RangePopover = ({
     // send the range back to the main state
     setRange(newRange);
   };
-  const { from, to } = tempRange;
+  const { from, to, label } = tempRange;
 
   const lteAppendLabel = i18n.translate('xpack.lens.indexPattern.ranges.lessThanOrEqualAppend', {
     defaultMessage: '\u2264',
@@ -132,11 +137,11 @@ export const RangePopover = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFieldNumber
-              value={isFinite(to) ? Number(to) : ''}
+              value={isValidNumber(to) ? Number(to) : ''}
               onChange={({ target }) => {
                 const newRange = {
                   ...tempRange,
-                  to: target.value !== '' ? Number(target.value) : -Infinity,
+                  to: target.value !== '' ? Number(target.value) : Infinity,
                 };
                 setTempRange(newRange);
                 saveRangeAndReset(newRange);
@@ -158,6 +163,25 @@ export const RangePopover = ({
             />
           </EuiFlexItem>
         </EuiFlexGroup>
+      </EuiFormRow>
+      <EuiFormRow>
+        <LabelInput
+          value={label || ''}
+          onChange={(newLabel) => {
+            const newRange = {
+              ...tempRange,
+              label: newLabel,
+            };
+            setTempRange(newRange);
+            saveRangeAndReset(newRange);
+          }}
+          placeholder={i18n.translate(
+            'xpack.lens.indexPattern.ranges.customRangeLabelPlaceholder',
+            { defaultMessage: 'Custom label' }
+          )}
+          onSubmit={onSubmit}
+          dataTestSubj="indexPattern-ranges-label"
+        />
       </EuiFormRow>
     </EuiPopover>
   );

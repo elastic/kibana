@@ -35,6 +35,7 @@ import {
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+import { EmptyPlaceholder } from '../shared_components/empty_placeholder';
 
 const onClickValue = jest.fn();
 const onSelectRange = jest.fn();
@@ -721,6 +722,29 @@ describe('xy_expression', () => {
       expect(component.find(Settings).prop('rotation')).toEqual(90);
     });
 
+    test('it renders regular bar empty placeholder for no results', () => {
+      const { data, args } = sampleArgs();
+
+      // send empty data to the chart
+      data.tables.first.rows = [];
+
+      const component = shallow(
+        <XYChart
+          data={data}
+          args={args}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      expect(component.find(BarSeries)).toHaveLength(0);
+      expect(component.find(EmptyPlaceholder).prop('icon')).toBeDefined();
+    });
+
     test('onBrushEnd returns correct context data for date histogram data', () => {
       const { args } = sampleArgs();
 
@@ -750,8 +774,89 @@ describe('xy_expression', () => {
       });
     });
 
+    test('onBrushEnd returns correct context data for number histogram data', () => {
+      const { args } = sampleArgs();
+
+      const numberLayer: LayerArgs = {
+        layerId: 'numberLayer',
+        hide: false,
+        xAccessor: 'xAccessorId',
+        yScaleType: 'linear',
+        xScaleType: 'linear',
+        isHistogram: true,
+        seriesType: 'bar_stacked',
+        accessors: ['yAccessorId'],
+      };
+
+      const numberHistogramData: LensMultiTable = {
+        type: 'lens_multitable',
+        tables: {
+          numberLayer: {
+            type: 'kibana_datatable',
+            rows: [
+              {
+                xAccessorId: 5,
+                yAccessorId: 1,
+              },
+              {
+                xAccessorId: 7,
+                yAccessorId: 1,
+              },
+              {
+                xAccessorId: 8,
+                yAccessorId: 1,
+              },
+              {
+                xAccessorId: 10,
+                yAccessorId: 1,
+              },
+            ],
+            columns: [
+              {
+                id: 'xAccessorId',
+                name: 'bytes',
+              },
+              {
+                id: 'yAccessorId',
+                name: 'Count of records',
+              },
+            ],
+          },
+        },
+        dateRange: {
+          fromDate: new Date('2020-04-01T16:14:16.246Z'),
+          toDate: new Date('2020-04-01T17:15:41.263Z'),
+        },
+      };
+
+      const wrapper = mountWithIntl(
+        <XYChart
+          data={numberHistogramData}
+          args={{
+            ...args,
+            layers: [numberLayer],
+          }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      wrapper.find(Settings).first().prop('onBrushEnd')!({ x: [5, 8] });
+
+      expect(onSelectRange).toHaveBeenCalledWith({
+        column: 0,
+        table: numberHistogramData.tables.numberLayer,
+        range: [5, 8],
+        timeFieldName: undefined,
+      });
+    });
+
     test('onElementClick returns correct context data', () => {
-      const geometry: GeometryValue = { x: 5, y: 1, accessor: 'y1', mark: null };
+      const geometry: GeometryValue = { x: 5, y: 1, accessor: 'y1', mark: null, datum: {} };
       const series = {
         key: 'spec{d}yAccessor{d}splitAccessors{b-2}',
         specId: 'd',
@@ -874,6 +979,36 @@ describe('xy_expression', () => {
       expect(component.find(BarSeries).at(0).prop('stackAccessors')).toHaveLength(1);
       expect(component.find(BarSeries).at(1).prop('stackAccessors')).toHaveLength(1);
       expect(component.find(Settings).prop('rotation')).toEqual(90);
+    });
+
+    test('it renders stacked bar empty placeholder for no results', () => {
+      const { data, args } = sampleArgs();
+
+      const component = shallow(
+        <XYChart
+          data={data}
+          args={{
+            ...args,
+            layers: [
+              {
+                ...args.layers[0],
+                xAccessor: undefined,
+                splitAccessor: 'e',
+                seriesType: 'bar_stacked',
+              },
+            ],
+          }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      expect(component.find(BarSeries)).toHaveLength(0);
+      expect(component.find(EmptyPlaceholder).prop('icon')).toBeDefined();
     });
 
     test('it passes time zone to the series', () => {

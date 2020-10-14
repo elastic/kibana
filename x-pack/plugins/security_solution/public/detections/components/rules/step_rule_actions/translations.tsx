@@ -28,6 +28,14 @@ export const NO_CONNECTOR_SELECTED = i18n.translate(
   }
 );
 
+export const NO_ACTIONS_READ_PERMISSIONS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepRuleActions.noReadActionsPrivileges',
+  {
+    defaultMessage:
+      'Cannot create rule actions. You do not have "Read" permissions for the "Actions" plugin.',
+  }
+);
+
 export const INVALID_MUSTACHE_TEMPLATE = (paramKey: string) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.createRule.stepRuleActions.invalidMustacheTemplateErrorMessage',

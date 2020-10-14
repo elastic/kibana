@@ -71,6 +71,20 @@ export const ENABLE_ML_JOB_WARNING = i18n.translate(
   }
 );
 
+export const QUERY_BAR_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldQuerBarLabel',
+  {
+    defaultMessage: 'Custom query',
+  }
+);
+
+export const EQL_QUERY_BAR_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.EqlQueryBarLabel',
+  {
+    defaultMessage: 'EQL query',
+  }
+);
+
 export const THREAT_MATCH_INDEX_HELPER_TEXT = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.threatMatchingIcesHelperDescription',
   {
