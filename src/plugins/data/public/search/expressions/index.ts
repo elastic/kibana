@@ -20,3 +20,4 @@
 export * from './esaggs';
 export * from './es_raw_response';
 export * from './esdsl';
+export * from './utils';

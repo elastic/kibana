@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { Datatable } from '../../../../../plugins/expressions/public';
+import { KibanaDatatable } from '../../../../../plugins/expressions/public';
+import { deserializeAggConfig } from '../../search/expressions';
 import { esFilters, Filter } from '../../../public';
-import { getIndexPatterns, getSearchService } from '../../../public/services';
-import { ValueClickContext } from '../../../../embeddable/public';
-import { AggConfigSerialized } from '../../../common/search/aggs';
+import { getIndexPatterns } from '../../../public/services';
+import type { ValueClickContext } from '../../../../embeddable/public';
 
 /**
  * For terms aggregations on `__other__` buckets, this assembles a list of applicable filter
@@ -33,7 +33,7 @@ import { AggConfigSerialized } from '../../../common/search/aggs';
  * @return {array} - array of terms to filter against
  */
 const getOtherBucketFilterTerms = (
-  table: Pick<Datatable, 'rows' | 'columns'>,
+  table: Pick<KibanaDatatable, 'rows' | 'columns'>,
   columnIndex: number,
   rowIndex: number
 ) => {
@@ -71,28 +71,22 @@ const getOtherBucketFilterTerms = (
  * @return {Filter[]|undefined} - list of filters to provide to queryFilter.addFilters()
  */
 const createFilter = async (
-  table: Pick<Datatable, 'rows' | 'columns'>,
+  table: Pick<KibanaDatatable, 'rows' | 'columns'>,
   columnIndex: number,
   rowIndex: number
 ) => {
-  if (
-    !table ||
-    !table.columns ||
-    !table.columns[columnIndex] ||
-    !table.columns[columnIndex].meta ||
-    table.columns[columnIndex].meta.source !== 'esaggs' ||
-    !table.columns[columnIndex].meta.sourceParams?.indexPatternId
-  ) {
+  if (!table || !table.columns || !table.columns[columnIndex]) {
     return;
   }
   const column = table.columns[columnIndex];
-  const { indexPatternId, ...aggConfigParams } = table.columns[columnIndex].meta
-    .sourceParams as any;
-  const aggConfigsInstance = getSearchService().aggs.createAggConfigs(
-    await getIndexPatterns().get(indexPatternId),
-    [aggConfigParams as AggConfigSerialized]
-  );
-  const aggConfig = aggConfigsInstance.aggs[0];
+  if (!column.meta || !column.meta.indexPatternId) {
+    return;
+  }
+  const aggConfig = deserializeAggConfig({
+    type: column.meta.type,
+    aggConfigParams: column.meta.aggConfigParams ? column.meta.aggConfigParams : {},
+    indexPattern: await getIndexPatterns().get(column.meta.indexPatternId),
+  });
   let filter: Filter[] = [];
   const value: any = rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
   if (value === null || value === undefined || !aggConfig.isFilterable()) {
