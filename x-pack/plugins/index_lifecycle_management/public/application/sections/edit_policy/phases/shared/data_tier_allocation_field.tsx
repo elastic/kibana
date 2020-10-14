@@ -61,20 +61,22 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({
           switch (phaseData.dataTierAllocationType) {
             case 'default':
               const isCloudEnabled = cloud?.isCloudEnabled ?? false;
-              const isUsingNodeRoles = !isUsingDeprecatedDataRoleConfig;
-              if (
-                isCloudEnabled &&
-                isUsingNodeRoles &&
-                phase === 'cold' &&
-                !nodesByRoles.data_cold?.length
-              ) {
-                // Tell cloud users they can deploy cold tier nodes.
-                return (
-                  <>
-                    <EuiSpacer size="s" />
-                    <CloudDataTierCallout />
-                  </>
-                );
+              if (isCloudEnabled && (phase === 'warm' || phase === 'cold')) {
+                const isUsingNodeRolesAllocation = !isUsingDeprecatedDataRoleConfig;
+                const hasNoNodesWithNodeRole =
+                  phase === 'warm'
+                    ? !nodesByRoles.data_warm?.length
+                    : !nodesByRoles.data_cold?.length;
+
+                if (isUsingNodeRolesAllocation && hasNoNodesWithNodeRole) {
+                  // Tell cloud users they can deploy cold tier nodes.
+                  return (
+                    <>
+                      <EuiSpacer size="s" />
+                      <CloudDataTierCallout phase={phase} />
+                    </>
+                  );
+                }
               }
 
               const allocationNodeRole = getAvailableNodeRoleForPhase(phase, nodesByRoles);
