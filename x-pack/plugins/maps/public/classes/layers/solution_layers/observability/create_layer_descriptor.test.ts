@@ -216,6 +216,7 @@ describe('createLayerDescriptor', () => {
         query: 'processor.event:"transaction"',
       },
       sourceDescriptor: {
+        applyGlobalQuery: true,
         geoField: 'client.geo.location',
         id: '12345',
         indexPatternId: 'apm_static_index_pattern_id',
