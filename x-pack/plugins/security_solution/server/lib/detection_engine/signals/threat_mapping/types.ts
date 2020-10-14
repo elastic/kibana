@@ -103,6 +103,11 @@ export interface CreateThreatSignalOptions {
   currentResult: SearchAfterAndBulkCreateReturnType;
 }
 
+export interface ThreatSignalResults {
+  threatList: SearchResponse<ThreatListItem>;
+  results: SearchAfterAndBulkCreateReturnType;
+}
+
 export interface BuildThreatMappingFilterOptions {
   threatMapping: ThreatMapping;
   threatList: SearchResponse<ThreatListItem>;
