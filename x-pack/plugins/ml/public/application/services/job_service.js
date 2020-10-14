@@ -15,7 +15,7 @@ import { isWebUrl } from '../util/url_utils';
 import { ML_DATA_PREVIEW_COUNT } from '../../../common/util/job_utils';
 import { TIME_FORMAT } from '../../../common/constants/time_format';
 import { parseInterval } from '../../../common/util/parse_interval';
-import { validateTimeRange } from '../util/date_utils';
+import { validateTimeRange } from '../../../common/util/date_utils';
 
 let jobs = [];
 let datafeedIds = {};
@@ -509,10 +509,10 @@ class JobService {
                 fields[job.data_description.time_field] = {};
               }
 
-              // console.log('fields: ', fields);
               const fieldsList = Object.keys(fields);
               if (fieldsList.length) {
-                body._source = fieldsList;
+                body.fields = fieldsList;
+                body._source = false;
               }
             }
 

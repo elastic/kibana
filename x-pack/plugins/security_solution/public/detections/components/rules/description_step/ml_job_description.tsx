@@ -8,7 +8,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { EuiBadge, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 
-import { MlSummaryJob } from '../../../../../../ml/public';
+import { ML_PAGES, MlSummaryJob, useMlHref } from '../../../../../../ml/public';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
 import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -72,9 +72,16 @@ const Wrapper = styled.div`
 
 const MlJobDescriptionComponent: React.FC<{ jobId: string }> = ({ jobId }) => {
   const { jobs } = useSecurityJobs(false);
-  const jobUrl = useKibana().services.application.getUrlForApp(
-    `ml#/jobs?mlManagement=(jobId:${encodeURI(jobId)})`
-  );
+  const {
+    services: { http, ml },
+  } = useKibana();
+  const jobUrl = useMlHref(ml, http.basePath.get(), {
+    page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+    pageState: {
+      jobId: [jobId],
+    },
+  });
+
   const job = jobs.find(({ id }) => id === jobId);
 
   const jobIdSpan = <span data-test-subj="machineLearningJobId">{jobId}</span>;

@@ -25,7 +25,7 @@ export interface DataTypeDefinition {
 export interface ParameterDefinition {
   title?: string;
   description?: JSX.Element | string;
-  fieldConfig: FieldConfig<any, any>;
+  fieldConfig: FieldConfig<any>;
   schema?: any;
   props?: { [key: string]: ParameterDefinition };
   documentation?: {
@@ -64,6 +64,7 @@ export type MainType =
   | 'point'
   | 'histogram'
   | 'constant_keyword'
+  | 'version'
   | 'wildcard'
   /**
    * 'other' is a special type that only exists inside of MappingsEditor as a placeholder

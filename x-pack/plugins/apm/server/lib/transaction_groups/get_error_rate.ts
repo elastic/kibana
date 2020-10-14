@@ -12,11 +12,7 @@ import {
   EVENT_OUTCOME,
 } from '../../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../../../common/utils/range_filter';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getBucketSize } from '../helpers/get_bucket_size';
 import {
   getProcessorEventForAggregatedTransactions,
@@ -33,10 +29,10 @@ export async function getErrorRate({
   serviceName: string;
   transactionType?: string;
   transactionName?: string;
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
 }) {
-  const { start, end, uiFiltersES, apmEventClient } = setup;
+  const { start, end, esFilter, apmEventClient } = setup;
 
   const transactionNamefilter = transactionName
     ? [{ term: { [TRANSACTION_NAME]: transactionName } }]
@@ -53,7 +49,7 @@ export async function getErrorRate({
     },
     ...transactionNamefilter,
     ...transactionTypefilter,
-    ...uiFiltersES,
+    ...esFilter,
   ];
 
   const params = {

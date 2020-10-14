@@ -9,7 +9,7 @@ import styled from 'styled-components';
 import { htmlIdGenerator, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { NodeSubMenu } from './submenu';
+import { NodeSubMenu } from './styles';
 import { applyMatrix3 } from '../models/vector2';
 import { Vector2, Matrix3, ResolverState } from '../types';
 import { SafeResolverEvent } from '../../../common/endpoint/types';
@@ -382,7 +382,7 @@ const UnstyledProcessEventDot = React.memo(
             />
           </StyledDescriptionText>
           <div
-            className={xScale >= 2 ? 'euiButton' : 'euiButton euiButton--small'}
+            className={'euiButton euiButton--small'}
             id={labelHTMLID}
             onClick={handleClick}
             onFocus={handleFocus}

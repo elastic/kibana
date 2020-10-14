@@ -17,11 +17,7 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../../../../../common/utils/range_filter';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../../../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../../../helpers/setup_request';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
@@ -66,17 +62,17 @@ export async function getBuckets({
   traceId: string;
   distributionMax: number;
   bucketSize: number;
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
 }) {
-  const { start, end, uiFiltersES, apmEventClient } = setup;
+  const { start, end, esFilter, apmEventClient } = setup;
 
   const commonFilters = [
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [TRANSACTION_TYPE]: transactionType } },
     { term: { [TRANSACTION_NAME]: transactionName } },
     { range: rangeFilter(start, end) },
-    ...uiFiltersES,
+    ...esFilter,
   ];
 
   async function getSamplesForDistributionBuckets() {

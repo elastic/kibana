@@ -1,23 +1,23 @@
-.lnsFieldItem--missing {
-  .lnsFieldItem__info {
-    background: lightOrDarkTheme(transparentize($euiColorMediumShade, .9), $euiColorEmptyShade);
-    color: $euiColorDarkShade;
-  }
-}
-
-.lnsFieldItem__info {
+.lnsFieldItem {
   .lnsFieldItem__infoIcon {
     visibility: hidden;
+    opacity: 0;
   }
 
-  &:hover,
-  &:focus {
+  &:hover:not([class*='isActive']) {
     cursor: grab;
 
     .lnsFieldItem__infoIcon {
       visibility: visible;
+      opacity: 1;
+      transition: opacity $euiAnimSpeedFast ease-in-out 1s;
     }
   }
+}
+
+.lnsFieldItem--missing {
+  background: lightOrDarkTheme(transparentize($euiColorMediumShade, .9), $euiColorEmptyShade);
+  color: $euiColorDarkShade;
 }
 
 .lnsFieldItem__topValue {

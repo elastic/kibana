@@ -6,18 +6,21 @@
 
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
+import { useKibana } from '../../../../../shared_imports';
 import { PhaseWithAllocationAction, PhaseWithAllocation } from '../../../../../../common/types';
+import { PhaseValidationErrors } from '../../../../services/policies/policy_validation';
+import { getAvailableNodeRoleForPhase } from '../../../../lib/data_tiers';
+import { isNodeRoleFirstPreference } from '../../../../lib/data_tiers/is_node_role_first_preference';
 
 import {
   DataTierAllocation,
-  DefaultAllocationWarning,
+  DefaultAllocationNotice,
   NoNodeAttributesWarning,
   NodesDataProvider,
+  CloudDataTierCallout,
 } from '../../components/data_tier_allocation';
-import { PhaseValidationErrors } from '../../../../services/policies/policy_validation';
-import { isPhaseDefaultDataAllocationCompatible } from '../../../../lib/data_tiers';
 
 const i18nTexts = {
   title: i18n.translate('xpack.indexLifecycleMgmt.common.dataTier.title', {
@@ -45,11 +48,62 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({
   isShowingErrors,
   errors,
 }) => {
+  const {
+    services: { cloud },
+  } = useKibana();
+
   return (
     <NodesDataProvider>
-      {(nodesData) => {
-        const isCompatible = isPhaseDefaultDataAllocationCompatible(phase, nodesData.nodesByRoles);
-        const hasNodeAttrs = Boolean(Object.keys(nodesData.nodesByAttributes ?? {}).length);
+      {({ nodesByRoles, nodesByAttributes, isUsingDeprecatedDataRoleConfig }) => {
+        const hasNodeAttrs = Boolean(Object.keys(nodesByAttributes ?? {}).length);
+
+        const renderNotice = () => {
+          switch (phaseData.dataTierAllocationType) {
+            case 'default':
+              const isCloudEnabled = cloud?.isCloudEnabled ?? false;
+              const isUsingNodeRoles = !isUsingDeprecatedDataRoleConfig;
+              if (
+                isCloudEnabled &&
+                isUsingNodeRoles &&
+                phase === 'cold' &&
+                !nodesByRoles.data_cold?.length
+              ) {
+                // Tell cloud users they can deploy cold tier nodes.
+                return (
+                  <>
+                    <EuiSpacer size="s" />
+                    <CloudDataTierCallout />
+                  </>
+                );
+              }
+
+              const allocationNodeRole = getAvailableNodeRoleForPhase(phase, nodesByRoles);
+              if (
+                allocationNodeRole === 'none' ||
+                !isNodeRoleFirstPreference(phase, allocationNodeRole)
+              ) {
+                return (
+                  <>
+                    <EuiSpacer size="s" />
+                    <DefaultAllocationNotice phase={phase} targetNodeRole={allocationNodeRole} />
+                  </>
+                );
+              }
+              break;
+            case 'custom':
+              if (!hasNodeAttrs) {
+                return (
+                  <>
+                    <EuiSpacer size="s" />
+                    <NoNodeAttributesWarning phase={phase} />
+                  </>
+                );
+              }
+              break;
+            default:
+              return null;
+          }
+        };
 
         return (
           <EuiDescribedFormGroup
@@ -66,18 +120,14 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({
                   setPhaseData={setPhaseData}
                   phaseData={phaseData}
                   isShowingErrors={isShowingErrors}
-                  nodes={nodesData.nodesByAttributes}
+                  nodes={nodesByAttributes}
+                  disableDataTierOption={
+                    !!(isUsingDeprecatedDataRoleConfig && cloud?.isCloudEnabled)
+                  }
                 />
 
-                {/* Data tier related warnings */}
-
-                {phaseData.dataTierAllocationType === 'default' && !isCompatible && (
-                  <DefaultAllocationWarning phase={phase} />
-                )}
-
-                {phaseData.dataTierAllocationType === 'custom' && !hasNodeAttrs && (
-                  <NoNodeAttributesWarning phase={phase} />
-                )}
+                {/* Data tier related warnings and call-to-action notices */}
+                {renderNotice()}
               </>
             </EuiFormRow>
           </EuiDescribedFormGroup>

@@ -13,11 +13,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { LocalUIFilterName } from '../../../../server/lib/ui_filters/local_ui_filters/config';
 import { Filter } from './Filter';
 import { useLocalUIFilters } from '../../../hooks/useLocalUIFilters';
 import { Projection } from '../../../../common/projections';
+import { LocalUIFilterName } from '../../../../common/ui_filter';
 
 interface Props {
   projection: Projection;

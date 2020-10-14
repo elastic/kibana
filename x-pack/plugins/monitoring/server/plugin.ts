@@ -119,7 +119,6 @@ export class Plugin {
       config,
       log: this.log,
     });
-    await this.licenseService.refresh();
 
     const serverInfo = core.http.getServerInfo();
     let kibanaUrl = `${serverInfo.protocol}://${serverInfo.hostname}:${serverInfo.port}`;
@@ -141,7 +140,7 @@ export class Plugin {
         kibanaUrl,
         isCloud
       );
-      plugins.alerts.registerType(alert.getAlertType());
+      plugins.alerts?.registerType(alert.getAlertType());
     }
 
     // Initialize telemetry

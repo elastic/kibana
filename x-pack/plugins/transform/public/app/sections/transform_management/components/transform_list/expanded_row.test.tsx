@@ -31,6 +31,7 @@ describe('Transform: Transform List <ExpandedRow />', () => {
 
   test('Minimal initialization', async () => {
     const mlShared = await getMlSharedImports();
+    // @ts-expect-error mock data is too loosely typed
     const item: TransformListRow = transformListRow;
 
     const { getByText, getByTestId } = render(

@@ -18,7 +18,7 @@
  */
 
 import * as ts from 'typescript';
-import { uniqBy } from 'lodash';
+import { uniqBy, pick } from 'lodash';
 import {
   getResolvedModuleSourceFile,
   getIdentifierDeclarationFromSource,
@@ -88,14 +88,27 @@ export function getConstraints(node: ts.Node, program: ts.Program): any {
 
   if (ts.isUnionTypeNode(node)) {
     const types = node.types.filter(discardNullOrUndefined);
-    return types.map((typeNode) => getConstraints(typeNode, program));
+    return types.reduce<any>((acc, typeNode) => {
+      const constraints = getConstraints(typeNode, program);
+      const contraintsArray = Array.isArray(constraints) ? constraints : [constraints];
+      return [...acc, ...contraintsArray];
+    }, []);
   }
 
   if (ts.isLiteralTypeNode(node) && ts.isLiteralExpression(node.literal)) {
     return node.literal.text;
   }
 
-  throw Error(`Unsupported constraint`);
+  if (ts.isImportSpecifier(node)) {
+    const source = node.getSourceFile();
+    const importedModuleName = getModuleSpecifier(node);
+
+    const declarationSource = getResolvedModuleSourceFile(source, program, importedModuleName);
+    const declarationNode = getIdentifierDeclarationFromSource(node.name, declarationSource);
+    return getConstraints(declarationNode, program);
+  }
+
+  throw Error(`Unsupported constraint of kind ${node.kind} [${ts.SyntaxKind[node.kind]}]`);
 }
 
 export function getDescriptor(node: ts.Node, program: ts.Program): Descriptor | DescriptorValue {
@@ -157,9 +170,25 @@ export function getDescriptor(node: ts.Node, program: ts.Program): Descriptor | 
       return { kind: TelemetryKinds.Date, type: 'Date' };
     }
     // Support `Record<string, SOMETHING>`
-    if (symbolName === 'Record' && node.typeArguments![0].kind === ts.SyntaxKind.StringKeyword) {
-      return { '@@INDEX@@': getDescriptor(node.typeArguments![1], program) };
+    if (symbolName === 'Record') {
+      const descriptor = getDescriptor(node.typeArguments![1], program);
+      if (node.typeArguments![0].kind === ts.SyntaxKind.StringKeyword) {
+        return { '@@INDEX@@': descriptor };
+      }
+      const constraints = getConstraints(node.typeArguments![0], program);
+      const constraintsArray = Array.isArray(constraints) ? constraints : [constraints];
+      if (typeof constraintsArray[0] === 'string') {
+        return constraintsArray.reduce((acc, c) => ({ ...acc, [c]: descriptor }), {});
+      }
     }
+
+    // Support `Pick<SOMETHING, 'prop1' | 'prop2'>`
+    if (symbolName === 'Pick') {
+      const parentDescriptor = getDescriptor(node.typeArguments![0], program);
+      const pickPropNames = getConstraints(node.typeArguments![1], program);
+      return pick(parentDescriptor, pickPropNames);
+    }
+
     const declaration = (symbol?.getDeclarations() || [])[0];
     if (declaration) {
       return getDescriptor(declaration, program);

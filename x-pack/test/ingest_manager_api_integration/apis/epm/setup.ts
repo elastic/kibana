@@ -20,23 +20,23 @@ export default function (providerContext: FtrProviderContext) {
       const oldEndpointVersion = '0.13.0';
       beforeEach(async () => {
         await supertest
-          .post(`/api/ingest_manager/epm/packages/endpoint-${oldEndpointVersion}`)
+          .post(`/api/fleet/epm/packages/endpoint-${oldEndpointVersion}`)
           .set('kbn-xsrf', 'xxxx')
           .send({ force: true })
           .expect(200);
       });
       it('upgrades the endpoint package from 0.13.0 to the latest version available', async function () {
         let { body }: { body: GetInfoResponse } = await supertest
-          .get(`/api/ingest_manager/epm/packages/endpoint-${oldEndpointVersion}`)
+          .get(`/api/fleet/epm/packages/endpoint-${oldEndpointVersion}`)
           .expect(200);
         const latestEndpointVersion = body.response.latestVersion;
         log.info(`Endpoint package latest version: ${latestEndpointVersion}`);
         // make sure we're actually doing an upgrade
         expect(latestEndpointVersion).not.eql(oldEndpointVersion);
-        await supertest.post(`/api/ingest_manager/setup`).set('kbn-xsrf', 'xxxx').expect(200);
+        await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);
 
         ({ body } = await supertest
-          .get(`/api/ingest_manager/epm/packages/endpoint-${latestEndpointVersion}`)
+          .get(`/api/fleet/epm/packages/endpoint-${latestEndpointVersion}`)
           .expect(200));
         expect(body.response).to.have.property('savedObject');
         expect((body.response as Installed).savedObject.attributes.install_version).to.eql(

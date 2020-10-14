@@ -6,9 +6,11 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { FC } from 'react';
 import { History } from 'history';
 import { ApplicationStart, ChromeBreadcrumb } from 'src/core/public';
 
+import { HttpLogic } from '../http';
 import { createHref, ICreateHrefOptions } from '../react_router_helpers';
 
 interface IKibanaLogicProps {
@@ -17,6 +19,7 @@ interface IKibanaLogicProps {
   navigateToUrl: ApplicationStart['navigateToUrl'];
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setDocTitle(title: string): void;
+  renderHeaderActions(HeaderActions: FC): void;
 }
 export interface IKibanaValues extends IKibanaLogicProps {
   navigateToUrl(path: string, options?: ICreateHrefOptions): Promise<void>;
@@ -29,13 +32,15 @@ export const KibanaLogic = kea<MakeLogicType<IKibanaValues>>({
     history: [props.history, {}],
     navigateToUrl: [
       (url: string, options?: ICreateHrefOptions) => {
-        const href = createHref(url, props.history, options);
+        const deps = { history: props.history, http: HttpLogic.values.http };
+        const href = createHref(url, deps, options);
         return props.navigateToUrl(href);
       },
       {},
     ],
     setBreadcrumbs: [props.setBreadcrumbs, {}],
     setDocTitle: [props.setDocTitle, {}],
+    renderHeaderActions: [props.renderHeaderActions, {}],
   }),
 });
 

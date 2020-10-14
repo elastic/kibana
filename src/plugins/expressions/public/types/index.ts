@@ -57,6 +57,7 @@ export interface IExpressionLoaderParams {
 
 export interface ExpressionRenderError extends Error {
   type?: string;
+  original?: Error;
 }
 
 export type RenderErrorHandlerFnType = (

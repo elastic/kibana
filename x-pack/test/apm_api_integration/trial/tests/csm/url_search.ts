@@ -16,7 +16,7 @@ export default function rumServicesApiTests({ getService }: FtrProviderContext) 
     describe('when there is no data', () => {
       it('returns empty list', async () => {
         const response = await supertest.get(
-          '/api/apm/rum-client/url-search?start=2020-09-07T20%3A35%3A54.654Z&end=2020-09-14T20%3A35%3A54.654Z&uiFilters=%7B%22serviceName%22%3A%5B%22elastic-co-rum-test%22%5D%7D'
+          '/api/apm/rum-client/url-search?start=2020-09-07T20%3A35%3A54.654Z&end=2020-09-14T20%3A35%3A54.654Z&uiFilters=%7B%22serviceName%22%3A%5B%22elastic-co-rum-test%22%5D%7D&percentile=50'
         );
 
         expect(response.status).to.be(200);
@@ -41,7 +41,7 @@ export default function rumServicesApiTests({ getService }: FtrProviderContext) 
 
       it('returns top urls when no query', async () => {
         const response = await supertest.get(
-          '/api/apm/rum-client/url-search?start=2020-09-07T20%3A35%3A54.654Z&end=2020-09-16T20%3A35%3A54.654Z&uiFilters=%7B%22serviceName%22%3A%5B%22kibana-frontend-8_0_0%22%5D%7D'
+          '/api/apm/rum-client/url-search?start=2020-09-07T20%3A35%3A54.654Z&end=2020-09-16T20%3A35%3A54.654Z&uiFilters=%7B%22serviceName%22%3A%5B%22kibana-frontend-8_0_0%22%5D%7D&percentile=50'
         );
 
         expect(response.status).to.be(200);
@@ -67,7 +67,7 @@ export default function rumServicesApiTests({ getService }: FtrProviderContext) 
 
       it('returns specific results against query', async () => {
         const response = await supertest.get(
-          '/api/apm/rum-client/url-search?start=2020-09-07T20%3A35%3A54.654Z&end=2020-09-16T20%3A35%3A54.654Z&uiFilters=%7B%22serviceName%22%3A%5B%22kibana-frontend-8_0_0%22%5D%7D&urlQuery=csm'
+          '/api/apm/rum-client/url-search?start=2020-09-07T20%3A35%3A54.654Z&end=2020-09-16T20%3A35%3A54.654Z&uiFilters=%7B%22serviceName%22%3A%5B%22kibana-frontend-8_0_0%22%5D%7D&urlQuery=csm&percentile=50'
         );
 
         expect(response.status).to.be(200);

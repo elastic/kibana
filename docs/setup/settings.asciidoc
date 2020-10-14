@@ -68,11 +68,6 @@ currently do not have an inspector, for example Timelion and Monitoring.
  | Time in milliseconds to wait for {es} to respond to pings.
 *Default: the value of the <<elasticsearch-requestTimeout, `elasticsearch.requestTimeout`>> setting*
 
-| `elasticsearch.preserveHost:`
- | When the value is `true`, {kib} uses the hostname specified in the
-<<server-host, `server.host`>> setting. When the value is `false`, {kib} uses
-the hostname of the host that connects to this {kib} instance. *Default: `true`*
-
 |[[elasticsearch-requestHeadersWhitelist]] `elasticsearch.requestHeadersWhitelist:`
  | List of {kib} client-side headers to send to {es}. To send *no* client-side
 headers, set this value to [] (an empty list). Removing the `authorization`
@@ -203,10 +198,6 @@ making an outbound SSL/TLS connection to {es}. Valid values are `"full"`,
 `"certificate"`, and `"none"`. Using `"full"` performs hostname verification,
 using `"certificate"` skips hostname verification, and using `"none"` skips
 verification entirely. *Default: `"full"`*
-
-| `elasticsearch.startupTimeout:`
- | Time in milliseconds to wait for {es} at {kib} startup before retrying.
-*Default: `5000`*
 
 |[[elasticsearch-user-passwd]] `elasticsearch.username:` and `elasticsearch.password:`
  | If your {es} is protected with basic authentication, these settings provide
@@ -647,7 +638,7 @@ include::{kib-repo-dir}/settings/alert-action-settings.asciidoc[]
 include::{kib-repo-dir}/settings/apm-settings.asciidoc[]
 include::{kib-repo-dir}/settings/dev-settings.asciidoc[]
 include::{kib-repo-dir}/settings/graph-settings.asciidoc[]
-include::{kib-repo-dir}/settings/ingest-manager-settings.asciidoc[]
+include::{kib-repo-dir}/settings/fleet-settings.asciidoc[]
 include::{kib-repo-dir}/settings/i18n-settings.asciidoc[]
 include::{kib-repo-dir}/settings/logs-ui-settings.asciidoc[]
 include::{kib-repo-dir}/settings/infrastructure-ui-settings.asciidoc[]

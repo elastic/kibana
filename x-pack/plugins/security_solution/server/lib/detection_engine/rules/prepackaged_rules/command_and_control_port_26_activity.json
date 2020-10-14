@@ -46,7 +46,7 @@
       "tactic": {
         "id": "TA0010",
         "name": "Exfiltration",
-        "reference": "https://attack.mitre.org/tactics/TA0011/"
+        "reference": "https://attack.mitre.org/tactics/TA0010/"
       },
       "technique": [
         {
@@ -58,5 +58,5 @@
     }
   ],
   "type": "query",
-  "version": 3
+  "version": 4
 }
