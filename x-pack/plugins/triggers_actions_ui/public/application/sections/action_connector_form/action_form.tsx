@@ -174,11 +174,13 @@ export const ActionForm = ({
   }, [connectors, actionTypesIndex]);
 
   useEffect(() => {
-    const hasActionWithBrokenConnector = actions.some(
-      (action) => !connectors.find((connector) => connector.id === action.id)
-    );
-    if (setHasActionsWithBrokenConnector) {
-      setHasActionsWithBrokenConnector(hasActionWithBrokenConnector);
+    if (connectors.length > 0) {
+      const hasActionWithBrokenConnector = actions.some(
+        (action) => !connectors.find((connector) => connector.id === action.id)
+      );
+      if (setHasActionsWithBrokenConnector) {
+        setHasActionsWithBrokenConnector(hasActionWithBrokenConnector);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actions, connectors]);
@@ -189,10 +191,6 @@ export const ActionForm = ({
       defaultMessage: '(preconfigured)',
     }
   );
-
-  const updateActions = (updatedActions: AlertAction[]) => {
-    setAlertProperty(updatedActions);
-  };
 
   const getSelectedOptions = (actionItemId: string) => {
     const selectedConnector = connectors.find((connector) => connector.id === actionItemId);
@@ -401,7 +399,7 @@ export const ActionForm = ({
                 const updatedActions = actions.filter(
                   (_item: AlertAction, i: number) => i !== index
                 );
-                updateActions(updatedActions);
+                setAlertProperty(updatedActions);
                 setIsAddActionPanelOpen(
                   updatedActions.filter((item: AlertAction) => item.id !== actionItem.id).length ===
                     0
@@ -478,7 +476,7 @@ export const ActionForm = ({
                 const updatedActions = actions.filter(
                   (_item: AlertAction, i: number) => i !== index
                 );
-                updateActions(updatedActions);
+                setAlertProperty(updatedActions);
                 setIsAddActionPanelOpen(
                   updatedActions.filter((item: AlertAction) => item.id !== actionItem.id).length ===
                     0
