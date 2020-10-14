@@ -11,7 +11,6 @@ import { LicensingPluginSetup } from '../../licensing/server';
 import { IndexManagementPluginSetup } from '../../index_management/server';
 import { License } from './services';
 import { IndexLifecycleManagementConfig } from './config';
-import { isEsError } from './shared_imports';
 
 export interface Dependencies {
   licensing: LicensingPluginSetup;
@@ -23,7 +22,4 @@ export interface RouteDependencies {
   router: IRouter;
   config: IndexLifecycleManagementConfig;
   license: License;
-  lib: {
-    isEsError: typeof isEsError;
-  };
 }
