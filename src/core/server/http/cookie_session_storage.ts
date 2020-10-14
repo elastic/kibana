@@ -80,7 +80,7 @@ class ScopedCookieSessionStorage<T extends Record<string, any>> implements Sessi
       const session = await this.server.auth.test('security-cookie', this.request);
       // A browser can send several cookies, if it's not an array, just return the session value
       if (!Array.isArray(session)) {
-        return session as T;
+        return session.credentials as T;
       }
 
       // If we have an array with one value, we're good also
