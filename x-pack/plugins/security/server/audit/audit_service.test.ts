@@ -188,7 +188,7 @@ describe('#createLoggingConfig', () => {
     expect(loggingConfig.loggers![0].level).toEqual('off');
   });
 
-  test('sets log level to `off` when legacy audit logger is used', async () => {
+  test('sets log level to `off` when appender is not defined', async () => {
     const features$ = of({
       allowAuditLogging: true,
     });
