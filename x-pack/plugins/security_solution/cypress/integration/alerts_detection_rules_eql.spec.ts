@@ -87,8 +87,7 @@ const expectedNumberOfRules = 1;
 const expectedNumberOfAlerts = 7;
 const expectedNumberOfSequenceAlerts = 1;
 
-// Failing: See https://github.com/elastic/kibana/issues/79522
-describe.skip('Detection rules, EQL', () => {
+describe('Detection rules, EQL', () => {
   beforeEach(() => {
     esArchiverLoad('timeline');
   });
