@@ -41,6 +41,7 @@ const props = {
   createPrePackagedRules: jest.fn(),
   loading: false,
   userHasNoPermissions: false,
+  'data-test-subj': 'load-prebuilt-rules',
 };
 
 describe('PrePackagedRulesPrompt', () => {
@@ -68,8 +69,8 @@ describe('LoadPrebuiltRulesAndTemplatesButton', () => {
     });
     wrapper!.update();
 
-    expect(wrapper!.find('[data-test-subj="loadPrebuiltRulesBtn"]').exists()).toEqual(true);
-    expect(wrapper!.find('[data-test-subj="loadPrebuiltRulesBtn"]').last().text()).toEqual(
+    expect(wrapper!.find('[data-test-subj="load-prebuilt-rules"]').exists()).toEqual(true);
+    expect(wrapper!.find('[data-test-subj="load-prebuilt-rules"]').last().text()).toEqual(
       'Load Elastic prebuilt rules and timeline templates'
     );
   });
@@ -90,8 +91,8 @@ describe('LoadPrebuiltRulesAndTemplatesButton', () => {
     });
     wrapper!.update();
 
-    expect(wrapper!.find('[data-test-subj="loadPrebuiltRulesBtn"]').exists()).toEqual(true);
-    expect(wrapper!.find('[data-test-subj="loadPrebuiltRulesBtn"]').last().text()).toEqual(
+    expect(wrapper!.find('[data-test-subj="load-prebuilt-rules"]').exists()).toEqual(true);
+    expect(wrapper!.find('[data-test-subj="load-prebuilt-rules"]').last().text()).toEqual(
       'Load Elastic prebuilt rules'
     );
   });
@@ -112,8 +113,8 @@ describe('LoadPrebuiltRulesAndTemplatesButton', () => {
     });
     wrapper!.update();
 
-    expect(wrapper!.find('[data-test-subj="loadPrebuiltRulesBtn"]').exists()).toEqual(true);
-    expect(wrapper!.find('[data-test-subj="loadPrebuiltRulesBtn"]').last().text()).toEqual(
+    expect(wrapper!.find('[data-test-subj="load-prebuilt-rules"]').exists()).toEqual(true);
+    expect(wrapper!.find('[data-test-subj="load-prebuilt-rules"]').last().text()).toEqual(
       'Load Elastic prebuilt timeline templates'
     );
   });
