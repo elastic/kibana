@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { levelOrder } from '../../lib/tree_sequencers';
+import { breadthFirst, levelOrder } from '../../lib/tree_sequencers';
 
 export class IndexedTree {
   /**
@@ -14,8 +14,9 @@ export class IndexedTree {
    *
    * If the graph doesn't form a tree, `null` is returned.
    * This can happen in a few ways:
-   * * any node has more than one parent
-   * * the graph is disconnected
+   * * there isn't a single root
+   * * other than the root, nodes all have one parent
+   * * starting from the root, we must be able to visit all children
    */
   public static fromIterable<T>(
     iterable: Iterable<T>,
@@ -31,15 +32,54 @@ export class IndexedTree {
     const parentToChildren: Map<string, Set<string>> = new Map();
     for (const item of iterable) {
       for (const [parent, child] of edges(item)) {
+        const existingParent = childToParent.get(child);
+        if (existingParent !== undefined && existingParent !== parent) {
+          // `child` has at least two different parent, therefore this is not a tree.
+          // TODO, test that giving a node two parents results in null
+          return null;
+        }
         childToParent.set(child, parent);
         addToMapOfSets(parentToChildren, parent, child);
+        // infer nodes from edges
         nodeSet.add(parent);
         nodeSet.add(child);
       }
       for (const node of nodes(item)) {
+        // infer nodes directly from items
         nodeSet.add(node);
       }
     }
+    // find the root, and assert that there is only one root
+    let rootCandidate: undefined | string;
+    for (const node of nodeSet) {
+      // the root is the one-and-only node that has no parent
+      if (childToParent.has(node) === false) {
+        if (rootCandidate === undefined) {
+          // we found a possible root
+          rootCandidate = node;
+        } else {
+          // `node` is the second node with no parent. this is not a tree.
+          return null;
+        }
+      }
+    }
+
+    const root: string = rootCandidate!;
+
+    // assert that the tree is connected from the root
+    // clone the nodeSet and use it to keep track of unvisited nodes
+    const unvisited = new Set(nodeSet);
+    for (const node of breadthFirst(root, (vertex) => {
+      const children = parentToChildren.get(vertex);
+      if (children) {
+        return children.values();
+      } else {
+        return [];
+      }
+    })) {
+      unvisited.delete(node);
+    }
+
     // TODO, return null if this isn't a tree? or is that a responsibility of the constructor?
     return new IndexedTree(nodeSet, childToParent, parentToChildren);
   }

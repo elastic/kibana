@@ -19,3 +19,26 @@ export function* levelOrder<T>(root: T, children: (parent: T) => Iterable<T>): I
     nextLevel = [];
   }
 }
+
+/**
+ * Yield all vertices that are traversible from `root`.
+ */
+export function* breadthFirst<T>(
+  root: T,
+  /** Must return children reachable from `parent`. */ children: (parent: T) => Iterable<T>
+): Iterable<T> {
+  const discovered: Set<T> = new Set();
+  const queue = [];
+  discovered.add(root);
+  queue.unshift(root);
+  while (queue.length) {
+    const vertex: T = queue.shift()!;
+    yield vertex;
+    for (const child of children(vertex)) {
+      if (!discovered.has(child)) {
+        discovered.add(child);
+        queue.unshift(child);
+      }
+    }
+  }
+}

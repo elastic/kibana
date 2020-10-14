@@ -254,10 +254,10 @@ type EntityIDFields = Partial<
 /**
  * Extract the first non null value from either the `entity_id` or `unique_pid` depending on the document type. Returns
  * undefined if the field doesn't exist in the document.
- *
- * @param event a document from ES
  */
-export function entityIDSafeVersion(event: EntityIDFields): string | undefined {
+export function entityIDSafeVersion(
+  /** a document from ES */ event: EntityIDFields
+): string | undefined {
   if (isLegacyEventSafeVersion(event)) {
     return event.endgame?.unique_pid === undefined
       ? undefined

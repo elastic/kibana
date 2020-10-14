@@ -58,4 +58,80 @@ describe('When `IndexedTree.fromIterable` is called with `nodes` and `edges` fun
       expect([...tree.levelOrder]).toEqual(['root']);
     });
   });
+  function iterableWithTwoDisconnectedNodes(): Iterable<SafeResolverEvent> {
+    return [
+      {
+        process: {
+          entity_id: 'first root',
+        },
+      },
+      {
+        process: {
+          entity_id: 'second root',
+        },
+      },
+    ];
+  }
+  function iterableWithARootThatHasTwoChildrenWhichShareASingleGrandchild(): Iterable<
+    SafeResolverEvent
+  > {
+    return [
+      {
+        process: {
+          entity_id: 'A',
+        },
+      },
+      {
+        process: {
+          entity_id: 'B',
+        },
+      },
+      {
+        process: {
+          entity_id: 'C',
+        },
+      },
+      {
+        process: {
+          parent: {
+            entity_id: ['B', 'C'],
+          },
+          entity_id: 'D',
+        },
+      },
+    ];
+  }
+  describe.each([
+    [iterableWithTwoDisconnectedNodes(), '(which represents two disconnected nodes)'],
+    [
+      iterableWithARootThatHasTwoChildrenWhichShareASingleGrandchild(),
+      `which represents a graph that looks like:
+           +---+
+           |   |
+           | A |
+           | | |
+           +---+
+             |
++---+        |        +---+
+|   +<-------+------->+   |
+| B |                 | C |
+|   |                 |   |
++-+-+                 +--++
+  |        +---+         |
+  |        |   |         |
+  +------->+ D +<--------+
+           |   |
+           +---+
+
+               `,
+    ],
+  ])('and when the iterable is %p %s', (iterable) => {
+    let tree: IndexedTree | null;
+    beforeEach(() => {
+      tree = IndexedTree.fromIterable(iterable, processTreeNodes, processTreeEdges);
+    });
+    it(`should return null`, () => {
+      expect(tree).toBe(null);
+    });
+  });
 });
