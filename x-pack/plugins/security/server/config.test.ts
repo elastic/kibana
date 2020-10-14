@@ -1076,4 +1076,17 @@ describe('createConfig()', () => {
       })
     ).toThrow('[audit.appender.2.kind]: expected value to equal [legacy-appender]');
   });
+
+  it('rejects an ignore_filter when no appender is configured', () => {
+    expect(() =>
+      ConfigSchema.validate({
+        audit: {
+          enabled: true,
+          ignore_filters: [{ actions: ['some_action'] }],
+        },
+      })
+    ).toThrow(
+      '[audit]: xpack.security.audit.ignore_filters can only be used with the ECS audit logger. To enable the ECS audit logger, specify where you want to write the audit events using xpack.security.audit.appender.'
+    );
+  });
 });

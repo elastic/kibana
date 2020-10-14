@@ -445,40 +445,6 @@ describe('#getLogger', () => {
     expect(logger.info).not.toHaveBeenCalled();
   });
 
-  test('does not call the underlying logger if an appender is specified which enables the new audit logger', () => {
-    const pluginId = 'foo';
-
-    const licenseWithFeatures = licenseMock.create();
-    licenseWithFeatures.features$ = new BehaviorSubject({
-      allowAuditLogging: true,
-    } as SecurityLicenseFeatures).asObservable();
-
-    const auditService = new AuditService(logger).setup({
-      license: licenseWithFeatures,
-      config: {
-        enabled: false,
-        appender: {
-          kind: 'console',
-          layout: {
-            kind: 'pattern',
-          },
-        },
-      },
-      logging,
-      http,
-      getCurrentUser,
-      getSpaceId,
-    });
-
-    const auditLogger = auditService.getLogger(pluginId);
-
-    const eventType = 'bar';
-    const message = 'this is my audit message';
-    auditLogger.log(eventType, message);
-
-    expect(logger.info).not.toHaveBeenCalled();
-  });
-
   test('calls the underlying logger after license upgrade', () => {
     const pluginId = 'foo';
 

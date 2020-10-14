@@ -8,17 +8,7 @@ import { Plugin, CoreSetup } from 'src/core/server';
 
 export class AuditTrailTestPlugin implements Plugin {
   public setup(core: CoreSetup) {
-    core.savedObjects.registerType({
-      name: 'audit_log',
-      hidden: false,
-      namespaceType: 'agnostic',
-      mappings: {
-        properties: {},
-      },
-    });
-
     const router = core.http.createRouter();
-
     router.get({ path: '/audit_log', validate: false }, async (context, request, response) => {
       await context.core.savedObjects.client.create('dashboard', {});
       await context.core.savedObjects.client.find({ type: 'dashboard' });

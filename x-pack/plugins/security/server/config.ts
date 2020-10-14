@@ -198,13 +198,11 @@ export const ConfigSchema = schema.object({
       schemes: schema.arrayOf(schema.string(), { defaultValue: ['apikey'] }),
     }),
   }),
-  audit: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
-    appender: schema.maybe(coreConfig.logging.appenders),
-    ignore_filters: schema.conditional(
-      schema.siblingRef('appender'),
-      coreConfig.logging.appenders,
-      schema.maybe(
+  audit: schema.object(
+    {
+      enabled: schema.boolean({ defaultValue: false }),
+      appender: schema.maybe(coreConfig.logging.appenders),
+      ignore_filters: schema.maybe(
         schema.arrayOf(
           schema.object({
             actions: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
@@ -215,9 +213,15 @@ export const ConfigSchema = schema.object({
           })
         )
       ),
-      schema.never()
-    ),
-  }),
+    },
+    {
+      validate: (auditConfig) => {
+        if (auditConfig.ignore_filters && !auditConfig.appender) {
+          return 'xpack.security.audit.ignore_filters can only be used with the ECS audit logger. To enable the ECS audit logger, specify where you want to write the audit events using xpack.security.audit.appender.';
+        }
+      },
+    }
+  ),
 });
 
 export function createConfig(
@@ -227,7 +231,7 @@ export function createConfig(
 ) {
   if (config.audit.appender) {
     logger.warn(
-      'The new audit logger has been enabled using the xpack.security.audit.appender setting. This is a beta feature and the format of the events recorded might change in future versions.'
+      'The ECS audit logger has been enabled using the xpack.security.audit.appender setting. This is a beta feature and the format of the events recorded might change in future versions.'
     );
   }
 
