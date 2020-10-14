@@ -1,14 +1,14 @@
 [role="xpack"]
 [[reporting-network-policy]]
-=== Restricting requests with a Reporting Network Policy
+=== Restrict requests with a Reporting network policy
 
 When {report-features} generates PDF reports, it uses the Chromium browser to fully load the {kib} page on the server. This
-potentially involves sending requests to external hosts, for example, a request may go to an external image server for showing a
+potentially involves sending requests to external hosts. For example, a request might go to an external image server to show a
 field formatted as an image, or to show an image in a Markdown visualization.
 
-If the Chromium browser is requested to send a request that violates the network policy, Reporting will stop processing the page
-before the request goes out, and the report will be marked as a failure. Additional information about the event can be found in
-Kibana's server logs.
+If the Chromium browser is asked to send a request that violates the network policy, Reporting stops processing the page
+before the request goes out, and the report is marked as a failure. Additional information about the event is in
+the Kibana server logs.
 
 A network policy applies not only to outgoing requests, but also incoming responses. That means if a request goes out to an allowed
 host, but is redirected and a response returns from a denied host, the response will be denied, and the report will fail.
@@ -19,14 +19,14 @@ host, but is redirected and a response returns from a denied host, the response 
 of the Elastic Stack security features do not change this condition.
 ============
 
-==== Configuring Reporting Network Policy
+==== Configure a Reporting network policy
 
 You configure the network policy by specifying the `xpack.reporting.capture.networkPolicy.rules` setting in `kibana.yml`. A policy is specified as
-an array of objects that describe what to allow or deny based on an optionally-provided host and/or protocol. If a host or protocol
-is not specified, the rule will match any host or protocol, respectively.
+an array of objects that describe what to allow or deny based on a host or protocol. If a host or protocol
+is not specified, the rule matches any host or protocol.
 
 The rule objects are evaluated sequentially from the beginning to the end of the array, and continue until there is a matching rule.
-If none of the rules allow a request, the request will be denied.
+If no rules allow a request, the request is denied.
 
 [source,yaml]
 -------------------------------------------------------
@@ -65,10 +65,10 @@ xpack.reporting.capture.networkPolicy
 
 [NOTE]
 ============
-The `file:` protocol will always be denied, even if there is no network policy configured.
+The `file:` protocol is always denied, even if no network policy is configured.
 ============
 
-==== Disabling Reporting Network Policy
+==== Disable a Reporting network policy
 
 You can use the `xpack.reporting.capture.networkPolicy.enabled: false` setting to disable the network policy feature. The default for
 this configuration property is `true`, so it is not necessary to explicitly enable it.  
