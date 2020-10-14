@@ -79,8 +79,8 @@ const Navigation = ({
 }) => (
   <EuiFlexGroup alignItems="center" gutterSize="none">
     <EuiFlexItem grow={false}>
-      <EuiButtonEmpty onClick={onCloseOverlay} size="xs">
-        {i18n.BACK_TO_EVENTS}
+      <EuiButtonEmpty iconType="cross" onClick={onCloseOverlay} size="xs">
+        {i18n.CLOSE_ANALYZER}
       </EuiButtonEmpty>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
