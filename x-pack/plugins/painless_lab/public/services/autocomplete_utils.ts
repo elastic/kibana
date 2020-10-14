@@ -18,10 +18,15 @@ interface Method {
   return: string;
 }
 
+interface Constructor {
+  declaring: string;
+  parameters: string[];
+}
+
 interface ContextClass {
   name: string;
   imported: boolean;
-  constructors: any[];
+  constructors: Constructor[];
   static_methods: Method[];
   methods: Method[];
   static_fields: Field[];
@@ -101,6 +106,7 @@ const indexToLetterMap: {
   5: 'f',
 };
 
+// TODO for now assuming we will always have parameters and return value
 const getMethodDescription = (
   methodName: string,
   parameters: string[],
@@ -121,6 +127,38 @@ const getMethodDescription = (
   // Final format will look something like this:
   // pow(double a, double b): double
   return `${methodName}(${parameterDescription}): ${returnValue}`;
+};
+
+export const getPainlessConstructorsToAutocomplete = (
+  range: monaco.IRange
+): monaco.languages.CompletionItem[] => {
+  const painlessConstructors = context.classes
+    .filter(({ constructors }) => constructors.length > 0)
+    .map(({ constructors }) => constructors)
+    .flat();
+
+  return (
+    painlessConstructors
+      // There are sometimes multiple definitions for the same constructor
+      // This method filters them out so we don't display more than once in autocomplete
+      .filter((constructor, index, constructorArray) => {
+        return (
+          constructorArray.findIndex(({ declaring }) => declaring === constructor.declaring) ===
+          index
+        );
+      })
+      .map(({ declaring }) => {
+        const constructorName = declaring.split('.').pop() || declaring; // TODO probably need something more sophisticated here
+
+        return {
+          label: constructorName,
+          kind: monaco.languages.CompletionItemKind.Constructor,
+          documentation: `Constructor ${constructorName}`,
+          insertText: constructorName,
+          range,
+        };
+      })
+  );
 };
 
 export const getPainlessClassToAutocomplete = (

@@ -14,11 +14,7 @@ import workerSrc from 'raw-loader!monaco-editor/min/vs/base/worker/workerMain.js
 
 import { monacoPainlessLang } from '../lib';
 
-import {
-  getPainlessClassToAutocomplete,
-  painlessTypes,
-  getPainlessClassesToAutocomplete,
-} from './autocomplete_utils';
+import { PainlessCompletionAdapter } from './completion_adapter';
 
 const LANGUAGE_ID = 'painless';
 
@@ -31,53 +27,7 @@ export class LanguageService {
   public setup() {
     monaco.languages.register({ id: LANGUAGE_ID });
     monaco.languages.setMonarchTokensProvider(LANGUAGE_ID, monacoPainlessLang);
-
-    monaco.languages.registerCompletionItemProvider(LANGUAGE_ID, {
-      triggerCharacters: ['.'],
-      provideCompletionItems(model, position) {
-        // Active line characters, e.g., "boolean isInCircle"
-        const activeCharacters = model.getValueInRange({
-          startLineNumber: position.lineNumber,
-          startColumn: 0,
-          endLineNumber: position.lineNumber,
-          endColumn: position.column,
-        });
-
-        const word = model.getWordUntilPosition(position);
-        const range = {
-          startLineNumber: position.lineNumber,
-          endLineNumber: position.lineNumber,
-          startColumn: word.startColumn,
-          endColumn: word.endColumn,
-        };
-
-        // Array of the active line words, e.g., [boolean, isInCircle]
-        const words = activeCharacters.replace('\t', '').split(' ');
-        // What the user is currently typing
-        const activeTyping = words[words.length - 1];
-        // If the active typing contains dot notation, we assume we need to access the object's properties
-        const isProperty = activeTyping.split('.').length === 2;
-        // If the active typing contains a type, we skip autocomplete, e.g., "boolean"
-        const isType = words.length === 2 && painlessTypes.includes(words[0]);
-
-        let autocompleteSuggestions: monaco.languages.CompletionItem[] = [];
-
-        if (isProperty) {
-          const className = activeTyping.substring(0, activeTyping.length - 1).split('.')[0];
-
-          autocompleteSuggestions = getPainlessClassToAutocomplete(className, range);
-        } else {
-          if (!isType) {
-            autocompleteSuggestions = getPainlessClassesToAutocomplete(range);
-          }
-        }
-
-        return {
-          incomplete: true,
-          suggestions: autocompleteSuggestions,
-        };
-      },
-    });
+    monaco.languages.registerCompletionItemProvider(LANGUAGE_ID, new PainlessCompletionAdapter());
 
     if (CAN_CREATE_WORKER) {
       this.originalMonacoEnvironment = (window as any).MonacoEnvironment;
