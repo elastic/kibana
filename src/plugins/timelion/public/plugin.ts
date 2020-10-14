@@ -36,20 +36,29 @@ import { createKbnUrlTracker } from '../../kibana_utils/public';
 import { DataPublicPluginStart, esFilters, DataPublicPluginSetup } from '../../data/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
 import { VisualizationsStart } from '../../visualizations/public';
+import { SavedObjectsStart } from '../../saved_objects/public';
 import {
   VisTypeTimelionPluginStart,
   VisTypeTimelionPluginSetup,
 } from '../../vis_type_timelion/public';
 
-export interface TimelionPluginDependencies {
+export interface TimelionPluginSetupDependencies {
+  data: DataPublicPluginSetup;
+  visTypeTimelion: VisTypeTimelionPluginSetup;
+}
+
+export interface TimelionPluginStartDependencies {
   data: DataPublicPluginStart;
   navigation: NavigationPublicPluginStart;
   visualizations: VisualizationsStart;
   visTypeTimelion: VisTypeTimelionPluginStart;
+  savedObjects: SavedObjectsStart;
+  kibanaLegacy: KibanaLegacyStart;
 }
 
 /** @internal */
-export class TimelionPlugin implements Plugin<void, void> {
+export class TimelionPlugin
+  implements Plugin<void, void, TimelionPluginSetupDependencies, TimelionPluginStartDependencies> {
   initializerContext: PluginInitializerContext;
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
@@ -60,7 +69,7 @@ export class TimelionPlugin implements Plugin<void, void> {
   }
 
   public setup(
-    core: CoreSetup,
+    core: CoreSetup<TimelionPluginStartDependencies>,
     {
       data,
       visTypeTimelion,
@@ -122,7 +131,7 @@ export class TimelionPlugin implements Plugin<void, void> {
           pluginInitializerContext: this.initializerContext,
           timelionPanels,
           core: coreStart,
-          plugins: pluginsStart as TimelionPluginDependencies,
+          plugins: pluginsStart,
         });
         return () => {
           unlistenParentHistory();

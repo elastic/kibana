@@ -45,16 +45,12 @@ describe('createFiltersFromValueClick', () => {
               name: 'test',
               id: '1-1',
               meta: {
-                type: 'date',
-                source: 'esaggs',
-                sourceParams: {
-                  indexPatternId: 'logstash-*',
-                  type: 'histogram',
-                  params: {
-                    field: 'bytes',
-                    interval: 30,
-                    otherBucket: true,
-                  },
+                type: 'histogram',
+                indexPatternId: 'logstash-*',
+                aggConfigParams: {
+                  field: 'bytes',
+                  interval: 30,
+                  otherBucket: true,
                 },
               },
             },
@@ -95,7 +91,9 @@ describe('createFiltersFromValueClick', () => {
   });
 
   test('handles an event when aggregations type is a terms', async () => {
-    (dataPoints[0].table.columns[0].meta.sourceParams as any).type = 'terms';
+    if (dataPoints[0].table.columns[0].meta) {
+      dataPoints[0].table.columns[0].meta.type = 'terms';
+    }
     const filters = await createFiltersFromValueClickAction({ data: dataPoints });
 
     expect(filters.length).toEqual(1);
