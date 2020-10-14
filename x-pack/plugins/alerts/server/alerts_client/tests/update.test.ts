@@ -15,7 +15,7 @@ import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/s
 import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
 import { AlertsAuthorization } from '../../authorization/alerts_authorization';
 import { resolvable } from '../../test_utils';
-import { ActionsAuthorization } from '../../../../actions/server';
+import { ActionsAuthorization, ActionsClient } from '../../../../actions/server';
 import { TaskStatus } from '../../../../task_manager/server';
 import { getBeforeSetup, setGlobalDate } from './lib';
 
@@ -319,7 +319,9 @@ describe('update()', () => {
         "version": "123",
       }
     `);
-    const actionsClient = await alertsClientParams.getActionsClient();
+    const actionsClient = (await alertsClientParams.getActionsClient()) as jest.Mocked<
+      ActionsClient
+    >;
     expect(actionsClient.isActionTypeEnabled).toHaveBeenCalledWith('test', { notifyUsage: true });
     expect(actionsClient.isActionTypeEnabled).toHaveBeenCalledWith('test2', { notifyUsage: true });
   });

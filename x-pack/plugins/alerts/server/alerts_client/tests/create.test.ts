@@ -374,7 +374,9 @@ describe('create()', () => {
         "scheduledTaskId": "task-123",
       }
     `);
-    const actionsClient = await alertsClientParams.getActionsClient();
+    const actionsClient = (await alertsClientParams.getActionsClient()) as jest.Mocked<
+      ActionsClient
+    >;
     expect(actionsClient.isActionTypeEnabled).toHaveBeenCalledWith('test', { notifyUsage: true });
   });
 
