@@ -480,7 +480,7 @@
     "typescript": "4.0.2",
     "ui-select": "0.19.8",
     "vega": "^5.17.0",
-    "vega-lite": "^4.16.8",
+    "vega-lite": "^4.17.0",
     "vega-schema-url-parser": "^2.1.0",
     "vega-tooltip": "^0.24.2",
     "vinyl-fs": "^3.0.3",
