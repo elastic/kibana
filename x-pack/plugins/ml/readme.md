@@ -1,5 +1,7 @@
 # Documentation for ML UI developers
 
+This plugin provides access to the machine learning features from Elastic.
+
 ## Requirements
 
 To use machine learning features, you must have a Platinum or Enterprise license 
