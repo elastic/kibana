@@ -33,6 +33,7 @@ import { outputService } from './output';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 import { getSettings } from './settings';
 import { normalizeKuery, escapeSearchQueryPhrase } from './saved_object';
+import { getFullAgentPolicyKibanaConfig } from '../../common/services/full_agent_policy_kibana_config';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
@@ -540,18 +541,11 @@ class AgentPolicyService {
       }
       if (!settings.kibana_urls || !settings.kibana_urls.length)
         throw new Error('kibana_urls is missing');
-      const hostsWithoutProtocol = settings.kibana_urls.map((url) => {
-        const parsedURL = new URL(url);
-        return `${parsedURL.host}${parsedURL.pathname !== '/' ? parsedURL.pathname : ''}`;
-      });
+
       fullAgentPolicy.fleet = {
-        kibana: {
-          protocol: new URL(settings.kibana_urls[0]).protocol.replace(':', ''),
-          hosts: hostsWithoutProtocol,
-        },
+        kibana: getFullAgentPolicyKibanaConfig(settings.kibana_urls),
       };
     }
-
     return fullAgentPolicy;
   }
 }
