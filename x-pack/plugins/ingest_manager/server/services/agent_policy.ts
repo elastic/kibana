@@ -128,12 +128,12 @@ class AgentPolicyService {
 
   public async requireUniqueName(
     soClient: SavedObjectsClientContract,
-    givenPolicy: { id?: string; name: string; namespace: string }
+    givenPolicy: { id?: string; name: string }
   ) {
     const results = await soClient.find<AgentPolicySOAttributes>({
       type: SAVED_OBJECT_TYPE,
-      searchFields: ['namespace', 'name'],
-      search: `${givenPolicy.namespace} + ${escapeSearchQueryPhrase(givenPolicy.name)}`,
+      searchFields: ['name'],
+      search: escapeSearchQueryPhrase(givenPolicy.name),
     });
     const idsWithName = results.total && results.saved_objects.map(({ id }) => id);
     if (Array.isArray(idsWithName)) {
@@ -144,9 +144,7 @@ class AgentPolicyService {
           ? `Agent Policy '${idsWithName[0]}' already exists`
           : `Agent Policies '${idsWithName.join(',')}' already exist`;
 
-        throw new AgentPolicyNameExistsError(
-          `${existClause} in '${givenPolicy.namespace}' namespace with name '${givenPolicy.name}'`
-        );
+        throw new AgentPolicyNameExistsError(`${existClause} with name '${givenPolicy.name}'`);
       }
     }
   }
@@ -236,11 +234,10 @@ class AgentPolicyService {
     agentPolicy: Partial<AgentPolicy>,
     options?: { user?: AuthenticatedUser }
   ): Promise<AgentPolicy> {
-    if (agentPolicy.name && agentPolicy.namespace) {
+    if (agentPolicy.name) {
       await this.requireUniqueName(soClient, {
         id,
         name: agentPolicy.name,
-        namespace: agentPolicy.namespace,
       });
     }
     return this._update(soClient, id, agentPolicy, options?.user);
