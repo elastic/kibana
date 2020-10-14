@@ -18,12 +18,46 @@
  */
 
 import uuid from 'uuid';
-import { Subject } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
+import { PluginInitializerContext, StartServicesAccessor } from 'kibana/public';
 import { ISessionService } from '../../common/search';
+import { ConfigSchema } from '../../config';
 
 export class SessionService implements ISessionService {
   private sessionId?: string;
   private session$: Subject<string | undefined> = new Subject();
+  private appChangeSubscription$?: Subscription;
+  private curApp?: string;
+
+  constructor(
+    initializerContext: PluginInitializerContext<ConfigSchema>,
+    getStartServices: StartServicesAccessor
+  ) {
+    /*
+      Make sure that apps don't leave sessions open.
+     */
+    getStartServices().then(([coreStart]) => {
+      this.appChangeSubscription$ = coreStart.application.currentAppId$.subscribe((appName) => {
+        if (this.sessionId) {
+          const message = `Application '${this.curApp}' had an open session while navigating`;
+          if (initializerContext.env.mode.dev) {
+            // TODO: This setTimeout is necessary due to a race condition while navigating.
+            setTimeout(() => {
+              coreStart.fatalErrors.add(message);
+            }, 100);
+          } else {
+            // eslint-disable-next-line no-console
+            console.warn(message);
+          }
+        }
+        this.curApp = appName;
+      });
+    });
+  }
+
+  public destroy() {
+    this.appChangeSubscription$?.unsubscribe();
+  }
 
   public getSessionId() {
     return this.sessionId;

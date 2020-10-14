@@ -332,6 +332,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     if (abortController) abortController.abort();
     savedSearch.destroy();
     subscriptions.unsubscribe();
+    data.search.session.clear();
     appStateUnsubscribe();
     stopStateSync();
     stopSyncingGlobalStateWithUrl();
