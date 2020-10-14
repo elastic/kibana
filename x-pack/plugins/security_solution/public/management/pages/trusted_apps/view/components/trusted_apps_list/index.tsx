@@ -27,6 +27,7 @@ import {
 } from '../../../store/selectors';
 
 import { FormattedDate } from '../../../../../../common/components/formatted_date';
+import { TextFieldValue } from '../../../../../../common/components/text_field_value';
 
 import { useTrustedAppsNavigateCallback, useTrustedAppsSelector } from '../../hooks';
 
@@ -96,13 +97,27 @@ const getColumnDefinitions = (context: TrustedAppsListContext): ColumnsList => {
     {
       field: 'name',
       name: PROPERTY_TITLES.name,
-      truncateText: true,
+      render(value: TrustedApp['name'], record: Immutable<TrustedApp>) {
+        return (
+          <TextFieldValue
+            fieldName={PROPERTY_TITLES.name}
+            value={value}
+            className="eui-textTruncate"
+          />
+        );
+      },
     },
     {
       field: 'os',
       name: PROPERTY_TITLES.os,
       render(value: TrustedApp['os'], record: Immutable<TrustedApp>) {
-        return OS_TITLES[value];
+        return (
+          <TextFieldValue
+            fieldName={PROPERTY_TITLES.os}
+            value={OS_TITLES[value]}
+            className="eui-textTruncate"
+          />
+        );
       },
     },
     {
@@ -121,6 +136,15 @@ const getColumnDefinitions = (context: TrustedAppsListContext): ColumnsList => {
     {
       field: 'created_by',
       name: PROPERTY_TITLES.created_by,
+      render(value: TrustedApp['created_by'], record: Immutable<TrustedApp>) {
+        return (
+          <TextFieldValue
+            fieldName={PROPERTY_TITLES.created_by}
+            value={value}
+            className="eui-textTruncate"
+          />
+        );
+      },
     },
     {
       name: ACTIONS_COLUMN_TITLE,

@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { from } from 'rxjs';
 import { AbstractSearchStrategy } from './abstract_search_strategy';
 
 describe('AbstractSearchStrategy', () => {
@@ -55,7 +56,7 @@ describe('AbstractSearchStrategy', () => {
 
   test('should return response', async () => {
     const searches = [{ body: 'body', index: 'index' }];
-    const searchFn = jest.fn().mockReturnValue(Promise.resolve({}));
+    const searchFn = jest.fn().mockReturnValue(from(Promise.resolve({})));
 
     const responses = await abstractSearchStrategy.search(
       {
@@ -82,7 +83,6 @@ describe('AbstractSearchStrategy', () => {
 
     expect(responses).toEqual([{}]);
     expect(searchFn).toHaveBeenCalledWith(
-      {},
       {
         params: {
           body: 'body',
@@ -92,7 +92,8 @@ describe('AbstractSearchStrategy', () => {
       },
       {
         strategy: 'es',
-      }
+      },
+      {}
     );
   });
 });

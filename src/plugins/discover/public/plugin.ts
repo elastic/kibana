@@ -41,7 +41,7 @@ import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwardi
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
 import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
-import { SavedObjectLoader } from '../../saved_objects/public';
+import { SavedObjectLoader, SavedObjectsStart } from '../../saved_objects/public';
 import { createKbnUrlTracker } from '../../kibana_utils/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { UrlGeneratorState } from '../../share/public';
@@ -141,6 +141,7 @@ export interface DiscoverStartPlugins {
   urlForwarding: UrlForwardingStart;
   inspector: InspectorPublicPluginStart;
   visualizations: VisualizationsStart;
+  savedObjects: SavedObjectsStart;
 }
 
 const innerAngularName = 'app/discover';
@@ -351,10 +352,7 @@ export class DiscoverPlugin
       urlGenerator: this.urlGenerator,
       savedSearchLoader: createSavedSearchesLoader({
         savedObjectsClient: core.savedObjects.client,
-        indexPatterns: plugins.data.indexPatterns,
-        search: plugins.data.search,
-        chrome: core.chrome,
-        overlays: core.overlays,
+        savedObjects: plugins.savedObjects,
       }),
     };
   }

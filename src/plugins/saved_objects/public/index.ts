@@ -31,7 +31,6 @@ export { getSavedObjectFinder, SavedObjectFinderUi, SavedObjectMetaData } from '
 export {
   SavedObjectLoader,
   SavedObjectLoaderFindOptions,
-  createSavedObjectClass,
   checkForDuplicateTitle,
   saveWithConfirmation,
   isErrorNonFatal,
