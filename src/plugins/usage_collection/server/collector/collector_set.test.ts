@@ -81,7 +81,9 @@ describe('CollectorSet', () => {
       collectors.registerCollector(
         new Collector(logger, {
           type: 'MY_TEST_COLLECTOR',
-          fetch: (caller: any) => caller(),
+          fetch: (collectorFetchContext: any) => {
+            return collectorFetchContext.callCluster();
+          },
           isReady: () => true,
         })
       );

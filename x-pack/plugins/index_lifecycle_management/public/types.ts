@@ -8,10 +8,12 @@ import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { ManagementSetup } from '../../../../src/plugins/management/public';
 import { IndexManagementPluginSetup } from '../../index_management/public';
+import { CloudSetup } from '../../cloud/public';
 
 export interface PluginsDependencies {
   usageCollection?: UsageCollectionSetup;
   management: ManagementSetup;
+  cloud?: CloudSetup;
   indexManagement?: IndexManagementPluginSetup;
   home?: HomePublicPluginSetup;
 }
@@ -20,4 +22,8 @@ export interface ClientConfigType {
   ui: {
     enabled: boolean;
   };
+}
+
+export interface AppServicesContext {
+  cloud?: CloudSetup;
 }

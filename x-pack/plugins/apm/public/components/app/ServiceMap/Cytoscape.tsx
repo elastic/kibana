@@ -84,6 +84,11 @@ function CytoscapeComponent({
       cy.elements().forEach((element) => {
         if (!elementIds.includes(element.data('id'))) {
           cy.remove(element);
+        } else {
+          // Doing an "add" with an element with the same id will keep the original
+          // element. Set the data with the new element data.
+          const newElement = elements.find((el) => el.data.id === element.id());
+          element.data(newElement?.data ?? element.data());
         }
       });
       cy.trigger('custom:data', [fit]);
