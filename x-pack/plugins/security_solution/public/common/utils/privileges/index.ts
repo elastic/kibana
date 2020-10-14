@@ -9,6 +9,8 @@ import * as i18n from '../../../detections/pages/detection_engine/rules/translat
 import { isMlRule } from '../../../../common/machine_learning/helpers';
 import * as detectionI18n from '../../../detections/pages/detection_engine/translations';
 
+export const isBoolean = (obj: unknown): obj is boolean => typeof obj === 'boolean';
+
 export const canEditRule = (
   rule: Rule | null | undefined,
   privileges:
@@ -20,8 +22,8 @@ export const canEditRule = (
   if (rule == null) {
     return true;
   }
-  if (rule.actions != null && rule.actions.length > 0) {
-    return privileges as boolean;
+  if (rule.actions != null && rule.actions.length > 0 && isBoolean(privileges)) {
+    return privileges;
   }
   return true;
 };
@@ -29,7 +31,11 @@ export const canEditRule = (
 export const getToolTipContent = (
   rule: Rule | null | undefined,
   hasMlPermissions: boolean,
-  hasReadActionsPrivileges: boolean
+  hasReadActionsPrivileges:
+    | boolean
+    | Readonly<{
+        [x: string]: boolean;
+      }>
 ): string | undefined => {
   if (rule == null) {
     return undefined;

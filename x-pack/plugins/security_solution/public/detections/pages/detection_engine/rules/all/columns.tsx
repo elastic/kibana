@@ -245,7 +245,7 @@ export const getColumns = ({
       render: (value: Rule['enabled'], item: Rule) => (
         <EuiToolTip
           position="top"
-          content={getToolTipContent(item, hasMlPermissions, hasReadActionsPrivileges as boolean)}
+          content={getToolTipContent(item, hasMlPermissions, hasReadActionsPrivileges)}
         >
           <RuleSwitch
             data-test-subj="enabled"

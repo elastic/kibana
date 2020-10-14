@@ -89,7 +89,7 @@ import { timelineDefaults } from '../../../../../timelines/store/timeline/defaul
 import { TimelineModel } from '../../../../../timelines/store/timeline/model';
 import { useSourcererScope } from '../../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
-import { getToolTipContent, canEditRule } from '../../../../../common/utils/privileges';
+import { getToolTipContent, canEditRule, isBoolean } from '../../../../../common/utils/privileges';
 
 import { AlertsHistogramOption } from '../../../../components/alerts_histogram_panel/types';
 
@@ -177,8 +177,8 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
     },
   } = useKibana();
   const hasActionsPrivileges = useMemo(() => {
-    if (rule?.actions != null && rule?.actions.length > 0) {
-      return actions.show as boolean;
+    if (rule?.actions != null && rule?.actions.length > 0 && isBoolean(actions.show)) {
+      return actions.show;
     }
     return true;
   }, [actions, rule?.actions]);
