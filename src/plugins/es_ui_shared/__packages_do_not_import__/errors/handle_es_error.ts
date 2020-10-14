@@ -24,7 +24,7 @@ interface EsErrorHandlerParams {
   error: ApiError;
   response: KibanaResponseFactory;
 }
-export const esErrorHandler = ({ error, response }: EsErrorHandlerParams): IKibanaResponse => {
+export const handleEsError = ({ error, response }: EsErrorHandlerParams): IKibanaResponse => {
   // error.name is slightly better in terms of performance, since all errors now have name property
   if (error.name === 'ResponseError') {
     return response.customError({
