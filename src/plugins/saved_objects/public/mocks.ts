@@ -17,19 +17,18 @@
  * under the License.
  */
 
-import { SavedObjectsClientContract } from 'kibana/public';
-import { SavedObjectLoader, SavedObjectsStart } from '../../../../plugins/saved_objects/public';
-import { createSavedDashboardClass } from './saved_dashboard';
+import { SavedObjectsStart } from './plugin';
 
-interface Services {
-  savedObjectsClient: SavedObjectsClientContract;
-  savedObjects: SavedObjectsStart;
-}
+const createStartContract = (): SavedObjectsStart => {
+  return {
+    SavedObjectClass: jest.fn(),
+    settings: {
+      getPerPage: () => 20,
+      getListingLimit: () => 100,
+    },
+  };
+};
 
-/**
- * @param services
- */
-export function createSavedDashboardLoader({ savedObjects, savedObjectsClient }: Services) {
-  const SavedDashboard = createSavedDashboardClass(savedObjects);
-  return new SavedObjectLoader(SavedDashboard, savedObjectsClient);
-}
+export const savedObjectsPluginMock = {
+  createStartContract,
+};
