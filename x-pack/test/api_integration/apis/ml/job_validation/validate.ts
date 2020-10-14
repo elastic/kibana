@@ -178,7 +178,9 @@ export default ({ getService }: FtrProviderContext) => {
       ]);
     });
 
-    it('should recognize non-basic issues in job configuration', async () => {
+    // Failing ES promotion due to changes in the cardinality agg,
+    // see https://github.com/elastic/kibana/issues/80418
+    it.skip('should recognize non-basic issues in job configuration', async () => {
       const requestBody = {
         duration: { start: 1586995459000, end: 1589672736000 },
         job: {
