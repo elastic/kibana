@@ -11,7 +11,7 @@ import { ApiResponse } from '@elastic/elasticsearch';
 import { IndexLifecyclePolicy, PolicyFromES } from '../../../../common/types';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
-import { esErrorHandler } from '../../../shared_imports';
+import { handleEsError } from '../../../shared_imports';
 
 interface PoliciesMap {
   [K: string]: Omit<PolicyFromES, 'name'>;
@@ -77,7 +77,7 @@ export function registerFetchRoute({ router, license }: RouteDependencies) {
         }
         return response.ok({ body: formatPolicies(policiesMap) });
       } catch (error) {
-        return esErrorHandler({ error, response });
+        return handleEsError({ error, response });
       }
     })
   );

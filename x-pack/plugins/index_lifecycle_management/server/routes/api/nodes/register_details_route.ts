@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
-import { esErrorHandler } from '../../../shared_imports';
+import { handleEsError } from '../../../shared_imports';
 
 function findMatchingNodes(stats: any, nodeAttrs: string): any {
   return Object.entries(stats.nodes).reduce((accum: any[], [nodeId, nodeStats]: [any, any]) => {
@@ -42,7 +42,7 @@ export function registerDetailsRoute({ router, license }: RouteDependencies) {
         const okResponse = { body: findMatchingNodes(statsResponse.body, nodeAttrs) };
         return response.ok(okResponse);
       } catch (error) {
-        return esErrorHandler({ error, response });
+        return handleEsError({ error, response });
       }
     })
   );

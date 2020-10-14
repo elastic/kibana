@@ -9,7 +9,7 @@ import { ElasticsearchClient } from 'kibana/server';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
-import { esErrorHandler } from '../../../shared_imports';
+import { handleEsError } from '../../../shared_imports';
 
 async function createPolicy(client: ElasticsearchClient, name: string, phases: any): Promise<any> {
   const body = {
@@ -146,7 +146,7 @@ export function registerCreateRoute({ router, license }: RouteDependencies) {
         await createPolicy(context.core.elasticsearch.client.asCurrentUser, name, phases);
         return response.ok();
       } catch (error) {
-        return esErrorHandler({ error, response });
+        return handleEsError({ error, response });
       }
     })
   );

@@ -13,7 +13,7 @@ import {
 } from '../../../../../index_management/common/types';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
-import { esErrorHandler } from '../../../shared_imports';
+import { handleEsError } from '../../../shared_imports';
 
 function isReservedSystemTemplate(templateName: string, indexPatterns: string[]): boolean {
   return (
@@ -94,7 +94,7 @@ export function registerFetchRoute({ router, license }: RouteDependencies) {
         const okResponse = { body: filterTemplates(templates, isLegacy) };
         return response.ok(okResponse);
       } catch (error) {
-        return esErrorHandler({ error, response });
+        return handleEsError({ error, response });
       }
     })
   );

@@ -8,7 +8,7 @@ import { ListNodesRouteResponse, NodeDataRole } from '../../../../common/types';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
-import { esErrorHandler } from '../../../shared_imports';
+import { handleEsError } from '../../../shared_imports';
 
 interface Stats {
   nodes: {
@@ -74,7 +74,7 @@ export function registerListRoute({ router, config, license }: RouteDependencies
         );
         return response.ok({ body });
       } catch (error) {
-        return esErrorHandler({ error, response });
+        return handleEsError({ error, response });
       }
     })
   );

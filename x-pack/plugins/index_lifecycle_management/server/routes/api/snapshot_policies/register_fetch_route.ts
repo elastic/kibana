@@ -8,7 +8,7 @@ import { ElasticsearchClient } from 'kibana/server';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
-import { esErrorHandler } from '../../../shared_imports';
+import { handleEsError } from '../../../shared_imports';
 
 async function fetchSnapshotPolicies(client: ElasticsearchClient): Promise<any> {
   const response = await client.slm.getLifecycle();
@@ -25,7 +25,7 @@ export function registerFetchRoute({ router, license }: RouteDependencies) {
         );
         return response.ok({ body: Object.keys(policiesByName) });
       } catch (error) {
-        return esErrorHandler({ error, response });
+        return handleEsError({ error, response });
       }
     })
   );

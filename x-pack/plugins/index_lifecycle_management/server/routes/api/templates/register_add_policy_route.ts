@@ -13,7 +13,7 @@ import { TemplateFromEs, TemplateSerialized } from '../../../../../index_managem
 import { LegacyTemplateSerialized } from '../../../../../index_management/server';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
-import { esErrorHandler } from '../../../shared_imports';
+import { handleEsError } from '../../../shared_imports';
 
 async function getLegacyIndexTemplate(
   client: ElasticsearchClient,
@@ -120,7 +120,7 @@ export function registerAddPolicyRoute({ router, license }: RouteDependencies) {
         }
         return response.ok();
       } catch (error) {
-        return esErrorHandler({ error, response });
+        return handleEsError({ error, response });
       }
     })
   );

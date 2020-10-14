@@ -9,7 +9,7 @@ import { ElasticsearchClient } from 'kibana/server';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
-import { esErrorHandler } from '../../../shared_imports';
+import { handleEsError } from '../../../shared_imports';
 
 async function removeLifecycle(client: ElasticsearchClient, indexNames: string[]) {
   const options = {
@@ -38,7 +38,7 @@ export function registerRemoveRoute({ router, license }: RouteDependencies) {
         await removeLifecycle(context.core.elasticsearch.client.asCurrentUser, indexNames);
         return response.ok();
       } catch (error) {
-        return esErrorHandler({ error, response });
+        return handleEsError({ error, response });
       }
     })
   );

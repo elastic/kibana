@@ -9,7 +9,7 @@ import { ElasticsearchClient } from 'kibana/server';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
-import { esErrorHandler } from '../../../shared_imports';
+import { handleEsError } from '../../../shared_imports';
 
 async function deletePolicies(client: ElasticsearchClient, policyName: string): Promise<any> {
   const options = {
@@ -35,7 +35,7 @@ export function registerDeleteRoute({ router, license }: RouteDependencies) {
         await deletePolicies(context.core.elasticsearch.client.asCurrentUser, policyNames);
         return response.ok();
       } catch (error) {
-        return esErrorHandler({ error, response });
+        return handleEsError({ error, response });
       }
     })
   );
