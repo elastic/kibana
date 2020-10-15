@@ -129,7 +129,7 @@ describe('Detection rules, threshold', () => {
 
     goToRuleDetails();
 
-    cy.get(RULE_NAME_HEADER).should('have.text', `${newThresholdRule.name} Beta`);
+    cy.get(RULE_NAME_HEADER).should('have.text', `${newThresholdRule.name}`);
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', newThresholdRule.description);
     cy.get(ABOUT_DETAILS).within(() => {
       getDetails(SEVERITY_DETAILS).should('have.text', newThresholdRule.severity);
@@ -143,7 +143,7 @@ describe('Detection rules, threshold', () => {
     cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
     cy.get(DEFINITION_DETAILS).within(() => {
       getDetails(INDEX_PATTERNS_DETAILS).should('have.text', indexPatterns.join(''));
-      getDetails(CUSTOM_QUERY_DETAILS).should('have.text', `${newThresholdRule.customQuery} `);
+      getDetails(CUSTOM_QUERY_DETAILS).should('have.text', newThresholdRule.customQuery);
       getDetails(RULE_TYPE_DETAILS).should('have.text', 'Threshold');
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
       getDetails(THRESHOLD_DETAILS).should(

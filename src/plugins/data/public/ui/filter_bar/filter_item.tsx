@@ -62,6 +62,13 @@ export type FilterLabelStatus =
   | typeof FILTER_ITEM_WARNING
   | typeof FILTER_ITEM_ERROR;
 
+/**
+ * @remarks
+ * if changing this make sure to also change
+ * $kbnGlobalFilterItemEditorWidth
+ */
+export const FILTER_EDITOR_WIDTH = 420;
+
 export function FilterItem(props: Props) {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [indexPatternExists, setIndexPatternExists] = useState<boolean | undefined>(undefined);
@@ -228,7 +235,7 @@ export function FilterItem(props: Props) {
       },
       {
         id: 1,
-        width: 420,
+        width: FILTER_EDITOR_WIDTH,
         content: (
           <div>
             <FilterEditor
