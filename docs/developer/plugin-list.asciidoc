@@ -417,7 +417,8 @@ using the CURL scripts in the scripts folder.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/ml/readme.md[ml]
-|This plugin provides access to the machine learning features from Elastic.
+|This plugin provides access to the machine learning features provided by
+Elastic.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/monitoring[monitoring]

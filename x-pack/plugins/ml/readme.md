@@ -1,6 +1,7 @@
 # Documentation for ML UI developers
 
-This plugin provides access to the machine learning features from Elastic.
+This plugin provides access to the machine learning features provided by 
+Elastic.
 
 ## Requirements
 
