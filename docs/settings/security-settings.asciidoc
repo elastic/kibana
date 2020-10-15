@@ -341,11 +341,11 @@ xpack.security.audit.ignore_filters:
 | experimental[] List of values matched against the `event.action` field of an audit event. Refer to <<xpack-security-audit-logging>> for a list of available events.
 
 | `xpack.security.audit.ignore_filters[].categories[]`
-| experimental[] List of values matched against the `event.category` field of an audit event. Refer to https://www.elastic.co/guide/en/ecs/current/ecs-allowed-values-event-category.html[ECS categorization field] for allowed values.
+| experimental[] List of values matched against the `event.category` field of an audit event. Refer to https://www.elastic.co/guide/en/ecs/1.5/ecs-allowed-values-event-category.html[ECS categorization field] for allowed values.
 
 | `xpack.security.audit.ignore_filters[].types[]`
-| experimental[] List of values matched against the `event.type` field of an audit event. Refer to https://www.elastic.co/guide/en/ecs/current/ecs-allowed-values-event-type.html[ECS type field] for allowed values.
+| experimental[] List of values matched against the `event.type` field of an audit event. Refer to https://www.elastic.co/guide/en/ecs/1.5/ecs-allowed-values-event-type.html[ECS type field] for allowed values.
 
 | `xpack.security.audit.ignore_filters[].outcomes[]`
-| experimental[] List of values matched against the `event.outcome` field of an audit event. Refer to https://www.elastic.co/guide/en/ecs/current/ecs-allowed-values-event-outcome.html[ECS outcome field] for allowed values.
+| experimental[] List of values matched against the `event.outcome` field of an audit event. Refer to https://www.elastic.co/guide/en/ecs/1.5/ecs-allowed-values-event-outcome.html[ECS outcome field] for allowed values.
 |===
