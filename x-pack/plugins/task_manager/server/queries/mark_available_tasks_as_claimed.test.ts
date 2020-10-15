@@ -23,11 +23,13 @@ import {
   SortByRunAtAndRetryAt,
 } from './mark_available_tasks_as_claimed';
 
-import { TaskDictionary, TaskDefinition } from '../task';
+import { TaskTypeDictionary } from '../task_type_dictionary';
+import { mockLogger } from '../test_utils';
 
 describe('mark_available_tasks_as_claimed', () => {
   test('generates query matching tasks to be claimed when polling for tasks', () => {
-    const definitions: TaskDictionary<TaskDefinition> = {
+    const definitions = new TaskTypeDictionary(mockLogger());
+    definitions.registerTaskDefinitions({
       sampleTask: {
         type: 'sampleTask',
         title: 'title',
@@ -39,7 +41,7 @@ describe('mark_available_tasks_as_claimed', () => {
         title: 'title',
         createTaskRunner: () => ({ run: () => Promise.resolve() }),
       },
-    };
+    });
     const defaultMaxAttempts = 1;
     const taskManagerId = '3478fg6-82374f6-83467gf5-384g6f';
     const claimOwnershipUntil = '2019-02-12T21:01:22.479Z';
@@ -53,7 +55,7 @@ describe('mark_available_tasks_as_claimed', () => {
           // Either task has an schedule or the attempts < the maximum configured
           shouldBeOneOf<ExistsFilter | TermFilter | RangeFilter>(
             TaskWithSchedule,
-            ...Object.entries(definitions).map(([type, { maxAttempts }]) =>
+            ...Array.from(definitions).map(([type, { maxAttempts }]) =>
               taskWithLessThanMaxAttempts(type, maxAttempts || defaultMaxAttempts)
             )
           )
