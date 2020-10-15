@@ -43,9 +43,6 @@ import {
   shouldBeOneOf,
   mustBeAllOf,
   filterDownBy,
-  ExistsFilter,
-  TermFilter,
-  RangeFilter,
   asPinnedQuery,
   matchesClauses,
 } from './queries/query_clauses';
@@ -55,7 +52,6 @@ import {
   IdleTaskWithExpiredRunAt,
   InactiveTasks,
   RunningOrClaimingTaskWithExpiredRetryAt,
-  TaskWithSchedule,
   SortByRunAtAndRetryAt,
   tasksClaimedByOwner,
 } from './queries/mark_available_tasks_as_claimed';
@@ -260,9 +256,7 @@ export class TaskStore {
     const queryForScheduledTasks = mustBeAllOf(
       // Either a task with idle status and runAt <= now or
       // status running or claiming with a retryAt <= now.
-      shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt),
-      // Either task has a schedule or the attempts < the maximum configured
-      shouldBeOneOf<ExistsFilter | TermFilter | RangeFilter>(TaskWithSchedule)
+      shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt)
     );
 
     const apmTrans = apm.startTransaction(`taskManager markAvailableTasksAsClaimed`, 'taskManager');
