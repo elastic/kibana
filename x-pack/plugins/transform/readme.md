@@ -1,14 +1,13 @@
-# Documentation for ML UI developers
+# Documentation for Transforms UI developers
 
-This plugin provides access to the machine learning features provided by 
-Elastic.
+This plugin provides access to the transforms features provided by Elastic.
 
 ## Requirements
 
-To use machine learning features, you must have a Platinum or Enterprise license 
-or a free 14-day trial. File Data Visualizer requires a Basic license. For more 
+To use the transforms feature, you must have at least a Basic license. For more 
 info, refer to 
-[Set up machine learning features](https://www.elastic.co/guide/en/machine-learning/master/setup.html).
+[Set up transforms](https://www.elastic.co/guide/en/elasticsearch/reference/current/transform-setup.html).
+
 
 ## Setup local environment
 
@@ -19,14 +18,15 @@ info, refer to
 1. Install `nvm`, `node`, `yarn` (for example, by using Homebrew). See 
    [Install dependencies](https://www.elastic.co/guide/en/kibana/master/development-getting-started.html#_install_dependencies).
 
-1. Make sure that Elasticsearch is deployed and running on localhost:9200.
+1. Make sure that Elasticsearch is deployed and running on `localhost:9200`.
 
 1. Navigate to the directory of the `kibana` repository on your machine.
 
 1. Fetch the latest changes from the repository.
 
 1. Checkout the branch of the version you want to use. For example, if you want 
-   to use a 7.9 version, run `git checkout 7.9`.
+   to use a 7.9 version, run `git checkout 7.9`. (Your Elasticsearch and Kibana 
+   instances need to be the same version.)
 
 1. Run `nvm use`. The response shows the Node version that the environment uses. 
    If you need to update your Node version, the response message contains the 
@@ -61,8 +61,7 @@ different configurations on sample data.
 1. Pick a data set or feel free to click *Add* on all of the available sample 
    data sets.
 
-These data sets are now ready be analyzed in ML jobs in Kibana.
-
+These data sets are now ready to be used for creating transforms in Kibana.
 
 ## Running tests
 
@@ -76,22 +75,22 @@ New snapshots, all plugins:
 node scripts/jest
 ```
  
-Update snapshots for the ML plugin: 
+Update snapshots for the transform plugin: 
 
 ```
-node scripts/jest plugins/ml -u
+node scripts/jest plugins/transform -u
 ```
 
 Update snapshots for a specific directory only: 
 
 ```
-node scripts/jest plugins/ml/public/application/settings/filter_lists
+node scripts/jest x-pack/plugins/transform/public/app/sections
 ```
 
 Run tests with verbose output: 
 
 ```
-node scripts/jest plugins/ml --verbose
+node scripts/jest plugins/transform --verbose
 ```
 
 ### Functional tests
@@ -107,45 +106,12 @@ Elasticsearch.
 
 1. In another tab, run the following command to perform API integration tests (from the x-pack directory):
 
-        node scripts/functional_test_runner.js --include-tag mlqa --config test/api_integration/config
+        node scripts/functional_test_runner.js --include-tag transform --config test/api_integration/config
         
-   ML API integration tests are located in `x-pack/test/api_integration/apis/ml`.
+   The transform API integration tests are located in `x-pack/test/api_integration/apis/transform`.
 
 1. In another tab, run the following command to perform UI functional tests (from the x-pack directory):
 
-        node scripts/functional_test_runner.js --include-tag mlqa
+        node scripts/functional_test_runner.js --include-tag transform
         
-   ML functional tests are located in `x-pack/test/functional/apps/ml`.
-
-## Shared functions
-
-
-You can find the ML shared functions in the following files in GitHub:
-
-```
-https://github.com/elastic/kibana/blob/master/x-pack/plugins/ml/public/shared.ts
-```
-
-```
-https://github.com/elastic/kibana/blob/master/x-pack/plugins/ml/server/shared.ts
-```
-
-These functions are shared from the root of the ML plugin, you can import them with an import statement. For example:
-
-```
-import { MlPluginSetup } from '../../../../ml/server';
-```
-
-or 
-
-```
-import { ANOMALY_SEVERITY } from '../../ml/common';
-```
-
-Functions are shared from the following directories:
-
-```
-ml/common
-ml/public
-ml/server
-```
+   The transform functional tests are located in `x-pack/test/functional/apps/transform`.
