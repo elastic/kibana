@@ -894,6 +894,8 @@ export interface Range {
     // (undocumented)
     from: number;
     // (undocumented)
+    label?: string;
+    // (undocumented)
     to: number;
     // Warning: (ae-forgotten-export) The symbol "name" needs to be exported by the entry point index.d.ts
     //
