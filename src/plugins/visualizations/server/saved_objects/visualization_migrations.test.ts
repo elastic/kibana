@@ -1579,79 +1579,158 @@ describe('migration visualization', () => {
     });
   });
 
-  describe('7.10.0 tsvb filter_ratio migration', () => {
+  describe('7.10.0', () => {
     const migrate = (doc: any) =>
       visualizationSavedObjectTypeMigrations['7.10.0'](
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );
 
-    const testDoc1 = {
-      attributes: {
-        title: 'My Vis',
-        description: 'This is my super cool vis.',
-        visState: `{"type":"metrics","params":{"id":"61ca57f0-469d-11e7-af02-69e470af7417","type":"timeseries",
-        "series":[{"id":"61ca57f1-469d-11e7-af02-69e470af7417","metrics":[{"id":"61ca57f2-469d-11e7-af02-69e470af7417",
-        "type":"filter_ratio","numerator":"Filter Bytes Test:>1000","denominator":"Filter Bytes Test:<1000"}]}]}}`,
-      },
-    };
+    describe('tsvb filter_ratio migration', () => {
+      const testDoc1 = {
+        attributes: {
+          title: 'My Vis',
+          description: 'This is my super cool vis.',
+          visState: `{"type":"metrics","params":{"id":"61ca57f0-469d-11e7-af02-69e470af7417","type":"timeseries",
+          "series":[{"id":"61ca57f1-469d-11e7-af02-69e470af7417","metrics":[{"id":"61ca57f2-469d-11e7-af02-69e470af7417",
+          "type":"filter_ratio","numerator":"Filter Bytes Test:>1000","denominator":"Filter Bytes Test:<1000"}]}]}}`,
+        },
+      };
 
-    it('should replace numerator string with a query object', () => {
-      const migratedTestDoc1 = migrate(testDoc1);
-      const metric = JSON.parse(migratedTestDoc1.attributes.visState).params.series[0].metrics[0];
+      it('should replace numerator string with a query object', () => {
+        const migratedTestDoc1 = migrate(testDoc1);
+        const metric = JSON.parse(migratedTestDoc1.attributes.visState).params.series[0].metrics[0];
 
-      expect(metric.numerator).toHaveProperty('query');
-      expect(metric.numerator).toHaveProperty('language');
+        expect(metric.numerator).toHaveProperty('query');
+        expect(metric.numerator).toHaveProperty('language');
+      });
+
+      it('should replace denominator string with a query object', () => {
+        const migratedTestDoc1 = migrate(testDoc1);
+        const metric = JSON.parse(migratedTestDoc1.attributes.visState).params.series[0].metrics[0];
+
+        expect(metric.denominator).toHaveProperty('query');
+        expect(metric.denominator).toHaveProperty('language');
+      });
     });
 
-    it('should replace denominator string with a query object', () => {
-      const migratedTestDoc1 = migrate(testDoc1);
-      const metric = JSON.parse(migratedTestDoc1.attributes.visState).params.series[0].metrics[0];
-
-      expect(metric.denominator).toHaveProperty('query');
-      expect(metric.denominator).toHaveProperty('language');
-    });
-  });
-
-  describe('7.10.0 remove tsvb search source', () => {
-    const migrate = (doc: any) =>
-      visualizationSavedObjectTypeMigrations['7.10.0'](
-        doc as Parameters<SavedObjectMigrationFn>[0],
-        savedObjectMigrationContext
-      );
-    const generateDoc = (visState: any) => ({
-      attributes: {
-        title: 'My Vis',
-        description: 'This is my super cool vis.',
-        visState: JSON.stringify(visState),
-        uiStateJSON: '{}',
-        version: 1,
-        kibanaSavedObjectMeta: {
-          searchSourceJSON: JSON.stringify({
-            filter: [],
-            query: {
+    describe('remove tsvb search source', () => {
+      const generateDoc = (visState: any) => ({
+        attributes: {
+          title: 'My Vis',
+          description: 'This is my super cool vis.',
+          visState: JSON.stringify(visState),
+          uiStateJSON: '{}',
+          version: 1,
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({
+              filter: [],
               query: {
-                query_string: {
-                  query: '*',
+                query: {
+                  query_string: {
+                    query: '*',
+                  },
+                },
+                language: 'lucene',
+              },
+            }),
+          },
+        },
+      });
+
+      it('should remove the search source JSON', () => {
+        const timeSeriesDoc = generateDoc({ type: 'metrics' });
+        const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
+        expect(migratedtimeSeriesDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON).toEqual(
+          '{}'
+        );
+        const { kibanaSavedObjectMeta, ...attributes } = migratedtimeSeriesDoc.attributes;
+        const {
+          kibanaSavedObjectMeta: oldKibanaSavedObjectMeta,
+          ...oldAttributes
+        } = migratedtimeSeriesDoc.attributes;
+        expect(attributes).toEqual(oldAttributes);
+      });
+    });
+
+    describe('nested filters agg query migration', () => {
+      const doc = {
+        attributes: {
+          visState: JSON.stringify({
+            aggs: [
+              {
+                type: 'avg_bucket',
+                params: {
+                  customBucket: {
+                    type: 'filters',
+                    params: {
+                      filters: [
+                        {
+                          input: {
+                            query: 'response:200',
+                          },
+                          label: '',
+                        },
+                        {
+                          input: {
+                            language: 'kuery',
+                            query: 'response:404',
+                          },
+                          label: 'bad response',
+                        },
+                        {
+                          input: {
+                            query: {
+                              exists: {
+                                field: 'phpmemory',
+                              },
+                            },
+                          },
+                          label: '',
+                        },
+                        {
+                          input: {
+                            query: {
+                              query_string: {
+                                query: 'foo:"bar"',
+                              },
+                            },
+                          },
+                          label: '',
+                        },
+                      ],
+                    },
+                  },
                 },
               },
-              language: 'lucene',
-            },
+            ],
           }),
         },
-      },
-    });
+      };
 
-    it('should remove the search source JSON', () => {
-      const timeSeriesDoc = generateDoc({ type: 'metrics' });
-      const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
-      expect(migratedtimeSeriesDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON).toEqual('{}');
-      const { kibanaSavedObjectMeta, ...attributes } = migratedtimeSeriesDoc.attributes;
-      const {
-        kibanaSavedObjectMeta: oldKibanaSavedObjectMeta,
-        ...oldAttributes
-      } = migratedtimeSeriesDoc.attributes;
-      expect(attributes).toEqual(oldAttributes);
+      it('should add language property to filters without one, assuming lucene', () => {
+        const migrationResult = migrate(doc);
+        const visState = JSON.parse(migrationResult.attributes.visState);
+
+        const languages = visState.aggs[0].params.customBucket.params.filters.map(
+          (filter: any) => filter.input.language
+        );
+        expect(languages).toEqual(['lucene', 'kuery', 'lucene', 'lucene']);
+      });
+
+      it('should move query.query_string.query to query', () => {
+        const migrationResult = migrate(doc);
+        const visState = JSON.parse(migrationResult.attributes.visState);
+
+        const filter = visState.aggs[0].params.customBucket.params.filters[3];
+        expect(filter).toEqual({
+          input: {
+            language: 'lucene',
+            query: 'foo:"bar"',
+          },
+          label: '',
+        });
+      });
     });
   });
 });

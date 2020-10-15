@@ -566,6 +566,55 @@ const migrateFiltersAggQueryStringQueries: SavedObjectMigrationFn<any, any> = (d
   return doc;
 };
 
+/**
+ * Performs the same migration as `migrateFiltersAggQuery` and
+ * `migrateFiltersAggQueryStringQueries`, but recursively searches
+ * for nested aggs used inside pipeline aggs, which were not handled
+ * in the original migrations.
+ */
+const migrateFiltersAggQueryNested: SavedObjectMigrationFn<any, any> = (doc) => {
+  const visStateJSON = get(doc, 'attributes.visState');
+
+  const updateAgg = (agg: any) => {
+    // Recurse to update nested aggs
+    if (agg.params.customBucket) updateAgg(agg.params.customBucket);
+    if (agg.params.customMetric) updateAgg(agg.params.customMetric);
+
+    if (agg.type !== 'filters') {
+      return;
+    }
+    agg.params.filters.forEach((filter: any) => {
+      // handle migrateFiltersAggQueryStringQueries
+      if (filter.input.query.query_string) {
+        filter.input.query = filter.input.query.query_string.query;
+      }
+      // handle migrateFiltersAggQuery
+      if (filter.input.language) return;
+      filter.input.language = 'lucene';
+    });
+  };
+
+  if (visStateJSON) {
+    try {
+      const visState = JSON.parse(visStateJSON);
+
+      if (visState?.aggs) {
+        visState.aggs.forEach((agg: any) => updateAgg(agg));
+        return {
+          ...doc,
+          attributes: {
+            ...doc.attributes,
+            visState: JSON.stringify(visState),
+          },
+        };
+      }
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+  }
+  return doc;
+};
+
 const addDocReferences: SavedObjectMigrationFn<any, any> = (doc) => ({
   ...doc,
   references: doc.references || [],
@@ -789,5 +838,5 @@ export const visualizationSavedObjectTypeMigrations = {
   '7.7.0': flow(migrateOperatorKeyTypo, migrateSplitByChartRow),
   '7.8.0': flow(migrateTsvbDefaultColorPalettes),
   '7.9.3': flow(migrateMatchAllQuery),
-  '7.10.0': flow(migrateFilterRatioQuery, removeTSVBSearchSource),
+  '7.10.0': flow(migrateFilterRatioQuery, removeTSVBSearchSource, migrateFiltersAggQueryNested),
 };
