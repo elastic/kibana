@@ -11,6 +11,7 @@ import deepEqual from 'fast-deep-equal';
 
 import { SpyRouteProps } from './types';
 import { useRouteSpy } from './use_route_spy';
+import { SecurityPageName } from '../../../../common/constants';
 
 export const SpyRouteComponent = memo<
   SpyRouteProps & { location: H.Location; pageName: string | undefined }
@@ -48,6 +49,7 @@ export const SpyRouteComponent = memo<
               history,
               pageName,
               pathName: pathname,
+              search: pageName === SecurityPageName.administration ? search ?? '' : '',
               state,
               tabName,
             },
