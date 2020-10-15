@@ -13,9 +13,9 @@ import { getPolicyExists } from '../../index/get_policy_exists';
 import { setPolicy } from '../../index/set_policy';
 import { setTemplate } from '../../index/set_template';
 import { getSignalsTemplate } from './get_signals_template';
-import { getTemplateExists } from '../../index/get_template_exists';
 import { createBootstrapIndex } from '../../index/create_bootstrap_index';
 import signalsPolicy from './signals_policy.json';
+import { templateNeedsUpdate } from './check_template_version';
 
 export const createIndexRoute = (router: IRouter) => {
   router.post(
@@ -68,18 +68,17 @@ export const createDetectionIndex = async (
 
   const index = siemClient.getSignalsIndex();
   const indexExists = await getIndexExists(callCluster, index);
-  if (indexExists) {
-    throw new CreateIndexError(`index: "${index}" already exists`, 409);
-  } else {
+  if (await templateNeedsUpdate(callCluster, index)) {
     const policyExists = await getPolicyExists(callCluster, index);
     if (!policyExists) {
       await setPolicy(callCluster, index, signalsPolicy);
     }
-    const templateExists = await getTemplateExists(callCluster, index);
-    if (!templateExists) {
-      const template = getSignalsTemplate(index);
-      await setTemplate(callCluster, index, template);
+    await setTemplate(callCluster, index, getSignalsTemplate(index));
+    if (indexExists) {
+      await callCluster('indices.rollover', { alias: index });
     }
+  }
+  if (!indexExists) {
     await createBootstrapIndex(callCluster, index);
   }
 };
