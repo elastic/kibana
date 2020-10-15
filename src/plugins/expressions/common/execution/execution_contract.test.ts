@@ -30,7 +30,7 @@ const createExecution = (
   const execution = new Execution({
     executor,
     ast: parseExpression(expression),
-    context,
+    params: { ...context },
   });
   return execution;
 };

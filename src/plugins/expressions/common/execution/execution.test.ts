@@ -38,8 +38,10 @@ const createExecution = (
   const execution = new Execution({
     executor,
     ast: parseExpression(expression),
-    context,
-    debug,
+    params: {
+      ...context,
+      debug,
+    },
   });
   return execution;
 };
@@ -143,6 +145,7 @@ describe('Execution', () => {
       const execution = new Execution({
         executor,
         expression,
+        params: {},
       });
       expect(execution.expression).toBe(expression);
     });
@@ -153,6 +156,7 @@ describe('Execution', () => {
       const execution = new Execution({
         ast: parseExpression(expression),
         executor,
+        params: {},
       });
       expect(execution.expression).toBe(expression);
     });
@@ -619,7 +623,7 @@ describe('Execution', () => {
         const execution = new Execution({
           executor,
           ast: parseExpression('add val=1 | throws | add val=3'),
-          debug: true,
+          params: { debug: true },
         });
         execution.start(0);
         await execution.result;
@@ -637,7 +641,7 @@ describe('Execution', () => {
         const execution = new Execution({
           executor,
           ast: parseExpression('add val=1 | throws | add val=3'),
-          debug: true,
+          params: { debug: true },
         });
         execution.start(0);
         await execution.result;
@@ -658,7 +662,7 @@ describe('Execution', () => {
         const execution = new Execution({
           executor,
           ast: parseExpression('add val=1 | throws | add val=3'),
-          debug: true,
+          params: { debug: true },
         });
         execution.start(0);
         await execution.result;

@@ -9,5 +9,5 @@ Contract is a public representation of `Execution` instances. Contract we can re
 <b>Signature:</b>
 
 ```typescript
-readonly contract: ExecutionContract<ExtraContext, Input, Output, InspectorAdapters>;
+readonly contract: ExecutionContract<Input, Output, InspectorAdapters>;
 ```
