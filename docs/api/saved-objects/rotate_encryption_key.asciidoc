@@ -5,9 +5,9 @@
 <titleabbrev>Rotate encryption key</titleabbrev>
 ++++
 
-experimental[] Rotate encryption key for the saved objects with encrypted attributes.
+experimental[] Rotate the encryption key for encrypted saved objects.
 
-For the time being if you specify <<xpack-encryptedSavedObjects-keyRotation-decryptionOnlyKeys, decryption-only keys>> {kib} may try to use them all if it cannot decrypt the saved object using the primary encryption key. In most of the cases this overhead is negligible, but if you're constantly dealing with the thousands of the saved objects that are encrypted and experiencing performance issues you may want to try to rotate encryption key for those objects.
+If a saved object cannot be decrypted using the primary encryption key, then {kib} will attempt to decrypt it using the specified <<xpack-encryptedSavedObjects-keyRotation-decryptionOnlyKeys, decryption-only keys>>. In most of the cases this overhead is negligible, but if you're dealing with a large number of saved objects and experiencing performance issues, you may want to rotate the encryption key.
 
 [IMPORTANT]
 ============================================================================
@@ -23,10 +23,10 @@ Bulk key rotation can consume a considerable amount of resources and hence only 
 ==== Query parameters
 
 `type`::
-(Optional, string) Limits encryption key rotation only to the saved objects with the specified type. By default, {kib} will try to rotate encryption key for all saved object types that may contain encrypted attributes.
+(Optional, string) Limits encryption key rotation only to the saved objects with the specified type. By default, {kib} tries to rotate the encryption key for all saved object types that may contain encrypted attributes.
 
 `batchSize`::
-(Optional, number) Specifies a maximum number of saved objects that {kib} can process in a single batch. Bulk key rotation is an iterative process since {kib} may not be able to fetch and process all required saved objects in one go and hence splits processing into consequent batches. By default, batch size is 10000 which is also a maximum allowed value.
+(Optional, number) Specifies a maximum number of saved objects that {kib} can process in a single batch. Bulk key rotation is an iterative process since {kib} may not be able to fetch and process all required saved objects in one go and splits processing into consequent batches. By default, the batch size is 10000, which is also a maximum allowed value.
 
 [[saved-objects-api-rotate-encryption-key-response-body]]
 ==== Response body
@@ -35,9 +35,9 @@ Bulk key rotation can consume a considerable amount of resources and hence only 
 (number) Indicates the total number of _all_ saved objects with the encrypted attributes, irrespective to the key {kib} used for encryption.
 
 `successful`::
-(number) Indicates the number of the saved objects that were still encrypted with one of the old encryption keys and that {kib} successfully re-encrypted with the primary key.
+(number) Indicates the total number of _all_ encrypted saved objects (optionally filtered by the requested `type`), regardless of the key {kib} used for encryption.
 +
-NOTE: In most of the cases `total` will be greater than `successful` even if `failed` is zero. The reason is that {kib} may not need or may not be able to rotate encryption key for all saved objects with the encrypted attributes.
+NOTE: In most cases, `total` will be greater than `successful` even if `failed` is zero. The reason is that {kib} may not need or may not be able to rotate encryption keys for all encrypted saved objects.
 
 `failed`::
 (number) Indicates the number of the saved objects that were still encrypted with one of the old encryption keys that {kib} failed to re-encrypt with the primary key.
@@ -77,17 +77,17 @@ The API returns the following:
 }
 --------------------------------------------------
 
-The result indicates that the encryption key was successfully rotated for 300 out of 1000 saved objects with encrypted attributes, and 700 of the saved objects either didn't require key rotation or were encrypted with unknown encryption key.
+The result indicates that the encryption key was successfully rotated for 300 out of 1000 saved objects with encrypted attributes, and 700 of the saved objects either didn't require key rotation, or were encrypted with an unknown encryption key.
 
 [[saved-objects-api-rotate-encryption-key-example-2]]
 ===== Encryption key rotation for the specific type with reduce batch size
 
 [IMPORTANT]
 ============================================================================
-We optimized default parameters for speed and don't expect you to change any of those without a strong need. However, if you're experiencing any issues with this API you may want to decrease a batch size or rotate encryption key for the specific types only. In this case you may need to run key rotation multiple times in a row.
+Default parameters are optimized for speed. Change the parameters only when necessary. However, if you're experiencing any issues with this API, you may want to decrease a batch size or rotate the encryption keys for the specific types only. In this case, you may need to run key rotation multiple times in a row.
 ============================================================================
 
-In this example we perform key rotation for all saved objects with the `alert` type in batches of 5000.
+In this example, key rotation is performed for all saved objects with the `alert` type in batches of 5000.
 
 [source,sh]
 --------------------------------------------------

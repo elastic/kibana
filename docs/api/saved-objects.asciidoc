@@ -28,7 +28,7 @@ The following saved objects APIs are available:
 
 * <<saved-objects-api-resolve-import-errors, Resolve import errors API>> to resolve errors from the import API
 
-* <<saved-objects-api-rotate-encryption-key, Rotate encryption key API>> to rotate encryption key for the saved objects with encrypted attributes
+* <<saved-objects-api-rotate-encryption-key, Rotate encryption key API>> to rotate the encryption key for encrypted saved objects
 
 include::saved-objects/get.asciidoc[]
 include::saved-objects/bulk_get.asciidoc[]

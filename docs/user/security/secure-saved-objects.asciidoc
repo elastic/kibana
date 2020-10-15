@@ -2,16 +2,11 @@
 [[xpack-security-secure-saved-objects]]
 === Secure saved objects
 
-{kib} stores entities such as dashboards, visualizations, alerts, actions, and advanced settings as *saved objects*, which are kept in a dedicated internal {es} index. If such an object includes any sensitive information, for example a PagerDuty’s integration key or email server credentials used by the alert action, {kib} encrypts it and makes sure it cannot be accidentally leaked or tampered with.
+{kib} stores entities such as dashboards, visualizations, alerts, actions, and advanced settings as saved objects, which are kept in a dedicated, internal {es} index. If such an object includes sensitive information, for example a PagerDuty integration key or email server credentials used by the alert action, {kib} encrypts it and makes sure it cannot be accidentally leaked or tampered with.
 
 Encrypting sensitive information means that a malicious party with access to the {kib} internal indices won't be able to extract that information without also knowing the encryption key.
 
 Example `kibana.yml`:
-
-[IMPORTANT]
-============================================================================
-If you don't specify encryption key {kib} will generate a random one automatically at startup time. That means every time you restart {kib} it will use a new ephemeral encryption key and won't be able to decrypt saved objects encrypted with another key. To prevent data loss, {kib} may disable features which rely on this encryption until you explicitly set an encryption key.
-============================================================================
 
 [source,yaml]
 --------------------------------------------------------------------------------
@@ -19,14 +14,19 @@ xpack.encryptedSavedObjects:
   encryptionKey: "min-32-byte-long-strong-encryption-key"
 --------------------------------------------------------------------------------
 
+[IMPORTANT]
+============================================================================
+If you don't specify an encryption key, {kib} automatically generates a random key at startup. Every time you restart {kib}, it uses a new ephemeral encryption key and is unable to decrypt saved objects encrypted with another key. To prevent data loss, {kib} might disable features that rely on this encryption until you explicitly set an encryption key.
+============================================================================
+
 [[encryption-key-rotation]]
 ==== Encryption key rotation
 
-Many policies and best practices stipulate that encryption keys should be periodically rotated to decrease the amount of content encrypted with one key and hence limit the potential damage in case the key is compromised. {kib} allows you to rotate encryption keys whenever there is a need. 
+Many policies and best practices stipulate that encryption keys should be periodically rotated to decrease the amount of content encrypted with one key and therefore limit the potential damage if the key is compromised. {kib} allows you to rotate encryption keys whenever there is a need.
 
-As a rule of thumb, when you change an encryption key you still keep the old one for some time. While {kib} will only use a new encryption key to encrypt all new and updated data it still may need to know the old one to decrypt data that was encrypted using that old key. Moreover, it's perfectly possible to have multiple old keys used only for decryption. It's worth noting that {kib} doesn't re-encrypt existing saved objects with the new encryption key automatically, re-encryption only happens when you update existing object or use <<saved-objects-api-rotate-encryption-key, Rotate encryption key API>>.
+When you change an encryption key, keep the old one for some time. Although {kib} only uses a new encryption key to encrypt all new and updated data, it still may need the old one to decrypt data that was encrypted using the old key. It's possible to have multiple old keys used only for decryption. {kib} doesn't automatically re-encrypt existing saved objects with the new encryption key. Re-encryption only happens when you update existing object or use the <<saved-objects-api-rotate-encryption-key, rotate encryption key API>>.
 
-Here is how your `kibana.yml` can look like if you want to use key rotation functionality:
+Here is how your `kibana.yml` might look if you use key rotation functionality:
 
 [source,yaml]
 --------------------------------------------------------------------------------
@@ -36,12 +36,12 @@ xpack.encryptedSavedObjects:
     decryptionOnlyKeys: ["min-32-byte-long-OLD#1-encryption-key", "min-32-byte-long-OLD#2-encryption-key"] <2>
 --------------------------------------------------------------------------------
 
-<1> Encryption key {kib} will use to encrypt all new or updated saved objects, known as the primary encryption key.
-<2> A list of encryption keys {kib} will try to use only to decrypt existing saved objects if decryption with the primary encryption key isn't possible, known as decryption-only or secondary encryption keys.
+<1> The encryption key {kib} will use to encrypt all new or updated saved objects. This is known as the primary encryption key.
+<2> A list of encryption keys {kib} will try to use to decrypt existing saved objects if decryption with the primary encryption key isn't possible. These keys are known as the decryption-only or secondary encryption keys.
 
 [NOTE]
 ============================================================================
-You may also leverage this functionality if, by mistake, you ended up with multiple {kib} instances connected to the same {es} cluster that use different encryption keys. In this case you may have a mix of saved objects encrypted with different keys and every {kib} instance can deal only with a specific subset of objects. To fix this you'll need to choose a single primary encryption key for `xpack.encryptedSavedObjects.encryptionKey`, move all other encryption keys to `xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys` and sync this configuration across all {kib} instances.
+You might also leverage this functionality if multiple {kib} instances connected to the same {es} cluster use different encryption keys. In this case, you might have a mix of saved objects encrypted with different keys, and every {kib} instance can only deal with a specific subset of objects. To fix this, you must choose a single primary encryption key for `xpack.encryptedSavedObjects.encryptionKey`, move all other encryption keys to `xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys`, and sync this configuration across all {kib} instances.
 ============================================================================
 
-At some point you may want to dispose old encryption keys completely, but before that you should make sure there are no saved objects left that {kib} encrypted with the encryption key you're going to dispose. You can use <<saved-objects-api-rotate-encryption-key, Rotate encryption key API>> for that purpose. It will figure out which existing saved objects still require decryption-only keys and re-encrypt them with the primary key.
+At some point you might want to dispose of old encryption keys completely. Make sure there are no saved objects that {kib} encrypted with these encryption keys. You can use the <<saved-objects-api-rotate-encryption-key, rotate encryption key API>> to determine which existing saved objects require decryption-only keys and re-encrypt them with the primary key.
