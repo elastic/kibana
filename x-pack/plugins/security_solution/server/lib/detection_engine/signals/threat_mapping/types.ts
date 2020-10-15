@@ -155,11 +155,14 @@ export interface GetThreatListOptions {
   sortOrder: 'asc' | 'desc' | undefined;
   threatFilters: PartialFilter[];
   exceptionItems: ExceptionListItemSchema[];
+  listClient: ListClient;
 }
 
 export interface GetSortWithTieBreakerOptions {
   sortField: string | undefined;
   sortOrder: 'asc' | 'desc' | undefined;
+  index: string[];
+  listItemIndex: string;
 }
 
 /**
@@ -171,6 +174,5 @@ export interface ThreatListItem {
 }
 
 export interface SortWithTieBreaker {
-  '@timestamp': 'asc';
   [key: string]: string;
 }
