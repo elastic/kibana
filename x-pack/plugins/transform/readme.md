@@ -18,7 +18,7 @@ info, refer to
 1. Install `nvm`, `node`, `yarn` (for example, by using Homebrew). See 
    [Install dependencies](https://www.elastic.co/guide/en/kibana/master/development-getting-started.html#_install_dependencies).
 
-1. Make sure that Elasticsearch is deployed and running on localhost:9200.
+1. Make sure that Elasticsearch is deployed and running on `localhost:9200`.
 
 1. Navigate to the directory of the `kibana` repository on your machine.
 
