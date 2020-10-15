@@ -60,7 +60,7 @@ different configurations on sample data.
 1. Pick a data set or feel free to click *Add* on all of the available sample 
    data sets.
 
-These data sets are now ready be transformed in Kibana.
+These data sets are now ready to be used for creating transforms in Kibana.
 
 ## Running tests
 
