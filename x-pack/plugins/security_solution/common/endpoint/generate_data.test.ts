@@ -12,7 +12,6 @@ import {
   RelatedEventCategory,
   ECSCategory,
   ANCESTRY_LIMIT,
-  DataStream,
 } from './generate_data';
 import { firstNonNullValue, values } from './models/ecs_safety_helpers';
 import {
@@ -27,34 +26,26 @@ interface Node {
   parent_entity_id?: string;
 }
 
-interface EventWithDataStream {
-  data_stream: DataStream;
-}
-
 describe('data generator data streams', () => {
   // these tests cast the result of the generate methods so that we can specifically compare the `data_stream` fields
   it('creates a generator with default data streams', () => {
     const generator = new EndpointDocGenerator('seed');
-    expect(
-      ((generator.generateHostMetadata() as unknown) as EventWithDataStream).data_stream
-    ).toEqual({
+    expect(generator.generateHostMetadata().data_stream).toEqual({
       type: 'metrics',
       dataset: 'endpoint.metadata',
       namespace: 'default',
     });
-    expect(
-      ((generator.generatePolicyResponse() as unknown) as EventWithDataStream).data_stream
-    ).toEqual({
+    expect(generator.generatePolicyResponse().data_stream).toEqual({
       type: 'metrics',
       dataset: 'endpoint.policy',
       namespace: 'default',
     });
-    expect(((generator.generateEvent() as unknown) as EventWithDataStream).data_stream).toEqual({
+    expect(generator.generateEvent().data_stream).toEqual({
       type: 'logs',
       dataset: 'endpoint.events.process',
       namespace: 'default',
     });
-    expect(((generator.generateAlert() as unknown) as EventWithDataStream).data_stream).toEqual({
+    expect(generator.generateAlert().data_stream).toEqual({
       type: 'logs',
       dataset: 'endpoint.alerts',
       namespace: 'default',
@@ -67,22 +58,18 @@ describe('data generator data streams', () => {
     const eventsDataStream = { type: 'events', dataset: 'events stuff', namespace: 'name' };
     const alertsDataStream = { type: 'alerts', dataset: 'alerts stuff', namespace: 'name' };
     const generator = new EndpointDocGenerator('seed');
-    expect(
-      ((generator.generateHostMetadata(0, metadataDataStream) as unknown) as EventWithDataStream)
-        .data_stream
-    ).toStrictEqual(metadataDataStream);
-    expect(
-      ((generator.generatePolicyResponse({ policyDataStream }) as unknown) as EventWithDataStream)
-        .data_stream
-    ).toStrictEqual(policyDataStream);
-    expect(
-      ((generator.generateEvent({ eventsDataStream }) as unknown) as EventWithDataStream)
-        .data_stream
-    ).toStrictEqual(eventsDataStream);
-    expect(
-      ((generator.generateAlert({ alertsDataStream }) as unknown) as EventWithDataStream)
-        .data_stream
-    ).toStrictEqual(alertsDataStream);
+    expect(generator.generateHostMetadata(0, metadataDataStream).data_stream).toStrictEqual(
+      metadataDataStream
+    );
+    expect(generator.generatePolicyResponse({ policyDataStream }).data_stream).toStrictEqual(
+      policyDataStream
+    );
+    expect(generator.generateEvent({ eventsDataStream }).data_stream).toStrictEqual(
+      eventsDataStream
+    );
+    expect(generator.generateAlert({ alertsDataStream }).data_stream).toStrictEqual(
+      alertsDataStream
+    );
   });
 });
 

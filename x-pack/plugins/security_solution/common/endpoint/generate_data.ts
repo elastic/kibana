@@ -7,6 +7,7 @@ import uuid from 'uuid';
 import seedrandom from 'seedrandom';
 import {
   AlertEvent,
+  DataStream,
   EndpointStatus,
   Host,
   HostMetadata,
@@ -266,15 +267,6 @@ interface NodeState {
 }
 
 /**
- * The data_stream fields in an elasticsearch document.
- */
-export interface DataStream {
-  dataset: string;
-  namespace: string;
-  type: string;
-}
-
-/**
  * The Tree and TreeNode interfaces define structures to make testing of resolver functionality easier. The `generateTree`
  * method builds a `Tree` structures which organizes the different parts of the resolver tree. Maps are used to allow
  * tests to quickly verify if the node they retrieved from ES was actually created by the generator or if there is an
@@ -392,10 +384,6 @@ const alertsDefaultDataStream = {
   namespace: 'default',
 };
 
-function createDataStreamField(ds: DataStream) {
-  return { data_stream: ds };
-}
-
 export class EndpointDocGenerator {
   commonInfo: HostInfo;
   random: seedrandom.prng;
@@ -499,7 +487,7 @@ export class EndpointDocGenerator {
         dataset: 'endpoint.metadata',
       },
       ...this.commonInfo,
-      ...createDataStreamField(metadataDataStream),
+      data_stream: metadataDataStream,
     };
   }
 
@@ -526,7 +514,7 @@ export class EndpointDocGenerator {
   } = {}): AlertEvent {
     return {
       ...this.commonInfo,
-      ...createDataStreamField(alertsDataStream),
+      data_stream: alertsDataStream,
       '@timestamp': ts,
       ecs: {
         version: '1.4.0',
@@ -675,7 +663,7 @@ export class EndpointDocGenerator {
         return {};
       })(options.eventCategory);
     return {
-      ...createDataStreamField(options?.eventsDataStream ?? eventsDefaultDataStream),
+      data_stream: options?.eventsDataStream ?? eventsDefaultDataStream,
       '@timestamp': options.timestamp ? options.timestamp : new Date().getTime(),
       agent: { ...this.commonInfo.agent, type: 'endpoint' },
       ecs: {
@@ -1353,7 +1341,7 @@ export class EndpointDocGenerator {
       return allStatus || this.randomHostPolicyResponseActionStatus();
     };
     return {
-      ...createDataStreamField(policyDataStream),
+      data_stream: policyDataStream,
       '@timestamp': ts,
       agent: {
         id: this.commonInfo.agent.id,
