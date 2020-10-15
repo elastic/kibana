@@ -7,6 +7,7 @@
 import React, { FC } from 'react';
 
 import { EuiTabbedContent } from '@elastic/eui';
+import { htmlIdGenerator } from '@elastic/eui/lib/services';
 import { Optional } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
 
@@ -162,9 +163,11 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
     position: 'left',
   };
 
+  const tabId = htmlIdGenerator()();
+
   const tabs = [
     {
-      id: `transform-details-tab-${item.id}`,
+      id: `transform-details-tab-${tabId}`,
       'data-test-subj': 'transformDetailsTab',
       name: i18n.translate(
         'xpack.transform.transformList.transformDetails.tabs.transformDetailsLabel',
@@ -175,7 +178,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       content: <ExpandedRowDetailsPane sections={[general, state, checkpointing]} />,
     },
     {
-      id: `transform-stats-tab-${item.id}`,
+      id: `transform-stats-tab-${tabId}`,
       'data-test-subj': 'transformStatsTab',
       name: i18n.translate(
         'xpack.transform.transformList.transformDetails.tabs.transformStatsLabel',
@@ -186,13 +189,13 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       content: <ExpandedRowDetailsPane sections={[stats]} />,
     },
     {
-      id: `transform-json-tab-${item.id}`,
+      id: `transform-json-tab-${tabId}`,
       'data-test-subj': 'transformJsonTab',
       name: 'JSON',
       content: <ExpandedRowJsonPane json={item.config} />,
     },
     {
-      id: `transform-messages-tab-${item.id}`,
+      id: `transform-messages-tab-${tabId}`,
       'data-test-subj': 'transformMessagesTab',
       name: i18n.translate(
         'xpack.transform.transformList.transformDetails.tabs.transformMessagesLabel',
@@ -203,7 +206,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       content: <ExpandedRowMessagesPane transformId={item.id} />,
     },
     {
-      id: `transform-preview-tab-${item.id}`,
+      id: `transform-preview-tab-${tabId}`,
       'data-test-subj': 'transformPreviewTab',
       name: i18n.translate(
         'xpack.transform.transformList.transformDetails.tabs.transformPreviewLabel',
