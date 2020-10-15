@@ -27,7 +27,7 @@ const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps<
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.components.builtinActionTypes.slackAction.webhookUrlHelpLabel"
-              defaultMessage="Create a Slack webhook URL"
+              defaultMessage="Create a Slack Webhook URL"
             />
           </EuiLink>
         }

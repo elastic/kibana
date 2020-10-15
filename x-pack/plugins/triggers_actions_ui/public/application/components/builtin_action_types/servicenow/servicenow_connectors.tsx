@@ -92,7 +92,7 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<
               >
                 <FormattedMessage
                   id="xpack.triggersActionsUI.components.builtinActionTypes.serviceNowAction.apiUrlHelpLabel"
-                  defaultMessage="Configure Personal Developer Instance for ServiceNow"
+                  defaultMessage="Configure a Personal Developer Instance"
                 />
               </EuiLink>
             }

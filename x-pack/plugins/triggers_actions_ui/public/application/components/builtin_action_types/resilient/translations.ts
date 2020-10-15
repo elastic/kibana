@@ -73,7 +73,7 @@ export const REMEMBER_VALUES_LABEL = i18n.translate(
 export const REENTER_VALUES_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.resilient.reenterValuesLabel',
   {
-    defaultMessage: 'API key ID and secret are encrypted. Please reenter values for these fields.',
+    defaultMessage: 'ID and secret are encrypted. Please reenter values for these fields.',
   }
 );
 

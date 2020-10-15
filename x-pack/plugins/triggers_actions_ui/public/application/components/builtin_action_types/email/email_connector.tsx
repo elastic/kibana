@@ -57,7 +57,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
               >
                 <FormattedMessage
                   id="xpack.triggersActionsUI.components.builtinActionTypes.emailAction.configureAccountsHelpLabel"
-                  defaultMessage="Configuring email accounts."
+                  defaultMessage="Configure email accounts"
                 />
               </EuiLink>
             }

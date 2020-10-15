@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 export const JIRA_DESC = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.selectMessageText',
   {
-    defaultMessage: 'Push or update data to a new issue in Jira',
+    defaultMessage: 'Push or update data to a new issue in Jira.',
   }
 );
 
@@ -81,28 +81,28 @@ export const JIRA_REENTER_VALUES_LABEL = i18n.translate(
 export const JIRA_EMAIL_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.emailTextFieldLabel',
   {
-    defaultMessage: 'Email or Username',
+    defaultMessage: 'Username or email address',
   }
 );
 
 export const JIRA_EMAIL_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.requiredEmailTextField',
   {
-    defaultMessage: 'Email or Username is required',
+    defaultMessage: 'Username or email address is required',
   }
 );
 
 export const JIRA_API_TOKEN_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.apiTokenTextFieldLabel',
   {
-    defaultMessage: 'API token or Password',
+    defaultMessage: 'API token or password',
   }
 );
 
 export const JIRA_API_TOKEN_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.requiredApiTokenTextField',
   {
-    defaultMessage: 'API token or Password is required',
+    defaultMessage: 'API token or password is required',
   }
 );
 

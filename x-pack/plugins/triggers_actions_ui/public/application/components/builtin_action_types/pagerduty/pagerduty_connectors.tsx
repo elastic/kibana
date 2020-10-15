@@ -53,7 +53,7 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFie
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.routingKeyNameHelpLabel"
-              defaultMessage="Configure a PagerDuty account."
+              defaultMessage="Configure a PagerDuty account"
             />
           </EuiLink>
         }
