@@ -22,16 +22,7 @@ import { BehaviorSubject } from 'rxjs';
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './types';
 
 import { handleResponse } from './fetch';
-import {
-  IEsSearchRequest,
-  IEsSearchResponse,
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-  ISearchGeneric,
-  ISearchOptions,
-  SearchSourceService,
-  SearchSourceDependencies,
-} from '../../common/search';
+import { ISearchGeneric, SearchSourceService, SearchSourceDependencies } from '../../common/search';
 import { getCallMsearch } from './legacy';
 import { AggsService, AggsStartDependencies } from './aggs';
 import { IndexPatternsContract } from '../index_patterns/index_patterns';
@@ -120,15 +111,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     const searchSourceDependencies: SearchSourceDependencies = {
       getConfig: uiSettings.get.bind(uiSettings),
-      search: <
-        SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-        SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
-      >(
-        request: SearchStrategyRequest,
-        options: ISearchOptions
-      ) => {
-        return search<SearchStrategyRequest, SearchStrategyResponse>(request, options).toPromise();
-      },
+      search,
       onResponse: handleResponse,
       legacy: {
         callMsearch: getCallMsearch({ http }),

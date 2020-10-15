@@ -38,12 +38,11 @@ export const esSearchStrategyProvider = (
   usage?: SearchUsage
 ): ISearchStrategy => {
   return {
-    search: (request, options, context) =>
+    search: ({ esClient, uiSettingsClient }, request, options) =>
       from(
         new Promise<IEsSearchResponse>(async (resolve, reject) => {
           logger.debug(`search ${request.params?.index}`);
           const config = await config$.pipe(first()).toPromise();
-          const uiSettingsClient = await context.core.uiSettings.client;
 
           // Only default index pattern type is supported here.
           // See data_enhanced for other type support.
@@ -64,7 +63,7 @@ export const esSearchStrategyProvider = (
 
           try {
             const promise = shimAbortSignal(
-              context.core.elasticsearch.client.asCurrentUser.search(params),
+              esClient.asCurrentUser.search(params),
               options?.abortSignal
             );
             const { body: rawResponse } = (await promise) as ApiResponse<SearchResponse<any>>;

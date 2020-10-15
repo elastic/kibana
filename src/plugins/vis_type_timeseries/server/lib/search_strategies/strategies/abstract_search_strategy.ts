@@ -56,12 +56,11 @@ export class AbstractSearchStrategy {
   }
 
   async search(req: ReqFacade, bodies: any[], options = {}) {
-    const [, deps] = await req.framework.core.getStartServices();
     const requests: any[] = [];
     bodies.forEach((body) => {
       requests.push(
-        deps.data.search
-          .search(
+        req.requestContext
+          .search!.search(
             {
               params: {
                 ...body,
@@ -72,8 +71,7 @@ export class AbstractSearchStrategy {
             {
               ...options,
               strategy: this.searchStrategyName,
-            },
-            req.requestContext
+            }
           )
           .toPromise()
       );

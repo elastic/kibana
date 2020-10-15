@@ -213,6 +213,7 @@ export {
   ISearchStrategy,
   ISearchSetup,
   ISearchStart,
+  SearchStrategyDependencies,
   toSnakeCase,
   getAsyncOptions,
   getDefaultSearchParams,

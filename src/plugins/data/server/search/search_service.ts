@@ -26,12 +26,17 @@ import {
   Logger,
   Plugin,
   PluginInitializerContext,
-  RequestHandlerContext,
   SharedGlobalConfig,
   StartServicesAccessor,
 } from 'src/core/server';
 import { first } from 'rxjs/operators';
-import { ISearchSetup, ISearchStart, ISearchStrategy, SearchEnhancements } from './types';
+import {
+  ISearchSetup,
+  ISearchStart,
+  ISearchStrategy,
+  SearchEnhancements,
+  SearchStrategyDependencies,
+} from './types';
 
 import { AggsService, AggsSetupDependencies } from './aggs';
 
@@ -53,6 +58,7 @@ import {
   SearchSourceService,
   searchSourceRequiredUiSettings,
   ISearchOptions,
+  ISearchClient,
 } from '../../common/search';
 import {
   getShardDelayBucketAgg,
@@ -60,6 +66,12 @@ import {
 } from '../../common/search/aggs/buckets/shard_delay';
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import { ConfigSchema } from '../../config';
+
+declare module 'src/core/server' {
+  interface RequestHandlerContext {
+    search?: ISearchClient;
+  }
+}
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
@@ -103,8 +115,16 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       getStartServices: core.getStartServices,
       globalConfig$: this.initializerContext.config.legacy.globalConfig$,
     };
-    registerSearchRoute(router, routeDependencies);
+    registerSearchRoute(router);
     registerMsearchRoute(router, routeDependencies);
+
+    core.http.registerRouteHandlerContext('search', (context) => {
+      return this.getSearchClient({
+        savedObjectsClient: context.core.savedObjects.client,
+        esClient: context.core.elasticsearch.client,
+        uiSettingsClient: context.core.uiSettings.client,
+      });
+    });
 
     this.registerSearchStrategy(
       ES_SEARCH_STRATEGY,
@@ -144,14 +164,25 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       usage,
     };
   }
+
   public start(
     { elasticsearch, savedObjects, uiSettings }: CoreStart,
     { fieldFormats, indexPatterns }: SearchServiceStartDependencies
   ): ISearchStart {
+    const getSearchClientAsScoped = (request: KibanaRequest) => {
+      const savedObjectsClient = savedObjects.getScopedClient(request);
+      const deps = {
+        savedObjectsClient,
+        esClient: elasticsearch.client.asScoped(request),
+        uiSettingsClient: uiSettings.asScopedToClient(savedObjectsClient),
+      };
+      return this.getSearchClient(deps);
+    };
+
     return {
       aggs: this.aggsService.start({ fieldFormats, uiSettings }),
       getSearchStrategy: this.getSearchStrategy,
-      search: this.search.bind(this),
+      asScoped: getSearchClientAsScoped,
       searchSource: {
         asScoped: async (request: KibanaRequest) => {
           const esClient = elasticsearch.client.asScoped(request);
@@ -169,39 +200,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
           const searchSourceDependencies: SearchSourceDependencies = {
             getConfig: <T = any>(key: string): T => uiSettingsCache[key],
-            search: <
-              SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-              SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
-            >(
-              searchStrategyRequest: SearchStrategyRequest,
-              options: ISearchOptions
-            ) => {
-              /**
-               * Unless we want all SearchSource users to provide both a KibanaRequest
-               * (needed for index patterns) AND the RequestHandlerContext (needed for
-               * low-level search), we need to fake the context as it can be derived
-               * from the request object anyway. This will pose problems for folks who
-               * are registering custom search strategies as they are only getting a
-               * subset of the entire context. Ideally low-level search should be
-               * refactored to only require the needed dependencies: esClient & uiSettings.
-               */
-              const fakeRequestHandlerContext = {
-                core: {
-                  elasticsearch: {
-                    client: esClient,
-                  },
-                  uiSettings: {
-                    client: uiSettingsClient,
-                  },
-                },
-              } as RequestHandlerContext;
-
-              return this.search<SearchStrategyRequest, SearchStrategyResponse>(
-                searchStrategyRequest,
-                options,
-                fakeRequestHandlerContext
-              ).toPromise();
-            },
+            search: getSearchClientAsScoped(request).search,
             // onResponse isn't used on the server, so we just return the original value
             onResponse: (req, res) => res,
             legacy: {
@@ -239,22 +238,35 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
     SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
   >(
+    deps: SearchStrategyDependencies,
     searchRequest: SearchStrategyRequest,
-    options: ISearchOptions,
-    context: RequestHandlerContext
+    options?: ISearchOptions
   ) => {
     const strategy = this.getSearchStrategy<SearchStrategyRequest, SearchStrategyResponse>(
-      options.strategy || this.defaultSearchStrategyName
+      options?.strategy
     );
 
-    return strategy.search(searchRequest, options, context);
+    return strategy.search(deps, searchRequest, options);
+  };
+
+  private cancel = (deps: SearchStrategyDependencies, id: string, options?: ISearchOptions) => {
+    const strategy = this.getSearchStrategy(options?.strategy);
+
+    return strategy.cancel ? strategy.cancel(deps, id) : Promise.resolve();
+  };
+
+  private getSearchClient = (deps: SearchStrategyDependencies): ISearchClient => {
+    return {
+      search: (searchRequest, options?) => this.search(deps, searchRequest, options),
+      cancel: (id: string, options?: ISearchOptions) => this.cancel(deps, id, options),
+    };
   };
 
   private getSearchStrategy = <
     SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
     SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
   >(
-    name: string
+    name: string = this.defaultSearchStrategyName
   ): ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse> => {
     this.logger.debug(`Get strategy ${name}`);
     const strategy = this.searchStrategies[name];

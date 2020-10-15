@@ -21,19 +21,18 @@ export const eqlSearchStrategyProvider = (
   logger: Logger
 ): ISearchStrategy<EqlSearchStrategyRequest, EqlSearchStrategyResponse> => {
   return {
-    cancel: async (context, id) => {
+    cancel: async ({ esClient }, id) => {
       logger.debug(`_eql/delete ${id}`);
-      await context.core.elasticsearch.client.asCurrentUser.eql.delete({
+      await esClient.asCurrentUser.eql.delete({
         id,
       });
     },
-    search: (request, options, context) =>
+    search: ({ esClient, uiSettingsClient }, request, options) =>
       from(
         new Promise<EqlSearchStrategyResponse>(async (resolve) => {
           logger.debug(`_eql/search ${JSON.stringify(request.params) || request.id}`);
           let promise: TransportRequestPromise<ApiResponse>;
-          const eqlClient = context.core.elasticsearch.client.asCurrentUser.eql;
-          const uiSettingsClient = await context.core.uiSettings.client;
+          const eqlClient = esClient.asCurrentUser.eql;
           const asyncOptions = getAsyncOptions();
           const searchOptions = toSnakeCase({ ...request.options });
 

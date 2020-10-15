@@ -31,7 +31,6 @@ export {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   injectReferences as injectSearchSourceReferences,
-  ISearch,
   ISearchGeneric,
   ISearchSource,
   parseSearchSourceJSON,

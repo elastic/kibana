@@ -17,10 +17,10 @@ import { SecuritySolutionTimelineFactory } from './factory/types';
 export const securitySolutionTimelineSearchStrategyProvider = <T extends TimelineFactoryQueryTypes>(
   data: PluginStart
 ): ISearchStrategy<TimelineStrategyRequestType<T>, TimelineStrategyResponseType<T>> => {
-  const es = data.search.getSearchStrategy('es');
+  const es = data.search.getSearchStrategy();
 
   return {
-    search: (request, options, context) => {
+    search: (deps, request, options) => {
       if (request.factoryQueryType == null) {
         throw new Error('factoryQueryType is required');
       }
@@ -29,12 +29,12 @@ export const securitySolutionTimelineSearchStrategyProvider = <T extends Timelin
       const dsl = queryFactory.buildDsl(request);
 
       return es
-        .search({ ...request, params: dsl }, options, context)
+        .search(deps, { ...request, params: dsl }, options)
         .pipe(mergeMap((esSearchRes) => queryFactory.parse(request, esSearchRes)));
     },
-    cancel: async (context, id) => {
+    cancel: async (deps, id) => {
       if (es.cancel) {
-        es.cancel(context, id);
+        es.cancel(deps, id);
       }
     },
   };

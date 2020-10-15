@@ -191,7 +191,7 @@ export class SearchInterceptor {
    *
    * @param request
    * @options
-   * @returns `Observalbe` emitting the search response or an error.
+   * @returns `Observable` emitting the search response or an error.
    */
   public search(
     request: IKibanaSearchRequest,

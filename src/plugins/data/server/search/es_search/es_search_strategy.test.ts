@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { RequestHandlerContext } from '../../../../../core/server';
 import { pluginInitializerContextConfigMock } from '../../../../../core/server/mocks';
 import { esSearchStrategyProvider } from './es_search_strategy';
+import { SearchStrategyDependencies } from '../types';
 
 describe('ES search strategy', () => {
   const mockLogger: any = {
@@ -36,16 +36,12 @@ describe('ES search strategy', () => {
     },
   });
 
-  const mockContext = ({
-    core: {
-      uiSettings: {
-        client: {
-          get: () => {},
-        },
-      },
-      elasticsearch: { client: { asCurrentUser: { search: mockApiCaller } } },
+  const mockDeps = ({
+    uiSettingsClient: {
+      get: () => {},
     },
-  } as unknown) as RequestHandlerContext;
+    esClient: { asCurrentUser: { search: mockApiCaller } },
+  } as unknown) as SearchStrategyDependencies;
 
   const mockConfig$ = pluginInitializerContextConfigMock<any>({}).legacy.globalConfig$;
 
@@ -63,7 +59,7 @@ describe('ES search strategy', () => {
     const params = { index: 'logstash-*' };
 
     await esSearchStrategyProvider(mockConfig$, mockLogger)
-      .search({ params }, {}, mockContext)
+      .search(mockDeps, { params }, {})
       .subscribe(() => {
         expect(mockApiCaller).toBeCalled();
         expect(mockApiCaller.mock.calls[0][0]).toEqual({
@@ -79,7 +75,7 @@ describe('ES search strategy', () => {
     const params = { index: 'logstash-*', ignore_unavailable: false, timeout: '1000ms' };
 
     await esSearchStrategyProvider(mockConfig$, mockLogger)
-      .search({ params }, {}, mockContext)
+      .search(mockDeps, { params }, {})
       .subscribe(() => {
         expect(mockApiCaller).toBeCalled();
         expect(mockApiCaller.mock.calls[0][0]).toEqual({
@@ -93,11 +89,11 @@ describe('ES search strategy', () => {
   it('has all response parameters', async (done) =>
     await esSearchStrategyProvider(mockConfig$, mockLogger)
       .search(
+        mockDeps,
         {
           params: { index: 'logstash-*' },
         },
-        {},
-        mockContext
+        {}
       )
       .subscribe((data) => {
         expect(data.isRunning).toBe(false);
