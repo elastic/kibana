@@ -191,18 +191,20 @@ export function ServiceList({ items, noItemsMessage }: Props) {
   const columns = displayHealthStatus
     ? SERVICE_COLUMNS
     : SERVICE_COLUMNS.filter((column) => column.field !== 'healthStatus');
+  const initialSortField = displayHealthStatus
+    ? 'healthStatus'
+    : 'transactionsPerMinute';
 
   return (
     <ManagedTable
       columns={columns}
       items={items}
       noItemsMessage={noItemsMessage}
-      initialSortField="healthStatus"
+      initialSortField={initialSortField}
       initialSortDirection="desc"
       initialPageSize={50}
       sortFn={(itemsToSort, sortField, sortDirection) => {
         // For healthStatus, sort items by healthStatus first, then by TPM
-
         return sortField === 'healthStatus'
           ? orderBy(
               itemsToSort,
