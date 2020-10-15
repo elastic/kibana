@@ -42,7 +42,7 @@ export const TestConnectorForm = ({
   onExecutAction,
   isExecutingAction,
 }: ConnectorAddFlyoutProps) => {
-  const { actionTypeRegistry, docLinks } = useActionsConnectorsContext();
+  const { actionTypeRegistry, docLinks, http, toastNotifications } = useActionsConnectorsContext();
   const actionTypeModel = actionTypeRegistry.get(connector.actionTypeId);
   const ParamsFieldsComponent = actionTypeModel.actionParamsFields;
 
@@ -74,6 +74,8 @@ export const TestConnectorForm = ({
             }
             messageVariables={[]}
             docLinks={docLinks}
+            http={http}
+            toastNotifications={toastNotifications}
             actionConnector={connector}
           />
         </Suspense>

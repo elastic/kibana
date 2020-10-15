@@ -9,5 +9,5 @@ A user friendly name of the renderer as will be displayed to user in UI.
 <b>Signature:</b>
 
 ```typescript
-displayName: string;
+displayName?: string;
 ```

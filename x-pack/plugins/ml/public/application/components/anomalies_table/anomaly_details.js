@@ -26,7 +26,7 @@ import {
   EuiTabbedContent,
   EuiText,
 } from '@elastic/eui';
-import { formatHumanReadableDateTimeSeconds } from '../../util/date_utils';
+import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
 
 import { EntityCell } from '../entity_cell';
 import {

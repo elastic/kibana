@@ -6,10 +6,19 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ActionTypeModel, ValidationResult } from '../../../../types';
-import { WebhookActionParams, WebhookActionConnector } from '../types';
+import {
+  WebhookActionParams,
+  WebhookConfig,
+  WebhookSecrets,
+  WebhookActionConnector,
+} from '../types';
 import { isValidUrl } from '../../../lib/value_validators';
 
-export function getActionType(): ActionTypeModel<WebhookActionConnector, WebhookActionParams> {
+export function getActionType(): ActionTypeModel<
+  WebhookConfig,
+  WebhookSecrets,
+  WebhookActionParams
+> {
   return {
     id: '.webhook',
     iconClass: 'logoWebhook',

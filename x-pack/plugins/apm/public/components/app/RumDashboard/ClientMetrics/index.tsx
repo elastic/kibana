@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiToolTip } from '@elastic/eui';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { I18LABELS } from '../translations';
 import { useUxQuery } from '../hooks/useUxQuery';
+import { formatToSec } from '../UXMetrics/KeyUXMetrics';
 import { CsmSharedContext } from '../CsmSharedContext';
 
 const ClFlexGroup = styled(EuiFlexGroup)`
@@ -49,14 +50,14 @@ export function ClientMetrics() {
 
   const STAT_STYLE = { width: '240px' };
 
+  const pageViewsTotal = data?.pageViews?.value ?? 0;
+
   return (
     <ClFlexGroup responsive={false}>
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="l"
-          title={
-            (((data?.backEnd?.value ?? 0) * 1000).toFixed(0) ?? '-') + ' ms'
-          }
+          title={formatToSec(data?.backEnd?.value ?? 0, 'ms')}
           description={I18LABELS.backEnd}
           isLoading={status !== 'success'}
         />
@@ -64,7 +65,7 @@ export function ClientMetrics() {
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="l"
-          title={((data?.frontEnd?.value ?? 0)?.toFixed(2) ?? '-') + ' s'}
+          title={formatToSec(data?.frontEnd?.value ?? 0, 'ms')}
           description={I18LABELS.frontEnd}
           isLoading={status !== 'success'}
         />
@@ -73,9 +74,13 @@ export function ClientMetrics() {
         <EuiStat
           titleSize="l"
           title={
-            <EuiToolTip content={data?.pageViews?.value}>
-              <>{numeral(data?.pageViews?.value).format('0 a') ?? '-'}</>
-            </EuiToolTip>
+            pageViewsTotal < 10000 ? (
+              numeral(pageViewsTotal).format('0,0')
+            ) : (
+              <EuiToolTip content={numeral(pageViewsTotal).format('0,0')}>
+                <>{numeral(pageViewsTotal).format('0 a')}</>
+              </EuiToolTip>
+            )
           }
           description={I18LABELS.pageViews}
           isLoading={status !== 'success'}

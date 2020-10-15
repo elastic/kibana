@@ -33,7 +33,10 @@ describe('parseTelemetryRC', () => {
       {
         root: configRoot,
         output: configRoot,
-        exclude: [path.resolve(configRoot, './unmapped_collector.ts')],
+        exclude: [
+          path.resolve(configRoot, './unmapped_collector.ts'),
+          path.resolve(configRoot, './externally_defined_usage_collector/index.ts'),
+        ],
       },
     ]);
   });

@@ -229,6 +229,21 @@ export default async function ({ readConfigFile }) {
           kibana: [],
         },
 
+        kibana_timefield: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['without-timefield', 'with-timefield'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+
         kibana_large_strings: {
           elasticsearch: {
             cluster: [],

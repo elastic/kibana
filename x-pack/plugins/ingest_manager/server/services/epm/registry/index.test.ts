@@ -6,16 +6,7 @@
 
 import { AssetParts } from '../../../types';
 import { getBufferExtractor, pathParts, splitPkgKey } from './index';
-import { getArchiveLocation } from './cache';
 import { untarBuffer, unzipBuffer } from './extract';
-
-jest.mock('./cache', () => {
-  return {
-    getArchiveLocation: jest.fn(),
-  };
-});
-
-const mockedGetArchiveLocation = getArchiveLocation as jest.Mock;
 
 const testPaths = [
   {
@@ -41,11 +32,11 @@ const testPaths = [
     },
   },
   {
-    path: 'coredns-1.0.1/dataset/stats/fields/coredns.stats.yml',
+    path: 'coredns-1.0.1/data_stream/stats/fields/coredns.stats.yml',
     assetParts: {
       dataset: 'stats',
       file: 'coredns.stats.yml',
-      path: 'coredns-1.0.1/dataset/stats/fields/coredns.stats.yml',
+      path: 'coredns-1.0.1/data_stream/stats/fields/coredns.stats.yml',
       pkgkey: 'coredns-1.0.1',
       service: '',
       type: 'fields',
@@ -92,19 +83,13 @@ describe('splitPkgKey tests', () => {
 });
 
 describe('getBufferExtractor', () => {
-  it('throws if the archive has not been downloaded/cached yet', () => {
-    expect(() => getBufferExtractor('missing', '1.2.3')).toThrow('no archive location');
-  });
-
   it('returns unzipBuffer if the archive key ends in .zip', () => {
-    mockedGetArchiveLocation.mockImplementation(() => '.zip');
-    const extractor = getBufferExtractor('will-use-mocked-key', 'a.b.c');
+    const extractor = getBufferExtractor('.zip');
     expect(extractor).toBe(unzipBuffer);
   });
 
   it('returns untarBuffer if the key ends in anything else', () => {
-    mockedGetArchiveLocation.mockImplementation(() => 'xyz');
-    const extractor = getBufferExtractor('will-use-mocked-key', 'a.b.c');
+    const extractor = getBufferExtractor('.xyz');
     expect(extractor).toBe(untarBuffer);
   });
 });

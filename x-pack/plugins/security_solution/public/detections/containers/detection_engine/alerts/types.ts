@@ -44,6 +44,7 @@ export interface UpdateAlertStatusProps {
 
 export interface AlertsIndex {
   name: string;
+  template_outdated: boolean;
 }
 
 export interface Privilege {

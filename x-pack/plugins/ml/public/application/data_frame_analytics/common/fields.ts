@@ -48,6 +48,8 @@ export const EXTENDED_NUMERICAL_TYPES = new Set([
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const ML__ID_COPY = 'ml__id_copy';
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const ML__INCREMENTAL_ID = 'ml__incremental_id';
 
 export const isKeywordAndTextType = (fieldName: string): boolean => {
   const { fields } = newJobCapsService;

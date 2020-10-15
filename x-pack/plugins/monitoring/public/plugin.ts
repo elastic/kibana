@@ -23,12 +23,15 @@ import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { MonitoringStartPluginDependencies, MonitoringConfig } from './types';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
 import { createCpuUsageAlertType } from './alerts/cpu_usage_alert';
+import { createMissingMonitoringDataAlertType } from './alerts/missing_monitoring_data_alert';
 import { createLegacyAlertTypes } from './alerts/legacy_alert';
+import { createDiskUsageAlertType } from './alerts/disk_usage_alert';
+import { createMemoryUsageAlertType } from './alerts/memory_usage_alert';
 
 interface MonitoringSetupPluginDependencies {
   home?: HomePublicPluginSetup;
   cloud?: { isCloudEnabled: boolean };
-  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   usageCollection: UsageCollectionSetup;
 }
 
@@ -70,10 +73,15 @@ export class MonitoringPlugin
       });
     }
 
-    plugins.triggers_actions_ui.alertTypeRegistry.register(createCpuUsageAlertType());
+    const { alertTypeRegistry } = plugins.triggersActionsUi;
+    alertTypeRegistry.register(createCpuUsageAlertType());
+    alertTypeRegistry.register(createDiskUsageAlertType());
+    alertTypeRegistry.register(createMemoryUsageAlertType());
+    alertTypeRegistry.register(createMissingMonitoringDataAlertType());
+
     const legacyAlertTypes = createLegacyAlertTypes();
     for (const legacyAlertType of legacyAlertTypes) {
-      plugins.triggers_actions_ui.alertTypeRegistry.register(legacyAlertType);
+      alertTypeRegistry.register(legacyAlertType);
     }
 
     const app: App = {
@@ -94,7 +102,7 @@ export class MonitoringPlugin
           isCloud: Boolean(plugins.cloud?.isCloudEnabled),
           pluginInitializerContext: this.initializerContext,
           externalConfig: this.getExternalConfig(),
-          triggersActionsUi: plugins.triggers_actions_ui,
+          triggersActionsUi: plugins.triggersActionsUi,
           usageCollection: plugins.usageCollection,
         };
 

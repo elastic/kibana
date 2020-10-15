@@ -14,14 +14,7 @@ import { timelineActions, timelineSelectors } from '../../store/timeline';
 import { ColumnHeaderOptions, TimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { defaultHeaders } from './body/column_headers/default_headers';
-import {
-  OnChangeItemsPerPage,
-  OnDataProviderRemoved,
-  OnDataProviderEdited,
-  OnToggleDataProviderEnabled,
-  OnToggleDataProviderExcluded,
-  OnToggleDataProviderType,
-} from './events';
+import { OnChangeItemsPerPage } from './events';
 import { Timeline } from './timeline';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
@@ -51,18 +44,13 @@ const StatefulTimelineComponent = React.memo<Props>(
     kqlMode,
     kqlQueryExpression,
     onClose,
-    onDataProviderEdited,
     removeColumn,
-    removeProvider,
     show,
     showCallOutUnauthorizedMsg,
     sort,
     start,
     status,
     timelineType,
-    updateDataProviderEnabled,
-    updateDataProviderExcluded,
-    updateDataProviderType,
     updateItemsPerPage,
     upsertColumn,
     usersViewing,
@@ -74,59 +62,6 @@ const StatefulTimelineComponent = React.memo<Props>(
       indexPattern,
       selectedPatterns,
     } = useSourcererScope(SourcererScopeName.timeline);
-
-    const onDataProviderRemoved: OnDataProviderRemoved = useCallback(
-      (providerId: string, andProviderId?: string) =>
-        removeProvider!({ id, providerId, andProviderId }),
-      [id, removeProvider]
-    );
-
-    const onToggleDataProviderEnabled: OnToggleDataProviderEnabled = useCallback(
-      ({ providerId, enabled, andProviderId }) =>
-        updateDataProviderEnabled!({
-          id,
-          enabled,
-          providerId,
-          andProviderId,
-        }),
-      [id, updateDataProviderEnabled]
-    );
-
-    const onToggleDataProviderExcluded: OnToggleDataProviderExcluded = useCallback(
-      ({ providerId, excluded, andProviderId }) =>
-        updateDataProviderExcluded!({
-          id,
-          excluded,
-          providerId,
-          andProviderId,
-        }),
-      [id, updateDataProviderExcluded]
-    );
-
-    const onToggleDataProviderType: OnToggleDataProviderType = useCallback(
-      ({ providerId, type, andProviderId }) =>
-        updateDataProviderType!({
-          id,
-          type,
-          providerId,
-          andProviderId,
-        }),
-      [id, updateDataProviderType]
-    );
-
-    const onDataProviderEditedLocal: OnDataProviderEdited = useCallback(
-      ({ andProviderId, excluded, field, operator, providerId, value }) =>
-        onDataProviderEdited!({
-          andProviderId,
-          excluded,
-          field,
-          id,
-          operator,
-          providerId,
-          value,
-        }),
-      [id, onDataProviderEdited]
-    );
 
     const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback(
       (itemsChangedPerPage) => updateItemsPerPage!({ id, itemsPerPage: itemsChangedPerPage }),
@@ -183,11 +118,6 @@ const StatefulTimelineComponent = React.memo<Props>(
         loadingSourcerer={loading}
         onChangeItemsPerPage={onChangeItemsPerPage}
         onClose={onClose}
-        onDataProviderEdited={onDataProviderEditedLocal}
-        onDataProviderRemoved={onDataProviderRemoved}
-        onToggleDataProviderEnabled={onToggleDataProviderEnabled}
-        onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-        onToggleDataProviderType={onToggleDataProviderType}
         show={show!}
         showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
         sort={sort!}
@@ -287,14 +217,8 @@ const makeMapStateToProps = () => {
 const mapDispatchToProps = {
   addProvider: timelineActions.addProvider,
   createTimeline: timelineActions.createTimeline,
-  onDataProviderEdited: timelineActions.dataProviderEdited,
   removeColumn: timelineActions.removeColumn,
-  removeProvider: timelineActions.removeProvider,
   updateColumns: timelineActions.updateColumns,
-  updateDataProviderEnabled: timelineActions.updateDataProviderEnabled,
-  updateDataProviderExcluded: timelineActions.updateDataProviderExcluded,
-  updateDataProviderKqlQuery: timelineActions.updateDataProviderKqlQuery,
-  updateDataProviderType: timelineActions.updateDataProviderType,
   updateHighlightedDropAndProviderId: timelineActions.updateHighlightedDropAndProviderId,
   updateItemsPerPage: timelineActions.updateItemsPerPage,
   updateItemsPerPageOptions: timelineActions.updateItemsPerPageOptions,

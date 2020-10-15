@@ -11,7 +11,7 @@ To start working with your data in {kib}, you can:
 
 * Connect {kib} with existing {es} indices.
 
-If you're not ready to use your own data, you can add a <<gs-get-data-into-kibana, sample data set>>
+If you're not ready to use your own data, you can add a <<get-started, sample data set>>
 to see all that you can do in {kib}.
 
 [float]

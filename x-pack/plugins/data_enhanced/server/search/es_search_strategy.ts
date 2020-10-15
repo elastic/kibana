@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { from } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
@@ -17,6 +18,8 @@ import {
   getShardTimeout,
   toSnakeCase,
   shimHitsTotal,
+  getAsyncOptions,
+  shimAbortSignal,
 } from '../../../../../src/plugins/data/server';
 import { IEnhancedEsSearchRequest } from '../../common';
 import {
@@ -34,35 +37,38 @@ export const enhancedEsSearchStrategyProvider = (
   logger: Logger,
   usage?: SearchUsage
 ): ISearchStrategy => {
-  const search = async (
-    context: RequestHandlerContext,
+  const search = (
     request: IEnhancedEsSearchRequest,
-    options?: ISearchOptions
-  ) => {
-    logger.debug(`search ${JSON.stringify(request.params) || request.id}`);
+    options: ISearchOptions,
+    context: RequestHandlerContext
+  ) =>
+    from(
+      new Promise<IEsSearchResponse>(async (resolve, reject) => {
+        logger.debug(`search ${JSON.stringify(request.params) || request.id}`);
 
-    const isAsync = request.indexType !== 'rollup';
+        const isAsync = request.indexType !== 'rollup';
 
-    try {
-      const response = isAsync
-        ? await asyncSearch(context, request, options)
-        : await rollupSearch(context, request, options);
+        try {
+          const response = isAsync
+            ? await asyncSearch(request, options, context)
+            : await rollupSearch(request, options, context);
 
-      if (
-        usage &&
-        isAsync &&
-        isEnhancedEsSearchResponse(response) &&
-        isCompleteResponse(response)
-      ) {
-        usage.trackSuccess(response.rawResponse.took);
-      }
+          if (
+            usage &&
+            isAsync &&
+            isEnhancedEsSearchResponse(response) &&
+            isCompleteResponse(response)
+          ) {
+            usage.trackSuccess(response.rawResponse.took);
+          }
 
-      return response;
-    } catch (e) {
-      if (usage) usage.trackError();
-      throw e;
-    }
-  };
+          resolve(response);
+        } catch (e) {
+          if (usage) usage.trackError();
+          reject(e);
+        }
+      })
+    );
 
   const cancel = async (context: RequestHandlerContext, id: string) => {
     logger.debug(`cancel ${id}`);
@@ -72,18 +78,14 @@ export const enhancedEsSearchStrategyProvider = (
   };
 
   async function asyncSearch(
-    context: RequestHandlerContext,
     request: IEnhancedEsSearchRequest,
-    options?: ISearchOptions
+    options: ISearchOptions,
+    context: RequestHandlerContext
   ): Promise<IEsSearchResponse> {
     let promise: TransportRequestPromise<any>;
     const esClient = context.core.elasticsearch.client.asCurrentUser;
     const uiSettingsClient = await context.core.uiSettings.client;
-
-    const asyncOptions = {
-      waitForCompletionTimeout: '100ms', // Wait up to 100ms for the response to return
-      keepAlive: '1m', // Extend the TTL for this search request by one minute
-    };
+    const asyncOptions = getAsyncOptions();
 
     // If we have an ID, then just poll for that ID, otherwise send the entire request body
     if (!request.id) {
@@ -102,9 +104,7 @@ export const enhancedEsSearchStrategyProvider = (
       });
     }
 
-    // Temporary workaround until https://github.com/elastic/elasticsearch-js/issues/1297
-    if (options?.abortSignal) options.abortSignal.addEventListener('abort', () => promise.abort());
-    const esResponse = await promise;
+    const esResponse = await shimAbortSignal(promise, options?.abortSignal);
     const { id, response, is_partial: isPartial, is_running: isRunning } = esResponse.body;
     return {
       id,
@@ -116,9 +116,9 @@ export const enhancedEsSearchStrategyProvider = (
   }
 
   const rollupSearch = async function (
-    context: RequestHandlerContext,
     request: IEnhancedEsSearchRequest,
-    options?: ISearchOptions
+    options: ISearchOptions,
+    context: RequestHandlerContext
   ): Promise<IEsSearchResponse> {
     const esClient = context.core.elasticsearch.client.asCurrentUser;
     const uiSettingsClient = await context.core.uiSettings.client;
@@ -139,9 +139,7 @@ export const enhancedEsSearchStrategyProvider = (
       querystring,
     });
 
-    // Temporary workaround until https://github.com/elastic/elasticsearch-js/issues/1297
-    if (options?.abortSignal) options.abortSignal.addEventListener('abort', () => promise.abort());
-    const esResponse = await promise;
+    const esResponse = await shimAbortSignal(promise, options?.abortSignal);
 
     const response = esResponse.body as SearchResponse<any>;
     return {

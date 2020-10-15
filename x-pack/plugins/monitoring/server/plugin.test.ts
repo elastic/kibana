@@ -21,9 +21,7 @@ jest.mock('./es_client/instantiate_client', () => ({
 
 jest.mock('./license_service', () => ({
   LicenseService: jest.fn().mockImplementation(() => ({
-    setup: jest.fn().mockImplementation(() => ({
-      refresh: jest.fn(),
-    })),
+    setup: jest.fn().mockImplementation(() => ({})),
   })),
 }));
 
