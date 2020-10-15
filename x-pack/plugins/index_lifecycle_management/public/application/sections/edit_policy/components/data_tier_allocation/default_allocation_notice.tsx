@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
 
 import { PhaseWithAllocation, NodeDataRole } from '../../../../../../common/types';
 
@@ -102,10 +102,5 @@ export const DefaultAllocationNotice: FunctionComponent<Props> = ({ phase, targe
       </EuiCallOut>
     );
 
-  return (
-    <>
-      <EuiSpacer size="s" />
-      {content}
-    </>
-  );
+  return content;
 };

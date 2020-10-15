@@ -21,7 +21,7 @@ import {
   CollectorOptions,
   createUsageCollectionSetupMock,
 } from '../../../../usage_collection/server/usage_collection.mock';
-
+import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
 import { registerCoreUsageCollector } from '.';
 import { coreUsageDataServiceMock } from '../../../../../core/server/mocks';
 import { CoreUsageData } from 'src/core/server/';
@@ -35,7 +35,7 @@ describe('telemetry_core', () => {
     return createUsageCollectionSetupMock().makeUsageCollector(config);
   });
 
-  const callCluster = jest.fn().mockImplementation(() => ({}));
+  const collectorFetchContext = createCollectorFetchContextMock();
   const coreUsageDataStart = coreUsageDataServiceMock.createStartContract();
   const getCoreUsageDataReturnValue = (Symbol('core telemetry') as any) as CoreUsageData;
   coreUsageDataStart.getCoreUsageData.mockResolvedValue(getCoreUsageDataReturnValue);
@@ -48,6 +48,6 @@ describe('telemetry_core', () => {
   });
 
   test('fetch', async () => {
-    expect(await collector.fetch(callCluster)).toEqual(getCoreUsageDataReturnValue);
+    expect(await collector.fetch(collectorFetchContext)).toEqual(getCoreUsageDataReturnValue);
   });
 });
