@@ -214,9 +214,7 @@ export function savedObjectEvent({
   error,
 }: SavedObjectParams): AuditEvent {
   const doc = savedObject ? `${savedObject.type} [id=${savedObject.id}]` : 'saved objects';
-  const present = eventVerbs[action][0];
-  const progressive = eventVerbs[action][1];
-  const past = eventVerbs[action][2];
+  const [present, progressive, past] = eventVerbs[action];
   const message = error
     ? `Failed attempt to ${present} ${doc}`
     : outcome === 'unknown'
