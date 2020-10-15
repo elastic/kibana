@@ -15,6 +15,7 @@ export interface TagSelectorProps {
   tags: Tag[];
   selected: string[];
   setSelected: (ids: string[]) => void;
+  'data-test-subj'?: string;
 }
 
 const renderTagOption = (
@@ -22,9 +23,9 @@ const renderTagOption = (
   searchValue: string,
   contentClassName: string
 ) => {
-  const { name, color } = option.value ?? { name: '' };
+  const { id, name, color } = option.value ?? { name: '' };
   return (
-    <EuiHealth color={color}>
+    <EuiHealth color={color} data-test-subj={`tagSelectorOption-${id}`}>
       <span className={contentClassName}>
         <EuiHighlight search={searchValue}>{name}</EuiHighlight>
       </span>
@@ -32,7 +33,12 @@ const renderTagOption = (
   );
 };
 
-export const TagSelector: FC<TagSelectorProps> = ({ tags, selected, setSelected }) => {
+export const TagSelector: FC<TagSelectorProps> = ({
+  tags,
+  selected,
+  setSelected,
+  ...otherProps
+}) => {
   const options = useMemo(() => {
     return tags.map((tag) => ({
       label: tag.name,
@@ -60,6 +66,7 @@ export const TagSelector: FC<TagSelectorProps> = ({ tags, selected, setSelected 
       selectedOptions={selectedOptions}
       onChange={onChange}
       renderOption={renderTagOption}
+      {...otherProps}
     />
   );
 };

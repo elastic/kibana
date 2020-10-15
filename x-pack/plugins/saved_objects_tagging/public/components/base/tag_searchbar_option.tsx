@@ -13,9 +13,9 @@ export interface TagSearchBarOptionProps {
 }
 
 export const TagSearchBarOption: FC<TagSearchBarOptionProps> = ({ tag }) => {
-  const { name, color } = tag;
+  const { name, color, id } = tag;
   return (
-    <EuiHealth color={color}>
+    <EuiHealth color={color} data-test-subj={`tag-searchbar-option-${id}`}>
       <span>
         <EuiText>{name}</EuiText>
       </span>

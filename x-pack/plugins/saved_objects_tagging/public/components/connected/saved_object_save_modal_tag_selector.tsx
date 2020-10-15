@@ -40,7 +40,12 @@ export const getConnectedSavedObjectModalTagSelectorComponent = (
           />
         }
       >
-        <TagSelector selected={selected} setSelected={setSelectedInternal} tags={tags} />
+        <TagSelector
+          selected={selected}
+          setSelected={setSelectedInternal}
+          tags={tags}
+          data-test-subj="savedObjectTagSelector"
+        />
       </EuiFormRow>
     );
   };
