@@ -10,9 +10,6 @@ If the Chromium browser is asked to send a request that violates the network pol
 before the request goes out, and the report is marked as a failure. Additional information about the event is in
 the Kibana server logs.
 
-A network policy applies not only to outgoing requests, but also incoming responses. That means if a request goes out to an allowed
-host, but is redirected and a response returns from a denied host, the response will be denied, and the report will fail.
-
 [NOTE]
 ============
 {kib} installations are not designed to be publicly accessible over the Internet. The Reporting network policy and other capabilities
