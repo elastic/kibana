@@ -10,11 +10,7 @@ import { getDataHandler } from '../data_handler';
 import { FETCH_STATUS } from '../hooks/use_fetcher';
 import { useRouteParams } from '../hooks/use_route_params';
 import { useTimeRange } from '../hooks/use_time_range';
-import {
-  ObservabilityFetchDataPlugins,
-  UXHasDataResponse,
-  ObservabilityHasDataResponse,
-} from '../typings/fetch_overview_data';
+import { ObservabilityFetchDataPlugins, UXHasDataResponse } from '../typings/fetch_overview_data';
 
 export type HasDataMap = Record<
   ObservabilityFetchDataPlugins,
