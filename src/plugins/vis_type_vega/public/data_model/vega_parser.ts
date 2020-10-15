@@ -410,7 +410,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
     }
 
     if (result.textTruncate === undefined) {
-      result.textTruncate = true;
+      result.textTruncate = false;
     } else if (typeof result.textTruncate !== 'boolean') {
       throw new Error(
         i18n.translate('visTypeVega.vegaParser.textTruncateConfigValueTypeErrorMessage', {

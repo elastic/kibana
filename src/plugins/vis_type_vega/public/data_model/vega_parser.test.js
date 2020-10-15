@@ -243,7 +243,7 @@ describe('VegaParser.parseSchema', () => {
 });
 
 describe('VegaParser._parseTooltips', () => {
-  function check(tooltips, position, padding, centerOnMark, textTruncate = true) {
+  function check(tooltips, position, padding, centerOnMark, textTruncate = false) {
     return () => {
       const vp = new VegaParser(tooltips !== undefined ? { config: { kibana: { tooltips } } } : {});
       vp._config = vp._parseConfig();
@@ -267,7 +267,7 @@ describe('VegaParser._parseTooltips', () => {
   test('centerOnMark=10', check({ centerOnMark: 10 }, 'top', 16, 10));
   test('centerOnMark=true', check({ centerOnMark: true }, 'top', 16, Number.MAX_VALUE));
   test('centerOnMark=false', check({ centerOnMark: false }, 'top', 16, -1));
-  test('textTruncate=false', check({ textTruncate: false }, 'top', 16, 50, false));
+  test('textTruncate=false', check({ textTruncate: true }, 'top', 16, 50, true));
 
   test('false', check(false, false));
 

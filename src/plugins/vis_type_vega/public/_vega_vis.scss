@@ -116,26 +116,6 @@
   &--textTruncate {
     td {
       @include euiTextTruncate;
-
-      &.key {
-        max-width: $euiSize * 10;
-      }
-
-      &.value {
-        max-width: $euiSizeL * 10;
-      }
-    }
-
-    @media only screen and (max-width: map-get($euiBreakpoints, 'm')) {
-      td {
-        &.key {
-          max-width: $euiSize * 6;
-        }
-
-        &.value {
-          max-width: $euiSize * 10;
-        }
-      }
     }
   }
 
@@ -144,13 +124,27 @@
     padding-bottom: $euiSizeXS;
 
     &.key {
+      max-width: $euiSize * 10;
       color: $euiColorMediumShade;
       text-align: right;
       padding-right: $euiSizeXS;
     }
 
     &.value {
+      max-width: $euiSizeL * 10;
       text-align: left;
+    }
+  }
+
+  @media only screen and (max-width: map-get($euiBreakpoints, 'm')) {
+    td {
+      &.key {
+        max-width: $euiSize * 6;
+      }
+
+      &.value {
+        max-width: $euiSize * 10;
+      }
     }
   }
 }
