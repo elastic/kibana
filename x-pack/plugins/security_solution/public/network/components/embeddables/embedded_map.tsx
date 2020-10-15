@@ -198,15 +198,13 @@ export const EmbeddedMapComponent = ({
     if (embeddable != null) {
       embeddable.updateInput({ query });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query]);
+  }, [embeddable, query]);
 
   useEffect(() => {
     if (embeddable != null) {
       embeddable.updateInput({ filters });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters]);
+  }, [embeddable, filters]);
 
   // DateRange updated useEffect
   useEffect(() => {
@@ -217,8 +215,7 @@ export const EmbeddedMapComponent = ({
       };
       embeddable.updateInput({ timeRange });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [startDate, endDate]);
+  }, [embeddable, startDate, endDate]);
 
   return isError ? null : (
     <Embeddable>
