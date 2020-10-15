@@ -25,7 +25,8 @@ info, refer to
 1. Fetch the latest changes from the repository.
 
 1. Checkout the branch of the version you want to use. For example, if you want 
-   to use a 7.9 version, run `git checkout 7.9`.
+   to use a 7.9 version, run `git checkout 7.9`. (Your Elasticsearch and Kibana 
+   instances need to be the same version.)
 
 1. Run `nvm use`. The response shows the Node version that the environment uses. 
    If you need to update your Node version, the response message contains the 
