@@ -183,17 +183,8 @@ export const DiscoverGrid = React.memo(
 
     const rowCount = useMemo(() => (rows ? rows.length : 0), [rows]);
     const euiGridColumns = useMemo(
-      () =>
-        getEuiGridColumns(
-          columns,
-          columnsWidth,
-          indexPattern,
-          showTimeCol,
-          timeString,
-          onSetColumns,
-          onSort
-        ),
-      [columns, indexPattern, showTimeCol, timeString, onSetColumns, onSort, columnsWidth]
+      () => getEuiGridColumns(columns, columnsWidth, indexPattern, showTimeCol, timeString),
+      [columns, indexPattern, showTimeCol, timeString, columnsWidth]
     );
     const schemaDetectors = useMemo(() => getSchemaDetectors(), []);
     const popoverContents = useMemo(() => getPopoverContents(), []);

@@ -195,6 +195,8 @@ export function DiscoverSidebar({
         aria-label={i18n.translate('discover.fieldChooser.filter.indexAndFieldsSectionAriaLabel', {
           defaultMessage: 'Index and fields',
         })}
+        id="discover-sidebar"
+        data-test-subj="discover-sidebar"
       >
         <EuiFlexGroup
           gutterSize="none"
