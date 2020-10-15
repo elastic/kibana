@@ -60,8 +60,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
   }
 
-  describe('log analysis apis', function () {
-    this.tags(['james']);
+  describe('log analysis apis', () => {
     before(async () => {
       // a real ML job must exist when searching for the results
       await createDummyJob(ML_JOB_ID);
