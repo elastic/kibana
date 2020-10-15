@@ -6,8 +6,7 @@
 
 import React, { FC } from 'react';
 
-import { EuiTabbedContent } from '@elastic/eui';
-import { htmlIdGenerator } from '@elastic/eui/lib/services';
+import { htmlIdGenerator, EuiTabbedContent } from '@elastic/eui';
 import { Optional } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
 
