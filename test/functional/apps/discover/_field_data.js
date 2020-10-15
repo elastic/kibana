@@ -27,22 +27,20 @@ export default function ({ getService, getPageObjects }) {
   const queryBar = getService('queryBar');
   const PageObjects = getPageObjects(['common', 'header', 'discover', 'visualize', 'timePicker']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/78689
-  describe.skip('discover tab', function describeIndexTests() {
+  // eslint-disable-next-line mocha/no-exclusive-tests
+  describe.only('discover tab', function describeIndexTests() {
     this.tags('includeFirefox');
     before(async function () {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('discover');
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       // delete .kibana index and update configDoc
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
       });
-
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
-
-    describe('field data', function () {
+    -describe('field data', function () {
       it('search php should show the correct hit count', async function () {
         const expectedHitCount = '445';
         await retry.try(async function () {
