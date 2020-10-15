@@ -40,7 +40,7 @@ export class RoleMappings {
   public async create(name: string, roleMapping: Record<string, any>) {
     this.log.debug(`creating role mapping ${name}`);
     const { data, status, statusText } = await this.kbnClient.request({
-      path: `/internal/security/role_mapping/${name}`,
+      path: `/internal/security/role_mapping/${encodeURIComponent(name)}`,
       method: 'POST',
       body: roleMapping,
     });
@@ -55,7 +55,7 @@ export class RoleMappings {
   public async delete(name: string) {
     this.log.debug(`deleting role mapping ${name}`);
     const { data, status, statusText } = await this.kbnClient.request({
-      path: `/internal/security/role_mapping/${name}`,
+      path: `/internal/security/role_mapping/${encodeURIComponent(name)}`,
       method: 'DELETE',
     });
     if (status !== 200 && status !== 404) {
