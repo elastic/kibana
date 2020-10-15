@@ -561,7 +561,7 @@ export const EndpointList = () => {
   return (
     <AdministrationListPage
       data-test-subj="endpointPage"
-      beta={true}
+      beta={false}
       title={
         <FormattedMessage
           id="xpack.securitySolution.endpoint.list.pageTitle"
