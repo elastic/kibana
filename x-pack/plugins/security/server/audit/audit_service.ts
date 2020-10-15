@@ -5,7 +5,7 @@
  */
 
 import { Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, distinctUntilKeyChanged } from 'rxjs/operators';
 import {
   Logger,
   LoggingServiceSetup,
@@ -86,8 +86,13 @@ export class AuditService {
       });
     }
 
-    // Configure logging
-    logging.configure(license.features$.pipe(createLoggingConfig(config)));
+    // Configure logging during setup and when license changes
+    logging.configure(
+      license.features$.pipe(
+        distinctUntilKeyChanged('allowAuditLogging'),
+        createLoggingConfig(config)
+      )
+    );
 
     /**
      * Creates an {@link AuditLogger} scoped to the current request.

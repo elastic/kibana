@@ -127,6 +127,7 @@ describe('#userLoginEvent', () => {
           "authentication_realm": "native1",
           "authentication_type": "basic",
           "lookup_realm": "native1",
+          "space_id": undefined,
         },
         "message": "User [user] has logged in using basic provider [name=basic1]",
         "user": Object {
@@ -162,6 +163,7 @@ describe('#userLoginEvent', () => {
           "authentication_realm": undefined,
           "authentication_type": "basic",
           "lookup_realm": undefined,
+          "space_id": undefined,
         },
         "message": "Failed attempt to login using basic provider [name=basic1]",
         "user": undefined,

@@ -123,7 +123,7 @@ export function httpRequestEvent({ request }: HttpRequestParams): AuditEvent {
       domain: request.url.hostname,
       path: pathname,
       port: request.url.port ? parseInt(request.url.port, 10) : undefined,
-      query: search?.slice(1) ?? undefined,
+      query: search?.slice(1) || undefined,
       scheme: request.url.protocol,
     },
   };
@@ -154,6 +154,7 @@ export function userLoginEvent({
       roles: authenticationResult.user.roles,
     },
     kibana: {
+      space_id: undefined, // Ensure this does not get populated by audit service
       authentication_provider: authenticationProvider,
       authentication_type: authenticationType,
       authentication_realm: authenticationResult.user?.authentication_realm.name,
