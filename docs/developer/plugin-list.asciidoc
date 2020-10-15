@@ -436,10 +436,8 @@ using the CURL scripts in the scripts folder.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/ml/readme.md[ml]
-|To use machine learning features, you must have a Platinum or Enterprise license
-or a free 14-day trial. File Data Visualizer requires a Basic license. For more
-info, refer to
-Set up machine learning features.
+|This plugin provides access to the machine learning features provided by
+Elastic.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/monitoring[monitoring]
