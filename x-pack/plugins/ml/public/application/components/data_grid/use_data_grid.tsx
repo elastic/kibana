@@ -113,17 +113,22 @@ export const useDataGrid = (
     // Sort the columns to be in line with the current order of visible columns.
     // EuiDataGrid misses a callback for the order of all available columns, so
     // this only can retain the order of visible columns.
-    updatedColumns.sort((a, b) => {
-      // Skip if one of the columns isn't visible.
-      if (visibleColumns.indexOf(a.id) === -1 || visibleColumns.indexOf(b.id) === -1) {
-        return 0;
+    return updatedColumns.sort((a, b) => {
+      // This will always move visible columns above invisible ones.
+      if (visibleColumns.indexOf(a.id) === -1 && visibleColumns.indexOf(b.id) > -1) {
+        return 1;
+      }
+      if (visibleColumns.indexOf(b.id) === -1 && visibleColumns.indexOf(a.id) > -1) {
+        return -1;
+      }
+      if (visibleColumns.indexOf(a.id) === -1 && visibleColumns.indexOf(b.id) === -1) {
+        return a.id.localeCompare(b.id);
       }
 
+      // If both columns are visible sort by their visible sorting order.
       return visibleColumns.indexOf(a.id) - visibleColumns.indexOf(b.id);
     });
-
-    return updatedColumns;
-  }, [columns, columnCharts, chartsVisible, visibleColumns]);
+  }, [columns, columnCharts, chartsVisible, JSON.stringify(visibleColumns)]);
 
   return {
     chartsVisible,
