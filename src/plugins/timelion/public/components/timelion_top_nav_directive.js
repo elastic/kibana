@@ -33,7 +33,7 @@ export function initTimelionTopNavDirective(app, deps) {
               setMenuMountPoint={deps.mountParams.setHeaderActionMenu}
               onQuerySubmit={props.onTimeUpdate}
               screenTitle="timelion"
-              showDatePicker={true}
+              showDatePicker
               showFilterBar={false}
               showQueryInput={false}
               showSaveQuery={false}
