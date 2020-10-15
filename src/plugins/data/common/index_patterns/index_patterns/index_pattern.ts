@@ -18,7 +18,6 @@
  */
 
 import _, { each, reject } from 'lodash';
-import { SavedObjectsClientCommon } from '../..';
 import { DuplicateField } from '../../../../kibana_utils/common';
 
 import {
@@ -37,10 +36,9 @@ import { SerializedFieldFormat } from '../../../../expressions/common';
 
 interface IndexPatternDeps {
   spec?: IndexPatternSpec;
-  savedObjectsClient: SavedObjectsClientCommon;
   fieldFormats: FieldFormatsStartCommon;
-  shortDotsEnable: boolean;
-  metaFields: string[];
+  shortDotsEnable?: boolean;
+  metaFields?: string[];
 }
 
 interface SavedObjectBody {

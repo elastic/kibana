@@ -19,14 +19,13 @@
 
 import { SearchResponse } from 'elasticsearch';
 import _ from 'lodash';
-import { SearchSource } from '../search_source';
 import { IndexPattern } from '../../index_patterns/index_patterns';
 import { DatatableColumn } from '../../../../expressions/common/expression_types/specs';
 
 export function flattenHit(
   hit: Record<string, any>,
   indexPattern?: IndexPattern,
-  deep: boolean = false
+  shallow: boolean = false
 ) {
   const flat = {} as Record<string, any>;
 
@@ -36,7 +35,7 @@ export function flattenHit(
 
       const field = indexPattern?.fields.getByName(key);
 
-      if (deep) {
+      if (!shallow) {
         const isNestedField = field?.type === 'nested';
         const isArrayOfObjects = Array.isArray(val) && _.isPlainObject(_.first(val));
         if (isArrayOfObjects && !isNestedField) {
@@ -70,28 +69,27 @@ export function flattenHit(
 }
 
 export interface TabifyDocsOptions {
-  deep: boolean;
-  source: boolean;
+  shallow?: boolean;
+  source?: boolean;
 }
 
 export const tabifyDocs = (
-  searchSource: SearchSource,
   esResponse: SearchResponse<unknown>,
-  { deep, source }: TabifyDocsOptions
+  index?: IndexPattern,
+  params: TabifyDocsOptions = {}
 ) => {
-  const index = searchSource.getField('index');
-
   const columns: DatatableColumn[] = [];
 
   const rows = esResponse.hits.hits
     .map((hit) => {
-      const toConvert = source ? hit._source : hit.fields;
-      const flat = flattenHit(toConvert, index, deep);
+      const toConvert = params.source ? hit._source : hit.fields;
+      const flat = flattenHit(toConvert, index, params.shallow);
       for (const [key, value] of Object.entries(flat)) {
         const field = index?.fields.getByName(key);
         if (!columns.find((c) => c.id === (field?.name || key))) {
           const fieldName = field?.name || key;
           const fieldType = (field?.type as any) || typeof value;
+          const formatter = field && index?.getFormatterForField(field);
           columns.push({
             id: fieldName,
             name: fieldName,
@@ -99,7 +97,7 @@ export const tabifyDocs = (
               type: fieldType,
               field: fieldName,
               index: index?.id,
-              params: index?.getFormatterForField(field!).toJSON(),
+              params: formatter ? formatter.toJSON() : undefined,
             },
           });
         }

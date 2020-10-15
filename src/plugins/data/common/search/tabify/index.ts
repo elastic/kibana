@@ -23,7 +23,7 @@ import { tabifyDocs } from './tabify_docs';
 
 export const tabify = (searchSource: SearchSource, esResponse: any, opts: any) => {
   return !esResponse.aggregations
-    ? tabifyDocs(searchSource, esResponse, opts)
+    ? tabifyDocs(esResponse, searchSource.getField('index'), opts)
     : tabifyAggResponse(searchSource.getField('aggs'), esResponse, opts);
 };
 
