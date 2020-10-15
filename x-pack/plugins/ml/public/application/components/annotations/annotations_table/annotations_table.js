@@ -52,6 +52,7 @@ import {
 } from '../../../../../common/constants/annotations';
 import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ML_APP_URL_GENERATOR, ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { PLUGIN_ID } from '../../../../../common/constants/app';
 import { timeFormatter } from '../../../../../common/util/date_utils';
 
 const CURRENT_SERIES = 'current_series';
@@ -201,6 +202,8 @@ class AnnotationsTableUI extends Component {
   openSingleMetricView = async (annotation = {}) => {
     const {
       services: {
+        application: { navigateToApp },
+
         share: {
           urlGenerators: { getUrlGenerator },
         },
@@ -286,7 +289,9 @@ class AnnotationsTableUI extends Component {
     });
 
     addItemToRecentlyAccessed('timeseriesexplorer', job.job_id, singleMetricViewerLink);
-    window.open(singleMetricViewerLink, '_blank');
+    await navigateToApp(PLUGIN_ID, {
+      path: singleMetricViewerLink,
+    });
   };
 
   onMouseOverRow = (record) => {
