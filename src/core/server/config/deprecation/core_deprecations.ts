@@ -18,12 +18,12 @@
  */
 
 import { has, get } from 'lodash';
-import { ConfigDeprecationProvider, ConfigDeprecation } from './types';
+import { ConfigDeprecationProvider, ConfigDeprecation } from '@kbn/config';
 
 const configPathDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   if (has(process.env, 'CONFIG_PATH')) {
     log(
-      `Environment variable CONFIG_PATH is deprecated. It has been replaced with KIBANA_PATH_CONF pointing to a config folder`
+      `Environment variable CONFIG_PATH is deprecated. It has been replaced with KBN_PATH_CONF pointing to a config folder`
     );
   }
   return settings;
@@ -33,6 +33,16 @@ const dataPathDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   if (has(process.env, 'DATA_PATH')) {
     log(
       `Environment variable "DATA_PATH" will be removed.  It has been replaced with kibana.yml setting "path.data"`
+    );
+  }
+  return settings;
+};
+
+const xsrfDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
+  if ((settings.server?.xsrf?.whitelist ?? []).length > 0) {
+    log(
+      'It is not recommended to disable xsrf protections for API endpoints via [server.xsrf.whitelist]. ' +
+        'It will be removed in 8.0 release. Instead, supply the "kbn-xsrf" header.'
     );
   }
   return settings;
@@ -59,26 +69,26 @@ const cspRulesDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   const rules: string[] = get(settings, 'csp.rules');
   if (rules) {
     const parsed = new Map(
-      rules.map(ruleStr => {
+      rules.map((ruleStr) => {
         const parts = ruleStr.split(/\s+/);
         return [parts[0], parts.slice(1)];
       })
     );
 
     settings.csp.rules = [...parsed].map(([policy, sourceList]) => {
-      if (sourceList.find(source => source.includes(NONCE_STRING))) {
+      if (sourceList.find((source) => source.includes(NONCE_STRING))) {
         log(`csp.rules no longer supports the {nonce} syntax. Replacing with 'self' in ${policy}`);
-        sourceList = sourceList.filter(source => !source.includes(NONCE_STRING));
+        sourceList = sourceList.filter((source) => !source.includes(NONCE_STRING));
 
         // Add 'self' if not present
-        if (!sourceList.find(source => source.includes(SELF_STRING))) {
+        if (!sourceList.find((source) => source.includes(SELF_STRING))) {
           sourceList.push(SELF_STRING);
         }
       }
 
       if (
         SELF_POLICIES.includes(policy) &&
-        !sourceList.find(source => source.includes(SELF_STRING))
+        !sourceList.find((source) => source.includes(SELF_STRING))
       ) {
         log(`csp.rules must contain the 'self' source. Automatically adding to ${policy}.`);
         sourceList.push(SELF_STRING);
@@ -91,24 +101,49 @@ const cspRulesDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   return settings;
 };
 
-export const coreDeprecationProvider: ConfigDeprecationProvider = ({
-  unusedFromRoot,
-  renameFromRoot,
-}) => [
+const mapManifestServiceUrlDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
+  if (has(settings, 'map.manifestServiceUrl')) {
+    log(
+      'You should no longer use the map.manifestServiceUrl setting in kibana.yml to configure the location ' +
+        'of the Elastic Maps Service settings. These settings have moved to the "map.emsTileApiUrl" and ' +
+        '"map.emsFileApiUrl" settings instead. These settings are for development use only and should not be ' +
+        'modified for use in production environments.'
+    );
+  }
+  return settings;
+};
+
+export const coreDeprecationProvider: ConfigDeprecationProvider = ({ rename, unusedFromRoot }) => [
   unusedFromRoot('savedObjects.indexCheckTimeout'),
   unusedFromRoot('server.xsrf.token'),
-  unusedFromRoot('uiSettings.enabled'),
-  renameFromRoot('optimize.lazy', 'optimize.watch'),
-  renameFromRoot('optimize.lazyPort', 'optimize.watchPort'),
-  renameFromRoot('optimize.lazyHost', 'optimize.watchHost'),
-  renameFromRoot('optimize.lazyPrebuild', 'optimize.watchPrebuild'),
-  renameFromRoot('optimize.lazyProxyTimeout', 'optimize.watchProxyTimeout'),
-  renameFromRoot('xpack.telemetry.enabled', 'telemetry.enabled'),
-  renameFromRoot('xpack.telemetry.config', 'telemetry.config'),
-  renameFromRoot('xpack.telemetry.banner', 'telemetry.banner'),
-  renameFromRoot('xpack.telemetry.url', 'telemetry.url'),
+  unusedFromRoot('maps.manifestServiceUrl'),
+  unusedFromRoot('optimize.lazy'),
+  unusedFromRoot('optimize.lazyPort'),
+  unusedFromRoot('optimize.lazyHost'),
+  unusedFromRoot('optimize.lazyPrebuild'),
+  unusedFromRoot('optimize.lazyProxyTimeout'),
+  unusedFromRoot('optimize.enabled'),
+  unusedFromRoot('optimize.bundleFilter'),
+  unusedFromRoot('optimize.bundleDir'),
+  unusedFromRoot('optimize.viewCaching'),
+  unusedFromRoot('optimize.watch'),
+  unusedFromRoot('optimize.watchPort'),
+  unusedFromRoot('optimize.watchHost'),
+  unusedFromRoot('optimize.watchPrebuild'),
+  unusedFromRoot('optimize.watchProxyTimeout'),
+  unusedFromRoot('optimize.useBundleCache'),
+  unusedFromRoot('optimize.sourceMaps'),
+  unusedFromRoot('optimize.workers'),
+  unusedFromRoot('optimize.profile'),
+  unusedFromRoot('optimize.validateSyntaxOfNodeModules'),
+  unusedFromRoot('elasticsearch.preserveHost'),
+  unusedFromRoot('elasticsearch.startupTimeout'),
+  rename('cpu.cgroup.path.override', 'ops.cGroupOverrides.cpuPath'),
+  rename('cpuacct.cgroup.path.override', 'ops.cGroupOverrides.cpuAcctPath'),
   configPathDeprecation,
   dataPathDeprecation,
   rewriteBasePathDeprecation,
   cspRulesDeprecation,
+  mapManifestServiceUrlDeprecation,
+  xsrfDeprecation,
 ];

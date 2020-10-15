@@ -32,7 +32,7 @@ describe('MomentService', () => {
   });
   afterEach(() => service.stop());
 
-  const flushPromises = () => new Promise(resolve => setTimeout(resolve, 100));
+  const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 100));
 
   test('sets initial moment config', async () => {
     const tz$ = new BehaviorSubject('tz1');
@@ -45,6 +45,26 @@ describe('MomentService', () => {
     await flushPromises();
     expect(momentMock.tz.setDefault).toHaveBeenCalledWith('tz1');
     expect(momentMock.updateLocale).toHaveBeenCalledWith('default-locale', { week: { dow: 0 } });
+  });
+
+  it('does not set unknkown zone', async () => {
+    const tz$ = new BehaviorSubject('timezone/undefined');
+    const uiSettings = uiSettingsServiceMock.createSetupContract();
+    uiSettings.get$.mockReturnValueOnce(tz$);
+
+    service.start({ uiSettings });
+    await flushPromises();
+    expect(momentMock.tz.setDefault).not.toHaveBeenCalled();
+  });
+
+  it('sets timezone when a zone is defined', async () => {
+    const tz$ = new BehaviorSubject('tz3');
+    const uiSettings = uiSettingsServiceMock.createSetupContract();
+    uiSettings.get$.mockReturnValueOnce(tz$);
+
+    service.start({ uiSettings });
+    await flushPromises();
+    expect(momentMock.tz.setDefault).toHaveBeenCalledWith('tz3');
   });
 
   test('updates moment config', async () => {

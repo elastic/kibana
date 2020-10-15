@@ -19,7 +19,7 @@
 
 import Path from 'path';
 
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 
 import { Lifecycle } from './lifecycle';
 
@@ -29,7 +29,7 @@ interface Metadata {
 
 export class FailureMetadata {
   // mocha's global types mean we can't import Mocha or it will override the global jest types..............
-  private currentTest?: any;
+  private currentRunnable?: any;
   private readonly allMetadata = new Map<any, Metadata>();
 
   constructor(lifecycle: Lifecycle) {
@@ -39,25 +39,25 @@ export class FailureMetadata {
       );
     }
 
-    lifecycle.beforeEachTest.add(test => {
-      this.currentTest = test;
+    lifecycle.beforeEachRunnable.add((runnable) => {
+      this.currentRunnable = runnable;
     });
   }
 
   add(metadata: Metadata | ((current: Metadata) => Metadata)) {
-    if (!this.currentTest) {
-      throw new Error('no current test to associate metadata with');
+    if (!this.currentRunnable) {
+      throw new Error('no current runnable to associate metadata with');
     }
 
-    const current = this.allMetadata.get(this.currentTest);
-    this.allMetadata.set(this.currentTest, {
+    const current = this.allMetadata.get(this.currentRunnable);
+    this.allMetadata.set(this.currentRunnable, {
       ...current,
       ...(typeof metadata === 'function' ? metadata(current || {}) : metadata),
     });
   }
 
   addMessages(messages: string[]) {
-    this.add(current => ({
+    this.add((current) => ({
       messages: [...(Array.isArray(current.messages) ? current.messages : []), ...messages],
     }));
   }
@@ -76,7 +76,7 @@ export class FailureMetadata {
     const slash = prefix.endsWith('/') ? '' : '/';
     const urlPath = Path.relative(REPO_ROOT, repoPath)
       .split(Path.sep)
-      .map(c => encodeURIComponent(c))
+      .map((c) => encodeURIComponent(c))
       .join('/');
 
     if (urlPath.startsWith('..')) {
@@ -91,14 +91,14 @@ export class FailureMetadata {
       url,
     };
 
-    this.add(current => ({
+    this.add((current) => ({
       screenshots: [...(Array.isArray(current.screenshots) ? current.screenshots : []), screenshot],
     }));
 
     return screenshot;
   }
 
-  get(test: any) {
-    return this.allMetadata.get(test);
+  get(runnable: any) {
+    return this.allMetadata.get(runnable);
   }
 }

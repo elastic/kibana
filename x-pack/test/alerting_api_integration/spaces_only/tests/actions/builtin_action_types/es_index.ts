@@ -14,10 +14,8 @@ const ES_TEST_INDEX_NAME = 'functional-test-actions-index';
 export default function indexTest({ getService }: FtrProviderContext) {
   const es = getService('legacyEs');
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
 
   describe('index action', () => {
-    after(() => esArchiver.unload('empty_kibana'));
     beforeEach(() => clearTestIndex(es));
 
     let createdActionID: string;
@@ -26,85 +24,108 @@ export default function indexTest({ getService }: FtrProviderContext) {
     it('should be created successfully', async () => {
       // create action with no config
       const { body: createdAction } = await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'An index action',
           actionTypeId: '.index',
-          config: {},
+          config: { index: ES_TEST_INDEX_NAME },
           secrets: {},
         })
         .expect(200);
 
       expect(createdAction).to.eql({
         id: createdAction.id,
+        isPreconfigured: false,
         name: 'An index action',
         actionTypeId: '.index',
         config: {
-          index: null,
+          index: ES_TEST_INDEX_NAME,
+          refresh: false,
+          executionTimeField: null,
         },
       });
       createdActionID = createdAction.id;
       expect(typeof createdActionID).to.be('string');
 
       const { body: fetchedAction } = await supertest
-        .get(`/api/action/${createdActionID}`)
+        .get(`/api/actions/action/${createdActionID}`)
         .expect(200);
 
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
+        isPreconfigured: false,
         name: 'An index action',
         actionTypeId: '.index',
-        config: { index: null },
+        config: { index: ES_TEST_INDEX_NAME, refresh: false, executionTimeField: null },
       });
 
-      // create action with index config
+      // create action with all config props
       const { body: createdActionWithIndex } = await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'An index action with index config',
           actionTypeId: '.index',
           config: {
             index: ES_TEST_INDEX_NAME,
+            refresh: true,
+            executionTimeField: 'test',
           },
         })
         .expect(200);
 
       expect(createdActionWithIndex).to.eql({
         id: createdActionWithIndex.id,
+        isPreconfigured: false,
         name: 'An index action with index config',
         actionTypeId: '.index',
         config: {
           index: ES_TEST_INDEX_NAME,
+          refresh: true,
+          executionTimeField: 'test',
         },
       });
       createdActionIDWithIndex = createdActionWithIndex.id;
       expect(typeof createdActionIDWithIndex).to.be('string');
 
       const { body: fetchedActionWithIndex } = await supertest
-        .get(`/api/action/${createdActionIDWithIndex}`)
+        .get(`/api/actions/action/${createdActionIDWithIndex}`)
         .expect(200);
 
       expect(fetchedActionWithIndex).to.eql({
         id: fetchedActionWithIndex.id,
+        isPreconfigured: false,
         name: 'An index action with index config',
         actionTypeId: '.index',
         config: {
           index: ES_TEST_INDEX_NAME,
+          refresh: true,
+          executionTimeField: 'test',
         },
       });
     });
 
     it('should execute successly when expected for a single body', async () => {
+      const { body: createdAction } = await supertest
+        .post('/api/actions/action')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'An index action',
+          actionTypeId: '.index',
+          config: {
+            index: ES_TEST_INDEX_NAME,
+            refresh: true,
+          },
+          secrets: {},
+        })
+        .expect(200);
       const { body: result } = await supertest
-        .post(`/api/action/${createdActionID}/_execute`)
+        .post(`/api/actions/action/${createdAction.id}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
-            index: ES_TEST_INDEX_NAME,
             documents: [{ testing: [1, 2, 3] }],
-            refresh: true,
           },
         })
         .expect(200);

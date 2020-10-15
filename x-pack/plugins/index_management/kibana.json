@@ -1,0 +1,22 @@
+{
+  "id": "indexManagement",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [
+    "home",
+    "licensing",
+    "management",
+    "features"
+  ],
+  "optionalPlugins": [
+    "security",
+    "usageCollection",
+    "ingestManager"
+  ],
+  "configPath": ["xpack", "index_management"],
+  "requiredBundles": [
+    "kibanaReact",
+    "esUiShared"
+  ]
+}

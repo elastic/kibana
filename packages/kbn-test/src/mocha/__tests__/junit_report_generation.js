@@ -49,8 +49,8 @@ describe('dev/mocha/junit report generation', () => {
     });
 
     mocha.addFile(resolve(PROJECT_DIR, 'test.js'));
-    await new Promise(resolve => mocha.run(resolve));
-    const report = await fcb(cb =>
+    await new Promise((resolve) => mocha.run(resolve));
+    const report = await fcb((cb) =>
       parseString(readFileSync(makeJunitReportPath(PROJECT_DIR, 'test')), cb)
     );
 
@@ -129,7 +129,7 @@ describe('dev/mocha/junit report generation', () => {
         name: 'SUITE SUB_SUITE never runs',
         'metadata-json': '{}',
       },
-      'system-out': testFail['system-out'],
+      'system-out': ['-- logs are only reported for failed tests --'],
       skipped: [''],
     });
   });

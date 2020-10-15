@@ -21,9 +21,7 @@ import React from 'react';
 import { render } from 'enzyme';
 import { requiredProps } from '../../test/required_props';
 
-import {
-  KuiFieldGroupSection,
-} from './field_group_section';
+import { KuiFieldGroupSection } from './field_group_section';
 
 test('renders KuiFieldGroupSection', () => {
   const component = <KuiFieldGroupSection {...requiredProps}>children</KuiFieldGroupSection>;
@@ -31,6 +29,10 @@ test('renders KuiFieldGroupSection', () => {
 });
 
 test('renders KuiFieldGroupSection isWide', () => {
-  const component = <KuiFieldGroupSection isWide {...requiredProps}>children</KuiFieldGroupSection>;
+  const component = (
+    <KuiFieldGroupSection isWide {...requiredProps}>
+      children
+    </KuiFieldGroupSection>
+  );
   expect(render(component)).toMatchSnapshot();
 });

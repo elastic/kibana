@@ -1,0 +1,9 @@
+{
+  "id": "embeddableExplorer",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["uiActions", "inspector", "embeddable", "embeddableExamples", "developerExamples"],
+  "optionalPlugins": []
+}

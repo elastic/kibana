@@ -17,7 +17,4 @@
  * under the License.
  */
 
-export {
-  getIndexNotFoundError,
-  getDocNotFoundError,
-} from './get_es_errors';
+export { getIndexNotFoundError, getDocNotFoundError } from './get_es_errors';

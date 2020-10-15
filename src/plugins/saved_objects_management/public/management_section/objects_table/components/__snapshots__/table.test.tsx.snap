@@ -1,0 +1,434 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Table prevents saved objects from being deleted 1`] = `
+<Fragment>
+  <EuiSearchBar
+    box={
+      Object {
+        "data-test-subj": "savedObjectSearchBar",
+      }
+    }
+    filters={
+      Array [
+        Object {
+          "field": "type",
+          "multiSelect": "or",
+          "name": "Type",
+          "options": Array [
+            Object {
+              "value": 2,
+            },
+          ],
+          "type": "field_value_selection",
+        },
+      ]
+    }
+    onChange={[Function]}
+    toolsRight={
+      Array [
+        <EuiButton
+          color="danger"
+          data-test-subj="savedObjectsManagementDelete"
+          iconType="trash"
+          isDisabled={true}
+          onClick={[Function]}
+          title="Unable to delete saved objects"
+        >
+          <FormattedMessage
+            defaultMessage="Delete"
+            id="savedObjectsManagement.objectsTable.table.deleteButtonLabel"
+            values={Object {}}
+          />
+        </EuiButton>,
+        <EuiPopover
+          anchorPosition="downCenter"
+          button={
+            <EuiButton
+              iconSide="right"
+              iconType="arrowDown"
+              isDisabled={false}
+              onClick={[Function]}
+            >
+              <FormattedMessage
+                defaultMessage="Export"
+                id="savedObjectsManagement.objectsTable.table.exportPopoverButtonLabel"
+                values={Object {}}
+              />
+            </EuiButton>
+          }
+          closePopover={[Function]}
+          display="inlineBlock"
+          hasArrow={true}
+          isOpen={false}
+          ownFocus={false}
+          panelPaddingSize="m"
+        >
+          <EuiFormRow
+            describedByIds={Array []}
+            display="row"
+            fullWidth={false}
+            hasChildLabel={true}
+            hasEmptyLabelSpace={false}
+            label={
+              <FormattedMessage
+                defaultMessage="Options"
+                id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.exportOptionsLabel"
+                values={Object {}}
+              />
+            }
+            labelType="label"
+          >
+            <EuiSwitch
+              checked={true}
+              label={
+                <FormattedMessage
+                  defaultMessage="Include related objects"
+                  id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
+                  values={Object {}}
+                />
+              }
+              name="includeReferencesDeep"
+              onChange={[Function]}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            describedByIds={Array []}
+            display="row"
+            fullWidth={false}
+            hasChildLabel={true}
+            hasEmptyLabelSpace={false}
+            labelType="label"
+          >
+            <EuiButton
+              fill={true}
+              iconType="exportAction"
+              onClick={[Function]}
+            >
+              <FormattedMessage
+                defaultMessage="Export"
+                id="savedObjectsManagement.objectsTable.table.exportButtonLabel"
+                values={Object {}}
+              />
+            </EuiButton>
+          </EuiFormRow>
+        </EuiPopover>,
+      ]
+    }
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <div
+    data-test-subj="savedObjectsTable"
+  >
+    <EuiBasicTable
+      columns={
+        Array [
+          Object {
+            "align": "center",
+            "data-test-subj": "savedObjectsTableRowType",
+            "description": "Type of the saved object",
+            "field": "type",
+            "name": "Type",
+            "render": [Function],
+            "sortable": false,
+            "width": "50px",
+          },
+          Object {
+            "data-test-subj": "savedObjectsTableRowTitle",
+            "dataType": "string",
+            "description": "Title of the saved object",
+            "field": "meta.title",
+            "name": "Title",
+            "render": [Function],
+            "sortable": false,
+          },
+          Object {
+            "actions": Array [
+              Object {
+                "available": [Function],
+                "data-test-subj": "savedObjectsTableAction-inspect",
+                "description": "Inspect this saved object",
+                "icon": "inspect",
+                "name": "Inspect",
+                "onClick": [Function],
+                "type": "icon",
+              },
+              Object {
+                "data-test-subj": "savedObjectsTableAction-relationships",
+                "description": "View the relationships this saved object has to other saved objects",
+                "icon": "kqlSelector",
+                "name": "Relationships",
+                "onClick": [Function],
+                "type": "icon",
+              },
+            ],
+            "name": "Actions",
+            "width": "80px",
+          },
+        ]
+      }
+      itemId="id"
+      items={
+        Array [
+          Object {
+            "attributes": Object {},
+            "id": "1",
+            "meta": Object {
+              "editUrl": "#/management/kibana/indexPatterns/patterns/1",
+              "icon": "indexPatternApp",
+              "inAppUrl": Object {
+                "path": "/management/kibana/indexPatterns/patterns/1",
+                "uiCapabilitiesPath": "management.kibana.indexPatterns",
+              },
+              "title": "MyIndexPattern*",
+            },
+            "references": Array [],
+            "type": "index-pattern",
+          },
+        ]
+      }
+      loading={false}
+      noItemsMessage="No items found"
+      onChange={[Function]}
+      pagination={
+        Object {
+          "pageIndex": 1,
+          "pageSize": 2,
+          "pageSizeOptions": Array [
+            5,
+            10,
+            20,
+            50,
+          ],
+          "totalItemCount": 3,
+        }
+      }
+      responsive={true}
+      rowProps={[Function]}
+      selection={
+        Object {
+          "onSelectionChange": [Function],
+        }
+      }
+      tableLayout="fixed"
+    />
+  </div>
+</Fragment>
+`;
+
+exports[`Table should render normally 1`] = `
+<Fragment>
+  <EuiSearchBar
+    box={
+      Object {
+        "data-test-subj": "savedObjectSearchBar",
+      }
+    }
+    filters={
+      Array [
+        Object {
+          "field": "type",
+          "multiSelect": "or",
+          "name": "Type",
+          "options": Array [
+            Object {
+              "value": 2,
+            },
+          ],
+          "type": "field_value_selection",
+        },
+      ]
+    }
+    onChange={[Function]}
+    toolsRight={
+      Array [
+        <EuiButton
+          color="danger"
+          data-test-subj="savedObjectsManagementDelete"
+          iconType="trash"
+          isDisabled={false}
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Delete"
+            id="savedObjectsManagement.objectsTable.table.deleteButtonLabel"
+            values={Object {}}
+          />
+        </EuiButton>,
+        <EuiPopover
+          anchorPosition="downCenter"
+          button={
+            <EuiButton
+              iconSide="right"
+              iconType="arrowDown"
+              isDisabled={false}
+              onClick={[Function]}
+            >
+              <FormattedMessage
+                defaultMessage="Export"
+                id="savedObjectsManagement.objectsTable.table.exportPopoverButtonLabel"
+                values={Object {}}
+              />
+            </EuiButton>
+          }
+          closePopover={[Function]}
+          display="inlineBlock"
+          hasArrow={true}
+          isOpen={false}
+          ownFocus={false}
+          panelPaddingSize="m"
+        >
+          <EuiFormRow
+            describedByIds={Array []}
+            display="row"
+            fullWidth={false}
+            hasChildLabel={true}
+            hasEmptyLabelSpace={false}
+            label={
+              <FormattedMessage
+                defaultMessage="Options"
+                id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.exportOptionsLabel"
+                values={Object {}}
+              />
+            }
+            labelType="label"
+          >
+            <EuiSwitch
+              checked={true}
+              label={
+                <FormattedMessage
+                  defaultMessage="Include related objects"
+                  id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
+                  values={Object {}}
+                />
+              }
+              name="includeReferencesDeep"
+              onChange={[Function]}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            describedByIds={Array []}
+            display="row"
+            fullWidth={false}
+            hasChildLabel={true}
+            hasEmptyLabelSpace={false}
+            labelType="label"
+          >
+            <EuiButton
+              fill={true}
+              iconType="exportAction"
+              onClick={[Function]}
+            >
+              <FormattedMessage
+                defaultMessage="Export"
+                id="savedObjectsManagement.objectsTable.table.exportButtonLabel"
+                values={Object {}}
+              />
+            </EuiButton>
+          </EuiFormRow>
+        </EuiPopover>,
+      ]
+    }
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <div
+    data-test-subj="savedObjectsTable"
+  >
+    <EuiBasicTable
+      columns={
+        Array [
+          Object {
+            "align": "center",
+            "data-test-subj": "savedObjectsTableRowType",
+            "description": "Type of the saved object",
+            "field": "type",
+            "name": "Type",
+            "render": [Function],
+            "sortable": false,
+            "width": "50px",
+          },
+          Object {
+            "data-test-subj": "savedObjectsTableRowTitle",
+            "dataType": "string",
+            "description": "Title of the saved object",
+            "field": "meta.title",
+            "name": "Title",
+            "render": [Function],
+            "sortable": false,
+          },
+          Object {
+            "actions": Array [
+              Object {
+                "available": [Function],
+                "data-test-subj": "savedObjectsTableAction-inspect",
+                "description": "Inspect this saved object",
+                "icon": "inspect",
+                "name": "Inspect",
+                "onClick": [Function],
+                "type": "icon",
+              },
+              Object {
+                "data-test-subj": "savedObjectsTableAction-relationships",
+                "description": "View the relationships this saved object has to other saved objects",
+                "icon": "kqlSelector",
+                "name": "Relationships",
+                "onClick": [Function],
+                "type": "icon",
+              },
+            ],
+            "name": "Actions",
+            "width": "80px",
+          },
+        ]
+      }
+      itemId="id"
+      items={
+        Array [
+          Object {
+            "attributes": Object {},
+            "id": "1",
+            "meta": Object {
+              "editUrl": "#/management/kibana/indexPatterns/patterns/1",
+              "icon": "indexPatternApp",
+              "inAppUrl": Object {
+                "path": "/management/kibana/indexPatterns/patterns/1",
+                "uiCapabilitiesPath": "management.kibana.indexPatterns",
+              },
+              "title": "MyIndexPattern*",
+            },
+            "references": Array [],
+            "type": "index-pattern",
+          },
+        ]
+      }
+      loading={false}
+      noItemsMessage="No items found"
+      onChange={[Function]}
+      pagination={
+        Object {
+          "pageIndex": 1,
+          "pageSize": 2,
+          "pageSizeOptions": Array [
+            5,
+            10,
+            20,
+            50,
+          ],
+          "totalItemCount": 3,
+        }
+      }
+      responsive={true}
+      rowProps={[Function]}
+      selection={
+        Object {
+          "onSelectionChange": [Function],
+        }
+      }
+      tableLayout="fixed"
+    />
+  </div>
+</Fragment>
+`;

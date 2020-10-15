@@ -19,35 +19,37 @@
 
 import React from 'react';
 
-import {
-  KuiTabs,
-  KuiTab,
-} from '../../../../components';
+import { KuiTabs, KuiTab } from '../../../../components';
 
 class KuiTabsExample extends React.Component {
   constructor(props) {
     super(props);
 
-    this.tabs = [{
-      id: 'cobalt',
-      name: 'Cobalt',
-    }, {
-      id: 'dextrose',
-      name: 'Dextrose',
-    }, {
-      id: 'helium_3',
-      name: 'Helium-3',
-    }, {
-      id: 'monosodium_glutamate',
-      name: 'Monosodium Glutamate',
-    }];
+    this.tabs = [
+      {
+        id: 'cobalt',
+        name: 'Cobalt',
+      },
+      {
+        id: 'dextrose',
+        name: 'Dextrose',
+      },
+      {
+        id: 'helium_3',
+        name: 'Helium-3',
+      },
+      {
+        id: 'monosodium_glutamate',
+        name: 'Monosodium Glutamate',
+      },
+    ];
 
     this.state = {
       selectedTabId: 'cobalt',
     };
   }
 
-  onSelectedTabChanged = id => {
+  onSelectedTabChanged = (id) => {
     this.setState({
       selectedTabId: id,
     });
@@ -66,11 +68,7 @@ class KuiTabsExample extends React.Component {
   }
 
   render() {
-    return (
-      <KuiTabs>
-        {this.renderTabs()}
-      </KuiTabs>
-    );
+    return <KuiTabs>{this.renderTabs()}</KuiTabs>;
   }
 }
 

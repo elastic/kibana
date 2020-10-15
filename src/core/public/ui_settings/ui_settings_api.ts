@@ -152,10 +152,14 @@ export class UiSettingsApi {
         },
       });
     } catch (err) {
-      if (err.response && err.response.status >= 300) {
-        throw new Error(`Request failed with status code: ${err.response.status}`);
+      if (err.response) {
+        if (err.response.status === 400) {
+          throw new Error(err.body.message);
+        }
+        if (err.response.status > 400) {
+          throw new Error(`Request failed with status code: ${err.response.status}`);
+        }
       }
-
       throw err;
     } finally {
       this.loadingCount$.next(this.loadingCount$.getValue() - 1);

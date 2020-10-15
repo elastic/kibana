@@ -5,11 +5,11 @@
  */
 
 export default function ({ loadTestFile }) {
-
   describe('rollup app', function () {
     this.tags('ciGroup1');
 
     loadTestFile(require.resolve('./rollup_jobs'));
     loadTestFile(require.resolve('./hybrid_index_pattern'));
+    loadTestFile(require.resolve('./tsvb'));
   });
 }

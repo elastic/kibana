@@ -5,9 +5,9 @@
  */
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'visualize', 'timePicker', 'visChart']);
   const inspector = getService('inspector');
 
   describe('hybrid index pattern', () => {
@@ -79,9 +79,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       const toTime = 'Aug 22, 2019 @ 23:09:36.205';
 
       await PageObjects.common.navigateToApp('visualize');
-      await PageObjects.visualize.clickVisualizationByName('hybrid_histogram_line_chart');
+      await PageObjects.visualize.openSavedVisualization('hybrid_histogram_line_chart');
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
+      await PageObjects.visChart.waitForVisualizationRenderingStabilized();
       await inspector.open();
       await inspector.setTablePageSize(50);
       await inspector.expectTableData(expectedData);

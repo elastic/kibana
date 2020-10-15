@@ -19,8 +19,7 @@
 import { Request } from 'hapi';
 import { merge } from 'lodash';
 import { Socket } from 'net';
-
-import querystring from 'querystring';
+import { stringify } from 'query-string';
 
 import { schema } from '@kbn/config-schema';
 
@@ -29,9 +28,16 @@ import {
   LifecycleResponseFactory,
   RouteMethod,
   KibanaResponseFactory,
+  RouteValidationSpec,
+  KibanaRouteOptions,
+  KibanaRequestState,
 } from './router';
+import { OnPreResponseToolkit } from './lifecycle/on_pre_response';
+import { OnPostAuthToolkit } from './lifecycle/on_post_auth';
+import { OnPreRoutingToolkit } from './lifecycle/on_pre_routing';
 
-interface RequestFixtureOptions {
+interface RequestFixtureOptions<P = any, Q = any, B = any> {
+  auth?: { isAuthenticated: boolean };
   headers?: Record<string, string>;
   params?: Record<string, any>;
   body?: Record<string, any>;
@@ -40,9 +46,17 @@ interface RequestFixtureOptions {
   method?: RouteMethod;
   socket?: Socket;
   routeTags?: string[];
+  kibanaRouteOptions?: KibanaRouteOptions;
+  kibanaRequestState?: KibanaRequestState;
+  routeAuthRequired?: false;
+  validation?: {
+    params?: RouteValidationSpec<P>;
+    query?: RouteValidationSpec<Q>;
+    body?: RouteValidationSpec<B>;
+  };
 }
 
-function createKibanaRequestMock({
+function createKibanaRequestMock<P = any, Q = any, B = any>({
   path = '/path',
   headers = { accept: 'something/html' },
   params = {},
@@ -51,10 +65,18 @@ function createKibanaRequestMock({
   method = 'get',
   socket = new Socket(),
   routeTags,
-}: RequestFixtureOptions = {}) {
-  const queryString = querystring.stringify(query);
-  return KibanaRequest.from(
+  routeAuthRequired,
+  validation = {},
+  kibanaRouteOptions = { xsrfRequired: true },
+  kibanaRequestState = { requestId: '123', requestUuid: '123e4567-e89b-12d3-a456-426614174000' },
+  auth = { isAuthenticated: true },
+}: RequestFixtureOptions<P, Q, B> = {}) {
+  const queryString = stringify(query, { sort: false });
+
+  return KibanaRequest.from<P, Q, B>(
     createRawRequestMock({
+      app: kibanaRequestState,
+      auth,
       headers,
       params,
       query,
@@ -67,17 +89,24 @@ function createKibanaRequestMock({
         query: queryString,
         search: queryString ? `?${queryString}` : queryString,
       },
-      route: { settings: { tags: routeTags } },
+      route: {
+        settings: { tags: routeTags, auth: routeAuthRequired, app: kibanaRouteOptions },
+      },
       raw: {
-        req: { socket },
+        req: {
+          socket,
+          // these are needed to avoid an error when consuming KibanaRequest.events
+          on: jest.fn(),
+          off: jest.fn(),
+        },
       },
     }),
     {
-      params: schema.object({}, { allowUnknowns: true }),
-      body: schema.object({}, { allowUnknowns: true }),
-      query: schema.object({}, { allowUnknowns: true }),
+      params: validation.params || schema.any(),
+      body: validation.body || schema.any(),
+      query: validation.query || schema.any(),
     }
-  ) as KibanaRequest<Readonly<{}>, Readonly<{}>, Readonly<{}>>;
+  );
 }
 
 type DeepPartial<T> = T extends any[]
@@ -95,6 +124,10 @@ function createRawRequestMock(customization: DeepPartial<Request> = {}) {
   return merge(
     {},
     {
+      app: { xsrfRequired: true } as any,
+      auth: {
+        isAuthenticated: true,
+      },
       headers: {},
       path: '/',
       route: { settings: {} },
@@ -104,6 +137,7 @@ function createRawRequestMock(customization: DeepPartial<Request> = {}) {
       raw: {
         req: {
           url: '/',
+          socket: {},
         },
       },
     },
@@ -137,9 +171,20 @@ const createLifecycleResponseFactoryMock = (): jest.Mocked<LifecycleResponseFact
   customError: jest.fn(),
 });
 
+type ToolkitMock = jest.Mocked<OnPreResponseToolkit & OnPostAuthToolkit & OnPreRoutingToolkit>;
+
+const createToolkitMock = (): ToolkitMock => {
+  return {
+    render: jest.fn(),
+    next: jest.fn(),
+    rewriteUrl: jest.fn(),
+  };
+};
+
 export const httpServerMock = {
   createKibanaRequest: createKibanaRequestMock,
   createRawRequest: createRawRequestMock,
   createResponseFactory: createResponseFactoryMock,
   createLifecycleResponseFactory: createLifecycleResponseFactoryMock,
+  createToolkit: createToolkitMock,
 };

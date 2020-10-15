@@ -18,8 +18,8 @@
  */
 
 import Boom from 'boom';
-import { createListStream } from '../../../../legacy/utils/streams';
-import { SavedObjectsClientContract } from '../types';
+import { createListStream } from '../../utils/streams';
+import { SavedObjectsClientContract, SavedObject } from '../types';
 import { fetchNestedDependencies } from './inject_nested_depdendencies';
 import { sortObjects } from './sort_objects';
 
@@ -84,6 +84,9 @@ async function fetchObjectsToExport({
   savedObjectsClient: SavedObjectsClientContract;
   namespace?: string;
 }) {
+  if ((types?.length ?? 0) > 0 && (objects?.length ?? 0) > 0) {
+    throw Boom.badRequest(`Can't specify both "types" and "objects" properties when exporting`);
+  }
   if (objects && objects.length > 0) {
     if (objects.length > exportSizeLimit) {
       throw Boom.badRequest(`Can't export more than ${exportSizeLimit} objects`);
@@ -92,7 +95,7 @@ async function fetchObjectsToExport({
       throw Boom.badRequest(`Can't specify both "search" and "objects" properties when exporting`);
     }
     const bulkGetResult = await savedObjectsClient.bulkGet(objects, { namespace });
-    const erroredObjects = bulkGetResult.saved_objects.filter(obj => !!obj.error);
+    const erroredObjects = bulkGetResult.saved_objects.filter((obj) => !!obj.error);
     if (erroredObjects.length) {
       const err = Boom.badRequest();
       err.output.payload.attributes = {
@@ -105,21 +108,32 @@ async function fetchObjectsToExport({
     const findResponse = await savedObjectsClient.find({
       type: types,
       search,
-      sortField: '_id',
-      sortOrder: 'asc',
       perPage: exportSizeLimit,
-      namespace,
+      namespaces: namespace ? [namespace] : undefined,
     });
     if (findResponse.total > exportSizeLimit) {
       throw Boom.badRequest(`Can't export more than ${exportSizeLimit} objects`);
     }
-    return findResponse.saved_objects;
+
+    // sorts server-side by _id, since it's only available in fielddata
+    return (
+      findResponse.saved_objects
+        // exclude the find-specific `score` property from the exported objects
+        .map(({ score, ...obj }) => obj)
+        .sort((a: SavedObject, b: SavedObject) => (a.id > b.id ? 1 : -1))
+    );
   } else {
     throw Boom.badRequest('Either `type` or `objects` are required.');
   }
 }
 
-export async function getSortedObjectsForExport({
+/**
+ * Generates sorted saved object stream to be used for export.
+ * See the {@link SavedObjectsExportOptions | options} for more detailed information.
+ *
+ * @public
+ */
+export async function exportSavedObjectsToStream({
   types,
   objects,
   search,
@@ -137,18 +151,26 @@ export async function getSortedObjectsForExport({
     exportSizeLimit,
     namespace,
   });
-  let exportedObjects = [...rootObjects];
+  let exportedObjects: Array<SavedObject<unknown>> = [];
   let missingReferences: SavedObjectsExportResultDetails['missingReferences'] = [];
+
   if (includeReferencesDeep) {
     const fetchResult = await fetchNestedDependencies(rootObjects, savedObjectsClient, namespace);
-    exportedObjects = fetchResult.objects;
+    exportedObjects = sortObjects(fetchResult.objects);
     missingReferences = fetchResult.missingRefs;
+  } else {
+    exportedObjects = sortObjects(rootObjects);
   }
-  exportedObjects = sortObjects(exportedObjects);
+
+  // redact attributes that should not be exported
+  const redactedObjects = exportedObjects.map<SavedObject<unknown>>(
+    ({ namespaces, ...object }) => object
+  );
+
   const exportDetails: SavedObjectsExportResultDetails = {
     exportedCount: exportedObjects.length,
     missingRefCount: missingReferences.length,
     missingReferences,
   };
-  return createListStream([...exportedObjects, ...(excludeExportDetails ? [] : [exportDetails])]);
+  return createListStream([...redactedObjects, ...(excludeExportDetails ? [] : [exportDetails])]);
 }

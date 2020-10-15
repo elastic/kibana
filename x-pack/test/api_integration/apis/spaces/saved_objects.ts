@@ -7,7 +7,7 @@
 import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('`space` saved object type', () => {
@@ -89,7 +89,7 @@ export default function({ getService }: FtrProviderContext) {
           .expect(404)
           .then((response: Record<string, any>) => {
             expect(response.body).to.eql({
-              message: 'Not Found',
+              message: 'Saved object [space/default] not found',
               statusCode: 404,
               error: 'Not Found',
             });

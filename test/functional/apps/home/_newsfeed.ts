@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const globalNav = getService('globalNav');
   const PageObjects = getPageObjects(['common', 'newsfeed']);
 
@@ -47,10 +47,17 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
     it('shows all news from newsfeed', async () => {
       const objects = await PageObjects.newsfeed.getNewsfeedList();
-      expect(objects).to.eql([
-        '21 June 2019\nYou are functionally testing the newsfeed widget with fixtures!\nSee test/common/fixtures/plugins/newsfeed/newsfeed_simulation\nGeneric feed-viewer could go here',
-        '21 June 2019\nStaging too!\nHello world\nGeneric feed-viewer could go here',
-      ]);
+
+      if (await PageObjects.common.isOss()) {
+        expect(objects).to.eql([
+          '21 June 2019\nYou are functionally testing the newsfeed widget with fixtures!\nSee test/common/fixtures/plugins/newsfeed/newsfeed_simulation\nGeneric feed-viewer could go here',
+          '21 June 2019\nStaging too!\nHello world\nGeneric feed-viewer could go here',
+        ]);
+      } else {
+        // can't shim the API in cloud so going to check that at least something is rendered
+        // to test that the API was called and returned something that could be rendered
+        expect(objects.length).to.be.above(0);
+      }
     });
 
     it('clicking on newsfeed icon should close opened newsfeed', async () => {

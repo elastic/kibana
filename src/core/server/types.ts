@@ -21,4 +21,5 @@
 export { PluginOpaqueId } from './plugins/types';
 export * from './saved_objects/types';
 export * from './ui_settings/types';
-export { EnvironmentMode, PackageInfo } from './config/types';
+export * from './legacy/types';
+export type { EnvironmentMode, PackageInfo } from '@kbn/config';

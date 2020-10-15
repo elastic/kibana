@@ -1,0 +1,364 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`StepTimeField should disable the action button if an invalid time field is selected 1`] = `
+<ActionButtons
+  createIndexPattern={[Function]}
+  goToPreviousStep={[Function]}
+  submittable={false}
+/>
+`;
+
+exports[`StepTimeField should enable the action button if the user decides to not select a time field 1`] = `
+<ActionButtons
+  createIndexPattern={[Function]}
+  goToPreviousStep={[Function]}
+  submittable={true}
+/>
+`;
+
+exports[`StepTimeField should render "Custom index pattern ID already exists" when error is "Conflict" 1`] = `
+<Fragment>
+  <Header
+    indexPattern="ki*"
+    indexPatternName="name"
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <TimeField
+    fetchTimeFields={[Function]}
+    isLoading={true}
+    isVisible={false}
+    onTimeFieldChanged={[Function]}
+    timeFieldOptions={Array []}
+  />
+  <EuiHorizontalRule />
+  <AdvancedOptions
+    indexPatternId=""
+    isVisible={false}
+    onChangeIndexPatternId={[Function]}
+    toggleAdvancedOptions={[Function]}
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <EuiCallOut
+    color="danger"
+    iconType="cross"
+    title={
+      <FormattedMessage
+        defaultMessage="Error"
+        id="indexPatternManagement.createIndexPattern.stepTime.error"
+        values={Object {}}
+      />
+    }
+  >
+    <p>
+      <FormattedMessage
+        defaultMessage="Custom index pattern ID already exists."
+        id="indexPatternManagement.createIndexPattern.stepTime.patterAlreadyExists"
+        values={Object {}}
+      />
+    </p>
+  </EuiCallOut>
+  <EuiSpacer
+    size="m"
+  />
+  <ActionButtons
+    createIndexPattern={[Function]}
+    goToPreviousStep={[Function]}
+    submittable={true}
+  />
+</Fragment>
+`;
+
+exports[`StepTimeField should render a loading state when creating the index pattern 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  direction="column"
+  gutterSize="s"
+  justifyContent="center"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiTitle
+      size="s"
+    >
+      <h3
+        className="eui-textCenter"
+      >
+        <FormattedMessage
+          defaultMessage="Creating index pattern…"
+          id="indexPatternManagement.createIndexPattern.stepTime.creatingLabel"
+          values={Object {}}
+        />
+      </h3>
+    </EuiTitle>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiLoadingSpinner
+      size="l"
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`StepTimeField should render a selected timeField 1`] = `
+<Fragment>
+  <Header
+    indexPattern="ki*"
+    indexPatternName="name"
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <TimeField
+    fetchTimeFields={[Function]}
+    isLoading={true}
+    isVisible={true}
+    onTimeFieldChanged={[Function]}
+    selectedTimeField="@timestamp"
+    timeFieldOptions={
+      Array [
+        Object {
+          "text": "",
+          "value": "",
+        },
+        Object {
+          "disabled": undefined,
+          "text": "@timestamp",
+          "value": "@timestamp",
+        },
+        Object {
+          "disabled": undefined,
+          "text": "name",
+          "value": "name",
+        },
+      ]
+    }
+  />
+  <EuiHorizontalRule />
+  <AdvancedOptions
+    indexPatternId=""
+    isVisible={false}
+    onChangeIndexPatternId={[Function]}
+    toggleAdvancedOptions={[Function]}
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <ActionButtons
+    createIndexPattern={[Function]}
+    goToPreviousStep={[Function]}
+    submittable={true}
+  />
+</Fragment>
+`;
+
+exports[`StepTimeField should render advanced options 1`] = `
+<Fragment>
+  <Header
+    indexPattern="ki*"
+    indexPatternName="name"
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <TimeField
+    fetchTimeFields={[Function]}
+    isLoading={true}
+    isVisible={false}
+    onTimeFieldChanged={[Function]}
+    timeFieldOptions={Array []}
+  />
+  <EuiHorizontalRule />
+  <AdvancedOptions
+    indexPatternId=""
+    isVisible={false}
+    onChangeIndexPatternId={[Function]}
+    toggleAdvancedOptions={[Function]}
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <ActionButtons
+    createIndexPattern={[Function]}
+    goToPreviousStep={[Function]}
+    submittable={true}
+  />
+</Fragment>
+`;
+
+exports[`StepTimeField should render advanced options with an index pattern id 1`] = `
+<Fragment>
+  <Header
+    indexPattern="ki*"
+    indexPatternName="name"
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <TimeField
+    fetchTimeFields={[Function]}
+    isLoading={true}
+    isVisible={false}
+    onTimeFieldChanged={[Function]}
+    timeFieldOptions={Array []}
+  />
+  <EuiHorizontalRule />
+  <AdvancedOptions
+    indexPatternId="foobar"
+    isVisible={false}
+    onChangeIndexPatternId={[Function]}
+    toggleAdvancedOptions={[Function]}
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <ActionButtons
+    createIndexPattern={[Function]}
+    goToPreviousStep={[Function]}
+    submittable={true}
+  />
+</Fragment>
+`;
+
+exports[`StepTimeField should render any error message 1`] = `
+<Fragment>
+  <Header
+    indexPattern="ki*"
+    indexPatternName="name"
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <TimeField
+    fetchTimeFields={[Function]}
+    isLoading={true}
+    isVisible={false}
+    onTimeFieldChanged={[Function]}
+    timeFieldOptions={Array []}
+  />
+  <EuiHorizontalRule />
+  <AdvancedOptions
+    indexPatternId=""
+    isVisible={false}
+    onChangeIndexPatternId={[Function]}
+    toggleAdvancedOptions={[Function]}
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <EuiCallOut
+    color="danger"
+    iconType="cross"
+    title={
+      <FormattedMessage
+        defaultMessage="Error"
+        id="indexPatternManagement.createIndexPattern.stepTime.error"
+        values={Object {}}
+      />
+    }
+  >
+    <p>
+      foobar
+    </p>
+  </EuiCallOut>
+  <EuiSpacer
+    size="m"
+  />
+  <ActionButtons
+    createIndexPattern={[Function]}
+    goToPreviousStep={[Function]}
+    submittable={true}
+  />
+</Fragment>
+`;
+
+exports[`StepTimeField should render normally 1`] = `
+<Fragment>
+  <Header
+    indexPattern="ki*"
+    indexPatternName="name"
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <TimeField
+    fetchTimeFields={[Function]}
+    isLoading={true}
+    isVisible={false}
+    onTimeFieldChanged={[Function]}
+    timeFieldOptions={Array []}
+  />
+  <EuiHorizontalRule />
+  <AdvancedOptions
+    indexPatternId=""
+    isVisible={false}
+    onChangeIndexPatternId={[Function]}
+    toggleAdvancedOptions={[Function]}
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <ActionButtons
+    createIndexPattern={[Function]}
+    goToPreviousStep={[Function]}
+    submittable={true}
+  />
+</Fragment>
+`;
+
+exports[`StepTimeField should render timeFields 1`] = `
+<Fragment>
+  <Header
+    indexPattern="ki*"
+    indexPatternName="name"
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <TimeField
+    fetchTimeFields={[Function]}
+    isLoading={true}
+    isVisible={true}
+    onTimeFieldChanged={[Function]}
+    timeFieldOptions={
+      Array [
+        Object {
+          "text": "",
+          "value": "",
+        },
+        Object {
+          "disabled": undefined,
+          "text": "@timestamp",
+          "value": "@timestamp",
+        },
+        Object {
+          "disabled": undefined,
+          "text": "name",
+          "value": "name",
+        },
+      ]
+    }
+  />
+  <EuiHorizontalRule />
+  <AdvancedOptions
+    indexPatternId=""
+    isVisible={false}
+    onChangeIndexPatternId={[Function]}
+    toggleAdvancedOptions={[Function]}
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <ActionButtons
+    createIndexPattern={[Function]}
+    goToPreviousStep={[Function]}
+    submittable={false}
+  />
+</Fragment>
+`;

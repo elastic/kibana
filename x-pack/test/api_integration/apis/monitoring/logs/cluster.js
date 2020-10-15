@@ -15,7 +15,7 @@ export default function ({ getService }) {
     const archive = 'monitoring/logs';
     const timeRange = {
       min: '2019-03-15T16:19:22.161Z',
-      max: '2019-03-15T17:19:22.161Z'
+      max: '2019-03-15T17:19:22.161Z',
     };
     const codePaths = ['logs'];
 

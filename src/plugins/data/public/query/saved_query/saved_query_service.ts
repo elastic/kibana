@@ -95,7 +95,7 @@ export const createSavedQueryService = (
     searchText: string = '',
     perPage: number = 50,
     activePage: number = 1
-  ): Promise<SavedQuery[]> => {
+  ): Promise<{ total: number; queries: SavedQuery[] }> => {
     const response = await savedObjectsClient.find<SerializedSavedQueryAttributes>({
       type: 'query',
       search: searchText,
@@ -105,15 +105,21 @@ export const createSavedQueryService = (
       page: activePage,
     });
 
-    return response.savedObjects.map(
-      (savedObject: { id: string; attributes: SerializedSavedQueryAttributes }) =>
-        parseSavedQueryObject(savedObject)
-    );
+    return {
+      total: response.total,
+      queries: response.savedObjects.map(
+        (savedObject: { id: string; attributes: SerializedSavedQueryAttributes }) =>
+          parseSavedQueryObject(savedObject)
+      ),
+    };
   };
 
   const getSavedQuery = async (id: string): Promise<SavedQuery> => {
-    const response = await savedObjectsClient.get<SerializedSavedQueryAttributes>('query', id);
-    return parseSavedQueryObject(response);
+    const savedObject = await savedObjectsClient.get<SerializedSavedQueryAttributes>('query', id);
+    if (savedObject.error) {
+      throw new Error(savedObject.error.message);
+    }
+    return parseSavedQueryObject(savedObject);
   };
 
   const deleteSavedQuery = async (id: string) => {

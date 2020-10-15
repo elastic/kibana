@@ -1,0 +1,32 @@
+{
+  "ml.find_file_structure": {
+    "url_params": {
+      "lines_to_sample": 0,
+      "line_merge_size_limit": 0,
+      "timeout": "",
+      "charset": "",
+      "format": [
+        "ndjson",
+        "xml",
+        "delimited",
+        "semi_structured_text"
+      ],
+      "has_header_row": "__flag__",
+      "column_names": [],
+      "delimiter": "",
+      "quote": "",
+      "should_trim_fields": "__flag__",
+      "grok_pattern": "",
+      "timestamp_field": "",
+      "timestamp_format": "",
+      "explain": "__flag__"
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_ml/find_file_structure"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-find-file-structure.html"
+  }
+}

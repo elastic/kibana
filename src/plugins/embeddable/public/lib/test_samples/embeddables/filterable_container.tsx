@@ -18,13 +18,13 @@
  */
 
 import { Container, ContainerInput } from '../../containers';
-import { GetEmbeddableFactory } from '../../types';
-import { esFilters } from '../../../../../data/public';
+import { Filter } from '../../../../../data/public';
+import { EmbeddableStart } from '../../../plugin';
 
 export const FILTERABLE_CONTAINER = 'FILTERABLE_CONTAINER';
 
 export interface FilterableContainerInput extends ContainerInput {
-  filters: esFilters.Filter[];
+  filters: Filter[];
 }
 
 /**
@@ -32,9 +32,8 @@ export interface FilterableContainerInput extends ContainerInput {
  * https://github.com/microsoft/TypeScript/issues/15300 is fixed so we use a type
  * here instead
  */
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type InheritedChildrenInput = {
-  filters: esFilters.Filter[];
+  filters: Filter[];
   id?: string;
 };
 
@@ -46,7 +45,7 @@ export class FilterableContainer extends Container<
 
   constructor(
     initialInput: FilterableContainerInput,
-    getFactory: GetEmbeddableFactory,
+    getFactory: EmbeddableStart['getEmbeddableFactory'],
     parent?: Container
   ) {
     super(initialInput, { embeddableLoaded: {} }, getFactory, parent);

@@ -1,3 +1,5 @@
+# This file is needed by functionalTests:ensureAllTestsInCiGroup for the list of ciGroups. That must be changed before this file can be removed
+
 JOB:
   - kibana-intake
   - x-pack-intake

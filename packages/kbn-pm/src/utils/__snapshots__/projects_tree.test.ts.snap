@@ -1,29 +1,29 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`handles projects outside root folder 1`] = `
-"kibana
+kibana
 ├── packages
 │   ├── bar
 │   └── foo
 └── ../plugins
     ├── baz
     ├── quux
-    └── zorge"
+    └── zorge
 `;
 
 exports[`handles projects with root folder 1`] = `
-"kibana
+kibana
 └── packages
     ├── bar
-    └── foo"
+    └── foo
 `;
 
 exports[`handles projects within projects outside root folder 1`] = `
-"kibana
+kibana
 ├── packages
 │   ├── bar
 │   └── foo
 └── ../kibana-extra/additional_projects (with-additional-projects)
     ├── packages/baz
-    └── plugins/quux"
+    └── plugins/quux
 `;

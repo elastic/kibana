@@ -5,7 +5,7 @@
  */
 import Boom from 'boom';
 import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../../src/core/server';
-import { LicenseCheck, LICENSE_CHECK_STATE } from '../../../../../licensing/server';
+import { LicenseCheck } from '../../../../../licensing/server';
 import { defineGetRolesRoutes } from './get';
 
 import {
@@ -27,18 +27,13 @@ interface TestOptions {
 describe('GET role', () => {
   const getRoleTest = (
     description: string,
-    {
-      name,
-      licenseCheckResult = { state: LICENSE_CHECK_STATE.Valid },
-      apiResponse,
-      asserts,
-    }: TestOptions
+    { name, licenseCheckResult = { state: 'valid' }, apiResponse, asserts }: TestOptions
   ) => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
       mockRouteDefinitionParams.authz.applicationName = application;
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
       mockRouteDefinitionParams.clusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
       if (apiResponse) {
         mockScopedClusterClient.callAsCurrentUser.mockImplementation(apiResponse);
@@ -76,7 +71,7 @@ describe('GET role', () => {
 
   describe('failure', () => {
     getRoleTest('returns result of license checker', {
-      licenseCheckResult: { state: LICENSE_CHECK_STATE.Invalid, message: 'test forbidden message' },
+      licenseCheckResult: { state: 'invalid', message: 'test forbidden message' },
       asserts: { statusCode: 403, result: { message: 'test forbidden message' } },
     });
 

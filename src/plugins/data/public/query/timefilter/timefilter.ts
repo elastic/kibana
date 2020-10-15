@@ -20,13 +20,12 @@
 import _ from 'lodash';
 import { Subject, BehaviorSubject } from 'rxjs';
 import moment from 'moment';
-import { IndexPattern } from 'src/legacy/core_plugins/data/public';
 import { areRefreshIntervalsDifferent, areTimeRangesDifferent } from './lib/diff_time_picker_vals';
-import { parseQueryString } from './lib/parse_querystring';
-import { calculateBounds, getTime } from './get_time';
+import { getForceNow } from './lib/get_force_now';
 import { TimefilterConfig, InputTimeRange, TimeRangeBounds } from './types';
-import { RefreshInterval, TimeRange } from '../../../common';
+import { calculateBounds, getTime, RefreshInterval, TimeRange } from '../../../common';
 import { TimeHistoryContract } from './time_history';
+import { IndexPattern } from '../../index_patterns';
 
 // TODO: remove!
 
@@ -42,6 +41,8 @@ export class Timefilter {
   private fetch$ = new Subject();
 
   private _time: TimeRange;
+  // Denotes whether setTime has been called, can be used to determine if the constructor defaults are being used.
+  private _isTimeTouched: boolean = false;
   private _refreshInterval!: RefreshInterval;
   private _history: TimeHistoryContract;
 
@@ -50,8 +51,13 @@ export class Timefilter {
 
   private _autoRefreshIntervalId: number = 0;
 
+  private readonly timeDefaults: TimeRange;
+  private readonly refreshIntervalDefaults: RefreshInterval;
+
   constructor(config: TimefilterConfig, timeHistory: TimeHistoryContract) {
     this._history = timeHistory;
+    this.timeDefaults = config.timeDefaults;
+    this.refreshIntervalDefaults = config.refreshIntervalDefaults;
     this._time = config.timeDefaults;
     this.setRefreshInterval(config.refreshIntervalDefaults);
   }
@@ -62,6 +68,10 @@ export class Timefilter {
 
   public isAutoRefreshSelectorEnabled() {
     return this._isAutoRefreshSelectorEnabled;
+  }
+
+  public isTimeTouched() {
+    return this._isTimeTouched;
   }
 
   public getEnabledUpdated$ = () => {
@@ -108,6 +118,7 @@ export class Timefilter {
         from: newTime.from,
         to: newTime.to,
       };
+      this._isTimeTouched = true;
       this._history.add(this._time);
       this.timeUpdate$.next();
       this.fetch$.next();
@@ -159,7 +170,9 @@ export class Timefilter {
   };
 
   public createFilter = (indexPattern: IndexPattern, timeRange?: TimeRange) => {
-    return getTime(indexPattern, timeRange ? timeRange : this._time, this.getForceNow());
+    return getTime(indexPattern, timeRange ? timeRange : this._time, {
+      forceNow: this.getForceNow(),
+    });
   };
 
   public getBounds(): TimeRangeBounds {
@@ -208,17 +221,16 @@ export class Timefilter {
     this.enabledUpdated$.next(false);
   };
 
-  private getForceNow = () => {
-    const forceNow = parseQueryString().forceNow as string;
-    if (!forceNow) {
-      return;
-    }
+  public getTimeDefaults(): TimeRange {
+    return _.cloneDeep(this.timeDefaults);
+  }
 
-    const ticks = Date.parse(forceNow);
-    if (isNaN(ticks)) {
-      throw new Error(`forceNow query parameter, ${forceNow}, can't be parsed by Date.parse`);
-    }
-    return new Date(ticks);
+  public getRefreshIntervalDefaults(): RefreshInterval {
+    return _.cloneDeep(this.refreshIntervalDefaults);
+  }
+
+  private getForceNow = () => {
+    return getForceNow();
   };
 }
 

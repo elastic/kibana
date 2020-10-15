@@ -18,19 +18,24 @@
  */
 
 import { Server } from 'http';
-
-jest.mock('fs', () => ({
-  readFileSync: jest.fn(),
-}));
-
+import { readFileSync } from 'fs';
 import supertest from 'supertest';
 
 import { ByteSizeValue, schema } from '@kbn/config-schema';
 import { HttpConfig } from './http_config';
-import { Router } from './router';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import {
+  Router,
+  KibanaRequest,
+  KibanaResponseFactory,
+  RequestHandler,
+  RouteValidationResultFactory,
+  RouteValidationFunction,
+} from './router';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 import { HttpServer } from './http_server';
 import { Readable } from 'stream';
+import { RequestHandlerContext } from 'kibana/server';
+import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 
 const cookieOptions = {
   name: 'sid',
@@ -43,27 +48,40 @@ let server: HttpServer;
 let config: HttpConfig;
 let configWithSSL: HttpConfig;
 
-const loggingService = loggingServiceMock.create();
+const loggingService = loggingSystemMock.create();
 const logger = loggingService.get();
 const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 
+let certificate: string;
+let key: string;
+
+beforeAll(() => {
+  certificate = readFileSync(KBN_CERT_PATH, 'utf8');
+  key = readFileSync(KBN_KEY_PATH, 'utf8');
+});
+
 beforeEach(() => {
   config = {
+    name: 'kibana',
     host: '127.0.0.1',
     maxPayload: new ByteSizeValue(1024),
     port: 10002,
     ssl: { enabled: false },
     compression: { enabled: true },
-  } as HttpConfig;
+    requestId: {
+      allowFromAnyIp: true,
+      ipAllowlist: [],
+    },
+  } as any;
 
   configWithSSL = {
     ...config,
     ssl: {
       enabled: true,
-      certificate: '/certificate',
+      certificate,
       cipherSuites: ['cipherSuite'],
       getSecureOptions: () => 0,
-      key: '/key',
+      key,
       redirectHttpFromPort: config.port + 1,
     },
   } as HttpConfig;
@@ -83,7 +101,7 @@ test('log listening address after started', async () => {
   await server.start();
 
   expect(server.isListening()).toBe(true);
-  expect(loggingServiceMock.collect(loggingService).info).toMatchInlineSnapshot(`
+  expect(loggingSystemMock.collect(loggingService).info).toMatchInlineSnapshot(`
     Array [
       Array [
         "http server running at http://127.0.0.1:10002",
@@ -99,7 +117,7 @@ test('log listening address after started when configured with BasePath and rewr
   await server.start();
 
   expect(server.isListening()).toBe(true);
-  expect(loggingServiceMock.collect(loggingService).info).toMatchInlineSnapshot(`
+  expect(loggingSystemMock.collect(loggingService).info).toMatchInlineSnapshot(`
     Array [
       Array [
         "http server running at http://127.0.0.1:10002",
@@ -115,7 +133,7 @@ test('log listening address after started when configured with BasePath and rewr
   await server.start();
 
   expect(server.isListening()).toBe(true);
-  expect(loggingServiceMock.collect(loggingService).info).toMatchInlineSnapshot(`
+  expect(loggingSystemMock.collect(loggingService).info).toMatchInlineSnapshot(`
     Array [
       Array [
         "http server running at http://127.0.0.1:10002/bar",
@@ -149,7 +167,7 @@ test('valid params', async () => {
   await supertest(innerServer.listener)
     .get('/foo/some-string')
     .expect(200)
-    .then(res => {
+    .then((res) => {
       expect(res.text).toBe('some-string');
     });
 });
@@ -179,7 +197,7 @@ test('invalid params', async () => {
   await supertest(innerServer.listener)
     .get('/foo/some-string')
     .expect(400)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({
         error: 'Bad Request',
         statusCode: 400,
@@ -214,7 +232,7 @@ test('valid query', async () => {
   await supertest(innerServer.listener)
     .get('/foo/?bar=test&quux=123')
     .expect(200)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({ bar: 'test', quux: 123 });
     });
 });
@@ -244,7 +262,7 @@ test('invalid query', async () => {
   await supertest(innerServer.listener)
     .get('/foo/?bar=test')
     .expect(400)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({
         error: 'Bad Request',
         statusCode: 400,
@@ -283,8 +301,231 @@ test('valid body', async () => {
       baz: 123,
     })
     .expect(200)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({ bar: 'test', baz: 123 });
+    });
+});
+
+test('valid body with validate function', async () => {
+  const router = new Router('/foo', logger, enhanceWithContext);
+
+  router.post(
+    {
+      path: '/',
+      validate: {
+        body: ({ bar, baz } = {}, { ok, badRequest }) => {
+          if (typeof bar === 'string' && typeof baz === 'number') {
+            return ok({ bar, baz });
+          } else {
+            return badRequest('Wrong payload', ['body']);
+          }
+        },
+      },
+    },
+    (context, req, res) => {
+      return res.ok({ body: req.body });
+    }
+  );
+
+  const { registerRouter, server: innerServer } = await server.setup(config);
+  registerRouter(router);
+
+  await server.start();
+
+  await supertest(innerServer.listener)
+    .post('/foo/')
+    .send({
+      bar: 'test',
+      baz: 123,
+    })
+    .expect(200)
+    .then((res) => {
+      expect(res.body).toEqual({ bar: 'test', baz: 123 });
+    });
+});
+
+test('not inline validation - specifying params', async () => {
+  const router = new Router('/foo', logger, enhanceWithContext);
+
+  const bodyValidation = (
+    { bar, baz }: any = {},
+    { ok, badRequest }: RouteValidationResultFactory
+  ) => {
+    if (typeof bar === 'string' && typeof baz === 'number') {
+      return ok({ bar, baz });
+    } else {
+      return badRequest('Wrong payload', ['body']);
+    }
+  };
+
+  router.post(
+    {
+      path: '/',
+      validate: {
+        body: bodyValidation,
+      },
+    },
+    (context, req, res) => {
+      return res.ok({ body: req.body });
+    }
+  );
+
+  const { registerRouter, server: innerServer } = await server.setup(config);
+  registerRouter(router);
+
+  await server.start();
+
+  await supertest(innerServer.listener)
+    .post('/foo/')
+    .send({
+      bar: 'test',
+      baz: 123,
+    })
+    .expect(200)
+    .then((res) => {
+      expect(res.body).toEqual({ bar: 'test', baz: 123 });
+    });
+});
+
+test('not inline validation - specifying validation handler', async () => {
+  const router = new Router('/foo', logger, enhanceWithContext);
+
+  const bodyValidation: RouteValidationFunction<{ bar: string; baz: number }> = (
+    { bar, baz } = {},
+    { ok, badRequest }
+  ) => {
+    if (typeof bar === 'string' && typeof baz === 'number') {
+      return ok({ bar, baz });
+    } else {
+      return badRequest('Wrong payload', ['body']);
+    }
+  };
+
+  router.post(
+    {
+      path: '/',
+      validate: {
+        body: bodyValidation,
+      },
+    },
+    (context, req, res) => {
+      return res.ok({ body: req.body });
+    }
+  );
+
+  const { registerRouter, server: innerServer } = await server.setup(config);
+  registerRouter(router);
+
+  await server.start();
+
+  await supertest(innerServer.listener)
+    .post('/foo/')
+    .send({
+      bar: 'test',
+      baz: 123,
+    })
+    .expect(200)
+    .then((res) => {
+      expect(res.body).toEqual({ bar: 'test', baz: 123 });
+    });
+});
+
+// https://github.com/elastic/kibana/issues/47047
+test('not inline handler - KibanaRequest', async () => {
+  const router = new Router('/foo', logger, enhanceWithContext);
+
+  const handler = (
+    context: RequestHandlerContext,
+    req: KibanaRequest<unknown, unknown, { bar: string; baz: number }>,
+    res: KibanaResponseFactory
+  ) => {
+    const body = {
+      bar: req.body.bar.toUpperCase(),
+      baz: req.body.baz.toString(),
+    };
+
+    return res.ok({ body });
+  };
+
+  router.post(
+    {
+      path: '/',
+      validate: {
+        body: ({ bar, baz } = {}, { ok, badRequest }) => {
+          if (typeof bar === 'string' && typeof baz === 'number') {
+            return ok({ bar, baz });
+          } else {
+            return badRequest('Wrong payload', ['body']);
+          }
+        },
+      },
+    },
+    handler
+  );
+
+  const { registerRouter, server: innerServer } = await server.setup(config);
+  registerRouter(router);
+
+  await server.start();
+
+  await supertest(innerServer.listener)
+    .post('/foo/')
+    .send({
+      bar: 'test',
+      baz: 123,
+    })
+    .expect(200)
+    .then((res) => {
+      expect(res.body).toEqual({ bar: 'TEST', baz: '123' });
+    });
+});
+
+test('not inline handler - RequestHandler', async () => {
+  const router = new Router('/foo', logger, enhanceWithContext);
+
+  const handler: RequestHandler<unknown, unknown, { bar: string; baz: number }> = (
+    context,
+    req,
+    res
+  ) => {
+    const body = {
+      bar: req.body.bar.toUpperCase(),
+      baz: req.body.baz.toString(),
+    };
+
+    return res.ok({ body });
+  };
+
+  router.post(
+    {
+      path: '/',
+      validate: {
+        body: ({ bar, baz } = {}, { ok, badRequest }) => {
+          if (typeof bar === 'string' && typeof baz === 'number') {
+            return ok({ bar, baz });
+          } else {
+            return badRequest('Wrong payload', ['body']);
+          }
+        },
+      },
+    },
+    handler
+  );
+
+  const { registerRouter, server: innerServer } = await server.setup(config);
+  registerRouter(router);
+
+  await server.start();
+
+  await supertest(innerServer.listener)
+    .post('/foo/')
+    .send({
+      bar: 'test',
+      baz: 123,
+    })
+    .expect(200)
+    .then((res) => {
+      expect(res.body).toEqual({ bar: 'TEST', baz: '123' });
     });
 });
 
@@ -314,7 +555,7 @@ test('invalid body', async () => {
     .post('/foo/')
     .send({ bar: 'test' })
     .expect(400)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({
         error: 'Bad Request',
         statusCode: 400,
@@ -349,7 +590,7 @@ test('handles putting', async () => {
     .put('/foo/')
     .send({ key: 'new value' })
     .expect(200)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({ key: 'new value' });
     });
 });
@@ -379,7 +620,7 @@ test('handles deleting', async () => {
   await supertest(innerServer.listener)
     .delete('/foo/3')
     .expect(200)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({ key: 3 });
     });
 });
@@ -409,28 +650,22 @@ describe('with `basepath: /bar` and `rewriteBasePath: false`', () => {
   });
 
   test('/bar => 404', async () => {
-    await supertest(innerServerListener)
-      .get('/bar')
-      .expect(404);
+    await supertest(innerServerListener).get('/bar').expect(404);
   });
 
   test('/bar/ => 404', async () => {
-    await supertest(innerServerListener)
-      .get('/bar/')
-      .expect(404);
+    await supertest(innerServerListener).get('/bar/').expect(404);
   });
 
   test('/bar/foo => 404', async () => {
-    await supertest(innerServerListener)
-      .get('/bar/foo')
-      .expect(404);
+    await supertest(innerServerListener).get('/bar/foo').expect(404);
   });
 
   test('/ => /', async () => {
     await supertest(innerServerListener)
       .get('/')
       .expect(200)
-      .then(res => {
+      .then((res) => {
         expect(res.text).toBe('value:/');
       });
   });
@@ -439,7 +674,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: false`', () => {
     await supertest(innerServerListener)
       .get('/foo')
       .expect(200)
-      .then(res => {
+      .then((res) => {
         expect(res.text).toBe('value:/foo');
       });
   });
@@ -473,7 +708,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
     await supertest(innerServerListener)
       .get('/bar')
       .expect(200)
-      .then(res => {
+      .then((res) => {
         expect(res.text).toBe('value:/');
       });
   });
@@ -482,7 +717,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
     await supertest(innerServerListener)
       .get('/bar/')
       .expect(200)
-      .then(res => {
+      .then((res) => {
         expect(res.text).toBe('value:/');
       });
   });
@@ -491,21 +726,17 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
     await supertest(innerServerListener)
       .get('/bar/foo')
       .expect(200)
-      .then(res => {
+      .then((res) => {
         expect(res.text).toBe('value:/foo');
       });
   });
 
   test('/ => 404', async () => {
-    await supertest(innerServerListener)
-      .get('/')
-      .expect(404);
+    await supertest(innerServerListener).get('/').expect(404);
   });
 
   test('/foo => 404', async () => {
-    await supertest(innerServerListener)
-      .get('/foo')
-      .expect(404);
+    await supertest(innerServerListener).get('/foo').expect(404);
   });
 });
 
@@ -550,13 +781,9 @@ test('allows attaching metadata to attach meta-data tag strings to a route', asy
   registerRouter(router);
 
   await server.start();
-  await supertest(innerServer.listener)
-    .get('/with-tags')
-    .expect(200, { tags });
+  await supertest(innerServer.listener).get('/with-tags').expect(200, { tags });
 
-  await supertest(innerServer.listener)
-    .get('/without-tags')
-    .expect(200, { tags: [] });
+  await supertest(innerServer.listener).get('/without-tags').expect(200, { tags: [] });
 });
 
 test('exposes route details of incoming request to a route handler', async () => {
@@ -574,7 +801,9 @@ test('exposes route details of incoming request to a route handler', async () =>
       path: '/',
       options: {
         authRequired: true,
+        xsrfRequired: false,
         tags: [],
+        timeout: {},
       },
     });
 });
@@ -597,9 +826,7 @@ describe('conditional compression', () => {
   test('with `compression.enabled: true`', async () => {
     const listener = await setupServer(config);
 
-    const response = await supertest(listener)
-      .get('/')
-      .set('accept-encoding', 'gzip');
+    const response = await supertest(listener).get('/').set('accept-encoding', 'gzip');
 
     expect(response.header).toHaveProperty('content-encoding', 'gzip');
   });
@@ -610,9 +837,7 @@ describe('conditional compression', () => {
       compression: { enabled: false },
     });
 
-    const response = await supertest(listener)
-      .get('/')
-      .set('accept-encoding', 'gzip');
+    const response = await supertest(listener).get('/').set('accept-encoding', 'gzip');
 
     expect(response.header).not.toHaveProperty('content-encoding');
   });
@@ -627,9 +852,7 @@ describe('conditional compression', () => {
     });
 
     test('enables compression for no referer', async () => {
-      const response = await supertest(listener)
-        .get('/')
-        .set('accept-encoding', 'gzip');
+      const response = await supertest(listener).get('/').set('accept-encoding', 'gzip');
 
       expect(response.header).toHaveProperty('content-encoding', 'gzip');
     });
@@ -686,7 +909,11 @@ test('exposes route details of incoming request to a route handler (POST + paylo
       path: '/',
       options: {
         authRequired: true,
+        xsrfRequired: true,
         tags: [],
+        timeout: {
+          payload: 10000,
+        },
         body: {
           parse: true, // hapi populates the default
           maxBytes: 1024, // hapi populates the default
@@ -713,14 +940,11 @@ describe('body options', () => {
     registerRouter(router);
 
     await server.start();
-    await supertest(innerServer.listener)
-      .post('/')
-      .send({ test: 1 })
-      .expect(415, {
-        statusCode: 415,
-        error: 'Unsupported Media Type',
-        message: 'Unsupported Media Type',
-      });
+    await supertest(innerServer.listener).post('/').send({ test: 1 }).expect(415, {
+      statusCode: 415,
+      error: 'Unsupported Media Type',
+      message: 'Unsupported Media Type',
+    });
   });
 
   test('should reject the request because the payload is too large', async () => {
@@ -738,14 +962,11 @@ describe('body options', () => {
     registerRouter(router);
 
     await server.start();
-    await supertest(innerServer.listener)
-      .post('/')
-      .send({ test: 1 })
-      .expect(413, {
-        statusCode: 413,
-        error: 'Request Entity Too Large',
-        message: 'Payload content length greater than maximum allowed: 1',
-      });
+    await supertest(innerServer.listener).post('/').send({ test: 1 }).expect(413, {
+      statusCode: 413,
+      error: 'Request Entity Too Large',
+      message: 'Payload content length greater than maximum allowed: 1',
+    });
   });
 
   test('should not parse the content in the request', async () => {
@@ -771,14 +992,258 @@ describe('body options', () => {
     registerRouter(router);
 
     await server.start();
-    await supertest(innerServer.listener)
-      .post('/')
-      .send({ test: 1 })
-      .expect(200, {
-        parse: false,
-        maxBytes: 1024, // hapi populates the default
-        output: 'data',
+    await supertest(innerServer.listener).post('/').send({ test: 1 }).expect(200, {
+      parse: false,
+      maxBytes: 1024, // hapi populates the default
+      output: 'data',
+    });
+  });
+});
+
+describe('timeout options', () => {
+  describe('payload timeout', () => {
+    test('POST routes set the payload timeout', async () => {
+      const { registerRouter, server: innerServer } = await server.setup(config);
+
+      const router = new Router('', logger, enhanceWithContext);
+      router.post(
+        {
+          path: '/',
+          validate: false,
+          options: {
+            timeout: {
+              payload: 300000,
+            },
+          },
+        },
+        (context, req, res) => {
+          try {
+            return res.ok({
+              body: {
+                timeout: req.route.options.timeout,
+              },
+            });
+          } catch (err) {
+            return res.internalError({ body: err.message });
+          }
+        }
+      );
+      registerRouter(router);
+      await server.start();
+      await supertest(innerServer.listener)
+        .post('/')
+        .send({ test: 1 })
+        .expect(200, {
+          timeout: {
+            payload: 300000,
+          },
+        });
+    });
+
+    test('DELETE routes set the payload timeout', async () => {
+      const { registerRouter, server: innerServer } = await server.setup(config);
+
+      const router = new Router('', logger, enhanceWithContext);
+      router.delete(
+        {
+          path: '/',
+          validate: false,
+          options: {
+            timeout: {
+              payload: 300000,
+            },
+          },
+        },
+        (context, req, res) => {
+          try {
+            return res.ok({
+              body: {
+                timeout: req.route.options.timeout,
+              },
+            });
+          } catch (err) {
+            return res.internalError({ body: err.message });
+          }
+        }
+      );
+      registerRouter(router);
+      await server.start();
+      await supertest(innerServer.listener)
+        .delete('/')
+        .expect(200, {
+          timeout: {
+            payload: 300000,
+          },
+        });
+    });
+
+    test('PUT routes set the payload timeout and automatically adjusts the idle socket timeout', async () => {
+      const { registerRouter, server: innerServer } = await server.setup(config);
+
+      const router = new Router('', logger, enhanceWithContext);
+      router.put(
+        {
+          path: '/',
+          validate: false,
+          options: {
+            timeout: {
+              payload: 300000,
+            },
+          },
+        },
+        (context, req, res) => {
+          try {
+            return res.ok({
+              body: {
+                timeout: req.route.options.timeout,
+              },
+            });
+          } catch (err) {
+            return res.internalError({ body: err.message });
+          }
+        }
+      );
+      registerRouter(router);
+      await server.start();
+      await supertest(innerServer.listener)
+        .put('/')
+        .expect(200, {
+          timeout: {
+            payload: 300000,
+          },
+        });
+    });
+
+    test('PATCH routes set the payload timeout and automatically adjusts the idle socket timeout', async () => {
+      const { registerRouter, server: innerServer } = await server.setup(config);
+
+      const router = new Router('', logger, enhanceWithContext);
+      router.patch(
+        {
+          path: '/',
+          validate: false,
+          options: {
+            timeout: {
+              payload: 300000,
+            },
+          },
+        },
+        (context, req, res) => {
+          try {
+            return res.ok({
+              body: {
+                timeout: req.route.options.timeout,
+              },
+            });
+          } catch (err) {
+            return res.internalError({ body: err.message });
+          }
+        }
+      );
+      registerRouter(router);
+      await server.start();
+      await supertest(innerServer.listener)
+        .patch('/')
+        .expect(200, {
+          timeout: {
+            payload: 300000,
+          },
+        });
+    });
+  });
+
+  describe('idleSocket timeout', () => {
+    test('uses server socket timeout when not specified in the route', async () => {
+      const { registerRouter, server: innerServer } = await server.setup({
+        ...config,
+        socketTimeout: 11000,
       });
+
+      const router = new Router('', logger, enhanceWithContext);
+      router.get(
+        {
+          path: '/',
+          validate: { body: schema.any() },
+        },
+        (context, req, res) => {
+          return res.ok({
+            body: {
+              timeout: req.route.options.timeout,
+            },
+          });
+        }
+      );
+      registerRouter(router);
+
+      await server.start();
+      await supertest(innerServer.listener)
+        .get('/')
+        .send()
+        .expect(200, {
+          timeout: {
+            idleSocket: 11000,
+          },
+        });
+    });
+
+    test('sets the socket timeout when specified in the route', async () => {
+      const { registerRouter, server: innerServer } = await server.setup({
+        ...config,
+        socketTimeout: 11000,
+      });
+
+      const router = new Router('', logger, enhanceWithContext);
+      router.get(
+        {
+          path: '/',
+          validate: { body: schema.any() },
+          options: { timeout: { idleSocket: 12000 } },
+        },
+        (context, req, res) => {
+          return res.ok({
+            body: {
+              timeout: req.route.options.timeout,
+            },
+          });
+        }
+      );
+      registerRouter(router);
+
+      await server.start();
+      await supertest(innerServer.listener)
+        .get('/')
+        .send()
+        .expect(200, {
+          timeout: {
+            idleSocket: 12000,
+          },
+        });
+    });
+  });
+
+  test(`idleSocket timeout can be smaller than the payload timeout`, async () => {
+    const { registerRouter } = await server.setup(config);
+
+    const router = new Router('', logger, enhanceWithContext);
+    router.post(
+      {
+        path: '/',
+        validate: { body: schema.any() },
+        options: {
+          timeout: {
+            payload: 1000,
+            idleSocket: 10,
+          },
+        },
+      },
+      (context, req, res) => {
+        return res.ok({ body: { timeout: req.route.options.timeout } });
+      }
+    );
+
+    registerRouter(router);
+
+    await server.start();
   });
 });
 
@@ -804,14 +1269,11 @@ test('should return a stream in the body', async () => {
   registerRouter(router);
 
   await server.start();
-  await supertest(innerServer.listener)
-    .put('/')
-    .send({ test: 1 })
-    .expect(200, {
-      parse: true,
-      maxBytes: 1024, // hapi populates the default
-      output: 'stream',
-    });
+  await supertest(innerServer.listener).put('/').send({ test: 1 }).expect(200, {
+    parse: true,
+    maxBytes: 1024, // hapi populates the default
+    output: 'stream',
+  });
 });
 
 describe('setup contract', () => {
@@ -829,140 +1291,106 @@ describe('setup contract', () => {
       await create();
       expect(create()).rejects.toThrowError('A cookieSessionStorageFactory was already created');
     });
-  });
 
-  describe('#auth.isAuthenticated()', () => {
-    it('returns true if has been authorized', async () => {
-      const { registerAuth, registerRouter, server: innerServer, auth } = await server.setup(
-        config
-      );
-
-      const router = new Router('', logger, enhanceWithContext);
-      router.get({ path: '/', validate: false }, (context, req, res) =>
-        res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
-      );
-      registerRouter(router);
-
-      await registerAuth((req, res, toolkit) => toolkit.authenticated());
-
-      await server.start();
-      await supertest(innerServer.listener)
-        .get('/')
-        .expect(200, { isAuthenticated: true });
-    });
-
-    it('returns false if has not been authorized', async () => {
-      const { registerAuth, registerRouter, server: innerServer, auth } = await server.setup(
-        config
-      );
-
-      const router = new Router('', logger, enhanceWithContext);
-      router.get(
-        { path: '/', validate: false, options: { authRequired: false } },
-        (context, req, res) => res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
-      );
-      registerRouter(router);
-
-      await registerAuth((req, res, toolkit) => toolkit.authenticated());
-
-      await server.start();
-      await supertest(innerServer.listener)
-        .get('/')
-        .expect(200, { isAuthenticated: false });
-    });
-
-    it('returns false if no authorization mechanism has been registered', async () => {
-      const { registerRouter, server: innerServer, auth } = await server.setup(config);
-
-      const router = new Router('', logger, enhanceWithContext);
-      router.get(
-        { path: '/', validate: false, options: { authRequired: false } },
-        (context, req, res) => res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
-      );
-      registerRouter(router);
-
-      await server.start();
-      await supertest(innerServer.listener)
-        .get('/')
-        .expect(200, { isAuthenticated: false });
+    it('does not throw if called after stop', async () => {
+      const { createCookieSessionStorageFactory } = await server.setup(config);
+      await server.stop();
+      expect(() => {
+        createCookieSessionStorageFactory(cookieOptions);
+      }).not.toThrow();
     });
   });
 
-  describe('#auth.get()', () => {
-    it('returns authenticated status and allow associate auth state with request', async () => {
-      const user = { id: '42' };
-      const {
-        createCookieSessionStorageFactory,
-        registerRouter,
-        registerAuth,
-        server: innerServer,
-        auth,
-      } = await server.setup(config);
-      const sessionStorageFactory = await createCookieSessionStorageFactory(cookieOptions);
-      registerAuth((req, res, toolkit) => {
-        sessionStorageFactory.asScoped(req).set({ value: user, expires: Date.now() + 1000 });
-        return toolkit.authenticated({ state: user });
+  describe('#getServerInfo', () => {
+    it('returns correct information', async () => {
+      let { getServerInfo } = await server.setup(config);
+
+      expect(getServerInfo()).toEqual({
+        hostname: '127.0.0.1',
+        name: 'kibana',
+        port: 10002,
+        protocol: 'http',
       });
 
-      const router = new Router('', logger, enhanceWithContext);
-      router.get({ path: '/', validate: false }, (context, req, res) =>
-        res.ok({ body: auth.get(req) })
-      );
-      registerRouter(router);
-      await server.start();
+      ({ getServerInfo } = await server.setup({
+        ...config,
+        port: 12345,
+        name: 'custom-name',
+        host: 'localhost',
+      }));
 
-      await supertest(innerServer.listener)
-        .get('/')
-        .expect(200, { state: user, status: 'authenticated' });
+      expect(getServerInfo()).toEqual({
+        hostname: 'localhost',
+        name: 'custom-name',
+        port: 12345,
+        protocol: 'http',
+      });
     });
 
-    it('returns correct authentication unknown status', async () => {
-      const { registerRouter, server: innerServer, auth } = await server.setup(config);
+    it('returns correct protocol when ssl is enabled', async () => {
+      const { getServerInfo } = await server.setup(configWithSSL);
 
-      const router = new Router('', logger, enhanceWithContext);
-      router.get({ path: '/', validate: false }, (context, req, res) =>
-        res.ok({ body: auth.get(req) })
-      );
-
-      registerRouter(router);
-      await server.start();
-      await supertest(innerServer.listener)
-        .get('/')
-        .expect(200, { status: 'unknown' });
-    });
-
-    it('returns correct unauthenticated status', async () => {
-      const authenticate = jest.fn();
-
-      const { registerRouter, registerAuth, server: innerServer, auth } = await server.setup(
-        config
-      );
-      await registerAuth(authenticate);
-      const router = new Router('', logger, enhanceWithContext);
-      router.get(
-        { path: '/', validate: false, options: { authRequired: false } },
-        (context, req, res) => res.ok({ body: auth.get(req) })
-      );
-
-      registerRouter(router);
-      await server.start();
-
-      await supertest(innerServer.listener)
-        .get('/')
-        .expect(200, { status: 'unauthenticated' });
-
-      expect(authenticate).not.toHaveBeenCalled();
+      expect(getServerInfo().protocol).toEqual('https');
     });
   });
 
-  describe('#isTlsEnabled', () => {
-    it('returns "true" if TLS enabled', async () => {
-      const { isTlsEnabled } = await server.setup(configWithSSL);
-      expect(isTlsEnabled).toBe(true);
+  describe('#registerStaticDir', () => {
+    it('does not throw if called after stop', async () => {
+      const { registerStaticDir } = await server.setup(config);
+      await server.stop();
+      expect(() => {
+        registerStaticDir('/path1/{path*}', '/path/to/resource');
+      }).not.toThrow();
     });
-    it('returns "false" if TLS not enabled', async () => {
-      const { isTlsEnabled } = await server.setup(config);
-      expect(isTlsEnabled).toBe(false);
+  });
+
+  describe('#registerOnPreRouting', () => {
+    test('does not throw if called after stop', async () => {
+      const { registerOnPreRouting } = await server.setup(config);
+      await server.stop();
+      expect(() => {
+        registerOnPreRouting((req, res) => res.unauthorized());
+      }).not.toThrow();
+    });
+  });
+
+  describe('#registerOnPreAuth', () => {
+    test('does not throw if called after stop', async () => {
+      const { registerOnPreAuth } = await server.setup(config);
+      await server.stop();
+      expect(() => {
+        registerOnPreAuth((req, res) => res.unauthorized());
+      }).not.toThrow();
+    });
+  });
+
+  describe('#registerOnPostAuth', () => {
+    test('does not throw if called after stop', async () => {
+      const { registerOnPostAuth } = await server.setup(config);
+      await server.stop();
+      expect(() => {
+        registerOnPostAuth((req, res) => res.unauthorized());
+      }).not.toThrow();
+    });
+  });
+
+  describe('#registerOnPreResponse', () => {
+    test('does not throw if called after stop', async () => {
+      const { registerOnPreResponse } = await server.setup(config);
+      await server.stop();
+      expect(() => {
+        registerOnPreResponse((req, res, t) => t.next());
+      }).not.toThrow();
+    });
+  });
+
+  describe('#registerAuth', () => {
+    test('does not throw if called after stop', async () => {
+      const { registerAuth } = await server.setup(config);
+      await server.stop();
+      expect(() => {
+        registerAuth((req, res) => res.unauthorized());
+      }).not.toThrow();
     });
   });
 });

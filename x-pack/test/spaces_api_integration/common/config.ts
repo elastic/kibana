@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
-import { resolveKibanaPath } from '@kbn/plugin-helpers';
 import path from 'path';
+
+import { REPO_ROOT } from '@kbn/utils';
+
 import { TestInvoker } from './lib/types';
 // @ts-ignore
 import { LegacyEsProvider } from './services/legacy_es';
@@ -22,11 +23,11 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
   return async ({ readConfigFile }: TestInvoker) => {
     const config = {
       kibana: {
-        api: await readConfigFile(resolveKibanaPath('test/api_integration/config.js')),
+        api: await readConfigFile(path.resolve(REPO_ROOT, 'test/api_integration/config.js')),
         functional: await readConfigFile(require.resolve('../../../../test/functional/config.js')),
       },
       xpack: {
-        api: await readConfigFile(require.resolve('../../api_integration/config.js')),
+        api: await readConfigFile(require.resolve('../../api_integration/config.ts')),
       },
     };
 
@@ -63,11 +64,11 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         ...config.xpack.api.get('kbnTestServer'),
         serverArgs: [
           ...config.xpack.api.get('kbnTestServer.serverArgs'),
-          '--optimize.enabled=false',
           // disable anonymouse access so that we're testing both on and off in different suites
           '--status.allowAnonymous=false',
           '--server.xsrf.disableProtection=true',
-          ...disabledPlugins.map(key => `--xpack.${key}.enabled=false`),
+          `--plugin-path=${path.join(__dirname, 'fixtures', 'spaces_test_plugin')}`,
+          ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
         ],
       },
     };

@@ -25,9 +25,7 @@ export const config = {
   path: 'kibana',
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
-    defaultAppId: schema.string({ defaultValue: 'home' }),
     index: schema.string({ defaultValue: '.kibana' }),
-    disableWelcomeScreen: schema.boolean({ defaultValue: false }),
     autocompleteTerminateAfter: schema.duration({ defaultValue: 100000 }),
     autocompleteTimeout: schema.duration({ defaultValue: 1000 }),
   }),

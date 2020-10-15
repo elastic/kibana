@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 /* Steps for version conflict test
  1. Create index pattern
  2. Click on  scripted field and fill in the values
@@ -38,13 +37,11 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover', 'header']);
   const log = getService('log');
 
-
   describe('index version conflict', function describeIndexTests() {
     before(async function () {
       await browser.setWindowSize(1200, 800);
       await esArchiver.load('discover');
     });
-
 
     it('Should be able to surface version conflict notification while creating scripted field', async function () {
       await PageObjects.settings.navigateTo();
@@ -58,8 +55,8 @@ export default function ({ getService, getPageObjects }) {
         index: '.kibana',
         id: 'index-pattern:logstash-*',
         body: {
-          'doc': { 'index-pattern': { 'fieldFormatMap': '{"geo.src":{"id":"number"}}' } }
-        }
+          doc: { 'index-pattern': { fieldFormatMap: '{"geo.src":{"id":"number"}}' } },
+        },
       });
       log.debug(JSON.stringify(response));
       expect(response.result).to.be('updated');
@@ -84,8 +81,8 @@ export default function ({ getService, getPageObjects }) {
         index: '.kibana',
         id: 'index-pattern:logstash-*',
         body: {
-          'doc': { 'index-pattern': { 'fieldFormatMap': '{"geo.dest":{"id":"number"}}' } }
-        }
+          doc: { 'index-pattern': { fieldFormatMap: '{"geo.dest":{"id":"number"}}' } },
+        },
       });
       log.debug(JSON.stringify(response));
       expect(response.result).to.be('updated');

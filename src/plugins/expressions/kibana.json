@@ -1,9 +1,12 @@
 {
   "id": "expressions",
   "version": "kibana",
-  "server": false,
+  "server": true,
   "ui": true,
-  "requiredPlugins": [
-    "inspector"
+  "extraPublicDirs": ["common", "common/fonts"],
+  "requiredBundles": [
+    "kibanaUtils",
+    "inspector",
+    "data"
   ]
 }

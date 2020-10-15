@@ -1,6 +1,0 @@
-{
-  "id": "status_page",
-  "version": "kibana",
-  "server": false,
-  "ui": true
-}

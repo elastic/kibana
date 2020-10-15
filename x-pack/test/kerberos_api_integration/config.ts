@@ -8,8 +8,8 @@ import { resolve } from 'path';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { services } from './services';
 
-export default async function({ readConfigFile }: FtrConfigProviderContext) {
-  const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.js'));
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+  const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
   const kerberosKeytabPath = resolve(
     __dirname,
@@ -34,6 +34,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
         ...xPackAPITestsConfig.get('esTestCluster.serverArgs'),
         'xpack.security.authc.token.enabled=true',
         'xpack.security.authc.token.timeout=15s',
+        'xpack.security.authc.realms.kerberos.kerb1.order=0',
         `xpack.security.authc.realms.kerberos.kerb1.keytab.path=${kerberosKeytabPath}`,
       ],
       serverEnvVars: {

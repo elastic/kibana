@@ -1,48 +1,35 @@
 {
-  "extends": "../tsconfig.json",
+  "extends": "../tsconfig.base.json",
   "include": [
+    "mocks.ts",
     "typings/**/*",
-    "legacy/common/**/*",
-    "legacy/server/**/*",
-    "legacy/plugins/**/*",
     "plugins/**/*",
     "test_utils/**/*",
     "tasks/**/*"
   ],
   "exclude": [
     "test/**/*",
-    "legacy/plugins/siem/cypress/**/*",
-    "legacy/plugins/apm/cypress/**/*",
-    "**/typespec_tests.ts"
+    "plugins/security_solution/cypress/**/*",
+    "plugins/apm/e2e/cypress/**/*",
+    "plugins/apm/scripts/**/*",
+    "plugins/licensing/**/*",
+    "plugins/global_search/**/*",
   ],
   "compilerOptions": {
-    "outDir": ".",
     "paths": {
       "kibana/public": ["src/core/public"],
       "kibana/server": ["src/core/server"],
-      "ui/*": [
-        "src/legacy/ui/public/*"
-      ],
-      "plugins/xpack_main/*": [
-        "x-pack/legacy/plugins/xpack_main/public/*"
-      ],
-      "plugins/security/*": [
-        "x-pack/legacy/plugins/security/public/*"
-      ],
-      "plugins/spaces/*": [
-        "x-pack/legacy/plugins/spaces/public/*"
-      ],
-      "test_utils/*": [
-        "x-pack/test_utils/*"
-      ],
-      "monitoring/common/*": [
-        "x-pack/monitoring/common/*"
-      ],
-      "plugins/*": ["src/legacy/core_plugins/*/public/"]
+      "test_utils/*": ["x-pack/test_utils/*"],
+      "fixtures/*": ["src/fixtures/*"]
     },
-    "types": [
-      "node",
-      "jest"
-    ]
-  }
+    // overhead is too significant
+    "incremental": false
+  },
+  "references": [
+    { "path": "../src/core/tsconfig.json" },
+    { "path": "../src/plugins/kibana_utils/tsconfig.json" },
+    { "path": "../src/plugins/kibana_react/tsconfig.json" },
+    { "path": "./plugins/licensing/tsconfig.json" },
+    { "path": "./plugins/global_search/tsconfig.json" },
+  ]
 }

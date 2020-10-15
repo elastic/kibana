@@ -22,27 +22,32 @@ import { escape, memoize } from 'lodash';
 import { getHighlightHtml } from '../utils';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
-import { TextContextTypeConvert, HtmlContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
+import {
+  TextContextTypeConvert,
+  HtmlContextTypeConvert,
+  IFieldFormatMetaParams,
+  FIELD_FORMAT_IDS,
+} from '../types';
 
 const templateMatchRE = /{{([\s\S]+?)}}/g;
-const whitelistUrlSchemes = ['http://', 'https://'];
+const allowedUrlSchemes = ['http://', 'https://'];
 
 const URL_TYPES = [
   {
     kind: 'a',
-    text: i18n.translate('data.common.fieldFormats.url.types.link', {
+    text: i18n.translate('data.fieldFormats.url.types.link', {
       defaultMessage: 'Link',
     }),
   },
   {
     kind: 'img',
-    text: i18n.translate('data.common.fieldFormats.url.types.img', {
+    text: i18n.translate('data.fieldFormats.url.types.img', {
       defaultMessage: 'Image',
     }),
   },
   {
     kind: 'audio',
-    text: i18n.translate('data.common.fieldFormats.url.types.audio', {
+    text: i18n.translate('data.fieldFormats.url.types.audio', {
       defaultMessage: 'Audio',
     }),
   },
@@ -51,7 +56,9 @@ const DEFAULT_URL_TYPE = 'a';
 
 export class UrlFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.URL;
-  static title = 'Url';
+  static title = i18n.translate('data.fieldFormats.url.title', {
+    defaultMessage: 'Url',
+  });
   static fieldType = [
     KBN_FIELD_TYPES.NUMBER,
     KBN_FIELD_TYPES.BOOLEAN,
@@ -64,7 +71,7 @@ export class UrlFormat extends FieldFormat {
   ];
   static urlTypes = URL_TYPES;
 
-  constructor(params: Record<string, any>) {
+  constructor(params: IFieldFormatMetaParams) {
     super(params);
     this.compileTemplate = memoize(this.compileTemplate);
   }
@@ -104,7 +111,7 @@ export class UrlFormat extends FieldFormat {
     // trim all the odd bits, the variable names
     const parts = template.split(templateMatchRE).map((part, i) => (i % 2 ? part.trim() : part));
 
-    return function(locals: Record<string, any>): string {
+    return function (locals: Record<string, any>): string {
       // replace all the odd bits with their local var
       let output = '';
       let i = -1;
@@ -132,9 +139,13 @@ export class UrlFormat extends FieldFormat {
     return `<img src="${url}" alt="${imageLabel}" style="width:auto; height:auto; max-width:${maxWidth}; max-height:${maxHeight};">`;
   }
 
-  textConvert: TextContextTypeConvert = value => this.formatLabel(value);
+  textConvert: TextContextTypeConvert = (value) => this.formatLabel(value);
 
-  htmlConvert: HtmlContextTypeConvert = (rawValue, field, hit, parsedUrl) => {
+  htmlConvert: HtmlContextTypeConvert = (rawValue, options = {}) => {
+    const { field, hit } = options;
+    const { parsedUrl } = this._params;
+    const { basePath, pathname, origin } = parsedUrl || {};
+
     const url = escape(this.formatUrl(rawValue));
     const label = escape(this.formatLabel(rawValue, url));
 
@@ -150,8 +161,8 @@ export class UrlFormat extends FieldFormat {
 
         return this.generateImgHtml(url, imageLabel);
       default:
-        const inWhitelist = whitelistUrlSchemes.some(scheme => url.indexOf(scheme) === 0);
-        if (!inWhitelist && !parsedUrl) {
+        const allowed = allowedUrlSchemes.some((scheme) => url.indexOf(scheme) === 0);
+        if (!allowed && !parsedUrl) {
           return url;
         }
 
@@ -167,20 +178,20 @@ export class UrlFormat extends FieldFormat {
          * UNSUPPORTED
          *  - app/kibana
          */
-        if (!inWhitelist) {
+        if (!allowed) {
           // Handles urls like: `#/discover`
           if (url[0] === '#') {
-            prefix = `${parsedUrl.origin}${parsedUrl.pathname}`;
+            prefix = `${origin}${pathname}`;
           }
           // Handle urls like: `/app/kibana` or `/xyz/app/kibana`
-          else if (url.indexOf(parsedUrl.basePath || '/') === 0) {
-            prefix = `${parsedUrl.origin}`;
+          else if (url.indexOf(basePath || '/') === 0) {
+            prefix = `${origin}`;
           }
           // Handle urls like: `../app/kibana`
           else {
             const prefixEnd = url[0] === '/' ? '' : '/';
 
-            prefix = `${parsedUrl.origin}${parsedUrl.basePath || ''}/app${prefixEnd}`;
+            prefix = `${origin}${basePath || ''}/app${prefixEnd}`;
           }
         }
 

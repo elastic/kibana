@@ -6,25 +6,28 @@
 
 import { Observable, Subject, Subscription, timer } from 'rxjs';
 import { take } from 'rxjs/operators';
-import moment, { Duration } from 'moment';
+import moment from 'moment';
 import { createHash } from 'crypto';
 import stringify from 'json-stable-stringify';
 
 import {
   CoreSetup,
-  CoreStart,
   Logger,
   Plugin,
   PluginInitializerContext,
-  IClusterClient,
+  ILegacyClusterClient,
+  ILegacyScopedClusterClient,
+  ScopeableRequest,
 } from 'src/core/server';
 
-import { ILicense, LicensingPluginSetup, PublicLicense, PublicFeatures } from '../common/types';
+import { ILicense, PublicLicense, PublicFeatures } from '../common/types';
+import { LicensingPluginSetup, LicensingPluginStart } from './types';
 import { License } from '../common/license';
 import { createLicenseUpdate } from '../common/license_update';
 
 import { ElasticsearchError, RawLicense, RawFeatures } from './types';
 import { registerRoutes } from './routes';
+import { FeatureUsageService } from './services';
 
 import { LicenseConfigType } from './licensing_config';
 import { createRouteHandlerContext } from './licensing_route_handler_context';
@@ -34,6 +37,7 @@ function normalizeServerLicense(license: RawLicense): PublicLicense {
   return {
     uid: license.uid,
     type: license.type,
+    mode: license.mode,
     expiryDateInMillis: license.expiry_date_in_millis,
     status: license.status,
   };
@@ -75,43 +79,86 @@ function sign({
  * A plugin for fetching, refreshing, and receiving information about the license for the
  * current Kibana instance.
  */
-export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
+export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPluginStart, {}, {}> {
   private stop$ = new Subject();
   private readonly logger: Logger;
   private readonly config$: Observable<LicenseConfigType>;
   private loggingSubscription?: Subscription;
+  private featureUsage = new FeatureUsageService();
+
+  private refresh?: () => Promise<ILicense>;
+  private license$?: Observable<ILicense>;
 
   constructor(private readonly context: PluginInitializerContext) {
     this.logger = this.context.logger.get();
     this.config$ = this.context.config.create<LicenseConfigType>();
   }
 
-  public async setup(core: CoreSetup) {
+  public async setup(core: CoreSetup<{}, LicensingPluginStart>) {
     this.logger.debug('Setting up Licensing plugin');
     const config = await this.config$.pipe(take(1)).toPromise();
-    const dataClient = await core.elasticsearch.dataClient$.pipe(take(1)).toPromise();
+    const pollingFrequency = config.api_polling_frequency;
 
-    const { refresh, license$ } = this.createLicensePoller(dataClient, config.pollingFrequency);
+    async function callAsInternalUser(
+      ...args: Parameters<ILegacyScopedClusterClient['callAsInternalUser']>
+    ): ReturnType<ILegacyScopedClusterClient['callAsInternalUser']> {
+      const [coreStart] = await core.getStartServices();
+      const client = coreStart.elasticsearch.legacy.client;
+      return await client.callAsInternalUser(...args);
+    }
 
-    core.http.registerRouteHandlerContext('licensing', createRouteHandlerContext(license$));
+    const client: ILegacyClusterClient = {
+      callAsInternalUser,
+      asScoped(request?: ScopeableRequest): ILegacyScopedClusterClient {
+        return {
+          async callAsCurrentUser(
+            ...args: Parameters<ILegacyScopedClusterClient['callAsCurrentUser']>
+          ): ReturnType<ILegacyScopedClusterClient['callAsCurrentUser']> {
+            const [coreStart] = await core.getStartServices();
+            const _client = coreStart.elasticsearch.legacy.client;
+            return await _client.asScoped(request).callAsCurrentUser(...args);
+          },
+          callAsInternalUser,
+        };
+      },
+    };
 
-    registerRoutes(core.http.createRouter());
+    const { refresh, license$ } = this.createLicensePoller(
+      client,
+      pollingFrequency.asMilliseconds()
+    );
+
+    core.http.registerRouteHandlerContext(
+      'licensing',
+      createRouteHandlerContext(license$, core.getStartServices)
+    );
+
+    const featureUsageSetup = this.featureUsage.setup();
+
+    registerRoutes(core.http.createRouter(), featureUsageSetup, core.getStartServices);
     core.http.registerOnPreResponse(createOnPreResponseHandler(refresh, license$));
+
+    this.refresh = refresh;
+    this.license$ = license$;
 
     return {
       refresh,
       license$,
+      createLicensePoller: this.createLicensePoller.bind(this),
+      featureUsage: featureUsageSetup,
     };
   }
 
-  private createLicensePoller(clusterClient: IClusterClient, pollingFrequency: Duration) {
-    const intervalRefresh$ = timer(0, pollingFrequency.asMilliseconds());
+  private createLicensePoller(clusterClient: ILegacyClusterClient, pollingFrequency: number) {
+    this.logger.debug(`Polling Elasticsearch License API with frequency ${pollingFrequency}ms.`);
+
+    const intervalRefresh$ = timer(0, pollingFrequency);
 
     const { license$, refreshManually } = createLicenseUpdate(intervalRefresh$, this.stop$, () =>
       this.fetchLicense(clusterClient)
     );
 
-    this.loggingSubscription = license$.subscribe(license =>
+    this.loggingSubscription = license$.subscribe((license) =>
       this.logger.debug(
         'Imported license information from Elasticsearch:' +
           [
@@ -131,7 +178,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
     };
   }
 
-  private fetchLicense = async (clusterClient: IClusterClient): Promise<ILicense> => {
+  private fetchLicense = async (clusterClient: ILegacyClusterClient): Promise<ILicense> => {
     try {
       const response = await clusterClient.callAsInternalUser('transport.request', {
         method: 'GET',
@@ -177,7 +224,17 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
     return error.message;
   }
 
-  public async start(core: CoreStart) {}
+  public async start() {
+    if (!this.refresh || !this.license$) {
+      throw new Error('Setup has not been completed');
+    }
+    return {
+      refresh: this.refresh,
+      license$: this.license$,
+      featureUsage: this.featureUsage.start(),
+      createLicensePoller: this.createLicensePoller.bind(this),
+    };
+  }
 
   public stop() {
     this.stop$.next();

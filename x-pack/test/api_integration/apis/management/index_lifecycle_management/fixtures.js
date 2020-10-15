@@ -4,50 +4,93 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getRandomString } from './lib';
 import { INDEX_TEMPLATE_PATTERN_PREFIX } from './constants';
 
-export const getPolicyPayload = ({ name = getRandomString() } = {}) => ({
+export const getPolicyPayload = (name) => ({
   name,
   phases: {
     hot: {
+      min_age: '1d',
       actions: {
+        set_priority: {
+          priority: 100,
+        },
+        unfollow: {},
         rollover: {
           max_age: '30d',
-          max_size: '50gb'
+          max_size: '50gb',
         },
-        set_priority: {
-          priority: 100
-        }
-      }
+      },
     },
     warm: {
       actions: {
         set_priority: {
-          priority: 50
-        }
-      }
+          priority: 50,
+        },
+        unfollow: {},
+        readonly: {},
+        allocate: {
+          number_of_replicas: 5,
+          include: {
+            a: 'a',
+          },
+          exclude: {
+            b: 'b',
+          },
+          require: {
+            c: 'c',
+          },
+        },
+        shrink: {
+          number_of_shards: 1,
+        },
+        forcemerge: {
+          max_num_segments: 1,
+        },
+      },
     },
     cold: {
       min_age: '10d',
       actions: {
         set_priority: {
-          priority: 0
-        }
-      }
+          priority: 0,
+        },
+        unfollow: {},
+        allocate: {
+          number_of_replicas: 5,
+          include: {
+            a: 'a',
+          },
+          exclude: {
+            b: 'b',
+          },
+          require: {
+            c: 'c',
+          },
+        },
+        freeze: {},
+        searchable_snapshot: {
+          snapshot_repository: 'backing_repo',
+        },
+      },
     },
     delete: {
       min_age: '10d',
       actions: {
-        delete: {}
-      }
-    }
-  }
+        wait_for_snapshot: {
+          policy: 'policy',
+        },
+        delete: {
+          delete_searchable_snapshot: true,
+        },
+      },
+    },
+  },
 });
 
 export const getTemplatePayload = () => ({
   index_patterns: [`${INDEX_TEMPLATE_PATTERN_PREFIX}*`],
   settings: {
-    number_of_shards: 1
+    number_of_shards: 1,
   },
 });

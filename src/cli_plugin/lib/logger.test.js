@@ -18,17 +18,15 @@
  */
 
 import sinon from 'sinon';
-import Logger from './logger';
+
+import { Logger } from './logger';
 
 describe('kibana cli', function () {
-
   describe('plugin installer', function () {
-
     describe('logger', function () {
       let logger;
 
       describe('logger.log', function () {
-
         beforeEach(function () {
           sinon.stub(process.stdout, 'write');
         });
@@ -98,11 +96,9 @@ describe('kibana cli', function () {
 
           expect(process.stdout.write.callCount).toBe(0);
         });
-
       });
 
       describe('logger.error', function () {
-
         beforeEach(function () {
           sinon.stub(process.stderr, 'write');
         });
@@ -134,11 +130,7 @@ describe('kibana cli', function () {
           logger.error(message);
           expect(process.stderr.write.callCount).toBe(0);
         });
-
       });
-
     });
-
   });
-
 });

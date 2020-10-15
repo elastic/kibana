@@ -6,8 +6,8 @@
 
 import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
-import Boom from 'boom';
 import { LicenseState, verifyApiAccess } from '../lib/license_state';
+import { UI_SETTINGS } from '../../../../../src/plugins/data/server';
 
 export function registerSearchRoute({
   router,
@@ -22,7 +22,7 @@ export function registerSearchRoute({
       validate: {
         body: schema.object({
           index: schema.string(),
-          body: schema.object({}, { allowUnknowns: true }),
+          body: schema.object({}, { unknowns: 'allow' }),
         }),
       },
     },
@@ -32,7 +32,9 @@ export function registerSearchRoute({
           core: {
             uiSettings: { client: uiSettings },
             elasticsearch: {
-              dataClient: { callAsCurrentUser: callCluster },
+              legacy: {
+                client: { callAsCurrentUser: callCluster },
+              },
             },
           },
         },
@@ -40,7 +42,8 @@ export function registerSearchRoute({
         response
       ) => {
         verifyApiAccess(licenseState);
-        const includeFrozen = await uiSettings.get<boolean>('search:includeFrozen');
+        licenseState.notifyUsage('Graph');
+        const includeFrozen = await uiSettings.get<boolean>(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
         try {
           return response.ok({
             body: {
@@ -53,7 +56,12 @@ export function registerSearchRoute({
             },
           });
         } catch (error) {
-          throw Boom.boomify(error, { statusCode: error.statusCode || 500 });
+          return response.customError({
+            statusCode: error.statusCode || 500,
+            body: {
+              message: error.message,
+            },
+          });
         }
       }
     )

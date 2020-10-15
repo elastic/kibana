@@ -6,6 +6,7 @@ APIs to their New Platform equivalents.
 - [Migration Examples](#migration-examples)
   - [Configuration](#configuration)
     - [Declaring config schema](#declaring-config-schema)
+    - [Using New Platform config in a new plugin](#using-new-platform-config-in-a-new-plugin)
     - [Using New Platform config from a Legacy plugin](#using-new-platform-config-from-a-legacy-plugin)
       - [Create a New Platform plugin](#create-a-new-platform-plugin)
   - [HTTP Routes](#http-routes)
@@ -14,8 +15,23 @@ APIs to their New Platform equivalents.
     - [3. New Platform shim using New Platform router](#3-new-platform-shim-using-new-platform-router)
       - [4. New Platform plugin](#4-new-platform-plugin)
     - [Accessing Services](#accessing-services)
+    - [Migrating Hapi "pre" handlers](#migrating-hapi-pre-handlers)
+      - [Simple example](#simple-example)
+      - [Full Example](#full-example)
   - [Chrome](#chrome)
-  
+    - [Updating an application navlink](#updating-an-application-navlink)
+  - [Chromeless Applications](#chromeless-applications)
+  - [Render HTML Content](#render-html-content)
+  - [Saved Objects types](#saved-objects-types)
+    - [Concrete example](#concrete-example)
+    - [Changes in structure compared to legacy](#changes-in-structure-compared-to-legacy)
+    - [Remarks](#remarks)
+  - [UiSettings](#uisettings)
+  - [Elasticsearch client](#elasticsearch-client)
+    - [Client API Changes](#client-api-changes)
+    - [Accessing the client from a route handler](#accessing-the-client-from-a-route-handler)
+    - [Creating a custom client](#creating-a-custom-client)
+
 ## Configuration
 
 ### Declaring config schema
@@ -59,7 +75,7 @@ export type MyPluginConfig = TypeOf<typeof config.schema>;
 ### Using New Platform config in a new plugin
 
 After setting the config schema for your plugin, you might want to reach the configuration in the plugin.
-It is provided as part of the [PluginInitializerContext](../../docs/development/core/server/kibana-plugin-server.plugininitializercontext.md)
+It is provided as part of the [PluginInitializerContext](../../docs/development/core/server/kibana-plugin-core-server.plugininitializercontext.md)
 in the *constructor* of the plugin:
 
 ```ts
@@ -204,9 +220,9 @@ new kibana.Plugin({
 In the legacy platform, plugins have direct access to the Hapi `server` object
 which gives full access to all of Hapi's API. In the New Platform, plugins have
 access to the
-[HttpServiceSetup](/docs/development/core/server/kibana-plugin-server.httpservicesetup.md)
+[HttpServiceSetup](/docs/development/core/server/kibana-plugin-core-server.httpservicesetup.md)
 interface, which is exposed via the
-[CoreSetup](/docs/development/core/server/kibana-plugin-server.coresetup.md)
+[CoreSetup](/docs/development/core/server/kibana-plugin-core-server.coresetup.md)
 object injected into the `setup` method of server-side plugins.
 
 This interface has a different API with slightly different behaviors.
@@ -385,7 +401,7 @@ class Plugin {
           }),
         }
       },
-      router.wrapErrors((context, req, res) => {
+      router.handleLegacyErrors((context, req, res) => {
         throw Boom.notFound('not there'); // will be converted into proper New Platform error
       })
     )
@@ -409,7 +425,7 @@ Services in the Legacy Platform were typically available via methods on either
 `server.plugins.*`, `server.*`, or `req.*`. In the New Platform, all services
 are available via the `context` argument to the route handler. The type of this
 argument is the
-[RequestHandlerContext](/docs/development/core/server/kibana-plugin-server.requesthandlercontext.md).
+[RequestHandlerContext](/docs/development/core/server/kibana-plugin-core-server.requesthandlercontext.md).
 The APIs available here will include all Core services and any services
 registered by plugins this plugin depends on.
 
@@ -447,6 +463,142 @@ class Plugin {
 }
 ```
 
+### Migrating Hapi "pre" handlers
+
+In the Legacy Platform, routes could provide a "pre" option in their config to
+register a function that should be run prior to the route handler. These
+"pre" handlers allow routes to share some business logic that may do some
+pre-work or validation. In Kibana, these are often used for license checks.
+
+The Kibana Platform's HTTP interface does not provide this functionality,
+however it is simple enough to port over using a higher-order function that can
+wrap the route handler.
+
+#### Simple example
+
+In this simple example, a pre-handler is used to either abort the request with
+an error or continue as normal. This is a simple "gate-keeping" pattern.
+
+```ts
+// Legacy pre-handler
+const licensePreRouting = (request) => {
+  const licenseInfo = getMyPluginLicenseInfo(request.server.plugins.xpack_main);
+  if (!licenseInfo.isOneOf(['gold', 'platinum', 'trial'])) {
+    throw Boom.forbidden(`You don't have the right license for MyPlugin!`);
+  }
+}
+
+server.route({
+  method: 'GET',
+  path: '/api/my-plugin/do-something',
+  config: {
+    pre: [{ method: licensePreRouting }]
+  },
+  handler: (req) => {
+    return doSomethingInteresting();
+  }
+})
+```
+
+In the Kibana Platform, the same functionality can be acheived by creating a
+function that takes a route handler (or factory for a route handler) as an
+argument and either invokes it in the successful case or returns an error
+response in the failure case.
+
+We'll call this a "high-order handler" similar to the "high-order component"
+pattern common in the React ecosystem.
+
+```ts
+// New Platform high-order handler
+const checkLicense = <P, Q, B>(
+  handler: RequestHandler<P, Q, B, RouteMethod>
+): RequestHandler<P, Q, B, RouteMethod> => {
+  return (context, req, res) => {
+    const licenseInfo = getMyPluginLicenseInfo(context.licensing.license);
+
+    if (licenseInfo.hasAtLeast('gold')) {
+      return handler(context, req, res);
+    } else {
+      return res.forbidden({ body: `You don't have the right license for MyPlugin!` });
+    }
+  }
+}
+
+router.get(
+  { path: '/api/my-plugin/do-something', validate: false },
+  checkLicense(async (context, req, res) => {
+    const results = doSomethingInteresting();
+    return res.ok({ body: results });
+  }),
+)
+```
+
+#### Full Example
+
+In some cases, the route handler may need access to data that the pre-handler
+retrieves. In this case, you can utilize a handler _factory_ rather than a raw
+handler.
+
+```ts
+// Legacy pre-handler
+const licensePreRouting = (request) => {
+  const licenseInfo = getMyPluginLicenseInfo(request.server.plugins.xpack_main);
+  if (licenseInfo.isOneOf(['gold', 'platinum', 'trial'])) {
+    // In this case, the return value of the pre-handler is made available on
+    // whatever the 'assign' option is in the route config.
+    return licenseInfo;
+  } else {
+    // In this case, the route handler is never called and the user gets this
+    // error message
+    throw Boom.forbidden(`You don't have the right license for MyPlugin!`);
+  }
+}
+
+server.route({
+  method: 'GET',
+  path: '/api/my-plugin/do-something',
+  config: {
+    pre: [{ method: licensePreRouting, assign: 'licenseInfo' }]
+  },
+  handler: (req) => {
+    const licenseInfo = req.pre.licenseInfo;
+    return doSomethingInteresting(licenseInfo);
+  }
+})
+```
+
+In many cases, it may be simpler to duplicate the function call
+to retrieve the data again in the main handler. In this other cases, you can
+utilize a handler _factory_ rather than a raw handler as the argument to your
+high-order handler. This way the high-order handler can pass arbitrary arguments
+to the route handler.
+
+```ts
+// New Platform high-order handler
+const checkLicense = <P, Q, B>(
+  handlerFactory: (licenseInfo: MyPluginLicenseInfo) => RequestHandler<P, Q, B, RouteMethod>
+): RequestHandler<P, Q, B, RouteMethod> => {
+  return (context, req, res) => {
+    const licenseInfo = getMyPluginLicenseInfo(context.licensing.license);
+
+    if (licenseInfo.hasAtLeast('gold')) {
+      const handler = handlerFactory(licenseInfo);
+      return handler(context, req, res);
+    } else {
+      return res.forbidden({ body: `You don't have the right license for MyPlugin!` });
+    }
+  }
+}
+
+router.get(
+  { path: '/api/my-plugin/do-something', validate: false },
+  checkLicense(licenseInfo => async (context, req, res) => {
+    const results = doSomethingInteresting(licenseInfo);
+    return res.ok({ body: results });
+  }),
+)
+```
+
 ## Chrome
 
 In the Legacy Platform, the `ui/chrome` import contained APIs for a very wide
@@ -462,7 +614,678 @@ elsewhere.
 | `chrome.setVisible`                                   | [`core.chrome.setIsVisible`](/docs/development/core/public/kibana-plugin-public.chromestart.setisvisible.md)                        |                                                                                                                                                                                  |
 | `chrome.getInjected`                                  | [`core.injectedMetadata.getInjected`](/docs/development/core/public/kibana-plugin-public.coresetup.injectedmetadata.md) (temporary) | A temporary API is available to read injected vars provided by legacy plugins. This will be removed after [#41990](https://github.com/elastic/kibana/issues/41990) is completed. |
 | `chrome.setRootTemplate` / `chrome.setRootController` | --                                                                                                                                  | Use application mounting via `core.application.register` (not currently avaiable to legacy plugins).                                                                             |
+| `chrome.navLinks.update`                              | [`core.appbase.updater`](/docs/development/core/public/kibana-plugin-public.appbase.updater_.md)                                    | Use the `updater$` property when registering your application via `core.application.register`                                                                                    |
 
 In most cases, the most convenient way to access these APIs will be via the
 [AppMountContext](/docs/development/core/public/kibana-plugin-public.appmountcontext.md)
 object passed to your application when your app is mounted on the page.
+
+### Updating an application navlink
+
+In the legacy platform, the navlink could be updated using `chrome.navLinks.update`
+
+```ts
+uiModules.get('xpack/ml').run(() => {
+  const showAppLink = xpackInfo.get('features.ml.showLinks', false);
+  const isAvailable = xpackInfo.get('features.ml.isAvailable', false);
+
+  const navLinkUpdates = {
+    // hide by default, only show once the xpackInfo is initialized
+    hidden: !showAppLink,
+    disabled: !showAppLink || (showAppLink && !isAvailable),
+  };
+
+  npStart.core.chrome.navLinks.update('ml', navLinkUpdates);
+});
+```
+
+In the new platform, navlinks should not be updated directly. Instead, it is now possible to add an `updater` when 
+registering an application to change the application or the navlink state at runtime.
+
+```ts
+// my_plugin has a required dependencie to the `licensing` plugin
+interface MyPluginSetupDeps {
+  licensing: LicensingPluginSetup;
+}
+
+export class MyPlugin implements Plugin {
+  setup({ application }, { licensing }: MyPluginSetupDeps) {
+    const updater$ = licensing.license$.pipe(
+      map(license => {
+        const { hidden, disabled } = calcStatusFor(license);
+        if (hidden) return { navLinkStatus: AppNavLinkStatus.hidden };
+        if (disabled) return { navLinkStatus: AppNavLinkStatus.disabled };
+        return { navLinkStatus: AppNavLinkStatus.default };
+      })
+    );
+
+    application.register({
+      id: 'my-app',
+      title: 'My App',
+      updater$,
+      async mount(params) {
+        const { renderApp } = await import('./application');
+        return renderApp(params);
+      },
+    });
+  }
+```
+
+## Chromeless Applications
+
+In Kibana, a "chromeless" application is one where the primary Kibana UI components
+such as header or navigation can be hidden. In the legacy platform these were referred to
+as "hidden" applications, and were set via the `hidden` property in a Kibana plugin.
+Chromeless applications are also not displayed in the left navbar.
+
+To mark an application as chromeless, specify `chromeless: false` when registering your application
+to hide the chrome UI when the application is mounted:
+
+```ts
+application.register({
+  id: 'chromeless',
+  chromeless: true,
+  async mount(context, params) {
+    /* ... */
+  },
+});
+```
+
+If you wish to render your application at a route that does not follow the `/app/${appId}` pattern,
+this can be done via the `appRoute` property. Doing this currently requires you to register a server
+route where you can return a bootstrapped HTML page for your application bundle. Instructions on
+registering this server route is covered in the next section: [Render HTML Content](#render-html-content).
+
+```ts
+application.register({
+  id: 'chromeless',
+  appRoute: '/chromeless',
+  chromeless: true,
+  async mount(context, params) {
+    /* ... */
+  },
+});
+```
+
+## Render HTML Content
+
+You can return a blank HTML page bootstrapped with the core application bundle from an HTTP route handler
+via the `httpResources` service. You may wish to do this if you are rendering a chromeless application with a
+custom application route or have other custom rendering needs.
+
+```typescript
+httpResources.register(
+  { path: '/chromeless', validate: false },
+  (context, request, response) => {
+    //... some logic
+    return response.renderCoreApp();
+  }
+);
+```
+
+You can also specify to exclude user data from the bundle metadata. User data
+comprises all UI Settings that are *user provided*, then injected into the page.
+You may wish to exclude fetching this data if not authorized or to slim the page
+size.
+
+```typescript
+httpResources.register(
+  { path: '/', validate: false, options: { authRequired: false } },
+  (context, request, response) => {
+    //... some logic
+    return response.renderAnonymousCoreApp();
+  }
+);
+```
+
+## Saved Objects types
+
+In the legacy platform, saved object types were registered using static definitions in the `uiExports` part of
+the plugin manifest.
+
+In the new platform, all these registration are to be performed programmatically during your plugin's `setup` phase,
+using the core `savedObjects`'s `registerType` setup API.
+
+The most notable difference is that in the new platform, the type registration is performed in a single call to 
+`registerType`, passing a new `SavedObjectsType` structure that is a superset of the legacy `schema`, `migrations` 
+`mappings` and `savedObjectsManagement`.
+
+### Concrete example
+
+Let say we have the following in a legacy plugin:
+
+```js
+// src/legacy/core_plugins/my_plugin/index.js
+import mappings from './mappings.json';
+import { migrations } from './migrations';
+
+new kibana.Plugin({
+  init(server){
+    // [...]
+  },
+  uiExports: {
+    mappings,
+    migrations,
+    savedObjectSchemas: {
+      'first-type': {
+        isNamespaceAgnostic: true,
+      },
+      'second-type': {
+        isHidden: true,
+      },
+    },
+    savedObjectsManagement: {
+      'first-type': {
+        isImportableAndExportable: true,
+        icon: 'myFirstIcon',
+        defaultSearchField: 'title',
+        getTitle(obj) {
+          return obj.attributes.title;
+        },
+        getEditUrl(obj) {
+          return `/some-url/${encodeURIComponent(obj.id)}`;
+        },
+      },
+      'second-type': {
+        isImportableAndExportable: false,
+        icon: 'mySecondIcon',
+        getTitle(obj) {
+          return obj.attributes.myTitleField;
+        },
+        getInAppUrl(obj) {
+          return {
+            path: `/some-url/${encodeURIComponent(obj.id)}`,
+            uiCapabilitiesPath: 'myPlugin.myType.show',
+          };
+        },
+      },
+    },
+  },
+})
+```
+
+```json
+// src/legacy/core_plugins/my_plugin/mappings.json
+{
+  "first-type": {
+    "properties": {
+      "someField": {
+        "type": "text"
+      },
+      "anotherField": {
+        "type": "text"
+      }
+    }
+  },
+  "second-type": {
+    "properties": {
+      "textField": {
+        "type": "text"
+      },
+      "boolField": {
+        "type": "boolean"
+      }
+    }
+  }
+}
+```
+
+```js
+// src/legacy/core_plugins/my_plugin/migrations.js
+export const migrations = {
+  'first-type': {
+    '1.0.0': migrateFirstTypeToV1,
+    '2.0.0': migrateFirstTypeToV2,
+  },
+  'second-type': {
+    '1.5.0': migrateSecondTypeToV15,
+  }
+}
+```
+
+To migrate this, we will have to regroup the declaration per-type. That would become:
+
+First type:
+ 
+```typescript
+// src/plugins/my_plugin/server/saved_objects/first_type.ts
+import { SavedObjectsType } from 'src/core/server';
+
+export const firstType: SavedObjectsType = {
+  name: 'first-type',
+  hidden: false,
+  namespaceType: 'agnostic',
+  mappings: {
+    properties: {
+      someField: {
+        type: 'text',
+      },
+      anotherField: {
+        type: 'text',
+      },
+    },
+  },
+  migrations: {
+    '1.0.0': migrateFirstTypeToV1,
+    '2.0.0': migrateFirstTypeToV2,
+  },
+  management: {
+    importableAndExportable: true,
+    icon: 'myFirstIcon',
+    defaultSearchField: 'title',
+    getTitle(obj) {
+      return obj.attributes.title;
+    },
+    getEditUrl(obj) {
+      return `/some-url/${encodeURIComponent(obj.id)}`;
+    },
+  },
+};
+```
+
+Second type:
+
+```typescript
+// src/plugins/my_plugin/server/saved_objects/second_type.ts
+import { SavedObjectsType } from 'src/core/server';
+
+export const secondType: SavedObjectsType = {
+  name: 'second-type',
+  hidden: true,
+  namespaceType: 'single',
+  mappings: {
+    properties: {
+      textField: {
+        type: 'text',
+      },
+      boolField: {
+        type: 'boolean',
+      },
+    },
+  },
+  migrations: {
+    '1.5.0': migrateSecondTypeToV15,
+  },
+  management: {
+    importableAndExportable: false,
+    icon: 'mySecondIcon',
+    getTitle(obj) {
+      return obj.attributes.myTitleField;
+    },
+    getInAppUrl(obj) {
+      return {
+        path: `/some-url/${encodeURIComponent(obj.id)}`,
+        uiCapabilitiesPath: 'myPlugin.myType.show',
+      };
+    },
+  },
+};
+```
+
+Registration in the plugin's setup phase:
+
+```typescript
+// src/plugins/my_plugin/server/plugin.ts
+import { firstType, secondType } from './saved_objects';
+
+export class MyPlugin implements Plugin {
+  setup({ savedObjects }) {
+    savedObjects.registerType(firstType);
+    savedObjects.registerType(secondType);
+  }
+}
+```
+
+### Changes in structure compared to legacy
+
+The NP `registerType` expected input is very close to the legacy format. However, there are some minor changes:
+
+- The `schema.isNamespaceAgnostic` property has been renamed: `SavedObjectsType.namespaceType`. It no longer accepts a boolean but instead an enum of 'single', 'multiple', or 'agnostic' (see [SavedObjectsNamespaceType](/docs/development/core/server/kibana-plugin-core-server.savedobjectsnamespacetype.md)).
+
+- The `schema.indexPattern` was accepting either a `string` or a `(config: LegacyConfig) => string`. `SavedObjectsType.indexPattern` only accepts a string, as you can access the configuration during your plugin's setup phase.
+
+- The `savedObjectsManagement.isImportableAndExportable` property has been renamed: `SavedObjectsType.management.importableAndExportable`
+
+- The migration function signature has changed:
+In legacy, it was `(doc: SavedObjectUnsanitizedDoc, log: SavedObjectsMigrationLogger) => SavedObjectUnsanitizedDoc;`
+In new platform, it is now `(doc: SavedObjectUnsanitizedDoc, context: SavedObjectMigrationContext) => SavedObjectUnsanitizedDoc;`
+
+With context being:
+
+```typescript
+export interface SavedObjectMigrationContext {
+  log: SavedObjectsMigrationLogger;
+}
+```
+
+The changes is very minor though. The legacy migration:
+
+```js
+const migration = (doc, log) => {...}
+```
+
+Would be converted to:
+
+```typescript
+const migration: SavedObjectMigrationFn<OldAttributes, MigratedAttributes> = (doc, { log }) => {...}
+```
+
+### Remarks
+
+The `registerType` API will throw if called after the service has started, and therefor cannot be used from 
+legacy plugin code. Legacy plugins should use the legacy savedObjects service and the legacy way to register
+saved object types until migrated.
+
+## UiSettings
+UiSettings defaults registration performed during `setup` phase via `core.uiSettings.register` API.
+
+```js
+// Before:
+uiExports: {
+  uiSettingDefaults: {
+    'my-plugin:my-setting': {
+      name: 'just-work',
+      value: true,
+      description: 'make it work',
+      category: ['my-category'],
+    },
+  }
+}
+```
+
+```ts
+// After:
+// src/plugins/my-plugin/server/plugin.ts
+setup(core: CoreSetup){
+  core.uiSettings.register({
+    'my-plugin:my-setting': {
+      name: 'just-work',
+      value: true,
+      description: 'make it work',
+      category: ['my-category'],
+      schema: schema.boolean(),
+    },
+  })
+}
+```
+
+## Elasticsearch client
+
+The new elasticsearch client is a thin wrapper around `@elastic/elasticsearch`'s `Client` class. Even if the API
+is quite close to the legacy client Kibana was previously using, there are some subtle changes to take into account 
+during migration.
+
+[Official documentation](https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/index.html) 
+
+### Client API Changes
+
+The most significant changes for the consumers are the following:
+
+- internal / current user client accessors has been renamed and are now properties instead of functions
+  - `callAsInternalUser('ping')` -> `asInternalUser.ping()`
+  - `callAsCurrentUser('ping')` -> `asCurrentUser.ping()`
+
+- the API now reflects the `Client`'s instead of leveraging the string-based endpoint names the `LegacyAPICaller` was using
+
+before:
+
+```ts
+const body = await client.callAsInternalUser('indices.get', { index: 'id' });
+```
+
+after:
+
+```ts
+const { body } = await client.asInternalUser.indices.get({ index: 'id' });
+```
+
+- calling any ES endpoint now returns the whole response object instead of only the body payload
+
+before:
+
+```ts
+const body = await legacyClient.callAsInternalUser('get', { id: 'id' });
+```
+
+after:
+
+```ts
+const { body } = await client.asInternalUser.get({ id: 'id' });
+```
+
+Note that more information from the ES response is available:
+
+```ts
+const {
+  body,        // response payload
+  statusCode,  // http status code of the response
+  headers,     // response headers
+  warnings,    // warnings returned from ES
+  meta         // meta information about the request, such as request parameters, number of attempts and so on
+} = await client.asInternalUser.get({ id: 'id' });
+```
+
+- all API methods are now generic to allow specifying the response body type
+
+before:
+
+```ts
+const body: GetResponse = await legacyClient.callAsInternalUser('get', { id: 'id' });
+```
+
+after:
+
+```ts
+// body is of type `GetResponse`
+const { body } = await client.asInternalUser.get<GetResponse>({ id: 'id' });
+// fallback to `Record<string, any>` if unspecified
+const { body } = await client.asInternalUser.get({ id: 'id' });
+```
+
+- the returned error types changed
+
+There are no longer specific errors for every HTTP status code (such as `BadRequest` or `NotFound`). A generic
+`ResponseError` with the specific `statusCode` is thrown instead.
+
+before:
+
+```ts
+import { errors } from 'elasticsearch';
+try {
+  await legacyClient.callAsInternalUser('ping');
+} catch(e) {
+  if(e instanceof errors.NotFound) {
+    // do something
+  }
+  if(e.status === 401) {}
+}
+``` 
+
+after:
+
+```ts
+import { errors } from '@elastic/elasticsearch';
+try {
+  await client.asInternalUser.ping();
+} catch(e) {
+  if(e instanceof errors.ResponseError && e.statusCode === 404) {
+    // do something
+  }
+  // also possible, as all errors got a name property with the name of the class,
+  // so this slightly better in term of performances
+  if(e.name === 'ResponseError' && e.statusCode === 404) {
+    // do something
+  }
+  if(e.statusCode === 401) {...}
+}
+```
+
+- the parameter property names changed from camelCase to snake_case
+
+Even if technically, the javascript client accepts both formats, the typescript definitions are only defining the snake_case
+properties.
+
+before:
+
+```ts
+legacyClient.callAsCurrentUser('get', {
+  id: 'id',
+  storedFields: ['some', 'fields'],
+})
+```
+
+after:
+
+```ts
+client.asCurrentUser.get({
+  id: 'id',
+  stored_fields: ['some', 'fields'],
+})
+```
+
+- the request abortion API changed
+
+All promises returned from the client API calls now have an `abort` method that can be used to cancel the request.
+
+before:
+
+```ts
+const controller = new AbortController();
+legacyClient.callAsCurrentUser('ping', {}, {
+  signal: controller.signal,
+})
+// later
+controller.abort();
+```
+
+after:
+
+```ts
+const request = client.asCurrentUser.ping();
+// later
+request.abort();
+```
+
+- it is now possible to override headers when performing specific API calls.
+
+Note that doing so is strongly discouraged due to potential side effects with the ES service internal
+behavior when scoping as the internal or as the current user.
+
+```ts
+const request = client.asCurrentUser.ping({}, { 
+  headers: {
+    authorization: 'foo',
+    custom: 'bar',
+  }
+});
+```
+
+- the new client doesn't provide exhaustive typings for the response object yet. You might have to copy
+response type definitions from the Legacy Elasticsearch library until https://github.com/elastic/elasticsearch-js/pull/970 merged.
+
+```ts
+// platform provides a few typings for internal purposes
+import { SearchResponse } from 'src/core/server';
+type SearchSource = {...};
+type SearchBody = SearchResponse<SearchSource>;
+const { body } = await client.search<SearchBody>(...);
+interface Info {...}
+const { body } = await client.info<Info>(...);
+```
+
+- Functional tests are subject to migration to the new client as well.
+before:
+```ts
+const client = getService('legacyEs');
+```
+
+after:
+```ts
+const client = getService('es');
+```
+
+Please refer to the  [Breaking changes list](https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/breaking-changes.html)
+for more information about the changes between the legacy and new client.
+
+### Accessing the client from a route handler
+
+Apart from the API format change, accessing the client from within a route handler
+did not change. As it was done for the legacy client, a preconfigured scoped client 
+bound to the request is accessible using `core` context provider:
+
+before:
+
+```ts
+router.get(
+  {
+    path: '/my-route',
+  },
+  async (context, req, res) => {
+    const { client } = context.core.elasticsearch.legacy;
+    // call as current user
+    const res = await client.callAsCurrentUser('ping');
+    // call as internal user
+    const res2 = await client.callAsInternalUser('search', options);
+    return res.ok({ body: 'ok' });
+  }
+);
+```
+
+after:
+
+```ts
+router.get(
+  {
+    path: '/my-route',
+  },
+  async (context, req, res) => {
+    const { client } = context.core.elasticsearch;
+    // call as current user
+    const res = await client.asCurrentUser.ping();
+    // call as internal user
+    const res2 = await client.asInternalUser.search(options);
+    return res.ok({ body: 'ok' });
+  }
+);
+```
+
+### Creating a custom client
+
+Note that the `plugins` option is now longer available on the new client. As the API is now exhaustive, adding custom
+endpoints using plugins should no longer be necessary.
+
+The API to create custom clients did not change much:
+
+before:
+
+```ts
+const customClient = coreStart.elasticsearch.legacy.createClient('my-custom-client', customConfig);
+// do something with the client, such as
+await customClient.callAsInternalUser('ping');
+// custom client are closable
+customClient.close();
+```
+
+after:
+
+```ts
+const customClient = coreStart.elasticsearch.createClient('my-custom-client', customConfig);
+// do something with the client, such as
+await customClient.asInternalUser.ping();
+// custom client are closable
+customClient.close();
+```
+
+If, for any reasons, one still needs to reach an endpoint not listed on the client API, using `request.transport` 
+is still possible:
+
+```ts
+const { body } = await client.asCurrentUser.transport.request({
+  method: 'get',
+  path: '/my-custom-endpoint',
+  body: { my: 'payload'},
+  querystring: { param: 'foo' }
+})
+```
+
+Remark: the new client creation API is now only available from the `start` contract of the elasticsearch service.

@@ -19,7 +19,7 @@
 
 export const mockReactDomRender = jest.fn();
 export const mockReactDomUnmount = jest.fn();
-export const mockReactDomCreatePortal = jest.fn().mockImplementation(component => component);
+export const mockReactDomCreatePortal = jest.fn().mockImplementation((component) => component);
 jest.doMock('react-dom', () => ({
   render: mockReactDomRender,
   createPortal: mockReactDomCreatePortal,

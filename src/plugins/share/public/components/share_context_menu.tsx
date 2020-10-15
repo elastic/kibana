@@ -21,13 +21,12 @@ import React, { Component } from 'react';
 
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
-import { EuiContextMenu } from '@elastic/eui';
+import { EuiContextMenu, EuiContextMenuPanelDescriptor } from '@elastic/eui';
 
 import { HttpStart } from 'kibana/public';
 
 import { UrlPanelContent } from './url_panel_content';
-import { ShareMenuItem, ShareContextMenuPanelItem } from '../types';
+import { ShareMenuItem, ShareContextMenuPanelItem, UrlParamExtension } from '../types';
 
 interface Props {
   allowEmbed: boolean;
@@ -40,6 +39,7 @@ interface Props {
   onClose: () => void;
   basePath: string;
   post: HttpStart['post'];
+  embedUrlParamExtensions?: UrlParamExtension[];
 }
 
 export class ShareContextMenu extends Component<Props> {
@@ -101,6 +101,7 @@ export class ShareContextMenu extends Component<Props> {
             basePath={this.props.basePath}
             post={this.props.post}
             shareableUrl={this.props.shareableUrl}
+            urlParamExtensions={this.props.embedUrlParamExtensions}
           />
         ),
       };
@@ -152,7 +153,7 @@ export class ShareContextMenu extends Component<Props> {
             }
             return -1;
           })
-          .map(menuItem => {
+          .map((menuItem) => {
             menuItem['data-test-subj'] = `sharePanel-${menuItem.name.replace(' ', '')}`;
             delete menuItem.sortOrder;
             return menuItem;

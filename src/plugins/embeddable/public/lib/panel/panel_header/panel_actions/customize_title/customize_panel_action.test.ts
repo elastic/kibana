@@ -18,8 +18,6 @@
  */
 
 import { Container, isErrorEmbeddable } from '../../../..';
-// @ts-ignore
-import { findTestSubject } from '@elastic/eui/lib/test';
 import { nextTick } from 'test_utils/enzyme_helpers';
 import { CustomizePanelTitleAction } from './customize_panel_action';
 import {
@@ -32,19 +30,19 @@ import {
   ContactCardEmbeddableFactory,
 } from '../../../../test_samples/embeddables/contact_card/contact_card_embeddable_factory';
 import { HelloWorldContainer } from '../../../../test_samples/embeddables/hello_world_container';
-import { GetEmbeddableFactory } from '../../../../types';
-import { EmbeddableFactory } from '../../../../embeddables';
+import { embeddablePluginMock } from '../../../../../mocks';
 
 let container: Container;
 let embeddable: ContactCardEmbeddable;
 
 function createHelloWorldContainer(input = { id: '123', panels: {} }) {
-  const embeddableFactories = new Map<string, EmbeddableFactory>();
-  const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => embeddableFactories.get(id);
-  embeddableFactories.set(
+  const { setup, doStart } = embeddablePluginMock.createInstance();
+  setup.registerEmbeddableFactory(
     CONTACT_CARD_EMBEDDABLE,
-    new ContactCardEmbeddableFactory({}, (() => {}) as any, {} as any)
+    new ContactCardEmbeddableFactory((() => {}) as any, {} as any)
   );
+  const getEmbeddableFactory = doStart().getEmbeddableFactory;
+
   return new HelloWorldContainer(input, { getEmbeddableFactory } as any);
 }
 
@@ -66,7 +64,7 @@ beforeEach(async () => {
   }
 });
 
-test('Updates the embeddable title when given', async done => {
+test('Updates the embeddable title when given', async (done) => {
   const getUserData = () => Promise.resolve({ title: 'What is up?' });
   const customizePanelAction = new CustomizePanelTitleAction(getUserData);
   expect(embeddable.getInput().title).toBeUndefined();

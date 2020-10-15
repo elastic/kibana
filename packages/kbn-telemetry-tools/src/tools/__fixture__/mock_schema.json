@@ -1,0 +1,54 @@
+{
+  "properties": {
+    "my_working_collector": {
+      "properties": {
+        "flat": {
+          "type": "keyword"
+        },
+        "my_index_signature_prop": {
+          "properties": {
+            "avg": {
+              "type": "number"
+            },
+            "count": {
+              "type": "number"
+            },
+            "max": {
+              "type": "number"
+            },
+            "min": {
+              "type": "number"
+            }
+          }
+        },
+        "my_str": {
+          "type": "text"
+        },
+        "my_objects": {
+          "properties": {
+            "total": {
+              "type": "number"
+            },
+            "type": {
+              "type": "boolean"
+            }
+          }
+        },
+        "my_array": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "total": {
+                "type": "number"
+              },
+              "type": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "my_str_array": { "type": "array", "items": { "type": "keyword" } }
+      }
+    }
+  }
+}

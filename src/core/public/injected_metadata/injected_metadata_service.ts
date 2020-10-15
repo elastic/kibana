@@ -18,6 +18,7 @@
  */
 
 import { get } from 'lodash';
+import { deepFreeze } from '@kbn/std';
 import { DiscoveredPlugin, PluginName } from '../../server';
 import {
   EnvironmentMode,
@@ -25,17 +26,7 @@ import {
   UiSettingsParams,
   UserProvidedValues,
 } from '../../server/types';
-import { deepFreeze } from '../../utils/';
-
-/** @public */
-export interface LegacyNavLink {
-  id: string;
-  title: string;
-  order: number;
-  url: string;
-  icon?: string;
-  euiIconType?: string;
-}
+import { AppCategory } from '../';
 
 export interface InjectedPluginMetadata {
   id: PluginName;
@@ -52,6 +43,8 @@ export interface InjectedMetadataParams {
     buildNumber: number;
     branch: string;
     basePath: string;
+    serverBasePath: string;
+    category?: AppCategory;
     csp: {
       warnLegacyBrowsers: boolean;
     };
@@ -63,18 +56,8 @@ export interface InjectedMetadataParams {
       packageInfo: Readonly<PackageInfo>;
     };
     uiPlugins: InjectedPluginMetadata[];
-    legacyMode: boolean;
+    anonymousStatusPage: boolean;
     legacyMetadata: {
-      app: unknown;
-      bundleId: string;
-      nav: LegacyNavLink[];
-      version: string;
-      branch: string;
-      buildNum: number;
-      buildSha: string;
-      basePath: string;
-      serverName: string;
-      devMode: boolean;
       uiSettings: {
         defaults: Record<string, UiSettingsParams>;
         user?: Record<string, UserProvidedValues>;
@@ -108,6 +91,14 @@ export class InjectedMetadataService {
         return this.state.basePath;
       },
 
+      getServerBasePath: () => {
+        return this.state.serverBasePath;
+      },
+
+      getAnonymousStatusPage: () => {
+        return this.state.anonymousStatusPage;
+      },
+
       getKibanaVersion: () => {
         return this.state.version;
       },
@@ -118,10 +109,6 @@ export class InjectedMetadataService {
 
       getPlugins: () => {
         return this.state.uiPlugins;
-      },
-
-      getLegacyMode: () => {
-        return this.state.legacyMode;
       },
 
       getLegacyMetadata: () => {
@@ -154,6 +141,7 @@ export class InjectedMetadataService {
  */
 export interface InjectedMetadataSetup {
   getBasePath: () => string;
+  getServerBasePath: () => string;
   getKibanaBuildNumber: () => number;
   getKibanaBranch: () => string;
   getKibanaVersion: () => string;
@@ -164,19 +152,8 @@ export interface InjectedMetadataSetup {
    * An array of frontend plugins in topological order.
    */
   getPlugins: () => InjectedPluginMetadata[];
-  /** Indicates whether or not we are rendering a known legacy app. */
-  getLegacyMode: () => boolean;
+  getAnonymousStatusPage: () => boolean;
   getLegacyMetadata: () => {
-    app: unknown;
-    bundleId: string;
-    nav: LegacyNavLink[];
-    version: string;
-    branch: string;
-    buildNum: number;
-    buildSha: string;
-    basePath: string;
-    serverName: string;
-    devMode: boolean;
     uiSettings: {
       defaults: Record<string, UiSettingsParams>;
       user?: Record<string, UserProvidedValues> | undefined;

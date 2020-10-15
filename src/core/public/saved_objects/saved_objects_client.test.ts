@@ -132,7 +132,9 @@ describe('SavedObjectsClient', () => {
           Object {
             "body": undefined,
             "method": "DELETE",
-            "query": undefined,
+            "query": Object {
+              "force": false,
+            },
           },
         ]
       `);
@@ -432,7 +434,7 @@ describe('SavedObjectsClient', () => {
         sortOrder: 'sort', // Not currently supported by API
       };
 
-      // @ts-ignore
+      // @ts-expect-error
       savedObjectsClient.find(options);
       expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
         Array [
@@ -447,24 +449,5 @@ describe('SavedObjectsClient', () => {
         ]
       `);
     });
-  });
-
-  it('maintains backwards compatibility by transforming http.fetch errors to be compatible with kfetch errors', () => {
-    const err = {
-      response: { ok: false, redirected: false, status: 409, statusText: 'Conflict' },
-      body: 'response body',
-    };
-    http.fetch.mockRejectedValue(err);
-    return expect(savedObjectsClient.get(doc.type, doc.id)).rejects.toMatchInlineSnapshot(`
-                    Object {
-                      "body": "response body",
-                      "res": Object {
-                        "ok": false,
-                        "redirected": false,
-                        "status": 409,
-                        "statusText": "Conflict",
-                      },
-                    }
-                `);
   });
 });

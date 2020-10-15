@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { LogRecord } from './log_record';
-import { Logger, LogMeta } from './logger';
+import { LogRecord, Logger, LogMeta } from '@kbn/logging';
 
 /** @internal */
 export class LoggerAdapter implements Logger {
@@ -62,5 +61,9 @@ export class LoggerAdapter implements Logger {
 
   public log(record: LogRecord) {
     this.logger.log(record);
+  }
+
+  public get(...contextParts: string[]): Logger {
+    return this.logger.get(...contextParts);
   }
 }

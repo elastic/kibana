@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { esFilters } from '../../../common';
+import { Filter } from '../../../common';
 
 export interface PartitionedFilters {
-  globalFilters: esFilters.Filter[];
-  appFilters: esFilters.Filter[];
+  globalFilters: Filter[];
+  appFilters: Filter[];
 }

@@ -19,7 +19,8 @@
 import { i18n } from '@kbn/i18n';
 
 import { RequestsViewComponent } from './components/requests_view';
-import { Adapters, InspectorViewDescription } from '../../types';
+import { InspectorViewDescription } from '../../types';
+import { Adapters } from '../../../common';
 
 export const getRequestsViewDescription = (): InspectorViewDescription => ({
   title: i18n.translate('inspector.requests.requestsTitle', {

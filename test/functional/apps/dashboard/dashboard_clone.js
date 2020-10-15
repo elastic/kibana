@@ -21,6 +21,7 @@ import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
+  const listingTable = getService('listingTable');
   const PageObjects = getPageObjects(['dashboard', 'header', 'common']);
 
   describe('dashboard clone', function describeIndexTests() {
@@ -33,14 +34,15 @@ export default function ({ getService, getPageObjects }) {
 
     it('Clone saves a copy', async function () {
       await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.addVisualizations(PageObjects.dashboard.getTestVisualizationNames());
-      await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName);
+      await PageObjects.dashboard.addVisualizations(
+        PageObjects.dashboard.getTestVisualizationNames()
+      );
+      await PageObjects.dashboard.saveDashboard(dashboardName);
 
       await PageObjects.dashboard.clickClone();
       await PageObjects.dashboard.confirmClone();
-
-      const countOfDashboards = await PageObjects.dashboard.getDashboardCountWithName(clonedDashboardName);
-      expect(countOfDashboards).to.equal(1);
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await listingTable.searchAndExpectItemsCount('dashboard', clonedDashboardName, 1);
     });
 
     it('the copy should have all the same visualizations', async function () {
@@ -64,11 +66,11 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.expectDuplicateTitleWarningDisplayed({ displayed: true });
     });
 
-    it('and doesn\'t save', async () => {
+    it("and doesn't save", async () => {
       await PageObjects.dashboard.cancelClone();
+      await PageObjects.dashboard.gotoDashboardLandingPage();
 
-      const countOfDashboards = await PageObjects.dashboard.getDashboardCountWithName(dashboardName);
-      expect(countOfDashboards).to.equal(1);
+      await listingTable.searchAndExpectItemsCount('dashboard', dashboardName, 1);
     });
 
     it('Clones on confirm duplicate title warning', async function () {
@@ -79,10 +81,9 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.expectDuplicateTitleWarningDisplayed({ displayed: true });
       await PageObjects.dashboard.confirmClone();
       await PageObjects.dashboard.waitForRenderComplete();
+      await PageObjects.dashboard.gotoDashboardLandingPage();
 
-      const countOfDashboards =
-        await PageObjects.dashboard.getDashboardCountWithName(dashboardName + ' Copy');
-      expect(countOfDashboards).to.equal(2);
+      await listingTable.searchAndExpectItemsCount('dashboard', dashboardName + ' Copy', 2);
     });
   });
 }

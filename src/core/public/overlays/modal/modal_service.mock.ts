@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ModalService, OverlayModalStart } from './modal_service';
 
 const createStartContractMock = () => {
@@ -25,6 +25,7 @@ const createStartContractMock = () => {
       close: jest.fn(),
       onClose: Promise.resolve(),
     }),
+    openConfirm: jest.fn().mockResolvedValue(true),
   };
   return startContract;
 };

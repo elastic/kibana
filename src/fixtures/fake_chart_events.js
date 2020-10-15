@@ -25,8 +25,8 @@ results.timeSeries = {
       date: true,
       interval: 600000,
       max: 1414437217559,
-      min: 1414394017559
-    }
+      min: 1414394017559,
+    },
   },
   label: 'apache',
   value: 44,
@@ -34,6 +34,6 @@ results.timeSeries = {
     label: 'apache',
     x: 1414400400000,
     y: 44,
-    y0: 0
-  }
+    y0: 0,
+  },
 };

@@ -4,27 +4,27 @@
 <titleabbrev>Check reindex status</titleabbrev>
 ++++
 
-Check the status of the reindex operation.
+experimental[] Check the status of the reindex operation.
 
-experimental["The underlying Upgrade Assistant concepts are stable, but the APIs for managing Upgrade Assistant are experimental."]
+Check the status of the reindex operation.
 
 [[check-reindex-status-request]]
 ==== Request
 
-`GET /api/upgrade_assistant/reindex/myIndex`
+`GET <kibana host>:<port>/api/upgrade_assistant/reindex/myIndex`
 
 [[check-reindex-status-response-codes]]
 ==== Response codes
 
 `200`::
   Indicates a successful call.
-  
+
 [[check-reindex-status-example]]
 ==== Example
 
 The API returns the following:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 {
   "reindexOp": {
@@ -53,59 +53,59 @@ The API returns the following:
 [[status-code]]
 ==== Status codes
 
-`0`:: 
+`0`::
   In progress
 
-`1`:: 
+`1`::
   Completed
 
-`2`:: 
+`2`::
   Failed
-  
-`3`:: 
+
+`3`::
   Paused
++
 NOTE: If the {kib} node that started the reindex is shutdown or restarted, the reindex goes into a paused state after some time.
 To resume the reindex, you must submit a new POST request to the `/api/upgrade_assistant/reindex/<indexName>` endpoint.
 
-`4`:: 
+`4`::
   Cancelled
 
 [[step-code]]
 ==== Step codes
 
-`0`::  
+`0`::
   The reindex operation has been created in Kibana.
-  
-`10`:: 
+
+`10`::
   The index group services stopped. Only applies to some system indices.
-  
-`20`:: 
-  The index is set to `readonly`. 
-  
-`30`:: 
+
+`20`::
+  The index is set to `readonly`.
+
+`30`::
   The new destination index has been created.
-  
-`40`:: 
+
+`40`::
   The reindex task in Elasticsearch has started.
-    
-`50`:: 
+
+`50`::
   The reindex task in Elasticsearch has completed.
-  
-`60`:: 
+
+`60`::
   Aliases were created to point to the new index, and the old index has been deleted.
-  
-`70`:: 
+
+`70`::
   The index group services have resumed. Only applies to some system indices.
 
 [[warning-code]]
 ==== Warning codes
 
-`0`:: 
+`0`::
   Specifies to remove the `_all` meta field.
-  
-`1`:: 
-  Specifies to convert any coerced boolean values in the source document. For example, `yes`, `1`, and `off`.
-  
-`2`:: 
-  Specifies to convert documents to support Elastic Common Schema. Only applies to APM indices created in 6.x.
 
+`1`::
+  Specifies to convert any coerced boolean values in the source document. For example, `yes`, `1`, and `off`.
+
+`2`::
+  Specifies to convert documents to support Elastic Common Schema. Only applies to APM indices created in 6.x.

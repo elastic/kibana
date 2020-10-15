@@ -1,0 +1,117 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PipelinesTable component renders component as expected 1`] = `
+<EuiInMemoryTable
+  columns={
+    Array [
+      Object {
+        "field": "id",
+        "name": "Id",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "field": "description",
+        "name": "Description",
+        "render": [Function],
+        "sortable": true,
+        "truncateText": true,
+      },
+      Object {
+        "field": "lastModifiedHumanized",
+        "name": "Last modified",
+        "render": [Function],
+        "sortable": [Function],
+      },
+      Object {
+        "field": "username",
+        "name": "Modified by",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "field": "id",
+        "name": "",
+        "render": [Function],
+        "sortable": false,
+        "width": "100px",
+      },
+    ]
+  }
+  data-test-subj="pipelineTable"
+  isSelectable={true}
+  itemId="id"
+  items={
+    Array [
+      Object {
+        "id": "testPipeline",
+      },
+    ]
+  }
+  message={null}
+  pagination={
+    Object {
+      "initialPageSize": 20,
+      "pageIndex": undefined,
+      "pageSizeOptions": Array [
+        5,
+        8,
+        20,
+        50,
+      ],
+      "totalItemCount": 1,
+    }
+  }
+  responsive={true}
+  rowProps={
+    Object {
+      "data-test-subj": "row",
+    }
+  }
+  search={
+    Object {
+      "box": Object {
+        "data-test-subj": "filter",
+        "incremental": true,
+      },
+      "filters": Array [
+        Object {
+          "field": "id",
+          "multiSelect": false,
+          "name": "Filter by ID",
+          "options": Array [
+            Object {
+              "name": "testPipeline",
+              "value": "testPipeline",
+              "view": "testPipeline",
+            },
+          ],
+          "type": "field_value_selection",
+        },
+      ],
+      "toolsLeft": null,
+      "toolsRight": <EuiButton
+        data-test-subj="btnAdd"
+        fill={true}
+        isDisabled={false}
+        onClick={[MockFunction]}
+      >
+        <FormattedMessage
+          defaultMessage="Create pipeline"
+          id="xpack.logstash.pipelinesTable.createPipelineButtonLabel"
+          values={Object {}}
+        />
+      </EuiButton>,
+    }
+  }
+  selection={
+    Object {
+      "onSelectionChange": [MockFunction],
+      "selectable": [Function],
+      "selectableMessage": [Function],
+    }
+  }
+  sorting={true}
+  tableLayout="fixed"
+/>
+`;

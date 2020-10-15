@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import datemath from '@elastic/datemath';
 import expect from '@kbn/expect';
 import mockRolledUpData, { mockIndices } from './hybrid_index_helper';
 
 export default function ({ getService, getPageObjects }) {
-
   const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
+  const find = getService('find');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'settings']);
 
@@ -38,13 +37,17 @@ export default function ({ getService, getPageObjects }) {
         await es.index(mockIndices(day, rollupSourceIndexPrefix));
       });
 
-      await retry.waitForWithTimeout('waiting for 3 records to be loaded into elasticsearch.', 10000, async () => {
-        const response = await es.indices.get({
-          index: `${rollupSourceIndexPrefix}*`,
-          allow_no_indices: false
-        });
-        return Object.keys(response).length === 3;
-      });
+      await retry.waitForWithTimeout(
+        'waiting for 3 records to be loaded into elasticsearch.',
+        10000,
+        async () => {
+          const response = await es.indices.get({
+            index: `${rollupSourceIndexPrefix}*`,
+            allow_no_indices: false,
+          });
+          return Object.keys(response).length === 3;
+        }
+      );
 
       await retry.try(async () => {
         //Create a rollup for kibana to recognize
@@ -52,22 +55,21 @@ export default function ({ getService, getPageObjects }) {
           path: `/_rollup/job/${rollupJobName}`,
           method: 'PUT',
           body: {
-            'index_pattern': `${rollupSourceIndexPrefix}*`,
-            'rollup_index': rollupTargetIndexName,
-            'cron': '*/10 * * * * ?',
-            'groups': {
-              'date_histogram': {
-                'fixed_interval': '1000ms',
-                'field': '@timestamp',
-                'time_zone': 'UTC'
-              }
+            index_pattern: `${rollupSourceIndexPrefix}*`,
+            rollup_index: rollupTargetIndexName,
+            cron: '*/10 * * * * ?',
+            groups: {
+              date_histogram: {
+                fixed_interval: '1000ms',
+                field: '@timestamp',
+                time_zone: 'UTC',
+              },
             },
-            'timeout': '20s',
-            'page_size': 1000
-          }
+            timeout: '20s',
+            page_size: 1000,
+          },
         });
       });
-
 
       await pastDates.map(async (day) => {
         await es.index(mockRolledUpData(rollupJobName, rollupTargetIndexName, day));
@@ -79,12 +81,23 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.common.navigateToApp('settings');
       await PageObjects.settings.createIndexPattern(rollupIndexPatternName, '@timestamp', false);
 
-
       await PageObjects.settings.clickKibanaIndexPatterns();
-      const indexPattern = (await PageObjects.settings.getIndexPatternList()).pop();
-      const indexPatternText = await indexPattern.getVisibleText();
-      expect(indexPatternText).to.contain(rollupIndexPatternName);
-      expect(indexPatternText).to.contain('Rollup');
+      const indexPatternNames = await PageObjects.settings.getAllIndexPatternNames();
+      //The assertion is going to check that the string has the right name and that the text Rollup
+      //is included (since there is a Rollup tag).
+      const filteredIndexPatternNames = indexPatternNames.filter(
+        (i) => i.includes(rollupIndexPatternName) && i.includes('Rollup')
+      );
+      expect(filteredIndexPatternNames.length).to.be(1);
+
+      // make sure there are no toasts which might be showing unexpected errors
+      const toastShown = await find.existsByCssSelector('.euiToast');
+      expect(toastShown).to.be(false);
+
+      // ensure all fields are available
+      await PageObjects.settings.clickIndexPatternByName(rollupIndexPatternName);
+      const fields = await PageObjects.settings.getFieldNames();
+      expect(fields).to.eql(['_source', '_id', '_type', '_index', '_score', '@timestamp']);
     });
 
     after(async () => {

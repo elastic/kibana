@@ -34,13 +34,14 @@ export default function ({ getService, getPageObjects }) {
     return hitsCountStatsRow[STATS_ROW_VALUE_INDEX];
   }
 
-  describe('inspect', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/39842
+  describe.skip('inspect', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('discover');
       // delete .kibana index and update configDoc
       await kibanaServer.uiSettings.replace({
-        'defaultIndex': 'logstash-*'
+        defaultIndex: 'logstash-*',
       });
 
       await PageObjects.common.navigateToApp('discover');
@@ -65,6 +66,5 @@ export default function ({ getService, getPageObjects }) {
 
       expect(getHitCount(requestStats)).to.be('14004');
     });
-
   });
 }

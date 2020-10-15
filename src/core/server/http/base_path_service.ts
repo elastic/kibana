@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ensureRawRequest, KibanaRequest, LegacyRequest } from './router';
+import { modifyUrl } from '@kbn/std';
 
-import { modifyUrl } from '../../utils';
+import { ensureRawRequest, KibanaRequest, LegacyRequest } from './router';
 
 /**
  * Access or manipulate the Kibana base path
@@ -69,7 +69,7 @@ export class BasePath {
    */
   public prepend = (path: string): string => {
     if (this.serverBasePath === '') return path;
-    return modifyUrl(path, parts => {
+    return modifyUrl(path, (parts) => {
       if (!parts.hostname && parts.pathname && parts.pathname.startsWith('/')) {
         parts.pathname = `${this.serverBasePath}${parts.pathname}`;
       }

@@ -17,95 +17,113 @@
  * under the License.
  */
 
-import React from 'react';
-import { RouteComponentProps } from 'react-router-dom';
-import { Subject } from 'rxjs';
+import React, {
+  Fragment,
+  FunctionComponent,
+  useLayoutEffect,
+  useRef,
+  useState,
+  MutableRefObject,
+} from 'react';
+import { EuiLoadingElastic } from '@elastic/eui';
 
-import { LegacyApp, AppMount, AppUnmount } from '../types';
-import { HttpStart } from '../../http';
+import type { MountPoint } from '../../types';
+import { AppLeaveHandler, AppStatus, AppUnmount, Mounter } from '../types';
 import { AppNotFound } from './app_not_found_screen';
+import { ScopedHistory } from '../scoped_history';
+import './app_container.scss';
 
-interface Props extends RouteComponentProps<{ appId: string }> {
-  apps: ReadonlyMap<string, AppMount>;
-  legacyApps: ReadonlyMap<string, LegacyApp>;
-  basePath: HttpStart['basePath'];
-  currentAppId$: Subject<string | undefined>;
-  /**
-   * Only necessary for redirecting to legacy apps
-   * @deprecated
-   */
-  redirectTo: (path: string) => void;
+interface Props {
+  /** Path application is mounted on without the global basePath */
+  appPath: string;
+  appId: string;
+  mounter?: Mounter;
+  appStatus: AppStatus;
+  setAppLeaveHandler: (appId: string, handler: AppLeaveHandler) => void;
+  setAppActionMenu: (appId: string, mount: MountPoint | undefined) => void;
+  createScopedHistory: (appUrl: string) => ScopedHistory;
+  setIsMounting: (isMounting: boolean) => void;
 }
 
-interface State {
-  appNotFound: boolean;
-}
+export const AppContainer: FunctionComponent<Props> = ({
+  mounter,
+  appId,
+  appPath,
+  setAppLeaveHandler,
+  setAppActionMenu,
+  createScopedHistory,
+  appStatus,
+  setIsMounting,
+}: Props) => {
+  const [showSpinner, setShowSpinner] = useState(true);
+  const [appNotFound, setAppNotFound] = useState(false);
+  const elementRef = useRef<HTMLDivElement>(null);
+  const unmountRef: MutableRefObject<AppUnmount | null> = useRef<AppUnmount>(null);
 
-export class AppContainer extends React.Component<Props, State> {
-  private readonly containerDiv = React.createRef<HTMLDivElement>();
-  private unmountFunc?: AppUnmount;
+  useLayoutEffect(() => {
+    const unmount = () => {
+      if (unmountRef.current) {
+        unmountRef.current();
+        unmountRef.current = null;
+      }
+    };
 
-  state: State = { appNotFound: false };
-
-  componentDidMount() {
-    this.mountApp();
-  }
-
-  componentWillUnmount() {
-    this.unmountApp();
-  }
-
-  componentDidUpdate(prevProps: Props) {
-    if (prevProps.match.params.appId !== this.props.match.params.appId) {
-      this.unmountApp();
-      this.mountApp();
+    if (!mounter || appStatus !== AppStatus.accessible) {
+      return setAppNotFound(true);
     }
-  }
+    setAppNotFound(false);
 
-  async mountApp() {
-    const { apps, legacyApps, match, basePath, currentAppId$, redirectTo } = this.props;
-    const { appId } = match.params;
-
-    const mount = apps.get(appId);
-    if (mount) {
-      this.unmountFunc = await mount({
-        appBasePath: basePath.prepend(`/app/${appId}`),
-        element: this.containerDiv.current!,
-      });
-      currentAppId$.next(appId);
-      this.setState({ appNotFound: false });
-      return;
+    setIsMounting(true);
+    if (mounter.unmountBeforeMounting) {
+      unmount();
     }
 
-    const legacyApp = findLegacyApp(appId, legacyApps);
-    if (legacyApp) {
-      this.unmountApp();
-      redirectTo(basePath.prepend(`/app/${appId}`));
-      this.setState({ appNotFound: false });
-      return;
-    }
+    const mount = async () => {
+      setShowSpinner(true);
+      try {
+        unmountRef.current =
+          (await mounter.mount({
+            appBasePath: mounter.appBasePath,
+            history: createScopedHistory(appPath),
+            element: elementRef.current!,
+            onAppLeave: (handler) => setAppLeaveHandler(appId, handler),
+            setHeaderActionMenu: (menuMount) => setAppActionMenu(appId, menuMount),
+          })) || null;
+      } catch (e) {
+        // TODO: add error UI
+        // eslint-disable-next-line no-console
+        console.error(e);
+      } finally {
+        if (elementRef.current) {
+          setShowSpinner(false);
+          setIsMounting(false);
+        }
+      }
+    };
 
-    this.setState({ appNotFound: true });
-  }
+    mount();
 
-  async unmountApp() {
-    if (this.unmountFunc) {
-      this.unmountFunc();
-      this.unmountFunc = undefined;
-    }
-  }
+    return unmount;
+  }, [
+    appId,
+    appStatus,
+    mounter,
+    createScopedHistory,
+    setAppLeaveHandler,
+    setAppActionMenu,
+    appPath,
+    setIsMounting,
+  ]);
 
-  render() {
-    return (
-      <React.Fragment>
-        {this.state.appNotFound && <AppNotFound />}
-        <div key={this.props.match.params.appId} ref={this.containerDiv} />
-      </React.Fragment>
-    );
-  }
-}
-
-function findLegacyApp(appId: string, apps: ReadonlyMap<string, LegacyApp>) {
-  const matchingApps = [...apps.entries()].filter(([id]) => id.split(':')[0] === appId);
-  return matchingApps.length ? matchingApps[0][1] : null;
-}
+  return (
+    <Fragment>
+      {appNotFound && <AppNotFound />}
+      {showSpinner && (
+        <div className="appContainer__loading">
+          <EuiLoadingElastic aria-label="Loading application" size="xxl" />
+        </div>
+      )}
+      <div key={appId} ref={elementRef} />
+    </Fragment>
+  );
+};

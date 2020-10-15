@@ -31,24 +31,22 @@ export default function ({ getService }) {
       await esArchiver.unload('index_patterns/basic_kibana');
     });
 
-    it('should return 200 with special characters', () => (
+    it('should return 200 with special characters', () =>
       supertest
         .post('/api/kibana/suggestions/values/basic_index')
         .send({
           field: 'baz.keyword',
-          query: '<something?with:lots&of^ bad characters'
+          query: '<something?with:lots&of^ bad characters',
         })
-        .expect(200)
-    ));
+        .expect(200));
 
-    it('should support nested fields', () => (
+    it('should support nested fields', () =>
       supertest
         .post('/api/kibana/suggestions/values/basic_index')
         .send({
           field: 'nestedField.child',
-          query: 'nes'
+          query: 'nes',
         })
-        .expect(200, ['nestedValue'])
-    ));
+        .expect(200, ['nestedValue']));
   });
 }

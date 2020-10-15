@@ -80,7 +80,7 @@ describe('#getProjects', () => {
   });
 
   test('includes additional projects in package.json', async () => {
-    const projectPaths = getProjectPaths(rootPath, {});
+    const projectPaths = getProjectPaths({ rootPath });
     const projects = await getProjects(rootPath, projectPaths);
 
     const expectedProjects = [
@@ -100,7 +100,7 @@ describe('#getProjects', () => {
   describe('with exclude/include filters', () => {
     let projectPaths: string[];
     beforeEach(() => {
-      projectPaths = getProjectPaths(rootPath, {});
+      projectPaths = getProjectPaths({ rootPath });
     });
 
     test('excludes projects specified in `exclude` filter', async () => {
@@ -208,7 +208,7 @@ describe('#topologicallyBatchProjects', () => {
   test('batches projects topologically based on their project dependencies', async () => {
     const batches = topologicallyBatchProjects(projects, graph);
 
-    const expectedBatches = batches.map(batch => batch.map(project => project.name));
+    const expectedBatches = batches.map((batch) => batch.map((project) => project.name));
 
     expect(expectedBatches).toMatchSnapshot();
   });
@@ -219,7 +219,7 @@ describe('#topologicallyBatchProjects', () => {
 
     const batches = topologicallyBatchProjects(projects, graph);
 
-    const expectedBatches = batches.map(batch => batch.map(project => project.name));
+    const expectedBatches = batches.map((batch) => batch.map((project) => project.name));
 
     expect(expectedBatches).toMatchSnapshot();
   });
@@ -228,7 +228,7 @@ describe('#topologicallyBatchProjects', () => {
     test('batches projects topologically based on their project dependencies and workspaces', async () => {
       const batches = topologicallyBatchProjects(projects, graph, { batchByWorkspace: true });
 
-      const expectedBatches = batches.map(batch => batch.map(project => project.name));
+      const expectedBatches = batches.map((batch) => batch.map((project) => project.name));
 
       expect(expectedBatches).toEqual([['kibana'], ['bar', 'foo'], ['baz', 'zorge'], ['quux']]);
     });

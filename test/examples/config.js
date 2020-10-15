@@ -25,18 +25,29 @@ export default async function ({ readConfigFile }) {
 
   return {
     testFiles: [
-      require.resolve('./search'),
+      require.resolve('./embeddables'),
+      require.resolve('./bfetch_explorer'),
+      require.resolve('./ui_actions'),
+      require.resolve('./state_sync'),
+      require.resolve('./routing'),
     ],
     services: {
       ...functionalConfig.get('services'),
       ...services,
+    },
+    uiSettings: {
+      defaults: {
+        'accessibility:disableAnimations': true,
+        'dateFormat:tz': 'UTC',
+        'telemetry:optIn': false,
+      },
     },
     pageObjects: functionalConfig.get('pageObjects'),
     servers: functionalConfig.get('servers'),
     esTestCluster: functionalConfig.get('esTestCluster'),
     apps: functionalConfig.get('apps'),
     esArchiver: {
-      directory: path.resolve(__dirname, '../es_archives')
+      directory: path.resolve(__dirname, '../es_archives'),
     },
     screenshots: functionalConfig.get('screenshots'),
     junit: {

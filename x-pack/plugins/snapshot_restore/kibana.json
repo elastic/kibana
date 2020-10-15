@@ -1,0 +1,23 @@
+{
+  "id": "snapshotRestore",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [
+    "licensing",
+    "management",
+    "features"
+  ],
+  "optionalPlugins": [
+    "usageCollection",
+    "security",
+    "cloud",
+    "home"
+  ],
+  "configPath": ["xpack", "snapshot_restore"],
+  "requiredBundles": [
+    "esUiShared",
+    "kibanaReact",
+    "home"
+  ]
+}

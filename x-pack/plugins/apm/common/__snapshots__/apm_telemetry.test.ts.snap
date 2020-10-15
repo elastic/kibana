@@ -1,0 +1,1024 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the telemetry mapping 1`] = `
+{
+  "properties": {
+    "stack_stats": {
+      "properties": {
+        "kibana": {
+          "properties": {
+            "plugins": {
+              "properties": {
+                "apm": {
+                  "properties": {
+                    "services_per_agent": {
+                      "properties": {
+                        "dotnet": {
+                          "type": "long"
+                        },
+                        "go": {
+                          "type": "long"
+                        },
+                        "java": {
+                          "type": "long"
+                        },
+                        "js-base": {
+                          "type": "long"
+                        },
+                        "nodejs": {
+                          "type": "long"
+                        },
+                        "python": {
+                          "type": "long"
+                        },
+                        "ruby": {
+                          "type": "long"
+                        },
+                        "rum-js": {
+                          "type": "long"
+                        },
+                        "otlp": {
+                          "type": "long"
+                        },
+                        "opentelemetry/cpp": {
+                          "type": "long"
+                        },
+                        "opentelemetry/dotnet": {
+                          "type": "long"
+                        },
+                        "opentelemetry/erlang": {
+                          "type": "long"
+                        },
+                        "opentelemetry/go": {
+                          "type": "long"
+                        },
+                        "opentelemetry/java": {
+                          "type": "long"
+                        },
+                        "opentelemetry/nodejs": {
+                          "type": "long"
+                        },
+                        "opentelemetry/php": {
+                          "type": "long"
+                        },
+                        "opentelemetry/python": {
+                          "type": "long"
+                        },
+                        "opentelemetry/ruby": {
+                          "type": "long"
+                        },
+                        "opentelemetry/webjs": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "agents": {
+                      "properties": {
+                        "dotnet": {
+                          "properties": {
+                            "agent": {
+                              "properties": {
+                                "version": {
+                                  "type": "keyword"
+                                }
+                              }
+                            },
+                            "service": {
+                              "properties": {
+                                "framework": {
+                                  "properties": {
+                                    "name": {
+                                      "type": "keyword"
+                                    },
+                                    "version": {
+                                      "type": "keyword"
+                                    },
+                                    "composite": {
+                                      "type": "keyword"
+                                    }
+                                  }
+                                },
+                                "language": {
+                                  "properties": {
+                                    "name": {
+                                      "type": "keyword"
+                                    },
+                                    "version": {
+                                      "type": "keyword"
+                                    },
+                                    "composite": {
+                                      "type": "keyword"
+                                    }
+                                  }
+                                },
+                                "runtime": {
+                                  "properties": {
+                                    "name": {
+                                      "type": "keyword"
+                                    },
+                                    "version": {
+                                      "type": "keyword"
+                                    },
+                                    "composite": {
+                                      "type": "keyword"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "go": {
+                          "properties": {
+                            "agent": {
+                              "properties": {
+                                "version": {
+                                  "type": "keyword"
+                                }
+                              }
+                            },
+                            "service": {
+                              "properties": {
+                                "framework": {
+                                  "properties": {
+                                    "name": {
+                                      "type": "keyword"
+                                    },
+                                    "version": {
+                                      "type": "keyword"
+                                    },
+                                    "composite": {
+                                      "type": "keyword"
+                                    }
+                                  }
+                                },
+                                "language": {
+                                  "properties": {
+                                    "name": {
+                                      "type": "keyword"
+                                    },
+                                    "version": {
+                                      "type": "keyword"
+                                    },
+                                    "composite": {
+                                      "type": "keyword"
+                                    }
+                                  }
+                                },
+                                "runtime": {
+                                  "properties": {
+                                    "name": {
+                                      "type": "keyword"
+                                    },
+                                    "version": {
+                                      "type": "keyword"
+                                    },
+                                    "composite": {
+                                      "type": "keyword"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "java": {
+                          "properties": {
+                            "agent": {
+                              "properties": {
+                                "version": {
+                                  "type": "keyword"
+                                }
+                              }
+                            },
+                            "service": {
+                              "properties": {
+                                "framework": {
+                                  "properties": {
+                                    "name": {
+                                      "type": "keyword"
+                                    },
+                                    "version": {
+                                      "type": "keyword"
+                                    },
+                                    "composite": {
+                                      "type": "keyword"
+                                    }
+                                  }
+                                },
+                                "language": {
+                                  "properties": {
+                                    "name": {
+                                      "type": "keyword"
+                                    },
+                                    "version": {
+                                      "type": "keyword"
+                                    },
+                                    "composite": {
+                                      "type": "keyword"
+                                    }
+                                  }
+                                },
+                                "runtime": {
+                                  "properties": {
+                                    "name": {
+                                      "type": "keyword"
+                                    },
+                                    "version": {
+                                      "type": "keyword"
+                                    },
+                                    "composite": {
+                                      "type": "keyword"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "js-base": {
+                          "properties": {
+                            "agent": {
+                              "properties": {
+                                "version": {
+                                  "type": "keyword"
+                                }
+                              }
+                            },
+                            "service": {
+                              "properties": {
+                                "framework": {
+                                  "properties": {
+                                    "name": {
+                                      "type": "keyword"
+                                    },
+                                    "version": {
+                                      "type": "keyword"
+                                    },
+                                    "composite": {
+                                      "type": "keyword"
+                                    }
+                                  }
+                                },
+                                "language": {
+                                  "properties": {
+                                    "name": {
+                                      "type": "keyword"
+                                    },
+                                    "version": {
+                                      "type": "keyword"
+                                    },
+                                    "composite": {
+                                      "type": "keyword"
+                                    }
+                                  }
+                                },
+                                "runtime": {
+                                  "properties": {
+                                    "name": {
+                                      "type": "keyword"
+                                    },
+                                    "version": {
+                                      "type": "keyword"
+                                    },
+                                    "composite": {
+                                      "type": "keyword"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "nodejs": {
+                          "properties": {
+                            "agent": {
+                              "properties": {
+                                "version": {
+                                  "type": "keyword"
+                                }
+                              }
+                            },
+                            "service": {
+                              "properties": {
+                                "framework": {
+                                  "properties": {
+                                    "name": {
+                                      "type": "keyword"
+                                    },
+                                    "version": {
+                                      "type": "keyword"
+                                    },
+                                    "composite": {
+                                      "type": "keyword"
+                                    }
+                                  }
+                                },
+                                "language": {
+                                  "properties": {
+                                    "name": {
+                                      "type": "keyword"
+                                    },
+                                    "version": {
+                                      "type": "keyword"
+                                    },
+                                    "composite": {
+                                      "type": "keyword"
+                                    }
+                                  }
+                                },
+                                "runtime": {
+                                  "properties": {
+                                    "name": {
+                                      "type": "keyword"
+                                    },
+                                    "version": {
+                                      "type": "keyword"
+                                    },
+                                    "composite": {
+                                      "type": "keyword"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "python": {
+                          "properties": {
+                            "agent": {
+                              "properties": {
+                                "version": {
+                                  "type": "keyword"
+                                }
+                              }
+                            },
+                            "service": {
+                              "properties": {
+                                "framework": {
+                                  "properties": {
+                                    "name": {
+                                      "type": "keyword"
+                                    },
+                                    "version": {
+                                      "type": "keyword"
+                                    },
+                                    "composite": {
+                                      "type": "keyword"
+                                    }
+                                  }
+                                },
+                                "language": {
+                                  "properties": {
+                                    "name": {
+                                      "type": "keyword"
+                                    },
+                                    "version": {
+                                      "type": "keyword"
+                                    },
+                                    "composite": {
+                                      "type": "keyword"
+                                    }
+                                  }
+                                },
+                                "runtime": {
+                                  "properties": {
+                                    "name": {
+                                      "type": "keyword"
+                                    },
+                                    "version": {
+                                      "type": "keyword"
+                                    },
+                                    "composite": {
+                                      "type": "keyword"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "ruby": {
+                          "properties": {
+                            "agent": {
+                              "properties": {
+                                "version": {
+                                  "type": "keyword"
+                                }
+                              }
+                            },
+                            "service": {
+                              "properties": {
+                                "framework": {
+                                  "properties": {
+                                    "name": {
+                                      "type": "keyword"
+                                    },
+                                    "version": {
+                                      "type": "keyword"
+                                    },
+                                    "composite": {
+                                      "type": "keyword"
+                                    }
+                                  }
+                                },
+                                "language": {
+                                  "properties": {
+                                    "name": {
+                                      "type": "keyword"
+                                    },
+                                    "version": {
+                                      "type": "keyword"
+                                    },
+                                    "composite": {
+                                      "type": "keyword"
+                                    }
+                                  }
+                                },
+                                "runtime": {
+                                  "properties": {
+                                    "name": {
+                                      "type": "keyword"
+                                    },
+                                    "version": {
+                                      "type": "keyword"
+                                    },
+                                    "composite": {
+                                      "type": "keyword"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "rum-js": {
+                          "properties": {
+                            "agent": {
+                              "properties": {
+                                "version": {
+                                  "type": "keyword"
+                                }
+                              }
+                            },
+                            "service": {
+                              "properties": {
+                                "framework": {
+                                  "properties": {
+                                    "name": {
+                                      "type": "keyword"
+                                    },
+                                    "version": {
+                                      "type": "keyword"
+                                    },
+                                    "composite": {
+                                      "type": "keyword"
+                                    }
+                                  }
+                                },
+                                "language": {
+                                  "properties": {
+                                    "name": {
+                                      "type": "keyword"
+                                    },
+                                    "version": {
+                                      "type": "keyword"
+                                    },
+                                    "composite": {
+                                      "type": "keyword"
+                                    }
+                                  }
+                                },
+                                "runtime": {
+                                  "properties": {
+                                    "name": {
+                                      "type": "keyword"
+                                    },
+                                    "version": {
+                                      "type": "keyword"
+                                    },
+                                    "composite": {
+                                      "type": "keyword"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "has_any_services": {
+                      "type": "boolean"
+                    },
+                    "version": {
+                      "properties": {
+                        "apm_server": {
+                          "properties": {
+                            "major": {
+                              "type": "long"
+                            },
+                            "minor": {
+                              "type": "long"
+                            },
+                            "patch": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "environments": {
+                      "properties": {
+                        "services_without_environments": {
+                          "type": "long"
+                        },
+                        "services_with_multiple_environments": {
+                          "type": "long"
+                        },
+                        "top_environments": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "aggregated_transactions": {
+                      "properties": {
+                        "current_implementation": {
+                          "properties": {
+                            "expected_metric_document_count": {
+                              "type": "long"
+                            },
+                            "transaction_count": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "no_observer_name": {
+                          "properties": {
+                            "expected_metric_document_count": {
+                              "type": "long"
+                            },
+                            "transaction_count": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "no_rum": {
+                          "properties": {
+                            "expected_metric_document_count": {
+                              "type": "long"
+                            },
+                            "transaction_count": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "no_rum_no_observer_name": {
+                          "properties": {
+                            "expected_metric_document_count": {
+                              "type": "long"
+                            },
+                            "transaction_count": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "only_rum": {
+                          "properties": {
+                            "expected_metric_document_count": {
+                              "type": "long"
+                            },
+                            "transaction_count": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "only_rum_no_observer_name": {
+                          "properties": {
+                            "expected_metric_document_count": {
+                              "type": "long"
+                            },
+                            "transaction_count": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "cloud": {
+                      "properties": {
+                        "availability_zone": {
+                          "type": "keyword"
+                        },
+                        "provider": {
+                          "type": "keyword"
+                        },
+                        "region": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "counts": {
+                      "properties": {
+                        "transaction": {
+                          "properties": {
+                            "1d": {
+                              "type": "long"
+                            },
+                            "all": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "span": {
+                          "properties": {
+                            "1d": {
+                              "type": "long"
+                            },
+                            "all": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "error": {
+                          "properties": {
+                            "1d": {
+                              "type": "long"
+                            },
+                            "all": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "metric": {
+                          "properties": {
+                            "1d": {
+                              "type": "long"
+                            },
+                            "all": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "sourcemap": {
+                          "properties": {
+                            "1d": {
+                              "type": "long"
+                            },
+                            "all": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "onboarding": {
+                          "properties": {
+                            "1d": {
+                              "type": "long"
+                            },
+                            "all": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "agent_configuration": {
+                          "properties": {
+                            "all": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "max_transaction_groups_per_service": {
+                          "properties": {
+                            "1d": {
+                              "type": "long"
+                            },
+                            "all": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "max_error_groups_per_service": {
+                          "properties": {
+                            "1d": {
+                              "type": "long"
+                            },
+                            "all": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "traces": {
+                          "properties": {
+                            "1d": {
+                              "type": "long"
+                            },
+                            "all": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "services": {
+                          "properties": {
+                            "1d": {
+                              "type": "long"
+                            },
+                            "all": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "cardinality": {
+                      "properties": {
+                        "client": {
+                          "properties": {
+                            "geo": {
+                              "properties": {
+                                "country_iso_code": {
+                                  "properties": {
+                                    "rum": {
+                                      "properties": {
+                                        "1d": {
+                                          "type": "long"
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "user_agent": {
+                          "properties": {
+                            "original": {
+                              "properties": {
+                                "all_agents": {
+                                  "properties": {
+                                    "1d": {
+                                      "type": "long"
+                                    }
+                                  }
+                                },
+                                "rum": {
+                                  "properties": {
+                                    "1d": {
+                                      "type": "long"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "transaction": {
+                          "properties": {
+                            "name": {
+                              "properties": {
+                                "all_agents": {
+                                  "properties": {
+                                    "1d": {
+                                      "type": "long"
+                                    }
+                                  }
+                                },
+                                "rum": {
+                                  "properties": {
+                                    "1d": {
+                                      "type": "long"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "retainment": {
+                      "properties": {
+                        "span": {
+                          "properties": {
+                            "ms": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "transaction": {
+                          "properties": {
+                            "ms": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "error": {
+                          "properties": {
+                            "ms": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "metric": {
+                          "properties": {
+                            "ms": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "sourcemap": {
+                          "properties": {
+                            "ms": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "onboarding": {
+                          "properties": {
+                            "ms": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "integrations": {
+                      "properties": {
+                        "ml": {
+                          "properties": {
+                            "all_jobs_count": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "indices": {
+                      "properties": {
+                        "shards": {
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "all": {
+                          "properties": {
+                            "total": {
+                              "properties": {
+                                "docs": {
+                                  "properties": {
+                                    "count": {
+                                      "type": "long"
+                                    }
+                                  }
+                                },
+                                "store": {
+                                  "properties": {
+                                    "size_in_bytes": {
+                                      "type": "long"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "tasks": {
+                      "properties": {
+                        "aggregated_transactions": {
+                          "properties": {
+                            "took": {
+                              "properties": {
+                                "ms": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "cloud": {
+                          "properties": {
+                            "took": {
+                              "properties": {
+                                "ms": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "processor_events": {
+                          "properties": {
+                            "took": {
+                              "properties": {
+                                "ms": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "agent_configuration": {
+                          "properties": {
+                            "took": {
+                              "properties": {
+                                "ms": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "services": {
+                          "properties": {
+                            "took": {
+                              "properties": {
+                                "ms": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "versions": {
+                          "properties": {
+                            "took": {
+                              "properties": {
+                                "ms": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "groupings": {
+                          "properties": {
+                            "took": {
+                              "properties": {
+                                "ms": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "integrations": {
+                          "properties": {
+                            "took": {
+                              "properties": {
+                                "ms": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "agents": {
+                          "properties": {
+                            "took": {
+                              "properties": {
+                                "ms": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "indices_stats": {
+                          "properties": {
+                            "took": {
+                              "properties": {
+                                "ms": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "cardinality": {
+                          "properties": {
+                            "took": {
+                              "properties": {
+                                "ms": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`;

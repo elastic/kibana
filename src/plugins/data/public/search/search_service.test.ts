@@ -18,24 +18,46 @@
  */
 
 import { coreMock } from '../../../../core/public/mocks';
+import { CoreSetup, CoreStart } from '../../../../core/public';
 
-import { SearchService } from './search_service';
-import { CoreSetup } from '../../../../core/public';
+import { SearchService, SearchServiceSetupDependencies } from './search_service';
 
 describe('Search service', () => {
   let searchService: SearchService;
   let mockCoreSetup: MockedKeys<CoreSetup>;
+  let mockCoreStart: MockedKeys<CoreStart>;
+  const initializerContext = coreMock.createPluginInitializerContext();
+  initializerContext.config.get = jest.fn().mockReturnValue({
+    search: { aggs: { shardDelay: { enabled: false } } },
+  });
 
   beforeEach(() => {
-    searchService = new SearchService(coreMock.createPluginInitializerContext());
     mockCoreSetup = coreMock.createSetup();
+    mockCoreStart = coreMock.createStart();
+    searchService = new SearchService(initializerContext);
   });
 
   describe('setup()', () => {
     it('exposes proper contract', async () => {
-      const setup = searchService.setup(mockCoreSetup);
-      expect(setup).toHaveProperty('registerSearchStrategyContext');
-      expect(setup).toHaveProperty('registerSearchStrategyProvider');
+      const setup = searchService.setup(mockCoreSetup, ({
+        packageInfo: { version: '8' },
+        expressions: { registerFunction: jest.fn(), registerType: jest.fn() },
+      } as unknown) as SearchServiceSetupDependencies);
+      expect(setup).toHaveProperty('aggs');
+      expect(setup).toHaveProperty('usageCollector');
+      expect(setup).toHaveProperty('__enhance');
+    });
+  });
+
+  describe('start()', () => {
+    it('exposes proper contract', async () => {
+      const start = searchService.start(mockCoreStart, {
+        fieldFormats: {},
+        indexPatterns: {},
+      } as any);
+      expect(start).toHaveProperty('aggs');
+      expect(start).toHaveProperty('search');
+      expect(start).toHaveProperty('searchSource');
     });
   });
 });

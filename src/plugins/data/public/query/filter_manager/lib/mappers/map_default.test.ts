@@ -18,12 +18,12 @@
  */
 
 import { mapDefault } from './map_default';
-import { esFilters } from '../../../../../common';
+import { buildQueryFilter, buildEmptyFilter } from '../../../../../common';
 
 describe('filter manager utilities', () => {
   describe('mapDefault()', () => {
     test('should return the key and value for matching filters', async () => {
-      const filter = esFilters.buildQueryFilter({ match_all: {} }, 'index', '');
+      const filter = buildQueryFilter({ match_all: {} }, 'index', '');
       const result = mapDefault(filter);
 
       expect(result).toHaveProperty('key', 'query');
@@ -31,7 +31,7 @@ describe('filter manager utilities', () => {
     });
 
     test('should return undefined if there is no valid key', async () => {
-      const filter = esFilters.buildEmptyFilter(true);
+      const filter = buildEmptyFilter(true);
 
       try {
         mapDefault(filter);

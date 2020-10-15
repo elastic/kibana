@@ -6,10 +6,17 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'timelion', 'header', 'security', 'spaceSelector']);
+  const PageObjects = getPageObjects([
+    'common',
+    'error',
+    'header',
+    'security',
+    'spaceSelector',
+    'timelion',
+  ]);
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
 
@@ -41,7 +48,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
 
         await PageObjects.security.login(
           'global_timelion_all_user',
@@ -53,16 +60,14 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
         await security.role.delete('global_timelion_all_role');
         await security.user.delete('global_timelion_all_user');
       });
 
       it('shows timelion navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Timelion', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.eql(['Overview', 'Timelion']);
       });
 
       it(`allows a timelion sheet to be created`, async () => {
@@ -107,16 +112,14 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
         await security.role.delete('global_timelion_read_role');
         await security.user.delete('global_timelion_read_user');
       });
 
       it('shows timelion navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Timelion', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.eql(['Overview', 'Timelion']);
       });
 
       it(`does not allow a timelion sheet to be created`, async () => {
@@ -151,7 +154,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
 
         await PageObjects.security.login(
           'no_timelion_privileges_user',
@@ -163,24 +166,17 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
         await security.role.delete('no_timelion_privileges_role');
         await security.user.delete('no_timelion_privileges_user');
       });
 
-      it(`returns a 404`, async () => {
+      it(`returns a 403`, async () => {
         await PageObjects.common.navigateToActualUrl('timelion', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        const messageText = await PageObjects.common.getBodyText();
-        expect(messageText).to.eql(
-          JSON.stringify({
-            statusCode: 404,
-            error: 'Not Found',
-            message: 'Not Found',
-          })
-        );
+        PageObjects.error.expectForbidden();
       });
     });
   });

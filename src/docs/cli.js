@@ -20,11 +20,7 @@
 import { execFileSync } from 'child_process';
 import { Command } from 'commander';
 
-import {
-  defaultDocsRepoPath,
-  buildDocsScript,
-  buildDocsArgs
-} from './docs_repo';
+import { defaultDocsRepoPath, buildDocsScript, buildDocsArgs } from './docs_repo';
 
 const cmd = new Command('node scripts/docs');
 cmd

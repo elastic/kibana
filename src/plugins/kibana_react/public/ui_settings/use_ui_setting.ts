@@ -18,8 +18,8 @@
  */
 
 import { useCallback, useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from '../context';
-import { useObservable } from '../util/use_observable';
 
 /**
  * Returns the current UI-settings value.

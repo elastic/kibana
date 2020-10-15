@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 const convert = require('./convert');
 
 const clusterHealthSpec = require('../test/fixtures/cluster_health_spec');

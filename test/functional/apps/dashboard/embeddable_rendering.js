@@ -33,9 +33,17 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const pieChart = getService('pieChart');
+  const security = getService('security');
   const dashboardExpect = getService('dashboardExpect');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'discover', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'dashboard',
+    'header',
+    'visualize',
+    'discover',
+    'timePicker',
+  ]);
   let visNames = [];
 
   const expectAllDataRenders = async () => {
@@ -45,7 +53,7 @@ export default function ({ getService, getPageObjects }) {
     const tsvbGuageExists = await find.existsByCssSelector('.tvbVisHalfGauge');
     expect(tsvbGuageExists).to.be(true);
     await dashboardExpect.timelionLegendCount(0);
-    await dashboardExpect.markdownWithValuesExists(['I\'m a markdown!']);
+    await dashboardExpect.markdownWithValuesExists(["I'm a markdown!"]);
     await dashboardExpect.vegaTextsExist(['5,000']);
     await dashboardExpect.goalAndGuageLabelsExist(['62.925%', '55.625%', '11.915 GB']);
     await dashboardExpect.dataTableRowCount(5);
@@ -75,7 +83,7 @@ export default function ({ getService, getPageObjects }) {
     await dashboardExpect.savedSearchRowCount(0);
     await dashboardExpect.inputControlItemCount(5);
     await dashboardExpect.metricValuesExist(['0']);
-    await dashboardExpect.markdownWithValuesExists(['I\'m a markdown!']);
+    await dashboardExpect.markdownWithValuesExists(["I'm a markdown!"]);
 
     // Three instead of 0 because there is a visualization based off a non time based index that
     // should still show data.
@@ -91,12 +99,13 @@ export default function ({ getService, getPageObjects }) {
     await dashboardExpect.vegaTextsDoNotExist(['5,000']);
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/46305
+  // Failing: See https://github.com/elastic/kibana/issues/76245
   describe.skip('dashboard embeddable rendering', function describeIndexTests() {
     before(async () => {
+      await security.testUser.setRoles(['kibana_admin', 'animals', 'test_logstash_reader']);
       await esArchiver.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
-        'defaultIndex': '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
@@ -112,6 +121,7 @@ export default function ({ getService, getPageObjects }) {
       const currentUrl = await browser.getCurrentUrl();
       const newUrl = currentUrl.replace(/\?.*$/, '');
       await browser.get(newUrl, false);
+      await security.testUser.restoreDefaults();
     });
 
     it('adding visualizations', async () => {
@@ -127,14 +137,18 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('adding saved searches', async () => {
-      const visAndSearchNames = visNames.concat(await dashboardAddPanel.addEverySavedSearch('"Rendering Test"'));
+      const visAndSearchNames = visNames.concat(
+        await dashboardAddPanel.addEverySavedSearch('"Rendering Test"')
+      );
       await dashboardAddPanel.closeAddPanel();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await dashboardExpect.visualizationsArePresent(visAndSearchNames);
       expect(visAndSearchNames.length).to.be.equal(28);
       await PageObjects.dashboard.waitForRenderComplete();
 
-      await PageObjects.dashboard.saveDashboard('embeddable rendering test', { storeTimeWithDashboard: true });
+      await PageObjects.dashboard.saveDashboard('embeddable rendering test', {
+        storeTimeWithDashboard: true,
+      });
     });
 
     it('initial render test', async () => {

@@ -18,6 +18,8 @@
  */
 
 /** @internal */
-export { LegacyObjectToConfigAdapter, ensureValidConfiguration, LegacyConfig } from './config';
+export { ensureValidConfiguration } from './config';
 /** @internal */
-export { LegacyService, LegacyServiceSetupDeps, LegacyServiceStartDeps } from './legacy_service';
+export { LegacyService, ILegacyService } from './legacy_service';
+/** @internal */
+export * from './types';

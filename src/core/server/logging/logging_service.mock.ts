@@ -16,72 +16,37 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
-// Test helpers to simplify mocking logs and collecting all their outputs
-import { Logger } from './logger';
-import { ILoggingService } from './logging_service';
-import { LoggerFactory } from './logger_factory';
+import {
+  LoggingService,
+  LoggingServiceSetup,
+  InternalLoggingServiceSetup,
+} from './logging_service';
 
-type MockedLogger = jest.Mocked<Logger>;
+const createInternalSetupMock = (): jest.Mocked<InternalLoggingServiceSetup> => ({
+  configure: jest.fn(),
+});
 
-const createLoggingServiceMock = () => {
-  const mockLog: MockedLogger = {
-    debug: jest.fn(),
-    error: jest.fn(),
-    fatal: jest.fn(),
-    info: jest.fn(),
-    log: jest.fn(),
-    trace: jest.fn(),
-    warn: jest.fn(),
-  };
+const createSetupMock = (): jest.Mocked<LoggingServiceSetup> => ({
+  configure: jest.fn(),
+});
 
-  const mocked: jest.Mocked<ILoggingService> = {
-    get: jest.fn(),
-    asLoggerFactory: jest.fn(),
-    upgrade: jest.fn(),
+type LoggingServiceContract = PublicMethodsOf<LoggingService>;
+const createMock = (): jest.Mocked<LoggingServiceContract> => {
+  const service: jest.Mocked<LoggingServiceContract> = {
+    setup: jest.fn(),
+    start: jest.fn(),
     stop: jest.fn(),
   };
-  mocked.get.mockImplementation((...context) => ({
-    context,
-    ...mockLog,
-  }));
-  mocked.asLoggerFactory.mockImplementation(() => mocked);
-  mocked.stop.mockResolvedValue();
-  return mocked;
-};
 
-const collectLoggingServiceMock = (loggerFactory: LoggerFactory) => {
-  const mockLog = loggerFactory.get() as MockedLogger;
-  return {
-    debug: mockLog.debug.mock.calls,
-    error: mockLog.error.mock.calls,
-    fatal: mockLog.fatal.mock.calls,
-    info: mockLog.info.mock.calls,
-    log: mockLog.log.mock.calls,
-    trace: mockLog.trace.mock.calls,
-    warn: mockLog.warn.mock.calls,
-  };
-};
+  service.setup.mockReturnValue(createInternalSetupMock());
 
-const clearLoggingServiceMock = (loggerFactory: LoggerFactory) => {
-  const mockedLoggerFactory = (loggerFactory as unknown) as jest.Mocked<ILoggingService>;
-  mockedLoggerFactory.get.mockClear();
-  mockedLoggerFactory.asLoggerFactory.mockClear();
-  mockedLoggerFactory.upgrade.mockClear();
-  mockedLoggerFactory.stop.mockClear();
-
-  const mockLog = loggerFactory.get() as MockedLogger;
-  mockLog.debug.mockClear();
-  mockLog.info.mockClear();
-  mockLog.warn.mockClear();
-  mockLog.error.mockClear();
-  mockLog.trace.mockClear();
-  mockLog.fatal.mockClear();
-  mockLog.log.mockClear();
+  return service;
 };
 
 export const loggingServiceMock = {
-  create: createLoggingServiceMock,
-  collect: collectLoggingServiceMock,
-  clear: clearLoggingServiceMock,
+  create: createMock,
+  createSetupContract: createSetupMock,
+  createInternalSetupContract: createInternalSetupMock,
 };

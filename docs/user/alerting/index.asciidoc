@@ -1,0 +1,5 @@
+include::alerting-getting-started.asciidoc[]
+include::defining-alerts.asciidoc[]
+include::action-types.asciidoc[]
+include::alert-types.asciidoc[]
+include::alerting-scale-performance.asciidoc[]

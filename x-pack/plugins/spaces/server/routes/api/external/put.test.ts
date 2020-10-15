@@ -7,47 +7,44 @@
 import * as Rx from 'rxjs';
 import {
   createSpaces,
-  createLegacyAPI,
   createMockSavedObjectsRepository,
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
 } from '../__fixtures__';
-import { CoreSetup, IRouter, kibanaResponseFactory } from 'src/core/server';
+import { CoreSetup, kibanaResponseFactory, RouteValidatorConfig } from 'src/core/server';
 import {
-  loggingServiceMock,
-  elasticsearchServiceMock,
+  loggingSystemMock,
   httpServiceMock,
   httpServerMock,
+  coreMock,
 } from 'src/core/server/mocks';
 import { SpacesService } from '../../../spaces_service';
 import { SpacesAuditLogger } from '../../../lib/audit_logger';
 import { SpacesClient } from '../../../lib/spaces_client';
 import { initPutSpacesApi } from './put';
-import { RouteSchemas } from 'src/core/server/http/router/route';
-import { ObjectType } from '@kbn/config-schema';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { securityMock } from '../../../../../security/server/mocks';
+import { ObjectType } from '@kbn/config-schema';
 
 describe('PUT /api/spaces/space', () => {
   const spacesSavedObjects = createSpaces();
-  const spaces = spacesSavedObjects.map(s => ({ id: s.id, ...s.attributes }));
 
   const setup = async () => {
     const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
+    const router = httpService.createRouter();
 
-    const legacyAPI = createLegacyAPI({ spaces });
+    const coreStart = coreMock.createStart();
 
     const savedObjectsRepositoryMock = createMockSavedObjectsRepository(spacesSavedObjects);
 
-    const log = loggingServiceMock.create().get('spaces');
+    const log = loggingSystemMock.create().get('spaces');
 
-    const service = new SpacesService(log, () => legacyAPI);
+    const service = new SpacesService(log);
     const spacesService = await service.setup({
       http: (httpService as unknown) as CoreSetup['http'],
-      elasticsearch: elasticsearchServiceMock.createSetupContract(),
+      getStartServices: async () => [coreStart, {}, {}],
       authorization: securityMock.createSetup().authz,
-      getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
+      auditLogger: {} as SpacesAuditLogger,
       config$: Rx.of(spacesConfig),
     });
 
@@ -67,15 +64,17 @@ describe('PUT /api/spaces/space', () => {
 
     initPutSpacesApi({
       externalRouter: router,
-      getSavedObjects: () => legacyAPI.savedObjects,
+      getStartServices: async () => [coreStart, {}, {}],
+      getImportExportObjectLimit: () => 1000,
       log,
       spacesService,
+      authorization: null, // not needed for this route
     });
 
     const [routeDefinition, routeHandler] = router.put.mock.calls[0];
 
     return {
-      routeValidation: routeDefinition.validate as RouteSchemas<ObjectType, ObjectType, ObjectType>,
+      routeValidation: routeDefinition.validate as RouteValidatorConfig<{}, {}, {}>,
       routeHandler,
       savedObjectsRepositoryMock,
     };
@@ -156,7 +155,7 @@ describe('PUT /api/spaces/space', () => {
       params: {
         id: payload.id,
       },
-      body: routeValidation.body!.validate(payload),
+      body: (routeValidation.body as ObjectType).validate(payload),
       method: 'post',
     });
 

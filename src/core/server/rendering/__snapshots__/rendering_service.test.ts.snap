@@ -1,0 +1,220 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RenderingService setup() render() renders "core" from legacy request 1`] = `
+Object {
+  "anonymousStatusPage": false,
+  "basePath": "/mock-server-basepath",
+  "branch": Any<String>,
+  "buildNumber": Any<Number>,
+  "csp": Object {
+    "warnLegacyBrowsers": true,
+  },
+  "env": Object {
+    "mode": Object {
+      "dev": Any<Boolean>,
+      "name": Any<String>,
+      "prod": Any<Boolean>,
+    },
+    "packageInfo": Object {
+      "branch": Any<String>,
+      "buildNum": Any<Number>,
+      "buildSha": Any<String>,
+      "dist": Any<Boolean>,
+      "version": Any<String>,
+    },
+  },
+  "i18n": Object {
+    "translationsUrl": "/mock-server-basepath/translations/en.json",
+  },
+  "legacyMetadata": Object {
+    "uiSettings": Object {
+      "defaults": Object {
+        "registered": Object {
+          "name": "title",
+        },
+      },
+      "user": Object {},
+    },
+  },
+  "serverBasePath": "/mock-server-basepath",
+  "uiPlugins": Array [],
+  "vars": Object {},
+  "version": Any<String>,
+}
+`;
+
+exports[`RenderingService setup() render() renders "core" page 1`] = `
+Object {
+  "anonymousStatusPage": false,
+  "basePath": "/mock-server-basepath",
+  "branch": Any<String>,
+  "buildNumber": Any<Number>,
+  "csp": Object {
+    "warnLegacyBrowsers": true,
+  },
+  "env": Object {
+    "mode": Object {
+      "dev": Any<Boolean>,
+      "name": Any<String>,
+      "prod": Any<Boolean>,
+    },
+    "packageInfo": Object {
+      "branch": Any<String>,
+      "buildNum": Any<Number>,
+      "buildSha": Any<String>,
+      "dist": Any<Boolean>,
+      "version": Any<String>,
+    },
+  },
+  "i18n": Object {
+    "translationsUrl": "/mock-server-basepath/translations/en.json",
+  },
+  "legacyMetadata": Object {
+    "uiSettings": Object {
+      "defaults": Object {
+        "registered": Object {
+          "name": "title",
+        },
+      },
+      "user": Object {},
+    },
+  },
+  "serverBasePath": "/mock-server-basepath",
+  "uiPlugins": Array [],
+  "vars": Object {},
+  "version": Any<String>,
+}
+`;
+
+exports[`RenderingService setup() render() renders "core" page driven by settings 1`] = `
+Object {
+  "anonymousStatusPage": false,
+  "basePath": "/mock-server-basepath",
+  "branch": Any<String>,
+  "buildNumber": Any<Number>,
+  "csp": Object {
+    "warnLegacyBrowsers": true,
+  },
+  "env": Object {
+    "mode": Object {
+      "dev": Any<Boolean>,
+      "name": Any<String>,
+      "prod": Any<Boolean>,
+    },
+    "packageInfo": Object {
+      "branch": Any<String>,
+      "buildNum": Any<Number>,
+      "buildSha": Any<String>,
+      "dist": Any<Boolean>,
+      "version": Any<String>,
+    },
+  },
+  "i18n": Object {
+    "translationsUrl": "/mock-server-basepath/translations/en.json",
+  },
+  "legacyMetadata": Object {
+    "uiSettings": Object {
+      "defaults": Object {
+        "registered": Object {
+          "name": "title",
+        },
+      },
+      "user": Object {
+        "theme:darkMode": Object {
+          "userValue": true,
+        },
+      },
+    },
+  },
+  "serverBasePath": "/mock-server-basepath",
+  "uiPlugins": Array [],
+  "vars": Object {},
+  "version": Any<String>,
+}
+`;
+
+exports[`RenderingService setup() render() renders "core" page for blank basepath 1`] = `
+Object {
+  "anonymousStatusPage": false,
+  "basePath": "",
+  "branch": Any<String>,
+  "buildNumber": Any<Number>,
+  "csp": Object {
+    "warnLegacyBrowsers": true,
+  },
+  "env": Object {
+    "mode": Object {
+      "dev": Any<Boolean>,
+      "name": Any<String>,
+      "prod": Any<Boolean>,
+    },
+    "packageInfo": Object {
+      "branch": Any<String>,
+      "buildNum": Any<Number>,
+      "buildSha": Any<String>,
+      "dist": Any<Boolean>,
+      "version": Any<String>,
+    },
+  },
+  "i18n": Object {
+    "translationsUrl": "/translations/en.json",
+  },
+  "legacyMetadata": Object {
+    "uiSettings": Object {
+      "defaults": Object {
+        "registered": Object {
+          "name": "title",
+        },
+      },
+      "user": Object {},
+    },
+  },
+  "serverBasePath": "/mock-server-basepath",
+  "uiPlugins": Array [],
+  "vars": Object {},
+  "version": Any<String>,
+}
+`;
+
+exports[`RenderingService setup() render() renders "core" with excluded user settings 1`] = `
+Object {
+  "anonymousStatusPage": false,
+  "basePath": "/mock-server-basepath",
+  "branch": Any<String>,
+  "buildNumber": Any<Number>,
+  "csp": Object {
+    "warnLegacyBrowsers": true,
+  },
+  "env": Object {
+    "mode": Object {
+      "dev": Any<Boolean>,
+      "name": Any<String>,
+      "prod": Any<Boolean>,
+    },
+    "packageInfo": Object {
+      "branch": Any<String>,
+      "buildNum": Any<Number>,
+      "buildSha": Any<String>,
+      "dist": Any<Boolean>,
+      "version": Any<String>,
+    },
+  },
+  "i18n": Object {
+    "translationsUrl": "/mock-server-basepath/translations/en.json",
+  },
+  "legacyMetadata": Object {
+    "uiSettings": Object {
+      "defaults": Object {
+        "registered": Object {
+          "name": "title",
+        },
+      },
+      "user": Object {},
+    },
+  },
+  "serverBasePath": "/mock-server-basepath",
+  "uiPlugins": Array [],
+  "vars": Object {},
+  "version": Any<String>,
+}
+`;

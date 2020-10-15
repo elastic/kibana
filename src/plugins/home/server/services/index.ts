@@ -33,3 +33,11 @@ export {
   TutorialContextFactory,
   ScopedTutorialContextFactory,
 } from './tutorials';
+
+export {
+  SampleDataRegistry,
+  SampleDataRegistrySetup,
+  SampleDataRegistryStart,
+} from './sample_data';
+
+export { SampleDatasetSchema, SampleDatasetProvider } from './sample_data';

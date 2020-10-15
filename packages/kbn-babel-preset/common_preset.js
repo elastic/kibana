@@ -34,23 +34,20 @@ const plugins = [
   // Nullish coalescing proposal is stage 3 (https://github.com/tc39/proposal-nullish-coalescing)
   // Need this since we are using TypeScript 3.7+
   require.resolve('@babel/plugin-proposal-nullish-coalescing-operator'),
+
+  // Proposal is on stage 4 (https://github.com/tc39/proposal-export-ns-from)
+  // Need this since we are using TypeScript 3.8+
+  require.resolve('@babel/plugin-proposal-export-namespace-from'),
+
+  // Proposal is on stage 4 (https://github.com/tc39/proposal-export-ns-from)
+  // Need this since we are using TypeScript 3.9+
+  require.resolve('@babel/plugin-proposal-private-methods'),
 ];
 
 module.exports = {
-  presets: [require.resolve('@babel/preset-typescript'), require.resolve('@babel/preset-react')],
-  plugins,
-  overrides: [
-    {
-      // Babel 7 don't support the namespace feature on typescript code.
-      // With namespaces only used for type declarations, we can securely
-      // strip them off for babel on x-pack infra/siem plugins
-      //
-      // See https://github.com/babel/babel/issues/8244#issuecomment-466548733
-      test: [
-        /x-pack[\/\\]legacy[\/\\]plugins[\/\\]infra[\/\\].*[\/\\]graphql/,
-        /x-pack[\/\\]legacy[\/\\]plugins[\/\\]siem[\/\\].*[\/\\]graphql/,
-      ],
-      plugins: [[require.resolve('babel-plugin-typescript-strip-namespaces')]],
-    },
+  presets: [
+    [require.resolve('@babel/preset-typescript'), { allowNamespaces: true }],
+    require.resolve('@babel/preset-react'),
   ],
+  plugins,
 };

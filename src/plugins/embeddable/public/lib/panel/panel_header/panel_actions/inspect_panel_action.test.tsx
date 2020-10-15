@@ -26,22 +26,17 @@ import {
   FilterableEmbeddable,
   ContactCardEmbeddable,
 } from '../../../test_samples';
-// eslint-disable-next-line
-import { inspectorPluginMock } from 'src/plugins/inspector/public/mocks';
-import {
-  EmbeddableFactory,
-  EmbeddableOutput,
-  isErrorEmbeddable,
-  ErrorEmbeddable,
-} from '../../../embeddables';
-import { GetEmbeddableFactory } from '../../../types';
+import { inspectorPluginMock } from '../../../../../../../plugins/inspector/public/mocks';
+import { EmbeddableOutput, isErrorEmbeddable, ErrorEmbeddable } from '../../../embeddables';
 import { of } from '../../../../tests/helpers';
 import { esFilters } from '../../../../../../../plugins/data/public';
+import { embeddablePluginMock } from '../../../../mocks';
+import { EmbeddableStart } from '../../../../plugin';
 
-const setup = async () => {
-  const embeddableFactories = new Map<string, EmbeddableFactory>();
-  embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
-  const getFactory: GetEmbeddableFactory = (id: string) => embeddableFactories.get(id);
+const setupTests = async () => {
+  const { setup, doStart } = embeddablePluginMock.createInstance();
+  setup.registerEmbeddableFactory(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
+  const getFactory = doStart().getEmbeddableFactory;
   const container = new FilterableContainer(
     {
       id: 'hello',
@@ -54,7 +49,7 @@ const setup = async () => {
         },
       ],
     },
-    getFactory
+    getFactory as EmbeddableStart['getEmbeddableFactory']
   );
 
   const embeddable: FilterableEmbeddable | ErrorEmbeddable = await container.addNewEmbeddable<
@@ -79,7 +74,7 @@ test('Is compatible when inspector adapters are available', async () => {
   const inspector = inspectorPluginMock.createStartContract();
   inspector.isAvailable.mockImplementation(() => true);
 
-  const { embeddable } = await setup();
+  const { embeddable } = await setupTests();
   const inspectAction = new InspectPanelAction(inspector);
 
   expect(await inspectAction.isCompatible({ embeddable })).toBe(true);
@@ -114,7 +109,7 @@ test('Executes when inspector adapters are available', async () => {
   const inspector = inspectorPluginMock.createStartContract();
   inspector.isAvailable.mockImplementation(() => true);
 
-  const { embeddable } = await setup();
+  const { embeddable } = await setupTests();
   const inspectAction = new InspectPanelAction(inspector);
 
   expect(inspector.open).toHaveBeenCalledTimes(0);

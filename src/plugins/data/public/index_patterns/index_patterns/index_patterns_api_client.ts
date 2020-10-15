@@ -17,25 +17,16 @@
  * under the License.
  */
 
-import { HttpServiceBase } from 'src/core/public';
-import { indexPatterns } from '../';
+import { HttpSetup } from 'src/core/public';
+import { IndexPatternMissingIndices } from '../../../common/index_patterns/lib';
+import { GetFieldsOptions, IIndexPatternsApiClient } from '../../../common/index_patterns/types';
 
 const API_BASE_URL: string = `/api/index_patterns/`;
 
-export interface GetFieldsOptions {
-  pattern?: string;
-  type?: string;
-  params?: any;
-  lookBack?: boolean;
-  metaFields?: string;
-}
+export class IndexPatternsApiClient implements IIndexPatternsApiClient {
+  private http: HttpSetup;
 
-export type IIndexPatternsApiClient = PublicMethodsOf<IndexPatternsApiClient>;
-
-export class IndexPatternsApiClient {
-  private http: HttpServiceBase;
-
-  constructor(http: HttpServiceBase) {
+  constructor(http: HttpSetup) {
     this.http = http;
   }
 
@@ -45,22 +36,16 @@ export class IndexPatternsApiClient {
         query,
       })
       .catch((resp: any) => {
-        if (resp.body.statusCode === 404 && resp.body.statuscode === 'no_matching_indices') {
-          throw new indexPatterns.IndexPatternMissingIndices(resp.body.message);
+        if (resp.body.statusCode === 404 && resp.body.attributes?.code === 'no_matching_indices') {
+          throw new IndexPatternMissingIndices(resp.body.message);
         }
 
         throw new Error(resp.body.message || resp.body.error || `${resp.body.statusCode} Response`);
       });
   }
 
-  _getUrl(path: string[]) {
-    return (
-      API_BASE_URL +
-      path
-        .filter(Boolean)
-        .map(encodeURIComponent)
-        .join('/')
-    );
+  private _getUrl(path: string[]) {
+    return API_BASE_URL + path.filter(Boolean).map(encodeURIComponent).join('/');
   }
 
   getFieldsForTimePattern(options: GetFieldsOptions = {}) {

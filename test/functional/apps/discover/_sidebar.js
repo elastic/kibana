@@ -27,7 +27,6 @@ export default function ({ getService, getPageObjects }) {
 
   describe('discover sidebar', function describeIndexTests() {
     before(async function () {
-
       // delete .kibana index and update configDoc
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',

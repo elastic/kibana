@@ -16,111 +16,138 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  Plugin,
-  CoreSetup,
-  PluginInitializerContext,
-  CoreStart,
-  IContextContainer,
-  PluginOpaqueId,
-} from '../../../../core/public';
 
-import { ISearchAppMountContext } from './i_search_app_mount_context';
-import { ISearchSetup } from './i_search_setup';
-import { createAppMountSearchContext } from './create_app_mount_context_search';
-import { SYNC_SEARCH_STRATEGY, syncSearchStrategyProvider } from './sync_search_strategy';
-import {
-  TSearchStrategyProvider,
-  TRegisterSearchStrategyProvider,
-  TSearchStrategiesMap,
-} from './i_search_strategy';
-import { TStrategyTypes } from './strategy_types';
-import { esSearchService } from './es_search';
-import { ISearchGeneric } from './i_search';
+import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from 'src/core/public';
+import { BehaviorSubject } from 'rxjs';
+import { ISearchSetup, ISearchStart, SearchEnhancements } from './types';
 
-/**
- * Extends the AppMountContext so other plugins have access
- * to search functionality in their applications.
- */
-declare module 'kibana/public' {
-  interface AppMountContext {
-    search?: ISearchAppMountContext;
-  }
+import { handleResponse } from './fetch';
+import {
+  IEsSearchRequest,
+  IEsSearchResponse,
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchGeneric,
+  ISearchOptions,
+  SearchSourceService,
+  SearchSourceDependencies,
+} from '../../common/search';
+import { getCallMsearch } from './legacy';
+import { AggsService, AggsStartDependencies } from './aggs';
+import { IndexPatternsContract } from '../index_patterns/index_patterns';
+import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
+import { SearchUsageCollector, createUsageCollector } from './collectors';
+import { UsageCollectionSetup } from '../../../usage_collection/public';
+import { esdsl, esRawResponse } from './expressions';
+import { ExpressionsSetup } from '../../../expressions/public';
+import { ConfigSchema } from '../../config';
+import {
+  SHARD_DELAY_AGG_NAME,
+  getShardDelayBucketAgg,
+} from '../../common/search/aggs/buckets/shard_delay';
+import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
+
+/** @internal */
+export interface SearchServiceSetupDependencies {
+  expressions: ExpressionsSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
-export interface ISearchStart {
-  search: ISearchGeneric;
+/** @internal */
+export interface SearchServiceStartDependencies {
+  fieldFormats: AggsStartDependencies['fieldFormats'];
+  indexPatterns: IndexPatternsContract;
 }
 
-/**
- * The search plugin exposes two registration methods for other plugins:
- *  -  registerSearchStrategyProvider for plugins to add their own custom
- * search strategies
- *  -  registerSearchStrategyContext for plugins to expose information
- * and/or functionality for other search strategies to use
- *
- * It also comes with two search strategy implementations - SYNC_SEARCH_STRATEGY and ES_SEARCH_STRATEGY.
- */
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
-  /**
-   * A mapping of search strategies keyed by a unique identifier.  Plugins can use this unique identifier
-   * to override certain strategy implementations.
-   */
-  private searchStrategies: TSearchStrategiesMap = {};
+  private readonly aggsService = new AggsService();
+  private readonly searchSourceService = new SearchSourceService();
+  private searchInterceptor!: ISearchInterceptor;
+  private usageCollector?: SearchUsageCollector;
 
-  /**
-   * Exposes context to the search strategies.
-   */
-  private contextContainer?: IContextContainer<TSearchStrategyProvider<any>>;
+  constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
-  private search?: ISearchGeneric;
+  public setup(
+    { http, getStartServices, notifications, uiSettings }: CoreSetup,
+    { expressions, usageCollection }: SearchServiceSetupDependencies
+  ): ISearchSetup {
+    this.usageCollector = createUsageCollector(getStartServices, usageCollection);
 
-  constructor(private initializerContext: PluginInitializerContext) {}
-
-  public setup(core: CoreSetup): ISearchSetup {
-    const search = (this.search = createAppMountSearchContext(this.searchStrategies).search);
-    core.application.registerMountContext<'search'>('search', () => {
-      return { search };
+    /**
+     * A global object that intercepts all searches and provides convenience methods for cancelling
+     * all pending search requests, as well as getting the number of pending search requests.
+     */
+    this.searchInterceptor = new SearchInterceptor({
+      toasts: notifications.toasts,
+      http,
+      uiSettings,
+      startServices: getStartServices(),
+      usageCollector: this.usageCollector!,
     });
 
-    this.contextContainer = core.context.createContextContainer();
+    expressions.registerFunction(esdsl);
+    expressions.registerType(esRawResponse);
 
-    const registerSearchStrategyProvider: TRegisterSearchStrategyProvider = <
-      T extends TStrategyTypes
-    >(
-      plugin: PluginOpaqueId,
-      name: T,
-      strategyProvider: TSearchStrategyProvider<T>
-    ) => {
-      this.searchStrategies[name] = this.contextContainer!.createHandler(plugin, strategyProvider);
-    };
+    const aggs = this.aggsService.setup({
+      registerFunction: expressions.registerFunction,
+      uiSettings,
+    });
 
-    const api = {
-      registerSearchStrategyContext: this.contextContainer!.registerContext,
-      registerSearchStrategyProvider,
-    };
-
-    api.registerSearchStrategyContext(this.initializerContext.opaqueId, 'core', () => core);
-    api.registerSearchStrategyProvider(
-      this.initializerContext.opaqueId,
-      SYNC_SEARCH_STRATEGY,
-      syncSearchStrategyProvider
-    );
-
-    // ES search capabilities are written in a way that it could easily be a separate plugin,
-    // however these two plugins are tightly coupled due to the default search strategy using
-    // es search types.
-    esSearchService(this.initializerContext).setup(core, { search: api });
-
-    return api;
-  }
-
-  public start(core: CoreStart) {
-    if (!this.search) {
-      throw new Error('Search should always be defined');
+    if (this.initializerContext.config.get().search.aggs.shardDelay.enabled) {
+      aggs.types.registerBucket(SHARD_DELAY_AGG_NAME, getShardDelayBucketAgg);
+      expressions.registerFunction(aggShardDelay);
     }
-    return { search: this.search };
+
+    return {
+      aggs,
+      usageCollector: this.usageCollector!,
+      __enhance: (enhancements: SearchEnhancements) => {
+        this.searchInterceptor = enhancements.searchInterceptor;
+      },
+    };
   }
 
-  public stop() {}
+  public start(
+    { application, http, notifications, uiSettings }: CoreStart,
+    { fieldFormats, indexPatterns }: SearchServiceStartDependencies
+  ): ISearchStart {
+    const search = ((request, options) => {
+      return this.searchInterceptor.search(request, options);
+    }) as ISearchGeneric;
+
+    const loadingCount$ = new BehaviorSubject(0);
+    http.addLoadingCountSource(loadingCount$);
+
+    const searchSourceDependencies: SearchSourceDependencies = {
+      getConfig: uiSettings.get.bind(uiSettings),
+      search: <
+        SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
+        SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
+      >(
+        request: SearchStrategyRequest,
+        options: ISearchOptions
+      ) => {
+        return search<SearchStrategyRequest, SearchStrategyResponse>(request, options).toPromise();
+      },
+      onResponse: handleResponse,
+      legacy: {
+        callMsearch: getCallMsearch({ http }),
+        loadingCount$,
+      },
+    };
+
+    return {
+      aggs: this.aggsService.start({ fieldFormats, uiSettings }),
+      search,
+      showError: (e: Error) => {
+        this.searchInterceptor.showError(e);
+      },
+      searchSource: this.searchSourceService.start(indexPatterns, searchSourceDependencies),
+    };
+  }
+
+  public stop() {
+    this.aggsService.stop();
+    this.searchSourceService.stop();
+  }
 }

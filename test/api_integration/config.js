@@ -24,20 +24,17 @@ export default async function ({ readConfigFile }) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
   return {
-    testFiles: [
-      require.resolve('./apis'),
-    ],
+    testFiles: [require.resolve('./apis')],
     services,
     servers: commonConfig.get('servers'),
     junit: {
-      reportName: 'API Integration Tests'
+      reportName: 'API Integration Tests',
     },
     esTestCluster: commonConfig.get('esTestCluster'),
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
-        '--optimize.enabled=false',
         '--elasticsearch.healthCheck.delay=3600000',
         '--server.xsrf.disableProtection=true',
         '--server.compression.referrerWhitelist=["some-host.com"]',

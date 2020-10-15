@@ -1,0 +1,8 @@
+{
+  "id": "core_plugin_appleave",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["core_plugin_appleave"],
+  "server": false,
+  "ui": true
+}

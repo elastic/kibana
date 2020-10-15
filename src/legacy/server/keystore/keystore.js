@@ -77,10 +77,7 @@ export class Keystore {
     // it easy to visually read the version as we could have easily
     // included it with the buffer
 
-    const keystore = [
-      VERSION,
-      Keystore.encrypt(text, this.password)
-    ].join(':');
+    const keystore = [VERSION, Keystore.encrypt(text, this.password)].join(':');
 
     writeFileSync(this.path, keystore);
   }

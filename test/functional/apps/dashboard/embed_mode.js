@@ -20,6 +20,7 @@
 import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
+  const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -28,10 +29,17 @@ export default function ({ getService, getPageObjects }) {
   const globalNav = getService('globalNav');
 
   describe('embed mode', () => {
+    const urlParamExtensions = [
+      'show-top-menu=true',
+      'show-query-input=true',
+      'show-time-filter=true',
+      'hide-filter-bar=true',
+    ];
+
     before(async () => {
       await esArchiver.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
-        'defaultIndex': '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
@@ -54,9 +62,28 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
+    it('shows or hides elements based on URL params', async () => {
+      await testSubjects.missingOrFail('top-nav');
+      await testSubjects.missingOrFail('queryInput');
+      await testSubjects.missingOrFail('superDatePickerToggleQuickMenuButton');
+      await testSubjects.existOrFail('showFilterActions');
+
+      const currentUrl = await browser.getCurrentUrl();
+      const newUrl = [currentUrl].concat(urlParamExtensions).join('&');
+      // Embed parameter only works on a hard refresh.
+      const useTimeStamp = true;
+      await browser.get(newUrl.toString(), useTimeStamp);
+
+      await testSubjects.existOrFail('top-nav');
+      await testSubjects.existOrFail('queryInput');
+      await testSubjects.existOrFail('superDatePickerToggleQuickMenuButton');
+      await testSubjects.missingOrFail('showFilterActions');
+    });
+
     after(async function () {
       const currentUrl = await browser.getCurrentUrl();
-      const newUrl = currentUrl.replace('&embed=true', '');
+      const replaceParams = ['', 'embed=true'].concat(urlParamExtensions).join('&');
+      const newUrl = currentUrl.replace(replaceParams, '');
       // First use the timestamp to cause a hard refresh so the new embed parameter works correctly.
       let useTimeStamp = true;
       await browser.get(newUrl.toString(), useTimeStamp);
@@ -66,4 +93,3 @@ export default function ({ getService, getPageObjects }) {
     });
   });
 }
-

@@ -19,7 +19,7 @@ export default async function ({ readConfigFile }) {
     },
 
     junit: {
-      reportName: 'Firefox XPack UI Functional Tests'
+      reportName: 'Firefox XPack UI Functional Tests',
     },
   };
 }

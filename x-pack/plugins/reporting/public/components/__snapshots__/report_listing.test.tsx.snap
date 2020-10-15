@@ -1,0 +1,677 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ReportListing Report job listing with some items 1`] = `
+Array [
+  <EuiBasicTable
+    columns={
+      Array [
+        Object {
+          "field": "object_title",
+          "name": "Report",
+          "render": [Function],
+        },
+        Object {
+          "field": "created_at",
+          "name": "Created at",
+          "render": [Function],
+        },
+        Object {
+          "field": "status",
+          "name": "Status",
+          "render": [Function],
+        },
+        Object {
+          "actions": Array [
+            Object {
+              "render": [Function],
+            },
+          ],
+          "name": "Actions",
+        },
+      ]
+    }
+    data-test-subj="reportJobListing"
+    isSelectable={true}
+    itemId="id"
+    items={Array []}
+    loading={true}
+    noItemsMessage="Loading reports"
+    onChange={[Function]}
+    pagination={
+      Object {
+        "hidePerPageOptions": true,
+        "pageIndex": 0,
+        "pageSize": 10,
+        "totalItemCount": 0,
+      }
+    }
+    responsive={true}
+    selection={
+      Object {
+        "itemId": "id",
+        "onSelectionChange": [Function],
+      }
+    }
+    tableLayout="fixed"
+  >
+    <div
+      className="euiBasicTable euiBasicTable-loading"
+      data-test-subj="reportJobListing"
+    >
+      <div>
+        <EuiTableHeaderMobile>
+          <div
+            className="euiTableHeaderMobile"
+          >
+            <EuiFlexGroup
+              alignItems="baseline"
+              justifyContent="spaceBetween"
+              responsive={false}
+            >
+              <div
+                className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+              >
+                <EuiFlexItem
+                  grow={false}
+                >
+                  <div
+                    className="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <EuiI18n
+                      default="Select all rows"
+                      token="euiBasicTable.selectAllRows"
+                    >
+                      <EuiCheckbox
+                        aria-label="Select all rows"
+                        checked={false}
+                        compressed={false}
+                        disabled={true}
+                        id="_selection_column-checkbox_generated-id"
+                        indeterminate={false}
+                        label="Select all rows"
+                        onChange={[Function]}
+                      >
+                        <div
+                          className="euiCheckbox"
+                        >
+                          <input
+                            aria-label="Select all rows"
+                            checked={false}
+                            className="euiCheckbox__input"
+                            disabled={true}
+                            id="_selection_column-checkbox_generated-id"
+                            onChange={[Function]}
+                            type="checkbox"
+                          />
+                          <div
+                            className="euiCheckbox__square"
+                          />
+                          <label
+                            className="euiCheckbox__label"
+                            htmlFor="_selection_column-checkbox_generated-id"
+                          >
+                            Select all rows
+                          </label>
+                        </div>
+                      </EuiCheckbox>
+                    </EuiI18n>
+                  </div>
+                </EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
+                >
+                  <div
+                    className="euiFlexItem euiFlexItem--flexGrowZero"
+                  />
+                </EuiFlexItem>
+              </div>
+            </EuiFlexGroup>
+          </div>
+        </EuiTableHeaderMobile>
+        <EuiTable
+          id="generated-id"
+          responsive={true}
+          tableLayout="fixed"
+        >
+          <table
+            className="euiTable euiTable--responsive"
+            id="generated-id"
+            tabIndex={-1}
+          >
+            <EuiScreenReaderOnly>
+              <caption
+                className="euiScreenReaderOnly euiTableCaption"
+              >
+                <EuiDelayRender
+                  delay={500}
+                />
+              </caption>
+            </EuiScreenReaderOnly>
+            <EuiTableHeader>
+              <thead>
+                <tr>
+                  <EuiTableHeaderCellCheckbox
+                    key="_selection_column_h"
+                  >
+                    <th
+                      className="euiTableHeaderCellCheckbox"
+                      scope="col"
+                      style={
+                        Object {
+                          "width": undefined,
+                        }
+                      }
+                    >
+                      <div
+                        className="euiTableCellContent"
+                      >
+                        <EuiI18n
+                          default="Select all rows"
+                          token="euiBasicTable.selectAllRows"
+                        >
+                          <EuiCheckbox
+                            aria-label="Select all rows"
+                            checked={false}
+                            compressed={false}
+                            data-test-subj="checkboxSelectAll"
+                            disabled={true}
+                            id="_selection_column-checkbox_generated-id"
+                            indeterminate={false}
+                            label={null}
+                            onChange={[Function]}
+                            type="inList"
+                          >
+                            <div
+                              className="euiCheckbox euiCheckbox--inList euiCheckbox--noLabel"
+                            >
+                              <input
+                                aria-label="Select all rows"
+                                checked={false}
+                                className="euiCheckbox__input"
+                                data-test-subj="checkboxSelectAll"
+                                disabled={true}
+                                id="_selection_column-checkbox_generated-id"
+                                onChange={[Function]}
+                                type="checkbox"
+                              />
+                              <div
+                                className="euiCheckbox__square"
+                              />
+                            </div>
+                          </EuiCheckbox>
+                        </EuiI18n>
+                      </div>
+                    </th>
+                  </EuiTableHeaderCellCheckbox>
+                  <EuiTableHeaderCell
+                    align="left"
+                    data-test-subj="tableHeaderCell_object_title_0"
+                    key="_data_h_object_title_0"
+                  >
+                    <th
+                      className="euiTableHeaderCell"
+                      data-test-subj="tableHeaderCell_object_title_0"
+                      role="columnheader"
+                      scope="col"
+                      style={
+                        Object {
+                          "width": undefined,
+                        }
+                      }
+                    >
+                      <div
+                        className="euiTableCellContent"
+                      >
+                        <EuiInnerText>
+                          <span
+                            className="euiTableCellContent__text"
+                            title="Report"
+                          >
+                            Report
+                          </span>
+                        </EuiInnerText>
+                      </div>
+                    </th>
+                  </EuiTableHeaderCell>
+                  <EuiTableHeaderCell
+                    align="left"
+                    data-test-subj="tableHeaderCell_created_at_1"
+                    key="_data_h_created_at_1"
+                  >
+                    <th
+                      className="euiTableHeaderCell"
+                      data-test-subj="tableHeaderCell_created_at_1"
+                      role="columnheader"
+                      scope="col"
+                      style={
+                        Object {
+                          "width": undefined,
+                        }
+                      }
+                    >
+                      <div
+                        className="euiTableCellContent"
+                      >
+                        <EuiInnerText>
+                          <span
+                            className="euiTableCellContent__text"
+                            title="Created at"
+                          >
+                            Created at
+                          </span>
+                        </EuiInnerText>
+                      </div>
+                    </th>
+                  </EuiTableHeaderCell>
+                  <EuiTableHeaderCell
+                    align="left"
+                    data-test-subj="tableHeaderCell_status_2"
+                    key="_data_h_status_2"
+                  >
+                    <th
+                      className="euiTableHeaderCell"
+                      data-test-subj="tableHeaderCell_status_2"
+                      role="columnheader"
+                      scope="col"
+                      style={
+                        Object {
+                          "width": undefined,
+                        }
+                      }
+                    >
+                      <div
+                        className="euiTableCellContent"
+                      >
+                        <EuiInnerText>
+                          <span
+                            className="euiTableCellContent__text"
+                            title="Status"
+                          >
+                            Status
+                          </span>
+                        </EuiInnerText>
+                      </div>
+                    </th>
+                  </EuiTableHeaderCell>
+                  <EuiTableHeaderCell
+                    align="right"
+                    key="_actions_h_3"
+                  >
+                    <th
+                      className="euiTableHeaderCell"
+                      role="columnheader"
+                      scope="col"
+                      style={
+                        Object {
+                          "width": undefined,
+                        }
+                      }
+                    >
+                      <div
+                        className="euiTableCellContent euiTableCellContent--alignRight"
+                      >
+                        <EuiInnerText>
+                          <span
+                            className="euiTableCellContent__text"
+                            title="Actions"
+                          >
+                            Actions
+                          </span>
+                        </EuiInnerText>
+                      </div>
+                    </th>
+                  </EuiTableHeaderCell>
+                </tr>
+              </thead>
+            </EuiTableHeader>
+            <EuiTableBody>
+              <tbody>
+                <EuiTableRow>
+                  <tr
+                    className="euiTableRow"
+                  >
+                    <EuiTableRowCell
+                      align="center"
+                      colSpan={5}
+                      isMobileFullWidth={true}
+                    >
+                      <td
+                        className="euiTableRowCell euiTableRowCell--isMobileFullWidth"
+                        colSpan={5}
+                        style={
+                          Object {
+                            "width": undefined,
+                          }
+                        }
+                      >
+                        <div
+                          className="euiTableCellContent euiTableCellContent--alignCenter"
+                        >
+                          <span
+                            className="euiTableCellContent__text"
+                          >
+                            Loading reports
+                          </span>
+                        </div>
+                      </td>
+                    </EuiTableRowCell>
+                  </tr>
+                </EuiTableRow>
+              </tbody>
+            </EuiTableBody>
+          </table>
+        </EuiTable>
+      </div>
+    </div>
+  </EuiBasicTable>,
+  <div
+    className="euiBasicTable euiBasicTable-loading"
+    data-test-subj="reportJobListing"
+  >
+    <div>
+      <EuiTableHeaderMobile>
+        <div
+          className="euiTableHeaderMobile"
+        >
+          <EuiFlexGroup
+            alignItems="baseline"
+            justifyContent="spaceBetween"
+            responsive={false}
+          >
+            <div
+              className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+            >
+              <EuiFlexItem
+                grow={false}
+              >
+                <div
+                  className="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <EuiI18n
+                    default="Select all rows"
+                    token="euiBasicTable.selectAllRows"
+                  >
+                    <EuiCheckbox
+                      aria-label="Select all rows"
+                      checked={false}
+                      compressed={false}
+                      disabled={true}
+                      id="_selection_column-checkbox_generated-id"
+                      indeterminate={false}
+                      label="Select all rows"
+                      onChange={[Function]}
+                    >
+                      <div
+                        className="euiCheckbox"
+                      >
+                        <input
+                          aria-label="Select all rows"
+                          checked={false}
+                          className="euiCheckbox__input"
+                          disabled={true}
+                          id="_selection_column-checkbox_generated-id"
+                          onChange={[Function]}
+                          type="checkbox"
+                        />
+                        <div
+                          className="euiCheckbox__square"
+                        />
+                        <label
+                          className="euiCheckbox__label"
+                          htmlFor="_selection_column-checkbox_generated-id"
+                        >
+                          Select all rows
+                        </label>
+                      </div>
+                    </EuiCheckbox>
+                  </EuiI18n>
+                </div>
+              </EuiFlexItem>
+              <EuiFlexItem
+                grow={false}
+              >
+                <div
+                  className="euiFlexItem euiFlexItem--flexGrowZero"
+                />
+              </EuiFlexItem>
+            </div>
+          </EuiFlexGroup>
+        </div>
+      </EuiTableHeaderMobile>
+      <EuiTable
+        id="generated-id"
+        responsive={true}
+        tableLayout="fixed"
+      >
+        <table
+          className="euiTable euiTable--responsive"
+          id="generated-id"
+          tabIndex={-1}
+        >
+          <EuiScreenReaderOnly>
+            <caption
+              className="euiScreenReaderOnly euiTableCaption"
+            >
+              <EuiDelayRender
+                delay={500}
+              />
+            </caption>
+          </EuiScreenReaderOnly>
+          <EuiTableHeader>
+            <thead>
+              <tr>
+                <EuiTableHeaderCellCheckbox
+                  key="_selection_column_h"
+                >
+                  <th
+                    className="euiTableHeaderCellCheckbox"
+                    scope="col"
+                    style={
+                      Object {
+                        "width": undefined,
+                      }
+                    }
+                  >
+                    <div
+                      className="euiTableCellContent"
+                    >
+                      <EuiI18n
+                        default="Select all rows"
+                        token="euiBasicTable.selectAllRows"
+                      >
+                        <EuiCheckbox
+                          aria-label="Select all rows"
+                          checked={false}
+                          compressed={false}
+                          data-test-subj="checkboxSelectAll"
+                          disabled={true}
+                          id="_selection_column-checkbox_generated-id"
+                          indeterminate={false}
+                          label={null}
+                          onChange={[Function]}
+                          type="inList"
+                        >
+                          <div
+                            className="euiCheckbox euiCheckbox--inList euiCheckbox--noLabel"
+                          >
+                            <input
+                              aria-label="Select all rows"
+                              checked={false}
+                              className="euiCheckbox__input"
+                              data-test-subj="checkboxSelectAll"
+                              disabled={true}
+                              id="_selection_column-checkbox_generated-id"
+                              onChange={[Function]}
+                              type="checkbox"
+                            />
+                            <div
+                              className="euiCheckbox__square"
+                            />
+                          </div>
+                        </EuiCheckbox>
+                      </EuiI18n>
+                    </div>
+                  </th>
+                </EuiTableHeaderCellCheckbox>
+                <EuiTableHeaderCell
+                  align="left"
+                  data-test-subj="tableHeaderCell_object_title_0"
+                  key="_data_h_object_title_0"
+                >
+                  <th
+                    className="euiTableHeaderCell"
+                    data-test-subj="tableHeaderCell_object_title_0"
+                    role="columnheader"
+                    scope="col"
+                    style={
+                      Object {
+                        "width": undefined,
+                      }
+                    }
+                  >
+                    <div
+                      className="euiTableCellContent"
+                    >
+                      <EuiInnerText>
+                        <span
+                          className="euiTableCellContent__text"
+                          title="Report"
+                        >
+                          Report
+                        </span>
+                      </EuiInnerText>
+                    </div>
+                  </th>
+                </EuiTableHeaderCell>
+                <EuiTableHeaderCell
+                  align="left"
+                  data-test-subj="tableHeaderCell_created_at_1"
+                  key="_data_h_created_at_1"
+                >
+                  <th
+                    className="euiTableHeaderCell"
+                    data-test-subj="tableHeaderCell_created_at_1"
+                    role="columnheader"
+                    scope="col"
+                    style={
+                      Object {
+                        "width": undefined,
+                      }
+                    }
+                  >
+                    <div
+                      className="euiTableCellContent"
+                    >
+                      <EuiInnerText>
+                        <span
+                          className="euiTableCellContent__text"
+                          title="Created at"
+                        >
+                          Created at
+                        </span>
+                      </EuiInnerText>
+                    </div>
+                  </th>
+                </EuiTableHeaderCell>
+                <EuiTableHeaderCell
+                  align="left"
+                  data-test-subj="tableHeaderCell_status_2"
+                  key="_data_h_status_2"
+                >
+                  <th
+                    className="euiTableHeaderCell"
+                    data-test-subj="tableHeaderCell_status_2"
+                    role="columnheader"
+                    scope="col"
+                    style={
+                      Object {
+                        "width": undefined,
+                      }
+                    }
+                  >
+                    <div
+                      className="euiTableCellContent"
+                    >
+                      <EuiInnerText>
+                        <span
+                          className="euiTableCellContent__text"
+                          title="Status"
+                        >
+                          Status
+                        </span>
+                      </EuiInnerText>
+                    </div>
+                  </th>
+                </EuiTableHeaderCell>
+                <EuiTableHeaderCell
+                  align="right"
+                  key="_actions_h_3"
+                >
+                  <th
+                    className="euiTableHeaderCell"
+                    role="columnheader"
+                    scope="col"
+                    style={
+                      Object {
+                        "width": undefined,
+                      }
+                    }
+                  >
+                    <div
+                      className="euiTableCellContent euiTableCellContent--alignRight"
+                    >
+                      <EuiInnerText>
+                        <span
+                          className="euiTableCellContent__text"
+                          title="Actions"
+                        >
+                          Actions
+                        </span>
+                      </EuiInnerText>
+                    </div>
+                  </th>
+                </EuiTableHeaderCell>
+              </tr>
+            </thead>
+          </EuiTableHeader>
+          <EuiTableBody>
+            <tbody>
+              <EuiTableRow>
+                <tr
+                  className="euiTableRow"
+                >
+                  <EuiTableRowCell
+                    align="center"
+                    colSpan={5}
+                    isMobileFullWidth={true}
+                  >
+                    <td
+                      className="euiTableRowCell euiTableRowCell--isMobileFullWidth"
+                      colSpan={5}
+                      style={
+                        Object {
+                          "width": undefined,
+                        }
+                      }
+                    >
+                      <div
+                        className="euiTableCellContent euiTableCellContent--alignCenter"
+                      >
+                        <span
+                          className="euiTableCellContent__text"
+                        >
+                          Loading reports
+                        </span>
+                      </div>
+                    </td>
+                  </EuiTableRowCell>
+                </tr>
+              </EuiTableRow>
+            </tbody>
+          </EuiTableBody>
+        </table>
+      </EuiTable>
+    </div>
+  </div>,
+]
+`;

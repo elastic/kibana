@@ -71,7 +71,7 @@ class PhraseValueInputUI extends PhraseSuggestorUI<Props> {
           defaultMessage: 'Select a value',
         })}
         options={options}
-        getLabel={option => option}
+        getLabel={(option) => option}
         selectedOptions={value ? [valueAsStr] : []}
         onChange={([newValue = '']) => onChange(newValue)}
         onSearchChange={this.onSearchChange}

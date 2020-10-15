@@ -1,13 +1,13 @@
 # Consuming state in non-React setting
 
-To read the current `state` of the store use `.get()` method.
+To read the current `state` of the store use `.get()` method or `getState()` alias method.
 
 ```ts
-store.get();
+stateContainer.get();
 ```
 
 To listen for latest state changes use `.state$` observable.
 
 ```ts
-store.state$.subscribe(state => { ... });
+stateContainer.state$.subscribe(state => { ... });
 ```

@@ -4,14 +4,12 @@
 <titleabbrev>Get all spaces</titleabbrev>
 ++++
 
-Retrieve all {kib} spaces.
-
-experimental["The underlying Spaces concepts are stable, but the APIs for managing Spaces are experimental."]
+experimental[] Retrieve all {kib} spaces.
 
 [[spaces-api-get-all-request]]
 ==== Request
 
-`GET /api/spaces/space`
+`GET <kibana host>:<port>/api/spaces/space`
 
 [[spaces-api-get-all-response-codes]]
 ==== Response code
@@ -24,7 +22,7 @@ experimental["The underlying Spaces concepts are stable, but the APIs for managi
 
 The API returns the following:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 [
   {
@@ -42,7 +40,7 @@ The API returns the following:
     "color": "#aabbcc",
     "disabledFeatures": ["apm"],
     "initials": "MK",
-    "imageUrl": "data:image/png;base64,iVBORw0KGgoAAAANSU",
+    "imageUrl": "data:image/png;base64,iVBORw0KGgoAAAANSU"
   },
   {
     "id": "sales",
@@ -50,6 +48,6 @@ The API returns the following:
     "initials": "MK",
     "disabledFeatures": ["discover", "timelion"],
     "imageUrl": ""
-  },
+  }
 ]
 --------------------------------------------------

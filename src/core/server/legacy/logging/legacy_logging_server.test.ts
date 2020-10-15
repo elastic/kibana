@@ -20,7 +20,7 @@
 jest.mock('../../../../legacy/server/config');
 jest.mock('../../../../legacy/server/logging');
 
-import { LogLevel } from '../../logging/log_level';
+import { LogLevel } from '../../logging';
 import { LegacyLoggingServer } from './legacy_logging_server';
 
 test('correctly forwards log records.', () => {
@@ -31,6 +31,7 @@ test('correctly forwards log records.', () => {
   const timestamp = 1554433221100;
   const firstLogRecord = {
     timestamp: new Date(timestamp),
+    pid: 5355,
     level: LogLevel.Info,
     context: 'some-context',
     message: 'some-message',
@@ -38,6 +39,7 @@ test('correctly forwards log records.', () => {
 
   const secondLogRecord = {
     timestamp: new Date(timestamp),
+    pid: 5355,
     level: LogLevel.Error,
     context: 'some-context.sub-context',
     message: 'some-message',
@@ -47,6 +49,7 @@ test('correctly forwards log records.', () => {
 
   const thirdLogRecord = {
     timestamp: new Date(timestamp),
+    pid: 5355,
     level: LogLevel.Trace,
     context: 'some-context.sub-context',
     message: 'some-message',

@@ -29,32 +29,25 @@ export default function (grunt) {
 
     const env = Object.assign(process.env, {
       KIBANA_DOCS_CONTAINER_NAME: 'kibana_docs',
-      KIBANA_DOCS_CONTEXT: rootPath
+      KIBANA_DOCS_CONTEXT: rootPath,
     });
     const stdio = [0, 1, 2];
     const execOptions = { env, stdio };
 
-    exec('docker-compose', [
-      '-f', composePath,
-      'up'
-    ], execOptions);
+    exec('docker-compose', ['-f', composePath, 'up'], execOptions);
 
-    const containerId = String(exec('docker-compose', [
-      '-f', composePath,
-      'ps',
-      '-q', env.KIBANA_DOCS_CONTAINER_NAME
-    ], { env })).trim();
+    const containerId = String(
+      exec('docker-compose', ['-f', composePath, 'ps', '-q', env.KIBANA_DOCS_CONTAINER_NAME], {
+        env,
+      })
+    ).trim();
 
     grunt.log.write('Clearing old docs ... ');
     del.sync(htmlDocsDir);
     grunt.log.writeln('done');
 
     grunt.log.write('Copying new docs ... ');
-    exec('docker', [
-      'cp',
-      `${containerId}:/home/kibana/html_docs`,
-      htmlDocsDir
-    ]);
+    exec('docker', ['cp', `${containerId}:/home/kibana/html_docs`, htmlDocsDir]);
     grunt.log.writeln('done');
   });
 }

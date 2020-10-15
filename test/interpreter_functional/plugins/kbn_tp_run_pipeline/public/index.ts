@@ -17,4 +17,12 @@
  * under the License.
  */
 
-export * from './np_ready';
+import { PluginInitializer, PluginInitializerContext } from 'src/core/public';
+import { Plugin, StartDeps } from './plugin';
+export { StartDeps };
+
+export const plugin: PluginInitializer<void, void, {}, StartDeps> = (
+  initializerContext: PluginInitializerContext
+) => {
+  return new Plugin(initializerContext);
+};

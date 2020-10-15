@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { merge } from 'lodash';
+import { mergeWith } from 'lodash';
 import { Capabilities } from './types';
 
 export const mergeCapabilities = (...sources: Array<Partial<Capabilities>>): Capabilities =>
-  merge({}, ...sources, (a: any, b: any) => {
+  mergeWith({}, ...sources, (a: any, b: any) => {
     if (
       (typeof a === 'boolean' && typeof b === 'object') ||
       (typeof a === 'object' && typeof b === 'boolean')

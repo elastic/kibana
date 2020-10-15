@@ -59,9 +59,15 @@ export default function ({ getService, getPageObjects }) {
         await pipelineEditor.setQueueCheckpointWrites(queueCheckpointWrites);
 
         await pipelineEditor.assertInputs({
-          id, description, pipeline,
-          workers, batchSize,
-          queueType, queueMaxBytesNumber, queueMaxBytesUnits, queueCheckpointWrites
+          id,
+          description,
+          pipeline,
+          workers,
+          batchSize,
+          queueType,
+          queueMaxBytesNumber,
+          queueMaxBytesUnits,
+          queueCheckpointWrites,
         });
 
         await pipelineEditor.clickSave();
@@ -70,10 +76,9 @@ export default function ({ getService, getPageObjects }) {
 
         await retry.try(async () => {
           const rows = await pipelineList.readRows();
-          const newRow = rows.find(row => row.id === id);
+          const newRow = rows.find((row) => row.id === id);
 
-          expect(newRow)
-            .to.have.property('description', description);
+          expect(newRow).to.have.property('description', description);
         });
       });
     });

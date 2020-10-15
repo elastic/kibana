@@ -47,7 +47,7 @@ export interface TestSuite {
     /* number of skipped tests as a string */
     skipped: string;
   };
-  testcase: TestCase[];
+  testcase?: TestCase[];
 }
 
 export interface TestCase {
@@ -70,7 +70,7 @@ export interface TestCase {
 }
 
 export interface FailedTestCase extends TestCase {
-  failure: Array<string | { _: string }>;
+  failure: Array<string | { $: { message?: string }; _: string }>;
 }
 
 /**
@@ -89,7 +89,7 @@ export function* makeTestCaseIter(report: TestReport) {
   const testSuites = 'testsuites' in report ? report.testsuites.testsuite : [report.testsuite];
 
   for (const testSuite of testSuites) {
-    for (const testCase of testSuite.testcase) {
+    for (const testCase of testSuite.testcase || []) {
       yield testCase;
     }
   }

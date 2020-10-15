@@ -17,12 +17,21 @@
  * under the License.
  */
 
-import { config, HttpConfig } from '.';
-import { Env } from '../config';
-import { getEnvOptions } from '../config/__mocks__/env';
+import uuid from 'uuid';
+import { config, HttpConfig } from './http_config';
+import { CspConfig } from '../csp';
 
 const validHostnames = ['www.example.com', '8.8.8.8', '::1', 'localhost'];
 const invalidHostname = 'asdf$%^';
+
+jest.mock('os', () => {
+  const original = jest.requireActual('os');
+
+  return {
+    ...original,
+    hostname: () => 'kibana-hostname',
+  };
+});
 
 test('has defaults for config', () => {
   const httpSchema = config.schema;
@@ -43,6 +52,63 @@ test('throws if invalid hostname', () => {
     host: invalidHostname,
   };
   expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
+});
+
+describe('requestId', () => {
+  test('accepts valid ip addresses', () => {
+    const {
+      requestId: { ipAllowlist },
+    } = config.schema.validate({
+      requestId: {
+        allowFromAnyIp: false,
+        ipAllowlist: ['0.0.0.0', '123.123.123.123', '1200:0000:AB00:1234:0000:2552:7777:1313'],
+      },
+    });
+    expect(ipAllowlist).toMatchInlineSnapshot(`
+      Array [
+        "0.0.0.0",
+        "123.123.123.123",
+        "1200:0000:AB00:1234:0000:2552:7777:1313",
+      ]
+    `);
+  });
+
+  test('rejects invalid ip addresses', () => {
+    expect(() => {
+      config.schema.validate({
+        requestId: {
+          allowFromAnyIp: false,
+          ipAllowlist: ['1200:0000:AB00:1234:O000:2552:7777:1313', '[2001:db8:0:1]:80'],
+        },
+      });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"[requestId.ipAllowlist.0]: value must be a valid ipv4 or ipv6 address"`
+    );
+  });
+
+  test('rejects if allowFromAnyIp is `true` and `ipAllowlist` is non-empty', () => {
+    expect(() => {
+      config.schema.validate({
+        requestId: {
+          allowFromAnyIp: true,
+          ipAllowlist: ['0.0.0.0', '123.123.123.123', '1200:0000:AB00:1234:0000:2552:7777:1313'],
+        },
+      });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"[requestId]: allowFromAnyIp must be set to 'false' if any values are specified in ipAllowlist"`
+    );
+
+    expect(() => {
+      config.schema.validate({
+        requestId: {
+          allowFromAnyIp: true,
+          ipAllowlist: ['0.0.0.0', '123.123.123.123', '1200:0000:AB00:1234:0000:2552:7777:1313'],
+        },
+      });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"[requestId]: allowFromAnyIp must be set to 'false' if any values are specified in ipAllowlist"`
+    );
+  });
 });
 
 test('can specify max payload as string', () => {
@@ -69,6 +135,14 @@ test('throws if basepath appends a slash', () => {
   expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
 });
 
+test('throws if basepath is an empty string', () => {
+  const httpSchema = config.schema;
+  const obj = {
+    basePath: '',
+  };
+  expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
+});
+
 test('throws if basepath is not specified, but rewriteBasePath is set', () => {
   const httpSchema = config.schema;
   const obj = {
@@ -77,29 +151,50 @@ test('throws if basepath is not specified, but rewriteBasePath is set', () => {
   expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
 });
 
+test('accepts only valid uuids for server.uuid', () => {
+  const httpSchema = config.schema;
+  expect(() => httpSchema.validate({ uuid: uuid.v4() })).not.toThrow();
+  expect(() => httpSchema.validate({ uuid: 'not an uuid' })).toThrowErrorMatchingInlineSnapshot(
+    `"[uuid]: must be a valid uuid"`
+  );
+});
+
+test('uses os.hostname() as default for server.name', () => {
+  const httpSchema = config.schema;
+  const validated = httpSchema.validate({});
+  expect(validated.name).toEqual('kibana-hostname');
+});
+
+test('throws if xsrf.whitelist element does not start with a slash', () => {
+  const httpSchema = config.schema;
+  const obj = {
+    xsrf: {
+      whitelist: ['/valid-path', 'invalid-path'],
+    },
+  };
+  expect(() => httpSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
+    `"[xsrf.whitelist.1]: must start with a slash"`
+  );
+});
+
+test('accepts any type of objects for custom headers', () => {
+  const httpSchema = config.schema;
+  const obj = {
+    customResponseHeaders: {
+      string: 'string',
+      bool: true,
+      number: 12,
+      array: [1, 2, 3],
+      nested: {
+        foo: 1,
+        bar: 'dolly',
+      },
+    },
+  };
+  expect(() => httpSchema.validate(obj)).not.toThrow();
+});
+
 describe('with TLS', () => {
-  test('throws if TLS is enabled but `key` is not specified', () => {
-    const httpSchema = config.schema;
-    const obj = {
-      ssl: {
-        certificate: '/path/to/certificate',
-        enabled: true,
-      },
-    };
-    expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
-  });
-
-  test('throws if TLS is enabled but `certificate` is not specified', () => {
-    const httpSchema = config.schema;
-    const obj = {
-      ssl: {
-        enabled: true,
-        key: '/path/to/key',
-      },
-    };
-    expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
-  });
-
   test('throws if TLS is enabled but `redirectHttpFromPort` is equal to `port`', () => {
     const httpSchema = config.schema;
     const obj = {
@@ -113,189 +208,16 @@ describe('with TLS', () => {
     };
     expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
   });
+});
 
-  test('throws if TLS is not enabled but `clientAuthentication` is `optional`', () => {
-    const httpSchema = config.schema;
-    const obj = {
-      port: 1234,
-      ssl: {
-        enabled: false,
-        clientAuthentication: 'optional',
-      },
-    };
-    expect(() => httpSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
-      `"[ssl]: must enable ssl to use [clientAuthentication]"`
-    );
-  });
-
-  test('throws if TLS is not enabled but `clientAuthentication` is `required`', () => {
-    const httpSchema = config.schema;
-    const obj = {
-      port: 1234,
-      ssl: {
-        enabled: false,
-        clientAuthentication: 'required',
-      },
-    };
-    expect(() => httpSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
-      `"[ssl]: must enable ssl to use [clientAuthentication]"`
-    );
-  });
-
-  test('can specify `none` for [clientAuthentication] if ssl is not enabled', () => {
-    const obj = {
-      ssl: {
-        enabled: false,
-        clientAuthentication: 'none',
-      },
-    };
-
-    const configValue = config.schema.validate(obj);
-    expect(configValue.ssl.clientAuthentication).toBe('none');
-  });
-
-  test('can specify single `certificateAuthority` as a string', () => {
-    const obj = {
-      ssl: {
-        certificate: '/path/to/certificate',
-        certificateAuthorities: '/authority/',
-        enabled: true,
-        key: '/path/to/key',
-      },
-    };
-
-    const configValue = config.schema.validate(obj);
-    expect(configValue.ssl.certificateAuthorities).toBe('/authority/');
-  });
-
-  test('can specify socket timeouts', () => {
-    const obj = {
-      keepaliveTimeout: 1e5,
-      socketTimeout: 5e5,
-    };
-    const { keepaliveTimeout, socketTimeout } = config.schema.validate(obj);
-    expect(keepaliveTimeout).toBe(1e5);
-    expect(socketTimeout).toBe(5e5);
-  });
-
-  test('can specify several `certificateAuthorities`', () => {
-    const obj = {
-      ssl: {
-        certificate: '/path/to/certificate',
-        certificateAuthorities: ['/authority/1', '/authority/2'],
-        enabled: true,
-        key: '/path/to/key',
-      },
-    };
-
-    const configValue = config.schema.validate(obj);
-    expect(configValue.ssl.certificateAuthorities).toEqual(['/authority/1', '/authority/2']);
-  });
-
-  test('accepts known protocols`', () => {
-    const httpSchema = config.schema;
-    const singleKnownProtocol = {
-      ssl: {
-        certificate: '/path/to/certificate',
-        enabled: true,
-        key: '/path/to/key',
-        supportedProtocols: ['TLSv1'],
-      },
-    };
-
-    const allKnownProtocols = {
-      ssl: {
-        certificate: '/path/to/certificate',
-        enabled: true,
-        key: '/path/to/key',
-        supportedProtocols: ['TLSv1', 'TLSv1.1', 'TLSv1.2'],
-      },
-    };
-
-    const singleKnownProtocolConfig = httpSchema.validate(singleKnownProtocol);
-    expect(singleKnownProtocolConfig.ssl.supportedProtocols).toEqual(['TLSv1']);
-
-    const allKnownProtocolsConfig = httpSchema.validate(allKnownProtocols);
-    expect(allKnownProtocolsConfig.ssl.supportedProtocols).toEqual(['TLSv1', 'TLSv1.1', 'TLSv1.2']);
-  });
-
-  test('should accept known protocols`', () => {
-    const httpSchema = config.schema;
-
-    const singleUnknownProtocol = {
-      ssl: {
-        certificate: '/path/to/certificate',
-        enabled: true,
-        key: '/path/to/key',
-        supportedProtocols: ['SOMEv100500'],
-      },
-    };
-
-    const allKnownWithOneUnknownProtocols = {
-      ssl: {
-        certificate: '/path/to/certificate',
-        enabled: true,
-        key: '/path/to/key',
-        supportedProtocols: ['TLSv1', 'TLSv1.1', 'TLSv1.2', 'SOMEv100500'],
-      },
-    };
-
-    expect(() => httpSchema.validate(singleUnknownProtocol)).toThrowErrorMatchingSnapshot();
-    expect(() =>
-      httpSchema.validate(allKnownWithOneUnknownProtocols)
-    ).toThrowErrorMatchingSnapshot();
-  });
-
-  test('HttpConfig instance should properly interpret `none` client authentication', () => {
-    const httpConfig = new HttpConfig(
-      config.schema.validate({
-        ssl: {
-          enabled: true,
-          key: 'some-key-path',
-          certificate: 'some-certificate-path',
-          clientAuthentication: 'none',
-        },
-      }),
-      Env.createDefault(getEnvOptions())
-    );
-
-    expect(httpConfig.ssl.requestCert).toBe(false);
-    expect(httpConfig.ssl.rejectUnauthorized).toBe(false);
-  });
-
-  test('HttpConfig instance should properly interpret `optional` client authentication', () => {
-    const httpConfig = new HttpConfig(
-      config.schema.validate({
-        ssl: {
-          enabled: true,
-          key: 'some-key-path',
-          certificate: 'some-certificate-path',
-          clientAuthentication: 'optional',
-        },
-      }),
-      Env.createDefault(getEnvOptions())
-    );
-
-    expect(httpConfig.ssl.requestCert).toBe(true);
-    expect(httpConfig.ssl.rejectUnauthorized).toBe(false);
-  });
-
-  test('HttpConfig instance should properly interpret `required` client authentication', () => {
-    const httpConfig = new HttpConfig(
-      config.schema.validate({
-        ssl: {
-          enabled: true,
-          key: 'some-key-path',
-          certificate: 'some-certificate-path',
-          clientAuthentication: 'required',
-        },
-      }),
-      Env.createDefault(getEnvOptions())
-    );
-
-    expect(httpConfig.ssl.requestCert).toBe(true);
-    expect(httpConfig.ssl.rejectUnauthorized).toBe(true);
-  });
+test('can specify socket timeouts', () => {
+  const obj = {
+    keepaliveTimeout: 1e5,
+    socketTimeout: 5e5,
+  };
+  const { keepaliveTimeout, socketTimeout } = config.schema.validate(obj);
+  expect(keepaliveTimeout).toBe(1e5);
+  expect(socketTimeout).toBe(5e5);
 });
 
 describe('with compression', () => {
@@ -336,5 +258,32 @@ describe('with compression', () => {
       },
     };
     expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
+  });
+});
+
+describe('HttpConfig', () => {
+  it('converts customResponseHeaders to strings or arrays of strings', () => {
+    const httpSchema = config.schema;
+    const rawConfig = httpSchema.validate({
+      customResponseHeaders: {
+        string: 'string',
+        bool: true,
+        number: 12,
+        array: [1, 2, 3],
+        nested: {
+          foo: 1,
+          bar: 'dolly',
+        },
+      },
+    });
+    const httpConfig = new HttpConfig(rawConfig, CspConfig.DEFAULT);
+
+    expect(httpConfig.customResponseHeaders).toEqual({
+      string: 'string',
+      bool: 'true',
+      number: '12',
+      array: ['1', '2', '3'],
+      nested: '{"foo":1,"bar":"dolly"}',
+    });
   });
 });

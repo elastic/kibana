@@ -1,0 +1,124 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Should not render icon map select when isCustomOnly 1`] = `
+<Fragment>
+  <IconStops
+    field={
+      MockField {
+        "_fieldName": "myField",
+        "_origin": "source",
+      }
+    }
+    getValueSuggestions={[Function]}
+    iconStops={
+      Array [
+        Object {
+          "icon": "circle",
+          "stop": null,
+        },
+        Object {
+          "icon": undefined,
+          "stop": "",
+        },
+      ]
+    }
+    onChange={[Function]}
+  />
+</Fragment>
+`;
+
+exports[`Should render custom stops input when useCustomIconMap 1`] = `
+<Fragment>
+  <EuiSuperSelect
+    compressed={true}
+    fullWidth={false}
+    hasDividers={true}
+    isInvalid={false}
+    isLoading={false}
+    onChange={[Function]}
+    options={
+      Array [
+        Object {
+          "inputDisplay": "Custom icon palette",
+          "value": "CUSTOM_MAP_ID",
+        },
+        Object {
+          "inputDisplay": <div>
+            mock filledShapes option
+          </div>,
+          "value": "filledShapes",
+        },
+        Object {
+          "inputDisplay": <div>
+            mock hollowShapes option
+          </div>,
+          "value": "hollowShapes",
+        },
+      ]
+    }
+    valueOfSelected="CUSTOM_MAP_ID"
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <IconStops
+    field={
+      MockField {
+        "_fieldName": "myField",
+        "_origin": "source",
+      }
+    }
+    getValueSuggestions={[Function]}
+    iconStops={
+      Array [
+        Object {
+          "icon": "circle",
+          "stop": null,
+        },
+        Object {
+          "icon": "marker",
+          "stop": "value1",
+        },
+      ]
+    }
+    onChange={[Function]}
+  />
+</Fragment>
+`;
+
+exports[`Should render default props 1`] = `
+<Fragment>
+  <EuiSuperSelect
+    compressed={true}
+    fullWidth={false}
+    hasDividers={true}
+    isInvalid={false}
+    isLoading={false}
+    onChange={[Function]}
+    options={
+      Array [
+        Object {
+          "inputDisplay": "Custom icon palette",
+          "value": "CUSTOM_MAP_ID",
+        },
+        Object {
+          "inputDisplay": <div>
+            mock filledShapes option
+          </div>,
+          "value": "filledShapes",
+        },
+        Object {
+          "inputDisplay": <div>
+            mock hollowShapes option
+          </div>,
+          "value": "hollowShapes",
+        },
+      ]
+    }
+    valueOfSelected="filledShapes"
+  />
+  <EuiSpacer
+    size="s"
+  />
+</Fragment>
+`;

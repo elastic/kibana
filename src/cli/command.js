@@ -17,18 +17,19 @@
  * under the License.
  */
 
+import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
+import Chalk from 'chalk';
 
 import help from './help';
 import { Command } from 'commander';
-import { red } from './color';
 
 Command.prototype.error = function (err) {
   if (err && err.message) err = err.message;
 
   console.log(
     `
-${red(' ERROR ')} ${err}
+${Chalk.white.bgRed(' ERROR ')} ${err}
 
 ${help(this, '  ')}
 `
@@ -80,10 +81,13 @@ Command.prototype.collectUnknownOptions = function () {
       }
 
       let val = opt[1];
-      try { val = JSON.parse(opt[1]); }
-      catch (e) { val = opt[1]; }
+      try {
+        val = JSON.parse(opt[1]);
+      } catch (e) {
+        val = opt[1];
+      }
 
-      _.set(opts, opt[0].slice(2), val);
+      set(opts, opt[0].slice(2), val);
     }
 
     return opts;

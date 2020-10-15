@@ -117,7 +117,7 @@ $ node scripts/my_task
 
     - *`flags.allowUnexpected: boolean`*
 
-      By default, any flag that is passed but not mentioned in `flags.string`, `flags.boolean`, `flags.alias` or `flags.default` will trigger an error, preventing the run function from calling its first argument. If you have a reason to disable this behavior set this option to `true`.
+      By default, any flag that is passed but not mentioned in `flags.string`, `flags.boolean`, `flags.alias` or `flags.default` will trigger an error, preventing the run function from calling its first argument. If you have a reason to disable this behavior set this option to `true`. Unexpected flags will be collected from argv into `flags.unexpected`. To parse these flags and guess at their types, you can additionally pass `flags.guessTypesForUnexpectedFlags` but that's not recommended.
 
 
 - ***`createFailError(reason: string, options: { exitCode: number, showHelp: boolean }): FailError`***

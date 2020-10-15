@@ -18,7 +18,7 @@
  */
 
 jest.mock('fs', () => ({
-  statSync: jest.fn().mockImplementation(path => {
+  statSync: jest.fn().mockImplementation((path) => {
     if (path.includes('oldest')) {
       return {
         ctime: new Date(2018, 2, 1),

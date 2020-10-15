@@ -43,6 +43,5 @@ export default function ({ getService, getPageObjects }) {
         bytesSent: 'Bytes Sent\n427.9 MB',
       });
     });
-
   });
 }

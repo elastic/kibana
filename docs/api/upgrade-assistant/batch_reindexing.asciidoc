@@ -1,0 +1,83 @@
+[[batch-start-resume-reindex]]
+=== Batch start or resume reindex API
+++++
+<titleabbrev>Batch start or resume reindex</titleabbrev>
+++++
+
+experimental["The underlying Upgrade Assistant concepts are stable, but the APIs for managing Upgrade Assistant are experimental."]
+
+Start or resume multiple reindexing tasks in one request. Additionally, reindexing tasks started or resumed
+via the batch endpoint will be placed on a queue and executed one-by-one, which ensures that minimal cluster resources
+are consumed over time.
+
+[[batch-start-resume-reindex-request]]
+==== Request
+
+`POST /api/upgrade_assistant/reindex/batch`
+
+[[batch-start-resume-reindex-request-body]]
+==== Request body
+
+`indexNames`::
+  (Required, array) The list of index names to be reindexed.
+
+[[batch-start-resume-reindex-codes]]
+==== Response code
+
+`200`::
+  Indicates a successful call.
+
+[[batch-start-resume-example]]
+==== Example
+
+[source,js]
+--------------------------------------------------
+$ curl -X POST api/upgrade_assistant/reindex/batch
+{
+  "indexNames": [ <1>
+    "index1",
+    "index2"
+  ]
+}
+--------------------------------------------------
+// KIBANA
+
+<1> The order of the indices determines the order that the reindex tasks are executed.
+
+Similar to the <<start-resume-reindex, start or resume endpoint>>, the API returns the following:
+
+[source,js]
+--------------------------------------------------
+{
+  "enqueued": [ <1>
+    {
+      "indexName": "index1",
+      "newIndexName": "reindexed-v8-index1",
+      "status": 3,
+      "lastCompletedStep": 0,
+      "locked": null,
+      "reindexTaskId": null,
+      "reindexTaskPercComplete": null,
+      "errorMessage": null,
+      "runningReindexCount": null,
+      "reindexOptions": { <2>
+        "queueSettings": {
+          "queuedAt": 1583406985489 <3>
+        }
+      }
+    }
+  ],
+  "errors": [ <4>
+    {
+      "indexName": "index2",
+      "message": "Something went wrong!"
+    }
+  ]
+}
+--------------------------------------------------
+
+<1> A list of reindex operations created, the order in the array indicates the order in which tasks will be executed.
+<2> Presence of this key indicates that the reindex job will occur in the batch.
+<3> A Unix timestamp of when the reindex task was placed in the queue.
+<4> A list of errors that may have occurred preventing the reindex task from being created.
+

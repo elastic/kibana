@@ -19,5 +19,6 @@
 
 export * from './form';
 export * from './use_field';
+export * from './use_multi_fields';
 export * from './use_array';
 export * from './form_data_provider';

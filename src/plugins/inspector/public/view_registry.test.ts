@@ -20,7 +20,7 @@
 import { InspectorViewRegistry } from './view_registry';
 import { InspectorViewDescription } from './types';
 
-import { Adapters } from './types';
+import { Adapters } from '../common';
 
 function createMockView(
   params: {
@@ -59,7 +59,7 @@ describe('InspectorViewRegistry', () => {
     registry.register(view1);
     registry.register(view2);
     const views = registry.getAll();
-    expect(views.map(v => v.title)).toEqual(['view2', 'view1']);
+    expect(views.map((v) => v.title)).toEqual(['view2', 'view1']);
   });
 
   describe('getVisible()', () => {
@@ -78,7 +78,7 @@ describe('InspectorViewRegistry', () => {
       registry.register(view1);
       registry.register(view2);
       const views = registry.getVisible({});
-      expect(views.map(v => v.title)).toEqual(['view1']);
+      expect(views.map((v) => v.title)).toEqual(['view1']);
     });
 
     it('views without shouldShow should be included', () => {
@@ -87,7 +87,7 @@ describe('InspectorViewRegistry', () => {
       registry.register(view1);
       registry.register(view2);
       const views = registry.getVisible({});
-      expect(views.map(v => v.title)).toEqual(['view1', 'view2']);
+      expect(views.map((v) => v.title)).toEqual(['view1', 'view2']);
     });
 
     it('should pass the adapters to the callbacks', () => {

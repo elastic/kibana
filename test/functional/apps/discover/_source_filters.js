@@ -27,7 +27,6 @@ export default function ({ getService, getPageObjects }) {
 
   describe('source filters', function describeIndexTests() {
     before(async function () {
-
       // delete .kibana index and update configDoc
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
@@ -50,11 +49,10 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should not get the field referer', async function () {
-      //let  fieldNames;
       const fieldNames = await PageObjects.discover.getAllFieldNames();
       expect(fieldNames).to.not.contain('referer');
       const relatedContentFields = fieldNames.filter(
-        fieldName => fieldName.indexOf('relatedContent') === 0
+        (fieldName) => fieldName.indexOf('relatedContent') === 0
       );
       expect(relatedContentFields).to.have.length(0);
     });

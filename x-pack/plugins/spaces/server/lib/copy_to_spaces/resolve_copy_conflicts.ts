@@ -4,38 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  SavedObjectsClientContract,
-  SavedObjectsLegacyService,
-  SavedObject,
-} from 'src/core/server';
 import { Readable } from 'stream';
+import { SavedObject, CoreStart, KibanaRequest, SavedObjectsImportRetry } from 'src/core/server';
+import {
+  exportSavedObjectsToStream,
+  resolveSavedObjectsImportErrors,
+} from '../../../../../../src/core/server';
 import { spaceIdToNamespace } from '../utils/namespace';
 import { CopyOptions, ResolveConflictsOptions, CopyResponse } from './types';
-import { getEligibleTypes } from './lib/get_eligible_types';
 import { createEmptyFailureResponse } from './lib/create_empty_failure_response';
 import { readStreamToCompletion } from './lib/read_stream_to_completion';
 import { createReadableStreamFromArray } from './lib/readable_stream_from_array';
+import { COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS } from './lib/saved_objects_client_opts';
+import { getIneligibleTypes } from './lib/get_ineligible_types';
 
 export function resolveCopySavedObjectsToSpacesConflictsFactory(
-  savedObjectsClient: SavedObjectsClientContract,
-  savedObjectsService: SavedObjectsLegacyService
+  savedObjects: CoreStart['savedObjects'],
+  getImportExportObjectLimit: () => number,
+  request: KibanaRequest
 ) {
-  const { importExport, types, schema } = savedObjectsService;
-  const eligibleTypes = getEligibleTypes({ types, schema });
+  const { getTypeRegistry, getScopedClient } = savedObjects;
+
+  const savedObjectsClient = getScopedClient(request, COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS);
 
   const exportRequestedObjects = async (
     sourceSpaceId: string,
     options: Pick<CopyOptions, 'includeReferences' | 'objects'>
   ) => {
-    const objectStream = await importExport.getSortedObjectsForExport({
+    const objectStream = await exportSavedObjectsToStream({
       namespace: spaceIdToNamespace(sourceSpaceId),
       includeReferencesDeep: options.includeReferences,
       excludeExportDetails: true,
       objects: options.objects,
       savedObjectsClient,
-      types: eligibleTypes,
-      exportSizeLimit: importExport.objectLimit,
+      exportSizeLimit: getImportExportObjectLimit(),
     });
     return readStreamToCompletion<SavedObject>(objectStream);
   };
@@ -43,26 +45,24 @@ export function resolveCopySavedObjectsToSpacesConflictsFactory(
   const resolveConflictsForSpace = async (
     spaceId: string,
     objectsStream: Readable,
-    retries: Array<{
-      type: string;
-      id: string;
-      overwrite: boolean;
-      replaceReferences: Array<{ type: string; from: string; to: string }>;
-    }>
+    retries: SavedObjectsImportRetry[],
+    createNewCopies: boolean
   ) => {
     try {
-      const importResponse = await importExport.resolveImportErrors({
+      const importResponse = await resolveSavedObjectsImportErrors({
         namespace: spaceIdToNamespace(spaceId),
-        objectLimit: importExport.objectLimit,
+        objectLimit: getImportExportObjectLimit(),
         savedObjectsClient,
-        supportedTypes: eligibleTypes,
+        typeRegistry: getTypeRegistry(),
         readStream: objectsStream,
         retries,
+        createNewCopies,
       });
 
       return {
         success: importResponse.success,
         successCount: importResponse.successCount,
+        successResults: importResponse.successResults,
         errors: importResponse.errors,
       };
     } catch (error) {
@@ -80,16 +80,21 @@ export function resolveCopySavedObjectsToSpacesConflictsFactory(
       includeReferences: options.includeReferences,
       objects: options.objects,
     });
+    const ineligibleTypes = getIneligibleTypes(getTypeRegistry());
+    const filteredObjects = exportedSavedObjects.filter(
+      ({ type }) => !ineligibleTypes.includes(type)
+    );
 
     for (const entry of Object.entries(options.retries)) {
       const [spaceId, entryRetries] = entry;
 
-      const retries = entryRetries.map(retry => ({ ...retry, replaceReferences: [] }));
+      const retries = entryRetries.map((retry) => ({ ...retry, replaceReferences: [] }));
 
       response[spaceId] = await resolveConflictsForSpace(
         spaceId,
-        createReadableStreamFromArray(exportedSavedObjects),
-        retries
+        createReadableStreamFromArray(filteredObjects),
+        retries,
+        options.createNewCopies
       );
     }
 

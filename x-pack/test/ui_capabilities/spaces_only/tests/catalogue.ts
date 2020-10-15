@@ -13,8 +13,18 @@ import { SpaceScenarios } from '../scenarios';
 export default function catalogueTests({ getService }: FtrProviderContext) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
 
+  const esFeatureExceptions = [
+    'security',
+    'index_lifecycle_management',
+    'snapshot_restore',
+    'rollup_jobs',
+    'reporting',
+    'transform',
+    'watcher',
+  ];
+
   describe('catalogue', () => {
-    SpaceScenarios.forEach(scenario => {
+    SpaceScenarios.forEach((scenario) => {
       it(`${scenario.name}`, async () => {
         const uiCapabilities = await uiCapabilitiesService.get({ spaceId: scenario.id });
         switch (scenario.id) {
@@ -29,8 +39,12 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
           case 'nothing_space': {
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('catalogue');
-            // everything is disabled
-            const expected = mapValues(uiCapabilities.value!.catalogue, () => false);
+            // everything is disabled except for ES features and spaces management
+            const expected = mapValues(
+              uiCapabilities.value!.catalogue,
+              (enabled, catalogueId) =>
+                esFeatureExceptions.includes(catalogueId) || catalogueId === 'spaces'
+            );
             expect(uiCapabilities.value!.catalogue).to.eql(expected);
             break;
           }

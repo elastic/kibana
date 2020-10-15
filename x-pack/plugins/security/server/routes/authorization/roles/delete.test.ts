@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../../src/core/server';
-import { LicenseCheck, LICENSE_CHECK_STATE } from '../../../../../licensing/server';
+import { LicenseCheck } from '../../../../../licensing/server';
 import { defineDeleteRolesRoutes } from './delete';
 
 import {
@@ -25,17 +25,12 @@ interface TestOptions {
 describe('DELETE role', () => {
   const deleteRoleTest = (
     description: string,
-    {
-      name,
-      licenseCheckResult = { state: LICENSE_CHECK_STATE.Valid },
-      apiResponse,
-      asserts,
-    }: TestOptions
+    { name, licenseCheckResult = { state: 'valid' }, apiResponse, asserts }: TestOptions
   ) => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
       mockRouteDefinitionParams.clusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
       if (apiResponse) {
         mockScopedClusterClient.callAsCurrentUser.mockImplementation(apiResponse);
@@ -75,7 +70,7 @@ describe('DELETE role', () => {
   describe('failure', () => {
     deleteRoleTest('returns result of license checker', {
       name: 'foo-role',
-      licenseCheckResult: { state: LICENSE_CHECK_STATE.Invalid, message: 'test forbidden message' },
+      licenseCheckResult: { state: 'invalid', message: 'test forbidden message' },
       asserts: { statusCode: 403, result: { message: 'test forbidden message' } },
     });
 

@@ -21,16 +21,18 @@ import { mockHttpServer } from './http_service.test.mocks';
 
 import { noop } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
+import { REPO_ROOT } from '@kbn/dev-utils';
+import { getEnvOptions } from '../config/mocks';
 import { HttpService } from '.';
 import { HttpConfigType, config } from './http_config';
 import { httpServerMock } from './http_server.mocks';
 import { ConfigService, Env } from '../config';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 import { contextServiceMock } from '../context/context_service.mock';
-import { getEnvOptions } from '../config/__mocks__/env';
+import { config as cspConfig } from '../csp';
 
-const logger = loggingServiceMock.create();
-const env = Env.createDefault(getEnvOptions());
+const logger = loggingSystemMock.create();
+const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 const coreId = Symbol();
 
 const createConfigService = (value: Partial<HttpConfigType> = {}) => {
@@ -45,6 +47,7 @@ const createConfigService = (value: Partial<HttpConfigType> = {}) => {
     logger
   );
   configService.setSchema(config.path, config.schema);
+  configService.setSchema(cspConfig.path, cspConfig.schema);
   return configService;
 };
 const contextSetup = contextServiceMock.createSetupContract();
@@ -113,7 +116,7 @@ test('spins up notReady server until started if configured with `autoListen:true
   const service = new HttpService({
     coreId,
     configService,
-    env: new Env('.', getEnvOptions()),
+    env: Env.createDefault(REPO_ROOT, getEnvOptions()),
     logger,
   });
 
@@ -157,7 +160,7 @@ test('logs error if already set up', async () => {
 
   await service.setup(setupDeps);
 
-  expect(loggingServiceMock.collect(logger).warn).toMatchSnapshot();
+  expect(loggingSystemMock.collect(logger).warn).toMatchSnapshot();
 });
 
 test('stops http server', async () => {
@@ -261,7 +264,7 @@ test('does not start http server if process is dev cluster master', async () => 
   const service = new HttpService({
     coreId,
     configService,
-    env: new Env('.', getEnvOptions({ isDevClusterMaster: true })),
+    env: Env.createDefault(REPO_ROOT, getEnvOptions({ isDevClusterMaster: true })),
     logger,
   });
 
@@ -286,7 +289,7 @@ test('does not start http server if configured with `autoListen:false`', async (
   const service = new HttpService({
     coreId,
     configService,
-    env: new Env('.', getEnvOptions()),
+    env: Env.createDefault(REPO_ROOT, getEnvOptions()),
     logger,
   });
 

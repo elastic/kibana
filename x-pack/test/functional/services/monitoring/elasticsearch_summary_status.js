@@ -17,8 +17,7 @@ export function MonitoringElasticsearchSummaryStatusProvider({ getService }) {
   const SUBJ_SUMMARY_DATA_SIZE = `${SUBJ_SUMMARY} > dataSize`;
   const SUBJ_SUMMARY_HEALTH = `${SUBJ_SUMMARY} > statusIcon`;
 
-  return new class ElasticsearchSummaryStatus {
-
+  return new (class ElasticsearchSummaryStatus {
     async getContent() {
       return {
         nodesCount: await testSubjects.getVisibleText(SUBJ_SUMMARY_NODES_COUNT),
@@ -31,6 +30,5 @@ export function MonitoringElasticsearchSummaryStatusProvider({ getService }) {
         health: await testSubjects.getAttribute(SUBJ_SUMMARY_HEALTH, 'alt'),
       };
     }
-
-  };
+  })();
 }

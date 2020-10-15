@@ -35,21 +35,18 @@ jest.doMock('./elasticsearch/elasticsearch_service', () => ({
   ElasticsearchService: jest.fn(() => mockElasticsearchService),
 }));
 
-import { ILegacyService } from './legacy/legacy_service';
-export const mockLegacyService: ILegacyService = {
-  legacyId: Symbol(),
-  discoverPlugins: jest.fn().mockReturnValue({ uiExports: {} }),
-  setup: jest.fn(),
-  start: jest.fn(),
-  stop: jest.fn(),
-};
+import { legacyServiceMock } from './legacy/legacy_service.mock';
+export const mockLegacyService = legacyServiceMock.create();
 jest.mock('./legacy/legacy_service', () => ({
   LegacyService: jest.fn(() => mockLegacyService),
 }));
 
-import { configServiceMock } from './config/config_service.mock';
+const realKbnConfig = jest.requireActual('@kbn/config');
+
+import { configServiceMock } from './config/mocks';
 export const mockConfigService = configServiceMock.create();
-jest.doMock('./config/config_service', () => ({
+jest.doMock('@kbn/config', () => ({
+  ...realKbnConfig,
   ConfigService: jest.fn(() => mockConfigService),
 }));
 
@@ -65,7 +62,47 @@ jest.doMock('./context/context_service', () => ({
   ContextService: jest.fn(() => mockContextService),
 }));
 
+import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
+export const mockUiSettingsService = uiSettingsServiceMock.create();
+jest.doMock('./ui_settings/ui_settings_service', () => ({
+  UiSettingsService: jest.fn(() => mockUiSettingsService),
+}));
+
 export const mockEnsureValidConfiguration = jest.fn();
 jest.doMock('./legacy/config/ensure_valid_configuration', () => ({
   ensureValidConfiguration: mockEnsureValidConfiguration,
+}));
+
+import { RenderingService, mockRenderingService } from './rendering/__mocks__/rendering_service';
+export { mockRenderingService };
+jest.doMock('./rendering/rendering_service', () => ({ RenderingService }));
+
+import { environmentServiceMock } from './environment/environment_service.mock';
+export const mockEnvironmentService = environmentServiceMock.create();
+jest.doMock('./environment/environment_service', () => ({
+  EnvironmentService: jest.fn(() => mockEnvironmentService),
+}));
+
+import { metricsServiceMock } from './metrics/metrics_service.mock';
+export const mockMetricsService = metricsServiceMock.create();
+jest.doMock('./metrics/metrics_service', () => ({
+  MetricsService: jest.fn(() => mockMetricsService),
+}));
+
+import { statusServiceMock } from './status/status_service.mock';
+export const mockStatusService = statusServiceMock.create();
+jest.doMock('./status/status_service', () => ({
+  StatusService: jest.fn(() => mockStatusService),
+}));
+
+import { loggingServiceMock } from './logging/logging_service.mock';
+export const mockLoggingService = loggingServiceMock.create();
+jest.doMock('./logging/logging_service', () => ({
+  LoggingService: jest.fn(() => mockLoggingService),
+}));
+
+import { auditTrailServiceMock } from './audit_trail/audit_trail_service.mock';
+export const mockAuditTrailService = auditTrailServiceMock.create();
+jest.doMock('./audit_trail/audit_trail_service', () => ({
+  AuditTrailService: jest.fn(() => mockAuditTrailService),
 }));

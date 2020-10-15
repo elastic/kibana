@@ -5,17 +5,23 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { KIBANA_CLOUD_STATS_TYPE } from '../../common/constants';
 
 interface Config {
   isCloudEnabled: boolean;
 }
 
+interface CloudUsage {
+  isCloudEnabled: boolean;
+}
+
 export function createCloudUsageCollector(usageCollection: UsageCollectionSetup, config: Config) {
   const { isCloudEnabled } = config;
-  return usageCollection.makeUsageCollector({
-    type: KIBANA_CLOUD_STATS_TYPE,
+  return usageCollection.makeUsageCollector<CloudUsage>({
+    type: 'cloud',
     isReady: () => true,
+    schema: {
+      isCloudEnabled: { type: 'boolean' },
+    },
     fetch: () => {
       return {
         isCloudEnabled,

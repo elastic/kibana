@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../../../core/server';
-import { EsSearchService } from './es_search_service';
+export { esSearchStrategyProvider } from './es_search_strategy';
+export * from './get_default_search_params';
+export { getTotalLoaded } from './get_total_loaded';
+export * from './to_snake_case';
+export { shimAbortSignal } from './shim_abort_signal';
 
-export { ES_SEARCH_STRATEGY, IEsSearchRequest, IEsSearchResponse } from '../../../common/search';
-
-export function esSearchService(initializerContext: PluginInitializerContext) {
-  return new EsSearchService(initializerContext);
-}
+export { ES_SEARCH_STRATEGY, IEsSearchRequest, IEsSearchResponse } from '../../../common';

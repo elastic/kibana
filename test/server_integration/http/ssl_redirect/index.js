@@ -26,14 +26,9 @@ export default function ({ getService }) {
       const port = process.env.TEST_KIBANA_PORT || '5620';
       const url = `https://${host}:${port}/`;
 
-      await supertest.get('/')
-        .expect('location', url)
-        .expect(302);
+      await supertest.get('/').expect('location', url).expect(302);
 
-      await supertest.get('/')
-        .redirects(1)
-        .expect('location', '/app/kibana')
-        .expect(302);
+      await supertest.get('/').redirects(1).expect('location', '/app/kibana').expect(302);
     });
   });
 }

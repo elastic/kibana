@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
@@ -32,7 +31,6 @@ export default function ({ getService, getPageObjects }) {
   };
 
   describe('discover filter editor', function describeIndexTests() {
-
     before(async function () {
       log.debug('load kibana index with default index pattern');
       await esArchiver.loadIfNeeded('discover');
@@ -63,9 +61,7 @@ export default function ({ getService, getPageObjects }) {
         await filterBar.addFilter('nestedField.child', 'is', 'nestedValue');
         expect(await filterBar.hasFilter('nestedField.child', 'nestedValue')).to.be(true);
         await retry.try(async function () {
-          expect(await PageObjects.discover.getHitCount()).to.be(
-            '1'
-          );
+          expect(await PageObjects.discover.getHitCount()).to.be('1');
         });
       });
     });

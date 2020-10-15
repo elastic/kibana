@@ -23,17 +23,11 @@ import classNames from 'classnames';
 
 export const KuiTab = ({ isSelected, onClick, children, className, ...rest }) => {
   const classes = classNames('kuiTab', className, {
-    'kuiTab-isSelected': isSelected
+    'kuiTab-isSelected': isSelected,
   });
 
   return (
-    <button
-      role="tab"
-      aria-selected={!!isSelected}
-      className={classes}
-      onClick={onClick}
-      {...rest}
-    >
+    <button role="tab" aria-selected={!!isSelected} className={classes} onClick={onClick} {...rest}>
       {children}
     </button>
   );

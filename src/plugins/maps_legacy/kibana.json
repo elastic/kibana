@@ -1,0 +1,9 @@
+{
+  "id": "mapsLegacy",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["map"],
+  "ui": true,
+  "server": true,
+  "requiredBundles": ["kibanaReact", "charts"]
+}

@@ -60,7 +60,6 @@ export default function stubSearchSource(Private, $q, Promise) {
     onRequestStart(fn) {
       this._requestStartHandlers.push(fn);
     },
-    requestIsStopped() {}
+    requestIsStopped() {},
   };
-
 }

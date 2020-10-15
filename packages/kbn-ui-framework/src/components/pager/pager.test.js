@@ -22,9 +22,7 @@ import sinon from 'sinon';
 import { render, mount } from 'enzyme';
 import { findTestSubject, requiredProps } from '../../test';
 
-import {
-  KuiPager,
-} from './pager';
+import { KuiPager } from './pager';
 
 let onPreviousPage;
 let onNextPage;
@@ -35,61 +33,69 @@ beforeEach(() => {
 });
 
 test('renders KuiPager', () => {
-  const component = (<KuiPager
-    hasPreviousPage={false}
-    hasNextPage={true}
-    onPreviousPage={onPreviousPage}
-    onNextPage={onNextPage}
-    startNumber={1}
-    endNumber={10}
-    totalItems={20}
-    {...requiredProps}
-  />);
+  const component = (
+    <KuiPager
+      hasPreviousPage={false}
+      hasNextPage={true}
+      onPreviousPage={onPreviousPage}
+      onNextPage={onNextPage}
+      startNumber={1}
+      endNumber={10}
+      totalItems={20}
+      {...requiredProps}
+    />
+  );
   expect(render(component)).toMatchSnapshot();
 });
 
 describe('property', () => {
   describe('hasPreviousPage', () => {
     test('disables previous button when false', () => {
-      const component = (<KuiPager
-        hasPreviousPage={false}
-        hasNextPage={true}
-        onPreviousPage={onPreviousPage}
-        onNextPage={onNextPage}
-        startNumber={1}
-        endNumber={10}
-        totalItems={20}
-      />);
+      const component = (
+        <KuiPager
+          hasPreviousPage={false}
+          hasNextPage={true}
+          onPreviousPage={onPreviousPage}
+          onNextPage={onNextPage}
+          startNumber={1}
+          endNumber={10}
+          totalItems={20}
+        />
+      );
       expect(render(component)).toMatchSnapshot();
     });
   });
 
   describe('hasNextPage', () => {
     test('disables next button when false', () => {
-      const component = (<KuiPager
-        hasPreviousPage={true}
-        hasNextPage={false}
-        onPreviousPage={onPreviousPage}
-        onNextPage={onNextPage}
-        startNumber={1}
-        endNumber={10}
-        totalItems={20}
-      />);
+      const component = (
+        <KuiPager
+          hasPreviousPage={true}
+          hasNextPage={false}
+          onPreviousPage={onPreviousPage}
+          onNextPage={onNextPage}
+          startNumber={1}
+          endNumber={10}
+          totalItems={20}
+        />
+      );
       expect(render(component)).toMatchSnapshot();
     });
   });
 
   describe('onPreviousPage', () => {
     test('is called when clicked', () => {
-      const component = (<KuiPager
-        hasPreviousPage={true}
-        hasNextPage={true}
-        onPreviousPage={onPreviousPage}
-        onNextPage={onNextPage}
-        startNumber={1}
-        endNumber={10}
-        totalItems={20}
-      />);
+      const component = (
+        <KuiPager
+          hasPreviousPage={true}
+          hasNextPage={true}
+          onPreviousPage={onPreviousPage}
+          onNextPage={onNextPage}
+          startNumber={1}
+          endNumber={10}
+          totalItems={20}
+        />
+      );
       const pager = mount(component);
       findTestSubject(pager, 'pagerPreviousButton').simulate('click');
       sinon.assert.calledOnce(onPreviousPage);
@@ -99,15 +105,17 @@ describe('property', () => {
 
   describe('onNextPage', () => {
     test('is called when clicked', () => {
-      const component = (<KuiPager
-        hasPreviousPage={true}
-        hasNextPage={true}
-        onPreviousPage={onPreviousPage}
-        onNextPage={onNextPage}
-        startNumber={1}
-        endNumber={10}
-        totalItems={20}
-      />);
+      const component = (
+        <KuiPager
+          hasPreviousPage={true}
+          hasNextPage={true}
+          onPreviousPage={onPreviousPage}
+          onNextPage={onNextPage}
+          startNumber={1}
+          endNumber={10}
+          totalItems={20}
+        />
+      );
       const pager = mount(component);
       findTestSubject(pager, 'pagerNextButton').simulate('click');
       sinon.assert.calledOnce(onNextPage);

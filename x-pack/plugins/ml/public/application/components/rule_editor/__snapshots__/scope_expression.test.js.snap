@@ -1,0 +1,492 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ScopeExpression renders when empty list of filter IDs is supplied 1`] = `
+<EuiFlexGroup
+  gutterSize="m"
+>
+  <EuiFlexItem
+    className="scope-field-checkbox"
+    grow={false}
+  >
+    <EuiCheckbox
+      checked={true}
+      compressed={false}
+      disabled={false}
+      id="scope_cb_domain"
+      indeterminate={false}
+      onChange={[Function]}
+    />
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiExpression
+      className="scope-field-button"
+      description={
+        <FormattedMessage
+          defaultMessage="when"
+          id="xpack.ml.ruleEditor.scopeExpression.scopeFieldWhenLabel"
+          values={Object {}}
+        />
+      }
+      isActive={false}
+      onClick={[Function]}
+      value="domain"
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`ScopeExpression renders when enabled set to false 1`] = `
+<EuiFlexGroup
+  gutterSize="m"
+>
+  <EuiFlexItem
+    className="scope-field-checkbox"
+    grow={false}
+  >
+    <EuiCheckbox
+      checked={false}
+      compressed={false}
+      disabled={false}
+      id="scope_cb_domain"
+      indeterminate={false}
+      onChange={[Function]}
+    />
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiExpression
+      className="scope-field-button"
+      description={
+        <FormattedMessage
+          defaultMessage="when"
+          id="xpack.ml.ruleEditor.scopeExpression.scopeFieldWhenLabel"
+          values={Object {}}
+        />
+      }
+      isActive={false}
+      onClick={[Function]}
+      value="domain"
+    />
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiPopover
+      anchorPosition="downLeft"
+      button={
+        <EuiExpression
+          description={
+            <FormattedMessage
+              defaultMessage="is {filterType}"
+              id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypeButtonLabel"
+              values={
+                Object {
+                  "filterType": "in",
+                }
+              }
+            />
+          }
+          isActive={false}
+          onClick={[Function]}
+          value="safe_domains"
+        />
+      }
+      closePopover={[Function]}
+      display="inlineBlock"
+      hasArrow={true}
+      id="operatorValuePopover"
+      isOpen={false}
+      ownFocus={true}
+      panelPaddingSize="none"
+      withTitle={true}
+    >
+      <div
+        style={
+          Object {
+            "zIndex": "200",
+          }
+        }
+      >
+        <EuiPopoverTitle>
+          <FormattedMessage
+            defaultMessage="Is"
+            id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypePopoverTitle"
+            values={Object {}}
+          />
+        </EuiPopoverTitle>
+        <div
+          className="euiExpression"
+        >
+          <EuiFlexGroup
+            style={
+              Object {
+                "maxWidth": 450,
+              }
+            }
+          >
+            <EuiFlexItem
+              grow={false}
+              style={
+                Object {
+                  "width": 150,
+                }
+              }
+            >
+              <EuiSelect
+                onChange={[Function]}
+                options={
+                  Array [
+                    Object {
+                      "text": "in",
+                      "value": "include",
+                    },
+                    Object {
+                      "text": "not in",
+                      "value": "exclude",
+                    },
+                  ]
+                }
+                value="include"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+              style={
+                Object {
+                  "width": 300,
+                }
+              }
+            >
+              <EuiSelect
+                onChange={[Function]}
+                options={
+                  Array [
+                    Object {
+                      "text": "web_domains",
+                      "value": "web_domains",
+                    },
+                    Object {
+                      "text": "safe_domains",
+                      "value": "safe_domains",
+                    },
+                    Object {
+                      "text": "uk_domains",
+                      "value": "uk_domains",
+                    },
+                  ]
+                }
+                value="safe_domains"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+      </div>
+    </EuiPopover>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`ScopeExpression renders when filter ID and type supplied 1`] = `
+<EuiFlexGroup
+  gutterSize="m"
+>
+  <EuiFlexItem
+    className="scope-field-checkbox"
+    grow={false}
+  >
+    <EuiCheckbox
+      checked={true}
+      compressed={false}
+      disabled={false}
+      id="scope_cb_domain"
+      indeterminate={false}
+      onChange={[Function]}
+    />
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiExpression
+      className="scope-field-button"
+      description={
+        <FormattedMessage
+          defaultMessage="when"
+          id="xpack.ml.ruleEditor.scopeExpression.scopeFieldWhenLabel"
+          values={Object {}}
+        />
+      }
+      isActive={false}
+      onClick={[Function]}
+      value="domain"
+    />
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiPopover
+      anchorPosition="downLeft"
+      button={
+        <EuiExpression
+          description={
+            <FormattedMessage
+              defaultMessage="is {filterType}"
+              id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypeButtonLabel"
+              values={
+                Object {
+                  "filterType": "in",
+                }
+              }
+            />
+          }
+          isActive={false}
+          onClick={[Function]}
+          value="safe_domains"
+        />
+      }
+      closePopover={[Function]}
+      display="inlineBlock"
+      hasArrow={true}
+      id="operatorValuePopover"
+      isOpen={false}
+      ownFocus={true}
+      panelPaddingSize="none"
+      withTitle={true}
+    >
+      <div
+        style={
+          Object {
+            "zIndex": "200",
+          }
+        }
+      >
+        <EuiPopoverTitle>
+          <FormattedMessage
+            defaultMessage="Is"
+            id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypePopoverTitle"
+            values={Object {}}
+          />
+        </EuiPopoverTitle>
+        <div
+          className="euiExpression"
+        >
+          <EuiFlexGroup
+            style={
+              Object {
+                "maxWidth": 450,
+              }
+            }
+          >
+            <EuiFlexItem
+              grow={false}
+              style={
+                Object {
+                  "width": 150,
+                }
+              }
+            >
+              <EuiSelect
+                onChange={[Function]}
+                options={
+                  Array [
+                    Object {
+                      "text": "in",
+                      "value": "include",
+                    },
+                    Object {
+                      "text": "not in",
+                      "value": "exclude",
+                    },
+                  ]
+                }
+                value="include"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+              style={
+                Object {
+                  "width": 300,
+                }
+              }
+            >
+              <EuiSelect
+                onChange={[Function]}
+                options={
+                  Array [
+                    Object {
+                      "text": "web_domains",
+                      "value": "web_domains",
+                    },
+                    Object {
+                      "text": "safe_domains",
+                      "value": "safe_domains",
+                    },
+                    Object {
+                      "text": "uk_domains",
+                      "value": "uk_domains",
+                    },
+                  ]
+                }
+                value="safe_domains"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+      </div>
+    </EuiPopover>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`ScopeExpression renders when no filter ID or type supplied 1`] = `
+<EuiFlexGroup
+  gutterSize="m"
+>
+  <EuiFlexItem
+    className="scope-field-checkbox"
+    grow={false}
+  >
+    <EuiCheckbox
+      checked={true}
+      compressed={false}
+      disabled={false}
+      id="scope_cb_domain"
+      indeterminate={false}
+      onChange={[Function]}
+    />
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiExpression
+      className="scope-field-button"
+      description={
+        <FormattedMessage
+          defaultMessage="when"
+          id="xpack.ml.ruleEditor.scopeExpression.scopeFieldWhenLabel"
+          values={Object {}}
+        />
+      }
+      isActive={false}
+      onClick={[Function]}
+      value="domain"
+    />
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiPopover
+      anchorPosition="downLeft"
+      button={
+        <EuiExpression
+          description={
+            <FormattedMessage
+              defaultMessage="is {filterType}"
+              id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypeButtonLabel"
+              values={
+                Object {
+                  "filterType": "",
+                }
+              }
+            />
+          }
+          isActive={false}
+          onClick={[Function]}
+          value=""
+        />
+      }
+      closePopover={[Function]}
+      display="inlineBlock"
+      hasArrow={true}
+      id="operatorValuePopover"
+      isOpen={false}
+      ownFocus={true}
+      panelPaddingSize="none"
+      withTitle={true}
+    >
+      <div
+        style={
+          Object {
+            "zIndex": "200",
+          }
+        }
+      >
+        <EuiPopoverTitle>
+          <FormattedMessage
+            defaultMessage="Is"
+            id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypePopoverTitle"
+            values={Object {}}
+          />
+        </EuiPopoverTitle>
+        <div
+          className="euiExpression"
+        >
+          <EuiFlexGroup
+            style={
+              Object {
+                "maxWidth": 450,
+              }
+            }
+          >
+            <EuiFlexItem
+              grow={false}
+              style={
+                Object {
+                  "width": 150,
+                }
+              }
+            >
+              <EuiSelect
+                onChange={[Function]}
+                options={
+                  Array [
+                    Object {
+                      "text": "in",
+                      "value": "include",
+                    },
+                    Object {
+                      "text": "not in",
+                      "value": "exclude",
+                    },
+                  ]
+                }
+              />
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+              style={
+                Object {
+                  "width": 300,
+                }
+              }
+            >
+              <EuiSelect
+                onChange={[Function]}
+                options={
+                  Array [
+                    Object {
+                      "text": "web_domains",
+                      "value": "web_domains",
+                    },
+                    Object {
+                      "text": "safe_domains",
+                      "value": "safe_domains",
+                    },
+                    Object {
+                      "text": "uk_domains",
+                      "value": "uk_domains",
+                    },
+                  ]
+                }
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+      </div>
+    </EuiPopover>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

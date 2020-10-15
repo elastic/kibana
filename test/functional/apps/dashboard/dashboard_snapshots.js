@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects, updateBaselines }) {
-  const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'common']);
+  const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'common', 'timePicker']);
   const screenshot = getService('screenshots');
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
     before(async function () {
       await esArchiver.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
-        'defaultIndex': '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
       // We use a really small window to minimize differences across os's and browsers.
       await browser.setScreenshotSize(1000, 500);
@@ -48,9 +48,9 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
     it('compare TSVB snapshot', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.setTimepickerInLogstashDataRange();
+      await PageObjects.timePicker.setLogstashDataRange();
       await dashboardAddPanel.addVisualization('Rendering Test: tsvb-ts');
-      await PageObjects.common.closeToast();
+      await PageObjects.common.closeToastIfExists();
 
       await PageObjects.dashboard.saveDashboard('tsvb');
       await PageObjects.dashboard.clickFullScreenMode();
@@ -58,19 +58,21 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await dashboardPanelActions.clickExpandPanelToggle();
 
       await PageObjects.dashboard.waitForRenderComplete();
-      const percentDifference = await screenshot.compareAgainstBaseline('tsvb_dashboard', updateBaselines);
+      const percentDifference = await screenshot.compareAgainstBaseline(
+        'tsvb_dashboard',
+        updateBaselines
+      );
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
-
       expect(percentDifference).to.be.lessThan(0.02);
     });
 
     it('compare area chart snapshot', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.setTimepickerInLogstashDataRange();
+      await PageObjects.timePicker.setLogstashDataRange();
       await dashboardAddPanel.addVisualization('Rendering Test: area with not filter');
-      await PageObjects.common.closeToast();
+      await PageObjects.common.closeToastIfExists();
 
       await PageObjects.dashboard.saveDashboard('area');
       await PageObjects.dashboard.clickFullScreenMode();
@@ -78,10 +80,12 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await dashboardPanelActions.clickExpandPanelToggle();
 
       await PageObjects.dashboard.waitForRenderComplete();
-      const percentDifference = await screenshot.compareAgainstBaseline('area_chart', updateBaselines);
+      const percentDifference = await screenshot.compareAgainstBaseline(
+        'area_chart',
+        updateBaselines
+      );
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
-
       expect(percentDifference).to.be.lessThan(0.02);
     });
   });

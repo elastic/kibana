@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { Spaces } from '../../scenarios';
-import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
+import { checkAAD, getUrlPrefix, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -20,7 +20,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
 
     it('should handle create action request appropriately', async () => {
       const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My action',
@@ -33,9 +33,11 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           },
         });
 
-      expect(response.statusCode).to.eql(200);
+      expect(response.status).to.eql(200);
+      objectRemover.add(Spaces.space1.id, response.body.id, 'action', 'actions');
       expect(response.body).to.eql({
         id: response.body.id,
+        isPreconfigured: false,
         name: 'My action',
         actionTypeId: 'test.index-record',
         config: {
@@ -43,7 +45,14 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         },
       });
       expect(typeof response.body.id).to.be('string');
-      objectRemover.add(Spaces.space1.id, response.body.id, 'action');
+
+      // Ensure AAD isn't broken
+      await checkAAD({
+        supertest,
+        spaceId: Spaces.space1.id,
+        type: 'action',
+        id: response.body.id,
+      });
     });
   });
 }

@@ -9,11 +9,8 @@ import { API_BASE_PATH } from './constants';
 export const registerHelpers = ({ supertest }) => {
   const getIndexSettings = (indexName) => supertest.get(`${API_BASE_PATH}/settings/${indexName}`);
 
-  const updateIndexSettings = (indexName, settings) => (
-    supertest.put(`${API_BASE_PATH}/settings/${indexName}`)
-      .set('kbn-xsrf', 'xxx')
-      .send(settings)
-  );
+  const updateIndexSettings = (indexName, settings) =>
+    supertest.put(`${API_BASE_PATH}/settings/${indexName}`).set('kbn-xsrf', 'xxx').send(settings);
 
   return {
     getIndexSettings,

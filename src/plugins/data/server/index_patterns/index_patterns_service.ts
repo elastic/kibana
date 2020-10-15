@@ -17,14 +17,56 @@
  * under the License.
  */
 
-import { CoreSetup } from 'kibana/server';
-import { Plugin } from '../../../../core/server';
+import { CoreSetup, CoreStart, Plugin, Logger, SavedObjectsClientContract } from 'kibana/server';
 import { registerRoutes } from './routes';
+import { indexPatternSavedObjectType } from '../saved_objects';
+import { capabilitiesProvider } from './capabilities_provider';
+import { IndexPatternsService as IndexPatternsCommonService } from '../../common/index_patterns';
+import { FieldFormatsStart } from '../field_formats';
+import { UiSettingsServerToCommon } from './ui_settings_wrapper';
+import { IndexPatternsApiServer } from './index_patterns_api_client';
+import { SavedObjectsClientServerToCommon } from './saved_objects_client_wrapper';
 
-export class IndexPatternsService implements Plugin<void> {
-  public setup({ http, elasticsearch }: CoreSetup) {
-    registerRoutes(http, elasticsearch);
+export interface IndexPatternsServiceStart {
+  indexPatternsServiceFactory: (
+    savedObjectsClient: SavedObjectsClientContract
+  ) => Promise<IndexPatternsCommonService>;
+}
+
+export interface IndexPatternsServiceStartDeps {
+  fieldFormats: FieldFormatsStart;
+  logger: Logger;
+}
+
+export class IndexPatternsService implements Plugin<void, IndexPatternsServiceStart> {
+  public setup(core: CoreSetup) {
+    core.savedObjects.registerType(indexPatternSavedObjectType);
+    core.capabilities.registerProvider(capabilitiesProvider);
+
+    registerRoutes(core.http);
   }
 
-  public start() {}
+  public start(core: CoreStart, { fieldFormats, logger }: IndexPatternsServiceStartDeps) {
+    const { uiSettings } = core;
+
+    return {
+      indexPatternsServiceFactory: async (savedObjectsClient: SavedObjectsClientContract) => {
+        const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
+        const formats = await fieldFormats.fieldFormatServiceFactory(uiSettingsClient);
+
+        return new IndexPatternsCommonService({
+          uiSettings: new UiSettingsServerToCommon(uiSettingsClient),
+          savedObjectsClient: new SavedObjectsClientServerToCommon(savedObjectsClient),
+          apiClient: new IndexPatternsApiServer(),
+          fieldFormats: formats,
+          onError: (error) => {
+            logger.error(error);
+          },
+          onNotification: ({ title, text }) => {
+            logger.warn(`${title} : ${text}`);
+          },
+        });
+      },
+    };
+  }
 }

@@ -122,7 +122,7 @@ test('<KibanaContextProvider> provider provides default kibana-react context', (
 
 test('<KibanaContextProvider> can set custom services in context', () => {
   const Test: React.FC = () => {
-    const { services } = useKibana();
+    const { services } = useKibana<{ test: string }>();
     expect(services.test).toBe('quux');
     return null;
   };
@@ -137,7 +137,7 @@ test('<KibanaContextProvider> can set custom services in context', () => {
 
 test('nested <KibanaContextProvider> override and merge services', () => {
   const Test: React.FC = () => {
-    const { services } = useKibana();
+    const { services } = useKibana<{ foo: string; bar: string; baz: string }>();
     expect(services.foo).toBe('foo2');
     expect(services.bar).toBe('bar');
     expect(services.baz).toBe('baz3');

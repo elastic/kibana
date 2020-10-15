@@ -17,19 +17,19 @@
  * under the License.
  */
 
-import { httpServiceMock, HttpServiceSetupMock } from '../http/http_service.mock';
+import { httpServiceMock, InternalHttpServiceSetupMock } from '../http/http_service.mock';
 import { mockRouter, RouterMock } from '../http/router/router.mock';
 import { CapabilitiesService, CapabilitiesSetup } from './capabilities_service';
 import { mockCoreContext } from '../core_context.mock';
 
 describe('CapabilitiesService', () => {
-  let http: HttpServiceSetupMock;
+  let http: InternalHttpServiceSetupMock;
   let service: CapabilitiesService;
   let setup: CapabilitiesSetup;
   let router: RouterMock;
 
   beforeEach(() => {
-    http = httpServiceMock.createSetupContract();
+    http = httpServiceMock.createInternalSetupContract();
     router = mockRouter.create();
     http.createRouter.mockReturnValue(router);
     service = new CapabilitiesService(mockCoreContext.create());
@@ -41,8 +41,8 @@ describe('CapabilitiesService', () => {
     });
 
     it('registers the capabilities routes', async () => {
-      expect(http.createRouter).toHaveBeenCalledWith('/api/core/capabilities');
-      expect(router.post).toHaveBeenCalledTimes(2);
+      expect(http.createRouter).toHaveBeenCalledWith('');
+      expect(router.post).toHaveBeenCalledTimes(1);
       expect(router.post).toHaveBeenCalledWith(expect.any(Object), expect.any(Function));
     });
 

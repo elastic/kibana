@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import axios, { AxiosInstance } from 'axios';
-import { UICapabilities } from 'ui/capabilities';
+import type { Capabilities as UICapabilities } from 'src/core/types';
 import { format as formatUrl } from 'url';
 import util from 'util';
 import { ToolingLog } from '@kbn/dev-utils';
@@ -52,8 +52,8 @@ export class UICapabilitiesService {
   }): Promise<GetUICapabilitiesResult> {
     const features = await this.featureService.get();
     const applications = Object.values(features)
-      .map(feature => feature.navLinkId)
-      .filter(link => !!link);
+      .flatMap((feature) => feature.app)
+      .filter((link) => !!link);
 
     const spaceUrlPrefix = spaceId ? `/s/${spaceId}` : '';
     this.log.debug(
@@ -68,7 +68,7 @@ export class UICapabilitiesService {
       : {};
     const response = await this.axios.post(
       `${spaceUrlPrefix}/api/core/capabilities`,
-      { applications: [...applications, 'kibana:management'] },
+      { applications: [...applications, 'kibana:stack_management'] },
       {
         headers: requestHeaders,
       }

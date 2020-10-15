@@ -22,15 +22,13 @@ import fs from 'fs';
 import del from 'del';
 
 import { cleanPrevious, cleanArtifacts } from './cleanup';
-import Logger from '../lib/logger';
+import { Logger } from '../lib/logger';
 
 describe('kibana cli', function () {
-
   describe('plugin installer', function () {
-
     describe('pluginCleaner', function () {
       const settings = {
-        workingPath: 'dummy'
+        workingPath: 'dummy',
       };
 
       describe('cleanPrevious', function () {
@@ -85,7 +83,9 @@ describe('kibana cli', function () {
           return cleanPrevious(settings, logger)
             .catch(errorStub)
             .then(function () {
-              expect(logger.log.calledWith('Found previous install attempt. Deleting...')).toBe(true);
+              expect(logger.log.calledWith('Found previous install attempt. Deleting...')).toBe(
+                true
+              );
             });
         });
 
@@ -133,9 +133,6 @@ describe('kibana cli', function () {
           expect(() => cleanArtifacts(settings)).not.toThrow();
         });
       });
-
     });
-
   });
-
 });

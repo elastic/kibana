@@ -18,23 +18,17 @@
  */
 
 import { OverlayRef } from '../../../core/public';
-
-/**
- * The interface that the adapters used to open an inspector have to fullfill.
- */
-export interface Adapters {
-  [key: string]: any;
-}
+import { Adapters } from '../common';
 
 /**
  * The props interface that a custom inspector view component, that will be passed
  * to {@link InspectorViewDescription#component}, must use.
  */
-export interface InspectorViewProps {
+export interface InspectorViewProps<TAdapters extends Adapters = Adapters> {
   /**
    * Adapters used to open the inspector.
    */
-  adapters: Adapters;
+  adapters: TAdapters;
   /**
    * The title that the inspector is currently using e.g. a visualization name.
    */

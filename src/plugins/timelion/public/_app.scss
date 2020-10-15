@@ -1,0 +1,21 @@
+.timApp {
+  position: relative;
+  background: $euiColorEmptyShade;
+
+  [ng-click] {
+    cursor: pointer;
+  }
+}
+
+.timApp__container {
+  margin: $euiSizeM;
+}
+
+.timApp__menus {
+  margin: $euiSizeM;
+}
+
+.timApp__stats {
+  font-weight: $euiFontWeightRegular;
+  color: $euiColorMediumShade;
+}

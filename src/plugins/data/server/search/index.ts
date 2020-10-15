@@ -17,12 +17,12 @@
  * under the License.
  */
 
-export { ISearchSetup } from './i_search_setup';
+export { ISearchStrategy, ISearchSetup, ISearchStart, SearchEnhancements } from './types';
 
-export { ISearchContext } from './i_search_context';
+export * from './es_search';
 
-export { IRequestTypesMap, IResponseTypesMap } from './i_search';
+export { usageProvider, SearchUsage } from './collectors';
 
-export { TStrategyTypes } from './strategy_types';
+export * from './aggs';
 
-export { TSearchStrategyProvider } from './i_search_strategy';
+export { shimHitsTotal } from './routes';

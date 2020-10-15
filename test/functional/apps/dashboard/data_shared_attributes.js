@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }) {
     before(async () => {
       await esArchiver.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
-        'defaultIndex': '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
@@ -59,7 +59,7 @@ export default function ({ getService, getPageObjects }) {
       await retry.try(async () => {
         const sharedData = await PageObjects.dashboard.getPanelSharedItemData();
         originalPanelTitles = await PageObjects.dashboard.getPanelTitles();
-        expect(sharedData.map(item => item.title)).to.eql(originalPanelTitles);
+        expect(sharedData.map((item) => item.title)).to.eql(originalPanelTitles);
       });
     });
 
@@ -67,7 +67,8 @@ export default function ({ getService, getPageObjects }) {
       const sharedContainerData = await PageObjects.dashboard.getSharedContainerData();
       expect(sharedContainerData.title).to.be('dashboard with everything');
       expect(sharedContainerData.description).to.be(
-        'I have one of every visualization type since the last time I was created!');
+        'I have one of every visualization type since the last time I was created!'
+      );
     });
 
     it('data-shared-item title should update a viz when using a custom panel title', async () => {
@@ -76,7 +77,7 @@ export default function ({ getService, getPageObjects }) {
       await dashboardPanelActions.setCustomPanelTitle(CUSTOM_VIS_TITLE);
       await retry.try(async () => {
         const sharedData = await PageObjects.dashboard.getPanelSharedItemData();
-        const foundSharedItemTitle = !!sharedData.find(item => {
+        const foundSharedItemTitle = !!sharedData.find((item) => {
           return item.title === CUSTOM_VIS_TITLE;
         });
         expect(foundSharedItemTitle).to.be(true);
@@ -87,7 +88,7 @@ export default function ({ getService, getPageObjects }) {
       await dashboardPanelActions.toggleHidePanelTitle();
       await retry.try(async () => {
         const sharedData = await PageObjects.dashboard.getPanelSharedItemData();
-        const foundSharedItemTitle = !!sharedData.find(item => {
+        const foundSharedItemTitle = !!sharedData.find((item) => {
           return item.title === '';
         });
         expect(foundSharedItemTitle).to.be(true);
@@ -99,7 +100,7 @@ export default function ({ getService, getPageObjects }) {
       await dashboardPanelActions.resetCustomPanelTitle();
       await retry.try(async () => {
         const sharedData = await PageObjects.dashboard.getPanelSharedItemData();
-        const foundOriginalSharedItemTitle = !!sharedData.find(item => {
+        const foundOriginalSharedItemTitle = !!sharedData.find((item) => {
           return item.title === originalPanelTitles[0];
         });
         expect(foundOriginalSharedItemTitle).to.be(true);
@@ -108,10 +109,13 @@ export default function ({ getService, getPageObjects }) {
 
     it('data-shared-item title should update a saved search when using a custom panel title', async () => {
       const CUSTOM_SEARCH_TITLE = 'ima custom title for a search!';
-      await dashboardPanelActions.setCustomPanelTitle(CUSTOM_SEARCH_TITLE, 'Rendering Test: saved search');
+      await dashboardPanelActions.setCustomPanelTitle(
+        CUSTOM_SEARCH_TITLE,
+        'Rendering Test: saved search'
+      );
       await retry.try(async () => {
         const sharedData = await PageObjects.dashboard.getPanelSharedItemData();
-        const foundSharedItemTitle = !!sharedData.find(item => {
+        const foundSharedItemTitle = !!sharedData.find((item) => {
           return item.title === CUSTOM_SEARCH_TITLE;
         });
         expect(foundSharedItemTitle).to.be(true);

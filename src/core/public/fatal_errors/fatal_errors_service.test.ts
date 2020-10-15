@@ -20,7 +20,7 @@
 import * as Rx from 'rxjs';
 
 expect.addSnapshotSerializer({
-  test: val => val instanceof Rx.Observable,
+  test: (val) => val instanceof Rx.Observable,
   print: () => `Rx.Observable`,
 });
 

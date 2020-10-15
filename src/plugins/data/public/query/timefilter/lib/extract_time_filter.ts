@@ -18,13 +18,14 @@
  */
 
 import { keys, partition } from 'lodash';
-import { esFilters } from '../../../../common';
+import { Filter, isRangeFilter, RangeFilter, TimeRange } from '../../../../common';
+import { convertRangeFilterToTimeRangeString } from './change_time_filter';
 
-export function extractTimeFilter(timeFieldName: string, filters: esFilters.Filter[]) {
-  const [timeRangeFilter, restOfFilters] = partition(filters, (obj: esFilters.Filter) => {
+export function extractTimeFilter(timeFieldName: string, filters: Filter[]) {
+  const [timeRangeFilter, restOfFilters] = partition(filters, (obj: Filter) => {
     let key;
 
-    if (esFilters.isRangeFilter(obj)) {
+    if (isRangeFilter(obj)) {
       key = keys(obj.range)[0];
     }
 
@@ -33,6 +34,18 @@ export function extractTimeFilter(timeFieldName: string, filters: esFilters.Filt
 
   return {
     restOfFilters,
-    timeRangeFilter: timeRangeFilter[0] as esFilters.RangeFilter | undefined,
+    timeRangeFilter: timeRangeFilter[0] as RangeFilter | undefined,
+  };
+}
+
+export function extractTimeRange(
+  filters: Filter[],
+  timeFieldName?: string
+): { restOfFilters: Filter[]; timeRange?: TimeRange } {
+  if (!timeFieldName) return { restOfFilters: filters, timeRange: undefined };
+  const { timeRangeFilter, restOfFilters } = extractTimeFilter(timeFieldName, filters);
+  return {
+    restOfFilters,
+    timeRange: timeRangeFilter ? convertRangeFilterToTimeRangeString(timeRangeFilter) : undefined,
   };
 }

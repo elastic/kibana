@@ -30,23 +30,26 @@ export default function ({ getService, getPageObjects }) {
       await kibanaServer.uiSettings.replace({});
     });
 
-    const columns = [{
-      heading: 'Name',
-      first: '@message',
-      last: 'xss.raw',
-      selector: async function () {
-        const tableRow = await PageObjects.settings.getTableRow(0, 0);
-        return await tableRow.getVisibleText();
-      }
-    }, {
-      heading: 'Type',
-      first: '_source',
-      last: 'string',
-      selector: async function () {
-        const tableRow = await PageObjects.settings.getTableRow(0, 1);
-        return await tableRow.getVisibleText();
-      }
-    }];
+    const columns = [
+      {
+        heading: 'Name',
+        first: '@message',
+        last: 'xss.raw',
+        selector: async function () {
+          const tableRow = await PageObjects.settings.getTableRow(0, 0);
+          return await tableRow.getVisibleText();
+        },
+      },
+      {
+        heading: 'Type',
+        first: '_source',
+        last: 'string',
+        selector: async function () {
+          const tableRow = await PageObjects.settings.getTableRow(0, 1);
+          return await tableRow.getVisibleText();
+        },
+      },
+    ];
 
     columns.forEach(function (col) {
       describe('sort by heading - ' + col.heading, function indexPatternCreation() {
@@ -86,7 +89,6 @@ export default function ({ getService, getPageObjects }) {
         await retry.try(async function () {
           const TabCount = await PageObjects.settings.getFieldsTabCount();
           expect(TabCount).to.be('' + EXPECTED_FIELD_COUNT);
-
         });
       });
     }); // end describe pagination

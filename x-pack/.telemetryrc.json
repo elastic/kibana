@@ -1,0 +1,5 @@
+{
+  "output": "plugins/telemetry_collection_xpack/schema/xpack_plugins.json",
+  "root": "plugins/",
+  "exclude": []
+}

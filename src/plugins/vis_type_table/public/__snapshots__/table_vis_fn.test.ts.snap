@@ -1,0 +1,44 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`interpreter/functions#table returns an object with the correct structure 1`] = `
+Object {
+  "as": "table_vis",
+  "type": "render",
+  "value": Object {
+    "visConfig": Object {
+      "dimensions": Object {
+        "buckets": Array [],
+        "metrics": Array [
+          Object {
+            "accessor": 0,
+            "aggType": "count",
+            "format": Object {
+              "id": "number",
+            },
+            "params": Object {},
+          },
+        ],
+      },
+      "perPage": 10,
+      "showMetricsAtAllLevels": false,
+      "showPartialRows": false,
+      "showTotal": false,
+      "sort": Object {
+        "columnIndex": null,
+        "direction": null,
+      },
+      "title": "My Chart title",
+      "totalFunc": "sum",
+    },
+    "visData": Object {
+      "tables": Array [
+        Object {
+          "columns": Array [],
+          "rows": Array [],
+        },
+      ],
+    },
+    "visType": "table",
+  },
+}
+`;

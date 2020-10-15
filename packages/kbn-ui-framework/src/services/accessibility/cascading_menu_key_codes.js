@@ -27,14 +27,7 @@
  * ESC: Deselect the current selection and hide the list.
  */
 
-import {
-  DOWN,
-  ESCAPE,
-  LEFT,
-  RIGHT,
-  TAB,
-  UP,
-} from '../key_codes';
+import { DOWN, ESCAPE, LEFT, RIGHT, TAB, UP } from '../key_codes';
 
 export const cascadingMenuKeyCodes = {
   DOWN,

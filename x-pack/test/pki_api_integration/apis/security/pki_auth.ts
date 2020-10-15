@@ -9,7 +9,6 @@ import request, { Cookie } from 'request';
 import { delay } from 'bluebird';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-// @ts-ignore
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -20,7 +19,7 @@ const UNTRUSTED_CLIENT_CERT = readFileSync(
   resolve(__dirname, '../../fixtures/untrusted_client.p12')
 );
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const config = getService('config');
 
@@ -48,7 +47,7 @@ export default function({ getService }: FtrProviderContext) {
         .post('/_security/role_mapping/first_client_pki')
         .ca(CA_CERT)
         .send({
-          roles: ['kibana_user'],
+          roles: ['kibana_admin'],
           enabled: true,
           rules: { field: { dn: 'CN=first_client' } },
         })
@@ -71,8 +70,13 @@ export default function({ getService }: FtrProviderContext) {
         .ca(CA_CERT)
         .pfx(UNTRUSTED_CLIENT_CERT)
         .set('kbn-xsrf', 'xxx')
-        .send({ username, password })
-        .expect(204);
+        .send({
+          providerType: 'basic',
+          providerName: 'basic',
+          currentURL: '/',
+          params: { username, password },
+        })
+        .expect(200);
 
       const cookies = response.headers['set-cookie'];
       expect(cookies).to.have.length(1);
@@ -89,7 +93,8 @@ export default function({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(user.username).to.eql(username);
-      expect(user.authentication_realm).to.eql({ name: 'reserved', type: 'reserved' });
+      expect(user.authentication_provider).to.eql('basic');
+      // Do not assert on the `authentication_realm`, as the value differes for on-prem vs cloud
     });
 
     it('should properly set cookie and authenticate user', async () => {
@@ -107,7 +112,7 @@ export default function({ getService }: FtrProviderContext) {
 
       expect(response.body).to.eql({
         username: 'first_client',
-        roles: ['kibana_user'],
+        roles: ['kibana_admin'],
         full_name: null,
         email: null,
         enabled: true,
@@ -118,6 +123,8 @@ export default function({ getService }: FtrProviderContext) {
         },
         authentication_realm: { name: 'pki1', type: 'pki' },
         lookup_realm: { name: 'pki1', type: 'pki' },
+        authentication_provider: 'pki',
+        authentication_type: 'token',
       });
 
       // Cookie should be accepted.
@@ -146,6 +153,7 @@ export default function({ getService }: FtrProviderContext) {
         .get('/internal/security/me')
         .ca(CA_CERT)
         .pfx(SECOND_CLIENT_CERT)
+        .set('kbn-xsrf', 'xxx')
         .set('Cookie', sessionCookie.cookieString())
         .expect(200, {
           username: 'second_client',
@@ -160,6 +168,8 @@ export default function({ getService }: FtrProviderContext) {
           },
           authentication_realm: { name: 'pki1', type: 'pki' },
           lookup_realm: { name: 'pki1', type: 'pki' },
+          authentication_provider: 'pki',
+          authentication_type: 'token',
         });
 
       checkCookieIsSet(request.cookie(response.headers['set-cookie'][0])!);
@@ -239,7 +249,7 @@ export default function({ getService }: FtrProviderContext) {
           .ca(CA_CERT)
           .pfx(FIRST_CLIENT_CERT)
           .set('kbn-xsrf', 'xxx')
-          .set('kbn-system-api', 'true')
+          .set('kbn-system-request', 'true')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
 
@@ -287,7 +297,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(cookies).to.have.length(1);
         checkCookieIsCleared(request.cookie(cookies[0])!);
 
-        expect(logoutResponse.headers.location).to.be('/logged_out');
+        expect(logoutResponse.headers.location).to.be('/security/logged_out');
       });
 
       it('should redirect to home page if session cookie is not provided', async () => {
@@ -319,7 +329,7 @@ export default function({ getService }: FtrProviderContext) {
         checkCookieIsSet(sessionCookie);
       });
 
-      it('AJAX call should re-acquire token and update existing cookie', async function() {
+      it('AJAX call should re-acquire token and update existing cookie', async function () {
         this.timeout(40000);
 
         // Access token expiration is set to 15s for API integration tests.
@@ -343,7 +353,7 @@ export default function({ getService }: FtrProviderContext) {
         checkCookieIsSet(refreshedCookie);
       });
 
-      it('non-AJAX call should re-acquire token and update existing cookie', async function() {
+      it('non-AJAX call should re-acquire token and update existing cookie', async function () {
         this.timeout(40000);
 
         // Access token expiration is set to 15s for API integration tests.

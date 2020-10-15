@@ -1,6 +1,6 @@
 [role="xpack"]
 [[indexing-geojson-data-tutorial]]
-== Indexing GeoJSON data tutorial
+=== Tutorial: Index GeoJSON data
 
 In this tutorial, you'll build a customized map that shows the flight path between
 two airports, and the lightning hot spots on that route. You'll learn to:
@@ -15,7 +15,7 @@ two airports, and the lightning hot spots on that route. You'll learn to:
 This tutorial requires you to download the following GeoJSON sample data files.
 These files are good examples of the types
 of vector data that you can upload to Kibana and index in
-Elasticsearch for display in *Elastic Maps*.
+Elasticsearch for display in  Maps.
 
 * https://raw.githubusercontent.com/elastic/examples/master/Maps/Getting%20Started%20Examples/geojson_upload_and_styling/logan_international_airport.geojson[Logan International Airport]
 * https://raw.githubusercontent.com/elastic/examples/master/Maps/Getting%20Started%20Examples/geojson_upload_and_styling/bangor_international_airport.geojson[Bangor International Airport]
@@ -46,7 +46,7 @@ image::maps/images/fu_gs_new_england_map.png[]
 === Upload and index GeoJSON files
 For each GeoJSON file you downloaded, complete the following steps:
 
-. Below the map legend, click *Add layer*.
+. Click *Add layer*.
 . From the list of layer types, click *Uploaded GeoJSON*.
 . Using the File Picker, upload the GeoJSON file.
 +
@@ -55,14 +55,14 @@ auto-populate *Index type* with either {ref}/geo-point.html[geo_point] or
  {ref}/geo-shape.html[geo_shape] and *Index name* with
 `<file name>`.
 
-. Click *Import file* in the lower right.
+. Click *Import file*.
 +
 You'll see activity as the GeoJSON Upload utility creates a new index
 and index pattern for the data set. When the process is complete, you should
 receive messages that the creation of the new index and index pattern
 were successful.
 
-. Click *Add layer* in the bottom right.
+. Click *Add layer*.
 
 . In *Layer settings*, adjust settings and <<maps-vector-style-properties, properties>> as needed.
 . Click *Save & close*.
@@ -86,15 +86,14 @@ hot spots are. An advantage of having indexed
 {ref}/geo-point.html[geo_point] data for the
 lightning strikes is that you can perform aggregations on the data.
 
-. Below the map legend, click *Add layer*.
-. From the list of layer types, click *Grid aggregation*.
+. Click *Add layer*.
+. From the list of layer types, click *Heat map*.
 +
 Because you indexed `lightning_detected.geojson` using the index name and
 pattern `lightning_detected`, that data is available as a {ref}/geo-point.html[geo_point]
 aggregation.
 
 . Select `lightning_detected`.
-. Click *Show as* and select `heat map`.
 . Click *Add layer* to add the heat map layer
 "Lightning intensity".
 +

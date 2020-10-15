@@ -1,0 +1,7 @@
+{
+  "id": "charts",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredBundles": ["visDefaultEditor"]
+}

@@ -17,14 +17,18 @@
  * under the License.
  */
 
-import { NotificationsStart } from 'src/core/public';
-import { CoreStart } from 'kibana/public';
-import { FieldFormatsStart } from '.';
+import { NotificationsStart, CoreStart } from 'src/core/public';
+import { FieldFormatsStart } from './field_formats';
 import { createGetterSetter } from '../../kibana_utils/public';
 import { IndexPatternsContract } from './index_patterns';
+import { DataPublicPluginStart } from './types';
 
 export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
   'Notifications'
+);
+
+export const [getUiSettings, setUiSettings] = createGetterSetter<CoreStart['uiSettings']>(
+  'UiSettings'
 );
 
 export const [getFieldFormats, setFieldFormats] = createGetterSetter<FieldFormatsStart>(
@@ -36,3 +40,11 @@ export const [getOverlays, setOverlays] = createGetterSetter<CoreStart['overlays
 export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatternsContract>(
   'IndexPatterns'
 );
+
+export const [getQueryService, setQueryService] = createGetterSetter<
+  DataPublicPluginStart['query']
+>('Query');
+
+export const [getSearchService, setSearchService] = createGetterSetter<
+  DataPublicPluginStart['search']
+>('Search');

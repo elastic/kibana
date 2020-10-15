@@ -40,6 +40,5 @@ export default function ({ getService, getPageObjects }) {
         health: 'Health: green',
       });
     });
-
   });
 }

@@ -19,7 +19,7 @@
 
 import { getFailures } from './get_failures';
 import { parseTestReport } from './test_report';
-import { FTR_REPORT, JEST_REPORT, KARMA_REPORT, MOCHA_REPORT } from './__fixtures__';
+import { FTR_REPORT, JEST_REPORT, MOCHA_REPORT } from './__fixtures__';
 
 it('discovers failures in ftr report', async () => {
   const failures = getFailures(await parseTestReport(FTR_REPORT));
@@ -48,6 +48,7 @@ it('discovers failures in ftr report', async () => {
         at process._tickCallback (internal/process/next_tick.js:68:7) name: 'NoSuchSessionError', remoteStacktrace: '' }
           ",
         "likelyIrrelevant": true,
+        "metadata-json": "{\\"messages\\":[\\"foo\\"],\\"screenshots\\":[{\\"name\\":\\"failure[dashboard app using current data dashboard snapshots compare TSVB snapshot]\\",\\"url\\":\\"https://storage.googleapis.com/kibana-ci-artifacts/jobs/elastic+kibana+7.x/1632/kibana-oss-tests/test/functional/screenshots/failure/dashboard%20app%20using%20current%20data%20dashboard%20snapshots%20compare%20TSVB%20snapshot.png\\"}]}",
         "name": "maps app \\"after all\\" hook",
         "time": "0.179",
       },
@@ -79,31 +80,6 @@ it('discovers failures in jest report', async () => {
         "likelyIrrelevant": false,
         "name": "launcher can reconnect if process died",
         "time": "7.060",
-      },
-    ]
-  `);
-});
-
-it('discovers failures in karma report', async () => {
-  const failures = getFailures(await parseTestReport(KARMA_REPORT));
-  expect(failures).toMatchInlineSnapshot(`
-    Array [
-      Object {
-        "classname": "Browser Unit Tests.CoordinateMapsVisualizationTest",
-        "failure": "Error: expected 7069 to be below 64
-        at Assertion.__kbnBundles__.tests../packages/kbn-expect/expect.js.Assertion.assert (http://localhost:5610/bundles/tests.bundle.js?shards=4&shard_num=1:13671:11)
-        at Assertion.__kbnBundles__.tests../packages/kbn-expect/expect.js.Assertion.lessThan.Assertion.below (http://localhost:5610/bundles/tests.bundle.js?shards=4&shard_num=1:13891:8)
-        at Function.lessThan (http://localhost:5610/bundles/tests.bundle.js?shards=4&shard_num=1:14078:15)
-        at _callee3$ (http://localhost:5610/bundles/tests.bundle.js?shards=4&shard_num=1:158985:60)
-        at tryCatch (webpack://%5Bname%5D/./node_modules/regenerator-runtime/runtime.js?:62:40)
-        at Generator.invoke [as _invoke] (webpack://%5Bname%5D/./node_modules/regenerator-runtime/runtime.js?:288:22)
-        at Generator.prototype.<computed> [as next] (webpack://%5Bname%5D/./node_modules/regenerator-runtime/runtime.js?:114:21)
-        at asyncGeneratorStep (http://localhost:5610/bundles/tests.bundle.js?shards=4&shard_num=1:158772:103)
-        at _next (http://localhost:5610/bundles/tests.bundle.js?shards=4&shard_num=1:158774:194)
-    ",
-        "likelyIrrelevant": false,
-        "name": "CoordinateMapsVisualizationTest CoordinateMapsVisualization - basics should initialize OK",
-        "time": "0.265",
       },
     ]
   `);

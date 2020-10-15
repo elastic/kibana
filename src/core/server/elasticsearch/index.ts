@@ -18,10 +18,30 @@
  */
 
 export { ElasticsearchService } from './elasticsearch_service';
-export { IClusterClient, ClusterClient, FakeRequest } from './cluster_client';
-export { IScopedClusterClient, ScopedClusterClient, Headers } from './scoped_cluster_client';
-export { ElasticsearchClientConfig } from './elasticsearch_client_config';
-export { config } from './elasticsearch_config';
-export { ElasticsearchError, ElasticsearchErrorHelpers } from './errors';
-export * from './api_types';
-export * from './types';
+export { config, configSchema, ElasticsearchConfig } from './elasticsearch_config';
+export { NodesVersionCompatibility } from './version_check/ensure_es_version';
+export {
+  ElasticsearchServiceSetup,
+  ElasticsearchServiceStart,
+  ElasticsearchStatusMeta,
+  InternalElasticsearchServiceSetup,
+  InternalElasticsearchServiceStart,
+  FakeRequest,
+  ScopeableRequest,
+} from './types';
+export * from './legacy';
+export {
+  IClusterClient,
+  ICustomClusterClient,
+  ElasticsearchClientConfig,
+  ElasticsearchClient,
+  IScopedClusterClient,
+  // responses
+  SearchResponse,
+  CountResponse,
+  ShardsInfo,
+  ShardsResponse,
+  Explanation,
+  GetResponse,
+  DeleteDocumentResponse,
+} from './client';

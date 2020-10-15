@@ -19,13 +19,14 @@
 
 import { Observable } from 'rxjs';
 import { Type } from '@kbn/config-schema';
+import { RecursiveReadonly } from '@kbn/utility-types';
+import { PathConfigType } from '@kbn/utils';
 
-import { RecursiveReadonly } from 'kibana/public';
 import { ConfigPath, EnvironmentMode, PackageInfo, ConfigDeprecationProvider } from '../config';
 import { LoggerFactory } from '../logging';
 import { KibanaConfigType } from '../kibana_config';
 import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
-import { PathConfigType } from '../path';
+import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
 import { CoreSetup, CoreStart } from '..';
 
 /**
@@ -93,6 +94,12 @@ export type PluginName = string;
 /** @public */
 export type PluginOpaqueId = symbol;
 
+/** @internal */
+export interface PluginDependencies {
+  asNames: ReadonlyMap<PluginName, PluginName[]>;
+  asOpaqueIds: ReadonlyMap<PluginOpaqueId, PluginOpaqueId[]>;
+}
+
 /**
  * Describes the set of required and optional properties plugin can define in its
  * mandatory JSON manifest file.
@@ -105,7 +112,8 @@ export type PluginOpaqueId = symbol;
  */
 export interface PluginManifest {
   /**
-   * Identifier of the plugin.
+   * Identifier of the plugin. Must be a string in camelCase. Part of a plugin public contract.
+   * Other plugins leverage it to access plugin API, navigate to the plugin, etc.
    */
   readonly id: PluginName;
 
@@ -121,7 +129,11 @@ export interface PluginManifest {
 
   /**
    * Root {@link ConfigPath | configuration path} used by the plugin, defaults
-   * to "id".
+   * to "id" in snake_case format.
+   *
+   * @example
+   * id: myPlugin
+   * configPath: my_plugin
    */
   readonly configPath: ConfigPath;
 
@@ -130,6 +142,18 @@ export interface PluginManifest {
    * for this plugin to function properly.
    */
   readonly requiredPlugins: readonly PluginName[];
+
+  /**
+   * List of plugin ids that this plugin's UI code imports modules from that are
+   * not in `requiredPlugins`.
+   *
+   * @remarks
+   * The plugins listed here will be loaded in the browser, even if the plugin is
+   * disabled. Required by `@kbn/optimizer` to support cross-plugin imports.
+   * "core" and plugins already listed in `requiredPlugins` do not need to be
+   * duplicated here.
+   */
+  readonly requiredBundles: readonly string[];
 
   /**
    * An optional list of the other plugins that if installed and enabled **may be**
@@ -148,6 +172,14 @@ export interface PluginManifest {
    * Specifies whether plugin includes some server-side specific functionality.
    */
   readonly server: boolean;
+
+  /**
+   * Specifies directory names that can be imported by other ui-plugins built
+   * using the same instance of the @kbn/optimizer. A temporary measure we plan
+   * to replace with better mechanisms for sharing static code between plugins
+   * @deprecated
+   */
+  readonly extraPublicDirs?: string[];
 }
 
 /**
@@ -162,7 +194,7 @@ export interface DiscoveredPlugin {
   readonly id: PluginName;
 
   /**
-   * Root configuration path used by the plugin, defaults to "id".
+   * Root configuration path used by the plugin, defaults to "id" in snake_case format.
    */
   readonly configPath: ConfigPath;
 
@@ -178,6 +210,18 @@ export interface DiscoveredPlugin {
    * not required for this plugin to work properly.
    */
   readonly optionalPlugins: readonly PluginName[];
+
+  /**
+   * List of plugin ids that this plugin's UI code imports modules from that are
+   * not in `requiredPlugins`.
+   *
+   * @remarks
+   * The plugins listed here will be loaded in the browser, even if the plugin is
+   * disabled. Required by `@kbn/optimizer` to support cross-plugin imports.
+   * "core" and plugins already listed in `requiredPlugins` do not need to be
+   * duplicated here.
+   */
+  readonly requiredBundles: readonly PluginName[];
 }
 
 /**
@@ -185,10 +229,18 @@ export interface DiscoveredPlugin {
  */
 export interface InternalPluginInfo {
   /**
-   * Path to the client-side entrypoint file to be used to build the client-side
-   * bundle for a plugin.
+   * Bundles that must be loaded for this plugoin
    */
-  readonly entryPointPath: string;
+  readonly requiredBundles: readonly string[];
+  /**
+   * Path to the target/public directory of the plugin which should be
+   * served
+   */
+  readonly publicTargetDir: string;
+  /**
+   * Path to the plugin assets directory.
+   */
+  readonly publicAssetsDir: string;
 }
 
 /**
@@ -209,9 +261,10 @@ export interface Plugin<
 
 export const SharedGlobalConfigKeys = {
   // We can add more if really needed
-  kibana: ['defaultAppId', 'index'] as const,
-  elasticsearch: ['shardTimeout', 'requestTimeout', 'pingTimeout', 'startupTimeout'] as const,
+  kibana: ['index', 'autocompleteTerminateAfter', 'autocompleteTimeout'] as const,
+  elasticsearch: ['shardTimeout', 'requestTimeout', 'pingTimeout'] as const,
   path: ['data'] as const,
+  savedObjects: ['maxImportPayloadBytes'] as const,
 };
 
 /**
@@ -221,6 +274,7 @@ export type SharedGlobalConfig = RecursiveReadonly<{
   kibana: Pick<KibanaConfigType, typeof SharedGlobalConfigKeys.kibana[number]>;
   elasticsearch: Pick<ElasticsearchConfigType, typeof SharedGlobalConfigKeys.elasticsearch[number]>;
   path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;
+  savedObjects: Pick<SavedObjectsConfigType, typeof SharedGlobalConfigKeys.savedObjects[number]>;
 }>;
 
 /**
@@ -233,6 +287,7 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
   env: {
     mode: EnvironmentMode;
     packageInfo: Readonly<PackageInfo>;
+    instanceUuid: string;
   };
   logger: LoggerFactory;
   config: {

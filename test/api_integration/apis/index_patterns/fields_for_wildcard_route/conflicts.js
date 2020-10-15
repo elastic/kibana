@@ -27,12 +27,12 @@ export default function ({ getService }) {
     before(() => esArchiver.load('index_patterns/conflicts'));
     after(() => esArchiver.unload('index_patterns/conflicts'));
 
-    it('flags fields with mismatched types as conflicting', () => (
+    it('flags fields with mismatched types as conflicting', () =>
       supertest
         .get('/api/index_patterns/_fields_for_wildcard')
         .query({ pattern: 'logs-*' })
         .expect(200)
-        .then(resp => {
+        .then((resp) => {
           expect(resp.body).to.eql({
             fields: [
               {
@@ -67,17 +67,12 @@ export default function ({ getService }) {
                 searchable: true,
                 readFromDocValues: false,
                 conflictDescriptions: {
-                  boolean: [
-                    'logs-2017.01.02'
-                  ],
-                  keyword: [
-                    'logs-2017.01.01'
-                  ]
-                }
-              }
-            ]
+                  boolean: ['logs-2017.01.02'],
+                  keyword: ['logs-2017.01.01'],
+                },
+              },
+            ],
           });
-        })
-    ));
+        }));
   });
 }

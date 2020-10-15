@@ -27,7 +27,7 @@ export function cleanPrevious(settings, logger) {
 
       logger.log('Found previous install attempt. Deleting...');
       try {
-        del.sync(settings.workingPath);
+        del.sync(settings.workingPath, { force: true });
       } catch (e) {
         reject(e);
       }
@@ -45,7 +45,5 @@ export function cleanArtifacts(settings) {
   // At this point we're bailing, so swallow any errors on delete.
   try {
     del.sync(settings.workingPath);
-    del.sync(settings.plugins[0].path);
-  }
-  catch (e) {} // eslint-disable-line no-empty
+  } catch (e) {} // eslint-disable-line no-empty
 }

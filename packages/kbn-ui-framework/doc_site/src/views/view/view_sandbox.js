@@ -28,18 +28,17 @@ import {
 
 import html from './view_sandbox.html';
 
-export default props => (
+export default (props) => (
   <GuideSandbox>
-    <GuideDemo
-      isFullScreen={true}
-      html={html}
-    />
+    <GuideDemo isFullScreen={true} html={html} />
 
     <GuideSandboxCodeToggle
-      source={[{
-        type: GuideSectionTypes.HTML,
-        code: html,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.HTML,
+          code: html,
+        },
+      ]}
       title={props.route.name}
     />
   </GuideSandbox>

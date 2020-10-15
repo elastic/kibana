@@ -7,7 +7,7 @@
       "config": {
         "buildNum": 8467,
         "dateFormat:tz": "UTC",
-        "defaultRoute": "/app/canvas"
+        "defaultRoute": "http://example.com/evil"
       },
       "type": "config"
     }
@@ -24,7 +24,7 @@
       "config": {
         "buildNum": 8467,
         "dateFormat:tz": "UTC",
-        "defaultRoute": "/app/kibana/#dashboard"
+        "defaultRoute": "/app/canvas"
       },
       "type": "config"
     }

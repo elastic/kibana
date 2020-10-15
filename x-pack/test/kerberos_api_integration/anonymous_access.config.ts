@@ -6,7 +6,7 @@
 
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 
-export default async function({ readConfigFile }: FtrConfigProviderContext) {
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kerberosAPITestsConfig = await readConfigFile(require.resolve('./config.ts'));
 
   return {
@@ -21,7 +21,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...kerberosAPITestsConfig.get('esTestCluster.serverArgs'),
         'xpack.security.authc.anonymous.username=anonymous_user',
-        'xpack.security.authc.anonymous.roles=superuser',
+        'xpack.security.authc.anonymous.roles=superuser_anonymous',
       ],
     },
   };

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 import { errorIfXPackInstall, errorIfXPackRemove } from './error_if_x_pack';
 
 describe('error_if_xpack', () => {
@@ -26,18 +25,18 @@ describe('error_if_xpack', () => {
   });
 
   it('should error on install if x-pack by url', () => {
-    expect(() => (
+    expect(() =>
       errorIfXPackInstall({
-        plugin: 'http://localhost/x-pack/x-pack-7.0.0-alpha1-SNAPSHOT.zip'
-      }))
+        plugin: 'http://localhost/x-pack/x-pack-7.0.0-alpha1-SNAPSHOT.zip',
+      })
     ).toThrow();
   });
 
   it('should not error on install if not x-pack', () => {
-    expect(() => (
+    expect(() =>
       errorIfXPackInstall({
-        plugin: 'foo'
-      }))
+        plugin: 'foo',
+      })
     ).not.toThrow();
   });
 

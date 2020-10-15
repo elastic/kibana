@@ -17,10 +17,23 @@
  * under the License.
  */
 
-export const searchSetupMock = {
-  registerSearchStrategyContext: jest.fn(),
-  registerSearchStrategyProvider: jest.fn(),
-  __LEGACY: {
+import { ISearchSetup, ISearchStart } from './types';
+import { searchAggsSetupMock, searchAggsStartMock } from './aggs/mocks';
+import { searchSourceMock } from './search_source/mocks';
+
+export function createSearchSetupMock(): jest.Mocked<ISearchSetup> {
+  return {
+    aggs: searchAggsSetupMock(),
+    registerSearchStrategy: jest.fn(),
+    __enhance: jest.fn(),
+  };
+}
+
+export function createSearchStartMock(): jest.Mocked<ISearchStart> {
+  return {
+    aggs: searchAggsStartMock(),
+    getSearchStrategy: jest.fn(),
     search: jest.fn(),
-  },
-};
+    searchSource: searchSourceMock.createStartContract(),
+  };
+}

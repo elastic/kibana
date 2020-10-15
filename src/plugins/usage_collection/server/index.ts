@@ -17,11 +17,18 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/server';
-import { Plugin } from './plugin';
-import { ConfigSchema } from './config';
+import { PluginInitializerContext } from 'kibana/server';
+import { UsageCollectionPlugin } from './plugin';
 
+export {
+  AllowedSchemaTypes,
+  MakeSchemaFrom,
+  SchemaField,
+  CollectorOptions,
+  Collector,
+  CollectorFetchContext,
+} from './collector';
 export { UsageCollectionSetup } from './plugin';
-export const config = { schema: ConfigSchema };
+export { config } from './config';
 export const plugin = (initializerContext: PluginInitializerContext) =>
-  new Plugin(initializerContext);
+  new UsageCollectionPlugin(initializerContext);

@@ -19,12 +19,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
-import { CoreStart } from 'src/core/public';
-import { TGetActionsCompatibleWithTrigger } from 'src/plugins/ui_actions/public';
-import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { Container, ViewMode, ContainerInput } from '../..';
 import { HelloWorldContainerComponent } from './hello_world_container_component';
-import { GetEmbeddableFactory, GetEmbeddableFactories } from '../../types';
+import { EmbeddableStart } from '../../../plugin';
 
 export const HELLO_WORLD_CONTAINER = 'HELLO_WORLD_CONTAINER';
 
@@ -33,7 +30,6 @@ export const HELLO_WORLD_CONTAINER = 'HELLO_WORLD_CONTAINER';
  * https://github.com/microsoft/TypeScript/issues/15300 is fixed so we use a type
  * here instead
  */
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type InheritedInput = {
   id: string;
   viewMode: ViewMode;
@@ -45,13 +41,8 @@ interface HelloWorldContainerInput extends ContainerInput {
 }
 
 interface HelloWorldContainerOptions {
-  getActions: TGetActionsCompatibleWithTrigger;
-  getEmbeddableFactory: GetEmbeddableFactory;
-  getAllEmbeddableFactories: GetEmbeddableFactories;
-  overlays: CoreStart['overlays'];
-  notifications: CoreStart['notifications'];
-  inspector: InspectorStartContract;
-  SavedObjectFinder: React.ComponentType<any>;
+  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
+  panelComponent: EmbeddableStart['EmbeddablePanel'];
 }
 
 export class HelloWorldContainer extends Container<InheritedInput, HelloWorldContainerInput> {
@@ -77,13 +68,7 @@ export class HelloWorldContainer extends Container<InheritedInput, HelloWorldCon
       <I18nProvider>
         <HelloWorldContainerComponent
           container={this}
-          getActions={this.options.getActions}
-          getAllEmbeddableFactories={this.options.getAllEmbeddableFactories}
-          getEmbeddableFactory={this.options.getEmbeddableFactory}
-          overlays={this.options.overlays}
-          notifications={this.options.notifications}
-          inspector={this.options.inspector}
-          SavedObjectFinder={this.options.SavedObjectFinder}
+          panelComponent={this.options.panelComponent}
         />
       </I18nProvider>,
       node

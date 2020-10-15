@@ -24,7 +24,6 @@ export default function ({ getPageObjects }) {
 
   describe('expression typeahead', () => {
     before(async () => {
-
       await PageObjects.timelion.initTests();
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });

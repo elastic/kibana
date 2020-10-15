@@ -22,9 +22,10 @@ export enum FilterStateStore {
   GLOBAL_STATE = 'globalState',
 }
 
-export interface FilterState {
+// eslint-disable-next-line
+export type FilterState = {
   store: FilterStateStore;
-}
+};
 
 type FilterFormatterFunction = (value: any) => string;
 export interface FilterValueFormatter {
@@ -32,7 +33,8 @@ export interface FilterValueFormatter {
   getConverterFor: (type: string) => FilterFormatterFunction;
 }
 
-export interface FilterMeta {
+// eslint-disable-next-line
+export type FilterMeta = {
   alias: string | null;
   disabled: boolean;
   negate: boolean;
@@ -43,14 +45,15 @@ export interface FilterMeta {
   type?: string;
   key?: string;
   params?: any;
-  value?: string | ((formatter?: FilterValueFormatter) => string);
-}
+  value?: string;
+};
 
-export interface Filter {
+// eslint-disable-next-line
+export type Filter = {
   $state?: FilterState;
   meta: FilterMeta;
   query?: any;
-}
+};
 
 export interface LatLon {
   lat: number;
@@ -107,3 +110,13 @@ export const pinFilter = (filter: Filter) =>
 
 export const unpinFilter = (filter: Filter) =>
   !isFilterPinned(filter) ? filter : toggleFilterPinned(filter);
+
+export const isFilter = (x: unknown): x is Filter =>
+  !!x &&
+  typeof x === 'object' &&
+  !!(x as Filter).meta &&
+  typeof (x as Filter).meta === 'object' &&
+  typeof (x as Filter).meta.disabled === 'boolean';
+
+export const isFilters = (x: unknown): x is Filter[] =>
+  Array.isArray(x) && !x.find((y) => !isFilter(y));

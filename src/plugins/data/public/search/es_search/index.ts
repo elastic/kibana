@@ -17,9 +17,4 @@
  * under the License.
  */
 
-import { PluginInitializer, PluginInitializerContext } from 'kibana/public';
-import { EsSearchService } from './es_search_service';
-
-export const esSearchService: PluginInitializer<void, void> = (
-  initializerContext: PluginInitializerContext
-) => new EsSearchService(initializerContext);
+export { getEsPreference } from './get_es_preference';

@@ -36,13 +36,9 @@ export function scrollIntoViewIfNecessary(target, fixedHeaderHeight) {
   var rootRect = rootScroller.getBoundingClientRect();
   var targetRect = target.getBoundingClientRect();
 
-  var viewportHeight = window.visualViewport
-    ? visualViewport.height
-    : window.innerHeight;
+  var viewportHeight = window.visualViewport ? visualViewport.height : window.innerHeight;
 
-  var viewportWidth = window.visualViewport
-    ? visualViewport.width
-    : window.innerWidth;
+  var viewportWidth = window.visualViewport ? visualViewport.width : window.innerWidth;
 
   function isInView() {
     return (

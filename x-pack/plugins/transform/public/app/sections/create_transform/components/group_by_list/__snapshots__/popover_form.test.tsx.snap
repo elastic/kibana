@@ -1,0 +1,93 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Transform: Group By <PopoverForm /> Minimal initialization 1`] = `
+<EuiForm
+  style={
+    Object {
+      "width": "300px",
+    }
+  }
+>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    error={false}
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText=""
+    isInvalid={false}
+    label="Group by name"
+    labelType="label"
+  >
+    <EuiFieldText
+      defaultValue="the-agg-name"
+      isInvalid={false}
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    error={false}
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    isInvalid={false}
+    label="Interval"
+    labelType="label"
+  >
+    <EuiSelect
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "text": "1m",
+            "value": "1m",
+          },
+          Object {
+            "text": "1h",
+            "value": "1h",
+          },
+          Object {
+            "text": "1d",
+            "value": "1d",
+          },
+          Object {
+            "text": "1w",
+            "value": "1w",
+          },
+          Object {
+            "text": "1M",
+            "value": "1M",
+          },
+          Object {
+            "text": "1q",
+            "value": "1q",
+          },
+          Object {
+            "text": "1y",
+            "value": "1y",
+          },
+        ]
+      }
+      value="1m"
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={true}
+    labelType="label"
+  >
+    <EuiButton
+      isDisabled={false}
+      onClick={[Function]}
+    >
+      Apply
+    </EuiButton>
+  </EuiFormRow>
+</EuiForm>
+`;

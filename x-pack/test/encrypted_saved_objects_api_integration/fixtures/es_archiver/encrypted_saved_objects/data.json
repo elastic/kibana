@@ -1,0 +1,370 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "config:8.0.0",
+    "index": ".kibana_1",
+    "source": {
+      "config": {
+        "buildNum": 9007199254740991
+      },
+      "migrationVersion": {
+        "config": "7.9.0"
+      },
+      "references": [
+      ],
+      "type": "config",
+      "updated_at": "2020-06-17T15:03:14.532Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "space:default",
+    "index": ".kibana_1",
+    "source": {
+      "migrationVersion": {
+        "space": "6.6.0"
+      },
+      "references": [
+      ],
+      "space": {
+        "_reserved": true,
+        "color": "#00bfb3",
+        "description": "This is your default space!",
+        "disabledFeatures": [
+        ],
+        "name": "Default"
+      },
+      "type": "space",
+      "updated_at": "2020-06-17T15:03:27.426Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "apm-telemetry:apm-telemetry",
+    "index": ".kibana_1",
+    "source": {
+      "apm-telemetry": {
+        "agents": {
+        },
+        "cardinality": {
+          "transaction": {
+            "name": {
+              "all_agents": {
+                "1d": 0
+              },
+              "rum": {
+                "1d": 0
+              }
+            }
+          },
+          "user_agent": {
+            "original": {
+              "all_agents": {
+                "1d": 0
+              },
+              "rum": {
+                "1d": 0
+              }
+            }
+          }
+        },
+        "counts": {
+          "agent_configuration": {
+            "all": 0
+          },
+          "error": {
+            "1d": 0,
+            "all": 0
+          },
+          "max_error_groups_per_service": {
+            "1d": 0
+          },
+          "max_transaction_groups_per_service": {
+            "1d": 0
+          },
+          "metric": {
+            "1d": 0,
+            "all": 0
+          },
+          "onboarding": {
+            "1d": 0,
+            "all": 0
+          },
+          "services": {
+            "1d": 0
+          },
+          "sourcemap": {
+            "1d": 0,
+            "all": 0
+          },
+          "span": {
+            "1d": 0,
+            "all": 0
+          },
+          "traces": {
+            "1d": 0
+          },
+          "transaction": {
+            "1d": 0,
+            "all": 0
+          }
+        },
+        "has_any_services": false,
+        "indices": {
+          "all": {
+            "total": {
+              "docs": {
+                "count": 0
+              },
+              "store": {
+                "size_in_bytes": 416
+              }
+            }
+          },
+          "shards": {
+            "total": 2
+          }
+        },
+        "integrations": {
+          "ml": {
+            "all_jobs_count": 0
+          }
+        },
+        "services_per_agent": {
+          "dotnet": 0,
+          "go": 0,
+          "java": 0,
+          "js-base": 0,
+          "nodejs": 0,
+          "python": 0,
+          "ruby": 0,
+          "rum-js": 0
+        },
+        "tasks": {
+          "agent_configuration": {
+            "took": {
+              "ms": 21
+            }
+          },
+          "agents": {
+            "took": {
+              "ms": 65
+            }
+          },
+          "cardinality": {
+            "took": {
+              "ms": 80
+            }
+          },
+          "groupings": {
+            "took": {
+              "ms": 25
+            }
+          },
+          "indices_stats": {
+            "took": {
+              "ms": 65
+            }
+          },
+          "integrations": {
+            "took": {
+              "ms": 108
+            }
+          },
+          "processor_events": {
+            "took": {
+              "ms": 113
+            }
+          },
+          "services": {
+            "took": {
+              "ms": 98
+            }
+          },
+          "versions": {
+            "took": {
+              "ms": 6
+            }
+          }
+        }
+      },
+      "references": [
+      ],
+      "type": "apm-telemetry",
+      "updated_at": "2020-06-17T15:03:47.184Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "saved-object-with-migration:74f3e6d7-b7bb-477d-ac28-92ee22728e6e",
+    "index": ".kibana_1",
+    "source": {
+      "saved-object-with-migration": {
+        "encryptedAttribute": "JuDwwSjflpKmPKUIfjgo04E0DW9iyhp8C94hwvflgkS0SUUPt+862FQ1eja4VEfEG7HVUt7xxj+BWeZv9vrf4olxgbr4/f5RrT8BVic0EOVS9nhspiDVEv12mV0uDWGtdneB/UWyaZg+0Qr0tPrwceSl8BS///U=",
+        "nonEncryptedAttribute": "elastic"
+      },
+      "migrationVersion": {
+        "saved-object-with-migration": "7.7.0"
+      },
+      "references": [
+      ],
+      "type": "saved-object-with-migration",
+      "updated_at": "2020-06-17T15:35:39.839Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "application_usage_transactional:5f01fd40-b0b0-11ea-9510-fdf248d5f2a4",
+    "index": ".kibana_1",
+    "source": {
+      "application_usage_transactional": {
+        "appId": "management",
+        "minutesOnScreen": 1.60245,
+        "numberOfClicks": 6,
+        "timestamp": "2020-06-17T15:36:54.292Z"
+      },
+      "references": [
+      ],
+      "type": "application_usage_transactional",
+      "updated_at": "2020-06-17T15:36:54.292Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "application_usage_transactional:4ca5ac00-b0b0-11ea-9510-fdf248d5f2a4",
+    "index": ".kibana_1",
+    "source": {
+      "application_usage_transactional": {
+        "appId": "home",
+        "minutesOnScreen": 0.4106666666666667,
+        "numberOfClicks": 3,
+        "timestamp": "2020-06-17T15:36:23.487Z"
+      },
+      "references": [
+      ],
+      "type": "application_usage_transactional",
+      "updated_at": "2020-06-17T15:36:23.488Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "ui-metric:kibana-user_agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36",
+    "index": ".kibana_1",
+    "source": {
+      "references": [
+      ],
+      "type": "ui-metric",
+      "ui-metric": {
+        "count": 1
+      },
+      "updated_at": "2020-06-17T15:36:23.487Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "ui-metric:Kibana_home:sampleDataDecline",
+    "index": ".kibana_1",
+    "source": {
+      "type": "ui-metric",
+      "ui-metric": {
+        "count": 1
+      },
+      "updated_at": "2020-06-17T15:36:23.488Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "ui-metric:Kibana_home:welcomeScreenMount",
+    "index": ".kibana_1",
+    "source": {
+      "type": "ui-metric",
+      "ui-metric": {
+        "count": 1
+      },
+      "updated_at": "2020-06-17T15:36:23.488Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "telemetry:telemetry",
+    "index": ".kibana_1",
+    "source": {
+      "references": [
+      ],
+      "telemetry": {
+        "lastReported": 1592408310031,
+        "reportFailureCount": 0,
+        "userHasSeenNotice": true
+      },
+      "type": "telemetry",
+      "updated_at": "2020-06-17T15:38:30.031Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "maps-telemetry:maps-telemetry",
+    "index": ".kibana_1",
+    "source": {
+      "maps-telemetry": {
+        "attributesPerMap": {
+          "dataSourcesCount": {
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          },
+          "emsVectorLayersCount": {
+          },
+          "layerTypesCount": {
+          },
+          "layersCount": {
+            "avg": 0,
+            "max": 0,
+            "min": 0
+          }
+        },
+        "indexPatternsWithGeoFieldCount": 0,
+        "indexPatternsWithGeoPointFieldCount": 0,
+        "indexPatternsWithGeoShapeFieldCount": 0,
+        "mapsTotalCount": 0,
+        "settings": {
+          "showMapVisualizationTypes": false
+        },
+        "timeCaptured": "2020-06-17T16:29:27.563Z"
+      },
+      "references": [
+      ],
+      "type": "maps-telemetry",
+      "updated_at": "2020-06-17T16:29:27.563Z"
+    }
+  }
+}

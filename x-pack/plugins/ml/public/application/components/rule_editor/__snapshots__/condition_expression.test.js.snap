@@ -1,0 +1,397 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ConditionExpression renders with appliesTo, operator and value supplied 1`] = `
+<EuiFlexGroup
+  gutterSize="m"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiPopover
+      anchorPosition="downLeft"
+      button={
+        <EuiExpression
+          description={
+            <FormattedMessage
+              defaultMessage="when"
+              id="xpack.ml.ruleEditor.conditionExpression.appliesToButtonLabel"
+              values={Object {}}
+            />
+          }
+          isActive={false}
+          onClick={[Function]}
+          value="diff from typical"
+        />
+      }
+      closePopover={[Function]}
+      display="inlineBlock"
+      hasArrow={true}
+      id="appliesToPopover"
+      isOpen={false}
+      ownFocus={true}
+      panelPaddingSize="none"
+      withTitle={true}
+    >
+      <div
+        style={
+          Object {
+            "zIndex": "200",
+          }
+        }
+      >
+        <EuiPopoverTitle>
+          <FormattedMessage
+            defaultMessage="When"
+            id="xpack.ml.ruleEditor.conditionExpression.appliesToPopoverTitle"
+            values={Object {}}
+          />
+        </EuiPopoverTitle>
+        <div
+          className="euiExpression"
+          style={
+            Object {
+              "width": 200,
+            }
+          }
+        >
+          <EuiSelect
+            onChange={[Function]}
+            options={
+              Array [
+                Object {
+                  "text": "actual",
+                  "value": "actual",
+                },
+                Object {
+                  "text": "typical",
+                  "value": "typical",
+                },
+                Object {
+                  "text": "diff from typical",
+                  "value": "diff_from_typical",
+                },
+              ]
+            }
+            value="diff_from_typical"
+          />
+        </div>
+      </div>
+    </EuiPopover>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiPopover
+      anchorPosition="downLeft"
+      button={
+        <EuiExpression
+          description={
+            <FormattedMessage
+              defaultMessage="is {operator}"
+              id="xpack.ml.ruleEditor.conditionExpression.operatorValueButtonLabel"
+              values={
+                Object {
+                  "operator": "greater than",
+                }
+              }
+            />
+          }
+          isActive={false}
+          onClick={[Function]}
+          value="123"
+        />
+      }
+      closePopover={[Function]}
+      display="inlineBlock"
+      hasArrow={true}
+      id="operatorValuePopover"
+      isOpen={false}
+      ownFocus={true}
+      panelPaddingSize="none"
+      withTitle={true}
+    >
+      <div
+        style={
+          Object {
+            "zIndex": "200",
+          }
+        }
+      >
+        <EuiPopoverTitle>
+          <FormattedMessage
+            defaultMessage="Is"
+            id="xpack.ml.ruleEditor.conditionExpression.operatorValuePopoverTitle"
+            values={Object {}}
+          />
+        </EuiPopoverTitle>
+        <div
+          className="euiExpression"
+        >
+          <EuiFlexGroup
+            style={
+              Object {
+                "maxWidth": 450,
+              }
+            }
+          >
+            <EuiFlexItem
+              grow={false}
+              style={
+                Object {
+                  "width": 250,
+                }
+              }
+            >
+              <EuiSelect
+                onChange={[Function]}
+                options={
+                  Array [
+                    Object {
+                      "text": "less than",
+                      "value": "lt",
+                    },
+                    Object {
+                      "text": "less than or equal to",
+                      "value": "lte",
+                    },
+                    Object {
+                      "text": "greater than",
+                      "value": "gt",
+                    },
+                    Object {
+                      "text": "greater than or equal to",
+                      "value": "gte",
+                    },
+                  ]
+                }
+                value="gt"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+              style={
+                Object {
+                  "width": 200,
+                }
+              }
+            >
+              <EuiFieldNumber
+                onChange={[Function]}
+                value={123}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+      </div>
+    </EuiPopover>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiButtonIcon
+      aria-label="Delete condition"
+      color="danger"
+      iconType="trash"
+      onClick={[Function]}
+      size="s"
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`ConditionExpression renders with only value supplied 1`] = `
+<EuiFlexGroup
+  gutterSize="m"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiPopover
+      anchorPosition="downLeft"
+      button={
+        <EuiExpression
+          description={
+            <FormattedMessage
+              defaultMessage="when"
+              id="xpack.ml.ruleEditor.conditionExpression.appliesToButtonLabel"
+              values={Object {}}
+            />
+          }
+          isActive={false}
+          onClick={[Function]}
+          value=""
+        />
+      }
+      closePopover={[Function]}
+      display="inlineBlock"
+      hasArrow={true}
+      id="appliesToPopover"
+      isOpen={false}
+      ownFocus={true}
+      panelPaddingSize="none"
+      withTitle={true}
+    >
+      <div
+        style={
+          Object {
+            "zIndex": "200",
+          }
+        }
+      >
+        <EuiPopoverTitle>
+          <FormattedMessage
+            defaultMessage="When"
+            id="xpack.ml.ruleEditor.conditionExpression.appliesToPopoverTitle"
+            values={Object {}}
+          />
+        </EuiPopoverTitle>
+        <div
+          className="euiExpression"
+          style={
+            Object {
+              "width": 200,
+            }
+          }
+        >
+          <EuiSelect
+            onChange={[Function]}
+            options={
+              Array [
+                Object {
+                  "text": "actual",
+                  "value": "actual",
+                },
+                Object {
+                  "text": "typical",
+                  "value": "typical",
+                },
+                Object {
+                  "text": "diff from typical",
+                  "value": "diff_from_typical",
+                },
+              ]
+            }
+          />
+        </div>
+      </div>
+    </EuiPopover>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiPopover
+      anchorPosition="downLeft"
+      button={
+        <EuiExpression
+          description={
+            <FormattedMessage
+              defaultMessage="is {operator}"
+              id="xpack.ml.ruleEditor.conditionExpression.operatorValueButtonLabel"
+              values={
+                Object {
+                  "operator": "",
+                }
+              }
+            />
+          }
+          isActive={false}
+          onClick={[Function]}
+          value="123"
+        />
+      }
+      closePopover={[Function]}
+      display="inlineBlock"
+      hasArrow={true}
+      id="operatorValuePopover"
+      isOpen={false}
+      ownFocus={true}
+      panelPaddingSize="none"
+      withTitle={true}
+    >
+      <div
+        style={
+          Object {
+            "zIndex": "200",
+          }
+        }
+      >
+        <EuiPopoverTitle>
+          <FormattedMessage
+            defaultMessage="Is"
+            id="xpack.ml.ruleEditor.conditionExpression.operatorValuePopoverTitle"
+            values={Object {}}
+          />
+        </EuiPopoverTitle>
+        <div
+          className="euiExpression"
+        >
+          <EuiFlexGroup
+            style={
+              Object {
+                "maxWidth": 450,
+              }
+            }
+          >
+            <EuiFlexItem
+              grow={false}
+              style={
+                Object {
+                  "width": 250,
+                }
+              }
+            >
+              <EuiSelect
+                onChange={[Function]}
+                options={
+                  Array [
+                    Object {
+                      "text": "less than",
+                      "value": "lt",
+                    },
+                    Object {
+                      "text": "less than or equal to",
+                      "value": "lte",
+                    },
+                    Object {
+                      "text": "greater than",
+                      "value": "gt",
+                    },
+                    Object {
+                      "text": "greater than or equal to",
+                      "value": "gte",
+                    },
+                  ]
+                }
+              />
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+              style={
+                Object {
+                  "width": 200,
+                }
+              }
+            >
+              <EuiFieldNumber
+                onChange={[Function]}
+                value={123}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+      </div>
+    </EuiPopover>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiButtonIcon
+      aria-label="Delete condition"
+      color="danger"
+      iconType="trash"
+      onClick={[Function]}
+      size="s"
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

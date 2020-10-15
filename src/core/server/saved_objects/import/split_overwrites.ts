@@ -20,12 +20,15 @@
 import { SavedObject } from '../types';
 import { SavedObjectsImportRetry } from './types';
 
-export function splitOverwrites(savedObjects: SavedObject[], retries: SavedObjectsImportRetry[]) {
-  const objectsToOverwrite: SavedObject[] = [];
-  const objectsToNotOverwrite: SavedObject[] = [];
+export function splitOverwrites<T>(
+  savedObjects: Array<SavedObject<T>>,
+  retries: SavedObjectsImportRetry[]
+) {
+  const objectsToOverwrite: Array<SavedObject<T>> = [];
+  const objectsToNotOverwrite: Array<SavedObject<T>> = [];
   const overwrites = retries
-    .filter(retry => retry.overwrite)
-    .map(retry => `${retry.type}:${retry.id}`);
+    .filter((retry) => retry.overwrite)
+    .map((retry) => `${retry.type}:${retry.id}`);
 
   for (const savedObject of savedObjects) {
     if (overwrites.includes(`${savedObject.type}:${savedObject.id}`)) {

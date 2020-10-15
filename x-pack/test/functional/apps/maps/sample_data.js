@@ -12,7 +12,6 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
 
   // FLAKY: https://github.com/elastic/kibana/issues/38137
   describe.skip('maps loaded from sample data', () => {
-
     // Sample data is shifted to be relative to current time
     // This means that a static timerange will return different documents
     // Setting the time range to a window larger than the sample data set
@@ -31,7 +30,9 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
     // Skipped because EMS vectors are not accessible in CI
     describe('ecommerce', () => {
       before(async () => {
-        await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
+        await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+          useActualUrl: true,
+        });
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.home.addSampleDataSet('ecommerce');
         await PageObjects.maps.loadSavedMap('[eCommerce] Orders by Country');
@@ -46,20 +47,27 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
 
       after(async () => {
         await PageObjects.maps.existFullScreen();
-        await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
+        await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+          useActualUrl: true,
+        });
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.home.removeSampleDataSet('ecommerce');
       });
 
       it('should load layers', async () => {
-        const percentDifference = await screenshot.compareAgainstBaseline('ecommerce_map', updateBaselines);
+        const percentDifference = await screenshot.compareAgainstBaseline(
+          'ecommerce_map',
+          updateBaselines
+        );
         expect(percentDifference).to.be.lessThan(0.05);
       });
     });
 
     describe('flights', () => {
       before(async () => {
-        await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
+        await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+          useActualUrl: true,
+        });
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.home.addSampleDataSet('flights');
         await PageObjects.maps.loadSavedMap('[Flights] Origin and Destination Flight Time');
@@ -70,13 +78,18 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
 
       after(async () => {
         await PageObjects.maps.existFullScreen();
-        await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
+        await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+          useActualUrl: true,
+        });
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.home.removeSampleDataSet('flights');
       });
 
       it('should load saved object and display layers', async () => {
-        const percentDifference = await screenshot.compareAgainstBaseline('flights_map', updateBaselines);
+        const percentDifference = await screenshot.compareAgainstBaseline(
+          'flights_map',
+          updateBaselines
+        );
         expect(percentDifference).to.be.lessThan(0.05);
       });
     });
@@ -84,7 +97,9 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
     // Skipped because EMS vectors are not accessible in CI
     describe('web logs', () => {
       before(async () => {
-        await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
+        await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+          useActualUrl: true,
+        });
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.home.addSampleDataSet('logs');
         await PageObjects.maps.loadSavedMap('[Logs] Total Requests and Bytes');
@@ -96,16 +111,20 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
 
       after(async () => {
         await PageObjects.maps.existFullScreen();
-        await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
+        await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+          useActualUrl: true,
+        });
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.home.removeSampleDataSet('logs');
       });
 
       it('should load saved object and display layers', async () => {
-        const percentDifference = await screenshot.compareAgainstBaseline('web_logs_map', updateBaselines);
+        const percentDifference = await screenshot.compareAgainstBaseline(
+          'web_logs_map',
+          updateBaselines
+        );
         expect(percentDifference).to.be.lessThan(0.06);
       });
     });
-
   });
 }

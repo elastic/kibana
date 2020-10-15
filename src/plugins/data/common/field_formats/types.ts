@@ -17,22 +17,28 @@
  * under the License.
  */
 
-/** @public **/
-export type ContentType = 'html' | 'text';
+import { GetConfigFn } from '../types';
+import { FieldFormat } from './field_format';
+import { FieldFormatsRegistry } from './field_formats_registry';
 
 /** @public **/
-export { IFieldFormat } from './field_format';
+export type FieldFormatsContentType = 'html' | 'text';
 
 /** @internal **/
-export type HtmlContextTypeConvert = (
-  value: any,
-  field?: any,
-  hit?: Record<string, any>,
-  meta?: any
-) => string;
+export interface HtmlContextTypeOptions {
+  field?: any;
+  indexPattern?: any;
+  hit?: Record<string, any>;
+}
 
 /** @internal **/
-export type TextContextTypeConvert = (value: any) => string;
+export type HtmlContextTypeConvert = (value: any, options?: HtmlContextTypeOptions) => string;
+
+/** @internal **/
+export type TextContextTypeOptions = Record<string, any>;
+
+/** @internal **/
+export type TextContextTypeConvert = (value: any, options?: TextContextTypeOptions) => string;
 
 /** @internal **/
 export type FieldFormatConvertFunction = HtmlContextTypeConvert | TextContextTypeConvert;
@@ -62,3 +68,40 @@ export enum FIELD_FORMAT_IDS {
   TRUNCATE = 'truncate',
   URL = 'url',
 }
+
+export interface FieldFormatConfig {
+  id: FieldFormatId;
+  params: Record<string, any>;
+  es?: boolean;
+}
+
+export type FieldFormatsGetConfigFn = GetConfigFn;
+
+export type IFieldFormat = PublicMethodsOf<FieldFormat>;
+
+/**
+ * @string id type is needed for creating custom converters.
+ */
+export type FieldFormatId = FIELD_FORMAT_IDS | string;
+
+/** @internal **/
+export type FieldFormatInstanceType = (new (
+  params?: any,
+  getConfig?: FieldFormatsGetConfigFn
+) => FieldFormat) & {
+  // Static properties:
+  id: FieldFormatId;
+  title: string;
+  fieldType: string | string[];
+};
+
+export interface IFieldFormatMetaParams {
+  [key: string]: any;
+  parsedUrl?: {
+    origin: string;
+    pathname?: string;
+    basePath?: string;
+  };
+}
+
+export type FieldFormatsStartCommon = Omit<FieldFormatsRegistry, 'init' & 'register'>;

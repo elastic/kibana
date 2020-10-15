@@ -4,13 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import datemath from '@elastic/datemath';
 import expect from '@kbn/expect';
 import { mockIndices } from './hybrid_index_helper';
 
 export default function ({ getService, getPageObjects }) {
-
   const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['rollup', 'common']);
@@ -33,17 +31,23 @@ export default function ({ getService, getPageObjects }) {
     it('create new rollup job', async () => {
       const interval = '1000ms';
 
-      pastDates.map(async (day) => {
+      for (const day of pastDates) {
         await es.index(mockIndices(day, rollupSourceDataPrepend));
-      });
+      }
 
       await PageObjects.common.navigateToApp('rollupJob');
-      await PageObjects.rollup.createNewRollUpJob(rollupJobName, rollupSourceIndexPattern, targetIndexName,
-        interval, ' ', true, { time: '*/10 * * * * ?', cron: true });
+      await PageObjects.rollup.createNewRollUpJob(
+        rollupJobName,
+        rollupSourceIndexPattern,
+        targetIndexName,
+        interval,
+        ' ',
+        true,
+        { time: '*/10 * * * * ?', cron: true }
+      );
 
       const jobList = await PageObjects.rollup.getJobList();
       expect(jobList.length).to.be(1);
-
     });
 
     after(async () => {

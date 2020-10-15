@@ -16,7 +16,7 @@ export default function ({ getService }) {
     const archive = 'monitoring/setup/collection/kibana_exclusive_mb';
     const timeRange = {
       min: '2019-04-09T00:00:00.741Z',
-      max: '2019-04-09T23:59:59.741Z'
+      max: '2019-04-09T23:59:59.741Z',
     };
 
     before('load archive', () => {
@@ -44,7 +44,7 @@ export default function ({ getService }) {
       await security.user.create(username, {
         password: password,
         full_name: 'Limited User',
-        roles: ['kibana_user', 'monitoring_user']
+        roles: ['kibana_admin', 'monitoring_user'],
       });
 
       const { body } = await supertestWithoutAuth

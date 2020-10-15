@@ -17,7 +17,6 @@
  * under the License.
  */
 
-export * from './use_observable';
-export * from './use_unmount';
-export * from './react_mount';
-export * from './use_shallow_compare_effect';
+export { toMountPoint } from './to_mount_point';
+export { MountPointPortal } from './mount_point_portal';
+export { useIfMounted } from './utils';

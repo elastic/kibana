@@ -1,0 +1,92 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+    },
+    "index": "tests-001",
+    "mappings": {
+      "properties": {
+        "@date": {
+          "type": "date"
+        },
+        "ants": {
+          "type": "integer"
+        },
+        "country": {
+          "type": "keyword"
+        },
+        "name": {
+          "type": "keyword"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+    },
+    "index": "tests-002",
+    "mappings": {
+      "properties": {
+        "@date": {
+          "type": "date"
+        },
+        "ants": {
+          "type": "integer"
+        },
+        "country": {
+          "type": "keyword"
+        },
+        "name": {
+          "type": "keyword"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+    },
+    "index": "tests-003",
+    "mappings": {
+      "properties": {
+        "@date": {
+          "type": "date"
+        },
+        "ants": {
+          "type": "integer"
+        },
+        "country": {
+          "type": "keyword"
+        },
+        "name": {
+          "type": "keyword"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

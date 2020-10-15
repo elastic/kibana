@@ -17,37 +17,85 @@
  * under the License.
  */
 
+import React, { FunctionComponent, useMemo } from 'react';
+import { Route, RouteComponentProps, Router, Switch } from 'react-router-dom';
 import { History } from 'history';
-import React from 'react';
-import { Router, Route } from 'react-router-dom';
-import { Subject } from 'rxjs';
+import { Observable } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 
-import { LegacyApp, AppMount } from '../types';
+import type { MountPoint } from '../../types';
+import { AppLeaveHandler, AppStatus, Mounter } from '../types';
 import { AppContainer } from './app_container';
-import { HttpStart } from '../../http';
+import { ScopedHistory } from '../scoped_history';
 
 interface Props {
-  apps: ReadonlyMap<string, AppMount>;
-  legacyApps: ReadonlyMap<string, LegacyApp>;
-  basePath: HttpStart['basePath'];
-  currentAppId$: Subject<string | undefined>;
+  mounters: Map<string, Mounter>;
   history: History;
-  /**
-   * Only necessary for redirecting to legacy apps
-   * @deprecated
-   */
-  redirectTo?: (path: string) => void;
+  appStatuses$: Observable<Map<string, AppStatus>>;
+  setAppLeaveHandler: (appId: string, handler: AppLeaveHandler) => void;
+  setAppActionMenu: (appId: string, mount: MountPoint | undefined) => void;
+  setIsMounting: (isMounting: boolean) => void;
 }
 
-export const AppRouter: React.FunctionComponent<Props> = ({
+interface Params {
+  appId: string;
+}
+
+export const AppRouter: FunctionComponent<Props> = ({
   history,
-  redirectTo = (path: string) => (window.location.href = path),
-  ...otherProps
-}) => (
-  <Router history={history}>
-    <Route
-      path="/app/:appId"
-      render={props => <AppContainer redirectTo={redirectTo} {...otherProps} {...props} />}
-    />
-  </Router>
-);
+  mounters,
+  setAppLeaveHandler,
+  setAppActionMenu,
+  appStatuses$,
+  setIsMounting,
+}) => {
+  const appStatuses = useObservable(appStatuses$, new Map());
+  const createScopedHistory = useMemo(
+    () => (appPath: string) => new ScopedHistory(history, appPath),
+    [history]
+  );
+
+  return (
+    <Router history={history}>
+      <Switch>
+        {[...mounters].map(([appId, mounter]) => (
+          <Route
+            key={mounter.appRoute}
+            path={mounter.appRoute}
+            exact={mounter.exactRoute}
+            render={({ match: { path } }) => (
+              <AppContainer
+                appPath={path}
+                appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
+                createScopedHistory={createScopedHistory}
+                {...{ appId, mounter, setAppLeaveHandler, setAppActionMenu, setIsMounting }}
+              />
+            )}
+          />
+        ))}
+        {/* handler for legacy apps and used as a catch-all to display 404 page on not existing /app/appId apps*/}
+        <Route
+          path="/app/:appId"
+          render={({
+            match: {
+              params: { appId },
+              url,
+            },
+          }: RouteComponentProps<Params>) => {
+            // the id/mounter retrieval can be removed once #76348 is addressed
+            const [id, mounter] = mounters.has(appId) ? [appId, mounters.get(appId)] : [];
+            return (
+              <AppContainer
+                appPath={url}
+                appId={id ?? appId}
+                appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
+                createScopedHistory={createScopedHistory}
+                {...{ mounter, setAppLeaveHandler, setAppActionMenu, setIsMounting }}
+              />
+            );
+          }}
+        />
+      </Switch>
+    </Router>
+  );
+};

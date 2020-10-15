@@ -20,23 +20,33 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 
-import { EuiComboBox } from '@elastic/eui';
-import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../core/public';
-import { getTitle } from '../../index_patterns/lib';
+import { Required } from '@kbn/utility-types';
+import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
 
-export interface IndexPatternSelectProps {
-  onChange: (opt: any) => void;
+import { SavedObjectsClientContract, SimpleSavedObject } from 'src/core/public';
+import { getTitle } from '../../../common/index_patterns/lib';
+
+export type IndexPatternSelectProps = Required<
+  Omit<
+    EuiComboBoxProps<any>,
+    'isLoading' | 'onSearchChange' | 'options' | 'selectedOptions' | 'onChange'
+  >,
+  'placeholder'
+> & {
+  onChange: (indexPatternId?: string) => void;
   indexPatternId: string;
-  placeholder: string;
-  fieldTypes: string[];
-  onNoIndexPatterns: () => void;
+  fieldTypes?: string[];
+  onNoIndexPatterns?: () => void;
+};
+
+export type IndexPatternSelectInternalProps = IndexPatternSelectProps & {
   savedObjectsClient: SavedObjectsClientContract;
-}
+};
 
 interface IndexPatternSelectState {
   isLoading: boolean;
   options: [];
-  selectedIndexPattern: string | undefined;
+  selectedIndexPattern: { value: string; label: string } | undefined;
   searchValue: string | undefined;
 }
 
@@ -55,18 +65,13 @@ const getIndexPatterns = async (
   return resp.savedObjects;
 };
 
-// Takes in stateful runtime dependencies and pre-wires them to the component
-export function createIndexPatternSelect(savedObjectsClient: SavedObjectsClientContract) {
-  return (props: Omit<IndexPatternSelectProps, 'savedObjectsClient'>) => (
-    <IndexPatternSelect {...props} savedObjectsClient={savedObjectsClient} />
-  );
-}
-
-export class IndexPatternSelect extends Component<IndexPatternSelectProps> {
+// Needed for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default class IndexPatternSelect extends Component<IndexPatternSelectInternalProps> {
   private isMounted: boolean = false;
   state: IndexPatternSelectState;
 
-  constructor(props: IndexPatternSelectProps) {
+  constructor(props: IndexPatternSelectInternalProps) {
     super(props);
 
     this.state = {
@@ -88,7 +93,7 @@ export class IndexPatternSelect extends Component<IndexPatternSelectProps> {
     this.fetchSelectedIndexPattern(this.props.indexPatternId);
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps: IndexPatternSelectProps) {
+  UNSAFE_componentWillReceiveProps(nextProps: IndexPatternSelectInternalProps) {
     if (nextProps.indexPatternId !== this.props.indexPatternId) {
       this.fetchSelectedIndexPattern(nextProps.indexPatternId);
     }
@@ -136,7 +141,7 @@ export class IndexPatternSelect extends Component<IndexPatternSelectProps> {
         try {
           const indexPatternFields = JSON.parse(savedObject.attributes.fields as any);
           return indexPatternFields.some((field: any) => {
-            return fieldTypes.includes(field.type);
+            return fieldTypes?.includes(field.type);
           });
         } catch (err) {
           // Unable to parse fields JSON, invalid index pattern
@@ -185,17 +190,18 @@ export class IndexPatternSelect extends Component<IndexPatternSelectProps> {
 
   render() {
     const {
-      fieldTypes, // eslint-disable-line no-unused-vars
-      onChange, // eslint-disable-line no-unused-vars
-      indexPatternId, // eslint-disable-line no-unused-vars
+      fieldTypes,
+      onChange,
+      indexPatternId,
       placeholder,
-      onNoIndexPatterns, // eslint-disable-line no-unused-vars
-      savedObjectsClient, // eslint-disable-line no-unused-vars
+      onNoIndexPatterns,
+      savedObjectsClient,
       ...rest
     } = this.props;
 
     return (
       <EuiComboBox
+        {...rest}
         placeholder={placeholder}
         singleSelection={true}
         isLoading={this.state.isLoading}
@@ -203,7 +209,6 @@ export class IndexPatternSelect extends Component<IndexPatternSelectProps> {
         options={this.state.options}
         selectedOptions={this.state.selectedIndexPattern ? [this.state.selectedIndexPattern] : []}
         onChange={this.onChange}
-        {...rest}
       />
     );
   }

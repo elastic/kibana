@@ -25,7 +25,10 @@ describe('getByAlias', () => {
     bar: { name: 'bar', aliases: ['b'] },
   };
 
-  const fnsArray = [{ name: 'foo', aliases: ['f'] }, { name: 'bar', aliases: ['b'] }];
+  const fnsArray = [
+    { name: 'foo', aliases: ['f'] },
+    { name: 'bar', aliases: ['b'] },
+  ];
 
   it('returns the function by name', () => {
     expect(getByAlias(fnsObject, 'foo')).toBe(fnsObject.foo);

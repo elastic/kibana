@@ -1,0 +1,8 @@
+{
+  "root": ".",
+  "output": ".",
+  "exclude": [
+    "./unmapped_collector.ts",
+    "./externally_defined_usage_collector/index.ts"
+  ]
+}

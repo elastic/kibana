@@ -1,0 +1,17 @@
+{
+  "ml.get_trained_models_stats": {
+    "url_params": {
+      "allow_no_match": "__flag__",
+      "from": 0,
+      "size": 0
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_ml/inference/{model_id}/_stats",
+      "_ml/inference/_stats"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/get-inference-stats.html"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "id": "visualize",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [
+    "data",
+    "urlForwarding",
+    "navigation",
+    "savedObjects",
+    "visualizations",
+    "embeddable",
+    "dashboard",
+    "uiActions"
+  ],
+  "optionalPlugins": ["home", "share"],
+  "requiredBundles": [
+    "kibanaUtils",
+    "kibanaReact",
+    "home",
+    "discover",
+    "visDefaultEditor"
+  ]
+}

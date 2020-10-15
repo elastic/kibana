@@ -31,21 +31,22 @@ interface Props {
 
 export const RangeField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+  const { onChange: onFieldChange } = field;
 
   const onChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>) => {
       const event = ({ ...e, value: `${e.currentTarget.value}` } as unknown) as React.ChangeEvent<{
         value: string;
       }>;
-      field.onChange(event);
+      onFieldChange(event);
     },
-    [field.onChange]
+    [onFieldChange]
   );
 
   return (
     <EuiFormRow
       label={field.label}
-      helpText={field.helpText}
+      helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}
       fullWidth

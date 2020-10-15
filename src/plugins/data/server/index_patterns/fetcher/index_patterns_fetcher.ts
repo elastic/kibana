@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { APICaller } from 'src/core/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import { getFieldCapabilities, resolveTimePattern, createNoMatchingIndicesError } from './lib';
 
@@ -37,9 +37,9 @@ interface FieldSubType {
 }
 
 export class IndexPatternsFetcher {
-  private _callDataCluster: APICaller;
+  private _callDataCluster: LegacyAPICaller;
 
-  constructor(callDataCluster: APICaller) {
+  constructor(callDataCluster: LegacyAPICaller) {
     this._callDataCluster = callDataCluster;
   }
 
@@ -55,9 +55,10 @@ export class IndexPatternsFetcher {
   async getFieldsForWildcard(options: {
     pattern: string | string[];
     metaFields?: string[];
+    fieldCapsOptions?: { allowNoIndices: boolean };
   }): Promise<FieldDescriptor[]> {
-    const { pattern, metaFields } = options;
-    return await getFieldCapabilities(this._callDataCluster, pattern, metaFields);
+    const { pattern, metaFields, fieldCapsOptions } = options;
+    return await getFieldCapabilities(this._callDataCluster, pattern, metaFields, fieldCapsOptions);
   }
 
   /**

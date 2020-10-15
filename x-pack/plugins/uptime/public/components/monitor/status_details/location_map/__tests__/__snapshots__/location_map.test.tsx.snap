@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LocationMap component renders correctly against snapshot 1`] = `
+<styled.div>
+  <EmbeddedMap
+    downPoints={Array []}
+    upPoints={
+      Array [
+        Object {
+          "location": Object {
+            "lat": "40.730610",
+            "lon": " -73.935242",
+          },
+          "name": "New York",
+        },
+        Object {
+          "location": Object {
+            "lat": "52.487448",
+            "lon": " 13.394798",
+          },
+          "name": "Tokyo",
+        },
+      ]
+    }
+  />
+</styled.div>
+`;

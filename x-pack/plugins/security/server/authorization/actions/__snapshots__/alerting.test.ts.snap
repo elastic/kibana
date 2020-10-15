@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`#get alertType of "" throws error 1`] = `"alertTypeId is required and must be a string"`;
+
+exports[`#get alertType of {} throws error 1`] = `"alertTypeId is required and must be a string"`;
+
+exports[`#get alertType of 1 throws error 1`] = `"alertTypeId is required and must be a string"`;
+
+exports[`#get alertType of null throws error 1`] = `"alertTypeId is required and must be a string"`;
+
+exports[`#get alertType of true throws error 1`] = `"alertTypeId is required and must be a string"`;
+
+exports[`#get alertType of undefined throws error 1`] = `"alertTypeId is required and must be a string"`;
+
+exports[`#get consumer of "" throws error 1`] = `"consumer is required and must be a string"`;
+
+exports[`#get consumer of {} throws error 1`] = `"consumer is required and must be a string"`;
+
+exports[`#get consumer of 1 throws error 1`] = `"consumer is required and must be a string"`;
+
+exports[`#get consumer of null throws error 1`] = `"consumer is required and must be a string"`;
+
+exports[`#get consumer of true throws error 1`] = `"consumer is required and must be a string"`;
+
+exports[`#get consumer of undefined throws error 1`] = `"consumer is required and must be a string"`;
+
+exports[`#get operation of "" throws error 1`] = `"operation is required and must be a string"`;
+
+exports[`#get operation of {} throws error 1`] = `"operation is required and must be a string"`;
+
+exports[`#get operation of 1 throws error 1`] = `"operation is required and must be a string"`;
+
+exports[`#get operation of null throws error 1`] = `"operation is required and must be a string"`;
+
+exports[`#get operation of true throws error 1`] = `"operation is required and must be a string"`;
+
+exports[`#get operation of undefined throws error 1`] = `"operation is required and must be a string"`;

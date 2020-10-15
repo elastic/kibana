@@ -7,22 +7,29 @@
 import expect from '@kbn/expect';
 
 export default function ({ getPageObjects, getService }) {
-
   const PageObjects = getPageObjects(['maps', 'header', 'timePicker']);
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
   const browser = getService('browser');
   const inspector = getService('inspector');
+  const security = getService('security');
 
   describe('map saved object management', () => {
-
     const MAP_NAME_PREFIX = 'saved_object_management_test_';
     const MAP1_NAME = `${MAP_NAME_PREFIX}map1`;
     const MAP2_NAME = `${MAP_NAME_PREFIX}map2`;
 
     describe('read', () => {
       before(async () => {
+        await security.testUser.setRoles([
+          'global_maps_all',
+          'geoshape_data_reader',
+          'test_logstash_reader',
+        ]);
         await PageObjects.maps.loadSavedMap('join example');
+      });
+      after(async () => {
+        await security.testUser.restoreDefaults();
       });
 
       it('should update global Kibana time to value stored with map', async () => {
@@ -63,7 +70,9 @@ export default function ({ getPageObjects, getService }) {
         it('should update app state with query stored with map', async () => {
           const currentUrl = await browser.getCurrentUrl();
           const appState = currentUrl.substring(currentUrl.indexOf('_a='));
-          expect(appState).to.equal('_a=(filters:!(),query:(language:kuery,query:%27machine.os.raw%20:%20%22ios%22%27))');
+          expect(appState).to.equal(
+            '_a=(filters:!(),query:(language:kuery,query:%27machine.os.raw%20:%20%22ios%22%27))'
+          );
         });
 
         it('should apply query stored with map', async () => {
@@ -77,9 +86,9 @@ export default function ({ getPageObjects, getService }) {
 
         it('should override query stored with map when query is provided in app state', async () => {
           const currentUrl = await browser.getCurrentUrl();
-          const kibanaBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));
+          const kibanaBaseUrl = currentUrl.substring(0, currentUrl.indexOf('/maps/'));
           const appState = `_a=(query:(language:kuery,query:'machine.os.raw%20:%20"win%208"'))`;
-          const urlWithQueryInAppState = `${kibanaBaseUrl}#/map/8eabdab0-144f-11e9-809f-ad25bb78262c?${appState}`;
+          const urlWithQueryInAppState = `${kibanaBaseUrl}/maps/map/8eabdab0-144f-11e9-809f-ad25bb78262c#?${appState}`;
 
           await browser.get(urlWithQueryInAppState, true);
           await PageObjects.maps.waitForLayersToLoad();
@@ -109,7 +118,9 @@ export default function ({ getPageObjects, getService }) {
         it('should update app state with query stored with map', async () => {
           const currentUrl = await browser.getCurrentUrl();
           const appState = currentUrl.substring(currentUrl.indexOf('_a='));
-          expect(appState).to.equal('_a=(filters:!((%27$state%27:(store:appState),meta:(alias:!n,disabled:!f,index:c698b940-e149-11e8-a35a-370a8516603a,key:machine.os.raw,negate:!f,params:(query:ios),type:phrase),query:(match:(machine.os.raw:(query:ios,type:phrase))))),query:(language:kuery,query:%27%27))'); // eslint-disable-line max-len
+          expect(appState).to.equal(
+            '_a=(filters:!((%27$state%27:(store:appState),meta:(alias:!n,disabled:!f,index:c698b940-e149-11e8-a35a-370a8516603a,key:machine.os.raw,negate:!f,params:(query:ios),type:phrase),query:(match:(machine.os.raw:(query:ios,type:phrase))))),query:(language:kuery,query:%27%27))'
+          );
         });
 
         it('should apply query stored with map', async () => {
@@ -153,6 +164,5 @@ export default function ({ getPageObjects, getService }) {
         expect(map2Count).to.equal(0);
       });
     });
-
   });
 }

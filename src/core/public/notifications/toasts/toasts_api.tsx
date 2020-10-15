@@ -55,7 +55,18 @@ export type ToastInput = string | ToastInputFields;
  * Options available for {@link IToasts} APIs.
  * @public
  */
-export interface ErrorToastOptions {
+export interface ToastOptions {
+  /**
+   * How long should the toast remain on screen.
+   */
+  toastLifeTimeMs?: number;
+}
+
+/**
+ * Options available for {@link IToasts} error APIs.
+ * @public
+ */
+export interface ErrorToastOptions extends ToastOptions {
   /**
    * The title of the toast and the dialog when expanding the message.
    */
@@ -84,7 +95,7 @@ const normalizeToast = (toastOrTitle: ToastInput): ToastInputFields => {
  */
 export type IToasts = Pick<
   ToastsApi,
-  'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
+  'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError' | 'addInfo'
 >;
 
 /**
@@ -139,23 +150,41 @@ export class ToastsApi implements IToasts {
   public remove(toastOrId: Toast | string) {
     const toRemove = typeof toastOrId === 'string' ? toastOrId : toastOrId.id;
     const list = this.toasts$.getValue();
-    const listWithoutToast = list.filter(t => t.id !== toRemove);
+    const listWithoutToast = list.filter((t) => t.id !== toRemove);
     if (listWithoutToast.length !== list.length) {
       this.toasts$.next(listWithoutToast);
     }
   }
 
   /**
+   * Adds a new toast pre-configured with the info color and info icon.
+   *
+   * @param toastOrTitle - a {@link ToastInput}
+   * @param options - a {@link ToastOptions}
+   * @returns a {@link Toast}
+   */
+  public addInfo(toastOrTitle: ToastInput, options?: ToastOptions) {
+    return this.add({
+      color: 'primary',
+      iconType: 'iInCircle',
+      ...normalizeToast(toastOrTitle),
+      ...options,
+    });
+  }
+
+  /**
    * Adds a new toast pre-configured with the success color and check icon.
    *
    * @param toastOrTitle - a {@link ToastInput}
+   * @param options - a {@link ToastOptions}
    * @returns a {@link Toast}
    */
-  public addSuccess(toastOrTitle: ToastInput) {
+  public addSuccess(toastOrTitle: ToastInput, options?: ToastOptions) {
     return this.add({
       color: 'success',
       iconType: 'check',
       ...normalizeToast(toastOrTitle),
+      ...options,
     });
   }
 
@@ -163,14 +192,16 @@ export class ToastsApi implements IToasts {
    * Adds a new toast pre-configured with the warning color and help icon.
    *
    * @param toastOrTitle - a {@link ToastInput}
+   * @param options - a {@link ToastOptions}
    * @returns a {@link Toast}
    */
-  public addWarning(toastOrTitle: ToastInput) {
+  public addWarning(toastOrTitle: ToastInput, options?: ToastOptions) {
     return this.add({
       color: 'warning',
       iconType: 'help',
       toastLifeTimeMs: this.uiSettings.get('notifications:lifetime:warning'),
       ...normalizeToast(toastOrTitle),
+      ...options,
     });
   }
 
@@ -178,14 +209,16 @@ export class ToastsApi implements IToasts {
    * Adds a new toast pre-configured with the danger color and alert icon.
    *
    * @param toastOrTitle - a {@link ToastInput}
+   * @param options - a {@link ToastOptions}
    * @returns a {@link Toast}
    */
-  public addDanger(toastOrTitle: ToastInput) {
+  public addDanger(toastOrTitle: ToastInput, options?: ToastOptions) {
     return this.add({
       color: 'danger',
       iconType: 'alert',
       toastLifeTimeMs: this.uiSettings.get('notifications:lifetime:warning'),
       ...normalizeToast(toastOrTitle),
+      ...options,
     });
   }
 
@@ -201,7 +234,6 @@ export class ToastsApi implements IToasts {
     return this.add({
       color: 'danger',
       iconType: 'alert',
-      title: options.title,
       toastLifeTimeMs: this.uiSettings.get('notifications:lifetime:error'),
       text: mountReactNode(
         <ErrorToast
@@ -212,6 +244,7 @@ export class ToastsApi implements IToasts {
           i18nContext={() => this.i18n!.Context}
         />
       ),
+      ...options,
     });
   }
 

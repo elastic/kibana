@@ -19,23 +19,16 @@
 
 import React from 'react';
 
-import {
-  KuiButton,
-} from '../../../../components';
+import { KuiButton } from '../../../../components';
 
 export default () => (
   <div>
-    <KuiButton buttonType="primary">
-      Primary button
-    </KuiButton>
+    <KuiButton buttonType="primary">Primary button</KuiButton>
 
     <br />
     <br />
 
-    <KuiButton
-      buttonType="primary"
-      disabled
-    >
+    <KuiButton buttonType="primary" disabled>
       Primary button, disabled
     </KuiButton>
   </div>

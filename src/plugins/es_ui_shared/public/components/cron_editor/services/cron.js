@@ -63,13 +63,6 @@ export function cronExpressionToParts(expression) {
   return parsedCron;
 }
 
-export function cronPartsToExpression({
-  second,
-  minute,
-  hour,
-  day,
-  date,
-  month,
-}) {
+export function cronPartsToExpression({ second, minute, hour, day, date, month }) {
   return `${second} ${minute} ${hour} ${date} ${month} ${day}`;
 }

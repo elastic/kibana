@@ -49,6 +49,5 @@ export default function ({ getService, getPageObjects }) {
         bytesWritten: 'Bytes sent\n18.3 KB',
       });
     });
-
   });
 }

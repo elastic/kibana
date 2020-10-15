@@ -17,18 +17,18 @@
  * under the License.
  */
 
-import sinon from 'sinon';
-import glob from 'glob-all';
-import del from 'del';
-import Logger from '../lib/logger';
-import remove from './remove';
 import { join } from 'path';
 import { writeFileSync, existsSync, mkdirSync } from 'fs';
 
+import sinon from 'sinon';
+import glob from 'glob-all';
+import del from 'del';
+
+import { Logger } from '../lib/logger';
+import { remove } from './remove';
+
 describe('kibana cli', function () {
-
   describe('plugin remover', function () {
-
     const pluginDir = join(__dirname, '.test.data.remove');
     let processExitStub;
     let logger;
@@ -82,7 +82,9 @@ describe('kibana cli', function () {
       settings.plugin = 'x-pack';
       expect(existsSync(settings.pluginPath)).toEqual(false);
       remove(settings, logger);
-      expect(logger.error.getCall(0).args[0]).toMatch(/Please install the OSS-only distribution to remove X-Pack features/);
+      expect(logger.error.getCall(0).args[0]).toMatch(
+        /Please install the OSS-only distribution to remove X-Pack features/
+      );
     });
 
     it('delete the specified folder.', function () {
@@ -96,7 +98,5 @@ describe('kibana cli', function () {
       const expected = ['bar'];
       expect(files.sort()).toEqual(expected.sort());
     });
-
   });
-
 });

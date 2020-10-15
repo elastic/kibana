@@ -13,9 +13,15 @@ import { Plugin } from './plugin';
 // run-time contracts.
 export { uiCapabilitiesRegex } from './feature_schema';
 
-export { Feature, FeatureWithAllOrReadPrivileges } from './feature';
-export { FeatureKibanaPrivileges } from './feature_kibana_privileges';
-export { PluginSetupContract } from './plugin';
+export {
+  KibanaFeature,
+  KibanaFeatureConfig,
+  FeatureKibanaPrivileges,
+  ElasticsearchFeature,
+  ElasticsearchFeatureConfig,
+  FeatureElasticsearchPrivileges,
+} from '../common';
+export { PluginSetupContract, PluginStartContract } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new Plugin(initializerContext);

@@ -5,7 +5,7 @@
  */
 
 import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../../src/core/server';
-import { LicenseCheck, LICENSE_CHECK_STATE } from '../../../../../licensing/server';
+import { LicenseCheck } from '../../../../../licensing/server';
 import { RawKibanaPrivileges } from '../../../../common/model';
 import { defineGetPrivilegesRoutes } from './get';
 
@@ -46,11 +46,7 @@ interface TestOptions {
 describe('GET privileges', () => {
   const getPrivilegesTest = (
     description: string,
-    {
-      licenseCheckResult = { state: LICENSE_CHECK_STATE.Valid },
-      includeActions,
-      asserts,
-    }: TestOptions
+    { licenseCheckResult = { state: 'valid' }, includeActions, asserts }: TestOptions
   ) => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
@@ -82,7 +78,7 @@ describe('GET privileges', () => {
 
   describe('failure', () => {
     getPrivilegesTest('returns result of license checker', {
-      licenseCheckResult: { state: LICENSE_CHECK_STATE.Invalid, message: 'test forbidden message' },
+      licenseCheckResult: { state: 'invalid', message: 'test forbidden message' },
       asserts: { statusCode: 403, result: { message: 'test forbidden message' } },
     });
   });

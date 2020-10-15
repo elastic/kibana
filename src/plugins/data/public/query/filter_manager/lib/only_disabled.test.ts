@@ -18,7 +18,7 @@
  */
 
 import { onlyDisabledFiltersChanged } from './only_disabled';
-import { esFilters } from '../../../../common';
+import { Filter } from '../../../../common';
 
 describe('filter manager utilities', () => {
   describe('onlyDisabledFiltersChanged()', () => {
@@ -27,20 +27,20 @@ describe('filter manager utilities', () => {
         { meta: { disabled: true } },
         { meta: { disabled: true } },
         { meta: { disabled: true } },
-      ] as esFilters.Filter[];
-      const newFilters = [{ meta: { disabled: true } }] as esFilters.Filter[];
+      ] as Filter[];
+      const newFilters = [{ meta: { disabled: true } }] as Filter[];
 
       expect(onlyDisabledFiltersChanged(newFilters, filters)).toBe(true);
     });
 
     test('should return false if there are no old filters', () => {
-      const newFilters = [{ meta: { disabled: false } }] as esFilters.Filter[];
+      const newFilters = [{ meta: { disabled: false } }] as Filter[];
 
       expect(onlyDisabledFiltersChanged(newFilters, undefined)).toBe(false);
     });
 
     test('should return false if there are no new filters', () => {
-      const filters = [{ meta: { disabled: false } }] as esFilters.Filter[];
+      const filters = [{ meta: { disabled: false } }] as Filter[];
 
       expect(onlyDisabledFiltersChanged(undefined, filters)).toBe(false);
     });
@@ -50,8 +50,8 @@ describe('filter manager utilities', () => {
         { meta: { disabled: false } },
         { meta: { disabled: false } },
         { meta: { disabled: false } },
-      ] as esFilters.Filter[];
-      const newFilters = [{ meta: { disabled: false } }] as esFilters.Filter[];
+      ] as Filter[];
+      const newFilters = [{ meta: { disabled: false } }] as Filter[];
 
       expect(onlyDisabledFiltersChanged(newFilters, filters)).toBe(false);
     });
@@ -61,8 +61,8 @@ describe('filter manager utilities', () => {
         { meta: { disabled: true } },
         { meta: { disabled: true } },
         { meta: { disabled: true } },
-      ] as esFilters.Filter[];
-      const newFilters = [{ meta: { disabled: false } }] as esFilters.Filter[];
+      ] as Filter[];
+      const newFilters = [{ meta: { disabled: false } }] as Filter[];
 
       expect(onlyDisabledFiltersChanged(newFilters, filters)).toBe(false);
     });
@@ -72,8 +72,8 @@ describe('filter manager utilities', () => {
         { meta: { disabled: false } },
         { meta: { disabled: false } },
         { meta: { disabled: false } },
-      ] as esFilters.Filter[];
-      const newFilters = [{ meta: { disabled: true } }] as esFilters.Filter[];
+      ] as Filter[];
+      const newFilters = [{ meta: { disabled: true } }] as Filter[];
 
       expect(onlyDisabledFiltersChanged(newFilters, filters)).toBe(false);
     });
@@ -83,8 +83,8 @@ describe('filter manager utilities', () => {
         { meta: { disabled: true } },
         { meta: { disabled: true } },
         { meta: { disabled: true } },
-      ] as esFilters.Filter[];
-      const newFilters = [] as esFilters.Filter[];
+      ] as Filter[];
+      const newFilters = [] as Filter[];
 
       expect(onlyDisabledFiltersChanged(newFilters, filters)).toBe(true);
     });
@@ -94,8 +94,8 @@ describe('filter manager utilities', () => {
         { meta: { disabled: false } },
         { meta: { disabled: false } },
         { meta: { disabled: false } },
-      ] as esFilters.Filter[];
-      const newFilters = [] as esFilters.Filter[];
+      ] as Filter[];
+      const newFilters = [] as Filter[];
 
       expect(onlyDisabledFiltersChanged(newFilters, filters)).toBe(false);
     });
@@ -104,11 +104,11 @@ describe('filter manager utilities', () => {
       const filters = [
         { meta: { disabled: true, negate: false } },
         { meta: { disabled: true, negate: false } },
-      ] as esFilters.Filter[];
+      ] as Filter[];
       const newFilters = [
         { meta: { disabled: true, negate: true } },
         { meta: { disabled: true, negate: true } },
-      ] as esFilters.Filter[];
+      ] as Filter[];
 
       expect(onlyDisabledFiltersChanged(newFilters, filters)).toBe(true);
     });
@@ -118,8 +118,8 @@ describe('filter manager utilities', () => {
         { meta: { disabled: false } },
         { meta: { disabled: false } },
         { meta: { disabled: true } },
-      ] as esFilters.Filter[];
-      const newFilters = [{ meta: { disabled: false } }] as esFilters.Filter[];
+      ] as Filter[];
+      const newFilters = [{ meta: { disabled: false } }] as Filter[];
 
       expect(onlyDisabledFiltersChanged(newFilters, filters)).toBe(false);
     });
@@ -129,15 +129,15 @@ describe('filter manager utilities', () => {
         { meta: { disabled: true } },
         { meta: { disabled: false } },
         { meta: { disabled: true } },
-      ] as esFilters.Filter[];
-      const newFilters = [] as esFilters.Filter[];
+      ] as Filter[];
+      const newFilters = [] as Filter[];
 
       expect(onlyDisabledFiltersChanged(newFilters, filters)).toBe(false);
     });
 
     test('should not throw with null filters', () => {
-      const filters = [null, { meta: { disabled: true } }] as esFilters.Filter[];
-      const newFilters = [] as esFilters.Filter[];
+      const filters = [null, { meta: { disabled: true } }] as Filter[];
+      const newFilters = [] as Filter[];
 
       expect(() => {
         onlyDisabledFiltersChanged(newFilters, filters);

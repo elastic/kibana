@@ -16,21 +16,46 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CoreSetup, Plugin } from 'src/core/server';
-import { TutorialsRegistry, TutorialsRegistrySetup, TutorialsRegistryStart } from './services';
+import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
+import {
+  TutorialsRegistry,
+  TutorialsRegistrySetup,
+  TutorialsRegistryStart,
+  SampleDataRegistry,
+  SampleDataRegistrySetup,
+  SampleDataRegistryStart,
+} from './services';
+import { UsageCollectionSetup } from '../../usage_collection/server';
+import { capabilitiesProvider } from './capabilities_provider';
+import { sampleDataTelemetry } from './saved_objects';
+import { registerRoutes } from './routes';
+
+interface HomeServerPluginSetupDependencies {
+  usageCollection?: UsageCollectionSetup;
+}
 
 export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServerPluginStart> {
+  constructor(private readonly initContext: PluginInitializerContext) {}
   private readonly tutorialsRegistry = new TutorialsRegistry();
+  private readonly sampleDataRegistry = new SampleDataRegistry(this.initContext);
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup, plugins: HomeServerPluginSetupDependencies): HomeServerPluginSetup {
+    core.capabilities.registerProvider(capabilitiesProvider);
+    core.savedObjects.registerType(sampleDataTelemetry);
+
+    const router = core.http.createRouter();
+    registerRoutes(router);
+
     return {
       tutorials: { ...this.tutorialsRegistry.setup(core) },
+      sampleData: { ...this.sampleDataRegistry.setup(core, plugins.usageCollection) },
     };
   }
 
-  public start() {
+  public start(): HomeServerPluginStart {
     return {
       tutorials: { ...this.tutorialsRegistry.start() },
+      sampleData: { ...this.sampleDataRegistry.start() },
     };
   }
 }
@@ -38,9 +63,11 @@ export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServe
 /** @public */
 export interface HomeServerPluginSetup {
   tutorials: TutorialsRegistrySetup;
+  sampleData: SampleDataRegistrySetup;
 }
 
 /** @public */
 export interface HomeServerPluginStart {
   tutorials: TutorialsRegistryStart;
+  sampleData: SampleDataRegistryStart;
 }

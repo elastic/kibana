@@ -1,0 +1,65 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "space:default",
+    "index": ".kibana_1",
+    "source": {
+      "migrationVersion": {
+        "space": "6.6.0"
+      },
+      "references": [],
+      "space": {
+        "_reserved": true,
+        "description": "This is the default space!",
+        "disabledFeatures": [],
+        "name": "Default"
+      },
+      "type": "space"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:lens-rolled-up-data",
+    "index": ".kibana_1",
+    "source": {
+      "index-pattern" : {
+        "title" : "lens_rolled_up_data",
+        "timeFieldName" : "@timestamp",
+        "fields" : "[{\"count\":0,\"name\":\"_source\",\"type\":\"_source\",\"esTypes\":[\"_source\"],\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"_id\",\"type\":\"string\",\"esTypes\":[\"_id\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"count\":0,\"name\":\"_type\",\"type\":\"string\",\"esTypes\":[\"_type\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"count\":0,\"name\":\"_index\",\"type\":\"string\",\"esTypes\":[\"_index\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"count\":0,\"name\":\"_score\",\"type\":\"number\",\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"@timestamp\",\"type\":\"date\",\"esTypes\":[\"date\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"bytes\",\"type\":\"number\",\"esTypes\":[\"float\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"geo.src\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true}]",
+        "type" : "rollup",
+        "typeMeta" : "{\"params\":{\"rollup_index\":\"lens_rolled_up_data\"},\"aggs\":{\"date_histogram\":{\"@timestamp\":{\"agg\":\"date_histogram\",\"fixed_interval\":\"60m\",\"time_zone\":\"UTC\"}},\"sum\":{\"bytes\":{\"agg\":\"sum\"}},\"max\":{\"bytes\":{\"agg\":\"max\"}},\"terms\":{\"geo.src\":{\"agg\":\"terms\"}}}}"
+      },
+      "type" : "index-pattern",
+      "references" : [ ],
+      "migrationVersion" : {
+        "index-pattern" : "7.6.0"
+      },
+      "updated_at" : "2020-08-19T08:39:09.998Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "config:8.0.0",
+    "index": ".kibana_1",
+    "source": {
+      "config": {
+        "accessibility:disableAnimations": true,
+        "buildNum": 9007199254740991,
+        "dateFormat:tz": "UTC",
+        "defaultIndex": "logstash-*"
+      },
+      "references": [],
+      "type": "config",
+      "updated_at": "2019-09-04T18:47:24.761Z"
+    },
+    "type": "_doc"
+  }
+}

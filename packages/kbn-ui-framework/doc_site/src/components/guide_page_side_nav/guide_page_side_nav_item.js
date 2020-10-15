@@ -21,7 +21,6 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 export class GuidePageSideNavItem extends Component {
-
   constructor(props) {
     super(props);
 
@@ -35,16 +34,12 @@ export class GuidePageSideNavItem extends Component {
   render() {
     return (
       <div className="guidePageSideNavMenu__item">
-        <div
-          className="guidePageSideNavMenu__itemLink"
-          onClick={this.onClick}
-        >
+        <div className="guidePageSideNavMenu__itemLink" onClick={this.onClick}>
           {this.props.children}
         </div>
       </div>
     );
   }
-
 }
 
 GuidePageSideNavItem.propTypes = {

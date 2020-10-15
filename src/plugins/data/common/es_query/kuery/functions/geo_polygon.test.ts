@@ -91,7 +91,7 @@ describe('kuery functions', () => {
         expect(result).toHaveProperty('geo_polygon');
         expect(result.geo_polygon.geo).toHaveProperty('points');
 
-        result.geo_polygon.geo.points.forEach((point: any, index: number) => {
+        (result.geo_polygon.geo as any).points.forEach((point: any, index: number) => {
           const expectedLatLon = `${points[index].lat}, ${points[index].lon}`;
 
           expect(point).toBe(expectedLatLon);
@@ -105,7 +105,7 @@ describe('kuery functions', () => {
         expect(result).toHaveProperty('geo_polygon');
         expect(result.geo_polygon.geo).toHaveProperty('points');
 
-        result.geo_polygon.geo.points.forEach((point: any, index: number) => {
+        (result.geo_polygon.geo as any).points.forEach((point: any, index: number) => {
           const expectedLatLon = `${points[index].lat}, ${points[index].lon}`;
 
           expect(point).toBe(expectedLatLon);

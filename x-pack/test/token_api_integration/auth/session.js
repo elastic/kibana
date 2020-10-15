@@ -7,13 +7,15 @@
 import request from 'request';
 import expect from '@kbn/expect';
 
-const delay = ms => new Promise(resolve => setTimeout(() => resolve(), ms));
+const delay = (ms) => new Promise((resolve) => setTimeout(() => resolve(), ms));
 
 export default function ({ getService }) {
   const supertest = getService('supertestWithoutAuth');
 
   function extractSessionCookie(response) {
-    const cookie = (response.headers['set-cookie'] || []).find(header => header.startsWith('sid='));
+    const cookie = (response.headers['set-cookie'] || []).find((header) =>
+      header.startsWith('sid=')
+    );
     return cookie ? request.cookie(cookie) : undefined;
   }
 
@@ -21,7 +23,12 @@ export default function ({ getService }) {
     const response = await supertest
       .post('/internal/security/login')
       .set('kbn-xsrf', 'true')
-      .send({ username: 'elastic', password: 'changeme' });
+      .send({
+        providerType: 'token',
+        providerName: 'token',
+        currentURL: '/',
+        params: { username: 'elastic', password: 'changeme' },
+      });
 
     const cookie = extractSessionCookie(response);
     if (!cookie) {
@@ -126,7 +133,7 @@ export default function ({ getService }) {
 
     describe('API access with missing access token document.', () => {
       let sessionCookie;
-      beforeEach(async () => sessionCookie = await createSessionCookie());
+      beforeEach(async () => (sessionCookie = await createSessionCookie()));
 
       it('should clear cookie and redirect to login', async function () {
         // Let's delete tokens from `.security` index directly to simulate the case when
@@ -139,7 +146,8 @@ export default function ({ getService }) {
         });
         expect(esResponse).to.have.property('deleted').greaterThan(0);
 
-        const response = await supertest.get('/abc/xyz/')
+        const response = await supertest
+          .get('/abc/xyz/')
           .set('Cookie', sessionCookie.cookieString())
           .expect('location', '/login?next=%2Fabc%2Fxyz%2F')
           .expect(302);

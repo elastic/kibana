@@ -10,18 +10,19 @@ import config from './config';
 export default {
   ...config,
   testMatch: [
-    `**/${RESERVED_DIR_JEST_INTEGRATION_TESTS}/**/*.test.{js,ts,tsx}`,
+    `**/${RESERVED_DIR_JEST_INTEGRATION_TESTS}/**/*.test.{js,mjs,ts,tsx}`,
     // Tests within `__jest__` directories should be treated as regular unit tests.
-    `!**/__jest__/${RESERVED_DIR_JEST_INTEGRATION_TESTS}/**/*.test.{js,ts,tsx}`,
+    `!**/__jest__/${RESERVED_DIR_JEST_INTEGRATION_TESTS}/**/*.test.{js,mjs,ts,tsx}`,
   ],
   testPathIgnorePatterns: config.testPathIgnorePatterns.filter(
     (pattern) => !pattern.includes(RESERVED_DIR_JEST_INTEGRATION_TESTS)
   ),
   reporters: [
     'default',
-    ['<rootDir>/../src/dev/jest/junit_reporter.js', { reportName: 'Jest Integration Tests' }],
+    [
+      '<rootDir>/../packages/kbn-test/target/jest/junit_reporter',
+      { reportName: 'Jest Integration Tests' },
+    ],
   ],
-  setupFilesAfterEnv: [
-    '<rootDir>/../src/dev/jest/setup/after_env.integration.js'
-  ]
+  setupFilesAfterEnv: ['<rootDir>/../src/dev/jest/setup/after_env.integration.js'],
 };

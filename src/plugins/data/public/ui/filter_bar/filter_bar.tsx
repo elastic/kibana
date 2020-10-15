@@ -23,14 +23,25 @@ import classNames from 'classnames';
 import React, { useState } from 'react';
 
 import { FilterEditor } from './filter_editor';
-import { FilterItem } from './filter_item';
+import { FILTER_EDITOR_WIDTH, FilterItem } from './filter_item';
 import { FilterOptions } from './filter_options';
 import { useKibana } from '../../../../kibana_react/public';
-import { IIndexPattern, esFilters } from '../..';
+import { IIndexPattern } from '../..';
+import {
+  buildEmptyFilter,
+  Filter,
+  enableFilter,
+  disableFilter,
+  pinFilter,
+  toggleFilterDisabled,
+  toggleFilterNegated,
+  unpinFilter,
+  UI_SETTINGS,
+} from '../../../common';
 
 interface Props {
-  filters: esFilters.Filter[];
-  onFiltersUpdated?: (filters: esFilters.Filter[]) => void;
+  filters: Filter[];
+  onFiltersUpdated?: (filters: Filter[]) => void;
   className: string;
   indexPatterns: IIndexPattern[];
   intl: InjectedIntl;
@@ -43,7 +54,7 @@ function FilterBarUI(props: Props) {
   const uiSettings = kibana.services.uiSettings;
   if (!uiSettings) return null;
 
-  function onFiltersUpdated(filters: esFilters.Filter[]) {
+  function onFiltersUpdated(filters: Filter[]) {
     if (props.onFiltersUpdated) {
       props.onFiltersUpdated(filters);
     }
@@ -54,8 +65,9 @@ function FilterBarUI(props: Props) {
       <EuiFlexItem key={i} grow={false} className="globalFilterBar__flexItem">
         <FilterItem
           id={`${i}`}
+          intl={props.intl}
           filter={filter}
-          onUpdate={newFilter => onUpdate(i, newFilter)}
+          onUpdate={(newFilter) => onUpdate(i, newFilter)}
           onRemove={() => onRemove(i)}
           indexPatterns={props.indexPatterns}
           uiSettings={uiSettings!}
@@ -65,10 +77,10 @@ function FilterBarUI(props: Props) {
   }
 
   function renderAddFilter() {
-    const isPinned = uiSettings!.get('filters:pinnedByDefault');
+    const isPinned = uiSettings!.get(UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT);
     const [indexPattern] = props.indexPatterns;
     const index = indexPattern && indexPattern.id;
-    const newFilter = esFilters.buildEmptyFilter(isPinned, index);
+    const newFilter = buildEmptyFilter(isPinned, index);
 
     const button = (
       <EuiButtonEmpty
@@ -96,9 +108,11 @@ function FilterBarUI(props: Props) {
           withTitle
           panelPaddingSize="none"
           ownFocus={true}
+          initialFocus=".filterEditor__hiddenItem"
+          repositionOnScroll
         >
           <EuiFlexItem grow={false}>
-            <div style={{ width: 400 }}>
+            <div style={{ width: FILTER_EDITOR_WIDTH, maxWidth: '100%' }}>
               <FilterEditor
                 filter={newFilter}
                 indexPatterns={props.indexPatterns}
@@ -113,7 +127,7 @@ function FilterBarUI(props: Props) {
     );
   }
 
-  function onAdd(filter: esFilters.Filter) {
+  function onAdd(filter: Filter) {
     setIsAddFilterPopoverOpen(false);
     const filters = [...props.filters, filter];
     onFiltersUpdated(filters);
@@ -125,39 +139,39 @@ function FilterBarUI(props: Props) {
     onFiltersUpdated(filters);
   }
 
-  function onUpdate(i: number, filter: esFilters.Filter) {
+  function onUpdate(i: number, filter: Filter) {
     const filters = [...props.filters];
     filters[i] = filter;
     onFiltersUpdated(filters);
   }
 
   function onEnableAll() {
-    const filters = props.filters.map(esFilters.enableFilter);
+    const filters = props.filters.map(enableFilter);
     onFiltersUpdated(filters);
   }
 
   function onDisableAll() {
-    const filters = props.filters.map(esFilters.disableFilter);
+    const filters = props.filters.map(disableFilter);
     onFiltersUpdated(filters);
   }
 
   function onPinAll() {
-    const filters = props.filters.map(esFilters.pinFilter);
+    const filters = props.filters.map(pinFilter);
     onFiltersUpdated(filters);
   }
 
   function onUnpinAll() {
-    const filters = props.filters.map(esFilters.unpinFilter);
+    const filters = props.filters.map(unpinFilter);
     onFiltersUpdated(filters);
   }
 
   function onToggleAllNegated() {
-    const filters = props.filters.map(esFilters.toggleFilterNegated);
+    const filters = props.filters.map(toggleFilterNegated);
     onFiltersUpdated(filters);
   }
 
   function onToggleAllDisabled() {
-    const filters = props.filters.map(esFilters.toggleFilterDisabled);
+    const filters = props.filters.map(toggleFilterDisabled);
     onFiltersUpdated(filters);
   }
 

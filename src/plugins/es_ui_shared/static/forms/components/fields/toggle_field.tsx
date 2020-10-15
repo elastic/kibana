@@ -23,7 +23,7 @@ import { EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
 interface Props {
-  field: FieldHook;
+  field: FieldHook<boolean>;
   euiFieldProps?: Record<string, any>;
   idAria?: string;
   [key: string]: any;
@@ -42,7 +42,7 @@ export const ToggleField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
 
   return (
     <EuiFormRow
-      helpText={field.helpText}
+      helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}
       fullWidth

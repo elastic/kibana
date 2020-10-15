@@ -25,18 +25,15 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
   const queryBar = getService('queryBar');
-  const PageObjects = getPageObjects([
-    'common',
-    'home',
-    'settings',
-    'discover',
-  ]);
+  const security = getService('security');
+  const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover']);
 
   describe('test large strings', function () {
     before(async function () {
+      await security.testUser.setRoles(['kibana_admin', 'kibana_large_strings']);
       await esArchiver.load('empty_kibana');
       await esArchiver.loadIfNeeded('hamlet');
-      await kibanaServer.uiSettings.replace({ 'defaultIndex': 'testlargestring'  });
+      await kibanaServer.uiSettings.replace({ defaultIndex: 'testlargestring' });
     });
 
     it('verify the large string book present', async function () {
@@ -82,6 +79,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     after(async () => {
+      await security.testUser.restoreDefaults();
       await esArchiver.unload('hamlet');
     });
   });

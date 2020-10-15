@@ -1,0 +1,295 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`extractCollectors extracts collectors given rc file 1`] = `
+Array [
+  Array [
+    "src/fixtures/telemetry_collectors/externally_defined_collector.ts",
+    Object {
+      "collectorName": "from_variable_collector",
+      "fetch": Object {
+        "typeDescriptor": Object {
+          "locale": Object {
+            "kind": 146,
+            "type": "StringKeyword",
+          },
+        },
+        "typeName": "Usage",
+      },
+      "schema": Object {
+        "value": Object {
+          "locale": Object {
+            "type": "keyword",
+          },
+        },
+      },
+    },
+  ],
+  Array [
+    "src/fixtures/telemetry_collectors/externally_defined_collector.ts",
+    Object {
+      "collectorName": "from_fn_collector",
+      "fetch": Object {
+        "typeDescriptor": Object {
+          "locale": Object {
+            "kind": 146,
+            "type": "StringKeyword",
+          },
+        },
+        "typeName": "Usage",
+      },
+      "schema": Object {
+        "value": Object {
+          "locale": Object {
+            "type": "keyword",
+          },
+        },
+      },
+    },
+  ],
+  Array [
+    "src/fixtures/telemetry_collectors/imported_schema.ts",
+    Object {
+      "collectorName": "with_imported_schema",
+      "fetch": Object {
+        "typeDescriptor": Object {
+          "locale": Object {
+            "kind": 146,
+            "type": "StringKeyword",
+          },
+        },
+        "typeName": "Usage",
+      },
+      "schema": Object {
+        "value": Object {
+          "locale": Object {
+            "type": "keyword",
+          },
+        },
+      },
+    },
+  ],
+  Array [
+    "src/fixtures/telemetry_collectors/imported_usage_interface.ts",
+    Object {
+      "collectorName": "imported_usage_interface_collector",
+      "fetch": Object {
+        "typeDescriptor": Object {
+          "locale": Object {
+            "kind": 146,
+            "type": "StringKeyword",
+          },
+        },
+        "typeName": "Usage",
+      },
+      "schema": Object {
+        "value": Object {
+          "locale": Object {
+            "type": "keyword",
+          },
+        },
+      },
+    },
+  ],
+  Array [
+    "src/fixtures/telemetry_collectors/indexed_interface_with_not_matching_schema.ts",
+    Object {
+      "collectorName": "indexed_interface_with_not_matching_schema",
+      "fetch": Object {
+        "typeDescriptor": Object {
+          "@@INDEX@@": Object {
+            "count_1": Object {
+              "kind": 143,
+              "type": "NumberKeyword",
+            },
+            "count_2": Object {
+              "kind": 143,
+              "type": "NumberKeyword",
+            },
+          },
+        },
+        "typeName": "Usage",
+      },
+      "schema": Object {
+        "value": Object {
+          "something": Object {
+            "count_1": Object {
+              "type": "long",
+            },
+          },
+        },
+      },
+    },
+  ],
+  Array [
+    "src/fixtures/telemetry_collectors/nested_collector.ts",
+    Object {
+      "collectorName": "my_nested_collector",
+      "fetch": Object {
+        "typeDescriptor": Object {
+          "locale": Object {
+            "kind": 146,
+            "type": "StringKeyword",
+          },
+        },
+        "typeName": "Usage",
+      },
+      "schema": Object {
+        "value": Object {
+          "locale": Object {
+            "type": "keyword",
+          },
+        },
+      },
+    },
+  ],
+  Array [
+    "src/fixtures/telemetry_collectors/schema_defined_with_spreads_collector.ts",
+    Object {
+      "collectorName": "schema_defined_with_spreads",
+      "fetch": Object {
+        "typeDescriptor": Object {
+          "flat": Object {
+            "kind": 146,
+            "type": "StringKeyword",
+          },
+          "my_objects": Object {
+            "total": Object {
+              "kind": 143,
+              "type": "NumberKeyword",
+            },
+            "type": Object {
+              "kind": 131,
+              "type": "BooleanKeyword",
+            },
+          },
+          "my_str": Object {
+            "kind": 146,
+            "type": "StringKeyword",
+          },
+        },
+        "typeName": "Usage",
+      },
+      "schema": Object {
+        "value": Object {
+          "flat": Object {
+            "type": "keyword",
+          },
+          "my_objects": Object {
+            "total": Object {
+              "type": "number",
+            },
+            "type": Object {
+              "type": "boolean",
+            },
+          },
+          "my_str": Object {
+            "type": "text",
+          },
+        },
+      },
+    },
+  ],
+  Array [
+    "src/fixtures/telemetry_collectors/working_collector.ts",
+    Object {
+      "collectorName": "my_working_collector",
+      "fetch": Object {
+        "typeDescriptor": Object {
+          "flat": Object {
+            "kind": 146,
+            "type": "StringKeyword",
+          },
+          "my_array": Object {
+            "items": Object {
+              "total": Object {
+                "kind": 143,
+                "type": "NumberKeyword",
+              },
+              "type": Object {
+                "kind": 131,
+                "type": "BooleanKeyword",
+              },
+            },
+          },
+          "my_index_signature_prop": Object {
+            "@@INDEX@@": Object {
+              "kind": 143,
+              "type": "NumberKeyword",
+            },
+          },
+          "my_objects": Object {
+            "total": Object {
+              "kind": 143,
+              "type": "NumberKeyword",
+            },
+            "type": Object {
+              "kind": 131,
+              "type": "BooleanKeyword",
+            },
+          },
+          "my_str": Object {
+            "kind": 146,
+            "type": "StringKeyword",
+          },
+          "my_str_array": Object {
+            "items": Object {
+              "kind": 146,
+              "type": "StringKeyword",
+            },
+          },
+        },
+        "typeName": "Usage",
+      },
+      "schema": Object {
+        "value": Object {
+          "flat": Object {
+            "type": "keyword",
+          },
+          "my_array": Object {
+            "items": Object {
+              "total": Object {
+                "type": "number",
+              },
+              "type": Object {
+                "type": "boolean",
+              },
+            },
+            "type": "array",
+          },
+          "my_index_signature_prop": Object {
+            "avg": Object {
+              "type": "number",
+            },
+            "count": Object {
+              "type": "number",
+            },
+            "max": Object {
+              "type": "number",
+            },
+            "min": Object {
+              "type": "number",
+            },
+          },
+          "my_objects": Object {
+            "total": Object {
+              "type": "number",
+            },
+            "type": Object {
+              "type": "boolean",
+            },
+          },
+          "my_str": Object {
+            "type": "text",
+          },
+          "my_str_array": Object {
+            "items": Object {
+              "type": "keyword",
+            },
+            "type": "array",
+          },
+        },
+      },
+    },
+  ],
+]
+`;

@@ -5,25 +5,23 @@
  */
 import {
   KibanaRequest,
-  OnPreAuthToolkit,
+  OnPreRoutingToolkit,
   LifecycleResponseFactory,
   CoreSetup,
 } from 'src/core/server';
 import { format } from 'url';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { modifyUrl } from '../utils/url';
-import { LegacyAPI } from '../../plugin';
 import { getSpaceIdFromPath } from '../../../common';
 
 export interface OnRequestInterceptorDeps {
-  getLegacyAPI(): LegacyAPI;
   http: CoreSetup['http'];
 }
-export function initSpacesOnRequestInterceptor({ getLegacyAPI, http }: OnRequestInterceptorDeps) {
-  http.registerOnPreAuth(async function spacesOnPreAuthHandler(
+export function initSpacesOnRequestInterceptor({ http }: OnRequestInterceptorDeps) {
+  http.registerOnPreRouting(async function spacesOnPreRoutingHandler(
     request: KibanaRequest,
     response: LifecycleResponseFactory,
-    toolkit: OnPreAuthToolkit
+    toolkit: OnPreRoutingToolkit
   ) {
     const serverBasePath = http.basePath.serverBasePath;
     const path = request.url.pathname;
@@ -39,7 +37,7 @@ export function initSpacesOnRequestInterceptor({ getLegacyAPI, http }: OnRequest
 
       const newLocation = (path && path.substr(reqBasePath.length)) || '/';
 
-      const newUrl = modifyUrl(format(request.url), parts => {
+      const newUrl = modifyUrl(format(request.url), (parts) => {
         return {
           ...parts,
           pathname: newLocation,

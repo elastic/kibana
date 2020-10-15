@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }) {
     before(async () => {
       await esArchiver.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
-        'defaultIndex': '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
@@ -68,14 +68,19 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('when time changed is stored with dashboard', async function () {
-          await PageObjects.dashboard.setTimepickerInDataRange();
+          await PageObjects.timePicker.setDefaultDataRange();
 
           const originalTime = await PageObjects.timePicker.getTimeConfig();
 
-          await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
+          await PageObjects.dashboard.saveDashboard(dashboardName, {
+            storeTimeWithDashboard: true,
+          });
 
           await PageObjects.dashboard.switchToEditMode();
-          await PageObjects.timePicker.setAbsoluteRange('Sep 19, 2013 @ 06:31:44.000', 'Sep 19, 2013 @ 06:31:44.000');
+          await PageObjects.timePicker.setAbsoluteRange(
+            'Sep 19, 2013 @ 06:31:44.000',
+            'Sep 19, 2013 @ 06:31:44.000'
+          );
           await PageObjects.dashboard.clickCancelOutOfEditMode();
 
           // confirm lose changes
@@ -131,7 +136,10 @@ export default function ({ getService, getPageObjects }) {
           await dashboardAddPanel.clickAddNewEmbeddableLink('visualization');
           await PageObjects.visualize.clickAreaChart();
           await PageObjects.visualize.clickNewSearch();
-          await PageObjects.visualize.saveVisualizationExpectSuccess('new viz panel');
+          await PageObjects.visualize.saveVisualizationExpectSuccess('new viz panel', {
+            saveAsNew: false,
+            redirectToOrigin: true,
+          });
 
           await PageObjects.dashboard.clickCancelOutOfEditMode();
           // for this sleep see https://github.com/elastic/kibana/issues/22299
@@ -161,14 +169,22 @@ export default function ({ getService, getPageObjects }) {
       describe('and preserves edits on cancel', function () {
         it('when time changed is stored with dashboard', async function () {
           await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
-          await PageObjects.timePicker.setAbsoluteRange('Sep 19, 2013 @ 06:31:44.000', 'Sep 19, 2013 @ 06:31:44.000');
+          await PageObjects.timePicker.setAbsoluteRange(
+            'Sep 19, 2013 @ 06:31:44.000',
+            'Sep 19, 2013 @ 06:31:44.000'
+          );
           await PageObjects.dashboard.saveDashboard(dashboardName, true);
           await PageObjects.dashboard.switchToEditMode();
-          await PageObjects.timePicker.setAbsoluteRange('Sep 19, 2015 @ 06:31:44.000', 'Sep 19, 2015 @ 06:31:44.000');
+          await PageObjects.timePicker.setAbsoluteRange(
+            'Sep 19, 2015 @ 06:31:44.000',
+            'Sep 19, 2015 @ 06:31:44.000'
+          );
           await PageObjects.dashboard.clickCancelOutOfEditMode();
 
           await PageObjects.common.clickCancelOnModal();
-          await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
+          await PageObjects.dashboard.saveDashboard(dashboardName, {
+            storeTimeWithDashboard: true,
+          });
 
           await PageObjects.dashboard.loadSavedDashboard(dashboardName);
 
@@ -183,10 +199,13 @@ export default function ({ getService, getPageObjects }) {
     describe('and preserves edits on cancel', function () {
       it('when time changed is stored with dashboard', async function () {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
-        await PageObjects.dashboard.setTimepickerInDataRange();
+        await PageObjects.timePicker.setDefaultDataRange();
         await PageObjects.dashboard.saveDashboard(dashboardName, true);
         await PageObjects.dashboard.switchToEditMode();
-        await PageObjects.timePicker.setAbsoluteRange('Sep 19, 2013 @ 06:31:44.000', 'Sep 19, 2013 @ 06:31:44.000');
+        await PageObjects.timePicker.setAbsoluteRange(
+          'Sep 19, 2013 @ 06:31:44.000',
+          'Sep 19, 2013 @ 06:31:44.000'
+        );
         const newTime = await PageObjects.timePicker.getTimeConfig();
 
         await PageObjects.dashboard.clickCancelOutOfEditMode();
@@ -208,7 +227,10 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
         await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: false });
         await PageObjects.dashboard.switchToEditMode();
-        await PageObjects.timePicker.setAbsoluteRange('Oct 19, 2014 @ 06:31:44.000', 'Dec 19, 2014 @ 06:31:44.000');
+        await PageObjects.timePicker.setAbsoluteRange(
+          'Oct 19, 2014 @ 06:31:44.000',
+          'Dec 19, 2014 @ 06:31:44.000'
+        );
         await PageObjects.dashboard.clickCancelOutOfEditMode();
 
         await PageObjects.common.expectConfirmModalOpenState(false);

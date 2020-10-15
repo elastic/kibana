@@ -37,9 +37,8 @@ export default function ({ getService, getPageObjects }) {
           duckbeat: 1,
           sheepbeat: 1,
           winlogbeat: 1,
-        }
+        },
       });
     });
-
   });
 }

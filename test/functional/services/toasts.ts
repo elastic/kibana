@@ -53,7 +53,17 @@ export function ToastsProvider({ getService }: FtrProviderContext) {
       await dismissButton.click();
     }
 
-    private async getToastElement(index: number) {
+    public async dismissAllToasts() {
+      const list = await this.getGlobalToastList();
+      const toasts = await list.findAllByCssSelector(`.euiToast`);
+      for (const toast of toasts) {
+        await toast.moveMouseTo();
+        const dismissButton = await testSubjects.findDescendant('toastCloseButton', toast);
+        await dismissButton.click();
+      }
+    }
+
+    public async getToastElement(index: number) {
       const list = await this.getGlobalToastList();
       return await list.findByCssSelector(`.euiToast:nth-child(${index})`);
     }
