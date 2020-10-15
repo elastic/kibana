@@ -34,19 +34,21 @@ exports[`RuleActionsOverflow snapshots renders correctly against snapshot 1`] = 
       hasFocus={true}
       items={
         Array [
-          <EuiToolTip
-            delay="regular"
-            position="left"
+          <EuiContextMenuItem
+            data-test-subj="rules-details-duplicate-rule"
+            disabled={false}
+            icon="copy"
+            onClick={[Function]}
           >
-            <EuiContextMenuItem
-              data-test-subj="rules-details-duplicate-rule"
-              disabled={false}
-              icon="copy"
-              onClick={[Function]}
+            <EuiToolTip
+              delay="regular"
+              position="left"
             >
-              Duplicate rule
-            </EuiContextMenuItem>
-          </EuiToolTip>,
+              <React.Fragment>
+                Duplicate rule
+              </React.Fragment>
+            </EuiToolTip>
+          </EuiContextMenuItem>,
           <EuiContextMenuItem
             data-test-subj="rules-details-export-rule"
             disabled={false}
