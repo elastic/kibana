@@ -11,18 +11,6 @@
 // Caching this here to avoid setTimeout mocking affecting our tests.
 const nativeTimeout = setTimeout;
 
-/**
- * Creates a mock task manager Logger.
- */
-export function mockLogger() {
-  return {
-    info: jest.fn(),
-    debug: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-  };
-}
-
 export interface Resolvable {
   resolve: () => void;
 }
