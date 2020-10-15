@@ -237,6 +237,7 @@ class AgentPolicyService {
   ): Promise<AgentPolicy> {
     if (agentPolicy.name) {
       await this.requireUniqueName(soClient, {
+        id,
         name: agentPolicy.name,
       });
     }
