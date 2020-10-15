@@ -14,6 +14,7 @@ const TO = '3000-01-01T00:00:00.000Z';
 
 // typical values that have to change after an update from "scripts/es_archiver"
 const HOST_NAME = 'zeek-newyork-sha-aa8df15';
+const LAST_SUCCESS_SOURCE_IP = '8.42.77.171';
 const TOTAL_COUNT = 3;
 const EDGE_LENGTH = 1;
 
@@ -78,6 +79,9 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(authentications.edges.length).to.be(EDGE_LENGTH);
       expect(authentications.totalCount).to.be(TOTAL_COUNT);
+      expect(authentications.edges[0]!.node.lastSuccess!.source!.ip).to.eql([
+        LAST_SUCCESS_SOURCE_IP,
+      ]);
       expect(authentications.edges[0]!.node.lastSuccess!.host!.name).to.eql([HOST_NAME]);
     });
   });
