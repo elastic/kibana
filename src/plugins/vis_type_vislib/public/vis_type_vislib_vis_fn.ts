@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
+import { ExpressionFunctionDefinition, KibanaDatatable, Render } from '../../expressions/public';
 // @ts-ignore
 import { vislibSeriesResponseHandler } from './vislib/response_handler';
 
@@ -36,13 +36,13 @@ interface RenderValue {
 
 export const createVisTypeVislibVisFn = (): ExpressionFunctionDefinition<
   'vislib',
-  Datatable,
+  KibanaDatatable,
   Arguments,
   Render<RenderValue>
 > => ({
   name: 'vislib',
   type: 'render',
-  inputTypes: ['datatable'],
+  inputTypes: ['kibana_datatable'],
   help: i18n.translate('visTypeVislib.functions.vislib.help', {
     defaultMessage: 'Vislib visualization',
   }),

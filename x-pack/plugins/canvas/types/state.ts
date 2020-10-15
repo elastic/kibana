@@ -10,6 +10,7 @@ import {
   ExpressionImage,
   ExpressionFunction,
   KibanaContext,
+  KibanaDatatable,
   PointSeries,
   Render,
   Style,
@@ -48,6 +49,7 @@ type ExpressionType =
   | ExpressionValueFilter
   | ExpressionImage
   | KibanaContext
+  | KibanaDatatable
   | PointSeries
   | Style
   | Range;

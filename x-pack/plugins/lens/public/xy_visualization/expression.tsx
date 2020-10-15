@@ -26,8 +26,7 @@ import {
   ExpressionFunctionDefinition,
   ExpressionRenderDefinition,
   ExpressionValueSearchContext,
-  Datatable,
-  DatatableRow,
+  KibanaDatatable,
 } from 'src/plugins/expressions/public';
 import { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -272,7 +271,7 @@ export function XYChart({
   const xAxisColumn = data.tables[filteredLayers[0].layerId].columns.find(
     ({ id }) => id === filteredLayers[0].xAccessor
   );
-  const xAxisFormatter = formatFactory(xAxisColumn && xAxisColumn.meta?.params);
+  const xAxisFormatter = formatFactory(xAxisColumn && xAxisColumn.formatHint);
   const layersAlreadyFormatted: Record<string, boolean> = {};
   // This is a safe formatter for the xAccessor that abstracts the knowledge of already formatted layers
   const safeXAccessorLabelRenderer = (value: unknown): string =>
@@ -331,8 +330,8 @@ export function XYChart({
 
     // add minInterval only for single point in domain
     if (data.dateRange && isSingleTimestampInXDomain()) {
-      const params = xAxisColumn?.meta?.sourceParams?.params as Record<string, string>;
-      if (params?.interval !== 'auto') return parseInterval(params?.interval)?.asMilliseconds();
+      if (xAxisColumn?.meta?.aggConfigParams?.interval !== 'auto')
+        return parseInterval(xAxisColumn?.meta?.aggConfigParams?.interval)?.asMilliseconds();
 
       const { fromDate, toDate } = data.dateRange;
       const duration = moment(toDate).diff(moment(fromDate));
@@ -418,9 +417,8 @@ export function XYChart({
           const xAxisColumnIndex = table.columns.findIndex(
             (el) => el.id === filteredLayers[0].xAccessor
           );
-
           const timeFieldName = isTimeViz
-            ? table.columns[xAxisColumnIndex]?.meta?.field
+            ? table.columns[xAxisColumnIndex]?.meta?.aggConfigParams?.field
             : undefined;
 
           const context: LensBrushEvent['data'] = {
@@ -473,7 +471,8 @@ export function XYChart({
             });
           }
 
-          const xAxisFieldName = table.columns.find((el) => el.id === layer.xAccessor)?.meta?.field;
+          const xAxisFieldName = table.columns.find((el) => el.id === layer.xAccessor)?.meta
+            ?.aggConfigParams?.field;
           const timeFieldName = xDomain && xAxisFieldName;
 
           const context: LensFilterEvent['data'] = {
@@ -553,14 +552,14 @@ export function XYChart({
           // what if row values are not primitive? That is the case of, for instance, Ranges
           // remaps them to their serialized version with the formatHint metadata
           // In order to do it we need to make a copy of the table as the raw one is required for more features (filters, etc...) later on
-          const tableConverted: Datatable = {
+          const tableConverted: KibanaDatatable = {
             ...table,
-            rows: table.rows.map((row: DatatableRow) => {
+            rows: table.rows.map((row) => {
               const newRow = { ...row };
               for (const column of table.columns) {
                 const record = newRow[column.id];
                 if (record && !isPrimitive(record)) {
-                  newRow[column.id] = formatFactory(column.meta.params).convert(record);
+                  newRow[column.id] = formatFactory(column.formatHint).convert(record);
                 }
               }
               return newRow;
@@ -635,7 +634,7 @@ export function XYChart({
               },
             },
             name(d) {
-              const splitHint = table.columns.find((col) => col.id === splitAccessor)?.meta?.params;
+              const splitHint = table.columns.find((col) => col.id === splitAccessor)?.formatHint;
 
               // For multiple y series, the name of the operation is used on each, either:
               // * Key - Y name

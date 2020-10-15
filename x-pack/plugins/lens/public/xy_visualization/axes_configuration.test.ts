@@ -5,13 +5,13 @@
  */
 
 import { LayerArgs } from './types';
-import { Datatable } from '../../../../../src/plugins/expressions/public';
+import { KibanaDatatable } from '../../../../../src/plugins/expressions/public';
 import { getAxesConfiguration } from './axes_configuration';
 
 describe('axes_configuration', () => {
-  const tables: Record<string, Datatable> = {
+  const tables: Record<string, KibanaDatatable> = {
     first: {
-      type: 'datatable',
+      type: 'kibana_datatable',
       rows: [
         {
           xAccessorId: 1585758120000,
@@ -99,60 +99,48 @@ describe('axes_configuration', () => {
           id: 'xAccessorId',
           name: 'order_date per minute',
           meta: {
-            type: 'date',
-            field: 'order_date',
-            source: 'esaggs',
-            index: 'indexPatternId',
-            sourceParams: {
-              indexPatternId: 'indexPatternId',
-              type: 'date_histogram',
-              params: {
-                field: 'order_date',
-                timeRange: { from: '2020-04-01T16:14:16.246Z', to: '2020-04-01T17:15:41.263Z' },
-                useNormalizedEsInterval: true,
-                scaleMetricValues: false,
-                interval: '1m',
-                drop_partials: false,
-                min_doc_count: 0,
-                extended_bounds: {},
-              },
+            type: 'date_histogram',
+            indexPatternId: 'indexPatternId',
+            aggConfigParams: {
+              field: 'order_date',
+              timeRange: { from: '2020-04-01T16:14:16.246Z', to: '2020-04-01T17:15:41.263Z' },
+              useNormalizedEsInterval: true,
+              scaleMetricValues: false,
+              interval: '1m',
+              drop_partials: false,
+              min_doc_count: 0,
+              extended_bounds: {},
             },
-            params: { params: { id: 'date', params: { pattern: 'HH:mm' } } },
           },
+          formatHint: { id: 'date', params: { pattern: 'HH:mm' } },
         },
         {
           id: 'splitAccessorId',
           name: 'Top values of category.keyword',
           meta: {
-            type: 'string',
-            field: 'category.keyword',
-            source: 'esaggs',
-            index: 'indexPatternId',
-            sourceParams: {
-              indexPatternId: 'indexPatternId',
-              type: 'terms',
-              params: {
-                field: 'category.keyword',
-                orderBy: 'yAccessorId',
-                order: 'desc',
-                size: 3,
-                otherBucket: false,
-                otherBucketLabel: 'Other',
-                missingBucket: false,
-                missingBucketLabel: 'Missing',
-              },
+            type: 'terms',
+            indexPatternId: 'indexPatternId',
+            aggConfigParams: {
+              field: 'category.keyword',
+              orderBy: 'yAccessorId',
+              order: 'desc',
+              size: 3,
+              otherBucket: false,
+              otherBucketLabel: 'Other',
+              missingBucket: false,
+              missingBucketLabel: 'Missing',
             },
+          },
+          formatHint: {
+            id: 'terms',
             params: {
-              id: 'terms',
-              params: {
-                id: 'string',
-                otherBucketLabel: 'Other',
-                missingBucketLabel: 'Missing',
-                parsedUrl: {
-                  origin: 'http://localhost:5601',
-                  pathname: '/jiy/app/kibana',
-                  basePath: '/jiy',
-                },
+              id: 'string',
+              otherBucketLabel: 'Other',
+              missingBucketLabel: 'Missing',
+              parsedUrl: {
+                origin: 'http://localhost:5601',
+                pathname: '/jiy/app/kibana',
+                basePath: '/jiy',
               },
             },
           },
@@ -161,57 +149,41 @@ describe('axes_configuration', () => {
           id: 'yAccessorId',
           name: 'Count of records',
           meta: {
-            type: 'number',
-            source: 'esaggs',
-            index: 'indexPatternId',
-            sourceParams: {
-              indexPatternId: 'indexPatternId',
-              type: 'count',
-            },
-            params: { id: 'number' },
+            type: 'count',
+            indexPatternId: 'indexPatternId',
+            aggConfigParams: {},
           },
+          formatHint: { id: 'number' },
         },
         {
           id: 'yAccessorId2',
           name: 'Other column',
           meta: {
-            type: 'number',
-            source: 'esaggs',
-            index: 'indexPatternId',
-            sourceParams: {
-              indexPatternId: 'indexPatternId',
-              type: 'average',
-            },
-            params: { id: 'bytes' },
+            type: 'average',
+            indexPatternId: 'indexPatternId',
+            aggConfigParams: {},
           },
+          formatHint: { id: 'bytes' },
         },
         {
           id: 'yAccessorId3',
           name: 'Other column',
           meta: {
-            type: 'number',
-            source: 'esaggs',
-            index: 'indexPatternId',
-            sourceParams: {
-              indexPatternId: 'indexPatternId',
-              type: 'average',
-            },
-            params: { id: 'currency' },
+            type: 'average',
+            indexPatternId: 'indexPatternId',
+            aggConfigParams: {},
           },
+          formatHint: { id: 'currency' },
         },
         {
           id: 'yAccessorId4',
           name: 'Other column',
           meta: {
-            type: 'number',
-            source: 'esaggs',
-            index: 'indexPatternId',
-            sourceParams: {
-              indexPatternId: 'indexPatternId',
-              type: 'average',
-            },
-            params: { id: 'currency' },
+            type: 'average',
+            indexPatternId: 'indexPatternId',
+            aggConfigParams: {},
           },
+          formatHint: { id: 'currency' },
         },
       ],
     },

@@ -49,7 +49,7 @@ export const getTimelionVisRenderer: (
     }
 
     render(
-      <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>
+      <VisualizationContainer showNoResult={showNoResult}>
         <KibanaContextProvider services={{ ...deps }}>
           <TimelionVisComponent
             interval={visParams.interval}

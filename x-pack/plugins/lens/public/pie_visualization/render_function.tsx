@@ -68,7 +68,7 @@ export function PieComponent(
 
   if (!hideLabels) {
     firstTable.columns.forEach((column) => {
-      formatters[column.id] = props.formatFactory(column.meta.params);
+      formatters[column.id] = props.formatFactory(column.formatHint);
     });
   }
 
@@ -108,7 +108,7 @@ export function PieComponent(
         if (hideLabels || d === EMPTY_SLICE) {
           return '';
         }
-        if (col.meta.params) {
+        if (col.formatHint) {
           return formatters[col.id].convert(d) ?? '';
         }
         return String(d);
