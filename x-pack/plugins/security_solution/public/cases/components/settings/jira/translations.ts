@@ -43,7 +43,7 @@ export const SEARCH_ISSUES_COMBO_BOX_ARIA_LABEL = i18n.translate(
 export const SEARCH_ISSUES_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.components.settings.jira.searchIssuesComboBoxPlaceholder',
   {
-    defaultMessage: 'Select parent issue',
+    defaultMessage: 'Type to search',
   }
 );
 
