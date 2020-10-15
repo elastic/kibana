@@ -32,6 +32,7 @@ import {
 import { findKibanaPlatformPlugins, KibanaPlatformPlugin } from './kibana_platform_plugins';
 import { getPluginBundles } from './get_plugin_bundles';
 import { filterById } from './filter_by_id';
+import { focusBundles } from './focus_bundles';
 import { readLimits } from '../limits';
 
 export interface Limits {
@@ -104,6 +105,11 @@ interface Options {
    *  --filter f*r # [foobar], excludes [foo, bar]
    */
   filter?: string[];
+  /**
+   * behaves just like filter, but includes required bundles and plugins of the
+   * listed bundle ids. Filters only apply to bundles selected by focus
+   */
+  focus?: string[];
 
   /** flag that causes the core bundle to be built along with plugins */
   includeCoreBundle?: boolean;
@@ -132,6 +138,7 @@ export interface ParsedOptions {
   pluginPaths: string[];
   pluginScanDirs: string[];
   filters: string[];
+  focus: string[];
   inspectWorkers: boolean;
   includeCoreBundle: boolean;
   themeTags: ThemeTags;
@@ -148,6 +155,7 @@ export class OptimizerConfig {
     const cache = options.cache !== false && !process.env.KBN_OPTIMIZER_NO_CACHE;
     const includeCoreBundle = !!options.includeCoreBundle;
     const filters = options.filter || [];
+    const focus = options.focus || [];
 
     const repoRoot = options.repoRoot;
     if (!Path.isAbsolute(repoRoot)) {
@@ -210,6 +218,7 @@ export class OptimizerConfig {
       pluginScanDirs,
       pluginPaths,
       filters,
+      focus,
       inspectWorkers,
       includeCoreBundle,
       themeTags,
@@ -236,7 +245,7 @@ export class OptimizerConfig {
     ];
 
     return new OptimizerConfig(
-      filterById(options.filters, bundles),
+      filterById(options.filters, focusBundles(options.focus, bundles)),
       options.cache,
       options.watch,
       options.inspectWorkers,
