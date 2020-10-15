@@ -5,8 +5,7 @@
  */
 
 import { first, map } from 'rxjs/operators';
-import { LegacyAPICaller } from 'kibana/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { ReportingCore } from '../';
 import { ExportTypesRegistry } from '../lib/export_types_registry';
 import { ReportingSetupDeps } from '../types';
@@ -37,7 +36,7 @@ export function getReportingUsageCollector(
 ) {
   return usageCollection.makeUsageCollector<ReportingUsageType, XpackBulkUpload>({
     type: 'reporting',
-    fetch: (callCluster: LegacyAPICaller) => {
+    fetch: ({ callCluster }: CollectorFetchContext) => {
       const config = reporting.getConfig();
       return getReportingUsage(config, getLicense, callCluster, exportTypesRegistry);
     },
