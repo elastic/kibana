@@ -105,10 +105,10 @@ export interface HttpRequestParams {
 }
 
 export function httpRequestEvent({ request }: HttpRequestParams): AuditEvent {
-  const [path, query] = request.url.path?.split('?') ?? [];
+  const { pathname, search } = request.url;
 
   return {
-    message: `User is requesting [${path}] endpoint`,
+    message: `User is requesting [${pathname}] endpoint`,
     event: {
       action: 'http_request',
       category: EventCategory.WEB,
@@ -121,9 +121,9 @@ export function httpRequestEvent({ request }: HttpRequestParams): AuditEvent {
     },
     url: {
       domain: request.url.hostname,
-      path,
+      path: pathname,
       port: request.url.port ? parseInt(request.url.port, 10) : undefined,
-      query,
+      query: search?.slice(1) ?? undefined,
       scheme: request.url.protocol,
     },
   };
