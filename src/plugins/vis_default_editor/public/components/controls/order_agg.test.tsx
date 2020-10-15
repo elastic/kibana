@@ -106,7 +106,7 @@ describe('OrderAggParamEditor component', () => {
 
     mount(<OrderByParamEditor {...props} />);
 
-    expect(setValue).toHaveBeenCalledWith('agg5');
+    expect(setValue).toHaveBeenCalledWith('agg3');
   });
 
   it('defaults to the _key metric if no agg is compatible', () => {

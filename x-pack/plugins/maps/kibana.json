@@ -15,16 +15,12 @@
     "embeddable",
     "mapsLegacy",
     "usageCollection",
+    "savedObjects",
     "share"
   ],
   "optionalPlugins": ["home"],
   "ui": true,
   "server": true,
   "extraPublicDirs": ["common/constants"],
-  "requiredBundles": [
-    "kibanaReact",
-    "kibanaUtils",
-    "savedObjects",
-    "home"
-  ]
+  "requiredBundles": ["kibanaReact", "kibanaUtils", "home"]
 }
