@@ -27,6 +27,7 @@ interface Props {
   bounds: InfraWaffleMapBounds;
   dataBounds: InfraWaffleMapBounds;
   bottomMargin: number;
+  staticHeight: boolean;
 }
 
 export const Map: React.FC<Props> = ({
@@ -39,6 +40,7 @@ export const Map: React.FC<Props> = ({
   nodeType,
   dataBounds,
   bottomMargin,
+  staticHeight,
 }) => {
   const sortedNodes = sortNodes(options.sort, nodes);
   const map = nodesToWaffleMap(sortedNodes);
@@ -51,6 +53,7 @@ export const Map: React.FC<Props> = ({
             ref={(el: any) => measureRef(el)}
             bottomMargin={bottomMargin}
             data-test-subj="waffleMap"
+            staticHeight={staticHeight}
           >
             <WaffleMapInnerContainer>
               {groupsWithLayout.map((group) => {
@@ -92,7 +95,7 @@ export const Map: React.FC<Props> = ({
   );
 };
 
-const WaffleMapOuterContainer = euiStyled.div<{ bottomMargin: number }>`
+const WaffleMapOuterContainer = euiStyled.div<{ bottomMargin: number; staticHeight: boolean }>`
   flex: 1 0 0%;
   display: flex;
   justify-content: flex-start;
@@ -100,6 +103,7 @@ const WaffleMapOuterContainer = euiStyled.div<{ bottomMargin: number }>`
   overflow-x: hidden;
   overflow-y: auto;
   margin-bottom: ${(props) => props.bottomMargin}px;
+  ${(props) => props.staticHeight && 'min-height: 300px;'}
 `;
 
 const WaffleMapInnerContainer = euiStyled.div`
