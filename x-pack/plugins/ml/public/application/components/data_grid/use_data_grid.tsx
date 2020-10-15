@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { EuiDataGridSorting, EuiDataGridColumn } from '@elastic/eui';
 
@@ -93,10 +93,8 @@ export const useDataGrid = (
     [columns]
   );
 
-  return {
-    chartsVisible,
-    chartsButtonVisible: true,
-    columnsWithCharts: columns.map((c, index) => {
+  const columnsWithCharts = useMemo(() => {
+    const updatedColumns = columns.map((c, index) => {
       const chartData = columnCharts.find((cd) => cd.id === c.id);
 
       return {
@@ -110,7 +108,27 @@ export const useDataGrid = (
             />
           ) : undefined,
       };
-    }),
+    });
+
+    // Sort the columns to be in line with the current order of visible columns.
+    // EuiDataGrid misses a callback for the order of all available columns, so
+    // this only can retain the order of visible columns.
+    updatedColumns.sort((a, b) => {
+      // Skip if one of the columns isn't visible.
+      if (visibleColumns.indexOf(a.id) === -1 || visibleColumns.indexOf(b.id) === -1) {
+        return 0;
+      }
+
+      return visibleColumns.indexOf(a.id) - visibleColumns.indexOf(b.id);
+    });
+
+    return updatedColumns;
+  }, [columns, columnCharts, chartsVisible, visibleColumns]);
+
+  return {
+    chartsVisible,
+    chartsButtonVisible: true,
+    columnsWithCharts,
     errorMessage,
     invalidSortingColumnns,
     noDataMessage,
