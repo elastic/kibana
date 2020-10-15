@@ -138,11 +138,11 @@ describe('EmbeddedMapComponent', () => {
       </TestProviders>
     );
     await waitFor(() => {
-      wrapper!.update();
+      wrapper.update();
 
-      expect(wrapper!.find('[data-test-subj="EmbeddablePanel"]').exists()).toEqual(false);
-      expect(wrapper!.find('[data-test-subj="IndexPatternsMissingPrompt"]').exists()).toEqual(true);
-      expect(wrapper!.find('[data-test-subj="loading-panel"]').exists()).toEqual(false);
+      expect(wrapper.find('[data-test-subj="EmbeddablePanel"]').exists()).toEqual(false);
+      expect(wrapper.find('[data-test-subj="IndexPatternsMissingPrompt"]').exists()).toEqual(true);
+      expect(wrapper.find('[data-test-subj="loading-panel"]').exists()).toEqual(false);
     });
   });
 
@@ -158,13 +158,11 @@ describe('EmbeddedMapComponent', () => {
       </TestProviders>
     );
     await waitFor(() => {
-      wrapper!.update();
+      wrapper.update();
 
-      expect(wrapper!.find('[data-test-subj="EmbeddablePanel"]').exists()).toEqual(false);
-      expect(wrapper!.find('[data-test-subj="IndexPatternsMissingPrompt"]').exists()).toEqual(
-        false
-      );
-      expect(wrapper!.find('[data-test-subj="loading-panel"]').exists()).toEqual(true);
+      expect(wrapper.find('[data-test-subj="EmbeddablePanel"]').exists()).toEqual(false);
+      expect(wrapper.find('[data-test-subj="IndexPatternsMissingPrompt"]').exists()).toEqual(false);
+      expect(wrapper.find('[data-test-subj="loading-panel"]').exists()).toEqual(true);
     });
   });
 });
