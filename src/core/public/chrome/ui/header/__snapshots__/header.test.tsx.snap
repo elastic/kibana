@@ -6096,7 +6096,7 @@ exports[`Header renders 1`] = `
                           size="m"
                           type="cross"
                         >
-                          <div
+                          <span
                             className="euiButtonContent__icon"
                             data-euiicon-type="cross"
                             size="m"
