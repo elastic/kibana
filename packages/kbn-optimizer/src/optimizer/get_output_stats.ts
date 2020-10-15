@@ -110,6 +110,11 @@ export function getMetrics(log: ToolingLog, config: OptimizerConfig) {
           value: sumSize(asyncChunks),
         },
         {
+          group: `async chunks count`,
+          id: bundle.id,
+          value: asyncChunks.length,
+        },
+        {
           group: `miscellaneous assets size`,
           id: bundle.id,
           value: sumSize(miscFiles),
