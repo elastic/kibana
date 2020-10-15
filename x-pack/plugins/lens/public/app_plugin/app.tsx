@@ -425,6 +425,14 @@ export function App({
           isSaveModalVisible: false,
           isLinkedToOriginatingApp: false,
         }));
+        notifications.toasts.addSuccess(
+          i18n.translate('visualize.topNavMenu.saveVisualization.successNotificationText', {
+            defaultMessage: `Saved '{visTitle}'`,
+            values: {
+              visTitle: docToSave.title,
+            },
+          })
+        );
         redirectTo(newInput.savedObjectId);
         return;
       }
@@ -440,6 +448,14 @@ export function App({
         isSaveModalVisible: false,
         isLinkedToOriginatingApp: false,
       }));
+      notifications.toasts.addSuccess(
+        i18n.translate('visualize.topNavMenu.saveVisualization.successNotificationText', {
+          defaultMessage: `Saved '{visTitle}'`,
+          values: {
+            visTitle: newDoc.title,
+          },
+        })
+      );
     } catch (e) {
       // eslint-disable-next-line no-console
       console.dir(e);
