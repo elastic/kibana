@@ -120,11 +120,10 @@ export const updateFieldsAndMarkAsFailed = (
   if (params.taskMaxAttempts[ctx._source.task.taskType] != null && params.taskMaxAttempts[ctx._source.task.taskType] <= ctx._source.task.attempts && ctx._source.task.status == "running") {
     ctx._source.task.status = "failed";
   } else {
-    ctx._source.task.status = "claiming";
+    ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
+      .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
+      .join(' ')}
   }
-  ${Object.keys(fieldUpdates)
-    .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
-    .join(' ')}
   `,
   lang: 'painless',
   params: {
