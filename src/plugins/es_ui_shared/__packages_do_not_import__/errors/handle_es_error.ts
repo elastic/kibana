@@ -24,6 +24,10 @@ interface EsErrorHandlerParams {
   error: ApiError;
   response: KibanaResponseFactory;
 }
+
+/*
+ * For errors returned by the new elasticsearch js client.
+ */
 export const handleEsError = ({ error, response }: EsErrorHandlerParams): IKibanaResponse => {
   // error.name is slightly better in terms of performance, since all errors now have name property
   if (error.name === 'ResponseError') {
