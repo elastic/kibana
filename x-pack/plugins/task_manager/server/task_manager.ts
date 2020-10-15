@@ -104,7 +104,6 @@ export class TaskManager {
   // our subscription to the poller
   private pollingSubscription: Subscription = Subscription.EMPTY;
 
-  private startQueue: Array<() => void> = [];
   private middleware: Middleware;
 
   /**
@@ -228,10 +227,6 @@ export class TaskManager {
    */
   public start() {
     if (!this.isStarted) {
-      // Some calls are waiting until task manager is started
-      this.startQueue.forEach((fn) => fn());
-      this.startQueue = [];
-
       this.pollingSubscription = this.poller$.subscribe(
         mapErr((error: PollingError<string>) => {
           if (error.type === PollingErrorType.RequestCapacityReached) {
@@ -243,14 +238,6 @@ export class TaskManager {
           this.logger.error(error.message);
         })
       );
-    }
-  }
-
-  private async waitUntilStarted() {
-    if (!this.isStarted) {
-      await new Promise((resolve) => {
-        this.startQueue.push(resolve);
-      });
     }
   }
 
@@ -274,7 +261,6 @@ export class TaskManager {
     taskInstance: TaskInstanceWithDeprecatedFields,
     options?: Record<string, unknown>
   ): Promise<ConcreteTaskInstance> {
-    await this.waitUntilStarted();
     const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
       ...options,
       taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
@@ -289,7 +275,6 @@ export class TaskManager {
    * @returns {Promise<ConcreteTaskInstance>}
    */
   public async runNow(taskId: string): Promise<RunNowResult> {
-    await this.waitUntilStarted();
     return new Promise(async (resolve, reject) => {
       awaitTaskRunResult(taskId, this.events$, this.store.getLifecycle.bind(this.store))
         .then(resolve)
@@ -317,39 +302,6 @@ export class TaskManager {
       }
       throw err;
     }
-  }
-
-  /**
-   * Fetches a list of scheduled tasks.
-   *
-   * @param opts - The query options used to filter tasks
-   * @returns {Promise<FetchResult>}
-   */
-  public async fetch(opts: SearchOpts): Promise<FetchResult> {
-    await this.waitUntilStarted();
-    return this.store.fetch(opts);
-  }
-
-  /**
-   * Get the current state of a specified task.
-   *
-   * @param {string} id
-   * @returns {Promise<RemoveResult>}
-   */
-  public async get(id: string): Promise<ConcreteTaskInstance> {
-    await this.waitUntilStarted();
-    return this.store.get(id);
-  }
-
-  /**
-   * Removes the specified task from the index.
-   *
-   * @param {string} id
-   * @returns {Promise<RemoveResult>}
-   */
-  public async remove(id: string): Promise<void> {
-    await this.waitUntilStarted();
-    return this.store.remove(id);
   }
 }
 

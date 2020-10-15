@@ -72,28 +72,7 @@ describe('TaskManager', () => {
     );
   });
 
-  test('allows and queues scheduling tasks before starting', async () => {
-    const client = new TaskManager(taskManagerOpts);
-    taskManagerOpts.definitions.registerTaskDefinitions({
-      foo: {
-        type: 'foo',
-        title: 'Foo',
-        createTaskRunner: jest.fn(),
-      },
-    });
-    const task = {
-      taskType: 'foo',
-      params: {},
-      state: {},
-    };
-    const promise = client.schedule(task);
-    client.start();
-    await promise;
-
-    expect(mockTaskStore.schedule).toHaveBeenCalled();
-  });
-
-  test('allows scheduling tasks after starting', async () => {
+  test('allows scheduling tasks', async () => {
     const client = new TaskManager(taskManagerOpts);
     taskManagerOpts.definitions.registerTaskDefinitions({
       foo: {
@@ -189,37 +168,6 @@ describe('TaskManager', () => {
     ).rejects.toMatchObject({
       statusCode: 409,
     });
-  });
-
-  test('allows and queues removing tasks before starting', async () => {
-    const client = new TaskManager(taskManagerOpts);
-    const promise = client.remove('1');
-    client.start();
-    await promise;
-    expect(mockTaskStore.remove).toHaveBeenCalled();
-  });
-
-  test('allows removing tasks after starting', async () => {
-    const client = new TaskManager(taskManagerOpts);
-    client.start();
-    await client.remove('1');
-    expect(mockTaskStore.remove).toHaveBeenCalled();
-  });
-
-  test('allows and queues fetching tasks before starting', async () => {
-    const client = new TaskManager(taskManagerOpts);
-    const promise = client.fetch({});
-    expect(mockTaskStore.fetch).not.toHaveBeenCalled();
-    client.start();
-    await promise;
-    expect(mockTaskStore.fetch).toHaveBeenCalled();
-  });
-
-  test('allows fetching tasks after starting', async () => {
-    const client = new TaskManager(taskManagerOpts);
-    client.start();
-    await client.fetch({});
-    expect(mockTaskStore.fetch).toHaveBeenCalled();
   });
 
   describe('runNow', () => {

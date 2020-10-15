@@ -11,7 +11,7 @@ import { TaskManagerConfig } from './config';
 import { createInitialMiddleware, addMiddlewareToChain, Middleware } from './lib/middleware';
 import { setupSavedObjects } from './saved_objects';
 import { TaskTypeDictionary } from './task_type_dictionary';
-import { TaskStore } from './task_store';
+import { FetchResult, SearchOpts, TaskStore } from './task_store';
 import { createManagedConfiguration } from './lib/create_managed_configuration';
 
 export type TaskManagerSetupContract = { addMiddleware: (middleware: Middleware) => void } & Pick<
@@ -21,8 +21,9 @@ export type TaskManagerSetupContract = { addMiddleware: (middleware: Middleware)
 
 export type TaskManagerStartContract = Pick<
   TaskManager,
-  'fetch' | 'get' | 'remove' | 'schedule' | 'runNow' | 'ensureScheduled'
->;
+  'schedule' | 'runNow' | 'ensureScheduled'
+> &
+  Pick<TaskStore, 'fetch' | 'get' | 'remove'>;
 
 export class TaskManagerPlugin
   implements Plugin<TaskManagerSetupContract, TaskManagerStartContract> {
@@ -101,25 +102,39 @@ export class TaskManagerPlugin
     });
     this.taskManager = taskManager;
 
-    // we need to "drain" any calls made to the seup API
-    // before `starting` TaskManager. This is a legacy relic
-    // of the old API that should be resolved once we split
-    // Task manager into two services, setup and start, instead
-    // of the single instance of TaskManager
+    // start polling for work
     taskManager.start();
 
     return {
-      fetch: (...args) => {
+      /**
+       * Fetches a list of scheduled tasks.
+       *
+       * @param opts - The query options used to filter tasks
+       * @returns {Promise<FetchResult>}
+       */
+      fetch: (opts: SearchOpts): Promise<FetchResult> => {
         this.ensurePluginLifecycle('start', 'fetch tasks');
-        return taskManager.fetch(...args);
+        return taskStore.fetch(opts);
       },
-      get: (...args) => {
+      /**
+       * Get the current state of a specified task.
+       *
+       * @param {string} id
+       * @returns {Promise<ConcreteTaskInstance>}
+       */
+      get: (id: string) => {
         this.ensurePluginLifecycle('start', 'get tasks');
-        return taskManager.get(...args);
+        return taskStore.get(id);
       },
-      remove: (...args) => {
+      /**
+       * Removes the specified task from the index.
+       *
+       * @param {string} id
+       * @returns {Promise<void>}
+       */
+      remove: (id: string) => {
         this.ensurePluginLifecycle('start', 'remove tasks');
-        return taskManager.remove(...args);
+        return taskStore.remove(id);
       },
       schedule: (...args) => {
         this.ensurePluginLifecycle('start', 'schedule tasks');
