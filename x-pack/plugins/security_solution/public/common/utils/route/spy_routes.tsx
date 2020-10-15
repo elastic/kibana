@@ -41,18 +41,24 @@ export const SpyRouteComponent = memo<
     useEffect(() => {
       if (pageName && !deepEqual(route.pathName, pathname)) {
         if (isInitializing && detailName == null) {
+          const routeAction = {
+            detailName,
+            flowTarget,
+            history,
+            pageName,
+            pathName: pathname,
+            state,
+            tabName,
+          };
           dispatch({
             type: 'updateRouteWithOutSearch',
-            route: {
-              detailName,
-              flowTarget,
-              history,
-              pageName,
-              pathName: pathname,
-              search: pageName === SecurityPageName.administration ? search ?? '' : '',
-              state,
-              tabName,
-            },
+            route:
+              pageName === SecurityPageName.administration
+                ? {
+                    ...routeAction,
+                    search: search ?? '',
+                  }
+                : routeAction,
           });
           setIsInitializing(false);
         } else {
