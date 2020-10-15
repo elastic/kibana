@@ -7,6 +7,8 @@
 import React, { FC, Fragment, useMemo, useEffect, useState } from 'react';
 import {
   EuiAccordion,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
   EuiFieldNumber,
   EuiFieldText,
   EuiFlexGrid,
@@ -30,6 +32,25 @@ import { ANALYTICS_STEPS } from '../../page';
 import { fetchExplainData } from '../shared';
 import { ContinueButton } from '../continue_button';
 import { OutlierHyperParameters } from './outlier_hyper_parameters';
+
+const defaultNumTopClassesOption: EuiComboBoxOptionOption = {
+  label: i18n.translate('xpack.ml.dataframe.analytics.create.allClassesLabel', {
+    defaultMessage: 'All classes',
+  }),
+  value: -1,
+};
+
+function getSelectedNumTomClassesOption(currentNumTopClasses: number) {
+  const option: EuiComboBoxOptionOption[] = [];
+  if (currentNumTopClasses === -1) {
+    option.push(defaultNumTopClassesOption);
+  } else {
+    option.push({
+      label: `${currentNumTopClasses}`,
+    });
+  }
+  return option;
+}
 
 export function getNumberValue(value?: number) {
   return value === undefined ? '' : +value;
@@ -70,6 +91,13 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
     predictionFieldName,
     randomizeSeed,
   } = form;
+
+  const [numTopClassesOptions, setNumTopClassesOptions] = useState<EuiComboBoxOptionOption[]>([
+    defaultNumTopClassesOption,
+  ]);
+  const [numTopClassesSelectedOptions, setNumTopClassesSelectedOptions] = useState<
+    EuiComboBoxOptionOption[]
+  >(getSelectedNumTomClassesOption(numTopClasses));
 
   const mmlErrors = useMemo(() => getModelMemoryLimitErrors(modelMemoryLimitValidationResult), [
     modelMemoryLimitValidationResult,
@@ -317,7 +345,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
                 }
               )}
             >
-              <EuiFieldNumber
+              <EuiComboBox
                 aria-label={i18n.translate(
                   'xpack.ml.dataframe.analytics.create.numTopClassesInputAriaLabel',
                   {
@@ -325,15 +353,39 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
                       'The number of categories for which the predicted probabilities are reported',
                   }
                 )}
-                data-test-subj="mlAnalyticsCreateJobWizardnumTopClassesInput"
-                min={0}
-                onChange={(e) =>
-                  setFormState({
-                    numTopClasses: e.target.value === '' ? undefined : +e.target.value,
-                  })
+                singleSelection={true}
+                options={numTopClassesOptions}
+                selectedOptions={numTopClassesSelectedOptions}
+                onCreateOption={(input: string, flattenedOptions = []) => {
+                  const normalizedInput = input.trim().toLowerCase();
+
+                  if (!normalizedInput) {
+                    return;
+                  }
+
+                  const newOption = {
+                    label: input,
+                  };
+
+                  if (
+                    flattenedOptions.findIndex(
+                      (option: any) => option.label.trim().toLowerCase() === normalizedInput
+                    ) === -1
+                  ) {
+                    setNumTopClassesOptions([...numTopClassesOptions, newOption]);
+                  }
+
+                  setNumTopClassesSelectedOptions([newOption]);
+                }}
+                onChange={(selectedOptions) => {
+                  setNumTopClassesSelectedOptions(selectedOptions);
+                }}
+                isClearable={true}
+                isInvalid={
+                  (numTopClassesSelectedOptions[0].value ??
+                    Number(numTopClassesSelectedOptions[0].label)) < -1
                 }
-                step={1}
-                value={getNumberValue(numTopClasses)}
+                data-test-subj="mlAnalyticsCreateJobWizardnumTopClassesInput"
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -440,6 +492,13 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
       <ContinueButton
         isDisabled={isStepInvalid}
         onClick={() => {
+          // @ts-ignore // TODO: fix types
+          const updatedNumTopClasses: number | undefined = numTopClassesSelectedOptions[0]
+            ? numTopClassesSelectedOptions[0].value || Number(numTopClassesSelectedOptions[0].label)
+            : undefined;
+          setFormState({
+            numTopClasses: updatedNumTopClasses,
+          });
           setCurrentStep(ANALYTICS_STEPS.DETAILS);
         }}
       />
