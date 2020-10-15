@@ -14,6 +14,8 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
   const ml = getService('ml');
 
+  const VALIDATED_SEPARATELY = 'this value is not validated directly';
+
   describe('Validate job', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/ecommerce');
@@ -252,9 +254,9 @@ export default ({ getService }: FtrProviderContext) => {
         },
         {
           id: 'cardinality_model_plot_high',
-          modelPlotCardinality: 'WILL BE VALIDATED SEPARATELY BELOW',
-          text: 'WILL BE VALIDATED SEPARATELY BELOW',
-          status: 'WILL BE VALIDATED SEPARATELY BELOW',
+          modelPlotCardinality: VALIDATED_SEPARATELY,
+          text: VALIDATED_SEPARATELY,
+          status: VALIDATED_SEPARATELY,
         },
         {
           id: 'cardinality_partition_field',
