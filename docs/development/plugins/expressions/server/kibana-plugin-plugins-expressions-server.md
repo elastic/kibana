@@ -52,9 +52,7 @@
 |  [ExecutionParams](./kibana-plugin-plugins-expressions-server.executionparams.md) |  |
 |  [ExecutionState](./kibana-plugin-plugins-expressions-server.executionstate.md) |  |
 |  [ExecutorState](./kibana-plugin-plugins-expressions-server.executorstate.md) |  |
-|  [ExpressionAstExpression](./kibana-plugin-plugins-expressions-server.expressionastexpression.md) |  |
 |  [ExpressionAstExpressionBuilder](./kibana-plugin-plugins-expressions-server.expressionastexpressionbuilder.md) |  |
-|  [ExpressionAstFunction](./kibana-plugin-plugins-expressions-server.expressionastfunction.md) |  |
 |  [ExpressionAstFunctionBuilder](./kibana-plugin-plugins-expressions-server.expressionastfunctionbuilder.md) |  |
 |  [ExpressionFunctionDefinition](./kibana-plugin-plugins-expressions-server.expressionfunctiondefinition.md) | <code>ExpressionFunctionDefinition</code> is the interface plugins have to implement to register a function in <code>expressions</code> plugin. |
 |  [ExpressionFunctionDefinitions](./kibana-plugin-plugins-expressions-server.expressionfunctiondefinitions.md) | A mapping of <code>ExpressionFunctionDefinition</code>s for functions which the Expressions services provides out-of-the-box. Any new functions registered by the Expressions plugin should have their types added here. |
@@ -86,6 +84,8 @@
 |  [ExecutionContainer](./kibana-plugin-plugins-expressions-server.executioncontainer.md) |  |
 |  [ExecutorContainer](./kibana-plugin-plugins-expressions-server.executorcontainer.md) |  |
 |  [ExpressionAstArgument](./kibana-plugin-plugins-expressions-server.expressionastargument.md) |  |
+|  [ExpressionAstExpression](./kibana-plugin-plugins-expressions-server.expressionastexpression.md) |  |
+|  [ExpressionAstFunction](./kibana-plugin-plugins-expressions-server.expressionastfunction.md) |  |
 |  [ExpressionAstNode](./kibana-plugin-plugins-expressions-server.expressionastnode.md) |  |
 |  [ExpressionFunctionKibana](./kibana-plugin-plugins-expressions-server.expressionfunctionkibana.md) |  |
 |  [ExpressionsServerSetup](./kibana-plugin-plugins-expressions-server.expressionsserversetup.md) |  |

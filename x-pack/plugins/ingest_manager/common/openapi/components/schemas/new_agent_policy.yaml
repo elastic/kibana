@@ -1,0 +1,9 @@
+title: NewAgentPolicy
+type: object
+properties:
+  name:
+    type: string
+  namespace:
+    type: string
+  description:
+    type: string
