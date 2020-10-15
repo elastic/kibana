@@ -6,7 +6,7 @@
 
 import { IScopedClusterClient } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
-import { JobSavedObjectService, JobType } from './filter';
+import type { JobSavedObjectService, JobType } from './service';
 import { ML_SAVED_OBJECT_TYPE } from './saved_objects';
 
 import { Job } from '../../common/types/anomaly_detection_jobs';
@@ -152,16 +152,22 @@ export function checksFactory(
       datafeeds: Datafeed[];
     }>();
 
+    const tasks: Array<() => Promise<void>> = [];
+
     const status = await checkStatus();
     for (const job of status.jobs.anomalyDetectors) {
       if (job.checks.savedObjectExits === false) {
         results.savedObjectsCreated.push(job.jobId);
         if (simulate === false) {
-          await jobSavedObjectService.createAnomalyDetectionJob(job.jobId);
-          if (job.datafeedId !== null) {
-            //
-            await jobSavedObjectService.addDatafeed(job.datafeedId, job.jobId);
-          }
+          const jobId = job.jobId;
+          const datafeedId = job.datafeedId;
+          tasks.push(async () => {
+            await jobSavedObjectService.createAnomalyDetectionJob(jobId);
+            if (datafeedId !== null) {
+              //
+              await jobSavedObjectService.addDatafeed(datafeedId, jobId);
+            }
+          });
         }
       }
     }
@@ -170,7 +176,8 @@ export function checksFactory(
         results.savedObjectsCreated.push(job.jobId);
         if (simulate === false) {
           //
-          await jobSavedObjectService.createDataFrameAnalyticsJob(job.jobId);
+          const jobId = job.jobId;
+          tasks.push(async () => await jobSavedObjectService.createDataFrameAnalyticsJob(jobId));
         }
       }
     }
@@ -180,7 +187,8 @@ export function checksFactory(
         results.savedObjectsDeleted.push(job.jobId);
         if (simulate === false) {
           //
-          await jobSavedObjectService.deleteAnomalyDetectionJob(job.jobId);
+          const jobId = job.jobId;
+          tasks.push(async () => await jobSavedObjectService.deleteAnomalyDetectionJob(jobId));
         }
       }
     }
@@ -189,7 +197,8 @@ export function checksFactory(
         results.savedObjectsDeleted.push(job.jobId);
         if (simulate === false) {
           //
-          await jobSavedObjectService.deleteDataFrameAnalyticsJob(job.jobId);
+          const jobId = job.jobId;
+          tasks.push(async () => await jobSavedObjectService.deleteDataFrameAnalyticsJob(jobId));
         }
       }
     }
@@ -201,9 +210,14 @@ export function checksFactory(
         if (simulate === false) {
           //
           const df = datafeeds.datafeeds.find((d) => d.job_id === job.jobId);
-          if (df !== undefined) {
-            await jobSavedObjectService.addDatafeed(df.datafeed_id, job.jobId);
-          }
+          const jobId = job.jobId;
+          const datafeedId = df?.datafeed_id;
+
+          tasks.push(async () => {
+            if (datafeedId !== undefined) {
+              await jobSavedObjectService.addDatafeed(datafeedId, jobId);
+            }
+          });
         }
       } else if (
         job.checks.jobExists === true &&
@@ -214,10 +228,12 @@ export function checksFactory(
         results.datafeedsRemoved.push(job.jobId);
         if (simulate === false) {
           //
-          await jobSavedObjectService.deleteDatafeed(job.datafeedId);
+          const datafeedId = job.datafeedId;
+          tasks.push(async () => await jobSavedObjectService.deleteDatafeed(datafeedId));
         }
       }
     }
+    await Promise.allSettled(tasks.map((t) => t()));
     return results;
   }
 
