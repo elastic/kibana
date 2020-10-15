@@ -151,8 +151,6 @@ const handleCourierRequest = async ({
   try {
     const response = await requestSearchSource.fetch({
       abortSignal,
-      // TODO: In order to run expressions outside a session, the session ID should be passed as input
-      sessionId: getSearchService().session.getSessionId(),
     });
 
     request.stats(getResponseInspectorStats(response, searchSource)).ok({ json: response });
