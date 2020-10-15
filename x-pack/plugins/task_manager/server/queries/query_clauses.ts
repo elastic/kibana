@@ -165,7 +165,7 @@ export interface ScriptClause {
   source: string;
   lang: string;
   params: {
-    [field: string]: string | number | Date;
+    [field: string]: string | number | Date | { [field: string]: string | number | Date };
   };
 }
 

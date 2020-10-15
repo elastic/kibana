@@ -608,21 +608,17 @@ export default function ({ getService }) {
       });
     });
 
-    it('ying', async () => {
-      console.log('hihihi');
+    it('should mark task as failed if task is still running but maxAttempts has been reached', async () => {
       const task = await scheduleTask({
         taskType: 'sampleTaskTimingOut',
         schedule: { interval: '1s' },
         params: {},
       });
-      let counter = 0;
 
       await retry.try(async () => {
-        console.log(`counter: ${counter++}`);
         const [scheduledTask] = (await currentTasks()).docs;
-        console.log(scheduledTask);
         expect(scheduledTask.id).to.eql(task.id);
-        expect(scheduledTask.status).to.eql('claiming');
+        expect(scheduledTask.status).to.eql('failed');
         expect(scheduledTask.attempts).to.eql(3);
       });
     });
