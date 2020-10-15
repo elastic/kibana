@@ -486,6 +486,8 @@ export function getDatasourceSuggestionsFromCurrentState(
         } else {
           suggestions.push(...createSimplifiedTableSuggestions(state, layerId));
 
+          // base range intervals are of number dataType.
+          // Custom range/intervals have a different dataType so they still receive the Over Time suggestion
           if (!timeDimension && timeField && !hasNumericDimension) {
             // suggest current configuration over time if there is a default time field
             // and no time dimension yet
