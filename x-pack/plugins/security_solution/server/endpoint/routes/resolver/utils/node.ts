@@ -12,24 +12,8 @@ import {
   SafeResolverLifecycleNode,
   SafeResolverEvent,
   SafeResolverChildNode,
-  SafeResolverRelatedEvents,
   ResolverPaginatedEvents,
 } from '../../../../../common/endpoint/types';
-
-/**
- * Creates a related event object that the related events handler would return
- *
- * @param entityID the entity_id for these related events
- * @param events array of related events
- * @param nextEvent the cursor to retrieve the next related event
- */
-export function createRelatedEvents(
-  entityID: string,
-  events: SafeResolverEvent[] = [],
-  nextEvent: string | null = null
-): SafeResolverRelatedEvents {
-  return { entityID, events, nextEvent };
-}
 
 /**
  * Creates an object that the events handler would return
@@ -115,10 +99,6 @@ export function createTree(entityID: string): SafeResolverTree {
     children: {
       childNodes: [],
       nextChild: null,
-    },
-    relatedEvents: {
-      events: [],
-      nextEvent: null,
     },
     relatedAlerts: {
       alerts: [],

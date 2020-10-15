@@ -13,6 +13,7 @@ import {
   ReactExpressionRendererType,
 } from 'src/plugins/expressions/public';
 import { ExecutionContextSearch } from 'src/plugins/expressions';
+import { getOriginalRequestErrorMessage } from '../error_helper';
 
 export interface ExpressionWrapperProps {
   ExpressionRenderer: ReactExpressionRendererType;
@@ -50,7 +51,20 @@ export function ExpressionWrapper({
             padding="m"
             expression={expression}
             searchContext={searchContext}
-            renderError={(error) => <div data-test-subj="expression-renderer-error">{error}</div>}
+            renderError={(errorMessage, error) => (
+              <div data-test-subj="expression-renderer-error">
+                <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
+                  <EuiFlexItem>
+                    <EuiIcon type="alert" color="danger" />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText size="s">
+                      {getOriginalRequestErrorMessage(error) || errorMessage}
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </div>
+            )}
             onEvent={handleEvent}
           />
         </div>

@@ -22,7 +22,7 @@ import {
   CollectorOptions,
   createUsageCollectionSetupMock,
 } from '../../../../usage_collection/server/usage_collection.mock';
-
+import { createCollectorFetchContextMock } from '../../../../usage_collection/server/mocks';
 import { registerKibanaUsageCollector } from './';
 
 describe('telemetry_kibana', () => {
@@ -35,7 +35,12 @@ describe('telemetry_kibana', () => {
   });
 
   const legacyConfig$ = pluginInitializerContextConfigMock({}).legacy.globalConfig$;
-  const callCluster = jest.fn().mockImplementation(() => ({}));
+
+  const getMockFetchClients = (hits?: unknown[]) => {
+    const fetchParamsMock = createCollectorFetchContextMock();
+    fetchParamsMock.callCluster.mockResolvedValue({ hits: { hits } });
+    return fetchParamsMock;
+  };
 
   beforeAll(() => registerKibanaUsageCollector(usageCollectionMock, legacyConfig$));
   afterAll(() => jest.clearAllTimers());
@@ -46,7 +51,7 @@ describe('telemetry_kibana', () => {
   });
 
   test('fetch', async () => {
-    expect(await collector.fetch(callCluster)).toStrictEqual({
+    expect(await collector.fetch(getMockFetchClients())).toStrictEqual({
       index: '.kibana-tests',
       dashboard: { total: 0 },
       visualization: { total: 0 },
