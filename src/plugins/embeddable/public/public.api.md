@@ -31,6 +31,7 @@ import { ExclusiveUnion } from '@elastic/eui';
 import { ExpressionAstFunction } from 'src/plugins/expressions/common';
 import { History } from 'history';
 import { Href } from 'history';
+import { I18nStart as I18nStart_2 } from 'src/core/public';
 import { IconType } from '@elastic/eui';
 import { ISearchOptions } from 'src/plugins/data/public';
 import { ISearchSource } from 'src/plugins/data/public';
@@ -117,6 +118,42 @@ export class AddPanelAction implements Action_3<ActionContext_2> {
     isCompatible(context: ActionExecutionContext_2<ActionContext_2>): Promise<boolean>;
     // (undocumented)
     readonly type = "ACTION_ADD_PANEL";
+}
+
+// Warning: (ae-missing-release-tag) "ATTRIBUTE_SERVICE_KEY" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public
+export const ATTRIBUTE_SERVICE_KEY = "attributes";
+
+// Warning: (ae-missing-release-tag) "AttributeService" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export class AttributeService<SavedObjectAttributes extends {
+    title: string;
+}, ValType extends EmbeddableInput & {
+    [ATTRIBUTE_SERVICE_KEY]: SavedObjectAttributes;
+} = EmbeddableInput & {
+    [ATTRIBUTE_SERVICE_KEY]: SavedObjectAttributes;
+}, RefType extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput> {
+    // Warning: (ae-forgotten-export) The symbol "AttributeServiceOptions" needs to be exported by the entry point index.d.ts
+    constructor(type: string, showSaveModal: (saveModal: React.ReactElement, I18nContext: I18nStart_2['Context']) => void, i18nContext: I18nStart_2['Context'], toasts: NotificationsStart_2['toasts'], options: AttributeServiceOptions<SavedObjectAttributes>, getEmbeddableFactory?: (embeddableFactoryId: string) => EmbeddableFactory);
+    // (undocumented)
+    getExplicitInputFromEmbeddable(embeddable: IEmbeddable): ValType | RefType;
+    // (undocumented)
+    getInputAsRefType: (input: ValType | RefType, saveOptions?: {
+        showSaveModal: boolean;
+        saveModalTitle?: string | undefined;
+    } | {
+        title: string;
+    } | undefined) => Promise<RefType>;
+    // (undocumented)
+    getInputAsValueType: (input: ValType | RefType) => Promise<ValType>;
+    // (undocumented)
+    inputIsRefType: (input: ValType | RefType) => input is RefType;
+    // (undocumented)
+    unwrapAttributes(input: RefType | ValType): Promise<SavedObjectAttributes>;
+    // (undocumented)
+    wrapAttributes(newAttributes: SavedObjectAttributes, useRefType: boolean, input?: ValType | RefType): Promise<Omit<ValType | RefType, 'id'>>;
 }
 
 // Warning: (ae-missing-release-tag) "ChartActionContext" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -526,6 +563,14 @@ export interface EmbeddableSetupDependencies {
 export interface EmbeddableStart extends PersistableState<EmbeddableInput> {
     // (undocumented)
     EmbeddablePanel: EmbeddablePanelHOC;
+    // (undocumented)
+    getAttributeService: <A extends {
+        title: string;
+    }, V extends EmbeddableInput & {
+        [ATTRIBUTE_SERVICE_KEY]: A;
+    } = EmbeddableInput & {
+        [ATTRIBUTE_SERVICE_KEY]: A;
+    }, R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput>(type: string, options: AttributeServiceOptions<A>) => AttributeService<A, V, R>;
     // (undocumented)
     getEmbeddableFactories: () => IterableIterator<EmbeddableFactory>;
     // (undocumented)
