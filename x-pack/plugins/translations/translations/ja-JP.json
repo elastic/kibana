@@ -18021,7 +18021,6 @@
     "xpack.triggersActionsUI.sections.alertsList.unableToLoadActionTypesMessage": "アクションタイプを読み込めません",
     "xpack.triggersActionsUI.sections.alertsList.unableToLoadAlertsMessage": "アラートを読み込めません",
     "xpack.triggersActionsUI.sections.alertsList.unableToLoadAlertTypesMessage": "アラートタイプを読み込めません",
-    "xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.addBccButton": "{titleBcc}",
     "xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.addCcButton": "Cc を追加",
     "xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.fromTextFieldLabel": "送信元",
     "xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.hostTextFieldLabel": "ホスト",
