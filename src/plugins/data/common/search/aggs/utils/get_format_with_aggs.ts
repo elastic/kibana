@@ -59,12 +59,22 @@ export function getFormatWithAggs(getFieldFormat: GetFieldFormat): GetFieldForma
 
           const gte = '\u2265';
           const lt = '\u003c';
+          let fromValue = format.convert(range.gte);
+          let toValue = format.convert(range.lt);
+          // In case of identity formatter and a specific flag, replace Infinity values by specific strings
+          if (params.replaceInfinity && nestedFormatter.id == null) {
+            const FROM_PLACEHOLDER = '\u2212\u221E';
+            const TO_PLACEHOLDER = '+\u221E';
+            fromValue = isFinite(range.gte) ? fromValue : FROM_PLACEHOLDER;
+            toValue = isFinite(range.lt) ? toValue : TO_PLACEHOLDER;
+          }
+
           if (params.template === 'compact') {
-            return i18n.translate('data.aggTypes.buckets.ranges.rangesFormatMessageWithin', {
+            return i18n.translate('data.aggTypes.buckets.ranges.rangesFormatMessageCompact', {
               defaultMessage: '{from} - {to}',
               values: {
-                from: format.convert(range.gte),
-                to: format.convert(range.lt),
+                from: fromValue,
+                to: toValue,
               },
             });
           }
@@ -72,9 +82,9 @@ export function getFormatWithAggs(getFieldFormat: GetFieldFormat): GetFieldForma
             defaultMessage: '{gte} {from} and {lt} {to}',
             values: {
               gte,
-              from: format.convert(range.gte),
+              from: fromValue,
               lt,
-              to: format.convert(range.lt),
+              to: toValue,
             },
           });
         });

@@ -7,6 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { supportedFormats } from '../../../../editor_frame_service/format_column';
 import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/common';
 import { Range } from '../../../../../../../../src/plugins/expressions/common/expression_types/index';
 import { RangeEditor } from './range_editor';
@@ -32,6 +33,11 @@ export interface RangeIndexPatternColumn extends FieldBasedIndexPatternColumn {
     type: MODES_TYPES;
     maxBars: typeof AUTO_BARS | number;
     ranges: RangeTypeLens[];
+    format?: { id: string; params?: { decimals: number } };
+    parentFormat?: {
+      id: string;
+      params?: { template?: string; id?: string; replaceInfinity?: boolean };
+    };
   };
 }
 
@@ -118,6 +124,8 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
         type: MODES.Histogram,
         ranges: [{ from: 0, to: DEFAULT_INTERVAL, label: '' }],
         maxBars: AUTO_BARS,
+        format: undefined,
+        parentFormat: undefined,
       },
     };
   },
@@ -149,10 +157,25 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
     };
   },
   paramEditor: ({ state, setState, currentColumn, layerId, columnId, uiSettings, data }) => {
+    const numberFormat = currentColumn.params.format as
+      | undefined
+      | {
+          id: string;
+          params: { decimals: number };
+        };
+    const numberFormatterPattern =
+      numberFormat &&
+      supportedFormats[numberFormat.id] &&
+      supportedFormats[numberFormat.id].decimalsToPattern(numberFormat.params.decimals);
+
     const rangeFormatter = data.fieldFormats.deserialize({
-      id: 'range',
-      params: { template: 'compact' },
+      ...currentColumn.params.parentFormat,
+      params: {
+        ...currentColumn.params.parentFormat?.params,
+        ...(numberFormat && { id: numberFormat.id, params: { pattern: numberFormatterPattern } }),
+      },
     });
+
     const MAX_HISTOGRAM_BARS = uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS);
     const granularityStep = (MAX_HISTOGRAM_BARS - MIN_HISTOGRAM_BARS) / SLICES;
     const maxBarsDefaultValue = (MAX_HISTOGRAM_BARS - MIN_HISTOGRAM_BARS) / 2;
@@ -174,6 +197,10 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
     const onChangeMode = (newMode: MODES_TYPES) => {
       const scale = newMode === MODES.Range ? 'ordinal' : 'interval';
       const dataType = newMode === MODES.Range ? 'string' : 'number';
+      const parentFormat =
+        newMode === MODES.Range
+          ? { id: 'range', params: { template: 'compact', replaceInfinity: true } }
+          : undefined;
       setState(
         changeColumn({
           state,
@@ -187,6 +214,8 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
               type: newMode,
               ranges: [{ from: 0, to: DEFAULT_INTERVAL, label: '' }],
               maxBars: maxBarsDefaultValue,
+              format: undefined,
+              parentFormat,
             },
           },
           keepParams: false,

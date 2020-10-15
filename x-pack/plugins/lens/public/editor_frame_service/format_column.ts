@@ -10,9 +10,15 @@ interface FormatColumn {
   format: string;
   columnId: string;
   decimals?: number;
+  nestedFormat?: string;
+  template?: string;
+  replaceInfinity?: boolean;
 }
 
-const supportedFormats: Record<string, { decimalsToPattern: (decimals?: number) => string }> = {
+export const supportedFormats: Record<
+  string,
+  { decimalsToPattern: (decimals?: number) => string }
+> = {
   number: {
     decimalsToPattern: (decimals = 2) => {
       if (decimals === 0) {
@@ -63,13 +69,27 @@ export const formatColumn: ExpressionFunctionDefinition<
       types: ['number'],
       help: '',
     },
+    nestedFormat: {
+      types: ['string'],
+      help: '',
+    },
+    template: {
+      types: ['string'],
+      help: '',
+    },
+    replaceInfinity: {
+      types: ['boolean'],
+      help: '',
+    },
   },
   inputTypes: ['kibana_datatable'],
-  fn(input, { format, columnId, decimals }: FormatColumn) {
+  fn(input, { format, columnId, decimals, nestedFormat, template, replaceInfinity }: FormatColumn) {
     return {
       ...input,
       columns: input.columns.map((col) => {
         if (col.id === columnId) {
+          const extraParams = { template, replaceInfinity };
+
           if (supportedFormats[format]) {
             return {
               ...col,
@@ -78,12 +98,26 @@ export const formatColumn: ExpressionFunctionDefinition<
                 params: { pattern: supportedFormats[format].decimalsToPattern(decimals) },
               },
             };
-          } else {
+          }
+          if (nestedFormat && supportedFormats[nestedFormat]) {
             return {
               ...col,
-              formatHint: { id: format, params: {} },
+              formatHint: {
+                id: format,
+                params: {
+                  id: nestedFormat,
+                  params: {
+                    pattern: supportedFormats[nestedFormat].decimalsToPattern(decimals),
+                  },
+                  ...extraParams,
+                },
+              },
             };
           }
+          return {
+            ...col,
+            formatHint: { id: format, params: { ...extraParams } },
+          };
         }
         return col;
       }),

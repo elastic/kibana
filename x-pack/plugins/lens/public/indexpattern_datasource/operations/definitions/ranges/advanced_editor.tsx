@@ -18,7 +18,6 @@ import {
   EuiLink,
   EuiText,
   EuiPopover,
-  EuiToolTip,
   htmlIdGenerator,
 } from '@elastic/eui';
 import { keys } from '@elastic/eui';
@@ -39,8 +38,8 @@ type LocalRangeType = RangeTypeLens & { id: string };
 const getBetterLabel = (range: RangeTypeLens, formatter: IFieldFormat) =>
   range.label ||
   formatter.convert({
-    gte: isValidNumber(range.from) ? range.from : FROM_PLACEHOLDER,
-    lt: isValidNumber(range.to) ? range.to : TO_PLACEHOLDER,
+    gte: isValidNumber(range.from) ? range.from : -Infinity,
+    lt: isValidNumber(range.to) ? range.to : Infinity,
   });
 
 export const RangePopover = ({
@@ -55,7 +54,6 @@ export const RangePopover = ({
   Button: React.FunctionComponent<{ onClick: MouseEventHandler }>;
   isOpenByCreation: boolean;
   setIsOpenByCreation: (open: boolean) => void;
-  formatter: IFieldFormat;
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [tempRange, setTempRange] = useState(range);
@@ -69,22 +67,6 @@ export const RangePopover = ({
     setRange(newRange);
   };
   const { from, to, label } = tempRange;
-
-  const lteAppendLabel = i18n.translate('xpack.lens.indexPattern.ranges.lessThanOrEqualAppend', {
-    defaultMessage: '\u2264',
-  });
-  const lteTooltipContent = i18n.translate(
-    'xpack.lens.indexPattern.ranges.lessThanOrEqualTooltip',
-    {
-      defaultMessage: 'Less than or equal to',
-    }
-  );
-  const ltPrependLabel = i18n.translate('xpack.lens.indexPattern.ranges.lessThanPrepend', {
-    defaultMessage: '\u003c',
-  });
-  const ltTooltipContent = i18n.translate('xpack.lens.indexPattern.ranges.lessThanTooltip', {
-    defaultMessage: 'Less than',
-  });
 
   const onSubmit = () => {
     setIsPopoverOpen(false);
@@ -274,7 +256,6 @@ export const AdvancedRangeEditor = ({
                   }
                   setLocalRanges(newRanges);
                 }}
-                formatter={formatter}
                 Button={({ onClick }: { onClick: MouseEventHandler }) => (
                   <EuiLink
                     color="text"

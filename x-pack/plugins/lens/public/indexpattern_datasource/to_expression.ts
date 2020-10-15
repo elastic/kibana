@@ -63,32 +63,64 @@ function getExpressionForLayer(
       };
     }, {} as Record<string, OriginalColumn>);
 
-    type FormattedColumn = Required<Extract<IndexPatternColumn, { params?: { format: unknown } }>>;
+    type FormattedColumn = Required<
+      Extract<
+        IndexPatternColumn,
+        | {
+            params?: {
+              format: unknown;
+            };
+          }
+        // when formatters are nested there's a slightly different format
+        | {
+            params: {
+              format?: unknown;
+              parentFormat: unknown;
+            };
+          }
+      >
+    >;
 
     const columnsWithFormatters = columnEntries.filter(
-      ([, col]) => col.params && 'format' in col.params && col.params.format
+      ([, col]) =>
+        col.params &&
+        (('format' in col.params && col.params.format) ||
+          ('parentFormat' in col.params && col.params.parentFormat))
     ) as Array<[string, FormattedColumn]>;
-    const formatterOverrides: ExpressionFunctionAST[] = columnsWithFormatters.map(([id, col]) => {
-      const format = (col as FormattedColumn).params!.format;
-      const base: ExpressionFunctionAST = {
-        type: 'function',
-        function: 'lens_format_column',
-        arguments: {
-          format: [format.id],
-          columnId: [id],
-        },
-      };
-      if (typeof format.params?.decimals === 'number') {
-        return {
-          ...base,
+    const formatterOverrides: ExpressionFunctionAST[] = columnsWithFormatters.map(
+      ([id, col]: [string, FormattedColumn]) => {
+        const parentFormat = 'parentFormat' in col.params ? col.params!.parentFormat : undefined;
+        const format = (col as FormattedColumn).params!.format;
+        const base: ExpressionFunctionAST = {
+          type: 'function',
+          function: 'lens_format_column',
           arguments: {
-            ...base.arguments,
-            decimals: [format.params.decimals],
+            format: [(format || parentFormat!).id], // either one of the two is available
+            columnId: [id],
           },
         };
+
+        // Handle nested formatter carefully one parameter at the time
+        if (parentFormat) {
+          base.arguments.format = [parentFormat.id];
+          if (format) {
+            base.arguments.nestedFormat = [format.id];
+          }
+        }
+        if (parentFormat?.params?.template) {
+          base.arguments.template = [parentFormat.params?.template];
+        }
+
+        if (parentFormat?.params?.replaceInfinity) {
+          base.arguments.replaceInfinity = [parentFormat.params?.replaceInfinity];
+        }
+
+        if (typeof format?.params?.decimals === 'number') {
+          base.arguments.decimals = [format.params.decimals];
+        }
+        return base;
       }
-      return base;
-    });
+    );
 
     const allDateHistogramFields = Object.values(columns)
       .map((column) =>
