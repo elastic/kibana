@@ -31,7 +31,10 @@ export function registerPipelinesListRoute(router: IRouter) {
       router.handleLegacyErrors(async (context, request, response) => {
         try {
           const client = context.logstash!.esClient;
-          const pipelinesRecord = (await fetchPipelines(client.callAsCurrentUser)) as Record<string, any>;
+          const pipelinesRecord = (await fetchPipelines(client.callAsCurrentUser)) as Record<
+            string,
+            any
+          >;
 
           const pipelines = Object.keys(pipelinesRecord)
             .sort()
