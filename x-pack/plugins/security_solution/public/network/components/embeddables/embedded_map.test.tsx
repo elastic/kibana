@@ -7,7 +7,6 @@
 import { mount, ReactWrapper, shallow } from 'enzyme';
 import React from 'react';
 import * as redux from 'react-redux';
-import { act } from 'react-dom/test-utils';
 import { waitFor } from '@testing-library/react';
 
 import '../../../common/mock/match_media';
