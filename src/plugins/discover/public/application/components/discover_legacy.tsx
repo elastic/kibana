@@ -192,12 +192,7 @@ export function DiscoverLegacy({
               />
             )}
             {resultState === 'uninitialized' && <DiscoverUninitialized onRefresh={fetch} />}
-            {/* @TODO: Solved in the Angular way to satisfy functional test - should be improved*/}
-            <span style={{ display: resultState !== 'loading' ? 'none' : '' }}>
-              <div className="dscOverlay">
-                <LoadingSpinner />
-              </div>
-            </span>
+            {resultState === 'loading' && <LoadingSpinner />}
             {resultState === 'ready' && (
               <>
                 <SkipBottomButton onClick={onSkipBottomButtonClick} />

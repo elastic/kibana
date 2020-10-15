@@ -12,7 +12,12 @@ import {
 import * as Registry from '../../registry';
 import { loadFieldsFromYaml, Fields, Field } from '../../fields/field';
 import { getPackageKeysByStatus } from '../../packages/get';
-import { InstallationStatus, RegistryPackage, CallESAsCurrentUser } from '../../../../types';
+import {
+  InstallationStatus,
+  RegistryPackage,
+  CallESAsCurrentUser,
+  DataType,
+} from '../../../../types';
 import { appContextService } from '../../../../services';
 
 interface FieldFormatMap {
@@ -69,10 +74,7 @@ export interface IndexPatternField {
   lang?: string;
   readFromDocValues: boolean;
 }
-export enum IndexPatternType {
-  logs = 'logs',
-  metrics = 'metrics',
-}
+
 // TODO: use a function overload and make pkgName and pkgVersion required for install/update
 // and not for an update removal.  or separate out the functions
 export async function installIndexPatterns(
@@ -117,7 +119,7 @@ export async function installIndexPatterns(
   const packageVersionsInfo = await Promise.all(packageVersionsFetchInfoPromise);
 
   // for each index pattern type, create an index pattern
-  const indexPatternTypes = [IndexPatternType.logs, IndexPatternType.metrics];
+  const indexPatternTypes = [DataType.logs, DataType.metrics];
   indexPatternTypes.forEach(async (indexPatternType) => {
     // if this is an update because a package is being uninstalled (no pkgkey argument passed) and no other packages are installed, remove the index pattern
     if (!pkgName && installedPackages.length === 0) {
@@ -144,7 +146,7 @@ export async function installIndexPatterns(
 // of all fields from all data streams matching data stream type
 export const getAllDataStreamFieldsByType = async (
   packages: RegistryPackage[],
-  dataStreamType: IndexPatternType
+  dataStreamType: DataType
 ): Promise<Fields> => {
   const dataStreamsPromises = packages.reduce<Array<Promise<Field[]>>>((acc, pkg) => {
     if (pkg.data_streams) {
@@ -389,7 +391,7 @@ export const ensureDefaultIndices = async (callCluster: CallESAsCurrentUser) => 
   // that no matching indices exist https://github.com/elastic/kibana/issues/62343
   const logger = appContextService.getLogger();
   return Promise.all(
-    Object.keys(IndexPatternType).map(async (indexPattern) => {
+    Object.keys(DataType).map(async (indexPattern) => {
       const defaultIndexPatternName = indexPattern + INDEX_PATTERN_PLACEHOLDER_SUFFIX;
       const indexExists = await callCluster('indices.exists', { index: defaultIndexPatternName });
       if (!indexExists) {

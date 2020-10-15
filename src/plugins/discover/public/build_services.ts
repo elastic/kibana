@@ -37,7 +37,6 @@ import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/publi
 import { SharePluginStart } from 'src/plugins/share/public';
 import { ChartsPluginStart } from 'src/plugins/charts/public';
 import { VisualizationsStart } from 'src/plugins/visualizations/public';
-import { SavedObjectKibanaServices } from 'src/plugins/saved_objects/public';
 
 import { DiscoverStartPlugins } from './plugin';
 import { createSavedSearchesLoader, SavedSearch } from './saved_searches';
@@ -80,12 +79,9 @@ export async function buildServices(
   getEmbeddableInjector: any,
   enhanced: boolean
 ): Promise<DiscoverServices> {
-  const services: SavedObjectKibanaServices = {
+  const services = {
     savedObjectsClient: core.savedObjects.client,
-    indexPatterns: plugins.data.indexPatterns,
-    search: plugins.data.search,
-    chrome: core.chrome,
-    overlays: core.overlays,
+    savedObjects: plugins.savedObjects,
   };
   const savedObjectService = createSavedSearchesLoader(services);
 
