@@ -111,6 +111,8 @@ const handleCourierRequest = async ({
     return aggs.toDsl(metricsAtAllLevels);
   });
 
+  requestSearchSource.setFilterPath(['*', '-**.key_as_string']);
+
   requestSearchSource.onRequestStart((paramSearchSource, options) => {
     return aggs.onSearchRequestStart(paramSearchSource, options);
   });

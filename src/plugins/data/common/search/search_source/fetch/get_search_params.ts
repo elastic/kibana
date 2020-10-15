@@ -51,6 +51,7 @@ export function getSearchParamsFromRequest(
   return {
     index: searchRequest.index.title || searchRequest.index,
     body: searchRequest.body,
+    filter_path: searchRequest.filterPath.join(',') || undefined,
     ...searchParams,
   };
 }

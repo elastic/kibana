@@ -100,7 +100,7 @@ export function getResponseInspectorStats(
       label: i18n.translate('data.search.searchSource.hitsLabel', {
         defaultMessage: 'Hits',
       }),
-      value: `${resp.hits.hits.length}`,
+      value: `${resp.hits?.hits?.length ?? 0}`,
       description: i18n.translate('data.search.searchSource.hitsDescription', {
         defaultMessage: 'The number of documents returned by the query.',
       }),

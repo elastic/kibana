@@ -123,13 +123,12 @@ export class SearchSource {
   > = [];
   private inheritOptions: SearchSourceOptions = {};
   public history: SearchRequest[] = [];
-  private fields: SearchSourceFields;
-  private readonly dependencies: SearchSourceDependencies;
+  private filterPaths: string[] = [];
 
-  constructor(fields: SearchSourceFields = {}, dependencies: SearchSourceDependencies) {
-    this.fields = fields;
-    this.dependencies = dependencies;
-  }
+  constructor(
+    private fields: SearchSourceFields = {},
+    private readonly dependencies: SearchSourceDependencies
+  ) {}
 
   /** ***
    * PUBLIC API
@@ -198,6 +197,15 @@ export class SearchSource {
    */
   getOwnField<K extends keyof SearchSourceFields>(field: K): SearchSourceFields[K] {
     return this.getField(field, false);
+  }
+
+  /**
+   * Use ES response filtering to reduce JSON size
+   * @param filterPath Array of filter strings, such as ['*', '-**.key_as_string']
+   */
+  setFilterPath(filterPaths: string[]) {
+    this.filterPaths = filterPaths;
+    return this;
   }
 
   /**
@@ -456,6 +464,7 @@ export class SearchSource {
     searchRequest.body = searchRequest.body || {};
     const { body, index, fields, query, filters, highlightAll } = searchRequest;
     searchRequest.indexType = this.getIndexType(index);
+    searchRequest.filterPath = this.filterPaths;
 
     const computedFields = index ? index.getComputedFields() : {};
 
