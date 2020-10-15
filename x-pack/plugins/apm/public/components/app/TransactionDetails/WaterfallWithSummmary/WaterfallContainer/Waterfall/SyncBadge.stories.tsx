@@ -20,4 +20,4 @@ export default {
 export function Example({ sync }: ComponentProps<typeof SyncBadge>) {
   return <SyncBadge sync={sync} />;
 }
-Example.args = { sync: true };
+Example.args = { sync: true } as ComponentProps<typeof SyncBadge>;
