@@ -71,7 +71,7 @@ export function getFormatWithAggs(getFieldFormat: GetFieldFormat): GetFieldForma
 
           if (params.template === 'arrow_right') {
             return i18n.translate('data.aggTypes.buckets.ranges.rangesFormatMessageArrowRight', {
-              defaultMessage: '{from} -> {to}',
+              defaultMessage: '{from} → {to}',
               values: {
                 from: fromValue,
                 to: toValue,
