@@ -179,6 +179,7 @@ export const RangePopover = ({
             { defaultMessage: 'Custom label' }
           )}
           onSubmit={onSubmit}
+          compressed
           dataTestSubj="indexPattern-ranges-label"
         />
       </EuiFormRow>
