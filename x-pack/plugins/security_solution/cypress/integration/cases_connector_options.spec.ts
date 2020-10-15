@@ -11,7 +11,7 @@ import { CONNECTOR_TITLE } from '../screens/edit_connector';
 import { goToCreateNewCase } from '../tasks/all_cases';
 import { CASES_URL } from '../urls/navigation';
 
-describe('connectors in case view', () => {
+describe('Cases connector incident fields', () => {
   before(() => {
     cy.server();
     cy.route('GET', '**/api/cases/configure/connectors/_find', mockConnectorsResponse);
@@ -30,7 +30,7 @@ describe('connectors in case view', () => {
       req.reply(response);
     });
   });
-  it('Configures many connectors in the case', () => {
+  it('Correct incident fields show when connector is changed', () => {
     loginAndWaitForPageWithoutDateRange(CASES_URL);
     goToCreateNewCase();
     createNewCaseWithConnector(case1);
