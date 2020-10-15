@@ -227,7 +227,7 @@ on multiple factors:
 * Network proxies, which are often configured by default to block large requests with a 413 error.
 * The amount of memory available to the Kibana server, which limits the size of CSV data that must be held temporarily.
 
-For information about how Kibana memory limits work, see <<production, using {kib} in a production environment>>.
+For information about {kib} memory limits, see <<production, using {kib} in a production environment>>.
 ============
 
 [cols="2*<"]
