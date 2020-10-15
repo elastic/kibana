@@ -11,17 +11,14 @@ import { MetricsSection } from '../../components/app/section/metrics';
 import { APMSection } from '../../components/app/section/apm';
 import { UptimeSection } from '../../components/app/section/uptime';
 import { UXSection } from '../../components/app/section/ux';
-import {
-  HasDataResponse,
-  ObservabilityFetchDataPlugins,
-  UXHasDataResponse,
-} from '../../typings/fetch_overview_data';
+import { UXHasDataResponse } from '../../typings/fetch_overview_data';
+import { HasDataMap } from '../../context/has_data_context';
 
 interface Props {
   bucketSize: string;
   absoluteTime: { start?: number; end?: number };
   relativeTime: { start: string; end: string };
-  hasData: Record<ObservabilityFetchDataPlugins, HasDataResponse>;
+  hasData?: Partial<HasDataMap>;
 }
 
 export function DataSections({ bucketSize, hasData, absoluteTime, relativeTime }: Props) {
@@ -67,7 +64,7 @@ export function DataSections({ bucketSize, hasData, absoluteTime, relativeTime }
         {hasData?.ux && (
           <EuiFlexItem grow={false}>
             <UXSection
-              serviceName={(hasData.ux as UXHasDataResponse).serviceName as string}
+              serviceName={(hasData.ux.hasData as UXHasDataResponse).serviceName as string}
               bucketSize={bucketSize}
               absoluteTime={absoluteTime}
               relativeTime={relativeTime}

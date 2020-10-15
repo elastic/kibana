@@ -6,25 +6,24 @@
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
+import { useTrackPageview } from '../..';
 import { EmptySection } from '../../components/app/empty_section';
 import { WithHeaderLayout } from '../../components/app/layout/with_header';
+import { NewsFeed } from '../../components/app/news_feed';
 import { Resources } from '../../components/app/resources';
 import { AlertsSection } from '../../components/app/section/alerts';
-import { DatePicker, TimePickerTime } from '../../components/shared/data_picker';
-import { NewsFeed } from '../../components/app/news_feed';
-import { fetchHasData } from '../../data_handler';
+import { DatePicker } from '../../components/shared/data_picker';
 import { FETCH_STATUS, useFetcher } from '../../hooks/use_fetcher';
-import { UI_SETTINGS, useKibanaUISettings } from '../../hooks/use_kibana_ui_settings';
+import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
+import { useTimeRange } from '../../hooks/use_time_range';
 import { RouteParams } from '../../routes';
+import { getNewsFeed } from '../../services/get_news_feed';
 import { getObservabilityAlerts } from '../../services/get_observability_alerts';
-import { getAbsoluteTime } from '../../utils/date';
 import { getBucketSize } from '../../utils/get_bucket_size';
+import { DataSections } from './data_sections';
 import { getEmptySections } from './empty_section';
 import { LoadingObservability } from './loading_observability';
-import { getNewsFeed } from '../../services/get_news_feed';
-import { DataSections } from './data_sections';
-import { useTrackPageview } from '../..';
 
 interface Props {
   routeParams: RouteParams<'/overview'>;
@@ -37,27 +36,17 @@ function calculateBucketSize({ start, end }: { start?: number; end?: number }) {
 }
 
 export function OverviewPage({ routeParams }: Props) {
-  const { core, plugins } = usePluginContext();
-
-  // read time from state and update the url
-  const timePickerSharedState = plugins.data.query.timefilter.timefilter.getTime();
-
-  const timePickerDefaults = useKibanaUISettings<TimePickerTime>(
-    UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
-  );
-
-  const relativeTime = {
-    start: routeParams.query.rangeFrom || timePickerSharedState.from || timePickerDefaults.from,
-    end: routeParams.query.rangeTo || timePickerSharedState.to || timePickerDefaults.to,
-  };
-
-  const absoluteTime = {
-    start: getAbsoluteTime(relativeTime.start) as number,
-    end: getAbsoluteTime(relativeTime.end, { roundUp: true }) as number,
-  };
-
   useTrackPageview({ app: 'observability', path: 'overview' });
   useTrackPageview({ app: 'observability', path: 'overview', delay: 15000 });
+  const { core } = usePluginContext();
+
+  const { rangeFrom, rangeTo, absStart, absEnd } = useTimeRange({
+    rangeFrom: routeParams.query.rangeFrom,
+    rangeTo: routeParams.query.rangeTo,
+  });
+
+  const relativeTime = { start: rangeFrom, end: rangeTo };
+  const absoluteTime = { start: absStart, end: absEnd };
 
   const { data: alerts = [], status: alertStatus } = useFetcher(() => {
     return getObservabilityAlerts({ core });
@@ -67,14 +56,9 @@ export function OverviewPage({ routeParams }: Props) {
 
   const theme = useContext(ThemeContext);
 
-  const result = useFetcher(
-    () => fetchHasData(absoluteTime),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
-  const hasData = result.data;
+  const { hasData, hasAnyData } = useHasData();
 
-  if (!hasData) {
+  if (hasAnyData === undefined) {
     return <LoadingObservability />;
   }
 
@@ -89,7 +73,7 @@ export function OverviewPage({ routeParams }: Props) {
     if (id === 'alert') {
       return alertStatus !== FETCH_STATUS.FAILURE && !alerts.length;
     }
-    return !hasData[id];
+    return hasData[id]?.hasData === false;
   });
 
   // Hides the data section when all 'hasData' is false or undefined

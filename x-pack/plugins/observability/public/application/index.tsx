@@ -18,6 +18,7 @@ import { usePluginContext } from '../hooks/use_plugin_context';
 import { useRouteParams } from '../hooks/use_route_params';
 import { Breadcrumbs, routes } from '../routes';
 import { ObservabilityPluginSetupDeps } from '../plugin';
+import { HasDataContextProvider } from '../context/has_data_context';
 
 const observabilityLabelBreadcrumb = {
   text: i18n.translate('xpack.observability.observability.breadcrumb.', {
@@ -45,7 +46,7 @@ function App() {
               core.chrome.docTitle.change(getTitleFromBreadCrumbs(breadcrumb));
             }, [core, breadcrumb]);
 
-            const { query, path: pathParams } = useRouteParams(route.params);
+            const { query, path: pathParams } = useRouteParams(path);
             return route.handler({ query, path: pathParams });
           };
           return <Route key={path} path={path} exact={true} component={Wrapper} />;
@@ -70,7 +71,9 @@ export const renderApp = (
           <EuiThemeProvider darkMode={isDarkMode}>
             <i18nCore.Context>
               <RedirectAppLinks application={core.application}>
-                <App />
+                <HasDataContextProvider>
+                  <App />
+                </HasDataContextProvider>
               </RedirectAppLinks>
             </i18nCore.Context>
           </EuiThemeProvider>
