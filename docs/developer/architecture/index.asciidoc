@@ -3,8 +3,13 @@
 
 [IMPORTANT]
 ==============================================
-{kib} developer services and apis are in a state of constant development. We cannot provide backwards compatibility at this time due to the high rate of change.
+The {kib} Platform Plugin API and developer services are in a state of
+constant development. We cannot provide backwards compatibility at this time due
+to the high rate of change.
 ==============================================
+
+To begin with plugin development, we recommend reading our overview of how plugins work:
+* <<kibana-platform-plugin-api>>.
 
 Our developer services are changing all the time. One of the best ways to discover and learn about them is to read the available
 READMEs from all the plugins inside our {kib-repo}tree/{branch}/src/plugins[open source plugins folder] and our
@@ -19,6 +24,8 @@ A few notable services are called out below.
 * <<add-data-tutorials>>
 * <<development-visualize-index>>
 
+include::kibana-platform-plugin-api.asciidoc[leveloffset=+1]
+
 include::security/index.asciidoc[leveloffset=+1]
 
 include::development-plugin-saved-objects.asciidoc[leveloffset=+1]
@@ -26,5 +33,4 @@ include::development-plugin-saved-objects.asciidoc[leveloffset=+1]
 include::add-data-tutorials.asciidoc[leveloffset=+1]
 
 include::development-visualize-index.asciidoc[leveloffset=+1]
-
 
