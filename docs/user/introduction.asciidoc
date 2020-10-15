@@ -26,7 +26,7 @@ image::images/intro-kibana.png[Kibana home page]
 [[get-data-into-kibana]]
 === Ingest data
 
-{kib} is designed to use {es} as a data source. Think of Elasticsearch as the engine that stores
+{kib} is designed to use {es} as a data source. Think of {es} as the engine that stores
 and processes the data, with {kib} sitting on top.
 
 From the home page, {kib} provides these options for ingesting data:
