@@ -92,6 +92,19 @@ export const ROLES = {
       ],
     },
   },
+  KIBANA_RBAC_DEFAULT_SPACE_VISUALIZE_READ_USER: {
+    name: 'kibana_rbac_default_space_visualize_read_user',
+    privileges: {
+      kibana: [
+        {
+          feature: {
+            visualize: ['read'],
+          },
+          spaces: ['default'],
+        },
+      ],
+    },
+  },
 };
 
 export const USERS = {
@@ -148,5 +161,10 @@ export const USERS = {
     username: 'a_kibana_rbac_default_space_dashboard_read_user',
     password: 'password',
     roles: [ROLES.KIBANA_RBAC_DEFAULT_SPACE_DASHBOARD_READ_USER.name],
+  },
+  DEFAULT_SPACE_VISUALIZE_READ_USER: {
+    username: 'a_kibana_rbac_default_space_visualize_read_user',
+    password: 'password',
+    roles: [ROLES.KIBANA_RBAC_DEFAULT_SPACE_VISUALIZE_READ_USER.name],
   },
 };

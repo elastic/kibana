@@ -55,12 +55,10 @@ export default function ({ getService }: FtrProviderContext) {
         USERS.DEFAULT_SPACE_SO_MANAGEMENT_WRITE_USER,
         USERS.DEFAULT_SPACE_SO_TAGGING_READ_USER,
         USERS.DEFAULT_SPACE_SO_TAGGING_WRITE_USER,
-      ],
-      unauthorized: [
-        USERS.NOT_A_KIBANA_USER,
-        // move to authorized once we add the permission to dashboard users
         USERS.DEFAULT_SPACE_DASHBOARD_READ_USER,
+        USERS.DEFAULT_SPACE_VISUALIZE_READ_USER,
       ],
+      unauthorized: [USERS.NOT_A_KIBANA_USER],
     };
 
     const createUserTest = (
