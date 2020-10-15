@@ -11,10 +11,7 @@
         "value": 46.06666666666667,
         "timeseries": []
       },
-      "avgResponseTime": null,
-      "environments": [
-        "test"
-      ]
+      "environments": ["test"]
     },
     {
       "serviceName": "opbeans-python",

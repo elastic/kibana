@@ -17,10 +17,28 @@
  * under the License.
  */
 
-import './jquery.flot';
-import './jquery.flot.time';
-import './jquery.flot.symbol';
-import './jquery.flot.crosshair';
-import './jquery.flot.selection';
-import './jquery.flot.stack';
-import './jquery.flot.axislabels';
+import { Bundle } from '../common';
+import { filterById } from './filter_by_id';
+
+export function focusBundles(filters: string[], bundles: Bundle[]) {
+  if (!filters.length) {
+    return [...bundles];
+  }
+
+  const queue = new Set<Bundle>(filterById(filters, bundles));
+  const focused: Bundle[] = [];
+
+  for (const bundle of queue) {
+    focused.push(bundle);
+
+    const { explicit, implicit } = bundle.readBundleDeps();
+    const depIds = [...explicit, ...implicit];
+    if (depIds.length) {
+      for (const dep of filterById(depIds, bundles)) {
+        queue.add(dep);
+      }
+    }
+  }
+
+  return focused;
+}
