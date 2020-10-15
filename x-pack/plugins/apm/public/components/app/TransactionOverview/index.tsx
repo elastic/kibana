@@ -36,7 +36,7 @@ import { TransactionTypeFilter } from '../../shared/LocalUIFilters/TransactionTy
 import { TransactionList } from './TransactionList';
 import { useRedirect } from './useRedirect';
 import { TRANSACTION_PAGE_LOAD } from '../../../../common/transaction_types';
-import { ClientSideMonitoringCallout } from './ClientSideMonitoringCallout';
+import { UserExperienceCallout } from './user_experience_callout';
 
 function getRedirectLocation({
   urlParams,
@@ -129,7 +129,7 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
         <EuiFlexItem grow={7}>
           {transactionType === TRANSACTION_PAGE_LOAD && (
             <>
-              <ClientSideMonitoringCallout />
+              <UserExperienceCallout />
               <EuiSpacer size="s" />
             </>
           )}
