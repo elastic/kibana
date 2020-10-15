@@ -80,11 +80,11 @@ describe('getFormatWithAggs', () => {
   });
 
   test('creates alternative format for range', () => {
-    const mapping = { id: 'range', params: { template: 'compact' } };
+    const mapping = { id: 'range', params: { template: 'arrow_right' } };
     const getFieldFormat = getFormatWithAggs(getFormat);
     const format = getFieldFormat(mapping);
 
-    expect(format.convert({ gte: 1, lt: 20 })).toBe('1 - 20');
+    expect(format.convert({ gte: 1, lt: 20 })).toBe('1 -> 20');
     expect(getFormat).toHaveBeenCalledTimes(1);
   });
 

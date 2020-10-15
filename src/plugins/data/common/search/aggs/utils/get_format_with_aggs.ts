@@ -69,9 +69,9 @@ export function getFormatWithAggs(getFieldFormat: GetFieldFormat): GetFieldForma
             toValue = isFinite(range.lt) ? toValue : TO_PLACEHOLDER;
           }
 
-          if (params.template === 'compact') {
-            return i18n.translate('data.aggTypes.buckets.ranges.rangesFormatMessageCompact', {
-              defaultMessage: '{from} - {to}',
+          if (params.template === 'arrow_right') {
+            return i18n.translate('data.aggTypes.buckets.ranges.rangesFormatMessageArrowRight', {
+              defaultMessage: '{from} -> {to}',
               values: {
                 from: fromValue,
                 to: toValue,

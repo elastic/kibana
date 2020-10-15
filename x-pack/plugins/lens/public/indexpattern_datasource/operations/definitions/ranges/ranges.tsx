@@ -199,7 +199,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
       const dataType = newMode === MODES.Range ? 'string' : 'number';
       const parentFormat =
         newMode === MODES.Range
-          ? { id: 'range', params: { template: 'compact', replaceInfinity: true } }
+          ? { id: 'range', params: { template: 'arrow_right', replaceInfinity: true } }
           : undefined;
       setState(
         changeColumn({
