@@ -4,6 +4,9 @@
   "license": "Apache-2.0",
   "main": "./target/index.js",
   "private": true,
+  "kibana": {
+    "devOnly": true
+  },
   "scripts": {
     "build": "babel src --out-dir target --delete-dir-on-start --extensions .ts --source-maps=inline",
     "kbn:bootstrap": "yarn build",
