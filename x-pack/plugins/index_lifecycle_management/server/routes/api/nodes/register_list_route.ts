@@ -8,7 +8,6 @@ import { ListNodesRouteResponse, NodeDataRole } from '../../../../common/types';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
-import { handleEsError } from '../../../shared_imports';
 
 interface Settings {
   nodes: {
@@ -63,7 +62,12 @@ export function convertSettingsIntoLists(
   );
 }
 
-export function registerListRoute({ router, config, license }: RouteDependencies) {
+export function registerListRoute({
+  router,
+  config,
+  license,
+  lib: { handleEsError },
+}: RouteDependencies) {
   const { filteredNodeAttributes } = config;
 
   const NODE_ATTRS_KEYS_TO_IGNORE: string[] = [

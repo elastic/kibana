@@ -8,7 +8,6 @@ import { schema } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
-import { handleEsError } from '../../../shared_imports';
 
 function findMatchingNodes(stats: any, nodeAttrs: string): any {
   return Object.entries(stats.nodes).reduce((accum: any[], [nodeId, nodeStats]: [any, any]) => {
@@ -30,7 +29,11 @@ const paramsSchema = schema.object({
   nodeAttrs: schema.string(),
 });
 
-export function registerDetailsRoute({ router, license }: RouteDependencies) {
+export function registerDetailsRoute({
+  router,
+  license,
+  lib: { handleEsError },
+}: RouteDependencies) {
   router.get(
     { path: addBasePath('/nodes/{nodeAttrs}/details'), validate: { params: paramsSchema } },
     license.guardApiRoute(async (context, request, response) => {

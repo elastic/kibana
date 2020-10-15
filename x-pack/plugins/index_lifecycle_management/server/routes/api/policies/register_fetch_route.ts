@@ -11,7 +11,6 @@ import { ApiResponse } from '@elastic/elasticsearch';
 import { IndexLifecyclePolicy, PolicyFromES } from '../../../../common/types';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
-import { handleEsError } from '../../../shared_imports';
 
 interface PoliciesMap {
   [K: string]: Omit<PolicyFromES, 'name'>;
@@ -58,7 +57,7 @@ const querySchema = schema.object({
   withIndices: schema.boolean({ defaultValue: false }),
 });
 
-export function registerFetchRoute({ router, license }: RouteDependencies) {
+export function registerFetchRoute({ router, license, lib: { handleEsError } }: RouteDependencies) {
   router.get(
     { path: addBasePath('/policies'), validate: { query: querySchema } },
     license.guardApiRoute(async (context, request, response) => {

@@ -9,7 +9,6 @@ import { ElasticsearchClient } from 'kibana/server';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
-import { handleEsError } from '../../../shared_imports';
 
 async function retryLifecycle(client: ElasticsearchClient, indexNames: string[]) {
   const options = {
@@ -28,7 +27,7 @@ const bodySchema = schema.object({
   indexNames: schema.arrayOf(schema.string()),
 });
 
-export function registerRetryRoute({ router, license }: RouteDependencies) {
+export function registerRetryRoute({ router, license, lib: { handleEsError } }: RouteDependencies) {
   router.post(
     { path: addBasePath('/index/retry'), validate: { body: bodySchema } },
     license.guardApiRoute(async (context, request, response) => {

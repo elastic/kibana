@@ -13,7 +13,6 @@ import { TemplateFromEs, TemplateSerialized } from '../../../../../index_managem
 import { LegacyTemplateSerialized } from '../../../../../index_management/server';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
-import { handleEsError } from '../../../shared_imports';
 
 async function getLegacyIndexTemplate(
   client: ElasticsearchClient,
@@ -93,7 +92,11 @@ const querySchema = schema.object({
   legacy: schema.maybe(schema.oneOf([schema.literal('true'), schema.literal('false')])),
 });
 
-export function registerAddPolicyRoute({ router, license }: RouteDependencies) {
+export function registerAddPolicyRoute({
+  router,
+  license,
+  lib: { handleEsError },
+}: RouteDependencies) {
   router.post(
     { path: addBasePath('/template'), validate: { body: bodySchema, query: querySchema } },
     license.guardApiRoute(async (context, request, response) => {

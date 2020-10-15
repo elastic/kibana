@@ -13,7 +13,6 @@ import {
 } from '../../../../../index_management/common/types';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
-import { handleEsError } from '../../../shared_imports';
 
 function isReservedSystemTemplate(templateName: string, indexPatterns: string[]): boolean {
   return (
@@ -81,7 +80,7 @@ const querySchema = schema.object({
   legacy: schema.maybe(schema.oneOf([schema.literal('true'), schema.literal('false')])),
 });
 
-export function registerFetchRoute({ router, license }: RouteDependencies) {
+export function registerFetchRoute({ router, license, lib: { handleEsError } }: RouteDependencies) {
   router.get(
     { path: addBasePath('/templates'), validate: { query: querySchema } },
     license.guardApiRoute(async (context, request, response) => {

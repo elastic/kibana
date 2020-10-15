@@ -9,7 +9,6 @@ import { ElasticsearchClient } from 'kibana/server';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
-import { handleEsError } from '../../../shared_imports';
 
 async function addLifecyclePolicy(
   client: ElasticsearchClient,
@@ -33,7 +32,11 @@ const bodySchema = schema.object({
   alias: schema.maybe(schema.string()),
 });
 
-export function registerAddPolicyRoute({ router, license }: RouteDependencies) {
+export function registerAddPolicyRoute({
+  router,
+  license,
+  lib: { handleEsError },
+}: RouteDependencies) {
   router.post(
     { path: addBasePath('/index/add'), validate: { body: bodySchema } },
     license.guardApiRoute(async (context, request, response) => {
