@@ -63,7 +63,8 @@ export class ActionTypeRegistry {
    */
   public ensureActionTypeEnabled(id: string) {
     this.actionsConfigUtils.ensureActionTypeEnabled(id);
-    // Important to happen last due to feature usage being notified at the same time
+    // Important to happen last because the function will notify of feature usage at the
+    // same time and it shouldn't notify when the action type isn't enabled
     this.licenseState.ensureLicenseForActionType(this.get(id));
   }
 
