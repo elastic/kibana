@@ -29,20 +29,19 @@ run(
   async ({ flags, log }) => {
     const { examples = false, extraPluginScanDirs = [] } = flags as AllOptions;
 
-    const plugins = findPlugins({
+    const pluginMap = findPlugins({
       oss: false,
       examples,
       extraPluginScanDirs,
     });
 
     const allErrors = new Map<string, SearchErrors>();
-    for (const pluginId of plugins.keys()) {
+    for (const pluginId of pluginMap.keys()) {
       const { errors } = getPluginDeps({
-        oss: false,
-        examples,
-        extraPluginScanDirs,
+        pluginMap,
         id: pluginId,
       });
+
       for (const [errorId, error] of errors) {
         if (!allErrors.has(errorId)) {
           allErrors.set(errorId, error);

@@ -17,11 +17,11 @@
  * under the License.
  */
 import { KibanaPlatformPlugin } from '@kbn/dev-utils';
-import { SearchOptions, findPlugins } from './find_plugins';
 
-type AllOptions = SearchOptions & {
+interface AllOptions {
   id: string;
-};
+  pluginMap: Map<string, KibanaPlatformPlugin>;
+}
 
 interface CircularRefsError {
   from: string;
@@ -37,8 +37,8 @@ interface State {
   errors: Map<string, SearchErrors>;
 }
 
-function traverse(pluginTree: Map<string, KibanaPlatformPlugin>, state: State, id: string) {
-  const plugin = pluginTree.get(id);
+function traverse(pluginMap: Map<string, KibanaPlatformPlugin>, state: State, id: string) {
+  const plugin = pluginMap.get(id);
   if (plugin === undefined) {
     throw new Error(`Unknown plugin id: ${id}`);
   }
@@ -69,27 +69,21 @@ function traverse(pluginTree: Map<string, KibanaPlatformPlugin>, state: State, i
     ...plugin.manifest.optionalPlugins,
     ...plugin.manifest.requiredBundles,
   ]).forEach((depId) => {
-    state.deps.add(pluginTree.get(depId)!);
-    traverse(pluginTree, state, depId);
+    state.deps.add(pluginMap.get(depId)!);
+    traverse(pluginMap, state, depId);
   });
 
   state.stack.pop();
 }
 
-export function getPluginDeps({
-  oss = false,
-  examples = false,
-  extraPluginScanDirs = [],
-  id,
-}: AllOptions): State {
-  const pluginTree = findPlugins({ oss, examples, extraPluginScanDirs });
+export function getPluginDeps({ pluginMap, id }: AllOptions): State {
   const state: State = {
     deps: new Set(),
     errors: new Map(),
     stack: [],
   };
 
-  traverse(pluginTree, state, id);
+  traverse(pluginMap, state, id);
 
   return state;
 }
