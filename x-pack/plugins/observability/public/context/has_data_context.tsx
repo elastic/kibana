@@ -38,35 +38,42 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
 
   const [hasData, setHasData] = useState<HasDataContextValue['hasData']>({});
 
-  useEffect(() => {
-    apps.forEach(async (app) => {
-      try {
-        const params =
-          app === 'ux' ? { absoluteTime: { start: absStart, end: absEnd } } : undefined;
+  useEffect(
+    () => {
+      apps.forEach(async (app) => {
+        try {
+          const params =
+            app === 'ux' ? { absoluteTime: { start: absStart, end: absEnd } } : undefined;
 
-        const result = await getDataHandler(app)?.hasData(params);
-        setHasData((prevState) => ({
-          ...prevState,
-          [app]: {
-            hasData: result,
-            status: FETCH_STATUS.SUCCESS,
-          },
-        }));
-      } catch (e) {
-        setHasData((prevState) => ({
-          ...prevState,
-          [app]: {
-            hasData: undefined,
-            status: FETCH_STATUS.FAILURE,
-          },
-        }));
-      }
-    });
-  }, [absStart, absEnd]);
+          const result = await getDataHandler(app)?.hasData(params);
+          setHasData((prevState) => ({
+            ...prevState,
+            [app]: {
+              hasData: result,
+              status: FETCH_STATUS.SUCCESS,
+            },
+          }));
+        } catch (e) {
+          setHasData((prevState) => ({
+            ...prevState,
+            [app]: {
+              hasData: undefined,
+              status: FETCH_STATUS.FAILURE,
+            },
+          }));
+        }
+      });
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
   const allRequestCompleted = isEmpty(hasData)
     ? false
-    : Object.values(hasData).every((dataContext) => dataContext?.status !== FETCH_STATUS.LOADING);
+    : apps.every((app) => {
+        const appStatus = hasData[app]?.status;
+        return appStatus !== undefined && appStatus !== FETCH_STATUS.LOADING;
+      });
 
   const hasSomeData = (Object.keys(hasData) as ObservabilityFetchDataPlugins[]).some(
     (app) => hasData[app]?.hasData === true

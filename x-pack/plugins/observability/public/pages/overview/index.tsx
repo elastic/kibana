@@ -73,7 +73,7 @@ export function OverviewPage({ routeParams }: Props) {
     if (id === 'alert') {
       return alertStatus !== FETCH_STATUS.FAILURE && !alerts.length;
     }
-    return hasData[id]?.hasData === false;
+    return hasData[id]?.status === FETCH_STATUS.FAILURE || hasData[id]?.hasData === false;
   });
 
   // Hides the data section when all 'hasData' is false or undefined
