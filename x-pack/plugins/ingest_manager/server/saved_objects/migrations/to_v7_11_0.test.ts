@@ -33,6 +33,7 @@ describe('7.11.0 Endpoint Package Policy migration', () => {
               policy: {
                 value: {
                   windows: {},
+                  mac: {},
                 },
               },
             },
@@ -66,6 +67,14 @@ describe('7.11.0 Endpoint Package Policy migration', () => {
               policy: {
                 value: {
                   windows: {
+                    popup: {
+                      malware: {
+                        message: '',
+                        enabled: false,
+                      },
+                    },
+                  },
+                  mac: {
                     popup: {
                       malware: {
                         message: '',

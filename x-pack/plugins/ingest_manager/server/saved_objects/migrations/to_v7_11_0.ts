@@ -24,7 +24,7 @@ export const migratePackagePolicyToV7110: SavedObjectMigrationFn<PackagePolicy, 
     };
     if (input && input.config) {
       input.config.policy.value.windows.popup = popup;
-      // input.config.policy.value.mac.popup = popup;
+      input.config.policy.value.mac.popup = popup;
     }
   }
 
