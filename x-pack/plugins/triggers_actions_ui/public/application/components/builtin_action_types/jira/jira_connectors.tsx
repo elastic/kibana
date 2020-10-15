@@ -225,12 +225,19 @@ const JiraConnectorFields: React.FC<ActionConnectorFieldsProps<JiraActionConnect
 function getEncryptedFieldNotifyLabel(isCreate: boolean) {
   if (isCreate) {
     return (
-      <EuiText color="secondary" size="s">
+      <EuiText color="secondary" size="s" data-test-subj="rememberValuesMessage">
         {i18n.JIRA_REMEMBER_VALUES_LABEL}
       </EuiText>
     );
   }
-  return <EuiCallOut size="s" iconType="iInCircle" title={i18n.JIRA_REENTER_VALUES_LABEL} />;
+  return (
+    <EuiCallOut
+      size="s"
+      iconType="iInCircle"
+      title={i18n.JIRA_REENTER_VALUES_LABEL}
+      data-test-subj="reenterValuesMessage"
+    />
+  );
 }
 
 // eslint-disable-next-line import/no-default-export

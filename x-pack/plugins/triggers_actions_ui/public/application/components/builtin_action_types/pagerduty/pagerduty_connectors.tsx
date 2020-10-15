@@ -95,7 +95,7 @@ function getEncryptedFieldNotifyLabel(isCreate: boolean) {
     return (
       <Fragment>
         <EuiSpacer size="s" />
-        <EuiText color="secondary" size="s">
+        <EuiText color="secondary" size="s" data-test-subj="rememberValuesMessage">
           <FormattedMessage
             id="xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.rememberValueLabel"
             defaultMessage="Remember this value. You must reenter it each time you edit the connector."
@@ -111,6 +111,7 @@ function getEncryptedFieldNotifyLabel(isCreate: boolean) {
       <EuiCallOut
         size="s"
         iconType="iInCircle"
+        data-test-subj="reenterValuesMessage"
         title={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.reenterValueLabel',
           { defaultMessage: 'This key is encrypted. Please reenter a value for this field.' }
