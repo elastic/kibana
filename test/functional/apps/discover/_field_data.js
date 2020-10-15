@@ -33,11 +33,10 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('discover');
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
-      // delete .kibana index and update configDoc
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
       });
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
     });
     -describe('field data', function () {
