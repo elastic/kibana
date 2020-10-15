@@ -95,7 +95,7 @@ function getEncryptedFieldNotifyLabel(isCreate: boolean) {
     return (
       <Fragment>
         <EuiSpacer size="s" />
-        <EuiText color="secondary" size="s" data-test-subj="rememberValuesMessage">
+        <EuiText size="s" data-test-subj="rememberValuesMessage">
           <FormattedMessage
             id="xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.rememberValueLabel"
             defaultMessage="Remember this value. You must reenter it each time you edit the connector."

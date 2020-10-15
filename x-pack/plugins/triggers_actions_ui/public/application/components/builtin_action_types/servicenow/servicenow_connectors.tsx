@@ -205,7 +205,7 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<
 function getEncryptedFieldNotifyLabel(isCreate: boolean) {
   if (isCreate) {
     return (
-      <EuiText color="secondary" size="s" data-test-subj="rememberValuesMessage">
+      <EuiText size="s" data-test-subj="rememberValuesMessage">
         {i18n.REMEMBER_VALUES_LABEL}
       </EuiText>
     );

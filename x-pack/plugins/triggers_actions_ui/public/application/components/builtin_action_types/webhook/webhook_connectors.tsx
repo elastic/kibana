@@ -395,7 +395,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
 function getEncryptedFieldNotifyLabel(isCreate: boolean) {
   if (isCreate) {
     return (
-      <EuiText color="secondary" size="s" data-test-subj="rememberValuesMessage">
+      <EuiText size="s" data-test-subj="rememberValuesMessage">
         <FormattedMessage
           id="xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.rememberValuesLabel"
           defaultMessage="Remember these values. You must reenter them each time you edit the connector."

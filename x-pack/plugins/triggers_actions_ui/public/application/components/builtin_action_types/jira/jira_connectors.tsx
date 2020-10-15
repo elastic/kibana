@@ -225,7 +225,7 @@ const JiraConnectorFields: React.FC<ActionConnectorFieldsProps<JiraActionConnect
 function getEncryptedFieldNotifyLabel(isCreate: boolean) {
   if (isCreate) {
     return (
-      <EuiText color="secondary" size="s" data-test-subj="rememberValuesMessage">
+      <EuiText size="s" data-test-subj="rememberValuesMessage">
         {i18n.JIRA_REMEMBER_VALUES_LABEL}
       </EuiText>
     );
