@@ -19,7 +19,7 @@
 
 import { get, hasIn } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Datatable, DatatableColumn } from 'src/plugins/expressions/public';
+import { KibanaDatatable, KibanaDatatableColumn } from 'src/plugins/expressions/public';
 import { PersistedState } from '../../../../../plugins/visualizations/public';
 import { Adapters } from '../../../../../plugins/inspector/public';
 
@@ -49,6 +49,7 @@ import {
   getSearchService,
 } from '../../services';
 import { buildTabularInspectorData } from './build_tabular_inspector_data';
+import { serializeAggConfig } from './utils';
 
 export interface RequestHandlerParams {
   searchSource: ISearchSource;
@@ -192,9 +193,11 @@ const handleCourierRequest = async ({
       : undefined,
   };
 
-  const response = tabifyAggResponse(aggs, (searchSource as any).finalResponse, tabifyParams);
-
-  (searchSource as any).tabifiedResponse = response;
+  (searchSource as any).tabifiedResponse = tabifyAggResponse(
+    aggs,
+    (searchSource as any).finalResponse,
+    tabifyParams
+  );
 
   inspectorAdapters.data.setTabularLoader(
     () =>
@@ -205,12 +208,12 @@ const handleCourierRequest = async ({
     { returnsFormattedValues: true }
   );
 
-  return response;
+  return (searchSource as any).tabifiedResponse;
 };
 
 export const esaggs = (): EsaggsExpressionFunctionDefinition => ({
   name,
-  type: 'datatable',
+  type: 'kibana_datatable',
   inputTypes: ['kibana_context', 'null'],
   help: i18n.translate('data.functions.esaggs.help', {
     defaultMessage: 'Run AggConfig aggregation',
@@ -276,25 +279,18 @@ export const esaggs = (): EsaggsExpressionFunctionDefinition => ({
       abortSignal: (abortSignal as unknown) as AbortSignal,
     });
 
-    const table: Datatable = {
-      type: 'datatable',
+    const table: KibanaDatatable = {
+      type: 'kibana_datatable',
       rows: response.rows,
-      columns: response.columns.map((column) => {
-        const cleanedColumn: DatatableColumn = {
+      columns: response.columns.map((column: any) => {
+        const cleanedColumn: KibanaDatatableColumn = {
           id: column.id,
           name: column.name,
-          meta: {
-            type: column.aggConfig.params.field?.type || 'number',
-            field: column.aggConfig.params.field?.name,
-            index: indexPattern.title,
-            params: column.aggConfig.toSerializedFieldFormat(),
-            source: 'esaggs',
-            sourceParams: {
-              indexPatternId: indexPattern.id,
-              ...column.aggConfig.serialize(),
-            },
-          },
+          meta: serializeAggConfig(column.aggConfig),
         };
+        if (args.includeFormatHints) {
+          cleanedColumn.formatHint = column.aggConfig.toSerializedFieldFormat();
+        }
         return cleanedColumn;
       }),
     };

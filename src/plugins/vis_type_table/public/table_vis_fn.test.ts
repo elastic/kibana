@@ -31,7 +31,7 @@ jest.mock('./table_vis_response_handler', () => ({
 describe('interpreter/functions#table', () => {
   const fn = functionWrapper(createTableVisFn());
   const context = {
-    type: 'datatable',
+    type: 'kibana_datatable',
     rows: [{ 'col-0-1': 0 }],
     columns: [{ id: 'col-0-1', name: 'Count' }],
   };

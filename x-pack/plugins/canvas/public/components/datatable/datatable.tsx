@@ -9,9 +9,11 @@ import PropTypes from 'prop-types';
 import { EuiIcon, EuiPagination } from '@elastic/eui';
 import moment from 'moment';
 import { Paginate } from '../paginate';
-import { Datatable as DatatableType, DatatableColumn, DatatableColumnType } from '../../../types';
+import { Datatable as DatatableType, DatatableColumn } from '../../../types';
 
-const getIcon = (type: DatatableColumnType | null) => {
+type IconType = 'string' | 'number' | 'date' | 'boolean' | 'null';
+
+const getIcon = (type: IconType) => {
   if (type === null) {
     return;
   }

@@ -50,7 +50,7 @@ Object {
           "col-0-1": 0,
         },
       ],
-      "type": "datatable",
+      "type": "kibana_datatable",
     },
     "visType": "region_map",
   },

@@ -124,3 +124,10 @@ export const PREVIEW_WARNING_TIMESTAMP = i18n.translate(
     defaultMessage: 'Unable to find "@timestamp" field on events.',
   }
 );
+
+export const PREVIEW_SUBTITLE_LOADING = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewSubtitleLoading',
+  {
+    defaultMessage: '...loading',
+  }
+);
