@@ -18,9 +18,10 @@ import {
   EuiLink,
   EuiText,
   EuiPopover,
+  EuiToolTip,
   htmlIdGenerator,
+  keys,
 } from '@elastic/eui';
-import { keys } from '@elastic/eui';
 import { IFieldFormat } from '../../../../../../../../src/plugins/data/common';
 import { RangeTypeLens, isValidRange, isValidNumber } from './ranges';
 import { FROM_PLACEHOLDER, TO_PLACEHOLDER, TYPING_DEBOUNCE_TIME } from './constants';
@@ -68,6 +69,22 @@ export const RangePopover = ({
   };
   const { from, to, label } = tempRange;
 
+  const lteAppendLabel = i18n.translate('xpack.lens.indexPattern.ranges.lessThanOrEqualAppend', {
+    defaultMessage: '\u2264',
+  });
+  const lteTooltipContent = i18n.translate(
+    'xpack.lens.indexPattern.ranges.lessThanOrEqualTooltip',
+    {
+      defaultMessage: 'Less than or equal to',
+    }
+  );
+  const ltPrependLabel = i18n.translate('xpack.lens.indexPattern.ranges.lessThanPrepend', {
+    defaultMessage: '\u003c',
+  });
+  const ltTooltipContent = i18n.translate('xpack.lens.indexPattern.ranges.lessThanTooltip', {
+    defaultMessage: 'Less than',
+  });
+
   const onSubmit = () => {
     setIsPopoverOpen(false);
     setIsOpenByCreation(false);
@@ -104,6 +121,11 @@ export const RangePopover = ({
                 setTempRange(newRange);
                 saveRangeAndReset(newRange);
               }}
+              append={
+                <EuiToolTip content={lteTooltipContent}>
+                  <EuiText size="s">{lteAppendLabel}</EuiText>
+                </EuiToolTip>
+              }
               compressed
               placeholder={FROM_PLACEHOLDER}
               isInvalid={!isValidRange(tempRange)}
@@ -124,6 +146,11 @@ export const RangePopover = ({
                 setTempRange(newRange);
                 saveRangeAndReset(newRange);
               }}
+              prepend={
+                <EuiToolTip content={ltTooltipContent}>
+                  <EuiText size="s">{ltPrependLabel}</EuiText>
+                </EuiToolTip>
+              }
               compressed
               placeholder={TO_PLACEHOLDER}
               isInvalid={!isValidRange(tempRange)}
