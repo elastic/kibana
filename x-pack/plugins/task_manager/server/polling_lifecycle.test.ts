@@ -8,13 +8,13 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import { of } from 'rxjs';
 
-import { TaskManager, claimAvailableTasks } from './task_manager';
-import { mockLogger } from './test_utils';
+import { TaskPollingLifecycle, claimAvailableTasks } from './polling_lifecycle';
+import { loggingSystemMock } from '../../../../src/core/server/mocks';
 import { createInitialMiddleware } from './lib/middleware';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { taskStoreMock } from './task_store.mock';
 
-describe('TaskManager', () => {
+describe('TaskPollingLifecycle', () => {
   let clock: sinon.SinonFakeTimers;
 
   const config = {
@@ -27,12 +27,12 @@ describe('TaskManager', () => {
     request_capacity: 1000,
   };
 
-  const taskManagerLogger = mockLogger();
+  const taskManagerLogger = loggingSystemMock.create().get();
   const mockTaskStore = taskStoreMock.create({});
   const taskManagerOpts = {
     config,
     taskStore: mockTaskStore,
-    logger: mockLogger(),
+    logger: taskManagerLogger,
     definitions: new TaskTypeDictionary(taskManagerLogger),
     middleware: createInitialMiddleware(),
     maxWorkersConfiguration$: of(100),
@@ -48,7 +48,7 @@ describe('TaskManager', () => {
 
   describe('start', () => {
     test('begins poilling once start is called', () => {
-      const taskManager = new TaskManager(taskManagerOpts);
+      const taskManager = new TaskPollingLifecycle(taskManagerOpts);
 
       clock.tick(150);
       expect(mockTaskStore.claimAvailableTasks).not.toHaveBeenCalled();
@@ -62,7 +62,7 @@ describe('TaskManager', () => {
 
   describe('claimAvailableTasks', () => {
     test('should claim Available Tasks when there are available workers', () => {
-      const logger = mockLogger();
+      const logger = loggingSystemMock.create().get();
       const claim = jest.fn(() => Promise.resolve({ docs: [], claimedTasks: 0 }));
 
       const availableWorkers = 1;
@@ -73,7 +73,7 @@ describe('TaskManager', () => {
     });
 
     test('should not claim Available Tasks when there are no available workers', () => {
-      const logger = mockLogger();
+      const logger = loggingSystemMock.create().get();
       const claim = jest.fn(() => Promise.resolve({ docs: [], claimedTasks: 0 }));
 
       const availableWorkers = 0;
@@ -88,7 +88,7 @@ describe('TaskManager', () => {
      * This is achieved by setting the `script.allowed_types` flag on Elasticsearch to `none`
      */
     test('handles failure due to inline scripts being disabled', () => {
-      const logger = mockLogger();
+      const logger = loggingSystemMock.create().get();
       const claim = jest.fn(() => {
         throw Object.assign(new Error(), {
           msg: '[illegal_argument_exception] cannot execute [inline] scripts',
@@ -110,8 +110,8 @@ describe('TaskManager', () => {
       claimAvailableTasks([], claim, 10, logger);
 
       expect(logger.warn).toHaveBeenCalledTimes(1);
-      expect(logger.warn.mock.calls[0][0]).toMatchInlineSnapshot(
-        `"Task Manager cannot operate when inline scripts are disabled in Elasticsearch"`
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Task Manager cannot operate when inline scripts are disabled in Elasticsearch`
       );
     });
   });

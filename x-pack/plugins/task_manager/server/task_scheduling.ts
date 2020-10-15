@@ -8,9 +8,8 @@ import { filter } from 'rxjs/operators';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, map as mapOptional, getOrElse } from 'fp-ts/lib/Option';
 
+import { Logger } from '../../../../src/core/server';
 import { asOk, either, map, mapErr, promiseResult } from './lib/result_type';
-
-import { Logger } from './types';
 import { isTaskRunEvent, isTaskClaimEvent, isTaskRunRequestEvent } from './task_events';
 import { Middleware } from './lib/middleware';
 import {
@@ -23,14 +22,14 @@ import {
 } from './task';
 import { TaskStore } from './task_store';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
-import { TaskLifecycleEvent, TaskManager } from './task_manager';
+import { TaskLifecycleEvent, TaskPollingLifecycle } from './polling_lifecycle';
 
 const VERSION_CONFLICT_STATUS = 409;
 
 export interface TaskSchedulingOpts {
   logger: Logger;
   taskStore: TaskStore;
-  taskManager: TaskManager;
+  taskPollingLifecycle: TaskPollingLifecycle;
   middleware: Middleware;
 }
 
@@ -40,7 +39,7 @@ interface RunNowResult {
 
 export class TaskScheduling {
   private store: TaskStore;
-  private taskManager: TaskManager;
+  private taskPollingLifecycle: TaskPollingLifecycle;
   private logger: Logger;
   private middleware: Middleware;
 
@@ -52,7 +51,7 @@ export class TaskScheduling {
   constructor(opts: TaskSchedulingOpts) {
     this.logger = opts.logger;
     this.middleware = opts.middleware;
-    this.taskManager = opts.taskManager;
+    this.taskPollingLifecycle = opts.taskPollingLifecycle;
     this.store = opts.taskStore;
   }
 
@@ -82,7 +81,7 @@ export class TaskScheduling {
   public async runNow(taskId: string): Promise<RunNowResult> {
     return new Promise(async (resolve, reject) => {
       this.awaitTaskRunResult(taskId).then(resolve).catch(reject);
-      this.taskManager.attemptToRun(taskId);
+      this.taskPollingLifecycle.attemptToRun(taskId);
     });
   }
 
@@ -108,7 +107,7 @@ export class TaskScheduling {
 
   private async awaitTaskRunResult(taskId: string): Promise<RunNowResult> {
     return new Promise((resolve, reject) => {
-      const subscription = this.taskManager.events
+      const subscription = this.taskPollingLifecycle.events
         // listen for all events related to the current task
         .pipe(filter(({ id }: TaskLifecycleEvent) => id === taskId))
         .subscribe((taskEvent: TaskLifecycleEvent) => {

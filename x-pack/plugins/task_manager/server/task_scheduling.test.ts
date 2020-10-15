@@ -14,10 +14,10 @@ import {
   asTaskClaimEvent,
   asTaskRunRequestEvent,
 } from './task_events';
-import { TaskLifecycleEvent } from './task_manager';
-import { taskManagerMock } from './task_manager.mock';
+import { TaskLifecycleEvent } from './polling_lifecycle';
+import { taskPollingLifecycleMock } from './polling_lifecycle.mock';
 import { TaskScheduling } from './task_scheduling';
-import { mockLogger } from './test_utils';
+import { loggingSystemMock } from '../../../../src/core/server/mocks';
 import { asErr, asOk } from './lib/result_type';
 import { ConcreteTaskInstance, TaskLifecycleResult, TaskStatus } from './task';
 import { createInitialMiddleware } from './lib/middleware';
@@ -25,11 +25,11 @@ import { taskStoreMock } from './task_store.mock';
 
 describe('TaskScheduling', () => {
   const mockTaskStore = taskStoreMock.create({});
-  const mockTaskManager = taskManagerMock.create({});
+  const mockTaskManager = taskPollingLifecycleMock.create({});
   const taskSchedulingOpts = {
     taskStore: mockTaskStore,
-    taskManager: mockTaskManager,
-    logger: mockLogger(),
+    taskPollingLifecycle: mockTaskManager,
+    logger: loggingSystemMock.create().get(),
     middleware: createInitialMiddleware(),
   };
 
@@ -107,7 +107,7 @@ describe('TaskScheduling', () => {
 
       const taskScheduling = new TaskScheduling({
         ...taskSchedulingOpts,
-        taskManager: taskManagerMock.create({ events$ }),
+        taskPollingLifecycle: taskPollingLifecycleMock.create({ events$ }),
       });
 
       const result = taskScheduling.runNow(id);
@@ -124,7 +124,7 @@ describe('TaskScheduling', () => {
 
       const taskScheduling = new TaskScheduling({
         ...taskSchedulingOpts,
-        taskManager: taskManagerMock.create({ events$ }),
+        taskPollingLifecycle: taskPollingLifecycleMock.create({ events$ }),
       });
 
       const result = taskScheduling.runNow(id);
@@ -145,7 +145,7 @@ describe('TaskScheduling', () => {
 
       const taskScheduling = new TaskScheduling({
         ...taskSchedulingOpts,
-        taskManager: taskManagerMock.create({ events$ }),
+        taskPollingLifecycle: taskPollingLifecycleMock.create({ events$ }),
       });
 
       const result = taskScheduling.runNow(id);
@@ -167,7 +167,7 @@ describe('TaskScheduling', () => {
 
       const taskScheduling = new TaskScheduling({
         ...taskSchedulingOpts,
-        taskManager: taskManagerMock.create({ events$ }),
+        taskPollingLifecycle: taskPollingLifecycleMock.create({ events$ }),
       });
 
       const result = taskScheduling.runNow(id);
@@ -189,7 +189,7 @@ describe('TaskScheduling', () => {
 
       const taskScheduling = new TaskScheduling({
         ...taskSchedulingOpts,
-        taskManager: taskManagerMock.create({ events$ }),
+        taskPollingLifecycle: taskPollingLifecycleMock.create({ events$ }),
       });
 
       const result = taskScheduling.runNow(id);
@@ -211,7 +211,7 @@ describe('TaskScheduling', () => {
 
       const taskScheduling = new TaskScheduling({
         ...taskSchedulingOpts,
-        taskManager: taskManagerMock.create({ events$ }),
+        taskPollingLifecycle: taskPollingLifecycleMock.create({ events$ }),
       });
 
       const result = taskScheduling.runNow(id);
@@ -233,7 +233,7 @@ describe('TaskScheduling', () => {
 
       const taskScheduling = new TaskScheduling({
         ...taskSchedulingOpts,
-        taskManager: taskManagerMock.create({ events$ }),
+        taskPollingLifecycle: taskPollingLifecycleMock.create({ events$ }),
       });
 
       const result = taskScheduling.runNow(id);
@@ -256,7 +256,7 @@ describe('TaskScheduling', () => {
 
       const taskScheduling = new TaskScheduling({
         ...taskSchedulingOpts,
-        taskManager: taskManagerMock.create({ events$ }),
+        taskPollingLifecycle: taskPollingLifecycleMock.create({ events$ }),
       });
 
       const result = taskScheduling.runNow(id);
@@ -278,7 +278,7 @@ describe('TaskScheduling', () => {
 
       const taskScheduling = new TaskScheduling({
         ...taskSchedulingOpts,
-        taskManager: taskManagerMock.create({ events$ }),
+        taskPollingLifecycle: taskPollingLifecycleMock.create({ events$ }),
       });
 
       const result = taskScheduling.runNow(id);
@@ -299,7 +299,7 @@ describe('TaskScheduling', () => {
 
       const taskScheduling = new TaskScheduling({
         ...taskSchedulingOpts,
-        taskManager: taskManagerMock.create({ events$ }),
+        taskPollingLifecycle: taskPollingLifecycleMock.create({ events$ }),
       });
 
       const result = taskScheduling.runNow(id);

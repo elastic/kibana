@@ -6,7 +6,7 @@
 
 import { createBuffer, Entity, OperationError, BulkOperation } from './bulk_operation_buffer';
 import { mapErr, asOk, asErr, Ok, Err } from './result_type';
-import { mockLogger } from '../test_utils';
+import { loggingSystemMock } from '../../../../../src/core/server/mocks';
 
 interface TaskInstance extends Entity {
   attempts: number;
@@ -238,7 +238,7 @@ describe('Bulk Operation Buffer', () => {
         }
       );
 
-      const logger = mockLogger();
+      const logger = loggingSystemMock.create().get();
 
       const bufferedUpdate = createBuffer(bulkUpdate, { logger });
 

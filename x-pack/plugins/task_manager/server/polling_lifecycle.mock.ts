@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TaskManager, TaskLifecycleEvent } from './task_manager';
+import { TaskPollingLifecycle, TaskLifecycleEvent } from './polling_lifecycle';
 import { of, Observable } from 'rxjs';
 
-const createTaskManagerMock = ({
+const createTaskPollingLifecycleMock = ({
   isStarted = true,
   events$ = of(),
 }: {
@@ -24,9 +24,9 @@ const createTaskManagerMock = ({
       return events$;
     },
     stop: jest.fn(),
-  } as unknown) as jest.Mocked<TaskManager>;
+  } as unknown) as jest.Mocked<TaskPollingLifecycle>;
 };
 
-export const taskManagerMock = {
-  create: createTaskManagerMock,
+export const taskPollingLifecycleMock = {
+  create: createTaskPollingLifecycleMock,
 };

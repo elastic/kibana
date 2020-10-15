@@ -9,12 +9,12 @@ import { performance } from 'perf_hooks';
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, some, map as mapOptional } from 'fp-ts/lib/Option';
+import { Logger } from '../../../../src/core/server';
 
 import { Result, asErr, mapErr } from './lib/result_type';
 import { ManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskManagerConfig } from './config';
 
-import { Logger } from './types';
 import {
   TaskMarkRunning,
   TaskRun,
@@ -39,7 +39,7 @@ import { identifyEsError } from './lib/identify_es_error';
 import { BufferedTaskStore } from './buffered_task_store';
 import { TaskTypeDictionary } from './task_type_dictionary';
 
-export type TaskManagerOpts = {
+export type TaskPollingLifecycleOpts = {
   logger: Logger;
   definitions: TaskTypeDictionary;
   taskStore: TaskStore;
@@ -49,20 +49,10 @@ export type TaskManagerOpts = {
 
 export type TaskLifecycleEvent = TaskMarkRunning | TaskRun | TaskClaim | TaskRunRequest;
 
-/*
- * The TaskManager is the public interface into the task manager system. This glues together
- * all of the disparate modules in one integration point. The task manager operates in two different ways:
- *
- * - pre-init, it allows middleware registration, but disallows task manipulation
- * - post-init, it disallows middleware registration, but allows task manipulation
- *
- * Due to its complexity, this is mostly tested by integration tests (see readme).
- */
-
 /**
  * The public interface into the task manager system.
  */
-export class TaskManager {
+export class TaskPollingLifecycle {
   private definitions: TaskTypeDictionary;
 
   private store: TaskStore;
@@ -86,14 +76,14 @@ export class TaskManager {
    * enabling the task manipulation methods, and beginning the background polling
    * mechanism.
    */
-  constructor(opts: TaskManagerOpts) {
+  constructor(opts: TaskPollingLifecycleOpts) {
     const { logger, middleware, maxWorkersConfiguration$, pollIntervalConfiguration$ } = opts;
     this.logger = logger;
     this.middleware = middleware;
 
     this.definitions = opts.definitions;
     this.store = opts.taskStore;
-    // pipe store events into the TaskManager's event stream
+    // pipe store events into the lifecycle event stream
     this.store.events.subscribe((event) => this.events$.next(event));
 
     this.bufferedStore = new BufferedTaskStore(this.store, {

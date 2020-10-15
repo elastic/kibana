@@ -6,7 +6,7 @@
 import { mapValues } from 'lodash';
 import Joi from 'joi';
 import { TaskDefinition, validateTaskDefinition } from './task';
-import { Logger } from './types';
+import { Logger } from '../../../../src/core/server';
 
 /*
  * The TaskManager is the public interface into the task manager system. This glues together

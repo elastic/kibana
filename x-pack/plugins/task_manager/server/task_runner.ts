@@ -15,10 +15,10 @@ import { performance } from 'perf_hooks';
 import Joi from 'joi';
 import { identity, defaults, flow } from 'lodash';
 
+import { Logger } from '../../../../src/core/server';
 import { asOk, asErr, mapErr, eitherAsync, unwrap, mapOk, Result } from './lib/result_type';
 import { TaskRun, TaskMarkRunning, asTaskRunEvent, asTaskMarkRunningEvent } from './task_events';
 import { intervalFromDate, intervalFromNow } from './lib/intervals';
-import { Logger } from './types';
 import { BeforeRunFunction, BeforeMarkRunningFunction } from './lib/middleware';
 import {
   CancelFunction,

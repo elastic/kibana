@@ -6,7 +6,7 @@
 import { PluginInitializerContext, Plugin, CoreSetup, Logger, CoreStart } from 'src/core/server';
 import { first } from 'rxjs/operators';
 import { ElasticJs, TaskDefinition } from './task';
-import { TaskManager } from './task_manager';
+import { TaskPollingLifecycle } from './polling_lifecycle';
 import { TaskManagerConfig } from './config';
 import { createInitialMiddleware, addMiddlewareToChain, Middleware } from './lib/middleware';
 import { setupSavedObjects } from './saved_objects';
@@ -28,7 +28,7 @@ export type TaskManagerStartContract = Pick<
 
 export class TaskManagerPlugin
   implements Plugin<TaskManagerSetupContract, TaskManagerStartContract> {
-  private taskManager?: TaskManager;
+  private taskPollingLifecycle?: TaskPollingLifecycle;
   private taskManagerId?: string;
   private config?: TaskManagerConfig;
   private logger: Logger;
@@ -96,7 +96,7 @@ export class TaskManagerPlugin
       startingPollInterval: this.config!.poll_interval,
     });
 
-    const taskManager = new TaskManager({
+    const taskPollingLifecycle = new TaskPollingLifecycle({
       config: this.config!,
       definitions: this.definitions,
       logger: this.logger,
@@ -105,17 +105,17 @@ export class TaskManagerPlugin
       maxWorkersConfiguration$,
       pollIntervalConfiguration$,
     });
-    this.taskManager = taskManager;
+    this.taskPollingLifecycle = taskPollingLifecycle;
 
     const taskScheduling = new TaskScheduling({
       logger: this.logger,
       taskStore,
       middleware: this.middleware,
-      taskManager,
+      taskPollingLifecycle,
     });
 
     // start polling for work
-    taskManager.start();
+    taskPollingLifecycle.start();
 
     return {
       /**
@@ -146,8 +146,8 @@ export class TaskManagerPlugin
   }
 
   public stop() {
-    if (this.taskManager) {
-      this.taskManager.stop();
+    if (this.taskPollingLifecycle) {
+      this.taskPollingLifecycle.stop();
     }
   }
 
@@ -158,7 +158,7 @@ export class TaskManagerPlugin
    * @returns void
    */
   private assertStillInSetup(operation: string) {
-    if (this.taskManager?.isStarted) {
+    if (this.taskPollingLifecycle?.isStarted) {
       throw new Error(`Cannot ${operation} after the task manager has started`);
     }
   }

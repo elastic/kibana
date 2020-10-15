@@ -17,7 +17,7 @@ import {
   SerializedConcreteTaskInstance,
   ConcreteTaskInstance,
 } from './task';
-import { mockLogger } from './test_utils';
+import { loggingSystemMock } from '../../../../src/core/server/mocks';
 import { StoreOpts, OwnershipClaimingOpts, TaskStore, SearchOpts } from './task_store';
 import { savedObjectsRepositoryMock } from 'src/core/server/mocks';
 import {
@@ -46,7 +46,7 @@ const mockedDate = new Date('2019-02-12T21:01:22.479Z');
   }
 };
 
-const taskDefinitions = new TaskTypeDictionary(mockLogger());
+const taskDefinitions = new TaskTypeDictionary(loggingSystemMock.create().get());
 taskDefinitions.registerTaskDefinitions({
   report: {
     type: 'report',
@@ -337,7 +337,7 @@ describe('TaskStore', () => {
       const maxAttempts = _.random(2, 43);
       const customMaxAttempts = _.random(44, 100);
 
-      const definitions = new TaskTypeDictionary(mockLogger());
+      const definitions = new TaskTypeDictionary(loggingSystemMock.create().get());
       definitions.registerTaskDefinitions({
         foo: {
           type: 'foo',
@@ -470,7 +470,7 @@ describe('TaskStore', () => {
     test('it supports claiming specific tasks by id', async () => {
       const maxAttempts = _.random(2, 43);
       const customMaxAttempts = _.random(44, 100);
-      const definitions = new TaskTypeDictionary(mockLogger());
+      const definitions = new TaskTypeDictionary(loggingSystemMock.create().get());
       definitions.registerTaskDefinitions({
         foo: {
           type: 'foo',
