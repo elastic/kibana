@@ -110,7 +110,7 @@ export function getMetrics(log: ToolingLog, config: OptimizerConfig) {
           value: sumSize(asyncChunks),
         },
         {
-          group: `async chunks count`,
+          group: `async chunk count`,
           id: bundle.id,
           value: asyncChunks.length,
         },
