@@ -310,7 +310,7 @@ describe('action_form', () => {
           .find(`EuiToolTip [data-test-subj="${actionType.id}-ActionTypeSelectOption"]`)
           .exists()
       ).toBeFalsy();
-      expect(deps.setHasActionsWithBrokenConnector).toHaveBeenCalledWith(false);
+      expect(deps.setHasActionsWithBrokenConnector).toHaveBeenLastCalledWith(false);
     });
 
     it('does not render action types disabled by config', async () => {
@@ -417,7 +417,7 @@ describe('action_form', () => {
           },
         },
       ]);
-      expect(deps.setHasActionsWithBrokenConnector).toHaveBeenCalledWith(true);
+      expect(deps.setHasActionsWithBrokenConnector).toHaveBeenLastCalledWith(true);
     });
   });
 });

@@ -174,13 +174,11 @@ export const ActionForm = ({
   }, [connectors, actionTypesIndex]);
 
   useEffect(() => {
-    if (connectors.length > 0) {
-      const hasActionWithBrokenConnector = actions.some(
-        (action) => !connectors.find((connector) => connector.id === action.id)
-      );
-      if (setHasActionsWithBrokenConnector) {
-        setHasActionsWithBrokenConnector(hasActionWithBrokenConnector);
-      }
+    const hasActionWithBrokenConnector = actions.some(
+      (action) => !connectors.find((connector) => connector.id === action.id)
+    );
+    if (setHasActionsWithBrokenConnector) {
+      setHasActionsWithBrokenConnector(hasActionWithBrokenConnector);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actions, connectors]);
