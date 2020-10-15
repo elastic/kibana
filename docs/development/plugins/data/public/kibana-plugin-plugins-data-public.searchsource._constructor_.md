@@ -9,13 +9,13 @@ Constructs a new instance of the `SearchSource` class
 <b>Signature:</b>
 
 ```typescript
-constructor(fields: SearchSourceFields | undefined, dependencies: SearchSourceDependencies);
+constructor(fields: SearchSourceFields, dependencies: SearchSourceDependencies);
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  fields | <code>SearchSourceFields &#124; undefined</code> |  |
+|  fields | <code>SearchSourceFields</code> |  |
 |  dependencies | <code>SearchSourceDependencies</code> |  |
 

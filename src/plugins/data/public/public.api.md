@@ -2028,7 +2028,7 @@ export type SearchRequest = Record<string, any>;
 // @public (undocumented)
 export class SearchSource {
     // Warning: (ae-forgotten-export) The symbol "SearchSourceDependencies" needs to be exported by the entry point index.d.ts
-    constructor(fields: SearchSourceFields | undefined, dependencies: SearchSourceDependencies);
+    constructor(fields: SearchSourceFields, dependencies: SearchSourceDependencies);
     // @deprecated (undocumented)
     create(): SearchSource;
     createChild(options?: {}): SearchSource;
@@ -2070,6 +2070,7 @@ export class SearchSource {
     };
     setField<K extends keyof SearchSourceFields>(field: K, value: SearchSourceFields[K]): this;
     setFields(newFields: SearchSourceFields): this;
+    setFilterPath(filterPaths: string[]): this;
     // Warning: (ae-forgotten-export) The symbol "SearchSourceOptions" needs to be exported by the entry point index.d.ts
     setParent(parent?: ISearchSource, options?: SearchSourceOptions): this;
     setPreferredSearchStrategyId(searchStrategyId: string): void;
