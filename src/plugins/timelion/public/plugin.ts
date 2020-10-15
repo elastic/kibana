@@ -52,7 +52,6 @@ export interface TimelionPluginStartDependencies {
   visualizations: VisualizationsStart;
   visTypeTimelion: VisTypeTimelionPluginStart;
   savedObjects: SavedObjectsStart;
-  kibanaLegacy: KibanaLegacyStart;
 }
 
 /** @internal */
