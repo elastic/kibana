@@ -4,27 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TaskManagerSetupContract, TaskManagerStartContract } from './plugin';
+import { TaskManager, TaskLifecycleEvent } from './task_manager';
+import { of, Observable } from 'rxjs';
+
+const createTaskManagerMock = ({
+  isStarted = true,
+  events$ = of(),
+}: {
+  isStarted?: boolean;
+  events$?: Observable<TaskLifecycleEvent>;
+} = {}) => {
+  return ({
+    start: jest.fn(),
+    attemptToRun: jest.fn(),
+    get isStarted() {
+      return isStarted;
+    },
+    get events() {
+      return events$;
+    },
+    stop: jest.fn(),
+  } as unknown) as jest.Mocked<TaskManager>;
+};
 
 export const taskManagerMock = {
-  setup(overrides: Partial<jest.Mocked<TaskManagerSetupContract>> = {}) {
-    const mocked: jest.Mocked<TaskManagerSetupContract> = {
-      registerTaskDefinitions: jest.fn(),
-      addMiddleware: jest.fn(),
-      ...overrides,
-    };
-    return mocked;
-  },
-  start(overrides: Partial<jest.Mocked<TaskManagerStartContract>> = {}) {
-    const mocked: jest.Mocked<TaskManagerStartContract> = {
-      ensureScheduled: jest.fn(),
-      schedule: jest.fn(),
-      fetch: jest.fn(),
-      get: jest.fn(),
-      runNow: jest.fn(),
-      remove: jest.fn(),
-      ...overrides,
-    };
-    return mocked;
-  },
+  create: createTaskManagerMock,
 };

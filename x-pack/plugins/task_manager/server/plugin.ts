@@ -13,6 +13,7 @@ import { setupSavedObjects } from './saved_objects';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { FetchResult, SearchOpts, TaskStore } from './task_store';
 import { createManagedConfiguration } from './lib/create_managed_configuration';
+import { TaskScheduling } from './task_scheduling';
 
 export type TaskManagerSetupContract = { addMiddleware: (middleware: Middleware) => void } & Pick<
   TaskTypeDictionary,
@@ -20,7 +21,7 @@ export type TaskManagerSetupContract = { addMiddleware: (middleware: Middleware)
 >;
 
 export type TaskManagerStartContract = Pick<
-  TaskManager,
+  TaskScheduling,
   'schedule' | 'runNow' | 'ensureScheduled'
 > &
   Pick<TaskStore, 'fetch' | 'get' | 'remove'>;
@@ -48,6 +49,15 @@ export class TaskManagerPlugin
 
     setupSavedObjects(savedObjects, this.config);
     this.taskManagerId = this.initContext.env.instanceUuid;
+
+    if (!this.taskManagerId) {
+      this.logger.error(
+        `TaskManager is unable to start as there the Kibana UUID is invalid (value of the "server.uuid" configuration is ${this.taskManagerId})`
+      );
+      throw new Error(`TaskManager is unable to start as Kibana has no valid UUID assigned to it.`);
+    } else {
+      this.logger.info(`TaskManager is identified by the Kibana UUID: ${this.taskManagerId}`);
+    }
 
     return {
       /**
@@ -87,7 +97,6 @@ export class TaskManagerPlugin
     });
 
     const taskManager = new TaskManager({
-      taskManagerId: this.taskManagerId!,
       config: this.config!,
       definitions: this.definitions,
       logger: this.logger,
@@ -97,6 +106,13 @@ export class TaskManagerPlugin
       pollIntervalConfiguration$,
     });
     this.taskManager = taskManager;
+
+    const taskScheduling = new TaskScheduling({
+      logger: this.logger,
+      taskStore,
+      middleware: this.middleware,
+      taskManager,
+    });
 
     // start polling for work
     taskManager.start();
@@ -123,9 +139,9 @@ export class TaskManagerPlugin
        * @returns {Promise<void>}
        */
       remove: (id: string) => taskStore.remove(id),
-      schedule: (...args) => taskManager.schedule(...args),
-      ensureScheduled: (...args) => taskManager.ensureScheduled(...args),
-      runNow: (...args) => taskManager.runNow(...args),
+      schedule: (...args) => taskScheduling.schedule(...args),
+      ensureScheduled: (...args) => taskScheduling.ensureScheduled(...args),
+      runNow: (...args) => taskScheduling.runNow(...args),
     };
   }
 

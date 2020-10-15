@@ -6,24 +6,10 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import { of, Subject } from 'rxjs';
-import { none } from 'fp-ts/lib/Option';
+import { of } from 'rxjs';
 
-import {
-  asTaskMarkRunningEvent,
-  asTaskRunEvent,
-  asTaskClaimEvent,
-  asTaskRunRequestEvent,
-} from './task_events';
-import {
-  TaskManager,
-  claimAvailableTasks,
-  awaitTaskRunResult,
-  TaskLifecycleEvent,
-} from './task_manager';
+import { TaskManager, claimAvailableTasks } from './task_manager';
 import { mockLogger } from './test_utils';
-import { asErr, asOk } from './lib/result_type';
-import { ConcreteTaskInstance, TaskLifecycleResult, TaskStatus } from './task';
 import { createInitialMiddleware } from './lib/middleware';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { taskStoreMock } from './task_store.mock';
@@ -47,7 +33,6 @@ describe('TaskManager', () => {
     config,
     taskStore: mockTaskStore,
     logger: mockLogger(),
-    taskManagerId: 'some-uuid',
     definitions: new TaskTypeDictionary(taskManagerLogger),
     middleware: createInitialMiddleware(),
     maxWorkersConfiguration$: of(100),
@@ -61,281 +46,17 @@ describe('TaskManager', () => {
 
   afterEach(() => clock.restore());
 
-  test('throws if no valid UUID is available', async () => {
-    expect(() => {
-      new TaskManager({
-        ...taskManagerOpts,
-        taskManagerId: '',
-      });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"TaskManager is unable to start as Kibana has no valid UUID assigned to it."`
-    );
-  });
+  describe('start', () => {
+    test('begins poilling once start is called', () => {
+      const taskManager = new TaskManager(taskManagerOpts);
 
-  test('allows scheduling tasks', async () => {
-    const client = new TaskManager(taskManagerOpts);
-    taskManagerOpts.definitions.registerTaskDefinitions({
-      foo: {
-        type: 'foo',
-        title: 'Foo',
-        createTaskRunner: jest.fn(),
-      },
-    });
-    client.start();
-    const task = {
-      taskType: 'foo',
-      params: {},
-      state: {},
-    };
-    await client.schedule(task);
-    expect(mockTaskStore.schedule).toHaveBeenCalled();
-  });
+      clock.tick(150);
+      expect(mockTaskStore.claimAvailableTasks).not.toHaveBeenCalled();
 
-  test('allows scheduling existing tasks that may have already been scheduled', async () => {
-    const client = new TaskManager(taskManagerOpts);
-    taskManagerOpts.definitions.registerTaskDefinitions({
-      foo: {
-        type: 'foo',
-        title: 'Foo',
-        createTaskRunner: jest.fn(),
-      },
-    });
-    mockTaskStore.schedule.mockRejectedValueOnce({
-      statusCode: 409,
-    });
+      taskManager.start();
 
-    client.start();
-
-    const result = await client.ensureScheduled({
-      id: 'my-foo-id',
-      taskType: 'foo',
-      params: {},
-      state: {},
-    });
-
-    expect(result.id).toEqual('my-foo-id');
-  });
-
-  test('doesnt ignore failure to scheduling existing tasks for reasons other than already being scheduled', async () => {
-    const client = new TaskManager(taskManagerOpts);
-    taskManagerOpts.definitions.registerTaskDefinitions({
-      foo: {
-        type: 'foo',
-        title: 'Foo',
-        createTaskRunner: jest.fn(),
-      },
-    });
-    mockTaskStore.schedule.mockRejectedValueOnce({
-      statusCode: 500,
-    });
-
-    client.start();
-
-    return expect(
-      client.ensureScheduled({
-        id: 'my-foo-id',
-        taskType: 'foo',
-        params: {},
-        state: {},
-      })
-    ).rejects.toMatchObject({
-      statusCode: 500,
-    });
-  });
-
-  test('doesnt allow naively rescheduling existing tasks that have already been scheduled', async () => {
-    const client = new TaskManager(taskManagerOpts);
-    taskManagerOpts.definitions.registerTaskDefinitions({
-      foo: {
-        type: 'foo',
-        title: 'Foo',
-        createTaskRunner: jest.fn(),
-      },
-    });
-    mockTaskStore.schedule.mockRejectedValueOnce({
-      statusCode: 409,
-    });
-
-    client.start();
-
-    return expect(
-      client.schedule({
-        id: 'my-foo-id',
-        taskType: 'foo',
-        params: {},
-        state: {},
-      })
-    ).rejects.toMatchObject({
-      statusCode: 409,
-    });
-  });
-
-  describe('runNow', () => {
-    describe('awaitTaskRunResult', () => {
-      test('resolves when the task run succeeds', () => {
-        const events$ = new Subject<TaskLifecycleEvent>();
-        const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
-        const getLifecycle = jest.fn();
-
-        const result = awaitTaskRunResult(id, events$, getLifecycle);
-
-        const task = { id } as ConcreteTaskInstance;
-        events$.next(asTaskRunEvent(id, asOk(task)));
-
-        return expect(result).resolves.toEqual({ id });
-      });
-
-      test('rejects when the task run fails', () => {
-        const events$ = new Subject<TaskLifecycleEvent>();
-        const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
-        const getLifecycle = jest.fn();
-
-        const result = awaitTaskRunResult(id, events$, getLifecycle);
-
-        const task = { id } as ConcreteTaskInstance;
-        events$.next(asTaskClaimEvent(id, asOk(task)));
-        events$.next(asTaskMarkRunningEvent(id, asOk(task)));
-        events$.next(asTaskRunEvent(id, asErr(new Error('some thing gone wrong'))));
-
-        return expect(result).rejects.toMatchInlineSnapshot(
-          `[Error: Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2": Error: some thing gone wrong]`
-        );
-      });
-
-      test('rejects when the task mark as running fails', () => {
-        const events$ = new Subject<TaskLifecycleEvent>();
-        const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
-        const getLifecycle = jest.fn();
-
-        const result = awaitTaskRunResult(id, events$, getLifecycle);
-
-        const task = { id } as ConcreteTaskInstance;
-        events$.next(asTaskClaimEvent(id, asOk(task)));
-        events$.next(asTaskMarkRunningEvent(id, asErr(new Error('some thing gone wrong'))));
-
-        return expect(result).rejects.toMatchInlineSnapshot(
-          `[Error: Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2": Error: some thing gone wrong]`
-        );
-      });
-
-      test('when a task claim fails we ensure the task exists', async () => {
-        const events$ = new Subject<TaskLifecycleEvent>();
-        const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
-        const getLifecycle = jest.fn(async () => TaskLifecycleResult.NotFound);
-
-        const result = awaitTaskRunResult(id, events$, getLifecycle);
-
-        events$.next(asTaskClaimEvent(id, asErr(none)));
-
-        await expect(result).rejects.toEqual(
-          new Error(`Failed to run task "${id}" as it does not exist`)
-        );
-
-        expect(getLifecycle).toHaveBeenCalledWith(id);
-      });
-
-      test('when a task claim fails we ensure the task isnt already claimed', async () => {
-        const events$ = new Subject<TaskLifecycleEvent>();
-        const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
-        const getLifecycle = jest.fn(async () => TaskStatus.Claiming);
-
-        const result = awaitTaskRunResult(id, events$, getLifecycle);
-
-        events$.next(asTaskClaimEvent(id, asErr(none)));
-
-        await expect(result).rejects.toEqual(
-          new Error(`Failed to run task "${id}" as it is currently running`)
-        );
-
-        expect(getLifecycle).toHaveBeenCalledWith(id);
-      });
-
-      test('when a task claim fails we ensure the task isnt already running', async () => {
-        const events$ = new Subject<TaskLifecycleEvent>();
-        const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
-        const getLifecycle = jest.fn(async () => TaskStatus.Running);
-
-        const result = awaitTaskRunResult(id, events$, getLifecycle);
-
-        events$.next(asTaskClaimEvent(id, asErr(none)));
-
-        await expect(result).rejects.toEqual(
-          new Error(`Failed to run task "${id}" as it is currently running`)
-        );
-
-        expect(getLifecycle).toHaveBeenCalledWith(id);
-      });
-
-      test('rejects when the task run fails due to capacity', async () => {
-        const events$ = new Subject<TaskLifecycleEvent>();
-        const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
-        const getLifecycle = jest.fn(async () => TaskStatus.Idle);
-
-        const result = awaitTaskRunResult(id, events$, getLifecycle);
-
-        events$.next(asTaskRunRequestEvent(id, asErr(new Error('failed to buffer request'))));
-
-        await expect(result).rejects.toEqual(
-          new Error(
-            `Failed to run task "${id}" as Task Manager is at capacity, please try again later`
-          )
-        );
-        expect(getLifecycle).not.toHaveBeenCalled();
-      });
-
-      test('when a task claim fails we return the underlying error if the task is idle', async () => {
-        const events$ = new Subject<TaskLifecycleEvent>();
-        const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
-        const getLifecycle = jest.fn(async () => TaskStatus.Idle);
-
-        const result = awaitTaskRunResult(id, events$, getLifecycle);
-
-        events$.next(asTaskClaimEvent(id, asErr(none)));
-
-        await expect(result).rejects.toMatchInlineSnapshot(
-          `[Error: Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2" for unknown reason (Current Task Lifecycle is "idle")]`
-        );
-
-        expect(getLifecycle).toHaveBeenCalledWith(id);
-      });
-
-      test('when a task claim fails we return the underlying error if the task is failed', async () => {
-        const events$ = new Subject<TaskLifecycleEvent>();
-        const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
-        const getLifecycle = jest.fn(async () => TaskStatus.Failed);
-
-        const result = awaitTaskRunResult(id, events$, getLifecycle);
-
-        events$.next(asTaskClaimEvent(id, asErr(none)));
-
-        await expect(result).rejects.toMatchInlineSnapshot(
-          `[Error: Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2" for unknown reason (Current Task Lifecycle is "failed")]`
-        );
-
-        expect(getLifecycle).toHaveBeenCalledWith(id);
-      });
-
-      test('ignores task run success of other tasks', () => {
-        const events$ = new Subject<TaskLifecycleEvent>();
-        const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
-        const differentTask = '4bebf429-181b-4518-bb7d-b4246d8a35f0';
-        const getLifecycle = jest.fn();
-
-        const result = awaitTaskRunResult(id, events$, getLifecycle);
-
-        const task = { id } as ConcreteTaskInstance;
-        const otherTask = { id: differentTask } as ConcreteTaskInstance;
-        events$.next(asTaskClaimEvent(id, asOk(task)));
-        events$.next(asTaskClaimEvent(differentTask, asOk(otherTask)));
-
-        events$.next(asTaskRunEvent(differentTask, asOk(task)));
-
-        events$.next(asTaskRunEvent(id, asErr(new Error('some thing gone wrong'))));
-
-        return expect(result).rejects.toMatchInlineSnapshot(
-          `[Error: Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2": Error: some thing gone wrong]`
-        );
-      });
+      clock.tick(150);
+      expect(mockTaskStore.claimAvailableTasks).toHaveBeenCalled();
     });
   });
 
