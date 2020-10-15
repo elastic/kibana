@@ -19,7 +19,6 @@
 import React, { ReactNode } from 'react';
 import { EuiDataGridColumn } from '@elastic/eui';
 import { IndexPattern } from '../../../../../data/common/index_patterns/index_patterns';
-import { moveColumn } from '../../angular/doc_table/actions/columns';
 
 const kibanaJSON = 'kibana-json';
 const geoPoint = 'geo-point';
@@ -29,37 +28,19 @@ export function getEuiGridColumns(
   columnsWidth: any = {},
   indexPattern: IndexPattern,
   showTimeCol: boolean,
-  timeString: string,
-  onSetColumns: (columns: string[]) => void,
-  onSort: (props: any) => void
+  timeString: string
 ) {
   const timeFieldName = indexPattern.timeFieldName;
 
   if (showTimeCol && indexPattern.timeFieldName && !columns.find((col) => col === timeFieldName)) {
     const usedColumns = [indexPattern.timeFieldName, ...columns];
     return usedColumns.map((column) =>
-      buildEuiGridColumn(
-        column,
-        columnsWidth ? columnsWidth[column] : 0,
-        indexPattern,
-        timeString,
-        usedColumns,
-        onSetColumns,
-        onSort
-      )
+      buildEuiGridColumn(column, columnsWidth ? columnsWidth[column] : 0, indexPattern, timeString)
     );
   }
 
   return columns.map((column) =>
-    buildEuiGridColumn(
-      column,
-      columnsWidth ? columnsWidth[column] : 0,
-      indexPattern,
-      timeString,
-      columns,
-      onSetColumns,
-      onSort
-    )
+    buildEuiGridColumn(column, columnsWidth ? columnsWidth[column] : 0, indexPattern, timeString)
   );
 }
 
@@ -81,10 +62,7 @@ export function buildEuiGridColumn(
   columnName: string,
   columnWidth: any,
   indexPattern: IndexPattern,
-  timeString: string,
-  columns: string[],
-  onSetColumns: (columns: string[]) => void,
-  onSort: (props: any) => void
+  timeString: string
 ) {
   const indexPatternField = indexPattern.getFieldByName(columnName);
   const column: EuiDataGridColumn = {

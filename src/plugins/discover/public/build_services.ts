@@ -78,7 +78,7 @@ export async function buildServices(
   plugins: DiscoverStartPlugins,
   context: PluginInitializerContext,
   getEmbeddableInjector: any,
-  enhanced: false
+  enhanced: boolean
 ): Promise<DiscoverServices> {
   const services: SavedObjectKibanaServices = {
     savedObjectsClient: core.savedObjects.client,
