@@ -26,7 +26,6 @@ import {
   migrateSettingsToV7100,
   migrateAgentActionToV7100,
 } from './migrations/to_v7_10_0';
-import { migratePackagePolicyToV7110 } from './migrations/to_v7_11_0';
 
 /*
  * Saved object types and mappings
@@ -269,7 +268,6 @@ const getSavedObjectTypes = (
     },
     migrations: {
       '7.10.0': migratePackagePolicyToV7100,
-      '7.11.0': migratePackagePolicyToV7110,
     },
   },
   [PACKAGES_SAVED_OBJECT_TYPE]: {

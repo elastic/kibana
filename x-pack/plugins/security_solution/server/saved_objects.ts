@@ -15,6 +15,7 @@ import {
   exceptionsArtifactType,
   manifestType,
 } from './endpoint/lib/artifacts/saved_object_mappings';
+import { packagePolicyType } from './endpoint/lib/policy/saved_object_mappings';
 
 const types = [
   noteType,
@@ -24,6 +25,7 @@ const types = [
   timelineType,
   exceptionsArtifactType,
   manifestType,
+  packagePolicyType,
 ];
 
 export const savedObjectTypes = types.map((type) => type.name);
