@@ -34,9 +34,10 @@ The {kib} directory must be named `kibana`, and your plugin directory should be 
         └── bar-plugin
 ----
 
+* <<migrating-legacy-plugins>>
 * <<external-plugin-functional-tests>>
 * <<external-plugin-localization>>
 
+include::migrating-legacy-plugins.asciidoc[leveloffset=+1]
 include::external-plugin-functional-tests.asciidoc[leveloffset=+1]
-
 include::external-plugin-localization.asciidoc[leveloffset=+1]
