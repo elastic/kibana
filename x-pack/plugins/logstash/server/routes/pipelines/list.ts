@@ -14,16 +14,10 @@ async function fetchPipelines(callWithRequest: LegacyAPICaller) {
   const params = {
     path: '/_logstash/pipeline',
     method: 'GET',
+    ignore: [404],
   };
 
-  try {
-    return await callWithRequest('transport.request', params);
-  } catch (err) {
-    if (err.statusCode === 404) {
-      return {};
-    }
-    throw err;
-  }
+  return await callWithRequest('transport.request', params);
 }
 
 export function registerPipelinesListRoute(router: IRouter) {
@@ -37,14 +31,13 @@ export function registerPipelinesListRoute(router: IRouter) {
       router.handleLegacyErrors(async (context, request, response) => {
         try {
           const client = context.logstash!.esClient;
-          const pipelinesRecord = (await fetchPipelines(client.callAsCurrentUser)) as Record<
-            string,
-            any
-          >;
+          const pipelinesRecord = (await fetchPipelines(client.callAsCurrentUser)) as Record<string, any>;
 
-          const pipelines = Object.keys(pipelinesRecord).map((key) => {
-            return PipelineListItem.fromUpstreamJSON(key, pipelinesRecord).downstreamJSON;
-          });
+          const pipelines = Object.keys(pipelinesRecord)
+            .sort()
+            .map((key) => {
+              return PipelineListItem.fromUpstreamJSON(key, pipelinesRecord).downstreamJSON;
+            });
 
           return response.ok({ body: { pipelines } });
         } catch (err) {

@@ -25,21 +25,19 @@ export function registerPipelineLoadRoute(router: IRouter) {
       router.handleLegacyErrors(async (context, request, response) => {
         const client = context.logstash!.esClient;
 
-        try {
-          const result = await client.callAsCurrentUser('transport.request', {
-            path: '/_logstash/pipeline/' + encodeURIComponent(request.params.id),
-            method: 'GET',
-          });
-          return response.ok({
-            body: Pipeline.fromUpstreamJSON(result).downstreamJSON,
-          });
-        } catch (err) {
-          if (err.statusCode === 404) {
-            return response.notFound();
-          }
+        const result = await client.callAsCurrentUser('transport.request', {
+          path: '/_logstash/pipeline/' + encodeURIComponent(request.params.id),
+          method: 'GET',
+          ignore: [404],
+        });
 
-          throw err;
+        if (result[request.params.id] === undefined) {
+          return response.notFound();
         }
+
+        return response.ok({
+          body: Pipeline.fromUpstreamJSON(result).downstreamJSON,
+        });
       })
     )
   );
