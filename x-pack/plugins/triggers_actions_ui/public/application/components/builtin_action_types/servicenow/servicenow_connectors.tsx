@@ -6,6 +6,7 @@
 import React, { useCallback } from 'react';
 
 import {
+  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,6 +14,8 @@ import {
   EuiFieldPassword,
   EuiSpacer,
   EuiLink,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { isEmpty } from 'lodash';
@@ -115,6 +118,20 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<
       <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem>
+          <EuiTitle size="xxs">
+            <h4>{i18n.AUTHENTICATION_LABEL}</h4>
+          </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFormRow fullWidth>{getEncryptedFieldNotifyLabel(!action.id)}</EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
           <EuiFormRow
             id="connector-servicenow-username"
             fullWidth
@@ -184,6 +201,17 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<
     </>
   );
 };
+
+function getEncryptedFieldNotifyLabel(isCreate: boolean) {
+  if (isCreate) {
+    return (
+      <EuiText color="secondary" size="s">
+        {i18n.REMEMBER_VALUES_LABEL}
+      </EuiText>
+    );
+  }
+  return <EuiCallOut size="s" iconType="iInCircle" title={i18n.REENTER_VALUES_LABEL} />;
+}
 
 // eslint-disable-next-line import/no-default-export
 export { ServiceNowConnectorFields as default };
