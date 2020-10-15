@@ -36,7 +36,7 @@ The following panels support URL drilldowns:
 
 This example shows how to create the "Show on Github" drilldown shown above.
 
-. Add the <<gs-get-data-into-kibana, sample web logs>> data set.
+. Add the sample web logs data set.
 . Open the *[Logs] Web traffic* dashboard. This isn’t data from Github, but it should work for demonstration purposes.
 . In the dashboard menu bar, click *Edit*.
 . In *[Logs] Visitors by OS*, open the panel menu, and then select *Create drilldown*.
